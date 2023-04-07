@@ -170,7 +170,6 @@ export const DataflowContentModel = TileContentModel
 
     addNewAttrFromNode(nodeId: number, nodeName: string){
       //if already an attribute with the same nodeId do nothing, helse write
-      console.log("addNewAttrFromNode with nodeId:", nodeId, "nodeName:", nodeName);
       const dataSetAttributes = self.dataSet.attributes;
       let foundFlag = false;
 
@@ -182,7 +181,6 @@ export const DataflowContentModel = TileContentModel
       }
 
       if (!foundFlag) {
-        console.log("!Found so we are writing");
         const newAttributeId = uniqueId() + "*" + nodeId;
         self.dataSet.addAttributeWithID({
           id: newAttributeId,

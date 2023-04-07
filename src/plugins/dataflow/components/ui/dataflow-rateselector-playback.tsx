@@ -16,9 +16,6 @@ interface IRateSelectorProps {
   programRecordState: number;
   isPlaying: boolean; //for playback of data
   handleChangeIsPlaying: () => void;
-  recordedTime: number;
-  updateRecordedTime: (num: number) => void;
-
   numNodes: number;
   onRecordDataChange: () => void;
 }
@@ -33,7 +30,7 @@ function formatTime(seconds: number) {
 
 export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
   const { onRateSelectClick, readOnly, dataRate, rateOptions, programRecordState,
-          isPlaying, handleChangeIsPlaying, numNodes, onRecordDataChange, recordedTime, updateRecordedTime} = props;
+          isPlaying, handleChangeIsPlaying, numNodes, onRecordDataChange } = props;
 
   /* ==[ Total Recording Time  - Calculate] format as "MMM:SS" */
   const totalTimeSec = Math.floor((dataRate / 1000) * (totalSamples/numNodes));
@@ -73,7 +70,6 @@ export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
       const timer = setInterval(() => {
         timerSec.current++;
         sliderSec.current++;
-        updateRecordedTime(sliderSec.current);
         if (timerSec.current === 60){
           timerMin.current++;
           timerSec.current = 0;
@@ -85,7 +81,6 @@ export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
       const playBackTimer = setInterval(() => {
         playBackTimerSec.current++;
         sliderSec.current++;
-        updateRecordedTime(sliderSec.current);
         if (playBackTimerSec.current === 60){
           playBackTimerMin.current++;
           playBackTimerSec.current = 0;

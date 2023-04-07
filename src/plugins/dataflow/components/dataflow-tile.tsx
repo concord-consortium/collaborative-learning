@@ -26,7 +26,7 @@ interface IDataflowTileState {
   programRecordingMode: number; // TODO: convert to enum
   isPlaying: boolean;
   playBackIndex: number;
-  recordedTime: number;
+  recordIndex: number; //# of ticks for record
 }
 
 @inject("stores")
@@ -41,14 +41,12 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
       programRecordingMode: 0,
       isPlaying: false,
       playBackIndex: 0,
-      recordedTime: 0,
+      recordIndex: 0,
     };
   }
 
   public render() {
     const { readOnly, height, model } = this.props;
-    // console.log("<DataflowToolComponent>");
-
     const editableClass = readOnly ? "read-only" : "editable";
     const classes = `dataflow-tool disable-tile-content-drag ${editableClass}`;
     const { program, programDataRate, programZoom } = this.getContent();
@@ -80,12 +78,12 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
                   programRecordState={this.state.programRecordingMode}
                   isPlaying={this.state.isPlaying}
                   playBackIndex={this.state.playBackIndex}
-                  recordedTime={this.state.recordedTime}
+                  recordIndex={this.state.recordIndex}
                   //state handlers
                   onRecordDataChange={this.handleChangeOfRecordingMode}
                   handleChangeIsPlaying={this.handleChangeIsPlaying}
                   updatePlayBackIndex={this.updatePlayBackIndex}
-                  updateRecordedTime={this.updateRecordedTime}
+                  updateRecordIndex={this.updateRecordIndex}
                   numNodes={numNodes}
                   tileModel={tileModel}
                 />
@@ -164,11 +162,9 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   };
 
   private pairNodesToAttributes = () => {
-    // console.log("pairNodeToAttributes");
     const model = this.getContent();
-
     //#1 check nodes on tile against dataset attributes, if already there do nothing, otherwise write.
-    model.addNewAttrFromNode(0, "Time"); //0 is unique # for time?
+    model.addNewAttrFromNode(0, "Time"); //add an attribute (first col for Time)
     model.program.nodes.forEach((n) => {
       model.addNewAttrFromNode(n.id, n.name);
     });
@@ -176,16 +172,12 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     //#2 check dataset attributes against nodes on tile, if an attribute is not on the tile - remove it.
     const dataSet = model.dataSet;
     const dataSetAttributes = dataSet.attributes;
-    console.log("dataSetAttributes.length:", dataSetAttributes.length);
 
-    // TO DO !!!!  ______________ SKIP IDX 0 ____ because thats time
     dataSetAttributes.forEach((attribute, idx) => {
       if (idx !== 0) { //skip first index, because that attribute is "Time"
         model.removeAttributesInDatasetMissingInTile(attribute.id);
       }
     });
-
-    console.log("dataSetAttributes.length:", dataSetAttributes.length);
   };
 
   private handleChangeOfRecordingMode = () => {
@@ -200,11 +192,10 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     const model = this.getContent();
 
     if (mode === 0){ //when Record is pressed
-      // console.log("mode 0 invoked");
       this.setState({isPlaying: false}); //reset isPlaying
       this.pairNodesToAttributes();
     }
-    if (mode === 2){
+    if (mode === 2){ // Clear pressed - remove all dataSet
       const allAttributes = model.dataSet.attributes;
       const ids = model.dataSet.cases.map(({__id__}) => ( __id__));
       model.dataSet.removeCases(ids);
@@ -231,9 +222,13 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     }
   };
 
-  private updateRecordedTime = (num: number) => {
-    // console.log("in update Recorded Time with num", num);
-    this.setState({recordedTime: num});
+  private updateRecordIndex = (update: string) => {
+    if (update === UpdateMode.Increment){
+      this.setState({recordIndex: this.state.recordIndex + 1});
+    }
+    if (update === UpdateMode.Reset){
+      this.setState({recordIndex: 0});
+    }
   };
 
   private getContent() {

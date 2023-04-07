@@ -63,9 +63,6 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
             handleChangeIsPlaying={handleChangeIsPlaying}
             numNodes={numNodes}
             onRecordDataChange={onRecordDataChange}
-            recordedTime={recordedTime}
-            updateRecordedTime={updateRecordedTime}
-
           />
           <RecordStopOrClearButton
             disabled={disableRecordButton}
