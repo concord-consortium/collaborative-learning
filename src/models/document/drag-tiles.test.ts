@@ -107,7 +107,14 @@ describe("tile dragging", () => {
   });
 
   describe("getDragTileItems", () => {
-    describe("when one tile selected", () => {
+    describe("when a non-existent tile is selected", () => {
+      it("returns an empty array", () => {
+        const items = getDragTileItems(documentContent, ["foo"]);
+
+        expect(items).toHaveLength(0);
+      });
+    });
+    describe("when one tile is selected", () => {
       it("returns an array of one IDragTileItem object", () => {
         const items = getDragTileItems(documentContent, ["tile1"]);
 
@@ -130,7 +137,7 @@ Array [
         /*eslint-enable max-len*/
       });
     });
-    describe("when two tiles selected", () => {
+    describe("when two tiles are selected", () => {
       it("returns an array of both IDragTileItem objects", () => {
         const items = getDragTileItems(documentContent, ["tile1", "tile2"]);
 
@@ -187,8 +194,8 @@ Array [
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   describe("getDragTiles", () => {
-    describe("with one tile selected", () => {
-      it("returns that tile", () => {
+    describe("when one tile is selected", () => {
+      it("returns that tile and an the other IDragTiles properties", () => {
         const model = documentContent.getTile("tile1");
         expect(model).toBeDefined();
         const dragTiles = getDragTiles(documentContent, model!, ["tile1"]);

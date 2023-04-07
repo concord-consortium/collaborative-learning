@@ -67,10 +67,6 @@ export function getDragTiles(
   // will change on each load of the document
   const sourceDocId = documentContent.contentId;
 
-  if (!sourceDocId) {
-    throw new Error("Can't find the id of the source document");
-  }
-
   const dragTiles: IDragTilesData = {
     sourceDocId,
     tiles: getDragTileItems(documentContent, tileIds),
@@ -89,6 +85,7 @@ export function getDragTiles(
   return dragTiles;
 }
 
+/* istanbul ignore next: this only used for debugging */
 export function logDataTransfer(_dataTransfer: DataTransfer) {
   if (!DEBUG_DROP) {
     return;
