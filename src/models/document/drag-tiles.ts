@@ -122,5 +122,6 @@ export function logDataTransfer(_dataTransfer: DataTransfer) {
     dataTransfer.dataValues[type] = _dataTransfer.getData(type);
   }
 
+  // eslint-disable-next-line no-console
   console.log("Dropped", dataTransfer);
 }
