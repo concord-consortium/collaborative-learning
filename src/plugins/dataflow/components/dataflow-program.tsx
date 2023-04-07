@@ -652,7 +652,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private tick = () => {
-    const {tileModel, playBackIndex, programRecordState, isPlaying, updateRecordIndex} = this.props;
+    const {tileModel, playBackIndex, programRecordState, isPlaying,
+      updateRecordIndex, updatePlayBackIndex } = this.props;
     const dataSet = tileModel.dataSet;
     const now = Date.now();
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});
@@ -676,8 +677,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
     if (isRecorded){
       isPlaying && this.playbackNodesWithCaseData(dataSet, playBackIndex);
-      isPlaying && this.props.updatePlayBackIndex(UpdateMode.Increment);
-      !isPlaying && this.props.updatePlayBackIndex(UpdateMode.Reset);
+      isPlaying && updatePlayBackIndex(UpdateMode.Increment);
+      !isPlaying && updatePlayBackIndex(UpdateMode.Reset);
       updateRecordIndex(UpdateMode.Reset);
     }
   };
