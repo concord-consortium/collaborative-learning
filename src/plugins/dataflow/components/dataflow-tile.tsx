@@ -164,8 +164,8 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   private pairNodesToAttributes = () => {
     const model = this.getContent();
     // dataSet looks like
-    // Time_Quantized | Time_Actual | Node 1 | Node 2 | Node 3 etf
-    //    0           |  0.323      | val    | val    |  N3
+    // Time_Quantized | Time_Actual | Node 1 | Node 2 | Node 3 etc
+    //    0           |  0          | val    | val    |  val
     model.addNewAttrFromNode(0, "Time_Quantized");
     model.addNewAttrFromNode(1, "Time_Actual");
 
