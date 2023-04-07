@@ -92,6 +92,7 @@ interface IProps extends SizeMeProps {
 interface IState {
   editorContainerWidth: number;
   lastIntervalDuration: number;
+  startTimeActual: number;
 }
 
 const numSocket = new Rete.Socket("Number value");
@@ -123,6 +124,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.state = {
       editorContainerWidth: 0,
       lastIntervalDuration: 0,
+      startTimeActual: 0,
     };
     this.lastIntervalTime = Date.now();
   }
@@ -543,24 +545,25 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private recordCase = () => {
     const { recordIndex } = this.props;
-    const { programDataRate } = this.props.tileModel; //grab the program Sampling Rate to write time
-    const recordTimeSec = (recordIndex * programDataRate) / 1000;
-
+    const { programDataRate } = this.props.tileModel; //grab the program Sampling Rate to write TimeQuantized
+    //attributes order  - Time_Quantized as first column | Time_Actual | + # of nodes
     const aCase: ICaseCreation = {};
+    const timeQuantizedKey = "Time_Quantized";
+    const timeActualKey = "Time_Actual";
 
-    // console.log("# of nodes", this.programEditor.nodes.length);
-    // console.log("# of attributes:", this.props.tileModel.dataSet.attributes.length);
-    // console.log("full attr:", this.props.tileModel.dataSet.attributes);
-    //# of attributes =  (time as first column) + # of nodes
-    //write time attribute first, then loop through nodes
-    const timeKey = "Time";
-    aCase[timeKey] = recordTimeSec;
+    const recordTimeQuantized = (recordIndex * programDataRate) / 1000; //in seconds
+    aCase[timeQuantizedKey] = recordTimeQuantized;
+    if (recordIndex === 0) {
+      this.setState({startTimeActual: Date.now()});
+    }
+    const recordTimeActual = (Date.now() - this.state.startTimeActual) / 1000; //in seconds
+    (recordTimeActual >= 0) && (aCase[timeActualKey] = recordTimeActual);
+
     //loop through attribute (nodes) and write each value
     this.programEditor.nodes.forEach((node, idx) => {
-      const key = this.props.tileModel.dataSet.attributes[idx + 1].id; //starts at index 1 to skip over time attribute
+      const key = this.props.tileModel.dataSet.attributes[idx + 2].id; //starts at index 2 to skip over time attribute
       aCase[key] = node.data.nodeValue as string;
       console.log("recording node:", node.name, aCase[key]);
-
     });
     console.log("FINAL [aCase]:", aCase);
     addCanonicalCasesToDataSet(this.props.tileModel.dataSet, [aCase]);
@@ -574,7 +577,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       console.log(" 🔨 playbackNodesWithCaseData:", playBackIndex);
       const {__id__} = currentCase; //this is the id of the case we are looking at for each frame
       this.programEditor.nodes.forEach((node, idx) => { //update each node in the frame
-        const attrId = dataSet.attributes[idx + 1].id; //add 1 to skip time
+        const attrId = dataSet.attributes[idx + 2].id; //add 2 to skip timeQuantized + timeActual
         const valueToSendToNode = dataSet.getValue(__id__, attrId) as number;
         let nodeControl;
         switch (node.name){
@@ -678,6 +681,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
 
     if (isRecorded){
+      console.log("finished recording: dataSet:", dataSet);
       isPlaying && this.playbackNodesWithCaseData(dataSet, playBackIndex);
       isPlaying && this.props.updatePlayBackIndex(UpdateMode.Increment);
       !isPlaying && this.props.updatePlayBackIndex(UpdateMode.Reset);

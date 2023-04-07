@@ -163,21 +163,28 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
 
   private pairNodesToAttributes = () => {
     const model = this.getContent();
-    //#1 check nodes on tile against dataset attributes, if already there do nothing, otherwise write.
-    model.addNewAttrFromNode(0, "Time"); //add an attribute (first col for Time)
+    // dataSet looks like
+    // Time_Quantized | Time_Actual | Node 1 | Node 2 | Node 3 etf
+    //    0           |  0.323      | val    | val    |  N3
+    model.addNewAttrFromNode(0, "Time_Quantized");
+    model.addNewAttrFromNode(1, "Time_Actual");
+
     model.program.nodes.forEach((n) => {
+      console.log("adding node:", n.name);
       model.addNewAttrFromNode(n.id, n.name);
     });
 
-    //#2 check dataset attributes against nodes on tile, if an attribute is not on the tile - remove it.
+    // dataset attributes against nodes on tile, if an attribute is not on the tile - remove it.
     const dataSet = model.dataSet;
     const dataSetAttributes = dataSet.attributes;
 
     dataSetAttributes.forEach((attribute, idx) => {
-      if (idx !== 0) { //skip first index, because that attribute is "Time"
+      if (idx > 1) { //skip 0 and 1 index because those attribute are Time
         model.removeAttributesInDatasetMissingInTile(attribute.id);
       }
     });
+
+    console.log("dataSet.length:", dataSet.attributes.length);
   };
 
   private handleChangeOfRecordingMode = () => {
