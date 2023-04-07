@@ -28,8 +28,9 @@ import { DataflowProgramToolbar } from "./ui/dataflow-program-toolbar";
 import { DataflowProgramTopbar } from "./ui/dataflow-program-topbar";
 import { DataflowProgramCover } from "./ui/dataflow-program-cover";
 import { DataflowProgramZoom } from "./ui/dataflow-program-zoom";
-import { NodeChannelInfo, NodeGeneratorTypes, ProgramDataRates, NodeTimerInfo,
-         virtualSensorChannels, serialSensorChannels} from "../model/utilities/node";
+import { NodeChannelInfo, serialSensorChannels } from "../model/utilities/channel";
+import { NodeGeneratorTypes, ProgramDataRates, NodeTimerInfo } from "../model/utilities/node";
+import { virtualSensorChannels } from "../model/utilities/virtual-channel";
 import { Rect, scaleRect, unionRect } from "../utilities/rect";
 import { DocumentContextReact } from "../../../components/document/document-context";
 import { SerialDevice } from "../../../models/stores/serial";
@@ -576,8 +577,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private passSerialStateToChannel(sd: SerialDevice, channel: NodeChannelInfo){
     if (sd.hasPort()){
       channel.serialConnected = true;
-      channel.missing = false;
-    } else {
+      const deviceMismatch = sd.deviceFamily !== channel.deviceFamily;
+      const timeSinceActive = channel.usesSerial && channel.lastMessageRecievedAt
+        ? Date.now() - channel.lastMessageRecievedAt: 0;
+      channel.missing = deviceMismatch || timeSinceActive > 5000;
+    }
+    else {
       channel.serialConnected = false;
       channel.missing = true;
     }
@@ -587,12 +592,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     // implementing with a "count" of 1 or 0 in case we need to count nodes in future
     let serialNodesCt = 0;
 
-    //sensor will need serial once these particular sensors are chosen
     nodes.forEach((n) => {
-      if(n.data.sensor === "emg" || n.data.sensor === "fsr"){
+      const isLiveSensor = /fsr|emg|[th]-[abcd]/; // match ids any live sensor channels
+      if(isLiveSensor.test(n.data.sensor as string)){
         serialNodesCt++;
       }
-
       //live output block will alert need for serial
       // only after connection to another node is made
       // this allows user to drag a block out and work on program before connecting
@@ -615,8 +619,15 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private sendDataToSerialDevice(n: Node){
-    if (isFinite(n.data.nodeValue as number)){
-      this.stores.serialDevice.writeToOut(n.data.nodeValue as number);
+    const isNumberOutput = isFinite(n.data.nodeValue as number);
+    const { deviceFamily } = this.stores.serialDevice;
+
+    if (deviceFamily === "arduino" && isNumberOutput){
+      this.stores.serialDevice.writeToOutForArduino(n.data.nodeValue as number);
+    }
+    if (deviceFamily === "microbit"){
+      // UPCOMING PT: #184753741 control messages out to hubs
+      this.stores.serialDevice.writeToOutForMicroBit(n.data.nodeValue as any);
     }
   }
 
@@ -629,7 +640,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       Click the ⚡️ button on the upper left, then select your device in the popup.
       Devices differ, but it may contain the words "usbserial" or "usbmodem"`;
 
-      // no physical connection
     if (lastMsg !== "connect" && this.stores.serialDevice.serialNodesCount > 0){
       alertMessage += `1. Connect the arduino to your computer.  2.${btnMsg}`;
     }
@@ -764,5 +774,4 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const { transform } = this.programEditor.view.area;
     this.props.onZoomChange(transform.x, transform.y, transform.k);
   };
-
 }

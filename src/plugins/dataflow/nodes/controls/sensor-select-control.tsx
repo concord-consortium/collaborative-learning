@@ -2,8 +2,8 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import React, { useRef }  from "react";
 import Rete, { NodeEditor, Node } from "rete";
-import { NodeSensorTypes, NodeChannelInfo,
-         kSensorSelectMessage, kSensorMissingMessage } from "../../model/utilities/node";
+import { NodeSensorTypes, kSensorSelectMessage, kSensorMissingMessage } from "../../model/utilities/node";
+import { NodeChannelInfo } from "../../model/utilities/channel";
 import { useStopEventPropagation, useCloseDropdownOnOutsideEvent } from "./custom-hooks";
 import DropdownCaretIcon from "../../assets/icons/dropdown-caret.svg";
 import { dataflowLogEvent } from "../../dataflow-logger";
@@ -135,20 +135,22 @@ export class SensorSelectControl extends Rete.Control {
                                     });
 
       const channelsForType = channels.filter((ch: NodeChannelInfo) => {
-        return (ch.type === type) || (type === "none");
+        if (ch.type !== "relays"){
+          return (ch.type === type) || (type === "none");
+        }
       });
       const selectedChannel = channelsForType.find((ch: any) => ch.channelId === id);
 
       const getChannelString = (ch?: NodeChannelInfo | "none") => {
-        if (!ch && (!id || id === "none")) return kSensorSelectMessage;
         if (ch === "none") return "None Available";
+        if (!ch && (!id || id === "none")) return kSensorSelectMessage;
         if (!ch) return `${kSensorMissingMessage} ${id}`;
-        if (ch.missing) return `${kSensorMissingMessage} connect for live ${ch.name}`;
+        if (ch.missing) return `${kSensorMissingMessage} connect ${ch.deviceFamily} for ${ch.name}`;
         let count = 0;
         channelsForType.forEach( c => { if (c.type === ch.type && ch.hubId === c.hubId) count++; } );
         const chStr = ch.virtual
           ? `${ch.name} Demo Data`
-          : `${ch.hubName}:${ch.type}${ch.plug > 0 && count > 1 ? `(plug ${ch.plug})` : ""}`;
+          : `${ch.hubName}:${ch.type}`;
         return chStr;
       };
 

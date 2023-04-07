@@ -103,7 +103,7 @@ export const DataflowContentModel = TileContentModel
 
   }))
   .actions(self => tileModelHooks({
-    doPostCreate(metadata: ITileMetadataModel){
+    doPostCreate(metadata: ITileMetadataModel) {
       self.metadata = metadata;
     }
   }))

@@ -6,7 +6,7 @@ import {
 } from "../tiles/placeholder/placeholder-content";
 import { kTextTileType } from "../tiles/text/text-content";
 import { getTileContentInfo, IDocumentExportOptions } from "../tiles/tile-content-info";
-import { ITileContentModel } from "../tiles/tile-content";
+import { ITileContentModel, ITileEnvironment } from "../tiles/tile-content";
 import {
   IDragTileItem, TileModel, ITileModel, ITileModelSnapshotIn, ITileModelSnapshotOut, IDropTileItem
 } from "../tiles/tile-model";
@@ -83,6 +83,7 @@ export const SharedModelEntry = types.model("SharedModelEntry", {
   }
 }));
 export interface SharedModelEntryType extends Instance<typeof SharedModelEntry> {}
+export interface  SharedModelEntrySnapshotType extends SnapshotIn<typeof SharedModelEntry> {}
 
 export interface IDragTilesData {
   sourceDocId: string;
@@ -119,6 +120,9 @@ export const DocumentContentModel = types
     }
 
     return {
+      get tileEnv() {
+        return getEnv(self) as ITileEnvironment | undefined;
+      },
       get isEmpty() {
         return self.tileMap.size === 0;
       },
@@ -969,7 +973,7 @@ export const DocumentContentModel = types
 
       return sharedModelEntry;
     },
-    addSharedModelFromImport(id: string, sharedModelEntry: SharedModelEntryType){
+    addSharedModelFromImport(id: string, sharedModelEntry: SharedModelEntrySnapshotType){
       if (self.sharedModelMap){
         self.sharedModelMap.set(id, sharedModelEntry);
       }
@@ -1048,7 +1052,7 @@ export const DocumentContentModel = types
           const sharedModel = Model !== UnknownSharedModel ? Model.create(content) : undefined;
           if (sharedModel) {
             const entry = SharedModelEntry.create({ sharedModel, provider: providerId, tiles: tileIds });
-            self.addSharedModelFromImport(sharedItem.modelId, entry);
+            self.sharedModelMap.set(sharedItem.modelId, entry);
           }
         }
         catch(e) {

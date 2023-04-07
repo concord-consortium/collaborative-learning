@@ -71,8 +71,12 @@ export function migrateSnapshot(snapshot: IDocumentImportSnapshot): any {
     }
   });
 
-  sharedModels?.forEach((entry:SharedModelEntryType) => {
+  sharedModels?.forEach((entry) => {
     const id = entry.sharedModel.id;
+    if (!id) {
+      console.warn("cannot import a shared model without an id", entry.sharedModel);
+      return;
+    }
     docContent.addSharedModelFromImport(id, entry);
   });
 
