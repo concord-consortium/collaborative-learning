@@ -324,6 +324,34 @@ export const NodeLiveOutputTypes = [
   }
 ];
 
+
+export const NodeMicroBitHubs = [
+  {
+    id: 'a',
+    name: "micro:bit hub a",
+    icon: LightIcon,
+    active: false,
+  },
+  {
+    id: 'b',
+    name: "micro:bit hub b",
+    icon: LightIcon,
+    active: false,
+  },
+  {
+    id: 'c',
+    name: "micro:bit hub c",
+    icon: LightIcon,
+    active: true
+  },
+  {
+    id: 'd',
+    name: "micro:bit hub d",
+    icon: LightIcon,
+    active: false
+  }
+];
+
 export const NodeGeneratorTypes = [
   {
     name: "Sine",

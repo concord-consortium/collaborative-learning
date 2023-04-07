@@ -79,10 +79,14 @@ export class DropdownListControl extends Rete.Control {
       const option = options.find((opt) => optionValue(opt) === val);
       const name = option?.name ?? val;
       const icon = option?.icon?.({}) || null;
+      const activeHub = (option as any).active; // SERIAL: what we need to calculate from state
+      const liveNode = this.getNode().name.substring(0,4) === "Live"
+      const disableSelected = this.key === "hubSelect" && liveNode && !activeHub;
+      const labelClasses = disableSelected ? "disabled item top" : "item top"
 
       return (
         <div className={`node-select ${listClass}`} ref={divRef}>
-          <div className="item top" onMouseDown={handleChange(onItemClick)}>
+          <div className={labelClasses} onMouseDown={handleChange(onItemClick)}>
             { icon &&
             <svg className="icon top">
               {icon}
@@ -96,11 +100,15 @@ export class DropdownListControl extends Rete.Control {
           {showList ?
           <div className={`option-list ${listClass}`} ref={listRef}>
             {options.map((ops: any, i: any) => {
+              // console.log("ops to test: ", ops)
               let className = `item ${listClass}`;
               const disabled = isDisabled && isDisabled(ops);
+              if (ops.active === false){
+                className += " disabled"
+              }
               if (optionValue(ops) === val) {
                 className += " selected";
-              } else if (disabled) {
+              } else if (disabled || ops.active === false) {
                 className += " disabled";
               } else {
                 className += " selectable";
@@ -177,6 +185,13 @@ export class DropdownListControl extends Rete.Control {
   public setOptions = (options: any) => {
     this.props.optionArray = options;
   };
+
+  public setActiveOption = (hubId: string, state: boolean) => {
+    console.log("this will be a function to set active option: ", this.props.optionArray)
+    const targetHub = this.props.optionArray.filter((o: any) => o.id === hubId)
+    console.log("make this targetHub active or not: ", targetHub, state )
+    targetHub[0].active = state;
+  }
 
   /**
    * This is called both when we load (in case the options have changed, and the user

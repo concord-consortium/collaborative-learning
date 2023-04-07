@@ -3,7 +3,7 @@ import { NodeData } from "rete/types/core/data";
 import { DataflowReteNodeFactory } from "./dataflow-rete-node-factory";
 import { InputValueControl } from "../controls/input-value-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
-import { NodeLiveOutputTypes } from "../../model/utilities/node";
+import { NodeLiveOutputTypes, NodeMicroBitHubs } from "../../model/utilities/node";
 import { dataflowLogEvent } from "../../dataflow-logger";
 
 export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
@@ -16,7 +16,8 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
     if (this.editor) {
       this.addInput(node, "nodeValue");
       node
-        .addControl(new DropdownListControl(this.editor, "liveOutputType", node, NodeLiveOutputTypes, true));
+        .addControl(new DropdownListControl(this.editor, "liveOutputType", node, NodeLiveOutputTypes, true))
+        .addControl(new DropdownListControl(this.editor, "hubSelect", node, NodeMicroBitHubs, true));
 
       node.data.lastTick = Date.now();
       return node as any;
@@ -24,6 +25,7 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   public worker(node: NodeData, inputs: any, outputs: any) {
+
     // TODO & NOTE (CLAW) At the moment we take the input as soon as we can and send it to serial
     // this updates the value of the node and then the default NodeProcess takes the data
     // and sends it out via Serial.  It does not pass through any rete "output"
@@ -31,11 +33,19 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
     if (this.editor) {
       const _node = this.editor.nodes.find((n: { id: any; }) => n.id === node.id);
       if (_node) {
+
+        // 1 WORKER CAN SET AN OPTION SO NOW WE HAVE TO SET ACTIVE DEPENDING ON CHANNEL STATE
+        const hubSelect = _node.controls.get("hubSelect") as DropdownListControl
+        console.log("hubSelect: ", hubSelect);
+        // 1 see if we can set active
+        hubSelect.setActiveOption("a", true)
+        // 2 see if we can get channel state
+
+        // 3 do it
+
         const outputTypeControl = _node.controls.get("liveOutputType") as DropdownListControl;
         const outputType = outputTypeControl.getValue();
-
         const nodeValue = _node.inputs.get("nodeValue")?.control as InputValueControl;
-
         let newValue = isNaN(n1) ? 0 : n1;
 
         if (outputType === "Light Bulb"){
@@ -57,7 +67,6 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
           // Swap commented/uncommented below to change to display of nearest 1%
           // nodeValue?.setDisplayMessage(`${newValue}% closed`);
           nodeValue?.setDisplayMessage(`${roundedDisplayValue}% closed`);
-
         }
 
         nodeValue?.setValue(newValue);
