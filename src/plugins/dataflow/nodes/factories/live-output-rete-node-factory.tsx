@@ -5,6 +5,7 @@ import { InputValueControl } from "../controls/input-value-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
 import { NodeLiveOutputTypes, NodeMicroBitHubs } from "../../model/utilities/node";
 import { dataflowLogEvent } from "../../dataflow-logger";
+import { NodeChannelInfo } from "../../model/utilities/channel";
 
 export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
   constructor(numSocket: Socket) {
@@ -40,8 +41,11 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
         // 1 see if we can set active
         hubSelect.setActiveOption("a", true)
         // 2 see if we can get channel state
-
+        // for each hubId
+        // are all the sensor channels on this hub missing? if so set this to false
         // 3 do it
+
+        console.log("this editor: ", this.editor)
 
         const outputTypeControl = _node.controls.get("liveOutputType") as DropdownListControl;
         const outputType = outputTypeControl.getValue();

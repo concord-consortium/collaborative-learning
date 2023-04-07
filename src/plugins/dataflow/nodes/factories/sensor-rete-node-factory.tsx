@@ -13,6 +13,7 @@ export class SensorReteNodeFactory extends DataflowReteNodeFactory {
   public builder(node: Node) {
     super.defaultBuilder(node);
     if (this.editor) {
+      console.log("WHO HERE HAS THE CHANNELS?", this.editor, node)
       const out1 = new Rete.Output("num", "Number", this.numSocket);
       return node
         .addControl(new SensorSelectControl(this.editor, "sensorSelect", node, true))

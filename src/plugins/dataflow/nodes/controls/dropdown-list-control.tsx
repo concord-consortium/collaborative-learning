@@ -5,6 +5,7 @@ import Rete, { NodeEditor, Node, Control } from "rete";
 import { useStopEventPropagation, useCloseDropdownOnOutsideEvent } from "./custom-hooks";
 import DropdownCaretIcon from "../../assets/icons/dropdown-caret.svg";
 import { dataflowLogEvent } from "../../dataflow-logger";
+import { NodeChannelInfo } from "../../model/utilities/channel";
 
 import "./dropdown-list-control.scss";
 
@@ -187,9 +188,7 @@ export class DropdownListControl extends Rete.Control {
   };
 
   public setActiveOption = (hubId: string, state: boolean) => {
-    console.log("this will be a function to set active option: ", this.props.optionArray)
     const targetHub = this.props.optionArray.filter((o: any) => o.id === hubId)
-    console.log("make this targetHub active or not: ", targetHub, state )
     targetHub[0].active = state;
   }
 
