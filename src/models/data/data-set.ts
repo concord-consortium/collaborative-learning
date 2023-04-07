@@ -3,6 +3,8 @@ import { applyAction, getEnv, Instance, ISerializedActionCall,
           onAction, types, getSnapshot, SnapshotOut } from "mobx-state-tree";
 import { Attribute, IAttribute, IAttributeCreation, IValueType } from "./attribute";
 import { uniqueId, uniqueSortableId } from "../../utilities/js-utils";
+import { CaseGroup } from "./data-set-types";
+import { observable } from "mobx";
 
 export const newCaseId = uniqueSortableId;
 
@@ -42,6 +44,10 @@ export const DataSet = types.model("DataSet", {
   cases: types.array(CaseID),
 })
 .volatile(self => ({
+  // MobX-observable set of selected case IDs
+  selection: observable.set<string>(),
+  // map from pseudo-case ID to the CaseGroup it represents
+  pseudoCaseMap: {} as Record<string, CaseGroup>,
   transactionCount: 0
 }))
 .views(self => ({
@@ -70,7 +76,29 @@ export const DataSet = types.model("DataSet", {
     return caseIDMap;
   }
 }))
+.views(self => {
+  let cachingCount = 0;
+  const caseCache = new Map<string, ICase>();
+  return {
+    get isCaching() {
+      return cachingCount > 0;
+    },
+    get caseCache() {
+      return caseCache;
+    },
+    clearCache() {
+      caseCache.clear();
+    },
+    beginCaching() {
+      return ++cachingCount;
+    },
+    _endCaching() {
+      return --cachingCount;
+    }
+  };
+})
 .extend(self => {
+  const attrIDMap: { [index: string]: IAttribute } = {};
   const disposers: { [index: string]: () => void } = {};
   let inFlightActions = 0;
 
@@ -155,7 +183,11 @@ export const DataSet = types.model("DataSet", {
     }
   }
 
-  function setCaseValues(caseValues: ICase) {
+  // `affectedAttributes` are not used in the function, but are present as a potential
+  // optimization for responders, as all arguments are available to `onAction` listeners.
+  // For instance, a scatter plot that is dragging many points but affecting only two
+  // attributes can indicate that, which can enable more efficient responses.
+  function setCaseValues(caseValues: ICase, affectedAttributes?: string[]) {
     const index = self.caseIDMap[caseValues.__id__];
     if (index == null) { return; }
 
@@ -229,6 +261,26 @@ export const DataSet = types.model("DataSet", {
         const attr = self.attrIDMap[attributeID];
         return attr && (index != null) ? attr.value(index) : undefined;
       },
+      getNumeric(caseID: string, attributeID: string): number | undefined {
+        // The values of a pseudo-case are considered to be the values of the first real case.
+        // For grouped attributes, these will be the grouped values. Clients shouldn't be
+        // asking for ungrouped values from pseudo-cases.
+        const _caseId = self.pseudoCaseMap[caseID]
+                          ? self.pseudoCaseMap[caseID].childCaseIds[0]
+                          : caseID;
+        const index = _caseId ? self.caseIDMap[_caseId] : undefined;
+        return index != null
+                ? this.getNumericAtIndex(self.caseIDMap[_caseId], attributeID)
+                : undefined;
+      },
+      getNumericAtIndex(index: number, attributeID: string) {
+        const attr = attrIDMap[attributeID],
+              caseID = self.cases[index]?.__id__,
+              cachedCase = self.isCaching ? self.caseCache.get(caseID) : undefined;
+        return (cachedCase && Object.prototype.hasOwnProperty.call(cachedCase, attributeID))
+                ? Number(cachedCase[attributeID])
+                : attr && (index != null) ? attr.numeric(index) : undefined;
+      },
       getCase(caseID: string): ICase | undefined {
         return getCase(caseID);
       },
@@ -280,6 +332,13 @@ export const DataSet = types.model("DataSet", {
           cases.push(getCanonicalCaseAtIndex(i));
         }
         return cases;
+      },
+      isCaseSelected(caseId: string) {
+        // a pseudo-case is selected if all of its individual cases are selected
+        const group = self.pseudoCaseMap[caseId];
+        return group
+                ? group.childCaseIds.every(id => self.selection.has(id))
+                : self.selection.has(caseId);
       },
       get isInTransaction() {
         return self.transactionCount > 0;
@@ -501,7 +560,7 @@ export const DataSet = types.model("DataSet", {
         });
       },
 
-      setCaseValues(cases: ICase[]) {
+      setCaseValues(cases: ICase[], affectedAttributes?: string[]) {
         cases.forEach((caseValues) => {
           setCaseValues(caseValues);
         });
@@ -523,6 +582,48 @@ export const DataSet = types.model("DataSet", {
             });
           }
         });
+      },
+
+      selectAll(select = true) {
+        if (select) {
+          self.cases.forEach(({__id__}) => self.selection.add(__id__));
+        }
+        else {
+          self.selection.clear();
+        }
+      },
+
+      selectCases(caseIds: string[], select = true) {
+        const ids: string[] = [];
+        caseIds.forEach(id => {
+          const pseudoCase = self.pseudoCaseMap[id];
+          if (pseudoCase) {
+            ids.push(...pseudoCase.childCaseIds);
+          } else {
+            ids.push(id);
+          }
+        });
+        ids.forEach(id => {
+          if (select) {
+            self.selection.add(id);
+          }
+          else {
+            self.selection.delete(id);
+          }
+        });
+      },
+
+      setSelectedCases(caseIds: string[]) {
+        const ids: string[] = [];
+        caseIds.forEach(id => {
+          const pseudoCase = self.pseudoCaseMap[id];
+          if (pseudoCase) {
+            ids.push(...pseudoCase.childCaseIds);
+          } else {
+            ids.push(id);
+          }
+        });
+        self.selection.replace(ids);
       },
 
       addActionListener(key: string, listener: (action: ISerializedActionCall) => void) {

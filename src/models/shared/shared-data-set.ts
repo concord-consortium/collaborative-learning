@@ -1,6 +1,6 @@
-import { Instance, types } from "mobx-state-tree";
+import { getType, Instance, types } from "mobx-state-tree";
 import { DataSet } from "../data/data-set";
-import { SharedModel } from "./shared-model";
+import { SharedModel, SharedModelType } from "./shared-model";
 
 export const kSharedDataSetType = "SharedDataSet";
 
@@ -20,3 +20,7 @@ export const SharedDataSet = SharedModel
   },
 }));
 export interface SharedDataSetType extends Instance<typeof SharedDataSet> {}
+
+export function isSharedDataSet(model?: SharedModelType): model is SharedDataSetType {
+  return model ? getType(model) === SharedDataSet : false;
+}

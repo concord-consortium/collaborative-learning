@@ -13,17 +13,38 @@ export const Attribute = types.model("Attribute", {
   hidden: false,
   units: "",
   formula: types.optional(Formula, () => Formula.create()),
-  values: types.array(ValueType)
+  values: types.array(ValueType),
+  title: "", // TODO: Is this needed?
+  description: types.maybe(types.string), // TODO: Is this needed?
+  precision: types.maybe(types.number), // TODO: Is this needed?
 }).preProcessSnapshot((snapshot) => {
   const { id, values: inValues, ...others } = snapshot;
   const values = (inValues || []).map(v => v == null ? undefined : v);
   return { id: id || uniqueId(), values, ...others };
-}).views(self => ({
+}).volatile(self => ({
+  strValues: [] as string[],
+  numValues: [] as number[]
+})).views(self => ({
+  get emptyCount() {
+    return self.strValues.reduce((prev, current) => current === "" ? ++prev : prev, 0);
+  },
+  get numericCount() {
+    return self.numValues.reduce((prev, current) => isFinite(current) ? ++prev : prev, 0);
+  }
+})).views(self => ({
   get length() {
     return self.values.length;
   },
+  get type() {
+    if (self.numValues.length === 0) return;
+    // only infer numeric if all non-empty values are numeric (CODAP2)
+    return self.numericCount === self.numValues.length - self.emptyCount ? "numeric" : "categorical";
+  },
   value(index: number) {
     return self.values[index];
+  },
+  numeric(index: number) {
+    return self.numValues[index];
   },
   numericValue(index: number) {
     const v = self.values[index];
@@ -33,7 +54,7 @@ export const Attribute = types.model("Attribute", {
   },
   derive(name?: string) {
     return { id: self.id, name: name || self.name, units: self.units, values: [] };
-  }
+  },
 })).actions(self => ({
   setName(newName: string) {
     self.name = newName;
@@ -103,3 +124,6 @@ export interface IAttributeCreation {
   values?: IValueType[];
 }
 export type IAttributeSnapshot = SnapshotOut<typeof Attribute>;
+
+export const attributeTypes = ["categorical", "numeric", "date", "qualitative", "boundary", "checkbox"] as const;
+export type AttributeType = typeof attributeTypes[number];
