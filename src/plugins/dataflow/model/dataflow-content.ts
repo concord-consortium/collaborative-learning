@@ -169,7 +169,7 @@ export const DataflowContentModel = TileContentModel
     },
 
     addNewAttrFromNode(nodeId: number, nodeName: string){
-      //if already an attribute with the same nodeId do nothing, helse write
+      //if already an attribute with the same nodeId do nothing, else write
       const dataSetAttributes = self.dataSet.attributes;
       let foundFlag = false;
 
