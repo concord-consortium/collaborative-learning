@@ -2,7 +2,7 @@ import { cloneDeep } from "lodash";
 import { getSnapshot } from "mobx-state-tree";
 import { ITileModelSnapshotIn } from "../tiles/tile-model";
 import {
-  DocumentContentModel, DocumentContentModelType, INewTileOptions, SharedModelEntryType
+  DocumentContentModel, DocumentContentModelType, INewTileOptions
 } from "./document-content";
 import {
   IDocumentImportSnapshot, isOriginalAuthoredTileModel, isOriginalSectionHeaderContent,

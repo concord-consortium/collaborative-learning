@@ -192,7 +192,6 @@ Array [
     });
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   describe("getDragTiles", () => {
     describe("when one tile is selected", () => {
       it("returns that tile and an the other IDragTiles properties", () => {
