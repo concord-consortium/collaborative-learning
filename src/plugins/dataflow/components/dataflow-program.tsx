@@ -563,9 +563,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.programEditor.nodes.forEach((node, idx) => {
       const key = this.props.tileModel.dataSet.attributes[idx + 2].id; //starts at index 2 to skip over time attribute
       aCase[key] = node.data.nodeValue as string;
-      console.log("recording node:", node.name, aCase[key]);
     });
-    console.log("FINAL [aCase]:", aCase);
     addCanonicalCasesToDataSet(this.props.tileModel.dataSet, [aCase]);
   };
 
@@ -573,8 +571,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
     const currentCase = dataSet.getCaseAtIndex(playBackIndex);
     if (currentCase){
-      console.log("------Tick Playback-------");
-      console.log(" 🔨 playbackNodesWithCaseData:", playBackIndex);
       const {__id__} = currentCase; //this is the id of the case we are looking at for each frame
       this.programEditor.nodes.forEach((node, idx) => { //update each node in the frame
         const attrId = dataSet.attributes[idx + 2].id; //add 2 to skip timeQuantized + timeActual
@@ -617,7 +613,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             break;
           default:
         }
-        console.log("playback node:", node.name, valueToSendToNode);
       });
     }
   };
@@ -673,7 +668,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
 
     if (isRecording){
-      console.log("------Tick Recording-------");
       this.recordCase();
       this.updateNodes();
       updateRecordIndex(UpdateMode.Increment);
@@ -681,7 +675,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
 
     if (isRecorded){
-      console.log("finished recording: dataSet:", dataSet);
       isPlaying && this.playbackNodesWithCaseData(dataSet, playBackIndex);
       isPlaying && this.props.updatePlayBackIndex(UpdateMode.Increment);
       !isPlaying && this.props.updatePlayBackIndex(UpdateMode.Reset);

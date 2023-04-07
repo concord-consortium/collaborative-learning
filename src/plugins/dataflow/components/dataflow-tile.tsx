@@ -170,7 +170,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     model.addNewAttrFromNode(1, "Time_Actual");
 
     model.program.nodes.forEach((n) => {
-      console.log("adding node:", n.name);
       model.addNewAttrFromNode(n.id, n.name);
     });
 
@@ -183,8 +182,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
         model.removeAttributesInDatasetMissingInTile(attribute.id);
       }
     });
-
-    console.log("dataSet.length:", dataSet.attributes.length);
   };
 
   private handleChangeOfRecordingMode = () => {
