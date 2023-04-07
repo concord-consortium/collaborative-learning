@@ -3,7 +3,6 @@ import Slider from "rc-slider";
 import { ProgramDataRate } from "../../model/utilities/node";
 
 import "./dataflow-rateselector-playback.scss";
-import { update } from "lodash";
 
 const totalSamples = 10000;
 

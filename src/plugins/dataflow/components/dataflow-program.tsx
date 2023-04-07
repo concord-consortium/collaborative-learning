@@ -541,42 +541,40 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.programEditor.clear();
   };
 
-  private recordCase = (samplingRate: number) => {
+  private recordCase = () => {
     const { recordIndex } = this.props;
-    const { programDataRate } = this.props.tileModel;
-
+    const { programDataRate } = this.props.tileModel; //grab the program Sampling Rate to write time
     const recordTimeSec = (recordIndex * programDataRate) / 1000;
-    console.log("time To Record:", recordTimeSec);
-    //Calculate time
+
     const aCase: ICaseCreation = {};
-    //loop through attribute (nodes) and write each value
 
-    console.log("# of nodes", this.programEditor.nodes.length);
-    console.log("# of attributes:", this.props.tileModel.dataSet.attributes.length);
-    console.log("full attr:", this.props.tileModel.dataSet.attributes);
-
-    //# of nodes is one less than # of attributes (which has time as first column)
-
-    //write time attribute first
+    // console.log("# of nodes", this.programEditor.nodes.length);
+    // console.log("# of attributes:", this.props.tileModel.dataSet.attributes.length);
+    // console.log("full attr:", this.props.tileModel.dataSet.attributes);
+    //# of attributes =  (time as first column) + # of nodes
+    //write time attribute first, then loop through nodes
     const timeKey = "Time";
-    console.log("timeKey", timeKey);
     aCase[timeKey] = recordTimeSec;
-
-    this.programEditor.nodes.forEach((node, idx) => { //change this forEach loop to loo through attributes
+    //loop through attribute (nodes) and write each value
+    this.programEditor.nodes.forEach((node, idx) => {
       const key = this.props.tileModel.dataSet.attributes[idx + 1].id; //starts at index 1 to skip over time attribute
       aCase[key] = node.data.nodeValue as string;
+      console.log("recording node:", node.name, aCase[key]);
+
     });
     console.log("FINAL [aCase]:", aCase);
     addCanonicalCasesToDataSet(this.props.tileModel.dataSet, [aCase]);
   };
 
   private playbackNodesWithCaseData = (dataSet: any, playBackIndex: number) => {
+
     const currentCase = dataSet.getCaseAtIndex(playBackIndex);
     if (currentCase){
       console.log("------Tick Playback-------");
+      console.log(" 🔨 playbackNodesWithCaseData:", playBackIndex);
       const {__id__} = currentCase; //this is the id of the case we are looking at for each frame
       this.programEditor.nodes.forEach((node, idx) => { //update each node in the frame
-        const attrId = dataSet.attributes[idx].id;
+        const attrId = dataSet.attributes[idx + 1].id; //add 1 to skip time
         const valueToSendToNode = dataSet.getValue(__id__, attrId) as number;
         let nodeControl;
         switch (node.name){
@@ -663,9 +661,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
     this.lastIntervalTime = now;
 
-    const isCleared = this.props.programRecordState === 0;
-    const isRecording = this.props.programRecordState === 1;
-    const isRecorded = this.props.programRecordState === 2;
+    const isCleared = programRecordState === 0;
+    const isRecording = programRecordState === 1;
+    const isRecorded = programRecordState === 2;
 
     if (isCleared){
       this.updateNodes();
@@ -673,15 +671,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
     if (isRecording){
       console.log("------Tick Recording-------");
-      const { lastIntervalDuration } = this.state;
-      this.recordCase(lastIntervalDuration);
+      this.recordCase();
       this.updateNodes();
       updateRecordIndex(UpdateMode.Increment);
 
     }
 
     if (isRecorded){
-      console.log("dataSet:", dataSet);
       isPlaying && this.playbackNodesWithCaseData(dataSet, playBackIndex);
       isPlaying && this.props.updatePlayBackIndex(UpdateMode.Increment);
       !isPlaying && this.props.updatePlayBackIndex(UpdateMode.Reset);
