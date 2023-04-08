@@ -9,7 +9,7 @@ import { SharedModelDocumentManager } from "./shared-model-document-manager";
 import { ITileEnvironment } from "../tiles/tile-content";
 registerTileTypes(["Text"]);
 
-// mock uniqueId so we auto-generated IDs are consistent
+// mock uniqueId so auto-generated IDs are consistent
 let idCount = 0;
 jest.mock("../../utilities/js-utils", () => {
   const { uniqueId, ...others } = jest.requireActual("../../utilities/js-utils");
