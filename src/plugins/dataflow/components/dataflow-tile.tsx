@@ -12,7 +12,7 @@ import { measureText } from "../../../components/tiles/hooks/use-measure-text";
 import { defaultTileTitleFont } from "../../../components/constants";
 import { ToolTitleArea } from "../../../components/tiles/tile-title-area";
 import { dataflowLogEvent } from "../dataflow-logger";
-
+import { addAttributeToDataSet } from "../../../models/data/data-set";
 
 import "./dataflow-tile.scss";
 
@@ -163,19 +163,20 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
 
   private pairNodesToAttributes = () => {
     const model = this.getContent();
+    const dataSet = model.dataSet;
+    const dataSetAttributes = dataSet.attributes;
+
     // dataSet looks like
     // Time_Quantized | Time_Actual | Node 1 | Node 2 | Node 3 etc
     //    0           |  0          | val    | val    |  val
-    model.addNewAttrFromNode(0, "Time_Quantized");
-    model.addNewAttrFromNode(1, "Time_Actual");
+    addAttributeToDataSet(model.dataSet, { name: "Time_Quantized" });
+    addAttributeToDataSet(model.dataSet, { name: "Time_Actual" });
 
     model.program.nodes.forEach((n) => {
       model.addNewAttrFromNode(n.id, n.name);
     });
 
-    // dataset attributes against nodes on tile, if an attribute is not on the tile - remove it.
-    const dataSet = model.dataSet;
-    const dataSetAttributes = dataSet.attributes;
+    // compare dataset attributes against nodes on tile, if an attribute is not on the tile - remove it.
 
     dataSetAttributes.forEach((attribute, idx) => {
       if (idx > 1) { //skip 0 and 1 index because those attribute are Time
