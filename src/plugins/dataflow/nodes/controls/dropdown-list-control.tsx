@@ -103,17 +103,14 @@ export class DropdownListControl extends Rete.Control {
             {options.map((ops: any, i: any) => {
               let className = `item ${listClass}`;
               const disabled = isDisabled && isDisabled(ops);
-
               if (ops.active === false || disabled){
                 className+= " disabled";
               } else {
                 className += " selectable";
               }
-
               if (optionValue(ops) === val) {
                 className += " selected";
               }
-
               return (
                 <div
                   className={className}

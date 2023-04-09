@@ -8,7 +8,6 @@ context('Dataflow Tool Tile', function () {
   before(function () {
     const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=dfe";
     cy.clearQAData('all');
-
     cy.visit(queryParams);
     cy.waitForLoad();
     cy.closeResourceTabs();
@@ -341,6 +340,11 @@ context('Dataflow Tool Tile', function () {
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).should("have.length", 0);
         dataflowToolTile.getDropdown(nodeType, dropdown).contains("Heat Lamp").should("exist");
         dataflowToolTile.getOutputNodeValueText().should("contain", "off");
+      });
+      it("verify live output options", () => {
+        dataflowToolTile.getDropdown(nodeType, "hubSelect").should("exist");
+        dataflowToolTile.getDropdown(nodeType, "hubSelect").should("contain", "micro:bit hub a");
+        dataflowToolTile.getDropdown(nodeType, "hubSelect").get(".disabled").should("exist");
       });
       it("verify node inputs outputs", () => {
         dataflowToolTile.getNodeInput().should("exist");
