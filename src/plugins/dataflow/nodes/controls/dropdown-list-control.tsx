@@ -80,7 +80,7 @@ export class DropdownListControl extends Rete.Control {
       const option = options.find((opt) => optionValue(opt) === val);
       const name = option?.name ?? val;
       const icon = option?.icon?.({}) || null;
-      const activeHub = (option as any).active; // SERIAL: what we need to calculate from state
+      const activeHub = (option as any).active;
       const liveNode = this.getNode().name.substring(0,4) === "Live"
       const disableSelected = this.key === "hubSelect" && liveNode && !activeHub;
       const labelClasses = disableSelected ? "disabled item top" : "item top"
@@ -101,19 +101,19 @@ export class DropdownListControl extends Rete.Control {
           {showList ?
           <div className={`option-list ${listClass}`} ref={listRef}>
             {options.map((ops: any, i: any) => {
-              // console.log("ops to test: ", ops)
               let className = `item ${listClass}`;
               const disabled = isDisabled && isDisabled(ops);
-              if (ops.active === false){
-                className += " disabled"
-              }
-              if (optionValue(ops) === val) {
-                className += " selected";
-              } else if (disabled || ops.active === false) {
-                className += " disabled";
+
+              if (ops.active === false || disabled){
+                className+= " disabled"
               } else {
                 className += " selectable";
               }
+
+              if (optionValue(ops) === val) {
+                className += " selected";
+              }
+
               return (
                 <div
                   className={className}
@@ -188,8 +188,20 @@ export class DropdownListControl extends Rete.Control {
   };
 
   public setActiveOption = (hubId: string, state: boolean) => {
-    const targetHub = this.props.optionArray.filter((o: any) => o.id === hubId)
-    targetHub[0].active = state;
+    if (this.props.optionArray){
+      const targetHub = this.props.optionArray.filter((o: any) => o.id === hubId)
+      if(targetHub[0]){
+        targetHub[0].active = state;
+      }
+    }
+  }
+
+  public setChannels = (channels: NodeChannelInfo[]) => {
+    this.props.channels = channels;
+  };
+
+  public getChannels = () => {
+    return this.props.channels;
   }
 
   /**

@@ -35,18 +35,19 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
       const _node = this.editor.nodes.find((n: { id: any; }) => n.id === node.id);
       if (_node) {
 
-        // 1 WORKER CAN SET AN OPTION SO NOW WE HAVE TO SET ACTIVE DEPENDING ON CHANNEL STATE
+        // handle appearance based on availibility of relevant devices
+        // const deviceSelect = _node.controls.get("liveOutputType") as DropdownListControl // <-- could do same at output type level?
         const hubSelect = _node.controls.get("hubSelect") as DropdownListControl
-        console.log("hubSelect: ", hubSelect);
-        // 1 see if we can set active
-        hubSelect.setActiveOption("a", true)
-        // 2 see if we can get channel state
-        // for each hubId
-        // are all the sensor channels on this hub missing? if so set this to false
-        // 3 do it
 
-        console.log("this editor: ", this.editor)
+        // check for status of temp channels to indicate whether this hub is active
+        const hubStatusArray = hubSelect.getChannels()
+          .filter((c:any) => c.type === "temperature" && c.deviceFamily === "microbit")
+          .map((c:any) => {
+            return { id: c.channelId.charAt(2), missing: c.missing}
+          })
+        hubStatusArray.forEach((s:any) => hubSelect.setActiveOption(s.id, !s.missing)) // "active" is !missing
 
+        // handle data and display of data
         const outputTypeControl = _node.controls.get("liveOutputType") as DropdownListControl;
         const outputType = outputTypeControl.getValue();
         const nodeValue = _node.inputs.get("nodeValue")?.control as InputValueControl;

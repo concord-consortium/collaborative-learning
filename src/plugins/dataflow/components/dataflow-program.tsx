@@ -40,6 +40,7 @@ import { ICaseCreation, addCanonicalCasesToDataSet } from "../../../models/data/
 import { SensorValueControl } from "../nodes/controls/sensor-value-control";
 import { InputValueControl } from "../nodes/controls/input-value-control";
 import { DemoOutputControl } from "../nodes/controls/demo-output-control";
+import { DropdownListControl } from "../nodes/controls/dropdown-list-control";
 
 import "./dataflow-program.sass";
 interface NodeNameValuePair {
@@ -319,13 +320,21 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         this.props.onProgramChange(this.programEditor.toJSON());
       });
 
-      this.programEditor.on("nodecreate", node => {
+      this.programEditor.on("nodecreated", node => {
         // trigger after each of the first six events
         // add the current set of sensors node controls
-        if (node.name === "Sensor") {
-          const sensorSelect = node.controls.get("sensorSelect") as SensorSelectControl;
-          sensorSelect.setChannels(this.channels);
-        }
+
+        // Lines below do not seem needed now as we are doing this next to updateChannels where it makes more sense
+        // but keep here for a momoment to see
+        // if (node.name === "Sensor") {
+        //   const sensorSelect = node.controls.get("sensorSelect") as SensorSelectControl;
+        //   sensorSelect.setChannels(this.channels);
+        //   console.log("onNodeCreate, sensorSelect has channel access: ", this, {sensorSelect})
+        // }
+        // if (node.name === "Live Output"){
+        //   const hubSelect = node.controls.get("hubSelect") as DropdownListControl;
+        //   hubSelect.setChannels(this.channels)
+        // }
         return true;
       });
 
@@ -412,6 +421,16 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.channels = [];
     this.channels = [...virtualSensorChannels, ...serialSensorChannels];
     this.countSerialDataNodes(this.programEditor.nodes);
+    this.programEditor.nodes.forEach((node) => {
+      if (node.name === "Sensor") {
+        const sensorSelect = node.controls.get("sensorSelect") as SensorSelectControl;
+        sensorSelect.setChannels(this.channels);
+      }
+      if (node.name === "Live Output"){
+        const hubSelect = node.controls.get("hubSelect") as DropdownListControl;
+        hubSelect.setChannels(this.channels)
+      }
+    })
   };
 
   private shouldShowProgramCover() {
