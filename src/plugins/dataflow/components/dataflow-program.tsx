@@ -320,24 +320,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         this.props.onProgramChange(this.programEditor.toJSON());
       });
 
-      this.programEditor.on("nodecreated", node => {
-        // trigger after each of the first six events
-        // add the current set of sensors node controls
-
-        // Lines below do not seem needed now as we are doing this next to updateChannels where it makes more sense
-        // but keep here for a momoment to see
-        // if (node.name === "Sensor") {
-        //   const sensorSelect = node.controls.get("sensorSelect") as SensorSelectControl;
-        //   sensorSelect.setChannels(this.channels);
-        //   console.log("onNodeCreate, sensorSelect has channel access: ", this, {sensorSelect})
-        // }
-        // if (node.name === "Live Output"){
-        //   const hubSelect = node.controls.get("hubSelect") as DropdownListControl;
-        //   hubSelect.setChannels(this.channels)
-        // }
-        return true;
-      });
-
       // remove rete double click zoom
       this.programEditor.on("zoom", ({ source }) => {
         return false;
@@ -428,9 +410,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       }
       if (node.name === "Live Output"){
         const hubSelect = node.controls.get("hubSelect") as DropdownListControl;
-        hubSelect.setChannels(this.channels)
+        hubSelect.setChannels(this.channels);
       }
-    })
+    });
   };
 
   private shouldShowProgramCover() {

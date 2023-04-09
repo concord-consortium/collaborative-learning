@@ -7,6 +7,10 @@ import { NodeLiveOutputTypes, NodeMicroBitHubs } from "../../model/utilities/nod
 import { dataflowLogEvent } from "../../dataflow-logger";
 import { NodeChannelInfo } from "../../model/utilities/channel";
 
+interface HubStatus {
+  id: string,
+  missing: boolean
+}
 export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
   constructor(numSocket: Socket) {
     super("Live Output", numSocket);
@@ -26,7 +30,6 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   public worker(node: NodeData, inputs: any, outputs: any) {
-
     // TODO & NOTE (CLAW) At the moment we take the input as soon as we can and send it to serial
     // this updates the value of the node and then the default NodeProcess takes the data
     // and sends it out via Serial.  It does not pass through any rete "output"
@@ -34,18 +37,14 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
     if (this.editor) {
       const _node = this.editor.nodes.find((n: { id: any; }) => n.id === node.id);
       if (_node) {
-
-        // handle appearance based on availibility of relevant devices
-        // const deviceSelect = _node.controls.get("liveOutputType") as DropdownListControl // <-- could do same at output type level?
-        const hubSelect = _node.controls.get("hubSelect") as DropdownListControl
-
-        // check for status of temp channels to indicate whether this hub is active
-        const hubStatusArray = hubSelect.getChannels()
-          .filter((c:any) => c.type === "temperature" && c.deviceFamily === "microbit")
-          .map((c:any) => {
-            return { id: c.channelId.charAt(2), missing: c.missing}
-          })
-        hubStatusArray.forEach((s:any) => hubSelect.setActiveOption(s.id, !s.missing)) // "active" is !missing
+        // use existing missing state information to figure out & display if hub is active
+        const hubSelect = _node.controls.get("hubSelect") as DropdownListControl;
+        const hubStatusArray: HubStatus[] = hubSelect.getChannels()
+          .filter((c: NodeChannelInfo) => c.type === "temperature" && c.deviceFamily === "microbit")
+          .map((c: NodeChannelInfo) => {
+            return { id: c.channelId.charAt(2), missing: c.missing};
+          });
+        hubStatusArray.forEach((s: HubStatus) => hubSelect.setActiveOption(s.id, !s.missing)); // "active" is !missing
 
         // handle data and display of data
         const outputTypeControl = _node.controls.get("liveOutputType") as DropdownListControl;

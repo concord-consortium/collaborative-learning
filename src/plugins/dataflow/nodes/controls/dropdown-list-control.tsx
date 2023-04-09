@@ -81,9 +81,9 @@ export class DropdownListControl extends Rete.Control {
       const name = option?.name ?? val;
       const icon = option?.icon?.({}) || null;
       const activeHub = (option as any).active;
-      const liveNode = this.getNode().name.substring(0,4) === "Live"
+      const liveNode = this.getNode().name.substring(0,4) === "Live";
       const disableSelected = this.key === "hubSelect" && liveNode && !activeHub;
-      const labelClasses = disableSelected ? "disabled item top" : "item top"
+      const labelClasses = disableSelected ? "disabled item top" : "item top";
 
       return (
         <div className={`node-select ${listClass}`} ref={divRef}>
@@ -105,7 +105,7 @@ export class DropdownListControl extends Rete.Control {
               const disabled = isDisabled && isDisabled(ops);
 
               if (ops.active === false || disabled){
-                className+= " disabled"
+                className+= " disabled";
               } else {
                 className += " selectable";
               }
@@ -189,12 +189,12 @@ export class DropdownListControl extends Rete.Control {
 
   public setActiveOption = (hubId: string, state: boolean) => {
     if (this.props.optionArray){
-      const targetHub = this.props.optionArray.filter((o: any) => o.id === hubId)
+      const targetHub = this.props.optionArray.filter((o: any) => o.id === hubId);
       if(targetHub[0]){
         targetHub[0].active = state;
       }
     }
-  }
+  };
 
   public setChannels = (channels: NodeChannelInfo[]) => {
     this.props.channels = channels;
@@ -202,7 +202,7 @@ export class DropdownListControl extends Rete.Control {
 
   public getChannels = () => {
     return this.props.channels;
-  }
+  };
 
   /**
    * This is called both when we load (in case the options have changed, and the user
