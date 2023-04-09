@@ -96,6 +96,7 @@ describe("tile dragging", () => {
         {
           tiles: ["tile3"],
           sharedModel: sharedDataSet,
+          provider: "tile3"
         }
       ]
     });
@@ -253,8 +254,6 @@ Object {
       it("returns the tile and the shared model", () => {
         const dragTiles = getDragTiles(documentContent, ["tile3"]);
 
-        // FIXME: why is the providerId undefined here, that seems like an error?
-
         /*eslint-disable max-len*/
         expect(dragTiles).toMatchInlineSnapshot(`
 Object {
@@ -262,7 +261,7 @@ Object {
     Object {
       "content": "{\\"type\\":\\"SharedDataSet\\",\\"id\\":\\"shared-data-set-1\\",\\"providerId\\":\\"tile3\\",\\"dataSet\\":{\\"id\\":\\"data-set-1\\",\\"name\\":\\"Table 1\\",\\"attributes\\":[{\\"id\\":\\"attribute-1\\",\\"clientKey\\":\\"\\",\\"name\\":\\"x\\",\\"hidden\\":false,\\"units\\":\\"\\",\\"formula\\":{},\\"values\\":[\\"0\\"]},{\\"id\\":\\"attribute-2\\",\\"clientKey\\":\\"\\",\\"name\\":\\"y\\",\\"hidden\\":false,\\"units\\":\\"\\",\\"formula\\":{},\\"values\\":[\\"1\\"]}],\\"cases\\":[{\\"__id__\\":\\"case-1\\"}]}}",
       "modelId": "shared-data-set-1",
-      "providerId": undefined,
+      "providerId": "tile3",
       "tileIds": Array [
         "tile3",
       ],
