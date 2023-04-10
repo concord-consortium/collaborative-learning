@@ -65,3 +65,61 @@ radio.onReceivedString(function (receivedString) {
 })
 
 ```
+
+Another version for handing signal
+
+```js
+
+radio.setGroup(1)
+
+let hubIds = ['x', 'a', 'b', 'c', 'd']
+let hubI = 0
+
+
+function getTempString() {
+    const t = Math.constrain(dht11_dht22.readData(dataType.temperature), 0, 100);
+    return `s${hubIds[hubI]}t${t}`;
+}
+
+function getHumidString() {
+    const h = Math.constrain(dht11_dht22.readData(dataType.humidity), 0, 100);
+    return `s${hubIds[hubI]}h${h}`;
+}
+
+function readSendData() {
+    dht11_dht22.queryData(DHTtype.DHT11, DigitalPin.P15, false, false, false)
+    radio.sendString(getTempString())
+    pause(1000)
+    radio.sendString(getHumidString())
+}
+
+basic.forever(function () {
+    basic.showString(hubIds[hubI])
+    if (hubI > 0) {
+        pause(2000)
+        readSendData()
+    }
+})
+
+input.onButtonPressed(Button.A, () => {
+    if (hubI > 0) hubI--;
+})
+
+input.onButtonPressed(Button.B, () => {
+    if (hubI < 4) hubI++;
+})
+
+// works
+radio.onReceivedString(function (receivedString) {
+    //`c${hubId}${ri}${data}`
+    const messageType = receivedString.charAt(0);
+    const addressedTo = receivedString.charAt(1);
+    const ri = receivedString.charAt(2);
+    const data = receivedString.charAt(3);
+    if(messageType == "c" && addressedTo == hubIds[hubI]){
+        basic.showString(ri + data)
+    } else {
+        basic.showIcon(IconNames.Asleep)
+    }
+})
+```
