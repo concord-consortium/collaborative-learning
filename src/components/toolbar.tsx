@@ -221,7 +221,8 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
 
   private handleDuplicate() {
     const { document } = this.props;
-    const { ui: { selectedTileIds } } = this.stores;
+    const { ui } = this.stores;
+    const selectedTileIds = ui.selectedTileIds;
 
     // Sort the selected tile ids in top->bottom, left->right order so they duplicate in the correct formation
     const tilePositions = document.content?.getTilePositions(Array.from(selectedTileIds)) ?? [];
@@ -236,6 +237,8 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     }).map(info => info.tileId);
 
     document.content?.duplicateTiles(getDragTileItems(document.content, sortedTileIds));
+    ui.clearSelectedTiles();
+    this.removeDropRowHighlight();
   }
 
   private setShowDeleteTilesConfirmationAlert = (showAlert: () => void) => {
