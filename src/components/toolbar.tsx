@@ -4,6 +4,7 @@ import React from "react";
 import { BaseComponent, IBaseProps } from "./base";
 import { DocumentModelType } from "../models/document/document";
 import { IDocumentContentAddTileOptions, IDragToolCreateInfo } from "../models/document/document-content";
+import { getDragTileItems } from "../models/document/drag-tiles";
 import { IToolbarModel } from "../models/stores/problem-configuration";
 import { IToolbarButtonModel } from "../models/tiles/toolbar-button";
 import { getTileContentInfo, ITileContentInfo } from "../models/tiles/tile-content-info";
@@ -205,7 +206,29 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleDuplicate() {
-    console.log(`Duplicated!`);
+    const { document } = this.props;
+    const documentContent = document.content;
+    const { ui: { selectedTileIds } } = this.stores;
+
+    // Sort the selected tile ids in top->bottom, left->right order so they duplicate in the correct formation
+    const tilePositionInfo = Array.from(selectedTileIds).map(tileId => {
+      const rowId = documentContent?.findRowContainingTile(tileId);
+      const rowIndex = rowId && documentContent?.getRowIndex(rowId) || 0;
+      const row = rowId ? documentContent?.getRow(rowId) : undefined;
+      const tileIndex = row?.tiles.findIndex(t => t.tileId === tileId) || 0;
+      return { tileId, rowIndex, tileIndex };
+    });
+    const sortedTileIds = tilePositionInfo.sort((a, b) => {
+      if (a.rowIndex < b.rowIndex) {
+        return -1;
+      } else if (a.rowIndex > b.rowIndex) {
+        return 1;
+      } else {
+        return a.tileIndex < b.tileIndex ? -1 : 1;
+      }
+    }).map(info => info.tileId);
+
+    documentContent?.duplicateTiles(getDragTileItems(documentContent, sortedTileIds));
   }
 
   private setShowDeleteTilesConfirmationAlert = (showAlert: () => void) => {

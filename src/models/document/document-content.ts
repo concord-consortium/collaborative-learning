@@ -882,6 +882,9 @@ export const DocumentContentModel = types
           });
         }
         return tileInfo;
+      },
+      duplicateTiles(tiles: IDragTileItem[]) {
+        self.copyTilesIntoNewRows(tiles, self.defaultInsertRow);
       }
     };
     return actions;
