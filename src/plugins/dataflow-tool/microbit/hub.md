@@ -56,7 +56,12 @@ input.onButtonPressed(Button.B, () => {
     if (hubI < 4) hubI++;
 })
 
+// works
+radio.onReceivedString(function (receivedString) {
+    const messageType = receivedString.charAt(0)
+    const targetHub = receivedString.charAt(1)
 
-
+    basic.showString(receivedString)
+})
 
 ```

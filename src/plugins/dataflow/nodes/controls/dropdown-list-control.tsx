@@ -201,10 +201,6 @@ export class DropdownListControl extends Rete.Control {
     return this.props.channels;
   };
 
-  public getProps = () => {
-    return this.props;
-  }
-
   /**
    * This is called both when we load (in case the options have changed, and the user
    * has a value that is no longer valid) and every time the isDisabled function changes.

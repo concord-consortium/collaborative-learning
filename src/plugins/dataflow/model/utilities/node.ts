@@ -441,9 +441,5 @@ export const ProgramDataRates: ProgramDataRate[] = [
   }
 ];
 
-export const outputRelayIndex = [
-  ""
-]
-
 export const kSensorSelectMessage = "Select a sensor";
 export const kSensorMissingMessage = "⚠️";

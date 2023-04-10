@@ -153,22 +153,18 @@ export class SerialDevice {
   }
 
   public writeToOutForMicroBitRelayHub(data: number, hubId: string, relayType: string){
-    const ri = NodeLiveOutputTypes.filter((ot:any) => ot.name === relayType)[0].relayIndex
-    const controlMessage = `c${hubId}${ri}${data}`
-    console.log("CONTROL! ", controlMessage);
-    // this.writer.write(`${controlMessage}\n`)
+    const ri = NodeLiveOutputTypes.filter((ot:any) => ot.name === relayType)[0].relayIndex;
+    const controlMessage = `c${hubId}${ri}${data}`;
+    this.writer.write(`${controlMessage}\n`);
   }
 
   public writeToOutForBBGripper(n:number){
-    // number visible to user represents "percent closed"
-    // so we need to map x percent to an angle in range where
-    // 100% (closed) is 120deg, and 0% (open) is 180deg
+    // "percent closed" is x% where 100% = 120deg and 0% = 180deg
     const percent = n / 100;
     let openTo = Math.round(180 - (percent * 60));
     if (openTo > 160) openTo = 180;
     if (openTo < 130) openTo = 120;
 
-    // Arduino readBytesUntil() expects newline as delimiter
     if(this.hasPort()){
       this.writer.write(`${openTo.toString()}\n`);
     }
