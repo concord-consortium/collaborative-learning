@@ -118,13 +118,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private processing = false;
   private startTimeActual = 0;
 
-
   constructor(props: IProps) {
     super(props);
     this.state = {
       editorContainerWidth: 0,
       lastIntervalDuration: 0,
-
     };
     this.lastIntervalTime = Date.now();
   }
@@ -555,11 +553,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const recordTimeQuantized = (recordIndex * programDataRate) / 1000; //in seconds
     aCase[timeQuantizedKey] = recordTimeQuantized;
     if (recordIndex === 0) {
-      console.log("recordIndex called");
       this.startTimeActual = now;
     }
     const recordTimeActual = (now - this.startTimeActual) / 1000; //in seconds
-    console.log("recordTimeActual:", recordTimeActual);
     (recordTimeActual >= 0) && (aCase[timeActualKey] = recordTimeActual);
 
     //loop through attribute (nodes) and write each value
@@ -568,8 +564,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       aCase[key] = node.data.nodeValue as string;
     });
     addCanonicalCasesToDataSet(this.props.tileModel.dataSet, [aCase]);
-
-
   };
 
   private getAttributeIdForNode = (nodeIndex: number) => {
@@ -579,7 +573,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private playbackNodesWithCaseData = (dataSet: any, playBackIndex: number) => {
-
     const currentCase = dataSet.getCaseAtIndex(playBackIndex);
     if (currentCase){
       const {__id__} = currentCase; //this is the id of the case we are looking at for each frame
@@ -686,7 +679,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
 
     if (isRecorded){
-      console.log("finished recording > dataSet:", dataSet);
       isPlaying && this.playbackNodesWithCaseData(dataSet, playBackIndex);
       isPlaying && updatePlayBackIndex(UpdateMode.Increment);
       !isPlaying && updatePlayBackIndex(UpdateMode.Reset);

@@ -210,7 +210,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     }
 
     this.setState({
-      programRecordingMode:  (mode + 1) % 3
+      programRecordingMode: (mode + 1) % 3
     });
   };
 
