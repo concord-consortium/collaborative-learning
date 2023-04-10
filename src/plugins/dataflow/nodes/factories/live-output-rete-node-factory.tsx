@@ -37,14 +37,7 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
     if (this.editor) {
       const _node = this.editor.nodes.find((n: { id: any; }) => n.id === node.id);
       if (_node) {
-        // use existing missing state information to figure out & display if hub is active
-        const hubSelect = _node.controls.get("hubSelect") as DropdownListControl;
-        const hubStatusArray: HubStatus[] = hubSelect.getChannels()
-          .filter((c: NodeChannelInfo) => c.type === "temperature" && c.deviceFamily === "microbit")
-          .map((c: NodeChannelInfo) => {
-            return { id: c.channelId.charAt(2), missing: c.missing};
-          });
-        hubStatusArray.forEach((s: HubStatus) => hubSelect.setActiveOption(s.id, !s.missing)); // "active" is !missing
+        this.updateHubsStatusReport(_node);
 
         // handle data and display of data
         const outputTypeControl = _node.controls.get("liveOutputType") as DropdownListControl;
@@ -52,22 +45,16 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
         const nodeValue = _node.inputs.get("nodeValue")?.control as InputValueControl;
         let newValue = isNaN(n1) ? 0 : n1;
 
-        if (outputType === "Light Bulb"){
+        const binaryOutputTypes = ["Light Bulb", "Heat Lamp", "Fan", "Sprinkler"];
+
+        if (binaryOutputTypes.includes(outputType)){
           newValue = isNaN(n1) ? 0 : +(n1 !== 0);
           nodeValue?.setDisplayMessage(newValue === 0 ? "off" : "on");
         }
 
         if (outputType === "Grabber"){
-          if (n1 > 1){
-            newValue = 100;
-          } else if (n1 < 0) {
-            newValue = 0;
-          } else {
-            newValue = parseInt((n1 * 100).toFixed(2), 10);
-          }
+          newValue = this.getNewValueForGrabber(n1);
           const roundedDisplayValue = Math.round((newValue / 10) * 10);
-          // at the moment, physical grabber is driven by a nearest 1%, not nearest 10%
-          // However, now displaying the rounded to nearest 10% for consistency.
           // Swap commented/uncommented below to change to display of nearest 1%
           // nodeValue?.setDisplayMessage(`${newValue}% closed`);
           nodeValue?.setDisplayMessage(`${roundedDisplayValue}% closed`);
@@ -81,6 +68,27 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
         _node.update();
       }
     }
+  }
+
+  private getNewValueForGrabber(num: number){
+    if (num > 1)  return 100;
+    if (num < 0)  return 0;
+    return parseInt((num * 100).toFixed(2), 10);
+  }
+
+  private updateHubsStatusReport(n: Node){
+    // use existing missing state information to figure out & display if hub is active
+    const hubSelect = n.controls.get("hubSelect") as DropdownListControl;
+    const hubStatusArray: HubStatus[] = hubSelect.getChannels()
+      .filter((c: NodeChannelInfo) => c.type === "temperature" && c.deviceFamily === "microbit")
+      .map((c: NodeChannelInfo) => {
+        return { id: c.channelId.charAt(2), missing: c.missing};
+      });
+
+    hubStatusArray.forEach((s: HubStatus) => {
+      // "active" is !missing
+      hubSelect.setActiveOption(s.id, !s.missing);
+    });
   }
 
   // TODO IMPROVEMENT - this is a duplicate method - abstract for all factories?
