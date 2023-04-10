@@ -57,6 +57,9 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
         case "delete":
           this.handleDelete();
           break;
+        case "duplicate":
+          this.handleDuplicate();
+          break;
         case "solution":
           this.handleToggleSelectedTilesSolution();
           break;
@@ -76,7 +79,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
       return toolbarModel.map(toolButton => {
         const buttonProps: IToolbarButtonProps = {
           toolButton,
-          isActive: this.buttonIsActive(toolButton),
+          isActive: this.isButtonActive(toolButton),
           isDisabled: this.isButtonDisabled(toolButton),
           onSetToolActive: handleSetActiveTool,
           onClick: handleClickTool,
@@ -119,7 +122,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     return titleBase && document.getUniqueTitle(type, titleBase, getTileTitle);
   }
 
-  private buttonIsActive(toolButton: IToolbarButtonModel) {
+  private isButtonActive(toolButton: IToolbarButtonModel) {
     return toolButton.id === "solution"
       ? this.selectedTilesIncludeTeacher()
       : toolButton === this.state.activeTool;
@@ -133,8 +136,8 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     if (toolButton.id === "undo" && !undoManager?.canUndo) return true;
     if (toolButton.id === "redo" && !undoManager?.canRedo) return true;
 
-    // If no tiles are selected, disable the delete and solution buttons.
-    if (["delete", "solution"].includes(toolButton.id) && !selectedTileIds.length) return true;
+    // If no tiles are selected, disable the delete, duplicate, and solution buttons.
+    if (["delete", "duplicate", "solution"].includes(toolButton.id) && !selectedTileIds.length) return true;
 
     if (toolButton.isTileTool && settings) {
       // If a limit on the number of tiles of a certain type has been specified in settings,
@@ -199,6 +202,10 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
       this.showDeleteTilesConfirmationAlert?.();
     }
     this.setState(state => ({ activeTool: state.defaultTool }));
+  }
+
+  private handleDuplicate() {
+    console.log(`Duplicated!`);
   }
 
   private setShowDeleteTilesConfirmationAlert = (showAlert: () => void) => {
