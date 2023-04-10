@@ -304,7 +304,8 @@ export const NodeDemoOutputTypes = [
 export const NodeLiveOutputTypes = [
   {
     name: "Light Bulb",
-    icon: LightBulbIcon
+    icon: LightBulbIcon,
+    relayIndex: 0
   },
   {
     name: "Grabber",
@@ -312,15 +313,18 @@ export const NodeLiveOutputTypes = [
   },
   {
     name: "Sprinkler",
-    icon: GrabberIcon
+    icon: GrabberIcon,
+    relayIndex: 3
   },
   {
     name: "Fan",
-    icon: GrabberIcon
+    icon: GrabberIcon,
+    relayIndex: 2
   },
   {
     name: "Heat Lamp",
-    icon: GrabberIcon
+    icon: GrabberIcon,
+    relayIndex: 1
   }
 ];
 
@@ -436,6 +440,10 @@ export const ProgramDataRates: ProgramDataRate[] = [
     val: 60000
   }
 ];
+
+export const outputRelayIndex = [
+  ""
+]
 
 export const kSensorSelectMessage = "Select a sensor";
 export const kSensorMissingMessage = "⚠️";

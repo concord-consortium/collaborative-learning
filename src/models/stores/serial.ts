@@ -1,4 +1,5 @@
 import { NodeChannelInfo } from "src/plugins/dataflow/model/utilities/channel";
+import { NodeLiveOutputTypes } from "../../plugins/dataflow/model/utilities/node";
 
 export class SerialDevice {
   localBuffer: string;
@@ -152,8 +153,9 @@ export class SerialDevice {
   }
 
   public writeToOutForMicroBitRelayHub(data: number, hubId: string, relayType: string){
-    console.log("OUTPUT! 2 build string given:", data, hubId, relayType)
-    // const controlMessage = makeCotrolMessage(data)
+    const ri = NodeLiveOutputTypes.filter((ot:any) => ot.name === relayType)[0].relayIndex
+    const controlMessage = `c${hubId}${ri}${data}`
+    console.log("CONTROL! ", controlMessage);
     // this.writer.write(`${controlMessage}\n`)
   }
 
