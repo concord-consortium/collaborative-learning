@@ -223,6 +223,12 @@
         "isTileTool": false
       },
       {
+        "id": "duplicate",
+        "title": "Duplicate",
+        "iconId": "icon-duplicate-tool",
+        "isTileTool": false
+      },
+      {
         "id": "delete",
         "title": "Delete",
         "iconId": "icon-delete-tool",
