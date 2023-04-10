@@ -11,11 +11,13 @@ import { StringBuilder } from "../../utilities/string-builder";
 // generally negotiated with app, e.g. single column width for table
 export const kDefaultMinWidth = 60;
 
-export interface IDragTileItem {
+export interface ITilePosition {
   rowIndex: number;
-  rowHeight?: number;
   tileIndex: number;
-  tileId: string;       // original tile id
+  tileId: string;
+}
+export interface IDragTileItem extends ITilePosition {
+  rowHeight?: number;
   tileContent: string;  // modified tile contents
   tileType: string;
 }

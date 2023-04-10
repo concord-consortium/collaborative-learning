@@ -8,7 +8,7 @@ import { kTextTileType } from "../tiles/text/text-content";
 import { getTileContentInfo, IDocumentExportOptions } from "../tiles/tile-content-info";
 import { ITileContentModel, ITileEnvironment } from "../tiles/tile-content";
 import {
-  IDragTileItem, TileModel, ITileModel, ITileModelSnapshotIn, ITileModelSnapshotOut
+  IDragTileItem, TileModel, ITileModel, ITileModelSnapshotIn, ITileModelSnapshotOut, ITilePosition
 } from "../tiles/tile-model";
 import {
   IDropRowInfo, TileRowModel, TileRowModelType, TileRowSnapshotType, TileRowSnapshotOutType, TileLayoutModelType
@@ -303,6 +303,9 @@ export const DocumentContentModel = types
       // if all else fails, revert to last visible row
       return self.indexOfLastVisibleRow + 1;
     },
+    getRowAfterTiles(tiles: ITilePosition[]) {
+      return Math.max(...tiles.map(tile => tile.rowIndex)) + 1;
+    },
     getTilesInDocumentOrder(): string[] {
       // Returns list of tile ids in the document from top to bottom, left to right
       const tiles: string[] = [];
@@ -480,6 +483,15 @@ export const DocumentContentModel = types
       const getTitle = (tileId: string) => (self.getTile(tileId) as any)?.title;
       const newTitle = self.getUniqueTitle(tileContent.type, titleBase, getTitle);
       return newTitle;
+    },
+    getTilePositions(tileIds: string[]) {
+      return tileIds.map(tileId => {
+        const rowId = self.findRowContainingTile(tileId);
+        const rowIndex = rowId && self.getRowIndex(rowId) || 0;
+        const row = rowId ? self.getRow(rowId) : undefined;
+        const tileIndex = row?.tiles.findIndex(t => t.tileId === tileId) || 0;
+        return { tileId, rowIndex, tileIndex };
+      });
     }
   }))
   .actions(self => ({
@@ -625,8 +637,8 @@ export const DocumentContentModel = types
       self.deleteRow(rowId);
       self.addPlaceholderRowIfAppropriate(rowIndex);
     },
-    showPendingInsertHighlight(show: boolean) {
-      self.highlightPendingDropLocation = show ? self.defaultInsertRow : -1;
+    showPendingInsertHighlight(show: boolean, insertRowIndex?: number) {
+      self.highlightPendingDropLocation = show ? insertRowIndex ?? self.defaultInsertRow : -1;
     }
   }))
   .actions((self) => ({
@@ -884,7 +896,8 @@ export const DocumentContentModel = types
         return tileInfo;
       },
       duplicateTiles(tiles: IDragTileItem[]) {
-        self.copyTilesIntoNewRows(tiles, self.defaultInsertRow);
+        const rowIndex = self.getRowAfterTiles(tiles);
+        self.copyTilesIntoNewRows(tiles, rowIndex);
       }
     };
     return actions;

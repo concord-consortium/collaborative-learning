@@ -85,7 +85,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
           onSetToolActive: handleSetActiveTool,
           onClick: handleClickTool,
           onDragStart: handleDragTool,
-          onShowDropHighlight: this.showDropRowHighlight,
+          onShowDropHighlight: this.getShowDropRowHighlight(toolButton),
           onHideDropHighlight: this.removeDropRowHighlight
         };
         toolButton.initialize();
@@ -104,9 +104,23 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     );
   }
 
-  private showDropRowHighlight = () => {
+  private getShowDropRowHighlight(toolButton: IToolbarButtonModel) {
+    return ["duplicate"].includes(toolButton.id)
+      ? this.showDropRowHighlightAfterSelectedTiles
+      : this.showDefaultDropRowHighlight;
+  }
+
+  private showDefaultDropRowHighlight = () => {
     const { document } = this.props;
     document.content?.showPendingInsertHighlight(true);
+  };
+
+  private showDropRowHighlightAfterSelectedTiles = () => {
+    const { document } = this.props;
+    const { ui: { selectedTileIds } } = this.stores;
+    const tilePositions = document.content?.getTilePositions(Array.from(selectedTileIds)) ?? [];
+    const rowIndex = document.content?.getRowAfterTiles(tilePositions);
+    document.content?.showPendingInsertHighlight(true, rowIndex);
   };
 
   private removeDropRowHighlight = () => {
@@ -207,18 +221,11 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
 
   private handleDuplicate() {
     const { document } = this.props;
-    const documentContent = document.content;
     const { ui: { selectedTileIds } } = this.stores;
 
     // Sort the selected tile ids in top->bottom, left->right order so they duplicate in the correct formation
-    const tilePositionInfo = Array.from(selectedTileIds).map(tileId => {
-      const rowId = documentContent?.findRowContainingTile(tileId);
-      const rowIndex = rowId && documentContent?.getRowIndex(rowId) || 0;
-      const row = rowId ? documentContent?.getRow(rowId) : undefined;
-      const tileIndex = row?.tiles.findIndex(t => t.tileId === tileId) || 0;
-      return { tileId, rowIndex, tileIndex };
-    });
-    const sortedTileIds = tilePositionInfo.sort((a, b) => {
+    const tilePositions = document.content?.getTilePositions(Array.from(selectedTileIds)) ?? [];
+    const sortedTileIds = tilePositions.sort((a, b) => {
       if (a.rowIndex < b.rowIndex) {
         return -1;
       } else if (a.rowIndex > b.rowIndex) {
@@ -228,7 +235,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
       }
     }).map(info => info.tileId);
 
-    documentContent?.duplicateTiles(getDragTileItems(documentContent, sortedTileIds));
+    document.content?.duplicateTiles(getDragTileItems(document.content, sortedTileIds));
   }
 
   private setShowDeleteTilesConfirmationAlert = (showAlert: () => void) => {
