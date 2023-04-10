@@ -707,11 +707,16 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const { deviceFamily } = this.stores.serialDevice;
 
     if (deviceFamily === "arduino" && isNumberOutput){
-      this.stores.serialDevice.writeToOutForArduino(n.data.nodeValue as number);
+      this.stores.serialDevice.writeToOutForBBGripper(n.data.nodeValue as number);
     }
     if (deviceFamily === "microbit"){
-      // UPCOMING PT: #184753741 control messages out to hubs
-      this.stores.serialDevice.writeToOutForMicroBit(n.data.nodeValue as any);
+      const hubSelect = n.controls.get("hubSelect") as DropdownListControl;
+      if (hubSelect.getChannels()){
+        const relayType = hubSelect.getData("liveOutputType") as string;
+        const hubId = hubSelect.getValue().charAt(14);
+        const state = n.data.nodeValue as number;
+        this.stores.serialDevice.writeToOutForMicroBitRelayHub(state, hubId, relayType );
+      }
     }
   }
 

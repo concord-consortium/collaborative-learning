@@ -151,13 +151,13 @@ export class SerialDevice {
     } while (match);
   }
 
-  public writeToOutForMicroBit(data: string | number){
-    // UPCOMING PT #184753741 compute control message string
+  public writeToOutForMicroBitRelayHub(data: number, hubId: string, relayType: string){
+    console.log("OUTPUT! 2 build string given:", data, hubId, relayType)
     // const controlMessage = makeCotrolMessage(data)
     // this.writer.write(`${controlMessage}\n`)
   }
 
-  public writeToOutForArduino(n:number){
+  public writeToOutForBBGripper(n:number){
     // number visible to user represents "percent closed"
     // so we need to map x percent to an angle in range where
     // 100% (closed) is 120deg, and 0% (open) is 180deg
