@@ -703,6 +703,15 @@ export const DocumentContentModel = types
       }
       return results;
     },
+    logCopyResults(tiles: IDragTileItem[], results: NewRowTileArray) {
+      results.forEach((result, i) => {
+        const newTile = result?.tileId && self.getTile(result.tileId);
+        if (result && newTile) {
+          const originalTileId = tiles[i].tileId;
+          logTileCopyEvent(LogEventName.COPY_TILE, { tile: newTile, originalTileId });
+        }
+      });
+    },
     moveRowToIndex(rowIndex: number, newRowIndex: number) {
       if (newRowIndex === 0) {
         const dstRowId = self.rowOrder[0];
@@ -897,7 +906,15 @@ export const DocumentContentModel = types
       },
       duplicateTiles(tiles: IDragTileItem[]) {
         const rowIndex = self.getRowAfterTiles(tiles);
-        self.copyTilesIntoNewRows(tiles, rowIndex);
+        const results = self.copyTilesIntoNewRows(tiles, rowIndex);
+        self.logCopyResults(tiles, results);
+        // results.forEach((result, i) => {
+        //   const newTile = result?.tileId && self.getTile(result.tileId);
+        //   if (result && newTile) {
+        //     const originalTileId = tiles[i].tileId;
+        //     logTileCopyEvent(LogEventName.COPY_TILE, { tile: newTile, originalTileId });
+        //   }
+        // });
       }
     };
     return actions;
@@ -998,13 +1015,14 @@ export const DocumentContentModel = types
       const results = dropRow?.acceptTileDrop(rowInfo)
                       ? self.copyTilesIntoExistingRow(tiles, rowInfo)
                       : self.copyTilesIntoNewRows(tiles, rowInfo.rowInsertIndex);
-      results.forEach((result, i) => {
-        const newTile = result?.tileId && self.getTile(result.tileId);
-        if (result && newTile) {
-          const originalTileId = tiles[i].tileId;
-          logTileCopyEvent(LogEventName.COPY_TILE, { tile: newTile, originalTileId });
-        }
-      });
+      self.logCopyResults(tiles, results);
+      // results.forEach((result, i) => {
+      //   const newTile = result?.tileId && self.getTile(result.tileId);
+      //   if (result && newTile) {
+      //     const originalTileId = tiles[i].tileId;
+      //     logTileCopyEvent(LogEventName.COPY_TILE, { tile: newTile, originalTileId });
+      //   }
+      // });
       return results;
     },
     userCopySingleTileWithSharedModel(dragTiles: IDragTilesData, rowInfo: IDropRowInfo) {
