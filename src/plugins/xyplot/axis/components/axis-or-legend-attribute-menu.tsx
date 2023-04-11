@@ -1,5 +1,4 @@
-// TODO: Work out chakra-ui issue
-// import { Menu, MenuItem, MenuList, MenuButton, MenuDivider } from "@chakra-ui/react";
+import { Menu, MenuItem, MenuList, MenuButton, MenuDivider } from "@chakra-ui/react";
 import React, { CSSProperties, useRef, memo } from "react";
 import { GraphPlace, graphPlaceToAttrRole } from "../../xyplot-types";
 import { useDataConfigurationContext } from "../../hooks/use-data-configuration-context";
@@ -45,10 +44,8 @@ const _AxisOrLegendAttributeMenu = ({ place, target, portal,
 
   return (
     <div className={`axis-legend-attribute-menu ${place}`} ref={menuRef}>
-      MENU GOES HERE
-      {/* TODO: Uncomment the below after getting chakra-ui issue resolved.
-          Update types for isOpen and onClose
       <Menu>
+        {/* TODO: Update types for isOpen and onClose */}
         {({ isOpen, onClose }: {isOpen: any, onClose: any}) => {
           onCloseRef.current = onClose;
           return (
@@ -78,7 +75,7 @@ const _AxisOrLegendAttributeMenu = ({ place, target, portal,
             </>
           );
         }}
-      </Menu> */}
+      </Menu>
     </div>
   );
 };

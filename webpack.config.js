@@ -35,8 +35,8 @@ module.exports = (env, argv) => {
     devtool: devMode ? 'eval-cheap-module-source-map' : 'source-map',
     entry: {
       index: './src/index.tsx',
-      admin: './src/admin.tsx',
-      'doc-editor': './src/doc-editor.tsx'
+      // admin: './src/admin.tsx',
+      // 'doc-editor': './src/doc-editor.tsx'
     },
     mode: devMode ? 'development' : 'production',
     output: {

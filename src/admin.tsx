@@ -1,3 +1,3 @@
-import { initCMS } from "./cms/init-cms";
+// import { initCMS } from "./cms/init-cms";
 
-initCMS();
+// initCMS();
