@@ -9,7 +9,7 @@ import { autorun } from "mobx";
 import { IDisposer, onSnapshot } from "mobx-state-tree";
 import { SizeMeProps } from "react-sizeme";
 import { forEach } from "lodash";
-import { ProgramZoomType, DataflowContentModelType } from "../model/dataflow-content";
+import { ProgramZoomType, DataflowContentModelType, kTimeAttributeCount } from "../model/dataflow-content";
 import { DataflowProgramModelType } from "../model/dataflow-program-model";
 import { SensorSelectControl } from "../nodes/controls/sensor-select-control";
 import { DataflowReteNodeFactory } from "../nodes/factories/dataflow-rete-node-factory";
@@ -569,7 +569,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private getAttributeIdForNode = (nodeIndex: number) => {
     const { dataSet } = this.props.tileModel;
     // this function adds two to the index to skip time attributes
-    return dataSet.attributes[nodeIndex + 2].id;
+    return dataSet.attributes[nodeIndex + kTimeAttributeCount].id;
   };
 
   private playbackNodesWithCaseData = (dataSet: any, playBackIndex: number) => {

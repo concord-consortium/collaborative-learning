@@ -7,7 +7,7 @@ import { ITileModel } from "../../../models/tiles/tile-model";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { ITileProps } from "../../../components/tiles/tile-component";
 import { EditableTileTitle } from "../../../components/tiles/editable-tile-title";
-import { DataflowContentModelType } from "../model/dataflow-content";
+import { DataflowContentModelType, kTimeAttributeCount } from "../model/dataflow-content";
 import { measureText } from "../../../components/tiles/hooks/use-measure-text";
 import { defaultTileTitleFont } from "../../../components/constants";
 import { ToolTitleArea } from "../../../components/tiles/tile-title-area";
@@ -179,7 +179,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     // compare dataset attributes against nodes on tile, if an attribute is not on the tile - remove it.
 
     dataSetAttributes.forEach((attribute, idx) => {
-      if (idx > 1) { //skip 0 and 1 index because those attribute are Time
+      if (idx >= kTimeAttributeCount) { //skip 0 and 1 index because those attribute are Time
         model.removeAttributesInDatasetMissingInTile(attribute.id);
       }
     });
