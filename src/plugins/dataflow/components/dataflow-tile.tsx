@@ -38,6 +38,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   public isLinkButtonEnabled = true;
   public isEditingTitle = false; //this is passed as a prop in geometry
 
+
   constructor(props: IProps) {
     super(props);
     this.state = {
@@ -47,6 +48,9 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
       recordIndex: 0,
     };
   }
+
+  // private { isLinkEnabled, showLinkTableDialog } = useTableLinking({ documentId, this.props.model, onRequestTilesOfType, actionHandlers });
+
 
   public render() {
     const { readOnly, height, model } = this.props;
@@ -60,8 +64,14 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
 
     //Table Linking
     //Copied from geometry-tile.tsx > line 52
+
+    //LEFT OFF: can't call this hook in a class component
     // const { isLinkEnabled, showLinkTableDialog } =
     // useTableLinking({ documentId, model, onRequestTilesOfType, actionHandlers });
+
+    // const { isLinkEnabled, showLinkTableDialog } = useTableLinking({ documentId, model, onRequestTilesOfType, actionHandlers });
+
+
     // showLinkTableDialog
 
     return (
