@@ -7,8 +7,8 @@ import {
   addTableToDocumentMap, getLinkedTableIndex, getTableLinkColors, removeTableFromDocumentMap
 } from "../../../models/tiles/table-links";
 import { ITileModel } from "../../../models/tiles/tile-model";
-import { useLinkTableDialog } from "./use-link-table-dialog";
-import { IToolbarActionHandlers } from "./geometry-shared";
+import { useLinkTableDialog } from "./dataflow-use-link-table-dialog";
+import { IToolbarActionHandlers } from "../../../components/tiles/geometry/geometry-shared";
 
 interface IProps {
   documentId?: string;
@@ -56,3 +56,4 @@ const useLinkableTableTiles = ({ onRequestTilesOfType }: IUseLinkableTableTilesP
   return tableTiles.current
           .map((tileInfo, i) => ({ id: tileInfo.id, title: tileInfo.title || `Table ${i + 1}` }));
 };
+

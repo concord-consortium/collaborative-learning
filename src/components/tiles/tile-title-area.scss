@@ -2,6 +2,8 @@
 .title-area-wrapper {
   display: flex;
   justify-content: center;
+  border: 1px solid black;
+  background-color: red;
 
   .title-area {
     position: absolute;
@@ -10,5 +12,6 @@
     align-items: center;
     justify-content: center;
     z-index: 10;  // has to be higher than JSXGraph entities that should be below it
+    background-color: blue;
   }
 }

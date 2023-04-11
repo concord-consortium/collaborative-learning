@@ -12,7 +12,8 @@ import { measureText } from "../../../components/tiles/hooks/use-measure-text";
 import { defaultTileTitleFont } from "../../../components/constants";
 import { ToolTitleArea } from "../../../components/tiles/tile-title-area";
 import { dataflowLogEvent } from "../dataflow-logger";
-
+import { DataflowLinkTableButton } from "./ui/dataflow-program-link-table-button";
+import { useTableLinking } from "./dataflow-use-table-linking";
 
 import "./dataflow-tile.scss";
 
@@ -34,6 +35,8 @@ interface IDataflowTileState {
 export default class DataflowToolComponent extends BaseComponent<IProps, IDataflowTileState> {
 
   public static tileHandlesSelection = true;
+  public isLinkButtonEnabled = true;
+  public isEditingTitle = false; //this is passed as a prop in geometry
 
   constructor(props: IProps) {
     super(props);
@@ -55,9 +58,20 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     const disabledRecordingStates = (this.state.programRecordingMode === 1 || this.state.programRecordingMode === 2);
     const dataFlowTileReadOnly = readOnly || disabledRecordingStates;
 
+    //Table Linking
+    //Copied from geometry-tile.tsx > line 52
+    // const { isLinkEnabled, showLinkTableDialog } =
+    // useTableLinking({ documentId, model, onRequestTilesOfType, actionHandlers });
+    // showLinkTableDialog
+
     return (
       <>
-        <ToolTitleArea>{this.renderTitle()}</ToolTitleArea>
+
+        <ToolTitleArea>
+          {this.renderTitle()}
+          {this.renderTableLinkButton()}
+        </ToolTitleArea>
+
         <div className={classes}>
           <SizeMe monitorHeight={true}>
             {({ size }: SizeMeProps) => {
@@ -141,6 +155,22 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
         readOnly={readOnly}
         measureText={(text) => measureText(text, defaultTileTitleFont)}
         onEndEdit={this.handleTitleChange}
+      />
+    );
+  }
+
+  private onLinkTableButtonClick(){
+    console.log("onLinkTableButtonClick");
+  }
+
+  private renderTableLinkButton() {
+    console.log("geometry-content.tsx > renderTableLinkButton");
+    // const { isLinkButtonEnabled, onLinkTableButtonClick } = this.props;
+    return (!this.isEditingTitle && !this.props.readOnly &&
+      <DataflowLinkTableButton
+        key="link-button"
+        isLinkButtonEnabled={this.isLinkButtonEnabled}
+        onLinkTableButtonClick={this.onLinkTableButtonClick}
       />
     );
   }
