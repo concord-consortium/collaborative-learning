@@ -86,43 +86,28 @@ export function getColumnWidths(documentContent: DocumentContentModelType, tileI
   return columnWidths;
 }
 
+export function getRowLayout(documentContent: DocumentContentModelType) {
+  const rowLayout: any = {};
+  documentContent.rowOrder.forEach(rowId => {
+    const row = documentContent.getRow(rowId);
+    const key = rowId.indexOf("testid-") !== -1 ? "NEW_ROW" : rowId;
+    rowLayout[key] = [];
+    row?.tiles.forEach((rowTile, index) => {
+      const tileType = documentContent.getTile(rowTile.tileId)!.content.type.toUpperCase();
+      const tileId = rowTile.tileId.indexOf("-") !== -1 ? `NEW_${tileType}_TILE_${index + 1}` : rowTile.tileId;
+      rowLayout[key].push(tileId);
+    });
+  });
+  return rowLayout;
+}
+
 export function setupDocumentContent(srcContent: DocumentContentSnapshotType) {
   const documentContent = DocumentContentModel.create(srcContent);
 
   return {
     documentContent,
-    getDragTiles(tileIds: string[]) {
-      return tileIds.map(tileId => {
-        const tile = documentContent.getTile(tileId)!;
-        const tileRowId = documentContent.findRowContainingTile(tileId)!;
-        const tileRow = documentContent.getRow(tileRowId)!;
-        const tileRowIndex = documentContent.getRowIndex(tileRowId)!;
-        const tileIndex = tileRow.tiles.findIndex(_tile => _tile.tileId === tileId);
-        const tileSnapshotWithoutId = cloneTileSnapshotWithoutId(tile);
-        const item: IDragTileItem = {
-          rowIndex: tileRowIndex,
-          rowHeight: tileRow.height || 0,
-          tileIndex,
-          tileId,
-          tileContent: JSON.stringify(tileSnapshotWithoutId),
-          tileType: tile.content.type
-        };
-        return item;
-      });
-    },
     getRowLayout() {
-      const rowLayout: any = {};
-      documentContent.rowOrder.forEach(rowId => {
-        const row = documentContent.getRow(rowId);
-        const key = rowId.indexOf("testid-") !== -1 ? "NEW_ROW" : rowId;
-        rowLayout[key] = [];
-        row?.tiles.forEach((rowTile, index) => {
-          const tileType = documentContent.getTile(rowTile.tileId)!.content.type.toUpperCase();
-          const tileId = rowTile.tileId.indexOf("-") !== -1 ? `NEW_${tileType}_TILE_${index + 1}` : rowTile.tileId;
-          rowLayout[key].push(tileId);
-        });
-      });
-      return rowLayout;
+      return getRowLayout(documentContent);
     }
   };
 }

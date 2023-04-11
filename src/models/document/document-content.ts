@@ -599,7 +599,7 @@ export const DocumentContentModel = types
   .actions(self => ({
     addTileContentInNewRow(content: ITileContentModel, options?: INewTileOptions): INewRowTile {
       const title = options?.title || self.getNewTileTitle(content);
-      return self.addTileInNewRow(TileModel.create({ title, content }), options);
+      return self.addTileInNewRow(TileModel.create({ title, content, id: options?.tileId }), options);
     },
     addTileSnapshotInNewRow(snapshot: ITileModelSnapshotIn, options?: INewTileOptions): INewRowTile {
       return self.addTileInNewRow(TileModel.create(snapshot), options);
@@ -688,6 +688,10 @@ export const DocumentContentModel = types
               lastRowId = result.rowId;
             }
             else {
+              // This code path happens when there are two or more tiles which
+              // were in the same row in the source document. `tile.rowIndex` is
+              // the rowIndex of the tile in the source document. `lastRowIndex`
+              // is the source row index of the last tile.
               const tileSnapshot: ITileModelSnapshotIn = { id: tile.newTileId, title: parsedTile.title, content };
               result = self.addTileSnapshotInExistingRow(tileSnapshot, tileOptions);
             }
@@ -1035,6 +1039,11 @@ export const DocumentContentModel = types
         return { ...tile, newTileId };
       });
 
+      // Copy the tiles, making use of the new ids generated above
+      // This has to be called first so that references in the shared
+      // model to these tiles are valid.
+      this.userCopyTiles(dropTiles, rowInfo);
+
       // map tile ids within shared models and add them to the document
       sharedModels?.forEach(sharedItem => {
         // for now, if we already have this shared model, don't copy it again
@@ -1051,17 +1060,28 @@ export const DocumentContentModel = types
           const Model = sharedModelFactory(content);
           const sharedModel = Model !== UnknownSharedModel ? Model.create(content) : undefined;
           if (sharedModel) {
-            const entry = SharedModelEntry.create({ sharedModel, provider: providerId, tiles: tileIds });
+            // TODO: try switching to a sharedModelManager.addSharedModel
+            const entry = SharedModelEntry.create({ sharedModel });
             self.sharedModelMap.set(sharedItem.modelId, entry);
+            tileIds.forEach(tileId => {
+              const tile = self.getTile(tileId);
+              if (!tile) {
+                console.warn("Can't find tile for", tileId);
+                return;
+              }
+              entry.addTile(tile, tileId === providerId);
+            });
+            // TODO: add a mst test to see if we can simplify this by working with
+            // snapshots.  Can an we create an object with a safeReference
+            // to another object that doesn't exist during the create call? Then
+            // when we add it to a tree that has the object being referenced does
+            // the reference match up?
           }
         }
         catch(e) {
           // ignore shared models with errors
         }
       });
-
-      // copy the tiles, making use of the new ids generated above
-      return this.userCopyTiles(dropTiles, rowInfo);
     }
   }));
 
