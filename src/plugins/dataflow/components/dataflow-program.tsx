@@ -664,7 +664,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const deviceMismatch = sd.deviceFamily !== channel.deviceFamily;
       const timeSinceActive = channel.usesSerial && channel.lastMessageRecievedAt
         ? Date.now() - channel.lastMessageRecievedAt: 0;
-      channel.missing = deviceMismatch || timeSinceActive > 5000;
+      channel.missing = deviceMismatch || timeSinceActive > 7000;
     }
     else {
       channel.serialConnected = false;

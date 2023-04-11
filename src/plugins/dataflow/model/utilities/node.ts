@@ -304,8 +304,7 @@ export const NodeDemoOutputTypes = [
 export const NodeLiveOutputTypes = [
   {
     name: "Light Bulb",
-    icon: LightBulbIcon,
-    relayIndex: 0
+    icon: LightBulbIcon
   },
   {
     name: "Grabber",
@@ -314,17 +313,17 @@ export const NodeLiveOutputTypes = [
   {
     name: "Sprinkler",
     icon: GrabberIcon,
-    relayIndex: 3
+    relayIndex: 2
   },
   {
     name: "Fan",
     icon: GrabberIcon,
-    relayIndex: 2
+    relayIndex: 1
   },
   {
     name: "Heat Lamp",
     icon: GrabberIcon,
-    relayIndex: 1
+    relayIndex: 0
   }
 ];
 
