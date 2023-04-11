@@ -1,69 +1,38 @@
 import React from "react";
 import { IDisposer, onSnapshot } from "mobx-state-tree";
 import { Map } from "immutable";
-import { CmsWidgetControlProps } from "netlify-cms-core";
 
 import { defaultDocumentModelParts } from "../components/doc-editor-app-defaults";
-import { EditableDocumentContent } from "../components/document/editable-document-content";
 import { appConfig, AppProvider, initializeApp } from "../initialize-app";
 import { IStores } from "../models/stores/stores";
 import { createDocumentModel, DocumentModelType } from "../models/document/document";
 import { DEBUG_CMS } from "../lib/debug";
+import { EditableDocumentContent } from "../components/document/editable-document-content";
 
-import "./clue-control.scss";
-import "./custom-control.scss";
+import "../../cms/src/custom-control.scss";
 
 (window as any).DISABLE_FIREBASE_SYNC = true;
+
+interface IProps {
+  initialValue?: DocumentModelType;
+  handleUpdateContent: (json: Record<string, any>) => void;
+}
 
 interface IState {
   document?: DocumentModelType;
   stores?: IStores;
 }
 
-// Initialize the app just one time globally, each control waits for this
-// initialization to finish to know the `stores` so the document editor
-// can use these stores
 const initializeAppPromise = initializeApp("dev", true);
 
-// We are using the CmsWidgetControlProps for the type of properties passed to
-// the control. This doesn't actually include all of the properties that are
-// available. A more complete list can be found in Widget.js in the DecapCMS
-// source code.
-export class ClueControl extends React.Component<CmsWidgetControlProps, IState>  {
+export class DocumentEditor extends React.Component<IProps, IState>  {
   disposer: IDisposer;
-  // Because we only create the document from the value property in the
-  // constructor, it is important to make sure the component is reconstructed
-  // whenever the CMS changes the value. As far as I can tell that is always
-  // the case.
-  //
-  // Notes on calls:
-  // - After publishing a CMS page, the component on the page is not
-  //   reconstructed. The existing component is reused. Because we are holding
-  //   onto the document this works fine.
-  // - When leaving (using the CMS ui) and coming back to the same page the
-  //   component is reconstructed.
-  // - When leaving (using the CMS ui) with unsaved changes, a message is shown,
-  //   and the control is reconstructed when returning to the page.
-  // - When leaving with unsaved changes by reloading the page in the
-  //   browser:
-  //   - a message is shown before reload confirming you want to lose your
-  //     changes
-  //   - a message is shown when the page is loaded again about an unsaved draft
-  //     Choosing the draft doesn't always work. See the "Known Issues" section of
-  //     cms.md
-  constructor(props: CmsWidgetControlProps) {
+  constructor(props: any) {
     super(props);
     this.state = {};
 
-    const initialValue = this.getValue();
-
-    if (DEBUG_CMS) {
-      // eslint-disable-next-line no-console
-      console.log("DEBUG: CMS ClueControl initial content value is: ", initialValue);
-    }
-
     initializeAppPromise.then((stores) => {
-
+      const { initialValue } = this.props;
       // Wait to construct the document until the main CLUE stuff is
       // initialized. I'm not sure if this is necessary but it seems
       // like the safest way to do things
@@ -101,7 +70,7 @@ export class ClueControl extends React.Component<CmsWidgetControlProps, IState> 
             // but it also gets returned in the value property so it means sometimes the value
             // is a immutable object and sometimes it is a plain JS object.
             const immutableValue = Map(parsedJson);
-            this.props.onChange(immutableValue);
+            this.props.handleUpdateContent(immutableValue);
             if (DEBUG_CMS) {
               // eslint-disable-next-line no-console
               console.log("DEBUG: CMS ClueControl onChange called with new content value: ", parsedJson);
@@ -110,10 +79,7 @@ export class ClueControl extends React.Component<CmsWidgetControlProps, IState> 
         }
       });
 
-      this.setState({
-        document,
-        stores
-      });
+      this.setState({ document, stores });
     });
   }
 
@@ -122,28 +88,25 @@ export class ClueControl extends React.Component<CmsWidgetControlProps, IState> 
   }
 
   render() {
-    if (this.state.stores && this.state.document) {
+    const { document, stores } = this.state;
+    if (document && stores) {
       return (
-        <AppProvider stores={this.state.stores} modalAppElement="#nc-root">
+        <AppProvider stores={stores} modalAppElement="#app">
           <EditableDocumentContent
-            className="custom-widget clue-control"
+            className="iframe-control"
             contained={true}
             mode="1-up"
             isPrimary={true}
             readOnly={false}
-            document={this.state.document}
+            document={document}
             toolbar={appConfig.authorToolbar}
           />
         </AppProvider>
       );
     } else {
       return (
-        <div className="custom-widget loading-box">Loading editor...</div>
+        <div className="loading-box">Loading editor...</div>
       );
     }
-  }
-
-  getValue() {
-    return this.props.value?.toJS?.();
   }
 }

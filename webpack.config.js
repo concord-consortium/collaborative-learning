@@ -35,7 +35,8 @@ module.exports = (env, argv) => {
     devtool: devMode ? 'eval-cheap-module-source-map' : 'source-map',
     entry: {
       index: './src/index.tsx',
-      admin: './src/admin.tsx',
+      admin: './cms/src/admin.tsx',
+      editor: './src/cms/editor.tsx',
       'doc-editor': './src/doc-editor.tsx'
     },
     mode: devMode ? 'development' : 'production',
@@ -252,7 +253,14 @@ module.exports = (env, argv) => {
         chunks: ['admin'],
         filename: 'admin.html',
         publicPath: '.',
-        template: 'src/admin.html'
+        template: 'cms/src/admin.html'
+      }),
+      new HtmlWebpackPlugin({
+        ...baseHtmlPluginConfig,
+        chunks: ['editor'],
+        filename: 'editor.html',
+        publicPath: '.',
+        template: 'src/cms/editor.html'
       }),
       ...(DEPLOY_PATH ? [new HtmlWebpackPlugin({
         ...baseHtmlPluginConfig,

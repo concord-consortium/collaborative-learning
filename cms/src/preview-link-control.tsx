@@ -2,9 +2,9 @@ import React from "react";
 import { CmsWidgetControlProps } from "netlify-cms-core";
 
 import { defaultCurriculumBranch } from "./cms-constants";
-import { urlParams } from "../utilities/url-params";
-import { getGuideJson, getUnitJson } from "../models/curriculum/unit";
-import { appConfig } from "../initialize-app";
+import { urlParams } from "../../src/utilities/url-params";
+import { getGuideJson, getUnitJson } from "../../src/models/curriculum/unit";
+import { appConfig } from "../../src/initialize-app";
 
 import "./custom-control.scss";
 import "./preview-link-control.scss";
@@ -49,9 +49,9 @@ export class PreviewLinkControl extends React.Component<CmsWidgetControlProps, I
     // Finish setting up the preview link after reading the unit json
     this.isTeacherGuide = this.pathParts?.[2] === "teacher-guide";
     if (this.isTeacherGuide) {
-      getGuideJson(this.unit, appConfig).then(unitJson => this.setPreviewLink(unitJson));
+      getGuideJson(this.unit, appConfig).then((unitJson: any) => this.setPreviewLink(unitJson));
     } else {
-      getUnitJson(this.unit, appConfig).then(unitJson => this.setPreviewLink(unitJson));
+      getUnitJson(this.unit, appConfig).then((unitJson: any) => this.setPreviewLink(unitJson));
     }
 
     this.state = {
@@ -95,7 +95,7 @@ export class PreviewLinkControl extends React.Component<CmsWidgetControlProps, I
     const params = `?unit=${previewUnit}&problem=${problemParam}&section=${sectionType}`;
     // TODO It would be better to use the github user for the demoName rather than the curriculum branch.
     // TODO Do we want to make the user a teacher when they are not modifying a teacher guide?
-    const demoParams = `&appMode=demo&domeName=${curriculumBranch}&fakeClass=1&fakeUser=teacher:2`;
+    const demoParams = `&appMode=demo&demoName=${curriculumBranch}&fakeClass=1&fakeUser=teacher:2`;
     const previewUrl = `${baseUrl}${params}${demoParams}`;
     this.setState({ previewUrl });
   }
