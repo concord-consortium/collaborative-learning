@@ -60,7 +60,7 @@ interface MicroBitHubInfo {
   location?: string
 }
 
-export const microBitHubs = [
+const microBitHubs = [
   { microBitId: "a", relaysState: [0,0,0] },
   { microBitId: "b", relaysState: [0,0,0] },
   { microBitId: "c", relaysState: [0,0,0] },
