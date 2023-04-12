@@ -1,7 +1,6 @@
 import { IDocumentExportOptions } from "../../tiles/tile-content-info";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { DocumentContentModel, DocumentContentModelType, DocumentContentSnapshotType } from "../document-content";
-import { IDragTileItem, cloneTileSnapshotWithoutId } from "../../tiles/tile-model";
 import { TableContentModelType } from "../../tiles/table/table-content";
 import { kDefaultColumnWidth } from "../../../components/tiles/table/table-types";
 
