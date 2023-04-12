@@ -234,7 +234,7 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
 
     it("can copy a tile to an existing row, removing placeholder tiles", () => {
       // copy drawingTool1 to whatIfRow1
-      const dragTiles = getDocumentDragTileItems(["drawingTool1"]).map(tile => ({ ...tile, newTileId: mockUniqueId() }));
+      const dragTiles = getDocumentDragTileItems(["drawingTool1"]).map(tile => ({...tile, newTileId: mockUniqueId()}));
       const whatIfRowIndex = documentContent.getRowIndex("whatIfRow1");
       const dropRowInfo: IDropRowInfo = {
         rowInsertIndex: whatIfRowIndex,
@@ -440,7 +440,7 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
   describe("single tile copies", () => {
     it("can copy a tile before another row", () => {
       // copy drawingTile1 to new row before introductionRow1
-      const dragTiles = getDocumentDragTileItems(["drawingTool1"]).map(tile => ({ ...tile, newTileId: mockUniqueId() }));
+      const dragTiles = getDocumentDragTileItems(["drawingTool1"]).map(tile => ({...tile, newTileId: mockUniqueId()}));
       const rowInsertIndex = documentContent.getRowIndex("introductionRow1");
       documentContent.copyTilesIntoNewRows(dragTiles, rowInsertIndex);
       expect(getRowLayout()).toEqual({
@@ -460,7 +460,7 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
 
     it("can copy a tile after another row", () => {
       // copy drawingTile1 to new row after introductionRow1
-      const dragTiles = getDocumentDragTileItems(["drawingTool1"]).map(tile => ({ ...tile, newTileId: mockUniqueId() }));
+      const dragTiles = getDocumentDragTileItems(["drawingTool1"]).map(tile => ({...tile, newTileId: mockUniqueId()}));
       const rowInsertIndex = documentContent.getRowIndex("introductionRow1") + 1;
       documentContent.copyTilesIntoNewRows(dragTiles, rowInsertIndex);
       expect(getRowLayout()).toEqual({
