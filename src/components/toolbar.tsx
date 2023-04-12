@@ -3,10 +3,10 @@ import React from "react";
 
 import { BaseComponent, IBaseProps } from "./base";
 import { DocumentModelType } from "../models/document/document";
-import { IDocumentContentAddTileOptions, IDragToolCreateInfo } from "../models/document/document-content";
 import { IToolbarModel } from "../models/stores/problem-configuration";
 import { IToolbarButtonModel } from "../models/tiles/toolbar-button";
 import { getTileContentInfo, ITileContentInfo } from "../models/tiles/tile-content-info";
+import { IDocumentContentAddTileOptions, IDragToolCreateInfo } from "../models/document/document-content-types";
 import { DeleteButton } from "./delete-button";
 import { IToolbarButtonProps, ToolbarButtonComponent } from "./toolbar-button";
 import { EditableTileApiInterfaceRefContext } from "./tiles/tile-api";

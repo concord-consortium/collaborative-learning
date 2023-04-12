@@ -4,7 +4,7 @@ import "./progress-widget.sass";
 
 import { ProgressWidgetItem } from "./progress-widget-item";
 import { BaseComponent } from "../../components/base";
-import { ITileCountsPerSection } from "../../models/document/document-content";
+import { ITileCountsPerSection } from "../../models/document/document-content-types";
 
 export interface IProgressItem {
   label: string;

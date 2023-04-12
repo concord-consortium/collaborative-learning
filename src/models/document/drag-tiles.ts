@@ -1,6 +1,7 @@
 import { uniqueId } from "../../utilities/js-utils";
 import { cloneTileSnapshotWithNewId, IDragTileItem } from "../tiles/tile-model";
-import { DocumentContentModelType, IDragTilesData } from "./document-content";
+import { DocumentContentModelType } from "./document-content";
+import { IDragTilesData } from "./document-content-types";
 import { getTileContentInfo } from "../tiles/tile-content-info";
 import { DEBUG_DROP } from "../../lib/debug";
 
