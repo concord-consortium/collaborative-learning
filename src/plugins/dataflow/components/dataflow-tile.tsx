@@ -33,11 +33,9 @@ interface IDataflowTileState {
 @inject("stores")
 @observer
 export default class DataflowToolComponent extends BaseComponent<IProps, IDataflowTileState> {
-
   public static tileHandlesSelection = true;
   public isLinkButtonEnabled = true;
   public isEditingTitle = false; //this is passed as a prop in geometry
-
   constructor(props: IProps) {
     super(props);
     this.state = {
@@ -47,9 +45,9 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
       recordIndex: 0,
     };
   }
-
   public render() {
     const { readOnly, height, model} = this.props;
+    console.log("dataflwoToolcomponent with readOnly:", readOnly);
     const editableClass = readOnly ? "read-only" : "editable";
     const classes = `dataflow-tool disable-tile-content-drag ${editableClass}`;
     const { program, programDataRate, programZoom } = this.getContent();
@@ -57,19 +55,8 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     const tileModel = this.getContent();
     const disabledRecordingStates = (this.state.programRecordingMode === 1 || this.state.programRecordingMode === 2);
     const dataFlowTileReadOnly = readOnly || disabledRecordingStates;
-
-    //Table Linking
-    //Copied from geometry-tile.tsx > line 52
-    //LEFT OFF: can't call this hook in a class component
-    // const { isLinkEnabled, showLinkTableDialog } =
-    // useTableLinking({ documentId, model, onRequestTilesOfType, actionHandlers });
-
-    // const { isLinkEnabled, showLinkTableDialog } = useTableLinking({ documentId, model,
-    // onRequestTilesOfType, actionHandlers });
-
     return (
       <>
-
         <ToolTitleArea>
           {this.renderTitle()}
           {this.renderTableLinkButton()}

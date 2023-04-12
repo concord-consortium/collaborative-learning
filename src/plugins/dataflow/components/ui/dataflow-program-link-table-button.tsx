@@ -16,7 +16,6 @@ interface IProps {
   model: ITileModel;
   onRequestTilesOfType: (tileType: string) => ITileLinkMetadata[];
   // actionHandlers?: IToolbarActionHandlers;
-
 }
 
 export const DataflowLinkTableButton: React.FC<IProps> = (props: IProps) => {
