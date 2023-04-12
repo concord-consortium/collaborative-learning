@@ -1,7 +1,8 @@
 import React, { useRef, useState } from "react";
-import LinkGraphIcon from "../../../clue/assets/icons/table/link-graph-icon.svg";
+import LinkGraphIcon from "../assets/icons/link-table-icon.svg"; //may need to change
 import { useCustomModal } from "../../../hooks/use-custom-modal";
-import { GeometryContentModelType } from "../../../models/tiles/geometry/geometry-content";
+// import { GeometryContentModelType } from "../../../models/tiles/geometry/geometry-content";
+import { DataflowContentModelType } from "../model/dataflow-content";
 import { ITileLinkMetadata } from "../../../models/tiles/table-link-types";
 import { ITileModel } from "../../../models/tiles/tile-model";
 
@@ -20,7 +21,7 @@ const Content: React.FC<IContentProps>
     return (
       <>
         <div className="prompt">
-          To link this graph to a table, drag the table to a graph or select a table from the link list.
+          To link this program to a table, record data, then select a table from the link list.
           To unlink this graph from a table, select a table from the unlink list.
         </div>
         <select ref={selectElt} value={selectValue} data-test="link-table-select"
@@ -57,7 +58,7 @@ interface IProps {
 export const useLinkTableDialog = ({ tableTiles, model, handleRequestTableLink, handleRequestTableUnlink }: IProps) => {
   const [selectValue, setSelectValue] = useState("");
   const handleClick = () => {
-    const _content = model.content as GeometryContentModelType;
+    const _content = model.content as DataflowContentModelType;
     const tileInfo = tableTiles.find(tile => tile.id === selectValue);
     if (tileInfo) {
       if (_content.isLinkedToTable(tileInfo.id)) {
@@ -67,13 +68,13 @@ export const useLinkTableDialog = ({ tableTiles, model, handleRequestTableLink, 
       }
     }
   };
-  const content = model.content as GeometryContentModelType;
+  const content = model.content as DataflowContentModelType;
   const unlinkedTiles = tableTiles.filter(tileInfo => !content.isLinkedToTable(tileInfo.id));
   const linkedTiles = tableTiles.filter(tileInfo => content.isLinkedToTable(tileInfo.id));
   const [showModal, hideModal] = useCustomModal({
     className: "link-table",
     Icon: LinkGraphIcon,
-    title: "Link or Unlink Table to a Graph",
+    title: "Link or Unlink Program to a Table",
     Content,
     contentProps: { unlinkedTiles, linkedTiles, selectValue, setSelectValue },
     buttons: [

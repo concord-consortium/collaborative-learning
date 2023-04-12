@@ -1,7 +1,7 @@
 import React from "react";
 import classNames from "classnames";
 import LinkTableIcon from "../../assets/icons/link-table-icon.svg"; //we may need to change to icon with icon up
-import { useDocumentFromStore, useFeatureFlag, useStores } from "../../../../hooks/use-stores";
+import { useDocumentFromStore, useFeatureFlag } from "../../../../hooks/use-stores";
 import { useTableLinking } from "../dataflow-use-table-linking";
 import { ITileModel } from "src/models/tiles/tile-model";
 
@@ -10,7 +10,7 @@ import { ITileLinkMetadata } from "src/models/tiles/table-link-types";
 
 interface IProps {
   isLinkButtonEnabled?: boolean;
-  onLinkTableButtonClick?: (documentID: string, isLinkEnabled: boolean, getLinkIndex: boolean) => void;
+  onLinkTableButtonClick?: (isLinkEnabled: boolean, showLinkTableDialog: ()=>void) => void;
   //useTableLinking
   documentId?: string;
   model: ITileModel;
@@ -20,24 +20,23 @@ interface IProps {
 
 export const DataflowLinkTableButton: React.FC<IProps> = (props: IProps) => {
   const { isLinkButtonEnabled, onLinkTableButtonClick, model, onRequestTilesOfType, documentId } = props;
-  console.log("<DataflowLinkTableButton> with model:", model);
+  // console.log("<DataflowLinkTableButton> with model:", model);
   const classes = classNames("link-table-button", { disabled: !isLinkButtonEnabled });
 
-  // //find documentId to pass
-  const store = useStores();
-  const currentDocumentIndex = store.documents.all.length -  1;
-  const currentDocumentKey = store.documents.all[currentDocumentIndex].key;
-  console.log("currentDocumentKey", currentDocumentKey);
-
-  const testReturn = useTableLinking({
+  const { isLinkEnabled, showLinkTableDialog } = useTableLinking({
                                        documentId,
                                        model,
                                        onRequestTilesOfType
                                      });
-  const  {isLinkEnabled, getLinkIndex} = testReturn;
+  // const { showLinkButton, isLinkEnabled, linkColors, getLinkIndex, showLinkTableDialog } = testReturn;
+  console.log("<DataflowLinkTableButton>");
+  // console.log("typeof showLinkButton", typeof showLinkButton);
+  // console.log("typeof getLinkIndex", typeof getLinkIndex);
+  console.log("tyopeof showLinkTableDialog", typeof showLinkTableDialog);
+
 
   const handleClick = (e: React.MouseEvent) => {
-    isLinkButtonEnabled && documentId && onLinkTableButtonClick?.(documentId, isLinkEnabled, getLinkIndex);
+    isLinkButtonEnabled && documentId && onLinkTableButtonClick?.(isLinkEnabled, showLinkTableDialog);
     e.stopPropagation();
   };
 
@@ -45,7 +44,7 @@ export const DataflowLinkTableButton: React.FC<IProps> = (props: IProps) => {
 
   // console.log("useFeatureFlag: geometryLinkedTables?", useFeatureFlag("GeometryLinkedTables"));
   // console.log(testReturn);
-  console.log(documentId, isLinkEnabled, getLinkIndex);
+  // console.log("<DataflowLinkTableButton> with props:", showLinkButton, isLinkEnabled, linkColors, getLinkIndex, showLinkTableDialog);
 
   return useFeatureFlag("DataflowLinkedTables") //change to DataflowLinkedTable
           ? <div

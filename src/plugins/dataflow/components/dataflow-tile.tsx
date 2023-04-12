@@ -48,7 +48,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   }
   public render() {
     const { readOnly, height, model} = this.props;
-    console.log("dataflwoToolcomponent with readOnly:", readOnly);
     const editableClass = readOnly ? "read-only" : "editable";
     const classes = `dataflow-tool disable-tile-content-drag ${editableClass}`;
     const { program, programDataRate, programZoom } = this.getContent();
@@ -150,24 +149,25 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     );
   }
 
-  private onLinkTableButtonClick(documentId: string, isLinkEnabled: boolean, getLinkIndex: boolean){
-    console.log("onLinkTableButtonClick with", documentId, isLinkEnabled, getLinkIndex);
+  private onLinkTableButtonClick(isLinkEnabled: boolean, showLinkTableDialog: ()=> void){
+    console.log("onLinkTableButtonClick with", isLinkEnabled, showLinkTableDialog);
     // const testLink = useCallBack(useTableLinking({documentId:"testId"}));
     // const test = useTableLinking({documentId:"testId"});
+    showLinkTableDialog();
   }
 
   private renderTableLinkButton() {
     // console.log("geometry-content.tsx > renderTableLinkButton");
     // const { isLinkButtonEnabled, onLinkTableButtonClick } = this.props;
-    const { model, onRequestTilesOfType, documentId} = this.props;
-
+    const { model, onRequestTilesOfType, documentId } = this.props;
+    const isLinkButtonEnabled = (this.state.programRecordingMode === 2);
 
     return (!this.isEditingTitle && !this.props.readOnly &&
       <DataflowLinkTableButton
         key="link-button"
-        isLinkButtonEnabled={this.isLinkButtonEnabled}
+        isLinkButtonEnabled={isLinkButtonEnabled}
         onLinkTableButtonClick={this.onLinkTableButtonClick}
-        //this holds our call to useTableLinking
+        //used in useTableLinking
         documentId={documentId}
         model={model}
         onRequestTilesOfType={onRequestTilesOfType}
@@ -270,7 +270,5 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     return this.props.model.content as DataflowContentModelType;
   }
 }
-function useCallBack(arg0: string | undefined) {
-  throw new Error("Function not implemented.");
-}
+
 

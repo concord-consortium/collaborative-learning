@@ -14,38 +14,39 @@ interface IProps {
   documentId?: string;
   model: ITileModel;
   onRequestTilesOfType: (tileType: string) => ITileLinkMetadata[];
-  actionHandlers?: IToolbarActionHandlers;
+  actionHandlers?: IToolbarActionHandlers; //maybe get rid of
 }
 
 
 
 export const useTableLinking = (props: IProps) => {
-  // const { documentId, model, onRequestTilesOfType, actionHandlers } = props;
-  // console.log("useTableLinking props", props);
-  // const {handleRequestTableLink, handleRequestTableUnlink} = actionHandlers || {};
-  // const modelId = model.id;
+  const { documentId, model, onRequestTilesOfType, actionHandlers } = props;
+  const {handleRequestTableLink, handleRequestTableUnlink} = actionHandlers || {};
+  const modelId = model.id;
   // const showLinkButton = useFeatureFlag("GeometryLinkedTables"); //original
-  // // const showLinkButton = useFeatureFlag("GeometryLinkedTables") || useFeatureFlag("DataflowLinkedTables");
-  // const tableTiles = useLinkableTableTiles({ model, onRequestTilesOfType });
-  // const isLinkEnabled = (tableTiles.length > 0);
-  // const linkColors = getTableLinkColors(modelId);
+  const showLinkButton = useFeatureFlag("DataflowLinkedTables"); //modified
+  const tableTiles = useLinkableTableTiles({ model, onRequestTilesOfType });
+  const isLinkEnabled = (tableTiles.length > 0);
+  const linkColors = getTableLinkColors(modelId);
 
-  // const [showLinkTableDialog] =
-  //         useLinkTableDialog({ tableTiles, model, handleRequestTableLink, handleRequestTableUnlink });
+  const [showLinkTableDialog] =
+          useLinkTableDialog({ tableTiles, model, handleRequestTableLink, handleRequestTableUnlink });
 
-  // useEffect(() => {
-  //   documentId && addTableToDocumentMap(documentId, modelId);
-  //   return () => removeTableFromDocumentMap(modelId);
-  // }, [documentId, modelId]);
+  useEffect(() => {
+    documentId && addTableToDocumentMap(documentId, modelId);
+    return () => removeTableFromDocumentMap(modelId);
+  }, [documentId, modelId]);
 
-  // const getLinkIndex = useCallback(() => {
-  //   return showLinkButton ? getLinkedTableIndex(modelId) : -1;
-  // }, [modelId, showLinkButton]);
+  const getLinkIndex = useCallback(() => {
+    return showLinkButton ? getLinkedTableIndex(modelId) : -1;
+  }, [modelId, showLinkButton]);
 
-  // return { showLinkButton, isLinkEnabled, linkColors, getLinkIndex, showLinkTableDialog };
-  const isLinkEnabled = true;
-  const getLinkIndex = false;
-  return {isLinkEnabled, getLinkIndex};
+  return { showLinkButton, isLinkEnabled, linkColors, getLinkIndex, showLinkTableDialog };
+  // const isLinkEnabled = true;
+  // const getLinkIndex = false;
+
+  console.log("typeof getLinkIndex:", typeof getLinkIndex);
+  // return {isLinkEnabled, getLinkIndex};
   // return testReturn;
 };
 

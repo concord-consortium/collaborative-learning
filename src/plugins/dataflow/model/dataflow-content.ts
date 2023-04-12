@@ -50,7 +50,8 @@ export const DataflowContentModel = TileContentModel
   })
   .volatile(self => ({
     metadata: undefined as any as ITileMetadataModel,
-    emptyDataSet: DataSet.create()
+    emptyDataSet: DataSet.create(),
+    updateSharedModels: 0, //added
   }))
   .views(self => ({
     get sharedModel() {
@@ -77,7 +78,18 @@ export const DataflowContentModel = TileContentModel
   .views(self => ({
     get dataSet(){
       return self.sharedModel?.dataSet || self.emptyDataSet;
-    }
+    },
+    ////added
+    get linkedDataSets(): SharedDataSetType[] {
+      // eslint-disable-next-line no-unused-expressions
+      self.updateSharedModels;
+      const sharedModelManager = self.tileEnv?.sharedModelManager;
+      const foundSharedModels = sharedModelManager?.isReady
+        ? sharedModelManager.getTileSharedModels(self) as SharedDataSetType[]
+        : [];
+      return foundSharedModels;
+    },
+    ////
   }))
   .views(self => ({
     get title() {
@@ -101,7 +113,17 @@ export const DataflowContentModel = TileContentModel
         `}`
       ].join("\n");
     },
-
+    /////added
+    get isLinked(){
+      return self.linkedDataSets.length > 0;
+    },
+    get linkedTableIds() {
+      return self.linkedDataSets.map(link => link.providerId);
+    },
+    isLinkedToTable(tableId: string) {
+      return self.linkedDataSets.some(link => link.providerId === tableId);
+    },
+    //////
   }))
   .actions(self => tileModelHooks({
     doPostCreate(metadata: ITileMetadataModel) {
@@ -148,7 +170,6 @@ export const DataflowContentModel = TileContentModel
       },
       {name: "sharedModelSetup", fireImmediately: true}));
     },
-
     setProgram(program: any) {
       if (program) {
         applySnapshot(self.program, cloneDeep(program));
@@ -168,7 +189,6 @@ export const DataflowContentModel = TileContentModel
     updateAfterSharedModelChanges(sharedModel?: SharedModelType){
       //do nothing
     },
-
     addNewAttrFromNode(nodeId: number, nodeName: string){
       //if already an attribute with the same nodeId do nothing, else write
       const dataSetAttributes = self.dataSet.attributes;
@@ -189,7 +209,6 @@ export const DataflowContentModel = TileContentModel
         });
       }
     },
-
     // this may be implemented if we change to preserve attributes accross runs
     removeAttributesInDatasetMissingInTile(attribute: string){
       const index = attribute.indexOf("*");
