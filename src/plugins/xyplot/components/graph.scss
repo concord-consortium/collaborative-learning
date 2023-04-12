@@ -1,9 +1,7 @@
-@import "../../vars.scss";
-
 .graph-plot {
   position: relative;
   width: 100%;
-  height: calc(100% - $title-bar-height);
+  height: 100%;
   background-color: aliceblue;
 
 

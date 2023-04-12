@@ -1,5 +1,5 @@
 export const t = (stringId: string, params?: Record<string, unknown>) => {
-  return "FIX THIS";
+  return stringId;
 };
 
 export default t;

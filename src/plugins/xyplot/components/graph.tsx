@@ -59,8 +59,10 @@ export const Graph = observer(function Graph({graphController, graphRef}: IProps
         .attr('transform', transform)
         .attr('x', 0 /*xScale?.length*/)
         .attr('y', 0)
-        .attr('width', layout.plotWidth)
-        .attr('height', layout.plotHeight);
+        // TODO: Determine why we're sometimes getting negative values for plotWidth and plotHeight
+        // Is it some sort of offset for the axis labels?
+        .attr('width', layout.plotWidth > -1 ? layout.plotWidth : 0)
+        .attr('height', layout.plotHeight > -1 ? layout.plotHeight : 0);
     }
   }, [dataset, plotAreaSVGRef, layout, layout.plotHeight, layout.plotWidth, xScale]);
 

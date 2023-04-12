@@ -19,9 +19,9 @@ interface IProps {
 
 type D3Handler = (this: Element, event: any, d: any) => void
 
-const axisDragHints = [t("DG.CellLinearAxisView.lowerPanelTooltip"),
-  t("DG.CellLinearAxisView.midPanelTooltip"),
-  t("DG.CellLinearAxisView.upperPanelTooltip")];
+const axisDragHints = [t("Drag to change axis lower bound"),
+  t("Drag to translate axis scale"),
+  t("Drag to change axis upper bound")];
 
 export const AxisDragRects = observer(
   function AxisDragRects({axisModel, axisWrapperElt, numSubAxes = 1, subAxisIndex = 0}: IProps) {

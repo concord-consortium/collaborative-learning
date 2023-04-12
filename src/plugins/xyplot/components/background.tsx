@@ -49,8 +49,9 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
     layout = useGraphLayoutContext(),
     graphModel = useGraphModelContext(),
     bounds = layout.computedBounds.get('plot') as Bounds,
-    plotWidth = bounds.width,
-    plotHeight = bounds.height,
+    // TODO: Figure out why we're sometimes getting negative values for bounds.width and bounds.height.
+    plotWidth = bounds.width > -1 ? bounds.width : 0,
+    plotHeight = bounds.height > -1 ? bounds.height : 0,
     transform = `translate(${bounds.left}, ${bounds.top})`,
     bgRef = ref as MutableRefObject<SVGGElement | null>,
     startX = useRef(0),

@@ -10,9 +10,8 @@ import {useDataConfigurationContext} from "../hooks/use-data-configuration-conte
 interface IProps {
   place: AxisPlace
   enableAnimation: MutableRefObject<boolean>
-  // TODO: Determine if changing `AxisPlace` to `GraphPlace` in the next two lines is OK
-  onDropAttribute?: (place: GraphPlace, attrId: string) => void
-  onRemoveAttribute?: (place: GraphPlace, attrId: string) => void
+  onDropAttribute?: (place: AxisPlace, attrId: string) => void
+  onRemoveAttribute?: (place: AxisPlace, attrId: string) => void
   onTreatAttributeAs?: (place: GraphPlace, attrId: string, treatAs: string) => void
 }
 
@@ -33,7 +32,9 @@ export const GraphAxis = observer(function GraphAxis(
         const isY2 = desc.attributeID === graphModel.getAttributeID('rightNumeric');
         return (desc.attributeID && !isY2 && dataset?.attrFromID(desc.attributeID)?.name) || '';
       }).filter(aName => aName !== '').join(', ')
-      : (attrId && dataset?.attrFromID(attrId)?.name) || t('DG.AxisView.emptyGraphCue');
+      : (attrId && dataset?.attrFromID(attrId)?.name) ||
+        // TODO: Determine the best way to set this default value. Probably don't need t()?
+        t("Click here to choose data to plot"); // t('DG.AxisView.emptyGraphCue');
   };
 
   return (

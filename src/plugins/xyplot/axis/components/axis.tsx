@@ -4,7 +4,7 @@ import {createPortal} from "react-dom";
 import {range} from "d3";
 import {AxisPlace} from "../axis-types";
 import {DroppableAxis} from "./droppable-axis";
-import {axisPlaceToAttrRole, GraphPlace, IsGraphDropAllowed} from "../../xyplot-types";
+import {axisPlaceToAttrRole, IsGraphDropAllowed} from "../../xyplot-types";
 import {useAxisBoundsProvider} from "../hooks/use-axis-bounds";
 import {getDragAttributeId, useDropHandler} from "../../../../hooks/use-drag-drop";
 import {useDropHintString} from "../../../../hooks/use-drop-hint-string";
@@ -25,10 +25,9 @@ interface IProps {
   showScatterPlotGridLines?: boolean
   centerCategoryLabels?: boolean
   isDropAllowed?: IsGraphDropAllowed
-  // TODO: Determine if change type from `AxisPlace` to `GraphPlace` is OK
-  onDropAttribute?: (place: GraphPlace, attrId: string) => void
-  onRemoveAttribute?: (place: GraphPlace, attrId: string) => void
-  onTreatAttributeAs?: (place: GraphPlace, attrId: string, treatAs: string) => void
+  onDropAttribute?: (place: AxisPlace, attrId: string) => void
+  onRemoveAttribute?: (place: AxisPlace, attrId: string) => void
+  onTreatAttributeAs?: (place: AxisPlace, attrId: string, treatAs: string) => void
 }
 
 export const Axis = ({
@@ -96,9 +95,10 @@ export const Axis = ({
           target={titleRef.current}
           portal={parentElt}
           place={place}
-          onChangeAttribute={onDropAttribute}
-          onRemoveAttribute={onRemoveAttribute}
-          onTreatAttributeAs={onTreatAttributeAs}
+          // TODO: Revisit casting to any after TypeScript 4.9 upgrade
+          onChangeAttribute={onDropAttribute as any}
+          onRemoveAttribute={onRemoveAttribute as any}
+          onTreatAttributeAs={onTreatAttributeAs as any}
         />, parentElt)
       }
 
