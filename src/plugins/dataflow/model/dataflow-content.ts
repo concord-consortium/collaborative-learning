@@ -23,6 +23,7 @@ export function defaultDataflowContent(): DataflowContentModelType {
 
 export const kDataflowDefaultHeight = 480;
 export const kDefaultLabel = "Dataflow Node";
+export const kTimeAttributeCount = 2; //# of time attributes (currently TimeQuantized + TimeActual)
 
 export function defaultDataSet() {
   const dataSet = DataSet.create();

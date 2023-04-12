@@ -4,11 +4,10 @@ import { observer, inject } from "mobx-react";
 import { isAlive } from "mobx-state-tree";
 import React from "react";
 import ResizeObserver from "resize-observer-polyfill";
-import { IDragTilesData } from "../../models/document/document-content";
+import { getDragTiles } from "../../models/document/drag-tiles";
 import { transformCurriculumImageUrl } from "../../models/tiles/image/image-import-export";
 import { getTileComponentInfo } from "../../models/tiles/tile-component-info";
-import { getTileContentInfo } from "../../models/tiles/tile-content-info";
-import { cloneTileSnapshotWithNewId, IDragTileItem, ITileModel } from "../../models/tiles/tile-model";
+import { ITileModel } from "../../models/tiles/tile-model";
 import { BaseComponent } from "../base";
 import PlaceholderTileComponent from "./placeholder/placeholder-tile";
 import { ITileApi, TileResizeEntry, TileApiInterfaceContext} from "./tile-api";
@@ -16,8 +15,7 @@ import { HotKeys } from "../../utilities/hot-keys";
 import { TileCommentsComponent } from "./tile-comments";
 import { LinkIndicatorComponent } from "./link-indicator";
 import { hasSelectionModifier } from "../../utilities/event-utils";
-import { uniqueId } from "../../utilities/js-utils";
-import { getContentIdFromNode, getDocumentContentFromNode } from "../../utilities/mst-utils";
+import { getDocumentContentFromNode } from "../../utilities/mst-utils";
 import TileDragHandle from "../../assets/icons/drag-tile/move.svg";
 import TileResizeHandle from "../../assets/icons/resize-tile/expand-handle.svg";
 import "../../utilities/dom-utils";
@@ -373,8 +371,6 @@ export class TileComponent extends BaseComponent<IProps, IState> {
     }
     // set the drag data
     const { model, docId } = this.props;
-    const sharedManager = model.content.tileEnv?.sharedModelManager;
-    const tileSharedModels = sharedManager?.getTileSharedModels(model.content);
 
     const Component = getTileComponentInfo(model.content.type)?.Component;
     // can't drag placeholder tiles
@@ -384,34 +380,28 @@ export class TileComponent extends BaseComponent<IProps, IState> {
     }
     if (!e.dataTransfer) return;
 
-    // TODO: move this to document-content.tsx since it is more than just the current tile
-    //       and also the drop handler is there
-
     const { ui } = this.stores;
-    const dragSrcContentId = getContentIdFromNode(model);
-    if (!dragSrcContentId) return;
 
     // dragging a tile selects it first
     ui.setSelectedTile(model, { append: hasSelectionModifier(e) });
 
-    const dragTiles: IDragTilesData = {
-      sourceDocId: docId,
-      tiles: this.getDragTileItems(dragSrcContentId, ui.selectedTileIds),
-      // TODO: include entry information, i.e. which tiles are associated with which shared models
-      sharedModels: tileSharedModels || []
-    };
+    const documentContent = getDocumentContentFromNode(model);
+    if (!documentContent) {
+      console.error("Tile model being dragged doesn't have a DocumentContentModel");
+      return;
+    }
 
-    // create a sorted array of selected tiles
-    dragTiles.tiles.sort((a, b) => {
-      if (a.rowIndex < b.rowIndex) return -1;
-      if (a.rowIndex > b.rowIndex) return 1;
-      if (a.tileIndex < b.tileIndex) return -1;
-      if (a.tileIndex > b.tileIndex) return 1;
-      return 0;
-    });
+    if (documentContent.contentId !== docId) {
+      // TODO: maybe we don't need to pass the docId, then it wouldn't be possible to have a mis-match
+      console.warn("The docId passed to TileComponent is different than the " +
+        "documentContent.contentId of the model passed to TileComponent");
+    }
+    const dragTiles = getDragTiles(documentContent, model, ui.selectedTileIds);
+
     e.dataTransfer.setData(kDragTiles, JSON.stringify(dragTiles));
 
-    // we have to set this as a transfer type because the kDragTiles contents are not available in drag over events
+    // We have to set this as a transfer type because the kDragTiles contents are not available in drag over events
+    // TODO: document why kDragTiles contents are not available.
     e.dataTransfer.setData(dragTileSrcDocId(docId), docId);
 
     // to support existing geometry and drawing layer drop logic set the single tile drag fields
@@ -430,38 +420,6 @@ export class TileComponent extends BaseComponent<IProps, IState> {
     const offsetY = 0;
     e.dataTransfer.setDragImage(defaultDragImage, offsetX, offsetY);
   };
-
-  private getDragTileItems(dragSrcContentId: string, tileIds: string[]) {
-    const { model } = this.props;
-    const dragTileItems: IDragTileItem[] = [];
-
-    const idMap: { [id: string]: string } = {};
-    tileIds.forEach(tileId => idMap[tileId] = uniqueId());
-
-    const content = getDocumentContentFromNode(model);
-    tileIds.forEach(tileId => {
-      const srcTile = content?.getTile(tileId) || (tileId === model.id ? model : undefined);
-      if (srcTile) {
-        const tileContentId = getContentIdFromNode(srcTile);
-        if (!tileContentId || (tileContentId !== dragSrcContentId)) return;
-        const rowId = content?.findRowContainingTile(srcTile.id);
-        const rowIndex = rowId && content?.getRowIndex(rowId) || 0;
-        const row = rowId ? content?.getRow(rowId) : undefined;
-        const rowHeight = row?.height;
-        const tileIndex = row?.tiles.findIndex(t => t.tileId === tileId) || 0;
-        const clonedTile = cloneTileSnapshotWithNewId(srcTile, idMap[srcTile.id]);
-        getTileContentInfo(clonedTile.content.type)?.contentSnapshotPostProcessor?.(clonedTile.content, idMap);
-        dragTileItems.push({
-          rowIndex, rowHeight, tileIndex,
-          tileId: srcTile.id,
-          tileContent: JSON.stringify(clonedTile),
-          tileType: srcTile.content.type
-        });
-      }
-    });
-
-    return dragTileItems;
-  }
 
   private triggerResizeHandler = () => {
     const handler = this.getTileResizeHandler();
