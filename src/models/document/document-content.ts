@@ -1,12 +1,12 @@
 import stringify from "json-stringify-pretty-compact";
 import { cloneDeep, each } from "lodash";
-import { types, getSnapshot, Instance, SnapshotIn, getType, getEnv } from "mobx-state-tree";
+import { types, getSnapshot, Instance, SnapshotIn, getType, getEnv, SnapshotOrInstance } from "mobx-state-tree";
 import {
   getPlaceholderSectionId, isPlaceholderTile, PlaceholderContentModel
 } from "../tiles/placeholder/placeholder-content";
 import { kTextTileType } from "../tiles/text/text-content";
 import { getTileContentInfo, IDocumentExportOptions } from "../tiles/tile-content-info";
-import { ITileContentModel, ITileEnvironment } from "../tiles/tile-content";
+import { ITileContentModel, ITileEnvironment, TileContentModel } from "../tiles/tile-content";
 import {
   IDragTileItem, TileModel, ITileModel, ITileModelSnapshotIn, ITileModelSnapshotOut, IDropTileItem
 } from "../tiles/tile-model";
@@ -478,10 +478,10 @@ export const DocumentContentModel = types
     }
   }))
   .views(self => ({
-    getNewTileTitle(tileContent: ITileContentModel) {
-      const titleBase = getTileContentInfo(tileContent.type)?.titleBase || tileContent.type;
+    getNewTileTitle(tileType: string) {
+      const titleBase = getTileContentInfo(tileType)?.titleBase || tileType;
       const getTitle = (tileId: string) => (self.getTile(tileId) as any)?.title;
-      const newTitle = self.getUniqueTitle(tileContent.type, titleBase, getTitle);
+      const newTitle = self.getUniqueTitle(tileType, titleBase, getTitle);
       return newTitle;
     }
   }))
@@ -597,8 +597,15 @@ export const DocumentContentModel = types
     }
   }))
   .actions(self => ({
-    addTileContentInNewRow(content: ITileContentModel, options?: INewTileOptions): INewRowTile {
-      const title = options?.title || self.getNewTileTitle(content);
+    addTileContentInNewRow(content: SnapshotOrInstance<typeof TileContentModel>,
+        options?: INewTileOptions): INewRowTile {
+      // We can assume content.type is always defined. If content is an instance
+      // then it has to be defined. If it is a snapshot, the type is required since
+      // this is a generic function. For completeness a warning is printed.
+      if (!content.type) {
+        console.warn("addTileContentInNewRow requires the content to have a type");
+      }
+      const title = options?.title || self.getNewTileTitle(content.type!);
       return self.addTileInNewRow(TileModel.create({ title, content, id: options?.tileId }), options);
     },
     addTileSnapshotInNewRow(snapshot: ITileModelSnapshotIn, options?: INewTileOptions): INewRowTile {
@@ -682,8 +689,7 @@ export const DocumentContentModel = types
               tileOptions.rowHeight = tile.rowHeight;
             }
             if (tile.rowIndex !== lastRowIndex) {
-              // TODO: figure out the appropriate type/conversion here
-              result = self.addTileContentInNewRow(content as any, tileOptions);
+              result = self.addTileContentInNewRow(content, tileOptions);
               lastRowIndex = tile.rowIndex;
               lastRowId = result.rowId;
             }
