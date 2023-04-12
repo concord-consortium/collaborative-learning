@@ -38,7 +38,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   public isLinkButtonEnabled = true;
   public isEditingTitle = false; //this is passed as a prop in geometry
 
-
   constructor(props: IProps) {
     super(props);
     this.state = {
@@ -49,11 +48,8 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     };
   }
 
-  // private { isLinkEnabled, showLinkTableDialog } = useTableLinking({ documentId, this.props.model, onRequestTilesOfType, actionHandlers });
-
-
   public render() {
-    const { readOnly, height, model } = this.props;
+    const { readOnly, height, model} = this.props;
     const editableClass = readOnly ? "read-only" : "editable";
     const classes = `dataflow-tool disable-tile-content-drag ${editableClass}`;
     const { program, programDataRate, programZoom } = this.getContent();
@@ -64,15 +60,12 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
 
     //Table Linking
     //Copied from geometry-tile.tsx > line 52
-
     //LEFT OFF: can't call this hook in a class component
     // const { isLinkEnabled, showLinkTableDialog } =
     // useTableLinking({ documentId, model, onRequestTilesOfType, actionHandlers });
 
-    // const { isLinkEnabled, showLinkTableDialog } = useTableLinking({ documentId, model, onRequestTilesOfType, actionHandlers });
-
-
-    // showLinkTableDialog
+    // const { isLinkEnabled, showLinkTableDialog } = useTableLinking({ documentId, model,
+    // onRequestTilesOfType, actionHandlers });
 
     return (
       <>
@@ -169,18 +162,27 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     );
   }
 
-  private onLinkTableButtonClick(){
-    console.log("onLinkTableButtonClick");
+  private onLinkTableButtonClick(documentId: string, isLinkEnabled: boolean, getLinkIndex: boolean){
+    console.log("onLinkTableButtonClick with", documentId, isLinkEnabled, getLinkIndex);
+    // const testLink = useCallBack(useTableLinking({documentId:"testId"}));
+    // const test = useTableLinking({documentId:"testId"});
   }
 
   private renderTableLinkButton() {
-    console.log("geometry-content.tsx > renderTableLinkButton");
+    // console.log("geometry-content.tsx > renderTableLinkButton");
     // const { isLinkButtonEnabled, onLinkTableButtonClick } = this.props;
+    const { model, onRequestTilesOfType, documentId} = this.props;
+
+
     return (!this.isEditingTitle && !this.props.readOnly &&
       <DataflowLinkTableButton
         key="link-button"
         isLinkButtonEnabled={this.isLinkButtonEnabled}
         onLinkTableButtonClick={this.onLinkTableButtonClick}
+        //this holds our call to useTableLinking
+        documentId={documentId}
+        model={model}
+        onRequestTilesOfType={onRequestTilesOfType}
       />
     );
   }
@@ -279,3 +281,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     return this.props.model.content as DataflowContentModelType;
   }
 }
+function useCallBack(arg0: string | undefined) {
+  throw new Error("Function not implemented.");
+}
+

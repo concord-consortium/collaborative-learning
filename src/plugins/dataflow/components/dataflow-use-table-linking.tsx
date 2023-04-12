@@ -16,32 +16,37 @@ interface IProps {
   onRequestTilesOfType: (tileType: string) => ITileLinkMetadata[];
   actionHandlers?: IToolbarActionHandlers;
 }
+
+
+
 export const useTableLinking = (props: IProps) => {
-  const { documentId, model, onRequestTilesOfType, actionHandlers } = props;
+  // const { documentId, model, onRequestTilesOfType, actionHandlers } = props;
+  // console.log("useTableLinking props", props);
+  // const {handleRequestTableLink, handleRequestTableUnlink} = actionHandlers || {};
+  // const modelId = model.id;
+  // const showLinkButton = useFeatureFlag("GeometryLinkedTables"); //original
+  // // const showLinkButton = useFeatureFlag("GeometryLinkedTables") || useFeatureFlag("DataflowLinkedTables");
+  // const tableTiles = useLinkableTableTiles({ model, onRequestTilesOfType });
+  // const isLinkEnabled = (tableTiles.length > 0);
+  // const linkColors = getTableLinkColors(modelId);
 
-  console.log("useTableLinking props", props);
+  // const [showLinkTableDialog] =
+  //         useLinkTableDialog({ tableTiles, model, handleRequestTableLink, handleRequestTableUnlink });
 
-  const {handleRequestTableLink, handleRequestTableUnlink} = actionHandlers || {};
-  const modelId = model.id;
-  const showLinkButton = useFeatureFlag("GeometryLinkedTables"); //original
-  // const showLinkButton = useFeatureFlag("GeometryLinkedTables") || useFeatureFlag("DataflowLinkedTables");
-  const tableTiles = useLinkableTableTiles({ model, onRequestTilesOfType });
-  const isLinkEnabled = (tableTiles.length > 0);
-  const linkColors = getTableLinkColors(modelId);
+  // useEffect(() => {
+  //   documentId && addTableToDocumentMap(documentId, modelId);
+  //   return () => removeTableFromDocumentMap(modelId);
+  // }, [documentId, modelId]);
 
-  const [showLinkTableDialog] =
-          useLinkTableDialog({ tableTiles, model, handleRequestTableLink, handleRequestTableUnlink });
+  // const getLinkIndex = useCallback(() => {
+  //   return showLinkButton ? getLinkedTableIndex(modelId) : -1;
+  // }, [modelId, showLinkButton]);
 
-  useEffect(() => {
-    documentId && addTableToDocumentMap(documentId, modelId);
-    return () => removeTableFromDocumentMap(modelId);
-  }, [documentId, modelId]);
-
-  const getLinkIndex = useCallback(() => {
-    return showLinkButton ? getLinkedTableIndex(modelId) : -1;
-  }, [modelId, showLinkButton]);
-
-  return { showLinkButton, isLinkEnabled, linkColors, getLinkIndex, showLinkTableDialog };
+  // return { showLinkButton, isLinkEnabled, linkColors, getLinkIndex, showLinkTableDialog };
+  const isLinkEnabled = true;
+  const getLinkIndex = false;
+  return {isLinkEnabled, getLinkIndex};
+  // return testReturn;
 };
 
 interface IUseLinkableTableTilesProps {

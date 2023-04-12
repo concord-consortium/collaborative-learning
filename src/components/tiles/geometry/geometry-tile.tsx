@@ -16,6 +16,7 @@ import "./geometry-tile.sass";
 const _GeometryToolComponent: React.FC<IGeometryProps> = ({
   model, readOnly, ...others
 }) => {
+  // console.log("_GeometryToolComponent with model:", model);
   const { documentId, documentContent, tileElt, scale, onRequestTilesOfType,
     onRegisterTileApi, onUnregisterTileApi } = others;
   const modelRef = useCurrent(model);
@@ -23,6 +24,7 @@ const _GeometryToolComponent: React.FC<IGeometryProps> = ({
   const content = model.content as GeometryContentModelType;
   const [board, setBoard] = useState<JXG.Board>();
   const [actionHandlers, setActionHandlers] = useState<IActionHandlers>();
+  // console.log("actionHAndlers:", actionHandlers);
   const hotKeys = useRef(new HotKeys());
   const forceUpdate = useForceUpdate();
 
@@ -57,7 +59,7 @@ const _GeometryToolComponent: React.FC<IGeometryProps> = ({
   // We must listen for mouse events because some browsers (notably Safari) don't
   // support pointer events.
 
-  console.log("geometry-tile.tsx > showLinkTableDialog", showLinkTableDialog);
+  // console.log("geometry-tile.tsx > showLinkTableDialog", showLinkTableDialog);
 
   return (
     <div className="geometry-tool" ref={domElement} tabIndex={0}
