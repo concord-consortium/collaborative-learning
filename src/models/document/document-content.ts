@@ -230,6 +230,14 @@ export const DocumentContentModel = types
           _tiles.forEach(tile => {
             sharedModelEntry.tiles.push(tileIdMap[tile]);
           });
+          // Update references to provider
+          if (sharedModelEntry.provider) {
+            sharedModelEntry.provider = tileIdMap[sharedModelEntry.provider];
+          }
+          const sharedModel = sharedModelEntry.sharedModel;
+          if ("providerId" in sharedModel && typeof sharedModel.providerId === "string") {
+            sharedModel.providerId = tileIdMap[sharedModel.providerId];
+          }
         });
         // TODO: Give the shared models new ids
 
