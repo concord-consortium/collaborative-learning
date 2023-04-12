@@ -1,6 +1,6 @@
 import {ScaleLinear} from "d3";
 import {AxisPlace} from "./axis-types";
-import {measureText, measureTextExtent} from "../../../hooks/use-measure-text";
+import {measureText, measureTextExtent} from "../../../components/tiles/hooks/use-measure-text";
 import {kGraphFont} from "../xyplot-types";
 
 export const getStringBounds = (s = 'Wy') => {

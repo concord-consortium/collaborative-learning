@@ -5,7 +5,7 @@ import {useDataConfigurationContext} from "../../hooks/use-data-configuration-co
 import {isSelectionAction} from "../../../../models/data/data-set-actions";
 import {useGraphLayoutContext} from "../../models/graph-layout";
 import {choroplethLegend} from "./choroplethLegend/choroplethLegend";
-import {measureTextExtent} from "../../../../hooks/use-measure-text";
+import {measureTextExtent} from "../../../../components/tiles/hooks/use-measure-text";
 import {useDataSetContext} from "../../../../hooks/use-data-set-context";
 import {kChoroplethHeight, kGraphFont} from "../../xyplot-types";
 import {axisGap} from "../../axis/axis-types";

@@ -1,6 +1,7 @@
-// TODO: Determine where to put the axis folder
 import { AxisPlace, AxisPlaces } from "./axis/axis-types";
 
+export const kGraphTileType = "XYplot";
+export const kGraphTileClass = "xyplot";
 export const kXYplotTileType = "XYplot";
 export const kXYplotDefaultHeight = 320;
 

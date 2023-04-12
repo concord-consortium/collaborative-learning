@@ -2,19 +2,16 @@ import {Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tre
 import {createContext, useContext} from "react";
 import {AxisPlace} from "../axis/axis-types";
 import {AxisModelUnion, EmptyAxisModel, IAxisModelUnion} from "../axis/models/axis-model";
-import {kGraphTileType} from "../xyplot-defs";
 import {
-  GraphAttrRole, hoverRadiusFactor, PlotType, PlotTypes,
+  GraphAttrRole, hoverRadiusFactor, PlotType, PlotTypes, kGraphTileType,
   pointRadiusLogBase, pointRadiusMax, pointRadiusMin, pointRadiusSelectionAddend
 } from "../xyplot-types";
 import {DataConfigurationModel} from "./data-configuration-model";
 import {IDataSet} from "../../../models/data/data-set";
 import { SharedModelType } from "../../../models/shared/shared-model";
-// TODO: Determine if shared-case-metadata should be copied from CODAP.
 import { ISharedCaseMetadata, isSharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
 import {isSharedDataSet} from "../../../models/shared/shared-data-set";
 import {ITileContentModel, TileContentModel} from "../../../models/tiles/tile-content";
-// TODO: Determine if we really need these.
 import {
   defaultBackgroundColor,
   defaultPointColor,
@@ -44,7 +41,6 @@ export const GraphModel = TileContentModel
     type: types.optional(types.literal(kGraphTileType), kGraphTileType),
     // keys are AxisPlaces
     axes: types.map(AxisModelUnion),
-    // TODO: should the default plot be something like "nullPlot" (which doesn't exist yet)?
     plotType: types.optional(types.enumeration([...PlotTypes]), "casePlot"),
     config: types.optional(DataConfigurationModel, () => DataConfigurationModel.create()),
     // Visual properties

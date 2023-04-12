@@ -3,21 +3,17 @@ import React from "react";
 import {isInteger} from "lodash";
 
 import {CaseData, kGraphFont, Point, Rect, rTreeRect, transitionDuration} from "../xyplot-types";
-// TODO: Is `between` all that's needed from math-utils? Should we remove everything else?
 import {between} from "../../../utilities/math-utils";
 import {IAxisModel, INumericAxisModel} from "../axis/models/axis-model";
 import {ScaleNumericBaseType} from "../axis/axis-types";
 import {IDataSet} from "../../../models/data/data-set";
 import {Bounds} from "../models/graph-layout";
-// TODO: Determine if the below are really needed.
 import {
   defaultSelectedColor, defaultSelectedStroke, defaultSelectedStrokeOpacity,
   defaultSelectedStrokeWidth, defaultStrokeOpacity, defaultStrokeWidth
 } from "../../../utilities/color-utils";
 import {IDataConfigurationModel} from "../models/data-configuration-model";
-// TODO: Determine if everything in the file below is needed or if it's just measureText.
-// Or shoud the below be merged with src/components/tiles/hooks/use-measure-text.ts?
-import {measureText} from "../../../hooks/use-measure-text";
+import {measureText} from "../../../components/tiles/hooks/use-measure-text";
 
 /**
  * Utility routines having to do with graph entities

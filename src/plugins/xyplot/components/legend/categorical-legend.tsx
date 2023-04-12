@@ -6,7 +6,7 @@ import {isSelectionAction} from "../../../../models/data/data-set-actions";
 import {useDataConfigurationContext} from "../../hooks/use-data-configuration-context";
 import {useGraphLayoutContext} from "../../models/graph-layout";
 import {missingColor} from "../../../../utilities/color-utils";
-import {measureText} from "../../../../hooks/use-measure-text";
+import {measureText} from "../../../../components/tiles/hooks/use-measure-text";
 import {kGraphFont} from "../../xyplot-types";
 
 import './legend.scss';
