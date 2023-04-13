@@ -542,7 +542,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private recordCase = () => {
-    const { recordIndex } = this.props;
+    const { recordIndex, programRecordState } = this.props;
     const { programDataRate } = this.props.tileModel; //grab the program Sampling Rate to write TimeQuantized
     const now = Date.now();
     //attributes order  - Time_Quantized as first column | Time_Actual | + # of nodes
@@ -552,17 +552,25 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
     const recordTimeQuantized = (recordIndex * programDataRate) / 1000; //in seconds
     aCase[timeQuantizedKey] = recordTimeQuantized;
-    if (recordIndex === 0) {
+
+    console.log("recordCase:", recordIndex);
+    if (recordIndex === 0 || programRecordState === 2) {
       this.startTimeActual = now;
     }
     const recordTimeActual = (now - this.startTimeActual) / 1000; //in seconds
     (recordTimeActual >= 0) && (aCase[timeActualKey] = recordTimeActual);
+    console.log("recordTimeQuantized:", recordTimeQuantized);
+    console.log("recordTimeActual:", recordTimeActual);
 
     //loop through attribute (nodes) and write each value
     this.programEditor.nodes.forEach((node, idx) => {
       const key = this.getAttributeIdForNode(idx);
       aCase[key] = node.data.nodeValue as string;
+      // console.log("recording node:", node.name, aCase[key]);
+
     });
+
+    console.log("aCase:", aCase);
     addCanonicalCasesToDataSet(this.props.tileModel.dataSet, [aCase]);
   };
 
@@ -617,6 +625,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             break;
           default:
         }
+        // console.log("playback node:", node.name, valueToSendToNode);
+
       });
     }
   };

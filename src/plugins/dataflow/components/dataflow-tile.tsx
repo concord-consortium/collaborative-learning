@@ -14,7 +14,6 @@ import { ToolTitleArea } from "../../../components/tiles/tile-title-area";
 import { dataflowLogEvent } from "../dataflow-logger";
 import { addAttributeToDataSet } from "../../../models/data/data-set";
 import { DataflowLinkTableButton } from "./ui/dataflow-program-link-table-button";
-import { useTableLinking } from "./dataflow-use-table-linking";
 
 import "./dataflow-tile.scss";
 
@@ -150,7 +149,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   }
 
   private onLinkTableButtonClick(isLinkEnabled: boolean, showLinkTableDialog: ()=> void){
-    console.log("onLinkTableButtonClick with", isLinkEnabled, showLinkTableDialog);
+    // console.log("onLinkTableButtonClick with", isLinkEnabled, showLinkTableDialog);
     // const testLink = useCallBack(useTableLinking({documentId:"testId"}));
     // const test = useTableLinking({documentId:"testId"});
     showLinkTableDialog();
@@ -161,6 +160,10 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     // const { isLinkButtonEnabled, onLinkTableButtonClick } = this.props;
     const { model, onRequestTilesOfType, documentId } = this.props;
     const isLinkButtonEnabled = (this.state.programRecordingMode === 2);
+    const actionHandlers = {
+                             handleRequestTableLink: this.handleRequestTableLink,
+                             handleRequestTableUnlink: this.handleRequestTableUnlink
+                           };
 
     return (!this.isEditingTitle && !this.props.readOnly &&
       <DataflowLinkTableButton
@@ -171,9 +174,20 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
         documentId={documentId}
         model={model}
         onRequestTilesOfType={onRequestTilesOfType}
+        actionHandlers={actionHandlers}
+
       />
     );
   }
+
+  private handleRequestTableLink = (tableId: string) => {
+    console.log("dataflow-tile.tsx > handleRequestTableLink > \n this.getContent()", this.getContent());
+    this.getContent().addLinkedTable(tableId);
+  };
+
+  private handleRequestTableUnlink = (tableId: string) => {
+    this.getContent().removeLinkedTable(tableId);
+  };
 
   private getTitle() {
     return this.getContent().title || "";
@@ -199,8 +213,12 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     // dataSet looks like
     // Time_Quantized | Time_Actual | Node 1 | Node 2 | Node 3 etc
     //    0           |  0          | val    | val    |  val
-    addAttributeToDataSet(model.dataSet, { name: "Time_Quantized" });
-    addAttributeToDataSet(model.dataSet, { name: "Time_Actual" });
+    // addAttributeToDataSet(model.dataSet, { name: "Time_Quantized" }); //original
+    // addAttributeToDataSet(model.dataSet, { name: "Time_Actual" });
+
+    model.addNewAttrFromNode(0, "Time_Quantized"); //test
+    model.addNewAttrFromNode(1, "Time_Actual");
+
 
     model.program.nodes.forEach((n) => {
       model.addNewAttrFromNode(n.id, n.name);
@@ -229,6 +247,9 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     if (mode === 0){ //when Record is pressed
       this.setState({isPlaying: false}); //reset isPlaying
       this.pairNodesToAttributes();
+    }
+    if (mode === 1){
+      console.log("before clear: dataSet:", model.dataSet);
     }
     if (mode === 2){ // Clear pressed - remove all dataSet
       const allAttributes = model.dataSet.attributes;

@@ -8,21 +8,22 @@ import {
 } from "../../../models/tiles/table-links";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { useLinkTableDialog } from "./dataflow-use-link-table-dialog";
-import { IToolbarActionHandlers } from "../../../components/tiles/geometry/geometry-shared";
+import { IDataFlowActionHandlers } from "./dataflow-shared";
 
 interface IProps {
   documentId?: string;
   model: ITileModel;
   onRequestTilesOfType: (tileType: string) => ITileLinkMetadata[];
-  actionHandlers?: IToolbarActionHandlers; //maybe get rid of
+  actionHandlers?: IDataFlowActionHandlers; //maybe get rid of
 }
 
 
 
-export const useTableLinking = (props: IProps) => {
+export const useTableLinkingDataFlow = (props: IProps) => {
   const { documentId, model, onRequestTilesOfType, actionHandlers } = props;
   const {handleRequestTableLink, handleRequestTableUnlink} = actionHandlers || {};
   const modelId = model.id;
+
   // const showLinkButton = useFeatureFlag("GeometryLinkedTables"); //original
   const showLinkButton = useFeatureFlag("DataflowLinkedTables"); //modified
   const tableTiles = useLinkableTableTiles({ model, onRequestTilesOfType });

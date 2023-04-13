@@ -491,10 +491,15 @@ export const DataSet = types.model("DataSet", {
       },
 
       addCanonicalCasesWithIDs(cases: ICase[], beforeID?: string | string[]) {
+        console.log("---------------");
+        console.log("data-set.ts >  \n 🔨 addCanonicalCasesWithIds > \n 🍔 cases:", cases);
+        console.log("self.attributes", self.attributes);
         cases.forEach((aCase, index) => {
           const beforeIndex = beforeIndexForInsert(index, beforeID);
           self.attributes.forEach((attr: IAttribute) => {
             const value = aCase[attr.id];
+            console.log("attr.id", attr.id);
+            console.log("value:", value);
             attr.addValue(value != null ? value : undefined, beforeIndex);
           });
           insertCaseIDAtIndex(aCase.__id__, beforeIndex);
@@ -593,6 +598,7 @@ export function addCanonicalCasesToDataSet(dataset: IDataSet, cases: ICaseCreati
       aCase.__id__ = newCaseId();
     }
   });
+  console.log("data-set.ts >  \n 🔨 addCanonicalCasesToDdataSet > \n 🍳 newCases:", newCases);
   dataset.addCanonicalCasesWithIDs(newCases, beforeID);
 }
 

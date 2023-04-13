@@ -19,13 +19,13 @@ interface IProps {
 export const useTableLinking = (props: IProps) => {
   const { documentId, model, onRequestTilesOfType, actionHandlers } = props;
 
-  console.log("Geometry > useTableLinking with prop onRequestTilesOfType", onRequestTilesOfType);
+  // console.log("Geometry > useTableLinking with prop onRequestTilesOfType", onRequestTilesOfType);
 
   const {handleRequestTableLink, handleRequestTableUnlink} = actionHandlers || {};
 
-  console.log("Geometry > useTableLinking > handleRequestTableLink:", handleRequestTableLink);
-  console.log("Geometry > useTableLinking > handleRequestTableULink:", handleRequestTableUnlink);
-  console.log("Geometry > useTableLinking > actionHandlers4:", actionHandlers);
+  // console.log("Geometry > useTableLinking > handleRequestTableLink:", handleRequestTableLink);
+  // console.log("Geometry > useTableLinking > handleRequestTableULink:", handleRequestTableUnlink);
+  // console.log("Geometry > useTableLinking > actionHandlers:", actionHandlers);
 
 
   const modelId = model.id;

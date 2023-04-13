@@ -23,8 +23,10 @@ const _GeometryToolComponent: React.FC<IGeometryProps> = ({
   const domElement = useRef<HTMLDivElement>(null);
   const content = model.content as GeometryContentModelType;
   const [board, setBoard] = useState<JXG.Board>();
+  //**************************** */
   const [actionHandlers, setActionHandlers] = useState<IActionHandlers>();
-  // console.log("actionHAndlers:", actionHandlers);
+
+  // console.log("geometry-tile > \n actionHandlers:", actionHandlers);
   const hotKeys = useRef(new HotKeys());
   const forceUpdate = useForceUpdate();
 
@@ -51,7 +53,7 @@ const _GeometryToolComponent: React.FC<IGeometryProps> = ({
   );
   const enabled = !readOnly && !!board && !!actionHandlers;
   const toolbarProps = useToolbarTileApi({ id: model.id, enabled, onRegisterTileApi, onUnregisterTileApi });
-
+  // console.log("geometry-tile.tsx > \n actionHandlers: ", actionHandlers);
   const { isLinkEnabled, showLinkTableDialog } =
     useTableLinking({ documentId, model, onRequestTilesOfType, actionHandlers });
   // We must listen for pointer events because we want to get the events before
@@ -59,7 +61,6 @@ const _GeometryToolComponent: React.FC<IGeometryProps> = ({
   // We must listen for mouse events because some browsers (notably Safari) don't
   // support pointer events.
 
-  // console.log("geometry-tile.tsx > showLinkTableDialog", showLinkTableDialog);
 
   return (
     <div className="geometry-tool" ref={domElement} tabIndex={0}
