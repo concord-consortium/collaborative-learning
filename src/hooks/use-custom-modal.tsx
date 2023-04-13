@@ -99,7 +99,8 @@ export const useCustomModal = <IContentProps,>({
             </button>}
         </div>
         <div className="modal-content">
-          <Content {...(contentProps)}/>
+          { /* TODO Fix type cast */ }
+          <Content as any {...(contentProps)}/>
         </div>
         <div className="modal-footer">
           {buttons.map((b, i) => {

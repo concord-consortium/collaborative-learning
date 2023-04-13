@@ -12,8 +12,9 @@ import { IStores, createStores } from "../models/stores/stores";
 import { UIModel } from "../models/stores/ui";
 import { UserModel } from "../models/stores/user";
 import { WorkspaceModel, ProblemWorkspace, WorkspaceModelType, LearningLogWorkspace } from "../models/stores/workspace";
-import { IDragTileItem } from "../models/tiles/tile-model";
+import { IDropTileItem } from "../models/tiles/tile-model";
 import { ENavTab } from "../models/view/nav-tabs";
+import { uniqueId } from "../utilities/js-utils";
 import { createSingleTileContent } from "../utilities/test-utils";
 
 // This is needed so MST can deserialize snapshots referring to tiles
@@ -348,10 +349,11 @@ describe("authed logger", () => {
 
       const tileToCopy = sourceDocument.content!.firstTile!;
 
-      const copyTileInfo: IDragTileItem = {
+      const copyTileInfo: IDropTileItem = {
         rowIndex: 0,
         tileIndex: 0,
         tileId: tileToCopy.id,
+        newTileId: uniqueId(),
         tileContent: JSON.stringify(tileToCopy),
         tileType: tileToCopy.content.type
       };

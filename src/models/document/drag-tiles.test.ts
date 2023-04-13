@@ -96,6 +96,7 @@ describe("tile dragging", () => {
         {
           tiles: ["tile3"],
           sharedModel: sharedDataSet,
+          provider: "tile3"
         }
       ]
     });
@@ -195,9 +196,7 @@ Array [
   describe("getDragTiles", () => {
     describe("when one tile is selected", () => {
       it("returns that tile and an the other IDragTiles properties", () => {
-        const model = documentContent.getTile("tile1");
-        expect(model).toBeDefined();
-        const dragTiles = getDragTiles(documentContent, model!, ["tile1"]);
+        const dragTiles = getDragTiles(documentContent, ["tile1"]);
         /*eslint-disable max-len*/
         expect(dragTiles).toMatchInlineSnapshot(`
 Object {
@@ -221,9 +220,7 @@ Object {
     });
     describe("with two tiles selected", () => {
       it("returns both tiles in document order", () => {
-        const model = documentContent.getTile("tile2");
-        expect(model).toBeDefined();
-        const dragTiles = getDragTiles(documentContent, model!, ["tile2", "tile1"]);
+        const dragTiles = getDragTiles(documentContent, ["tile2", "tile1"]);
         /*eslint-disable max-len*/
         expect(dragTiles).toMatchInlineSnapshot(`
 Object {
@@ -255,60 +252,19 @@ Object {
     });
     describe("with a tile using a shared model", () => {
       it("returns the tile and the shared model", () => {
-        const model = documentContent.getTile("tile3");
-        expect(model).toBeDefined();
-        const dragTiles = getDragTiles(documentContent, model!, ["tile3"]);
+        const dragTiles = getDragTiles(documentContent, ["tile3"]);
 
         /*eslint-disable max-len*/
         expect(dragTiles).toMatchInlineSnapshot(`
 Object {
   "sharedModels": Array [
     Object {
-      "dataSet": Object {
-        "attributes": Array [
-          Object {
-            "clientKey": "",
-            "formula": Object {
-              "canonical": undefined,
-              "display": undefined,
-            },
-            "hidden": false,
-            "id": "attribute-1",
-            "name": "x",
-            "sourceID": undefined,
-            "units": "",
-            "values": Array [
-              "0",
-            ],
-          },
-          Object {
-            "clientKey": "",
-            "formula": Object {
-              "canonical": undefined,
-              "display": undefined,
-            },
-            "hidden": false,
-            "id": "attribute-2",
-            "name": "y",
-            "sourceID": undefined,
-            "units": "",
-            "values": Array [
-              "1",
-            ],
-          },
-        ],
-        "cases": Array [
-          Object {
-            "__id__": "case-1",
-          },
-        ],
-        "id": "data-set-1",
-        "name": "Table 1",
-        "sourceID": undefined,
-      },
-      "id": "shared-data-set-1",
+      "content": "{\\"type\\":\\"SharedDataSet\\",\\"id\\":\\"shared-data-set-1\\",\\"providerId\\":\\"tile3\\",\\"dataSet\\":{\\"id\\":\\"data-set-1\\",\\"name\\":\\"Table 1\\",\\"attributes\\":[{\\"id\\":\\"attribute-1\\",\\"clientKey\\":\\"\\",\\"name\\":\\"x\\",\\"hidden\\":false,\\"units\\":\\"\\",\\"formula\\":{},\\"values\\":[\\"0\\"]},{\\"id\\":\\"attribute-2\\",\\"clientKey\\":\\"\\",\\"name\\":\\"y\\",\\"hidden\\":false,\\"units\\":\\"\\",\\"formula\\":{},\\"values\\":[\\"1\\"]}],\\"cases\\":[{\\"__id__\\":\\"case-1\\"}]}}",
+      "modelId": "shared-data-set-1",
       "providerId": "tile3",
-      "type": "SharedDataSet",
+      "tileIds": Array [
+        "tile3",
+      ],
     },
   ],
   "sourceDocId": "testid-10",

@@ -1,5 +1,5 @@
 import { uniqueId } from "../../utilities/js-utils";
-import { cloneTileSnapshotWithNewId, IDragTileItem, ITileModel, ITilePosition } from "../tiles/tile-model";
+import { cloneTileSnapshotWithNewId, IDragTileItem, ITilePosition } from "../tiles/tile-model";
 import { DocumentContentModelType, IDragTilesData } from "./document-content";
 import { getTileContentInfo } from "../tiles/tile-content-info";
 import { DEBUG_DROP } from "../../lib/debug";
@@ -71,14 +71,11 @@ export function orderTilePositions(tilePositions: ITilePosition[]) {
 /**
  *
  * @param documentContent
- * @param model this parameter will be removed when support is added for shared
- * models of multiple tiles
  * @param tileIds
  * @returns
  */
 export function getDragTiles(
   documentContent: DocumentContentModelType,
-  model: ITileModel,
   tileIds: string[]): IDragTilesData {
 
   const sharedManager = documentContent.tileEnv?.sharedModelManager;
@@ -91,7 +88,7 @@ export function getDragTiles(
   const dragTiles: IDragTilesData = {
     sourceDocId,
     tiles: getDragTileItems(documentContent, tileIds),
-    sharedModels: sharedManager?.getTileSharedModels(model.content) ?? []
+    sharedModels: sharedManager?.getSharedModelDragDataForTiles(tileIds) ?? []
   };
 
   // create a sorted array of selected tiles

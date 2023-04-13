@@ -22,6 +22,10 @@ export interface IDragTileItem extends ITilePosition {
   tileType: string;
 }
 
+export interface IDropTileItem extends IDragTileItem {
+  newTileId: string;
+}
+
 export function cloneTileSnapshotWithoutId(tile: ITileModel) {
   const { id, display, ...copy } = cloneDeep(getSnapshot(tile));
   return copy;
