@@ -485,15 +485,6 @@ export const DocumentContentModel = types
       const getTitle = (tileId: string) => (self.getTile(tileId) as any)?.title;
       const newTitle = self.getUniqueTitle(tileContent.type, titleBase, getTitle);
       return newTitle;
-    },
-    getTilePositions(tileIds: string[]) {
-      return tileIds.map(tileId => {
-        const rowId = self.findRowContainingTile(tileId);
-        const rowIndex = rowId && self.getRowIndex(rowId) || 0;
-        const row = rowId ? self.getRow(rowId) : undefined;
-        const tileIndex = row?.tiles.findIndex(t => t.tileId === tileId) || 0;
-        return { tileId, rowIndex, tileIndex };
-      });
     }
   }))
   .actions(self => ({
