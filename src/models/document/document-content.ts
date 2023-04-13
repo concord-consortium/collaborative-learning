@@ -923,7 +923,14 @@ export const DocumentContentModel = types
       },
       duplicateTiles(tiles: IDragTileItem[]) {
         const rowIndex = self.getRowAfterTiles(tiles);
-        const results = self.copyTilesIntoNewRows(tiles, rowIndex);
+        // TODO: this should be unified with the code in handleDragCopyTiles
+        // They both take drag tile items and add them to the document.
+        // They both will want to make copies of the shared models
+        const dropTiles = tiles.map(tile => {
+          const newTileId = uniqueId();
+          return { ...tile, newTileId };
+        });
+        const results = self.copyTilesIntoNewRows(dropTiles, rowIndex);
 
         // Increment default titles when necessary
         results.forEach((result, i) => {
@@ -933,7 +940,7 @@ export const DocumentContentModel = types
             if (tileContentInfo) {
               const match = titleMatchesDefault(newTile.title, tileContentInfo.titleBase);
               if (match) {
-                newTile.setTitle(self.getNewTileTitle(newTile.content));
+                newTile.setTitle(self.getNewTileTitle(newTile.content.type));
               }
             }
           }
