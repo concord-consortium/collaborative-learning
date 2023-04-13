@@ -4,6 +4,7 @@ import React from "react";
 import { BaseComponent, IBaseProps } from "./base";
 import { DocumentModelType } from "../models/document/document";
 import { IDocumentContentAddTileOptions, IDragToolCreateInfo } from "../models/document/document-content";
+import { getDragTileItems, getTilePositions, orderTilePositions } from "../models/document/drag-tiles";
 import { IToolbarModel } from "../models/stores/problem-configuration";
 import { IToolbarButtonModel } from "../models/tiles/toolbar-button";
 import { getTileContentInfo, ITileContentInfo } from "../models/tiles/tile-content-info";
@@ -57,6 +58,9 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
         case "delete":
           this.handleDelete();
           break;
+        case "duplicate":
+          this.handleDuplicate();
+          break;
         case "solution":
           this.handleToggleSelectedTilesSolution();
           break;
@@ -76,12 +80,12 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
       return toolbarModel.map(toolButton => {
         const buttonProps: IToolbarButtonProps = {
           toolButton,
-          isActive: this.buttonIsActive(toolButton),
+          isActive: this.isButtonActive(toolButton),
           isDisabled: this.isButtonDisabled(toolButton),
           onSetToolActive: handleSetActiveTool,
           onClick: handleClickTool,
           onDragStart: handleDragTool,
-          onShowDropHighlight: this.showDropRowHighlight,
+          onShowDropHighlight: this.getShowDropRowHighlight(toolButton),
           onHideDropHighlight: this.removeDropRowHighlight
         };
         toolButton.initialize();
@@ -100,9 +104,23 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     );
   }
 
-  private showDropRowHighlight = () => {
+  private getShowDropRowHighlight(toolButton: IToolbarButtonModel) {
+    return ["duplicate"].includes(toolButton.id)
+      ? this.showDropRowHighlightAfterSelectedTiles
+      : this.showDefaultDropRowHighlight;
+  }
+
+  private showDefaultDropRowHighlight = () => {
     const { document } = this.props;
     document.content?.showPendingInsertHighlight(true);
+  };
+
+  private showDropRowHighlightAfterSelectedTiles = () => {
+    const { document } = this.props;
+    const { ui: { selectedTileIds } } = this.stores;
+    const tilePositions = getTilePositions(Array.from(selectedTileIds), document.content);
+    const rowIndex = document.content?.getRowAfterTiles(tilePositions);
+    document.content?.showPendingInsertHighlight(true, rowIndex);
   };
 
   private removeDropRowHighlight = () => {
@@ -119,7 +137,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     return titleBase && document.getUniqueTitle(type, titleBase, getTileTitle);
   }
 
-  private buttonIsActive(toolButton: IToolbarButtonModel) {
+  private isButtonActive(toolButton: IToolbarButtonModel) {
     return toolButton.id === "solution"
       ? this.selectedTilesIncludeTeacher()
       : toolButton === this.state.activeTool;
@@ -133,8 +151,8 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     if (toolButton.id === "undo" && !undoManager?.canUndo) return true;
     if (toolButton.id === "redo" && !undoManager?.canRedo) return true;
 
-    // If no tiles are selected, disable the delete and solution buttons.
-    if (["delete", "solution"].includes(toolButton.id) && !selectedTileIds.length) return true;
+    // If no tiles are selected, disable the delete, duplicate, and solution buttons.
+    if (["delete", "duplicate", "solution"].includes(toolButton.id) && !selectedTileIds.length) return true;
 
     if (toolButton.isTileTool && settings) {
       // If a limit on the number of tiles of a certain type has been specified in settings,
@@ -199,6 +217,20 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
       this.showDeleteTilesConfirmationAlert?.();
     }
     this.setState(state => ({ activeTool: state.defaultTool }));
+  }
+
+  private handleDuplicate() {
+    const { document } = this.props;
+    const { ui } = this.stores;
+    const selectedTileIds = ui.selectedTileIds;
+
+    // Sort the selected tile ids in top->bottom, left->right order so they duplicate in the correct formation
+    const tilePositions = getTilePositions(Array.from(selectedTileIds), document.content);
+    const sortedTileIds = orderTilePositions(tilePositions).map(info => info.tileId);
+
+    document.content?.duplicateTiles(getDragTileItems(document.content, sortedTileIds));
+    ui.clearSelectedTiles();
+    this.removeDropRowHighlight();
   }
 
   private setShowDeleteTilesConfirmationAlert = (showAlert: () => void) => {

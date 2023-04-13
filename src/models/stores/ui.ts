@@ -208,7 +208,12 @@ export const UIModel = types
         self.dragId = dragId;
       }
     };
-  });
+  })
+  .actions(self => ({
+    clearSelectedTiles() {
+      self.selectedTileIds.forEach(tileId => self.removeTileIdFromSelection(tileId));
+    }
+  }));
 
 export type UIModelType = typeof UIModel.Type;
 export type UIDialogModelType = typeof UIDialogModel.Type;

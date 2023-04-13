@@ -10,7 +10,7 @@ import { TileContentModel } from "../../../models/tiles/tile-content";
 import { DEFAULT_DATA_RATE } from "./utilities/node";
 import { getTileModel, setTileTitleFromContent } from "../../../models/tiles/tile-model";
 import { SharedDataSet, kSharedDataSetType, SharedDataSetType  } from "../../../models/shared/shared-data-set";
-import { addAttributeToDataSet, addCasesToDataSet, DataSet, ICase } from "../../../models/data/data-set";
+import { addAttributeToDataSet, addCasesToDataSet, DataSet } from "../../../models/data/data-set";
 import { updateSharedDataSetColors } from "../../../models/shared/shared-data-set-colors";
 import { uniqueId } from "../../../utilities/js-utils";
 import { SharedModelType } from "src/models/shared/shared-model";
@@ -140,6 +140,7 @@ export const DataflowContentModel = TileContentModel
           // Add the shared model to both the document and the tile
           sharedModelManager.addTileSharedModel(self, sharedDataSet);
         }
+
         // update the colors
         const dataSets = sharedModelManager.getSharedModelsByType(kSharedDataSetType) as SharedDataSetType[];
         updateSharedDataSetColors(dataSets);

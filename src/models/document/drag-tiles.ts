@@ -1,10 +1,21 @@
 import { uniqueId } from "../../utilities/js-utils";
-import { cloneTileSnapshotWithNewId, IDragTileItem } from "../tiles/tile-model";
+import { cloneTileSnapshotWithNewId, IDragTileItem, ITilePosition } from "../tiles/tile-model";
 import { DocumentContentModelType, IDragTilesData } from "./document-content";
 import { getTileContentInfo } from "../tiles/tile-content-info";
 import { DEBUG_DROP } from "../../lib/debug";
 
 // TODO: move the drop tile logic here too
+
+export function getTilePositions(tileIds: string[], documentContent?: DocumentContentModelType) {
+  if (!documentContent) return [];
+  return tileIds.map(tileId => {
+    const rowId = documentContent.findRowContainingTile(tileId);
+    const rowIndex = rowId && documentContent.getRowIndex(rowId) || 0;
+    const row = rowId ? documentContent.getRow(rowId) : undefined;
+    const tileIndex = row?.tiles.findIndex(t => t.tileId === tileId) || 0;
+    return { tileId, rowIndex, row, tileIndex };
+  });
+}
 
 export function getDragTileItems(documentContent: DocumentContentModelType, tileIds: string[]) {
   const dragTileItems: IDragTileItem[] = [];
@@ -12,7 +23,9 @@ export function getDragTileItems(documentContent: DocumentContentModelType, tile
   const idMap: { [id: string]: string } = {};
   tileIds.forEach(tileId => idMap[tileId] = uniqueId());
 
-  tileIds.forEach(tileId => {
+  const tilePositions = getTilePositions(tileIds, documentContent);
+
+  tilePositions.forEach(({ tileId, rowIndex, row, tileIndex }) => {
     // Note: previously this function would be passed the tileModel being
     // dragged. It would accept a tileId if it matched the tileModel.id even if
     // `documentContent.getTile(tileId)` did not return a tile model. This seems
@@ -29,11 +42,7 @@ export function getDragTileItems(documentContent: DocumentContentModelType, tile
     // `contentId`. Because srcTile is found via `documentContent.getTile` this
     // should guarantee that the contentId return by `getContentIdFromNode`
     // always matches the dragSrcContentId.
-    const rowId = documentContent?.findRowContainingTile(srcTile.id);
-    const rowIndex = rowId && documentContent?.getRowIndex(rowId) || 0;
-    const row = rowId ? documentContent?.getRow(rowId) : undefined;
     const rowHeight = row?.height;
-    const tileIndex = row?.tiles.findIndex(t => t.tileId === tileId) || 0;
     const clonedTile = cloneTileSnapshotWithNewId(srcTile, idMap[srcTile.id]);
     getTileContentInfo(clonedTile.content.type)?.contentSnapshotPostProcessor?.(clonedTile.content, idMap);
     dragTileItems.push({
@@ -45,6 +54,18 @@ export function getDragTileItems(documentContent: DocumentContentModelType, tile
   });
 
   return dragTileItems;
+}
+
+// Sorts the given tile positions in top->bottom, left->right order IN PLACE!
+export function orderTilePositions(tilePositions: ITilePosition[]) {
+  tilePositions.sort((a, b) => {
+    if (a.rowIndex < b.rowIndex) return -1;
+    if (a.rowIndex > b.rowIndex) return 1;
+    if (a.tileIndex < b.tileIndex) return -1;
+    if (a.tileIndex > b.tileIndex) return 1;
+    return 0;
+  });
+  return tilePositions;
 }
 
 /**
@@ -71,13 +92,7 @@ export function getDragTiles(
   };
 
   // create a sorted array of selected tiles
-  dragTiles.tiles.sort((a, b) => {
-    if (a.rowIndex < b.rowIndex) return -1;
-    if (a.rowIndex > b.rowIndex) return 1;
-    if (a.tileIndex < b.tileIndex) return -1;
-    if (a.tileIndex > b.tileIndex) return 1;
-    return 0;
-  });
+  orderTilePositions(dragTiles.tiles);
 
   return dragTiles;
 }

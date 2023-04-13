@@ -8,7 +8,8 @@ import { kTextTileType } from "../tiles/text/text-content";
 import { getTileContentInfo, IDocumentExportOptions } from "../tiles/tile-content-info";
 import { ITileContentModel, ITileEnvironment, TileContentModel } from "../tiles/tile-content";
 import {
-  IDragTileItem, TileModel, ITileModel, ITileModelSnapshotIn, ITileModelSnapshotOut, IDropTileItem
+  IDragTileItem, TileModel, ITileModel, ITileModelSnapshotIn, ITileModelSnapshotOut,
+  ITilePosition, IDropTileItem
 } from "../tiles/tile-model";
 import {
   IDropRowInfo, TileRowModel, TileRowModelType, TileRowSnapshotType, TileRowSnapshotOutType, TileLayoutModelType
@@ -21,6 +22,7 @@ import { logTileDocumentEvent } from "../tiles/log/log-tile-document-event";
 import { LogEventName } from "../../lib/logger-types";
 import { safeJsonParse, uniqueId } from "../../utilities/js-utils";
 import { comma, StringBuilder } from "../../utilities/string-builder";
+import { defaultTitle, titleMatchesDefault } from "../../utilities/title-utils";
 import { SharedModel, SharedModelType } from "../shared/shared-model";
 import {
   IDragSharedModelItem, sharedModelFactory, SharedModelUnion, UnknownSharedModel
@@ -314,6 +316,9 @@ export const DocumentContentModel = types
       // if all else fails, revert to last visible row
       return self.indexOfLastVisibleRow + 1;
     },
+    getRowAfterTiles(tiles: ITilePosition[]) {
+      return Math.max(...tiles.map(tile => tile.rowIndex)) + 1;
+    },
     getTilesInDocumentOrder(): string[] {
       // Returns list of tile ids in the document from top to bottom, left to right
       const tiles: string[] = [];
@@ -377,12 +382,12 @@ export const DocumentContentModel = types
       const tiles = self.getTilesOfType(tileType);
       const maxDefaultTitleIndex = tiles.reduce((maxIndex: number, tileId: string) => {
         const title = getTileTitle(tileId);
-        const match = title?.match(new RegExp(`${titleBase} (\\d+)`));
+        const match = titleMatchesDefault(title, titleBase);
         return match?.[1]
                 ? Math.max(maxIndex, +match[1])
                 : maxIndex;
       }, 0);
-      return `${titleBase} ${maxDefaultTitleIndex + 1}`;
+      return defaultTitle(titleBase, maxDefaultTitleIndex + 1);
     },
     getTileCountsPerSection(sectionIds: string[]): ITileCountsPerSection {
       const counts: ITileCountsPerSection = {};
@@ -643,8 +648,8 @@ export const DocumentContentModel = types
       self.deleteRow(rowId);
       self.addPlaceholderRowIfAppropriate(rowIndex);
     },
-    showPendingInsertHighlight(show: boolean) {
-      self.highlightPendingDropLocation = show ? self.defaultInsertRow : -1;
+    showPendingInsertHighlight(show: boolean, insertRowIndex?: number) {
+      self.highlightPendingDropLocation = show ? insertRowIndex ?? self.defaultInsertRow : -1;
     }
   }))
   .actions((self) => ({
@@ -714,6 +719,15 @@ export const DocumentContentModel = types
         });
       }
       return results;
+    },
+    logCopyTileResults(tiles: IDragTileItem[], results: NewRowTileArray) {
+      results.forEach((result, i) => {
+        const newTile = result?.tileId && self.getTile(result.tileId);
+        if (result && newTile) {
+          const originalTileId = tiles[i].tileId;
+          logTileCopyEvent(LogEventName.COPY_TILE, { tile: newTile, originalTileId });
+        }
+      });
     },
     moveRowToIndex(rowIndex: number, newRowIndex: number) {
       if (newRowIndex === 0) {
@@ -906,6 +920,26 @@ export const DocumentContentModel = types
           });
         }
         return tileInfo;
+      },
+      duplicateTiles(tiles: IDragTileItem[]) {
+        const rowIndex = self.getRowAfterTiles(tiles);
+        const results = self.copyTilesIntoNewRows(tiles, rowIndex);
+
+        // Increment default titles when necessary
+        results.forEach((result, i) => {
+          const newTile = result?.tileId && self.getTile(result.tileId);
+          if (result && newTile) {
+            const tileContentInfo = getTileContentInfo(newTile.content.type);
+            if (tileContentInfo) {
+              const match = titleMatchesDefault(newTile.title, tileContentInfo.titleBase);
+              if (match) {
+                newTile.setTitle(self.getNewTileTitle(newTile.content));
+              }
+            }
+          }
+        });
+
+        self.logCopyTileResults(tiles, results);
       }
     };
     return actions;
@@ -1025,13 +1059,7 @@ export const DocumentContentModel = types
       const results = dropRow?.acceptTileDrop(rowInfo)
                       ? self.copyTilesIntoExistingRow(tiles, rowInfo)
                       : self.copyTilesIntoNewRows(tiles, rowInfo.rowInsertIndex);
-      results.forEach((result, i) => {
-        const newTile = result?.tileId && self.getTile(result.tileId);
-        if (result && newTile) {
-          const originalTileId = tiles[i].tileId;
-          logTileCopyEvent(LogEventName.COPY_TILE, { tile: newTile, originalTileId });
-        }
-      });
+      self.logCopyTileResults(tiles, results);
       return results;
     },
     handleDragCopyTiles(dragTiles: IDragTilesData, rowInfo: IDropRowInfo) {

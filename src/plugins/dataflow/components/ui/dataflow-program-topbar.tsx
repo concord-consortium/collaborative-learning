@@ -5,6 +5,7 @@ import { SerialDevice } from "../../../../models/stores/serial";
 import RecordIcon from "../../assets/topbar-buttons/record-icon.svg";
 import StopIcon from "../../assets/topbar-buttons/stop-icon.svg";
 import PlayIcon from "../../assets/topbar-buttons/play-icon.svg";
+import PauseIcon from "../../assets/topbar-buttons/pause-icon.svg";
 import ClearIcon from "../../assets/topbar-buttons/clear-icon.svg";
 import { DataflowSerialConnectButton } from "./dataflow-serial-connect-button";
 
@@ -21,12 +22,16 @@ interface TopbarProps {
   serialDevice: SerialDevice;
   onRecordDataChange: () => void;
   programRecordState: number;
+  isPlaying: boolean;
+  handleChangeIsPlaying: () => void;
   numNodes: number;
 }
 
 export const DataflowProgramTopbar = (props: TopbarProps) => {
-  const { onSerialRefreshDevices, readOnly, serialDevice, programDataRates,
-    dataRate, onRateSelectClick, onRecordDataChange, programRecordState, numNodes } = props;
+  const { onSerialRefreshDevices, readOnly, serialDevice, programDataRates, dataRate, onRateSelectClick,
+          onRecordDataChange, programRecordState, isPlaying, handleChangeIsPlaying, numNodes } = props;
+
+  const disableRecordButton = readOnly && programRecordState === 0; //hides RecordButton on leftside read only docs
 
   return (
     <div className="program-editor-topbar">
@@ -41,7 +46,11 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
           <div className="topbar-blank-or-play">
             {
               (programRecordState === 1 || programRecordState === 2) &&
-              <PlaybackButton programRecordState={programRecordState}/>
+              <PlaybackButton
+                isPlaying={isPlaying}
+                handleChangeIsPlaying={handleChangeIsPlaying}
+                programRecordState={programRecordState}
+              />
             }
           </div>
           <RateSelectorOrPlayBack
@@ -50,12 +59,15 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
             onRateSelectClick={onRateSelectClick}
             readOnly={readOnly}
             programRecordState={programRecordState}
+            isPlaying={isPlaying}
+            handleChangeIsPlaying={handleChangeIsPlaying}
             numNodes={numNodes}
             onRecordDataChange={onRecordDataChange}
           />
           <RecordStopOrClearButton
+            disabled={disableRecordButton}
             programRecordState={programRecordState}
-            buttonClickHandler={onRecordDataChange}
+            onRecordDataChange={onRecordDataChange}
           />
         </div>
 
@@ -80,17 +92,21 @@ const iconArr = [ //button icon
 ];
 
 interface IRecordStopOrClearProps {
-  buttonClickHandler: (program: any) => void;
+  disabled: boolean;
+  onRecordDataChange: (program: any) => void;
   programRecordState: number;
 }
 
 const RecordStopOrClearButton = (props: IRecordStopOrClearProps) => {
-  const { buttonClickHandler, programRecordState } = props;
+  const { disabled, onRecordDataChange, programRecordState } = props;
+  if (programRecordState === 2){ //stop button pressed
+  }
   return (
     <div className="record-btn-container">
       <button
         className="record-data-btn"
-        onClick={buttonClickHandler}
+        onClick={onRecordDataChange}
+        disabled={disabled}
       >
         <div className="record-data-icon">
           {iconArr[programRecordState]}
@@ -107,22 +123,24 @@ const RecordStopOrClearButton = (props: IRecordStopOrClearProps) => {
 /* ==[ Playback Button ] == */
 interface IPlaybackProps {
   programRecordState: number;
+  isPlaying: boolean;
+  handleChangeIsPlaying: () => void;
 }
 
 const PlaybackButton = (props: IPlaybackProps) => {
-  const {programRecordState} = props;
-
+  const {programRecordState, isPlaying, handleChangeIsPlaying} = props;
   return (
     <div className="playback-btn-container">
       <button
         className="playback-data-btn"
         disabled={programRecordState === 1}
+        onClick={handleChangeIsPlaying}
       >
         <div className="playback-data-icon">
-          <PlayIcon/>
+          {isPlaying ? <PauseIcon/> : <PlayIcon/>}
         </div>
         <div className="playback-data-txt">
-          Play
+          { isPlaying ? "Pause" : "Play"}
         </div>
       </button>
     </div>
