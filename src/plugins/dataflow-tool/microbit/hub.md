@@ -52,14 +52,11 @@ function readSendData() {
 }
 
 function operateRelay(relayIndex: number, state: number) {
-    // validate incoming signal makecode js implementation does not seems to support regex nor includes
     const validRelay = relayIndex === 0 || relayIndex === 1 || relayIndex === 2;
     const validRelaySignal = state === 0 || state === 1;
-    // operate relay
     if (validRelay && validRelaySignal){
         pins.digitalWritePin(relayPins[relayIndex], state)
     }
-
 
     // show one of three LEDs to indicate index 0, 1, or 2
     led.plot(relayIndex, 0)
