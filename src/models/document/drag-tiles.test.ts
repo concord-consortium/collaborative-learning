@@ -1,5 +1,4 @@
 import { DocumentContentModel, DocumentContentModelType, DocumentContentSnapshotType } from "./document-content";
-import { getDragTileItems, getDragTiles } from "./drag-tiles";
 
 // This is needed so MST can deserialize snapshots referring to tools
 import { registerTileTypes } from "../../register-tile-types";
@@ -110,14 +109,14 @@ describe("tile dragging", () => {
   describe("getDragTileItems", () => {
     describe("when a non-existent tile is selected", () => {
       it("returns an empty array", () => {
-        const items = getDragTileItems(documentContent, ["foo"]);
+        const items = documentContent.getDragTileItems(["foo"]);
 
         expect(items).toHaveLength(0);
       });
     });
     describe("when one tile is selected", () => {
       it("returns an array of one IDragTileItem object", () => {
-        const items = getDragTileItems(documentContent, ["tile1"]);
+        const items = documentContent.getDragTileItems(["tile1"]);
 
         // Jest messes up the indentation when it writes out the snapshots with
         // --updateSnapshot (see https://jestjs.io/docs/snapshot-testing)
@@ -140,7 +139,7 @@ Array [
     });
     describe("when two tiles are selected", () => {
       it("returns an array of both IDragTileItem objects", () => {
-        const items = getDragTileItems(documentContent, ["tile1", "tile2"]);
+        const items = documentContent.getDragTileItems(["tile1", "tile2"]);
 
         /*eslint-disable max-len*/
         expect(items).toMatchInlineSnapshot(`
@@ -169,7 +168,7 @@ Array [
 
     describe("when a table using a shared dataset is selected", () => {
       it("returns the table IDragTileItem object", () => {
-        const items = getDragTileItems(documentContent, ["tile3"]);
+        const items = documentContent.getDragTileItems(["tile3"]);
 
         // TODO: The exported table here includes importedDataSet property.
         // Since we are going to include the actual shared dataset too, the
@@ -196,7 +195,7 @@ Array [
   describe("getDragTiles", () => {
     describe("when one tile is selected", () => {
       it("returns that tile and an the other IDragTiles properties", () => {
-        const dragTiles = getDragTiles(documentContent, ["tile1"]);
+        const dragTiles = documentContent.getDragTiles(["tile1"]);
         /*eslint-disable max-len*/
         expect(dragTiles).toMatchInlineSnapshot(`
 Object {
@@ -220,7 +219,7 @@ Object {
     });
     describe("with two tiles selected", () => {
       it("returns both tiles in document order", () => {
-        const dragTiles = getDragTiles(documentContent, ["tile2", "tile1"]);
+        const dragTiles = documentContent.getDragTiles(["tile2", "tile1"]);
         /*eslint-disable max-len*/
         expect(dragTiles).toMatchInlineSnapshot(`
 Object {
@@ -252,7 +251,7 @@ Object {
     });
     describe("with a tile using a shared model", () => {
       it("returns the tile and the shared model", () => {
-        const dragTiles = getDragTiles(documentContent, ["tile3"]);
+        const dragTiles = documentContent.getDragTiles(["tile3"]);
 
         /*eslint-disable max-len*/
         expect(dragTiles).toMatchInlineSnapshot(`

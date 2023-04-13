@@ -4,7 +4,6 @@ import { observer, inject } from "mobx-react";
 import { isAlive } from "mobx-state-tree";
 import React from "react";
 import ResizeObserver from "resize-observer-polyfill";
-import { getDragTiles } from "../../models/document/drag-tiles";
 import { transformCurriculumImageUrl } from "../../models/tiles/image/image-import-export";
 import { getTileComponentInfo } from "../../models/tiles/tile-component-info";
 import { ITileModel } from "../../models/tiles/tile-model";
@@ -396,7 +395,7 @@ export class TileComponent extends BaseComponent<IProps, IState> {
       console.warn("The docId passed to TileComponent is different than the " +
         "documentContent.contentId of the model passed to TileComponent");
     }
-    const dragTiles = getDragTiles(documentContent, ui.selectedTileIds);
+    const dragTiles = documentContent.getDragTiles(ui.selectedTileIds);
 
     e.dataTransfer.setData(kDragTiles, JSON.stringify(dragTiles));
 
