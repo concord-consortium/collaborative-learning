@@ -4,6 +4,7 @@ export const kGraphTileType = "XYplot";
 export const kGraphTileClass = "xyplot";
 export const kXYplotTileType = "XYplot";
 export const kXYplotDefaultHeight = 320;
+export const kGraphIdPrefix = "XYPLOT"; // TODO: Determine what this is for. In CODAP, value was GRPH.
 
  // The data stored with each plot element (e.g. 'circle')
 export type CaseData = { plotNum: number, caseID: string }
@@ -11,6 +12,7 @@ export type CaseData = { plotNum: number, caseID: string }
 export const GraphPlaces = [...AxisPlaces, "yPlus", "plot", "legend"] as const;
 export type GraphPlace = typeof GraphPlaces[number];
 export const PrimaryAttrRoles = ['x', 'y'] as const;
+export type PrimaryAttrRole = typeof PrimaryAttrRoles[number];
 export const TipAttrRoles =
   [...PrimaryAttrRoles, 'rightNumeric', 'topSplit', 'rightSplit', 'legend', 'caption'] as const;
 export const GraphAttrRoles = [

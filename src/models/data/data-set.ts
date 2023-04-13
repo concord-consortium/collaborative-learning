@@ -505,6 +505,7 @@ export const DataSet = types.model("DataSet", {
         for (let i = attribute.values.length; i < self.cases.length; ++i) {
           attribute.values.push("");
         }
+        return attribute;
       },
 
       setAttributeName(attributeID: string, name: string) {

@@ -12,7 +12,7 @@ import {GraphController} from "../models/graph-controller";
 import {GraphLayoutContext} from "../models/graph-layout";
 import {GraphModelContext, isGraphModel} from "../models/graph-model";
 import {Graph} from "./graph";
-// import { ITileModel } from 'src/models/tiles/tile-model';
+//import { ITileModel } from 'src/models/tiles/tile-model';
 import { ITileProps } from 'src/components/tiles/tile-component';
 
 // TODO: Determine if changing `{tile}: ITileBaseProps` to `tile: ITileModel` is the right thing to do.

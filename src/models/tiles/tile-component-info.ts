@@ -24,6 +24,10 @@ export function registerTileComponentInfo(tileComponentInfo: ITileComponentInfo)
   gTileComponentInfoMap.set(tileComponentInfo.type.toLowerCase(), tileComponentInfo);
 }
 
+export function getTileComponentKeys() {
+  return Array.from(gTileComponentInfoMap.keys());
+}
+
 // Tool id, e.g. kDrawingTileType, kGeometryTileType, etc.
 // undefined is supported so callers do not need to check the id before passing it in
 export function getTileComponentInfo(type?: string) {

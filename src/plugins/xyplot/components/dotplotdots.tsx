@@ -5,7 +5,7 @@ import {CaseData, PlotProps} from "../xyplot-types";
 import {useDragHandlers, usePlotResponders} from "../hooks/use-plot";
 import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
 import {useDataSetContext} from "../../../hooks/use-data-set-context";
-import {Bounds, useGraphLayoutContext} from "../models/graph-layout";
+import {useGraphLayoutContext} from "../models/graph-layout";
 import {ICase} from "../../../models/data/data-set-types";
 import {
   handleClickOnDot,
@@ -250,13 +250,12 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
         getScreenX = primaryIsBottom ? getPrimaryScreenCoord : getSecondaryScreenCoord,
         getScreenY = primaryIsBottom ? getSecondaryScreenCoord : getPrimaryScreenCoord,
         getLegendColor = dataConfiguration?.attributeID('legend')
-          ? dataConfiguration?.getLegendColorForCase : undefined,
-        plotBounds = layout.computedBounds.get('plot') as Bounds;
+          ? dataConfiguration?.getLegendColorForCase : undefined;
 
       setPointCoordinates({
         dataset, pointRadius: graphModel.getPointRadius(), selectedPointRadius: graphModel.getPointRadius('select'),
         dotsRef, selectedOnly, pointColor, pointStrokeColor,
-        getScreenX, getScreenY, getLegendColor, enableAnimation, plotBounds
+        getScreenX, getScreenY, getLegendColor, enableAnimation
       });
     },
     [graphModel, dataConfiguration, layout, primaryAttrRole, secondaryAttrRole, dataset, dotsRef,

@@ -5,14 +5,14 @@ import {IDataSet} from "../../../models/data/data-set";
 import {AxisPlace, AxisPlaces} from "../axis/axis-types";
 import {
   CategoricalAxisModel, EmptyAxisModel, IEmptyAxisModel, INumericAxisModel,
-  isCategoricalAxisModel, isNumericAxisModel, NumericAxisModel
+  isCategoricalAxisModel, NumericAxisModel
 } from "../axis/models/axis-model";
-import {scaleTypeToD3Scale} from "../axis/models/multi-scale";
 import {
-  attrRoleToAxisPlace, axisPlaceToAttrRole, GraphAttrRole, GraphPlace, graphPlaceToAttrRole, PlotType
+  axisPlaceToAttrRole, GraphPlace, graphPlaceToAttrRole, PlotType
 } from "../xyplot-types";
 import {matchCirclesToData, setNiceDomain} from "../utilities/graph-utils";
 
+// keys are [primaryAxisType][secondaryAxisType]
 const plotChoices: Record<string, Record<string, PlotType>> = {
   empty: {empty: 'casePlot', numeric: 'dotPlot', categorical: 'dotChart'},
   numeric: {empty: 'dotPlot', numeric: 'scatterPlot', categorical: 'dotPlot'},

@@ -125,5 +125,7 @@ export interface IAttributeCreation {
 }
 export type IAttributeSnapshot = SnapshotOut<typeof Attribute>;
 
-export const attributeTypes = ["categorical", "numeric", "date", "qualitative", "boundary", "checkbox"] as const;
+export const attributeTypes = [
+  "categorical", "numeric", "date", "qualitative", "boundary", "checkbox", "color"
+] as const;
 export type AttributeType = typeof attributeTypes[number];
