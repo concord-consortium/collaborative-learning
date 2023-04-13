@@ -1016,29 +1016,30 @@ export const DocumentContentModel = types
           cases: newCases
         }
       };
-      console.log(`newSharedModel`, newSharedModel);
 
       // Update tile with new ids
       let tileContent;
       const tile = tiles[0];
+      const oldContent = JSON.parse(tile.tileContent);
       if (tile.tileType === "Table") {
-        const tableContent = JSON.parse(tile.tileContent);
         const newColumnWidths: Record<string, number> = {};
-        console.log(`tableContent`, tableContent);
-        for (const entry of Object.entries(tableContent.content.columnWidths)) {
+        for (const entry of Object.entries(oldContent.content.columnWidths)) {
           const originalId = entry[0];
           const width = entry[1] as number;
           if (width !== undefined && originalId && attributeIdMap[originalId]) {
             newColumnWidths[attributeIdMap[originalId]] = width;
           }
         }
-        tileContent = { ...tableContent, content: { ...tableContent.content, columnWidths: newColumnWidths }};
-        console.log(`tileContent`, tileContent);
+        tileContent = { ...oldContent, content: { ...oldContent.content, columnWidths: newColumnWidths }};
+      } else if (tile.tileType === "DataCard") {
+        const oldAttributeId = oldContent.content.selectedSortAttributeId;
+        const content =  { ...oldContent.content, selectedSortAttributeId: attributeIdMap[oldAttributeId]};
+        tileContent = { ...oldContent, content };
       }
-      // TODO DataCard
 
+      // Copy the updated tiles and shared models
       const results = this.userCopyTiles([{ ...tile, tileContent: JSON.stringify(tileContent) }], rowInfo);
-      results.forEach((result, i) => {
+      results.forEach(result => {
         if (result?.tileId) {
           self.sharedModelMap.set(newSharedModelId, {
             sharedModel: newSharedModel,
@@ -1046,17 +1047,6 @@ export const DocumentContentModel = types
           });
         }
       });
-      // const results = this.userCopyTiles(tiles, rowInfo);
-      // results.forEach((result, i) => {
-      //   const newSharedModelId = sharedModels[0].id;
-      //   // TODO: fix types -- should be SharedModelEntry
-      //   const pckg = {
-      //     sharedModel: sharedModels[0],
-      //     tiles: [result?.tileId]
-      //   };
-      //   self.sharedModelMap.set(newSharedModelId, pckg as any);
-        // "copy" is already logged above
-      // });
     },
     handleDragCopyTiles(dragTiles: IDragTilesData, rowInfo: IDropRowInfo) {
       const { tiles, sharedModels } = dragTiles;
