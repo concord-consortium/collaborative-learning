@@ -192,8 +192,13 @@ export const DataflowContentModel = TileContentModel
     },
     addNewAttrFromNode(nodeId: number, nodeName: string){
       //if already an attribute with the same nodeId do nothing, else write
+      // console.log("dataflow-content.ts > addNewAttrFromNode \n nodeId", nodeId, "nodeName:", nodeName);
+
       const dataSetAttributes = self.dataSet.attributes;
       let foundFlag = false;
+
+
+      // console.log("objectKeys datasetAttributes:", Object.keys(dataSetAttributes));
 
       for (let i = 0; i < Object.keys(dataSetAttributes).length ; i++){ //look in dataSet.attributes for each Id
         const idInDataSet = dataSetAttributes[i].id;
@@ -204,6 +209,11 @@ export const DataflowContentModel = TileContentModel
 
       if (!foundFlag) {
         const newAttributeId = uniqueId() + "*" + nodeId;
+        console.log("adding to dataSet:", {
+          id: newAttributeId,
+          name: `Dataflow-${nodeName}_${nodeId}`
+        });
+
         self.dataSet.addAttributeWithID({
           id: newAttributeId,
           name: `Dataflow-${nodeName}_${nodeId}`

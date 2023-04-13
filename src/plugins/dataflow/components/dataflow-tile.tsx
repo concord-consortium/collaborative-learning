@@ -213,19 +213,14 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     // dataSet looks like
     // Time_Quantized | Time_Actual | Node 1 | Node 2 | Node 3 etc
     //    0           |  0          | val    | val    |  val
-    // addAttributeToDataSet(model.dataSet, { name: "Time_Quantized" }); //original
-    // addAttributeToDataSet(model.dataSet, { name: "Time_Actual" });
-
-    model.addNewAttrFromNode(0, "Time_Quantized"); //test
-    model.addNewAttrFromNode(1, "Time_Actual");
-
+    addAttributeToDataSet(model.dataSet, { name: "Time_Quantized" }); //original
+    addAttributeToDataSet(model.dataSet, { name: "Time_Actual" });
 
     model.program.nodes.forEach((n) => {
       model.addNewAttrFromNode(n.id, n.name);
     });
 
     // compare dataset attributes against nodes on tile, if an attribute is not on the tile - remove it.
-
     dataSetAttributes.forEach((attribute, idx) => {
       if (idx >= kTimeAttributeCount) { //skip 0 and 1 index because those attribute are Time
         model.removeAttributesInDatasetMissingInTile(attribute.id);
@@ -247,9 +242,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     if (mode === 0){ //when Record is pressed
       this.setState({isPlaying: false}); //reset isPlaying
       this.pairNodesToAttributes();
-    }
-    if (mode === 1){
-      console.log("before clear: dataSet:", model.dataSet);
     }
     if (mode === 2){ // Clear pressed - remove all dataSet
       const allAttributes = model.dataSet.attributes;

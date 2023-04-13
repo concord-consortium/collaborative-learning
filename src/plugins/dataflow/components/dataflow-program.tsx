@@ -542,35 +542,35 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private recordCase = () => {
+    console.log("--------recordCase tick---------");
     const { recordIndex, programRecordState } = this.props;
-    const { programDataRate } = this.props.tileModel; //grab the program Sampling Rate to write TimeQuantized
+    const { programDataRate, dataSet } = this.props.tileModel; //grab the program Sampling Rate to write TimeQuantized
+
+    //Establish time
     const now = Date.now();
-    //attributes order  - Time_Quantized as first column | Time_Actual | + # of nodes
-    const aCase: ICaseCreation = {};
-    const timeQuantizedKey = "Time_Quantized";
-    const timeActualKey = "Time_Actual";
-
-    const recordTimeQuantized = (recordIndex * programDataRate) / 1000; //in seconds
-    aCase[timeQuantizedKey] = recordTimeQuantized;
-
-    console.log("recordCase:", recordIndex);
     if (recordIndex === 0 || programRecordState === 2) {
       this.startTimeActual = now;
     }
+
+    //attributes order  - Time_Quantized as first column | Time_Actual | + # of nodes
+    const aCase: ICaseCreation = {};
+
+    const timeQuantizedKey = dataSet.attributes[0].id;
+    const recordTimeQuantized = (recordIndex * programDataRate) / 1000; //in seconds
+    aCase[timeQuantizedKey] = recordTimeQuantized;
+
+    const timeActualKey = dataSet.attributes[1].id;
     const recordTimeActual = (now - this.startTimeActual) / 1000; //in seconds
     (recordTimeActual >= 0) && (aCase[timeActualKey] = recordTimeActual);
-    console.log("recordTimeQuantized:", recordTimeQuantized);
-    console.log("recordTimeActual:", recordTimeActual);
+
 
     //loop through attribute (nodes) and write each value
+    console.log("# of nodes:",   this.programEditor.nodes.length);
     this.programEditor.nodes.forEach((node, idx) => {
       const key = this.getAttributeIdForNode(idx);
       aCase[key] = node.data.nodeValue as string;
-      // console.log("recording node:", node.name, aCase[key]);
-
     });
 
-    console.log("aCase:", aCase);
     addCanonicalCasesToDataSet(this.props.tileModel.dataSet, [aCase]);
   };
 
