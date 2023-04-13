@@ -27,6 +27,7 @@ export const DataflowLinkTableButton: React.FC<IProps> = (props: IProps) => {
                                        documentId,
                                        model,
                                        onRequestTilesOfType
+                                       //need to pass an actionHandlers array
                                      });
   // const { showLinkButton, isLinkEnabled, linkColors, getLinkIndex, showLinkTableDialog } = testReturn;
   console.log("<DataflowLinkTableButton>");

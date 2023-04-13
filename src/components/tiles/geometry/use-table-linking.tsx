@@ -22,6 +22,12 @@ export const useTableLinking = (props: IProps) => {
   console.log("Geometry > useTableLinking with prop onRequestTilesOfType", onRequestTilesOfType);
 
   const {handleRequestTableLink, handleRequestTableUnlink} = actionHandlers || {};
+
+  console.log("Geometry > useTableLinking > handleRequestTableLink:", handleRequestTableLink);
+  console.log("Geometry > useTableLinking > handleRequestTableULink:", handleRequestTableUnlink);
+  console.log("Geometry > useTableLinking > actionHandlers4:", actionHandlers);
+
+
   const modelId = model.id;
   const showLinkButton = useFeatureFlag("GeometryLinkedTables"); //original
   // const showLinkButton = useFeatureFlag("GeometryLinkedTables") || useFeatureFlag("DataflowLinkedTables");

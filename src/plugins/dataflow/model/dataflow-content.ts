@@ -224,7 +224,29 @@ export const DataflowContentModel = TileContentModel
       if (!foundFlag){
         self.dataSet.removeAttribute(attribute);
       }
-    }
+    },
+    //TODO
+    addLinkedTable(tableId: string) {  //tableID is table we linked it to
+      console.log("dataflow-content.ts > addLinkedTable with tableId", tableId);
+      const sharedModelManager = self.tileEnv?.sharedModelManager;
+      if (sharedModelManager?.isReady && !self.isLinkedToTable(tableId)) {
+        const sharedTable = sharedModelManager.findFirstSharedModelByType(SharedDataSet, tableId);
+        //sever the connection between table -> sharedData set
+
+        // sharedTable && sharedModelManager.removeTileSharedModel( tableTile, sharedTable)
+
+        //,connect table -> dataflow Dataset
+        // const dataFlowDataSet = sharedModelManager.findFirstSharedModelByType(SharedDataSet, self.) //2nd arg  want id of dataflow content
+        // sharedTable && sharedModelManager.addTileSharedModel(tableTile, dataFlowDataSet); //do not use self which would be dataflow
+        //instead we want to pass table content
+        // first argument is (source)
+        // self.forceSharedModelUpdate();
+      }
+      else {
+        console.warn("GeometryContent.addLinkedTable unable to link table");
+      }
+    },
+
   }));
 
 export type DataflowContentModelType = Instance<typeof DataflowContentModel>;

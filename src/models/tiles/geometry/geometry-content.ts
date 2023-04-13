@@ -279,6 +279,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       setTileTitleFromContent(self, title);
     },
     addLinkedTable(tableId: string) {
+      console.log("geometry-content.ts > addLinkedTable with tableId", tableId);
       const sharedModelManager = self.tileEnv?.sharedModelManager;
       if (sharedModelManager?.isReady && !self.isLinkedToTable(tableId)) {
         const sharedTable = sharedModelManager.findFirstSharedModelByType(SharedDataSet, tableId);
