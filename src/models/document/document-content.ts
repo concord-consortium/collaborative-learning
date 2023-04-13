@@ -23,6 +23,8 @@ import { safeJsonParse, uniqueId } from "../../utilities/js-utils";
 import { comma, StringBuilder } from "../../utilities/string-builder";
 import { SharedModel, SharedModelType } from "../shared/shared-model";
 import { SharedModelUnion } from "../shared/shared-model-manager";
+import { SharedDataSetType } from "../shared/shared-data-set";
+
 export interface IDocumentAddTileOptions {
   title?: string;
   addSidecarNotes?: boolean;
@@ -989,17 +991,72 @@ export const DocumentContentModel = types
     },
     userCopySingleTileWithSharedModel(dragTiles: IDragTilesData, rowInfo: IDropRowInfo) {
       const { tiles, sharedModels } = dragTiles;
-      const results = this.userCopyTiles(tiles, rowInfo);
-      results.forEach((result, i) => {
-        const newSharedModelId = sharedModels[0].id;
-        // TODO: fix types -- should be SharedModelEntry
-        const pckg = {
-          sharedModel: sharedModels[0],
-          tiles: [result?.tileId]
-        };
-        self.sharedModelMap.set(newSharedModelId, pckg as any);
-        // "copy" is already logged above
+
+      // Determine new ids for the shared data set
+      const newSharedModelId = uniqueId();
+      const attributeIdMap: Record<string, string> = {};
+      const caseIdMap: Record<string, string> = {};
+      const sharedModel = sharedModels[0] as SharedDataSetType;
+      sharedModel.dataSet.attributes.forEach(attr => {
+        attributeIdMap[attr.id] = uniqueId();
       });
+      sharedModel.dataSet.cases.forEach(c => {
+        caseIdMap[c.__id__] = uniqueId();
+      });
+
+      // Update the shared model with new ids
+      const newAttributes = sharedModel.dataSet.attributes.map(a => ({ ...a, id: attributeIdMap[a.id] }));
+      const newCases = sharedModel.dataSet.cases.map(c => ({ __id__: caseIdMap[c.__id__]}));
+      const newSharedModel = {
+        ...sharedModel,
+        id: newSharedModelId,
+        dataSet: {
+          ...sharedModel.dataSet,
+          attributes: newAttributes,
+          cases: newCases
+        }
+      };
+      console.log(`newSharedModel`, newSharedModel);
+
+      // Update tile with new ids
+      let tileContent;
+      const tile = tiles[0];
+      if (tile.tileType === "Table") {
+        const tableContent = JSON.parse(tile.tileContent);
+        const newColumnWidths: Record<string, number> = {};
+        console.log(`tableContent`, tableContent);
+        for (const entry of Object.entries(tableContent.content.columnWidths)) {
+          const originalId = entry[0];
+          const width = entry[1] as number;
+          if (width !== undefined && originalId && attributeIdMap[originalId]) {
+            newColumnWidths[attributeIdMap[originalId]] = width;
+          }
+        }
+        tileContent = { ...tableContent, content: { ...tableContent.content, columnWidths: newColumnWidths }};
+        console.log(`tileContent`, tileContent);
+      }
+      // TODO DataCard
+
+      const results = this.userCopyTiles([{ ...tile, tileContent: JSON.stringify(tileContent) }], rowInfo);
+      results.forEach((result, i) => {
+        if (result?.tileId) {
+          self.sharedModelMap.set(newSharedModelId, {
+            sharedModel: newSharedModel,
+            tiles: [result?.tileId]
+          });
+        }
+      });
+      // const results = this.userCopyTiles(tiles, rowInfo);
+      // results.forEach((result, i) => {
+      //   const newSharedModelId = sharedModels[0].id;
+      //   // TODO: fix types -- should be SharedModelEntry
+      //   const pckg = {
+      //     sharedModel: sharedModels[0],
+      //     tiles: [result?.tileId]
+      //   };
+      //   self.sharedModelMap.set(newSharedModelId, pckg as any);
+        // "copy" is already logged above
+      // });
     },
     handleDragCopyTiles(dragTiles: IDragTilesData, rowInfo: IDropRowInfo) {
       const { tiles, sharedModels } = dragTiles;
@@ -1008,19 +1065,23 @@ export const DocumentContentModel = types
         this.userCopyTiles(tiles, rowInfo);
       }
 
-      // For now only handle shared data if tile is new to destination, and is paired 1:1 with a sharedModel
+      // For now only handle shared data if there's only one tile and it's a table or data card
       else if (sharedModels.length === 1) {
-        const existingProviderIds = self.getSharedModelsByType("SharedDataSet").map((sm) => {
-          return (sm as any).providerId;
-        });
-        const incomingProviderId = (sharedModels[0] as any).providerId;
-        const tileAlreadyCopied = existingProviderIds.includes(incomingProviderId);
+        let warningMessage = "";
+        if (tiles.length > 1) {
+          warningMessage = "not handling multiple tiles in a drag of shared data";
+        } else {
+          const tile = tiles[0];
+          if (tile.tileType !== "Table" && tile.tileType !== "DataCard") {
+            console.log(`tile`, tile);
+            warningMessage = "can only handle copying table and data card tiles with shared models";
+          }
+        }
 
-        if (tileAlreadyCopied) return console.warn("not handling new drags of same tile");
-        if (tiles.length > 1) return console.warn("not handling multiple tiles in a drag of shared data");
-
-        // this is a drag with a sharedModel we can currently handle
-        if (!tileAlreadyCopied && tiles.length === 1) {
+        if (warningMessage) {
+          console.warn(warningMessage);
+        } else {
+          // this is a drag with a sharedModel we can currently handle
           this.userCopySingleTileWithSharedModel(dragTiles, rowInfo);
         }
       }
