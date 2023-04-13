@@ -11,12 +11,11 @@ context('Duplicate Tiles', function () {
   const duplicateTool = () => toolButton("duplicate");
 
   before(function () {
-    const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=msa";
+    const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=example";
     cy.clearQAData('all');
 
     cy.visit(queryParams);
     cy.waitForLoad();
-    cy.closeResourceTabs();
   });
 
   describe("Duplicate tool", () => {
