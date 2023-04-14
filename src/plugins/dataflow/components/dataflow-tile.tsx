@@ -35,7 +35,7 @@ interface IDataflowTileState {
 export default class DataflowToolComponent extends BaseComponent<IProps, IDataflowTileState> {
   public static tileHandlesSelection = true;
   public isLinkButtonEnabled = true;
-  public isEditingTitle = false; //this is passed as a prop in geometry
+  public isEditingTitle = false;
   constructor(props: IProps) {
     super(props);
     this.state = {
@@ -204,8 +204,8 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     const dataSetAttributes = dataSet.attributes;
 
     // dataSet looks like
-    // Time_Quantized |  Node 1 | Node 2 | Node 3 etc
-    //    0           |   val    | val    |  val
+    // Time   |  Node 1 | Node 2 | Node 3 etc
+    //    0   |   val    | val    |  val
     addAttributeToDataSet(model.dataSet, { name: "Time" }); //this is time quantized to nearest sampling rate
 
     model.program.nodes.forEach((n) => {

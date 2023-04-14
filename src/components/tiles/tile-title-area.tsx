@@ -9,5 +9,3 @@ export const ToolTitleArea: React.FC = ({ children }) => {
     </div>
   );
 };
-
-

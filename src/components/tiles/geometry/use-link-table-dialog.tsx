@@ -59,7 +59,6 @@ export const useLinkTableDialog = ({ tableTiles, model, handleRequestTableLink, 
   const handleClick = () => {
     const _content = model.content as GeometryContentModelType;
     const tileInfo = tableTiles.find(tile => tile.id === selectValue);
-
     if (tileInfo) {
       if (_content.isLinkedToTable(tileInfo.id)) {
         handleRequestTableUnlink?.(tileInfo.id);
@@ -71,7 +70,6 @@ export const useLinkTableDialog = ({ tableTiles, model, handleRequestTableLink, 
   const content = model.content as GeometryContentModelType;
   const unlinkedTiles = tableTiles.filter(tileInfo => !content.isLinkedToTable(tileInfo.id));
   const linkedTiles = tableTiles.filter(tileInfo => content.isLinkedToTable(tileInfo.id));
-
   const [showModal, hideModal] = useCustomModal({
     className: "link-table",
     Icon: LinkGraphIcon,

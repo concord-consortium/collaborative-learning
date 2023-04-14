@@ -51,8 +51,6 @@ export const DataflowContentModel = TileContentModel
   .volatile(self => ({
     metadata: undefined as any as ITileMetadataModel,
     emptyDataSet: DataSet.create(),
-    // Used to force linkedDataSets() to update.(similar to geometry-content.ts)
-    updateSharedModels: 0,
   }))
   .views(self => ({
     get sharedModel() {
@@ -80,17 +78,13 @@ export const DataflowContentModel = TileContentModel
     get dataSet(){
       return self.sharedModel?.dataSet || self.emptyDataSet;
     },
-    ////added
     get linkedDataSets(): SharedDataSetType[] {
-      // eslint-disable-next-line no-unused-expressions
-      self.updateSharedModels;
       const sharedModelManager = self.tileEnv?.sharedModelManager;
       const foundSharedModels = sharedModelManager?.isReady
         ? sharedModelManager.getTileSharedModels(self) as SharedDataSetType[]
         : [];
       return foundSharedModels;
     },
-    ////
   }))
   .views(self => ({
     get title() {
@@ -114,7 +108,6 @@ export const DataflowContentModel = TileContentModel
         `}`
       ].join("\n");
     },
-    /////added
     get isLinked(){
       return self.linkedDataSets.length > 0;
     },
@@ -128,7 +121,6 @@ export const DataflowContentModel = TileContentModel
       });
       return isTableIdFound;
     },
-    //////
   }))
   .actions(self => tileModelHooks({
     doPostCreate(metadata: ITileMetadataModel) {
@@ -230,7 +222,6 @@ export const DataflowContentModel = TileContentModel
         self.dataSet.removeAttribute(attribute);
       }
     },
-    //TODO
     addLinkedTable(tableId: string) {  //tableID is table we linked it to
       const sharedModelManager = self.tileEnv?.sharedModelManager;
       if (sharedModelManager?.isReady && !self.isLinkedToTable(tableId)) {
@@ -245,7 +236,6 @@ export const DataflowContentModel = TileContentModel
         console.warn("GeometryContent.addLinkedTable unable to link table");
       }
     },
-
     removeLinkedTable(tableId: string) {
       const sharedModelManager = self.tileEnv?.sharedModelManager;
       if (sharedModelManager?.isReady && self.isLinkedToTable(tableId)) {

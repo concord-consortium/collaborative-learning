@@ -45,7 +45,6 @@ interface IUseLinkableTableTilesProps {
   onRequestTilesOfType: (tileType: string) => ITileLinkMetadata[];
 }
 
-//this is what tells us which table tiles are currently in the document
 const useLinkableTableTiles = ({ onRequestTilesOfType }: IUseLinkableTableTilesProps) => {
   const tableTiles = useCurrent(onRequestTilesOfType(kTableTileType));
   // add default title if there isn't a title

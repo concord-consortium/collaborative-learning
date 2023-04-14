@@ -22,7 +22,6 @@ export const useTableLinkingDataFlow = (props: IProps) => {
   const {handleRequestTableLink, handleRequestTableUnlink} = actionHandlers || {};
   const modelId = model.id;
 
-  // const showLinkButton = useFeatureFlag("GeometryLinkedTables"); //original
   const showLinkButton = useFeatureFlag("DataflowLinkedTables"); //modified
   const tableTiles = useLinkableTableTiles({ model, onRequestTilesOfType });
   const isLinkEnabled = (tableTiles.length > 0);

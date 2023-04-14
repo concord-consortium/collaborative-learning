@@ -23,7 +23,6 @@ const _GeometryToolComponent: React.FC<IGeometryProps> = ({
   const content = model.content as GeometryContentModelType;
   const [board, setBoard] = useState<JXG.Board>();
   const [actionHandlers, setActionHandlers] = useState<IActionHandlers>();
-
   const hotKeys = useRef(new HotKeys());
   const forceUpdate = useForceUpdate();
 
@@ -56,8 +55,6 @@ const _GeometryToolComponent: React.FC<IGeometryProps> = ({
   // JSXGraph, which appears to listen to pointer events on browsers that support them.
   // We must listen for mouse events because some browsers (notably Safari) don't
   // support pointer events.
-
-
   return (
     <div className="geometry-tool" ref={domElement} tabIndex={0}
           onPointerDownCapture={handlePointerDown}
