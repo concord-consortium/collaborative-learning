@@ -26,7 +26,6 @@ export const EditableTileTitle: React.FC<IProps> = observer(({
   // getTitle() and observer() allow this component to re-render
   // when the title changes without re-rendering the entire tile
   const title = getTitle() || "Tile Title";
-  // console.log("editable-tile-title> with getTitle()", getTitle());
   const kTitlePadding = 30;
   // There can be one render before we know our container size, which will then be
   // immediately replaced by a subsequent render with a known container size.

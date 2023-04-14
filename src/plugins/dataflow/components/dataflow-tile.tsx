@@ -149,15 +149,10 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   }
 
   private onLinkTableButtonClick(isLinkEnabled: boolean, showLinkTableDialog: ()=> void){
-    // console.log("onLinkTableButtonClick with", isLinkEnabled, showLinkTableDialog);
-    // const testLink = useCallBack(useTableLinking({documentId:"testId"}));
-    // const test = useTableLinking({documentId:"testId"});
     showLinkTableDialog();
   }
 
   private renderTableLinkButton() {
-    // console.log("geometry-content.tsx > renderTableLinkButton");
-    // const { isLinkButtonEnabled, onLinkTableButtonClick } = this.props;
     const { model, onRequestTilesOfType, documentId } = this.props;
     const isLinkButtonEnabled = (this.state.programRecordingMode === 2);
     const actionHandlers = {
@@ -180,7 +175,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   }
 
   private handleRequestTableLink = (tableId: string) => {
-    // console.log("dataflow-tile.tsx > handleRequestTableLink > \n this.getContent()", this.getContent());
     this.getContent().addLinkedTable(tableId);
   };
 

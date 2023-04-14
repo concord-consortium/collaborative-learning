@@ -22,7 +22,6 @@ interface IProps {
 export const DataflowLinkTableButton: React.FC<IProps> = (props: IProps) => {
   const { isLinkButtonEnabled, onLinkTableButtonClick,
           documentId,  model, onRequestTilesOfType, actionHandlers } = props;
-  // console.log("<DataflowLinkTableButton> with model:", model);
   const classes = classNames("link-table-button", { disabled: !isLinkButtonEnabled });
 
   const { isLinkEnabled, showLinkTableDialog } = useTableLinkingDataFlow({
@@ -36,10 +35,6 @@ export const DataflowLinkTableButton: React.FC<IProps> = (props: IProps) => {
     isLinkButtonEnabled && documentId && onLinkTableButtonClick?.(isLinkEnabled, showLinkTableDialog);
     e.stopPropagation();
   };
-  //
-  // console.log("useFeatureFlag: geometryLinkedTables?", useFeatureFlag("GeometryLinkedTables"));
-  // console.log(testReturn);
-  // console.log("<DataflowLinkTableButton> with props:", showLinkButton, isLinkEnabled, linkColors, getLinkIndex, showLinkTableDialog);
 
   return useFeatureFlag("DataflowLinkedTables") //change to DataflowLinkedTable
           ? <div

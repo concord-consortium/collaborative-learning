@@ -158,9 +158,7 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
         myWorkDocuments &&
         (myWorkDocuments).map((doc: PromisedDocumentDocument, index: number) =>{
           const sectionDoc =  store.documents.getDocument(doc.key);
-          console.log("sectionDoc:", sectionDoc);
           const networkDoc = store.networkDocuments.getDocument(doc.key);
-          console.log("networkDoc:", networkDoc);
           if (sectionDoc){
             return (
               <MyWorkDocuments

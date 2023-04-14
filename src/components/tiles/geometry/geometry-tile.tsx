@@ -16,17 +16,14 @@ import "./geometry-tile.sass";
 const _GeometryToolComponent: React.FC<IGeometryProps> = ({
   model, readOnly, ...others
 }) => {
-  // console.log("_GeometryToolComponent with model:", model);
   const { documentId, documentContent, tileElt, scale, onRequestTilesOfType,
     onRegisterTileApi, onUnregisterTileApi } = others;
   const modelRef = useCurrent(model);
   const domElement = useRef<HTMLDivElement>(null);
   const content = model.content as GeometryContentModelType;
   const [board, setBoard] = useState<JXG.Board>();
-  //**************************** */
   const [actionHandlers, setActionHandlers] = useState<IActionHandlers>();
 
-  // console.log("geometry-tile > \n actionHandlers:", actionHandlers);
   const hotKeys = useRef(new HotKeys());
   const forceUpdate = useForceUpdate();
 
@@ -53,7 +50,6 @@ const _GeometryToolComponent: React.FC<IGeometryProps> = ({
   );
   const enabled = !readOnly && !!board && !!actionHandlers;
   const toolbarProps = useToolbarTileApi({ id: model.id, enabled, onRegisterTileApi, onUnregisterTileApi });
-  // console.log("geometry-tile.tsx > \n actionHandlers: ", actionHandlers);
   const { isLinkEnabled, showLinkTableDialog } =
     useTableLinking({ documentId, model, onRequestTilesOfType, actionHandlers });
   // We must listen for pointer events because we want to get the events before

@@ -247,7 +247,6 @@ export const DataflowContentModel = TileContentModel
     },
 
     removeLinkedTable(tableId: string) {
-      console.log("removeLinkedTable");
       const sharedModelManager = self.tileEnv?.sharedModelManager;
       if (sharedModelManager?.isReady && self.isLinkedToTable(tableId)) {
         // #1 sever connection dataflow -> table sharedDataSet

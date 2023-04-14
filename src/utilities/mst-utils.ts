@@ -39,7 +39,6 @@ export function getContentIdFromNode(target: IAnyStateTreeNode) {
 }
 
 export function getTileContentById(target: IAnyStateTreeNode, tileId: string) {
-  console.log("mst-utils.ts > \n🔨 getTileContentById > \n 🍔 target:", target, "\n 🍔 tileId:", tileId);
   return getDocumentContentFromNode(target)?.getTileContent(tileId);
 }
 

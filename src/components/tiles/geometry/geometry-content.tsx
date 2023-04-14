@@ -480,7 +480,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderTableLinkButton() {
-    // console.log("geometry-content.tsx > renderTableLinkButton");
     const { isLinkButtonEnabled, onLinkTableButtonClick } = this.props;
     return (!this.state.isEditingTitle && !this.props.readOnly &&
       <LinkTableButton key="link-button" isEnabled={isLinkButtonEnabled} onClick={onLinkTableButtonClick}/>

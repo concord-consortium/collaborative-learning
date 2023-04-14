@@ -116,7 +116,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private disposers: IDisposer[] = [];
   private onSnapshotSetup = false;
   private processing = false;
-  private startTimeActual = 0;
 
   constructor(props: IProps) {
     super(props);
@@ -542,35 +541,23 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private recordCase = () => {
-    // console.log("--------recordCase tick---------");
-    const { recordIndex, programRecordState } = this.props;
+    const { recordIndex } = this.props;
     const { programDataRate, dataSet } = this.props.tileModel; //grab the program Sampling Rate to write TimeQuantized
 
-    //Establish time
-    const now = Date.now();
-    if (recordIndex === 0 || programRecordState === 2) {
-      this.startTimeActual = now;
-    }
-
-    //attributes order  - Time_Quantized as first column | Time_Actual | + # of nodes
+    //Write case
+    //Attributes look like  Time (quantized) as col 1 followed by all nodes
     const aCase: ICaseCreation = {};
 
+    //Quantize and write time
     const timeQuantizedKey = dataSet.attributes[0].id;
     const recordTimeQuantized = (recordIndex * programDataRate) / 1000; //in seconds
     aCase[timeQuantizedKey] = recordTimeQuantized;
 
-    const timeActualKey = dataSet.attributes[1].id;
-    const recordTimeActual = (now - this.startTimeActual) / 1000; //in seconds
-    (recordTimeActual >= 0) && (aCase[timeActualKey] = recordTimeActual);
-
-
     //loop through attribute (nodes) and write each value
-    // console.log("# of nodes:",   this.programEditor.nodes.length);
     this.programEditor.nodes.forEach((node, idx) => {
       const key = this.getAttributeIdForNode(idx);
       aCase[key] = node.data.nodeValue as string;
     });
-
     addCanonicalCasesToDataSet(this.props.tileModel.dataSet, [aCase]);
   };
 
@@ -625,8 +612,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             break;
           default:
         }
-        // console.log("playback node:", node.name, valueToSendToNode);
-
       });
     }
   };

@@ -232,10 +232,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       return self.linkedDataSets.map(link => link.providerId);
     },
     isLinkedToTable(tableId: string) {
-      console.log("geometry-content.ts > isLinkedToTable: with tableId", tableId);
-      console.log("geometry-content.ts > returning :", self.linkedDataSets.some(link => link.providerId === tableId));
       return self.linkedDataSets.some(link => link.providerId === tableId);
-
     }
   }))
   .views(self => ({
@@ -282,7 +279,6 @@ export const GeometryContentModel = GeometryBaseContentModel
       setTileTitleFromContent(self, title);
     },
     addLinkedTable(tableId: string) {
-      console.log("geometry-content.ts > \n 🔨 addLinkedTable \n  🍔 tableId:", tableId);
       const sharedModelManager = self.tileEnv?.sharedModelManager;
       if (sharedModelManager?.isReady && !self.isLinkedToTable(tableId)) {
         const sharedTable = sharedModelManager.findFirstSharedModelByType(SharedDataSet, tableId);

@@ -17,7 +17,6 @@ interface IContentProps {
 const Content: React.FC<IContentProps>
               = ({ unlinkedTiles, linkedTiles, selectValue, setSelectValue })=> {
   const selectElt = useRef<HTMLSelectElement>(null);
-  // console.log("dataflow-use-link-table-dialog.tsx > Content > linkedTiles:", linkedTiles);
     return (
       <>
         <div className="prompt">
@@ -60,11 +59,9 @@ export const useLinkTableDialog = ({ tableTiles, model, handleRequestTableLink, 
   const handleClick = () => {
     const _content = model.content as DataflowContentModelType;
     const tileInfo = tableTiles.find(tile => tile.id === selectValue);
-    // console.log("dataflow > use-link-table.diaglog.tsx >tileInfo ", tileInfo);
 
     if (tileInfo) {
       if (_content.isLinkedToTable(tileInfo.id)) {
-        // console.log("dataflow > isLinkedToTable");
         handleRequestTableUnlink?.(tileInfo.id);
       } else {
         handleRequestTableLink?.(tileInfo.id);
