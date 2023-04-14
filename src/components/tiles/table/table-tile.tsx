@@ -42,7 +42,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   const getContent = useCallback(() => modelRef.current.content as TableContentModelType, [modelRef]);
   const content = useMemo(() => getContent(), [getContent]);
 
-  console.log("table-tile.tsx > \n <TableToolComponent> \n 🍳 content:", content);
+  // console.log("table-tile.tsx > \n <TableToolComponent> \n 🍳 content:", content);
   verifyAlive(content, "TableToolComponent");
   const metadata = getContent().metadata;
 

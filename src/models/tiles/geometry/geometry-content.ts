@@ -232,7 +232,10 @@ export const GeometryContentModel = GeometryBaseContentModel
       return self.linkedDataSets.map(link => link.providerId);
     },
     isLinkedToTable(tableId: string) {
+      console.log("geometry-content.ts > isLinkedToTable: with tableId", tableId);
+      console.log("geometry-content.ts > returning :", self.linkedDataSets.some(link => link.providerId === tableId));
       return self.linkedDataSets.some(link => link.providerId === tableId);
+
     }
   }))
   .views(self => ({

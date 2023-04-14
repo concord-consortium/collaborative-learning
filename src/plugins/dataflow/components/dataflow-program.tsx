@@ -542,7 +542,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private recordCase = () => {
-    console.log("--------recordCase tick---------");
+    // console.log("--------recordCase tick---------");
     const { recordIndex, programRecordState } = this.props;
     const { programDataRate, dataSet } = this.props.tileModel; //grab the program Sampling Rate to write TimeQuantized
 
@@ -565,7 +565,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
 
     //loop through attribute (nodes) and write each value
-    console.log("# of nodes:",   this.programEditor.nodes.length);
+    // console.log("# of nodes:",   this.programEditor.nodes.length);
     this.programEditor.nodes.forEach((node, idx) => {
       const key = this.getAttributeIdForNode(idx);
       aCase[key] = node.data.nodeValue as string;

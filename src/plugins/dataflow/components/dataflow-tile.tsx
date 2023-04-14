@@ -175,13 +175,12 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
         model={model}
         onRequestTilesOfType={onRequestTilesOfType}
         actionHandlers={actionHandlers}
-
       />
     );
   }
 
   private handleRequestTableLink = (tableId: string) => {
-    console.log("dataflow-tile.tsx > handleRequestTableLink > \n this.getContent()", this.getContent());
+    // console.log("dataflow-tile.tsx > handleRequestTableLink > \n this.getContent()", this.getContent());
     this.getContent().addLinkedTable(tableId);
   };
 

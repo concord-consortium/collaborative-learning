@@ -17,8 +17,6 @@ interface IProps {
   actionHandlers?: IDataFlowActionHandlers; //maybe get rid of
 }
 
-
-
 export const useTableLinkingDataFlow = (props: IProps) => {
   const { documentId, model, onRequestTilesOfType, actionHandlers } = props;
   const {handleRequestTableLink, handleRequestTableUnlink} = actionHandlers || {};
@@ -43,12 +41,6 @@ export const useTableLinkingDataFlow = (props: IProps) => {
   }, [modelId, showLinkButton]);
 
   return { showLinkButton, isLinkEnabled, linkColors, getLinkIndex, showLinkTableDialog };
-  // const isLinkEnabled = true;
-  // const getLinkIndex = false;
-
-  console.log("typeof getLinkIndex:", typeof getLinkIndex);
-  // return {isLinkEnabled, getLinkIndex};
-  // return testReturn;
 };
 
 interface IUseLinkableTableTilesProps {

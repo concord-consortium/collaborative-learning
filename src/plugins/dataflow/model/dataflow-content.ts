@@ -52,7 +52,8 @@ export const DataflowContentModel = TileContentModel
   .volatile(self => ({
     metadata: undefined as any as ITileMetadataModel,
     emptyDataSet: DataSet.create(),
-    updateSharedModels: 0, //added
+    // Used to force linkedDataSets() to update.(similar to geometry-content.ts)
+    updateSharedModels: 0,
   }))
   .views(self => ({
     get sharedModel() {
@@ -122,7 +123,11 @@ export const DataflowContentModel = TileContentModel
       return self.linkedDataSets.map(link => link.providerId);
     },
     isLinkedToTable(tableId: string) {
-      return self.linkedDataSets.some(link => link.providerId === tableId);
+      const sharedModelManager = self.tileEnv?.sharedModelManager;
+      const isTableIdFound = self.linkedDataSets.some(link => { //link is the shared model
+        return sharedModelManager?.getSharedModelTileIds(link).includes(tableId);
+      });
+      return isTableIdFound;
     },
     //////
   }))
@@ -209,11 +214,6 @@ export const DataflowContentModel = TileContentModel
 
       if (!foundFlag) {
         const newAttributeId = uniqueId() + "*" + nodeId;
-        console.log("adding to dataSet:", {
-          id: newAttributeId,
-          name: `Dataflow-${nodeName}_${nodeId}`
-        });
-
         self.dataSet.addAttributeWithID({
           id: newAttributeId,
           name: `Dataflow-${nodeName}_${nodeId}`
@@ -242,19 +242,17 @@ export const DataflowContentModel = TileContentModel
       const sharedModelManager = self.tileEnv?.sharedModelManager;
       if (sharedModelManager?.isReady && !self.isLinkedToTable(tableId)) {
         const sharedTable = sharedModelManager.findFirstSharedModelByType(SharedDataSet, tableId);
-        console.log("dataflow-content.ts > 🔨 addLinkedTable > sharedTable", sharedTable);
+        // console.log("dataflow-content.ts > 🔨 addLinkedTable > sharedTable", sharedTable);
         //sever the connection between table -> sharedData set
-        console.log("dataflow-content.ts > self:", self);
+        // console.log("dataflow-content.ts > self:", self);
 
         //need to get tableTile contents given a tableId
         const tableTile = getTileContentById(self, tableId);
-        console.log("dataflow-content.ts > tableTile:", tableTile);
+        // console.log("dataflow-content.ts > tableTile:", tableTile);
         sharedTable && sharedModelManager.removeTileSharedModel(tableTile, sharedTable);
         //,connect table -> dataflow Dataset
         self.sharedModel && sharedModelManager.addTileSharedModel(tableTile, self.sharedModel);
         //instead we want to pass table content
-        // first argument is (source)
-        // self.forceSharedModelUpdate();
       }
       else {
         console.warn("GeometryContent.addLinkedTable unable to link table");
@@ -262,7 +260,16 @@ export const DataflowContentModel = TileContentModel
     },
 
     removeLinkedTable(tableId: string) {
-      console.log("dataflow-content.ts > removeLinkedTable with tableId", tableId);
+      // console.log("dataflow-content.ts > removeLinkedTable with tableId", tableId);
+      const sharedModelManager = self.tileEnv?.sharedModelManager;
+      if (sharedModelManager?.isReady && self.isLinkedToTable(tableId)) {
+        const sharedTable = sharedModelManager.findFirstSharedModelByType(SharedDataSet, tableId);
+        sharedTable && sharedModelManager.removeTileSharedModel(self, sharedTable);
+        // self.forceSharedModelUpdate();
+      }
+      else {
+        console.warn("GeometryContent.addLinkedTable unable to unlink table");
+      }
     }
 
   }));
