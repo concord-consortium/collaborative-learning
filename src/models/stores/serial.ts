@@ -1,4 +1,5 @@
 import { NodeChannelInfo } from "src/plugins/dataflow/model/utilities/channel";
+import { NodeLiveOutputTypes } from "../../plugins/dataflow/model/utilities/node";
 
 export class SerialDevice {
   localBuffer: string;
@@ -151,22 +152,19 @@ export class SerialDevice {
     } while (match);
   }
 
-  public writeToOutForMicroBit(data: string | number){
-    // UPCOMING PT #184753741 compute control message string
-    // const controlMessage = makeCotrolMessage(data)
-    // this.writer.write(`${controlMessage}\n`)
+  public writeToOutForMicroBitRelayHub(data: number, hubId: string, relayType: string){
+    const ri = NodeLiveOutputTypes.filter((ot:any) => ot.name === relayType)[0].relayIndex;
+    const controlMessage = `c${hubId}${ri}${data}`;
+    this.writer.write(`${controlMessage}\n`);
   }
 
-  public writeToOutForArduino(n:number){
-    // number visible to user represents "percent closed"
-    // so we need to map x percent to an angle in range where
-    // 100% (closed) is 120deg, and 0% (open) is 180deg
+  public writeToOutForBBGripper(n:number){
+    // "percent closed" is x% where 100% = 120deg and 0% = 180deg
     const percent = n / 100;
     let openTo = Math.round(180 - (percent * 60));
     if (openTo > 160) openTo = 180;
     if (openTo < 130) openTo = 120;
 
-    // Arduino readBytesUntil() expects newline as delimiter
     if(this.hasPort()){
       this.writer.write(`${openTo.toString()}\n`);
     }

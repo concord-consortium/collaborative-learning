@@ -40,6 +40,7 @@ import { ICaseCreation, addCanonicalCasesToDataSet } from "../../../models/data/
 import { SensorValueControl } from "../nodes/controls/sensor-value-control";
 import { InputValueControl } from "../nodes/controls/input-value-control";
 import { DemoOutputControl } from "../nodes/controls/demo-output-control";
+import { DropdownListControl } from "../nodes/controls/dropdown-list-control";
 
 import "./dataflow-program.sass";
 interface NodeNameValuePair {
@@ -323,16 +324,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         this.props.onProgramChange(this.programEditor.toJSON());
       });
 
-      this.programEditor.on("nodecreate", node => {
-        // trigger after each of the first six events
-        // add the current set of sensors node controls
-        if (node.name === "Sensor") {
-          const sensorSelect = node.controls.get("sensorSelect") as SensorSelectControl;
-          sensorSelect.setChannels(this.channels);
-        }
-        return true;
-      });
-
       // remove rete double click zoom
       this.programEditor.on("zoom", ({ source }) => {
         return false;
@@ -416,6 +407,16 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.channels = [];
     this.channels = [...virtualSensorChannels, ...serialSensorChannels];
     this.countSerialDataNodes(this.programEditor.nodes);
+    this.programEditor.nodes.forEach((node) => {
+      if (node.name === "Sensor") {
+        const sensorSelect = node.controls.get("sensorSelect") as SensorSelectControl;
+        sensorSelect.setChannels(this.channels);
+      }
+      if (node.name === "Live Output"){
+        const hubSelect = node.controls.get("hubSelect") as DropdownListControl;
+        hubSelect.setChannels(this.channels);
+      }
+    });
   };
 
   private shouldShowProgramCover() {
@@ -692,7 +693,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const deviceMismatch = sd.deviceFamily !== channel.deviceFamily;
       const timeSinceActive = channel.usesSerial && channel.lastMessageRecievedAt
         ? Date.now() - channel.lastMessageRecievedAt: 0;
-      channel.missing = deviceMismatch || timeSinceActive > 5000;
+      channel.missing = deviceMismatch || timeSinceActive > 7000;
     }
     else {
       channel.serialConnected = false;
@@ -735,11 +736,16 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const { deviceFamily } = this.stores.serialDevice;
 
     if (deviceFamily === "arduino" && isNumberOutput){
-      this.stores.serialDevice.writeToOutForArduino(n.data.nodeValue as number);
+      this.stores.serialDevice.writeToOutForBBGripper(n.data.nodeValue as number);
     }
     if (deviceFamily === "microbit"){
-      // UPCOMING PT: #184753741 control messages out to hubs
-      this.stores.serialDevice.writeToOutForMicroBit(n.data.nodeValue as any);
+      const hubSelect = n.controls.get("hubSelect") as DropdownListControl;
+      if (hubSelect.getChannels()){
+        const relayType = hubSelect.getData("liveOutputType") as string;
+        const hubId = hubSelect.getValue().charAt(14);
+        const state = n.data.nodeValue as number;
+        this.stores.serialDevice.writeToOutForMicroBitRelayHub(state, hubId, relayType );
+      }
     }
   }
 

@@ -5,6 +5,7 @@ import Rete, { NodeEditor, Node, Control } from "rete";
 import { useStopEventPropagation, useCloseDropdownOnOutsideEvent } from "./custom-hooks";
 import DropdownCaretIcon from "../../assets/icons/dropdown-caret.svg";
 import { dataflowLogEvent } from "../../dataflow-logger";
+import { NodeChannelInfo } from "../../model/utilities/channel";
 
 import "./dropdown-list-control.scss";
 
@@ -79,10 +80,14 @@ export class DropdownListControl extends Rete.Control {
       const option = options.find((opt) => optionValue(opt) === val);
       const name = option?.name ?? val;
       const icon = option?.icon?.({}) || null;
+      const activeHub = (option as any).active;
+      const liveNode = this.getNode().name.substring(0,4) === "Live";
+      const disableSelected = this.key === "hubSelect" && liveNode && !activeHub;
+      const labelClasses = disableSelected ? "disabled item top" : "item top";
 
       return (
         <div className={`node-select ${listClass}`} ref={divRef}>
-          <div className="item top" onMouseDown={handleChange(onItemClick)}>
+          <div className={labelClasses} onMouseDown={handleChange(onItemClick)}>
             { icon &&
             <svg className="icon top">
               {icon}
@@ -98,12 +103,13 @@ export class DropdownListControl extends Rete.Control {
             {options.map((ops: any, i: any) => {
               let className = `item ${listClass}`;
               const disabled = isDisabled && isDisabled(ops);
-              if (optionValue(ops) === val) {
-                className += " selected";
-              } else if (disabled) {
-                className += " disabled";
+              if (ops.active === false || disabled){
+                className+= " disabled";
               } else {
                 className += " selectable";
+              }
+              if (optionValue(ops) === val) {
+                className += " selected";
               }
               return (
                 <div
@@ -176,6 +182,23 @@ export class DropdownListControl extends Rete.Control {
 
   public setOptions = (options: any) => {
     this.props.optionArray = options;
+  };
+
+  public setActiveOption = (hubId: string, state: boolean) => {
+    if (this.props.optionArray){
+      const targetHub = this.props.optionArray.filter((o: any) => o.id === hubId);
+      if(targetHub[0]){
+        targetHub[0].active = state;
+      }
+    }
+  };
+
+  public setChannels = (channels: NodeChannelInfo[]) => {
+    this.props.channels = channels;
+  };
+
+  public getChannels = () => {
+    return this.props.channels;
   };
 
   /**
