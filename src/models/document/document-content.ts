@@ -24,6 +24,7 @@ import { comma, StringBuilder } from "../../utilities/string-builder";
 import { SharedModel, SharedModelType } from "../shared/shared-model";
 import { SharedModelUnion } from "../shared/shared-model-manager";
 import { SharedDataSetType } from "../shared/shared-data-set";
+import { newCaseId } from "../data/data-set";
 
 export interface IDocumentAddTileOptions {
   title?: string;
@@ -1001,7 +1002,7 @@ export const DocumentContentModel = types
         attributeIdMap[attr.id] = uniqueId();
       });
       sharedModel.dataSet.cases.forEach(c => {
-        caseIdMap[c.__id__] = uniqueId();
+        caseIdMap[c.__id__] = newCaseId();
       });
 
       // Update the shared model with new ids

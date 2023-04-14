@@ -229,9 +229,9 @@ export const TableContentModel = TileContentModel
   }))
   .views(self => ({
     get tileSnapshotForCopy() {
-      const snapshot = getSnapshot(self);
       // Do not include importedDataSet when copying
-      return { type: snapshot.type, columnWidths: snapshot.columnWidths };
+      const { isImported, importedDataSet, ...nonImportSnapshot } = getSnapshot(self);
+      return nonImportSnapshot;
     }
   }))
   .views(self => ({
