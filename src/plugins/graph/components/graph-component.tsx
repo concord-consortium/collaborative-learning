@@ -12,14 +12,14 @@ import {GraphController} from "../models/graph-controller";
 import {GraphLayoutContext} from "../models/graph-layout";
 import {GraphModelContext, isGraphModel} from "../models/graph-model";
 import {Graph} from "./graph";
-//import { ITileModel } from 'src/models/tiles/tile-model';
-import { ITileProps } from 'src/components/tiles/tile-component';
+import { ITileModel } from 'src/models/tiles/tile-model';
 
-// TODO: Determine if changing `{tile}: ITileBaseProps` to `tile: ITileModel` is the right thing to do.
-// TODO: Determine if change from line 20 to 21-22 is OK.
-//export const GraphComponent = observer(function GraphComponent(tile: ITileModel) {
-export const GraphComponent: React.FC<ITileProps> = observer((props) => {
-  const tile = props.model;
+interface IProps {
+  size?: any;
+  tile?: ITileModel;
+}
+
+export const GraphComponent = observer(function GraphComponent({size, tile}: IProps) {
   const graphModel = isGraphModel(tile?.content) ? tile?.content : undefined;
 
   const instanceId = useNextInstanceId("graph");
