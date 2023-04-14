@@ -148,10 +148,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     );
   }
 
-  private onLinkTableButtonClick(isLinkEnabled: boolean, showLinkTableDialog: ()=> void){
-    showLinkTableDialog();
-  }
-
   private renderTableLinkButton() {
     const { model, onRequestTilesOfType, documentId } = this.props;
     const isLinkButtonEnabled = (this.state.programRecordingMode === 2);
@@ -164,7 +160,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
       <DataflowLinkTableButton
         key="link-button"
         isLinkButtonEnabled={isLinkButtonEnabled}
-        onLinkTableButtonClick={this.onLinkTableButtonClick}
         //used in useTableLinking
         documentId={documentId}
         model={model}

@@ -11,8 +11,6 @@ import { IDataFlowActionHandlers } from "../dataflow-shared";
 
 interface IProps {
   isLinkButtonEnabled?: boolean;
-  onLinkTableButtonClick?: (isLinkEnabled: boolean, showLinkTableDialog: ()=>void) => void;
-  //useTableLinking
   documentId?: string;
   model: ITileModel;
   onRequestTilesOfType: (tileType: string) => ITileLinkMetadata[];
@@ -20,19 +18,19 @@ interface IProps {
 }
 
 export const DataflowLinkTableButton: React.FC<IProps> = (props: IProps) => {
-  const { isLinkButtonEnabled, onLinkTableButtonClick,
+  const { isLinkButtonEnabled,
           documentId,  model, onRequestTilesOfType, actionHandlers } = props;
   const classes = classNames("link-table-button", { disabled: !isLinkButtonEnabled });
 
-  const { isLinkEnabled, showLinkTableDialog } = useTableLinkingDataFlow({
-                                       documentId,
-                                       model,
-                                       onRequestTilesOfType,
-                                       actionHandlers
-                                     });
+  const { showLinkTableDialog } = useTableLinkingDataFlow({
+                                    documentId,
+                                    model,
+                                    onRequestTilesOfType,
+                                    actionHandlers
+                                  });
 
   const handleClick = (e: React.MouseEvent) => {
-    isLinkButtonEnabled && documentId && onLinkTableButtonClick?.(isLinkEnabled, showLinkTableDialog);
+    isLinkButtonEnabled && documentId && showLinkTableDialog();
     e.stopPropagation();
   };
 
