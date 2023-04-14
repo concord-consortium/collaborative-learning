@@ -32,9 +32,7 @@ export const GraphAxis = observer(function GraphAxis(
         const isY2 = desc.attributeID === graphModel.getAttributeID('rightNumeric');
         return (desc.attributeID && !isY2 && dataset?.attrFromID(desc.attributeID)?.name) || '';
       }).filter(aName => aName !== '').join(', ')
-      : (attrId && dataset?.attrFromID(attrId)?.name) ||
-        // TODO: Determine the best way to set this default value. Probably don't need t()?
-        t("Click here to choose data to plot"); // t('DG.AxisView.emptyGraphCue');
+      : (attrId && dataset?.attrFromID(attrId)?.name) || "Click here to choose data to plot";
   };
 
   return (

@@ -19,7 +19,7 @@ export function useInitGraphLayout(model?: IGraphModel) {
         return repetitions;
       },
       (repetitions) => {
-        // TODO: Update type declarations. First `place` was originally AxisPlace (not string).
+        // TODO: Update type declarations? First `place` was originally AxisPlace (not string).
         // Second had no cast to type.
         Object.keys(repetitions).forEach((place: string) => {
           layout.getAxisMultiScale(place as AxisPlace)?.setRepetitions(repetitions[place]);

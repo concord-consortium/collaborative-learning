@@ -122,7 +122,7 @@ export class GraphController {
     const setupAxis = (place: AxisPlace) => {
       const attrRole = graphPlaceToAttrRole[place],
         attributeID = dataConfig.attributeID(attrRole),
-        attr = dataset?.attrFromID(attributeID),
+        attr = dataset?.attrFromID(attributeID!), // TODO: Fix use of !
         attrType = dataConfig.attributeType(attrRole) ?? 'empty',
         currAxisModel = graphModel.getAxis(place),
         currentType = currAxisModel?.type ?? 'empty';

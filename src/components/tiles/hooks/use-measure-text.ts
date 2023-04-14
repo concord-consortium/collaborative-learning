@@ -13,7 +13,7 @@ export const measureTextExtent = (text: string, font = defaultFont) => {
 
 export const measureText = (text:string, font = defaultFont) => {
   cache[font] = cache[font] || {};
-  cache[font][text] = cache[font][text] || Math.ceil(10 * measureTextExtent(text).width) / 10;
+  cache[font][text] = cache[font][text] || Math.ceil(10 * measureTextExtent(text, font).width) / 10;
   return cache[font][text];
 };
 

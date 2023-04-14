@@ -111,27 +111,19 @@ export const DataConfigurationModel = types
         : role === 'rightNumeric' ? self._attributeDescriptions.get('rightNumeric')
           : this.attributeDescriptions[role];
     },
-    attributeID(role: GraphAttrRole): string {
+    attributeID(role: GraphAttrRole): string | undefined {
       let attrID = this.attributeDescriptionForRole(role)?.attributeID;
       if ((role === "caption") && !attrID) {
         attrID = this.defaultCaptionAttributeID;
       }
-      // TODO: Determine what to do besides returning "" if there is no attrID
-      if (!attrID) {
-        return "";
-      }
       return attrID;
     },
-    attributeType(role: GraphAttrRole):string {
+    attributeType(role: GraphAttrRole): string | undefined {
       const desc = this.attributeDescriptionForRole(role);
       const attrID = this.attributeID(role);
-      const attr = attrID && self.dataset?.attrFromID(attrID);
-      // TODO: Refactor the change below. Was `return desc?.type || attr?.type`
-      return desc && desc.type
-               ? desc.type
-               : attr && attr.type
-                 ? attr.type
-                 : "categorical";
+      const attr = attrID ? self.dataset?.attrFromID(attrID) : undefined;
+      // TODO: Determine why attr never has a type property?
+      return desc?.type || (attr && attr?.type);
     },
     get places() {
       const places = new Set<string>(Object.keys(this.attributeDescriptions));
@@ -151,34 +143,6 @@ export const DataConfigurationModel = types
       return self.secondaryRole && self.attributeID(self.secondaryRole) || '';
     }
   }))
-  // TODO: Reorganize these view blocks?
-  .views(self => ({
-    getSetOfAllGraphCaseIDs() {
-      const allGraphCaseIds = new Set<string>();
-      // todo: We're bypassing get caseDataArray to avoid infinite recursion. Is it necessary?
-      self.filteredCases?.forEach(aFilteredCases => {
-        if (aFilteredCases) {
-          aFilteredCases.caseIds.forEach((id: any) => allGraphCaseIds.add(id));
-        }
-      });
-      return allGraphCaseIds;
-    }
-  }))
-  .views(self => ({
-    // Note that we have to go through each of the filteredCases in order to return all the values
-    valuesForAttrRole(role: GraphAttrRole): string[] {
-      const attrID = self.attributeID(role),
-        dataset = self.dataset,
-        allGraphCaseIds = Array.from(self.getSetOfAllGraphCaseIDs()),
-        allValues = attrID ? allGraphCaseIds.map((anID: string) => String(dataset?.getValue(anID, attrID)))
-          : [];
-      return allValues.filter(aValue => aValue !== '');
-    },
-    numericValuesForAttrRole(role: GraphAttrRole): number[] {
-      return this.valuesForAttrRole(role).map((aValue: string) => Number(aValue))
-        .filter((aValue: number) => isFinite(aValue));
-    },
-  }))
   .extend(self => {
     // TODO: This is a hack to get around the fact that MST doesn't seem to cache this as expected
     // when implemented as simple view.
@@ -188,6 +152,7 @@ export const DataConfigurationModel = types
       views: {
         get legendQuantileScale(): ScaleQuantile<string> {
           if (!quantileScale) {
+            // @ts-expect-error FIXME: numericValuesForAttrRole does exist
             quantileScale = scaleQuantile(self.numericValuesForAttrRole("legend"), schemeBlues[5]);
           }
           return quantileScale;
@@ -282,12 +247,12 @@ export const DataConfigurationModel = types
       return self.places.map(place => self.attributeID(place));
     },
     get uniqueAttributes() {
-      return Array.from(new Set<string>(this.attributes));
+      return Array.from(new Set<string | undefined>(this.attributes));
     },
     get tipAttributes(): RoleAttrIDPair[] {
       return TipAttrRoles
         .map(role => {
-          return {role, attributeID: self.attributeID(role)};
+          return {role, attributeID: self.attributeID(role)!}; // TODO: Fix use of !
         })
         .filter(pair => !!pair.attributeID);
     },
@@ -322,6 +287,35 @@ export const DataConfigurationModel = types
         })
         : [];
     },
+    getCaseDataArray(caseArrayNumber: number) {
+      const caseDataArray = this.getUnsortedCaseDataArray(caseArrayNumber),
+        legendAttrID = self.attributeID("legend");
+      if (legendAttrID) {
+        // @ts-expect-error FIXME: categorySetForAttrRole does exist
+        const categories = Array.from(self.categorySetForAttrRole("legend"));
+        caseDataArray.sort((cd1: CaseData, cd2: CaseData) => {
+          const cd1_Value = self.dataset?.getValue(cd1.caseID, legendAttrID),
+            cd2_value = self.dataset?.getValue(cd2.caseID, legendAttrID);
+          // TODO: Determine why/if this type check is necessary and/or if returning 0 in the else block makes sense.
+          if (typeof cd1_Value === "string" && typeof cd2_value === "string") {
+            return categories.indexOf(cd1_Value) - categories.indexOf(cd2_value);
+          } else {
+            return 0;
+          }
+        });
+      }
+      return caseDataArray;
+    },
+    getSetOfAllGraphCaseIDs() {
+      const allGraphCaseIds = new Set<string>();
+      // todo: We're bypassing get caseDataArray to avoid infinite recursion. Is it necessary?
+      self.filteredCases?.forEach(aFilteredCases => {
+        if (aFilteredCases) {
+          aFilteredCases.caseIds.forEach((id: any) => allGraphCaseIds.add(id));
+        }
+      });
+      return allGraphCaseIds;
+    },
     get joinedCaseDataArrays() {
       const joinedCaseData: CaseData[] = [];
       self.filteredCases?.forEach((aFilteredCases, index) => {
@@ -331,6 +325,9 @@ export const DataConfigurationModel = types
       );
       return joinedCaseData;
     },
+    get caseDataArray() {
+      return this.getCaseDataArray(0);
+    },
     /**
      * Note that in order to eliminate a selected case from the graph's selection, we have to check that it is not
      * present in any of the case sets, not just the 0th one.
@@ -338,12 +335,25 @@ export const DataConfigurationModel = types
     get selection() {
       if (!self.dataset || !self.filteredCases || !self.filteredCases[0]) return [];
       const selection = Array.from(self.dataset.selection),
-        allGraphCaseIds = self.getSetOfAllGraphCaseIDs();
+        allGraphCaseIds = this.getSetOfAllGraphCaseIDs();
       return selection.filter((caseId: string) => allGraphCaseIds.has(caseId));
     }
   }))
   .views(self => (
     {
+      // Note that we have to go through each of the filteredCases in order to return all the values
+      valuesForAttrRole(role: GraphAttrRole): string[] {
+        const attrID = self.attributeID(role),
+          dataset = self.dataset,
+          allGraphCaseIds = Array.from(self.getSetOfAllGraphCaseIDs()),
+          allValues = attrID ? allGraphCaseIds.map((anID: string) => String(dataset?.getValue(anID, attrID)))
+            : [];
+        return allValues.filter(aValue => aValue !== '');
+      },
+      numericValuesForAttrRole(role: GraphAttrRole): number[] {
+        return this.valuesForAttrRole(role).map((aValue: string) => Number(aValue))
+          .filter((aValue: number) => isFinite(aValue));
+      },
       get numericValuesForYAxis() {
         const allGraphCaseIds = Array.from(self.getSetOfAllGraphCaseIDs()),
           allValues: number[] = [];
@@ -358,34 +368,13 @@ export const DataConfigurationModel = types
         if (existingSet) {
           return existingSet;
         } else {
-          const result: Set<string> = new Set(self.valuesForAttrRole(role).sort());
+          const result: Set<string> = new Set(this.valuesForAttrRole(role).sort());
           if (result.size === 0) {
             result.add('__main__');
           }
           self.setCategorySetForRole(role, result);
           return result;
         }
-      },
-      getCaseDataArray(caseArrayNumber: number) {
-        const caseDataArray = self.getUnsortedCaseDataArray(caseArrayNumber),
-          legendAttrID = self.attributeID("legend");
-        if (legendAttrID) {
-          const categories = Array.from(this.categorySetForAttrRole("legend"));
-          caseDataArray.sort((cd1: CaseData, cd2: CaseData) => {
-            const cd1_Value = self.dataset?.getValue(cd1.caseID, legendAttrID),
-              cd2_value = self.dataset?.getValue(cd2.caseID, legendAttrID);
-            // TODO: Determine why/if this type check is necessary and/or if returning 0 in the else block makes sense.
-            if (typeof cd1_Value === "string" && typeof cd2_value === "string") {
-              return categories.indexOf(cd1_Value) - categories.indexOf(cd2_value);
-            } else {
-              return 0;
-            }
-          });
-        }
-        return caseDataArray;
-      },
-      get caseDataArray() {
-        return this.getCaseDataArray(0);
       },
       numRepetitionsForPlace(place: GraphPlace) {
         let numRepetitions = 1;
@@ -539,10 +528,8 @@ export const DataConfigurationModel = types
         const otherRole = role === 'x' ? 'y' : 'x',
           otherDesc = self.attributeDescriptionForRole(otherRole);
         if (otherDesc?.attributeID === desc?.attributeID) {
-          // TODO: Determine if changing type from "empty" to undefined is OK.
-          const currentDesc = self.attributeDescriptionForRole(role) ?? {attributeID: '', type: undefined};
+          const currentDesc = self.attributeDescriptionForRole(role) ?? {attributeID: '', type: "empty"};
           setAttributeDescription(otherRole,
-            // TODO: Determine if changing `currentDesc.attributeType` to `currentDesc.type` is OK
             {attributeID: currentDesc.attributeID, type: currentDesc.type});
           self.categorySets.set(otherRole, null);
         }

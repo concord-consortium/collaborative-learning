@@ -106,7 +106,6 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
     }, [layout, dataConfiguration, dataset, dragID]),
 
     onDragEnd = useCallback(() => {
-      // TODO: Determine if simply calling the _ version here is OK (was calling endCaching)
       dataset?._endCaching();
 
       if (dragID !== '') {

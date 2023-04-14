@@ -14,7 +14,7 @@ export type PrimaryAttrRole = typeof PrimaryAttrRoles[number];
 export const TipAttrRoles =
   [...PrimaryAttrRoles, 'rightNumeric', 'topSplit', 'rightSplit', 'legend', 'caption'] as const;
 export const GraphAttrRoles = [
-  ...TipAttrRoles, 'polygon', 'yPlus'] as const;
+  ...TipAttrRoles, 'polygon', 'yPlus', 'empty'] as const;
 export type GraphAttrRole = typeof GraphAttrRoles[number];
 export type IsGraphDropAllowed = (place: GraphPlace, attrId?: string) => boolean;
 

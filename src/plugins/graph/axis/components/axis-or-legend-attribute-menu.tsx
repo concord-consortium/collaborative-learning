@@ -45,8 +45,7 @@ const _AxisOrLegendAttributeMenu = ({ place, target, portal,
   return (
     <div className={`axis-legend-attribute-menu ${place}`} ref={menuRef}>
       <Menu>
-        {/* TODO: Update types for isOpen and onClose */}
-        {({ isOpen, onClose }: {isOpen: any, onClose: any}) => {
+        {({ isOpen, onClose }: {isOpen: () => void, onClose: () => void}) => {
           onCloseRef.current = onClose;
           return (
             <>
@@ -66,8 +65,8 @@ const _AxisOrLegendAttributeMenu = ({ place, target, portal,
                       {removeAttrItemLabel}
                     </MenuItem>
                     <MenuItem onClick={() => onTreatAttributeAs(place, attribute?.id, treatAs)}>
-                      {treatAs === "categorical" && t("Treat as Categorical")}
-                      {treatAs === "numeric" && t("Treat as Numeric")}
+                      {treatAs === "categorical" && "Treat as Categorical"}
+                      {treatAs === "numeric" && "Treat as Numeric"}
                     </MenuItem>
                   </>
                 }

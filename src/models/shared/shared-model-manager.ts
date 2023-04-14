@@ -73,6 +73,11 @@ export interface ISharedModelManager {
   getSharedModelsByType<IT extends typeof SharedModelUnion>(type: string): IT["Type"][];
 
   /**
+   * Add a shared model
+   */
+  addSharedModel(sharedModel: SharedModelType): void;
+
+  /**
    * Add a shared model to the container if it doesn't exist and add a link to
    * the tile from the shared model.
    *

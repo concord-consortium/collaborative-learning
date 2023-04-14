@@ -274,7 +274,7 @@ export const DataSet = types.model("DataSet", {
                 : undefined;
       },
       getNumericAtIndex(index: number, attributeID: string) {
-        const attr = attrIDMap[attributeID],
+        const attr = self.attrIDMap[attributeID],
               caseID = self.cases[index]?.__id__,
               cachedCase = self.isCaching ? self.caseCache.get(caseID) : undefined;
         return (cachedCase && Object.prototype.hasOwnProperty.call(cachedCase, attributeID))
@@ -505,7 +505,6 @@ export const DataSet = types.model("DataSet", {
         for (let i = attribute.values.length; i < self.cases.length; ++i) {
           attribute.values.push("");
         }
-        return attribute;
       },
 
       setAttributeName(attributeID: string, name: string) {

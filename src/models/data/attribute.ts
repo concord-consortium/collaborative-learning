@@ -108,7 +108,19 @@ export const Attribute = types.model("Attribute", {
     if ((index != null) && (index < self.values.length) && (count > 0)) {
       self.values.splice(index, count);
     }
-  }
+  },
+  // // should be called before retrieving snapshot (i.e. before serialization)
+  // prepareSnapshot() {
+  //   if (isDevelopment()) {
+  //     self.values = [...self.strValues];
+  //   }
+  // },
+  // // should be called after retrieving snapshot (i.e. after serialization)
+  // completeSnapshot() {
+  //   if (isDevelopment()) {
+  //     self.values = undefined;
+  //   }
+  // }
 }));
 export type IAttribute = Instance<typeof Attribute>;
 
@@ -126,6 +138,6 @@ export interface IAttributeCreation {
 export type IAttributeSnapshot = SnapshotOut<typeof Attribute>;
 
 export const attributeTypes = [
-  "categorical", "numeric", "date", "qualitative", "boundary", "checkbox", "color"
+  "categorical", "numeric", "date", "qualitative", "boundary", "checkbox", "color", "empty"
 ] as const;
 export type AttributeType = typeof attributeTypes[number];

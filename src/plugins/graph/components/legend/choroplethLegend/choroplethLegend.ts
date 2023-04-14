@@ -83,8 +83,7 @@ export function choroplethLegend(scale: ChoroplethScale, choroplethElt: SVGGElem
     });
 
   tickValues = range(thresholds.length);
-  // TODO: Update i type. Was `number` before being changed to `any`
-  tickFormat = (i: any) => thresholdFormat(thresholds[i]);
+  tickFormat = (i: number) => thresholdFormat(thresholds[i]);
 
   svg.append("g")
     .attr('class', 'legend-axis')

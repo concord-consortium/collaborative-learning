@@ -26,14 +26,15 @@
       "/functions/test/(?!(shared\\.test\\.ts)$).*$"
     ],
     "transformIgnorePatterns": [
-      "/node_modules/(?!(d3-format|escape-string-regexp|json-stringify-pretty-compact|nanoid)/)"
+      "/comments/ESM-only (https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c) modules that should not be transformed by ts-jest",
+      "/node_modules/(?!(d3|d3-(.+)|delaunator|escape-string-regexp|internmap|json-stringify-pretty-compact|nanoid|robust-predicates)/)"
     ],
     "coveragePathIgnorePatterns": [
       "/node_modules/",
       "src/utilities/test-utils.ts"
     ],
     "moduleNameMapper": {
-      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/__mocks__/fileMock.js",
+      "\\.(csv|jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/__mocks__/fileMock.js",
       "\\.(css|less|sass|scss)$": "<rootDir>/__mocks__/styleMock.js",
       "react-modal-hook": "@concord-consortium/react-modal-hook",
       "mobx-state-tree": "@concord-consortium/mobx-state-tree"
