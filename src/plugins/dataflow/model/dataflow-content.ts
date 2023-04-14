@@ -196,13 +196,8 @@ export const DataflowContentModel = TileContentModel
     },
     addNewAttrFromNode(nodeId: number, nodeName: string){
       //if already an attribute with the same nodeId do nothing, else write
-      // console.log("dataflow-content.ts > addNewAttrFromNode \n nodeId", nodeId, "nodeName:", nodeName);
-
       const dataSetAttributes = self.dataSet.attributes;
       let foundFlag = false;
-
-
-      // console.log("objectKeys datasetAttributes:", Object.keys(dataSetAttributes));
 
       for (let i = 0; i < Object.keys(dataSetAttributes).length ; i++){ //look in dataSet.attributes for each Id
         const idInDataSet = dataSetAttributes[i].id;
@@ -237,21 +232,14 @@ export const DataflowContentModel = TileContentModel
     },
     //TODO
     addLinkedTable(tableId: string) {  //tableID is table we linked it to
-      console.log("dataflow-content.ts > 🔨 addLinkedTable with tableId", tableId);
       const sharedModelManager = self.tileEnv?.sharedModelManager;
       if (sharedModelManager?.isReady && !self.isLinkedToTable(tableId)) {
         const sharedTable = sharedModelManager.findFirstSharedModelByType(SharedDataSet, tableId);
-        // console.log("dataflow-content.ts > 🔨 addLinkedTable > sharedTable", sharedTable);
-        //sever the connection between table -> sharedData set
-        // console.log("dataflow-content.ts > self:", self);
-
-        //need to get tableTile contents given a tableId
-        const tableTile = getTileContentById(self, tableId);
-        // console.log("dataflow-content.ts > tableTile:", tableTile);
+        const tableTile = getTileContentById(self, tableId); //get tableTile contents given a tableId
+        //sever connection table -> table sharedDataSet
         sharedTable && sharedModelManager.removeTileSharedModel(tableTile, sharedTable);
-        //,connect table -> dataflow Dataset
+        //connect table -> dataflow sharedDataset
         self.sharedModel && sharedModelManager.addTileSharedModel(tableTile, self.sharedModel);
-        //instead we want to pass table content
       }
       else {
         console.warn("GeometryContent.addLinkedTable unable to link table");
@@ -259,12 +247,16 @@ export const DataflowContentModel = TileContentModel
     },
 
     removeLinkedTable(tableId: string) {
-      // console.log("dataflow-content.ts > removeLinkedTable with tableId", tableId);
+      console.log("removeLinkedTable");
       const sharedModelManager = self.tileEnv?.sharedModelManager;
       if (sharedModelManager?.isReady && self.isLinkedToTable(tableId)) {
+        // #1 sever connection dataflow -> table sharedDataSet
         const sharedTable = sharedModelManager.findFirstSharedModelByType(SharedDataSet, tableId);
         sharedTable && sharedModelManager.removeTileSharedModel(self, sharedTable);
-        // self.forceSharedModelUpdate();
+        //sever connection table -> table sharedDataSet
+        // TODO - when table is unlinked have it default to Table 1 (X, Y) instead of empty
+        const tableTile = getTileContentById(self, tableId); //get tableTile contents given a tableId
+        sharedTable && sharedModelManager.removeTileSharedModel(tableTile, sharedTable);
       }
       else {
         console.warn("GeometryContent.addLinkedTable unable to unlink table");
