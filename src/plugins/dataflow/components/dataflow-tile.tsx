@@ -28,14 +28,14 @@ interface IDataflowTileState {
   isPlaying: boolean;
   playBackIndex: number;
   recordIndex: number; //# of ticks for record
+  isEditingTitle: boolean;
 }
 
 @inject("stores")
 @observer
 export default class DataflowToolComponent extends BaseComponent<IProps, IDataflowTileState> {
   public static tileHandlesSelection = true;
-  public isLinkButtonEnabled = true;
-  public isEditingTitle = false;
+
   constructor(props: IProps) {
     super(props);
     this.state = {
@@ -43,10 +43,11 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
       isPlaying: false,
       playBackIndex: 0,
       recordIndex: 0,
+      isEditingTitle: false
     };
   }
   public render() {
-    const { readOnly, height, model} = this.props;
+    const { readOnly, height, model } = this.props;
     const editableClass = readOnly ? "read-only" : "editable";
     const classes = `dataflow-tool disable-tile-content-drag ${editableClass}`;
     const { program, programDataRate, programZoom } = this.getContent();
@@ -125,10 +126,16 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     return document && document.properties.toJSON();
   }
 
+  private handleBeginEditTitle = () => {
+    this.setState({isEditingTitle: true});
+
+  };
+
   private handleTitleChange = (title?: string) => {
     if (title){
       this.getContent().setTitle(title);
       dataflowLogEvent("changeprogramtitle", { programTitleValue: this.getTitle() }, this.props.model.id);
+      this.setState({isEditingTitle: false});
     }
   };
 
@@ -143,6 +150,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
         getTitle={this.getTitle.bind(this)}
         readOnly={readOnly}
         measureText={(text) => measureText(text, defaultTileTitleFont)}
+        onBeginEdit={this.handleBeginEditTitle}
         onEndEdit={this.handleTitleChange}
       />
     );
@@ -156,7 +164,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
                              handleRequestTableUnlink: this.handleRequestTableUnlink
                            };
 
-    return (!this.isEditingTitle && !this.props.readOnly &&
+    return (!this.state.isEditingTitle && !this.props.readOnly &&
       <DataflowLinkTableButton
         key="link-button"
         isLinkButtonEnabled={isLinkButtonEnabled}
