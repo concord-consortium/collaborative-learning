@@ -33,6 +33,7 @@ let hubI = 0
 // pins chosen based on https://makecode.microbit.org/device/pins
 // relays       0 Heat           1 Fan          2 Sprinkler
 let relayPins = [DigitalPin.P12, DigitalPin.P9, DigitalPin.P8]
+let relayStates = [0, 0, 0]
 
 function getTempString() {
     const t = Math.constrain(dht11_dht22.readData(dataType.temperature), 0, 100);
@@ -56,6 +57,8 @@ function operateRelay(relayIndex: number, state: number) {
     const validRelaySignal = state === 0 || state === 1;
     if (validRelay && validRelaySignal){
         pins.digitalWritePin(relayPins[relayIndex], state)
+        relayStates[relayIndex] = state
+        sendAggregatedRelayState();
     }
 
     // show one of three LEDs to indicate index 0, 1, or 2
@@ -78,8 +81,8 @@ function operateRelay(relayIndex: number, state: number) {
 }
 
 function sendAggregatedRelayState(){
-    // UPCOMING PT STORY #184916018 "Live Output Node Displays sent and received state"
-    // e.g. sendString ra001 over radio
+    const relayStateString = `r${hubIds[hubI]}${relayStates.join('')}`;
+    radio.sendString(relayStateString);
 }
 
 basic.forever(function () {
