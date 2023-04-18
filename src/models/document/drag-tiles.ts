@@ -5,7 +5,18 @@ import { getTileContentInfo } from "../tiles/tile-content-info";
 import { DEBUG_DROP } from "../../lib/debug";
 import { BaseDocumentContentModel } from "./base-document-content";
 
-// TODO: move the drop tile logic here too
+/**
+ * This is one part of the DocumentContentModel. The other part is
+ * BaseDocumentContentModel. It was split out to reduce the size of the
+ * DocumentContentModel.
+ *
+ * This file should contain the any properties, views, and actions that are
+ * related to dragging and dropping tiles.
+ *
+ * TODO: move tile dropping actions from BaseDocumentContentModel here TODO:
+ * consider extending this to include tile copying since that is fundamental
+ * part of dragging and dropping.
+ */
 export const DocumentContentModelWithTileDragging = BaseDocumentContentModel
 .named("DocumentContentModelWithTileDragging")
 .views(self => ({

@@ -31,6 +31,14 @@ import { IDocumentContentAddTileOptions, IDragTilesData, INewRowTile, INewTileOp
    ITileCountsPerSection, NewRowTileArray } from "./document-content-types";
 import { SharedModelEntry, SharedModelEntryType, SharedModelEntrySnapshotType } from "./shared-model-entry";
 
+/**
+ * This is one part of the DocumentContentModel. The other part is
+ * DocumentContentModelWithTileDragging. It was split out to reduce the size of the
+ * DocumentContentModel.
+ *
+ * This file should contain the any properties, views, and actions that are
+ * not related to dragging and dropping tiles.
+ */
 export const BaseDocumentContentModel = types
   .model("BaseDocumentContent", {
     rowMap: types.map(TileRowModel),
