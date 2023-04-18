@@ -1,0 +1,12 @@
+@import "../../components/vars.sass";
+
+.xyplot-tool {
+  height: 100%;
+  text-align: center;
+  overflow: auto;
+  width: 100%;
+
+  &.editable {
+    border: 1px solid #ccc;
+  }
+}

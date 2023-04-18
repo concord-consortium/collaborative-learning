@@ -46,6 +46,7 @@ export const ToolbarButtonComponent: React.FC<IToolbarButtonProps> =
     onDragStart(e, toolButton);
   };
 
+  const showDropHighlight = (isTileTool || id === "duplicate") && !isDisabled;
   const tileEltClass = id.toLowerCase();
   return (
     <div className={classNames("tool", tileEltClass, { active: isActive }, isDisabled ? "disabled" : "enabled")}
@@ -56,8 +57,8 @@ export const ToolbarButtonComponent: React.FC<IToolbarButtonProps> =
         onClick={handleClick}
         onDragStart={isTileTool && !isDisabled ? handleDrag : undefined}
         draggable={(isTileTool && !isDisabled) || false}
-        onMouseEnter={isTileTool && !isDisabled ? onShowDropHighlight : undefined}
-        onMouseLeave={isTileTool && !isDisabled ? onHideDropHighlight : undefined}>
+        onMouseEnter={showDropHighlight ? onShowDropHighlight : undefined}
+        onMouseLeave={showDropHighlight ? onHideDropHighlight : undefined}>
       {Icon && <Icon />}
     </div>
   );

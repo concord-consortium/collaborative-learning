@@ -133,7 +133,6 @@ export class SensorSelectControl extends Rete.Control {
                                       this.props.showSensorList = false;
                                       (this as any).update();
                                     });
-
       const channelsForType = channels.filter((ch: NodeChannelInfo) => {
         if (ch.type !== "relays"){
           return (ch.type === type) || (type === "none");
