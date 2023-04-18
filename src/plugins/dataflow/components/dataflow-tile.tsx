@@ -61,7 +61,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
           {this.renderTitle()}
           {this.renderTableLinkButton()}
         </ToolTitleArea>
-
         <div className={classes}>
           <SizeMe monitorHeight={true}>
             {({ size }: SizeMeProps) => {
