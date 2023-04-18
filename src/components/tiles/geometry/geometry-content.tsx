@@ -342,9 +342,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const editableClass = this.props.readOnly ? "read-only" : "editable";
     const isLinkedClass = this.getContent().isLinked ? "is-linked" : "";
     const classes = `geometry-content ${editableClass} ${isLinkedClass}`;
-
-    console.log("geometry-content > isEditingTitle:", this.state.isEditingTitle);
-
     return ([
       this.renderCommentEditor(),
       this.renderLineEditor(),

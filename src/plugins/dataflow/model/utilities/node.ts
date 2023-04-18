@@ -409,5 +409,17 @@ export const ProgramDataRates: ProgramDataRate[] = [
   }
 ];
 
+export const MapProgramDataRatesTimeString = {
+  50: "ms",
+  100: "ms",
+  500: "ms",
+  1000: "sec",
+  10000: "sec",
+  60000: "min"
+};
+
+
+
+
 export const kSensorSelectMessage = "Select a sensor";
 export const kSensorMissingMessage = "⚠️";
