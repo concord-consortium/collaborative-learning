@@ -1057,14 +1057,12 @@ export const DocumentContentModel = types
 
       // For now only handle shared data if there's only one tile and it's a table or data card
       else if (sharedModels.length === 1) {
-        console.log(`shared models`);
         let warningMessage = "";
         if (tiles.length > 1) {
           warningMessage = "not handling multiple tiles in a drag of shared data";
         } else {
           const tile = tiles[0];
           if (tile.tileType !== "Table" && tile.tileType !== "DataCard") {
-            console.log(`tile`, tile);
             warningMessage = "can only handle copying table and data card tiles with shared models";
           }
         }
