@@ -1,8 +1,8 @@
 import { action, computed, makeObservable, observable } from "mobx";
-import { getParentOfType, hasParentOfType, IAnyStateTreeNode } from "mobx-state-tree";
+import { getParentOfType, getSnapshot, hasParentOfType, IAnyStateTreeNode } from "mobx-state-tree";
 import { DocumentContentModelType } from "./document-content";
 import { SharedModelType } from "../shared/shared-model";
-import { ISharedModelManager, SharedModelUnion } from "../shared/shared-model-manager";
+import { IDragSharedModelItem, ISharedModelManager, SharedModelUnion } from "../shared/shared-model-manager";
 import { ITileModel, TileModel } from "../tiles/tile-model";
 
 function getTileModel(tileContentModel: IAnyStateTreeNode) {
@@ -134,6 +134,24 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
       }
     }
     return sharedModels;
+  }
+
+  getSharedModelDragDataForTiles(requestedTileIds: string[]): IDragSharedModelItem[] {
+    const models: IDragSharedModelItem[] = [];
+
+    this.document?.sharedModelMap.forEach(({ sharedModel, provider, tiles }) => {
+      // intersect the tiles associated with this shared model with the tiles being requested
+      const tileIds = tiles.map(tile => tile.id).filter(tileId => requestedTileIds.includes(tileId));
+      if (tileIds.length) {
+        models.push({
+          modelId: sharedModel.id,
+          providerId: provider?.id,
+          tileIds,
+          content: JSON.stringify(getSnapshot(sharedModel))
+        });
+      }
+    });
+    return models;
   }
 
   getSharedModelTiles(sharedModel?: SharedModelType): ITileModel[] {

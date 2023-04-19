@@ -1,5 +1,4 @@
 import { DocumentContentModel, DocumentContentModelType, DocumentContentSnapshotType } from "./document-content";
-import { getDragTileItems, getDragTiles } from "./drag-tiles";
 
 // This is needed so MST can deserialize snapshots referring to tools
 import { registerTileTypes } from "../../register-tile-types";
@@ -96,6 +95,7 @@ describe("tile dragging", () => {
         {
           tiles: ["tile3"],
           sharedModel: sharedDataSet,
+          provider: "tile3"
         }
       ]
     });
@@ -109,14 +109,14 @@ describe("tile dragging", () => {
   describe("getDragTileItems", () => {
     describe("when a non-existent tile is selected", () => {
       it("returns an empty array", () => {
-        const items = getDragTileItems(documentContent, ["foo"]);
+        const items = documentContent.getDragTileItems(["foo"]);
 
         expect(items).toHaveLength(0);
       });
     });
     describe("when one tile is selected", () => {
       it("returns an array of one IDragTileItem object", () => {
-        const items = getDragTileItems(documentContent, ["tile1"]);
+        const items = documentContent.getDragTileItems(["tile1"]);
 
         // Jest messes up the indentation when it writes out the snapshots with
         // --updateSnapshot (see https://jestjs.io/docs/snapshot-testing)
@@ -139,7 +139,7 @@ Array [
     });
     describe("when two tiles are selected", () => {
       it("returns an array of both IDragTileItem objects", () => {
-        const items = getDragTileItems(documentContent, ["tile1", "tile2"]);
+        const items = documentContent.getDragTileItems(["tile1", "tile2"]);
 
         /*eslint-disable max-len*/
         expect(items).toMatchInlineSnapshot(`
@@ -168,7 +168,7 @@ Array [
 
     describe("when a table using a shared dataset is selected", () => {
       it("returns the table IDragTileItem object", () => {
-        const items = getDragTileItems(documentContent, ["tile3"]);
+        const items = documentContent.getDragTileItems(["tile3"]);
 
         // TODO: The exported table here includes importedDataSet property.
         // Since we are going to include the actual shared dataset too, the
@@ -195,9 +195,7 @@ Array [
   describe("getDragTiles", () => {
     describe("when one tile is selected", () => {
       it("returns that tile and an the other IDragTiles properties", () => {
-        const model = documentContent.getTile("tile1");
-        expect(model).toBeDefined();
-        const dragTiles = getDragTiles(documentContent, model!, ["tile1"]);
+        const dragTiles = documentContent.getDragTiles(["tile1"]);
         /*eslint-disable max-len*/
         expect(dragTiles).toMatchInlineSnapshot(`
 Object {
@@ -221,9 +219,7 @@ Object {
     });
     describe("with two tiles selected", () => {
       it("returns both tiles in document order", () => {
-        const model = documentContent.getTile("tile2");
-        expect(model).toBeDefined();
-        const dragTiles = getDragTiles(documentContent, model!, ["tile2", "tile1"]);
+        const dragTiles = documentContent.getDragTiles(["tile2", "tile1"]);
         /*eslint-disable max-len*/
         expect(dragTiles).toMatchInlineSnapshot(`
 Object {
@@ -255,60 +251,19 @@ Object {
     });
     describe("with a tile using a shared model", () => {
       it("returns the tile and the shared model", () => {
-        const model = documentContent.getTile("tile3");
-        expect(model).toBeDefined();
-        const dragTiles = getDragTiles(documentContent, model!, ["tile3"]);
+        const dragTiles = documentContent.getDragTiles(["tile3"]);
 
         /*eslint-disable max-len*/
         expect(dragTiles).toMatchInlineSnapshot(`
 Object {
   "sharedModels": Array [
     Object {
-      "dataSet": Object {
-        "attributes": Array [
-          Object {
-            "clientKey": "",
-            "formula": Object {
-              "canonical": undefined,
-              "display": undefined,
-            },
-            "hidden": false,
-            "id": "attribute-1",
-            "name": "x",
-            "sourceID": undefined,
-            "units": "",
-            "values": Array [
-              "0",
-            ],
-          },
-          Object {
-            "clientKey": "",
-            "formula": Object {
-              "canonical": undefined,
-              "display": undefined,
-            },
-            "hidden": false,
-            "id": "attribute-2",
-            "name": "y",
-            "sourceID": undefined,
-            "units": "",
-            "values": Array [
-              "1",
-            ],
-          },
-        ],
-        "cases": Array [
-          Object {
-            "__id__": "case-1",
-          },
-        ],
-        "id": "data-set-1",
-        "name": "Table 1",
-        "sourceID": undefined,
-      },
-      "id": "shared-data-set-1",
+      "content": "{\\"type\\":\\"SharedDataSet\\",\\"id\\":\\"shared-data-set-1\\",\\"providerId\\":\\"tile3\\",\\"dataSet\\":{\\"id\\":\\"data-set-1\\",\\"name\\":\\"Table 1\\",\\"attributes\\":[{\\"id\\":\\"attribute-1\\",\\"clientKey\\":\\"\\",\\"name\\":\\"x\\",\\"hidden\\":false,\\"units\\":\\"\\",\\"formula\\":{},\\"values\\":[\\"0\\"]},{\\"id\\":\\"attribute-2\\",\\"clientKey\\":\\"\\",\\"name\\":\\"y\\",\\"hidden\\":false,\\"units\\":\\"\\",\\"formula\\":{},\\"values\\":[\\"1\\"]}],\\"cases\\":[{\\"__id__\\":\\"case-1\\"}]}}",
+      "modelId": "shared-data-set-1",
       "providerId": "tile3",
-      "type": "SharedDataSet",
+      "tileIds": Array [
+        "tile3",
+      ],
     },
   ],
   "sourceDocId": "testid-10",

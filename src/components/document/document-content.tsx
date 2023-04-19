@@ -8,7 +8,8 @@ import classNames from "classnames";
 import { BaseComponent, IBaseProps } from "../base";
 import { TileRowComponent, kDragResizeRowId, extractDragResizeRowId, extractDragResizeY,
         extractDragResizeModelHeight, extractDragResizeDomHeight } from "../document/tile-row";
-import { DocumentContentModelType, IDragTilesData, IDragToolCreateInfo } from "../../models/document/document-content";
+import { DocumentContentModelType } from "../../models/document/document-content";
+import { IDragToolCreateInfo, IDragTilesData } from "../../models/document/document-content-types";
 import { getTileContentInfo } from "../../models/tiles/tile-content-info";
 import { getDocumentIdentifier } from "../../models/document/document-utils";
 import { IDropRowInfo } from "../../models/document/tile-row";

@@ -327,7 +327,7 @@ describe("SharedModelDocumentManager", () => {
             id: "sm1",
             type: "TestSharedModel3",
             foo: "hello"
-          }
+          } as any
         }
       },
     });

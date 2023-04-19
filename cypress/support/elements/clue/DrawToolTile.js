@@ -76,7 +76,7 @@ class DrawToolTile{
       return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer .drawing-variable.variable-chip');
     }
     getDrawTileTitle(workspaceClass){
-      return cy.get(`${workspaceClass || ".primary-workspace"} .editable-tile-title`);
+      return cy.get(`${workspaceClass || ".primary-workspace"} .drawing-tool-tile .editable-tile-title`);
   }
 }
 

@@ -180,7 +180,7 @@
     "ts-jest": "^28.0.8",
     "ts-loader": "^9.3.1",
     "ts-node": "^10.9.1",
-    "typescript": "^4.7.4",
+    "typescript": "^4.9.5",
     "utility-types": "^3.10.0",
     "wait-on": "^6.0.1",
     "webpack": "^5.74.0",
@@ -189,7 +189,7 @@
     "xhr-mock": "^2.5.1"
   },
   "dependencies": {
-    "@concord-consortium/diagram-view": "^0.0.41",
+    "@concord-consortium/diagram-view": "^0.0.43",
     "@concord-consortium/mobx-state-tree": "5.1.5-cc.1",
     "@concord-consortium/react-components": "^0.7.1",
     "@concord-consortium/react-modal-hook": "^3.0.0-cc.1",

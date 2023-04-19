@@ -7,7 +7,7 @@
  */
 
 import { DisplayUserType } from "../stores/user-types";
-import { SharedModelEntrySnapshotType } from "./document-content";
+import { SharedModelEntrySnapshotType } from "./shared-model-entry";
 
 // authored content is converted to current content on the fly
 export interface IAuthoredBaseTileContent {

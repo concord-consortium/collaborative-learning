@@ -16,6 +16,7 @@ On received command string via serial
  */
 
 let mode = 0
+let readFromSerial = ""
 
 radio.setGroup(1)
 serial.redirect(
@@ -36,12 +37,20 @@ input.onButtonPressed(Button.B, function () {
 })
 
 radio.onReceivedString(function (receivedString) {
-    const isIncoming = ["s", "r"].includes(receivedString.substring(0,1))
-    if (mode == 1 && isIncoming) {
-        serial.writeLine(receivedString)
+    if (mode == 1){
+        const signalType = receivedString.substr(0, 1)
+        if (signalType == "s" || signalType == "r") {
+            serial.writeLine(receivedString)
+        }
     }
 })
 
+// works
+serial.onDataReceived(serial.delimiters(Delimiters.NewLine), function () {
+    readFromSerial = serial.readLine()
+    radio.sendString(readFromSerial)
+})
+
+
 
 ```
-

@@ -42,7 +42,9 @@ export function useFirestoreTeacher(uid: string, network: string) {
 }
 
 // https://medium.com/swlh/using-firestore-with-typescript-65bd2a602945
-const defaultConverter = <T>(): firebase.firestore.FirestoreDataConverter<T> => ({
+const defaultConverter = <T extends firebase.firestore.DocumentData>():
+  firebase.firestore.FirestoreDataConverter<T> =>
+({
   toFirestore: (data: T) => data,
   fromFirestore: (doc: firebase.firestore.QueryDocumentSnapshot) => doc.data() as T
 });
@@ -52,7 +54,7 @@ export interface IUseOrderedCollectionRealTimeQuery<T> {
   orderBy?: string;
   useQueryOptions?: UseQueryOptions<WithId<T>[]>;
 }
-export function useCollectionOrderedRealTimeQuery<T>(
+export function useCollectionOrderedRealTimeQuery<T extends firebase.firestore.DocumentData>(
           partialPath: string, options?: IUseOrderedCollectionRealTimeQuery<T>) {
   const { converter = defaultConverter<T>(), orderBy, useQueryOptions: _useQueryOptions } = options || {};
   const queryClient = useQueryClient();
