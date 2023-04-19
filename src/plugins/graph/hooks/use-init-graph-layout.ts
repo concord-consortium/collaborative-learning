@@ -12,17 +12,15 @@ export function useInitGraphLayout(model?: IGraphModel) {
     // synchronize the number of repetitions from the DataConfiguration to the layout's MultiScales
     return reaction(
       () => {
-        const repetitions: Record<string, number> = {};
+        const repetitions: Partial<Record<AxisPlace, number>> = {};
         layout.axisScales.forEach((multiScale, place) => {
           repetitions[place] = model?.config.numRepetitionsForPlace(place) ?? 1;
         });
         return repetitions;
       },
       (repetitions) => {
-        // TODO: Update type declarations? First `place` was originally AxisPlace (not string).
-        // Second had no cast to type.
-        Object.keys(repetitions).forEach((place: string) => {
-          layout.getAxisMultiScale(place as AxisPlace)?.setRepetitions(repetitions[place]);
+        (Object.keys(repetitions) as AxisPlace[]).forEach((place: AxisPlace) => {
+          layout.getAxisMultiScale(place)?.setRepetitions(repetitions[place] ?? 0);
         });
       }
     );

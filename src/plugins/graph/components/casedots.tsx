@@ -1,6 +1,7 @@
 import {randomUniform, select} from "d3";
 import {onAction} from "mobx-state-tree";
 import React, {useCallback, useEffect, useRef, useState} from "react";
+import { selectDots } from "../d3-types";
 import {CaseData, pointRadiusSelectionAddend, transitionDuration} from "../graph-types";
 import {ICase} from "../../../models/data/data-set-types";
 import {isAddCasesAction} from "../../../models/data/data-set-actions";
@@ -34,7 +35,7 @@ export const CaseDots = function CaseDots(props: {
       enableAnimation.current = false; // We don't want to animate points until end of drag
       target.current = select(event.target as SVGSVGElement);
       const aCaseData: CaseData = target.current.node().__data__;
-      if (target.current.node()?.nodeName === 'circle') {
+      if (aCaseData && target.current.node()?.nodeName === 'circle') {
         target.current.transition()
           .attr('r', dragPointRadius);
         setDragID(aCaseData.caseID);
@@ -85,43 +86,38 @@ export const CaseDots = function CaseDots(props: {
   }, [dataConfiguration, graphModel, dotsRef]);
 
   const refreshPointPositions = useCallback((selectedOnly: boolean) => {
+    if (!dotsRef.current) return;
     const
       pointRadius = graphModel.getPointRadius(),
-      dotsSelection = select(dotsRef.current).selectAll(selectedOnly ? '.graph-dot-highlighted' : '.graph-dot'),
+      dotsSelection = selectDots(dotsRef.current, selectedOnly),
       duration = enableAnimation.current ? transitionDuration : 0,
       onComplete = enableAnimation.current ? () => {
         enableAnimation.current = false;
       } : undefined,
       xLength = layout.getAxisMultiScale('bottom')?.length ?? 0,
       yLength = layout.getAxisMultiScale('left')?.length ?? 0;
+    if (!dotsSelection) return;
     dotsSelection
       .transition()
       .duration(duration)
       .on('end', (id, i) => (i === dotsSelection.size() - 1) && onComplete?.())
-      // TODO: Use CaseData type instead of any below
-      .attr('cx', (aCaseData: any) => {
+      .attr('cx', (aCaseData: CaseData) => {
         return pointRadius + randomPointsRef.current[aCaseData.caseID].x * (xLength - 2 * pointRadius);
       })
-      // TODO: Use CaseData type instead of any below
-      .attr('cy', (aCaseData: any) => {
+      .attr('cy', (aCaseData: CaseData) => {
         return yLength - (pointRadius + randomPointsRef.current[aCaseData.caseID].y * (yLength - 2 * pointRadius));
       })
-      // TODO: Use CaseData type instead of any below
-      .style('fill', (aCaseData: any) => {
+      .style('fill', (aCaseData: CaseData) => {
         const anID = aCaseData.caseID;
         return (legendAttrID && anID && dataConfiguration?.getLegendColorForCase(anID)) ?? graphModel.pointColor;
       })
-      // TODO: Use CaseData type instead of any below
-      .style('stroke', (aCaseData: any) => (legendAttrID && dataset?.isCaseSelected(aCaseData.caseID))
+      .style('stroke', (aCaseData: CaseData) => (legendAttrID && dataset?.isCaseSelected(aCaseData.caseID))
         ? defaultSelectedStroke : graphModel.pointStrokeColor)
-      // TODO: Update id type. Was `string` before being changed to `any`
-      .style('stroke-width', (id: any) => (legendAttrID && dataset?.isCaseSelected(id))
+      .style('stroke-width', (aCaseData: CaseData) => (legendAttrID && dataset?.isCaseSelected(aCaseData.caseID))
         ? defaultSelectedStrokeWidth : defaultStrokeWidth)
-      // TODO: Use CaseData type instead of any below
-      .attr('r', (aCaseData: any) => pointRadius + (dataset?.isCaseSelected(aCaseData.caseID)
+      .attr('r', (aCaseData: CaseData) => pointRadius + (dataset?.isCaseSelected(aCaseData.caseID)
         ? pointRadiusSelectionAddend : 0));
-  }, [dataset, legendAttrID, dataConfiguration, graphModel,
-    layout, dotsRef, enableAnimation]);
+  }, [dataset, legendAttrID, dataConfiguration, graphModel, layout, dotsRef, enableAnimation]);
 
   useEffect(function initDistribution() {
     const {cases} = dataset || {};

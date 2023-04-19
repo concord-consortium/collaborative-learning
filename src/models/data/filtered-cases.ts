@@ -1,9 +1,9 @@
 import { action, computed, makeObservable, observable } from "mobx";
 import { ISerializedActionCall, onAction } from "mobx-state-tree";
 import { IDataSet } from "./data-set";
-import { isSetCaseValuesAction, SetCaseValuesAction } from "./data-set-actions";
+import { isSetCaseValuesAction } from "./data-set-actions";
 
-export type FilterFn = (data: IDataSet, caseId: string, casesArrayNumber?:number) => boolean
+export type FilterFn = (data: IDataSet, caseId: string, casesArrayNumber?: number) => boolean
 
 export interface IFilteredChangedCases {
   added: string[]   // ids of cases that newly pass the filter
@@ -13,7 +13,7 @@ export interface IFilteredChangedCases {
 
 // TODO: Determine if changing actionCall's type to SetCaseValuesAction is appropriate.
 // It was previously set to ISerializedActionCall.
-export type OnSetCaseValuesFn = (actionCall: SetCaseValuesAction, cases: IFilteredChangedCases) => void
+export type OnSetCaseValuesFn = (actionCall: ISerializedActionCall, cases: IFilteredChangedCases) => void
 
 interface IProps {
   source: IDataSet

@@ -1,7 +1,7 @@
 import {extent, format, select, timeout} from "d3";
 import React from "react";
 import {isInteger} from "lodash";
-
+import {selectCircles, selectDots} from "../d3-types";
 import {CaseData, kGraphFont, Point, Rect, rTreeRect, transitionDuration} from "../graph-types";
 import {between} from "../../../utilities/math-utils";
 import {IAxisModel, INumericAxisModel} from "../axis/models/axis-model";
@@ -105,8 +105,7 @@ export function getPointTipText(caseID: string, attributeIDs: string[], dataset?
       const attribute = dataset?.attrFromID(attrID),
         name = attribute?.name,
         numValue = dataset?.getNumeric(caseID, attrID),
-        value = numValue != null
-                  ? isFinite(numValue) ? float(numValue) : ''
+        value = numValue != null && isFinite(numValue) ? float(numValue)
                   : dataset?.getValue(caseID, attrID);
       return value ? `${name}: ${value}` : '';
     }));
@@ -130,7 +129,7 @@ export function handleClickOnDot(event: MouseEvent, caseID: string, dataset?: ID
 
 export interface IMatchCirclesProps {
   dataConfiguration: IDataConfigurationModel
-  dotsElement: SVGGElement | null
+  dotsElement: SVGSVGElement | null
   pointRadius: number
   pointColor: string
   pointStrokeColor: string
@@ -143,24 +142,22 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
   const {dataConfiguration, enableAnimation, instanceId,
       dotsElement, pointRadius, pointColor, pointStrokeColor} = props,
     allCaseData = dataConfiguration.joinedCaseDataArrays,
-    caseDataKeyFunc = (d: CaseData) => `${d.plotNum}-${d.caseID}`;
+    caseDataKeyFunc = (d: CaseData) => `${d.plotNum}-${d.caseID}`,
+    circles = selectCircles(dotsElement);
+  if (!circles) return;
   startAnimation(enableAnimation);
-  select(dotsElement)
-    .selectAll('circle')
-    .data<any>(allCaseData, caseDataKeyFunc) // TODO: Update this type annotation
+  circles
+    .data(allCaseData, caseDataKeyFunc)
     .join(
-      // @ts-expect-error void => Selection
-      (enter) => {
+      (enter) =>
         enter.append('circle')
           .attr('class', 'graph-dot')
-          .property('id', (anID: string) => `${instanceId}_${anID}`);
-      },
-      (update) => {
+          .property('id', (anID: string) => `${instanceId}_${anID}`),
+      (update) =>
         update.attr('r', pointRadius)
           .style('fill', pointColor)
           .style('stroke', pointStrokeColor)
-          .style('stroke-width', defaultStrokeWidth);
-      }
+          .style('stroke-width', defaultStrokeWidth)
     );
   select(dotsElement).on('click',
     (event: MouseEvent) => {
@@ -256,8 +253,7 @@ export function lineToAxisIntercepts(iSlope: number, iIntercept: number,
 
 export function equationString(slope: number, intercept: number) {
   const float = format('.4~r');
-  const kSlopeIntercept = `<p style="color:#4782B4"><i>y</i> = ${float(slope)} <i>x</i> + ${float(intercept)}</p>`;
-  /*,
+  const kSlopeIntercept = `<p style="color:#4782B4"><i>y</i> = ${float(slope)} <i>x</i> + ${float(intercept)}</p>`;/*,
   // color,y,slope,x,signInt,Int
     kInfiniteSlope = '<p style = "color:%@"><i>%@</i> = %@ %@</p>', // x,constant,unit
     kSlopeOnly = '<p style = "color:%@">%@ = %@ %@</p>' // color, left side, numeric slope, slope unit*/
@@ -366,16 +362,16 @@ export function setPointSelection(props: ISetPointSelection) {
     {dotsRef, dataConfiguration, pointRadius, selectedPointRadius,
       pointColor, pointStrokeColor, getPointColorAtIndex} = props,
     dataset = dataConfiguration.dataset,
-    dotsSvgElement = dotsRef.current,
-    dots = select(dotsSvgElement),
+    dots = selectCircles(dotsRef.current),
     legendID = dataConfiguration.attributeID('legend');
+
+  if (!dots) return;
+
   // First set the class based on selection
-  dots.selectAll('circle')
-    // @ts-expect-error aCaseData and datum are incompatible
-    .classed('graph-dot-highlighted', (aCaseData: CaseData) => !!(dataset?.isCaseSelected(aCaseData.caseID)))
+  dots
+    .classed('graph-dot-highlighted', (aCaseData: CaseData) => !!dataset?.isCaseSelected(aCaseData.caseID))
     // Then set properties to defaults w/o selection
     .attr('r', pointRadius)
-    // @ts-expect-error style is not a property of selection
     .style('stroke', pointStrokeColor)
     .style('fill', (aCaseData:CaseData) => {
       return legendID
@@ -433,27 +429,21 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
     setPoints = () => {
       const duration = enableAnimation.current ? transitionDuration : 0;
 
-      if (theSelection.size() > 0) {
+      if (theSelection?.size()) {
         theSelection
           .transition()
           .duration(duration)
           .on('end', (id, i) => (i === theSelection.size() - 1) && onComplete())
-          // @ts-expect-error aCaseData and datum are incompatible
           .attr('cx', (aCaseData: CaseData) => getScreenX(aCaseData.caseID))
-          // @ts-expect-error aCaseData and datum are incompatible
           .attr('cy', (aCaseData: CaseData) => {
             return getScreenY(aCaseData.caseID, aCaseData.plotNum);
           })
-          // @ts-expect-error aCaseData and datum are incompatible
           .attr('r', (aCaseData: CaseData) => dataset?.isCaseSelected(aCaseData.caseID)
             ? selectedPointRadius : pointRadius)
-          // @ts-expect-error style is not a property of selection
           .style('fill', (aCaseData: CaseData) => lookupLegendColor(aCaseData))
-          // @ts-expect-error style is not a property of selection
           .style('stroke', (aCaseData: CaseData) =>
             (getLegendColor && dataset?.isCaseSelected(aCaseData.caseID))
             ? defaultSelectedStroke : pointStrokeColor)
-          // @ts-expect-error style is not a property of selection
           .style('stroke-width', (aCaseData: CaseData) =>
             (getLegendColor && dataset?.isCaseSelected(aCaseData.caseID))
             ? defaultSelectedStrokeWidth : defaultStrokeWidth);
@@ -473,6 +463,6 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
       })
     } = props,
 
-    theSelection = select(dotsRef.current).selectAll(selectedOnly ? '.graph-dot-highlighted' : '.graph-dot');
+    theSelection = selectDots(dotsRef.current, selectedOnly);
   setPoints();
 }

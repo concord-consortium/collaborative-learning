@@ -115,7 +115,9 @@ export class DataBroker {
     this.dataSets.clear();
   }
 
-  // TODO: Are the below needed?
+  // TODO: Are the below needed? Currently throwing errors:
+  // "Property 'prepareSnapshot' does not exist on type" and 
+  // "Property 'completeSnapshot' does not exist on type"
   // prepareSnapshots() {
   //   this.dataSets.forEach(data => data.prepareSnapshot());
   // }

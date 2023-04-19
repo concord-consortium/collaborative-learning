@@ -71,8 +71,7 @@ export const useAxis = ({
       }
     }
     return desiredExtent;
-  }, [centerCategoryLabels, ordinalScale, axisPlace, attrRole, dataConfiguration,
-    axisTitle, type, multiScale]);
+  }, [centerCategoryLabels, ordinalScale, axisPlace, attrRole, dataConfiguration, axisTitle, type, multiScale]);
 
   const refreshAxisTitle = useCallback(() => {
     const axisBounds = layout.getComputedBounds(axisPlace) as AxisBounds,
@@ -89,17 +88,14 @@ export const useAxis = ({
         .selectAll('text.axis-title')
         .data([1])
         .join(
-          // @ts-expect-error void => Selection
-          // eslint-disable-next-line @typescript-eslint/no-empty-function
-          () => {
-          },
-          (update) => {
+          enter => enter,
+          (update) =>
             update
               .attr("transform", titleTransform + tRotation)
               .attr('x', tX)
               .attr('y', tY)
-              .text(axisTitle);
-          });
+              .text(axisTitle)
+        );
     }
 
   }, [axisPlace, layout, place, titleRef, axisTitle, halfRange]);
@@ -182,13 +178,12 @@ export const useAxis = ({
         .selectAll('text.axis-title')
         .data([1])
         .join(
-          // @ts-expect-error void => Selection
-          (enter) => {
+          (enter) => 
             enter.append('text')
               .attr('class', 'axis-title')
               .attr('text-anchor', 'middle')
-              .attr('data-testid', `axis-title-${place}`);
-          });
+              .attr('data-testid', `axis-title-${place}`)
+          );
     }
   }, [axisElt, halfRange, axisTitle, place, titleRef]);
 

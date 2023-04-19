@@ -5,8 +5,8 @@ import { useDataConfigurationContext } from "../../hooks/use-data-configuration-
 import { useDataSetContext } from "../../../../hooks/use-data-set-context";
 import { useOutsidePointerDown } from "../../../../hooks/use-outside-pointer-down";
 import { useOverlayBounds } from "../../../../hooks/use-overlay-bounds";
-import t from "../../../../utilities/translation/translate";
 import { AttributeType } from "../../../../models/data/attribute";
+import t from "../../../../utilities/translation/translate";
 
 interface IProps {
   place: GraphPlace,

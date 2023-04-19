@@ -2,9 +2,8 @@ import {Active} from "@dnd-kit/core";
 import React, {MutableRefObject, useRef, useState} from "react";
 import {createPortal} from "react-dom";
 import {range} from "d3";
-import {AxisPlace} from "../axis-types";
 import {DroppableAxis} from "./droppable-axis";
-import {axisPlaceToAttrRole, IsGraphDropAllowed} from "../../graph-types";
+import {axisPlaceToAttrRole, GraphPlace, IsGraphDropAllowed} from "../../graph-types";
 import {useAxisBoundsProvider} from "../hooks/use-axis-bounds";
 import {getDragAttributeId, useDropHandler} from "../../../../hooks/use-drag-drop";
 import {useDropHintString} from "../../../../hooks/use-drop-hint-string";
@@ -12,6 +11,7 @@ import {useInstanceIdContext} from "../../../../hooks/use-instance-id-context";
 import {useAxis} from "../hooks/use-axis";
 import {useAxisLayoutContext} from "../models/axis-layout-context";
 import {IAxisModel} from "../models/axis-model";
+import {AttributeType} from "../../../../models/data/attribute";
 import {AxisOrLegendAttributeMenu} from "./axis-or-legend-attribute-menu";
 import {SubAxis} from "./sub-axis";
 
@@ -25,9 +25,9 @@ interface IProps {
   showScatterPlotGridLines?: boolean
   centerCategoryLabels?: boolean
   isDropAllowed?: IsGraphDropAllowed
-  onDropAttribute?: (place: AxisPlace, attrId: string) => void
-  onRemoveAttribute?: (place: AxisPlace, attrId: string) => void
-  onTreatAttributeAs?: (place: AxisPlace, attrId: string, treatAs: string) => void
+  onDropAttribute?: (place: GraphPlace, attrId: string) => void
+  onRemoveAttribute?: (place: GraphPlace, attrId: string) => void
+  onTreatAttributeAs?: (place: GraphPlace, attrId: string, treatAs: string) => void
 }
 
 export const Axis = ({

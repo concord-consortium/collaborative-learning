@@ -96,7 +96,7 @@ export const CategoricalLegend = memo(function CategoricalLegend(
         select(keysElt).selectAll('key').remove(); // start fresh
 
         const keysSelection = select(keysElt)
-          .selectAll('g')
+          .selectAll<SVGGElement, number>('g')
           .data(range(0, numCategories ?? 0))
           .join(
             enter => enter
@@ -104,22 +104,20 @@ export const CategoricalLegend = memo(function CategoricalLegend(
               .attr('class', 'key')
           );
         keysSelection.each(function (d, n, group) {
-          const sel = select(this),
-            size = sel.selectAll('rect').size();
+          const sel = select<SVGGElement, number>(this),
+            size = sel.selectAll<SVGRectElement, number>('rect').size();
           if (size === 0) {
             sel.append('rect')
               .attr('width', keySize)
               .attr('height', keySize)
-              .on('click',
-                (event, i) => {
+              .on('click', (event, i: number) => {
                   dataConfiguration?.selectCasesForLegendValue(
-                    categoryData.current[i as number].category, 
+                    categoryData.current[i as number].category,
                     event.shiftKey
                   );
                 });
             sel.append('text')
-              .on('click',
-                (event, i) => {
+              .on('click', (event, i: number) => {
                   dataConfiguration?.selectCasesForLegendValue(
                     categoryData.current[i as number].category,
                     event.shiftKey
@@ -137,10 +135,7 @@ export const CategoricalLegend = memo(function CategoricalLegend(
         .selectAll('g')
         .data(range(0, numCategories ?? 0))
         .join(
-          // @ts-expect-error void => Selection
-          // eslint-disable-next-line @typescript-eslint/no-empty-function
-          () => {
-          },
+          enter => enter,
           update => {
             update.select('rect')
               .classed('legend-rect-selected',
@@ -155,7 +150,7 @@ export const CategoricalLegend = memo(function CategoricalLegend(
               })
               .attr('y',
                 (index: number) => 10 + categoryData.current[index].row * (keySize + padding));
-            update.select('text')
+            return update.select('text')
               .text((index: number) => categoryData.current[index].category)
               .attr('transform', transform)
               .attr('x', (index: number) => {
