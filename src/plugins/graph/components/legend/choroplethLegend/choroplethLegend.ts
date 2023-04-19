@@ -40,8 +40,7 @@ export function choroplethLegend(scale: ChoroplethScale, choroplethElt: SVGGElem
     minValue = min(scale.domain()) ?? 0,
     maxValue = max(scale.domain()) ?? 0;
 
-  // TODO: Update i type. Was `number` before being changed to `any`
-  let tickFormat: string | ((i: any) => string) = '.2r',
+  let tickFormat: string | ((i: number) => string) = '.2r',
     tickValues: number[] = [];
 
   select(choroplethElt).selectAll("*").remove();
@@ -88,8 +87,10 @@ export function choroplethLegend(scale: ChoroplethScale, choroplethElt: SVGGElem
   svg.append("g")
     .attr('class', 'legend-axis')
     .attr("transform", `${transform} translate(0,${kChoroplethHeight})`)
+    // @ts-expect-error strictFunctionTypes
     .call(axisBottom(x)
       .ticks(ticks)
+      // @ts-expect-error strictFunctionTypes
       .tickFormat(tickFormat)
       .tickSize(tickSize)
       .tickValues(tickValues));

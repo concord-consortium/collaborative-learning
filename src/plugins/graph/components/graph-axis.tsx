@@ -43,10 +43,10 @@ export const GraphAxis = observer(function GraphAxis(
           enableAnimation={enableAnimation}
           showScatterPlotGridLines={graphModel.axisShouldShowGridLines(place)}
           centerCategoryLabels={graphModel.config.categoriesForAxisShouldBeCentered(place)}
-          // isDropAllowed={isDropAllowed} // TODO: Fix this.
+          isDropAllowed={isDropAllowed}
           onDropAttribute={onDropAttribute}
           onRemoveAttribute={onRemoveAttribute}
-          // onTreatAttributeAs={onTreatAttributeAs}// TODO: Fix this.
+          onTreatAttributeAs={onTreatAttributeAs}
     />
   );
 });

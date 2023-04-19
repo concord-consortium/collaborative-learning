@@ -27,7 +27,7 @@ interface IProps {
   isDropAllowed?: IsGraphDropAllowed
   onDropAttribute?: (place: GraphPlace, attrId: string) => void
   onRemoveAttribute?: (place: GraphPlace, attrId: string) => void
-  onTreatAttributeAs?: (place: GraphPlace, attrId: string, treatAs: string) => void
+  onTreatAttributeAs?: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void
 }
 
 export const Axis = ({
