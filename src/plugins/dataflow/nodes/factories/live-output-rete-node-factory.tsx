@@ -125,7 +125,7 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
     const relayReportedValue = relayChannel.relaysState[selectedOutputRelayIndex];
     if (relayReportedValue === valueShown) return "(received)";
     if (relayReportedValue !== valueShown) return "(sent)";
-    // TODO: channel "missing" attribute sometimes innacurate here, causing hub to appear as missing until reconnect
+    // TODO: channel "missing" attribute innacurrate without sensor block
   }
 
   // TODO IMPROVEMENT - this is a duplicate method - abstract for all factories?
