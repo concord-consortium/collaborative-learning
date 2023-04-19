@@ -15,6 +15,8 @@ import { updateSharedDataSetColors } from "../../../models/shared/shared-data-se
 import { uniqueId } from "../../../utilities/js-utils";
 import { SharedModelType } from "../../../models/shared/shared-model";
 import { getTileContentById } from "../../../utilities/mst-utils";
+import { TableContentModel } from "../../../models/tiles/table/table-content";
+import { getTileTitleFromContent } from "../../../models/tiles/tile-model";
 
 export const kDataflowTileType = "Dataflow";
 
@@ -239,19 +241,22 @@ export const DataflowContentModel = TileContentModel
     removeLinkedTable(tableId: string) {
       const sharedModelManager = self.tileEnv?.sharedModelManager;
       if (sharedModelManager?.isReady && self.isLinkedToTable(tableId)) {
-        // #1 sever connection dataflow -> table sharedDataSet
         const sharedTable = sharedModelManager.findFirstSharedModelByType(SharedDataSet, tableId);
-        sharedTable && sharedModelManager.removeTileSharedModel(self, sharedTable);
         //sever connection table -> table sharedDataSet
-        // TODO - when table is unlinked have it default to Table 1 (X, Y) instead of empty
-        const tableTile = getTileContentById(self, tableId); //get tableTile contents given a tableId
-        sharedTable && sharedModelManager.removeTileSharedModel(tableTile, sharedTable);
+        const tableTileContents = getTileContentById(self, tableId); //get tableTile contents given a tableId
+        sharedTable && sharedModelManager.removeTileSharedModel(tableTileContents, sharedTable);
+        //create a dataSet with two attributes with X / Y, link table tile to this dataSet
+        const title = tableTileContents ? getTileTitleFromContent(tableTileContents) : undefined;
+        const dataSet = DataSet.create({name: title});
+        addAttributeToDataSet(dataSet, { name: "x" });
+        addAttributeToDataSet(dataSet, { name: "y" });
+        const newSharedDataSet = SharedDataSet.create({ providerId: tableId, dataSet });
+        sharedModelManager.addTileSharedModel(tableTileContents, newSharedDataSet);
       }
       else {
         console.warn("GeometryContent.addLinkedTable unable to unlink table");
       }
     }
-
   }));
 
 export type DataflowContentModelType = Instance<typeof DataflowContentModel>;

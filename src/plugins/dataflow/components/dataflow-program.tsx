@@ -191,13 +191,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     if (!this.programEditor && this.toolDiv) {
       this.initProgram();
     }
-
     this.setupOnSnapshot();
   }
 
   public componentWillUnmount() {
     clearInterval(this.intervalHandle);
-
     this.disposers.forEach(disposer => disposer());
   }
 
@@ -656,7 +654,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const dataSet = tileModel.dataSet;
     const now = Date.now();
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});
-
     this.lastIntervalTime = now;
 
     const isCleared = programRecordState === 0;

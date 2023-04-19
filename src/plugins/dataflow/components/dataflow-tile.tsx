@@ -14,10 +14,8 @@ import { ToolTitleArea } from "../../../components/tiles/tile-title-area";
 import { dataflowLogEvent } from "../dataflow-logger";
 import { addAttributeToDataSet } from "../../../models/data/data-set";
 import { DataflowLinkTableButton } from "./ui/dataflow-program-link-table-button";
-import { MapProgramDataRatesTimeString, ProgramDataRates } from "../model/utilities/node";
 
 import "./dataflow-tile.scss";
-import { times } from "lodash";
 
 interface IProps extends ITileProps{
   model: ITileModel;
@@ -129,7 +127,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
 
   private handleBeginEditTitle = () => {
     this.setState({isEditingTitle: true});
-
   };
 
   private handleTitleChange = (title?: string) => {
@@ -169,7 +166,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
       <DataflowLinkTableButton
         key="link-button"
         isLinkButtonEnabled={isLinkButtonEnabled}
-        //used in useTableLinking
+        //use in useTableLinking
         documentId={documentId}
         model={model}
         onRequestTilesOfType={onRequestTilesOfType}
@@ -204,20 +201,13 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
 
   private pairNodesToAttributes = () => {
     const model = this.getContent();
-    console.log("dataflow-tile.tsx > pairNodeToAttributes> model:", model);
-    const programDataRate = model.programDataRate;
     const dataSet = model.dataSet;
     const dataSetAttributes = dataSet.attributes;
 
     // dataSet looks like
     // Time   |  Node 1 | Node 2 | Node 3 etc
     //    0   |   val    | val    |  val
-
-    const timeStr = `Time (${this.mapProgramDataRateToSecondString(programDataRate)})`;
-    console.log("timeStr:", timeStr);
-    if (timeStr){
-      addAttributeToDataSet(model.dataSet, { name: timeStr }); //this is time quantized to nearest sampling rate
-    }
+    addAttributeToDataSet(model.dataSet, { name: "Time (sec)" }); //this is time quantized to nearest sampling rate
 
     model.program.nodes.forEach((n) => {
       model.addNewAttrFromNode(n.id, n.name);
@@ -281,12 +271,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
       this.setState({recordIndex: 0});
     }
   };
-
-  private mapProgramDataRateToSecondString = (programDataRate: number) => {
-    //returns correct time string (ms, s, min) to display in attribute table
-    return MapProgramDataRatesTimeString[programDataRate as keyof typeof MapProgramDataRatesTimeString];
-  };
-
 
   private getContent() {
     return this.props.model.content as DataflowContentModelType;
