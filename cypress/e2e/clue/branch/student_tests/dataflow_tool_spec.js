@@ -329,7 +329,7 @@ context('Dataflow Tool Tile', function () {
       });
       it("verify live output types", () => {
         const dropdown = "liveOutputType";
-        const outputTypes = ["Light Bulb", "Grabber", "Sprinkler", "Fan", "Heat Lamp"];
+        const outputTypes = ["Light Bulb", "Grabber", "Humidifier", "Fan", "Heat Lamp"];
         dataflowToolTile.getDropdown(nodeType, dropdown).click();
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).should("have.length", 5);
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).each(($tab, index, $typeList) => {

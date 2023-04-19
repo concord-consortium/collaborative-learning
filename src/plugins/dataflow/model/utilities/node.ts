@@ -311,7 +311,7 @@ export const NodeLiveOutputTypes = [
     icon: GrabberIcon
   },
   {
-    name: "Sprinkler",
+    name: "Humidifier",
     icon: GrabberIcon,
     relayIndex: 2
   },
@@ -442,3 +442,7 @@ export const ProgramDataRates: ProgramDataRate[] = [
 
 export const kSensorSelectMessage = "Select a sensor";
 export const kSensorMissingMessage = "⚠️";
+export const kRelayMappings = ["Heat Lamp", "Fan", "Humidifier"];
+export const kBinaryOutputTypes = ["Heat Lamp", "Fan", "Humidifier", "Light Bulb"];
+export const kRelayOutputTypes =  ["Heat Lamp", "Fan", "Humidifier"]
+export const kRoundedOutputTypes = ["Grabber"];

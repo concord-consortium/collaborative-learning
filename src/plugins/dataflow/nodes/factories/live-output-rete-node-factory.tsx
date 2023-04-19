@@ -3,7 +3,8 @@ import { NodeData } from "rete/types/core/data";
 import { DataflowReteNodeFactory } from "./dataflow-rete-node-factory";
 import { InputValueControl } from "../controls/input-value-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
-import { NodeLiveOutputTypes, NodeMicroBitHubs } from "../../model/utilities/node";
+import { NodeLiveOutputTypes, NodeMicroBitHubs,
+  kRelayMappings, kBinaryOutputTypes, kRelayOutputTypes, kRoundedOutputTypes } from "../../model/utilities/node";
 import { dataflowLogEvent } from "../../dataflow-logger";
 import { NodeChannelInfo } from "../../model/utilities/channel";
 
@@ -12,10 +13,6 @@ interface HubStatus {
   missing: boolean
 }
 
-function getRelayMessageReceived(node: Node) {
-  console.log("| given the node, can we determne if the relay state has been receieved?")
-  return "(sent) or (received)";
-}
 export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
   constructor(numSocket: Socket) {
     super("Live Output", numSocket);
@@ -35,9 +32,9 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   public worker(node: NodeData, inputs: any, outputs: any) {
-    // TODO & NOTE (CLAW) At the moment we take the input as soon as we can and send it to serial
-    // this updates the value of the node and then the default NodeProcess takes the data
-    // and sends it out via Serial.  It does not pass through any rete "output"
+    // This node type is a "live" output and does not output a value into a rete outputs
+    // This worker updates the value of the node
+    // Then the default NodeProcess takes the data and sends it out via Serial.
     const n1 = inputs.nodeValue.length ? inputs.nodeValue[0] : node.data.nodeValue;
     if (this.editor) {
       const _node = this.editor.nodes.find((n: { id: any; }) => n.id === node.id);
@@ -50,22 +47,20 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
         const nodeValue = _node.inputs.get("nodeValue")?.control as InputValueControl;
         let newValue = isNaN(n1) ? 0 : n1;
 
-        const binaryOutputTypes = ["Heat Lamp", "Fan", "Sprinkler", "Light Bulb"];
-        const relayOutputTypes =  ["Heat Lamp", "Fan", "Sprinkler"]
-
-        if (binaryOutputTypes.includes(outputType)){
+        // Output types have varying display requirements
+        if (kBinaryOutputTypes.includes(outputType)){
           newValue = isNaN(n1) ? 0 : +(n1 !== 0);
           const offOnString = newValue === 0 ? "off" : "on";
-          if (!relayOutputTypes.includes(outputType)) {
+          if (!kRelayOutputTypes.includes(outputType)) {
             nodeValue?.setDisplayMessage(offOnString);
           }
           // handle relay outputs, which are binarty but must also display if the relay state has been received
-          else if (relayOutputTypes.includes(outputType)) {
-            nodeValue?.setDisplayMessage(offOnString + " " + getRelayMessageReceived(_node));
+          else {
+            nodeValue?.setDisplayMessage(offOnString + " " + this.getRelayMessageReceived(_node));
           }
         }
 
-        if (outputType === "Grabber"){
+        if (kRoundedOutputTypes.includes(outputType)){
           newValue = this.getNewValueForGrabber(n1);
           const roundedDisplayValue = Math.round((newValue / 10) * 10);
           // Swap commented/uncommented below to change to display of nearest 1%
@@ -89,6 +84,18 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
     return parseInt((num * 100).toFixed(2), 10);
   }
 
+  private getHubChannelsForNode(node: Node){
+    const hubSelect = node.controls.get("hubSelect") as DropdownListControl;
+    const selectedHubIdentifier = hubSelect.getValue().slice(-1); // "micro:bit hub a" => "a"
+    return hubSelect.getChannels().filter((c: NodeChannelInfo) => c.channelId.charAt(2) === selectedHubIdentifier);
+  }
+
+  // NEXT - you need below to know the relay index for the selected output type, so you can call this down in getRelayMessageReceived
+  private getSelectedRelayIndex(node: Node){
+    const outputTypeControl = node.controls.get("liveOutputType") as DropdownListControl;
+    return kRelayMappings.indexOf(outputTypeControl.getValue());
+  }
+
   private updateHubsStatusReport(n: Node){
     // use existing missing state information to figure out & display if hub is active
     const hubSelect = n.controls.get("hubSelect") as DropdownListControl;
@@ -102,6 +109,13 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
       // "active" is !missing
       hubSelect.setActiveOption(s.id, !s.missing);
     });
+  }
+
+  private getRelayMessageReceived(node: Node) {
+    const hubRelaysState =  this.getHubChannelsForNode(node)
+      .filter((c: NodeChannelInfo) => c.type === "relays")[0].relaysState;
+    const valueOfRelayAtIndex = hubRelaysState[this.getSelectedRelayIndex(node)];
+    return node.data.nodeValue === valueOfRelayAtIndex ? "(recieved)" : "(sent)";
   }
 
   // TODO IMPROVEMENT - this is a duplicate method - abstract for all factories?

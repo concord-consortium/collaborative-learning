@@ -20,7 +20,7 @@ e.g. : `ca11`
 
 #### Pins
 - `15`    dht sensor (should change to `16`?):
-- `8`     relay 2 (sprinkler) (green)
+- `8`     relay 2 (Humidifier) (green)
 - `9`     relay 1 (fan) (yellow)
 - `12`    relay 0 (heat) (red)
 
@@ -31,7 +31,7 @@ let hubIds = ['x', 'a', 'b', 'c', 'd']
 let hubI = 0
 
 // pins chosen based on https://makecode.microbit.org/device/pins
-// relays       0 Heat           1 Fan          2 Sprinkler
+// relays       0 Heat           1 Fan          2 Humidifier
 let relayPins = [DigitalPin.P12, DigitalPin.P9, DigitalPin.P8]
 let relayStates = [0, 0, 0]
 
