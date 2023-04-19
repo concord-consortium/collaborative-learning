@@ -31,6 +31,10 @@ import { IDocumentContentAddTileOptions, IDragTilesData, INewRowTile, INewTileOp
    ITileCountsPerSection, NewRowTileArray } from "./document-content-types";
 import { SharedModelEntry, SharedModelEntryType, SharedModelEntrySnapshotType } from "./shared-model-entry";
 
+// Imports related to hard coding shared model duplication
+import { newCaseId } from "../data/data-set";
+import { SharedDataSetSnapshotType } from "../shared/shared-data-set";
+
 /**
  * This is one part of the DocumentContentModel. The other part is
  * DocumentContentModelWithTileDragging. It was split out to reduce the size of the
@@ -127,7 +131,11 @@ export const BaseDocumentContentModel = types
         let sectionId = "";
         const foundRow = self.rowOrder.find((rowId, i) => {
           const row = self.rowMap.get(rowId);
-          row?.sectionId && (sectionId = row?.sectionId);
+          // TODO: Figure out why linting is failing
+          // row?.sectionId && (sectionId = row?.sectionId);
+          if (row?.sectionId) {
+            sectionId = row.sectionId;
+          }
           return row?.hasTile(tileId);
         });
         return foundRow ? sectionId : undefined;
@@ -183,8 +191,14 @@ export const BaseDocumentContentModel = types
             sharedModelEntry.provider = tileIdMap[sharedModelEntry.provider];
           }
           const sharedModel = sharedModelEntry.sharedModel;
-          if ("providerId" in sharedModel && typeof sharedModel.providerId === "string") {
-            sharedModel.providerId = tileIdMap[sharedModel.providerId];
+          // TODO: Figure out why linting is failing
+          // if ("providerId" in sharedModel && typeof sharedModel.providerId === "string") {
+          //   sharedModel.providerId = tileIdMap[sharedModel.providerId];
+          if ("providerId" in sharedModel) {
+            const providedSharedModel = sharedModel as any;
+            if (typeof providedSharedModel.providerId === "string") {
+              providedSharedModel.providerId = tileIdMap[providedSharedModel.providerId];
+            }
           }
         });
         // TODO: Give the shared models new ids
@@ -867,33 +881,6 @@ export const BaseDocumentContentModel = types
         }
         return tileInfo;
       },
-      duplicateTiles(tiles: IDragTileItem[]) {
-        const rowIndex = self.getRowAfterTiles(tiles);
-        // TODO: this should be unified with the code in handleDragCopyTiles
-        // They both take drag tile items and add them to the document.
-        // They both will want to make copies of the shared models
-        const dropTiles = tiles.map(tile => {
-          const newTileId = uniqueId();
-          return { ...tile, newTileId };
-        });
-        const results = self.copyTilesIntoNewRows(dropTiles, rowIndex);
-
-        // Increment default titles when necessary
-        results.forEach((result, i) => {
-          const newTile = result?.tileId && self.getTile(result.tileId);
-          if (result && newTile) {
-            const tileContentInfo = getTileContentInfo(newTile.content.type);
-            if (tileContentInfo) {
-              const match = titleMatchesDefault(newTile.title, tileContentInfo.titleBase);
-              if (match) {
-                newTile.setTitle(self.getNewTileTitle(newTile.content.type));
-              }
-            }
-          }
-        });
-
-        self.logCopyTileResults(tiles, results);
-      }
     };
     return actions;
   })
@@ -1077,5 +1064,131 @@ export const BaseDocumentContentModel = types
           // ignore shared models with errors
         }
       });
+    },
+    duplicateTiles(tiles: IDragTileItem[]) {
+      // Determine the row to add the duplicated tiles into
+      const rowIndex = self.getRowAfterTiles(tiles);
+
+      // Find shared models used by tiles being duplicated
+      const sharedModelEntries = Object.values(self.getSharedModelsUsedByTiles(tiles.map(tile => tile.tileId)));
+
+      // Update shared models with new ids
+      interface UpdatedSharedDataSet {
+        sharedModelId: string;
+        attributeIdMap: Record<string, string>;
+        caseIdMap: Record<string, string>;
+      }
+      const updatedSharedModelMap: Record<string, UpdatedSharedDataSet> = {};
+      const newSharedModelEntries: any[] = [];
+      sharedModelEntries.forEach(sharedModelEntry => {
+        // For now, only duplicate shared data sets
+        if (sharedModelEntry.sharedModel.type === "SharedDataSet") {
+          // Determine new ids
+          const sharedDataSet = getSnapshot(sharedModelEntry.sharedModel) as SharedDataSetSnapshotType;
+          const sharedModelId = uniqueId();
+          const dataSetId = uniqueId();
+          const attributeIdMap: Record<string, string> = {};
+          const caseIdMap: Record<string, string> = {};
+          sharedDataSet.dataSet.attributes?.forEach((attr: any) => {
+            attributeIdMap[attr.id] = uniqueId();
+          });
+          sharedDataSet.dataSet.cases?.forEach((c: any) => {
+            caseIdMap[c.__id__] = newCaseId();
+          });
+          if (sharedDataSet.id) updatedSharedModelMap[sharedDataSet.id] = { sharedModelId, attributeIdMap, caseIdMap };
+
+          // Create a snapshot for the shared model with updated ids, which will be updated with new tile ids
+          // and added to the document later
+          const newAttributes = sharedDataSet.dataSet.attributes?.map((a: any) => {
+            return { ...a, id: attributeIdMap[a.id] };
+          });
+          const newCases = sharedDataSet.dataSet.cases?.map((c: any) => ({ ...c, __id__: caseIdMap[c.__id__] }));
+          newSharedModelEntries.push({
+            tiles: sharedModelEntry.tiles,
+            sharedModel: {
+              ...sharedDataSet,
+              id: sharedModelId,
+              dataSet: {
+                ...sharedDataSet.dataSet,
+                id: dataSetId,
+                attributes: newAttributes,
+                cases: newCases
+              }
+            }
+          });
+        }
+      });
+
+      // Update tile content with new shared model ids
+      const tileIdMap: Record<string, string> = {};
+      const updatedTiles: any[] = [];
+      tiles.forEach(tile => {
+        const oldContent = JSON.parse(tile.tileContent);
+        const tileContent = oldContent;
+        tileIdMap[tile.tileId] = uniqueId();
+        if (["Table", "DataCard"].includes(tile.tileType)) {
+          // Find the shared models for this tile
+          const sharedDataSetEntries = sharedModelEntries.filter(entry => (
+            entry.tiles.map(t => t.id).includes(tile.tileId)
+          ));
+          // TODO: Handle an arbitrary number of shared models
+          if (sharedDataSetEntries.length === 1) {
+            const originalSharedDataSetId = sharedDataSetEntries[0].sharedModel.id;
+            const attributeIdMap = updatedSharedModelMap[originalSharedDataSetId].attributeIdMap;
+            if (tile.tileType === "Table") {
+              const columnWidths: Record<string, number> = {};
+              for (const entry of Object.entries(oldContent.content.columnWidths)) {
+                const originalId = entry[0];
+                const width = entry[1] as number;
+                if (width !== undefined && originalId && attributeIdMap[originalId]) {
+                    columnWidths[attributeIdMap[originalId]] = width;
+                }
+              }
+              tileContent.content = { ...oldContent.content, columnWidths };
+            } else if (tile.tileType === "DataCard") {
+              const oldAttributeId = oldContent.content.selectedSortAttributeId;
+              const content = { ...oldContent.content, selectedSortAttributeId: attributeIdMap[oldAttributeId] };
+              tileContent.content = content;
+            }
+          }
+        }
+        updatedTiles.push({
+          ...tile,
+          newTileId: tileIdMap[tile.tileId],
+          tileContent: JSON.stringify(tileContent)
+        });
+      });
+
+      // Add copied tiles to document
+      const results = self.copyTilesIntoNewRows(updatedTiles, rowIndex);
+
+      // Increment default titles when necessary
+      // TODO: Update dataset name when necessary
+      results.forEach((result, i) => {
+        const newTile = result?.tileId && self.getTile(result.tileId);
+        if (result && newTile) {
+          const tileContentInfo = getTileContentInfo(newTile.content.type);
+          if (tileContentInfo) {
+            const match = titleMatchesDefault(newTile.title, tileContentInfo.titleBase);
+            if (match) {
+              newTile.setTitle(self.getNewTileTitle(newTile.content.type));
+            }
+          }
+        }
+      });
+
+      // Update tile ids for shared models and add copies to document
+      newSharedModelEntries.forEach(sharedModelEntry => {
+        const updatedTileIds: string[] = sharedModelEntry.tiles.map((oldTile: any) => tileIdMap[oldTile.id]);
+        const updatedSharedModel = { ...sharedModelEntry.sharedModel };
+        // TODO: Handle other shared model types
+        if (sharedModelEntry.sharedModel.type === "SharedDataSet") {
+          updatedSharedModel.providerId = tileIdMap[sharedModelEntry.sharedModel.providerId];
+        }
+        const newSharedModelEntry = self.addSharedModel(updatedSharedModel);
+        updatedTileIds.forEach(tileId => newSharedModelEntry.tiles.push(tileId));
+      });
+
+      self.logCopyTileResults(tiles, results);
     }
   }));
