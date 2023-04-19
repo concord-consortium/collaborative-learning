@@ -122,7 +122,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           axisSettingsOpen: false,
         };
 
-
   private instanceId = ++sInstanceId;
   private elementId: string;
   private domElement: HTMLDivElement | null;
