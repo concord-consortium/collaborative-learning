@@ -7,6 +7,9 @@ import { ITileModel } from "../../../models/tiles/tile-model";
 
 import "./link-table-dialog.scss";
 
+//TODO: dataflow-use-link-table-dialog.tsx is very similar
+//consider refactoring -> https://www.pivotaltracker.com/n/projects/2441242/stories/184992684
+
 interface IContentProps {
   unlinkedTiles: ITileLinkMetadata[];
   linkedTiles: ITileLinkMetadata[];

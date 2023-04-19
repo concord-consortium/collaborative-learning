@@ -1,12 +1,15 @@
 import React, { useRef, useState } from "react";
-import LinkGraphIcon from "../assets/icons/link-table-icon.svg"; //may need to change
+import LinkGraphIcon from "../assets/icons/link-table-icon.svg"; //Leslie wants to change this to new icon
 import { useCustomModal } from "../../../hooks/use-custom-modal";
-// import { GeometryContentModelType } from "../../../models/tiles/geometry/geometry-content";
 import { DataflowContentModelType } from "../model/dataflow-content";
 import { ITileLinkMetadata } from "../../../models/tiles/table-link-types";
 import { ITileModel } from "../../../models/tiles/tile-model";
 
 import "./dataflow-use-link-table-dialog.scss";
+
+//TODO: this is generally a copy of use-link-table-dialog.tsx for Geometry Tile
+//consider refactoring -> https://www.pivotaltracker.com/n/projects/2441242/stories/184992684
+
 
 interface IContentProps {
   unlinkedTiles: ITileLinkMetadata[];

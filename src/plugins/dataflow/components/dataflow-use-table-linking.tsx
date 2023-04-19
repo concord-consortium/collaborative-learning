@@ -10,6 +10,9 @@ import { ITileModel } from "../../../models/tiles/tile-model";
 import { useLinkTableDialog } from "./dataflow-use-link-table-dialog";
 import { IDataFlowActionHandlers } from "./dataflow-shared";
 
+//TODO: this is generally a copy of use-table-linking.tsx for Geometry Tile
+//consider refactoring -> https://www.pivotaltracker.com/n/projects/2441242/stories/184992684
+
 interface IProps {
   documentId?: string;
   model: ITileModel;

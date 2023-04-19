@@ -10,6 +10,9 @@ import { ITileModel } from "../../../models/tiles/tile-model";
 import { useLinkTableDialog } from "./use-link-table-dialog";
 import { IToolbarActionHandlers } from "./geometry-shared";
 
+//TODO: dataflow-program-link-table-button.tsx is very similar
+//consider refactoring -> https://www.pivotaltracker.com/n/projects/2441242/stories/184992684
+
 interface IProps {
   documentId?: string;
   model: ITileModel;

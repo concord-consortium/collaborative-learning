@@ -222,12 +222,15 @@ export const DataflowContentModel = TileContentModel
     addLinkedTable(tableId: string) {  //tableID is table we linked it to
       const sharedModelManager = self.tileEnv?.sharedModelManager;
       if (sharedModelManager?.isReady && !self.isLinkedToTable(tableId)) {
-        const sharedTable = sharedModelManager.findFirstSharedModelByType(SharedDataSet, tableId);
-        const tableTile = getTileContentById(self, tableId); //get tableTile contents given a tableId
+        const tableTileContents = getTileContentById(self, tableId); //get tableTile contents given a tableId
+        const tableSharedModels = sharedModelManager.getTileSharedModels(tableTileContents);
+        if (tableSharedModels.length > 1){ //table ideally should only have 1 shared dataSet
+          console.warn("Table has more than one shared dataSet");
+        }
         //sever connection table -> table sharedDataSet
-        sharedTable && sharedModelManager.removeTileSharedModel(tableTile, sharedTable);
+        tableSharedModels && sharedModelManager.removeTileSharedModel(tableTileContents, tableSharedModels[0]);
         //connect table -> dataflow sharedDataset
-        self.sharedModel && sharedModelManager.addTileSharedModel(tableTile, self.sharedModel);
+        self.sharedModel && sharedModelManager.addTileSharedModel(tableTileContents, self.sharedModel);
       }
       else {
         console.warn("DataflowContent.addLinkedTable unable to link table");
@@ -236,10 +239,11 @@ export const DataflowContentModel = TileContentModel
     removeLinkedTable(tableId: string) {
       const sharedModelManager = self.tileEnv?.sharedModelManager;
       if (sharedModelManager?.isReady && self.isLinkedToTable(tableId)) {
-        const sharedTable = sharedModelManager.findFirstSharedModelByType(SharedDataSet, tableId);
+        // const sharedTable = sharedModelManager.findFirstSharedModelByType(SharedDataSet, tableId);
+
         //sever connection table -> table sharedDataSet
         const tableTileContents = getTileContentById(self, tableId); //get tableTile contents given a tableId
-        sharedTable && sharedModelManager.removeTileSharedModel(tableTileContents, sharedTable);
+        self.sharedModel && sharedModelManager.removeTileSharedModel(tableTileContents, self.sharedModel);
         //create a dataSet with two attributes with X / Y, link table tile to this dataSet
         const title = tableTileContents ? getTileTitleFromContent(tableTileContents) : undefined;
         const dataSet = DataSet.create({name: title});

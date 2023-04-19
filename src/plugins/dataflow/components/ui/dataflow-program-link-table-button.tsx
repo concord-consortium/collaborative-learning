@@ -4,10 +4,13 @@ import LinkTableIcon from "../../assets/icons/link-table-icon.svg"; //we may nee
 import { useFeatureFlag } from "../../../../hooks/use-stores";
 import { useTableLinkingDataFlow } from "../dataflow-use-table-linking";
 import { ITileModel } from "src/models/tiles/tile-model";
-
-import "./dataflow-program-link-table-button.scss";
 import { ITileLinkMetadata } from "src/models/tiles/table-link-types";
 import { IDataFlowActionHandlers } from "../dataflow-shared";
+
+import "./dataflow-program-link-table-button.scss";
+
+//TODO: this is generally a copy of link-table-button.tsx for Geometry Tile
+//consider refactoring -> https://www.pivotaltracker.com/n/projects/2441242/stories/184992684
 
 interface IProps {
   isLinkButtonEnabled?: boolean;
