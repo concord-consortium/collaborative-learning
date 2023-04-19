@@ -759,7 +759,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       Devices differ, but it may contain the words "usbserial" or "usbmodem"`;
 
     if (lastMsg !== "connect" && this.stores.serialDevice.serialNodesCount > 0){
-      alertMessage += `1. Connect the arduino to your computer.  2.${btnMsg}`;
+      alertMessage += `1. Connect the arduino or micro:bit to your computer.  2.${btnMsg}`;
     }
 
     // physical connection has been made but user action needed

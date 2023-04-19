@@ -124,6 +124,7 @@ export class SerialDevice {
           // handle message about relays state
           targetChannel.relaysState = reading.split('').map(s => Number(s));
           targetChannel.lastMessageRecievedAt = Date.now();
+          console.log("| recieving relay state and setting i t on targetChannel: ", targetChannel);
         }
       }
     } while (match);

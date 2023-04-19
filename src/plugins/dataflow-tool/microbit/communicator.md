@@ -37,7 +37,7 @@ input.onButtonPressed(Button.B, function () {
 })
 
 radio.onReceivedString(function (receivedString) {
-    if (mode == 1){
+    if (mode == 1) {
         const signalType = receivedString.substr(0, 1)
         if (signalType == "s" || signalType == "r") {
             serial.writeLine(receivedString)
@@ -45,12 +45,10 @@ radio.onReceivedString(function (receivedString) {
     }
 })
 
-// works
 serial.onDataReceived(serial.delimiters(Delimiters.NewLine), function () {
     readFromSerial = serial.readLine()
     radio.sendString(readFromSerial)
 })
-
 
 
 ```

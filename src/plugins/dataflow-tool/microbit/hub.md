@@ -6,9 +6,9 @@ Downloadable link: https://makecode.microbit.org/_YpoCfzeTwCWP
 
 #### Outgoing strings to write,
 e.g. : `sat20.31`
-- `s`: "sensor"
+- `s`: "signal"
 - `a`: "hub A"
-- `t`: "temperature reading"
+- `t`: "temperature reading" (or `h` for humidity, or `r` for relays state),
 - `<n>`: the reading as a string of num chars
 
 #### Incoming strings to read
@@ -81,7 +81,7 @@ function operateRelay(relayIndex: number, state: number) {
 }
 
 function sendAggregatedRelayState(){
-    const relayStateString = `r${hubIds[hubI]}${relayStates.join('')}`;
+    const relayStateString = `s${hubIds[hubI]}r${relayStates.join('')}`;
     radio.sendString(relayStateString);
 }
 
