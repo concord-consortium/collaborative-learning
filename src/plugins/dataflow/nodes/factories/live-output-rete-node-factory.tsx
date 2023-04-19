@@ -114,11 +114,18 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   private getRelayMessageReceived(node: Node) {
-    const hubRelaysState =  this.getHubChannelsForNode(node);
-    if (hubRelaysState.length === 0) return "";
-    hubRelaysState.filter((c: NodeChannelInfo) => c.type === "relays")[0].relaysState;
-    const valueOfRelayAtIndex = hubRelaysState[this.getSelectedRelayIndex(node)];
-    return node.data.nodeValue === valueOfRelayAtIndex ? "(recieved)" : "(sent)";
+    const valueShown = node.data.nodeValue;
+    const hubRelayChannels =  this.getHubChannelsForNode(node)
+      .filter((c: NodeChannelInfo) => c.type === "relays");
+
+    if (hubRelayChannels.length === 0) return "(no hub)";
+    const relayChannel = hubRelayChannels[0];
+    if (!relayChannel.relaysState) return "(no hub)";
+    const selectedOutputRelayIndex = this.getSelectedRelayIndex(node);
+    const relayReportedValue = relayChannel.relaysState[selectedOutputRelayIndex];
+    if (relayReportedValue === valueShown) return "(received)";
+    if (relayReportedValue !== valueShown) return "(sent)";
+    // TODO: channel "missing" attribute sometimes innacurate here, causing hub to appear as missing until reconnect
   }
 
   // TODO IMPROVEMENT - this is a duplicate method - abstract for all factories?
