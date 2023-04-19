@@ -83,7 +83,7 @@ describe("SharedCaseMetadata", () => {
     expect(categories).toBeUndefined();
   });
 
-  // TODO: Determine if this can be removed.
+  // TODO: Fix or remove if not needed.
   // it("stores collapsed pseudo-cases", () => {
   //   // ignores invalid ids
   //   expect(tree.metadata.isCollapsed("foo")).toBe(false);

@@ -2,6 +2,8 @@ import { types, Instance, SnapshotOut } from "mobx-state-tree";
 import { uniqueId } from "../../utilities/js-utils";
 import { Formula } from "./formula";
 
+const isDevelopment = () => process.env.NODE_ENV !== "production";
+
 const ValueType = types.union(types.number, types.string, types.undefined);
 export type IValueType = number | string | undefined;
 
@@ -14,16 +16,16 @@ export const Attribute = types.model("Attribute", {
   units: "",
   formula: types.optional(Formula, () => Formula.create()),
   values: types.array(ValueType),
-  title: "", // TODO: Is this needed?
-  description: types.maybe(types.string), // TODO: Is this needed?
-  precision: types.maybe(types.number), // TODO: Is this needed?
+  title: "",
+  description: types.maybe(types.string),
+  precision: types.maybe(types.number),
 }).preProcessSnapshot((snapshot) => {
   const { id, values: inValues, ...others } = snapshot;
   const values = (inValues || []).map(v => v == null ? undefined : v);
   return { id: id || uniqueId(), values, ...others };
 }).volatile(self => ({
-  strValues: [] as string[],
-  numValues: [] as number[]
+  strValues: self.values as string[],
+  numValues: self.values as number[]
 })).views(self => ({
   get emptyCount() {
     return self.strValues.reduce((prev, current) => current === "" ? ++prev : prev, 0);
@@ -109,18 +111,22 @@ export const Attribute = types.model("Attribute", {
       self.values.splice(index, count);
     }
   },
-  // // should be called before retrieving snapshot (i.e. before serialization)
-  // prepareSnapshot() {
-  //   if (isDevelopment()) {
-  //     self.values = [...self.strValues];
-  //   }
-  // },
-  // // should be called after retrieving snapshot (i.e. after serialization)
-  // completeSnapshot() {
-  //   if (isDevelopment()) {
-  //     self.values = undefined;
-  //   }
-  // }
+
+  // TODO: Do we need prepareSnapshot? completeSnapshot?
+  // should be called before retrieving snapshot (i.e. before serialization)
+  prepareSnapshot() {
+    if (isDevelopment()) {
+      // @ts-expect-error type error 
+      self.values = [...self.strValues];
+    }
+  },
+  // should be called after retrieving snapshot (i.e. after serialization)
+  completeSnapshot() {
+    if (isDevelopment()) {
+      // @ts-expect-error type error
+      self.values = undefined;
+    }
+  }
 }));
 export type IAttribute = Instance<typeof Attribute>;
 

@@ -135,9 +135,13 @@ export const Graph = observer(function Graph({graphController, graphRef}: IProps
   const renderDroppableAddAttributes = () => {
     const droppables: JSX.Element[] = [];
     if (plotType !== 'casePlot') {
-      const places = ['top', 'rightCat'].concat(plotType=== 'scatterPlot' ? ['yPlus', 'rightNumeric'] : []);
-      // TODO: Use GraphPlace instead of any below.
-      places.forEach((place: any) => {
+      // TODO: Is this refactoring to get the typing right on L143 OK?
+      // Was: const places = ['top', 'rightCat'].concat(plotType === 'scatterPlot' ? ['yPlus', 'rightNumeric'] : []);
+      const places: GraphPlace[] = ['top', 'rightCat'];
+      if (plotType === 'scatterPlot') {
+        places.concat(['yPlus', 'rightNumeric']);
+      }
+      places.forEach((place: GraphPlace) => {
         droppables.push(
           <DroppableAddAttribute
             key={place}

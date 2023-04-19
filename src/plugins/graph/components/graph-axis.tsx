@@ -32,7 +32,7 @@ export const GraphAxis = observer(function GraphAxis(
         const isY2 = desc.attributeID === graphModel.getAttributeID('rightNumeric');
         return (desc.attributeID && !isY2 && dataset?.attrFromID(desc.attributeID)?.name) || '';
       }).filter(aName => aName !== '').join(', ')
-      : (attrId && dataset?.attrFromID(attrId)?.name) || "Click here to choose data to plot";
+      : (attrId && dataset?.attrFromID(attrId)?.name) || t('DG.AxisView.emptyGraphCue');
   };
 
   return (
@@ -42,8 +42,7 @@ export const GraphAxis = observer(function GraphAxis(
           enableAnimation={enableAnimation}
           showScatterPlotGridLines={graphModel.axisShouldShowGridLines(place)}
           centerCategoryLabels={graphModel.config.categoriesForAxisShouldBeCentered(place)}
-          // TODO: Add drag-and-drop support?
-          // isDropAllowed={isDropAllowed}
+          // isDropAllowed={isDropAllowed} // TODO: Fix this.
           onDropAttribute={onDropAttribute}
           onRemoveAttribute={onRemoveAttribute}
           onTreatAttributeAs={onTreatAttributeAs}

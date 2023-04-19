@@ -2,7 +2,7 @@ import React from "react";
 import {clsx} from "clsx";
 import {Active, useDroppable} from "@dnd-kit/core";
 import {useDropHintString} from "../../../hooks/use-drop-hint-string";
-//import {getDragAttributeId, useDropHandler} from "../../../hooks/use-drag-drop";
+import {getDragAttributeId, useDropHandler} from "../../../hooks/use-drag-drop";
 import {DropHint} from "./drop-hint";
 import {GraphPlace, graphPlaceToAttrRole, PlotType} from "../graph-types";
 import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
@@ -24,18 +24,18 @@ export const DroppableAddAttribute = ({place, onDrop}: IAddAttributeProps) => {
     hintString = useDropHintString({role});
 
   const handleIsActive = (iActive: Active) => {
-    // const droppedAttrId = getDragAttributeId(iActive) ?? '';
-    // if (isDropAllowed) {
-    //   return isDropAllowed(place, droppedAttrId);
-    // } else {
-    //   return !!droppedAttrId;
-    // }
+    const droppedAttrId = getDragAttributeId(iActive) ?? '';
+    if (isDropAllowed) {
+      return isDropAllowed(place, droppedAttrId);
+    } else {
+      return !!droppedAttrId;
+    }
   };
 
-  // useDropHandler(droppableId, (iActive: any) => {
-  //   const dragAttributeID = getDragAttributeId(iActive);
-  //   dragAttributeID && onDrop(dragAttributeID);
-  // });
+  useDropHandler(droppableId, (iActive: any) => {
+    const dragAttributeID = getDragAttributeId(iActive);
+    dragAttributeID && onDrop(dragAttributeID);
+  });
 
   // if (plotType === 'scatterPlot') {
   const isActive = active && handleIsActive(active),

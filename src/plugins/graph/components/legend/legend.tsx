@@ -8,8 +8,7 @@ import {CategoricalLegend} from "./categorical-legend";
 import {NumericLegend} from "./numeric-legend";
 import {DroppableSvg} from "../droppable-svg";
 import {useInstanceIdContext} from "../../../../hooks/use-instance-id-context";
-// TODO: Add drag-and-drop support?
-// import {getDragAttributeId, useDropHandler} from "../../../../hooks/use-drag-drop";
+import {getDragAttributeId, useDropHandler} from "../../../../hooks/use-drag-drop";
 import {useDropHintString} from "../../../../hooks/use-drop-hint-string";
 import {GraphAttrRole, GraphPlace} from "../../graph-types";
 import {AxisOrLegendAttributeMenu} from "../../axis/components/axis-or-legend-attribute-menu";
@@ -40,20 +39,19 @@ export const Legend = function Legend({
     attributeIDs = useMemo(() => legendAttrID ? [legendAttrID] : [], [legendAttrID]);
 
   const handleIsActive = (active: Active) => {
-    // TODO: Add drag-and-drop support?
-    // const droppedAttrId = getDragAttributeId(active) ?? '';
-    // if (isDropAllowed) {
-    //   return isDropAllowed('legend', droppedAttrId);
-    // } else {
-    //   return !!droppedAttrId;
-    // }
+    const droppedAttrId = getDragAttributeId(active) ?? '';
+    if (isDropAllowed) {
+      return isDropAllowed('legend', droppedAttrId);
+    } else {
+      return !!droppedAttrId;
+    }
   };
 
-  // useDropHandler(droppableId, (active: any) => {
-  //   const dragAttributeID = getDragAttributeId(active);
-  //   dragAttributeID && isDropAllowed('legend', dragAttributeID) &&
-  //   onDropAttribute('legend', dragAttributeID);
-  // });
+  useDropHandler(droppableId, (active: any) => {
+    const dragAttributeID = getDragAttributeId(active);
+    dragAttributeID && isDropAllowed('legend', dragAttributeID) &&
+    onDropAttribute('legend', dragAttributeID);
+  });
 
   const legendBounds = layout.computedBounds.get('legend') as Bounds,
     transform = `translate(${legendBounds.left}, ${legendBounds.top})`;
@@ -91,7 +89,7 @@ export const Legend = function Legend({
         portal={graphElt}
         target={legendRef.current}
         dropId={droppableId}
-        // onIsActive={handleIsActive}
+        onIsActive={handleIsActive}
         hintString={hintString}
       />
     </>

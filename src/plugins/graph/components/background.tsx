@@ -105,7 +105,7 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
         marqueeState.setMarqueeRect({x: 0, y: 0, width: 0, height: 0});
         selectionTree.current = null;
       },
-      dragBehavior = drag()
+      dragBehavior = drag<SVGRectElement, number>()
         .on("start", onDragStart)
         .on("drag", onDrag)
         .on("end", onDragEnd),
@@ -122,9 +122,8 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
         // @ts-expect-error void => Selection
         (enter) => {
           enter.append('rect')
-            .attr('class', 'graph-background');
-            // TODO: Add drag-and-drop support?
-            // .call(dragBehavior);
+            .attr('class', 'graph-background')
+            .call(dragBehavior);
         },
         (update) => {
           update

@@ -1,4 +1,5 @@
 // TODO: Reinstate these tests.
+// Doing so may need to wait till React and React Testing Library are updated to newer versions.
 // /* eslint-disable testing-library/no-node-access */
 // import { renderHook } from "@testing-library/react";
 // import React from "react";
@@ -7,7 +8,11 @@
 // import { INumericAxisModel, NumericAxisModel } from "../models/axis-model";
 // import {IUseAxis, useAxis} from "./use-axis";
 
-// describe("useNumericAxis", () => {
+describe("useNumericAxis", () => {
+
+  it("does something we're not testing for now", () => {
+    expect(true).toBe(true);
+  });
 
 //   let layout: SliderAxisLayout;
 //   let axisModel: INumericAxisModel;
@@ -86,5 +91,5 @@
 //     expect(axisElt.querySelector(".axis")).toBeDefined();
 //     expect(axisElt.querySelector(".tick")).toBeDefined();
 //   });
-// });
+});
 // /* eslint-enable testing-library/no-node-access */

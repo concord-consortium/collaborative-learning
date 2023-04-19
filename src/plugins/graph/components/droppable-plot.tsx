@@ -1,7 +1,6 @@
-// TODO: Add drag-and-drop support?
 import {Active} from "@dnd-kit/core";
 import React, {memo} from "react";
-//import {getDragAttributeId, useDropHandler} from "../../../hooks/use-drag-drop";
+import {getDragAttributeId, useDropHandler} from "../../../hooks/use-drag-drop";
 import {useDropHintString} from "../../../hooks/use-drop-hint-string";
 import {useInstanceIdContext} from "../../../hooks/use-instance-id-context";
 import {GraphPlace} from "../graph-types";
@@ -23,19 +22,19 @@ const _DroppablePlot = ({graphElt, plotElt, onDropAttribute}: IProps) => {
   const hintString = useDropHintString({role});
 
   const handleIsActive = (active: Active) => {
-    // const droppedAttrId = getDragAttributeId(active) ?? '';
-    // if (isDropAllowed) {
-    //   return isDropAllowed('legend', droppedAttrId);
-    // } else {
-    //   return !!droppedAttrId;
-    // }
+    const droppedAttrId = getDragAttributeId(active) ?? '';
+    if (isDropAllowed) {
+      return isDropAllowed('legend', droppedAttrId);
+    } else {
+      return !!droppedAttrId;
+    }
   };
 
-  // useDropHandler(droppableId, (active: any) => {
-  //   const dragAttributeID = getDragAttributeId(active);
-  //   dragAttributeID && isDropAllowed('legend', dragAttributeID) &&
-  //   onDropAttribute('plot', dragAttributeID);
-  // });
+  useDropHandler(droppableId, (active: any) => {
+    const dragAttributeID = getDragAttributeId(active);
+    dragAttributeID && isDropAllowed('legend', dragAttributeID) &&
+    onDropAttribute('plot', dragAttributeID);
+  });
 
   return (
     <DroppableSvg
@@ -43,7 +42,7 @@ const _DroppablePlot = ({graphElt, plotElt, onDropAttribute}: IProps) => {
       portal={graphElt}
       target={plotElt}
       dropId={droppableId}
-      //onIsActive={handleIsActive}
+      onIsActive={handleIsActive}
       hintString={hintString}
     />
   );

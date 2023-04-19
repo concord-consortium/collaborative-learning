@@ -46,7 +46,6 @@ export const Axis = ({
     titleRef = useRef<SVGGElement | null>(null);
 
   const handleIsActive = (active: Active) => {
-    // TODO: Determine if we will support drag and drop
     const droppedAttrId = getDragAttributeId(active);
     if (isDropAllowed) {
       return isDropAllowed(place, droppedAttrId);
@@ -61,7 +60,6 @@ export const Axis = ({
     axisModel, axisElt, titleRef, axisTitle: label, centerCategoryLabels
   });
 
-  // TODO: Determine if we will support drag and drop
   useDropHandler(droppableId, (active: any) => {
     const droppedAttrId = getDragAttributeId(active);
     droppedAttrId && isDropAllowed(place, droppedAttrId) && onDropAttribute?.(place, droppedAttrId);
@@ -95,7 +93,6 @@ export const Axis = ({
           target={titleRef.current}
           portal={parentElt}
           place={place}
-          // TODO: Revisit casting to any after TypeScript 4.9 upgrade
           onChangeAttribute={onDropAttribute as any}
           onRemoveAttribute={onRemoveAttribute as any}
           onTreatAttributeAs={onTreatAttributeAs as any}
@@ -106,11 +103,9 @@ export const Axis = ({
          <DroppableAxis
             place={`${place}`}
             dropId={droppableId}
-
             hintString={hintString}
             portal={parentElt}
             target={wrapperElt}
-            // TODO: Determine if we will support drag and drop
             onIsActive={handleIsActive}
          />}
     </>

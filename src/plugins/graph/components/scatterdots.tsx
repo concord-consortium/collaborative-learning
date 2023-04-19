@@ -154,10 +154,9 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
         xValue = dataset?.getNumeric(anID, xAttrID) ?? NaN,
         xScale = layout.getAxisScale('bottom') as ScaleLinear<number, number>,
         topSplitID = dataConfiguration?.attributeID('topSplit') ?? '',
-        topCoordValue = dataset?.getValue(anID, topSplitID) ?? '',
+        topCoordValue = dataset?.getStrValue(anID, topSplitID) ?? '',
         topScale = layout.getAxisScale('top') as ScaleBand<string>;
-        // TODO: Determine if using toString below is OK.
-      return xScale(xValue) / numExtraPrimaryBands + (topScale(topCoordValue.toString()) || 0);
+      return xScale(xValue) / numExtraPrimaryBands + (topScale(topCoordValue) || 0);
     };
 
     const getScreenY = (anID: string, plotNum = 0) => {
@@ -166,10 +165,9 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
         yScale = (hasY2Attribute && plotNum === numberOfPlots - 1 ? v2Scale : yScaleRef.current) as
           ScaleLinear<number, number>,
         rightSplitID = dataConfiguration?.attributeID('rightSplit') ?? '',
-        rightCoordValue = dataset?.getValue(anID, rightSplitID) ?? '',
+        rightCoordValue = dataset?.getStrValue(anID, rightSplitID) ?? '',
         rightScale = layout.getAxisScale('rightCat') as ScaleBand<string>,
-        // TODO: Determine if using toString below is OK.
-        rightScreenCoord = ((rightCoordValue && rightScale(rightCoordValue.toString())) || 0);
+        rightScreenCoord = ((rightCoordValue && rightScale(rightCoordValue)) || 0);
       return yScale(yValue) / numExtraSecondaryBands + rightScreenCoord;
     };
 

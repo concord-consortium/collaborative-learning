@@ -169,10 +169,9 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
               numerator = primaryAxisScale(dataset?.getNumeric(anID, primaryAttrID) ?? -1) /
                 numExtraPrimaryBands,
               bin = Math.ceil((numerator ?? 0) / binWidth),
-              // TODO: Determine why toString is needed and whether it's OK to use here
-              category = dataset?.getValue(anID, secondaryAttrID)?.toString() ?? '__main__',
-              extraCategory = dataset?.getValue(anID, extraSecondaryAttrID)?.toString() ?? '__main__',
-              extraPrimaryCategory = dataset?.getValue(anID, extraPrimaryAttrID)?.toString() ?? '__main__';
+              category = dataset?.getStrValue(anID, secondaryAttrID) ?? '__main__',
+              extraCategory = dataset?.getStrValue(anID, extraSecondaryAttrID) ?? '__main__',
+              extraPrimaryCategory = dataset?.getStrValue(anID, extraPrimaryAttrID) ?? '__main__';
             if (!bins[category]) {
               bins[category] = {};
             }
@@ -231,10 +230,9 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
         getPrimaryScreenCoord = (anID: string) => {
           const primaryCoord = primaryAxisScale(dataset?.getNumeric(anID, primaryAttrID) ?? -1) /
               numExtraPrimaryBands,
-            extraPrimaryValue = dataset?.getValue(anID, extraPrimaryAttrID),
+            extraPrimaryValue = dataset?.getStrValue(anID, extraPrimaryAttrID),
             extraPrimaryCoord = extraPrimaryValue
-              // TODO: Determine why toString is needed and if it's OK to use
-              ? extraPrimaryAxisScale(dataset?.getValue(anID, extraPrimaryAttrID)?.toString() ?? '__main__') ?? 0
+              ? extraPrimaryAxisScale(extraPrimaryValue ?? '__main__') ?? 0
               : 0;
           return primaryCoord + extraPrimaryCoord;
         },

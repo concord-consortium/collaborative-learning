@@ -1,5 +1,7 @@
-import {Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
+import {Instance, ISerializedActionCall, SnapshotIn, types, getSnapshot} from "mobx-state-tree";
 import {createContext, useContext} from "react";
+import stringify from "json-stringify-pretty-compact";
+
 import {AxisPlace} from "../axis/axis-types";
 import {AxisModelUnion, EmptyAxisModel, IAxisModelUnion} from "../axis/models/axis-model";
 import {
@@ -18,6 +20,7 @@ import {
   defaultStrokeColor,
   kellyColors
 } from "../../../utilities/color-utils";
+import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 
 export interface GraphProperties {
   axes: Record<string, IAxisModelUnion>
@@ -104,6 +107,14 @@ export const GraphModel = TileContentModel
     },
     axisShouldShowGridLines(place: AxisPlace) {
       return self.plotType === 'scatterPlot' && ['left', 'bottom'].includes(place);
+    },
+    exportJson(options?: ITileExportOptions) {
+      const snapshot = getSnapshot(self);
+
+      // json-stringify-pretty-compact is used, so the exported content is more
+      // compact. It results in something close to what we used to get when the
+      // export was created using a string builder.
+      return stringify(snapshot, {maxLength: 200});
     }
   }))
   .actions(self => ({

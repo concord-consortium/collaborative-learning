@@ -18,12 +18,12 @@ interface IProps {
 }
 
 const removeAttrItemLabelKeys: Record<string, string> = {
-  "x": "Remove X: %@",
-  "y": "Remove Y: %@",
-  "rightNumeric": "Remove Y: %@",
-  "legend": "Remove Legend: %@",
-  "topSplit": "Remove Side-by-side Layout by %@",
-  "rightSplit": "Remove Vertical Layout by %@"
+  "x": "DG.DataDisplayMenu.removeAttribute_x",
+  "y": "DG.DataDisplayMenu.removeAttribute_y",
+  "rightNumeric": "DG.DataDisplayMenu.removeAttribute_y2",
+  "legend": "DG.DataDisplayMenu.removeAttribute_legend",
+  "topSplit": "DG.DataDisplayMenu.removeAttribute_top",
+  "rightSplit": "DG.DataDisplayMenu.removeAttribute_right"
 };
 
 const _AxisOrLegendAttributeMenu = ({ place, target, portal,
@@ -49,7 +49,9 @@ const _AxisOrLegendAttributeMenu = ({ place, target, portal,
           onCloseRef.current = onClose;
           return (
             <>
-              <MenuButton style={{ ...overlayBounds, ...buttonStyles }}>{attribute?.name}</MenuButton>
+              <MenuButton style={{ ...overlayBounds, ...buttonStyles }}>
+                {attribute?.name}
+              </MenuButton>
               <MenuList>
                 { data?.attributes?.map((attr) => {
                   return (
@@ -65,8 +67,8 @@ const _AxisOrLegendAttributeMenu = ({ place, target, portal,
                       {removeAttrItemLabel}
                     </MenuItem>
                     <MenuItem onClick={() => onTreatAttributeAs(place, attribute?.id, treatAs)}>
-                      {treatAs === "categorical" && "Treat as Categorical"}
-                      {treatAs === "numeric" && "Treat as Numeric"}
+                      {treatAs === "categorical" && "DG.DataDisplayMenu.treatAsCategorical"}
+                      {treatAs === "numeric" && "DG.DataDisplayMenu.treatAsNumeric"}
                     </MenuItem>
                   </>
                 }

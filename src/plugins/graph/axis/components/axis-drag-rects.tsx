@@ -19,9 +19,9 @@ interface IProps {
 
 type D3Handler = (this: Element, event: any, d: any) => void
 
-const axisDragHints = [t("Drag to change axis lower bound"),
-  t("Drag to translate axis scale"),
-  t("Drag to change axis upper bound")];
+const axisDragHints = [t("DG.CellLinearAxisView.lowerPanelTooltip"),
+  t("DG.CellLinearAxisView.midPanelTooltip"),
+  t("DG.CellLinearAxisView.upperPanelTooltip")];
 
 export const AxisDragRects = observer(
   function AxisDragRects({axisModel, axisWrapperElt, numSubAxes = 1, subAxisIndex = 0}: IProps) {
@@ -39,8 +39,7 @@ export const AxisDragRects = observer(
         dilationAnchorCoord: number,
         dragging = false;
 
-      // TODO: Determine if adding `self` here and using it in place of `this` is valid.
-      const onDragStart: D3Handler = (self) => {
+      const onDragStart: D3Handler = function() {
           const subAxisLength = layout.getAxisLength(place) / numSubAxes,
             rangeMin = subAxisIndex * subAxisLength,
             rangeMax = (subAxisIndex + 1) * subAxisLength,
@@ -51,12 +50,12 @@ export const AxisDragRects = observer(
           d3ScaleAtStart = d3Scale.copy();
           lower = d3ScaleAtStart.domain()[0];
           upper = d3ScaleAtStart.domain()[1];
-          select(self as Element)
+          select(this)
             .classed('dragging', true);
           axisModel.setTransitionDuration(0);
         },
 
-        onDilateStart: D3Handler = (event: { x: number, y: number }) => {
+        onDilateStart: D3Handler = function(event: { x: number, y: number }) {
           select(self)
             .classed('dragging', true);
           multiScale = layout.getAxisMultiScale(place);
@@ -108,9 +107,8 @@ export const AxisDragRects = observer(
           }
         },
 
-        // TODO: Determine if adding `self` here and using it in place of `this` is valid.
-        onDragEnd = (self: any) => {
-          select(self)
+        onDragEnd: D3Handler = function() {
+          select(this)
             .classed('dragging', false);
           dragging = false;
         };

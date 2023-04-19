@@ -10,6 +10,7 @@ registerTileContentInfo({
   defaultContent: () => createGraphModel(),
   defaultHeight: kGraphDefaultHeight,
   modelClass: GraphModel,
+  titleBase: "X-Y Plot",
   type: kGraphTileType
 });
 
