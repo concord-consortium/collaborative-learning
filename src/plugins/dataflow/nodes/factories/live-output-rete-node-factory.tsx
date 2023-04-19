@@ -63,8 +63,6 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
         if (kRoundedOutputTypes.includes(outputType)){
           newValue = this.getNewValueForGrabber(n1);
           const roundedDisplayValue = Math.round((newValue / 10) * 10);
-          // Swap commented/uncommented below to change to display of nearest 1%
-          // nodeValue?.setDisplayMessage(`${newValue}% closed`);
           nodeValue?.setDisplayMessage(`${roundedDisplayValue}% closed`);
         }
 
@@ -90,23 +88,23 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
     return hubSelect.getChannels().filter((c: NodeChannelInfo) => c.channelId.charAt(2) === selectedHubIdentifier);
   }
 
-  // NEXT - you need below to know the relay index for the selected output type, so you can call this down in getRelayMessageReceived
   private getSelectedRelayIndex(node: Node){
     const outputTypeControl = node.controls.get("liveOutputType") as DropdownListControl;
     return kRelayMappings.indexOf(outputTypeControl.getValue());
   }
 
-  private updateHubsStatusReport(n: Node){
-    // use existing missing state information to figure out & display if hub is active
-    const hubSelect = n.controls.get("hubSelect") as DropdownListControl;
+  private updateHubsStatusReport(node: Node){
+    const hubSelect = node.controls.get("hubSelect") as DropdownListControl;
     const hubStatusArray: HubStatus[] = hubSelect.getChannels()
-      .filter((c: NodeChannelInfo) => c.type === "temperature" && c.deviceFamily === "microbit")
+      .filter((c: NodeChannelInfo) => c.deviceFamily === "microbit")
       .map((c: NodeChannelInfo) => {
-        return { id: c.channelId.charAt(2), missing: c.missing};
+        return {
+          id: c.channelId.charAt(2), // this char is hub identifier
+          missing: c.missing
+        };
       });
 
     hubStatusArray.forEach((s: HubStatus) => {
-      // "active" is !missing
       hubSelect.setActiveOption(s.id, !s.missing);
     });
   }
@@ -157,6 +155,5 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
       node.removeInput(input);
     }
   }
-
 }
 
