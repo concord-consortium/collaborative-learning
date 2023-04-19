@@ -239,23 +239,26 @@ export const DataflowContentModel = TileContentModel
     removeLinkedTable(tableId: string) {
       const sharedModelManager = self.tileEnv?.sharedModelManager;
       if (sharedModelManager?.isReady && self.isLinkedToTable(tableId)) {
-        // const sharedTable = sharedModelManager.findFirstSharedModelByType(SharedDataSet, tableId);
-
         //sever connection table -> table sharedDataSet
         const tableTileContents = getTileContentById(self, tableId); //get tableTile contents given a tableId
         self.sharedModel && sharedModelManager.removeTileSharedModel(tableTileContents, self.sharedModel);
         //create a dataSet with two attributes with X / Y, link table tile to this dataSet
         const title = tableTileContents ? getTileTitleFromContent(tableTileContents) : undefined;
-        const dataSet = DataSet.create({name: title});
-        addAttributeToDataSet(dataSet, { name: "x" });
-        addAttributeToDataSet(dataSet, { name: "y" });
-        const newSharedDataSet = SharedDataSet.create({ providerId: tableId, dataSet });
+        const newDataSet = this.createDefaultDataSet(title);
+        const newSharedDataSet = newDataSet && SharedDataSet.create({ providerId: tableId, dataSet: newDataSet });
         sharedModelManager.addTileSharedModel(tableTileContents, newSharedDataSet);
       }
       else {
         console.warn("DataflowContent.addLinkedTable unable to unlink table");
       }
+    },
+    createDefaultDataSet(title: string | undefined){
+      const dataSet = DataSet.create({name: title});
+      addAttributeToDataSet(dataSet, { name: "x" });
+      addAttributeToDataSet(dataSet, { name: "y" });
+      return dataSet;
     }
+
   }));
 
 export type DataflowContentModelType = Instance<typeof DataflowContentModel>;

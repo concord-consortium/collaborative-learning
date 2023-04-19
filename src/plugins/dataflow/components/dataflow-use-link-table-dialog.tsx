@@ -24,7 +24,7 @@ const Content: React.FC<IContentProps>
       <>
         <div className="prompt">
           To link this program to a table, record data, then select a table from the link list.
-          To unlink this graph from a table, select a table from the unlink list.
+          To unlink this program from a table, select a table from the unlink list.
         </div>
         <select ref={selectElt} value={selectValue} data-test="link-table-select"
                                 onChange={e => {
@@ -57,21 +57,23 @@ interface IProps {
   handleRequestTableLink: ((tableId: string) => void) | undefined;
   handleRequestTableUnlink: ((tableId: string) => void) | undefined;
 }
+
 export const useLinkTableDialog = ({ tableTiles, model, handleRequestTableLink, handleRequestTableUnlink }: IProps) => {
   const [selectValue, setSelectValue] = useState("");
+  const content = model.content as DataflowContentModelType;
+
   const handleClick = () => {
-    const _content = model.content as DataflowContentModelType;
+    // const _content = model.content as DataflowContentModelType;
     const tileInfo = tableTiles.find(tile => tile.id === selectValue);
 
     if (tileInfo) {
-      if (_content.isLinkedToTable(tileInfo.id)) {
+      if (content.isLinkedToTable(tileInfo.id)) {
         handleRequestTableUnlink?.(tileInfo.id);
       } else {
         handleRequestTableLink?.(tileInfo.id);
       }
     }
   };
-  const content = model.content as DataflowContentModelType;
   const unlinkedTiles = tableTiles.filter(tileInfo => !content.isLinkedToTable(tileInfo.id));
   const linkedTiles = tableTiles.filter(tileInfo => content.isLinkedToTable(tileInfo.id));
   const [showModal, hideModal] = useCustomModal({

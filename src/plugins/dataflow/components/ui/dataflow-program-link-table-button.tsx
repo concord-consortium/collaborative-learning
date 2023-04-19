@@ -3,8 +3,8 @@ import classNames from "classnames";
 import LinkTableIcon from "../../assets/icons/link-table-icon.svg"; //we may need to change to icon with icon up
 import { useFeatureFlag } from "../../../../hooks/use-stores";
 import { useTableLinkingDataFlow } from "../dataflow-use-table-linking";
-import { ITileModel } from "src/models/tiles/tile-model";
-import { ITileLinkMetadata } from "src/models/tiles/table-link-types";
+import { ITileModel } from "../../../../models/tiles/tile-model";
+import { ITileLinkMetadata } from "../../../../models/tiles/table-link-types";
 import { IDataFlowActionHandlers } from "../dataflow-shared";
 
 import "./dataflow-program-link-table-button.scss";
@@ -37,7 +37,7 @@ export const DataflowLinkTableButton: React.FC<IProps> = (props: IProps) => {
     e.stopPropagation();
   };
 
-  return useFeatureFlag("DataflowLinkedTables") //change to DataflowLinkedTable
+  return useFeatureFlag("DataflowLinkedTables")
           ? <div
               key="table-link-button"
               className={classes}
