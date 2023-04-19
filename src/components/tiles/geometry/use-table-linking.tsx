@@ -16,8 +16,7 @@ interface IProps {
   onRequestTilesOfType: (tileType: string) => ITileLinkMetadata[];
   actionHandlers?: IToolbarActionHandlers;
 }
-export const useTableLinking = (props: IProps) => {
-  const { documentId, model, onRequestTilesOfType, actionHandlers } = props;
+export const useTableLinking = ({documentId, model, onRequestTilesOfType, actionHandlers}: IProps) => {
   const {handleRequestTableLink, handleRequestTableUnlink} = actionHandlers || {};
   const modelId = model.id;
   const showLinkButton = useFeatureFlag("GeometryLinkedTables");
@@ -44,7 +43,6 @@ interface IUseLinkableTableTilesProps {
   model: ITileModel;
   onRequestTilesOfType: (tileType: string) => ITileLinkMetadata[];
 }
-
 const useLinkableTableTiles = ({ onRequestTilesOfType }: IUseLinkableTableTilesProps) => {
   const tableTiles = useCurrent(onRequestTilesOfType(kTableTileType));
   // add default title if there isn't a title
