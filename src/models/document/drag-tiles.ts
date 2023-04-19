@@ -1,60 +1,104 @@
 import { uniqueId } from "../../utilities/js-utils";
 import { cloneTileSnapshotWithNewId, IDragTileItem, ITilePosition } from "../tiles/tile-model";
-import { DocumentContentModelType, IDragTilesData } from "./document-content";
+import { IDragTilesData } from "./document-content-types";
 import { getTileContentInfo } from "../tiles/tile-content-info";
 import { DEBUG_DROP } from "../../lib/debug";
+import { BaseDocumentContentModel } from "./base-document-content";
 
-// TODO: move the drop tile logic here too
-
-export function getTilePositions(tileIds: string[], documentContent?: DocumentContentModelType) {
-  if (!documentContent) return [];
-  return tileIds.map(tileId => {
-    const rowId = documentContent.findRowContainingTile(tileId);
-    const rowIndex = rowId && documentContent.getRowIndex(rowId) || 0;
-    const row = rowId ? documentContent.getRow(rowId) : undefined;
-    const tileIndex = row?.tiles.findIndex(t => t.tileId === tileId) || 0;
-    return { tileId, rowIndex, row, tileIndex };
-  });
-}
-
-export function getDragTileItems(documentContent: DocumentContentModelType, tileIds: string[]) {
-  const dragTileItems: IDragTileItem[] = [];
-
-  const idMap: { [id: string]: string } = {};
-  tileIds.forEach(tileId => idMap[tileId] = uniqueId());
-
-  const tilePositions = getTilePositions(tileIds, documentContent);
-
-  tilePositions.forEach(({ tileId, rowIndex, row, tileIndex }) => {
-    // Note: previously this function would be passed the tileModel being
-    // dragged. It would accept a tileId if it matched the tileModel.id even if
-    // `documentContent.getTile(tileId)` did not return a tile model. This seems
-    // like it would mask an error and also complicates the code.
-    const srcTile = documentContent.getTile(tileId);
-    if (!srcTile) {
-      return;
-    }
-
-    // Note: previously this would look up the "contentId" of the srcTile using
-    // `getContentIdFromNode`. If it didn't exist or was different from
-    // `documentContent.contentId` the tile would be skipped. This contentId is
-    // found by looking up the contentDocument parent of the tile and getting is
-    // `contentId`. Because srcTile is found via `documentContent.getTile` this
-    // should guarantee that the contentId return by `getContentIdFromNode`
-    // always matches the dragSrcContentId.
-    const rowHeight = row?.height;
-    const clonedTile = cloneTileSnapshotWithNewId(srcTile, idMap[srcTile.id]);
-    getTileContentInfo(clonedTile.content.type)?.contentSnapshotPostProcessor?.(clonedTile.content, idMap);
-    dragTileItems.push({
-      rowIndex, rowHeight, tileIndex,
-      tileId: srcTile.id,
-      tileContent: JSON.stringify(clonedTile),
-      tileType: srcTile.content.type
+/**
+ * This is one part of the DocumentContentModel. The other part is
+ * BaseDocumentContentModel. It was split out to reduce the size of the
+ * DocumentContentModel.
+ *
+ * This file should contain the any properties, views, and actions that are
+ * related to dragging and dropping tiles.
+ *
+ * TODO: move tile dropping actions from BaseDocumentContentModel here TODO:
+ * consider extending this to include tile copying since that is fundamental
+ * part of dragging and dropping.
+ */
+export const DocumentContentModelWithTileDragging = BaseDocumentContentModel
+.named("DocumentContentModelWithTileDragging")
+.views(self => ({
+  getTilePositions(tileIds: string[]) {
+    return tileIds.map(tileId => {
+      const rowId = self.findRowContainingTile(tileId);
+      const rowIndex = rowId && self.getRowIndex(rowId) || 0;
+      const row = rowId ? self.getRow(rowId) : undefined;
+      const tileIndex = row?.tiles.findIndex(t => t.tileId === tileId) || 0;
+      return { tileId, rowIndex, row, tileIndex };
     });
-  });
+  }
+}))
+.views(self => ({
+  getDragTileItems(tileIds: string[]) {
+    const dragTileItems: IDragTileItem[] = [];
 
-  return dragTileItems;
-}
+    const idMap: { [id: string]: string } = {};
+    tileIds.forEach(tileId => idMap[tileId] = uniqueId());
+
+    const tilePositions = self.getTilePositions(tileIds);
+
+    tilePositions.forEach(({ tileId, rowIndex, row, tileIndex }) => {
+      // Note: previously this function would be passed the tileModel being
+      // dragged. It would accept a tileId if it matched the tileModel.id even if
+      // `documentContent.getTile(tileId)` did not return a tile model. This seems
+      // like it would mask an error and also complicates the code.
+      const srcTile = self.getTile(tileId);
+      if (!srcTile) {
+        return;
+      }
+
+      // Note: previously this would look up the "contentId" of the srcTile using
+      // `getContentIdFromNode`. If it didn't exist or was different from
+      // `documentContent.contentId` the tile would be skipped. This contentId is
+      // found by looking up the contentDocument parent of the tile and getting is
+      // `contentId`. Because srcTile is found via `documentContent.getTile` this
+      // should guarantee that the contentId return by `getContentIdFromNode`
+      // always matches the dragSrcContentId.
+      const rowHeight = row?.height;
+      const clonedTile = cloneTileSnapshotWithNewId(srcTile, idMap[srcTile.id]);
+      getTileContentInfo(clonedTile.content.type)?.contentSnapshotPostProcessor?.(clonedTile.content, idMap);
+      dragTileItems.push({
+        rowIndex, rowHeight, tileIndex,
+        tileId: srcTile.id,
+        tileContent: JSON.stringify(clonedTile),
+        tileType: srcTile.content.type
+      });
+    });
+
+    return dragTileItems;
+  }
+}))
+.views(self => ({
+  /**
+   *
+   * @param documentContent
+   * @param tileIds
+   * @returns
+   */
+  getDragTiles(tileIds: string[]): IDragTilesData {
+
+    const sharedManager = self.tileEnv?.sharedModelManager;
+
+    // This is an ephemeral id DocumentContent#contentId
+    // it is like an instance id for the document content it
+    // will change on each load of the document
+    const sourceDocId = self.contentId;
+
+    const dragTiles: IDragTilesData = {
+      sourceDocId,
+      tiles: self.getDragTileItems(tileIds),
+      sharedModels: sharedManager?.getSharedModelDragDataForTiles(tileIds) ?? []
+    };
+
+    // create a sorted array of selected tiles
+    orderTilePositions(dragTiles.tiles);
+
+    return dragTiles;
+  }
+}));
+
 
 // Sorts the given tile positions in top->bottom, left->right order IN PLACE!
 export function orderTilePositions(tilePositions: ITilePosition[]) {
@@ -66,35 +110,6 @@ export function orderTilePositions(tilePositions: ITilePosition[]) {
     return 0;
   });
   return tilePositions;
-}
-
-/**
- *
- * @param documentContent
- * @param tileIds
- * @returns
- */
-export function getDragTiles(
-  documentContent: DocumentContentModelType,
-  tileIds: string[]): IDragTilesData {
-
-  const sharedManager = documentContent.tileEnv?.sharedModelManager;
-
-  // This is an ephemeral id DocumentContent#contentId
-  // it is like an instance id for the document content it
-  // will change on each load of the document
-  const sourceDocId = documentContent.contentId;
-
-  const dragTiles: IDragTilesData = {
-    sourceDocId,
-    tiles: getDragTileItems(documentContent, tileIds),
-    sharedModels: sharedManager?.getSharedModelDragDataForTiles(tileIds) ?? []
-  };
-
-  // create a sorted array of selected tiles
-  orderTilePositions(dragTiles.tiles);
-
-  return dragTiles;
 }
 
 /* istanbul ignore next: this only used for debugging */

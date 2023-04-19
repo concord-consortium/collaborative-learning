@@ -3,11 +3,11 @@ import React from "react";
 
 import { BaseComponent, IBaseProps } from "./base";
 import { DocumentModelType } from "../models/document/document";
-import { IDocumentContentAddTileOptions, IDragToolCreateInfo } from "../models/document/document-content";
-import { getDragTileItems, getTilePositions, orderTilePositions } from "../models/document/drag-tiles";
+import { orderTilePositions } from "../models/document/drag-tiles";
 import { IToolbarModel } from "../models/stores/problem-configuration";
 import { IToolbarButtonModel } from "../models/tiles/toolbar-button";
 import { getTileContentInfo, ITileContentInfo } from "../models/tiles/tile-content-info";
+import { IDocumentContentAddTileOptions, IDragToolCreateInfo } from "../models/document/document-content-types";
 import { DeleteButton } from "./delete-button";
 import { IToolbarButtonProps, ToolbarButtonComponent } from "./toolbar-button";
 import { EditableTileApiInterfaceRefContext } from "./tiles/tile-api";
@@ -118,7 +118,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   private showDropRowHighlightAfterSelectedTiles = () => {
     const { document } = this.props;
     const { ui: { selectedTileIds } } = this.stores;
-    const tilePositions = getTilePositions(Array.from(selectedTileIds), document.content);
+    const tilePositions = document.content?.getTilePositions(Array.from(selectedTileIds)) || [];
     const rowIndex = document.content?.getRowAfterTiles(tilePositions);
     document.content?.showPendingInsertHighlight(true, rowIndex);
   };
@@ -225,10 +225,11 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     const selectedTileIds = ui.selectedTileIds;
 
     // Sort the selected tile ids in top->bottom, left->right order so they duplicate in the correct formation
-    const tilePositions = getTilePositions(Array.from(selectedTileIds), document.content);
+    const tilePositions = document.content?.getTilePositions(Array.from(selectedTileIds)) || [];
     const sortedTileIds = orderTilePositions(tilePositions).map(info => info.tileId);
+    const dragTileItems = document.content?.getDragTileItems(sortedTileIds) || [];
 
-    document.content?.duplicateTiles(getDragTileItems(document.content, sortedTileIds));
+    document.content?.duplicateTiles(dragTileItems);
     ui.clearSelectedTiles();
     this.removeDropRowHighlight();
   }

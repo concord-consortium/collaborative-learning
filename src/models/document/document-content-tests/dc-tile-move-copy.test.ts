@@ -4,7 +4,6 @@ import { mockUniqueId, parsedExport, setupDocumentContent,
   getColumnWidths, parsedSections } from "./dc-test-utils";
 import { DocumentContentModelType, DocumentContentSnapshotType } from "../document-content";
 import { IDropRowInfo } from "../tile-row";
-import { getDragTileItems } from "../drag-tiles";
 
 // TODO: this content has a few problems in it:
 // - the table model errors when trying to load it
@@ -59,7 +58,7 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
   */
 
   function getDocumentDragTileItems(tileIds: string[]) {
-    return getDragTileItems(documentContent, tileIds);
+    return documentContent.getDragTileItems(tileIds);
   }
 
   let getRowLayout: () => any;

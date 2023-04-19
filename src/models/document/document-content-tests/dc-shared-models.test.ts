@@ -4,7 +4,6 @@ import { getSnapshot } from "mobx-state-tree";
 import { parsedExport, getColumnWidths } from "./dc-test-utils";
 import { DocumentContentModel, DocumentContentModelType, DocumentContentSnapshotType } from "../document-content";
 import { IDropRowInfo } from "../tile-row";
-import { getDragTileItems, getDragTiles } from "../drag-tiles";
 
 import { IDocumentImportSnapshot } from "../document-content-import-types";
 import { SharedModelDocumentManager } from "../shared-model-document-manager";
@@ -36,7 +35,7 @@ describe("DocumentContentModel -- shared Models --", () => {
   let columnWidths: Record<string, number>;
 
   function getDocumentDragTileItems(tileIds: string[]) {
-    return getDragTileItems(documentContent, tileIds);
+    return documentContent.getDragTileItems(tileIds);
   }
 
   beforeEach(() => {
@@ -254,7 +253,7 @@ Object {
 
   describe("single tile copies", () => {
     it("can copy a tile into another empty document", () => {
-      const dragTileInfo = getDragTiles(documentContent, ["tableTool"]);
+      const dragTileInfo = documentContent.getDragTiles(["tableTool"]);
       const targetDocument = createDocumentContentModel({tiles: []});
       const dropRowInfo: IDropRowInfo = {
         rowInsertIndex: 0
@@ -370,7 +369,7 @@ Object {
     });
 
     it("can copy a tile into another document's row", () => {
-      const dragTileInfo = getDragTiles(documentContent, ["tableTool"]);
+      const dragTileInfo = documentContent.getDragTiles(["tableTool"]);
       // The import doc needs to have a tile in the row for the first
       // row to be created
       const targetDocument = createDocumentContentModel({
@@ -509,7 +508,7 @@ Object {
 
   describe("multiple tile copies", () => {
     it("can copy two tiles into another document", () => {
-      const dragTileInfo = getDragTiles(documentContent, ["tableTool", "graphTool"]);
+      const dragTileInfo = documentContent.getDragTiles(["tableTool", "graphTool"]);
       const targetDocument = createDocumentContentModel({tiles: []});
       const dropRowInfo: IDropRowInfo = {
         rowInsertIndex: 0
