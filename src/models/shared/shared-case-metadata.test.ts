@@ -7,6 +7,7 @@ import { SharedModel } from "./shared-model";
 var mockNodeIdCount = 0;
 jest.mock("../../utilities/js-utils", () => ({
   typedId: () => `test-${++mockNodeIdCount}`,
+  uniqueId: () => `test-${++mockNodeIdCount}`,
   uniqueOrderedId: () => `order-${++mockNodeIdCount}`
 }));
 

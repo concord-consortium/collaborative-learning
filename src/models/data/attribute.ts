@@ -28,7 +28,7 @@ export const Attribute = types.model("Attribute", {
   numValues: self.values as number[]
 })).views(self => ({
   get emptyCount() {
-    return self.strValues.reduce((prev, current) => current === "" ? ++prev : prev, 0);
+    return self.strValues.reduce((prev, current) => current == null || current === "" ? ++prev : prev, 0);
   },
   get numericCount() {
     return self.numValues.reduce((prev, current) => isFinite(current) ? ++prev : prev, 0);
