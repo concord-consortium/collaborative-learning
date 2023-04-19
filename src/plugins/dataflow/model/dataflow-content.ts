@@ -8,15 +8,13 @@ import { ITileMetadataModel } from "../../../models/tiles/tile-metadata";
 import { tileModelHooks } from "../../../models/tiles/tile-model-hooks";
 import { TileContentModel } from "../../../models/tiles/tile-content";
 import { DEFAULT_DATA_RATE } from "./utilities/node";
-import { getTileModel, setTileTitleFromContent } from "../../../models/tiles/tile-model";
+import { getTileModel, setTileTitleFromContent, getTileTitleFromContent } from "../../../models/tiles/tile-model";
 import { SharedDataSet, kSharedDataSetType, SharedDataSetType  } from "../../../models/shared/shared-data-set";
 import { addAttributeToDataSet, addCasesToDataSet, DataSet } from "../../../models/data/data-set";
 import { updateSharedDataSetColors } from "../../../models/shared/shared-data-set-colors";
 import { uniqueId } from "../../../utilities/js-utils";
 import { SharedModelType } from "../../../models/shared/shared-model";
 import { getTileContentById } from "../../../utilities/mst-utils";
-import { TableContentModel } from "../../../models/tiles/table/table-content";
-import { getTileTitleFromContent } from "../../../models/tiles/tile-model";
 
 export const kDataflowTileType = "Dataflow";
 
@@ -112,9 +110,6 @@ export const DataflowContentModel = TileContentModel
     },
     get isLinked(){
       return self.linkedDataSets.length > 0;
-    },
-    get linkedTableIds() {
-      return self.linkedDataSets.map(link => link.providerId);
     },
     isLinkedToTable(tableId: string) {
       const sharedModelManager = self.tileEnv?.sharedModelManager;
@@ -235,7 +230,7 @@ export const DataflowContentModel = TileContentModel
         self.sharedModel && sharedModelManager.addTileSharedModel(tableTile, self.sharedModel);
       }
       else {
-        console.warn("GeometryContent.addLinkedTable unable to link table");
+        console.warn("DataflowContent.addLinkedTable unable to link table");
       }
     },
     removeLinkedTable(tableId: string) {
@@ -254,7 +249,7 @@ export const DataflowContentModel = TileContentModel
         sharedModelManager.addTileSharedModel(tableTileContents, newSharedDataSet);
       }
       else {
-        console.warn("GeometryContent.addLinkedTable unable to unlink table");
+        console.warn("DataflowContent.addLinkedTable unable to unlink table");
       }
     }
   }));

@@ -408,6 +408,5 @@ export const ProgramDataRates: ProgramDataRate[] = [
     val: 60000
   }
 ];
-
 export const kSensorSelectMessage = "Select a sensor";
 export const kSensorMissingMessage = "⚠️";
