@@ -2,7 +2,7 @@ import React from "react";
 import classNames from "classnames";
 import LinkTableIcon from "../../assets/icons/link-table-icon.svg"; //we may need to change to icon with icon up
 import { useFeatureFlag } from "../../../../hooks/use-stores";
-import { useTableLinkingDataFlow } from "../dataflow-use-table-linking";
+import { useTableLinkingDataFlow } from "../use-table-linking-dataflow";
 import { ITileModel } from "../../../../models/tiles/tile-model";
 import { ITileLinkMetadata } from "../../../../models/tiles/table-link-types";
 import { IDataFlowActionHandlers } from "../dataflow-shared";

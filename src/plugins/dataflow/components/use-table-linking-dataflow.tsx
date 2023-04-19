@@ -7,7 +7,7 @@ import {
   addTableToDocumentMap, getLinkedTableIndex, getTableLinkColors, removeTableFromDocumentMap
 } from "../../../models/tiles/table-links";
 import { ITileModel } from "../../../models/tiles/tile-model";
-import { useLinkTableDialog } from "./dataflow-use-link-table-dialog";
+import { useLinkTableDialogDataFlow } from "./use-link-table-dialog-dataflow";
 import { IDataFlowActionHandlers } from "./dataflow-shared";
 
 //TODO: this is generally a copy of use-table-linking.tsx for Geometry Tile
@@ -31,7 +31,7 @@ export const useTableLinkingDataFlow = (props: IProps) => {
   const linkColors = getTableLinkColors(modelId);
 
   const [showLinkTableDialog] =
-          useLinkTableDialog({ tableTiles, model, handleRequestTableLink, handleRequestTableUnlink });
+          useLinkTableDialogDataFlow({ tableTiles, model, handleRequestTableLink, handleRequestTableUnlink });
 
   useEffect(() => {
     documentId && addTableToDocumentMap(documentId, modelId);

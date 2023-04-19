@@ -5,7 +5,7 @@ import { DataflowContentModelType } from "../model/dataflow-content";
 import { ITileLinkMetadata } from "../../../models/tiles/table-link-types";
 import { ITileModel } from "../../../models/tiles/tile-model";
 
-import "./dataflow-use-link-table-dialog.scss";
+import "./use-link-table-dialog-dataflow.scss";
 
 //TODO: this is generally a copy of use-link-table-dialog.tsx for Geometry Tile
 //consider refactoring -> https://www.pivotaltracker.com/n/projects/2441242/stories/184992684
@@ -58,7 +58,9 @@ interface IProps {
   handleRequestTableUnlink: ((tableId: string) => void) | undefined;
 }
 
-export const useLinkTableDialog = ({ tableTiles, model, handleRequestTableLink, handleRequestTableUnlink }: IProps) => {
+export const useLinkTableDialogDataFlow = ({ tableTiles, model, handleRequestTableLink,
+  handleRequestTableUnlink }: IProps) => {
+
   const [selectValue, setSelectValue] = useState("");
   const content = model.content as DataflowContentModelType;
 
