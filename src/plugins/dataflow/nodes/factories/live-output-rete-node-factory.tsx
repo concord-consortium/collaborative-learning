@@ -11,6 +11,11 @@ interface HubStatus {
   id: string,
   missing: boolean
 }
+
+function getRelayMessageReceived(node: Node) {
+  console.log("| given the node, can we determne if the relay state has been receieved?")
+  return "(sent) or (received)";
+}
 export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
   constructor(numSocket: Socket) {
     super("Live Output", numSocket);
@@ -45,11 +50,19 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
         const nodeValue = _node.inputs.get("nodeValue")?.control as InputValueControl;
         let newValue = isNaN(n1) ? 0 : n1;
 
-        const binaryOutputTypes = ["Light Bulb", "Heat Lamp", "Fan", "Sprinkler"];
+        const binaryOutputTypes = ["Heat Lamp", "Fan", "Sprinkler", "Light Bulb"];
+        const relayOutputTypes =  ["Heat Lamp", "Fan", "Sprinkler"]
 
         if (binaryOutputTypes.includes(outputType)){
           newValue = isNaN(n1) ? 0 : +(n1 !== 0);
-          nodeValue?.setDisplayMessage(newValue === 0 ? "off" : "on");
+          const offOnString = newValue === 0 ? "off" : "on";
+          if (!relayOutputTypes.includes(outputType)) {
+            nodeValue?.setDisplayMessage(offOnString);
+          }
+          // handle relay outputs, which are binarty but must also display if the relay state has been received
+          else if (relayOutputTypes.includes(outputType)) {
+            nodeValue?.setDisplayMessage(offOnString + " " + getRelayMessageReceived(_node));
+          }
         }
 
         if (outputType === "Grabber"){
