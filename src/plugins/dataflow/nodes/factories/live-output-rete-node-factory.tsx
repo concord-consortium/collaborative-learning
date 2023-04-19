@@ -85,7 +85,9 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
   private getHubChannelsForNode(node: Node){
     const hubSelect = node.controls.get("hubSelect") as DropdownListControl;
     const selectedHubIdentifier = hubSelect.getValue().slice(-1); // "micro:bit hub a" => "a"
-    return hubSelect.getChannels().filter((c: NodeChannelInfo) => c.channelId.charAt(2) === selectedHubIdentifier);
+    const hubSelectChannels = hubSelect.getChannels();
+    if (!hubSelectChannels) return [];
+    return hubSelectChannels.filter((c: NodeChannelInfo) => c.channelId.charAt(2) === selectedHubIdentifier);
   }
 
   private getSelectedRelayIndex(node: Node){
@@ -95,7 +97,9 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
 
   private updateHubsStatusReport(node: Node){
     const hubSelect = node.controls.get("hubSelect") as DropdownListControl;
-    const hubStatusArray: HubStatus[] = hubSelect.getChannels()
+    const hubsChannels = hubSelect.getChannels();
+    if (!hubsChannels) return;
+    const hubStatusArray: HubStatus[] = hubsChannels
       .filter((c: NodeChannelInfo) => c.deviceFamily === "microbit")
       .map((c: NodeChannelInfo) => {
         return {
@@ -110,8 +114,9 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   private getRelayMessageReceived(node: Node) {
-    const hubRelaysState =  this.getHubChannelsForNode(node)
-      .filter((c: NodeChannelInfo) => c.type === "relays")[0].relaysState;
+    const hubRelaysState =  this.getHubChannelsForNode(node);
+    if (hubRelaysState.length === 0) return "";
+    hubRelaysState.filter((c: NodeChannelInfo) => c.type === "relays")[0].relaysState;
     const valueOfRelayAtIndex = hubRelaysState[this.getSelectedRelayIndex(node)];
     return node.data.nodeValue === valueOfRelayAtIndex ? "(recieved)" : "(sent)";
   }
