@@ -7,28 +7,31 @@ import {
   addTableToDocumentMap, getLinkedTableIndex, getTableLinkColors, removeTableFromDocumentMap
 } from "../../../models/tiles/table-links";
 import { ITileModel } from "../../../models/tiles/tile-model";
-import { useLinkTableDialog } from "./use-link-table-dialog";
-import { IToolbarActionHandlers } from "./geometry-shared";
+import { useLinkTableDialogDataFlow } from "./use-link-table-dialog-dataflow";
+import { IDataFlowActionHandlers } from "./dataflow-shared";
 
-//TODO: use-table-linking-dataflow.tsx is very similar
+//TODO: this is generally a copy of use-table-linking.tsx for Geometry Tile
 //consider refactoring -> https://www.pivotaltracker.com/n/projects/2441242/stories/184992684
 
 interface IProps {
   documentId?: string;
   model: ITileModel;
   onRequestTilesOfType: (tileType: string) => ITileLinkMetadata[];
-  actionHandlers?: IToolbarActionHandlers;
+  actionHandlers?: IDataFlowActionHandlers; //maybe get rid of
 }
-export const useTableLinking = ({documentId, model, onRequestTilesOfType, actionHandlers}: IProps) => {
+
+export const useTableLinkingDataFlow = (props: IProps) => {
+  const { documentId, model, onRequestTilesOfType, actionHandlers } = props;
   const {handleRequestTableLink, handleRequestTableUnlink} = actionHandlers || {};
   const modelId = model.id;
-  const showLinkButton = useFeatureFlag("GeometryLinkedTables");
+
+  const showLinkButton = useFeatureFlag("DataflowLinkedTables"); //modified
   const tableTiles = useLinkableTableTiles({ model, onRequestTilesOfType });
   const isLinkEnabled = (tableTiles.length > 0);
   const linkColors = getTableLinkColors(modelId);
 
   const [showLinkTableDialog] =
-          useLinkTableDialog({ tableTiles, model, handleRequestTableLink, handleRequestTableUnlink });
+          useLinkTableDialogDataFlow({ tableTiles, model, handleRequestTableLink, handleRequestTableUnlink });
 
   useEffect(() => {
     documentId && addTableToDocumentMap(documentId, modelId);
@@ -46,9 +49,12 @@ interface IUseLinkableTableTilesProps {
   model: ITileModel;
   onRequestTilesOfType: (tileType: string) => ITileLinkMetadata[];
 }
+
+//this is what tells us which table tiles are currently in the document
 const useLinkableTableTiles = ({ onRequestTilesOfType }: IUseLinkableTableTilesProps) => {
   const tableTiles = useCurrent(onRequestTilesOfType(kTableTileType));
   // add default title if there isn't a title
   return tableTiles.current
           .map((tileInfo, i) => ({ id: tileInfo.id, title: tileInfo.title || `Table ${i + 1}` }));
 };
+

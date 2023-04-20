@@ -35,13 +35,11 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
 
   return (
     <div className="program-editor-topbar">
-
         <DataflowSerialConnectButton
           onSerialRefreshDevices={onSerialRefreshDevices}
           readOnly={readOnly}
           serialDevice={serialDevice}
         />
-
         <div className="topbar-center-container">
           <div className="topbar-blank-or-play">
             {
