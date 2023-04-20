@@ -87,7 +87,7 @@ interface IProps extends SizeMeProps {
   updatePlayBackIndex: (update: string) => void;
   updateRecordIndex: (update: string) => void;
   numNodes: number;
-  tileModel: DataflowContentModelType;
+  tileContent: DataflowContentModelType;
 }
 
 interface IState {
@@ -541,7 +541,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private recordCase = () => {
     const { recordIndex } = this.props;
-    const { programDataRate, dataSet } = this.props.tileModel; //grab the program Sampling Rate to write TimeQuantized
+    const { programDataRate, dataSet } = this.props.tileContent; //grab the program Sampling Rate to write TimeQuantized
 
     //Write case
     //Attributes look like  Time (quantized) as col 1 followed by all nodes
@@ -557,11 +557,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const key = this.getAttributeIdForNode(idx);
       aCase[key] = node.data.nodeValue as string;
     });
-    addCanonicalCasesToDataSet(this.props.tileModel.dataSet, [aCase]);
+    addCanonicalCasesToDataSet(this.props.tileContent.dataSet, [aCase]);
   };
 
   private getAttributeIdForNode = (nodeIndex: number) => {
-    const { dataSet } = this.props.tileModel;
+    const { dataSet } = this.props.tileContent;
     // this function adds one to index to skip time attribute
     return dataSet.attributes[nodeIndex + 1].id;
   };
@@ -650,7 +650,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private tick = () => {
-    const {tileModel, playBackIndex, programRecordState, isPlaying,
+    const {tileContent: tileModel, playBackIndex, programRecordState, isPlaying,
       updateRecordIndex, updatePlayBackIndex } = this.props;
     const dataSet = tileModel.dataSet;
     const now = Date.now();

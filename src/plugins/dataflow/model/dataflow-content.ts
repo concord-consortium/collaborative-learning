@@ -46,6 +46,7 @@ export const DataflowContentModel = TileContentModel
     type: types.optional(types.literal(kDataflowTileType), kDataflowTileType),
     program: types.optional(DataflowProgramModel, getSnapshot(DataflowProgramModel.create())),
     programDataRate: DEFAULT_DATA_RATE,
+    programRecordingMode: 0,
     programZoom: types.optional(ProgramZoom, DEFAULT_PROGRAM_ZOOM),
   })
   .volatile(self => ({
@@ -104,6 +105,7 @@ export const DataflowContentModel = TileContentModel
         `    "dy": ${zoom.dy},`,
         `    "scale": ${zoom.scale}`,
         `  },`,
+        // `  "programRecordingMode: ${self.programRecordingMode}"`,
         `  "program": ${stringify(self.programWithoutRecentValues())}`,
         `}`
       ].join("\n");
@@ -179,6 +181,11 @@ export const DataflowContentModel = TileContentModel
       self.programZoom.dx = dx;
       self.programZoom.dy = dy;
       self.programZoom.scale = scale;
+    },
+    setProgramRecordingMode(){
+      self.programRecordingMode = (self.programRecordingMode + 1) % 3;
+      console.log("self.program:", self.programRecordingMode);
+
     },
     updateAfterSharedModelChanges(sharedModel?: SharedModelType){
       //do nothing
