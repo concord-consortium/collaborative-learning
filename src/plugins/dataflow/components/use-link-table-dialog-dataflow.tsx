@@ -65,7 +65,6 @@ export const useLinkTableDialogDataFlow = ({ tableTiles, model, handleRequestTab
   const content = model.content as DataflowContentModelType;
 
   const handleClick = () => {
-    // const _content = model.content as DataflowContentModelType;
     const tileInfo = tableTiles.find(tile => tile.id === selectValue);
 
     if (tileInfo) {

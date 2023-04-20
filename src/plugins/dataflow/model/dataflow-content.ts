@@ -3,17 +3,18 @@ import { reaction } from "mobx";
 import { cloneDeep} from "lodash";
 import stringify from "json-stringify-pretty-compact";
 import { DataflowProgramModel } from "./dataflow-program-model";
+import { createDefaultDataSet } from "./utilities/create-default-data-set";
+import { DEFAULT_DATA_RATE } from "./utilities/node";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { ITileMetadataModel } from "../../../models/tiles/tile-metadata";
 import { tileModelHooks } from "../../../models/tiles/tile-model-hooks";
 import { TileContentModel } from "../../../models/tiles/tile-content";
-import { DEFAULT_DATA_RATE } from "./utilities/node";
 import { getTileModel, setTileTitleFromContent, getTileTitleFromContent } from "../../../models/tiles/tile-model";
 import { SharedDataSet, kSharedDataSetType, SharedDataSetType  } from "../../../models/shared/shared-data-set";
-import { addAttributeToDataSet, addCasesToDataSet, DataSet } from "../../../models/data/data-set";
 import { updateSharedDataSetColors } from "../../../models/shared/shared-data-set-colors";
-import { uniqueId } from "../../../utilities/js-utils";
 import { SharedModelType } from "../../../models/shared/shared-model";
+import { addAttributeToDataSet, addCasesToDataSet, DataSet } from "../../../models/data/data-set";
+import { uniqueId } from "../../../utilities/js-utils";
 import { getTileContentById } from "../../../utilities/mst-utils";
 
 export const kDataflowTileType = "Dataflow";
@@ -244,7 +245,8 @@ export const DataflowContentModel = TileContentModel
         self.sharedModel && sharedModelManager.removeTileSharedModel(tableTileContents, self.sharedModel);
         //create a dataSet with two attributes with X / Y, link table tile to this dataSet
         const title = tableTileContents ? getTileTitleFromContent(tableTileContents) : undefined;
-        const newDataSet = this.createDefaultDataSet(title);
+
+        const newDataSet = createDefaultDataSet(title);
         const newSharedDataSet = newDataSet && SharedDataSet.create({ providerId: tableId, dataSet: newDataSet });
         sharedModelManager.addTileSharedModel(tableTileContents, newSharedDataSet);
       }
@@ -252,13 +254,6 @@ export const DataflowContentModel = TileContentModel
         console.warn("DataflowContent.addLinkedTable unable to unlink table");
       }
     },
-    createDefaultDataSet(title: string | undefined){
-      const dataSet = DataSet.create({name: title});
-      addAttributeToDataSet(dataSet, { name: "x" });
-      addAttributeToDataSet(dataSet, { name: "y" });
-      return dataSet;
-    }
-
   }));
 
 export type DataflowContentModelType = Instance<typeof DataflowContentModel>;
