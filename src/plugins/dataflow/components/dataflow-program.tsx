@@ -631,6 +631,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         this.updateNodeSensorValue(n);
       },
       "Live Output": (n: Node) => {
+        this.updateNodeChannelInfo(n);
         this.sendDataToSerialDevice(n);
       }
     };
