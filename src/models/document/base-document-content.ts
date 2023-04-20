@@ -1134,12 +1134,11 @@ export const BaseDocumentContentModel = types
 
         // Update the tile's references to its shared models
         if (tile.tileType === "Table") {
-          const { isImported, importedDataSet, ...nonImportedContent } = oldContent.content;
           const columnWidths: Record<string, number> = {};
           sharedDataSetEntries.forEach(sharedDataSetEntry => {
             const originalSharedDataSetId = sharedDataSetEntry.sharedModel.id;
             const attributeIdMap = updatedSharedModelMap[originalSharedDataSetId].attributeIdMap;
-            for (const entry of Object.entries(nonImportedContent.columnWidths)) {
+            for (const entry of Object.entries(oldContent.content.columnWidths)) {
               const originalId = entry[0];
               const width = entry[1] as number;
               if (width !== undefined && originalId && attributeIdMap[originalId]) {
@@ -1147,7 +1146,7 @@ export const BaseDocumentContentModel = types
               }
             }
           });
-          tileContent.content = { ...nonImportedContent, columnWidths };
+          tileContent.content = { ...oldContent.content, columnWidths };
         } else if (tile.tileType === "DataCard") {
           const oldAttributeId = oldContent.content.selectedSortAttributeId;
           sharedDataSetEntries.forEach(sharedDataSetEntry => {
