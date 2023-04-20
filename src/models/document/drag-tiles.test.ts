@@ -184,7 +184,7 @@ Array [
     "newTileId": "testid-1000",
     "rowHeight": undefined,
     "rowIndex": 2,
-    "tileContent": "{\\"id\\":\\"testid-1000\\",\\"title\\":\\"tile 3\\",\\"content\\":{\\"type\\":\\"Table\\",\\"columnWidths\\":{}}}",
+    "tileContent": "{\\"id\\":\\"testid-1000\\",\\"title\\":\\"tile 3\\",\\"content\\":{\\"type\\":\\"Table\\",\\"isImported\\":false,\\"importedDataSet\\":{\\"id\\":\\"testid-8\\",\\"attributes\\":[],\\"cases\\":[]},\\"columnWidths\\":{}}}",
     "tileId": "tile3",
     "tileIndex": 0,
     "tileType": "Table",
@@ -204,7 +204,7 @@ Array [
         expect(dragTiles).toMatchInlineSnapshot(`
 Object {
   "sharedModels": Array [],
-  "sourceDocId": "testid-11",
+  "sourceDocId": "testid-10",
   "tiles": Array [
     Object {
       "newTileId": "testid-1000",
@@ -229,7 +229,7 @@ Object {
         expect(dragTiles).toMatchInlineSnapshot(`
 Object {
   "sharedModels": Array [],
-  "sourceDocId": "testid-11",
+  "sourceDocId": "testid-10",
   "tiles": Array [
     Object {
       "newTileId": "testid-1001",
@@ -273,13 +273,13 @@ Object {
       ],
     },
   ],
-  "sourceDocId": "testid-11",
+  "sourceDocId": "testid-10",
   "tiles": Array [
     Object {
       "newTileId": "testid-1000",
       "rowHeight": undefined,
       "rowIndex": 2,
-      "tileContent": "{\\"id\\":\\"testid-1000\\",\\"title\\":\\"tile 3\\",\\"content\\":{\\"type\\":\\"Table\\",\\"columnWidths\\":{}}}",
+      "tileContent": "{\\"id\\":\\"testid-1000\\",\\"title\\":\\"tile 3\\",\\"content\\":{\\"type\\":\\"Table\\",\\"isImported\\":false,\\"importedDataSet\\":{\\"id\\":\\"testid-8\\",\\"attributes\\":[],\\"cases\\":[]},\\"columnWidths\\":{}}}",
       "tileId": "tile3",
       "tileIndex": 0,
       "tileType": "Table",
