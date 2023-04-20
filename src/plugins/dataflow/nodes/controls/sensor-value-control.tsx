@@ -38,13 +38,6 @@ export class SensorValueControl extends Rete.Control {
   }
 
   public setValue = (val: number) => {
-    // SERIAL and RADIO data note:
-    // with a lot of radio signals coming in, we may fail to parse data from more packets
-    // rather than update node with NaN (and probably breaking student program logic)
-    // we will leave the current value in the node until a new isFinite value is received
-    // use this console log to see how many NaN values are reaching this point or
-    // keep in view while debugging sample program behavior
-    // console.log("| SensorValueControl.setValue(val): ", val);
     if (isFinite(val)) {
       this.props.value = val;
       this.putData(this.key, val);

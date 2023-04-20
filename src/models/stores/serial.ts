@@ -117,14 +117,16 @@ export class SerialDevice {
       if (targetChannel && signalType === "s" ){
         if (["h", "t"].includes(element)){
           // handle message from a humidity or temperature sensor
-          targetChannel.value = Number(reading);
+          const newValue = Number(reading);
+          if (isFinite(newValue) && newValue > 0){
+            targetChannel.value = Number(reading)
+          }
           targetChannel.lastMessageRecievedAt = Date.now();
         }
         if (["r"].includes(element)){
           // handle message about relays state
           targetChannel.relaysState = reading.split('').map(s => Number(s));
           targetChannel.lastMessageRecievedAt = Date.now();
-          // console.log(`| ${targetChannel.hubName} has relays state as ${targetChannel.relaysState}`)
         }
       }
     } while (match);
