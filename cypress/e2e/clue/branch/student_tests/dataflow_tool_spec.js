@@ -341,6 +341,13 @@ context('Dataflow Tool Tile', function () {
         dataflowToolTile.getDropdown(nodeType, dropdown).contains("Heat Lamp").should("exist");
         dataflowToolTile.getOutputNodeValueText().should("contain", "off");
       });
+      it("verify live binary outputs indicate hub not present if not connected", () => {
+        const dropdown = "liveOutputType";
+        dataflowToolTile.getDropdown(nodeType, dropdown).click();
+        dataflowToolTile.getDropdownOptions(nodeType, dropdown).eq(3).click();
+        dataflowToolTile.getDropdown(nodeType, dropdown).contains("Fan").should("exist");
+        dataflowToolTile.getOutputNodeValueText().should("contain", "(no hub)");
+      });
       it("verify live output options", () => {
         dataflowToolTile.getDropdown(nodeType, "hubSelect").should("exist");
         dataflowToolTile.getDropdown(nodeType, "hubSelect").should("contain", "micro:bit hub a");

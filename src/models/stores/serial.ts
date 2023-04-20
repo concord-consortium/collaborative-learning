@@ -119,7 +119,7 @@ export class SerialDevice {
           // handle message from a humidity or temperature sensor
           const newValue = Number(reading);
           if (isFinite(newValue) && newValue > 0){
-            targetChannel.value = Number(reading)
+            targetChannel.value = Number(reading);
           }
           targetChannel.lastMessageRecievedAt = Date.now();
         }
