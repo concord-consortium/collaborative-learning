@@ -1126,32 +1126,41 @@ export const BaseDocumentContentModel = types
         const oldContent = JSON.parse(tile.tileContent);
         const tileContent = oldContent;
         tileIdMap[tile.tileId] = uniqueId();
-        if (["Table", "DataCard"].includes(tile.tileType)) {
-          // Find the shared models for this tile
-          const sharedDataSetEntries = sharedModelEntries.filter(entry => (
-            entry.tiles.map(t => t.id).includes(tile.tileId)
-          ));
-          // TODO: Handle an arbitrary number of shared models
-          if (sharedDataSetEntries.length === 1) {
-            const originalSharedDataSetId = sharedDataSetEntries[0].sharedModel.id;
+
+        // Find the shared models for this tile
+        const sharedDataSetEntries = sharedModelEntries.filter(entry => (
+          entry.tiles.map(t => t.id).includes(tile.tileId)
+        ));
+
+        // Update the tile's references to its shared models
+        if (tile.tileType === "Table") {
+          const { isImported, importedDataSet, ...nonImportedContent } = oldContent.content;
+          const columnWidths: Record<string, number> = {};
+          sharedDataSetEntries.forEach(sharedDataSetEntry => {
+            const originalSharedDataSetId = sharedDataSetEntry.sharedModel.id;
             const attributeIdMap = updatedSharedModelMap[originalSharedDataSetId].attributeIdMap;
-            if (tile.tileType === "Table") {
-              const columnWidths: Record<string, number> = {};
-              for (const entry of Object.entries(oldContent.content.columnWidths)) {
-                const originalId = entry[0];
-                const width = entry[1] as number;
-                if (width !== undefined && originalId && attributeIdMap[originalId]) {
-                    columnWidths[attributeIdMap[originalId]] = width;
-                }
+            for (const entry of Object.entries(nonImportedContent.columnWidths)) {
+              const originalId = entry[0];
+              const width = entry[1] as number;
+              if (width !== undefined && originalId && attributeIdMap[originalId]) {
+                  columnWidths[attributeIdMap[originalId]] = width;
               }
-              tileContent.content = { ...oldContent.content, columnWidths };
-            } else if (tile.tileType === "DataCard") {
-              const oldAttributeId = oldContent.content.selectedSortAttributeId;
+            }
+          });
+          tileContent.content = { ...nonImportedContent, columnWidths };
+        } else if (tile.tileType === "DataCard") {
+          const oldAttributeId = oldContent.content.selectedSortAttributeId;
+          sharedDataSetEntries.forEach(sharedDataSetEntry => {
+            const originalSharedDataSetId = sharedDataSetEntry.sharedModel.id;
+            const attributeIdMap = updatedSharedModelMap[originalSharedDataSetId].attributeIdMap;
+            if (attributeIdMap[oldAttributeId]) {
               const content = { ...oldContent.content, selectedSortAttributeId: attributeIdMap[oldAttributeId] };
               tileContent.content = content;
             }
-          }
+          });
         }
+
+        // Save the updated tile so we can add it to the document
         updatedTiles.push({
           ...tile,
           newTileId: tileIdMap[tile.tileId],
@@ -1163,7 +1172,6 @@ export const BaseDocumentContentModel = types
       const results = self.copyTilesIntoNewRows(updatedTiles, rowIndex);
 
       // Increment default titles when necessary
-      // TODO: Update dataset name when necessary
       results.forEach((result, i) => {
         const newTile = result?.tileId && self.getTile(result.tileId);
         if (result && newTile) {
@@ -1171,7 +1179,17 @@ export const BaseDocumentContentModel = types
           if (tileContentInfo) {
             const match = titleMatchesDefault(newTile.title, tileContentInfo.titleBase);
             if (match) {
-              newTile.setTitle(self.getNewTileTitle(newTile.content.type));
+              const newTitle = self.getNewTileTitle(newTile.content.type);
+
+              // If the tile title needed to be update, we assume we should also update the data set's name
+              newSharedModelEntries.forEach(sharedModelEntry => {
+                const oldName = sharedModelEntry.sharedModel.dataSet.name;
+                if (oldName === newTile.title) {
+                  sharedModelEntry.sharedModel.dataSet.name = newTitle;
+                }
+              });
+
+              newTile.setTitle(newTitle);
             }
           }
         }
