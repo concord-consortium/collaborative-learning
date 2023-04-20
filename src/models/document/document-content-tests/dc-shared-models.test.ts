@@ -108,9 +108,9 @@ describe("DocumentContentModel -- shared Models --", () => {
       expect(getSnapshot(documentContent)).toMatchInlineSnapshot(`
 Object {
   "rowMap": Object {
-    "testid-14": Object {
+    "testid-13": Object {
       "height": undefined,
-      "id": "testid-14",
+      "id": "testid-13",
       "isSectionHeader": false,
       "sectionId": undefined,
       "tiles": Array [
@@ -126,7 +126,7 @@ Object {
     },
   },
   "rowOrder": Array [
-    "testid-14",
+    "testid-13",
   ],
   "sharedModelMap": Object {
     "sharedDataSet1": Object {
@@ -224,6 +224,14 @@ Object {
     "tableTool": Object {
       "content": Object {
         "columnWidths": Object {},
+        "importedDataSet": Object {
+          "attributes": Array [],
+          "cases": Array [],
+          "id": "testid-12",
+          "name": undefined,
+          "sourceID": undefined,
+        },
+        "isImported": false,
         "type": "Table",
       },
       "display": undefined,
@@ -256,25 +264,25 @@ Object {
       expect(getSnapshot(targetDocument)).toMatchInlineSnapshot(`
 Object {
   "rowMap": Object {
-    "testid-32": Object {
+    "testid-28": Object {
       "height": undefined,
-      "id": "testid-32",
+      "id": "testid-28",
       "isSectionHeader": false,
       "sectionId": undefined,
       "tiles": Array [
         Object {
-          "tileId": "testid-30",
+          "tileId": "testid-27",
           "widthPct": undefined,
         },
       ],
     },
   },
   "rowOrder": Array [
-    "testid-32",
+    "testid-28",
   ],
   "sharedModelMap": Object {
     "sharedDataSet1": Object {
-      "provider": "testid-30",
+      "provider": "testid-27",
       "sharedModel": Object {
         "dataSet": Object {
           "attributes": Array [
@@ -329,22 +337,30 @@ Object {
           "sourceID": undefined,
         },
         "id": "sharedDataSet1",
-        "providerId": "testid-30",
+        "providerId": "testid-27",
         "type": "SharedDataSet",
       },
       "tiles": Array [
-        "testid-30",
+        "testid-27",
       ],
     },
   },
   "tileMap": Object {
-    "testid-30": Object {
+    "testid-27": Object {
       "content": Object {
         "columnWidths": Object {},
+        "importedDataSet": Object {
+          "attributes": Array [],
+          "cases": Array [],
+          "id": "testid-20",
+          "name": undefined,
+          "sourceID": undefined,
+        },
+        "isImported": false,
         "type": "Table",
       },
       "display": undefined,
-      "id": "testid-30",
+      "id": "testid-27",
       "title": "Table 1",
     },
   },
@@ -370,9 +386,9 @@ Object {
       expect(getSnapshot(targetDocument)).toMatchInlineSnapshot(`
 Object {
   "rowMap": Object {
-    "testid-45": Object {
+    "testid-40": Object {
       "height": undefined,
-      "id": "testid-45",
+      "id": "testid-40",
       "isSectionHeader": false,
       "sectionId": undefined,
       "tiles": Array [
@@ -381,18 +397,18 @@ Object {
           "widthPct": undefined,
         },
         Object {
-          "tileId": "testid-47",
+          "tileId": "testid-42",
           "widthPct": undefined,
         },
       ],
     },
   },
   "rowOrder": Array [
-    "testid-45",
+    "testid-40",
   ],
   "sharedModelMap": Object {
     "sharedDataSet1": Object {
-      "provider": "testid-47",
+      "provider": "testid-42",
       "sharedModel": Object {
         "dataSet": Object {
           "attributes": Array [
@@ -447,22 +463,30 @@ Object {
           "sourceID": undefined,
         },
         "id": "sharedDataSet1",
-        "providerId": "testid-47",
+        "providerId": "testid-42",
         "type": "SharedDataSet",
       },
       "tiles": Array [
-        "testid-47",
+        "testid-42",
       ],
     },
   },
   "tileMap": Object {
-    "testid-47": Object {
+    "testid-42": Object {
       "content": Object {
         "columnWidths": Object {},
+        "importedDataSet": Object {
+          "attributes": Array [],
+          "cases": Array [],
+          "id": "testid-33",
+          "name": undefined,
+          "sourceID": undefined,
+        },
+        "isImported": false,
         "type": "Table",
       },
       "display": undefined,
-      "id": "testid-47",
+      "id": "testid-42",
       "title": undefined,
     },
     "textTool": Object {
@@ -495,29 +519,29 @@ Object {
       expect(getSnapshot(targetDocument)).toMatchInlineSnapshot(`
 Object {
   "rowMap": Object {
-    "testid-65": Object {
+    "testid-57": Object {
       "height": undefined,
-      "id": "testid-65",
+      "id": "testid-57",
       "isSectionHeader": false,
       "sectionId": undefined,
       "tiles": Array [
         Object {
-          "tileId": "testid-62",
+          "tileId": "testid-55",
           "widthPct": undefined,
         },
         Object {
-          "tileId": "testid-63",
+          "tileId": "testid-56",
           "widthPct": undefined,
         },
       ],
     },
   },
   "rowOrder": Array [
-    "testid-65",
+    "testid-57",
   ],
   "sharedModelMap": Object {
     "sharedDataSet1": Object {
-      "provider": "testid-62",
+      "provider": "testid-55",
       "sharedModel": Object {
         "dataSet": Object {
           "attributes": Array [
@@ -572,26 +596,34 @@ Object {
           "sourceID": undefined,
         },
         "id": "sharedDataSet1",
-        "providerId": "testid-62",
+        "providerId": "testid-55",
         "type": "SharedDataSet",
       },
       "tiles": Array [
-        "testid-62",
-        "testid-63",
+        "testid-55",
+        "testid-56",
       ],
     },
   },
   "tileMap": Object {
-    "testid-62": Object {
+    "testid-55": Object {
       "content": Object {
         "columnWidths": Object {},
+        "importedDataSet": Object {
+          "attributes": Array [],
+          "cases": Array [],
+          "id": "testid-47",
+          "name": undefined,
+          "sourceID": undefined,
+        },
+        "isImported": false,
         "type": "Table",
       },
       "display": undefined,
-      "id": "testid-62",
+      "id": "testid-55",
       "title": "Table 1",
     },
-    "testid-63": Object {
+    "testid-56": Object {
       "content": Object {
         "bgImage": undefined,
         "board": Object {
@@ -614,7 +646,7 @@ Object {
         "type": "Geometry",
       },
       "display": undefined,
-      "id": "testid-63",
+      "id": "testid-56",
       "title": undefined,
     },
   },
@@ -623,4 +655,3 @@ Object {
     });
   });
 });
-

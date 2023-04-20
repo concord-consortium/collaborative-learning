@@ -1198,7 +1198,6 @@ export const BaseDocumentContentModel = types
       newSharedModelEntries.forEach(sharedModelEntry => {
         const updatedTileIds: string[] = sharedModelEntry.tiles.map((oldTile: any) => tileIdMap[oldTile.id]);
         const updatedSharedModel = { ...sharedModelEntry.sharedModel };
-        // TODO: Handle other shared model types
         if (sharedModelEntry.sharedModel.type === "SharedDataSet") {
           updatedSharedModel.providerId = tileIdMap[sharedModelEntry.sharedModel.providerId];
         }
@@ -1206,6 +1205,7 @@ export const BaseDocumentContentModel = types
         updatedTileIds.forEach(tileId => newSharedModelEntry.tiles.push(tileId));
       });
 
+      // TODO: Make sure logging is correct
       self.logCopyTileResults(tiles, results);
     }
   }));

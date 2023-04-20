@@ -1,7 +1,7 @@
 const getNodeText = (nodeType) => `.primary-workspace .node.${nodeType}`;
 
 class DataflowToolTile {
-  getDrawTile(workspaceClass) {
+  getDataflowTile(workspaceClass) {
     return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .dataflow-tool-tile`);
   }
   getTileTitle(workspaceClass){
