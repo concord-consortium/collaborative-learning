@@ -17,6 +17,7 @@ export interface ITilePosition {
   tileId: string;
 }
 export interface IDragTileItem extends ITilePosition {
+  newTileId?: string;
   rowHeight?: number;
   tileContent: string;  // modified tile contents
   tileType: string;
