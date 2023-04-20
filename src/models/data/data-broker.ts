@@ -74,8 +74,7 @@ export class DataBroker {
 
   @action
   addDataSet(ds: IDataSet) {
-    const sharedModel = SharedDataSet.create();
-    sharedModel.setDataSet(ds);
+    const sharedModel = SharedDataSet.create({ dataSet: ds });
     this.sharedModelManager?.addSharedModel(sharedModel);
 
     const caseMetadata = SharedCaseMetadata.create();
@@ -116,7 +115,7 @@ export class DataBroker {
   }
 
   // TODO: Are the below needed? Currently throwing errors:
-  // "Property 'prepareSnapshot' does not exist on type" and 
+  // "Property 'prepareSnapshot' does not exist on type" and
   // "Property 'completeSnapshot' does not exist on type"
   // prepareSnapshots() {
   //   this.dataSets.forEach(data => data.prepareSnapshot());

@@ -452,7 +452,7 @@ export const DataConfigurationModel = types
   .actions(self => ({
     handleAction(actionCall: ISerializedActionCall) {
       // forward all actions from dataset except "setCaseValues" which requires intervention
-      if (actionCall.name === "setCaseValues") return;
+      if (isSetCaseValuesAction(actionCall)) return;
       self.handlers.forEach(handler => handler(actionCall));
     },
     handleSetCaseValues(actionCall: ISerializedActionCall, cases: IFilteredChangedCases) {

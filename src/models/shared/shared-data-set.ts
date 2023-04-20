@@ -8,7 +8,7 @@ export const SharedDataSet = SharedModel
 .named("SharedDataSet")
 .props({
   type: types.optional(types.literal(kSharedDataSetType), kSharedDataSetType),
-  providerId: types.string,
+  providerId: "",
   dataSet: DataSet
 })
 .views(self => ({
