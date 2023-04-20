@@ -540,7 +540,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private recordCase = () => {
-    const { recordIndex } = this.props;
+    const { recordIndex, readOnly } = this.props;
+    // if (readOnly) return;
     const { programDataRate, dataSet } = this.props.tileContent; //grab the program Sampling Rate to write TimeQuantized
 
     //Write case
@@ -650,12 +651,15 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private tick = () => {
-    const {tileContent: tileModel, playBackIndex, programRecordState, isPlaying,
+    const { readOnly, tileId, tileContent: tileModel, playBackIndex, programRecordState, isPlaying,
       updateRecordIndex, updatePlayBackIndex } = this.props;
     const dataSet = tileModel.dataSet;
     const now = Date.now();
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});
     this.lastIntervalTime = now;
+    console.log("\t\t ---Child dataflow-program.tsx");
+    console.log("\t\t\t tileId:", tileId);
+    console.log("\t\t\t tick with  Dataflow readOnly:", readOnly);
 
     const isCleared = programRecordState === 0;
     const isRecording = programRecordState === 1;

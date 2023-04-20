@@ -29,11 +29,16 @@ interface IProps extends ITileProps{
 
 // when we put state in MST model, its rendering on both sides, and then when we close left side it only renders once on the right side.
 
+//
+//stop should on left should always be disabled
+//maybe left side button should not update state
+
+
 //theory - we need to differential left and right side
 //we can use either isPrimary, readOnly as a flag (See stickie)
 
 interface IDataflowTileState {
-  programRecordingMode: number;
+  // programRecordingMode: number;
   isPlaying: boolean;
   playBackIndex: number;
   recordIndex: number; //# of ticks for record
@@ -48,7 +53,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   constructor(props: IProps) {
     super(props);
     this.state = {
-      programRecordingMode: 0,
+      // programRecordingMode: 0,
       isPlaying: false,
       playBackIndex: 0,
       recordIndex: 0,
@@ -63,13 +68,14 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     const { program, programDataRate, programZoom } = this.getContent();
     const numNodes = program.nodes.size;
     const tileContent = this.getContent();
-    const disabledRecordingStates = (this.state.programRecordingMode === 1 || this.state.programRecordingMode === 2);
+    // const disabledRecordingStates = (this.state.programRecordingMode === 1 || this.state.programRecordingMode === 2);
+    const disabledRecordingStates = (tileContent.programRecordingMode === 1 || tileContent.programRecordingMode === 2);
     const dataFlowTileReadOnly = readOnly || disabledRecordingStates;
-    console.log("---------------");
-    console.log("dataflow-tile > render > model:", model);
+    console.log("----- dataflow-tile >  render ()----------");
     // console.log("dataFlowTileReadOnly:", dataFlowTileReadOnly);
-    console.log("readOnly:", readOnly);
-    console.log("programRecordingMode local:", this.state.programRecordingMode);
+    console.log("\t dataflow-tile > original readOnly:", readOnly);
+    // console.log("programRecordingMode local:", this.state.programRecordingMode);
+    // console.log("\t programRecordingMode Model:", tileContent.programRecordingMode);
 
 
 
@@ -96,7 +102,8 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
                   tileHeight={height}
                   tileId={model.id}
                   //state
-                  programRecordState={this.state.programRecordingMode}
+                  // programRecordState={this.state.programRecordingMode}
+                  programRecordState={tileContent.programRecordingMode}
                   isPlaying={this.state.isPlaying}
                   playBackIndex={this.state.playBackIndex}
                   recordIndex={this.state.recordIndex}
@@ -176,7 +183,9 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     const { model, onRequestTilesOfType, documentId } = this.props;
     const tileContent = this.getContent();
 
-    const isLinkButtonEnabled = (this.state.programRecordingMode === 2);
+    // const isLinkButtonEnabled = (this.state.programRecordingMode === 2);
+    const isLinkButtonEnabled = (tileContent.programRecordingMode === 2);
+
     const actionHandlers = {
                              handleRequestTableLink: this.handleRequestTableLink,
                              handleRequestTableUnlink: this.handleRequestTableUnlink
@@ -251,7 +260,9 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
 
 
     const tileContent = this.getContent();
-    const mode = this.state.programRecordingMode;
+    // const mode = this.state.programRecordingMode; //old
+      const mode = tileContent.programRecordingMode; //added
+
 
     if (mode === 0){ //when Record is pressed
       this.setState({isPlaying: false}); //reset isPlaying
@@ -265,11 +276,13 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
         tileContent.dataSet.removeAttribute(attr.id);
       });
     }
-    // tileContent.setProgramRecordingMode();
 
-    this.setState({
-      programRecordingMode: (mode + 1) % 3
-    });
+    // this.setState({ //old
+    //   programRecordingMode: (mode + 1) % 3
+    // });
+
+    tileContent.setProgramRecordingMode();
+
   };
 
   private handleChangeIsPlaying = () => {
