@@ -169,10 +169,6 @@ export const TableContentModel = TileContentModel
     }
     return convertLegacyDataSet(snapshot);
   })
-  .postProcessSnapshot(snapshot => {
-    const { isImported, importedDataSet, ...nonImportedSnapshot } = snapshot;
-    return nonImportedSnapshot;
-  })
   // TODO When importing a table, we were preprocessing, postprocessing, then preprocessing again the snapshot
   // all before we passed the data off to a sharedDataSet. Removing the importedDataSet in postProcessSnapshot
   // meant a loss of all data on import. This quick fix is not ideal but will solve the immediate
