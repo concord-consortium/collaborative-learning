@@ -5,11 +5,11 @@ import {CaseData, PlotProps} from "../graph-types";
 import {useDragHandlers, usePlotResponders} from "../hooks/use-plot";
 import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
 import {useDataSetContext} from "../../../hooks/use-data-set-context";
-import {useInstanceIdContext} from "../../../hooks/use-instance-id-context";
+// import {useInstanceIdContext} from "../../../hooks/use-instance-id-context";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {ICase} from "../../../models/data/data-set-types";
 import {
-  getScreenCoord,
+  // getScreenCoord,
   handleClickOnDot,
   setPointCoordinates,
   setPointSelection,
@@ -20,7 +20,7 @@ import {useGraphModelContext} from "../models/graph-model";
 export const ScatterDots = function ScatterDots(props: PlotProps) {
   const {dotsRef, enableAnimation} = props,
     graphModel = useGraphModelContext(),
-    instanceId = useInstanceIdContext(),
+    // instanceId = useInstanceIdContext(),
     dataConfiguration = useDataConfigurationContext(),
     dataset = useDataSetContext(),
     secondaryAttrIDsRef = useRef<string[]>([]),
@@ -190,30 +190,30 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
   }, [dataConfiguration, dataset, dotsRef, layout, legendAttrID, enableAnimation, graphModel,
     yScaleRef]);
 
-  const refreshPointPositionsSVG = useCallback((selectedOnly: boolean) => {
-    const xAttrID = dataConfiguration?.attributeID('x') ?? '',
-      {joinedCaseDataArrays, selection} = dataConfiguration || {},
-      primaryAxisScale = layout.getAxisScale('bottom') as ScaleLinear<number, number>;
-    const updateDot = (aCaseData: CaseData) => {
-      const caseId = aCaseData.caseID,
-        dot = dotsRef.current?.querySelector(`#${instanceId}_${caseId}`);
-      if (dot) {
-        const dotSvg = dot as SVGCircleElement;
-        const x = primaryAxisScale && getScreenCoord(dataset, caseId, xAttrID, primaryAxisScale);
-        const y = yScaleRef.current &&
-          getScreenCoord(dataset, caseId, secondaryAttrIDsRef.current[aCaseData.plotNum], yScaleRef.current);
-        if (x != null && isFinite(x) && y != null && isFinite(y)) {
-          dotSvg.setAttribute("cx", `${x}`);
-          dotSvg.setAttribute("cy", `${y}`);
-        }
-      }
-    };
-    if (selectedOnly) {
-      selection?.forEach(caseId => updateDot({plotNum: 0, caseID: caseId}));
-    } else {
-      joinedCaseDataArrays?.forEach((aCaseData) => updateDot(aCaseData));
-    }
-  }, [layout, dataConfiguration, dataset, dotsRef, instanceId]);
+  // const refreshPointPositionsSVG = useCallback((selectedOnly: boolean) => {
+  //   const xAttrID = dataConfiguration?.attributeID('x') ?? '',
+  //     {joinedCaseDataArrays, selection} = dataConfiguration || {},
+  //     primaryAxisScale = layout.getAxisScale('bottom') as ScaleLinear<number, number>;
+  //   const updateDot = (aCaseData: CaseData) => {
+  //     const caseId = aCaseData.caseID,
+  //       dot = dotsRef.current?.querySelector(`#${instanceId}_${caseId}`);
+  //     if (dot) {
+  //       const dotSvg = dot as SVGCircleElement;
+  //       const x = primaryAxisScale && getScreenCoord(dataset, caseId, xAttrID, primaryAxisScale);
+  //       const y = yScaleRef.current &&
+  //         getScreenCoord(dataset, caseId, secondaryAttrIDsRef.current[aCaseData.plotNum], yScaleRef.current);
+  //       if (x != null && isFinite(x) && y != null && isFinite(y)) {
+  //         dotSvg.setAttribute("cx", `${x}`);
+  //         dotSvg.setAttribute("cy", `${y}`);
+  //       }
+  //     }
+  //   };
+  //   if (selectedOnly) {
+  //     selection?.forEach(caseId => updateDot({plotNum: 0, caseID: caseId}));
+  //   } else {
+  //     joinedCaseDataArrays?.forEach((aCaseData) => updateDot(aCaseData));
+  //   }
+  // }, [layout, dataConfiguration, dataset, dotsRef, instanceId]);
 
   const refreshPointPositions = useCallback((selectedOnly: boolean) => {
     refreshPointPositionsD3(selectedOnly);

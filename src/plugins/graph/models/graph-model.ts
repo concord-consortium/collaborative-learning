@@ -12,7 +12,7 @@ import {DataConfigurationModel} from "./data-configuration-model";
 import {IDataSet} from "../../../models/data/data-set";
 import { SharedModelType } from "../../../models/shared/shared-model";
 import { ISharedCaseMetadata, isSharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
-import {isSharedDataSet, kSharedDataSetType, SharedDataSet} from "../../../models/shared/shared-data-set";
+import {isSharedDataSet, SharedDataSet} from "../../../models/shared/shared-data-set";
 import {ITileContentModel, TileContentModel} from "../../../models/tiles/tile-content";
 import {
   defaultBackgroundColor,
