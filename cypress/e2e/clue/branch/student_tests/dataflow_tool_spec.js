@@ -15,7 +15,7 @@ context('Dataflow Tool Tile', function () {
   describe("Dataflow Tool", () => {
     it("renders dataflow tool tile", () => {
       clueCanvas.addTile("dataflow");
-      dataflowToolTile.getDrawTile().should("exist");
+      dataflowToolTile.getDataflowTile().should("exist");
       dataflowToolTile.getTileTitle().should("exist");
     });
     it("edit tile title", () => {
