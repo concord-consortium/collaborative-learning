@@ -417,7 +417,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private shouldShowProgramCover() {
-    return this.props.readOnly;
+    return this.props.readOnly || this.disabledRecordingStates();
+  }
+
+  //disable the right side when recordingMode is 1 (record) or 2 (stop)
+  private disabledRecordingStates(){
+    const { tileContent } = this.props;
+    return (tileContent.programRecordingMode === 1 || tileContent.programRecordingMode === 2);
   }
 
   private keepNodesInView = () => {
@@ -657,9 +663,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const now = Date.now();
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});
     this.lastIntervalTime = now;
-    console.log("\t\t ---Child dataflow-program.tsx");
-    console.log("\t\t\t tileId:", tileId);
-    console.log("\t\t\t tick with  Dataflow readOnly:", readOnly);
 
     const isCleared = programRecordState === 0;
     const isRecording = programRecordState === 1;
@@ -670,7 +673,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
 
     if (isRecording){
-      this.recordCase();
+      if (!readOnly) this.recordCase();
       this.updateNodes();
       updateRecordIndex(UpdateMode.Increment);
     }

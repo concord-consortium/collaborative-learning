@@ -185,8 +185,6 @@ export const DataflowContentModel = TileContentModel
     },
     setProgramRecordingMode(){
       self.programRecordingMode = (self.programRecordingMode + 1) % 3;
-      console.log("self.program:", self.programRecordingMode);
-
     },
     updateAfterSharedModelChanges(sharedModel?: SharedModelType){
       //do nothing

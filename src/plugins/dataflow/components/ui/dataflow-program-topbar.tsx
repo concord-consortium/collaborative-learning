@@ -31,8 +31,6 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
   const { onSerialRefreshDevices, readOnly, serialDevice, programDataRates, dataRate, onRateSelectClick,
           onRecordDataChange, programRecordState, isPlaying, handleChangeIsPlaying, numNodes } = props;
 
-  const disableRecordButton = readOnly && programRecordState === 0; //hides RecordButton on leftside read only docs
-
   return (
     <div className="program-editor-topbar">
         <DataflowSerialConnectButton
@@ -63,7 +61,7 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
             onRecordDataChange={onRecordDataChange}
           />
           <RecordStopOrClearButton
-            disabled={disableRecordButton}
+            disabled={readOnly}
             programRecordState={programRecordState}
             onRecordDataChange={onRecordDataChange}
           />

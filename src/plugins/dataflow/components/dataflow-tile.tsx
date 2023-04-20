@@ -22,23 +22,8 @@ interface IProps extends ITileProps{
   readOnly?: boolean;
   height?: number;
 }
-//TODO:
-// when localState (programRecordingMode )is  active, its only writing once to table
-// when we move the state to the model (dataflow-content.ts), it writes twice, due to the left side copy of DF <-> Table
-//observation: when we have it in localState its only rendering on the right side
-
-// when we put state in MST model, its rendering on both sides, and then when we close left side it only renders once on the right side.
-
-//
-//stop should on left should always be disabled
-//maybe left side button should not update state
-
-
-//theory - we need to differential left and right side
-//we can use either isPrimary, readOnly as a flag (See stickie)
 
 interface IDataflowTileState {
-  // programRecordingMode: number;
   isPlaying: boolean;
   playBackIndex: number;
   recordIndex: number; //# of ticks for record
@@ -53,7 +38,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   constructor(props: IProps) {
     super(props);
     this.state = {
-      // programRecordingMode: 0,
       isPlaying: false,
       playBackIndex: 0,
       recordIndex: 0,
@@ -61,23 +45,13 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     };
   }
   public render() {
-    // console.log("dataflow-tile.tsx > with programRecordingMode:", this.state.programRecordingMode);
     const { readOnly, height, model } = this.props;
     const editableClass = readOnly ? "read-only" : "editable";
     const classes = `dataflow-tool disable-tile-content-drag ${editableClass}`;
     const { program, programDataRate, programZoom } = this.getContent();
     const numNodes = program.nodes.size;
     const tileContent = this.getContent();
-    // const disabledRecordingStates = (this.state.programRecordingMode === 1 || this.state.programRecordingMode === 2);
-    const disabledRecordingStates = (tileContent.programRecordingMode === 1 || tileContent.programRecordingMode === 2);
-    const dataFlowTileReadOnly = readOnly || disabledRecordingStates;
     console.log("----- dataflow-tile >  render ()----------");
-    // console.log("dataFlowTileReadOnly:", dataFlowTileReadOnly);
-    console.log("\t dataflow-tile > original readOnly:", readOnly);
-    // console.log("programRecordingMode local:", this.state.programRecordingMode);
-    // console.log("\t programRecordingMode Model:", tileContent.programRecordingMode);
-
-
 
     return (
       <>
@@ -90,7 +64,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
             {({ size }: SizeMeProps) => {
               return (
                 <DataflowProgram
-                  readOnly={dataFlowTileReadOnly}
+                  readOnly={readOnly}
                   documentProperties={this.getDocumentProperties()}
                   program={program}
                   onProgramChange={this.handleProgramChange}
@@ -102,7 +76,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
                   tileHeight={height}
                   tileId={model.id}
                   //state
-                  // programRecordState={this.state.programRecordingMode}
                   programRecordState={tileContent.programRecordingMode}
                   isPlaying={this.state.isPlaying}
                   playBackIndex={this.state.playBackIndex}
@@ -182,8 +155,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   private renderTableLinkButton() {
     const { model, onRequestTilesOfType, documentId } = this.props;
     const tileContent = this.getContent();
-
-    // const isLinkButtonEnabled = (this.state.programRecordingMode === 2);
     const isLinkButtonEnabled = (tileContent.programRecordingMode === 2);
 
     const actionHandlers = {
@@ -260,8 +231,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
 
 
     const tileContent = this.getContent();
-    // const mode = this.state.programRecordingMode; //old
-      const mode = tileContent.programRecordingMode; //added
+      const mode = tileContent.programRecordingMode;
 
 
     if (mode === 0){ //when Record is pressed
@@ -276,13 +246,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
         tileContent.dataSet.removeAttribute(attr.id);
       });
     }
-
-    // this.setState({ //old
-    //   programRecordingMode: (mode + 1) % 3
-    // });
-
     tileContent.setProgramRecordingMode();
-
   };
 
   private handleChangeIsPlaying = () => {
