@@ -29,6 +29,9 @@ const makeSharedModelManager = (variables?: SharedVariablesType): ISharedModelMa
     getTileSharedModels(tileContentModel: IAnyStateTreeNode): SharedModelType[] {
       return variables ? [variables] : [];
     },
+    getSharedModelDragDataForTiles(tileIds: string[]) {
+      return [];
+    },
     getSharedModelTiles(sharedModel?: SharedModelType) {
       return [];
     },

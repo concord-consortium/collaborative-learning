@@ -1,7 +1,8 @@
 import { applySnapshot, types, Instance, SnapshotIn, getEnv, onAction, addDisposer, destroy } from "mobx-state-tree";
 import { forEach } from "lodash";
 import { QueryClient, UseQueryResult } from "react-query";
-import { DocumentContentModel, DocumentContentSnapshotType, IDocumentAddTileOptions } from "./document-content";
+import { DocumentContentModel, DocumentContentSnapshotType } from "./document-content";
+import { IDocumentAddTileOptions } from "./document-content-types";
 import { IDocumentEnvironment } from "./document-environment";
 import {
   DocumentType, DocumentTypeEnum, IDocumentContext, ISetProperties,

@@ -8,10 +8,12 @@ import classNames from "classnames";
 import { BaseComponent, IBaseProps } from "../base";
 import { TileRowComponent, kDragResizeRowId, extractDragResizeRowId, extractDragResizeY,
         extractDragResizeModelHeight, extractDragResizeDomHeight } from "../document/tile-row";
-import { DocumentContentModelType, IDragTilesData, IDragToolCreateInfo } from "../../models/document/document-content";
+import { DocumentContentModelType } from "../../models/document/document-content";
+import { IDragToolCreateInfo, IDragTilesData } from "../../models/document/document-content-types";
 import { getTileContentInfo } from "../../models/tiles/tile-content-info";
 import { getDocumentIdentifier } from "../../models/document/document-utils";
 import { IDropRowInfo } from "../../models/document/tile-row";
+import { logDataTransfer } from "../../models/document/drag-tiles";
 import { TileApiInterfaceContext } from "../tiles/tile-api";
 import { dragTileSrcDocId, kDragTileCreate, kDragTiles } from "../tiles/tile-component";
 import { safeJsonParse } from "../../utilities/js-utils";
@@ -427,6 +429,8 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     content?.showPendingInsertHighlight(false);
 
     if (!e.dataTransfer || !content || readOnly) return;
+
+    logDataTransfer(e.dataTransfer);
 
     if (this.hasDragType(e.dataTransfer, kDragResizeRowId)) {
       this.handleRowResizeDrop(e);

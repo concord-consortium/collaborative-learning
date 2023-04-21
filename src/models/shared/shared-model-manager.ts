@@ -44,6 +44,13 @@ export const UnknownSharedModel = types.snapshotProcessor(_UnknownSharedModel, {
   }
 });
 
+export interface IDragSharedModelItem {
+  modelId: string;
+  providerId?: string;
+  tileIds: string[];
+  content: string;  // shared model snapshot
+}
+
 /**
  * An instance of this interface should be provided to tiles so they can interact
  * with shared models.
@@ -119,6 +126,13 @@ export interface ISharedModelManager {
    * @param tileContentModel
    */
   getTileSharedModels(tileContentModel: IAnyStateTreeNode): SharedModelType[];
+
+  /**
+   * Get all of the shared models that link to this tile
+   *
+   * @param tileIds ids of tiles whose shared model should be retrieved
+   */
+  getSharedModelDragDataForTiles(tileIds: string[]): IDragSharedModelItem[];
 
   /**
    * Get the tiles that link to this shared model

@@ -29,7 +29,7 @@ function formatTime(seconds: number) {
 
 export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
   const { onRateSelectClick, readOnly, dataRate, rateOptions, programRecordState,
-          isPlaying, handleChangeIsPlaying, numNodes, onRecordDataChange} = props;
+          isPlaying, handleChangeIsPlaying, numNodes, onRecordDataChange } = props;
 
   /* ==[ Total Recording Time  - Calculate] format as "MMM:SS" */
   const totalTimeSec = Math.floor((dataRate / 1000) * (totalSamples/numNodes));

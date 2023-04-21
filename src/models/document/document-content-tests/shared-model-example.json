@@ -1,0 +1,39 @@
+{
+  "content": {
+    "__comment__": [
+      "The tiles are in a double array so they end up in the same row.",
+      "This way the code that handles adding them to a single row in the",
+      "drop code will be triggered"
+    ],
+    "tiles": [
+      [
+        { "id": "tableTool", "content": {"type": "Table"   }},
+        { "id": "graphTool", "content": {"type": "Geometry"}}
+      ]
+    ],
+    "sharedModels": [
+      {
+        "tiles": ["tableTool", "graphTool"],
+        "provider": "tableTool",
+        "sharedModel": {
+          "type": "SharedDataSet",
+          "id": "sharedDataSet1",
+          "providerId": "tableTool",
+          "dataSet": {
+            "id": "dataSet1",
+            "name": "Demo Dataset",
+            "attributes": [
+              { "id": "attribute1", "name": "x", "values": ["1" , "2", "3"] },
+              { "id": "attribute2", "name": "y", "values": ["-1", "0", "1"] }
+            ],
+            "cases": [
+              {"__id__": "HR3at2-RqvnRaT9z"},
+              {"__id__": "O3SmGUb4iRPw29HU"},
+              {"__id__": "76WRbhQpTu2Wqy1c"}
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

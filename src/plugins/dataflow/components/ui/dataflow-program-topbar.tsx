@@ -74,7 +74,6 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
         <div className="topbar-right">
           {props.showRateUI && <span className={"rate-ui"}>{`${props.lastIntervalDuration}ms`}</span>}
         </div>
-
     </div>
   );
 };
