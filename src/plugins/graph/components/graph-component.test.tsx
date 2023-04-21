@@ -36,7 +36,7 @@ describe.skip("Graph", () => {
   });
 
   it.skip("can switch to dot plot", async () => {
-    const user = userEvent; // TODO: Is removing `.setup()` from userEvent here valid?
+    const user = userEvent;
     const data = DataSet.create();
     data.addAttributeWithID({ name: "xVariable" });
     data.addAttributeWithID({ name: "yVariable" });

@@ -3,8 +3,8 @@ import {AxisPlace} from "./axis-types";
 import {measureText, measureTextExtent} from "../../../components/tiles/hooks/use-measure-text";
 import {kGraphFont} from "../graph-types";
 
-export const getStringBounds = (s = 'Wy') => {
-  return measureTextExtent(s, kGraphFont);
+export const getStringBounds = (s = 'Wy', font = kGraphFont) => {
+  return measureTextExtent(s, font);
 };
 
 interface ICollisionProps {

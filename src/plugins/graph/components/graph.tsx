@@ -8,7 +8,7 @@ import {Background} from "./background";
 import {DroppablePlot} from "./droppable-plot";
 import {AxisPlace, AxisPlaces} from "../axis/axis-types";
 import {GraphAxis} from "./graph-axis";
-import {attrRoleToGraphPlace, GraphPlace, graphPlaceToAttrRole, kGraphClass} from "../graph-types";
+import {attrRoleToGraphPlace, graphPlaceToAttrRole, kGraphClass} from "../graph-types";
 import {ScatterDots} from "./scatterdots";
 import {DotPlotDots} from "./dotplotdots";
 import {CaseDots} from "./casedots";
@@ -19,6 +19,7 @@ import {useDataSetContext} from "../../../hooks/use-data-set-context";
 import {useGraphModel} from "../hooks/use-graph-model";
 import {setNiceDomain, startAnimation} from "../utilities/graph-utils";
 import {IAxisModel} from "../axis/models/axis-model";
+import {GraphPlace} from "../axis-graph-shared";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {isSetAttributeIDAction, useGraphModelContext} from "../models/graph-model";
 import {useInstanceIdContext} from "../../../hooks/use-instance-id-context";
@@ -57,8 +58,6 @@ export const Graph = observer(function Graph({graphController, graphRef}: IProps
       select(plotAreaSVGRef.current)
         .attr('x', plotBounds?.left || 0)
         .attr('y', plotBounds?.top || 0)
-        // TODO: Determine why we're sometimes getting negative values for plotWidth and plotHeight
-        // Is it some sort of offset for the axis labels?
         .attr('width', layout.plotWidth > -1 ? layout.plotWidth : 0)
         .attr('height', layout.plotHeight > -1 ? layout.plotHeight : 0);
     }
@@ -138,14 +137,17 @@ export const Graph = observer(function Graph({graphController, graphRef}: IProps
       const plotPlaces: GraphPlace[] = plotType === 'scatterPlot' ? ['yPlus', 'rightNumeric'] : [];
       const places: GraphPlace[] = ['top', 'rightCat', ...plotPlaces];
       places.forEach((place: GraphPlace) => {
-        droppables.push(
-          <DroppableAddAttribute
-            key={place}
-            place={place}
-            plotType={plotType}
-            onDrop={handleChangeAttribute.bind(null, place)}
-          />
-        );
+        // Since an axis is already a droppable, we only need to render a droppable if there is no axis
+        if (!graphModel.getAxis(place as AxisPlace)) {
+          droppables.push(
+            <DroppableAddAttribute
+              key={place}
+              place={place}
+              plotType={plotType}
+              onDrop={handleChangeAttribute.bind(null, place)}
+            />
+          );
+        }
       });
     }
     return droppables;

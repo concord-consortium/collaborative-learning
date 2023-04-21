@@ -3,7 +3,7 @@ import React, {forwardRef, MutableRefObject, useEffect, useRef} from "react";
 import {drag, select} from "d3";
 import RTree from "rtree";
 import {CaseData, InternalizedData, rTreeRect} from "../graph-types";
-import {Bounds, useGraphLayoutContext} from "../models/graph-layout";
+import {useGraphLayoutContext} from "../models/graph-layout";
 import {rectangleSubtract, rectNormalize} from "../utilities/graph-utils";
 import {useCurrent} from "../../../hooks/use-current";
 import {useDataSetContext} from "../../../hooks/use-data-set-context";
@@ -47,8 +47,7 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
     dataset = useCurrent(useDataSetContext()),
     layout = useGraphLayoutContext(),
     graphModel = useGraphModelContext(),
-    bounds = layout.computedBounds.get('plot') as Bounds,
-    // TODO: Figure out why we're sometimes getting negative values for bounds.width and bounds.height.
+    bounds = layout.computedBounds.plot,
     plotWidth = bounds.width > -1 ? bounds.width : 0,
     plotHeight = bounds.height > -1 ? bounds.height : 0,
     transform = `translate(${bounds.left}, ${bounds.top})`,
@@ -63,7 +62,7 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
   useEffect(() => {
     const onDragStart = (event: { x: number; y: number; sourceEvent: { shiftKey: boolean } }) => {
       const {computedBounds} = layout,
-          plotBounds = computedBounds.get('plot') as Bounds;
+        plotBounds = computedBounds.plot;
         selectionTree.current = prepareTree(`.${instanceId}`, 'circle');
         startX.current = event.x - plotBounds.left;
         startY.current = event.y - plotBounds.top;
