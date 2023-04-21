@@ -58,6 +58,9 @@ class DataflowToolTile {
   getZoomOutButton() {
     return cy.get(`.primary-workspace [title='Zoom Out']`);
   }
+  getNumberNodeOutput() {
+    return cy.get(".flow-tool .node.number .node-output");
+  }
 
   //Dataflow Tile
 

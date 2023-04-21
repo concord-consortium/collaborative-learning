@@ -360,9 +360,15 @@ context('Dataflow Tool Tile', function () {
         dataflowToolTile.getCreateNodeButton("number").click();
         dataflowToolTile.getNode("number").should("exist");
         dataflowToolTile.getNumberField().type("1{enter}");
-        //dataflowToolTile.getNode("number").getNodeOutput().click()
-          // .trigger("pointerdown", { force: true })
-          // .trigger("pointermove", 40, 40, { force: true } );
+        dataflowToolTile.getNumberNodeOutput().should("exist");
+        dataflowToolTile.getDrawTile().click(306, 182)
+          .trigger("pointerdown", 306, 182, {force: true})
+          .trigger("pointermove", 366, 172, {force: true})
+          .trigger("pointerup", 366, 172, {force: true});
+        // dataflowToolTile.getNumberNodeOutput().click()
+        //   .trigger("pointerdown", "center", { force: true })
+        //   .trigger("pointermove", 40, 10, { force: true } )
+        //   .trigger("pointerup", 40, 10, { force: true } );
 
 
         dataflowToolTile.getDeleteNodeButton("number").click();
