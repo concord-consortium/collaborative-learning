@@ -61,7 +61,6 @@ export const DocumentContentModelWithTileDragging = BaseDocumentContentModel
       getTileContentInfo(clonedTile.content.type)?.contentSnapshotPostProcessor?.(clonedTile.content, idMap);
       dragTileItems.push({
         rowIndex, rowHeight, tileIndex,
-        newTileId: idMap[srcTile.id],
         tileId: srcTile.id,
         tileContent: JSON.stringify(clonedTile),
         tileType: srcTile.content.type

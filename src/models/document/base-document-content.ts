@@ -1125,7 +1125,7 @@ export const BaseDocumentContentModel = types
       tiles.forEach(tile => {
         const oldContent = JSON.parse(tile.tileContent);
         const tileContent = oldContent;
-        tileIdMap[tile.tileId] = tile.newTileId ?? uniqueId();
+        tileIdMap[tile.tileId] = uniqueId();
 
         // Find the shared models for this tile
         const sharedDataSetEntries = sharedModelEntries.filter(entry => (
