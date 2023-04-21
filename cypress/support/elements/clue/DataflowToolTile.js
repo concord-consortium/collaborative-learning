@@ -61,7 +61,9 @@ class DataflowToolTile {
   getNumberNodeOutput() {
     return cy.get(".flow-tool .node.number .node-output");
   }
-
+  getModalOkButton() {
+    return cy.get('.dialog-contents #okButton');
+  }
   //Dataflow Tile
 
   getDataflowTileTitle(workspaceClass){

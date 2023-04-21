@@ -350,13 +350,16 @@ context('Dataflow Tool Tile', function () {
         dataflowToolTile.getDropdown(nodeType, dropdown).contains("Fan").should("exist");
         dataflowToolTile.getOutputNodeValueText().should("contain", "(no hub)");
       });
-      it("can be dragged to the right", () => {
+      it("can be dragged to the right and set back to light bulb", () => {
+        const dropdown = "liveOutputType";
         dataflowToolTile.getNode(nodeType).click(50, 10)
           .trigger("pointerdown", 50, 10 )
           .trigger("pointermove", dragXDestination, 10, { force: true } )
           .trigger("pointerup", dragXDestination, 10, { force: true } );
+          dataflowToolTile.getDropdown(nodeType, dropdown).click();
+          dataflowToolTile.getDropdownOptions(nodeType, dropdown).eq(0).click();
       });
-      it("can get a value from a number node", () => {
+      it("can connect and trigger modal connection warning", () => {
         dataflowToolTile.getCreateNodeButton("number").click();
         dataflowToolTile.getNode("number").should("exist");
         dataflowToolTile.getNumberField().type("1{enter}");
@@ -365,12 +368,14 @@ context('Dataflow Tool Tile', function () {
           .trigger("pointerdown", 306, 182, {force: true})
           .trigger("pointermove", 366, 172, {force: true})
           .trigger("pointerup", 366, 172, {force: true});
-        // dataflowToolTile.getNumberNodeOutput().click()
-        //   .trigger("pointerdown", "center", { force: true })
-        //   .trigger("pointermove", 40, 10, { force: true } )
-        //   .trigger("pointerup", 40, 10, { force: true } );
-
-
+        dataflowToolTile.getModalOkButton().click();
+      });
+      it("can recieve a value from a connected block, and display correct on or off string", () => {
+        dataflowToolTile.getNode("number").should("exist");
+        dataflowToolTile.getOutputNodeValueText().should("contain", "on");
+        dataflowToolTile.getNumberField().type("{backspace}0{enter}");
+        dataflowToolTile.getNumberNodeOutput().should("exist");
+        dataflowToolTile.getOutputNodeValueText().should("contain", "off");
         dataflowToolTile.getDeleteNodeButton("number").click();
       });
       it("verify live output options", () => {
