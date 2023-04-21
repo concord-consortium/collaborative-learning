@@ -109,7 +109,7 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   private getRelayMessageReceived(node: Node) {
-    const hubRelaysChannel = this.getHubRelaysChannel(node)
+    const hubRelaysChannel = this.getHubRelaysChannel(node);
     if (!hubRelaysChannel || !hubRelaysChannel.relaysState) return "(no hub)";
     const rIndex = this.getSelectedRelayIndex(node);
     const reportedValue = hubRelaysChannel.relaysState[rIndex];

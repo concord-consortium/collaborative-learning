@@ -1,8 +1,10 @@
 import ClueCanvas from '../../../../support/elements/clue/cCanvas';
 import DataflowToolTile from '../../../../support/elements/clue/DataflowToolTile';
 
-let clueCanvas = new ClueCanvas,
-  dataflowToolTile = new DataflowToolTile;
+let clueCanvas = new ClueCanvas;
+let dataflowToolTile = new DataflowToolTile;
+let dragXDestination = 300;
+
 
 context('Dataflow Tool Tile', function () {
   before(function () {
@@ -347,6 +349,23 @@ context('Dataflow Tool Tile', function () {
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).eq(3).click();
         dataflowToolTile.getDropdown(nodeType, dropdown).contains("Fan").should("exist");
         dataflowToolTile.getOutputNodeValueText().should("contain", "(no hub)");
+      });
+      it("can be dragged to the right", () => {
+        dataflowToolTile.getNode(nodeType).click(50, 10)
+          .trigger("pointerdown", 50, 10 )
+          .trigger("pointermove", dragXDestination, 10, { force: true } )
+          .trigger("pointerup", dragXDestination, 10, { force: true } );
+      });
+      it("can get a value from a number node", () => {
+        dataflowToolTile.getCreateNodeButton("number").click();
+        dataflowToolTile.getNode("number").should("exist");
+        dataflowToolTile.getNumberField().type("1{enter}");
+        //dataflowToolTile.getNode("number").getNodeOutput().click()
+          // .trigger("pointerdown", { force: true })
+          // .trigger("pointermove", 40, 40, { force: true } );
+
+
+        dataflowToolTile.getDeleteNodeButton("number").click();
       });
       it("verify live output options", () => {
         dataflowToolTile.getDropdown(nodeType, "hubSelect").should("exist");
