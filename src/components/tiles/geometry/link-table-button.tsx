@@ -5,6 +5,9 @@ import { useFeatureFlag } from "../../../hooks/use-stores";
 
 import "./link-table-button.scss";
 
+//TODO: dataflow-program-link-table-button.tsx is very similar
+//consider refactoring -> https://www.pivotaltracker.com/n/projects/2441242/stories/184992684
+
 interface IProps {
   isEnabled?: boolean;
   onClick?: () => void;

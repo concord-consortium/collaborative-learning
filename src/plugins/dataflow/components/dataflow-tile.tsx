@@ -7,12 +7,13 @@ import { ITileModel } from "../../../models/tiles/tile-model";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { ITileProps } from "../../../components/tiles/tile-component";
 import { EditableTileTitle } from "../../../components/tiles/editable-tile-title";
-import { DataflowContentModelType, kTimeAttributeCount } from "../model/dataflow-content";
+import { DataflowContentModelType } from "../model/dataflow-content";
 import { measureText } from "../../../components/tiles/hooks/use-measure-text";
 import { defaultTileTitleFont } from "../../../components/constants";
 import { ToolTitleArea } from "../../../components/tiles/tile-title-area";
 import { dataflowLogEvent } from "../dataflow-logger";
 import { addAttributeToDataSet } from "../../../models/data/data-set";
+import { DataflowLinkTableButton } from "./ui/dataflow-program-link-table-button";
 
 import "./dataflow-tile.scss";
 
@@ -27,12 +28,12 @@ interface IDataflowTileState {
   isPlaying: boolean;
   playBackIndex: number;
   recordIndex: number; //# of ticks for record
+  isEditingTitle: boolean;
 }
 
 @inject("stores")
 @observer
 export default class DataflowToolComponent extends BaseComponent<IProps, IDataflowTileState> {
-
   public static tileHandlesSelection = true;
 
   constructor(props: IProps) {
@@ -42,9 +43,9 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
       isPlaying: false,
       playBackIndex: 0,
       recordIndex: 0,
+      isEditingTitle: false
     };
   }
-
   public render() {
     const { readOnly, height, model } = this.props;
     const editableClass = readOnly ? "read-only" : "editable";
@@ -54,10 +55,12 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     const tileModel = this.getContent();
     const disabledRecordingStates = (this.state.programRecordingMode === 1 || this.state.programRecordingMode === 2);
     const dataFlowTileReadOnly = readOnly || disabledRecordingStates;
-
     return (
       <>
-        <ToolTitleArea>{this.renderTitle()}</ToolTitleArea>
+        <ToolTitleArea>
+          {this.renderTitle()}
+          {this.renderTableLinkButton()}
+        </ToolTitleArea>
         <div className={classes}>
           <SizeMe monitorHeight={true}>
             {({ size }: SizeMeProps) => {
@@ -122,10 +125,15 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     return document && document.properties.toJSON();
   }
 
+  private handleBeginEditTitle = () => {
+    this.setState({isEditingTitle: true});
+  };
+
   private handleTitleChange = (title?: string) => {
     if (title){
       this.getContent().setTitle(title);
       dataflowLogEvent("changeprogramtitle", { programTitleValue: this.getTitle() }, this.props.model.id);
+      this.setState({isEditingTitle: false});
     }
   };
 
@@ -140,10 +148,40 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
         getTitle={this.getTitle.bind(this)}
         readOnly={readOnly}
         measureText={(text) => measureText(text, defaultTileTitleFont)}
+        onBeginEdit={this.handleBeginEditTitle}
         onEndEdit={this.handleTitleChange}
       />
     );
   }
+
+  private renderTableLinkButton() {
+    const { model, onRequestTilesOfType, documentId } = this.props;
+    const isLinkButtonEnabled = (this.state.programRecordingMode === 2);
+    const actionHandlers = {
+                             handleRequestTableLink: this.handleRequestTableLink,
+                             handleRequestTableUnlink: this.handleRequestTableUnlink
+                           };
+
+    return (!this.state.isEditingTitle && !this.props.readOnly &&
+      <DataflowLinkTableButton
+        key="link-button"
+        isLinkButtonEnabled={isLinkButtonEnabled}
+        //use in useTableLinking
+        documentId={documentId}
+        model={model}
+        onRequestTilesOfType={onRequestTilesOfType}
+        actionHandlers={actionHandlers}
+      />
+    );
+  }
+
+  private handleRequestTableLink = (tableId: string) => {
+    this.getContent().addLinkedTable(tableId);
+  };
+
+  private handleRequestTableUnlink = (tableId: string) => {
+    this.getContent().removeLinkedTable(tableId);
+  };
 
   private getTitle() {
     return this.getContent().title || "";
@@ -167,19 +205,17 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     const dataSetAttributes = dataSet.attributes;
 
     // dataSet looks like
-    // Time_Quantized | Time_Actual | Node 1 | Node 2 | Node 3 etc
-    //    0           |  0          | val    | val    |  val
-    addAttributeToDataSet(model.dataSet, { name: "Time_Quantized" });
-    addAttributeToDataSet(model.dataSet, { name: "Time_Actual" });
+    // Time   |  Node 1 | Node 2 | Node 3 etc
+    //    0   |   val    | val    |  val
+    addAttributeToDataSet(model.dataSet, { name: "Time (sec)" }); //this is time quantized to nearest sampling rate
 
     model.program.nodes.forEach((n) => {
       model.addNewAttrFromNode(n.id, n.name);
     });
 
     // compare dataset attributes against nodes on tile, if an attribute is not on the tile - remove it.
-
     dataSetAttributes.forEach((attribute, idx) => {
-      if (idx >= kTimeAttributeCount) { //skip 0 and 1 index because those attribute are Time
+      if (idx >= 1) { //skip 0 index (Time)
         model.removeAttributesInDatasetMissingInTile(attribute.id);
       }
     });
@@ -240,3 +276,5 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     return this.props.model.content as DataflowContentModelType;
   }
 }
+
+
