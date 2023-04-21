@@ -125,7 +125,6 @@ describe("tile dragging", () => {
         expect(items).toMatchInlineSnapshot(`
 Array [
   Object {
-    "newTileId": "testid-1000",
     "rowHeight": undefined,
     "rowIndex": 0,
     "tileContent": "{\\"id\\":\\"testid-1000\\",\\"title\\":\\"tile 1\\",\\"content\\":{\\"type\\":\\"Text\\",\\"text\\":\\"\\"}}",
@@ -146,7 +145,6 @@ Array [
         expect(items).toMatchInlineSnapshot(`
 Array [
   Object {
-    "newTileId": "testid-1000",
     "rowHeight": undefined,
     "rowIndex": 0,
     "tileContent": "{\\"id\\":\\"testid-1000\\",\\"title\\":\\"tile 1\\",\\"content\\":{\\"type\\":\\"Text\\",\\"text\\":\\"\\"}}",
@@ -155,7 +153,6 @@ Array [
     "tileType": "Text",
   },
   Object {
-    "newTileId": "testid-1001",
     "rowHeight": undefined,
     "rowIndex": 1,
     "tileContent": "{\\"id\\":\\"testid-1001\\",\\"title\\":\\"tile 2\\",\\"content\\":{\\"type\\":\\"Text\\",\\"text\\":\\"\\"}}",
@@ -181,7 +178,6 @@ Array [
         expect(items).toMatchInlineSnapshot(`
 Array [
   Object {
-    "newTileId": "testid-1000",
     "rowHeight": undefined,
     "rowIndex": 2,
     "tileContent": "{\\"id\\":\\"testid-1000\\",\\"title\\":\\"tile 3\\",\\"content\\":{\\"type\\":\\"Table\\",\\"isImported\\":false,\\"importedDataSet\\":{\\"id\\":\\"testid-8\\",\\"attributes\\":[],\\"cases\\":[]},\\"columnWidths\\":{}}}",
@@ -207,7 +203,6 @@ Object {
   "sourceDocId": "testid-10",
   "tiles": Array [
     Object {
-      "newTileId": "testid-1000",
       "rowHeight": undefined,
       "rowIndex": 0,
       "tileContent": "{\\"id\\":\\"testid-1000\\",\\"title\\":\\"tile 1\\",\\"content\\":{\\"type\\":\\"Text\\",\\"text\\":\\"\\"}}",
@@ -232,7 +227,6 @@ Object {
   "sourceDocId": "testid-10",
   "tiles": Array [
     Object {
-      "newTileId": "testid-1001",
       "rowHeight": undefined,
       "rowIndex": 0,
       "tileContent": "{\\"id\\":\\"testid-1001\\",\\"title\\":\\"tile 1\\",\\"content\\":{\\"type\\":\\"Text\\",\\"text\\":\\"\\"}}",
@@ -241,7 +235,6 @@ Object {
       "tileType": "Text",
     },
     Object {
-      "newTileId": "testid-1000",
       "rowHeight": undefined,
       "rowIndex": 1,
       "tileContent": "{\\"id\\":\\"testid-1000\\",\\"title\\":\\"tile 2\\",\\"content\\":{\\"type\\":\\"Text\\",\\"text\\":\\"\\"}}",
@@ -276,7 +269,6 @@ Object {
   "sourceDocId": "testid-10",
   "tiles": Array [
     Object {
-      "newTileId": "testid-1000",
       "rowHeight": undefined,
       "rowIndex": 2,
       "tileContent": "{\\"id\\":\\"testid-1000\\",\\"title\\":\\"tile 3\\",\\"content\\":{\\"type\\":\\"Table\\",\\"isImported\\":false,\\"importedDataSet\\":{\\"id\\":\\"testid-8\\",\\"attributes\\":[],\\"cases\\":[]},\\"columnWidths\\":{}}}",
