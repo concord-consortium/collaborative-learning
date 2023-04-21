@@ -14,6 +14,7 @@ import { ToolTitleArea } from "../../../components/tiles/tile-title-area";
 import { dataflowLogEvent } from "../dataflow-logger";
 import { addAttributeToDataSet } from "../../../models/data/data-set";
 import { DataflowLinkTableButton } from "./ui/dataflow-program-link-table-button";
+import { useLinkableTableTiles } from "./use-table-linking-dataflow";
 
 import "./dataflow-tile.scss";
 
@@ -51,7 +52,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     const { program, programDataRate, programZoom } = this.getContent();
     const numNodes = program.nodes.size;
     const tileContent = this.getContent();
-    console.log("----- dataflow-tile >  render ()----------");
 
     return (
       <>
@@ -176,10 +176,12 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   }
 
   private handleRequestTableLink = (tableId: string) => {
+    console.log("handleRequestTableLink with tableID;", tableId);
     this.getContent().addLinkedTable(tableId);
   };
 
   private handleRequestTableUnlink = (tableId: string) => {
+    console.log("handleRequestTableUnLink with tableID;", tableId);
     this.getContent().removeLinkedTable(tableId);
   };
 
@@ -228,23 +230,31 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     //below are "substates" of #2 above
     //isPlaying: playbackIndex incrementing, Nodes updated "by hand" rather than via execution
     //isPaused: playbackIndex not incrementing, nodes stay as they were at last index above
-
-
     const tileContent = this.getContent();
-      const mode = tileContent.programRecordingMode;
-
+    const mode = tileContent.programRecordingMode;
+    // const { model, onRequestTilesOfType } = this.props;
 
     if (mode === 0){ //when Record is pressed
       this.setState({isPlaying: false}); //reset isPlaying
       this.pairNodesToAttributes();
     }
     if (mode === 2){ // Clear pressed - remove all dataSet
+      console.log("clear button pressed > tileContent:", tileContent);
+      // const tableTiles = useLinkableTableTiles( {tileContent, onRequestTilesOfType});
+      //TODO
+      //if it is Table is linked to Data set, we must remove
+      //this is what tells us which table tiles are currently in the document
+      // const tableTiles = useLinkableTableTiles({model, onRequestTilesOfType}); //does not work can't call hook
+      // console.log("tableTiles on the document :", tableTiles);
+
+
       const allAttributes = tileContent.dataSet.attributes;
       const ids = tileContent.dataSet.cases.map(({__id__}) => ( __id__));
       tileContent.dataSet.removeCases(ids);
       allAttributes.forEach((attr)=>{
         tileContent.dataSet.removeAttribute(attr.id);
       });
+
     }
     tileContent.setProgramRecordingMode();
   };

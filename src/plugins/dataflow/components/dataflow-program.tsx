@@ -125,6 +125,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       lastIntervalDuration: 0,
     };
     this.lastIntervalTime = Date.now();
+
   }
 
   public render() {
@@ -188,12 +189,15 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     );
   }
 
+
   public componentDidMount() {
     if (!this.programEditor && this.toolDiv) {
       this.initProgram();
     }
     this.setupOnSnapshot();
   }
+
+
 
   public componentWillUnmount() {
     clearInterval(this.intervalHandle);
@@ -546,8 +550,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private recordCase = () => {
-    const { recordIndex, readOnly } = this.props;
-    // if (readOnly) return;
+    const { recordIndex } = this.props;
     const { programDataRate, dataSet } = this.props.tileContent; //grab the program Sampling Rate to write TimeQuantized
 
     //Write case
@@ -657,8 +660,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private tick = () => {
-    const { readOnly, tileId, tileContent: tileModel, playBackIndex, programRecordState, isPlaying,
-      updateRecordIndex, updatePlayBackIndex } = this.props;
+    const { readOnly, tileContent: tileModel, playBackIndex, programRecordState,
+            isPlaying, updateRecordIndex, updatePlayBackIndex } = this.props;
     const dataSet = tileModel.dataSet;
     const now = Date.now();
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});
@@ -673,7 +676,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
 
     if (isRecording){
-      if (!readOnly) this.recordCase();
+      if (!readOnly) this.recordCase(); //only record cases from right DF tiles
       this.updateNodes();
       updateRecordIndex(UpdateMode.Increment);
     }

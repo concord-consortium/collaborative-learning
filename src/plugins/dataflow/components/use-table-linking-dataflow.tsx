@@ -11,7 +11,7 @@ import { useLinkTableDialogDataFlow } from "./use-link-table-dialog-dataflow";
 import { IDataFlowActionHandlers } from "./dataflow-shared";
 
 //TODO: this is generally a copy of use-table-linking.tsx for Geometry Tile
-//consider refactoring -> https://www.pivotaltracker.com/n/projects/2441242/stories/184992684
+//consider refacxtoring -> https://www.pivotaltracker.com/n/projects/2441242/stories/184992684
 
 interface IProps {
   documentId?: string;
@@ -22,10 +22,11 @@ interface IProps {
 
 export const useTableLinkingDataFlow = (props: IProps) => {
   const { documentId, model, onRequestTilesOfType, actionHandlers } = props;
-  const {handleRequestTableLink, handleRequestTableUnlink} = actionHandlers || {};
+  const { handleRequestTableLink, handleRequestTableUnlink } = actionHandlers || {};
   const modelId = model.id;
 
-  const showLinkButton = useFeatureFlag("DataflowLinkedTables"); //modified
+  const showLinkButton = useFeatureFlag("DataflowLinkedTables");
+  // console.log(" useTableLinkingDataFlow > model? : ", model);
   const tableTiles = useLinkableTableTiles({ model, onRequestTilesOfType });
   const isLinkEnabled = (tableTiles.length > 0);
   const linkColors = getTableLinkColors(modelId);
@@ -51,7 +52,7 @@ interface IUseLinkableTableTilesProps {
 }
 
 //this is what tells us which table tiles are currently in the document
-const useLinkableTableTiles = ({ onRequestTilesOfType }: IUseLinkableTableTilesProps) => {
+export const useLinkableTableTiles = ({ onRequestTilesOfType }: IUseLinkableTableTilesProps) => {
   const tableTiles = useCurrent(onRequestTilesOfType(kTableTileType));
   // add default title if there isn't a title
   return tableTiles.current
