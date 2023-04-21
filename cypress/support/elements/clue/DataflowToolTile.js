@@ -1,7 +1,7 @@
 const getNodeText = (nodeType) => `.primary-workspace .node.${nodeType}`;
 
 class DataflowToolTile {
-  getDrawTile(workspaceClass) {
+  getDataflowTile(workspaceClass) {
     return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .dataflow-tool-tile`);
   }
   getTileTitle(workspaceClass){
@@ -64,8 +64,6 @@ class DataflowToolTile {
   getModalOkButton() {
     return cy.get('.dialog-contents #okButton');
   }
-  //Dataflow Tile
-
   getDataflowTileTitle(workspaceClass){
     return cy.get(`${workspaceClass || ".primary-workspace"} .editable-tile-title`);
   }
@@ -73,12 +71,10 @@ class DataflowToolTile {
   getAmplitudeField() {
     return cy.get(`${getNodeText("generator")} [title='Set Amplitude']`);
   }
-
   //Timer
   getLabel(value) {
     return cy.get(`${getNodeText("timer")} [title='Set Time ${value}'] label`);
   }
-
   //Demo Output
   getAdvancedGrabberImages() {
     cy.get('.demo-output-image.grabber-paddle-image').should("exist");

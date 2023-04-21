@@ -17,7 +17,7 @@ context('Dataflow Tool Tile', function () {
   describe("Dataflow Tool", () => {
     it("renders dataflow tool tile", () => {
       clueCanvas.addTile("dataflow");
-      dataflowToolTile.getDrawTile().should("exist");
+      dataflowToolTile.getDataflowTile().should("exist");
       dataflowToolTile.getTileTitle().should("exist");
     });
     it("edit tile title", () => {
@@ -364,7 +364,7 @@ context('Dataflow Tool Tile', function () {
         dataflowToolTile.getNode("number").should("exist");
         dataflowToolTile.getNumberField().type("1{enter}");
         dataflowToolTile.getNumberNodeOutput().should("exist");
-        dataflowToolTile.getDrawTile().click(306, 182)
+        dataflowToolTile.getDataflowTile().click(306, 182)
           .trigger("pointerdown", 306, 182, {force: true})
           .trigger("pointermove", 366, 172, {force: true})
           .trigger("pointerup", 366, 172, {force: true});
