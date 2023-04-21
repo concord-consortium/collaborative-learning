@@ -16,7 +16,8 @@ export interface NodeChannelInfo {
   timeFactor?: number;
   deviceFamily?: string;
   lastMessageRecievedAt?: number | null;
-  relaysState?: number[]
+  relaysState?: number[];
+  microbitId?: string;
 }
 
 const emgSensorChannel: NodeChannelInfo = {
@@ -92,6 +93,7 @@ function createMicroBitSensorChannels(sensors: MicroBitSensorChannelInfo[] ){
   const channels = sensors.map((s) => {
     return {
       ...basis,
+      microbitId: s.microBitId,
       hubId: `MICROBIT-RADIO-${s.microBitId}`,
       hubName: `microbit ${s.microBitId}`,
       name: `${s.type}-microbit-${s.microBitId}`,
@@ -117,6 +119,7 @@ function createMicroBitRelayInfoChannels(hubs: MicroBitHubInfo[] ){
   const channels = hubs.map((h) => {
     return {
       ...basis,
+      microbitId: h.microBitId,
       hubId: `MICROBIT-RADIO-${h.microBitId}`,
       hubName: `microbit ${h.microBitId}`,
       name: `relays-microbit-${h.microBitId}`,

@@ -442,7 +442,6 @@ export const ProgramDataRates: ProgramDataRate[] = [
 
 export const kSensorSelectMessage = "Select a sensor";
 export const kSensorMissingMessage = "⚠️";
-export const kRelayMappings = ["Heat Lamp", "Fan", "Humidifier"];
-export const kBinaryOutputTypes = ["Heat Lamp", "Fan", "Humidifier", "Light Bulb"];
-export const kRelayOutputTypes =  ["Heat Lamp", "Fan", "Humidifier"];
+export const kRelaysIndexed =  ["Heat Lamp", "Fan", "Humidifier"];
+export const kBinaryOutputTypes = [...kRelaysIndexed, "Light Bulb"];
 export const kRoundedOutputTypes = ["Grabber"];

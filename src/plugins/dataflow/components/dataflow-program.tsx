@@ -743,7 +743,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const hubSelect = n.controls.get("hubSelect") as DropdownListControl;
       if (hubSelect.getChannels()){
         const relayType = hubSelect.getData("liveOutputType") as string;
-        const hubId = hubSelect.getValue().charAt(14);
+        const hubId = hubSelect.getSelectionId();
         const state = n.data.nodeValue as number;
         this.stores.serialDevice.writeToOutForMicroBitRelayHub(state, hubId, relayType );
       }
