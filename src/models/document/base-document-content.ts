@@ -1073,44 +1073,49 @@ export const BaseDocumentContentModel = types
       const sharedModelEntries = Object.values(self.getSharedModelsUsedByTiles(tiles.map(tile => tile.tileId)));
 
       // Update shared models with new ids
-      interface UpdatedSharedDataSet {
-        sharedModelId: string;
+      interface UpdatedSharedDataSetIds {
         attributeIdMap: Record<string, string>;
         caseIdMap: Record<string, string>;
+        dataSetId: string;
+        sharedModelId: string;
       }
-      const updatedSharedModelMap: Record<string, UpdatedSharedDataSet> = {};
+      const updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds> = {};
       const newSharedModelEntries: any[] = [];
       sharedModelEntries.forEach(sharedModelEntry => {
         // For now, only duplicate shared data sets
         if (sharedModelEntry.sharedModel.type === "SharedDataSet") {
           // Determine new ids
           const sharedDataSet = getSnapshot(sharedModelEntry.sharedModel) as SharedDataSetSnapshotType;
-          const sharedModelId = uniqueId();
-          const dataSetId = uniqueId();
-          const attributeIdMap: Record<string, string> = {};
-          const caseIdMap: Record<string, string> = {};
-          sharedDataSet.dataSet.attributes?.forEach((attr: any) => {
-            attributeIdMap[attr.id] = uniqueId();
+          const updatedEntry: UpdatedSharedDataSetIds = {
+            attributeIdMap: {},
+            caseIdMap: {},
+            dataSetId: uniqueId(),
+            sharedModelId: uniqueId()
+          };
+          sharedDataSet.dataSet.attributes?.forEach(attr => {
+            updatedEntry.attributeIdMap[attr.id] = uniqueId();
           });
-          sharedDataSet.dataSet.cases?.forEach((c: any) => {
-            caseIdMap[c.__id__] = newCaseId();
+          sharedDataSet.dataSet.cases?.forEach(c => {
+            if (c.__id__) updatedEntry.caseIdMap[c.__id__] = newCaseId();
           });
-          if (sharedDataSet.id) updatedSharedModelMap[sharedDataSet.id] = { sharedModelId, attributeIdMap, caseIdMap };
+          if (sharedDataSet.id) updatedSharedModelMap[sharedDataSet.id] = updatedEntry;
 
           // Create a snapshot for the shared model with updated ids, which will be updated with new tile ids
           // and added to the document later
-          const newAttributes = sharedDataSet.dataSet.attributes?.map((a: any) => {
-            return { ...a, id: attributeIdMap[a.id] };
+          const newAttributes = sharedDataSet.dataSet.attributes?.map(a => {
+            return { ...a, id: updatedEntry.attributeIdMap[a.id] };
           });
-          const newCases = sharedDataSet.dataSet.cases?.map((c: any) => ({ ...c, __id__: caseIdMap[c.__id__] }));
+          const newCases = sharedDataSet.dataSet.cases?.filter(c => c.__id__).map(c => (
+            c.__id__ && { ...c, __id__: updatedEntry.caseIdMap[c.__id__] }
+          ));
           newSharedModelEntries.push({
             tiles: sharedModelEntry.tiles,
             sharedModel: {
               ...sharedDataSet,
-              id: sharedModelId,
+              id: updatedEntry.sharedModelId,
               dataSet: {
                 ...sharedDataSet.dataSet,
-                id: dataSetId,
+                id: updatedEntry.dataSetId,
                 attributes: newAttributes,
                 cases: newCases
               }
