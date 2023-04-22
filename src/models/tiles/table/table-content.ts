@@ -230,9 +230,6 @@ export const TableContentModel = TileContentModel
   .views(self => ({
     get tileSnapshotForCopy() {
       const snapshot = getSnapshot(self);
-      if (!self.dataSet.isEmpty) {
-        return { ...snapshot, importedDataSet: getSnapshot(self.dataSet) };
-      }
       return snapshot;
     }
   }))
