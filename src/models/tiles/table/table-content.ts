@@ -12,7 +12,7 @@ import { tileModelHooks } from "../tile-model-hooks";
 import { setTileTitleFromContent } from "../tile-model";
 import { TileContentModel } from "../tile-content";
 import { addCanonicalCasesToDataSet, IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
-import { kSharedDataSetType, SharedDataSet, SharedDataSetType } from "../../shared/shared-data-set";
+import { kSharedDataSetType, SharedDataSet, SharedDataSetType, UpdatedSharedDataSetIds } from "../../shared/shared-data-set";
 import { updateSharedDataSetColors } from "../../shared/shared-data-set-colors";
 import { SharedModelType } from "../../shared/shared-model";
 import { kMinColumnWidth } from "../../../components/tiles/table/table-types";
@@ -20,6 +20,7 @@ import { canonicalizeExpression, kSerializedXKey } from "../../data/expression-u
 import { LogEventName } from "../../../lib/logger-types";
 import { logTileChangeEvent } from "../log/log-tile-change-event";
 import { uniqueId } from "../../../utilities/js-utils";
+import { PartialSharedModelEntry } from "src/models/document/document-content-types";
 
 export const kTableTileType = "Table";
 export const kCaseIdName = "__id__";
@@ -450,3 +451,23 @@ export const TableContentModel = TileContentModel
   }));
 
 export type TableContentModelType = Instance<typeof TableContentModel>;
+
+export function updateTableContentWithNewSharedModelIds(
+  content: TableContentModelType,
+  sharedDataSetEntries: PartialSharedModelEntry[],
+  updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds>
+) {
+  const columnWidths: Record<string, number> = {};
+  sharedDataSetEntries.forEach(sharedDataSetEntry => {
+    const originalSharedDataSetId = sharedDataSetEntry.sharedModel.id;
+    const attributeIdMap = updatedSharedModelMap[originalSharedDataSetId].attributeIdMap;
+    for (const entry of Object.entries(content.columnWidths)) {
+      const originalId = entry[0];
+      const width = entry[1] as number;
+      if (width !== undefined && originalId && attributeIdMap[originalId]) {
+          columnWidths[attributeIdMap[originalId]] = width;
+      }
+    }
+  });
+  return { ...content, columnWidths };
+}

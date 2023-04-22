@@ -32,8 +32,12 @@ import { IDocumentContentAddTileOptions, IDragTilesData, INewRowTile, INewTileOp
 import { SharedModelEntry, SharedModelEntryType, SharedModelEntrySnapshotType } from "./shared-model-entry";
 
 // Imports related to hard coding shared model duplication
-import { newCaseId } from "../data/data-set";
-import { SharedDataSetSnapshotType } from "../shared/shared-data-set";
+import {
+  getSharedDataSetSnapshotWithUpdatedIds, getUpdatedSharedDataSetIds, SharedDataSetSnapshotType,
+  UpdatedSharedDataSetIds, updateSharedDataSetSnapshotWithNewTileIds
+} from "../shared/shared-data-set";
+import { updateTableContentWithNewSharedModelIds } from "../tiles/table/table-content";
+import { updateDataCardContentWithNewSharedModelIds } from "../../plugins/data-card/data-card-content";
 
 /**
  * This is one part of the DocumentContentModel. The other part is
@@ -1001,23 +1005,37 @@ export const BaseDocumentContentModel = types
                       : self.copyTilesIntoNewRows(tiles, rowInfo.rowInsertIndex);
       self.logCopyTileResults(tiles, results);
       return results;
+    },
+    // If the tile with the given id has a default title, give it a new default title
+    // Note that this will update the tile's title, even if there are no other tiles with the same title
+    // Returns { oldTitle, newTitle }, which are undefined if the title wasn't changed
+    updateDefaultTileTitle(tileId: string) {
+      const tile = self.getTile(tileId);
+      if (tile) {
+        const tileContentInfo = getTileContentInfo(tile.content.type);
+        if (tileContentInfo) {
+          const oldTitle = tile.title;
+          const match = titleMatchesDefault(oldTitle, tileContentInfo.titleBase);
+          if (match) {
+            const newTitle = self.getNewTileTitle(tile.content.type);
+            tile.setTitle(newTitle);
+            return { oldTitle, newTitle };
+          }
+        }
+      }
+      return { oldTitle: undefined, newTitle: undefined };
     }
+
   }))
   .actions(self => ({
+    // Copies tiles and shared models into the specified row, giving them all new ids
     copyTiles(
       tiles: IDragTileItem[],
       sharedModelEntries: PartialSharedModelEntry[],
       rowInfo: IDropRowInfo,
       insertTileFunction: (updatedTiles: any[], rowInfo: IDropRowInfo) => NewRowTileArray
     ) {
-
       // Update shared models with new ids
-      interface UpdatedSharedDataSetIds {
-        attributeIdMap: Record<string, string>;
-        caseIdMap: Record<string, string>;
-        dataSetId: string;
-        sharedModelId: string;
-      }
       const updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds> = {};
       const newSharedModelEntries: any[] = [];
       sharedModelEntries.forEach(sharedModelEntry => {
@@ -1025,41 +1043,15 @@ export const BaseDocumentContentModel = types
         if (sharedModelEntry.sharedModel.type === "SharedDataSet") {
           // Determine new ids
           const sharedDataSet = sharedModelEntry.sharedModel as SharedDataSetSnapshotType;
-          const updatedEntry: UpdatedSharedDataSetIds = {
-            attributeIdMap: {},
-            caseIdMap: {},
-            dataSetId: uniqueId(),
-            sharedModelId: uniqueId()
-          };
-          sharedDataSet.dataSet.attributes?.forEach(attr => {
-            updatedEntry.attributeIdMap[attr.id] = uniqueId();
-          });
-          sharedDataSet.dataSet.cases?.forEach(c => {
-            if (c.__id__) updatedEntry.caseIdMap[c.__id__] = newCaseId();
-          });
-          if (sharedDataSet.id) updatedSharedModelMap[sharedDataSet.id] = updatedEntry;
+          const updatedIds = getUpdatedSharedDataSetIds(sharedDataSet);
+          if (sharedDataSet.id) updatedSharedModelMap[sharedDataSet.id] = updatedIds;
 
           // Create a snapshot for the shared model with updated ids, which will be updated with new tile ids
           // and added to the document later
-          const newAttributes = sharedDataSet.dataSet.attributes?.map(a => {
-            const formula = cloneDeep(a.formula);
-            return { ...a, id: updatedEntry.attributeIdMap[a.id], formula };
-          });
-          const newCases = sharedDataSet.dataSet.cases?.filter(c => c.__id__).map(c => (
-            c.__id__ && { ...c, __id__: updatedEntry.caseIdMap[c.__id__] }
-          ));
+          const sharedModel = getSharedDataSetSnapshotWithUpdatedIds(sharedDataSet, updatedIds);
           newSharedModelEntries.push({
             tiles: sharedModelEntry.tiles,
-            sharedModel: {
-              ...sharedDataSet,
-              id: updatedEntry.sharedModelId,
-              dataSet: {
-                ...sharedDataSet.dataSet,
-                id: updatedEntry.dataSetId,
-                attributes: newAttributes,
-                cases: newCases
-              }
-            }
+            sharedModel
           });
         }
       });
@@ -1069,47 +1061,24 @@ export const BaseDocumentContentModel = types
       const updatedTiles: any[] = [];
       tiles.forEach(tile => {
         const oldContent = JSON.parse(tile.tileContent);
-        const tileContent = oldContent;
+        const tileContent = cloneDeep(oldContent);
         tileIdMap[tile.tileId] = uniqueId();
 
         // Find the shared models for this tile
-        const sharedDataSetEntries = sharedModelEntries.filter(entry => (
-          entry.tiles?.map(t => t.id).includes(tile.tileId)
-        ));
+        const sharedDataSetEntries =
+          sharedModelEntries.filter(entry => entry.tiles?.map(t => t.id).includes(tile.tileId));
 
         // Update the tile's references to its shared models
         if (tile.tileType === "Table") {
-          const columnWidths: Record<string, number> = {};
-          sharedDataSetEntries.forEach(sharedDataSetEntry => {
-            const originalSharedDataSetId = sharedDataSetEntry.sharedModel.id;
-            const attributeIdMap = updatedSharedModelMap[originalSharedDataSetId].attributeIdMap;
-            for (const entry of Object.entries(oldContent.content.columnWidths)) {
-              const originalId = entry[0];
-              const width = entry[1] as number;
-              if (width !== undefined && originalId && attributeIdMap[originalId]) {
-                  columnWidths[attributeIdMap[originalId]] = width;
-              }
-            }
-          });
-          tileContent.content = { ...oldContent.content, columnWidths };
+          tileContent.content =
+            updateTableContentWithNewSharedModelIds(oldContent.content, sharedDataSetEntries, updatedSharedModelMap);
         } else if (tile.tileType === "DataCard") {
-          const oldAttributeId = oldContent.content.selectedSortAttributeId;
-          sharedDataSetEntries.forEach(sharedDataSetEntry => {
-            const originalSharedDataSetId = sharedDataSetEntry.sharedModel.id;
-            const attributeIdMap = updatedSharedModelMap[originalSharedDataSetId].attributeIdMap;
-            if (attributeIdMap[oldAttributeId]) {
-              const content = { ...oldContent.content, selectedSortAttributeId: attributeIdMap[oldAttributeId] };
-              tileContent.content = content;
-            }
-          });
+          tileContent.content =
+            updateDataCardContentWithNewSharedModelIds(oldContent.content, sharedDataSetEntries, updatedSharedModelMap);
         }
 
         // Save the updated tile so we can add it to the document
-        updatedTiles.push({
-          ...tile,
-          newTileId: tileIdMap[tile.tileId],
-          tileContent: JSON.stringify(tileContent)
-        });
+        updatedTiles.push({ ...tile, newTileId: tileIdMap[tile.tileId], tileContent: JSON.stringify(tileContent) });
       });
 
       // Add copied tiles to document
@@ -1117,24 +1086,19 @@ export const BaseDocumentContentModel = types
 
       // Increment default titles when necessary
       results.forEach((result, i) => {
-        const newTile = result?.tileId && self.getTile(result.tileId);
-        if (result && newTile) {
-          const tileContentInfo = getTileContentInfo(newTile.content.type);
-          if (tileContentInfo) {
-            const match = titleMatchesDefault(newTile.title, tileContentInfo.titleBase);
-            if (match) {
-              const newTitle = self.getNewTileTitle(newTile.content.type);
+        if (result?.tileId) {
+          const { oldTitle, newTitle } = self.updateDefaultTileTitle(result.tileId);
 
-              // If the tile title needed to be update, we assume we should also update the data set's name
-              newSharedModelEntries.forEach(sharedModelEntry => {
+          // If the tile title needed to be update, we assume we should also update the data set's name
+          if (newTitle && sharedModelEntries) {
+            newSharedModelEntries.forEach(sharedModelEntry => {
+              if (sharedModelEntry.sharedModel.type === "SharedDataSet") {
                 const oldName = sharedModelEntry.sharedModel.dataSet.name;
-                if (oldName === newTile.title) {
+                if (oldName === oldTitle) {
                   sharedModelEntry.sharedModel.dataSet.name = newTitle;
                 }
-              });
-
-              newTile.setTitle(newTitle);
-            }
+              }
+            });
           }
         }
       });
@@ -1144,7 +1108,7 @@ export const BaseDocumentContentModel = types
         const updatedTileIds: string[] = sharedModelEntry.tiles.map((oldTile: any) => tileIdMap[oldTile.id]);
         const updatedSharedModel = { ...sharedModelEntry.sharedModel };
         if (sharedModelEntry.sharedModel.type === "SharedDataSet") {
-          updatedSharedModel.providerId = tileIdMap[sharedModelEntry.sharedModel.providerId];
+          updateSharedDataSetSnapshotWithNewTileIds(updatedSharedModel, tileIdMap);
         }
         const newSharedModelEntry = self.addSharedModel(updatedSharedModel);
         updatedTileIds.forEach(tileId => newSharedModelEntry.tiles.push(tileId));
@@ -1171,7 +1135,7 @@ export const BaseDocumentContentModel = types
             });
           }
         } catch (e) {
-          console.log(`Unable to copy shared model with content`, dragSharedModel.content);
+          console.warn(`Unable to copy shared model with content`, dragSharedModel.content);
         }
       });
 
