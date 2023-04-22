@@ -42,3 +42,11 @@ export interface IDragTilesData {
   tiles: IDragTileItem[];
   sharedModels: IDragSharedModelItem[];
 }
+
+export interface PartialTile {
+  id: string;
+}
+export interface PartialSharedModelEntry {
+  sharedModel: any;
+  tiles: PartialTile[];
+}
