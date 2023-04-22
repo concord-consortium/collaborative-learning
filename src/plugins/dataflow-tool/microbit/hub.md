@@ -4,27 +4,37 @@ The program for the micro:bit attached to the sensors/relays
 
 Downloadable link: https://makecode.microbit.org/_YpoCfzeTwCWP
 
-#### Outgoing strings to write,
-e.g. : `sat20.31`
-- `s`: "signal"
-- `a`: "hub A"
-- `t`: "temperature reading" (or `h` for humidity, or `r` for relays state),
+#### Place value decoder for outgoing strings
+e.g. : `sat20.31` translates to "signal from hub A, temperature reading 20.31"
+- `s`: indicates this is a "signal" from the hub
+- `a`: specifies hub: (`a`, `b`, `c`, `d`, or `x` for ignorable)
+- `t`: specifies sensor type (`t` for temperature, `h` for humidity)
 - `<n>`: the reading as a string of num chars
 
 #### Incoming strings to read
-e.g. : `ca11`
-- `c`: "control"
-- `a`: "hub A"
-- `1`: "relay at index 1"
-- `1`: "turn on"
+e.g. : `ca11` translates to "control message for hub A, relay at index 1, turn on"
+- `c`: indicates this is a "control" message
+- `a`: specifies hub: (`a`, `b`, `c`, `d`)
+- `1`: specifies index of relay: (`0`, `1`, `2`)
+- `1`: specifies on or off: (`0`, `1`)
 
-#### Pins
-- `15`    dht sensor (should change to `16`?):
-- `8`     relay 2 (Humidifier) (green)
-- `9`     relay 1 (fan) (yellow)
+#### Pins needed for connecting micro:bit
+colors are a convention for making it easier to debug
+- `15`    dht sensor
+- `8`     relay 2 (Humidifier) (yellow)
+- `9`     relay 1 (fan) (orange)
 - `12`    relay 0 (heat) (red)
 
+#### makecode javascript
+load this code onto hub micro:bit via mnakecode.microbit.org
+
 ```js
+/**
+ * micro:bit + Dataflow: "Hub"
+ * This is the basic program for the Hub micro:bit
+ * that is connected to sensors and relays.
+ */
+
 radio.setGroup(1)
 
 let hubIds = ['x', 'a', 'b', 'c', 'd']
