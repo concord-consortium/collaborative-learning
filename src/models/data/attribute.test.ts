@@ -1,4 +1,4 @@
-import { Attribute, IAttributeCreation } from "./attribute";
+import { Attribute } from "./attribute";
 import { clone } from "lodash";
 
 test("Attribute functionality", () => {
@@ -64,12 +64,12 @@ test("Attribute functionality", () => {
   expect(bar.name).toBe("bar");
   expect(bar.length).toBe(3);
 
-  const bazSnap: IAttributeCreation = bar.derive("baz");
+  const bazSnap = bar.derive("baz");
   expect(bazSnap.id).toBe(bar.id);
   expect(bazSnap.name).toBe("baz");
   expect(bazSnap.values && bazSnap.values.length).toBe(0);
 
-  const barSnap: IAttributeCreation = bar.derive();
+  const barSnap = bar.derive();
   expect(barSnap.id).toBe(bar.id);
   expect(barSnap.name).toBe(bar.name);
   expect(barSnap.values && barSnap.values.length).toBe(0);

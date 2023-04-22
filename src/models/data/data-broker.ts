@@ -113,17 +113,6 @@ export class DataBroker {
   clear() {
     this.dataSets.clear();
   }
-
-  // TODO: Are the below needed? Currently throwing errors:
-  // "Property 'prepareSnapshot' does not exist on type" and
-  // "Property 'completeSnapshot' does not exist on type"
-  // prepareSnapshots() {
-  //   this.dataSets.forEach(data => data.prepareSnapshot());
-  // }
-
-  // completeSnapshots() {
-  //   this.dataSets.forEach(data => data.completeSnapshot());
-  // }
 }
 
 export const gDataBroker = new DataBroker({ allowMultiple: true });

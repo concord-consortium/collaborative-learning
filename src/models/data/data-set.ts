@@ -1,7 +1,7 @@
 import { cloneDeep, findIndex } from "lodash";
 import { applyAction, getEnv, Instance, ISerializedActionCall,
           onAction, types, getSnapshot, SnapshotOut } from "mobx-state-tree";
-import { Attribute, IAttribute, IAttributeCreation, IValueType } from "./attribute";
+import { Attribute, IAttribute, IAttributeSnapshot, IValueType } from "./attribute";
 import { uniqueId, uniqueSortableId } from "../../utilities/js-utils";
 import { CaseGroup } from "./data-set-types";
 import { observable } from "mobx";
@@ -98,7 +98,6 @@ export const DataSet = types.model("DataSet", {
   };
 })
 .extend(self => {
-  const attrIDMap: { [index: string]: IAttribute } = {};
   const disposers: { [index: string]: () => void } = {};
   let inFlightActions = 0;
 
@@ -275,7 +274,7 @@ export const DataSet = types.model("DataSet", {
         return strValue;
       },
       getStrValueAtIndex(index: number, attributeID: string) {
-        const attr = attrIDMap[attributeID],
+        const attr = self.attrIDMap[attributeID],
               caseID = self.cases[index]?.__id__,
               cachedCase = self.isCaching ? self.caseCache.get(caseID) : undefined;
         const valueAtIndex = (cachedCase && Object.prototype.hasOwnProperty.call(cachedCase, attributeID))
@@ -301,7 +300,7 @@ export const DataSet = types.model("DataSet", {
               cachedCase = self.isCaching ? self.caseCache.get(caseID) : undefined;
         return (cachedCase && Object.prototype.hasOwnProperty.call(cachedCase, attributeID))
                 ? Number(cachedCase[attributeID])
-                : attr && (index != null) ? attr.numeric(index) : undefined;
+                : attr && (index != null) ? attr.numValue(index) : undefined;
       },
       getCase(caseID: string): ICase | undefined {
         return getCase(caseID);
@@ -512,7 +511,7 @@ export const DataSet = types.model("DataSet", {
       setName(name: string) {
         self.name = name;
       },
-      addAttributeWithID(snapshot: IAttributeCreation, beforeID?: string) {
+      addAttributeWithID(snapshot: IAttributeSnapshot, beforeID?: string) {
         const { formula, ...others } = snapshot;
         const attrSnap = { formula: { display: formula }, ...others };
         const beforeIndex = beforeID ? attrIndexFromID(beforeID) : undefined;
@@ -691,7 +690,7 @@ export interface IDataSetCreation {
 }
 export type IDataSetSnapshot = SnapshotOut<typeof DataSet>;
 
-export function addAttributeToDataSet(dataset: IDataSet, snapshot: IAttributeCreation, beforeID?: string) {
+export function addAttributeToDataSet(dataset: IDataSet, snapshot: IAttributeSnapshot, beforeID?: string) {
   if (!snapshot.id) {
     snapshot.id = uniqueId();
   }
@@ -725,7 +724,7 @@ export function getDataSetBounds(dataSet: IDataSet) {
     let min = Infinity;
     let max = -Infinity;
     dataSet.cases.forEach(( aCase, caseIndex) => {
-      const value = dataSet.attributes[attrIndex].numericValue(caseIndex);
+      const value = dataSet.attributes[attrIndex].numValue(caseIndex);
       if (isFinite(value)) {
         if (value < min) min = value;
         if (value > max) max = value;

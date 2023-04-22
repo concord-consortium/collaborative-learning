@@ -11,8 +11,6 @@ export interface IFilteredChangedCases {
   removed: string[] // ids of cases that no longer pass the filter
 }
 
-// TODO: Determine if changing actionCall's type to SetCaseValuesAction is appropriate.
-// It was previously set to ISerializedActionCall.
 export type OnSetCaseValuesFn = (actionCall: ISerializedActionCall, cases: IFilteredChangedCases) => void
 
 interface IProps {
