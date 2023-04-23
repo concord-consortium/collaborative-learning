@@ -8,6 +8,7 @@ import PlayIcon from "../../assets/topbar-buttons/play-icon.svg";
 import PauseIcon from "../../assets/topbar-buttons/pause-icon.svg";
 import ClearIcon from "../../assets/topbar-buttons/clear-icon.svg";
 import { DataflowSerialConnectButton } from "./dataflow-serial-connect-button";
+import { DataflowContentModelType } from "../../model/dataflow-content";
 
 import "./dataflow-program-topbar.scss";
 
@@ -25,11 +26,12 @@ interface TopbarProps {
   isPlaying: boolean;
   handleChangeIsPlaying: () => void;
   numNodes: number;
+  tileContent: DataflowContentModelType;
 }
 
 export const DataflowProgramTopbar = (props: TopbarProps) => {
   const { onSerialRefreshDevices, readOnly, serialDevice, programDataRates, dataRate, onRateSelectClick,
-          onRecordDataChange, programRecordState, isPlaying, handleChangeIsPlaying, numNodes } = props;
+          onRecordDataChange, programRecordState, isPlaying, handleChangeIsPlaying, numNodes, tileContent } = props;
 
   return (
     <div className="program-editor-topbar">
@@ -59,6 +61,7 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
             handleChangeIsPlaying={handleChangeIsPlaying}
             numNodes={numNodes}
             onRecordDataChange={onRecordDataChange}
+            tileContent={tileContent}
           />
           <RecordStopOrClearButton
             disabled={readOnly}

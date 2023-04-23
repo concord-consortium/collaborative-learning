@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { types, Instance, applySnapshot, getSnapshot, addDisposer, getType } from "mobx-state-tree";
 import { reaction } from "mobx";
 import { cloneDeep} from "lodash";
@@ -18,6 +19,9 @@ import { uniqueId } from "../../../utilities/js-utils";
 import { getTileContentById } from "../../../utilities/mst-utils";
 
 export const kDataflowTileType = "Dataflow";
+
+
+
 
 export function defaultDataflowContent(): DataflowContentModelType {
   return DataflowContentModel.create();
@@ -49,6 +53,7 @@ export const DataflowContentModel = TileContentModel
     programDataRate: DEFAULT_DATA_RATE,
     programRecordingMode: 0,
     programZoom: types.optional(ProgramZoom, DEFAULT_PROGRAM_ZOOM),
+    formattedTime: "000:00"
   })
   .volatile(self => ({
     metadata: undefined as any as ITileMetadataModel,
@@ -80,6 +85,7 @@ export const DataflowContentModel = TileContentModel
     get dataSet(){
       return self.sharedModel?.dataSet || self.emptyDataSet;
     },
+
     get linkedDataSets(): SharedDataSetType[] {
       const sharedModelManager = self.tileEnv?.sharedModelManager;
       const foundSharedModels = sharedModelManager?.isReady
@@ -111,6 +117,11 @@ export const DataflowContentModel = TileContentModel
         `}`
       ].join("\n");
     },
+    // ------ADDED---------------------------------
+    get isEmptyDataSet(){
+      return self.dataSet.isEmpty;
+    },
+    // ------ END -----------------------------------
     get isLinked(){
       return self.linkedDataSets.length > 0;
     },
@@ -156,11 +167,9 @@ export const DataflowContentModel = TileContentModel
             const dataSet = defaultDataSet();
             sharedDataSet = SharedDataSet.create({ providerId: self.metadata.id, dataSet });
           }
-
           // Add the shared model to both the document and the tile
           sharedModelManager.addTileSharedModel(self, sharedDataSet);
         }
-
         // update the colors
         const dataSets = sharedModelManager.getSharedModelsByType(kSharedDataSetType) as SharedDataSetType[];
         updateSharedDataSetColors(dataSets);
@@ -183,8 +192,14 @@ export const DataflowContentModel = TileContentModel
       self.programZoom.dy = dy;
       self.programZoom.scale = scale;
     },
-    setProgramRecordingMode(){
+    incrementProgramRecordingMode(refreshFlag?: boolean){
       self.programRecordingMode = (self.programRecordingMode + 1) % 3;
+      if (refreshFlag){
+        self.programRecordingMode = 2;
+      }
+    },
+    setFormattedTime(formattedTime: string){
+      self.formattedTime = formattedTime;
     },
     updateAfterSharedModelChanges(sharedModel?: SharedModelType){
       //do nothing

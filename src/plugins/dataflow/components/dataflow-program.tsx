@@ -129,7 +129,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { readOnly, documentProperties, numNodes} = this.props;
+    const { readOnly, documentProperties, numNodes, tileContent} = this.props;
     const editorClassForDisplayState = "full";
     const editorClass = `editor ${editorClassForDisplayState}`;
     const toolbarEditorContainerClass = `toolbar-editor-container`;
@@ -153,6 +153,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           isPlaying={this.props.isPlaying}
           handleChangeIsPlaying={this.props.handleChangeIsPlaying}
           numNodes={numNodes}
+          tileContent={tileContent}
         />
         <div className={toolbarEditorContainerClass}>
           { showProgramToolbar && <DataflowProgramToolbar
@@ -196,8 +197,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
     this.setupOnSnapshot();
   }
-
-
 
   public componentWillUnmount() {
     clearInterval(this.intervalHandle);
@@ -426,8 +425,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   //disable the right side when recordingMode is 1 (record) or 2 (stop)
   private disabledRecordingStates(){
-    const { tileContent } = this.props;
-    return (tileContent.programRecordingMode === 1 || tileContent.programRecordingMode === 2);
+    const { programRecordState } = this.props;
+    return (programRecordState === 1 || programRecordState === 2);
   }
 
   private keepNodesInView = () => {
