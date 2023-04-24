@@ -3,7 +3,7 @@ import {createPortal} from "react-dom";
 import {reaction} from "mobx";
 import {observer} from "mobx-react-lite";
 import {select} from "d3";
-import t from "../../../utilities/translation/translate";
+import t from "../utilities/translation/translate";
 import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
 import {AttributeType} from "../../../models/data/attribute";
 import {isSetAttributeNameAction} from "../../../models/data/data-set-actions";

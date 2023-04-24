@@ -5,7 +5,7 @@ import {AxisBounds, axisPlaceToAxisFn, AxisScaleType, otherPlace} from "../axis-
 import {useAxisLayoutContext} from "../models/axis-layout-context";
 import {IAxisModel, isNumericAxisModel} from "../models/axis-model";
 import {isVertical} from "../../axis-graph-shared";
-import {between} from "../../../../utilities/math-utils";
+import {between} from "../../utilities/math-utils";
 import {transitionDuration} from "../../graph-types";
 import {collisionExists, computeBestNumberOfTicks, getCategoricalLabelPlacement, getStringBounds} from "../axis-utils";
 

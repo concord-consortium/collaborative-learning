@@ -15,11 +15,10 @@ import {Graph} from "./graph";
 import { ITileModel } from 'src/models/tiles/tile-model';
 
 interface IProps {
-  size?: any;
   tile?: ITileModel;
 }
 
-export const GraphComponent = observer(function GraphComponent({size, tile}: IProps) {
+export const GraphComponent = observer(function GraphComponent({tile}: IProps) {
   const graphModel = isGraphModel(tile?.content) ? tile?.content : undefined;
 
   const instanceId = useNextInstanceId("graph");

@@ -5,7 +5,7 @@ import {getDragAttributeId} from "./use-drag-drop";
 import {useDataConfigurationContext} from "../plugins/graph/hooks/use-data-configuration-context";
 import {attrRoleToGraphPlace, GraphAttrRole} from "../plugins/graph/graph-types";
 import {GraphPlace} from "../plugins/graph/axis-graph-shared";
-import t from "../utilities/translation/translate";
+import t from "../plugins/graph/utilities/translation/translate";
 
 export interface IUseDropHintStringProps {
   role: GraphAttrRole

@@ -1,6 +1,6 @@
 import { Menu, MenuItem, MenuList, MenuButton, MenuDivider } from "@chakra-ui/react";
 import React, { CSSProperties, useRef, memo } from "react";
-import t from "../../../../utilities/translation/translate";
+import t from "../../utilities/translation/translate";
 import {GraphPlace} from "../../axis-graph-shared";
 import { graphPlaceToAttrRole } from "../../graph-types";
 import { useDataConfigurationContext } from "../../hooks/use-data-configuration-context";

@@ -3,7 +3,7 @@ import React from "react";
 import {isInteger} from "lodash";
 import {selectCircles, selectDots} from "../d3-types";
 import {CaseData, kGraphFont, Point, Rect, rTreeRect, transitionDuration} from "../graph-types";
-import {between} from "../../../utilities/math-utils";
+import {between} from "./math-utils";
 import {IAxisModel, INumericAxisModel} from "../axis/models/axis-model";
 import {ScaleNumericBaseType} from "../axis/axis-types";
 import {IDataSet} from "../../../models/data/data-set";

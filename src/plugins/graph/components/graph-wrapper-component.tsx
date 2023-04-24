@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import classNames from "classnames";
-import { SizeMe, SizeMeProps } from "react-sizeme";
 
 import { GraphComponent } from "./graph-component";
 import { ITileProps } from "../../../components/tiles/tile-component";
@@ -50,15 +49,7 @@ export const GraphWrapperComponent: React.FC<ITileProps> = (props) => {
           onEndEdit={handleTitleChange}
        />
       </ToolTitleArea>
-      <SizeMe monitorHeight={true}>
-        {({ size }: SizeMeProps) => {
-          return (
-            <div className="graph-size-me">
-              <GraphComponent size={size} tile={model} />
-            </div>
-          );
-        }}
-      </SizeMe>
+      <GraphComponent tile={model} />
     </div>
   );
 };
