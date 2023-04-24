@@ -1,14 +1,19 @@
+import ResourcesPanel from '../../../../support/elements/clue/ResourcesPanel';
 import Canvas from '../../../../support/elements/common/Canvas';
 import ClueCanvas from '../../../../support/elements/clue/cCanvas';
 import GraphToolTile from '../../../../support/elements/clue/GraphToolTile';
 import TableToolTile from '../../../../support/elements/clue/TableToolTile';
 import TextToolTile from '../../../../support/elements/clue/TextToolTile';
 
+let resourcesPanel = new ResourcesPanel;
 const canvas = new Canvas;
 const clueCanvas = new ClueCanvas;
 const graphToolTile = new GraphToolTile;
 const tableToolTile = new TableToolTile;
 const textToolTile = new TextToolTile;
+
+const x = ['3', '7', '6', '0'];
+const y = ['2.5', '5', '1', '0'];
 
 context('Graph Table Integration', function () {
   before(function () {
@@ -23,8 +28,6 @@ context('Graph Table Integration', function () {
   });
 
   context('Tests for graph and table integration', function () {
-    const x = ['3', '7', '6', '0'];
-    const y = ['2.5', '5', '1', '0'];
     before(function () {
       clueCanvas.addTile('table');
       cy.get(".primary-workspace").within((workspace) => {
@@ -215,4 +218,55 @@ context('Graph Table Integration', function () {
       graphToolTile.getGraphPoint().should('exist').and('have.length', 3);
     });
   });
+});
+
+context("Dragging to copy linked tiles", () => {
+  before(function () {
+    const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&problem=2.3&qaGroup=5"; //using different problem bec. 2.1 disables graph table integration
+    cy.clearQAData('all');
+
+    cy.visit(queryParams);
+    cy.waitForLoad();
+    // cy.closeResourceTabs();
+
+    clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle');
+  });
+
+  describe("Can drag to copy linked tiles from the left panel", () => {
+    const dataTransfer = new DataTransfer;
+    it("drag a linked table and geometry tile", () => {
+      // Set up and link table and geometry tile
+      clueCanvas.addTile('table');
+      cy.get(".primary-workspace").within((workspace) => {
+        tableToolTile.getTableCell().eq(1).click().type(x[0] +'{enter}');
+        tableToolTile.getTableCell().eq(2).click();
+        tableToolTile.getTableCell().eq(2).type(y[0] +'{enter}');
+        tableToolTile.getTableCell().eq(5).click();
+        tableToolTile.getTableCell().eq(5).type(x[1] + '{enter}');
+        tableToolTile.getTableCell().eq(6).click();
+        cy.wait(500);
+        tableToolTile.getTableCell().eq(6).type(y[1] + '{enter}');
+        tableToolTile.getTableCell().eq(9).click();
+      });
+      clueCanvas.addTile('geometry');
+      textToolTile.deleteTextTile();
+      cy.linkTableToGraph('Table 1', "Graph 1");
+  
+      resourcesPanel.openPrimaryWorkspaceTab("my-work");
+      cy.get(".tab-panel-documents-section .list-item").first().click();
+      canvas.createNewExtraDocumentFromFileMenuWithoutTabs("Test Document", "my-work");
+
+      const leftTile = type => cy.get(`.nav-tab-panel .documents-panel .${type}-tool-tile`);
+      leftTile('table').first().click({ shiftKey: true });
+      leftTile('geometry').first().click({ shiftKey: true });
+
+      // Drag the selected copies to the workspace on the right
+      leftTile('geometry').first().trigger('dragstart', { dataTransfer });
+      cy.get('.single-workspace .canvas .document-content').first()
+        .trigger('drop', { force: true, dataTransfer });
+      
+      graphToolTile.getGraphPoint().should("exist").and("have.length", 2);
+    });
+  });
+  
 });
