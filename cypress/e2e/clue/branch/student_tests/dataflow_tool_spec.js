@@ -1,8 +1,10 @@
 import ClueCanvas from '../../../../support/elements/clue/cCanvas';
 import DataflowToolTile from '../../../../support/elements/clue/DataflowToolTile';
 
-let clueCanvas = new ClueCanvas,
-  dataflowToolTile = new DataflowToolTile;
+let clueCanvas = new ClueCanvas;
+let dataflowToolTile = new DataflowToolTile;
+let dragXDestination = 300;
+
 
 context('Dataflow Tool Tile', function () {
   before(function () {
@@ -329,7 +331,7 @@ context('Dataflow Tool Tile', function () {
       });
       it("verify live output types", () => {
         const dropdown = "liveOutputType";
-        const outputTypes = ["Light Bulb", "Grabber", "Sprinkler", "Fan", "Heat Lamp"];
+        const outputTypes = ["Light Bulb", "Grabber", "Humidifier", "Fan", "Heat Lamp"];
         dataflowToolTile.getDropdown(nodeType, dropdown).click();
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).should("have.length", 5);
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).each(($tab, index, $typeList) => {
@@ -340,6 +342,41 @@ context('Dataflow Tool Tile', function () {
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).should("have.length", 0);
         dataflowToolTile.getDropdown(nodeType, dropdown).contains("Heat Lamp").should("exist");
         dataflowToolTile.getOutputNodeValueText().should("contain", "off");
+      });
+      it("verify live binary outputs indicate hub not present if not connected", () => {
+        const dropdown = "liveOutputType";
+        dataflowToolTile.getDropdown(nodeType, dropdown).click();
+        dataflowToolTile.getDropdownOptions(nodeType, dropdown).eq(3).click();
+        dataflowToolTile.getDropdown(nodeType, dropdown).contains("Fan").should("exist");
+        dataflowToolTile.getOutputNodeValueText().should("contain", "(no hub)");
+      });
+      it("can be dragged to the right and set back to light bulb", () => {
+        const dropdown = "liveOutputType";
+        dataflowToolTile.getNode(nodeType).click(50, 10)
+          .trigger("pointerdown", 50, 10 )
+          .trigger("pointermove", dragXDestination, 10, { force: true } )
+          .trigger("pointerup", dragXDestination, 10, { force: true } );
+          dataflowToolTile.getDropdown(nodeType, dropdown).click();
+          dataflowToolTile.getDropdownOptions(nodeType, dropdown).eq(0).click();
+      });
+      it("can connect and trigger modal connection warning", () => {
+        dataflowToolTile.getCreateNodeButton("number").click();
+        dataflowToolTile.getNode("number").should("exist");
+        dataflowToolTile.getNumberField().type("1{enter}");
+        dataflowToolTile.getNumberNodeOutput().should("exist");
+        dataflowToolTile.getDataflowTile().click(306, 182)
+          .trigger("pointerdown", 306, 182, {force: true})
+          .trigger("pointermove", 366, 172, {force: true})
+          .trigger("pointerup", 366, 172, {force: true});
+        dataflowToolTile.getModalOkButton().click();
+      });
+      it("can recieve a value from a connected block, and display correct on or off string", () => {
+        dataflowToolTile.getNode("number").should("exist");
+        dataflowToolTile.getOutputNodeValueText().should("contain", "on");
+        dataflowToolTile.getNumberField().type("{backspace}0{enter}");
+        dataflowToolTile.getNumberNodeOutput().should("exist");
+        dataflowToolTile.getOutputNodeValueText().should("contain", "off");
+        dataflowToolTile.getDeleteNodeButton("number").click();
       });
       it("verify live output options", () => {
         dataflowToolTile.getDropdown(nodeType, "hubSelect").should("exist");

@@ -624,6 +624,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         this.updateNodeSensorValue(n);
       },
       "Live Output": (n: Node) => {
+        this.updateNodeChannelInfo(n);
         this.sendDataToSerialDevice(n);
       }
     };
@@ -734,7 +735,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const hubSelect = n.controls.get("hubSelect") as DropdownListControl;
       if (hubSelect.getChannels()){
         const relayType = hubSelect.getData("liveOutputType") as string;
-        const hubId = hubSelect.getValue().charAt(14);
+        const hubId = hubSelect.getSelectionId();
         const state = n.data.nodeValue as number;
         this.stores.serialDevice.writeToOutForMicroBitRelayHub(state, hubId, relayType );
       }
@@ -751,7 +752,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       Devices differ, but it may contain the words "usbserial" or "usbmodem"`;
 
     if (lastMsg !== "connect" && this.stores.serialDevice.serialNodesCount > 0){
-      alertMessage += `1. Connect the arduino to your computer.  2.${btnMsg}`;
+      alertMessage += `1. Connect the arduino or micro:bit to your computer.  2.${btnMsg}`;
     }
 
     // physical connection has been made but user action needed
