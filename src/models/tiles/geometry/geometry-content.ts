@@ -1,7 +1,7 @@
 import { castArray, difference, each, size as _size, union } from "lodash";
 import { reaction } from "mobx";
 import { addDisposer, applySnapshot, Instance, SnapshotIn, types } from "mobx-state-tree";
-import { SharedDataSet, SharedDataSetType } from "../../shared/shared-data-set";
+import { SharedDataSet, SharedDataSetType, UpdatedSharedDataSetIds } from "../../shared/shared-data-set";
 import { SelectionStoreModelType } from "../../stores/selection";
 import { ITableLinkProperties, linkedPointId } from "../table-link-types";
 import { ITileExportOptions, IDefaultContentOptions } from "../tile-content-info";
@@ -39,6 +39,7 @@ import { uniqueId } from "../../../utilities/js-utils";
 import { logTileChangeEvent } from "../log/log-tile-change-event";
 import { LogEventName } from "../../../lib/logger-types";
 import { gImageMap } from "../../image-map";
+import { PartialSharedModelEntry } from "../../document/document-content-types";
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
 
@@ -1151,3 +1152,11 @@ export type GeometryContentModelType = Instance<typeof GeometryContentModel>;
 export type GeometryContentSnapshotType = SnapshotIn<typeof GeometryContentModel>;
 
 export type GeometryMigratedContent = [GeometryContentModelType, { title: string }];
+
+export function updateGeometryContentWithNewSharedModelIds(
+  content: GeometryContentModelType,
+  sharedDataSetEntries: PartialSharedModelEntry[],
+  updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds>
+) {
+  return content;
+}

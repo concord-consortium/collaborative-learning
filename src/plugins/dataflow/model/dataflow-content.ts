@@ -10,12 +10,15 @@ import { ITileMetadataModel } from "../../../models/tiles/tile-metadata";
 import { tileModelHooks } from "../../../models/tiles/tile-model-hooks";
 import { TileContentModel } from "../../../models/tiles/tile-content";
 import { getTileModel, setTileTitleFromContent, getTileTitleFromContent } from "../../../models/tiles/tile-model";
-import { SharedDataSet, kSharedDataSetType, SharedDataSetType  } from "../../../models/shared/shared-data-set";
+import {
+  SharedDataSet, kSharedDataSetType, SharedDataSetType, UpdatedSharedDataSetIds
+} from "../../../models/shared/shared-data-set";
 import { updateSharedDataSetColors } from "../../../models/shared/shared-data-set-colors";
 import { SharedModelType } from "../../../models/shared/shared-model";
 import { addAttributeToDataSet, addCasesToDataSet, DataSet } from "../../../models/data/data-set";
 import { uniqueId } from "../../../utilities/js-utils";
 import { getTileContentById } from "../../../utilities/mst-utils";
+import { PartialSharedModelEntry } from "../../../models/document/document-content-types";
 
 export const kDataflowTileType = "Dataflow";
 
@@ -257,3 +260,11 @@ export const DataflowContentModel = TileContentModel
   }));
 
 export type DataflowContentModelType = Instance<typeof DataflowContentModel>;
+
+export function updateDataflowContentWithNewSharedModelIds(
+  content: DataflowContentModelType,
+  sharedDataSetEntries: PartialSharedModelEntry[],
+  updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds>
+) {
+  return content;
+}
