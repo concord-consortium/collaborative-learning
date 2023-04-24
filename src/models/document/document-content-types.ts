@@ -1,3 +1,4 @@
+import { SharedModelSnapshotType } from "../shared/shared-model";
 import { IDragSharedModelItem } from "../shared/shared-model-manager";
 import { IDragTileItem } from "../tiles/tile-model";
 import { IDropRowInfo } from "./tile-row";
@@ -47,6 +48,6 @@ export interface PartialTile {
   id: string;
 }
 export interface PartialSharedModelEntry {
-  sharedModel: any;
+  sharedModel: SharedModelSnapshotType;
   tiles: PartialTile[];
 }

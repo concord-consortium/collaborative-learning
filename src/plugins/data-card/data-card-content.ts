@@ -1,5 +1,5 @@
 import { reaction } from "mobx";
-import { addDisposer, getType, Instance, types } from "mobx-state-tree";
+import { addDisposer, getType, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { cloneDeep } from "lodash";
 
 import { kDataCardTileType, kDefaultLabel, kDefaultLabelPrefix } from "./data-card-types";
@@ -244,9 +244,10 @@ export const DataCardContentModel = TileContentModel
   }));
 
 export interface DataCardContentModelType extends Instance<typeof DataCardContentModel> {}
+export type DataCardContentSnapshotType = SnapshotIn<typeof DataCardContentModel>;
 
 export function updateDataCardContentWithNewSharedModelIds(
-  content: DataCardContentModelType,
+  content: DataCardContentSnapshotType,
   sharedDataSetEntries: PartialSharedModelEntry[],
   updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds>
 ) {

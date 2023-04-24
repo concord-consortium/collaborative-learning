@@ -451,9 +451,10 @@ export const TableContentModel = TileContentModel
   }));
 
 export type TableContentModelType = Instance<typeof TableContentModel>;
+export type TableContentSnapshotType = SnapshotIn<typeof TableContentModel>;
 
 export function updateTableContentWithNewSharedModelIds(
-  content: TableContentModelType,
+  content: TableContentSnapshotType,
   sharedDataSetEntries: PartialSharedModelEntry[],
   updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds>
 ) {
@@ -462,7 +463,7 @@ export function updateTableContentWithNewSharedModelIds(
   sharedDataSetEntries.forEach(sharedDataSetEntry => {
     const originalSharedDataSetId = sharedDataSetEntry.sharedModel.id;
     const attributeIdMap = updatedSharedModelMap[originalSharedDataSetId].attributeIdMap;
-    for (const entry of Object.entries(content.columnWidths)) {
+    for (const entry of Object.entries(content.columnWidths ?? {})) {
       const originalId = entry[0];
       const width = entry[1] as number;
       if (width !== undefined && originalId && attributeIdMap[originalId]) {

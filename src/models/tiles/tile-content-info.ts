@@ -25,7 +25,6 @@ type TileContentNewSharedModelIdUpdater = (
   updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds>
 ) => any;
 
-
 export interface ITileContentInfo {
   type: string;
   modelClass: typeof TileContentModel;

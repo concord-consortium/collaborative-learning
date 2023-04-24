@@ -1067,7 +1067,9 @@ export const BaseDocumentContentModel = types
 
         // Update the tile's references to its shared models
         const updateFunction = getTileContentInfo(tile.tileType)?.updateContentWithNewSharedModelIds;
-        updateFunction?.(oldContent.content, sharedDataSetEntries, updatedSharedModelMap);
+        if (updateFunction) {
+          tileContent.content = updateFunction(oldContent.content, sharedDataSetEntries, updatedSharedModelMap);
+        }
 
         // Save the updated tile so we can add it to the document
         updatedTiles.push({ ...tile, newTileId: tileIdMap[tile.tileId], tileContent: JSON.stringify(tileContent) });
@@ -1081,7 +1083,7 @@ export const BaseDocumentContentModel = types
         if (result?.tileId) {
           const { oldTitle, newTitle } = self.updateDefaultTileTitle(result.tileId);
 
-          // If the tile title needed to be update, we assume we should also update the data set's name
+          // If the tile title needed to be updated, we assume we should also update the data set's name
           if (newTitle && sharedModelEntries) {
             newSharedModelEntries.forEach(sharedModelEntry => {
               if (sharedModelEntry.sharedModel.type === "SharedDataSet") {
