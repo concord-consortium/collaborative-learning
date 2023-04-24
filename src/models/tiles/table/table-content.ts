@@ -457,6 +457,7 @@ export function updateTableContentWithNewSharedModelIds(
   sharedDataSetEntries: PartialSharedModelEntry[],
   updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds>
 ) {
+  // Column widths uses attribute ids, so we have to update them when updating shared dataset ids
   const columnWidths: Record<string, number> = {};
   sharedDataSetEntries.forEach(sharedDataSetEntry => {
     const originalSharedDataSetId = sharedDataSetEntry.sharedModel.id;

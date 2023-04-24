@@ -251,6 +251,7 @@ export function updateDataCardContentWithNewSharedModelIds(
   updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds>
 ) {
   const updatedContent = cloneDeep(content);
+  // Datacard content uses an attribute id for sorting, which has to be updated with new shared dataset ids
   const oldAttributeId = content.selectedSortAttributeId;
   sharedDataSetEntries.forEach(sharedDataSetEntry => {
     const originalSharedDataSetId = sharedDataSetEntry.sharedModel.id;

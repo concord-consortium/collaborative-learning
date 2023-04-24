@@ -266,5 +266,6 @@ export function updateDataflowContentWithNewSharedModelIds(
   sharedDataSetEntries: PartialSharedModelEntry[],
   updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds>
 ) {
+  // Dataflow content has no references to shared dataset ids, so we can just return the unmodified content
   return content;
 }

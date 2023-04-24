@@ -1158,5 +1158,6 @@ export function updateGeometryContentWithNewSharedModelIds(
   sharedDataSetEntries: PartialSharedModelEntry[],
   updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds>
 ) {
+  // Geometry content has no references to shared dataset ids, so we can just return the unmodified content
   return content;
 }

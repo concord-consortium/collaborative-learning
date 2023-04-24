@@ -71,7 +71,9 @@ export function getSharedDataSetSnapshotWithUpdatedIds(
 }
 
 export function updateSharedDataSetSnapshotWithNewTileIds(
-  sharedDataSetSnapshot: any, tileIdMap: Record<string, string>
+  sharedDataSetSnapshot: SharedDataSetSnapshotType, tileIdMap: Record<string, string>
 ) {
-  sharedDataSetSnapshot.providerId = tileIdMap[sharedDataSetSnapshot.providerId];
+  if (sharedDataSetSnapshot.providerId) {
+    sharedDataSetSnapshot.providerId = tileIdMap[sharedDataSetSnapshot.providerId];
+  }
 }
