@@ -259,7 +259,7 @@ context("Dragging to copy linked tiles", () => {
 
       // Select the table and geometry tiles on the left
       const leftTile = type => cy.get(`.nav-tab-panel .documents-panel .${type}-tool-tile`);
-      leftTile('table').first().click({ shiftKey: true });
+      leftTile('table').first().click();
       leftTile('geometry').first().click({ shiftKey: true });
 
       // Drag the selected tiles to the workspace on the right
@@ -270,26 +270,26 @@ context("Dragging to copy linked tiles", () => {
       // The copied geometry tile should have two points from its linked shared dataset
       graphToolTile.getGraphPoint().should("exist").and("have.length", 2);
 
-      // // Drag just the geometry tile from the left to the right
-      // leftTile('geometry').first().click();
-      // leftTile('geometry').first().trigger('dragstart', { dataTransfer });
-      // cy.get('.single-workspace .canvas .document-content').first()
-      //   .trigger('drop', { force: true, dataTransfer });
+      // Drag just the geometry tile from the left to the right
+      leftTile('table').first().click({ shiftKey: true });
+      leftTile('geometry').first().trigger('dragstart', { dataTransfer });
+      cy.get('.single-workspace .canvas .document-content').first()
+        .trigger('drop', { force: true, dataTransfer });
 
-      // // We should now have a total of four points, two in each table
-      // graphToolTile.getGraphPoint().should("exist").and("have.length", 4);
+      // We should now have a total of four points, two in each table
+      graphToolTile.getGraphPoint().should("exist").and("have.length", 4);
 
-      // // Add a new point to the table
-      // cy.get(".primary-workspace").within((workspace) => {
-      //   tableToolTile.getTableCell().eq(9).click();
-      //   tableToolTile.getTableCell().eq(9).type(x[2] + '{enter}');
-      //   tableToolTile.getTableCell().eq(10).click();
-      //   tableToolTile.getTableCell().eq(10).type(y[2] + '{enter}');
-      //   tableToolTile.getTableCell().eq(13).click();
-      // });
+      // Add a new point to the table
+      cy.get(".primary-workspace").within((workspace) => {
+        tableToolTile.getTableCell().eq(9).click();
+        tableToolTile.getTableCell().eq(9).type(x[2] + '{enter}');
+        tableToolTile.getTableCell().eq(10).click();
+        tableToolTile.getTableCell().eq(10).type(y[2] + '{enter}');
+        tableToolTile.getTableCell().eq(13).click();
+      });
 
-      // // The new point should only appear in the first copied geometry tile, so we now have a total of five
-      // graphToolTile.getGraphPoint().should("exist").and("have.length", 5);
+      // The new point should only appear in the first copied geometry tile, so we now have a total of five
+      graphToolTile.getGraphPoint().should("exist").and("have.length", 5);
     });
   });
   
