@@ -1,6 +1,6 @@
-import { Instance, SnapshotIn, types } from "mobx-state-tree";
-import { DataSet } from "../data/data-set";
-import { SharedModel } from "./shared-model";
+import { getType, Instance, SnapshotIn, types } from "mobx-state-tree";
+import { DataSet, IDataSet } from "../data/data-set";
+import { SharedModel, SharedModelType } from "./shared-model";
 
 export const kSharedDataSetType = "SharedDataSet";
 
@@ -18,6 +18,16 @@ export const SharedDataSet = SharedModel
   get yLabel() {
     return self.dataSet.attributes[1]?.name;
   },
+}))
+.actions(self => ({
+  setDataSet(data: IDataSet) {
+    self.dataSet = data;
+  }
 }));
 export interface SharedDataSetType extends Instance<typeof SharedDataSet> {}
+
+export function isSharedDataSet(model?: SharedModelType): model is SharedDataSetType {
+  return model ? getType(model) === SharedDataSet : false;
+}
+
 export interface SharedDataSetSnapshotType extends SnapshotIn<typeof SharedDataSet> {}

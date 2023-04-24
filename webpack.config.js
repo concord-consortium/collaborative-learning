@@ -35,8 +35,8 @@ module.exports = (env, argv) => {
     devtool: devMode ? 'eval-cheap-module-source-map' : 'source-map',
     entry: {
       index: './src/index.tsx',
-      admin: './src/admin.tsx',
-      'doc-editor': './src/doc-editor.tsx'
+      // admin: './src/admin.tsx',
+      // 'doc-editor': './src/doc-editor.tsx'
     },
     mode: devMode ? 'development' : 'production',
     output: {
@@ -61,20 +61,6 @@ module.exports = (env, argv) => {
                 replace:
                   "// [CC] (string-replace-loader) allow clearing the selection\n" +
                   "    if (!(position.idx === -1 && position.rowIdx === -1) && !isCellWithinBounds(position)) return;",
-                strict: true  // fail build if replacement not performed
-              }
-            ]
-          }
-        },
-        {
-          test: /popper\.js$/,
-          loader: require.resolve('string-replace-loader'),
-          options: {
-            multiple: [
-              { // I couldn't get react-tippy's popperOptions to have the desired effect, so we
-                // just use the string-replace trick to change the popper.js library defaults.
-                search: /padding: 5,/g,
-                replace: "padding: 0, // [CC] override (string-replace-loader)",
                 strict: true  // fail build if replacement not performed
               }
             ]

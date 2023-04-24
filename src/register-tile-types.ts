@@ -21,7 +21,7 @@ const gTileRegistration: Record<string, () => void> = {
     import(/* webpackChunkName: "SharedDataSet" */"./models/shared/shared-data-set-registration")
   ]),
   "Text": () => import(/* webpackChunkName: "Text" */"./models/tiles/text/text-registration"),
-  "XYplot": () => import(/* webpackChunkName: "XYplot" */"./plugins/xyplot/xyplot-registration")
+  "Graph": () => import(/* webpackChunkName: "Graph" */"./plugins/graph/graph-registration"),
 };
 
 export function registerTileTypes(tileTypeIds: string[]) {

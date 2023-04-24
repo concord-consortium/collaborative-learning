@@ -38,7 +38,10 @@ const makeSharedModelManager = (variables?: SharedVariablesType): ISharedModelMa
     getSharedModelTileIds(sharedModel?: SharedModelType) {
       // ignore linked tiles for now
       return [];
-    }
+    },
+    addSharedModel(sharedModel: SharedModelType): void {
+      // ignore this for now
+    },
   };
 };
 

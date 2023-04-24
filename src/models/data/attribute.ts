@@ -1,46 +1,117 @@
-import { types, Instance, SnapshotOut } from "mobx-state-tree";
-import { uniqueId } from "../../utilities/js-utils";
+import {Instance, SnapshotIn, types} from "mobx-state-tree";
 import { Formula } from "./formula";
+import { typedId } from "../../utilities/js-utils";
+
+export const kDefaultFormatStr = ".3~f";
 
 const ValueType = types.union(types.number, types.string, types.undefined);
 export type IValueType = number | string | undefined;
 
+export function importValueToString(value: IValueType) {
+  return value == null || Number.isNaN(value) ? "" : typeof value === "string" ? value : JSON.stringify(value);
+}
+
+export const attributeTypes = [
+  "categorical", "numeric", "date", "qualitative", "boundary", "checkbox", "color"
+] as const;
+export type AttributeType = typeof attributeTypes[number]
+
 export const Attribute = types.model("Attribute", {
-  id: types.identifier,
+  id: types.optional(types.identifier, () => typedId("ATTR")),
   clientKey: "",
   sourceID: types.maybe(types.string),
   name: types.string,
   hidden: false,
   units: "",
   formula: types.optional(Formula, () => Formula.create()),
-  values: types.array(ValueType)
-}).preProcessSnapshot((snapshot) => {
-  const { id, values: inValues, ...others } = snapshot;
-  const values = (inValues || []).map(v => v == null ? undefined : v);
-  return { id: id || uniqueId(), values, ...others };
-}).views(self => ({
+  values: types.array(ValueType),
+  title: "",
+  description: types.maybe(types.string),
+  // userType: types.maybe(types.enumeration([...attributeTypes])),
+  precision: types.maybe(types.number),
+})
+.views(self => ({
+  importValue(value: IValueType) {
+    // may eventually want to do something more sophisticated here, like convert
+    // numeric values using an attribute-specific number of decimal places
+    return importValueToString(value);
+  },
+  toNumeric(value: string) {
+    if (value == null || value === "") return NaN;
+    return Number(value);
+  },
+  // CODAP3 has an optimization so that strValues and numValues are kept up to date
+  // rather than (potentially) recomputing them from scratch on every change.
+  get strValues() {
+    return self.values.map(value => importValueToString(value));
+  },
+  get numValues() {
+    return self.values.map(value => value == null || value === "" ? NaN : Number(value));
+  }
+}))
+.views(self => ({
+  get emptyCount() {
+    return self.strValues.reduce((prev, current) => current === "" ? ++prev : prev, 0);
+  },
+  get numericCount() {
+    return self.numValues.reduce((prev, current) => isFinite(current) ? ++prev : prev, 0);
+  }
+}))
+.views(self => ({
   get length() {
-    return self.values.length;
+    return self.strValues.length;
+  },
+  get type() {
+    // if (self.userType) return self.userType;
+    if (self.numValues.length === 0) return;
+    // only infer numeric if all non-empty values are numeric (CODAP2)
+    return self.numericCount === self.numValues.length - self.emptyCount ? "numeric" : "categorical";
+  },
+  get format() {
+    return self.precision != null ? `.${self.precision}~f` : kDefaultFormatStr;
   },
   value(index: number) {
     return self.values[index];
   },
-  numericValue(index: number) {
-    const v = self.values[index];
-    if (v == null || v === "") return NaN;
-    if (typeof v === "string") return parseFloat(v);
-    return v;
+  strValue(index: number) {
+    return self.strValues[index];
+  },
+  isNumeric(index: number) {
+    return !isNaN(self.numValues[index]);
+  },
+  numValue(index: number) {
+    return self.numValues[index];
+  },
+  boolean(index: number) {
+    return ["true", "yes"].includes(self.strValues[index].toLowerCase()) ||
+            (!isNaN(this.numValue(index)) ? this.numValue(index) !== 0 : false);
   },
   derive(name?: string) {
-    return { id: self.id, name: name || self.name, units: self.units, values: [] };
+    return { id: self.id, name: name || self.name, values: [] };
   }
-})).actions(self => ({
+}))
+.actions(self => ({
   setName(newName: string) {
     self.name = newName;
   },
   setUnits(units: string) {
     self.units = units;
   },
+  setDescription(description: string) {
+    self.description = description;
+  },
+  // setUserType(type: AttributeType | undefined) {
+  //   self.userType = type;
+  // },
+  // setUserFormat(precision: string) {
+  //   self.userFormat = `.${precision}~f`
+  // },
+  setPrecision(precision?: number) {
+    self.precision = precision;
+  },
+  // setEditable(editable: boolean) {
+  //   self.editable = editable;
+  // },
   clearFormula() {
     self.formula.setDisplay();
     self.formula.setCanonical();
@@ -67,7 +138,7 @@ export const Attribute = types.model("Attribute", {
     }
     else {
       self.values.push(...values);
-    }
+  }
   },
   setValue(index: number, value: IValueType) {
     if ((index >= 0) && (index < self.values.length)) {
@@ -89,17 +160,5 @@ export const Attribute = types.model("Attribute", {
     }
   }
 }));
-export type IAttribute = Instance<typeof Attribute>;
-
-// Need to redefine to make id optional
-export interface IAttributeCreation {
-  id?: string;
-  clientKey?: string;
-  sourceID?: string;
-  name: string;
-  hidden?: boolean;
-  units?: string;
-  formula?: string;
-  values?: IValueType[];
-}
-export type IAttributeSnapshot = SnapshotOut<typeof Attribute>;
+export interface IAttribute extends Instance<typeof Attribute> {}
+export interface IAttributeSnapshot extends SnapshotIn<typeof Attribute> {}

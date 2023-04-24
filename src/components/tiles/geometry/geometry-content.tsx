@@ -630,11 +630,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const parents: JXGCoordPair[] = [];
       const properties: Array<{ id: string }> = [];
       for (let ci = 0; ci < link.dataSet.cases.length; ++ci) {
-        const x = link.dataSet.attributes[0]?.numericValue(ci);
+        const x = link.dataSet.attributes[0]?.numValue(ci);
         for (let ai = 1; ai < link.dataSet.attributes.length; ++ai) {
           const attr = link.dataSet.attributes[ai];
           const id = linkedPointId(link.dataSet.cases[ci].__id__, attr.id);
-          const y = attr.numericValue(ci);
+          const y = attr.numValue(ci);
           if (isFinite(x) && isFinite(y)) {
             parents.push([x, y]);
             properties.push({ id });

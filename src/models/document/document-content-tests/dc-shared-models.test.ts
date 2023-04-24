@@ -70,6 +70,7 @@ describe("DocumentContentModel -- shared Models --", () => {
                   hidden: false,
                   id: "attribute1",
                   name: "x",
+                  title: "",
                   units: "",
                   values: [ "1", "2", "3"]
                 },
@@ -79,6 +80,7 @@ describe("DocumentContentModel -- shared Models --", () => {
                   hidden: false,
                   id: "attribute2",
                   name: "y",
+                  title: "",
                   units: "",
                   values: ["-1", "0", "1"]
                 }
@@ -136,6 +138,7 @@ Object {
           "attributes": Array [
             Object {
               "clientKey": "",
+              "description": undefined,
               "formula": Object {
                 "canonical": undefined,
                 "display": undefined,
@@ -143,7 +146,9 @@ Object {
               "hidden": false,
               "id": "attribute1",
               "name": "x",
+              "precision": undefined,
               "sourceID": undefined,
+              "title": "",
               "units": "",
               "values": Array [
                 "1",
@@ -153,6 +158,7 @@ Object {
             },
             Object {
               "clientKey": "",
+              "description": undefined,
               "formula": Object {
                 "canonical": undefined,
                 "display": undefined,
@@ -160,7 +166,9 @@ Object {
               "hidden": false,
               "id": "attribute2",
               "name": "y",
+              "precision": undefined,
               "sourceID": undefined,
+              "title": "",
               "units": "",
               "values": Array [
                 "-1",
@@ -288,6 +296,7 @@ Object {
           "attributes": Array [
             Object {
               "clientKey": "",
+              "description": undefined,
               "formula": Object {
                 "canonical": undefined,
                 "display": undefined,
@@ -295,7 +304,9 @@ Object {
               "hidden": false,
               "id": "attribute1",
               "name": "x",
+              "precision": undefined,
               "sourceID": undefined,
+              "title": "",
               "units": "",
               "values": Array [
                 "1",
@@ -305,6 +316,7 @@ Object {
             },
             Object {
               "clientKey": "",
+              "description": undefined,
               "formula": Object {
                 "canonical": undefined,
                 "display": undefined,
@@ -312,7 +324,9 @@ Object {
               "hidden": false,
               "id": "attribute2",
               "name": "y",
+              "precision": undefined,
               "sourceID": undefined,
+              "title": "",
               "units": "",
               "values": Array [
                 "-1",
@@ -414,6 +428,7 @@ Object {
           "attributes": Array [
             Object {
               "clientKey": "",
+              "description": undefined,
               "formula": Object {
                 "canonical": undefined,
                 "display": undefined,
@@ -421,7 +436,9 @@ Object {
               "hidden": false,
               "id": "attribute1",
               "name": "x",
+              "precision": undefined,
               "sourceID": undefined,
+              "title": "",
               "units": "",
               "values": Array [
                 "1",
@@ -431,6 +448,7 @@ Object {
             },
             Object {
               "clientKey": "",
+              "description": undefined,
               "formula": Object {
                 "canonical": undefined,
                 "display": undefined,
@@ -438,7 +456,9 @@ Object {
               "hidden": false,
               "id": "attribute2",
               "name": "y",
+              "precision": undefined,
               "sourceID": undefined,
+              "title": "",
               "units": "",
               "values": Array [
                 "-1",
@@ -547,6 +567,7 @@ Object {
           "attributes": Array [
             Object {
               "clientKey": "",
+              "description": undefined,
               "formula": Object {
                 "canonical": undefined,
                 "display": undefined,
@@ -554,7 +575,9 @@ Object {
               "hidden": false,
               "id": "attribute1",
               "name": "x",
+              "precision": undefined,
               "sourceID": undefined,
+              "title": "",
               "units": "",
               "values": Array [
                 "1",
@@ -564,6 +587,7 @@ Object {
             },
             Object {
               "clientKey": "",
+              "description": undefined,
               "formula": Object {
                 "canonical": undefined,
                 "display": undefined,
@@ -571,7 +595,9 @@ Object {
               "hidden": false,
               "id": "attribute2",
               "name": "y",
+              "precision": undefined,
               "sourceID": undefined,
+              "title": "",
               "units": "",
               "values": Array [
                 "-1",
