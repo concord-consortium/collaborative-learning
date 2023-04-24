@@ -24,7 +24,6 @@ interface IProps extends ITileProps{
 }
 
 interface IDataflowTileState {
-  // tileContent.programRecordingMode: number; // TODO: convert to enum
   isRecording: boolean;
   isPlaying: boolean;
   playBackIndex: number;
@@ -41,7 +40,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     super(props);
     this.state = {
       isRecording: false,
-      // programRecordingMode: 0,
       isPlaying: false,
       playBackIndex: 0,
       recordIndex: 0,
@@ -60,15 +58,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
       <>
         <ToolTitleArea>
           {this.renderTitle()}
-          {`programRecordingMode ${tileContent.programRecordingMode}`}
-          <br/>
-          {`isPlaying ${this.state.isPlaying ? "T" : "F"}`}
-          <br/>
-
-          {`isRecording ${this.state.isRecording ? "T" : "F"}`}
-
           {this.renderTableLinkButton()}
-
         </ToolTitleArea>
         <div className={classes}>
           <SizeMe monitorHeight={true}>
