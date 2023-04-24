@@ -193,12 +193,10 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   }
 
   private handleRequestTableLink = (tableId: string) => {
-    console.log("handleRequestTableLink with tableID;", tableId);
     this.getContent().addLinkedTable(tableId);
   };
 
   private handleRequestTableUnlink = (tableId: string) => {
-    console.log("handleRequestTableUnLink with tableID;", tableId);
     this.getContent().removeLinkedTable(tableId);
   };
 
@@ -219,24 +217,13 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   };
 
   private pairNodesToAttributes = () => {
-    const model = this.getContent();
-    const dataSet = model.dataSet;
-    const dataSetAttributes = dataSet.attributes;
-
+    const tileContent = this.getContent();
     // dataSet looks like
     // Time   |  Node 1 | Node 2 | Node 3 etc
     //    0   |   val    | val    |  val
-    addAttributeToDataSet(model.dataSet, { name: "Time (sec)" }); //this is time quantized to nearest sampling rate
-
-    model.program.nodes.forEach((n) => {
-      model.addNewAttrFromNode(n.id, n.name);
-    });
-
-    // compare dataset attributes against nodes on tile, if an attribute is not on the tile - remove it.
-    dataSetAttributes.forEach((attribute, idx) => {
-      if (idx >= 1) { //skip 0 index (Time)
-        model.removeAttributesInDatasetMissingInTile(attribute.id);
-      }
+    addAttributeToDataSet(tileContent.dataSet, { name: "Time (sec)" }); //time quantized to nearest sampling rate
+    tileContent.program.nodes.forEach((n) => { //add attributes based on nodes in tile
+      tileContent.addNewAttrFromNode(n.id, n.name);
     });
   };
 
@@ -251,31 +238,36 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     const tileContent = this.getContent();
     const mode = tileContent.programRecordingMode;
 
+    const clearAttributes = () => {
+      const allAttributes = tileContent.dataSet.attributes;
+      allAttributes.forEach((attr)=>{
+        tileContent.dataSet.removeAttribute(attr.id);
+      });
+    };
+    const clearCases = () => {
+      const ids = tileContent.dataSet.cases.map(({__id__}) => ( __id__));
+      tileContent.dataSet.removeCases(ids);
+    };
+
     if (mode === 0){ //when Record is pressed
+      clearAttributes(); //clear X | Y attributes from previous state
       this.setState({isPlaying: false}); //reset isPlaying
       this.setState({isRecording: true});
       this.pairNodesToAttributes();
     }
-
     if (mode === 1){ //Stop Recording
       this.setState({isRecording: false});
     }
-    if (mode === 2){ // Clear pressed - remove all dataSet
-      //set formattedTime to 000:00
-      tileContent.setFormattedTime("000:00");
-
-      const allAttributes = tileContent.dataSet.attributes;
-      const ids = tileContent.dataSet.cases.map(({__id__}) => ( __id__));
-      tileContent.dataSet.removeCases(ids);
-      allAttributes.forEach((attr)=>{
-        tileContent.dataSet.removeAttribute(attr.id);
-      });
-      //add an X Y attribute to the DF shared Dataset,
-      // but then we'd have to make sure we clear it when we press record
-
-      //Code
-      // tileContent.dataSet.
+    if (mode === 2){ // Clear pressed
+      tileContent.setFormattedTime("000:00"); //set formattedTime to 000:00
+      //clear the dataSet;
+      clearAttributes();
+      clearCases();
+      // create a default dataSet x | y table
+      addAttributeToDataSet(tileContent.dataSet, { name: "x" });
+      addAttributeToDataSet(tileContent.dataSet, { name: "y" });
     }
+
     tileContent.incrementProgramRecordingMode();
   };
 

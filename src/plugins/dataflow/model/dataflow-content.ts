@@ -224,22 +224,6 @@ export const DataflowContentModel = TileContentModel
         });
       }
     },
-    // this may be implemented if we change to preserve attributes accross runs
-    removeAttributesInDatasetMissingInTile(attribute: string){
-      const index = attribute.indexOf("*");
-      const stringAfterIndex = attribute.substring(index + 1);
-      let foundFlag = false;
-      const { nodes } = getSnapshot(self.program);
-      const castedNodes = nodes as Record<string, any>;
-      const castedNodesIdArr = Object.keys(castedNodes);
-      for (let i = 0; i < castedNodesIdArr.length; i++){
-        const idInTile = castedNodesIdArr[i];
-        if (idInTile === stringAfterIndex) foundFlag = true;
-      }
-      if (!foundFlag){
-        self.dataSet.removeAttribute(attribute);
-      }
-    },
     addLinkedTable(tableId: string) {  //tableID is table we linked it to
       const sharedModelManager = self.tileEnv?.sharedModelManager;
       if (sharedModelManager?.isReady && !self.isLinkedToTable(tableId)) {
@@ -265,7 +249,6 @@ export const DataflowContentModel = TileContentModel
         self.sharedModel && sharedModelManager.removeTileSharedModel(tableTileContents, self.sharedModel);
         //create a dataSet with two attributes with X / Y, link table tile to this dataSet
         const title = tableTileContents ? getTileTitleFromContent(tableTileContents) : undefined;
-
         const newDataSet = createDefaultDataSet(title);
         const newSharedDataSet = newDataSet && SharedDataSet.create({ providerId: tableId, dataSet: newDataSet });
         sharedModelManager.addTileSharedModel(tableTileContents, newSharedDataSet);

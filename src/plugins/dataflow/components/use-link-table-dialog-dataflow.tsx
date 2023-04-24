@@ -65,17 +65,8 @@ export const useLinkTableDialogDataFlow = ({ tableTiles, model, handleRequestTab
   const content = model.content as DataflowContentModelType;
 
   const handleClick = () => {
-    console.log("useLinkTableDialogDataFlow with content:", content);
-    console.log("handleClick TableTiles:", tableTiles);
-
     const tileInfo = tableTiles.find(tile => tile.id === selectValue);
-    console.log("handleClick link button > tileInfo:", tileInfo);
-
-
-
     if (tileInfo) {
-      console.log("\t\t tileInfo.iD:", tileInfo.id);
-
       if (content.isLinkedToTable(tileInfo.id)) {
         handleRequestTableUnlink?.(tileInfo.id);
       } else {

@@ -26,7 +26,6 @@ export const useTableLinkingDataFlow = (props: IProps) => {
   const modelId = model.id;
 
   const showLinkButton = useFeatureFlag("DataflowLinkedTables");
-  // console.log(" useTableLinkingDataFlow > model? : ", model);
   const tableTiles = useLinkableTableTiles({ model, onRequestTilesOfType });
   const isLinkEnabled = (tableTiles.length > 0);
   const linkColors = getTableLinkColors(modelId);
