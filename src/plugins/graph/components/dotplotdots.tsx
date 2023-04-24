@@ -4,7 +4,7 @@ import React, {useCallback, useRef, useState} from "react";
 import {CaseData, PlotProps} from "../graph-types";
 import {useDragHandlers, usePlotResponders} from "../hooks/use-plot";
 import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
-import {useDataSetContext} from "../../../hooks/use-data-set-context";
+import {useDataSetContext} from "../hooks/use-data-set-context";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {ICase} from "../../../models/data/data-set-types";
 import {

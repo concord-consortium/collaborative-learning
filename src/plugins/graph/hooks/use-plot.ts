@@ -6,8 +6,8 @@ import {INumericAxisModel} from "../axis/models/axis-model";
 import {GraphLayout} from "../models/graph-layout";
 import {IGraphModel} from "../models/graph-model";
 import {matchCirclesToData, startAnimation} from "../utilities/graph-utils";
-import {useInstanceIdContext} from "../../../hooks/use-instance-id-context";
-import {useDataSetContext} from "../../../hooks/use-data-set-context";
+import {useInstanceIdContext} from "./use-instance-id-context";
+import {useDataSetContext} from "./use-data-set-context";
 
 interface IDragHandlers {
   start: (event: MouseEvent) => void

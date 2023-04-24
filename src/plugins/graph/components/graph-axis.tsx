@@ -1,19 +1,19 @@
 import React, {MutableRefObject, useEffect} from "react";
 import {observer} from "mobx-react-lite";
 import {Active} from "@dnd-kit/core";
-import {useInstanceIdContext} from "../../../hooks/use-instance-id-context";
+import {useInstanceIdContext} from "../hooks/use-instance-id-context";
 import {AttributeType} from "../../../models/data/attribute";
 import {useGraphModelContext} from "../models/graph-model";
 import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
 import {useGraphLayoutContext} from "../models/graph-layout";
-import {getDragAttributeId, useDropHandler} from "../../../hooks/use-drag-drop";
+import {getDragAttributeId, useDropHandler} from "../hooks/use-drag-drop";
 import {AxisPlace} from "../axis/axis-types";
 import {Axis} from "../axis/components/axis";
 import {axisPlaceToAttrRole, kGraphClassSelector} from "../graph-types";
 import {GraphPlace} from "../axis-graph-shared";
 import {DroppableAxis} from "../axis/components/droppable-axis";
 import {AttributeLabel} from "./attribute-label";
-import {useDropHintString} from "../../../hooks/use-drop-hint-string";
+import {useDropHintString} from "../hooks/use-drop-hint-string";
 import {useAxisBoundsProvider} from "../axis/hooks/use-axis-bounds";
 
 interface IProps {

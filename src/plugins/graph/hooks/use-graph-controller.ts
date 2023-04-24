@@ -1,5 +1,5 @@
 import {useEffect} from "react";
-import { useDataSet } from "../../../hooks/use-data-set";
+import { useDataSet } from "./use-data-set";
 import {GraphController} from "../models/graph-controller";
 import {IGraphModel} from "../models/graph-model";
 

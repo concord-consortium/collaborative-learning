@@ -4,7 +4,7 @@ import { selectDots } from "../d3-types";
 import {attrRoleToAxisPlace, CaseData, PlotProps, transitionDuration} from "../graph-types";
 import {usePlotResponders} from "../hooks/use-plot";
 import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
-import {useDataSetContext} from "../../../hooks/use-data-set-context";
+import {useDataSetContext} from "../hooks/use-data-set-context";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {setPointSelection} from "../utilities/graph-utils";
 import {useGraphModelContext} from "../models/graph-model";

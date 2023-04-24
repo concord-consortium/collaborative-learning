@@ -4,8 +4,8 @@ import {ScaleNumericBaseType} from "../axis/axis-types";
 import {CaseData, PlotProps} from "../graph-types";
 import {useDragHandlers, usePlotResponders} from "../hooks/use-plot";
 import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
-import {useDataSetContext} from "../../../hooks/use-data-set-context";
-// import {useInstanceIdContext} from "../../../hooks/use-instance-id-context";
+import {useDataSetContext} from "../hooks/use-data-set-context";
+// import {useInstanceIdContext} from "../hooks/use-instance-id-context";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {ICase} from "../../../models/data/data-set-types";
 import {

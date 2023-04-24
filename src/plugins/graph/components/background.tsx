@@ -6,10 +6,10 @@ import {CaseData, InternalizedData, rTreeRect} from "../graph-types";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {rectangleSubtract, rectNormalize} from "../utilities/graph-utils";
 import {useCurrent} from "../../../hooks/use-current";
-import {useDataSetContext} from "../../../hooks/use-data-set-context";
+import {useDataSetContext} from "../hooks/use-data-set-context";
 import {MarqueeState} from "../models/marquee-state";
 import {useGraphModelContext} from "../models/graph-model";
-import {useInstanceIdContext} from "../../../hooks/use-instance-id-context";
+import {useInstanceIdContext} from "../hooks/use-instance-id-context";
 
 interface IProps {
   marqueeState: MarqueeState

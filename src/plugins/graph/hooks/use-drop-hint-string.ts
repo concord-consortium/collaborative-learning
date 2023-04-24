@@ -1,11 +1,11 @@
 import {useDndContext} from "@dnd-kit/core";
-import { AttributeType } from "../models/data/attribute";
+import { AttributeType } from "../../../models/data/attribute";
 import {useDataSetContext} from "./use-data-set-context";
 import {getDragAttributeId} from "./use-drag-drop";
-import {useDataConfigurationContext} from "../plugins/graph/hooks/use-data-configuration-context";
-import {attrRoleToGraphPlace, GraphAttrRole} from "../plugins/graph/graph-types";
-import {GraphPlace} from "../plugins/graph/axis-graph-shared";
-import t from "../plugins/graph/utilities/translation/translate";
+import {useDataConfigurationContext} from "./use-data-configuration-context";
+import {attrRoleToGraphPlace, GraphAttrRole} from "../graph-types";
+import {GraphPlace} from "../axis-graph-shared";
+import t from "../utilities/translation/translate";
 
 export interface IUseDropHintStringProps {
   role: GraphAttrRole

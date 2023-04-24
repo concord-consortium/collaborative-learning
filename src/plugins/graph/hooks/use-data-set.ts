@@ -1,7 +1,7 @@
-import { IDataSet } from "../models/data/data-set";
+import { IDataSet } from "../../../models/data/data-set";
 import { ISharedCaseMetadata, kSharedCaseMetadataType,
-         SharedCaseMetadata } from "../models/shared/shared-case-metadata";
-import { getSharedModelManager } from "../models/tiles/tile-environment";
+         SharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
+import { getSharedModelManager } from "../../../models/tiles/tile-environment";
 import { useDataSetContext } from "./use-data-set-context";
 
 export function useDataSet(inData?: IDataSet, inMetadata?: ISharedCaseMetadata) {

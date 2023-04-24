@@ -2,7 +2,7 @@ import {MutableRefObject, RefObject, useCallback, useEffect} from "react";
 import {onAction} from "mobx-state-tree";
 import {matchCirclesToData, setNiceDomain, startAnimation} from "../utilities/graph-utils";
 import {IGraphModel, isGraphVisualPropsAction} from "../models/graph-model";
-import {useDataSetContext} from "../../../hooks/use-data-set-context";
+import {useDataSetContext} from "./use-data-set-context";
 import {INumericAxisModel} from "../axis/models/axis-model";
 
 interface IProps {

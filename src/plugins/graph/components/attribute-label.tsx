@@ -11,7 +11,7 @@ import {GraphPlace, isVertical} from "../axis-graph-shared";
 import {graphPlaceToAttrRole, kGraphClassSelector} from "../graph-types";
 import {useGraphModelContext} from "../models/graph-model";
 import {useGraphLayoutContext} from "../models/graph-layout";
-import {useTileModelContext} from "../../../hooks/use-tile-model-context";
+import {useTileModelContext} from "../hooks/use-tile-model-context";
 import {getStringBounds} from "../axis/axis-utils";
 import {AxisOrLegendAttributeMenu} from "../axis/components/axis-or-legend-attribute-menu";
 
