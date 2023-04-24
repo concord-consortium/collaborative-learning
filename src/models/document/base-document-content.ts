@@ -33,8 +33,8 @@ import { SharedModelEntry, SharedModelEntryType, SharedModelEntrySnapshotType } 
 
 // Imports related to hard coding shared model duplication
 import {
-  getSharedDataSetSnapshotWithUpdatedIds, getUpdatedSharedDataSetIds, SharedDataSet, SharedDataSetSnapshotType,
-  UpdatedSharedDataSetIds, updateSharedDataSetSnapshotWithNewTileIds
+  getSharedDataSetSnapshotWithUpdatedIds, getUpdatedSharedDataSetIds, isSharedDataSetSnapshot, SharedDataSet,
+  SharedDataSetSnapshotType, UpdatedSharedDataSetIds, updateSharedDataSetSnapshotWithNewTileIds
 } from "../shared/shared-data-set";
 
 /**
@@ -1037,7 +1037,7 @@ export const BaseDocumentContentModel = types
       const newSharedModelEntries: PartialSharedModelEntry[] = [];
       sharedModelEntries.forEach(sharedModelEntry => {
         // For now, only duplicate shared data sets
-        if (sharedModelEntry.sharedModel.type === "SharedDataSet") {
+        if (isSharedDataSetSnapshot(sharedModelEntry.sharedModel)) {
           // Determine new ids
           const sharedDataSet = sharedModelEntry.sharedModel as SharedDataSetSnapshotType;
           const updatedIds = getUpdatedSharedDataSetIds(sharedDataSet);
@@ -1062,13 +1062,13 @@ export const BaseDocumentContentModel = types
         tileIdMap[tile.tileId] = uniqueId();
 
         // Find the shared models for this tile
-        const sharedDataSetEntries =
+        const tileSharedModelEntries =
           sharedModelEntries.filter(entry => entry.tiles?.map(t => t.id).includes(tile.tileId));
 
         // Update the tile's references to its shared models
         const updateFunction = getTileContentInfo(tile.tileType)?.updateContentWithNewSharedModelIds;
         if (updateFunction) {
-          tileContent.content = updateFunction(oldContent.content, sharedDataSetEntries, updatedSharedModelMap);
+          tileContent.content = updateFunction(oldContent.content, tileSharedModelEntries, updatedSharedModelMap);
         }
 
         // Save the updated tile so we can add it to the document
@@ -1086,8 +1086,8 @@ export const BaseDocumentContentModel = types
           // If the tile title needed to be updated, we assume we should also update the data set's name
           if (newTitle && sharedModelEntries) {
             newSharedModelEntries.forEach(sharedModelEntry => {
-              if (sharedModelEntry.sharedModel.type === "SharedDataSet") {
-                const sharedDataSet = (sharedModelEntry.sharedModel as SharedDataSetSnapshotType);
+              if (isSharedDataSetSnapshot(sharedModelEntry.sharedModel)) {
+                const sharedDataSet = sharedModelEntry.sharedModel as SharedDataSetSnapshotType;
                 const oldName = sharedDataSet.dataSet.name;
                 if (oldName === oldTitle) {
                   sharedDataSet.dataSet.name = newTitle;
@@ -1102,13 +1102,13 @@ export const BaseDocumentContentModel = types
       newSharedModelEntries.forEach(sharedModelEntry => {
         const updatedTileIds: string[] = sharedModelEntry.tiles.map((oldTile: PartialTile) => tileIdMap[oldTile.id])
           .filter((tileId: string | undefined) => tileId !== undefined);
-        const updatedSharedModel = { ...sharedModelEntry.sharedModel };
-        if (sharedModelEntry.sharedModel.type === "SharedDataSet") {
+        if (isSharedDataSetSnapshot(sharedModelEntry.sharedModel)) {
+          const updatedSharedModel = { ...sharedModelEntry.sharedModel };
           updateSharedDataSetSnapshotWithNewTileIds(updatedSharedModel as SharedDataSetSnapshotType, tileIdMap);
+          const newSharedModelEntry =
+            self.addSharedModel(SharedDataSet.create(updatedSharedModel as SharedDataSetSnapshotType));
+          updatedTileIds.forEach(tileId => newSharedModelEntry.tiles.push(tileId));
         }
-        const newSharedModelEntry =
-          self.addSharedModel(SharedDataSet.create(updatedSharedModel as SharedDataSetSnapshotType));
-        updatedTileIds.forEach(tileId => newSharedModelEntry.tiles.push(tileId));
       });
 
       // TODO: Make sure logging is correct

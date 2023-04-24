@@ -25,6 +25,10 @@ export const SharedDataSet = SharedModel
 export interface SharedDataSetType extends Instance<typeof SharedDataSet> {}
 export interface SharedDataSetSnapshotType extends SnapshotIn<typeof SharedDataSet> {}
 
+export function isSharedDataSetSnapshot(snapshot: any): snapshot is SharedDataSetSnapshotType {
+  return snapshot.type === kSharedDataSetType;
+}
+
 export interface UpdatedSharedDataSetIds {
   attributeIdMap: Record<string, string>;
   caseIdMap: Record<string, string>;
