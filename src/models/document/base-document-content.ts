@@ -34,7 +34,7 @@ import { SharedModelEntry, SharedModelEntryType, SharedModelEntrySnapshotType } 
 // Imports related to hard coding shared model duplication
 import {
   getSharedDataSetSnapshotWithUpdatedIds, getUpdatedSharedDataSetIds, isSharedDataSetSnapshot, SharedDataSet,
-  SharedDataSetSnapshotType, UpdatedSharedDataSetIds, updateSharedDataSetSnapshotWithNewTileIds
+  UpdatedSharedDataSetIds, updateSharedDataSetSnapshotWithNewTileIds
 } from "../shared/shared-data-set";
 
 /**
@@ -1039,7 +1039,7 @@ export const BaseDocumentContentModel = types
         // For now, only duplicate shared data sets
         if (isSharedDataSetSnapshot(sharedModelEntry.sharedModel)) {
           // Determine new ids
-          const sharedDataSet = sharedModelEntry.sharedModel as SharedDataSetSnapshotType;
+          const sharedDataSet = sharedModelEntry.sharedModel;
           const updatedIds = getUpdatedSharedDataSetIds(sharedDataSet);
           if (sharedDataSet.id) updatedSharedModelMap[sharedDataSet.id] = updatedIds;
 
@@ -1087,7 +1087,7 @@ export const BaseDocumentContentModel = types
           if (newTitle && sharedModelEntries) {
             newSharedModelEntries.forEach(sharedModelEntry => {
               if (isSharedDataSetSnapshot(sharedModelEntry.sharedModel)) {
-                const sharedDataSet = sharedModelEntry.sharedModel as SharedDataSetSnapshotType;
+                const sharedDataSet = sharedModelEntry.sharedModel;
                 const oldName = sharedDataSet.dataSet.name;
                 if (oldName === oldTitle) {
                   sharedDataSet.dataSet.name = newTitle;
@@ -1104,9 +1104,9 @@ export const BaseDocumentContentModel = types
           .filter((tileId: string | undefined) => tileId !== undefined);
         if (isSharedDataSetSnapshot(sharedModelEntry.sharedModel)) {
           const updatedSharedModel = { ...sharedModelEntry.sharedModel };
-          updateSharedDataSetSnapshotWithNewTileIds(updatedSharedModel as SharedDataSetSnapshotType, tileIdMap);
+          updateSharedDataSetSnapshotWithNewTileIds(updatedSharedModel, tileIdMap);
           const newSharedModelEntry =
-            self.addSharedModel(SharedDataSet.create(updatedSharedModel as SharedDataSetSnapshotType));
+            self.addSharedModel(SharedDataSet.create(updatedSharedModel));
           updatedTileIds.forEach(tileId => newSharedModelEntry.tiles.push(tileId));
         }
       });
