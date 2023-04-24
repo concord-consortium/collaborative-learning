@@ -1,6 +1,8 @@
 import { ITileMetadataModel, TileMetadataModel } from "./tile-metadata";
 import { TileContentModel, ITileContentModel } from "./tile-content";
 import { AppConfigModelType } from "../stores/app-config-model";
+import { PartialSharedModelEntry } from "../document/document-content-types";
+import { UpdatedSharedDataSetIds } from "../shared/shared-data-set";
 
 export interface IDefaultContentOptions {
   // title is only currently used by the Geometry and Table tiles
@@ -17,6 +19,13 @@ type TileModelSnapshotPreProcessor = (tile: any) => any
 type TileContentSnapshotPostProcessor =
       (content: any, idMap: Record<string, string>, asTemplate?: boolean) => any;
 
+type TileContentNewSharedModelIdUpdater = (
+  content: any,
+  sharedModelEntries: PartialSharedModelEntry[],
+  updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds>
+) => any;
+
+
 export interface ITileContentInfo {
   type: string;
   modelClass: typeof TileContentModel;
@@ -28,6 +37,7 @@ export interface ITileContentInfo {
   exportNonDefaultHeight?: boolean;
   tileSnapshotPreProcessor?: TileModelSnapshotPreProcessor;
   contentSnapshotPostProcessor?: TileContentSnapshotPostProcessor;
+  updateContentWithNewSharedModelIds?: TileContentNewSharedModelIdUpdater;
 }
 
 const gTileContentInfoMap: Record<string, ITileContentInfo> = {};

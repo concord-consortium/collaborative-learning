@@ -36,10 +36,6 @@ import {
   getSharedDataSetSnapshotWithUpdatedIds, getUpdatedSharedDataSetIds, SharedDataSetSnapshotType,
   UpdatedSharedDataSetIds, updateSharedDataSetSnapshotWithNewTileIds
 } from "../shared/shared-data-set";
-import { updateGeometryContentWithNewSharedModelIds } from "../tiles/geometry/geometry-content";
-import { updateTableContentWithNewSharedModelIds } from "../tiles/table/table-content";
-import { updateDataCardContentWithNewSharedModelIds } from "../../plugins/data-card/data-card-content";
-import { updateDataflowContentWithNewSharedModelIds } from "../../plugins/dataflow/model/dataflow-content";
 
 /**
  * This is one part of the DocumentContentModel. The other part is
@@ -1070,19 +1066,8 @@ export const BaseDocumentContentModel = types
           sharedModelEntries.filter(entry => entry.tiles?.map(t => t.id).includes(tile.tileId));
 
         // Update the tile's references to its shared models
-        if (tile.tileType === "Geometry") {
-          tileContent.content =
-            updateGeometryContentWithNewSharedModelIds(oldContent.content, sharedDataSetEntries, updatedSharedModelMap);
-        } else if (tile.tileType === "Table") {
-          tileContent.content =
-            updateTableContentWithNewSharedModelIds(oldContent.content, sharedDataSetEntries, updatedSharedModelMap);
-        } else if (tile.tileType === "DataCard") {
-          tileContent.content =
-            updateDataCardContentWithNewSharedModelIds(oldContent.content, sharedDataSetEntries, updatedSharedModelMap);
-        } else if (tile.tileType === "Dataflow") {
-          tileContent.content =
-            updateDataflowContentWithNewSharedModelIds(oldContent.content, sharedDataSetEntries, updatedSharedModelMap);
-        }
+        const updateFunction = getTileContentInfo(tile.tileType)?.updateContentWithNewSharedModelIds;
+        updateFunction?.(oldContent.content, sharedDataSetEntries, updatedSharedModelMap);
 
         // Save the updated tile so we can add it to the document
         updatedTiles.push({ ...tile, newTileId: tileIdMap[tile.tileId], tileContent: JSON.stringify(tileContent) });
