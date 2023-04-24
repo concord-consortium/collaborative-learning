@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import { types, Instance, applySnapshot, getSnapshot, addDisposer, getType } from "mobx-state-tree";
 import { reaction } from "mobx";
 import { cloneDeep} from "lodash";
@@ -19,9 +18,6 @@ import { uniqueId } from "../../../utilities/js-utils";
 import { getTileContentById } from "../../../utilities/mst-utils";
 
 export const kDataflowTileType = "Dataflow";
-
-
-
 
 export function defaultDataflowContent(): DataflowContentModelType {
   return DataflowContentModel.create();
