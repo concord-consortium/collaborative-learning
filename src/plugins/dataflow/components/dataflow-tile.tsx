@@ -1,7 +1,7 @@
 import React from "react";
 import { SizeMe, SizeMeProps } from "react-sizeme";
 import { observer, inject } from "mobx-react";
-import { DataflowProgram, UpdateMode } from "./dataflow-program";
+import { DataflowProgram, ProgramMode, UpdateMode } from "./dataflow-program";
 import { BaseComponent } from "../../../components/base";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
@@ -77,7 +77,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
                   tileHeight={height}
                   tileId={model.id}
                   //state
-                  programRecordState={tileContent.programRecordingMode}
+                  programMode={this.determineProgramMode()}
                   isPlaying={this.state.isPlaying}
                   playBackIndex={this.state.playBackIndex}
                   recordIndex={this.state.recordIndex}
@@ -111,12 +111,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
       const { model: { id }, onRequestUniqueTitle } = this.props;
       const title = onRequestUniqueTitle(id);
       title && this.getContent().setTitle(title);
-    }
-
-    //when recording and program is refreshed, if the dataSet is filled, then increment to Clear mode
-    const tileContent = this.getContent();
-    if (tileContent.programRecordingMode === 1 && !tileContent.isEmptyDataSet){
-      tileContent.incrementProgramRecordingMode();
     }
   }
 
@@ -161,8 +155,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
 
   private renderTableLinkButton() {
     const { model, onRequestTilesOfType, documentId } = this.props;
-    const tileContent = this.getContent();
-    const isLinkButtonEnabled = (tileContent.programRecordingMode === 2);
+    const isLinkButtonEnabled = (this.determineProgramMode() === ProgramMode.Clear);
 
     const actionHandlers = {
                              handleRequestTableLink: this.handleRequestTableLink,
@@ -217,16 +210,10 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     });
   };
 
-  private handleChangeOfRecordingMode = () => {
-    //0 program: executing, dataSet: empty
-    //1 program: executing, dataSet: writing in progress
-    //2 program: not executing,  dataSet: populated
-    //below are "substates" of #2 above
-    //isPlaying: playbackIndex incrementing, Nodes updated "by hand" rather than via execution
-    //isPaused: playbackIndex not incrementing, nodes stay as they were at last index above
 
+  private handleChangeOfRecordingMode = () => {
     const tileContent = this.getContent();
-    const mode = tileContent.programRecordingMode;
+    const programMode = this.determineProgramMode();
 
     const clearAttributes = () => {
       const allAttributes = tileContent.dataSet.attributes;
@@ -239,26 +226,41 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
       tileContent.dataSet.removeCases(ids);
     };
 
-    if (mode === 0){ //when Record is pressed
-      clearAttributes(); //clear X | Y attributes from previous state
-      this.setState({isPlaying: false}); //reset isPlaying
-      this.setState({isRecording: true});
-      this.pairNodesToAttributes();
+    switch (programMode){
+      case ProgramMode.Record:
+        clearAttributes(); //clear X | Y attributes from previous state
+        this.setState({isPlaying: false}); //reset isPlaying
+        this.setState({isRecording: true});
+        this.pairNodesToAttributes();
+        break;
+      case ProgramMode.Stop:
+        this.setState({isRecording: false});
+        break;
+      case ProgramMode.Clear:
+        tileContent.setFormattedTime("000:00"); //set formattedTime to 000:00
+        //clear the dataSet;
+        clearAttributes();
+        clearCases();
+        // create a default dataSet x | y table
+        addAttributeToDataSet(tileContent.dataSet, { name: "x" });
+        addAttributeToDataSet(tileContent.dataSet, { name: "y" });
+        break;
     }
-    if (mode === 1){ //Stop Recording
-      this.setState({isRecording: false});
-    }
-    if (mode === 2){ // Clear pressed
-      tileContent.setFormattedTime("000:00"); //set formattedTime to 000:00
-      //clear the dataSet;
-      clearAttributes();
-      clearCases();
-      // create a default dataSet x | y table
-      addAttributeToDataSet(tileContent.dataSet, { name: "x" });
-      addAttributeToDataSet(tileContent.dataSet, { name: "y" });
-    }
+  };
 
-    tileContent.incrementProgramRecordingMode();
+  private determineProgramMode = () => { //used to prop drill to children
+    const { isRecording } = this.state;
+    const tileContent = this.getContent();
+    if (!isRecording && tileContent.isEmptyDataSet){
+      return ProgramMode.Record;
+    }
+    else if (isRecording){
+      return ProgramMode.Stop;
+    }
+    else if (!isRecording && !tileContent.isEmptyDataSet){
+     return ProgramMode.Clear;
+    }
+    return ProgramMode.Record;
   };
 
   private handleChangeIsPlaying = () => {

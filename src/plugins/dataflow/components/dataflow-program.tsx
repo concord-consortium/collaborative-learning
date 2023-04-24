@@ -65,6 +65,12 @@ export enum UpdateMode {
   Reset = "Reset",
 }
 
+export enum ProgramMode {
+  Record,
+  Stop,
+  Clear
+}
+
 interface IProps extends SizeMeProps {
   readOnly?: boolean;
   documentProperties?: { [key: string]: string };
@@ -77,7 +83,7 @@ interface IProps extends SizeMeProps {
   tileHeight?: number;
   tileId: string;
   //state
-  programRecordState: number;
+  programMode: ProgramMode;
   isPlaying: boolean;
   playBackIndex: number;
   recordIndex: number;
@@ -149,7 +155,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           lastIntervalDuration={this.state.lastIntervalDuration}
           serialDevice={this.stores.serialDevice}
           onRecordDataChange={this.props.onRecordDataChange}
-          programRecordState={this.props.programRecordState}
+          programMode={this.props.programMode}
+
           isPlaying={this.props.isPlaying}
           handleChangeIsPlaying={this.props.handleChangeIsPlaying}
           numNodes={numNodes}
@@ -423,10 +430,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     return this.props.readOnly || this.disabledRecordingStates();
   }
 
-  //disable the right side when recordingMode is 1 (record) or 2 (stop)
+  //disable the right side when recordingMode in stop or clear
   private disabledRecordingStates(){
-    const { programRecordState } = this.props;
-    return (programRecordState === 1 || programRecordState === 2);
+    const { programMode } = this.props;
+    return ( programMode === ProgramMode.Stop || programMode === ProgramMode.Clear);
   }
 
   private keepNodesInView = () => {
@@ -659,32 +666,29 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private tick = () => {
-    const { readOnly, tileContent: tileModel, playBackIndex, programRecordState,
+    const { readOnly, tileContent: tileModel, playBackIndex, programMode,
             isPlaying, updateRecordIndex, updatePlayBackIndex } = this.props;
+
     const dataSet = tileModel.dataSet;
     const now = Date.now();
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});
     this.lastIntervalTime = now;
 
-    const isCleared = programRecordState === 0;
-    const isRecording = programRecordState === 1;
-    const isRecorded = programRecordState === 2;
-
-    if (isCleared){
-      this.updateNodes();
-    }
-
-    if (isRecording){
-      if (!readOnly) this.recordCase(); //only record cases from right DF tiles
-      this.updateNodes();
-      updateRecordIndex(UpdateMode.Increment);
-    }
-
-    if (isRecorded){
-      isPlaying && this.playbackNodesWithCaseData(dataSet, playBackIndex);
-      isPlaying && updatePlayBackIndex(UpdateMode.Increment);
-      !isPlaying && updatePlayBackIndex(UpdateMode.Reset);
-      updateRecordIndex(UpdateMode.Reset);
+    switch (programMode){
+      case ProgramMode.Record:
+        this.updateNodes();
+        break;
+      case ProgramMode.Stop:
+        if (!readOnly) this.recordCase(); //only record cases from right DF tiles
+        this.updateNodes();
+        updateRecordIndex(UpdateMode.Increment);
+        break;
+      case ProgramMode.Clear:
+        isPlaying && this.playbackNodesWithCaseData(dataSet, playBackIndex);
+        isPlaying && updatePlayBackIndex(UpdateMode.Increment);
+        !isPlaying && updatePlayBackIndex(UpdateMode.Reset);
+        updateRecordIndex(UpdateMode.Reset);
+        break;
     }
   };
 

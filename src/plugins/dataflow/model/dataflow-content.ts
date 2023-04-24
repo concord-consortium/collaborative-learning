@@ -47,7 +47,6 @@ export const DataflowContentModel = TileContentModel
     type: types.optional(types.literal(kDataflowTileType), kDataflowTileType),
     program: types.optional(DataflowProgramModel, getSnapshot(DataflowProgramModel.create())),
     programDataRate: DEFAULT_DATA_RATE,
-    programRecordingMode: 0,
     programZoom: types.optional(ProgramZoom, DEFAULT_PROGRAM_ZOOM),
     formattedTime: "000:00"
   })
@@ -115,7 +114,7 @@ export const DataflowContentModel = TileContentModel
     },
     // ------ADDED---------------------------------
     get isEmptyDataSet(){
-      return self.dataSet.isEmpty;
+      return self.dataSet.cases.length === 0;
     },
     // ------ END -----------------------------------
     get isLinked(){
@@ -187,12 +186,6 @@ export const DataflowContentModel = TileContentModel
       self.programZoom.dx = dx;
       self.programZoom.dy = dy;
       self.programZoom.scale = scale;
-    },
-    incrementProgramRecordingMode(refreshFlag?: boolean){
-      self.programRecordingMode = (self.programRecordingMode + 1) % 3;
-      if (refreshFlag){
-        self.programRecordingMode = 2;
-      }
     },
     setFormattedTime(formattedTime: string){
       self.formattedTime = formattedTime;

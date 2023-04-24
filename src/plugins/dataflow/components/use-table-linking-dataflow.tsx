@@ -11,7 +11,7 @@ import { useLinkTableDialogDataFlow } from "./use-link-table-dialog-dataflow";
 import { IDataFlowActionHandlers } from "./dataflow-shared";
 
 //TODO: this is generally a copy of use-table-linking.tsx for Geometry Tile
-//consider refacxtoring -> https://www.pivotaltracker.com/n/projects/2441242/stories/184992684
+//consider refactoring -> https://www.pivotaltracker.com/n/projects/2441242/stories/184992684
 
 interface IProps {
   documentId?: string;
