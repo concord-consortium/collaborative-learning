@@ -33,7 +33,7 @@ import { SharedModelEntry, SharedModelEntryType, SharedModelEntrySnapshotType } 
 
 // Imports related to hard coding shared model duplication
 import {
-  getSharedDataSetSnapshotWithUpdatedIds, getUpdatedSharedDataSetIds, SharedDataSetSnapshotType,
+  getSharedDataSetSnapshotWithUpdatedIds, getUpdatedSharedDataSetIds, SharedDataSet, SharedDataSetSnapshotType,
   UpdatedSharedDataSetIds, updateSharedDataSetSnapshotWithNewTileIds
 } from "../shared/shared-data-set";
 
@@ -1087,9 +1087,10 @@ export const BaseDocumentContentModel = types
           if (newTitle && sharedModelEntries) {
             newSharedModelEntries.forEach(sharedModelEntry => {
               if (sharedModelEntry.sharedModel.type === "SharedDataSet") {
-                const oldName = sharedModelEntry.sharedModel.dataSet.name;
+                const sharedDataSet = (sharedModelEntry.sharedModel as SharedDataSetSnapshotType);
+                const oldName = sharedDataSet.dataSet.name;
                 if (oldName === oldTitle) {
-                  sharedModelEntry.sharedModel.dataSet.name = newTitle;
+                  sharedDataSet.dataSet.name = newTitle;
                 }
               }
             });
@@ -1103,9 +1104,10 @@ export const BaseDocumentContentModel = types
           .filter((tileId: string | undefined) => tileId !== undefined);
         const updatedSharedModel = { ...sharedModelEntry.sharedModel };
         if (sharedModelEntry.sharedModel.type === "SharedDataSet") {
-          updateSharedDataSetSnapshotWithNewTileIds(updatedSharedModel, tileIdMap);
+          updateSharedDataSetSnapshotWithNewTileIds(updatedSharedModel as SharedDataSetSnapshotType, tileIdMap);
         }
-        const newSharedModelEntry = self.addSharedModel(updatedSharedModel);
+        const newSharedModelEntry =
+          self.addSharedModel(SharedDataSet.create(updatedSharedModel as SharedDataSetSnapshotType));
         updatedTileIds.forEach(tileId => newSharedModelEntry.tiles.push(tileId));
       });
 

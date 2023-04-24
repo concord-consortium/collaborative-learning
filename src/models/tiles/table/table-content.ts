@@ -12,7 +12,9 @@ import { tileModelHooks } from "../tile-model-hooks";
 import { setTileTitleFromContent } from "../tile-model";
 import { TileContentModel } from "../tile-content";
 import { addCanonicalCasesToDataSet, IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
-import { kSharedDataSetType, SharedDataSet, SharedDataSetType, UpdatedSharedDataSetIds } from "../../shared/shared-data-set";
+import {
+  kSharedDataSetType, SharedDataSet, SharedDataSetType, UpdatedSharedDataSetIds
+} from "../../shared/shared-data-set";
 import { updateSharedDataSetColors } from "../../shared/shared-data-set-colors";
 import { SharedModelType } from "../../shared/shared-model";
 import { kMinColumnWidth } from "../../../components/tiles/table/table-types";
@@ -462,12 +464,14 @@ export function updateTableContentWithNewSharedModelIds(
   const columnWidths: Record<string, number> = {};
   sharedDataSetEntries.forEach(sharedDataSetEntry => {
     const originalSharedDataSetId = sharedDataSetEntry.sharedModel.id;
-    const attributeIdMap = updatedSharedModelMap[originalSharedDataSetId].attributeIdMap;
-    for (const entry of Object.entries(content.columnWidths ?? {})) {
-      const originalId = entry[0];
-      const width = entry[1] as number;
-      if (width !== undefined && originalId && attributeIdMap[originalId]) {
-          columnWidths[attributeIdMap[originalId]] = width;
+    if (originalSharedDataSetId) {
+      const attributeIdMap = updatedSharedModelMap[originalSharedDataSetId].attributeIdMap;
+      for (const entry of Object.entries(content.columnWidths ?? {})) {
+        const originalId = entry[0];
+        const width = entry[1] as number;
+        if (width !== undefined && originalId && attributeIdMap[originalId]) {
+            columnWidths[attributeIdMap[originalId]] = width;
+        }
       }
     }
   });

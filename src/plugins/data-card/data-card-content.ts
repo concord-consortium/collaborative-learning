@@ -256,9 +256,11 @@ export function updateDataCardContentWithNewSharedModelIds(
   const oldAttributeId = content.selectedSortAttributeId;
   sharedDataSetEntries.forEach(sharedDataSetEntry => {
     const originalSharedDataSetId = sharedDataSetEntry.sharedModel.id;
-    const attributeIdMap = updatedSharedModelMap[originalSharedDataSetId].attributeIdMap;
-    if (oldAttributeId && attributeIdMap[oldAttributeId]) {
-      updatedContent.selectedSortAttributeId = attributeIdMap[oldAttributeId];
+    if (originalSharedDataSetId) {
+      const attributeIdMap = updatedSharedModelMap[originalSharedDataSetId].attributeIdMap;
+      if (oldAttributeId && attributeIdMap[oldAttributeId]) {
+        updatedContent.selectedSortAttributeId = attributeIdMap[oldAttributeId];
+      }
     }
   });
   return updatedContent;
