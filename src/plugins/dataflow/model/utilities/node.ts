@@ -21,6 +21,8 @@ import DivideIcon from "../../assets/icons/math/divide.svg";
 import LightBulbIcon from "../../assets/icons/output/light-bulb.svg";
 import GrabberIcon from "../../assets/icons/output/grabber.svg";
 import AdvancedGrabberIcon from "../../assets/icons/output/advanced-grabber.svg";
+//import FanIcon from "" // TODO get as SVG
+//import HumidifierIcon from "" // TODO get SVG
 
 import TemperatureIcon from "../../assets/icons/sensor/temperature.svg";
 import CO2Icon from "../../assets/icons/sensor/co2.svg";
@@ -298,6 +300,14 @@ export const NodeDemoOutputTypes = [
   {
     name: "Advanced Grabber",
     icon: AdvancedGrabberIcon
+  },
+  {
+    name: "Fan",
+    icon: LightBulbIcon
+  },
+  {
+    name: "Humidifier",
+    icon: LightBulbIcon
   }
 ];
 
@@ -444,4 +454,5 @@ export const kSensorSelectMessage = "Select a sensor";
 export const kSensorMissingMessage = "⚠️";
 export const kRelaysIndexed =  ["Heat Lamp", "Fan", "Humidifier"];
 export const kBinaryOutputTypes = [...kRelaysIndexed, "Light Bulb"];
+export const kAnimatedBinaryChangeOutputTypes = ["Humidifier"];
 export const kRoundedOutputTypes = ["Grabber"];

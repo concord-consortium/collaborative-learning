@@ -5,8 +5,10 @@ import { DemoOutputControl } from "../controls/demo-output-control";
 import { InputValueControl } from "../controls/input-value-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
 import { MinigraphOptions } from "../dataflow-node-plot";
-import { NodeDemoOutputTypes, NodePlotRed } from "../../model/utilities/node";
+import { NodeDemoOutputTypes, NodePlotRed, kBinaryOutputTypes,
+  kAnimatedBinaryChangeOutputTypes } from "../../model/utilities/node";
 import { dataflowLogEvent } from "../../dataflow-logger";
+import { BinaryStateChangeAnimation } from "../controls/binary-state-change-animation";
 
 const minigraphOptions: Record<string, MinigraphOptions> = {
   "tilt": {
@@ -19,16 +21,19 @@ const grabberSpeed = .002;
 const tiltSpeed = .002;
 
 export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
+  public binaryAnimation: BinaryStateChangeAnimation | undefined;
+
   constructor(numSocket: Socket) {
     super("Demo Output", numSocket);
+    this.binaryAnimation = new BinaryStateChangeAnimation("demo-output-control"); // ANIMATION - make unique or skip
   }
 
   public builder(node: Node) {
     super.defaultBuilder(node);
-    if (this.editor) {
+    if (this.editor && this.binaryAnimation) {
       node
         .addControl(new DropdownListControl(this.editor, "outputType", node, NodeDemoOutputTypes, true))
-        .addControl(new DemoOutputControl(this.editor, "demoOutput", node));
+        .addControl(new DemoOutputControl(this.editor, "demoOutput", node, this.binaryAnimation));
 
       this.addInput(node, "nodeValue");
 
@@ -60,7 +65,7 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
         // Update the lightbulb or grabber
         const nodeValue = _node.inputs.get("nodeValue")?.control as InputValueControl;
         let newValue = isNaN(n1) ? 0 : n1;
-        if (outputType === "Light Bulb") {
+        if (kBinaryOutputTypes.includes(outputType)) {
           // if there is not a valid input, use 0
           // otherwise convert all non-zero to 1
           newValue = isNaN(n1) ? 0 : +(n1 !== 0);
@@ -68,8 +73,19 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
         } else {
           newValue = this.updateGrabber(_node, newValue, tickTime, nodeValue);
         }
+        const fromValue = node.data.nodeValue;
         nodeValue?.setValue(newValue);
         nodeValue?.setConnected(inputs.nodeValue.length);
+
+        // If this is a binary output with an animation
+        // it should set phase based on detected change
+        if (kAnimatedBinaryChangeOutputTypes.includes(outputType)){
+          this.binaryAnimation?.setAnimationPhaseState(fromValue as number, newValue);
+        }
+        // otherwise turn it off (should we call looping more directly?)
+        else {
+          this.binaryAnimation?.setAnimationPhaseState(0, 0);
+        }
 
         // Set the demo output's main value (lightbulb on/off, grabber % closed)
         const demoOutput = _node.controls.get("demoOutput") as DemoOutputControl;

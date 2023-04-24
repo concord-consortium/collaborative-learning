@@ -43,7 +43,7 @@
     top: 84px;
   }
 
-  .grabber-chord-image {
+  .grabber-cord-image {
     width: 55px;
     height: 110px;
     left: 12px;
@@ -56,5 +56,33 @@
     left: 4px;
     top: 37px;
     transform-origin: 9px 50%;
+  }
+}
+
+.humidifier-control {
+  height: 140px;
+  width: 113px;
+
+  .humidifier-image {
+    position: absolute;
+    left:20px;
+    bottom:10px;
+    opacity: .3;
+    height: 80%;
+    z-index: 1000;
+  }
+
+  #humidifier-base {
+    position: absolute;
+    left:25px;
+    width: 60%;
+    bottom:-22px;
+    z-index: 999;
+  }
+}
+
+.fan-control {
+  .motor {
+    border:1px dotted green;
   }
 }
