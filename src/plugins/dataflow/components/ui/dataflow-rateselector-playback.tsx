@@ -195,8 +195,8 @@ const stringToSeconds = (formattedTime: string) => {
     // Split the input string into minutes and seconds
     const [minutes, seconds] = formattedTime.split(':');
     // Convert the minutes and seconds to numbers
-    const numMinutes = parseInt(minutes);
-    const numSeconds = parseInt(seconds);
+    const numMinutes = parseInt(minutes, 10);
+    const numSeconds = parseInt(seconds, 10);
     // Convert the minutes to seconds and add to the seconds
     const totalSeconds = (numMinutes * 60) + numSeconds;
     // Return the total number of seconds
