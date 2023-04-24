@@ -1113,7 +1113,8 @@ export const BaseDocumentContentModel = types
 
       // Update tile ids for shared models and add copies to document
       newSharedModelEntries.forEach(sharedModelEntry => {
-        const updatedTileIds: string[] = sharedModelEntry.tiles.map((oldTile: any) => tileIdMap[oldTile.id]);
+        const updatedTileIds: string[] = sharedModelEntry.tiles.map((oldTile: any) => tileIdMap[oldTile.id])
+          .filter((tileId: string | undefined) => tileId !== undefined);
         const updatedSharedModel = { ...sharedModelEntry.sharedModel };
         if (sharedModelEntry.sharedModel.type === "SharedDataSet") {
           updateSharedDataSetSnapshotWithNewTileIds(updatedSharedModel, tileIdMap);
