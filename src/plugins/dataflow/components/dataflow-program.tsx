@@ -335,10 +335,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       });
 
       // remove rete double click zoom
-      this.programEditor.on("zoom", ({ transform, zoom, source }) => {
-        console.log(`transform`, transform);
-        console.log(`zoom`, zoom);
-        console.log(`source`, source);
+      this.programEditor.on("zoom", ({ source }) => {
 
         return false;
       });
