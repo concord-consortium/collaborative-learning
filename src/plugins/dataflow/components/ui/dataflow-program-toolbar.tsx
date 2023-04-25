@@ -1,5 +1,5 @@
-import React from "react";
-import { NodeTypes } from "../../model/utilities/node";
+import React, { useCallback } from "react";
+import { NodeType, NodeTypes } from "../../model/utilities/node";
 
 import "./dataflow-program-toolbar.sass";
 
@@ -10,26 +10,9 @@ interface IProps {
   disabled: boolean;
 }
 
-export class DataflowProgramToolbar extends React.Component<IProps> {
-  constructor(props: IProps) {
-    super(props);
-  }
-
-  public render() {
-    const { isTesting } = this.props;
-    return (
-      <div className="program-toolbar" data-test="program-toolbar">
-        { NodeTypes.map((nt: any, i: any) => (
-            this.renderAddNodeButton(nt.name, i)
-          ))
-        }
-        { isTesting && <button className={"qa"} onClick={this.props.onClearClick}>Clear</button> }
-      </div>
-    );
-  }
-
-  public renderAddNodeButton(nodeType: string, i: number) {
-    const handleAddNodeButtonClick = () => { this.props.onNodeCreateClick(nodeType); };
+export const DataflowProgramToolbar = ({ onNodeCreateClick, onClearClick, isTesting, disabled }: IProps) => {
+  const renderAddNodeButton = useCallback((nodeType: string, i: number) => {
+    const handleAddNodeButtonClick = () => { onNodeCreateClick(nodeType); };
     const iconClass = "icon-block " + nodeType.toLowerCase().replace(" ", "-");
     const nodeIcons = [];
     switch (nodeType) {
@@ -62,7 +45,7 @@ export class DataflowProgramToolbar extends React.Component<IProps> {
     );
     return (
       <button
-        disabled={this.props.disabled}
+        disabled={disabled}
         key={i} title={`Add ${nodeType} Block`}
         onClick={handleAddNodeButtonClick}
       >
@@ -70,6 +53,14 @@ export class DataflowProgramToolbar extends React.Component<IProps> {
         <div className="label">{nodeType}</div>
       </button>
     );
-  }
+  }, [onNodeCreateClick, disabled]);
 
-}
+  return (
+    <div className="program-toolbar" data-test="program-toolbar">
+      { NodeTypes.map((nt: NodeType, i: number) => (
+        renderAddNodeButton(nt.name, i)
+      ))}
+      { isTesting && <button className="qa" onClick={ onClearClick }>Clear</button> }
+    </div>
+  );
+};
