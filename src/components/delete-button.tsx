@@ -19,6 +19,7 @@ export const DeleteButton: React.FC<IProps> =
   };
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    console.log("delete-button.tsx > handleClick");
     !isDisabled && onClick(e, toolButton);
   };
 

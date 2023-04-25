@@ -210,10 +210,18 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     });
   };
 
+  //TODO
+  //- Press the Clear button and get a dialog that warns
+  //"Remove the program's recorded data and any linked displays of this data? This action is not undoable."
+  // with Cancel/Clear choices.
+  // - use the confirmation dialog box shown when the user deletes a tile as a model. (see picture attached.)
+
+
 
   private handleChangeOfRecordingMode = () => {
     const tileContent = this.getContent();
     const programMode = this.determineProgramMode();
+    console.log('handleChangeOfRecordingMode');
 
     const clearAttributes = () => {
       const allAttributes = tileContent.dataSet.attributes;
@@ -237,6 +245,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
         this.setState({isRecording: false});
         break;
       case ProgramMode.Clear:
+        console.log("switch CLEAR");
         tileContent.setFormattedTime("000:00"); //set formattedTime to 000:00
         //clear the dataSet;
         clearAttributes();
@@ -249,6 +258,8 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   };
 
   private determineProgramMode = () => { //used to prop drill to children
+    console.log("determineProgramMode");
+
     const { isRecording } = this.state;
     const tileContent = this.getContent();
     if (!isRecording && tileContent.isEmptyDataSet){
