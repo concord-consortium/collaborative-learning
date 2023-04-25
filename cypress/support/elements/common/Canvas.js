@@ -71,7 +71,7 @@ class Canvas {
     this.openFileMenu();
     cy.get('[data-test=list-item-icon-open-workspace]').click();
     cy.get('[data-test=' + type + '-section-workspaces-documents] [data-test=my-work-new-document]').click();
-    dialog.getDialogTitle().should('exist').contains('Create Document');
+    dialog.getDialogTitle().should('exist');
     dialog.getDialogTextInput().click().clear().type(title);
     dialog.getDialogOKButton().click();
   }

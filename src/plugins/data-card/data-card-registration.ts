@@ -4,7 +4,9 @@ import { TileMetadataModel } from "../../models/tiles/tile-metadata";
 import { kDataCardDefaultHeight, kDataCardTileType } from "./data-card-types";
 import DataCardToolIcon from "./assets/data-card-tool.svg";
 import { DataCardToolComponent } from "./data-card-tile";
-import { defaultDataCardContent, DataCardContentModel } from "./data-card-content";
+import {
+  defaultDataCardContent, DataCardContentModel, updateDataCardContentWithNewSharedModelIds
+} from "./data-card-content";
 
 registerTileContentInfo({
   type: kDataCardTileType,
@@ -12,7 +14,8 @@ registerTileContentInfo({
   titleBase: "Data Card Collection",
   metadataClass: TileMetadataModel,
   defaultContent: defaultDataCardContent,
-  defaultHeight: kDataCardDefaultHeight
+  defaultHeight: kDataCardDefaultHeight,
+  updateContentWithNewSharedModelIds: updateDataCardContentWithNewSharedModelIds
 });
 
 registerTileComponentInfo({

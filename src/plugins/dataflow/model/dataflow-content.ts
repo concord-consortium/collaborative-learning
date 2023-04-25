@@ -10,7 +10,9 @@ import { ITileMetadataModel } from "../../../models/tiles/tile-metadata";
 import { tileModelHooks } from "../../../models/tiles/tile-model-hooks";
 import { TileContentModel } from "../../../models/tiles/tile-content";
 import { getTileModel, setTileTitleFromContent, getTileTitleFromContent } from "../../../models/tiles/tile-model";
-import { SharedDataSet, kSharedDataSetType, SharedDataSetType  } from "../../../models/shared/shared-data-set";
+import {
+  SharedDataSet, kSharedDataSetType, SharedDataSetType,
+} from "../../../models/shared/shared-data-set";
 import { updateSharedDataSetColors } from "../../../models/shared/shared-data-set-colors";
 import { SharedModelType } from "../../../models/shared/shared-model";
 import { addAttributeToDataSet, addCasesToDataSet, DataSet } from "../../../models/data/data-set";
