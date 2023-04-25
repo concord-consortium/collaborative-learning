@@ -41,6 +41,7 @@ import { SensorValueControl } from "../nodes/controls/sensor-value-control";
 import { InputValueControl } from "../nodes/controls/input-value-control";
 import { DemoOutputControl } from "../nodes/controls/demo-output-control";
 import { DropdownListControl } from "../nodes/controls/dropdown-list-control";
+import { ProgramMode, UpdateMode } from "./types/dataflow-tile-types";
 
 import "./dataflow-program.sass";
 interface NodeNameValuePair {
@@ -58,17 +59,6 @@ export interface IStartProgramParams {
   endTime: number;
   hasData: boolean;
   title: string;
-}
-
-export enum UpdateMode {
-  Increment = "Increment",
-  Reset = "Reset",
-}
-
-export enum ProgramMode {
-  Record,
-  Stop,
-  Clear
 }
 
 interface IProps extends SizeMeProps {
@@ -433,7 +423,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   //disable the right side when recordingMode in stop or clear
   private disabledRecordingStates(){
     const { programMode } = this.props;
-    return ( programMode === ProgramMode.Stop || programMode === ProgramMode.Clear);
+    return ( programMode === ProgramMode.Recording || programMode === ProgramMode.Done);
   }
 
   private keepNodesInView = () => {
@@ -675,15 +665,15 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.lastIntervalTime = now;
 
     switch (programMode){
-      case ProgramMode.Record:
+      case ProgramMode.Ready:
         this.updateNodes();
         break;
-      case ProgramMode.Stop:
+      case ProgramMode.Recording:
         if (!readOnly) this.recordCase(); //only record cases from right DF tiles
         this.updateNodes();
         updateRecordIndex(UpdateMode.Increment);
         break;
-      case ProgramMode.Clear:
+      case ProgramMode.Done:
         isPlaying && this.playbackNodesWithCaseData(dataSet, playBackIndex);
         isPlaying && updatePlayBackIndex(UpdateMode.Increment);
         !isPlaying && updatePlayBackIndex(UpdateMode.Reset);

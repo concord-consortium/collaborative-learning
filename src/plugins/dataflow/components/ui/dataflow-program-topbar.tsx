@@ -9,9 +9,9 @@ import PauseIcon from "../../assets/topbar-buttons/pause-icon.svg";
 import ClearIcon from "../../assets/topbar-buttons/clear-icon.svg";
 import { DataflowSerialConnectButton } from "./dataflow-serial-connect-button";
 import { DataflowContentModelType } from "../../model/dataflow-content";
+import { ProgramMode } from "../types/dataflow-tile-types";
 
 import "./dataflow-program-topbar.scss";
-import { ProgramMode } from "../dataflow-program";
 
 interface TopbarProps {
   programDataRates: ProgramDataRate[];
@@ -44,7 +44,7 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
         <div className="topbar-center-container">
           <div className="topbar-blank-or-play">
             {
-              (programMode === ProgramMode.Stop || programMode === ProgramMode.Clear) &&
+              (programMode === ProgramMode.Recording || programMode === ProgramMode.Done) &&
               <PlaybackButton
                 isPlaying={isPlaying}
                 handleChangeIsPlaying={handleChangeIsPlaying}
@@ -98,7 +98,7 @@ interface IRecordStopOrClearProps {
 
 const RecordStopOrClearButton = (props: IRecordStopOrClearProps) => {
   const { disabled, onRecordDataChange, programMode } = props;
-  if (programMode === ProgramMode.Clear){ //stop button pressed
+  if (programMode === ProgramMode.Done){ //stop button pressed
   }
   return (
     <div className="record-btn-container">
@@ -132,7 +132,7 @@ const PlaybackButton = (props: IPlaybackProps) => {
     <div className="playback-btn-container">
       <button
         className="playback-data-btn"
-        disabled={programMode === ProgramMode.Stop}
+        disabled={programMode === ProgramMode.Recording}
         onClick={handleChangeIsPlaying}
       >
         <div className="playback-data-icon">
