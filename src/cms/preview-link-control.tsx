@@ -95,7 +95,7 @@ export class PreviewLinkControl extends React.Component<CmsWidgetControlProps, I
     const params = `?unit=${previewUnit}&problem=${problemParam}&section=${sectionType}`;
     // TODO It would be better to use the github user for the demoName rather than the curriculum branch.
     // TODO Do we want to make the user a teacher when they are not modifying a teacher guide?
-    const demoParams = `&appMode=demo&domeName=${curriculumBranch}&fakeClass=1&fakeUser=teacher:2`;
+    const demoParams = `&appMode=demo&demoName=${curriculumBranch}&fakeClass=1&fakeUser=teacher:2`;
     const previewUrl = `${baseUrl}${params}${demoParams}`;
     this.setState({ previewUrl });
   }
