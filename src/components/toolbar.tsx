@@ -91,7 +91,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
           onShowDropHighlight: this.getShowDropRowHighlight(toolButton),
           onHideDropHighlight: this.removeDropRowHighlight
         };
-        console.log("toolbar.tsx > buttonProps:", buttonProps);
+        // console.log("toolbar.tsx > buttonProps:", buttonProps);
         toolButton.initialize();
         return toolButton.id !== "delete"
                 // ? <ToolbarButtonComponent key={toolButton.id} {...buttonProps} />

@@ -88,8 +88,9 @@ interface IProps extends SizeMeProps {
   playBackIndex: number;
   recordIndex: number;
   //state handlers
-  onRecordDataChange: () => void;
+  handleChangeOfProgramMode: () => void;
   handleChangeIsPlaying: () => void;
+  handleClearConfirmed: () => void;
   updatePlayBackIndex: (update: string) => void;
   updateRecordIndex: (update: string) => void;
   numNodes: number;
@@ -154,13 +155,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           showRateUI={showRateUI}
           lastIntervalDuration={this.state.lastIntervalDuration}
           serialDevice={this.stores.serialDevice}
-          onRecordDataChange={this.props.onRecordDataChange}
           programMode={this.props.programMode}
-
           isPlaying={this.props.isPlaying}
-          handleChangeIsPlaying={this.props.handleChangeIsPlaying}
           numNodes={numNodes}
           tileContent={tileContent}
+          handleChangeOfProgramMode={this.props.handleChangeOfProgramMode}
+          handleChangeIsPlaying={this.props.handleChangeIsPlaying}
+          handleClearConfirmed={this.props.handleClearConfirmed}
         />
         <div className={toolbarEditorContainerClass}>
           { showProgramToolbar && <DataflowProgramToolbar

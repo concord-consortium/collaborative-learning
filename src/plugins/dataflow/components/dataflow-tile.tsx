@@ -29,6 +29,7 @@ interface IDataflowTileState {
   playBackIndex: number;
   recordIndex: number; //# of ticks for record
   isEditingTitle: boolean;
+  clearConfirmed: boolean;
 }
 
 @inject("stores")
@@ -43,7 +44,8 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
       isPlaying: false,
       playBackIndex: 0,
       recordIndex: 0,
-      isEditingTitle: false
+      isEditingTitle: false,
+      clearConfirmed: false
     };
   }
   public render() {
@@ -82,12 +84,14 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
                   playBackIndex={this.state.playBackIndex}
                   recordIndex={this.state.recordIndex}
                   //state handlers
-                  onRecordDataChange={this.handleChangeOfRecordingMode}
+                  handleChangeOfProgramMode={this.handleChangeOfProgramMode}
                   handleChangeIsPlaying={this.handleChangeIsPlaying}
+                  handleClearConfirmed={this.handleClearConfirmed}
                   updatePlayBackIndex={this.updatePlayBackIndex}
                   updateRecordIndex={this.updateRecordIndex}
                   numNodes={numNodes}
                   tileContent={tileContent}
+
                 />
               );
             }}
@@ -218,10 +222,10 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
 
 
 
-  private handleChangeOfRecordingMode = () => {
+  private handleChangeOfProgramMode = () => {
     const tileContent = this.getContent();
     const programMode = this.determineProgramMode();
-    console.log('handleChangeOfRecordingMode');
+    // console.log('handleChangeOfRecordingMode');
 
     const clearAttributes = () => {
       const allAttributes = tileContent.dataSet.attributes;
@@ -245,7 +249,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
         this.setState({isRecording: false});
         break;
       case ProgramMode.Clear:
-        console.log("switch CLEAR");
+        // console.log("switch CLEAR");
         tileContent.setFormattedTime("000:00"); //set formattedTime to 000:00
         //clear the dataSet;
         clearAttributes();
@@ -258,7 +262,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   };
 
   private determineProgramMode = () => { //used to prop drill to children
-    console.log("determineProgramMode");
+    // console.log("determineProgramMode");
 
     const { isRecording } = this.state;
     const tileContent = this.getContent();
@@ -285,6 +289,10 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     if (update === UpdateMode.Reset){
       this.setState({playBackIndex: 0});
     }
+  };
+
+  private handleClearConfirmed = () => {
+    this.setState({clearConfirmed: true});
   };
 
   private updateRecordIndex = (update: string) => {

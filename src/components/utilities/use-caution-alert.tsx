@@ -23,7 +23,7 @@ const TextContent: React.FC<ITextProps> = ({ content }) => {
 
 export const useCautionAlert = (props: IProps) => {
   const { className, title, content, confirmLabel, cancelLabel, onConfirm, onClose } = props;
-  console.log("useCautionAlert:", props);
+  // console.log("useCautionAlert:", props);
 
 
   const Content = typeof content === "string"

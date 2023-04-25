@@ -1,4 +1,4 @@
-import React from "react";
+import React, { MouseEventHandler, useState } from "react";
 import { RateSelectorOrPlayBack } from "./dataflow-rateselector-playback";
 import { ProgramDataRate } from "../../model/utilities/node";
 import { SerialDevice } from "../../../../models/stores/serial";
@@ -12,6 +12,7 @@ import { DataflowContentModelType } from "../../model/dataflow-content";
 
 import "./dataflow-program-topbar.scss";
 import { ProgramMode } from "../dataflow-program";
+import { clear } from "@testing-library/user-event/dist/clear";
 
 interface TopbarProps {
   programDataRates: ProgramDataRate[];
@@ -22,17 +23,19 @@ interface TopbarProps {
   showRateUI: boolean;
   lastIntervalDuration: number;
   serialDevice: SerialDevice;
-  onRecordDataChange: () => void;
+  handleChangeOfProgramMode: () => void;
   programMode: ProgramMode;
   isPlaying: boolean;
   handleChangeIsPlaying: () => void;
   numNodes: number;
   tileContent: DataflowContentModelType;
+  handleClearConfirmed: () => void;
 }
 
 export const DataflowProgramTopbar = (props: TopbarProps) => {
-  const { onSerialRefreshDevices, readOnly, serialDevice, programDataRates, dataRate, onRateSelectClick,
-          onRecordDataChange, programMode, isPlaying, handleChangeIsPlaying, numNodes, tileContent } = props;
+  const { onSerialRefreshDevices, readOnly, serialDevice, programDataRates, dataRate,
+          onRateSelectClick, handleChangeOfProgramMode, programMode, isPlaying, handleChangeIsPlaying,
+          numNodes, tileContent, handleClearConfirmed} = props;
 
   return (
     <div className="program-editor-topbar">
@@ -61,14 +64,19 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
             isPlaying={isPlaying}
             handleChangeIsPlaying={handleChangeIsPlaying}
             numNodes={numNodes}
-            onRecordDataChange={onRecordDataChange}
+            handleChangeOfProgramMode={handleChangeOfProgramMode}
             tileContent={tileContent}
           />
           <RecordStopOrClearButton
             disabled={readOnly}
             programMode={programMode}
-            onRecordDataChange={onRecordDataChange}
+            handleChangeOfProgramMode={handleChangeOfProgramMode}
+            handleClearConfirmed={handleClearConfirmed}
           />
+
+
+
+
         </div>
 
         <div className="topbar-right">
@@ -92,19 +100,54 @@ const iconArr = [ //button icon
 
 interface IRecordStopOrClearProps {
   disabled: boolean;
-  onRecordDataChange: (program: any) => void;
+  handleChangeOfProgramMode: () => void;
+  handleClearConfirmed: () => void;
   programMode: number;
 }
 
 const RecordStopOrClearButton = (props: IRecordStopOrClearProps) => {
-  const { disabled, onRecordDataChange, programMode } = props;
-  if (programMode === ProgramMode.Clear){ //stop button pressed
-  }
+
+  const [clearConfirmed, setClearConfirmed] = useState(false);
+
+  const { disabled, handleChangeOfProgramMode, programMode } = props;
+  // console.log("dataflow-program-topbar.tsx with props:", props);
+
+  const AlertContent = () => {
+    return (
+      <p> Remove the program&#39;s recorded data and any linked displays of this data? This action is not undoable.</p>
+    );
+  };
+
+  const showAlert = (confirmStatus?: boolean) => {
+    if (confirmStatus){
+      setClearConfirmed(confirmStatus);
+    }
+    if (clearConfirmed === true) AlertContent();
+  };
+
+  const onClickHandler = () => {
+    // console.log("onClickHandler");
+    if (!disabled && programMode === 2 && !clearConfirmed){
+      console.log("-------POP UP --------");
+      showAlert();
+    }
+    else {
+      console.log("default");
+      handleChangeOfProgramMode();
+      // return handleChangeOfProgramMode;
+    }
+    if (clearConfirmed){
+      console.log("clear confirmed handler");
+    }
+
+  };
+
   return (
     <div className="record-btn-container">
       <button
         className="record-data-btn"
-        onClick={onRecordDataChange}
+        onClick={onClickHandler}
+        // onClick={handleChangeOfProgramMode}
         disabled={disabled}
       >
         <div className="record-data-icon">
@@ -114,6 +157,21 @@ const RecordStopOrClearButton = (props: IRecordStopOrClearProps) => {
           {Mode[programMode]}
         </div>
       </button>
+
+      <button
+        onClick={() => console.log("close")}
+      >
+        cancel
+      </button>
+      <button
+        onClick={() => {
+          console.log("confirm, increment");
+          handleChangeOfProgramMode();
+        }}
+      >
+        confirm
+      </button>
+
     </div>
   );
 };
