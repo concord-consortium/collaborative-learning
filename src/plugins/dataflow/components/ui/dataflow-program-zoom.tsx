@@ -10,7 +10,7 @@ interface ZoomProps {
 
 export const DataflowProgramZoom = (props: ZoomProps) => {
   return (
-    <div className="program-editor-zoom">
+    <div className="program-editor-zoom" onScroll={() => console.log(`zoom`)} >
       <button
         title={"Zoom In"}
         onClick={props.onZoomInClick}
