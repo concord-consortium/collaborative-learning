@@ -172,7 +172,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
               className={editorClass}
               ref={(elt) => this.editorDomElement = elt}
             >
-              <div className="flow-tool" ref={elt => this.toolDiv = elt} onWheel={this.handleWheel} />
+              <div
+                className="flow-tool"
+                ref={elt => this.toolDiv = elt}
+                onWheel={e => this.handleWheel(e, this.toolDiv) }
+              />
               { this.shouldShowProgramCover() &&
                 <DataflowProgramCover editorClass={editorClassForDisplayState} /> }
               {showZoomControl &&
@@ -188,16 +192,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     );
   }
 
-  private handleWheel(e: any) {
-    // console.log(`wheeling`, e);
-    const canvasAreas = document.getElementsByClassName("canvas-area");
-    // console.log(`canvasAreas`, canvasAreas);
-    if (canvasAreas.length > 0) {
-      const canvasArea = canvasAreas[0];
-      const canvas = canvasArea.children[0];
-      const documentContent = canvas.children[0];
-      // console.log(`documentContent`, documentContent);
-      documentContent.scrollBy(e.deltaX, e.deltaY);
+  private handleWheel(e: any, toolDiv: HTMLElement | null) {
+    if (toolDiv !== null) {
+      const documentContent = toolDiv.closest(".document-content");
+      documentContent?.scrollBy(e.deltaX, e.deltaY);
     }
   }
 
@@ -336,7 +334,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       // remove rete double click zoom
       this.programEditor.on("zoom", ({ source }) => {
-
         return false;
       });
 
