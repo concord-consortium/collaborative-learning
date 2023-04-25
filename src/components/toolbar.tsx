@@ -45,7 +45,6 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
 
   public render() {
     const handleClickTool = (e: React.MouseEvent<HTMLDivElement>, tool: IToolbarButtonModel) => {
-      console.log("toolbar.tsx > handleClickTool()");
       switch (tool.id) {
         case "select":
           this.handleSelect();
@@ -78,8 +77,6 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
       this.handleDragNewTile(tool, e);
     };
     const renderToolButtons = (toolbarModel: IToolbarModel) => {
-
-      // console.log("toolbar.tsx > toolbarModel", toolbarModel);
       return toolbarModel.map(toolButton => {
         const buttonProps: IToolbarButtonProps = {
           toolButton,
@@ -91,11 +88,9 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
           onShowDropHighlight: this.getShowDropRowHighlight(toolButton),
           onHideDropHighlight: this.removeDropRowHighlight
         };
-        // console.log("toolbar.tsx > buttonProps:", buttonProps);
         toolButton.initialize();
         return toolButton.id !== "delete"
-                // ? <ToolbarButtonComponent key={toolButton.id} {...buttonProps} />
-                ? undefined //console.log
+                ? <ToolbarButtonComponent key={toolButton.id} {...buttonProps} />
                 : <DeleteButton key={toolButton.id}
                                 onSetShowDeleteTilesConfirmationAlert={this.setShowDeleteTilesConfirmationAlert}
                                 onDeleteSelectedTiles={this.handleDeleteSelectedTiles}
