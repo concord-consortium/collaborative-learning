@@ -189,12 +189,16 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private handleWheel(e: any) {
-    console.log(`wheeling`, e);
-    document.onscroll?.(e);
-    // if (this.editorDomElement !== null) {
-    //   console.log(`wheeling`);
-    //   this.editorDomElement.onwheel?.(e);
-    // }
+    // console.log(`wheeling`, e);
+    const canvasAreas = document.getElementsByClassName("canvas-area");
+    // console.log(`canvasAreas`, canvasAreas);
+    if (canvasAreas.length > 0) {
+      const canvasArea = canvasAreas[0];
+      const canvas = canvasArea.children[0];
+      const documentContent = canvas.children[0];
+      // console.log(`documentContent`, documentContent);
+      documentContent.scrollBy(e.deltaX, e.deltaY);
+    }
   }
 
   public componentDidMount() {
