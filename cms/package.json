@@ -4,23 +4,13 @@
   "description": "A CMS for authoring CLUE content.",
   "main": "index.tsx",
   "config": {
-    "pageTitle": "CLUE",
-    "pageDescription": "Collaborative Learning User Environment",
-    "branchTagRegEx": "/collaborative-learning\\.concord\\.org\\/(branch|tag)(\\/|$)/i",
-    "masterBranchRegEx": "/collaborative-learning\\.concord\\.org\\/branch\\/master(\\/|$)/i",
+    "pageTitle": "CLUE CMS",
+    "pageDescription": "Collaborative Learning User Environment CMS",
     "rollbarAccessToken": "fb9dd070b7344cc7a5e529d8fa25e765"
   },
   "scripts": {
-    "build": "npm-run-all lint:build",
-    "build-and-serve": "npm-run-all build serve",
-    "build:debug": "npm-run-all lint clean build:webpack",
-    "build:top-test": "cross-env DEPLOY_PATH=specific/release/ webpack --mode production --output-path top-test/specific/release && cp top-test/specific/release/index-top.html top-test/",
-    "build:webpack": "cross-env NODE_OPTIONS=--max-old-space-size=4096 webpack --mode production",
     "lint": "eslint -c \"../.eslintrc.js\" \"./src/**/*.{js,jsx,ts,tsx}\"",
-    "lint:build": "eslint -c \"../.eslintrc.build.js\" \"./src/**/*.{js,jsx,ts,tsx}\"",
     "lint:fix": "eslint --fix \"./src/**/*.{js,jsx,ts,tsx}\"",
-    "start": "webpack-dev-server --hot",
-    "start:secure": "webpack-dev-server --https --hot --cert ~/.localhost-ssl/localhost.pem --key ~/.localhost-ssl/localhost.key",
     "test": "jest"
   },
   "author": "Concord Consortium <> (https://concord.org)",

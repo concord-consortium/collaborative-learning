@@ -79,7 +79,10 @@ export class DocumentEditor extends React.Component<IProps, IState>  {
         }
       });
 
-      this.setState({ document, stores });
+      this.setState({
+        document,
+        stores
+      });
     });
   }
 

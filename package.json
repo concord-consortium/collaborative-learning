@@ -52,7 +52,7 @@
     "report-dir": "coverage-cypress"
   },
   "scripts": {
-    "build": "npm-run-all lint:build clean build:webpack build:cms",
+    "build": "npm-run-all lint:build clean build:webpack",
     "build-and-serve": "npm-run-all build serve",
     "build:cms": "cd cms && npm run build",
     "build:debug": "npm-run-all lint clean build:webpack",

@@ -5,6 +5,7 @@ import { defaultCurriculumBranch } from "./cms-constants";
 import { urlParams } from "../../src/utilities/url-params";
 import { getGuideJson, getUnitJson } from "../../src/models/curriculum/unit";
 import { appConfig } from "../../src/initialize-app";
+import { DocumentModelType } from "../../src/models/document/document";
 
 import "./custom-control.scss";
 import "./preview-link-control.scss";
@@ -49,9 +50,9 @@ export class PreviewLinkControl extends React.Component<CmsWidgetControlProps, I
     // Finish setting up the preview link after reading the unit json
     this.isTeacherGuide = this.pathParts?.[2] === "teacher-guide";
     if (this.isTeacherGuide) {
-      getGuideJson(this.unit, appConfig).then((unitJson: any) => this.setPreviewLink(unitJson));
+      getGuideJson(this.unit, appConfig).then((unitJson: DocumentModelType) => this.setPreviewLink(unitJson));
     } else {
-      getUnitJson(this.unit, appConfig).then((unitJson: any) => this.setPreviewLink(unitJson));
+      getUnitJson(this.unit, appConfig).then((unitJson: DocumentModelType) => this.setPreviewLink(unitJson));
     }
 
     this.state = {

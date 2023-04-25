@@ -21,7 +21,6 @@ export class IframeControl extends React.Component<CmsWidgetControlProps, IState
   }
 
   componentDidMount = () => {
-    // TODO: Is there a better place for this?
     if (DEBUG_CMS) {
       // eslint-disable-next-line no-console
       console.log("DEBUG: CMS ClueControl initial content value is: ", this.state.initialValue);
