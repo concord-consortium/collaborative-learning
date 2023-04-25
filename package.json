@@ -54,7 +54,6 @@
   "scripts": {
     "build": "npm-run-all lint:build clean build:webpack",
     "build-and-serve": "npm-run-all build serve",
-    "build:cms": "cd cms && npm run build",
     "build:debug": "npm-run-all lint clean build:webpack",
     "build:top-test": "cross-env DEPLOY_PATH=specific/release/ webpack --mode production --output-path top-test/specific/release && cp top-test/specific/release/index-top.html top-test/",
     "build:webpack": "cross-env NODE_OPTIONS=--max-old-space-size=4096 webpack --mode production",
