@@ -90,7 +90,6 @@ interface IProps extends SizeMeProps {
   //state handlers
   handleChangeOfProgramMode: () => void;
   handleChangeIsPlaying: () => void;
-  handleClearConfirmed: () => void;
   updatePlayBackIndex: (update: string) => void;
   updateRecordIndex: (update: string) => void;
   numNodes: number;
@@ -161,7 +160,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           tileContent={tileContent}
           handleChangeOfProgramMode={this.props.handleChangeOfProgramMode}
           handleChangeIsPlaying={this.props.handleChangeIsPlaying}
-          handleClearConfirmed={this.props.handleClearConfirmed}
         />
         <div className={toolbarEditorContainerClass}>
           { showProgramToolbar && <DataflowProgramToolbar

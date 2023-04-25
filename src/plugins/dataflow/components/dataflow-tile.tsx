@@ -29,7 +29,6 @@ interface IDataflowTileState {
   playBackIndex: number;
   recordIndex: number; //# of ticks for record
   isEditingTitle: boolean;
-  clearConfirmed: boolean;
 }
 
 @inject("stores")
@@ -45,7 +44,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
       playBackIndex: 0,
       recordIndex: 0,
       isEditingTitle: false,
-      clearConfirmed: false
     };
   }
   public render() {
@@ -86,7 +84,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
                   //state handlers
                   handleChangeOfProgramMode={this.handleChangeOfProgramMode}
                   handleChangeIsPlaying={this.handleChangeIsPlaying}
-                  handleClearConfirmed={this.handleClearConfirmed}
                   updatePlayBackIndex={this.updatePlayBackIndex}
                   updateRecordIndex={this.updateRecordIndex}
                   numNodes={numNodes}
@@ -290,11 +287,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
       this.setState({playBackIndex: 0});
     }
   };
-
-  private handleClearConfirmed = () => {
-    this.setState({clearConfirmed: true});
-  };
-
   private updateRecordIndex = (update: string) => {
     if (update === UpdateMode.Increment){
       this.setState({recordIndex: this.state.recordIndex + 1});
@@ -303,7 +295,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
       this.setState({recordIndex: 0});
     }
   };
-
   private getContent() {
     return this.props.model.content as DataflowContentModelType;
   }
