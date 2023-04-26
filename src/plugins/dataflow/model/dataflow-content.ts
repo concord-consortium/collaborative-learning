@@ -193,25 +193,12 @@ export const DataflowContentModel = TileContentModel
     updateAfterSharedModelChanges(sharedModel?: SharedModelType){
       //do nothing
     },
-    addNewAttrFromNode(nodeId: number, nodeName: string){
-      //if already an attribute with the same nodeId do nothing, else write
-      const dataSetAttributes = self.dataSet.attributes;
-      let foundFlag = false;
-
-      for (let i = 0; i < Object.keys(dataSetAttributes).length ; i++){ //look in dataSet.attributes for each Id
-        const idInDataSet = dataSetAttributes[i].id;
-        const index = idInDataSet.indexOf("*");
-        const stringAfterIndex = idInDataSet.substring(index+1);
-        if (nodeId.toString() === stringAfterIndex)foundFlag = true;
-      }
-
-      if (!foundFlag) {
-        const newAttributeId = uniqueId() + "*" + nodeId;
-        self.dataSet.addAttributeWithID({
-          id: newAttributeId,
-          name: `${nodeName}_${nodeId}`
-        });
-      }
+    addNewAttrFromNode(nodeId: number, nodeName: string, idx: number){
+      const newAttributeId = uniqueId() + "*" + nodeId;
+      self.dataSet.addAttributeWithID({
+        id: newAttributeId,
+        name: `${nodeName} ${idx}`
+      });
     },
     addLinkedTable(tableId: string) {  //tableID is table we linked it to
       const sharedModelManager = self.tileEnv?.sharedModelManager;

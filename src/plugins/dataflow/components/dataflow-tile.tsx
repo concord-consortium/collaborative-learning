@@ -83,12 +83,13 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
                   playBackIndex={this.state.playBackIndex}
                   recordIndex={this.state.recordIndex}
                   //state handlers
-                  onRecordDataChange={this.handleChangeOfRecordingMode}
+                  handleChangeOfProgramMode={this.handleChangeOfProgramMode}
                   handleChangeIsPlaying={this.handleChangeIsPlaying}
                   updatePlayBackIndex={this.updatePlayBackIndex}
                   updateRecordIndex={this.updateRecordIndex}
                   numNodes={numNodes}
                   tileContent={tileContent}
+
                 />
               );
             }}
@@ -206,13 +207,14 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     // Time   |  Node 1 | Node 2 | Node 3 etc
     //    0   |   val    | val    |  val
     addAttributeToDataSet(tileContent.dataSet, { name: "Time (sec)" }); //time quantized to nearest sampling rate
+    let insertionOrder = 1;
     tileContent.program.nodes.forEach((n) => { //add attributes based on nodes in tile
-      tileContent.addNewAttrFromNode(n.id, n.name);
+      tileContent.addNewAttrFromNode(n.id, n.name, insertionOrder);
+      insertionOrder ++;
     });
   };
 
-
-  private handleChangeOfRecordingMode = () => {
+  private handleChangeOfProgramMode = () => {
     const tileContent = this.getContent();
     const programMode = this.determineProgramMode();
 
@@ -276,7 +278,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
       this.setState({playBackIndex: 0});
     }
   };
-
   private updateRecordIndex = (update: string) => {
     if (update === UpdateMode.Increment){
       this.setState({recordIndex: this.state.recordIndex + 1});
@@ -285,7 +286,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
       this.setState({recordIndex: 0});
     }
   };
-
   private getContent() {
     return this.props.model.content as DataflowContentModelType;
   }
