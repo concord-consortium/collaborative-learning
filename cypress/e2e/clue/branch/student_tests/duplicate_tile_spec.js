@@ -1,10 +1,14 @@
 import ClueCanvas from '../../../../support/elements/clue/cCanvas';
 import DrawToolTile from "../../../../support/elements/clue/DrawToolTile";
 import ImageToolTile from '../../../../support/elements/clue/ImageToolTile';
+import TableToolTile from '../../../../support/elements/clue/TableToolTile';
+import DataCardToolTile from '../../../../support/elements/clue/DataCardToolTile';
 
 let clueCanvas = new ClueCanvas,
   drawToolTile = new DrawToolTile,
-  imageToolTile = new ImageToolTile;
+  imageToolTile = new ImageToolTile,
+  tableToolTile = new TableToolTile,
+  dataCardToolTile = new DataCardToolTile;
 
 context('Duplicate Tiles', function () {
   const toolButton = toolType => cy.get(`.tool.${toolType}`);
@@ -47,6 +51,30 @@ context('Duplicate Tiles', function () {
       imageToolTile.getImageTile().first().click();
       duplicateTool().click();
       imageToolTile.getImageTileTitle().eq(1).should("contain.text", "Image 4");
+    });
+  });
+
+  describe("Duplicate tool with shared models", () => {
+    it("duplicates tables", () => {
+      clueCanvas.addTile("table");
+      tableToolTile.getTableTile().click();
+      duplicateTool().click();
+      tableToolTile.getTableTile().should("have.length", 2);
+      tableToolTile.getTableTitle().last().should("contain.text", "Table 2");
+      tableToolTile.typeInTableCell(1, "x");
+      tableToolTile.getTableCell().eq(1).should("contain.text", "x");
+      tableToolTile.getTableCell().eq(5).should("not.contain.text", "x");
+    });
+
+    it("duplicates datacards", () => {
+      clueCanvas.addTile("datacard");
+      dataCardToolTile.getSortSelect().select("Label 1");
+      dataCardToolTile.getTile().click();
+      duplicateTool().click();
+      dataCardToolTile.getTile().should("have.length", 2);
+      dataCardToolTile.getSortSelect().last().should("contain.text", "Label 1");
+      dataCardToolTile.getSortSelect().last().select("None");
+      dataCardToolTile.getSortSelect().first().should("contain.text", "Label 1");
     });
   });
 });

@@ -1,18 +1,16 @@
 # Communicator
 
 The program for the micro:bit attached to the computer
+- It takes data received from the hub and sends it to the computer via serial.
+- It takes data received from the computer and sends it to the hub via radio.
+- You can toggle this on and off by pressing the A and B buttons.
 
-On received string via radio
-  - assemble the string
-  - write it to serial
-
-On received command string via serial
-  - broadcast it to targeted hub
 
 ```js
 /**
  * micro:bit + Dataflow: "Communicator"
- * This is the basic program for the micro:bit physically attached to the computer.
+ * This is the basic program for the "Communicator"
+ * micro:bit physically attached to the computer.
  */
 
 let mode = 0
@@ -37,7 +35,7 @@ input.onButtonPressed(Button.B, function () {
 })
 
 radio.onReceivedString(function (receivedString) {
-    if (mode == 1){
+    if (mode == 1) {
         const signalType = receivedString.substr(0, 1)
         if (signalType == "s" || signalType == "r") {
             serial.writeLine(receivedString)
@@ -45,12 +43,9 @@ radio.onReceivedString(function (receivedString) {
     }
 })
 
-// works
 serial.onDataReceived(serial.delimiters(Delimiters.NewLine), function () {
     readFromSerial = serial.readLine()
     radio.sendString(readFromSerial)
 })
-
-
 
 ```

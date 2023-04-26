@@ -38,10 +38,12 @@ export class SensorValueControl extends Rete.Control {
   }
 
   public setValue = (val: number) => {
-    this.props.value = val;
-    this.putData(this.key, val);
-    this.updateUnits();
-    (this as any).update();
+    if (isFinite(val)) {
+      this.props.value = val;
+      this.putData(this.key, val);
+      this.updateUnits();
+      (this as any).update();
+    }
   };
 
   public getValue = () => {

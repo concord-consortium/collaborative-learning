@@ -1,5 +1,7 @@
 import { reaction } from "mobx";
-import { addDisposer, getType, Instance, types } from "mobx-state-tree";
+import { addDisposer, getType, Instance, SnapshotIn, types } from "mobx-state-tree";
+import { cloneDeep } from "lodash";
+
 import { kDataCardTileType, kDefaultLabel, kDefaultLabelPrefix } from "./data-card-types";
 import { withoutUndo } from "../../models/history/without-undo";
 import { IDefaultContentOptions, ITileExportOptions } from "../../models/tiles/tile-content-info";
@@ -10,10 +12,13 @@ import { TileContentModel } from "../../models/tiles/tile-content";
 import {
   addAttributeToDataSet, addCanonicalCasesToDataSet, addCasesToDataSet, DataSet
 } from "../../models/data/data-set";
-import { kSharedDataSetType, SharedDataSet, SharedDataSetType } from "../../models/shared/shared-data-set";
+import {
+  kSharedDataSetType, SharedDataSet, SharedDataSetType, UpdatedSharedDataSetIds
+} from "../../models/shared/shared-data-set";
 import { updateSharedDataSetColors } from "../../models/shared/shared-data-set-colors";
 import { SharedModelType } from "../../models/shared/shared-model";
 import { uniqueId, uniqueTitle } from "../../utilities/js-utils";
+import { PartialSharedModelEntry } from "../../models/document/document-content-types";
 
 export function defaultDataSet() {
   // as per slack discussion, default attribute is added automatically
@@ -239,3 +244,24 @@ export const DataCardContentModel = TileContentModel
   }));
 
 export interface DataCardContentModelType extends Instance<typeof DataCardContentModel> {}
+export type DataCardContentSnapshotType = SnapshotIn<typeof DataCardContentModel>;
+
+export function updateDataCardContentWithNewSharedModelIds(
+  content: DataCardContentSnapshotType,
+  sharedDataSetEntries: PartialSharedModelEntry[],
+  updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds>
+) {
+  const updatedContent = cloneDeep(content);
+  // Datacard content uses an attribute id for sorting, which has to be updated with new shared dataset ids
+  const oldAttributeId = content.selectedSortAttributeId;
+  sharedDataSetEntries.forEach(sharedDataSetEntry => {
+    const originalSharedDataSetId = sharedDataSetEntry.sharedModel.id;
+    if (originalSharedDataSetId) {
+      const attributeIdMap = updatedSharedModelMap[originalSharedDataSetId].attributeIdMap;
+      if (oldAttributeId && attributeIdMap[oldAttributeId]) {
+        updatedContent.selectedSortAttributeId = attributeIdMap[oldAttributeId];
+      }
+    }
+  });
+  return updatedContent;
+}
