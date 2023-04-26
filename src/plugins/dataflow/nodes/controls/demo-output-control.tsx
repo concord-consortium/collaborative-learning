@@ -171,9 +171,14 @@ export class DemoOutputControl extends Rete.Control {
   };
 
   private handleAnimationPhase() {
-    // if(!this.binaryAnimation.currentPhase){
-    //   return
-    // }
+
+    if(this.binaryAnimation.currentPhase === undefined) {
+      console.log("|> ❌ 1 HANDLE: what should we do if currentPhase is undefined?", this.binaryAnimation.currentPhase)
+    } else {
+      console.log("|> 😀 1 HANDLE: currentPhase is defined so all should go well now", this.binaryAnimation.currentPhase.name)
+    }
+
+   // console.log("|> 1 HANDLE: what should we do if currentPhase is undefined?", this.binaryAnimation.currentPhase)
 
     if (this.binaryAnimation.currentPhase.name === "rampUp") {
       console.log("|> 5 HANDLE: rampUp")
