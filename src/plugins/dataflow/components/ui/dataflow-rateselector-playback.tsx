@@ -32,7 +32,7 @@ function formatTime(seconds: number) {
 
 export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
   const { onRateSelectClick, readOnly, dataRate, rateOptions, programMode, isPlaying,
-          handleChangeIsPlaying, numNodes, handleChangeOfProgramMode: onRecordDataChange, tileContent } = props;
+          handleChangeIsPlaying, numNodes, handleChangeOfProgramMode, tileContent } = props;
 
   /* ==[ Total Recording Time  - Calculate] format as "MMM:SS" */
   const totalTimeSec = Math.floor((dataRate / 1000) * (totalSamples/numNodes));
@@ -119,7 +119,7 @@ export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
   }, [isPlaying, playBackIsFinished]);
 
   if(sliderSec.current === totalTimeSec && programMode === ProgramMode.Recording){
-    onRecordDataChange();
+    handleChangeOfProgramMode();
   }
 
   const railRef = useRef<HTMLDivElement>(null);

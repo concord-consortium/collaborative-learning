@@ -207,7 +207,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     // Time   |  Node 1 | Node 2 | Node 3 etc
     //    0   |   val    | val    |  val
     addAttributeToDataSet(tileContent.dataSet, { name: "Time (sec)" }); //time quantized to nearest sampling rate
-    let insertionOrder = 0;
+    let insertionOrder = 1;
     tileContent.program.nodes.forEach((n) => { //add attributes based on nodes in tile
       tileContent.addNewAttrFromNode(n.id, n.name, insertionOrder);
       insertionOrder ++;
