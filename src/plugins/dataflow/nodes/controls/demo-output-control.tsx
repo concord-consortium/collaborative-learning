@@ -1,7 +1,7 @@
 import React from "react";
 import Rete, { NodeEditor, Node } from "rete";
 import { lightBulbOn, lightBulbOff, grabberFrames, grabberPaddle,
-  advancedGrabberFrames, grabberChordFrames } from "./demo-output-control-assets";
+  advancedGrabberFrames, grabberCordFrames } from "./demo-output-control-assets";
 
 import "./demo-output-control.scss";
 
@@ -21,7 +21,7 @@ export class DemoOutputControl extends Rete.Control {
           const controlClassName = compProps.type === "Light Bulb" ? "lightbulb-control"
         : compProps.type === "Grabber" ? "grabber-control" : "advanced-grabber-control";
       const grabberFrame = this.getGrabberFrame(compProps.percentClosed);
-      const chordFrame = this.getChordFrame(compProps.percentTilt);
+      const cordFrame = this.getCordFrame(compProps.percentTilt);
       return (
         <div className={`demo-output-control ${controlClassName}`}>
           {compProps.type === "Light Bulb"
@@ -30,7 +30,7 @@ export class DemoOutputControl extends Rete.Control {
             ? <img src={ grabberFrames[grabberFrame] } className="demo-output-image grabber-image" />
             : <>
                 <img src={ grabberPaddle } className="demo-output-image grabber-paddle-image" />
-                <img src={ grabberChordFrames[chordFrame] } className="demo-output-image grabber-chord-image" />
+                <img src={ grabberCordFrames[cordFrame] } className="demo-output-image grabber-cord-image" />
                 <img
                   src={ advancedGrabberFrames[grabberFrame] }
                   className="demo-output-image advanced-grabber-image"
@@ -94,8 +94,8 @@ export class DemoOutputControl extends Rete.Control {
     return this.getFrame(percentClosed, advancedGrabberFrames.length);
   };
 
-  private getChordFrame = (percentTilt: number) => {
-    return this.getFrame(percentTilt, grabberChordFrames.length);
+  private getCordFrame = (percentTilt: number) => {
+    return this.getFrame(percentTilt, grabberCordFrames.length);
   };
 
   private getFrame = (percent: number, numFrames: number) => {

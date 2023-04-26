@@ -78,7 +78,7 @@ class DataflowToolTile {
   //Demo Output
   getAdvancedGrabberImages() {
     cy.get('.demo-output-image.grabber-paddle-image').should("exist");
-    cy.get('.demo-output-image.grabber-chord-image').should("exist");
+    cy.get('.demo-output-image.grabber-cord-image').should("exist");
     cy.get('.demo-output-image.advanced-grabber-image').should("exist");
   }
   getGrabberImage() {
