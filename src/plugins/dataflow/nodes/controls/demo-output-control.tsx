@@ -1,7 +1,13 @@
 import React from "react";
+import classNames from "classnames";
 import Rete, { NodeEditor, Node } from "rete";
-import { lightBulbOn, lightBulbOff, grabberFrames, grabberPaddle,
-  advancedGrabberFrames, grabberCordFrames } from "./demo-output-control-assets";
+import {
+  lightBulbOn, lightBulbOff, grabberFrames, grabberPaddle,
+  advancedGrabberFrames, grabberCordFrames,
+  fanHousing, fanMotor, fanFrames,
+  humidifier, humidAnimationPhases
+} from "./demo-output-control-assets";
+import { HumidiferAnimation } from "./humidifier-animation";
 
 import "./demo-output-control.scss";
 
@@ -18,25 +24,61 @@ export class DemoOutputControl extends Rete.Control {
     this.node = node;
 
     this.component = (compProps: {value: number, percentClosed: number, percentTilt: number, type: string}) => {
-          const controlClassName = compProps.type === "Light Bulb" ? "lightbulb-control"
-        : compProps.type === "Grabber" ? "grabber-control" : "advanced-grabber-control";
+      const controlClassName = classNames({
+        "lightbulb-control": compProps.type === "Light Bulb" || compProps.type === "Heat Lamp",
+        "advanced-grabber-control": compProps.type === "Advanced Grabber",
+        "grabber-control": compProps.type === "Grabber",
+        "humidifier-control": compProps.type === "Humidifier",
+        "fan-control": compProps.type === "Fan",
+      });
       const grabberFrame = this.getGrabberFrame(compProps.percentClosed);
       const cordFrame = this.getCordFrame(compProps.percentTilt);
       return (
         <div className={`demo-output-control ${controlClassName}`}>
-          {compProps.type === "Light Bulb"
-            ? <img src={ compProps.value ? lightBulbOn : lightBulbOff } className="demo-output-image lightbulb-image" />
-            : compProps.type === "Grabber"
-            ? <img src={ grabberFrames[grabberFrame] } className="demo-output-image grabber-image" />
-            : <>
-                <img src={ grabberPaddle } className="demo-output-image grabber-paddle-image" />
-                <img src={ grabberCordFrames[cordFrame] } className="demo-output-image grabber-cord-image" />
-                <img
-                  src={ advancedGrabberFrames[grabberFrame] }
-                  className="demo-output-image advanced-grabber-image"
-                  style={this.getGrabberRotateStyle(compProps.percentTilt)}
-                />
-              </>
+          { (compProps.type === "Light Bulb" || compProps.type === "Heat Lamp") &&
+            <img
+              src={ compProps.value ? lightBulbOn : lightBulbOff }
+              className="demo-output-image lightbulb-image"
+            />
+          }
+
+          { compProps.type === "Grabber" &&
+            <img
+              src={ grabberFrames[grabberFrame] }
+              className="demo-output-image grabber-image"
+            />
+          }
+
+          { compProps.type === "Advanced Grabber" &&
+            <>
+              <img
+                src={ grabberPaddle }
+                className="demo-output-image grabber-paddle-image"
+              />
+              <img
+                src={ grabberCordFrames[cordFrame] }
+                className="demo-output-image grabber-cord-image"
+              />
+              <img
+                src={ advancedGrabberFrames[grabberFrame] }
+                className="demo-output-image advanced-grabber-image"
+                style={this.getGrabberRotateStyle(compProps.percentTilt)}
+              />
+            </>
+          }
+
+          { compProps.type === "Humidifier" &&
+            <>
+                <HumidiferAnimation nodeValue={compProps.value}/>
+                {<img
+                  id="humidifier-base"
+                  src={humidifier}
+                />}
+            </>
+          }
+
+          { compProps.type === "Fan" &&
+            <span style={{ color: "white" }}>animation frame</span>
           }
         </div>
       );
