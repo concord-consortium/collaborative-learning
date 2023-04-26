@@ -4,7 +4,7 @@ export class BinaryStateChangeAnimation {
   private key: string;
   public currentPhase: AnimationPhase;
   public intervalId: any;
-  public currentFrameIndex: 0;
+  public currentFrameIndex: number = 0;
 
   constructor(str: string){
     this.key = str;
