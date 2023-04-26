@@ -207,8 +207,23 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     // Time   |  Node 1 | Node 2 | Node 3 etc
     //    0   |   val    | val    |  val
     addAttributeToDataSet(tileContent.dataSet, { name: "Time (sec)" }); //time quantized to nearest sampling rate
-    tileContent.program.nodes.forEach((n) => { //add attributes based on nodes in tile
-      tileContent.addNewAttrFromNode(n.id, n.name);
+
+    console.log("nodes:", tileContent.program.nodes);
+
+    //for loop method
+    // for (let i = 0; i < tileContent.program.nodes.size; i++){//add attributes based on nodes in tile
+    //   const key = i.toString();
+    //   console.log("key:", key);
+    //   // const node = tileContent.program.nodes[key];
+    //   // tileContent.addNewAttrFromNode(n.id, n.name, i);
+    // }
+    let size = 0;
+    tileContent.program.nodes.forEach((n, idx) => { //add attributes based on nodes in tile
+      console.log(n);
+      // console.log("idx:", idx);
+      // console.log("typeof idx:", typeof idx);
+      tileContent.addNewAttrFromNode(n.id, n.name, size);
+      size ++;
     });
   };
 
