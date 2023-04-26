@@ -46,8 +46,6 @@ jobs:
         working-directory: ./cms
         run: npm ci
       - uses: cypress-io/github-action@v4
-        env:
-            NODE_OPTIONS: "--max_old_space_size=4096"
         with:
           start: npm start
           wait-on: 'http://localhost:8080'
@@ -73,6 +71,8 @@ jobs:
           # Also turn on the code coverage tasks in cypress itself, these are disabled
           # by default.
           CYPRESS_coverage: true
+          # Increase memory allocation
+          NODE_OPTIONS: "--max_old_space_size=4096"
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
