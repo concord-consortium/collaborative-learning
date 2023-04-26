@@ -684,9 +684,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         updateRecordIndex(UpdateMode.Reset);
         break;
     }
-
-    console.log("--------tick--------");
-    console.log("dataSet:", dataSet);
   };
 
   private passSerialStateToChannel(sd: SerialDevice, channel: NodeChannelInfo){
