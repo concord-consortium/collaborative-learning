@@ -68,7 +68,7 @@
     "lint:unused": "tsc --noUnusedLocals --project .",
     "migrate": "node ./migrations/migrate",
     "migrate:debug": "node --inspect-brk ./migrations/migrate",
-    "postinstall": "patch-package && cd cms && npm install",
+    "postinstall": "patch-package",
     "serve": "npx serve -l 8080 dist",
     "serve:top-test": "npx http-server top-test",
     "start": "webpack-dev-server --hot",
