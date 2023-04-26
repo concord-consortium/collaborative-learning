@@ -1,7 +1,7 @@
 import React from "react";
 import { SizeMe, SizeMeProps } from "react-sizeme";
 import { observer, inject } from "mobx-react";
-import { DataflowProgram, ProgramMode, UpdateMode } from "./dataflow-program";
+import { DataflowProgram } from "./dataflow-program";
 import { BaseComponent } from "../../../components/base";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
@@ -14,6 +14,7 @@ import { ToolTitleArea } from "../../../components/tiles/tile-title-area";
 import { dataflowLogEvent } from "../dataflow-logger";
 import { addAttributeToDataSet } from "../../../models/data/data-set";
 import { DataflowLinkTableButton } from "./ui/dataflow-program-link-table-button";
+import { ProgramMode, UpdateMode } from "./types/dataflow-tile-types";
 
 import "./dataflow-tile.scss";
 
@@ -156,7 +157,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
 
   private renderTableLinkButton() {
     const { model, onRequestTilesOfType, documentId } = this.props;
-    const isLinkButtonEnabled = (this.determineProgramMode() === ProgramMode.Clear);
+    const isLinkButtonEnabled = (this.determineProgramMode() === ProgramMode.Done);
 
     const actionHandlers = {
                              handleRequestTableLink: this.handleRequestTableLink,
@@ -236,17 +237,16 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     };
 
     switch (programMode){
-      case ProgramMode.Record:
+      case ProgramMode.Ready:
         clearAttributes(); //clear X | Y attributes from previous state
         this.setState({isPlaying: false}); //reset isPlaying
         this.setState({isRecording: true});
         this.pairNodesToAttributes();
         break;
-      case ProgramMode.Stop:
+      case ProgramMode.Recording:
         this.setState({isRecording: false});
         break;
-      case ProgramMode.Clear:
-        // console.log("switch CLEAR");
+      case ProgramMode.Done:
         tileContent.setFormattedTime("000:00"); //set formattedTime to 000:00
         //clear the dataSet;
         clearAttributes();
@@ -259,20 +259,18 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   };
 
   private determineProgramMode = () => { //used to prop drill to children
-    // console.log("determineProgramMode");
-
     const { isRecording } = this.state;
     const tileContent = this.getContent();
-    if (!isRecording && tileContent.isEmptyDataSet){
-      return ProgramMode.Record;
+    if (!isRecording && tileContent.isDataSetEmptyCases){
+      return ProgramMode.Ready;
     }
     else if (isRecording){
-      return ProgramMode.Stop;
+      return ProgramMode.Recording;
     }
-    else if (!isRecording && !tileContent.isEmptyDataSet){
-     return ProgramMode.Clear;
+    else if (!isRecording && !tileContent.isDataSetEmptyCases){
+     return ProgramMode.Done;
     }
-    return ProgramMode.Record;
+    return ProgramMode.Ready;
   };
 
   private handleChangeIsPlaying = () => {

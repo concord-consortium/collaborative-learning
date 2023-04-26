@@ -41,6 +41,7 @@ import { SensorValueControl } from "../nodes/controls/sensor-value-control";
 import { InputValueControl } from "../nodes/controls/input-value-control";
 import { DemoOutputControl } from "../nodes/controls/demo-output-control";
 import { DropdownListControl } from "../nodes/controls/dropdown-list-control";
+import { ProgramMode, UpdateMode } from "./types/dataflow-tile-types";
 
 import "./dataflow-program.sass";
 interface NodeNameValuePair {
@@ -58,17 +59,6 @@ export interface IStartProgramParams {
   endTime: number;
   hasData: boolean;
   title: string;
-}
-
-export enum UpdateMode {
-  Increment = "Increment",
-  Reset = "Reset",
-}
-
-export enum ProgramMode {
-  Record,
-  Stop,
-  Clear
 }
 
 interface IProps extends SizeMeProps {
@@ -135,31 +125,38 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { readOnly, documentProperties, numNodes, tileContent} = this.props;
+    const { readOnly, documentProperties, numNodes, tileContent, programDataRate, onProgramDataRateChange,
+            isPlaying, handleChangeIsPlaying, onRecordDataChange, programMode} = this.props;
+
     const editorClassForDisplayState = "full";
     const editorClass = `editor ${editorClassForDisplayState}`;
     const toolbarEditorContainerClass = `toolbar-editor-container`;
     const isTesting = ["qa", "test"].indexOf(this.stores.appMode) >= 0;
     const showRateUI = ["qa", "test", "dev"].indexOf(this.stores.appMode) >= 0;
     const showZoomControl = !documentProperties?.dfHasData;
-    const showProgramToolbar = showZoomControl && !readOnly;
+    const disableToolBarModes = programMode === ProgramMode.Recording || programMode === ProgramMode.Done;
+    const showProgramToolbar = showZoomControl && !disableToolBarModes;
+
     return (
       <div className="dataflow-program-container">
         <DataflowProgramTopbar
           onSerialRefreshDevices={this.serialDeviceRefresh}
           programDataRates={ProgramDataRates}
-          dataRate={this.props.programDataRate}
-          onRateSelectClick={this.props.onProgramDataRateChange}
+          dataRate={programDataRate}
+          onRateSelectClick={onProgramDataRateChange}
           readOnly={!!readOnly}
           showRateUI={showRateUI}
           lastIntervalDuration={this.state.lastIntervalDuration}
           serialDevice={this.stores.serialDevice}
-          programMode={this.props.programMode}
-          isPlaying={this.props.isPlaying}
+          onRecordDataChange={onRecordDataChange}
+          programMode={programMode}
+
+          isPlaying={isPlaying}
+          handleChangeIsPlaying={handleChangeIsPlaying}
           numNodes={numNodes}
           tileContent={tileContent}
-          handleChangeOfProgramMode={this.props.handleChangeOfProgramMode}
-          handleChangeIsPlaying={this.props.handleChangeIsPlaying}
+          handleChangeOfProgramMode={handleChangeOfProgramMode}
+          handleChangeIsPlaying={handleChangeIsPlaying}
         />
         <div className={toolbarEditorContainerClass}>
           { showProgramToolbar && <DataflowProgramToolbar
@@ -432,7 +429,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   //disable the right side when recordingMode in stop or clear
   private disabledRecordingStates(){
     const { programMode } = this.props;
-    return ( programMode === ProgramMode.Stop || programMode === ProgramMode.Clear);
+    return ( programMode === ProgramMode.Recording || programMode === ProgramMode.Done);
   }
 
   private keepNodesInView = () => {
@@ -639,6 +636,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         this.updateNodeSensorValue(n);
       },
       "Live Output": (n: Node) => {
+        this.updateNodeChannelInfo(n);
         this.sendDataToSerialDevice(n);
       }
     };
@@ -674,15 +672,15 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.lastIntervalTime = now;
 
     switch (programMode){
-      case ProgramMode.Record:
+      case ProgramMode.Ready:
         this.updateNodes();
         break;
-      case ProgramMode.Stop:
+      case ProgramMode.Recording:
         if (!readOnly) this.recordCase(); //only record cases from right DF tiles
         this.updateNodes();
         updateRecordIndex(UpdateMode.Increment);
         break;
-      case ProgramMode.Clear:
+      case ProgramMode.Done:
         isPlaying && this.playbackNodesWithCaseData(dataSet, playBackIndex);
         isPlaying && updatePlayBackIndex(UpdateMode.Increment);
         !isPlaying && updatePlayBackIndex(UpdateMode.Reset);
@@ -746,7 +744,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const hubSelect = n.controls.get("hubSelect") as DropdownListControl;
       if (hubSelect.getChannels()){
         const relayType = hubSelect.getData("liveOutputType") as string;
-        const hubId = hubSelect.getValue().charAt(14);
+        const hubId = hubSelect.getSelectionId();
         const state = n.data.nodeValue as number;
         this.stores.serialDevice.writeToOutForMicroBitRelayHub(state, hubId, relayType );
       }
@@ -763,7 +761,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       Devices differ, but it may contain the words "usbserial" or "usbmodem"`;
 
     if (lastMsg !== "connect" && this.stores.serialDevice.serialNodesCount > 0){
-      alertMessage += `1. Connect the arduino to your computer.  2.${btnMsg}`;
+      alertMessage += `1. Connect the arduino or micro:bit to your computer.  2.${btnMsg}`;
     }
 
     // physical connection has been made but user action needed

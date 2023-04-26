@@ -10,10 +10,12 @@ import { ITileMetadataModel } from "../../../models/tiles/tile-metadata";
 import { tileModelHooks } from "../../../models/tiles/tile-model-hooks";
 import { TileContentModel } from "../../../models/tiles/tile-content";
 import { getTileModel, setTileTitleFromContent, getTileTitleFromContent } from "../../../models/tiles/tile-model";
-import { SharedDataSet, kSharedDataSetType, SharedDataSetType  } from "../../../models/shared/shared-data-set";
+import {
+  SharedDataSet, kSharedDataSetType, SharedDataSetType,
+} from "../../../models/shared/shared-data-set";
 import { updateSharedDataSetColors } from "../../../models/shared/shared-data-set-colors";
 import { SharedModelType } from "../../../models/shared/shared-model";
-import { addAttributeToDataSet, addCasesToDataSet, DataSet } from "../../../models/data/data-set";
+import { DataSet } from "../../../models/data/data-set";
 import { uniqueId } from "../../../utilities/js-utils";
 import { getTileContentById } from "../../../utilities/mst-utils";
 
@@ -28,8 +30,6 @@ export const kDefaultLabel = "Dataflow Node";
 
 export function defaultDataSet() {
   const dataSet = DataSet.create();
-  addAttributeToDataSet(dataSet, { name: kDefaultLabel });
-  addCasesToDataSet(dataSet, [{ [kDefaultLabel]: "" }]);
   return dataSet;
 }
 
@@ -112,11 +112,11 @@ export const DataflowContentModel = TileContentModel
         `}`
       ].join("\n");
     },
-    // ------ADDED---------------------------------
-    get isEmptyDataSet(){
+    get isDataSetEmptyCases(){
+      //Used when DF linked to a table, then we clear. Different than isEmpty
+      //Since there are two attributes X|Y for the default table, we only want to check if there are no cases
       return self.dataSet.cases.length === 0;
     },
-    // ------ END -----------------------------------
     get isLinked(){
       return self.linkedDataSets.length > 0;
     },

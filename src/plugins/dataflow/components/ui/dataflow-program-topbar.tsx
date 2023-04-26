@@ -45,7 +45,7 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
         <div className="topbar-center-container">
           <div className="topbar-blank-or-play">
             {
-              (programMode === ProgramMode.Stop || programMode === ProgramMode.Clear) &&
+              (programMode === ProgramMode.Recording || programMode === ProgramMode.Done) &&
               <PlaybackButton
                 isPlaying={isPlaying}
                 handleChangeIsPlaying={handleChangeIsPlaying}
@@ -157,7 +157,7 @@ const PlaybackButton = (props: IPlaybackProps) => {
     <div className="playback-btn-container">
       <button
         className="playback-data-btn"
-        disabled={programMode === ProgramMode.Stop}
+        disabled={programMode === ProgramMode.Recording}
         onClick={handleChangeIsPlaying}
       >
         <div className="playback-data-icon">

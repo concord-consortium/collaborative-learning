@@ -170,6 +170,10 @@ export class DropdownListControl extends Rete.Control {
     return this.props.value;
   };
 
+  public getSelectionId = () => {
+    return this.props.optionArray.find((opt: any) => optionValue(opt) === this.props.value).id;
+  };
+
   /**
    * Is passed a function that will check each list option to see if it should
    * be disabled

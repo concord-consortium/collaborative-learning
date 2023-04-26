@@ -3,7 +3,9 @@ import { NodeData } from "rete/types/core/data";
 import { DataflowReteNodeFactory } from "./dataflow-rete-node-factory";
 import { InputValueControl } from "../controls/input-value-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
-import { NodeLiveOutputTypes, NodeMicroBitHubs } from "../../model/utilities/node";
+import { NodeLiveOutputTypes, NodeMicroBitHubs,
+  kRelaysIndexed, kBinaryOutputTypes, kRoundedOutputTypes
+} from "../../model/utilities/node";
 import { dataflowLogEvent } from "../../dataflow-logger";
 import { NodeChannelInfo } from "../../model/utilities/channel";
 
@@ -11,6 +13,7 @@ interface HubStatus {
   id: string,
   missing: boolean
 }
+
 export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
   constructor(numSocket: Socket) {
     super("Live Output", numSocket);
@@ -30,9 +33,8 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   public worker(node: NodeData, inputs: any, outputs: any) {
-    // TODO & NOTE (CLAW) At the moment we take the input as soon as we can and send it to serial
-    // this updates the value of the node and then the default NodeProcess takes the data
-    // and sends it out via Serial.  It does not pass through any rete "output"
+    // This node type is a "live" output and does not output a value into a rete outputs
+    // Then the default NodeProcess takes the updated data and sends it out via Serial.
     const n1 = inputs.nodeValue.length ? inputs.nodeValue[0] : node.data.nodeValue;
     if (this.editor) {
       const _node = this.editor.nodes.find((n: { id: any; }) => n.id === node.id);
@@ -45,18 +47,18 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
         const nodeValue = _node.inputs.get("nodeValue")?.control as InputValueControl;
         let newValue = isNaN(n1) ? 0 : n1;
 
-        const binaryOutputTypes = ["Light Bulb", "Heat Lamp", "Fan", "Sprinkler"];
-
-        if (binaryOutputTypes.includes(outputType)){
+        if (kBinaryOutputTypes.includes(outputType)){
           newValue = isNaN(n1) ? 0 : +(n1 !== 0);
-          nodeValue?.setDisplayMessage(newValue === 0 ? "off" : "on");
+          const offOnString = newValue === 0 ? "off" : "on";
+          const displayMessage = kRelaysIndexed.includes(outputType)
+            ? `${offOnString} ${this.getRelayMessageReceived(_node)}` : offOnString;
+
+          nodeValue?.setDisplayMessage(displayMessage);
         }
 
-        if (outputType === "Grabber"){
+        if (kRoundedOutputTypes.includes(outputType)){
           newValue = this.getNewValueForGrabber(n1);
           const roundedDisplayValue = Math.round((newValue / 10) * 10);
-          // Swap commented/uncommented below to change to display of nearest 1%
-          // nodeValue?.setDisplayMessage(`${newValue}% closed`);
           nodeValue?.setDisplayMessage(`${roundedDisplayValue}% closed`);
         }
 
@@ -76,19 +78,42 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
     return parseInt((num * 100).toFixed(2), 10);
   }
 
-  private updateHubsStatusReport(n: Node){
-    // use existing missing state information to figure out & display if hub is active
-    const hubSelect = n.controls.get("hubSelect") as DropdownListControl;
-    const hubStatusArray: HubStatus[] = hubSelect.getChannels()
-      .filter((c: NodeChannelInfo) => c.type === "temperature" && c.deviceFamily === "microbit")
+  private getSelectedRelayIndex(node: Node){
+    const outputTypeControl = node.controls.get("liveOutputType") as DropdownListControl;
+    return kRelaysIndexed.indexOf(outputTypeControl.getValue());
+  }
+
+  private updateHubsStatusReport(node: Node){
+    const hubSelect = node.controls.get("hubSelect") as DropdownListControl;
+    const hubsChannels = hubSelect.getChannels();
+    if (!hubsChannels) return;
+    const hubStatusArray: HubStatus[] = hubsChannels
+      .filter((c: NodeChannelInfo) => c.deviceFamily === "microbit")
       .map((c: NodeChannelInfo) => {
-        return { id: c.channelId.charAt(2), missing: c.missing};
+        return {
+          id: c.microbitId,
+          missing: c.missing
+        };
       });
 
     hubStatusArray.forEach((s: HubStatus) => {
-      // "active" is !missing
       hubSelect.setActiveOption(s.id, !s.missing);
     });
+  }
+
+  private getHubRelaysChannel(node: Node){
+    const hubSelect = node.controls.get("hubSelect") as DropdownListControl;
+    const selectedHubIdentifier = hubSelect.getSelectionId();
+    const relayChannels = hubSelect.getChannels().filter((c: NodeChannelInfo) => c.type === "relays");
+    return relayChannels.find((c: NodeChannelInfo) => c.microbitId === selectedHubIdentifier);
+  }
+
+  private getRelayMessageReceived(node: Node) {
+    const hubRelaysChannel = this.getHubRelaysChannel(node);
+    if (!hubRelaysChannel || !hubRelaysChannel.relaysState) return "(no hub)";
+    const rIndex = this.getSelectedRelayIndex(node);
+    const reportedValue = hubRelaysChannel.relaysState[rIndex];
+    return reportedValue === node.data.nodeValue ? "(received)" : "(sent)";
   }
 
   // TODO IMPROVEMENT - this is a duplicate method - abstract for all factories?
@@ -130,6 +155,5 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
       node.removeInput(input);
     }
   }
-
 }
 

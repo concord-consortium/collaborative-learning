@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 import Slider from "rc-slider";
 import { ProgramDataRate } from "../../model/utilities/node";
 import { DataflowContentModelType } from "../../model/dataflow-content";
+import { ProgramMode } from "../types/dataflow-tile-types";
 
 import "./dataflow-rateselector-playback.scss";
 
@@ -54,16 +55,13 @@ export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
   const playBackFormattedTime = `${playBackFormattedMin}:${playBackFormattedSec}`;
 
   /* ==[ Timer - Enable ] == */
-  const timerRunning = numNodes > 0 && sliderSec.current < totalTimeSec && (programMode === 1);
+  const timerRunning = numNodes > 0 && sliderSec.current < totalTimeSec && (programMode === ProgramMode.Recording);
   const playBackTimerRunning = !timerRunning && isPlaying;
-
   const playBackIsFinished = (playBackTimerSec.current === timerSec.current) && (playBackTimerSec.current !== 0);
 
-  //after you've hit is playing, or when you've paused (!isPlaying) and its not done yet, and you're in clear state
-  const condition = (playBackTimerRunning || ((!isPlaying) && (!playBackIsFinished) && programMode === 2))
-  || playBackIsFinished;
-
   /* ==[ Slider Max Value ] == */
+  const condition = (playBackTimerRunning || (!isPlaying && !playBackIsFinished && programMode === ProgramMode.Done))
+  || playBackIsFinished;
   let sliderMaxValue = condition ? timerSec.current : totalTimeSec;
 
   /* ==[ Timer for Play, Timer for Playback ] == */
@@ -95,12 +93,12 @@ export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
   /* ==[ Stop Mode - Reset slider and counter to 0 ] == */
   useEffect(()=>{
     /* ==[ Timer - Reset ] == */
-    if (programMode === 0) {
+    if (programMode === ProgramMode.Ready) {
       timerSec.current = 0;
       timerMin.current = 0;
       sliderSec.current = 0;
     }
-    if (programMode === 2){
+    if (programMode === ProgramMode.Done){
       playBackTimerSec.current = 0;
       sliderSec.current = 0;
     }
@@ -120,7 +118,7 @@ export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
     }
   }, [isPlaying, playBackIsFinished]);
 
-  if(sliderSec.current === totalTimeSec && programMode === 1){
+  if(sliderSec.current === totalTimeSec && programMode === ProgramMode.Recording){
     onRecordDataChange();
   }
 
@@ -129,13 +127,14 @@ export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
   const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     onRateSelectClick(Number(event.target.value));
   };
+
   /* ==[ For Refresh -  Store Value Into Model ] == */
-  if (programMode === 1 ){ //write into model to keep value upon refresh
+  if (programMode === ProgramMode.Recording ){ //write into model to keep value upon refresh
     tileContent.setFormattedTime(formattedTime);
   }
   /* ==[ For Refresh -  Reset sliderMaxValue] == */
   //TODO: figure out a more efficient way to do this
-  if (tileContent.formattedTime !== "000:00" && programMode === 2){
+  if (tileContent.formattedTime !== "000:00" && programMode === ProgramMode.Done){
     sliderMaxValue = stringToSeconds(tileContent.formattedTime) + 1;
     timerSec.current = sliderMaxValue;
   }
@@ -179,7 +178,7 @@ export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
             numNodes > 0 &&
             <div className="countdown-timer">
               {
-                programMode === 1 ? `${formattedTime} / ${totalTimeFormatted}`
+                programMode === ProgramMode.Recording ? `${formattedTime} / ${totalTimeFormatted}`
                 : `${playBackFormattedTime}/${tileContent.formattedTime}` //store formattedTime upon refresh =
               }
             </div>
@@ -190,7 +189,7 @@ export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
   );
 };
 
-//used to go back from "MMM:SS" -> number of seconds
+//convert "MMM:SS" -> number of seconds
 const stringToSeconds = (formattedTime: string) => {
     const [minutes, seconds] = formattedTime.split(':');
     const numMinutes = parseInt(minutes, 10);
