@@ -306,7 +306,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       });
 
       this.programEditor.on("nodecreated", node => {
-        console.log("| 1 NODECREATED")
+        //console.log("| 1 NODECREATED")
         this.processAndSave();
         this.moveNodeToFront(node, true);
         node.meta.inTileWithId = this.props.tileId;

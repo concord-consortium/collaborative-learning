@@ -25,7 +25,7 @@ export class DemoOutputControl extends Rete.Control {
     this.node = node;
     this.binaryAnimation = binaryAnimation;
 
-    console.log("| 3 DemoOutputControl constructor")
+    // console.log("| 3 DemoOutputControl constructor")
 
     this.component = (compProps: {value: number, percentClosed: number, percentTilt: number, type: string}) => {
       const controlClassName = classNames({
@@ -84,6 +84,7 @@ export class DemoOutputControl extends Rete.Control {
                   id="humidifier-base"
                   src={humidifier}
                 />}
+                { this.handleAnimationPhase()}
             </>
           }
 
@@ -168,4 +169,42 @@ export class DemoOutputControl extends Rete.Control {
     const transform = `rotate(${degrees}deg)`;
     return { transform };
   };
+
+  private handleAnimationPhase() {
+    console.log("|", this.binaryAnimation.currentPhase.name, this.binaryAnimation.intervalId)
+
+    if (this.binaryAnimation.currentPhase.name === "rampUp") {
+      console.log("|> 5 HANDLE: rampUp")
+      if (this.binaryAnimation.intervalId === null) {
+        this.binaryAnimation.playFrames(humidAnimationPhases.rampUp.frames);
+        setTimeout(() => { this.binaryAnimation.startLooping(); }, 400);
+      }
+    }
+
+    if (this.binaryAnimation.currentPhase.name === "rampDown") {
+      console.log("|> 5 HANDLE: rampDown")
+      if (this.binaryAnimation.intervalId !== null) {
+        this.binaryAnimation.stopLooping();
+        this.binaryAnimation.playFrames(humidAnimationPhases.rampDown.frames);
+      }
+    }
+
+    if (this.binaryAnimation.currentPhase.name === "stayOn") {
+      console.log("|> 5 HANDLE: stayOn")
+      if (this.binaryAnimation.intervalId === null) {
+        // this.binaryAnimation.playFrames(humidAnimationPhases.rampUp.frames);
+        // setTimeout(() => { this.binaryAnimation.startLooping(); }, 400);
+        this.binaryAnimation.startLooping();
+      }
+    }
+
+    if (this.binaryAnimation.currentPhase.name === "stayOff") {
+      console.log("|> 5 HANDLE: stayOff")
+      if (this.binaryAnimation.intervalId !== null) {
+        this.binaryAnimation.stopLooping();
+        //this.binaryAnimation.playFrames(humidAnimationPhases.rampDown.frames);
+      }
+    }
+  }
+
 }
