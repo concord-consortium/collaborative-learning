@@ -25,6 +25,8 @@ export class DemoOutputControl extends Rete.Control {
     this.node = node;
     this.binaryAnimation = binaryAnimation;
 
+    console.log("| 3 DemoOutputControl constructor")
+
     this.component = (compProps: {value: number, percentClosed: number, percentTilt: number, type: string}) => {
       const controlClassName = classNames({
         "lightbulb-control": compProps.type === "Light Bulb" || compProps.type === "Heat Lamp",

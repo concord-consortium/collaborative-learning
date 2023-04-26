@@ -24,8 +24,9 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
   public binaryAnimation: BinaryStateChangeAnimation | undefined;
 
   constructor(numSocket: Socket) {
+    console.log("| 1 DemoOutputReteNodeFactor constructor is zero-ing out the animation object?")
     super("Demo Output", numSocket);
-    this.binaryAnimation = new BinaryStateChangeAnimation("demo-output-control"); // ANIMATION - make unique or skip
+    this.binaryAnimation = new BinaryStateChangeAnimation("demo-output-control");
   }
 
   public builder(node: Node) {
@@ -40,7 +41,7 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
       if (node.data.outputType === "Grabber") {
         this.setupGrabberInputs(node);
       }
-
+      console.log("| 2 builder")
       node.data.targetClosed = 0;
       node.data.currentClosed = node.data.targetClosed;
       node.data.targetTilt = 0;
