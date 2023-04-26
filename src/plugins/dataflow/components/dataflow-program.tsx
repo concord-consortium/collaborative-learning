@@ -155,10 +155,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         />
         <div className={toolbarEditorContainerClass}>
           { showProgramToolbar && <DataflowProgramToolbar
-            onNodeCreateClick={this.addNode}
-            onClearClick={this.clearProgram}
-            isTesting={isTesting}
             disabled={!!readOnly}
+            isTesting={isTesting}
+            onClearClick={this.clearProgram}
+            onNodeCreateClick={this.addNode}
+            tileId={this.props.tileId}
           /> }
           <div
             className="editor-graph-container"

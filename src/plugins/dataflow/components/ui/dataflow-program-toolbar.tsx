@@ -1,11 +1,11 @@
 import React from "react";
 import { DragEndEvent, DragOverlay, useDndMonitor, useDraggable, useDroppable } from "@dnd-kit/core";
 
-import { kNewNodeButtonDraggableId, kNewNodeButtonDroppableId } from "../dataflow-types";
+import { getNodeType, isNodeDraggableId, nodeDraggableId, nodeDroppableId } from "../dataflow-types";
 import { NodeType, NodeTypes } from "../../model/utilities/node";
 import { useUIStore } from "../../../../hooks/use-stores";
 
-import "./dataflow-program-toolbar.sass";
+import "./dataflow-program-toolbar.scss";
 
 interface INodeIconProps {
   i: number;
@@ -38,8 +38,11 @@ const NodeIcon = ({ i, nodeType }: INodeIconProps) => {
       break;
   }
   return (
-    <div className={iconClass}>
-      {nodeIcons}
+    <div className="node-icon">
+      <div className={iconClass}>
+        {nodeIcons}
+      </div>
+      <div className="label">{nodeType}</div>
     </div>
   );
 };
@@ -49,19 +52,17 @@ interface IAddNodeButtonProps {
   i: number;
   nodeType: string;
   onNodeCreateClick: (type: string) => void;
+  tileId: string;
 }
-const AddNodeButton = ({ disabled, i, nodeType, onNodeCreateClick }: IAddNodeButtonProps) => {
-  const ui = useUIStore();
-  // const draggableId = `${kNewNodeButtonDraggableId}-${nodeType}-${tileId}`;
-  const draggableId = `${kNewNodeButtonDraggableId}-${nodeType}`;
+const AddNodeButton = ({ disabled, i, nodeType, onNodeCreateClick, tileId }: IAddNodeButtonProps) => {
+  const draggableId = nodeDraggableId(nodeType, tileId);
   const { attributes, listeners, setNodeRef } = useDraggable({ id: draggableId });
 
   const handleAddNodeButtonClick = () => { onNodeCreateClick(nodeType); };
   
   // Because the button is draggable, it can no longer be clicked.
   // Instead, we check to see if it's dropped on itself, and if it is we "click" it.
-  // const droppableId = `${kNewNodeButtonDroppableId}-${nodeType}-${tileId}`;
-  const droppableId = `${kNewNodeButtonDroppableId}-${nodeType}`;
+  const droppableId = nodeDroppableId(nodeType, tileId);
   const droppableInfo = useDroppable({ id: droppableId });
   const setDroppableNodeRef = droppableInfo.setNodeRef;
   useDndMonitor({
@@ -82,35 +83,42 @@ const AddNodeButton = ({ disabled, i, nodeType, onNodeCreateClick }: IAddNodeBut
           onClick={handleAddNodeButtonClick}
         >
           <NodeIcon i={i} nodeType={nodeType} />
-          <div className="label">{nodeType}</div>
         </button>
       </div>
-      <DragOverlay>
-        { ui.dragId === draggableId.toString()
-          ? <NodeIcon i={i} nodeType={nodeType} />
-          : null }
-      </DragOverlay>
     </div>
   );
 };
 
 interface IProps {
-  onNodeCreateClick: (type: string) => void;
-  onClearClick: () => void;
-  isTesting: boolean;
   disabled: boolean;
+  isTesting: boolean;
+  onClearClick: () => void;
+  onNodeCreateClick: (type: string) => void;
+  tileId: string;
 }
-export const DataflowProgramToolbar = ({ onNodeCreateClick, onClearClick, isTesting, disabled }: IProps) => (
-  <div className="program-toolbar" data-test="program-toolbar">
-    { NodeTypes.map((nt: NodeType, i: number) => (
-      <AddNodeButton
-        disabled={disabled}
-        i={i}
-        key={nt.name}
-        nodeType={nt.name}
-        onNodeCreateClick={onNodeCreateClick}
-      />
-    ))}
-    { isTesting && <button className="qa" onClick={ onClearClick }>Clear</button> }
-  </div>
-);
+export const DataflowProgramToolbar = ({ disabled, isTesting, onClearClick, onNodeCreateClick, tileId }: IProps) => {
+  const ui = useUIStore();
+  let dragOverlay = null;
+  if (ui.dragId && isNodeDraggableId(ui.dragId)) {
+    dragOverlay = <NodeIcon i={0} nodeType={getNodeType(ui.dragId) || ""} />;
+  }
+  
+  return (
+    <div className="program-toolbar" data-test="program-toolbar">
+      { NodeTypes.map((nt: NodeType, i: number) => (
+        <AddNodeButton
+          disabled={disabled}
+          i={i}
+          key={nt.name}
+          nodeType={nt.name}
+          onNodeCreateClick={onNodeCreateClick}
+          tileId={tileId}
+        />
+      ))}
+      <DragOverlay>
+        { dragOverlay }
+      </DragOverlay>
+      { isTesting && <button className="qa" onClick={ onClearClick }>Clear</button> }
+    </div>
+  );
+};
