@@ -165,6 +165,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           <DataflowDropZone
             addNode={this.addNode}
             className="editor-graph-container"
+            programEditor={this.programEditor}
             style={this.getEditorStyle}
             tileId={this.props.tileId}
           >
@@ -475,10 +476,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     return bounds;
   }
 
-  private addNode = async (nodeType: string) => {
+  private addNode = async (nodeType: string, position?: [number, number]) => {
     const nodeFactory = this.programEditor.components.get(nodeType) as DataflowReteNodeFactory;
     const n1 = await nodeFactory!.createNode();
-    n1.position = this.getNewNodePosition();
+    n1.position = position ?? this.getNewNodePosition();
     this.programEditor.addNode(n1);
   };
 
