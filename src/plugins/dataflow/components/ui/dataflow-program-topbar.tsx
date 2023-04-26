@@ -9,7 +9,7 @@ import PauseIcon from "../../assets/topbar-buttons/pause-icon.svg";
 import ClearIcon from "../../assets/topbar-buttons/clear-icon.svg";
 import { DataflowSerialConnectButton } from "./dataflow-serial-connect-button";
 import { DataflowContentModelType } from "../../model/dataflow-content";
-import { ProgramMode } from "../dataflow-program";
+import { ProgramMode } from "../types/dataflow-tile-types";
 import { useCautionAlert } from "../../../../components/utilities/use-caution-alert";
 
 import "./dataflow-program-topbar.scss";

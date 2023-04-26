@@ -126,7 +126,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   public render() {
     const { readOnly, documentProperties, numNodes, tileContent, programDataRate, onProgramDataRateChange,
-            isPlaying, handleChangeIsPlaying, onRecordDataChange, programMode} = this.props;
+            isPlaying, handleChangeIsPlaying, handleChangeOfProgramMode, programMode} = this.props;
 
     const editorClassForDisplayState = "full";
     const editorClass = `editor ${editorClassForDisplayState}`;
@@ -148,15 +148,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           showRateUI={showRateUI}
           lastIntervalDuration={this.state.lastIntervalDuration}
           serialDevice={this.stores.serialDevice}
-          onRecordDataChange={onRecordDataChange}
           programMode={programMode}
-
           isPlaying={isPlaying}
           handleChangeIsPlaying={handleChangeIsPlaying}
           numNodes={numNodes}
           tileContent={tileContent}
           handleChangeOfProgramMode={handleChangeOfProgramMode}
-          handleChangeIsPlaying={handleChangeIsPlaying}
         />
         <div className={toolbarEditorContainerClass}>
           { showProgramToolbar && <DataflowProgramToolbar
