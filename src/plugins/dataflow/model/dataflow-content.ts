@@ -10,10 +10,12 @@ import { ITileMetadataModel } from "../../../models/tiles/tile-metadata";
 import { tileModelHooks } from "../../../models/tiles/tile-model-hooks";
 import { TileContentModel } from "../../../models/tiles/tile-content";
 import { getTileModel, setTileTitleFromContent, getTileTitleFromContent } from "../../../models/tiles/tile-model";
-import { SharedDataSet, kSharedDataSetType, SharedDataSetType  } from "../../../models/shared/shared-data-set";
+import {
+  SharedDataSet, kSharedDataSetType, SharedDataSetType,
+} from "../../../models/shared/shared-data-set";
 import { updateSharedDataSetColors } from "../../../models/shared/shared-data-set-colors";
 import { SharedModelType } from "../../../models/shared/shared-model";
-import { addAttributeToDataSet, addCasesToDataSet, DataSet } from "../../../models/data/data-set";
+import { DataSet } from "../../../models/data/data-set";
 import { uniqueId } from "../../../utilities/js-utils";
 import { getTileContentById } from "../../../utilities/mst-utils";
 
@@ -28,8 +30,6 @@ export const kDefaultLabel = "Dataflow Node";
 
 export function defaultDataSet() {
   const dataSet = DataSet.create();
-  addAttributeToDataSet(dataSet, { name: kDefaultLabel });
-  addCasesToDataSet(dataSet, [{ [kDefaultLabel]: "" }]);
   return dataSet;
 }
 
@@ -48,6 +48,7 @@ export const DataflowContentModel = TileContentModel
     program: types.optional(DataflowProgramModel, getSnapshot(DataflowProgramModel.create())),
     programDataRate: DEFAULT_DATA_RATE,
     programZoom: types.optional(ProgramZoom, DEFAULT_PROGRAM_ZOOM),
+    formattedTime: "000:00"
   })
   .volatile(self => ({
     metadata: undefined as any as ITileMetadataModel,
@@ -79,6 +80,7 @@ export const DataflowContentModel = TileContentModel
     get dataSet(){
       return self.sharedModel?.dataSet || self.emptyDataSet;
     },
+
     get linkedDataSets(): SharedDataSetType[] {
       const sharedModelManager = self.tileEnv?.sharedModelManager;
       const foundSharedModels = sharedModelManager?.isReady
@@ -105,9 +107,15 @@ export const DataflowContentModel = TileContentModel
         `    "dy": ${zoom.dy},`,
         `    "scale": ${zoom.scale}`,
         `  },`,
+        // `  "programRecordingMode: ${self.programRecordingMode}"`,
         `  "program": ${stringify(self.programWithoutRecentValues())}`,
         `}`
       ].join("\n");
+    },
+    get isDataSetEmptyCases(){
+      //Used when DF linked to a table, then we clear. Different than isEmpty
+      //Since there are two attributes X|Y for the default table, we only want to check if there are no cases
+      return self.dataSet.cases.length === 0;
     },
     get isLinked(){
       return self.linkedDataSets.length > 0;
@@ -154,11 +162,9 @@ export const DataflowContentModel = TileContentModel
             const dataSet = defaultDataSet();
             sharedDataSet = SharedDataSet.create({ providerId: self.metadata.id, dataSet });
           }
-
           // Add the shared model to both the document and the tile
           sharedModelManager.addTileSharedModel(self, sharedDataSet);
         }
-
         // update the colors
         const dataSets = sharedModelManager.getSharedModelsByType(kSharedDataSetType) as SharedDataSetType[];
         updateSharedDataSetColors(dataSets);
@@ -181,44 +187,18 @@ export const DataflowContentModel = TileContentModel
       self.programZoom.dy = dy;
       self.programZoom.scale = scale;
     },
+    setFormattedTime(formattedTime: string){
+      self.formattedTime = formattedTime;
+    },
     updateAfterSharedModelChanges(sharedModel?: SharedModelType){
       //do nothing
     },
-    addNewAttrFromNode(nodeId: number, nodeName: string){
-      //if already an attribute with the same nodeId do nothing, else write
-      const dataSetAttributes = self.dataSet.attributes;
-      let foundFlag = false;
-
-      for (let i = 0; i < Object.keys(dataSetAttributes).length ; i++){ //look in dataSet.attributes for each Id
-        const idInDataSet = dataSetAttributes[i].id;
-        const index = idInDataSet.indexOf("*");
-        const stringAfterIndex = idInDataSet.substring(index+1);
-        if (nodeId.toString() === stringAfterIndex)foundFlag = true;
-      }
-
-      if (!foundFlag) {
-        const newAttributeId = uniqueId() + "*" + nodeId;
-        self.dataSet.addAttributeWithID({
-          id: newAttributeId,
-          name: `${nodeName}_${nodeId}`
-        });
-      }
-    },
-    // this may be implemented if we change to preserve attributes accross runs
-    removeAttributesInDatasetMissingInTile(attribute: string){
-      const index = attribute.indexOf("*");
-      const stringAfterIndex = attribute.substring(index + 1);
-      let foundFlag = false;
-      const { nodes } = getSnapshot(self.program);
-      const castedNodes = nodes as Record<string, any>;
-      const castedNodesIdArr = Object.keys(castedNodes);
-      for (let i = 0; i < castedNodesIdArr.length; i++){
-        const idInTile = castedNodesIdArr[i];
-        if (idInTile === stringAfterIndex) foundFlag = true;
-      }
-      if (!foundFlag){
-        self.dataSet.removeAttribute(attribute);
-      }
+    addNewAttrFromNode(nodeId: number, nodeName: string, idx: number){
+      const newAttributeId = uniqueId() + "*" + nodeId;
+      self.dataSet.addAttributeWithID({
+        id: newAttributeId,
+        name: `${nodeName} ${idx}`
+      });
     },
     addLinkedTable(tableId: string) {  //tableID is table we linked it to
       const sharedModelManager = self.tileEnv?.sharedModelManager;
@@ -245,7 +225,6 @@ export const DataflowContentModel = TileContentModel
         self.sharedModel && sharedModelManager.removeTileSharedModel(tableTileContents, self.sharedModel);
         //create a dataSet with two attributes with X / Y, link table tile to this dataSet
         const title = tableTileContents ? getTileTitleFromContent(tableTileContents) : undefined;
-
         const newDataSet = createDefaultDataSet(title);
         const newSharedDataSet = newDataSet && SharedDataSet.create({ providerId: tableId, dataSet: newDataSet });
         sharedModelManager.addTileSharedModel(tableTileContents, newSharedDataSet);

@@ -21,9 +21,9 @@ const TextContent: React.FC<ITextProps> = ({ content }) => {
   return <p>{content}</p>;
 };
 
-export const useCautionAlert = ({
-  className, title, content, confirmLabel, cancelLabel, onConfirm, onClose
-}: IProps) => {
+export const useCautionAlert = (props: IProps) => {
+  const { className, title, content, confirmLabel, cancelLabel, onConfirm, onClose } = props;
+
 
   const Content = typeof content === "string"
                     ? TextContent

@@ -45,7 +45,7 @@ context('Dataflow Tool Tile', function () {
         dataflowToolTile.getNumberField().should("have.value", "3");
       });
 
-      //TO DO: write a test that can check min and max (should be 0 and 3)
+      //TODO: write a test that can check min and max (should be 0 and 3)
       // could be in class .chartjs-size-monitor
 
       it("can click zoom in positive button", () => {

@@ -41,6 +41,7 @@ import { SensorValueControl } from "../nodes/controls/sensor-value-control";
 import { InputValueControl } from "../nodes/controls/input-value-control";
 import { DemoOutputControl } from "../nodes/controls/demo-output-control";
 import { DropdownListControl } from "../nodes/controls/dropdown-list-control";
+import { ProgramMode, UpdateMode } from "./types/dataflow-tile-types";
 
 import "./dataflow-program.sass";
 interface NodeNameValuePair {
@@ -60,11 +61,6 @@ export interface IStartProgramParams {
   title: string;
 }
 
-export enum UpdateMode {
-  Increment = "Increment",
-  Reset = "Reset",
-}
-
 interface IProps extends SizeMeProps {
   readOnly?: boolean;
   documentProperties?: { [key: string]: string };
@@ -77,17 +73,17 @@ interface IProps extends SizeMeProps {
   tileHeight?: number;
   tileId: string;
   //state
-  programRecordState: number;
+  programMode: ProgramMode;
   isPlaying: boolean;
   playBackIndex: number;
   recordIndex: number;
   //state handlers
-  onRecordDataChange: () => void;
+  handleChangeOfProgramMode: () => void;
   handleChangeIsPlaying: () => void;
   updatePlayBackIndex: (update: string) => void;
   updateRecordIndex: (update: string) => void;
   numNodes: number;
-  tileModel: DataflowContentModelType;
+  tileContent: DataflowContentModelType;
 }
 
 interface IState {
@@ -125,33 +121,39 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       lastIntervalDuration: 0,
     };
     this.lastIntervalTime = Date.now();
+
   }
 
   public render() {
-    const { readOnly, documentProperties, numNodes} = this.props;
+    const { readOnly, documentProperties, numNodes, tileContent, programDataRate, onProgramDataRateChange,
+            isPlaying, handleChangeIsPlaying, handleChangeOfProgramMode, programMode} = this.props;
+
     const editorClassForDisplayState = "full";
     const editorClass = `editor ${editorClassForDisplayState}`;
     const toolbarEditorContainerClass = `toolbar-editor-container`;
     const isTesting = ["qa", "test"].indexOf(this.stores.appMode) >= 0;
     const showRateUI = ["qa", "test", "dev"].indexOf(this.stores.appMode) >= 0;
     const showZoomControl = !documentProperties?.dfHasData;
-    const showProgramToolbar = showZoomControl && !readOnly;
+    const disableToolBarModes = programMode === ProgramMode.Recording || programMode === ProgramMode.Done;
+    const showProgramToolbar = showZoomControl && !disableToolBarModes;
+
     return (
       <div className="dataflow-program-container">
         <DataflowProgramTopbar
           onSerialRefreshDevices={this.serialDeviceRefresh}
           programDataRates={ProgramDataRates}
-          dataRate={this.props.programDataRate}
-          onRateSelectClick={this.props.onProgramDataRateChange}
+          dataRate={programDataRate}
+          onRateSelectClick={onProgramDataRateChange}
           readOnly={!!readOnly}
           showRateUI={showRateUI}
           lastIntervalDuration={this.state.lastIntervalDuration}
           serialDevice={this.stores.serialDevice}
-          onRecordDataChange={this.props.onRecordDataChange}
-          programRecordState={this.props.programRecordState}
-          isPlaying={this.props.isPlaying}
-          handleChangeIsPlaying={this.props.handleChangeIsPlaying}
+          programMode={programMode}
+          isPlaying={isPlaying}
+          handleChangeIsPlaying={handleChangeIsPlaying}
           numNodes={numNodes}
+          tileContent={tileContent}
+          handleChangeOfProgramMode={handleChangeOfProgramMode}
         />
         <div className={toolbarEditorContainerClass}>
           { showProgramToolbar && <DataflowProgramToolbar
@@ -428,7 +430,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private shouldShowProgramCover() {
-    return this.props.readOnly;
+    return this.props.readOnly || this.disabledRecordingStates();
+  }
+
+  //disable the right side when recordingMode in stop or clear
+  private disabledRecordingStates(){
+    const { programMode } = this.props;
+    return ( programMode === ProgramMode.Recording || programMode === ProgramMode.Done);
   }
 
   private keepNodesInView = () => {
@@ -552,7 +560,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private recordCase = () => {
     const { recordIndex } = this.props;
-    const { programDataRate, dataSet } = this.props.tileModel; //grab the program Sampling Rate to write TimeQuantized
+    const { programDataRate, dataSet } = this.props.tileContent; //grab the program Sampling Rate to write TimeQuantized
 
     //Write case
     //Attributes look like  Time (quantized) as col 1 followed by all nodes
@@ -568,11 +576,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const key = this.getAttributeIdForNode(idx);
       aCase[key] = node.data.nodeValue as string;
     });
-    addCanonicalCasesToDataSet(this.props.tileModel.dataSet, [aCase]);
+    addCanonicalCasesToDataSet(this.props.tileContent.dataSet, [aCase]);
   };
 
   private getAttributeIdForNode = (nodeIndex: number) => {
-    const { dataSet } = this.props.tileModel;
+    const { dataSet } = this.props.tileContent;
     // this function adds one to index to skip time attribute
     return dataSet.attributes[nodeIndex + 1].id;
   };
@@ -662,32 +670,29 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private tick = () => {
-    const {tileModel, playBackIndex, programRecordState, isPlaying,
-      updateRecordIndex, updatePlayBackIndex } = this.props;
+    const { readOnly, tileContent: tileModel, playBackIndex, programMode,
+            isPlaying, updateRecordIndex, updatePlayBackIndex } = this.props;
+
     const dataSet = tileModel.dataSet;
     const now = Date.now();
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});
     this.lastIntervalTime = now;
 
-    const isCleared = programRecordState === 0;
-    const isRecording = programRecordState === 1;
-    const isRecorded = programRecordState === 2;
-
-    if (isCleared){
-      this.updateNodes();
-    }
-
-    if (isRecording){
-      this.recordCase();
-      this.updateNodes();
-      updateRecordIndex(UpdateMode.Increment);
-    }
-
-    if (isRecorded){
-      isPlaying && this.playbackNodesWithCaseData(dataSet, playBackIndex);
-      isPlaying && updatePlayBackIndex(UpdateMode.Increment);
-      !isPlaying && updatePlayBackIndex(UpdateMode.Reset);
-      updateRecordIndex(UpdateMode.Reset);
+    switch (programMode){
+      case ProgramMode.Ready:
+        this.updateNodes();
+        break;
+      case ProgramMode.Recording:
+        if (!readOnly) this.recordCase(); //only record cases from right DF tiles
+        this.updateNodes();
+        updateRecordIndex(UpdateMode.Increment);
+        break;
+      case ProgramMode.Done:
+        isPlaying && this.playbackNodesWithCaseData(dataSet, playBackIndex);
+        isPlaying && updatePlayBackIndex(UpdateMode.Increment);
+        !isPlaying && updatePlayBackIndex(UpdateMode.Reset);
+        updateRecordIndex(UpdateMode.Reset);
+        break;
     }
   };
 
