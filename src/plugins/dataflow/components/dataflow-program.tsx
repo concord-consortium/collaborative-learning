@@ -125,30 +125,34 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { readOnly, documentProperties, numNodes, tileContent} = this.props;
+    const { readOnly, documentProperties, numNodes, tileContent, programDataRate, onProgramDataRateChange,
+            isPlaying, handleChangeIsPlaying, onRecordDataChange, programMode} = this.props;
+
     const editorClassForDisplayState = "full";
     const editorClass = `editor ${editorClassForDisplayState}`;
     const toolbarEditorContainerClass = `toolbar-editor-container`;
     const isTesting = ["qa", "test"].indexOf(this.stores.appMode) >= 0;
     const showRateUI = ["qa", "test", "dev"].indexOf(this.stores.appMode) >= 0;
     const showZoomControl = !documentProperties?.dfHasData;
-    const showProgramToolbar = showZoomControl && !readOnly;
+    const disableToolBarModes = programMode === ProgramMode.Recording || programMode === ProgramMode.Done;
+    const showProgramToolbar = showZoomControl && !disableToolBarModes;
+
     return (
       <div className="dataflow-program-container">
         <DataflowProgramTopbar
           onSerialRefreshDevices={this.serialDeviceRefresh}
           programDataRates={ProgramDataRates}
-          dataRate={this.props.programDataRate}
-          onRateSelectClick={this.props.onProgramDataRateChange}
+          dataRate={programDataRate}
+          onRateSelectClick={onProgramDataRateChange}
           readOnly={!!readOnly}
           showRateUI={showRateUI}
           lastIntervalDuration={this.state.lastIntervalDuration}
           serialDevice={this.stores.serialDevice}
-          onRecordDataChange={this.props.onRecordDataChange}
-          programMode={this.props.programMode}
+          onRecordDataChange={onRecordDataChange}
+          programMode={programMode}
 
-          isPlaying={this.props.isPlaying}
-          handleChangeIsPlaying={this.props.handleChangeIsPlaying}
+          isPlaying={isPlaying}
+          handleChangeIsPlaying={handleChangeIsPlaying}
           numNodes={numNodes}
           tileContent={tileContent}
         />

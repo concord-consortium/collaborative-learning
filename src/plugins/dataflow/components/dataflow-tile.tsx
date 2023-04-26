@@ -249,7 +249,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     }
   };
 
-  private determineProgramMode = () => { //used to prop drill to children
+  private determineProgramMode = () => {
     const { isRecording } = this.state;
     const tileContent = this.getContent();
     if (!isRecording && tileContent.isDataSetEmptyCases){

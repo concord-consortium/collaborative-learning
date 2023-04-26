@@ -13,7 +13,7 @@ import { getTileModel, setTileTitleFromContent, getTileTitleFromContent } from "
 import { SharedDataSet, kSharedDataSetType, SharedDataSetType  } from "../../../models/shared/shared-data-set";
 import { updateSharedDataSetColors } from "../../../models/shared/shared-data-set-colors";
 import { SharedModelType } from "../../../models/shared/shared-model";
-import { addAttributeToDataSet, addCasesToDataSet, DataSet } from "../../../models/data/data-set";
+import { DataSet } from "../../../models/data/data-set";
 import { uniqueId } from "../../../utilities/js-utils";
 import { getTileContentById } from "../../../utilities/mst-utils";
 
@@ -28,8 +28,6 @@ export const kDefaultLabel = "Dataflow Node";
 
 export function defaultDataSet() {
   const dataSet = DataSet.create();
-  addAttributeToDataSet(dataSet, { name: kDefaultLabel });
-  addCasesToDataSet(dataSet, [{ [kDefaultLabel]: "" }]);
   return dataSet;
 }
 
