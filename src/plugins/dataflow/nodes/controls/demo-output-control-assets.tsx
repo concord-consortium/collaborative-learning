@@ -35,6 +35,23 @@ import cord12 from "../../assets/grabber/cord/Cord_tilt_up_05.png";
 import cord13 from "../../assets/grabber/cord/Cord_tilt_up_06.png";
 import cord14 from "../../assets/grabber/cord/Cord_tilt_up_07.png";
 import cord15 from "../../assets/grabber/cord/Cord_tilt_up_08.png";
+import housing from "../../assets/fan/fan_housing.png";
+import blade00 from "../../assets/fan/fan_blade_00.png";
+import blade01 from "../../assets/fan/fan_blade_01.png";
+import motor from "../../assets/fan/fan_motor.png";
+import hBase from "../../assets/humidifier/humidifier_base.png";
+import mist00 from "../../assets/humidifier/mist_00.png";
+import mist01 from "../../assets/humidifier/mist_01.png";
+import mist02 from "../../assets/humidifier/mist_02.png";
+import mist03 from "../../assets/humidifier/mist_03.png";
+import mist04 from "../../assets/humidifier/mist_04.png";
+import mist05 from "../../assets/humidifier/mist_05.png";
+import mist06 from "../../assets/humidifier/mist_06.png";
+import mist07 from "../../assets/humidifier/mist_07.png";
+import mist08 from "../../assets/humidifier/mist_08.png";
+import mist09 from "../../assets/humidifier/mist_09.png";
+import mist10 from "../../assets/humidifier/mist_10.png";
+import mist11 from "../../assets/humidifier/mist_11.png";
 
 export const lightBulbOn = bulbOn;
 export const lightBulbOff = bulbOff;
@@ -45,6 +62,7 @@ export const grabberFrames = [
 ];
 
 export const grabberPaddle = paddle;
+
 export const advancedGrabberFrames = [
   grabber00, grabber01, grabber02, grabber03,
   grabber04, grabber05, grabber06, grabber07
@@ -55,3 +73,32 @@ export const grabberCordFrames = [
   cord08, cord09, cord10, cord11,
   cord12, cord13, cord14, cord15
 ];
+
+export const fanHousing = housing;
+export const fanMotor = motor;
+export const fanFrames = [ blade00, blade01 ];
+
+export const humidifier = hBase;
+
+const humidOffFrames = [ mist00 ];
+const humidStartingFrames = [ mist01, mist02, mist03, mist04, mist05 ];
+const humidLoopFrames = [ mist06, mist07, mist08 ];
+const humidEndingFrames = [ mist09, mist10, mist11, mist00 ];
+
+export interface AnimationPhase {
+  name: string;
+  frames: string[];
+}
+export interface AnimationPhaseSet {
+  rampUp: AnimationPhase;
+  stayOn: AnimationPhase;
+  rampDown: AnimationPhase;
+  stayOff: AnimationPhase;
+}
+
+export const humidAnimationPhases = {
+  rampUp: { name: "rampUp", frames: humidStartingFrames },
+  stayOn: { name: "stayOn", frames: humidLoopFrames },
+  rampDown: { name: "rampDown", frames: humidEndingFrames },
+  stayOff: { name: "stayOff", frames: humidOffFrames }
+}
