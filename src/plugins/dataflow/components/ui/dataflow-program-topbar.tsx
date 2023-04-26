@@ -117,7 +117,7 @@ const RecordStopOrClearButton = (props: IRecordStopOrClearProps) => {
   });
 
   const onClickHandler = () => {
-    if (!disabled && programMode === 2){
+    if (!disabled && programMode === ProgramMode.Recording){
       showAlert();
     }
     else {
