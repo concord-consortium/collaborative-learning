@@ -38,7 +38,7 @@ export class DemoOutputControl extends Rete.Control {
       const grabberFrame = this.getGrabberFrame(compProps.percentClosed);
       const cordFrame = this.getCordFrame(compProps.percentTilt);
       const initialHumidFrame = this.getInitialHumidFrame();
-
+      console.log("| compProps ", compProps)
       return (
         <div className={`demo-output-control ${controlClassName}`}>
           { (compProps.type === "Light Bulb" || compProps.type === "Heat Lamp") &&
@@ -62,7 +62,7 @@ export class DemoOutputControl extends Rete.Control {
                 className="demo-output-image grabber-paddle-image"
               />
               <img
-                src={ grabberCordFrames[cordFrame] }
+                src={ grabberCordFrames[cordFrame] }  // TODO get the initial frame like this, from a calc based on props? maybe log when Teale's calcs happen?
                 className="demo-output-image grabber-cord-image"
               />
               <img
@@ -171,7 +171,9 @@ export class DemoOutputControl extends Rete.Control {
   };
 
   private handleAnimationPhase() {
-    console.log("|", this.binaryAnimation.currentPhase.name, this.binaryAnimation.intervalId)
+    // if(!this.binaryAnimation.currentPhase){
+    //   return
+    // }
 
     if (this.binaryAnimation.currentPhase.name === "rampUp") {
       console.log("|> 5 HANDLE: rampUp")
