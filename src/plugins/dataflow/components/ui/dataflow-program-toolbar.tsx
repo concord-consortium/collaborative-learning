@@ -100,7 +100,11 @@ export const DataflowProgramToolbar = ({ disabled, isTesting, onClearClick, onNo
   const ui = useUIStore();
   let dragOverlay = null;
   if (ui.dragId && isNodeDraggableId(ui.dragId)) {
-    dragOverlay = <NodeIcon i={0} nodeType={getNodeType(ui.dragId) || ""} />;
+    dragOverlay = (
+      <div className="dragged-node">
+        <NodeIcon i={0} nodeType={getNodeType(ui.dragId) || ""} />
+      </div>
+    );
   }
   
   return (

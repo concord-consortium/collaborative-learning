@@ -55,6 +55,12 @@ $button-label-text: $gray-text;
   }
 }
 
+.dragged-node {
+  background-color: $gray-light;
+  border-radius: $border-radius;
+  padding: 4px;
+}
+
 .node-icon {
   text-align: center;
   align-content: center;
