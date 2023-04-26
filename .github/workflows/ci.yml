@@ -46,6 +46,8 @@ jobs:
         working-directory: ./cms
         run: npm ci
       - uses: cypress-io/github-action@v4
+        env:
+            NODE_OPTIONS: "--max_old_space_size=4096"
         with:
           start: npm start
           wait-on: 'http://localhost:8080'
