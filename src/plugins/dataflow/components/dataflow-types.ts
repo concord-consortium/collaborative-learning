@@ -14,3 +14,5 @@ export const getNodeType = (id: string) => {
     return parts[parts.length - 1];
   }
 };
+export const dataflowDroppableId = (tileId: string) =>
+  `${kDataflowDroppableId}_${tileId}`;

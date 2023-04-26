@@ -25,6 +25,7 @@ import { GeneratorReteNodeFactory } from "../nodes/factories/generator-rete-node
 import { TimerReteNodeFactory } from "../nodes/factories/timer-rete-node-factory";
 import { NumControl } from "../nodes/controls/num-control";
 import { ValueControl } from "../nodes/controls/value-control";
+import { DataflowDropZone } from "./ui/dataflow-drop-zone";
 import { DataflowProgramToolbar } from "./ui/dataflow-program-toolbar";
 import { DataflowProgramTopbar } from "./ui/dataflow-program-topbar";
 import { DataflowProgramCover } from "./ui/dataflow-program-cover";
@@ -161,13 +162,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             onNodeCreateClick={this.addNode}
             tileId={this.props.tileId}
           /> }
-          <div
+          <DataflowDropZone
+            addNode={this.addNode}
             className="editor-graph-container"
-            style={this.getEditorStyle()}
-            onDragOver={event => {
-              event.preventDefault();
-              event.dataTransfer.dropEffect = "copy";
-            }}
+            style={this.getEditorStyle}
+            tileId={this.props.tileId}
           >
             <div
               className={editorClass}
@@ -183,7 +182,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                   disabled={false}
                 /> }
             </div>
-          </div>
+          </DataflowDropZone>
         </div>
       </div>
     );
