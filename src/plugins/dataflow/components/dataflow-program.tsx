@@ -174,7 +174,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
               className={editorClass}
               ref={(elt) => this.editorDomElement = elt}
             >
-              <div className="flow-tool" ref={elt => this.toolDiv = elt}/>
+              <div
+                className="flow-tool"
+                ref={elt => this.toolDiv = elt}
+                onWheel={e => this.handleWheel(e, this.toolDiv) }
+              />
               { this.shouldShowProgramCover() &&
                 <DataflowProgramCover editorClass={editorClassForDisplayState} /> }
               {showZoomControl &&
@@ -190,6 +194,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     );
   }
 
+  private handleWheel(e: any, toolDiv: HTMLElement | null) {
+    if (toolDiv !== null) {
+      const documentContent = toolDiv.closest(".document-content");
+      documentContent?.scrollBy(e.deltaX, e.deltaY);
+    }
+  }
 
   public componentDidMount() {
     if (!this.programEditor && this.toolDiv) {
