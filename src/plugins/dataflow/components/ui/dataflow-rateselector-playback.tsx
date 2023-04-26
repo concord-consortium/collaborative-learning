@@ -1,6 +1,8 @@
 import React, { useEffect, useRef } from "react";
 import Slider from "rc-slider";
 import { ProgramDataRate } from "../../model/utilities/node";
+import { DataflowContentModelType } from "../../model/dataflow-content";
+import { ProgramMode } from "../types/dataflow-tile-types";
 
 import "./dataflow-rateselector-playback.scss";
 
@@ -12,11 +14,12 @@ interface IRateSelectorProps {
   dataRate: number;
   onRateSelectClick: (rate: number) => void;
   readOnly: boolean;
-  programRecordState: number;
+  programMode: number;
   isPlaying: boolean; //for playback of data
   handleChangeIsPlaying: () => void;
   numNodes: number;
   onRecordDataChange: () => void;
+  tileContent: DataflowContentModelType;
 }
 
 function formatTime(seconds: number) {
@@ -28,8 +31,8 @@ function formatTime(seconds: number) {
 }
 
 export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
-  const { onRateSelectClick, readOnly, dataRate, rateOptions, programRecordState,
-          isPlaying, handleChangeIsPlaying, numNodes, onRecordDataChange } = props;
+  const { onRateSelectClick, readOnly, dataRate, rateOptions, programMode,
+          isPlaying, handleChangeIsPlaying, numNodes, onRecordDataChange, tileContent } = props;
 
   /* ==[ Total Recording Time  - Calculate] format as "MMM:SS" */
   const totalTimeSec = Math.floor((dataRate / 1000) * (totalSamples/numNodes));
@@ -44,7 +47,7 @@ export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
   const formattedTime = `${formattedMin}:${formattedSec}`;
 
   /* ==[ Playback Recording Time  - Calculate] format as "MMM:SS" */
-  // seperate timer for when programRecordState is stopped (2), and Play button is hit
+  // seperate timer for when programMode is stopped (2), and Play button is hit
   const playBackTimerMin = useRef(0);
   const playBackTimerSec = useRef(0);
   const playBackFormattedMin = playBackTimerMin.current.toString().padStart(3, "0");
@@ -52,16 +55,14 @@ export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
   const playBackFormattedTime = `${playBackFormattedMin}:${playBackFormattedSec}`;
 
   /* ==[ Timer - Enable ] == */
-  const timerRunning = numNodes > 0 && sliderSec.current < totalTimeSec && (programRecordState === 1);
+  const timerRunning = numNodes > 0 && sliderSec.current < totalTimeSec && (programMode === ProgramMode.Recording);
   const playBackTimerRunning = !timerRunning && isPlaying;
   const playBackIsFinished = (playBackTimerSec.current === timerSec.current) && (playBackTimerSec.current !== 0);
 
-  //after you've hit is playing, or when you've paused (!isPlaying) and its not done yet, and you're in clear state
-  const condition = (playBackTimerRunning || ((!isPlaying) && (!playBackIsFinished) && programRecordState === 2))
-  || playBackIsFinished;
-
   /* ==[ Slider Max Value ] == */
-  const sliderMaxValue = condition ? timerSec.current : totalTimeSec;
+  const condition = (playBackTimerRunning || (!isPlaying && !playBackIsFinished && programMode === ProgramMode.Done))
+  || playBackIsFinished;
+  let sliderMaxValue = condition ? timerSec.current : totalTimeSec;
 
   /* ==[ Timer for Play, Timer for Playback ] == */
   useEffect(()=>{
@@ -87,16 +88,21 @@ export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
       }, 1000);
       return () => clearInterval(playBackTimer);
     }
-  }, [timerSec, timerRunning, sliderSec, playBackTimerRunning, programRecordState, playBackIsFinished]);
+  }, [timerSec, timerRunning, sliderSec, playBackTimerRunning, programMode, playBackIsFinished]);
 
   /* ==[ Stop Mode - Reset slider and counter to 0 ] == */
   useEffect(()=>{
-     if (programRecordState === 2){
+    /* ==[ Timer - Reset ] == */
+    if (programMode === ProgramMode.Ready) {
+      timerSec.current = 0;
+      timerMin.current = 0;
+      sliderSec.current = 0;
+    }
+    if (programMode === ProgramMode.Done){
       playBackTimerSec.current = 0;
       sliderSec.current = 0;
     }
-  }, [programRecordState]);
-
+  }, [programMode]);
 
   useEffect(()=>{
     if (playBackIsFinished && isPlaying) {
@@ -112,16 +118,7 @@ export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
     }
   }, [isPlaying, playBackIsFinished]);
 
-
-
-  /* ==[ Timer - Reset ] == */
-  if (programRecordState === 0) {
-    timerSec.current = 0;
-    timerMin.current = 0;
-    sliderSec.current = 0;
-  }
-
-  if(sliderSec.current === totalTimeSec && programRecordState === 1){
+  if(sliderSec.current === totalTimeSec && programMode === ProgramMode.Recording){
     onRecordDataChange();
   }
 
@@ -131,13 +128,22 @@ export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
     onRateSelectClick(Number(event.target.value));
   };
 
+  /* ==[ For Refresh -  Store Value Into Model ] == */
+  if (programMode === ProgramMode.Recording ){ //write into model to keep value upon refresh
+    tileContent.setFormattedTime(formattedTime);
+  }
+  /* ==[ For Refresh -  Reset sliderMaxValue] == */
+  //TODO: figure out a more efficient way to do this
+  if (tileContent.formattedTime !== "000:00" && programMode === ProgramMode.Done){
+    sliderMaxValue = stringToSeconds(tileContent.formattedTime) + 1;
+    timerSec.current = sliderMaxValue;
+  }
+
   return (
     <>
       <div className="topbar-sampleratetext-or-timeslider">
-        {/* {sliderMaxValue} <br/> */}
-        {/* {sliderSec.current} */}
         {
-          programRecordState ?
+          programMode ?
           <div className="slider-container">
             <Slider
               min={0}
@@ -155,7 +161,7 @@ export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
       <div className="topbar-datarate-or-timer">
         <div className="datarate-options">
           {
-            !programRecordState ?
+            !programMode ?
             <select onChange={handleSelectChange}
               disabled={readOnly}
               value={dataRate.toString()}
@@ -172,14 +178,22 @@ export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
             numNodes > 0 &&
             <div className="countdown-timer">
               {
-                programRecordState === 1 ? `${formattedTime} / ${totalTimeFormatted}`
-                : `${playBackFormattedTime}/${formattedTime}`
+                programMode === ProgramMode.Recording ? `${formattedTime} / ${totalTimeFormatted}`
+                : `${playBackFormattedTime}/${tileContent.formattedTime}` //store formattedTime upon refresh =
               }
             </div>
           }
-
         </div>
       </div>
     </>
   );
+};
+
+//convert "MMM:SS" -> number of seconds
+const stringToSeconds = (formattedTime: string) => {
+    const [minutes, seconds] = formattedTime.split(':');
+    const numMinutes = parseInt(minutes, 10);
+    const numSeconds = parseInt(seconds, 10);
+    const totalSeconds = (numMinutes * 60) + numSeconds;
+    return totalSeconds;
 };
