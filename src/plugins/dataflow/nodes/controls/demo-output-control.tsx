@@ -38,7 +38,7 @@ export class DemoOutputControl extends Rete.Control {
       const grabberFrame = this.getGrabberFrame(compProps.percentClosed);
       const cordFrame = this.getCordFrame(compProps.percentTilt);
       const initialHumidFrame = this.getInitialHumidFrame();
-      console.log("| compProps ", compProps)
+      console.log("|> 🤖 compProps ", compProps)
       return (
         <div className={`demo-output-control ${controlClassName}`}>
           { (compProps.type === "Light Bulb" || compProps.type === "Heat Lamp") &&
@@ -173,13 +173,21 @@ export class DemoOutputControl extends Rete.Control {
   private handleAnimationPhase() {
 
     if(this.binaryAnimation.currentPhase === undefined) {
-      console.log("|> ❌ 1 HANDLE: what should we do if currentPhase is undefined?", this.binaryAnimation.currentPhase)
+      console.log("|> ❌ 1 HANDLE: what should we do if currentPhase is undefined?", this.binaryAnimation, this.node.data.nodeValue)
+      if (this.node.data.nodeValue === 0){
+        console.log("|>     1 ... we should set phase to stayOff")
+        this.binaryAnimation.setAnimationPhase(humidAnimationPhases.rampDown);
+      }
+      if (this.node.data.nodeValue === 1){
+        console.log("|>     1 ... we should set phase to stayOn")
+        this.binaryAnimation.setAnimationPhase(humidAnimationPhases.rampUp);
+      }
     } else {
       console.log("|> 😀 1 HANDLE: currentPhase is defined so all should go well now", this.binaryAnimation.currentPhase.name)
     }
 
    // console.log("|> 1 HANDLE: what should we do if currentPhase is undefined?", this.binaryAnimation.currentPhase)
-
+    console.log("|> INTERVAL ID:", this.binaryAnimation.intervalId)
     if (this.binaryAnimation.currentPhase.name === "rampUp") {
       console.log("|> 5 HANDLE: rampUp")
       if (this.binaryAnimation.intervalId === null) {

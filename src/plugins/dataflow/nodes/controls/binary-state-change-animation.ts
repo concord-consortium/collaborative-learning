@@ -16,6 +16,7 @@ export class BinaryStateChangeAnimation {
   }
 
   public setImageSrc(str: string) {
+    console.log("|> 🏞️  SET IMAGE SRC:", str, "but to which object?", this)
     const img = document.getElementById("humidifier-frame") as HTMLImageElement;
     img.src = str;
   }

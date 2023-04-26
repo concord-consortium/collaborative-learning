@@ -9,6 +9,7 @@ import { NodeDemoOutputTypes, NodePlotRed, kBinaryOutputTypes,
   kAnimatedBinaryChangeOutputTypes } from "../../model/utilities/node";
 import { dataflowLogEvent } from "../../dataflow-logger";
 import { BinaryStateChangeAnimation } from "../controls/binary-state-change-animation";
+import { uniqueId } from "lodash";
 
 const minigraphOptions: Record<string, MinigraphOptions> = {
   "tilt": {
@@ -26,7 +27,8 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
   constructor(numSocket: Socket) {
     //console.log("| 1 DemoOutputReteNodeFactor constructor is zero-ing out the animation object?")
     super("Demo Output", numSocket);
-    this.binaryAnimation = new BinaryStateChangeAnimation("demo-output-control");
+    const objId = uniqueId("binary-animation-");
+    this.binaryAnimation = new BinaryStateChangeAnimation(objId);
   }
 
   public builder(node: Node) {
