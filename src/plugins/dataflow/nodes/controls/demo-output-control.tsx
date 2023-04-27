@@ -69,7 +69,7 @@ export class DemoOutputControl extends Rete.Control {
 
           { compProps.type === "Humidifier" &&
             <>
-                <HumidiferAnimation nodeValue={compProps.value}/>
+                <HumidiferAnimation nodeValue={compProps.value} nodeId={this.node.id}/>
                 {<img
                   id="humidifier-base"
                   src={humidifier}
