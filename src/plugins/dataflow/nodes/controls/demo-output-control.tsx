@@ -31,6 +31,10 @@ export class DemoOutputControl extends Rete.Control {
         "humidifier-control": compProps.type === "Humidifier",
         "fan-control": compProps.type === "Fan",
       });
+      const fanBladeClasses = classNames({
+        "fan-part blades": true,
+        "spinning fast": compProps.value === 1
+      });
       const grabberFrame = this.getGrabberFrame(compProps.percentClosed);
       const cordFrame = this.getCordFrame(compProps.percentTilt);
       return (
@@ -83,13 +87,9 @@ export class DemoOutputControl extends Rete.Control {
 
           { compProps.type === "Fan" &&
             <div className="fan-assembly">
-              {/* <FanAnimation
-                nodeValue={compProps.value}
-                nodeId={this.node.id}
-                editor={this.emitter}
-              /> */}
+              {/* .spinning, .slow, .medium, .fast*/}
               <img className="fan-part motor" src={fanMotor}/>
-              <img className="fan-part blades spinning fast" src={fanFrames[0]} />
+              <img className={fanBladeClasses} src={fanFrames[0]} />
               <img className="fan-part housing" src={fanHousing}/>
             </div>
           }
