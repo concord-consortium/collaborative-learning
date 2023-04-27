@@ -489,5 +489,72 @@ context('Dataflow Tool Tile', function () {
         dataflowToolTile.getNode(nodeType).should("not.exist");
       });
     });
+    describe("Record Data", () => {
+      it("can create a small program", () => {
+        const nodes = [ "timer", "demo-output" ];
+        dataflowToolTile.getCreateNodeButton(nodes[0]).click();
+        dataflowToolTile.getNode(nodes[0]).should("exist");
+        dataflowToolTile.getNodeTitle().should("contain", "Timer (on/off)");
+        dataflowToolTile.getCreateNodeButton(nodes[1]).click();
+        dataflowToolTile.getNode(nodes[1]).should("exist");
+        dataflowToolTile.getNodeTitle().should("contain", "Demo Output");
+        dataflowToolTile.getNodeOutput().eq(0).click();
+        dataflowToolTile.getNodeInput().eq(0).click();
+      });
+      it("verify sampling rate", () => {
+        const rate = "500"
+        dataflowToolTile.getSamplingRateLabel().should("have.text", "Sampling Rate");
+        dataflowToolTile.selectSamplingRate(rate);
+      });
+      it("verify recording and stop recording", () => {
+        dataflowToolTile.verifyRecordButtonText();
+        dataflowToolTile.verifyRecordButtonIcon();
+        dataflowToolTile.getRecordButton().click();
+        
+        dataflowToolTile.verifyPlayButtonText();
+        dataflowToolTile.verifyPlayButtonIcon();
+        dataflowToolTile.getPlayButton().should("be.disabled");
+        dataflowToolTile.verifyStopButtonText();
+        dataflowToolTile.verifyStopButtonIcon();
+
+        dataflowToolTile.getTimeSlider().should("be.visible");
+        dataflowToolTile.getCountdownTimer().should("contain", "/");
+        cy.wait(5000);
+
+        dataflowToolTile.getStopButton().click();
+      });
+      it("verify play and pause recording", () => {
+        dataflowToolTile.getPlayButton().should("be.enabled");
+        dataflowToolTile.verifyRecordingClearButtonText();
+        dataflowToolTile.verifyRecordingClearButtonIcon();
+        dataflowToolTile.getPlayButton().click();
+
+        dataflowToolTile.verifyPauseButtonText();
+        dataflowToolTile.verifyPauseButtonIcon();
+        dataflowToolTile.getPauseButton().should("be.enabled");
+        dataflowToolTile.getPauseButton().click();
+
+        dataflowToolTile.getPlayButton().should("be.enabled");
+        dataflowToolTile.getPlayButton().click();
+        cy.wait(5000);
+      });
+      it("verify clear recording", () => {
+        dataflowToolTile.verifyRecordingClearButtonText();
+        dataflowToolTile.verifyRecordingClearButtonIcon();
+        dataflowToolTile.getRecordingClearButton().click();
+        dataflowToolTile.getClearDataWarningTitle().should("have.text", "Clear Data");
+        dataflowToolTile.getClearDataWarningContent().should(
+          "contain", 
+          "Remove the program's recorded data and any linked displays of this data? This action is not undoable.");
+        dataflowToolTile.getClearDataWarningCancel().click();
+        dataflowToolTile.verifyRecordingClearButtonText();
+        dataflowToolTile.verifyRecordingClearButtonIcon();
+        dataflowToolTile.getRecordingClearButton().click();
+        dataflowToolTile.getClearDataWarningClear().click();
+        dataflowToolTile.getSamplingRateLabel().should("have.text", "Sampling Rate");
+        dataflowToolTile.verifyRecordButtonText();
+        dataflowToolTile.verifyRecordButtonIcon();
+      });
+    });
   });
 });
