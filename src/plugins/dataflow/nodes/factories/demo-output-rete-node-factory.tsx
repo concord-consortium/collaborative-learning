@@ -5,7 +5,7 @@ import { DemoOutputControl } from "../controls/demo-output-control";
 import { InputValueControl } from "../controls/input-value-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
 import { MinigraphOptions } from "../dataflow-node-plot";
-import { NodeDemoOutputTypes, NodePlotRed } from "../../model/utilities/node";
+import { NodeDemoOutputTypes, NodePlotRed, kBinaryOutputTypes } from "../../model/utilities/node";
 import { dataflowLogEvent } from "../../dataflow-logger";
 
 const minigraphOptions: Record<string, MinigraphOptions> = {
@@ -60,7 +60,7 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
         // Update the lightbulb or grabber
         const nodeValue = _node.inputs.get("nodeValue")?.control as InputValueControl;
         let newValue = isNaN(n1) ? 0 : n1;
-        if (outputType === "Light Bulb") {
+        if (kBinaryOutputTypes.includes(outputType)) {
           // if there is not a valid input, use 0
           // otherwise convert all non-zero to 1
           newValue = isNaN(n1) ? 0 : +(n1 !== 0);
