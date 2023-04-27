@@ -82,7 +82,16 @@ export class DemoOutputControl extends Rete.Control {
           }
 
           { compProps.type === "Fan" &&
-            <span style={{ color: "white" }}>animation frame</span>
+            <div className="fan-assembly">
+              {/* <FanAnimation
+                nodeValue={compProps.value}
+                nodeId={this.node.id}
+                editor={this.emitter}
+              /> */}
+              <img className="fan-part motor" src={fanMotor}/>
+              <img className="fan-part blades" src={fanFrames[0]} />
+              <img className="fan-part housing" src={fanHousing}/>
+            </div>
           }
         </div>
       );

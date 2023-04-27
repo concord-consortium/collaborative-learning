@@ -82,7 +82,24 @@
 }
 
 .fan-control {
-  .motor {
-    border:1px dotted green;
+  .fan-assembly {
+    position: relative;
+    height:140px;
+    left:-64.5px;
+    top:14px;
+
+    .fan-part {
+      position: absolute;
+      height: 120px;
+    }
+
+    .fan-part.motor {
+      top:27px;
+      left:20px;
+    }
+    .fan-part.housing, .fan-part.blades {
+      top:4px;
+      left:5px;
+    }
   }
 }
