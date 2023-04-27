@@ -8,7 +8,7 @@ interface IProps {
 export const HumidiferAnimation: React.FC<IProps> = ({nodeValue, nodeId}) => {
   const priorValue = useRef<number | undefined>();
   const canLoopRef = useRef(false);
-  const intervalRef = useRef<any | undefined>();
+  const intervalRef = useRef<any | undefined>(null);
 
   const setImageSrc = (src: string, nodeId: number) => {
     const imgs = document.querySelectorAll(`.mist-${nodeId}`) as any;
@@ -16,7 +16,7 @@ export const HumidiferAnimation: React.FC<IProps> = ({nodeValue, nodeId}) => {
   }
 
   const startLooping = (id: number) => {
-    if (canLoopRef.current === true){
+    if (canLoopRef.current === true && intervalRef.current === null){
       console.log("🔁 we can and should loop animation on node", id);
       intervalRef.current = setInterval(() => {
         console.log("✅ looping animation on node", id, intervalRef.current);
