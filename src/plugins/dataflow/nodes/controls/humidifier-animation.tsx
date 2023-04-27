@@ -1,8 +1,10 @@
 import React, { useRef, useEffect } from "react";
 import { humidAnimationPhases } from "./demo-output-control-assets";
+import { NodeEditor } from "rete";
 interface IProps {
   nodeValue: number;
   nodeId: number;
+  editor: NodeEditor;
 }
 
 const humidAnimations = new Map<number, any>();
@@ -20,11 +22,16 @@ function nodeHasAnimation(nodeId: number) {
   return humidAnimations.has(nodeId);
 }
 
-export const HumidiferAnimation: React.FC<IProps> = ({nodeValue, nodeId}) => {
+export const HumidiferAnimation: React.FC<IProps> = ({nodeValue, nodeId, editor}) => {
   const priorValue = useRef<number | undefined>();
 
+  editor.on("noderemoved", (node: any) => {
+    if (node.id === nodeId) {
+      removeAnimation(nodeId);
+    }
+  });
+
   const advanceFrame = (frames: string[]) => {
-    console.log("advanceFrame!")
     const currentFrame = frames[0];
     const nextFrame = frames[1];
     frames.shift();
@@ -79,7 +86,12 @@ export const HumidiferAnimation: React.FC<IProps> = ({nodeValue, nodeId}) => {
 
     if (shouldJustLoop) setImageSrc(humidAnimationPhases.stayOn.frames[0]);
     if (shouldJustRest) setImageSrc(humidAnimationPhases.stayOff.frames[0]);
-    shouldJustLoop || shouldRampUp ? startLooping() : stopLooping();
+
+    if (shouldJustLoop || shouldRampUp){
+      startLooping();
+    } else {
+      stopLooping();
+    }
 
     priorValue.current = nodeValue;
   },[nodeValue]);
