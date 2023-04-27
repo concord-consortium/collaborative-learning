@@ -71,6 +71,21 @@ context('Dataflow Tool Tile', function () {
         dataflowToolTile.getNode(nodeType).should("not.exist");
       });
     });
+    describe("Drag to Add Node", () => {
+      const dataTransfer = new DataTransfer;
+      const nodeType = "number";
+      // TODO Why isn't this test working?
+      it.skip('can create node by dragging button onto tile', () => {
+        const draggable = () => cy.get(".program-toolbar [aria-roledescription='draggable'] button").eq(1);
+        dataflowToolTile.getNode(nodeType).should("not.exist");
+        draggable().focus().trigger('dragstart', { dataTransfer });
+        dataflowToolTile.getDataflowTile().trigger('drop', { dataTransfer });
+        draggable().trigger('dragend');
+        dataflowToolTile.getNode(nodeType).should("exist");
+        dataflowToolTile.getDeleteNodeButton(nodeType).click();
+        dataflowToolTile.getNode(nodeType).should("not.exist");
+      });
+    });
     describe("Generator Node", () => {
       const nodeType = "generator";
       it("can create generator node", () => {
