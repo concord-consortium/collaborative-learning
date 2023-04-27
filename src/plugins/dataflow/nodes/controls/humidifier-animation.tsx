@@ -16,7 +16,7 @@ export const HumidiferAnimation: React.FC<IProps> = ({nodeValue, nodeId}) => {
     if (intervalId){
       clearInterval(intervalId);
     }
-    setIntervalId(null)
+    setIntervalId(() => null)
   }
 
   const setImageSrc = (src: string, nodeId: number) => {
@@ -31,13 +31,12 @@ export const HumidiferAnimation: React.FC<IProps> = ({nodeValue, nodeId}) => {
   }
 
   const startLooping = () => {
-
     if (intervalId === null && !isLooping) {
       setIsLooping(true);
       console.log("|> 🔁 startLooping!", intervalId)
       // const interval = setInterval(() => {
       //   advanceFrame(humidAnimationPhases.stayOn.frames);
-      // }, 200);
+      // }, 100);
       // setIntervalId(interval as any);
     }
   }
@@ -86,7 +85,7 @@ export const HumidiferAnimation: React.FC<IProps> = ({nodeValue, nodeId}) => {
     }
 
     priorValue.current = nodeValue;
-    return disposeInterval();
+    return () => disposeInterval();
   },[nodeValue])
 
   return (<>
