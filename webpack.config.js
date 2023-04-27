@@ -36,7 +36,7 @@ module.exports = (env, argv) => {
     entry: {
       index: './src/index.tsx',
       admin: './cms/src/admin.tsx',
-      editor: './src/cms/editor.tsx',
+      'cms-editor': './src/cms/cms-editor.tsx',
       'doc-editor': './src/doc-editor.tsx'
     },
     mode: devMode ? 'development' : 'production',
@@ -257,10 +257,10 @@ module.exports = (env, argv) => {
       }),
       new HtmlWebpackPlugin({
         ...baseHtmlPluginConfig,
-        chunks: ['editor'],
-        filename: 'editor.html',
+        chunks: ['cms-editor'],
+        filename: 'cms-editor.html',
         publicPath: '.',
-        template: 'src/cms/editor.html'
+        template: 'src/cms/cms-editor.html'
       }),
       ...(DEPLOY_PATH ? [new HtmlWebpackPlugin({
         ...baseHtmlPluginConfig,
