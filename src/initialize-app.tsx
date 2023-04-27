@@ -30,7 +30,7 @@ export const appConfig = AppConfigModel.create(appConfigSnapshot);
  * This function is used by the 3 different entry points supported
  * by CLUE:
  * - runtime (index.tsx)
- * - authoring (CMS iframe-control.tsx)
+ * - authoring (cms/document-editor.tsx)
  * - standalone doc editor (doc-editor.tsx)
  *
  * It is intended to only be called one time.
