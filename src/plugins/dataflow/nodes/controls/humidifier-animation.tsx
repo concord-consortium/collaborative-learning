@@ -27,9 +27,11 @@ export const HumidiferAnimation: React.FC<IProps> = ({nodeValue, nodeId}) => {
   }
 
   const setImageSrc = (src: string, nodeId: number) => {
-    const imgs = document.querySelector(`.mist-${nodeId}`) as HTMLImageElement; //handle more than one?
-    console.log("|> setImageSrc", src);
-    imgs.src = src;
+    const imgs = document.querySelectorAll(`.mist-${nodeId}`) as any; //handle more than one?
+    console.log("imgs? ", imgs)
+    imgs.forEach((img: any) => {
+      img.src = src;
+    });
   }
 
   useEffect(() => {
