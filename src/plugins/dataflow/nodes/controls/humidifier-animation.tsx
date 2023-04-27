@@ -5,8 +5,12 @@ interface IProps {
   nodeId: number;
 }
 
-// TODO in morning, make this work
-// THEN, make it an array and check for the id sort of thing where it is a registry of all the humiidifier animations
+// TODO in morning,this now works
+// 1 first add a timeout before the animation starts so it looks nice (15)
+// 2 THEN, make it an map and check for the id sort of thing (45)
+// where it is a registry of all the humiidifier animations
+// 3 then duplicate the whole thing for the fan (30)
+// 4 merge it backto your branch (5)
 var humidAnimationInterval: any = null;
 
 
