@@ -30,6 +30,7 @@ import {useDataTips} from "../hooks/use-data-tips";
 import {onAnyAction} from "../../../utilities/mst-utils";
 
 import "./graph.scss";
+import "./graph-clue-styles.scss";
 
 interface IProps {
   graphController: GraphController
@@ -55,6 +56,9 @@ export const Graph = observer(function Graph({graphController, graphRef, dotsRef
   useGraphModel({dotsRef, graphModel, enableAnimation, instanceId});
 
   useEffect(function setupPlotArea() {
+    // TODO: Replace this quick and dirty method for setting attributes
+    dataset && graphModel.setAttributeID('x', dataset.attributes[0].id);
+    dataset && graphModel.setAttributeID('y', dataset.attributes[1].id);
     if (xScale && xScale?.length > 0) {
       const plotBounds = layout.getComputedBounds('plot');
       select(plotAreaSVGRef.current)
@@ -63,7 +67,7 @@ export const Graph = observer(function Graph({graphController, graphRef, dotsRef
         .attr('width', layout.plotWidth > -1 ? layout.plotWidth : 0)
         .attr('height', layout.plotHeight > -1 ? layout.plotHeight : 0);
     }
-  }, [dataset, plotAreaSVGRef, layout, layout.plotHeight, layout.plotWidth, xScale]);
+  }, [dataset, plotAreaSVGRef, layout, layout.plotHeight, layout.plotWidth, xScale, graphModel]);
 
   const handleChangeAttribute = (place: GraphPlace, attrId: string) => {
     const computedPlace = place === 'plot' && graphModel.config.noAttributesAssigned ? 'bottom' : place;

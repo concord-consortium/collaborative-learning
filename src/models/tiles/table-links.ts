@@ -6,6 +6,8 @@ import { kTableTileType, TableContentModelType } from "./table/table-content";
 import { getRowLabel, ILinkProperties, IRowLabel, ITableLinkProperties } from "./table-link-types";
 import { IDataSet } from "../data/data-set";
 import { getTileContentById } from "../../utilities/mst-utils";
+import { kGraphTileType } from "../../plugins/graph/graph-types";
+import { GraphContentModelType } from "../../plugins/graph/models/graph-content";
 
 // cf. https://mattferderer.com/use-sass-variables-in-typescript-and-javascript
 import styles from "./table-links.scss";
@@ -113,7 +115,11 @@ export function getTableContent(requester: IAnyStateTreeNode, tableId: string) {
 
 export function getGeometryContent(requester: IAnyStateTreeNode, geometryId: string) {
   const content = getTileContentById(requester, geometryId);
-  return content?.type === kGeometryTileType ? content as GeometryContentModelType : undefined;
+  return content?.type === kGeometryTileType
+                             ? content as GeometryContentModelType
+                             : kGraphTileType
+                               ? content as GraphContentModelType
+                               : undefined;
 }
 
 export function requestGeometryLinkToTable(tableContent: TableContentModelType, geometryId: string) {

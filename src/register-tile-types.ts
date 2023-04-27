@@ -22,7 +22,10 @@ const gTileRegistration: Record<string, () => void> = {
     import(/* webpackChunkName: "SharedDataSet" */"./models/shared/shared-data-set-registration")
   ]),
   "Text": () => import(/* webpackChunkName: "Text" */"./models/tiles/text/text-registration"),
-  "Graph": () => import(/* webpackChunkName: "Graph" */"./plugins/graph/graph-registration"),
+  "Graph": () => Promise.all([
+    import(/* webpackChunkName: "Graph" */"./plugins/graph/graph-registration"),
+    import(/* webpackChunkName: "SharedDataSet" */"./models/shared/shared-data-set-registration")
+  ])
 };
 
 export function registerTileTypes(tileTypeIds: string[]) {

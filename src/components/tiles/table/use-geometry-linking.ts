@@ -1,4 +1,5 @@
 import { useCallback, useEffect } from "react";
+import { kGraphTileType } from "../../../plugins/graph/graph-types";
 import { useCurrent } from "../../../hooks/use-current";
 import { useFeatureFlag } from "../../../hooks/use-stores";
 import { getColorMapEntry } from "../../../models/shared/shared-data-set-colors";
@@ -48,8 +49,11 @@ interface IUseLinkableGeometryTilesProps {
   onRequestTilesOfType: (tileType: string) => ITileLinkMetadata[];
 }
 const useLinkableGeometryTiles = ({ model, onRequestTilesOfType }: IUseLinkableGeometryTilesProps) => {
+  // get all tiles of type graph and geometry
+  const graphTiles = useCurrent(onRequestTilesOfType(kGraphTileType));
   const geometryTiles = useCurrent(onRequestTilesOfType(kGeometryTileType));
+  const linkableTiles = graphTiles.current.concat(geometryTiles.current);
+
   // add default title if there isn't a title
-  return geometryTiles.current
-          .map((tileInfo, i) => ({ id: tileInfo.id, title: tileInfo.title || `Graph ${i + 1}` }));
+  return linkableTiles.map((tileInfo, i) => ({ id: tileInfo.id, title: tileInfo.title || `Graph ${i + 1}` }));
 };

@@ -12,7 +12,7 @@ import {DataConfigurationModel} from "./data-configuration-model";
 import {IDataSet} from "../../../models/data/data-set";
 import { SharedModelType } from "../../../models/shared/shared-model";
 import { ISharedCaseMetadata, isSharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
-import {isSharedDataSet, SharedDataSet} from "../../../models/shared/shared-data-set";
+import {isSharedDataSet} from "../../../models/shared/shared-data-set";
 import {ITileContentModel, TileContentModel} from "../../../models/tiles/tile-content";
 import {
   defaultBackgroundColor,
@@ -58,13 +58,16 @@ export const GraphModel = TileContentModel
     plotBackgroundLockInfo: types.maybe(types.frozen<BackgroundLockInfo>()),
     // numberToggleModel: types.optional(types.union(NumberToggleModel, null))
     showParentToggles: false,
-    showMeasuresForSelection: false
+    showMeasuresForSelection: false,
+    // Used for importing table links from legacy documents
+    links: types.array(types.string)  // table tile ids
   })
   .views(self => ({
     get data(): IDataSet | undefined {
       const sharedModelManager = self.tileEnv?.sharedModelManager;
-      // const sharedModel = sharedModelManager?.getTileSharedModels(self).find(m => isSharedDataSet(m));
-      const sharedModel = sharedModelManager?.findFirstSharedModelByType(SharedDataSet);
+      const sharedModel = sharedModelManager?.getTileSharedModels(self).find(m => isSharedDataSet(m));
+      // TODO: Remove the below once we're sure it's no longer useful
+      // const sharedModel = sharedModelManager?.findFirstSharedModelByType(SharedDataSet);
       return isSharedDataSet(sharedModel) ? sharedModel.dataSet : undefined;
     },
     get metadata(): ISharedCaseMetadata | undefined {
@@ -166,6 +169,11 @@ export const GraphModel = TileContentModel
     },
     setShowMeasuresForSelection(show: boolean) {
       self.showMeasuresForSelection = show;
+    }
+  }))
+  .actions(self => ({
+    replaceLinks(newLinks: string[]) {
+      self.links.replace(newLinks);
     }
   }));
 export interface IGraphModel extends Instance<typeof GraphModel> {}
