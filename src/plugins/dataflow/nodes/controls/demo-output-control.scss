@@ -92,7 +92,6 @@
       position: absolute;
       height: 120px;
     }
-
     .fan-part.motor {
       top:27px;
       left:20px;
@@ -100,6 +99,24 @@
     .fan-part.housing, .fan-part.blades {
       top:4px;
       left:5px;
+    }
+
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
+    .fan-part.blades.spinning.medium {
+      animation: spin 1s linear infinite;
+    }
+    .fan-part.blades.spinning.fast {
+      animation: spin .7s linear infinite;
+    }
+    .fan-part.blades.spinning.slow {
+      animation: spin .2s linear infinite;
     }
   }
 }

@@ -89,7 +89,7 @@ export class DemoOutputControl extends Rete.Control {
                 editor={this.emitter}
               /> */}
               <img className="fan-part motor" src={fanMotor}/>
-              <img className="fan-part blades" src={fanFrames[0]} />
+              <img className="fan-part blades spinning fast" src={fanFrames[0]} />
               <img className="fan-part housing" src={fanHousing}/>
             </div>
           }
