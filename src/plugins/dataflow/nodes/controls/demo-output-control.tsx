@@ -23,6 +23,8 @@ export class DemoOutputControl extends Rete.Control {
     this.key = key;
     this.node = node;
 
+    console.log("node", node);
+
     this.component = (compProps: {value: number, percentClosed: number, percentTilt: number, type: string}) => {
       const controlClassName = classNames({
         "lightbulb-control": compProps.type === "Light Bulb" || compProps.type === "Heat Lamp",
