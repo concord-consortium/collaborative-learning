@@ -6,39 +6,24 @@ interface IProps {
 }
 
 export const HumidiferAnimation: React.FC<IProps> = ({nodeValue, nodeId}) => {
-  const [intervalId, setIntervalId] = useState(null);
-  const [isLooping, setIsLooping] = useState(false);
-  const [loopIndex, setLoopIndex] = useState(0);
   const priorValue = useRef<number | undefined>();
-
-  const disposeInterval = () => {
-    setIsLooping(false);
-    if (intervalId){
-      clearInterval(intervalId);
-    }
-    setIntervalId(() => null)
-  }
 
   const setImageSrc = (src: string, nodeId: number) => {
     const imgs = document.querySelectorAll(`.mist-${nodeId}`) as any;
     imgs.forEach((img: any) => img.src = src);
   }
 
-  const advanceFrame = (frames: string[]) => {
-    console.log("|> advanceFrame", loopIndex)
-    setLoopIndex(() => (loopIndex + 1) % frames.length);
-    setImageSrc(frames[loopIndex], nodeId);
-  }
-
-  const startLooping = () => {
-    if (intervalId === null && !isLooping) {
-      setIsLooping(true);
-      console.log("|> 🔁 startLooping!", intervalId)
-      // const interval = setInterval(() => {
-      //   advanceFrame(humidAnimationPhases.stayOn.frames);
-      // }, 100);
-      // setIntervalId(interval as any);
-    }
+  const advanceLoop = (i: number) => {
+    if (nodeValue !== 1) return;
+    const nextFrame = humidAnimationPhases.stayOn.frames[i];
+    setImageSrc(nextFrame, nodeId);
+    setTimeout(() => {
+      if (i < humidAnimationPhases.stayOn.frames.length - 1) {
+        advanceLoop(i + 1);
+      } else {
+        advanceLoop(0);
+      }
+    }, 100);
   }
 
   useEffect(() => {
@@ -56,7 +41,7 @@ export const HumidiferAnimation: React.FC<IProps> = ({nodeValue, nodeId}) => {
           setImageSrc(frame, nodeId);
         }, index * 100);
       })
-      setTimeout(() => startLooping(),400);
+      advanceLoop(0);
     }
 
     if (shouldRampDown) {
@@ -67,25 +52,20 @@ export const HumidiferAnimation: React.FC<IProps> = ({nodeValue, nodeId}) => {
           setImageSrc(frame, nodeId);
         }, index * 100);
       })
-      disposeInterval();
     }
 
     if (shouldJustLoop) {
       console.log("|> loadInLoop")
       setImageSrc(humidAnimationPhases.stayOn.frames[0], nodeId);
-      setTimeout(() => {
-        if (!isLooping) startLooping();
-      }, 400);
+      advanceLoop(0);
     }
 
     if (shouldJustRest) {
       console.log("|> loadInRest")
       setImageSrc(humidAnimationPhases.stayOff.frames[0], nodeId);
-      disposeInterval();
     }
 
     priorValue.current = nodeValue;
-    return () => disposeInterval();
   },[nodeValue])
 
   return (<>
