@@ -7,23 +7,22 @@ interface IProps {
 
 export const HumidiferAnimation: React.FC<IProps> = ({nodeValue, nodeId}) => {
   const priorValue = useRef<number | undefined>();
+  const canLoopRef = useRef(false);
 
   const setImageSrc = (src: string, nodeId: number) => {
     const imgs = document.querySelectorAll(`.mist-${nodeId}`) as any;
     imgs.forEach((img: any) => img.src = src);
   }
 
-  const advanceLoop = (i: number) => {
-    if (nodeValue !== 1) return;
-    const nextFrame = humidAnimationPhases.stayOn.frames[i];
-    setImageSrc(nextFrame, nodeId);
-    setTimeout(() => {
-      if (i < humidAnimationPhases.stayOn.frames.length - 1) {
-        advanceLoop(i + 1);
-      } else {
-        advanceLoop(0);
-      }
-    }, 100);
+  const startLooping = (id: number) => {
+    if (canLoopRef.current === true){
+      console.log("🔁 we can and should loop animation on node", id);
+    }
+  }
+
+  const stopLooping = (id: number) => {
+    canLoopRef.current = false;
+    console.log("🔴 we should stop looping animation on node", id);
   }
 
   useEffect(() => {
@@ -34,18 +33,19 @@ export const HumidiferAnimation: React.FC<IProps> = ({nodeValue, nodeId}) => {
     const shouldJustRest = justLoaded && nodeValue === 0;
 
     if (shouldRampUp) {
-      console.log("|> shouldRampUp")
+      //console.log("|> shouldRampUp")
+      canLoopRef.current = true;
       setImageSrc(humidAnimationPhases.rampUp.frames[0], nodeId);
       humidAnimationPhases.rampUp.frames.forEach((frame, index) => {
         setTimeout(() => {
           setImageSrc(frame, nodeId);
         }, index * 100);
       })
-      advanceLoop(0);
     }
 
     if (shouldRampDown) {
-      console.log("|> shouldRampDown")
+      canLoopRef.current = false;
+      //console.log("|> shouldRampDown")
       setImageSrc(humidAnimationPhases.rampDown.frames[0], nodeId);
       humidAnimationPhases.rampDown.frames.forEach((frame, index) => {
         setTimeout(() => {
@@ -55,14 +55,21 @@ export const HumidiferAnimation: React.FC<IProps> = ({nodeValue, nodeId}) => {
     }
 
     if (shouldJustLoop) {
-      console.log("|> loadInLoop")
+      canLoopRef.current = true;
+      //console.log("|> loadInLoop")
       setImageSrc(humidAnimationPhases.stayOn.frames[0], nodeId);
-      advanceLoop(0);
     }
 
     if (shouldJustRest) {
-      console.log("|> loadInRest")
+      canLoopRef.current = false;
+      //console.log("|> loadInRest")
       setImageSrc(humidAnimationPhases.stayOff.frames[0], nodeId);
+    }
+
+    if (shouldJustLoop || shouldRampUp){
+      startLooping(nodeId);
+    } else {
+      stopLooping(nodeId)
     }
 
     priorValue.current = nodeValue;
