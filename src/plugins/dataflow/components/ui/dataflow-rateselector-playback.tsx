@@ -133,7 +133,6 @@ export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
     tileContent.setFormattedTime(formattedTime);
   }
   /* ==[ For Refresh -  Reset sliderMaxValue] == */
-  //TODO: figure out a more efficient way to do this
   if (tileContent.formattedTime !== "000:00" && programMode === ProgramMode.Done){
     sliderMaxValue = stringToSeconds(tileContent.formattedTime) + 1;
     timerSec.current = sliderMaxValue;
