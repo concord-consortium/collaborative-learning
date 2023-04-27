@@ -3,13 +3,12 @@ import {
   DndContext, DragEndEvent, DragStartEvent, PointerSensor, useSensor, useSensors
 } from "@dnd-kit/core";
 
-import { useUIStore } from "../../hooks/use-stores";
+import { useStores } from "../../hooks/use-stores";
 
 interface IDocumentDndContextProps {
   children: any;
 }
 export const DocumentDndContext = ({ children }: IDocumentDndContextProps) => {
-  const ui = useUIStore();
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -17,8 +16,10 @@ export const DocumentDndContext = ({ children }: IDocumentDndContextProps) => {
       }
     })
   );
-  const onDragStart = (event: DragStartEvent) => ui.setDraggingId(event.active.id.toString());
-  const onDragEnd = (event: DragEndEvent) => ui.setDraggingId(undefined);
+  // We use useStores instead of useUIStore because the ui store is not set up for some jest tests.
+  const stores = useStores();
+  const onDragStart = (event: DragStartEvent) => stores.ui?.setDraggingId(event.active.id.toString());
+  const onDragEnd = (event: DragEndEvent) => stores.ui?.setDraggingId(undefined);
   return (
     <DndContext onDragStart={onDragStart} onDragEnd={onDragEnd} sensors={sensors} >
       { children }

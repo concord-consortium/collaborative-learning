@@ -75,6 +75,58 @@ context('Dataflow Tool Tile', function () {
       const dataTransfer = new DataTransfer;
       const nodeType = "number";
       // TODO Why isn't this test working?
+//     cy.get(target_el).then($target => {
+//       return $target[0].getBoundingClientRect()
+//   }).then($targetRect => {
+//       cy.get(source_el).contains(attribute).then($subject => {
+//           cy.mouseMoveBy($subject, $targetRect, { delay: 100 })
+//       })
+//   })
+//   cy.wait(2000)
+// })
+
+// Cypress.Commands.add("clickToUnselect", (subject, options?: { delay: number }) => {
+//   cy.wrap(subject)
+//   .trigger("pointerdown", {
+//       force: true,
+//       clientX: Math.floor(subject[0].x + 10),
+//       clientY: Math.floor(subject[0].y + 10),
+//   })
+//   .wait(options?.delay || 0, { log: Boolean(options?.delay) })
+//   .trigger("pointerup", { force: true })
+//   .wait(options?.delay || 0, { log: Boolean(options?.delay) })
+// })
+
+// Cypress.Commands.add("mouseMoveBy",
+//   (subject, targetRect, options?: { delay: number }) => {
+//       cy.wrap(subject)
+//           .trigger("mousedown", { force: true })
+//           .wait(options?.delay || 0, { log: Boolean(options?.delay) })
+//           .trigger("mousemove", {
+//               force: true,
+//               clientX: Math.floor(targetRect.x + targetRect.width / 2),
+//               clientY: Math.floor(targetRect.y + targetRect.height / 2),
+//           })
+//           .wait(options?.delay || 0, { log: Boolean(options?.delay) })
+//           .trigger("mouseup", { force: true })
+//           .wait(options?.delay || 0, { log: Boolean(options?.delay) })
+//   })
+
+// // analogous to mouseMoveBy but doesn't seem to trigger the PointerSensor as expected
+// Cypress.Commands.add("pointerMoveBy",
+//   (subject, targetRect, options?: { delay: number }) => {
+//       cy.wrap(subject)
+//           .trigger("pointerdown", { force: true })
+//           .wait(options?.delay || 0, { log: Boolean(options?.delay) })
+//           .trigger("pointermove", {
+//               force: true,
+//               clientX: Math.floor(targetRect.x + targetRect.width / 2),
+//               clientY: Math.floor(targetRect.y + targetRect.height / 2),
+//           })
+//           .wait(options?.delay || 0, { log: Boolean(options?.delay) })
+//           .trigger("pointerup", { force: true })
+//           .wait(options?.delay || 0, { log: Boolean(options?.delay) })
+//   })
       it.skip('can create node by dragging button onto tile', () => {
         const draggable = () => cy.get(".program-toolbar [aria-roledescription='draggable'] button").eq(1);
         dataflowToolTile.getNode(nodeType).should("not.exist");
