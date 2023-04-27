@@ -1,7 +1,7 @@
 import React from "react";
-import { DragEndEvent, DragOverlay, useDndMonitor, useDraggable, useDroppable } from "@dnd-kit/core";
+import { DragOverlay, useDraggable } from "@dnd-kit/core";
 
-import { getNodeType, isNodeDraggableId, nodeDraggableId, nodeDroppableId } from "../dataflow-types";
+import { getNodeType, isNodeDraggableId, nodeDraggableId } from "../dataflow-types";
 import { NodeType, NodeTypes } from "../../model/utilities/node";
 import { useUIStore } from "../../../../hooks/use-stores";
 
@@ -59,32 +59,17 @@ const AddNodeButton = ({ disabled, i, nodeType, onNodeCreateClick, tileId }: IAd
   const { attributes, listeners, setNodeRef } = useDraggable({ id: draggableId });
 
   const handleAddNodeButtonClick = () => { onNodeCreateClick(nodeType); };
-  
-  // Because the button is draggable, it can no longer be clicked.
-  // Instead, we check to see if it's dropped on itself, and if it is we "click" it.
-  const droppableId = nodeDroppableId(nodeType, tileId);
-  const droppableInfo = useDroppable({ id: droppableId });
-  const setDroppableNodeRef = droppableInfo.setNodeRef;
-  useDndMonitor({
-    onDragEnd: (event: DragEndEvent) => {
-      if (event.over?.id === droppableId && event.active.id === draggableId) {
-        handleAddNodeButtonClick();
-      }
-    }
-  });
 
   return (
-    <div ref={setDroppableNodeRef}>
-      <div ref={setNodeRef} {...attributes} {...listeners} >
-        <button
-          disabled={disabled}
-          key={i}
-          title={`Add ${nodeType} Block`}
-          onClick={handleAddNodeButtonClick}
-        >
-          <NodeIcon i={i} nodeType={nodeType} />
-        </button>
-      </div>
+    <div ref={setNodeRef} {...attributes} {...listeners} >
+      <button
+        disabled={disabled}
+        key={i}
+        title={`Add ${nodeType} Block`}
+        onClick={handleAddNodeButtonClick}
+      >
+        <NodeIcon i={i} nodeType={nodeType} />
+      </button>
     </div>
   );
 };
