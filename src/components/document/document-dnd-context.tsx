@@ -12,7 +12,7 @@ export const DocumentDndContext = ({ children }: IDocumentDndContextProps) => {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 15
+        distance: 3
       }
     })
   );
