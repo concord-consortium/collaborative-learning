@@ -101,4 +101,4 @@ export const humidAnimationPhases = {
   stayOn: { name: "stayOn", frames: humidLoopFrames },
   rampDown: { name: "rampDown", frames: humidEndingFrames },
   stayOff: { name: "stayOff", frames: humidOffFrames }
-}
+};
