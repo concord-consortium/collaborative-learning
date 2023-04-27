@@ -5,33 +5,35 @@ interface IProps {
   nodeId: number;
 }
 
-const rampUpCount = humidAnimationPhases.rampUp.frames.length;
-const rampDownCount = humidAnimationPhases.rampDown.frames.length;
-const stayOnCount = humidAnimationPhases.stayOn.frames.length;
-const { rampDown, rampUp, stayOn, stayOff } = humidAnimationPhases;
-
-console.log("| humidAnimationPhases", humidAnimationPhases)
 export const HumidiferAnimation: React.FC<IProps> = ({nodeValue, nodeId}) => {
-  const [currentPhase, setCurrentPhase] = useState<AnimationPhase | null>(null);
   const [intervalId, setIntervalId] = useState(null);
-  const [currentFrameIndex, setCurrentFrameIndex] = useState(0);
-  const [playing, setPlaying] = useState(false);
+  const [ramping, setRamping] = useState(false);
+  const [loopIndex, setLoopIndex] = useState(0);
   const priorValue = useRef<number | undefined>();
 
-  const niceLog = (msg: string) => {
-    console.log(msg, `\n    | prior: ${priorValue.current} | value: ${nodeValue} | phase: ${currentPhase?.name}[${currentFrameIndex}] | interval: ${intervalId}`)
-  }
-
   const disposeInterval = () => {
+    if (intervalId){
+      clearInterval(intervalId);
+    }
     setIntervalId(null)
   }
 
   const setImageSrc = (src: string, nodeId: number) => {
-    const imgs = document.querySelectorAll(`.mist-${nodeId}`) as any; //handle more than one?
-    console.log("imgs? ", imgs)
-    imgs.forEach((img: any) => {
-      img.src = src;
-    });
+    const imgs = document.querySelectorAll(`.mist-${nodeId}`) as any;
+    imgs.forEach((img: any) => img.src = src);
+  }
+
+  const advanceFrame = (frames: string[]) => {
+    setLoopIndex((loopIndex + 1) % frames.length);
+    setImageSrc(frames[loopIndex], nodeId);
+  }
+
+  const startLooping = () => {
+    if(intervalId === null) {
+      setIntervalId(setInterval(() => {
+        advanceFrame(humidAnimationPhases.stayOn.frames);
+      }, 100) as any);
+    }
   }
 
   useEffect(() => {
@@ -41,10 +43,10 @@ export const HumidiferAnimation: React.FC<IProps> = ({nodeValue, nodeId}) => {
     const shouldJustLoop = justLoaded && nodeValue === 1;
     const shouldJustRest = justLoaded && nodeValue === 0;
 
-    setCurrentFrameIndex(0);
-
     if (shouldRampUp) {
-      console.log("\n|> shouldRampUp")
+      console.log("|> shouldRampUp")
+      // setRamping(true)
+      // setTimeout(() => { setRamping(false) }, humidAnimationPhases.rampUp.frames.length * 110);
       setImageSrc(humidAnimationPhases.rampUp.frames[0], nodeId);
       humidAnimationPhases.rampUp.frames.forEach((frame, index) => {
         setTimeout(() => {
@@ -54,23 +56,28 @@ export const HumidiferAnimation: React.FC<IProps> = ({nodeValue, nodeId}) => {
     }
 
     if (shouldRampDown) {
-      console.log("\n|> shouldRampDown")
+      console.log("|> shouldRampDown")
+      // setRamping(true)
+      // setTimeout(() => { setRamping(false) }, humidAnimationPhases.rampUp.frames.length * 110);
       setImageSrc(humidAnimationPhases.rampDown.frames[0], nodeId);
       humidAnimationPhases.rampDown.frames.forEach((frame, index) => {
         setTimeout(() => {
           setImageSrc(frame, nodeId);
         }, index * 100);
       })
+      disposeInterval();
     }
 
     if (shouldJustLoop) {
-      console.log("\n|> shouldJustLoop")
+      console.log("|> shouldJustLoop, but are we ramping?", ramping)
       setImageSrc(humidAnimationPhases.stayOn.frames[0], nodeId);
+      //if (!ramping) startLooping();
     }
 
     if (shouldJustRest) {
-      console.log("\n|> shouldJustRest")
+      console.log("|> shouldJustRest")
       setImageSrc(humidAnimationPhases.stayOff.frames[0], nodeId);
+      disposeInterval();
     }
 
     priorValue.current = nodeValue;
