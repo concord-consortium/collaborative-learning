@@ -5,10 +5,22 @@ interface IProps {
   nodeId: number;
 }
 
+// TODO in morning, make this work
+// THEN, make it an array and check for the id sort of thing where it is a registry of all the humiidifier animations
+var humidAnimationInterval: any = null;
+
+
 export const HumidiferAnimation: React.FC<IProps> = ({nodeValue, nodeId}) => {
   const priorValue = useRef<number | undefined>();
-  const canLoopRef = useRef(false);
-  const intervalRef = useRef<any | undefined>(null);
+
+  const advanceFrame = (frames: string[]) => {
+    const currentFrame = frames[0];
+    const nextFrame = frames[1];
+    frames.shift();
+    frames.push(currentFrame);
+    setImageSrc(nextFrame, nodeId);
+  }
+
 
   const setImageSrc = (src: string, nodeId: number) => {
     const imgs = document.querySelectorAll(`.mist-${nodeId}`) as any;
@@ -16,18 +28,20 @@ export const HumidiferAnimation: React.FC<IProps> = ({nodeValue, nodeId}) => {
   }
 
   const startLooping = (id: number) => {
-    if (canLoopRef.current === true && intervalRef.current === null){
-      console.log("🔁 we can and should loop animation on node", id);
-      intervalRef.current = setInterval(() => {
-        console.log("✅ looping animation on node", id, intervalRef.current);
+    if (humidAnimationInterval === null){
+      humidAnimationInterval = setInterval(() => {
+        console.log("🔁 loop animation on node", id, humidAnimationInterval);
+        advanceFrame(humidAnimationPhases.stayOn.frames);
       }, 100);
     }
   }
 
   const stopLooping = (id: number) => {
-    canLoopRef.current = false;
     console.log("🔴 we should stop looping animation on node", id);
-    clearInterval(intervalRef.current);
+    console.log("interval BEFORE KILL: ", humidAnimationInterval)
+    clearInterval(humidAnimationInterval);
+    humidAnimationInterval = null;
+    console.log("interval AFTER KILL: ", humidAnimationInterval)
   }
 
   useEffect(() => {
@@ -37,8 +51,8 @@ export const HumidiferAnimation: React.FC<IProps> = ({nodeValue, nodeId}) => {
     const shouldJustLoop = justLoaded && nodeValue === 1;
     const shouldJustRest = justLoaded && nodeValue === 0;
 
+    console.log("interval: ", humidAnimationInterval)
     if (shouldRampUp) {
-      canLoopRef.current = true;
       setImageSrc(humidAnimationPhases.rampUp.frames[0], nodeId);
       humidAnimationPhases.rampUp.frames.forEach((frame, index) => {
         setTimeout(() => {
@@ -48,7 +62,6 @@ export const HumidiferAnimation: React.FC<IProps> = ({nodeValue, nodeId}) => {
     }
 
     if (shouldRampDown) {
-      canLoopRef.current = false;
       setImageSrc(humidAnimationPhases.rampDown.frames[0], nodeId);
       humidAnimationPhases.rampDown.frames.forEach((frame, index) => {
         setTimeout(() => {
@@ -58,26 +71,20 @@ export const HumidiferAnimation: React.FC<IProps> = ({nodeValue, nodeId}) => {
     }
 
     if (shouldJustLoop) {
-      canLoopRef.current = true;
       setImageSrc(humidAnimationPhases.stayOn.frames[0], nodeId);
     }
 
     if (shouldJustRest) {
-      canLoopRef.current = false;
       setImageSrc(humidAnimationPhases.stayOff.frames[0], nodeId);
     }
 
     if (shouldJustLoop || shouldRampUp){
-      if (canLoopRef.current === true){
-        startLooping(nodeId);
-      }
-
+      startLooping(nodeId);
     } else {
       stopLooping(nodeId)
     }
-
     priorValue.current = nodeValue;
-    //return clearInterval(intervalRef.current);
+    console.log("| humidInterval: ", humidAnimationInterval)
   },[nodeValue])
 
   return (<>
