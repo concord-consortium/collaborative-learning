@@ -21,6 +21,8 @@ import DivideIcon from "../../assets/icons/math/divide.svg";
 import LightBulbIcon from "../../assets/icons/output/light-bulb.svg";
 import GrabberIcon from "../../assets/icons/output/grabber.svg";
 import AdvancedGrabberIcon from "../../assets/icons/output/advanced-grabber.svg";
+import HumidIcon from "../../assets/icons/output/humid.svg";
+import FanIcon from "../../assets/icons/output/fan.svg";
 
 import TemperatureIcon from "../../assets/icons/sensor/temperature.svg";
 import CO2Icon from "../../assets/icons/sensor/co2.svg";
@@ -301,11 +303,11 @@ export const NodeDemoOutputTypes = [
   },
   {
     name: "Fan",
-    icon: LightBulbIcon
+    icon: FanIcon
   },
   {
     name: "Humidifier",
-    icon: LightBulbIcon
+    icon: HumidIcon
   }
 ];
 
@@ -320,17 +322,17 @@ export const NodeLiveOutputTypes = [
   },
   {
     name: "Humidifier",
-    icon: GrabberIcon,
+    icon: HumidIcon,
     relayIndex: 2
   },
   {
     name: "Fan",
-    icon: GrabberIcon,
+    icon: FanIcon,
     relayIndex: 1
   },
   {
     name: "Heat Lamp",
-    icon: GrabberIcon,
+    icon: LightBulbIcon,
     relayIndex: 0
   }
 ];
