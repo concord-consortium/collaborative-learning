@@ -8,6 +8,7 @@ interface IProps {
 export const HumidiferAnimation: React.FC<IProps> = ({nodeValue, nodeId}) => {
   const priorValue = useRef<number | undefined>();
   const canLoopRef = useRef(false);
+  const intervalRef = useRef<any | undefined>();
 
   const setImageSrc = (src: string, nodeId: number) => {
     const imgs = document.querySelectorAll(`.mist-${nodeId}`) as any;
@@ -17,12 +18,16 @@ export const HumidiferAnimation: React.FC<IProps> = ({nodeValue, nodeId}) => {
   const startLooping = (id: number) => {
     if (canLoopRef.current === true){
       console.log("🔁 we can and should loop animation on node", id);
+      intervalRef.current = setInterval(() => {
+        console.log("✅ looping animation on node", id, intervalRef.current);
+      }, 100);
     }
   }
 
   const stopLooping = (id: number) => {
     canLoopRef.current = false;
     console.log("🔴 we should stop looping animation on node", id);
+    clearInterval(intervalRef.current);
   }
 
   useEffect(() => {
@@ -33,7 +38,6 @@ export const HumidiferAnimation: React.FC<IProps> = ({nodeValue, nodeId}) => {
     const shouldJustRest = justLoaded && nodeValue === 0;
 
     if (shouldRampUp) {
-      //console.log("|> shouldRampUp")
       canLoopRef.current = true;
       setImageSrc(humidAnimationPhases.rampUp.frames[0], nodeId);
       humidAnimationPhases.rampUp.frames.forEach((frame, index) => {
@@ -45,7 +49,6 @@ export const HumidiferAnimation: React.FC<IProps> = ({nodeValue, nodeId}) => {
 
     if (shouldRampDown) {
       canLoopRef.current = false;
-      //console.log("|> shouldRampDown")
       setImageSrc(humidAnimationPhases.rampDown.frames[0], nodeId);
       humidAnimationPhases.rampDown.frames.forEach((frame, index) => {
         setTimeout(() => {
@@ -56,23 +59,25 @@ export const HumidiferAnimation: React.FC<IProps> = ({nodeValue, nodeId}) => {
 
     if (shouldJustLoop) {
       canLoopRef.current = true;
-      //console.log("|> loadInLoop")
       setImageSrc(humidAnimationPhases.stayOn.frames[0], nodeId);
     }
 
     if (shouldJustRest) {
       canLoopRef.current = false;
-      //console.log("|> loadInRest")
       setImageSrc(humidAnimationPhases.stayOff.frames[0], nodeId);
     }
 
     if (shouldJustLoop || shouldRampUp){
-      startLooping(nodeId);
+      if (canLoopRef.current === true){
+        startLooping(nodeId);
+      }
+
     } else {
       stopLooping(nodeId)
     }
 
     priorValue.current = nodeValue;
+    //return clearInterval(intervalRef.current);
   },[nodeValue])
 
   return (<>
