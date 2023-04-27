@@ -14,7 +14,6 @@ function registerAnimation(nodeId: number, interval: any) {
 }
 
 function removeAnimation(nodeId: number) {
-  console.log("removing animation", nodeId, humidAnimations.get(nodeId));
   clearInterval(humidAnimations.get(nodeId));
   humidAnimations.delete(nodeId);
 }
@@ -33,7 +32,6 @@ export const HumidiferAnimation: React.FC<IProps> = ({nodeValue, nodeId, editor}
   });
 
   const advanceFrame = (frames: string[]) => {
-    console.log("advancing frame")
     const currentFrame = frames[0];
     const nextFrame = frames[1];
     frames.shift();
