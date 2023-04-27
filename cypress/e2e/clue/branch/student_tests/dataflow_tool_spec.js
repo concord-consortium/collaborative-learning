@@ -250,19 +250,21 @@ context('Dataflow Tool Tile', function () {
       });
       it("can change output type", () => {
         const dropdown = "outputType";
-        const outputTypes = ["Light Bulb", "Grabber", "Advanced Grabber"];
+        const outputTypes = ["Light Bulb", "Grabber", "Advanced Grabber", "Fan", "Humidifier"];
         dataflowToolTile.getDropdown(nodeType, dropdown).click();
-        dataflowToolTile.getDropdownOptions(nodeType, dropdown).should("have.length", 3);
+        dataflowToolTile.getDropdownOptions(nodeType, dropdown).should("have.length", 5);
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).each(($tab, index, $typeList) => {
           expect($tab.text()).to.contain(outputTypes[index]);
         });
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).last().click();
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).should("have.length", 0);
-        dataflowToolTile.getDropdown(nodeType, dropdown).contains("Grabber").should("exist");
+        dataflowToolTile.getDropdown(nodeType, dropdown).contains("Humidifier").should("exist");
       });
       it("verify demo output images, node inputs outputs & toggle minigraph", () => {
         const dropdown = "outputType";
         //verify advanced grabber
+        dataflowToolTile.getDropdown(nodeType, dropdown).click();
+        dataflowToolTile.getDropdownOptions(nodeType, dropdown).eq(2).click();
         dataflowToolTile.getAdvancedGrabberImages();
         dataflowToolTile.getNodeInput().should("exist");
         dataflowToolTile.getNodeInput().should('have.length', 2);
