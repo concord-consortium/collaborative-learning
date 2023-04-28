@@ -8,7 +8,7 @@ let dragXDestination = 300;
 
 context('Dataflow Tool Tile', function () {
   before(function () {
-    const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=dfe";
+    const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=dfe&mouseSensor";
     cy.clearQAData('all');
     cy.visit(queryParams);
     cy.waitForLoad();
@@ -67,6 +67,31 @@ context('Dataflow Tool Tile', function () {
         dataflowToolTile.getFlowtool().children().should("have.attr", "style").and("contain", "scale(1)");
       });
       it("can delete number node", () => {
+        dataflowToolTile.getDeleteNodeButton(nodeType).click();
+        dataflowToolTile.getNode(nodeType).should("not.exist");
+      });
+    });
+    describe("Drag to Add Node", () => {
+      const nodeType = "number";
+      // TODO Why isn't this test working?
+      it('can create node by dragging button onto tile', () => {
+        const draggable = () => cy.get(".program-toolbar [aria-roledescription='draggable'] button").eq(1);
+        dataflowToolTile.getNode(nodeType).should("not.exist");
+        draggable().trigger("mousedown", { force: true })
+          .wait(100)
+          .trigger("mousemove", {
+            force: true,
+            clientX: 500,
+            clientY: 200
+          })
+          .wait(100)
+          .trigger("mouseup", { force: true })
+          .wait(100);
+        // const dataTransfer = new DataTransfer;
+        // draggable().focus().trigger('dragstart', { dataTransfer });
+        // dataflowToolTile.getDataflowTile().trigger('drop', { dataTransfer });
+        // draggable().trigger('dragend');
+        dataflowToolTile.getNode(nodeType).should("exist");
         dataflowToolTile.getDeleteNodeButton(nodeType).click();
         dataflowToolTile.getNode(nodeType).should("not.exist");
       });

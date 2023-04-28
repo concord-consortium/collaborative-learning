@@ -3,11 +3,11 @@ import { observer } from "mobx-react";
 import React from "react";
 import ReactDOM from "react-dom";
 import { Tooltip } from "react-tippy";
-import { DragEndEvent, DragOverlay, useDndMonitor, useDraggable, useDroppable } from "@dnd-kit/core";
+import { DragOverlay, useDraggable } from "@dnd-kit/core";
 import { DiagramHelper, VariableType } from "@concord-consortium/diagram-view";
 
 import { DiagramContentModelType } from "./diagram-content";
-import { kNewVariableButtonDraggableId, kNewVariableButtonDroppableId } from "./diagram-types";
+import { kNewVariableButtonDraggableId } from "./diagram-types";
 import { useUIStore } from "../../hooks/use-stores";
 import { useTooltipOptions } from "../../hooks/use-tooltip-options";
 import { ButtonDivider } from "../../components/tiles/toolbar/button-divider";
@@ -71,21 +71,8 @@ const NewVaribleButton = ({ handleClick, tileId }: INewVariableButton) => {
   const draggableId = `${kNewVariableButtonDraggableId}-${tileId}`;
   const { attributes, listeners, setNodeRef } = useDraggable({ id: draggableId });
 
-  // Because the button is draggable, it can no longer be clicked.
-  // Instead, we check to see if it's dropped on itself, and if it is we "click" it.
-  const droppableId = `${kNewVariableButtonDroppableId}-${tileId}`;
-  const droppableInfo = useDroppable({ id: droppableId });
-  const setDroppableNodeRef = droppableInfo.setNodeRef;
-  useDndMonitor({
-    onDragEnd: (event: DragEndEvent) => {
-      if (event.over?.id === droppableId && event.active.id === draggableId) {
-        handleClick();
-      }
-    }
-  });
-
   return (
-    <div ref={setDroppableNodeRef}>
+    <>
       <div ref={setNodeRef} {...attributes} {...listeners} >
         <SvgToolbarButton SvgIcon={AddVariableCardIcon} buttonClass="button-add-variable" title="New Variable"
           onClick={handleClick} />
@@ -95,7 +82,7 @@ const NewVaribleButton = ({ handleClick, tileId }: INewVariableButton) => {
           ? <AddVariableCardIcon />
           : null }
       </DragOverlay>
-    </div>
+    </>
   );
 };
 

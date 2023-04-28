@@ -25,6 +25,7 @@ import { GeneratorReteNodeFactory } from "../nodes/factories/generator-rete-node
 import { TimerReteNodeFactory } from "../nodes/factories/timer-rete-node-factory";
 import { NumControl } from "../nodes/controls/num-control";
 import { ValueControl } from "../nodes/controls/value-control";
+import { DataflowDropZone } from "./ui/dataflow-drop-zone";
 import { DataflowProgramToolbar } from "./ui/dataflow-program-toolbar";
 import { DataflowProgramTopbar } from "./ui/dataflow-program-topbar";
 import { DataflowProgramCover } from "./ui/dataflow-program-cover";
@@ -157,18 +158,18 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         />
         <div className={toolbarEditorContainerClass}>
           { showProgramToolbar && <DataflowProgramToolbar
-            onNodeCreateClick={this.addNode}
-            onClearClick={this.clearProgram}
-            isTesting={isTesting}
             disabled={!!readOnly}
+            isTesting={isTesting}
+            onClearClick={this.clearProgram}
+            onNodeCreateClick={this.addNode}
+            tileId={this.props.tileId}
           /> }
-          <div
+          <DataflowDropZone
+            addNode={this.addNode}
             className="editor-graph-container"
-            style={this.getEditorStyle()}
-            onDragOver={event => {
-              event.preventDefault();
-              event.dataTransfer.dropEffect = "copy";
-            }}
+            programEditor={this.programEditor}
+            style={this.getEditorStyle}
+            tileId={this.props.tileId}
           >
             <div
               className={editorClass}
@@ -188,7 +189,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                   disabled={false}
                 /> }
             </div>
-          </div>
+          </DataflowDropZone>
         </div>
       </div>
     );
@@ -494,10 +495,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     return bounds;
   }
 
-  private addNode = async (nodeType: string) => {
+  private addNode = async (nodeType: string, position?: [number, number]) => {
     const nodeFactory = this.programEditor.components.get(nodeType) as DataflowReteNodeFactory;
     const n1 = await nodeFactory!.createNode();
-    n1.position = this.getNewNodePosition();
+    n1.position = position ?? this.getNewNodePosition();
     this.programEditor.addNode(n1);
   };
 
