@@ -9,7 +9,7 @@ import {
 import { IDocumentExportOptions, IDefaultContentOptions } from "../tile-content-info";
 import { TileMetadataModel } from "../tile-metadata";
 import { tileModelHooks } from "../tile-model-hooks";
-import { setTileTitleFromContent } from "../tile-model";
+import { getTileTitleFromContent, setTileTitleFromContent } from "../tile-model";
 import { TileContentModel } from "../tile-content";
 import { addCanonicalCasesToDataSet, IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
 import {
@@ -227,7 +227,7 @@ export const TableContentModel = TileContentModel
   }))
   .views(self => ({
     get title() {
-      return self.dataSet.name;
+      return getTileTitleFromContent(self) ?? self.dataSet.name;
     }
   }))
   .views(self => ({
@@ -333,7 +333,6 @@ export const TableContentModel = TileContentModel
       // }
     },
     setTableName(name: string) {
-      self.dataSet.setName(name);
       setTileTitleFromContent(self, name);
       self.logChange({ action: "update", target: "table", props: { name } });
     },
