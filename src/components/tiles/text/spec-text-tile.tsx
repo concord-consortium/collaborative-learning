@@ -38,6 +38,9 @@ export function specTextTile(options: ISpecTextTileOptions) {
     onRequestTilesOfType: (tileType) => {
       throw new Error("Function not implemented.");
     },
+    onRequestLinkableTiles: () => {
+      throw new Error("Function not implemented.");
+    },
     onRequestUniqueTitle: (tileId) => {
       throw new Error("Function not implemented.");
     },

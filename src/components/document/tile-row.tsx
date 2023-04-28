@@ -69,6 +69,7 @@ interface IProps {
   readOnly?: boolean;
   dropHighlight?: string;
   onRequestTilesOfType: (tileType: string) => Array<{ id: string, title?: string }>;
+  onRequestLinkableTiles: () => Array<{ id: string, title?: string }>;
   onRequestUniqueTitle: (tileId: string) => string | undefined;
 }
 

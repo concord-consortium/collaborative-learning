@@ -22,7 +22,7 @@ interface IProps {
 export const useTableLinking = ({documentId, model, onRequestTilesOfType, actionHandlers}: IProps) => {
   const {handleRequestTableLink, handleRequestTableUnlink} = actionHandlers || {};
   const modelId = model.id;
-  const showLinkButton = useFeatureFlag("GeometryLinkedTables");
+  const showLinkButton = useFeatureFlag("TileLinkedTables");
   const tableTiles = useLinkableTableTiles({ model, onRequestTilesOfType });
   const isLinkEnabled = (tableTiles.length > 0);
   const linkColors = getTableLinkColors(modelId);

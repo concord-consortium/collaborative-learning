@@ -979,7 +979,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   private isAcceptableTileDrag = (e: React.DragEvent<HTMLDivElement>) => {
     const { appConfig } = this.stores;
     const { readOnly } = this.props;
-    const canAcceptTableDrops = appConfig.isFeatureSupported("GeometryLinkedTables") &&
+    const canAcceptTableDrops = appConfig.isFeatureSupported("TileLinkedTables") &&
                                   this.isDragTileInSameDocument(e);
     const toolType = extractDragTileType(e.dataTransfer);
     // image drop area is central 80% in each dimension

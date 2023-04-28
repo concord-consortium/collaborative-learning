@@ -28,6 +28,7 @@ registerTileContentInfo({
 registerTileComponentInfo({
   type: kTableTileType,
   Component: TableToolComponent,
+  providesData: true,
   tileEltClass: "table-tool-tile",
   Icon: TableToolIcon
 });

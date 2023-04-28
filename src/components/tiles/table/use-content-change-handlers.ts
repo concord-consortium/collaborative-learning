@@ -23,8 +23,8 @@ export interface IContentChangeHandlers {
   onAddRows: (newCases: ICaseCreation[]) => void;
   onUpdateRow: (caseValues: ICase) => void;
   onRemoveRows: (rowIds: string[]) => void;
-  onLinkGeometryTile: (geomTileInfo: ITileLinkMetadata) => void;
-  onUnlinkGeometryTile: (geomTileInfo: ITileLinkMetadata) => void;
+  onLinkTile: (tileInfo: ITileLinkMetadata) => void;
+  onUnlinkTile: (tileInfo: ITileLinkMetadata) => void;
 }
 
 interface IProps {
@@ -121,12 +121,12 @@ export const useContentChangeHandlers = ({
     getContent().removeCases(rowIds);
   }, [readOnly, getContent]);
 
-  const linkGeometryTile = useCallback((geomTileInfo: ITileLinkMetadata) => {
+  const linkTile = useCallback((tileInfo: ITileLinkMetadata) => {
     // !readOnly && requestGeometryLinkToTable(getContent(), geomTileInfo.id);
     // The below makes the Geometry model's addLinkedTable action redundant.
     // Should we instead add an addLinkedTable action to the Graph model,
     // and then do something more similar to requestGeometryLinkToTable here?
-    const consumerTile = getTileContentById(getContent(), geomTileInfo.id);
+    const consumerTile = getTileContentById(getContent(), tileInfo.id);
     if (!readOnly && consumerTile) {
       const sharedModelManager = consumerTile.tileEnv?.sharedModelManager;
       if (sharedModelManager?.isReady) {
@@ -136,12 +136,12 @@ export const useContentChangeHandlers = ({
     }
   }, [getContent, readOnly, modelRef]);
 
-  const unlinkGeometryTile = useCallback((geomTileInfo: ITileLinkMetadata) => {
+  const unlinkTile = useCallback((tileInfo: ITileLinkMetadata) => {
     // !readOnly && requestGeometryUnlinkFromTable(getContent(), geomTileInfo.id);
     // The below makes the Geometry model's removeLinkedTable action redundant.
     // Should we instead add a removeLinkedTable action to the Graph model,
     // and then do something more similar to requestGeometryUnlinkFromTable here?
-    const consumerTile = getTileContentById(getContent(), geomTileInfo.id);
+    const consumerTile = getTileContentById(getContent(), tileInfo.id);
     if (!readOnly && consumerTile) {
       const sharedModelManager = consumerTile.tileEnv?.sharedModelManager;
       if (sharedModelManager?.isReady) {
@@ -154,5 +154,5 @@ export const useContentChangeHandlers = ({
   return { onSetTableTitle: setTableTitle, onSetColumnName: setColumnName, onSetColumnExpressions: setColumnExpressions,
           onAddColumn: addColumn, onRemoveColumn: removeColumn, requestRowHeight,
           onAddRows: addRows, onUpdateRow: updateRow, onRemoveRows: removeRows,
-          onLinkGeometryTile: linkGeometryTile, onUnlinkGeometryTile: unlinkGeometryTile };
+          onLinkTile: linkTile, onUnlinkTile: unlinkTile };
 };

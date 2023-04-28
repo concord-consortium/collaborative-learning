@@ -7,9 +7,9 @@ interface IProps {
   getLinkIndex: () => number;
   onClick?: () => void;
 }
-export const LinkGeometryButton: React.FC<IProps> = ({ isEnabled, getLinkIndex, onClick }) => {
+export const LinkTileButton: React.FC<IProps> = ({ isEnabled, getLinkIndex, onClick }) => {
   const linkIndex = getLinkIndex();
-  const classes = classNames("link-geometry-button", `link-color-${linkIndex}`, { disabled: !isEnabled });
+  const classes = classNames("link-tile-button", `link-color-${linkIndex}`, { disabled: !isEnabled });
   const handleClick = (e: React.MouseEvent) => {
     isEnabled && onClick?.();
     e.stopPropagation();

@@ -16,6 +16,7 @@ registerTileContentInfo({
 
 registerTileComponentInfo({
   Component: GraphWrapperComponent,
+  consumesData: true,
   Icon: GraphToolIcon,
   tileEltClass: "graph-tool-tile",
   type: kGraphTileType

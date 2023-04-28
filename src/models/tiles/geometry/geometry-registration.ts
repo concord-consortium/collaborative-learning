@@ -28,6 +28,7 @@ registerTileContentInfo({
 registerTileComponentInfo({
   type: kGeometryTileType,
   Component: GeometryToolComponent,
+  consumesData: true,
   tileEltClass: "geometry-tool-tile",
   tileHandlesOwnSelection: true,
   Icon: GeometryToolIcon

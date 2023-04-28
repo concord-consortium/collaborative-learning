@@ -220,6 +220,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
                                   rowIndex={index} height={rowHeight} tileMap={tileMap}
                                   dropHighlight={dropHighlight}
                                   onRequestTilesOfType={this.handleRequestTilesOfType}
+                                  onRequestLinkableTiles={this.handleRequestLinkableTiles}
                                   onRequestUniqueTitle={this.handleRequestUniqueTitle}
                                   ref={(elt) => this.rowRefs.push(elt)} {...others} />
               : null;
@@ -244,6 +245,14 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     if (!content || !tileType || !tileApiInterface) return [];
     const tilesOfType = content.getTilesOfType(tileType);
     return tilesOfType.map(id => ({ id, title: tileApiInterface.getTileApi(id)?.getTitle?.() }));
+  };
+
+  private handleRequestLinkableTiles = () => {
+    const { content } = this.props;
+    const tileApiInterface = this.context;
+    if (!content || !tileApiInterface) return [];
+    const linkableTiles = content.getLinkableTiles();
+    return linkableTiles.map((id: string) => ({ id, title: tileApiInterface.getTileApi(id)?.getTitle?.() }));
   };
 
   private handleRequestUniqueTitle = (tileId: string) => {

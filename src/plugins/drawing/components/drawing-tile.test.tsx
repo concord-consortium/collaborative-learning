@@ -71,6 +71,9 @@ describe("DrawingToolComponent", () => {
     onRequestTilesOfType: (tileType: string): { id: string; title?: string | undefined; }[] => {
       throw new Error("Function not implemented.");
     },
+    onRequestLinkableTiles: (): { id: string; title?: string | undefined; }[] => {
+      throw new Error("Function not implemented.");
+    },
     onRequestUniqueTitle: (tileId: string): string | undefined => {
       throw new Error("Function not implemented.");
     },

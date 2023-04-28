@@ -18,7 +18,7 @@ export const LinkTableButton: React.FC<IProps> = ({ isEnabled, onClick }) => {
     isEnabled && onClick?.();
     e.stopPropagation();
   };
-  return useFeatureFlag("GeometryLinkedTables")
+  return useFeatureFlag("TileLinkedTables")
           ? <div key="table-link-button" className={classes} data-testid="table-link-button" onClick={handleClick}>
               <LinkTableIcon />
             </div>
