@@ -3,7 +3,7 @@ import { TileContentModel } from "../../models/tiles/tile-content";
 import { kExpressionTileType } from "./expression-types";
 
 export function defaultExpressionContent(): ExpressionContentModelType {
-  return ExpressionContentModel.create({text: "Hello World"});
+  return ExpressionContentModel.create({text: "Math Expression"});
 }
 
 export const ExpressionContentModel = TileContentModel

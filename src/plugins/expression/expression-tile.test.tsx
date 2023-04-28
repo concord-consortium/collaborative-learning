@@ -46,13 +46,13 @@ describe("ExpressionToolComponent", () => {
   it("renders successfully", () => {
     const {getByText} =
       render(<ExpressionToolComponent  {...defaultProps} {...{model}}></ExpressionToolComponent>);
-    expect(getByText("Hello World")).toBeInTheDocument();
+    expect(getByText("Math Expression")).toBeInTheDocument();
   });
 
   it("updates the text when the model changes", async () => {
     const {getByText, findByText} =
       render(<ExpressionToolComponent  {...defaultProps} {...{model}}></ExpressionToolComponent>);
-    expect(getByText("Hello World")).toBeInTheDocument();
+    expect(getByText("Math Expression")).toBeInTheDocument();
 
     content.setText("New Text");
 

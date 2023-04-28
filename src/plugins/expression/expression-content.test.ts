@@ -4,7 +4,7 @@ import { defaultExpressionContent, ExpressionContentModel } from "./expression-c
 describe("ExpressionContent", () => {
   it("has default content of 'hello world'", () => {
     const content = defaultExpressionContent();
-    expect(content.text).toBe("Hello World");
+    expect(content.text).toBe("Math Expression");
   });
 
   it("supports changing the text", () => {
