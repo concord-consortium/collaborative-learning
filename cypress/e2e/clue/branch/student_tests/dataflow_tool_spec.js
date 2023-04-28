@@ -8,7 +8,7 @@ let dragXDestination = 300;
 
 context('Dataflow Tool Tile', function () {
   before(function () {
-    const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=dfe";
+    const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=dfe&mouseSensor";
     cy.clearQAData('all');
     cy.visit(queryParams);
     cy.waitForLoad();
@@ -74,7 +74,7 @@ context('Dataflow Tool Tile', function () {
     describe("Drag to Add Node", () => {
       const nodeType = "number";
       // TODO Why isn't this test working?
-      it.skip('can create node by dragging button onto tile', () => {
+      it('can create node by dragging button onto tile', () => {
         const draggable = () => cy.get(".program-toolbar [aria-roledescription='draggable'] button").eq(1);
         dataflowToolTile.getNode(nodeType).should("not.exist");
         draggable().trigger("mousedown", { force: true })
