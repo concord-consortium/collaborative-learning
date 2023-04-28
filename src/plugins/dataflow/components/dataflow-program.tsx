@@ -424,8 +424,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private destroyEditor() {
     this.reactElements.forEach(el => {
-      const success = ReactDOM.unmountComponentAtNode(el);
-      console.log("DataflowProgram unmounted", success, el);
+      ReactDOM.unmountComponentAtNode(el);
     });
     this.programEditor.destroy();
     this.reactElements = [];
