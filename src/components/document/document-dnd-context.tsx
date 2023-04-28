@@ -11,7 +11,7 @@ interface IDocumentDndContextProps {
 }
 export const DocumentDndContext = ({ children }: IDocumentDndContextProps) => {
 
-  const useMouseSensor = useSensor(MouseSensor)
+  const useMouseSensor = useSensor(MouseSensor);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
