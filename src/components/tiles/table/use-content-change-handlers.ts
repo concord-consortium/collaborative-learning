@@ -3,12 +3,15 @@ import { getTableContentHeight } from "./table-utils";
 import { useCurrent } from "../../../hooks/use-current";
 import { ICase, ICaseCreation, IDataSet } from "../../../models/data/data-set";
 import { ITileLinkMetadata } from "../../../models/tiles/table-link-types";
-import { requestGeometryLinkToTable, requestGeometryUnlinkFromTable } from "../../../models/tiles/table-links";
+// import { requestGeometryLinkToTable, requestGeometryUnlinkFromTable } from "../../../models/tiles/table-links";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
 import { isLinkableValue } from "../../../models/tiles/table/table-model-types";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { uniqueId, uniqueName } from "../../../utilities/js-utils";
 import { TColumn, TRow } from "./table-types";
+import { IAttribute } from "../../../models/data/attribute";
+import { getTileContentById } from "../../../utilities/mst-utils";
+import { SharedDataSet } from "../../../models/shared/shared-data-set";
 
 export interface IContentChangeHandlers {
   onSetTableTitle: (title: string) => void;
@@ -50,7 +53,7 @@ export const useContentChangeHandlers = ({
     const newCase: ICaseCreation = { __id__: uniqueId() };
     if (getContent().isLinked) {
       // validate linkable values
-      dataSet.attributes.forEach(attr => {
+      dataSet.attributes.forEach((attr: IAttribute) => {
         const value = aCase[attr.id];
         newCase[attr.id] = isLinkableValue(value) ? value : 0;
       });
@@ -119,12 +122,34 @@ export const useContentChangeHandlers = ({
   }, [readOnly, getContent]);
 
   const linkGeometryTile = useCallback((geomTileInfo: ITileLinkMetadata) => {
-    !readOnly && requestGeometryLinkToTable(getContent(), geomTileInfo.id);
-  }, [getContent, readOnly]);
+    // !readOnly && requestGeometryLinkToTable(getContent(), geomTileInfo.id);
+    // The below makes the Geometry model's addLinkedTable action redundant.
+    // Should we instead add an addLinkedTable action to the Graph model,
+    // and then do something more similar to requestGeometryLinkToTable here?
+    const consumerTile = getTileContentById(getContent(), geomTileInfo.id);
+    if (!readOnly && consumerTile) {
+      const sharedModelManager = consumerTile.tileEnv?.sharedModelManager;
+      if (sharedModelManager?.isReady) {
+        const sharedTable = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, modelRef.current.id);
+        sharedTable && sharedModelManager?.addTileSharedModel(consumerTile, sharedTable);
+      }
+    }
+  }, [getContent, readOnly, modelRef]);
 
   const unlinkGeometryTile = useCallback((geomTileInfo: ITileLinkMetadata) => {
-    !readOnly && requestGeometryUnlinkFromTable(getContent(), geomTileInfo.id);
-  }, [getContent, readOnly]);
+    // !readOnly && requestGeometryUnlinkFromTable(getContent(), geomTileInfo.id);
+    // The below makes the Geometry model's removeLinkedTable action redundant.
+    // Should we instead add a removeLinkedTable action to the Graph model,
+    // and then do something more similar to requestGeometryUnlinkFromTable here?
+    const consumerTile = getTileContentById(getContent(), geomTileInfo.id);
+    if (!readOnly && consumerTile) {
+      const sharedModelManager = consumerTile.tileEnv?.sharedModelManager;
+      if (sharedModelManager?.isReady) {
+        const sharedTable = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, modelRef.current.id);
+        sharedTable && sharedModelManager?.removeTileSharedModel(consumerTile, sharedTable);
+      }
+    }
+  }, [getContent, readOnly, modelRef]);
 
   return { onSetTableTitle: setTableTitle, onSetColumnName: setColumnName, onSetColumnExpressions: setColumnExpressions,
           onAddColumn: addColumn, onRemoveColumn: removeColumn, requestRowHeight,

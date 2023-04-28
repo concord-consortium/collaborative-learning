@@ -2,15 +2,14 @@ import { registerTileComponentInfo } from "../../models/tiles/tile-component-inf
 import { registerTileContentInfo } from "../../models/tiles/tile-content-info";
 import { kGraphDefaultHeight, kGraphTileType } from "./graph-types";
 import { GraphWrapperComponent } from "./components/graph-wrapper-component";
-import { createGraphContentModel, GraphContentModel, GraphMetadataModel } from "./models/graph-content";
+import { createGraphModel, GraphModel } from "./models/graph-model";
 
 import GraphToolIcon from "./graph-icon.svg";
 
 registerTileContentInfo({
-  defaultContent: () => createGraphContentModel(),
+  defaultContent: () => createGraphModel(),
   defaultHeight: kGraphDefaultHeight,
-  modelClass: GraphContentModel,
-  metadataClass: GraphMetadataModel,
+  modelClass: GraphModel,
   titleBase: "X-Y Plot",
   type: kGraphTileType
 });

@@ -59,8 +59,6 @@ export const GraphModel = TileContentModel
     // numberToggleModel: types.optional(types.union(NumberToggleModel, null))
     showParentToggles: false,
     showMeasuresForSelection: false,
-    // Used for importing table links from legacy documents
-    links: types.array(types.string)  // table tile ids
   })
   .views(self => ({
     get data(): IDataSet | undefined {
@@ -169,11 +167,6 @@ export const GraphModel = TileContentModel
     },
     setShowMeasuresForSelection(show: boolean) {
       self.showMeasuresForSelection = show;
-    }
-  }))
-  .actions(self => ({
-    replaceLinks(newLinks: string[]) {
-      self.links.replace(newLinks);
     }
   }));
 export interface IGraphModel extends Instance<typeof GraphModel> {}
