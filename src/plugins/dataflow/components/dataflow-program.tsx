@@ -1,4 +1,5 @@
 import React from "react";
+import ReactDOM from "react-dom";
 import "regenerator-runtime/runtime";
 import { inject, observer } from "mobx-react";
 import { BaseComponent } from "../../../components/base";
@@ -114,6 +115,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private disposers: IDisposer[] = [];
   private onSnapshotSetup = false;
   private processing = false;
+  private reactElements: HTMLElement[] = [];
+  private reactNodeElements = new Map<Node, HTMLElement>();
 
   constructor(props: IProps) {
     super(props);
@@ -212,6 +215,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   public componentWillUnmount() {
     clearInterval(this.intervalHandle);
     this.disposers.forEach(disposer => disposer());
+    this.destroyEditor();
   }
 
   public componentDidUpdate(prevProps: IProps) {
@@ -288,6 +292,44 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.programEditor = new Rete.NodeEditor(RETE_APP_IDENTIFIER, this.toolDiv);
       this.programEditor.use(ConnectionPlugin);
       this.programEditor.use(ReactRenderPlugin);
+
+      // Work around for cleaning up React components created
+      // by the react-render-plugin. The other part of this is
+      // in `destroyEditor`.
+      this.programEditor.on("rendercontrol", ({el, control}) => {
+        const extControl = control as any;
+        if (!extControl.render || extControl.render === "react") {
+          this.reactElements.push(el);
+        }
+      });
+
+      this.programEditor.on("rendernode", ({ el, node, component, bindSocket, bindControl }) => {
+        const extComponent = component as any;
+        if (!extComponent.render || extComponent.render === "react") {
+          this.reactElements.push(el);
+          this.reactNodeElements.set(node, el);
+        }
+      });
+
+      this.programEditor.on("noderemoved", node => {
+        const el = this.reactNodeElements.get(node);
+        if (el) {
+          this.reactNodeElements.delete(node);
+          this.reactElements = this.reactElements.filter(item => item !== el);
+
+          // Remove all the controls inside of this node
+          const childControls = el.getElementsByClassName("control");
+          for (let i=0; i<childControls.length; i++) {
+            const controlEl = childControls[i];
+            if (controlEl instanceof HTMLElement && this.reactElements.indexOf(controlEl)) {
+              this.reactElements = this.reactElements.filter(item => item !== controlEl);
+              ReactDOM.unmountComponentAtNode(controlEl);
+            }
+          }
+          ReactDOM.unmountComponentAtNode(el);
+        }
+      });
+      // End of work around for cleaning up React components
 
       this.components.map(c => {
         this.programEditor.register(c);
@@ -381,9 +423,22 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
   }
 
+  private destroyEditor() {
+    this.reactElements.forEach(el => {
+      ReactDOM.unmountComponentAtNode(el);
+    });
+    this.programEditor.destroy();
+    this.reactElements = [];
+    this.reactNodeElements.clear();
+  }
+
   private updateProgramEditor = () => {
     // TODO: allow updates to write tiles for undo/redo
     if (this.toolDiv && this.props.readOnly) {
+      if (this.programEditor) {
+        // Clean up the old editor first
+        this.destroyEditor();
+      }
       this.toolDiv.innerHTML = "";
       this.initProgramEditor();
     }
