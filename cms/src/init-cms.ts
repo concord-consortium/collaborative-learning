@@ -3,8 +3,8 @@
 import CMS from "netlify-cms-app";
 import { CmsBackendType, CmsConfig, CmsField } from "netlify-cms-core";
 
-import { urlParams } from "../utilities/url-params";
-import { ClueControl } from "./clue-control";
+import { urlParams } from "../../src/utilities/url-params";
+import { IframeControl } from "./iframe-control";
 import { JsonControl } from "./json-control";
 import { PreviewLinkControl } from "./preview-link-control";
 import { defaultCurriculumBranch } from "./cms-constants";
@@ -83,7 +83,7 @@ const cmsConfig: CmsConfig = {
 };
 
 export function initCMS() {
-  CMS.registerWidget("clue", ClueControl);
+  CMS.registerWidget("clue", IframeControl);
   CMS.registerWidget("json", JsonControl);
   CMS.registerWidget("preview-link", PreviewLinkControl);
   CMS.init({config: cmsConfig});

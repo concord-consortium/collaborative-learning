@@ -17,6 +17,15 @@ The code for this function is located here: https://github.com/Herohtar/netlify-
 
 It was configured with the client ID and client secret from the GitHub OAuth app.
 
+# Notes on calls:
+After publishing a CMS page, the component on the page is not reconstructed. The existing component is reused. Because we are holding onto the document this works fine.
+
+- When leaving (using the CMS ui) and coming back to the same page the component is reconstructed.
+- When leaving (using the CMS ui) with unsaved changes, a message is shown, and the control is reconstructed when returning to the page.
+- When leaving with unsaved changes by reloading the page in the browser:
+- A message is shown before reload confirming you want to lose your changes
+- A message is shown when the page is loaded again about an unsaved draft Choosing the draft doesn't always work. See the "Known Issues" section of cms.md
+
 # TODO
 
 ## Image tiles cause changes
