@@ -10,6 +10,7 @@ const gTileRegistration: Record<string, () => void> = {
     import(/* webpackChunkName: "SharedVariables" */"./plugins/shared-variables/shared-variables-registration")
   ]),
   "Drawing": () => import(/* webpackChunkName: "Drawing" */"./plugins/drawing/drawing-registration"),
+  "Expression": () => import(/* webpackChunkName: "Expression" */"./plugins/expression/expression-registration"),
   "Geometry": () => Promise.all([
     import(/* webpackChunkName: "Geometry" */"./models/tiles/geometry/geometry-registration"),
     import(/* webpackChunkName: "SharedDataSet" */"./models/shared/shared-data-set-registration")
