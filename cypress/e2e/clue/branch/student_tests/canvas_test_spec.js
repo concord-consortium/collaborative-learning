@@ -315,7 +315,7 @@ context('Test Canvas', function () {
       cy.openDocumentWithTitle('my-work', 'workspaces', 'SAS 2.1 Drawing Wumps');
     });
     it('will delete elements from canvas', function () {
-      // //Delete elements in the canvas
+      // Delete elements in the canvas
       clueCanvas.deleteTile('graph');
       clueCanvas.deleteTile('image');
       clueCanvas.deleteTile('draw');
