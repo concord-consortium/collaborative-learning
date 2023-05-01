@@ -16,6 +16,20 @@ import { DataCardSortArea } from "./components/sort-area";
 
 import "./data-card-tile.scss";
 
+//TODO:
+//Study https://github.com/concord-consortium/collaborative-learning/pull/1691
+
+//Tasks
+//Data Card tiles can be dragged onto each other from the usual corner drag mechanism, resulting in a single tile with all the cards from both decks.
+//target deck should light up around the outside edge when the drag will merge it.
+// if a toolbar to merge (brings up list of mergeable decks) is easier than drag do that.
+// merged (dragged) deck tile is removed.
+// Number of cards will be the sum of the card count in the two tiles.
+// Data fields will the the union of the two field set names. If each deck has unique fields the resulting cards have more fields: deck1fields + deck2fields, with blank data for the added fields on each card.
+// Data is available in the document model
+// Image data remains visible
+// new larger deck can be sorted to resolve any field differences in spelling or capitalization
+
 export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
   const { model, onRequestUniqueTitle, readOnly, documentContent, tileElt, onRegisterTileApi,
             onUnregisterTileApi } = props;

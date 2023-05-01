@@ -348,6 +348,8 @@ export class TileComponent extends BaseComponent<IProps, IState> {
 
   private handleTileDragStart = (e: React.DragEvent<HTMLDivElement>) => {
     // tile dragging can be disabled globally via appConfig
+    console.log("tile-component.tsx > handleTileDragSTART with event:", e); //added
+
     if (this.stores.appConfig.disableTileDrags) {
       e.preventDefault();
       return;
@@ -370,7 +372,7 @@ export class TileComponent extends BaseComponent<IProps, IState> {
     }
     // set the drag data
     const { model, docId } = this.props;
-
+    console.log("model:", model);
     const Component = getTileComponentInfo(model.content.type)?.Component;
     // can't drag placeholder tiles
     if (Component === PlaceholderTileComponent) {
