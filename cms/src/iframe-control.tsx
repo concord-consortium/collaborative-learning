@@ -61,7 +61,7 @@ export class IframeControl extends React.Component<CmsWidgetControlProps, IState
   render() {
     return (
       <div className="iframe-control custom-widget">
-        <iframe id="editor" src="/cms-editor.html" onLoad={this.sendInitialValueToEditor.bind(this)}></iframe>
+        <iframe id="editor" src="./cms-editor.html" onLoad={this.sendInitialValueToEditor.bind(this)}></iframe>
       </div>
     );
   }
