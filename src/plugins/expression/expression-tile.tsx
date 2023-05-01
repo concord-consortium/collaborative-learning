@@ -11,7 +11,6 @@ import "./expression-tile.scss";
 
 export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) => {
   const content = props.model.content as ExpressionContentModelType;
-  const { onRequestUniqueTitle } = props;
 
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     content.setText(event.target.value);
@@ -19,12 +18,12 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
 
   const handleBeginEditTitle = () => {
     console.log("| begin edit title");
-  }
+  };
 
   const handleTitleChange = (title: any): void => {
     content.setTitle(title);
     console.log("| title change", title);
-  }
+  };
 
   const renderTitle = () => {
     const size = {width: null, height: null};
@@ -41,7 +40,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
         onEndEdit={handleTitleChange}
       />
     );
-  }
+  };
 
   return (
     <div className="expression-tool">
