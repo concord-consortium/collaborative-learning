@@ -132,8 +132,6 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const documentClass = classNames("document-content", {"document-content-smooth-scroll" : viaTeacherDashboard,
                                      "comment-select" : documentSelectedForComment});
 
-    const onDragStart = (event: DragStartEvent) => ui.setDraggingId(event.active.id.toString());
-    const onDragEnd = (event: DragEndEvent) => ui.setDraggingId(undefined);
     return (
       <DocumentDndContext>
         <div className={documentClass}
