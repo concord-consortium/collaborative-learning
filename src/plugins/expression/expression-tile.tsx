@@ -16,13 +16,8 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     content.setText(event.target.value);
   };
 
-  const handleBeginEditTitle = () => {
-    console.log("| begin edit title");
-  };
-
   const handleTitleChange = (title: any): void => {
     content.setTitle(title);
-    console.log("| title change", title);
   };
 
   const renderTitle = () => {
@@ -36,7 +31,6 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
         getTitle={() => content.title}
         readOnly={readOnly}
         measureText={(text) => measureText(text, defaultTileTitleFont)}
-        onBeginEdit={handleBeginEditTitle}
         onEndEdit={handleTitleChange}
       />
     );
