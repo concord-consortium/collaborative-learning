@@ -2,8 +2,7 @@ import { types, Instance } from "mobx-state-tree";
 import { TileContentModel } from "../../models/tiles/tile-content";
 import { kExpressionTileType } from "./expression-types";
 import { getTileModel, setTileTitleFromContent } from "../../models/tiles/tile-model";
-import { uniqueId, uniqueTitle } from "../../utilities/js-utils";
-import { IDefaultContentOptions, ITileExportOptions } from "../../models/tiles/tile-content-info";
+import { IDefaultContentOptions } from "../../models/tiles/tile-content-info";
 
 export function defaultExpressionContent(props?: IDefaultContentOptions): ExpressionContentModelType {
   const content = ExpressionContentModel.create({text: "Math Expression"});

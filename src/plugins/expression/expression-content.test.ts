@@ -1,4 +1,3 @@
-import { defaultBoldFont } from "../../components/constants";
 import { defaultExpressionContent, ExpressionContentModel } from "./expression-content";
 
 describe("ExpressionContent", () => {

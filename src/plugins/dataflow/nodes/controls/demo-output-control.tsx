@@ -5,7 +5,7 @@ import {
   lightBulbOn, lightBulbOff, grabberFrames, grabberPaddle,
   advancedGrabberFrames, grabberCordFrames,
   fanHousing, fanMotor, fanFrames,
-  humidifier, humidAnimationPhases
+  humidifier
 } from "./demo-output-control-assets";
 import { HumidiferAnimation } from "./humidifier-animation";
 
