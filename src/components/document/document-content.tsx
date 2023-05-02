@@ -1,6 +1,6 @@
+import React from "react";
 import { inject, observer } from "mobx-react";
 import { IReactionDisposer, reaction } from "mobx";
-import React from "react";
 import { findDOMNode } from "react-dom";
 import { throttle } from "lodash";
 import classNames from "classnames";
@@ -131,6 +131,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
                                           && ui.focusDocument;
     const documentClass = classNames("document-content", {"document-content-smooth-scroll" : viaTeacherDashboard,
                                      "comment-select" : documentSelectedForComment});
+    // console.log("📁 document-content.tsx > \n\t🔨render() > \n\t\t 🍳 documentClass:", documentClass);
 
     return (
       <DocumentDndContext>
@@ -284,6 +285,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    // console.log("handleDragOver with e:", e);
     const { content, readOnly } = this.props;
     const { dropRowInfo } = this.state;
     if (!content || readOnly) return;

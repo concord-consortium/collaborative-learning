@@ -88,6 +88,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
 
   constructor(props: IProps) {
     super(props);
+    console.log("ImageToolComponent");
 
     this.imageDragDrop = new ImageDragDrop({
       isAcceptableImageDrag: this.isAcceptableImageDrag
@@ -146,9 +147,11 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { documentContent, tileElt, readOnly, scale } = this.props;
+    const { documentContent, tileElt, readOnly, scale, onSetCanAcceptDrop } = this.props;
     const { isLoading, imageEntry } = this.state;
     const showEmptyImagePrompt = !this.getContent().hasValidImage;
+    console.log("📁 image-tile.tsx > \n\t 🔨render() > \n\t\t 🍔 onSetCanAcceptDrop", onSetCanAcceptDrop);
+
 
     // Include states for selected and editing separately to clean up UI a little
     const imageToUseForDisplay = imageEntry?.displayUrl || (isLoading ? "" : placeholderImage as string);
@@ -319,6 +322,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   }
 
   private isAcceptableImageDrag = (e: React.DragEvent<HTMLDivElement>) => {
+
     const { readOnly } = this.props;
     // image drop area is central 80% in each dimension
     if (!readOnly) {
@@ -330,9 +334,12 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
           (e.clientX < eltBounds.right - kImgDropMarginX) &&
           (e.clientY > eltBounds.top + kImgDropMarginY) &&
           (e.clientY < eltBounds.bottom - kImgDropMarginY)) {
+        console.log("📁 image-tile.tsx > \n\t 🔨isAcceptableImageDrag() return TRUE");
         return true;
       }
     }
+    console.log("📁 image-tile.tsx > \n\t 🔨isAcceptableImageDrag() return FALSE");
+
     return false;
   };
 

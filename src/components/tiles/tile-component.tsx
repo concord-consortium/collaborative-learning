@@ -1,8 +1,8 @@
+import React from "react";
 import classNames from "classnames";
 import { debounce } from "lodash";
 import { observer, inject } from "mobx-react";
 import { isAlive } from "mobx-state-tree";
-import React from "react";
 import ResizeObserver from "resize-observer-polyfill";
 import { transformCurriculumImageUrl } from "../../models/tiles/image/image-import-export";
 import { getTileComponentInfo } from "../../models/tiles/tile-component-info";
@@ -197,6 +197,9 @@ export class TileComponent extends BaseComponent<IProps, IState> {
                       selected: isTileSelected ,
                       "selected-for-comment": tileSelectedForComment});
     const isDraggable = !isPlaceholderTile && !appConfig.disableTileDrags;
+    // console.log("📁 tile-component.tsx > 🔨render() >  🍳 classes", classes);
+    // console.log("📁 tile-component.tsx > 🔨render() >  🍳 isDraggable", isDraggable);
+
     const dragTileButton = isDraggable &&
                             <DragTileButton divRef={elt => this.dragElement = elt}
                               hovered={hoverTile} selected={isTileSelected}
@@ -268,6 +271,8 @@ export class TileComponent extends BaseComponent<IProps, IState> {
   }
 
   private getTileResizeHandler = () => {
+    // console.log("getTileResizeHandler");
+
     const { model } = this.props;
     // Because this is debounced and can also fire from a browser event, it
     // can happen after the tile has been removed from the document.
@@ -279,6 +284,8 @@ export class TileComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleRegisterTileApi = (tileApi: ITileApi, facet?: string) => {
+    // console.log("handleRegisterTileAPI:", tileApi, facet );
+
     const id = facet ? `${this.modelId}[${facet}]` : this.modelId;
     const tileApiInterface = this.context;
     tileApiInterface?.register(id, tileApi);
@@ -301,6 +308,7 @@ export class TileComponent extends BaseComponent<IProps, IState> {
   };
 
   private handlePointerDown = (e: MouseEvent | TouchEvent) => {
+    // console.log("handlePointerDown");
     const { model } = this.props;
     const { ui } = this.stores;
 
@@ -320,6 +328,8 @@ export class TileComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleCopyImportJsonToClipboard = () => {
+    // console.log("handleCopyImportJsonToclipboard");
+
     const { appConfig, unit } = this.stores;
     const unitBasePath = appConfig.getUnitBasePath(unit.code);
     const transformImageUrl = (url?: string, filename?: string) => {
@@ -339,6 +349,8 @@ export class TileComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleCopyModelJson = () => {
+    // console.log("handleCopyModelJson:");
+
     const { content } = this.props.model;
     const { clipboard } = this.stores;
     clipboard.clear();
@@ -348,16 +360,20 @@ export class TileComponent extends BaseComponent<IProps, IState> {
 
   private handleTileDragStart = (e: React.DragEvent<HTMLDivElement>) => {
     // tile dragging can be disabled globally via appConfig
-    console.log("tile-component.tsx > handleTileDragSTART with event:", e); //added
+    console.log("⚡ DRAG START ⚡ \n\n\n");
+    console.log("handleTileDragStart > 🍔 event: \t", e); //added
 
     if (this.stores.appConfig.disableTileDrags) {
       e.preventDefault();
+      console.log("line 368: handleTileDragStart > disableTileDrags"); //added
       return;
     }
 
     // tile dragging can be disabled for individual tiles
     const target: HTMLElement | null = e.target as HTMLElement;
     if (!target || target.querySelector(".disable-tile-drag")) {
+      console.log("line 375: handleTileDragStart > disableTileDrags"); //added
+
       e.preventDefault();
       return;
     }
@@ -372,7 +388,8 @@ export class TileComponent extends BaseComponent<IProps, IState> {
     }
     // set the drag data
     const { model, docId } = this.props;
-    console.log("model:", model);
+    // console.log("📁 tile-component.tsx > 🔨 handleTileDragStart > 🍔 model:", model); //added
+
     const Component = getTileComponentInfo(model.content.type)?.Component;
     // can't drag placeholder tiles
     if (Component === PlaceholderTileComponent) {
@@ -408,6 +425,8 @@ export class TileComponent extends BaseComponent<IProps, IState> {
     // to support existing geometry and drawing layer drop logic set the single tile drag fields
     // if only 1 tile is selected
     if (dragTiles.tiles.length === 1) {
+      // console.log("data transfer??:");
+
       const dragTile = dragTiles.tiles[0];
       e.dataTransfer.setData(kDragTileId, dragTile.tileId);
       e.dataTransfer.setData(kDragTileContent, dragTile.tileContent);
@@ -423,9 +442,12 @@ export class TileComponent extends BaseComponent<IProps, IState> {
   };
 
   private triggerResizeHandler = () => {
+    // console.log("tile-component.tsx > triggerResizeHandler()");
     const handler = this.getTileResizeHandler();
     if (this.domElement && handler) {
+      // console.log("if statement");
       const bounds = this.domElement.getBoundingClientRect();
+      // console.log("bounds:", bounds);
       const kBorderSize = 4;
       const entry: TileResizeEntry = {
         target: this.domElement,

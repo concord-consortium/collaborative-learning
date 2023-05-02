@@ -82,7 +82,6 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
 
   static contextType = TileApiInterfaceContext;
   declare context: React.ContextType<typeof TileApiInterfaceContext>;
-
   public state: IState = {};
 
   public tileRowDiv: HTMLElement | null;
@@ -187,6 +186,8 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleSetCanAcceptDrop = (tileId?: string) => {
+    console.log("📁 tile-row.tsx > \n\t  > 🍔 handleSetCanAcceptDrop:", tileId);
+    // console.log("📁 tile-row.tsx > \n\t  > 🍔 this.state.tileAcceptDrop:", this.state.tileAcceptDrop);
     this.setState({ tileAcceptDrop: tileId });
   };
 

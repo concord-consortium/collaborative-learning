@@ -1,5 +1,5 @@
-import { inject, observer } from "mobx-react";
 import React from "react";
+import { inject, observer } from "mobx-react";
 import { DocumentComponent, WorkspaceSide } from "../../components/document/document";
 import { GroupVirtualDocumentComponent } from "../../components/document/group-virtual-document";
 import { BaseComponent, IBaseProps } from "../../components/base";

@@ -1,5 +1,5 @@
 import React from "react";
-import { DragEndEvent, useDndMonitor, useDroppable } from "@dnd-kit/core";
+import { DragOverlay, useDraggable, DragEndEvent, useDndMonitor, useDroppable } from "@dnd-kit/core";
 import { observer } from "mobx-react";
 import { NodeEditor } from "rete";
 
@@ -16,15 +16,26 @@ interface IDataflowDropZoneProps {
 export const DataflowDropZone = observer((
   { addNode, children, className, programEditor, style, tileId }: IDataflowDropZoneProps
 ) => {
+  // console.log("📁 dataflow-drop-zone.tsx > 🔨 DataflowDropZone >  🍔 addNode:", addNode);
+  // console.log("📁 dataflow-drop-zone.tsx > \n\t 🔨 DataflowDropZone > \n\t\t 🍔 tileId:", tileId);
 
   const droppableId = dataflowDroppableId(tileId);
   const { isOver, setNodeRef } = useDroppable({ id: droppableId });
+  // console.log("📁 dataflow-drop-zone.tsx > \n\t 🔨 DataflowDropZone > \n\t\t 🍔 isOVER?:", isOver);
+
+  if (isOver){
+    // console.log("📁 dataflow-drop-zone.tsx > 🔨 DataflowDropZone >  🍔 isOver?:", isOver);
+
+  }
+
   const dropTargetStyle = {
     ...(style || {}),
     outline: isOver ? "2px solid #b7e2ec" : undefined
   };
   useDndMonitor({
     onDragEnd: (event: DragEndEvent) => {
+      // console.log("📁 dataflow-drop-zone.tsx > 🔨 DataflowDropZone > 🔨useDndMonitor > 🔨 onDragEnd:");
+
       const draggableId = event.active.id.toString();
       if (event.over?.id === droppableId && isNodeDraggableId(draggableId)) {
         const nodeType = getNodeType(draggableId);

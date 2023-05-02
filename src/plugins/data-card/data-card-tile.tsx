@@ -1,6 +1,7 @@
+import React, { useEffect, useState } from "react";
 import classNames from "classnames";
 import { observer } from "mobx-react";
-import React, { useEffect, useState } from "react";
+import { DragOverlay, useDraggable } from "@dnd-kit/core";
 import { ITileProps } from "../../components/tiles/tile-component";
 import { useUIStore } from "../../hooks/use-stores";
 import { addCanonicalCasesToDataSet } from "../../models/data/data-set";
@@ -11,8 +12,9 @@ import { SortSelect } from "./components/sort-select";
 import { useToolbarTileApi } from "../../components/tiles/hooks/use-toolbar-tile-api";
 import { AddIconButton, RemoveIconButton } from "./components/add-remove-icons";
 import { useCautionAlert } from "../../components/utilities/use-caution-alert";
-import { EditFacet } from "./data-card-types";
+import { EditFacet, dataCardDraggableId } from "./data-card-types";
 import { DataCardSortArea } from "./components/sort-area";
+import { DataCardDropZone } from "./data-card-drop-zone";
 
 import "./data-card-tile.scss";
 
@@ -32,7 +34,9 @@ import "./data-card-tile.scss";
 
 export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
   const { model, onRequestUniqueTitle, readOnly, documentContent, tileElt, onRegisterTileApi,
-            onUnregisterTileApi } = props;
+            onUnregisterTileApi, onSetCanAcceptDrop } = props;
+  // console.log("📁 data-card-tile.tsx > \n\t  > 🍔 onSetCanAcceptDrop:", onSetCanAcceptDrop);
+
   const content = model.content as DataCardContentModelType;
   const ui = useUIStore();
   const isTileSelected = ui.selectedTileIds.findIndex(id => id === content.metadata.id) >= 0;
@@ -46,6 +50,10 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
   const displaySingle = !content.selectedSortAttributeId;
   const shouldShowAddField = !readOnly && isTileSelected && displaySingle;
   const attrIdsNames = content.existingAttributesWithNames();
+
+  const draggableId = dataCardDraggableId(model.id);
+  const { attributes, listeners, setNodeRef } = useDraggable({ id: draggableId });
+
 
   useEffect(() => {
     if (!content.title) {
@@ -216,80 +224,95 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
         handleDuplicateCard={duplicateCard}
       />
       <div className="data-card-content" onClick={handleBackgroundClick}>
-        <div className="data-card-header-row">
-          <div className="panel title">
-            { isEditingTitle && !readOnly
-            ? <input
-                className="data-card-title-input-editing"
-                value={titleValue}
-                onChange={handleTitleChange}
-                onKeyDown={handleTitleKeyDown}
-                onBlur={handleCompleteTitle}
-                onClick={handleTitleInputClick}
-                onDoubleClick={handleTitleInputDoubleClick}
-            />
-            : <div className="editable-data-card-title-text" onClick={handleTitleClick}>
-                { content.title }
-              </div>
-            }
-          </div>
-        </div>
+        <div ref={setNodeRef} {...attributes} {...listeners}>
+          <DataCardDropZone
+            className={"data-card-container"}
+            tileId={model.id}
+          >
 
-        <div className="panel sort">
-          <SortSelect
-            model={model}
-            onSortAttrChange={setSort}
-            attrIdNamePairs={attrIdsNames}
-          />
-        </div>
-
-        { displaySingle &&
-          <div className="panel nav">
-            <div className="card-number-of-listing">
-              <div className="cell-text">
-                { content.totalCases > 0
-                    ? `Card ${content.caseIndex + 1} of ${content.totalCases}`
-                    : "Add a card" }
+          {/* added V
+          <div className="data-card-container"> */}
+            <div className="data-card-header-row">
+              <div className="panel title">
+                { isEditingTitle && !readOnly
+                ? <input
+                    className="data-card-title-input-editing"
+                    value={titleValue}
+                    onChange={handleTitleChange}
+                    onKeyDown={handleTitleKeyDown}
+                    onBlur={handleCompleteTitle}
+                    onClick={handleTitleInputClick}
+                    onDoubleClick={handleTitleInputDoubleClick}
+                />
+                : <div className="editable-data-card-title-text" onClick={handleTitleClick}>
+                    { content.title }
+                  </div>
+                }
               </div>
             </div>
-            <div className="card-nav-buttons">
-              <button className={ previousButtonClasses } onClick={previousCase}></button>
-              <button className={ nextButtonClasses } onClick={nextCase}></button>
-            </div>
-            { !readOnly &&
-              <div className="add-remove-card-buttons">
-                <AddIconButton className={addCardClasses} onClick={addNewCase} />
-                <RemoveIconButton className={removeCardClasses} onClick={handleDeleteCardClick} />
-              </div>
-            }
-          </div>
-        }
-        { displaySingle &&
-          <div className="single-card-data-area">
-            { content.totalCases > 0 &&
-              <DataCardRows
-                caseIndex={content.caseIndex}
+
+            <div className="panel sort">
+              <SortSelect
                 model={model}
-                totalCases={content.totalCases}
-                readOnly={readOnly}
-                currEditAttrId={currEditAttrId}
-                currEditFacet={currEditFacet}
-                setCurrEditAttrId={setCurrEditAttrId}
-                setCurrEditFacet={setCurrEditFacet}
-                imageUrlToAdd={imageUrlToAdd}
-                setImageUrlToAdd={setImageUrlToAdd}
+                onSortAttrChange={setSort}
+                attrIdNamePairs={attrIdsNames}
               />
+            </div>
+
+            { displaySingle &&
+              <div className="panel nav">
+                <div className="card-number-of-listing">
+                  <div className="cell-text">
+                    { content.totalCases > 0
+                        ? `Card ${content.caseIndex + 1} of ${content.totalCases}`
+                        : "Add a card" }
+                  </div>
+                </div>
+                <div className="card-nav-buttons">
+                  <button className={ previousButtonClasses } onClick={previousCase}></button>
+                  <button className={ nextButtonClasses } onClick={nextCase}></button>
+                </div>
+                { !readOnly &&
+                  <div className="add-remove-card-buttons">
+                    <AddIconButton className={addCardClasses} onClick={addNewCase} />
+                    <RemoveIconButton className={removeCardClasses} onClick={handleDeleteCardClick} />
+                  </div>
+                }
+              </div>
             }
-          </div>
-        }
-        { shouldShowAddField && !readOnly &&
-          <AddIconButton className="add-field" onClick={handleAddField} />
-        }
-        { !displaySingle &&
-          <div className="sorting-cards-data-area">
-            <DataCardSortArea model={model} />
-          </div>
-        }
+            { displaySingle &&
+              <div className="single-card-data-area">
+                { content.totalCases > 0 &&
+                  <DataCardRows
+                    caseIndex={content.caseIndex}
+                    model={model}
+                    totalCases={content.totalCases}
+                    readOnly={readOnly}
+                    currEditAttrId={currEditAttrId}
+                    currEditFacet={currEditFacet}
+                    setCurrEditAttrId={setCurrEditAttrId}
+                    setCurrEditFacet={setCurrEditFacet}
+                    imageUrlToAdd={imageUrlToAdd}
+                    setImageUrlToAdd={setImageUrlToAdd}
+                  />
+                }
+              </div>
+            }
+            { shouldShowAddField && !readOnly &&
+              <AddIconButton className="add-field" onClick={handleAddField} />
+            }
+            { !displaySingle &&
+              <div className="sorting-cards-data-area">
+                <DataCardSortArea model={model} />
+              </div>
+            }
+          {/* </div>
+          added ^  */}
+          </DataCardDropZone>
+        </div>
+
+
+
       </div>
     </div>
   );

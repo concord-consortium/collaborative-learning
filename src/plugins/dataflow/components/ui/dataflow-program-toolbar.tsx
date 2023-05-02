@@ -11,6 +11,8 @@ interface INodeIconProps {
   i: number;
   nodeType: string;
 }
+
+//this is just the circle node icon to the right
 const NodeIcon = ({ i, nodeType }: INodeIconProps) => {
   const iconClass = "icon-block " + nodeType.toLowerCase().replace(" ", "-");
   const nodeIcons = [];
@@ -54,7 +56,11 @@ interface IAddNodeButtonProps {
   onNodeCreateClick: (type: string) => void;
   tileId: string;
 }
-const AddNodeButton = ({ disabled, i, nodeType, onNodeCreateClick, tileId }: IAddNodeButtonProps) => {
+const AddNodeButton = (props: IAddNodeButtonProps) => {
+  const { disabled, i, nodeType, onNodeCreateClick, tileId } = props;
+
+  console.log("📁 dataflow-program-toolbar.tsx > \n\t 🔨 addNodeButton  >  props:", props);
+
   const draggableId = nodeDraggableId(nodeType, tileId);
   const { attributes, listeners, setNodeRef } = useDraggable({ id: draggableId });
 
@@ -91,7 +97,7 @@ export const DataflowProgramToolbar = ({ disabled, isTesting, onClearClick, onNo
       </div>
     );
   }
-  
+
   return (
     <div className="program-toolbar" data-test="program-toolbar">
       { NodeTypes.map((nt: NodeType, i: number) => (

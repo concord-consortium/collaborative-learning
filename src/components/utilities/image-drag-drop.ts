@@ -9,9 +9,11 @@ export class ImageDragDrop {
 
   constructor(options: ExternalImageDragDropOptions) {
     this.options = options;
+    // console.log("ImageDragDrop class");
   }
 
   public dragOver(e: React.DragEvent<HTMLDivElement>) {
+    console.log("📁 image-drag-drop.ts > \n\t 🔨dragOver >  ");
     // the cypress tests generate drag events without the dataTransfer element of the event
     if (this.hasMissingDataTransfer(e)) {
       return false;
