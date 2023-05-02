@@ -10,7 +10,6 @@ import "./iframe-control.scss";
 (window as any).DISABLE_FIREBASE_SYNC = true;
 interface IState {
   initialValue?: string;
-  unit?: string;
   validOrigin: string;
 }
 export class IframeControl extends React.Component<CmsWidgetControlProps, IState>  {
@@ -18,7 +17,6 @@ export class IframeControl extends React.Component<CmsWidgetControlProps, IState
     super(props);
     this.state = {
       initialValue: this.getValue(),
-      unit: urlParams.unit,
       validOrigin: `${window.location.protocol}//${window.location.host}`
     };
   }
@@ -62,7 +60,7 @@ export class IframeControl extends React.Component<CmsWidgetControlProps, IState
   };
 
   render() {
-    const iframeUrl = `./cms-editor.html?unit=${this.state.unit}`;
+    const iframeUrl = urlParams.unit ? `./cms-editor.html?unit=${urlParams.unit}` : "./cms-editor.html";
     return (
       <div className="iframe-control custom-widget">
         <iframe id="editor" src={iframeUrl} onLoad={this.sendInitialValueToEditor.bind(this)}></iframe>
