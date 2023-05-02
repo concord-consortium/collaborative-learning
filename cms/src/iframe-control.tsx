@@ -2,6 +2,7 @@ import React from "react";
 import { Map } from "immutable";
 import { CmsWidgetControlProps } from "netlify-cms-core";
 
+import { urlParams } from "../../src/utilities/url-params";
 import { DEBUG_CMS } from "../../src/lib/debug";
 
 import "./iframe-control.scss";
@@ -9,6 +10,7 @@ import "./iframe-control.scss";
 (window as any).DISABLE_FIREBASE_SYNC = true;
 interface IState {
   initialValue?: string;
+  unit?: string;
   validOrigin: string;
 }
 export class IframeControl extends React.Component<CmsWidgetControlProps, IState>  {
@@ -16,6 +18,7 @@ export class IframeControl extends React.Component<CmsWidgetControlProps, IState
     super(props);
     this.state = {
       initialValue: this.getValue(),
+      unit: urlParams.unit,
       validOrigin: `${window.location.protocol}//${window.location.host}`
     };
   }
@@ -59,9 +62,10 @@ export class IframeControl extends React.Component<CmsWidgetControlProps, IState
   };
 
   render() {
+    const iframeUrl = `./cms-editor.html?unit=${this.state.unit}`;
     return (
       <div className="iframe-control custom-widget">
-        <iframe id="editor" src="./cms-editor.html" onLoad={this.sendInitialValueToEditor.bind(this)}></iframe>
+        <iframe id="editor" src={iframeUrl} onLoad={this.sendInitialValueToEditor.bind(this)}></iframe>
       </div>
     );
   }
