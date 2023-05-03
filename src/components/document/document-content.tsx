@@ -11,6 +11,7 @@ import { TileRowComponent, kDragResizeRowId, extractDragResizeRowId, extractDrag
 import { DocumentContentModelType } from "../../models/document/document-content";
 import { IDragToolCreateInfo, IDragTilesData } from "../../models/document/document-content-types";
 import { getTileContentInfo } from "../../models/tiles/tile-content-info";
+import { kNoLinkableTiles } from "../../models/tiles/tile-link-types";
 import { getDocumentIdentifier } from "../../models/document/document-utils";
 import { IDropRowInfo } from "../../models/document/tile-row";
 import { logDataTransfer } from "../../models/document/drag-tiles";
@@ -239,20 +240,26 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     tileApiInterface?.forEach(api => api.handleDocumentScroll?.(xScroll, yScroll));
   }, 50);
 
+  private getTileTitle(id: string) {
+    const tileApiInterface = this.context;
+    return tileApiInterface?.getTileApi(id)?.getTitle?.();
+  }
+
   private handleRequestTilesOfType = (tileType: string) => {
     const { content } = this.props;
     const tileApiInterface = this.context;
     if (!content || !tileType || !tileApiInterface) return [];
     const tilesOfType = content.getTilesOfType(tileType);
-    return tilesOfType.map(id => ({ id, title: tileApiInterface.getTileApi(id)?.getTitle?.() }));
+    return tilesOfType.map(id => ({ id, title: this.getTileTitle(id) }));
   };
 
   private handleRequestLinkableTiles = () => {
     const { content } = this.props;
-    const tileApiInterface = this.context;
-    if (!content || !tileApiInterface) return [];
-    const linkableTiles = content.getLinkableTiles();
-    return linkableTiles.map((id: string) => ({ id, title: tileApiInterface.getTileApi(id)?.getTitle?.() }));
+    const { providers, consumers } = content?.getLinkableTiles() || kNoLinkableTiles;
+    return {
+      providers: providers.map(tileInfo => ({ title: this.getTileTitle(tileInfo.id), ...tileInfo })),
+      consumers: consumers.map(tileInfo => ({ title: this.getTileTitle(tileInfo.id), ...tileInfo }))
+    };
   };
 
   private handleRequestUniqueTitle = (tileId: string) => {

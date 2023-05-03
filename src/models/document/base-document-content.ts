@@ -7,6 +7,7 @@ import {
 import { kTextTileType } from "../tiles/text/text-content";
 import { getTileContentInfo, IDocumentExportOptions } from "../tiles/tile-content-info";
 import { ITileContentModel, ITileEnvironment, TileContentModel } from "../tiles/tile-content";
+import { ILinkableTiles, ITypedTileLinkMetadata } from "../tiles/tile-link-types";
 import {
   IDragTileItem, TileModel, ITileModel, ITileModelSnapshotIn, ITileModelSnapshotOut,
   ITilePosition, IDropTileItem
@@ -30,7 +31,6 @@ import {
 import { IDocumentContentAddTileOptions, IDragTilesData, INewRowTile, INewTileOptions,
    ITileCountsPerSection, NewRowTileArray, PartialSharedModelEntry, PartialTile } from "./document-content-types";
 import { SharedModelEntry, SharedModelEntryType, SharedModelEntrySnapshotType } from "./shared-model-entry";
-import { getTileComponentInfo } from "../tiles/tile-component-info";
 
 // Imports related to hard coding shared model duplication
 import {
@@ -315,22 +315,24 @@ export const BaseDocumentContentModel = types
       });
       return tiles;
     },
-    getLinkableTiles() {
-      // TODO: Make this capable of returning a list of providesData tiles
-      // and maybe a list of both consumesData and providesData tiles?
-      const linkableTiles: string[] = [];
+    getLinkableTiles(): ILinkableTiles {
+      const providers: ITypedTileLinkMetadata[] = [];
+      const consumers: ITypedTileLinkMetadata[] = [];
       self.rowOrder.forEach(rowId => {
         const row = self.getRow(rowId);
         each(row?.tiles, tileEntry => {
           const tileType = self.getTileType(tileEntry.tileId);
           if (tileType) {
-            if (getTileComponentInfo(tileType)?.consumesData) {
-              linkableTiles.push(tileEntry.tileId);
+            if (getTileContentInfo(tileType)?.isDataProvider) {
+              providers.push({ id: tileEntry.tileId, type: tileType });
+            }
+            if (getTileContentInfo(tileType)?.isDataConsumer) {
+              consumers.push({ id: tileEntry.tileId, type: tileType });
             }
           }
         });
       });
-      return linkableTiles;
+      return { providers, consumers };
     },
     publish() {
       return JSON.stringify(self.snapshotWithUniqueIds());

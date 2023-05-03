@@ -6,8 +6,6 @@ export interface ITileComponentInfo {
   Component: React.ComponentType<ITileProps>;
   tileEltClass: string;
   Icon?: React.FC<SVGProps<SVGSVGElement>>;
-  consumesData?: boolean;
-  providesData?: boolean;
   /**
    * By default the tool tile wrapper TileComponent will handle the selection of the
    * the tile when it gets a mouse down or touch start.

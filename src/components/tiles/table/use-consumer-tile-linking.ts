@@ -1,7 +1,8 @@
 import { useCallback, useEffect } from "react";
-import { useFeatureFlag } from "../../../hooks/use-stores";
 import { getColorMapEntry } from "../../../models/shared/shared-data-set-colors";
-import { ITileLinkMetadata } from "../../../models/tiles/table-link-types";
+import {
+  ILinkableTiles, ITileLinkMetadata, ITypedTileLinkMetadata, kNoLinkableTiles
+} from "../../../models/tiles/tile-link-types";
 import {
   addTableToDocumentMap, getLinkedTableIndex, removeTableFromDocumentMap
 } from "../../../models/tiles/table-links";
@@ -13,16 +14,15 @@ interface IProps {
   model: ITileModel;
   hasLinkableRows: boolean;
   onRequestTilesOfType: (tileType: string) => ITileLinkMetadata[];
-  onRequestLinkableTiles: () => ITileLinkMetadata[];
+  onRequestLinkableTiles?: () => ILinkableTiles;
   onLinkTile: (tileInfo: ITileLinkMetadata) => void;
   onUnlinkTile: (tileInfo: ITileLinkMetadata) => void;
 }
-export const useTileLinking = ({
+export const useConsumerTileLinking = ({
   documentId, model, hasLinkableRows, onRequestTilesOfType, onRequestLinkableTiles, onLinkTile, onUnlinkTile
 }: IProps) => {
   const modelId = model.id;
-  const showLinkButton = useFeatureFlag("TileLinkedTables");
-  const linkableTiles = useLinkableTiles({ model, onRequestTilesOfType, onRequestLinkableTiles });
+  const { consumers: linkableTiles } = useLinkableTiles({ model, onRequestTilesOfType, onRequestLinkableTiles });
   const isLinkEnabled = hasLinkableRows && (linkableTiles.length > 0);
   const colorMapEntry = getColorMapEntry(modelId);
   const linkColors = colorMapEntry?.colorSet;
@@ -36,20 +36,27 @@ export const useTileLinking = ({
   }, [documentId, modelId]);
 
   const getLinkIndex = useCallback(() => {
-    return showLinkButton ? getLinkedTableIndex(modelId) : -1;
-  }, [modelId, showLinkButton]);
+    return getLinkedTableIndex(modelId);
+  }, [modelId]);
 
-  return { showLinkButton, isLinkEnabled, linkColors, getLinkIndex, showLinkTileDialog };
+  return { isLinkEnabled, linkColors, getLinkIndex, showLinkTileDialog };
 };
 
 interface IUseLinkableTilesProps {
   model: ITileModel;
   onRequestTilesOfType: (tileType: string) => ITileLinkMetadata[];
-  onRequestLinkableTiles: () => ITileLinkMetadata[];
+  onRequestLinkableTiles?: () => ILinkableTiles;
 }
 const useLinkableTiles = ({ model, onRequestTilesOfType, onRequestLinkableTiles }: IUseLinkableTilesProps) => {
-  const linkableTiles = onRequestLinkableTiles();
+  const { providers, consumers } = onRequestLinkableTiles?.() || kNoLinkableTiles;
 
   // add default title if there isn't a title
-  return linkableTiles.map((tileInfo, i) => ({ id: tileInfo.id, title: tileInfo.title || `Graph ${i + 1}` }));
+  function addDefaultTitle({ id, type, title }: ITypedTileLinkMetadata, i: number) {
+    return { id, type, title: title || `${type} ${i + 1}`};
+  }
+
+  return {
+    providers: providers.map(addDefaultTitle),
+    consumers: consumers.map(addDefaultTitle)
+  };
 };

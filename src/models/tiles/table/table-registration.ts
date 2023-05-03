@@ -22,13 +22,13 @@ registerTileContentInfo({
   defaultHeight: kTableDefaultHeight,
   defaultContent: defaultTableContent,
   tileSnapshotPreProcessor,
-  updateContentWithNewSharedModelIds: updateTableContentWithNewSharedModelIds
+  updateContentWithNewSharedModelIds: updateTableContentWithNewSharedModelIds,
+  isDataProvider: true
 });
 
 registerTileComponentInfo({
   type: kTableTileType,
   Component: TableToolComponent,
-  providesData: true,
   tileEltClass: "table-tool-tile",
   Icon: TableToolIcon
 });

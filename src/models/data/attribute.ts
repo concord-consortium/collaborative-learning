@@ -30,6 +30,11 @@ export const Attribute = types.model("Attribute", {
   // userType: types.maybe(types.enumeration([...attributeTypes])),
   precision: types.maybe(types.number),
 })
+.preProcessSnapshot(snap => {
+  // convert nulls to undefined
+  const values = snap.values?.map(value => value != null ? value : undefined);
+  return { ...snap, values };
+})
 .views(self => ({
   importValue(value: IValueType) {
     // may eventually want to do something more sophisticated here, like convert

@@ -16,7 +16,7 @@ import { useContentChangeHandlers } from "./use-content-change-handlers";
 import { useControlsColumn } from "./use-controls-column";
 import { useDataSet } from "./use-data-set";
 import { useExpressionsDialog } from "./use-expressions-dialog";
-import { useTileLinking } from "./use-tile-linking";
+import { useConsumerTileLinking } from "./use-consumer-tile-linking";
 import { useGridContext } from "./use-grid-context";
 import { useMeasureColumnWidth } from "./use-measure-column-width";
 import { useModelDataSet } from "./use-model-data-set";
@@ -150,8 +150,8 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     readOnly: !!readOnly, changeHandlers, columns, onColumnResize, selectedCell, inputRowId });
 
   // Variables for handling linking to geometry tiles
-  const { showLinkButton, isLinkEnabled, linkColors, getLinkIndex, showLinkTileDialog: showLinkGeometryDialog } =
-    useTileLinking({ documentId, model, hasLinkableRows,
+  const { isLinkEnabled, linkColors, getLinkIndex, showLinkTileDialog: showLinkGeometryDialog } =
+    useConsumerTileLinking({ documentId, model, hasLinkableRows,
                           onRequestTilesOfType, onRequestLinkableTiles, onLinkTile, onUnlinkTile });
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -212,7 +212,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
           content={content}
           className="table-title"
           readOnly={readOnly}
-          showLinkButton={showLinkButton}
+          showLinkButton={true}
           isLinkEnabled={isLinkEnabled}
           getLinkIndex={getLinkIndex}
           onLinkGeometryClick={showLinkGeometryDialog}

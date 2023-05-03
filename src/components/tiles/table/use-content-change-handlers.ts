@@ -2,14 +2,12 @@ import { useCallback } from "react";
 import { getTableContentHeight } from "./table-utils";
 import { useCurrent } from "../../../hooks/use-current";
 import { ICase, ICaseCreation, IDataSet } from "../../../models/data/data-set";
-import { ITileLinkMetadata } from "../../../models/tiles/table-link-types";
-// import { requestGeometryLinkToTable, requestGeometryUnlinkFromTable } from "../../../models/tiles/table-links";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
 import { isLinkableValue } from "../../../models/tiles/table/table-model-types";
+import { ITileLinkMetadata } from "../../../models/tiles/tile-link-types";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { uniqueId, uniqueName } from "../../../utilities/js-utils";
 import { TColumn, TRow } from "./table-types";
-import { IAttribute } from "../../../models/data/attribute";
 import { getTileContentById } from "../../../utilities/mst-utils";
 import { SharedDataSet } from "../../../models/shared/shared-data-set";
 
@@ -53,7 +51,7 @@ export const useContentChangeHandlers = ({
     const newCase: ICaseCreation = { __id__: uniqueId() };
     if (getContent().isLinked) {
       // validate linkable values
-      dataSet.attributes.forEach((attr: IAttribute) => {
+      dataSet.attributes.forEach(attr => {
         const value = aCase[attr.id];
         newCase[attr.id] = isLinkableValue(value) ? value : 0;
       });

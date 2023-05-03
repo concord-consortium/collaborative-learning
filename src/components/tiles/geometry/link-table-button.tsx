@@ -1,7 +1,6 @@
 import classNames from "classnames";
 import React from "react";
 import LinkTableIcon from "../../../clue/assets/icons/geometry/link-table-icon.svg";
-import { useFeatureFlag } from "../../../hooks/use-stores";
 
 import "./link-table-button.scss";
 
@@ -18,9 +17,9 @@ export const LinkTableButton: React.FC<IProps> = ({ isEnabled, onClick }) => {
     isEnabled && onClick?.();
     e.stopPropagation();
   };
-  return useFeatureFlag("TileLinkedTables")
-          ? <div key="table-link-button" className={classes} data-testid="table-link-button" onClick={handleClick}>
-              <LinkTableIcon />
-            </div>
-          : null;
+  return (
+    <div key="table-link-button" className={classes} data-testid="table-link-button" onClick={handleClick}>
+      <LinkTableIcon />
+    </div>
+  );
 };

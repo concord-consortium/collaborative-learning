@@ -11,12 +11,12 @@ registerTileContentInfo({
   defaultHeight: kGraphDefaultHeight,
   modelClass: GraphModel,
   titleBase: "X-Y Plot",
-  type: kGraphTileType
+  type: kGraphTileType,
+  isDataConsumer: true
 });
 
 registerTileComponentInfo({
   Component: GraphWrapperComponent,
-  consumesData: true,
   Icon: GraphToolIcon,
   tileEltClass: "graph-tool-tile",
   type: kGraphTileType
