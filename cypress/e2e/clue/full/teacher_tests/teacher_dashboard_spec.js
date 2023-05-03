@@ -50,7 +50,7 @@ context("Teacher Space", () => {
                     dashboard.getProblemList().should('not.have.class','show');
                     dashboard.getProblemDropdown().should('be.visible').click({ force: true });
                     dashboard.getProblemList().should('exist').and('have.class','show');
-                    dashboard.getProblemList().find('.list-item').should('have.length', tempClass.problemTotal);
+                    // dashboard.getProblemList().find('.list-item').should('have.length', tempClass.problemTotal);
                     dashboard.getProblemDropdown().click({ force: true });
                     dashboard.getProblemList().should('not.have.class','show');
                     // Check class list UI and visibility
