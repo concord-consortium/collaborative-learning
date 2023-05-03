@@ -1,5 +1,5 @@
 import { getSnapshot, getRoot, hasParent, getEnv } from "mobx-state-tree";
-import { ProblemModel } from "./problem";
+import { LegacyProblemSnapshot, ProblemModel } from "./problem";
 import { SectionModelType } from "./section";
 import { omitUndefined } from "../../utilities/test-utils";
 
@@ -33,7 +33,7 @@ describe("problem model", () => {
           type: "initialChallenge"
         }
       ]
-    });
+    } as LegacyProblemSnapshot);
     // omit undefined properties for comparison purposes
     expect(omitUndefined(getSnapshot(problem))).toEqual({
       ordinal: 1,
@@ -51,7 +51,8 @@ describe("problem model", () => {
           supports: []
         }
       ],
-      supports: []
+      supports: [],
+      config: {}
     });
     expect(problem.fullTitle).toBe("test: sub");
   });
@@ -68,7 +69,7 @@ describe("problem model", () => {
           type: "initialChallenge"
         }
       ]
-    });
+    } as LegacyProblemSnapshot);
     problem.sections.forEach(section => {
       expect(hasParent(section)).toBeFalsy();
       expect(getRoot(section)).toBe(section);
@@ -88,7 +89,7 @@ describe("problem model", () => {
           type: "initialChallenge"
         }
       ]
-    });
+    } as LegacyProblemSnapshot);
 
     const sharedModelManagers = problem.sections.map(section =>
       getEnv(section)?.sharedModelManager
@@ -110,7 +111,7 @@ describe("problem model", () => {
           type: "initialChallenge"
         }
       ]
-    });
+    } as LegacyProblemSnapshot);
     const firstSection = problem.getSectionByIndex(0) as SectionModelType;
     expect(firstSection.type).toBe("introduction");
     const lastSection = problem.getSectionByIndex(1) as SectionModelType;
@@ -137,7 +138,7 @@ describe("problem model", () => {
           type: "initialChallenge"
         }
       ]
-    });
+    } as LegacyProblemSnapshot);
     const firstSection = problem.getSectionById("introduction") as SectionModelType;
     expect(firstSection.type).toBe("introduction");
     const lastSection = problem.getSectionById("initialChallenge") as SectionModelType;
@@ -151,7 +152,7 @@ describe("problem model", () => {
       title: "Test",
       disabled: ["foo"],
       settings: { foo: "bar" }
-    });
+    } as LegacyProblemSnapshot);
     expect(problem).toEqual({
       ordinal: 1,
       title: "Test",
@@ -173,7 +174,7 @@ describe("problem model", () => {
       config: {
         settings: { foo: "bar" }
       }
-    });
+    } as LegacyProblemSnapshot);
     expect(problem).toEqual({
       ordinal: 1,
       title: "Test",
@@ -197,7 +198,7 @@ describe("problem model", () => {
         disabledFeatures: ["foo"],
         settings: { foo: "bar" }
       }
-    });
+    } as LegacyProblemSnapshot);
     expect(problem).toEqual({
       ordinal: 1,
       title: "Test",

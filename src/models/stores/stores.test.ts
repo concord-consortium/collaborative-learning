@@ -1,8 +1,8 @@
 import { AppMode } from "./store-types";
 import { specStores } from "./spec-stores";
-import { UnitModel } from "../curriculum/unit";
-import { InvestigationModel } from "../curriculum/investigation";
-import { ProblemModel } from "../curriculum/problem";
+import { LegacyUnitSnapshot, UnitModel } from "../curriculum/unit";
+import { InvestigationModel, LegacyInvestigationSnapshot } from "../curriculum/investigation";
+import { LegacyProblemSnapshot, ProblemModel } from "../curriculum/problem";
 import { SectionModel, SectionType } from "../curriculum/section";
 import { AppConfigModel } from "./app-config-model";
 import { UserModel } from "./user";
@@ -59,20 +59,23 @@ describe("isFeatureSupported()", () => {
   });
 
   it("can disable features at the unit level", () => {
-    const { appConfig } = specStores({ unit: UnitModel.create({ title: "Unit", disabled: ["foo"] }) });
+    const { appConfig } = specStores({
+      unit: UnitModel.create({ title: "Unit", disabled: ["foo"] } as LegacyUnitSnapshot) });
     expect(appConfig.isFeatureSupported("foo")).toBe(false);
     expect(appConfig.isFeatureSupported("foo", specIntroductionSection())).toBe(false);
   });
 
   it("can disable features at the investigation level", () => {
-    const investigation = InvestigationModel.create({ ordinal: 1, title: "Investigation", disabled: ["foo"] });
+    const investigation = InvestigationModel.create({
+      ordinal: 1, title: "Investigation", disabled: ["foo"] } as LegacyInvestigationSnapshot);
     const { appConfig } = specStores({ investigation });
     expect(appConfig.isFeatureSupported("foo")).toBe(false);
     expect(appConfig.isFeatureSupported("foo", specIntroductionSection())).toBe(false);
   });
 
   it("can disable features at the problem level", () => {
-    const problem = ProblemModel.create({ ordinal: 1, title: "Problem", disabled: ["baz", "foo"] });
+    const problem = ProblemModel.create({
+      ordinal: 1, title: "Problem", disabled: ["baz", "foo"] } as LegacyProblemSnapshot);
     const { appConfig } = specStores({ problem });
     expect(appConfig.isFeatureSupported("foo")).toBe(false);
     expect(appConfig.isFeatureSupported("foo", specIntroductionSection())).toBe(false);
@@ -80,26 +83,29 @@ describe("isFeatureSupported()", () => {
 
   it("can disable features at the section level", () => {
     const section = SectionModel.create({ type: "introduction" as SectionType, disabled: ["foo"] });
-    const problem = ProblemModel.create({ ordinal: 1, title: "Problem", sections: [getSnapshot(section)] });
+    const problem = ProblemModel.create({
+      ordinal: 1, title: "Problem", sections: [getSnapshot(section)] } as LegacyProblemSnapshot);
     const { appConfig } = specStores({ problem });
     expect(appConfig.isFeatureSupported("foo")).toBe(true);
     expect(appConfig.isFeatureSupported("foo", section)).toBe(false);
   });
 
   it("can disable features at the unit level and reenable them at the problem level", () => {
-    const unit = UnitModel.create({ title: "Unit", disabled: ["foo"] });
-    const problem = ProblemModel.create({ ordinal: 1, title: "Problem", disabled: ["baz", "!foo"] });
+    const unit = UnitModel.create({ title: "Unit", disabled: ["foo"] } as LegacyUnitSnapshot);
+    const problem = ProblemModel.create({
+      ordinal: 1, title: "Problem", disabled: ["baz", "!foo"] } as LegacyProblemSnapshot);
     const { appConfig } = specStores({ unit, problem });
     expect(appConfig.isFeatureSupported("foo")).toBe(true);
     expect(appConfig.isFeatureSupported("foo", specIntroductionSection())).toBe(true);
   });
 
   it("can enable/disable features at every level", () => {
-    const unit = UnitModel.create({ title: "Unit", disabled: ["foo"] });
-    const investigation = InvestigationModel.create({ ordinal: 1, title: "Investigation", disabled: ["!foo"] });
+    const unit = UnitModel.create({ title: "Unit", disabled: ["foo"] } as LegacyUnitSnapshot);
+    const investigation = InvestigationModel.create({
+      ordinal: 1, title: "Investigation", disabled: ["!foo"] } as LegacyInvestigationSnapshot);
     const section = SectionModel.create({ type: "introduction" as SectionType, disabled: ["bar", "baz", "!foo"] });
-    const problem = ProblemModel.create(
-                      { ordinal: 1, title: "Problem", disabled: ["foo"], sections: [getSnapshot(section)] });
+    const problem = ProblemModel.create({
+      ordinal: 1, title: "Problem", disabled: ["foo"], sections: [getSnapshot(section)] } as LegacyProblemSnapshot);
     const { appConfig } = specStores({ unit, investigation, problem });
     expect(appConfig.isFeatureSupported("foo")).toBe(false);
     expect(appConfig.isFeatureSupported("foo", section)).toBe(true);
@@ -117,13 +123,12 @@ describe("getDisabledFeaturesOfTile()", () => {
 
   it("returns disabled features from across levels", () => {
     const unit = UnitModel.create({
-                  title: "Unit",
-                  config: { disabledFeatures: ["fooFeature1", "barFeature", "fooFeature2"] }
-                });
-    const investigation = InvestigationModel.create(
-                            { ordinal: 1, title: "Investigation",
-                              disabled: ["!fooFeature2", "fooFeature3", "fooFeature4"] });
-    const problem = ProblemModel.create({ ordinal: 1, title: "Problem", disabled: ["!fooFeature4"] });
+      title: "Unit", config: { disabledFeatures: ["fooFeature1", "barFeature", "fooFeature2"] } });
+    const investigation = InvestigationModel.create({
+      ordinal: 1, title: "Investigation", disabled: ["!fooFeature2", "fooFeature3", "fooFeature4"]
+    } as LegacyInvestigationSnapshot);
+    const problem = ProblemModel.create({
+      ordinal: 1, title: "Problem", disabled: ["!fooFeature4"] } as LegacyProblemSnapshot);
     const { appConfig } = specStores({ unit, investigation, problem });
     expect(appConfig.getDisabledFeaturesOfTile("foo")).toEqual(["fooFeature1", "fooFeature3"]);
   });

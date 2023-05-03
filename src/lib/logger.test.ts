@@ -6,7 +6,7 @@ import { createDocumentModel, DocumentModelType } from "../models/document/docum
 import { DocumentContentModel } from "../models/document/document-content";
 import { ProblemDocument } from "../models/document/document-types";
 import { InvestigationModel } from "../models/curriculum/investigation";
-import { ProblemModel, ProblemModelType } from "../models/curriculum/problem";
+import { LegacyProblemSnapshot, ProblemModel, ProblemModelType } from "../models/curriculum/problem";
 import { specAppConfig } from "../models/stores/spec-app-config";
 import { IStores, createStores } from "../models/stores/stores";
 import { UIModel } from "../models/stores/ui";
@@ -196,7 +196,7 @@ describe("authed logger", () => {
           type: "introduction",
           content: getSnapshot(content),
         }]
-      })
+      } as LegacyProblemSnapshot)
     });
 
     Logger.initializeLogger(stores, { investigation: investigation.title, problem: problem?.title });

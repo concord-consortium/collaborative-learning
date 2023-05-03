@@ -1,4 +1,4 @@
-import { getRoot, getRunningActionContext } from "@concord-consortium/mobx-state-tree";
+import { getRoot, getRunningActionContext } from "mobx-state-tree";
 import { DEBUG_UNDO } from "../../lib/debug";
 import { runningCalls } from "./tree-types";
 

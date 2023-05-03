@@ -65,19 +65,30 @@ const ModernProblemModel = types
       return self.sections.find((section) => section.type === sectionId);
     }
   }));
-interface LegacySnapshot extends SnapshotIn<typeof LegacyProblemModel> {}
-interface ModernSnapshot extends SnapshotIn<typeof ModernProblemModel> {}
+export interface LegacyProblemSnapshot extends SnapshotIn<typeof LegacyProblemModel> {}
+export interface ModernProblemSnapshot extends SnapshotIn<typeof ModernProblemModel> {}
+
+const hasLegacySnapshotProperties = (sn: ModernProblemSnapshot | LegacyProblemSnapshot) => {
+  return "disabled" in sn || "sections" in sn || "settings" in sn;
+};
+const isLegacySnapshot = (sn: ModernProblemSnapshot | LegacyProblemSnapshot): sn is LegacyProblemSnapshot => {
+  return !("config" in sn) && hasLegacySnapshotProperties(sn);
+};
+const isAmbiguousSnapshot = (sn: ModernProblemSnapshot | LegacyProblemSnapshot) => {
+  return "config" in sn && hasLegacySnapshotProperties(sn);
+};
 
 export const ProblemModel = types.snapshotProcessor(ModernProblemModel, {
-  preProcessor(sn: ModernSnapshot & LegacySnapshot) {
-    const { disabled: _disabled, settings: _settings, config: _config, sections, ...others } = sn;
-    const disabledFeatures = _disabled ? { disabledFeatures: _disabled } : undefined;
-    const settings = _settings ? { settings: _settings } : undefined;
-    const config = _config || disabledFeatures || settings
-                    ? { config: { ...disabledFeatures, ...settings, ..._config } }
-                    : undefined;
-    const loadedSections = sections ? { loadedSections: sections } : undefined;
-    return { ...others, ...config, ...loadedSections };
+  preProcessor(sn: ModernProblemSnapshot | LegacyProblemSnapshot) {
+    if (isLegacySnapshot(sn)) {
+      const { disabled: disabledFeatures, settings, sections: loadedSections, ...others } = sn;
+      return { ...others, loadedSections, config: { disabledFeatures, settings } } as ModernProblemSnapshot;
+    }
+    if (isAmbiguousSnapshot(sn)) {
+      const { disabled: disabledFeatures, settings, sections: loadedSections, config, ...others } = sn as any;
+      return { ...others, loadedSections, config: { disabledFeatures, settings, ...config } } as ModernProblemSnapshot;
+    }
+    return sn;
   }
 });
 export interface ProblemModelType extends Instance<typeof ModernProblemModel> {}

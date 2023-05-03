@@ -1,4 +1,4 @@
-import { getPath, IActionContext, IPatchRecorder } from "@concord-consortium/mobx-state-tree";
+import { getPath, IActionContext, IPatchRecorder } from "mobx-state-tree";
 import { IActionTrackingMiddleware3Call } from "./create-action-tracking-middleware-3";
 
 export interface CallEnv {

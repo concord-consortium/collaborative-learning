@@ -26,25 +26,33 @@ export const TextContentModel = TileContentModel
     editor:  undefined as CustomEditor | undefined,
   }))
   .views(self => ({
-    get joinText() {
+    // guarantees string (not readonly string) types
+    get textStr(): string | string[] {
       return Array.isArray(self.text)
-        ? self.text.join("\n")
-        : self.text as string;
+              ? self.text as string[]
+              : self.text as string;
+    }
+  }))
+  .views(self => ({
+    get joinText() {
+      return Array.isArray(self.textStr)
+        ? self.textStr.join("\n")
+        : self.textStr;
 
     },
     get joinHtml() {
-      return Array.isArray(self.text)
-        ? self.text.join("")
-        : self.text as string;
+      return Array.isArray(self.textStr)
+        ? self.textStr.join("")
+        : self.textStr;
     },
     getSlate() {
-      if (!self.text || Array.isArray(self.text)) {
+      if (!self.textStr || Array.isArray(self.textStr)) {
         return textToSlate("");
       }
 
       let parsed = null;
       try {
-        parsed = JSON.parse(self.text);
+        parsed = JSON.parse(self.textStr);
         // If this is old style json
         if (parsed.document?.nodes) {
           const convertedDoc = convertDocument(parsed.document);
@@ -56,7 +64,7 @@ export const TextContentModel = TileContentModel
       } catch (e) {
         console.warn('json did not parse');
       }
-      return textToSlate(self.text);
+      return textToSlate(self.textStr);
     }
   }))
   .views(self => ({
