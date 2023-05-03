@@ -9,10 +9,12 @@ import {
 import { IDocumentExportOptions, IDefaultContentOptions } from "../tile-content-info";
 import { TileMetadataModel } from "../tile-metadata";
 import { tileModelHooks } from "../tile-model-hooks";
-import { setTileTitleFromContent } from "../tile-model";
+import { getTileTitleFromContent, setTileTitleFromContent } from "../tile-model";
 import { TileContentModel } from "../tile-content";
 import { addCanonicalCasesToDataSet, IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
-import { kSharedDataSetType, SharedDataSet, SharedDataSetType } from "../../shared/shared-data-set";
+import {
+  kSharedDataSetType, SharedDataSet, SharedDataSetType, UpdatedSharedDataSetIds
+} from "../../shared/shared-data-set";
 import { updateSharedDataSetColors } from "../../shared/shared-data-set-colors";
 import { SharedModelType } from "../../shared/shared-model";
 import { kMinColumnWidth } from "../../../components/tiles/table/table-types";
@@ -20,6 +22,7 @@ import { canonicalizeExpression, kSerializedXKey } from "../../data/expression-u
 import { LogEventName } from "../../../lib/logger-types";
 import { logTileChangeEvent } from "../log/log-tile-change-event";
 import { uniqueId } from "../../../utilities/js-utils";
+import { PartialSharedModelEntry } from "src/models/document/document-content-types";
 
 export const kTableTileType = "Table";
 export const kCaseIdName = "__id__";
@@ -224,15 +227,12 @@ export const TableContentModel = TileContentModel
   }))
   .views(self => ({
     get title() {
-      return self.dataSet.name;
+      return getTileTitleFromContent(self) ?? self.dataSet.name;
     }
   }))
   .views(self => ({
     get tileSnapshotForCopy() {
       const snapshot = getSnapshot(self);
-      if (!self.dataSet.isEmpty) {
-        return { ...snapshot, importedDataSet: getSnapshot(self.dataSet) };
-      }
       return snapshot;
     }
   }))
@@ -333,7 +333,6 @@ export const TableContentModel = TileContentModel
       // }
     },
     setTableName(name: string) {
-      self.dataSet.setName(name);
       setTileTitleFromContent(self, name);
       self.logChange({ action: "update", target: "table", props: { name } });
     },
@@ -453,3 +452,27 @@ export const TableContentModel = TileContentModel
   }));
 
 export type TableContentModelType = Instance<typeof TableContentModel>;
+export type TableContentSnapshotType = SnapshotIn<typeof TableContentModel>;
+
+export function updateTableContentWithNewSharedModelIds(
+  content: TableContentSnapshotType,
+  sharedDataSetEntries: PartialSharedModelEntry[],
+  updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds>
+) {
+  // Column widths uses attribute ids, so we have to update them when updating shared dataset ids
+  const columnWidths: Record<string, number> = {};
+  sharedDataSetEntries.forEach(sharedDataSetEntry => {
+    const originalSharedDataSetId = sharedDataSetEntry.sharedModel.id;
+    if (originalSharedDataSetId) {
+      const attributeIdMap = updatedSharedModelMap[originalSharedDataSetId].attributeIdMap;
+      for (const entry of Object.entries(content.columnWidths ?? {})) {
+        const originalId = entry[0];
+        const width = entry[1] as number;
+        if (width !== undefined && originalId && attributeIdMap[originalId]) {
+            columnWidths[attributeIdMap[originalId]] = width;
+        }
+      }
+    }
+  });
+  return { ...content, columnWidths };
+}

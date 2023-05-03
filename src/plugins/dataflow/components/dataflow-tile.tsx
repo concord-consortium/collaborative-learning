@@ -1,7 +1,7 @@
 import React from "react";
 import { SizeMe, SizeMeProps } from "react-sizeme";
 import { observer, inject } from "mobx-react";
-import { DataflowProgram, UpdateMode } from "./dataflow-program";
+import { DataflowProgram } from "./dataflow-program";
 import { BaseComponent } from "../../../components/base";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
@@ -14,6 +14,7 @@ import { ToolTitleArea } from "../../../components/tiles/tile-title-area";
 import { dataflowLogEvent } from "../dataflow-logger";
 import { addAttributeToDataSet } from "../../../models/data/data-set";
 import { DataflowLinkTableButton } from "./ui/dataflow-program-link-table-button";
+import { ProgramMode, UpdateMode } from "./types/dataflow-tile-types";
 
 import "./dataflow-tile.scss";
 
@@ -24,7 +25,7 @@ interface IProps extends ITileProps{
 }
 
 interface IDataflowTileState {
-  programRecordingMode: number; // TODO: convert to enum
+  isRecording: boolean;
   isPlaying: boolean;
   playBackIndex: number;
   recordIndex: number; //# of ticks for record
@@ -39,7 +40,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   constructor(props: IProps) {
     super(props);
     this.state = {
-      programRecordingMode: 0,
+      isRecording: false,
       isPlaying: false,
       playBackIndex: 0,
       recordIndex: 0,
@@ -52,9 +53,8 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     const classes = `dataflow-tool disable-tile-content-drag ${editableClass}`;
     const { program, programDataRate, programZoom } = this.getContent();
     const numNodes = program.nodes.size;
-    const tileModel = this.getContent();
-    const disabledRecordingStates = (this.state.programRecordingMode === 1 || this.state.programRecordingMode === 2);
-    const dataFlowTileReadOnly = readOnly || disabledRecordingStates;
+    const tileContent = this.getContent();
+
     return (
       <>
         <ToolTitleArea>
@@ -66,7 +66,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
             {({ size }: SizeMeProps) => {
               return (
                 <DataflowProgram
-                  readOnly={dataFlowTileReadOnly}
+                  readOnly={readOnly}
                   documentProperties={this.getDocumentProperties()}
                   program={program}
                   onProgramChange={this.handleProgramChange}
@@ -78,17 +78,18 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
                   tileHeight={height}
                   tileId={model.id}
                   //state
-                  programRecordState={this.state.programRecordingMode}
+                  programMode={this.determineProgramMode()}
                   isPlaying={this.state.isPlaying}
                   playBackIndex={this.state.playBackIndex}
                   recordIndex={this.state.recordIndex}
                   //state handlers
-                  onRecordDataChange={this.handleChangeOfRecordingMode}
+                  handleChangeOfProgramMode={this.handleChangeOfProgramMode}
                   handleChangeIsPlaying={this.handleChangeIsPlaying}
                   updatePlayBackIndex={this.updatePlayBackIndex}
                   updateRecordIndex={this.updateRecordIndex}
                   numNodes={numNodes}
-                  tileModel={tileModel}
+                  tileContent={tileContent}
+
                 />
               );
             }}
@@ -156,7 +157,8 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
 
   private renderTableLinkButton() {
     const { model, onRequestTilesOfType, documentId } = this.props;
-    const isLinkButtonEnabled = (this.state.programRecordingMode === 2);
+    const isLinkButtonEnabled = (this.determineProgramMode() === ProgramMode.Done);
+
     const actionHandlers = {
                              handleRequestTableLink: this.handleRequestTableLink,
                              handleRequestTableUnlink: this.handleRequestTableUnlink
@@ -200,54 +202,68 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   };
 
   private pairNodesToAttributes = () => {
-    const model = this.getContent();
-    const dataSet = model.dataSet;
-    const dataSetAttributes = dataSet.attributes;
-
+    const tileContent = this.getContent();
     // dataSet looks like
     // Time   |  Node 1 | Node 2 | Node 3 etc
     //    0   |   val    | val    |  val
-    addAttributeToDataSet(model.dataSet, { name: "Time (sec)" }); //this is time quantized to nearest sampling rate
-
-    model.program.nodes.forEach((n) => {
-      model.addNewAttrFromNode(n.id, n.name);
-    });
-
-    // compare dataset attributes against nodes on tile, if an attribute is not on the tile - remove it.
-    dataSetAttributes.forEach((attribute, idx) => {
-      if (idx >= 1) { //skip 0 index (Time)
-        model.removeAttributesInDatasetMissingInTile(attribute.id);
-      }
+    addAttributeToDataSet(tileContent.dataSet, { name: "Time (sec)" }); //time quantized to nearest sampling rate
+    let insertionOrder = 1;
+    tileContent.program.nodes.forEach((n) => { //add attributes based on nodes in tile
+      tileContent.addNewAttrFromNode(n.id, n.name, insertionOrder);
+      insertionOrder ++;
     });
   };
 
-  private handleChangeOfRecordingMode = () => {
-    //0 program: executing, dataSet: empty
-    //1 program: executing, dataSet: writing in progress
-    //2 program: not executing,  dataSet: populated
-    //below are "substates" of #2 above
-    //isPlaying: playbackIndex incrementing, Nodes updated "by hand" rather than via execution
-    //isPaused: playbackIndex not incrementing, nodes stay as they were at last index above
+  private handleChangeOfProgramMode = () => {
+    const tileContent = this.getContent();
+    const programMode = this.determineProgramMode();
 
-    const mode = this.state.programRecordingMode;
-    const model = this.getContent();
-
-    if (mode === 0){ //when Record is pressed
-      this.setState({isPlaying: false}); //reset isPlaying
-      this.pairNodesToAttributes();
-    }
-    if (mode === 2){ // Clear pressed - remove all dataSet
-      const allAttributes = model.dataSet.attributes;
-      const ids = model.dataSet.cases.map(({__id__}) => ( __id__));
-      model.dataSet.removeCases(ids);
+    const clearAttributes = () => {
+      const allAttributes = tileContent.dataSet.attributes;
       allAttributes.forEach((attr)=>{
-        model.dataSet.removeAttribute(attr.id);
+        tileContent.dataSet.removeAttribute(attr.id);
       });
-    }
+    };
+    const clearCases = () => {
+      const ids = tileContent.dataSet.cases.map(({__id__}) => ( __id__));
+      tileContent.dataSet.removeCases(ids);
+    };
 
-    this.setState({
-      programRecordingMode: (mode + 1) % 3
-    });
+    switch (programMode){
+      case ProgramMode.Ready:
+        clearAttributes(); //clear X | Y attributes from previous state
+        this.setState({isPlaying: false}); //reset isPlaying
+        this.setState({isRecording: true});
+        this.pairNodesToAttributes();
+        break;
+      case ProgramMode.Recording:
+        this.setState({isRecording: false});
+        break;
+      case ProgramMode.Done:
+        tileContent.setFormattedTime("000:00"); //set formattedTime to 000:00
+        //clear the dataSet;
+        clearAttributes();
+        clearCases();
+        // create a default dataSet x | y table
+        addAttributeToDataSet(tileContent.dataSet, { name: "x" });
+        addAttributeToDataSet(tileContent.dataSet, { name: "y" });
+        break;
+    }
+  };
+
+  private determineProgramMode = () => {
+    const { isRecording } = this.state;
+    const tileContent = this.getContent();
+    if (!isRecording && tileContent.isDataSetEmptyCases){
+      return ProgramMode.Ready;
+    }
+    else if (isRecording){
+      return ProgramMode.Recording;
+    }
+    else if (!isRecording && !tileContent.isDataSetEmptyCases){
+     return ProgramMode.Done;
+    }
+    return ProgramMode.Ready;
   };
 
   private handleChangeIsPlaying = () => {
@@ -262,7 +278,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
       this.setState({playBackIndex: 0});
     }
   };
-
   private updateRecordIndex = (update: string) => {
     if (update === UpdateMode.Increment){
       this.setState({recordIndex: this.state.recordIndex + 1});
@@ -271,7 +286,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
       this.setState({recordIndex: 0});
     }
   };
-
   private getContent() {
     return this.props.model.content as DataflowContentModelType;
   }

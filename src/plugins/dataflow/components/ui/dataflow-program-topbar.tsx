@@ -8,6 +8,9 @@ import PlayIcon from "../../assets/topbar-buttons/play-icon.svg";
 import PauseIcon from "../../assets/topbar-buttons/pause-icon.svg";
 import ClearIcon from "../../assets/topbar-buttons/clear-icon.svg";
 import { DataflowSerialConnectButton } from "./dataflow-serial-connect-button";
+import { DataflowContentModelType } from "../../model/dataflow-content";
+import { ProgramMode } from "../types/dataflow-tile-types";
+import { useCautionAlert } from "../../../../components/utilities/use-caution-alert";
 
 import "./dataflow-program-topbar.scss";
 
@@ -20,18 +23,17 @@ interface TopbarProps {
   showRateUI: boolean;
   lastIntervalDuration: number;
   serialDevice: SerialDevice;
-  onRecordDataChange: () => void;
-  programRecordState: number;
+  handleChangeOfProgramMode: () => void;
+  programMode: ProgramMode;
   isPlaying: boolean;
   handleChangeIsPlaying: () => void;
   numNodes: number;
+  tileContent: DataflowContentModelType;
 }
 
 export const DataflowProgramTopbar = (props: TopbarProps) => {
   const { onSerialRefreshDevices, readOnly, serialDevice, programDataRates, dataRate, onRateSelectClick,
-          onRecordDataChange, programRecordState, isPlaying, handleChangeIsPlaying, numNodes } = props;
-
-  const disableRecordButton = readOnly && programRecordState === 0; //hides RecordButton on leftside read only docs
+          handleChangeOfProgramMode, programMode, isPlaying, handleChangeIsPlaying, numNodes, tileContent} = props;
 
   return (
     <div className="program-editor-topbar">
@@ -43,11 +45,11 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
         <div className="topbar-center-container">
           <div className="topbar-blank-or-play">
             {
-              (programRecordState === 1 || programRecordState === 2) &&
+              (programMode === ProgramMode.Recording || programMode === ProgramMode.Done) &&
               <PlaybackButton
                 isPlaying={isPlaying}
                 handleChangeIsPlaying={handleChangeIsPlaying}
-                programRecordState={programRecordState}
+                programMode={programMode}
               />
             }
           </div>
@@ -56,17 +58,19 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
             dataRate={dataRate}
             onRateSelectClick={onRateSelectClick}
             readOnly={readOnly}
-            programRecordState={programRecordState}
+            programMode={programMode}
             isPlaying={isPlaying}
             handleChangeIsPlaying={handleChangeIsPlaying}
             numNodes={numNodes}
-            onRecordDataChange={onRecordDataChange}
+            handleChangeOfProgramMode={handleChangeOfProgramMode}
+            tileContent={tileContent}
           />
           <RecordStopOrClearButton
-            disabled={disableRecordButton}
-            programRecordState={programRecordState}
-            onRecordDataChange={onRecordDataChange}
+            disabled={readOnly}
+            programMode={programMode}
+            handleChangeOfProgramMode={handleChangeOfProgramMode}
           />
+
         </div>
 
         <div className="topbar-right">
@@ -90,26 +94,49 @@ const iconArr = [ //button icon
 
 interface IRecordStopOrClearProps {
   disabled: boolean;
-  onRecordDataChange: (program: any) => void;
-  programRecordState: number;
+  handleChangeOfProgramMode: () => void;
+  programMode: number;
 }
 
 const RecordStopOrClearButton = (props: IRecordStopOrClearProps) => {
-  const { disabled, onRecordDataChange, programRecordState } = props;
-  if (programRecordState === 2){ //stop button pressed
-  }
+
+  const { disabled, handleChangeOfProgramMode, programMode } = props;
+
+  /* ==[ Clear Data - Confirmation Modal ] == */
+  const AlertContent = () => {
+    return (
+      <p> Remove the program&#39;s recorded data and any linked displays of this data? This action is not undoable.</p>
+    );
+  };
+
+  const [showAlert] = useCautionAlert({
+    title: "Clear Data",
+    content: AlertContent,
+    confirmLabel: "Clear",
+    onConfirm: handleChangeOfProgramMode
+  });
+
+  const onClickHandler = () => {
+    if (!disabled && programMode === ProgramMode.Done){
+      showAlert();
+    }
+    else {
+      handleChangeOfProgramMode();
+    }
+  };
+
   return (
     <div className="record-btn-container">
       <button
         className="record-data-btn"
-        onClick={onRecordDataChange}
+        onClick={onClickHandler}
         disabled={disabled}
       >
         <div className="record-data-icon">
-          {iconArr[programRecordState]}
+          {iconArr[programMode]}
         </div>
         <div className="record-data-txt">
-          {Mode[programRecordState]}
+          {Mode[programMode]}
         </div>
       </button>
     </div>
@@ -119,18 +146,18 @@ const RecordStopOrClearButton = (props: IRecordStopOrClearProps) => {
 
 /* ==[ Playback Button ] == */
 interface IPlaybackProps {
-  programRecordState: number;
+  programMode: number;
   isPlaying: boolean;
   handleChangeIsPlaying: () => void;
 }
 
 const PlaybackButton = (props: IPlaybackProps) => {
-  const {programRecordState, isPlaying, handleChangeIsPlaying} = props;
+  const {programMode, isPlaying, handleChangeIsPlaying} = props;
   return (
     <div className="playback-btn-container">
       <button
         className="playback-data-btn"
-        disabled={programRecordState === 1}
+        disabled={programMode === ProgramMode.Recording}
         onClick={handleChangeIsPlaying}
       >
         <div className="playback-data-icon">

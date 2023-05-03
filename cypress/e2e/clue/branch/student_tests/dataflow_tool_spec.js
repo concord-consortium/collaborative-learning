@@ -1,12 +1,14 @@
 import ClueCanvas from '../../../../support/elements/clue/cCanvas';
 import DataflowToolTile from '../../../../support/elements/clue/DataflowToolTile';
 
-let clueCanvas = new ClueCanvas,
-  dataflowToolTile = new DataflowToolTile;
+let clueCanvas = new ClueCanvas;
+let dataflowToolTile = new DataflowToolTile;
+let dragXDestination = 300;
+
 
 context('Dataflow Tool Tile', function () {
   before(function () {
-    const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=dfe";
+    const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=dfe&mouseSensor";
     cy.clearQAData('all');
     cy.visit(queryParams);
     cy.waitForLoad();
@@ -15,7 +17,7 @@ context('Dataflow Tool Tile', function () {
   describe("Dataflow Tool", () => {
     it("renders dataflow tool tile", () => {
       clueCanvas.addTile("dataflow");
-      dataflowToolTile.getDrawTile().should("exist");
+      dataflowToolTile.getDataflowTile().should("exist");
       dataflowToolTile.getTileTitle().should("exist");
     });
     it("edit tile title", () => {
@@ -43,7 +45,7 @@ context('Dataflow Tool Tile', function () {
         dataflowToolTile.getNumberField().should("have.value", "3");
       });
 
-      //TO DO: write a test that can check min and max (should be 0 and 3)
+      //TODO: write a test that can check min and max (should be 0 and 3)
       // could be in class .chartjs-size-monitor
 
       it("can click zoom in positive button", () => {
@@ -65,6 +67,31 @@ context('Dataflow Tool Tile', function () {
         dataflowToolTile.getFlowtool().children().should("have.attr", "style").and("contain", "scale(1)");
       });
       it("can delete number node", () => {
+        dataflowToolTile.getDeleteNodeButton(nodeType).click();
+        dataflowToolTile.getNode(nodeType).should("not.exist");
+      });
+    });
+    describe("Drag to Add Node", () => {
+      const nodeType = "number";
+      // TODO Why isn't this test working?
+      it('can create node by dragging button onto tile', () => {
+        const draggable = () => cy.get(".program-toolbar [aria-roledescription='draggable'] button").eq(1);
+        dataflowToolTile.getNode(nodeType).should("not.exist");
+        draggable().trigger("mousedown", { force: true })
+          .wait(100)
+          .trigger("mousemove", {
+            force: true,
+            clientX: 500,
+            clientY: 200
+          })
+          .wait(100)
+          .trigger("mouseup", { force: true })
+          .wait(100);
+        // const dataTransfer = new DataTransfer;
+        // draggable().focus().trigger('dragstart', { dataTransfer });
+        // dataflowToolTile.getDataflowTile().trigger('drop', { dataTransfer });
+        // draggable().trigger('dragend');
+        dataflowToolTile.getNode(nodeType).should("exist");
         dataflowToolTile.getDeleteNodeButton(nodeType).click();
         dataflowToolTile.getNode(nodeType).should("not.exist");
       });
@@ -248,19 +275,21 @@ context('Dataflow Tool Tile', function () {
       });
       it("can change output type", () => {
         const dropdown = "outputType";
-        const outputTypes = ["Light Bulb", "Grabber", "Advanced Grabber"];
+        const outputTypes = ["Light Bulb", "Grabber", "Advanced Grabber", "Fan", "Humidifier"];
         dataflowToolTile.getDropdown(nodeType, dropdown).click();
-        dataflowToolTile.getDropdownOptions(nodeType, dropdown).should("have.length", 3);
+        dataflowToolTile.getDropdownOptions(nodeType, dropdown).should("have.length", 5);
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).each(($tab, index, $typeList) => {
           expect($tab.text()).to.contain(outputTypes[index]);
         });
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).last().click();
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).should("have.length", 0);
-        dataflowToolTile.getDropdown(nodeType, dropdown).contains("Grabber").should("exist");
+        dataflowToolTile.getDropdown(nodeType, dropdown).contains("Humidifier").should("exist");
       });
       it("verify demo output images, node inputs outputs & toggle minigraph", () => {
         const dropdown = "outputType";
         //verify advanced grabber
+        dataflowToolTile.getDropdown(nodeType, dropdown).click();
+        dataflowToolTile.getDropdownOptions(nodeType, dropdown).eq(2).click();
         dataflowToolTile.getAdvancedGrabberImages();
         dataflowToolTile.getNodeInput().should("exist");
         dataflowToolTile.getNodeInput().should('have.length', 2);
@@ -329,7 +358,7 @@ context('Dataflow Tool Tile', function () {
       });
       it("verify live output types", () => {
         const dropdown = "liveOutputType";
-        const outputTypes = ["Light Bulb", "Grabber", "Sprinkler", "Fan", "Heat Lamp"];
+        const outputTypes = ["Light Bulb", "Grabber", "Humidifier", "Fan", "Heat Lamp"];
         dataflowToolTile.getDropdown(nodeType, dropdown).click();
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).should("have.length", 5);
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).each(($tab, index, $typeList) => {
@@ -340,6 +369,41 @@ context('Dataflow Tool Tile', function () {
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).should("have.length", 0);
         dataflowToolTile.getDropdown(nodeType, dropdown).contains("Heat Lamp").should("exist");
         dataflowToolTile.getOutputNodeValueText().should("contain", "off");
+      });
+      it("verify live binary outputs indicate hub not present if not connected", () => {
+        const dropdown = "liveOutputType";
+        dataflowToolTile.getDropdown(nodeType, dropdown).click();
+        dataflowToolTile.getDropdownOptions(nodeType, dropdown).eq(3).click();
+        dataflowToolTile.getDropdown(nodeType, dropdown).contains("Fan").should("exist");
+        dataflowToolTile.getOutputNodeValueText().should("contain", "(no hub)");
+      });
+      it("can be dragged to the right and set back to light bulb", () => {
+        const dropdown = "liveOutputType";
+        dataflowToolTile.getNode(nodeType).click(50, 10)
+          .trigger("pointerdown", 50, 10 )
+          .trigger("pointermove", dragXDestination, 10, { force: true } )
+          .trigger("pointerup", dragXDestination, 10, { force: true } );
+          dataflowToolTile.getDropdown(nodeType, dropdown).click();
+          dataflowToolTile.getDropdownOptions(nodeType, dropdown).eq(0).click();
+      });
+      it("can connect and trigger modal connection warning", () => {
+        dataflowToolTile.getCreateNodeButton("number").click();
+        dataflowToolTile.getNode("number").should("exist");
+        dataflowToolTile.getNumberField().type("1{enter}");
+        dataflowToolTile.getNumberNodeOutput().should("exist");
+        dataflowToolTile.getDataflowTile().click(306, 182)
+          .trigger("pointerdown", 306, 182, {force: true})
+          .trigger("pointermove", 366, 172, {force: true})
+          .trigger("pointerup", 366, 172, {force: true});
+        dataflowToolTile.getModalOkButton().click();
+      });
+      it("can recieve a value from a connected block, and display correct on or off string", () => {
+        dataflowToolTile.getNode("number").should("exist");
+        dataflowToolTile.getOutputNodeValueText().should("contain", "on");
+        dataflowToolTile.getNumberField().type("{backspace}0{enter}");
+        dataflowToolTile.getNumberNodeOutput().should("exist");
+        dataflowToolTile.getOutputNodeValueText().should("contain", "off");
+        dataflowToolTile.getDeleteNodeButton("number").click();
       });
       it("verify live output options", () => {
         dataflowToolTile.getDropdown(nodeType, "hubSelect").should("exist");
@@ -450,6 +514,73 @@ context('Dataflow Tool Tile', function () {
       it("can delete sensor node", () => {
         dataflowToolTile.getDeleteNodeButton(nodeType).click();
         dataflowToolTile.getNode(nodeType).should("not.exist");
+      });
+    });
+    describe("Record Data", () => {
+      it("can create a small program", () => {
+        const nodes = [ "timer", "demo-output" ];
+        dataflowToolTile.getCreateNodeButton(nodes[0]).click();
+        dataflowToolTile.getNode(nodes[0]).should("exist");
+        dataflowToolTile.getNodeTitle().should("contain", "Timer (on/off)");
+        dataflowToolTile.getCreateNodeButton(nodes[1]).click();
+        dataflowToolTile.getNode(nodes[1]).should("exist");
+        dataflowToolTile.getNodeTitle().should("contain", "Demo Output");
+        dataflowToolTile.getNodeOutput().eq(0).click();
+        dataflowToolTile.getNodeInput().eq(0).click();
+      });
+      it("verify sampling rate", () => {
+        const rate = "500";
+        dataflowToolTile.getSamplingRateLabel().should("have.text", "Sampling Rate");
+        dataflowToolTile.selectSamplingRate(rate);
+      });
+      it("verify recording and stop recording", () => {
+        dataflowToolTile.verifyRecordButtonText();
+        dataflowToolTile.verifyRecordButtonIcon();
+        dataflowToolTile.getRecordButton().click();
+
+        dataflowToolTile.verifyPlayButtonText();
+        dataflowToolTile.verifyPlayButtonIcon();
+        dataflowToolTile.getPlayButton().should("be.disabled");
+        dataflowToolTile.verifyStopButtonText();
+        dataflowToolTile.verifyStopButtonIcon();
+
+        dataflowToolTile.getTimeSlider().should("be.visible");
+        dataflowToolTile.getCountdownTimer().should("contain", "/");
+        cy.wait(5000);
+
+        dataflowToolTile.getStopButton().click();
+      });
+      it("verify play and pause recording", () => {
+        dataflowToolTile.getPlayButton().should("be.enabled");
+        dataflowToolTile.verifyRecordingClearButtonText();
+        dataflowToolTile.verifyRecordingClearButtonIcon();
+        dataflowToolTile.getPlayButton().click();
+
+        dataflowToolTile.verifyPauseButtonText();
+        dataflowToolTile.verifyPauseButtonIcon();
+        dataflowToolTile.getPauseButton().should("be.enabled");
+        dataflowToolTile.getPauseButton().click();
+
+        dataflowToolTile.getPlayButton().should("be.enabled");
+        dataflowToolTile.getPlayButton().click();
+        cy.wait(5000);
+      });
+      it("verify clear recording", () => {
+        dataflowToolTile.verifyRecordingClearButtonText();
+        dataflowToolTile.verifyRecordingClearButtonIcon();
+        dataflowToolTile.getRecordingClearButton().click();
+        dataflowToolTile.getClearDataWarningTitle().should("have.text", "Clear Data");
+        dataflowToolTile.getClearDataWarningContent().should(
+          "contain",
+          "Remove the program's recorded data and any linked displays of this data? This action is not undoable.");
+        dataflowToolTile.getClearDataWarningCancel().click();
+        dataflowToolTile.verifyRecordingClearButtonText();
+        dataflowToolTile.verifyRecordingClearButtonIcon();
+        dataflowToolTile.getRecordingClearButton().click();
+        dataflowToolTile.getClearDataWarningClear().click();
+        dataflowToolTile.getSamplingRateLabel().should("have.text", "Sampling Rate");
+        dataflowToolTile.verifyRecordButtonText();
+        dataflowToolTile.verifyRecordButtonIcon();
       });
     });
   });

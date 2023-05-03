@@ -315,7 +315,7 @@ context('Test Canvas', function () {
       cy.openDocumentWithTitle('my-work', 'workspaces', 'SAS 2.1 Drawing Wumps');
     });
     it('will delete elements from canvas', function () {
-      // //Delete elements in the canvas
+      // Delete elements in the canvas
       clueCanvas.deleteTile('graph');
       clueCanvas.deleteTile('image');
       clueCanvas.deleteTile('draw');
@@ -346,8 +346,7 @@ context('Test Canvas', function () {
         imageToolTile.getImageTile().find('.editable-tile-title-text').contains('Did You Know?: Images in computer graphics');
         clueCanvas.deleteTile('image');
       });
-      // FIXME: enable below test when dragging multiple shared-model-backed tiles works
-      it.skip('will maintain positioning when copying multiple tiles', () => {
+      it('will maintain positioning when copying multiple tiles', () => {
         resourcesPanel.openBottomTab("Initial Challenge");
         const leftTile = type => cy.get(`.nav-tab-panel .problem-panel .${type}-tool-tile`);
 

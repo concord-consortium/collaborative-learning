@@ -1,10 +1,18 @@
 import { registerTileComponentInfo } from "../tile-component-info";
 import { registerTileContentInfo } from "../tile-content-info";
 import {
-  kTableTileType, TableContentModel, TableMetadataModel, kTableDefaultHeight, defaultTableContent
+  kTableTileType, TableContentModel, TableMetadataModel, kTableDefaultHeight, defaultTableContent,
+  updateTableContentWithNewSharedModelIds
 } from "./table-content";
 import TableToolComponent from "../../../components/tiles/table/table-tile";
 import TableToolIcon from "../../../clue/assets/icons/table-tool.svg";
+
+export function tileSnapshotPreProcessor(tileSnap: any) {
+  // Get the title from the dataSet if it's only there
+  return !("title" in tileSnap) && "name" in tileSnap.content
+    ? { ...tileSnap, title: tileSnap.content.name }
+    : tileSnap;
+}
 
 registerTileContentInfo({
   type: kTableTileType,
@@ -12,7 +20,9 @@ registerTileContentInfo({
   modelClass: TableContentModel,
   metadataClass: TableMetadataModel,
   defaultHeight: kTableDefaultHeight,
-  defaultContent: defaultTableContent
+  defaultContent: defaultTableContent,
+  tileSnapshotPreProcessor,
+  updateContentWithNewSharedModelIds: updateTableContentWithNewSharedModelIds
 });
 
 registerTileComponentInfo({

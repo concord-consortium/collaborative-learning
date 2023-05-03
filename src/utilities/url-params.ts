@@ -81,6 +81,8 @@ export interface QueryParams {
   curriculumBranch?: string;
   // work with a local checkout of the curriculum instead of github
   localCMSBackend?: boolean;
+  // mouse sensor can be enabled for cypress drag and drop tests for dnd-kit
+  mouseSensor?: boolean;
 }
 
 export const processUrlParams = (): QueryParams => {

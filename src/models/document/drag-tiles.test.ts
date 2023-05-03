@@ -180,7 +180,7 @@ Array [
   Object {
     "rowHeight": undefined,
     "rowIndex": 2,
-    "tileContent": "{\\"id\\":\\"testid-1000\\",\\"title\\":\\"tile 3\\",\\"content\\":{\\"type\\":\\"Table\\",\\"isImported\\":false,\\"importedDataSet\\":{\\"id\\":\\"data-set-1\\",\\"name\\":\\"Table 1\\",\\"attributes\\":[{\\"id\\":\\"attribute-1\\",\\"clientKey\\":\\"\\",\\"name\\":\\"x\\",\\"hidden\\":false,\\"units\\":\\"\\",\\"formula\\":{},\\"values\\":[\\"0\\"],\\"title\\":\\"\\"},{\\"id\\":\\"attribute-2\\",\\"clientKey\\":\\"\\",\\"name\\":\\"y\\",\\"hidden\\":false,\\"units\\":\\"\\",\\"formula\\":{},\\"values\\":[\\"1\\"],\\"title\\":\\"\\"}],\\"cases\\":[{\\"__id__\\":\\"case-1\\"}]},\\"columnWidths\\":{}}}",
+    "tileContent": "{\\"id\\":\\"testid-1000\\",\\"title\\":\\"tile 3\\",\\"content\\":{\\"type\\":\\"Table\\",\\"isImported\\":false,\\"importedDataSet\\":{\\"id\\":\\"testid-8\\",\\"attributes\\":[],\\"cases\\":[]},\\"columnWidths\\":{}}}",
     "tileId": "tile3",
     "tileIndex": 0,
     "tileType": "Table",
@@ -271,7 +271,7 @@ Object {
     Object {
       "rowHeight": undefined,
       "rowIndex": 2,
-      "tileContent": "{\\"id\\":\\"testid-1000\\",\\"title\\":\\"tile 3\\",\\"content\\":{\\"type\\":\\"Table\\",\\"isImported\\":false,\\"importedDataSet\\":{\\"id\\":\\"data-set-1\\",\\"name\\":\\"Table 1\\",\\"attributes\\":[{\\"id\\":\\"attribute-1\\",\\"clientKey\\":\\"\\",\\"name\\":\\"x\\",\\"hidden\\":false,\\"units\\":\\"\\",\\"formula\\":{},\\"values\\":[\\"0\\"],\\"title\\":\\"\\"},{\\"id\\":\\"attribute-2\\",\\"clientKey\\":\\"\\",\\"name\\":\\"y\\",\\"hidden\\":false,\\"units\\":\\"\\",\\"formula\\":{},\\"values\\":[\\"1\\"],\\"title\\":\\"\\"}],\\"cases\\":[{\\"__id__\\":\\"case-1\\"}]},\\"columnWidths\\":{}}}",
+      "tileContent": "{\\"id\\":\\"testid-1000\\",\\"title\\":\\"tile 3\\",\\"content\\":{\\"type\\":\\"Table\\",\\"isImported\\":false,\\"importedDataSet\\":{\\"id\\":\\"testid-8\\",\\"attributes\\":[],\\"cases\\":[]},\\"columnWidths\\":{}}}",
       "tileId": "tile3",
       "tileIndex": 0,
       "tileType": "Table",

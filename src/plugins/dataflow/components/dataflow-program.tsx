@@ -1,4 +1,5 @@
 import React from "react";
+import ReactDOM from "react-dom";
 import "regenerator-runtime/runtime";
 import { inject, observer } from "mobx-react";
 import { BaseComponent } from "../../../components/base";
@@ -25,6 +26,7 @@ import { GeneratorReteNodeFactory } from "../nodes/factories/generator-rete-node
 import { TimerReteNodeFactory } from "../nodes/factories/timer-rete-node-factory";
 import { NumControl } from "../nodes/controls/num-control";
 import { ValueControl } from "../nodes/controls/value-control";
+import { DataflowDropZone } from "./ui/dataflow-drop-zone";
 import { DataflowProgramToolbar } from "./ui/dataflow-program-toolbar";
 import { DataflowProgramTopbar } from "./ui/dataflow-program-topbar";
 import { DataflowProgramCover } from "./ui/dataflow-program-cover";
@@ -41,6 +43,7 @@ import { SensorValueControl } from "../nodes/controls/sensor-value-control";
 import { InputValueControl } from "../nodes/controls/input-value-control";
 import { DemoOutputControl } from "../nodes/controls/demo-output-control";
 import { DropdownListControl } from "../nodes/controls/dropdown-list-control";
+import { ProgramMode, UpdateMode } from "./types/dataflow-tile-types";
 
 import "./dataflow-program.sass";
 interface NodeNameValuePair {
@@ -60,11 +63,6 @@ export interface IStartProgramParams {
   title: string;
 }
 
-export enum UpdateMode {
-  Increment = "Increment",
-  Reset = "Reset",
-}
-
 interface IProps extends SizeMeProps {
   readOnly?: boolean;
   documentProperties?: { [key: string]: string };
@@ -77,17 +75,17 @@ interface IProps extends SizeMeProps {
   tileHeight?: number;
   tileId: string;
   //state
-  programRecordState: number;
+  programMode: ProgramMode;
   isPlaying: boolean;
   playBackIndex: number;
   recordIndex: number;
   //state handlers
-  onRecordDataChange: () => void;
+  handleChangeOfProgramMode: () => void;
   handleChangeIsPlaying: () => void;
   updatePlayBackIndex: (update: string) => void;
   updateRecordIndex: (update: string) => void;
   numNodes: number;
-  tileModel: DataflowContentModelType;
+  tileContent: DataflowContentModelType;
 }
 
 interface IState {
@@ -117,6 +115,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private disposers: IDisposer[] = [];
   private onSnapshotSetup = false;
   private processing = false;
+  private reactElements: HTMLElement[] = [];
+  private reactNodeElements = new Map<Node, HTMLElement>();
 
   constructor(props: IProps) {
     super(props);
@@ -125,54 +125,64 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       lastIntervalDuration: 0,
     };
     this.lastIntervalTime = Date.now();
+
   }
 
   public render() {
-    const { readOnly, documentProperties, numNodes} = this.props;
+    const { readOnly, documentProperties, numNodes, tileContent, programDataRate, onProgramDataRateChange,
+            isPlaying, handleChangeIsPlaying, handleChangeOfProgramMode, programMode} = this.props;
+
     const editorClassForDisplayState = "full";
     const editorClass = `editor ${editorClassForDisplayState}`;
     const toolbarEditorContainerClass = `toolbar-editor-container`;
     const isTesting = ["qa", "test"].indexOf(this.stores.appMode) >= 0;
     const showRateUI = ["qa", "test", "dev"].indexOf(this.stores.appMode) >= 0;
     const showZoomControl = !documentProperties?.dfHasData;
-    const showProgramToolbar = showZoomControl && !readOnly;
+    const disableToolBarModes = programMode === ProgramMode.Recording || programMode === ProgramMode.Done;
+    const showProgramToolbar = showZoomControl && !disableToolBarModes;
+
     return (
       <div className="dataflow-program-container">
         <DataflowProgramTopbar
           onSerialRefreshDevices={this.serialDeviceRefresh}
           programDataRates={ProgramDataRates}
-          dataRate={this.props.programDataRate}
-          onRateSelectClick={this.props.onProgramDataRateChange}
+          dataRate={programDataRate}
+          onRateSelectClick={onProgramDataRateChange}
           readOnly={!!readOnly}
           showRateUI={showRateUI}
           lastIntervalDuration={this.state.lastIntervalDuration}
           serialDevice={this.stores.serialDevice}
-          onRecordDataChange={this.props.onRecordDataChange}
-          programRecordState={this.props.programRecordState}
-          isPlaying={this.props.isPlaying}
-          handleChangeIsPlaying={this.props.handleChangeIsPlaying}
+          programMode={programMode}
+          isPlaying={isPlaying}
+          handleChangeIsPlaying={handleChangeIsPlaying}
           numNodes={numNodes}
+          tileContent={tileContent}
+          handleChangeOfProgramMode={handleChangeOfProgramMode}
         />
         <div className={toolbarEditorContainerClass}>
           { showProgramToolbar && <DataflowProgramToolbar
-            onNodeCreateClick={this.addNode}
-            onClearClick={this.clearProgram}
-            isTesting={isTesting}
             disabled={!!readOnly}
+            isTesting={isTesting}
+            onClearClick={this.clearProgram}
+            onNodeCreateClick={this.addNode}
+            tileId={this.props.tileId}
           /> }
-          <div
+          <DataflowDropZone
+            addNode={this.addNode}
             className="editor-graph-container"
-            style={this.getEditorStyle()}
-            onDragOver={event => {
-              event.preventDefault();
-              event.dataTransfer.dropEffect = "copy";
-            }}
+            programEditor={this.programEditor}
+            style={this.getEditorStyle}
+            tileId={this.props.tileId}
           >
             <div
               className={editorClass}
               ref={(elt) => this.editorDomElement = elt}
             >
-              <div className="flow-tool" ref={elt => this.toolDiv = elt}/>
+              <div
+                className="flow-tool"
+                ref={elt => this.toolDiv = elt}
+                onWheel={e => this.handleWheel(e, this.toolDiv) }
+              />
               { this.shouldShowProgramCover() &&
                 <DataflowProgramCover editorClass={editorClassForDisplayState} /> }
               {showZoomControl &&
@@ -182,10 +192,17 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                   disabled={false}
                 /> }
             </div>
-          </div>
+          </DataflowDropZone>
         </div>
       </div>
     );
+  }
+
+  private handleWheel(e: any, toolDiv: HTMLElement | null) {
+    if (toolDiv !== null) {
+      const documentContent = toolDiv.closest(".document-content");
+      documentContent?.scrollBy(e.deltaX, e.deltaY);
+    }
   }
 
   public componentDidMount() {
@@ -198,6 +215,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   public componentWillUnmount() {
     clearInterval(this.intervalHandle);
     this.disposers.forEach(disposer => disposer());
+    this.destroyEditor();
   }
 
   public componentDidUpdate(prevProps: IProps) {
@@ -274,6 +292,44 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.programEditor = new Rete.NodeEditor(RETE_APP_IDENTIFIER, this.toolDiv);
       this.programEditor.use(ConnectionPlugin);
       this.programEditor.use(ReactRenderPlugin);
+
+      // Work around for cleaning up React components created
+      // by the react-render-plugin. The other part of this is
+      // in `destroyEditor`.
+      this.programEditor.on("rendercontrol", ({el, control}) => {
+        const extControl = control as any;
+        if (!extControl.render || extControl.render === "react") {
+          this.reactElements.push(el);
+        }
+      });
+
+      this.programEditor.on("rendernode", ({ el, node, component, bindSocket, bindControl }) => {
+        const extComponent = component as any;
+        if (!extComponent.render || extComponent.render === "react") {
+          this.reactElements.push(el);
+          this.reactNodeElements.set(node, el);
+        }
+      });
+
+      this.programEditor.on("noderemoved", node => {
+        const el = this.reactNodeElements.get(node);
+        if (el) {
+          this.reactNodeElements.delete(node);
+          this.reactElements = this.reactElements.filter(item => item !== el);
+
+          // Remove all the controls inside of this node
+          const childControls = el.getElementsByClassName("control");
+          for (let i=0; i<childControls.length; i++) {
+            const controlEl = childControls[i];
+            if (controlEl instanceof HTMLElement && this.reactElements.indexOf(controlEl)) {
+              this.reactElements = this.reactElements.filter(item => item !== controlEl);
+              ReactDOM.unmountComponentAtNode(controlEl);
+            }
+          }
+          ReactDOM.unmountComponentAtNode(el);
+        }
+      });
+      // End of work around for cleaning up React components
 
       this.components.map(c => {
         this.programEditor.register(c);
@@ -367,9 +423,22 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
   }
 
+  private destroyEditor() {
+    this.reactElements.forEach(el => {
+      ReactDOM.unmountComponentAtNode(el);
+    });
+    this.programEditor.destroy();
+    this.reactElements = [];
+    this.reactNodeElements.clear();
+  }
+
   private updateProgramEditor = () => {
     // TODO: allow updates to write tiles for undo/redo
     if (this.toolDiv && this.props.readOnly) {
+      if (this.programEditor) {
+        // Clean up the old editor first
+        this.destroyEditor();
+      }
       this.toolDiv.innerHTML = "";
       this.initProgramEditor();
     }
@@ -417,7 +486,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private shouldShowProgramCover() {
-    return this.props.readOnly;
+    return this.props.readOnly || this.disabledRecordingStates();
+  }
+
+  //disable the right side when recordingMode in stop or clear
+  private disabledRecordingStates(){
+    const { programMode } = this.props;
+    return ( programMode === ProgramMode.Recording || programMode === ProgramMode.Done);
   }
 
   private keepNodesInView = () => {
@@ -475,10 +550,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     return bounds;
   }
 
-  private addNode = async (nodeType: string) => {
+  private addNode = async (nodeType: string, position?: [number, number]) => {
     const nodeFactory = this.programEditor.components.get(nodeType) as DataflowReteNodeFactory;
     const n1 = await nodeFactory!.createNode();
-    n1.position = this.getNewNodePosition();
+    n1.position = position ?? this.getNewNodePosition();
     this.programEditor.addNode(n1);
   };
 
@@ -541,7 +616,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private recordCase = () => {
     const { recordIndex } = this.props;
-    const { programDataRate, dataSet } = this.props.tileModel; //grab the program Sampling Rate to write TimeQuantized
+    const { programDataRate, dataSet } = this.props.tileContent; //grab the program Sampling Rate to write TimeQuantized
 
     //Write case
     //Attributes look like  Time (quantized) as col 1 followed by all nodes
@@ -557,11 +632,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const key = this.getAttributeIdForNode(idx);
       aCase[key] = node.data.nodeValue as string;
     });
-    addCanonicalCasesToDataSet(this.props.tileModel.dataSet, [aCase]);
+    addCanonicalCasesToDataSet(this.props.tileContent.dataSet, [aCase]);
   };
 
   private getAttributeIdForNode = (nodeIndex: number) => {
-    const { dataSet } = this.props.tileModel;
+    const { dataSet } = this.props.tileContent;
     // this function adds one to index to skip time attribute
     return dataSet.attributes[nodeIndex + 1].id;
   };
@@ -624,6 +699,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         this.updateNodeSensorValue(n);
       },
       "Live Output": (n: Node) => {
+        this.updateNodeChannelInfo(n);
         this.sendDataToSerialDevice(n);
       }
     };
@@ -650,32 +726,29 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private tick = () => {
-    const {tileModel, playBackIndex, programRecordState, isPlaying,
-      updateRecordIndex, updatePlayBackIndex } = this.props;
+    const { readOnly, tileContent: tileModel, playBackIndex, programMode,
+            isPlaying, updateRecordIndex, updatePlayBackIndex } = this.props;
+
     const dataSet = tileModel.dataSet;
     const now = Date.now();
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});
     this.lastIntervalTime = now;
 
-    const isCleared = programRecordState === 0;
-    const isRecording = programRecordState === 1;
-    const isRecorded = programRecordState === 2;
-
-    if (isCleared){
-      this.updateNodes();
-    }
-
-    if (isRecording){
-      this.recordCase();
-      this.updateNodes();
-      updateRecordIndex(UpdateMode.Increment);
-    }
-
-    if (isRecorded){
-      isPlaying && this.playbackNodesWithCaseData(dataSet, playBackIndex);
-      isPlaying && updatePlayBackIndex(UpdateMode.Increment);
-      !isPlaying && updatePlayBackIndex(UpdateMode.Reset);
-      updateRecordIndex(UpdateMode.Reset);
+    switch (programMode){
+      case ProgramMode.Ready:
+        this.updateNodes();
+        break;
+      case ProgramMode.Recording:
+        if (!readOnly) this.recordCase(); //only record cases from right DF tiles
+        this.updateNodes();
+        updateRecordIndex(UpdateMode.Increment);
+        break;
+      case ProgramMode.Done:
+        isPlaying && this.playbackNodesWithCaseData(dataSet, playBackIndex);
+        isPlaying && updatePlayBackIndex(UpdateMode.Increment);
+        !isPlaying && updatePlayBackIndex(UpdateMode.Reset);
+        updateRecordIndex(UpdateMode.Reset);
+        break;
     }
   };
 
@@ -734,7 +807,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const hubSelect = n.controls.get("hubSelect") as DropdownListControl;
       if (hubSelect.getChannels()){
         const relayType = hubSelect.getData("liveOutputType") as string;
-        const hubId = hubSelect.getValue().charAt(14);
+        const hubId = hubSelect.getSelectionId();
         const state = n.data.nodeValue as number;
         this.stores.serialDevice.writeToOutForMicroBitRelayHub(state, hubId, relayType );
       }
@@ -751,7 +824,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       Devices differ, but it may contain the words "usbserial" or "usbmodem"`;
 
     if (lastMsg !== "connect" && this.stores.serialDevice.serialNodesCount > 0){
-      alertMessage += `1. Connect the arduino to your computer.  2.${btnMsg}`;
+      alertMessage += `1. Connect the arduino or micro:bit to your computer.  2.${btnMsg}`;
     }
 
     // physical connection has been made but user action needed

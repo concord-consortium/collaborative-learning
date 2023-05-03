@@ -51,7 +51,8 @@ describe("problem model", () => {
           supports: []
         }
       ],
-      supports: []
+      supports: [],
+      config: {}
     });
     expect(problem.fullTitle).toBe("test: sub");
   });

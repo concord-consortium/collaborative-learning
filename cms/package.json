@@ -1,0 +1,21 @@
+{
+  "name": "clue-cms",
+  "version": "1.0.0",
+  "description": "A CMS for authoring CLUE content.",
+  "main": "index.tsx",
+  "config": {
+    "pageTitle": "CLUE CMS",
+    "pageDescription": "Collaborative Learning User Environment CMS",
+    "rollbarAccessToken": "fb9dd070b7344cc7a5e529d8fa25e765"
+  },
+  "scripts": {
+    "lint": "eslint -c \"../.eslintrc.js\" \"./src/**/*.{js,jsx,ts,tsx}\"",
+    "lint:fix": "eslint --fix \"./src/**/*.{js,jsx,ts,tsx}\"",
+    "test": "jest"
+  },
+  "author": "Concord Consortium <> (https://concord.org)",
+  "license": "MIT",
+  "dependencies": {
+    "netlify-cms-app": "^2.15.72"
+  }
+}

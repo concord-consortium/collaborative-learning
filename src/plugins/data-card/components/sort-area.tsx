@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { getSnapshot } from "@concord-consortium/mobx-state-tree";
+import { getSnapshot } from "mobx-state-tree";
 import { uniq, orderBy } from "lodash";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { DataCardContentModelType } from "../data-card-content";

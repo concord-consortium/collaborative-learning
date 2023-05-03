@@ -34,19 +34,19 @@ const ModernInvestigationModel = types
       }
     };
   });
-interface LegacySnapshot extends SnapshotIn<typeof LegacyInvestigationModel> {}
-interface ModernSnapshot extends SnapshotIn<typeof ModernInvestigationModel> {}
+export interface LegacyInvestigationSnapshot extends SnapshotIn<typeof LegacyInvestigationModel> {}
+export interface ModernInvestigationSnapshot extends SnapshotIn<typeof ModernInvestigationModel> {}
 
-const isLegacySnapshot = (sn: ModernSnapshot | LegacySnapshot): sn is LegacySnapshot => {
-  const s = sn as LegacySnapshot;
-  return !!s.disabled || !!s.settings;
+const isLegacySnapshot = (sn: ModernInvestigationSnapshot | LegacyInvestigationSnapshot)
+        : sn is LegacyInvestigationSnapshot => {
+  return "disabled" in sn || "settings" in sn;
 };
 
 export const InvestigationModel = types.snapshotProcessor(ModernInvestigationModel, {
-  preProcessor(sn: ModernSnapshot | LegacySnapshot) {
+  preProcessor(sn: ModernInvestigationSnapshot | LegacyInvestigationSnapshot) {
     if (isLegacySnapshot(sn)) {
       const { disabled: disabledFeatures, settings, ...others } = sn;
-      return { ...others, config: { disabledFeatures, settings } };
+      return { ...others, config: { disabledFeatures, settings } } as ModernInvestigationSnapshot;
     }
     return sn;
   }

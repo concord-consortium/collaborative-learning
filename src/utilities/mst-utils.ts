@@ -1,5 +1,7 @@
-import { IAnyStateTreeNode, getParent, getType, hasParent, types,
-         isAlive } from "mobx-state-tree";
+import {
+  IAnyStateTreeNode, IDisposer, isAlive, ISerializedActionCall, getParent, getType,
+  IOnActionOptions, onAction, hasParent, types
+} from "mobx-state-tree";
 import { DocumentContentModelType } from "../models/document/document-content";
 
 /**
@@ -62,4 +64,22 @@ export function verifyAlive(target: IAnyStateTreeNode, source = "unknown") {
   if (!isAlive(target)) {
     console.warn(`Destroyed MST Object is being accessed from ${source}. Type: ${getType(target)}`);
   }
+}
+
+/**
+ * Identical to onAction (above) except defaults to { afterAttach: true, allActions: true }
+ *
+ * @param target
+ * @param listener
+ * @param options object that controls the behavior
+ * @param options.attachAfter (default false) fires the listener *after* the action has executed instead of before.
+ * @param options.onlyOuter (default true) only fires the listener for outermost actions
+ * @returns
+ */
+export function onAnyAction(
+    target: IAnyStateTreeNode,
+    listener: (call: ISerializedActionCall) => void,
+    options?: IOnActionOptions
+): IDisposer {
+    return onAction(target, listener, { attachAfter: true, allActions: true, ...options });
 }

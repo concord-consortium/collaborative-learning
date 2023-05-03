@@ -281,7 +281,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   };
 
   private handleFocus = () => {
-    this.textOnFocus = this.getContent().text;
+    this.textOnFocus = this.getContent().textStr;
     this.setState({ revision: this.state.revision + 1 }); // Force a rerender
   };
 }
