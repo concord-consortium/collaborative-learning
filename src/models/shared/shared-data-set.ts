@@ -54,7 +54,9 @@ export function getUpdatedSharedDataSetIds(sharedDataSet: SharedDataSetSnapshotT
     sharedModelId: uniqueId()
   };
   sharedDataSet.dataSet.attributes?.forEach(attr => {
-    updatedIds.attributeIdMap[attr.id] = uniqueId();
+    if (attr.id) {
+      updatedIds.attributeIdMap[attr.id] = uniqueId();
+    }
   });
   sharedDataSet.dataSet.cases?.forEach(c => {
     if (c.__id__) updatedIds.caseIdMap[c.__id__] = newCaseId();
@@ -67,7 +69,9 @@ export function getSharedDataSetSnapshotWithUpdatedIds(
 ) {
   const newAttributes = sharedDataSet.dataSet.attributes?.map(a => {
     const formula = cloneDeep(a.formula);
-    return { ...a, id: updatedIds.attributeIdMap[a.id], formula };
+    if (a.id) {
+      return { ...a, id: updatedIds.attributeIdMap[a.id], formula };
+    }
   });
   const newCases = sharedDataSet.dataSet.cases?.filter(c => c.__id__).map(c => (
     c.__id__ && { ...c, __id__: updatedIds.caseIdMap[c.__id__] }

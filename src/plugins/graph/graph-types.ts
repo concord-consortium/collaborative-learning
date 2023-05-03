@@ -1,13 +1,11 @@
 import React from "react";
 import { AxisPlace } from "./axis/axis-types";
 import {GraphPlace} from "./axis-graph-shared";
+import {DotsElt} from "./d3-types";
 
 export const kGraphTileType = "Graph";
 export const kGraphTileClass = "graph";
 export const kGraphDefaultHeight = 320;
-
- // The data stored with each plot element (e.g. 'circle')
-export type CaseData = { plotNum: number, caseID: string }
 
 export const PrimaryAttrRoles = ['x', 'y'] as const;
 export type PrimaryAttrRole = typeof PrimaryAttrRoles[number];
@@ -17,6 +15,8 @@ export const GraphAttrRoles = [
   ...TipAttrRoles, 'polygon', 'yPlus', 'empty'] as const;
 export type GraphAttrRole = typeof GraphAttrRoles[number];
 export type IsGraphDropAllowed = (place: GraphPlace, attrId?: string) => boolean;
+
+export type IDotsRef = React.MutableRefObject<DotsElt>
 
 export const attrRoleToAxisPlace: Partial<Record<GraphAttrRole, AxisPlace>> = {
   x: "bottom",
@@ -48,7 +48,7 @@ export const graphPlaceToAttrRole: Record<GraphPlace, GraphAttrRole> = {
 };
 
 export interface PlotProps {
-  dotsRef: React.RefObject<SVGSVGElement>
+  dotsRef: IDotsRef
   enableAnimation: React.MutableRefObject<boolean>
 }
 

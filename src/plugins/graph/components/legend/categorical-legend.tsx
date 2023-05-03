@@ -6,6 +6,7 @@ import {isSelectionAction} from "../../../../models/data/data-set-actions";
 import {useDataConfigurationContext} from "../../hooks/use-data-configuration-context";
 import {useGraphLayoutContext} from "../../models/graph-layout";
 import {missingColor} from "../../../../utilities/color-utils";
+import {onAnyAction} from "../../../../utilities/mst-utils";
 import {measureText} from "../../../../components/tiles/hooks/use-measure-text";
 import {kGraphFont} from "../../graph-types";
 import {getStringBounds} from "../../axis/axis-utils";
@@ -166,11 +167,11 @@ export const CategoricalLegend = memo(function CategoricalLegend(
     }, [dataConfiguration, keysElt, transform, labelHeight]);
 
   useEffect(function respondToSelectionChange() {
-    return onAction(dataset, action => {
+    return onAnyAction(dataset, action => {
       if (isSelectionAction(action)) {
         refreshKeys();
       }
-    }, true);
+    });
   }, [refreshKeys, dataset, computeDesiredExtent]);
 
   useEffect(function respondToCategorySetsChange() {

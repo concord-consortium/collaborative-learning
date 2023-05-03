@@ -1,7 +1,8 @@
 import {ScaleBand, ScaleLinear, select} from "d3";
 import React, {useCallback, useRef, useState} from "react";
 import {ScaleNumericBaseType} from "../axis/axis-types";
-import {CaseData, PlotProps} from "../graph-types";
+import {CaseData} from "../d3-types";
+import {PlotProps} from "../graph-types";
 import {useDragHandlers, usePlotResponders} from "../hooks/use-plot";
 import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
 import {useDataSetContext} from "../hooks/use-data-set-context";
@@ -183,12 +184,13 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
       getLegendColor = legendAttrID ? dataConfiguration?.getLegendColorForCase : undefined;
 
     setPointCoordinates({
-      dataset, dotsRef, pointRadius: pointRadiusRef.current, selectedPointRadius: selectedPointRadiusRef.current,
+      dataset, dotsRef, pointRadius: pointRadiusRef.current,
+      selectedPointRadius: selectedPointRadiusRef.current,
       selectedOnly, getScreenX, getScreenY, getLegendColor,
       getPointColorAtIndex: graphModel.pointColorAtIndex, enableAnimation, pointColor, pointStrokeColor
     });
-  }, [dataConfiguration, dataset, dotsRef, layout, legendAttrID, enableAnimation, graphModel,
-    yScaleRef]);
+  }, [dataConfiguration, dataset, dotsRef, layout, legendAttrID,
+    enableAnimation, graphModel, yScaleRef]);
 
   // const refreshPointPositionsSVG = useCallback((selectedOnly: boolean) => {
   //   const xAttrID = dataConfiguration?.attributeID('x') ?? '',
@@ -220,9 +222,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
   }, [refreshPointPositionsD3]);
 
   usePlotResponders({
-    graphModel, primaryAttrID: dataConfiguration?.attributeID('x') ?? '',
-    secondaryAttrID: secondaryAttrIDsRef.current[0],
-    layout, dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation
+    graphModel, layout, dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation
   });
 
   return (
