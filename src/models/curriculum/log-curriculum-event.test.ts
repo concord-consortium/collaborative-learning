@@ -1,7 +1,7 @@
 import { getSnapshot } from "mobx-state-tree";
 import { DocumentContentModel } from "../document/document-content";
 import { InvestigationModel } from "./investigation";
-import { LegacyProblemSnapshot, ProblemModel } from "./problem";
+import { ProblemModel } from "./problem";
 import { specAppConfig } from "../stores/spec-app-config";
 import { createStores, IStores } from "../stores/stores";
 import { UserModel } from "../stores/user";
@@ -44,7 +44,7 @@ describe("logCurriculumEvent", () => {
           type: "introduction",
           content: getSnapshot(content),
         }]
-      } as LegacyProblemSnapshot)
+      })
     });
 
     Logger.initializeLogger(stores, { investigation: investigation.title, problem: problem?.title });

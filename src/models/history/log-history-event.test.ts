@@ -1,7 +1,7 @@
 import { getSnapshot } from "mobx-state-tree";
 import mockXhr from "xhr-mock";
 import { InvestigationModel } from "../curriculum/investigation";
-import { LegacyProblemSnapshot, ProblemModel } from "../curriculum/problem";
+import { ProblemModel } from "../curriculum/problem";
 import { DocumentContentModel } from "../document/document-content";
 import { createDocumentModel } from "../../models/document/document";
 import { ProblemDocument } from "../../models/document/document-types";
@@ -45,7 +45,7 @@ describe("authed logger", () => {
           type: "introduction",
           content: getSnapshot(content),
         }]
-      } as LegacyProblemSnapshot)
+      })
     });
 
     Logger.initializeLogger(stores, { investigation: investigation.title, problem: problem?.title });

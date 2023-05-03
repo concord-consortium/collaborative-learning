@@ -2,7 +2,7 @@ import { getSnapshot } from "mobx-state-tree";
 import mockXhr from "xhr-mock";
 import { DocumentContentModel } from "./document-content";
 import { InvestigationModel } from "../curriculum/investigation";
-import { LegacyProblemSnapshot, ProblemModel } from "../curriculum/problem";
+import { ProblemModel } from "../curriculum/problem";
 import { specAppConfig } from "../stores/spec-app-config";
 import { createStores, IStores } from "../stores/stores";
 import { UserModel } from "../stores/user";
@@ -45,7 +45,7 @@ describe("logDocumentEvent", () => {
           type: "introduction",
           content: getSnapshot(content),
         }]
-      } as LegacyProblemSnapshot)
+      })
     });
 
     Logger.initializeLogger(stores, { investigation: investigation.title, problem: problem?.title });
