@@ -529,7 +529,7 @@ context('Dataflow Tool Tile', function () {
         dataflowToolTile.getNodeInput().eq(0).click();
       });
       it("verify sampling rate", () => {
-        const rate = "500"
+        const rate = "500";
         dataflowToolTile.getSamplingRateLabel().should("have.text", "Sampling Rate");
         dataflowToolTile.selectSamplingRate(rate);
       });
@@ -537,7 +537,7 @@ context('Dataflow Tool Tile', function () {
         dataflowToolTile.verifyRecordButtonText();
         dataflowToolTile.verifyRecordButtonIcon();
         dataflowToolTile.getRecordButton().click();
-        
+
         dataflowToolTile.verifyPlayButtonText();
         dataflowToolTile.verifyPlayButtonIcon();
         dataflowToolTile.getPlayButton().should("be.disabled");
@@ -571,7 +571,7 @@ context('Dataflow Tool Tile', function () {
         dataflowToolTile.getRecordingClearButton().click();
         dataflowToolTile.getClearDataWarningTitle().should("have.text", "Clear Data");
         dataflowToolTile.getClearDataWarningContent().should(
-          "contain", 
+          "contain",
           "Remove the program's recorded data and any linked displays of this data? This action is not undoable.");
         dataflowToolTile.getClearDataWarningCancel().click();
         dataflowToolTile.verifyRecordingClearButtonText();

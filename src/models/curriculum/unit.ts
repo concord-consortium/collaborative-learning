@@ -111,33 +111,32 @@ const ModernUnitModel = types
       };
     }
   }));
-interface LegacySnapshot extends SnapshotIn<typeof LegacyUnitModel> {}
-interface ModernSnapshot extends SnapshotIn<typeof ModernUnitModel> {}
+export interface LegacyUnitSnapshot extends SnapshotIn<typeof LegacyUnitModel> {}
+export interface ModernUnitSnapshot extends SnapshotIn<typeof ModernUnitModel> {}
 
-const hasLegacySnapshotProperties = (sn: ModernSnapshot | LegacySnapshot) => {
-  const s = sn as LegacySnapshot;
-  return !!s.disabled || !!s.navTabs || !!s.placeholderText || !!s.defaultStamps || !!s.settings;
+const hasLegacySnapshotProperties = (sn: ModernUnitSnapshot | LegacyUnitSnapshot) => {
+  return "disabled" in sn || "navTabs" in sn || "placeholderText" in sn || "defaultStamps" in sn || "settings" in sn;
 };
 
-const isLegacySnapshot = (sn: ModernSnapshot | LegacySnapshot): sn is LegacySnapshot => {
-  const s = sn as ModernSnapshot;
-  return !s.config && hasLegacySnapshotProperties(sn);
+const isLegacySnapshot = (sn: ModernUnitSnapshot | LegacyUnitSnapshot): sn is LegacyUnitSnapshot => {
+  return !("config" in sn) && hasLegacySnapshotProperties(sn);
 };
 
-const isAmbiguousSnapshot = (sn: ModernSnapshot | LegacySnapshot): sn is LegacySnapshot => {
-  const s = sn as ModernSnapshot;
-  return !!s.config && hasLegacySnapshotProperties(sn);
+const isAmbiguousSnapshot = (sn: ModernUnitSnapshot | LegacyUnitSnapshot) => {
+  return "config" in sn && hasLegacySnapshotProperties(sn);
 };
 
 export const UnitModel = types.snapshotProcessor(ModernUnitModel, {
-  preProcessor(sn: ModernSnapshot | LegacySnapshot) {
+  preProcessor(sn: ModernUnitSnapshot | LegacyUnitSnapshot) {
     if (isLegacySnapshot(sn)) {
       const {
         disabled: disabledFeatures, navTabs, placeholderText, defaultStamps: stamps, settings, ...others
       } = sn;
-      return { ...others, config: { disabledFeatures, navTabs, placeholderText, stamps, settings } };
+      return {
+        ...others, config: { disabledFeatures, navTabs, placeholderText, stamps, settings }
+      } as ModernUnitSnapshot;
     }
-    else if (isAmbiguousSnapshot(sn)) {
+    if (isAmbiguousSnapshot(sn)) {
       console.warn("UnitModel ignoring legacy top-level properties!");
     }
     return sn;
