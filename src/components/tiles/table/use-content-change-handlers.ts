@@ -120,10 +120,6 @@ export const useContentChangeHandlers = ({
   }, [readOnly, getContent]);
 
   const linkTile = useCallback((tileInfo: ITileLinkMetadata) => {
-    // !readOnly && requestGeometryLinkToTable(getContent(), geomTileInfo.id);
-    // The below makes the Geometry model's addLinkedTable action redundant.
-    // Should we instead add an addLinkedTable action to the Graph model,
-    // and then do something more similar to requestGeometryLinkToTable here?
     const consumerTile = getTileContentById(getContent(), tileInfo.id);
     if (!readOnly && consumerTile) {
       const sharedModelManager = consumerTile.tileEnv?.sharedModelManager;
@@ -135,10 +131,6 @@ export const useContentChangeHandlers = ({
   }, [getContent, readOnly, modelRef]);
 
   const unlinkTile = useCallback((tileInfo: ITileLinkMetadata) => {
-    // !readOnly && requestGeometryUnlinkFromTable(getContent(), geomTileInfo.id);
-    // The below makes the Geometry model's removeLinkedTable action redundant.
-    // Should we instead add a removeLinkedTable action to the Graph model,
-    // and then do something more similar to requestGeometryUnlinkFromTable here?
     const consumerTile = getTileContentById(getContent(), tileInfo.id);
     if (!readOnly && consumerTile) {
       const sharedModelManager = consumerTile.tileEnv?.sharedModelManager;
