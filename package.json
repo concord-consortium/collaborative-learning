@@ -104,7 +104,7 @@
   },
   "homepage": "https://github.com/concord-consortium/collaborative-learning#readme",
   "overrides": {
-    "mobx-state-tree": "npm:@concord-consortium/mobx-state-tree@5.1.5-cc.1"
+    "mobx-state-tree": "npm:@concord-consortium/mobx-state-tree@5.1.8-cc.1"
   },
   "devDependencies": {
     "@babel/core": "^7.18.13",
@@ -137,8 +137,8 @@
     "@types/superagent": "^4.1.15",
     "@types/uuid": "^8.3.4",
     "@types/w3c-web-serial": "^1.0.2",
-    "@typescript-eslint/eslint-plugin": "^5.35.1",
-    "@typescript-eslint/parser": "^5.35.1",
+    "@typescript-eslint/eslint-plugin": "^5.59.2",
+    "@typescript-eslint/parser": "^5.59.2",
     "autoprefixer": "^10.4.8",
     "babel-loader": "^8.2.5",
     "common-tags": "^1.8.2",
@@ -190,7 +190,7 @@
   },
   "dependencies": {
     "@concord-consortium/diagram-view": "^0.0.43",
-    "@concord-consortium/mobx-state-tree": "5.1.5-cc.1",
+    "@concord-consortium/mobx-state-tree": "^5.1.8-cc.1",
     "@concord-consortium/react-components": "^0.7.1",
     "@concord-consortium/react-modal-hook": "^3.0.0-cc.1",
     "@concord-consortium/rete-react-render-plugin": "^0.2.1-cc.2",
@@ -204,6 +204,7 @@
     "expr-eval": "^2.0.2",
     "file-saver": "^2.0.5",
     "firebase": "^8.10.1",
+    "immutable": "^4.3.0",
     "initials": "^3.1.2",
     "json-stringify-pretty-compact": "^4.0.0",
     "jsxgraph": "1.4.4",
@@ -212,7 +213,6 @@
     "mobx": "^6.6.1",
     "mobx-react": "^7.5.2",
     "nanoid": "^3.3.4",
-    "netlify-cms-app": "^2.15.72",
     "object-hash": "^3.0.0",
     "patch-package": "^6.4.7",
     "query-string": "7.1.1",

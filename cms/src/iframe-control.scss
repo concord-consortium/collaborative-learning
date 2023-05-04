@@ -1,4 +1,9 @@
-.clue-control {
+.iframe-control {
+  iframe {
+    border: none;
+    height: 680px;
+    width: 100%;
+  }
   // Override/revert Decap CMS style rules that adversely affect
   // CLUE content styling in the editor.
   a:active, a:link, a:hover, a:visited {

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="36px" height="34px" viewBox="0 0 36 34" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>expressions-tool</title>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Draft-Area" transform="translate(-2026.000000, -1743.000000)">
+            <g id="expressions-tool" transform="translate(2026.000000, 1743.000000)">
+                <polygon id="Path" points="0 0 36 0 36 34 0 34"></polygon>
+                <path d="M27,6 C28.65,6 30,7.35 30,9 L30,25 C30,26.65 28.65,28 27,28 L9,28 C7.35,28 6,26.65 6,25 L6,9 C6,7.35 7.35,6 9,6 L27,6 Z M27,8 L9,8 C8.458,8 8,8.458 8,9 L8,25 C8,25.542 8.458,26 9,26 L27,26 C27.542,26 28,25.542 28,25 L28,9 C28,8.458 27.542,8 27,8 Z" id="Shape" fill="#707070" fill-rule="nonzero"></path>
+                <g id="expressions-icon" transform="translate(10.000000, 10.000000)" fill="#707070">
+                    <text id="2+" font-family="Lato-Bold, Lato" font-size="10" font-weight="bold">
+                        <tspan x="0" y="10">2+</tspan>
+                    </text>
+                    <rect id="Rectangle" x="12" y="2" width="4.09090909" height="9" rx="1"></rect>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

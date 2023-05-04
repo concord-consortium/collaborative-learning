@@ -9,7 +9,8 @@ MSU Inscriptions project.
 
 1. Clone this repo and `cd` into it
 2. Run `npm install` to pull dependencies
-3. Run `npm start` to run `webpack-dev-server` in development mode with hot module replacement
+3. `cd` into the `cms` subdirectory and run `npm install` to pull authoring dependencies (This is currently required even if you will not need to author content.)
+4. `cd` back to the repo's root directory, then run `npm start` to run `webpack-dev-server` in development mode with hot module replacement
 
 ### Building
 

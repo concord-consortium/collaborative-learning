@@ -130,7 +130,7 @@ export const DocumentModel = Tree.named("Document")
     }
   }))
   .views(self => ({
-    matchProperties(properties?: string[], options?: IMatchPropertiesOptions) {
+    matchProperties(properties?: readonly string[], options?: IMatchPropertiesOptions) {
       // if no properties specified then consider it a match
       if (!properties?.length) return true;
       return properties?.every(p => {
