@@ -87,7 +87,6 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
   public tileRowDiv: HTMLElement | null;
 
   public render() {
-    // console.log("<TileRowComponent>");
     const { model, typeClass } = this.props;
     const { isSectionHeader, sectionId, tiles } = model;
     // ignore height setting for section header rows
@@ -191,8 +190,6 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleSetCanAcceptDrop = (tileId?: string) => {
-    // console.log("< tile-row.tsx >  🔨 handleSetCanAcceptDrop, tileId:", tileId);
-    // console.log("📁 tile-row.tsx > \n\t  > 🍔 this.state.tileAcceptDrop:", this.state.tileAcceptDrop);
     this.setState({ tileAcceptDrop: tileId });
   };
 

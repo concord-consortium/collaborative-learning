@@ -27,7 +27,6 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
   let imageDragDrop: ImageDragDrop;
 
   const handleDragOverWorkspace = (e: React.DragEvent<HTMLDivElement>) => {
-    console.log("line 30: handleDragOverWorkSpace");
     imageDragDrop?.dragOver(e);
   };
 

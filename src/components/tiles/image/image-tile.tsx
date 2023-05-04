@@ -305,8 +305,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    // console.log()
-    // console.log("<image-tile.tsx> handleMouseDown");
     debouncedSelectTile(this.stores.ui, this.props.model, hasSelectionModifier(e));
   };
 
