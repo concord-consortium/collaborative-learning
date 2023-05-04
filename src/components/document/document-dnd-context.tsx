@@ -10,7 +10,6 @@ interface IDocumentDndContextProps {
   children: any;
 }
 export const DocumentDndContext = ({ children }: IDocumentDndContextProps) => {
-  // console.log("📁 document-dnd-context.tsx > 🔨DocumentDndContext >  🍔 children:", children);
 
   const useMouseSensor = useSensor(MouseSensor);
 

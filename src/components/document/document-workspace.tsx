@@ -1,5 +1,5 @@
-import React from "react";
 import { inject, observer } from "mobx-react";
+import React from "react";
 import { DocumentComponent, WorkspaceSide } from "../../components/document/document";
 import { GroupVirtualDocumentComponent } from "../../components/document/group-virtual-document";
 import { BaseComponent, IBaseProps } from "../../components/base";
@@ -24,7 +24,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
 
   constructor(props: IProps) {
     super(props);
-    // console.log("DocumentWorkSpaceComponent");
     this.imageDragDrop = new ImageDragDrop({
       isAcceptableImageDrag: this.isAcceptableImageDrag
     });

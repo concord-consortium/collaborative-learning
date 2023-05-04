@@ -1497,6 +1497,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           content.deselectAll(board);
         }
         vertices.forEach(vertex => content.selectElement(board, vertex.id));
+
         content.selectElement(board, line.id);
       }
 
