@@ -22,8 +22,8 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
   const { documentContent, tileElt, model, readOnly, scale, onRegisterTileApi, onUnregisterTileApi,
     onSetCanAcceptDrop, onRequestTilesOfType } = props;
 
-  // console.log("📁 drawing-tile.tsx > \n\t  > 🍔 onSetCanAcceptDrop:", onSetCanAcceptDrop);
-  // console.log("📁 drawing-tile.tsx > \n\t  > 🍔 OnRequestTilesOfType:", onRequestTilesOfType);
+
+  console.log("<drawing.tile.tsx> with tileId:", model.id);
 
   const contentRef = useCurrent(model.content as DrawingContentModelType);
   const [imageUrlToAdd, setImageUrlToAdd] = useState("");

@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from "react";
 import classNames from "classnames";
 import { observer } from "mobx-react";
-import { DragOverlay, useDraggable } from "@dnd-kit/core";
-import { ITileProps } from "../../components/tiles/tile-component";
+import React, { useEffect, useState } from "react";
+import { ITileProps, kDragTileContent, kDragTiles } from "../../components/tiles/tile-component";
 import { useUIStore } from "../../hooks/use-stores";
 import { addCanonicalCasesToDataSet } from "../../models/data/data-set";
 import { DataCardContentModelType } from "./data-card-content";
@@ -12,48 +11,43 @@ import { SortSelect } from "./components/sort-select";
 import { useToolbarTileApi } from "../../components/tiles/hooks/use-toolbar-tile-api";
 import { AddIconButton, RemoveIconButton } from "./components/add-remove-icons";
 import { useCautionAlert } from "../../components/utilities/use-caution-alert";
-import { EditFacet, dataCardDraggableId } from "./data-card-types";
+import { EditFacet } from "./data-card-types";
 import { DataCardSortArea } from "./components/sort-area";
-import { DataCardDropZone } from "./data-card-drop-zone";
+// import { DataCardDragDrop } from "./data-card-drag-drop";
 
 import "./data-card-tile.scss";
+// import { ImageDragDrop } from "../../components/utilities/image-drag-drop";
+import { safeJsonParse } from "../../utilities/js-utils";
 
-//TODO:
-//Study https://github.com/concord-consortium/collaborative-learning/pull/1691
-
-//Tasks
-//Data Card tiles can be dragged onto each other from the usual corner drag mechanism, resulting in a single tile with all the cards from both decks.
-//target deck should light up around the outside edge when the drag will merge it.
-// if a toolbar to merge (brings up list of mergeable decks) is easier than drag do that.
-// merged (dragged) deck tile is removed.
-// Number of cards will be the sum of the card count in the two tiles.
-// Data fields will the the union of the two field set names. If each deck has unique fields the resulting cards have more fields: deck1fields + deck2fields, with blank data for the added fields on each card.
-// Data is available in the document model
-// Image data remains visible
-// new larger deck can be sorted to resolve any field differences in spelling or capitalization
 
 export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
-  const { model, onRequestUniqueTitle, readOnly, documentContent, tileElt, onRegisterTileApi,
-            onUnregisterTileApi, onSetCanAcceptDrop } = props;
-  // console.log("📁 data-card-tile.tsx > \n\t  > 🍔 onSetCanAcceptDrop:", onSetCanAcceptDrop);
-
+  const { model, onRequestUniqueTitle, readOnly, documentContent, tileElt, onSetCanAcceptDrop, onRegisterTileApi,
+            onUnregisterTileApi } = props;
+  console.log("< DataCardToolComponent >");
   const content = model.content as DataCardContentModelType;
   const ui = useUIStore();
   const isTileSelected = ui.selectedTileIds.findIndex(id => id === content.metadata.id) >= 0;
+  // console.log("< DataCardToolComponent > with tileId:", model.id);
+
   const [titleValue, setTitleValue] = useState(content.title);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [currEditAttrId, setCurrEditAttrId] = useState<string>("");
   const [currEditFacet, setCurrEditFacet] = useState<EditFacet>("");
   const [imageUrlToAdd, setImageUrlToAdd] = useState<string>("");
+  const [highlightDataCard, setHighlightDataCard] = useState(false);
+
   const shouldShowAddCase = !readOnly && isTileSelected;
   const shouldShowDeleteCase = !readOnly && isTileSelected && content.dataSet.cases.length > 1;
   const displaySingle = !content.selectedSortAttributeId;
   const shouldShowAddField = !readOnly && isTileSelected && displaySingle;
   const attrIdsNames = content.existingAttributesWithNames();
 
-  const draggableId = dataCardDraggableId(model.id);
-  const { attributes, listeners, setNodeRef } = useDraggable({ id: draggableId });
+  // let highlightContainerClasses = "data-card-container";
+  const highlightContainerClasses = classNames(
+    "data-card-container", {"highlight": highlightDataCard},
+    {"no-highlight": !highlightDataCard});
 
+  console.log('highlightContainerClasses:', highlightContainerClasses);
 
   useEffect(() => {
     if (!content.title) {
@@ -61,6 +55,105 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
       title && content.setTitle(title);
     }
   }, [content, model.id, onRequestUniqueTitle]);
+
+  /* ==[ Drag n Drop ] == */
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    // console.log("handleMouseDown");
+  };
+
+  //taken from drawing-layer > handleDragOver, disables outer edge highlights
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    const isAcceptableDrag = isAcceptableDataCardDrag(e);
+    onSetCanAcceptDrop(isAcceptableDrag ? model.id : undefined); //this turns off highlighting outer edge
+    if (isAcceptableDrag) {
+      // console.log("< data-card-tile.tsx > copying-over");
+      e.dataTransfer.dropEffect = "copy";
+      e.preventDefault();
+    }
+  };
+
+  const isAcceptableDataCardDrag =  (e: React.DragEvent<HTMLDivElement>) => {
+    // image drop area is central 80% in each dimension
+//     local document id = parsedContent source doc id
+    // const getData = e.dataTransfer.getData(kDragTiles);
+    // const parsedData = safeJsonParse(getData);
+    // const tilesSelected = parsedData?.tiles;
+    // console.log("tilesSelected:", tilesSelected);
+    // if (tilesSelected){
+    //   const isSameTile = !!tilesSelected.find((tile: any)=>{ //true if we drag data card onto itself
+    //     return tile.tileId === model.id;
+    //   });
+    //   // console.log("isSameTile:", isSameTile);
+    //   if (!isSameTile){ //transfer Data
+    //     // console.log("in if statement");
+    //   }
+
+    // } else {
+    //   console.log("returning false");
+    //   return false;
+    // }
+    const numTilesDragged = ui?.selectedTileIds.length; //this may change
+    //check if current id is inside of selected Tiles
+    const draggingWithinItself = ui?.selectedTileIds.includes(model.id);
+    //  local document id = parsedContent source doc id
+
+    console.log("ui is....", ui);
+
+    if (draggingWithinItself){
+      setHighlightDataCard(false);
+      return false;
+    }
+    if (!readOnly && numTilesDragged >= 1) {
+      const kImgDropMarginPct = 0.1;
+      const eltBounds = e.currentTarget.getBoundingClientRect();
+      console.log("eltBounds:", eltBounds);
+      const kImgDropMarginX = eltBounds.width * kImgDropMarginPct;
+      const kImgDropMarginY = eltBounds.height * kImgDropMarginPct;
+      // console.log("eltBounds.bottom - kImgDropMarginY", eltBounds.bottom - kImgDropMarginY);
+      // console.log("clientY:", e.clientY);
+      // console.log("//1:", (e.clientY > eltBounds.top + kImgDropMarginY)); //1
+      // console.log("//1 bounds:", eltBounds.top + kImgDropMarginY);
+      // console.log("//2:", (e.clientY < eltBounds.bottom - kImgDropMarginY)); //2
+      // console.log("//2 bounds:", eltBounds.bottom - kImgDropMarginY);
+
+      if ((e.clientX > eltBounds.left + kImgDropMarginX) &&
+          (e.clientX < eltBounds.right - kImgDropMarginX) &&
+          (e.clientY > eltBounds.top + kImgDropMarginY) && //1
+          (e.clientY < ((eltBounds.bottom - kImgDropMarginY)*0.95))){ //2
+        console.log("within bounds!");
+        setHighlightDataCard(true);
+        return true;
+
+      } else {
+        console.log("out of bounds!");
+        console.log(("returning false"));
+        setHighlightDataCard(false);
+        return false;
+      }
+
+    }
+
+
+  };
+
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    if (isAcceptableDataCardDrag(e)) {
+      console.log("VALID DROPPPED!!!!");
+      if (highlightDataCard) setHighlightDataCard(false);
+
+      // console.log("parsedContent:", parsedContent);
+      // if (parsedContent) {
+      //   const droppedContent: ImageContentSnapshotOutType = parsedContent.content;
+      //   const droppedUrl = droppedContent.url;
+      //   if (droppedUrl) {
+      //     this.handleImageDrop(droppedUrl);
+      //   }
+      //   e.preventDefault();
+      //   e.stopPropagation();
+      // }
+    }
+  };
 
   function nextCase(){
     if (content.caseIndex < content.totalCases - 1) {
@@ -184,19 +277,15 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
     "card-nav", "previous",
     content.caseIndex > 0 ? "active" : "disabled",
   );
-
   const nextButtonClasses = classNames(
     "card-nav", "next",
     content.caseIndex < content.totalCases - 1 ? "active" : "disabled",
   );
-
   const addCardClasses = classNames("add-card", "teal-bg", { hidden: !shouldShowAddCase });
   const removeCardClasses = classNames("remove-card", { hidden: !shouldShowDeleteCase });
-
   const toolClasses = classNames(
     "data-card-tool", `display-as-${ displaySingle ? 'single' : 'sorted'}`
   );
-
   const toolbarProps = useToolbarTileApi(
     {
       id: model.id,
@@ -211,8 +300,12 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
     setCurrEditFacet("");
   };
 
+
   return (
     <div className={toolClasses}>
+      {/* {console.log("data-card-tile render(): highlightDataCard:", highlightDataCard)} */}
+      {/* {console.log("data-card-tile render(): highlightDataCardClasses:", highlightContainerClasses)} */}
+
       <DataCardToolbar
         model={model}
         documentContent={documentContent}
@@ -223,96 +316,91 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
         handleDeleteValue={deleteSelectedValue}
         handleDuplicateCard={duplicateCard}
       />
-      <div className="data-card-content" onClick={handleBackgroundClick}>
-        <div ref={setNodeRef} {...attributes} {...listeners}>
-          <DataCardDropZone
-            className={"data-card-container"}
-            tileId={model.id}
-          >
+      {highlightDataCard ? "T": "F"}
+      <div
+        className="data-card-content"
+        onClick={handleBackgroundClick}
+        onMouseDown={handleMouseDown} //maybe get rid of
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+      >
 
-          {/* added V
-          <div className="data-card-container"> */}
-            <div className="data-card-header-row">
-              <div className="panel title">
-                { isEditingTitle && !readOnly
-                ? <input
-                    className="data-card-title-input-editing"
-                    value={titleValue}
-                    onChange={handleTitleChange}
-                    onKeyDown={handleTitleKeyDown}
-                    onBlur={handleCompleteTitle}
-                    onClick={handleTitleInputClick}
-                    onDoubleClick={handleTitleInputDoubleClick}
-                />
-                : <div className="editable-data-card-title-text" onClick={handleTitleClick}>
-                    { content.title }
-                  </div>
-                }
-              </div>
-            </div>
-
-            <div className="panel sort">
-              <SortSelect
-                model={model}
-                onSortAttrChange={setSort}
-                attrIdNamePairs={attrIdsNames}
+        <div className={highlightContainerClasses}>
+          <div className="data-card-header-row">
+            <div className="panel title">
+              { isEditingTitle && !readOnly
+              ? <input
+                  className="data-card-title-input-editing"
+                  value={titleValue}
+                  onChange={handleTitleChange}
+                  onKeyDown={handleTitleKeyDown}
+                  onBlur={handleCompleteTitle}
+                  onClick={handleTitleInputClick}
+                  onDoubleClick={handleTitleInputDoubleClick}
               />
+              : <div className="editable-data-card-title-text" onClick={handleTitleClick}>
+                  { content.title }
+                </div>
+              }
             </div>
+          </div>
 
-            { displaySingle &&
-              <div className="panel nav">
-                <div className="card-number-of-listing">
-                  <div className="cell-text">
-                    { content.totalCases > 0
-                        ? `Card ${content.caseIndex + 1} of ${content.totalCases}`
-                        : "Add a card" }
-                  </div>
+          <div className="panel sort">
+            <SortSelect
+              model={model}
+              onSortAttrChange={setSort}
+              attrIdNamePairs={attrIdsNames}
+            />
+          </div>
+
+          { displaySingle &&
+            <div className="panel nav">
+              <div className="card-number-of-listing">
+                <div className="cell-text">
+                  { content.totalCases > 0
+                      ? `Card ${content.caseIndex + 1} of ${content.totalCases}`
+                      : "Add a card" }
                 </div>
-                <div className="card-nav-buttons">
-                  <button className={ previousButtonClasses } onClick={previousCase}></button>
-                  <button className={ nextButtonClasses } onClick={nextCase}></button>
+              </div>
+              <div className="card-nav-buttons">
+                <button className={ previousButtonClasses } onClick={previousCase}></button>
+                <button className={ nextButtonClasses } onClick={nextCase}></button>
+              </div>
+              { !readOnly &&
+                <div className="add-remove-card-buttons">
+                  <AddIconButton className={addCardClasses} onClick={addNewCase} />
+                  <RemoveIconButton className={removeCardClasses} onClick={handleDeleteCardClick} />
                 </div>
-                { !readOnly &&
-                  <div className="add-remove-card-buttons">
-                    <AddIconButton className={addCardClasses} onClick={addNewCase} />
-                    <RemoveIconButton className={removeCardClasses} onClick={handleDeleteCardClick} />
-                  </div>
-                }
-              </div>
-            }
-            { displaySingle &&
-              <div className="single-card-data-area">
-                { content.totalCases > 0 &&
-                  <DataCardRows
-                    caseIndex={content.caseIndex}
-                    model={model}
-                    totalCases={content.totalCases}
-                    readOnly={readOnly}
-                    currEditAttrId={currEditAttrId}
-                    currEditFacet={currEditFacet}
-                    setCurrEditAttrId={setCurrEditAttrId}
-                    setCurrEditFacet={setCurrEditFacet}
-                    imageUrlToAdd={imageUrlToAdd}
-                    setImageUrlToAdd={setImageUrlToAdd}
-                  />
-                }
-              </div>
-            }
-            { shouldShowAddField && !readOnly &&
-              <AddIconButton className="add-field" onClick={handleAddField} />
-            }
-            { !displaySingle &&
-              <div className="sorting-cards-data-area">
-                <DataCardSortArea model={model} />
-              </div>
-            }
-          {/* </div>
-          added ^  */}
-          </DataCardDropZone>
+              }
+            </div>
+          }
+          { displaySingle &&
+            <div className="single-card-data-area">
+              { content.totalCases > 0 &&
+                <DataCardRows
+                  caseIndex={content.caseIndex}
+                  model={model}
+                  totalCases={content.totalCases}
+                  readOnly={readOnly}
+                  currEditAttrId={currEditAttrId}
+                  currEditFacet={currEditFacet}
+                  setCurrEditAttrId={setCurrEditAttrId}
+                  setCurrEditFacet={setCurrEditFacet}
+                  imageUrlToAdd={imageUrlToAdd}
+                  setImageUrlToAdd={setImageUrlToAdd}
+                />
+              }
+            </div>
+          }
+          { shouldShowAddField && !readOnly &&
+            <AddIconButton className="add-field" onClick={handleAddField} />
+          }
+          { !displaySingle &&
+            <div className="sorting-cards-data-area">
+              <DataCardSortArea model={model} />
+            </div>
+          }
         </div>
-
-
-
       </div>
     </div>
   );

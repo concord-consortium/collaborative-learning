@@ -87,6 +87,7 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
   public tileRowDiv: HTMLElement | null;
 
   public render() {
+    // console.log("<TileRowComponent>");
     const { model, typeClass } = this.props;
     const { isSectionHeader, sectionId, tiles } = model;
     // ignore height setting for section header rows
@@ -150,13 +151,17 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
       const tileModel = this.getTile(tileRef.tileId);
       const tileWidthPct = this.getTileWidth(tileRef.tileId, tiles);
       return tileModel
-              ? <TileComponent key={tileModel.id} model={tileModel}
-                                    widthPct={tileWidthPct} height={rowHeight}
-                                    isUserResizable={model.isUserResizable}
-                                    onResizeRow={this.handleStartResizeRow}
-                                    onSetCanAcceptDrop={this.handleSetCanAcceptDrop}
-                                    onRequestRowHeight={this.handleRequestRowHeight}
-                                    {...others} />
+              ? <TileComponent
+                  key={tileModel.id}
+                  model={tileModel}
+                  widthPct={tileWidthPct}
+                  height={rowHeight}
+                  isUserResizable={model.isUserResizable}
+                  onResizeRow={this.handleStartResizeRow}
+                  onSetCanAcceptDrop={this.handleSetCanAcceptDrop}
+                  onRequestRowHeight={this.handleRequestRowHeight}
+                  {...others}
+                />
               : null;
     });
   }
@@ -186,7 +191,7 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleSetCanAcceptDrop = (tileId?: string) => {
-    console.log("📁 tile-row.tsx > \n\t  > 🍔 handleSetCanAcceptDrop:", tileId);
+    // console.log("< tile-row.tsx >  🔨 handleSetCanAcceptDrop, tileId:", tileId);
     // console.log("📁 tile-row.tsx > \n\t  > 🍔 this.state.tileAcceptDrop:", this.state.tileAcceptDrop);
     this.setState({ tileAcceptDrop: tileId });
   };

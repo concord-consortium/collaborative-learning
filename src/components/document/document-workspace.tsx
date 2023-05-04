@@ -24,7 +24,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
 
   constructor(props: IProps) {
     super(props);
-
+    // console.log("DocumentWorkSpaceComponent");
     this.imageDragDrop = new ImageDragDrop({
       isAcceptableImageDrag: this.isAcceptableImageDrag
     });

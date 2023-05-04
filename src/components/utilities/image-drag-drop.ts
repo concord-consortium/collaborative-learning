@@ -1,25 +1,27 @@
 import { DocumentDragKey } from "../../models/document/document-types";
 
+
+//Also now allows for use of
 export interface ExternalImageDragDropOptions {
   isAcceptableImageDrag?: (e: React.DragEvent<HTMLDivElement>) => boolean;
 }
 
 export class ImageDragDrop {
   private options: ExternalImageDragDropOptions;
-
   constructor(options: ExternalImageDragDropOptions) {
     this.options = options;
-    // console.log("ImageDragDrop class");
+    // console.log("image-drag-drop.ts (class)");
   }
 
   public dragOver(e: React.DragEvent<HTMLDivElement>) {
-    console.log("📁 image-drag-drop.ts > \n\t 🔨dragOver >  ");
+    // console.log("image-drag-drop.ts (class) -> 🔨dragOver ");
     // the cypress tests generate drag events without the dataTransfer element of the event
     if (this.hasMissingDataTransfer(e)) {
       return false;
     }
 
     const isAcceptableDrag = this.checkForAcceptableImageDrag(e);
+
     if (isAcceptableDrag) {
       e.dataTransfer.dropEffect = "copy";
       e.preventDefault();
@@ -29,6 +31,9 @@ export class ImageDragDrop {
   }
 
   public drop(e: React.DragEvent<HTMLDivElement>) {
+    // console.log("image-drag-drop.ts (class) -> 🔨drop ");
+
+
     return new Promise<string>((resolve, reject) => {
       // the cypress tests generate drag events without the dataTransfer element of the event
       if (this.hasMissingDataTransfer(e)) {

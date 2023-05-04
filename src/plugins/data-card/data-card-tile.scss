@@ -14,12 +14,12 @@ $default-button-border-color: #979797;
   height: 100%;
   text-align: left;
   overflow: auto;
-  // background-color: orange;
 
   .data-card-content {
     width: 100%;
     height: 100%;
     padding: 20px;
+    // background-color: lightblue; console.log
   }
 
   &.editable {
@@ -32,12 +32,16 @@ $default-button-border-color: #979797;
   }
 
   .data-card-container{
-    background-color: orange; //console.log
-    width: $single-view-card-width;
+    width: $single-view-card-width + 5;
+    &.highlight{
+      border: 3px solid yellow;
+    }
+    &.no-highlight{
+      border: 0px;
+    }
 
     .panel {
       border: solid 1px $charcoal-light-1;
-      // border: solid 3px black; //console.log
       width: $single-view-card-width;
       height: 34px;
       font-family: Lato;
@@ -52,7 +56,6 @@ $default-button-border-color: #979797;
     }
     .panel.title {
       background-color: $workspace-teal-light-7;
-      // background-color: red; //console.log
       border-radius: 3px 3px 0px 0px;
       font-style: italic;
       border-bottom-width: 0px;
@@ -269,8 +272,5 @@ $default-button-border-color: #979797;
       // half of 35% minus half the width of the icon
       margin-left: ($single-view-card-width * 0.175) - 12px;
     }
-
-  }
-
-
+  } //console.log
 }

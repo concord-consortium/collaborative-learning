@@ -135,7 +135,6 @@ export class TileComponent extends BaseComponent<IProps, IState> {
   private hotKeys: HotKeys = new HotKeys();
   private dragElement: HTMLDivElement | null;
   private resizeElement: HTMLDivElement | null;
-
   state = {
     hoverTile: false
   };
@@ -148,7 +147,7 @@ export class TileComponent extends BaseComponent<IProps, IState> {
     const { content: { type } } = model;
     this.modelId = model.id;
     model.setDisabledFeatures(appConfig.getDisabledFeaturesOfTile(type));
-
+    // console.log("<TileComponent>");
     this.hotKeys.register({
       "cmd-option-e": this.handleCopyImportJsonToClipboard,
       "cmd-shift-c": this.handleCopyModelJson
@@ -183,6 +182,7 @@ export class TileComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
+    // console.log("< TileComponent >");
     const { model, readOnly, isUserResizable, widthPct } = this.props;
     const { hoverTile } = this.state;
     const { appConfig, ui } = this.stores;
@@ -360,19 +360,18 @@ export class TileComponent extends BaseComponent<IProps, IState> {
 
   private handleTileDragStart = (e: React.DragEvent<HTMLDivElement>) => {
     // tile dragging can be disabled globally via appConfig
-    console.log("⚡ DRAG START ⚡ \n\n\n");
-    console.log("handleTileDragStart > 🍔 event: \t", e); //added
+    // console.log("📁 tile-component.tsx >\n\t ⚡ DRAG handleTileDragStart ⚡ \n\n\n");
 
     if (this.stores.appConfig.disableTileDrags) {
       e.preventDefault();
-      console.log("line 368: handleTileDragStart > disableTileDrags"); //added
+      // console.log("line 368: handleTileDragStart > disableTileDrags"); //added
       return;
     }
 
     // tile dragging can be disabled for individual tiles
     const target: HTMLElement | null = e.target as HTMLElement;
     if (!target || target.querySelector(".disable-tile-drag")) {
-      console.log("line 375: handleTileDragStart > disableTileDrags"); //added
+      // console.log("line 375: handleTileDragStart > disableTileDrags"); //added
 
       e.preventDefault();
       return;
@@ -425,7 +424,6 @@ export class TileComponent extends BaseComponent<IProps, IState> {
     // to support existing geometry and drawing layer drop logic set the single tile drag fields
     // if only 1 tile is selected
     if (dragTiles.tiles.length === 1) {
-      // console.log("data transfer??:");
 
       const dragTile = dragTiles.tiles[0];
       e.dataTransfer.setData(kDragTileId, dragTile.tileId);
@@ -439,10 +437,11 @@ export class TileComponent extends BaseComponent<IProps, IState> {
     const offsetX = kDefaultDragImageWidth;
     const offsetY = 0;
     e.dataTransfer.setDragImage(defaultDragImage, offsetX, offsetY);
+    console.log("📁 tile-component.tsx > ⚡ END handleTileDragStart ⚡ ");
   };
 
   private triggerResizeHandler = () => {
-    // console.log("tile-component.tsx > triggerResizeHandler()");
+    console.log("tile-component.tsx > triggerResizeHandler()");
     const handler = this.getTileResizeHandler();
     if (this.domElement && handler) {
       // console.log("if statement");
