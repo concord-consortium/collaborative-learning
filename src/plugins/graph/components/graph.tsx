@@ -1,5 +1,4 @@
 import {observer} from "mobx-react-lite";
-import {onAction} from "mobx-state-tree";
 import React, {MutableRefObject, useEffect, useMemo, useRef} from "react";
 import {select} from "d3";
 import {GraphController} from "../models/graph-controller";
@@ -40,7 +39,7 @@ interface IProps {
 
 export const Graph = observer(function Graph({graphController, graphRef, dotsRef}: IProps) {
   const graphModel = useGraphModelContext(),
-    { enableAnimation } = graphController,
+    { autoAdjustAxes, enableAnimation } = graphController,
     {plotType} = graphModel,
     instanceId = useInstanceIdContext(),
     marqueeState = useMemo<MarqueeState>(() => new MarqueeState(), []),
@@ -130,6 +129,7 @@ export const Graph = observer(function Graph({graphController, graphRef, dotsRef
       return <GraphAxis key={place}
                         place={place}
                         enableAnimation={enableAnimation}
+                        autoAdjust={autoAdjustAxes}
                         onDropAttribute={handleChangeAttribute}
                         onRemoveAttribute={handleRemoveAttribute}
                         // onTreatAttributeAs={handleTreatAttrAs}

@@ -16,17 +16,19 @@ import {DroppableAxis} from "../axis/components/droppable-axis";
 import {AttributeLabel} from "./attribute-label";
 import {useDropHintString} from "../hooks/use-drop-hint-string";
 import {useAxisBoundsProvider} from "../axis/hooks/use-axis-bounds";
+import { isAddCasesAction, isSetCaseValuesAction } from "../../../models/data/data-set-actions";
 
 interface IProps {
   place: AxisPlace
   enableAnimation: MutableRefObject<boolean>
+  autoAdjust?: React.MutableRefObject<boolean>
   onDropAttribute?: (place: GraphPlace, attrId: string) => void
   onRemoveAttribute?: (place: GraphPlace, attrId: string) => void
   onTreatAttributeAs?: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void
 }
 
 export const GraphAxis = observer(function GraphAxis(
-  {place, enableAnimation, onDropAttribute, onRemoveAttribute, onTreatAttributeAs}: IProps) {
+  {place, enableAnimation, autoAdjust, onDropAttribute, onRemoveAttribute, onTreatAttributeAs}: IProps) {
   const dataConfig = useDataConfigurationContext(),
     isDropAllowed = dataConfig?.graphPlaceCanAcceptAttributeIDDrop ?? (() => true),
     graphModel = useGraphModelContext(),
@@ -51,6 +53,18 @@ export const GraphAxis = observer(function GraphAxis(
     const droppedAttrId = getDragAttributeId(active);
     droppedAttrId && isDropAllowed(place, droppedAttrId) && onDropAttribute?.(place, droppedAttrId);
   });
+
+  useEffect(() => {
+    if (autoAdjust?.current) {
+      dataConfig?.onAction(action => {
+        if (isAlive(graphModel)) {
+          if (isAddCasesAction(action) || isSetCaseValuesAction(action)) {
+            layout.setDesiredExtent(place, 0);
+          }
+        }
+      });
+    }
+  }, [autoAdjust, dataConfig, graphModel, layout, place]);
 
   useEffect(function cleanup () {
     return () => {
