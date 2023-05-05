@@ -1,5 +1,6 @@
 import {format, ScaleBand, ScaleLinear, select} from "d3";
 import {autorun, reaction} from "mobx";
+import {isAlive} from "mobx-state-tree";
 import {MutableRefObject, useCallback, useEffect} from "react";
 import {AxisBounds, axisPlaceToAxisFn, AxisScaleType, otherPlace} from "../axis-types";
 import {useAxisLayoutContext} from "../models/axis-layout-context";
@@ -27,6 +28,7 @@ export const useSubAxis = ({
     multiScaleChangeCount = layout.getAxisMultiScale(axisModel?.place ?? 'bottom')?.changeCount ?? 0;
 
   const refreshSubAxis = useCallback(() => {
+    if (!isAlive(axisModel)) return;
     const
       place = axisModel?.place ?? 'bottom',
       multiScale = layout.getAxisMultiScale(place);
@@ -146,17 +148,20 @@ export const useSubAxis = ({
   // Install reaction to bring about rerender when layout's computedBounds changes
   useEffect(() => {
     const disposer = reaction(
-      () => layout.getComputedBounds(axisModel?.place ?? 'bottom'),
+      () => {
+        const { place = 'bottom' } = (isAlive(axisModel) && axisModel) || {};
+        return layout.getComputedBounds(place);
+      },
       () => refreshSubAxis()
     );
     return () => disposer();
-  }, [layout, refreshSubAxis, axisModel?.place]);
+  }, [axisModel, layout, refreshSubAxis]);
 
   // update d3 scale and axis when axis domain changes
   useEffect(function installDomainSync() {
     if (isNumeric) {
       const disposer = autorun(() => {
-        if (axisModel.domain) {
+        if (isAlive(axisModel) && axisModel.domain) {
           const {domain} = axisModel;
           layout.getAxisMultiScale(axisModel.place)?.setNumericDomain(domain);
           refreshSubAxis();
@@ -170,11 +175,10 @@ export const useSubAxis = ({
   useEffect(() => {
     const disposer = reaction(
       () => {
-        return layout.getAxisLength(axisModel?.place ?? 'bottom');
+        const { place = 'bottom' } = (isAlive(axisModel) && axisModel) || {};
+        return layout.getAxisLength(place);
       },
-      () => {
-        refreshSubAxis();
-      }
+      () => refreshSubAxis()
     );
     return () => disposer();
   }, [axisModel, layout, refreshSubAxis]);

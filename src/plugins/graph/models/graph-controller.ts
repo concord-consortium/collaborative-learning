@@ -26,14 +26,12 @@ interface IGraphControllerConstructorProps {
 
 interface IGraphControllerProps {
   graphModel: IGraphModel
-  dataset: IDataSet | undefined
   dotsRef: IDotsRef
 }
 
 export class GraphController {
   graphModel?: IGraphModel;
   layout: GraphLayout;
-  dataset?: IDataSet;
   enableAnimation: React.MutableRefObject<boolean>;
   instanceId: string;
   autoAdjustAxes: React.MutableRefObject<boolean>;
@@ -47,9 +45,8 @@ export class GraphController {
 
   setProperties(props: IGraphControllerProps) {
     this.graphModel = props.graphModel;
-    this.dataset = props.dataset;
-    if (this.graphModel.config.dataset !== props.dataset) {
-      this.graphModel.config.setDataset(props.dataset);
+    if (this.graphModel.config.dataset !== this.graphModel.data) {
+      this.graphModel.config.setDataset(this.graphModel.data);
     }
     this.initializeGraph(props.dotsRef);
   }
@@ -84,9 +81,10 @@ export class GraphController {
   }
 
   handleAttributeAssignment(graphPlace: GraphPlace, attrID: string) {
-    const {graphModel, layout, dataset} = this,
-      dataConfig = graphModel?.config;
-    if (!(graphModel && layout && dataset && dataConfig)) {
+    const {graphModel, layout} = this,
+      dataConfig = graphModel?.config,
+      dataset = graphModel?.data;
+    if (!(layout && dataConfig && dataset)) {
       return;
     }
     if (['plot', 'legend'].includes(graphPlace)) {

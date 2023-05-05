@@ -173,8 +173,14 @@ export const GraphModel = TileContentModel
   .actions(self => ({
     updateAfterSharedModelChanges(sharedModel?: SharedModelType, changeType?: SharedModelChangeType) {
       if (changeType === "link" && self.data) {
+        self.config.setDataset(self.data);
         self.setAttributeID("x", self.data.attributes[0].id);
         self.setAttributeID("y", self.data.attributes[1].id);
+      }
+      else if (changeType === "unlink") {
+        self.setAttributeID("y", "");
+        self.setAttributeID("x", "");
+        self.config.setDataset(undefined);
       }
     }
   }));
