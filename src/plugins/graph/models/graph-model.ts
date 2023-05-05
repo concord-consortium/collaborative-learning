@@ -64,8 +64,6 @@ export const GraphModel = TileContentModel
     get data(): IDataSet | undefined {
       const sharedModelManager = self.tileEnv?.sharedModelManager;
       const sharedModel = sharedModelManager?.getTileSharedModels(self).find(m => isSharedDataSet(m));
-      // TODO: Remove the below once we're sure it's no longer useful
-      // const sharedModel = sharedModelManager?.findFirstSharedModelByType(SharedDataSet);
       return isSharedDataSet(sharedModel) ? sharedModel.dataSet : undefined;
     },
     get metadata(): ISharedCaseMetadata | undefined {
