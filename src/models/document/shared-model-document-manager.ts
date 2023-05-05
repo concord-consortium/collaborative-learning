@@ -110,7 +110,7 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
     // the tile content model automatically by the tree monitor. However when
     // the list of shared models is changed like here addTileSharedModel, the
     // tree monitor doesn't pick that up, so we must call it directly.
-    tileContentModel.updateAfterSharedModelChanges(sharedModel);
+    tileContentModel.updateAfterSharedModelChanges(sharedModel, "link");
   }
 
   // This is not an action because it is deriving state.
@@ -182,6 +182,7 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
       return;
     }
 
+    tileContentModel.updateAfterSharedModelChanges(sharedModel, "unlink");
     sharedModelEntry.removeTile(tile);
   }
 }
