@@ -82,15 +82,15 @@ interface IProps {
   tileId: string;
 }
 export const DataflowProgramToolbar = ({ disabled, isTesting, onClearClick, onNodeCreateClick, tileId }: IProps) => {
-  //const ui = useUIStore();
-  // let dragOverlay = null;
-  // if (ui.dragId && isNodeDraggableId(ui.dragId)) {
-  //   dragOverlay = (
-  //     <div className="dragged-node">
-  //       <NodeIcon i={0} nodeType={getNodeType(ui.dragId) || ""} />
-  //     </div>
-  //   );
-  // }
+  const ui = useUIStore();
+  let dragOverlay = null;
+  if (ui.dragId && isNodeDraggableId(ui.dragId)) {
+    dragOverlay = (
+      <div className="dragged-node">
+        <NodeIcon i={0} nodeType={getNodeType(ui.dragId) || ""} />
+      </div>
+    );
+  }
 
   return (
     <div className="program-toolbar" data-test="program-toolbar">
@@ -104,7 +104,7 @@ export const DataflowProgramToolbar = ({ disabled, isTesting, onClearClick, onNo
           tileId={tileId}
         />
       ))}
-      {/* {<DragOverlay>{ dragOverlay }</DragOverlay> } */}
+      {/* TODO - fix this {<DragOverlay>{ dragOverlay }</DragOverlay> } */}
       { isTesting && <button className="qa" onClick={ onClearClick }>Clear</button> }
     </div>
   );
