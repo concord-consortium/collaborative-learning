@@ -27,6 +27,16 @@ export const useConsumerTileLinking = ({
   const colorMapEntry = getColorMapEntry(modelId);
   const linkColors = colorMapEntry?.colorSet;
 
+  // sort linkableTiles so all Graph tiles are first, then all Geometry tiles
+  linkableTiles.sort((a, b) => {
+    if (a.type === b.type) return 0;
+    if (a.type === "Graph") return -1;
+    if (b.type === "Graph") return 1;
+    if (a.type === "Geometry") return -1;
+    if (b.type === "Geometry") return 1;
+    return 0;
+  });
+
   const [showLinkTileDialog] =
           useLinkTileDialog({ linkableTiles, model, onLinkTile, onUnlinkTile });
 
