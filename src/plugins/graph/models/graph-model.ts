@@ -21,7 +21,7 @@ import {
   defaultStrokeColor,
   kellyColors
 } from "../../../utilities/color-utils";
-import {uniqueId} from "../../../utilities/js-utils";
+import { SharedModelChangeType } from "../../../models/shared/shared-model-manager";
 
 export type SharedModelChangeHandler = (sharedModel: SharedModelType | undefined, type: string) => void;
 
@@ -123,15 +123,6 @@ export const GraphModel = TileContentModel
     }
   }))
   .actions(self => ({
-    onSharedModelChange(handler: SharedModelChangeHandler) {
-      const id = uniqueId();
-      self.sharedModelChangeHandlers.set(id, handler);
-      return () => self.sharedModelChangeHandlers.delete(id);
-    },
-    updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
-      // after #1706 is merged, pass the actual type of the change
-      self.sharedModelChangeHandlers.forEach(handler => handler(sharedModel, "change"));
-    },
     setAxis(place: AxisPlace, axis: IAxisModelUnion) {
       self.axes.set(place, axis);
     },
@@ -177,6 +168,14 @@ export const GraphModel = TileContentModel
     },
     setShowMeasuresForSelection(show: boolean) {
       self.showMeasuresForSelection = show;
+    }
+  }))
+  .actions(self => ({
+    updateAfterSharedModelChanges(sharedModel?: SharedModelType, changeType?: SharedModelChangeType) {
+      if (changeType === "link" && self.data) {
+        self.setAttributeID("x", self.data.attributes[0].id);
+        self.setAttributeID("y", self.data.attributes[1].id);
+      }
     }
   }));
 export interface IGraphModel extends Instance<typeof GraphModel> {}

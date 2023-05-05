@@ -56,8 +56,8 @@ export const Graph = observer(function Graph({graphController, graphRef, dotsRef
 
   useEffect(function setupPlotArea() {
     // TODO: Replace this quick and dirty method for setting attributes
-    dataset && graphModel.setAttributeID('x', dataset.attributes[0].id);
-    dataset && graphModel.setAttributeID('y', dataset.attributes[1].id);
+    // dataset && graphModel.setAttributeID('x', dataset.attributes[0].id);
+    // dataset && graphModel.setAttributeID('y', dataset.attributes[1].id);
     if (xScale && xScale?.length > 0) {
       const plotBounds = layout.getComputedBounds('plot');
       select(plotAreaSVGRef.current)
