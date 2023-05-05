@@ -14,13 +14,16 @@ import { SharedModelType } from "../../../models/shared/shared-model";
 import { ISharedCaseMetadata, isSharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
 import {isSharedDataSet} from "../../../models/shared/shared-data-set";
 import {ITileContentModel, TileContentModel} from "../../../models/tiles/tile-content";
+import {ITileExportOptions} from "../../../models/tiles/tile-content-info";
 import {
   defaultBackgroundColor,
   defaultPointColor,
   defaultStrokeColor,
   kellyColors
 } from "../../../utilities/color-utils";
-import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
+import {uniqueId} from "../../../utilities/js-utils";
+
+export type SharedModelChangeHandler = (sharedModel: SharedModelType | undefined, type: string) => void;
 
 export interface GraphProperties {
   axes: Record<string, IAxisModelUnion>
@@ -60,6 +63,9 @@ export const GraphModel = TileContentModel
     showParentToggles: false,
     showMeasuresForSelection: false,
   })
+  .volatile(self => ({
+    sharedModelChangeHandlers: new Map<string, SharedModelChangeHandler>()
+  }))
   .views(self => ({
     get data(): IDataSet | undefined {
       const sharedModelManager = self.tileEnv?.sharedModelManager;
@@ -117,8 +123,14 @@ export const GraphModel = TileContentModel
     }
   }))
   .actions(self => ({
+    onSharedModelChange(handler: SharedModelChangeHandler) {
+      const id = uniqueId();
+      self.sharedModelChangeHandlers.set(id, handler);
+      return () => self.sharedModelChangeHandlers.delete(id);
+    },
     updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
-      // TODO
+      // after #1706 is merged, pass the actual type of the change
+      self.sharedModelChangeHandlers.forEach(handler => handler(sharedModel, "change"));
     },
     setAxis(place: AxisPlace, axis: IAxisModelUnion) {
       self.axes.set(place, axis);

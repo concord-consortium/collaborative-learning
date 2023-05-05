@@ -2,6 +2,7 @@ import React from "react";
 import {IGraphModel} from "./graph-model";
 import {GraphLayout} from "./graph-layout";
 import {IDataSet} from "../../../models/data/data-set";
+import {SharedModelType} from "../../../models/shared/shared-model";
 import {AxisPlace, AxisPlaces} from "../axis/axis-types";
 import {
   CategoricalAxisModel, EmptyAxisModel, isCategoricalAxisModel, isNumericAxisModel, NumericAxisModel
@@ -37,6 +38,7 @@ export class GraphController {
   enableAnimation: React.MutableRefObject<boolean>;
   instanceId: string;
   autoAdjustAxes: React.MutableRefObject<boolean>;
+  sharedModelChangeDisposer?: () => void;
 
   constructor({layout, enableAnimation, instanceId, autoAdjustAxes}: IGraphControllerConstructorProps) {
     this.layout = layout;
@@ -45,8 +47,19 @@ export class GraphController {
     this.autoAdjustAxes = autoAdjustAxes;
   }
 
+  destroy() {
+    this.sharedModelChangeDisposer?.();
+  }
+
+  handleSharedModelChange(sharedModel: SharedModelType | undefined, type: string) {
+    if (type === "link") {
+      // call this.handleAttributeAssignment() as necessary
+    }
+  }
+
   setProperties(props: IGraphControllerProps) {
     this.graphModel = props.graphModel;
+    this.sharedModelChangeDisposer = this.graphModel.onSharedModelChange(this.handleSharedModelChange);
     this.dataset = props.dataset;
     if (this.graphModel.config.dataset !== props.dataset) {
       this.graphModel.config.setDataset(props.dataset);
