@@ -3,6 +3,10 @@
   "version": "4.0.0",
   "description": "Collaborative Learning environment",
   "main": "index.js",
+  "engines": {
+    "node": ">= 16",
+    "npm": ">= 8"
+  },
   "config": {
     "pageTitle": "CLUE",
     "pageDescription": "Collaborative Learning User Environment",
