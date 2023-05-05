@@ -109,8 +109,6 @@ export const DataCardContentModel = TileContentModel
       });
     },
     attrById(str: string){
-      console.log("attrByID:", str);
-
       return self.dataSet.attrFromID(str);
     },
     isEmptyCase(caseId: string){
@@ -124,7 +122,6 @@ export const DataCardContentModel = TileContentModel
       return attributesWithValues === 0;
     },
     caseIdsFromAttributeValue(attrId: string, value: string){
-      console.log("data-card-content > caesIdsFromAttributeValue");
       const allCases = this.allCases();
       const foundCases: string[] = [];
       allCases.forEach((c) => c && c[attrId] === value && foundCases.push(c.__id__));
@@ -209,19 +206,14 @@ export const DataCardContentModel = TileContentModel
       self.selectedSortAttributeId = attrId;
     },
     setAttName(attrId: string, name: string){
-      // console.log("data-card-content  -> setAttrName:", attrId, name);
      self.dataSet.setAttributeName(attrId, name);
     },
     setAttValue(caseId: string, attrId: string, val: string){
-      // console.log("data-card-content  -> setAttrValue:", caseId, attrId, val);
-
       self.dataSet.setCanonicalCaseValues([
         { __id__: caseId, [attrId]: val }
       ]);
     },
     addNewCaseFromAttrKeys(atts: string[], beforeId?: string ){
-      // console.log("data-card-content > this.addNewCaseFromAttrKeys with atts:", atts);
-
       const obj = atts.reduce((o, key) => Object.assign(o, {[key]: ""}), {});
       if (beforeId){
         addCanonicalCasesToDataSet(self.dataSet, [obj], beforeId);

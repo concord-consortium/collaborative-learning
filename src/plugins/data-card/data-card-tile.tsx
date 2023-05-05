@@ -1,9 +1,9 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { useEffect, useState } from "react";
-import { ITileProps, kDragTiles } from "../../components/tiles/tile-component";
+import { ITileProps, extractDragTileType, kDragTiles } from "../../components/tiles/tile-component";
 import { useUIStore } from "../../hooks/use-stores";
-import { CaseID, addCanonicalCasesToDataSet } from "../../models/data/data-set";
+import { addCanonicalCasesToDataSet } from "../../models/data/data-set";
 import { DataCardContentModelType } from "./data-card-content";
 import { DataCardRows } from "./components/data-card-rows";
 import { DataCardToolbar } from "./data-card-toolbar";
@@ -17,15 +17,18 @@ import { safeJsonParse } from "../../utilities/js-utils";
 
 import "./data-card-tile.scss";
 
-
 export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
   const { model, onRequestUniqueTitle, readOnly, documentContent, tileElt, onSetCanAcceptDrop, onRegisterTileApi,
             onUnregisterTileApi } = props;
+
+
   // console.log("< DataCardToolComponent >");
   const content = model.content as DataCardContentModelType;
   const ui = useUIStore();
+
   const isTileSelected = ui.selectedTileIds.findIndex(id => id === content.metadata.id) >= 0;
   // console.log("< DataCardToolComponent > with tileId:", model.id);
+  // console.log(documentContent.tilemap)
 
   const [titleValue, setTitleValue] = useState(content.title);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -47,7 +50,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
     }
   }, [content, model.id, onRequestUniqueTitle]);
 
-  /* ==[ Drag n Drop ] == */
+  /* ==[ Drag and Drop ] == */
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     // console.log("handleMouseDown");
   };
@@ -55,17 +58,8 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     const isAcceptableDrag = isAcceptableDataCardDrag(e);
     onSetCanAcceptDrop(isAcceptableDrag ? model.id : undefined); //this turns off highlighting outer edge
-    if (isAcceptableDrag) {
-      e.dataTransfer.dropEffect = "copy";
-      e.preventDefault();
-    }
   };
 
-  const highlightContainerClasses = classNames(
-    "data-card-container",
-    {"highlight": highlightDataCard},
-    {"no-highlight": !highlightDataCard}
-  );
 
   const isAcceptableDataCardDrag =  (e: React.DragEvent<HTMLDivElement>) => {
     //TODO: local document id = parsedContent source doc id
@@ -75,26 +69,65 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
       return false;
     }
 
-    const numTilesDragged = ui?.selectedTileIds.length; //this may change
-    if (!readOnly && numTilesDragged >= 1) {
-      const kImgDropMarginPct = 0.1; //check if drag is within central 80% of tile
-      const eltBounds = e.currentTarget.getBoundingClientRect();
-      const kImgDropMarginX = eltBounds.width * kImgDropMarginPct;
-      const kImgDropMarginY = eltBounds.height * kImgDropMarginPct;
-      if ((e.clientX > eltBounds.left + kImgDropMarginX) &&
-          (e.clientX < eltBounds.right - kImgDropMarginX) &&
-          (e.clientY > eltBounds.top + kImgDropMarginY) &&
-          (e.clientY < ((eltBounds.bottom - kImgDropMarginY)*0.95))){
-        setHighlightDataCard(true); //within bounds
-        return true;
-      } else {
-        setHighlightDataCard(false); //out of bounds
+    const numTilesDragged = ui?.selectedTileIds.length;
+
+    if (!readOnly && numTilesDragged === 1) {
+      //check if draggedTile is of type Datacard
+      const tileTypeDragged = extractDragTileType(e.dataTransfer);
+      const isDraggedTileDataCard = tileTypeDragged === "datacard";
+      if (isDraggedTileDataCard){ //compute bounds verify drag is within central 80% of tile
+        const kImgDropMarginPct = 0.1;
+        const eltBounds = e.currentTarget.getBoundingClientRect();
+        const kImgDropMarginX = eltBounds.width * kImgDropMarginPct;
+        const kImgDropMarginY = eltBounds.height * kImgDropMarginPct;
+        if ((e.clientX > eltBounds.left + kImgDropMarginX) &&
+            (e.clientX < eltBounds.right - kImgDropMarginX) &&
+            (e.clientY > eltBounds.top + kImgDropMarginY) &&
+            (e.clientY < ((eltBounds.bottom - kImgDropMarginY)*0.95))){
+          setHighlightDataCard(true); //within bounds
+          return true;
+        } else {
+          setHighlightDataCard(false); //out of bounds
+          return false;
+        }
+      }
+      else { //not of type Datacard
+        setHighlightDataCard(false);
         return false;
       }
     }
   };
 
+  const highlightContainerClasses = classNames(
+    "data-card-container",
+    {"highlight": highlightDataCard},
+    {"no-highlight": !highlightDataCard}
+  );
+
+
+  //______________GUIDELINES__________________________________
+
+  //- Data Card tiles can be dragged onto each other from the usual corner drag mechanism, resulting in a
+  //single tile with all the cards from both decks.
+
+  // - Data fields will the the union of the two field set names. If each deck has unique fields the resulting
+  //cards have more fields: deck1fields + deck2fields with blank data for the added fields on each card.
+
+  // - new larger deck can be sorted to resolve any field differences in spelling or capitalization
+
+  // - Data is available in the document model
+
+  // - Image data remains visible
+
+  //- merged (dragged) deck tile is removed.
+
+  //__________________________________________________________
+
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    //TODO bug - copies successfully but also changes layout of tiles, could be preventDefault needs to be added
+    //check with leslie that only within same document DC will be deleted, if its left -> right (or 4 up) then left should stay
+    //when copying from other document, it adds a copy, we dont want this.
+
     if (isAcceptableDataCardDrag(e)) {
       if (highlightDataCard) {
         setHighlightDataCard(false); //after you drop turn off highlighting
@@ -104,12 +137,19 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
       const parsedDataDraggedTile = safeJsonParse(getDataDraggedTile);
       const contentOfDraggedTile= safeJsonParse(parsedDataDraggedTile.sharedModels[0].content);
       const dataSetOfDraggedTile = contentOfDraggedTile.dataSet;
+      // const idDraggedTile
+
+      // console.log("parsedDataDraggedTile:", parsedDataDraggedTile);
+      // console.log("idDraggedTile!!: ", idDraggedTile);
+      // console.log("dataSetOfDraggedTiles:", dataSetOfDraggedTile);
       const attrNamesDraggedTile = dataSetOfDraggedTile.attributes.map((attrObj: any) => {
         return attrObj.name;
       });
       const attrNamesDroppedTile = content.existingAttributesWithNames().map((attrObj: any) => {
         return attrObj.attrName;
       });
+
+      //TODO - pull algorithm code into data-card-merge function that take two datasets (dragged, dropped)
 
       //search for duplicates between draggedTile & droppedTile - only add names of unique attr
       attrNamesDraggedTile.forEach((attrNameDrag: any) => {
@@ -127,13 +167,13 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
           content.setAttName(newAttrId, attrNameDrag);
         } //else don't add them
       });
-      console.log("----ADD Cards-----");
+      // console.log("----ADD Cards-----");
       //Add data cards (case) from draggedTile
       dataSetOfDraggedTile.cases.forEach((card: any) => {
         addNewCase(); //add # of cases (cards)
       });
 
-      console.log("----- Add Values------");
+      // console.log("----- Add Values------");
       const numCasesDraggedTile = dataSetOfDraggedTile.cases.length;
       const allCasesDroppedTile = content.allCases();
       const startIndexDroppedTile = allCasesDroppedTile.length - numCasesDraggedTile;
@@ -142,19 +182,13 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
       const attrOfDraggedTile = dataSetOfDraggedTile.attributes; //name id + others
       const attrOfDroppedTile = content.existingAttributesWithNames();//this holds both name and Id
 
-      console.log("attrOfDraggedTiles:", attrOfDraggedTile);
-      console.log("attrOfDroppedTiles:", attrOfDroppedTile);
-
       //insert all values
       for (let i = startIndexDroppedTile; i < allCasesDroppedTile.length; i++){ //start at cards that were added
-        console.log("looking at case ", i, allCasesDroppedTile[i],"-----------");
         const caseId = allCasesDroppedTile[i]?.__id__;
         attrOfDroppedTile.forEach((attrDrop) => {
           attrOfDraggedTile.forEach((attrDrag: any, idx: number) => {
             if (attrDrop.attrName === attrDrag.name){
               const val = attrDrag.values[startIndexDraggedTile];
-              console.log("we need to add value where", attrDrop.attrName, " === ", attrDrag.name);
-              console.log("draggedTile Starting Index:", startIndexDraggedTile);
               if (caseId){
                 content.setAttValue(caseId, attrDrop.attrId, val);
               }
@@ -163,29 +197,43 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
 
         });
         startIndexDraggedTile ++;
-        console.log("-----end Card------");
       }
 
-      //______________GUIDELINES__________________________________
+      //Delete tile (if within same document);
+      const sourceDocIdDraggedTile = parsedDataDraggedTile.sourceDocId;
+      const docIdDroppedTile = props.docId;
+      console.log("props:", props);
 
-      //- Data Card tiles can be dragged onto each other from the usual corner drag mechanism, resulting in a
-      //single tile with all the cards from both decks.
+      console.log("document:", document);
 
-      // - Data fields will the the union of the two field set names. If each deck has unique fields the resulting
-      //cards have more fields: deck1fields + deck2fields with blank data for the added fields on each card.
+      const idDraggedTile = parsedDataDraggedTile.tiles[0].tileId;
+      if (sourceDocIdDraggedTile === docIdDroppedTile){
 
-      // - new larger deck can be sorted to resolve any field differences in spelling or capitalization
+        ui.removeTileIdFromSelection(idDraggedTile);
+        // document.deleteTile(idDraggedTile); //TODO THIS NEEDS TO RUN
+      }
+      // console.log("lets find droppedTile Id:, ui", ui);
+      // console.log("content", content);
+      // console.log("contentId:", content.contentId);
 
-      // - Data is available in the document model
+      // console.log(`props for dropped tile ${model.id}:`, props);
+      console.log("docID Dropped Doc: ", props.docId);
 
-      // - Image data remains visible
 
-      //- merged (dragged) deck tile is removed.
 
-      //__________________________________________________________
+      //temp
+      // ui.selectedTileIds.forEach((id) => {
+      //   console.log("id", id);
+      // });
+
+      //end temp
+
+
+
 
     }
   };
+
 
   function nextCase(){
     if (content.caseIndex < content.totalCases - 1) {

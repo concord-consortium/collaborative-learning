@@ -201,7 +201,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleDelete() {
-    console.log("toolbar.tsx > handleDelete() line 204");
+    // console.log("toolbar.tsx > handleDelete() line 204");
     const tileApiInterface = this.context?.current;
     if (!tileApiInterface) return;
     let didDeleteInteriorSelection = false;
@@ -210,11 +210,13 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
       const tileApi = tileApiInterface?.getTileApi(tileId);
       // if there is selected content inside the selected tile, delete it first
       if (tileApi?.hasSelection?.()) {
+        // console.log("toolbar.tsx > delete selected content inside the selected tile, line 213");
         tileApi.deleteSelection?.();
         didDeleteInteriorSelection = true;
       }
     });
     if (!didDeleteInteriorSelection) {
+      // console.log("toolbar.tsx -> showing confirmation alert");
       this.showDeleteTilesConfirmationAlert?.();
     }
     this.setState(state => ({ activeTool: state.defaultTool }));
@@ -236,13 +238,14 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   }
 
   private setShowDeleteTilesConfirmationAlert = (showAlert: () => void) => {
-    console.log("toolbar.tsx > setShowDeleteTilesConfirmationAlert, line 239, with showAlert:", showAlert);
+    // console.log("toolbar.tsx > setShowDeleteTilesConfirmationAlert, line 239, with showAlert:", showAlert);
     this.showDeleteTilesConfirmationAlert = showAlert;
   };
 
   private handleDeleteSelectedTiles = () => {
     const { ui } = this.stores;
     const { document } = this.props;
+    console.log("handleDeleteSelectedTiles with document:", document)
     ui.selectedTileIds.forEach(tileId => {
       ui.removeTileIdFromSelection(tileId);
       document.deleteTile(tileId);

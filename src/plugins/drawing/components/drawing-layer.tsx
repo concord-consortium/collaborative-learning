@@ -350,7 +350,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   };
 
   public render() {
-    console.log("<drawing-layer.tsx> with tileId:", this.props.model.id);
+    // console.log("<drawing-layer.tsx> with tileId:", this.props.model.id);
     const hoveringOverAlreadySelectedObject =
       this.state.hoverObject
         ? this.state.selectedObjects.indexOf(this.state.hoverObject) !== -1
@@ -390,7 +390,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   }
 
   private isAcceptableImageDrag = (e: React.DragEvent<HTMLDivElement>) => {
-    console.log("drawing-layer.tsx > isAcceptableImageDrag");
+    // console.log("drawing-layer.tsx > isAcceptableImageDrag");
     const { readOnly } = this.props;
     const toolType = extractDragTileType(e.dataTransfer);
     // image drop area is central 80% in each dimension
@@ -403,13 +403,10 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
           (e.clientX < eltBounds.right - kImgDropMarginX) &&
           (e.clientY > eltBounds.top + kImgDropMarginY) &&
           (e.clientY < eltBounds.bottom - kImgDropMarginY)) {
-          console.log("drawing-layer.tsx > return TRUE");
-          console.log("yooo turn off highlighting");
-          // this.props.onSetCanAcceptDrop(this.props.model.id); //turn off highlighting
+        this.props.onSetCanAcceptDrop(this.props.model.id); //turn off highlighting
         return true;
       }
     }
-    console.log("drawing-layer.tsx > return FALSE");
     return false;
   };
 
@@ -418,7 +415,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     // TODO: what is this method used for?
     this.props.onSetCanAcceptDrop(isAcceptableDrag ? this.props.model.id : undefined);
     if (isAcceptableDrag) {
-      console.log("drawing-layer-copying-over");
       e.dataTransfer.dropEffect = "copy";
       e.preventDefault();
     }
@@ -429,7 +425,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   };
 
   private handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    console.log("📁 drawing-layer.tsx > handleDrop");
+    // console.log("📁 drawing-layer.tsx > handleDrop");
     if (this.isAcceptableImageDrag(e)) {
       const dragContent = e.dataTransfer.getData(kDragTileContent);
       const parsedContent = safeJsonParse(dragContent);

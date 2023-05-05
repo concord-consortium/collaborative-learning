@@ -11,11 +11,10 @@ interface IProps extends IButtonProps {
 export const DeleteButton: React.FC<IProps> =
   ({ toolButton, isActive, isDisabled, onSetToolActive, onClick,
       onSetShowDeleteTilesConfirmationAlert, onDeleteSelectedTiles }) => {
-  console.log("---------- < DeleteButton > --------");
-  console.log("onClick:", onClick);
-  console.log("onSetShowDeleteTilesConfirmationAlert:", onSetShowDeleteTilesConfirmationAlert);
-  console.log("onDeleteSelectedTiles:", onDeleteSelectedTiles);
-
+  // console.log("---------- < DeleteButton > --------");
+  // console.log("onClick:", onClick);
+  // console.log("onSetShowDeleteTilesConfirmationAlert:", onSetShowDeleteTilesConfirmationAlert);
+  // console.log("onDeleteSelectedTiles:", onDeleteSelectedTiles);
 
   const { id, title, Icon } = toolButton;
 
