@@ -1,4 +1,4 @@
-export {};
+export {};  // isolatedModules compatibility
 
 describe("setupTests", () => {
   describe("assertIsDefined", () => {

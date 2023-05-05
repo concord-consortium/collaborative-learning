@@ -1,4 +1,4 @@
-export {};
+export {};  // isolatedModules compatibility
 
 // import { ICellEditorParams, TextCellEditor } from "@ag-grid-community/core";
 // import { TableMetadataModelType } from "../../../models/tools/table/table-content";

@@ -1,4 +1,4 @@
-export {};
+export {};  // isolatedModules compatibility
 
 // import React from "react";
 // import { onSnapshot, getSnapshot, types } from "mobx-state-tree";
