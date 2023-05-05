@@ -78,7 +78,7 @@ describe("TextContentModel", () => {
 
   it("calls updateTextContentAfterSharedModelChanges on each plugin that provides it", () => {
     const model = TextContentModel.create({ text: "foo" });
-    model.updateAfterSharedModelChanges();
+    model.updateAfterSharedModelChanges(undefined, "change");
     expect(testTextPluginInfoWithUpdate.updateTextContentAfterSharedModelChanges).toBeCalled();
   });
 });

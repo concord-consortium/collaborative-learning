@@ -44,6 +44,8 @@ export const UnknownSharedModel = types.snapshotProcessor(_UnknownSharedModel, {
   }
 });
 
+export type SharedModelChangeType = "link" | "change" | "unlink"
+
 export interface IDragSharedModelItem {
   modelId: string;
   providerId?: string;

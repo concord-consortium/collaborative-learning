@@ -55,7 +55,7 @@ const setupContainer = (content: DiagramContentModelType, variables?: SharedVari
   // Need to monitor the variables just like sharedModelDocumentManager does
   if (variables) {
     onSnapshot(variables, () => {
-      content.updateAfterSharedModelChanges(variables);
+      content.updateAfterSharedModelChanges(variables, "change");
     });
   }
 
