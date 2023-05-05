@@ -201,6 +201,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleDelete() {
+    console.log("toolbar.tsx > handleDelete() line 204");
     const tileApiInterface = this.context?.current;
     if (!tileApiInterface) return;
     let didDeleteInteriorSelection = false;
@@ -235,6 +236,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   }
 
   private setShowDeleteTilesConfirmationAlert = (showAlert: () => void) => {
+    console.log("toolbar.tsx > setShowDeleteTilesConfirmationAlert, line 239, with showAlert:", showAlert);
     this.showDeleteTilesConfirmationAlert = showAlert;
   };
 
