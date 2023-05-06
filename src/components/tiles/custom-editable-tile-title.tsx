@@ -1,7 +1,8 @@
+import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { useEffect, useState } from "react";
-import { ExpressionContentModelType } from "../../plugins/expression/expression-content"
-import { DataCardContentModelType } from "../../plugins/data-card/data-card-content"
+import { ExpressionContentModelType } from "../../plugins/expression/expression-content";
+import { DataCardContentModelType } from "../../plugins/data-card/data-card-content";
 
 type SimpleTitleTileTypes = DataCardContentModelType | ExpressionContentModelType;
 
@@ -11,7 +12,7 @@ interface IProps {
   readOnly: boolean | undefined;
 }
 
-export const EditableTileTitleText: React.FC<IProps> = observer((props) => {
+export const CustomEditableTileTitle: React.FC<IProps> = observer((props) => {
   const { model, onRequestUniqueTitle, readOnly } = props;
   const content = model.content as SimpleTitleTileTypes;
 
@@ -68,8 +69,12 @@ export const EditableTileTitleText: React.FC<IProps> = observer((props) => {
     setIsEditingTitle(false);
   };
 
+  const elementClasses = classNames(
+    "title-text-element", {editing: isEditingTitle}
+  );
+
   return (
-    <div className="title-text-element">
+    <div className={elementClasses}>
       { isEditingTitle && !readOnly
       ? <input
           className="title-input-editing"
@@ -87,4 +92,4 @@ export const EditableTileTitleText: React.FC<IProps> = observer((props) => {
     </div>
   );
 });
-EditableTileTitleText.displayName = "EditableTileTitleText";
+CustomEditableTileTitle.displayName = "CustomEditableTileTitle";

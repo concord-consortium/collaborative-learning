@@ -8,7 +8,7 @@ import { defaultExpressionContent, ExpressionContentModel } from "./expression-c
 registerTileContentInfo({
   type: kExpressionTileType,
   modelClass: ExpressionContentModel,
-  titleBase: "Expression",
+  titleBase: "Eq.",
   defaultContent: defaultExpressionContent,
   defaultHeight: kExpressionDefaultHeight
 });
