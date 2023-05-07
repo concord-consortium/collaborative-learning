@@ -6,9 +6,19 @@ import { TileModel } from "../../models/tiles/tile-model";
 import { defaultExpressionContent } from "./expression-content";
 import { ExpressionToolComponent } from "./expression-tile";
 
+import("mathlive")
+import * as mathlive from 'mathlive'
+
 // The expression tile needs to be registered so the TileModel.create
 // knows it is a supported tile type
 import "./expression-registration";
+
+jest.mock('mathlive', () => {
+  return {
+    _esmodule: true,
+    mathlive: jest.fn()
+  }
+})
 
 describe("ExpressionToolComponent", () => {
   const content = defaultExpressionContent();

@@ -4,7 +4,7 @@ import { ITileProps } from "../../components/tiles/tile-component";
 import { ExpressionContentModelType } from "./expression-content";
 import { MathfieldElementAttributes, MathfieldElement } from "mathlive";
 import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
-import('mathlive');
+import("mathlive"); // passes linter, but results in MODULE_NOT_FOUND in jest test
 
 import "./expression-tile.scss";
 
