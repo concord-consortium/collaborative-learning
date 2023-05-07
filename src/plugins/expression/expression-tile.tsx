@@ -4,8 +4,7 @@ import { ITileProps } from "../../components/tiles/tile-component";
 import { ExpressionContentModelType } from "./expression-content";
 import { MathfieldElementAttributes, MathfieldElement } from "mathlive";
 import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
-import("mathlive"); // passes linter, but results in MODULE_NOT_FOUND in jest test
-
+import("mathlive");
 import "./expression-tile.scss";
 
 type CustomElement<T> = Partial<T & DOMAttributes<T>>;
