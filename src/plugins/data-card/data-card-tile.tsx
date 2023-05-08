@@ -14,7 +14,7 @@ import { useCautionAlert } from "../../components/utilities/use-caution-alert";
 import { EditFacet } from "./data-card-types";
 import { DataCardSortArea } from "./components/sort-area";
 import { safeJsonParse } from "../../utilities/js-utils";
-import { mergeTwoCards } from "./data-card-merge-two-cards";
+import { dataCardMergeTwoCards } from "./data-card-merge-two-cards";
 
 import "./data-card-tile.scss";
 
@@ -107,7 +107,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
       const getDataDraggedTile = e.dataTransfer.getData(kDragTiles);
       const parsedDataDraggedTile = safeJsonParse(getDataDraggedTile);
       const contentOfDraggedTile= safeJsonParse(parsedDataDraggedTile.sharedModels[0].content);
-      mergeTwoCards(contentOfDraggedTile, content, addNewCase); //where content is our droppedTile, addNewCase is a cb
+      dataCardMergeTwoCards(contentOfDraggedTile, content, addNewCase); //content is our droppedTile
 
       e.preventDefault();
       e.stopPropagation(); //prevents calling document-content > handleDrop

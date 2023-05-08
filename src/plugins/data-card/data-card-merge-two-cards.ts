@@ -1,7 +1,7 @@
 import { DataCardContentModelType } from "./data-card-content";
 
-export const mergeTwoCards = (draggedTile: any, droppedTile: DataCardContentModelType, addNewCase: () => void) => {
-
+export const dataCardMergeTwoCards = (draggedTile: any, droppedTile: DataCardContentModelType,
+                                      addNewCase: () => void) => {
   const dataSetOfDraggedTile = draggedTile.dataSet;
   const attrNamesDraggedTile = dataSetOfDraggedTile.attributes.map((attrObj: any) => {
     return attrObj.name;
