@@ -1,7 +1,6 @@
 import React from "react";
 import {IGraphModel} from "./graph-model";
 import {GraphLayout} from "./graph-layout";
-import {IDataSet} from "../../../models/data/data-set";
 import {AxisPlace, AxisPlaces} from "../axis/axis-types";
 import {
   CategoricalAxisModel, EmptyAxisModel, isCategoricalAxisModel, isNumericAxisModel, NumericAxisModel

@@ -118,7 +118,6 @@ export const AxisDragRects = observer(
               ratio = (x2 - lower) / (dilationAnchorCoord - lower),
               newRange = (upper - lower) / ratio,
               newUpperBound = lower + newRange;
-            console.log("newUpperBound: ", newUpperBound);
             axisModel.setDomain(lower, newUpperBound);
           }
         },

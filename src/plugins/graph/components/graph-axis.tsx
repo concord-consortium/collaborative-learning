@@ -17,6 +17,8 @@ import {AttributeLabel} from "./attribute-label";
 import {useDropHintString} from "../hooks/use-drop-hint-string";
 import {useAxisBoundsProvider} from "../axis/hooks/use-axis-bounds";
 import { isAddCasesAction, isSetCaseValuesAction } from "../../../models/data/data-set-actions";
+import { computeNiceNumericBounds } from "../utilities/graph-utils";
+import { isNumericAxisModel } from "../axis/models/axis-model";
 
 interface IProps {
   place: AxisPlace
@@ -57,9 +59,29 @@ export const GraphAxis = observer(function GraphAxis(
   useEffect(() => {
     if (autoAdjust?.current) {
       dataConfig?.onAction(action => {
-        if (isAlive(graphModel)) {
-          if (isAddCasesAction(action) || isSetCaseValuesAction(action)) {
-            layout.setDesiredExtent(place, 0);
+        if (
+            isAlive(graphModel) &&
+            (isAddCasesAction(action) || isSetCaseValuesAction(action))
+           )
+        {
+          const xValues = dataConfig.numericValuesForAttrRole("x");
+          const yValues = dataConfig.numericValuesForAttrRole("y");
+          const axisModel = graphModel.getAxis(place);
+
+          if (axisModel && isNumericAxisModel(axisModel)) {
+            if (xValues && place === "bottom") {
+              const minX = Math.min(...xValues);
+              const maxX = Math.max(...xValues);
+              const newXBounds = computeNiceNumericBounds(minX, maxX);
+              axisModel.setDomain(newXBounds.min, newXBounds.max);
+            }
+
+            if (yValues && place === "left") {
+              const minY = Math.min(...yValues);
+              const maxY = Math.max(...yValues);
+              const newYBounds = computeNiceNumericBounds(minY, maxY);
+              axisModel.setDomain(newYBounds.min, newYBounds.max);
+            }
           }
         }
       });
@@ -102,3 +124,4 @@ export const GraphAxis = observer(function GraphAxis(
     </g>
   );
 });
+

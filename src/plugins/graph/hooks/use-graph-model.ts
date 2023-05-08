@@ -1,5 +1,4 @@
 import {MutableRefObject, useCallback, useEffect} from "react";
-import {onAction} from "mobx-state-tree";
 import {matchCirclesToData, setNiceDomain, startAnimation} from "../utilities/graph-utils";
 import {IGraphModel, isGraphVisualPropsAction} from "../models/graph-model";
 import {useDataSetContext} from "./use-data-set-context";

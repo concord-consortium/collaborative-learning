@@ -1,5 +1,4 @@
 import {reaction} from "mobx";
-import {onAction} from "mobx-state-tree";
 import {range, select} from "d3";
 import React, {memo, useCallback, useEffect, useRef, useState} from "react";
 import {isSelectionAction} from "../../../../models/data/data-set-actions";
