@@ -284,6 +284,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    console.log("document-content.tsx > handleDragOver");
     const { content, readOnly } = this.props;
     const { dropRowInfo } = this.state;
     if (!content || readOnly) return;
