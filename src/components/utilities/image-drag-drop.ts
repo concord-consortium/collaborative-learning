@@ -6,6 +6,7 @@ export interface ExternalImageDragDropOptions {
 
 export class ImageDragDrop {
   private options: ExternalImageDragDropOptions;
+
   constructor(options: ExternalImageDragDropOptions) {
     this.options = options;
   }
