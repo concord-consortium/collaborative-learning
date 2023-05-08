@@ -132,7 +132,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const { readOnly, documentProperties, numNodes, tileContent, programDataRate, onProgramDataRateChange,
             isPlaying, handleChangeIsPlaying, handleChangeOfProgramMode, programMode} = this.props;
 
-
     const editorClassForDisplayState = "full";
     const editorClass = `editor ${editorClassForDisplayState}`;
     const toolbarEditorContainerClass = `toolbar-editor-container`;
@@ -365,7 +364,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.programEditor.on("nodecreated", node => {
         this.processAndSave();
         this.moveNodeToFront(node, true);
-
         node.meta.inTileWithId = this.props.tileId;
         dataflowLogEvent("nodecreated", node, this.props.tileId);
       });

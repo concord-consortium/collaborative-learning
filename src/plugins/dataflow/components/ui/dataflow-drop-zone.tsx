@@ -18,7 +18,6 @@ export const DataflowDropZone = observer((
 ) => {
   const droppableId = dataflowDroppableId(tileId);
   const { isOver, setNodeRef } = useDroppable({ id: droppableId });
-
   const dropTargetStyle = {
     ...(style || {}),
     outline: isOver ? "2px solid #b7e2ec" : undefined

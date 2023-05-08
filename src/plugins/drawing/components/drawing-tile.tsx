@@ -20,7 +20,6 @@ type IProps = ITileProps;
 
 const DrawingToolComponent: React.FC<IProps> = (props) => {
   const { documentContent, tileElt, model, readOnly, scale, onRegisterTileApi, onUnregisterTileApi } = props;
-
   const contentRef = useCurrent(model.content as DrawingContentModelType);
   const [imageUrlToAdd, setImageUrlToAdd] = useState("");
   const hotKeys = useRef(new HotKeys());

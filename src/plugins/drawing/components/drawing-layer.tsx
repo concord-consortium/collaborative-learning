@@ -401,7 +401,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
           (e.clientX < eltBounds.right - kImgDropMarginX) &&
           (e.clientY > eltBounds.top + kImgDropMarginY) &&
           (e.clientY < eltBounds.bottom - kImgDropMarginY)) {
-        this.props.onSetCanAcceptDrop(this.props.model.id); //turn off highlighting
         return true;
       }
     }
