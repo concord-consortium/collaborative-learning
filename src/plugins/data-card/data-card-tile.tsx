@@ -56,7 +56,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
 
   const isAcceptableDataCardDrag =  (e: React.DragEvent<HTMLDivElement>) => {
     const draggingWithinItself = ui?.selectedTileIds.includes(model.id);
-    if (draggingWithinItself){ //if dragging within itself
+    if (draggingWithinItself){
       setHighlightDataCard(false);
       return false;
     }
@@ -75,7 +75,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
         if ((e.clientX > eltBounds.left + kImgDropMarginX) &&
             (e.clientX < eltBounds.right - kImgDropMarginX) &&
             (e.clientY > eltBounds.top + kImgDropMarginY) &&
-            (e.clientY < ((eltBounds.bottom - kImgDropMarginY)*0.95))){
+            (e.clientY < ((eltBounds.bottom - kImgDropMarginY) * 0.95))){
           setHighlightDataCard(true); //within bounds
           return true;
         } else {
