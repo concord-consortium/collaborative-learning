@@ -12,7 +12,6 @@ interface INodeIconProps {
   nodeType: string;
 }
 
-//this is just the circle node icon to the right
 const NodeIcon = ({ i, nodeType }: INodeIconProps) => {
   const iconClass = "icon-block " + nodeType.toLowerCase().replace(" ", "-");
   const nodeIcons = [];
@@ -56,8 +55,7 @@ interface IAddNodeButtonProps {
   onNodeCreateClick: (type: string) => void;
   tileId: string;
 }
-const AddNodeButton = (props: IAddNodeButtonProps) => {
-  const { disabled, i, nodeType, onNodeCreateClick, tileId } = props;
+const AddNodeButton = ({ disabled, i, nodeType, onNodeCreateClick, tileId }: IAddNodeButtonProps) => {
 
   const draggableId = nodeDraggableId(nodeType, tileId);
   const { attributes, listeners, setNodeRef } = useDraggable({ id: draggableId });

@@ -319,7 +319,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   }
 
   private isAcceptableImageDrag = (e: React.DragEvent<HTMLDivElement>) => {
-
     const { readOnly } = this.props;
     // image drop area is central 80% in each dimension
     if (!readOnly) {

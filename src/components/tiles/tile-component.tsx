@@ -135,6 +135,7 @@ export class TileComponent extends BaseComponent<IProps, IState> {
   private hotKeys: HotKeys = new HotKeys();
   private dragElement: HTMLDivElement | null;
   private resizeElement: HTMLDivElement | null;
+
   state = {
     hoverTile: false
   };
@@ -195,7 +196,6 @@ export class TileComponent extends BaseComponent<IProps, IState> {
                       selected: isTileSelected ,
                       "selected-for-comment": tileSelectedForComment});
     const isDraggable = !isPlaceholderTile && !appConfig.disableTileDrags;
-
     const dragTileButton = isDraggable &&
                             <DragTileButton divRef={elt => this.dragElement = elt}
                               hovered={hoverTile} selected={isTileSelected}
@@ -404,7 +404,6 @@ export class TileComponent extends BaseComponent<IProps, IState> {
     // to support existing geometry and drawing layer drop logic set the single tile drag fields
     // if only 1 tile is selected
     if (dragTiles.tiles.length === 1) {
-
       const dragTile = dragTiles.tiles[0];
       e.dataTransfer.setData(kDragTileId, dragTile.tileId);
       e.dataTransfer.setData(kDragTileContent, dragTile.tileContent);
