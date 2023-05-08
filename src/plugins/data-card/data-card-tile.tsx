@@ -51,21 +51,11 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     const isAcceptableDrag = isAcceptableDataCardDrag(e);
-    console.log("isAcceptableDrag:", isAcceptableDrag);
     onSetCanAcceptDrop(isAcceptableDrag ? model.id : undefined); //this turns off highlighting outer edge
-
-    if (isAcceptableDrag) {
-      e.dataTransfer.dropEffect = "copy";
-      e.preventDefault();
-    }
-    // e.preventDefault(); //will this help? //no
-
   };
 
   const isAcceptableDataCardDrag =  (e: React.DragEvent<HTMLDivElement>) => {
     const draggingWithinItself = ui?.selectedTileIds.includes(model.id);
-    e.preventDefault();
-
     if (draggingWithinItself){ //if dragging within itself
       setHighlightDataCard(false);
       return false;
@@ -118,6 +108,9 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
       const parsedDataDraggedTile = safeJsonParse(getDataDraggedTile);
       const contentOfDraggedTile= safeJsonParse(parsedDataDraggedTile.sharedModels[0].content);
       mergeTwoCards(contentOfDraggedTile, content, addNewCase); //where content is our droppedTile, addNewCase is a cb
+
+      e.preventDefault();
+      e.stopPropagation(); //prevents calling document-content > handleDrop
 
       /* ==[ Delete tile (if within same document) ] == */
       const sourceDocIdDraggedTile = parsedDataDraggedTile.sourceDocId;
