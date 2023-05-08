@@ -91,6 +91,7 @@ export const DataflowProgramToolbar = ({ disabled, isTesting, onClearClick, onNo
       </div>
     );
   }
+
   return (
     <div className="program-toolbar" data-test="program-toolbar">
       { NodeTypes.map((nt: NodeType, i: number) => (
