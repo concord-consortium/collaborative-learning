@@ -38,6 +38,17 @@ describe("ExpressionToolComponent", () => {
     }
   };
 
+  beforeEach(() => {
+    jest.spyOn(console, 'error')
+    // @ts-ignore jest.spyOn adds this functionallity
+    console.error.mockImplementation(() => null);
+  });
+
+  afterEach(() => {
+    // @ts-ignore jest.spyOn adds this functionallity
+    console.error.mockRestore()
+  })
+
   it("renders a math field web component", () => {
     render(<ExpressionToolComponent  {...defaultProps} {...{model}}></ExpressionToolComponent>);
     expect(document.querySelector("math-field")).toBeInTheDocument();
@@ -51,16 +62,18 @@ describe("ExpressionToolComponent", () => {
 
   it("the math field renders content in a shadow dom", () => {
     render(<ExpressionToolComponent  {...defaultProps} {...{model}}></ExpressionToolComponent>);
-    const shadowElement = document.querySelector("math-field")?.shadowRoot;
-    expect(shadowElement).toBeTruthy();
-    expect(shadowElement?.querySelector("span")).toBeInTheDocument();
+    const shadow = document.querySelector("math-field")?.shadowRoot;
+    const parentSpan = shadow?.querySelector("span");
+    expect(parentSpan).toBeInTheDocument();
   });
 
-  // it("renders the pi character in the math field", () => {
-  //   const { getByText, container, queryByText } = render(<ExpressionToolComponent  {...defaultProps} {...{model}}></ExpressionToolComponent>);
-  //   const mathShadow = document.querySelector("math-field")?.shadowRoot;
-  //   const mathEl = container.querySelector("math-field");
-  //   const mathSpan = mathEl?.shadowRoot?.querySelector("span.ML__content");
-  //   expect(mathSpan).toBeInTheDocument();
-  // });
+  it("renders the pi character in the math field", () => {
+    const { getByText, container, queryByText } = render(
+      <ExpressionToolComponent  {...defaultProps} {...{model}}></ExpressionToolComponent>
+    );
+    const mathField = container.querySelector("math-field");
+    const shadow = mathField?.shadowRoot;
+    const something = shadow?.children[1].childNodes.length;
+    console.log("something", something);
+  });
 });
