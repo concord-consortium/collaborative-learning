@@ -190,7 +190,6 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleSetCanAcceptDrop = (tileId?: string) => {
-    console.log("tile-row.tsx > handleSetCanACceptDrop");
     this.setState({ tileAcceptDrop: tileId });
   };
 
@@ -205,7 +204,6 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleStartResizeRow = (e: React.DragEvent<HTMLDivElement>) => {
-    console.log("handleStartResizeRow:");
     const { model, docId } = this.props;
     const { id } = model;
     e.dataTransfer.setData(dragTileSrcDocId(docId), docId);
