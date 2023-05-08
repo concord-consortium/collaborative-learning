@@ -1,24 +1,14 @@
-import { render } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import React from "react";
+import { queryByText, render, screen } from "@testing-library/react";
 import { ITileApi } from "../../components/tiles/tile-api";
 import { TileModel } from "../../models/tiles/tile-model";
 import { defaultExpressionContent } from "./expression-content";
 import { ExpressionToolComponent } from "./expression-tile";
 import "./expression-registration";
-import("mathlive");
-
-// jest.mock("mathlive", () => {
-//   const mathlive = jest.requireActual("mathlive");
-//   return {
-//     mathlive: jest.fn(),
-//   };
-// });
 
 describe("ExpressionToolComponent", () => {
   const content = defaultExpressionContent();
   const model = TileModel.create({content});
-
   const defaultProps = {
     tileElt: null,
     context: "",
@@ -35,7 +25,7 @@ describe("ExpressionToolComponent", () => {
       throw new Error("Function not implemented.");
     },
     onRequestUniqueTitle: (tileId: string): string | undefined => {
-      throw new Error("Function not implemented.");
+      return tileId;
     },
     onRequestRowHeight: (tileId: string, height?: number, deltaHeight?: number): void => {
       throw new Error("Function not implemented.");
@@ -48,31 +38,29 @@ describe("ExpressionToolComponent", () => {
     }
   };
 
-  it("renders successfully", () => {
-    const {getByText} =
-      render(<ExpressionToolComponent  {...defaultProps} {...{model}}></ExpressionToolComponent>);
-    expect(getByText("Math Expression")).toBeInTheDocument();
+  it("renders a math field web component", () => {
+    render(<ExpressionToolComponent  {...defaultProps} {...{model}}></ExpressionToolComponent>);
+    expect(document.querySelector("math-field")).toBeInTheDocument();
+    expect(screen.getByRole("math")).toBeInTheDocument();
   });
 
-  it("updates the text when the model changes", async () => {
-    const {getByText, findByText} =
-      render(<ExpressionToolComponent  {...defaultProps} {...{model}}></ExpressionToolComponent>);
-    expect(getByText("Math Expression")).toBeInTheDocument();
-
-    content.setLatexStr("New Text");
-
-    expect(await findByText("New Text")).toBeInTheDocument();
+  it("renders with a LaTeX string in the math-field value", () => {
+    render(<ExpressionToolComponent  {...defaultProps} {...{model}}></ExpressionToolComponent>);
+    expect(document.querySelector("math-field")).toHaveAttribute("value", "a=\\pi r^2");
   });
 
-  it("updates the model when the user types", () => {
-    const {getByRole, getByText} =
-      render(<ExpressionToolComponent  {...defaultProps} {...{model}}></ExpressionToolComponent>);
-    expect(getByText("New Text")).toBeInTheDocument();
-
-    const textBox = getByRole("textbox");
-    userEvent.type(textBox, "{selectall}{del}Typed Text");
-
-    expect(textBox).toHaveValue("Typed Text");
-    expect(content.latexStr).toBe("Typed Text");
+  it("the math field renders content in a shadow dom", () => {
+    render(<ExpressionToolComponent  {...defaultProps} {...{model}}></ExpressionToolComponent>);
+    const shadowElement = document.querySelector("math-field")?.shadowRoot;
+    expect(shadowElement).toBeTruthy();
+    expect(shadowElement?.querySelector("span")).toBeInTheDocument();
   });
+
+  // it("renders the pi character in the math field", () => {
+  //   const { getByText, container, queryByText } = render(<ExpressionToolComponent  {...defaultProps} {...{model}}></ExpressionToolComponent>);
+  //   const mathShadow = document.querySelector("math-field")?.shadowRoot;
+  //   const mathEl = container.querySelector("math-field");
+  //   const mathSpan = mathEl?.shadowRoot?.querySelector("span.ML__content");
+  //   expect(mathSpan).toBeInTheDocument();
+  // });
 });

@@ -15,7 +15,6 @@ interface IProps {
 export const CustomEditableTileTitle: React.FC<IProps> = observer((props) => {
   const { model, onRequestUniqueTitle, readOnly } = props;
   const content = model.content as SimpleTitleTileTypes;
-
   const [titleValue, setTitleValue] = useState(content.title);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
 
@@ -73,6 +72,9 @@ export const CustomEditableTileTitle: React.FC<IProps> = observer((props) => {
     "title-text-element", {editing: isEditingTitle}
   );
 
+  const titleString = content.type === "Expression"
+    ? `(${content.title})` : content.title;
+
   return (
     <div className={elementClasses}>
       { isEditingTitle && !readOnly
@@ -86,7 +88,7 @@ export const CustomEditableTileTitle: React.FC<IProps> = observer((props) => {
           onDoubleClick={handleTitleInputDoubleClick}
       />
       : <div className="editable-title-text" onClick={handleTitleClick}>
-          { content.title }
+          { titleString }
         </div>
       }
     </div>

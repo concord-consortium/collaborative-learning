@@ -5,6 +5,7 @@ import ExpressionToolIcon from "./expression-icon.svg";
 import { ExpressionToolComponent } from "./expression-tile";
 import { defaultExpressionContent, ExpressionContentModel } from "./expression-content";
 
+
 registerTileContentInfo({
   type: kExpressionTileType,
   modelClass: ExpressionContentModel,
