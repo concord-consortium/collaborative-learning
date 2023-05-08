@@ -14,7 +14,7 @@ export interface IUseToolbarToolApi {
  * Implements the tool's side of the floating toolbar API.
  */
 export const useToolbarTileApi = (
-  { id, enabled, onRegisterTileApi, onUnregisterTileApi } : IUseToolbarToolApi ) => {
+  { id, enabled, onRegisterTileApi, onUnregisterTileApi }: IUseToolbarToolApi) => {
   const toolbarToolApi = useRef<ITileApi | undefined>();
 
   useEffect(() => {
