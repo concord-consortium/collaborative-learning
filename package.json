@@ -25,6 +25,14 @@
       "/firebase-test/",
       "/functions/test/(?!(shared\\.test\\.ts)$).*$"
     ],
+    "transform": {
+      "^.+\\.tsx?$": [
+        "ts-jest",
+        {
+          "isolatedModules": true
+        }
+      ]
+    },
     "transformIgnorePatterns": [
       "/node_modules/(?!(d3-format|escape-string-regexp|json-stringify-pretty-compact|nanoid)/)"
     ],
