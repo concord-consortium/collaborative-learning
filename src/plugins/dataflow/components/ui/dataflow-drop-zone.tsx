@@ -1,5 +1,5 @@
 import React from "react";
-import { DragOverlay, useDraggable, DragEndEvent, useDndMonitor, useDroppable } from "@dnd-kit/core";
+import { DragEndEvent, useDndMonitor, useDroppable } from "@dnd-kit/core";
 import { observer } from "mobx-react";
 import { NodeEditor } from "rete";
 
