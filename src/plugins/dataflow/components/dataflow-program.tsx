@@ -365,7 +365,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.programEditor.on("nodecreated", node => {
         this.processAndSave();
         this.moveNodeToFront(node, true);
-        console.log("this.props.tileId:", this.props.tileId);
 
         node.meta.inTileWithId = this.props.tileId;
         dataflowLogEvent("nodecreated", node, this.props.tileId);
@@ -554,8 +553,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private addNode = async (nodeType: string, position?: [number, number]) => {
-    console.log("📁 dataflow-program.tsx > \n\t 🔨 addNode  >  \n\t\t 🍔 nodeType:", nodeType);
-
     const nodeFactory = this.programEditor.components.get(nodeType) as DataflowReteNodeFactory;
     const n1 = await nodeFactory!.createNode();
     n1.position = position ?? this.getNewNodePosition();

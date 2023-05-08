@@ -16,17 +16,8 @@ interface IDataflowDropZoneProps {
 export const DataflowDropZone = observer((
   { addNode, children, className, programEditor, style, tileId }: IDataflowDropZoneProps
 ) => {
-  // console.log("📁 dataflow-drop-zone.tsx > 🔨 DataflowDropZone >  🍔 addNode:", addNode);
-  // console.log("📁 dataflow-drop-zone.tsx > \n\t 🔨 DataflowDropZone > \n\t\t 🍔 tileId:", tileId);
-
   const droppableId = dataflowDroppableId(tileId);
   const { isOver, setNodeRef } = useDroppable({ id: droppableId });
-  // console.log("📁 dataflow-drop-zone.tsx > \n\t 🔨 DataflowDropZone > \n\t\t 🍔 isOVER?:", isOver);
-
-  if (isOver){
-    // console.log("📁 dataflow-drop-zone.tsx > 🔨 DataflowDropZone >  🍔 isOver?:", isOver);
-
-  }
 
   const dropTargetStyle = {
     ...(style || {}),
@@ -34,8 +25,6 @@ export const DataflowDropZone = observer((
   };
   useDndMonitor({
     onDragEnd: (event: DragEndEvent) => {
-      // console.log("📁 dataflow-drop-zone.tsx > 🔨 DataflowDropZone > 🔨useDndMonitor > 🔨 onDragEnd:");
-
       const draggableId = event.active.id.toString();
       if (event.over?.id === droppableId && isNodeDraggableId(draggableId)) {
         const nodeType = getNodeType(draggableId);

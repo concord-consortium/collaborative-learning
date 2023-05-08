@@ -134,7 +134,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     this._isMounted = false;
   }
   public componentDidUpdate(prevProps: IProps, prevState: IState) {
-    // console.log("image-tile.tsx > componentDidUpdate()");
     if (this.state.imageContentUrl) {
       this.updateImageUrl(this.state.imageContentUrl, this.state.imageFilename);
     }
@@ -147,10 +146,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    // console.log("<image-tile.tsx> with tileId:", this.props.model.id);
-
-
-    const { documentContent, tileElt, readOnly, scale, onSetCanAcceptDrop } = this.props;
+    const { documentContent, tileElt, readOnly, scale } = this.props;
     const { isLoading, imageEntry } = this.state;
     const showEmptyImagePrompt = !this.getContent().hasValidImage;
 
@@ -335,21 +331,17 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
           (e.clientX < eltBounds.right - kImgDropMarginX) &&
           (e.clientY > eltBounds.top + kImgDropMarginY) &&
           (e.clientY < eltBounds.bottom - kImgDropMarginY)) {
-        // console.log("<image-tile.tsx>  🔨isAcceptableImageDrag() return TRUE"); //true even within same tile
         return true;
       }
     }
-    // console.log("<image-tile.tsx>  🔨isAcceptableImageDrag() return FALSE");
     return false;
   };
 
   private handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    // console.log("<image-tile.tsx>  🔨 handleDragOver");
     this.imageDragDrop.dragOver(e);
   };
 
   private handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    // console.log("<image-tile.tsx>  🔨 handleDrop");
 
     this.imageDragDrop.drop(e)
       .then((dropUrl) => {

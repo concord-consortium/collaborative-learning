@@ -19,11 +19,7 @@ import "./drawing-tile.scss";
 type IProps = ITileProps;
 
 const DrawingToolComponent: React.FC<IProps> = (props) => {
-  const { documentContent, tileElt, model, readOnly, scale, onRegisterTileApi, onUnregisterTileApi,
-    onSetCanAcceptDrop, onRequestTilesOfType } = props;
-
-
-  console.log("<drawing.tile.tsx> with tileId:", model.id);
+  const { documentContent, tileElt, model, readOnly, scale, onRegisterTileApi, onUnregisterTileApi } = props;
 
   const contentRef = useCurrent(model.content as DrawingContentModelType);
   const [imageUrlToAdd, setImageUrlToAdd] = useState("");
@@ -51,8 +47,6 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handlePaste = async () => {
-    console.log("handlePaste");
-
     const osClipboardContents = await getClipboardContent();
     if (osClipboardContents) {
       pasteClipboardImage(osClipboardContents, ({ image }) => {

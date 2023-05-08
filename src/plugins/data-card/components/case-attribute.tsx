@@ -106,7 +106,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   };
 
   const handleCompleteName = () => {
-    console.log("case-attribute.tsx > handleCompleteName");
     if (labelCandidate !== getLabel()) {
       const names = content.existingAttributesWithNames().map(a => a.attrName);
       if (!names.includes(labelCandidate)){

@@ -44,8 +44,6 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   verifyAlive(content, "TableToolComponent");
   const metadata = getContent().metadata;
 
-  console.log("<TableToolComponent>");
-
   // Basic operations based on the model
   const {
     dataSet, columnChanges, triggerColumnChange, rowChanges, triggerRowChange, ...gridModelProps

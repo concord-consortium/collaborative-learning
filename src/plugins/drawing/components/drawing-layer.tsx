@@ -350,7 +350,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   };
 
   public render() {
-    // console.log("<drawing-layer.tsx> with tileId:", this.props.model.id);
     const hoveringOverAlreadySelectedObject =
       this.state.hoverObject
         ? this.state.selectedObjects.indexOf(this.state.hoverObject) !== -1
@@ -390,7 +389,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   }
 
   private isAcceptableImageDrag = (e: React.DragEvent<HTMLDivElement>) => {
-    // console.log("drawing-layer.tsx > isAcceptableImageDrag");
     const { readOnly } = this.props;
     const toolType = extractDragTileType(e.dataTransfer);
     // image drop area is central 80% in each dimension
@@ -425,7 +423,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   };
 
   private handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    // console.log("📁 drawing-layer.tsx > handleDrop");
     if (this.isAcceptableImageDrag(e)) {
       const dragContent = e.dataTransfer.getData(kDragTileContent);
       const parsedContent = safeJsonParse(dragContent);

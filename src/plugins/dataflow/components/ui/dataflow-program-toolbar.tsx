@@ -59,7 +59,6 @@ interface IAddNodeButtonProps {
 const AddNodeButton = (props: IAddNodeButtonProps) => {
   const { disabled, i, nodeType, onNodeCreateClick, tileId } = props;
 
-  // console.log("📁 dataflow-program-toolbar.tsx > \n\t 🔨 addNodeButton  >  props:", props);
   const draggableId = nodeDraggableId(nodeType, tileId);
   const { attributes, listeners, setNodeRef } = useDraggable({ id: draggableId });
 

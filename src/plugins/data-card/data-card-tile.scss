@@ -19,7 +19,6 @@ $default-button-border-color: #979797;
     width: 100%;
     height: 100%;
     padding: 20px;
-    // background-color: lightblue; console.log
   }
 
   &.editable {
@@ -272,5 +271,5 @@ $default-button-border-color: #979797;
       // half of 35% minus half the width of the icon
       margin-left: ($single-view-card-width * 0.175) - 12px;
     }
-  } //console.log
+  }
 }
