@@ -341,7 +341,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-
     this.imageDragDrop.drop(e)
       .then((dropUrl) => {
         this.storeNewImageUrl(dropUrl);

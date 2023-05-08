@@ -148,6 +148,7 @@ export class TileComponent extends BaseComponent<IProps, IState> {
     const { content: { type } } = model;
     this.modelId = model.id;
     model.setDisabledFeatures(appConfig.getDisabledFeaturesOfTile(type));
+
     this.hotKeys.register({
       "cmd-option-e": this.handleCopyImportJsonToClipboard,
       "cmd-shift-c": this.handleCopyModelJson
@@ -369,6 +370,7 @@ export class TileComponent extends BaseComponent<IProps, IState> {
     }
     // set the drag data
     const { model, docId } = this.props;
+
     const Component = getTileComponentInfo(model.content.type)?.Component;
     // can't drag placeholder tiles
     if (Component === PlaceholderTileComponent) {
