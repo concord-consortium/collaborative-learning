@@ -5,6 +5,7 @@ import {
 import { ITileExportOptions } from "../tile-content-info";
 import { TileContentModel } from "../tile-content";
 import { SharedModelType } from "../../shared/shared-model";
+import { SharedModelChangeType } from "../../shared/shared-model-manager";
 import { getAllTextPluginInfos } from "./text-plugin-info";
 import { escapeBackslashes, escapeDoubleQuotes, removeNewlines, removeTabs } from "../../../utilities/string-utils";
 
@@ -126,7 +127,7 @@ export const TextContentModel = TileContentModel
     }
   }))
   .actions(self => ({
-    updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
+    updateAfterSharedModelChanges(sharedModel: SharedModelType | undefined, type: SharedModelChangeType) {
       getAllTextPluginInfos().forEach(pluginInfo => {
         pluginInfo?.updateTextContentAfterSharedModelChanges?.(self, sharedModel);
       });

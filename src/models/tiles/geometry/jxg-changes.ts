@@ -1,6 +1,6 @@
 import { castArray } from "lodash";
 import { ILinkProperties, ITableLinkProperties } from "../table-link-types";
-export { ILinkProperties, ITableLinkProperties };
+export { type ILinkProperties, type ITableLinkProperties };
 
 export type JXGOperation = "create" | "update" | "delete";
 export type JXGObjectType = "board" | "comment" | "image" | "linkedPoint" | "metadata" | "movableLine" |
