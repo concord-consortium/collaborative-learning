@@ -14,6 +14,7 @@ import { useCautionAlert } from "../../components/utilities/use-caution-alert";
 import { EditFacet } from "./data-card-types";
 import { DataCardSortArea } from "./components/sort-area";
 import { safeJsonParse } from "../../utilities/js-utils";
+import { mergeTwoCards } from "./data-card-merge-two-cards";
 
 import "./data-card-tile.scss";
 
@@ -102,78 +103,22 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
         setHighlightDataCard(false); //after you drop turn off highlighting
       }
 
+      /* ==[ Merge dragged tile -> dropped tile ] == */
       const getDataDraggedTile = e.dataTransfer.getData(kDragTiles);
       const parsedDataDraggedTile = safeJsonParse(getDataDraggedTile);
       const contentOfDraggedTile= safeJsonParse(parsedDataDraggedTile.sharedModels[0].content);
-      const dataSetOfDraggedTile = contentOfDraggedTile.dataSet;
-      const attrNamesDraggedTile = dataSetOfDraggedTile.attributes.map((attrObj: any) => {
-        return attrObj.name;
-      });
-      const attrNamesDroppedTile = content.existingAttributesWithNames().map((attrObj: any) => {
-        return attrObj.attrName;
-      });
-
-      //TODO - pull algorithm code into data-card-merge function that take two datasets (dragged, dropped)
-
-      //search for duplicates between draggedTile & droppedTile - only add names of unique attr
-      attrNamesDraggedTile.forEach((attrNameDrag: any) => {
-        let foundAttrFlag = false;
-        attrNamesDroppedTile.forEach((attrNameDrop: any) => {
-          if (attrNameDrag === attrNameDrop){
-            foundAttrFlag = true;
-          }
-        });
-        if (!foundAttrFlag){
-          content.addNewAttr(); //add names
-          const attrIds = content.existingAttributes();
-          const lastIndex = attrIds.length - 1;
-          const newAttrId = attrIds[lastIndex];
-          content.setAttName(newAttrId, attrNameDrag);
-        } //else don't add them
-      });
-      //Add data cards (case) from draggedTile
-      dataSetOfDraggedTile.cases.forEach((card: any) => {
-        addNewCase(); //add # of cases (cards)
-      });
-
-      const numCasesDraggedTile = dataSetOfDraggedTile.cases.length;
-      const allCasesDroppedTile = content.allCases();
-      const startIndexDroppedTile = allCasesDroppedTile.length - numCasesDraggedTile;
-      let startIndexDraggedTile = 0;
-
-      const attrOfDraggedTile = dataSetOfDraggedTile.attributes; //name id + others
-      const attrOfDroppedTile = content.existingAttributesWithNames();//this holds both name and Id
-
-      //insert all values
-      for (let i = startIndexDroppedTile; i < allCasesDroppedTile.length; i++){ //start at cards that were added
-        const caseId = allCasesDroppedTile[i]?.__id__;
-        attrOfDroppedTile.forEach((attrDrop) => {
-          attrOfDraggedTile.forEach((attrDrag: any, idx: number) => {
-            if (attrDrop.attrName === attrDrag.name){
-              const val = attrDrag.values[startIndexDraggedTile];
-              if (caseId){
-                content.setAttValue(caseId, attrDrop.attrId, val);
-              }
-            }
-          });
-
-        });
-        startIndexDraggedTile ++;
-      }
+      mergeTwoCards(contentOfDraggedTile, content, addNewCase); //where content is our droppedTile, addNewCase is a cb
 
       /* ==[ Delete tile (if within same document) ] == */
-
-      //TODO - document cannot be accessed, this would require a refactor
-      //https://www.pivotaltracker.com/n/projects/2441242/stories/185129553
-
       const sourceDocIdDraggedTile = parsedDataDraggedTile.sourceDocId;
       const docIdDroppedTile = props.docId;
       const idDraggedTile = parsedDataDraggedTile.tiles[0].tileId;
       if (sourceDocIdDraggedTile === docIdDroppedTile){
         ui.removeTileIdFromSelection(idDraggedTile);
         // document.deleteTile(idDraggedTile);
+        //TODO - document cannot be accessed, this would require a refactor
+        //https://www.pivotaltracker.com/n/projects/2441242/stories/185129553
       }
-
     }
   };
 
