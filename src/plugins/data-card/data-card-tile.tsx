@@ -245,88 +245,80 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
             />
           </div>
         </div>
-      <div
-        className="data-card-content"
-        onClick={handleBackgroundClick}
-        onDragOver={handleDragOver}
-        onDrop={handleDrop}
-      >
+        <div
+          className="data-card-content"
+          onClick={handleBackgroundClick}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+        >
 
-        <div className={highlightContainerClasses}>
-          <div className="data-card-header-row">
-            <div className="panel title">
-              { isEditingTitle && !readOnly
-              ? <input
-                  className="data-card-title-input-editing"
-                  value={titleValue}
-                  onChange={handleTitleChange}
-                  onKeyDown={handleTitleKeyDown}
-                  onBlur={handleCompleteTitle}
-                  onClick={handleTitleInputClick}
-                  onDoubleClick={handleTitleInputDoubleClick}
+          <div className={highlightContainerClasses}>
+            <div className="data-card-header-row">
+              <div className="panel title">
+              <CustomEditableTileTitle
+                model={props.model}
+                onRequestUniqueTitle={props.onRequestUniqueTitle}
+                readOnly={props.readOnly}
               />
-              : <div className="editable-data-card-title-text" onClick={handleTitleClick}>
-                  { content.title }
-                </div>
-              }
-            </div>
-          </div>
-
-          <div className="panel sort">
-            <SortSelect
-              model={model}
-              onSortAttrChange={setSort}
-              attrIdNamePairs={attrIdsNames}
-            />
-          </div>
-
-          { displaySingle &&
-            <div className="panel nav">
-              <div className="card-number-of-listing">
-                <div className="cell-text">
-                  { content.totalCases > 0
-                      ? `Card ${content.caseIndex + 1} of ${content.totalCases}`
-                      : "Add a card" }
-                </div>
               </div>
-              <div className="card-nav-buttons">
-                <button className={ previousButtonClasses } onClick={previousCase}></button>
-                <button className={ nextButtonClasses } onClick={nextCase}></button>
-              </div>
-              { !readOnly &&
-                <div className="add-remove-card-buttons">
-                  <AddIconButton className={addCardClasses} onClick={addNewCase} />
-                  <RemoveIconButton className={removeCardClasses} onClick={handleDeleteCardClick} />
+            </div>
+
+            <div className="panel sort">
+              <SortSelect
+                model={model}
+                onSortAttrChange={setSort}
+                attrIdNamePairs={attrIdsNames}
+              />
+            </div>
+
+            { displaySingle &&
+              <div className="panel nav">
+                <div className="card-number-of-listing">
+                  <div className="cell-text">
+                    { content.totalCases > 0
+                        ? `Card ${content.caseIndex + 1} of ${content.totalCases}`
+                        : "Add a card" }
+                  </div>
                 </div>
-              }
-            </div>
-          }
-          { displaySingle &&
-            <div className="single-card-data-area">
-              { content.totalCases > 0 &&
-                <DataCardRows
-                  caseIndex={content.caseIndex}
-                  model={model}
-                  totalCases={content.totalCases}
-                  readOnly={readOnly}
-                  currEditAttrId={currEditAttrId}
-                  currEditFacet={currEditFacet}
-                  setCurrEditAttrId={setCurrEditAttrId}
-                  setCurrEditFacet={setCurrEditFacet}
-                  imageUrlToAdd={imageUrlToAdd}
-                  setImageUrlToAdd={setImageUrlToAdd}
-                />
-              }
-            </div>
-          }
-          { shouldShowAddField && !readOnly &&
-            <AddIconButton className="add-field" onClick={handleAddField} />
-          }
-          { !displaySingle &&
-            <div className="sorting-cards-data-area">
-              <DataCardSortArea model={model} />
-            </div>
-          }
+                <div className="card-nav-buttons">
+                  <button className={ previousButtonClasses } onClick={previousCase}></button>
+                  <button className={ nextButtonClasses } onClick={nextCase}></button>
+                </div>
+                { !readOnly &&
+                  <div className="add-remove-card-buttons">
+                    <AddIconButton className={addCardClasses} onClick={addNewCase} />
+                    <RemoveIconButton className={removeCardClasses} onClick={handleDeleteCardClick} />
+                  </div>
+                }
+              </div>
+            }
+            { displaySingle &&
+              <div className="single-card-data-area">
+                { content.totalCases > 0 &&
+                  <DataCardRows
+                    caseIndex={content.caseIndex}
+                    model={model}
+                    totalCases={content.totalCases}
+                    readOnly={readOnly}
+                    currEditAttrId={currEditAttrId}
+                    currEditFacet={currEditFacet}
+                    setCurrEditAttrId={setCurrEditAttrId}
+                    setCurrEditFacet={setCurrEditFacet}
+                    imageUrlToAdd={imageUrlToAdd}
+                    setImageUrlToAdd={setImageUrlToAdd}
+                  />
+                }
+              </div>
+            }
+            { shouldShowAddField && !readOnly &&
+              <AddIconButton className="add-field" onClick={handleAddField} />
+            }
+            { !displaySingle &&
+              <div className="sorting-cards-data-area">
+                <DataCardSortArea model={model} />
+              </div>
+            }
+          </div>
         </div>
       </div>
     </div>
