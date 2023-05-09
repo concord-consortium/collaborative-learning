@@ -22,7 +22,8 @@ registerTileContentInfo({
   defaultHeight: kTableDefaultHeight,
   defaultContent: defaultTableContent,
   tileSnapshotPreProcessor,
-  updateContentWithNewSharedModelIds: updateTableContentWithNewSharedModelIds
+  updateContentWithNewSharedModelIds: updateTableContentWithNewSharedModelIds,
+  isDataProvider: true
 });
 
 registerTileComponentInfo({

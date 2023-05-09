@@ -1,11 +1,11 @@
 import React, { useRef, useState } from "react";
 import LinkGraphIcon from "../../../clue/assets/icons/table/link-graph-icon.svg";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
-import { ITileLinkMetadata } from "../../../models/tiles/table-link-types";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
+import { ITileLinkMetadata } from "../../../models/tiles/tile-link-types";
 import { ITileModel } from "../../../models/tiles/tile-model";
 
-import "./link-geometry-dialog.scss";
+import "./link-tile-dialog.scss";
 
 interface IContentProps {
   unlinkedTiles: ITileLinkMetadata[];
@@ -49,43 +49,43 @@ const Content: React.FC<IContentProps>
 };
 
 interface IProps {
-  geometryTiles: ITileLinkMetadata[];
+  linkableTiles: ITileLinkMetadata[];
   model: ITileModel;
-  onLinkGeometryTile: (geomTileInfo: ITileLinkMetadata) => void;
-  onUnlinkGeometryTile: (geomTileInfo: ITileLinkMetadata) => void;
+  onLinkTile: (tileInfo: ITileLinkMetadata) => void;
+  onUnlinkTile: (tileInfo: ITileLinkMetadata) => void;
 }
-export const useLinkGeometryDialog = ({ geometryTiles, model, onLinkGeometryTile, onUnlinkGeometryTile }: IProps) => {
+export const useLinkTileDialog = ({ linkableTiles, model, onLinkTile, onUnlinkTile }: IProps) => {
   const [selectValue, setSelectValue] = useState("");
   const handleClick = () => {
-    const tileInfo = geometryTiles.find(tile => tile.id === selectValue);
+    const tileInfo = linkableTiles.find(tile => tile.id === selectValue);
     if (tileInfo) {
-      if (content.linkedGeometries.indexOf(tileInfo.id) < 0) {
-        onLinkGeometryTile(tileInfo);
+      if (content.linkedTiles.indexOf(tileInfo.id) < 0) {
+        onLinkTile(tileInfo);
       } else {
-        onUnlinkGeometryTile(tileInfo);
+        onUnlinkTile(tileInfo);
       }
     }
   };
   const content = model.content as TableContentModelType;
-  const unlinkedTiles = geometryTiles
-                                  .filter(tileInfo => content.linkedGeometries.indexOf(tileInfo.id) < 0);
-  const linkedTiles = geometryTiles
-                                  .filter(tileInfo => content.linkedGeometries.indexOf(tileInfo.id) >= 0);
+  const unlinkedTiles = linkableTiles
+                                  .filter(tileInfo => content.linkedTiles.indexOf(tileInfo.id) < 0);
+  const linkedTiles = linkableTiles
+                                  .filter(tileInfo => content.linkedTiles.indexOf(tileInfo.id) >= 0);
   const [showModal, hideModal] = useCustomModal({
-    className: "link-geometry",
+    className: "link-tile",
     Icon: LinkGraphIcon,
     title: "Link or Unlink Table to a Graph",
     Content,
     contentProps: { unlinkedTiles, linkedTiles, selectValue, setSelectValue },
     buttons: [
       { label: "Cancel" },
-      { label: content.linkedGeometries.indexOf(selectValue) < 0 ? "Link" : "Unlink",
+      { label: content.linkedTiles.indexOf(selectValue) < 0 ? "Link" : "Unlink",
         isDefault: true,
         isDisabled: !selectValue,
         onClick: handleClick
       }
     ]
-  }, [geometryTiles]);
+  }, [linkableTiles]);
 
   return [showModal, hideModal];
 };

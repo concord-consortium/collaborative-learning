@@ -28,9 +28,10 @@ export const GraphComponent = observer(function GraphComponent({tile}: IProps) {
   // Removed deboucing, but we can bring it back if we find we need it
   const {width, height, ref: graphRef} = useResizeDetector(/*{refreshMode: "debounce", refreshRate: 15}*/);
   const enableAnimation = useRef(true);
+  const autoAdjustAxes = useRef(true);
   const dotsRef = useRef<DotsElt>(null);
   const graphController = useMemo(
-    () => new GraphController({layout, enableAnimation, instanceId}),
+    () => new GraphController({layout, enableAnimation, instanceId, autoAdjustAxes}),
     [layout, instanceId]
   );
 

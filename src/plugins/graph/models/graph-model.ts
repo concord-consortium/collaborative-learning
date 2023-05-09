@@ -12,15 +12,18 @@ import {DataConfigurationModel} from "./data-configuration-model";
 import {IDataSet} from "../../../models/data/data-set";
 import { SharedModelType } from "../../../models/shared/shared-model";
 import { ISharedCaseMetadata, isSharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
-import {isSharedDataSet, SharedDataSet} from "../../../models/shared/shared-data-set";
+import {isSharedDataSet} from "../../../models/shared/shared-data-set";
 import {ITileContentModel, TileContentModel} from "../../../models/tiles/tile-content";
+import {ITileExportOptions} from "../../../models/tiles/tile-content-info";
 import {
   defaultBackgroundColor,
   defaultPointColor,
   defaultStrokeColor,
   kellyColors
 } from "../../../utilities/color-utils";
-import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
+import { SharedModelChangeType } from "../../../models/shared/shared-model-manager";
+
+export type SharedModelChangeHandler = (sharedModel: SharedModelType | undefined, type: string) => void;
 
 export interface GraphProperties {
   axes: Record<string, IAxisModelUnion>
@@ -58,13 +61,12 @@ export const GraphModel = TileContentModel
     plotBackgroundLockInfo: types.maybe(types.frozen<BackgroundLockInfo>()),
     // numberToggleModel: types.optional(types.union(NumberToggleModel, null))
     showParentToggles: false,
-    showMeasuresForSelection: false
+    showMeasuresForSelection: false,
   })
   .views(self => ({
     get data(): IDataSet | undefined {
       const sharedModelManager = self.tileEnv?.sharedModelManager;
-      // const sharedModel = sharedModelManager?.getTileSharedModels(self).find(m => isSharedDataSet(m));
-      const sharedModel = sharedModelManager?.findFirstSharedModelByType(SharedDataSet);
+      const sharedModel = sharedModelManager?.getTileSharedModels(self).find(m => isSharedDataSet(m));
       return isSharedDataSet(sharedModel) ? sharedModel.dataSet : undefined;
     },
     get metadata(): ISharedCaseMetadata | undefined {
@@ -118,9 +120,6 @@ export const GraphModel = TileContentModel
     }
   }))
   .actions(self => ({
-    updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
-      // TODO
-    },
     setAxis(place: AxisPlace, axis: IAxisModelUnion) {
       self.axes.set(place, axis);
     },
@@ -166,6 +165,20 @@ export const GraphModel = TileContentModel
     },
     setShowMeasuresForSelection(show: boolean) {
       self.showMeasuresForSelection = show;
+    }
+  }))
+  .actions(self => ({
+    updateAfterSharedModelChanges(sharedModel?: SharedModelType, changeType?: SharedModelChangeType) {
+      if (changeType === "link" && self.data) {
+        self.config.setDataset(self.data);
+        self.setAttributeID("x", self.data.attributes[0].id);
+        self.setAttributeID("y", self.data.attributes[1].id);
+      }
+      else if (changeType === "unlink") {
+        self.setAttributeID("y", "");
+        self.setAttributeID("x", "");
+        self.config.setDataset(undefined);
+      }
     }
   }));
 export interface IGraphModel extends Instance<typeof GraphModel> {}

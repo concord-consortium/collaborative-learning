@@ -6,10 +6,11 @@ import React from "react";
 import ResizeObserver from "resize-observer-polyfill";
 import { transformCurriculumImageUrl } from "../../models/tiles/image/image-import-export";
 import { getTileComponentInfo } from "../../models/tiles/tile-component-info";
+import { ILinkableTiles } from "../../models/tiles/tile-link-types";
 import { ITileModel } from "../../models/tiles/tile-model";
 import { BaseComponent } from "../base";
 import PlaceholderTileComponent from "./placeholder/placeholder-tile";
-import { ITileApi, TileResizeEntry, TileApiInterfaceContext} from "./tile-api";
+import { ITileApi, TileResizeEntry, TileApiInterfaceContext } from "./tile-api";
 import { HotKeys } from "../../utilities/hot-keys";
 import { TileCommentsComponent } from "./tile-comments";
 import { LinkIndicatorComponent } from "./link-indicator";
@@ -68,6 +69,7 @@ interface ITileBaseProps {
   onResizeRow: (e: React.DragEvent<HTMLDivElement>) => void;
   onSetCanAcceptDrop: (tileId?: string) => void;
   onRequestTilesOfType: (tileType: string) => Array<{ id: string, title?: string }>;
+  onRequestLinkableTiles?: () => ILinkableTiles;
   onRequestUniqueTitle: (tileId: string) => string | undefined;
   onRequestRowHeight: (tileId: string, height?: number, deltaHeight?: number) => void;
 }

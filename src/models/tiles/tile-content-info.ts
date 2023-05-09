@@ -34,6 +34,8 @@ export interface ITileContentInfo {
   addSidecarNotes?: boolean;
   defaultHeight?: number;
   exportNonDefaultHeight?: boolean;
+  isDataConsumer?: boolean;
+  isDataProvider?: boolean;
   tileSnapshotPreProcessor?: TileModelSnapshotPreProcessor;
   contentSnapshotPostProcessor?: TileContentSnapshotPostProcessor;
   updateContentWithNewSharedModelIds?: TileContentNewSharedModelIdUpdater;

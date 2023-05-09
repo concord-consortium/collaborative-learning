@@ -71,7 +71,7 @@ export const AxisDragRects = observer(
         },
 
         onDilateStart: D3Handler = function(event: { x: number, y: number }) {
-          select(self)
+          select(this)
             .classed('dragging', true);
           multiScale = layout.getAxisMultiScale(place);
           d3Scale = multiScale?.scale as ScaleContinuousNumeric<number, number>;
