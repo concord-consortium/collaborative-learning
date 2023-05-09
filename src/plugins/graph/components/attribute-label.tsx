@@ -6,7 +6,7 @@ import {select} from "d3";
 import t from "../utilities/translation/translate";
 import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
 import {AttributeType} from "../../../models/data/attribute";
-import {isSetAttributeNameAction} from "../../../models/data/data-set-actions";
+import {isSetAttributeNameAction, isSetNameAction} from "../../../models/data/data-set-actions";
 import {GraphPlace, isVertical} from "../axis-graph-shared";
 import {graphPlaceToAttrRole, kGraphClassSelector} from "../graph-types";
 import {useGraphModelContext} from "../models/graph-model";
@@ -91,16 +91,23 @@ export const AttributeLabel = observer(
 
     useEffect(function observeAttributeNameChange() {
       const disposer = dataConfiguration?.onAction(action => {
+        const attrIDs = getAttributeIDs();
         if (isSetAttributeNameAction(action)) {
           const [changedAttributeID] = action.args;
-          if (getAttributeIDs().includes(changedAttributeID)) {
+          if (attrIDs.includes(changedAttributeID)) {
+            refreshAxisTitle();
+          }
+        } else if (isSetNameAction(action)) {
+          const [changedNameValue] = action.args;
+          const changedAttributeID = attrIDs.find(anID => dataset?.attrFromID(anID)?.name === changedNameValue);
+          if (changedAttributeID && attrIDs.includes(changedAttributeID)) {
             refreshAxisTitle();
           }
         }
       });
 
       return () => disposer?.();
-    }, [dataConfiguration, refreshAxisTitle, getAttributeIDs]);
+    }, [dataConfiguration, dataset, refreshAxisTitle, getAttributeIDs]);
 
     // Install reaction to bring about rerender when layout's computedBounds changes
     useEffect(() => {
