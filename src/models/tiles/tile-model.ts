@@ -87,8 +87,7 @@ export const TileModel = types
     },
     exportJson(options?: ITileExportOptions): string | undefined {
       const { includeId, excludeTitle, ...otherOptions } = options || {};
-      // let contentJson = (self.content as any).exportJson(otherOptions);
-      let contentJson = (self.content as any).exportJson ? (self.content as any).exportJson(otherOptions) : undefined;
+      let contentJson = (self.content as any).exportJson?.(otherOptions);
       if (!contentJson) return;
       if (options?.rowHeight) {
         // add comma before layout/height entry
