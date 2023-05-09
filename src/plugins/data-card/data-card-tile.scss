@@ -59,7 +59,8 @@ $default-button-border-color: #979797;
       font-style: italic;
       border-bottom-width: 0px;
 
-      .data-card-title-input-editing {
+    .title-text-element {
+      .title-input-editing {
         width: 100%;
         height: 100%;
         font-style: normal;
@@ -68,6 +69,13 @@ $default-button-border-color: #979797;
         outline:1px solid $highlight-blue;
       }
     }
+    .title-text-element.editing {
+      width:100%;
+      height: 100%;
+    }
+  }
+
+
 
     .panel.sort {
       background-color: $workspace-teal-light-6;
