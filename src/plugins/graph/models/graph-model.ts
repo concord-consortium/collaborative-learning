@@ -63,9 +63,6 @@ export const GraphModel = TileContentModel
     showParentToggles: false,
     showMeasuresForSelection: false,
   })
-  .volatile(self => ({
-    sharedModelChangeHandlers: new Map<string, SharedModelChangeHandler>()
-  }))
   .views(self => ({
     get data(): IDataSet | undefined {
       const sharedModelManager = self.tileEnv?.sharedModelManager;
