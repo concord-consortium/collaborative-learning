@@ -31,5 +31,19 @@ context('Expression Tool Tile', function () {
       exp.getMathFieldMath().should("exist");
       exp.getMathFieldMath().should("contain", "π");
     });
+    it("should have an editable title", () => {
+      exp.getTileTitle().click();
+      exp.getTitleInput().should("exist");
+      exp.getTitleInput().should("have.value", "Eq. 1");
+      exp.getTitleInput().dblclick();
+      exp.getTitleInput().type("new title{enter}");
+      exp.getTileTitle().should("contain", "(new title)");
+    });
+    it("should name new expressions with an incrementing id", () => {
+      clueCanvas.addTile("expression");
+      cy.contains("(Eq. 1)").should("exist");
+      clueCanvas.addTile("expression");
+      cy.contains("(Eq. 2)").should("exist");
+    });
   });
 });

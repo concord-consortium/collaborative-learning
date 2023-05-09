@@ -14,6 +14,9 @@ class ExpressionToolTile {
   getTileTitle = () => {
     return cy.get(`${tileSelector} .editable-title-text`);
   };
+  getTitleInput = () => {
+    return cy.get(`${tileSelector} .title-input-editing`);
+  };
   getMathArea = () => {
     return cy.get(`${tileSelector} .expression-math-area`);
   };
