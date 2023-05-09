@@ -1,3 +1,5 @@
+export {}; // isolatedModules compatibility
+
 // TODO: Reinstate these tests.
 // Doing so may need to wait till React and React Testing Library are updated to newer versions.
 // /* eslint-disable testing-library/no-node-access */
