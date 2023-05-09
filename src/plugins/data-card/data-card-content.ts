@@ -29,9 +29,7 @@ export function defaultDataSet() {
 }
 
 export function defaultDataCardContent(props?: IDefaultContentOptions): DataCardContentModelType {
-  const content = DataCardContentModel.create();
-  props?.title && content.setTitle(props.title);
-  return content;
+  return DataCardContentModel.create();
 }
 
 export const DataCardContentModel = TileContentModel
@@ -47,9 +45,6 @@ export const DataCardContentModel = TileContentModel
     emptyDataSet: DataSet.create()
   }))
   .views(self => ({
-    get title(): string | undefined {
-      return getTileModel(self)?.title;
-    },
     get sharedModel() {
       const sharedModelManager = self.tileEnv?.sharedModelManager;
       // Perhaps we should pass the type to getTileSharedModel, so it can return the right value
@@ -192,9 +187,6 @@ export const DataCardContentModel = TileContentModel
       if (self.caseIndex >= self.totalCases) {
         this.setCaseIndex(self.totalCases - 1);
       }
-    },
-    setTitle(title: string) {
-      setTileTitleFromContent(self, title);
     },
     setCaseIndex(caseIndex: number) {
       // current case is serialized, but navigation is not undoable
