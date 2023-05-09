@@ -1,5 +1,4 @@
 import React, { SVGProps } from "react";
-import { registerPlugins } from "@concord-consortium/slate-editor";
 import { ITileProps } from "../../components/tiles/tile-component";
 
 export interface ITileComponentInfo {
@@ -21,7 +20,6 @@ export interface ITileComponentInfo {
 const gTileComponentInfoMap = new Map<string, ITileComponentInfo>();
 
 export function registerTileComponentInfo(tileComponentInfo: ITileComponentInfo) {
-  registerPlugins();
   // toLowerCase() for legacy support of tool names
   gTileComponentInfoMap.set(tileComponentInfo.type.toLowerCase(), tileComponentInfo);
 }
