@@ -114,7 +114,6 @@ describe("DerivedDataSet", () => {
     expect(trigger).toHaveBeenCalledTimes(0);
 
     data.setCaseValues([{ __id__: "c3", x: 3 }]);
-    // TODO: Determine if it's acceptable for the expected call count to be changed from 1 to 2
     expect(trigger).toHaveBeenCalledTimes(2);
     expect(filtered.caseIds.length).toBe(2);
     expect(filtered.caseIds).toEqual(["c1", "c3"]);
@@ -122,7 +121,6 @@ describe("DerivedDataSet", () => {
     data.setCaseValues([{ __id__: "c1", x: undefined}]);
     expect(filtered.caseIds.length).toBe(1);
     expect(filtered.caseIds).toEqual(["c3"]);
-    // TODO: Determine if it's acceptable for the expected call count to be changed from 2 to 4
     expect(trigger).toHaveBeenCalledTimes(4);
 
     filtered.destroy();
