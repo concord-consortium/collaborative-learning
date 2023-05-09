@@ -14,7 +14,7 @@ import { useCautionAlert } from "../../components/utilities/use-caution-alert";
 import { EditFacet } from "./data-card-types";
 import { DataCardSortArea } from "./components/sort-area";
 import { safeJsonParse } from "../../utilities/js-utils";
-import { dataCardMergeTwoCards } from "./data-card-merge-two-cards";
+import { mergeTwoDataSets } from "../../models/data/data-set-utils";
 
 import "./data-card-tile.scss";
 
@@ -60,33 +60,27 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
       setHighlightDataCard(false);
       return false;
     }
-
-    const numTilesDragged = ui?.selectedTileIds.length;
-
-    if (!readOnly && numTilesDragged === 1) {
-      //check if draggedTile is of type Datacard
-      const tileTypeDragged = extractDragTileType(e.dataTransfer);
-      const isDraggedTileDataCard = tileTypeDragged === "datacard";
-      if (isDraggedTileDataCard){ //compute bounds verify drag is within central 80% of tile
-        const kImgDropMarginPct = 0.1;
-        const eltBounds = e.currentTarget.getBoundingClientRect();
-        const kImgDropMarginX = eltBounds.width * kImgDropMarginPct;
-        const kImgDropMarginY = eltBounds.height * kImgDropMarginPct;
-        if ((e.clientX > eltBounds.left + kImgDropMarginX) &&
-            (e.clientX < eltBounds.right - kImgDropMarginX) &&
-            (e.clientY > eltBounds.top + kImgDropMarginY) &&
-            (e.clientY < ((eltBounds.bottom - kImgDropMarginY) * 0.95))){
-          setHighlightDataCard(true); //within bounds
-          return true;
-        } else {
-          setHighlightDataCard(false); //out of bounds
-          return false;
-        }
-      }
-      else { //not of type Datacard
-        setHighlightDataCard(false);
+    const tileTypeDragged = extractDragTileType(e.dataTransfer);
+    const isDraggedTileDataCard = tileTypeDragged === "datacard"; //if two cards dragged, tileTypeDragged is undefined
+    if (!readOnly && isDraggedTileDataCard) {
+      const kImgDropMarginPct = 0.1;
+      const eltBounds = e.currentTarget.getBoundingClientRect();
+      const kImgDropMarginX = eltBounds.width * kImgDropMarginPct;
+      const kImgDropMarginY = eltBounds.height * kImgDropMarginPct;
+      if ((e.clientX > eltBounds.left + kImgDropMarginX) &&
+          (e.clientX < eltBounds.right - kImgDropMarginX) &&
+          (e.clientY > eltBounds.top + kImgDropMarginY) &&
+          (e.clientY < ((eltBounds.bottom - kImgDropMarginY) * 0.95))){
+        setHighlightDataCard(true); //within bounds
+        return true;
+      } else {
+        setHighlightDataCard(false); //out of bounds
         return false;
       }
+    }
+    else { //not of type Datacard
+      setHighlightDataCard(false);
+      return false;
     }
   };
 
@@ -107,7 +101,10 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
       const getDataDraggedTile = e.dataTransfer.getData(kDragTiles);
       const parsedDataDraggedTile = safeJsonParse(getDataDraggedTile);
       const contentOfDraggedTile= safeJsonParse(parsedDataDraggedTile.sharedModels[0].content);
-      dataCardMergeTwoCards(contentOfDraggedTile, content, addNewCase); //content is our droppedTile
+      const dataSetOfDraggedTile = contentOfDraggedTile.dataSet;
+      const dataSetOfDroppedTile = content.dataSet;
+
+      mergeTwoDataSets(dataSetOfDraggedTile, dataSetOfDroppedTile);
 
       e.preventDefault();
       e.stopPropagation(); //prevents calling document-content > handleDrop
