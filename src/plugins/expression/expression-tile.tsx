@@ -1,5 +1,5 @@
 import { observer } from "mobx-react";
-import React, { BaseSyntheticEvent, DOMAttributes, useRef } from "react";
+import React, { DOMAttributes, useRef } from "react";
 import "mathlive"; // separate static import of library for initialization to run
 // eslint-disable-next-line no-duplicate-imports
 import type { MathfieldElementAttributes, MathfieldElement } from "mathlive";

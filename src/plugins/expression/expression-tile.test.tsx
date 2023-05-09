@@ -1,5 +1,5 @@
 import React from "react";
-import { queryByText, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { ITileApi } from "../../components/tiles/tile-api";
 import { TileModel } from "../../models/tiles/tile-model";
 import { defaultExpressionContent } from "./expression-content";
@@ -38,17 +38,6 @@ describe("ExpressionToolComponent", () => {
     }
   };
 
-  beforeEach(() => {
-    jest.spyOn(console, 'error')
-    // @ts-ignore jest.spyOn adds this functionallity
-    console.error.mockImplementation(() => null);
-  });
-
-  afterEach(() => {
-    // @ts-ignore jest.spyOn adds this functionallity
-    console.error.mockRestore()
-  })
-
   it("renders a math field web component", () => {
     render(<ExpressionToolComponent  {...defaultProps} {...{model}}></ExpressionToolComponent>);
     expect(document.querySelector("math-field")).toBeInTheDocument();
@@ -60,20 +49,31 @@ describe("ExpressionToolComponent", () => {
     expect(document.querySelector("math-field")).toHaveAttribute("value", "a=\\pi r^2");
   });
 
-  it("the math field renders content in a shadow dom", () => {
+  it("the math field element hosts a shadow dom", () => {
     render(<ExpressionToolComponent  {...defaultProps} {...{model}}></ExpressionToolComponent>);
     const shadow = document.querySelector("math-field")?.shadowRoot;
     const parentSpan = shadow?.querySelector("span");
     expect(parentSpan).toBeInTheDocument();
   });
 
-  it("renders the pi character in the math field", () => {
-    const { getByText, container, queryByText } = render(
-      <ExpressionToolComponent  {...defaultProps} {...{model}}></ExpressionToolComponent>
-    );
-    const mathField = container.querySelector("math-field");
-    const shadow = mathField?.shadowRoot;
-    const something = shadow?.children[1].childNodes.length;
-    console.log("something", something);
-  });
+  // TODO, get shadow dom to render in test context (below is a failed attempt)
+  // In the default, the shadow dom is only rendered as deep as the first three elements
+  // Everything below that is not rendered in the test context
+  // Below is a failed attempt to load mathlive and render the shadow dom
+
+  // it("renders the pi character in the math field", () => {
+  //   import("mathlive").then((mathlive) => {
+  //     const { getByText, container, queryByText } = render(
+  //       <ExpressionToolComponent  {...defaultProps} {...{model}}></ExpressionToolComponent>
+  //     );
+  //     const mathField = container.querySelector("math-field");
+  //     const shadow = mathField?.shadowRoot;
+  //     mathlive.renderMathInElement(mathField as HTMLElement);
+  //     mathlive.renderMathInDocument();
+  //     shadow?.childNodes.forEach((node) => {
+  //       console.log("child of top level span and children below: ", node);
+  //       console.log(node.hasChildNodes()) // each is empty
+  //     });
+  //   });
+  // });
 });
