@@ -50,15 +50,23 @@ $default-button-border-color: #979797;
     font-style: italic;
     border-bottom-width: 0px;
 
-    .data-card-title-input-editing {
-      width: 100%;
+    .title-text-element {
+      .title-input-editing {
+        width: 100%;
+        height: 100%;
+        font-style: normal;
+        font-weight: 300;
+        text-align: center;
+        outline:1px solid $highlight-blue;
+      }
+    }
+    .title-text-element.editing {
+      width:100%;
       height: 100%;
-      font-style: normal;
-      font-weight: 300;
-      text-align: center;
-      outline:1px solid $highlight-blue;
     }
   }
+
+
 
   .panel.sort {
     background-color: $workspace-teal-light-6;

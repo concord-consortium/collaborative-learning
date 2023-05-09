@@ -15,6 +15,7 @@ import { EditFacet } from "./data-card-types";
 import { DataCardSortArea } from "./components/sort-area";
 
 import "./data-card-tile.scss";
+import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
 
 export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
   const { model, onRequestUniqueTitle, readOnly, documentContent, tileElt, onRegisterTileApi,
@@ -22,8 +23,6 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
   const content = model.content as DataCardContentModelType;
   const ui = useUIStore();
   const isTileSelected = ui.selectedTileIds.findIndex(id => id === content.metadata.id) >= 0;
-  const [titleValue, setTitleValue] = useState(content.title);
-  const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [currEditAttrId, setCurrEditAttrId] = useState<string>("");
   const [currEditFacet, setCurrEditFacet] = useState<EditFacet>("");
   const [imageUrlToAdd, setImageUrlToAdd] = useState<string>("");
@@ -51,49 +50,6 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
       content.setCaseIndex(content.caseIndex - 1);
     }
   }
-
-  const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setTitleValue(event.target.value);
-  };
-
-  const handleTitleClick = () => {
-    if (!readOnly){
-      setIsEditingTitle(true);
-    }
-  };
-
-  const handleTitleInputClick = (event: React.MouseEvent<HTMLInputElement>) => {
-    event.currentTarget.focus();
-    const isHighlighted = event.currentTarget.selectionStart === 0;
-    const valLength = event.currentTarget.value.length;
-    if (isHighlighted && valLength > 0){
-        event.currentTarget.setSelectionRange(valLength, valLength, "forward");
-    }
-  };
-
-  const handleTitleInputDoubleClick = (event: React.MouseEvent<HTMLInputElement>) => {
-    event.currentTarget.select();
-  };
-
-  const handleTitleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    switch (event.key) {
-      case "Enter":
-        handleCompleteTitle();
-        setIsEditingTitle(false);
-        break;
-      case "Escape":
-        setTitleValue(content.title);
-        setIsEditingTitle(false);
-        break;
-    }
-  };
-
-  const handleCompleteTitle = () => {
-    if (titleValue){
-      content.setTitle(titleValue);
-    }
-    setIsEditingTitle(false);
-  };
 
   function setSort(event: React.ChangeEvent<HTMLSelectElement>){
     content.setSelectedSortAttributeId(event.target.value);
@@ -204,20 +160,11 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
       <div className="data-card-content" onClick={handleBackgroundClick}>
         <div className="data-card-header-row">
           <div className="panel title">
-            { isEditingTitle && !readOnly
-            ? <input
-                className="data-card-title-input-editing"
-                value={titleValue}
-                onChange={handleTitleChange}
-                onKeyDown={handleTitleKeyDown}
-                onBlur={handleCompleteTitle}
-                onClick={handleTitleInputClick}
-                onDoubleClick={handleTitleInputDoubleClick}
+            <CustomEditableTileTitle
+              model={props.model}
+              onRequestUniqueTitle={props.onRequestUniqueTitle}
+              readOnly={props.readOnly}
             />
-            : <div className="editable-data-card-title-text" onClick={handleTitleClick}>
-                { content.title }
-              </div>
-            }
           </div>
         </div>
 
