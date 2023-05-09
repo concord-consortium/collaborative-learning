@@ -26,6 +26,11 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     content.setLatexStr(e.target.value);
   };
 
+  // This is an example of how we can access mathfield api
+  // const exampleApiUse = () => {
+  //   mathfieldRef.current?.setValue(`42\\frac12`)
+  // }
+
   return (
     <div className="expression-tool">
       <div className="expression-title-area">
