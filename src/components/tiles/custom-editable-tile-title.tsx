@@ -15,13 +15,13 @@ interface IProps {
 export const CustomEditableTileTitle: React.FC<IProps> = observer((props) => {
   const { model, onRequestUniqueTitle, readOnly } = props;
   const content = model.content as SimpleTitleTileTypes;
-  const [titleValue, setTitleValue] = useState(content.title);
+  const [titleValue, setTitleValue] = useState(model.title);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
 
   useEffect(() => {
-    if (!content.title) {
+    if (!model.title) {
       const title = onRequestUniqueTitle(model.id);
-      title && content.setTitle(title);
+      title && model.setTitle(title);
     }
   }, [content, model.id, onRequestUniqueTitle]);
 
@@ -55,7 +55,7 @@ export const CustomEditableTileTitle: React.FC<IProps> = observer((props) => {
         setIsEditingTitle(false);
         break;
       case "Escape":
-        setTitleValue(content.title);
+        setTitleValue(model.title);
         setIsEditingTitle(false);
         break;
     }
@@ -63,7 +63,7 @@ export const CustomEditableTileTitle: React.FC<IProps> = observer((props) => {
 
   const handleCompleteTitle = () => {
     if (titleValue){
-      content.setTitle(titleValue);
+      model.setTitle(titleValue);
     }
     setIsEditingTitle(false);
   };
@@ -73,7 +73,7 @@ export const CustomEditableTileTitle: React.FC<IProps> = observer((props) => {
   );
 
   const titleString = content.type === "Expression"
-    ? `(${content.title})` : content.title;
+    ? `(${model.title})` : model.title;
 
   return (
     <div className={elementClasses}>

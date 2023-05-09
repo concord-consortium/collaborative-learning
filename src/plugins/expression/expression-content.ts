@@ -5,9 +5,7 @@ import { getTileModel, setTileTitleFromContent } from "../../models/tiles/tile-m
 import { IDefaultContentOptions, ITileExportOptions } from "../../models/tiles/tile-content-info";
 
 export function defaultExpressionContent(props?: IDefaultContentOptions): ExpressionContentModelType {
-  const content = ExpressionContentModel.create({latexStr: `a=\\pi r^2`});
-  props?.title && content.setTitle(props.title);
-  return content;
+  return ExpressionContentModel.create({latexStr: `a=\\pi r^2`});
 }
 
 export const ExpressionContentModel = TileContentModel
@@ -17,9 +15,6 @@ export const ExpressionContentModel = TileContentModel
     latexStr: "",
   })
   .views(self => ({
-    get title(): string | undefined {
-      return getTileModel(self)?.title;
-    },
     get isUserResizable() {
       return true;
     },
@@ -32,9 +27,6 @@ export const ExpressionContentModel = TileContentModel
     }
   }))
   .actions(self => ({
-    setTitle(title: string) {
-      setTileTitleFromContent(self, title);
-    },
     setLatexStr(text: string) {
       self.latexStr = text;
     }
