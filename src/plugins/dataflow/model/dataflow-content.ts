@@ -17,7 +17,7 @@ import { updateSharedDataSetColors } from "../../../models/shared/shared-data-se
 import { SharedModelType } from "../../../models/shared/shared-model";
 import { DataSet } from "../../../models/data/data-set";
 import { uniqueId } from "../../../utilities/js-utils";
-import { getTileContentById } from "../../../utilities/mst-utils";
+import { getTileContentById, getTileModelById } from "../../../utilities/mst-utils";
 
 export const kDataflowTileType = "Dataflow";
 
@@ -90,9 +90,6 @@ export const DataflowContentModel = TileContentModel
     },
   }))
   .views(self => ({
-    get title() {
-      return getTileModel(self)?.title;
-    },
     get isUserResizable() {
       return true;
     },
@@ -176,9 +173,6 @@ export const DataflowContentModel = TileContentModel
         applySnapshot(self.program, cloneDeep(program));
       }
     },
-    setTitle(title: string) {
-      setTileTitleFromContent(self, title);
-    },
     setProgramDataRate(dataRate: number) {
       self.programDataRate = dataRate;
     },
@@ -221,13 +215,14 @@ export const DataflowContentModel = TileContentModel
       const sharedModelManager = self.tileEnv?.sharedModelManager;
       if (sharedModelManager?.isReady && self.isLinkedToTable(tableId)) {
         //sever connection table -> table sharedDataSet
-        const tableTileContents = getTileContentById(self, tableId); //get tableTile contents given a tableId
-        self.sharedModel && sharedModelManager.removeTileSharedModel(tableTileContents, self.sharedModel);
+        const tableTileModel = getTileModelById(self, tableId); //get tableTile contents given a tableId
+        const tableTileContent = tableTileModel?.content;
+        self.sharedModel && sharedModelManager.removeTileSharedModel(tableTileContent, self.sharedModel);
         //create a dataSet with two attributes with X / Y, link table tile to this dataSet
-        const title = tableTileContents ? getTileTitleFromContent(tableTileContents) : undefined;
+        const title = tableTileModel?.title;
         const newDataSet = createDefaultDataSet(title);
         const newSharedDataSet = newDataSet && SharedDataSet.create({ providerId: tableId, dataSet: newDataSet });
-        sharedModelManager.addTileSharedModel(tableTileContents, newSharedDataSet);
+        sharedModelManager.addTileSharedModel(tableTileContent, newSharedDataSet);
       }
       else {
         console.warn("DataflowContent.addLinkedTable unable to unlink table");
