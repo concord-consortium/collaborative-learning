@@ -129,7 +129,7 @@ export const Graph = observer(function Graph({graphController, graphRef, dotsRef
                         autoAdjust={autoAdjustAxes}
                         onDropAttribute={handleChangeAttribute}
                         onRemoveAttribute={handleRemoveAttribute}
-                        // onTreatAttributeAs={handleTreatAttrAs}
+                        onTreatAttributeAs={handleTreatAttrAs}
       />;
     });
   };

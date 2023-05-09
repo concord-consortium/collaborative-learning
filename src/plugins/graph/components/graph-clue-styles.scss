@@ -2,6 +2,10 @@
 
 .graph-plot {
   background-color: $workspace-teal-light-7;
+  .attribute-label {
+    fill: $workspace-teal-dark-2;
+    text-decoration: underline;
+  }
 }
 
 .attribute-label {
@@ -10,4 +14,49 @@
 
 .empty-label {
   font-family: Lato, "Noto Sans Symbols 2", "Noto Sans Math", sans-serif;
+}
+
+// TODO: Determine if using Chakra's theming features in CLUE is a good idea.
+// Doing so would probably be better than targeting the Chakra classes directly
+// like we're doing here.
+.chakra-menu__menu-button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+.chakra-menu__menu-list {
+  background: $workspace-teal-light-9;
+  border: solid 2px $workspace-teal;
+  border-radius: 5px;
+  min-width: 100px;
+  padding: 5px;
+
+  button {
+    background: $workspace-teal-light-9;
+    border: none;
+    color: $workspace-teal-dark-2;
+    cursor: pointer;
+    padding: 3px 5px;
+
+
+    &:hover {
+      background: $workspace-teal-light-6;
+    }
+    &:active {
+      background: $workspace-teal-light-4;
+    }
+
+    &.inactive {
+      background: $workspace-teal-light-9;
+      cursor: default;
+      &:hover, &:active {
+        background: $workspace-teal-light-9;
+      }
+    }
+  }
+  hr {
+    border: none;
+    border-top: 1px solid $workspace-teal-light-2;
+    margin: 5px 0;
+  }
 }

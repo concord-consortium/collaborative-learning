@@ -54,6 +54,11 @@ const _AxisOrLegendAttributeMenu = ({ place, target, portal,
                 {attribute?.name}
               </MenuButton>
               <MenuList>
+                { !data &&
+                  <MenuItem className="inactive">
+                    Link Data
+                  </MenuItem>
+                }
                 { data?.attributes?.map((attr) => {
                   return (
                     <MenuItem onClick={() => onChangeAttribute(place, attr.id)} key={attr.id}>
@@ -68,8 +73,8 @@ const _AxisOrLegendAttributeMenu = ({ place, target, portal,
                       {removeAttrItemLabel}
                     </MenuItem>
                     <MenuItem onClick={() => onTreatAttributeAs(place, attribute?.id, treatAs)}>
-                      {treatAs === "categorical" && "DG.DataDisplayMenu.treatAsCategorical"}
-                      {treatAs === "numeric" && "DG.DataDisplayMenu.treatAsNumeric"}
+                      {treatAs === "categorical" && t("DG.DataDisplayMenu.treatAsCategorical")}
+                      {treatAs === "numeric" && t("DG.DataDisplayMenu.treatAsNumeric")}
                     </MenuItem>
                   </>
                 }
