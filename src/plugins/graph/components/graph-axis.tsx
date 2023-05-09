@@ -72,15 +72,25 @@ export const GraphAxis = observer(function GraphAxis(
             if (xValues && place === "bottom") {
               const minX = Math.min(...xValues);
               const maxX = Math.max(...xValues);
-              const newXBounds = computeNiceNumericBounds(minX, maxX);
-              axisModel.setDomain(newXBounds.min, newXBounds.max);
+              const currentDomain = axisModel.domain;
+              const currentMin = currentDomain[0];
+              const currentMax = currentDomain[1];
+              if (minX < currentMin || maxX > currentMax) {
+                const newXBounds = computeNiceNumericBounds(minX, maxX);
+                axisModel.setDomain(newXBounds.min, newXBounds.max);
+              }
             }
 
             if (yValues && place === "left") {
               const minY = Math.min(...yValues);
               const maxY = Math.max(...yValues);
-              const newYBounds = computeNiceNumericBounds(minY, maxY);
-              axisModel.setDomain(newYBounds.min, newYBounds.max);
+              const currentDomain = axisModel.domain;
+              const currentMin = currentDomain[0];
+              const currentMax = currentDomain[1];
+              if (minY < currentMin || maxY > currentMax) {
+                const newYBounds = computeNiceNumericBounds(minY, maxY);
+                axisModel.setDomain(newYBounds.min, newYBounds.max);
+              }
             }
           }
         }
