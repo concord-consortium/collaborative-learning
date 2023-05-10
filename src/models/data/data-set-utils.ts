@@ -1,6 +1,6 @@
-import { addAttributeToDataSet, IDataSet, addCasesToDataSet } from "./data-set";
+import { addAttributeToDataSet, IDataSet, addCasesToDataSet, IDataSetSnapshot } from "./data-set";
 
-export function mergeTwoDataSets(source: IDataSet, target: IDataSet) {
+export function mergeTwoDataSets(source: IDataSetSnapshot, target: IDataSet) {
     const sourceAttrNames = source.attributes.map((attrObj: any) => attrObj.name);
     sourceAttrNames.forEach((name) => {
       if (!target.attrNameMap[name]) {
