@@ -1,11 +1,13 @@
 import { observer } from "mobx-react";
-import React, { DOMAttributes, useRef } from "react";
+import React, { DOMAttributes, useRef, useEffect } from "react";
+import { onSnapshot } from "mobx-state-tree";
 import "mathlive"; // separate static import of library for initialization to run
 // eslint-disable-next-line no-duplicate-imports
 import type { MathfieldElementAttributes, MathfieldElement } from "mathlive";
 import { ITileProps } from "../../components/tiles/tile-component";
 import { ExpressionContentModelType } from "./expression-content";
 import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
+import { replaceKeyBinding } from "./expression-utils";
 
 import "./expression-tile.scss";
 
@@ -21,6 +23,27 @@ declare global {
 export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) => {
   const content = props.model.content as ExpressionContentModelType;
   const mathfieldRef = useRef<MathfieldElement>(null);
+
+  if (mathfieldRef.current?.keybindings){
+    replaceKeyBinding(mathfieldRef.current.keybindings, "cmd+z", "selectAll");
+  }
+
+  useEffect(() => {
+    const disposer = onSnapshot((content as any), () => {
+      handleSnapshot();
+    });
+    return () => disposer();
+  }, [content]);
+
+  const modelMatches = () => {
+    return mathfieldRef.current?.getValue() === content.latexStr;
+  };
+
+  const handleSnapshot = () => {
+    if (!modelMatches()) {
+      mathfieldRef.current?.setValue(content.latexStr, {suppressChangeNotifications: true});
+    }
+  };
 
   const handleChange = (e: any) => {
     content.setLatexStr(e.target.value);
