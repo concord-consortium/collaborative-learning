@@ -3,7 +3,7 @@ import { addAttributeToDataSet, IDataSet, addCasesToDataSet } from "./data-set";
 export function mergeTwoDataSets(source: IDataSet, target: IDataSet) {
     const sourceAttrNames = source.attributes.map((attrObj: any) => attrObj.name);
     sourceAttrNames.forEach((name) => {
-      if (!target.attrNameMap[name]) { // only add unique attributes in source not in target
+      if (!target.attrNameMap[name]) {
         addAttributeToDataSet(target, { name });
       }
     });
