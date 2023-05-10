@@ -1,17 +1,17 @@
-import { addAttributeToDataSet, IDataSet, addCasesToDataSet, IDataSetSnapshot } from "./data-set";
+import { addAttributeToDataSet, IDataSet, addCasesToDataSet, IDataSetSnapshot, ICaseCreation, ICase } from "./data-set";
 
 export function mergeTwoDataSets(source: IDataSetSnapshot, target: IDataSet) {
-    const sourceAttrNames = source.attributes.map((attrObj: any) => attrObj.name);
+    const sourceAttrNames = source.attributes.map((attrObj) => attrObj.name);
     sourceAttrNames.forEach((name) => {
       if (!target.attrNameMap[name]) {
         addAttributeToDataSet(target, { name });
       }
     });
-    const sourceCases: any[] = [];
+    const sourceCases: ICaseCreation[] = [];
     source.cases.forEach((aCase, idx) => {
-      const newCase: any = {};
+      const newCase: ICaseCreation = {};
       source.attributes.forEach((attr) => {
-        const attrName = attr.name as keyof typeof newCase;
+        const attrName = attr.name;
         newCase[attrName] = attr.values[idx];
       });
       sourceCases.push(newCase);
