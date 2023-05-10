@@ -1,7 +1,6 @@
 import { types, Instance } from "mobx-state-tree";
 import { TileContentModel } from "../../models/tiles/tile-content";
 import { kExpressionTileType } from "./expression-types";
-import { getTileModel, setTileTitleFromContent } from "../../models/tiles/tile-model";
 import { IDefaultContentOptions, ITileExportOptions } from "../../models/tiles/tile-content-info";
 
 export function defaultExpressionContent(props?: IDefaultContentOptions): ExpressionContentModelType {

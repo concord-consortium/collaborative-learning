@@ -7,7 +7,6 @@ import { withoutUndo } from "../../models/history/without-undo";
 import { IDefaultContentOptions, ITileExportOptions } from "../../models/tiles/tile-content-info";
 import { ITileMetadataModel } from "../../models/tiles/tile-metadata";
 import { tileModelHooks } from "../../models/tiles/tile-model-hooks";
-import { getTileModel, setTileTitleFromContent } from "../../models/tiles/tile-model";
 import { TileContentModel } from "../../models/tiles/tile-content";
 import {
   addAttributeToDataSet, addCanonicalCasesToDataSet, addCasesToDataSet, DataSet
