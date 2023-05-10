@@ -276,7 +276,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       }
     },
     setTitle(title: string) {
-      setTileTitleFromContent(self, title);
+      setTileTitleFromContent(self, title); // title-refactor
     },
     addLinkedTable(tableId: string) {
       const sharedModelManager = self.tileEnv?.sharedModelManager;

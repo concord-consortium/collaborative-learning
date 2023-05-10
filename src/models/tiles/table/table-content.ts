@@ -227,7 +227,7 @@ export const TableContentModel = TileContentModel
   }))
   .views(self => ({
     get title() {
-      return getTileTitleFromContent(self) ?? self.dataSet.name;
+      return getTileTitleFromContent(self) ?? self.dataSet.name; // title-refactor
     }
   }))
   .views(self => ({
@@ -333,7 +333,7 @@ export const TableContentModel = TileContentModel
       // }
     },
     setTableName(name: string) {
-      setTileTitleFromContent(self, name);
+      setTileTitleFromContent(self, name); // title-refactor
       self.logChange({ action: "update", target: "table", props: { name } });
     },
     setColumnWidth(attrId: string, width: number) {

@@ -47,11 +47,11 @@ export function getTileModel(tileContentModel: ITileContentModel) {
   }
 }
 
-export function getTileTitleFromContent(tileContentModel: ITileContentModel) {
+export function getTileTitleFromContent(tileContentModel: ITileContentModel) { // title-refactor
   return getTileModel(tileContentModel)?.title;
 }
 
-export function setTileTitleFromContent(tileContentModel: ITileContentModel, title: string) {
+export function setTileTitleFromContent(tileContentModel: ITileContentModel, title: string) { // title-refactor
   getTileModel(tileContentModel)?.setTitle(title);
 }
 
