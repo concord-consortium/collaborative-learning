@@ -39,7 +39,6 @@ export const mergeTwoDataSets = ( dataSetOfDraggedTile: IDataSet, dataSetOfDropp
   // //insert all values
   for (let i = startIndexDroppedTile; i < allCasesDroppedTile.length; i++){ //start at cards that were added
     const caseId = allCasesDroppedTile[i]?.__id__;
-    console.log("caseID:", caseId);
     attrOfDroppedTile.forEach((attrDrop) => {
       attrOfDraggedTile.forEach((attrDrag: any, idx: number) => {
         if (attrDrop.name === attrDrag.name){
