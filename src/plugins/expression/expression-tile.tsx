@@ -1,5 +1,5 @@
 import { observer } from "mobx-react";
-import React, { DOMAttributes, useRef, useEffect } from "react";
+import React, { DOMAttributes, useRef, useEffect, useState } from "react";
 import { onSnapshot } from "mobx-state-tree";
 import "mathlive"; // separate static import of library for initialization to run
 // eslint-disable-next-line no-duplicate-imports
@@ -23,9 +23,10 @@ declare global {
 export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) => {
   const content = props.model.content as ExpressionContentModelType;
   const mathfieldRef = useRef<MathfieldElement>(null);
+  const [trackedCursorSpot, setTrackedCursorSpot] = useState<any[] | undefined>([0,0]);
 
   if (mathfieldRef.current?.keybindings){
-    replaceKeyBinding(mathfieldRef.current.keybindings, "cmd+z", "selectAll");
+    replaceKeyBinding(mathfieldRef.current.keybindings, "cmd+z", "moveToMathfieldStart");
   }
 
   useEffect(() => {
@@ -42,17 +43,27 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   const handleSnapshot = () => {
     if (!modelMatches()) {
       mathfieldRef.current?.setValue(content.latexStr, {suppressChangeNotifications: true});
+      if (mathfieldRef.current){
+        console.log("| set cursor to this: ", trackedCursorSpot);
+        console.log("| what shape? ", mathfieldRef.current.selection.ranges[0]);
+        mathfieldRef.current.selection.ranges[0] = trackedCursorSpot as any;
+      }
     }
   };
 
   const handleChange = (e: any) => {
+    console.log("| setting trackedCursorSpot to: ", mathfieldRef.current?.selection.ranges[0])
+    setTrackedCursorSpot(mathfieldRef.current?.selection.ranges[0]);
     content.setLatexStr(e.target.value);
+    console.log("| but maybe it did not work:", trackedCursorSpot);
   };
 
-  // This is an example of how we can access mathfield api
-  // const exampleApiUse = () => {
-  //   mathfieldRef.current?.setValue(`42\\frac12`)
-  // }
+  const handleKeyDown = (e: any) => {
+    if ((e.ctrlKey || e.metaKey) && e.keyCode === 90) {
+      //console.log("| 3 cursor?", mathfieldRef.current?.selection, e);
+    }
+  };
+
 
   return (
     <div className="expression-tool">
@@ -68,6 +79,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
           ref={mathfieldRef}
           value={content.latexStr}
           onInput={handleChange}
+          onKeyDown={handleKeyDown}
         />
       </div>
     </div>
