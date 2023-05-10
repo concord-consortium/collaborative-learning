@@ -7,6 +7,8 @@ import { ITileContentModel } from "./tile-content";
 import { DisplayUserType, DisplayUserTypeEnum } from "../stores/user-types";
 import { uniqueId } from "../../utilities/js-utils";
 import { StringBuilder } from "../../utilities/string-builder";
+import { logTileDocumentEvent } from "./log/log-tile-document-event";
+import { LogEventName } from "../../lib/logger-types";
 
 // generally negotiated with app, e.g. single column width for table
 export const kDefaultMinWidth = 60;
@@ -117,6 +119,7 @@ export const TileModel = types
   .actions(self => ({
     setTitle(title: string) {
       self.title = title;
+      logTileDocumentEvent(LogEventName.RENAME_TILE,{ tile: self as ITileModel });
     },
     setDisplay(display: DisplayUserType) {
       self.display = display;

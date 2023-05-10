@@ -822,7 +822,7 @@ export const BaseDocumentContentModel = types
         const documentEnv = getEnv(self)?.documentEnv as IDocumentEnvironment | undefined;
         const appConfig = documentEnv?.appConfig;
 
-        // TODO: title-refactor: Rather than pass the title, we want to set it on the tile model directly..
+        // TODO: title-refactor: remove title from addTileOptions?
         const newContent = contentInfo?.defaultContent({ title, url, appConfig });
         const tileInfo = self.addTileContentInNewRow(
                               newContent,

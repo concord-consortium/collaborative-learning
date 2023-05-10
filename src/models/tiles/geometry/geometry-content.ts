@@ -33,7 +33,6 @@ import {
 } from "./jxg-types";
 import { SharedModelType } from "../../shared/shared-model";
 import { ISharedModelManager } from "../../shared/shared-model-manager";
-import { getTileModel, setTileTitleFromContent } from "../tile-model";
 import { IDataSet } from "../../data/data-set";
 import { uniqueId } from "../../../utilities/js-utils";
 import { logTileChangeEvent } from "../log/log-tile-change-event";
@@ -173,9 +172,6 @@ export const GeometryContentModel = GeometryBaseContentModel
     }
   }))
   .views(self => ({
-    get title(): string | undefined {
-      return getTileModel(self)?.title;
-    },
     getObject(id: string) {
       return self.objects.get(id);
     },
@@ -275,9 +271,6 @@ export const GeometryContentModel = GeometryBaseContentModel
         }
       }
     },
-    setTitle(title: string) {
-      setTileTitleFromContent(self, title); // title-refactor
-    },
     addLinkedTable(tableId: string) {
       const sharedModelManager = self.tileEnv?.sharedModelManager;
       if (sharedModelManager?.isReady && !self.isLinkedToTable(tableId)) {
@@ -364,16 +357,6 @@ export const GeometryContentModel = GeometryBaseContentModel
     let batchChanges: string[] = [];
 
     function handleWillApplyChange(board: JXG.Board | string, change: JXGChange) {
-      const op = change.operation.toLowerCase();
-      const target = change.target.toLowerCase();
-
-      // TODO Remove this or change metadata to tilecontainer or something
-      if ((op === "update") && (target === "metadata")) {
-        const props = change?.properties as JXGProperties | undefined;
-        if (props?.title) {
-          self.setTitle(props.title);
-        }
-      }
       return undefined;
     }
 
@@ -617,21 +600,6 @@ export const GeometryContentModel = GeometryBaseContentModel
       };
       return applyAndLogChange(board, change);
     }
-
-    // TODO Remove this or change metadata to tilecontainer or something
-    function updateTitle(board: JXG.Board | undefined, title: string) {
-      const change: JXGChange = {
-              operation: "update",
-              target: "metadata",
-              properties: { title }
-            };
-      return applyAndLogChange(board, change);
-    }
-
-    // If we remove the above we could easily replace it with this
-    // function updateTitle(board: JXG.Board | undefined, title: string) {
-    //   self.setTitle(title);
-    // }
 
     function getCentroid(obj: GeometryObjectModelUnion) {
       const forceNumber = (num: number | undefined) => num || 0;
@@ -1013,7 +981,6 @@ export const GeometryContentModel = GeometryBaseContentModel
         addPoints,
         addMovableLine,
         removeObjects,
-        updateTitle,
         updateObjects,
         createPolygonFromFreePoints,
         addVertexAngle,

@@ -453,7 +453,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleTitleChange = (title?: string) => {
-    title && this.applyChange(() => this.getContent().updateTitle(this.state.board, title));
+    title && this.props.model.setTitle(title);
     this.setState({ isEditingTitle: false });
   };
 
