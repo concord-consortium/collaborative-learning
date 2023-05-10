@@ -251,7 +251,6 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
           onDragOver={handleDragOver}
           onDrop={handleDrop}
         >
-
           <div className={highlightContainerClasses}>
             <div className="data-card-header-row">
               <div className="panel title">
@@ -262,7 +261,6 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
               />
               </div>
             </div>
-
             <div className="panel sort">
               <SortSelect
                 model={model}
@@ -270,7 +268,6 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
                 attrIdNamePairs={attrIdsNames}
               />
             </div>
-
             { displaySingle &&
               <div className="panel nav">
                 <div className="card-number-of-listing">
