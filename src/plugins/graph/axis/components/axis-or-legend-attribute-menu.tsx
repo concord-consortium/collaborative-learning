@@ -8,7 +8,7 @@ import { useDataSetContext } from "../../hooks/use-data-set-context";
 import { useOutsidePointerDown } from "../../hooks/use-outside-pointer-down";
 import { useOverlayBounds } from "../../hooks/use-overlay-bounds";
 import { AttributeType } from "../../../../models/data/attribute";
-import { isSetNameAction } from "../../../../models/data/data-set-actions";
+import { isSetAttributeNameAction } from "../../../../models/data/data-set-actions";
 
 interface IProps {
   place: GraphPlace,
@@ -47,7 +47,7 @@ const _AxisOrLegendAttributeMenu = ({ place, target, portal,
 
   useEffect(() => {
     dataConfig?.onAction(action => {
-      if (isSetNameAction(action)) {
+      if (isSetAttributeNameAction(action)) {
         data?.attributes?.map((attr) => {
           if (attr.id === attrId) {
             setLabelText(attr.name);

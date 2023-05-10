@@ -32,14 +32,6 @@ export interface SetAttributeNameAction extends ISerializedActionCall {
 export const isSetAttributeNameAction = (action: ISerializedActionCall): action is SetAttributeNameAction =>
               action.name === "setAttributeName";
 
-export interface SetNameAction extends ISerializedActionCall {
-  name: "setName"
-  args: [string /*newName*/]
-}
-
-export const isSetNameAction = (action: ISerializedActionCall): action is SetNameAction =>
-              action.name === "setName";
-
 export interface RemoveCasesAction extends ISerializedActionCall {
   name: "removeCases"
   args: [string[]]
