@@ -1,4 +1,4 @@
-import { addAttributeToDataSet, IDataSet, addCasesToDataSet, IDataSetSnapshot, ICaseCreation, ICase } from "./data-set";
+import { addAttributeToDataSet, IDataSet, addCasesToDataSet, IDataSetSnapshot, ICaseCreation } from "./data-set";
 
 export function mergeTwoDataSets(source: IDataSetSnapshot, target: IDataSet) {
     const sourceAttrNames = source.attributes.map((attrObj) => attrObj.name);
