@@ -1,15 +1,15 @@
 import { defaultExpressionContent, ExpressionContentModel } from "./expression-content";
 
 describe("ExpressionContent", () => {
-  it("has default content of 'hello world'", () => {
+  it("has default content of area of a circle formula", () => {
     const content = defaultExpressionContent();
-    expect(content.text).toBe("Math Expression");
+    expect(content.latexStr).toBe("a=\\pi r^2");
   });
 
   it("supports changing the text", () => {
     const content = ExpressionContentModel.create();
-    content.setText("New Text");
-    expect(content.text).toBe("New Text");
+    content.setLatexStr("abc");
+    expect(content.latexStr).toBe("abc");
   });
 
   it("is always user resizable", () => {

@@ -55,7 +55,7 @@ context('Graph Table Integration', function () {
     describe('Link graph dialog', () => {
       it('verify correct graph names appear in selection list', function () {
         tableToolTile.getTableTile().click();
-        cy.get('.primary-workspace .link-geometry-button').click();
+        cy.get('.primary-workspace .link-tile-button').click();
         cy.wait(2000);
         // cy.get('[data-test=link-graph-select]').select('Second One');
         cy.get('[data-test=link-graph-select]').select('Graph 1');

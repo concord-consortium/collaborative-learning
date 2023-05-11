@@ -116,20 +116,6 @@ export function getGeometryContent(requester: IAnyStateTreeNode, geometryId: str
   return content?.type === kGeometryTileType ? content as GeometryContentModelType : undefined;
 }
 
-export function requestGeometryLinkToTable(tableContent: TableContentModelType, geometryId: string) {
-  const geometryContent = getGeometryContent(tableContent, geometryId);
-  if (geometryContent) {
-    geometryContent.addLinkedTable(tableContent.metadata.id);
-  }
-}
-
-export function requestGeometryUnlinkFromTable(tableContent: TableContentModelType, geometryId: string) {
-  const geometryContent = getGeometryContent(tableContent, geometryId);
-  if (geometryContent) {
-    geometryContent.removeLinkedTable(tableContent.metadata.id);
-  }
-}
-
 /*
   * Returns link metadata for attaching to client (e.g. geometry) tool actions
   * that includes label information.

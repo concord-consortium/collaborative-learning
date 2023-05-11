@@ -44,8 +44,7 @@ export const UnknownSharedModel = types.snapshotProcessor(_UnknownSharedModel, {
   }
 });
 
-export type SharedModelChangeType = "link" | "change" | "unlink"
-
+export type SharedModelChangeType = "link" | "change" | "unlink";
 export interface IDragSharedModelItem {
   modelId: string;
   providerId?: string;
@@ -80,6 +79,11 @@ export interface ISharedModelManager {
    * @param sharedModelType the MST model "class" of the shared model
    */
   getSharedModelsByType<IT extends typeof SharedModelUnion>(type: string): IT["Type"][];
+
+  /**
+   * Add a shared model
+   */
+  addSharedModel(sharedModel: SharedModelType): void;
 
   /**
    * Add a shared model to the container if it doesn't exist and add a link to

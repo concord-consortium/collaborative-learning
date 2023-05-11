@@ -397,7 +397,9 @@ export const externalUrlImagesHandler: IImageHandler = {
     // 4. the data uri is "fetched" to turn it into a blob and then blob url
     // 5. the resulting imageData value will be the blob url
     // 6. the displayUrl is set to this blob url
-    if (db?.stores.user.id) {
+    // In the context of authoring, db.stores is undefined and we consequently
+    // do not upload any images added via the CMS.
+    if (db?.stores?.user.id) {
       try {
         const simpleImage = await storeImage(db, url);
         if (isPlaceholderImage(simpleImage.imageUrl)) {

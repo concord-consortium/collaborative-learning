@@ -2,7 +2,7 @@ import React, { useRef, useState } from "react";
 import LinkGraphIcon from "../../../clue/assets/icons/table/link-graph-icon.svg";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
 import { GeometryContentModelType } from "../../../models/tiles/geometry/geometry-content";
-import { ITileLinkMetadata } from "../../../models/tiles/table-link-types";
+import { ITileLinkMetadata } from "../../../models/tiles/tile-link-types";
 import { ITileModel } from "../../../models/tiles/tile-model";
 
 import "./link-table-dialog.scss";

@@ -1,19 +1,14 @@
-import { render } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import React from "react";
+import { render, screen } from "@testing-library/react";
 import { ITileApi } from "../../components/tiles/tile-api";
 import { TileModel } from "../../models/tiles/tile-model";
 import { defaultExpressionContent } from "./expression-content";
 import { ExpressionToolComponent } from "./expression-tile";
-
-// The expression tile needs to be registered so the TileModel.create
-// knows it is a supported tile type
 import "./expression-registration";
 
 describe("ExpressionToolComponent", () => {
   const content = defaultExpressionContent();
   const model = TileModel.create({content});
-
   const defaultProps = {
     tileElt: null,
     context: "",
@@ -30,7 +25,7 @@ describe("ExpressionToolComponent", () => {
       throw new Error("Function not implemented.");
     },
     onRequestUniqueTitle: (tileId: string): string | undefined => {
-      throw new Error("Function not implemented.");
+      return tileId;
     },
     onRequestRowHeight: (tileId: string, height?: number, deltaHeight?: number): void => {
       throw new Error("Function not implemented.");
@@ -43,31 +38,42 @@ describe("ExpressionToolComponent", () => {
     }
   };
 
-  it("renders successfully", () => {
-    const {getByText} =
-      render(<ExpressionToolComponent  {...defaultProps} {...{model}}></ExpressionToolComponent>);
-    expect(getByText("Math Expression")).toBeInTheDocument();
+  it("renders a math field web component", () => {
+    render(<ExpressionToolComponent  {...defaultProps} {...{model}}></ExpressionToolComponent>);
+    expect(document.querySelector("math-field")).toBeInTheDocument();
+    expect(screen.getByRole("math")).toBeInTheDocument();
   });
 
-  it("updates the text when the model changes", async () => {
-    const {getByText, findByText} =
-      render(<ExpressionToolComponent  {...defaultProps} {...{model}}></ExpressionToolComponent>);
-    expect(getByText("Math Expression")).toBeInTheDocument();
-
-    content.setText("New Text");
-
-    expect(await findByText("New Text")).toBeInTheDocument();
+  it("renders with a LaTeX string in the math-field value", () => {
+    render(<ExpressionToolComponent  {...defaultProps} {...{model}}></ExpressionToolComponent>);
+    expect(document.querySelector("math-field")).toHaveAttribute("value", "a=\\pi r^2");
   });
 
-  it("updates the model when the user types", () => {
-    const {getByRole, getByText} =
-      render(<ExpressionToolComponent  {...defaultProps} {...{model}}></ExpressionToolComponent>);
-    expect(getByText("New Text")).toBeInTheDocument();
-
-    const textBox = getByRole("textbox");
-    userEvent.type(textBox, "{selectall}{del}Typed Text");
-
-    expect(textBox).toHaveValue("Typed Text");
-    expect(content.text).toBe("Typed Text");
+  it("the math field element hosts a shadow dom", () => {
+    render(<ExpressionToolComponent  {...defaultProps} {...{model}}></ExpressionToolComponent>);
+    const shadow = document.querySelector("math-field")?.shadowRoot;
+    const parentSpan = shadow?.querySelector("span");
+    expect(parentSpan).toBeInTheDocument();
   });
+
+  // TODO, get shadow dom to render in test context (below is a failed attempt)
+  // In the default, the shadow dom is only rendered as deep as the first three elements
+  // Everything below that is not rendered in the test context
+  // Below is a failed attempt to load mathlive and render the shadow dom
+
+  // it("renders the pi character in the math field", () => {
+  //   import("mathlive").then((mathlive) => {
+  //     const { getByText, container, queryByText } = render(
+  //       <ExpressionToolComponent  {...defaultProps} {...{model}}></ExpressionToolComponent>
+  //     );
+  //     const mathField = container.querySelector("math-field");
+  //     const shadow = mathField?.shadowRoot;
+  //     mathlive.renderMathInElement(mathField as HTMLElement);
+  //     mathlive.renderMathInDocument();
+  //     shadow?.childNodes.forEach((node) => {
+  //       console.log("child of top level span and children below: ", node);
+  //       console.log(node.hasChildNodes()) // each is empty
+  //     });
+  //   });
+  // });
 });

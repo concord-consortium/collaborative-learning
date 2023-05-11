@@ -196,7 +196,7 @@ export const TableContentModel = TileContentModel
     }
   }))
   .views(self => ({
-    get linkedGeometries(): string[] {
+    get linkedTiles(): string[] {
       const sharedModelManager = self.tileEnv?.sharedModelManager;
       const tileIds = sharedModelManager?.getSharedModelTileIds(self.sharedModel) ?? [];
       return tileIds.filter(id => id !== self.metadata.id);
@@ -216,7 +216,7 @@ export const TableContentModel = TileContentModel
       return true;
     },
     get isLinked() {
-      return self.linkedGeometries.length > 0;
+      return self.linkedTiles.length > 0;
     },
     get hasExpressions() {
       return self.metadata.hasExpressions;
