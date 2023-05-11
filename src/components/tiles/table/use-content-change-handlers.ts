@@ -2,13 +2,14 @@ import { useCallback } from "react";
 import { getTableContentHeight } from "./table-utils";
 import { useCurrent } from "../../../hooks/use-current";
 import { ICase, ICaseCreation, IDataSet } from "../../../models/data/data-set";
-import { ITileLinkMetadata } from "../../../models/tiles/table-link-types";
-import { requestGeometryLinkToTable, requestGeometryUnlinkFromTable } from "../../../models/tiles/table-links";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
 import { isLinkableValue } from "../../../models/tiles/table/table-model-types";
+import { ITileLinkMetadata } from "../../../models/tiles/tile-link-types";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { uniqueId, uniqueName } from "../../../utilities/js-utils";
 import { TColumn, TRow } from "./table-types";
+import { getTileContentById } from "../../../utilities/mst-utils";
+import { SharedDataSet } from "../../../models/shared/shared-data-set";
 
 export interface IContentChangeHandlers {
   onSetTableTitle: (title: string) => void;
@@ -20,8 +21,8 @@ export interface IContentChangeHandlers {
   onAddRows: (newCases: ICaseCreation[]) => void;
   onUpdateRow: (caseValues: ICase) => void;
   onRemoveRows: (rowIds: string[]) => void;
-  onLinkGeometryTile: (geomTileInfo: ITileLinkMetadata) => void;
-  onUnlinkGeometryTile: (geomTileInfo: ITileLinkMetadata) => void;
+  onLinkTile: (tileInfo: ITileLinkMetadata) => void;
+  onUnlinkTile: (tileInfo: ITileLinkMetadata) => void;
 }
 
 interface IProps {
@@ -77,9 +78,9 @@ export const useContentChangeHandlers = ({
 
   const setColumnName = useCallback((column: TColumn, columnName: string) => {
     if (readOnly) return;
-    getContent().setAttributeName(column.key, columnName);
+    dataSet.setAttributeName(column.key, columnName);
     requestRowHeight();
-  }, [readOnly, getContent, requestRowHeight]);
+  }, [readOnly, dataSet, requestRowHeight]);
 
   const setColumnExpressions = useCallback((rawExpressions: Map<string, string>, xName: string) => {
     if (readOnly) return;
@@ -118,16 +119,30 @@ export const useContentChangeHandlers = ({
     getContent().removeCases(rowIds);
   }, [readOnly, getContent]);
 
-  const linkGeometryTile = useCallback((geomTileInfo: ITileLinkMetadata) => {
-    !readOnly && requestGeometryLinkToTable(getContent(), geomTileInfo.id);
-  }, [getContent, readOnly]);
+  const linkTile = useCallback((tileInfo: ITileLinkMetadata) => {
+    const consumerTile = getTileContentById(getContent(), tileInfo.id);
+    if (!readOnly && consumerTile) {
+      const sharedModelManager = consumerTile.tileEnv?.sharedModelManager;
+      if (sharedModelManager?.isReady) {
+        const sharedTable = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, modelRef.current.id);
+        sharedTable && sharedModelManager?.addTileSharedModel(consumerTile, sharedTable);
+      }
+    }
+  }, [getContent, readOnly, modelRef]);
 
-  const unlinkGeometryTile = useCallback((geomTileInfo: ITileLinkMetadata) => {
-    !readOnly && requestGeometryUnlinkFromTable(getContent(), geomTileInfo.id);
-  }, [getContent, readOnly]);
+  const unlinkTile = useCallback((tileInfo: ITileLinkMetadata) => {
+    const consumerTile = getTileContentById(getContent(), tileInfo.id);
+    if (!readOnly && consumerTile) {
+      const sharedModelManager = consumerTile.tileEnv?.sharedModelManager;
+      if (sharedModelManager?.isReady) {
+        const sharedTable = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, modelRef.current.id);
+        sharedTable && sharedModelManager?.removeTileSharedModel(consumerTile, sharedTable);
+      }
+    }
+  }, [getContent, readOnly, modelRef]);
 
   return { onSetTableTitle: setTableTitle, onSetColumnName: setColumnName, onSetColumnExpressions: setColumnExpressions,
           onAddColumn: addColumn, onRemoveColumn: removeColumn, requestRowHeight,
           onAddRows: addRows, onUpdateRow: updateRow, onRemoveRows: removeRows,
-          onLinkGeometryTile: linkGeometryTile, onUnlinkGeometryTile: unlinkGeometryTile };
+          onLinkTile: linkTile, onUnlinkTile: unlinkTile };
 };

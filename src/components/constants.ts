@@ -6,3 +6,6 @@ export const defaultBoldFont = `bold ${defaultFont}`;
 export const defaultItalicFont = `italic ${defaultFont}`;
 
 export const defaultTileTitleFont = defaultItalicFont;
+
+export const kDefaultTileWidth = 250;
+export const kDefaultTileHeight = 250;
