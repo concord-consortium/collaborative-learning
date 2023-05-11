@@ -1,5 +1,5 @@
 import { observer } from "mobx-react";
-import React, { DOMAttributes, useRef, useEffect, FormEventHandler, FormEvent } from "react";
+import React, { DOMAttributes, useRef, useEffect, FormEvent } from "react";
 import { onSnapshot } from "mobx-state-tree";
 import "mathlive"; // separate static import of library for initialization to run
 // eslint-disable-next-line no-duplicate-imports
@@ -26,11 +26,12 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   const trackedCursorPos = useRef<number>(0);
 
   if (mf.current?.keybindings){
-    // Disable mathlive's undo
+    // Disable mathlive's undo with keyboard, as our undo picks up cmd+z
     replaceKeyBinding(mf.current.keybindings, "cmd+z", "");
   }
 
   useEffect(() => {
+    // when we change model via undo button, we need to update mathfield
     const disposer = onSnapshot((content as any), () => {
       if (mf.current?.getValue() === content.latexStr) return;
       mf.current?.setValue(content.latexStr, {suppressChangeNotifications: true});
@@ -39,9 +40,9 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     return () => disposer();
   }, [content]);
 
-  const handleChange = (e: any) => {
+  const handleChange = (e: FormEvent<MathfieldElementAttributes>) => {
     trackedCursorPos.current =  mf.current?.position || 0;
-    content.setLatexStr(e.target.value);
+    content.setLatexStr((e.target as any).value);
   };
 
   return (
