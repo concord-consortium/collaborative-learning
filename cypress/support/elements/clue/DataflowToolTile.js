@@ -107,55 +107,55 @@ class DataflowToolTile {
     return cy.get('#rate-select').select(rate);
   }
   verifyRecordButtonText() {
-    cy.get(".record-data-txt").should("have.text", "Record");
+    cy.get(".primary-workspace .record-data-txt").should("have.text", "Record");
   }
   verifyRecordButtonIcon() {
-    cy.get(".record-data-icon path").invoke("attr", "data-name").should("contain", "record");
+    cy.get(".primary-workspace .record-data-icon path").invoke("attr", "data-name").should("contain", "record");
   }
   getRecordButton() {
-    return cy.get('.record-data-btn').contains("Record").parent();
+    return cy.get(".primary-workspace .record-data-btn").contains("Record").parent();
   }
   verifyPlayButtonText() {
-    cy.get(".playback-data-txt").should("have.text", "Play");
+    cy.get(".primary-workspace .playback-data-txt").should("have.text", "Play");
   }
   verifyPlayButtonIcon() {
-    cy.get(".playback-data-icon path").invoke("attr", "data-name").should("contain", "run");
+    cy.get(".primary-workspace .playback-data-icon path").invoke("attr", "data-name").should("contain", "run");
   }
   getPlayButton() {
-    return cy.get('.playback-data-btn').contains("Play").parent();
+    return cy.get(".primary-workspace .playback-data-btn").contains("Play").parent();
   }
   verifyPauseButtonText() {
-    cy.get(".playback-data-txt").should("have.text", "Pause");
+    cy.get(".primary-workspace .playback-data-txt").should("have.text", "Pause");
   }
   verifyPauseButtonIcon() {
-    cy.get(".playback-data-icon path").invoke("attr", "data-name").should("contain", "pause");
+    cy.get(".primary-workspace .playback-data-icon path").invoke("attr", "data-name").should("contain", "pause");
   }
   getPauseButton() {
-    return cy.get('.playback-data-btn').contains("Pause").parent();
+    return cy.get(".primary-workspace .playback-data-btn").contains("Pause").parent();
   }
   getTimeSlider() {
-    return cy.get('.program-editor-topbar .rc-slider.rc-slider-horizontal');
+    return cy.get(".primary-workspace .program-editor-topbar .rc-slider.rc-slider-horizontal");
   }
   getCountdownTimer() {
-    return cy.get('.program-editor-topbar .countdown-timer');
+    return cy.get(".primary-workspace .program-editor-topbar .countdown-timer");
   }
   verifyStopButtonText() {
-    cy.get(".record-data-txt").should("have.text", "Stop");
+    cy.get(".primary-workspace .record-data-txt").should("have.text", "Stop");
   }
   verifyStopButtonIcon() {
-    cy.get(".record-data-icon path").invoke("attr", "data-name").should("contain", "stop");
+    cy.get(".primary-workspace .record-data-icon path").invoke("attr", "data-name").should("contain", "stop");
   }
   getStopButton() {
-    return cy.get('.record-data-btn').contains("Stop").parent();
+    return cy.get(".primary-workspace .record-data-btn").contains("Stop").parent();
   }
   verifyRecordingClearButtonText() {
-    cy.get(".record-data-txt").should("have.text", "Clear");
+    cy.get(".primary-workspace .record-data-txt").should("have.text", "Clear");
   }
   verifyRecordingClearButtonIcon() {
-    cy.get(".record-data-icon path").invoke("attr", "data-name").should("contain", "clear");
+    cy.get(".primary-workspace .record-data-icon path").invoke("attr", "data-name").should("contain", "clear");
   }
   getRecordingClearButton() {
-    return cy.get('.record-data-btn').contains("Clear").parent();
+    return cy.get(".primary-workspace .record-data-btn").contains("Clear").parent();
   }
   getClearDataWarningTitle() {
     return cy.get(".modal-title");

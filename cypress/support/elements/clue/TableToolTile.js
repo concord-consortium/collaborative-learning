@@ -20,6 +20,9 @@ class TableToolTile{
     getColumnHeader(){
       return cy.get('.column-header-cell .editable-header-cell');
     }
+    getWorkspaceColumnHeader(){
+      return cy.get('.primary-workspace .column-header-cell .editable-header-cell');
+    }
     renameColumn(column, title){
       this.getColumnHeader().contains(column).dblclick();
       cy.get('.column-header-cell .editable-header-cell input').type(title+'{enter}');
@@ -48,6 +51,9 @@ class TableToolTile{
     getTableCellWithColIndex(colIndex, colValue){
         return cy.get('.rdg-row').contains('.rdg-cell[aria-colindex="' + colIndex + '"]', colValue);
         // return cy.get('.rdg-row .rdg-cell[aria-colindex=\"' + colIndex + '\"]');
+    }
+    getTableCellWithRowColIndex(rowIndex, colIndex){
+      return cy.get('.rdg-row').eq(rowIndex).find('.rdg-cell[aria-colindex="' + colIndex + '"]');
     }
     enterData(cell, num){
         this.getTableCell().eq(cell).type(num+'{enter}');
