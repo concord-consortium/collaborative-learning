@@ -16,7 +16,7 @@ import { useContentChangeHandlers } from "./use-content-change-handlers";
 import { useControlsColumn } from "./use-controls-column";
 import { useDataSet } from "./use-data-set";
 import { useExpressionsDialog } from "./use-expressions-dialog";
-import { useGeometryLinking } from "./use-geometry-linking";
+import { useConsumerTileLinking } from "./use-consumer-tile-linking";
 import { useGridContext } from "./use-grid-context";
 import { useMeasureColumnWidth } from "./use-measure-column-width";
 import { useModelDataSet } from "./use-model-data-set";
@@ -35,7 +35,8 @@ import "./table-tile.scss";
 // observes row selection from shared selection store
 const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComponent({
   documentId, documentContent, tileElt, model, readOnly, height, scale,
-  onRequestRowHeight, onRequestTilesOfType, onRequestUniqueTitle, onRegisterTileApi, onUnregisterTileApi
+  onRequestRowHeight, onRequestTilesOfType, onRequestLinkableTiles, onRequestUniqueTitle,
+  onRegisterTileApi, onUnregisterTileApi
 }) {
   // Gather data from the model
   const modelRef = useCurrent(model);
@@ -105,7 +106,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     model, dataSet, rows, rowHeight, headerHeight, getTitleHeight,
     onRequestRowHeight: handleRequestRowHeight, triggerColumnChange, triggerRowChange
   });
-  const { onSetTableTitle, onSetColumnExpressions, onLinkGeometryTile, onUnlinkGeometryTile,
+  const { onSetTableTitle, onSetColumnExpressions, onLinkTile, onUnlinkTile,
     requestRowHeight, onAddColumn, onRemoveRows } = changeHandlers;
 
   // A function to call when a column needs to change width
@@ -149,9 +150,9 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     readOnly: !!readOnly, changeHandlers, columns, onColumnResize, selectedCell, inputRowId });
 
   // Variables for handling linking to geometry tiles
-  const { showLinkButton, isLinkEnabled, linkColors, getLinkIndex, showLinkGeometryDialog } =
-    useGeometryLinking({ documentId, model, hasLinkableRows,
-                          onRequestTilesOfType, onLinkGeometryTile, onUnlinkGeometryTile });
+  const { isLinkEnabled, linkColors, getLinkIndex, showLinkTileDialog: showLinkGeometryDialog } =
+    useConsumerTileLinking({ documentId, model, hasLinkableRows,
+                          onRequestTilesOfType, onRequestLinkableTiles, onLinkTile, onUnlinkTile });
 
   const containerRef = useRef<HTMLDivElement>(null);
   const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -211,7 +212,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
           content={content}
           className="table-title"
           readOnly={readOnly}
-          showLinkButton={showLinkButton}
+          showLinkButton={true}
           isLinkEnabled={isLinkEnabled}
           getLinkIndex={getLinkIndex}
           onLinkGeometryClick={showLinkGeometryDialog}

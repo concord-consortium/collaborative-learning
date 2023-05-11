@@ -21,6 +21,7 @@ registerTileContentInfo({
   addSidecarNotes: true,
   defaultHeight: kGeometryDefaultHeight,
   exportNonDefaultHeight: true,
+  isDataConsumer: true,
   defaultContent: defaultGeometryContent,
   tileSnapshotPreProcessor
 });

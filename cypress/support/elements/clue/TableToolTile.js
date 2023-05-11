@@ -56,7 +56,7 @@ class TableToolTile{
         return cy.get('.canvas-area .rdg-cell.index-column');
     }
     getLinkGraphButton(){
-      return cy.get('.link-geometry-button');
+      return cy.get('.link-tile-button');
     }
     linkTable(table, graph) {
       cy.get('.table-title').text().contains(table).within((tableTile)=>{

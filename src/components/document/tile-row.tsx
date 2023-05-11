@@ -5,6 +5,7 @@ import { BaseComponent } from "../base";
 import { TileLayoutModelType, TileRowModelType } from "../../models/document/tile-row";
 import { isShowingTeacherContent } from "../../models/stores/stores";
 import { getTileContentInfo } from "../../models/tiles/tile-content-info";
+import { ILinkableTiles } from "../../models/tiles/tile-link-types";
 import { ITileModel } from "../../models/tiles/tile-model";
 import { SectionHeader } from "../tiles/section-header";
 import { TileApiInterfaceContext } from "../tiles/tile-api";
@@ -69,6 +70,7 @@ interface IProps {
   readOnly?: boolean;
   dropHighlight?: string;
   onRequestTilesOfType: (tileType: string) => Array<{ id: string, title?: string }>;
+  onRequestLinkableTiles?: () => ILinkableTiles;
   onRequestUniqueTitle: (tileId: string) => string | undefined;
 }
 
