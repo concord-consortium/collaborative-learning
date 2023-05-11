@@ -1,3 +1,3 @@
 export const kExpressionTileType = "Expression";
 
-export const kExpressionDefaultHeight = 320;
+export const kExpressionDefaultHeight = 100;

@@ -1,8 +1,7 @@
 import { useCallback, useEffect } from "react";
 import { useCurrent } from "../../../hooks/use-current";
-import { useFeatureFlag } from "../../../hooks/use-stores";
 import { kTableTileType } from "../../../models/tiles/table/table-content";
-import { ITileLinkMetadata } from "../../../models/tiles/table-link-types";
+import { ITileLinkMetadata } from "../../../models/tiles/tile-link-types";
 import {
   addTableToDocumentMap, getLinkedTableIndex, getTableLinkColors, removeTableFromDocumentMap
 } from "../../../models/tiles/table-links";
@@ -22,7 +21,6 @@ interface IProps {
 export const useTableLinking = ({documentId, model, onRequestTilesOfType, actionHandlers}: IProps) => {
   const {handleRequestTableLink, handleRequestTableUnlink} = actionHandlers || {};
   const modelId = model.id;
-  const showLinkButton = useFeatureFlag("GeometryLinkedTables");
   const tableTiles = useLinkableTableTiles({ model, onRequestTilesOfType });
   const isLinkEnabled = (tableTiles.length > 0);
   const linkColors = getTableLinkColors(modelId);
@@ -36,10 +34,10 @@ export const useTableLinking = ({documentId, model, onRequestTilesOfType, action
   }, [documentId, modelId]);
 
   const getLinkIndex = useCallback(() => {
-    return showLinkButton ? getLinkedTableIndex(modelId) : -1;
-  }, [modelId, showLinkButton]);
+    return getLinkedTableIndex(modelId);
+  }, [modelId]);
 
-  return { showLinkButton, isLinkEnabled, linkColors, getLinkIndex, showLinkTableDialog };
+  return { isLinkEnabled, linkColors, getLinkIndex, showLinkTableDialog };
 };
 
 interface IUseLinkableTableTilesProps {

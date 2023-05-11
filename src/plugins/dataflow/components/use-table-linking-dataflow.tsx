@@ -2,7 +2,7 @@ import { useCallback, useEffect } from "react";
 import { useCurrent } from "../../../hooks/use-current";
 import { useFeatureFlag } from "../../../hooks/use-stores";
 import { kTableTileType } from "../../../models/tiles/table/table-content";
-import { ITileLinkMetadata } from "../../../models/tiles/table-link-types";
+import { ITileLinkMetadata } from "../../../models/tiles/tile-link-types";
 import {
   addTableToDocumentMap, getLinkedTableIndex, getTableLinkColors, removeTableFromDocumentMap
 } from "../../../models/tiles/table-links";
@@ -57,4 +57,3 @@ export const useLinkableTableTiles = ({ onRequestTilesOfType }: IUseLinkableTabl
   return tableTiles.current
           .map((tileInfo, i) => ({ id: tileInfo.id, title: tileInfo.title || `Table ${i + 1}` }));
 };
-

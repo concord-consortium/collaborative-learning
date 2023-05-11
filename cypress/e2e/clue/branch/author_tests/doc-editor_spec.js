@@ -10,6 +10,7 @@ context('Doc Editor', () => {
   });
 
   const documentContent = () => cy.get(".canvas-area .canvas .document-content");
+
   it('verify doc editor loads', function() {
     cy.get(".toolbar").should("exist");
     documentContent().should("exist");

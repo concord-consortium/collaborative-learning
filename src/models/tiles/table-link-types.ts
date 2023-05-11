@@ -1,7 +1,4 @@
-export interface ITileLinkMetadata {
-  id: string;
-  title?: string
-}
+// Note: these are legacy types used by the original Table/Geometry linking code
 
 export interface ILinkProperties {
   // id: string;

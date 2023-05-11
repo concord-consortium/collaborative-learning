@@ -4,7 +4,7 @@ import LinkTableIcon from "../../assets/icons/link-table-icon.svg"; //we may nee
 import { useFeatureFlag } from "../../../../hooks/use-stores";
 import { useTableLinkingDataFlow } from "../use-table-linking-dataflow";
 import { ITileModel } from "../../../../models/tiles/tile-model";
-import { ITileLinkMetadata } from "../../../../models/tiles/table-link-types";
+import { ITileLinkMetadata } from "../../../../models/tiles/tile-link-types";
 import { IDataFlowActionHandlers } from "../dataflow-shared";
 
 import "./dataflow-program-link-table-button.scss";

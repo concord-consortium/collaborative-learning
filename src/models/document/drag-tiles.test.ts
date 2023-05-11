@@ -258,7 +258,7 @@ Object {
 Object {
   "sharedModels": Array [
     Object {
-      "content": "{\\"type\\":\\"SharedDataSet\\",\\"id\\":\\"shared-data-set-1\\",\\"providerId\\":\\"tile3\\",\\"dataSet\\":{\\"id\\":\\"data-set-1\\",\\"name\\":\\"Table 1\\",\\"attributes\\":[{\\"id\\":\\"attribute-1\\",\\"clientKey\\":\\"\\",\\"name\\":\\"x\\",\\"hidden\\":false,\\"units\\":\\"\\",\\"formula\\":{},\\"values\\":[\\"0\\"]},{\\"id\\":\\"attribute-2\\",\\"clientKey\\":\\"\\",\\"name\\":\\"y\\",\\"hidden\\":false,\\"units\\":\\"\\",\\"formula\\":{},\\"values\\":[\\"1\\"]}],\\"cases\\":[{\\"__id__\\":\\"case-1\\"}]}}",
+      "content": "{\\"type\\":\\"SharedDataSet\\",\\"id\\":\\"shared-data-set-1\\",\\"providerId\\":\\"tile3\\",\\"dataSet\\":{\\"id\\":\\"data-set-1\\",\\"name\\":\\"Table 1\\",\\"attributes\\":[{\\"id\\":\\"attribute-1\\",\\"clientKey\\":\\"\\",\\"name\\":\\"x\\",\\"hidden\\":false,\\"units\\":\\"\\",\\"formula\\":{},\\"values\\":[\\"0\\"],\\"title\\":\\"\\"},{\\"id\\":\\"attribute-2\\",\\"clientKey\\":\\"\\",\\"name\\":\\"y\\",\\"hidden\\":false,\\"units\\":\\"\\",\\"formula\\":{},\\"values\\":[\\"1\\"],\\"title\\":\\"\\"}],\\"cases\\":[{\\"__id__\\":\\"case-1\\"}]}}",
       "modelId": "shared-data-set-1",
       "providerId": "tile3",
       "tileIds": Array [

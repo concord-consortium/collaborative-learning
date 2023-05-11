@@ -624,8 +624,8 @@ async function prepareFirestoreHistoryInfo(
     {userContextProvider, mainDocument, firestore}: IPrepareFirestoreHistoryInfoArgs): Promise<IFirestoreHistoryInfo> {
   // TODO: Wait for userContext to be valid.
   // The userContext initially starts out with a user id of 0 and doesn't have a portal and other
-  // properties defined. After the user is authenticated the userContext will have valid fields. 
-  // The invalid userContext will cause an error below. So we should use something like a MobX 
+  // properties defined. After the user is authenticated the userContext will have valid fields.
+  // The invalid userContext will cause an error below. So we should use something like a MobX
   // `await when(() => userContext?.uid)`. So far we haven't seen a case where
   // prepareFirestoreHistoryInfo is called before the userContext is ready.
   const userContext = userContextProvider?.userContext;

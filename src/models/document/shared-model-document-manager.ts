@@ -61,6 +61,34 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
     return this.document?.getSharedModelsByType<IT>(type) || [];
   }
 
+  addSharedModel(sharedModel: SharedModelType) {
+    if (!this.document) {
+      console.warn("addSharedModel has no document. this will have no effect");
+      return;
+    }
+
+    // assign an indexOfType if necessary
+    if (sharedModel.indexOfType < 0) {
+      const usedIndices = new Set<number>();
+      const sharedModels = this.document.getSharedModelsByType(sharedModel.type);
+      sharedModels.forEach((model: SharedModelType) => {
+        if (model.indexOfType >= 0) {
+          usedIndices.add(model.indexOfType);
+        }
+      });
+      for (let i = 1; sharedModel.indexOfType < 0; ++i) {
+        if (!usedIndices.has(i)) {
+          sharedModel.setIndexOfType(i);
+          break;
+        }
+      }
+    }
+
+    // register it with the document if necessary.
+    // This won't re-add it if it is already there
+    return this.document.addSharedModel(sharedModel);
+  }
+
   assignIndexOfType(sharedModel: SharedModelType) {
     if (sharedModel.indexOfType < 0) {
       const usedIndices = new Set<number>();
@@ -110,7 +138,7 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
     // the tile content model automatically by the tree monitor. However when
     // the list of shared models is changed like here addTileSharedModel, the
     // tree monitor doesn't pick that up, so we must call it directly.
-    tileContentModel.updateAfterSharedModelChanges(sharedModel);
+    tileContentModel.updateAfterSharedModelChanges(sharedModel, "link");
   }
 
   // This is not an action because it is deriving state.
@@ -182,6 +210,7 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
       return;
     }
 
+    tileContentModel.updateAfterSharedModelChanges(sharedModel, "unlink");
     sharedModelEntry.removeTile(tile);
   }
 }

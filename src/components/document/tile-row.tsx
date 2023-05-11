@@ -5,6 +5,7 @@ import { BaseComponent } from "../base";
 import { TileLayoutModelType, TileRowModelType } from "../../models/document/tile-row";
 import { isShowingTeacherContent } from "../../models/stores/stores";
 import { getTileContentInfo } from "../../models/tiles/tile-content-info";
+import { ILinkableTiles } from "../../models/tiles/tile-link-types";
 import { ITileModel } from "../../models/tiles/tile-model";
 import { SectionHeader } from "../tiles/section-header";
 import { TileApiInterfaceContext } from "../tiles/tile-api";
@@ -69,6 +70,7 @@ interface IProps {
   readOnly?: boolean;
   dropHighlight?: string;
   onRequestTilesOfType: (tileType: string) => Array<{ id: string, title?: string }>;
+  onRequestLinkableTiles?: () => ILinkableTiles;
   onRequestUniqueTitle: (tileId: string) => string | undefined;
 }
 
@@ -82,7 +84,6 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
 
   static contextType = TileApiInterfaceContext;
   declare context: React.ContextType<typeof TileApiInterfaceContext>;
-
   public state: IState = {};
 
   public tileRowDiv: HTMLElement | null;
@@ -151,13 +152,17 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
       const tileModel = this.getTile(tileRef.tileId);
       const tileWidthPct = this.getTileWidth(tileRef.tileId, tiles);
       return tileModel
-              ? <TileComponent key={tileModel.id} model={tileModel}
-                                    widthPct={tileWidthPct} height={rowHeight}
-                                    isUserResizable={model.isUserResizable}
-                                    onResizeRow={this.handleStartResizeRow}
-                                    onSetCanAcceptDrop={this.handleSetCanAcceptDrop}
-                                    onRequestRowHeight={this.handleRequestRowHeight}
-                                    {...others} />
+              ? <TileComponent
+                  key={tileModel.id}
+                  model={tileModel}
+                  widthPct={tileWidthPct}
+                  height={rowHeight}
+                  isUserResizable={model.isUserResizable}
+                  onResizeRow={this.handleStartResizeRow}
+                  onSetCanAcceptDrop={this.handleSetCanAcceptDrop}
+                  onRequestRowHeight={this.handleRequestRowHeight}
+                  {...others}
+                />
               : null;
     });
   }

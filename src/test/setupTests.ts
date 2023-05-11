@@ -106,3 +106,6 @@ declare global {
   expect(value).toBeDefined();
   expect(value).not.toBeNull();
 };
+
+// required for ResizeObserver called in mathlive
+global.ResizeObserver = require('resize-observer-polyfill');

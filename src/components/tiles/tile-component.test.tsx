@@ -30,6 +30,7 @@ describe("TileComponent", () => {
     const onResizeRow = jest.fn();
     const onSetCanAcceptDrop = jest.fn();
     const onRequestTilesOfType = jest.fn();
+    const onRequestLinkableTiles = jest.fn();
     const onRequestUniqueTitle = jest.fn();
     const onRequestRowHeight = jest.fn();
 
@@ -45,6 +46,7 @@ describe("TileComponent", () => {
             onResizeRow={onResizeRow}
             onSetCanAcceptDrop={onSetCanAcceptDrop}
             onRequestTilesOfType={onRequestTilesOfType}
+            onRequestLinkableTiles={onRequestLinkableTiles}
             onRequestUniqueTitle={onRequestUniqueTitle}
             onRequestRowHeight={onRequestRowHeight}
             />

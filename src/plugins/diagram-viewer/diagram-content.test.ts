@@ -38,7 +38,10 @@ const makeSharedModelManager = (variables?: SharedVariablesType): ISharedModelMa
     getSharedModelTileIds(sharedModel?: SharedModelType) {
       // ignore linked tiles for now
       return [];
-    }
+    },
+    addSharedModel(sharedModel: SharedModelType): void {
+      // ignore this for now
+    },
   };
 };
 
@@ -52,7 +55,7 @@ const setupContainer = (content: DiagramContentModelType, variables?: SharedVari
   // Need to monitor the variables just like sharedModelDocumentManager does
   if (variables) {
     onSnapshot(variables, () => {
-      content.updateAfterSharedModelChanges(variables);
+      content.updateAfterSharedModelChanges(variables, "change");
     });
   }
 
