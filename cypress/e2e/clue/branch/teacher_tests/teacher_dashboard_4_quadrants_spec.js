@@ -51,7 +51,7 @@ context('Teacher Dashboard View 4 Quadrants', () => {
       });
 
       // FIXME: this test was crashing my local cypress.
-      it.skip('verify toggling the 4 quardrants in a 4 up view', () => {
+      it('verify toggling the 4 quardrants in a 4 up view', () => {
 
         //North West Quardrants
         dashboard.getGroups().eq(0).within(() => {
