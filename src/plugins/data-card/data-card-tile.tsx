@@ -13,9 +13,9 @@ import { AddIconButton, RemoveIconButton } from "./components/add-remove-icons";
 import { useCautionAlert } from "../../components/utilities/use-caution-alert";
 import { EditFacet } from "./data-card-types";
 import { DataCardSortArea } from "./components/sort-area";
+import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
 
 import "./data-card-tile.scss";
-import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
 
 export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
   const { model, onRequestUniqueTitle, readOnly, documentContent, tileElt, onRegisterTileApi,
