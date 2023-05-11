@@ -55,13 +55,36 @@ export const useSubAxis = ({
           axisScale = axis(numericScale).tickSizeOuter(0).tickFormat(format('.9'));
         if (!axisIsVertical && numericScale.ticks) {
           axisScale.tickValues(numericScale.ticks(computeBestNumberOfTicks(numericScale)));
+        } else if (type === "empty") {
+          // set default/placeholder ticks
+          multiScale.setScaleType('linear');
+          multiScale.scale.domain([-12, 14]);
+          const d3PlaceholderScale: AxisScaleType = multiScale.scale.copy()
+            .range(axisIsVertical ? [0, axisBounds.height] : [0, axisBounds.width]) as AxisScaleType;
+          const placeholderNumericScale = d3PlaceholderScale as unknown as ScaleLinear<number, number>,
+            placeholderAxisScale = axis(placeholderNumericScale).tickSizeOuter(0).tickFormat(format('.9'));
+          placeholderAxisScale.tickValues(
+            placeholderNumericScale.ticks(computeBestNumberOfTicks(placeholderNumericScale))
+          );
+
+          // multiScale.scale.range(axisIsVertical ? [0, axisBounds.height] : [0, axisBounds.width]);
+          // axisScale.tickSizeOuter(0).tickFormat(format('.9'));
+          // axisScale.ticks(13);
+          //axisScale.tickValues([-12, -10, -8, -6, -4, -2, 0, 2, 4, 6, 8, 10, 12]).ticks(13);
         }
         select(subAxisElt)
+          .attr("class", type === "empty" ? "disabled" : "")
           .attr("transform", initialTransform)
           .transition().duration(duration)
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore types are incompatible
           .call(axisScale);
+        if (type === "empty") {
+          // remove the first tick from the axis
+          select(subAxisElt).select('.tick').remove();
+          // remove the last tick from the axis
+          select(subAxisElt).selectAll('.tick').filter((d, i, nodes) => i === nodes.length - 1).remove();
+        }
       },
 
       drawScatterPlotGridLines = () => {
@@ -117,9 +140,12 @@ export const useSubAxis = ({
     d3Scale.range(axisIsVertical ? [rangeMax, rangeMin] : [rangeMin, rangeMax]);
     switch (type) {
       case 'numeric':
-      case 'empty':
         drawAxis();
         showScatterPlotGridLines && drawScatterPlotGridLines();
+        break;
+      case 'empty':
+        drawAxis();
+        drawScatterPlotGridLines();
         break;
       case 'categorical':
         drawCategoricalAxis();

@@ -32,7 +32,7 @@ export const SubAxis = ({
   return (
     <g className='sub-axis-wrapper' ref={subWrapperElt}>
       <g className='axis' ref={elt => setSubAxisElt(elt)}/>
-      {axisModel?.type === 'numeric'
+      {axisModel?.type === 'numeric' || axisModel?.type === 'empty'
         ? <AxisDragRects
           axisModel={axisModel as INumericAxisModel}
           axisWrapperElt={subWrapperElt.current}

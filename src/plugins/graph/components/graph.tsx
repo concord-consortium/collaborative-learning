@@ -27,6 +27,7 @@ import {Legend} from "./legend/legend";
 import {AttributeType} from "../../../models/data/attribute";
 import {useDataTips} from "../hooks/use-data-tips";
 import {onAnyAction} from "../../../utilities/mst-utils";
+import {PlaceholderDataSvg} from "./placeholder-data-svg";
 
 import "./graph.scss";
 import "./graph-clue-styles.scss";
@@ -170,9 +171,12 @@ export const Graph = observer(function Graph({graphController, graphRef, dotsRef
           {renderGraphAxes()}
 
           <svg ref={plotAreaSVGRef}>
-            <svg ref={dotsRef} className={`graph-dot-area ${instanceId}`}>
-              {renderPlotComponent()}
-            </svg>
+            {dataset &&
+              <svg ref={dotsRef} className={`graph-dot-area ${instanceId}`}>
+                {renderPlotComponent()}
+              </svg>
+            }
+            {!dataset && <PlaceholderDataSvg/>}
             <Marquee marqueeState={marqueeState}/>
           </svg>
 

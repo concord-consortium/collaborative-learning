@@ -1,3 +1,7 @@
+.sub-axis-wrapper {
+  .disabled { opacity: .5; }
+}
+
 // We can't put dragRect inside axis for some reason
 .dragRect {
   fill: #e38e71;

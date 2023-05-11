@@ -64,6 +64,14 @@ export const useAxis = ({
           : numbersHeight + axisGap;
         break;
       }
+      case 'empty': {
+        const format = (d3Scale as ScaleLinear<number, number>).tickFormat?.();
+        ticks = (((d3Scale as ScaleLinear<number, number>).ticks?.()) ?? []).map(tick => format(tick));
+        desiredExtent += ['left', 'rightNumeric'].includes(axisPlace)
+          ? Math.max(getStringBounds(ticks[0]).width, getStringBounds(ticks[ticks.length - 1]).width) + axisGap
+          : numbersHeight + axisGap;
+        break;
+      }
       case 'categorical': {
         desiredExtent += collision ? maxLabelExtent : getStringBounds().height;
         break;
