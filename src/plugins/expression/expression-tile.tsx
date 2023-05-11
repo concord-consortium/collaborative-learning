@@ -23,10 +23,14 @@ declare global {
 export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) => {
   const content = props.model.content as ExpressionContentModelType;
   const mathfieldRef = useRef<MathfieldElement>(null);
-  const [trackedCursorSpot, setTrackedCursorSpot] = useState<any[] | undefined>([0,0]);
 
   if (mathfieldRef.current?.keybindings){
-    replaceKeyBinding(mathfieldRef.current.keybindings, "cmd+z", "moveToMathfieldStart");
+    // TODO: this clobbers the default cmd+z binding, which is mapped to mathlive's undo.
+    // This allows the field to re-render with the correct value, dervied from CLUE undo/history.
+    // The passed action moveToMathFieldEnd does not actually work
+    // Because a re-render of mathfield is triggered, which resets the cursor position to the end.
+    // We need to figure out how to get the cursor to stay in the same position after a re-render.
+    replaceKeyBinding(mathfieldRef.current.keybindings, "cmd+z", "moveToMathFieldEnd");
   }
 
   useEffect(() => {
@@ -36,34 +40,18 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     return () => disposer();
   }, [content]);
 
-  const modelMatches = () => {
-    return mathfieldRef.current?.getValue() === content.latexStr;
-  };
-
   const handleSnapshot = () => {
-    if (!modelMatches()) {
+    const modelMatches = mathfieldRef.current?.getValue() === content.latexStr;
+    if (!modelMatches) {
       mathfieldRef.current?.setValue(content.latexStr, {suppressChangeNotifications: true});
-      if (mathfieldRef.current){
-        console.log("| set cursor to this: ", trackedCursorSpot);
-        console.log("| what shape? ", mathfieldRef.current.selection.ranges[0]);
-        mathfieldRef.current.selection.ranges[0] = trackedCursorSpot as any;
-      }
     }
   };
+
+
 
   const handleChange = (e: any) => {
-    console.log("| setting trackedCursorSpot to: ", mathfieldRef.current?.selection.ranges[0])
-    setTrackedCursorSpot(mathfieldRef.current?.selection.ranges[0]);
     content.setLatexStr(e.target.value);
-    console.log("| but maybe it did not work:", trackedCursorSpot);
   };
-
-  const handleKeyDown = (e: any) => {
-    if ((e.ctrlKey || e.metaKey) && e.keyCode === 90) {
-      //console.log("| 3 cursor?", mathfieldRef.current?.selection, e);
-    }
-  };
-
 
   return (
     <div className="expression-tool">
@@ -79,7 +67,6 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
           ref={mathfieldRef}
           value={content.latexStr}
           onInput={handleChange}
-          onKeyDown={handleKeyDown}
         />
       </div>
     </div>
