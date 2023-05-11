@@ -78,9 +78,9 @@ export const useContentChangeHandlers = ({
 
   const setColumnName = useCallback((column: TColumn, columnName: string) => {
     if (readOnly) return;
-    getContent().setAttributeName(column.key, columnName);
+    dataSet.setAttributeName(column.key, columnName);
     requestRowHeight();
-  }, [readOnly, getContent, requestRowHeight]);
+  }, [readOnly, dataSet, requestRowHeight]);
 
   const setColumnExpressions = useCallback((rawExpressions: Map<string, string>, xName: string) => {
     if (readOnly) return;
