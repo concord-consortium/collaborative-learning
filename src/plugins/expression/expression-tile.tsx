@@ -1,5 +1,5 @@
 import { observer } from "mobx-react";
-import React, { DOMAttributes, useRef, useEffect } from "react";
+import React, { DOMAttributes, useRef, useEffect, FormEventHandler, FormEvent } from "react";
 import { onSnapshot } from "mobx-state-tree";
 import "mathlive"; // separate static import of library for initialization to run
 // eslint-disable-next-line no-duplicate-imports
@@ -22,30 +22,25 @@ declare global {
 
 export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) => {
   const content = props.model.content as ExpressionContentModelType;
-  const mathfieldRef = useRef<MathfieldElement>(null);
+  const mf = useRef<MathfieldElement>(null);
+  const trackedCursorPos = useRef<number>(0);
 
-  if (mathfieldRef.current?.keybindings){
-    // TODO: this clobbers the default cmd+z binding, which is mapped to mathlive's undo.
-    // This allows the field to re-render with the correct value, dervied from CLUE undo/history.
-    // moveToMathField happens is the effect of re-render, not the fact that we passed it in here.
-    replaceKeyBinding(mathfieldRef.current.keybindings, "cmd+z", "moveToMathFieldEnd");
+  if (mf.current?.keybindings){
+    // Disable mathlive's undo
+    replaceKeyBinding(mf.current.keybindings, "cmd+z", "");
   }
-
-  const handleSnapshot = () => {
-    const modelMatches = mathfieldRef.current?.getValue() === content.latexStr;
-    if (!modelMatches) {
-      mathfieldRef.current?.setValue(content.latexStr, {suppressChangeNotifications: true});
-    }
-  };
 
   useEffect(() => {
     const disposer = onSnapshot((content as any), () => {
-      handleSnapshot();
+      if (mf.current?.getValue() === content.latexStr) return;
+      mf.current?.setValue(content.latexStr, {suppressChangeNotifications: true});
+      if (mf.current?.position) mf.current.position = trackedCursorPos.current - 1;
     });
     return () => disposer();
-  }, [content, handleSnapshot()]);
+  }, [content]);
 
   const handleChange = (e: any) => {
+    trackedCursorPos.current =  mf.current?.position || 0;
     content.setLatexStr(e.target.value);
   };
 
@@ -60,7 +55,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
       </div>
       <div className="expression-math-area">
         <math-field
-          ref={mathfieldRef}
+          ref={mf}
           value={content.latexStr}
           onInput={handleChange}
         />
