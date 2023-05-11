@@ -1,5 +1,5 @@
 import { observer } from "mobx-react";
-import React, { DOMAttributes, useRef, useEffect, useState } from "react";
+import React, { DOMAttributes, useRef, useEffect } from "react";
 import { onSnapshot } from "mobx-state-tree";
 import "mathlive"; // separate static import of library for initialization to run
 // eslint-disable-next-line no-duplicate-imports
@@ -27,18 +27,9 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   if (mathfieldRef.current?.keybindings){
     // TODO: this clobbers the default cmd+z binding, which is mapped to mathlive's undo.
     // This allows the field to re-render with the correct value, dervied from CLUE undo/history.
-    // The passed action moveToMathFieldEnd does not actually work
-    // Because a re-render of mathfield is triggered, which resets the cursor position to the end.
-    // We need to figure out how to get the cursor to stay in the same position after a re-render.
+    // moveToMathField happens is the effect of re-render, not the fact that we passed it in here.
     replaceKeyBinding(mathfieldRef.current.keybindings, "cmd+z", "moveToMathFieldEnd");
   }
-
-  useEffect(() => {
-    const disposer = onSnapshot((content as any), () => {
-      handleSnapshot();
-    });
-    return () => disposer();
-  }, [content]);
 
   const handleSnapshot = () => {
     const modelMatches = mathfieldRef.current?.getValue() === content.latexStr;
@@ -47,7 +38,12 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     }
   };
 
-
+  useEffect(() => {
+    const disposer = onSnapshot((content as any), () => {
+      handleSnapshot();
+    });
+    return () => disposer();
+  }, [content, handleSnapshot()]);
 
   const handleChange = (e: any) => {
     content.setLatexStr(e.target.value);
