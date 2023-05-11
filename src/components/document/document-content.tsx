@@ -1,6 +1,6 @@
+import React from "react";
 import { inject, observer } from "mobx-react";
 import { IReactionDisposer, reaction } from "mobx";
-import React from "react";
 import { findDOMNode } from "react-dom";
 import { throttle } from "lodash";
 import classNames from "classnames";

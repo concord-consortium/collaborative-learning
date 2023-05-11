@@ -1,8 +1,8 @@
+import React from "react";
 import classNames from "classnames";
 import { debounce } from "lodash";
 import { observer, inject } from "mobx-react";
 import { isAlive } from "mobx-state-tree";
-import React from "react";
 import ResizeObserver from "resize-observer-polyfill";
 import { transformCurriculumImageUrl } from "../../models/tiles/image/image-import-export";
 import { getTileComponentInfo } from "../../models/tiles/tile-component-info";
