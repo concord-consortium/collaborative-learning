@@ -1,9 +1,7 @@
 import React from "react";
-import { DragOverlay, useDraggable } from "@dnd-kit/core";
-
-import { getNodeType, isNodeDraggableId, nodeDraggableId } from "../dataflow-types";
+import { useDraggable } from "@dnd-kit/core";
+import { nodeDraggableId } from "../dataflow-types";
 import { NodeType, NodeTypes } from "../../model/utilities/node";
-import { useUIStore } from "../../../../hooks/use-stores";
 
 import "./dataflow-program-toolbar.scss";
 
@@ -82,15 +80,17 @@ interface IProps {
   tileId: string;
 }
 export const DataflowProgramToolbar = ({ disabled, isTesting, onClearClick, onNodeCreateClick, tileId }: IProps) => {
-  const ui = useUIStore();
-  let dragOverlay = null;
-  if (ui.dragId && isNodeDraggableId(ui.dragId)) {
-    dragOverlay = (
-      <div className="dragged-node">
-        <NodeIcon i={0} nodeType={getNodeType(ui.dragId) || ""} />
-      </div>
-    );
-  }
+  // TODO: reinstate below
+  // disabling until we can solve drag overlay bug
+  // const ui = useUIStore();
+  // let dragOverlay = null;
+  // if (ui.dragId && isNodeDraggableId(ui.dragId)) {
+  //   dragOverlay = (
+  //     <div className="dragged-node">
+  //       <NodeIcon i={0} nodeType={getNodeType(ui.dragId) || ""} />
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="program-toolbar" data-test="program-toolbar">
@@ -104,9 +104,7 @@ export const DataflowProgramToolbar = ({ disabled, isTesting, onClearClick, onNo
           tileId={tileId}
         />
       ))}
-      <DragOverlay>
-        { dragOverlay }
-      </DragOverlay>
+      {/* {<DragOverlay>{ dragOverlay }</DragOverlay> } */}
       { isTesting && <button className="qa" onClick={ onClearClick }>Clear</button> }
     </div>
   );
