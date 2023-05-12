@@ -49,12 +49,14 @@ export const AttributeLabel = observer(
 
     const getLabel = useCallback(() => {
       if (useClickHereCue) {
+        if (place === "bottom") return "x";
+        if (place === "left") return "y";
         return t('DG.AxisView.emptyGraphCue');
       }
       const attrIDs = getAttributeIDs();
       return attrIDs.map(anID => dataset?.attrFromID(anID)?.name)
         .filter(aName => aName !== '').join(', ');
-    }, [dataset, getAttributeIDs, useClickHereCue]);
+    }, [dataset, getAttributeIDs, place, useClickHereCue]);
 
     const refreshAxisTitle = useCallback(() => {
       const labelFont = useClickHereCue ? graphVars.graphEmptyLabelFont : graphVars.graphLabelFont,

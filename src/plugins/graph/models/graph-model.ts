@@ -3,7 +3,7 @@ import {createContext, useContext} from "react";
 import stringify from "json-stringify-pretty-compact";
 
 import {AxisPlace} from "../axis/axis-types";
-import {AxisModelUnion, EmptyAxisModel, IAxisModelUnion} from "../axis/models/axis-model";
+import {AxisModelUnion, IAxisModelUnion, NumericAxisModel} from "../axis/models/axis-model";
 import {
   GraphAttrRole, hoverRadiusFactor, PlotType, PlotTypes, kGraphTileType,
   pointRadiusLogBase, pointRadiusMax, pointRadiusMin, pointRadiusSelectionAddend
@@ -107,9 +107,6 @@ export const GraphModel = TileContentModel
           return result + pointRadiusSelectionAddend;
       }
     },
-    axisShouldShowGridLines(place: AxisPlace) {
-      return self.plotType === 'scatterPlot' && ['left', 'bottom'].includes(place);
-    },
     exportJson(options?: ITileExportOptions) {
       const snapshot = getSnapshot(self);
 
@@ -117,6 +114,11 @@ export const GraphModel = TileContentModel
       // compact. It results in something close to what we used to get when the
       // export was created using a string builder.
       return stringify(snapshot, {maxLength: 200});
+    }
+  }))
+  .views(self => ({
+    axisShouldShowGridLines(place: AxisPlace) {
+      return self.plotType === 'scatterPlot' && ['left', 'bottom'].includes(place) || !self.data;
     }
   }))
   .actions(self => ({
@@ -187,8 +189,8 @@ export interface IGraphModelSnapshot extends SnapshotIn<typeof GraphModel> {}
 export function createGraphModel(snap?: IGraphModelSnapshot) {
   return GraphModel.create({
     axes: {
-      bottom: EmptyAxisModel.create({place: "bottom"}),
-      left: EmptyAxisModel.create({place: "left"})
+      bottom: NumericAxisModel.create({place: "bottom", min: -11, max: 13}),
+      left: NumericAxisModel.create({place: "left", min: -11, max: 13})
     },
     ...snap
   });

@@ -150,12 +150,12 @@ export class GraphController {
           break;
         case 'empty': {
           if (currentType !== 'empty') {
-            layout.setAxisScaleType(place, 'ordinal');
-            if (['left', 'bottom'].includes(place)) {
-              graphModel.setAxis(place, EmptyAxisModel.create({place}));
+            if (!['left', 'bottom'].includes(place)) {
+              layout.setAxisScaleType(place, 'ordinal');
+              graphModel.removeAxis(place);
             }
             else {
-              graphModel.removeAxis(place);
+              graphModel.setAxis(place, NumericAxisModel.create({place, min: -11, max: 13}));
             }
           }
         }
