@@ -101,61 +101,91 @@ class DataflowToolTile {
 
   // Record/Play/Pause/Stop/Clear
   getSamplingRateLabel() {
-    return cy.get('.samplerate-label');
+    return cy.get('.primary-workspace .samplerate-label');
   }
   selectSamplingRate(rate) {
-    return cy.get('#rate-select').select(rate);
+    return cy.get('.primary-workspace #rate-select').select(rate);
   }
   verifyRecordButtonText() {
-    cy.get(".record-data-txt").should("have.text", "Record");
+    cy.get(".primary-workspace .record-data-txt").should("have.text", "Record");
   }
   verifyRecordButtonIcon() {
-    cy.get(".record-data-icon path").invoke("attr", "data-name").should("contain", "record");
+    cy.get(".primary-workspace .record-data-icon path").invoke("attr", "data-name").should("contain", "record");
   }
   getRecordButton() {
-    return cy.get('.record-data-btn').contains("Record").parent();
+    return cy.get(".primary-workspace .record-data-btn").contains("Record").parent();
+  }
+  verifyRecordButton() {
+    this.verifyRecordButtonText();
+    this.verifyRecordButtonIcon();
   }
   verifyPlayButtonText() {
-    cy.get(".playback-data-txt").should("have.text", "Play");
+    cy.get(".primary-workspace .playback-data-txt").should("have.text", "Play");
   }
   verifyPlayButtonIcon() {
-    cy.get(".playback-data-icon path").invoke("attr", "data-name").should("contain", "run");
+    cy.get(".primary-workspace .playback-data-icon path").invoke("attr", "data-name").should("contain", "run");
   }
   getPlayButton() {
-    return cy.get('.playback-data-btn').contains("Play").parent();
+    return cy.get(".primary-workspace .playback-data-btn").contains("Play").parent();
+  }
+  clickPlayButton() {
+    this.getPlayButton().should("be.enabled");
+    this.getPlayButton().click();
+  }
+  verifyPlayButtonDoesNotExist() {
+    cy.get(".primary-workspace .playback-data-btn").should("not.exist");
   }
   verifyPauseButtonText() {
-    cy.get(".playback-data-txt").should("have.text", "Pause");
+    cy.get(".primary-workspace .playback-data-txt").should("have.text", "Pause");
   }
   verifyPauseButtonIcon() {
-    cy.get(".playback-data-icon path").invoke("attr", "data-name").should("contain", "pause");
+    cy.get(".primary-workspace .playback-data-icon path").invoke("attr", "data-name").should("contain", "pause");
   }
   getPauseButton() {
-    return cy.get('.playback-data-btn').contains("Pause").parent();
+    return cy.get(".primary-workspace .playback-data-btn").contains("Pause").parent();
+  }
+  clickPauseButton() {
+    this.verifyPauseButtonText();
+    this.verifyPauseButtonIcon();
+    this.getPauseButton().should("be.enabled");
+    this.getPauseButton().click();
+  }
+  verifyPauseButtonDoesNotExist() {
+    cy.get(".primary-workspace .playback-data-btn").should("not.exist");
   }
   getTimeSlider() {
-    return cy.get('.program-editor-topbar .rc-slider.rc-slider-horizontal');
+    return cy.get(".primary-workspace .program-editor-topbar .rc-slider.rc-slider-horizontal");
   }
   getCountdownTimer() {
-    return cy.get('.program-editor-topbar .countdown-timer');
+    return cy.get(".primary-workspace .program-editor-topbar .countdown-timer");
   }
   verifyStopButtonText() {
-    cy.get(".record-data-txt").should("have.text", "Stop");
+    cy.get(".primary-workspace .record-data-txt").should("have.text", "Stop");
   }
   verifyStopButtonIcon() {
-    cy.get(".record-data-icon path").invoke("attr", "data-name").should("contain", "stop");
+    cy.get(".primary-workspace .record-data-icon path").invoke("attr", "data-name").should("contain", "stop");
   }
   getStopButton() {
-    return cy.get('.record-data-btn').contains("Stop").parent();
+    return cy.get(".primary-workspace .record-data-btn").contains("Stop").parent();
+  }
+  verifyStopButtonDoesNotExist() {
+    cy.get(".primary-workspace .record-data-btn").should("not.have.text", "Stop");
   }
   verifyRecordingClearButtonText() {
-    cy.get(".record-data-txt").should("have.text", "Clear");
+    cy.get(".primary-workspace .record-data-txt").should("have.text", "Clear");
   }
   verifyRecordingClearButtonIcon() {
-    cy.get(".record-data-icon path").invoke("attr", "data-name").should("contain", "clear");
+    cy.get(".primary-workspace .record-data-icon path").invoke("attr", "data-name").should("contain", "clear");
   }
   getRecordingClearButton() {
-    return cy.get('.record-data-btn').contains("Clear").parent();
+    return cy.get(".primary-workspace .record-data-btn").contains("Clear").parent();
+  }
+  verifyClearButtonDoesNotExist() {
+    cy.get(".primary-workspace .record-data-btn").should("not.have.text", "Clear");
+  }
+  verifyRecordingClearButton() {
+    this.verifyRecordingClearButtonText();
+    this.verifyRecordingClearButtonIcon();
   }
   getClearDataWarningTitle() {
     return cy.get(".modal-title");
@@ -168,6 +198,56 @@ class DataflowToolTile {
   }
   getClearDataWarningClear() {
     return cy.get('.modal-button').contains("Clear");
+  }
+  createProgram(programNodes) {
+    this.getDataflowTile().should("exist");
+    programNodes.forEach(node => {
+      this.getCreateNodeButton(node.name).click();
+      this.getNode(node.name).should("exist");
+      this.getNodeTitle().should("contain", node.title);
+    });
+    this.getNodeOutput().eq(0).click({force: true});
+    this.getNodeInput().eq(0).click({force: true});
+  }
+  recordData(samplingRate, timer) {
+    this.selectSamplingRate(samplingRate);
+    this.getRecordButton().click();
+    this.getCountdownTimer().should("contain", "000:0" + timer.toString())
+    this.getStopButton().click();
+  }
+  recordDataWithoutStop(samplingRate, timer) {
+    this.selectSamplingRate(samplingRate);
+    this.getRecordButton().click();
+    this.getCountdownTimer().should("contain", "000:0" + timer.toString())
+  }
+  clearRecordedData() {
+    this.getRecordingClearButton().click();
+    this.getClearDataWarningClear().click();
+  }
+  checkLinkedTableRecordedData(tableTile, tableTitle, attributes, rows) {
+    tableTile.getTableTitle().should("have.text", tableTitle);
+    tableTile.checkWorkspaceColumnHeaders(attributes);
+    tableTile.checkTableColumnValues(2, rows);
+  }
+  checkEmptyLinkedTable(tableTile, tableTitle, attributes) {
+    tableTile.getTableTitle().should("have.text", tableTitle);
+    tableTile.checkWorkspaceColumnHeaders(attributes);
+    tableTile.checkEmptyTableValues();
+  }
+  checkRecordedStateButtons() {
+    this.verifyRecordingClearButton();
+    this.clickPlayButton();
+    this.clickPauseButton();
+    this.verifyRecordingClearButton();
+  }
+  checkInitialStateButtons() {
+    this.getSamplingRateLabel().should("have.text", "Sampling Rate");
+    this.verifyRecordButtonText();
+    this.verifyRecordButtonIcon();
+    this.verifyPlayButtonDoesNotExist();
+    this.verifyPauseButtonDoesNotExist();
+    this.verifyStopButtonDoesNotExist();
+    this.verifyClearButtonDoesNotExist();
   }
 }
 
