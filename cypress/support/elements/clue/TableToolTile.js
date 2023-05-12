@@ -74,5 +74,21 @@ class TableToolTile{
     getTableToolbarButton(button){// ['set-expression', 'delete']
       return cy.get(`.table-toolbar .toolbar-button.${button}`);
     }
+    checkWorkspaceColumnHeaders(attributes) {
+      this.getWorkspaceColumnHeader().should("have.length", attributes.length);
+      attributes.forEach((attributeName, index) => {
+        this.getWorkspaceColumnHeader().eq(index).should("have.text", attributeName);
+      });
+    }
+    checkTableColumnValues(columnIndex, rows) {
+      this.getTableRow().should("have.length.least", rows);
+      for(let rowIndex = 0; rowIndex < rows; rowIndex++) {
+        this.getTableCellWithRowColIndex(rowIndex, columnIndex).should("have.text", rowIndex.toString());
+      }
+    }
+    checkEmptyTableValues() {
+      this.getTableCellWithRowColIndex(0, 2).should("have.text", "");
+      this.getTableCellWithRowColIndex(0, 3).should("have.text", "");
+    }
 }
 export default TableToolTile;
