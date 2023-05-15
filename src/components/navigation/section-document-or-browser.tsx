@@ -292,11 +292,16 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
       return;
     }
     const [remoteContext, uid, key] = docIdentifier.split("/");
-    // This type is a hack, we don't really know what kind of document it is
-    // but I'm hoping that it doesn't matter
-    const documentInfo: DocumentModelSnapshotType = {remoteContext, uid, key, type: PersonalDocument};
-    const document = createDocumentModel(documentInfo);
-    store.networkDocuments.add(document);
+
+    let document = store.documents.getDocument(key) || store.networkDocuments.getDocument(key);
+    if (!document) {
+      // This type is a hack, we don't really know what kind of document it is
+      // but I'm hoping that it doesn't matter
+      const documentInfo: DocumentModelSnapshotType = {remoteContext, uid, key, type: PersonalDocument};
+      document = createDocumentModel(documentInfo);
+      store.networkDocuments.add(document);
+    }
+
     // TODO: this isn't showing the loading indicator that usually shows up
     // when loading a networked document
     handleSelectDocument(document);
