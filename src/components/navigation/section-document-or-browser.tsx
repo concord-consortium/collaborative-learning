@@ -311,7 +311,10 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
         selectedIndex={tabIndex}
         selectedTabClassName="selected"
       >
-        <input size={100} ref={openDocInput}></input><button onClick={handleDocOpen}>open</button>
+        <div className="document-location-bar">
+          <input ref={openDocInput}></input>
+          <button onClick={handleDocOpen}>open</button>
+        </div>
         <div className={`tab-header-row ${!hasSubTabs ? "no-sub-tabs" : ""}`}>
           <TabList className={`tab-list ${navTabSpec?.tab}`}>
             {subTabs.map((subTab) => {
