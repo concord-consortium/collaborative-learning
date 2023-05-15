@@ -37,7 +37,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
       const title = onRequestUniqueTitle(model.id);
       title && model.setTitle(title);
     }
-  }, [model.id, onRequestUniqueTitle]);
+  }, [model, onRequestUniqueTitle]);
 
   function nextCase(){
     if (content.caseIndex < content.totalCases - 1) {

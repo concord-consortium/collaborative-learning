@@ -23,7 +23,7 @@ export const CustomEditableTileTitle: React.FC<IProps> = observer((props) => {
       const title = onRequestUniqueTitle(model.id);
       title && model.setTitle(title);
     }
-  }, [content, model.id, onRequestUniqueTitle]);
+  }, [content, model, onRequestUniqueTitle]);
 
   const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setTitleValue(event.target.value);
