@@ -16,13 +16,12 @@ export const useToolApi = ({
 }: IProps) => {
   const contentRef = useCurrent(content);
   const tileApi: ITileApi = useMemo(() => ({
-    // TODO: we should be able to remove getTitle from the tool api. Most tiles
-    // let the the TileModel (wrapper) store the title and read it from there.
-    // Many of them have a title property on their content model and a setTitle
-    // action both of which update the title in the TileModel (wrapper). This
-    // table tile is more complicated because the title is actually coming from
-    // the dataSet. So we'll need a title abstraction that can handle this case
-    // too.
+    // TODO: we should be able to remove getTitle from the tool api. All other
+    // tiles can just access the title from the TileModel (wrapper). This table
+    // tile is more complicated because if the title of the tile isn't, set then
+    // the title is pulled from the table's dataset. So to remove this from the
+    // api, we'll need a title view on TileModel that optionally lets the content
+    // override the title stored on the TileModel.
     getTitle: () => contentRef.current.title,
     getContentHeight,
     exportContentAsTileJson,

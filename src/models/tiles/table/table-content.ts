@@ -9,7 +9,7 @@ import {
 import { IDocumentExportOptions, IDefaultContentOptions } from "../tile-content-info";
 import { TileMetadataModel } from "../tile-metadata";
 import { tileModelHooks } from "../tile-model-hooks";
-import { getTileTitleFromContent, setTileTitleFromContent } from "../tile-model";
+import { getTileModel } from "../tile-model";
 import { TileContentModel } from "../tile-content";
 import { addCanonicalCasesToDataSet, IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
 import {
@@ -227,7 +227,7 @@ export const TableContentModel = TileContentModel
   }))
   .views(self => ({
     get title() {
-      return getTileTitleFromContent(self) ?? self.dataSet.name; // title-refactor
+      return getTileModel(self)?.title ?? self.dataSet.name;
     }
   }))
   .views(self => ({
@@ -331,10 +331,6 @@ export const TableContentModel = TileContentModel
       // if (self.metadata.hasExpressions) {
       //   self.metadata.updateDatasetByExpressions(self.dataSet);
       // }
-    },
-    setTableName(name: string) {
-      setTileTitleFromContent(self, name); // title-refactor
-      self.logChange({ action: "update", target: "table", props: { name } });
     },
     setColumnWidth(attrId: string, width: number) {
       self.columnWidths.set(attrId, width);

@@ -44,6 +44,11 @@ import DrawingToolComponent from "./drawing-tile";
 // knows it is a supported tile type
 import "../drawing-registration";
 
+// mock Logger calls
+const mockLogTileDocumentEvent = jest.fn();
+jest.mock("../../../models/tiles/log/log-tile-document-event", () => ({
+  logTileDocumentEvent: (...args: any[]) => mockLogTileDocumentEvent()
+}));
 
 describe("DrawingToolComponent", () => {
 
