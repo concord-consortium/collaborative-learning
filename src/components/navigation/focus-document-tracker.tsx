@@ -37,7 +37,7 @@ export const FocusDocumentTracker = observer(({ navTabPanelElt }: IProps) => {
         // find elements at a point below the rows of tab headers
         const bounds = navTabPanelElt.getBoundingClientRect();
         const kHeaderHeight = 34;
-        const kMaxHeadersHeight = 3 * kHeaderHeight;
+        const kMaxHeadersHeight = 4 * kHeaderHeight;
         const kOffset = 10;
         const testLeft = bounds.left + kOffset;
         const testTop = bounds.top + kMaxHeadersHeight + kOffset;

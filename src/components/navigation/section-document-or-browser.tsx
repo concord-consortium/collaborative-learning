@@ -1,8 +1,8 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react";
 import { useQueryClient } from 'react-query';
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
-import { DocumentModelType } from "../../models/document/document";
+import { createDocumentModel, DocumentModelSnapshotType, DocumentModelType } from "../../models/document/document";
 import { getDocumentDisplayTitle } from "../../models/document/document-utils";
 import { logDocumentEvent } from "../../models/document/log-document-event";
 import { ENavTabSectionType, NavTabSectionSpec, NavTabSpec } from "../../models/view/nav-tabs";
@@ -13,7 +13,7 @@ import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import { useUserContext } from "../../hooks/use-user-context";
 import { DocumentCollectionByType } from "../thumbnail/documents-type-collection";
-import { DocumentDragKey, SupportPublication } from "../../models/document/document-types";
+import { DocumentDragKey, PersonalDocument, SupportPublication } from "../../models/document/document-types";
 import { NetworkDocumentsSection } from "./network-documents-section";
 import EditIcon from "../../clue/assets/icons/edit-right-icon.svg";
 
@@ -41,8 +41,8 @@ export interface ISubTabSpec {
   sections: NavTabSectionSpec[];
 }
 
-export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, reset, selectedDocument,
-  isChatOpen, onSelectNewDocument, onSelectDocument, onTabClick }) => {
+export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function SectionDocumentOrBrowser(
+    { tabSpec, reset, selectedDocument, isChatOpen, onSelectNewDocument, onSelectDocument, onTabClick }) {
   const ui = useUIStore();
   const store = useStores();
   const [referenceDocument, setReferenceDocument] = useState<DocumentModelType>();
@@ -53,6 +53,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
   const queryClient = useQueryClient();
   const user = useUserStore();
   const classStore = useClassStore();
+  const openDocInput = useRef<HTMLInputElement>(null);
   const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
   const subTabs: ISubTabSpec[] = [];
   // combine sections with matching titles into a single tab with sub-sections
@@ -284,6 +285,23 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
       />
     </div>;
 
+  const handleDocOpen = () => {
+    const docIdentifier = openDocInput.current?.value;
+    console.log("openDocInput", openDocInput.current?.value, openDocInput.current);
+    if (!docIdentifier) {
+      return;
+    }
+    const [remoteContext, uid, key] = docIdentifier.split("/");
+    // This type is a hack, we don't really know what kind of document it is
+    // but I'm hoping that it doesn't matter
+    const documentInfo: DocumentModelSnapshotType = {remoteContext, uid, key, type: PersonalDocument};
+    const document = createDocumentModel(documentInfo);
+    store.networkDocuments.add(document);
+    // TODO: this isn't showing the loading indicator that usually shows up
+    // when loading a networked document
+    handleSelectDocument(document);
+  };
+
   return (
     <div className="document-tab-content">
       <Tabs
@@ -293,6 +311,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
         selectedIndex={tabIndex}
         selectedTabClassName="selected"
       >
+        <input size={100} ref={openDocInput}></input><button onClick={handleDocOpen}>open</button>
         <div className={`tab-header-row ${!hasSubTabs ? "no-sub-tabs" : ""}`}>
           <TabList className={`tab-list ${navTabSpec?.tab}`}>
             {subTabs.map((subTab) => {
