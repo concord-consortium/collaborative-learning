@@ -33,7 +33,6 @@ export const kTableDefaultHeight = 160;
 export function defaultTableContent(props?: IDefaultContentOptions) {
   return TableContentModel.create({
                             type: "Table",
-                            name: props?.title,
                             columns: [
                               { name: "x" },
                               { name: "y" }

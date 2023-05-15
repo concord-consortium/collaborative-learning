@@ -5,8 +5,6 @@ import { PartialSharedModelEntry } from "../document/document-content-types";
 import { UpdatedSharedDataSetIds } from "../shared/shared-data-set";
 
 export interface IDefaultContentOptions {
-  // title is only currently used by the Geometry and Table tiles
-  title?: string;
   // url is added so the CLUE core can add an image tile to the document when a user
   // drops an image on the document.
   url?: string;
