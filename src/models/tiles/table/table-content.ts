@@ -33,6 +33,13 @@ export const kTableDefaultHeight = 160;
 export function defaultTableContent(props?: IDefaultContentOptions) {
   return TableContentModel.create({
                             type: "Table",
+                            // TODO: this name property is used in
+                            // convertImportToSnapshot to set the name of the
+                            // dataSet. This approach for creating and naming a
+                            // dataset should be improved. It is difficult to
+                            // reason about. Other tiles do not use the title
+                            // of the props and they get unique names. So perhaps
+                            // the table tile can do something similar.
                             name: props?.title,
                             columns: [
                               { name: "x" },
