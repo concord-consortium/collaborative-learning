@@ -811,11 +811,8 @@ export const BaseDocumentContentModel = types
           }
         }
       },
-      // FIXME: the title property of options is ignored here.
-      // Somehow things are working anyhow. This needs to be investigated
-      // before we fix it by passing the title to addTileContentInNewRow.
       addTile(toolId: string, options?: IDocumentContentAddTileOptions) {
-        const { addSidecarNotes, url, insertRowInfo } = options || {};
+        const { title, addSidecarNotes, url, insertRowInfo } = options || {};
         // for historical reasons, this function initially places new rows at
         // the end of the content and then moves them to the desired location.
         const addTileOptions = { rowIndex: self.rowCount };
@@ -825,7 +822,8 @@ export const BaseDocumentContentModel = types
         const documentEnv = getEnv(self)?.documentEnv as IDocumentEnvironment | undefined;
         const appConfig = documentEnv?.appConfig;
 
-        const newContent = contentInfo?.defaultContent({ url, appConfig });
+        // TODO: title-refactor: remove title from addTileOptions?
+        const newContent = contentInfo?.defaultContent({ title, url, appConfig });
         const tileInfo = self.addTileContentInNewRow(
                               newContent,
                               { rowHeight: contentInfo.defaultHeight, ...addTileOptions });
