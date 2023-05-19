@@ -24,7 +24,7 @@ export const SimulatorToolComponent: React.FC<ITileProps> = observer((props) => 
     }
     intervalRef.current = setInterval(() => {
       content.step();
-    }, 100);
+    }, 50);
   };
 
   const handleStop = () => {
