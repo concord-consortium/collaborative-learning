@@ -1,11 +1,13 @@
 import { observer } from "mobx-react";
-import React, { DOMAttributes, useRef } from "react";
+import React, { DOMAttributes, useRef, useEffect, FormEvent } from "react";
+import { onSnapshot } from "mobx-state-tree";
 import "mathlive"; // separate static import of library for initialization to run
 // eslint-disable-next-line no-duplicate-imports
 import type { MathfieldElementAttributes, MathfieldElement } from "mathlive";
 import { ITileProps } from "../../components/tiles/tile-component";
 import { ExpressionContentModelType } from "./expression-content";
 import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
+import { replaceKeyBinding } from "./expression-tile-utils";
 
 import "./expression-tile.scss";
 
@@ -18,18 +20,33 @@ declare global {
   }
 }
 
+const undoKeys = ["cmd+z", "[Undo]", "ctrl+z"];
+
 export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) => {
   const content = props.model.content as ExpressionContentModelType;
-  const mathfieldRef = useRef<MathfieldElement>(null);
+  const mf = useRef<MathfieldElement>(null);
+  const trackedCursorPos = useRef<number>(0);
 
-  const handleChange = (e: any) => {
-    content.setLatexStr(e.target.value);
+  if (mf.current?.keybindings){
+    undoKeys.forEach((key: string) => {
+      mf.current && replaceKeyBinding(mf.current.keybindings, key, "");
+    });
+  }
+
+  useEffect(() => {
+    // when we change model via undo button, we need to update mathfield
+    const disposer = onSnapshot((content as any), () => {
+      if (mf.current?.getValue() === content.latexStr) return;
+      mf.current?.setValue(content.latexStr, {suppressChangeNotifications: true});
+      if (mf.current?.position) mf.current.position = trackedCursorPos.current - 1;
+    });
+    return () => disposer();
+  }, [content]);
+
+  const handleChange = (e: FormEvent<MathfieldElementAttributes>) => {
+    trackedCursorPos.current =  mf.current?.position || 0;
+    content.setLatexStr((e.target as any).value);
   };
-
-  // This is an example of how we can access mathfield api
-  // const exampleApiUse = () => {
-  //   mathfieldRef.current?.setValue(`42\\frac12`)
-  // }
 
   return (
     <div className="expression-tool">
@@ -42,7 +59,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
       </div>
       <div className="expression-math-area">
         <math-field
-          ref={mathfieldRef}
+          ref={mf}
           value={content.latexStr}
           onInput={handleChange}
         />
