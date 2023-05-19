@@ -59,6 +59,16 @@
         "isTileTool": true
       },
       {
+        "id": "Simulator",
+        "title": "Simulator",
+        "isTileTool": true
+      },
+      {
+        "id": "Diagram",
+        "title": "Diagram",
+        "isTileTool": true
+      },
+      {
         "id": "undo",
         "title": "Undo",
         "iconId": "icon-undo-tool",
