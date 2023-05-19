@@ -15,7 +15,8 @@ registerTileContentInfo({
   metadataClass: TileMetadataModel,
   defaultContent: defaultDataCardContent,
   defaultHeight: kDataCardDefaultHeight,
-  updateContentWithNewSharedModelIds: updateDataCardContentWithNewSharedModelIds
+  updateContentWithNewSharedModelIds: updateDataCardContentWithNewSharedModelIds,
+  isDataProvider: true
 });
 
 registerTileComponentInfo({

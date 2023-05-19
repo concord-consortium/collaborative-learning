@@ -71,8 +71,16 @@ export const DataCardContentModel = TileContentModel
     get dataSet() {
       return self.sharedModel?.dataSet || self.emptyDataSet;
     },
+    get linkedTiles(): string[] {
+      const sharedModelManager = self.tileEnv?.sharedModelManager;
+      const tileIds = sharedModelManager?.getSharedModelTileIds(self.sharedModel) ?? [];
+      return tileIds.filter(id => id !== self.metadata.id);
+    }
   }))
   .views(self => ({
+    get isLinked() {
+      return self.linkedTiles.length > 0;
+    },
     get dataSetName(){
       return self.dataSet.name;
     },

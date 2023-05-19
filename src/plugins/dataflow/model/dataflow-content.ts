@@ -88,6 +88,11 @@ export const DataflowContentModel = TileContentModel
         : [];
       return foundSharedModels;
     },
+    get linkedTiles(): string[] {
+      const sharedModelManager = self.tileEnv?.sharedModelManager;
+      const tileIds = sharedModelManager?.getSharedModelTileIds(self.sharedModel) ?? [];
+      return tileIds.filter(id => id !== self.metadata.id);
+    }
   }))
   .views(self => ({
     get title() {
