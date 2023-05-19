@@ -7,7 +7,7 @@ import type { MathfieldElementAttributes, MathfieldElement } from "mathlive";
 import { ITileProps } from "../../components/tiles/tile-component";
 import { ExpressionContentModelType } from "./expression-content";
 import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
-import { discoverOS, replaceKeyBinding } from "./expression-utils";
+import { replaceKeyBinding } from "./expression-tile-utils";
 
 import "./expression-tile.scss";
 
@@ -20,7 +20,7 @@ declare global {
   }
 }
 
-const os = discoverOS();
+const undoKeys = ["cmd+z", "[Undo]", "ctrl+z"];
 
 export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) => {
   const content = props.model.content as ExpressionContentModelType;
@@ -28,10 +28,9 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   const trackedCursorPos = useRef<number>(0);
 
   if (mf.current?.keybindings){
-    // Disable mathlive's response to keybindings for undo
-    const ks = os === "Mac" ? "cmd+z" : "ctrl+z";
-    replaceKeyBinding(mf.current.keybindings, ks, "");
-    replaceKeyBinding(mf.current.keybindings, "[Undo]", "");
+    undoKeys.forEach((key: string) => {
+      mf.current && replaceKeyBinding(mf.current.keybindings, key, "");
+    });
   }
 
   useEffect(() => {
