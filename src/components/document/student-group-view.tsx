@@ -14,9 +14,10 @@ interface IGroupButtonProps {
 const GroupButton: React.FC<IGroupButtonProps> = ({ id, selected, onSelectGroup }) => {
   const className = `icon group-number ${selected ? "active" : ""}`;
   const handleClick = () => onSelectGroup(id);
+  const displayId = id.slice(id.length - 3);
   return(
     <div key={`group-${id}`} className={className} onClick={handleClick}>
-      <div className="number">G{id}</div>
+      <div className="number">G{displayId}</div>
     </div>
   );
 };
