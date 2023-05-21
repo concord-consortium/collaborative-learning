@@ -1,5 +1,6 @@
 import { reaction } from "mobx";
-import { types, Instance, getType, addDisposer } from "mobx-state-tree";
+import { types, Instance, getType, addDisposer, getSnapshot } from "mobx-state-tree";
+import { ITileExportOptions } from "../../models/tiles/tile-content-info";
 import { TileContentModel } from "../../models/tiles/tile-content";
 import { SharedVariables, SharedVariablesType } from "../shared-variables/shared-variables";
 import { kSimulatorTileType } from "./simulator-types";
@@ -16,6 +17,10 @@ export const SimulatorContentModel = TileContentModel
     text: "",
   })
   .views(self => ({
+    exportJson(options?: ITileExportOptions) {
+      // crude, but enough to get us started
+      return JSON.stringify(getSnapshot(self));
+    },
     get isUserResizable() {
       return true;
     },
