@@ -1,0 +1,261 @@
+{
+  "tiles": [
+    {
+      "id": "tQ2pBmd4z_2eB2Uu",
+      "title": "Diagram 1",
+      "content": {
+        "nodes": {
+          "qO6SSY0WiGB3i4Ti": {
+            "id": "qO6SSY0WiGB3i4Ti",
+            "variable": "h_sBmUT4XAj6ZZHv",
+            "x": 13.5,
+            "y": 32
+          },
+          "LFevkevGYDycHoPR": {
+            "id": "LFevkevGYDycHoPR",
+            "variable": "tg23GL84x381CDHk",
+            "x": 11.5,
+            "y": 158.5
+          },
+          "blKvt2h668G_CYCz": {
+            "id": "blKvt2h668G_CYCz",
+            "variable": "EC1bjjAYbNMibfVG",
+            "x": 16.5,
+            "y": 369.5
+          },
+          "-51k2AiXzwwyZJ0U": {
+            "id": "-51k2AiXzwwyZJ0U",
+            "variable": "TtWG5s-C108ryBMa",
+            "x": 260.5,
+            "y": 16.5
+          },
+          "c4VCa3FyWHvZs6Rf": {
+            "id": "c4VCa3FyWHvZs6Rf",
+            "variable": "wfoWGElt4Gh1FWxl",
+            "x": 263.5,
+            "y": 132.5
+          },
+          "LDgFXlbTlUFvbf3c": {
+            "id": "LDgFXlbTlUFvbf3c",
+            "variable": "88rSANWRWfTMU43e",
+            "x": 514.5,
+            "y": 32.5
+          },
+          "DxWYxgDDsivgSAts": {
+            "id": "DxWYxgDDsivgSAts",
+            "variable": "0-dJEA7mtxL3zBiB",
+            "x": 296.5,
+            "y": 282.5
+          },
+          "AhzGnneBpAoZZrsc": {
+            "id": "AhzGnneBpAoZZrsc",
+            "variable": "niSbeq3PjP6pWvjI",
+            "x": 539.5,
+            "y": 229.5
+          },
+          "J0b3Jc3nL7A1kLzL": {
+            "id": "J0b3Jc3nL7A1kLzL",
+            "variable": "TU1vB4s2f_RQcfOg",
+            "x": 573.5,
+            "y": 428.5
+          },
+          "ONE5aBtzSBt4A-Fd": {
+            "id": "ONE5aBtzSBt4A-Fd",
+            "variable": "0Crh6NJ9u4WvTBvf",
+            "x": 863.5,
+            "y": 258.5
+          },
+          "aoWge-3G09QSF7hS": {
+            "id": "aoWge-3G09QSF7hS",
+            "variable": "XZ7vyzxWoB-52er6",
+            "x": 723.5,
+            "y": 45.5
+          },
+          "Ib-oJgn0ihSH_BKS": {
+            "id": "Ib-oJgn0ihSH_BKS",
+            "variable": "vpCx2K6X_ydkJvGO",
+            "x": 956.5,
+            "y": 60.5
+          },
+          "iybruA5eNIGGVXEv": {
+            "id": "iybruA5eNIGGVXEv",
+            "variable": "rtHq4X9at29bcYZ2",
+            "x": 1215.5,
+            "y": 61.5
+          },
+          "RdGWKhmPsiHT6JE6": {
+            "id": "RdGWKhmPsiHT6JE6",
+            "variable": "4Xif_z3Fc4yBQCzY",
+            "x": 1160.5,
+            "y": 280.5
+          },
+          "IyKmJbKb9mjfKf01": {
+            "id": "IyKmJbKb9mjfKf01",
+            "variable": "lQH7xIRfYCkM_ki3",
+            "x": 302.5,
+            "y": 467.5
+          }
+        },
+        "flowTransform": { "x": 0, "y": 0, "zoom": 1 }
+      }
+    }
+  ],
+  "sharedModels": [
+    {
+      "sharedModel": {
+        "type": "SharedVariables",
+        "id": "JymOXWiTWunJEZBP",
+        "variables": [
+          {
+            "id": "tg23GL84x381CDHk",
+            "name": "time",
+            "unit": "s",
+            "value": 0,
+            "inputs": [],
+            "color": "light-gray"
+          },
+          {
+            "id": "h_sBmUT4XAj6ZZHv",
+            "name": "burn_rate",
+            "description": "",
+            "unit": "kg/s",
+            "value": 2,
+            "inputs": [],
+            "color": "light-gray"
+          },
+          {
+            "id": "EC1bjjAYbNMibfVG",
+            "name": "thrust",
+            "description": "",
+            "unit": "N",
+            "value": 1000,
+            "inputs": [],
+            "color": "light-gray"
+          },
+          {
+            "id": "TtWG5s-C108ryBMa",
+            "name": "initial_fuel",
+            "description": "",
+            "unit": "kg",
+            "value": 1.5,
+            "inputs": [],
+            "color": "light-gray"
+          },
+          {
+            "id": "wfoWGElt4Gh1FWxl",
+            "name": "fuel_required",
+            "description": "",
+            "inputs": ["h_sBmUT4XAj6ZZHv", "tg23GL84x381CDHk"],
+            "expression": "burn_rate * time",
+            "color": "light-gray"
+          },
+          {
+            "id": "88rSANWRWfTMU43e",
+            "name": "fuel_remaining",
+            "description": "",
+            "inputs": ["TtWG5s-C108ryBMa", "wfoWGElt4Gh1FWxl"],
+            "expression": "fuel_required > initial_fuel ? 0 kg : initial_fuel - fuel_required",
+            "color": "light-gray"
+          },
+          {
+            "id": "0-dJEA7mtxL3zBiB",
+            "name": "current_thrust",
+            "description": "",
+            "inputs": ["88rSANWRWfTMU43e", "EC1bjjAYbNMibfVG"],
+            "expression": "fuel_remaining > 0 kg ? thrust : 0 N",
+            "color": "light-gray"
+          },
+          {
+            "id": "niSbeq3PjP6pWvjI",
+            "name": "weight",
+            "description": "",
+            "inputs": ["88rSANWRWfTMU43e"],
+            "expression": "10kg + fuel_remaining",
+            "color": "light-gray"
+          },
+          {
+            "id": "TU1vB4s2f_RQcfOg",
+            "name": "acceleration",
+            "description": "",
+            "inputs": [
+              "niSbeq3PjP6pWvjI",
+              "0-dJEA7mtxL3zBiB",
+              "lQH7xIRfYCkM_ki3"
+            ],
+            "expression": "current_thrust / weight + gravity",
+            "color": "light-gray"
+          },
+          {
+            "id": "0Crh6NJ9u4WvTBvf",
+            "name": "velocity",
+            "description": "",
+            "inputs": [
+              "XZ7vyzxWoB-52er6",
+              "TU1vB4s2f_RQcfOg",
+              "vpCx2K6X_ydkJvGO"
+            ],
+            "expression": "prev_velocity + acceleration * dT",
+            "color": "light-gray"
+          },
+          {
+            "id": "XZ7vyzxWoB-52er6",
+            "name": "prev_velocity",
+            "description": "",
+            "unit": "(N s) / kg",
+            "value": 0,
+            "inputs": [],
+            "color": "light-gray"
+          },
+          {
+            "id": "vpCx2K6X_ydkJvGO",
+            "name": "dT",
+            "description": "",
+            "unit": "s",
+            "value": 0.05,
+            "inputs": [],
+            "color": "light-gray"
+          },
+          {
+            "id": "5nbIxcXl6JBmilzi",
+            "name": "test",
+            "description": "",
+            "inputs": ["vpCx2K6X_ydkJvGO", "TU1vB4s2f_RQcfOg"],
+            "expression": "acceleration * dT",
+            "color": "light-gray"
+          },
+          {
+            "id": "rtHq4X9at29bcYZ2",
+            "name": "prev_y",
+            "description": "",
+            "unit": "(s^2 N) / kg",
+            "value": 0,
+            "inputs": [],
+            "color": "light-gray"
+          },
+          {
+            "id": "4Xif_z3Fc4yBQCzY",
+            "name": "y",
+            "description": "",
+            "inputs": [
+              "rtHq4X9at29bcYZ2",
+              "0Crh6NJ9u4WvTBvf",
+              "vpCx2K6X_ydkJvGO"
+            ],
+            "expression": "prev_y + velocity * dT",
+            "color": "light-gray"
+          },
+          {
+            "id": "lQH7xIRfYCkM_ki3",
+            "name": "gravity",
+            "description": "",
+            "unit": "N/kg",
+            "value": -9.8,
+            "inputs": [],
+            "color": "light-gray"
+          }
+        ]
+      },
+      "tiles": ["smy1U10QfSjZv-2j", "tQ2pBmd4z_2eB2Uu"]
+    }
+  ]
+}
