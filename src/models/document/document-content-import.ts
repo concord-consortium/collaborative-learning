@@ -58,14 +58,15 @@ function migrateRow(content: DocumentContentModelType, tiles: OriginalTileModel[
   });
 }
 
-// FIXME: this does not handle tiles that refer to shared models correctly
-// the tiles are created first and if they have references to the shared
-// model then those references will be broken because the shared model
+// FIXME: this does not handle tiles that refer to shared models correctly.
+// The tiles are created first and if they have references to the shared
+// model, then those references will be broken because the shared model
 // doesn't exist yet. Many tiles use "afterAttach" to work with their sharedModel
 // so that is also going to be run before the actual shared model is added.
 // For example the diagram-view might try to create a shared variables model when it is
-// first attached. However the shared model manager might not be ready yet at this
-// point so perhaps it won't do that.
+// first attached. However in practice this might not be an issue because the
+// the shared model manager might not be ready yet at this point, so the reaction
+// in after attach will wait for the shared model manager to be ready.
 export function migrateSnapshot(snapshot: IDocumentImportSnapshot): any {
   const docContent = DocumentContentModel.create();
   const { tiles: tilesOrRows, sharedModels } = snapshot;

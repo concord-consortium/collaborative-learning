@@ -97,12 +97,11 @@ export const DocEditorApp = ({ appConfig }: IDocEditorAppProps) => {
         const documentText = await response.text();
         loadDocument(documentText);
       } else {
-        // If the document is not found, return the response so that the caller can
-        // handle it appropriately.
-        throw Error(`Request rejected with status ${response.status}`);
+        throw Error(`status ${response.status}`);
       }
     })
     .catch(error => {
+      // This error is printed in the console as an "Uncaught (in promise)..."
       throw Error(`Request rejected with exception ${error}`);
     });
   }, []);
