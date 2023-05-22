@@ -568,18 +568,9 @@ export const firebaseRealTimeDBImagesHandler: IImageHandler = {
   name: kFirebaseRealTimeDBHandlerName,
   priority: 4,
   match(url: string) {
-
-
-
     const newUrl = url || "";
-    console.log("newURL:", newUrl);
-    if (newUrl === undefined){
-      console.log("newURL UNDEFINED");
-    }
-     return newUrl.startsWith(kFirebaseRTDBFauxUrlPrefix) ||
+    return newUrl.startsWith(kFirebaseRTDBFauxUrlPrefix) ||
       (newUrl.startsWith(`${kCCImageScheme}://`) && (newUrl.indexOf("concord.org") < 0));
-
-
   },
 
   async store(url: string, options?: IImageHandlerStoreOptions): Promise<IImageHandlerStoreResult> {

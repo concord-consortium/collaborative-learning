@@ -13,7 +13,6 @@ interface IProps {
 }
 
 export const DataCardSortArea: React.FC<IProps> = ({ model }) => {
-  console.log("DataCardSortArea with model:", model);
   const content = model.content as DataCardContentModelType;
   const sortById = content.selectedSortAttributeId;
 
