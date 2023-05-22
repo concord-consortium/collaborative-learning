@@ -3,7 +3,6 @@ import { exportImageTileSpec, isLegacyImageTileImport, convertLegacyImageTile } 
 import { ITileExportOptions, IDefaultContentOptions } from "../tile-content-info";
 import { ITileMetadataModel } from "../tile-metadata";
 import { tileModelHooks } from "../tile-model-hooks";
-import { getTileModel, setTileTitleFromContent } from "../tile-model";
 import { TileContentModel } from "../tile-content";
 import { isPlaceholderImage } from "../../../utilities/image-utils";
 import placeholderImage from "../../../assets/image_placeholder.png";
@@ -31,9 +30,6 @@ export const ImageContentModel = TileContentModel
             : snapshot;
   })
   .views(self => ({
-    get title() {
-      return getTileModel(self)?.title;
-    },
     get isUserResizable() {
       return true;
     },
@@ -60,9 +56,6 @@ export const ImageContentModel = TileContentModel
     updateImageUrl(oldUrl: string, newUrl: string) {
       if (!oldUrl || !newUrl || (oldUrl === newUrl)) return;
       if (self.url === oldUrl) self.url = newUrl;
-    },
-    setTitle(title: string) {
-      setTileTitleFromContent(self, title);
     }
   }));
 

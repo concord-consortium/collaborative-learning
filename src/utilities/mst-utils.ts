@@ -44,6 +44,10 @@ export function getTileContentById(target: IAnyStateTreeNode, tileId: string) {
   return getDocumentContentFromNode(target)?.getTileContent(tileId);
 }
 
+export function getTileModelById(target: IAnyStateTreeNode, tileId: string) {
+  return getDocumentContentFromNode(target)?.getTile(tileId);
+}
+
 /**
  * A short circuit isAlive check. It is intended to be used in observing
  * components. If the observing component is working with a MST object that

@@ -112,7 +112,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     if (this.getTitle() === '') {
       const { model: { id }, onRequestUniqueTitle } = this.props;
       const title = onRequestUniqueTitle(id);
-      title && this.getContent().setTitle(title);
+      title && this.props.model.setTitle(title);
     }
   }
 
@@ -132,7 +132,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
 
   private handleTitleChange = (title?: string) => {
     if (title){
-      this.getContent().setTitle(title);
+      this.props.model.setTitle(title);
       dataflowLogEvent("changeprogramtitle", { programTitleValue: this.getTitle() }, this.props.model.id);
       this.setState({isEditingTitle: false});
     }
@@ -186,7 +186,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   };
 
   private getTitle() {
-    return this.getContent().title || "";
+    return this.props.model.title || "";
   }
 
   private handleProgramChange = (program: any) => {

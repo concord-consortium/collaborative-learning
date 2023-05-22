@@ -251,7 +251,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleTitleChange = (title?: string) => {
-    title && this.getContent().setTitle(title);
+    title && this.props.model.setTitle(title);
     this.setState({ isEditingTitle: false });
   };
 
@@ -266,7 +266,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   }
 
   private getTitle() {
-    return this.getContent().title || "";
+    return this.props.model.title || "";
   }
 
   private renderTitle() {
