@@ -493,15 +493,7 @@ const kErrorStorageResult: IImageHandlerStoreResult = {
 export const firebaseStorageImagesHandler: IImageHandler = {
   name: kFirebaseStorageHandlerName,
   priority: 3,
-
   match(url: string) {
-
-    // old
-    // return url.startsWith(kFirebaseStorageUrlPrefix) ||
-    //   // original firebase storage path reference
-    //   /^\/.+\/portals\/.+$/.test(url);
-
-    // new
     const newUrl = url || "";
     return newUrl.startsWith(kFirebaseStorageUrlPrefix) ||
       // original firebase storage path reference
@@ -577,28 +569,7 @@ export const firebaseRealTimeDBImagesHandler: IImageHandler = {
   priority: 4,
   match(url: string) {
 
-    // console.log("image-map.ts line 570 > firebaseRealTimeDbImagesHandler >");
-    console.log("match function with url:", url);
 
-    // old
-    // return url.startsWith(kFirebaseRTDBFauxUrlPrefix) ||
-    //   (url.startsWith(`${kCCImageScheme}://`) && (url.indexOf("concord.org") < 0));
-
-    // new - method 1 - picture shows up
-
-    // console.log("return url.startsWith(kFirebaseRTDBFauxUrlPrefix: ", url.startsWith(kFirebaseRTDBFauxUrlPrefix));
-
-    // if (url){
-    //   console.log("url defined");
-    //   return url.startsWith(kFirebaseRTDBFauxUrlPrefix) ||
-    //     (url.startsWith(`${kCCImageScheme}://`) && (url.indexOf("concord.org") < 0));
-    // } else {
-    //   console.log("url UNDEFINED");
-    //   return true;
-    //   // return false;
-    // }
-
-    // new method 2 -
 
     const newUrl = url || "";
     console.log("newURL:", newUrl);
