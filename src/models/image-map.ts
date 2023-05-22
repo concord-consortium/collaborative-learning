@@ -495,9 +495,17 @@ export const firebaseStorageImagesHandler: IImageHandler = {
   priority: 3,
 
   match(url: string) {
-    return url.startsWith(kFirebaseStorageUrlPrefix) ||
+
+    // old
+    // return url.startsWith(kFirebaseStorageUrlPrefix) ||
+    //   // original firebase storage path reference
+    //   /^\/.+\/portals\/.+$/.test(url);
+
+    // new
+    const newUrl = url || "";
+    return newUrl.startsWith(kFirebaseStorageUrlPrefix) ||
       // original firebase storage path reference
-      /^\/.+\/portals\/.+$/.test(url);
+      /^\/.+\/portals\/.+$/.test(newUrl);
   },
 
   async store(url: string, options?: IImageHandlerStoreOptions): Promise<IImageHandlerStoreResult> {
@@ -567,10 +575,40 @@ function parseFauxFirebaseRTDBUrl(url: string) {
 export const firebaseRealTimeDBImagesHandler: IImageHandler = {
   name: kFirebaseRealTimeDBHandlerName,
   priority: 4,
-
   match(url: string) {
-    return url.startsWith(kFirebaseRTDBFauxUrlPrefix) ||
-      (url.startsWith(`${kCCImageScheme}://`) && (url.indexOf("concord.org") < 0));
+
+    // console.log("image-map.ts line 570 > firebaseRealTimeDbImagesHandler >");
+    console.log("match function with url:", url);
+
+    // old
+    // return url.startsWith(kFirebaseRTDBFauxUrlPrefix) ||
+    //   (url.startsWith(`${kCCImageScheme}://`) && (url.indexOf("concord.org") < 0));
+
+    // new - method 1 - picture shows up
+
+    // console.log("return url.startsWith(kFirebaseRTDBFauxUrlPrefix: ", url.startsWith(kFirebaseRTDBFauxUrlPrefix));
+
+    // if (url){
+    //   console.log("url defined");
+    //   return url.startsWith(kFirebaseRTDBFauxUrlPrefix) ||
+    //     (url.startsWith(`${kCCImageScheme}://`) && (url.indexOf("concord.org") < 0));
+    // } else {
+    //   console.log("url UNDEFINED");
+    //   return true;
+    //   // return false;
+    // }
+
+    // new method 2 -
+
+    const newUrl = url || "";
+    console.log("newURL:", newUrl);
+    if (newUrl === undefined){
+      console.log("newURL UNDEFINED");
+    }
+     return newUrl.startsWith(kFirebaseRTDBFauxUrlPrefix) ||
+      (newUrl.startsWith(`${kCCImageScheme}://`) && (newUrl.indexOf("concord.org") < 0));
+
+
   },
 
   async store(url: string, options?: IImageHandlerStoreOptions): Promise<IImageHandlerStoreResult> {

@@ -16,7 +16,7 @@ interface IProps {
 }
 
 const getStackValueDisplay = (value: string) => {
-  if (value === "") return "(no value)";
+  if (value === "" || value === undefined) return "(no value)";
   if (gImageMap.isImageUrl(value)) return "(image)";
   if (value.length < 14) return value;
   return value.slice(0, 13) + '... ';
