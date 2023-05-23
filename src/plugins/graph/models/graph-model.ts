@@ -48,6 +48,7 @@ export const GraphModel = TileContentModel
     // keys are AxisPlaces
     axes: types.map(AxisModelUnion),
     plotType: types.optional(types.enumeration([...PlotTypes]), "casePlot"),
+    hasXYDefaultAxisLabels: types.optional(types.boolean, false),
     config: types.optional(DataConfigurationModel, () => DataConfigurationModel.create()),
     // Visual properties
     _pointColors: types.optional(types.array(types.string), [defaultPointColor]),
@@ -192,6 +193,7 @@ export function createGraphModel(snap?: IGraphModelSnapshot) {
       bottom: NumericAxisModel.create({place: "bottom", min: -11, max: 13}),
       left: NumericAxisModel.create({place: "left", min: -11, max: 13})
     },
+    hasXYDefaultAxisLabels: true,
     ...snap
   });
 }

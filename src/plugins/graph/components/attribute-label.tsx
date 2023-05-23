@@ -18,6 +18,7 @@ import {AxisOrLegendAttributeMenu} from "../axis/components/axis-or-legend-attri
 import graphVars from "./graph.scss";
 
 interface IAttributeLabelProps {
+  hasXYDefaultAxisLabels?: boolean;
   place: GraphPlace
   onChangeAttribute?: (place: GraphPlace, attrId: string) => void
   onRemoveAttribute?: (place: GraphPlace, attrId: string) => void
@@ -25,7 +26,9 @@ interface IAttributeLabelProps {
 }
 
 export const AttributeLabel = observer(
-  function AttributeLabel({place, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute}: IAttributeLabelProps) {
+  function AttributeLabel({
+    hasXYDefaultAxisLabels, place, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute
+  }: IAttributeLabelProps) {
     const graphModel = useGraphModelContext(),
       dataConfiguration = useDataConfigurationContext(),
       layout = useGraphLayoutContext(),
@@ -48,15 +51,15 @@ export const AttributeLabel = observer(
     }, [dataConfiguration, graphModel.plotType, place]);
 
     const getLabel = useCallback(() => {
+      if (hasXYDefaultAxisLabels && place === "bottom") return "x";
+      if (hasXYDefaultAxisLabels && place === "left") return "y";
       if (useClickHereCue) {
-        if (place === "bottom") return "x";
-        if (place === "left") return "y";
         return t('DG.AxisView.emptyGraphCue');
       }
       const attrIDs = getAttributeIDs();
       return attrIDs.map(anID => dataset?.attrFromID(anID)?.name)
         .filter(aName => aName !== '').join(', ');
-    }, [dataset, getAttributeIDs, place, useClickHereCue]);
+    }, [dataset, hasXYDefaultAxisLabels, getAttributeIDs, place, useClickHereCue]);
 
     const refreshAxisTitle = useCallback(() => {
       const labelFont = useClickHereCue ? graphVars.graphEmptyLabelFont : graphVars.graphLabelFont,

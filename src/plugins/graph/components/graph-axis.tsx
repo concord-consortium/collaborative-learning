@@ -21,6 +21,7 @@ import { computeNiceNumericBounds } from "../utilities/graph-utils";
 import { isNumericAxisModel } from "../axis/models/axis-model";
 
 interface IProps {
+  hasXYDefaultAxisLabels?: boolean
   place: AxisPlace
   enableAnimation: MutableRefObject<boolean>
   autoAdjust?: React.MutableRefObject<boolean>
@@ -29,8 +30,9 @@ interface IProps {
   onTreatAttributeAs?: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void
 }
 
-export const GraphAxis = observer(function GraphAxis(
-  {place, enableAnimation, autoAdjust, onDropAttribute, onRemoveAttribute, onTreatAttributeAs}: IProps) {
+export const GraphAxis = observer(function GraphAxis({
+  hasXYDefaultAxisLabels, place, enableAnimation, autoAdjust, onDropAttribute, onRemoveAttribute, onTreatAttributeAs
+}: IProps) {
   const dataConfig = useDataConfigurationContext(),
     isDropAllowed = dataConfig?.graphPlaceCanAcceptAttributeIDDrop ?? (() => true),
     graphModel = useGraphModelContext(),
@@ -107,6 +109,7 @@ export const GraphAxis = observer(function GraphAxis(
             centerCategoryLabels={graphModel.config.categoriesForAxisShouldBeCentered(place)}
       />
       <AttributeLabel
+        hasXYDefaultAxisLabels={hasXYDefaultAxisLabels}
         place={place}
         onChangeAttribute={onDropAttribute}
         onRemoveAttribute={onRemoveAttribute}

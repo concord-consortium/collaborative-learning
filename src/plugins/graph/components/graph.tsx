@@ -40,7 +40,7 @@ interface IProps {
 export const Graph = observer(function Graph({graphController, graphRef, dotsRef}: IProps) {
   const graphModel = useGraphModelContext(),
     { autoAdjustAxes, enableAnimation } = graphController,
-    {plotType} = graphModel,
+    { hasXYDefaultAxisLabels, plotType } = graphModel,
     instanceId = useInstanceIdContext(),
     marqueeState = useMemo<MarqueeState>(() => new MarqueeState(), []),
     dataset = useDataSetContext(),
@@ -124,6 +124,7 @@ export const Graph = observer(function Graph({graphController, graphRef, dotsRef
     });
     return places.map((place: AxisPlace) => {
       return <GraphAxis key={place}
+                        hasXYDefaultAxisLabels={hasXYDefaultAxisLabels}
                         place={place}
                         enableAnimation={enableAnimation}
                         autoAdjust={autoAdjustAxes}
