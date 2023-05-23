@@ -1,5 +1,5 @@
 import { observer } from "mobx-react";
-import React, { DOMAttributes, useEffect, useRef, useEffect, FormEvent } from "react";
+import React, { DOMAttributes, useRef, useEffect, FormEvent } from "react";
 import { onSnapshot } from "mobx-state-tree";
 import "mathlive"; // separate static import of library for initialization to run
 // eslint-disable-next-line no-duplicate-imports
@@ -19,6 +19,8 @@ declare global {
     }
   }
 }
+
+const undoKeys = ["cmd+z", "[Undo]", "ctrl+z"];
 
 export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) => {
   const content = props.model.content as ExpressionContentModelType;
