@@ -15,6 +15,10 @@ const textToolTile = new TextToolTile;
 const x = ['3', '7', '6', '0'];
 const y = ['2.5', '5', '1', '0'];
 
+//TODO: All instances of "Geometry 1" were originally "Graph 1" and changed to pass test.
+//      All instances of "Geometry 2" were originally "Graph 2" and changed to pass test.
+//      These tests should be reviewed and updated as part of the CODAP Graph import work
+
 context('Graph Table Integration', function () {
   before(function () {
     const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&problem=2.3&qaGroup=5"; //using different problem bec. 2.1 disables graph table integration
@@ -58,7 +62,7 @@ context('Graph Table Integration', function () {
         cy.get('.primary-workspace .link-tile-button').click();
         cy.wait(2000);
         // cy.get('[data-test=link-graph-select]').select('Second One');
-        cy.get('[data-test=link-graph-select]').select('Graph 1');
+        cy.get('[data-test=link-graph-select]').select('Geometry 1');
       });
       after(function () {
         cy.get('.ReactModalPortal button').contains('Cancel').click();
@@ -67,7 +71,7 @@ context('Graph Table Integration', function () {
     describe("connect and disconnect table and graph after coordinates have been added", function () {
       it('verify link icon appears when table and graph are connected', function () {
         cy.get(clueCanvas.linkIconEl()).should('not.exist');
-        cy.linkTableToGraph('Table 1', "Graph 1");
+        cy.linkTableToGraph('Table 1', "Geometry 1");
         tableToolTile.getTableTile().scrollIntoView();
         graphToolTile.getGraphTile().siblings(clueCanvas.linkIconEl()).should('exist');
         // verifies that values exported from .scss file were successfully imported
@@ -84,11 +88,11 @@ context('Graph Table Integration', function () {
       });
       it('verify table can be linked to two graphs', function () {
         clueCanvas.addTile('geometry');
-        cy.linkTableToGraph('Table 1', "Graph 2");
+        cy.linkTableToGraph('Table 1', "Geometry 2");
         graphToolTile.getGraphTile().siblings(clueCanvas.linkIconEl()).should('have.length', 2);
       });
       it('verify unlink of graph and table', function () {
-        cy.unlinkTableToGraph('Table 1', "Graph 2");
+        cy.unlinkTableToGraph('Table 1', "Geometry 2");
         graphToolTile.getGraphTile().siblings(clueCanvas.linkIconEl()).should('have.length', 1);
         graphToolTile.getGraph().last().should('not.have.class', 'is-linked');
       });
@@ -250,8 +254,8 @@ context("Dragging to copy linked tiles", () => {
       });
       clueCanvas.addTile('geometry');
       textToolTile.deleteTextTile();
-      cy.linkTableToGraph('Table 1', "Graph 1");
-  
+      cy.linkTableToGraph('Table 1', "Geometry 1");
+
       // Open the document on the left, then create a new document on the right
       resourcesPanel.openPrimaryWorkspaceTab("my-work");
       cy.get(".tab-panel-documents-section .list-item").first().click();
@@ -266,7 +270,7 @@ context("Dragging to copy linked tiles", () => {
       leftTile('geometry').first().trigger('dragstart', { dataTransfer });
       cy.get('.single-workspace .canvas .document-content').first()
         .trigger('drop', { force: true, dataTransfer });
-      
+
       // The copied geometry tile should have two points from its linked shared dataset
       graphToolTile.getGraphPoint().should("exist").and("have.length", 2);
 
@@ -292,5 +296,5 @@ context("Dragging to copy linked tiles", () => {
       graphToolTile.getGraphPoint().should("exist").and("have.length", 5);
     });
   });
-  
+
 });
