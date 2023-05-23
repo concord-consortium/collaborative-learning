@@ -190,8 +190,8 @@ export interface IGraphModelSnapshot extends SnapshotIn<typeof GraphModel> {}
 export function createGraphModel(snap?: IGraphModelSnapshot) {
   return GraphModel.create({
     axes: {
-      bottom: NumericAxisModel.create({place: "bottom", min: -11, max: 13}),
-      left: NumericAxisModel.create({place: "left", min: -11, max: 13})
+      bottom: NumericAxisModel.create({place: "bottom", min: -10, max: 11}),
+      left: NumericAxisModel.create({place: "left", min: -11, max: 11})
     },
     hasXYDefaultAxisLabels: true,
     ...snap
