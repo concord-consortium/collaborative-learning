@@ -18,9 +18,11 @@ export const ExpressionContentModel = TileContentModel
       return true;
     },
     exportJson(options?: ITileExportOptions){
+      const escapedLatexStr = self.latexStr.replace(/\\/g, "\\\\");
       return [
         `{`,
-        `  "type": "Expression Tile"`,
+        `  "type": "Expression",`,
+        `  "latexStr": "${escapedLatexStr}"`,
         `}`
       ].join("\n");
     }
