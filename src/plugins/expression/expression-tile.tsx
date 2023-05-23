@@ -67,9 +67,6 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
           ref={mf}
           value={content.latexStr}
           onInput={handleChange}
-          // onMouseDown={evaluateInputField}
-          // onClick={evaluateInputField}
-          // onMouseUp={handleMouseUp}
         />
       </div>
     </div>
