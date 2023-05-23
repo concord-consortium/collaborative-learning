@@ -13,6 +13,10 @@ const mockLogTileCopyEvent = jest.fn();
 jest.mock("../../tiles/log/log-tile-copy-event", () => ({
   logTileCopyEvent: (...args: any[]) => mockLogTileCopyEvent()
 }));
+const mockLogTileDocumentEvent = jest.fn();
+jest.mock("../../tiles/log/log-tile-document-event", () => ({
+  logTileDocumentEvent: (...args: any[]) => mockLogTileDocumentEvent()
+}));
 
 /*
   This can be opened with: http://localhost:8080/doc-editor.html

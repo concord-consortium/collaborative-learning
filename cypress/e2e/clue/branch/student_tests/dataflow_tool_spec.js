@@ -5,7 +5,6 @@ let clueCanvas = new ClueCanvas;
 let dataflowToolTile = new DataflowToolTile;
 let dragXDestination = 300;
 
-
 context('Dataflow Tool Tile', function () {
   before(function () {
     const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=dfe&mouseSensor";

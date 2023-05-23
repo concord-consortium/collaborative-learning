@@ -842,6 +842,10 @@ export const BaseDocumentContentModel = types
         const documentEnv = getEnv(self)?.documentEnv as IDocumentEnvironment | undefined;
         const appConfig = documentEnv?.appConfig;
 
+        // TODO: The table tile is the only tile that uses the title property
+        // here the title gets set as the name of the dataSet that is created by
+        // the table's defaultContent. We should find a way for the table tile
+        // to work without needing this title.
         const newContent = contentInfo?.defaultContent({ title, url, appConfig });
         const tileInfo = self.addTileContentInNewRow(
                               newContent,

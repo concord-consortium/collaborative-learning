@@ -16,6 +16,12 @@ jest.mock("../../hooks/use-stores", () => ({
   })
 }));
 
+// mock Logger calls
+const mockLogTileDocumentEvent = jest.fn();
+jest.mock("../../models/tiles/log/log-tile-document-event", () => ({
+  logTileDocumentEvent: (...args: any[]) => mockLogTileDocumentEvent()
+}));
+
 describe("DataCardToolComponent", () => {
   const content = defaultDataCardContent();
   const model = TileModel.create({content});

@@ -11,6 +11,9 @@ class ExpressionToolTile {
   getExpressionTile = () => {
     return cy.get(tileSelector);
   };
+  getNthExpressionTile(nth) {
+    return cy.get(tileSelector).eq(nth - 1);
+  }
   getTileTitle = () => {
     return cy.get(`${tileSelector} .editable-title-text`);
   };
@@ -31,6 +34,10 @@ class ExpressionToolTile {
   getMathFieldMath = () => {
     const mathFieldSelector = `${tileSelector} .expression-math-area math-field`;
     return cy.get(mathFieldSelector).shadow().find("span");
+  };
+  getMathKeyboardToggle = () => {
+    const mathFieldSelector = `${tileSelector} .expression-math-area math-field`;
+    return cy.get(mathFieldSelector).shadow().find("div");
   };
 }
 

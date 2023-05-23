@@ -6,6 +6,12 @@ import { defaultExpressionContent } from "./expression-content";
 import { ExpressionToolComponent } from "./expression-tile";
 import "./expression-registration";
 
+// mock Logger calls
+const mockLogTileDocumentEvent = jest.fn();
+jest.mock("../../models/tiles/log/log-tile-document-event", () => ({
+  logTileDocumentEvent: (...args: any[]) => mockLogTileDocumentEvent()
+}));
+
 describe("ExpressionToolComponent", () => {
   const content = defaultExpressionContent();
   const model = TileModel.create({content});

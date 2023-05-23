@@ -39,6 +39,19 @@ context('Expression Tool Tile', function () {
       exp.getTitleInput().type("new title{enter}");
       exp.getTileTitle().should("contain", "(new title)");
     });
+    // it("expression can be changed and re-renders", () => {
+    //   TODO - figure out how to type into math field
+
+    //   The below finds the toggle div, but it is not visible in cy playback
+    //   and causes an error when we chain a click to it.
+    //   exp.getMathKeyboardToggle().should("exist");
+
+    //   The below tests a change, but does not follow a genuine user path
+    //   exp.getMathField().invoke("val", "a=\\theta r^3");
+    //   exp.getMathFieldMath().should("contain", "θ");
+
+    //   see: https://github.com/arnog/mathlive/issues/830
+    // });
     it("should name new expressions with an incrementing id", () => {
       clueCanvas.addTile("expression");
       cy.contains("(Eq. 1)").should("exist");

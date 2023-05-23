@@ -217,10 +217,6 @@ describe("GeometryContent", () => {
           };
     content.applyChange(board, change);
 
-    expect(content.title).toBeUndefined();
-    content.updateTitle(board, "New Title");
-    expect(content.title).toBe("New Title");
-
     const badChange: JXGChange = { operation: "update", target: "board", targetID: "foo" };
     content.applyChange(board, badChange);
     badChange.properties = {};

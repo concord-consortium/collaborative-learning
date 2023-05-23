@@ -236,6 +236,24 @@ Cypress.Commands.add('unlinkTableToGraph', (table, graph) => {
     cy.get('button').contains('Unlink').click();
   });
 });
+Cypress.Commands.add('linkTableToDataflow', (program, table) => {
+  cy.get('.primary-workspace .title-area').contains(program).parent().parent().within(() => {
+    cy.get('.link-table-button').click();
+  });
+  cy.get('.ReactModalPortal').within(() => {
+    cy.get('[data-test=link-table-select]').select(table);
+    cy.get('button').contains('Link').click();
+  });
+});
+Cypress.Commands.add('unlinkTableToDataflow', (program, table) => {
+  cy.get('.primary-workspace .title-area').contains(program).parent().parent().within(() => {
+    cy.get('.link-table-button').click();
+  });
+  cy.get('.ReactModalPortal').within(() => {
+    cy.get('[data-test=link-table-select]').select(table);
+    cy.get('button').contains('Unlink').click();
+  });
+});
 Cypress.Commands.add("deleteDocumentThumbnail", (tab, section,title) => { 
   cy.get('.'+tab+' .list.'+section+' [data-test='+section+'-list-items] .footer .icon-delete-document').eq(1).click({force:true});
 });
