@@ -23,6 +23,7 @@ declare global {
 const undoKeys = ["cmd+z", "[Undo]", "ctrl+z"];
 
 export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) => {
+  console.log("| ExpressionToolComponent context: ", props.context, "title: ", props.model.title, "readOnly: ", props.readOnly);
   const content = props.model.content as ExpressionContentModelType;
   const mf = useRef<MathfieldElement>(null);
   const trackedCursorPos = useRef<number>(0);
@@ -32,6 +33,17 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
       mf.current && replaceKeyBinding(mf.current.keybindings, key, "");
     });
   }
+
+  useEffect(() => {
+    if (mf.current?.readOnly !== undefined){
+      if (props.readOnly === true){
+        mf.current.readOnly = true;
+      } else if (props.readOnly === false){
+        mf.current.readOnly = false;
+      }
+      console.log("| mf.current.readOnly is ", mf.current?.readOnly, " and app.readOnly is ", props.readOnly)
+    }
+  }, [props.readOnly])
 
   useEffect(() => {
     // when we change model via undo button, we need to update mathfield
