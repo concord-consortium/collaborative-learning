@@ -3,7 +3,7 @@ import {IGraphModel} from "./graph-model";
 import {GraphLayout} from "./graph-layout";
 import {AxisPlace, AxisPlaces} from "../axis/axis-types";
 import {
-  CategoricalAxisModel, EmptyAxisModel, isCategoricalAxisModel, isNumericAxisModel, NumericAxisModel
+  CategoricalAxisModel, isCategoricalAxisModel, isNumericAxisModel, NumericAxisModel
 } from "../axis/models/axis-model";
 import {axisPlaceToAttrRole, graphPlaceToAttrRole, IDotsRef, PlotType} from "../graph-types";
 import {GraphPlace} from "../axis-graph-shared";
