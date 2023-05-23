@@ -1,6 +1,6 @@
+import React, { useEffect, useState } from "react";
 import classNames from "classnames";
 import { observer } from "mobx-react";
-import React, { useEffect, useState } from "react";
 import { ITileProps, extractDragTileType, kDragTiles } from "../../components/tiles/tile-component";
 import { useUIStore } from "../../hooks/use-stores";
 import { addCanonicalCasesToDataSet } from "../../models/data/data-set";
@@ -15,10 +15,9 @@ import { EditFacet } from "./data-card-types";
 import { DataCardSortArea } from "./components/sort-area";
 import { safeJsonParse } from "../../utilities/js-utils";
 import { mergeTwoDataSets } from "../../models/data/data-set-utils";
-
-import "./data-card-tile.scss";
 import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
 
+import "./data-card-tile.scss";
 
 export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
   const { model, onRequestUniqueTitle, readOnly, documentContent, tileElt, onSetCanAcceptDrop, onRegisterTileApi,
