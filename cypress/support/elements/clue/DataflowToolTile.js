@@ -212,13 +212,13 @@ class DataflowToolTile {
   recordData(samplingRate, timer) {
     this.selectSamplingRate(samplingRate);
     this.getRecordButton().click();
-    this.getCountdownTimer().should("contain", "000:0" + timer.toString())
+    this.getCountdownTimer().should("contain", "000:0" + timer.toString());
     this.getStopButton().click();
   }
   recordDataWithoutStop(samplingRate, timer) {
     this.selectSamplingRate(samplingRate);
     this.getRecordButton().click();
-    this.getCountdownTimer().should("contain", "000:0" + timer.toString())
+    this.getCountdownTimer().should("contain", "000:0" + timer.toString());
   }
   clearRecordedData() {
     this.getRecordingClearButton().click();
