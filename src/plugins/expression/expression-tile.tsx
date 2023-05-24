@@ -8,7 +8,6 @@ import { ITileProps } from "../../components/tiles/tile-component";
 import { ExpressionContentModelType } from "./expression-content";
 import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
 import { replaceKeyBinding } from "./expression-tile-utils";
-
 import "./expression-tile.scss";
 
 type CustomElement<T> = Partial<T & DOMAttributes<T>>;
@@ -62,6 +61,8 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
           ref={mf}
           value={content.latexStr}
           onInput={handleChange}
+          // MathLive only interprets undefined as false
+          readOnly={props.readOnly === true ? true : undefined}
         />
       </div>
     </div>
