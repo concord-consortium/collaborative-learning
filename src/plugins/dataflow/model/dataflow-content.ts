@@ -87,11 +87,6 @@ export const DataflowContentModel = TileContentModel
         ? sharedModelManager.getTileSharedModels(self) as SharedDataSetType[]
         : [];
       return foundSharedModels;
-    },
-    get linkedTiles(): string[] {
-      const sharedModelManager = self.tileEnv?.sharedModelManager;
-      const tileIds = sharedModelManager?.getSharedModelTileIds(self.sharedModel) ?? [];
-      return tileIds.filter(id => id !== self.metadata.id);
     }
   }))
   .views(self => ({

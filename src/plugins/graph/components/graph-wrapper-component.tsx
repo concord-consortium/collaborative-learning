@@ -14,9 +14,8 @@ import { useToolbarTileApi } from "../../../components/tiles/hooks/use-toolbar-t
 import { GraphToolbar } from "./graph-toolbar";
 import { useProviderTileLinking } from "../../../hooks/use-provider-tile-linking";
 import { getTileContentById } from "../../../utilities/mst-utils";
-import { getEnv } from "@concord-consortium/mobx-state-tree";
-import { ITileEnvironment } from "../../../models/tiles/tile-content";
 import { SharedDataSet } from "../../../models/shared/shared-data-set";
+import { getSharedModelManager } from "../../../models/tiles/tile-environment";
 
 import "./graph-wrapper-component.scss";
 
@@ -33,10 +32,10 @@ export const GraphWrapperComponent: React.FC<ITileProps> = (props) => {
   const handleTileLinkRequest = (tableId: string) => {
     if (enabled) {
       const consumerTile = getTileContentById(model.content, model.id);
-      const sharedModelManager = (getEnv(model) as ITileEnvironment).sharedModelManager;
+      const sharedModelManager = getSharedModelManager(model);
       if (sharedModelManager?.isReady) {
-        const sharedTable = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, tableId);
-        sharedTable && sharedModelManager?.addTileSharedModel(consumerTile, sharedTable);
+        const providerDataSet = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, tableId);
+        providerDataSet && sharedModelManager?.addTileSharedModel(consumerTile, providerDataSet);
       }
     }
   };
@@ -44,10 +43,10 @@ export const GraphWrapperComponent: React.FC<ITileProps> = (props) => {
   const handleTileUnlinkRequest = (tableId: string) => {
     if (enabled) {
       const consumerTile = getTileContentById(model.content, model.id);
-      const sharedModelManager = (getEnv(model) as ITileEnvironment).sharedModelManager;
+      const sharedModelManager = getSharedModelManager(model);
       if (sharedModelManager?.isReady) {
-        const sharedTable = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, tableId);
-        sharedTable && sharedModelManager?.removeTileSharedModel(consumerTile, sharedTable);
+        const providerDataSet = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, tableId);
+        providerDataSet && sharedModelManager?.removeTileSharedModel(consumerTile, providerDataSet);
       }
     }
   };

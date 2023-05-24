@@ -3,18 +3,12 @@ import LinkGraphIcon from "../clue/assets/icons/table/link-graph-icon.svg";
 import { useCustomModal } from "./use-custom-modal";
 import { ITileLinkMetadata } from "../models/tiles/tile-link-types";
 import { ITileModel } from "../models/tiles/tile-model";
-import { getTileContentById } from "../utilities/mst-utils";
-import { TableContentModelType } from "../models/tiles/table/table-content";
+import { isLinkedToTile } from "../utilities/shared-data-utils";
 
 import "./link-tile-dialog.scss";
 
 //TODO: use-link-table-dialog-dataflow.tsx is very similar
 //consider refactoring -> https://www.pivotaltracker.com/n/projects/2441242/stories/184992684
-
-const isLinkedToTile = (model: ITileModel, tileId: string) => {
-  const tileContent = getTileContentById(model, tileId) as TableContentModelType;
-  return tileContent?.linkedTiles?.includes(model.id);
-};
 
 interface IContentProps {
   unlinkedTiles: ITileLinkMetadata[];
