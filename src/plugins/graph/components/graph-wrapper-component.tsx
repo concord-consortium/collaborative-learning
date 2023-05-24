@@ -56,7 +56,7 @@ export const GraphWrapperComponent: React.FC<ITileProps> = (props) => {
     handleRequestTileUnlink: handleTileUnlinkRequest
   };
 
-  const { isLinkEnabled, showLinkTableDialog } = useProviderTileLinking({
+  const { isLinkEnabled, showLinkTileDialog } = useProviderTileLinking({
     actionHandlers, documentId, model, onRequestTilesOfType, onRequestLinkableTiles
   });
 
@@ -89,7 +89,7 @@ export const GraphWrapperComponent: React.FC<ITileProps> = (props) => {
         model={model}
         content={content} {...toolbarProps}
         isLinkEnabled={isLinkEnabled}
-        onLinkTableButtonClick={showLinkTableDialog}
+        onLinkTableButtonClick={showLinkTileDialog}
         onRequestTilesOfType={onRequestTilesOfType}
       />
       <ToolTitleArea>

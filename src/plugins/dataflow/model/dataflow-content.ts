@@ -120,12 +120,12 @@ export const DataflowContentModel = TileContentModel
     get isLinked(){
       return self.linkedDataSets.length > 0;
     },
-    isLinkedToTable(tableId: string) {
+    isLinkedToTile(tileId: string) {
       const sharedModelManager = self.tileEnv?.sharedModelManager;
-      const isTableIdFound = self.linkedDataSets.some(link => { //link is the shared model
-        return sharedModelManager?.getSharedModelTileIds(link).includes(tableId);
+      const isTileIdFound = self.linkedDataSets.some(link => { //link is the shared model
+        return sharedModelManager?.getSharedModelTileIds(link).includes(tileId);
       });
-      return isTableIdFound;
+      return isTileIdFound;
     },
   }))
   .actions(self => tileModelHooks({
@@ -200,26 +200,27 @@ export const DataflowContentModel = TileContentModel
         name: `${nodeName} ${idx}`
       });
     },
-    addLinkedTable(tableId: string) {  //tableID is table we linked it to
+    addLinkedTile(tileId: string) {
       const sharedModelManager = self.tileEnv?.sharedModelManager;
-      if (sharedModelManager?.isReady && !self.isLinkedToTable(tableId)) {
-        const tableTileContents = getTileContentById(self, tableId); //get tableTile contents given a tableId
-        const tableSharedModels = sharedModelManager.getTileSharedModels(tableTileContents);
-        if (tableSharedModels.length > 1){ //table ideally should only have 1 shared dataSet
-          console.warn("Table has more than one shared dataSet");
+      if (sharedModelManager?.isReady && !self.isLinkedToTile(tileId)) {
+        const linkedTileContents = getTileContentById(self, tileId);
+        const linkedTileSharedModels = sharedModelManager.getTileSharedModels(linkedTileContents);
+        if (linkedTileSharedModels.length > 1){ //table ideally should only have 1 shared dataSet
+          console.warn("Tile has more than one shared dataSet");
         }
-        //sever connection table -> table sharedDataSet
-        tableSharedModels && sharedModelManager.removeTileSharedModel(tableTileContents, tableSharedModels[0]);
-        //connect table -> dataflow sharedDataset
-        self.sharedModel && sharedModelManager.addTileSharedModel(tableTileContents, self.sharedModel);
+        //sever connection tile -> tile sharedDataSet
+        linkedTileSharedModels.length > 0 &&
+          sharedModelManager.removeTileSharedModel(linkedTileContents, linkedTileSharedModels[0]);
+        //connect tile -> dataflow sharedDataset
+        self.sharedModel && sharedModelManager.addTileSharedModel(linkedTileContents, self.sharedModel);
       }
       else {
-        console.warn("DataflowContent.addLinkedTable unable to link table");
+        console.warn("DataflowContent.addLinkedTile unable to link tile");
       }
     },
     removeLinkedTable(tableId: string) {
       const sharedModelManager = self.tileEnv?.sharedModelManager;
-      if (sharedModelManager?.isReady && self.isLinkedToTable(tableId)) {
+      if (sharedModelManager?.isReady && self.isLinkedToTile(tableId)) {
         //sever connection table -> table sharedDataSet
         const tableTileContents = getTileContentById(self, tableId); //get tableTile contents given a tableId
         self.sharedModel && sharedModelManager.removeTileSharedModel(tableTileContents, self.sharedModel);

@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+
 import LinkGraphIcon from "../clue/assets/icons/table/link-graph-icon.svg";
 import { useCustomModal } from "./use-custom-modal";
 import { ITileLinkMetadata } from "../models/tiles/tile-link-types";
@@ -7,24 +8,23 @@ import { isLinkedToTile } from "../utilities/shared-data-utils";
 
 import "./link-tile-dialog.scss";
 
-//TODO: use-link-table-dialog-dataflow.tsx is very similar
-//consider refactoring -> https://www.pivotaltracker.com/n/projects/2441242/stories/184992684
-
 interface IContentProps {
-  unlinkedTiles: ITileLinkMetadata[];
   linkedTiles: ITileLinkMetadata[];
   selectValue: string;
+  tileTitle?: string;
+  unlinkedTiles: ITileLinkMetadata[];
   setSelectValue: React.Dispatch<React.SetStateAction<string>>;
 }
 const Content: React.FC<IContentProps>
-              = ({ unlinkedTiles, linkedTiles, selectValue, setSelectValue })=> {
+              = ({ linkedTiles, selectValue, tileTitle, unlinkedTiles, setSelectValue })=> {
+  const displayTileTitle = tileTitle || "this tile";
   const selectElt = useRef<HTMLSelectElement>(null);
 
     return (
       <>
         <div className="prompt">
-          To link this graph to a data provider, select a data provider from the link list.
-          To unlink this graph from a data provider, select a data provider from the unlink list.
+          To link {displayTileTitle} to a data provider, select a data provider from the link list.
+          To unlink {displayTileTitle} from a data provider, select a data provider from the unlink list.
         </div>
         <select ref={selectElt} value={selectValue} data-test="link-tile-select"
                                 onChange={e => {
@@ -60,6 +60,7 @@ interface IProps {
 export const useLinkProviderTileDialog = ({
   linkableTiles, model, handleRequestTileLink, handleRequestTileUnlink
 }: IProps) => {
+  const tileTitle = model.title;
   const [selectValue, setSelectValue] = useState("");
   const handleClick = () => {
     const tileInfo = linkableTiles.find(tile => tile.id === selectValue);
@@ -72,13 +73,13 @@ export const useLinkProviderTileDialog = ({
     }
   };
   const unlinkedTiles = linkableTiles.filter(tileInfo => !isLinkedToTile(model, tileInfo.id));
-  const linkedTiles = linkableTiles.filter(tileInfo => isLinkedToTile(model, tileInfo.id));
+  const linkedTiles = linkableTiles.filter(tileInfo => isLinkedToTile(model, tileInfo.id) && tileInfo.id !== model.id);
   const [showModal, hideModal] = useCustomModal({
     className: "link-tile",
     Icon: LinkGraphIcon,
-    title: "Link or Unlink Data Provider to a Graph",
+    title: "Link or Unlink Data Provider",
     Content,
-    contentProps: { unlinkedTiles, linkedTiles, selectValue, setSelectValue },
+    contentProps: { unlinkedTiles, linkedTiles, selectValue, tileTitle, setSelectValue },
     buttons: [
       { label: "Cancel" },
       { label: !isLinkedToTile(model, selectValue) ? "Link" : "Unlink",

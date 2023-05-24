@@ -1,4 +1,5 @@
 import { useCallback, useEffect } from "react";
+
 import {
   ILinkableTiles, ITileLinkMetadata, ITypedTileLinkMetadata, kNoLinkableTiles
 } from "../models/tiles/tile-link-types";
@@ -7,9 +8,6 @@ import {
 } from "../models/tiles/table-links";
 import { ITileModel } from "../models/tiles/tile-model";
 import { useLinkProviderTileDialog } from "./use-link-provider-tile-dialog";
-
-//TODO: use-table-linking-dataflow.tsx is very similar
-//consider refactoring -> https://www.pivotaltracker.com/n/projects/2441242/stories/184992684
 
 interface IProps {
   actionHandlers?: any;
@@ -27,8 +25,10 @@ export const useProviderTileLinking = ({
   const isLinkEnabled = (linkableTiles.length > 0);
   const linkColors = getTableLinkColors(modelId);
 
-  const [showLinkTableDialog] =
-          useLinkProviderTileDialog({ linkableTiles, model, handleRequestTileLink, handleRequestTileUnlink });
+  const [showLinkTileDialog] =
+          useLinkProviderTileDialog({
+            linkableTiles, model, handleRequestTileLink, handleRequestTileUnlink
+          });
 
   useEffect(() => {
     documentId && addTableToDocumentMap(documentId, modelId);
@@ -39,7 +39,7 @@ export const useProviderTileLinking = ({
     return getLinkedTableIndex(modelId);
   }, [modelId]);
 
-  return { isLinkEnabled, linkColors, getLinkIndex, showLinkTableDialog };
+  return { isLinkEnabled, linkColors, getLinkIndex, showLinkTileDialog };
 };
 
 interface IUseLinkableTilesProps {

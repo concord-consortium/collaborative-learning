@@ -2,6 +2,7 @@ import { observer } from "mobx-react";
 import { onSnapshot } from "mobx-state-tree";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactDataGrid from "react-data-grid";
+
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
 import { exportTableContentAsJson } from "../../../models/tiles/table/table-export";
 import { ITileProps } from "../tile-component";
@@ -16,7 +17,7 @@ import { useContentChangeHandlers } from "./use-content-change-handlers";
 import { useControlsColumn } from "./use-controls-column";
 import { useDataSet } from "./use-data-set";
 import { useExpressionsDialog } from "./use-expressions-dialog";
-import { useConsumerTileLinking } from "./use-consumer-tile-linking";
+import { useConsumerTileLinking } from "../../../hooks/use-consumer-tile-linking";
 import { useGridContext } from "./use-grid-context";
 import { useMeasureColumnWidth } from "./use-measure-column-width";
 import { useModelDataSet } from "./use-model-data-set";

@@ -223,7 +223,7 @@ Cypress.Commands.add('linkTableToGraph', (table, graph) => {
     cy.get('.link-tile-button').click();
   });
   cy.get('.ReactModalPortal').within(() => {
-    cy.get('[data-test=link-graph-select]').select(graph);
+    cy.get('[data-test=link-tile-select]').select(graph);
     cy.get('button').contains('Link').click();
   });
 });
@@ -232,7 +232,7 @@ Cypress.Commands.add('unlinkTableToGraph', (table, graph) => {
     cy.get('.link-tile-button').click();
   });
   cy.get('.ReactModalPortal').within(() => {
-    cy.get('[data-test=link-graph-select]').select(graph);
+    cy.get('[data-test=link-tile-select]').select(graph);
     cy.get('button').contains('Unlink').click();
   });
 });
@@ -241,7 +241,7 @@ Cypress.Commands.add('linkTableToDataflow', (program, table) => {
     cy.get('.link-table-button').click();
   });
   cy.get('.ReactModalPortal').within(() => {
-    cy.get('[data-test=link-table-select]').select(table);
+    cy.get('[data-test=link-tile-select]').select(table);
     cy.get('button').contains('Link').click();
   });
 });
@@ -250,7 +250,7 @@ Cypress.Commands.add('unlinkTableToDataflow', (program, table) => {
     cy.get('.link-table-button').click();
   });
   cy.get('.ReactModalPortal').within(() => {
-    cy.get('[data-test=link-table-select]').select(table);
+    cy.get('[data-test=link-tile-select]').select(table);
     cy.get('button').contains('Unlink').click();
   });
 });

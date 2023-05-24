@@ -1,6 +1,7 @@
 import React from "react";
 import { SizeMe, SizeMeProps } from "react-sizeme";
 import { observer, inject } from "mobx-react";
+
 import { DataflowProgram } from "./dataflow-program";
 import { BaseComponent } from "../../../components/base";
 import { ITileModel } from "../../../models/tiles/tile-model";
@@ -15,6 +16,7 @@ import { dataflowLogEvent } from "../dataflow-logger";
 import { addAttributeToDataSet } from "../../../models/data/data-set";
 import { DataflowLinkTableButton } from "./ui/dataflow-program-link-table-button";
 import { ProgramMode, UpdateMode } from "./types/dataflow-tile-types";
+import { ITileLinkMetadata } from "../../../models/tiles/tile-link-types";
 
 import "./dataflow-tile.scss";
 
@@ -156,7 +158,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   }
 
   private renderTableLinkButton() {
-    const { model, onRequestTilesOfType, documentId } = this.props;
+    const { model, documentId, onRequestTilesOfType, onRequestLinkableTiles } = this.props;
     const isLinkButtonEnabled = (this.determineProgramMode() === ProgramMode.Done);
 
     const actionHandlers = {
@@ -172,17 +174,18 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
         documentId={documentId}
         model={model}
         onRequestTilesOfType={onRequestTilesOfType}
+        onRequestLinkableTiles={onRequestLinkableTiles}
         actionHandlers={actionHandlers}
       />
     );
   }
 
-  private handleRequestTableLink = (tableId: string) => {
-    this.getContent().addLinkedTable(tableId);
+  private handleRequestTableLink = (tileInfo: ITileLinkMetadata) => {
+    this.getContent().addLinkedTile(tileInfo.id);
   };
 
-  private handleRequestTableUnlink = (tableId: string) => {
-    this.getContent().removeLinkedTable(tableId);
+  private handleRequestTableUnlink = (tileInfo: ITileLinkMetadata) => {
+    this.getContent().removeLinkedTable(tileInfo.id);
   };
 
   private getTitle() {
