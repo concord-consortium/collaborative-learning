@@ -1,8 +1,7 @@
-import { types, Instance } from "mobx-state-tree";
+import { types, Instance, getSnapshot } from "mobx-state-tree";
 import { TileContentModel } from "../../models/tiles/tile-content";
 import { kExpressionTileType } from "./expression-types";
 import { IDefaultContentOptions, ITileExportOptions } from "../../models/tiles/tile-content-info";
-import { getSnapshot } from "mobx-state-tree";
 
 export function defaultExpressionContent(props?: IDefaultContentOptions): ExpressionContentModelType {
   return ExpressionContentModel.create({latexStr: `a=\\pi r^2`});
