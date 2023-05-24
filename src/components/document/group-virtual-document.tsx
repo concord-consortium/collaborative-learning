@@ -37,7 +37,7 @@ export class GroupVirtualDocumentComponent extends BaseComponent<IProps, IState>
     );
   }
 
-  private groupButton(groupId: string) {
+  private groupButton(groupId: string, displayId: string) {
     const { document } = this.props;
     const thisId = document.id;
     const selected = thisId === groupId;
@@ -45,7 +45,7 @@ export class GroupVirtualDocumentComponent extends BaseComponent<IProps, IState>
     const clickHandler = () => this.handleGroupClicked(groupId);
     return(
       <div key={groupId} className={className} onClick={clickHandler}>
-        <div className="number">G{groupId}</div>
+        <div className="number">G{displayId}</div>
       </div>
     );
   }
@@ -58,7 +58,7 @@ export class GroupVirtualDocumentComponent extends BaseComponent<IProps, IState>
     return (
       <div className={`titlebar ${type}`}>
         <div className="actions">
-          { groups.allGroups.map( group => this.groupButton(group.id)) }
+          { groups.allGroups.map( group => this.groupButton(group.id, group.displayId)) }
         </div>
         <div className="group-title" data-test="document-title">
           Group {thisId}

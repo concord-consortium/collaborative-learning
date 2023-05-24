@@ -26,6 +26,9 @@ export const GroupModel = types
   .views((self) => ({
     getUserById(id?: string) {
       return self.users.find(user => user.id === id);
+    },
+    get displayId() {
+      return self.id.slice(self.id.length - 3);
     }
   }));
 

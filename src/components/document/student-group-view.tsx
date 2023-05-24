@@ -7,16 +7,17 @@ import { FourUpComponent } from "../four-up";
 import "./student-group-view.scss";
 
 interface IGroupButtonProps {
+  displayId: string;
   id: string;
   selected: boolean;
   onSelectGroup: (id: string) => void;
 }
-const GroupButton: React.FC<IGroupButtonProps> = ({ id, selected, onSelectGroup }) => {
+const GroupButton: React.FC<IGroupButtonProps> = ({ displayId, id, selected, onSelectGroup }) => {
   const className = `icon group-number ${selected ? "active" : ""}`;
   const handleClick = () => onSelectGroup(id);
   return(
     <div key={`group-${id}`} className={className} onClick={handleClick}>
-      <div className="number">G{id}</div>
+      <div className="number">G{displayId}</div>
     </div>
   );
 };
@@ -65,7 +66,7 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
           { groups.allGroups
               .filter(group => group.users.length > 0)
               .map(group => {
-                return <GroupButton id={group.id} key={group.id}
+                return <GroupButton displayId={group.displayId} id={group.id} key={group.id}
                                     selected={group.id === selectedId}
                                     onSelectGroup={onSelectGroup} />;
               })}
