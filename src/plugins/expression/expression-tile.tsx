@@ -61,6 +61,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
           ref={mf}
           value={content.latexStr}
           onInput={handleChange}
+          // MathLive only interprets undefined as false
           readOnly={props.readOnly === true ? true : undefined}
         />
       </div>
