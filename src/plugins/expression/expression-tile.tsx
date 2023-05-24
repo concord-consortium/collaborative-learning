@@ -8,9 +8,7 @@ import { ITileProps } from "../../components/tiles/tile-component";
 import { ExpressionContentModelType } from "./expression-content";
 import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
 import { replaceKeyBinding } from "./expression-tile-utils";
-
 import "./expression-tile.scss";
-import { calc } from "@chakra-ui/react";
 
 type CustomElement<T> = Partial<T & DOMAttributes<T>>;
 declare global {
