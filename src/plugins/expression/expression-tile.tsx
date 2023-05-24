@@ -35,8 +35,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
 
   useEffect(() => {
     if (mf.current?.readOnly === undefined) return;
-    if (props.readOnly === true) mf.current.readOnly = true;
-    if (props.readOnly === false) mf.current.readOnly = false;
+    if (props.readOnly !== undefined) mf.current.readOnly = props.readOnly;
   }, [props.readOnly]);
 
   useEffect(() => {
