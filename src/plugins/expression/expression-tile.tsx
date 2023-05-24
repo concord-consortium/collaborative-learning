@@ -10,6 +10,7 @@ import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-
 import { replaceKeyBinding } from "./expression-tile-utils";
 
 import "./expression-tile.scss";
+import { calc } from "@chakra-ui/react";
 
 type CustomElement<T> = Partial<T & DOMAttributes<T>>;
 declare global {
@@ -32,11 +33,6 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
       mf.current && replaceKeyBinding(mf.current.keybindings, key, "");
     });
   }
-
-  useEffect(() => {
-    if (mf.current?.readOnly === undefined) return;
-    if (props.readOnly !== undefined) mf.current.readOnly = props.readOnly;
-  }, [props.readOnly]);
 
   useEffect(() => {
     // when we change model via undo button, we need to update mathfield
@@ -67,6 +63,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
           ref={mf}
           value={content.latexStr}
           onInput={handleChange}
+          readOnly={props.readOnly === true ? true : undefined}
         />
       </div>
     </div>
