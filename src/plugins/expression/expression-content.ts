@@ -2,6 +2,7 @@ import { types, Instance } from "mobx-state-tree";
 import { TileContentModel } from "../../models/tiles/tile-content";
 import { kExpressionTileType } from "./expression-types";
 import { IDefaultContentOptions, ITileExportOptions } from "../../models/tiles/tile-content-info";
+import { getSnapshot } from "mobx-state-tree";
 
 export function defaultExpressionContent(props?: IDefaultContentOptions): ExpressionContentModelType {
   return ExpressionContentModel.create({latexStr: `a=\\pi r^2`});
@@ -18,13 +19,7 @@ export const ExpressionContentModel = TileContentModel
       return true;
     },
     exportJson(options?: ITileExportOptions){
-      const escapedLatexStr = self.latexStr.replace(/\\/g, "\\\\");
-      return [
-        `{`,
-        `  "type": "Expression",`,
-        `  "latexStr": "${escapedLatexStr}"`,
-        `}`
-      ].join("\n");
+      return JSON.stringify(getSnapshot(self), null, 2);
     }
   }))
   .actions(self => ({
