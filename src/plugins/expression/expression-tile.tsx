@@ -24,7 +24,14 @@ const undoKeys = ["cmd+z", "[Undo]", "ctrl+z"];
 export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) => {
   const content = props.model.content as ExpressionContentModelType;
   const mf = useRef<MathfieldElement>(null);
+  const toolRef = useRef<HTMLDivElement>(null);
   const trackedCursorPos = useRef<number>(0);
+
+  if(mf.current) {
+    mf.current.addEventListener("click", (e: any) => {
+      console.log("| click!", e, toolRef.current);
+    });
+  }
 
   if (mf.current?.keybindings){
     undoKeys.forEach((key: string) => {
@@ -48,7 +55,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   };
 
   return (
-    <div className="expression-tool">
+    <div className="expression-tool" ref={toolRef} onClick={() => console.log("| tool got the click!")}>
       <div className="expression-title-area">
         <CustomEditableTileTitle
           model={props.model}
