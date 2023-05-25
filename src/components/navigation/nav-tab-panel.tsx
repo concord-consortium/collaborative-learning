@@ -9,7 +9,6 @@ import { LogEventName } from "../../lib/logger-types";
 import { StudentGroupView } from "../document/student-group-view";
 import { ProblemTabContent } from "./problem-tab-content";
 import { SectionDocumentOrBrowser } from "./section-document-or-browser";
-import { FocusDocumentTracker } from "./focus-document-tracker";
 // import { NewCommentsBadge } from "./new-comments-badge";
 import { ChatPanel } from "../chat/chat-panel";
 import ChatIcon from "../../assets/chat-icon.svg";
@@ -60,7 +59,6 @@ export class NavTabPanel extends BaseComponent<IProps> {
       <div className={`resource-and-chat-panel ${isResourceExpanded ? "shown" : ""}`} style={resourceWidthStyle}>
         <div className={`nav-tab-panel ${showChatPanel ? "chat-open" : ""}`}
             ref={elt => this.navTabPanelElt = elt}>
-          <FocusDocumentTracker navTabPanelElt={this.navTabPanelElt} />
           <Tabs
             selectedIndex={selectedTabIndex}
             onSelect={this.handleSelectTab}
@@ -174,14 +172,13 @@ export class NavTabPanel extends BaseComponent<IProps> {
       const tabSpec = tabs[tabIndex];
       if (ui.activeNavTab !== tabSpec.tab) {
         ui.setActiveNavTab(tabSpec.tab);
-        ui.setSelectedCommentedDocument(undefined);
-        ui.updateFocusDocument();
         const logParameters = {
           tab_name: tabSpec.tab.toString()
         };
         const logEvent = () => { Logger.log(LogEventName.SHOW_TAB, logParameters); };
         logEvent();
       } else {
+        // TODO: is this necessary anymore?
         // track this value in a member rather than state to avoid excessive renders
         this.topTabReset = tabSpec.tab;
         // must force refresh initially but not when value is reset

@@ -72,9 +72,11 @@ export function createStores(params?: ICreateStores): IStores {
     selection: SelectionStoreModel.create(),
     serialDevice: new SerialDevice()
   };
+  const problemPath = getProblemPath(stores);
+  stores.ui.setProblemPath(problemPath);
   return {
     ...stores,
-    problemPath: getProblemPath(stores),
+    problemPath,
     userContextProvider: new UserContextProvider(stores)
   };
 }
@@ -129,8 +131,9 @@ export const setUnitAndProblem = async (stores: IStores, unitId: string | undefi
     stores.problem = problem;
   }
   stores.problemPath = getProblemPath(stores);
+  stores.ui.setProblemPath(stores.problemPath);
 
-  // TODO: It would be best to make stores a MobX object so when the teacherGuide is 
+  // TODO: It would be best to make stores a MobX object so when the teacherGuide is
   // updated, the Workspace component will re-render to show the teacher guide.
   // It currently works in real-world use, but was causing a Cypress test failure.
   addDisposer(unit, when(() => {
