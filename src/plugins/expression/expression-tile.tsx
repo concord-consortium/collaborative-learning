@@ -8,6 +8,7 @@ import { ITileProps } from "../../components/tiles/tile-component";
 import { ExpressionContentModelType } from "./expression-content";
 import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
 import { replaceKeyBinding } from "./expression-tile-utils";
+import { useUIStore } from "../../hooks/use-stores";
 import "./expression-tile.scss";
 
 type CustomElement<T> = Partial<T & DOMAttributes<T>>;
@@ -24,18 +25,13 @@ const undoKeys = ["cmd+z", "[Undo]", "ctrl+z"];
 export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) => {
   const content = props.model.content as ExpressionContentModelType;
   const mf = useRef<MathfieldElement>(null);
-  const toolRef = useRef<HTMLDivElement>(null);
   const trackedCursorPos = useRef<number>(0);
+  const ui = useUIStore();
 
   if(mf.current) {
-    mf.current.addEventListener("click", (e: any) => {
-      console.log("| 👤 shadow click!", e);
-      // Each of 3 methods below works to trigger click that is registered
-      // by toolRef and body, but does not affect other tile toolbar as normal clicks do
-      // 1 document.body.click();
-      // 2 toolRef.current?.click();
-      // 3 const mockClick = new Event("click", {bubbles: true, cancelable: true, composed: true});
-      //   toolRef.current?.dispatchEvent(mockClick);
+    mf.current.addEventListener("focus", (e: any) => {
+      ui.clearSelectedTiles();
+      ui.setSelectedTileId(props.model.id);
     });
   }
 
@@ -61,7 +57,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   };
 
   return (
-    <div className="expression-tool" ref={toolRef} onClick={() => console.log("| 🔨 toolRef click!")}>
+    <div className="expression-tool">
       <div className="expression-title-area">
         <CustomEditableTileTitle
           model={props.model}
