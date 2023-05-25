@@ -28,11 +28,8 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   const trackedCursorPos = useRef<number>(0);
   const ui = useUIStore();
 
-  if(mf.current) {
-    mf.current.addEventListener("focus", (e: any) => {
-      ui.clearSelectedTiles();
-      ui.setSelectedTileId(props.model.id);
-    });
+  if(mf.current && ui) {
+    mf.current.addEventListener("focus", () => ui.setSelectedTileId(props.model.id));
   }
 
   if (mf.current?.keybindings){
