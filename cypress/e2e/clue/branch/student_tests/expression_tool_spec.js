@@ -61,6 +61,7 @@ context('Expression Tool Tile', function () {
     it("should become the active tile when equation is clicked", () => {
       exp.getMathField().eq(1).click({force: true});
       exp.getExpressionTile().eq(1).should("have.class", "selected");
+      exp.getExpressionTile().eq(0).should("not.have.class", "selected");
     });
   });
 });
