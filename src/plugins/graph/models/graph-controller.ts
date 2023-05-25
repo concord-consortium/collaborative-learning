@@ -3,11 +3,12 @@ import {IGraphModel} from "./graph-model";
 import {GraphLayout} from "./graph-layout";
 import {AxisPlace, AxisPlaces} from "../axis/axis-types";
 import {
-  CategoricalAxisModel, isCategoricalAxisModel, isNumericAxisModel, NumericAxisModel
+  CategoricalAxisModel, EmptyAxisModel, isCategoricalAxisModel, isNumericAxisModel, NumericAxisModel
 } from "../axis/models/axis-model";
 import {axisPlaceToAttrRole, graphPlaceToAttrRole, IDotsRef, PlotType} from "../graph-types";
 import {GraphPlace} from "../axis-graph-shared";
 import {matchCirclesToData, setNiceDomain} from "../utilities/graph-utils";
+import { appConfig } from "../../../initialize-app";
 
 // keys are [primaryAxisType][secondaryAxisType]
 const plotChoices: Record<string, Record<string, PlotType>> = {
@@ -155,7 +156,11 @@ export class GraphController {
               graphModel.removeAxis(place);
             }
             else {
-              graphModel.setAxis(place, NumericAxisModel.create({place, min: -11, max: 13}));
+              const emptyPlotIsNumeric = appConfig.getSetting("emptyPlotIsNumeric", "graph");
+              const newAxisModel = emptyPlotIsNumeric
+                                     ? NumericAxisModel.create({place, min: 0, max: 1})
+                                     : EmptyAxisModel.create({place});
+              graphModel.setAxis(place, newAxisModel);
             }
           }
         }

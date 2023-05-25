@@ -3,7 +3,7 @@ import {createContext, useContext} from "react";
 import stringify from "json-stringify-pretty-compact";
 
 import {AxisPlace} from "../axis/axis-types";
-import {AxisModelUnion, IAxisModelUnion, NumericAxisModel} from "../axis/models/axis-model";
+import {AxisModelUnion, EmptyAxisModel, IAxisModelUnion, NumericAxisModel} from "../axis/models/axis-model";
 import {
   GraphAttrRole, hoverRadiusFactor, PlotType, PlotTypes, kGraphTileType,
   pointRadiusLogBase, pointRadiusMax, pointRadiusMin, pointRadiusSelectionAddend
@@ -22,6 +22,7 @@ import {
   kellyColors
 } from "../../../utilities/color-utils";
 import { SharedModelChangeType } from "../../../models/shared/shared-model-manager";
+import { appConfig } from "../../../initialize-app";
 
 export type SharedModelChangeHandler = (sharedModel: SharedModelType | undefined, type: string) => void;
 
@@ -48,7 +49,6 @@ export const GraphModel = TileContentModel
     // keys are AxisPlaces
     axes: types.map(AxisModelUnion),
     plotType: types.optional(types.enumeration([...PlotTypes]), "casePlot"),
-    hasXYDefaultAxisLabels: types.optional(types.boolean, false),
     config: types.optional(DataConfigurationModel, () => DataConfigurationModel.create()),
     // Visual properties
     _pointColors: types.optional(types.array(types.string), [defaultPointColor]),
@@ -119,7 +119,7 @@ export const GraphModel = TileContentModel
   }))
   .views(self => ({
     axisShouldShowGridLines(place: AxisPlace) {
-      return self.plotType === 'scatterPlot' && ['left', 'bottom'].includes(place) || !self.data;
+      return self.plotType === 'scatterPlot' && ['left', 'bottom'].includes(place);
     }
   }))
   .actions(self => ({
@@ -188,12 +188,18 @@ export interface IGraphModel extends Instance<typeof GraphModel> {}
 export interface IGraphModelSnapshot extends SnapshotIn<typeof GraphModel> {}
 
 export function createGraphModel(snap?: IGraphModelSnapshot) {
+  const emptyPlotIsNumeric = appConfig.getSetting("emptyPlotIsNumeric", "graph");
+  const bottomAxisModel = emptyPlotIsNumeric
+                            ? NumericAxisModel.create({place: "bottom", min: -10, max: 11})
+                            : EmptyAxisModel.create({place: "bottom"});
+  const leftAxisModel = emptyPlotIsNumeric
+                          ? NumericAxisModel.create({place: "left", min: -10, max: 11})
+                          : EmptyAxisModel.create({place: "left"});
   return GraphModel.create({
     axes: {
-      bottom: NumericAxisModel.create({place: "bottom", min: -10, max: 11}),
-      left: NumericAxisModel.create({place: "left", min: -11, max: 11})
+      bottom: bottomAxisModel,
+      left: leftAxisModel
     },
-    hasXYDefaultAxisLabels: true,
     ...snap
   });
 }

@@ -19,9 +19,9 @@ import {useAxisBoundsProvider} from "../axis/hooks/use-axis-bounds";
 import { isAddCasesAction, isSetCaseValuesAction } from "../../../models/data/data-set-actions";
 import { computeNiceNumericBounds } from "../utilities/graph-utils";
 import { isNumericAxisModel } from "../axis/models/axis-model";
+import { useSettingFromStores } from "../../../hooks/use-stores";
 
 interface IProps {
-  hasXYDefaultAxisLabels?: boolean
   place: AxisPlace
   enableAnimation: MutableRefObject<boolean>
   autoAdjust?: React.MutableRefObject<boolean>
@@ -31,7 +31,7 @@ interface IProps {
 }
 
 export const GraphAxis = observer(function GraphAxis({
-  hasXYDefaultAxisLabels, place, enableAnimation, autoAdjust, onDropAttribute, onRemoveAttribute, onTreatAttributeAs
+  place, enableAnimation, autoAdjust, onDropAttribute, onRemoveAttribute, onTreatAttributeAs
 }: IProps) {
   const dataConfig = useDataConfigurationContext(),
     isDropAllowed = dataConfig?.graphPlaceCanAcceptAttributeIDDrop ?? (() => true),
@@ -39,7 +39,9 @@ export const GraphAxis = observer(function GraphAxis({
     instanceId = useInstanceIdContext(),
     layout = useGraphLayoutContext(),
     droppableId = `${instanceId}-${place}-axis-drop`,
-    hintString = useDropHintString({role: axisPlaceToAttrRole[place]});
+    hintString = useDropHintString({role: axisPlaceToAttrRole[place]}),
+    emptyPlotIsNumeric = useSettingFromStores("emptyPlotIsNumeric", "graph") as boolean | undefined,
+    axisShouldShowGridlines = emptyPlotIsNumeric || graphModel.axisShouldShowGridLines(place);
 
   const handleIsActive = (active: Active) => {
     const droppedAttrId = getDragAttributeId(active) ?? '';
@@ -105,11 +107,10 @@ export const GraphAxis = observer(function GraphAxis({
       <Axis getAxisModel={() => graphModel.getAxis(place)}
             label={''}  // Remove
             enableAnimation={enableAnimation}
-            showScatterPlotGridLines={graphModel.axisShouldShowGridLines(place)}
+            showScatterPlotGridLines={axisShouldShowGridlines}
             centerCategoryLabels={graphModel.config.categoriesForAxisShouldBeCentered(place)}
       />
       <AttributeLabel
-        hasXYDefaultAxisLabels={hasXYDefaultAxisLabels}
         place={place}
         onChangeAttribute={onDropAttribute}
         onRemoveAttribute={onRemoveAttribute}

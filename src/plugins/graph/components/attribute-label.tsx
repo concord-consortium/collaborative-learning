@@ -14,11 +14,11 @@ import {useGraphLayoutContext} from "../models/graph-layout";
 import {useTileModelContext} from "../hooks/use-tile-model-context";
 import {getStringBounds} from "../axis/axis-utils";
 import {AxisOrLegendAttributeMenu} from "../axis/components/axis-or-legend-attribute-menu";
+import { useSettingFromStores } from "../../../hooks/use-stores";
 
 import graphVars from "./graph.scss";
 
 interface IAttributeLabelProps {
-  hasXYDefaultAxisLabels?: boolean;
   place: GraphPlace
   onChangeAttribute?: (place: GraphPlace, attrId: string) => void
   onRemoveAttribute?: (place: GraphPlace, attrId: string) => void
@@ -27,10 +27,11 @@ interface IAttributeLabelProps {
 
 export const AttributeLabel = observer(
   function AttributeLabel({
-    hasXYDefaultAxisLabels, place, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute
+    place, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute
   }: IAttributeLabelProps) {
     const graphModel = useGraphModelContext(),
       dataConfiguration = useDataConfigurationContext(),
+      defaultAxisLabels = useSettingFromStores("defaultAxisLabels", "graph") as Record<string, string> | undefined,
       layout = useGraphLayoutContext(),
       {isTileSelected} = useTileModelContext(),
       dataset = dataConfiguration?.dataset,
@@ -51,15 +52,16 @@ export const AttributeLabel = observer(
     }, [dataConfiguration, graphModel.plotType, place]);
 
     const getLabel = useCallback(() => {
-      if (hasXYDefaultAxisLabels && place === "bottom") return "x";
-      if (hasXYDefaultAxisLabels && place === "left") return "y";
+      if (defaultAxisLabels?.[place]) {
+        return defaultAxisLabels[place];
+      }
       if (useClickHereCue) {
         return t('DG.AxisView.emptyGraphCue');
       }
       const attrIDs = getAttributeIDs();
       return attrIDs.map(anID => dataset?.attrFromID(anID)?.name)
         .filter(aName => aName !== '').join(', ');
-    }, [dataset, hasXYDefaultAxisLabels, getAttributeIDs, place, useClickHereCue]);
+    }, [dataset, defaultAxisLabels, getAttributeIDs, place, useClickHereCue]);
 
     const refreshAxisTitle = useCallback(() => {
       const labelFont = useClickHereCue ? graphVars.graphEmptyLabelFont : graphVars.graphLabelFont,
