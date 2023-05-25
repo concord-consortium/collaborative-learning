@@ -13,7 +13,7 @@ interface IProps {
 export const SortCardAttribute: React.FC<IProps> = ({ model, caseId, attr }) => {
   const content = model.content as DataCardContentModelType;
   const attrName = content.dataSet.attrFromID(attr.id).name;
-  const value = content.dataSet.getValue(caseId, attr.id) as string;
+  const value = content.dataSet.getStrValue(caseId, attr.id);
   const isImage = gImageMap.isImageUrl(value);
   const [imageUrl, setImageUrl] = useState("");
 
