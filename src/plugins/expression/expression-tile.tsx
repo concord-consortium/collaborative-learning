@@ -29,7 +29,13 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
 
   if(mf.current) {
     mf.current.addEventListener("click", (e: any) => {
-      console.log("| click!", e, toolRef.current);
+      console.log("| 👤 shadow click!", e);
+      // Each of 3 methods below works to trigger click that is registered
+      // by toolRef and body, but does not affect other tile toolbar as normal clicks do
+      // 1 document.body.click();
+      // 2 toolRef.current?.click();
+      // 3 const mockClick = new Event("click", {bubbles: true, cancelable: true, composed: true});
+      //   toolRef.current?.dispatchEvent(mockClick);
     });
   }
 
@@ -55,7 +61,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   };
 
   return (
-    <div className="expression-tool" ref={toolRef} onClick={() => console.log("| tool got the click!")}>
+    <div className="expression-tool" ref={toolRef} onClick={() => console.log("| 🔨 toolRef click!")}>
       <div className="expression-title-area">
         <CustomEditableTileTitle
           model={props.model}
