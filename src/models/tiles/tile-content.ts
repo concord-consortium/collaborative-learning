@@ -1,10 +1,12 @@
 import { getEnv, getSnapshot, Instance, types } from "mobx-state-tree";
 import { SharedModelType } from "../shared/shared-model";
 import { ISharedModelManager, SharedModelChangeType } from "../shared/shared-model-manager";
+import { AppConfigModelType } from "../stores/app-config-model";
 import { tileModelHooks } from "./tile-model-hooks";
 import { kUnknownTileType } from "./unknown-types";
 
 export interface ITileEnvironment {
+  appConfig?: AppConfigModelType;
   sharedModelManager?: ISharedModelManager;
 }
 

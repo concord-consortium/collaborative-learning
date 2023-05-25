@@ -3,7 +3,8 @@ import { IDisposer, onSnapshot } from "mobx-state-tree";
 import { Map } from "immutable";
 
 import { defaultDocumentModelParts } from "../components/doc-editor-app-defaults";
-import { appConfig, AppProvider, initializeApp } from "../initialize-app";
+import { gAppConfig } from "../global-app-config";
+import { AppProvider, initializeApp } from "../initialize-app";
 import { IStores } from "../models/stores/stores";
 import { createDocumentModel, DocumentModelType } from "../models/document/document";
 import { DEBUG_CMS } from "../lib/debug";
@@ -102,7 +103,7 @@ export class DocumentEditor extends React.Component<IProps, IState>  {
             isPrimary={true}
             readOnly={false}
             document={document}
-            toolbar={appConfig.authorToolbar}
+            toolbar={gAppConfig.authorToolbar}
           />
         </AppProvider>
       );

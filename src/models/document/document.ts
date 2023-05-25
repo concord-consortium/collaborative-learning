@@ -9,6 +9,7 @@ import {
   LearningLogDocument, LearningLogPublication, PersonalDocument, PersonalPublication,
   PlanningDocument, ProblemDocument, ProblemPublication, SupportPublication
 } from "./document-types";
+import { gAppConfig } from "../../global-app-config";
 import { AppConfigModelType } from "../stores/app-config-model";
 import { TileCommentsModel, TileCommentsModelType } from "../tiles/tile-comments";
 import { UserStarModel, UserStarModelType } from "../tiles/user-star";
@@ -347,6 +348,7 @@ export const getDocumentContext = (document: DocumentModelType): IDocumentContex
 
 /**
  * Create a DocumentModel and add a new sharedModelManager into its environment
+ * TODO: move this function into its own module
  *
  * @param snapshot
  * @returns
@@ -354,6 +356,7 @@ export const getDocumentContext = (document: DocumentModelType): IDocumentContex
 export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
   const sharedModelManager = new SharedModelDocumentManager();
   const fullEnvironment: ITileEnvironment & {documentEnv: IDocumentEnvironment} = {
+    appConfig: gAppConfig,
     sharedModelManager,
     documentEnv: {}
   };

@@ -11,7 +11,7 @@ import { AppMode } from "./models/stores/store-types";
 import { Logger } from "./lib/logger";
 import { appConfigSnapshot, appIcons, createStores } from "./app-config";
 import { AppConfigContext } from "./app-config-context";
-import { AppConfigModel } from "./models/stores/app-config-model";
+import { gAppConfig } from "./global-app-config";
 import { IStores, setUnitAndProblem } from "./models/stores/stores";
 import { UserModel } from "./models/stores/user";
 import { urlParams } from "./utilities/url-params";
@@ -23,8 +23,6 @@ import "./index.scss";
 
 // set to true to enable MST liveliness checking
 const kEnableLivelinessChecking = false;
-
-export const appConfig = AppConfigModel.create(appConfigSnapshot);
 
 /**
  * This function is used by the 3 different entry points supported
@@ -44,6 +42,7 @@ export const initializeApp = async (appMode: AppMode, authoring?: boolean): Prom
 
   const user = UserModel.create();
 
+  const appConfig = gAppConfig;
   const unitId = urlParams.unit || appConfigSnapshot.defaultUnit;
   const problemOrdinal = urlParams.problem || appConfigSnapshot.config.defaultProblemOrdinal;
   const showDemoCreator = urlParams.demo;
