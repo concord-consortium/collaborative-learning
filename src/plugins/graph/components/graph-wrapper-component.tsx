@@ -14,8 +14,9 @@ import { useToolbarTileApi } from "../../../components/tiles/hooks/use-toolbar-t
 import { GraphToolbar } from "./graph-toolbar";
 import { useProviderTileLinking } from "../../../hooks/use-provider-tile-linking";
 import { getTileContentById } from "../../../utilities/mst-utils";
-import { SharedDataSet } from "../../../models/shared/shared-data-set";
+import { isSharedDataSet, SharedDataSet } from "../../../models/shared/shared-data-set";
 import { getSharedModelManager } from "../../../models/tiles/tile-environment";
+import { getTileSharedModels } from "../../../utilities/shared-data-utils";
 
 import "./graph-wrapper-component.scss";
 
@@ -29,12 +30,16 @@ export const GraphWrapperComponent: React.FC<ITileProps> = (props) => {
   const content = model.content as IGraphModel;
   const toolbarProps = useToolbarTileApi({ id: model.id, enabled, onRegisterTileApi, onUnregisterTileApi });
 
-  const handleTileLinkRequest = (tableId: string) => {
+  const handleTileLinkRequest = (tileId: string) => {
     if (enabled) {
       const consumerTile = getTileContentById(model.content, model.id);
       const sharedModelManager = getSharedModelManager(model);
       if (sharedModelManager?.isReady) {
-        const providerDataSet = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, tableId);
+        const existingConsumerDataset = getTileSharedModels(model).find(m => isSharedDataSet(m));
+        if (existingConsumerDataset) {
+          sharedModelManager.removeTileSharedModel(consumerTile, existingConsumerDataset);
+        }
+        const providerDataSet = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, tileId);
         providerDataSet && sharedModelManager?.addTileSharedModel(consumerTile, providerDataSet);
       }
     }

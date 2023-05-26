@@ -22,7 +22,7 @@ import {
   kellyColors
 } from "../../../utilities/color-utils";
 import { SharedModelChangeType } from "../../../models/shared/shared-model-manager";
-import { appConfig } from "../../../initialize-app";
+import { AppConfigModelType } from "../../../models/stores/app-config-model";
 
 export type SharedModelChangeHandler = (sharedModel: SharedModelType | undefined, type: string) => void;
 
@@ -187,11 +187,8 @@ export const GraphModel = TileContentModel
 export interface IGraphModel extends Instance<typeof GraphModel> {}
 export interface IGraphModelSnapshot extends SnapshotIn<typeof GraphModel> {}
 
-export function createGraphModel(snap?: IGraphModelSnapshot) {
-  // TODO: Right now we're importing appConfig directly. It would be better if it
-  // were accessed through the MST environment, but that doesn't seem possible
-  // from here right now.
-  const emptyPlotIsNumeric = appConfig.getSetting("emptyPlotIsNumeric", "graph");
+export function createGraphModel(snap?: IGraphModelSnapshot, appConfig?: AppConfigModelType) {
+  const emptyPlotIsNumeric = appConfig?.getSetting("emptyPlotIsNumeric", "graph");
   const bottomAxisModel = emptyPlotIsNumeric
                             ? NumericAxisModel.create({place: "bottom", min: -10, max: 11})
                             : EmptyAxisModel.create({place: "bottom"});
