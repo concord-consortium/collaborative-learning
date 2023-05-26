@@ -156,6 +156,9 @@ export class GraphController {
               graphModel.removeAxis(place);
             }
             else {
+              // TODO: Right now we're importing appConfig directly. It would be better if it
+              // were accessed through the MST environment, but that doesn't seem possible
+              // from here right
               const emptyPlotIsNumeric = appConfig.getSetting("emptyPlotIsNumeric", "graph");
               const newAxisModel = emptyPlotIsNumeric
                                      ? NumericAxisModel.create({place, min: 0, max: 1})
