@@ -29,12 +29,16 @@ export const GraphWrapperComponent: React.FC<ITileProps> = (props) => {
   const content = model.content as IGraphModel;
   const toolbarProps = useToolbarTileApi({ id: model.id, enabled, onRegisterTileApi, onUnregisterTileApi });
 
-  const handleTileLinkRequest = (tableId: string) => {
+  const handleTileLinkRequest = (tileId: string) => {
     if (enabled) {
       const consumerTile = getTileContentById(model.content, model.id);
       const sharedModelManager = getSharedModelManager(model);
       if (sharedModelManager?.isReady) {
-        const providerDataSet = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, tableId);
+        const existingConsumerDataset = sharedModelManager.findFirstSharedModelByType(SharedDataSet);
+        if (existingConsumerDataset) {
+          sharedModelManager.removeTileSharedModel(consumerTile, existingConsumerDataset);
+        }
+        const providerDataSet = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, tileId);
         providerDataSet && sharedModelManager?.addTileSharedModel(consumerTile, providerDataSet);
       }
     }
