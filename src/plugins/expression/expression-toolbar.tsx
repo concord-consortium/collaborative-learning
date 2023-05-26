@@ -5,7 +5,7 @@ import ReactDOM from "react-dom";
 import {
   IFloatingToolbarProps, useFloatingToolbarLocation
 } from "../../components/tiles/hooks/use-floating-toolbar-location";
-//import { ExpressionContentModelType } from "./expression-content";
+import { ExpressionContentModelType } from "./expression-content";
 import { ITileModel } from "../../models/tiles/tile-model";
 
 import "./expression-toolbar.scss";
@@ -17,13 +17,13 @@ interface IProps extends IFloatingToolbarProps {
 
 export const ExpressionToolbar: React.FC<IProps> = observer((
   {model, documentContent, tileElt, onIsEnabled, ...others}: IProps) => {
-    // const content = model.content as ExpressionContentModelType;
+    const content = model.content as ExpressionContentModelType;
     const enabled = onIsEnabled();
 
     const location = useFloatingToolbarLocation({
       documentContent,
       tileElt,
-      toolbarHeight: 24,
+      toolbarHeight: 14,
       toolbarTopOffset: 2,
       enabled,
       ...others

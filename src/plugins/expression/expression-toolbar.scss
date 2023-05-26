@@ -2,6 +2,8 @@
 
 .expression-toolbar {
   position: absolute;
+  display:flex;
+  border: $toolbar-border;
   &.disabled {
     display:none;
   }
