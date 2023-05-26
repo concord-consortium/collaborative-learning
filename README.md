@@ -203,7 +203,7 @@ There are a number of URL parameters that can aid in testing:
 
 ### Standalone Document Editor
 
-There is an alternative entry point for CLUE available at `/doc-editor.html`. This can be used to save and open individual documents from the local file system. Remote documents can be loaded into this editor with the `document` URL parameter. The editor requires a `unit` parameter to configure the toolbar. The editor supports loading section documents or document content documents. It can load an exported document content which is typical or section documents. It can also load a raw document content which is the same thing stored in Firebase.
+There is an alternative entry point for CLUE available at `/doc-editor.html`. This can be used to save and open individual documents from the local file system. Remote documents can be loaded into this editor with the `document` URL parameter. The editor requires a `unit` parameter to configure the toolbar. The editor supports loading section documents or document content documents. It can load an exported document content which is typical for section documents. It can also load a raw document content which is the same format that is stored in Firebase.
 
 ### QA
 
