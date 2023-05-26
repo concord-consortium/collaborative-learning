@@ -39,6 +39,9 @@ class ExpressionToolTile {
   getExpressionToolbar = () => {
     return cy.get(`.canvas-area .expression-toolbar`);
   };
+  getDeleteExpressionButton = () => {
+    return cy.get(`.canvas-area .expression-toolbar .delete-expression`);
+  };
 }
 
 export default ExpressionToolTile;

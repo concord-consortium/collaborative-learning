@@ -1,13 +1,12 @@
 @import "../../components/vars.sass";
 
 .expression-toolbar {
-  padding: 5px;
   position: absolute;
-  display:flex;
   border: $toolbar-border;
   border-radius: 0 0 $toolbar-border-radius $toolbar-border-radius;
   z-index: $toolbar-z-index;
   background-color: $workspace-teal-light-9;
+  display:flex;
   &.disabled {
     display:none;
   }

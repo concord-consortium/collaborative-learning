@@ -9,6 +9,7 @@ import { ExpressionContentModelType } from "./expression-content";
 import { ITileModel } from "../../models/tiles/tile-model";
 
 import "./expression-toolbar.scss";
+import { DeleteExpressionButton } from "./expression-buttons";
 
 interface IProps extends IFloatingToolbarProps {
   model: ITileModel;
@@ -34,6 +35,11 @@ export const ExpressionToolbar: React.FC<IProps> = observer((
     enabled && location ? "enabled" : "disabled",
   );
 
+  const deleteButtonClasses = classNames(
+    "delete-expression",
+    enabled ? "enabled" : "disabled",
+  );
+
   const deleteExpression = () => {
     content.setLatexStr("");
     mf.current.focus();
@@ -43,7 +49,7 @@ export const ExpressionToolbar: React.FC<IProps> = observer((
     ? ReactDOM.createPortal(
       <div className={toolbarClasses} style={location}>
         <div className="toolbar-content">
-          <button onClick={deleteExpression}>❌</button>
+          <DeleteExpressionButton onClick={deleteExpression} className={deleteButtonClasses} />
         </div>
       </div>, documentContent)
   : null;

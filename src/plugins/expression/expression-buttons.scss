@@ -1,0 +1,14 @@
+@import "../../components/vars.sass";
+
+.expression-button {
+  display: flex;
+  &:hover {
+    background-color: $workspace-teal-light-5 !important;
+    border-radius: 0px 0px 2px 2px;
+  }
+
+  svg {
+    fill: white;
+    stroke: $workspace-teal-dark-1;
+  }
+}
