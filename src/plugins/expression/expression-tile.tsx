@@ -8,6 +8,7 @@ import { ITileProps } from "../../components/tiles/tile-component";
 import { ExpressionContentModelType } from "./expression-content";
 import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
 import { replaceKeyBinding } from "./expression-tile-utils";
+import { useUIStore } from "../../hooks/use-stores";
 import "./expression-tile.scss";
 
 type CustomElement<T> = Partial<T & DOMAttributes<T>>;
@@ -25,6 +26,11 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   const content = props.model.content as ExpressionContentModelType;
   const mf = useRef<MathfieldElement>(null);
   const trackedCursorPos = useRef<number>(0);
+  const ui = useUIStore();
+
+  if(mf.current && ui) {
+    mf.current.addEventListener("focus", () => ui.setSelectedTileId(props.model.id));
+  }
 
   if (mf.current?.keybindings){
     undoKeys.forEach((key: string) => {
