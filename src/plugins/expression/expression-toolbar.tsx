@@ -12,10 +12,11 @@ import "./expression-toolbar.scss";
 
 interface IProps extends IFloatingToolbarProps {
   model: ITileModel;
+  mf: any;
 }
 
 export const ExpressionToolbar: React.FC<IProps> = observer((
-  {model, documentContent, tileElt, onIsEnabled, ...others}: IProps) => {
+  {model, documentContent, mf, tileElt, onIsEnabled, ...others}: IProps) => {
     const content = model.content as ExpressionContentModelType;
     const enabled = onIsEnabled();
 
@@ -33,15 +34,17 @@ export const ExpressionToolbar: React.FC<IProps> = observer((
     enabled && location ? "enabled" : "disabled",
   );
 
-  const deleteValue = () => {
+  const deleteExpression = () => {
     content.setLatexStr("");
+    mf.current.focus();
   };
 
   return documentContent
     ? ReactDOM.createPortal(
       <div className={toolbarClasses} style={location}>
-        <div className="toolbar-content">TOOLBAR</div>
-        <button onClick={deleteValue}>Delete</button>
+        <div className="toolbar-content">
+          <button onClick={deleteExpression}>❌</button>
+        </div>
       </div>, documentContent)
   : null;
 });

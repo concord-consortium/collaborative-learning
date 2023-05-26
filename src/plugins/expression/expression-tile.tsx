@@ -71,6 +71,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
         documentContent={props.documentContent}
         tileElt={props.tileElt}
         {...toolbarProps}
+        mf={mf}
       />
       <div className="expression-title-area">
         <CustomEditableTileTitle
