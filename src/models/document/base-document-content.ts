@@ -17,9 +17,9 @@ import {
 } from "../document/tile-row";
 import { migrateSnapshot } from "./document-content-import";
 import { isImportDocument } from "./document-content-import-types";
-import { IDocumentEnvironment } from "./document-environment";
 import { logTileCopyEvent } from "../tiles/log/log-tile-copy-event";
 import { logTileDocumentEvent } from "../tiles/log/log-tile-document-event";
+import { getAppConfig } from "../tiles/tile-environment";
 import { LogEventName } from "../../lib/logger-types";
 import { safeJsonParse, uniqueId } from "../../utilities/js-utils";
 import { comma, StringBuilder } from "../../utilities/string-builder";
@@ -839,8 +839,7 @@ export const BaseDocumentContentModel = types
         const contentInfo = getTileContentInfo(toolId);
         if (!contentInfo) return;
 
-        const documentEnv = getEnv(self)?.documentEnv as IDocumentEnvironment | undefined;
-        const appConfig = documentEnv?.appConfig;
+        const appConfig = getAppConfig(self);
 
         // TODO: The table tile is the only tile that uses the title property
         // here the title gets set as the name of the dataSet that is created by
