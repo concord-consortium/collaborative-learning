@@ -210,7 +210,6 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
   }
 
   removeTileSharedModel(tileContentModel: IAnyStateTreeNode, sharedModel: SharedModelType): void {
-    console.log("removeTileSharedModel", tileContentModel, sharedModel);
     if (!this.document) {
       console.warn("removeTileSharedModel has no document");
       return;
