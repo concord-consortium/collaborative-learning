@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { getSnapshot } from "mobx-state-tree";
 import { uniq, orderBy } from "lodash";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { DataCardContentModelType } from "../data-card-content";
@@ -16,11 +15,14 @@ export const DataCardSortArea: React.FC<IProps> = ({ model }) => {
   const content = model.content as DataCardContentModelType;
   const sortById = content.selectedSortAttributeId;
 
-  const attrsSnap = getSnapshot(content.attributes);
-  const allAttrValues = attrsSnap.filter((a) => a.id === sortById)[0].values;
+  const attribute = sortById ? content.dataSet.attrFromID(sortById) : undefined;
+  const allAttrValues = attribute?.strValues || [];
   const uniqueOrderedValues = orderBy(uniq(allAttrValues));
-  // if one of the categories is a category for no value, put this stack last
-  uniqueOrderedValues.includes("") && uniqueOrderedValues.push(uniqueOrderedValues.shift());
+  // orderBy will put "" first, we want it last
+  if (uniqueOrderedValues[0] === "") {
+    uniqueOrderedValues.shift();
+    uniqueOrderedValues.push("");
+  }
 
   const [sortDragActive, setSortDragActive] = useState(false);
 
@@ -58,7 +60,7 @@ export const DataCardSortArea: React.FC<IProps> = ({ model }) => {
               key={`${sortById}-${value}`}
               id={`${sortById}-${value}`}
               model={model}
-              stackValue={value as string}
+              stackValue={value}
               inAttributeId={sortById}
               draggingActive={sortDragActive}
             />

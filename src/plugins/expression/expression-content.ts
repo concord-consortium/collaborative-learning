@@ -1,13 +1,10 @@
-import { types, Instance } from "mobx-state-tree";
+import { types, Instance, getSnapshot } from "mobx-state-tree";
 import { TileContentModel } from "../../models/tiles/tile-content";
 import { kExpressionTileType } from "./expression-types";
-import { getTileModel, setTileTitleFromContent } from "../../models/tiles/tile-model";
 import { IDefaultContentOptions, ITileExportOptions } from "../../models/tiles/tile-content-info";
 
 export function defaultExpressionContent(props?: IDefaultContentOptions): ExpressionContentModelType {
-  const content = ExpressionContentModel.create({latexStr: `a=\\pi r^2`});
-  props?.title && content.setTitle(props.title);
-  return content;
+  return ExpressionContentModel.create({latexStr: `a=\\pi r^2`});
 }
 
 export const ExpressionContentModel = TileContentModel
@@ -17,24 +14,14 @@ export const ExpressionContentModel = TileContentModel
     latexStr: "",
   })
   .views(self => ({
-    get title(): string | undefined {
-      return getTileModel(self)?.title;
-    },
     get isUserResizable() {
       return true;
     },
     exportJson(options?: ITileExportOptions){
-      return [
-        `{`,
-        `  "type": "Expression Tile"`,
-        `}`
-      ].join("\n");
+      return JSON.stringify(getSnapshot(self), null, 2);
     }
   }))
   .actions(self => ({
-    setTitle(title: string) {
-      setTileTitleFromContent(self, title);
-    },
     setLatexStr(text: string) {
       self.latexStr = text;
     }

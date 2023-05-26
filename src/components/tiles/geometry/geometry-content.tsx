@@ -208,7 +208,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     this.initializeContent();
 
     this.props.onRegisterTileApi({
-      getTitle: () => this.getContent().title,
       hasSelection: () => {
         const geometryContent = this.props.model.content as GeometryContentModelType;
         // Note: hasSelection() returns true when there is a selection whether or not
@@ -454,7 +453,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleTitleChange = (title?: string) => {
-    title && this.applyChange(() => this.getContent().updateTitle(this.state.board, title));
+    title && this.props.model.setTitle(title);
     this.setState({ isEditingTitle: false });
   };
 
@@ -470,7 +469,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderTitle() {
-    const getTitle = () => this.getContent().title || "";
+    const getTitle = () => this.props.model.title || "";
     const { measureText, readOnly, size, scale } = this.props;
     return (
       <EditableTileTitle key="geometry-title" size={size} scale={scale} getTitle={getTitle}

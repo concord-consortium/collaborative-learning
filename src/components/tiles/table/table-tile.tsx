@@ -49,7 +49,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   // Basic operations based on the model
   const {
     dataSet, columnChanges, triggerColumnChange, rowChanges, triggerRowChange, ...gridModelProps
-  } = useModelDataSet(content);
+  } = useModelDataSet(model, content);
 
   // Set up user specified columns and function to measure a column
   const { measureColumnWidth, resizeColumn, resizeColumnWidth } = useMeasureColumnWidth({ content });

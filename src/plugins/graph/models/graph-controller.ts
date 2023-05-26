@@ -8,6 +8,7 @@ import {
 import {axisPlaceToAttrRole, graphPlaceToAttrRole, IDotsRef, PlotType} from "../graph-types";
 import {GraphPlace} from "../axis-graph-shared";
 import {matchCirclesToData, setNiceDomain} from "../utilities/graph-utils";
+import { appConfig } from "../../../initialize-app";
 
 // keys are [primaryAxisType][secondaryAxisType]
 const plotChoices: Record<string, Record<string, PlotType>> = {
@@ -150,12 +151,19 @@ export class GraphController {
           break;
         case 'empty': {
           if (currentType !== 'empty') {
-            layout.setAxisScaleType(place, 'ordinal');
-            if (['left', 'bottom'].includes(place)) {
-              graphModel.setAxis(place, EmptyAxisModel.create({place}));
+            if (!['left', 'bottom'].includes(place)) {
+              layout.setAxisScaleType(place, 'ordinal');
+              graphModel.removeAxis(place);
             }
             else {
-              graphModel.removeAxis(place);
+              // TODO: Right now we're importing appConfig directly. It would be better if it
+              // were accessed through the MST environment, but that doesn't seem possible
+              // from here right
+              const emptyPlotIsNumeric = appConfig.getSetting("emptyPlotIsNumeric", "graph");
+              const newAxisModel = emptyPlotIsNumeric
+                                     ? NumericAxisModel.create({place, min: 0, max: 1})
+                                     : EmptyAxisModel.create({place});
+              graphModel.setAxis(place, newAxisModel);
             }
           }
         }

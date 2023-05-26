@@ -24,9 +24,13 @@ $expression-title-width: 200px;
     }
   }
 
-  .expression-math-area math-field {
+  math-field {
     font-size:20px;
     border-width: 0px;
     padding:$expression-padding;
   }
+}
+
+.readonly math-field {
+  outline:none;
 }

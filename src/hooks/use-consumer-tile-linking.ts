@@ -62,8 +62,8 @@ const useLinkableTiles = ({ model, onRequestTilesOfType, onRequestLinkableTiles 
   const { providers, consumers } = onRequestLinkableTiles?.() || kNoLinkableTiles;
 
   // add default title if there isn't a title
-  function addDefaultTitle({ id, type, title }: ITypedTileLinkMetadata, i: number) {
-    return { id, type, title: title || `${type} ${i + 1}`};
+  function addDefaultTitle({ id, type, title, titleBase }: ITypedTileLinkMetadata, i: number) {
+    return { id, type, title: title || `${titleBase || type} ${i + 1}`};
   }
 
   return {
