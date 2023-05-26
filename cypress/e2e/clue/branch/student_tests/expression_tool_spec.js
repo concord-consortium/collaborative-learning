@@ -63,5 +63,18 @@ context('Expression Tool Tile', function () {
       exp.getExpressionTile().eq(1).should("have.class", "selected");
       exp.getExpressionTile().eq(0).should("not.have.class", "selected");
     });
+    it("should have a toggleable toolbar", () => {
+      exp.getExpressionToolbar().eq(1).should("be.visible");
+      exp.getExpressionToolbar().eq(0).should("not.be.visible");
+      exp.getMathField().eq(0).click({force: true});
+      exp.getExpressionToolbar().eq(0).should("be.visible");
+      exp.getExpressionToolbar().eq(1).should("not.be.visible");
+     // exp.getNthExpressionToolbar()
+      // exp.getNthExpressionToolbar(1).should("be.visible");
+      // exp.getNthExpressionToolbar(0).should("not.be.visible");
+      // exp.getMathField().eq(0).click({force: true});
+      // exp.getNthExpressionToolbar(0).should("be.visible");
+      // exp.getNthExpressionToolbar(1).should("not.be.visible");
+    });
   });
 });

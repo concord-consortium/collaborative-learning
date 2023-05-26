@@ -9,6 +9,10 @@ import { ExpressionContentModelType } from "./expression-content";
 import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
 import { replaceKeyBinding } from "./expression-tile-utils";
 import { useUIStore } from "../../hooks/use-stores";
+import { ITileApi } from "../../components/tiles/tile-api";
+// import { useToolbarTileApi } from "../../components/tiles/hooks/use-toolbar-tile-api";
+import { ExpressionToolbar } from "./expression-toolbar";
+
 import "./expression-tile.scss";
 
 type CustomElement<T> = Partial<T & DOMAttributes<T>>;
@@ -37,6 +41,14 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
       mf.current && replaceKeyBinding(mf.current.keybindings, key, "");
     });
   }
+
+  const handleIsEnabled = () => {
+    if (ui) {
+      return ui.selectedTileIds.includes(props.model.id);
+    } else {
+      return false;
+    }
+  };
 
   useEffect(() => {
     // when we change model via undo button, we need to update mathfield
@@ -71,6 +83,15 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
           readOnly={props.readOnly === true ? true : undefined}
         />
       </div>
+      <ExpressionToolbar
+        model={props.model}
+        documentContent={props.documentContent}
+        tileElt={props.tileElt}
+        handleDeleteValue={() => console.log("| delete value func should be passed down?")}
+        onIsEnabled={handleIsEnabled}
+        onRegisterTileApi={(tileApi: ITileApi) => console.log("| register tileApi", tileApi)}
+        onUnregisterTileApi={() => console.log("| unregister tileApi")}
+      />
     </div>
   );
 });

@@ -1,0 +1,8 @@
+@import "../../components/vars.sass";
+
+.expression-toolbar {
+  position: absolute;
+  &.disabled {
+    display:none;
+  }
+}
