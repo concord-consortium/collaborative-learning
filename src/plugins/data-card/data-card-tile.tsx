@@ -45,6 +45,14 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
     }
   }, [model, onRequestUniqueTitle]);
 
+  useEffect(() => {
+    onRegisterTileApi({
+      getTitle: () => {
+        return model.title;
+      }
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   /* ==[ Drag and Drop ] == */
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
