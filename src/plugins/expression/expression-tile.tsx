@@ -9,8 +9,7 @@ import { ExpressionContentModelType } from "./expression-content";
 import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
 import { replaceKeyBinding } from "./expression-tile-utils";
 import { useUIStore } from "../../hooks/use-stores";
-import { ITileApi } from "../../components/tiles/tile-api";
-// import { useToolbarTileApi } from "../../components/tiles/hooks/use-toolbar-tile-api";
+import { useToolbarTileApi } from "../../components/tiles/hooks/use-toolbar-tile-api";
 import { ExpressionToolbar } from "./expression-toolbar";
 
 import "./expression-tile.scss";
@@ -27,6 +26,7 @@ declare global {
 const undoKeys = ["cmd+z", "[Undo]", "ctrl+z"];
 
 export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) => {
+  const { onRegisterTileApi, onUnregisterTileApi } = props;
   const content = props.model.content as ExpressionContentModelType;
   const mf = useRef<MathfieldElement>(null);
   const trackedCursorPos = useRef<number>(0);
@@ -41,14 +41,6 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
       mf.current && replaceKeyBinding(mf.current.keybindings, key, "");
     });
   }
-
-  const handleIsEnabled = () => {
-    if (ui) {
-      return ui.selectedTileIds.includes(props.model.id) && !props.readOnly;
-    } else {
-      return false;
-    }
-  };
 
   useEffect(() => {
     // when we change model via undo button, we need to update mathfield
@@ -65,8 +57,22 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     content.setLatexStr((e.target as any).value);
   };
 
+  const toolbarProps = useToolbarTileApi({
+    id: props.model.id,
+    enabled: !props.readOnly,
+    onRegisterTileApi,
+    onUnregisterTileApi
+  });
+
   return (
     <div className="expression-tool">
+      <ExpressionToolbar
+        model={props.model}
+        documentContent={props.documentContent}
+        tileElt={props.tileElt}
+        handleDeleteValue={() => console.log("| delete value!")}
+        {...toolbarProps}
+      />
       <div className="expression-title-area">
         <CustomEditableTileTitle
           model={props.model}
@@ -83,15 +89,6 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
           readOnly={props.readOnly === true ? true : undefined}
         />
       </div>
-      <ExpressionToolbar
-        model={props.model}
-        documentContent={props.documentContent}
-        tileElt={props.tileElt}
-        handleDeleteValue={() => console.log("| delete value func should be passed down?")}
-        onIsEnabled={handleIsEnabled}
-        onRegisterTileApi={(tileApi: ITileApi) => console.log("| register tileApi", tileApi)}
-        onUnregisterTileApi={() => console.log("| unregister tileApi")}
-      />
     </div>
   );
 });
