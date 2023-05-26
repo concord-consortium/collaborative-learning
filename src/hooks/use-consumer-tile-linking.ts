@@ -1,13 +1,14 @@
 import { useCallback, useEffect } from "react";
-import { getColorMapEntry } from "../../../models/shared/shared-data-set-colors";
+
+import { getColorMapEntry } from "../models/shared/shared-data-set-colors";
 import {
   ILinkableTiles, ITileLinkMetadata, ITypedTileLinkMetadata, kNoLinkableTiles
-} from "../../../models/tiles/tile-link-types";
+} from "../models/tiles/tile-link-types";
 import {
   addTableToDocumentMap, getLinkedTableIndex, removeTableFromDocumentMap
-} from "../../../models/tiles/table-links";
-import { ITileModel } from "../../../models/tiles/tile-model";
-import { useLinkTileDialog } from "./use-link-tile-dialog";
+} from "../models/tiles/table-links";
+import { ITileModel } from "../models/tiles/tile-model";
+import { useLinkConsumerTileDialog } from "./use-link-consumer-tile-dialog";
 
 interface IProps {
   documentId?: string;
@@ -38,7 +39,7 @@ export const useConsumerTileLinking = ({
   });
 
   const [showLinkTileDialog] =
-          useLinkTileDialog({ linkableTiles, model, onLinkTile, onUnlinkTile });
+          useLinkConsumerTileDialog({ linkableTiles, model, onLinkTile, onUnlinkTile });
 
   useEffect(() => {
     documentId && addTableToDocumentMap(documentId, modelId);
@@ -61,8 +62,14 @@ const useLinkableTiles = ({ model, onRequestTilesOfType, onRequestLinkableTiles 
   const { providers, consumers } = onRequestLinkableTiles?.() || kNoLinkableTiles;
 
   // add default title if there isn't a title
-  function addDefaultTitle({ id, type, title, titleBase }: ITypedTileLinkMetadata, i: number) {
-    return { id, type, title: title || `${titleBase || type} ${i + 1}`};
+  const countsOfType = {} as Record<string, number>;
+  function addDefaultTitle({ id, type, title, titleBase }: ITypedTileLinkMetadata) {
+    if (!countsOfType[type]) {
+      countsOfType[type] = 1;
+    } else {
+      countsOfType[type]++;
+    }
+    return { id, type, title: title || `${titleBase || type} ${countsOfType[type]}`};
   }
 
   return {

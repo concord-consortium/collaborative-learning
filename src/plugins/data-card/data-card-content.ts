@@ -64,7 +64,7 @@ export const DataCardContentModel = TileContentModel
   .views(self => ({
     get dataSet() {
       return self.sharedModel?.dataSet || self.emptyDataSet;
-    },
+    }
   }))
   .views(self => ({
     get dataSetName(){

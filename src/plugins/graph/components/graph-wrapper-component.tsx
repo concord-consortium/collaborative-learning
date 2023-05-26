@@ -10,12 +10,55 @@ import { defaultTileTitleFont } from "../../../components/constants";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { useCurrent } from "../../../hooks/use-current";
 import { IGraphModel } from "../models/graph-model";
+import { useToolbarTileApi } from "../../../components/tiles/hooks/use-toolbar-tile-api";
+import { GraphToolbar } from "./graph-toolbar";
+import { useProviderTileLinking } from "../../../hooks/use-provider-tile-linking";
+import { getTileContentById } from "../../../utilities/mst-utils";
+import { SharedDataSet } from "../../../models/shared/shared-data-set";
+import { getSharedModelManager } from "../../../models/tiles/tile-environment";
 
 import "./graph-wrapper-component.scss";
 
 export const GraphWrapperComponent: React.FC<ITileProps> = (props) => {
-  const { model, readOnly, scale, onRegisterTileApi } = props;
+  const {
+    documentContent, documentId, model, readOnly, scale, tileElt,
+    onRegisterTileApi, onUnregisterTileApi, onRequestTilesOfType, onRequestLinkableTiles
+  } = props;
   const contentRef = useCurrent(model.content as IGraphModel);
+  const enabled = !readOnly;
+  const content = model.content as IGraphModel;
+  const toolbarProps = useToolbarTileApi({ id: model.id, enabled, onRegisterTileApi, onUnregisterTileApi });
+
+  const handleTileLinkRequest = (tableId: string) => {
+    if (enabled) {
+      const consumerTile = getTileContentById(model.content, model.id);
+      const sharedModelManager = getSharedModelManager(model);
+      if (sharedModelManager?.isReady) {
+        const providerDataSet = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, tableId);
+        providerDataSet && sharedModelManager?.addTileSharedModel(consumerTile, providerDataSet);
+      }
+    }
+  };
+
+  const handleTileUnlinkRequest = (tableId: string) => {
+    if (enabled) {
+      const consumerTile = getTileContentById(model.content, model.id);
+      const sharedModelManager = getSharedModelManager(model);
+      if (sharedModelManager?.isReady) {
+        const providerDataSet = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, tableId);
+        providerDataSet && sharedModelManager?.removeTileSharedModel(consumerTile, providerDataSet);
+      }
+    }
+  };
+
+  const actionHandlers = {
+    handleRequestTileLink: handleTileLinkRequest,
+    handleRequestTileUnlink: handleTileUnlinkRequest
+  };
+
+  const { isLinkEnabled, showLinkTileDialog } = useProviderTileLinking({
+    actionHandlers, documentId, model, onRequestTilesOfType, onRequestLinkableTiles
+  });
 
   useEffect(() => {
     onRegisterTileApi({
@@ -38,6 +81,17 @@ export const GraphWrapperComponent: React.FC<ITileProps> = (props) => {
 
   return (
     <div className={classNames("graph-wrapper", { "read-only": readOnly })}>
+      <GraphToolbar
+        documentContent={documentContent}
+        documentId={documentId}
+        tileElt={tileElt}
+        scale={scale}
+        model={model}
+        content={content} {...toolbarProps}
+        isLinkEnabled={isLinkEnabled}
+        onLinkTableButtonClick={showLinkTileDialog}
+        onRequestTilesOfType={onRequestTilesOfType}
+      />
       <ToolTitleArea>
         <EditableTileTitle
           key="drawing-title"

@@ -57,8 +57,8 @@ context('Graph Table Integration', function () {
         tableToolTile.getTableTile().click();
         cy.get('.primary-workspace .link-tile-button').click();
         cy.wait(2000);
-        // cy.get('[data-test=link-graph-select]').select('Second One');
-        cy.get('[data-test=link-graph-select]').select('Graph 1');
+        // cy.get('[data-test=link-tile-select]').select('Second One');
+        cy.get('[data-test=link-tile-select]').select('Graph 1');
       });
       after(function () {
         cy.get('.ReactModalPortal button').contains('Cancel').click();
