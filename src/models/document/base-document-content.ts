@@ -322,12 +322,13 @@ export const BaseDocumentContentModel = types
         const row = self.getRow(rowId);
         each(row?.tiles, tileEntry => {
           const tileType = self.getTileType(tileEntry.tileId);
+          const titleBase = getTileContentInfo(tileType)?.titleBase || tileType;
           if (tileType) {
             if (getTileContentInfo(tileType)?.isDataProvider) {
-              providers.push({ id: tileEntry.tileId, type: tileType });
+              providers.push({ id: tileEntry.tileId, type: tileType, titleBase });
             }
             if (getTileContentInfo(tileType)?.isDataConsumer) {
-              consumers.push({ id: tileEntry.tileId, type: tileType });
+              consumers.push({ id: tileEntry.tileId, type: tileType, titleBase });
             }
           }
         });

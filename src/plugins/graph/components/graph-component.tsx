@@ -13,7 +13,7 @@ import {GraphLayoutContext} from "../models/graph-layout";
 import {GraphModelContext, isGraphModel} from "../models/graph-model";
 import {Graph} from "./graph";
 import {DotsElt} from '../d3-types';
-import { ITileModel } from 'src/models/tiles/tile-model';
+import { ITileModel } from '../../../models/tiles/tile-model';
 
 interface IProps {
   tile?: ITileModel;

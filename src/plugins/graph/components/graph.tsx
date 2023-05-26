@@ -40,7 +40,7 @@ interface IProps {
 export const Graph = observer(function Graph({graphController, graphRef, dotsRef}: IProps) {
   const graphModel = useGraphModelContext(),
     { autoAdjustAxes, enableAnimation } = graphController,
-    {plotType} = graphModel,
+    { plotType } = graphModel,
     instanceId = useInstanceIdContext(),
     marqueeState = useMemo<MarqueeState>(() => new MarqueeState(), []),
     dataset = useDataSetContext(),
