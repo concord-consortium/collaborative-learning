@@ -44,7 +44,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
 
   const handleIsEnabled = () => {
     if (ui) {
-      return ui.selectedTileIds.includes(props.model.id);
+      return ui.selectedTileIds.includes(props.model.id) && !props.readOnly;
     } else {
       return false;
     }
