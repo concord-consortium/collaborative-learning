@@ -57,6 +57,10 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     content.setLatexStr((e.target as any).value);
   };
 
+  const deleteValue = () => {
+    content.setLatexStr("");
+  };
+
   const toolbarProps = useToolbarTileApi({
     id: props.model.id,
     enabled: !props.readOnly,
@@ -70,7 +74,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
         model={props.model}
         documentContent={props.documentContent}
         tileElt={props.tileElt}
-        handleDeleteValue={() => console.log("| delete value!")}
+        handleDeleteValue={deleteValue}
         {...toolbarProps}
       />
       <div className="expression-title-area">
