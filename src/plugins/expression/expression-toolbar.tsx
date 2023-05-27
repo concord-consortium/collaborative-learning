@@ -10,10 +10,11 @@ import { ITileModel } from "../../models/tiles/tile-model";
 
 import "./expression-toolbar.scss";
 import { DeleteExpressionButton } from "./expression-buttons";
+import { MathfieldElement } from "mathlive";
 
 interface IProps extends IFloatingToolbarProps {
   model: ITileModel;
-  mf: any;
+  mf: React.RefObject<MathfieldElement> | undefined;
 }
 
 export const ExpressionToolbar: React.FC<IProps> = observer((
@@ -42,7 +43,7 @@ export const ExpressionToolbar: React.FC<IProps> = observer((
 
   const deleteExpression = () => {
     content.setLatexStr("");
-    mf.current.focus();
+    mf && mf.current?.focus();
   };
 
   return documentContent
