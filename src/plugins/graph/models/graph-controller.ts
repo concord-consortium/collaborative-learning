@@ -83,7 +83,9 @@ export class GraphController {
   handleAttributeAssignment(graphPlace: GraphPlace, attrID: string) {
     const {graphModel, layout} = this,
       dataConfig = graphModel?.config,
-      dataset = graphModel?.data;
+      dataset = graphModel?.data,
+      appConfig = getAppConfig(graphModel);
+    const emptyPlotIsNumeric = appConfig?.getSetting("emptyPlotIsNumeric", "graph");
     if (!(layout && dataConfig && dataset)) {
       return;
     }
@@ -101,11 +103,12 @@ export class GraphController {
       const axisPlace = graphPlace as AxisPlace,
         graphAttributeRole = axisPlaceToAttrRole[axisPlace];
       if (['left', 'bottom'].includes(axisPlace)) { // Only assignment to 'left' and 'bottom' change plotType
-        const attributeType = dataConfig.attributeType(graphPlaceToAttrRole[graphPlace]) ?? 'empty',
+        const defaultAttrType = emptyPlotIsNumeric ? 'numeric' : 'empty';
+        const attributeType = dataConfig.attributeType(graphPlaceToAttrRole[graphPlace]) ?? defaultAttrType,
           primaryType = attributeType,
           otherAxisPlace = axisPlace === 'bottom' ? 'left' : 'bottom',
           otherAttrRole = axisPlaceToAttrRole[otherAxisPlace],
-          otherAttributeType = dataConfig.attributeType(graphPlaceToAttrRole[otherAxisPlace]) ?? 'empty',
+          otherAttributeType = dataConfig.attributeType(graphPlaceToAttrRole[otherAxisPlace]) ?? defaultAttrType,
           // Numeric attributes get priority for primaryRole when present. First one that is already present
           // and then the newly assigned one. If there is an already assigned categorical then its place is
           // the primaryRole, or, lastly, the newly assigned place
@@ -156,8 +159,6 @@ export class GraphController {
               graphModel.removeAxis(place);
             }
             else {
-              const appConfig = getAppConfig(graphModel);
-              const emptyPlotIsNumeric = appConfig?.getSetting("emptyPlotIsNumeric", "graph");
               const newAxisModel = emptyPlotIsNumeric
                                      ? NumericAxisModel.create({place, min: 0, max: 1})
                                      : EmptyAxisModel.create({place});
