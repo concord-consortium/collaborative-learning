@@ -1,13 +1,23 @@
+@import "../../components/mixins.sass";
 @import "../../components/vars.sass";
 
 .expression-toolbar {
-  position: absolute;
-  border: $toolbar-border;
-  border-radius: 0 0 $toolbar-border-radius $toolbar-border-radius;
-  z-index: $toolbar-z-index;
-  background-color: $workspace-teal-light-9;
+  @include tile-toolbar;
   display:flex;
   &.disabled {
     display:none;
+  }
+
+  .expression-button {
+    display: flex;
+    &:hover {
+      background-color: $workspace-teal-light-5;
+      border-radius: 0px 0px 2px 2px;
+    }
+
+    svg {
+      fill: white;
+      stroke: $workspace-teal-dark-1;
+    }
   }
 }

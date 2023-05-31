@@ -1,13 +1,10 @@
 @import "../../components/vars.sass";
+@import "../../components/mixins.sass";
 
 .data-card-toolbar {
-  position: absolute;
-  display:flex;
-  border: $toolbar-border;
-  border-radius: 0 0 $toolbar-border-radius $toolbar-border-radius;
-  z-index: $toolbar-z-index;
-  background-color: $workspace-teal-light-9;
+  @include tile-toolbar;
 
+  display:flex;
   &.disabled {
     display: none;
   }

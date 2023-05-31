@@ -4,7 +4,7 @@ import { Tooltip } from "react-tippy";
 import DeleteSelectionIcon from "../../assets/icons/delete/delete-selection-icon.svg";
 import { useTooltipOptions } from "../../hooks/use-tooltip-options";
 
-import "./expression-buttons.scss";
+import "./expression-toolbar.scss";
 
 interface IconButtonProps {
   className?: string;
