@@ -1,4 +1,4 @@
-import { types, Instance } from "mobx-state-tree";
+import { types, Instance, getSnapshot } from "mobx-state-tree";
 import { TileContentModel } from "../../models/tiles/tile-content";
 import { kExpressionTileType } from "./expression-types";
 import { IDefaultContentOptions, ITileExportOptions } from "../../models/tiles/tile-content-info";
@@ -18,11 +18,7 @@ export const ExpressionContentModel = TileContentModel
       return true;
     },
     exportJson(options?: ITileExportOptions){
-      return [
-        `{`,
-        `  "type": "Expression Tile"`,
-        `}`
-      ].join("\n");
+      return JSON.stringify(getSnapshot(self), null, 2);
     }
   }))
   .actions(self => ({

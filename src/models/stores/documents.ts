@@ -1,13 +1,13 @@
 import { forEach } from "lodash";
-import { getEnv, types } from "mobx-state-tree";
+import { types } from "mobx-state-tree";
 import { observable } from "mobx";
 import { AppConfigModelType } from "./app-config-model";
 import { DocumentModelType } from "../document/document";
-import { IDocumentEnvironment } from "../document/document-environment";
 import {
   DocumentType, LearningLogDocument, LearningLogPublication, OtherDocumentType, OtherPublicationType,
   PersonalDocument, PersonalPublication, PlanningDocument, ProblemDocument, ProblemPublication
 } from "../document/document-types";
+import { getTileEnvironment } from "../tiles/tile-environment";
 import { ClassModelType } from "./class";
 import { UserModelType } from "./user";
 import { DEBUG_DOCUMENT } from "../../lib/debug";
@@ -191,10 +191,8 @@ export const DocumentsModel = types
       }
       if (!self.getDocument(document.key)) {
         self.all.push(document);
-        const documentEnv = getEnv(document)?.documentEnv as IDocumentEnvironment | undefined;
-        if (documentEnv) {
-          documentEnv.appConfig = self.appConfig;
-        }
+        const tileEnv = getTileEnvironment(document);
+        if (tileEnv) tileEnv.appConfig = self.appConfig;
 
         const {firestore, userContextProvider} = self;
 

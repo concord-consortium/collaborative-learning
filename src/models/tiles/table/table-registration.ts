@@ -23,7 +23,8 @@ registerTileContentInfo({
   defaultContent: defaultTableContent,
   tileSnapshotPreProcessor,
   updateContentWithNewSharedModelIds: updateTableContentWithNewSharedModelIds,
-  isDataProvider: true
+  isDataProvider: true,
+  isDataConsumer: true
 });
 
 registerTileComponentInfo({

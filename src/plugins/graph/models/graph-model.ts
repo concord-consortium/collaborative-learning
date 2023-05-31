@@ -3,7 +3,7 @@ import {createContext, useContext} from "react";
 import stringify from "json-stringify-pretty-compact";
 
 import {AxisPlace} from "../axis/axis-types";
-import {AxisModelUnion, EmptyAxisModel, IAxisModelUnion} from "../axis/models/axis-model";
+import {AxisModelUnion, EmptyAxisModel, IAxisModelUnion, NumericAxisModel} from "../axis/models/axis-model";
 import {
   GraphAttrRole, hoverRadiusFactor, PlotType, PlotTypes, kGraphTileType,
   pointRadiusLogBase, pointRadiusMax, pointRadiusMin, pointRadiusSelectionAddend
@@ -22,6 +22,7 @@ import {
   kellyColors
 } from "../../../utilities/color-utils";
 import { SharedModelChangeType } from "../../../models/shared/shared-model-manager";
+import { AppConfigModelType } from "../../../models/stores/app-config-model";
 
 export type SharedModelChangeHandler = (sharedModel: SharedModelType | undefined, type: string) => void;
 
@@ -107,9 +108,6 @@ export const GraphModel = TileContentModel
           return result + pointRadiusSelectionAddend;
       }
     },
-    axisShouldShowGridLines(place: AxisPlace) {
-      return self.plotType === 'scatterPlot' && ['left', 'bottom'].includes(place);
-    },
     exportJson(options?: ITileExportOptions) {
       const snapshot = getSnapshot(self);
 
@@ -117,6 +115,11 @@ export const GraphModel = TileContentModel
       // compact. It results in something close to what we used to get when the
       // export was created using a string builder.
       return stringify(snapshot, {maxLength: 200});
+    }
+  }))
+  .views(self => ({
+    axisShouldShowGridLines(place: AxisPlace) {
+      return self.plotType === 'scatterPlot' && ['left', 'bottom'].includes(place);
     }
   }))
   .actions(self => ({
@@ -184,11 +187,18 @@ export const GraphModel = TileContentModel
 export interface IGraphModel extends Instance<typeof GraphModel> {}
 export interface IGraphModelSnapshot extends SnapshotIn<typeof GraphModel> {}
 
-export function createGraphModel(snap?: IGraphModelSnapshot) {
+export function createGraphModel(snap?: IGraphModelSnapshot, appConfig?: AppConfigModelType) {
+  const emptyPlotIsNumeric = appConfig?.getSetting("emptyPlotIsNumeric", "graph");
+  const bottomAxisModel = emptyPlotIsNumeric
+                            ? NumericAxisModel.create({place: "bottom", min: -10, max: 11})
+                            : EmptyAxisModel.create({place: "bottom"});
+  const leftAxisModel = emptyPlotIsNumeric
+                          ? NumericAxisModel.create({place: "left", min: -10, max: 11})
+                          : EmptyAxisModel.create({place: "left"});
   return GraphModel.create({
     axes: {
-      bottom: EmptyAxisModel.create({place: "bottom"}),
-      left: EmptyAxisModel.create({place: "left"})
+      bottom: bottomAxisModel,
+      left: leftAxisModel
     },
     ...snap
   });
