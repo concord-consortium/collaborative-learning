@@ -63,5 +63,18 @@ context('Expression Tool Tile', function () {
       exp.getExpressionTile().eq(1).should("have.class", "selected");
       exp.getExpressionTile().eq(0).should("not.have.class", "selected");
     });
+    it("should have a toggleable toolbar", () => {
+      exp.getExpressionToolbar().eq(1).should("be.visible");
+      exp.getExpressionToolbar().eq(0).should("not.be.visible");
+      exp.getMathField().eq(0).click({force: true});
+      exp.getExpressionToolbar().eq(0).should("be.visible");
+      exp.getExpressionToolbar().eq(1).should("not.be.visible");
+    });
+    it("delete expression button deletes the whole expression", () => {
+      exp.getMathField().eq(0).click({force: true});
+      exp.getDeleteExpressionButton().eq(0).click();
+      exp.getMathFieldMath().eq(0).should("not.contain.text");
+      exp.getMathField().should("not.have.value", "a=\\pi r^2");
+    });
   });
 });
