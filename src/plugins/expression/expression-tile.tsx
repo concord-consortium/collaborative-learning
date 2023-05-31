@@ -8,6 +8,10 @@ import { ITileProps } from "../../components/tiles/tile-component";
 import { ExpressionContentModelType } from "./expression-content";
 import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
 import { replaceKeyBinding } from "./expression-tile-utils";
+import { useUIStore } from "../../hooks/use-stores";
+import { useToolbarTileApi } from "../../components/tiles/hooks/use-toolbar-tile-api";
+import { ExpressionToolbar } from "./expression-toolbar";
+
 import "./expression-tile.scss";
 
 type CustomElement<T> = Partial<T & DOMAttributes<T>>;
@@ -22,9 +26,15 @@ declare global {
 const undoKeys = ["cmd+z", "[Undo]", "ctrl+z"];
 
 export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) => {
+  const { onRegisterTileApi, onUnregisterTileApi } = props;
   const content = props.model.content as ExpressionContentModelType;
   const mf = useRef<MathfieldElement>(null);
   const trackedCursorPos = useRef<number>(0);
+  const ui = useUIStore();
+
+  if(mf.current && ui) {
+    mf.current.addEventListener("focus", () => ui.setSelectedTileId(props.model.id));
+  }
 
   if (mf.current?.keybindings){
     undoKeys.forEach((key: string) => {
@@ -47,8 +57,22 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     content.setLatexStr((e.target as any).value);
   };
 
+  const toolbarProps = useToolbarTileApi({
+    id: props.model.id,
+    enabled: !props.readOnly,
+    onRegisterTileApi,
+    onUnregisterTileApi
+  });
+
   return (
     <div className="expression-tool">
+      <ExpressionToolbar
+        model={props.model}
+        documentContent={props.documentContent}
+        tileElt={props.tileElt}
+        {...toolbarProps}
+        mf={mf}
+      />
       <div className="expression-title-area">
         <CustomEditableTileTitle
           model={props.model}

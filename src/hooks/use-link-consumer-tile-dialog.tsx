@@ -1,36 +1,39 @@
 import React, { useRef, useState } from "react";
-import LinkGraphIcon from "../../../clue/assets/icons/table/link-graph-icon.svg";
-import { useCustomModal } from "../../../hooks/use-custom-modal";
-import { TableContentModelType } from "../../../models/tiles/table/table-content";
-import { ITileLinkMetadata } from "../../../models/tiles/tile-link-types";
-import { ITileModel } from "../../../models/tiles/tile-model";
+
+import LinkGraphIcon from "../clue/assets/icons/table/link-graph-icon.svg";
+import { useCustomModal } from "./use-custom-modal";
+import { ITileLinkMetadata } from "../models/tiles/tile-link-types";
+import { ITileModel } from "../models/tiles/tile-model";
+import { isLinkedToTile } from "../utilities/shared-data-utils";
 
 import "./link-tile-dialog.scss";
 
 interface IContentProps {
-  unlinkedTiles: ITileLinkMetadata[];
   linkedTiles: ITileLinkMetadata[];
   selectValue: string;
+  tileTitle?: string;
+  unlinkedTiles: ITileLinkMetadata[];
   setSelectValue: React.Dispatch<React.SetStateAction<string>>;
 }
 const Content: React.FC<IContentProps>
-              = ({ unlinkedTiles, linkedTiles, selectValue, setSelectValue })=> {
+              = ({ linkedTiles, selectValue, tileTitle, unlinkedTiles, setSelectValue })=> {
+  const displayTileTitle = tileTitle || "this tile";
   const selectElt = useRef<HTMLSelectElement>(null);
 
     return (
       <>
         <div className="prompt">
-          To link this table to a graph, drag the table to a graph or select a graph from the link list.
-          To unlink this table from a graph, select a graph from the unlink list.
+          To link {displayTileTitle} to another tile, select a tile from the link list.
+          To unlink {displayTileTitle} from another tile, select a tile from the unlink list.
         </div>
-        <select ref={selectElt} value={selectValue} data-test="link-graph-select"
+        <select ref={selectElt} value={selectValue} data-test="link-tile-select"
                                 onChange={e => {
                                   setSelectValue(e.target.value);
                                   setTimeout(() => selectElt.current?.focus());
                                 }}>
-          <option key="prompt" value={""}>Select a graph</option>
+          <option key="prompt" value={""}>Select a tile</option>
             {unlinkedTiles.length > 0 &&
-              <optgroup label="Link Graphs">
+              <optgroup label="Link Tiles">
                 {unlinkedTiles
                   .map(tileInfo => <option key={tileInfo.id} value={tileInfo.id}>{tileInfo.title}</option>)}
               </optgroup>
@@ -38,7 +41,7 @@ const Content: React.FC<IContentProps>
             {(unlinkedTiles.length > 0) && (linkedTiles.length > 0) &&
               <option disabled>──────────────────────────────</option> }
             {linkedTiles.length > 0 &&
-                <optgroup label="Unlink Graphs">
+                <optgroup label="Unlink Tiles">
                   {linkedTiles
                     .map(tileInfo => <option key={tileInfo.id} value={tileInfo.id}>{tileInfo.title}</option>)}
                 </optgroup>
@@ -54,32 +57,32 @@ interface IProps {
   onLinkTile: (tileInfo: ITileLinkMetadata) => void;
   onUnlinkTile: (tileInfo: ITileLinkMetadata) => void;
 }
-export const useLinkTileDialog = ({ linkableTiles, model, onLinkTile, onUnlinkTile }: IProps) => {
+export const useLinkConsumerTileDialog = ({ linkableTiles, model, onLinkTile, onUnlinkTile }: IProps) => {
+  const tileTitle = model.title;
   const [selectValue, setSelectValue] = useState("");
   const handleClick = () => {
     const tileInfo = linkableTiles.find(tile => tile.id === selectValue);
     if (tileInfo) {
-      if (content.linkedTiles.indexOf(tileInfo.id) < 0) {
-        onLinkTile(tileInfo);
-      } else {
+      if (isLinkedToTile(model, tileInfo.id)) {
         onUnlinkTile(tileInfo);
+      } else {
+        onLinkTile(tileInfo);
       }
     }
   };
-  const content = model.content as TableContentModelType;
   const unlinkedTiles = linkableTiles
-                                  .filter(tileInfo => content.linkedTiles.indexOf(tileInfo.id) < 0);
+                                  .filter(tileInfo => !isLinkedToTile(model, tileInfo.id));
   const linkedTiles = linkableTiles
-                                  .filter(tileInfo => content.linkedTiles.indexOf(tileInfo.id) >= 0);
+                                  .filter(tileInfo => isLinkedToTile(model, tileInfo.id) && tileInfo.id !== model.id);
   const [showModal, hideModal] = useCustomModal({
     className: "link-tile",
     Icon: LinkGraphIcon,
-    title: "Link or Unlink Table to a Graph",
+    title: "Link or Unlink Tile",
     Content,
-    contentProps: { unlinkedTiles, linkedTiles, selectValue, setSelectValue },
+    contentProps: { linkedTiles, selectValue, tileTitle, unlinkedTiles, setSelectValue },
     buttons: [
       { label: "Cancel" },
-      { label: content.linkedTiles.indexOf(selectValue) < 0 ? "Link" : "Unlink",
+      { label: !isLinkedToTile(model, selectValue) ? "Link" : "Unlink",
         isDefault: true,
         isDisabled: !selectValue,
         onClick: handleClick

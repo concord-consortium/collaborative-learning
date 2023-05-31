@@ -83,6 +83,13 @@ export interface QueryParams {
   localCMSBackend?: boolean;
   // mouse sensor can be enabled for cypress drag and drop tests for dnd-kit
   mouseSensor?: boolean;
+
+  //
+  // Standalone document editor options (doc-editor.html)
+  //
+
+  // URL to the document to open in the document editor
+  document?: string;
 }
 
 export const processUrlParams = (): QueryParams => {

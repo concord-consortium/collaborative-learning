@@ -2,6 +2,7 @@ import { each } from "lodash";
 import { inject, observer } from "mobx-react";
 import { getSnapshot, destroy } from "mobx-state-tree";
 import React from "react";
+import stringify from "json-stringify-pretty-compact";
 import { DocumentLoadingSpinner } from "./document-loading-spinner";
 import { BaseComponent } from "../base";
 import { DocumentContentComponent } from "./document-content";
@@ -73,6 +74,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
 
     this.hotKeys.register({
       "cmd-shift-s": this.handleCopyDocumentJson,
+      "cmd-shift-p": this.handleCopyRawDocumentJson,
       "cmd-option-shift-s": this.handleExportSectionJson,
       "cmd-z": this.handleDocumentUndo,
       "cmd-shift-z": this.handleDocumentRedo
@@ -155,7 +157,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
   private handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     this.hotKeys.dispatch(e);
   };
-  
+
   private getDocumentContent = () => {
     const { content, document } = this.props;
     return document?.content ?? content;
@@ -174,6 +176,16 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
     const transformImageUrl = this.getTransformImageUrl();
     const json = documentContent?.exportAsJson({ includeTileIds: true, transformImageUrl });
     json && navigator.clipboard.writeText(json);
+  };
+
+  private handleCopyRawDocumentJson = () => {
+    const documentContent = this.getDocumentContent();
+    if (!documentContent) {
+      return;
+    }
+    const json = getSnapshot(documentContent);
+    const jsonString =  stringify(json, {maxLength: 100});
+    navigator.clipboard.writeText(jsonString);
   };
 
   // Saves the current document as separate section files on the user's hard drive.

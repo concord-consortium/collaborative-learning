@@ -13,7 +13,8 @@ registerTileContentInfo({
   modelClass: DataflowContentModel,
   metadataClass: TileMetadataModel,
   defaultHeight: kDataflowDefaultHeight,
-  defaultContent: defaultDataflowContent
+  defaultContent: defaultDataflowContent,
+  isDataProvider: true
 });
 
 registerTileComponentInfo({

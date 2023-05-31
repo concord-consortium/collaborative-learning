@@ -1,9 +1,8 @@
-import { applySnapshot, types, Instance, SnapshotIn, getEnv, onAction, addDisposer, destroy } from "mobx-state-tree";
+import { applySnapshot, types, Instance, SnapshotIn, onAction, addDisposer, destroy } from "mobx-state-tree";
 import { forEach } from "lodash";
 import { QueryClient, UseQueryResult } from "react-query";
 import { DocumentContentModel, DocumentContentSnapshotType } from "./document-content";
 import { IDocumentAddTileOptions } from "./document-content-types";
-import { IDocumentEnvironment } from "./document-environment";
 import {
   DocumentType, DocumentTypeEnum, IDocumentContext, ISetProperties,
   LearningLogDocument, LearningLogPublication, PersonalDocument, PersonalPublication,
@@ -11,6 +10,7 @@ import {
 } from "./document-types";
 import { AppConfigModelType } from "../stores/app-config-model";
 import { TileCommentsModel, TileCommentsModelType } from "../tiles/tile-comments";
+import { getSharedModelManager } from "../tiles/tile-environment";
 import { UserStarModel, UserStarModelType } from "../tiles/user-star";
 import {
   IDocumentMetadata, IGetNetworkDocumentParams, IGetNetworkDocumentResponse, IUserContext
@@ -212,7 +212,7 @@ export const DocumentModel = Tree.named("Document")
       }
       else {
         self.content = DocumentContentModel.create(snapshot);
-        const sharedModelManager = (getEnv(self) as ITileEnvironment).sharedModelManager;
+        const sharedModelManager = getSharedModelManager(self);
         (sharedModelManager as ISharedModelDocumentManager).setDocument(self.content);
       }
     },
@@ -353,9 +353,8 @@ export const getDocumentContext = (document: DocumentModelType): IDocumentContex
  */
 export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
   const sharedModelManager = new SharedModelDocumentManager();
-  const fullEnvironment: ITileEnvironment & {documentEnv: IDocumentEnvironment} = {
-    sharedModelManager,
-    documentEnv: {}
+  const fullEnvironment: ITileEnvironment = {
+    sharedModelManager
   };
   try {
     const document = DocumentModel.create(snapshot, fullEnvironment);

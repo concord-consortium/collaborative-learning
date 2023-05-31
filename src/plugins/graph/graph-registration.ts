@@ -7,7 +7,7 @@ import { createGraphModel, GraphModel } from "./models/graph-model";
 import GraphToolIcon from "./graph-icon.svg";
 
 registerTileContentInfo({
-  defaultContent: () => createGraphModel(),
+  defaultContent: (options) => createGraphModel(undefined, options?.appConfig),
   defaultHeight: kGraphDefaultHeight,
   modelClass: GraphModel,
   titleBase: "X-Y Plot",

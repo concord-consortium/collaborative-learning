@@ -2,9 +2,9 @@ import React from "react";
 import classNames from "classnames";
 import LinkTableIcon from "../../assets/icons/link-table-icon.svg"; //we may need to change to icon with icon up
 import { useFeatureFlag } from "../../../../hooks/use-stores";
-import { useTableLinkingDataFlow } from "../use-table-linking-dataflow";
+import { useConsumerTileLinking } from "../../../../hooks/use-consumer-tile-linking";
 import { ITileModel } from "../../../../models/tiles/tile-model";
-import { ITileLinkMetadata } from "../../../../models/tiles/tile-link-types";
+import { ILinkableTiles, ITileLinkMetadata } from "../../../../models/tiles/tile-link-types";
 import { IDataFlowActionHandlers } from "../dataflow-shared";
 
 import "./dataflow-program-link-table-button.scss";
@@ -17,23 +17,27 @@ interface IProps {
   documentId?: string;
   model: ITileModel;
   onRequestTilesOfType: (tileType: string) => ITileLinkMetadata[];
+  onRequestLinkableTiles?: () => ILinkableTiles;
   actionHandlers: IDataFlowActionHandlers;
 }
 
 export const DataflowLinkTableButton: React.FC<IProps> = (props: IProps) => {
   const { isLinkButtonEnabled,
-          documentId,  model, onRequestTilesOfType, actionHandlers } = props;
+          documentId,  model, onRequestTilesOfType, onRequestLinkableTiles, actionHandlers } = props;
   const classes = classNames("link-table-button", { disabled: !isLinkButtonEnabled });
 
-  const { showLinkTableDialog } = useTableLinkingDataFlow({
+  const { showLinkTileDialog } = useConsumerTileLinking({
                                     documentId,
+                                    hasLinkableRows: true,
                                     model,
                                     onRequestTilesOfType,
-                                    actionHandlers
+                                    onRequestLinkableTiles,
+                                    onLinkTile: actionHandlers.handleRequestTableLink,
+                                    onUnlinkTile: actionHandlers.handleRequestTableUnlink
                                   });
 
   const handleClick = (e: React.MouseEvent) => {
-    isLinkButtonEnabled && documentId && showLinkTableDialog();
+    isLinkButtonEnabled && documentId && showLinkTileDialog();
     e.stopPropagation();
   };
 

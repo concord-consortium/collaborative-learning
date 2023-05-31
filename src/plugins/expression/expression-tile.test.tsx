@@ -12,6 +12,12 @@ jest.mock("../../models/tiles/log/log-tile-document-event", () => ({
   logTileDocumentEvent: (...args: any[]) => mockLogTileDocumentEvent()
 }));
 
+jest.mock("../../hooks/use-stores", () => ({
+  useUIStore: () => ({
+    selectedTileIds: []
+  })
+}));
+
 describe("ExpressionToolComponent", () => {
   const content = defaultExpressionContent();
   const model = TileModel.create({content});
@@ -37,7 +43,8 @@ describe("ExpressionToolComponent", () => {
       throw new Error("Function not implemented.");
     },
     onRegisterTileApi: (tileApi: ITileApi, facet?: string): void => {
-      throw new Error("Function not implemented.");
+      // throw new Error("Function not implemented.");
+      // () => null;
     },
     onUnregisterTileApi: (facet?: string): void => {
       throw new Error("Function not implemented.");
