@@ -5,7 +5,9 @@ import {AxisPlace, AxisPlaces} from "../axis/axis-types";
 import {
   CategoricalAxisModel, EmptyAxisModel, isCategoricalAxisModel, isNumericAxisModel, NumericAxisModel
 } from "../axis/models/axis-model";
-import {axisPlaceToAttrRole, graphPlaceToAttrRole, IDotsRef, PlotType} from "../graph-types";
+import {
+  axisPlaceToAttrRole, graphPlaceToAttrRole, IDotsRef, kDefaultNumericAxisBounds, PlotType
+} from "../graph-types";
 import {GraphPlace} from "../axis-graph-shared";
 import {matchCirclesToData, setNiceDomain} from "../utilities/graph-utils";
 import { getAppConfig } from "../../../models/tiles/tile-environment";
@@ -129,11 +131,12 @@ export class GraphController {
         attr = attributeID ? dataset?.attrFromID(attributeID) : undefined,
         attrType = dataConfig.attributeType(attrRole) ?? 'empty',
         currAxisModel = graphModel.getAxis(place),
-        currentType = currAxisModel?.type ?? 'empty';
+        currentType = currAxisModel?.type ?? 'empty',
+        [min, max] = kDefaultNumericAxisBounds;
       switch (attrType) {
         case 'numeric': {
           if (!currAxisModel || !isNumericAxisModel(currAxisModel)) {
-            const newAxisModel = NumericAxisModel.create({place, min: 0, max: 1});
+            const newAxisModel = NumericAxisModel.create({place, min, max});
             graphModel.setAxis(place, newAxisModel);
             layout.setAxisScaleType(place, 'linear');
             setNiceDomain(attr?.numValues || [], newAxisModel);
@@ -160,7 +163,7 @@ export class GraphController {
             }
             else {
               const newAxisModel = emptyPlotIsNumeric
-                                     ? NumericAxisModel.create({place, min: 0, max: 1})
+                                     ? NumericAxisModel.create({place, min, max})
                                      : EmptyAxisModel.create({place});
               graphModel.setAxis(place, newAxisModel);
             }

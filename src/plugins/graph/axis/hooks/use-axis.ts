@@ -1,6 +1,6 @@
 import {ScaleBand, ScaleLinear, scaleLinear, scaleOrdinal} from "d3";
 import {autorun, reaction} from "mobx";
-import {MutableRefObject, useCallback, useEffect, useRef} from "react";
+import {MutableRefObject, useCallback, useEffect} from "react";
 import {axisGap} from "../axis-types";
 import {useAxisLayoutContext} from "../models/axis-layout-context";
 import {IAxisModel, isNumericAxisModel} from "../models/axis-model";
@@ -11,7 +11,8 @@ import {collisionExists, getStringBounds} from "../axis-utils";
 import graphVars from "../../components/graph.scss";
 
 export interface IUseAxis {
-  axisModel?: IAxisModel
+  // pass accessor rather than axis model itself to avoid stale closure/defunct object issues
+  getAxisModel: () => IAxisModel | undefined
   axisElt: SVGGElement | null
   titleRef?: MutableRefObject<SVGGElement | null>
   axisTitle?: string
@@ -19,26 +20,21 @@ export interface IUseAxis {
 }
 
 export const useAxis = ({
-                          axisModel, axisTitle = "",
+                          getAxisModel, axisTitle = "",
                           centerCategoryLabels
                         }: IUseAxis) => {
   const layout = useAxisLayoutContext(),
+    axisModel = getAxisModel(),
     isNumeric = axisModel && isNumericAxisModel(axisModel),
     place = axisModel?.place ?? 'bottom',
     multiScale = layout.getAxisMultiScale(place),
     ordinalScale = isNumeric || axisModel?.type === 'empty' ? null : multiScale?.scale as ScaleBand<string>;
   const
-    // By all rights, the following three lines should not be necessary to get installDomainSync to run when
-    // GraphController:processV2Document installs a new axis model.
-    // Todo: Revisit and figure out whether we can remove the workaround.
-    previousAxisModel = useRef<IAxisModel>(),
-    axisModelChanged = previousAxisModel.current !== axisModel,
     dataConfiguration = useDataConfigurationContext(),
     axisPlace = axisModel?.place ?? 'bottom',
     attrRole = graphPlaceToAttrRole[axisPlace],
     type = axisModel?.type ?? 'empty',
     attributeID = dataConfiguration?.attributeID(attrRole);
-  previousAxisModel.current = axisModel;
 
   const computeDesiredExtent = useCallback(() => {
     if (dataConfiguration?.placeCanHaveZeroExtent(axisPlace)) {
@@ -74,32 +70,33 @@ export const useAxis = ({
 
   // update d3 scale and axis when scale type changes
   useEffect(() => {
-    if (axisModel) {
+    if (getAxisModel()) {
       const disposer = reaction(
         () => {
-          const {place: aPlace, scale: scaleType} = axisModel;
+          const {place: aPlace, scale: scaleType} = getAxisModel() || {};
           return {place: aPlace, scaleType};
         },
         ({place: aPlace, scaleType}) => {
-          layout.getAxisMultiScale(aPlace)?.setScaleType(scaleType);
+          aPlace && scaleType && layout.getAxisMultiScale(aPlace)?.setScaleType(scaleType);
         }
       );
       return () => disposer();
     }
-  }, [isNumeric, axisModel, layout]);
+  }, [getAxisModel, isNumeric, layout]);
 
   // update d3 scale and axis when axis domain changes
   useEffect(function installDomainSync() {
-    if (isNumeric) {
+    if (getAxisModel()?.isNumeric) {
       const disposer = autorun(() => {
-        multiScale?.setNumericDomain(axisModel.domain);
+        const _axisModel = getAxisModel();
+        if (_axisModel && isNumericAxisModel(_axisModel)) {
+          multiScale?.setNumericDomain(_axisModel?.domain);
+        }
         layout.setDesiredExtent(axisPlace, computeDesiredExtent());
       });
       return () => disposer();
     }
-    // Note axisModelChanged as a dependent. Shouldn't be necessary.
-  }, [axisModelChanged, isNumeric, axisModel, multiScale,
-    axisPlace, layout, computeDesiredExtent]);
+  }, [multiScale, axisPlace, layout, computeDesiredExtent, getAxisModel]);
 
   // update d3 scale and axis when layout/range changes
   useEffect(() => {
@@ -112,7 +109,7 @@ export const useAxis = ({
       }
     );
     return () => disposer();
-  }, [axisModel, layout, axisPlace, computeDesiredExtent]);
+  }, [layout, axisPlace, computeDesiredExtent]);
 
   // Set desired extent when things change
   useEffect(() => {
