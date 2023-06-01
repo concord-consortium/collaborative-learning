@@ -70,6 +70,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
         model={props.model}
         documentContent={props.documentContent}
         tileElt={props.tileElt}
+        scale={props.scale}
         {...toolbarProps}
         mf={mf}
       />
