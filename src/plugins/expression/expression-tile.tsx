@@ -26,14 +26,15 @@ declare global {
 const undoKeys = ["cmd+z", "[Undo]", "ctrl+z"];
 
 export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) => {
-  const { onRegisterTileApi, onUnregisterTileApi } = props;
-  const content = props.model.content as ExpressionContentModelType;
+  const { onRegisterTileApi, onRequestUniqueTitle, onUnregisterTileApi,
+    model, readOnly, documentContent, tileElt, scale } = props;
+  const content = model.content as ExpressionContentModelType;
   const mf = useRef<MathfieldElement>(null);
   const trackedCursorPos = useRef<number>(0);
   const ui = useUIStore();
 
   if(mf.current && ui) {
-    mf.current.addEventListener("focus", () => ui.setSelectedTileId(props.model.id));
+    mf.current.addEventListener("focus", () => ui.setSelectedTileId(model.id));
   }
 
   if (mf.current?.keybindings){
@@ -58,8 +59,8 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   };
 
   const toolbarProps = useToolbarTileApi({
-    id: props.model.id,
-    enabled: !props.readOnly,
+    id: model.id,
+    enabled: !readOnly,
     onRegisterTileApi,
     onUnregisterTileApi
   });
@@ -67,18 +68,18 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   return (
     <div className="expression-tool">
       <ExpressionToolbar
-        model={props.model}
-        documentContent={props.documentContent}
-        tileElt={props.tileElt}
-        scale={props.scale}
+        model={model}
+        documentContent={documentContent}
+        tileElt={tileElt}
+        scale={scale}
         {...toolbarProps}
         mf={mf}
       />
       <div className="expression-title-area">
         <CustomEditableTileTitle
-          model={props.model}
-          onRequestUniqueTitle={props.onRequestUniqueTitle}
-          readOnly={props.readOnly}
+          model={model}
+          onRequestUniqueTitle={onRequestUniqueTitle}
+          readOnly={readOnly}
         />
       </div>
       <div className="expression-math-area">
@@ -87,7 +88,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
           value={content.latexStr}
           onInput={handleChange}
           // MathLive only interprets undefined as false
-          readOnly={props.readOnly === true ? true : undefined}
+          readOnly={readOnly === true ? true : undefined}
         />
       </div>
     </div>
