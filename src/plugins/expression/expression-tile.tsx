@@ -26,6 +26,11 @@ declare global {
 const undoKeys = ["cmd+z", "[Undo]", "ctrl+z"];
 
 export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) => {
+  console.log("| render ExpressionToolComponent");
+  /*
+  we are rendering react component each time, but the mathfield is not updating, so we need to trigger that in the case that we are in authoring context?
+
+  */
   const { onRegisterTileApi, onUnregisterTileApi } = props;
   const content = props.model.content as ExpressionContentModelType;
   const mf = useRef<MathfieldElement>(null);
@@ -45,6 +50,8 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   useEffect(() => {
     // when we change model via undo button, we need to update mathfield
     const disposer = onSnapshot((content as any), () => {
+      console.log("| snapshot!")
+      console.log("| snapshot! ", "\n content: ", content.latexStr, "\n value: ", mf.current?.getValue())
       if (mf.current?.getValue() === content.latexStr) return;
       mf.current?.setValue(content.latexStr, {suppressChangeNotifications: true});
       if (mf.current?.position) mf.current.position = trackedCursorPos.current - 1;
