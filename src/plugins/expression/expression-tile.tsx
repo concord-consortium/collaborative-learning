@@ -39,6 +39,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
 
   if(mf.current && ui) {
     mf.current.addEventListener("focus", () => ui.setSelectedTileId(props.model.id));
+    mf.current.addEventListener("input", () => console.log("| input"));
   }
 
   if (mf.current?.keybindings){
@@ -50,8 +51,14 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   useEffect(() => {
     // when we change model via undo button, we need to update mathfield
     const disposer = onSnapshot((content as any), () => {
-      console.log("| snapshot!")
-      console.log("| snapshot! ", "\n content: ", content.latexStr, "\n value: ", mf.current?.getValue())
+      // console.log("| snapshot!")
+      // console.log("| snapshot! ", "\n content: ", content.latexStr, "\n value: ", mf.current?.getValue())
+      // console.log("| mf ", mf.current);
+      // one thing to try next
+      // on each keystroke, fake a blur and focus event
+      // this will trigger the mathfield to update?
+      // I could also look at the mount and lifecycle events of the mathfield
+      // and see if they can be manually triggered
       if (mf.current?.getValue() === content.latexStr) return;
       mf.current?.setValue(content.latexStr, {suppressChangeNotifications: true});
       if (mf.current?.position) mf.current.position = trackedCursorPos.current - 1;
@@ -60,6 +67,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   }, [content]);
 
   const handleChange = (e: FormEvent<MathfieldElementAttributes>) => {
+    console.log("| handleChange", mf.current);
     trackedCursorPos.current =  mf.current?.position || 0;
     content.setLatexStr((e.target as any).value);
   };
