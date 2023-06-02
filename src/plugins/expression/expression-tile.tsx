@@ -58,6 +58,12 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     content.setLatexStr((e.target as any).value);
 
     if (isEditor) {
+      // wholesale replace works, but we sometimes lose cursor position
+      // and fractions load in a slash group, which is not what we want
+      // mf.current?.executeCommand(["insert", content.latexStr, {insertionMode: "replaceAll"}]);
+
+      // the below covers the fraction issue, but not the cursor position, and it's a bit hacky
+      // we also have not-intuitive behavior when creating an exponent
       const cleanedLatex = stripGroupedSlashes(content.latexStr);
       mf.current?.executeCommand(["insert", cleanedLatex, {insertionMode: "replaceAll"}]);
     }
