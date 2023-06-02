@@ -7,11 +7,11 @@ import type { MathfieldElementAttributes, MathfieldElement } from "mathlive";
 import { ITileProps } from "../../components/tiles/tile-component";
 import { ExpressionContentModelType } from "./expression-content";
 import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
-import { replaceKeyBinding } from "./expression-tile-utils";
+import { replaceKeyBinding, stripGroupedSlashes } from "./expression-tile-utils";
 import { useUIStore } from "../../hooks/use-stores";
 import { useToolbarTileApi } from "../../components/tiles/hooks/use-toolbar-tile-api";
 import { ExpressionToolbar } from "./expression-toolbar";
-import { MathfieldElement as MFE } from "mathlive";
+
 import "./expression-tile.scss";
 
 type CustomElement<T> = Partial<T & DOMAttributes<T>>;
@@ -31,6 +31,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   const mf = useRef<MathfieldElement>(null);
   const trackedCursorPos = useRef<number>(0);
   const ui = useUIStore();
+  const isEditor = frames.location.href.includes("cms-editor.html?");
 
   if(mf.current && ui) {
     mf.current.addEventListener("focus", () => ui.setSelectedTileId(props.model.id));
@@ -53,30 +54,12 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   }, [content]);
 
   const handleChange = (e: FormEvent<MathfieldElementAttributes>) => {
-
     trackedCursorPos.current =  mf.current?.position || 0;
     content.setLatexStr((e.target as any).value);
-    // console.log("| handleChange! 🤷🏽‍♂️\n", "\n\n frames.MathfieldElement", frames.MathfieldElement, "\n\nmf value:\n", mf.current?.getValue(), "\n\nlatexStr:\n", content.latexStr, "\n\nthe element:\n", e.target, "\n\nthe event target value:\n", (e.target as any).value, "\n\nthe mf element:\n", mf.current);
-    /**
-     * OK SO we may have to progmatically swap in a new mathfield element with the correct values
-     * with something like this:
-     * let mfe = new MathfieldElement();
-     * // set the value
-     * // swap it in
-     * // but we only want to do that if
-     * // and we are in the iframe (and maybe if the value is different?)
-     * // so lets do this
-     * 1. check if we are in the iframe
-     * 2. swap in a new mathfield
-     */
 
-    // test frames.location for the substring "cms-editor.html?"
-    const isEditor = frames.location.href.includes("cms-editor.html?");
     if (isEditor) {
-      const mmf = document.querySelector("math-field") as MathfieldElement;
-      console.log("| math-field found in dom:\n", mmf);
-      console.log("| math-field shadow dom:", mmf?.shadowRoot);
-      mmf.executeCommand(['insert', '(#0)']); // interestingly, this works
+      const cleanedLatex = stripGroupedSlashes(content.latexStr);
+      mf.current?.executeCommand(["insert", cleanedLatex, {insertionMode: "replaceAll"}]);
     }
   };
 
