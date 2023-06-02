@@ -11,7 +11,7 @@ import { replaceKeyBinding } from "./expression-tile-utils";
 import { useUIStore } from "../../hooks/use-stores";
 import { useToolbarTileApi } from "../../components/tiles/hooks/use-toolbar-tile-api";
 import { ExpressionToolbar } from "./expression-toolbar";
-
+import { MathfieldElement as MFE } from "mathlive";
 import "./expression-tile.scss";
 
 type CustomElement<T> = Partial<T & DOMAttributes<T>>;
@@ -26,11 +26,6 @@ declare global {
 const undoKeys = ["cmd+z", "[Undo]", "ctrl+z"];
 
 export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) => {
-  console.log("| render ExpressionToolComponent");
-  /*
-  we are rendering react component each time, but the mathfield is not updating, so we need to trigger that in the case that we are in authoring context?
-
-  */
   const { onRegisterTileApi, onUnregisterTileApi } = props;
   const content = props.model.content as ExpressionContentModelType;
   const mf = useRef<MathfieldElement>(null);
@@ -39,7 +34,6 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
 
   if(mf.current && ui) {
     mf.current.addEventListener("focus", () => ui.setSelectedTileId(props.model.id));
-    mf.current.addEventListener("input", () => console.log("| input"));
   }
 
   if (mf.current?.keybindings){
@@ -51,14 +45,6 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   useEffect(() => {
     // when we change model via undo button, we need to update mathfield
     const disposer = onSnapshot((content as any), () => {
-      // console.log("| snapshot!")
-      // console.log("| snapshot! ", "\n content: ", content.latexStr, "\n value: ", mf.current?.getValue())
-      // console.log("| mf ", mf.current);
-      // one thing to try next
-      // on each keystroke, fake a blur and focus event
-      // this will trigger the mathfield to update?
-      // I could also look at the mount and lifecycle events of the mathfield
-      // and see if they can be manually triggered
       if (mf.current?.getValue() === content.latexStr) return;
       mf.current?.setValue(content.latexStr, {suppressChangeNotifications: true});
       if (mf.current?.position) mf.current.position = trackedCursorPos.current - 1;
@@ -67,9 +53,31 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   }, [content]);
 
   const handleChange = (e: FormEvent<MathfieldElementAttributes>) => {
-    console.log("| handleChange", mf.current);
+
     trackedCursorPos.current =  mf.current?.position || 0;
     content.setLatexStr((e.target as any).value);
+    // console.log("| handleChange! 🤷🏽‍♂️\n", "\n\n frames.MathfieldElement", frames.MathfieldElement, "\n\nmf value:\n", mf.current?.getValue(), "\n\nlatexStr:\n", content.latexStr, "\n\nthe element:\n", e.target, "\n\nthe event target value:\n", (e.target as any).value, "\n\nthe mf element:\n", mf.current);
+    /**
+     * OK SO we may have to progmatically swap in a new mathfield element with the correct values
+     * with something like this:
+     * let mfe = new MathfieldElement();
+     * // set the value
+     * // swap it in
+     * // but we only want to do that if
+     * // and we are in the iframe (and maybe if the value is different?)
+     * // so lets do this
+     * 1. check if we are in the iframe
+     * 2. swap in a new mathfield
+     */
+
+    // test frames.location for the substring "cms-editor.html?"
+    const isEditor = frames.location.href.includes("cms-editor.html?");
+    if (isEditor) {
+      const mmf = document.querySelector("math-field") as MathfieldElement;
+      console.log("| math-field found in dom:\n", mmf);
+      console.log("| math-field shadow dom:", mmf?.shadowRoot);
+      mmf.executeCommand(['insert', '(#0)']); // interestingly, this works
+    }
   };
 
   const toolbarProps = useToolbarTileApi({
