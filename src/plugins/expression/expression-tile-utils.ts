@@ -5,6 +5,6 @@ export function replaceKeyBinding(bindings: any[], keyPress: string, command: st
   }
 }
 
-export function stripGroupedSlashes(str: string) {
-  return str.replace(/\{\/\}/g, '');
-}
+// export function stripGroupedSlashes(str: string) {
+//   return str.replace(/\{\/\}/g, '');
+// }

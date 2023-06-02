@@ -7,7 +7,7 @@ import type { MathfieldElementAttributes, MathfieldElement} from "mathlive";
 import { ITileProps } from "../../components/tiles/tile-component";
 import { ExpressionContentModelType } from "./expression-content";
 import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
-import { replaceKeyBinding, stripGroupedSlashes } from "./expression-tile-utils";
+import { replaceKeyBinding } from "./expression-tile-utils";
 import { useUIStore } from "../../hooks/use-stores";
 import { useToolbarTileApi } from "../../components/tiles/hooks/use-toolbar-tile-api";
 import { ExpressionToolbar } from "./expression-toolbar";
