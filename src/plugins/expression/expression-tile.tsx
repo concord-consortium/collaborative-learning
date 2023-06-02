@@ -35,7 +35,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
 
   if(mf.current && ui) {
     mf.current.addEventListener("focus", () => {
-      ui.setSelectedTileId(props.model.id)
+      ui.setSelectedTileId(props.model.id);
     });
   }
 
@@ -59,10 +59,11 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     trackedCursorPos.current =  mf.current?.position || 0;
     content.setLatexStr((e.target as any).value);
     if (isEditor && mf.current?.position) {
-      // const cleanedLatex = stripGroupedSlashes(content.latexStr);
-      // mf.current?.executeCommand(["insert", cleanedLatex, {insertionMode: "replaceAll"}]);
-      // mf.current.position = trackedCursorPos.current; // not working to move it back to where it was
-      mf.current.executeCommand(["moveToPreviousChar"]);
+      // this is a hack to create "re-render" within shadow dom
+      // perhaps will need to sub in a custom command that either does nothing, or adds side effect of
+      // figuring out if there is an extra slash that should be handled
+      // there is an escaped/not-escaped issue we need to dig into
+      mf.current.executeCommand(["plonk"]);
     }
   };
 
