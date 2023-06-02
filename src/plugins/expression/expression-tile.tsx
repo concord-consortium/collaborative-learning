@@ -37,13 +37,6 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     mf.current.addEventListener("focus", () => {
       ui.setSelectedTileId(props.model.id)
     });
-    mf.current.addEventListener("mount", () => {
-      console.log("| mathfield mounted")
-    });
-    mf.current.addEventListener("input", () => {
-      // you can see the jump here
-      console.log("| input: mf.current", mf.current?.position)
-    });
   }
 
   if (mf.current?.keybindings){
@@ -66,11 +59,10 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     trackedCursorPos.current =  mf.current?.position || 0;
     content.setLatexStr((e.target as any).value);
     if (isEditor && mf.current?.position) {
-      const cleanedLatex = stripGroupedSlashes(content.latexStr);
-      mf.current?.executeCommand(["insert", cleanedLatex, {insertionMode: "replaceAll"}]);
-      //mf.current?.executeCommand(["insert", content.latexStr, {insertionMode: "replaceAll"}]);
-      console.log("| cursorPos \nt:", trackedCursorPos.current, "  \nm:", mf.current?.position)
-      mf.current.position = trackedCursorPos.current;
+      // const cleanedLatex = stripGroupedSlashes(content.latexStr);
+      // mf.current?.executeCommand(["insert", cleanedLatex, {insertionMode: "replaceAll"}]);
+      // mf.current.position = trackedCursorPos.current; // not working to move it back to where it was
+      mf.current.executeCommand(["moveToPreviousChar"]);
     }
   };
 
