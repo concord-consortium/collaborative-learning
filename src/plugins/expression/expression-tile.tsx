@@ -3,7 +3,7 @@ import React, { DOMAttributes, useRef, useEffect, FormEvent } from "react";
 import { onSnapshot } from "mobx-state-tree";
 import "mathlive"; // separate static import of library for initialization to run
 // eslint-disable-next-line no-duplicate-imports
-import type { MathfieldElementAttributes, MathfieldElement } from "mathlive";
+import type { MathfieldElementAttributes, MathfieldElement} from "mathlive";
 import { ITileProps } from "../../components/tiles/tile-component";
 import { ExpressionContentModelType } from "./expression-content";
 import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
@@ -34,7 +34,9 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   const isEditor = frames.location.href.includes("cms-editor.html?");
 
   if(mf.current && ui) {
-    mf.current.addEventListener("focus", () => ui.setSelectedTileId(props.model.id));
+    mf.current.addEventListener("focus", () => {
+      ui.setSelectedTileId(props.model.id)
+    });
   }
 
   if (mf.current?.keybindings){
@@ -56,16 +58,12 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   const handleChange = (e: FormEvent<MathfieldElementAttributes>) => {
     trackedCursorPos.current =  mf.current?.position || 0;
     content.setLatexStr((e.target as any).value);
-
-    if (isEditor) {
-      // wholesale replace works, but we sometimes lose cursor position
-      // and fractions load in a slash group, which is not what we want
-      // mf.current?.executeCommand(["insert", content.latexStr, {insertionMode: "replaceAll"}]);
-
-      // the below covers the fraction issue, but not the cursor position, and it's a bit hacky
-      // we also have not-intuitive behavior when creating an exponent
+    if (isEditor && mf.current?.position) {
       const cleanedLatex = stripGroupedSlashes(content.latexStr);
       mf.current?.executeCommand(["insert", cleanedLatex, {insertionMode: "replaceAll"}]);
+      //mf.current?.executeCommand(["insert", content.latexStr, {insertionMode: "replaceAll"}]);
+      console.log("| cursorPos \nt:", trackedCursorPos.current, "  \nm:", mf.current?.position)
+      mf.current.position = trackedCursorPos.current;
     }
   };
 
