@@ -37,6 +37,13 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     mf.current.addEventListener("focus", () => {
       ui.setSelectedTileId(props.model.id)
     });
+    mf.current.addEventListener("mount", () => {
+      console.log("| mathfield mounted")
+    });
+    mf.current.addEventListener("input", () => {
+      // you can see the jump here
+      console.log("| input: mf.current", mf.current?.position)
+    });
   }
 
   if (mf.current?.keybindings){
