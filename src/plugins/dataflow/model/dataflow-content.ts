@@ -218,11 +218,6 @@ export const DataflowContentModel = TileContentModel
         const tableTileModel = getTileModelById(self, tableId); //get tableTile contents given a tableId
         const tableTileContent = tableTileModel?.content;
         self.sharedModel && sharedModelManager.removeTileSharedModel(tableTileContent, self.sharedModel);
-        //create a dataSet with two attributes with X / Y, link table tile to this dataSet
-        const title = tableTileModel?.title;
-        const newDataSet = createDefaultDataSet(title);
-        const newSharedDataSet = newDataSet && SharedDataSet.create({ providerId: tableId, dataSet: newDataSet });
-        sharedModelManager.addTileSharedModel(tableTileContent, newSharedDataSet);
       }
       else {
         console.warn("DataflowContent.addLinkedTable unable to unlink table");
