@@ -1,4 +1,4 @@
-import React, {MutableRefObject, useEffect} from "react";
+import React, {MutableRefObject, useCallback, useEffect} from "react";
 import {observer} from "mobx-react-lite";
 import {isAlive} from "mobx-state-tree";
 import {Active} from "@dnd-kit/core";
@@ -18,7 +18,7 @@ import {useDropHintString} from "../hooks/use-drop-hint-string";
 import {useAxisBoundsProvider} from "../axis/hooks/use-axis-bounds";
 import { isAddCasesAction, isSetCaseValuesAction } from "../../../models/data/data-set-actions";
 import { computeNiceNumericBounds } from "../utilities/graph-utils";
-import { isNumericAxisModel } from "../axis/models/axis-model";
+import { IAxisModel, isNumericAxisModel } from "../axis/models/axis-model";
 import { useSettingFromStores } from "../../../hooks/use-stores";
 
 interface IProps {
@@ -102,9 +102,14 @@ export const GraphAxis = observer(function GraphAxis({
     };
   }, [layout, place, graphModel]);
 
+  const getAxisModel = useCallback((): IAxisModel | undefined => {
+    if (isAlive(graphModel)) return graphModel.getAxis(place);
+    console.warn("GraphAxis.getAxisModel", "attempt to access defunct graph model");
+  }, [graphModel, place]);
+
   return (
     <g className='axis-wrapper' ref={elt => setWrapperElt(elt)}>
-      <Axis getAxisModel={() => graphModel.getAxis(place)}
+      <Axis getAxisModel={getAxisModel}
             label={''}  // Remove
             enableAnimation={enableAnimation}
             showScatterPlotGridLines={axisShouldShowGridlines}
@@ -128,4 +133,3 @@ export const GraphAxis = observer(function GraphAxis({
     </g>
   );
 });
-

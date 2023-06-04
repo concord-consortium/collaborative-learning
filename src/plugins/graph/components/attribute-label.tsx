@@ -52,11 +52,9 @@ export const AttributeLabel = observer(
     }, [dataConfiguration, graphModel.plotType, place]);
 
     const getLabel = useCallback(() => {
-      if (defaultAxisLabels?.[place]) {
-        return defaultAxisLabels[place];
-      }
       if (useClickHereCue) {
-        return t('DG.AxisView.emptyGraphCue');
+        // empty axis shows the default axis label (if configured) or the click here prompt
+        return defaultAxisLabels?.[place] || t('DG.AxisView.emptyGraphCue');
       }
       const attrIDs = getAttributeIDs();
       return attrIDs.map(anID => dataset?.attrFromID(anID)?.name)

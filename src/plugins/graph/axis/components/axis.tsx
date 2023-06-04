@@ -27,7 +27,7 @@ export const Axis = ({
     [axisElt, setAxisElt] = useState<SVGGElement | null>(null);
 
   useAxis({
-    axisModel, axisElt, axisTitle: label, centerCategoryLabels
+    getAxisModel, axisElt, axisTitle: label, centerCategoryLabels
   });
 
   const getSubAxes = () => {

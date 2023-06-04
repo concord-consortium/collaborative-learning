@@ -5,7 +5,9 @@ import {AxisPlace, AxisPlaces} from "../axis/axis-types";
 import {
   CategoricalAxisModel, EmptyAxisModel, isCategoricalAxisModel, isNumericAxisModel, NumericAxisModel
 } from "../axis/models/axis-model";
-import {axisPlaceToAttrRole, graphPlaceToAttrRole, IDotsRef, PlotType} from "../graph-types";
+import {
+  axisPlaceToAttrRole, graphPlaceToAttrRole, IDotsRef, kDefaultNumericAxisBounds, PlotType
+} from "../graph-types";
 import {GraphPlace} from "../axis-graph-shared";
 import {matchCirclesToData, setNiceDomain} from "../utilities/graph-utils";
 import { getAppConfig } from "../../../models/tiles/tile-environment";
@@ -83,7 +85,9 @@ export class GraphController {
   handleAttributeAssignment(graphPlace: GraphPlace, attrID: string) {
     const {graphModel, layout} = this,
       dataConfig = graphModel?.config,
-      dataset = graphModel?.data;
+      dataset = graphModel?.data,
+      appConfig = getAppConfig(graphModel);
+    const emptyPlotIsNumeric = appConfig?.getSetting("emptyPlotIsNumeric", "graph");
     if (!(layout && dataConfig && dataset)) {
       return;
     }
@@ -101,11 +105,12 @@ export class GraphController {
       const axisPlace = graphPlace as AxisPlace,
         graphAttributeRole = axisPlaceToAttrRole[axisPlace];
       if (['left', 'bottom'].includes(axisPlace)) { // Only assignment to 'left' and 'bottom' change plotType
-        const attributeType = dataConfig.attributeType(graphPlaceToAttrRole[graphPlace]) ?? 'empty',
+        const defaultAttrType = emptyPlotIsNumeric ? 'numeric' : 'empty';
+        const attributeType = dataConfig.attributeType(graphPlaceToAttrRole[graphPlace]) ?? defaultAttrType,
           primaryType = attributeType,
           otherAxisPlace = axisPlace === 'bottom' ? 'left' : 'bottom',
           otherAttrRole = axisPlaceToAttrRole[otherAxisPlace],
-          otherAttributeType = dataConfig.attributeType(graphPlaceToAttrRole[otherAxisPlace]) ?? 'empty',
+          otherAttributeType = dataConfig.attributeType(graphPlaceToAttrRole[otherAxisPlace]) ?? defaultAttrType,
           // Numeric attributes get priority for primaryRole when present. First one that is already present
           // and then the newly assigned one. If there is an already assigned categorical then its place is
           // the primaryRole, or, lastly, the newly assigned place
@@ -126,11 +131,12 @@ export class GraphController {
         attr = attributeID ? dataset?.attrFromID(attributeID) : undefined,
         attrType = dataConfig.attributeType(attrRole) ?? 'empty',
         currAxisModel = graphModel.getAxis(place),
-        currentType = currAxisModel?.type ?? 'empty';
+        currentType = currAxisModel?.type ?? 'empty',
+        [min, max] = kDefaultNumericAxisBounds;
       switch (attrType) {
         case 'numeric': {
           if (!currAxisModel || !isNumericAxisModel(currAxisModel)) {
-            const newAxisModel = NumericAxisModel.create({place, min: 0, max: 1});
+            const newAxisModel = NumericAxisModel.create({place, min, max});
             graphModel.setAxis(place, newAxisModel);
             layout.setAxisScaleType(place, 'linear');
             setNiceDomain(attr?.numValues || [], newAxisModel);
@@ -156,10 +162,8 @@ export class GraphController {
               graphModel.removeAxis(place);
             }
             else {
-              const appConfig = getAppConfig(graphModel);
-              const emptyPlotIsNumeric = appConfig?.getSetting("emptyPlotIsNumeric", "graph");
               const newAxisModel = emptyPlotIsNumeric
-                                     ? NumericAxisModel.create({place, min: 0, max: 1})
+                                     ? NumericAxisModel.create({place, min, max})
                                      : EmptyAxisModel.create({place});
               graphModel.setAxis(place, newAxisModel);
             }
