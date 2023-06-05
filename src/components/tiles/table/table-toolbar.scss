@@ -31,6 +31,10 @@
     &:active {
       background-color: $workspace-teal-light-4;
     }
+
+    &.link-tile-button {
+      padding-top: 4px;
+    }
   }
 
   .toolbar-button:first-child {

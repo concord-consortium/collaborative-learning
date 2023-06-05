@@ -65,9 +65,6 @@ export const EditableTableTitle: React.FC<IProps> = observer(function EditableTa
         ? <HeaderCellInput style={style} value={editingTitle || ""}
             onKeyDown={handleKeyDown} onChange={setEditingTitle} onClose={handleClose} />
         : title}
-      {showLinkButton && !isEditing &&
-        <LinkTileButton isEnabled={!readOnly && isLinkEnabled} getLinkIndex={getLinkIndex}
-                            onClick={onLinkGeometryClick} />}
     </div>
   );
 });
