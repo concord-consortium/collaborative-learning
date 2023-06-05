@@ -27,10 +27,8 @@ context('Teacher Dashboard View 4 Quadrants', () => {
         cy.get('@clueData').then((clueData) => {
           let groups = clueData.classes[0].problems[0].groups;
           let groupIndex = 0;
-          let studentIndex = 0;
 
           let groupName = groups[groupIndex].groupName;
-          let studentID = groups[groupIndex].students[studentIndex].studentID;
 
           dashboard.getGroupName().eq(groupIndex).should('contain', 'Group ' + groupName);
           dashboard.getGroups().eq(groupIndex).within(() => {

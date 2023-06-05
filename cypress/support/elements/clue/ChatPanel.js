@@ -2,10 +2,8 @@ const DOCUMENT_COMMENT_CLASS = 'comment-select';
 const TILE_COMMENT_CLASS = 'selected-for-comment';
 
 import TeacherDashboard from "./TeacherDashboard";
-import ResourcesPanel from "./ResourcesPanel";
 
 let dashboard = new TeacherDashboard;
-let resourcesPanel = new ResourcesPanel;
 
 class ChatPanel{
 

@@ -207,13 +207,14 @@ context('Teacher Dashboard View', () => {
     });
   });
   describe('group support message appears in student view', () => {
-    const textToStudent = "This is a note to clue testing1";
+    // Commented lines in this file have been removed because of bug #183870573
+    // const textToStudent = "This is a note to clue testing1";
     const textToGroup = "This is a note to Group 3";
 
     before(function () {
-      let group = 1,
-          studentName = "Student 1",
-          quadrant = "north-west";
+      // let group = 1,
+      //     studentName = "Student 1",
+      //     quadrant = "north-west";
 
       dashboard.sendGroupNote(2, textToGroup);
       // dashboard.sendStudentNote(group, studentName, quadrant, textToStudent); //Currently will fail due to the bug #183870573
