@@ -81,7 +81,7 @@ export const useDataSet = ({
     }
   };
 
-  const hasLinkableRows = getContent().hasLinkableCases(dataSet);
+  const hasLinkableRows = dataSet.attributes.length > 1;
 
   const getUpdatedRowAndColumn = (_rows?: TRow[], _columns?: TColumn[]) => {
     const rs = _rows ?? rows;
