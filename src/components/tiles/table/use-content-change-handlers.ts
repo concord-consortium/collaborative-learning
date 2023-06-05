@@ -124,6 +124,10 @@ export const useContentChangeHandlers = ({
     if (!readOnly && consumerTile) {
       const sharedModelManager = consumerTile.tileEnv?.sharedModelManager;
       if (sharedModelManager?.isReady) {
+        const existingSharedTable = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, tileInfo.id);
+        if (existingSharedTable) {
+          sharedModelManager?.removeTileSharedModel(consumerTile, existingSharedTable);
+        }
         const sharedTable = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, modelRef.current.id);
         sharedTable && sharedModelManager?.addTileSharedModel(consumerTile, sharedTable);
       }

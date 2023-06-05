@@ -56,11 +56,9 @@ interface ILinkTableButtonProps {
   onClick?: () => void;
 }
 export const LinkTileButton = ({ isEnabled, getLinkIndex, onClick }: ILinkTableButtonProps) => {
-  console.log("isEnabled", isEnabled);
   const linkIndex = getLinkIndex();
   const classes = classNames("link-tile-button", `link-color-${linkIndex}`, { disabled: !isEnabled });
   const handleClick = (e: React.MouseEvent) => {
-    console.log("handleClick");
     isEnabled && onClick?.();
     e.stopPropagation();
   };
