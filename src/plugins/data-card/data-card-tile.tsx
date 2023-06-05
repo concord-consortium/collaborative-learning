@@ -21,7 +21,7 @@ import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-
 
 export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
   const { model, onRequestUniqueTitle, readOnly, documentContent, tileElt, onSetCanAcceptDrop, onRegisterTileApi,
-            onUnregisterTileApi } = props;
+            scale, onUnregisterTileApi } = props;
 
   const content = model.content as DataCardContentModelType;
   const ui = useUIStore();
@@ -230,7 +230,6 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
     setCurrEditFacet("");
   };
 
-
   return (
     <div className={toolClasses}>
       <DataCardToolbar
@@ -242,6 +241,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
         setImageUrlToAdd={setImageUrlToAdd} {...toolbarProps}
         handleDeleteValue={deleteSelectedValue}
         handleDuplicateCard={duplicateCard}
+        scale={scale}
       />
       <div
         className="data-card-content"
