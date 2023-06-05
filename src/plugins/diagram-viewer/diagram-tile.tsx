@@ -13,6 +13,7 @@ import { SharedVariablesType } from "../shared-variables/shared-variables";
 import { useNewVariableDialog } from "../shared-variables/dialog/use-new-variable-dialog";
 import { ITileProps } from "../../components/tiles/tile-component";
 import { useToolbarTileApi } from "../../components/tiles/hooks/use-toolbar-tile-api";
+import { useUIStore } from "../../hooks/use-stores";
 
 import InsertVariableCardIcon from "./src/assets/insert-variable-card-icon.svg";
 import "@concord-consortium/diagram-view/dist/index.css";
@@ -22,6 +23,8 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
   { documentContent, model, onRegisterTileApi, onUnregisterTileApi, readOnly, scale, tileElt }
 ) => {
   const content = model.content as DiagramContentModelType;
+  const ui = useUIStore();
+  const isTileSelected = ui.isSelectedTile(model);
 
   const [diagramHelper, setDiagramHelper] = useState<DiagramHelper | undefined>();
   const [interactionLocked, setInteractionLocked] = useState(false);
@@ -32,6 +35,9 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
     setInteractionLocked(!interactionLocked);
   };
 
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const onClose = () => setDialogOpen(false);
+
   const handleDeleteClick = () => {
     const selectedNode = content.root.selectedNode;
     if (selectedNode) {
@@ -39,7 +45,13 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
     }
   };
 
+  const showDialog = (showDialogFunction: () => void) => {
+    setDialogOpen(true);
+    showDialogFunction();
+  };
+
   const [showEditVariableDialog] = useEditVariableDialog({
+    onClose,
     variable: content.root.selectedNode?.variable
   });
   
@@ -71,11 +83,13 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
 
   const [showNewVariableDialog] = useNewVariableDialog({
     addVariable: insertVariable,
+    onClose,
     sharedModel: content.sharedModel as SharedVariablesType
   });
 
   const { selfVariables, otherVariables, unusedVariables } = variableBuckets(content, content.sharedModel);
   const [showInsertVariableDialog] = useInsertVariableDialog({
+    onClose,
     disallowSelf: true,
     Icon: InsertVariableCardIcon,
     insertVariables,
@@ -111,6 +125,7 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
     }
   });
 
+  const preventKeyboardDelete = dialogOpen || !isTileSelected;
   return (
     <div className="diagram-tool">
       <DiagramToolbar
@@ -119,9 +134,9 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
         disableInsertVariableButton={disableInsertVariableButton}
         documentContent={documentContent}
         handleDeleteClick={handleDeleteClick}
-        handleEditVariableClick={showEditVariableDialog}
-        handleInsertVariableClick={showInsertVariableDialog}
-        handleNewVariableClick={showNewVariableDialog}
+        handleEditVariableClick={() => showDialog(showEditVariableDialog)}
+        handleInsertVariableClick={() => showDialog(showInsertVariableDialog)}
+        handleNewVariableClick={() => showDialog(showNewVariableDialog)}
         hideNavigator={!!content.hideNavigator}
         interactionLocked={interactionLocked}
         tileElt={tileElt}
@@ -138,6 +153,7 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
           hideNavigator={!!content.hideNavigator}
           hideNewVariableButton={true}
           interactionLocked={interactionLocked}
+          preventKeyboardDelete={preventKeyboardDelete}
           setDiagramHelper={setDiagramHelper}
         />
       </div>
