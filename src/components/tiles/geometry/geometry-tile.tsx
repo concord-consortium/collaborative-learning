@@ -8,7 +8,7 @@ import { useUIStore } from "../../../hooks/use-stores";
 import { useCurrent } from "../../../hooks/use-current";
 import { useForceUpdate } from "../hooks/use-force-update";
 import { useToolbarTileApi } from "../hooks/use-toolbar-tile-api";
-import { useTableLinking } from "./use-table-linking";
+import { useProviderTileLinking } from "../../../hooks/use-provider-tile-linking";
 import { HotKeys } from "../../../utilities/hot-keys";
 
 import "./geometry-tile.sass";
@@ -16,7 +16,7 @@ import "./geometry-tile.sass";
 const _GeometryToolComponent: React.FC<IGeometryProps> = ({
   model, readOnly, ...others
 }) => {
-  const { documentId, documentContent, tileElt, scale, onRequestTilesOfType,
+  const { documentId, documentContent, tileElt, scale, onRequestLinkableTiles, onRequestTilesOfType,
     onRegisterTileApi, onUnregisterTileApi } = others;
   const modelRef = useCurrent(model);
   const domElement = useRef<HTMLDivElement>(null);
@@ -49,8 +49,9 @@ const _GeometryToolComponent: React.FC<IGeometryProps> = ({
   );
   const enabled = !readOnly && !!board && !!actionHandlers;
   const toolbarProps = useToolbarTileApi({ id: model.id, enabled, onRegisterTileApi, onUnregisterTileApi });
-  const { isLinkEnabled, showLinkTableDialog } =
-    useTableLinking({ documentId, model, onRequestTilesOfType, actionHandlers });
+  const { isLinkEnabled, showLinkTileDialog } = useProviderTileLinking({
+    documentId, model, readOnly, onRequestTilesOfType, onRequestLinkableTiles
+  });
   // We must listen for pointer events because we want to get the events before
   // JSXGraph, which appears to listen to pointer events on browsers that support them.
   // We must listen for mouse events because some browsers (notably Safari) don't
@@ -67,7 +68,7 @@ const _GeometryToolComponent: React.FC<IGeometryProps> = ({
         board={board} content={content} handlers={actionHandlers} {...toolbarProps} />
       <GeometryContentWrapper model={model} readOnly={readOnly} {...others}
         onSetBoard={setBoard} onSetActionHandlers={handleSetHandlers}
-        onContentChange={forceUpdate} isLinkButtonEnabled={isLinkEnabled} onLinkTableButtonClick={showLinkTableDialog}/>
+        onContentChange={forceUpdate} isLinkButtonEnabled={isLinkEnabled} onLinkTileButtonClick={showLinkTileDialog}/>
     </div>
   );
 };

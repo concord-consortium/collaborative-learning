@@ -2,6 +2,7 @@ import { observer } from "mobx-react";
 import classNames from "classnames";
 import React from "react";
 import ReactDOM from "react-dom";
+
 import { gImageMap } from "../../models/image-map";
 import {
   IFloatingToolbarProps, useFloatingToolbarLocation
@@ -9,25 +10,27 @@ import {
 import { DataCardContentModelType } from "./data-card-content";
 import { ITileModel } from "../../models/tiles/tile-model";
 import { ImageUploadButton } from "../../components/tiles/image/image-toolbar";
-import { DeleteAttrIconButton, DuplicateCardIconButton } from "./components/add-remove-icons";
 import { EditFacet } from "./data-card-types";
+import { DeleteAttrButton, DuplicateCardButton, LinkTileButton } from "./components/data-card-toolbar-buttons";
 
 import "./data-card-toolbar.scss";
 
 interface IProps extends IFloatingToolbarProps {
-  model: ITileModel;
   currEditAttrId: string;
   currEditFacet: EditFacet;
-  setImageUrlToAdd: (url: string) => void;
+  isLinkEnabled?: boolean;
+  model: ITileModel;
+  getLinkIndex: () => number;
   handleDeleteValue: () => void;
   handleDuplicateCard: () => void;
+  setImageUrlToAdd: (url: string) => void;
+  showLinkTileDialog?: () => void;
 }
 
 export const DataCardToolbar: React.FC<IProps> = observer(({
-  model, documentContent, tileElt, currEditAttrId, currEditFacet,
-  onIsEnabled, setImageUrlToAdd, handleDeleteValue, handleDuplicateCard, ...others
+  isLinkEnabled, model, documentContent, tileElt, currEditAttrId, currEditFacet, showLinkTileDialog,
+  getLinkIndex, onIsEnabled, setImageUrlToAdd, handleDeleteValue, handleDuplicateCard, ...others
   }: IProps) => {
-
     const content = model.content as DataCardContentModelType;
     const currentCaseId = content.dataSet.caseIDFromIndex(content.caseIndex);
     const enabled = onIsEnabled(); //"enabled" is the visibility of the toolbar at lower left
@@ -52,6 +55,10 @@ export const DataCardToolbar: React.FC<IProps> = observer(({
       });
   };
 
+  const handleLinkButtonCLick = () => {
+    showLinkTileDialog && showLinkTileDialog();
+  };
+
   const toolbarClasses = classNames(
     "data-card-toolbar",
     enabled && location ? "enabled" : "disabled",
@@ -71,11 +78,12 @@ export const DataCardToolbar: React.FC<IProps> = observer(({
     ? ReactDOM.createPortal(
       <div className={toolbarClasses} style={location}>
         <div className={cardActionsButtonsClasses}>
-          <DuplicateCardIconButton onClick={handleDuplicateCard} />
+          <DuplicateCardButton onClick={handleDuplicateCard} />
+          <LinkTileButton getLinkIndex={getLinkIndex} isEnabled={isLinkEnabled} onClick={handleLinkButtonCLick} />
         </div>
         <div className={valueActionsButtonsClasses}>
           <ImageUploadButton onUploadImageFile={file => uploadImage(file)} />
-          <DeleteAttrIconButton onClick={handleDeleteValue} />
+          <DeleteAttrButton onClick={handleDeleteValue} />
         </div>
       </div>, documentContent)
   : null;

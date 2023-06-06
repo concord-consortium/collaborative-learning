@@ -249,9 +249,9 @@ export class TileComponent extends BaseComponent<IProps, IState> {
     const { model } = this.props;
     const tileApiInterface = this.context;
     const tileApi = tileApiInterface?.getTileApi(model.id);
-    const clientTableLinks = tileApi?.getLinkedTables?.();
-    return clientTableLinks
-            ? clientTableLinks.map((id, index) => {
+    const clientTileLinks = tileApi?.getLinkedTiles?.();
+    return clientTileLinks
+            ? clientTileLinks.map((id, index) => {
                 return <LinkIndicatorComponent key={id} id={id} index={index} />;
               })
             : null; // tables don't use the original link indicator any more

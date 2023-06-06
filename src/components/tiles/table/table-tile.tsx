@@ -107,8 +107,8 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     model, dataSet, rows, rowHeight, headerHeight, getTitleHeight,
     onRequestRowHeight: handleRequestRowHeight, triggerColumnChange, triggerRowChange
   });
-  const { onSetTableTitle, onSetColumnExpressions, onLinkTile, onUnlinkTile,
-    requestRowHeight, onAddColumn, onRemoveRows } = changeHandlers;
+  const { onSetTableTitle, onSetColumnExpressions, requestRowHeight,
+          onAddColumn, onRemoveRows } = changeHandlers;
 
   // A function to call when a column needs to change width
   const { onColumnResize } = useColumnResize({
@@ -153,7 +153,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   // Variables for handling linking to geometry tiles
   const { isLinkEnabled, linkColors, getLinkIndex, showLinkTileDialog } =
     useConsumerTileLinking({ documentId, model, hasLinkableRows,
-                          onRequestTilesOfType, onRequestLinkableTiles, onLinkTile, onUnlinkTile });
+                          onRequestTilesOfType, onRequestLinkableTiles });
 
   const containerRef = useRef<HTMLDivElement>(null);
   const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {

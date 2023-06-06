@@ -8,16 +8,19 @@ import {
 } from "../models/tiles/table-links";
 import { ITileModel } from "../models/tiles/tile-model";
 import { useLinkProviderTileDialog } from "./use-link-provider-tile-dialog";
+import { getTileContentById } from "../utilities/mst-utils";
+import { SharedDataSet } from "../models/shared/shared-data-set";
 
 interface IProps {
   actionHandlers?: any;
   documentId?: string;
   model: ITileModel;
+  readOnly?: boolean;
   onRequestTilesOfType: (tileType: string) => ITileLinkMetadata[];
   onRequestLinkableTiles?: () => ILinkableTiles;
 }
 export const useProviderTileLinking = ({
-  actionHandlers, documentId, model, onRequestTilesOfType, onRequestLinkableTiles
+  actionHandlers, documentId, model, readOnly, onRequestTilesOfType, onRequestLinkableTiles
 }: IProps) => {
   const {handleRequestTileLink, handleRequestTileUnlink} = actionHandlers || {};
   const modelId = model.id;
@@ -25,9 +28,36 @@ export const useProviderTileLinking = ({
   const isLinkEnabled = (linkableTiles.length > 0);
   const linkColors = getTableLinkColors(modelId);
 
+  const linkTile = useCallback((tileInfo: ITileLinkMetadata) => {
+    const providerTile = getTileContentById(model.content, tileInfo.id);
+    if (!readOnly && providerTile) {
+      const sharedModelManager = providerTile.tileEnv?.sharedModelManager;
+      if (sharedModelManager?.isReady) {
+        const sharedDataSet = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, tileInfo.id);
+        sharedDataSet && sharedModelManager?.addTileSharedModel(model.content, sharedDataSet);
+      }
+    }
+  }, [readOnly, model]);
+
+  const unlinkTile = useCallback((tileInfo: ITileLinkMetadata) => {
+    const linkedTile = getTileContentById(model.content, tileInfo.id);
+    if (!readOnly && linkedTile) {
+      const sharedModelManager = linkedTile.tileEnv?.sharedModelManager;
+      if (sharedModelManager?.isReady) {
+        const sharedDataSet = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, tileInfo.id);
+        if (sharedDataSet) {
+          sharedModelManager?.removeTileSharedModel(model.content, sharedDataSet);
+        }
+      }
+    }
+  }, [readOnly, model]);
+
+  const onLinkTile = handleRequestTileLink || linkTile;
+  const onUnlinkTile = handleRequestTileUnlink || unlinkTile;
+
   const [showLinkTileDialog] =
           useLinkProviderTileDialog({
-            linkableTiles, model, handleRequestTileLink, handleRequestTileUnlink
+            linkableTiles, model, onLinkTile, onUnlinkTile
           });
 
   useEffect(() => {

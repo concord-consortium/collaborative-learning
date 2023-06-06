@@ -9,18 +9,22 @@ import {
 } from "../models/tiles/table-links";
 import { ITileModel } from "../models/tiles/tile-model";
 import { useLinkConsumerTileDialog } from "./use-link-consumer-tile-dialog";
+import { getTileContentById } from "../utilities/mst-utils";
+import { SharedDataSet } from "../models/shared/shared-data-set";
+import { getTileContentInfo } from "../models/tiles/tile-content-info";
 
 interface IProps {
   documentId?: string;
-  model: ITileModel;
   hasLinkableRows: boolean;
+  model: ITileModel;
+  readOnly?: boolean;
   onRequestTilesOfType: (tileType: string) => ITileLinkMetadata[];
   onRequestLinkableTiles?: () => ILinkableTiles;
-  onLinkTile: (tileInfo: ITileLinkMetadata) => void;
-  onUnlinkTile: (tileInfo: ITileLinkMetadata) => void;
+  onLinkTile?: (tileInfo: ITileLinkMetadata) => void;
+  onUnlinkTile?: (tileInfo: ITileLinkMetadata) => void;
 }
 export const useConsumerTileLinking = ({
-  documentId, model, hasLinkableRows, onRequestTilesOfType, onRequestLinkableTiles, onLinkTile, onUnlinkTile
+  documentId, model, hasLinkableRows, readOnly, onRequestTilesOfType, onRequestLinkableTiles, onLinkTile, onUnlinkTile
 }: IProps) => {
   const modelId = model.id;
   const { consumers: linkableTiles } = useLinkableTiles({ model, onRequestTilesOfType, onRequestLinkableTiles });
@@ -38,8 +42,51 @@ export const useConsumerTileLinking = ({
     return 0;
   });
 
-  const [showLinkTileDialog] =
-          useLinkConsumerTileDialog({ linkableTiles, model, onLinkTile, onUnlinkTile });
+  const linkTile = useCallback((tileInfo: ITileLinkMetadata) => {
+    const consumerTile = getTileContentById(model.content, tileInfo.id);
+    if (!readOnly && consumerTile) {
+      const sharedModelManager = consumerTile.tileEnv?.sharedModelManager;
+      if (sharedModelManager?.isReady) {
+        // If the consumer tile does not support multiple shared data sets, remove it from
+        // any existing shared data sets before linking.
+        if (!getTileContentInfo(consumerTile.type)?.consumesMultipleDataSets) {
+          const allSharedDataSets = sharedModelManager?.getSharedModelsByType("SharedDataSet");
+          allSharedDataSets?.forEach(sharedDataSet => {
+            const sharedModelTileIds = sharedModelManager?.getSharedModelTileIds(sharedDataSet);
+            if (sharedModelTileIds?.includes(tileInfo.id)) {
+              sharedModelManager?.removeTileSharedModel(consumerTile, sharedDataSet);
+            }
+          });
+        }
+        const sharedModel = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, model.id);
+        sharedModel && sharedModelManager?.addTileSharedModel(consumerTile, sharedModel);
+      }
+    }
+  }, [readOnly, model]);
+
+  const unlinkTile = useCallback((tileInfo: ITileLinkMetadata) => {
+    const linkedTile = getTileContentById(model.content, tileInfo.id);
+    if (!readOnly && linkedTile) {
+      const sharedModelManager = linkedTile.tileEnv?.sharedModelManager;
+      if (sharedModelManager?.isReady) {
+        const sharedModel = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, model.id);
+        // If providerId matches model.id, we're the provider and should remove the other tile
+        // from the sharedModel. Otherwise, we're the consumer and should remove ourselves.
+        if (sharedModel && sharedModel.providerId === model.id) {
+          sharedModelManager?.removeTileSharedModel(linkedTile, sharedModel);
+        } else if (sharedModel) {
+          sharedModelManager?.removeTileSharedModel(model.content, sharedModel);
+        }
+      }
+    }
+  }, [readOnly, model]);
+
+  const onLinkTileHandler = onLinkTile || linkTile;
+  const onUnlinkTileHandler = onUnlinkTile || unlinkTile;
+
+  const [showLinkTileDialog] = useLinkConsumerTileDialog({
+    linkableTiles, model, onLinkTile: onLinkTileHandler, onUnlinkTile: onUnlinkTileHandler
+  });
 
   useEffect(() => {
     documentId && addTableToDocumentMap(documentId, modelId);

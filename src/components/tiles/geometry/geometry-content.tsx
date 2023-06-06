@@ -60,7 +60,7 @@ export interface IGeometryContentProps extends IGeometryProps {
   onSetBoard: (board: JXG.Board) => void;
   onSetActionHandlers: (handlers: IActionHandlers) => void;
   onContentChange: () => void;
-  onLinkTableButtonClick?: () => void;
+  onLinkTileButtonClick?: () => void;
 }
 export interface IProps extends IGeometryContentProps, SizeMeProps {
   isLinkButtonEnabled: boolean;
@@ -193,9 +193,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         handleCreateLineLabel: this.handleCreateLineLabel,
         handleCreateMovableLine: this.handleCreateMovableLine,
         handleCreateComment: this.handleCreateComment,
-        handleUploadImageFile: this.handleUploadBackgroundImage,
-        handleRequestTableLink: this.handleTableTileLinkRequest,
-        handleRequestTableUnlink: this.handleTableTileUnlinkRequest
+        handleUploadImageFile: this.handleUploadBackgroundImage
       };
       onSetActionHandlers(handlers);
     }
@@ -267,7 +265,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       //                       : undefined;
       //   return tableLink?.id ? getLinkedTableIndex(tableLink?.id) : -1;
       // },
-      getLinkedTables: () => {
+      getLinkedTiles: () => {
         return this.getContent().linkedTableIds;
       },
       exportContentAsTileJson: (options?: ITileExportOptions) => {
@@ -465,7 +463,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       <div className="title-area-wrapper" key="title-area">
         <div className="title-area">
           {this.renderTitle()}
-          {this.renderTableLinkButton()}
+          {this.renderTileLinkButton()}
         </div>
       </div>
     );
@@ -481,10 +479,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     );
   }
 
-  private renderTableLinkButton() {
-    const { isLinkButtonEnabled, onLinkTableButtonClick } = this.props;
+  private renderTileLinkButton() {
+    const { isLinkButtonEnabled, onLinkTileButtonClick } = this.props;
     return (!this.state.isEditingTitle && !this.props.readOnly &&
-      <LinkTableButton key="link-button" isEnabled={isLinkButtonEnabled} onClick={onLinkTableButtonClick}/>
+      <LinkTableButton key="link-button" isEnabled={isLinkButtonEnabled} onClick={onLinkTileButtonClick}/>
     );
   }
 
@@ -1071,16 +1069,12 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   private handleTableTileDrop(e: React.DragEvent<HTMLDivElement>) {
     const dragTileId = e.dataTransfer.getData(kDragTileId);
     if (dragTileId) {
-      this.handleTableTileLinkRequest(dragTileId);
+      this.handleTileLinkRequest(dragTileId);
     }
   }
 
-  private handleTableTileLinkRequest = (tableId: string) => {
+  private handleTileLinkRequest = (tableId: string) => {
     this.getContent().addLinkedTable(tableId);
-  };
-
-  private handleTableTileUnlinkRequest = (tableId: string) => {
-    this.getContent().removeLinkedTable(tableId);
   };
 
   private handleCreateElements = (elts?: JXG.GeometryElement | JXG.GeometryElement[]) => {
