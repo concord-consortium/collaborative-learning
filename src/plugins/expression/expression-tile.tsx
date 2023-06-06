@@ -52,7 +52,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
         mf.current.position = trackedCursorPos.current - 1;
       }
 
-      if (readOnlyMf) { // if this is a read only mathfield, use the model value
+      if (readOnlyMf) {
         readOnlyMf.current?.setValue(content.latexStr, {silenceNotifications: true});
       }
     });
