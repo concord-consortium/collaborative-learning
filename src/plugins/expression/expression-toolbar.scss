@@ -9,7 +9,12 @@
   }
 
   .expression-button {
+    width: 100%;
+    padding:0px;
     display: flex;
+    background:transparent;
+    border:0px;
+    cursor:pointer;
     &:hover {
       background-color: $workspace-teal-light-5;
       border-radius: 0px 0px 2px 2px;
