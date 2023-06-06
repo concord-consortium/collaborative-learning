@@ -30,7 +30,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     model, readOnly, documentContent, tileElt, scale } = props;
   const content = model.content as ExpressionContentModelType;
   const mf = useRef<MathfieldElement>(null);
-  const readOnlyMf = useRef<MathfieldElement>(null);
+  const readOnlyMf = readOnly ? useRef<MathfieldElement>(null) : null;
   const trackedCursorPos = useRef<number>(0);
   const ui = useUIStore();
 
@@ -46,10 +46,15 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     // when we change model programatically, we need to update mathfield
     const disposer = onSnapshot((content as any), () => {
       if (mf.current?.getValue() === content.latexStr) return;
-      mf.current?.setValue(content.latexStr, {silenceNotifications: true});
-      if (mf.current?.position) mf.current.position = trackedCursorPos.current - 1;
-      // keep the read-only version in sync
-      readOnlyMf.current?.setValue(content.latexStr, {silenceNotifications: true});
+
+      if (mf.current && mf.current.position){
+        mf.current?.setValue(content.latexStr, {silenceNotifications: true});
+        mf.current.position = trackedCursorPos.current - 1;
+      }
+
+      if (readOnlyMf) { // if this is a read only mathfield, use the model value
+        readOnlyMf.current?.setValue(content.latexStr, {silenceNotifications: true});
+      }
     });
     return () => disposer();
   }, [content]);
@@ -70,7 +75,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     ref: readOnly ? readOnlyMf : mf,
     value: content.latexStr,
     onInput: !readOnly ? handleChange : () => null,
-    readOnly: readOnly ? "true" : undefined
+    readOnly: readOnly ? "true" : undefined,
   };
 
   return (
@@ -91,7 +96,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
         />
       </div>
       <div className="expression-math-area">
-        <math-field {...mathfieldAttributes} />
+        <math-field {...mathfieldAttributes} smart-mode="false"/>
       </div>
     </div>
   );
