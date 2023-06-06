@@ -96,7 +96,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
         />
       </div>
       <div className="expression-math-area">
-        <math-field {...mathfieldAttributes} smart-mode="false"/>
+        <math-field {...mathfieldAttributes} />
       </div>
     </div>
   );
