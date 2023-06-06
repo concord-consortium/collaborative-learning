@@ -43,7 +43,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   }
 
   useEffect(() => {
-    // when we change model via undo button, we need to update mathfield
+    // when we change model programatically, we need to update mathfield
     const disposer = onSnapshot((content as any), () => {
       if (mf.current?.getValue() === content.latexStr) return;
       mf.current?.setValue(content.latexStr, {silenceNotifications: true});
