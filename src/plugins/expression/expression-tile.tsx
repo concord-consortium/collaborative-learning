@@ -66,6 +66,13 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     onUnregisterTileApi
   });
 
+  const mathfieldAttributes = {
+    ref: readOnly ? readOnlyMf : mf,
+    value: content.latexStr,
+    onInput: !readOnly ? handleChange : () => {},
+    readOnly: readOnly ? "true" : undefined
+  };
+
   return (
     <div className="expression-tool">
       <ExpressionToolbar
@@ -84,20 +91,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
         />
       </div>
       <div className="expression-math-area">
-        { !readOnly &&
-          <math-field
-            ref={mf}
-            value={content.latexStr}
-            onInput={handleChange}
-          />
-        }
-        { readOnly &&
-          <math-field
-            ref={readOnlyMf}
-            value={content.latexStr}
-            readOnly={true}
-          />
-        }
+        <math-field {...mathfieldAttributes} />
       </div>
     </div>
   );
