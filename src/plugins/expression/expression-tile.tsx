@@ -30,12 +30,11 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     model, readOnly, documentContent, tileElt, scale } = props;
   const content = model.content as ExpressionContentModelType;
   const mf = useRef<MathfieldElement>(null);
+  const readOnlyMf = useRef<MathfieldElement>(null);
   const trackedCursorPos = useRef<number>(0);
   const ui = useUIStore();
 
-  if(mf.current && ui) {
-    mf.current.addEventListener("focus", () => ui.setSelectedTileId(model.id));
-  }
+  if(mf.current && ui) mf.current.addEventListener("focus", () => ui.setSelectedTileId(model.id));
 
   if (mf.current?.keybindings){
     undoKeys.forEach((key: string) => {
@@ -49,6 +48,8 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
       if (mf.current?.getValue() === content.latexStr) return;
       mf.current?.setValue(content.latexStr, {silenceNotifications: true});
       if (mf.current?.position) mf.current.position = trackedCursorPos.current - 1;
+      // keep the read-only version in sync
+      readOnlyMf.current?.setValue(content.latexStr, {silenceNotifications: true});
     });
     return () => disposer();
   }, [content]);
@@ -83,13 +84,20 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
         />
       </div>
       <div className="expression-math-area">
-        <math-field
-          ref={mf}
-          value={content.latexStr}
-          onInput={handleChange}
-          // MathLive only interprets undefined as false
-          readOnly={readOnly === true ? true : undefined}
-        />
+        { !readOnly &&
+          <math-field
+            ref={mf}
+            value={content.latexStr}
+            onInput={handleChange}
+          />
+        }
+        { readOnly &&
+          <math-field
+            ref={readOnlyMf}
+            value={content.latexStr}
+            readOnly={true}
+          />
+        }
       </div>
     </div>
   );
