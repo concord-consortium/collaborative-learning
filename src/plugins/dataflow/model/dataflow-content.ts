@@ -3,7 +3,6 @@ import { reaction } from "mobx";
 import { cloneDeep} from "lodash";
 import stringify from "json-stringify-pretty-compact";
 import { DataflowProgramModel } from "./dataflow-program-model";
-import { createDefaultDataSet } from "./utilities/create-default-data-set";
 import { DEFAULT_DATA_RATE } from "./utilities/node";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { ITileMetadataModel } from "../../../models/tiles/tile-metadata";
