@@ -71,7 +71,7 @@ export interface ISharedModelManager {
    * @param sharedModelType the MST model "class" of the shared model
    */
   findFirstSharedModelByType<IT extends typeof SharedModelUnion>(
-    sharedModelType: IT, providerId?: string): IT["Type"] | undefined;
+    sharedModelType: IT, tileId?: string): IT["Type"] | undefined;
 
   /**
    * Return an array of all models of the specified type.

@@ -215,7 +215,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
         scale={scale}
         isLinkEnabled={isLinkEnabled}
         getLinkIndex={getLinkIndex}
-        showLinkGeometryDialog={showLinkTileDialog}
+        showLinkDialog={showLinkTileDialog}
       />
       <div className="table-grid-container" ref={containerRef} onClick={handleBackgroundClick}>
         <EditableTableTitle

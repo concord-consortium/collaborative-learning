@@ -15,11 +15,11 @@ interface IProps extends IFloatingToolbarProps {
   deleteSelected: () => void;
   getLinkIndex: () => number;
   onSetExpression: () => void;
-  showLinkGeometryDialog?: () => void;
+  showLinkDialog?: () => void;
 }
 export const TableToolbar: React.FC<IProps> = observer(({
   documentContent, isLinkEnabled, deleteSelected, getLinkIndex, onIsEnabled, 
-  onSetExpression, showLinkGeometryDialog, ...others
+  onSetExpression, showLinkDialog, ...others
 }) => {
   const enabled = onIsEnabled();
   const location = useFloatingToolbarLocation({
@@ -44,7 +44,7 @@ export const TableToolbar: React.FC<IProps> = observer(({
                  key={toolName}
                  isEnabled={isLinkEnabled}
                  getLinkIndex={getLinkIndex}
-                 onClick={showLinkGeometryDialog}
+                 onClick={showLinkDialog}
                />;
     }
   };

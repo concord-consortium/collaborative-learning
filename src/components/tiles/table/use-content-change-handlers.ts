@@ -10,6 +10,7 @@ import { uniqueId, uniqueName } from "../../../utilities/js-utils";
 import { TColumn, TRow } from "./table-types";
 import { getTileContentById } from "../../../utilities/mst-utils";
 import { SharedDataSet } from "../../../models/shared/shared-data-set";
+import { getTileContentInfo } from "../../../models/tiles/tile-content-info";
 
 export interface IContentChangeHandlers {
   onSetTableTitle: (title: string) => void;
@@ -124,9 +125,13 @@ export const useContentChangeHandlers = ({
     if (!readOnly && consumerTile) {
       const sharedModelManager = consumerTile.tileEnv?.sharedModelManager;
       if (sharedModelManager?.isReady) {
-        const existingSharedTable = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, tileInfo.id);
-        if (existingSharedTable) {
-          sharedModelManager?.removeTileSharedModel(consumerTile, existingSharedTable);
+        // If the consumer tile does not support multiple shared data sets, remove it from
+        // any existing shared data set before linking.
+        if (!getTileContentInfo(consumerTile.type)?.supportsMultipleDataSets) {
+          const existingSharedTable = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, tileInfo.id);
+          if (existingSharedTable) {
+            sharedModelManager?.removeTileSharedModel(consumerTile, existingSharedTable);
+          }
         }
         const sharedTable = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, modelRef.current.id);
         sharedTable && sharedModelManager?.addTileSharedModel(consumerTile, sharedTable);

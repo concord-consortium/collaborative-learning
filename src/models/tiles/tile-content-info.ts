@@ -36,6 +36,7 @@ export interface ITileContentInfo {
   exportNonDefaultHeight?: boolean;
   isDataConsumer?: boolean;
   isDataProvider?: boolean;
+  supportsMultipleDataSets?: boolean;
   tileSnapshotPreProcessor?: TileModelSnapshotPreProcessor;
   contentSnapshotPostProcessor?: TileContentSnapshotPostProcessor;
   updateContentWithNewSharedModelIds?: TileContentNewSharedModelIdUpdater;
