@@ -51,12 +51,17 @@ export const ExpressionToolbar: React.FC<IProps> = observer((
     mf && mf.current?.focus();
   };
 
+  const addMixedFraction = () => {
+    content.setLatexStr("\\placeholder{}\\frac");
+    mf && mf.current?.focus();
+  };
+
   return documentContent
     ? ReactDOM.createPortal(
       <div className={toolbarClasses} style={location}>
         <div className="toolbar-content">
           <DeleteExpressionButton onClick={deleteExpression} className={deleteButtonClasses} />
-          <MixedFractionButton onClick={() => console.log("make a mixed fraction")} className={mixedFractionButtonClasses} />
+          <MixedFractionButton onClick={addMixedFraction} className={mixedFractionButtonClasses} />
         </div>
       </div>, documentContent)
   : null;
