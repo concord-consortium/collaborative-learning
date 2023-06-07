@@ -73,7 +73,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   const mathfieldAttributes = {
     ref: readOnly ? readOnlyMf : mf,
     value: content.latexStr,
-    onInput: !readOnly ? handleChange : () => null,
+    onInput: !readOnly ? handleChange : undefined,
     readOnly: readOnly ? "true" : undefined,
   };
 
