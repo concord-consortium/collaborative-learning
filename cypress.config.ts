@@ -15,6 +15,7 @@ export default defineConfig({
   env: {
     coverage: false,
   },
+  includeShadowDom: true,
   queryParams:
     '?appMode=qa&fakeClass=5&fakeUser=student:5&demoOffering=5&problem=2.1&qaGroup=5',
   teacherQueryParams:
@@ -22,16 +23,16 @@ export default defineConfig({
   e2e: {
     // We've imported your old cypress plugins here.
     // You may want to clean this up later by importing these.
-    
+
     setupNodeEvents(on, config) {
       const fetchConfigurationByFile = file => {
         const pathOfConfigurationFile = `config/cypress.${file}.json`;
-      
+
         return (
           file && fs.readJson(path.join(__dirname, "./cypress/", pathOfConfigurationFile))
         );
       };
-  
+
       require('cypress-terminal-report/src/installLogsPrinter')(on);
 
       const environment = config.env.testEnv || 'dev';

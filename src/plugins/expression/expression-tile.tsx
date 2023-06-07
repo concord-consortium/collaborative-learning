@@ -34,10 +34,9 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   const ui = useUIStore();
 
   useEffect(() => {
-    console.log("| listeners and keybindings")
     mf.current?.addEventListener("focus", () => ui.setSelectedTileId(model.id));
     undoKeys.forEach((key: string) => {
-      mf.current && replaceKeyBinding(mf.current.keybindings, key, "");
+      mf.current?.keybindings && replaceKeyBinding(mf.current.keybindings, key, "");
     });
   }, [model.id, ui]);
 
