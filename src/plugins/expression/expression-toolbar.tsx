@@ -9,7 +9,7 @@ import { ExpressionContentModelType } from "./expression-content";
 import { ITileModel } from "../../models/tiles/tile-model";
 
 import "./expression-toolbar.scss";
-import { DeleteExpressionButton } from "./expression-buttons";
+import { DeleteExpressionButton, MixedFractionButton } from "./expression-buttons";
 import { MathfieldElement } from "mathlive";
 
 interface IProps extends IFloatingToolbarProps {
@@ -41,6 +41,11 @@ export const ExpressionToolbar: React.FC<IProps> = observer((
     enabled ? "enabled" : "disabled",
   );
 
+  const mixedFractionButtonClasses = classNames(
+    "mixed-fraction",
+    enabled ? "enabled" : "disabled",
+  );
+
   const deleteExpression = () => {
     content.setLatexStr("");
     mf && mf.current?.focus();
@@ -51,6 +56,7 @@ export const ExpressionToolbar: React.FC<IProps> = observer((
       <div className={toolbarClasses} style={location}>
         <div className="toolbar-content">
           <DeleteExpressionButton onClick={deleteExpression} className={deleteButtonClasses} />
+          <MixedFractionButton onClick={() => console.log("make a mixed fraction")} className={mixedFractionButtonClasses} />
         </div>
       </div>, documentContent)
   : null;
