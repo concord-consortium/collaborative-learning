@@ -15,7 +15,6 @@ export default defineConfig({
   env: {
     coverage: false,
   },
-  includeShadowDom: true,
   queryParams:
     '?appMode=qa&fakeClass=5&fakeUser=student:5&demoOffering=5&problem=2.1&qaGroup=5',
   teacherQueryParams:
