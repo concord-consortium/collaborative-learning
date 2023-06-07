@@ -15,10 +15,14 @@ import { MathfieldElement } from "mathlive";
 interface IProps extends IFloatingToolbarProps {
   model: ITileModel;
   mf: React.RefObject<MathfieldElement> | undefined;
+  trackedCursorPos: React.MutableRefObject<number>;
+  trackedSelection: React.MutableRefObject<string>;
 }
 
 export const ExpressionToolbar: React.FC<IProps> = observer((
-  {model, documentContent, mf, tileElt, onIsEnabled, ...others}: IProps) => {
+  { model, documentContent, mf, tileElt, onIsEnabled,
+    trackedCursorPos, trackedSelection, ...others
+  }: IProps) => {
     const content = model.content as ExpressionContentModelType;
     const enabled = onIsEnabled();
 
@@ -52,7 +56,18 @@ export const ExpressionToolbar: React.FC<IProps> = observer((
   };
 
   const addMixedFraction = () => {
-    content.setLatexStr("\\placeholder{}\\frac");
+    const selected = trackedSelection.current;
+    const position = trackedCursorPos.current;
+    const ltx = content.latexStr;
+    let newString = "";
+    if (ltx.length === 0) {
+      newString = "\\placeholder{}\\frac"
+    } else {
+      // NEXT this is just a simple case...need to handle more complex cases
+      // it breaks, for example, if it is before an operator
+      newString = ltx.replace(selected, `${selected}\\frac`);
+    }
+    content.setLatexStr(newString);
     mf && mf.current?.focus();
   };
 
