@@ -30,17 +30,16 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     model, readOnly, documentContent, tileElt, scale } = props;
   const content = model.content as ExpressionContentModelType;
   const mf = useRef<MathfieldElement>(null);
-  const readOnlyMf = readOnly ? useRef<MathfieldElement>(null) : null;
+  const readOnlyMf = useRef<MathfieldElement>(null);
   const trackedCursorPos = useRef<number>(0);
   const ui = useUIStore();
 
-  if(mf.current && ui) mf.current.addEventListener("focus", () => ui.setSelectedTileId(model.id));
-
-  if (mf.current?.keybindings){
+  useEffect(() => {
+    mf.current?.addEventListener("focus", () => ui.setSelectedTileId(model.id));
     undoKeys.forEach((key: string) => {
       mf.current && replaceKeyBinding(mf.current.keybindings, key, "");
     });
-  }
+  }, []);
 
   useEffect(() => {
     // when we change model programatically, we need to update mathfield
