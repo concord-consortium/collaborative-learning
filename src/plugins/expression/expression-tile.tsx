@@ -31,6 +31,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   const content = model.content as ExpressionContentModelType;
   const mf = useRef<MathfieldElement>(null);
   const trackedCursorPos = useRef<number>(0);
+  const trackedSelection = useRef<string>("");
   const ui = useUIStore();
 
   useEffect(() => {
@@ -41,7 +42,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     mf.current?.addEventListener("selection-change", (e: any) => {
       const selection = document.getSelection()?.getRangeAt(0);
       const asLatex = selection?.startContainer.childNodes[0].nodeValue;
-      console.log("| selection-change:", asLatex);
+      if (asLatex) trackedSelection.current = asLatex;
     });
   }, [model.id, ui]);
 
@@ -83,6 +84,8 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
         scale={scale}
         {...toolbarProps}
         mf={mf}
+        trackedSelection={trackedSelection}
+        trackedCursorPos={trackedCursorPos}
       />
       <div className="expression-title-area">
         <CustomEditableTileTitle
