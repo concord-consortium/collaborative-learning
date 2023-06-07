@@ -30,7 +30,6 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     model, readOnly, documentContent, tileElt, scale } = props;
   const content = model.content as ExpressionContentModelType;
   const mf = useRef<MathfieldElement>(null);
-  const readOnlyMf = useRef<MathfieldElement>(null);
   const trackedCursorPos = useRef<number>(0);
   const ui = useUIStore();
 
@@ -45,15 +44,8 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     // when we change model programatically, we need to update mathfield
     const disposer = onSnapshot((content as any), () => {
       if (mf.current?.getValue() === content.latexStr) return;
-
-      if (mf.current && mf.current.position){
-        mf.current?.setValue(content.latexStr, {silenceNotifications: true});
-        mf.current.position = trackedCursorPos.current - 1;
-      }
-
-      if (readOnlyMf) {
-        readOnlyMf.current?.setValue(content.latexStr, {silenceNotifications: true});
-      }
+      mf.current?.setValue(content.latexStr, {silenceNotifications: true});
+      if (!readOnly && mf.current) mf.current.position = trackedCursorPos.current - 1;
     });
     return () => disposer();
   }, [content]);
@@ -71,7 +63,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   });
 
   const mathfieldAttributes = {
-    ref: readOnly ? readOnlyMf : mf,
+    ref: mf,
     value: content.latexStr,
     onInput: !readOnly ? handleChange : undefined,
     readOnly: readOnly ? "true" : undefined,
