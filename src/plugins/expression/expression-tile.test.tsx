@@ -1,5 +1,4 @@
 import React from "react";
-
 import { render } from "@testing-library/react";
 import { ITileApi } from "../../components/tiles/tile-api";
 import { TileModel } from "../../models/tiles/tile-model";
@@ -19,10 +18,9 @@ jest.mock("../../hooks/use-stores", () => ({
   })
 }));
 
-// mock replaceSync so render happens
-jest.mock("mathlive", () => ({
-  replaceSync: jest.fn()
-}));
+// mock out mathlive to prevent attempt to render shadow dom
+jest.mock("mathlive", () => jest.fn());
+
 
 describe("ExpressionToolComponent", () => {
   const content = defaultExpressionContent();
@@ -62,7 +60,7 @@ describe("ExpressionToolComponent", () => {
     expect(document.querySelector("math-field")).toBeInTheDocument();
   });
 
-  it("renders with a LaTeX string in the math-field value", () => {
+  it("loads default LaTeX string in the math-field value", () => {
     render(<ExpressionToolComponent  {...defaultProps} {...{model}}></ExpressionToolComponent>);
     expect(document.querySelector("math-field")).toHaveAttribute("value", "a=\\pi r^2");
   });
