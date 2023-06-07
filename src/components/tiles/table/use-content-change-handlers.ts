@@ -140,15 +140,21 @@ export const useContentChangeHandlers = ({
   }, [getContent, readOnly, modelRef]);
 
   const unlinkTile = useCallback((tileInfo: ITileLinkMetadata) => {
-    const consumerTile = getTileContentById(getContent(), tileInfo.id);
-    if (!readOnly && consumerTile) {
-      const sharedModelManager = consumerTile.tileEnv?.sharedModelManager;
+    const linkedTile = getTileContentById(getContent(), tileInfo.id);
+    if (!readOnly && linkedTile) {
+      const sharedModelManager = linkedTile.tileEnv?.sharedModelManager;
       if (sharedModelManager?.isReady) {
         const sharedTable = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, modelRef.current.id);
-        sharedTable && sharedModelManager?.removeTileSharedModel(consumerTile, sharedTable);
+        // If providerId matches model.id, we're the data provider and should remove the other tile
+        // from the shared data set. Otherwise, we're the consumer and should remove ourselves.
+        if (sharedTable && sharedTable.providerId === model.id) {
+          sharedModelManager?.removeTileSharedModel(linkedTile, sharedTable);
+        } else if (sharedTable) {
+          sharedModelManager?.removeTileSharedModel(model.content, sharedTable);
+        }
       }
     }
-  }, [getContent, readOnly, modelRef]);
+  }, [getContent, readOnly, modelRef, model.id, model.content]);
 
   return { onSetTableTitle: setTableTitle, onSetColumnName: setColumnName, onSetColumnExpressions: setColumnExpressions,
           onAddColumn: addColumn, onRemoveColumn: removeColumn, requestRowHeight,
