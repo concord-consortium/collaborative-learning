@@ -8,12 +8,15 @@
     display:none;
   }
 
-  .expression-button {
-    width: 100%;
-    padding:0px;
-    display: flex;
+  // TODO - standardize this - starts with svgs
+  button {
+    padding: 0px;
+    margin:0px;
+    border:3px dotted red;
+    padding: 3px;
     background:transparent;
-    border:0px;
+    width: 34px;
+    height: 34px;
     cursor:pointer;
     &:hover {
       background-color: $workspace-teal-light-5;
@@ -23,6 +26,12 @@
     svg {
       fill: white;
       stroke: $workspace-teal-dark-1;
+    }
+  }
+
+  .mixed-fraction {
+    svg {
+      transform: scale(0.6);
     }
   }
 }
