@@ -33,25 +33,22 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   const trackedCursorPos = useRef<number>(0);
   const ui = useUIStore();
 
-  if(mf.current && ui) {
-    mf.current.addEventListener("focus", () => ui.setSelectedTileId(model.id));
-  }
-
-  if (mf.current?.keybindings){
+  useEffect(() => {
+    mf.current?.addEventListener("focus", () => ui.setSelectedTileId(model.id));
     undoKeys.forEach((key: string) => {
-      mf.current && replaceKeyBinding(mf.current.keybindings, key, "");
+      mf.current?.keybindings && replaceKeyBinding(mf.current.keybindings, key, "");
     });
-  }
+  }, [model.id, ui]);
 
   useEffect(() => {
-    // when we change model via undo button, we need to update mathfield
+    // when we change model programatically, we need to update mathfield
     const disposer = onSnapshot((content as any), () => {
       if (mf.current?.getValue() === content.latexStr) return;
-      mf.current?.setValue(content.latexStr, {suppressChangeNotifications: true});
-      if (mf.current?.position) mf.current.position = trackedCursorPos.current - 1;
+      mf.current?.setValue(content.latexStr, {silenceNotifications: true});
+      if (!readOnly && mf.current) mf.current.position = trackedCursorPos.current - 1;
     });
     return () => disposer();
-  }, [content]);
+  }, [content, readOnly]);
 
   const handleChange = (e: FormEvent<MathfieldElementAttributes>) => {
     trackedCursorPos.current =  mf.current?.position || 0;
@@ -64,6 +61,13 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     onRegisterTileApi,
     onUnregisterTileApi
   });
+
+  const mathfieldAttributes = {
+    ref: mf,
+    value: content.latexStr,
+    onInput: !readOnly ? handleChange : undefined,
+    readOnly: readOnly ? "true" : undefined,
+  };
 
   return (
     <div className="expression-tool">
@@ -83,13 +87,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
         />
       </div>
       <div className="expression-math-area">
-        <math-field
-          ref={mf}
-          value={content.latexStr}
-          onInput={handleChange}
-          // MathLive only interprets undefined as false
-          readOnly={readOnly === true ? true : undefined}
-        />
+        <math-field {...mathfieldAttributes} />
       </div>
     </div>
   );
