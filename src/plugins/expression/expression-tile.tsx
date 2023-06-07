@@ -38,6 +38,11 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     undoKeys.forEach((key: string) => {
       mf.current?.keybindings && replaceKeyBinding(mf.current.keybindings, key, "");
     });
+    mf.current?.addEventListener("selection-change", (e: any) => {
+      const selection = document.getSelection()?.getRangeAt(0);
+      const asLatex = selection?.startContainer.childNodes[0].nodeValue;
+      console.log("| selection-change:", asLatex);
+    });
   }, [model.id, ui]);
 
   useEffect(() => {
