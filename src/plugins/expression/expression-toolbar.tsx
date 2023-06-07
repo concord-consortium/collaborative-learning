@@ -61,7 +61,7 @@ export const ExpressionToolbar: React.FC<IProps> = observer((
     const ltx = content.latexStr;
     let newString = "";
     if (ltx.length === 0) {
-      newString = "\\placeholder{}\\frac"
+      newString = "\\placeholder{}\\frac";
     } else {
       // NEXT this is just a simple case...need to handle more complex cases
       // it breaks, for example, if it is before an operator
