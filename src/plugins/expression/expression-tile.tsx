@@ -34,11 +34,12 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   const ui = useUIStore();
 
   useEffect(() => {
+    console.log("| listeners and keybindings")
     mf.current?.addEventListener("focus", () => ui.setSelectedTileId(model.id));
     undoKeys.forEach((key: string) => {
       mf.current && replaceKeyBinding(mf.current.keybindings, key, "");
     });
-  }, []);
+  }, [model.id, ui]);
 
   useEffect(() => {
     // when we change model programatically, we need to update mathfield
@@ -48,7 +49,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
       if (!readOnly && mf.current) mf.current.position = trackedCursorPos.current - 1;
     });
     return () => disposer();
-  }, [content]);
+  }, [content, readOnly]);
 
   const handleChange = (e: FormEvent<MathfieldElementAttributes>) => {
     trackedCursorPos.current =  mf.current?.position || 0;
