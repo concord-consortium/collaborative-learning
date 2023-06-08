@@ -58,19 +58,41 @@ export const ExpressionToolbar: React.FC<IProps> = observer((
   const addMixedFraction = () => {
     const selected = trackedSelection.current;
     const position = trackedCursorPos.current;
-    let newString = "";
+    const initialPlaceholder = "\\placeholder{}";
+    const emptyFrac = "\\frac{\\placeholder{}}{\\placeholder{}}";
+    if (!mf) return;
 
+    // case: field is empty of value, insert an empty mixed fraction
     if (content.latexStr.length === 0) {
-      newString = "\\placeholder{}\\frac";
+      mf.current?.executeCommand([
+        "insert", initialPlaceholder + emptyFrac, {insertionMode: "replaceAll"}
+      ]);
     }
 
+    // case: everything selected, put existing value in integer slot
+    else if (selected.length === content.latexStr.length){
+      mf.current?.executeCommand([
+        "insert", selected + emptyFrac, {insertionMode: "replaceAll"}
+      ]);
+    }
+
+    // case: no selection
+    else if (content.latexStr.length > 0 && selected.length === 0) {
+      mf.current?.executeCommand([
+        "insert", initialPlaceholder + emptyFrac, {insertionMode: "insertAfter"}
+      ]);
+    }
+
+    // cases something more complicated...
     else {
-      console.log("| addMixedFraction \n   latex:  ", content.latexStr,  "\n   selected: ", selected, "\n   position: ", position, "\n   ...so what should newString be?");
-
-      newString = content.latexStr.replace(selected, `${selected}\\frac`);
-      console.log("|   newString: ", newString);
+      console.log("| crazy cases...")
+      // const splicedIn = content.latexStr.replace(selected, `{{${selected}}\\frac}`);
+      // mf.current?.executeCommand([
+      //   "insert", splicedIn, {insertionMode: "replaceAll"}
+      // ]);
+      // console.log("| splicedIn", splicedIn)
     }
-    content.setLatexStr(newString);
+
     mf && mf.current?.focus();
   };
 

@@ -45,20 +45,14 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
       if (selection && selection.startContainer.childNodes.length === 0) return;
       const asLatex = selection?.startContainer?.childNodes[0].nodeValue;
       if (asLatex) trackedSelection.current = asLatex;
+      console.log("| trackedSelection.current.length", trackedSelection.current.length);
     });
-
-
-    const newSmallFracMacro = {
-      args: 2,
-      def: '{}^{#1}\\!\\!/\\!{}_{#2}',
-      captureSelection: false,
-    }
-
-    if (mf.current?.macros) {
-      mf.current.macros = { ...mf.current.macros, smallfrac: newSmallFracMacro };
-    }
-
-
+    // TODO - we want selectionm to be up to date, so was going to update it on click
+    // but should look for built in state that knows about selection first
+    mf.current?.addEventListener("click", () => {
+      const anySelection = document.getSelection()?.getRangeAt(0);
+      console.log("| anySelection", anySelection);
+    });
   }, [model.id, ui]);
 
   useEffect(() => {
