@@ -107,8 +107,13 @@ export const DiagramContentModel = TileContentModel
     updateAfterSharedModelChanges() {
       // First cleanup any invalid references this can happen when an item is deleted
       self.root.nodes.forEach(node => {
-        // If the sharedItem is not valid destroy the list item
-        if (!isValidReference(() => node.variable)) {
+        try {
+          // If the sharedItem is not valid destroy the list item
+          if (!isValidReference(() => node.variable)) {
+            destroy(node);
+          }
+        } catch (e) {
+          // If we were unable to resolve node.variable, just destroy the node.
           destroy(node);
         }
       });
