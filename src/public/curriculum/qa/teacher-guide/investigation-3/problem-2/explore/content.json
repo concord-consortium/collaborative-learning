@@ -1,0 +1,55 @@
+{
+  "type": "explore",
+  "content": {
+    "tiles": [
+      {
+        "id": "6lPb04vZIDjQ4Cga",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Explore (Digging In)</strong></u></p>",
+            "<p><u>Providing for Individual Needs</u></p>",
+            "<p>Check to make sure that students are identifying the correct scale factor in the parts that give information about area. For example, in the Initial Challenge and Triangle X,  if the area of the sketched figure must be 16 times the area of the original figure, students must understand that the area grows by the square of the scale factor. So, in this case, the scale factor is 4.</p>"
+          ]
+        }
+      },
+      {
+        "id": "XGiCodfhKZHIR2XV",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>Can using corresponding sides help you? (yes)</li><li>Can using corresponding angle help you? (yes)</li><li>What is the scale factor from one shape to the other?  (Answers will vary.)</li><li>What do you we know about the relationship between scale factor and area change?  (Scale factor squared is the area change)</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "oOiDhg9djA-baU5l",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>To move conversations forward on corresponding parts for the similar rectangles, ask students which side has the shortest length. Then, ask which side has the longest length. This will help them match corresponding sides. (Language)</p>",
+            "<p>Look for students who solve the Problem in interesting ways. Be sure to call on these students to share their ideas during the Summarize.</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Planning for the Summary</u></p>",
+            "<p>What evidence will you use in the summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence? </p>",
+            "<p><em>Now What Do You Know?</em></p>",
+            "<p><em>How can you use scale factors to draw similar figures (scale drawings)? How can you use scale factors to find missing information about angle measures? Area? Perimeter?</em></p>",
+            "(As you are circulating during the summary select student work from the design criteria in the Initial Challenge to use for the summary discussion- select work that is correct and incorrect to help students work on justifying their ideas about scale factor and area relationships. Choose examples from the What If Situations to discuss how to use scale factor to find missing side lengths.)"
+          ]
+        }
+      }
+    ]
+  }
+}

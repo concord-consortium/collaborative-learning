@@ -1,0 +1,47 @@
+{
+  "type": "explore",
+  "content": {
+    "tiles": [
+      {
+        "id": "JfnRf9aZN6X4Lmam",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Explore (Digging In)</strong></u></p>",
+            "<p><u>Providing for Individual Needs</u></p>",
+            "<p>Take note of the strategies that students are using to decide which shape is the imposter so that these can be discussed in the Summary. Look for students who are using scale factors, equivalent ratios of adjacent sides, and rep-tiles.</p>",
+            "<p></p>",
+            "<p>Suggest to some students that making copies of the shapes and moving them may help them to compare the shapes.</p>"
+          ]
+        }
+      },
+      {
+        "id": "pRzmf1YTV5A3-Gkh",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>What tools might help you? (Answers will vary. Ruler, angle ruler, protractor)</li><li>What are the corresponding sides of the two figures? (Answers will vary depending on the two figures)</li><li>What is the ratio between the adjacent sides? (Answers will vary depending on the two figures)</li><li>What is the scale factor between the corresponding sides of the two figures? (Answers will vary depending on the two figures)</li><li>What are the corresponding angles of the two figures? (Answers will vary depending on the two figures)</li></ul>",
+            "Have students put their sketches for What If Situation B on large paper to display and discuss in the Summary."
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Planning for the Summary</u></p>",
+            "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence? </p>",
+            "<p><em>Now What Do You Know?</em></p>",
+            "<p><em>What are strategies for identifying if shapes have been scaled (similar figures) or if the shapes are imposters? </em></p>",
+            "(Take note of the strategies that students are using to decide which shape is the imposter so that these can be discussed in the Summary. Look for students who are using scale factors, equivalent ratios of adjacent sides, and rep-tiles.)"
+          ]
+        }
+      }
+    ]
+  }
+}

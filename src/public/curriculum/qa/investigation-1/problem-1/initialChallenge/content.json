@@ -1,0 +1,709 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {
+        "id": "document_Text_1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>One of Daphne’s photos looks like the picture below. Daphne has a copy of the P.I. Monthly magazine shown in the picture. The P.I. Monthly magazine is 10 inches high. She thinks the photo might be helpful in determining the height of the mystery teacher.</p>"
+          ]
+        }
+      },
+      {
+        "id": "20AUG20220932",
+        "title": "Daphne’s photo of the mystery teacher by a magazine rack",
+        "content": {
+          "type": "Image",
+          "url": "qa/images/SS_1_1_06_magazine_rack_500w.png"
+        }
+      },
+      {
+        "id": "FIpcrGvP0HSdKURM",
+        "title": "Image 1",
+        "content": {
+          "type": "Image",
+          "url": "qa/images/screenshot-2023-04-10-at-10.46.10-am.png",
+          "filename": "qa/images/screenshot-2023-04-10-at-10.46.10-am.png"
+        }
+      },
+      {
+        "id": "C0QqKOny1112OybO",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ol><li>test</li><li>test2</li><li>test3</li></ol><ul><li>test4</li><li>test5</li><li>test6</li></ul><p><strong>test7 test8</strong></p><p><em>test9 test10</em></p><p><u>test1 test12</u></p><p>test<sub>t</sub></p><p>test<sup>test</sup></p>"
+          ]
+        }
+      },
+      {
+        "id": "ig8HobKFUh130aWi",
+        "title": "Drawing 1",
+        "content": {
+          "type": "Drawing",
+          "objects": [
+            {
+              "type": "line",
+              "id": "KLZuh6oqmC_g46-M",
+              "x": 60.3367919921875,
+              "y": 147.45831298828125,
+              "stroke": "#000000",
+              "strokeDashArray": "",
+              "strokeWidth": 2,
+              "deltaPoints": [
+                {
+                  "dx": 0,
+                  "dy": 0
+                },
+                {
+                  "dx": 0,
+                  "dy": -1
+                },
+                {
+                  "dx": 0,
+                  "dy": -3
+                },
+                {
+                  "dx": 0,
+                  "dy": -6
+                },
+                {
+                  "dx": 0,
+                  "dy": -1
+                },
+                {
+                  "dx": 0,
+                  "dy": -5
+                },
+                {
+                  "dx": 1,
+                  "dy": -7
+                },
+                {
+                  "dx": 4,
+                  "dy": -7
+                },
+                {
+                  "dx": 8,
+                  "dy": -9
+                },
+                {
+                  "dx": 12,
+                  "dy": -7
+                },
+                {
+                  "dx": 16,
+                  "dy": -6
+                },
+                {
+                  "dx": 21,
+                  "dy": -6
+                },
+                {
+                  "dx": 22,
+                  "dy": -3
+                },
+                {
+                  "dx": 22,
+                  "dy": -1
+                },
+                {
+                  "dx": 20,
+                  "dy": 0
+                },
+                {
+                  "dx": 18,
+                  "dy": 0
+                },
+                {
+                  "dx": 16,
+                  "dy": 2
+                },
+                {
+                  "dx": 13,
+                  "dy": 4
+                },
+                {
+                  "dx": 11,
+                  "dy": 6
+                },
+                {
+                  "dx": 8,
+                  "dy": 6
+                },
+                {
+                  "dx": 6,
+                  "dy": 7
+                },
+                {
+                  "dx": 5,
+                  "dy": 9
+                },
+                {
+                  "dx": 3,
+                  "dy": 9
+                },
+                {
+                  "dx": 1,
+                  "dy": 8
+                },
+                {
+                  "dx": 1,
+                  "dy": 7
+                },
+                {
+                  "dx": 0,
+                  "dy": 6
+                },
+                {
+                  "dx": -1,
+                  "dy": 3
+                },
+                {
+                  "dx": -3,
+                  "dy": 2
+                },
+                {
+                  "dx": -5,
+                  "dy": 1
+                },
+                {
+                  "dx": -6,
+                  "dy": 1
+                },
+                {
+                  "dx": -6,
+                  "dy": -2
+                },
+                {
+                  "dx": -6,
+                  "dy": -4
+                },
+                {
+                  "dx": -7,
+                  "dy": -8
+                },
+                {
+                  "dx": -6,
+                  "dy": -9
+                },
+                {
+                  "dx": -4,
+                  "dy": -10
+                },
+                {
+                  "dx": -2,
+                  "dy": -10
+                },
+                {
+                  "dx": 0,
+                  "dy": -10
+                },
+                {
+                  "dx": 6,
+                  "dy": -12
+                },
+                {
+                  "dx": 15,
+                  "dy": -13
+                },
+                {
+                  "dx": 18,
+                  "dy": -8
+                },
+                {
+                  "dx": 23,
+                  "dy": -5
+                },
+                {
+                  "dx": 26,
+                  "dy": -2
+                },
+                {
+                  "dx": 25,
+                  "dy": 0
+                },
+                {
+                  "dx": 21,
+                  "dy": 2
+                },
+                {
+                  "dx": 19,
+                  "dy": 4
+                },
+                {
+                  "dx": 19,
+                  "dy": 6
+                },
+                {
+                  "dx": 17,
+                  "dy": 8
+                },
+                {
+                  "dx": 13,
+                  "dy": 8
+                },
+                {
+                  "dx": 11,
+                  "dy": 8
+                },
+                {
+                  "dx": 7,
+                  "dy": 6
+                },
+                {
+                  "dx": 4,
+                  "dy": 6
+                },
+                {
+                  "dx": 4,
+                  "dy": 5
+                },
+                {
+                  "dx": 2,
+                  "dy": 5
+                },
+                {
+                  "dx": 1,
+                  "dy": 6
+                },
+                {
+                  "dx": 0,
+                  "dy": 6
+                },
+                {
+                  "dx": -2,
+                  "dy": 6
+                },
+                {
+                  "dx": -5,
+                  "dy": 5
+                },
+                {
+                  "dx": -7,
+                  "dy": 4
+                },
+                {
+                  "dx": -9,
+                  "dy": 2
+                },
+                {
+                  "dx": -11,
+                  "dy": 0
+                },
+                {
+                  "dx": -11,
+                  "dy": -3
+                },
+                {
+                  "dx": -10,
+                  "dy": -6
+                },
+                {
+                  "dx": -8,
+                  "dy": -8
+                },
+                {
+                  "dx": -4,
+                  "dy": -9
+                },
+                {
+                  "dx": -2,
+                  "dy": -13
+                },
+                {
+                  "dx": 4,
+                  "dy": -17
+                },
+                {
+                  "dx": 10,
+                  "dy": -19
+                },
+                {
+                  "dx": 17,
+                  "dy": -17
+                },
+                {
+                  "dx": 23,
+                  "dy": -13
+                },
+                {
+                  "dx": 27,
+                  "dy": -6
+                },
+                {
+                  "dx": 29,
+                  "dy": -1
+                },
+                {
+                  "dx": 29,
+                  "dy": 2
+                },
+                {
+                  "dx": 22,
+                  "dy": 5
+                },
+                {
+                  "dx": 19,
+                  "dy": 9
+                },
+                {
+                  "dx": 17,
+                  "dy": 12
+                },
+                {
+                  "dx": 12,
+                  "dy": 12
+                },
+                {
+                  "dx": 9,
+                  "dy": 13
+                },
+                {
+                  "dx": 7,
+                  "dy": 12
+                },
+                {
+                  "dx": 4,
+                  "dy": 10
+                },
+                {
+                  "dx": 2,
+                  "dy": 8
+                },
+                {
+                  "dx": 1,
+                  "dy": 7
+                },
+                {
+                  "dx": 0,
+                  "dy": 6
+                },
+                {
+                  "dx": -1,
+                  "dy": 4
+                },
+                {
+                  "dx": -2,
+                  "dy": 5
+                },
+                {
+                  "dx": -3,
+                  "dy": 4
+                },
+                {
+                  "dx": -5,
+                  "dy": 3
+                },
+                {
+                  "dx": -4,
+                  "dy": 3
+                },
+                {
+                  "dx": -7,
+                  "dy": 1
+                },
+                {
+                  "dx": -9,
+                  "dy": 1
+                },
+                {
+                  "dx": -8,
+                  "dy": -2
+                },
+                {
+                  "dx": -9,
+                  "dy": -4
+                },
+                {
+                  "dx": -6,
+                  "dy": -7
+                },
+                {
+                  "dx": -5,
+                  "dy": -9
+                },
+                {
+                  "dx": -3,
+                  "dy": -11
+                },
+                {
+                  "dx": 1,
+                  "dy": -15
+                },
+                {
+                  "dx": 7,
+                  "dy": -17
+                },
+                {
+                  "dx": 12,
+                  "dy": -14
+                },
+                {
+                  "dx": 14,
+                  "dy": -8
+                },
+                {
+                  "dx": 19,
+                  "dy": -6
+                },
+                {
+                  "dx": 19,
+                  "dy": -3
+                },
+                {
+                  "dx": 17,
+                  "dy": 2
+                },
+                {
+                  "dx": 13,
+                  "dy": 5
+                },
+                {
+                  "dx": 10,
+                  "dy": 6
+                },
+                {
+                  "dx": 8,
+                  "dy": 6
+                },
+                {
+                  "dx": 6,
+                  "dy": 5
+                },
+                {
+                  "dx": 4,
+                  "dy": 5
+                },
+                {
+                  "dx": 3,
+                  "dy": 5
+                },
+                {
+                  "dx": 3,
+                  "dy": 4
+                },
+                {
+                  "dx": 3,
+                  "dy": 3
+                },
+                {
+                  "dx": 2,
+                  "dy": 3
+                },
+                {
+                  "dx": 1,
+                  "dy": 2
+                },
+                {
+                  "dx": 2,
+                  "dy": 3
+                },
+                {
+                  "dx": 1,
+                  "dy": 2
+                },
+                {
+                  "dx": 2,
+                  "dy": 3
+                },
+                {
+                  "dx": 1,
+                  "dy": 2
+                },
+                {
+                  "dx": 0,
+                  "dy": 3
+                },
+                {
+                  "dx": 1,
+                  "dy": 3
+                },
+                {
+                  "dx": 0,
+                  "dy": 0
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": "w9noP5GpRM2-CrHm",
+        "title": "Table 1",
+        "content": {
+          "type": "Table",
+          "columnWidths": {
+            "Km6FHc5xC0m13du5": 80,
+            "7lG7HHHqeGWBr1-r": 80
+          },
+          "name": "Table 1"
+        }
+      },
+      [
+        {
+          "id": "V_iWOkC8Vr87paOL",
+          "title": "Graph 1",
+          "content": {
+            "type": "Geometry",
+            "board": {
+              "properties": {
+                "axisMin": [
+                  0,
+                  0
+                ],
+                "axisRange": [
+                  16,
+                  15
+                ],
+                "axisNames": [
+                  "time",
+                  "distance"
+                ],
+                "axisLabels": [
+                  "x",
+                  "y"
+                ]
+              }
+            },
+            "objects": [
+              {
+                "type": "point",
+                "parents": [
+                  1.2000000000000002,
+                  8.4
+                ],
+                "properties": {
+                  "id": "2lwQfUOqdYIvczNF",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  10.4,
+                  10.4
+                ],
+                "properties": {
+                  "id": "WuGEVjfOz7Tk-_oi",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "polygon",
+                "parents": [
+                  "2lwQfUOqdYIvczNF",
+                  "WuGEVjfOz7Tk-_oi"
+                ],
+                "properties": {
+                  "id": "dacZ3QdZipZhRI3e"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "J0Ohtgsh-qNRUUid",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p></p>"
+            ]
+          }
+        }
+      ],
+      {
+        "id": "document_Text_3",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Daphne’s claim is correct. In her picture, we can measure both the height of the P.I. magazine and the height of the teacher and then compare two values. Knowing the P.I. magazine is 10 inches high in real life, you can estimate the teacher’s real height.</p><p> Possible student strategies:</p><ul><li>Students can use rulers or edges of a piece of paper to make informal estimates of various measurements. Do not push for precise measurement at this time. Pay attention, though, to which students measure naturally and easily and which struggle with measurement. This will help you to plan your teaching in later Problems in the Unit where careful measurement is important.</li><li>Some students will measure the height in inches on the magazine and of the mystery teacher. They will then divide the height of the teacher by the height of the magazine to find how many magazines tall the teacher is. This is a more precise version of the first strategy. Make sure students are clear about the comparisons that they are making. They may compare the real magazine to the magazine in the picture or the magazine in the picture to the teacher in the picture.</li><li>The magazine is 10 inches tall. The teacher is about 7 magazines, or 70 inches, tall.</li><li>In the picture, the height of the P.I. Monthly is 0.5 in. We know that the height of the real magazine is 10 in. So, the real magazine is 10 ÷ 0.5=20 times larger than in the picture. The teacher should also be 20 times larger in real life than he/she is in the picture. The teacher’s height in the picture is about  in. So, the actual height is about 20  =72.5 in.</li><li>Students may use ratio or “for every” statements, such as “The ratio of the teacher’s height in the picture to her height in real life is about 1 to 20.” Or “For every inch in height of the magazine in the picture there are 20 inches in height for the real magazine.”</li><li>Students may also compare the magazine in the picture to the teacher in the picture. In this case, the teacher is / = 7 times as tall as the magazine. Students may say that the teacher is 7 magazines tall. This should be true in real life as well. Since the height of the magazine is 10 in., the teacher is 10x7=72.5 in. tall.</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "document_Text_4",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            ""
+          ]
+        }
+      },
+      {
+        "id": "document_Text_5",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Answers will vary. Possible answers:</p><ul><li>Yes. Instead of the height of the magazine, I could have measured the height of the actual bookshelf shown in the picture and used it to figure out the teacher’s height.</li><li>No. If I do not know the real height of the magazine is 10 inches, I would not be able to find the real height of the teacher. I only know the teacher is 7.25 times taller than the magazine.</li></ul><p>Students will think about the proportional relationship of heights between the picture and the reality. <strong></strong></p>"
+          ]
+        }
+      }
+    ],
+    "sharedModels": [
+      {
+        "sharedModel": {
+          "type": "SharedDataSet",
+          "id": "RvtUfhnifkiQ5uDr",
+          "providerId": "w9noP5GpRM2-CrHm",
+          "dataSet": {
+            "id": "hVV3fGLPdrNXECkS",
+            "name": "Table 1",
+            "attributes": [
+              {
+                "id": "Km6FHc5xC0m13du5",
+                "clientKey": "",
+                "name": "x",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "1",
+                  "3"
+                ]
+              },
+              {
+                "id": "7lG7HHHqeGWBr1-r",
+                "clientKey": "",
+                "name": "y",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "2",
+                  "4"
+                ]
+              }
+            ],
+            "cases": [
+              {
+                "__id__": "o4mDAJVzT6O3w724"
+              },
+              {
+                "__id__": "ZxizyY3r54ZAmX_3"
+              }
+            ]
+          }
+        },
+        "tiles": [
+          "w9noP5GpRM2-CrHm"
+        ]
+      }
+    ]
+  },
+  "supports": []
+}

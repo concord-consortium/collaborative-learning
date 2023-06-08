@@ -1,0 +1,21 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {"content": {"type": "Text", "format": "html", "text": ["The original figure and its image are <strong>similar figures</strong> or scale drawings. For two similar figures, what characteristics and measures are the same?  Different? Explain how you know."]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Informally students should see that when enlarging a geometric figure some attributes of shape change and some stay the same:</p>",
+            "<ul><li>angles of the two figures appear to be the same,</li><li>side lengths of the enlarged figure are longer,</li><li>area of the enlarged figure is bigger.</li></ul>",
+            "<p>Note that as the Unit continues, students will revisit these questions and add more specific mathematical detail to them.</p>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": [{"text": "Have you considered how points, angles, side lengths, and area change?"}]
+}

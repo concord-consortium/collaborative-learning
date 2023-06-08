@@ -1,0 +1,52 @@
+{
+  "type": "launch",
+  "content": {
+    "tiles": [
+      {
+        "id": "ZU1C-FcaWkYsOOCF",
+        "content": {"type": "Text", "format": "html", "text": ["<p><u><strong>Launch (Getting Started)</strong></u> </p>", "<p><u>Connecting to Prior Knowledge</u></p>", "<p>In this Problem, students continue to build on their understanding of scale factors and scaled drawings or similarity.</p>"]}
+      },
+      {
+        "id": "fqhk3w02W8CFi-fP",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>If you are given a rectangle, how might you draw a similar rectangle with a scale factor of 2? (Calculate twice the length for each side of the rectangle, and then draw a rectangle with those measurements.) </li><li>How would the areas of the original rectangle and the rectangle you drew relate? (The new rectangle would have an area 4 times as great as the original rectangle.) </li><li>What would the scale factor be for a pair of similar figures where one figure has an area 16 times as great as the other figure? (4)</li><li>What is base of a triangle? (This can be any side of a triangle.)</li><li>What is the height of a triangle? (Perpendicular distance from the base to the opposite vertex.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "xh4Z4DhjulxSDU-A",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Presenting the Challenge</u></p>",
+            "<p>Display Rectangle A and Triangle B for the class. Tell the class that their challenge is to draw similar figures with the conditions given in the Problem.</p>",
+            "<p><strong>Implementation Note:</strong> Assign one or two from each set in the Initial Challenge to partner groups.  Have students create posters to present their findings.</p>"
+          ]
+        }
+      },
+      {
+        "id": "dWVgd1HX3LcCkThA",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p><strong>Suggested Questions</strong></p>", "<ul><li>What are the side lengths of Rectangle A? (4 units and 8 units)</li><li>What is the area of Rectangle A? (32 square units)</li><li>What is the area of Triangle B? (14 square units)</li></ul>"]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Pass out <strong>Learning Aid 3.2A: Designing Under Constraints.</strong> Students may also want to use Quarter-inch Grid Paper, angle rulers or protractors and rulers. Give students time to begin this Problem independently before they work with a partner. (Agency, Identity, Ownership)</p>"
+          ]
+        }
+      }
+    ]
+  }
+}
