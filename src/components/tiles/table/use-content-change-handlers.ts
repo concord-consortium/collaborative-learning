@@ -127,7 +127,7 @@ export const useContentChangeHandlers = ({
       if (sharedModelManager?.isReady) {
         // If the consumer tile does not support multiple shared data sets, remove it from
         // any existing shared data set before linking.
-        if (!getTileContentInfo(consumerTile.type)?.supportsMultipleDataSets) {
+        if (!getTileContentInfo(consumerTile.type)?.consumesMultipleDataSets) {
           const existingSharedTable = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, tileInfo.id);
           if (existingSharedTable) {
             sharedModelManager?.removeTileSharedModel(consumerTile, existingSharedTable);
@@ -145,16 +145,16 @@ export const useContentChangeHandlers = ({
       const sharedModelManager = linkedTile.tileEnv?.sharedModelManager;
       if (sharedModelManager?.isReady) {
         const sharedTable = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, modelRef.current.id);
-        // If providerId matches model.id, we're the data provider and should remove the other tile
+        // If providerId matches model id, we're the data provider and should remove the other tile
         // from the shared data set. Otherwise, we're the consumer and should remove ourselves.
-        if (sharedTable && sharedTable.providerId === model.id) {
+        if (sharedTable && sharedTable.providerId === modelRef.current.id) {
           sharedModelManager?.removeTileSharedModel(linkedTile, sharedTable);
         } else if (sharedTable) {
-          sharedModelManager?.removeTileSharedModel(model.content, sharedTable);
+          sharedModelManager?.removeTileSharedModel(modelRef.current.content, sharedTable);
         }
       }
     }
-  }, [getContent, readOnly, modelRef, model.id, model.content]);
+  }, [getContent, readOnly, modelRef]);
 
   return { onSetTableTitle: setTableTitle, onSetColumnName: setColumnName, onSetColumnExpressions: setColumnExpressions,
           onAddColumn: addColumn, onRemoveColumn: removeColumn, requestRowHeight,

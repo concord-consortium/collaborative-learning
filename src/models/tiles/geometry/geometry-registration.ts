@@ -22,7 +22,7 @@ registerTileContentInfo({
   defaultHeight: kGeometryDefaultHeight,
   exportNonDefaultHeight: true,
   isDataConsumer: true,
-  supportsMultipleDataSets: true,
+  consumesMultipleDataSets: true,
   defaultContent: defaultGeometryContent,
   tileSnapshotPreProcessor
 });
