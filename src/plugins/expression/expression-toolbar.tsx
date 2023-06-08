@@ -58,14 +58,17 @@ export const ExpressionToolbar: React.FC<IProps> = observer((
   const addMixedFraction = () => {
     const selected = trackedSelection.current;
     const position = trackedCursorPos.current;
-    const ltx = content.latexStr;
     let newString = "";
-    if (ltx.length === 0) {
+
+    if (content.latexStr.length === 0) {
       newString = "\\placeholder{}\\frac";
-    } else {
-      // NEXT this is just a simple case...need to handle more complex cases
-      // it breaks, for example, if it is before an operator
-      newString = ltx.replace(selected, `${selected}\\frac`);
+    }
+
+    else {
+      console.log("| addMixedFraction \n   latex:  ", content.latexStr,  "\n   selected: ", selected, "\n   position: ", position, "\n   ...so what should newString be?");
+
+      newString = content.latexStr.replace(selected, `${selected}\\frac`);
+      console.log("|   newString: ", newString);
     }
     content.setLatexStr(newString);
     mf && mf.current?.focus();

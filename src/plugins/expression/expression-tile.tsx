@@ -34,6 +34,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   const trackedSelection = useRef<string>("");
   const ui = useUIStore();
 
+  // TODO - maybe all this listening should be in a hook or external function
   useEffect(() => {
     mf.current?.addEventListener("focus", () => ui.setSelectedTileId(model.id));
     undoKeys.forEach((key: string) => {
@@ -41,9 +42,23 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     });
     mf.current?.addEventListener("selection-change", (e: any) => {
       const selection = document.getSelection()?.getRangeAt(0);
-      const asLatex = selection?.startContainer.childNodes[0].nodeValue;
+      if (selection && selection.startContainer.childNodes.length === 0) return;
+      const asLatex = selection?.startContainer?.childNodes[0].nodeValue;
       if (asLatex) trackedSelection.current = asLatex;
     });
+
+
+    const newSmallFracMacro = {
+      args: 2,
+      def: '{}^{#1}\\!\\!/\\!{}_{#2}',
+      captureSelection: false,
+    }
+
+    if (mf.current?.macros) {
+      mf.current.macros = { ...mf.current.macros, smallfrac: newSmallFracMacro };
+    }
+
+
   }, [model.id, ui]);
 
   useEffect(() => {
