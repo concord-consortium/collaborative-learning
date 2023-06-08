@@ -51,11 +51,11 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
   // Also this cannot be marked as an `action`. Doing that will cause it to not watch the
   // stuff it reads.
   findFirstSharedModelByType<IT extends typeof SharedModelUnion>(
-    sharedModelType: IT, providerId?: string): IT["Type"] | undefined {
+    sharedModelType: IT, tileId?: string): IT["Type"] | undefined {
     if (!this.document) {
       console.warn("findFirstSharedModelByType has no document");
     }
-    return this.document?.getFirstSharedModelByType(sharedModelType, providerId);
+    return this.document?.getFirstSharedModelByType(sharedModelType, tileId);
   }
 
   getSharedModelsByType<IT extends typeof SharedModelUnion>(type: string): IT["Type"][] {

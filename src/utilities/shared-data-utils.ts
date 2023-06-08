@@ -12,8 +12,8 @@ export const isLinkedToTile = (model: ITileModel, tileId: string) => {
   const sharedModelManager = getSharedModelManager(model);
   if (sharedModelManager?.isReady) {
     const modelDataSet = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, model.id);
-    const sourceTileDataSet = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, tileId);
-    if (sourceTileDataSet?.id === modelDataSet?.id) {
+    const sharedModelTileIds = sharedModelManager?.getSharedModelTileIds(modelDataSet);
+    if (sharedModelTileIds?.includes(tileId)) {
       return true;
     }
   }

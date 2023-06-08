@@ -23,6 +23,8 @@ import { LogEventName } from "../../../lib/logger-types";
 import { logTileChangeEvent } from "../log/log-tile-change-event";
 import { uniqueId } from "../../../utilities/js-utils";
 import { PartialSharedModelEntry } from "../../document/document-content-types";
+import { createDefaultDataSet } from "../../../plugins/dataflow/model/utilities/create-default-data-set";
+import { SharedModelChangeType } from "../../shared/shared-model-manager";
 
 export const kTableTileType = "Table";
 export const kCaseIdName = "__id__";
@@ -315,7 +317,7 @@ export const TableContentModel = TileContentModel
       },
       {name: "sharedModelSetup", fireImmediately: true}));
     },
-    updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
+    updateAfterSharedModelChanges(sharedModel?: SharedModelType, changeType?: SharedModelChangeType) {
       // console.warn("updateAfterSharedModelChanges hasn't been implemented for table content.");
 
       // TODO This was moved from doPostCreate and might need to be rethought.
@@ -338,6 +340,18 @@ export const TableContentModel = TileContentModel
       // if (self.metadata.hasExpressions) {
       //   self.metadata.updateDatasetByExpressions(self.dataSet);
       // }
+
+      if (changeType === "unlink") {
+        const title = self.title;
+        const newDataSet = createDefaultDataSet(title);
+        const newSharedDataSet = newDataSet && SharedDataSet.create(
+          { providerId: self.metadata.id, dataSet: newDataSet }
+        );
+        const sharedModelManager = self.tileEnv?.sharedModelManager;
+        if (sharedModelManager?.isReady) {
+          sharedModelManager?.addTileSharedModel(self, newSharedDataSet);
+        }
+      }
     },
     setColumnWidth(attrId: string, width: number) {
       self.columnWidths.set(attrId, width);

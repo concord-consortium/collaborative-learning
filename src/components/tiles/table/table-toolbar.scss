@@ -2,6 +2,7 @@
 
 .table-toolbar {
   position: absolute;
+  background-color: $workspace-teal-light-9;
   border: $toolbar-border;
   border-radius: 0 0 $toolbar-border-radius $toolbar-border-radius;
   display: flex;
@@ -30,6 +31,14 @@
 
     &:active {
       background-color: $workspace-teal-light-4;
+    }
+
+    &.disabled {
+      opacity: 35%;
+      pointer-events: none;
+    }
+    &.link-tile-button {
+      padding-top: 4px;
     }
   }
 
