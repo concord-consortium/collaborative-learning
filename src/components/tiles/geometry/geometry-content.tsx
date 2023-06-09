@@ -1074,7 +1074,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleTileLinkRequest = (tableId: string) => {
-    this.getContent().addLinkedTable(tableId);
+    this.getContent().addLinkedTile(tableId);
   };
 
   private handleCreateElements = (elts?: JXG.GeometryElement | JXG.GeometryElement[]) => {
