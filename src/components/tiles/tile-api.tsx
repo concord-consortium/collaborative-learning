@@ -12,7 +12,7 @@ export interface ITileApi {
   setSelectionHighlight?: (selectionInfo: string, isHighlighted: boolean) => void;
   isLinked?: () => boolean;
   getLinkIndex?: (index?: number) => number;
-  getLinkedTables?: () => string[] | undefined;
+  getLinkedTiles?: () => string[] | undefined;
   getContentHeight?: () => number | undefined;
   exportContentAsTileJson?: (options?: ITileExportOptions) => string;
   handleDocumentScroll?: (x: number, y: number) => void;

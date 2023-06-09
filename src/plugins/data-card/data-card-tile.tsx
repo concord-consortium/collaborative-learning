@@ -1,6 +1,7 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { useEffect, useState } from "react";
+
 import { ITileProps, extractDragTileType, kDragTiles } from "../../components/tiles/tile-component";
 import { useUIStore } from "../../hooks/use-stores";
 import { addCanonicalCasesToDataSet } from "../../models/data/data-set";
@@ -15,13 +16,14 @@ import { EditFacet } from "./data-card-types";
 import { DataCardSortArea } from "./components/sort-area";
 import { safeJsonParse } from "../../utilities/js-utils";
 import { mergeTwoDataSets } from "../../models/data/data-set-utils";
+import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
+import { useConsumerTileLinking } from "../../hooks/use-consumer-tile-linking";
 
 import "./data-card-tile.scss";
-import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
 
 export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
-  const { model, onRequestUniqueTitle, readOnly, documentContent, tileElt, onSetCanAcceptDrop, onRegisterTileApi,
-            scale, onUnregisterTileApi } = props;
+  const { documentId, model, readOnly, documentContent, tileElt, onSetCanAcceptDrop, onRegisterTileApi,
+            scale, onRequestUniqueTitle, onUnregisterTileApi, onRequestTilesOfType, onRequestLinkableTiles } = props;
 
   const content = model.content as DataCardContentModelType;
   const ui = useUIStore();
@@ -230,6 +232,11 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
     setCurrEditFacet("");
   };
 
+  const hasLinkableRows = content.dataSet.attributes.length > 1;
+  const { isLinkEnabled, getLinkIndex, showLinkTileDialog } = useConsumerTileLinking({
+    documentId, model, hasLinkableRows, onRequestTilesOfType, onRequestLinkableTiles
+  });
+
   return (
     <div className={toolClasses}>
       <DataCardToolbar
@@ -242,6 +249,9 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
         handleDeleteValue={deleteSelectedValue}
         handleDuplicateCard={duplicateCard}
         scale={scale}
+        isLinkEnabled={isLinkEnabled}
+        getLinkIndex={getLinkIndex}
+        showLinkTileDialog={showLinkTileDialog}
       />
       <div
         className="data-card-content"

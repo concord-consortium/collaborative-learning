@@ -227,8 +227,8 @@ export const GeometryContentModel = GeometryBaseContentModel
     get linkedTableIds() {
       return self.linkedDataSets.map(link => link.providerId);
     },
-    isLinkedToTable(tableId: string) {
-      return self.linkedDataSets.some(link => link.providerId === tableId);
+    isLinkedToTile(tileId: string) {
+      return self.linkedDataSets.some(link => link.providerId === tileId);
     }
   }))
   .views(self => ({
@@ -271,22 +271,22 @@ export const GeometryContentModel = GeometryBaseContentModel
         }
       }
     },
-    addLinkedTable(tableId: string) {
+    addLinkedTile(tileId: string) {
       const sharedModelManager = self.tileEnv?.sharedModelManager;
-      if (sharedModelManager?.isReady && !self.isLinkedToTable(tableId)) {
-        const sharedTable = sharedModelManager.findFirstSharedModelByType(SharedDataSet, tableId);
-        sharedTable && sharedModelManager.addTileSharedModel(self, sharedTable);
+      if (sharedModelManager?.isReady && !self.isLinkedToTile(tileId)) {
+        const sharedDataSet = sharedModelManager.findFirstSharedModelByType(SharedDataSet, tileId);
+        sharedDataSet && sharedModelManager.addTileSharedModel(self, sharedDataSet);
         self.forceSharedModelUpdate();
       }
       else {
         console.warn("GeometryContent.addLinkedTable unable to link table");
       }
     },
-    removeLinkedTable(tableId: string) {
+    removeLinkedTile(tileId: string) {
       const sharedModelManager = self.tileEnv?.sharedModelManager;
-      if (sharedModelManager?.isReady && self.isLinkedToTable(tableId)) {
-        const sharedTable = sharedModelManager.findFirstSharedModelByType(SharedDataSet, tableId);
-        sharedTable && sharedModelManager.removeTileSharedModel(self, sharedTable);
+      if (sharedModelManager?.isReady && self.isLinkedToTile(tileId)) {
+        const sharedDataSet = sharedModelManager.findFirstSharedModelByType(SharedDataSet, tileId);
+        sharedDataSet && sharedModelManager.removeTileSharedModel(self, sharedDataSet);
         self.forceSharedModelUpdate();
       }
       else {

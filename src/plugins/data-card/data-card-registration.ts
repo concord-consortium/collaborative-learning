@@ -16,7 +16,8 @@ registerTileContentInfo({
   defaultContent: defaultDataCardContent,
   defaultHeight: kDataCardDefaultHeight,
   updateContentWithNewSharedModelIds: updateDataCardContentWithNewSharedModelIds,
-  isDataProvider: true
+  isDataProvider: true,
+  isDataConsumer: true
 });
 
 registerTileComponentInfo({
