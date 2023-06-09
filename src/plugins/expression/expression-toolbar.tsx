@@ -16,12 +16,12 @@ interface IProps extends IFloatingToolbarProps {
   model: ITileModel;
   mf: React.RefObject<MathfieldElement> | undefined;
   trackedCursorPos: React.MutableRefObject<number>;
-  trackedSelection: React.MutableRefObject<string>;
+  //trackedSelection?: React.MutableRefObject<string>;
 }
 
 export const ExpressionToolbar: React.FC<IProps> = observer((
   { model, documentContent, mf, tileElt, onIsEnabled,
-    trackedCursorPos, trackedSelection, ...others
+    trackedCursorPos, /*trackedSelection,*/ ...others
   }: IProps) => {
     const content = model.content as ExpressionContentModelType;
     const enabled = onIsEnabled();
@@ -56,44 +56,75 @@ export const ExpressionToolbar: React.FC<IProps> = observer((
   };
 
   const addMixedFraction = () => {
-    const selected = trackedSelection.current;
-    const position = trackedCursorPos.current;
-    const initialPlaceholder = "\\placeholder{}";
-    const emptyFrac = "\\frac{\\placeholder{}}{\\placeholder{}}";
     if (!mf) return;
 
-    // case: field is empty of value, insert an empty mixed fraction
-    if (content.latexStr.length === 0) {
-      mf.current?.executeCommand([
-        "insert", initialPlaceholder + emptyFrac, {insertionMode: "replaceAll"}
-      ]);
+    // collect info on state of the mathfield vis=à-vis selection and curspr
+    const exp = content.latexStr;
+    const selStart = mf.current?.selection.ranges[0][0];
+    const selEnd = mf.current?.selection.ranges[0][1];
+    const pos = mf.current?.position;
+
+    let editableStatus: "empty" | "allSelected" | "someSelected"| "cursorInContent" | undefined;
+
+    if (exp.length === 0 || exp === "\\placeholder" || exp === " ") editableStatus = "empty";
+    else if (selStart === 0 && selEnd === exp.length) editableStatus = "allSelected";
+    else if (selStart !== selEnd) editableStatus = "someSelected";
+    else if (selStart === selEnd && selStart === pos) editableStatus = "cursorInContent";
+    else editableStatus = undefined;
+
+    console.log("| ",
+    "\n exp:        ", exp,
+    //"\n expression  ", mf.current?.expression.json,
+    "\n exp.length: ", exp.length,
+    "\n pos:        ", pos,
+    "\n selStart:   ", selStart,
+    "\n selEnd:     ", selEnd,
+    "\n ... editableStatus: ", editableStatus
+    );
+
+    const ph = "\\placeholder{}";
+    const emptyFrac = `\\frac{${ph}}{${ph}}}`;
+
+    /* testing substrings has limited use here, instead we should
+    consider navigating the cursor and selection among groups in the mathfield */
+
+    if (editableStatus === "empty"){
+      mf.current?.executeCommand(
+        ["insert", ph + emptyFrac, {insertionMode: "replaceAll"}]
+      );
     }
 
-    // case: everything selected, put existing value in integer slot
-    else if (selected.length === content.latexStr.length){
-      mf.current?.executeCommand([
-        "insert", selected + emptyFrac, {insertionMode: "replaceAll"}
-      ]);
+    else if (editableStatus === "allSelected"){
+      mf.current?.executeCommand(
+        ["insert", exp + emptyFrac, {insertionMode: "replaceAll"}]
+      );
     }
 
-    // case: no selection
-    else if (content.latexStr.length > 0 && selected.length === 0) {
-      mf.current?.executeCommand([
-        "insert", initialPlaceholder + emptyFrac, {insertionMode: "insertAfter"}
-      ]);
+    else if (editableStatus === "cursorInContent"){
+      mf.current?.executeCommand(
+        ["insert", ph + emptyFrac, {insertionMode: "insertAfter"}]
+      );
     }
 
-    // cases something more complicated...
-    else {
-      console.log("| crazy cases...")
-      // const splicedIn = content.latexStr.replace(selected, `{{${selected}}\\frac}`);
-      // mf.current?.executeCommand([
-      //   "insert", splicedIn, {insertionMode: "replaceAll"}
-      // ]);
-      // console.log("| splicedIn", splicedIn)
+    else if (editableStatus === "someSelected"){
+      if (mf.current?.position && isFinite(mf.current?.position)){
+        mf.current.position = selEnd || 0;
+        // if (mf.current?.position < exp.length){
+        //   mf.current?.executeCommand(
+        //     ["insert", emptyFrac + "+", {insertionMode: "insertAfter"}]
+        //   );
+        // } else {
+        //   mf.current?.executeCommand(
+        //     ["insert", emptyFrac, {insertionMode: "insertAfter"}]
+        //   );
+        // }
+      }
+      mf.current?.executeCommand(
+        ["insert", emptyFrac + "+", {insertionMode: "insertAfter"}]
+      );
     }
 
-    mf && mf.current?.focus();
+    mf.current?.focus();
   };
 
   return documentContent

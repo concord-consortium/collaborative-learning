@@ -31,7 +31,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   const content = model.content as ExpressionContentModelType;
   const mf = useRef<MathfieldElement>(null);
   const trackedCursorPos = useRef<number>(0);
-  const trackedSelection = useRef<string>("");
+  //const trackedSelection = useRef<string>("");
   const ui = useUIStore();
 
   // TODO - maybe all this listening should be in a hook or external function
@@ -41,17 +41,16 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
       mf.current?.keybindings && replaceKeyBinding(mf.current.keybindings, key, "");
     });
     mf.current?.addEventListener("selection-change", (e: any) => {
-      const selection = document.getSelection()?.getRangeAt(0);
-      if (selection && selection.startContainer.childNodes.length === 0) return;
-      const asLatex = selection?.startContainer?.childNodes[0].nodeValue;
-      if (asLatex) trackedSelection.current = asLatex;
-      console.log("| trackedSelection.current.length", trackedSelection.current.length);
+      // const selection = document.getSelection()?.getRangeAt(0);
+      // if (selection && selection.startContainer.childNodes.length === 0) return;
+      // const asLatex = selection?.startContainer?.childNodes[0].nodeValue;
+      // if (asLatex) trackedSelection.current = asLatex;
+      //console.log("| selection-change!", trackedSelection.current);
     });
     // TODO - we want selectionm to be up to date, so was going to update it on click
     // but should look for built in state that knows about selection first
     mf.current?.addEventListener("click", () => {
-      const anySelection = document.getSelection()?.getRangeAt(0);
-      console.log("| anySelection", anySelection);
+
     });
   }, [model.id, ui]);
 
@@ -93,7 +92,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
         scale={scale}
         {...toolbarProps}
         mf={mf}
-        trackedSelection={trackedSelection}
+        //trackedSelection={trackedSelection}
         trackedCursorPos={trackedCursorPos}
       />
       <div className="expression-title-area">
