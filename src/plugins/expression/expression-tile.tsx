@@ -50,7 +50,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     // TODO - we want selectionm to be up to date, so was going to update it on click
     // but should look for built in state that knows about selection first
     mf.current?.addEventListener("click", () => {
-
+      console.log("| click!", mf.current?.selection.ranges[0][0])
     });
   }, [model.id, ui]);
 
