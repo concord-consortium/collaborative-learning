@@ -28,6 +28,6 @@ export const DeleteExpressionButton = (props: IconButtonProps) => {
 
 const ExpressionButton: React.FC<IconButtonProps> = ({ children, className, ...others }) => {
   return (
-    <div className={`expression-button ${className}`} {...others}>{children}</div>
+    <button className={`expression-button ${className}`} {...others}>{children}</button>
   );
 };

@@ -1,8 +1,6 @@
 import { useCallback } from "react";
 import { DataGridHandle } from "react-data-grid";
-import { useCurrent } from "../../../hooks/use-current";
 import { ICase, IDataSet } from "../../../models/data/data-set";
-import { TableContentModelType } from "../../../models/tiles/table/table-content";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { uniqueId } from "../../../utilities/js-utils";
 import { formatValue } from "./cell-formatter";
@@ -35,8 +33,6 @@ export const useDataSet = ({
   changeHandlers, columns, onColumnResize
 }: IUseDataSet) => {
   const { onAddRows, onUpdateRow } = changeHandlers;
-  const modelRef = useCurrent(model);
-  const getContent = useCallback(() => modelRef.current.content as TableContentModelType, [modelRef]);
   const onSelectedCellChange = (position: TPosition) => {
     const forward = (selectedCell.current.rowIdx < position.rowIdx) ||
                     ((selectedCell.current.rowIdx === position.rowIdx) &&
@@ -81,7 +77,7 @@ export const useDataSet = ({
     }
   };
 
-  const hasLinkableRows = getContent().hasLinkableCases(dataSet);
+  const hasLinkableRows = dataSet.attributes.length > 1;
 
   const getUpdatedRowAndColumn = (_rows?: TRow[], _columns?: TColumn[]) => {
     const rs = _rows ?? rows;

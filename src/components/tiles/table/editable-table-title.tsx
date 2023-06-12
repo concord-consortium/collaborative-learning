@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
 import { verifyAlive } from "../../../utilities/mst-utils";
 import { HeaderCellInput } from "./header-cell-input";
-import { LinkTileButton } from "./link-tile-button";
 
 interface IProps {
   content: TableContentModelType;
@@ -65,9 +64,6 @@ export const EditableTableTitle: React.FC<IProps> = observer(function EditableTa
         ? <HeaderCellInput style={style} value={editingTitle || ""}
             onKeyDown={handleKeyDown} onChange={setEditingTitle} onClose={handleClose} />
         : title}
-      {showLinkButton && !isEditing &&
-        <LinkTileButton isEnabled={!readOnly && isLinkEnabled} getLinkIndex={getLinkIndex}
-                            onClick={onLinkGeometryClick} />}
     </div>
   );
 });

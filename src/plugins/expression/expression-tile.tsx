@@ -26,31 +26,29 @@ declare global {
 const undoKeys = ["cmd+z", "[Undo]", "ctrl+z"];
 
 export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) => {
-  const { onRegisterTileApi, onUnregisterTileApi } = props;
-  const content = props.model.content as ExpressionContentModelType;
+  const { onRegisterTileApi, onRequestUniqueTitle, onUnregisterTileApi,
+    model, readOnly, documentContent, tileElt, scale } = props;
+  const content = model.content as ExpressionContentModelType;
   const mf = useRef<MathfieldElement>(null);
   const trackedCursorPos = useRef<number>(0);
   const ui = useUIStore();
 
-  if(mf.current && ui) {
-    mf.current.addEventListener("focus", () => ui.setSelectedTileId(props.model.id));
-  }
-
-  if (mf.current?.keybindings){
+  useEffect(() => {
+    mf.current?.addEventListener("focus", () => ui.setSelectedTileId(model.id));
     undoKeys.forEach((key: string) => {
-      mf.current && replaceKeyBinding(mf.current.keybindings, key, "");
+      mf.current?.keybindings && replaceKeyBinding(mf.current.keybindings, key, "");
     });
-  }
+  }, [model.id, ui]);
 
   useEffect(() => {
-    // when we change model via undo button, we need to update mathfield
+    // when we change model programatically, we need to update mathfield
     const disposer = onSnapshot((content as any), () => {
       if (mf.current?.getValue() === content.latexStr) return;
-      mf.current?.setValue(content.latexStr, {suppressChangeNotifications: true});
-      if (mf.current?.position) mf.current.position = trackedCursorPos.current - 1;
+      mf.current?.setValue(content.latexStr, {silenceNotifications: true});
+      if (!readOnly && mf.current) mf.current.position = trackedCursorPos.current - 1;
     });
     return () => disposer();
-  }, [content]);
+  }, [content, readOnly]);
 
   const handleChange = (e: FormEvent<MathfieldElementAttributes>) => {
     trackedCursorPos.current =  mf.current?.position || 0;
@@ -58,36 +56,38 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   };
 
   const toolbarProps = useToolbarTileApi({
-    id: props.model.id,
-    enabled: !props.readOnly,
+    id: model.id,
+    enabled: !readOnly,
     onRegisterTileApi,
     onUnregisterTileApi
   });
 
+  const mathfieldAttributes = {
+    ref: mf,
+    value: content.latexStr,
+    onInput: !readOnly ? handleChange : undefined,
+    readOnly: readOnly ? "true" : undefined,
+  };
+
   return (
     <div className="expression-tool">
       <ExpressionToolbar
-        model={props.model}
-        documentContent={props.documentContent}
-        tileElt={props.tileElt}
+        model={model}
+        documentContent={documentContent}
+        tileElt={tileElt}
+        scale={scale}
         {...toolbarProps}
         mf={mf}
       />
       <div className="expression-title-area">
         <CustomEditableTileTitle
-          model={props.model}
-          onRequestUniqueTitle={props.onRequestUniqueTitle}
-          readOnly={props.readOnly}
+          model={model}
+          onRequestUniqueTitle={onRequestUniqueTitle}
+          readOnly={readOnly}
         />
       </div>
       <div className="expression-math-area">
-        <math-field
-          ref={mf}
-          value={content.latexStr}
-          onInput={handleChange}
-          // MathLive only interprets undefined as false
-          readOnly={props.readOnly === true ? true : undefined}
-        />
+        <math-field {...mathfieldAttributes} />
       </div>
     </div>
   );

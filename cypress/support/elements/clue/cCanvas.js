@@ -3,7 +3,6 @@ import ImageToolTile from './ImageToolTile';
 import DrawToolTile from './DrawToolTile';
 import TextToolTile from './TextToolTile';
 import TableToolTile from './TableToolTile';
-import DiagramToolTile from './DiagramToolTile';
 import DataflowToolTile from './DataflowToolTile';
 import Canvas from '../common/Canvas';
 import Dialog from '../common/Dialog';
@@ -13,7 +12,6 @@ let graphToolTile = new GraphToolTile,
     drawToolTile = new DrawToolTile,
     textToolTile = new TextToolTile,
     tableToolTile = new TableToolTile,
-    diagramToolTile = new DiagramToolTile,
     dataflowToolTile = new DataflowToolTile,
     canvas = new Canvas,
     dialog = new Dialog;
