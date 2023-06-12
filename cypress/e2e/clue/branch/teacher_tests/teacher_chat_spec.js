@@ -1,12 +1,10 @@
 import TeacherDashboard from "../../../../support/elements/clue/TeacherDashboard";
 import ClueCanvas from "../../../../support/elements/clue/cCanvas";
 import ChatPanel from "../../../../support/elements/clue/ChatPanel";
-import ResourcesPanel from "../../../../support/elements/clue/ResourcesPanel";
 
 let dashboard = new TeacherDashboard();
 let clueCanvas = new ClueCanvas;
 let chatPanel = new ChatPanel;
-let resourcesPanel = new ResourcesPanel;
 
 let selectedChatBackground = 'rgb(215, 255, 204)';
 let expandedChatBackground = 'rgb(193, 243, 179)';

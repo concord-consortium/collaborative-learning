@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useCallback, useRef, useEffect } from "react";
 import { humidAnimationPhases } from "./demo-output-control-assets";
 import { NodeEditor } from "rete";
 interface IProps {
@@ -31,33 +31,33 @@ export const HumidiferAnimation: React.FC<IProps> = ({nodeValue, nodeId, editor}
     }
   });
 
-  const advanceFrame = (frames: string[]) => {
+  const setImageSrc = useCallback((src: string) => {
+    const imgs = document.querySelectorAll(`.mist-${nodeId}`) as any;
+    imgs.forEach((img: any) => img.src = src);
+  }, [nodeId]);
+
+  const advanceFrame = useCallback((frames: string[]) => {
     const currentFrame = frames[0];
     const nextFrame = frames[1];
     frames.shift();
     frames.push(currentFrame);
     setImageSrc(nextFrame);
-  };
+  }, [setImageSrc]);
 
-  const setImageSrc = (src: string) => {
-    const imgs = document.querySelectorAll(`.mist-${nodeId}`) as any;
-    imgs.forEach((img: any) => img.src = src);
-  };
-
-  const startLooping = () => {
+  const startLooping = useCallback(() => {
     if (!nodeHasAnimation(nodeId)){
       const interval = setInterval(() => {
         advanceFrame(humidAnimationPhases.stayOn.frames);
       }, 100);
       registerAnimation(nodeId, interval);
     }
-  };
+  }, [advanceFrame, nodeId]);
 
-  const stopLooping = () => {
+  const stopLooping = useCallback(() => {
     if (nodeHasAnimation(nodeId)){
       removeAnimation(nodeId);
     }
-  };
+  }, [nodeId]);
 
   useEffect(() => {
     const justLoaded = priorValue.current === undefined;
@@ -94,7 +94,7 @@ export const HumidiferAnimation: React.FC<IProps> = ({nodeValue, nodeId, editor}
     }
 
     priorValue.current = nodeValue;
-  },[nodeValue]);
+  },[nodeValue, setImageSrc, startLooping, stopLooping]);
 
   return (
     <img className={`mist-${nodeId} mist`} src={humidAnimationPhases.stayOff.frames[0]} />

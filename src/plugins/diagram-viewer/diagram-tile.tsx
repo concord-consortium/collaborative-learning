@@ -125,7 +125,7 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
     }
   });
 
-  const preventKeyboardDelete = dialogOpen || !isTileSelected;
+  const preventKeyboardDelete = dialogOpen || !isTileSelected || readOnly;
   return (
     <div className="diagram-tool">
       <DiagramToolbar
@@ -138,7 +138,7 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
         handleInsertVariableClick={() => showDialog(showInsertVariableDialog)}
         handleNewVariableClick={() => showDialog(showNewVariableDialog)}
         hideNavigator={!!content.hideNavigator}
-        interactionLocked={interactionLocked}
+        interactionLocked={interactionLocked || readOnly || false}
         tileElt={tileElt}
         tileId={model.id}
         toggleInteractionLocked={toggleInteractionLocked}
@@ -152,7 +152,7 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
           hideControls={true}
           hideNavigator={!!content.hideNavigator}
           hideNewVariableButton={true}
-          interactionLocked={interactionLocked}
+          interactionLocked={interactionLocked || readOnly}
           preventKeyboardDelete={preventKeyboardDelete}
           setDiagramHelper={setDiagramHelper}
         />
