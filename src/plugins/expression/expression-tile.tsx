@@ -4,6 +4,7 @@ import { onSnapshot } from "mobx-state-tree";
 import "mathlive"; // separate static import of library for initialization to run
 // eslint-disable-next-line no-duplicate-imports
 import type { MathfieldElementAttributes, MathfieldElement } from "mathlive";
+import { ComputeEngine, version } from "@concord-consortium/compute-engine";
 import { ITileProps } from "../../components/tiles/tile-component";
 import { ExpressionContentModelType } from "./expression-content";
 import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
@@ -22,6 +23,9 @@ declare global {
     }
   }
 }
+
+console.log("ComputeEngine version", version);
+const computeEngine = new ComputeEngine();
 
 const undoKeys = ["cmd+z", "[Undo]", "ctrl+z"];
 
