@@ -154,6 +154,7 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
           hideNewVariableButton={true}
           interactionLocked={interactionLocked || readOnly}
           preventKeyboardDelete={preventKeyboardDelete}
+          readOnly={readOnly}
           setDiagramHelper={setDiagramHelper}
         />
       </div>

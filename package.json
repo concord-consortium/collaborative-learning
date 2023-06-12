@@ -201,7 +201,7 @@
   },
   "dependencies": {
     "@chakra-ui/react": "^1.8.9",
-    "@concord-consortium/diagram-view": "^0.0.47",
+    "@concord-consortium/diagram-view": "^0.0.48",
     "@concord-consortium/mobx-state-tree": "^5.1.8-cc.1",
     "@concord-consortium/react-components": "^0.7.1",
     "@concord-consortium/react-modal-hook": "^3.0.0-cc.1",
