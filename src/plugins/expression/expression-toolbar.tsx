@@ -70,129 +70,131 @@ export const ExpressionToolbar: React.FC<IProps> = observer((
 
     let editableStatus: "empty" | "allSelected" | "someSelected"| "cursorInContent" | undefined;
 
+    // this needs to be reworked, but the logic now works
     if (exp.length === 0 || exp === "\\placeholder" || exp === " ") editableStatus = "empty";
     else if (selStart === 0 && selEnd === exp.length) editableStatus = "allSelected";
+    else if (selStart === 0 && selEnd === pos && pos !== selStart) editableStatus = "allSelected";
     else if (selStart !== selEnd) editableStatus = "someSelected";
     else if (selStart === selEnd && selStart === pos) editableStatus = "cursorInContent";
     else editableStatus = undefined;
 
+    // locale is not always correct
     const locale = pos === 0 ? "beginning" : (pos === exp.length || (pos === selEnd && pos === selStart) ? "end" : "middle");
-    const parsedJson = ce.parse(exp).json;
+    const parsedJson = JSON.stringify(ce.parse(exp).json);
     const parsedLatex = ce.parse(exp).latex;
     const isAllNumerals = /^\d+$/.test(exp);
 
     const ph = "\\placeholder{}";
     const emptyFrac = `\\frac{${ph}}{${ph}}}`;
 
-    console.log("| handle click mixed fraction button |",
-    "\n CONTENT:",
-    "\n   initial exp:    ", exp,
-    "\n   parsedJson:     ", parsedJson,
-    "\n   parsedLatex:    ", parsedLatex,
-    "\n SELECTION: ",
-    "\n   selStart:       ", selStart,
-    "\n   selEnd:         ", selEnd,
-    "\n   pos:            ", pos,
-    "\n DERIVED: ",
-    "\n   isAllNumerals:  ", isAllNumerals,
-    "\n   editableStatus: ", editableStatus,
-    "\n   cLocale:        ", locale
-    )
 
-    if (editableStatus === "empty"){
+
+    /* viable path
+
+    */
+
+    if (editableStatus === "empty" || editableStatus === "allSelected"){
       mf.current?.executeCommand(
         ["insert", ph + emptyFrac, {insertionMode: "replaceAll"}]
       );
-    }
-
-    else if (editableStatus === "allSelected"){
+    } else if (editableStatus === "cursorInContent") {
       mf.current?.executeCommand(
-        ["insert", exp + emptyFrac, {insertionMode: "replaceAll"}]
+        ["insert", `#@${emptyFrac}`, {insertionMode: "insertAfter"}]
       );
+    } else if (editableStatus === "someSelected") {
+      const currentSelection = mf.current?.selection;
+      console.log("| handle someSelected |",
+      "\n CONTENT:",
+      "\n   initial exp:      ", exp,
+      "\n   parsedJson:       ", parsedJson,
+      "\n   parsedLatex:      ", parsedLatex,
+      "\n SELECTION: ",
+      "\n   selStart:         ", selStart,
+      "\n   selEnd:           ", selEnd,
+      "\n   pos:              ", pos,
+      "\n   currentSelection: ", currentSelection,
+      "\n DERIVED: ",
+      "\n   isAllNumerals:    ", isAllNumerals,
+      "\n   editableStatus:   ", editableStatus,
+      "\n   cLocale:          ", locale
+      )
     }
 
-    // 1 DOES SOME SELECTED ALWAYS WORK, PROBABLY NOT
-    else if (editableStatus === "someSelected"){
+    // const token = `#@${emptyFrac}`
+    // mf.current?.executeCommand(
+    //   ["insert", token, {insertionMode: "insertAfter"}]
+    // );
 
-        if (isAllNumerals){
-          mf.current?.executeCommand(
-            ["insert", "+" + ph + emptyFrac + "+", {insertionMode: "insertAfter"}]
-          );
-        }
+    // mf.current?.executeCommand(
+    //   ["insert", token, {insertionMode: "insertAfter"}]
+    // );
+    // if (editableStatus === "empty"){
+    //   mf.current?.executeCommand(
+    //     ["insert", ph + emptyFrac, {insertionMode: "replaceAll"}]
+    //   );
+    // }
 
-        else {
-          mf.current?.executeCommand(
-            ["insert", "+" + ph + emptyFrac + "+", {insertionMode: "replaceSelected"}]
-          );
-        }
-      // if (mf.current?.position && isFinite(mf.current?.position)){
-      //   mf.current.position = selEnd || 0;
-      //   if (mf.current?.position < exp.length){
-      //     mf.current?.executeCommand(
-      //       ["insert", emptyFrac + "+", {insertionMode: "insertAfter"}]
-      //     );
-      //   } else {
-      //     mf.current?.executeCommand(
-      //       ["insert", emptyFrac, {insertionMode: "insertAfter"}]
-      //     );
-      //   }
-      // }
-      // mf.current?.executeCommand(
-      //   ["insert", emptyFrac + "+", {insertionMode: "insertAfter"}]
-      // );
-    }
+    // else if (editableStatus === "allSelected"){
+    //   mf.current?.executeCommand(
+    //     ["insert", exp + emptyFrac, {insertionMode: "replaceAll"}]
+    //   );
+    // }
 
-    // 2 DOES CURSOR IN CONTENT ALWAYS WORK, PROBABLY NOT
-    else if (editableStatus === "cursorInContent"){
-      if(locale === "end"){
-        mf.current?.executeCommand(
-          ["insert", "+" + ph + emptyFrac, {insertionMode: "insertAfter"}]
-        );
-      }
+    // // 1 DOES SOME SELECTED ALWAYS WORK, PROBABLY NOT
+    // else if (editableStatus === "someSelected"){
 
-      else if(locale === "beginning"){
-        mf.current?.executeCommand(
-          ["insert", ph + emptyFrac + "+", {insertionMode: "insertBefore"}]
-        );
-      }
+    //     if (isAllNumerals){
+    //       mf.current?.executeCommand(
+    //         ["insert", "+" + ph + emptyFrac + "+", {insertionMode: "insertAfter"}]
+    //       );
+    //     }
 
-      else {
+    //     else {
+    //       mf.current?.executeCommand(
+    //         ["insert", "+" + ph + emptyFrac + "+", {insertionMode: "replaceSelected"}]
+    //       );
+    //     }
 
-        if (!pos) return;
-        // const charBeforeCursor = exp[pos - 1];
-        // const charAfterCursor = exp[pos];
-        // const isNumeralBeforeCursor = /^\d+$/.test(charBeforeCursor);
-        // const isNumeralAfterCursor = /^\d+$/.test(charAfterCursor);
-        // const isNumeralAfterCursor = /^\d+$/.test(exp.slice(pos));
-        //const safeToInsert = isNumeralBeforeCursor && isNumeralAfterCursor;
-        if (isAllNumerals){
-          mf.current?.executeCommand(
-            ["insert", "+" + ph + emptyFrac + "+", {insertionMode: "insertAfter"}]
-          );
-        }
+    // }
 
-        else {
+    // // 2 DOES CURSOR IN CONTENT ALWAYS WORK, PROBABLY NOT
+    // else if (editableStatus === "cursorInContent"){
+    //   if(locale === "end"){
+    //     mf.current?.executeCommand(
+    //       ["insert", "+" + ph + emptyFrac, {insertionMode: "insertAfter"}]
+    //     );
+    //   }
 
-          // mf.current?.executeCommand(
-          //   ["moveToPreviousWord", {extendSelection: true}]
-          // );
-          // mf.current?.executeCommand(
-          //   ["insert", "+" + ph + emptyFrac, {insertionMode: "insertAfter"}]
-          // );
-        }
-      }
-    }
+    //   else if(locale === "beginning"){
+    //     mf.current?.executeCommand(
+    //       ["insert", ph + emptyFrac + "+", {insertionMode: "insertBefore"}]
+    //     );
+    //   }
+
+    //   else {
+
+    //     if (!pos) return;
+    //     if (isAllNumerals){
+    //       mf.current?.executeCommand(
+    //         ["insert", "+" + ph + emptyFrac + "+", {insertionMode: "insertAfter"}]
+    //       );
+    //     }
+
+    //     else {
+
+    //       // mf.current?.executeCommand(
+    //       //   ["moveToPreviousWord", {extendSelection: true}]
+    //       // );
+    //       // mf.current?.executeCommand(
+    //       //   ["insert", "+" + ph + emptyFrac, {insertionMode: "insertAfter"}]
+    //       // );
+    //     }
+    //   }
+    // }
 
     mf.current?.focus();
   };
 
-  /*
-  an addition to this approach could be to check the math json/evaluation if possible for errors
-  and insert a placeholder if there is an error
-  however that would break the plan, so put it in a separate function
-  in fact all this insertion should be abstracted to a function so it can happen with other buttons
-
-  */
   return documentContent
     ? ReactDOM.createPortal(
       <div className={toolbarClasses} style={location}>
