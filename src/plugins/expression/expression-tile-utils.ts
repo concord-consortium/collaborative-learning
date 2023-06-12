@@ -7,49 +7,63 @@ export function replaceKeyBinding(bindings: any[], keyPress: string, command: st
   }
 }
 
-function getEditableStatus(mf: MathfieldElement) {
-  let editableStatus: "empty" | "allSelected" | "someSelected"| "cursorInContent" | undefined;
-
+function getEditableStatus(mf: MathfieldElement): string | undefined {
   const exp = mf.value;
   const selStart = mf.selection.ranges[0][0];
   const selEnd = mf.selection.ranges[0][1];
   const pos = mf.position;
 
-  const locale = pos === 0 ? "beginning"
-    : (pos === exp.length || (pos === selEnd && pos === selStart) ? "end"
-    : "middle");
+  console.log("| getEditableStatus |",
+    "\n selStart: ", selStart,
+    "\n selEnd: ", selEnd,
+    "\n pos: ", pos,
+    "\n exp.length: ", exp.length,
+  );
 
-  if (exp.length === 0 || exp === "\\placeholder" || exp === " ") editableStatus = "empty";
-  else if (selStart === 0 && selEnd === exp.length) editableStatus = "allSelected";
-  else if (selStart === 0 && selEnd === pos && pos !== selStart) editableStatus = "allSelected";
-  else if (selStart !== selEnd) editableStatus = "someSelected";
-  else if (selStart === selEnd && selStart === pos) editableStatus = "cursorInContent";
-  else editableStatus = undefined;
-
-  return editableStatus;
+  if (exp.length === 0 || exp === "\\placeholder" || exp === " ") return "empty";
+  if (selStart === 0 && selEnd === pos && pos !== 0 ) return "all";
+  if (selStart !== selEnd)  return "some";
+  if (selStart === selEnd && selStart === pos)  return "cursor";
+  return undefined;
 }
 
 export function getMixedFractionCommandArray(mf: MathfieldElement ) {
   const editableStatus = getEditableStatus(mf);
+  console.log("|editableStatus|", editableStatus)
   const ph = "\\placeholder{}";
   const emptyFrac = `\\frac{${ph}}{${ph}}}`;
 
-  const replaceAll = editableStatus === "empty" || editableStatus === "allSelected";
+  switch (editableStatus) {
+    case "empty":
+      return ["insert", `#@${emptyFrac}`, { insertionMode: "replaceAll" }];
 
-  if (replaceAll){
-    return ["insert", ph + emptyFrac, {insertionMode: "replaceAll"}]
+    case "all":
+      return ["insert", `#@${emptyFrac}`, { insertionMode: "replaceAll" }];
+
+    case "cursor":
+      return ["insert", `#@${emptyFrac}`, { insertionMode: "insertAfter" }];
+
+    case "some":
+      // TODO - you implemented this in an earlier version, reimplement it here
+      console.log("| selection ", mf.selection.ranges[0][0], mf.selection.ranges[0][1])
+      //return ["insert", `#@${emptyFrac}`, { insertionMode: "insertBefore" }];
+
+    default:
+      return ["insert", `#@${emptyFrac}`, { insertionMode: "insertAfter" }];
   }
+}
 
-  else if (editableStatus === "cursorInContent") {
-    return ["insert", `#@${emptyFrac}`, {insertionMode: "insertAfter"}]
-  }
+/**
+ *
+ * [ X ] empty
+ * [ X ] all
+ * [  ] someSelected
+ * [ x ] cursorInContent
+ */
 
-  else if (editableStatus === "someSelected") {
-    return ["insert", `#@${emptyFrac}`, {insertionMode: "insertAfter"}]
-  }
-
-  else {
-    return ["insert", `#@${emptyFrac}`, {insertionMode: "insertAfter"}]
-  }
-
+export function getDivisionCommandArray(mf: MathfieldElement){
+  const editableStatus = getEditableStatus(mf);
+  const ph = "\\placeholder{}";
+  const divSign = "\\div";
+  return ["insert", `#@${ph}${divSign}${ph}`, {insertionMode: "replaceAll"}]
 }

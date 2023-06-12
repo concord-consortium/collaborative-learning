@@ -6,7 +6,7 @@ import {
   IFloatingToolbarProps, useFloatingToolbarLocation
 } from "../../components/tiles/hooks/use-floating-toolbar-location";
 import { ExpressionContentModelType } from "./expression-content";
-import { getMixedFractionCommandArray } from "./expression-tile-utils";
+import { getMixedFractionCommandArray, getDivisionCommandArray } from "./expression-tile-utils";
 import { ITileModel } from "../../models/tiles/tile-model";
 
 import "./expression-toolbar.scss";
@@ -62,12 +62,20 @@ export const ExpressionToolbar: React.FC<IProps> = observer((
     mf.current?.focus();
   };
 
+  const addDivisionSymbol = () => {
+    if (!(mf && mf.current)) return;
+    const c = getDivisionCommandArray(mf.current)
+    mf.current.executeCommand(c as any);
+    mf.current?.focus();
+  };
+
   return documentContent
     ? ReactDOM.createPortal(
       <div className={toolbarClasses} style={location}>
         <div className="toolbar-content">
           <DeleteExpressionButton onClick={deleteExpression} className={deleteButtonClasses} />
           <MixedFractionButton onClick={addMixedFraction} className={mixedFractionButtonClasses} />
+          <button onClick={addDivisionSymbol}>÷</button>
         </div>
       </div>, documentContent)
   : null;
