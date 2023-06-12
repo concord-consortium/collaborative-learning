@@ -75,6 +75,22 @@ export const ExpressionToolbar: React.FC<IProps> = observer((
     else editableStatus = undefined;
 
 
+
+      const replacedLatex = (latex: string) => {
+        const newLatex = latex.replace("blacksquare", "placeholder");
+        const errorFreeLatex = newLatex.replace("\\error", "");
+        return errorFreeLatex;
+      };
+
+      console.log("| clicked mixed fraction button |",
+      "\n initial exp:        ", exp,
+      "\n parsedLatex:  ",    ce.parse(exp).latex,
+      "\n replacedLatex:  ",  replacedLatex(ce.parse(exp).latex),
+      );
+
+      mf.current?.executeCommand(
+        ["insert", replacedLatex(ce.parse(exp).latex), {insertionMode: "replaceAll"}]
+      );
     // console.log("| clicked mixed fraction button |",
     // // "\n exp:        ", exp,
     // // "\n exp.length: ", exp.length,
@@ -84,20 +100,20 @@ export const ExpressionToolbar: React.FC<IProps> = observer((
     // "\n ... editableStatus: ", editableStatus
     // );
 
-    const ph = "\\placeholder{}";
-    const emptyFrac = `\\frac{${ph}}{${ph}}}`;
+    // const ph = "\\placeholder{}";
+    // const emptyFrac = `\\frac{${ph}}{${ph}}}`;
 
-    if (editableStatus === "empty"){
-      mf.current?.executeCommand(
-        ["insert", ph + emptyFrac, {insertionMode: "replaceAll"}]
-      );
-    }
+    // if (editableStatus === "empty"){
+    //   mf.current?.executeCommand(
+    //     ["insert", ph + emptyFrac, {insertionMode: "replaceAll"}]
+    //   );
+    // }
 
-    else if (editableStatus === "allSelected"){
-      mf.current?.executeCommand(
-        ["insert", exp + emptyFrac, {insertionMode: "replaceAll"}]
-      );
-    }
+    // else if (editableStatus === "allSelected"){
+    //   mf.current?.executeCommand(
+    //     ["insert", exp + emptyFrac, {insertionMode: "replaceAll"}]
+    //   );
+    // }
 
     /**
      * cases
@@ -105,45 +121,45 @@ export const ExpressionToolbar: React.FC<IProps> = observer((
      *  2. cursor at end of content: __
      *  3. cursor at beginning of content: __
      */
-    else if (editableStatus === "cursorInContent"){
-      const locale = pos === 0 ? "beginning" : (pos === exp.length ? "end" : "middle");
-      const parsed = ce.parse(exp);
-      console.log("| clicked mixed fraction button |",
-        "\n initial exp:        ", exp,
-        "\n exp.length: ", exp.length,
-        "\n ... editableStatus: ", editableStatus,
-        "\n pos:          ", pos,
-        "\n selStart:     ", selStart,
-        "\n selEnd:       ", selEnd,
-        "\n cursorlocale: ", locale,
-        "\n parsedLatex:  ", parsed.latex,
-      );
+    // else if (editableStatus === "cursorInContent"){
+    //   const locale = pos === 0 ? "beginning" : (pos === exp.length ? "end" : "middle");
+    //   const parsed = ce.parse(exp);
+    //   console.log("| clicked mixed fraction button |",
+    //     "\n initial exp:        ", exp,
+    //     "\n exp.length: ", exp.length,
+    //     "\n ... editableStatus: ", editableStatus,
+    //     "\n pos:          ", pos,
+    //     "\n selStart:     ", selStart,
+    //     "\n selEnd:       ", selEnd,
+    //     "\n cursorlocale: ", locale,
+    //     "\n parsedLatex:  ", parsed.latex,
+    //   );
 
 
-      // works if cursor really in the middle of the content
-      // mf.current?.executeCommand(
-      //   ["insert", "+" + ph + emptyFrac + "+", {insertionMode: "insertAfter"}]
-      // );
-      //console.log("| resulting exp |", mf.current?.getValue());
-    }
+    //   // works if cursor really in the middle of the content
+    //   // mf.current?.executeCommand(
+    //   //   ["insert", "+" + ph + emptyFrac + "+", {insertionMode: "insertAfter"}]
+    //   // );
+    //   //console.log("| resulting exp |", mf.current?.getValue());
+    // }
 
-    else if (editableStatus === "someSelected"){
-      if (mf.current?.position && isFinite(mf.current?.position)){
-        mf.current.position = selEnd || 0;
-        // if (mf.current?.position < exp.length){
-        //   mf.current?.executeCommand(
-        //     ["insert", emptyFrac + "+", {insertionMode: "insertAfter"}]
-        //   );
-        // } else {
-        //   mf.current?.executeCommand(
-        //     ["insert", emptyFrac, {insertionMode: "insertAfter"}]
-        //   );
-        // }
-      }
-      mf.current?.executeCommand(
-        ["insert", emptyFrac + "+", {insertionMode: "insertAfter"}]
-      );
-    }
+    // else if (editableStatus === "someSelected"){
+    //   if (mf.current?.position && isFinite(mf.current?.position)){
+    //     mf.current.position = selEnd || 0;
+    //     // if (mf.current?.position < exp.length){
+    //     //   mf.current?.executeCommand(
+    //     //     ["insert", emptyFrac + "+", {insertionMode: "insertAfter"}]
+    //     //   );
+    //     // } else {
+    //     //   mf.current?.executeCommand(
+    //     //     ["insert", emptyFrac, {insertionMode: "insertAfter"}]
+    //     //   );
+    //     // }
+    //   }
+    //   mf.current?.executeCommand(
+    //     ["insert", emptyFrac + "+", {insertionMode: "insertAfter"}]
+    //   );
+    // }
 
     mf.current?.focus();
   };
