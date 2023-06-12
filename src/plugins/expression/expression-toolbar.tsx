@@ -20,6 +20,8 @@ interface IProps extends IFloatingToolbarProps {
 }
 
 const ce = new ComputeEngine();
+// find the code using the "power" button
+
 
 export const ExpressionToolbar: React.FC<IProps> = observer((
   { model, documentContent, mf, tileElt, onIsEnabled,
@@ -82,7 +84,7 @@ export const ExpressionToolbar: React.FC<IProps> = observer((
     const ph = "\\placeholder{}";
     const emptyFrac = `\\frac{${ph}}{${ph}}}`;
 
-    console.log("| handle cursorInMiddle - not all numerals |",
+    console.log("| handle click mixed fraction button |",
     "\n CONTENT:",
     "\n   initial exp:    ", exp,
     "\n   parsedJson:     ", parsedJson,
@@ -180,6 +182,7 @@ export const ExpressionToolbar: React.FC<IProps> = observer((
         }
       }
     }
+
     mf.current?.focus();
   };
 
