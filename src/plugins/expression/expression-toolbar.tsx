@@ -74,93 +74,112 @@ export const ExpressionToolbar: React.FC<IProps> = observer((
     else if (selStart === selEnd && selStart === pos) editableStatus = "cursorInContent";
     else editableStatus = undefined;
 
+    const locale = pos === 0 ? "beginning" : (pos === exp.length || (pos === selEnd && pos === selStart) ? "end" : "middle");
+    const parsedJson = ce.parse(exp).json;
+    const parsedLatex = ce.parse(exp).latex;
+    const isAllNumerals = /^\d+$/.test(exp);
 
+    const ph = "\\placeholder{}";
+    const emptyFrac = `\\frac{${ph}}{${ph}}}`;
 
-      const replacedLatex = (latex: string) => {
-        const newLatex = latex.replace("blacksquare", "placeholder");
-        const errorFreeLatex = newLatex.replace("\\error", "");
-        return errorFreeLatex;
-      };
+    console.log("| handle cursorInMiddle - not all numerals |",
+    "\n CONTENT:",
+    "\n   initial exp:    ", exp,
+    "\n   parsedJson:     ", parsedJson,
+    "\n   parsedLatex:    ", parsedLatex,
+    "\n SELECTION: ",
+    "\n   selStart:       ", selStart,
+    "\n   selEnd:         ", selEnd,
+    "\n   pos:            ", pos,
+    "\n DERIVED: ",
+    "\n   isAllNumerals:  ", isAllNumerals,
+    "\n   editableStatus: ", editableStatus,
+    "\n   cLocale:        ", locale
+    )
 
-      console.log("| clicked mixed fraction button |",
-      "\n initial exp:        ", exp,
-      "\n parsedLatex:  ",    ce.parse(exp).latex,
-      "\n replacedLatex:  ",  replacedLatex(ce.parse(exp).latex),
-      );
-
+    if (editableStatus === "empty"){
       mf.current?.executeCommand(
-        ["insert", replacedLatex(ce.parse(exp).latex), {insertionMode: "replaceAll"}]
+        ["insert", ph + emptyFrac, {insertionMode: "replaceAll"}]
       );
-    // console.log("| clicked mixed fraction button |",
-    // // "\n exp:        ", exp,
-    // // "\n exp.length: ", exp.length,
-    // "\n pos:        ", pos,
-    // "\n selStart:   ", selStart,
-    // "\n selEnd:     ", selEnd,
-    // "\n ... editableStatus: ", editableStatus
-    // );
+    }
 
-    // const ph = "\\placeholder{}";
-    // const emptyFrac = `\\frac{${ph}}{${ph}}}`;
+    else if (editableStatus === "allSelected"){
+      mf.current?.executeCommand(
+        ["insert", exp + emptyFrac, {insertionMode: "replaceAll"}]
+      );
+    }
 
-    // if (editableStatus === "empty"){
-    //   mf.current?.executeCommand(
-    //     ["insert", ph + emptyFrac, {insertionMode: "replaceAll"}]
-    //   );
-    // }
+    // 1 DOES SOME SELECTED ALWAYS WORK, PROBABLY NOT
+    else if (editableStatus === "someSelected"){
 
-    // else if (editableStatus === "allSelected"){
-    //   mf.current?.executeCommand(
-    //     ["insert", exp + emptyFrac, {insertionMode: "replaceAll"}]
-    //   );
-    // }
+        if (isAllNumerals){
+          mf.current?.executeCommand(
+            ["insert", "+" + ph + emptyFrac + "+", {insertionMode: "insertAfter"}]
+          );
+        }
 
-    /**
-     * cases
-     *  1. cursor in middle of content: works
-     *  2. cursor at end of content: __
-     *  3. cursor at beginning of content: __
-     */
-    // else if (editableStatus === "cursorInContent"){
-    //   const locale = pos === 0 ? "beginning" : (pos === exp.length ? "end" : "middle");
-    //   const parsed = ce.parse(exp);
-    //   console.log("| clicked mixed fraction button |",
-    //     "\n initial exp:        ", exp,
-    //     "\n exp.length: ", exp.length,
-    //     "\n ... editableStatus: ", editableStatus,
-    //     "\n pos:          ", pos,
-    //     "\n selStart:     ", selStart,
-    //     "\n selEnd:       ", selEnd,
-    //     "\n cursorlocale: ", locale,
-    //     "\n parsedLatex:  ", parsed.latex,
-    //   );
+        else {
+          mf.current?.executeCommand(
+            ["insert", "+" + ph + emptyFrac + "+", {insertionMode: "replaceSelected"}]
+          );
+        }
+      // if (mf.current?.position && isFinite(mf.current?.position)){
+      //   mf.current.position = selEnd || 0;
+      //   if (mf.current?.position < exp.length){
+      //     mf.current?.executeCommand(
+      //       ["insert", emptyFrac + "+", {insertionMode: "insertAfter"}]
+      //     );
+      //   } else {
+      //     mf.current?.executeCommand(
+      //       ["insert", emptyFrac, {insertionMode: "insertAfter"}]
+      //     );
+      //   }
+      // }
+      // mf.current?.executeCommand(
+      //   ["insert", emptyFrac + "+", {insertionMode: "insertAfter"}]
+      // );
+    }
 
+    // 2 DOES CURSOR IN CONTENT ALWAYS WORK, PROBABLY NOT
+    else if (editableStatus === "cursorInContent"){
+      if(locale === "end"){
+        mf.current?.executeCommand(
+          ["insert", "+" + ph + emptyFrac, {insertionMode: "insertAfter"}]
+        );
+      }
 
-    //   // works if cursor really in the middle of the content
-    //   // mf.current?.executeCommand(
-    //   //   ["insert", "+" + ph + emptyFrac + "+", {insertionMode: "insertAfter"}]
-    //   // );
-    //   //console.log("| resulting exp |", mf.current?.getValue());
-    // }
+      else if(locale === "beginning"){
+        mf.current?.executeCommand(
+          ["insert", ph + emptyFrac + "+", {insertionMode: "insertBefore"}]
+        );
+      }
 
-    // else if (editableStatus === "someSelected"){
-    //   if (mf.current?.position && isFinite(mf.current?.position)){
-    //     mf.current.position = selEnd || 0;
-    //     // if (mf.current?.position < exp.length){
-    //     //   mf.current?.executeCommand(
-    //     //     ["insert", emptyFrac + "+", {insertionMode: "insertAfter"}]
-    //     //   );
-    //     // } else {
-    //     //   mf.current?.executeCommand(
-    //     //     ["insert", emptyFrac, {insertionMode: "insertAfter"}]
-    //     //   );
-    //     // }
-    //   }
-    //   mf.current?.executeCommand(
-    //     ["insert", emptyFrac + "+", {insertionMode: "insertAfter"}]
-    //   );
-    // }
+      else {
 
+        if (!pos) return;
+        // const charBeforeCursor = exp[pos - 1];
+        // const charAfterCursor = exp[pos];
+        // const isNumeralBeforeCursor = /^\d+$/.test(charBeforeCursor);
+        // const isNumeralAfterCursor = /^\d+$/.test(charAfterCursor);
+        // const isNumeralAfterCursor = /^\d+$/.test(exp.slice(pos));
+        //const safeToInsert = isNumeralBeforeCursor && isNumeralAfterCursor;
+        if (isAllNumerals){
+          mf.current?.executeCommand(
+            ["insert", "+" + ph + emptyFrac + "+", {insertionMode: "insertAfter"}]
+          );
+        }
+
+        else {
+
+          // mf.current?.executeCommand(
+          //   ["moveToPreviousWord", {extendSelection: true}]
+          // );
+          // mf.current?.executeCommand(
+          //   ["insert", "+" + ph + emptyFrac, {insertionMode: "insertAfter"}]
+          // );
+        }
+      }
+    }
     mf.current?.focus();
   };
 
