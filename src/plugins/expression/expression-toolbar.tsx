@@ -82,16 +82,9 @@ export const ExpressionToolbar: React.FC<IProps> = observer((
     const locale = pos === 0 ? "beginning" : (pos === exp.length || (pos === selEnd && pos === selStart) ? "end" : "middle");
     const parsedJson = JSON.stringify(ce.parse(exp).json);
     const parsedLatex = ce.parse(exp).latex;
-    const isAllNumerals = /^\d+$/.test(exp);
 
     const ph = "\\placeholder{}";
     const emptyFrac = `\\frac{${ph}}{${ph}}}`;
-
-
-
-    /* viable path
-
-    */
 
     if (editableStatus === "empty" || editableStatus === "allSelected"){
       mf.current?.executeCommand(
@@ -114,83 +107,10 @@ export const ExpressionToolbar: React.FC<IProps> = observer((
       "\n   pos:              ", pos,
       "\n   currentSelection: ", currentSelection,
       "\n DERIVED: ",
-      "\n   isAllNumerals:    ", isAllNumerals,
       "\n   editableStatus:   ", editableStatus,
       "\n   cLocale:          ", locale
       )
     }
-
-    // const token = `#@${emptyFrac}`
-    // mf.current?.executeCommand(
-    //   ["insert", token, {insertionMode: "insertAfter"}]
-    // );
-
-    // mf.current?.executeCommand(
-    //   ["insert", token, {insertionMode: "insertAfter"}]
-    // );
-    // if (editableStatus === "empty"){
-    //   mf.current?.executeCommand(
-    //     ["insert", ph + emptyFrac, {insertionMode: "replaceAll"}]
-    //   );
-    // }
-
-    // else if (editableStatus === "allSelected"){
-    //   mf.current?.executeCommand(
-    //     ["insert", exp + emptyFrac, {insertionMode: "replaceAll"}]
-    //   );
-    // }
-
-    // // 1 DOES SOME SELECTED ALWAYS WORK, PROBABLY NOT
-    // else if (editableStatus === "someSelected"){
-
-    //     if (isAllNumerals){
-    //       mf.current?.executeCommand(
-    //         ["insert", "+" + ph + emptyFrac + "+", {insertionMode: "insertAfter"}]
-    //       );
-    //     }
-
-    //     else {
-    //       mf.current?.executeCommand(
-    //         ["insert", "+" + ph + emptyFrac + "+", {insertionMode: "replaceSelected"}]
-    //       );
-    //     }
-
-    // }
-
-    // // 2 DOES CURSOR IN CONTENT ALWAYS WORK, PROBABLY NOT
-    // else if (editableStatus === "cursorInContent"){
-    //   if(locale === "end"){
-    //     mf.current?.executeCommand(
-    //       ["insert", "+" + ph + emptyFrac, {insertionMode: "insertAfter"}]
-    //     );
-    //   }
-
-    //   else if(locale === "beginning"){
-    //     mf.current?.executeCommand(
-    //       ["insert", ph + emptyFrac + "+", {insertionMode: "insertBefore"}]
-    //     );
-    //   }
-
-    //   else {
-
-    //     if (!pos) return;
-    //     if (isAllNumerals){
-    //       mf.current?.executeCommand(
-    //         ["insert", "+" + ph + emptyFrac + "+", {insertionMode: "insertAfter"}]
-    //       );
-    //     }
-
-    //     else {
-
-    //       // mf.current?.executeCommand(
-    //       //   ["moveToPreviousWord", {extendSelection: true}]
-    //       // );
-    //       // mf.current?.executeCommand(
-    //       //   ["insert", "+" + ph + emptyFrac, {insertionMode: "insertAfter"}]
-    //       // );
-    //     }
-    //   }
-    // }
 
     mf.current?.focus();
   };
