@@ -2,12 +2,13 @@ import {ScaleBand, ScaleLinear, select} from "d3"
 import React, {useCallback, useRef, useState} from "react"
 import {appState} from "../../../models/app-state"
 import {ScaleNumericBaseType} from "../../axis/axis-types"
-import {CaseData, PlotProps} from "../graphing-types"
+import {CaseData} from "../d3-types"
+import {PlotProps} from "../graphing-types"
 import {useDragHandlers, usePlotResponders} from "../hooks/use-plot"
 import {useDataConfigurationContext} from "../hooks/use-data-configuration-context"
 import {useDataSetContext} from "../../../hooks/use-data-set-context"
 import {useInstanceIdContext} from "../../../hooks/use-instance-id-context"
-import {Bounds, useGraphLayoutContext} from "../models/graph-layout"
+import {useGraphLayoutContext} from "../models/graph-layout"
 import {ICase} from "../../../models/data/data-set-types"
 import {
   getScreenCoord,
@@ -46,12 +47,14 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
   yScaleRef.current = layout.getAxisScale("left") as ScaleNumericBaseType
 
   const onDragStart = useCallback((event: MouseEvent) => {
+      target.current = select(event.target as SVGSVGElement)
+      const aCaseData: CaseData = target.current.node().__data__
+      if (!aCaseData) return
       dataset?.beginCaching()
       secondaryAttrIDsRef.current = dataConfiguration?.yAttributeIDs || []
       enableAnimation.current = false // We don't want to animate points until end of drag
       didDrag.current = false
-      target.current = select(event.target as SVGSVGElement)
-      const tItsID = target.current.datum()?.caseID ?? ''
+      const tItsID = aCaseData.caseID
       plotNumRef.current = target.current.datum()?.plotNum ?? 0
       if (target.current.node()?.nodeName === 'circle') {
         appState.beginPerformance()
@@ -157,7 +160,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
         xValue = dataset?.getNumeric(anID, xAttrID) ?? NaN,
         xScale = layout.getAxisScale('bottom') as ScaleLinear<number, number>,
         topSplitID = dataConfiguration?.attributeID('topSplit') ?? '',
-        topCoordValue = dataset?.getValue(anID, topSplitID) ?? '',
+        topCoordValue = dataset?.getStrValue(anID, topSplitID) ?? '',
         topScale = layout.getAxisScale('top') as ScaleBand<string>
       return xScale(xValue) / numExtraPrimaryBands + (topScale(topCoordValue) || 0)
     }
@@ -168,7 +171,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
         yScale = (hasY2Attribute && plotNum === numberOfPlots - 1 ? v2Scale : yScaleRef.current) as
           ScaleLinear<number, number>,
         rightSplitID = dataConfiguration?.attributeID('rightSplit') ?? '',
-        rightCoordValue = dataset?.getValue(anID, rightSplitID) ?? '',
+        rightCoordValue = dataset?.getStrValue(anID, rightSplitID) ?? '',
         rightScale = layout.getAxisScale('rightCat') as ScaleBand<string>,
         rightScreenCoord = ((rightCoordValue && rightScale(rightCoordValue)) || 0)
       return yScale(yValue) / numExtraSecondaryBands + rightScreenCoord
@@ -181,17 +184,16 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
       numExtraPrimaryBands = dataConfiguration?.numRepetitionsForPlace('bottom') ?? 1,
       numExtraSecondaryBands = dataConfiguration?.numRepetitionsForPlace('left') ?? 1,
       numberOfPlots = dataConfiguration?.numberOfPlots || 1,
-      getLegendColor = legendAttrID ? dataConfiguration?.getLegendColorForCase : undefined,
-      {computedBounds} = layout,
-      plotBounds = computedBounds.get('plot') as Bounds
+      getLegendColor = legendAttrID ? dataConfiguration?.getLegendColorForCase : undefined
 
     setPointCoordinates({
-      dataset, dotsRef, pointRadius: pointRadiusRef.current, selectedPointRadius: selectedPointRadiusRef.current,
-      plotBounds, selectedOnly, getScreenX, getScreenY, getLegendColor,
+      dataset, dotsRef, pointRadius: pointRadiusRef.current,
+      selectedPointRadius: selectedPointRadiusRef.current,
+      selectedOnly, getScreenX, getScreenY, getLegendColor,
       getPointColorAtIndex: graphModel.pointColorAtIndex, enableAnimation, pointColor, pointStrokeColor
     })
-  }, [dataConfiguration, dataset, dotsRef, layout, legendAttrID, enableAnimation, graphModel,
-    yScaleRef])
+  }, [dataConfiguration, dataset, dotsRef, layout, legendAttrID,
+    enableAnimation, graphModel, yScaleRef])
 
   const refreshPointPositionsSVG = useCallback((selectedOnly: boolean) => {
     const xAttrID = dataConfiguration?.attributeID('x') ?? '',
@@ -226,11 +228,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
     }
   }, [refreshPointPositionsD3, refreshPointPositionsSVG])
 
-  usePlotResponders({
-    graphModel, primaryAttrID: dataConfiguration?.attributeID('x') ?? '',
-    secondaryAttrID: secondaryAttrIDsRef.current[0],
-    layout, dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation
-  })
+  usePlotResponders({dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation})
 
   return (
     <svg/>

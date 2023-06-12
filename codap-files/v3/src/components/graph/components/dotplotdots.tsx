@@ -1,12 +1,13 @@
 import {max, range, ScaleBand, ScaleLinear, select} from "d3"
 import {observer} from "mobx-react-lite"
 import React, {useCallback, useRef, useState} from "react"
-import {CaseData, PlotProps} from "../graphing-types"
+import {CaseData} from "../d3-types"
+import {PlotProps} from "../graphing-types"
 import {useDragHandlers, usePlotResponders} from "../hooks/use-plot"
 import {appState} from "../../../models/app-state"
 import {useDataConfigurationContext} from "../hooks/use-data-configuration-context"
 import {useDataSetContext} from "../../../hooks/use-data-set-context"
-import {Bounds, useGraphLayoutContext} from "../models/graph-layout"
+import {useGraphLayoutContext} from "../models/graph-layout"
 import {ICase} from "../../../models/data/data-set-types"
 import {
   handleClickOnDot,
@@ -34,10 +35,12 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
     selectedDataObjects = useRef<Record<string, number>>({})
 
   const onDragStart = useCallback((event: any) => {
+      target.current = select(event.target as SVGSVGElement)
+      const aCaseData: CaseData = target.current.node().__data__
+      if (!aCaseData) return
       dataset?.beginCaching()
       didDrag.current = false
-      target.current = select(event.target as SVGSVGElement)
-      const tItsID: string = target.current.datum()?.caseID ?? ''
+      const tItsID: string = aCaseData.caseID
       if (target.current.node()?.nodeName === 'circle') {
         enableAnimation.current = false // We don't want to animate points until end of drag
         appState.beginPerformance()
@@ -53,7 +56,7 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
         const {selection} = dataConfiguration || {},
           primaryAttrID = dataConfiguration?.attributeID(dataConfiguration?.primaryRole ?? 'x') ?? ''
         selection?.forEach(anID => {
-            const itsValue = dataset?.getNumeric(anID, primaryAttrID) || undefined
+          const itsValue = dataset?.getNumeric(anID, primaryAttrID) || undefined
           if (itsValue != null) {
             selectedDataObjects.current[anID] = itsValue
           }
@@ -119,9 +122,8 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
 
   const refreshPointSelection = useCallback(() => {
     dataConfiguration && setPointSelection({
-      pointColor, pointStrokeColor,
       dotsRef, dataConfiguration, pointRadius: graphModel.getPointRadius(),
-      selectedPointRadius: graphModel.getPointRadius('select')
+      pointColor, pointStrokeColor, selectedPointRadius: graphModel.getPointRadius('select')
     })
   }, [dataConfiguration, dotsRef, graphModel, pointColor, pointStrokeColor])
 
@@ -172,9 +174,9 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
               numerator = primaryAxisScale(dataset?.getNumeric(anID, primaryAttrID) ?? -1) /
                 numExtraPrimaryBands,
               bin = Math.ceil((numerator ?? 0) / binWidth),
-              category = dataset?.getValue(anID, secondaryAttrID) ?? '__main__',
-              extraCategory = dataset?.getValue(anID, extraSecondaryAttrID) ?? '__main__',
-              extraPrimaryCategory = dataset?.getValue(anID, extraPrimaryAttrID) ?? '__main__'
+              category = dataset?.getStrValue(anID, secondaryAttrID) ?? '__main__',
+              extraCategory = dataset?.getStrValue(anID, extraSecondaryAttrID) ?? '__main__',
+              extraPrimaryCategory = dataset?.getStrValue(anID, extraPrimaryAttrID) ?? '__main__'
             if (!bins[category]) {
               bins[category] = {}
             }
@@ -233,42 +235,40 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
         getPrimaryScreenCoord = (anID: string) => {
           const primaryCoord = primaryAxisScale(dataset?.getNumeric(anID, primaryAttrID) ?? -1) /
               numExtraPrimaryBands,
-            extraPrimaryValue = dataset?.getValue(anID, extraPrimaryAttrID),
+            extraPrimaryValue = dataset?.getStrValue(anID, extraPrimaryAttrID),
             extraPrimaryCoord = extraPrimaryValue
-              ? extraPrimaryAxisScale(dataset?.getValue(anID, extraPrimaryAttrID) ?? '__main__') ?? 0
+              ? extraPrimaryAxisScale(extraPrimaryValue ?? '__main__') ?? 0
               : 0
           return primaryCoord + extraPrimaryCoord
         },
         getSecondaryScreenCoord = (anID: string) => {
           if (!binMap[anID]) {
-            return NaN
+            return null // Not NaN because NaN causes errors during transitions
           }
           const secondaryCat = binMap[anID].category,
             extraSecondaryCat = binMap[anID].extraCategory,
-            indexInBin = binMap[anID].indexInBin
-          return binMap[anID] ? computeSecondaryCoord({secondaryCat, extraSecondaryCat, indexInBin}) : null
+            indexInBin = binMap[anID].indexInBin,
+            onePixelOffset = primaryIsBottom ? -1 : 1 // Separate circles from axis line by 1 pixel
+          return binMap[anID]
+            ? computeSecondaryCoord({secondaryCat, extraSecondaryCat, indexInBin}) + onePixelOffset
+            : null
         },
         getScreenX = primaryIsBottom ? getPrimaryScreenCoord : getSecondaryScreenCoord,
         getScreenY = primaryIsBottom ? getSecondaryScreenCoord : getPrimaryScreenCoord,
         getLegendColor = dataConfiguration?.attributeID('legend')
-          ? dataConfiguration?.getLegendColorForCase : undefined,
-        plotBounds = layout.computedBounds.get('plot') as Bounds
+          ? dataConfiguration?.getLegendColorForCase : undefined
 
       setPointCoordinates({
-        dataset, pointRadius: graphModel.getPointRadius(), selectedPointRadius: graphModel.getPointRadius('select'),
+        dataset, pointRadius: graphModel.getPointRadius(),
+        selectedPointRadius: graphModel.getPointRadius('select'),
         dotsRef, selectedOnly, pointColor, pointStrokeColor,
-        getScreenX, getScreenY, getLegendColor, enableAnimation, plotBounds
+        getScreenX, getScreenY, getLegendColor, enableAnimation
       })
     },
     [graphModel, dataConfiguration, layout, primaryAttrRole, secondaryAttrRole, dataset, dotsRef,
       enableAnimation, primaryIsBottom, pointColor, pointStrokeColor])
 
-  usePlotResponders({
-    graphModel, primaryAttrID: dataConfiguration?.attributeID(primaryAttrRole) ?? '',
-    secondaryAttrID: dataConfiguration?.attributeID(secondaryAttrRole),
-    legendAttrID: dataConfiguration?.attributeID('legend'),
-    layout, dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation
-  })
+  usePlotResponders({dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation})
 
   return (
     <></>

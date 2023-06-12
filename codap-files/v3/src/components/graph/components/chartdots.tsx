@@ -1,15 +1,13 @@
-import {ScaleBand, select} from "d3"
+import {ScaleBand} from "d3"
 import React, {useCallback} from "react"
-import {attrRoleToAxisPlace, CaseData, PlotProps, transitionDuration} from "../graphing-types"
+import {CaseData, selectDots} from "../d3-types"
+import {attrRoleToAxisPlace, PlotProps} from "../graphing-types"
 import {usePlotResponders} from "../hooks/use-plot"
 import {useDataConfigurationContext} from "../hooks/use-data-configuration-context"
 import {useDataSetContext} from "../../../hooks/use-data-set-context"
-import {Bounds, useGraphLayoutContext} from "../models/graph-layout"
-import {setPointSelection} from "../utilities/graph-utils"
+import {useGraphLayoutContext} from "../models/graph-layout"
+import {setPointCoordinates, setPointSelection} from "../utilities/graph-utils"
 import {useGraphModelContext} from "../models/graph-model"
-import {
-  defaultSelectedColor, defaultSelectedStroke, defaultSelectedStrokeWidth, defaultStrokeWidth
-} from "../../../utilities/color-utils"
 
 type BinMap = Record<string, Record<string, Record<string, Record<string, number>>>>
 
@@ -90,15 +88,15 @@ export const ChartDots = function ChartDots(props: PlotProps) {
       extraPrimaryAttrID = dataConfiguration?.attributeID(extraPrimaryAttrRole) ?? '',
       extraSecondaryAttrID = dataConfiguration?.attributeID(extraSecondaryAttrRole) ?? '',
       primCatsArray: string[] = (dataConfiguration && primaryAttrRole)
-        ? Array.from(dataConfiguration.categorySetForAttrRole(primaryAttrRole)) : [],
+        ? Array.from(dataConfiguration.categoryArrayForAttrRole(primaryAttrRole)) : [],
       secCatsArray: string[] = (dataConfiguration && secondaryAttrRole)
-        ? Array.from(dataConfiguration.categorySetForAttrRole(secondaryAttrRole)) : [],
+        ? Array.from(dataConfiguration.categoryArrayForAttrRole(secondaryAttrRole)) : [],
       extraPrimCatsArray: string[] = (dataConfiguration && extraPrimaryAttrRole)
-        ? Array.from(dataConfiguration.categorySetForAttrRole(extraPrimaryAttrRole)) : [],
+        ? Array.from(dataConfiguration.categoryArrayForAttrRole(extraPrimaryAttrRole)) : [],
       extraSecCatsArray: string[] = (dataConfiguration && extraSecondaryAttrRole)
-        ? Array.from(dataConfiguration.categorySetForAttrRole(extraSecondaryAttrRole)) : [],
+        ? Array.from(dataConfiguration.categoryArrayForAttrRole(extraSecondaryAttrRole)) : [],
       pointDiameter = 2 * graphModel.getPointRadius(),
-      selection = select(dotsRef.current).selectAll(selectedOnly ? '.graph-dot-highlighted' : '.graph-dot'),
+      selection = selectDots(dotsRef.current, selectedOnly),
       primOrdinalScale = layout.getAxisScale(primaryAxisPlace) as ScaleBand<string>,
       secOrdinalScale = layout.getAxisScale(secondaryAxisPlace) as ScaleBand<string>,
       extraPrimOrdinalScale = layout.getAxisScale(extraPrimaryAxisPlace) as ScaleBand<string>,
@@ -106,14 +104,16 @@ export const ChartDots = function ChartDots(props: PlotProps) {
       primaryCellWidth = ((primOrdinalScale.bandwidth?.()) ?? 0) /
         (dataConfiguration?.numRepetitionsForPlace(primaryAxisPlace) ?? 1),
       primaryHeight = (secOrdinalScale.bandwidth ? secOrdinalScale.bandwidth()
-        : (secondaryAxisPlace ? layout.getAxisLength(secondaryAxisPlace) : 0)) /
-            (dataConfiguration?.numRepetitionsForPlace(secondaryAxisPlace) ?? 1),
+          : (secondaryAxisPlace ? layout.getAxisLength(secondaryAxisPlace) : 0)) /
+        (dataConfiguration?.numRepetitionsForPlace(secondaryAxisPlace) ?? 1),
       extraPrimCellWidth = (extraPrimOrdinalScale.bandwidth?.()) ?? 0,
       extraSecCellWidth = (extraSecOrdinalScale.bandwidth?.()) ?? 0,
       catMap: Record<string, Record<string, Record<string, Record<string,
-          { cell: { p: number, s: number, ep: number, es: number }, numSoFar: number }>>>> = {},
+        { cell: { p: number, s: number, ep: number, es: number }, numSoFar: number }>>>> = {},
       legendAttrID = dataConfiguration?.attributeID('legend'),
       getLegendColor = legendAttrID ? dataConfiguration?.getLegendColorForCase : undefined
+
+    if (!selection) return
 
     const computeCellParams = () => {
         primCatsArray.forEach((primeCat, i) => {
@@ -154,16 +154,18 @@ export const ChartDots = function ChartDots(props: PlotProps) {
       cellParams = computeCellParams(),
 
       buildMapOfIndicesByCase = () => {
-        const indices: Record<string, { cell: { p: number, s: number, ep:number, es:number },
-            row: number, column: number }> = {},
+        const indices: Record<string, {
+            cell: { p: number, s: number, ep: number, es: number },
+            row: number, column: number
+          }> = {},
           primaryAttrID = dataConfiguration?.attributeID(primaryAttrRole) ?? '',
           secondaryAttrID = dataConfiguration?.attributeID(secondaryAttrRole) ?? ''
         primaryAttrID && (dataConfiguration?.caseDataArray || []).forEach((aCaseData: CaseData) => {
           const anID = aCaseData.caseID,
-            hCat = dataset?.getValue(anID, primaryAttrID),
-            vCat = secondaryAttrID ? dataset?.getValue(anID, secondaryAttrID) : '__main__',
-            extraHCat = extraPrimaryAttrID ? dataset?.getValue(anID, extraPrimaryAttrID) : '__main__',
-            extraVCat = extraSecondaryAttrID ? dataset?.getValue(anID, extraSecondaryAttrID) : '__main__'
+            hCat = dataset?.getStrValue(anID, primaryAttrID),
+            vCat = secondaryAttrID ? dataset?.getStrValue(anID, secondaryAttrID) : '__main__',
+            extraHCat = extraPrimaryAttrID ? dataset?.getStrValue(anID, extraPrimaryAttrID) : '__main__',
+            extraVCat = extraSecondaryAttrID ? dataset?.getStrValue(anID, extraSecondaryAttrID) : '__main__'
           if (hCat && vCat && extraHCat && extraVCat &&
             catMap[hCat] && catMap[hCat][vCat] && catMap[hCat][vCat][extraHCat] &&
             catMap[hCat][vCat][extraHCat][extraVCat]) {
@@ -179,76 +181,41 @@ export const ChartDots = function ChartDots(props: PlotProps) {
       cellIndices = buildMapOfIndicesByCase(),
       baseCoord = primaryIsBottom ? 0 : layout.getAxisLength('left'),
       signForOffset = primaryIsBottom ? 1 : -1,
-      primaryCenterKey = primaryIsBottom ? 'cx' : 'cy',
-      secondaryCenterKey = primaryIsBottom ? 'cy' : 'cx',
-
-      lookupLegendColor = (id: string) => {
-        const isSelected = dataset?.isCaseSelected(id),
-          legendColor = getLegendColor?.(id) ?? ''
-        return legendColor !== '' ? legendColor
-          : isSelected ? defaultSelectedColor : graphModel.pointColor
-      },
-      onComplete = () => {
-        if (enableAnimation.current) {
-          enableAnimation.current = false
-          setPoints()
+      pointRadius = graphModel.getPointRadius(),
+      getPrimaryScreenCoord = (anID: string) => {
+        if (cellIndices[anID]) {
+          const {column} = cellIndices[anID],
+            {p, ep} = cellIndices[anID].cell
+          return baseCoord + signForOffset * ((p + 0.5) * primaryCellWidth + ep * extraPrimCellWidth) +
+            (column + 0.5) * pointDiameter - cellParams.numPointsInRow * pointDiameter / 2
+        } else {
+          return 0
         }
       },
+      getSecondaryScreenCoord = (anID: string) => {
+        if (cellIndices[anID] && secOrdinalScale) {
+          const {row} = cellIndices[anID],
+            {s, es} = cellIndices[anID].cell
+          return secOrdinalScale.range()[0] -
+            signForOffset * (s * primaryHeight + es * extraSecCellWidth +
+              (row + 0.5) * pointDiameter + row * cellParams.overlap)
+        } else {
+          return 0
+        }
+      },
+      getScreenX = primaryIsBottom ? getPrimaryScreenCoord : getSecondaryScreenCoord,
+      getScreenY = primaryIsBottom ? getSecondaryScreenCoord : getPrimaryScreenCoord
 
-      setPoints = () => {
-        const duration = enableAnimation.current ? transitionDuration : 0,
-          plotBounds = layout.computedBounds.get('plot') as Bounds,
-          transform = `translate(${plotBounds.left}, ${plotBounds.top})`,
-          pointRadius = graphModel.getPointRadius()
-        selection
-          .attr('transform', transform)
-          .transition()
-          .duration(duration)
-          .on('end', (id, i) => (i === selection.size() - 1) && onComplete?.())
-          .attr('r', pointRadius)
-          .attr(primaryCenterKey, (aCaseData: CaseData) => {
-            const anID = aCaseData.caseID
-            if (cellIndices[anID]) {
-              const {column} = cellIndices[anID],
-                {p, ep} = cellIndices[anID].cell
-              return baseCoord + signForOffset * ((p + 0.5) * primaryCellWidth + ep * extraPrimCellWidth) +
-                (column + 0.5) * pointDiameter - cellParams.numPointsInRow * pointDiameter / 2
-            } else {
-              return 0
-            }
-          })
-          .attr(secondaryCenterKey, (aCaseData: CaseData) => {
-            const anID = aCaseData.caseID
-            if (cellIndices[anID] && secOrdinalScale) {
-              const {row} = cellIndices[anID],
-                {s, es} = cellIndices[anID].cell
-              return secOrdinalScale.range()[0] -
-                signForOffset * (s * primaryHeight + es * extraSecCellWidth +
-                  (row + 0.5) * pointDiameter + row * cellParams.overlap)
-            } else {
-              return 0
-            }
-          })
-          .style('fill', (aCaseData: CaseData) => lookupLegendColor(aCaseData.caseID))
-          .style('stroke', (aCaseData: CaseData) =>
-            (getLegendColor && dataset?.isCaseSelected(aCaseData.caseID))
-              ? defaultSelectedStroke : pointStrokeColor)
-          .style('stroke-width', (aCaseData: CaseData) =>
-            (getLegendColor && dataset?.isCaseSelected(aCaseData.caseID))
-              ? defaultSelectedStrokeWidth : defaultStrokeWidth)
-      }
-
-    setPoints()
+    setPointCoordinates({
+      dataset, pointRadius, selectedPointRadius: graphModel.getPointRadius('select'),
+      dotsRef, selectedOnly, pointColor, pointStrokeColor,
+      getScreenX, getScreenY, getLegendColor, enableAnimation
+    })
   }, [dataConfiguration, primaryAxisPlace, primaryAttrRole, secondaryAttrRole, graphModel, dotsRef,
-    extraPrimaryAttrRole, extraSecondaryAttrRole,
+    extraPrimaryAttrRole, extraSecondaryAttrRole, pointColor,
     enableAnimation, primaryIsBottom, layout, pointStrokeColor, computeMaxOverAllCells, dataset])
 
-  usePlotResponders({
-    graphModel, layout, dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation,
-    primaryAttrID: dataConfiguration?.attributeID(primaryAttrRole),
-    secondaryAttrID: dataConfiguration?.attributeID(secondaryAttrRole),
-    legendAttrID: dataConfiguration?.attributeID('legend')
-  })
+  usePlotResponders({dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation})
 
   return (
     <></>

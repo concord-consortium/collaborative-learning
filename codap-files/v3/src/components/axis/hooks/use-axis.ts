@@ -1,24 +1,25 @@
-import {ScaleBand, ScaleLinear, scaleLinear, scaleOrdinal, select} from "d3"
+import {ScaleBand, ScaleLinear, scaleLinear, scaleOrdinal} from "d3"
 import {autorun, reaction} from "mobx"
 import {MutableRefObject, useCallback, useEffect, useRef} from "react"
-import {AxisBounds, axisGap, isVertical} from "../axis-types"
+import {axisGap} from "../axis-types"
 import {useAxisLayoutContext} from "../models/axis-layout-context"
 import {IAxisModel, isNumericAxisModel} from "../models/axis-model"
 import {graphPlaceToAttrRole} from "../../graph/graphing-types"
 import {maxWidthOfStringsD3} from "../../graph/utilities/graph-utils"
 import {useDataConfigurationContext} from "../../graph/hooks/use-data-configuration-context"
 import {collisionExists, getStringBounds} from "../axis-utils"
+import graphVars from "../../graph/components/graph.scss"
 
 export interface IUseAxis {
   axisModel?: IAxisModel
   axisElt: SVGGElement | null
-  titleRef: MutableRefObject<SVGGElement | null>
+  titleRef?: MutableRefObject<SVGGElement | null>
   axisTitle?: string
   centerCategoryLabels: boolean
 }
 
 export const useAxis = ({
-                          axisModel, axisElt, titleRef, axisTitle = "",
+                          axisModel, axisTitle = "",
                           centerCategoryLabels
                         }: IUseAxis) => {
   const layout = useAxisLayoutContext(),
@@ -27,7 +28,6 @@ export const useAxis = ({
     multiScale = layout.getAxisMultiScale(place),
     ordinalScale = isNumeric || axisModel?.type === 'empty' ? null : multiScale?.scale as ScaleBand<string>
   const
-    bandWidth = (ordinalScale?.bandwidth?.()) ?? 0,
     // By all rights, the following three lines should not be necessary to get installDomainSync to run when
     // GraphController:processV2Document installs a new axis model.
     // Todo: Revisit and figure out whether we can remove the workaround.
@@ -36,9 +36,6 @@ export const useAxis = ({
     dataConfiguration = useDataConfigurationContext(),
     axisPlace = axisModel?.place ?? 'bottom',
     attrRole = graphPlaceToAttrRole[axisPlace],
-    scaleLength = multiScale?.length ?? 0,
-    [rangeMin, rangeMax] = [0, scaleLength],
-    halfRange = Math.abs(rangeMax - rangeMin) / 2,
     type = axisModel?.type ?? 'empty',
     attributeID = dataConfiguration?.attributeID(attrRole)
   previousAxisModel.current = axisModel
@@ -47,11 +44,14 @@ export const useAxis = ({
     if (dataConfiguration?.placeCanHaveZeroExtent(axisPlace)) {
       return 0
     }
-    const axisTitleHeight = getStringBounds(axisTitle).height,
+    const labelFont = graphVars.graphLabelFont,
+      axisTitleHeight = getStringBounds(axisTitle, labelFont).height,
       numbersHeight = getStringBounds('0').height,
+      repetitions = multiScale?.repetitions ?? 1,
+      bandWidth = ((ordinalScale?.bandwidth?.()) ?? 0) / repetitions,
       categories = ordinalScale?.domain() ?? [],
       collision = collisionExists({bandWidth, categories, centerCategoryLabels}),
-      maxLabelExtent = maxWidthOfStringsD3(dataConfiguration?.categorySetForAttrRole(attrRole) ?? []),
+      maxLabelExtent = maxWidthOfStringsD3(dataConfiguration?.categoryArrayForAttrRole(attrRole) ?? []),
       d3Scale = multiScale?.scale ?? (type === 'numeric' ? scaleLinear() : scaleOrdinal())
     let desiredExtent = axisTitleHeight + 2 * axisGap
     let ticks: string[] = []
@@ -70,38 +70,7 @@ export const useAxis = ({
       }
     }
     return desiredExtent
-  }, [bandWidth, centerCategoryLabels, ordinalScale, axisPlace, attrRole, dataConfiguration,
-    axisTitle, type, multiScale])
-
-  const refreshAxisTitle = useCallback(() => {
-    const axisBounds = layout.getComputedBounds(axisPlace) as AxisBounds,
-      labelBounds = getStringBounds(axisTitle),
-      titleTransform = `translate(${axisBounds.left}, ${axisBounds.top})`,
-      tX = place === 'left' ? labelBounds.height
-        : ['rightNumeric', 'rightCat'].includes(place) ? axisBounds.width - labelBounds.height / 2
-          : halfRange,
-      tY = isVertical(place) ?  halfRange
-        : place === 'top' ? labelBounds.height : axisBounds.height - labelBounds.height / 2,
-      tRotation = isVertical(place) ? ` rotate(-90,${tX},${tY})` : ''
-    if (titleRef) {
-      select(titleRef.current)
-        .selectAll('text.axis-title')
-        .data([1])
-        .join(
-          // @ts-expect-error void => Selection
-          // eslint-disable-next-line @typescript-eslint/no-empty-function
-          () => {
-          },
-          (update) => {
-            update
-              .attr("transform", titleTransform + tRotation)
-              .attr('x', tX)
-              .attr('y', tY)
-              .text(axisTitle)
-          })
-    }
-
-  }, [axisPlace, layout, place, titleRef, axisTitle, halfRange])
+  }, [centerCategoryLabels, ordinalScale, axisPlace, attrRole, dataConfiguration, axisTitle, type, multiScale])
 
   // update d3 scale and axis when scale type changes
   useEffect(() => {
@@ -113,21 +82,11 @@ export const useAxis = ({
         },
         ({place: aPlace, scaleType}) => {
           layout.getAxisMultiScale(aPlace)?.setScaleType(scaleType)
-          refreshAxisTitle()
         }
       )
       return () => disposer()
     }
-  }, [isNumeric, axisModel, layout, refreshAxisTitle])
-
-  // Install reaction to bring about rerender when layout's computedBounds changes
-  useEffect(() => {
-    const disposer = reaction(
-      () => layout.getComputedBounds(axisPlace),
-      () => refreshAxisTitle()
-    )
-    return () => disposer()
-  }, [axisPlace, layout, refreshAxisTitle])
+  }, [isNumeric, axisModel, layout])
 
   // update d3 scale and axis when axis domain changes
   useEffect(function installDomainSync() {
@@ -135,12 +94,11 @@ export const useAxis = ({
       const disposer = autorun(() => {
         multiScale?.setNumericDomain(axisModel.domain)
         layout.setDesiredExtent(axisPlace, computeDesiredExtent())
-        refreshAxisTitle()
       })
       return () => disposer()
     }
     // Note axisModelChanged as a dependent. Shouldn't be necessary.
-  }, [axisModelChanged, isNumeric, axisModel, refreshAxisTitle, multiScale,
+  }, [axisModelChanged, isNumeric, axisModel, multiScale,
     axisPlace, layout, computeDesiredExtent])
 
   // update d3 scale and axis when layout/range changes
@@ -150,36 +108,28 @@ export const useAxis = ({
         return layout.getAxisLength(axisPlace)
       },
       () => {
-        refreshAxisTitle()
+        layout.setDesiredExtent(axisPlace, computeDesiredExtent())
       }
     )
     return () => disposer()
-  }, [axisModel, layout, refreshAxisTitle, axisPlace])
+  }, [axisModel, layout, axisPlace, computeDesiredExtent])
 
-  // Set desired extent
+  // Set desired extent when things change
   useEffect(() => {
     layout.setDesiredExtent(axisPlace, computeDesiredExtent())
   }, [computeDesiredExtent, axisPlace, attributeID, layout])
 
-  useEffect(function setupTitle() {
-    if (titleRef) {
-      select(titleRef.current)
-        .selectAll('text.axis-title')
-        .data([1])
-        .join(
-          // @ts-expect-error void => Selection
-          (enter) => {
-            enter.append('text')
-              .attr('class', 'axis-title')
-              .attr('text-anchor', 'middle')
-              .attr('data-testid', `axis-title-${place}`)
-          })
-    }
-  }, [axisElt, halfRange, axisTitle, place, titleRef])
-
-  // update on component refresh
+  // Set desired extent when repetitions of my multiscale changes
   useEffect(() => {
-    refreshAxisTitle()
-  }, [refreshAxisTitle])
+    const disposer = reaction(
+      () => {
+        return layout.getAxisMultiScale(axisPlace)?.repetitions
+      },
+      () => {
+        layout.setDesiredExtent(axisPlace, computeDesiredExtent())
+      }
+    )
+    return () => disposer()
+  }, [computeDesiredExtent, axisPlace, layout])
 
 }

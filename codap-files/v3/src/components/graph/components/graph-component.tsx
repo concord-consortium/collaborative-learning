@@ -13,6 +13,7 @@ import {GraphController} from "../models/graph-controller"
 import {GraphLayoutContext} from "../models/graph-layout"
 import {GraphModelContext, isGraphModel} from "../models/graph-model"
 import {Graph} from "./graph"
+import {DotsElt} from '../d3-types'
 
 export const GraphComponent = observer(function GraphComponent({tile}: ITileBaseProps) {
   const graphModel = isGraphModel(tile?.content) ? tile?.content : undefined
@@ -20,19 +21,26 @@ export const GraphComponent = observer(function GraphComponent({tile}: ITileBase
   const instanceId = useNextInstanceId("graph")
   const { data } = useDataSet(graphModel?.data)
   const layout = useInitGraphLayout(graphModel)
-  const {width, height, ref: graphRef} = useResizeDetector({refreshMode: "debounce", refreshRate: 10})
+  // Removed deboucing, but we can bring it back if we find we need it
+  const {width, height, ref: graphRef} = useResizeDetector(/*{refreshMode: "debounce", refreshRate: 15}*/)
   const enableAnimation = useRef(true)
-  const dotsRef = useRef<SVGSVGElement>(null)
+  const dotsRef = useRef<DotsElt>(null)
   const graphController = useMemo(
-    () => new GraphController({layout, enableAnimation, dotsRef, instanceId}),
+    () => new GraphController({layout, enableAnimation, instanceId}),
     [layout, instanceId]
   )
 
-  useGraphController({graphController, graphModel})
+  useGraphController({graphController, graphModel, dotsRef})
 
   useEffect(() => {
     (width != null) && (height != null) && layout.setParentExtent(width, height)
   }, [width, height, layout])
+
+  useEffect(function cleanup() {
+    return () => {
+      layout.cleanup()
+    }
+  }, [layout])
 
   // used to determine when a dragged attribute is over the graph component
   const dropId = `${instanceId}-component-drop-overlay`
@@ -49,6 +57,7 @@ export const GraphComponent = observer(function GraphComponent({tile}: ITileBase
             <GraphModelContext.Provider value={graphModel}>
               <Graph graphController={graphController}
                       graphRef={graphRef}
+                      dotsRef={dotsRef}
               />
             </GraphModelContext.Provider>
           </AxisLayoutContext.Provider>

@@ -1,20 +1,16 @@
 import React from "react"
 import {IGraphModel} from "./graph-model"
 import {GraphLayout} from "./graph-layout"
-import {IDataSet} from "../../../models/data/data-set"
+import {getDataSetFromId} from "../../../models/shared/shared-data-utils"
 import {AxisPlace, AxisPlaces} from "../../axis/axis-types"
 import {
-  CategoricalAxisModel, EmptyAxisModel, IEmptyAxisModel, INumericAxisModel,
-  isCategoricalAxisModel, isNumericAxisModel, NumericAxisModel
+  CategoricalAxisModel, EmptyAxisModel, isCategoricalAxisModel, isNumericAxisModel, NumericAxisModel
 } from "../../axis/models/axis-model"
-import {scaleTypeToD3Scale} from "../../axis/models/multi-scale"
-import {
-  attrRoleToAxisPlace, axisPlaceToAttrRole, GraphAttrRole, GraphPlace, graphPlaceToAttrRole, PlotType
-} from "../graphing-types"
+import {axisPlaceToAttrRole, graphPlaceToAttrRole, IDotsRef, PlotType} from "../graphing-types"
+import {GraphPlace} from "../../axis-graph-shared"
 import {matchCirclesToData, setNiceDomain} from "../utilities/graph-utils"
-import {CodapV2Document} from "../../../v2/codap-v2-document"
-import {ICodapV2GraphStorage, IGuidLink} from "../../../v2/codap-v2-types"
 
+// keys are [primaryAxisType][secondaryAxisType]
 const plotChoices: Record<string, Record<string, PlotType>> = {
   empty: {empty: 'casePlot', numeric: 'dotPlot', categorical: 'dotChart'},
   numeric: {empty: 'dotPlot', numeric: 'scatterPlot', categorical: 'dotPlot'},
@@ -24,133 +20,78 @@ const plotChoices: Record<string, Record<string, PlotType>> = {
 interface IGraphControllerConstructorProps {
   layout: GraphLayout
   enableAnimation: React.MutableRefObject<boolean>
-  dotsRef: React.RefObject<SVGSVGElement>
   instanceId: string
 }
 
 interface IGraphControllerProps {
   graphModel: IGraphModel
-  dataset: IDataSet | undefined
+  dotsRef: IDotsRef
 }
 
 export class GraphController {
   graphModel?: IGraphModel
+  dotsRef?: IDotsRef
   layout: GraphLayout
-  dataset?: IDataSet
   enableAnimation: React.MutableRefObject<boolean>
-  dotsRef: React.RefObject<SVGSVGElement>
   instanceId: string
 
-  constructor({layout, enableAnimation, dotsRef, instanceId}: IGraphControllerConstructorProps) {
+  constructor({layout, enableAnimation, instanceId}: IGraphControllerConstructorProps) {
     this.layout = layout
     this.instanceId = instanceId
     this.enableAnimation = enableAnimation
-    this.dotsRef = dotsRef
   }
 
   setProperties(props: IGraphControllerProps) {
     this.graphModel = props.graphModel
-    this.dataset = props.dataset
-    if (this.graphModel.config.dataset !== props.dataset) {
-      this.graphModel.config.setDataset(props.dataset)
+    this.dotsRef = props.dotsRef
+    if (this.graphModel.config.dataset !== this.graphModel.data) {
+      this.graphModel.config.setDataset(this.graphModel.data, this.graphModel.metadata)
     }
     this.initializeGraph()
   }
 
+  callMatchCirclesToData() {
+    const {graphModel, dotsRef, enableAnimation, instanceId} = this
+    if (graphModel && dotsRef?.current) {
+      const { config: dataConfiguration, pointColor, pointStrokeColor } = graphModel,
+        pointRadius = graphModel.getPointRadius()
+      matchCirclesToData({
+        dataConfiguration, dotsElement: dotsRef.current,
+        pointRadius, enableAnimation, instanceId, pointColor, pointStrokeColor
+      })
+    }
+  }
+
   initializeGraph() {
-    const {graphModel, dotsRef, enableAnimation, instanceId, layout} = this,
+    const {graphModel, dotsRef, layout} = this,
       dataConfig = graphModel?.config
-    if (dataConfig && layout && dotsRef.current) {
+    if (dataConfig && layout && dotsRef?.current) {
       AxisPlaces.forEach((axisPlace: AxisPlace) => {
         const axisModel = graphModel.getAxis(axisPlace),
           attrRole = axisPlaceToAttrRole[axisPlace]
         if (axisModel) {
           layout.setAxisScaleType(axisPlace, axisModel.scale)
+          const axisMultiScale = layout.getAxisMultiScale(axisPlace)
           if (isCategoricalAxisModel(axisModel)) {
-            layout.getAxisMultiScale(axisPlace)
-              .setCategoricalDomain(dataConfig.categorySetForAttrRole(attrRole) ?? [])
+            layout.getAxisMultiScale(axisPlace)?.setCategorySet(dataConfig.categorySetForAttrRole(attrRole))
+          }
+          if (isNumericAxisModel(axisModel)) {
+            axisMultiScale.setNumericDomain(axisModel.domain)
           }
         }
       })
-      matchCirclesToData({
-        dataConfiguration: dataConfig, dotsElement: dotsRef.current,
-        pointRadius: graphModel.getPointRadius(), enableAnimation, instanceId,
-        pointColor: graphModel.pointColor,
-        pointStrokeColor: graphModel.pointStrokeColor
-      })
+      this.callMatchCirclesToData()
     }
   }
 
-  processV2Document(v2Document: CodapV2Document) {
-    const {graphModel, layout, /*dotsRef, enableAnimation,*/ dataset} = this,
-      dataConfig = graphModel?.config,
-      firstV2GraphComponent = v2Document?.components.find(aComp => aComp.type === 'DG.GraphView'),
-      storage = firstV2GraphComponent?.componentStorage as ICodapV2GraphStorage,
-      links = storage?._links_ || {},
-      attrTypes: Record<string, string> = {x: 'empty', y: 'empty', legend: 'empty'},
-      attrRoles = ['x', 'y', 'rightNumeric', 'topSplit', 'rightSplit', 'legend']
-    Object.keys(links).forEach((aKey: keyof typeof links) => {
-      if (['xAttr', 'yAttr', 'y2Attr', 'legendAttr', 'topAttr', 'rightAttr'].includes(aKey)) {
-        const match = aKey.match(/[a-z2]+/),
-          attrKey = match?.[0],
-          attrRole = ((attrKey === 'top' ? 'topSplit'
-            : attrKey === 'right' ? 'rightSplit' : attrKey) ?? 'x') as GraphAttrRole,
-          v2AttrArray = Array.isArray(links[aKey]) ? links[aKey] as any[] : [links[aKey]]
-        v2AttrArray.forEach((aLink: IGuidLink<"DG.Attribute">, index: number) => {
-          const attrV2ID = aLink.id,
-            attrName = v2Document?.getAttribute(attrV2ID)?.object.name,
-            attribute = dataset?.attrFromName(attrName),
-            attrID = attribute?.id ?? '',
-            attrSnapshot = {attributeID: attrID}
-          if (index === 0) {
-            graphModel?.setAttributeID(attrRole, attrID)
-            if (attrRoles.includes(attrRole)) {
-              attrTypes[attrRole] = attribute?.type ?? 'empty'
-            }
-          } else if (attrRole === 'y') {
-            dataConfig?.addYAttribute(attrSnapshot)
-          }
-        })
-      }
-    })
-    graphModel?.setPlotType(plotChoices[attrTypes.x][attrTypes.y])
-    attrRoles.forEach((attrRole: GraphAttrRole) => {
-      const axisPlace = attrRoleToAxisPlace[attrRole],
-        attrType = attrTypes[attrRole]
-      if (axisPlace) {
-        let axisModel
-        switch (attrType) {
-          case 'numeric':
-            axisModel = NumericAxisModel.create({place: axisPlace, min: 0, max: 1})
-            graphModel?.setAxis(axisPlace, axisModel)
-            setNiceDomain(dataConfig?.numericValuesForAttrRole(attrRole) ?? [], axisModel)
-            layout.setAxisScaleType(axisPlace, 'linear')
-            layout?.getAxisMultiScale(axisPlace)?.setNumericDomain(axisModel.domain)
-            break
-          case 'categorical':
-            axisModel = CategoricalAxisModel.create({place: axisPlace})
-            graphModel?.setAxis(axisPlace, axisModel)
-            layout.setAxisScaleType(axisPlace, 'band')
-            layout?.getAxisMultiScale(axisPlace)
-              ?.setCategoricalDomain(dataConfig?.categorySetForAttrRole(attrRole) ?? [])
-            break
-          default:  // Only add empty axes to 'left' and 'bottom'
-            if (['left', 'bottom'].includes(axisPlace)) {
-              axisModel = EmptyAxisModel.create({place: axisPlace})
-              graphModel?.setAxis(axisPlace, axisModel)
-              layout?.setAxisScaleType(axisPlace, 'ordinal')
-            }
-        }
-      }
-    })
-  }
-
-  handleAttributeAssignment(graphPlace: GraphPlace, attrID: string) {
-    const {graphModel, layout, dataset} = this,
+  handleAttributeAssignment(graphPlace: GraphPlace, dataSetID: string, attrID: string) {
+    const {graphModel, layout} = this,
+      dataset = getDataSetFromId(graphModel, dataSetID),
       dataConfig = graphModel?.config
     if (!(graphModel && layout && dataset && dataConfig)) {
       return
     }
+    this.callMatchCirclesToData()
     if (['plot', 'legend'].includes(graphPlace)) {
       // Since there is no axis associated with the legend and the plotType will not change, we bail
       return
@@ -166,8 +107,7 @@ export class GraphController {
         graphAttributeRole = axisPlaceToAttrRole[axisPlace]
       if (['left', 'bottom'].includes(axisPlace)) { // Only assignment to 'left' and 'bottom' change plotType
         const attributeType = dataConfig.attributeType(graphPlaceToAttrRole[graphPlace]) ?? 'empty',
-          // rightNumeric only occurs in presence of scatterplot
-          primaryType = graphPlace === 'rightNumeric' ? 'numeric' : attributeType,
+          primaryType = attributeType,
           otherAxisPlace = axisPlace === 'bottom' ? 'left' : 'bottom',
           otherAttrRole = axisPlaceToAttrRole[otherAxisPlace],
           otherAttributeType = dataConfig.attributeType(graphPlaceToAttrRole[otherAxisPlace]) ?? 'empty',
@@ -188,38 +128,40 @@ export class GraphController {
     const setupAxis = (place: AxisPlace) => {
       const attrRole = graphPlaceToAttrRole[place],
         attributeID = dataConfig.attributeID(attrRole),
-        attr = dataset?.attrFromID(attributeID),
+        attr = attributeID ? dataset?.attrFromID(attributeID) : undefined,
         attrType = dataConfig.attributeType(attrRole) ?? 'empty',
         currAxisModel = graphModel.getAxis(place),
         currentType = currAxisModel?.type ?? 'empty'
       switch (attrType) {
         case 'numeric': {
-          if (currentType !== 'numeric') {
+          if (!currAxisModel || !isNumericAxisModel(currAxisModel)) {
             const newAxisModel = NumericAxisModel.create({place, min: 0, max: 1})
             graphModel.setAxis(place, newAxisModel)
             layout.setAxisScaleType(place, 'linear')
             setNiceDomain(attr?.numValues || [], newAxisModel)
           } else {
-            setNiceDomain(attr?.numValues || [], currAxisModel as INumericAxisModel)
+            setNiceDomain(attr?.numValues || [], currAxisModel)
           }
         }
           break
         case 'categorical': {
-          const setOfValues = dataConfig.categorySetForAttrRole(attrRole)
           if (currentType !== 'categorical') {
             const newAxisModel = CategoricalAxisModel.create({place})
             graphModel.setAxis(place, newAxisModel)
             layout.setAxisScaleType(place, 'band')
           }
-          layout.getAxisMultiScale(place)?.setCategoricalDomain(setOfValues)
+          layout.getAxisMultiScale(place)?.setCategorySet(dataConfig.categorySetForAttrRole(attrRole))
         }
           break
         case 'empty': {
           if (currentType !== 'empty') {
             layout.setAxisScaleType(place, 'ordinal')
-            const newAxisModel = attrRole !== 'rightNumeric'
-              ? EmptyAxisModel.create({place}) : undefined
-            graphModel.setAxis(place, newAxisModel as IEmptyAxisModel)
+            if (['left', 'bottom'].includes(place)) {
+              graphModel.setAxis(place, EmptyAxisModel.create({place}))
+            }
+            else {
+              graphModel.removeAxis(place)
+            }
           }
         }
       }
