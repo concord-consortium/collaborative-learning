@@ -31,31 +31,18 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   const content = model.content as ExpressionContentModelType;
   const mf = useRef<MathfieldElement>(null);
   const trackedCursorPos = useRef<number>(0);
-  //const trackedSelection = useRef<string>("");
   const ui = useUIStore();
 
-  // TODO - maybe all this listening should be in a hook or external function
   useEffect(() => {
     mf.current?.addEventListener("focus", () => ui.setSelectedTileId(model.id));
     undoKeys.forEach((key: string) => {
       mf.current?.keybindings && replaceKeyBinding(mf.current.keybindings, key, "");
     });
-    mf.current?.addEventListener("selection-change", (e: any) => {
-      // const selection = document.getSelection()?.getRangeAt(0);
-      // if (selection && selection.startContainer.childNodes.length === 0) return;
-      // const asLatex = selection?.startContainer?.childNodes[0].nodeValue;
-      // if (asLatex) trackedSelection.current = asLatex;
-      //console.log("| selection-change!", trackedSelection.current);
-    });
-    // TODO - we want selectionm to be up to date, so was going to update it on click
-    // but should look for built in state that knows about selection first
-    mf.current?.addEventListener("click", () => {
-      console.log("| click!", mf.current?.selection.ranges[0][0]);
-    });
+
   }, [model.id, ui]);
 
   useEffect(() => {
-    // when we change model programatically, we need to update mathfield
+    // model has changed beneath UI - update mathfield, yet restore cursor position
     const disposer = onSnapshot((content as any), () => {
       if (mf.current?.getValue() === content.latexStr) return;
       mf.current?.setValue(content.latexStr, {silenceNotifications: true});
@@ -64,7 +51,8 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     return () => disposer();
   }, [content, readOnly]);
 
-  const handleChange = (e: FormEvent<MathfieldElementAttributes>) => {
+  // when the mathfield changes, update the model, and track cursor position
+  const handleMathfieldInput = (e: FormEvent<MathfieldElementAttributes>) => {
     trackedCursorPos.current =  mf.current?.position || 0;
     content.setLatexStr((e.target as any).value);
   };
@@ -79,7 +67,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   const mathfieldAttributes = {
     ref: mf,
     value: content.latexStr,
-    onInput: !readOnly ? handleChange : undefined,
+    onInput: !readOnly ? handleMathfieldInput : undefined,
     readOnly: readOnly ? "true" : undefined,
   };
 
@@ -87,13 +75,12 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     <div className="expression-tool">
       <ExpressionToolbar
         model={model}
+        mf={mf}
+        trackedCursorPos={trackedCursorPos}
         documentContent={documentContent}
         tileElt={tileElt}
         scale={scale}
         {...toolbarProps}
-        mf={mf}
-        //trackedSelection={trackedSelection}
-        trackedCursorPos={trackedCursorPos}
       />
       <div className="expression-title-area">
         <CustomEditableTileTitle

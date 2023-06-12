@@ -1,4 +1,5 @@
 import { observer } from "mobx-react";
+import { ComputeEngine } from "@cortex-js/compute-engine";
 import classNames from "classnames";
 import React from "react";
 import ReactDOM from "react-dom";
@@ -16,12 +17,13 @@ interface IProps extends IFloatingToolbarProps {
   model: ITileModel;
   mf: React.RefObject<MathfieldElement> | undefined;
   trackedCursorPos: React.MutableRefObject<number>;
-  //trackedSelection?: React.MutableRefObject<string>;
 }
+
+const ce = new ComputeEngine();
 
 export const ExpressionToolbar: React.FC<IProps> = observer((
   { model, documentContent, mf, tileElt, onIsEnabled,
-    trackedCursorPos, /*trackedSelection,*/ ...others
+    trackedCursorPos, ...others
   }: IProps) => {
     const content = model.content as ExpressionContentModelType;
     const enabled = onIsEnabled();
@@ -72,21 +74,18 @@ export const ExpressionToolbar: React.FC<IProps> = observer((
     else if (selStart === selEnd && selStart === pos) editableStatus = "cursorInContent";
     else editableStatus = undefined;
 
-    console.log("| ",
-    "\n exp:        ", exp,
-    //"\n expression  ", mf.current?.expression.json,
-    "\n exp.length: ", exp.length,
-    "\n pos:        ", pos,
-    "\n selStart:   ", selStart,
-    "\n selEnd:     ", selEnd,
-    "\n ... editableStatus: ", editableStatus
-    );
+
+    // console.log("| clicked mixed fraction button |",
+    // // "\n exp:        ", exp,
+    // // "\n exp.length: ", exp.length,
+    // "\n pos:        ", pos,
+    // "\n selStart:   ", selStart,
+    // "\n selEnd:     ", selEnd,
+    // "\n ... editableStatus: ", editableStatus
+    // );
 
     const ph = "\\placeholder{}";
     const emptyFrac = `\\frac{${ph}}{${ph}}}`;
-
-    /* testing substrings has limited use here, instead we should
-    consider navigating the cursor and selection among groups in the mathfield */
 
     if (editableStatus === "empty"){
       mf.current?.executeCommand(
@@ -100,10 +99,32 @@ export const ExpressionToolbar: React.FC<IProps> = observer((
       );
     }
 
+    /**
+     * cases
+     *  1. cursor in middle of content: works
+     *  2. cursor at end of content: __
+     *  3. cursor at beginning of content: __
+     */
     else if (editableStatus === "cursorInContent"){
-      mf.current?.executeCommand(
-        ["insert", ph + emptyFrac, {insertionMode: "insertAfter"}]
+      const locale = pos === 0 ? "beginning" : (pos === exp.length ? "end" : "middle");
+      const parsed = ce.parse(exp);
+      console.log("| clicked mixed fraction button |",
+        "\n initial exp:        ", exp,
+        "\n exp.length: ", exp.length,
+        "\n ... editableStatus: ", editableStatus,
+        "\n pos:          ", pos,
+        "\n selStart:     ", selStart,
+        "\n selEnd:       ", selEnd,
+        "\n cursorlocale: ", locale,
+        "\n parsedLatex:  ", parsed.latex,
       );
+
+
+      // works if cursor really in the middle of the content
+      // mf.current?.executeCommand(
+      //   ["insert", "+" + ph + emptyFrac + "+", {insertionMode: "insertAfter"}]
+      // );
+      //console.log("| resulting exp |", mf.current?.getValue());
     }
 
     else if (editableStatus === "someSelected"){
@@ -127,6 +148,13 @@ export const ExpressionToolbar: React.FC<IProps> = observer((
     mf.current?.focus();
   };
 
+  /*
+  an addition to this approach could be to check the math json/evaluation if possible for errors
+  and insert a placeholder if there is an error
+  however that would break the plan, so put it in a separate function
+  in fact all this insertion should be abstracted to a function so it can happen with other buttons
+
+  */
   return documentContent
     ? ReactDOM.createPortal(
       <div className={toolbarClasses} style={location}>
