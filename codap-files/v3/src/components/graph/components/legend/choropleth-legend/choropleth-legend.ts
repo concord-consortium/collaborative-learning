@@ -13,7 +13,7 @@ import {
   scaleLinear,
   format,
   // range,
-  select, range, min, max, ScaleQuantile
+  select, range, min, max, ScaleQuantile, NumberValue
 } from "d3"
 import {kChoroplethHeight} from "../../../graphing-types"
 import {neededSigDigitsArrayForQuantiles} from "../../../../../utilities/math-utils"
@@ -40,7 +40,7 @@ export function choroplethLegend(scale: ChoroplethScale, choroplethElt: SVGGElem
     minValue = min(scale.domain()) ?? 0,
     maxValue = max(scale.domain()) ?? 0
 
-  let tickFormat: string | ((i: number) => string) = '.2r',
+  let tickFormat: string | ((i: NumberValue) => string) = '.2r',
     tickValues: number[] = []
 
   select(choroplethElt).selectAll("*").remove()
@@ -82,7 +82,7 @@ export function choroplethLegend(scale: ChoroplethScale, choroplethElt: SVGGElem
     })
 
   tickValues = range(thresholds.length)
-  tickFormat = (i: number) => thresholdFormat(thresholds[i])
+  tickFormat = (i: NumberValue) => thresholdFormat(thresholds[Number(i)])
 
   svg.append("g")
     .attr('class', 'legend-axis')
@@ -99,14 +99,12 @@ export function choroplethLegend(scale: ChoroplethScale, choroplethElt: SVGGElem
     .selectAll('text')
     .data([Number(minValue), Number(maxValue)])
     .join(
-      // @ts-expect-error void => Selection
-      (enter) => {
+      (enter) =>
         enter.append('text')
           .attr('y', kChoroplethHeight)
           .style('text-anchor', (d, i) => i ? 'end' : 'start')
           .attr('x', (d, i) => i * width)
           .text((d, i) => format(`.${significantDigits[i === 0 ? 0 : 5]}r`)(d))
-      }
     )
 
   return svg.node()

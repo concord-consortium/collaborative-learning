@@ -1,15 +1,19 @@
 import {extent, format, select, timeout} from "d3"
 import React from "react"
 import {isInteger} from "lodash"
-import {CaseData, kGraphFont, Point, Rect, rTreeRect, transitionDuration} from "../graphing-types"
+import {CaseData, DotsElt, selectCircles, selectDots} from "../d3-types"
+import {IDotsRef, kGraphFont, Point, Rect, rTreeRect, transitionDuration} from "../graphing-types"
 import {between} from "../../../utilities/math-utils"
-import {IAxisModel, INumericAxisModel} from "../../axis/models/axis-model"
+import {IAxisModel, isNumericAxisModel} from "../../axis/models/axis-model"
 import {ScaleNumericBaseType} from "../../axis/axis-types"
 import {IDataSet} from "../../../models/data/data-set"
-import {Bounds} from "../models/graph-layout"
 import {
-  defaultSelectedColor, defaultSelectedStroke, defaultSelectedStrokeOpacity,
-  defaultSelectedStrokeWidth, defaultStrokeOpacity, defaultStrokeWidth
+  defaultSelectedColor,
+  defaultSelectedStroke,
+  defaultSelectedStrokeOpacity,
+  defaultSelectedStrokeWidth,
+  defaultStrokeOpacity,
+  defaultStrokeWidth
 } from "../../../utilities/color-utils"
 import {IDataConfigurationModel} from "../models/data-configuration-model"
 import {measureText} from "../../../hooks/use-measure-text"
@@ -92,10 +96,10 @@ export function computeNiceNumericBounds(min: number, max: number): { min: numbe
 }
 
 export function setNiceDomain(values: number[], axisModel: IAxisModel) {
-  if (axisModel.type === 'numeric') {
+  if (isNumericAxisModel(axisModel)) {
     const [minValue, maxValue] = extent(values, d => d) as [number, number]
     const {min: niceMin, max: niceMax} = computeNiceNumericBounds(minValue, maxValue)
-    ;(axisModel as INumericAxisModel).setDomain(niceMin, niceMax)
+    axisModel.setDomain(niceMin, niceMax)
   }
 }
 
@@ -104,11 +108,10 @@ export function getPointTipText(caseID: string, attributeIDs: string[], dataset?
     attrArray = (attributeIDs.map(attrID => {
       const attribute = dataset?.attrFromID(attrID),
         name = attribute?.name,
-        isNumeric = attribute?.type === 'numeric',
-        value = isNumeric
-          ? float(dataset?.getNumeric(caseID, attrID) ?? 0)
-          : dataset?.getValue(caseID, attrID)
-      return (value && (isNumeric && isFinite(value)) || (!isNumeric && value !== '')) ? `${name}: ${value}` : ''
+        numValue = dataset?.getNumeric(caseID, attrID),
+        value = numValue != null && isFinite(numValue) ? float(numValue)
+                  : dataset?.getValue(caseID, attrID)
+      return value ? `${name}: ${value}` : ''
     }))
   // Caption attribute can also be one of the plotted attributes, so we remove dups and join into html string
   return Array.from(new Set(attrArray)).filter(anEntry => anEntry !== '').join('<br>')
@@ -130,7 +133,7 @@ export function handleClickOnDot(event: MouseEvent, caseID: string, dataset?: ID
 
 export interface IMatchCirclesProps {
   dataConfiguration: IDataConfigurationModel
-  dotsElement: SVGGElement | null
+  dotsElement: DotsElt
   pointRadius: number
   pointColor: string
   pointStrokeColor: string
@@ -143,26 +146,24 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
   const {dataConfiguration, enableAnimation, instanceId,
       dotsElement, pointRadius, pointColor, pointStrokeColor} = props,
     allCaseData = dataConfiguration.joinedCaseDataArrays,
-    caseDataKeyFunc = (d: CaseData) => `${d.plotNum}-${d.caseID}`
+    caseDataKeyFunc = (d: CaseData) => `${d.plotNum}-${d.caseID}`,
+    circles = selectCircles(dotsElement)
+  if (!circles) return
   startAnimation(enableAnimation)
-  select(dotsElement)
-    .selectAll('circle')
+  circles
     .data(allCaseData, caseDataKeyFunc)
     .join(
-      // @ts-expect-error void => Selection
-      (enter) => {
+      (enter) =>
         enter.append('circle')
           .attr('class', 'graph-dot')
-          .property('id', (anID: string) => `${instanceId}_${anID}`)
-      },
-      (update) => {
+          .property('id', (d: CaseData) => `${instanceId}_${d.caseID}`),
+      (update) =>
         update.attr('r', pointRadius)
           .style('fill', pointColor)
           .style('stroke', pointStrokeColor)
           .style('stroke-width', defaultStrokeWidth)
-      }
     )
-  select(dotsElement).on('click',
+  dotsElement && select(dotsElement).on('click',
     (event: MouseEvent) => {
       const target = select(event.target as SVGSVGElement)
       if (target.node()?.nodeName === 'circle') {
@@ -351,7 +352,7 @@ export function getScreenCoord(dataSet: IDataSet | undefined, id: string,
 }
 
 export interface ISetPointSelection {
-  dotsRef: React.RefObject<SVGSVGElement>
+  dotsRef: IDotsRef
   dataConfiguration: IDataConfigurationModel
   pointRadius: number,
   selectedPointRadius: number,
@@ -365,13 +366,14 @@ export function setPointSelection(props: ISetPointSelection) {
     {dotsRef, dataConfiguration, pointRadius, selectedPointRadius,
       pointColor, pointStrokeColor, getPointColorAtIndex} = props,
     dataset = dataConfiguration.dataset,
-    dotsSvgElement = dotsRef.current,
-    dots = select(dotsSvgElement),
+    dots = selectCircles(dotsRef.current),
     legendID = dataConfiguration.attributeID('legend')
+
+  if (!(dotsRef.current && dots)) return
+
   // First set the class based on selection
-  dots.selectAll('circle')
-    .classed('graph-dot-highlighted',
-      (aCaseData: CaseData) => !!(dataset?.isCaseSelected(aCaseData.caseID)))
+  dots
+    .classed('graph-dot-highlighted', (aCaseData: CaseData) => !!dataset?.isCaseSelected(aCaseData.caseID))
     // Then set properties to defaults w/o selection
     .attr('r', pointRadius)
     .style('stroke', pointStrokeColor)
@@ -384,37 +386,32 @@ export function setPointSelection(props: ISetPointSelection) {
     .style('stroke-width', defaultStrokeWidth)
     .style('stroke-opacity', defaultStrokeOpacity)
 
-  const selectedDots = dots.selectAll('.graph-dot-highlighted')
+  const selectedDots = selectDots(dotsRef.current, true)
   // How we deal with this depends on whether there is a legend or not
   if (legendID) {
-    selectedDots
-      .style('stroke', defaultSelectedStroke)
+    selectedDots?.style('stroke', defaultSelectedStroke)
       .style('stroke-width', defaultSelectedStrokeWidth)
       .style('stroke-opacity', defaultSelectedStrokeOpacity)
   } else {
-    selectedDots
-      .style('fill', defaultSelectedColor)
+    selectedDots?.style('fill', defaultSelectedColor)
   }
-  selectedDots
-    .attr('r', selectedPointRadius)
+  selectedDots?.attr('r', selectedPointRadius)
     .raise()
 }
 
 export interface ISetPointCoordinates {
   dataset?: IDataSet
-  dotsRef: React.RefObject<SVGSVGElement>
+  dotsRef: IDotsRef
   selectedOnly?: boolean
   pointRadius: number
   selectedPointRadius: number
   pointColor: string
   pointStrokeColor: string
   getPointColorAtIndex?: (index: number) => string
-  plotBounds: Bounds
   getScreenX: ((anID: string) => number | null)
   getScreenY: ((anID: string, plotNum?:number) => number | null)
   getLegendColor?: ((anID: string) => string)
   enableAnimation: React.MutableRefObject<boolean>
-  onComplete?: () => void
 }
 
 export function setPointCoordinates(props: ISetPointCoordinates) {
@@ -430,15 +427,11 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
     },
 
     setPoints = () => {
-      const duration = enableAnimation.current ? transitionDuration : 0,
-        transform = `translate(${plotBounds.left}, ${plotBounds.top})`
 
-      if (theSelection.size() > 0) {
+      if (theSelection?.size()) {
         theSelection
-          .attr('transform', transform)
           .transition()
           .duration(duration)
-          .on('end', (id, i) => (i === theSelection.size() - 1) && onComplete())
           .attr('cx', (aCaseData: CaseData) => getScreenX(aCaseData.caseID))
           .attr('cy', (aCaseData: CaseData) => {
             return getScreenY(aCaseData.caseID, aCaseData.plotNum)
@@ -459,15 +452,10 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
     {
       dataset, dotsRef, selectedOnly = false, pointRadius, selectedPointRadius,
       pointStrokeColor, pointColor, getPointColorAtIndex,
-      plotBounds, getScreenX, getScreenY, getLegendColor, enableAnimation,
-      onComplete = (() => {
-        if (enableAnimation.current) {
-          setPoints()
-          enableAnimation.current = false
-        }
-      })
+      getScreenX, getScreenY, getLegendColor, enableAnimation
     } = props,
+    duration = enableAnimation.current ? transitionDuration : 0,
 
-    theSelection = select(dotsRef.current).selectAll(selectedOnly ? '.graph-dot-highlighted' : '.graph-dot')
+    theSelection = selectDots(dotsRef.current, selectedOnly)
   setPoints()
 }

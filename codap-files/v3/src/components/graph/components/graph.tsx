@@ -1,5 +1,4 @@
 import {observer} from "mobx-react-lite"
-import {onAction} from "mobx-state-tree"
 import React, {MutableRefObject, useEffect, useMemo, useRef} from "react"
 import {select} from "d3"
 import {GraphController} from "../models/graph-controller"
@@ -8,7 +7,7 @@ import {Background} from "./background"
 import {DroppablePlot} from "./droppable-plot"
 import {AxisPlace, AxisPlaces} from "../../axis/axis-types"
 import {GraphAxis} from "./graph-axis"
-import {attrRoleToGraphPlace, GraphPlace, graphPlaceToAttrRole, kGraphClass} from "../graphing-types"
+import {attrRoleToGraphPlace, graphPlaceToAttrRole, IDotsRef, kGraphClass} from "../graphing-types"
 import {ScatterDots} from "./scatterdots"
 import {DotPlotDots} from "./dotplotdots"
 import {CaseDots} from "./casedots"
@@ -19,24 +18,28 @@ import {useDataSetContext} from "../../../hooks/use-data-set-context"
 import {useGraphModel} from "../hooks/use-graph-model"
 import {setNiceDomain, startAnimation} from "../utilities/graph-utils"
 import {IAxisModel} from "../../axis/models/axis-model"
+import {GraphPlace} from "../../axis-graph-shared"
 import {useGraphLayoutContext} from "../models/graph-layout"
 import {isSetAttributeIDAction, useGraphModelContext} from "../models/graph-model"
 import {useInstanceIdContext} from "../../../hooks/use-instance-id-context"
 import {MarqueeState} from "../models/marquee-state"
 import {Legend} from "./legend/legend"
 import {AttributeType} from "../../../models/data/attribute"
+import {IDataSet} from "../../../models/data/data-set"
 import {useDataTips} from "../hooks/use-data-tips"
+import {onAnyAction} from "../../../utilities/mst-utils"
 
 import "./graph.scss"
 
 interface IProps {
   graphController: GraphController
   graphRef: MutableRefObject<HTMLDivElement>
+  dotsRef: IDotsRef
 }
 
-export const Graph = observer(function Graph({graphController, graphRef}: IProps) {
+export const Graph = observer(function Graph({graphController, graphRef, dotsRef}: IProps) {
   const graphModel = useGraphModelContext(),
-    { enableAnimation, dotsRef } = graphController,
+    {enableAnimation} = graphController,
     {plotType} = graphModel,
     instanceId = useInstanceIdContext(),
     marqueeState = useMemo<MarqueeState>(() => new MarqueeState(), []),
@@ -49,25 +52,21 @@ export const Graph = observer(function Graph({graphController, graphRef}: IProps
     xAttrID = graphModel.getAttributeID('x'),
     yAttrID = graphModel.getAttributeID('y')
 
-  useGraphModel({dotsRef, graphModel, enableAnimation, instanceId})
-
   useEffect(function setupPlotArea() {
     if (xScale && xScale?.length > 0) {
-      const plotBounds = layout.getComputedBounds('plot'),
-        transform = `translate(${plotBounds?.left}, ${plotBounds?.top})`
+      const plotBounds = layout.getComputedBounds('plot')
       select(plotAreaSVGRef.current)
-        .attr('transform', transform)
-        .attr('x', 0 /*xScale?.length*/)
-        .attr('y', 0)
+        .attr('x', plotBounds?.left || 0)
+        .attr('y', plotBounds?.top || 0)
         .attr('width', layout.plotWidth)
         .attr('height', layout.plotHeight)
     }
   }, [dataset, plotAreaSVGRef, layout, layout.plotHeight, layout.plotWidth, xScale])
 
-  const handleChangeAttribute = (place: GraphPlace, attrId: string) => {
+  const handleChangeAttribute = (place: GraphPlace, dataSet: IDataSet, attrId: string) => {
     const computedPlace = place === 'plot' && graphModel.config.noAttributesAssigned ? 'bottom' : place
     const attrRole = graphPlaceToAttrRole[computedPlace]
-    graphModel.setAttributeID(attrRole, attrId)
+    graphModel.setAttributeID(attrRole, dataSet.id, attrId)
   }
 
   /**
@@ -80,29 +79,29 @@ export const Graph = observer(function Graph({graphController, graphRef}: IProps
       const yAxisModel = graphModel.getAxis('left') as IAxisModel
       setNiceDomain(graphModel.config.numericValuesForAttrRole('y'), yAxisModel)
     } else {
-      handleChangeAttribute(place, '')
+      dataset && handleChangeAttribute(place, dataset, '')
     }
   }
 
   // respond to assignment of new attribute ID
   useEffect(function handleNewAttributeID() {
-    const disposer = graphModel && onAction(graphModel, action => {
+    const disposer = graphModel && onAnyAction(graphModel, action => {
       if (isSetAttributeIDAction(action)) {
-        const [role, attrID] = action.args,
+        const [role, dataSetId, attrID] = action.args,
           graphPlace = attrRoleToGraphPlace[role]
         startAnimation(enableAnimation)
-        graphPlace && graphController?.handleAttributeAssignment(graphPlace, attrID)
+        graphPlace && graphController?.handleAttributeAssignment(graphPlace, dataSetId, attrID)
       }
-    }, true)
+    })
     return () => disposer?.()
   }, [graphController, dataset, layout, enableAnimation, graphModel])
 
   const handleTreatAttrAs = (place: GraphPlace, attrId: string, treatAs: AttributeType) => {
     graphModel.config.setAttributeType(graphPlaceToAttrRole[place], treatAs)
-    graphController?.handleAttributeAssignment(place, attrId)
+    dataset && graphController?.handleAttributeAssignment(place, dataset.id, attrId)
   }
 
-  useDataTips(dotsRef, dataset, graphModel)
+  useDataTips({dotsRef, dataset, graphModel, enableAnimation})
 
   const renderPlotComponent = () => {
     const props = {
@@ -135,20 +134,26 @@ export const Graph = observer(function Graph({graphController, graphRef}: IProps
   const renderDroppableAddAttributes = () => {
     const droppables: JSX.Element[] = []
     if (plotType !== 'casePlot') {
-      const places = ['top', 'rightCat'].concat(plotType=== 'scatterPlot' ? ['yPlus', 'rightNumeric'] : [])
+      const plotPlaces: GraphPlace[] = plotType === 'scatterPlot' ? ['yPlus', 'rightNumeric'] : []
+      const places: GraphPlace[] = ['top', 'rightCat', ...plotPlaces]
       places.forEach((place: GraphPlace) => {
-        droppables.push(
-          <DroppableAddAttribute
-            key={place}
-            place={place}
-            plotType={plotType}
-            onDrop={handleChangeAttribute.bind(null, place)}
-          />
-        )
+        // Since an axis is already a droppable, we only need to render a droppable if there is no axis
+        if (!graphModel.getAxis(place as AxisPlace)) {
+          droppables.push(
+            <DroppableAddAttribute
+              key={place}
+              place={place}
+              plotType={plotType}
+              onDrop={handleChangeAttribute.bind(null, place)}
+            />
+          )
+        }
       })
     }
     return droppables
   }
+
+  useGraphModel({dotsRef, graphModel, enableAnimation, instanceId})
 
   return (
     <DataConfigurationContext.Provider value={graphModel.config}>

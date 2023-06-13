@@ -1,4 +1,5 @@
-import {Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree"
+import {reaction} from "mobx"
+import {addDisposer, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree"
 import {createContext, useContext} from "react"
 import {AxisPlace} from "../../axis/axis-types"
 import {AxisModelUnion, EmptyAxisModel, IAxisModelUnion} from "../../axis/models/axis-model"
@@ -8,10 +9,14 @@ import {
   pointRadiusLogBase, pointRadiusMax, pointRadiusMin, pointRadiusSelectionAddend
 } from "../graphing-types"
 import {DataConfigurationModel} from "./data-configuration-model"
-import {IDataSet} from "../../../models/data/data-set"
+import {
+  ISharedDataSet, isSharedDataSet, kSharedDataSetType, SharedDataSet
+} from "../../../models/shared/shared-data-set"
+import {
+  getDataSetFromId, getTileCaseMetadata, getTileDataSet, isTileLinkedToDataSet, linkTileToDataSet
+} from "../../../models/shared/shared-data-utils"
 import {ISharedModel} from "../../../models/shared/shared-model"
-import { ISharedCaseMetadata, isSharedCaseMetadata } from "../../../models/shared/shared-case-metadata"
-import {isSharedDataSet} from "../../../models/shared/shared-data-set"
+import {SharedModelChangeType} from "../../../models/shared/shared-model-manager"
 import {ITileContentModel, TileContentModel} from "../../../models/tiles/tile-content"
 import {
   defaultBackgroundColor,
@@ -60,15 +65,11 @@ export const GraphModel = TileContentModel
     showMeasuresForSelection: false
   })
   .views(self => ({
-    get data(): IDataSet | undefined {
-      const sharedModelManager = self.tileEnv?.sharedModelManager
-      const sharedModel = sharedModelManager?.getTileSharedModels(self).find(m => isSharedDataSet(m))
-      return isSharedDataSet(sharedModel) ? sharedModel.dataSet : undefined
+    get data() {
+      return getTileDataSet(self)
     },
-    get metadata(): ISharedCaseMetadata | undefined {
-      const sharedModelManager = self.tileEnv?.sharedModelManager
-      const sharedModel = sharedModelManager?.getTileSharedModels(self).find(m => isSharedCaseMetadata(m))
-      return isSharedCaseMetadata(sharedModel) ? sharedModel : undefined
+    get metadata() {
+      return getTileCaseMetadata(self)
     },
     pointColorAtIndex(plotIndex = 0) {
       return self._pointColors[plotIndex] ?? kellyColors[plotIndex % kellyColors.length]
@@ -108,13 +109,60 @@ export const GraphModel = TileContentModel
     }
   }))
   .actions(self => ({
-    updateAfterSharedModelChanges(sharedModel?: ISharedModel) {
-      // TODO
+    afterAttachToDocument() {
+      // Monitor our parents and update our shared model when we have a document parent
+      addDisposer(self, reaction(() => {
+        const sharedModelManager = self.tileEnv?.sharedModelManager
+
+        const sharedDataSets: ISharedDataSet[] = sharedModelManager?.isReady
+          ? sharedModelManager?.getSharedModelsByType<typeof SharedDataSet>(kSharedDataSetType) ?? []
+          : []
+
+        const tileSharedModels = sharedModelManager?.isReady
+          ? sharedModelManager?.getTileSharedModels(self)
+          : undefined
+
+        return { sharedModelManager, sharedDataSets, tileSharedModels }
+      },
+      // reaction/effect
+      ({sharedModelManager, sharedDataSets, tileSharedModels}) => {
+        if (!sharedModelManager?.isReady) {
+          // We aren't added to a document yet so we can't do anything yet
+          return
+        }
+
+        const tileDataSet = getTileDataSet(self)
+        if (self.data || self.metadata) {
+          self.config.setDataset(self.data, self.metadata)
+        }
+        // auto-link to DataSet if we aren't currently linked and there's only one available
+        else if (!tileDataSet && sharedDataSets.length === 1) {
+          linkTileToDataSet(self, sharedDataSets[0].dataSet)
+        }
+      },
+      {name: "sharedModelSetup", fireImmediately: true}))
+    },
+    updateAfterSharedModelChanges(sharedModel: ISharedModel | undefined, type: SharedModelChangeType) {
+      if (type === "link") {
+        self.config.setDataset(self.data, self.metadata)
+      }
+      else if (type === "unlink" && isSharedDataSet(sharedModel)) {
+        self.config.setDataset(undefined, undefined)
+      }
     },
     setAxis(place: AxisPlace, axis: IAxisModelUnion) {
       self.axes.set(place, axis)
     },
-    setAttributeID(role: GraphAttrRole, id: string) {
+    removeAxis(place: AxisPlace) {
+      self.axes.delete(place)
+    },
+    setAttributeID(role: GraphAttrRole, dataSetID: string, id: string) {
+      const newDataSet = getDataSetFromId(self, dataSetID)
+      if (newDataSet && !isTileLinkedToDataSet(self, newDataSet)) {
+        linkTileToDataSet(self, newDataSet)
+        self.config.clearAttributes()
+        self.config.setDataset(newDataSet, getTileCaseMetadata(self))
+      }
       if (role === 'yPlus') {
         self.config.addYAttribute({attributeID: id})
       } else {
@@ -170,7 +218,7 @@ export function createGraphModel(snap?: IGraphModelSnapshot) {
 
 export interface SetAttributeIDAction extends ISerializedActionCall {
   name: "setAttributeID"
-  args: [GraphAttrRole, string]
+  args: [GraphAttrRole, string, string]
 }
 
 export function isSetAttributeIDAction(action: ISerializedActionCall): action is SetAttributeIDAction {

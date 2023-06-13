@@ -1,19 +1,22 @@
 import { Menu, MenuItem, MenuList, MenuButton, MenuDivider } from "@chakra-ui/react"
 import React, { CSSProperties, useRef, memo } from "react"
-import { GraphPlace, graphPlaceToAttrRole } from "../../graph/graphing-types"
+import t from "../../../utilities/translation/translate"
+import {GraphPlace} from "../../axis-graph-shared"
+import { graphPlaceToAttrRole } from "../../graph/graphing-types"
 import { useDataConfigurationContext } from "../../graph/hooks/use-data-configuration-context"
 import { useDataSetContext } from "../../../hooks/use-data-set-context"
 import { useOutsidePointerDown } from "../../../hooks/use-outside-pointer-down"
 import { useOverlayBounds } from "../../../hooks/use-overlay-bounds"
-import t from "../../../utilities/translation/translate"
+import { AttributeType } from "../../../models/data/attribute"
+import { IDataSet } from "../../../models/data/data-set"
 
 interface IProps {
   place: GraphPlace,
   target: SVGGElement | null
   portal: HTMLElement | null
-  onChangeAttribute: (place: GraphPlace, attrId: string) => void
+  onChangeAttribute: (place: GraphPlace, dataSet: IDataSet, attrId: string) => void
   onRemoveAttribute: (place: GraphPlace, attrId: string) => void
-  onTreatAttributeAs: (place: GraphPlace, attrId: string, treatAs: string) => void
+  onTreatAttributeAs: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void
 }
 
 const removeAttrItemLabelKeys: Record<string, string> = {
@@ -44,7 +47,7 @@ const _AxisOrLegendAttributeMenu = ({ place, target, portal,
   return (
     <div className={`axis-legend-attribute-menu ${place}`} ref={menuRef}>
       <Menu>
-        {({ isOpen, onClose }) => {
+        {({ onClose }) => {
           onCloseRef.current = onClose
           return (
             <>
@@ -52,7 +55,7 @@ const _AxisOrLegendAttributeMenu = ({ place, target, portal,
               <MenuList>
                 { data?.attributes?.map((attr) => {
                   return (
-                    <MenuItem onClick={() => onChangeAttribute(place, attr.id)} key={attr.id}>
+                    <MenuItem onClick={() => onChangeAttribute(place, data, attr.id)} key={attr.id}>
                       {attr.name}
                     </MenuItem>
                   )
