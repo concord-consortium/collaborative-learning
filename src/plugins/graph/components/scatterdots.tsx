@@ -6,11 +6,11 @@ import {PlotProps} from "../graph-types";
 import {useDragHandlers, usePlotResponders} from "../hooks/use-plot";
 import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
 import {useDataSetContext} from "../hooks/use-data-set-context";
-// import {useInstanceIdContext} from "../hooks/use-instance-id-context";
+import {useInstanceIdContext} from "../hooks/use-instance-id-context";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {ICase} from "../../../models/data/data-set-types";
 import {
-  // getScreenCoord,
+  getScreenCoord,
   handleClickOnDot,
   setPointCoordinates,
   setPointSelection,
@@ -192,6 +192,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
   }, [dataConfiguration, dataset, dotsRef, layout, legendAttrID,
     enableAnimation, graphModel, yScaleRef]);
 
+  // TODO: Leave this commented out? It's not in CODAP.
   // const refreshPointPositionsSVG = useCallback((selectedOnly: boolean) => {
   //   const xAttrID = dataConfiguration?.attributeID('x') ?? '',
   //     {joinedCaseDataArrays, selection} = dataConfiguration || {},
@@ -222,7 +223,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
   }, [refreshPointPositionsD3]);
 
   usePlotResponders({
-    graphModel, layout, dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation
+    dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation
   });
 
   return (

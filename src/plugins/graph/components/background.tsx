@@ -3,7 +3,7 @@ import React, {forwardRef, MutableRefObject, useCallback, useEffect, useMemo, us
 import {drag, select, color, range} from "d3";
 import RTreeLib from 'rtree';
 type RTree = ReturnType<typeof RTreeLib>
-import {CaseData} from "../d3-types"; // TODO: ??
+import {CaseData} from "../d3-types";
 import {InternalizedData, rTreeRect} from "../graph-types";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {rectangleSubtract, rectNormalize} from "../utilities/graph-utils";

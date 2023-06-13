@@ -1,6 +1,7 @@
 import React from "react";
 import {IGraphModel} from "./graph-model";
 import {GraphLayout} from "./graph-layout";
+import {getDataSetFromId} from "../../../utilities/shared-data-utils";
 import {AxisPlace, AxisPlaces} from "../axis/axis-types";
 import {
   CategoricalAxisModel, EmptyAxisModel, isCategoricalAxisModel, isNumericAxisModel, NumericAxisModel
@@ -33,6 +34,7 @@ interface IGraphControllerProps {
 
 export class GraphController {
   graphModel?: IGraphModel;
+  dotsRef?: IDotsRef;
   layout: GraphLayout;
   enableAnimation: React.MutableRefObject<boolean>;
   instanceId: string;
@@ -47,18 +49,29 @@ export class GraphController {
 
   setProperties(props: IGraphControllerProps) {
     this.graphModel = props.graphModel;
+    this.dotsRef = props.dotsRef;
     if (this.graphModel.config.dataset !== this.graphModel.data) {
-      this.graphModel.config.setDataset(this.graphModel.data);
+      this.graphModel.config.setDataset(this.graphModel.data, this.graphModel.metadata);
     }
-    this.initializeGraph(props.dotsRef);
+    this.initializeGraph();
   }
 
-  initializeGraph(dotsRef: IDotsRef) {
-    const {graphModel,
-      enableAnimation,
-      instanceId, layout} = this,
+  callMatchCirclesToData() {
+    const {graphModel, dotsRef, enableAnimation, instanceId} = this;
+    if (graphModel && dotsRef?.current) {
+      const { config: dataConfiguration, pointColor, pointStrokeColor } = graphModel,
+        pointRadius = graphModel.getPointRadius();
+      matchCirclesToData({
+        dataConfiguration, dotsElement: dotsRef.current,
+        pointRadius, enableAnimation, instanceId, pointColor, pointStrokeColor
+      });
+    }
+  }
+
+  initializeGraph() {
+    const {graphModel, dotsRef, layout} = this,
       dataConfig = graphModel?.config;
-    if (dataConfig && layout && dotsRef.current) {
+    if (dataConfig && layout && dotsRef?.current) {
       AxisPlaces.forEach((axisPlace: AxisPlace) => {
         const axisModel = graphModel.getAxis(axisPlace),
           attrRole = axisPlaceToAttrRole[axisPlace];
@@ -66,31 +79,27 @@ export class GraphController {
           layout.setAxisScaleType(axisPlace, axisModel.scale);
           const axisMultiScale = layout.getAxisMultiScale(axisPlace);
           if (isCategoricalAxisModel(axisModel)) {
-            axisMultiScale.setCategoricalDomain(dataConfig.categorySetForAttrRole(attrRole) ?? []);
+            layout.getAxisMultiScale(axisPlace)?.setCategorySet(dataConfig.categorySetForAttrRole(attrRole));
           }
           if (isNumericAxisModel(axisModel)) {
             axisMultiScale.setNumericDomain(axisModel.domain);
           }
         }
       });
-      matchCirclesToData({
-        dataConfiguration: dataConfig, dotsElement: dotsRef.current,
-        pointRadius: graphModel.getPointRadius(), enableAnimation, instanceId,
-        pointColor: graphModel.pointColor,
-        pointStrokeColor: graphModel.pointStrokeColor
-      });
+      this.callMatchCirclesToData();
     }
   }
 
-  handleAttributeAssignment(graphPlace: GraphPlace, attrID: string) {
+  handleAttributeAssignment(graphPlace: GraphPlace, dataSetID: string, attrID: string) {
     const {graphModel, layout} = this,
-      dataConfig = graphModel?.config,
-      dataset = graphModel?.data,
-      appConfig = getAppConfig(graphModel);
+      dataset = getDataSetFromId(graphModel, dataSetID),
+      appConfig = getAppConfig(graphModel),
+      dataConfig = graphModel?.config;
     const emptyPlotIsNumeric = appConfig?.getSetting("emptyPlotIsNumeric", "graph");
-    if (!(layout && dataConfig && dataset)) {
+    if (!(graphModel && layout && dataConfig && dataset)) {
       return;
     }
+    this.callMatchCirclesToData();
     if (['plot', 'legend'].includes(graphPlace)) {
       // Since there is no axis associated with the legend and the plotType will not change, we bail
       return;
@@ -146,26 +155,22 @@ export class GraphController {
         }
           break;
         case 'categorical': {
-          const setOfValues = dataConfig.categorySetForAttrRole(attrRole);
           if (currentType !== 'categorical') {
             const newAxisModel = CategoricalAxisModel.create({place});
             graphModel.setAxis(place, newAxisModel);
             layout.setAxisScaleType(place, 'band');
           }
-          layout.getAxisMultiScale(place)?.setCategoricalDomain(setOfValues);
+          layout.getAxisMultiScale(place)?.setCategorySet(dataConfig.categorySetForAttrRole(attrRole));
         }
           break;
         case 'empty': {
           if (currentType !== 'empty') {
+            layout.setAxisScaleType(place, 'ordinal');
             if (!['left', 'bottom'].includes(place)) {
-              layout.setAxisScaleType(place, 'ordinal');
-              graphModel.removeAxis(place);
+              graphModel.setAxis(place, EmptyAxisModel.create({place}));
             }
             else {
-              const newAxisModel = emptyPlotIsNumeric
-                                     ? NumericAxisModel.create({place, min, max})
-                                     : EmptyAxisModel.create({place});
-              graphModel.setAxis(place, newAxisModel);
+              graphModel.removeAxis(place);
             }
           }
         }

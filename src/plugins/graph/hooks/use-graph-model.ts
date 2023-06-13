@@ -16,6 +16,7 @@ interface IProps {
 export function useGraphModel(props: IProps) {
   const {graphModel, enableAnimation, dotsRef, instanceId} = props,
     dataConfig = graphModel.config,
+    yAxisModel = graphModel.getAxis('left'),
     yAttrID = graphModel.getAttributeID('y'),
     dataset = useDataSetContext();
 
@@ -30,10 +31,6 @@ export function useGraphModel(props: IProps) {
     });
   }, [dataConfig, graphModel, dotsRef, enableAnimation, instanceId]);
 
-  useEffect(function createCircles() {
-    callMatchCirclesToData();
-  }, [callMatchCirclesToData, dataConfig.caseDataArray]);
-
   // respond to change in plotType
   useEffect(function installPlotTypeAction() {
     const disposer = onAnyAction(graphModel, action => {
@@ -43,14 +40,13 @@ export function useGraphModel(props: IProps) {
         startAnimation(enableAnimation);
         // In case the y-values have changed we rescale
         if (newPlotType === 'scatterPlot') {
-          const yAxisModel = graphModel.getAxis('left');
           const values = dataConfig.caseDataArray.map(({ caseID }) => dataset?.getNumeric(caseID, yAttrID)) as number[];
           setNiceDomain(values || [], yAxisModel as INumericAxisModel);
         }
       }
     });
     return () => disposer();
-  }, [dataConfig.caseDataArray, dataset, enableAnimation, graphModel, yAttrID]);
+  }, [dataConfig.caseDataArray, dataset, enableAnimation, graphModel, yAttrID, yAxisModel]);
 
   // respond to point properties change
   useEffect(function respondToGraphPointVisualAction() {

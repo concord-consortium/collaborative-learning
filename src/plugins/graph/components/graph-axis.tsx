@@ -1,21 +1,21 @@
-import React, {MutableRefObject, useCallback, useEffect} from "react";
+import React, {MutableRefObject, useCallback, useEffect, useRef, useState} from "react";
 import {observer} from "mobx-react-lite";
 import {isAlive} from "mobx-state-tree";
 import {Active} from "@dnd-kit/core";
 import {useInstanceIdContext} from "../hooks/use-instance-id-context";
 import {AttributeType} from "../../../models/data/attribute";
+import {IDataSet} from "../../../models/data/data-set";
 import {useGraphModelContext} from "../models/graph-model";
 import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
 import {useGraphLayoutContext} from "../models/graph-layout";
-import {getDragAttributeId, useDropHandler} from "../hooks/use-drag-drop";
+import {getDragAttributeInfo, useDropHandler} from "../hooks/use-drag-drop";
 import {AxisPlace} from "../axis/axis-types";
 import {Axis} from "../axis/components/axis";
 import {axisPlaceToAttrRole, kGraphClassSelector} from "../graph-types";
 import {GraphPlace} from "../axis-graph-shared";
-import {DroppableAxis} from "../axis/components/droppable-axis";
+import {DroppableAxis} from "./droppable-axis";
 import {AttributeLabel} from "./attribute-label";
 import {useDropHintString} from "../hooks/use-drop-hint-string";
-import {useAxisBoundsProvider} from "../axis/hooks/use-axis-bounds";
 import { isAddCasesAction, isSetCaseValuesAction } from "../../../models/data/data-set-actions";
 import { computeNiceNumericBounds } from "../utilities/graph-utils";
 import { IAxisModel, isNumericAxisModel } from "../axis/models/axis-model";
@@ -25,7 +25,7 @@ interface IProps {
   place: AxisPlace
   enableAnimation: MutableRefObject<boolean>
   autoAdjust?: React.MutableRefObject<boolean>
-  onDropAttribute?: (place: GraphPlace, attrId: string) => void
+  onDropAttribute?: (place: GraphPlace, dataSet: IDataSet, attrId: string) => void
   onRemoveAttribute?: (place: GraphPlace, attrId: string) => void
   onTreatAttributeAs?: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void
 }
@@ -43,21 +43,29 @@ export const GraphAxis = observer(function GraphAxis({
     emptyPlotIsNumeric = useSettingFromStores("emptyPlotIsNumeric", "graph") as boolean | undefined,
     axisShouldShowGridlines = emptyPlotIsNumeric || graphModel.axisShouldShowGridLines(place);
 
+  const parentEltRef = useRef<HTMLDivElement | null>(null),
+    [wrapperElt, _setWrapperElt] = useState<SVGGElement | null>(null),
+    setWrapperElt = useCallback((elt: SVGGElement | null) => {
+      parentEltRef.current = elt?.closest(kGraphClassSelector) as HTMLDivElement ?? null;
+      _setWrapperElt(elt);
+    }, []);
+
   const handleIsActive = (active: Active) => {
-    const droppedAttrId = getDragAttributeId(active) ?? '';
+    const {dataSet, attributeId: droppedAttrId} = getDragAttributeInfo(active) || {};
     if (isDropAllowed) {
-      return isDropAllowed(place, droppedAttrId);
+      return isDropAllowed(place, dataSet, droppedAttrId);
     } else {
       return !!droppedAttrId;
     }
   };
 
-  const {parentElt, wrapperElt,
-    setWrapperElt} = useAxisBoundsProvider(place, kGraphClassSelector);
+  // const {parentElt, wrapperElt,
+  //   setWrapperElt} = useAxisBoundsProvider(place, kGraphClassSelector);
 
   useDropHandler(droppableId, active => {
-    const droppedAttrId = getDragAttributeId(active);
-    droppedAttrId && isDropAllowed(place, droppedAttrId) && onDropAttribute?.(place, droppedAttrId);
+    const {dataSet, attributeId: droppedAttrId} = getDragAttributeInfo(active) || {};
+    dataSet && droppedAttrId && isDropAllowed(place, dataSet, droppedAttrId) &&
+    onDropAttribute?.(place, dataSet, droppedAttrId);
   });
 
   useEffect(() => {
@@ -112,6 +120,7 @@ export const GraphAxis = observer(function GraphAxis({
       <Axis getAxisModel={getAxisModel}
             label={''}  // Remove
             enableAnimation={enableAnimation}
+            // TODO: Should this be graphModel.axisShouldShowGridLines(place)?
             showScatterPlotGridLines={axisShouldShowGridlines}
             centerCategoryLabels={graphModel.config.categoriesForAxisShouldBeCentered(place)}
       />
@@ -126,7 +135,7 @@ export const GraphAxis = observer(function GraphAxis({
             place={`${place}`}
             dropId={droppableId}
             hintString={hintString}
-            portal={parentElt}
+            portal={parentEltRef.current}
             target={wrapperElt}
             onIsActive={handleIsActive}
          />}

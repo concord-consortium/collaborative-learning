@@ -17,8 +17,8 @@ interface IProps {
 
 export const Axis = ({
                         label, getAxisModel, showScatterPlotGridLines = false,
-                        centerCategoryLabels = true,
-                        enableAnimation
+                        enableAnimation,
+                        centerCategoryLabels = true
 }: IProps) => {
   const
     axisModel = getAxisModel(),

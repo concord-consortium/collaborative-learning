@@ -1,8 +1,9 @@
-import {action, computed, makeObservable, observable} from "mobx";
+import {action, autorun, computed, IReactionDisposer, makeObservable, observable} from "mobx";
 import {
   format, NumberValue, ScaleBand, scaleBand, scaleLinear, scaleLog, ScaleOrdinal, scaleOrdinal
 } from "d3";
 import {AxisScaleType, IScaleType, ScaleNumericBaseType} from "../axis-types";
+import {ICategorySet} from "../../../../models/data/category-set";
 
 interface IDataCoordinate {
   cell: number
@@ -45,14 +46,22 @@ export class MultiScale {
   @observable length = 0;
   @observable orientation: "horizontal" | "vertical";
   @observable changeCount = 0;
+  @observable categorySet: ICategorySet | undefined;
+
   // Subaxes copy this scale to do their rendering because they need to change the range.
   scale: AxisScaleType;  // d3 scale whose range is the entire axis length.
+  disposers: IReactionDisposer[] = [];
 
   constructor({scaleType, orientation}: IMultiScaleProps) {
     this.scaleType = scaleType;
     this.orientation = orientation;
     this.scale = scaleTypeToD3Scale(scaleType);
     makeObservable(this);
+    this.disposers.push(this.reactToCategorySetChange());
+  }
+
+  cleanup() {
+    this.disposers.forEach(disposer => disposer());
   }
 
   @computed get numericScale() {
@@ -85,6 +94,10 @@ export class MultiScale {
     return this.scale.range();
   }
 
+  @computed get categorySetValues() {
+    return this.categorySet?.values ?? [];
+  }
+
   _setRangeFromLength() {
     this.scale.range(this.orientation === 'horizontal' ? [0, this.length] : [this.length, 0]);
   }
@@ -95,6 +108,12 @@ export class MultiScale {
       this.scale = scaleTypeToD3Scale(scaleType);
       this._setRangeFromLength();
     }
+  }
+
+  @action setCategorySet(categorySet: ICategorySet | undefined) {
+    this.categorySet = categorySet;
+    this.categoricalScale?.domain(categorySet?.values ?? []);
+    this.incrementChangeCount();
   }
 
   @action setLength(length: number) {
@@ -113,6 +132,16 @@ export class MultiScale {
   @action setCategoricalDomain(domain: Iterable<string>) {
     this.categoricalScale?.domain(domain);
     this.incrementChangeCount();
+  }
+
+  @action reactToCategorySetChange() {
+    return autorun(() => {
+      const categories = this.categorySetValues;
+      if (categories?.length) {
+        this.setCategoricalDomain(categories);
+        this.incrementChangeCount();
+      }
+    });
   }
 
   @action incrementChangeCount() {
