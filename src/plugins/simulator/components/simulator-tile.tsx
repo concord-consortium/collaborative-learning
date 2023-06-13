@@ -1,8 +1,10 @@
+import { VariableType } from "@concord-consortium/diagram-view";
 import { observer } from "mobx-react";
 import React/*, { useRef }*/ from "react";
 
-import { ITileProps } from "../../../components/tiles/tile-component";
+import { brainwavesGrabberVariables } from "../simulations/brainwaves-grabber";
 import { SimulatorContentModelType } from "../model/simulator-content";
+import { ITileProps } from "../../../components/tiles/tile-component";
 
 import "./simulator-tile.scss";
 
@@ -54,6 +56,29 @@ export const SimulatorToolComponent: React.FC<ITileProps> = observer((props) => 
   //     {/* <textarea value={content.text} onChange={handleChange} /> */}
   //   </div>
   // );
-  return <p>Wow a simulator tile! {content}</p>;
+
+  const displayVariables = brainwavesGrabberVariables;
+
+  interface IVariableRowProps {
+    key?: string;
+    variable?: VariableType;
+  }
+  const VariableRow = ({ key, variable }: IVariableRowProps) => {
+    const display = variable ? `${variable.name}: ${variable.value}` : "";
+    return (
+      <p>
+        {display}
+      </p>
+    );
+  };
+
+  return (
+    <>
+      <h3>Wow a simulator tile!</h3>
+      {displayVariables.map(
+        variable => <VariableRow variable={content?.getVariable(variable.name)} key={variable.name} />
+      )}
+    </>
+  );
 });
 SimulatorToolComponent.displayName = "SimulatorToolComponent";
