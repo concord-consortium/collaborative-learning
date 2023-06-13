@@ -37,4 +37,11 @@ export const expressionButtonsList = [
     baseLatex: mixedFrac,
     // icon: MixedFractionIcon // can't seem to pass this
   },
+  {
+    name: "mixedFractionSmart",
+    title: "Mixed Fraction Smart",
+    className: "mixed-fraction-smart",
+    baseLatex: `$#@\\frac{${ph}}{${ph}}`
+    // icon: MixedFractionIcon // can't seem to pass this
+  },
 ];

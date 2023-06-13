@@ -25,6 +25,7 @@ interface AddMathTextButtonProps {
 
 const iconSvgs = {
   "mixedFraction": <MixedFractionIcon />,
+  "mixedFractionSmart": <MixedFractionIcon />,
   "divisionSymbol": <DivisionSymbolIcon />
 };
 

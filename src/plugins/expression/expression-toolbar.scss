@@ -35,4 +35,10 @@
   .division-symbol svg {
     transform: scale(0.9) translateY(1px);
   }
+  .mixed-fraction-smart {
+    background-color: rgb(175, 121, 175);
+    svg {
+      transform: scale(0.9) translate(-2px, 2px);
+    }
+  }
 }
