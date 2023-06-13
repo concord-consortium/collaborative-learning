@@ -22,24 +22,15 @@ function getEditableStatus(mf: MathfieldElement): string | undefined {
 
 export function getMixedFractionCommandArray(mf: MathfieldElement ) {
   const editableStatus = getEditableStatus(mf);
-  console.log("|editableStatus|", editableStatus)
   const ph = "\\placeholder{}";
   const emptyFrac = `\\frac{${ph}}{${ph}}}`;
+  const mixedFrac = `${ph}\\frac{${ph}}{${ph}}`
 
-  switch (editableStatus) {
-    case "empty":
-      return ["insert", `#@${emptyFrac}`, { insertionMode: "replaceAll" }];
+  let insertMode: "replaceAll" | "insertAfter" | "replaceSelection" = "replaceAll";
+  if (editableStatus === "cursor") insertMode = "insertAfter";
+  if (editableStatus === "some") insertMode = "replaceSelection";
 
-    case "all":
-      return ["insert", `#@${emptyFrac}`, { insertionMode: "replaceAll" }];
-
-    case "cursor":
-      return ["insert", `${ph}${emptyFrac}`, { insertionMode: "insertAfter" }];
-
-    case "some":
-      return ["insert", `${ph}${emptyFrac}`, { insertionMode: "replaceSelection" }];
-
-  }
+  return ["insert", mixedFrac, {insertionMode: insertMode}]
 }
 
 export function getDivisionCommandArray(mf: MathfieldElement){
