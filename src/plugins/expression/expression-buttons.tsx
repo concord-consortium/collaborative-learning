@@ -8,7 +8,8 @@ import "./expression-toolbar.scss";
 
 interface IconButtonProps {
   className?: string;
-  onClick: (evt: React.MouseEvent) => void;
+  onClick?: (evt: React.MouseEvent | string) => void;
+  buttonName?: string;
 }
 
 export const DeleteExpressionButton = (props: IconButtonProps) => {
@@ -40,6 +41,21 @@ export const MixedFractionButton = (props: IconButtonProps) => {
     </Tooltip>
   );
 };
+
+export const AddMathTextButton = (props: IconButtonProps) => {
+  const tooltipOptions = useTooltipOptions({
+    distance: 5,
+    offset: 5
+  });
+
+  return (
+    <Tooltip title="Add math text" {...tooltipOptions}>
+      <ExpressionButton {...props}>
+        <span>ABC</span>
+      </ExpressionButton>
+    </Tooltip>
+  );
+}
 
 const ExpressionButton: React.FC<IconButtonProps> = ({ children, className, ...others }) => {
   return (

@@ -6,11 +6,11 @@ import {
   IFloatingToolbarProps, useFloatingToolbarLocation
 } from "../../components/tiles/hooks/use-floating-toolbar-location";
 import { ExpressionContentModelType } from "./expression-content";
-import { getMixedFractionCommandArray, getDivisionCommandArray } from "./expression-tile-utils";
+import { getCommand } from "./expression-tile-utils";
 import { ITileModel } from "../../models/tiles/tile-model";
 
 import "./expression-toolbar.scss";
-import { DeleteExpressionButton, MixedFractionButton } from "./expression-buttons";
+import { DeleteExpressionButton, MixedFractionButton, AddMathTextButton } from "./expression-buttons";
 import { MathfieldElement } from "mathlive";
 
 interface IProps extends IFloatingToolbarProps {
@@ -50,6 +50,13 @@ export const ExpressionToolbar: React.FC<IProps> = observer((
     enabled ? "enabled" : "disabled",
   );
 
+  const addMathTextButtonClasses = (buttonName: string) => {
+    return classNames(
+      buttonName,
+      enabled ? "enabled" : "disabled",
+    );
+  };
+
   const deleteExpression = () => {
     content.setLatexStr("");
     mf && mf.current?.focus();
@@ -57,17 +64,25 @@ export const ExpressionToolbar: React.FC<IProps> = observer((
 
   const addMixedFraction = () => {
     if (!(mf && mf.current)) return;
-    const c = getMixedFractionCommandArray(mf.current)
+    const c = getCommand(mf.current, "mixedFraction")
     mf.current.executeCommand(c as any);
     mf.current?.focus();
   };
 
   const addDivisionSymbol = () => {
     if (!(mf && mf.current)) return;
-    const c = getDivisionCommandArray(mf.current)
+    const c = getCommand(mf.current, "divisionSymbol")
     mf.current.executeCommand(c as any);
     mf.current?.focus();
   };
+
+  const addMathText = (buttonName: string) => {
+    if (!(mf && mf.current)) return;
+    const c = getCommand(mf.current, buttonName)
+    mf.current.executeCommand(c as any);
+    mf.current?.focus();
+  };
+
 
   return documentContent
     ? ReactDOM.createPortal(
@@ -75,6 +90,8 @@ export const ExpressionToolbar: React.FC<IProps> = observer((
         <div className="toolbar-content">
           <DeleteExpressionButton onClick={deleteExpression} className={deleteButtonClasses} />
           <MixedFractionButton onClick={addMixedFraction} className={mixedFractionButtonClasses} />
+        {/* FINISH IMPLEMENTING THIS IN THE MORNING */}
+          {/* <AddMathTextButton buttonName="mixedFraction" onClick={addMathText("mixedFraction") as any} className={addMathTextButtonClasses("mixedFraction")} /> */}
           <button onClick={addDivisionSymbol}>÷</button>
         </div>
       </div>, documentContent)

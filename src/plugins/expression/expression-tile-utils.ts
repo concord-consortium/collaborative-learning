@@ -1,5 +1,16 @@
 import { MathfieldElement } from 'mathlive';
 
+const ph = "\\placeholder{}";
+const emptyFrac = `\\frac{${ph}}{${ph}}}`;
+const mixedFrac = `${ph}\\frac{${ph}}{${ph}}`
+const divSign = "\\div";
+const multSign = "\\times";
+const divisionEmpty = `${ph}${divSign}${ph}`;
+const multEmpty = `${ph}${multSign}${ph}`;
+
+type SelectStatus = "empty" | "all" | "some" | "cursor" | undefined;
+type InsertModeString = "replaceAll" | "insertAfter" | "replaceSelection";
+
 export function replaceKeyBinding(bindings: any[], keyPress: string, command: string) {
   const index = bindings.findIndex(binding => binding.key === keyPress);
   if (index >= 0) {
@@ -7,7 +18,7 @@ export function replaceKeyBinding(bindings: any[], keyPress: string, command: st
   }
 }
 
-function getEditableStatus(mf: MathfieldElement): string | undefined {
+function getSelectStatus(mf: MathfieldElement): SelectStatus {
   const exp = mf.value;
   const selStart = mf.selection.ranges[0][0];
   const selEnd = mf.selection.ranges[0][1];
@@ -20,22 +31,19 @@ function getEditableStatus(mf: MathfieldElement): string | undefined {
   return undefined;
 }
 
-export function getMixedFractionCommandArray(mf: MathfieldElement ) {
-  const editableStatus = getEditableStatus(mf);
-  const ph = "\\placeholder{}";
-  const emptyFrac = `\\frac{${ph}}{${ph}}}`;
-  const mixedFrac = `${ph}\\frac{${ph}}{${ph}}`
+export function getCommand(mf: MathfieldElement, buttonName: string) {
+  const selectStatus = getSelectStatus(mf);
 
-  let insertMode: "replaceAll" | "insertAfter" | "replaceSelection" = "replaceAll";
-  if (editableStatus === "cursor") insertMode = "insertAfter";
-  if (editableStatus === "some") insertMode = "replaceSelection";
+  const insertString = buttonName === "mixedFraction" ? mixedFrac : divisionEmpty;
 
-  return ["insert", mixedFrac, {insertionMode: insertMode}]
+  let insertMode: InsertModeString = "replaceAll";
+  if (selectStatus === "cursor") insertMode = "insertAfter";
+  if (selectStatus === "some") insertMode = "replaceSelection";
+
+  return ["insert", insertString, {insertionMode: insertMode}]
 }
 
-export function getDivisionCommandArray(mf: MathfieldElement){
-  const editableStatus = getEditableStatus(mf);
-  const ph = "\\placeholder{}";
-  const divSign = "\\div";
-  return ["insert", `#@${ph}${divSign}${ph}`, {insertionMode: "replaceAll"}]
-}
+// export function getDivisionCommandArray(mf: MathfieldElement){
+//   const SelectStatus = getSelectStatus(mf);
+//   return ["insert", `#@${ph}${divSign}${ph}`, {insertionMode: "replaceAll"}]
+// }
