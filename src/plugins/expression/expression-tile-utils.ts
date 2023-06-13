@@ -8,6 +8,23 @@ const multSign = "\\times";
 const divisionEmpty = `${ph}${divSign}${ph}`;
 const multEmpty = `${ph}${multSign}${ph}`;
 
+export const expressionButtonsList = [
+  {
+    name: "mixedFraction",
+    title: "Mixed Fraction",
+    icon: "mixed-fraction",
+    className: "mixed-fraction",
+    baseLatex: "\\frac{\\placeholder{}}{\\placeholder{}}"
+  },
+  {
+    name: "divisionSymbol",
+    title: "Division Symbol",
+    icon: "division-symbol",
+    className: "division-symbol",
+    baseLatex: "\\placeholder{}\\div\\placeholder{}"
+  },
+];
+
 type SelectStatus = "empty" | "all" | "some" | "cursor" | undefined;
 type InsertModeString = "replaceAll" | "insertAfter" | "replaceSelection";
 

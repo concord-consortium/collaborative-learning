@@ -6,11 +6,11 @@ import {
   IFloatingToolbarProps, useFloatingToolbarLocation
 } from "../../components/tiles/hooks/use-floating-toolbar-location";
 import { ExpressionContentModelType } from "./expression-content";
-import { getCommand } from "./expression-tile-utils";
+import { getCommand, expressionButtonsList } from "./expression-tile-utils";
 import { ITileModel } from "../../models/tiles/tile-model";
 
 import "./expression-toolbar.scss";
-import { DeleteExpressionButton, MixedFractionButton, AddMathTextButton } from "./expression-buttons";
+import { DeleteExpressionButton, AddMathTextButton } from "./expression-buttons";
 import { MathfieldElement } from "mathlive";
 
 interface IProps extends IFloatingToolbarProps {
@@ -45,54 +45,29 @@ export const ExpressionToolbar: React.FC<IProps> = observer((
     enabled ? "enabled" : "disabled",
   );
 
-  const mixedFractionButtonClasses = classNames(
-    "mixed-fraction",
-    enabled ? "enabled" : "disabled",
-  );
-
-  const addMathTextButtonClasses = (buttonName: string) => {
-    return classNames(
-      buttonName,
-      enabled ? "enabled" : "disabled",
-    );
-  };
-
   const deleteExpression = () => {
     content.setLatexStr("");
     mf && mf.current?.focus();
   };
 
-  const addMixedFraction = () => {
-    if (!(mf && mf.current)) return;
-    const c = getCommand(mf.current, "mixedFraction")
-    mf.current.executeCommand(c as any);
-    mf.current?.focus();
-  };
-
-  const addDivisionSymbol = () => {
-    if (!(mf && mf.current)) return;
-    const c = getCommand(mf.current, "divisionSymbol")
-    mf.current.executeCommand(c as any);
-    mf.current?.focus();
-  };
-
-  const addMathText = (buttonName: string) => {
-    if (!(mf && mf.current)) return;
-    const c = getCommand(mf.current, buttonName)
-    mf.current.executeCommand(c as any);
-    mf.current?.focus();
-  };
-
+  console.log("| expressionButtonsList: ", expressionButtonsList)
 
   return documentContent
     ? ReactDOM.createPortal(
       <div className={toolbarClasses} style={location}>
         <div className="toolbar-content">
-          <DeleteExpressionButton onClick={deleteExpression} className={deleteButtonClasses} />
-          <MixedFractionButton onClick={addMixedFraction} className={mixedFractionButtonClasses} />
-        {/* FINISH IMPLEMENTING THIS IN THE MORNING */}
-          {/* <AddMathTextButton buttonName="mixedFraction" onClick={addMathText("mixedFraction") as any} className={addMathTextButtonClasses("mixedFraction")} /> */}
-          <button onClick={addDivisionSymbol}>÷</button>
+          {expressionButtonsList.map((btn) => {
+            return (<AddMathTextButton
+              key={btn.name}
+              buttonName={btn.name}
+              enabled={enabled}
+              mf={mf}
+            />);
+          })}
+          <DeleteExpressionButton
+            onClick={deleteExpression}
+            className={deleteButtonClasses}
+          />
         </div>
       </div>, documentContent)
   : null;
