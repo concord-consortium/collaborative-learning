@@ -44,8 +44,9 @@ export const SharedVariables = SharedModel.named("SharedVariables")
       insertVariable(addedVariable);
     }
   },
-  createVariable(): VariableType {
-    const variable = Variable.create();
+  // TODO: VariableSnapshotType
+  createVariable(snapshot?: any): VariableType {
+    const variable = Variable.create(snapshot);
     self.addVariable(variable);
     return variable;
   },
