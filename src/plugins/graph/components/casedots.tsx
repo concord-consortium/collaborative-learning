@@ -128,7 +128,7 @@ export const CaseDots = function CaseDots(props: {
   }, [dataset]);
 
   usePlotResponders({
-    graphModel, dotsRef, layout, refreshPointPositions, refreshPointSelection, enableAnimation
+    dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation
   });
 
   return (

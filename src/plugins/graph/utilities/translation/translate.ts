@@ -10,7 +10,8 @@ const translations: Record<string, string> = {
   "DG.DataDisplayMenu.removeAttribute_top": "Remove Side-by-side Layout by %@", // %@ = attribute name
   "DG.DataDisplayMenu.removeAttribute_right": "Remove Vertical Layout by %@", // %@ = attribute name
   "DG.DataDisplayMenu.treatAsCategorical": "Treat as Categorical",
-  "DG.DataDisplayMenu.treatAsNumeric": "Treat as Numeric"
+  "DG.DataDisplayMenu.treatAsNumeric": "Treat as Numeric",
+  "DG.CellAxis.dragCategory": "Click and drag to reorder categories"
 };
 
 // supports named variables (e.g. %{foo}) and SproutCore numbered variables (e.g. %@1)

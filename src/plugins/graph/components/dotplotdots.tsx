@@ -240,12 +240,15 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
         },
         getSecondaryScreenCoord = (anID: string) => {
           if (!binMap[anID]) {
-            return NaN;
+            return null; // Not NaN because NaN causes errors during transitions
           }
           const secondaryCat = binMap[anID].category,
             extraSecondaryCat = binMap[anID].extraCategory,
-            indexInBin = binMap[anID].indexInBin;
-          return binMap[anID] ? computeSecondaryCoord({secondaryCat, extraSecondaryCat, indexInBin}) : null;
+            indexInBin = binMap[anID].indexInBin,
+            onePixelOffset = primaryIsBottom ? -1 : 1; // Separate circles from axis line by 1 pixel
+            return binMap[anID]
+              ? computeSecondaryCoord({secondaryCat, extraSecondaryCat, indexInBin}) + onePixelOffset
+              : null;
         },
         getScreenX = primaryIsBottom ? getPrimaryScreenCoord : getSecondaryScreenCoord,
         getScreenY = primaryIsBottom ? getSecondaryScreenCoord : getPrimaryScreenCoord,
@@ -262,9 +265,7 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
     [graphModel, dataConfiguration, layout, primaryAttrRole, secondaryAttrRole, dataset, dotsRef,
       enableAnimation, primaryIsBottom, pointColor, pointStrokeColor]);
 
-  usePlotResponders({
-    graphModel, layout, dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation
-  });
+  usePlotResponders({dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation});
 
   return (
     <>

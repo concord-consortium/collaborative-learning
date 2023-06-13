@@ -1,5 +1,5 @@
 import React from "react";
-import { AxisPlace } from "./axis/axis-types";
+import {AxisPlace} from "./axis/axis-types";
 import {GraphPlace} from "./axis-graph-shared";
 import {DotsElt} from "./d3-types";
 

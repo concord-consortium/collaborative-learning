@@ -1,11 +1,37 @@
+import { IAnyStateTreeNode } from "@concord-consortium/mobx-state-tree";
 import { IDataSet } from "../models/data/data-set";
-import { isSharedDataSet, SharedDataSet } from "../models/shared/shared-data-set";
+import { ISharedCaseMetadata, isSharedCaseMetadata, kSharedCaseMetadataType, SharedCaseMetadata } from "../models/shared/shared-case-metadata";
+import {
+  isSharedDataSet, kSharedDataSetType, SharedDataSet, SharedDataSetType
+} from "../models/shared/shared-data-set";
+import { ITileContentModel } from "../models/tiles/tile-content";
 import { getSharedModelManager } from "../models/tiles/tile-environment";
 import { ITileModel } from "../models/tiles/tile-model";
 
-export function getTileSharedModels(tile: ITileModel) {
+export function getSharedDataSets(node: IAnyStateTreeNode): SharedDataSetType[] {
+  const sharedModelManager = getSharedModelManager(node);
+  return sharedModelManager?.getSharedModelsByType<typeof SharedDataSet>(kSharedDataSetType) ?? [];
+}
+
+export function getDataSetFromId(node: IAnyStateTreeNode, id: string): IDataSet | undefined {
+  const sharedDataSets = getSharedDataSets(node);
+  const sharedDataSet = sharedDataSets.find(model => model.dataSet.id === id);
+  return sharedDataSet?.dataSet;
+}
+
+export function getTileSharedModels(tile: ITileContentModel) {
   const sharedModelManager = getSharedModelManager(tile);
   return sharedModelManager?.getTileSharedModels(tile) ?? [];
+}
+
+export function getTileDataSet(tile: ITileContentModel): IDataSet | undefined {
+  const sharedDataSet = getTileSharedModels(tile).find(m => isSharedDataSet(m));
+  return isSharedDataSet(sharedDataSet) ? sharedDataSet.dataSet : undefined;
+}
+
+export function getTileCaseMetadata(tile: ITileContentModel) {
+  const sharedCaseMetadata = getTileSharedModels(tile).find(m => isSharedCaseMetadata(m));
+  return isSharedCaseMetadata(sharedCaseMetadata) ? sharedCaseMetadata : undefined;
 }
 
 export const isLinkedToTile = (model: ITileModel, tileId: string) => {
@@ -29,12 +55,17 @@ export const isLinkedToTile = (model: ITileModel, tileId: string) => {
   return false;
 };
 
-export function isTileLinkedToOtherDataSet(tile: ITileModel, dataSet: IDataSet) {
+export function isTileLinkedToDataSet(tile: ITileContentModel, dataSet: IDataSet) {
+  const sharedModels = getTileSharedModels(tile);
+  return !!sharedModels.find(sharedModel => isSharedDataSet(sharedModel) && sharedModel.dataSet.id === dataSet.id);
+}
+
+export function isTileLinkedToOtherDataSet(tile: ITileContentModel, dataSet: IDataSet) {
   const sharedModels = getTileSharedModels(tile);
   return !!sharedModels.find(sharedModel => isSharedDataSet(sharedModel) && sharedModel.dataSet.id !== dataSet.id);
 }
 
-export function unlinkTileFromDataSets(tile: ITileModel) {
+export function unlinkTileFromDataSets(tile: ITileContentModel) {
   const sharedModelManager = getSharedModelManager(tile);
   const sharedModels = sharedModelManager?.getTileSharedModels(tile);
   sharedModels?.forEach(sharedModel => {
@@ -42,4 +73,22 @@ export function unlinkTileFromDataSets(tile: ITileModel) {
       sharedModelManager?.removeTileSharedModel(tile, sharedModel);
     }
   });
+}
+
+export function linkTileToDataSet(tile: ITileContentModel, dataSet: IDataSet) {
+  if (isTileLinkedToOtherDataSet(tile, dataSet)) {
+    unlinkTileFromDataSets(tile);
+  }
+
+  const sharedModelManager = getSharedModelManager(tile);
+  const sharedDataSets = sharedModelManager?.getSharedModelsByType<typeof SharedDataSet>(kSharedDataSetType);
+  const sharedDataSet = sharedDataSets?.find(model => model.dataSet.id === dataSet.id) as SharedDataSetType | undefined;
+  if (sharedModelManager && sharedDataSet) {
+    sharedModelManager.addTileSharedModel(tile, sharedDataSet);
+
+    const sharedMetadata = sharedModelManager.getSharedModelsByType<typeof SharedCaseMetadata>(kSharedCaseMetadataType);
+    const sharedCaseMetadata: ISharedCaseMetadata | undefined =
+            sharedMetadata.find(model => model.data?.id === dataSet.id);
+    sharedCaseMetadata && sharedModelManager.addTileSharedModel(tile, sharedCaseMetadata);
+  }
 }
