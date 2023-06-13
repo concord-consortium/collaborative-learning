@@ -44,7 +44,6 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     model, readOnly, documentContent, tileElt, scale } = props;
   const content = model.content as ExpressionContentModelType;
   const mf = useRef<MathfieldElement>(null);
-  const mfReplaced = useRef<MathfieldElement>(null);
   const trackedCursorPos = useRef<number>(0);
   const ui = useUIStore();
 
@@ -71,8 +70,14 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     trackedCursorPos.current =  mf.current?.position || 0;
     const mfLatex = (e.target as MathfieldElement).value;
     const replacedLatex = replaceLatex(mfLatex);
-    mfReplaced?.current?.setValue(replacedLatex);
-    content.setLatexStr(mfLatex);
+    trackedCursorPos.current =  mf.current?.position || 0;
+    if (mf.current?.value){
+      mf.current.value = replacedLatex;
+    }
+    if (mf.current?.position){
+      mf.current.position = trackedCursorPos?.current; //restore cursor position
+    }
+    content.setLatexStr(replacedLatex);
   };
 
   // It seems that changes `value` property of the math-field element are
@@ -105,6 +110,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
         scale={scale}
         {...toolbarProps}
       />
+
       <div className="expression-title-area">
         <CustomEditableTileTitle
           model={model}
@@ -114,7 +120,6 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
       </div>
       <div className="expression-math-area">
         <math-field {...mathfieldAttributes} />
-        <math-field ref={mfReplaced} readOnly={true} value={initialReplacedLatex}/>
       </div>
     </div>
   );

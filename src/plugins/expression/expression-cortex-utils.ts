@@ -65,7 +65,7 @@ export function replaceMissingElements(latex: string, missingElements: any[]) {
   let prevIndex = 0;
   for (const missingIndex of missingIndexes) {
     parts.push(latex.slice(prevIndex, missingIndex));
-    parts.push('\\error{\\placeholder{}}');
+    parts.push('\\placeholder{}');
     prevIndex = missingIndex;
   }
   // Add the last part
