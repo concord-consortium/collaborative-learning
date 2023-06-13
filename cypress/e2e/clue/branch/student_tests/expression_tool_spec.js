@@ -53,6 +53,18 @@ context('Expression Tool Tile', function () {
       exp.getMathField().invoke("val", "a=\\theta r^3");
       exp.getMathFieldMath().should("contain", "θ");
     });
+    it("can create a mixed fraction with the button", () => {
+      exp.clearValue();
+      exp.getMathField().eq(0).click({force: true});
+      exp.getMixedFractionButton().eq(0).click();
+      exp.getMathField().eq(0).should("have.value", "\\placeholder{}\\frac{\\placeholder{}}{\\placeholder{}}");
+    });
+    it("can add an empty division expression with the button", () => {
+      exp.clearValue();
+      exp.getMathField().eq(0).click({force: true});
+      exp.getDivisionButton().eq(0).click();
+      exp.getMathField().eq(0).should("have.value", "\\placeholder{}\\div\\placeholder{}");
+    });
     it("should name new expressions with an incrementing id", () => {
       clueCanvas.addTile("expression");
       cy.contains("(Eq. 1)").should("exist");
