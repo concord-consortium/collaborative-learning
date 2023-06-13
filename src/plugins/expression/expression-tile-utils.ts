@@ -1,32 +1,5 @@
 import { MathfieldElement } from 'mathlive';
-
-const ph = "\\placeholder{}";
-const emptyFrac = `\\frac{${ph}}{${ph}}}`;
-const mixedFrac = `${ph}\\frac{${ph}}{${ph}}`
-const divSign = "\\div";
-const multSign = "\\times";
-const divisionEmpty = `${ph}${divSign}${ph}`;
-const multEmpty = `${ph}${multSign}${ph}`;
-
-export const expressionButtonsList = [
-  {
-    name: "mixedFraction",
-    title: "Mixed Fraction",
-    icon: "mixed-fraction",
-    className: "mixed-fraction",
-    baseLatex: "\\frac{\\placeholder{}}{\\placeholder{}}"
-  },
-  {
-    name: "divisionSymbol",
-    title: "Division Symbol",
-    icon: "division-symbol",
-    className: "division-symbol",
-    baseLatex: "\\placeholder{}\\div\\placeholder{}"
-  },
-];
-
-type SelectStatus = "empty" | "all" | "some" | "cursor" | undefined;
-type InsertModeString = "replaceAll" | "insertAfter" | "replaceSelection";
+import { SelectStatus, InsertModeString, expressionButtonsList } from './expression-types';
 
 export function replaceKeyBinding(bindings: any[], keyPress: string, command: string) {
   const index = bindings.findIndex(binding => binding.key === keyPress);
@@ -50,17 +23,13 @@ function getSelectStatus(mf: MathfieldElement): SelectStatus {
 
 export function getCommand(mf: MathfieldElement, buttonName: string) {
   const selectStatus = getSelectStatus(mf);
-
-  const insertString = buttonName === "mixedFraction" ? mixedFrac : divisionEmpty;
-
+  const button = expressionButtonsList.find(b => b.name === buttonName);
+  const insertString = button?.baseLatex;
   let insertMode: InsertModeString = "replaceAll";
   if (selectStatus === "cursor") insertMode = "insertAfter";
   if (selectStatus === "some") insertMode = "replaceSelection";
 
+  // TODO (?) - add logic to handle cases where a tokenized version is preferred
+
   return ["insert", insertString, {insertionMode: insertMode}]
 }
-
-// export function getDivisionCommandArray(mf: MathfieldElement){
-//   const SelectStatus = getSelectStatus(mf);
-//   return ["insert", `#@${ph}${divSign}${ph}`, {insertionMode: "replaceAll"}]
-// }

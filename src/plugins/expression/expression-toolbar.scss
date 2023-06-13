@@ -8,30 +8,31 @@
     display:none;
   }
 
-  // TODO - standardize this - starts with svgs
   button {
-    padding: 0px;
-    margin:0px;
-    border:3px dotted red;
-    padding: 3px;
-    background:transparent;
-    width: 34px;
-    height: 34px;
-    cursor:pointer;
+    height: 100%;
+    width: 37px;
+    background-color: white;
+    border: none;
+    cursor: pointer;
+    padding:4px;
     &:hover {
       background-color: $workspace-teal-light-5;
       border-radius: 0px 0px 2px 2px;
     }
-
-    svg {
-      fill: white;
-      stroke: $workspace-teal-dark-1;
-    }
   }
 
-  .mixed-fraction {
-    svg {
-      transform: scale(0.6);
-    }
+  svg {
+    width: 29px;
+    height: 26px;
+  }
+
+  .delete-expression svg {
+    transform: translate(-3px, -2px);
+  }
+  .mixed-fraction svg {
+    transform: scale(0.9) translate(-2px, 2px);
+  }
+  .division-symbol svg {
+    transform: scale(0.9) translateY(1px);
   }
 }

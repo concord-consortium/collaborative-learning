@@ -5,7 +5,7 @@
         <g id="Expression-Tile" transform="translate(-102, -23)">
             <g id="mixed-fraction-tool" transform="translate(93, 17)">
                 <polygon id="Path" points="0 0 36 0 36 34 0 34"></polygon>
-                <g id="mixed-fraction-icon" transform="translate(9, 6)" fill="#707070" fill-rule="nonzero">
+                <g id="mixed-fraction-icon" transform="translate(9, 6)" fill="#545454" fill-rule="nonzero">
                     <rect id="Rectangle" x="0" y="2.2" width="8.786358" height="16.8018012" rx="1"></rect>
                     <rect id="Rectangle" x="10.9009006" y=".5" width="7.95152322" height="9.54182786" rx="1"></rect>
                     <rect id="Rectangle" x="10.9009006" y="11.9581721" width="7.95152322" height="9.54182786" rx="1"></rect>
@@ -14,3 +14,4 @@
         </g>
     </g>
 </svg>
+
