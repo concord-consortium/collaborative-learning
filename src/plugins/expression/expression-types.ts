@@ -22,26 +22,18 @@ export const latexStrings = {
   multEmpty
 };
 
-// TODO - how to define icons here without extra map step, see "icon" below
+// Note: #@ token replaced by any highlighted value, otherwise placeholder
 export const expressionButtonsList = [
   {
     name: "divisionSymbol",
     title: "Division Symbol",
     className: "division-symbol",
-    baseLatex: divSign
+    baseLatex: `$#@${divSign}${ph}`
   },
   {
     name: "mixedFraction",
     title: "Mixed Fraction",
     className: "mixed-fraction",
-    baseLatex: mixedFrac,
-    // icon: MixedFractionIcon // can't seem to pass this
-  },
-  {
-    name: "mixedFractionSmart",
-    title: "Mixed Fraction Smart",
-    className: "mixed-fraction-smart",
     baseLatex: `$#@\\frac{${ph}}{${ph}}`
-    // icon: MixedFractionIcon // can't seem to pass this
-  },
+  }
 ];

@@ -42,6 +42,15 @@ class ExpressionToolTile {
   getDeleteExpressionButton = () => {
     return cy.get(`.canvas-area .expression-toolbar .delete-expression`);
   };
+  getMixedFractionButton = () => {
+    return cy.get(`.canvas-area .expression-toolbar .mixed-fraction`);
+  };
+  getDivisionButton = () => {
+    return cy.get(`.canvas-area .expression-toolbar .division-symbol`);
+  };
+  clearValue = () => {
+    this.getMathField().invoke("val", "");
+  };
 }
 
 export default ExpressionToolTile;
