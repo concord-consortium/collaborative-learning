@@ -37,12 +37,12 @@ export const AddMathTextButton = (props: AddMathTextButtonProps) => {
   const buttonClasses = classNames(
     "add-math-text",
     button?.className,
-    props.enabled ? "enabled" : "disabled"
+    enabled ? "enabled" : "disabled"
   );
 
   const addMathToExpression = () => {
     if (!(mf && mf.current && buttonName)) return;
-    const c = getCommand(mf.current, buttonName)
+    const c = getCommand(mf.current, buttonName);
     mf.current.executeCommand(c as any);
     mf.current?.focus();
   };
@@ -54,7 +54,7 @@ export const AddMathTextButton = (props: AddMathTextButtonProps) => {
       </button>
     </Tooltip>
   );
-}
+};
 
 export const DeleteExpressionButton = (props: IconButtonProps) => {
   const tooltipOptions = useTooltipOptions({

@@ -31,5 +31,5 @@ export function getCommand(mf: MathfieldElement, buttonName: string) {
 
   // TODO (?) - add logic to handle cases where a tokenized version is preferred
 
-  return ["insert", insertString, {insertionMode: insertMode}]
+  return ["insert", insertString, {insertionMode: insertMode}];
 }

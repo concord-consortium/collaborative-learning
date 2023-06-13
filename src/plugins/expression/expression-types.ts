@@ -4,11 +4,9 @@ export const kExpressionDefaultHeight = 100;
 export type SelectStatus = "empty" | "all" | "some" | "cursor" | undefined;
 export type InsertModeString = "replaceAll" | "insertAfter" | "replaceSelection";
 
-import MixedFractionIcon from "./assets/mixed-fraction-icon.svg";
-
 const ph = "\\placeholder{}";
 const emptyFrac = `\\frac{${ph}}{${ph}}}`;
-const mixedFrac = `${ph}\\frac{${ph}}{${ph}}`
+const mixedFrac = `${ph}\\frac{${ph}}{${ph}}`;
 const divSign = "\\div";
 const multSign = "\\times";
 const divisionEmpty = `${ph}${divSign}${ph}`;
