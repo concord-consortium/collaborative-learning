@@ -6,13 +6,12 @@ import {
   IFloatingToolbarProps, useFloatingToolbarLocation
 } from "../../components/tiles/hooks/use-floating-toolbar-location";
 import { ExpressionContentModelType } from "./expression-content";
-import { getCommand, expressionButtonsList } from "./expression-tile-utils";
+import { expressionButtonsList} from "./expression-types"
 import { ITileModel } from "../../models/tiles/tile-model";
-
-import "./expression-toolbar.scss";
 import { DeleteExpressionButton, AddMathTextButton } from "./expression-buttons";
 import { MathfieldElement } from "mathlive";
 
+import "./expression-toolbar.scss";
 interface IProps extends IFloatingToolbarProps {
   model: ITileModel;
   mf: React.RefObject<MathfieldElement> | undefined;
@@ -49,8 +48,6 @@ export const ExpressionToolbar: React.FC<IProps> = observer((
     content.setLatexStr("");
     mf && mf.current?.focus();
   };
-
-  console.log("| expressionButtonsList: ", expressionButtonsList)
 
   return documentContent
     ? ReactDOM.createPortal(

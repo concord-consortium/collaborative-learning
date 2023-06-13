@@ -2,12 +2,14 @@ import React from "react";
 import { Tooltip } from "react-tippy";
 import classNames from "classnames";
 import DeleteSelectionIcon from "../../assets/icons/delete/delete-selection-icon.svg";
-import MixedFractionIcon from "./assets/mixed-fraction-icon.svg";
 import { useTooltipOptions } from "../../hooks/use-tooltip-options";
+import { getCommand } from "./expression-tile-utils";
+import { MathfieldElement } from "mathlive";
+import { expressionButtonsList } from "./expression-types";
+import MixedFractionIcon from "./assets/mixed-fraction-icon.svg";
+import DivisionSymbolIcon from "./assets/division-symbol-icon.svg";
 
 import "./expression-toolbar.scss";
-import { expressionButtonsList, getCommand } from "./expression-tile-utils";
-import { MathfieldElement } from "mathlive";
 
 interface IconButtonProps {
   className?: string;
@@ -21,17 +23,16 @@ interface AddMathTextButtonProps {
   mf: React.RefObject<MathfieldElement> | undefined;
 }
 
-const ExpressionButton: React.FC<IconButtonProps> = ({ children, className, ...others }) => {
-  return (
-    <button className={`expression-button ${className}`} {...others}>{children}</button>
-  );
+const iconSvgs = {
+  "mixedFraction": <MixedFractionIcon />,
+  "divisionSymbol": <DivisionSymbolIcon />
 };
 
 export const AddMathTextButton = (props: AddMathTextButtonProps) => {
   const { mf, buttonName, enabled } = props;
   const button = expressionButtonsList.find((btn) => btn.name === buttonName);
   const tooltipOptions = useTooltipOptions({distance: 5,offset: 5});
-  const tooltipText = "Add " + button?.name + " to expression";
+  const tooltipText = "Add  " + button?.title + "  to expression";
 
   const buttonClasses = classNames(
     "add-math-text",
@@ -49,7 +50,7 @@ export const AddMathTextButton = (props: AddMathTextButtonProps) => {
   return (
     <Tooltip title={tooltipText} {...tooltipOptions}>
       <button onClick={addMathToExpression} className={buttonClasses}>
-        {button?.icon}
+        {iconSvgs[buttonName as keyof typeof iconSvgs]}
       </button>
     </Tooltip>
   );
@@ -63,9 +64,9 @@ export const DeleteExpressionButton = (props: IconButtonProps) => {
 
   return (
     <Tooltip title="Delete Expression" {...tooltipOptions}>
-      <ExpressionButton {...props}>
+      <button {...props}>
         <DeleteSelectionIcon />
-      </ExpressionButton>
+      </button>
     </Tooltip>
   );
 };
