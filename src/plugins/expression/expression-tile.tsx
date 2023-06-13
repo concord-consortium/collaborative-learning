@@ -12,6 +12,7 @@ import { replaceKeyBinding } from "./expression-tile-utils";
 import { useUIStore } from "../../hooks/use-stores";
 import { useToolbarTileApi } from "../../components/tiles/hooks/use-toolbar-tile-api";
 import { ExpressionToolbar } from "./expression-toolbar";
+import { findMissingElements, replaceMissingElements } from "./expression-cortex-utils";
 
 import "./expression-tile.scss";
 
@@ -26,6 +27,15 @@ declare global {
 
 console.log("ComputeEngine version", version);
 const computeEngine = new ComputeEngine();
+computeEngine.latexOptions = { preserveLatex: true };
+computeEngine.jsonSerializationOptions = { metadata: ['latex'] };
+
+function replaceLatex(mfLatex: string) {
+  // parse the latex, replace missing elements with placeholders
+  const mathJSON = computeEngine.latexSyntax.parse(mfLatex);
+  const missingElements = findMissingElements(mathJSON);
+  return replaceMissingElements(mfLatex, missingElements);
+}
 
 const undoKeys = ["cmd+z", "[Undo]", "ctrl+z"];
 
@@ -34,6 +44,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     model, readOnly, documentContent, tileElt, scale } = props;
   const content = model.content as ExpressionContentModelType;
   const mf = useRef<MathfieldElement>(null);
+  const mfReplaced = useRef<MathfieldElement>(null);
   const trackedCursorPos = useRef<number>(0);
   const ui = useUIStore();
 
@@ -56,8 +67,16 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
 
   const handleChange = (e: FormEvent<MathfieldElementAttributes>) => {
     trackedCursorPos.current =  mf.current?.position || 0;
-    content.setLatexStr((e.target as any).value);
+    const mfLatex = (e.target as MathfieldElement).value;
+    const replacedLatex = replaceLatex(mfLatex);
+    mfReplaced?.current?.setValue(replacedLatex);
+    content.setLatexStr(mfLatex);
   };
+
+  // It seems that changes `value` property of the math-field element are
+  // not picked by math-live. So we pass this initialReplacedLatex to the
+  // value, but it is only used on the first render.
+  const initialReplacedLatex = replaceLatex(content.latexStr);
 
   const toolbarProps = useToolbarTileApi({
     id: model.id,
@@ -92,6 +111,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
       </div>
       <div className="expression-math-area">
         <math-field {...mathfieldAttributes} />
+        <math-field ref={mfReplaced} readOnly={true} value={initialReplacedLatex}/>
       </div>
     </div>
   );
