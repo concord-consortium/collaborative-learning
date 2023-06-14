@@ -24,6 +24,7 @@ declare global {
     }
   }
 }
+console.log("ComputeEngine version", version);
 
 const computeEngine = new ComputeEngine();
 computeEngine.latexOptions = { preserveLatex: true };
