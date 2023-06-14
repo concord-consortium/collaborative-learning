@@ -1,7 +1,8 @@
 import { reaction } from "mobx";
 import { types, Instance, getType, addDisposer, getSnapshot } from "mobx-state-tree";
 
-import { brainwavesGrabberSimulation } from "../simulations/brainwaves-grabber";
+import { kBrainwavesKey } from "../simulations/brainwaves-grabber";
+import { simulations } from "../simulations/simulations";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { TileContentModel } from "../../../models/tiles/tile-content";
 import { kSharedVariablesID, SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
@@ -12,10 +13,10 @@ export function defaultSimulatorContent(): SimulatorContentModelType {
   return SimulatorContentModel.create({});
 }
 
-
 export const SimulatorContentModel = TileContentModel
   .named("SimulatorTool")
   .props({
+    simulation: types.optional(types.string, kBrainwavesKey),
     type: types.optional(types.literal(kSimulatorTileType), kSimulatorTileType),
   })
   .volatile(self => ({
@@ -42,7 +43,7 @@ export const SimulatorContentModel = TileContentModel
       return firstSharedModel as SharedVariablesType;
     },
     get simulationData() {
-      return brainwavesGrabberSimulation;
+      return simulations[self.simulation];
     }
   }))
   .views(self => ({
