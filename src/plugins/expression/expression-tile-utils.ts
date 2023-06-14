@@ -24,10 +24,20 @@ function getSelectStatus(mf: MathfieldElement): SelectStatus {
 export function getCommand(mf: MathfieldElement, buttonName: string) {
   const selectStatus = getSelectStatus(mf);
   const button = expressionButtonsList.find(b => b.name === buttonName);
-  const insertString = button?.baseLatex;
+  let insertString = button?.baseLatex;
+
   let insertMode: InsertModeString = "replaceAll";
   if (selectStatus === "cursor") insertMode = "insertAfter";
   if (selectStatus === "some") insertMode = "replaceSelection";
+
+  // if a binary operator, we need to add placeholders now
+  // This may be replaced by generic solution based on computation: PT#185337722
+  if (button?.isBinaryOperator){
+    const atStart = selectStatus === "cursor" && mf.position === 0;
+    insertString = atStart ?
+      `\\placeholder{}${insertString}`
+      : `#@${insertString}\\placeholder{}`;
+  }
 
   return ["insert", insertString, {insertionMode: insertMode}];
 }
