@@ -32,16 +32,14 @@ export const expressionButtonsList = [
     name: "divisionSymbol",
     title: "division operator",
     className: "division-symbol",
-    baseLatex: divSign,
-    icon: <DivisionSymbolIcon />,
-    isBinaryOperator: true
+    baseLatex: `#@${divSign}${ph}`,
+    icon: <DivisionSymbolIcon />
   },
   {
     name: "mixedFraction",
     title: "mixed fraction",
     className: "mixed-fraction",
     baseLatex: `#@\\frac{${ph}}{${ph}}`,
-    icon: <MixedFractionIcon />,
-    isBinaryOperator: false
+    icon: <MixedFractionIcon />
   }
 ];
