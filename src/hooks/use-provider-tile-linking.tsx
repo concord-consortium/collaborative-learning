@@ -6,15 +6,18 @@ import {
 import {
   addTableToDocumentMap, getLinkedTableIndex, getTableLinkColors, removeTableFromDocumentMap
 } from "../models/tiles/table-links";
+import { getTileContentInfo } from "../models/tiles/tile-content-info";
 import { ITileModel } from "../models/tiles/tile-model";
 import { useLinkProviderTileDialog } from "./use-link-provider-tile-dialog";
 import { getTileContentById } from "../utilities/mst-utils";
 import { SharedDataSet } from "../models/shared/shared-data-set";
+import { linkTileToDataSet } from "../models/shared/shared-data-utils";
+import { ILinkOptions } from "../models/shared/shared-types";
 
 interface IProps {
   actionHandlers?: any;
   documentId?: string;
-  model: ITileModel;
+  model: ITileModel;  // consumer
   readOnly?: boolean;
   onRequestTilesOfType: (tileType: string) => ITileLinkMetadata[];
   onRequestLinkableTiles?: () => ILinkableTiles;
@@ -34,7 +37,11 @@ export const useProviderTileLinking = ({
       const sharedModelManager = providerTile.tileEnv?.sharedModelManager;
       if (sharedModelManager?.isReady) {
         const sharedDataSet = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, tileInfo.id);
-        sharedDataSet && sharedModelManager?.addTileSharedModel(model.content, sharedDataSet);
+        if (sharedDataSet) {
+          const { requiresCaseMetadata } = getTileContentInfo(model.content.type) || {};
+          const options: ILinkOptions = { requiresCaseMetadata };
+          linkTileToDataSet(model.content, sharedDataSet?.dataSet, options);
+        }
       }
     }
   }, [readOnly, model]);

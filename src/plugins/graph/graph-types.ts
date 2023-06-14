@@ -2,6 +2,7 @@ import React from "react";
 import {AxisPlace} from "./axis/axis-types";
 import {GraphPlace} from "./axis-graph-shared";
 import {DotsElt} from "./d3-types";
+import { ILinkOptions } from "../../models/shared/shared-types";
 
 export const kGraphTileType = "Graph";
 export const kGraphTileClass = "graph";
@@ -92,3 +93,5 @@ export const kGraphClassSelector = `.${kGraphClass}`;
 
 // TODO: determine this via configuration, e.g. appConfig, since apps may prefer different defaults
 export const kDefaultNumericAxisBounds = [-10, 11] as const;
+
+export const kGraphLinkOptions: ILinkOptions = { requiresCaseMetadata: true };

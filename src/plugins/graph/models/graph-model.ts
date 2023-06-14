@@ -6,7 +6,7 @@ import stringify from "json-stringify-pretty-compact";
 import {AxisPlace} from "../axis/axis-types";
 import {AxisModelUnion, EmptyAxisModel, IAxisModelUnion, NumericAxisModel} from "../axis/models/axis-model";
 import {
-  GraphAttrRole, hoverRadiusFactor, kDefaultNumericAxisBounds, kGraphTileType, PlotType, PlotTypes,
+  GraphAttrRole, hoverRadiusFactor, kDefaultNumericAxisBounds, kGraphLinkOptions, kGraphTileType, PlotType, PlotTypes,
   pointRadiusLogBase, pointRadiusMax, pointRadiusMin, pointRadiusSelectionAddend
 } from "../graph-types";
 import {DataConfigurationModel} from "./data-configuration-model";
@@ -24,7 +24,7 @@ import {
 } from "../../../utilities/color-utils";
 import {
   getDataSetFromId, getTileCaseMetadata, getTileDataSet, isTileLinkedToDataSet, linkTileToDataSet
-} from "../../../utilities/shared-data-utils";
+} from "../../../models/shared/shared-data-utils";
 import { SharedModelChangeType } from "../../../models/shared/shared-model-manager";
 import { AppConfigModelType } from "../../../models/stores/app-config-model";
 
@@ -151,7 +151,7 @@ export const GraphModel = TileContentModel
         }
         // auto-link to DataSet if we aren't currently linked and there's only one available
         else if (!tileDataSet && sharedDataSets.length === 1) {
-          linkTileToDataSet(self, sharedDataSets[0].dataSet);
+          linkTileToDataSet(self, sharedDataSets[0].dataSet, kGraphLinkOptions);
         }
       },
       {name: "sharedModelSetup", fireImmediately: true}));
@@ -173,7 +173,7 @@ export const GraphModel = TileContentModel
     setAttributeID(role: GraphAttrRole, dataSetID: string, id: string) {
       const newDataSet = getDataSetFromId(self, dataSetID);
       if (newDataSet && !isTileLinkedToDataSet(self, newDataSet)) {
-        linkTileToDataSet(self, newDataSet);
+        linkTileToDataSet(self, newDataSet, kGraphLinkOptions);
         self.config.clearAttributes();
         self.config.setDataset(newDataSet, getTileCaseMetadata(self));
       }

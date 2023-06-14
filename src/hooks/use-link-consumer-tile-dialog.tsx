@@ -4,7 +4,7 @@ import LinkGraphIcon from "../clue/assets/icons/table/link-graph-icon.svg";
 import { useCustomModal } from "./use-custom-modal";
 import { ITileLinkMetadata } from "../models/tiles/tile-link-types";
 import { ITileModel } from "../models/tiles/tile-model";
-import { isLinkedToTile } from "../utilities/shared-data-utils";
+import { isLinkedToTile } from "../models/shared/shared-data-utils";
 
 import "./link-tile-dialog.scss";
 
