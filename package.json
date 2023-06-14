@@ -45,7 +45,8 @@
       "\\.(csv|jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/__mocks__/fileMock.js",
       "\\.(css|less|sass|scss)$": "<rootDir>/__mocks__/styleMock.js",
       "react-modal-hook": "@concord-consortium/react-modal-hook",
-      "mobx-state-tree": "@concord-consortium/mobx-state-tree"
+      "mobx-state-tree": "@concord-consortium/mobx-state-tree",
+      "@cortex-js/compute-engine": "@concord-consortium/compute-engine"
     },
     "moduleFileExtensions": [
       "ts",
@@ -113,7 +114,8 @@
   },
   "homepage": "https://github.com/concord-consortium/collaborative-learning#readme",
   "overrides": {
-    "mobx-state-tree": "npm:@concord-consortium/mobx-state-tree@5.1.8-cc.1"
+    "mobx-state-tree": "npm:@concord-consortium/mobx-state-tree@5.1.8-cc.1",
+    "@cortex-js/compute-engine": "npm:@concord-consortium/compute-engine@0.12.3-cc.1"
   },
   "devDependencies": {
     "@babel/core": "^7.18.13",
@@ -201,6 +203,7 @@
   },
   "dependencies": {
     "@chakra-ui/react": "^1.8.9",
+    "@concord-consortium/compute-engine": "^0.12.3-cc.2",
     "@concord-consortium/diagram-view": "^0.0.48",
     "@concord-consortium/mobx-state-tree": "^5.1.8-cc.1",
     "@concord-consortium/react-components": "^0.7.1",
