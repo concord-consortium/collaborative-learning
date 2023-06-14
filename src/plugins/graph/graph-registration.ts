@@ -12,7 +12,8 @@ registerTileContentInfo({
   modelClass: GraphModel,
   titleBase: "X-Y Plot",
   type: kGraphTileType,
-  isDataConsumer: true
+  isDataConsumer: true,
+  requiresCaseMetadata: true
 });
 
 registerTileComponentInfo({

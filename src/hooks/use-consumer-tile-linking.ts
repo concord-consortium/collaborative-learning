@@ -12,6 +12,8 @@ import { useLinkConsumerTileDialog } from "./use-link-consumer-tile-dialog";
 import { getTileContentById } from "../utilities/mst-utils";
 import { SharedDataSet } from "../models/shared/shared-data-set";
 import { getTileContentInfo } from "../models/tiles/tile-content-info";
+import { ILinkOptions } from "../models/shared/shared-types";
+import { linkTileToDataSet } from "../models/shared/shared-data-utils";
 
 interface IProps {
   documentId?: string;
@@ -47,19 +49,12 @@ export const useConsumerTileLinking = ({
     if (!readOnly && consumerTile) {
       const sharedModelManager = consumerTile.tileEnv?.sharedModelManager;
       if (sharedModelManager?.isReady) {
-        // If the consumer tile does not support multiple shared data sets, remove it from
-        // any existing shared data sets before linking.
-        if (!getTileContentInfo(consumerTile.type)?.consumesMultipleDataSets) {
-          const allSharedDataSets = sharedModelManager?.getSharedModelsByType("SharedDataSet");
-          allSharedDataSets?.forEach(sharedDataSet => {
-            const sharedModelTileIds = sharedModelManager?.getSharedModelTileIds(sharedDataSet);
-            if (sharedModelTileIds?.includes(tileInfo.id)) {
-              sharedModelManager?.removeTileSharedModel(consumerTile, sharedDataSet);
-            }
-          });
-        }
         const sharedModel = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, model.id);
-        sharedModel && sharedModelManager?.addTileSharedModel(consumerTile, sharedModel);
+        if (sharedModel) {
+          const { consumesMultipleDataSets, requiresCaseMetadata } = getTileContentInfo(consumerTile.type) || {};
+          const options: ILinkOptions = { consumesMultipleDataSets, requiresCaseMetadata };
+          linkTileToDataSet(consumerTile, sharedModel?.dataSet, options);
+        }
       }
     }
   }, [readOnly, model]);

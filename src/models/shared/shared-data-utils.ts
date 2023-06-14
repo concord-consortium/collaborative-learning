@@ -10,6 +10,7 @@ import { ILinkOptions } from "./shared-types";
 import { ITileContentModel } from "../tiles/tile-content";
 import { getSharedModelManager } from "../tiles/tile-environment";
 import { ITileModel } from "../tiles/tile-model";
+import { SharedModelType } from "./shared-model";
 
 export function getSharedDataSets(node: IAnyStateTreeNode): SharedDataSetType[] {
   const sharedModelManager = getSharedModelManager(node);
@@ -68,22 +69,31 @@ export function isTileLinkedToOtherDataSet(tile: ITileContentModel, dataSet: IDa
   return !!sharedModels.find(sharedModel => isSharedDataSet(sharedModel) && sharedModel.dataSet.id !== dataSet.id);
 }
 
-export function unlinkTileFromDataSets(tile: ITileContentModel) {
+export function unlinkTileFromDataSet(tile: ITileContentModel, sharedModel: SharedModelType) {
+  const sharedModelManager = getSharedModelManager(tile);
+  sharedModelManager?.removeTileSharedModel(tile, sharedModel);
+  const sharedCaseMetadata = getTileCaseMetadata(tile);
+  if (sharedCaseMetadata && sharedCaseMetadata.data?.id === sharedModel.id) {
+    sharedModelManager?.removeTileSharedModel(tile, sharedCaseMetadata);
+  }
+}
+
+export function unlinkTileFromAllDataSets(tile: ITileContentModel) {
   const sharedModelManager = getSharedModelManager(tile);
   const sharedModels = sharedModelManager?.getTileSharedModels(tile);
   sharedModels?.forEach(sharedModel => {
     if (["SharedDataSet", "SharedCaseMetadata"].includes(sharedModel.type)) {
-      sharedModelManager?.removeTileSharedModel(tile, sharedModel);
+      unlinkTileFromDataSet(tile, sharedModel);
     }
   });
 }
 
 export function linkTileToDataSet(tile: ITileContentModel, dataSet: IDataSet, options?: ILinkOptions) {
-  if (isTileLinkedToOtherDataSet(tile, dataSet)) {
-    unlinkTileFromDataSets(tile);
+  const { consumesMultipleDataSets = false, requiresCaseMetadata = false } = options || {};
+  if (isTileLinkedToOtherDataSet(tile, dataSet) && !consumesMultipleDataSets) {
+    unlinkTileFromAllDataSets(tile);
   }
 
-  const { requiresCaseMetadata = false } = options || {};
   const sharedModelManager = getSharedModelManager(tile);
   const sharedDataSets = sharedModelManager?.getSharedModelsByType<typeof SharedDataSet>(kSharedDataSetType);
   const sharedDataSet = sharedDataSets?.find(model => model.dataSet.id === dataSet.id) as SharedDataSetType | undefined;
@@ -94,7 +104,8 @@ export function linkTileToDataSet(tile: ITileContentModel, dataSet: IDataSet, op
     let sharedCaseMetadata: ISharedCaseMetadata | undefined =
             sharedMetadata.find(model => model.data?.id === dataSet.id);
     if (!sharedCaseMetadata && requiresCaseMetadata) {
-      sharedCaseMetadata = SharedCaseMetadata.create({ data: sharedDataSet.dataSet.id });
+      sharedCaseMetadata = SharedCaseMetadata.create();
+      sharedCaseMetadata.setData(dataSet);
     }
     sharedCaseMetadata && sharedModelManager.addTileSharedModel(tile, sharedCaseMetadata);
   }
