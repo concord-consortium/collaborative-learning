@@ -38,7 +38,6 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     undoKeys.forEach((key: string) => {
       mf.current?.keybindings && replaceKeyBinding(mf.current.keybindings, key, "");
     });
-
   }, [model.id, ui]);
 
   useEffect(() => {
