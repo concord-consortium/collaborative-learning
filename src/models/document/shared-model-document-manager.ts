@@ -1,10 +1,10 @@
 import { action, computed, makeObservable, observable } from "mobx";
 import { getParentOfType, getSnapshot, hasParentOfType, IAnyStateTreeNode } from "mobx-state-tree";
 import { DocumentContentModelType } from "./document-content";
+import { isTileLinkedToOtherDataSet, unlinkTileFromDataSets } from "../shared/shared-data-utils";
 import { SharedModelType } from "../shared/shared-model";
 import { IDragSharedModelItem, ISharedModelManager, SharedModelUnion } from "../shared/shared-model-manager";
 import { ITileModel, TileModel } from "../tiles/tile-model";
-import { isTileLinkedToOtherDataSet, unlinkTileFromDataSets } from "../../utilities/shared-data-utils";
 
 function getTileModel(tileContentModel: IAnyStateTreeNode) {
   if (!hasParentOfType(tileContentModel, TileModel)) {
@@ -129,7 +129,7 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
     if (tileContentModel.type === "Graph" && sharedModel.type === "SharedDataSet") {
       // Related to the comment above, although we know the type of sharedModel is
       // SharedDataSetType, TypeScript will throw an error if we try to access the dataSet
-      // property on it without first using isSharedDataSet to check the type. So we cast 
+      // property on it without first using isSharedDataSet to check the type. So we cast
       // sharedModel to any (again we don't want to introduce the data set types here).
       const sm = sharedModel as any;
       if (isTileLinkedToOtherDataSet(tileContentModel, sm.dataSet)) {
