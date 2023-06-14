@@ -11,7 +11,7 @@ import { ITileModel } from "../models/tiles/tile-model";
 import { useLinkProviderTileDialog } from "./use-link-provider-tile-dialog";
 import { getTileContentById } from "../utilities/mst-utils";
 import { SharedDataSet } from "../models/shared/shared-data-set";
-import { linkTileToDataSet } from "../models/shared/shared-data-utils";
+import { linkTileToDataSet, unlinkTileFromDataSet } from "../models/shared/shared-data-utils";
 import { ILinkOptions } from "../models/shared/shared-types";
 
 interface IProps {
@@ -38,8 +38,8 @@ export const useProviderTileLinking = ({
       if (sharedModelManager?.isReady) {
         const sharedDataSet = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, tileInfo.id);
         if (sharedDataSet) {
-          const { requiresCaseMetadata } = getTileContentInfo(model.content.type) || {};
-          const options: ILinkOptions = { requiresCaseMetadata };
+          const { consumesMultipleDataSets, requiresCaseMetadata } = getTileContentInfo(model.content.type) || {};
+          const options: ILinkOptions = { consumesMultipleDataSets, requiresCaseMetadata };
           linkTileToDataSet(model.content, sharedDataSet?.dataSet, options);
         }
       }
@@ -52,9 +52,7 @@ export const useProviderTileLinking = ({
       const sharedModelManager = linkedTile.tileEnv?.sharedModelManager;
       if (sharedModelManager?.isReady) {
         const sharedDataSet = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, tileInfo.id);
-        if (sharedDataSet) {
-          sharedModelManager?.removeTileSharedModel(model.content, sharedDataSet);
-        }
+        sharedDataSet && unlinkTileFromDataSet(model.content, sharedDataSet);
       }
     }
   }, [readOnly, model]);

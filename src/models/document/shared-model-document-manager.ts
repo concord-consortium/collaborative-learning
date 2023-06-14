@@ -1,7 +1,7 @@
 import { action, computed, makeObservable, observable } from "mobx";
 import { getParentOfType, getSnapshot, hasParentOfType, IAnyStateTreeNode } from "mobx-state-tree";
 import { DocumentContentModelType } from "./document-content";
-import { isTileLinkedToOtherDataSet, unlinkTileFromDataSets } from "../shared/shared-data-utils";
+import { isTileLinkedToOtherDataSet, unlinkTileFromAllDataSets } from "../shared/shared-data-utils";
 import { SharedModelType } from "../shared/shared-model";
 import { IDragSharedModelItem, ISharedModelManager, SharedModelUnion } from "../shared/shared-model-manager";
 import { ITileModel, TileModel } from "../tiles/tile-model";
@@ -133,7 +133,7 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
       // sharedModel to any (again we don't want to introduce the data set types here).
       const sm = sharedModel as any;
       if (isTileLinkedToOtherDataSet(tileContentModel, sm.dataSet)) {
-        unlinkTileFromDataSets(tileContentModel);
+        unlinkTileFromAllDataSets(tileContentModel);
       }
     }
 
