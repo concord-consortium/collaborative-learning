@@ -5,7 +5,7 @@ let clueCanvas = new ClueCanvas;
 let exp = new ExpressionToolTile;
 
 // FIXME: skipping tests for now to get this deployed
-context.skip('Expression Tool Tile', function () {
+context('Expression Tool Tile', function () {
   before(function () {
     const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=example";
     cy.clearQAData('all');
