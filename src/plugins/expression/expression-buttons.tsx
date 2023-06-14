@@ -6,8 +6,6 @@ import { useTooltipOptions } from "../../hooks/use-tooltip-options";
 import { getCommand } from "./expression-tile-utils";
 import { MathfieldElement } from "mathlive";
 import { expressionButtonsList } from "./expression-types";
-import MixedFractionIcon from "./assets/mixed-fraction-icon.svg";
-import DivisionSymbolIcon from "./assets/division-symbol-icon.svg";
 
 import "./expression-toolbar.scss";
 
@@ -22,12 +20,6 @@ interface AddMathTextButtonProps {
   enabled?: boolean;
   mf: React.RefObject<MathfieldElement> | undefined;
 }
-
-const iconSvgs = {
-  "mixedFraction": <MixedFractionIcon />,
-  "mixedFractionSmart": <MixedFractionIcon />,
-  "divisionSymbol": <DivisionSymbolIcon />
-};
 
 export const AddMathTextButton = (props: AddMathTextButtonProps) => {
   const { mf, buttonName, enabled } = props;
@@ -51,7 +43,7 @@ export const AddMathTextButton = (props: AddMathTextButtonProps) => {
   return (
     <Tooltip title={tooltipText} {...tooltipOptions}>
       <button onClick={addMathToExpression} className={buttonClasses}>
-        {iconSvgs[buttonName as keyof typeof iconSvgs]}
+        { button?.icon }
       </button>
     </Tooltip>
   );
@@ -64,7 +56,7 @@ export const DeleteExpressionButton = (props: IconButtonProps) => {
   });
 
   return (
-    <Tooltip title="Delete Expression" {...tooltipOptions}>
+    <Tooltip title="Clear Expression" {...tooltipOptions}>
       <button {...props}>
         <DeleteSelectionIcon />
       </button>

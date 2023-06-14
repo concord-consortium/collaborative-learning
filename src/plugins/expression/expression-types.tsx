@@ -1,3 +1,7 @@
+import React from "react";
+import MixedFractionIcon from "./assets/mixed-fraction-icon.svg";
+import DivisionSymbolIcon from "./assets/division-symbol-icon.svg";
+
 export const kExpressionTileType = "Expression";
 export const kExpressionDefaultHeight = 100;
 
@@ -26,16 +30,18 @@ export const latexStrings = {
 export const expressionButtonsList = [
   {
     name: "divisionSymbol",
-    title: "Division Symbol",
+    title: "division operator",
     className: "division-symbol",
     baseLatex: divSign,
+    icon: <DivisionSymbolIcon />,
     isBinaryOperator: true
   },
   {
     name: "mixedFraction",
-    title: "Mixed Fraction",
+    title: "mixed fraction",
     className: "mixed-fraction",
     baseLatex: `#@\\frac{${ph}}{${ph}}`,
+    icon: <MixedFractionIcon />,
     isBinaryOperator: false
   }
 ];

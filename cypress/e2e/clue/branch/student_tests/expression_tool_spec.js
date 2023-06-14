@@ -59,11 +59,18 @@ context('Expression Tool Tile', function () {
       exp.getMixedFractionButton().eq(0).click();
       exp.getMathField().eq(0).should("have.value", "\\placeholder{}\\frac{\\placeholder{}}{\\placeholder{}}");
     });
-    it("can add an empty division expression with the button", () => {
+    it("can add an empty division expression when division button clicked in empty expression", () => {
       exp.clearValue();
       exp.getMathField().eq(0).click({force: true});
       exp.getDivisionButton().eq(0).click();
       exp.getMathField().eq(0).should("have.value", "\\placeholder{}\\div\\placeholder{}");
+    });
+    it("can add a division sign and a placeholder when division button clicked following existing value", () => {
+      exp.clearValue();
+      exp.getMathField().eq(0).click({force: true});
+      exp.getMathField().eq(0).invoke("val", "123");
+      exp.getDivisionButton().eq(0).click();
+      exp.getMathField().eq(0).should("have.value", "123\\div\\placeholder{}");
     });
     it("should name new expressions with an incrementing id", () => {
       clueCanvas.addTile("expression");
