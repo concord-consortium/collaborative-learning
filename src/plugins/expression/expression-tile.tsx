@@ -24,7 +24,6 @@ declare global {
     }
   }
 }
-/*eslint-comments/no-unused-disable*/
 console.log("ComputeEngine version", version);
 
 const computeEngine = new ComputeEngine();
@@ -72,15 +71,11 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     if (mf.current?.value){
       mf.current.value = replacedLatex;
     }
-    if (mf.current?.position && trackedCursorPos.current != null){
+    if (mf.current && trackedCursorPos.current != null){
       mf.current.position = trackedCursorPos?.current; //restore cursor position
     }
     content.setLatexStr(replacedLatex);
   };
-
-  // It seems that changes `value` property of the math-field element are
-  // not picked by math-live. So we pass this initialReplacedLatex to the
-  // value, but it is only used on the first render.
 
   const toolbarProps = useToolbarTileApi({
     id: model.id,
