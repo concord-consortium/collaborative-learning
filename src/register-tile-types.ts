@@ -24,6 +24,7 @@ const gTileRegistration: Record<string, () => void> = {
   "Text": () => import(/* webpackChunkName: "Text" */"./models/tiles/text/text-registration"),
   "Graph": () => Promise.all([
     import(/* webpackChunkName: "Graph" */"./plugins/graph/graph-registration"),
+    import(/* webpackChunkName: "SharedCaseMetadata" */"./models/shared/shared-case-metadata-registration"),
     import(/* webpackChunkName: "SharedDataSet" */"./models/shared/shared-data-set-registration")
   ])
 };
