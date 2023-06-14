@@ -1,5 +1,3 @@
-import { is } from "immutable";
-
 export const kExpressionTileType = "Expression";
 export const kExpressionDefaultHeight = 100;
 
