@@ -1,16 +1,16 @@
-// FIXME: should use Expression from ComputeEngine, to get rid of the `any`s
-// however it isn't exported. It is exported from "math-json", but I'm not sure
-// how to import that. I also think math-json bundles everything instead of
-// sharing with compute-engine so using both might cause problems
-// Could hack this by creating a type based on the return type of
-// `computeEngine.latexSyntax.parse`
-function isMissingString(mathJSON: any) {
-  return mathJSON?.str === 'missing' ||
+import { ComputeEngine } from "@concord-consortium/compute-engine";
+
+// ComputeEngine doesn't export its Expression type so we use some typescript
+// manipulation to pull out the return value of ComputeEngine.latexSyntax.parse
+type Expression = ReturnType<ComputeEngine["latexSyntax"]["parse"]>;
+
+function isMissingString(mathJSON: Expression) {
+  return (typeof mathJSON === "object" && "str" in mathJSON && mathJSON?.str === 'missing') ||
     mathJSON === 'missing' ||
     mathJSON === "'missing'";
 }
 
-function isMissingError(mathJSON: any) {
+function isMissingError(mathJSON: Expression) {
   if (Array.isArray(mathJSON) &&
     mathJSON.length > 1 &&
     mathJSON[0] === 'Error' &&
@@ -29,13 +29,13 @@ function isMissingError(mathJSON: any) {
   return false;
 }
 
-export function findMissingElements(mathJSON: any): any[] {
+export function findMissingElements(mathJSON: Expression): Expression[] {
   if (isMissingError(mathJSON)) {
     return [mathJSON];
   }
 
   if (Array.isArray(mathJSON)) {
-    let missingElements: any[] = [];
+    let missingElements: Expression[] = [];
     for (const item of mathJSON) {
       missingElements = [...missingElements, ...findMissingElements(item)];
     }
@@ -47,10 +47,11 @@ export function findMissingElements(mathJSON: any): any[] {
   return [];
 }
 
-export function replaceMissingElements(latex: string, missingElements: any[]) {
+export function replaceMissingElements(latex: string, missingElements: Expression[]) {
   const missingIndexes = [];
   for (const item of missingElements) {
-    if (item?.sourceOffsets?.length === 2 &&
+    if (typeof item === "object" && !Array.isArray(item) &&
+      item.sourceOffsets?.length === 2 &&
       item.sourceOffsets[0] === item.sourceOffsets[1]) {
       missingIndexes.push(item.sourceOffsets[0]);
     }
