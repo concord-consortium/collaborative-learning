@@ -1,8 +1,7 @@
 import { VariableType } from "@concord-consortium/diagram-view";
 import { observer } from "mobx-react";
-import React/*, { useRef }*/ from "react";
+import React, { useEffect, useState } from "react";
 
-import { brainwavesGrabberVariables } from "../simulations/brainwaves-grabber";
 import { SimulatorContentModelType } from "../model/simulator-content";
 import { ITileProps } from "../../../components/tiles/tile-component";
 
@@ -15,56 +14,24 @@ export const SimulatorToolComponent: React.FC<ITileProps> = observer((props) => 
   // (https://github.com/concord-consortium/collaborative-learning/pull/1222/files#r824873678
   // and following comments) for details. We should be on the lookout for such issues.
   const content = props.model.content as SimulatorContentModelType;
-  // const intervalRef = useRef<any>(null);
 
-  // const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-  //   content.setText(event.target.value);
-  // };
+  const [steps, setSteps] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => {
+      content?.step();
+      setSteps(v => v + 1);
+    }, content.simulationData.delay);
+    return () => clearInterval(id);
+  }, [content]);
 
-  // const handleStart = () => {
-  //   if (intervalRef.current) {
-  //     // don't start twice
-  //     return;
-  //   }
-  //   intervalRef.current = setInterval(() => {
-  //     content.step();
-  //   }, 50);
-  // };
-
-  // const handleStop = () => {
-  //   if (intervalRef.current) {
-  //     clearInterval(intervalRef.current);
-  //     intervalRef.current = null;
-  //   }
-  // };
-
-  // const x = content.xVariable?.computedValue;
-  // const y = content.yVariable?.computedValue;
-
-  // return (
-  //   <div className="simulator-tool">
-  //     <button onClick={handleStart}>Start</button>
-  //     <button onClick={handleStop}>Stop</button>
-  //     <div style={{
-        //   width:20,
-        //   height:20,
-        //   backgroundColor:"red",
-        //   position:"absolute",
-        //   bottom:`${y}px`,
-        //   left:`${x}px`
-        // }}></div>
-  //     {/* <textarea value={content.text} onChange={handleChange} /> */}
-  //   </div>
-  // );
-
-  const displayVariables = brainwavesGrabberVariables;
+  const displayVariables = content.simulationData.variables;
 
   interface IVariableRowProps {
     key?: string;
     variable?: VariableType;
   }
-  const VariableRow = ({ key, variable }: IVariableRowProps) => {
-    const display = variable ? `${variable.name}: ${variable.value}` : "";
+  const VariableRow = ({ variable }: IVariableRowProps) => {
+    const display = variable ? `${variable.name}: ${variable.value?.toFixed(2)}` : "";
     return (
       <p>
         {display}

@@ -1,7 +1,7 @@
 import { reaction } from "mobx";
 import { types, Instance, getType, addDisposer, getSnapshot } from "mobx-state-tree";
 
-import { brainwavesGrabberVariables } from "../simulations/brainwaves-grabber";
+import { brainwavesGrabberSimulation } from "../simulations/brainwaves-grabber";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { TileContentModel } from "../../../models/tiles/tile-content";
 import { kSharedVariablesID, SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
@@ -18,6 +18,9 @@ export const SimulatorContentModel = TileContentModel
   .props({
     type: types.optional(types.literal(kSimulatorTileType), kSimulatorTileType),
   })
+  .volatile(self => ({
+    frame: 0
+  }))
   .views(self => ({
     exportJson(options?: ITileExportOptions) {
       // crude, but enough to get us started
@@ -38,24 +41,15 @@ export const SimulatorContentModel = TileContentModel
       }
       return firstSharedModel as SharedVariablesType;
     },
+    get simulationData() {
+      return brainwavesGrabberSimulation;
+    }
   }))
   .views(self => ({
     getVariable(name: string) {
       return self.sharedModel?.variables.find(v => v.name === name);
     }
   }))
-  // .views(self => ({
-  //   get timeVariable() {
-  //     return self.sharedModel?.variables.find(variable => variable.name === "time");
-  //   },
-  //   get xVariable() {
-  //     return self.sharedModel?.variables.find(variable => variable.name === "x");
-
-  //   },
-  //   get yVariable() {
-  //     return self.sharedModel?.variables.find(variable => variable.name === "y");
-  //   }
-  // }))
   .actions(self => ({
     // TODO: Do we want to attach to an existing SharedVariables if one exists when the tile is created?
     // Currently, it will be impossible to link to a Diagram tile.
@@ -84,13 +78,15 @@ export const SimulatorContentModel = TileContentModel
         }
 
         if (!tileSharedModels?.includes(containerSharedModel)) {
+          // TODO: This will currently generate multiple history events because it
+          // is running outside of a document tree action.
+          // Add the shared model to both the document and the tile
           sharedModelManager.addTileSharedModel(self, containerSharedModel);
         }
 
         // Set up starter variables
-        
         // TODO: VariableSnapshotType
-        const defaultVariableSnapshots = brainwavesGrabberVariables;
+        const defaultVariableSnapshots = self.simulationData.variables;
         defaultVariableSnapshots.forEach((variableSnapshot: any) => {
           const variable = containerSharedModel?.variables.find(v => v.name === variableSnapshot.name);
           if (!variable) {
@@ -106,8 +102,6 @@ export const SimulatorContentModel = TileContentModel
         //   if (!containerSharedModel) {
         //     // The document doesn't have a shared model yet
         //     containerSharedModel = SharedVariables.create();
-
-        //     // TODO: Set up starter variables
         //   }
 
         //   // TODO: This will currently generate multiple history events because it
@@ -115,38 +109,22 @@ export const SimulatorContentModel = TileContentModel
         //   // Add the shared model to both the document and the tile
         //   sharedModelManager.addTileSharedModel(self, containerSharedModel);
         // }
-
-        // // If there isn't a time variable create one
-        // let timeVariable = containerSharedModel.variables.find(variable => variable.name === "time");
-        // if (!timeVariable) {
-        //   timeVariable = containerSharedModel.createVariable();
-        //   timeVariable.setName("time");
-        //   timeVariable.setValue(0);
-        // }
       },
       {name: "sharedModelSetup", fireImmediately: true}));
     },
     updateAfterSharedModelChanges() {
       // nothing to do here
     },
-    // step() {
-    //   const {timeVariable} = self;
-    //   if (timeVariable?.value === undefined) {
-    //     timeVariable?.setValue(0);
-    //   } else {
-    //     timeVariable?.setValue(timeVariable.value + 0.05);
-    //   }
+    step() {
+      // Update all variables that have specified values
+      for (const [name, values] of Object.entries(self.simulationData.values)) {
+        const variable = self.getVariable(name);
+        variable?.setValue(values[self.frame % values.length]);
+      }
 
-    //   self.sharedModel?.variables.forEach(variable => {
-    //     if (variable.name?.startsWith("prev_")) {
-    //       const realName = variable.name?.substring(5);
-    //       const realVariable = self.sharedModel?.variables.find(_var => _var.name === realName);
-    //       if (realVariable && realVariable.computedValue !== undefined) {
-    //         variable.setValue(realVariable.computedValue);
-    //       }
-    //     }
-    //   });
-    // }
+      // Increment the frame
+      self.frame++;
+    }
   }));
 
 export interface SimulatorContentModelType extends Instance<typeof SimulatorContentModel> {}
