@@ -32,7 +32,7 @@ export const expressionButtonsList = [
     name: "divisionSymbol",
     title: "division operator",
     className: "division-symbol",
-    baseLatex: `#@${divSign}${ph}`,
+    baseLatex: `#@${divSign}`,
     icon: <DivisionSymbolIcon />
   },
   {

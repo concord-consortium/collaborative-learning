@@ -96,5 +96,24 @@ context('Expression Tool Tile', function () {
       exp.getMathFieldMath().eq(0).should("not.contain.text");
       exp.getMathField().should("not.have.value", "a=\\pi r^2");
     });
+    it("adds placeholder to negative sign", () => {
+      exp.getDeleteExpressionButton().eq(0).click();
+      exp.getMathField().eq(0).click({force: true});
+      exp.getMathField().eq(0).type("-", {force: true});
+      exp.getMathField().eq(0).should("have.value", "-\\placeholder{}");
+    });
+    it("adds placeholders to multiplication symbol", () => {
+      exp.getDeleteExpressionButton().eq(0).click();
+      // Normally typing "*" will add a \cdot to the latex value. This happens because
+      // of some special handling in the mathField. Apparently when cypress types
+      // characters this handling doesn't happen. So instead we use MathLives
+      // executeCommand to insert the \cdot directly
+      exp.getMathField().then($mf => {
+        const mf = $mf[0];
+        mf.executeCommand(["insert", "\\cdot"]);
+      });
+      exp.getMathField().eq(0).should("have.value", "\\placeholder{}\\cdot\\placeholder{}");
+      cy.wait(2000);
+    });
   });
 });
