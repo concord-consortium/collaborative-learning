@@ -1,6 +1,7 @@
-// TODO: VariableSnapshotType
+import { VariableSnapshot } from "@concord-consortium/diagram-view";
+
 export interface ISimulation {
   delay: number,
-  variables: any[],
+  variables: VariableSnapshot[],
   values: Record<string, number[]>
 }

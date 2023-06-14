@@ -1,5 +1,6 @@
 import { reaction } from "mobx";
 import { types, Instance, getType, addDisposer, getSnapshot } from "mobx-state-tree";
+import { VariableSnapshot } from "@concord-consortium/diagram-view";
 
 import { kBrainwavesKey } from "../simulations/brainwaves-grabber";
 import { simulations } from "../simulations/simulations";
@@ -86,9 +87,8 @@ export const SimulatorContentModel = TileContentModel
         }
 
         // Set up starter variables
-        // TODO: VariableSnapshotType
         const defaultVariableSnapshots = self.simulationData.variables;
-        defaultVariableSnapshots.forEach((variableSnapshot: any) => {
+        defaultVariableSnapshots.forEach((variableSnapshot: VariableSnapshot) => {
           const variable = containerSharedModel?.variables.find(v => v.name === variableSnapshot.name);
           if (!variable) {
             containerSharedModel?.createVariable(variableSnapshot);

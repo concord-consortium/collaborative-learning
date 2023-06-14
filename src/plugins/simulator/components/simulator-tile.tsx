@@ -43,7 +43,9 @@ export const SimulatorToolComponent: React.FC<ITileProps> = observer((props) => 
     <>
       <h3>Wow a simulator tile!</h3>
       {displayVariables.map(
-        variable => <VariableRow variable={content?.getVariable(variable.name)} key={variable.name} />
+        variable => variable.name
+          ? <VariableRow variable={content?.getVariable(variable.name)} key={variable.name} />
+          : null
       )}
     </>
   );
