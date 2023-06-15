@@ -2,7 +2,7 @@ import {MutableRefObject, useCallback, useEffect} from "react";
 import {matchCirclesToData, setNiceDomain, startAnimation} from "../utilities/graph-utils";
 import {IGraphModel, isGraphVisualPropsAction} from "../models/graph-model";
 import {useDataSetContext} from "./use-data-set-context";
-import {INumericAxisModel} from "../axis/models/axis-model";
+import {isNumericAxisModel} from "../axis/models/axis-model";
 import {IDotsRef} from "../graph-types";
 import {onAnyAction} from "../../../utilities/mst-utils";
 
@@ -16,7 +16,6 @@ interface IProps {
 export function useGraphModel(props: IProps) {
   const {graphModel, enableAnimation, dotsRef, instanceId} = props,
     dataConfig = graphModel.config,
-    yAxisModel = graphModel.getAxis('left'),
     yAttrID = graphModel.getAttributeID('y'),
     dataset = useDataSetContext();
 
@@ -34,6 +33,7 @@ export function useGraphModel(props: IProps) {
   // respond to change in plotType
   useEffect(function installPlotTypeAction() {
     const disposer = onAnyAction(graphModel, action => {
+      const yAxisModel = graphModel.getAxis('left');
       if (action.name === 'setPlotType') {
         const newPlotType = action.args?.[0];/*,
           attrIDs = newPlotType === 'dotPlot' ? [xAttrID] : [xAttrID, yAttrID]*/
@@ -41,12 +41,12 @@ export function useGraphModel(props: IProps) {
         // In case the y-values have changed we rescale
         if (newPlotType === 'scatterPlot') {
           const values = dataConfig.caseDataArray.map(({ caseID }) => dataset?.getNumeric(caseID, yAttrID)) as number[];
-          setNiceDomain(values || [], yAxisModel as INumericAxisModel);
+          yAxisModel && isNumericAxisModel(yAxisModel) && setNiceDomain(values || [], yAxisModel);
         }
       }
     });
     return () => disposer();
-  }, [dataConfig.caseDataArray, dataset, enableAnimation, graphModel, yAttrID, yAxisModel]);
+  }, [dataConfig.caseDataArray, dataset, enableAnimation, graphModel, yAttrID]);
 
   // respond to point properties change
   useEffect(function respondToGraphPointVisualAction() {
