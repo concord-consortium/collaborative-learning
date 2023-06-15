@@ -130,7 +130,6 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
   return (
     <div className="diagram-tool">
       <BasicEditableTileTitle
-        key="diagram-title"
         model={model}
         readOnly={readOnly}
         scale={scale}

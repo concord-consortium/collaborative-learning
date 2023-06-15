@@ -7,12 +7,12 @@ import { defaultTileTitleFont } from "../constants";
 import { ITileModel } from "../../models/tiles/tile-model";
 
 interface IBasicEditableTileTitleProps {
-  key: string;
   model: ITileModel;
   readOnly?: boolean;
   scale?: number;
+  titleKey?: string;
 }
-export function BasicEditableTileTitle({ key, model, readOnly, scale }: IBasicEditableTileTitleProps) {
+export function BasicEditableTileTitle({ model, readOnly, scale, titleKey }: IBasicEditableTileTitleProps) {
   const getTitle  = () => {
     return model.title || "";
   };
@@ -23,7 +23,7 @@ export function BasicEditableTileTitle({ key, model, readOnly, scale }: IBasicEd
   return (
     <ToolTitleArea>
       <EditableTileTitle
-        key={key}
+        key={titleKey}
         size={{width:null, height:null}}
         scale={scale}
         getTitle={getTitle}

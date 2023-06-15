@@ -57,7 +57,6 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
   return (
     <DrawingContentModelContext.Provider value={contentRef.current} >
       <BasicEditableTileTitle
-        key="drawing-title"
         model={model}
         readOnly={readOnly}
         scale={scale}
