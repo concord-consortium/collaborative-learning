@@ -73,8 +73,9 @@ export function unlinkTileFromDataSet(tile: ITileContentModel, sharedModel: Shar
   const sharedModelManager = getSharedModelManager(tile);
   sharedModelManager?.removeTileSharedModel(tile, sharedModel);
   const sharedCaseMetadata = getTileCaseMetadata(tile);
-  if (sharedCaseMetadata && sharedCaseMetadata.data?.id === sharedModel.id) {
-    sharedModelManager?.removeTileSharedModel(tile, sharedCaseMetadata);
+  const sharedDataSet = isSharedDataSet(sharedModel) ? sharedModel.dataSet : undefined;
+  if (sharedCaseMetadata?.data?.id === sharedDataSet?.id) {
+    sharedCaseMetadata && sharedModelManager?.removeTileSharedModel(tile, sharedCaseMetadata);
   }
 }
 
