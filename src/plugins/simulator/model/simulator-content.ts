@@ -26,7 +26,7 @@ export const SimulatorContentModel = TileContentModel
   .views(self => ({
     exportJson(options?: ITileExportOptions) {
       // crude, but enough to get us started
-      return JSON.stringify(getSnapshot(self));
+      return JSON.stringify(getSnapshot(self), null, 2);
     },
     get isUserResizable() {
       return true;
