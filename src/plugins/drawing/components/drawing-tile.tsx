@@ -78,7 +78,7 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
           readOnly={readOnly}
           measureText={(text) => measureText(text, defaultTileTitleFont)}
           onEndEdit={handleTitleChange}
-       />
+        />
       </ToolTitleArea>
       <div
         className={classNames("drawing-tool", { "read-only": readOnly })}

@@ -53,8 +53,6 @@ export const SimulatorContentModel = TileContentModel
     }
   }))
   .actions(self => ({
-    // TODO: Do we want to attach to an existing SharedVariables if one exists when the tile is created?
-    // Currently, it will be impossible to link to a Diagram tile.
     afterAttach() {
       // Monitor our parents and update our shared model when we have a document parent
       addDisposer(self, reaction(() => {
