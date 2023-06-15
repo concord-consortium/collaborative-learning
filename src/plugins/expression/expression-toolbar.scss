@@ -8,21 +8,37 @@
     display:none;
   }
 
-  .expression-button {
-    width: 100%;
-    padding:0px;
-    display: flex;
-    background:transparent;
-    border:0px;
-    cursor:pointer;
+  button {
+    height: 100%;
+    width: 37px;
+    background-color: white;
+    border: none;
+    cursor: pointer;
+    padding:4px;
     &:hover {
       background-color: $workspace-teal-light-5;
       border-radius: 0px 0px 2px 2px;
     }
+  }
 
+  svg {
+    width: 29px;
+    height: 26px;
+  }
+
+  .delete-expression svg {
+    transform: translate(-3px, -2px);
+  }
+  .mixed-fraction svg {
+    transform: scale(0.9) translate(-2px, 2px);
+  }
+  .division-symbol svg {
+    transform: scale(0.9) translateY(1px);
+  }
+  .mixed-fraction-smart {
+    background-color: rgb(175, 121, 175);
     svg {
-      fill: white;
-      stroke: $workspace-teal-dark-1;
+      transform: scale(0.9) translate(-2px, 2px);
     }
   }
 }

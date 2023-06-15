@@ -4,6 +4,7 @@ import { onSnapshot } from "mobx-state-tree";
 import "mathlive"; // separate static import of library for initialization to run
 // eslint-disable-next-line no-duplicate-imports
 import type { MathfieldElementAttributes, MathfieldElement } from "mathlive";
+import { ComputeEngine, version } from "@concord-consortium/compute-engine";
 import { ITileProps } from "../../components/tiles/tile-component";
 import { ExpressionContentModelType } from "./expression-content";
 import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
@@ -11,6 +12,7 @@ import { replaceKeyBinding } from "./expression-tile-utils";
 import { useUIStore } from "../../hooks/use-stores";
 import { useToolbarTileApi } from "../../components/tiles/hooks/use-toolbar-tile-api";
 import { ExpressionToolbar } from "./expression-toolbar";
+import { findMissingElements, replaceMissingElements } from "./expression-cortex-utils";
 
 import "./expression-tile.scss";
 
@@ -21,6 +23,18 @@ declare global {
       ["math-field"]: CustomElement<MathfieldElementAttributes>;
     }
   }
+}
+console.log("ComputeEngine version", version);
+
+const computeEngine = new ComputeEngine();
+computeEngine.latexOptions = { preserveLatex: true };
+computeEngine.jsonSerializationOptions = { metadata: ['latex'] };
+
+function replaceLatex(mfLatex: string) {
+  // parse the latex, replace missing elements with placeholders
+  const mathJSON = computeEngine.latexSyntax.parse(mfLatex);
+  const missingElements = findMissingElements(mathJSON);
+  return replaceMissingElements(mfLatex, missingElements);
 }
 
 const undoKeys = ["cmd+z", "[Undo]", "ctrl+z"];
@@ -38,10 +52,11 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     undoKeys.forEach((key: string) => {
       mf.current?.keybindings && replaceKeyBinding(mf.current.keybindings, key, "");
     });
+    if (mf.current) mf.current.inlineShortcuts = {};
   }, [model.id, ui]);
 
   useEffect(() => {
-    // when we change model programatically, we need to update mathfield
+    // model has changed beneath UI - update mathfield, yet restore cursor position
     const disposer = onSnapshot((content as any), () => {
       if (mf.current?.getValue() === content.latexStr) return;
       mf.current?.setValue(content.latexStr, {silenceNotifications: true});
@@ -50,9 +65,17 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     return () => disposer();
   }, [content, readOnly]);
 
-  const handleChange = (e: FormEvent<MathfieldElementAttributes>) => {
+  const handleMathfieldInput = (e: FormEvent<MathfieldElementAttributes>) => {
+    const mfLatex = (e.target as MathfieldElement).value;
+    const replacedLatex = replaceLatex(mfLatex);
     trackedCursorPos.current =  mf.current?.position || 0;
-    content.setLatexStr((e.target as any).value);
+    if (mf.current?.value){
+      mf.current.value = replacedLatex;
+    }
+    if (mf.current && trackedCursorPos.current != null){
+      mf.current.position = trackedCursorPos?.current; //restore cursor position
+    }
+    content.setLatexStr(replacedLatex);
   };
 
   const toolbarProps = useToolbarTileApi({
@@ -65,7 +88,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   const mathfieldAttributes = {
     ref: mf,
     value: content.latexStr,
-    onInput: !readOnly ? handleChange : undefined,
+    onInput: !readOnly ? handleMathfieldInput : undefined,
     readOnly: readOnly ? "true" : undefined,
   };
 
@@ -73,12 +96,14 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     <div className="expression-tool">
       <ExpressionToolbar
         model={model}
+        mf={mf}
+        trackedCursorPos={trackedCursorPos}
         documentContent={documentContent}
         tileElt={tileElt}
         scale={scale}
         {...toolbarProps}
-        mf={mf}
       />
+
       <div className="expression-title-area">
         <CustomEditableTileTitle
           model={model}
