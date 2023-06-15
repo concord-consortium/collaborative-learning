@@ -37,34 +37,59 @@
       background-color: $charcoal-light-8;
       color: $charcoal;
       border: solid 1px $charcoal-light-2;
-      &:hover {
-        opacity: .5;
-      }
-      &.selected {
-        background-color: $comment-select-green-dark;
-        border: none;
-      }
+
       &.problems {
         background-color: $problem-orange-light-7;
+        &:hover{
+          background-color: $problem-comment-hover;
+        }
+        &.selected {
+          border: none;
+          background-color: $comment-select-yellow;
+        }
       }
+
       &.teacher-guide {
         background-color: $learninglog-green-light-7;
+        &:hover{
+          background-color: $teacherguide-comment-hover;
+        }
+        &.selected {
+          border: none;
+          background-color: $comment-select-yellow;
+        }
       }
+
       &.my-work {
         background-color: $workspace-teal-light-6;
+        &:hover{
+          background-color: $mywork-comment-hover;
+        }
+        &.selected {
+          border: none;
+          background-color: $comment-select-yellow;
+        }
       }
+
       &.class-work {
         background-color: $classwork-purple-light-7;
+        &:hover{
+          background-color: $classwork-comment-hover;
+        }
+        &.selected {
+          border: none;
+          background-color: $comment-select-yellow;
+        }
       }
+
       &.supports {
         background-color: $support-blue-light-7;
       }
       .comment-card-header-icon {
         height: 34px;
       }
-      &.selected {
-        background-color: $comment-select-green-dark;
-      }
+
+
     }
     .chat-thread-title {
         line-height: 1.29;
