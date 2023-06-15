@@ -13,7 +13,7 @@ import { getTileContentById } from "../utilities/mst-utils";
 import { SharedDataSet } from "../models/shared/shared-data-set";
 import { getTileContentInfo } from "../models/tiles/tile-content-info";
 import { ILinkOptions } from "../models/shared/shared-types";
-import { linkTileToDataSet } from "../models/shared/shared-data-utils";
+import { linkTileToDataSet, unlinkTileFromDataSet } from "../models/shared/shared-data-utils";
 
 interface IProps {
   documentId?: string;
@@ -68,9 +68,9 @@ export const useConsumerTileLinking = ({
         // If providerId matches model.id, we're the provider and should remove the other tile
         // from the sharedModel. Otherwise, we're the consumer and should remove ourselves.
         if (sharedModel && sharedModel.providerId === model.id) {
-          sharedModelManager?.removeTileSharedModel(linkedTile, sharedModel);
+          sharedModel && unlinkTileFromDataSet(linkedTile, sharedModel);
         } else if (sharedModel) {
-          sharedModelManager?.removeTileSharedModel(model.content, sharedModel);
+          sharedModel && unlinkTileFromDataSet(model.content, sharedModel);
         }
       }
     }
