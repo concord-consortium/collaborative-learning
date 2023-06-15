@@ -726,7 +726,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private tick = () => {
-    console.log("\n| tick |")
     const { readOnly, tileContent: tileModel, playBackIndex, programMode,
             isPlaying, updateRecordIndex, updatePlayBackIndex } = this.props;
 
@@ -802,10 +801,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const { deviceFamily } = this.stores.serialDevice;
 
     if (deviceFamily === "arduino" && isNumberOutput){
-      // console.log("1 | program | sendDataToSerialDevice |",
-      // "\n    recieved: node: ", n,
-      // "\n    sending n.data.nodeValue: ", n.data.nodeValue,
-      // )
+      console.log("\n\n1 | tick | sendDataToSerialDevice |", n.data.nodeValue);
       this.stores.serialDevice.writeToOutForBBGripper(n.data.nodeValue as number);
     }
     if (deviceFamily === "microbit"){

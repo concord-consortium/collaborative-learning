@@ -162,16 +162,19 @@ export class SerialDevice {
 
   public writeToOutForBBGripper(n:number){
     console.log("2 | serial.ts | writeToOut(n):    ", n);
-    console.log("3 | serial.ts |  ...calcs pct:    ", n / 100);
-    console.log("4 | serial.ts |  ...calcs openTo: ", Math.round(180 - (n / 100 * 60)));
+
     const percent = n / 100;
+    console.log("3 | serial.ts |  ...calcs pct:    ", percent);
+
     let openTo = Math.round(180 - (percent * 60));
     if (openTo > 160) openTo = 180;
     if (openTo < 130) openTo = 120;
+    console.log("4 | serial.ts |  ...calcs openTo:  ", openTo);
+
 
     if(this.hasPort()){
       this.writer.write(`${openTo.toString()}\n`);
-
+      console.log("5 | serial.ts |  ...sends it out...      ");
     }
   }
 }
