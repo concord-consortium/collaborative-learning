@@ -20,7 +20,7 @@ export const SimulatorToolComponent: React.FC<ITileProps> = observer((props) => 
   const { model, readOnly, scale } = props;
   const content = model.content as SimulatorContentModelType;
 
-  const [steps, setSteps] = useState(0);
+  const [_steps, setSteps] = useState(0);
   useEffect(() => {
     const id = setInterval(() => {
       content?.step();

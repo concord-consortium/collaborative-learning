@@ -177,7 +177,7 @@
                           },
                           {
                             "id": "pGi1SioPJYtNIUU9",
-                            "title": “Test Simulation",
+                            "title": "Test Simulation",
                             "content": {
                               "type": "Simulator",
                               "simulation": "EMG_and_claw"
