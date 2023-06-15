@@ -3,11 +3,11 @@ import {IGraphModel} from "./graph-model";
 import {GraphLayout} from "./graph-layout";
 import { IDataSet } from "../../../models/data/data-set";
 import {getDataSetFromId} from "../../../models/shared/shared-data-utils";
-import { getAppConfig } from "../../../models/tiles/tile-environment";
 import {AxisPlace, AxisPlaces} from "../axis/axis-types";
 import {
   CategoricalAxisModel, EmptyAxisModel, isCategoricalAxisModel, isNumericAxisModel, NumericAxisModel
 } from "../axis/models/axis-model";
+import { getGraphSetting } from "../graph-environment";
 import {
   axisPlaceToAttrRole, graphPlaceToAttrRole, IDotsRef, kDefaultNumericAxisBounds, PlotType
 } from "../graph-types";
@@ -95,9 +95,8 @@ export class GraphController {
   handleAttributeAssignment(graphPlace: GraphPlace, dataSetID: string, attrID: string) {
     const {graphModel, layout} = this,
       dataset = getDataSetFromId(graphModel, dataSetID),
-      appConfig = getAppConfig(graphModel),
       dataConfig = graphModel?.config;
-    const emptyPlotIsNumeric = appConfig?.getSetting("emptyPlotIsNumeric", "graph");
+    const emptyPlotIsNumeric = getGraphSetting(graphModel, "emptyPlotIsNumeric");
     if (!(graphModel && layout && dataConfig && dataset)) {
       return;
     }

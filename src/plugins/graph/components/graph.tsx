@@ -7,7 +7,8 @@ import {Background} from "./background";
 import {DroppablePlot} from "./droppable-plot";
 import {AxisPlace, AxisPlaces} from "../axis/axis-types";
 import {GraphAxis} from "./graph-axis";
-import {attrRoleToGraphPlace, GraphAttrRole, graphPlaceToAttrRole, IDotsRef, kGraphClass} from "../graph-types";
+import { getGraphSetting } from "../graph-environment";
+import {attrRoleToGraphPlace, graphPlaceToAttrRole, IDotsRef, kGraphClass} from "../graph-types";
 import {ScatterDots} from "./scatterdots";
 import {DotPlotDots} from "./dotplotdots";
 import {CaseDots} from "./casedots";
@@ -17,7 +18,7 @@ import {DataConfigurationContext} from "../hooks/use-data-configuration-context"
 import {useDataSetContext} from "../hooks/use-data-set-context";
 import {useGraphModel} from "../hooks/use-graph-model";
 import {setNiceDomain, startAnimation} from "../utilities/graph-utils";
-import {IAxisModel} from "../axis/models/axis-model";
+import {IAxisModel, isNumericAxisModel} from "../axis/models/axis-model";
 import {GraphPlace} from "../axis-graph-shared";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {isSetAttributeIDAction, useGraphModelContext} from "../models/graph-model";
@@ -25,7 +26,8 @@ import {useInstanceIdContext} from "../hooks/use-instance-id-context";
 import {MarqueeState} from "../models/marquee-state";
 import {Legend} from "./legend/legend";
 import {AttributeType} from "../../../models/data/attribute";
-import { IDataSet } from "../../../models/data/data-set";
+import {IDataSet} from "../../../models/data/data-set";
+import {isSetCaseValuesAction} from "../../../models/data/data-set-actions";
 import {useDataTips} from "../hooks/use-data-tips";
 import {onAnyAction} from "../../../utilities/mst-utils";
 
@@ -103,6 +105,23 @@ export const Graph = observer(function Graph({graphController, graphRef, dotsRef
     graphModel.config.setAttributeType(graphPlaceToAttrRole[place], treatAs);
     dataset && graphController?.handleAttributeAssignment(place, dataset.id, attrId);
   };
+
+  useEffect(function handleDataChange() {
+    const scalePlotOnValueChange = getGraphSetting(graphModel, "scalePlotOnValueChange");
+    const disposer = dataset && scalePlotOnValueChange ? onAnyAction(dataset, action => {
+      if (isSetCaseValuesAction(action)) {
+        const xAxisModel = graphModel.getAxis("bottom");
+        if (isNumericAxisModel(xAxisModel)) {
+          setNiceDomain(graphModel.config.numericValuesForAttrRole("x"), xAxisModel);
+        }
+        const yAxisModel = graphModel.getAxis("left");
+        if (isNumericAxisModel(yAxisModel)) {
+          setNiceDomain(graphModel.config.numericValuesForAttrRole("y"), yAxisModel);
+        }
+      }
+    }) : undefined;
+    return () => disposer?.();
+  });
 
   useDataTips({dotsRef, dataset, graphModel, enableAnimation});
 
