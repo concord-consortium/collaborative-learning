@@ -63,6 +63,9 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     return _subTabs;
   }, [tabSpec.sections]);
 
+  const _subTabIndex = subTabs.findIndex((subTab) => tabState?.openSubTab === subTab.label);
+  const subTabIndex = _subTabIndex < 0 ? 0 : _subTabIndex;
+
   const hasSubTabs = subTabs.length > 1;
   const vh = window.innerHeight;
   const headerOffset = hasSubTabs
@@ -104,7 +107,10 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     if (!document.hasContent && document.isRemote) {
       loadDocumentContent(document);
     }
-    const selectedSubTab = subTabs[tabIndex];
+    // The subTabIndex is computed above on every render. It is the index
+    // of the currently open subTab. Its also passed to the Tab component
+    // below.
+    const selectedSubTab = subTabs[subTabIndex];
     ui.openSubTabDocument(tabSpec.tab, selectedSubTab.label, document.key);
     const logEvent = document.isRemote
       ? LogEventName.VIEW_SHOW_TEACHER_NETWORK_COMPARISON_DOCUMENT
@@ -235,16 +241,13 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     );
   };
 
-  const subTabIndex = subTabs.findIndex((subTab) => tabState?.openSubTab === subTab.label);
-  const tabIndex = subTabIndex < 0 ? 0 : subTabIndex;
-
   return (
     <div className="document-tab-content">
       <Tabs
         className={`document-tabs ${navTabSpec?.tab} ${isChatOpen ? "chat-open" : ""}`}
         forceRenderTabPanel={true}
         onSelect={handleTabSelect}
-        selectedIndex={tabIndex}
+        selectedIndex={subTabIndex}
         selectedTabClassName="selected"
       >
         <div className={`tab-header-row ${!hasSubTabs ? "no-sub-tabs" : ""}`}>

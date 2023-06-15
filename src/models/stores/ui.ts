@@ -41,7 +41,7 @@ export const UITabModel = types
   .model("UITab", {
     id: types.identifier,
     openSubTab: types.maybe(types.string),
-    // The key here is the sub tab label
+    // The key of this map is the sub tab label
     openDocuments: types.map(types.string)
   });
 
@@ -228,13 +228,23 @@ export const UIModel = types
       },
       // We could switch this to openSubTab, however that would imply that the activeTab would be
       // switched if this is called. When all of the tabs are initialized this is called to setup
-      // the default sub tab or each main tab.
+      // the default sub tab or each main tab, so we don't want to be switching the activeTab in
+      // that case.
       setOpenSubTab(tab: string, subTab: string) {
         const tabState = getTabState(tab);
         tabState.openSubTab = subTab;
       },
+      /**
+       * Open to the tab and subTab and open a document.
+       *
+       * @param tab
+       * @param subTab
+       * @param documentKey
+       */
       openSubTabDocument(tab: string, subTab: string, documentKey: string) {
         const tabState = getTabState(tab);
+        self.activeNavTab = tab;
+        tabState.openSubTab = subTab;
         tabState.openDocuments.set(subTab, documentKey);
       },
       closeSubTabDocument(tab: string, subTab: string) {
@@ -256,6 +266,7 @@ export const UIModel = types
      *
      * @param doc a non curriculum document
      */
+    // FIXME: change to Resource(s) instead of Left
     openDocumentOnLeft(doc: DocumentModelType) {
       let navTab = '';
       const myWorkTypes = ["problem", "planning", "learningLog", "personal"];
@@ -268,7 +279,6 @@ export const UIModel = types
           navTab = ENavTab.kClassWork;
         }
       }
-      self.setActiveNavTab(navTab);
 
       let subTab = '';
       if (navTab === ENavTab.kClassWork) {
@@ -289,7 +299,6 @@ export const UIModel = types
         console.warn("Can't find subTab for doc", getSnapshot(doc));
         return;
       }
-      self.setOpenSubTab(navTab, subTab);
       self.openSubTabDocument(navTab, subTab, doc.key);
     },
 

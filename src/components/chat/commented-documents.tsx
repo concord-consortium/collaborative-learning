@@ -121,6 +121,9 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
       {
         docsCommentedOn &&
         (docsCommentedOn).map((doc: PromisedCurriculumDocument, index:number) => {
+          // TODO: the navTab is used both in openCurriculumDocOnLeft and here
+          // to style the item in the list. So we should move this logic into a helper
+          // method in the ui store so it can be used by both places.
           let navTab: string;
           if (doc.id?.includes("guide")){
             navTab = ENavTab.kTeacherGuide;
@@ -128,6 +131,7 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
           else {
             navTab = ENavTab.kProblems;
           }
+          // end of stuff to move
           return (
             <div
               className={`document-box ${navTab}`}
@@ -197,8 +201,12 @@ interface JProps {
   handleDocView: (() => void) | undefined,
 }
 
+// This is rendering a single document item in the commented document list
 export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionOrNetworkDoc, isNetworkDoc, handleDocView}) => {
   const ui = useUIStore();
+  // TODO: we need the navTab to style the item. The navTab is also computed by
+  // openDocumentOnLeft. So we could move this logic in the ui store as a helper method so it
+  // can be used here as well as by openDocumentOnLeft.
   let navTab = '';
   const myWorkTypes = ["problem", "planning", "learningLog", "personal"];
   const classWorkTypes = ["publication", "learningLogPublication", "personalPublication", "supportPublication"];
@@ -210,6 +218,7 @@ export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionOrNetworkD
       navTab = ENavTab.kClassWork;
     }
   }
+  // end of stuff to move
   const title =  useDocumentCaption(sectionOrNetworkDoc);
 
   return (
