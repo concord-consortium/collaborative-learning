@@ -55,8 +55,6 @@ export const Graph = observer(function Graph({graphController, graphRef, dotsRef
     xAttrID = graphModel.getAttributeID('x'),
     yAttrID = graphModel.getAttributeID('y');
 
-  // useGraphModel({dotsRef, graphModel, enableAnimation, instanceId});
-
   useEffect(function setupPlotArea() {
     if (xScale && xScale?.length > 0) {
       const plotBounds = layout.getComputedBounds('plot');

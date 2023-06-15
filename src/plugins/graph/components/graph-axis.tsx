@@ -120,7 +120,6 @@ export const GraphAxis = observer(function GraphAxis({
       <Axis getAxisModel={getAxisModel}
             label={''}  // Remove
             enableAnimation={enableAnimation}
-            // TODO: Should this be graphModel.axisShouldShowGridLines(place)?
             showScatterPlotGridLines={axisShouldShowGridlines}
             centerCategoryLabels={graphModel.config.categoriesForAxisShouldBeCentered(place)}
       />
