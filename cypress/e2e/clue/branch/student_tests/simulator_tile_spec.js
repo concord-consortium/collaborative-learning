@@ -6,7 +6,7 @@ let simulatorTile = new SimulatorTile;
 
 context('Simulator Tile', function () {
   beforeEach(function () {
-    const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&mouseSensor&unit=https://collaborative-learning.concord.org/branch/simulator-tile/curriculum/dataflow/dataflow-example.json";
+    const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&mouseSensor&unit=dfe";
     cy.clearQAData('all');
     cy.visit(queryParams);
     cy.waitForLoad();
@@ -18,6 +18,7 @@ context('Simulator Tile', function () {
       clueCanvas.addTile("simulator");
       simulatorTile.getSimulatorTile().should("exist");
       simulatorTile.getTileTitle().should("exist");
+      // TODO: These should be removed when we change what's displayed in the simulator tile
       simulatorTile.getSimulatorTile().should("contain.text", "sensor1");
       simulatorTile.getSimulatorTile().should("contain.text", "output1");
     });
