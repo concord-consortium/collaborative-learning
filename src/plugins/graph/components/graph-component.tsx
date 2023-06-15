@@ -25,7 +25,7 @@ export const GraphComponent = observer(function GraphComponent({tile}: IProps) {
   const instanceId = useNextInstanceId("graph");
   const { data } = useDataSet(graphModel?.data);
   const layout = useInitGraphLayout(graphModel);
-  // Removed deboucing, but we can bring it back if we find we need it
+  // Removed debouncing, but we can bring it back if we find we need it
   const {width, height, ref: graphRef} = useResizeDetector(/*{refreshMode: "debounce", refreshRate: 15}*/);
   const enableAnimation = useRef(true);
   const autoAdjustAxes = useRef(true);
@@ -35,7 +35,7 @@ export const GraphComponent = observer(function GraphComponent({tile}: IProps) {
     [layout, instanceId]
   );
 
-  useGraphController({graphController, graphModel, dotsRef});
+  useGraphController({data, graphController, graphModel, dotsRef});
 
   useEffect(() => {
     (width != null) && (height != null) && layout.setParentExtent(width, height);

@@ -12,7 +12,7 @@ import {
 import {DataConfigurationModel} from "./data-configuration-model";
 import { SharedModelType } from "../../../models/shared/shared-model";
 import {
-  SharedDataSetType, isSharedDataSet, kSharedDataSetType, SharedDataSet
+  SharedDataSetType, kSharedDataSetType, SharedDataSet
 } from "../../../models/shared/shared-data-set";
 import {ITileContentModel, TileContentModel} from "../../../models/tiles/tile-content";
 import {ITileExportOptions} from "../../../models/tiles/tile-content-info";
@@ -155,14 +155,6 @@ export const GraphModel = TileContentModel
         }
       },
       {name: "sharedModelSetup", fireImmediately: true}));
-    },
-    updateAfterSharedModelChanges(sharedModel: SharedModelType | undefined, type: SharedModelChangeType) {
-      if (type === "link") {
-        self.config.setDataset(self.data, self.metadata);
-      }
-      else if (type === "unlink" && isSharedDataSet(sharedModel)) {
-        self.config.setDataset(undefined, undefined);
-      }
     },
     setAxis(place: AxisPlace, axis: IAxisModelUnion) {
       self.axes.set(place, axis);

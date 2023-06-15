@@ -1,7 +1,9 @@
 import React from "react";
 import {IGraphModel} from "./graph-model";
 import {GraphLayout} from "./graph-layout";
+import { IDataSet } from "../../../models/data/data-set";
 import {getDataSetFromId} from "../../../models/shared/shared-data-utils";
+import { getAppConfig } from "../../../models/tiles/tile-environment";
 import {AxisPlace, AxisPlaces} from "../axis/axis-types";
 import {
   CategoricalAxisModel, EmptyAxisModel, isCategoricalAxisModel, isNumericAxisModel, NumericAxisModel
@@ -11,7 +13,6 @@ import {
 } from "../graph-types";
 import {GraphPlace} from "../axis-graph-shared";
 import {matchCirclesToData, setNiceDomain} from "../utilities/graph-utils";
-import { getAppConfig } from "../../../models/tiles/tile-environment";
 
 // keys are [primaryAxisType][secondaryAxisType]
 const plotChoices: Record<string, Record<string, PlotType>> = {
@@ -28,6 +29,7 @@ interface IGraphControllerConstructorProps {
 }
 
 interface IGraphControllerProps {
+  data?: IDataSet
   graphModel: IGraphModel
   dotsRef: IDotsRef
 }

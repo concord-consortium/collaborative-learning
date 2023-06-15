@@ -7,6 +7,7 @@ import {
   addTableToDocumentMap, getLinkedTableIndex, getTableLinkColors, removeTableFromDocumentMap
 } from "../models/tiles/table-links";
 import { getTileContentInfo } from "../models/tiles/tile-content-info";
+import { getSharedModelManager } from "../models/tiles/tile-environment";
 import { ITileModel } from "../models/tiles/tile-model";
 import { useLinkProviderTileDialog } from "./use-link-provider-tile-dialog";
 import { getTileContentById } from "../utilities/mst-utils";
@@ -34,7 +35,7 @@ export const useProviderTileLinking = ({
   const linkTile = useCallback((tileInfo: ITileLinkMetadata) => {
     const providerTile = getTileContentById(model.content, tileInfo.id);
     if (!readOnly && providerTile) {
-      const sharedModelManager = providerTile.tileEnv?.sharedModelManager;
+      const sharedModelManager = getSharedModelManager(providerTile);
       if (sharedModelManager?.isReady) {
         const sharedDataSet = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, tileInfo.id);
         if (sharedDataSet) {
@@ -49,7 +50,7 @@ export const useProviderTileLinking = ({
   const unlinkTile = useCallback((tileInfo: ITileLinkMetadata) => {
     const linkedTile = getTileContentById(model.content, tileInfo.id);
     if (!readOnly && linkedTile) {
-      const sharedModelManager = linkedTile.tileEnv?.sharedModelManager;
+      const sharedModelManager = getSharedModelManager(linkedTile);
       if (sharedModelManager?.isReady) {
         const sharedDataSet = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, tileInfo.id);
         sharedDataSet && unlinkTileFromDataSet(model.content, sharedDataSet);

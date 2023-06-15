@@ -10,7 +10,6 @@ import { ILinkOptions } from "./shared-types";
 import { ITileContentModel } from "../tiles/tile-content";
 import { getSharedModelManager } from "../tiles/tile-environment";
 import { ITileModel } from "../tiles/tile-model";
-import { SharedModelType } from "./shared-model";
 
 export function getSharedDataSets(node: IAnyStateTreeNode): SharedDataSetType[] {
   const sharedModelManager = getSharedModelManager(node);
@@ -69,13 +68,12 @@ export function isTileLinkedToOtherDataSet(tile: ITileContentModel, dataSet: IDa
   return !!sharedModels.find(sharedModel => isSharedDataSet(sharedModel) && sharedModel.dataSet.id !== dataSet.id);
 }
 
-export function unlinkTileFromDataSet(tile: ITileContentModel, sharedModel: SharedModelType) {
+export function unlinkTileFromDataSet(tile: ITileContentModel, sharedDataSet: SharedDataSetType) {
   const sharedModelManager = getSharedModelManager(tile);
-  sharedModelManager?.removeTileSharedModel(tile, sharedModel);
   const sharedCaseMetadata = getTileCaseMetadata(tile);
-  const sharedDataSet = isSharedDataSet(sharedModel) ? sharedModel.dataSet : undefined;
-  if (sharedCaseMetadata?.data?.id === sharedDataSet?.id) {
-    sharedCaseMetadata && sharedModelManager?.removeTileSharedModel(tile, sharedCaseMetadata);
+  sharedModelManager?.removeTileSharedModel(tile, sharedDataSet);
+  if (sharedCaseMetadata && sharedCaseMetadata.data?.id === sharedDataSet.dataSet.id) {
+    sharedModelManager?.removeTileSharedModel(tile, sharedCaseMetadata);
   }
 }
 
@@ -83,7 +81,7 @@ export function unlinkTileFromAllDataSets(tile: ITileContentModel) {
   const sharedModelManager = getSharedModelManager(tile);
   const sharedModels = sharedModelManager?.getTileSharedModels(tile);
   sharedModels?.forEach(sharedModel => {
-    if (["SharedDataSet", "SharedCaseMetadata"].includes(sharedModel.type)) {
+    if (isSharedDataSet(sharedModel)) {
       unlinkTileFromDataSet(tile, sharedModel);
     }
   });
