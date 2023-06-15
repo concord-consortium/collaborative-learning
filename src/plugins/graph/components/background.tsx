@@ -7,7 +7,6 @@ import {CaseData} from "../d3-types";
 import {InternalizedData, rTreeRect} from "../graph-types";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {rectangleSubtract, rectNormalize} from "../utilities/graph-utils";
-import {useCurrent} from "../../../hooks/use-current";
 import {useDataSetContext} from "../hooks/use-data-set-context";
 import {MarqueeState} from "../models/marquee-state";
 import {useGraphModelContext} from "../models/graph-model";
@@ -45,7 +44,7 @@ const prepareTree = (areaSelector: string, circleSelector: string): RTree => {
 export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
   const {marqueeState} = props,
     instanceId = useInstanceIdContext() || 'background',
-    dataset = useCurrent(useDataSetContext()),
+    dataset = useDataSetContext(),
     layout = useGraphLayoutContext(),
     graphModel = useGraphModelContext(),
     bgRef = ref as MutableRefObject<SVGGElement | null>,
@@ -65,7 +64,7 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
       width.current = 0;
       height.current = 0;
       if (!event.sourceEvent.shiftKey) {
-        dataset.current?.setSelectedCases([]);
+        dataset?.setSelectedCases([]);
       }
       marqueeState.setMarqueeRect({x: startX.current, y: startY.current, width: 0, height: 0});
     }, [dataset, instanceId, layout, marqueeState]),
@@ -89,8 +88,8 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
           }),
           newSelection = getCasesForDelta(selectionTree.current, currentRect, previousMarqueeRect.current),
           newDeselection = getCasesForDelta(selectionTree.current, previousMarqueeRect.current, currentRect);
-        newSelection.length && dataset.current?.selectCases(newSelection, true);
-        newDeselection.length && dataset.current?.selectCases(newDeselection, false);
+        newSelection.length && dataset?.selectCases(newSelection, true);
+        newDeselection.length && dataset?.selectCases(newDeselection, false);
       }
     }, [dataset, marqueeState]),
 
@@ -121,7 +120,7 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
         // clicking on the background deselects all cases
         .on('click', (event) => {
           if (!event.shiftKey) {
-            dataset.current?.selectAll(false);
+            dataset?.selectAll(false);
           }
         })
         .selectAll<SVGRectElement, number>('rect')
