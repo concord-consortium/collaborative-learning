@@ -1,5 +1,5 @@
 import { destroy, Instance, types } from "mobx-state-tree";
-import { Variable, VariableType } from "@concord-consortium/diagram-view";
+import { Variable, VariableSnapshot, VariableType } from "@concord-consortium/diagram-view";
 import { SharedModel } from "../../models/shared/shared-model";
 import { withoutUndo } from "../../models/history/without-undo";
 
@@ -44,8 +44,7 @@ export const SharedVariables = SharedModel.named("SharedVariables")
       insertVariable(addedVariable);
     }
   },
-  // TODO: VariableSnapshotType
-  createVariable(snapshot?: any): VariableType {
+  createVariable(snapshot?: VariableSnapshot): VariableType {
     const variable = Variable.create(snapshot);
     self.addVariable(variable);
     return variable;
