@@ -8,6 +8,7 @@ import { NodeLiveOutputTypes, NodeMicroBitHubs,
 } from "../../model/utilities/node";
 import { dataflowLogEvent } from "../../dataflow-logger";
 import { NodeChannelInfo } from "../../model/utilities/channel";
+import { parse } from "initials";
 
 interface HubStatus {
   id: string,
@@ -36,6 +37,9 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
     // This node type is a "live" output and does not output a value into a rete outputs
     // Then the default NodeProcess takes the updated data and sends it out via Serial.
     const n1 = inputs.nodeValue.length ? inputs.nodeValue[0] : node.data.nodeValue;
+
+    console.log("| A | factory | nodeValue:  ", n1);
+
     if (this.editor) {
       const _node = this.editor.nodes.find((n: { id: any; }) => n.id === node.id);
       if (_node) {
@@ -59,6 +63,7 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
         if (kRoundedOutputTypes.includes(outputType)){
           newValue = this.getNewValueForGrabber(n1);
           const roundedDisplayValue = Math.round((newValue / 10) * 10);
+          console.log("| C | factory | roundedVal: ", roundedDisplayValue);
           nodeValue?.setDisplayMessage(`${roundedDisplayValue}% closed`);
         }
 
@@ -75,7 +80,9 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
   private getNewValueForGrabber(num: number){
     if (num > 1)  return 100;
     if (num < 0)  return 0;
-    return parseInt((num * 100).toFixed(2), 10);
+    const specialValue = parseInt((num * 100).toFixed(2), 10);
+    console.log("| B | factory | specialVal: ", specialValue);
+    return specialValue;
   }
 
   private getSelectedRelayIndex(node: Node){

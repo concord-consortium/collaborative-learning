@@ -161,7 +161,9 @@ export class SerialDevice {
   }
 
   public writeToOutForBBGripper(n:number){
-    // "percent closed" is x% where 100% = 120deg and 0% = 180deg
+    console.log("2 | serial.ts | writeToOut(n):    ", n);
+    console.log("3 | serial.ts |  ...calcs pct:    ", n / 100);
+    console.log("4 | serial.ts |  ...calcs openTo: ", Math.round(180 - (n / 100 * 60)));
     const percent = n / 100;
     let openTo = Math.round(180 - (percent * 60));
     if (openTo > 160) openTo = 180;
@@ -169,7 +171,7 @@ export class SerialDevice {
 
     if(this.hasPort()){
       this.writer.write(`${openTo.toString()}\n`);
+
     }
   }
 }
-
