@@ -14,10 +14,7 @@ import { useNewVariableDialog } from "../shared-variables/dialog/use-new-variabl
 import { ITileProps } from "../../components/tiles/tile-component";
 import { useToolbarTileApi } from "../../components/tiles/hooks/use-toolbar-tile-api";
 import { useUIStore } from "../../hooks/use-stores";
-import { ToolTitleArea } from "../../components/tiles/tile-title-area";
-import { EditableTileTitle } from "../../components/tiles/editable-tile-title";
-import { measureText } from "../../components/tiles/hooks/use-measure-text";
-import { defaultTileTitleFont } from "../../components/constants";
+import { BasicEditableTileTitle } from "../../components/tiles/basic-editable-tile-title";
 
 import InsertVariableCardIcon from "./src/assets/insert-variable-card-icon.svg";
 import "@concord-consortium/diagram-view/dist/index.css";
@@ -129,28 +126,15 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
     }
   });
 
-  const getTitle  = () => {
-    return model.title || "";
-  };
-
-  const handleTitleChange = (title?: string) => {
-    title && model.setTitle(title);
-  };
-
   const preventKeyboardDelete = dialogOpen || !isTileSelected || readOnly;
   return (
     <div className="diagram-tool">
-      <ToolTitleArea>
-        <EditableTileTitle
-          key="drawing-title"
-          size={{width:null, height:null}}
-          scale={scale}
-          getTitle={getTitle}
-          readOnly={readOnly}
-          measureText={(text) => measureText(text, defaultTileTitleFont)}
-          onEndEdit={handleTitleChange}
-       />
-      </ToolTitleArea>
+      <BasicEditableTileTitle
+        key="diagram-title"
+        model={model}
+        readOnly={readOnly}
+        scale={scale}
+      />
       <DiagramToolbar
         content={content}
         diagramHelper={diagramHelper}
