@@ -2,7 +2,7 @@ import {MutableRefObject, useCallback, useEffect} from "react";
 import {matchCirclesToData, setNiceDomain, startAnimation} from "../utilities/graph-utils";
 import {IGraphModel, isGraphVisualPropsAction} from "../models/graph-model";
 import {useDataSetContext} from "./use-data-set-context";
-import {INumericAxisModel} from "../axis/models/axis-model";
+import {isNumericAxisModel} from "../axis/models/axis-model";
 import {IDotsRef} from "../graph-types";
 import {onAnyAction} from "../../../utilities/mst-utils";
 
@@ -30,22 +30,18 @@ export function useGraphModel(props: IProps) {
     });
   }, [dataConfig, graphModel, dotsRef, enableAnimation, instanceId]);
 
-  useEffect(function createCircles() {
-    callMatchCirclesToData();
-  }, [callMatchCirclesToData, dataConfig.caseDataArray]);
-
   // respond to change in plotType
   useEffect(function installPlotTypeAction() {
     const disposer = onAnyAction(graphModel, action => {
+      const yAxisModel = graphModel.getAxis('left');
       if (action.name === 'setPlotType') {
         const newPlotType = action.args?.[0];/*,
           attrIDs = newPlotType === 'dotPlot' ? [xAttrID] : [xAttrID, yAttrID]*/
         startAnimation(enableAnimation);
         // In case the y-values have changed we rescale
         if (newPlotType === 'scatterPlot') {
-          const yAxisModel = graphModel.getAxis('left');
           const values = dataConfig.caseDataArray.map(({ caseID }) => dataset?.getNumeric(caseID, yAttrID)) as number[];
-          setNiceDomain(values || [], yAxisModel as INumericAxisModel);
+          yAxisModel && isNumericAxisModel(yAxisModel) && setNiceDomain(values || [], yAxisModel);
         }
       }
     });

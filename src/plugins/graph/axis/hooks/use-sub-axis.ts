@@ -4,7 +4,7 @@ import {isAlive} from "mobx-state-tree";
 import {MutableRefObject, useCallback, useEffect} from "react";
 import {AxisBounds, axisPlaceToAxisFn, AxisScaleType, otherPlace} from "../axis-types";
 import {useAxisLayoutContext} from "../models/axis-layout-context";
-import {IAxisModel, isNumericAxisModel} from "../models/axis-model";
+import {IAxisModel, isCategoricalAxisModel, isNumericAxisModel} from "../models/axis-model";
 import {isVertical} from "../../axis-graph-shared";
 import {between} from "../../utilities/math-utils";
 import {transitionDuration} from "../../graph-types";
@@ -25,6 +25,7 @@ export const useSubAxis = ({
                            }: IUseSubAxis) => {
   const layout = useAxisLayoutContext(),
     isNumeric = axisModel && isNumericAxisModel(axisModel),
+    isCategorical = axisModel && isCategoricalAxisModel(axisModel),
     multiScaleChangeCount = layout.getAxisMultiScale(axisModel?.place ?? 'bottom')?.changeCount ?? 0;
 
   const refreshSubAxis = useCallback(() => {
@@ -170,6 +171,19 @@ export const useSubAxis = ({
       return () => disposer();
     }
   }, [isNumeric, axisModel, refreshSubAxis, layout]);
+
+  // Refresh when category set, if any, changes
+  useEffect(function installCategorySetSync() {
+    if (isCategorical) {
+      const disposer = autorun(() => {
+        const values = layout.getAxisMultiScale(axisModel.place)?.categorySetValues;
+        if (values?.length) {
+          refreshSubAxis();
+        }
+      });
+      return () => disposer();
+    }
+  }, [axisModel, refreshSubAxis, layout, isCategorical]);
 
   // update d3 scale and axis when layout/range changes
   useEffect(() => {
