@@ -88,6 +88,18 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
 
   const newCommentCount = unreadComments?.length || 0;
 
+  const isStudentWorkspace = activeNavTab === "student-work";
+  const commentInstructions =
+    isStudentWorkspace ?
+    <>
+      <p>You cannot make comments on groups.</p>
+      <br></br>
+      <p>Choose a Student in the group to begin or view comment threads.</p>
+    </>
+    :
+    "Open a document to begin or view comment threads";
+
+
   return (
     <div className={`chat-panel ${activeNavTab}`} data-testid="chat-panel">
       <ChatPanelHeader
@@ -117,7 +129,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
         />
         :
         <div className="select-doc-message" data-testid="select-doc-message">
-          Open a document to begin or view comment threads
+          {commentInstructions}
         </div>
 
       }
