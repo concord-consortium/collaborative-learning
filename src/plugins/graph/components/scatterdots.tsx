@@ -192,7 +192,6 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
   }, [dataConfiguration, dataset, dotsRef, layout, legendAttrID,
     enableAnimation, graphModel, yScaleRef]);
 
-  // TODO: Leave this commented out? It's not in CODAP.
   // const refreshPointPositionsSVG = useCallback((selectedOnly: boolean) => {
   //   const xAttrID = dataConfiguration?.attributeID('x') ?? '',
   //     {joinedCaseDataArrays, selection} = dataConfiguration || {},
