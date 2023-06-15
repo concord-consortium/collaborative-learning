@@ -47,6 +47,13 @@ context('Diagram Tool Tile', function () {
       hideNavigatorButton().should("exist");
       diagramDeleteButton().should("exist").should("be.disabled");
 
+      // Title
+      const newName = "Test Diagram";
+      diagramTile.getTileTitleText().should("contain", "Diagram 1");
+      diagramTile.getTileTitleContainer().click();
+      diagramTile.getTileTitleContainer().type(newName + '{enter}');
+      diagramTile.getTileTitleText().should("contain", newName);
+
       // Navigator can be hidden and shown
       const navigator = () => diagramTile.getDiagramTile().find(".react-flow__minimap");
       navigator().should("exist");
