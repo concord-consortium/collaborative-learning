@@ -160,11 +160,23 @@ export class SerialDevice {
     this.writer.write(`${controlMessage}\n`);
   }
 
-  public writeToOutForBBGripper(n:number){
-    const percent = n / 100;
-    let openTo = Math.round(180 - (percent * 60));
+  public writeToOutForBBGripper(n:number, liveOutputType: string){
+    const gripperVersion = liveOutputType === "Grabber" ? 1 : 2;
+    let openTo = this.getOpenToForBBGripper(n, gripperVersion);
     if(this.hasPort()){
       this.writer.write(`${openTo.toString()}\n`);
+    }
+  }
+
+  public getOpenToForBBGripper(n:number, gripperVersion: number){
+    const percent = n / 100;
+    switch (gripperVersion){
+      case 1:
+        return Math.round(180 - (percent * 60));
+      case 2:
+        return Math.round(180 - (percent * 90));
+      default:
+        return Math.round(180 - (percent * 60));
     }
   }
 }

@@ -798,11 +798,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private sendDataToSerialDevice(n: Node){
+    const liveOutputType = n.controls.get("hubSelect")?.getData("liveOutputType") as string;
     const isNumberOutput = isFinite(n.data.nodeValue as number);
     const { deviceFamily } = this.stores.serialDevice;
 
     if (deviceFamily === "arduino" && isNumberOutput){
-      this.stores.serialDevice.writeToOutForBBGripper(n.data.nodeValue as number);
+      this.stores.serialDevice.writeToOutForBBGripper(n.data.nodeValue as number, liveOutputType);
     }
     if (deviceFamily === "microbit"){
       const hubSelect = n.controls.get("hubSelect") as DropdownListControl;
