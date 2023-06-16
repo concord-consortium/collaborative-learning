@@ -1,4 +1,6 @@
 import { getParent } from "mobx-state-tree";
+import { DocumentViewMode } from "../../components/document/document";
+import { FourUpUser } from "../../components/four-up";
 import { ProblemModelType } from "../curriculum/problem";
 import { SectionModelType } from "../curriculum/section";
 import { getSectionPath } from "../curriculum/unit";
@@ -22,14 +24,14 @@ export function getDocumentDisplayTitle(
 
 /**
  * Returns the key for user documents or path for problem documents
- * @param document 
- * @returns 
+ * @param document
+ * @returns
  */
 export function getDocumentIdentifier(document?: DocumentContentModelType) {
   if (!document) {
     return undefined;
   }
-  
+
   const parent = getParent(document);
   if (Object.hasOwn(parent, "key")) {
     return (parent as DocumentModelType).key;
@@ -37,4 +39,29 @@ export function getDocumentIdentifier(document?: DocumentContentModelType) {
     const section = parent as SectionModelType;
     return getSectionPath(section);
   }
+}
+
+// Utility function that creates an array of dictionaries of students and their docs in a group
+export function getGroupUsers(groups: any, documents: any, groupId: string | undefined,
+    documentViewMode?: DocumentViewMode) {
+  const group = groups.getGroupById(groupId);
+  const groupDocuments = group && groupId &&
+                         (documentViewMode === DocumentViewMode.Published
+                           ? documents.getLastPublishedProblemDocumentsForGroup(groupId)
+                           : documents.getProblemDocumentsForGroup(groupId)
+                         ) || [];
+  const groupUsers: FourUpUser[] = group
+    ? group.users
+        .map((groupUser: any) => {
+          const groupUserDoc = groupDocuments && groupDocuments.find((groupDocument: any) => {
+            return groupDocument.uid === groupUser.id;
+          });
+          return {
+            user: groupUser,
+            doc: groupUserDoc,
+            initials: groupUser.initials
+          };
+        })
+    : [];
+  return groupUsers;
 }

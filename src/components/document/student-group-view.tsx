@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { GroupUserModelType } from "src/models/stores/groups";
-import { useGroupsStore, useUserStore } from "../../hooks/use-stores";
+import { getGroupUsers } from "../../models/document/document-utils";
+import { GroupUserModelType } from "../../models/stores/groups";
+import { useProblemStore, useStores } from "../../hooks/use-stores";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import { FourUpComponent } from "../four-up";
@@ -38,11 +39,11 @@ interface IProps {
   setGroupId: (groupId: string) => void;
 }
 export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
-  const user = useUserStore();
-  const groups = useGroupsStore();
+  const {user, groups, documents} = useStores();
   const [focusedGroupUser, setFocusedGroupUser] = useState<GroupUserModelType | undefined>();
   const [groupViewContext, setGroupViewContext] = useState<string | null>(null);
   const selectedGroupId = groupId || (groups.allGroups.length ? groups.allGroups[0].id : "");
+  const groupUsers = getGroupUsers(groups, documents, selectedGroupId);
 
   const handleSelectGroup = (id: string) => {
     Logger.log(LogEventName.VIEW_GROUP, {group: id, via: "group-document-titlebar"});
@@ -76,11 +77,17 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
   };
 
   const GroupTitlebar: React.FC<IGroupTitlebarProps> = ({selectedId, context, groupUser}) => {
+    const problem = useProblemStore();
+    const userInfo = groupUsers.find(gUser => gUser.user.id === groupUser?.id);
+    const userDocTitle = userInfo?.doc?.title || "Document";
+    const titleText = groupUser && userInfo
+                        ? `${groupUser.name}: ${userInfo.doc?.type === "problem" ? problem.title : userDocTitle}`
+                        : selectedId ? `Student Group ${selectedId}` : "No groups";
     return (
       <div className="group-title" data-test="group-title">
         <div className="group-title-center">
           <div className="group-name">
-            {selectedId ? `Student Group ${selectedId}` : "No groups"}
+            {titleText}
           </div>
         </div>
       </div>

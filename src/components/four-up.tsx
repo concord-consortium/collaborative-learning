@@ -11,6 +11,7 @@ import { GroupUserModelType } from "../models/stores/groups";
 import { CellPositions, FourUpGridCellModelType, FourUpGridModel, FourUpGridModelType
       } from "../models/view/four-up-grid";
 import { FourUpOverlayComponent } from "./four-up-overlay";
+import { getGroupUsers } from "../models/document/document-utils";
 import { Logger } from "../lib/logger";
 import { LogEventName } from "../lib/logger-types";
 import FourUpIcon from "../clue/assets/icons/4-up-icon.svg";
@@ -35,7 +36,7 @@ interface IState {
   toggledContextMap: Record<string, string | null>
 }
 
-interface FourUpUser {
+export interface FourUpUser {
   user: GroupUserModelType;
   doc?: DocumentModelType;
 }
@@ -131,25 +132,8 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     const { groups, documents } = this.stores;
     const { userId, groupId, isGhostUser, toggleable, ...others } = this.props;
 
-    const group = groups.getGroupById(groupId);
-    const groupDocuments = group && groupId &&
-                           (documentViewMode === DocumentViewMode.Published
-                             ? documents.getLastPublishedProblemDocumentsForGroup(groupId)
-                             : documents.getProblemDocumentsForGroup(groupId)
-                           ) || [];
-    const groupUsers: FourUpUser[] = group
-      ? group.users
-          .map((groupUser) => {
-            const groupUserDoc = groupDocuments && groupDocuments.find((groupDocument) => {
-              return groupDocument.uid === groupUser.id;
-            });
-            return {
-              user: groupUser,
-              doc: groupUserDoc,
-              initials: groupUser.initials
-            };
-          })
-      : [];
+    const groupUsers = getGroupUsers(groups, documents, groupId, documentViewMode);
+
     // put the primary user's document first (i.e. in the upper-left corner)
     groupUsers.sort((a, b) => {
       if (a.user.id === userId) return -1;
@@ -213,12 +197,10 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
         const name = isToggled ? fullName : initials;
         return (
           isToggled && viaStudentGroupView
-            ? <>
-                <div className={className} title={fullName}>{name}</div>
-                <button className="restore-fourup-button" onClick={()=>this.handleOverlayClick(context)}>
-                  <FourUpIcon /> 4-Up
-                </button>
-              </>
+            ?
+              <button className="restore-fourup-button" onClick={()=>this.handleOverlayClick(context)}>
+                <FourUpIcon /> 4-Up
+              </button>
             : <div className={className} title={fullName} onClick={()=>this.handleOverlayClick(context)}>
                   {name}
               </div>
