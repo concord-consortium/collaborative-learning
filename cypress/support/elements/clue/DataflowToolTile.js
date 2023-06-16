@@ -7,6 +7,9 @@ class DataflowToolTile {
   getTileTitle(workspaceClass){
     return cy.get(`${workspaceClass || ".primary-workspace"} .editable-tile-title-text`);
   }
+  getDataflowTileTitle(workspaceClass){
+    return cy.get(`${workspaceClass || ".primary-workspace"} .editable-tile-title`);
+  }
   getCreateNodeButton(nodeType) {
     return cy.get(`.primary-workspace .icon-block.${nodeType}`);
   }
@@ -63,9 +66,6 @@ class DataflowToolTile {
   }
   getModalOkButton() {
     return cy.get('.dialog-contents #okButton');
-  }
-  getDataflowTileTitle(workspaceClass){
-    return cy.get(`${workspaceClass || ".primary-workspace"} .editable-tile-title`);
   }
   //Generator
   getAmplitudeField() {
