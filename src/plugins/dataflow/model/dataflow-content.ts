@@ -2,8 +2,10 @@ import { types, Instance, applySnapshot, getSnapshot, addDisposer, getType } fro
 import { reaction } from "mobx";
 import { cloneDeep} from "lodash";
 import stringify from "json-stringify-pretty-compact";
+
 import { DataflowProgramModel } from "./dataflow-program-model";
 import { DEFAULT_DATA_RATE } from "./utilities/node";
+import { SharedVariables } from "../../shared-variables/shared-variables";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { ITileMetadataModel } from "../../../models/tiles/tile-metadata";
 import { tileModelHooks } from "../../../models/tiles/tile-model-hooks";
@@ -136,30 +138,36 @@ export const DataflowContentModel = TileContentModel
           ? sharedModelManager?.findFirstSharedModelByType(SharedDataSet, self.metadata.id)
           : undefined;
 
+        const sharedVariables = sharedModelManager?.isReady
+          ? sharedModelManager?.findFirstSharedModelByType(SharedVariables)
+          : undefined;
+
         const tileSharedModels = sharedModelManager?.isReady
           ? sharedModelManager?.getTileSharedModels(self)
           : undefined;
 
-        return { sharedModelManager, sharedDataSet, tileSharedModels };
+        return { sharedModelManager, sharedDataSet, sharedVariables, tileSharedModels };
       },
-      ({sharedModelManager, sharedDataSet, tileSharedModels}) => {
+      ({sharedModelManager, sharedDataSet, sharedVariables, tileSharedModels}) => {
         if (!sharedModelManager?.isReady) {
           return;
         }
 
-        if (sharedDataSet && tileSharedModels?.includes(sharedDataSet)) {
-          // The shared model has already been registered by a client, but as the
-          // "owner" of the data, we synchronize it with our local content.
+        if (!sharedDataSet) {
+          const dataSet = defaultDataSet();
+          sharedDataSet = SharedDataSet.create({ providerId: self.metadata.id, dataSet });
         }
-        else {
-          if (!sharedDataSet) {
-            // The document doesn't have a shared model yet
-            const dataSet = defaultDataSet();
-            sharedDataSet = SharedDataSet.create({ providerId: self.metadata.id, dataSet });
-          }
-          // Add the shared model to both the document and the tile
+
+        if (!tileSharedModels?.includes(sharedDataSet)) {
           sharedModelManager.addTileSharedModel(self, sharedDataSet);
         }
+
+        // We won't create a sharedVariables model, but we'll automatically attach to any we find
+        if (sharedVariables && !tileSharedModels?.includes(sharedVariables)) {
+          console.log(`attaching to`, sharedVariables);
+          sharedModelManager.addTileSharedModel(self, sharedVariables);
+        }
+
         // update the colors
         const dataSets = sharedModelManager.getSharedModelsByType(kSharedDataSetType) as SharedDataSetType[];
         updateSharedDataSetColors(dataSets);
