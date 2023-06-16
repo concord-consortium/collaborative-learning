@@ -802,7 +802,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const { deviceFamily } = this.stores.serialDevice;
 
     if (deviceFamily === "arduino" && isNumberOutput){
-      console.log("\n\n1 | tick | sendDataToSerialDevice |", n.data.nodeValue);
       this.stores.serialDevice.writeToOutForBBGripper(n.data.nodeValue as number);
     }
     if (deviceFamily === "microbit"){
