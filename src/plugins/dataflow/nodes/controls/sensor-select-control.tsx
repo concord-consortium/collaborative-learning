@@ -150,6 +150,8 @@ export class SensorSelectControl extends Rete.Control {
         if (ch.missing) return `${kSensorMissingMessage} connect ${ch.deviceFamily} for ${ch.name}`;
         const chStr = ch.virtual
           ? `${ch.name} Demo Data`
+          : ch.simulated
+          ? `Simulated ${ch.name}`
           : `${ch.hubName}:${ch.type}`;
         return chStr;
       };

@@ -12,6 +12,7 @@ import { SizeMeProps } from "react-sizeme";
 import { forEach } from "lodash";
 import { ProgramZoomType, DataflowContentModelType } from "../model/dataflow-content";
 import { DataflowProgramModelType } from "../model/dataflow-program-model";
+import { simulatedChannel } from "../model/utilities/simulated-channel";
 import { SensorSelectControl } from "../nodes/controls/sensor-select-control";
 import { DataflowReteNodeFactory } from "../nodes/factories/dataflow-rete-node-factory";
 import { NumberReteNodeFactory } from "../nodes/factories/number-rete-node-factory";
@@ -269,15 +270,18 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.setDataRate(this.props.programDataRate);
   };
 
-  private initComponents = () => {
+  private get dataflowContent() {
     const content = this.props.model?.content;
-    const dataflowContent = content && content as DataflowContentModelType;
+    return content && content as DataflowContentModelType;
+  }
+
+  private initComponents = () => {
     this.components = [new NumberReteNodeFactory(numSocket),
       new MathReteNodeFactory(numSocket),
       new TransformReteNodeFactory(numSocket),
       new ControlReteNodeFactory(numSocket),
       new LogicReteNodeFactory(numSocket),
-      new SensorReteNodeFactory(numSocket, dataflowContent),
+      new SensorReteNodeFactory(numSocket, this.dataflowContent),
       new DemoOutputReteNodeFactory(numSocket),
       new LiveOutputReteNodeFactory(numSocket),
       new GeneratorReteNodeFactory(numSocket),
@@ -477,9 +481,15 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
   };
 
+  private get simulatedChannels() {
+    return this.dataflowContent
+      ? this.dataflowContent.inputVariables?.map(variable => simulatedChannel(variable)) ?? []
+      : [];
+  }
+
   private updateChannels = () => {
     this.channels = [];
-    this.channels = [...virtualSensorChannels, ...serialSensorChannels];
+    this.channels = [...virtualSensorChannels, ...this.simulatedChannels, ...serialSensorChannels];
     this.countSerialDataNodes(this.programEditor.nodes);
     this.programEditor.nodes.forEach((node) => {
       if (node.name === "Sensor") {
@@ -874,6 +884,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       if (chInfo?.virtualValueMethod && chInfo.timeFactor) {
         const time = Math.floor(Date.now() / chInfo.timeFactor);
         chInfo.value = chInfo.virtualValueMethod(time);
+      }
+
+      // update simulated sensors
+      if (chInfo?.simulatedVariable) {
+        chInfo.value = chInfo.simulatedVariable.value || 0;
       }
 
       if (chInfo && chInfo.value) {
