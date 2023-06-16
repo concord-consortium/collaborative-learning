@@ -4,10 +4,7 @@ import React, { useEffect, useState } from "react";
 
 import { SimulatorContentModelType } from "../model/simulator-content";
 import { ITileProps } from "../../../components/tiles/tile-component";
-import { ToolTitleArea } from "../../../components/tiles/tile-title-area";
-import { EditableTileTitle } from "../../../components/tiles/editable-tile-title";
-import { measureText } from "../../../components/tiles/hooks/use-measure-text";
-import { defaultTileTitleFont } from "../../../components/constants";
+import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
 
 import "./simulator-tile.scss";
 
@@ -43,28 +40,14 @@ export const SimulatorToolComponent: React.FC<ITileProps> = observer((props) => 
       </p>
     );
   };
-  
-  const getTitle  = () => {
-    return model.title || "";
-  };
-
-  const handleTitleChange = (title?: string) => {
-    title && model.setTitle(title);
-  };
 
   return (
     <div className="simulator-content-container">
-      <ToolTitleArea>
-        <EditableTileTitle
-          key="drawing-title"
-          size={{width:null, height:null}}
-          scale={scale}
-          getTitle={getTitle}
-          readOnly={readOnly}
-          measureText={(text) => measureText(text, defaultTileTitleFont)}
-          onEndEdit={handleTitleChange}
-        />
-      </ToolTitleArea>
+      <BasicEditableTileTitle
+        model={model}
+        readOnly={readOnly}
+        scale={scale}
+      />
       <div className="simulator-content">
         {displayVariables.map(
           variable => variable.name
