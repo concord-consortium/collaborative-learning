@@ -178,7 +178,13 @@ export class NavTabPanel extends BaseComponent<IProps> {
         const logEvent = () => { Logger.log(LogEventName.SHOW_TAB, logParameters); };
         logEvent();
       } else {
-        // TODO: is this necessary anymore?
+        // User clicked on the top tab that is currently open
+        // We want the open document of a subtab (if there is one) to go away and be
+        // replaced with the browser.
+        // TODO: replace the code below by changing the UIStore to close the current
+        // document of the subTab. This code is also implemented in the click handler
+        // of the subTab.
+
         // track this value in a member rather than state to avoid excessive renders
         this.topTabReset = tabSpec.tab;
         // must force refresh initially but not when value is reset

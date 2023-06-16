@@ -63,6 +63,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     return _subTabs;
   }, [tabSpec.sections]);
 
+  const tabState = navTabSpec && ui.tabs.get(navTabSpec?.tab);
   const _subTabIndex = subTabs.findIndex((subTab) => tabState?.openSubTab === subTab.label);
   const subTabIndex = _subTabIndex < 0 ? 0 : _subTabIndex;
 
@@ -74,33 +75,27 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
   const documentsPanelHeight = vh - headerOffset;
   const documentsPanelStyle = { height: documentsPanelHeight };
 
-  const tabState = navTabSpec && ui.tabs.get(navTabSpec?.tab);
-
   useEffect(() => {
     // Set the initial open tab. If the tabSpec changes somehow then the open
     // sub tab will get reset
     ui.setOpenSubTab(tabSpec.tab, subTabs[0].label);
   }, [subTabs, tabSpec.tab, ui]);
 
-  // FIXME: this should be handled by handleTabSelect instead of TabClick
-  // However there is some magic where if a document is opened then clicking
-  // on the tab will revert its view back to the browse view.
-  const handleTabClick = useCallback((title: string, type?: string) => {
+  // This is called even if the tab is already open
+  const handleTabSelect = (tabidx: number) => {
+    const selectedSubTab = subTabs[tabidx];
+    const subTabType = selectedSubTab.sections[0].type;
+    const title = selectedSubTab.label;
     if (tabState?.openSubTab === title && tabState?.openDocuments.get(title)) {
       // If there is a document open then a click on the tab should close
       // the document
       ui.closeSubTabDocument(tabSpec.tab, title);
     }
+    ui.setOpenSubTab(tabSpec.tab, title);
     Logger.log(LogEventName.SHOW_TAB_SECTION, {
       tab_section_name: title,
-      tab_section_type: type
+      tab_section_type: subTabType
     });
-  },[tabSpec.tab, tabState?.openDocuments, tabState?.openSubTab, ui]);
-
-  const handleTabSelect = (tabidx: number) => {
-    const selectedSubTab = subTabs[tabidx];
-
-    ui.setOpenSubTab(tabSpec.tab, selectedSubTab.label);
   };
 
   const handleSelectDocument = (document: DocumentModelType) => {
@@ -257,8 +252,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
               const type = subTab.sections[0].type;
               return (
                 <Tab className={`doc-tab ${navTabSpec?.tab} ${sectionTitle} ${type}`}
-                  key={`section-${sectionTitle}`}
-                  onClick={() => handleTabClick?.(subTab.label, type)}>
+                  key={`section-${sectionTitle}`}>
                   {subTab.label}
                 </Tab>
               );
