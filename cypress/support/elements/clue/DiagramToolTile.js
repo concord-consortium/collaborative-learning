@@ -6,6 +6,12 @@ class DiagramToolTile {
   getDiagramTile(workspaceClass) {
     return cy.get(`${canvasArea(workspaceClass)} .diagram-tool-tile`);
   }
+  getTileTitleText(workspaceClass){
+    return cy.get(`${workspaceClass || ".primary-workspace"} .editable-tile-title-text`);
+  }
+  getTileTitleContainer(workspaceClass){
+    return cy.get(`${workspaceClass || ".primary-workspace"} .editable-tile-title`);
+  }
   getDiagramToolbar(workspaceClass, skipClick) {
     if (!skipClick) {
       this.getDiagramTile(workspaceClass).click();

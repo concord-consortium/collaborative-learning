@@ -3,10 +3,7 @@ import classNames from "classnames";
 
 import { GraphComponent } from "./graph-component";
 import { ITileProps } from "../../../components/tiles/tile-component";
-import { ToolTitleArea } from "../../../components/tiles/tile-title-area";
-import { EditableTileTitle } from "../../../components/tiles/editable-tile-title";
-import { measureText } from "../../../components/tiles/hooks/use-measure-text";
-import { defaultTileTitleFont } from "../../../components/constants";
+import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { useCurrent } from "../../../hooks/use-current";
 import { IGraphModel } from "../models/graph-model";
@@ -45,10 +42,6 @@ export const GraphWrapperComponent: React.FC<ITileProps> = (props) => {
     return model.title || "";
   };
 
-  const handleTitleChange = (title?: string) => {
-    title && model.setTitle(title);
-  };
-
   return (
     <div className={classNames("graph-wrapper", { "read-only": readOnly })}>
       <GraphToolbar
@@ -62,17 +55,11 @@ export const GraphWrapperComponent: React.FC<ITileProps> = (props) => {
         onLinkTableButtonClick={showLinkTileDialog}
         onRequestTilesOfType={onRequestTilesOfType}
       />
-      <ToolTitleArea>
-        <EditableTileTitle
-          key="drawing-title"
-          size={{width:null, height:null}}
-          scale={scale}
-          getTitle={getTitle}
-          readOnly={readOnly}
-          measureText={(text) => measureText(text, defaultTileTitleFont)}
-          onEndEdit={handleTitleChange}
-       />
-      </ToolTitleArea>
+      <BasicEditableTileTitle
+        model={model}
+        readOnly={readOnly}
+        scale={scale}
+      />
       <GraphComponent tile={model} />
     </div>
   );

@@ -8,10 +8,7 @@ import { DrawingContentModelType } from "../model/drawing-content";
 import { useCurrent } from "../../../hooks/use-current";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { DrawingContentModelContext } from "./drawing-content-context";
-import { ToolTitleArea } from "../../../components/tiles/tile-title-area";
-import { EditableTileTitle } from "../../../components/tiles/editable-tile-title";
-import { measureText } from "../../../components/tiles/hooks/use-measure-text";
-import { defaultTileTitleFont } from "../../../components/constants";
+import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
 import { HotKeys } from "../../../utilities/hot-keys";
 import { getClipboardContent, pasteClipboardImage } from "../../../utilities/clipboard-utils";
 import "./drawing-tile.scss";
@@ -31,9 +28,6 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
     onRegisterTileApi({
       exportContentAsTileJson: (options?: ITileExportOptions) => {
         return contentRef.current.exportJson(options);
-      },
-      getTitle: () => {
-        return getTitle();
       }
     });
     if (!readOnly) {
@@ -59,27 +53,14 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
   };
 
   const toolbarProps = useToolbarTileApi({ id: model.id, enabled: !readOnly, onRegisterTileApi, onUnregisterTileApi });
-  const getTitle  = () => {
-    return model.title || "";
-  };
-
-  const handleTitleChange = (title?: string) => {
-    title && model.setTitle(title);
-  };
 
   return (
     <DrawingContentModelContext.Provider value={contentRef.current} >
-      <ToolTitleArea>
-        <EditableTileTitle
-          key="drawing-title"
-          size={{width:null, height:null}}
-          scale={scale}
-          getTitle={getTitle}
-          readOnly={readOnly}
-          measureText={(text) => measureText(text, defaultTileTitleFont)}
-          onEndEdit={handleTitleChange}
-       />
-      </ToolTitleArea>
+      <BasicEditableTileTitle
+        model={model}
+        readOnly={readOnly}
+        scale={scale}
+      />
       <div
         className={classNames("drawing-tool", { "read-only": readOnly })}
         data-testid="drawing-tool"
