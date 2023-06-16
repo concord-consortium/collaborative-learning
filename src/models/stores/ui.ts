@@ -79,14 +79,19 @@ export const UIModel = types
     get workspaceShown () {
       return self.dividerPosition < kDividerMax;
     },
+    get openSubTab () {
+      return self.tabs.get(self.activeNavTab)?.openSubTab;
+    }
+  }))
+  .views((self) => ({
     // document key or section path for reference (left) document
     get focusDocument () {
       if (self.activeNavTab === ENavTab.kProblems || self.activeNavTab === ENavTab.kTeacherGuide) {
         const facet = self.activeNavTab === ENavTab.kTeacherGuide ? ENavTab.kTeacherGuide : undefined;
-        return buildSectionPath(self.problemPath, self.tabs.get(self.activeNavTab)?.openSubTab, facet);
+        return buildSectionPath(self.problemPath, self.openSubTab, facet);
       } else {
         const activeTabState = self.tabs.get(self.activeNavTab);
-        return activeTabState?.openSubTab && activeTabState?.openDocuments.get(activeTabState?.openSubTab);
+        return self.openSubTab && activeTabState?.openDocuments.get(self.openSubTab);
       }
     }
   }))

@@ -30,7 +30,6 @@ interface IProps extends IBaseProps {
 export class NavTabPanel extends BaseComponent<IProps> {
 
   private navTabPanelElt: HTMLDivElement | null = null;
-  private topTabReset = "";
 
   constructor(props: IProps) {
     super(props);
@@ -126,18 +125,11 @@ export class NavTabPanel extends BaseComponent<IProps> {
     }
   };
 
-  private clearTopTabReset = () => {
-    // clear without triggering render (hence not in state)
-     this.topTabReset = "";
-  };
-
   private renderDocuments = (tabSpec: NavTabSpec) => {
     const { ui: { showChatPanel } } = this.stores;
-    const reset = tabSpec.tab === this.topTabReset;
     return (
       <SectionDocumentOrBrowser
         tabSpec={tabSpec}
-        reset={reset ? this.clearTopTabReset : undefined}
         isChatOpen={showChatPanel}
       />
     );
@@ -178,17 +170,12 @@ export class NavTabPanel extends BaseComponent<IProps> {
         const logEvent = () => { Logger.log(LogEventName.SHOW_TAB, logParameters); };
         logEvent();
       } else {
-        // User clicked on the top tab that is currently open
-        // We want the open document of a subtab (if there is one) to go away and be
-        // replaced with the browser.
-        // TODO: replace the code below by changing the UIStore to close the current
-        // document of the subTab. This code is also implemented in the click handler
-        // of the subTab.
-
-        // track this value in a member rather than state to avoid excessive renders
-        this.topTabReset = tabSpec.tab;
-        // must force refresh initially but not when value is reset
-        this.forceUpdate();
+        if (ui.openSubTab) {
+          // If there is a document open then a click on the active top level tab
+          // closes the document. Also a click on the active sub tab closes the
+          // document, this is handled in section-document-or-browser
+          ui.closeSubTabDocument(tabSpec.tab, ui.openSubTab);
+        }
       }
     }
   };

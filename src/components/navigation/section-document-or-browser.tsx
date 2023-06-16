@@ -27,7 +27,6 @@ const kTabSectionBorderWidth = 2;
 
 interface IProps {
   tabSpec: NavTabSpec;
-  reset?: () => void;
   isChatOpen?: boolean;
 }
 
@@ -37,7 +36,7 @@ export interface ISubTabSpec {
 }
 
 export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function SectionDocumentOrBrowser(
-    { tabSpec, reset, isChatOpen }) {
+    { tabSpec, isChatOpen }) {
   const ui = useUIStore();
   const store = useStores();
   const appConfigStore = useAppConfig();
