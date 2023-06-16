@@ -701,6 +701,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       "Live Output": (n: Node) => {
         this.updateNodeChannelInfo(n);
         this.sendDataToSerialDevice(n);
+        // NOTE this probably be the spot to send data to wherever the simuulator plans to find it
       }
     };
     let processNeeded = false;

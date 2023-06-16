@@ -167,8 +167,8 @@ export class SerialDevice {
     console.log("3 | serial.ts |  ...calcs pct:    ", percent);
 
     let openTo = Math.round(180 - (percent * 60));
-    if (openTo > 160) openTo = 180;
-    if (openTo < 130) openTo = 120;
+    // if (openTo > 160) openTo = 180;
+    // if (openTo < 130) openTo = 120;
     console.log("4 | serial.ts |  ...calcs openTo:  ", openTo);
 
 
