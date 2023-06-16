@@ -37,14 +37,11 @@
       background-color: $charcoal-light-8;
       color: $charcoal;
       border: solid 1px $charcoal-light-2;
+
       &.problems {
         background-color: $problem-orange-light-7;
         &:hover{
           background-color: $problem-comment-hover;
-        }
-        &.selected {
-          border: none;
-          background-color: $comment-select-yellow;
         }
       }
       &.teacher-guide {
@@ -52,19 +49,11 @@
         &:hover{
           background-color: $teacherguide-comment-hover;
         }
-        &.selected {
-          border: none;
-          background-color: $comment-select-yellow;
-        }
       }
       &.my-work {
         background-color: $workspace-teal-light-6;
         &:hover{
           background-color: $mywork-comment-hover;
-        }
-        &.selected {
-          border: none;
-          background-color: $comment-select-yellow;
         }
       }
       &.class-work {
@@ -72,10 +61,10 @@
         &:hover{
           background-color: $classwork-comment-hover;
         }
-        &.selected {
-          border: none;
-          background-color: $comment-select-yellow;
-        }
+      }
+      &.selected {
+        border: none;
+        background-color: $comment-select-yellow;
       }
 
       &.supports {
@@ -84,8 +73,6 @@
       .comment-card-header-icon {
         height: 34px;
       }
-
-
     }
     .chat-thread-title {
         line-height: 1.29;
