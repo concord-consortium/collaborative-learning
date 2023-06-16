@@ -269,18 +269,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.setDataRate(this.props.programDataRate);
   };
 
-  private get dataflowContent() {
-    const content = this.props.model?.content;
-    return content && content as DataflowContentModelType;
-  }
-
   private initComponents = () => {
     this.components = [new NumberReteNodeFactory(numSocket),
       new MathReteNodeFactory(numSocket),
       new TransformReteNodeFactory(numSocket),
       new ControlReteNodeFactory(numSocket),
       new LogicReteNodeFactory(numSocket),
-      new SensorReteNodeFactory(numSocket, this.dataflowContent),
+      new SensorReteNodeFactory(numSocket),
       new DemoOutputReteNodeFactory(numSocket),
       new LiveOutputReteNodeFactory(numSocket),
       new GeneratorReteNodeFactory(numSocket),
@@ -478,6 +473,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.processing = false;
     }
   };
+
+  private get dataflowContent() {
+    const content = this.props.model?.content;
+    return content && content as DataflowContentModelType;
+  }
 
   private get simulatedChannels() {
     return this.dataflowContent

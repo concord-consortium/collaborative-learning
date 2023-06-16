@@ -3,13 +3,10 @@
 import classNames from "classnames";
 import React, { useRef }  from "react";
 import Rete, { NodeEditor, Node } from "rete";
-import { VariableType } from "@concord-consortium/diagram-view";
 
 import { useStopEventPropagation, useCloseDropdownOnOutsideEvent } from "./custom-hooks";
-import { DataflowContentModelType } from "../../model/dataflow-content";
 import { NodeSensorTypes, kSensorSelectMessage, kSensorMissingMessage } from "../../model/utilities/node";
 import { NodeChannelInfo } from "../../model/utilities/channel";
-import { simulatedChannel } from "../../model/utilities/simulated-channel";
 import DropdownCaretIcon from "../../assets/icons/dropdown-caret.svg";
 import { dataflowLogEvent } from "../../dataflow-logger";
 import { resetGraph } from "../../utilities/graph-utils";
@@ -23,7 +20,7 @@ export class SensorSelectControl extends Rete.Control {
   private props: any;
   private node: Node;
 
-  constructor(emitter: NodeEditor, key: string, node: Node, readonly = false, content?: DataflowContentModelType) {
+  constructor(emitter: NodeEditor, key: string, node: Node, readonly = false) {
     super(key);
     this.emitter = emitter;
     this.key = key;
@@ -159,19 +156,12 @@ export class SensorSelectControl extends Rete.Control {
       };
 
       const options: any = [...channelsForType];
-      if (content) {
-        content?.inputVariables?.forEach((variable: VariableType) => options.push(simulatedChannel(variable)));
-      }
       if (!options.length) {
         options.push("none");
       }
       const channelString = getChannelString(selectedChannel);
-      const titleClass = channelString.includes(kSensorSelectMessage)
-                         ? "label unselected"
-                         : "label";
-      const topItemClass = channelString.includes(kSensorMissingMessage)
-                         ? "item top missing"
-                         : "item top";
+      const titleClass = classNames("label", { selected: channelString.includes(kSensorSelectMessage) });
+      const topItemClass = classNames("item", "top", { missing: channelString.includes(kSensorMissingMessage) });
       return (
         <div className="node-select sensor-select" ref={divRef} title={"Select Sensor"}>
           <div className={topItemClass} onMouseDown={handleChange(onDropdownClick)}>
