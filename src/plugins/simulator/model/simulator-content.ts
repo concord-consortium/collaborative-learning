@@ -2,7 +2,7 @@ import { reaction } from "mobx";
 import { types, Instance, getType, addDisposer, getSnapshot } from "mobx-state-tree";
 import { VariableSnapshot } from "@concord-consortium/diagram-view";
 
-import { kBrainwavesKey } from "../simulations/brainwaves-grabber";
+import { kBrainwavesKey } from "../simulations/brainwaves-gripper";
 import { simulations } from "../simulations/simulations";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { TileContentModel } from "../../../models/tiles/tile-content";

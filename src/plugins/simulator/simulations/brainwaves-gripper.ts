@@ -1,6 +1,6 @@
 export const kBrainwavesKey = "EMG_and_claw";
 
-export const brainwavesGrabberSimulation = {
+export const brainwavesGripperSimulation = {
   delay: 200,
   variables: [
     {
