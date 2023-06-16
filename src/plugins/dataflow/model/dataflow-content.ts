@@ -6,6 +6,7 @@ import stringify from "json-stringify-pretty-compact";
 import { DataflowProgramModel } from "./dataflow-program-model";
 import { DEFAULT_DATA_RATE } from "./utilities/node";
 import { isInputVariable } from "./utilities/simulated-channel";
+import { isOutputVariable } from "./utilities/simulated-output";
 import { SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { ITileMetadataModel } from "../../../models/tiles/tile-metadata";
@@ -85,6 +86,10 @@ export const DataflowContentModel = TileContentModel
     get inputVariables() {
       const variables = self.sharedVariables?.variables;
       return variables?.filter(variable => isInputVariable(variable));
+    },
+    get outputVariables() {
+      const variables = self.sharedVariables?.variables;
+      return variables?.filter(variable => isOutputVariable(variable));
     },
     get dataSet(){
       return self.sharedModel?.dataSet || self.emptyDataSet;

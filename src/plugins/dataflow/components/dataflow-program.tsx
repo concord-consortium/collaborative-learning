@@ -1,15 +1,17 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import "regenerator-runtime/runtime";
+import { forEach } from "lodash";
 import { inject, observer } from "mobx-react";
-import { BaseComponent } from "../../../components/base";
+import { autorun, values } from "mobx";
+import { IDisposer, onSnapshot } from "mobx-state-tree";
+import { SizeMeProps } from "react-sizeme";
 import Rete, { NodeEditor, Engine, Node } from "rete";
 import ConnectionPlugin from "rete-connection-plugin";
 import ReactRenderPlugin from "rete-react-render-plugin";
-import { autorun } from "mobx";
-import { IDisposer, onSnapshot } from "mobx-state-tree";
-import { SizeMeProps } from "react-sizeme";
-import { forEach } from "lodash";
+import { VariableType } from "@concord-consortium/diagram-view";
+
+import { BaseComponent } from "../../../components/base";
 import { ProgramZoomType, DataflowContentModelType } from "../model/dataflow-content";
 import { DataflowProgramModelType } from "../model/dataflow-program-model";
 import { simulatedChannel } from "../model/utilities/simulated-channel";
@@ -48,6 +50,7 @@ import { ProgramMode, UpdateMode } from "./types/dataflow-tile-types";
 import { ITileModel } from "../../../models/tiles/tile-model";
 
 import "./dataflow-program.sass";
+import { outputNameMatches, outputNamesToMatch } from "../model/utilities/simulated-output";
 interface NodeNameValuePair {
   name: string;
   val: number;
@@ -717,6 +720,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       "Live Output": (n: Node) => {
         this.updateNodeChannelInfo(n);
         this.sendDataToSerialDevice(n);
+        this.sendDataToSimulatedOutput(n);
       }
     };
     let processNeeded = false;
@@ -827,6 +831,22 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         const state = n.data.nodeValue as number;
         this.stores.serialDevice.writeToOutForMicroBitRelayHub(state, hubId, relayType );
       }
+    }
+  }
+
+  private findOutputVariable(n: Node) {
+    const names = outputNamesToMatch(n);
+    return this.props.tileContent.outputVariables?.find((variable: VariableType) => outputNameMatches(names, variable));
+  }
+
+  private sendDataToSimulatedOutput(n: Node) {
+    const outputVariable = this.findOutputVariable(n);
+    if (outputVariable) {
+      const nodeValue = n.data.nodeValue as number;
+      const outputValue = isFinite(nodeValue) ? nodeValue : 0;
+      outputVariable.setValue(outputValue);
+      // TODO: Should we also set the unit?
+      // We'd use n.data.nodeValueUnits but it might be undefined
     }
   }
 
