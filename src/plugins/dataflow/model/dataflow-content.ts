@@ -1,10 +1,11 @@
-import { types, Instance, applySnapshot, getSnapshot, addDisposer, getType } from "mobx-state-tree";
+import { types, Instance, applySnapshot, getSnapshot, addDisposer } from "mobx-state-tree";
 import { reaction } from "mobx";
 import { cloneDeep} from "lodash";
 import stringify from "json-stringify-pretty-compact";
 
 import { DataflowProgramModel } from "./dataflow-program-model";
 import { DEFAULT_DATA_RATE } from "./utilities/node";
+import { isInputVariable } from "./utilities/simulated-channel";
 import { SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { ITileMetadataModel } from "../../../models/tiles/tile-metadata";
@@ -83,7 +84,7 @@ export const DataflowContentModel = TileContentModel
   .views(self => ({
     get inputVariables() {
       const variables = self.sharedVariables?.variables;
-      return variables?.filter(variable => variable.name?.startsWith("input_"));
+      return variables?.filter(variable => isInputVariable(variable));
     },
     get dataSet(){
       return self.sharedModel?.dataSet || self.emptyDataSet;

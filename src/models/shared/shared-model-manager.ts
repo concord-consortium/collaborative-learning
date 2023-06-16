@@ -129,10 +129,10 @@ export interface ISharedModelManager {
   getTileSharedModels(tileContentModel: IAnyStateTreeNode): SharedModelType[];
 
   /**
-   * Get all of the shared models of a certain type that link to this tile
+   * Get all of the shared models of a certain type that link to the given tile
    * 
-   * @param tileContentModel
-   * @param modelType
+   * @param tileContentModel Tile whose shared models will be returned.
+   * @param modelType Only shared models with this type will be returned.
    */
   getTileSharedModelsByType(tileContentModel: IAnyStateTreeNode, modelType: typeof SharedModelUnion): SharedModelType[];
 

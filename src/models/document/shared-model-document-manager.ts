@@ -181,8 +181,9 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
     return sharedModels;
   }
 
-  getTileSharedModelsByType(tileContentModel: IAnyStateTreeNode, modelType: typeof SharedModelUnion):
-    SharedModelType[] {
+  getTileSharedModelsByType(
+    tileContentModel: IAnyStateTreeNode, modelType: typeof SharedModelUnion
+  ): SharedModelType[] {
     const tileSharedModels = this.getTileSharedModels(tileContentModel);
     return tileSharedModels.filter(sharedModel => getType(sharedModel) === modelType);
   }

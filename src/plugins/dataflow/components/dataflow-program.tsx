@@ -129,7 +129,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.lastIntervalTime = Date.now();
   }
 
-  private tileId() {
+  private get tileId() {
     return this.props.model?.id || "";
   }
 
@@ -145,7 +145,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const showZoomControl = !documentProperties?.dfHasData;
     const disableToolBarModes = programMode === ProgramMode.Recording || programMode === ProgramMode.Done;
     const showProgramToolbar = showZoomControl && !disableToolBarModes;
-    const tileId = this.tileId();
 
     return (
       <div className="dataflow-program-container">
@@ -171,14 +170,14 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             isTesting={isTesting}
             onClearClick={this.clearProgram}
             onNodeCreateClick={this.addNode}
-            tileId={tileId}
+            tileId={this.tileId}
           /> }
           <DataflowDropZone
             addNode={this.addNode}
             className="editor-graph-container"
             programEditor={this.programEditor}
             style={this.getEditorStyle}
-            tileId={tileId}
+            tileId={this.tileId}
           >
             <div
               className={editorClass}
@@ -300,7 +299,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     (async () => {
       if (!this.toolDiv) return;
 
-      const tileId = this.tileId();
       this.programEditor = new Rete.NodeEditor(RETE_APP_IDENTIFIER, this.toolDiv);
       this.programEditor.use(ConnectionPlugin);
       this.programEditor.use(ReactRenderPlugin);
@@ -376,13 +374,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.programEditor.on("nodecreated", node => {
         this.processAndSave();
         this.moveNodeToFront(node, true);
-        node.meta.inTileWithId = tileId;
-        dataflowLogEvent("nodecreated", node, tileId);
+        node.meta.inTileWithId = this.tileId;
+        dataflowLogEvent("nodecreated", node, this.tileId);
       });
 
       this.programEditor.on("selectnode", ( { node } ) => {
         this.moveNodeToFront(node, false);
-        node.meta.inTileWithId = tileId;
+        node.meta.inTileWithId = this.tileId;
       });
 
       this.programEditor.on("nodedraged", node => {
@@ -409,15 +407,15 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       // Program changes are logged from here, except nodecreated, above
       this.programEditor.on("noderemoved", node => {
-        dataflowLogEvent("noderemoved", node, tileId);
+        dataflowLogEvent("noderemoved", node, this.tileId);
       });
 
       this.programEditor.on("connectioncreated", connection => {
-        dataflowLogEvent("connectioncreated", connection, tileId);
+        dataflowLogEvent("connectioncreated", connection, this.tileId);
       });
 
       this.programEditor.on("connectionremoved", connection => {
-        dataflowLogEvent("connectionremoved", connection, tileId);
+        dataflowLogEvent("connectionremoved", connection, this.tileId);
       });
     })();
   };

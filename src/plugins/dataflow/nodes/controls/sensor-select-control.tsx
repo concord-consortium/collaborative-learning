@@ -1,5 +1,6 @@
 // FIXME: ESLint is unhappy with these control components
 /* eslint-disable react-hooks/rules-of-hooks */
+import classNames from "classnames";
 import React, { useRef }  from "react";
 import Rete, { NodeEditor, Node } from "rete";
 import { VariableType } from "@concord-consortium/diagram-view";
@@ -8,6 +9,7 @@ import { useStopEventPropagation, useCloseDropdownOnOutsideEvent } from "./custo
 import { DataflowContentModelType } from "../../model/dataflow-content";
 import { NodeSensorTypes, kSensorSelectMessage, kSensorMissingMessage } from "../../model/utilities/node";
 import { NodeChannelInfo } from "../../model/utilities/channel";
+import { simulatedChannel } from "../../model/utilities/simulated-channel";
 import DropdownCaretIcon from "../../assets/icons/dropdown-caret.svg";
 import { dataflowLogEvent } from "../../dataflow-logger";
 import { resetGraph } from "../../utilities/graph-utils";
@@ -158,7 +160,7 @@ export class SensorSelectControl extends Rete.Control {
 
       const options: any = [...channelsForType];
       if (content) {
-        content?.inputVariables?.forEach((variable: VariableType) => options.push(variable));
+        content?.inputVariables?.forEach((variable: VariableType) => options.push(simulatedChannel(variable)));
       }
       if (!options.length) {
         options.push("none");
@@ -182,21 +184,22 @@ export class SensorSelectControl extends Rete.Control {
           </div>
           {showList ?
           <div className="option-list" ref={listRef}>
-            {options.map((ch: NodeChannelInfo, i: any) => (
-              <div
-                className={
-                  (!!id && !!ch && ch.channelId === id) || (!selectedChannel && i === 0)
-                    ? ("item sensor-type-option selected " + (ch.missing ? "missing" : ""))
-                    : ("item sensor-type-option selectable " + (ch.missing ? "missing" : ""))
-                }
-                key={i}
-                onMouseDown={onListOptionClick(ch ? ch.channelId : null)}
-              >
-                <div className="label">
-                  {getChannelString(ch)}
+            {options.map((ch: NodeChannelInfo, i: any) => {
+              const selected = (!!id && !!ch && ch.channelId === id) || (!selectedChannel && i === 0);
+              const missing = ch.missing;
+              const className = classNames("item", "sensor-type-option", { selected, missing });
+              return (
+                <div
+                  className={className}
+                  key={i}
+                  onMouseDown={onListOptionClick(ch ? ch.channelId : null)}
+                >
+                  <div className="label">
+                    {getChannelString(ch)}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
           : null }
         </div>
