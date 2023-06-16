@@ -5,7 +5,7 @@ import stringify from "json-stringify-pretty-compact";
 
 import { DataflowProgramModel } from "./dataflow-program-model";
 import { DEFAULT_DATA_RATE } from "./utilities/node";
-import { SharedVariables } from "../../shared-variables/shared-variables";
+import { SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { ITileMetadataModel } from "../../../models/tiles/tile-metadata";
 import { tileModelHooks } from "../../../models/tiles/tile-model-hooks";
@@ -57,11 +57,15 @@ export const DataflowContentModel = TileContentModel
   .views(self => ({
     get sharedModel() {
       const sharedModelManager = self.tileEnv?.sharedModelManager;
-      const firstSharedModel = sharedModelManager?.getTileSharedModels(self)?.[0];
-      if (!firstSharedModel || getType(firstSharedModel) !== SharedDataSet) {
-        return undefined;
-      }
+      const firstSharedModel = sharedModelManager?.getTileSharedModelsByType(self, SharedDataSet)?.[0];
+      if (!firstSharedModel) return undefined;
       return firstSharedModel as SharedDataSetType;
+    },
+    get sharedVariables() {
+      const sharedModelManager = self.tileEnv?.sharedModelManager;
+      const firstSharedVariables = sharedModelManager?.getTileSharedModelsByType(self, SharedVariables)?.[0];
+      if (!firstSharedVariables) return undefined;
+      return firstSharedVariables as SharedVariablesType;
     },
     programWithoutRecentValues() {
       const { values, ...rest } = getSnapshot(self.program);
@@ -77,6 +81,10 @@ export const DataflowContentModel = TileContentModel
     }
   }))
   .views(self => ({
+    get inputVariables() {
+      const variables = self.sharedVariables?.variables;
+      return variables?.filter(variable => variable.name?.startsWith("input_"));
+    },
     get dataSet(){
       return self.sharedModel?.dataSet || self.emptyDataSet;
     },

@@ -68,17 +68,17 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
             {({ size }: SizeMeProps) => {
               return (
                 <DataflowProgram
-                  readOnly={readOnly}
                   documentProperties={this.getDocumentProperties()}
-                  program={program}
+                  model={model}
                   onProgramChange={this.handleProgramChange}
-                  programDataRate={programDataRate}
                   onProgramDataRateChange={this.handleProgramDataRateChange}
-                  programZoom={programZoom}
                   onZoomChange={this.handleProgramZoomChange}
+                  program={program}
+                  programDataRate={programDataRate}
+                  programZoom={programZoom}
+                  readOnly={readOnly}
                   size={size}
                   tileHeight={height}
-                  tileId={model.id}
                   //state
                   programMode={this.determineProgramMode()}
                   isPlaying={this.state.isPlaying}

@@ -4,10 +4,15 @@ import { DataflowReteNodeFactory } from "./dataflow-rete-node-factory";
 import { SensorSelectControl } from "../controls/sensor-select-control";
 import { PlotButtonControl } from "../controls/plot-button-control";
 import { SensorValueControl } from "../controls/sensor-value-control";
+import { DataflowContentModelType } from "../../model/dataflow-content";
 
 export class SensorReteNodeFactory extends DataflowReteNodeFactory {
-  constructor(numSocket: Socket) {
+  private content?: DataflowContentModelType;
+
+  constructor(numSocket: Socket, content?: DataflowContentModelType) {
     super("Sensor", numSocket);
+
+    this.content = content;
   }
 
   public builder(node: Node) {
@@ -15,7 +20,7 @@ export class SensorReteNodeFactory extends DataflowReteNodeFactory {
     if (this.editor) {
       const out1 = new Rete.Output("num", "Number", this.numSocket);
       return node
-        .addControl(new SensorSelectControl(this.editor, "sensorSelect", node, true))
+        .addControl(new SensorSelectControl(this.editor, "sensorSelect", node, true, this.content))
         .addControl(new PlotButtonControl(this.editor, "plot", node))
         .addControl(new SensorValueControl(this.editor, "nodeValue", node, true))
         .addOutput(out1) as any;

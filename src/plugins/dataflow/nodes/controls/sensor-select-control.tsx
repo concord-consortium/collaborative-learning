@@ -2,9 +2,12 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import React, { useRef }  from "react";
 import Rete, { NodeEditor, Node } from "rete";
+import { VariableType } from "@concord-consortium/diagram-view";
+
+import { useStopEventPropagation, useCloseDropdownOnOutsideEvent } from "./custom-hooks";
+import { DataflowContentModelType } from "../../model/dataflow-content";
 import { NodeSensorTypes, kSensorSelectMessage, kSensorMissingMessage } from "../../model/utilities/node";
 import { NodeChannelInfo } from "../../model/utilities/channel";
-import { useStopEventPropagation, useCloseDropdownOnOutsideEvent } from "./custom-hooks";
 import DropdownCaretIcon from "../../assets/icons/dropdown-caret.svg";
 import { dataflowLogEvent } from "../../dataflow-logger";
 import { resetGraph } from "../../utilities/graph-utils";
@@ -18,7 +21,7 @@ export class SensorSelectControl extends Rete.Control {
   private props: any;
   private node: Node;
 
-  constructor(emitter: NodeEditor, key: string, node: Node, readonly = false) {
+  constructor(emitter: NodeEditor, key: string, node: Node, readonly = false, content?: DataflowContentModelType) {
     super(key);
     this.emitter = emitter;
     this.key = key;
@@ -152,6 +155,9 @@ export class SensorSelectControl extends Rete.Control {
       };
 
       const options: any = [...channelsForType];
+      if (content) {
+        content?.inputVariables?.forEach((variable: VariableType) => options.push(variable));
+      }
       if (!options.length) {
         options.push("none");
       }
