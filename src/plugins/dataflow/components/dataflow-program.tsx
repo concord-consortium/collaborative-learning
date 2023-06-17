@@ -33,7 +33,7 @@ import {
   sendDataToSerialDevice, sendDataToSimulatedOutput, updateNodeChannelInfo, updateGeneratorNode, updateSensorNode,
   updateTimerNode
 } from "../nodes/utilities/update-utilities";
-import { getBoundingRectOfNodes } from "../nodes/utilities/view-utilities";
+import { getBoundingRectOfNodes, getNewNodePosition, moveNodeToFront } from "../nodes/utilities/view-utilities";
 import { DataflowDropZone } from "./ui/dataflow-drop-zone";
 import { DataflowProgramToolbar } from "./ui/dataflow-program-toolbar";
 import { DataflowProgramTopbar } from "./ui/dataflow-program-topbar";
@@ -373,13 +373,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       this.programEditor.on("nodecreated", node => {
         this.processAndSave();
-        this.moveNodeToFront(node, true);
+        moveNodeToFront(this.programEditor, node, true);
         node.meta.inTileWithId = this.tileId;
         dataflowLogEvent("nodecreated", node, this.tileId);
       });
 
       this.programEditor.on("selectnode", ( { node } ) => {
-        this.moveNodeToFront(node, false);
+        moveNodeToFront(this.programEditor, node, false);
         node.meta.inTileWithId = this.tileId;
       });
 
@@ -550,47 +550,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private addNode = async (nodeType: string, position?: [number, number]) => {
     const nodeFactory = this.programEditor.components.get(nodeType) as DataflowReteNodeFactory;
     const n1 = await nodeFactory!.createNode();
-    n1.position = position ?? this.getNewNodePosition();
+    n1.position = position ?? getNewNodePosition(this.programEditor);
     this.programEditor.addNode(n1);
-  };
-
-  private getNewNodePosition = () => {
-    const numNodes = this.programEditor.nodes.length;
-    const kNodesPerColumn = 5;
-    const kNodesPerRow = 4;
-    const kColumnWidth = 200;
-    const kRowHeight = 90;
-    const kLeftMargin = 40;
-    const kTopMargin = 5;
-    const kColumnOffset = 15;
-    const { k } = this.programEditor.view.area.transform;
-    const nodePos: [number, number] =
-      [kLeftMargin * (1 / k) + Math.floor((numNodes % (kNodesPerColumn * kNodesPerRow)) / kNodesPerColumn)
-        * kColumnWidth + Math.floor(numNodes / (kNodesPerColumn * kNodesPerRow)) * kColumnOffset,
-      kTopMargin + numNodes % kNodesPerColumn * kRowHeight];
-    return nodePos;
-  };
-
-  private moveNodeToFront = (node: Node, newNode: boolean) => {
-    const totalNodes = this.programEditor.nodes.length;
-    const selectedNodeView = this.programEditor.view.nodes.get(node);
-    let selectedNodeZ = 0;
-    if (selectedNodeView) {
-      selectedNodeZ = selectedNodeView.el.style.zIndex ? parseInt(selectedNodeView.el.style.zIndex, 10) : selectedNodeZ;
-    }
-    this.programEditor.nodes.forEach((n: Node) => {
-      const nodeView = this.programEditor.view.nodes.get(n);
-      if (nodeView) {
-        if (node.id === n.id) {
-          nodeView.el.style.zIndex = totalNodes.toString();
-        } else if (nodeView.el.style.zIndex) {
-          const nodeZ = parseInt(nodeView.el.style.zIndex, 10);
-          if (nodeZ > selectedNodeZ && !newNode) {
-            nodeView.el.style.zIndex = (nodeZ - 1).toString();
-          }
-        }
-      }
-    });
   };
 
   private serialDeviceRefresh = () => {
