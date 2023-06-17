@@ -1,0 +1,123 @@
+// Functions for updating nodes on each tick.
+
+import { Node } from "rete";
+import { VariableType } from "@concord-consortium/diagram-view";
+
+import { DropdownListControl } from "../controls/dropdown-list-control";
+import { NumControl } from "../controls/num-control";
+import { SensorSelectControl } from "../controls/sensor-select-control";
+import { NodeChannelInfo } from "../../model/utilities/channel";
+import { NodeGeneratorTypes, NodeTimerInfo } from "../../model/utilities/node";
+import { findOutputVariable } from "../../model/utilities/simulated-output";
+import { SerialDevice } from "../../../../models/stores/serial";
+
+function passSerialStateToChannel(sd: SerialDevice, channel: NodeChannelInfo) {
+  if (sd.hasPort()){
+    channel.serialConnected = true;
+    const deviceMismatch = sd.deviceFamily !== channel.deviceFamily;
+    const timeSinceActive = channel.usesSerial && channel.lastMessageRecievedAt
+      ? Date.now() - channel.lastMessageRecievedAt: 0;
+    channel.missing = deviceMismatch || timeSinceActive > 7000;
+  } else {
+    channel.serialConnected = false;
+    channel.missing = true;
+  }
+}
+
+export function sendDataToSerialDevice(n: Node, serialDevice: SerialDevice) {
+  const isNumberOutput = isFinite(n.data.nodeValue as number);
+  const { deviceFamily } = serialDevice;
+
+  if (deviceFamily === "arduino" && isNumberOutput){
+    serialDevice.writeToOutForBBGripper(n.data.nodeValue as number);
+  }
+  if (deviceFamily === "microbit"){
+    const hubSelect = n.controls.get("hubSelect") as DropdownListControl;
+    if (hubSelect.getChannels()){
+      const relayType = hubSelect.getData("liveOutputType") as string;
+      const hubId = hubSelect.getSelectionId();
+      const state = n.data.nodeValue as number;
+      serialDevice.writeToOutForMicroBitRelayHub(state, hubId, relayType );
+    }
+  }
+}
+
+export function sendDataToSimulatedOutput(n: Node, outputVariables?: VariableType[]) {
+  const outputVariable = findOutputVariable(n, outputVariables);
+  if (outputVariable) {
+    const nodeValue = n.data.nodeValue as number;
+    const outputValue = isFinite(nodeValue) ? nodeValue : 0;
+    outputVariable.setValue(outputValue);
+    // TODO: Should we also set the unit?
+    // We'd use n.data.nodeValueUnits but it might be undefined
+  }
+}
+
+export function updateNodeChannelInfo(n: Node, channels: NodeChannelInfo[], serialDevice: SerialDevice) {
+  if (channels.length > 0 ){
+    channels.filter(c => c.usesSerial).forEach((ch) => {
+      passSerialStateToChannel(serialDevice, ch);
+    });
+  }
+
+  const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
+  if (sensorSelect) {
+    sensorSelect.setChannels(channels);
+    (sensorSelect as any).update();
+  }
+}
+
+export function updateGeneratorNode(n: Node) {
+  const generatorType = n.data.generatorType;
+  const period = Number(n.data.period);
+  const amplitude = Number(n.data.amplitude);
+  const nodeGeneratorType = NodeGeneratorTypes.find(gt => gt.name === generatorType);
+  if (nodeGeneratorType && period && amplitude) {
+    const time = Date.now();
+    // note: period is given in s, but we're passing in ms for time, need to adjust
+    const val = nodeGeneratorType.method(time, period * 1000, amplitude);
+    const nodeValue = n.controls.get("nodeValue") as NumControl;
+    if (nodeValue) {
+      nodeValue.setValue(val);
+    }
+  }
+}
+
+export function updateSensorNode(n: Node, channels: NodeChannelInfo[]) {
+  const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
+
+  if (sensorSelect) {
+    const chInfo = channels.find(ci => ci.channelId === n.data.sensor);
+
+    // update virtual sensors
+    if (chInfo?.virtualValueMethod && chInfo.timeFactor) {
+      const time = Math.floor(Date.now() / chInfo.timeFactor);
+      chInfo.value = chInfo.virtualValueMethod(time);
+    }
+
+    // update simulated sensors
+    if (chInfo?.simulatedVariable) {
+      chInfo.value = chInfo.simulatedVariable.value || 0;
+    }
+
+    if (chInfo && isFinite(chInfo.value)) {
+      sensorSelect.setSensorValue(chInfo.value);
+    } else {
+      sensorSelect.setSensorValue(NaN);
+    }
+  }
+}
+
+export function updateTimerNode(n: Node) {
+  const timeOn = Number(n.data.timeOn);
+  const timeOff = Number(n.data.timeOff);
+  if (timeOn && timeOff) {
+    const time = Date.now();
+    // note: time on/off is given in s, but we're passing in ms for time, need to adjust
+    const val = NodeTimerInfo.method(time, timeOn * 1000, timeOff * 1000);
+    const nodeValue = n.controls.get("nodeValue") as NumControl;
+    if (nodeValue) {
+      nodeValue.setValue(val);
+    }
+  }
+}
