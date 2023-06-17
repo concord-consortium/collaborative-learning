@@ -889,7 +889,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private updateNodeSensorValue = (n: Node) => {
-
     const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
 
     if (sensorSelect) {
@@ -906,7 +905,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         chInfo.value = chInfo.simulatedVariable.value || 0;
       }
 
-      if (chInfo && chInfo.value) {
+      if (chInfo && isFinite(chInfo.value)) {
         sensorSelect.setSensorValue(chInfo.value);
       } else {
         sensorSelect.setSensorValue(NaN);
