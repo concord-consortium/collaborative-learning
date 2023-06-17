@@ -41,10 +41,10 @@ import { DataflowProgramCover } from "./ui/dataflow-program-cover";
 import { DataflowProgramZoom } from "./ui/dataflow-program-zoom";
 import { NodeChannelInfo, serialSensorChannels } from "../model/utilities/channel";
 import { ProgramDataRates } from "../model/utilities/node";
+import { getAttributeIdForNode, recordCase } from "../model/utilities/recording-utilities";
 import { virtualSensorChannels } from "../model/utilities/virtual-channel";
 import { DocumentContextReact } from "../../../components/document/document-context";
 import { dataflowLogEvent } from "../dataflow-logger";
-import { ICaseCreation, addCanonicalCasesToDataSet } from "../../../models/data/data-set";
 import { SensorValueControl } from "../nodes/controls/sensor-value-control";
 import { InputValueControl } from "../nodes/controls/input-value-control";
 import { DemoOutputControl } from "../nodes/controls/demo-output-control";
@@ -572,39 +572,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.programEditor.clear();
   };
 
-  private recordCase = () => {
-    const { recordIndex } = this.props;
-    const { programDataRate, dataSet } = this.props.tileContent; //grab the program Sampling Rate to write TimeQuantized
-
-    //Write case
-    //Attributes look like  Time (quantized) as col 1 followed by all nodes
-    const aCase: ICaseCreation = {};
-
-    //Quantize and write time
-    const timeQuantizedKey = dataSet.attributes[0].id;
-    const recordTimeQuantized = (recordIndex * programDataRate) / 1000; //in seconds
-    aCase[timeQuantizedKey] = recordTimeQuantized;
-
-    //loop through attribute (nodes) and write each value
-    this.programEditor.nodes.forEach((node, idx) => {
-      const key = this.getAttributeIdForNode(idx);
-      aCase[key] = node.data.nodeValue as string;
-    });
-    addCanonicalCasesToDataSet(this.props.tileContent.dataSet, [aCase]);
-  };
-
-  private getAttributeIdForNode = (nodeIndex: number) => {
-    const { dataSet } = this.props.tileContent;
-    // this function adds one to index to skip time attribute
-    return dataSet.attributes[nodeIndex + 1].id;
-  };
-
   private playbackNodesWithCaseData = (dataSet: any, playBackIndex: number) => {
     const currentCase = dataSet.getCaseAtIndex(playBackIndex);
     if (currentCase){
       const {__id__} = currentCase; //this is the id of the case we are looking at for each frame
       this.programEditor.nodes.forEach((node, idx) => { //update each node in the frame
-        const attrId = this.getAttributeIdForNode(idx);
+        const attrId = getAttributeIdForNode(this.props.tileContent.dataSet, idx);
         const valueToSendToNode = dataSet.getValue(__id__, attrId) as number;
         let nodeControl;
         switch (node.name){
@@ -698,7 +671,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         this.updateNodes();
         break;
       case ProgramMode.Recording:
-        if (!readOnly) this.recordCase(); //only record cases from right DF tiles
+        if (!readOnly) {
+          recordCase(this.props.tileContent, this.programEditor, this.props.recordIndex);
+        }
         this.updateNodes();
         updateRecordIndex(UpdateMode.Increment);
         break;
@@ -724,6 +699,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       // only after connection to another node is made
       // this allows user to drag a block out and work on program before connecting
       if (n.name === "Live Output"){
+        // Don't count the node if it's connected to a shared output variable
         const outputVariable = findOutputVariable(n, this.props.tileContent?.outputVariables);
         if(!outputVariable && n.inputs.entries().next().value[1].connections.length > 0) {
           serialNodesCt++;
