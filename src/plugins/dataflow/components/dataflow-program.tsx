@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import "regenerator-runtime/runtime";
 import { forEach } from "lodash";
 import { inject, observer } from "mobx-react";
-import { autorun, values } from "mobx";
+import { autorun } from "mobx";
 import { IDisposer, onSnapshot } from "mobx-state-tree";
 import { SizeMeProps } from "react-sizeme";
 import Rete, { NodeEditor, Engine, Node } from "rete";
@@ -50,7 +50,7 @@ import { ProgramMode, UpdateMode } from "./types/dataflow-tile-types";
 import { ITileModel } from "../../../models/tiles/tile-model";
 
 import "./dataflow-program.sass";
-import { outputNameMatches, outputNamesToMatch } from "../model/utilities/simulated-output";
+import { findOutputVariable } from "../model/utilities/simulated-output";
 interface NodeNameValuePair {
   name: string;
   val: number;
@@ -789,6 +789,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private countSerialDataNodes(nodes: Node[]){
     // implementing with a "count" of 1 or 0 in case we need to count nodes in future
     let serialNodesCt = 0;
+    const documentContent = this.props?.model?.content as DataflowContentModelType;
 
     nodes.forEach((n) => {
       const isLiveSensor = /fsr|emg|[th]-[abcd]/; // match ids any live sensor channels
@@ -799,7 +800,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       // only after connection to another node is made
       // this allows user to drag a block out and work on program before connecting
       if (n.name === "Live Output"){
-        if(n.inputs.entries().next().value[1].connections.length > 0){
+        const outputVariable = findOutputVariable(n, documentContent?.outputVariables);
+        if(!outputVariable && n.inputs.entries().next().value[1].connections.length > 0) {
           serialNodesCt++;
         }
       }
@@ -834,13 +836,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
   }
 
-  private findOutputVariable(n: Node) {
-    const names = outputNamesToMatch(n);
-    return this.props.tileContent.outputVariables?.find((variable: VariableType) => outputNameMatches(names, variable));
-  }
-
   private sendDataToSimulatedOutput(n: Node) {
-    const outputVariable = this.findOutputVariable(n);
+    const outputVariable = findOutputVariable(n, this.props.tileContent?.outputVariables);
     if (outputVariable) {
       const nodeValue = n.data.nodeValue as number;
       const outputValue = isFinite(nodeValue) ? nodeValue : 0;

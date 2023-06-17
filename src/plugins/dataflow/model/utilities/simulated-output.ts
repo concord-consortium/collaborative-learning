@@ -15,14 +15,20 @@ function outputVariableNamePart(variable: VariableType) {
 
 // Returns possible names to match with a shared variable based on the given node's outputType.
 // This is so output_LightBulb, output_lightbulb, output_light_bulb, etc will all match.
-export function outputNamesToMatch(node: Node) {
+function outputNamesToMatch(node: Node) {
   const lowerName = getOutputType(node)?.toLowerCase();
   const underscoreName = lowerName.replace(" ", "_");
   const noSpaceName = lowerName.replace(" ", "");
   return [underscoreName, noSpaceName];
 }
 
-export function outputNameMatches(names: string[], variable:VariableType) {
+function outputNameMatches(names: string[], variable:VariableType) {
   const variableName = outputVariableNamePart(variable)?.toLowerCase();
   return variableName && names.includes(variableName);
+}
+
+export function findOutputVariable(node: Node, variables?: VariableType[]) {
+  if (!variables) return undefined;
+  const names = outputNamesToMatch(node);
+  return variables?.find((variable: VariableType) => outputNameMatches(names, variable));
 }
