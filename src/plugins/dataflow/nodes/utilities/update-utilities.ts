@@ -4,11 +4,10 @@ import { Node } from "rete";
 import { VariableType } from "@concord-consortium/diagram-view";
 
 import { getHubSelect } from "./live-output-utilities";
-import { DropdownListControl } from "../controls/dropdown-list-control";
 import { NumControl } from "../controls/num-control";
 import { SensorSelectControl } from "../controls/sensor-select-control";
 import { NodeChannelInfo } from "../../model/utilities/channel";
-import { NodeGeneratorTypes, NodeTimerInfo } from "../../model/utilities/node";
+import { kMaxNodeValues, NodeGeneratorTypes, NodeTimerInfo, NodeValue } from "../../model/utilities/node";
 import { findOutputVariable } from "../../model/utilities/simulated-output";
 import { SerialDevice } from "../../../../models/stores/serial";
 
@@ -82,6 +81,42 @@ export function updateGeneratorNode(n: Node) {
       nodeValue.setValue(val);
     }
   }
+}
+
+export function updateNodeRecentValues(n: Node) {
+  const watchedValues = n.data.watchedValues as Record<string, any>;
+  Object.keys(watchedValues).forEach((valueKey: string) => {
+    const value: any = n.data[valueKey];
+    let recentValue: NodeValue = {};
+
+    // Store recentValue as object with unique keys for each value stored in node
+    // Needed for node types that require more than a single value
+    if (value === "number") {
+      recentValue[valueKey] = { name: n.name, val: value };
+    } else {
+      recentValue = value;
+    }
+
+    const recentValues = n.data.recentValues as Record<string, any>;
+    if (recentValues) {
+      if (recentValues[valueKey]) {
+        const newRecentValues: any = recentValues[valueKey];
+        if (newRecentValues.length > kMaxNodeValues) {
+          newRecentValues.shift();
+        }
+        newRecentValues.push(recentValue);
+        recentValues[valueKey] = newRecentValues;
+      } else {
+        recentValues[valueKey] = [recentValue];
+      }
+    } else {
+      n.data.recentValues = {[valueKey]: [recentValue]};
+    }
+
+    if (n.data.watchedValues) {
+      n.update();
+    }
+  });
 }
 
 export function updateSensorNode(n: Node, channels: NodeChannelInfo[]) {

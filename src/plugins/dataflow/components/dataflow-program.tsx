@@ -30,8 +30,8 @@ import { NumControl } from "../nodes/controls/num-control";
 import { ValueControl } from "../nodes/controls/value-control";
 import { getHubSelect } from "../nodes/utilities/live-output-utilities";
 import {
-  sendDataToSerialDevice, sendDataToSimulatedOutput, updateNodeChannelInfo, updateGeneratorNode, updateSensorNode,
-  updateTimerNode
+  sendDataToSerialDevice, sendDataToSimulatedOutput, updateNodeChannelInfo, updateGeneratorNode, updateNodeRecentValues,
+  updateSensorNode, updateTimerNode
 } from "../nodes/utilities/update-utilities";
 import { getBoundingRectOfNodes, getNewNodePosition, moveNodeToFront } from "../nodes/utilities/view-utilities";
 import { DataflowDropZone } from "./ui/dataflow-drop-zone";
@@ -53,14 +53,6 @@ import { ITileModel } from "../../../models/tiles/tile-model";
 
 import "./dataflow-program.sass";
 import { findOutputVariable } from "../model/utilities/simulated-output";
-interface NodeNameValuePair {
-  name: string;
-  val: number;
-}
-interface NodeValueMap {
-  [key: string]: NodeNameValuePair;
-}
-type NodeValue = number | NodeValueMap;
 
 export interface IStartProgramParams {
   runId: string;
@@ -102,7 +94,6 @@ interface IState {
 
 const numSocket = new Rete.Socket("Number value");
 const RETE_APP_IDENTIFIER = "dataflow@0.1.0";
-export const MAX_NODE_VALUES = 16;
 const MAX_ZOOM = 2;
 const MIN_ZOOM = .1;
 
@@ -643,7 +634,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         nodeProcess(n);
       }
       if (Object.prototype.hasOwnProperty.call(n.data, "nodeValue")) {
-        this.updateNodeRecentValues(n);
+        updateNodeRecentValues(n);
       }
     });
     if (processNeeded) {
@@ -744,42 +735,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.stores.serialDevice.serialModalShown = true;
     }
   }
-
-  private updateNodeRecentValues = (n: Node) => {
-    const watchedValues = n.data.watchedValues as Record<string, any>;
-    Object.keys(watchedValues).forEach((valueKey: string) => {
-      const value: any = n.data[valueKey];
-      let recentValue: NodeValue = {};
-
-      // Store recentValue as object with unique keys for each value stored in node
-      // Needed for node types that require more than a single value
-      if (value === "number") {
-        recentValue[valueKey] = { name: n.name, val: value };
-      } else {
-        recentValue = value;
-      }
-
-      const recentValues = n.data.recentValues as Record<string, any>;
-      if (recentValues) {
-        if (recentValues[valueKey]) {
-          const newRecentValues: any = recentValues[valueKey];
-          if (newRecentValues.length > MAX_NODE_VALUES) {
-            newRecentValues.shift();
-          }
-          newRecentValues.push(recentValue);
-          recentValues[valueKey] = newRecentValues;
-        } else {
-          recentValues[valueKey] = [recentValue];
-        }
-      } else {
-        n.data.recentValues = {[valueKey]: [recentValue]};
-      }
-
-      if (n.data.watchedValues) {
-        n.update();
-      }
-    });
-  };
 
   private zoomIn = () => {
     const { k } = this.programEditor.view.area.transform;
