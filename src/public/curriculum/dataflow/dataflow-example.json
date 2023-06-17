@@ -76,11 +76,6 @@
         "isTileTool": true
       },
       {
-        "id": "Simulator",
-        "title": "Simulator",
-        "isTileTool": true
-      },
-      {
         "id": "Diagram",
         "title": "Diagram",
         "isTileTool": true
@@ -104,6 +99,7 @@
         "isTileTool": false
       }
     ],
+    "tools": ["Simulator"],
     "stamps": []
   },
   "sections": {
