@@ -3,7 +3,8 @@ import React from "react";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { BaseComponent, IBaseProps } from "../base";
 import { kDividerMax, kDividerMin } from "../../models/stores/ui-types";
-import { NavTabSpec, ENavTab } from "../../models/view/nav-tabs";
+import { NavTabSpec, ENavTab, NavTabModelType } from "../../models/view/nav-tabs";
+import { getTabsToDisplay } from "../../models/stores/stores";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import { StudentGroupView } from "../document/student-group-view";
@@ -18,7 +19,6 @@ import "./nav-tab-panel.sass";
 import "../themes.scss";
 
 interface IProps extends IBaseProps {
-  tabs?: NavTabSpec[];
   isResourceExpanded: boolean;
   isExpanderShown: boolean;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
@@ -30,15 +30,18 @@ interface IProps extends IBaseProps {
 export class NavTabPanel extends BaseComponent<IProps> {
 
   private navTabPanelElt: HTMLDivElement | null = null;
+  private tabs: NavTabModelType[];
 
   constructor(props: IProps) {
     super(props);
+    this.tabs = getTabsToDisplay(this.stores);
   }
 
   public render() {
-    const { tabs, isResourceExpanded, isExpanderShown } = this.props;
+    const { isResourceExpanded, isExpanderShown } = this.props;
     const { ui: { activeNavTab, dividerPosition, focusDocument, showChatPanel, selectedTileIds },
             user } = this.stores;
+    const { tabs } = this;
     const selectedTabIndex = tabs?.findIndex(t => t.tab === activeNavTab);
     const resizePanelWidth = 6;
     const collapseTabWidth = 44;
@@ -158,7 +161,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
   };
 
   private handleSelectTab = (tabIndex: number) => {
-    const { tabs } = this.props;
+    const { tabs } = this;
     const { ui } = this.stores;
     if (tabs) {
       const tabSpec = tabs[tabIndex];

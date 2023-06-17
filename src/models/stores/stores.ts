@@ -94,6 +94,17 @@ export function getProblemPath(stores: IBaseStores) {
   return `${stores.unit.code}/${stores.investigation.ordinal}/${stores.problem.ordinal}`;
 }
 
+export function getTabsToDisplay(stores: IBaseStores) {
+  const { appConfig: { navTabs: navTabSpecs },
+    teacherGuide,
+    user: { isTeacher }
+  } = stores;
+
+  return isTeacher
+    ? navTabSpecs.tabSpecs.filter(t => !t.teacherOnly)
+    : navTabSpecs.tabSpecs.filter(t => (t.tab !== "teacher-guide") || teacherGuide);
+}
+
 export const setUnitAndProblem = async (stores: IStores, unitId: string | undefined, problemOrdinal?: string) => {
   let unitJson = await getUnitJson(unitId, stores.appConfig);
   if (unitJson.status === 404) {
@@ -132,6 +143,12 @@ export const setUnitAndProblem = async (stores: IStores, unitId: string | undefi
   }
   stores.problemPath = getProblemPath(stores);
   stores.ui.setProblemPath(stores.problemPath);
+
+  // Set the active tab to be the first tab
+  const tabs = getTabsToDisplay(stores);
+  if (tabs.length > 0) {
+    stores.ui.setActiveNavTab(tabs[0].tab);
+  }
 
   // TODO: It would be best to make stores a MobX object so when the teacherGuide is
   // updated, the Workspace component will re-render to show the teacher guide.
