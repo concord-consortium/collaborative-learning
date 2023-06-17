@@ -28,10 +28,12 @@ import { GeneratorReteNodeFactory } from "../nodes/factories/generator-rete-node
 import { TimerReteNodeFactory } from "../nodes/factories/timer-rete-node-factory";
 import { NumControl } from "../nodes/controls/num-control";
 import { ValueControl } from "../nodes/controls/value-control";
+import { getHubSelect } from "../nodes/utilities/live-output-utilities";
 import {
   sendDataToSerialDevice, sendDataToSimulatedOutput, updateNodeChannelInfo, updateGeneratorNode, updateSensorNode,
   updateTimerNode
 } from "../nodes/utilities/update-utilities";
+import { getBoundingRectOfNodes } from "../nodes/utilities/view-utilities";
 import { DataflowDropZone } from "./ui/dataflow-drop-zone";
 import { DataflowProgramToolbar } from "./ui/dataflow-program-toolbar";
 import { DataflowProgramTopbar } from "./ui/dataflow-program-topbar";
@@ -40,14 +42,12 @@ import { DataflowProgramZoom } from "./ui/dataflow-program-zoom";
 import { NodeChannelInfo, serialSensorChannels } from "../model/utilities/channel";
 import { ProgramDataRates } from "../model/utilities/node";
 import { virtualSensorChannels } from "../model/utilities/virtual-channel";
-import { Rect, scaleRect, unionRect } from "../utilities/rect";
 import { DocumentContextReact } from "../../../components/document/document-context";
 import { dataflowLogEvent } from "../dataflow-logger";
 import { ICaseCreation, addCanonicalCasesToDataSet } from "../../../models/data/data-set";
 import { SensorValueControl } from "../nodes/controls/sensor-value-control";
 import { InputValueControl } from "../nodes/controls/input-value-control";
 import { DemoOutputControl } from "../nodes/controls/demo-output-control";
-import { DropdownListControl } from "../nodes/controls/dropdown-list-control";
 import { ProgramMode, UpdateMode } from "./types/dataflow-tile-types";
 import { ITileModel } from "../../../models/tiles/tile-model";
 
@@ -495,18 +495,18 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         sensorSelect.setChannels(this.channels);
       }
       if (node.name === "Live Output"){
-        const hubSelect = node.controls.get("hubSelect") as DropdownListControl;
+        const hubSelect = getHubSelect(node);
         hubSelect.setChannels(this.channels);
       }
     });
   };
 
   private shouldShowProgramCover() {
-    return this.props.readOnly || this.disabledRecordingStates();
+    return this.props.readOnly || this.inDisabledRecordingState;
   }
 
   //disable the right side when recordingMode in stop or clear
-  private disabledRecordingStates(){
+  private get inDisabledRecordingState() {
     const { programMode } = this.props;
     return ( programMode === ProgramMode.Recording || programMode === ProgramMode.Done);
   }
@@ -524,7 +524,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       k = this.programEditor.view.area.transform.k;
     }
 
-    const rect = this.getBoundingRectOfNodes();
+    const rect = getBoundingRectOfNodes(this.programEditor);
 
     if (rect?.isValid) {
       const widthQ = k * clientWidth / (rect.right + margin);
@@ -546,25 +546,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       }
     }
   };
-
-  private getBoundingRectOfNode(n: Node): Rect | undefined {
-    const { k } = this.programEditor.view.area.transform;
-    const nodeView = this.programEditor.view.nodes.get(n);
-    if (!nodeView) return;
-    return scaleRect(new Rect(nodeView.node.position[0], nodeView.node.position[1],
-                              nodeView.el.clientWidth, nodeView.el.clientHeight), k);
-  }
-
-  private getBoundingRectOfNodes(): Rect | undefined {
-    let bounds: Rect | undefined;
-    this.programEditor.nodes.forEach((n: Node) => {
-      const nodeBounds = this.getBoundingRectOfNode(n);
-      if (nodeBounds?.isValid) {
-        bounds = bounds ? unionRect(bounds, nodeBounds) : nodeBounds;
-      }
-    });
-    return bounds;
-  }
 
   private addNode = async (nodeType: string, position?: [number, number]) => {
     const nodeFactory = this.programEditor.components.get(nodeType) as DataflowReteNodeFactory;

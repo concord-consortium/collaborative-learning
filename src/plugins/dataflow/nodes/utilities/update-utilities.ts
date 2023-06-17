@@ -3,6 +3,7 @@
 import { Node } from "rete";
 import { VariableType } from "@concord-consortium/diagram-view";
 
+import { getHubSelect } from "./live-output-utilities";
 import { DropdownListControl } from "../controls/dropdown-list-control";
 import { NumControl } from "../controls/num-control";
 import { SensorSelectControl } from "../controls/sensor-select-control";
@@ -32,7 +33,7 @@ export function sendDataToSerialDevice(n: Node, serialDevice: SerialDevice) {
     serialDevice.writeToOutForBBGripper(n.data.nodeValue as number);
   }
   if (deviceFamily === "microbit"){
-    const hubSelect = n.controls.get("hubSelect") as DropdownListControl;
+    const hubSelect = getHubSelect(n);
     if (hubSelect.getChannels()){
       const relayType = hubSelect.getData("liveOutputType") as string;
       const hubId = hubSelect.getSelectionId();
