@@ -213,6 +213,7 @@ module.exports = (env, argv) => {
     resolve: {
       alias: {
         'mobx-state-tree': '@concord-consortium/mobx-state-tree',
+        '@cortex-js/compute-engine': '@concord-consortium/compute-engine',
         // cf. https://github.com/facebook/react/issues/20235#issuecomment-732205073
         'react/jsx-runtime': require.resolve('react/jsx-runtime'),
         'react-modal-hook': '@concord-consortium/react-modal-hook',

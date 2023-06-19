@@ -256,6 +256,7 @@ context("Dragging to copy linked tiles", () => {
       resourcesPanel.openPrimaryWorkspaceTab("my-work");
       cy.get(".tab-panel-documents-section .list-item").first().click();
       canvas.createNewExtraDocumentFromFileMenuWithoutTabs("Test Document", "my-work");
+      cy.wait(100);
 
       // Select the table and geometry tiles on the left
       const leftTile = type => cy.get(`.nav-tab-panel .documents-panel .${type}-tool-tile`);

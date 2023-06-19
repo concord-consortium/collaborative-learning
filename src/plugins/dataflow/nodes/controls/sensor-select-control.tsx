@@ -145,8 +145,6 @@ export class SensorSelectControl extends Rete.Control {
         if (!ch && (!id || id === "none")) return kSensorSelectMessage;
         if (!ch) return `${kSensorMissingMessage} ${id}`;
         if (ch.missing) return `${kSensorMissingMessage} connect ${ch.deviceFamily} for ${ch.name}`;
-        let count = 0;
-        channelsForType.forEach( c => { if (c.type === ch.type && ch.hubId === c.hubId) count++; } );
         const chStr = ch.virtual
           ? `${ch.name} Demo Data`
           : `${ch.hubName}:${ch.type}`;

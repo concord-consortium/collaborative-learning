@@ -188,6 +188,13 @@ export const DiagramToolbar: React.FC<IProps> = observer(({
   const root = content?.root;
   const selectedVariable = root?.selectedNode?.variable;
 
+  const handleViewportChange = (changeFunction?: () => any) => {
+    const updatedViewport = changeFunction?.();
+    if (updatedViewport) {
+      content.root.setTransform(updatedViewport);
+    }
+  };
+
   const enabled = onIsEnabled();
   const location = useFloatingToolbarLocation({
     documentContent,
@@ -204,9 +211,9 @@ export const DiagramToolbar: React.FC<IProps> = observer(({
         <InsertVariableButton disabled={disableInsertVariableButton} handleClick={handleInsertVariableClick} />
         <EditVariableButton handleClick={handleEditVariableClick} selectedVariable={selectedVariable} />
         <ButtonDivider />
-        <ZoomInButton handleClick={() => diagramHelper?.zoomIn()} />
-        <ZoomOutButton handleClick={() => diagramHelper?.zoomOut()} />
-        <FitViewButton handleClick={() => diagramHelper?.fitView()} />
+        <ZoomInButton handleClick={() => handleViewportChange(() => diagramHelper?.zoomIn())} />
+        <ZoomOutButton handleClick={() => handleViewportChange(() => diagramHelper?.zoomOut())} />
+        <FitViewButton handleClick={() => handleViewportChange(() => diagramHelper?.fitView())} />
         <LockLayoutButton interactionLocked={interactionLocked} toggleInteractionLocked={toggleInteractionLocked} />
         <HideNavigatorButton hideNavigator={hideNavigator} toggleNavigator={toggleNavigator} />
         <ButtonDivider />

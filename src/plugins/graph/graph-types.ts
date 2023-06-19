@@ -89,3 +89,6 @@ export type PlotType = typeof PlotTypes[number];
 
 export const kGraphClass = "graph-plot";
 export const kGraphClassSelector = `.${kGraphClass}`;
+
+// TODO: determine this via configuration, e.g. appConfig, since apps may prefer different defaults
+export const kDefaultNumericAxisBounds = [-10, 11] as const;

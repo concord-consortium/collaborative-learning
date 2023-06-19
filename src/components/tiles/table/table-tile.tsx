@@ -107,8 +107,8 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     model, dataSet, rows, rowHeight, headerHeight, getTitleHeight,
     onRequestRowHeight: handleRequestRowHeight, triggerColumnChange, triggerRowChange
   });
-  const { onSetTableTitle, onSetColumnExpressions, onLinkTile, onUnlinkTile,
-    requestRowHeight, onAddColumn, onRemoveRows } = changeHandlers;
+  const { onSetTableTitle, onSetColumnExpressions, requestRowHeight,
+          onAddColumn, onRemoveRows } = changeHandlers;
 
   // A function to call when a column needs to change width
   const { onColumnResize } = useColumnResize({
@@ -151,9 +151,9 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     readOnly: !!readOnly, changeHandlers, columns, onColumnResize, selectedCell, inputRowId });
 
   // Variables for handling linking to geometry tiles
-  const { isLinkEnabled, linkColors, getLinkIndex, showLinkTileDialog: showLinkGeometryDialog } =
+  const { isLinkEnabled, linkColors, getLinkIndex, showLinkTileDialog } =
     useConsumerTileLinking({ documentId, model, hasLinkableRows,
-                          onRequestTilesOfType, onRequestLinkableTiles, onLinkTile, onUnlinkTile });
+                          onRequestTilesOfType, onRequestLinkableTiles });
 
   const containerRef = useRef<HTMLDivElement>(null);
   const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -206,8 +206,17 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   const toolbarProps = useToolbarTileApi({ id: model.id, enabled: !readOnly, onRegisterTileApi, onUnregisterTileApi });
   return (
     <div className="table-tool">
-      <TableToolbar documentContent={documentContent} tileElt={tileElt} {...toolbarProps}
-                    deleteSelected={deleteSelected} onSetExpression={showExpressionsDialog} scale={scale}/>
+      <TableToolbar
+        documentContent={documentContent}
+        tileElt={tileElt}
+        {...toolbarProps}
+        deleteSelected={deleteSelected}
+        onSetExpression={showExpressionsDialog}
+        scale={scale}
+        isLinkEnabled={isLinkEnabled}
+        getLinkIndex={getLinkIndex}
+        showLinkDialog={showLinkTileDialog}
+      />
       <div className="table-grid-container" ref={containerRef} onClick={handleBackgroundClick}>
         <EditableTableTitle
           content={content}
@@ -216,7 +225,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
           showLinkButton={true}
           isLinkEnabled={isLinkEnabled}
           getLinkIndex={getLinkIndex}
-          onLinkGeometryClick={showLinkGeometryDialog}
+          onLinkGeometryClick={showLinkTileDialog}
           titleCellWidth={titleCellWidth}
           titleCellHeight={getTitleHeight()}
           onBeginEdit={onBeginTitleEdit}

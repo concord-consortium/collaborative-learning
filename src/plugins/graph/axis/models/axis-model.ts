@@ -1,4 +1,5 @@
-import {Instance, SnapshotIn, types} from "mobx-state-tree";
+import {Instance, isAlive, SnapshotIn, types} from "mobx-state-tree";
+import { kDefaultNumericAxisBounds } from "../../graph-types";
 import {AxisOrientation, AxisPlaces, IScaleType, ScaleTypes} from "../axis-types";
 
 export const AxisModel = types.model("AxisModel", {
@@ -68,7 +69,10 @@ export const NumericAxisModel = AxisModel
   })
   .views(self => ({
     get domain() {
-      return [self.min, self.max] as const;
+      // TODO: figure out why this is sometimes called on defunct objects during linking, etc.
+      if (isAlive(self)) return [self.min, self.max] as const;
+      console.warn("NumericAxisModel.domain", "attempt to access defunct axis model domain");
+      return kDefaultNumericAxisBounds;
     }
   }))
   .actions(self => ({

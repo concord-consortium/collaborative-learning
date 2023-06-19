@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useStores, useUIStore} from "../../hooks/use-stores";
 import { useFirestore } from "../../hooks/firestore-hooks";
 import { CurriculumDocument, DocumentDocument } from "../../lib/firestore-schema";
@@ -36,17 +36,20 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
 
   //"Problem"/"Teacher-Guide"
   const [docsCommentedOn, setDocsCommentedOn] = useState<PromisedCurriculumDocument[]>();
-  const cDocsRef = db.collection("curriculum");
-  const cDocsInScopeRef = cDocsRef
+  const cDocsRef = useMemo(() => db.collection("curriculum"), [db]);
+  const cDocsInScopeRef = useMemo(() => (
+    cDocsRef
     .where("unit", "==", unit)
     .where("problem", "==", problem)
-    .where("network","==", user?.network);
+    .where("network","==", user?.network)
+  ), [cDocsRef, problem, unit, user?.network]);
 
   //"MyWork"/"ClassWork"
   const [workDocuments, setWorkDocuments] = useState<PromisedDocumentDocument[]>();
-  const mDocsRef = db.collection("documents");
-  const mDocsInScopeRef = mDocsRef
-    .where("network", "==", user?.network);
+  const mDocsRef = useMemo(() => db.collection("documents"), [db]);
+  const mDocsInScopeRef = useMemo(() => (
+    mDocsRef.where("network", "==", user?.network)
+  ), [mDocsRef, user?.network]);
 
   //------Curriculum Documents--------
   useEffect(() => {
@@ -79,7 +82,7 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
       });
     });
     return () => unsubscribeFromDocs?.();
-  },[]);
+  },[cDocsRef, cDocsInScopeRef]);
 
   // ------MyWork/ClassWork--------
   useEffect(() => {
@@ -114,7 +117,7 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
 
     });
     return () => unsubscribeFromDocs?.();
-  },[]);
+  },[mDocsRef, mDocsInScopeRef]);
 
   return (
     <div className="commented-document-list">

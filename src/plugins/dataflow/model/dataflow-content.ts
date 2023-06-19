@@ -3,7 +3,6 @@ import { reaction } from "mobx";
 import { cloneDeep} from "lodash";
 import stringify from "json-stringify-pretty-compact";
 import { DataflowProgramModel } from "./dataflow-program-model";
-import { createDefaultDataSet } from "./utilities/create-default-data-set";
 import { DEFAULT_DATA_RATE } from "./utilities/node";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { ITileMetadataModel } from "../../../models/tiles/tile-metadata";
@@ -218,11 +217,6 @@ export const DataflowContentModel = TileContentModel
         const tableTileModel = getTileModelById(self, tableId); //get tableTile contents given a tableId
         const tableTileContent = tableTileModel?.content;
         self.sharedModel && sharedModelManager.removeTileSharedModel(tableTileContent, self.sharedModel);
-        //create a dataSet with two attributes with X / Y, link table tile to this dataSet
-        const title = tableTileModel?.title;
-        const newDataSet = createDefaultDataSet(title);
-        const newSharedDataSet = newDataSet && SharedDataSet.create({ providerId: tableId, dataSet: newDataSet });
-        sharedModelManager.addTileSharedModel(tableTileContent, newSharedDataSet);
       }
       else {
         console.warn("DataflowContent.addLinkedTable unable to unlink table");

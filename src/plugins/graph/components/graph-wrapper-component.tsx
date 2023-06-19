@@ -3,20 +3,13 @@ import classNames from "classnames";
 
 import { GraphComponent } from "./graph-component";
 import { ITileProps } from "../../../components/tiles/tile-component";
-import { ToolTitleArea } from "../../../components/tiles/tile-title-area";
-import { EditableTileTitle } from "../../../components/tiles/editable-tile-title";
-import { measureText } from "../../../components/tiles/hooks/use-measure-text";
-import { defaultTileTitleFont } from "../../../components/constants";
+import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { useCurrent } from "../../../hooks/use-current";
 import { IGraphModel } from "../models/graph-model";
 import { useToolbarTileApi } from "../../../components/tiles/hooks/use-toolbar-tile-api";
 import { GraphToolbar } from "./graph-toolbar";
 import { useProviderTileLinking } from "../../../hooks/use-provider-tile-linking";
-import { getTileContentById } from "../../../utilities/mst-utils";
-import { isSharedDataSet, SharedDataSet } from "../../../models/shared/shared-data-set";
-import { getSharedModelManager } from "../../../models/tiles/tile-environment";
-import { getTileSharedModels } from "../../../utilities/shared-data-utils";
 
 import "./graph-wrapper-component.scss";
 
@@ -30,39 +23,8 @@ export const GraphWrapperComponent: React.FC<ITileProps> = (props) => {
   const content = model.content as IGraphModel;
   const toolbarProps = useToolbarTileApi({ id: model.id, enabled, onRegisterTileApi, onUnregisterTileApi });
 
-  const handleTileLinkRequest = (tileId: string) => {
-    if (enabled) {
-      const consumerTile = getTileContentById(model.content, model.id);
-      const sharedModelManager = getSharedModelManager(model);
-      if (sharedModelManager?.isReady) {
-        const existingConsumerDataset = getTileSharedModels(model).find(m => isSharedDataSet(m));
-        if (existingConsumerDataset) {
-          sharedModelManager.removeTileSharedModel(consumerTile, existingConsumerDataset);
-        }
-        const providerDataSet = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, tileId);
-        providerDataSet && sharedModelManager?.addTileSharedModel(consumerTile, providerDataSet);
-      }
-    }
-  };
-
-  const handleTileUnlinkRequest = (tableId: string) => {
-    if (enabled) {
-      const consumerTile = getTileContentById(model.content, model.id);
-      const sharedModelManager = getSharedModelManager(model);
-      if (sharedModelManager?.isReady) {
-        const providerDataSet = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, tableId);
-        providerDataSet && sharedModelManager?.removeTileSharedModel(consumerTile, providerDataSet);
-      }
-    }
-  };
-
-  const actionHandlers = {
-    handleRequestTileLink: handleTileLinkRequest,
-    handleRequestTileUnlink: handleTileUnlinkRequest
-  };
-
   const { isLinkEnabled, showLinkTileDialog } = useProviderTileLinking({
-    actionHandlers, documentId, model, onRequestTilesOfType, onRequestLinkableTiles
+    documentId, model, readOnly, onRequestTilesOfType, onRequestLinkableTiles
   });
 
   useEffect(() => {
@@ -80,10 +42,6 @@ export const GraphWrapperComponent: React.FC<ITileProps> = (props) => {
     return model.title || "";
   };
 
-  const handleTitleChange = (title?: string) => {
-    title && model.setTitle(title);
-  };
-
   return (
     <div className={classNames("graph-wrapper", { "read-only": readOnly })}>
       <GraphToolbar
@@ -97,17 +55,11 @@ export const GraphWrapperComponent: React.FC<ITileProps> = (props) => {
         onLinkTableButtonClick={showLinkTileDialog}
         onRequestTilesOfType={onRequestTilesOfType}
       />
-      <ToolTitleArea>
-        <EditableTileTitle
-          key="drawing-title"
-          size={{width:null, height:null}}
-          scale={scale}
-          getTitle={getTitle}
-          readOnly={readOnly}
-          measureText={(text) => measureText(text, defaultTileTitleFont)}
-          onEndEdit={handleTitleChange}
-       />
-      </ToolTitleArea>
+      <BasicEditableTileTitle
+        model={model}
+        readOnly={readOnly}
+        scale={scale}
+      />
       <GraphComponent tile={model} />
     </div>
   );

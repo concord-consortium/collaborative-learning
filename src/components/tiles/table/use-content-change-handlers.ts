@@ -1,15 +1,13 @@
 import { useCallback } from "react";
+
 import { getTableContentHeight } from "./table-utils";
 import { useCurrent } from "../../../hooks/use-current";
 import { ICase, ICaseCreation, IDataSet } from "../../../models/data/data-set";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
 import { isLinkableValue } from "../../../models/tiles/table/table-model-types";
-import { ITileLinkMetadata } from "../../../models/tiles/tile-link-types";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { uniqueId, uniqueName } from "../../../utilities/js-utils";
 import { TColumn, TRow } from "./table-types";
-import { getTileContentById } from "../../../utilities/mst-utils";
-import { SharedDataSet } from "../../../models/shared/shared-data-set";
 
 export interface IContentChangeHandlers {
   onSetTableTitle: (title: string) => void;
@@ -21,8 +19,6 @@ export interface IContentChangeHandlers {
   onAddRows: (newCases: ICaseCreation[]) => void;
   onUpdateRow: (caseValues: ICase) => void;
   onRemoveRows: (rowIds: string[]) => void;
-  onLinkTile: (tileInfo: ITileLinkMetadata) => void;
-  onUnlinkTile: (tileInfo: ITileLinkMetadata) => void;
 }
 
 interface IProps {
@@ -119,30 +115,7 @@ export const useContentChangeHandlers = ({
     getContent().removeCases(rowIds);
   }, [readOnly, getContent]);
 
-  const linkTile = useCallback((tileInfo: ITileLinkMetadata) => {
-    const consumerTile = getTileContentById(getContent(), tileInfo.id);
-    if (!readOnly && consumerTile) {
-      const sharedModelManager = consumerTile.tileEnv?.sharedModelManager;
-      if (sharedModelManager?.isReady) {
-        const sharedTable = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, modelRef.current.id);
-        sharedTable && sharedModelManager?.addTileSharedModel(consumerTile, sharedTable);
-      }
-    }
-  }, [getContent, readOnly, modelRef]);
-
-  const unlinkTile = useCallback((tileInfo: ITileLinkMetadata) => {
-    const consumerTile = getTileContentById(getContent(), tileInfo.id);
-    if (!readOnly && consumerTile) {
-      const sharedModelManager = consumerTile.tileEnv?.sharedModelManager;
-      if (sharedModelManager?.isReady) {
-        const sharedTable = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, modelRef.current.id);
-        sharedTable && sharedModelManager?.removeTileSharedModel(consumerTile, sharedTable);
-      }
-    }
-  }, [getContent, readOnly, modelRef]);
-
   return { onSetTableTitle: setTableTitle, onSetColumnName: setColumnName, onSetColumnExpressions: setColumnExpressions,
           onAddColumn: addColumn, onRemoveColumn: removeColumn, requestRowHeight,
-          onAddRows: addRows, onUpdateRow: updateRow, onRemoveRows: removeRows,
-          onLinkTile: linkTile, onUnlinkTile: unlinkTile };
+          onAddRows: addRows, onUpdateRow: updateRow, onRemoveRows: removeRows };
 };

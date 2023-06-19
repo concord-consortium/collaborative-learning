@@ -219,8 +219,9 @@ Cypress.Commands.add('collapseWorkspace', () => {
   // cy.get('.divider-container .expand-handle.right').click(); // to ensure workspace is collapsed regardless of initial position
 });
 Cypress.Commands.add('linkTableToGraph', (table, graph) => {
-  cy.get('.primary-workspace .table-title').contains(table).within(() => {
-    cy.get('.link-tile-button').click();
+  cy.get('.primary-workspace .table-title').contains(table).click();
+  cy.get(".primary-workspace").within((workspace) => {
+    cy.get(".table-toolbar .toolbar-button.link-tile-button").click();
   });
   cy.get('.ReactModalPortal').within(() => {
     cy.get('[data-test=link-tile-select]').select(graph);
@@ -228,8 +229,9 @@ Cypress.Commands.add('linkTableToGraph', (table, graph) => {
   });
 });
 Cypress.Commands.add('unlinkTableToGraph', (table, graph) => {
-  cy.get('.primary-workspace .table-title').contains(table).within(() => {
-    cy.get('.link-tile-button').click();
+  cy.get('.primary-workspace .table-title').contains(table).click();
+  cy.get(".primary-workspace").within((workspace) => {
+    cy.get(".table-toolbar .toolbar-button.link-tile-button").click();
   });
   cy.get('.ReactModalPortal').within(() => {
     cy.get('[data-test=link-tile-select]').select(graph);

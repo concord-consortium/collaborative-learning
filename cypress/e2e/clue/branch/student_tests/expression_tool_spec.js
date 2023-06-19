@@ -39,19 +39,39 @@ context('Expression Tool Tile', function () {
       exp.getTitleInput().type("new title{enter}");
       exp.getTileTitle().should("contain", "(new title)");
     });
-    // it("expression can be changed and re-renders", () => {
-    //   TODO - figure out how to type into math field
-
-    //   The below finds the toggle div, but it is not visible in cy playback
-    //   and causes an error when we chain a click to it.
-    //   exp.getMathKeyboardToggle().should("exist");
-
-    //   The below tests a change, but does not follow a genuine user path
-    //   exp.getMathField().invoke("val", "a=\\theta r^3");
-    //   exp.getMathFieldMath().should("contain", "θ");
-
-    //   see: https://github.com/arnog/mathlive/issues/830
-    // });
+    it("should accept basic keyboard input", () => {
+      // Can now perform keyboard input
+      // but thus far cannot get sequences like {del} to work in test
+      exp.getMathField().eq(0).click({force: true});
+      exp.getMathField().eq(0).type("hi", {force: true});
+      exp.getMathField().eq(0).should("have.value", "hia=\\pi r^2");
+      cy.wait(2000);
+    });
+    it("expression can be changed and re-renders", () => {
+      //  The below tests a change, but does not follow a genuine user path
+      //   see: https://github.com/arnog/mathlive/issues/830
+      exp.getMathField().invoke("val", "a=\\theta r^3");
+      exp.getMathFieldMath().should("contain", "θ");
+    });
+    it("can create a mixed fraction with the button", () => {
+      exp.clearValue();
+      exp.getMathField().eq(0).click({force: true});
+      exp.getMixedFractionButton().eq(0).click();
+      exp.getMathField().eq(0).should("have.value", "\\placeholder{}\\frac{\\placeholder{}}{\\placeholder{}}");
+    });
+    it("can add an empty division expression when division button clicked in empty expression", () => {
+      exp.clearValue();
+      exp.getMathField().eq(0).click({force: true});
+      exp.getDivisionButton().eq(0).click();
+      exp.getMathField().eq(0).should("have.value", "\\placeholder{}\\div\\placeholder{}");
+    });
+    it("can add a division sign and a placeholder when division button clicked following existing value", () => {
+      exp.clearValue();
+      exp.getMathField().eq(0).click({force: true});
+      exp.getMathField().eq(0).invoke("val", "123");
+      exp.getDivisionButton().eq(0).click();
+      exp.getMathField().eq(0).should("have.value", "123\\div\\placeholder{}");
+    });
     it("should name new expressions with an incrementing id", () => {
       clueCanvas.addTile("expression");
       cy.contains("(Eq. 1)").should("exist");
@@ -62,6 +82,38 @@ context('Expression Tool Tile', function () {
       exp.getMathField().eq(1).click({force: true});
       exp.getExpressionTile().eq(1).should("have.class", "selected");
       exp.getExpressionTile().eq(0).should("not.have.class", "selected");
+    });
+    it("should have a toggleable toolbar", () => {
+      exp.getExpressionToolbar().eq(1).should("be.visible");
+      exp.getExpressionToolbar().eq(0).should("not.be.visible");
+      exp.getMathField().eq(0).click({force: true});
+      exp.getExpressionToolbar().eq(0).should("be.visible");
+      exp.getExpressionToolbar().eq(1).should("not.be.visible");
+    });
+    it("delete expression button deletes the whole expression", () => {
+      exp.getMathField().eq(0).click({force: true});
+      exp.getDeleteExpressionButton().eq(0).click();
+      exp.getMathFieldMath().eq(0).should("not.contain.text");
+      exp.getMathField().should("not.have.value", "a=\\pi r^2");
+    });
+    it("adds placeholder to negative sign", () => {
+      exp.getDeleteExpressionButton().eq(0).click();
+      exp.getMathField().eq(0).click({force: true});
+      exp.getMathField().eq(0).type("-", {force: true});
+      exp.getMathField().eq(0).should("have.value", "-\\placeholder{}");
+    });
+    it("adds placeholders to multiplication symbol", () => {
+      exp.getDeleteExpressionButton().eq(0).click();
+      // Normally typing "*" will add a \cdot to the latex value. This happens because
+      // of some special handling in the mathField. Apparently when cypress types
+      // characters this handling doesn't happen. So instead we use MathLives
+      // executeCommand to insert the \cdot directly
+      exp.getMathField().then($mf => {
+        const mf = $mf[0];
+        mf.executeCommand(["insert", "\\cdot"]);
+      });
+      exp.getMathField().eq(0).should("have.value", "\\placeholder{}\\cdot\\placeholder{}");
+      cy.wait(2000);
     });
   });
 });

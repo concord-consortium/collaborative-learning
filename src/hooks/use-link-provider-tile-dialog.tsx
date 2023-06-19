@@ -54,11 +54,11 @@ const Content: React.FC<IContentProps>
 interface IProps {
   linkableTiles: ITileLinkMetadata[];
   model: ITileModel;
-  handleRequestTileLink: ((tableId: string) => void) | undefined;
-  handleRequestTileUnlink: ((tableId: string) => void) | undefined;
+  onLinkTile: (tileInfo: ITileLinkMetadata) => void;
+  onUnlinkTile: (tileInfo: ITileLinkMetadata) => void;
 }
 export const useLinkProviderTileDialog = ({
-  linkableTiles, model, handleRequestTileLink, handleRequestTileUnlink
+  linkableTiles, model, onLinkTile, onUnlinkTile
 }: IProps) => {
   const tileTitle = model.title;
   const [selectValue, setSelectValue] = useState("");
@@ -66,14 +66,15 @@ export const useLinkProviderTileDialog = ({
     const tileInfo = linkableTiles.find(tile => tile.id === selectValue);
     if (tileInfo) {
       if (isLinkedToTile(model, tileInfo.id)) {
-        handleRequestTileUnlink?.(tileInfo.id);
+        onUnlinkTile?.(tileInfo);
       } else {
-        handleRequestTileLink?.(tileInfo.id);
+        onLinkTile?.(tileInfo);
       }
     }
   };
   const unlinkedTiles = linkableTiles.filter(tileInfo => !isLinkedToTile(model, tileInfo.id));
-  const linkedTiles = linkableTiles.filter(tileInfo => isLinkedToTile(model, tileInfo.id) && tileInfo.id !== model.id);
+  const linkedTiles =
+    linkableTiles.filter(tileInfo => isLinkedToTile(model, tileInfo.id) && tileInfo.id !== model.id);
   const [showModal, hideModal] = useCustomModal({
     className: "link-tile",
     Icon: LinkGraphIcon,

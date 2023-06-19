@@ -4,6 +4,7 @@ import classNames from "classnames";
 
 import DeleteSelectedIconSvg from "../../../assets/icons/delete/delete-selection-icon.svg";
 import SetExpressionIconSvg from "../../../clue/assets/icons/table/set-expression-icon.svg";
+import LinkGraphIcon from "../../../clue/assets/icons/table/link-graph-icon.svg";
 import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
 
 import "./table-toolbar.scss";
@@ -11,7 +12,7 @@ import "./table-toolbar.scss";
 interface ITableButtonProps {
   className?: string;
   icon: any;
-  onClick: () => void;
+  onClick: (e: React.MouseEvent) => void;
   tooltipOptions: TooltipProps;
 }
 const TableButton = ({ className, icon, onClick, tooltipOptions}: ITableButtonProps) => {
@@ -48,3 +49,25 @@ export const SetExpressionButton = ({ onClick }: ISetExpressionButtonProps) => (
     tooltipOptions={{ title: "Set expression" }}
   />
 );
+
+interface ILinkTableButtonProps {
+  isEnabled?: boolean;
+  getLinkIndex: () => number;
+  onClick?: () => void;
+}
+export const LinkTileButton = ({ isEnabled, getLinkIndex, onClick }: ILinkTableButtonProps) => {
+  const linkIndex = getLinkIndex();
+  const classes = classNames("link-tile-button", `link-color-${linkIndex}`, { disabled: !isEnabled });
+  const handleClick = (e: React.MouseEvent) => {
+    isEnabled && onClick?.();
+    e.stopPropagation();
+  };
+  return (
+    <TableButton
+      className={classes}
+      icon={<LinkGraphIcon />}
+      onClick={handleClick}
+      tooltipOptions={{ title: "Link table" }}
+    />
+  );
+};

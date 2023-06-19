@@ -1,13 +1,11 @@
 import Canvas from '../../../../support/elements/common/Canvas';
 import ClueCanvas from '../../../../support/elements/clue/cCanvas';
 import TextToolTile from '../../../../support/elements/clue/TextToolTile';
-import DrawToolTile from '../../../../support/elements/clue/DrawToolTile';
 import DiagramToolTile from '../../../../support/elements/clue/DiagramToolTile';
 
 const canvas = new Canvas;
 const clueCanvas = new ClueCanvas;
 const textToolTile = new TextToolTile;
-const drawToolTile = new DrawToolTile;
 const diagramToolTile = new DiagramToolTile;
 
 context('Shared Variables', function () {

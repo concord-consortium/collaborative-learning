@@ -5,7 +5,7 @@ import stringify from "json-stringify-pretty-compact";
 import {AxisPlace} from "../axis/axis-types";
 import {AxisModelUnion, EmptyAxisModel, IAxisModelUnion, NumericAxisModel} from "../axis/models/axis-model";
 import {
-  GraphAttrRole, hoverRadiusFactor, PlotType, PlotTypes, kGraphTileType,
+  GraphAttrRole, hoverRadiusFactor, kDefaultNumericAxisBounds, kGraphTileType, PlotType, PlotTypes,
   pointRadiusLogBase, pointRadiusMax, pointRadiusMin, pointRadiusSelectionAddend
 } from "../graph-types";
 import {DataConfigurationModel} from "./data-configuration-model";
@@ -188,12 +188,13 @@ export interface IGraphModel extends Instance<typeof GraphModel> {}
 export interface IGraphModelSnapshot extends SnapshotIn<typeof GraphModel> {}
 
 export function createGraphModel(snap?: IGraphModelSnapshot, appConfig?: AppConfigModelType) {
+  const [min, max] = kDefaultNumericAxisBounds;
   const emptyPlotIsNumeric = appConfig?.getSetting("emptyPlotIsNumeric", "graph");
   const bottomAxisModel = emptyPlotIsNumeric
-                            ? NumericAxisModel.create({place: "bottom", min: -10, max: 11})
+                            ? NumericAxisModel.create({place: "bottom", min, max})
                             : EmptyAxisModel.create({place: "bottom"});
   const leftAxisModel = emptyPlotIsNumeric
-                          ? NumericAxisModel.create({place: "left", min: -10, max: 11})
+                          ? NumericAxisModel.create({place: "left", min, max})
                           : EmptyAxisModel.create({place: "left"});
   return GraphModel.create({
     axes: {

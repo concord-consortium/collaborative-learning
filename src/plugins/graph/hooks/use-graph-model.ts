@@ -16,7 +16,6 @@ interface IProps {
 export function useGraphModel(props: IProps) {
   const {graphModel, enableAnimation, dotsRef, instanceId} = props,
     dataConfig = graphModel.config,
-    yAxisModel = graphModel.getAxis('left'),
     yAttrID = graphModel.getAttributeID('y'),
     dataset = useDataSetContext();
 
@@ -44,13 +43,14 @@ export function useGraphModel(props: IProps) {
         startAnimation(enableAnimation);
         // In case the y-values have changed we rescale
         if (newPlotType === 'scatterPlot') {
+          const yAxisModel = graphModel.getAxis('left');
           const values = dataConfig.caseDataArray.map(({ caseID }) => dataset?.getNumeric(caseID, yAttrID)) as number[];
           setNiceDomain(values || [], yAxisModel as INumericAxisModel);
         }
       }
     });
     return () => disposer();
-  }, [dataConfig.caseDataArray, dataset, enableAnimation, graphModel, yAttrID, yAxisModel]);
+  }, [dataConfig.caseDataArray, dataset, enableAnimation, graphModel, yAttrID]);
 
   // respond to point properties change
   useEffect(function respondToGraphPointVisualAction() {

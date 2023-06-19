@@ -1,15 +1,50 @@
 @import "../../components/vars.sass";
+@import "../../components/mixins.sass";
 
 .data-card-toolbar {
-  position: absolute;
-  display:flex;
-  border: $toolbar-border;
-  border-radius: 0 0 $toolbar-border-radius $toolbar-border-radius;
-  z-index: $toolbar-z-index;
-  background-color: $workspace-teal-light-9;
+  @include tile-toolbar;
 
+  display:flex;
   &.disabled {
     display: none;
+  }
+
+  .toolbar-button {
+    position: relative;
+    // These are button elements so we have to disable default button styles
+    // of border, padding, and display
+    border: 0;    
+    padding: 0;
+    display: block;
+    user-select: none;
+    width: $toolbar-button-width;
+    height: $toolbar-button-height;
+    cursor: pointer;
+    background-color: $workspace-teal-light-9;
+
+    &:hover {
+      background-color: $workspace-teal-light-6;
+    }
+
+    &:active {
+      background-color: $workspace-teal-light-4;
+    }
+
+    &.disabled {
+      opacity: 35%;
+      pointer-events: none;
+    }
+    &.link-tile-button {
+      padding-top: 4px;
+    }
+  }
+
+  .toolbar-button:first-child {
+    border-bottom-left-radius: 3px;
+  }
+
+  .toolbar-button:last-child {
+    border-bottom-right-radius: 3px;
   }
 
   .value-actions-buttons {
@@ -53,16 +88,11 @@
 
     .delete-value-button {
       opacity: 1;
-      width: 24px;
-      &:hover svg {
-        background-color:$workspace-teal-light-6;
-      }
-    }
-
-    .delete-value-button {
-      transform: translate(-13px, -4px);
       svg path {
         fill: $charcoal-dark-1;
+      }
+      &:hover svg {
+        background-color:$workspace-teal-light-6;
       }
     }
     &.value-actions-disabled {
@@ -72,15 +102,24 @@
   }
 
   .card-actions-buttons {
+    display: flex;
+    flex-direction: row;
     .duplicate-card-button {
       opacity: 1;
-      transform: translate(-12px, 0px);
       svg {
         stroke: transparent;
       }
       &:hover svg {
         background-color:$workspace-teal-light-6;
       }
+    }
+    .link-tile-button {
+      svg {
+        stroke: transparent;
+      }
+      &:hover svg {
+        background-color:$workspace-teal-light-6;
+      }      
     }
     &.card-actions-disabled {
       opacity: 0.35;

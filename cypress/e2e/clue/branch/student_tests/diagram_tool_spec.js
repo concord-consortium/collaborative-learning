@@ -47,6 +47,13 @@ context('Diagram Tool Tile', function () {
       hideNavigatorButton().should("exist");
       diagramDeleteButton().should("exist").should("be.disabled");
 
+      // Title
+      const newName = "Test Diagram";
+      diagramTile.getTileTitleText().should("contain", "Diagram 1");
+      diagramTile.getTileTitleContainer().click();
+      diagramTile.getTileTitleContainer().type(newName + '{enter}');
+      diagramTile.getTileTitleText().should("contain", newName);
+
       // Navigator can be hidden and shown
       const navigator = () => diagramTile.getDiagramTile().find(".react-flow__minimap");
       navigator().should("exist");
@@ -126,7 +133,7 @@ context('Diagram Tool Tile', function () {
 
       // Fit view
       diagramTile.getDiagramToolbarButton("button-fit-view").click();
-      diagramTile.getVariableCard().parent().should("have.attr", "style").and("contain", "scale(2)");
+      diagramTile.getVariableCard().parent().parent().should("have.attr", "style").and("contain", "scale(2)");
 
       // Delete button works
       diagramDeleteButton().should("be.enabled").click();
@@ -171,6 +178,7 @@ context('Diagram Tool Tile', function () {
 
       // New variable dialog works
       const vName = "variable-name";
+      const vNameProcessed = "variablename";
       const vValue = "1.2";
       const vUnit = "meter";
       drawTile.getDrawTile().click();
@@ -182,7 +190,7 @@ context('Diagram Tool Tile', function () {
       drawTile.getVariableChip().should("not.exist");
       dialogOkButton().click();
       drawTile.getVariableChip().should("exist");
-      drawTile.getVariableChip().should("contain", vName);
+      drawTile.getVariableChip().should("contain", vNameProcessed);
       drawTile.getVariableChip().should("contain", vValue);
       drawTile.getVariableChip().should("contain", vUnit);
 

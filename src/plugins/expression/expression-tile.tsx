@@ -4,11 +4,16 @@ import { onSnapshot } from "mobx-state-tree";
 import "mathlive"; // separate static import of library for initialization to run
 // eslint-disable-next-line no-duplicate-imports
 import type { MathfieldElementAttributes, MathfieldElement } from "mathlive";
+import { ComputeEngine, version } from "@concord-consortium/compute-engine";
 import { ITileProps } from "../../components/tiles/tile-component";
 import { ExpressionContentModelType } from "./expression-content";
 import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
 import { replaceKeyBinding } from "./expression-tile-utils";
 import { useUIStore } from "../../hooks/use-stores";
+import { useToolbarTileApi } from "../../components/tiles/hooks/use-toolbar-tile-api";
+import { ExpressionToolbar } from "./expression-toolbar";
+import { findMissingElements, replaceMissingElements } from "./expression-cortex-utils";
+
 import "./expression-tile.scss";
 
 type CustomElement<T> = Partial<T & DOMAttributes<T>>;
@@ -19,57 +24,95 @@ declare global {
     }
   }
 }
+console.log("ComputeEngine version", version);
+
+const computeEngine = new ComputeEngine();
+computeEngine.latexOptions = { preserveLatex: true };
+computeEngine.jsonSerializationOptions = { metadata: ['latex'] };
+
+function replaceLatex(mfLatex: string) {
+  // parse the latex, replace missing elements with placeholders
+  const mathJSON = computeEngine.latexSyntax.parse(mfLatex);
+  const missingElements = findMissingElements(mathJSON);
+  return replaceMissingElements(mfLatex, missingElements);
+}
 
 const undoKeys = ["cmd+z", "[Undo]", "ctrl+z"];
 
 export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) => {
-  const content = props.model.content as ExpressionContentModelType;
+  const { onRegisterTileApi, onRequestUniqueTitle, onUnregisterTileApi,
+    model, readOnly, documentContent, tileElt, scale } = props;
+  const content = model.content as ExpressionContentModelType;
   const mf = useRef<MathfieldElement>(null);
   const trackedCursorPos = useRef<number>(0);
   const ui = useUIStore();
 
-  if(mf.current && ui) {
-    mf.current.addEventListener("focus", () => ui.setSelectedTileId(props.model.id));
-  }
-
-  if (mf.current?.keybindings){
+  useEffect(() => {
+    mf.current?.addEventListener("focus", () => ui.setSelectedTileId(model.id));
     undoKeys.forEach((key: string) => {
-      mf.current && replaceKeyBinding(mf.current.keybindings, key, "");
+      mf.current?.keybindings && replaceKeyBinding(mf.current.keybindings, key, "");
     });
-  }
+    if (mf.current) mf.current.inlineShortcuts = {};
+  }, [model.id, ui]);
 
   useEffect(() => {
-    // when we change model via undo button, we need to update mathfield
+    // model has changed beneath UI - update mathfield, yet restore cursor position
     const disposer = onSnapshot((content as any), () => {
       if (mf.current?.getValue() === content.latexStr) return;
-      mf.current?.setValue(content.latexStr, {suppressChangeNotifications: true});
-      if (mf.current?.position) mf.current.position = trackedCursorPos.current - 1;
+      mf.current?.setValue(content.latexStr, {silenceNotifications: true});
+      if (!readOnly && mf.current) mf.current.position = trackedCursorPos.current - 1;
     });
     return () => disposer();
-  }, [content]);
+  }, [content, readOnly]);
 
-  const handleChange = (e: FormEvent<MathfieldElementAttributes>) => {
+  const handleMathfieldInput = (e: FormEvent<MathfieldElementAttributes>) => {
+    const mfLatex = (e.target as MathfieldElement).value;
+    const replacedLatex = replaceLatex(mfLatex);
     trackedCursorPos.current =  mf.current?.position || 0;
-    content.setLatexStr((e.target as any).value);
+    if (mf.current?.value){
+      mf.current.value = replacedLatex;
+    }
+    if (mf.current && trackedCursorPos.current != null){
+      mf.current.position = trackedCursorPos?.current; //restore cursor position
+    }
+    content.setLatexStr(replacedLatex);
+  };
+
+  const toolbarProps = useToolbarTileApi({
+    id: model.id,
+    enabled: !readOnly,
+    onRegisterTileApi,
+    onUnregisterTileApi
+  });
+
+  const mathfieldAttributes = {
+    ref: mf,
+    value: content.latexStr,
+    onInput: !readOnly ? handleMathfieldInput : undefined,
+    readOnly: readOnly ? "true" : undefined,
   };
 
   return (
     <div className="expression-tool">
+      <ExpressionToolbar
+        model={model}
+        mf={mf}
+        trackedCursorPos={trackedCursorPos}
+        documentContent={documentContent}
+        tileElt={tileElt}
+        scale={scale}
+        {...toolbarProps}
+      />
+
       <div className="expression-title-area">
         <CustomEditableTileTitle
-          model={props.model}
-          onRequestUniqueTitle={props.onRequestUniqueTitle}
-          readOnly={props.readOnly}
+          model={model}
+          onRequestUniqueTitle={onRequestUniqueTitle}
+          readOnly={readOnly}
         />
       </div>
       <div className="expression-math-area">
-        <math-field
-          ref={mf}
-          value={content.latexStr}
-          onInput={handleChange}
-          // MathLive only interprets undefined as false
-          readOnly={props.readOnly === true ? true : undefined}
-        />
+        <math-field {...mathfieldAttributes} />
       </div>
     </div>
   );

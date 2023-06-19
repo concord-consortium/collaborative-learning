@@ -2,20 +2,24 @@ import { observer } from "mobx-react";
 import React from "react";
 import ReactDOM from "react-dom";
 
-import { DeleteSelectedButton, SetExpressionButton } from "./table-toolbar-buttons";
+import { DeleteSelectedButton, LinkTileButton, SetExpressionButton } from "./table-toolbar-buttons";
 import { useSettingFromStores } from "../../../hooks/use-stores";
 import { IFloatingToolbarProps, useFloatingToolbarLocation } from "../hooks/use-floating-toolbar-location";
 
 import "./table-toolbar.scss";
 
-const defaultButtons = ["set-expression", "delete"];
+const defaultButtons = ["set-expression", "link-tile", "delete"];
 
 interface IProps extends IFloatingToolbarProps {
+  isLinkEnabled: boolean;
   deleteSelected: () => void;
+  getLinkIndex: () => number;
   onSetExpression: () => void;
+  showLinkDialog?: () => void;
 }
 export const TableToolbar: React.FC<IProps> = observer(({
-  deleteSelected, documentContent, onIsEnabled, onSetExpression, ...others
+  documentContent, isLinkEnabled, deleteSelected, getLinkIndex, onIsEnabled, 
+  onSetExpression, showLinkDialog, ...others
 }) => {
   const enabled = onIsEnabled();
   const location = useFloatingToolbarLocation({
@@ -35,6 +39,13 @@ export const TableToolbar: React.FC<IProps> = observer(({
         return <SetExpressionButton key={toolName} onClick={onSetExpression} />;
       case "delete":
         return <DeleteSelectedButton key={toolName} onClick={deleteSelected} />;
+      case "link-tile":
+        return <LinkTileButton
+                 key={toolName}
+                 isEnabled={isLinkEnabled}
+                 getLinkIndex={getLinkIndex}
+                 onClick={showLinkDialog}
+               />;
     }
   };
 
