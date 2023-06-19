@@ -9,6 +9,9 @@ import { LogEventName } from "../../lib/logger-types";
 import { ITileModel } from "../tiles/tile-model";
 import { ENavTab } from "../view/nav-tabs";
 import { buildSectionPath, getCurriculumMetadata } from "../../../functions/src/shared";
+import { LearningLogDocument, LearningLogPublication, PersonalDocument,
+  PersonalPublication, PlanningDocument, ProblemDocument,
+  ProblemPublication, SupportPublication } from "../document/document-types";
 
 type BooleanDialogResolver = (value: boolean | PromiseLike<boolean>) => void;
 type StringDialogResolver = (value: string | PromiseLike<string>) => void;
@@ -273,28 +276,20 @@ export const UIModel = types
      */
     // FIXME: change to Resource(s) instead of Left
     openDocumentOnLeft(doc: DocumentModelType) {
-      let navTab = '';
-      const myWorkTypes = ["problem", "planning", "learningLog", "personal"];
-      const classWorkTypes = ["publication", "learningLogPublication", "personalPublication", "supportPublication"];
-      for (let i = 0; i < 4; i++){
-        if (doc.type === myWorkTypes[i]) {
-          navTab = ENavTab.kMyWork;
-        }
-        if (doc.type === classWorkTypes[i]) {
-          navTab = ENavTab.kClassWork;
-        }
-      }
+      const navTab = getNavTabOfDocument(doc.type)  || "";
 
-      let subTab = '';
+      let subTab = "";
       if (navTab === ENavTab.kClassWork) {
-        if (doc.type === "learningLogPublication") {
+        if (doc.type === LearningLogPublication) {
+          // FIXME: if the subTabs are renamed in the unit then this won't
+          // work
           subTab = "Learning Logs";
         } else {
           subTab = "Workspaces";
         }
       }
       if (navTab === ENavTab.kMyWork) {
-        if (doc.type === "learningLog") {
+        if (doc.type === LearningLogDocument) {
           subTab = "Learning Log";
         } else {
           subTab = "Workspaces";
@@ -308,14 +303,13 @@ export const UIModel = types
     },
 
     openCurriculumDocOnLeft(docPath: string) {
-      const {facet,section} = getCurriculumMetadata(docPath) || {};
-      if (!section) {
-        console.warn("Can't find section in curriculum documentPath", docPath);
+      const {navTab, subTab} = getTabsOfCurriculumDoc(docPath);
+      if (!subTab) {
+        console.warn("Can't find subTab in curriculum documentPath", docPath);
         return;
       }
-      const navTab = facet === "guide" ? ENavTab.kTeacherGuide : ENavTab.kProblems;
       self.setActiveNavTab(navTab);
-      self.setOpenSubTab(navTab, section);
+      self.setOpenSubTab(navTab, subTab);
     }
 }));
 
@@ -329,3 +323,30 @@ export function selectTile(ui: UIModelType, model: ITileModel, isExtending?: boo
 // Sometimes we get multiple selection events for a single click.
 // We only want to respond once per such burst of selection events.
 export const debouncedSelectTile = debounce(selectTile, 50);
+
+// Maybe this should return the navTab and subTab
+export function getTabsOfCurriculumDoc(docPath: string) {
+  const {facet,section} = getCurriculumMetadata(docPath) || {};
+  return {
+    navTab: facet === "guide" ? ENavTab.kTeacherGuide : ENavTab.kProblems,
+    subTab: section
+  };
+}
+
+const docTypeToNavTab: Record<string, ENavTab | undefined> = {
+  // MyWork
+  [ProblemDocument]: ENavTab.kMyWork,
+  [PlanningDocument]: ENavTab.kMyWork,
+  [LearningLogDocument]: ENavTab.kMyWork,
+  [PersonalDocument]: ENavTab.kMyWork,
+
+  // ClassWork
+  [ProblemPublication]: ENavTab.kClassWork,
+  [LearningLogPublication]: ENavTab.kClassWork,
+  [PersonalPublication]: ENavTab.kClassWork,
+  [SupportPublication]: ENavTab.kClassWork,
+};
+
+export function getNavTabOfDocument(docType: string) {
+  return docTypeToNavTab[docType];
+}

@@ -4,13 +4,13 @@ import { useFirestore } from "../../hooks/firestore-hooks";
 import { CurriculumDocument, DocumentDocument } from "../../lib/firestore-schema";
 import { getSectionTitle } from "../../models/curriculum/section";
 import { UserModelType } from "../../models/stores/user";
+import { getProblemOrdinal } from "../../models/stores/stores";
+import { getNavTabOfDocument, getTabsOfCurriculumDoc } from "../../models/stores/ui";
 import { DocumentModelType } from "../../models/document/document";
 import { useDocumentCaption } from "../thumbnail/decorated-document-thumbnail-item";
-import { ENavTab } from "../../models/view/nav-tabs";
 import DocumentIcon from "../../assets/icons/document-icon.svg";
 
 import "./commented-documents.scss";
-import { getProblemOrdinal } from "../../models/stores/stores";
 
 interface IProps {
   user?: UserModelType
@@ -43,7 +43,7 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
     .where("network","==", user?.network);
 
   //"MyWork"/"ClassWork"
-  const [myWorkDocuments, setMyWorkDocuments] = useState<PromisedDocumentDocument[]>();
+  const [workDocuments, setWorkDocuments] = useState<PromisedDocumentDocument[]>();
   const mDocsRef = db.collection("documents");
   const mDocsInScopeRef = mDocsRef
     .where("network", "==", user?.network);
@@ -109,7 +109,7 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
       }
 
       Promise.all(promiseArr).then(()=>{
-        setMyWorkDocuments(commentedDocs);
+        setWorkDocuments(commentedDocs);
       });
 
     });
@@ -121,17 +121,7 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
       {
         docsCommentedOn &&
         (docsCommentedOn).map((doc: PromisedCurriculumDocument, index:number) => {
-          // TODO: the navTab is used both in openCurriculumDocOnLeft and here
-          // to style the item in the list. So we should move this logic into a helper
-          // method in the ui store so it can be used by both places.
-          let navTab: string;
-          if (doc.id?.includes("guide")){
-            navTab = ENavTab.kTeacherGuide;
-          }
-          else {
-            navTab = ENavTab.kProblems;
-          }
-          // end of stuff to move
+          const {navTab} = getTabsOfCurriculumDoc(doc.path);
           return (
             <div
               className={`document-box ${navTab}`}
@@ -158,13 +148,13 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
         })
       }
       {
-        myWorkDocuments &&
-        (myWorkDocuments).map((doc: PromisedDocumentDocument, index: number) =>{
+        workDocuments &&
+        (workDocuments).map((doc: PromisedDocumentDocument, index: number) =>{
           const sectionDoc =  store.documents.getDocument(doc.key);
           const networkDoc = store.networkDocuments.getDocument(doc.key);
           if (sectionDoc){
             return (
-              <MyWorkDocuments
+              <WorkDocumentItem
                 key={index}
                 doc={doc}
                 index={index}
@@ -176,7 +166,7 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
           }
           if (networkDoc){
             return (
-              <MyWorkDocuments
+              <WorkDocumentItem
                 key={index}
                 doc={doc}
                 index={index}
@@ -202,23 +192,10 @@ interface JProps {
 }
 
 // This is rendering a single document item in the commented document list
-export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionOrNetworkDoc, isNetworkDoc, handleDocView}) => {
+export const WorkDocumentItem: React.FC<JProps> = ({doc, index, sectionOrNetworkDoc, isNetworkDoc, handleDocView}) => {
   const ui = useUIStore();
-  // TODO: we need the navTab to style the item. The navTab is also computed by
-  // openDocumentOnLeft. So we could move this logic in the ui store as a helper method so it
-  // can be used here as well as by openDocumentOnLeft.
-  let navTab = '';
-  const myWorkTypes = ["problem", "planning", "learningLog", "personal"];
-  const classWorkTypes = ["publication", "learningLogPublication", "personalPublication", "supportPublication"];
-  for (let i = 0; i < 4; i++){
-    if (doc.type === myWorkTypes[i]){
-      navTab = ENavTab.kMyWork;
-    }
-    if (doc.type === classWorkTypes[i]){
-      navTab = ENavTab.kClassWork;
-    }
-  }
-  // end of stuff to move
+  // We need the navTab to style the item.
+  const navTab = getNavTabOfDocument(doc.type);
   const title =  useDocumentCaption(sectionOrNetworkDoc);
 
   return (
