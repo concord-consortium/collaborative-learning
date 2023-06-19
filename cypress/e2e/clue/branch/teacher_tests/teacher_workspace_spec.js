@@ -88,7 +88,7 @@ context('Teacher Workspace', () => {
     it('verify teacher guide', () => {
       cy.get('.top-tab.tab-teacher-guide').should('exist').click({force:true});
       cy.get('.prob-tab.teacher-guide').should('exist').and('have.length', 4).each(function (subTab, index, subTabList) {
-        const teacherGuideSubTabs = ["Launch", "Explore", "Summarize"];
+        const teacherGuideSubTabs = ["Launch", "Explore", "Summarize", "Unit Plan"];
         cy.wrap(subTab).text().should('contain', teacherGuideSubTabs[index]);
       });
     });
