@@ -101,8 +101,8 @@ export function getTabsToDisplay(stores: IBaseStores) {
   } = stores;
 
   return isTeacher
-    ? navTabSpecs.tabSpecs.filter(t => !t.teacherOnly)
-    : navTabSpecs.tabSpecs.filter(t => (t.tab !== "teacher-guide") || teacherGuide);
+    ? navTabSpecs.tabSpecs.filter(t => (t.tab !== "teacher-guide") || teacherGuide)
+    : navTabSpecs.tabSpecs.filter(t => !t.teacherOnly);
 }
 
 export const setUnitAndProblem = async (stores: IStores, unitId: string | undefined, problemOrdinal?: string) => {
