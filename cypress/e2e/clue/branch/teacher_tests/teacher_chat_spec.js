@@ -205,18 +205,6 @@ context('Chat Panel', () => {
       // tile comment
       chatPanel.addCommentAndVerify("This is tile comment for problems-section now-what-subsection");
     });
-    it.skip("verify chat is available on Teacher Guide section - Overview tab", () => {
-      cy.openTopTab("teacher-guide");
-      cy.openProblemSection('Overview');
-      cy.wait(2000);
-      // document comment
-      chatPanel.addCommentAndVerify("This is document comment for teacher-guide-section overview-subsection");
-      // click first tile
-      cy.clickProblemResourceTile('overview');
-      cy.wait(2000);
-      // tile comment
-      chatPanel.addCommentAndVerify("This is tile comment for teacher-guide-section overview-subsection");
-    });
     it("verify chat is available on Teacher Guide section - Launch tab", () => {
       cy.openTopTab("teacher-guide");
       cy.openProblemSection('Launch');
