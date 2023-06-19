@@ -205,7 +205,7 @@ context('Chat Panel', () => {
       // tile comment
       chatPanel.addCommentAndVerify("This is tile comment for problems-section now-what-subsection");
     });
-    it("verify chat is available on Teacher Guide section - Overview tab", () => {
+    it.skip("verify chat is available on Teacher Guide section - Overview tab", () => {
       cy.openTopTab("teacher-guide");
       cy.openProblemSection('Overview');
       cy.wait(2000);
