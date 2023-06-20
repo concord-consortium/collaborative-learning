@@ -1,8 +1,7 @@
 import React from "react";
 import { Line } from "react-chartjs-2";
 import { ChartOptions, ChartData, ChartDataSets } from "chart.js";
-import { MAX_NODE_VALUES } from "../components/dataflow-program";
-import { NodePlotColor } from "../model/utilities/node";
+import { kMaxNodeValues, NodePlotColor } from "../model/utilities/node";
 import "./dataflow-node.scss";
 
 interface INodePlotProps {
@@ -104,7 +103,7 @@ function lineData(node: any) {
   stepY = (maxY(node) - minY(node)) / 2;
 
   const chartData: ChartData = {
-    labels: new Array(MAX_NODE_VALUES).fill(undefined).map((val,idx) => idx),
+    labels: new Array(kMaxNodeValues).fill(undefined).map((val,idx) => idx),
     datasets: chartDataSets
   };
 

@@ -3,7 +3,7 @@ import { when } from "mobx";
 import { createDiagramContent, defaultDiagramContent,
   DiagramContentModel, DiagramContentModelType } from "./diagram-content";
 import { SharedModelType } from "../../models/shared/shared-model";
-import { ISharedModelManager } from "../../models/shared/shared-model-manager";
+import { ISharedModelManager, SharedModelUnion } from "../../models/shared/shared-model-manager";
 import { SharedVariables, SharedVariablesType } from "../shared-variables/shared-variables";
 
 const TestContainer = types.model("TestContainer", {
@@ -27,6 +27,10 @@ const makeSharedModelManager = (variables?: SharedVariablesType): ISharedModelMa
       // ignore this for now
     },
     getTileSharedModels(tileContentModel: IAnyStateTreeNode): SharedModelType[] {
+      return variables ? [variables] : [];
+    },
+    getTileSharedModelsByType(tileContentModel: IAnyStateTreeNode, modelType: typeof SharedModelUnion):
+      SharedModelType[] {
       return variables ? [variables] : [];
     },
     getSharedModelDragDataForTiles(tileIds: string[]) {
