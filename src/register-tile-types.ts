@@ -25,6 +25,10 @@ const gTileRegistration: Record<string, () => void> = {
   "Graph": () => Promise.all([
     import(/* webpackChunkName: "Graph" */"./plugins/graph/graph-registration"),
     import(/* webpackChunkName: "SharedDataSet" */"./models/shared/shared-data-set-registration")
+  ]),
+  "Simulator": () => Promise.all([
+    import(/* webpackChunkName: "Simulator" */"./plugins/simulator/simulator-registration"),
+    import(/* webpackChunkName: "SharedVariables" */"./plugins/shared-variables/shared-variables-registration")
   ])
 };
 
