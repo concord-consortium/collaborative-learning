@@ -1,5 +1,5 @@
 import { NodeChannelInfo } from "src/plugins/dataflow/model/utilities/channel";
-import { NodeLiveOutputTypes, kGripperVersions } from "../../plugins/dataflow/model/utilities/node";
+import { NodeLiveOutputTypes } from "../../plugins/dataflow/model/utilities/node";
 
 export class SerialDevice {
   localBuffer: string;
