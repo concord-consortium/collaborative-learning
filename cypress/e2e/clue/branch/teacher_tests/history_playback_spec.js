@@ -27,7 +27,7 @@ context('History Playback', () => {
 
   it('verify playback shows no history if there is no history', function() {
     cy.openTopTab('my-work');
-    cy.openDocumentThumbnail('workspaces', this.investigationTitle);
+    cy.openDocumentThumbnail('my-work','workspaces', this.investigationTitle);
     cy.get('[data-testid="playback-component-button"]').click();
     cy.get('.playback-controls').contains("This document has no history");
     cy.get('[data-testid="playback-component-button"]').click();
@@ -36,7 +36,7 @@ context('History Playback', () => {
     clueCanvas.addTile('drawing');
     // give firestore some time to record this new history entry before we try
     // to find it.
-    // FIXME: really this is a bug, it shouldn't matter how quickly a user 
+    // FIXME: really this is a bug, it shouldn't matter how quickly a user
     // opens the history controls. The code should know what the history entry is that
     // matches the document that it is displaying
     cy.wait(4000);
@@ -88,7 +88,7 @@ context('History Playback', () => {
 
       // create a table
       clueCanvas.addTile('table');
-      // 
+      //
       // By default getTableTile looks in the right side (editable) workspace
       tableToolTile.getTableTile().within(() => {
         tableToolTile.typeInTableCell(1, '1');
@@ -204,11 +204,11 @@ context('History Playback', () => {
       clueCanvas.publishDoc("This Class");
       cy.openTopTab('class-work');
       cy.openSection('class-work', "workspaces");
-      cy.openDocumentThumbnail('workspaces','Network User');
+      cy.openDocumentThumbnail('class-work','workspaces','Network User');
       cy.get('[data-testid="playback-component-button"]').should('be.visible');
       cy.get('.playback-toolbar-button.themed.class-work').should('have.css', 'background-color', 'rgb(236, 201, 255)');
       cy.openSection('class-work', "learning-logs");
-      cy.openDocumentThumbnail('learning-logs','Network User');
+      cy.openDocumentThumbnail('class-work','learning-logs','Network User');
       cy.get('[data-testid="playback-component-button"]').should('be.visible');
       cy.get('.playback-toolbar-button.themed.class-work').should('have.css', 'background-color', 'rgb(236, 201, 255)');
     });
@@ -228,7 +228,7 @@ context('History Playback for student', () => {
 
   it('verify playback icon not displayed for student', function() {
     cy.openTopTab('my-work');
-    cy.openDocumentThumbnail('workspaces', this.investigationTitle);
+    cy.openDocumentThumbnail('my-work','workspaces', this.investigationTitle);
     cy.get('[data-testid="playback-component-button"]').should("not.exist");
   });
 });

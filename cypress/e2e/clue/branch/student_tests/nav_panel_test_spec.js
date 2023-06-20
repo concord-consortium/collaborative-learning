@@ -43,13 +43,13 @@ context('Nav Panel', function () {
         it('verify that a problem workspace thumbnail is visible in the My Work/Workspaces nav panel', function () {
           cy.openTopTab('my-work');
           cy.openSection('my-work', 'workspaces');
-          cy.getCanvasItemTitle('workspaces').contains(this.title).should('exist');
+          resourcesPanel.getCanvasItemTitle('my-work','workspaces').contains(this.title).should('exist');
           // cy.closeTabs();
         });
         it('verify publish Investigation', function () {
           canvas.publishCanvas("investigation");
           cy.openTopTab('class-work');
-          cy.getCanvasItemTitle('workspaces').should('contain', this.title);
+          resourcesPanel.getCanvasItemTitle('class-work','workspaces').should('contain', this.title);
         });
         it('verify make a copy of a canvas', function () {
           canvas.copyDocument(copyDocumentTitle);
@@ -57,24 +57,24 @@ context('Nav Panel', function () {
         });
         it('verify copied investigation appears in the workspaces section', function () {
           cy.openTopTab("my-work");
-          cy.getCanvasItemTitle('workspaces').contains(copyDocumentTitle).should('be.visible');
+          resourcesPanel.getCanvasItemTitle('my-work','workspaces').contains(copyDocumentTitle).should('be.visible');
         });
         it('verify publish of personal workspace', function () {
           canvas.publishCanvas("personal");
           cy.openTopTab('class-work');
           cy.openSection('class-work', 'workspaces');
-          cy.getCanvasItemTitle('workspaces').should('contain', copyDocumentTitle);
+          resourcesPanel.getCanvasItemTitle('class-work','workspaces').should('contain', copyDocumentTitle);
         });
         it('verify delete document reverts nav-tab panel to show thumbnails', function () {
           const deleteDocument = "Delete me";
           canvas.copyDocument(deleteDocument);
           cy.openTopTab('my-work');
           cy.wait(1000);
-          cy.getCanvasItemTitle('workspaces').should('contain', deleteDocument);
+          resourcesPanel.getCanvasItemTitle('my-work','workspaces').should('contain', deleteDocument);
           cy.openDocumentWithTitle('my-work', 'workspaces', copyDocumentTitle);
           cy.openDocumentWithTitle('my-work', 'workspaces', deleteDocument);
           canvas.deleteDocument();
-          cy.getCanvasItemTitle('workspaces').should('not.contain', deleteDocument);
+          resourcesPanel.getCanvasItemTitle('my-work','workspaces').should('not.contain', deleteDocument);
         });
       });
       describe('Workspaces section', function () {
@@ -104,18 +104,18 @@ context('Nav Panel', function () {
         });
         it('verify starred document appears in the Starred section', function () {
           cy.openSection('my-work', 'starred');
-          cy.getCanvasItemTitle('starred').contains(copyDocumentTitle).should('exist');
+          resourcesPanel.getCanvasItemTitle('my-work','starred').contains(copyDocumentTitle).should('exist');
         });
       });
       describe('Learning Log Section', function () {
         it('verify investigation canvas is not listed in Learning Log ', function () { //still need to verify the titles match the titles from opened canvases
           cy.openTopTab('my-work');
           cy.openSection('my-work', 'learning-log');
-          cy.getCanvasItemTitle('learning-log').contains(this.title).should('not.exist');
-          cy.getCanvasItemTitle('learning-log').should('have.length', 1);
+          resourcesPanel.getCanvasItemTitle('my-work','learning-log').contains(this.title).should('not.exist');
+          resourcesPanel.getCanvasItemTitle('my-work','learning-log').should('have.length', 1);
         });
         it('verify user starter learning log canvas exists', function () {
-          cy.getCanvasItemTitle('learning-log').contains("My First Learning Log").should('be.visible');
+          resourcesPanel.getCanvasItemTitle('my-work','learning-log').contains("My First Learning Log").should('be.visible');
         });
         it('verify open of learning log canvas into main workspace', function () {
           cy.openDocumentWithTitle('my-work', 'learning-log', "My First Learning Log");
@@ -125,13 +125,13 @@ context('Nav Panel', function () {
           canvas.copyDocument("Learning Log Copy");
           cy.openSection("my-work","learning-log");
           cy.wait(2500);
-          cy.getCanvasItemTitle('learning-log').contains("Learning Log Copy").should("be.visible");
+          resourcesPanel.getCanvasItemTitle('my-work','learning-log').contains("Learning Log Copy").should("be.visible");
         });
         it('verify publish learning log', function () {
           canvas.publishCanvas("personal");
           cy.openTopTab("class-work");
           cy.openSection("class-work", "learning-logs");
-          cy.getCanvasItemTitle("learning-logs", "Learning Log Copy");
+          resourcesPanel.getCanvasItemTitle("class-work","learning-logs", "Learning Log Copy");
         });
       });
       after(function () {
@@ -147,24 +147,24 @@ context('Nav Panel', function () {
       describe('Open correct canvas from correct section', function () {
         it('verify open published canvas from Workspace list', function () { //this assumes there are published work
           cy.openSection("class-work", "workspaces");
-          cy.openDocumentThumbnail('workspaces', copyDocumentTitle);
+          cy.openDocumentThumbnail('class-work','workspaces', copyDocumentTitle);
         });
         it('will verify that published canvas does not have Edit button', function () {
-          cy.get('.edit-button').should("not.be.visible");
+          resourcesPanel.getActiveTabEditButton().should("not.exist");
         });
         it('verify open published canvas from Investigations list', function () { //this assumes there are published work
           cy.openSection("class-work", "workspaces");
-          cy.openDocumentThumbnail('workspaces', this.title);
+          cy.openDocumentThumbnail('class-work','workspaces', this.title);
         });
         it('will verify that published canvas does not have Edit button', function () {
-          cy.get('.edit-button').should("not.be.visible");
+          resourcesPanel.getActiveTabEditButton().should("not.exist");
         });
         it('verify delete document from Workspace list', function () { //this assumes there are published work
           cy.openSection("class-work", "workspaces");
           cy.deleteDocumentThumbnail("class-work", 'workspaces', copyDocumentTitle);
           dialog.getDialogTitle().should('exist').contains('Confirm Delete');
           dialog.getDialogOKButton().click();
-          cy.getCanvasItemTitle('workspaces').should('not.contain', copyDocumentTitle);
+          resourcesPanel.getCanvasItemTitle('class-work','workspaces').should('not.contain', copyDocumentTitle);
         });
       });
     });

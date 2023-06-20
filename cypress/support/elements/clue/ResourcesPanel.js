@@ -29,8 +29,10 @@ class ResourcesPanel{
       return cy.get('.collapsed-resources-tab');
     }
 
+    // TODO: this is duplicated in commands.js, however in that case the tab
+    // isn't passed in.
     getCanvasItemTitle(tab, section){
-        return cy.get('.list.'+section+' [data-test='+section+'-list-items] .footer');
+        return cy.get('.document-tabs.'+tab+' .list.'+section+' [data-test='+section+'-list-items] .footer');
     }
 
     starCanvasItem(tab, section,title){
@@ -48,6 +50,14 @@ class ResourcesPanel{
 
     getLeftNavExpandedSpace(){
         return cy.get('.left-nav.expanded');
+    }
+
+    getActiveTabEditButton(){
+        // This looks for the edit button in the active tab and active sub tab
+        // both .react-tabs__tab-panel--selected classes are needed. Otherwise it
+        // can find edit buttons inside of sub tabs which are active/selected,
+        // but the top level (navTab) of this sub tab is not active/selected.
+        return cy.get('.nav-tab-panel .react-tabs__tab-panel--selected .react-tabs__tab-panel--selected .edit-button');
     }
 }
 export default ResourcesPanel;
