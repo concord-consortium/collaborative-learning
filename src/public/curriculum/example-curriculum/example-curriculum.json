@@ -8,7 +8,8 @@
     "defaultDocumentType": "personal",
     "settings": {
       "table": { "numFormat": ".2~f" },
-      "text": {"tools": ["bold", "subscript", "superscript"]}
+      "text": {"tools": ["bold", "subscript", "superscript", "new-variable", "insert-variable", "edit-variable"]},
+      "drawing": {"tools": ["select", "line", "vector", "rectangle", "ellipse", "stamp", "stroke-color", "fill-color", "new-variable", "insert-variable", "edit-variable", "delete"]}
     },
     "navTabs": {
       "showNavPanel": false,
@@ -51,6 +52,21 @@
       {
         "id": "Drawing",
         "title": "Drawing",
+        "isTileTool": true
+      },
+      {
+        "id": "Dataflow",
+        "title": "Dataflow",
+        "isTileTool": true
+      },
+      {
+        "id": "Simulator",
+        "title": "Simulator",
+        "isTileTool": true
+      },
+      {
+        "id": "Diagram",
+        "title": "Diagram",
         "isTileTool": true
       },
       {
