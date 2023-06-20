@@ -1,17 +1,19 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import "regenerator-runtime/runtime";
+import { forEach } from "lodash";
 import { inject, observer } from "mobx-react";
-import { BaseComponent } from "../../../components/base";
-import Rete, { NodeEditor, Engine, Node } from "rete";
-import ConnectionPlugin from "rete-connection-plugin";
-import ReactRenderPlugin from "rete-react-render-plugin";
 import { autorun } from "mobx";
 import { IDisposer, onSnapshot } from "mobx-state-tree";
 import { SizeMeProps } from "react-sizeme";
-import { forEach } from "lodash";
+import Rete, { NodeEditor, Engine, Node } from "rete";
+import ConnectionPlugin from "rete-connection-plugin";
+import ReactRenderPlugin from "rete-react-render-plugin";
+
+import { BaseComponent } from "../../../components/base";
 import { ProgramZoomType, DataflowContentModelType } from "../model/dataflow-content";
 import { DataflowProgramModelType } from "../model/dataflow-program-model";
+import { simulatedChannel } from "../model/utilities/simulated-channel";
 import { SensorSelectControl } from "../nodes/controls/sensor-select-control";
 import { DataflowReteNodeFactory } from "../nodes/factories/dataflow-rete-node-factory";
 import { NumberReteNodeFactory } from "../nodes/factories/number-rete-node-factory";
@@ -26,34 +28,31 @@ import { GeneratorReteNodeFactory } from "../nodes/factories/generator-rete-node
 import { TimerReteNodeFactory } from "../nodes/factories/timer-rete-node-factory";
 import { NumControl } from "../nodes/controls/num-control";
 import { ValueControl } from "../nodes/controls/value-control";
+import { getHubSelect } from "../nodes/utilities/live-output-utilities";
+import {
+  sendDataToSerialDevice, sendDataToSimulatedOutput, updateNodeChannelInfo, updateGeneratorNode, updateNodeRecentValues,
+  updateSensorNode, updateTimerNode
+} from "../nodes/utilities/update-utilities";
+import { getBoundingRectOfNodes, getNewNodePosition, moveNodeToFront } from "../nodes/utilities/view-utilities";
 import { DataflowDropZone } from "./ui/dataflow-drop-zone";
 import { DataflowProgramToolbar } from "./ui/dataflow-program-toolbar";
 import { DataflowProgramTopbar } from "./ui/dataflow-program-topbar";
 import { DataflowProgramCover } from "./ui/dataflow-program-cover";
 import { DataflowProgramZoom } from "./ui/dataflow-program-zoom";
 import { NodeChannelInfo, serialSensorChannels } from "../model/utilities/channel";
-import { NodeGeneratorTypes, ProgramDataRates, NodeTimerInfo } from "../model/utilities/node";
+import { ProgramDataRates } from "../model/utilities/node";
+import { getAttributeIdForNode, recordCase } from "../model/utilities/recording-utilities";
 import { virtualSensorChannels } from "../model/utilities/virtual-channel";
-import { Rect, scaleRect, unionRect } from "../utilities/rect";
 import { DocumentContextReact } from "../../../components/document/document-context";
-import { SerialDevice } from "../../../models/stores/serial";
 import { dataflowLogEvent } from "../dataflow-logger";
-import { ICaseCreation, addCanonicalCasesToDataSet } from "../../../models/data/data-set";
 import { SensorValueControl } from "../nodes/controls/sensor-value-control";
 import { InputValueControl } from "../nodes/controls/input-value-control";
 import { DemoOutputControl } from "../nodes/controls/demo-output-control";
-import { DropdownListControl } from "../nodes/controls/dropdown-list-control";
 import { ProgramMode, UpdateMode } from "./types/dataflow-tile-types";
+import { ITileModel } from "../../../models/tiles/tile-model";
 
 import "./dataflow-program.sass";
-interface NodeNameValuePair {
-  name: string;
-  val: number;
-}
-interface NodeValueMap {
-  [key: string]: NodeNameValuePair;
-}
-type NodeValue = number | NodeValueMap;
+import { findOutputVariable } from "../model/utilities/simulated-output";
 
 export interface IStartProgramParams {
   runId: string;
@@ -64,16 +63,16 @@ export interface IStartProgramParams {
 }
 
 interface IProps extends SizeMeProps {
-  readOnly?: boolean;
   documentProperties?: { [key: string]: string };
-  program?: DataflowProgramModelType;
+  model?: ITileModel;
   onProgramChange: (program: any) => void;
-  programDataRate: number;
   onProgramDataRateChange: (dataRate: number) => void;
-  programZoom?: ProgramZoomType;
   onZoomChange: (dx: number, dy: number, scale: number) => void;
+  program?: DataflowProgramModelType;
+  programDataRate: number;
+  programZoom?: ProgramZoomType;
+  readOnly?: boolean;
   tileHeight?: number;
-  tileId: string;
   //state
   programMode: ProgramMode;
   isPlaying: boolean;
@@ -95,7 +94,6 @@ interface IState {
 
 const numSocket = new Rete.Socket("Number value");
 const RETE_APP_IDENTIFIER = "dataflow@0.1.0";
-export const MAX_NODE_VALUES = 16;
 const MAX_ZOOM = 2;
 const MIN_ZOOM = .1;
 
@@ -125,7 +123,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       lastIntervalDuration: 0,
     };
     this.lastIntervalTime = Date.now();
+  }
 
+  private get tileId() {
+    return this.props.model?.id || "";
   }
 
   public render() {
@@ -165,14 +166,14 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             isTesting={isTesting}
             onClearClick={this.clearProgram}
             onNodeCreateClick={this.addNode}
-            tileId={this.props.tileId}
+            tileId={this.tileId}
           /> }
           <DataflowDropZone
             addNode={this.addNode}
             className="editor-graph-container"
             programEditor={this.programEditor}
             style={this.getEditorStyle}
-            tileId={this.props.tileId}
+            tileId={this.tileId}
           >
             <div
               className={editorClass}
@@ -363,14 +364,14 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       this.programEditor.on("nodecreated", node => {
         this.processAndSave();
-        this.moveNodeToFront(node, true);
-        node.meta.inTileWithId = this.props.tileId;
-        dataflowLogEvent("nodecreated", node, this.props.tileId);
+        moveNodeToFront(this.programEditor, node, true);
+        node.meta.inTileWithId = this.tileId;
+        dataflowLogEvent("nodecreated", node, this.tileId);
       });
 
       this.programEditor.on("selectnode", ( { node } ) => {
-        this.moveNodeToFront(node, false);
-        node.meta.inTileWithId = this.props.tileId;
+        moveNodeToFront(this.programEditor, node, false);
+        node.meta.inTileWithId = this.tileId;
       });
 
       this.programEditor.on("nodedraged", node => {
@@ -397,15 +398,15 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       // Program changes are logged from here, except nodecreated, above
       this.programEditor.on("noderemoved", node => {
-        dataflowLogEvent("noderemoved", node, this.props.tileId);
+        dataflowLogEvent("noderemoved", node, this.tileId);
       });
 
       this.programEditor.on("connectioncreated", connection => {
-        dataflowLogEvent("connectioncreated", connection, this.props.tileId);
+        dataflowLogEvent("connectioncreated", connection, this.tileId);
       });
 
       this.programEditor.on("connectionremoved", connection => {
-        dataflowLogEvent("connectionremoved", connection, this.props.tileId);
+        dataflowLogEvent("connectionremoved", connection, this.tileId);
       });
     })();
   };
@@ -469,9 +470,15 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
   };
 
+  private get simulatedChannels() {
+    return this.props.tileContent
+      ? this.props.tileContent.inputVariables?.map(variable => simulatedChannel(variable)) ?? []
+      : [];
+  }
+
   private updateChannels = () => {
     this.channels = [];
-    this.channels = [...virtualSensorChannels, ...serialSensorChannels];
+    this.channels = [...virtualSensorChannels, ...this.simulatedChannels, ...serialSensorChannels];
     this.countSerialDataNodes(this.programEditor.nodes);
     this.programEditor.nodes.forEach((node) => {
       if (node.name === "Sensor") {
@@ -479,18 +486,18 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         sensorSelect.setChannels(this.channels);
       }
       if (node.name === "Live Output"){
-        const hubSelect = node.controls.get("hubSelect") as DropdownListControl;
+        const hubSelect = getHubSelect(node);
         hubSelect.setChannels(this.channels);
       }
     });
   };
 
   private shouldShowProgramCover() {
-    return this.props.readOnly || this.disabledRecordingStates();
+    return this.props.readOnly || this.inDisabledRecordingState;
   }
 
   //disable the right side when recordingMode in stop or clear
-  private disabledRecordingStates(){
+  private get inDisabledRecordingState() {
     const { programMode } = this.props;
     return ( programMode === ProgramMode.Recording || programMode === ProgramMode.Done);
   }
@@ -508,7 +515,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       k = this.programEditor.view.area.transform.k;
     }
 
-    const rect = this.getBoundingRectOfNodes();
+    const rect = getBoundingRectOfNodes(this.programEditor);
 
     if (rect?.isValid) {
       const widthQ = k * clientWidth / (rect.right + margin);
@@ -531,69 +538,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
   };
 
-  private getBoundingRectOfNode(n: Node): Rect | undefined {
-    const { k } = this.programEditor.view.area.transform;
-    const nodeView = this.programEditor.view.nodes.get(n);
-    if (!nodeView) return;
-    return scaleRect(new Rect(nodeView.node.position[0], nodeView.node.position[1],
-                              nodeView.el.clientWidth, nodeView.el.clientHeight), k);
-  }
-
-  private getBoundingRectOfNodes(): Rect | undefined {
-    let bounds: Rect | undefined;
-    this.programEditor.nodes.forEach((n: Node) => {
-      const nodeBounds = this.getBoundingRectOfNode(n);
-      if (nodeBounds?.isValid) {
-        bounds = bounds ? unionRect(bounds, nodeBounds) : nodeBounds;
-      }
-    });
-    return bounds;
-  }
-
   private addNode = async (nodeType: string, position?: [number, number]) => {
     const nodeFactory = this.programEditor.components.get(nodeType) as DataflowReteNodeFactory;
     const n1 = await nodeFactory!.createNode();
-    n1.position = position ?? this.getNewNodePosition();
+    n1.position = position ?? getNewNodePosition(this.programEditor);
     this.programEditor.addNode(n1);
-  };
-
-  private getNewNodePosition = () => {
-    const numNodes = this.programEditor.nodes.length;
-    const kNodesPerColumn = 5;
-    const kNodesPerRow = 4;
-    const kColumnWidth = 200;
-    const kRowHeight = 90;
-    const kLeftMargin = 40;
-    const kTopMargin = 5;
-    const kColumnOffset = 15;
-    const { k } = this.programEditor.view.area.transform;
-    const nodePos: [number, number] =
-      [kLeftMargin * (1 / k) + Math.floor((numNodes % (kNodesPerColumn * kNodesPerRow)) / kNodesPerColumn)
-        * kColumnWidth + Math.floor(numNodes / (kNodesPerColumn * kNodesPerRow)) * kColumnOffset,
-      kTopMargin + numNodes % kNodesPerColumn * kRowHeight];
-    return nodePos;
-  };
-
-  private moveNodeToFront = (node: Node, newNode: boolean) => {
-    const totalNodes = this.programEditor.nodes.length;
-    const selectedNodeView = this.programEditor.view.nodes.get(node);
-    let selectedNodeZ = 0;
-    if (selectedNodeView) {
-      selectedNodeZ = selectedNodeView.el.style.zIndex ? parseInt(selectedNodeView.el.style.zIndex, 10) : selectedNodeZ;
-    }
-    this.programEditor.nodes.forEach((n: Node) => {
-      const nodeView = this.programEditor.view.nodes.get(n);
-      if (nodeView) {
-        if (node.id === n.id) {
-          nodeView.el.style.zIndex = totalNodes.toString();
-        } else if (nodeView.el.style.zIndex) {
-          const nodeZ = parseInt(nodeView.el.style.zIndex, 10);
-          if (nodeZ > selectedNodeZ && !newNode) {
-            nodeView.el.style.zIndex = (nodeZ - 1).toString();
-          }
-        }
-      }
-    });
   };
 
   private serialDeviceRefresh = () => {
@@ -614,39 +563,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.programEditor.clear();
   };
 
-  private recordCase = () => {
-    const { recordIndex } = this.props;
-    const { programDataRate, dataSet } = this.props.tileContent; //grab the program Sampling Rate to write TimeQuantized
-
-    //Write case
-    //Attributes look like  Time (quantized) as col 1 followed by all nodes
-    const aCase: ICaseCreation = {};
-
-    //Quantize and write time
-    const timeQuantizedKey = dataSet.attributes[0].id;
-    const recordTimeQuantized = (recordIndex * programDataRate) / 1000; //in seconds
-    aCase[timeQuantizedKey] = recordTimeQuantized;
-
-    //loop through attribute (nodes) and write each value
-    this.programEditor.nodes.forEach((node, idx) => {
-      const key = this.getAttributeIdForNode(idx);
-      aCase[key] = node.data.nodeValue as string;
-    });
-    addCanonicalCasesToDataSet(this.props.tileContent.dataSet, [aCase]);
-  };
-
-  private getAttributeIdForNode = (nodeIndex: number) => {
-    const { dataSet } = this.props.tileContent;
-    // this function adds one to index to skip time attribute
-    return dataSet.attributes[nodeIndex + 1].id;
-  };
-
   private playbackNodesWithCaseData = (dataSet: any, playBackIndex: number) => {
     const currentCase = dataSet.getCaseAtIndex(playBackIndex);
     if (currentCase){
       const {__id__} = currentCase; //this is the id of the case we are looking at for each frame
       this.programEditor.nodes.forEach((node, idx) => { //update each node in the frame
-        const attrId = this.getAttributeIdForNode(idx);
+        const attrId = getAttributeIdForNode(this.props.tileContent.dataSet, idx);
         const valueToSendToNode = dataSet.getValue(__id__, attrId) as number;
         let nodeControl;
         switch (node.name){
@@ -692,15 +614,16 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private updateNodes = () => {
     const nodeProcessMap: { [name: string]: (n: Node) => void } = {
-      Generator: this.updateGeneratorNode,
-      Timer: this.updateTimerNode,
+      Generator: updateGeneratorNode,
+      Timer: updateTimerNode,
       Sensor: (n: Node) => {
-        this.updateNodeChannelInfo(n);
-        this.updateNodeSensorValue(n);
+        updateNodeChannelInfo(n, this.channels, this.stores.serialDevice);
+        updateSensorNode(n, this.channels);
       },
       "Live Output": (n: Node) => {
-        this.updateNodeChannelInfo(n);
-        this.sendDataToSerialDevice(n);
+        updateNodeChannelInfo(n, this.channels, this.stores.serialDevice);
+        sendDataToSerialDevice(n, this.stores.serialDevice);
+        sendDataToSimulatedOutput(n, this.props.tileContent?.outputVariables);
       }
     };
     let processNeeded = false;
@@ -711,7 +634,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         nodeProcess(n);
       }
       if (Object.prototype.hasOwnProperty.call(n.data, "nodeValue")) {
-        this.updateNodeRecentValues(n);
+        updateNodeRecentValues(n);
       }
     });
     if (processNeeded) {
@@ -739,7 +662,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         this.updateNodes();
         break;
       case ProgramMode.Recording:
-        if (!readOnly) this.recordCase(); //only record cases from right DF tiles
+        if (!readOnly) {
+          recordCase(this.props.tileContent, this.programEditor, this.props.recordIndex);
+        }
         this.updateNodes();
         updateRecordIndex(UpdateMode.Increment);
         break;
@@ -751,20 +676,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         break;
     }
   };
-
-  private passSerialStateToChannel(sd: SerialDevice, channel: NodeChannelInfo){
-    if (sd.hasPort()){
-      channel.serialConnected = true;
-      const deviceMismatch = sd.deviceFamily !== channel.deviceFamily;
-      const timeSinceActive = channel.usesSerial && channel.lastMessageRecievedAt
-        ? Date.now() - channel.lastMessageRecievedAt: 0;
-      channel.missing = deviceMismatch || timeSinceActive > 7000;
-    }
-    else {
-      channel.serialConnected = false;
-      channel.missing = true;
-    }
-  }
 
   private countSerialDataNodes(nodes: Node[]){
     // implementing with a "count" of 1 or 0 in case we need to count nodes in future
@@ -779,7 +690,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       // only after connection to another node is made
       // this allows user to drag a block out and work on program before connecting
       if (n.name === "Live Output"){
-        if(n.inputs.entries().next().value[1].connections.length > 0){
+        // Don't count the node if it's connected to a shared output variable
+        const outputVariable = findOutputVariable(n, this.props.tileContent?.outputVariables);
+        if(!outputVariable && n.inputs.entries().next().value[1].connections.length > 0) {
           serialNodesCt++;
         }
       }
@@ -793,24 +706,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
     if (serialNodesCt > 0 && !this.stores.serialDevice.hasPort()){
       this.postSerialModal();
-    }
-  }
-
-  private sendDataToSerialDevice(n: Node){
-    const isNumberOutput = isFinite(n.data.nodeValue as number);
-    const { deviceFamily } = this.stores.serialDevice;
-
-    if (deviceFamily === "arduino" && isNumberOutput){
-      this.stores.serialDevice.writeToOutForBBGripper(n.data.nodeValue as number);
-    }
-    if (deviceFamily === "microbit"){
-      const hubSelect = n.controls.get("hubSelect") as DropdownListControl;
-      if (hubSelect.getChannels()){
-        const relayType = hubSelect.getData("liveOutputType") as string;
-        const hubId = hubSelect.getSelectionId();
-        const state = n.data.nodeValue as number;
-        this.stores.serialDevice.writeToOutForMicroBitRelayHub(state, hubId, relayType );
-      }
     }
   }
 
@@ -840,107 +735,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.stores.serialDevice.serialModalShown = true;
     }
   }
-
-  private updateNodeChannelInfo = (n: Node) => {
-    if (this.channels.length > 0 ){
-      this.channels.filter(c => c.usesSerial).forEach((ch) => {
-        this.passSerialStateToChannel(this.stores.serialDevice, ch);
-      });
-    }
-
-    const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
-    if (sensorSelect) {
-      sensorSelect.setChannels(this.channels);
-      (sensorSelect as any).update();
-    }
-  };
-
-  private updateNodeSensorValue = (n: Node) => {
-
-    const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
-
-    if (sensorSelect) {
-      const chInfo = this.channels.find(ci => ci.channelId === n.data.sensor);
-
-      // update virtual sensors
-      if (chInfo?.virtualValueMethod && chInfo.timeFactor) {
-        const time = Math.floor(Date.now() / chInfo.timeFactor);
-        chInfo.value = chInfo.virtualValueMethod(time);
-      }
-
-      if (chInfo && chInfo.value) {
-        sensorSelect.setSensorValue(chInfo.value);
-      } else {
-        sensorSelect.setSensorValue(NaN);
-      }
-    }
-  };
-
-  private updateNodeRecentValues = (n: Node) => {
-    const watchedValues = n.data.watchedValues as Record<string, any>;
-    Object.keys(watchedValues).forEach((valueKey: string) => {
-      const value: any = n.data[valueKey];
-      let recentValue: NodeValue = {};
-
-      // Store recentValue as object with unique keys for each value stored in node
-      // Needed for node types that require more than a single value
-      if (value === "number") {
-        recentValue[valueKey] = { name: n.name, val: value };
-      } else {
-        recentValue = value;
-      }
-
-      const recentValues = n.data.recentValues as Record<string, any>;
-      if (recentValues) {
-        if (recentValues[valueKey]) {
-          const newRecentValues: any = recentValues[valueKey];
-          if (newRecentValues.length > MAX_NODE_VALUES) {
-            newRecentValues.shift();
-          }
-          newRecentValues.push(recentValue);
-          recentValues[valueKey] = newRecentValues;
-        } else {
-          recentValues[valueKey] = [recentValue];
-        }
-      } else {
-        n.data.recentValues = {[valueKey]: [recentValue]};
-      }
-
-      if (n.data.watchedValues) {
-        n.update();
-      }
-    });
-  };
-
-  private updateGeneratorNode = (n: Node) => {
-    const generatorType = n.data.generatorType;
-    const period = Number(n.data.period);
-    const amplitude = Number(n.data.amplitude);
-    const nodeGeneratorType = NodeGeneratorTypes.find(gt => gt.name === generatorType);
-    if (nodeGeneratorType && period && amplitude) {
-      const time = Date.now();
-      // note: period is given in s, but we're passing in ms for time, need to adjust
-      const val = nodeGeneratorType.method(time, period * 1000, amplitude);
-      const nodeValue = n.controls.get("nodeValue") as NumControl;
-      if (nodeValue) {
-        nodeValue.setValue(val);
-      }
-    }
-  };
-
-  private updateTimerNode = (n: Node) => {
-    const timeOn = Number(n.data.timeOn);
-    const timeOff = Number(n.data.timeOff);
-    if (timeOn && timeOff) {
-      const time = Date.now();
-      // note: time on/off is given in s, but we're passing in ms for time, need to adjust
-      const val = NodeTimerInfo.method(time, timeOn * 1000, timeOff * 1000);
-      const nodeValue = n.controls.get("nodeValue") as NumControl;
-      if (nodeValue) {
-        nodeValue.setValue(val);
-      }
-    }
-  };
 
   private zoomIn = () => {
     const { k } = this.programEditor.view.area.transform;

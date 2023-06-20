@@ -1,5 +1,5 @@
 import { action, computed, makeObservable, observable } from "mobx";
-import { getParentOfType, getSnapshot, hasParentOfType, IAnyStateTreeNode } from "mobx-state-tree";
+import { getParentOfType, getSnapshot, getType, hasParentOfType, IAnyStateTreeNode } from "mobx-state-tree";
 import { DocumentContentModelType } from "./document-content";
 import { SharedModelType } from "../shared/shared-model";
 import { IDragSharedModelItem, ISharedModelManager, SharedModelUnion } from "../shared/shared-model-manager";
@@ -179,6 +179,13 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
       }
     }
     return sharedModels;
+  }
+
+  getTileSharedModelsByType(
+    tileContentModel: IAnyStateTreeNode, modelType: typeof SharedModelUnion
+  ): SharedModelType[] {
+    const tileSharedModels = this.getTileSharedModels(tileContentModel);
+    return tileSharedModels.filter(sharedModel => getType(sharedModel) === modelType);
   }
 
   getSharedModelDragDataForTiles(requestedTileIds: string[]): IDragSharedModelItem[] {

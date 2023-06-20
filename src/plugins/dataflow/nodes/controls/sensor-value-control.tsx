@@ -25,16 +25,22 @@ export class SensorValueControl extends Rete.Control {
 
     this.updateUnits();
 
-    this.component = (compProps: { value: number; units: string; }) => (
-      <div className="sensor-value" title={"Node Value"}>
-        <div className="value-container">
-          {isNaN(compProps.value) ? kEmptyValueString : compProps.value}
+    this.component = (compProps: { value: number; units: string; }) => {
+      // Only display up to 3 decimal places
+      const places = 1000;
+      const displayValue = isNaN(compProps.value) ? kEmptyValueString
+        : Math.round(compProps.value * places) / places;
+      return (
+        <div className="sensor-value" title={"Node Value"}>
+          <div className="value-container">
+            {displayValue}
+          </div>
+          <div className={`units-container ${compProps.units.length > 4 ? "small" : ""}`}>
+            {compProps.units}
+          </div>
         </div>
-        <div className={`units-container ${compProps.units.length > 4 ? "small" : ""}`}>
-          {compProps.units}
-        </div>
-      </div>
-    );
+      );
+    };
   }
 
   public setValue = (val: number) => {

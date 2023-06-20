@@ -3,6 +3,7 @@ import { NodeData } from "rete/types/core/data";
 import { DataflowReteNodeFactory } from "./dataflow-rete-node-factory";
 import { InputValueControl } from "../controls/input-value-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
+import { getOutputType } from "../utilities/live-output-utilities";
 import { NodeLiveOutputTypes, NodeMicroBitHubs,
   kRelaysIndexed, kBinaryOutputTypes, kRoundedOutputTypes
 } from "../../model/utilities/node";
@@ -42,8 +43,7 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
         this.updateHubsStatusReport(_node);
 
         // handle data and display of data
-        const outputTypeControl = _node.controls.get("liveOutputType") as DropdownListControl;
-        const outputType = outputTypeControl.getValue();
+        const outputType = getOutputType(_node);
         const nodeValue = _node.inputs.get("nodeValue")?.control as InputValueControl;
         let newValue = isNaN(n1) ? 0 : n1;
 
@@ -79,8 +79,7 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   private getSelectedRelayIndex(node: Node){
-    const outputTypeControl = node.controls.get("liveOutputType") as DropdownListControl;
-    return kRelaysIndexed.indexOf(outputTypeControl.getValue());
+    return kRelaysIndexed.indexOf(getOutputType(node));
   }
 
   private updateHubsStatusReport(node: Node){

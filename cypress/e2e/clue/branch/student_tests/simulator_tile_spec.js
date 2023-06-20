@@ -19,8 +19,8 @@ context('Simulator Tile', function () {
       simulatorTile.getSimulatorTile().should("exist");
       simulatorTile.getTileTitle().should("exist");
       // TODO: These should be removed when we change what's displayed in the simulator tile
-      simulatorTile.getSimulatorTile().should("contain.text", "sensor1");
-      simulatorTile.getSimulatorTile().should("contain.text", "output1");
+      simulatorTile.getSimulatorTile().should("contain.text", "input_EMG");
+      simulatorTile.getSimulatorTile().should("contain.text", "output_LightBulb");
     });
     it("edit tile title", () => {
       const newName = "Test Simulation";
