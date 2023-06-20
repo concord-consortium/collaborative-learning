@@ -3,7 +3,10 @@ import "./models/tiles/placeholder/placeholder-registration";
 import "./models/tiles/unknown-content-registration";
 
 const gTileRegistration: Record<string, () => void> = {
-  "DataCard": () => import(/* webpackChunkName: "DataCard" */"./plugins/data-card/data-card-registration"),
+  "DataCard": () => Promise.all([
+    import(/* webpackChunkName: "DataCard" */"./plugins/data-card/data-card-registration"),
+    import(/* webpackChunkName: "SharedDataSet" */"./models/shared/shared-data-set-registration")
+  ]),
   "Dataflow": () => Promise.all([
     import(/* webpackChunkName: "Dataflow" */"./plugins/dataflow/dataflow-registration"),
     import(/* webpackChunkName: "SharedVariables" */"./plugins/shared-variables/shared-variables-registration"),
