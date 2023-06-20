@@ -1,6 +1,8 @@
+import { ISimulation } from "./simulation-types";
+
 export const kBrainwavesKey = "EMG_and_claw";
 
-export const brainwavesGripperSimulation = {
+export const brainwavesGripperSimulation: ISimulation = {
   delay: 200,
   variables: [
     {
