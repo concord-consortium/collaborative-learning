@@ -106,7 +106,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
 
   private getToggledContext () {
     const {toggledContextMap} = this.state;
-   return (this.props.groupId && toggledContextMap[this.props.groupId]) ?? null;
+    return (this.props.groupId && toggledContextMap[this.props.groupId]) ?? null;
   }
 
   public render() {
@@ -355,6 +355,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     const { groupId, setFocusedGroupUser, onToggleContext } = this.props;
     const groupUser = this.userByContext[context];
     const toggledContext = this.getToggledContext();
+    console.log("groupUser", groupUser);
     this.setState(state => {
       if (groupId) {
         const current = state.toggledContextMap[groupId] ?? null;
@@ -366,8 +367,8 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       const event = toggledContext ? LogEventName.DASHBOARD_SELECT_STUDENT : LogEventName.DASHBOARD_DESELECT_STUDENT;
       Logger.log(event, {groupId, studentId: groupUser.user.id});
     }
-    const focusedGroupUser = toggledContext ? groupUser?.user : undefined;
-    setFocusedGroupUser && setFocusedGroupUser(focusedGroupUser);
-    onToggleContext && onToggleContext(context, groupUser?.user);
+    const focusedGroupUser = groupUser?.user || undefined;
+    setFocusedGroupUser && setFocusedGroupUser(groupUser?.user);
+    onToggleContext && onToggleContext(context, context? groupUser?.user : undefined);
   };
 }

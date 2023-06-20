@@ -53,9 +53,11 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
   };
   const handleFocusedGroupUserChange = (selectedGroupUser: GroupUserModelType | undefined) => {
     setFocusedGroupUser(selectedGroupUser);
+    // console.log("selectedGroupUser", selectedGroupUser, "focusedGroupUser", focusedGroupUser);
   };
 
   const handleToggleContext = (context: string | null, selectedGroupUser: GroupUserModelType | undefined) => {
+    // console.log("handleToggleContext", context, selectedGroupUser);
     setGroupViewContext(context);
     setFocusedGroupUser(selectedGroupUser);
   };
@@ -80,7 +82,8 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
     const problem = useProblemStore();
     const userInfo = groupUsers.find(gUser => gUser.user.id === groupUser?.id);
     const userDocTitle = userInfo?.doc?.title || "Document";
-    const titleText = groupUser && userInfo
+    console.log("userInfo", userInfo);
+    const titleText = focusedGroupUser && groupUser && userInfo
                         ? `${groupUser.name}: ${userInfo.doc?.type === "problem" ? problem.title : userDocTitle}`
                         : selectedId ? `Student Group ${selectedId}` : "No groups";
     return (
@@ -93,6 +96,7 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
       </div>
     );
   };
+
   return (
     <div key="student-group-view" className="document student-group-view">
       <GroupViewTitlebar selectedId={selectedGroupId} onSelectGroup={handleSelectGroup} />
@@ -103,7 +107,8 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
                          isGhostUser={true}
                          viaStudentGroupView={true}
                          groupViewContext={groupViewContext}
-                         setFocusedGroupUser={handleFocusedGroupUserChange}
+                         setFocusedGroupUser={setFocusedGroupUser}
+                        //  setFocusedGroupUser={handleFocusedGroupUserChange}
                          onToggleContext={handleToggleContext}
         />
       </div>
