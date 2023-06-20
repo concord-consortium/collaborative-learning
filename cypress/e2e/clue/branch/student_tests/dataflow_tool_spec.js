@@ -357,9 +357,9 @@ context('Dataflow Tool Tile', function () {
       });
       it("verify live output types", () => {
         const dropdown = "liveOutputType";
-        const outputTypes = ["Light Bulb", "Grabber", "Humidifier", "Fan", "Heat Lamp"];
+        const outputTypes = ["Light Bulb", "Grabber", "Gripper 2.0", "Humidifier", "Fan", "Heat Lamp"];
         dataflowToolTile.getDropdown(nodeType, dropdown).click();
-        dataflowToolTile.getDropdownOptions(nodeType, dropdown).should("have.length", 5);
+        dataflowToolTile.getDropdownOptions(nodeType, dropdown).should("have.length", 6);
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).each(($tab, index, $typeList) => {
           expect($tab.text()).to.contain(outputTypes[index]);
         });
@@ -372,7 +372,7 @@ context('Dataflow Tool Tile', function () {
       it("verify live binary outputs indicate hub not present if not connected", () => {
         const dropdown = "liveOutputType";
         dataflowToolTile.getDropdown(nodeType, dropdown).click();
-        dataflowToolTile.getDropdownOptions(nodeType, dropdown).eq(3).click();
+        dataflowToolTile.getDropdownOptions(nodeType, dropdown).eq(4).click();
         dataflowToolTile.getDropdown(nodeType, dropdown).contains("Fan").should("exist");
         dataflowToolTile.getOutputNodeValueText().should("contain", "(no hub)");
       });

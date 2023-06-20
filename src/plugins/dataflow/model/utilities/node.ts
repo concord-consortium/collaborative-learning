@@ -454,10 +454,14 @@ export const ProgramDataRates: ProgramDataRate[] = [
   }
 ];
 
-export const angleBases = {
+export type AngleBases = {
+  [key: string]: number;
+};
+
+export const kAngleBases: AngleBases = {
   "Gripper 2.0": 100,
   "Grabber": 180
-}
+};
 
 export const kSensorSelectMessage = "Select a sensor";
 export const kSensorMissingMessage = "⚠️";
