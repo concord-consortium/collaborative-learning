@@ -130,7 +130,7 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
               className={`document-box ${navTab}`}
               key={index}
               onClick={() => {
-                ui.openCurriculumDocOnLeft(doc.path);
+                ui.openCurriculumDocument(doc.path);
                 ui.setSelectedTile();
                 if (handleDocView !== undefined){
                   handleDocView();
@@ -205,7 +205,7 @@ export const WorkDocumentItem: React.FC<JProps> = ({doc, index, sectionOrNetwork
     <div
       className={`document-box my-work-document ${navTab}`}
       onClick={()=>{
-        ui.openDocumentOnLeft(sectionOrNetworkDoc);
+        ui.openResourceDocument(sectionOrNetworkDoc);
         ui.setSelectedTile();
         if (handleDocView !== undefined){
           handleDocView();

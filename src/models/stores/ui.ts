@@ -87,7 +87,7 @@ export const UIModel = types
     }
   }))
   .views((self) => ({
-    // document key or section path for reference (left) document
+    // document key or section path for resource (left) document
     get focusDocument () {
       if (self.activeNavTab === ENavTab.kProblems || self.activeNavTab === ENavTab.kTeacherGuide) {
         const facet = self.activeNavTab === ENavTab.kTeacherGuide ? ENavTab.kTeacherGuide : undefined;
@@ -269,13 +269,12 @@ export const UIModel = types
       self.selectedTileIds.forEach(tileId => self.removeTileIdFromSelection(tileId));
     },
     /**
-     * Update the top level tab on the left, and guess a sub tab to open to view
+     * Update the top level tab in the resources panel (left side), and guess a sub tab to open to view
      * this document. Currently this only works with non curriculum docs.
      *
      * @param doc a non curriculum document
      */
-    // FIXME: change to Resource(s) instead of Left
-    openDocumentOnLeft(doc: DocumentModelType) {
+    openResourceDocument(doc: DocumentModelType) {
       const navTab = getNavTabOfDocument(doc.type)  || "";
 
       let subTab = "";
@@ -302,7 +301,7 @@ export const UIModel = types
       self.openSubTabDocument(navTab, subTab, doc.key);
     },
 
-    openCurriculumDocOnLeft(docPath: string) {
+    openCurriculumDocument(docPath: string) {
       const {navTab, subTab} = getTabsOfCurriculumDoc(docPath);
       if (!subTab) {
         console.warn("Can't find subTab in curriculum documentPath", docPath);
