@@ -321,6 +321,10 @@ export const NodeLiveOutputTypes = [
     icon: GrabberIcon
   },
   {
+    name: "Gripper 2.0",
+    icon: GrabberIcon
+  },
+  {
     name: "Humidifier",
     icon: HumidIcon,
     relayIndex: 2
@@ -450,9 +454,14 @@ export const ProgramDataRates: ProgramDataRate[] = [
   }
 ];
 
+export const angleBases = {
+  "Gripper 2.0": 100,
+  "Grabber": 180
+}
+
 export const kSensorSelectMessage = "Select a sensor";
 export const kSensorMissingMessage = "⚠️";
 export const kAnimatedBinaryTypes = ["Fan", "Humidifier"];
 export const kRelaysIndexed =  ["Heat Lamp", "Fan", "Humidifier"];
 export const kBinaryOutputTypes = [...kRelaysIndexed, "Light Bulb"];
-export const kRoundedOutputTypes = ["Grabber"];
+export const kRoundedOutputTypes = ["Grabber", "Gripper 2.0"];
