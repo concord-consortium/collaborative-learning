@@ -2,7 +2,7 @@ import { registerTileComponentInfo } from "../../models/tiles/tile-component-inf
 import { registerTileContentInfo } from "../../models/tiles/tile-content-info";
 import { kSimulatorDefaultHeight, kSimulatorTileType } from "./simulator-types";
 import SimulatorToolIcon from "./assets/simulator-icon.svg";
-import { SimulatorToolComponent } from "./components/simulator-tile";
+import { SimulatorTileComponent } from "./components/simulator-tile";
 import { defaultSimulatorContent, SimulatorContentModel } from "./model/simulator-content";
 
 registerTileContentInfo({
@@ -14,7 +14,7 @@ registerTileContentInfo({
 });
 
 registerTileComponentInfo({
-  Component: SimulatorToolComponent,
+  Component: SimulatorTileComponent,
   Icon: SimulatorToolIcon,
   tileEltClass: "simulator-tool-tile",
   type: kSimulatorTileType,
