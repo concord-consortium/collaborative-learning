@@ -1,5 +1,9 @@
 @import "../vars.sass";
 
+.chat-open-student{
+  width: calc(100% - 36%);
+}
+
 .student-group-view {
   .canvas-area {
     position: absolute;
@@ -8,6 +12,7 @@
     left: 0;
     right: 0;
     border-top: $document-border-width solid white;
+    background-color: black;
   }
 }
 

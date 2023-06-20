@@ -55,6 +55,8 @@ export class NavTabPanel extends BaseComponent<IProps> {
     const isChatEnabled = user.isNetworkedTeacher;
     const openChatPanel = isChatEnabled && showChatPanel;
     const focusTileId = selectedTileIds?.length === 1 ? selectedTileIds[0] : undefined;
+    console.log("---------📁 nav-tab-panel-------------- ");
+    console.log(`nav-tab-panel ${showChatPanel ? "chat-open" : ""}`);
 
     return (
       <div className={`resource-and-chat-panel ${isResourceExpanded ? "shown" : ""}`} style={resourceWidthStyle}>
@@ -79,8 +81,14 @@ export class NavTabPanel extends BaseComponent<IProps> {
                   })
                 }
               </TabList>
+              {console.log("isChatEnabled:", isChatEnabled)}
+              {console.log("openChatPanel:", openChatPanel)}
+              {console.log(`chat-panel-toggle themed ${activeNavTab}`)}
+
+
               { isChatEnabled
                   ? !openChatPanel &&
+                  // <p> test </p>
                     <div className={`chat-panel-toggle themed ${activeNavTab}`}>
                       {/* The next line of code is commented out, but deliberately not removed,
                           per: https://www.pivotaltracker.com/story/show/179754830 */}
@@ -198,6 +206,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
   private handleShowChatColumn = () => {
     const { ui } = this.stores;
     const event = ui.showChatPanel ? LogEventName.CHAT_PANEL_HIDE : LogEventName.CHAT_PANEL_SHOW;
+    console.log("📁 handleShowChatColumn log event:", event);
     Logger.log(event);
     ui.toggleShowChatPanel(!ui.showChatPanel);
   };

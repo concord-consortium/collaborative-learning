@@ -286,6 +286,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
 
   return (
     <div className="document-tab-content">
+      {/* {test} */}
       <Tabs
         className={`document-tabs ${navTabSpec?.tab} ${isChatOpen ? "chat-open" : ""}`}
         forceRenderTabPanel={true}

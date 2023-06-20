@@ -88,6 +88,8 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
   };
   return (
     <div key="student-group-view" className="document student-group-view">
+      {/* // <div key="student-group-view" className="student-group-view"> */}
+
       <GroupViewTitlebar selectedId={selectedGroupId} onSelectGroup={handleSelectGroup} />
       <GroupTitlebar selectedId={selectedGroupId} context={groupViewContext} groupUser={focusedGroupUser}/>
       <div className="canvas-area">
