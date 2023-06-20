@@ -6,7 +6,8 @@ const gTileRegistration: Record<string, () => void> = {
   "DataCard": () => import(/* webpackChunkName: "DataCard" */"./plugins/data-card/data-card-registration"),
   "Dataflow": () => Promise.all([
     import(/* webpackChunkName: "Dataflow" */"./plugins/dataflow/dataflow-registration"),
-    import(/* webpackChunkName: "SharedVariables" */"./plugins/shared-variables/shared-variables-registration")
+    import(/* webpackChunkName: "SharedVariables" */"./plugins/shared-variables/shared-variables-registration"),
+    import(/* webpackChunkName: "SharedDataSet" */"./models/shared/shared-data-set-registration")
   ]),
   "Diagram": () => Promise.all([
     import(/* webpackChunkName: "Diagram" */"./plugins/diagram-viewer/diagram-registration"),
