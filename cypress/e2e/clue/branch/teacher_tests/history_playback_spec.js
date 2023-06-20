@@ -155,7 +155,8 @@ context('History Playback', () => {
         tableToolTile.getTableCell().eq(2).should('not.contain', '2');
       });
 
-      moveSliderTo(99);
+      // This was 99 and sometimes Cypress said it was covered by the parent element
+      moveSliderTo(98);
       tableToolTile.getTableTile('[data-test="subtab-workspaces"] .editable-document-content').within(() => {
         tableToolTile.getTableCell().eq(1).should('contain', '1');
         tableToolTile.getTableCell().eq(2).should('contain', '2');

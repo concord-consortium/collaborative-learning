@@ -410,7 +410,7 @@ context('Test Canvas', function () {
       canvas.deleteDocument();
       resourcesPanel.openTopTab("my-work");
       cy.openSection("my-work", "workspaces");
-      resourcesPanel.getCanvasItemTitle("my-work","workspaces").contains(renameTitlePencil).should('not.be.visible');
+      resourcesPanel.getCanvasItemTitle("my-work","workspaces").contains(renameTitlePencil).should('not.exist');
 
     });
     it('verify delete of personal workspace', function () {
