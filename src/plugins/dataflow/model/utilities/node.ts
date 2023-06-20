@@ -318,11 +318,13 @@ export const NodeLiveOutputTypes = [
   },
   {
     name: "Grabber",
-    icon: GrabberIcon
+    icon: GrabberIcon,
+    angleBase: 180
   },
   {
-    name: "Gripper 2.0",
-    icon: GrabberIcon
+    name: "Gripper v2",
+    icon: GrabberIcon,
+    angleBase: 100
   },
   {
     name: "Humidifier",
@@ -454,18 +456,9 @@ export const ProgramDataRates: ProgramDataRate[] = [
   }
 ];
 
-export type AngleBases = {
-  [key: string]: number;
-};
-
-export const kAngleBases: AngleBases = {
-  "Gripper 2.0": 100,
-  "Grabber": 180
-};
-
 export const kSensorSelectMessage = "Select a sensor";
 export const kSensorMissingMessage = "⚠️";
 export const kAnimatedBinaryTypes = ["Fan", "Humidifier"];
 export const kRelaysIndexed =  ["Heat Lamp", "Fan", "Humidifier"];
 export const kBinaryOutputTypes = [...kRelaysIndexed, "Light Bulb"];
-export const kRoundedOutputTypes = ["Grabber", "Gripper 2.0"];
+export const kRoundedOutputTypes = ["Grabber", "Gripper v2"];

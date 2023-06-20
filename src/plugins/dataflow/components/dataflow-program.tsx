@@ -701,7 +701,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       "Live Output": (n: Node) => {
         this.updateNodeChannelInfo(n);
         this.sendDataToSerialDevice(n);
-        // NOTE this probably be the spot to send data to wherever the simuulator plans to find it
       }
     };
     let processNeeded = false;
@@ -803,7 +802,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
     if (deviceFamily === "arduino" && isNumberOutput){
       const liveOutputType = n.controls.get("hubSelect")?.getData("liveOutputType") as string;
-      this.stores.serialDevice.writeToOutForBBGripper(n.data.nodeValue as number, liveOutputType);
+      if (["Gripper v2", "Grabber"].includes(liveOutputType)){
+        this.stores.serialDevice.writeToOutForBBGripper(n.data.nodeValue as number, liveOutputType);
+      }
     }
     if (deviceFamily === "microbit"){
       const hubSelect = n.controls.get("hubSelect") as DropdownListControl;

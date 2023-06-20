@@ -1,5 +1,5 @@
 import { NodeChannelInfo } from "src/plugins/dataflow/model/utilities/channel";
-import { NodeLiveOutputTypes, kAngleBases } from "../../plugins/dataflow/model/utilities/node";
+import { NodeLiveOutputTypes, kGripperVersions } from "../../plugins/dataflow/model/utilities/node";
 
 export class SerialDevice {
   localBuffer: string;
@@ -161,11 +161,10 @@ export class SerialDevice {
   }
 
   public writeToOutForBBGripper(n:number, liveOutputType: string){
-    const percent = n / 100;
-    const angleBase: number = kAngleBases[liveOutputType];
-    const openTo = Math.round(angleBase - (percent * 60));
-
-    if(this.hasPort()){
+    const gripperVer = NodeLiveOutputTypes.find(o => o.name === liveOutputType);
+    if (this.hasPort() && gripperVer?.angleBase){
+      const percent = n / 100;
+      const openTo = Math.round(gripperVer.angleBase - (percent * 60));
       this.writer.write(`${openTo.toString()}\n`);
     }
   }
