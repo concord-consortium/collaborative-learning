@@ -161,57 +161,15 @@ export class SerialDevice {
   }
 
   public writeToOutForBBGripper(n:number, liveOutputType: string){
-    //const gripperVersion = liveOutputType === "Grabber" ? 1 : 2;
-    // temporary for testing
+    const percent = n / 100;
+    // temporary hard code version for testing
     const gripperVersion = 2;
-    let openTo = this.getOpenToForBBGripper(n, gripperVersion);
+
+    const angleBase = gripperVersion === 2 ? 100 : 180;
+    const openTo = Math.round(angleBase - (percent * 60));
+
     if(this.hasPort()){
       this.writer.write(`${openTo.toString()}\n`);
-      console.log("| percent: ", n, " | openTo: ", openTo, " | gripperVersion: ", gripperVersion);
-    }
-  }
-
-  public getOpenToForBBGripper(n:number, gripperVersion: number){
-    const percent = n / 100;
-    switch (gripperVersion){
-      case 1:
-        return Math.round(180 - (percent * 60));
-      case 2:
-        const min = 924;
-        const max = 1583;
-        const scaled = min + (percent * (max - min));
-        return Math.round(scaled);
-      default:
-        return Math.round(180 - (percent * 60));
     }
   }
 }
-
-/*
-
-TEMPORARY
- dummy servo program for figuring out angles on new BB gripper
-
-#include <Servo.h>
-//angle constant can take value in range from 750 to 2250
-#define MIN_SERVO_ANGLE 924
-#define MAX_SERVO_ANGLE 1583
-#define MODE_NORMAL_OPEN 0
-#define MODE_NORMAL_CLOSED 1
-int servoPin = 2;
-Servo Gripper;
-
-void setup() {
-  Serial.begin(9600);
-  Gripper.attach(servoPin);
-  Gripper.write(MIN_SERVO_ANGLE);
-}
-
-void loop() {
-  delay(1000);
-  Gripper.write(MAX_SERVO_ANGLE);
-  delay(1000);
-  Gripper.write(MIN_SERVO_ANGLE);
-}
-
-*/
