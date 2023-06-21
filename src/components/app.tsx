@@ -8,7 +8,7 @@ import { urlParams } from "../utilities/url-params";
 import { DemoCreatorComponent } from "./demo/demo-creator";
 
 import { GroupChooserComponent } from "./group/group-chooser";
-import { IStores, setUnitAndProblem } from "../models/stores/stores";
+import { IStores } from "../models/stores/stores";
 import { isDifferentUnitAndProblem } from "../models/curriculum/unit";
 import { updateProblem } from "../lib/misc";
 import ErrorAlert from "./utilities/error-alert";
@@ -96,7 +96,7 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
         stores.class.updateFromPortal(classInfo);
       }
       if (unitCode && problemId && isDifferentUnitAndProblem(stores, unitCode, problemId)) {
-        await setUnitAndProblem(stores, unitCode, problemId).then( () => {
+        await stores.setUnitAndProblem(unitCode, problemId).then( () => {
           updateProblem(stores, problemId);
         });
       }

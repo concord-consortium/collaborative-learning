@@ -29,6 +29,7 @@ export interface IStores extends IBaseStores {
   userContextProvider: UserContextProvider;
   tabsToDisplay: NavTabModelType[];
   isShowingTeacherContent: boolean;
+  setUnitAndProblem: (unitId: string | undefined, problemOrdinal?: string) => Promise<void>;
 }
 
 export interface ICreateStores extends Partial<IStores> {
@@ -42,7 +43,7 @@ export function createStores(params?: ICreateStores): IStores {
   return new Stores(params);
 }
 
-export class Stores implements IStores{
+class Stores implements IStores{
   appMode: AppMode;
   isPreviewing?: boolean;
   appVersion: string;
@@ -75,7 +76,8 @@ export class Stores implements IStores{
       problem: observable,
       tabsToDisplay: computed,
       problemPath: computed,
-      problemOrdinal: computed
+      problemOrdinal: computed,
+      isShowingTeacherContent: computed
     });
 
     this.appMode = params?.appMode || "dev";
@@ -99,7 +101,6 @@ export class Stores implements IStores{
         },
       });
     this.groups = params?.groups || GroupsModel.create({ acceptUnknownStudents: params?.isPreviewing });
-    // TODO: is the word "class" here ok?
     this.class = params?.class || ClassModel.create({ name: "Null Class", classHash: "" });
     this.db = params?.db || new DB();
     this.documents = params?.documents || createDocumentsModelWithRequiredDocuments(requiredDocumentTypes);
@@ -140,69 +141,73 @@ export class Stores implements IStores{
     const { ui: { showTeacherContent }, user: { isTeacher } } = this;
     return isTeacher && showTeacherContent;
   }
-}
 
-export const setUnitAndProblem = async (stores: IStores, unitId: string | undefined, problemOrdinal?: string) => {
-  let unitJson = await getUnitJson(unitId, stores.appConfig);
-  if (unitJson.status === 404) {
-    unitJson = await getUnitJson(stores.appConfig.defaultUnit, stores.appConfig);
-  }
-
-  // read the unit content, but don't instantiate section contents (DocumentModels) yet
-  const unit = createUnitWithoutContent(unitJson);
-
-  const _problemOrdinal = problemOrdinal || stores.appConfig.defaultProblemOrdinal;
-  const { investigation: _investigation, problem: _problem } = unit.getProblem(_problemOrdinal);
-
-  stores.appConfig.setConfigs([unit.config || {}, _investigation?.config || {}, _problem?.config || {}]);
-
-  // load/initialize the necessary tools
-  const { authorTools = [], toolbar = [], tools: tileTypes = [] } = stores.appConfig;
-  const unitTileTypes = new Set(
-    [...toolbar.map(button => button.id), ...authorTools.map(button => button.id), ...tileTypes]);
-  await registerTileTypes([...unitTileTypes]);
-
-  // read the unit content with full contents now that we have tools
-  stores.unit = UnitModel.create(unitJson);
-  const {investigation, problem} = stores.unit.getProblem(_problemOrdinal);
-
-  // TODO: make this dynamic like the way the components work. The components
-  // access these values from the stores when they need them. This way the values
-  // can be changed on the fly without having to track down each object that is
-  // using them.
-  stores.documents.setAppConfig(stores.appConfig);
-  stores.documents.setFirestore(stores.db.firestore);
-  stores.documents.setUserContextProvider(stores.userContextProvider);
-
-  if (investigation && problem) {
-    stores.investigation = investigation;
-    stores.problem = problem;
-  }
-  stores.ui.setProblemPath(stores.problemPath);
-
-  // Set the active tab to be the first tab
-  const tabs = stores.tabsToDisplay;
-  if (tabs.length > 0) {
-    stores.ui.setActiveNavTab(tabs[0].tab);
-  }
-
-  addDisposer(unit, when(() => {
-      return stores.user.isTeacher;
-    },
-    async () => {
-      // Uncomment the next line to add a 5 second delay.
-      // This is useful to test whether the teacher guide tab shows when there is a network delay.
-      // await new Promise((resolve) => setTimeout(resolve, 5000));
-
-      // only load the teacher guide content for teachers
-      const guideJson = await getGuideJson(unitId, stores.appConfig);
-      if (guideJson.status !== 404) {
-        const unitGuide = guideJson && UnitModel.create(guideJson);
-        // Not sure if this should be "guide" or "teacher-guide", either ought to work
-        unitGuide?.setFacet("teacher-guide");
-        const teacherGuide = unitGuide?.getProblem(problemOrdinal || stores.appConfig.defaultProblemOrdinal)?.problem;
-        stores.teacherGuide = teacherGuide;
-      }
+  // If we need to batch up the changes here we could try changing this to a
+  // MobX flow. However we need to experiment with the interaction of MobX flows
+  // with MST flows.
+  async setUnitAndProblem(unitId: string | undefined, problemOrdinal?: string) {
+    const { appConfig } = this;
+    let unitJson = await getUnitJson(unitId, appConfig);
+    if (unitJson.status === 404) {
+      unitJson = await getUnitJson(appConfig.defaultUnit, appConfig);
     }
-  ));
-};
+
+    // read the unit content, but don't instantiate section contents (DocumentModels) yet
+    const unit = createUnitWithoutContent(unitJson);
+
+    const _problemOrdinal = problemOrdinal || appConfig.defaultProblemOrdinal;
+    const { investigation: _investigation, problem: _problem } = unit.getProblem(_problemOrdinal);
+
+    appConfig.setConfigs([unit.config || {}, _investigation?.config || {}, _problem?.config || {}]);
+
+    // load/initialize the necessary tools
+    const { authorTools = [], toolbar = [], tools: tileTypes = [] } = appConfig;
+    const unitTileTypes = new Set(
+      [...toolbar.map(button => button.id), ...authorTools.map(button => button.id), ...tileTypes]);
+    await registerTileTypes([...unitTileTypes]);
+
+    // read the unit content with full contents now that we have tools
+    this.unit = UnitModel.create(unitJson);
+    const {investigation, problem} = this.unit.getProblem(_problemOrdinal);
+
+    // TODO: make this dynamic like the way the components work. The components
+    // access these values from the stores when they need them. This way the values
+    // can be changed on the fly without having to track down each object that is
+    // using them.
+    this.documents.setAppConfig(appConfig);
+    this.documents.setFirestore(this.db.firestore);
+    this.documents.setUserContextProvider(this.userContextProvider);
+
+    if (investigation && problem) {
+      this.investigation = investigation;
+      this.problem = problem;
+    }
+    this.ui.setProblemPath(this.problemPath);
+
+    // Set the active tab to be the first tab
+    const tabs = this.tabsToDisplay;
+    if (tabs.length > 0) {
+      this.ui.setActiveNavTab(tabs[0].tab);
+    }
+
+    addDisposer(unit, when(() => {
+        return this.user.isTeacher;
+      },
+      async () => {
+        // Uncomment the next line to add a 5 second delay.
+        // This is useful to test whether the teacher guide tab shows when there is a network delay.
+        // await new Promise((resolve) => setTimeout(resolve, 5000));
+
+        // only load the teacher guide content for teachers
+        const guideJson = await getGuideJson(unitId, appConfig);
+        if (guideJson.status !== 404) {
+          const unitGuide = guideJson && UnitModel.create(guideJson);
+          // Not sure if this should be "guide" or "teacher-guide", either ought to work
+          unitGuide?.setFacet("teacher-guide");
+          const teacherGuide = unitGuide?.getProblem(problemOrdinal || appConfig.defaultProblemOrdinal)?.problem;
+          this.teacherGuide = teacherGuide;
+        }
+      }
+    ));
+  }
+}
