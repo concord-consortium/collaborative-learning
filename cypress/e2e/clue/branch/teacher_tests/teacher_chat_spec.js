@@ -82,7 +82,7 @@ context('Chat Panel', () => {
       clueCanvas.getInvestigationCanvasTitle().text().then((title)=>{
         cy.openTopTab('my-work');
         cy.openSection('my-work', 'workspaces');
-        cy.openDocumentThumbnail('workspaces', title);
+        cy.openDocumentThumbnail('my-work','workspaces', title);
         chatPanel.verifyDocumentCommentClass();
       });
     });
@@ -257,7 +257,7 @@ context('Chat Panel', () => {
       clueCanvas.getInvestigationCanvasTitle().text().then((title)=>{
         cy.openTopTab('my-work');
         cy.openSection('my-work', 'workspaces');
-        cy.openDocumentThumbnail('workspaces', title);
+        cy.openDocumentThumbnail('my-work','workspaces', title);
         cy.wait(2000);
         // document comment
         chatPanel.addCommentAndVerify("This is document comment for teacher-my-work workspaces-subsection");

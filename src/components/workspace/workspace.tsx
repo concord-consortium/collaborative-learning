@@ -16,12 +16,11 @@ interface IProps extends IBaseProps {
 }
 
 export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
+  const stores = useStores();
   const { appConfig: { navTabs: navTabSpecs },
-          teacherGuide,
-          user: { isTeacher },
           ui: { activeNavTab, navTabContentShown, dividerPosition,
                 workspaceShown, problemWorkspace, setDividerPosition }
-        } = useStores();
+        } = stores;
    const [showExpanders, setShowExpanders] = useState(false);
 
   let imageDragDrop: ImageDragDrop;
@@ -55,14 +54,9 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
   };
 
   const renderNavTabPanel = () => {
-    const studentTabs = navTabSpecs?.tabSpecs.filter(t => !t.teacherOnly);
-    const teacherTabs = navTabSpecs?.tabSpecs.filter(t => (t.tab !== "teacher-guide") || teacherGuide);
-    const tabsToDisplay = isTeacher ? teacherTabs : studentTabs;
-
     return (
       navTabContentShown
         ? <NavTabPanel
-            tabs={tabsToDisplay}
             onDragOver={handleDragOverWorkspace}
             isResourceExpanded={navTabContentShown}
             isExpanderShown={showExpanders}

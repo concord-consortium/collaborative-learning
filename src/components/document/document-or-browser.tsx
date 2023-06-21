@@ -3,7 +3,7 @@ import { useAppConfig } from "../../hooks/use-stores";
 import { DocumentModelType } from "../../models/document/document";
 import { LearningLogDocument, PersonalDocument, ProblemDocument } from "../../models/document/document-types";
 import { ENavTab, ENavTabSectionType, NavTabSpec } from "../../models/view/nav-tabs";
-import { SectionDocumentOrBrowser } from "../navigation/section-document-or-browser";
+import { DocumentBrowser } from "../navigation/document-browser";
 import { EditableDocumentContent, IProps as IEditableDocumentContentProps } from "./editable-document-content";
 
 function getSectionForDocument(document: DocumentModelType) {
@@ -25,7 +25,7 @@ interface IDocumentOrBrowserProps extends IEditableDocumentContentProps {
 export const DocumentOrBrowser: React.FC<IDocumentOrBrowserProps> = props => {
   const { showBrowser, tabSpec, document, onSelectNewDocument, onSelectDocument, ...others } = props;
   return showBrowser && tabSpec
-          ? <SectionDocumentOrBrowser tabSpec={tabSpec}
+          ? <DocumentBrowser tabSpec={tabSpec}
               selectedDocument={document.key}
               selectedSection={getSectionForDocument(document)}
               onSelectNewDocument={onSelectNewDocument}

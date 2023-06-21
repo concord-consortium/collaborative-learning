@@ -1,9 +1,9 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { useProblemPathWithFacet, useUIStore, useUserStore } from "../../hooks/use-stores";
-import { getSectionTitle, SectionModelType, findSectionIndex } from "../../models/curriculum/section";
+import { getSectionTitle, SectionModelType } from "../../models/curriculum/section";
 import { ProblemPanelComponent } from "./problem-panel";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
@@ -24,7 +24,7 @@ const kNavTabHeight = 34;
 const kTabSectionBorderWidth = 2;
 
 export const ProblemTabContent: React.FC<IProps>
-  = observer(({ context, sections, showSolutionsSwitch }: IProps) => {
+  = observer(function ProblemTabContent({ context, sections, showSolutionsSwitch }: IProps) {
   const { isTeacher } = useUserStore();
   const ui = useUIStore();
   const problemPath = useProblemPathWithFacet(context);
@@ -37,33 +37,25 @@ export const ProblemTabContent: React.FC<IProps>
                         : kHeaderHeight + kNavTabHeight + (2 * (kWorkspaceContentMargin + kTabSectionBorderWidth));
   const problemsPanelHeight = vh - headerOffset;
   const problemsPanelStyle = { height: problemsPanelHeight };
-  //per Scott's PR comments we should be using ui.focusDocument instead of keeping this local state [activeIndex]
-  const [activeIndex, setActiveIndex] = useState(0); //used to display correct "section" or subtab
-
+  const tabId = context || ENavTab.kProblems;
 
   useEffect(() => {
-    if (ui.activeNavTab === ENavTab.kProblems) {
-      ui.updateFocusDocument();
+    if (hasSubTabs) {
+      ui.setOpenSubTab(tabId, sections[0].type);
     }
-    setActiveIndex((prevState) => {
-      const newIndex = findSectionIndex(sections, ui.focusDocument);
-      if (newIndex !== -1) {
-        return newIndex;
-      } else {
-        return prevState;
-      }
-    });
-
-  }, [sections, ui, ui.focusDocument]);
+  }, [hasSubTabs, sections, tabId, ui]);
 
   const handleTabSelected = (index: number) => {
     const section = sections?.[index];
     if (!section) return;
+
+    ui.setOpenSubTab(tabId, section.type);
+
     // TODO: The log event properties have been reversed for quite a while now.
     // We don't want to introduce a breaking change in the log event stream, so
     // the variables are named for clarity. It might be better to add a version
     // property to the log event so we can fix this.
-    const namePropButReallyType = section.type;    
+    const namePropButReallyType = section.type;
     const typePropButReallyTitle = getSectionTitle(section.type);
     Logger.log(LogEventName.SHOW_TAB_SECTION, {
       tab_section_name: namePropButReallyType,
@@ -71,14 +63,17 @@ export const ProblemTabContent: React.FC<IProps>
     });
     // Clear any selected tiles when the tab changes
     ui.setSelectedTile();
-    ui.updateFocusDocument();
-    setActiveIndex(index);
   };
 
   const handleToggleSolutions = () => {
     ui.toggleShowTeacherContent(!showTeacherContent);
     Logger.log(showTeacherContent ? LogEventName.HIDE_SOLUTIONS : LogEventName.SHOW_SOLUTIONS);
   };
+
+  const openSubTab = ui.tabs.get(tabId)?.openSubTab;
+  const sectionIndex = sections.findIndex((section: any) => section.type === openSubTab);
+  // activeIndex might be -1 in an error condition
+  const activeIndex = sectionIndex < 0 ? 0 : sectionIndex;
 
   return (
     <Tabs className={classNames("problem-tabs", context, chatBorder)}

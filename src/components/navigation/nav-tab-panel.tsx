@@ -3,13 +3,13 @@ import React from "react";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { BaseComponent, IBaseProps } from "../base";
 import { kDividerMax, kDividerMin } from "../../models/stores/ui-types";
-import { NavTabSpec, ENavTab } from "../../models/view/nav-tabs";
+import { NavTabSpec, ENavTab, NavTabModelType } from "../../models/view/nav-tabs";
+import { getTabsToDisplay } from "../../models/stores/stores";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import { StudentGroupView } from "../document/student-group-view";
 import { ProblemTabContent } from "./problem-tab-content";
 import { SectionDocumentOrBrowser } from "./section-document-or-browser";
-import { FocusDocumentTracker } from "./focus-document-tracker";
 // import { NewCommentsBadge } from "./new-comments-badge";
 import { ChatPanel } from "../chat/chat-panel";
 import ChatIcon from "../../assets/chat-icon.svg";
@@ -19,7 +19,6 @@ import "./nav-tab-panel.sass";
 import "../themes.scss";
 
 interface IProps extends IBaseProps {
-  tabs?: NavTabSpec[];
   isResourceExpanded: boolean;
   isExpanderShown: boolean;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
@@ -31,16 +30,18 @@ interface IProps extends IBaseProps {
 export class NavTabPanel extends BaseComponent<IProps> {
 
   private navTabPanelElt: HTMLDivElement | null = null;
-  private topTabReset = "";
+  private tabs: NavTabModelType[];
 
   constructor(props: IProps) {
     super(props);
+    this.tabs = getTabsToDisplay(this.stores);
   }
 
   public render() {
-    const { tabs, isResourceExpanded, isExpanderShown } = this.props;
+    const { isResourceExpanded, isExpanderShown } = this.props;
     const { ui: { activeNavTab, dividerPosition, focusDocument, showChatPanel, selectedTileIds },
             user } = this.stores;
+    const { tabs } = this;
     const selectedTabIndex = tabs?.findIndex(t => t.tab === activeNavTab);
     const resizePanelWidth = 6;
     const collapseTabWidth = 44;
@@ -60,7 +61,6 @@ export class NavTabPanel extends BaseComponent<IProps> {
       <div className={`resource-and-chat-panel ${isResourceExpanded ? "shown" : ""}`} style={resourceWidthStyle}>
         <div className={`nav-tab-panel ${showChatPanel ? "chat-open" : ""}`}
             ref={elt => this.navTabPanelElt = elt}>
-          <FocusDocumentTracker navTabPanelElt={this.navTabPanelElt} />
           <Tabs
             selectedIndex={selectedTabIndex}
             onSelect={this.handleSelectTab}
@@ -128,18 +128,11 @@ export class NavTabPanel extends BaseComponent<IProps> {
     }
   };
 
-  private clearTopTabReset = () => {
-    // clear without triggering render (hence not in state)
-     this.topTabReset = "";
-  };
-
   private renderDocuments = (tabSpec: NavTabSpec) => {
     const { ui: { showChatPanel } } = this.stores;
-    const reset = tabSpec.tab === this.topTabReset;
     return (
       <SectionDocumentOrBrowser
         tabSpec={tabSpec}
-        reset={reset ? this.clearTopTabReset : undefined}
         isChatOpen={showChatPanel}
       />
     );
@@ -168,24 +161,24 @@ export class NavTabPanel extends BaseComponent<IProps> {
   };
 
   private handleSelectTab = (tabIndex: number) => {
-    const { tabs } = this.props;
+    const { tabs } = this;
     const { ui } = this.stores;
     if (tabs) {
       const tabSpec = tabs[tabIndex];
       if (ui.activeNavTab !== tabSpec.tab) {
         ui.setActiveNavTab(tabSpec.tab);
-        ui.setSelectedCommentedDocument(undefined);
-        ui.updateFocusDocument();
         const logParameters = {
           tab_name: tabSpec.tab.toString()
         };
         const logEvent = () => { Logger.log(LogEventName.SHOW_TAB, logParameters); };
         logEvent();
       } else {
-        // track this value in a member rather than state to avoid excessive renders
-        this.topTabReset = tabSpec.tab;
-        // must force refresh initially but not when value is reset
-        this.forceUpdate();
+        if (ui.openSubTab) {
+          // If there is a document open then a click on the active top level tab
+          // closes the document. Also a click on the active sub tab closes the
+          // document, this is handled in section-document-or-browser
+          ui.closeSubTabDocument(tabSpec.tab, ui.openSubTab);
+        }
       }
     }
   };
