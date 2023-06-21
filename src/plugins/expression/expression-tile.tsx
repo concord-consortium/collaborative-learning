@@ -81,6 +81,18 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   }, [content, readOnly]);
 
   const handleMathfieldInput = (e: FormEvent<MathfieldElementAttributes>) => {
+    const mathLiveEvent = e.nativeEvent as any;
+    if(mathLiveEvent.inputType === "insertText" && mathLiveEvent.data === "insertText") {
+      // This is an event that happens when the user types `\`
+      // this same type of event is also sent when the user is typing characters after
+      // the `\` before they hit enter. After they hit enter there is another
+      // insertText event which has data of what they typed, for example `\div`
+
+      // So in this case when we are in this `\` mode, we don't want to set the value
+      // of the element. We also don't need to save the value to the content because
+      // the value is not changing while in this `\` mode.
+      return;
+    }
     const mfLatex = (e.target as MathfieldElement).value;
     const replacedLatex = replaceLatex(mfLatex);
     trackedCursorPos.current =  mf.current?.position || 0;
