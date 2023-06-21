@@ -79,11 +79,8 @@ export class NavTabPanel extends BaseComponent<IProps> {
                   })
                 }
               </TabList>
-
-
               { isChatEnabled
                   ? !openChatPanel &&
-                  // <p> test </p>
                     <div className={`chat-panel-toggle themed ${activeNavTab}`}>
                       {/* The next line of code is commented out, but deliberately not removed,
                           per: https://www.pivotaltracker.com/story/show/179754830 */}

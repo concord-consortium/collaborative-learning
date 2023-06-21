@@ -22,7 +22,6 @@ export class ProblemPanelComponent extends BaseComponent<IProps> {
       <div className="problem-panel">
         {section ? this.renderSection(section) : null}
       </div>
-      // <p>test </p>
     );
   }
 
