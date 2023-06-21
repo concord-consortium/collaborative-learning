@@ -88,7 +88,7 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
     .then(async ({appMode: newAppMode, authenticatedUser, classInfo, problemId, unitCode}) => {
       // authentication can trigger appMode change (e.g. preview => demo)
       if (newAppMode && (newAppMode !== appMode)) {
-        stores.appMode = newAppMode;
+        stores.setAppMode(newAppMode);
       }
       user.setAuthenticatedUser(authenticatedUser);
       rawPortalJWT = authenticatedUser.rawPortalJWT;

@@ -1,5 +1,5 @@
 import { addDisposer } from "mobx-state-tree";
-import { computed, makeObservable, observable, when } from "mobx";
+import { action, computed, flow, flowResult, makeAutoObservable, makeObservable, observable, runInAction, when } from "mobx";
 import { AppConfigModel, AppConfigModelType } from "./app-config-model";
 import { createUnitWithoutContent, getGuideJson, getUnitJson, UnitModel, UnitModelType } from "../curriculum/unit";
 import { InvestigationModel, InvestigationModelType } from "../curriculum/investigation";
@@ -29,6 +29,7 @@ export interface IStores extends IBaseStores {
   userContextProvider: UserContextProvider;
   tabsToDisplay: NavTabModelType[];
   isShowingTeacherContent: boolean;
+  setAppMode: (appMode: AppMode) => void;
   setUnitAndProblem: (unitId: string | undefined, problemOrdinal?: string) => Promise<void>;
 }
 
@@ -68,17 +69,13 @@ class Stores implements IStores{
   userContextProvider: UserContextProvider;
 
   constructor(params?: ICreateStores){
-    makeObservable(this, {
-      appMode: observable,
-      teacherGuide: observable,
-      unit: observable,
-      investigation: observable,
-      problem: observable,
-      tabsToDisplay: computed,
-      problemPath: computed,
-      problemOrdinal: computed,
-      isShowingTeacherContent: computed
-    });
+    // This will mark all properties as observable
+    // all getters as computed, all setters as actions
+    // and any other function's type will be determined
+    // at runtime. It isn't clear from the docs what it
+    // will do with async functions, but whatever it
+    // does seems to work without warnings.
+    makeAutoObservable(this);
 
     this.appMode = params?.appMode || "dev";
     this.isPreviewing = params?.isPreviewing || false;
@@ -142,6 +139,14 @@ class Stores implements IStores{
     return isTeacher && showTeacherContent;
   }
 
+  setTeacherGuide(guide: ProblemModelType | undefined) {
+    this.teacherGuide = guide;
+  }
+
+  setAppMode(mode: AppMode) {
+    this.appMode = mode;
+  }
+
   // If we need to batch up the changes here we could try changing this to a
   // MobX flow. However we need to experiment with the interaction of MobX flows
   // with MST flows.
@@ -166,29 +171,38 @@ class Stores implements IStores{
       [...toolbar.map(button => button.id), ...authorTools.map(button => button.id), ...tileTypes]);
     await registerTileTypes([...unitTileTypes]);
 
-    // read the unit content with full contents now that we have tools
-    this.unit = UnitModel.create(unitJson);
-    const {investigation, problem} = this.unit.getProblem(_problemOrdinal);
+    // We are changing our observable state here so we need to be in an action.
+    // Because this is an async function, we'd have to switch it to a flow to
+    // make the whole thing an action. However typing the yields in flows is
+    // annoying, so instead we just run this non async part in an anonymous action.
+    // Because appConfig.setConfigs is located before this block it will
+    // not be batched with the rest of these updates. Having it not batched
+    // should be fine and keeps things less complicated.
+    runInAction(() => {
+      // read the unit content with full contents now that we have tools
+      this.unit = UnitModel.create(unitJson);
+      const {investigation, problem} = this.unit.getProblem(_problemOrdinal);
 
-    // TODO: make this dynamic like the way the components work. The components
-    // access these values from the stores when they need them. This way the values
-    // can be changed on the fly without having to track down each object that is
-    // using them.
-    this.documents.setAppConfig(appConfig);
-    this.documents.setFirestore(this.db.firestore);
-    this.documents.setUserContextProvider(this.userContextProvider);
+      // TODO: make this dynamic like the way the components work. The components
+      // access these values from the stores when they need them. This way the values
+      // can be changed on the fly without having to track down each object that is
+      // using them.
+      this.documents.setAppConfig(appConfig);
+      this.documents.setFirestore(this.db.firestore);
+      this.documents.setUserContextProvider(this.userContextProvider);
 
-    if (investigation && problem) {
-      this.investigation = investigation;
-      this.problem = problem;
-    }
-    this.ui.setProblemPath(this.problemPath);
+      if (investigation && problem) {
+        this.investigation = investigation;
+        this.problem = problem;
+      }
+      this.ui.setProblemPath(this.problemPath);
 
-    // Set the active tab to be the first tab
-    const tabs = this.tabsToDisplay;
-    if (tabs.length > 0) {
-      this.ui.setActiveNavTab(tabs[0].tab);
-    }
+      // Set the active tab to be the first tab
+      const tabs = this.tabsToDisplay;
+      if (tabs.length > 0) {
+        this.ui.setActiveNavTab(tabs[0].tab);
+      }
+    });
 
     addDisposer(unit, when(() => {
         return this.user.isTeacher;
@@ -205,7 +219,7 @@ class Stores implements IStores{
           // Not sure if this should be "guide" or "teacher-guide", either ought to work
           unitGuide?.setFacet("teacher-guide");
           const teacherGuide = unitGuide?.getProblem(problemOrdinal || appConfig.defaultProblemOrdinal)?.problem;
-          this.teacherGuide = teacherGuide;
+          this.setTeacherGuide(teacherGuide);
         }
       }
     ));
