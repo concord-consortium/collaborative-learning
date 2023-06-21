@@ -5,7 +5,6 @@ import DocumentsWithCommentsIcon  from "../../assets/documents-list-icon.svg";
 
 import "./chat-panel-header.scss";
 import "../themes.scss";
-import { active } from "d3";
 
 interface IProps {
   activeNavTab: string;
