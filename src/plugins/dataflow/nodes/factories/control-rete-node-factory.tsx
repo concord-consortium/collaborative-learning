@@ -5,6 +5,7 @@ import { ValueControl } from "../controls/value-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
 import { NodeControlTypes, roundNodeValue } from "../../model/utilities/node";
 import { PlotButtonControl } from "../controls/plot-button-control";
+import { on } from "superagent";
 
 export class ControlReteNodeFactory extends DataflowReteNodeFactory {
   constructor(numSocket: Socket) {
@@ -59,13 +60,13 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
     }
 
     // For each function, evaluate given inputs and node state
-    if (funcName === "Output Zero"){
+    if (funcName === "Hold 0"){
       this.heldValue = null;
       result = n1 === 1 ? 0 : n2;
       cResult = 0;
     }
 
-    else if (funcName === "Hold Current"){
+    else if (funcName === "Hold this"){
       if (n1 === 1){
         // Already a number here? Maintain. Otherwise set the new held value;
         this.heldValue = typeof this.heldValue === "number" ? this.heldValue : n2;
@@ -79,7 +80,7 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
       }
     }
 
-    else if (funcName === "Hold Prior"){
+    else if (funcName === "Hold previous"){
       if (n1 === 1){
         // Already a number here? Maintain. Otherwise set the new held value;
         this.heldValue = typeof this.heldValue === "number" ? this.heldValue : priorValue;
@@ -99,9 +100,13 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
     // const n1String = isNaN(n1) ? kEmptyValueString : `${roundNodeValue(n1)}`;
     const n2String = isNaN(n2) ? kEmptyValueString : `${roundNodeValue(n2)}`;
 
-    const resultSentence = n1 === 1 ?
-      `1 ? ${cResultString} : ${n2String} ⇒ ${resultString}` :
-      `0 ? ${n2String} : ${cResultString} ⇒ ${resultString}`;
+    const onString = `on →${cResultString}`;
+    const offString = `off →${resultString}`;
+
+    const resultSentence = n1 === 1 ? onString : offString;
+      // first version
+      // `1 ? ${cResultString} : ${n2String} ⇒ ${resultString}` :
+      // `0 ? ${n2String} : ${cResultString} ⇒ ${resultString}`;
       // alternative ui: rather than make any !== 1 appear as 0, show actual input
       // `${n1} ? ${cResultString} : ${n2String} ⇒ ${resultString}` :
       // `${n1} ? ${n2String} : ${cResultString} ⇒ ${resultString}`;

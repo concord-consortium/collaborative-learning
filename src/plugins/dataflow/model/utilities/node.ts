@@ -89,7 +89,7 @@ export const NodeTypes: NodeType[] = [
   },
   {
     name: "Control",
-    displayName: "Control",
+    displayName: "Hold",
   },
   {
     name: "Demo Output",
@@ -226,17 +226,17 @@ export const NodeOperationTypes = [
 
 export const NodeControlTypes = [
   {
-    name: "Hold Current",
+    name: "Hold this",
     type: "control",
     icon: HoldCurrentArrowIcon
   },
   {
-    name: "Hold Prior",
+    name: "Hold previous",
     type: "control",
     icon: HoldPreviousArrowIcon
   },
   {
-    name: "Output Zero",
+    name: "Hold 0",
     type: "control",
     icon: HoldZeroArrowIcon
   }
