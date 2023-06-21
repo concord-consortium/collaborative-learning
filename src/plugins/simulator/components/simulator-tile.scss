@@ -7,10 +7,13 @@
   overflow: auto;
 
   .simulator-content {
-    padding: 10px 0 0 25px;
+    .simulator-variables {
+      display: flex;
+      height: 100%;
+      justify-content: space-between;
+      padding: 45px 20px;
+      position: absolute;
+      width: 100%;
+    }
   }
-
-  // &.editable {
-  //   border: 1px solid #cccccc;
-  // }
 }

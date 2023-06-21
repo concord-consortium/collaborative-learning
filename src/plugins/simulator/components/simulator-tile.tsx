@@ -3,6 +3,7 @@ import { observer } from "mobx-react";
 import React, { useEffect, useState } from "react";
 
 import { SimulatorContentModelType } from "../model/simulator-content";
+import { inputVariableNamePart, outputVariableNamePart } from "../../shared-variables/simulations/simulation-utilities";
 import { ITileProps } from "../../../components/tiles/tile-component";
 import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
 
@@ -25,20 +26,35 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
     return () => clearInterval(id);
   }, [content]);
 
-  const displayVariables = content.simulationData.variables;
-
   interface IVariableRowProps {
     key?: string;
+    nameFunction?: (v: VariableType) => string | undefined;
     variable?: VariableType;
   }
-  const VariableRow = ({ variable }: IVariableRowProps) => {
-    const display = variable ? `${variable.name}: ${variable.value?.toFixed(2)}` : "";
+  const VariableRow = ({ nameFunction, variable }: IVariableRowProps) => {
+    const defaultFunction = (v: VariableType) => v.name || "";
+    const _nameFunction = nameFunction ?? defaultFunction;
+
+    // Limit the value to two decimal places
+    const value = variable?.value;
+    const scaleFactor = 100;
+    const displayValue = value !== undefined ? Math.round(value * scaleFactor) / scaleFactor : "";
+    const display = variable?.name ? `${_nameFunction(variable)}: ${displayValue}` : "";
     return (
       <p>
         {display}
       </p>
     );
   };
+
+  const displayName = (
+    nameFunction: (v: VariableType) => string | undefined, suffix: string, variable: VariableType
+  ) => {
+    return variable?.name ? `${nameFunction(variable)} ${suffix}` : "";
+  };
+
+  const inputDisplayName = (v: VariableType) => displayName(inputVariableNamePart, "Sensor", v);
+  const outputDisplayName = (v: VariableType) => displayName(outputVariableNamePart, "Output", v);
 
   return (
     <div className="simulator-content-container">
@@ -48,11 +64,22 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
         scale={scale}
       />
       <div className="simulator-content">
-        {displayVariables.map(
-          variable => variable.name
-            ? <VariableRow variable={content?.getVariable(variable.name)} key={variable.name} />
-            : null
-        )}
+        <div className="simulator-variables">
+          { content.inputVariables.map(variable =>
+            <VariableRow
+              key={variable.name}
+              nameFunction={inputDisplayName}
+              variable={content.getVariable(variable.name)}
+            />
+          )}
+          { content.outputVariables.map(variable =>
+            <VariableRow
+              key={variable.name}
+              nameFunction={outputDisplayName}
+              variable={content.getVariable(variable.name)}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

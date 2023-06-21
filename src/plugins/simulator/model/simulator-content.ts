@@ -1,11 +1,12 @@
 import { reaction } from "mobx";
 import { types, Instance, getType, addDisposer, getSnapshot } from "mobx-state-tree";
-import { VariableSnapshot } from "@concord-consortium/diagram-view";
+import { VariableSnapshot, VariableType } from "@concord-consortium/diagram-view";
 
 import { kSimulatorTileType } from "../simulator-types";
 import { kSharedVariablesID, SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
 import { kBrainwavesKey } from "../simulations/brainwaves-gripper";
 import { simulations } from "../simulations/simulations";
+import { isInputVariable, isOutputVariable } from "../../shared-variables/simulations/simulation-utilities";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { TileContentModel } from "../../../models/tiles/tile-content";
 import { SharedModelType } from "../../../models/shared/shared-model";
@@ -48,8 +49,19 @@ export const SimulatorContentModel = TileContentModel
     }
   }))
   .views(self => ({
-    getVariable(name: string) {
-      return self.sharedModel?.variables.find(v => v.name === name);
+    get variables() {
+      return self.sharedModel?.variables;
+    }
+  }))
+  .views(self => ({
+    getVariable(name?: string) {
+      return self.variables?.find(v => v.name === name);
+    },
+    get inputVariables(): VariableType[] {
+      return self.variables?.filter(v => isInputVariable(v)) ?? [];
+    },
+    get outputVariables(): VariableType[] {
+      return self.variables?.filter(v => isOutputVariable(v)) ?? [];
     }
   }))
   .actions(self => ({
