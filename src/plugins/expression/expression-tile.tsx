@@ -50,7 +50,11 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   const ui = useUIStore();
 
   useEffect(() => {
-    mf.current?.addEventListener("focus", () => ui.setSelectedTileId(model.id));
+    const handleFocus = () => ui.setSelectedTileId(model.id);
+    // Save the math field so we can remove the listener from the same instance
+    // even if the instance is changed for some reason
+    const currentMathField = mf.current;
+    currentMathField?.addEventListener("focus", handleFocus);
     undoKeys.forEach((key: string) => {
       mf.current?.keybindings && replaceKeyBinding(mf.current.keybindings, key, "");
     });
@@ -68,6 +72,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
         "*": "\\times"
       };
     }
+    return () => currentMathField?.removeEventListener("focus", handleFocus);
   }, [model.id, ui]);
 
   useEffect(() => {
