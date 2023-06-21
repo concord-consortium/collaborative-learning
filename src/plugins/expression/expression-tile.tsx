@@ -1,6 +1,8 @@
 import { observer } from "mobx-react";
 import React, { DOMAttributes, useRef, useEffect, FormEvent } from "react";
 import { onSnapshot } from "mobx-state-tree";
+import { pick } from "lodash";
+
 import "mathlive"; // separate static import of library for initialization to run
 // eslint-disable-next-line no-duplicate-imports
 import type { MathfieldElementAttributes, MathfieldElement } from "mathlive";
@@ -52,7 +54,20 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     undoKeys.forEach((key: string) => {
       mf.current?.keybindings && replaceKeyBinding(mf.current.keybindings, key, "");
     });
-    if (mf.current) mf.current.inlineShortcuts = {};
+    if (mf.current) {
+      // Uncomment this line to see all of the available shortcuts
+      // console.log("mf.current.inlineShortcuts", mf.current.inlineShortcuts);
+
+      // Only pick some of the default mathlive shortcuts
+      const defaultShortcuts = pick(mf.current.inlineShortcuts, [
+        "%"
+      ]);
+      // Combine those defaults with some custom shortcuts
+      mf.current.inlineShortcuts = {
+        ...defaultShortcuts,
+        "*": "\\times"
+      };
+    }
   }, [model.id, ui]);
 
   useEffect(() => {
