@@ -38,9 +38,9 @@ import AbsoluteValueIcon from "../../assets/icons/transform/absolute-value.svg";
 import NegationIcon from "../../assets/icons/transform/negation.svg";
 import NotIcon from "../../assets/icons/transform/not.svg";
 
-import CurrentValueIcon from "../../assets/icons/control/control-current-value.svg";
-import PreviousValueIcon from "../../assets/icons/control/control-previous-value.svg";
-import ZeroValueIcon from "../../assets/icons/control/control-zero-value.svg";
+import HoldPreviousArrowIcon from "../../assets/icons/control/hold-previous.svg";
+import HoldCurrentArrowIcon from "../../assets/icons/control/hold-this.svg";
+import HoldZeroArrowIcon from "../../assets/icons/control/hold-zero.svg";
 
 export const kMaxNodeValues = 16;
 
@@ -228,17 +228,17 @@ export const NodeControlTypes = [
   {
     name: "Hold Current",
     type: "control",
-    icon: CurrentValueIcon
+    icon: HoldCurrentArrowIcon
   },
   {
     name: "Hold Prior",
     type: "control",
-    icon: PreviousValueIcon
+    icon: HoldPreviousArrowIcon
   },
   {
     name: "Output Zero",
     type: "control",
-    icon: ZeroValueIcon
+    icon: HoldZeroArrowIcon
   }
 ];
 

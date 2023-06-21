@@ -16,8 +16,8 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
   public builder(node: Node) {
     super.defaultBuilder(node);
     if (this.editor) {
-      const inp1 = new Rete.Input("num1", "Binary", this.numSocket);
-      const inp2 = new Rete.Input("num2", "Number2", this.numSocket);
+      const binaryInput = new Rete.Input("num1", "Binary", this.numSocket);
+      const valueInput = new Rete.Input("num2", "Number2", this.numSocket);
       const out = new Rete.Output("num", "Number", this.numSocket);
 
       node.data.hasGate = true;
@@ -28,8 +28,8 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
           return { name: nodeOp.name, icon: nodeOp.icon };
         });
       return node
-        .addInput(inp1)
-        .addInput(inp2)
+        .addInput(valueInput)
+        .addInput(binaryInput)
         .addControl(new DropdownListControl(this.editor, "controlOperator", node, dropdownOptions, true))
         .addControl(new PlotButtonControl(this.editor, "plot", node))
         .addControl(new ValueControl(this.editor, "nodeValue", node))
