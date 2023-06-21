@@ -113,7 +113,6 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
       const dataSetOfDroppedTile = content.dataSet;
 
       mergeTwoDataSets(dataSetOfDraggedTile, dataSetOfDroppedTile);
-      console.log("test to delete");
       e.preventDefault();
       e.stopPropagation(); //prevents calling document-content > handleDrop
 
