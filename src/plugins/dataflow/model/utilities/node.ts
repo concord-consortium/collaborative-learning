@@ -42,6 +42,17 @@ import CurrentValueIcon from "../../assets/icons/control/control-current-value.s
 import PreviousValueIcon from "../../assets/icons/control/control-previous-value.svg";
 import ZeroValueIcon from "../../assets/icons/control/control-zero-value.svg";
 
+export const kMaxNodeValues = 16;
+
+interface NodeNameValuePair {
+  name: string;
+  val: number;
+}
+interface NodeValueMap {
+  [key: string]: NodeNameValuePair;
+}
+export type NodeValue = number | NodeValueMap;
+
 export interface NodeType {
   name: string;
   displayName: string;

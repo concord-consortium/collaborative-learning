@@ -1,10 +1,12 @@
 // FIXME: ESLint is unhappy with these control components
 /* eslint-disable react-hooks/rules-of-hooks */
+import classNames from "classnames";
 import React, { useRef }  from "react";
 import Rete, { NodeEditor, Node } from "rete";
+
+import { useStopEventPropagation, useCloseDropdownOnOutsideEvent } from "./custom-hooks";
 import { NodeSensorTypes, kSensorSelectMessage, kSensorMissingMessage } from "../../model/utilities/node";
 import { NodeChannelInfo } from "../../model/utilities/channel";
-import { useStopEventPropagation, useCloseDropdownOnOutsideEvent } from "./custom-hooks";
 import DropdownCaretIcon from "../../assets/icons/dropdown-caret.svg";
 import { dataflowLogEvent } from "../../dataflow-logger";
 import { resetGraph } from "../../utilities/graph-utils";
@@ -147,6 +149,8 @@ export class SensorSelectControl extends Rete.Control {
         if (ch.missing) return `${kSensorMissingMessage} connect ${ch.deviceFamily} for ${ch.name}`;
         const chStr = ch.virtual
           ? `${ch.name} Demo Data`
+          : ch.simulated
+          ? `Simulated ${ch.name}`
           : `${ch.hubName}:${ch.type}`;
         return chStr;
       };
@@ -156,12 +160,8 @@ export class SensorSelectControl extends Rete.Control {
         options.push("none");
       }
       const channelString = getChannelString(selectedChannel);
-      const titleClass = channelString.includes(kSensorSelectMessage)
-                         ? "label unselected"
-                         : "label";
-      const topItemClass = channelString.includes(kSensorMissingMessage)
-                         ? "item top missing"
-                         : "item top";
+      const titleClass = classNames("label", { selected: channelString.includes(kSensorSelectMessage) });
+      const topItemClass = classNames("item", "top", { missing: channelString.includes(kSensorMissingMessage) });
       return (
         <div className="node-select sensor-select" ref={divRef} title={"Select Sensor"}>
           <div className={topItemClass} onMouseDown={handleChange(onDropdownClick)}>
@@ -174,21 +174,22 @@ export class SensorSelectControl extends Rete.Control {
           </div>
           {showList ?
           <div className="option-list" ref={listRef}>
-            {options.map((ch: NodeChannelInfo, i: any) => (
-              <div
-                className={
-                  (!!id && !!ch && ch.channelId === id) || (!selectedChannel && i === 0)
-                    ? ("item sensor-type-option selected " + (ch.missing ? "missing" : ""))
-                    : ("item sensor-type-option selectable " + (ch.missing ? "missing" : ""))
-                }
-                key={i}
-                onMouseDown={onListOptionClick(ch ? ch.channelId : null)}
-              >
-                <div className="label">
-                  {getChannelString(ch)}
+            {options.map((ch: NodeChannelInfo, i: any) => {
+              const selected = (!!id && !!ch && ch.channelId === id) || (!selectedChannel && i === 0);
+              const missing = ch.missing;
+              const className = classNames("item", "sensor-type-option", { selected, missing });
+              return (
+                <div
+                  className={className}
+                  key={i}
+                  onMouseDown={onListOptionClick(ch ? ch.channelId : null)}
+                >
+                  <div className="label">
+                    {getChannelString(ch)}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
           : null }
         </div>

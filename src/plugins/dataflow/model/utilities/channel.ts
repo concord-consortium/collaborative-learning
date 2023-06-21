@@ -1,3 +1,5 @@
+import { VariableType } from "@concord-consortium/diagram-view";
+
 export interface NodeChannelInfo {
   hubId: string;
   hubName: string;
@@ -7,6 +9,8 @@ export interface NodeChannelInfo {
   units: string;
   value: number;
   name: string;
+  simulated?: boolean;
+  simulatedVariable?: VariableType;
   virtual?: boolean;
   virtualValueMethod?: (t: number) => number;
   usesSerial?:boolean;
