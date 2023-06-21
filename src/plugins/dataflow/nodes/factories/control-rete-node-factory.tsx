@@ -5,7 +5,6 @@ import { ValueControl } from "../controls/value-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
 import { NodeControlTypes, roundNodeValue } from "../../model/utilities/node";
 import { PlotButtonControl } from "../controls/plot-button-control";
-import { on } from "superagent";
 
 export class ControlReteNodeFactory extends DataflowReteNodeFactory {
   constructor(numSocket: Socket) {
@@ -98,7 +97,7 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
     const resultString = isNaN(result) ? kEmptyValueString : `${roundNodeValue(result)}`;
     const cResultString = isNaN(cResult) ? kEmptyValueString : `${roundNodeValue(cResult)}`;
     // const n1String = isNaN(n1) ? kEmptyValueString : `${roundNodeValue(n1)}`;
-    const n2String = isNaN(n2) ? kEmptyValueString : `${roundNodeValue(n2)}`;
+    // const n2String = isNaN(n2) ? kEmptyValueString : `${roundNodeValue(n2)}`;
 
     const onString = `on →${cResultString}`;
     const offString = `off →${resultString}`;
