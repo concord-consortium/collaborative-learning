@@ -30,7 +30,7 @@ interface IGroupViewTitlebarProps {
 
 interface IGroupTitlebarProps {
   selectedId: string;
-  context: string | null;
+  // context: string | null;
   groupUser?: GroupUserModelType | undefined;
 }
 
@@ -41,7 +41,7 @@ interface IProps {
 export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
   const {user, groups, documents} = useStores();
   const [focusedGroupUser, setFocusedGroupUser] = useState<GroupUserModelType | undefined>();
-  const [groupViewContext, setGroupViewContext] = useState<string | null>(null);
+  // const [groupViewContext, setGroupViewContext] = useState<string | null>(null);
   const selectedGroupId = groupId || (groups.allGroups.length ? groups.allGroups[0].id : "");
   const groupUsers = getGroupUsers(groups, documents, selectedGroupId);
 
@@ -49,18 +49,18 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
     Logger.log(LogEventName.VIEW_GROUP, {group: id, via: "group-document-titlebar"});
     setGroupId(id);
     setFocusedGroupUser(undefined);
-    setGroupViewContext(null);
+    // setGroupViewContext(null);
   };
-  const handleFocusedGroupUserChange = (selectedGroupUser: GroupUserModelType | undefined) => {
-    setFocusedGroupUser(selectedGroupUser);
-    // console.log("selectedGroupUser", selectedGroupUser, "focusedGroupUser", focusedGroupUser);
-  };
+  // const handleFocusedGroupUserChange = (selectedGroupUser: GroupUserModelType | undefined) => {
+  //   setFocusedGroupUser(selectedGroupUser);
+  //   console.log("selectedGroupUser", selectedGroupUser, "focusedGroupUser", focusedGroupUser);
+  // };
 
-  const handleToggleContext = (context: string | null, selectedGroupUser: GroupUserModelType | undefined) => {
-    // console.log("handleToggleContext", context, selectedGroupUser);
-    setGroupViewContext(context);
-    setFocusedGroupUser(selectedGroupUser);
-  };
+  // const handleToggleContext = (context: string | null, selectedGroupUser: GroupUserModelType | undefined) => {
+  //   console.log("handleToggleContext", context, selectedGroupUser);
+  //   setGroupViewContext(context);
+  //   setFocusedGroupUser(selectedGroupUser);
+  // };
 
   const GroupViewTitlebar: React.FC<IGroupViewTitlebarProps> = ({ selectedId, onSelectGroup }) => {
     return (
@@ -78,11 +78,10 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
     );
   };
 
-  const GroupTitlebar: React.FC<IGroupTitlebarProps> = ({selectedId, context, groupUser}) => {
+  const GroupTitlebar: React.FC<IGroupTitlebarProps> = ({selectedId, groupUser}) => {
     const problem = useProblemStore();
     const userInfo = groupUsers.find(gUser => gUser.user.id === groupUser?.id);
     const userDocTitle = userInfo?.doc?.title || "Document";
-    console.log("userInfo", userInfo);
     const titleText = focusedGroupUser && groupUser && userInfo
                         ? `${groupUser.name}: ${userInfo.doc?.type === "problem" ? problem.title : userDocTitle}`
                         : selectedId ? `Student Group ${selectedId}` : "No groups";
@@ -100,16 +99,14 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
   return (
     <div key="student-group-view" className="document student-group-view">
       <GroupViewTitlebar selectedId={selectedGroupId} onSelectGroup={handleSelectGroup} />
-      <GroupTitlebar selectedId={selectedGroupId} context={groupViewContext} groupUser={focusedGroupUser}/>
+      <GroupTitlebar selectedId={selectedGroupId} groupUser={focusedGroupUser}/>
       <div className="canvas-area">
         <FourUpComponent userId={user.id}
                          groupId={selectedGroupId}
                          isGhostUser={true}
                          viaStudentGroupView={true}
-                         groupViewContext={groupViewContext}
+                        //  groupViewContext={groupViewContext}
                          setFocusedGroupUser={setFocusedGroupUser}
-                        //  setFocusedGroupUser={handleFocusedGroupUserChange}
-                         onToggleContext={handleToggleContext}
         />
       </div>
     </div>

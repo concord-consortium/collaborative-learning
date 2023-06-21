@@ -27,13 +27,12 @@ interface IProps extends IBaseProps {
   selectedSectionId?: string | null;
   viaTeacherDashboard?: boolean;
   viaStudentGroupView?: boolean
-  groupViewContext?: string | null;
+  // groupViewContext?: string | null;
   setFocusedGroupUser?: (focusedGroupUser?: GroupUserModelType) => void;
-  onToggleContext?: (context: string | null, selectedGroupUser: GroupUserModelType | undefined) => void;
 }
 
 interface IState {
-  toggledContextMap: Record<string, string | null>
+  toggledContextMap: Record<string, string | undefined>
 }
 
 export interface FourUpUser {
@@ -197,8 +196,8 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
         const name = isToggled ? fullName : initials;
         return (
           isToggled && viaStudentGroupView
-            ?
-              <button className="restore-fourup-button" onClick={()=>this.handleOverlayClick(context)}>
+            ? //pass an undefined context to handleOverlayClick to null out selected quadrant
+              <button className="restore-fourup-button" onClick={()=>this.handleOverlayClick()}>
                 <FourUpIcon /> 4-Up
               </button>
             : <div className={className} title={fullName} onClick={()=>this.handleOverlayClick(context)}>
@@ -351,24 +350,22 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     window.addEventListener("mouseup", handleMouseUp);
   };
 
-  private handleOverlayClick = (context: string) => {
-    const { groupId, setFocusedGroupUser, onToggleContext } = this.props;
-    const groupUser = this.userByContext[context];
+  private handleOverlayClick = (context?: string) => {
+    const { groupId, setFocusedGroupUser } = this.props;
+    const groupUser = context ? this.userByContext[context] : undefined;
     const toggledContext = this.getToggledContext();
-    console.log("groupUser", groupUser);
     this.setState(state => {
       if (groupId) {
         const current = state.toggledContextMap[groupId] ?? null;
-        state.toggledContextMap[groupId] = current ? null : context;
+        state.toggledContextMap[groupId] = current ? undefined : context;
       }
       return { toggledContextMap: clone(state.toggledContextMap) };
-     });
+    });
+    setFocusedGroupUser && setFocusedGroupUser(groupUser?.user);
+
     if (groupUser) {
       const event = toggledContext ? LogEventName.DASHBOARD_SELECT_STUDENT : LogEventName.DASHBOARD_DESELECT_STUDENT;
       Logger.log(event, {groupId, studentId: groupUser.user.id});
     }
-    const focusedGroupUser = groupUser?.user || undefined;
-    setFocusedGroupUser && setFocusedGroupUser(groupUser?.user);
-    onToggleContext && onToggleContext(context, context? groupUser?.user : undefined);
   };
 }
