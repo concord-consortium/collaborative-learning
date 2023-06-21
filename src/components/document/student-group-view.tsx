@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { GroupUserModelType } from "src/models/stores/groups";
-import { useGroupsStore, useUserStore } from "../../hooks/use-stores";
+import { useGroupsStore, useUIStore, useUserStore } from "../../hooks/use-stores";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import { FourUpComponent } from "../four-up";
@@ -39,6 +39,9 @@ interface IProps {
 }
 export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
   const user = useUserStore();
+  const isStudentViewA3ctiveTab = useUIStore().activeNavTab;
+  const isChatPanelShown = useUIStore().showChatPanel;
+
   const groups = useGroupsStore();
   const [focusedGroupUser, setFocusedGroupUser] = useState<GroupUserModelType | undefined>();
   const [groupViewContext, setGroupViewContext] = useState<string | null>(null);
@@ -88,8 +91,6 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
   };
   return (
     <div key="student-group-view" className="document student-group-view">
-      {/* // <div key="student-group-view" className="student-group-view"> */}
-
       <GroupViewTitlebar selectedId={selectedGroupId} onSelectGroup={handleSelectGroup} />
       <GroupTitlebar selectedId={selectedGroupId} context={groupViewContext} groupUser={focusedGroupUser}/>
       <div className="canvas-area">

@@ -5,6 +5,7 @@ import DocumentsWithCommentsIcon  from "../../assets/documents-list-icon.svg";
 
 import "./chat-panel-header.scss";
 import "../themes.scss";
+import { active } from "d3";
 
 interface IProps {
   activeNavTab: string;
@@ -16,6 +17,8 @@ interface IProps {
 
 export const ChatPanelHeader: React.FC<IProps> = observer(({activeNavTab, newCommentCount, onCloseChatPanel,
   handleDocView, chatPanelTitle}) => {
+  console.log('---------<ChatPanelHeader>-------');
+  console.log("\twithActiveNavTab:", activeNavTab);
   const renderNotification = () => {
     return (
       <div className="notification-toggle">
