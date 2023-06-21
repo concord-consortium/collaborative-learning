@@ -50,16 +50,18 @@ export function getGroupUsers(groups: any, documents: any, groupId: string | und
                            ? documents.getLastPublishedProblemDocumentsForGroup(groupId)
                            : documents.getProblemDocumentsForGroup(groupId)
                          ) || [];
+  const quadrants = [ "four-up-nw", "four-up-ne", "four-up-se", "four-up-sw"];
   const groupUsers: FourUpUser[] = group
     ? group.users
-        .map((groupUser: any) => {
+        .map((groupUser: any, idx: number) => {
           const groupUserDoc = groupDocuments && groupDocuments.find((groupDocument: any) => {
             return groupDocument.uid === groupUser.id;
           });
           return {
             user: groupUser,
             doc: groupUserDoc,
-            initials: groupUser.initials
+            initials: groupUser.initials,
+            context: quadrants[idx]
           };
         })
     : [];

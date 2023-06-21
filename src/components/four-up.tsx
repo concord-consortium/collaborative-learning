@@ -38,6 +38,7 @@ interface IState {
 export interface FourUpUser {
   user: GroupUserModelType;
   doc?: DocumentModelType;
+  context: string;
 }
 
 interface ContextUserMap {
@@ -187,7 +188,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       (cell: FourUpGridCellModelType, corner: string) => (toggledContext === corner ? 2 : 1) * cell.scale;
 
     const memberName = (context: string) => {
-      const groupUser = this.userByContext[context];
+      const groupUser = groupUsers.find(u => u.context === context);
       const isToggled = context === toggledContext;
       if (groupUser) {
         const { name: fullName, initials } = groupUser.user;
