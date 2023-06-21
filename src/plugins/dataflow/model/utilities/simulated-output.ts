@@ -1,6 +1,5 @@
 import { Node } from "rete";
 import { VariableType } from "@concord-consortium/diagram-view";
-
 import { getOutputType } from "../../nodes/utilities/live-output-utilities";
 
 export const kOutputVariablePrefix = "output_";

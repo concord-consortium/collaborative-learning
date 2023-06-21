@@ -160,14 +160,11 @@ export class SerialDevice {
     this.writer.write(`${controlMessage}\n`);
   }
 
-  public writeToOutForBBGripper(n:number){
-    // "percent closed" is x% where 100% = 120deg and 0% = 180deg
-    const percent = n / 100;
-    let openTo = Math.round(180 - (percent * 60));
-    if (openTo > 160) openTo = 180;
-    if (openTo < 130) openTo = 120;
-
-    if(this.hasPort()){
+  public writeToOutForBBGripper(n:number, liveOutputType: string){
+    const gripperVer = NodeLiveOutputTypes.find(o => o.name === liveOutputType);
+    if (this.hasPort() && gripperVer?.angleBase){
+      const percent = n / 100;
+      const openTo = Math.round(gripperVer.angleBase - (percent * 60));
       this.writer.write(`${openTo.toString()}\n`);
     }
   }

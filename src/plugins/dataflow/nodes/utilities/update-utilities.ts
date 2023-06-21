@@ -2,8 +2,7 @@
 
 import { Node } from "rete";
 import { VariableType } from "@concord-consortium/diagram-view";
-
-import { getHubSelect } from "./live-output-utilities";
+import { getHubSelect, getNodeValueWithType } from "./live-output-utilities";
 import { NumControl } from "../controls/num-control";
 import { SensorSelectControl } from "../controls/sensor-select-control";
 import { NodeChannelInfo } from "../../model/utilities/channel";
@@ -25,19 +24,18 @@ function passSerialStateToChannel(sd: SerialDevice, channel: NodeChannelInfo) {
 }
 
 export function sendDataToSerialDevice(n: Node, serialDevice: SerialDevice) {
-  const isNumberOutput = isFinite(n.data.nodeValue as number);
+  const { val, outType } = getNodeValueWithType(n);
+  const isNumberOutput = isFinite(val);
   const { deviceFamily } = serialDevice;
 
   if (deviceFamily === "arduino" && isNumberOutput){
-    serialDevice.writeToOutForBBGripper(n.data.nodeValue as number);
+    serialDevice.writeToOutForBBGripper(val, outType);
   }
   if (deviceFamily === "microbit"){
     const hubSelect = getHubSelect(n);
     if (hubSelect.getChannels()){
-      const relayType = hubSelect.getData("liveOutputType") as string;
       const hubId = hubSelect.getSelectionId();
-      const state = n.data.nodeValue as number;
-      serialDevice.writeToOutForMicroBitRelayHub(state, hubId, relayType );
+      serialDevice.writeToOutForMicroBitRelayHub(val, hubId, outType);
     }
   }
 }
@@ -45,11 +43,12 @@ export function sendDataToSerialDevice(n: Node, serialDevice: SerialDevice) {
 export function sendDataToSimulatedOutput(n: Node, outputVariables?: VariableType[]) {
   const outputVariable = findOutputVariable(n, outputVariables);
   if (outputVariable) {
-    const nodeValue = n.data.nodeValue as number;
-    const outputValue = isFinite(nodeValue) ? nodeValue : 0;
+    const { val } = getNodeValueWithType(n);
+    const outputValue = isFinite(val) ? val : 0;
     outputVariable.setValue(outputValue);
     // TODO: Should we also set the unit?
     // We'd use n.data.nodeValueUnits but it might be undefined
+    // We could add a units field to getNodeValueWithType(n) ?
   }
 }
 
