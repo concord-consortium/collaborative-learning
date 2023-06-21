@@ -347,7 +347,6 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     const { groupId, setFocusedGroupUser } = this.props;
     const groupUser = context ? this.userByContext[context] : undefined;
     const toggledContext = this.getToggledContext();
-    console.log("groupUser", groupUser);
     this.setState(state => {
       if (groupId) {
         const current = state.toggledContextMap[groupId] ?? null;
