@@ -56,8 +56,6 @@ export class NavTabPanel extends BaseComponent<IProps> {
     const isChatEnabled = user.isNetworkedTeacher;
     const openChatPanel = isChatEnabled && showChatPanel;
     const focusTileId = selectedTileIds?.length === 1 ? selectedTileIds[0] : undefined;
-    console.log("class nav-tab-panel ");
-    console.log(`\tnav-tab-panel ${showChatPanel ? "chat-open" : ""}`);
 
     return (
       <div className={`resource-and-chat-panel ${isResourceExpanded ? "shown" : ""}`} style={resourceWidthStyle}>
@@ -81,9 +79,6 @@ export class NavTabPanel extends BaseComponent<IProps> {
                   })
                 }
               </TabList>
-              {console.log("\tisChatEnabled:", isChatEnabled)}
-              {console.log("\topenChatPanel:", openChatPanel)}
-              {console.log(`\tchat-panel-toggle themed ${activeNavTab}`)}
 
 
               { isChatEnabled
@@ -199,7 +194,6 @@ export class NavTabPanel extends BaseComponent<IProps> {
   private handleShowChatColumn = () => {
     const { ui } = this.stores;
     const event = ui.showChatPanel ? LogEventName.CHAT_PANEL_HIDE : LogEventName.CHAT_PANEL_SHOW;
-    console.log("\t 📁 handleShowChatColumn log event:", event);
     Logger.log(event);
     ui.toggleShowChatPanel(!ui.showChatPanel);
   };

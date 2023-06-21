@@ -4,6 +4,8 @@ import { useGroupsStore, useUIStore, useUserStore } from "../../hooks/use-stores
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import { FourUpComponent } from "../four-up";
+import classNames from "classnames";
+
 import "./student-group-view.scss";
 
 interface IGroupButtonProps {
@@ -38,10 +40,8 @@ interface IProps {
   setGroupId: (groupId: string) => void;
 }
 export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
-  const user = useUserStore();
-  const isStudentViewA3ctiveTab = useUIStore().activeNavTab;
-  const isChatPanelShown = useUIStore().showChatPanel;
 
+  const user = useUserStore();
   const groups = useGroupsStore();
   const [focusedGroupUser, setFocusedGroupUser] = useState<GroupUserModelType | undefined>();
   const [groupViewContext, setGroupViewContext] = useState<string | null>(null);
@@ -89,8 +89,14 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
       </div>
     );
   };
+
+  const isStudentViewActiveTab = useUIStore().activeNavTab === "student-work";
+  const isChatPanelShown = useUIStore().showChatPanel;
+  const shrinkStudentView  = isStudentViewActiveTab && isChatPanelShown;
+  const classes = classNames("document", "student-group-view", {"shrink-student-view": shrinkStudentView});
+
   return (
-    <div key="student-group-view" className="document student-group-view">
+    <div key="student-group-view" className={classes}>
       <GroupViewTitlebar selectedId={selectedGroupId} onSelectGroup={handleSelectGroup} />
       <GroupTitlebar selectedId={selectedGroupId} context={groupViewContext} groupUser={focusedGroupUser}/>
       <div className="canvas-area">

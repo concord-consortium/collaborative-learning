@@ -76,7 +76,6 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
 
   constructor(props: IProps) {
     super(props);
-    console.log("class FourUpComponent");
     this.state = {
       toggledContextMap: {}
     };
