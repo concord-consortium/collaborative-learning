@@ -424,7 +424,7 @@ context('Dataflow Tool Tile', function () {
       it("can create control node", () => {
         dataflowToolTile.getCreateNodeButton(nodeType).click();
         dataflowToolTile.getNode(nodeType).should("exist");
-        dataflowToolTile.getNodeTitle().should("contain", "Control");
+        dataflowToolTile.getNodeTitle().should("contain", "Hold");
       });
       it("can toggle minigraph", () => {
         dataflowToolTile.getShowGraphButton(nodeType).click();
@@ -434,7 +434,7 @@ context('Dataflow Tool Tile', function () {
       });
       it("verify control operator types", () => {
         const dropdown = "controlOperator";
-        const operatorTypes = ["Hold Current", "Hold Prior", "Output Zero"];
+        const operatorTypes = ["Hold this", "Hold previous", "Hold 0"];
         dataflowToolTile.getDropdown(nodeType, dropdown).click();
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).should("have.length", 3);
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).each(($tab, index, $typeList) => {
@@ -442,7 +442,7 @@ context('Dataflow Tool Tile', function () {
         });
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).last().click();
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).should("have.length", 0);
-        dataflowToolTile.getDropdown(nodeType, dropdown).contains("Output Zero").should("exist");
+        dataflowToolTile.getDropdown(nodeType, dropdown).contains("Hold 0").should("exist");
       });
       it("verify node inputs outputs", () => {
         dataflowToolTile.getNodeInput().should("exist");
