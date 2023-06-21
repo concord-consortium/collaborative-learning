@@ -1,5 +1,5 @@
 import { addDisposer } from "mobx-state-tree";
-import { action, computed, flow, flowResult, makeAutoObservable, makeObservable, observable, runInAction, when } from "mobx";
+import { makeAutoObservable, runInAction, when } from "mobx";
 import { AppConfigModel, AppConfigModelType } from "./app-config-model";
 import { createUnitWithoutContent, getGuideJson, getUnitJson, UnitModel, UnitModelType } from "../curriculum/unit";
 import { InvestigationModel, InvestigationModelType } from "../curriculum/investigation";
@@ -147,9 +147,11 @@ class Stores implements IStores{
     this.appMode = mode;
   }
 
-  // If we need to batch up the changes here we could try changing this to a
-  // MobX flow. However we need to experiment with the interaction of MobX flows
-  // with MST flows.
+  // If we need to batch up the changes even more than currently,
+  // we could try changing this to a MobX flow.
+  // However typing the yield statements is difficult. Also flows
+  // in MobX are slightly different than flows in MST, so there might
+  // be some weird interactions with action tracking if we mix them.
   async setUnitAndProblem(unitId: string | undefined, problemOrdinal?: string) {
     const { appConfig } = this;
     let unitJson = await getUnitJson(unitId, appConfig);
