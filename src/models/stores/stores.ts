@@ -25,8 +25,10 @@ import { NavTabModelType } from "../view/nav-tabs";
 
 export interface IStores extends IBaseStores {
   problemPath: string;
+  problemOrdinal: string;
   userContextProvider: UserContextProvider;
   tabsToDisplay: NavTabModelType[];
+  isShowingTeacherContent: boolean;
 }
 
 export interface ICreateStores extends Partial<IStores> {
@@ -62,13 +64,18 @@ export class Stores implements IStores{
   clipboard: ClipboardModelType;
   selection: SelectionStoreModelType;
   serialDevice: SerialDevice;
-  problemPath: string;
   userContextProvider: UserContextProvider;
 
   constructor(params?: ICreateStores){
     makeObservable(this, {
+      appMode: observable,
       teacherGuide: observable,
-      tabsToDisplay: computed
+      unit: observable,
+      investigation: observable,
+      problem: observable,
+      tabsToDisplay: computed,
+      problemPath: computed,
+      problemOrdinal: computed
     });
 
     this.appMode = params?.appMode || "dev";
@@ -105,9 +112,6 @@ export class Stores implements IStores{
     this.clipboard = ClipboardModel.create();
     this.selection = SelectionStoreModel.create();
     this.serialDevice = new SerialDevice();
-
-    // TODO change this to a getter
-    this.problemPath = getProblemPath(this);
     this.ui.setProblemPath(this.problemPath);
     this.userContextProvider = new UserContextProvider(this);
   }
@@ -122,30 +126,20 @@ export class Stores implements IStores{
       ? navTabSpecs.tabSpecs.filter(t => (t.tab !== "teacher-guide") || teacherGuide)
       : navTabSpecs.tabSpecs.filter(t => !t.teacherOnly);
   }
-}
 
-export function setAppMode(stores: IStores, appMode: AppMode) {
-  stores.appMode = appMode;
-}
+  get problemPath() {
+    return `${this.unit.code}/${this.investigation.ordinal}/${this.problem.ordinal}`;
+  }
 
-export function getProblemOrdinal(stores: IBaseStores) {
-  const { investigation, problem } = stores;
-  return `${investigation.ordinal}.${problem.ordinal}`;
-}
+  get problemOrdinal() {
+    const { investigation, problem } = this;
+    return `${investigation.ordinal}.${problem.ordinal}`;
+  }
 
-export function getProblemPath(stores: IBaseStores) {
-  return `${stores.unit.code}/${stores.investigation.ordinal}/${stores.problem.ordinal}`;
-}
-
-export function getTabsToDisplay(stores: IBaseStores): NavTabModelType[] {
-  const { appConfig: { navTabs: navTabSpecs },
-    teacherGuide,
-    user: { isTeacher }
-  } = stores;
-
-  return isTeacher
-    ? navTabSpecs.tabSpecs.filter(t => (t.tab !== "teacher-guide") || teacherGuide)
-    : navTabSpecs.tabSpecs.filter(t => !t.teacherOnly);
+  get isShowingTeacherContent() {
+    const { ui: { showTeacherContent }, user: { isTeacher } } = this;
+    return isTeacher && showTeacherContent;
+  }
 }
 
 export const setUnitAndProblem = async (stores: IStores, unitId: string | undefined, problemOrdinal?: string) => {
@@ -184,7 +178,6 @@ export const setUnitAndProblem = async (stores: IStores, unitId: string | undefi
     stores.investigation = investigation;
     stores.problem = problem;
   }
-  stores.problemPath = getProblemPath(stores);
   stores.ui.setProblemPath(stores.problemPath);
 
   // Set the active tab to be the first tab
@@ -213,8 +206,3 @@ export const setUnitAndProblem = async (stores: IStores, unitId: string | undefi
     }
   ));
 };
-
-export function isShowingTeacherContent(stores: IStores) {
-  const { ui: { showTeacherContent }, user: { isTeacher } } = stores;
-  return isTeacher && showTeacherContent;
-}

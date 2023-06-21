@@ -8,7 +8,7 @@ import { urlParams } from "../utilities/url-params";
 import { DemoCreatorComponent } from "./demo/demo-creator";
 
 import { GroupChooserComponent } from "./group/group-chooser";
-import { IStores, setAppMode, setUnitAndProblem } from "../models/stores/stores";
+import { IStores, setUnitAndProblem } from "../models/stores/stores";
 import { isDifferentUnitAndProblem } from "../models/curriculum/unit";
 import { updateProblem } from "../lib/misc";
 import ErrorAlert from "./utilities/error-alert";
@@ -88,7 +88,7 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
     .then(async ({appMode: newAppMode, authenticatedUser, classInfo, problemId, unitCode}) => {
       // authentication can trigger appMode change (e.g. preview => demo)
       if (newAppMode && (newAppMode !== appMode)) {
-        setAppMode(stores, newAppMode);
+        stores.appMode = newAppMode;
       }
       user.setAuthenticatedUser(authenticatedUser);
       rawPortalJWT = authenticatedUser.rawPortalJWT;
