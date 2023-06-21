@@ -1,6 +1,8 @@
 import { observer } from "mobx-react";
 import React, { DOMAttributes, useRef, useEffect, FormEvent } from "react";
 import { onSnapshot } from "mobx-state-tree";
+import { pick } from "lodash";
+
 import "mathlive"; // separate static import of library for initialization to run
 // eslint-disable-next-line no-duplicate-imports
 import type { MathfieldElementAttributes, MathfieldElement } from "mathlive";
@@ -48,11 +50,29 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   const ui = useUIStore();
 
   useEffect(() => {
-    mf.current?.addEventListener("focus", () => ui.setSelectedTileId(model.id));
+    const handleFocus = () => ui.setSelectedTileId(model.id);
+    // Save the math field so we can remove the listener from the same instance
+    // even if the instance is changed for some reason
+    const currentMathField = mf.current;
+    currentMathField?.addEventListener("focus", handleFocus);
     undoKeys.forEach((key: string) => {
       mf.current?.keybindings && replaceKeyBinding(mf.current.keybindings, key, "");
     });
-    if (mf.current) mf.current.inlineShortcuts = {};
+    if (mf.current) {
+      // Uncomment this line to see all of the available shortcuts
+      // console.log("mf.current.inlineShortcuts", mf.current.inlineShortcuts);
+
+      // Only pick some of the default mathlive shortcuts
+      const defaultShortcuts = pick(mf.current.inlineShortcuts, [
+        "%"
+      ]);
+      // Combine those defaults with some custom shortcuts
+      mf.current.inlineShortcuts = {
+        ...defaultShortcuts,
+        "*": "\\times"
+      };
+    }
+    return () => currentMathField?.removeEventListener("focus", handleFocus);
   }, [model.id, ui]);
 
   useEffect(() => {
@@ -66,6 +86,23 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   }, [content, readOnly]);
 
   const handleMathfieldInput = (e: FormEvent<MathfieldElementAttributes>) => {
+    const mathLiveEvent = e.nativeEvent as any;
+    const mathField = e.target as MathfieldElement;
+
+    if(mathField.mode === "latex" && mathLiveEvent.inputType === "insertText" && mathLiveEvent.data === "insertText") {
+      // This is an event that happens when the user types `\`
+      // this same type of event is also sent when the user is typing characters after
+      // the `\` before they hit enter. After they hit enter there is another
+      // insertText event which has data of what they typed, for example `\div`
+      // The `mode` is "math" when the user is entering characters normally. After the
+      // the user hits enter when typing in `\div` another input event sent with
+      // the `mode` of "math".
+
+      // So in this case when we are in this `\` mode, we don't want to set the value
+      // of the element. We also don't need to save the value to the content because
+      // the value is not changing while in this `\` mode.
+      return;
+    }
     const mfLatex = (e.target as MathfieldElement).value;
     const replacedLatex = replaceLatex(mfLatex);
     trackedCursorPos.current =  mf.current?.position || 0;

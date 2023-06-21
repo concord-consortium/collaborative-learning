@@ -182,16 +182,20 @@ Cypress.Commands.add("openProblemSection", (section) => {//doc-tab my-work works
 Cypress.Commands.add("openSection", (tab, section) => {//doc-tab my-work workspaces problem-documents selected
   cy.get('.doc-tab.'+tab+'.'+section).click({force:true});
 });
+
+// TODO: this is duplicated in ResourcesPanel.js, however in that case the tab
+// is passed in. Passing the tab is safer, otherwise this can find document items
+// in other tabs.
 Cypress.Commands.add("getCanvasItemTitle", (section) => {
   cy.get('.list.'+section+' [data-test='+section+'-list-items] .footer');
 });
-Cypress.Commands.add("openDocumentThumbnail", (section,title) => { //opens thumbnail into the nav panel
-  cy.get('.list.'+section+' [data-test='+section+'-list-items] .footer').contains(title).parent().parent().siblings('.scaled-list-item-container').click({force:true});
+Cypress.Commands.add("openDocumentThumbnail", (navTab,section,title) => { //opens thumbnail into the nav panel
+  cy.get('.document-tabs.'+navTab+' .list.'+section+' [data-test='+section+'-list-items] .footer').contains(title).parent().parent().siblings('.scaled-list-item-container').click({force:true});
 });
 Cypress.Commands.add("openDocumentWithTitle", (tab, section, title) => {
   cy.openSection(tab,section);
-  cy.get('.list.'+section+' [data-test='+section+'-list-items] .footer').contains(title).parent().parent().siblings('.scaled-list-item-container').click({force:true});
-  cy.get('.edit-button').click();
+  cy.get('.document-tabs.'+tab+' .list.'+section+' [data-test='+section+'-list-items] .footer').contains(title).parent().parent().siblings('.scaled-list-item-container').click({force:true});
+  cy.get('.document-tabs.'+tab+' [data-test=subtab-'+section+'] .edit-button').click();
 });
 Cypress.Commands.add("openDocumentWithIndex", (tab, section, docIndex) => {
   cy.openSection(tab,section);
@@ -256,6 +260,6 @@ Cypress.Commands.add('unlinkTableToDataflow', (program, table) => {
     cy.get('button').contains('Unlink').click();
   });
 });
-Cypress.Commands.add("deleteDocumentThumbnail", (tab, section,title) => { 
+Cypress.Commands.add("deleteDocumentThumbnail", (tab, section,title) => {
   cy.get('.'+tab+' .list.'+section+' [data-test='+section+'-list-items] .footer .icon-delete-document').eq(1).click({force:true});
 });

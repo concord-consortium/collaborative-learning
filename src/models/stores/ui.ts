@@ -1,4 +1,4 @@
-import { SnapshotIn, types } from "mobx-state-tree";
+import { getSnapshot, SnapshotIn, types } from "mobx-state-tree";
 import { debounce } from "lodash";
 import { AppConfigModelType } from "./app-config-model";
 import { kDividerHalf, kDividerMax, kDividerMin, UIDialogTypeEnum } from "./ui-types";
@@ -8,6 +8,10 @@ import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import { ITileModel } from "../tiles/tile-model";
 import { ENavTab } from "../view/nav-tabs";
+import { buildSectionPath, getCurriculumMetadata } from "../../../functions/src/shared";
+import { LearningLogDocument, LearningLogPublication, PersonalDocument,
+  PersonalPublication, PlanningDocument, ProblemDocument,
+  ProblemPublication, SupportPublication } from "../document/document-types";
 
 type BooleanDialogResolver = (value: boolean | PromiseLike<boolean>) => void;
 type StringDialogResolver = (value: string | PromiseLike<string>) => void;
@@ -32,6 +36,18 @@ export const UIDialogModel = types
 type UIDialogModelSnapshot = SnapshotIn<typeof UIDialogModel>;
 type UIDialogModelSnapshotWithoutType = Omit<UIDialogModelSnapshot, "type">;
 
+// This generic model should work for both the problem tab, and the MyWork/ClassWork tabs
+// The StudentWorkspaces tab might work this way too. It has an open group which could be
+// stored in the openSubTab. And then it might have an open'd student document of the group
+// this would be the openDocument.
+export const UITabModel = types
+  .model("UITab", {
+    id: types.identifier,
+    openSubTab: types.maybe(types.string),
+    // The key of this map is the sub tab label
+    openDocuments: types.map(types.string)
+  });
+
 export const UIModel = types
   .model("UI", {
     // dividerPosition: kDividerHalf,
@@ -47,18 +63,15 @@ export const UIModel = types
     showTeacherContent: true,
     showChatPanel: false,
     dialog: types.maybe(UIDialogModel),
-    // document key or section path for reference (left) document
-    focusDocument: types.maybe(types.string),
-    // counter that serves to trigger updates
-    focusDocUpdates: 0,
+    tabs: types.map(UITabModel),
     problemWorkspace: WorkspaceModel,
     learningLogWorkspace: WorkspaceModel,
     teacherPanelKey: types.maybe(types.string),
-    selectedCommentedDocument: types.maybe(types.string),//key of selected commented MyWork/ClassWork doc
     dragId: types.maybe(types.string) // The id of the object being dragged. Used with dnd-kit dragging.
   })
   .volatile(self => ({
     defaultLeftNavExpanded: false,
+    problemPath: ""
   }))
   .views((self) => ({
     isSelectedTile(tile: ITileModel) {
@@ -70,6 +83,21 @@ export const UIModel = types
     get workspaceShown () {
       return self.dividerPosition < kDividerMax;
     },
+    get openSubTab () {
+      return self.tabs.get(self.activeNavTab)?.openSubTab;
+    }
+  }))
+  .views((self) => ({
+    // document key or section path for resource (left) document
+    get focusDocument () {
+      if (self.activeNavTab === ENavTab.kProblems || self.activeNavTab === ENavTab.kTeacherGuide) {
+        const facet = self.activeNavTab === ENavTab.kTeacherGuide ? ENavTab.kTeacherGuide : undefined;
+        return buildSectionPath(self.problemPath, self.openSubTab, facet);
+      } else {
+        const activeTabState = self.tabs.get(self.activeNavTab);
+        return self.openSubTab && activeTabState?.openDocuments.get(self.openSubTab);
+      }
+    }
   }))
   .actions((self) => {
     const alert = (textOrOpts: string | UIDialogModelSnapshotWithoutType, title?: string) => {
@@ -132,6 +160,15 @@ export const UIModel = types
       }
     };
 
+    const getTabState = (tab: string) => {
+      let tabState = self.tabs.get(tab);
+      if (!tabState) {
+        tabState = UITabModel.create({id: tab});
+        self.tabs.put(tabState);
+      }
+      return tabState;
+    };
+
     return {
       alert,
       prompt,
@@ -178,13 +215,6 @@ export const UIModel = types
         self.showDemoCreator = showDemoCreator;
       },
       closeDialog,
-      setFocusDocument(documentKey?: string) {
-        self.focusDocument = documentKey;
-      },
-      updateFocusDocument() {
-        // increment counter to trigger observers to update
-        ++self.focusDocUpdates;
-      },
       rightNavDocumentSelected(appConfig: AppConfigModelType, document: DocumentModelType) {
         if (!document.isPublished || appConfig.showPublishedDocsInPrimaryWorkspace) {
           self.problemWorkspace.setAvailableDocument(document);
@@ -202,19 +232,86 @@ export const UIModel = types
       setTeacherPanelKey(key: string) {
         self.teacherPanelKey = key;
       },
-      setSelectedCommentedDocument(key: string | undefined){
-        self.selectedCommentedDocument = key ;
-      },
       setDraggingId(dragId?: string) {
         self.dragId = dragId;
+      },
+      // We could switch this to openSubTab, however that would imply that the activeTab would be
+      // switched if this is called. When all of the tabs are initialized this is called to setup
+      // the default sub tab or each main tab, so we don't want to be switching the activeTab in
+      // that case.
+      setOpenSubTab(tab: string, subTab: string) {
+        const tabState = getTabState(tab);
+        tabState.openSubTab = subTab;
+      },
+      /**
+       * Open to the tab and subTab and open a document.
+       *
+       * @param tab
+       * @param subTab
+       * @param documentKey
+       */
+      openSubTabDocument(tab: string, subTab: string, documentKey: string) {
+        const tabState = getTabState(tab);
+        self.activeNavTab = tab;
+        tabState.openSubTab = subTab;
+        tabState.openDocuments.set(subTab, documentKey);
+      },
+      closeSubTabDocument(tab: string, subTab: string) {
+        const tabState = getTabState(tab);
+        tabState.openDocuments.delete(subTab);
+      },
+      setProblemPath(problemPath: string) {
+        self.problemPath = problemPath;
       }
     };
   })
   .actions(self => ({
     clearSelectedTiles() {
       self.selectedTileIds.forEach(tileId => self.removeTileIdFromSelection(tileId));
+    },
+    /**
+     * Update the top level tab in the resources panel (left side), and guess a sub tab to open to view
+     * this document. Currently this only works with non curriculum docs.
+     *
+     * @param doc a non curriculum document
+     */
+    openResourceDocument(doc: DocumentModelType) {
+      const navTab = getNavTabOfDocument(doc.type)  || "";
+
+      let subTab = "";
+      if (navTab === ENavTab.kClassWork) {
+        if (doc.type === LearningLogPublication) {
+          // FIXME: if the subTabs are renamed in the unit then this won't
+          // work
+          subTab = "Learning Logs";
+        } else {
+          subTab = "Workspaces";
+        }
+      }
+      if (navTab === ENavTab.kMyWork) {
+        if (doc.type === LearningLogDocument) {
+          subTab = "Learning Log";
+        } else {
+          subTab = "Workspaces";
+        }
+      }
+      if (!subTab) {
+        console.warn("Can't find subTab for doc", getSnapshot(doc));
+        return;
+      }
+      self.openSubTabDocument(navTab, subTab, doc.key);
+    },
+
+    openCurriculumDocument(docPath: string) {
+      const {navTab, subTab} = getTabsOfCurriculumDoc(docPath);
+      if (!subTab) {
+        console.warn("Can't find subTab in curriculum documentPath", docPath);
+        return;
+      }
+      self.setActiveNavTab(navTab);
+      self.setOpenSubTab(navTab, subTab);
     }
-  }));
+}));
 
 export type UIModelType = typeof UIModel.Type;
 export type UIDialogModelType = typeof UIDialogModel.Type;
@@ -226,3 +323,30 @@ export function selectTile(ui: UIModelType, model: ITileModel, isExtending?: boo
 // Sometimes we get multiple selection events for a single click.
 // We only want to respond once per such burst of selection events.
 export const debouncedSelectTile = debounce(selectTile, 50);
+
+// Maybe this should return the navTab and subTab
+export function getTabsOfCurriculumDoc(docPath: string) {
+  const {facet,section} = getCurriculumMetadata(docPath) || {};
+  return {
+    navTab: facet === "guide" ? ENavTab.kTeacherGuide : ENavTab.kProblems,
+    subTab: section
+  };
+}
+
+const docTypeToNavTab: Record<string, ENavTab | undefined> = {
+  // MyWork
+  [ProblemDocument]: ENavTab.kMyWork,
+  [PlanningDocument]: ENavTab.kMyWork,
+  [LearningLogDocument]: ENavTab.kMyWork,
+  [PersonalDocument]: ENavTab.kMyWork,
+
+  // ClassWork
+  [ProblemPublication]: ENavTab.kClassWork,
+  [LearningLogPublication]: ENavTab.kClassWork,
+  [PersonalPublication]: ENavTab.kClassWork,
+  [SupportPublication]: ENavTab.kClassWork,
+};
+
+export function getNavTabOfDocument(docType: string) {
+  return docTypeToNavTab[docType];
+}

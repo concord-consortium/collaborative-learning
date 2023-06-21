@@ -57,7 +57,7 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
         }
 
         if (kRoundedOutputTypes.includes(outputType)){
-          newValue = this.getNewValueForGrabber(n1);
+          newValue = this.getPercentageAsInt(n1);
           const roundedDisplayValue = Math.round((newValue / 10) * 10);
           nodeValue?.setDisplayMessage(`${roundedDisplayValue}% closed`);
         }
@@ -72,7 +72,7 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
     }
   }
 
-  private getNewValueForGrabber(num: number){
+  private getPercentageAsInt(num: number){
     if (num > 1)  return 100;
     if (num < 0)  return 0;
     return parseInt((num * 100).toFixed(2), 10);

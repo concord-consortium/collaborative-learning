@@ -72,9 +72,11 @@ export function createStores(params?: ICreateStores): IStores {
     selection: SelectionStoreModel.create(),
     serialDevice: new SerialDevice()
   };
+  const problemPath = getProblemPath(stores);
+  stores.ui.setProblemPath(problemPath);
   return {
     ...stores,
-    problemPath: getProblemPath(stores),
+    problemPath,
     userContextProvider: new UserContextProvider(stores)
   };
 }
@@ -90,6 +92,17 @@ export function getProblemOrdinal(stores: IBaseStores) {
 
 export function getProblemPath(stores: IBaseStores) {
   return `${stores.unit.code}/${stores.investigation.ordinal}/${stores.problem.ordinal}`;
+}
+
+export function getTabsToDisplay(stores: IBaseStores) {
+  const { appConfig: { navTabs: navTabSpecs },
+    teacherGuide,
+    user: { isTeacher }
+  } = stores;
+
+  return isTeacher
+    ? navTabSpecs.tabSpecs.filter(t => (t.tab !== "teacher-guide") || teacherGuide)
+    : navTabSpecs.tabSpecs.filter(t => !t.teacherOnly);
 }
 
 export const setUnitAndProblem = async (stores: IStores, unitId: string | undefined, problemOrdinal?: string) => {
@@ -129,8 +142,15 @@ export const setUnitAndProblem = async (stores: IStores, unitId: string | undefi
     stores.problem = problem;
   }
   stores.problemPath = getProblemPath(stores);
+  stores.ui.setProblemPath(stores.problemPath);
 
-  // TODO: It would be best to make stores a MobX object so when the teacherGuide is 
+  // Set the active tab to be the first tab
+  const tabs = getTabsToDisplay(stores);
+  if (tabs.length > 0) {
+    stores.ui.setActiveNavTab(tabs[0].tab);
+  }
+
+  // TODO: It would be best to make stores a MobX object so when the teacherGuide is
   // updated, the Workspace component will re-render to show the teacher guide.
   // It currently works in real-world use, but was causing a Cypress test failure.
   addDisposer(unit, when(() => {

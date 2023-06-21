@@ -6,8 +6,9 @@ let dashboard = new TeacherDashboard();
 let clueCanvas = new ClueCanvas;
 let chatPanel = new ChatPanel;
 
-let selectedChatBackground = 'rgb(215, 255, 204)';
-let expandedChatBackground = 'rgb(193, 243, 179)';
+let selectedChatBackground = 'rgb(234, 242, 142)';
+let expandedChatBackground = 'rgb(234, 242, 142)';
+
 
 const queryParams = "/?appMode=qa&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:7&unit=msa";
 
@@ -82,7 +83,7 @@ context('Chat Panel', () => {
       clueCanvas.getInvestigationCanvasTitle().text().then((title)=>{
         cy.openTopTab('my-work');
         cy.openSection('my-work', 'workspaces');
-        cy.openDocumentThumbnail('workspaces', title);
+        cy.openDocumentThumbnail('my-work','workspaces', title);
         chatPanel.verifyDocumentCommentClass();
       });
     });
@@ -257,7 +258,7 @@ context('Chat Panel', () => {
       clueCanvas.getInvestigationCanvasTitle().text().then((title)=>{
         cy.openTopTab('my-work');
         cy.openSection('my-work', 'workspaces');
-        cy.openDocumentThumbnail('workspaces', title);
+        cy.openDocumentThumbnail('my-work','workspaces', title);
         cy.wait(2000);
         // document comment
         chatPanel.addCommentAndVerify("This is document comment for teacher-my-work workspaces-subsection");

@@ -87,12 +87,6 @@ describe("ui model", () => {
     expect(ui.workspaceShown).toBe(true);
   });
 
-  it("allows reference document to be set", () => {
-    expect(ui.focusDocument).toBeUndefined();
-    ui.setFocusDocument("1234");
-    expect(ui.focusDocument).toBe("1234");
-  });
-
   it("allows alert dialogs", () => {
     expect(ui.dialog).toBe(undefined);
     ui.alert("alert test");
