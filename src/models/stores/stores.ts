@@ -1,30 +1,32 @@
 import { addDisposer } from "mobx-state-tree";
-import { when } from "mobx";
-import { AppConfigModel } from "./app-config-model";
-import { createUnitWithoutContent, getGuideJson, getUnitJson, UnitModel } from "../curriculum/unit";
-import { InvestigationModel } from "../curriculum/investigation";
-import { ProblemModel } from "../curriculum/problem";
-import { UIModel } from "./ui";
-import { UserModel } from "./user";
-import { GroupsModel } from "./groups";
-import { ClassModel } from "./class";
+import { computed, makeObservable, observable, when } from "mobx";
+import { AppConfigModel, AppConfigModelType } from "./app-config-model";
+import { createUnitWithoutContent, getGuideJson, getUnitJson, UnitModel, UnitModelType } from "../curriculum/unit";
+import { InvestigationModel, InvestigationModelType } from "../curriculum/investigation";
+import { ProblemModel, ProblemModelType } from "../curriculum/problem";
+import { UIModel, UIModelType } from "./ui";
+import { UserModel, UserModelType } from "./user";
+import { GroupsModel, GroupsModelType } from "./groups";
+import { ClassModel, ClassModelType } from "./class";
 import { DB } from "../../lib/db";
 import { UserContextProvider } from "./user-context-provider";
 import { registerTileTypes } from "../../register-tile-types";
-import { DemoModel } from "./demo";
-import { SupportsModel } from "./supports";
-import { DocumentsModel, createDocumentsModelWithRequiredDocuments } from "./documents";
+import { DemoModel, DemoModelType } from "./demo";
+import { SupportsModel, SupportsModelType } from "./supports";
+import { DocumentsModel, createDocumentsModelWithRequiredDocuments, DocumentsModelType } from "./documents";
 import { LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument } from "../document/document-types";
 import { LearningLogWorkspace, ProblemWorkspace } from "./workspace";
-import { ClipboardModel } from "./clipboard";
-import { SelectionStoreModel } from "./selection";
+import { ClipboardModel, ClipboardModelType } from "./clipboard";
+import { SelectionStoreModel, SelectionStoreModelType } from "./selection";
 import { AppMode } from "./store-types";
 import { SerialDevice } from "./serial";
 import { IBaseStores } from "./base-stores-types";
+import { NavTabModelType } from "../view/nav-tabs";
 
 export interface IStores extends IBaseStores {
   problemPath: string;
   userContextProvider: UserContextProvider;
+  tabsToDisplay: NavTabModelType[];
 }
 
 export interface ICreateStores extends Partial<IStores> {
@@ -35,50 +37,91 @@ export interface ICreateStores extends Partial<IStores> {
 const requiredDocumentTypes = [PersonalDocument, PlanningDocument, ProblemDocument, LearningLogDocument];
 
 export function createStores(params?: ICreateStores): IStores {
-  const user = params?.user || UserModel.create({ id: "0" });
-  const appConfig = params?.appConfig || AppConfigModel.create();
-  const appMode = params?.appMode || "dev";
-  const demoName = params?.demoName || appConfig.appName;
+  return new Stores(params);
+}
 
-  const stores: IBaseStores = {
-    appMode,
-    isPreviewing: params?.isPreviewing || false,
-    appVersion: params?.appVersion || "unknown",
-    appConfig,
+export class Stores implements IStores{
+  appMode: AppMode;
+  isPreviewing?: boolean;
+  appVersion: string;
+  appConfig: AppConfigModelType;
+  unit: UnitModelType;
+  investigation: InvestigationModelType;
+  problem: ProblemModelType;
+  teacherGuide?: ProblemModelType;
+  user: UserModelType;
+  ui: UIModelType;
+  groups: GroupsModelType;
+  class: ClassModelType;
+  documents: DocumentsModelType;
+  networkDocuments: DocumentsModelType;
+  db: DB;
+  demo: DemoModelType;
+  showDemoCreator: boolean;
+  supports: SupportsModelType;
+  clipboard: ClipboardModelType;
+  selection: SelectionStoreModelType;
+  serialDevice: SerialDevice;
+  problemPath: string;
+  userContextProvider: UserContextProvider;
+
+  constructor(params?: ICreateStores){
+    makeObservable(this, {
+      teacherGuide: observable,
+      tabsToDisplay: computed
+    });
+
+    this.appMode = params?.appMode || "dev";
+    this.isPreviewing = params?.isPreviewing || false;
+    this.appVersion = params?.appVersion || "unknown";
+    this.appConfig = params?.appConfig || AppConfigModel.create();
+
     // for testing, we create a null problem or investigation if none is provided
-    investigation: params?.investigation || InvestigationModel.create({ ordinal: 0, title: "Null Investigation" }),
-    problem: params?.problem || ProblemModel.create({ ordinal: 0, title: "Null Problem" }),
-    user,
-    ui: params?.ui || UIModel.create({
-      problemWorkspace: {
-        type: ProblemWorkspace,
-        mode: "1-up"
-      },
-      learningLogWorkspace: {
-        type: LearningLogWorkspace,
-        mode: "1-up"
-      },
-    }),
-    groups: params?.groups || GroupsModel.create({ acceptUnknownStudents: params?.isPreviewing }),
-    class: params?.class || ClassModel.create({ name: "Null Class", classHash: "" }),
-    db: params?.db || new DB(),
-    documents: params?.documents || createDocumentsModelWithRequiredDocuments(requiredDocumentTypes),
-    networkDocuments: params?.networkDocuments || DocumentsModel.create({}),
-    unit: params?.unit || UnitModel.create({code: "NULL", title: "Null Unit"}),
-    demo: params?.demo || DemoModel.create({name: demoName, class: {id: "0", name: "Null Class"}}),
-    showDemoCreator: params?.showDemoCreator || false,
-    supports: params?.supports || SupportsModel.create({}),
-    clipboard: ClipboardModel.create(),
-    selection: SelectionStoreModel.create(),
-    serialDevice: new SerialDevice()
-  };
-  const problemPath = getProblemPath(stores);
-  stores.ui.setProblemPath(problemPath);
-  return {
-    ...stores,
-    problemPath,
-    userContextProvider: new UserContextProvider(stores)
-  };
+    this.investigation = params?.investigation ||
+      InvestigationModel.create({ ordinal: 0, title: "Null Investigation" });
+    this.problem = params?.problem || ProblemModel.create({ ordinal: 0, title: "Null Problem" });
+    this.user = params?.user || UserModel.create({ id: "0" });
+    this.ui = params?.ui || UIModel.create({
+        problemWorkspace: {
+          type: ProblemWorkspace,
+          mode: "1-up"
+        },
+        learningLogWorkspace: {
+          type: LearningLogWorkspace,
+          mode: "1-up"
+        },
+      });
+    this.groups = params?.groups || GroupsModel.create({ acceptUnknownStudents: params?.isPreviewing });
+    // TODO: is the word "class" here ok?
+    this.class = params?.class || ClassModel.create({ name: "Null Class", classHash: "" });
+    this.db = params?.db || new DB();
+    this.documents = params?.documents || createDocumentsModelWithRequiredDocuments(requiredDocumentTypes);
+    this.networkDocuments = params?.networkDocuments || DocumentsModel.create({});
+    this.unit = params?.unit || UnitModel.create({code: "NULL", title: "Null Unit"});
+    const demoName = params?.demoName || this.appConfig.appName;
+    this.demo = params?.demo || DemoModel.create({name: demoName, class: {id: "0", name: "Null Class"}});
+    this.showDemoCreator = params?.showDemoCreator || false;
+    this.supports = params?.supports || SupportsModel.create({});
+    this.clipboard = ClipboardModel.create();
+    this.selection = SelectionStoreModel.create();
+    this.serialDevice = new SerialDevice();
+
+    // TODO change this to a getter
+    this.problemPath = getProblemPath(this);
+    this.ui.setProblemPath(this.problemPath);
+    this.userContextProvider = new UserContextProvider(this);
+  }
+
+  get tabsToDisplay() {
+    const { appConfig: { navTabs: navTabSpecs },
+      teacherGuide,
+      user: { isTeacher }
+    } = this;
+
+    return isTeacher
+      ? navTabSpecs.tabSpecs.filter(t => (t.tab !== "teacher-guide") || teacherGuide)
+      : navTabSpecs.tabSpecs.filter(t => !t.teacherOnly);
+  }
 }
 
 export function setAppMode(stores: IStores, appMode: AppMode) {
@@ -94,7 +137,7 @@ export function getProblemPath(stores: IBaseStores) {
   return `${stores.unit.code}/${stores.investigation.ordinal}/${stores.problem.ordinal}`;
 }
 
-export function getTabsToDisplay(stores: IBaseStores) {
+export function getTabsToDisplay(stores: IBaseStores): NavTabModelType[] {
   const { appConfig: { navTabs: navTabSpecs },
     teacherGuide,
     user: { isTeacher }
@@ -145,18 +188,19 @@ export const setUnitAndProblem = async (stores: IStores, unitId: string | undefi
   stores.ui.setProblemPath(stores.problemPath);
 
   // Set the active tab to be the first tab
-  const tabs = getTabsToDisplay(stores);
+  const tabs = stores.tabsToDisplay;
   if (tabs.length > 0) {
     stores.ui.setActiveNavTab(tabs[0].tab);
   }
 
-  // TODO: It would be best to make stores a MobX object so when the teacherGuide is
-  // updated, the Workspace component will re-render to show the teacher guide.
-  // It currently works in real-world use, but was causing a Cypress test failure.
   addDisposer(unit, when(() => {
       return stores.user.isTeacher;
     },
     async () => {
+      // Uncomment the next line to add a 5 second delay.
+      // This is useful to test whether the teacher guide tab shows when there is a network delay.
+      // await new Promise((resolve) => setTimeout(resolve, 5000));
+
       // only load the teacher guide content for teachers
       const guideJson = await getGuideJson(unitId, stores.appConfig);
       if (guideJson.status !== 404) {

@@ -30,18 +30,16 @@ interface IProps extends IBaseProps {
 export class NavTabPanel extends BaseComponent<IProps> {
 
   private navTabPanelElt: HTMLDivElement | null = null;
-  private tabs: NavTabModelType[];
 
   constructor(props: IProps) {
     super(props);
-    this.tabs = getTabsToDisplay(this.stores);
   }
 
   public render() {
     const { isResourceExpanded, isExpanderShown } = this.props;
     const { ui: { activeNavTab, dividerPosition, focusDocument, showChatPanel, selectedTileIds },
             user } = this.stores;
-    const { tabs } = this;
+    const tabs = this.stores.tabsToDisplay;
     const selectedTabIndex = tabs?.findIndex(t => t.tab === activeNavTab);
     const resizePanelWidth = 6;
     const collapseTabWidth = 44;
@@ -161,7 +159,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
   };
 
   private handleSelectTab = (tabIndex: number) => {
-    const { tabs } = this;
+    const tabs = this.stores.tabsToDisplay;
     const { ui } = this.stores;
     if (tabs) {
       const tabSpec = tabs[tabIndex];
