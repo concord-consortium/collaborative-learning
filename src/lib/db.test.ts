@@ -109,7 +109,7 @@ describe("db", () => {
 
   it("resolves paths in dev mode", async () => {
     expect.assertions(2);
-    stores.appMode = "dev";
+    stores.setAppMode("dev");
     await db.connect({appMode: "dev", stores, dontStartListeners: true});
     expect(db.firebase.getRootFolder()).toMatch(/^\/dev\/([^/])+\/portals\/example_com\/$/);
     expect(db.firebase.getFullPath("foo")).toMatch(/^\/dev\/([^/])+\/portals\/example_com\/foo$/);

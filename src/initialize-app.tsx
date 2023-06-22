@@ -12,7 +12,7 @@ import { Logger } from "./lib/logger";
 import { appConfigSnapshot, appIcons, createStores } from "./app-config";
 import { AppConfigContext } from "./app-config-context";
 import { AppConfigModel } from "./models/stores/app-config-model";
-import { IStores, setUnitAndProblem } from "./models/stores/stores";
+import { IStores } from "./models/stores/stores";
 import { UserModel } from "./models/stores/user";
 import { urlParams } from "./utilities/url-params";
 import { DEBUG_STORES } from "./lib/debug";
@@ -56,7 +56,7 @@ export const initializeApp = async (appMode: AppMode, authoring?: boolean): Prom
     (window as any).stores = stores;
   }
 
-  await setUnitAndProblem(stores, unitId, problemOrdinal);
+  await stores.setUnitAndProblem(unitId, problemOrdinal);
 
   gImageMap.initialize(stores.db);
 
