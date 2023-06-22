@@ -31,7 +31,6 @@ interface IGroupViewTitlebarProps {
 
 interface IGroupTitlebarProps {
   selectedId: string;
-  // context: string | null;
   groupUser?: GroupUserModelType | undefined;
 }
 
@@ -62,7 +61,7 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
                             selected={group.id === selectedId}
               />
               { groupUsers.map(u => {
-                  const className = classNames("member-button", "in-student-group-view", `${u.context}`);
+                  const className = classNames("member-button", "in-student-group-view", u.context);
                 return (
                   <div key={u.user.name} className={className} title={u.user.name}>{u.user.name}</div>
                 );
@@ -108,7 +107,6 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
                          groupId={selectedGroupId}
                          isGhostUser={true}
                          viaStudentGroupView={true}
-                        //  groupViewContext={groupViewContext}
                          setFocusedGroupUser={setFocusedGroupUser}
         />
       </div>
