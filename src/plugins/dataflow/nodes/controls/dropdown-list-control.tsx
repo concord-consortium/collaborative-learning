@@ -22,7 +22,7 @@ const optionValue = (opt: ListOption) => Object.prototype.hasOwnProperty.call(op
 const optionLabelClass = (str?: string) => {
   const optClass = str?.toLowerCase().replace(/ /g, "-") ?? "";
   return "label " + optClass;
-}
+};
 export class DropdownListControl extends Rete.Control {
   private emitter: NodeEditor;
   private component: any;
