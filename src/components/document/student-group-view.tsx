@@ -7,6 +7,7 @@ import { LogEventName } from "../../lib/logger-types";
 import { FourUpComponent } from "../four-up";
 
 import "./student-group-view.scss";
+import { group } from "d3";
 
 interface IGroupButtonProps {
   displayId: string;
@@ -40,6 +41,9 @@ interface IProps {
   setGroupId: (groupId: string) => void;
 }
 export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
+  console.log("<----StudentGroupView---->");
+  console.log("\tgroupId:", groupId);
+  console.log("\tsetGroupId:", setGroupId);
   const user = useUserStore();
   const groups = useGroupsStore();
   const [focusedGroupUser, setFocusedGroupUser] = useState<GroupUserModelType | undefined>();
