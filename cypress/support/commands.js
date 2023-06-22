@@ -217,6 +217,10 @@ Cypress.Commands.add("getDocumentToolTile", (tileIndex = 0) => {
 Cypress.Commands.add('closeResourceTabs', () => {
   cy.get('.nav-tab-panel .close-button').click();
 });
+Cypress.Commands.add('collapseResourcesPanel', () => {
+  cy.get('.divider').click({force:true});
+  cy.get('.divider-container .expand-handle.left').click();
+});
 Cypress.Commands.add('collapseWorkspace', () => {
   cy.get('.divider').click({force:true});
   cy.get('.divider-container .expand-handle.right').click();
