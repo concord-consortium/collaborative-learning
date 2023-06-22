@@ -99,8 +99,8 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
     // const n1String = isNaN(n1) ? kEmptyValueString : `${roundNodeValue(n1)}`;
     // const n2String = isNaN(n2) ? kEmptyValueString : `${roundNodeValue(n2)}`;
 
-    const onString = `on →${cResultString}`;
-    const offString = `off →${resultString}`;
+    const onString = `on → ${cResultString}`;
+    const offString = `off → ${resultString}`;
 
     const resultSentence = n1 === 1 ? onString : offString;
       // first version

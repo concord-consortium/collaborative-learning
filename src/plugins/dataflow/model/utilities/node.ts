@@ -130,7 +130,6 @@ export const NodeOperationTypes = [
     numberSentence: (n1: string, n2: string) => `${n1} / ${n2} = `,
     icon: DivideIcon
   },
-
   {
     name: "Absolute Value",
     type: "transform",
@@ -333,7 +332,7 @@ export const NodeLiveOutputTypes = [
     angleBase: 180,
   },
   {
-    name: "Gripper v2",
+    name: "Gripper 2.0",
     icon: GrabberIcon,
     angleBase: 100
   },
@@ -472,4 +471,4 @@ export const kSensorMissingMessage = "⚠️";
 export const kAnimatedBinaryTypes = ["Fan", "Humidifier"];
 export const kRelaysIndexed =  ["Heat Lamp", "Fan", "Humidifier"];
 export const kBinaryOutputTypes = [...kRelaysIndexed, "Light Bulb"];
-export const kRoundedOutputTypes = ["Grabber", "Gripper v2"];
+export const kRoundedOutputTypes = ["Grabber", "Gripper", "Gripper 2.0"];
