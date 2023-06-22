@@ -43,7 +43,7 @@ interface IProps {
 export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
   console.log("<----StudentGroupView---->");
   console.log("\tgroupId:", groupId);
-  console.log("\tsetGroupId:", setGroupId);
+  // console.log("\tsetGroupId:", setGroupId);
   const user = useUserStore();
   const groups = useGroupsStore();
   const [focusedGroupUser, setFocusedGroupUser] = useState<GroupUserModelType | undefined>();
@@ -57,12 +57,14 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
   const classes = classNames("document", "student-group-view", {"shrink-student-view": shrinkStudentView});
 
   const handleSelectGroup = (id: string) => {
+    console.log("\t🔨handleSelectGroup with id:",id);
     Logger.log(LogEventName.VIEW_GROUP, {group: id, via: "group-document-titlebar"});
     setGroupId(id);
     setFocusedGroupUser(undefined);
     setGroupViewContext(null);
   };
   const handleFocusedGroupUserChange = (selectedGroupUser: GroupUserModelType | undefined) => {
+    console.log("\t🔨handleFocusedGroupUserChange with selectedGroupUser:", selectedGroupUser);
     setFocusedGroupUser(selectedGroupUser);
   };
   const handleToggleContext = (context: string | null, selectedGroupUser: GroupUserModelType | undefined) => {

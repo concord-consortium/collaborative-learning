@@ -51,7 +51,7 @@ export const UITabModel = types
 export const UIModel = types
   .model("UI", {
     // dividerPosition: kDividerHalf,
-    dividerPosition: kDividerMin,
+    dividerPosition: kDividerMax,
 
     error: types.maybeNull(types.string),
     activeNavTab: ENavTab.kProblems,

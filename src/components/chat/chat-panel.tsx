@@ -22,7 +22,11 @@ interface IProps {
 }
 
 
-export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument, focusTileId, onCloseChatPanel }) => {
+export const ChatPanel: React.FC<IProps> = (props) => {
+  const { user, activeNavTab, focusDocument, focusTileId, onCloseChatPanel } = props;
+  console.log("----<ChatPanel>------");
+  console.log("props:", props);
+
   const document = useDocumentOrCurriculumMetadata(focusDocument);
   const content = useCurriculumOrDocumentContent(focusDocument);
   const ordering = content?.getTilesInDocumentOrder();
