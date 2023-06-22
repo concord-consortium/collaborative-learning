@@ -286,6 +286,7 @@ $node-inner-width: 140px;
     &.has-gate .inputs {
       // BINARY
       div:nth-of-type(2) .socket {
+        background-image: url("../assets/icons/control/node-arrow.svg");
         transform:rotate(270deg);
       }
     }
@@ -299,6 +300,7 @@ $node-inner-width: 140px;
       div:nth-of-type(2) .socket {
         transform:rotate(180deg);
         background-image: url("../assets/icons/control/node-arrow.svg");
+        background-color: $control-green;
       }
     }
 
