@@ -25,6 +25,8 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
     return () => clearInterval(id);
   }, [content]);
 
+  const component = content.simulationData.component;
+
   return (
     <div className="simulator-content-container">
       <BasicEditableTileTitle
@@ -49,6 +51,11 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
             />
           )}
         </div>
+        { component && (
+          <div className="simulator-component-container">
+            { component({ frame: _steps, variables: content.variables || [] }) }
+          </div>
+        )}
       </div>
     </div>
   );
