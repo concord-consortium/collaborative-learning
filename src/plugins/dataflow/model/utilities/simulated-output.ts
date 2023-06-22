@@ -1,6 +1,7 @@
 import { Node } from "rete";
 import { VariableType } from "@concord-consortium/diagram-view";
 import { getOutputType } from "../../nodes/utilities/live-output-utilities";
+import LightIcon from "../../assets/icons/sensor/light.svg";
 
 export const kOutputVariablePrefix = "output_";
 
@@ -21,7 +22,7 @@ function outputNamesToMatch(node: Node) {
   return [underscoreName, noSpaceName];
 }
 
-function outputNameMatches(names: string[], variable:VariableType) {
+function outputNameMatches(names: string[], variable: VariableType) {
   const variableName = outputVariableNamePart(variable)?.toLowerCase();
   return variableName && names.includes(variableName);
 }
@@ -30,4 +31,21 @@ export function findOutputVariable(node: Node, variables?: VariableType[]) {
   if (!variables) return undefined;
   const names = outputNamesToMatch(node);
   return variables?.find((variable: VariableType) => outputNameMatches(names, variable));
+}
+
+function simulatedHubId(variable: VariableType) {
+  return `HUB${outputVariableNamePart(variable)}`;
+}
+
+function simulatedHubName(node: Node) {
+  return `Simulated ${getOutputType(node)}`;
+}
+
+export function simulatedHub(variable: VariableType, node: Node) {
+  return {
+    id: simulatedHubId(variable),
+    name: simulatedHubName(node) || "",
+    icon: LightIcon,
+    active: true
+  };
 }

@@ -14,6 +14,7 @@ import { BaseComponent } from "../../../components/base";
 import { ProgramZoomType, DataflowContentModelType } from "../model/dataflow-content";
 import { DataflowProgramModelType } from "../model/dataflow-program-model";
 import { simulatedChannel } from "../model/utilities/simulated-channel";
+import { findOutputVariable, simulatedHub } from "../model/utilities/simulated-output";
 import { SensorSelectControl } from "../nodes/controls/sensor-select-control";
 import { DataflowReteNodeFactory } from "../nodes/factories/dataflow-rete-node-factory";
 import { NumberReteNodeFactory } from "../nodes/factories/number-rete-node-factory";
@@ -40,7 +41,7 @@ import { DataflowProgramTopbar } from "./ui/dataflow-program-topbar";
 import { DataflowProgramCover } from "./ui/dataflow-program-cover";
 import { DataflowProgramZoom } from "./ui/dataflow-program-zoom";
 import { NodeChannelInfo, serialSensorChannels } from "../model/utilities/channel";
-import { ProgramDataRates } from "../model/utilities/node";
+import { NodeMicroBitHubs, ProgramDataRates } from "../model/utilities/node";
 import { getAttributeIdForNode, recordCase } from "../model/utilities/recording-utilities";
 import { virtualSensorChannels } from "../model/utilities/virtual-channel";
 import { DocumentContextReact } from "../../../components/document/document-context";
@@ -52,7 +53,6 @@ import { ProgramMode, UpdateMode } from "./types/dataflow-tile-types";
 import { ITileModel } from "../../../models/tiles/tile-model";
 
 import "./dataflow-program.sass";
-import { findOutputVariable } from "../model/utilities/simulated-output";
 
 export interface IStartProgramParams {
   runId: string;
@@ -488,6 +488,15 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       if (node.name === "Live Output"){
         const hubSelect = getHubSelect(node);
         hubSelect.setChannels(this.channels);
+
+        // Update live output hub options with simulated hubs
+        const outputVariable = findOutputVariable(node, this.props.tileContent?.outputVariables);
+        const options = outputVariable ? [...NodeMicroBitHubs, simulatedHub(outputVariable, node)] : NodeMicroBitHubs;
+        // If the selected option no longer exists, switch to the first option
+        if (!options.find(option => option.name === hubSelect.getValue())) {
+          hubSelect.setValue(options[0].name);
+        }
+        hubSelect.setOptions(options);
       }
     });
   };
