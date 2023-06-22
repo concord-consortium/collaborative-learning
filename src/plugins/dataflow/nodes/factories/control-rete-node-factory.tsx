@@ -59,6 +59,7 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
     }
 
     // For each function, evaluate given inputs and node state
+    // TODO - check and see if this gets serialized, and if so, how to handle legacy funcNames on load
     if (funcName === "Hold 0"){
       this.heldValue = null;
       result = node.data.gateActive ? 0 : n2;
