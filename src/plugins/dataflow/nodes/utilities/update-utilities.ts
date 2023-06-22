@@ -7,7 +7,7 @@ import { NumControl } from "../controls/num-control";
 import { SensorSelectControl } from "../controls/sensor-select-control";
 import { NodeChannelInfo } from "../../model/utilities/channel";
 import { kMaxNodeValues, NodeGeneratorTypes, NodeTimerInfo, NodeValue } from "../../model/utilities/node";
-import { findOutputVariable } from "../../model/utilities/simulated-output";
+import { findOutputVariable, simulatedHubName } from "../../model/utilities/simulated-output";
 import { SerialDevice } from "../../../../models/stores/serial";
 
 function passSerialStateToChannel(sd: SerialDevice, channel: NodeChannelInfo) {
@@ -42,7 +42,7 @@ export function sendDataToSerialDevice(n: Node, serialDevice: SerialDevice) {
 
 export function sendDataToSimulatedOutput(n: Node, outputVariables?: VariableType[]) {
   const outputVariable = findOutputVariable(n, outputVariables);
-  if (outputVariable) {
+  if (outputVariable && getHubSelect(n).getValue() === simulatedHubName(n)) {
     const { val } = getNodeValueWithType(n);
     const outputValue = isFinite(val) ? val : 0;
     outputVariable.setValue(outputValue);

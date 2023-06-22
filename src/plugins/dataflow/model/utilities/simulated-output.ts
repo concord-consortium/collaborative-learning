@@ -37,7 +37,7 @@ function simulatedHubId(variable: VariableType) {
   return `HUB${outputVariableNamePart(variable)}`;
 }
 
-function simulatedHubName(node: Node) {
+export function simulatedHubName(node: Node) {
   return `Simulated ${getOutputType(node)}`;
 }
 
