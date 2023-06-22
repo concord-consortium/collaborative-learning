@@ -1,6 +1,7 @@
-import { VariableType } from "@concord-consortium/diagram-view";
+import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { useEffect, useState } from "react";
+import { VariableType } from "@concord-consortium/diagram-view";
 
 import { SimulatorContentModelType } from "../model/simulator-content";
 import { inputVariableNamePart, outputVariableNamePart } from "../../shared-variables/simulations/simulation-utilities";
@@ -26,12 +27,13 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
     return () => clearInterval(id);
   }, [content]);
 
-  interface IVariableRowProps {
+  interface ISimulatorVariableProps {
+    className?: string;
     key?: string;
     nameFunction?: (v: VariableType) => string | undefined;
     variable?: VariableType;
   }
-  const VariableRow = ({ nameFunction, variable }: IVariableRowProps) => {
+  const SimulatorVariable = ({ className, nameFunction, variable }: ISimulatorVariableProps) => {
     const defaultFunction = (v: VariableType) => v.name || "";
     const _nameFunction = nameFunction ?? defaultFunction;
 
@@ -40,10 +42,12 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
     const scaleFactor = 100;
     const displayValue = value !== undefined ? Math.round(value * scaleFactor) / scaleFactor : "";
     const display = variable?.name ? `${_nameFunction(variable)}: ${displayValue}` : "";
+    const classes = classNames("simulator-variable", className);
     return (
-      <p>
-        {display}
-      </p>
+      <div className={classes}>
+        <div className="leading-box" />
+        <div>{display}</div>
+      </div>
     );
   };
 
@@ -66,14 +70,16 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
       <div className="simulator-content">
         <div className="simulator-variables">
           { content.inputVariables.map(variable =>
-            <VariableRow
+            <SimulatorVariable
+              className="input"
               key={variable.name}
               nameFunction={inputDisplayName}
               variable={content.getVariable(variable.name)}
             />
           )}
           { content.outputVariables.map(variable =>
-            <VariableRow
+            <SimulatorVariable
+              className="output"
               key={variable.name}
               nameFunction={outputDisplayName}
               variable={content.getVariable(variable.name)}
