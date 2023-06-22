@@ -2,10 +2,11 @@ import React, { useState } from "react";
 import classNames from "classnames";
 import { getGroupUsers } from "../../models/document/document-utils";
 import { GroupUserModelType } from "../../models/stores/groups";
-import { useProblemStore, useStores } from "../../hooks/use-stores";
+import { useProblemStore, useUIStore, useStores } from "../../hooks/use-stores";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import { FourUpComponent } from "../four-up";
+
 import "./student-group-view.scss";
 
 interface IGroupButtonProps {
@@ -45,12 +46,17 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
   const groupUsers = getGroupUsers(user.id, groups, documents, selectedGroupId);
   const group = groups.getGroupById(selectedGroupId);
 
+  const ui = useUIStore();
+  const isStudentViewActiveTab = (ui.activeNavTab === "student-work");
+  const isChatPanelShown = ui.showChatPanel;
+  const shrinkStudentView  = isStudentViewActiveTab && isChatPanelShown;
+  const classes = classNames("document", "student-group-view", {"shrink-student-view": shrinkStudentView});
+
   const handleSelectGroup = (id: string) => {
     Logger.log(LogEventName.VIEW_GROUP, {group: id, via: "group-document-titlebar"});
     setGroupId(id);
     setFocusedGroupUser(undefined);
   };
-
   const GroupViewTitlebar: React.FC<IGroupViewTitlebarProps> = ({ selectedId, onSelectGroup }) => {
     return (
       <div className={`titlebar student-group group`}>
@@ -99,7 +105,7 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
   };
 
   return (
-    <div key="student-group-view" className="document student-group-view">
+    <div key="student-group-view" className={classes}>
       <GroupViewTitlebar selectedId={selectedGroupId} onSelectGroup={handleSelectGroup} />
       <GroupTitlebar selectedId={selectedGroupId} groupUser={focusedGroupUser}/>
       <div className="canvas-area">
