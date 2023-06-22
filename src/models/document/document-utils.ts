@@ -42,7 +42,7 @@ export function getDocumentIdentifier(document?: DocumentContentModelType) {
 }
 
 // Utility function that creates an array of dictionaries of students and their docs in a group
-export function getGroupUsers(groups: any, documents: any, groupId: string | undefined,
+export function getGroupUsers(userId: string | undefined, groups: any, documents: any, groupId: string | undefined,
     documentViewMode?: DocumentViewMode) {
   const group = groups.getGroupById(groupId);
   const groupDocuments = group && groupId &&
@@ -65,5 +65,12 @@ export function getGroupUsers(groups: any, documents: any, groupId: string | und
           };
         })
     : [];
+
+   // put the primary user's document first (i.e. in the upper-left corner)
+  groupUsers.sort((a, b) => {
+    if (a.user.id === userId) return -1;
+    if (b.user.id === userId) return 1;
+    return 0;
+  });
   return groupUsers;
 }

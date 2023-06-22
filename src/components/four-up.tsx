@@ -132,14 +132,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     const { groups, documents } = this.stores;
     const { userId, groupId, isGhostUser, toggleable, ...others } = this.props;
 
-    const groupUsers = getGroupUsers(groups, documents, groupId, documentViewMode);
-
-    // put the primary user's document first (i.e. in the upper-left corner)
-    groupUsers.sort((a, b) => {
-      if (a.user.id === userId) return -1;
-      if (b.user.id === userId) return 1;
-      return 0;
-    });
+    const groupUsers = getGroupUsers(userId, groups, documents, groupId, documentViewMode);
 
     // save reference to use for the username display in this render and logger in #handleOverlayClicked
     this.userByContext = {
@@ -188,7 +181,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       (cell: FourUpGridCellModelType, corner: string) => (toggledContext === corner ? 2 : 1) * cell.scale;
 
     const memberName = (context: string) => {
-      const groupUser = groupUsers.find(u => u.context === context);
+      const groupUser = this.userByContext[context];
       const isToggled = context === toggledContext;
       if (groupUser) {
         const { name: fullName, initials } = groupUser.user;

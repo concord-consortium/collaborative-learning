@@ -43,7 +43,7 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
   const {user, groups, documents} = useStores();
   const [focusedGroupUser, setFocusedGroupUser] = useState<GroupUserModelType | undefined>();
   const selectedGroupId = groupId || (groups.allGroups.length ? groups.allGroups[0].id : "");
-  const groupUsers = getGroupUsers(groups, documents, selectedGroupId);
+  const groupUsers = getGroupUsers(user.id, groups, documents, selectedGroupId);
   const group = groups.getGroupById(selectedGroupId);
 
   const handleSelectGroup = (id: string) => {
