@@ -11,6 +11,7 @@ import { GroupUserModelType } from "../models/stores/groups";
 import { CellPositions, FourUpGridCellModelType, FourUpGridModel, FourUpGridModelType
       } from "../models/view/four-up-grid";
 import { FourUpOverlayComponent } from "./four-up-overlay";
+import { getGroupUsers } from "../models/document/document-utils";
 import { Logger } from "../lib/logger";
 import { LogEventName } from "../lib/logger-types";
 import FourUpIcon from "../clue/assets/icons/4-up-icon.svg";
@@ -26,18 +27,17 @@ interface IProps extends IBaseProps {
   selectedSectionId?: string | null;
   viaTeacherDashboard?: boolean;
   viaStudentGroupView?: boolean
-  groupViewContext?: string | null;
   setFocusedGroupUser?: (focusedGroupUser?: GroupUserModelType) => void;
-  onToggleContext?: (context: string | null, selectedGroupUser: GroupUserModelType | undefined) => void;
 }
 
 interface IState {
-  toggledContextMap: Record<string, string | null>
+  toggledContextMap: Record<string, string | undefined>
 }
 
-interface FourUpUser {
+export interface FourUpUser {
   user: GroupUserModelType;
   doc?: DocumentModelType;
+  context: string;
 }
 
 interface ContextUserMap {
@@ -108,7 +108,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
 
   private getToggledContext () {
     const {toggledContextMap} = this.state;
-   return (this.props.groupId && toggledContextMap[this.props.groupId]) ?? null;
+    return (this.props.groupId && toggledContextMap[this.props.groupId]) ?? null;
   }
 
   public render() {
@@ -134,31 +134,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     const { groups, documents } = this.stores;
     const { userId, groupId, isGhostUser, toggleable, ...others } = this.props;
 
-    const group = groups.getGroupById(groupId);
-    const groupDocuments = group && groupId &&
-                           (documentViewMode === DocumentViewMode.Published
-                             ? documents.getLastPublishedProblemDocumentsForGroup(groupId)
-                             : documents.getProblemDocumentsForGroup(groupId)
-                           ) || [];
-    const groupUsers: FourUpUser[] = group
-      ? group.users
-          .map((groupUser) => {
-            const groupUserDoc = groupDocuments && groupDocuments.find((groupDocument) => {
-              return groupDocument.uid === groupUser.id;
-            });
-            return {
-              user: groupUser,
-              doc: groupUserDoc,
-              initials: groupUser.initials
-            };
-          })
-      : [];
-    // put the primary user's document first (i.e. in the upper-left corner)
-    groupUsers.sort((a, b) => {
-      if (a.user.id === userId) return -1;
-      if (b.user.id === userId) return 1;
-      return 0;
-    });
+    const groupUsers = getGroupUsers(userId, groups, documents, groupId, documentViewMode);
 
     // save reference to use for the username display in this render and logger in #handleOverlayClicked
     this.userByContext = {
@@ -216,12 +192,10 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
         const name = isToggled ? fullName : initials;
         return (
           isToggled && viaStudentGroupView
-            ? <>
-                <div className={className} title={fullName}>{name}</div>
-                <button className="restore-fourup-button" onClick={()=>this.handleOverlayClick(context)}>
-                  <FourUpIcon /> 4-Up
-                </button>
-              </>
+            ? //pass an undefined context to handleOverlayClick to null out selected quadrant
+              <button className="restore-fourup-button" onClick={()=>this.handleOverlayClick()}>
+                <FourUpIcon /> 4-Up
+              </button>
             : <div className={className} title={fullName} onClick={()=>this.handleOverlayClick(context)}>
                   {name}
               </div>
@@ -372,23 +346,22 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     window.addEventListener("mouseup", handleMouseUp);
   };
 
-  private handleOverlayClick = (context: string) => {
-    const { groupId, setFocusedGroupUser, onToggleContext } = this.props;
-    const groupUser = this.userByContext[context];
+  private handleOverlayClick = (context?: string) => {
+    const { groupId, setFocusedGroupUser } = this.props;
+    const groupUser = context ? this.userByContext[context] : undefined;
     const toggledContext = this.getToggledContext();
     this.setState(state => {
       if (groupId) {
         const current = state.toggledContextMap[groupId] ?? null;
-        state.toggledContextMap[groupId] = current ? null : context;
+        state.toggledContextMap[groupId] = current ? undefined : context;
       }
       return { toggledContextMap: clone(state.toggledContextMap) };
-     });
+    });
+    setFocusedGroupUser && setFocusedGroupUser(groupUser?.user);
+
     if (groupUser) {
       const event = toggledContext ? LogEventName.DASHBOARD_SELECT_STUDENT : LogEventName.DASHBOARD_DESELECT_STUDENT;
       Logger.log(event, {groupId, studentId: groupUser.user.id});
     }
-    const focusedGroupUser = toggledContext ? groupUser?.user : undefined;
-    setFocusedGroupUser && setFocusedGroupUser(focusedGroupUser);
-    onToggleContext && onToggleContext(context, groupUser?.user);
   };
 }
