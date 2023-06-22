@@ -27,7 +27,6 @@ interface IProps extends IBaseProps {
   selectedSectionId?: string | null;
   viaTeacherDashboard?: boolean;
   viaStudentGroupView?: boolean
-  // groupViewContext?: string | null;
   setFocusedGroupUser?: (focusedGroupUser?: GroupUserModelType) => void;
 }
 
