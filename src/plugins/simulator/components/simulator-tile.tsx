@@ -1,10 +1,8 @@
-import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { useEffect, useState } from "react";
-import { VariableType } from "@concord-consortium/diagram-view";
 
+import { SimulatorVariable } from "./simulator-variable";
 import { SimulatorContentModelType } from "../model/simulator-content";
-import { inputVariableNamePart, outputVariableNamePart } from "../../shared-variables/simulations/simulation-utilities";
 import { ITileProps } from "../../../components/tiles/tile-component";
 import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
 
@@ -27,39 +25,6 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
     return () => clearInterval(id);
   }, [content]);
 
-  interface ISimulatorVariableProps {
-    className?: string;
-    key?: string;
-    nameFunction?: (v: VariableType) => string | undefined;
-    variable?: VariableType;
-  }
-  const SimulatorVariable = ({ className, nameFunction, variable }: ISimulatorVariableProps) => {
-    const defaultFunction = (v: VariableType) => v.name || "";
-    const _nameFunction = nameFunction ?? defaultFunction;
-
-    // Limit the value to two decimal places
-    const value = variable?.value;
-    const scaleFactor = 100;
-    const displayValue = value !== undefined ? Math.round(value * scaleFactor) / scaleFactor : "";
-    const display = variable?.name ? `${_nameFunction(variable)}: ${displayValue}` : "";
-    const classes = classNames("simulator-variable", className);
-    return (
-      <div className={classes}>
-        <div className="leading-box" />
-        <div>{display}</div>
-      </div>
-    );
-  };
-
-  const displayName = (
-    nameFunction: (v: VariableType) => string | undefined, suffix: string, variable: VariableType
-  ) => {
-    return variable?.name ? `${nameFunction(variable)} ${suffix}` : "";
-  };
-
-  const inputDisplayName = (v: VariableType) => displayName(inputVariableNamePart, "Sensor", v);
-  const outputDisplayName = (v: VariableType) => displayName(outputVariableNamePart, "Output", v);
-
   return (
     <div className="simulator-content-container">
       <BasicEditableTileTitle
@@ -71,17 +36,15 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
         <div className="simulator-variables">
           { content.inputVariables.map(variable =>
             <SimulatorVariable
-              className="input"
+              inputVariable={true}
               key={variable.name}
-              nameFunction={inputDisplayName}
               variable={content.getVariable(variable.name)}
             />
           )}
           { content.outputVariables.map(variable =>
             <SimulatorVariable
-              className="output"
+              inputVariable={false}
               key={variable.name}
-              nameFunction={outputDisplayName}
               variable={content.getVariable(variable.name)}
             />
           )}

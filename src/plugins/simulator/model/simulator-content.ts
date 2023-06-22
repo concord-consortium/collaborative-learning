@@ -104,22 +104,6 @@ export const SimulatorContentModel = TileContentModel
             containerSharedModel?.createVariable(variableSnapshot);
           }
         });
-
-        // if (containerSharedModel && tileSharedModels?.includes(containerSharedModel)) {
-        //   // We already have a shared model so we skip some steps
-        //   // below. If we don't skip these steps we can get in an infinite
-        //   // loop.
-        // } else {
-        //   if (!containerSharedModel) {
-        //     // The document doesn't have a shared model yet
-        //     containerSharedModel = SharedVariables.create();
-        //   }
-
-        //   // TODO: This will currently generate multiple history events because it
-        //   // is running outside of a document tree action.
-        //   // Add the shared model to both the document and the tile
-        //   sharedModelManager.addTileSharedModel(self, containerSharedModel);
-        // }
       },
       {name: "sharedModelSetup", fireImmediately: true}));
     },

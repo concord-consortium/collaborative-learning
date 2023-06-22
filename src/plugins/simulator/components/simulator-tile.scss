@@ -15,27 +15,6 @@
       padding: 45px 20px;
       position: absolute;
       width: 100%;
-
-      .simulator-variable {
-        align-items: center;
-        display: flex;
-        height: 20px;
-        // For now, use a fixed width to prevent the variables from shifting as their values change
-        width: 150px;
-
-        .leading-box {
-          height: 14px;
-          margin-right: 8px;
-          width: 14px;
-        }
-
-        &.input .leading-box {
-          background-color: #5584e5;
-        }
-        &.output .leading-box {
-          background-color: #f29046;
-        }
-      }
     }
   }
 }
