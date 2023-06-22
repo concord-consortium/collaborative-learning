@@ -1,5 +1,5 @@
 import { Instance, SnapshotIn, types } from "mobx-state-tree";
-import { ENavTab, NavTabModel, NavTabSpec } from "../view/nav-tabs";
+import { ENavTab, NavTabModel } from "../view/nav-tabs";
 
 export const NavTabsConfigModel = types
   .model("NavTabsConfig", {
@@ -10,7 +10,7 @@ export const NavTabsConfigModel = types
     showNavPanel: false
   })
   .views(self => ({
-    getNavTabSpec(tabId: ENavTab): NavTabSpec | undefined {
+    getNavTabSpec(tabId: ENavTab) {
       return self.tabSpecs.find(tab => tabId === tab.tab);
     }
   }));
