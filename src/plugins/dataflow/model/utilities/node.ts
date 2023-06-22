@@ -223,19 +223,22 @@ export const NodeOperationTypes = [
   }
 ];
 
-export const NodeControlTypes = [
+export const HoldFunctionOptions = [
   {
-    name: "Hold this",
+    name: "Hold Current",
+    displayName: "Hold this",
     type: "control",
     icon: HoldCurrentArrowIcon
   },
   {
-    name: "Hold previous",
+    name: "Hold Prior",
+    displayName: "Hold previous",
     type: "control",
     icon: HoldPreviousArrowIcon
   },
   {
-    name: "Hold 0",
+    name: "Output Zero",
+    displayName: "Hold 0",
     type: "control",
     icon: HoldZeroArrowIcon
   }

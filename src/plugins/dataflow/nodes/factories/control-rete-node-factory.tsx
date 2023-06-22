@@ -3,7 +3,7 @@ import { NodeData } from "rete/types/core/data";
 import { DataflowReteNodeFactory, kEmptyValueString } from "./dataflow-rete-node-factory";
 import { ValueControl } from "../controls/value-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
-import { NodeControlTypes, roundNodeValue } from "../../model/utilities/node";
+import { HoldFunctionOptions, roundNodeValue } from "../../model/utilities/node";
 import { PlotButtonControl } from "../controls/plot-button-control";
 
 export class ControlReteNodeFactory extends DataflowReteNodeFactory {
@@ -23,9 +23,9 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
       node.data.hasGate = true;
       node.data.gateActive = false;
 
-      const dropdownOptions = NodeControlTypes
+      const dropdownOptions = HoldFunctionOptions
         .map((nodeOp) => {
-          return { name: nodeOp.name, icon: nodeOp.icon };
+          return { name: nodeOp.name, displayName: nodeOp.displayName, icon: nodeOp.icon };
         });
       return node
         .addInput(valueInput)
@@ -60,13 +60,13 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
 
     // For each function, evaluate given inputs and node state
     // TODO - check and see if this gets serialized, and if so, how to handle legacy funcNames on load
-    if (funcName === "Hold 0"){
+    if (funcName === "Hold 0" || funcName === "Output Zero"){
       this.heldValue = null;
       result = node.data.gateActive ? 0 : n2;
       cResult = 0;
     }
 
-    else if (funcName === "Hold this"){
+    else if (funcName === "Hold Current"){
       if (node.data.gateActive){
         // Already a number here? Maintain. Otherwise set the new held value;
         this.heldValue = typeof this.heldValue === "number" ? this.heldValue : n2;
@@ -80,7 +80,7 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
       }
     }
 
-    else if (funcName === "Hold previous"){
+    else if (funcName === "Hold Prior"){
       if (node.data.gateActive){
         // Already a number here? Maintain. Otherwise set the new held value;
         this.heldValue = typeof this.heldValue === "number" ? this.heldValue : priorValue;
