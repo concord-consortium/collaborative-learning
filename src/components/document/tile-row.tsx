@@ -3,7 +3,6 @@ import React from "react";
 import { observer, inject } from "mobx-react";
 import { BaseComponent } from "../base";
 import { TileLayoutModelType, TileRowModelType } from "../../models/document/tile-row";
-import { isShowingTeacherContent } from "../../models/stores/stores";
 import { getTileContentInfo } from "../../models/tiles/tile-content-info";
 import { ILinkableTiles } from "../../models/tiles/tile-link-types";
 import { ITileModel } from "../../models/tiles/tile-model";
@@ -122,7 +121,7 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
 
   private isTileRenderable(tileId: string) {
     const tile = this.getTile(tileId);
-    return !!tile && (!tile.display || isShowingTeacherContent(this.stores));
+    return !!tile && (!tile.display || this.stores.isShowingTeacherContent);
   }
 
   private getTileWidth(tileId: string, tiles: TileLayoutModelType[]) {

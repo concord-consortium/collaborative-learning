@@ -6,7 +6,7 @@ let dashboard = new TeacherDashboard();
 let clueCanvas = new ClueCanvas;
 let chatPanel = new ChatPanel;
 
-let selectedChatBackground = 'rgb(234, 242, 142)';
+let selectedChatBackground = 'rgb(247, 251, 199)';
 let expandedChatBackground = 'rgb(234, 242, 142)';
 
 

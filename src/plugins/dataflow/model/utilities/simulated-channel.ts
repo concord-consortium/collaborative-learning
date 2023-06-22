@@ -5,6 +5,7 @@
 import { VariableType } from "@concord-consortium/diagram-view";
 
 import { NodeChannelInfo } from "./channel";
+import { NodeSensorTypes } from "./node";
 import { inputVariableNamePart } from "../../../shared-variables/simulations/simulation-utilities";
 
 export const kSimulatedChannelType = "simulated-channel";
@@ -18,12 +19,16 @@ function simulatedChannelName(variable: VariableType) {
 }
 
 export function simulatedChannel(variable: VariableType): NodeChannelInfo {
+  const name = inputVariableNamePart(variable) ?? "";
+  const lowerName = name.toLowerCase();
+  const sensorType = NodeSensorTypes.find(nst => nst.name.toLowerCase() === lowerName);
+  const type = sensorType?.type ?? kSimulatedChannelType;
   return {
     hubId: "",
     hubName: "",
     channelId: simulatedChannelId(variable),
     missing: false,
-    type: kSimulatedChannelType,
+    type,
     units: variable.computedUnit ?? "",
     value: variable.computedValue ?? 0,
     name: simulatedChannelName(variable) || "",

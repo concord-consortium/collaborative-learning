@@ -3,8 +3,7 @@ import React from "react";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { BaseComponent, IBaseProps } from "../base";
 import { kDividerMax, kDividerMin } from "../../models/stores/ui-types";
-import { NavTabSpec, ENavTab, NavTabModelType } from "../../models/view/nav-tabs";
-import { getTabsToDisplay } from "../../models/stores/stores";
+import { NavTabSpec, ENavTab } from "../../models/view/nav-tabs";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import { StudentGroupView } from "../document/student-group-view";
@@ -30,18 +29,16 @@ interface IProps extends IBaseProps {
 export class NavTabPanel extends BaseComponent<IProps> {
 
   private navTabPanelElt: HTMLDivElement | null = null;
-  private tabs: NavTabModelType[];
 
   constructor(props: IProps) {
     super(props);
-    this.tabs = getTabsToDisplay(this.stores);
   }
 
   public render() {
     const { isResourceExpanded, isExpanderShown } = this.props;
     const { ui: { activeNavTab, dividerPosition, focusDocument, showChatPanel, selectedTileIds },
             user } = this.stores;
-    const { tabs } = this;
+    const tabs = this.stores.tabsToDisplay;
     const selectedTabIndex = tabs?.findIndex(t => t.tab === activeNavTab);
     const resizePanelWidth = 6;
     const collapseTabWidth = 44;
@@ -161,7 +158,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
   };
 
   private handleSelectTab = (tabIndex: number) => {
-    const { tabs } = this;
+    const tabs = this.stores.tabsToDisplay;
     const { ui } = this.stores;
     if (tabs) {
       const tabSpec = tabs[tabIndex];
