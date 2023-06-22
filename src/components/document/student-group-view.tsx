@@ -39,7 +39,7 @@ interface IProps {
   setGroupId: (groupId: string) => void;
 }
 export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
-  const {groups, documents} = useStores();
+  const {user, groups, documents} = useStores();
   const [focusedGroupUser, setFocusedGroupUser] = useState<GroupUserModelType | undefined>();
   const selectedGroupId = groupId || (groups.allGroups.length ? groups.allGroups[0].id : "");
   const groupUsers = getGroupUsers(user.id, groups, documents, selectedGroupId);
