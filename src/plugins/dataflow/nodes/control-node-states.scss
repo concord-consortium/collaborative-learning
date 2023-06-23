@@ -1,0 +1,54 @@
+@import "../../../components/vars";
+@import "../components/dataflow-vars";
+
+// pulsing "signal dot" on the incoming data socket
+.node.control.has-flow-in .inputs {
+  @keyframes pulse {
+    0% {
+      filter: opacity(0);
+    }
+    50% {
+      filter: opacity(1);
+    }
+    100% {
+      filter: opacity(0);
+    }
+  }
+  .number2 .socket::before {
+    content: "";
+    position: absolute;
+    top: 63px;
+    left: -14px;
+    width: 20px;
+    height: 20px;
+    background-image: url("../assets/icons/control/signal.svg");
+    background-repeat: no-repeat;
+    animation: pulse 1s infinite;
+  }
+}
+
+.node.control .binary .socket {
+  background-image: url("../assets/icons/control/node-arrow.svg");
+  transition: all .2s ease-in-out;
+  transform: rotate(0deg);
+}
+
+
+.node.control.gate-active .binary .socket {
+  transform:rotate(180deg);
+  background-color: $control-green;
+  transition: all .2s ease-in-out;
+}
+
+.node.control.gate-active.has-flow-in .inputs {
+  .number2 .socket::before {
+    content: "";
+    position: absolute;
+    top: 63px;
+    left: -14px;
+    width: 20px;
+    height: 20px;
+    background-image: url("../assets/icons/control/signal.svg");
+    animation: none;
+  }
+}
