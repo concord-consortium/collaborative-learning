@@ -28,6 +28,10 @@ export class DataflowNode extends Node {
       "gate-active": node.data.gateActive
     });
 
+    const inputClass = (s: string) => {
+      return "input " + s.toLowerCase().replace(/ /g, "-");
+    };
+
     return (
       <div className={`node ${node.name.toLowerCase().replace(/ /g, "-")} ${dynamicClasses}`}>
         <div className="top-bar">
@@ -58,7 +62,7 @@ export class DataflowNode extends Node {
         <div className="inputs-outputs">
           <div className="inputs">
             {!["Demo Output"].includes(this.props.node.name) && undecoratedInputs.map((input: any) => (
-              <div className="input" key={input.key}>
+              <div className={inputClass(input.name)} key={input.key}>
                 <Socket
                   type="input"
                   socket={input.socket}
