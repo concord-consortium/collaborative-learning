@@ -15,8 +15,8 @@ interface INodeIconProps {
 
 const NodeIcon = ({ i, nodeType, nodeDisplayName }: INodeIconProps) => {
   const iconClass = "icon-block " + nodeType.toLowerCase().replace(" ", "-");
-  const iconDisplayName = nodeDisplayName ? nodeDisplayName : nodeType;
-  const nodeIcons = [];
+  const iconDisplayName = nodeDisplayName ?? nodeType;
+    const nodeIcons = [];
   switch (nodeType) {
     case "Number":
     case "Sensor":

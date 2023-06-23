@@ -89,7 +89,7 @@ export class DropdownListControl extends Rete.Control {
       const liveNode = this.getNode().name.substring(0,4) === "Live";
       const disableSelected = this.key === "hubSelect" && liveNode && !activeHub;
       const labelClasses = disableSelected ? "disabled item top" : "item top";
-      console.log("| displayName: ", displayName);
+
       return (
         <div className={`node-select ${listClass}`} ref={divRef}>
           <div className={labelClasses} onMouseDown={handleChange(onItemClick)}>
@@ -123,7 +123,7 @@ export class DropdownListControl extends Rete.Control {
                     <svg className="icon">{ops.icon()} </svg>
                   }
                   <div className={optionLabelClass(ops.name)}>
-                    {ops.displayName || ops.name}
+                    {ops.displayName ?? ops.name}
                   </div>
                 </div>
               );
