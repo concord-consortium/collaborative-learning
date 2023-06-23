@@ -29,8 +29,6 @@ export const MyWorkDocumentOrBrowser: React.FC<IProps> = props => {
           <DocumentCollectionList
             subTab={subTab}
             tabSpec={myWorkTabSpec}
-            // FIXME what is this?
-            // selectedDocument={selectedDocument}
             onSelectNewDocument={onSelectNewDocument}
             onSelectDocument={onSelectDocument}
           />
