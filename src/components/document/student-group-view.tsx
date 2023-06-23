@@ -45,10 +45,14 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
   const selectedGroupId = groupId || (groups.allGroups.length ? groups.allGroups[0].id : "");
   const groupUsers = getGroupUsers(user.id, groups, documents, selectedGroupId);
 
-  //Comments can be made on in-progress student documents like they can on Class work published documents for the current class.
+  //Comments can be made on in-progress student documents like they can on Class work
+  // --published documents for the current class.
+
   //Networked teachers only see/comment their own current class in Student Workspaces
   //New comments show in the list of all comments
-  //If a document deletes the tile on which a comment was made, the comment is orphaned (shows up at the bottom of the list) but not deleted (I think this should happen for free)
+
+  //If a document deletes the tile on which a comment was made, the comment
+  //--is orphaned (shows up at the bottom of the list) but not deleted (I think this should happen for free)
 
   //notes
   //getGroupUsers - student group-view
@@ -63,7 +67,6 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
   // console.log("\tgroupUsers:", groupUsers);
   // console.log("\tdocuments:", documents);
 
-
   const isStudentViewActiveTab = (ui.activeNavTab === "student-work");
   const isChatPanelShown = ui.showChatPanel;
   const shrinkStudentView  = isStudentViewActiveTab && isChatPanelShown;
@@ -73,23 +76,15 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
     console.log("focusedGroupUser!");
     const id = focusedGroupUser.id;
     const foundUser = groupUsers.find(obj => obj.user.id === id);
-    if (foundUser){
-      if (foundUser.doc){
-        if (foundUser.doc.key){
-          if (foundUser.doc.groupId){
-            const subTab = foundUser.doc.groupId; //G1, G2, etc
-            const documentKey = foundUser.doc.key;
-            console.log("ui.openSubTabDocument Student Work");
-            ui.openSubTabDocument("student-work", subTab, documentKey);
-            //if subtab exists and no focus document -> 4 up view
-
-          }
-        }
+    if (foundUser && foundUser.doc && foundUser.doc.key){
+      if (foundUser.doc.groupId){
+        const subTab = foundUser.doc.groupId; //G1, G2, etc
+        const documentKey = foundUser.doc.key;
+        console.log("ui.openSubTabDocument Student Work");
+        ui.openSubTabDocument("student-work", subTab, documentKey);
       }
     }
   }
-
-
 
   const handleSelectGroup = (id: string) => {
     Logger.log(LogEventName.VIEW_GROUP, {group: id, via: "group-document-titlebar"});
