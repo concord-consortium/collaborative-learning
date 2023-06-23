@@ -11,9 +11,9 @@ interface IProps {
   tabSpec: NavTabModelType;
   renderSubTabPanel: (subTab: ISubTabSpec) => JSX.Element;
   tabsExtraClassNames?: classNames.Argument,
-  // These will make the tabs a controlled component
   onSelect?: (tabIdx: number) => void,
-  selectedIndex?: number
+  // This will make the tabs a controlled component
+  selectedIndex?: number,
 }
 
 const kHeaderHeight = 55;

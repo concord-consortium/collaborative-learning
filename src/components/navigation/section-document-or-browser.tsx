@@ -59,6 +59,9 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     ui.setOpenSubTab(tabSpec.tab, title);
     Logger.log(LogEventName.SHOW_TAB_SECTION, {
       tab_section_name: title,
+      // FIXME: this can be inaccurate, there can be multiple
+      // section types in a sub tab, this is just going to be
+      // the type of the first section
       tab_section_type: subTabType
     });
   };
