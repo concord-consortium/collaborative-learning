@@ -120,7 +120,9 @@ export class DropdownListControl extends Rete.Control {
                   onMouseDown={!disabled ? onListClick(optionValue(ops)) : null}
                 >
                   { ops.icon &&
-                    <svg className="icon">{ops.icon()} </svg>
+                    <svg className="icon">
+                      {ops.icon()}
+                    </svg>
                   }
                   <div className={optionLabelClass(ops.name)}>
                     {ops.displayName ?? ops.name}
