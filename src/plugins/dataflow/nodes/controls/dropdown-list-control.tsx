@@ -12,6 +12,7 @@ import "./dropdown-list-control.scss";
 
 export interface ListOption {
   name: string;
+  displayName?: string;
   icon?: FunctionComponent<SVGProps<SVGSVGElement>>;
   val?: string | number; // if an option includes `val`, it will be used as the value, otherwise `name` will
 }
@@ -19,7 +20,10 @@ export interface ListOption {
 type DisabledChecker = (opt: ListOption) => boolean;
 
 const optionValue = (opt: ListOption) => Object.prototype.hasOwnProperty.call(opt, "val") ? opt.val : opt.name;
-
+const optionLabelClass = (str?: string) => {
+  const optClass = str?.toLowerCase().replace(/ /g, "-") ?? "";
+  return "label " + optClass;
+};
 export class DropdownListControl extends Rete.Control {
   private emitter: NodeEditor;
   private component: any;
@@ -80,6 +84,7 @@ export class DropdownListControl extends Rete.Control {
                                     });
       const option = options.find((opt) => optionValue(opt) === val);
       const name = option?.name ?? val;
+      const displayName = option?.displayName ?? name;
       const icon = option?.icon?.({}) || null;
       const activeHub = (option as any).active;
       const liveNode = this.getNode().name.substring(0,4) === "Live";
@@ -89,12 +94,8 @@ export class DropdownListControl extends Rete.Control {
       return (
         <div className={`node-select ${listClass}`} ref={divRef}>
           <div className={labelClasses} onMouseDown={handleChange(onItemClick)}>
-            { icon &&
-            <svg className="icon top">
-              {icon}
-            </svg>
-            }
-            <div className="label">{name}</div>
+            { icon && <svg className="icon top">{icon}</svg> }
+            <div className={optionLabelClass(displayName as string)}>{displayName}</div>
             <svg className="icon dropdown-caret">
               <DropdownCaretIcon />
             </svg>
@@ -119,7 +120,9 @@ export class DropdownListControl extends Rete.Control {
                       {ops.icon()}
                     </svg>
                   }
-                  <div className="label">{ops.name}</div>
+                  <div className={optionLabelClass(ops.name)}>
+                    {ops.displayName ?? ops.name}
+                  </div>
                 </div>
               );
             })}

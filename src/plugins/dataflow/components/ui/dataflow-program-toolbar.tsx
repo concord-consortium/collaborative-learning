@@ -10,10 +10,13 @@ import "./dataflow-program-toolbar.scss";
 interface INodeIconProps {
   i: number;
   nodeType: string;
+  nodeDisplayName?: string;
 }
-const NodeIcon = ({ i, nodeType }: INodeIconProps) => {
+
+const NodeIcon = ({ i, nodeType, nodeDisplayName }: INodeIconProps) => {
   const iconClass = "icon-block " + nodeType.toLowerCase().replace(" ", "-");
-  const nodeIcons = [];
+  const iconDisplayName = nodeDisplayName ?? nodeType;
+    const nodeIcons = [];
   switch (nodeType) {
     case "Number":
     case "Sensor":
@@ -42,7 +45,7 @@ const NodeIcon = ({ i, nodeType }: INodeIconProps) => {
       <div className={iconClass}>
         {nodeIcons}
       </div>
-      <div className="label">{nodeType}</div>
+      <div className="label">{iconDisplayName}</div>
     </div>
   );
 };
@@ -51,10 +54,11 @@ interface IAddNodeButtonProps {
   disabled: boolean;
   i: number;
   nodeType: string;
+  nodeDisplayName?: string;
   onNodeCreateClick: (type: string) => void;
   tileId: string;
 }
-const AddNodeButton = ({ disabled, i, nodeType, onNodeCreateClick, tileId }: IAddNodeButtonProps) => {
+const AddNodeButton = ({ disabled, i, nodeType, nodeDisplayName, onNodeCreateClick, tileId }: IAddNodeButtonProps) => {
   const draggableId = nodeDraggableId(nodeType, tileId);
   const { attributes, listeners, setNodeRef } = useDraggable({ id: draggableId });
 
@@ -68,7 +72,7 @@ const AddNodeButton = ({ disabled, i, nodeType, onNodeCreateClick, tileId }: IAd
         title={`Add ${nodeType} Block`}
         onClick={handleAddNodeButtonClick}
       >
-        <NodeIcon i={i} nodeType={nodeType} />
+        <NodeIcon i={i} nodeType={nodeType} nodeDisplayName={nodeDisplayName} />
       </button>
     </div>
   );
@@ -100,6 +104,7 @@ export const DataflowProgramToolbar = ({ disabled, isTesting, onClearClick, onNo
           i={i}
           key={nt.name}
           nodeType={nt.name}
+          nodeDisplayName={nt.displayName}
           onNodeCreateClick={onNodeCreateClick}
           tileId={tileId}
         />

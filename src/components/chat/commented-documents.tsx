@@ -4,7 +4,6 @@ import { useFirestore } from "../../hooks/firestore-hooks";
 import { CurriculumDocument, DocumentDocument } from "../../lib/firestore-schema";
 import { getSectionTitle } from "../../models/curriculum/section";
 import { UserModelType } from "../../models/stores/user";
-import { getProblemOrdinal } from "../../models/stores/stores";
 import { getNavTabOfDocument, getTabsOfCurriculumDoc } from "../../models/stores/ui";
 import { DocumentModelType } from "../../models/document/document";
 import { useDocumentCaption } from "../thumbnail/decorated-document-thumbnail-item";
@@ -31,7 +30,7 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
   const [db] = useFirestore();
   const ui = useUIStore();
   const store = useStores();
-  const problem =  getProblemOrdinal(store);
+  const problem =  store.problemOrdinal;
   const unit = store.unit.code;
 
   //"Problem"/"Teacher-Guide"

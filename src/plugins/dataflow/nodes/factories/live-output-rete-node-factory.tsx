@@ -75,7 +75,7 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
   private getPercentageAsInt(num: number){
     if (num > 1)  return 100;
     if (num < 0)  return 0;
-    return parseInt((num * 100).toFixed(2), 10);
+    return Math.round(num * 100);
   }
 
   private getSelectedRelayIndex(node: Node){
