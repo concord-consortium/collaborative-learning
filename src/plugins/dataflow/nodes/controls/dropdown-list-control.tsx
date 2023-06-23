@@ -2,6 +2,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import React, { FunctionComponent, SVGProps, useRef } from "react";
 import Rete, { NodeEditor, Node, Control } from "rete";
+import classNames from "classnames";
 import { useStopEventPropagation, useCloseDropdownOnOutsideEvent } from "./custom-hooks";
 import DropdownCaretIcon from "../../assets/icons/dropdown-caret.svg";
 import { dataflowLogEvent } from "../../dataflow-logger";
@@ -11,6 +12,7 @@ import "./dropdown-list-control.scss";
 
 export interface ListOption {
   name: string;
+  displayName?: string;
   icon?: FunctionComponent<SVGProps<SVGSVGElement>>;
   val?: string | number; // if an option includes `val`, it will be used as the value, otherwise `name` will
 }
@@ -18,7 +20,10 @@ export interface ListOption {
 type DisabledChecker = (opt: ListOption) => boolean;
 
 const optionValue = (opt: ListOption) => Object.prototype.hasOwnProperty.call(opt, "val") ? opt.val : opt.name;
-
+const optionLabelClass = (str?: string) => {
+  const optClass = str?.toLowerCase().replace(/ /g, "-") ?? "";
+  return "label " + optClass;
+};
 export class DropdownListControl extends Rete.Control {
   private emitter: NodeEditor;
   private component: any;
@@ -79,6 +84,7 @@ export class DropdownListControl extends Rete.Control {
                                     });
       const option = options.find((opt) => optionValue(opt) === val);
       const name = option?.name ?? val;
+      const displayName = option?.displayName ?? name;
       const icon = option?.icon?.({}) || null;
       const activeHub = (option as any).active;
       const liveNode = this.getNode().name.substring(0,4) === "Live";
@@ -88,12 +94,8 @@ export class DropdownListControl extends Rete.Control {
       return (
         <div className={`node-select ${listClass}`} ref={divRef}>
           <div className={labelClasses} onMouseDown={handleChange(onItemClick)}>
-            { icon &&
-            <svg className="icon top">
-              {icon}
-            </svg>
-            }
-            <div className="label">{name}</div>
+            { icon && <svg className="icon top">{icon}</svg> }
+            <div className={optionLabelClass(displayName as string)}>{displayName}</div>
             <svg className="icon dropdown-caret">
               <DropdownCaretIcon />
             </svg>
@@ -101,16 +103,12 @@ export class DropdownListControl extends Rete.Control {
           {showList ?
           <div className={`option-list ${listClass}`} ref={listRef}>
             {options.map((ops: any, i: any) => {
-              let className = `item ${listClass}`;
-              const disabled = isDisabled && isDisabled(ops);
-              if (ops.active === false || disabled){
-                className+= " disabled";
-              } else {
-                className += " selectable";
-              }
-              if (optionValue(ops) === val) {
-                className += " selected";
-              }
+              const disabled = ops.active === false || isDisabled?.(ops);
+              const className = classNames("item", listClass, {
+                disabled,
+                selectable: !disabled,
+                selected: optionValue(ops) === val
+              });
               return (
                 <div
                   className={className}
@@ -118,11 +116,13 @@ export class DropdownListControl extends Rete.Control {
                   onMouseDown={!disabled ? onListClick(optionValue(ops)) : null}
                 >
                   { ops.icon &&
-                  <svg className="icon">
-                    {ops.icon()}
-                  </svg>
+                    <svg className="icon">
+                      {ops.icon()}
+                    </svg>
                   }
-                  <div className="label">{ops.name}</div>
+                  <div className={optionLabelClass(ops.name)}>
+                    {ops.displayName ?? ops.name}
+                  </div>
                 </div>
               );
             })}
@@ -184,7 +184,7 @@ export class DropdownListControl extends Rete.Control {
     (this as any).update();
   };
 
-  public setOptions = (options: any) => {
+  public setOptions = (options: ListOption[]) => {
     this.props.optionArray = options;
   };
 

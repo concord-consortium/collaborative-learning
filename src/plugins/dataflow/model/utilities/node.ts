@@ -38,9 +38,9 @@ import AbsoluteValueIcon from "../../assets/icons/transform/absolute-value.svg";
 import NegationIcon from "../../assets/icons/transform/negation.svg";
 import NotIcon from "../../assets/icons/transform/not.svg";
 
-import CurrentValueIcon from "../../assets/icons/control/control-current-value.svg";
-import PreviousValueIcon from "../../assets/icons/control/control-previous-value.svg";
-import ZeroValueIcon from "../../assets/icons/control/control-zero-value.svg";
+import HoldPreviousArrowIcon from "../../assets/icons/control/hold-previous.svg";
+import HoldCurrentArrowIcon from "../../assets/icons/control/hold-this.svg";
+import HoldZeroArrowIcon from "../../assets/icons/control/hold-zero.svg";
 
 export const kMaxNodeValues = 16;
 
@@ -89,7 +89,7 @@ export const NodeTypes: NodeType[] = [
   },
   {
     name: "Control",
-    displayName: "Control",
+    displayName: "Hold",
   },
   {
     name: "Demo Output",
@@ -130,7 +130,6 @@ export const NodeOperationTypes = [
     numberSentence: (n1: string, n2: string) => `${n1} / ${n2} = `,
     icon: DivideIcon
   },
-
   {
     name: "Absolute Value",
     type: "transform",
@@ -224,21 +223,24 @@ export const NodeOperationTypes = [
   }
 ];
 
-export const NodeControlTypes = [
+export const HoldFunctionOptions = [
   {
     name: "Hold Current",
+    displayName: "Hold this",
     type: "control",
-    icon: CurrentValueIcon
+    icon: HoldCurrentArrowIcon
   },
   {
     name: "Hold Prior",
+    displayName: "Hold previous",
     type: "control",
-    icon: PreviousValueIcon
+    icon: HoldPreviousArrowIcon
   },
   {
     name: "Output Zero",
+    displayName: "Hold 0",
     type: "control",
-    icon: ZeroValueIcon
+    icon: HoldZeroArrowIcon
   }
 ];
 
@@ -333,7 +335,7 @@ export const NodeLiveOutputTypes = [
     angleBase: 180,
   },
   {
-    name: "Gripper v2",
+    name: "Gripper 2.0",
     icon: GrabberIcon,
     angleBase: 100
   },
@@ -472,4 +474,4 @@ export const kSensorMissingMessage = "⚠️";
 export const kAnimatedBinaryTypes = ["Fan", "Humidifier"];
 export const kRelaysIndexed =  ["Heat Lamp", "Fan", "Humidifier"];
 export const kBinaryOutputTypes = [...kRelaysIndexed, "Light Bulb"];
-export const kRoundedOutputTypes = ["Grabber", "Gripper v2"];
+export const kRoundedOutputTypes = ["Grabber", "Gripper", "Gripper 2.0"];
