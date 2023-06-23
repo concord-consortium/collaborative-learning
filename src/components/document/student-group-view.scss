@@ -25,6 +25,8 @@
       background-color: white;
 
       .actions {
+        display: flex;
+        flex-direction: row;
         .icon.group-number {
           width: 32px;
           height: 26px;
@@ -44,6 +46,35 @@
           &.active {
             border: solid 1.5px white;
             background-color: $charcoal-dark-1;
+            pointer-events: none;
+          }
+        }
+        .member-button {
+          font-size: 12px;
+          border-radius: 5px;
+          border: solid 1.5px $charcoal-light-1;
+          box-sizing: border-box;
+          margin: 0 2px;
+          color: $charcoal-dark-3;
+          cursor: pointer;
+          text-align: center;
+          height: 26px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 5px;
+
+          &.four-up-nw {
+            background-color: $id-blue
+          }
+          &.four-up-ne {
+            background-color: $id-orange
+          }
+          &.four-up-se {
+            background-color: $id-green
+          }
+          &.four-up-sw {
+            background-color: $id-purple
           }
         }
       }
@@ -92,3 +123,9 @@
     }
   }
 }
+
+.shrink-student-view{
+  width: 64%;
+}
+
+
