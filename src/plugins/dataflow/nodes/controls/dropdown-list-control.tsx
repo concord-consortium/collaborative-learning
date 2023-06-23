@@ -2,6 +2,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import React, { FunctionComponent, SVGProps, useRef } from "react";
 import Rete, { NodeEditor, Node, Control } from "rete";
+import classNames from "classnames";
 import { useStopEventPropagation, useCloseDropdownOnOutsideEvent } from "./custom-hooks";
 import DropdownCaretIcon from "../../assets/icons/dropdown-caret.svg";
 import { dataflowLogEvent } from "../../dataflow-logger";
@@ -102,17 +103,12 @@ export class DropdownListControl extends Rete.Control {
           {showList ?
           <div className={`option-list ${listClass}`} ref={listRef}>
             {options.map((ops: any, i: any) => {
-              let className = `item ${listClass}`;
-              const disabled = isDisabled && isDisabled(ops);
-
-              if (ops.active === false || disabled){
-                className+= " disabled";
-              } else {
-                className += " selectable";
-              }
-              if (optionValue(ops) === val) {
-                className += " selected";
-              }
+              const disabled = ops.active === false || isDisabled?.(ops);
+              const className = classNames("item", listClass, {
+                disabled,
+                selectable: !disabled,
+                selected: optionValue(ops) === val
+              });
               return (
                 <div
                   className={className}
@@ -188,7 +184,7 @@ export class DropdownListControl extends Rete.Control {
     (this as any).update();
   };
 
-  public setOptions = (options: any) => {
+  public setOptions = (options: ListOption[]) => {
     this.props.optionArray = options;
   };
 
