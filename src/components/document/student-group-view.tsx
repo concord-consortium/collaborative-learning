@@ -62,7 +62,15 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
   // console.log("\tgroups:", groups);
   // console.log("\tgroupUsers:", groupUsers);
   // console.log("\tdocuments:", documents);
-  if (focusedGroupUser){
+
+
+  const isStudentViewActiveTab = (ui.activeNavTab === "student-work");
+  const isChatPanelShown = ui.showChatPanel;
+  const shrinkStudentView  = isStudentViewActiveTab && isChatPanelShown;
+  const classes = classNames("document", "student-group-view", {"shrink-student-view": shrinkStudentView});
+
+  if (focusedGroupUser && isStudentViewActiveTab){
+    console.log("focusedGroupUser!");
     const id = focusedGroupUser.id;
     const foundUser = groupUsers.find(obj => obj.user.id === id);
     if (foundUser){
@@ -71,8 +79,8 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
           if (foundUser.doc.groupId){
             const subTab = foundUser.doc.groupId; //G1, G2, etc
             const documentKey = foundUser.doc.key;
+            console.log("ui.openSubTabDocument Student Work");
             ui.openSubTabDocument("student-work", subTab, documentKey);
-
             //if subtab exists and no focus document -> 4 up view
 
           }
@@ -80,22 +88,14 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
       }
     }
   }
-  else {
-    console.log("in 4 up view??");
-  }
 
-  const isStudentViewActiveTab = (ui.activeNavTab === "student-work");
-  const isChatPanelShown = ui.showChatPanel;
-  const shrinkStudentView  = isStudentViewActiveTab && isChatPanelShown;
-  const classes = classNames("document", "student-group-view", {"shrink-student-view": shrinkStudentView});
 
-  function handleSelectGroup (id: string){
-    // console.log("\t🔨handleSelectGroup with id:",id);
+
+  const handleSelectGroup = (id: string) => {
     Logger.log(LogEventName.VIEW_GROUP, {group: id, via: "group-document-titlebar"});
     setGroupId(id);
     setFocusedGroupUser(undefined);
-  }
-
+  };
 
   const GroupViewTitlebar: React.FC<IGroupViewTitlebarProps> = ({ selectedId, onSelectGroup }) => {
     return (
