@@ -90,7 +90,7 @@ export const UIModel = types
   .views((self) => ({
     // document key or section path for resource (left) document
     get focusDocument () {
-      // console.log("--------- ui.ts > get focusDocument()");
+      console.log("--------- ui.ts > get focusDocument()");
       if (self.activeNavTab === ENavTab.kProblems || self.activeNavTab === ENavTab.kTeacherGuide) {
         const facet = self.activeNavTab === ENavTab.kTeacherGuide ? ENavTab.kTeacherGuide : undefined;
         return buildSectionPath(self.problemPath, self.openSubTab, facet);
@@ -263,6 +263,9 @@ export const UIModel = types
         tabState.openDocuments.set(subTab, documentKey);
       },
       closeSubTabDocument(tab: string, subTab: string) {
+        console.log("ui.ts > closeSubTabDocument");
+        console.log("\ttab:", tab);
+        console.log("\tsubTab:", subTab);
         const tabState = getTabState(tab);
         tabState.openDocuments.delete(subTab);
       },

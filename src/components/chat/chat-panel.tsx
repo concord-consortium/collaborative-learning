@@ -93,7 +93,6 @@ export const ChatPanel: React.FC<IProps> = (props) => {
   }, [isDocumentView]);
 
   const newCommentCount = unreadComments?.length || 0;
-
   const isStudentWorkspace = activeNavTab === "student-work";
   const commentInstructions =
     isStudentWorkspace ?
@@ -104,9 +103,6 @@ export const ChatPanel: React.FC<IProps> = (props) => {
     </>
     :
     "Open a document to begin or view comment threads";
-
-
-  console.log("")
 
   return (
     <div className={`chat-panel ${activeNavTab}`} data-testid="chat-panel">

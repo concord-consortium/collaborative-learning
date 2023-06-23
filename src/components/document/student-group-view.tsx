@@ -50,8 +50,6 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
   //New comments show in the list of all comments
   //If a document deletes the tile on which a comment was made, the comment is orphaned (shows up at the bottom of the list) but not deleted (I think this should happen for free)
 
-
-
   //notes
   //getGroupUsers - student group-view
   //move focusedGroupUser
@@ -59,7 +57,7 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
   //call on ui.openSubTabDocument(tabSpec.tab,)
   const ui = useUIStore();
   const group = groups.getGroupById(selectedGroupId);
-  console.log("------<StudentGroupView>--------");
+  // console.log("------<StudentGroupView>--------");
   // console.log("\tuser:", user);
   // console.log("\tgroups:", groups);
   // console.log("\tgroupUsers:", groupUsers);
@@ -70,17 +68,20 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
     if (foundUser){
       if (foundUser.doc){
         if (foundUser.doc.key){
-          console.log("\tfoundUser:", foundUser);
-          const subTab = foundUser.doc.groupId || "0";
+          if (foundUser.doc.groupId){
+            const subTab = foundUser.doc.groupId; //G1, G2, etc
+            const documentKey = foundUser.doc.key;
+            ui.openSubTabDocument("student-work", subTab, documentKey);
 
-          const documentKey = foundUser.doc.key;
-          console.log("\tsubTab:", subTab);
-          console.log("\tdocumentKey", documentKey);
-          ui.openSubTabDocument("student-work", subTab, documentKey);
+            //if subtab exists and no focus document -> 4 up view
+
+          }
         }
-
       }
     }
+  }
+  else {
+    console.log("in 4 up view??");
   }
 
   const isStudentViewActiveTab = (ui.activeNavTab === "student-work");
