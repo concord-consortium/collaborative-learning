@@ -308,11 +308,13 @@ export const NodeDemoOutputTypes = [
   },
   {
     name: "Grabber",
-    icon: GrabberIcon
+    icon: GrabberIcon,
+    displayName: "Gripper"
   },
   {
     name: "Advanced Grabber",
-    icon: AdvancedGrabberIcon
+    icon: AdvancedGrabberIcon,
+    displayName: "Advanced Gripper"
   },
   {
     name: "Fan",
@@ -333,6 +335,7 @@ export const NodeLiveOutputTypes = [
     name: "Grabber",
     icon: GrabberIcon,
     angleBase: 180,
+    displayName: "Gripper"
   },
   {
     name: "Gripper 2.0",
