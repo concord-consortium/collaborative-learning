@@ -3,7 +3,7 @@ import { NodeData } from "rete/types/core/data";
 import { DataflowReteNodeFactory, kEmptyValueString } from "./dataflow-rete-node-factory";
 import { ValueControl } from "../controls/value-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
-import { NodeControlTypes, roundNodeValue } from "../../model/utilities/node";
+import { HoldFunctionOptions, roundNodeValue } from "../../model/utilities/node";
 import { PlotButtonControl } from "../controls/plot-button-control";
 
 export class ControlReteNodeFactory extends DataflowReteNodeFactory {
@@ -16,20 +16,20 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
   public builder(node: Node) {
     super.defaultBuilder(node);
     if (this.editor) {
-      const inp1 = new Rete.Input("num1", "Binary", this.numSocket);
-      const inp2 = new Rete.Input("num2", "Number2", this.numSocket);
+      const binaryInput = new Rete.Input("num1", "Binary", this.numSocket);
+      const valueInput = new Rete.Input("num2", "Number2", this.numSocket);
       const out = new Rete.Output("num", "Number", this.numSocket);
 
       node.data.hasGate = true;
       node.data.gateActive = false;
 
-      const dropdownOptions = NodeControlTypes
+      const dropdownOptions = HoldFunctionOptions
         .map((nodeOp) => {
-          return { name: nodeOp.name, icon: nodeOp.icon };
+          return { name: nodeOp.name, displayName: nodeOp.displayName, icon: nodeOp.icon };
         });
       return node
-        .addInput(inp1)
-        .addInput(inp2)
+        .addInput(valueInput)
+        .addInput(binaryInput)
         .addControl(new DropdownListControl(this.editor, "controlOperator", node, dropdownOptions, true))
         .addControl(new PlotButtonControl(this.editor, "plot", node))
         .addControl(new ValueControl(this.editor, "nodeValue", node))
@@ -59,14 +59,15 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
     }
 
     // For each function, evaluate given inputs and node state
-    if (funcName === "Output Zero"){
+    // TODO - check and see if this gets serialized, and if so, how to handle legacy funcNames on load
+    if (funcName === "Hold 0" || funcName === "Output Zero"){
       this.heldValue = null;
-      result = n1 === 1 ? 0 : n2;
+      result = node.data.gateActive ? 0 : n2;
       cResult = 0;
     }
 
     else if (funcName === "Hold Current"){
-      if (n1 === 1){
+      if (node.data.gateActive){
         // Already a number here? Maintain. Otherwise set the new held value;
         this.heldValue = typeof this.heldValue === "number" ? this.heldValue : n2;
         result = this.heldValue;
@@ -80,7 +81,7 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
     }
 
     else if (funcName === "Hold Prior"){
-      if (n1 === 1){
+      if (node.data.gateActive){
         // Already a number here? Maintain. Otherwise set the new held value;
         this.heldValue = typeof this.heldValue === "number" ? this.heldValue : priorValue;
         result = this.heldValue || 0;
@@ -96,16 +97,9 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
     // prepare string to display on node
     const resultString = isNaN(result) ? kEmptyValueString : `${roundNodeValue(result)}`;
     const cResultString = isNaN(cResult) ? kEmptyValueString : `${roundNodeValue(cResult)}`;
-    // const n1String = isNaN(n1) ? kEmptyValueString : `${roundNodeValue(n1)}`;
-    const n2String = isNaN(n2) ? kEmptyValueString : `${roundNodeValue(n2)}`;
-
-    const resultSentence = n1 === 1 ?
-      `1 ? ${cResultString} : ${n2String} ⇒ ${resultString}` :
-      `0 ? ${n2String} : ${cResultString} ⇒ ${resultString}`;
-      // alternative ui: rather than make any !== 1 appear as 0, show actual input
-      // `${n1} ? ${cResultString} : ${n2String} ⇒ ${resultString}` :
-      // `${n1} ? ${n2String} : ${cResultString} ⇒ ${resultString}`;
-      //  also needs n1String above
+    const onString = `on → ${cResultString}`;
+    const offString = `off → ${resultString}`;
+    const resultSentence = node.data.gateActive ? onString : offString;
 
     // operate rete
     if (this.editor) {

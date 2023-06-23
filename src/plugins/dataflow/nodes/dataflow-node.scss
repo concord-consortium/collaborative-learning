@@ -276,22 +276,37 @@ $node-inner-width: 140px;
       .type-options span {
         border-top-color: $control-green;
       }
+      .label {
+        padding-left:3px;
+        text-align: left;
+        width: 100%;
+      }
     }
+    // OFF -- when not-holding, default
     &.has-gate .inputs {
-      div:first-of-type .socket {
-        transform:rotate(0deg);
-        background-image: url("../assets/icons/control/gate.svg");
-        transition: all .4s;
-        border-radius: 10px 4px 4px 10px;
+      .binary .socket {
+        background-image: url("../assets/icons/control/node-arrow.svg");
+        transform:rotate(270deg);
+        transition: all .2s ease-in-out;
       }
     }
+    //  ON --- additional for when holding
     &.has-gate.gate-active .inputs {
-      div:first-of-type .socket {
-        transform:rotate(180deg);
-        background-color: $control-green;
-        transition: all .4s;
-        border-radius: 4px 10px 10px 4px;
+      .number2 .socket {
+        background-image: url("../assets/icons/control/signal.svg");
       }
+      .binary .socket {
+        transform:rotate(180deg);
+        background-image: url("../assets/icons/control/node-arrow.svg");
+        background-color: $control-green;
+        transition: all .2s ease-in-out;
+      }
+    }
+
+    &.has-gate.gate-active .item.top .label {
+      background-image: url("../assets/icons/control/signal.svg");
+      background-repeat: no-repeat;
+      background-position: 70px;
     }
 
     .top-bar {
