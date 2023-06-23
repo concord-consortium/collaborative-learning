@@ -44,20 +44,58 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
   const [focusedGroupUser, setFocusedGroupUser] = useState<GroupUserModelType | undefined>();
   const selectedGroupId = groupId || (groups.allGroups.length ? groups.allGroups[0].id : "");
   const groupUsers = getGroupUsers(user.id, groups, documents, selectedGroupId);
-  const group = groups.getGroupById(selectedGroupId);
 
+  //Comments can be made on in-progress student documents like they can on Class work published documents for the current class.
+  //Networked teachers only see/comment their own current class in Student Workspaces
+  //New comments show in the list of all comments
+  //If a document deletes the tile on which a comment was made, the comment is orphaned (shows up at the bottom of the list) but not deleted (I think this should happen for free)
+
+
+
+  //notes
+  //getGroupUsers - student group-view
+  //move focusedGroupUser
+  //get the # from focusedGroupUser, find it in the array groupUsers:
+  //call on ui.openSubTabDocument(tabSpec.tab,)
   const ui = useUIStore();
+  const group = groups.getGroupById(selectedGroupId);
+  console.log("------<StudentGroupView>--------");
+  // console.log("\tuser:", user);
+  // console.log("\tgroups:", groups);
+  // console.log("\tgroupUsers:", groupUsers);
+  // console.log("\tdocuments:", documents);
+  if (focusedGroupUser){
+    const id = focusedGroupUser.id;
+    const foundUser = groupUsers.find(obj => obj.user.id === id);
+    if (foundUser){
+      if (foundUser.doc){
+        if (foundUser.doc.key){
+          console.log("\tfoundUser:", foundUser);
+          const subTab = foundUser.doc.groupId || "0";
+
+          const documentKey = foundUser.doc.key;
+          console.log("\tsubTab:", subTab);
+          console.log("\tdocumentKey", documentKey);
+          ui.openSubTabDocument("student-work", subTab, documentKey);
+        }
+
+      }
+    }
+  }
+
   const isStudentViewActiveTab = (ui.activeNavTab === "student-work");
   const isChatPanelShown = ui.showChatPanel;
   const shrinkStudentView  = isStudentViewActiveTab && isChatPanelShown;
   const classes = classNames("document", "student-group-view", {"shrink-student-view": shrinkStudentView});
 
-  const handleSelectGroup = (id: string) => {
-    console.log("\t🔨handleSelectGroup with id:",id);
+  function handleSelectGroup (id: string){
+    // console.log("\t🔨handleSelectGroup with id:",id);
     Logger.log(LogEventName.VIEW_GROUP, {group: id, via: "group-document-titlebar"});
     setGroupId(id);
     setFocusedGroupUser(undefined);
-  };
+  }
+
+
   const GroupViewTitlebar: React.FC<IGroupViewTitlebarProps> = ({ selectedId, onSelectGroup }) => {
     return (
       <div className={`titlebar student-group group`}>

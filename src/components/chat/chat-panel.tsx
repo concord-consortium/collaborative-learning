@@ -8,7 +8,7 @@ import {
   useCommentsCollectionPath, useDocumentComments, usePostDocumentComment, useUnreadDocumentComments
 } from "../../hooks/document-comment-hooks";
 import { useDeleteDocument } from "../../hooks/firestore-hooks";
-import {useCurriculumOrDocumentContent, useDocumentOrCurriculumMetadata } from "../../hooks/use-stores";
+import {useCurriculumOrDocumentContent, useDocumentOrCurriculumMetadata, useUIStore } from "../../hooks/use-stores";
 import { CommentedDocuments } from "./commented-documents";
 
 import "./chat-panel.scss";
@@ -25,7 +25,9 @@ interface IProps {
 export const ChatPanel: React.FC<IProps> = (props) => {
   const { user, activeNavTab, focusDocument, focusTileId, onCloseChatPanel } = props;
   console.log("----<ChatPanel>------");
-  console.log("props:", props);
+  console.log("\tprops:", props);
+  const ui = useUIStore();
+  console.log("\tui:", ui);
 
   const document = useDocumentOrCurriculumMetadata(focusDocument);
   const content = useCurriculumOrDocumentContent(focusDocument);
@@ -103,6 +105,8 @@ export const ChatPanel: React.FC<IProps> = (props) => {
     :
     "Open a document to begin or view comment threads";
 
+
+  console.log("")
 
   return (
     <div className={`chat-panel ${activeNavTab}`} data-testid="chat-panel">

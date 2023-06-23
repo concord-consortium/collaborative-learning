@@ -76,8 +76,8 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
 
   constructor(props: IProps) {
     super(props);
-    console.log("-----class FourUpComponent------");
-    console.log(this);
+    // console.log("-----class FourUpComponent------");
+    // console.log("this:", this);
 
 
     this.state = {
