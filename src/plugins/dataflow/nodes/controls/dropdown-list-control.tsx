@@ -83,7 +83,7 @@ export class DropdownListControl extends Rete.Control {
                                       (this as any).update();
                                     });
       const option = options.find((opt) => optionValue(opt) === val);
-      const name = option?.name ?? val;
+      const name = option?.name ?? val.toString();
       const displayName = option?.displayName ?? name;
       const icon = option?.icon?.({}) || null;
       const activeHub = (option as any).active;
@@ -95,7 +95,7 @@ export class DropdownListControl extends Rete.Control {
         <div className={`node-select ${listClass}`} ref={divRef}>
           <div className={labelClasses} onMouseDown={handleChange(onItemClick)}>
             { icon && <svg className="icon top">{icon}</svg> }
-            <div className={optionLabelClass(displayName as string)}>{displayName}</div>
+            <div className={optionLabelClass(displayName)}>{displayName}</div>
             <svg className="icon dropdown-caret">
               <DropdownCaretIcon />
             </svg>
