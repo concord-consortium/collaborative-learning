@@ -112,15 +112,17 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
     );
   };
 
+  const focusedUserContext = (groupUsers.find(u => u.user.id === focusedGroupUser?.id))?.context;
+
   return (
     <div key="student-group-view" className={classes}>
       <GroupViewTitlebar selectedId={selectedGroupId} onSelectGroup={handleSelectGroup} />
       <GroupTitlebar selectedId={selectedGroupId} groupUser={focusedGroupUser}/>
       <div className="canvas-area">
-        <FourUpComponent userId={focusedGroupUser?.id}
-                         groupId={selectedGroupId}
+        <FourUpComponent groupId={selectedGroupId}
                          isGhostUser={true}
                          viaStudentGroupView={true}
+                         focusedUserContext={focusedUserContext}
                          setFocusedGroupUser={setFocusedGroupUser}
         />
       </div>
