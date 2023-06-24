@@ -13,7 +13,34 @@
   }
 }
 
-// pulsing "signal dot" on the incoming data socket
+.node.control {
+  .label.hold-current, .label.hold-this, .label.hold-prior {
+    background-image: url("../assets/icons/control/signal.svg");
+    background-repeat:no-repeat;
+    background-size: 20px 20px;
+  }
+
+  .label.hold-current, .label.hold-this {
+    background-position: 47px 1.5px;
+  }
+
+  .label.hold-prior {
+    background-position: 73px 1.5px;
+  }
+
+  .binary .socket {
+    background-image: url("../assets/icons/control/node-arrow.svg");
+    transition: all .2s ease-in-out;
+    transform: rotate(0deg);
+  }
+}
+
+.node.control.gate-active .binary .socket {
+  transform:rotate(180deg);
+  background-color: $control-green;
+  transition: all .2s ease-in-out;
+}
+
 .node.control.has-flow-in .inputs {
   .number2 .socket::before {
     content: "";
@@ -28,44 +55,8 @@
   }
 }
 
-.node.control .binary .socket {
-  background-image: url("../assets/icons/control/node-arrow.svg");
-  transition: all .2s ease-in-out;
-  transform: rotate(0deg);
-}
-
-
-.node.control.gate-active .binary .socket {
-  transform:rotate(180deg);
-  background-color: $control-green;
-  transition: all .2s ease-in-out;
-}
-
-.node.control.gate-active.has-flow-in .inputs {
+.node.control.has-flow-in.gate-active .inputs {
   .number2 .socket::before {
-    content: "";
-    position: absolute;
-    top: 63px;
-    left: -14px;
-    width: 20px;
-    height: 20px;
-    background-image: url("../assets/icons/control/signal.svg");
     animation: none;
-  }
-}
-
-.node.control {
-  .label.hold-current, .label.hold-this, .label.hold-prior {
-    background-image: url("../assets/icons/control/signal.svg");
-    background-repeat:no-repeat;
-    background-size: 20px 20px;
-  }
-
-  .label.hold-current, .label.hold-this {
-    background-position: 47px 1.5px;
-  }
-
-  .label.hold-prior {
-    background-position: 73px 1.5px;
   }
 }
