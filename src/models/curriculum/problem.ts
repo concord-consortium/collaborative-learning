@@ -1,5 +1,4 @@
 import { getSnapshot, Instance, SnapshotIn, types } from "mobx-state-tree";
-import { cloneDeep } from "lodash";
 import { SectionModel, SectionModelType } from "./section";
 import { SettingsMstType } from "../stores/settings";
 import { SupportModel } from "./support";
