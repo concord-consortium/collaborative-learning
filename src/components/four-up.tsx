@@ -363,7 +363,5 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       const event = toggledContext ? LogEventName.DASHBOARD_SELECT_STUDENT : LogEventName.DASHBOARD_DESELECT_STUDENT;
       Logger.log(event, {groupId, studentId: groupUser.user.id});
     }
-
-
   };
 }

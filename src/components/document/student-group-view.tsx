@@ -48,7 +48,7 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
   const isStudentViewActiveTab = (ui.activeNavTab === "student-work");
   const isChatPanelShown = ui.showChatPanel;
   const shrinkStudentView  = isStudentViewActiveTab && isChatPanelShown;
-  const documentSelectedForComment = ui.showChatPanel && ui.selectedTileIds.length === 0;
+  const documentSelectedForComment = ui.showChatPanel && ui.selectedTileIds.length === 0 && ui.focusDocument;
   const studentGroupViewClasses = classNames( "editable-document-content", "document", "student-group-view",
   {"shrink-student-view": shrinkStudentView}, {"comment-select" : documentSelectedForComment});
 
@@ -56,9 +56,10 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
     const id = focusedGroupUser.id;
     const foundUser = groupUsers.find(obj => obj.user.id === id);
     if (foundUser && foundUser.doc && foundUser.doc.key && foundUser.doc.groupId){
-      const subTab = foundUser.doc.groupId; //G1, G2, etc
+      //use group buttons (G1, G2, etc) as a pseudo subTab
+      const groupSubTab = foundUser.doc.groupId;
       const documentKey = foundUser.doc.key;
-      ui.openSubTabDocument("student-work", subTab, documentKey);
+      ui.openSubTabDocument("student-work", groupSubTab, documentKey);
     }
   }
 
