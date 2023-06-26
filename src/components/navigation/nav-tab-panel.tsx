@@ -3,7 +3,7 @@ import React from "react";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { BaseComponent, IBaseProps } from "../base";
 import { kDividerMax, kDividerMin } from "../../models/stores/ui-types";
-import { NavTabSpec, ENavTab } from "../../models/view/nav-tabs";
+import { ENavTab, NavTabModelType } from "../../models/view/nav-tabs";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import { StudentGroupView } from "../document/student-group-view";
@@ -107,7 +107,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
     );
   }
 
-  private renderTabContent = (tabSpec: NavTabSpec) => {
+  private renderTabContent = (tabSpec: NavTabModelType) => {
     switch (tabSpec.tab) {
       case ENavTab.kProblems:
         return this.renderProblem();
@@ -125,7 +125,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
     }
   };
 
-  private renderDocuments = (tabSpec: NavTabSpec) => {
+  private renderDocuments = (tabSpec: NavTabModelType) => {
     const { ui: { showChatPanel } } = this.stores;
     return (
       <SectionDocumentOrBrowser
