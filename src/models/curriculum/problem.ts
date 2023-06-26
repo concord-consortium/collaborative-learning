@@ -44,10 +44,7 @@ const ModernProblemModel = types
           sharedModelManager
         };
         const sectionSnapshot = getSnapshot(section);
-        // We have to make a copy of the sectionSnapshot because child models modify
-        // their snapshots in place during preProcessor calls. The objects from
-        // getSnapshot are readonly
-        const sectionCopy = SectionModel.create(cloneDeep(sectionSnapshot), environment);
+        const sectionCopy = SectionModel.create(sectionSnapshot, environment);
         sectionCopy.setRealParent(self);
         if (sectionCopy.content) {
           sharedModelManager.setDocument(sectionCopy.content);
