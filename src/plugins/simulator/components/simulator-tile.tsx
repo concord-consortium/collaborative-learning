@@ -1,7 +1,7 @@
-import { VariableType } from "@concord-consortium/diagram-view";
 import { observer } from "mobx-react";
 import React, { useEffect, useState } from "react";
 
+import { SimulatorVariable } from "./simulator-variable";
 import { SimulatorContentModelType } from "../model/simulator-content";
 import { ITileProps } from "../../../components/tiles/tile-component";
 import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
@@ -25,20 +25,7 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
     return () => clearInterval(id);
   }, [content]);
 
-  const displayVariables = content.simulationData.variables;
-
-  interface IVariableRowProps {
-    key?: string;
-    variable?: VariableType;
-  }
-  const VariableRow = ({ variable }: IVariableRowProps) => {
-    const display = variable ? `${variable.name}: ${variable.value?.toFixed(2)}` : "";
-    return (
-      <p>
-        {display}
-      </p>
-    );
-  };
+  const component = content.simulationData.component;
 
   return (
     <div className="simulator-content-container">
@@ -48,10 +35,26 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
         scale={scale}
       />
       <div className="simulator-content">
-        {displayVariables.map(
-          variable => variable.name
-            ? <VariableRow variable={content?.getVariable(variable.name)} key={variable.name} />
-            : null
+        <div className="simulator-variables">
+          { content.inputVariables.map(variable =>
+            <SimulatorVariable
+              inputVariable={true}
+              key={variable.name}
+              variable={content.getVariable(variable.name)}
+            />
+          )}
+          { content.outputVariables.map(variable =>
+            <SimulatorVariable
+              inputVariable={false}
+              key={variable.name}
+              variable={content.getVariable(variable.name)}
+            />
+          )}
+        </div>
+        { component && (
+          <div className="simulator-component-container">
+            { component({ frame: _steps, variables: content.variables || [] }) }
+          </div>
         )}
       </div>
     </div>

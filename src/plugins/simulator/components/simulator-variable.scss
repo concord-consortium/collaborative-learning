@@ -1,0 +1,19 @@
+.simulator-variable {
+  align-items: center;
+  display: flex;
+  // For now, use a fixed width to prevent the variables from shifting as their values change
+  width: 180px;
+
+  .leading-box {
+    height: 14px;
+    margin-right: 8px;
+    width: 14px;
+  }
+
+  &.input .leading-box {
+    background-color: #5584e5;
+  }
+  &.output .leading-box {
+    background-color: #f29046;
+  }
+}

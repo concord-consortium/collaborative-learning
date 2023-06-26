@@ -5,9 +5,8 @@ import stringify from "json-stringify-pretty-compact";
 
 import { DataflowProgramModel } from "./dataflow-program-model";
 import { DEFAULT_DATA_RATE } from "./utilities/node";
-import { isInputVariable } from "./utilities/simulated-channel";
-import { isOutputVariable } from "./utilities/simulated-output";
 import { SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
+import { isInputVariable, isOutputVariable } from "../../shared-variables/simulations/simulation-utilities";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { ITileMetadataModel } from "../../../models/tiles/tile-metadata";
 import { tileModelHooks } from "../../../models/tiles/tile-model-hooks";
