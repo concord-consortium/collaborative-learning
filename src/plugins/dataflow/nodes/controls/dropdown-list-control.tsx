@@ -120,7 +120,7 @@ export class DropdownListControl extends Rete.Control {
                       {ops.icon()}
                     </svg>
                   }
-                  <div className={optionLabelClass(ops.name)}>
+                  <div className={optionLabelClass(ops.displayName)}>
                     {ops.displayName ?? ops.name}
                   </div>
                 </div>

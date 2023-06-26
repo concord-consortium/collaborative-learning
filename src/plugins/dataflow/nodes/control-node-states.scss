@@ -14,7 +14,7 @@
 }
 
 .node.control {
-  .label.hold-current, .label.hold-this, .label.hold-prior {
+  .label.hold-current, .label.hold-this, .label.hold-previous {
     background-image: url("../assets/icons/control/signal.svg");
     background-repeat:no-repeat;
     background-size: 20px 20px;
@@ -24,7 +24,7 @@
     background-position: 47px 1.5px;
   }
 
-  .label.hold-prior {
+  .label.hold-previous {
     background-position: 73px 1.5px;
   }
 
