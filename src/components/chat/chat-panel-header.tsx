@@ -14,10 +14,9 @@ interface IProps {
   chatPanelTitle: string;
 }
 
-export const ChatPanelHeader: React.FC<IProps> = observer((props) => {
-  const {activeNavTab, newCommentCount, onCloseChatPanel,
-    handleDocView, chatPanelTitle} = props;
-
+export const ChatPanelHeader: React.FC<IProps> =observer(({activeNavTab,
+  newCommentCount, onCloseChatPanel,
+  handleDocView, chatPanelTitle}) => {
 
   const renderNotification = () => {
     return (
