@@ -164,7 +164,7 @@ export const DataflowProgramModel = types.
     }
   }))
   .preProcessSnapshot((snapshot: any) => {
-    const { nodes, ...rest } = snapshot;
+    const { nodes, ...rest } = cloneDeep(snapshot);
     const values: { [key: string]: any } = {};
     if (nodes) {
       const keys = Object.keys(nodes);
