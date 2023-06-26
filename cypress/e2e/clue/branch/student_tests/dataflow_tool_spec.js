@@ -274,7 +274,7 @@ context('Dataflow Tool Tile', function () {
       });
       it("can change output type", () => {
         const dropdown = "outputType";
-        const outputTypes = ["Light Bulb", "Grabber", "Advanced Grabber", "Fan", "Humidifier"];
+        const outputTypes = ["Light Bulb", "Gripper", "Advanced Gripper", "Fan", "Humidifier"];
         dataflowToolTile.getDropdown(nodeType, dropdown).click();
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).should("have.length", 5);
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).each(($tab, index, $typeList) => {
@@ -357,7 +357,7 @@ context('Dataflow Tool Tile', function () {
       });
       it("verify live output types", () => {
         const dropdown = "liveOutputType";
-        const outputTypes = ["Light Bulb", "Grabber", "Gripper 2.0", "Humidifier", "Fan", "Heat Lamp"];
+        const outputTypes = ["Light Bulb", "Gripper", "Gripper 2.0", "Humidifier", "Fan", "Heat Lamp"];
         dataflowToolTile.getDropdown(nodeType, dropdown).click();
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).should("have.length", 6);
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).each(($tab, index, $typeList) => {
