@@ -43,45 +43,22 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
   const [focusedGroupUser, setFocusedGroupUser] = useState<GroupUserModelType | undefined>();
   const selectedGroupId = groupId || (groups.allGroups.length ? groups.allGroups[0].id : "");
   const groupUsers = getGroupUsers(user.id, groups, documents, selectedGroupId);
-
-  //Comments can be made on in-progress student documents like they can on Class work
-  // --published documents for the current class.
-
-  //Networked teachers only see/comment their own current class in Student Workspaces
-  //New comments show in the list of all comments
-
-  //If a document deletes the tile on which a comment was made, the comment
-  //--is orphaned (shows up at the bottom of the list) but not deleted (I think this should happen for free)
-
-  //notes
-  //getGroupUsers - student group-view
-  //move focusedGroupUser
-  //get the # from focusedGroupUser, find it in the array groupUsers:
-  //call on ui.openSubTabDocument(tabSpec.tab,)
   const ui = useUIStore();
   const group = groups.getGroupById(selectedGroupId);
-  // console.log("------<StudentGroupView>--------");
-  // console.log("\tuser:", user);
-  // console.log("\tgroups:", groups);
-  // console.log("\tgroupUsers:", groupUsers);
-  // console.log("\tdocuments:", documents);
-
   const isStudentViewActiveTab = (ui.activeNavTab === "student-work");
   const isChatPanelShown = ui.showChatPanel;
   const shrinkStudentView  = isStudentViewActiveTab && isChatPanelShown;
-  const classes = classNames("document", "student-group-view", {"shrink-student-view": shrinkStudentView});
+  const documentSelectedForComment = ui.showChatPanel && ui.selectedTileIds.length === 0;
+  const studentGroupViewClasses = classNames( "editable-document-content", "document", "student-group-view",
+  {"shrink-student-view": shrinkStudentView}, {"comment-select" : documentSelectedForComment});
 
   if (focusedGroupUser && isStudentViewActiveTab){
-    console.log("focusedGroupUser!");
     const id = focusedGroupUser.id;
     const foundUser = groupUsers.find(obj => obj.user.id === id);
-    if (foundUser && foundUser.doc && foundUser.doc.key){
-      if (foundUser.doc.groupId){
-        const subTab = foundUser.doc.groupId; //G1, G2, etc
-        const documentKey = foundUser.doc.key;
-        console.log("ui.openSubTabDocument Student Work");
-        ui.openSubTabDocument("student-work", subTab, documentKey);
-      }
+    if (foundUser && foundUser.doc && foundUser.doc.key && foundUser.doc.groupId){
+      const subTab = foundUser.doc.groupId; //G1, G2, etc
+      const documentKey = foundUser.doc.key;
+      ui.openSubTabDocument("student-work", subTab, documentKey);
     }
   }
 
@@ -149,7 +126,7 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
   const focusedUserContext = (groupUsers.find(u => u.user.id === focusedGroupUser?.id))?.context;
 
   return (
-    <div key="student-group-view" className={classes}>
+    <div key="student-group-view" className={studentGroupViewClasses}>
       <GroupViewTitlebar selectedId={selectedGroupId} onSelectGroup={handleSelectGroup} />
       <GroupTitlebar selectedId={selectedGroupId} groupUser={focusedGroupUser}/>
       <div className="canvas-area">

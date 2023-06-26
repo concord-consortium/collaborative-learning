@@ -98,9 +98,6 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
   };
 
   const handleSelectDocument = (document: DocumentModelType) => {
-    console.log("----------<SectionDocumentOrBrowser>-----------");
-    console.log("\tdocument:", document);
-
     if (!document.hasContent && document.isRemote) {
       loadDocumentContent(document);
     }

@@ -109,12 +109,9 @@ export const EditableDocumentContent: React.FC<IProps> = props => {
   const showToolbarClass = isShowingToolbar ? "show-toolbar" : "hide-toolbar";
   const isChatEnabled = isNetworkedTeacher;
   const documentSelectedForComment = isChatEnabled && ui.showChatPanel && ui.selectedTileIds.length === 0 && !isPrimary;
-  console.log("-----------<EditableDocumentContent>----------");
-  console.log("documentSelectedForComment", documentSelectedForComment);
   const editableDocContentClass = classNames("editable-document-content", showToolbarClass,
     contained ? "contained-editable-document-content" : "full-screen-editable-document-content",
     {"comment-select" : documentSelectedForComment}, className);
-  console.log("editableDocContentClasse", documentSelectedForComment);
 
   useDocumentSyncToFirebase(user, firebase, document, readOnly);
   return (

@@ -77,10 +77,6 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
 
   constructor(props: IProps) {
     super(props);
-    console.log("-----class FourUpComponent------");
-    // console.log("this:", this);
-
-
     this.state = {
       toggledContextMap: {}
     };
@@ -347,8 +343,6 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleOverlayClick = (context?: string) => {
-    console.log("handleOverLayClick!");
-    console.log("\t context:", context);
     const { ui } = this.stores;
 
     const { groupId, setFocusedGroupUser } = this.props;

@@ -158,7 +158,6 @@ export class NavTabPanel extends BaseComponent<IProps> {
   };
 
   private handleSelectTab = (tabIndex: number) => {
-    console.log("handleSelectTab:");
     const tabs = this.stores.tabsToDisplay;
     const { ui } = this.stores;
     if (tabs) {

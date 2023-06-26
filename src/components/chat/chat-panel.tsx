@@ -8,7 +8,7 @@ import {
   useCommentsCollectionPath, useDocumentComments, usePostDocumentComment, useUnreadDocumentComments
 } from "../../hooks/document-comment-hooks";
 import { useDeleteDocument } from "../../hooks/firestore-hooks";
-import {useCurriculumOrDocumentContent, useDocumentOrCurriculumMetadata, useUIStore } from "../../hooks/use-stores";
+import { useCurriculumOrDocumentContent, useDocumentOrCurriculumMetadata } from "../../hooks/use-stores";
 import { CommentedDocuments } from "./commented-documents";
 
 import "./chat-panel.scss";
@@ -22,12 +22,8 @@ interface IProps {
 }
 
 
-export const ChatPanel: React.FC<IProps> = (props) => {
-  const { user, activeNavTab, focusDocument, focusTileId, onCloseChatPanel } = props;
-  console.log("----<ChatPanel>------");
-  console.log("\tprops:", props);
-  const ui = useUIStore();
-  console.log("\tui:", ui);
+export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
+  focusTileId, onCloseChatPanel }) => {
 
   const document = useDocumentOrCurriculumMetadata(focusDocument);
   const content = useCurriculumOrDocumentContent(focusDocument);
