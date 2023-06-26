@@ -3,6 +3,7 @@ import classNames from "classnames";
 import { Node, Socket, Control } from "rete-react-render-plugin";
 import { DataflowNodePlot } from "./dataflow-node-plot";
 import { NodeType, NodeTypes } from "../model/utilities/node";
+import { hasFlowIn } from "./utilities/view-utilities";
 import "./dataflow-node.scss";
 import "./control-node-states.scss";
 
@@ -26,7 +27,7 @@ export class DataflowNode extends Node {
 
     const dynamicClasses = classNames({
       "gate-active": node.data.gateActive,
-      "has-flow-in": inputs[0]?.connections.length > 0
+      "has-flow-in": hasFlowIn(node)
     });
 
     const inputClass = (s: string) => "input " + s.toLowerCase().replace(/ /g, "-");
