@@ -5,8 +5,7 @@ import { GroupUserModelType } from "../../models/stores/groups";
 import { useProblemStore, useUIStore, useStores } from "../../hooks/use-stores";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
-import { FourUpComponent } from "../four-up";
-
+import { FourUpComponent, FourUpUser } from "../four-up";
 import "./student-group-view.scss";
 
 interface IGroupButtonProps {
@@ -92,6 +91,10 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
     setFocusedGroupUser(undefined);
   };
 
+  const handleFocusedUserChange = (selectedUser: FourUpUser) => {
+    setFocusedGroupUser(selectedUser.user);
+  };
+
   const GroupViewTitlebar: React.FC<IGroupViewTitlebarProps> = ({ selectedId, onSelectGroup }) => {
     return (
       <div className={`titlebar student-group group`}>
@@ -102,9 +105,13 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
                             selected={group.id === selectedId}
               />
               { groupUsers.map(u => {
-                  const className = classNames("member-button", "in-student-group-view", u.context);
+                  const className = classNames("member-button", "in-student-group-view", u.context,
+                                                {focused: u.user.id === focusedGroupUser.id});
                 return (
-                  <div key={u.user.name} className={className} title={u.user.name}>{u.user.name}</div>
+                  <button key={u.user.name} className={className} title={u.user.name}
+                      onClick={()=>handleFocusedUserChange(u)}>
+                    {u.user.name}
+                  </button>
                 );
               })}
             </>
@@ -121,7 +128,7 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
     );
   };
 
-  const GroupTitlebar: React.FC<IGroupTitlebarProps> = ({selectedId, groupUser}) => {
+  const GroupTitlebar: React.FC<IGroupTitlebarProps> = ({groupUser}) => {
     const problem = useProblemStore();
     const userInfo = groupUsers.find(gUser => gUser.user.id === groupUser?.id);
     const userDocTitle = userInfo?.doc?.title || "Document";
@@ -139,15 +146,17 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
     );
   };
 
+  const focusedUserContext = (groupUsers.find(u => u.user.id === focusedGroupUser?.id))?.context;
+
   return (
     <div key="student-group-view" className={classes}>
       <GroupViewTitlebar selectedId={selectedGroupId} onSelectGroup={handleSelectGroup} />
       <GroupTitlebar selectedId={selectedGroupId} groupUser={focusedGroupUser}/>
       <div className="canvas-area">
-        <FourUpComponent userId={user.id}
-                         groupId={selectedGroupId}
+        <FourUpComponent groupId={selectedGroupId}
                          isGhostUser={true}
                          viaStudentGroupView={true}
+                         focusedUserContext={focusedUserContext}
                          setFocusedGroupUser={setFocusedGroupUser}
         />
       </div>

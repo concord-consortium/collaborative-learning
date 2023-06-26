@@ -66,16 +66,44 @@
           padding: 5px;
 
           &.four-up-nw {
-            background-color: $id-blue
+            background-color: $id-blue-light;
+            &:hover {
+              background-color: $id-blue-medium;;
+            }
+            &.focused {
+              background-color: $id-blue;
+              border-color: white;
+            }
           }
           &.four-up-ne {
-            background-color: $id-orange
+            background-color: $id-orange-light;
+            &:hover {
+              background-color: $id-orange-medium;;
+            }
+            &.focused {
+              background-color: $id-orange;
+              border-color: white;
+            }
           }
           &.four-up-se {
-            background-color: $id-green
+            background-color: $id-green-light;
+            &:hover {
+              background-color: $id-green-medium;;
+            }
+            &.focused {
+              background-color: $id-green;
+              border-color: white;
+            }
           }
           &.four-up-sw {
-            background-color: $id-purple
+            background-color: $id-purple-light;
+            &:hover {
+              background-color: $id-purple-medium;;
+            }
+            &.focused {
+              background-color: $id-purple;
+              border-color: white;
+            }
           }
         }
       }

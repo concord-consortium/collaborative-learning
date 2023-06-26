@@ -26,7 +26,8 @@ interface IProps extends IBaseProps {
   documentViewMode?: DocumentViewMode;
   selectedSectionId?: string | null;
   viaTeacherDashboard?: boolean;
-  viaStudentGroupView?: boolean
+  viaStudentGroupView?: boolean;
+  focusedUserContext?: string;
   setFocusedGroupUser?: (focusedGroupUser?: GroupUserModelType) => void;
 }
 
@@ -112,8 +113,9 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const {documentViewMode, viaStudentGroupView} = this.props;
-    const toggledContext = this.getToggledContext();
+    const {focusedUserContext, documentViewMode, viaStudentGroupView,
+        userId, groupId, isGhostUser, toggleable, ...others } = this.props;
+    const toggledContext = focusedUserContext || this.getToggledContext();
     const {width, height} = this.grid;
     const nwCell = this.grid.cells[CellPositions.NorthWest];
     const neCell = this.grid.cells[CellPositions.NorthEast];
@@ -132,8 +134,6 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     };
 
     const { groups, documents } = this.stores;
-    const { userId, groupId, isGhostUser, toggleable, ...others } = this.props;
-
     const groupUsers = getGroupUsers(userId, groups, documents, groupId, documentViewMode);
 
     // save reference to use for the username display in this render and logger in #handleOverlayClicked
@@ -217,7 +217,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
           document={document}
         />;
 
-      // If we are looking at a specific student toggledContext equals the cornerLabel
+      // If we are looking at a specific student, toggledContext equals the cornerLabel
       // of that student. When we are looking at a specific student we need the overlay
       // to be inside of the Canvas so the canvas can put its history UI on top of the
       // overlay. When we are not looking at a specific student we need the overlay
