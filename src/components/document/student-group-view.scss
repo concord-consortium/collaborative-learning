@@ -1,7 +1,6 @@
 @import "../vars.sass";
 
 .student-group-view {
-
   .canvas-area {
     position: absolute;
     top: $workspace-titlebar-height;
@@ -155,7 +154,7 @@
 
 .shrink-student-view{
   width: 64%;
-  background-color: $comment-select-background !important;
+  background-color: $comment-select-background;
 }
 
 
