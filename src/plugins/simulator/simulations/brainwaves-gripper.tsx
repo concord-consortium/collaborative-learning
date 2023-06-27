@@ -49,7 +49,7 @@ function step({ frame, variables }: ISimulationProps) {
 
 export const brainwavesGripperSimulation: ISimulation = {
   component: BrainwavesGripperComponent,
-  delay: 17,
+  delay: 67,
   step,
   variables: [
     {
