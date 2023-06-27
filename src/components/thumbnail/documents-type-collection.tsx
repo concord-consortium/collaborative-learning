@@ -20,6 +20,7 @@ interface IProps {
   tab: string;
   section: NavTabSectionModelType;
   index: number;
+  horizontal?: boolean;
   numSections: number;
   scale: number;
   selectedDocument?: string;
@@ -82,9 +83,9 @@ function getSectionDocs(section: NavTabSectionModelType, documents: DocumentsMod
   return sectDocs;
 }
 
-export const DocumentCollectionByType: React.FC<IProps> = observer(({ 
+export const DocumentCollectionByType: React.FC<IProps> = observer(({
                                   topTab, tab, section, index, numSections=0, scale, selectedDocument,
-                                  onSelectNewDocument, onSelectDocument, onDocumentDragStart,
+                                  horizontal, onSelectNewDocument, onSelectDocument, onDocumentDragStart,
                                   onDocumentStarClick, onDocumentDeleteClick }: IProps) => {
   const appConfigStore = useAppConfig();
   const classStore = useClassStore();
@@ -104,9 +105,11 @@ export const DocumentCollectionByType: React.FC<IProps> = observer(({
   function handleNewDocumentClick() {
     onSelectNewDocument?.(section.documentTypes[0]);
   }
-  const tabPanelDocumentSectionClass = classNames("tab-panel-documents-section", tabName, {"top-panel": isTopPanel});
+  const tabPanelDocumentSectionClass = classNames("tab-panel-documents-section", tabName, {"top-panel": isTopPanel},
+                                                  {horizontal});
   const listClass = classNames("list", tabName, {"top-panel": isTopPanel},
-                                {"bottom-panel": isBottomPanel && !isSinglePanel && sectionDocs.length > 0});
+                                {"bottom-panel": isBottomPanel && !isSinglePanel && sectionDocs.length > 0},
+                                {horizontal});
   return (
     <div className={tabPanelDocumentSectionClass}
           key={`${tab}-${section.type}`}

@@ -12,6 +12,7 @@ interface IProps {
   subTab: ISubTabSpec;
   tabSpec: NavTabModelType;
   selectedDocument?: string;
+  horizontal?: boolean;
   onSelectNewDocument?: (type: string) => void;
   onSelectDocument?: (document: DocumentModelType) => void;
 }
@@ -19,7 +20,7 @@ interface IProps {
 export const kNavItemScale = 0.11;
 
 export const DocumentCollectionList: React.FC<IProps> = observer(function DocumentCollectionList(
-    { subTab, tabSpec, selectedDocument, onSelectNewDocument, onSelectDocument }) {
+    { subTab, tabSpec, horizontal, selectedDocument, onSelectNewDocument, onSelectDocument }) {
   const ui = useUIStore();
   const appConfigStore = useAppConfig();
   const user = useUserStore();
@@ -46,7 +47,7 @@ export const DocumentCollectionList: React.FC<IProps> = observer(function Docume
   };
 
   return (
-    <>
+    <div className={`doc-collection-list ${horizontal ? "horizontal" : ""}`}>
       {
         subTab.sections.map((section: any, index: any) => {
           const _handleDocumentStarClick = section.showStarsForUser(user)
@@ -60,6 +61,7 @@ export const DocumentCollectionList: React.FC<IProps> = observer(function Docume
               tab={subTab.label}
               section={section}
               index={index}
+              horizontal={horizontal}
               numSections={subTab.sections.length}
               scale={kNavItemScale}
               selectedDocument={selectedDocument}
@@ -72,5 +74,5 @@ export const DocumentCollectionList: React.FC<IProps> = observer(function Docume
           );
         })
       }
-    </>);
+    </div>);
 });

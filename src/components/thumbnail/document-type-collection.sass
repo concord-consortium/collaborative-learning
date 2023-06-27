@@ -9,6 +9,8 @@ $section-padding: 6px
   display: flex
   flex-direction: column
   padding: $section-padding
+  &.horizontal
+    flex-direction: row
   &.top-panel
     padding: 4px $section-padding 0 $section-padding
 
@@ -40,11 +42,16 @@ $section-padding: 6px
     &.bottom-panel
       border-top: solid 1px $charcoal-light-1
       overflow-y: hidden
+    &.horizontal
+      flex-direction: row
+      flex-wrap: nowrap
+      overflow-x: auto
+      overflow-y: hidden
 
     .list-item
       position: relative
       min-height: 120px
-      width: 116px
+      min-width: 116px
       border-radius: 5px
       padding: $padding 0
       display: flex

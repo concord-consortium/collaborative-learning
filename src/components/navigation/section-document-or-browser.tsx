@@ -147,21 +147,32 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     const sectionClass = openDocument?.type === "learningLog" ? "learning-log" : "";
 
     return (
-      <div>
-        <div className={`document-header ${tabSpec.tab} ${sectionClass}`} onClick={() => ui.setSelectedTile()}>
-          <div className={`document-title`}>
-            {getDocumentDisplayTitle(openDocument, appConfigStore, problemStore)}
-          </div>
-          {(!openDocument.isRemote)
-              && editButton(tabSpec.tab, sectionClass, openDocument)}
+      <div className="scroller-and-document">
+        <div className="scroller">
+          <DocumentCollectionList
+              subTab={subTab}
+              tabSpec={tabSpec}
+              horizontal={true}
+              selectedDocument={openDocumentKey}
+              onSelectDocument={handleSelectDocument}
+          />
         </div>
-        <EditableDocumentContent
-          mode={"1-up"}
-          isPrimary={false}
-          document={openDocument}
-          readOnly={true}
-          showPlayback={showPlayback}
-        />
+        <div className="document-area">
+          <div className={`document-header ${tabSpec.tab} ${sectionClass}`} onClick={() => ui.setSelectedTile()}>
+            <div className={`document-title`}>
+              {getDocumentDisplayTitle(openDocument, appConfigStore, problemStore)}
+            </div>
+            {(!openDocument.isRemote)
+                && editButton(tabSpec.tab, sectionClass, openDocument)}
+          </div>
+          <EditableDocumentContent
+            mode={"1-up"}
+            isPrimary={false}
+            document={openDocument}
+            readOnly={true}
+            showPlayback={showPlayback}
+          />
+        </div>
       </div>
     );
   };
