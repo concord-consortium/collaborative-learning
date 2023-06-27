@@ -5,8 +5,13 @@
   justify-content: center;
 
   .gripper {
+    border: 2px solid white;
     height: 40px;
     width: 40px;
+
+    &.pressure {
+      border-color: red;
+    }
   }
 
   .emg-track {

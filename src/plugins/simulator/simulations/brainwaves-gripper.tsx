@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import React from "react";
 
 import { ISimulation, ISimulationProps } from "./simulation-types";
@@ -13,8 +14,11 @@ export const kPressureKey = "input_Surface_Pressure";
 
 function BrainwavesGripperComponent({ frame, variables }: ISimulationProps) {
   const gripperVariable = findVariable(kGripperKey, variables);
+  const pressureVariable = findVariable(kPressureKey, variables);
+  const pressure = pressureVariable?.value && pressureVariable.value >= 1000;
   const gripperScaler = (gripperVariable?.value ?? 0) / 100 * 0xFF;
   const backgroundColor = `rgb(${gripperScaler}, ${gripperScaler}, ${gripperScaler})`;
+  const gripperClass = classNames("gripper", { pressure });
   const gripperStyle = { backgroundColor };
 
   const emgVariable = findVariable(kEMGKey, variables);
@@ -22,7 +26,7 @@ function BrainwavesGripperComponent({ frame, variables }: ISimulationProps) {
   const emgStyle = { left: `${150 * normalizedValue - 10}px` };
   return (
     <div className="bwg-component">
-      <div className="gripper" style={gripperStyle} />
+      <div className={gripperClass} style={gripperStyle} />
       <div className="emg-track">
         <div className="emg" style={emgStyle} />
       </div>
@@ -34,7 +38,12 @@ function step({ frame, variables }: ISimulationProps) {
   const gripperVariable = findVariable(kGripperKey, variables);
   const pressureVariable = findVariable(kPressureKey, variables);
   if (gripperVariable && pressureVariable) {
-    pressureVariable.setValue(gripperVariable.value);
+    const minPressureValue = 60;
+    const gripperValue = gripperVariable.value;
+    const pressureValue = gripperValue && gripperValue > minPressureValue
+      ? (gripperValue - minPressureValue) * 100
+      : 0;
+    pressureVariable.setValue(pressureValue);
   }
 }
 
@@ -49,7 +58,8 @@ export const brainwavesGripperSimulation: ISimulation = {
     },
     {
       name: kPressureKey,
-      value: 0
+      value: 0,
+      unit: "mPa"
     },
     {
       name: kGripperKey,
