@@ -14,7 +14,7 @@ interface ISimulatorVariableProps {
 export function SimulatorVariable({ inputVariable, variable }: ISimulatorVariableProps) {
   const nameFunction = inputVariable ? inputVariableNamePart : outputVariableNamePart;
   const suffix = inputVariable ? "Sensor" : "Output";
-  const displayName = variable?.name ? `${nameFunction(variable)} ${suffix}` : "";
+  const displayName = variable?.name ? `${nameFunction(variable)?.replace("_", " ")} ${suffix}` : "";
 
   // Limit the value to two decimal places
   const value = variable?.value;
