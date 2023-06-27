@@ -117,6 +117,9 @@ export const SimulatorContentModel = TileContentModel
         variable?.setValue(values[self.frame % values.length]);
       }
 
+      // Call simulation's step function
+      self.simulationData.step?.({ frame: self.frame, variables: self.variables ?? [] });
+
       // Increment the frame
       self.frame++;
     }

@@ -2,6 +2,7 @@ import classNames from "classnames";
 import React from "react";
 
 import { ISimulation, ISimulationProps } from "./simulation-types";
+import { findVariable } from "./simulation-utilities";
 import { demoStreams } from "../../dataflow/model/utilities/demo-data";
 
 import "./brainwaves-gripper.scss";
@@ -28,9 +29,18 @@ function BrainwavesGripperComponent({ frame, variables }: ISimulationProps) {
   );
 }
 
+function step({ frame, variables }: ISimulationProps) {
+  const lightBulbVariable = findVariable(kLightBulbKey, variables);
+  const pressureVariable = findVariable(kPressureKey, variables);
+  if (lightBulbVariable && pressureVariable) {
+    pressureVariable.setValue(lightBulbVariable.value);
+  }
+}
+
 export const brainwavesGripperSimulation: ISimulation = {
   component: BrainwavesGripperComponent,
   delay: 17,
+  step,
   variables: [
     {
       name: kEMGKey,
