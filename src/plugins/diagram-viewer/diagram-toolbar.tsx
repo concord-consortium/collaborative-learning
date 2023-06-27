@@ -4,7 +4,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { Tooltip } from "react-tippy";
 import { DragOverlay, useDraggable } from "@dnd-kit/core";
-import { DiagramHelper, VariableType } from "@concord-consortium/diagram-view";
+import { DiagramHelper/*, VariableType*/ } from "@concord-consortium/diagram-view";
 
 import { DiagramContentModelType } from "./diagram-content";
 import { kNewVariableButtonDraggableId } from "./diagram-types";
@@ -99,7 +99,7 @@ const InsertVariableButton = ({ disabled, handleClick }: IInsertVariableButton) 
 
 interface IEditVariableButton {
   handleClick: () => void;
-  selectedVariable?: VariableType;
+  selectedVariable?: any; // TODO Should be VariableType
 }
 const EditVariableButton = ({ handleClick, selectedVariable }: IEditVariableButton) => {
   return (
@@ -157,7 +157,7 @@ const HideNavigatorButton = ({ hideNavigator, toggleNavigator }: IHideNavigatorB
 
 interface IDeleteButton {
   handleClick: () => void;
-  selectedVariable?: VariableType;
+  selectedVariable?: any; // TODO Should be VariableType
 }
 const DeleteButton = ({ handleClick, selectedVariable }: IDeleteButton) => {
   return (

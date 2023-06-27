@@ -53,15 +53,21 @@ export const brainwavesGripperSimulation: ISimulation = {
   step,
   variables: [
     {
+      displayName: "EMG",
+      labels: ["input", "sensor:emg-reading"],
       name: kEMGKey,
       value: 0
     },
     {
+      displayName: "Surface Pressure",
+      labels: ["input", "sensor:fsr-reading"],
       name: kPressureKey,
       value: 0,
       unit: "mPa"
     },
     {
+      displayName: "Gripper",
+      labels: ["output", "live-output:Grabber"],
       name: kGripperKey,
       value: 0
     }

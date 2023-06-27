@@ -2,8 +2,6 @@ import classNames from "classnames";
 import React from "react";
 import { VariableType } from "@concord-consortium/diagram-view";
 
-import { inputVariableNamePart, outputVariableNamePart } from "../../shared-variables/simulations/simulation-utilities";
-
 // TODO: This should be defined in the simulation.
 import { kEMGKey, kGripperKey, kPressureKey } from "../simulations/brainwaves-gripper";
 import EMGIcon from "../../dataflow/assets/icons/control/signal.svg";
@@ -36,16 +34,15 @@ interface ISimulatorVariableProps {
   variable?: VariableType;
 }
 export function SimulatorVariable({ inputVariable, variable }: ISimulatorVariableProps) {
-  const nameFunction = inputVariable ? inputVariableNamePart : outputVariableNamePart;
   const suffix = inputVariable ? "Sensor" : "Output";
-  const displayName = variable?.name ? `${nameFunction(variable)?.replace("_", " ")} ${suffix}` : "";
+  const displayName = variable?.displayName ? `${variable.displayName} ${suffix}` : "";
 
   // Limit the value to two decimal places
   const value = variable?.value;
   const scaleFactor = 100;
   const displayValue = value !== undefined ? Math.round(value * scaleFactor) / scaleFactor : "";
 
-  const variableDisplay = variable?.name ? `${displayName}: ${displayValue}` : "";
+  const variableDisplay = `${displayName}: ${displayValue}`;
 
   const className = inputVariable ? "input" : "output";
   const classes = classNames("simulator-variable", className);
