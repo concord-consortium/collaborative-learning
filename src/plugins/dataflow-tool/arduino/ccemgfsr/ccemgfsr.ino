@@ -108,8 +108,9 @@
     }
 
     // 3 Collect EMG and FSR readings
+    // (note that A2 is pin used for FSR in newer Muscle SpikerShield)
     emgReading = analogRead(A0);
-    fsrReading = analogRead(A1);
+    fsrReading = analogRead(A2);
 
     // 4 Turn off LEDs, then light up 1 -6 of them to reflect sensitivity
     for(int j = 0; j < NUM_LED; j++){
