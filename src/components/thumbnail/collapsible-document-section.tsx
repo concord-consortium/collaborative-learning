@@ -5,10 +5,9 @@ import { INetworkResourceClassResponse } from "../../../functions/src/shared";
 import { DocumentModelType, getDocumentContext } from "../../models/document/document";
 import { IStores } from "../../models/stores/stores";
 import ArrowIcon from "../../assets/icons/arrow/arrow.svg";
-import { ISubTabSpec } from "../navigation/section-document-or-browser";
 import { useNetworkDocuments, useUserStore } from "../../hooks/use-stores";
 import { DecoratedDocumentThumbnailItem } from "./decorated-document-thumbnail-item";
-import { NavTabSectionModelType } from "../../models/view/nav-tabs";
+import { ISubTabSpec, NavTabSectionModelType } from "../../models/view/nav-tabs";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 

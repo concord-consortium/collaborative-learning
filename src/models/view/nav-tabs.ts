@@ -70,13 +70,34 @@ export const NavTabSectionModel =
 export type NavTabSectionSpec = SnapshotIn<typeof NavTabSectionModel>;
 export type NavTabSectionModelType  = Instance<typeof NavTabSectionModel>;
 
+export interface ISubTabSpec {
+  label: string;
+  sections: NavTabSectionSpec[];
+}
+
 export const NavTabModel =
   types.model("NavTab", {
     tab: types.enumeration<ENavTab>("ENavTab", Object.values(ENavTab)),
     label: types.string,
     teacherOnly: false,
     sections: types.array(NavTabSectionModel)
-  });
+  })
+  .views(self => ({
+    // combine sections with matching titles into a single tab with sub-sections
+    get subTabs() {
+      const _subTabs: ISubTabSpec[] = [];
+      self.sections?.forEach(section => {
+        const found = _subTabs.find(tab => tab.label === section.title);
+        if (found) {
+          found.sections.push(section);
+        }
+        else {
+          _subTabs.push({ label: section.title, sections: [section] });
+        }
+      });
+      return _subTabs;
+    }
+  }));
 export type NavTabSpec = SnapshotIn<typeof NavTabModel>;
 export type NavTabModelType = Instance<typeof NavTabModel>;
 

@@ -3,8 +3,8 @@ import { INetworkResourceClassResponse } from "../../../functions/src/shared";
 import { useNetworkResources } from "../../hooks/network-resources";
 import { useStores } from "../../hooks/use-stores";
 import { DocumentModelType } from "../../models/document/document";
+import { ISubTabSpec } from "../../models/view/nav-tabs";
 import { CollapsibleDocumentsSection } from "../thumbnail/collapsible-document-section";
-import { ISubTabSpec } from "./section-document-or-browser";
 
 import "./network-documents-section.scss";
 

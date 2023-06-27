@@ -1,16 +1,30 @@
 @import "../../../components/vars.sass";
 
 .simulator-content-container {
-  width: 100%;
   height: 100%;
+  width: 100%;
   text-align: left;
   overflow: auto;
 
   .simulator-content {
-    padding: 10px 0 0 25px;
-  }
+    height: 100%;
+    width: 100%;
 
-  // &.editable {
-  //   border: 1px solid #cccccc;
-  // }
+    .simulator-variables {
+      display: flex;
+      font-family: 'Ubunutu', sans-serif;
+      height: 20px;
+      justify-content: space-between;
+      margin: 45px 20px 10px;
+      width: 100%;
+    }
+
+    .simulator-component-container {
+      align-content: center;
+      display: flex;
+      height: calc(100% - 75px);
+      justify-content: center;
+      width: 100%;
+    }
+  }
 }

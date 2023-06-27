@@ -1,17 +1,10 @@
 import { Node } from "rete";
 import { VariableType } from "@concord-consortium/diagram-view";
+
 import { getOutputType } from "../../nodes/utilities/live-output-utilities";
+import { outputVariableNamePart } from "../../../shared-variables/simulations/simulation-utilities";
+
 import LightIcon from "../../assets/icons/sensor/light.svg";
-
-export const kOutputVariablePrefix = "output_";
-
-export function isOutputVariable(variable: VariableType) {
-  return variable.name?.startsWith(kOutputVariablePrefix);
-}
-
-function outputVariableNamePart(variable: VariableType) {
-  return variable.name?.slice(kOutputVariablePrefix.length);
-}
 
 // Returns possible names to match with a shared variable based on the given node's outputType.
 // This is so output_LightBulb, output_lightbulb, output_light_bulb, etc will all match.

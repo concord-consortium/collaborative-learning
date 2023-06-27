@@ -58,3 +58,10 @@ export function moveNodeToFront(editor: NodeEditor, node: Node, newNode: boolean
     }
   });
 }
+
+export function hasFlowIn(node: Node){
+  const inputs = Array.from(node.inputs.values());
+  if (inputs.length === 0) return false;
+  if (node.name === "Control") return inputs[0].connections.length > 0;
+  return inputs.some((input) => input.connections.length > 0);
+}

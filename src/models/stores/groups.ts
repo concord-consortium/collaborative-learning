@@ -28,7 +28,8 @@ export const GroupModel = types
       return self.users.find(user => user.id === id);
     },
     get displayId() {
-      return self.id.slice(self.id.length - 3);
+      const maxChars = 3;
+      return self.id.length > maxChars ? self.id.slice(self.id.length - maxChars) : self.id;
     }
   }));
 

@@ -1,13 +1,14 @@
 import { reaction } from "mobx";
 import { types, Instance, getType, addDisposer, getSnapshot } from "mobx-state-tree";
-import { VariableSnapshot } from "@concord-consortium/diagram-view";
+import { VariableSnapshot, VariableType } from "@concord-consortium/diagram-view";
 
+import { kSimulatorTileType } from "../simulator-types";
+import { kSharedVariablesID, SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
 import { kBrainwavesKey } from "../simulations/brainwaves-gripper";
 import { simulations } from "../simulations/simulations";
+import { isInputVariable, isOutputVariable } from "../../shared-variables/simulations/simulation-utilities";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { TileContentModel } from "../../../models/tiles/tile-content";
-import { kSharedVariablesID, SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
-import { kSimulatorTileType } from "../simulator-types";
 import { SharedModelType } from "../../../models/shared/shared-model";
 
 export function defaultSimulatorContent(): SimulatorContentModelType {
@@ -48,8 +49,19 @@ export const SimulatorContentModel = TileContentModel
     }
   }))
   .views(self => ({
-    getVariable(name: string) {
-      return self.sharedModel?.variables.find(v => v.name === name);
+    get variables() {
+      return self.sharedModel?.variables;
+    }
+  }))
+  .views(self => ({
+    getVariable(name?: string) {
+      return self.variables?.find(v => v.name === name);
+    },
+    get inputVariables(): VariableType[] {
+      return self.variables?.filter(v => isInputVariable(v)) ?? [];
+    },
+    get outputVariables(): VariableType[] {
+      return self.variables?.filter(v => isOutputVariable(v)) ?? [];
     }
   }))
   .actions(self => ({
@@ -92,22 +104,6 @@ export const SimulatorContentModel = TileContentModel
             containerSharedModel?.createVariable(variableSnapshot);
           }
         });
-
-        // if (containerSharedModel && tileSharedModels?.includes(containerSharedModel)) {
-        //   // We already have a shared model so we skip some steps
-        //   // below. If we don't skip these steps we can get in an infinite
-        //   // loop.
-        // } else {
-        //   if (!containerSharedModel) {
-        //     // The document doesn't have a shared model yet
-        //     containerSharedModel = SharedVariables.create();
-        //   }
-
-        //   // TODO: This will currently generate multiple history events because it
-        //   // is running outside of a document tree action.
-        //   // Add the shared model to both the document and the tile
-        //   sharedModelManager.addTileSharedModel(self, containerSharedModel);
-        // }
       },
       {name: "sharedModelSetup", fireImmediately: true}));
     },

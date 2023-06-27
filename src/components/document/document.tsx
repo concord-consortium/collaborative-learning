@@ -4,7 +4,7 @@ import React from "react";
 import FileSaver from "file-saver";
 import { usePublishDialog } from "./use-publish-dialog";
 import { DocumentFileMenu } from "./document-file-menu";
-import { MyWorkDocumentOrBrowser } from "./document-or-browser";
+import { MyWorkDocumentOrBrowser } from "./mywork-document-or-browser";
 import { BaseComponent, IBaseProps } from "../base";
 import { DocumentModelType } from "../../models/document/document";
 import { LearningLogDocument, LearningLogPublication } from "../../models/document/document-types";

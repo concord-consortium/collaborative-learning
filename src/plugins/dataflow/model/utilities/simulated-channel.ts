@@ -6,17 +6,9 @@ import { VariableType } from "@concord-consortium/diagram-view";
 
 import { NodeChannelInfo } from "./channel";
 import { NodeSensorTypes } from "./node";
+import { inputVariableNamePart } from "../../../shared-variables/simulations/simulation-utilities";
 
 export const kSimulatedChannelType = "simulated-channel";
-export const kInputVariablePrefix = "input_";
-
-export function isInputVariable(variable: VariableType) {
-  return variable.name?.startsWith(kInputVariablePrefix);
-}
-
-function inputVariableNamePart(variable: VariableType) {
-  return variable.name?.slice(kInputVariablePrefix.length);
-}
 
 function simulatedChannelId(variable: VariableType) {
   return `SIM${inputVariableNamePart(variable)}`;
