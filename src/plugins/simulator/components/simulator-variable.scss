@@ -10,10 +10,28 @@
     width: 14px;
   }
 
-  &.input .leading-box {
-    background-color: #5584e5;
+  .variable-icon {
+    height: 16px;
+    margin-right: 8px;
+    width: 16px;
   }
-  &.output .leading-box {
-    background-color: #f29046;
+
+  &.input {
+    .leading-box {
+      background-color: #5584e5;
+    }
+
+    .variable-icon {
+      fill: #5584e5;
+    }
+  }
+  &.output {
+    .leading-box {
+      background-color: #f29046;
+    }
+
+    .variable-icon {
+      fill: #f29046;
+    }
   }
 }

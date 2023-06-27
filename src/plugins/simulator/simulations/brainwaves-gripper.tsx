@@ -8,8 +8,8 @@ import { demoStreams } from "../../dataflow/model/utilities/demo-data";
 import "./brainwaves-gripper.scss";
 
 export const kBrainwavesKey = "EMG_and_claw";
-const kEMGKey = "input_EMG";
-const kGripperKey = "output_Grabber";
+export const kEMGKey = "input_EMG";
+export const kGripperKey = "output_Grabber";
 export const kPressureKey = "input_Surface_Pressure";
 
 function BrainwavesGripperComponent({ frame, variables }: ISimulationProps) {
