@@ -1,4 +1,3 @@
-import classNames from "classnames";
 import React from "react";
 
 import { ISimulation, ISimulationProps } from "./simulation-types";
@@ -9,19 +8,21 @@ import "./brainwaves-gripper.scss";
 
 export const kBrainwavesKey = "EMG_and_claw";
 const kEMGKey = "input_EMG";
+const kGripperKey = "output_Grabber";
 export const kPressureKey = "input_Surface_Pressure";
-const kLightBulbKey = "output_LightBulb";
 
 function BrainwavesGripperComponent({ frame, variables }: ISimulationProps) {
-  const lightbulbVariable = variables.find(v => v.name === kLightBulbKey);
-  const lightbulbClass = classNames("lightbulb", lightbulbVariable?.value === 1 ? "on" : "off");
+  const gripperVariable = findVariable(kGripperKey, variables);
+  const gripperScaler = (gripperVariable?.value ?? 0) / 100 * 0xFF;
+  const backgroundColor = `rgb(${gripperScaler}, ${gripperScaler}, ${gripperScaler})`;
+  const gripperStyle = { backgroundColor };
 
-  const emgVariable = variables.find(v => v.name === kEMGKey);
+  const emgVariable = findVariable(kEMGKey, variables);
   const normalizedValue = Math.min((emgVariable?.value ?? 0) / 500, 1);
   const emgStyle = { left: `${150 * normalizedValue - 10}px` };
   return (
     <div className="bwg-component">
-      <div className={lightbulbClass} />
+      <div className="gripper" style={gripperStyle} />
       <div className="emg-track">
         <div className="emg" style={emgStyle} />
       </div>
@@ -30,10 +31,10 @@ function BrainwavesGripperComponent({ frame, variables }: ISimulationProps) {
 }
 
 function step({ frame, variables }: ISimulationProps) {
-  const lightBulbVariable = findVariable(kLightBulbKey, variables);
+  const gripperVariable = findVariable(kGripperKey, variables);
   const pressureVariable = findVariable(kPressureKey, variables);
-  if (lightBulbVariable && pressureVariable) {
-    pressureVariable.setValue(lightBulbVariable.value);
+  if (gripperVariable && pressureVariable) {
+    pressureVariable.setValue(gripperVariable.value);
   }
 }
 
@@ -51,7 +52,7 @@ export const brainwavesGripperSimulation: ISimulation = {
       value: 0
     },
     {
-      name: kLightBulbKey,
+      name: kGripperKey,
       value: 0
     }
   ],

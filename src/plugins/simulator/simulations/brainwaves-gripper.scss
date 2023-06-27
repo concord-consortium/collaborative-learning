@@ -4,16 +4,9 @@
   flex-direction: column;
   justify-content: center;
 
-  .lightbulb {
+  .gripper {
     height: 40px;
     width: 40px;
-
-    &.on {
-      background-color: yellow;
-    }
-    &.off {
-      background-color: black;
-    }
   }
 
   .emg-track {
