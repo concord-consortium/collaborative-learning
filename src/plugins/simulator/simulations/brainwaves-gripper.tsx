@@ -8,12 +8,14 @@ import "./brainwaves-gripper.scss";
 
 export const kBrainwavesKey = "EMG_and_claw";
 const kEMGKey = "input_EMG";
+export const kPressureKey = "input_Surface_Pressure";
+const kLightBulbKey = "output_LightBulb";
 
 function BrainwavesGripperComponent({ frame, variables }: ISimulationProps) {
-  const lightbulbVariable = variables.find(v => v.name === "output_LightBulb");
+  const lightbulbVariable = variables.find(v => v.name === kLightBulbKey);
   const lightbulbClass = classNames("lightbulb", lightbulbVariable?.value === 1 ? "on" : "off");
 
-  const emgVariable = variables.find(v => v.name === "input_EMG");
+  const emgVariable = variables.find(v => v.name === kEMGKey);
   const normalizedValue = Math.min((emgVariable?.value ?? 0) / 500, 1);
   const emgStyle = { left: `${150 * normalizedValue - 10}px` };
   return (
@@ -35,7 +37,11 @@ export const brainwavesGripperSimulation: ISimulation = {
       value: 0
     },
     {
-      name: "output_LightBulb",
+      name: kPressureKey,
+      value: 0
+    },
+    {
+      name: kLightBulbKey,
       value: 0
     }
   ],

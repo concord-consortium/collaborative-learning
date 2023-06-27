@@ -8,6 +8,9 @@ import { NodeChannelInfo } from "./channel";
 import { NodeSensorTypes } from "./node";
 import { inputVariableNamePart } from "../../../shared-variables/simulations/simulation-utilities";
 
+// TODO Remove this import
+import { kPressureKey } from "../../../simulator/simulations/brainwaves-gripper";
+
 export const kSimulatedChannelType = "simulated-channel";
 
 function simulatedChannelId(variable: VariableType) {
@@ -15,14 +18,21 @@ function simulatedChannelId(variable: VariableType) {
 }
 
 function simulatedChannelName(variable: VariableType) {
-  return inputVariableNamePart(variable);
+  return inputVariableNamePart(variable)?.replace("_", " ");
 }
 
-export function simulatedChannel(variable: VariableType): NodeChannelInfo {
+function simulatedChannelType(variable: VariableType) {
+  // TODO Remove this hard coded reference
+  if (variable.name === kPressureKey) return "fsr-reading";
+  
   const name = inputVariableNamePart(variable) ?? "";
   const lowerName = name.toLowerCase();
   const sensorType = NodeSensorTypes.find(nst => nst.name.toLowerCase() === lowerName);
-  const type = sensorType?.type ?? kSimulatedChannelType;
+  return sensorType?.type ?? kSimulatedChannelType;
+}
+
+export function simulatedChannel(variable: VariableType): NodeChannelInfo {
+  const type = simulatedChannelType(variable);
   return {
     hubId: "",
     hubName: "",
