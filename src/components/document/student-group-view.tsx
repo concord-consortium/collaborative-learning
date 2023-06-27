@@ -3,7 +3,7 @@ import { observer } from "mobx-react";
 import classNames from "classnames";
 import { getGroupUsers } from "../../models/document/document-utils";
 import { GroupUserModelType } from "../../models/stores/groups";
-import { useProblemStore, useUIStore, useStores } from "../../hooks/use-stores";
+import { useProblemStore, useStores } from "../../hooks/use-stores";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import { FourUpComponent, FourUpUser } from "../four-up";

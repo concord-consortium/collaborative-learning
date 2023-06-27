@@ -354,9 +354,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleOverlayClick = (context?: string) => {
-    console.log("handleOverlayClick with context:", context);
     const { ui } = this.stores;
-
     const { groupId } = this.props;
     const groupUser = context ? this.userByContext[context] : undefined;
     const toggledContext = this.getToggledContext();
@@ -367,16 +365,10 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       }
       return { toggledContextMap: clone(state.toggledContextMap) };
     });
-    // setFocusedGroupUser && setFocusedGroupUser(groupUser?.user);
 
     if (groupUser && groupUser.doc && groupId) {
-      console.log("here line 362");
-      console.log("groupUser.doc.key:", groupUser.doc.key);
       ui.openSubTabDocument("student-work", groupId, groupUser.doc.key);
     }
-
-    //remove focus document to re-render chat panel
-    // groupId && ui.closeSubTabDocument("student-work",  groupId);
 
     if (groupUser) {
       const event = toggledContext ? LogEventName.DASHBOARD_SELECT_STUDENT : LogEventName.DASHBOARD_DESELECT_STUDENT;
