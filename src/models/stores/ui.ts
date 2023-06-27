@@ -239,7 +239,6 @@ export const UIModel = types
       // the default sub tab or each main tab, so we don't want to be switching the activeTab in
       // that case.
       setOpenSubTab(tab: string, subTab: string) {
-        console.log("ui.ts > setOpenSubTab");
         const tabState = getTabState(tab);
         tabState.openSubTab = subTab;
       },
@@ -251,7 +250,6 @@ export const UIModel = types
        * @param documentKey
        */
       openSubTabDocument(tab: string, subTab: string, documentKey: string) {
-        console.log("ui.ts > openSubTabDoc:");
         const tabState = getTabState(tab);
         self.activeNavTab = tab;
         tabState.openSubTab = subTab;

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { observer } from "mobx-react";
 import classNames from "classnames";
 import { getGroupUsers } from "../../models/document/document-utils";
@@ -36,39 +36,14 @@ interface IGroupTitlebarProps {
   groupUser?: GroupUserModelType | undefined;
 }
 
-interface IProps {
-  // groupId?: string;
-  // setGroupId: (groupId: string) => void;
-}
-
-//Scott's comments
-// don't pass groupId and setGroupId as props to StudentGroupView
-
-// StudentGroupView gets the ui store and then sets selectedGroupId = ui.tabs.get("student-work").openSubTab
-//to figure out which group it should display.
-
-// handleSelectGroup calls ui.setOpenSubTab("student-work", id) and uui.closeSubTabDocument("student-work", id)
-
-// the focusedGroupUser is computed from openDoc = ui.tabs.get("student-work").openDocuments.get(selectedGroupId)
-//then the id of the openDoc is looked for in groupsUsers the user with this document is the focusedGroupUser
-//when a user is selected in the 4up or in the top bar then ui.openSubTabDocument("student-work", selectedGroupId, documentId)
-// is called with the documentId of the user that was clicked on
-
-// private selectStudentGroup = (groupId: string) => {
-//   const { ui } = this.stores;
-//   ui.setActiveStudentGroup(groupId);
-// };
-
-
+interface IProps {}
 
 export const StudentGroupView:React.FC<IProps> = observer(function StudentGroupView(){
-
-  const {user, groups, documents} = useStores();
-  const ui = useUIStore();
-  if (ui.activeNavTab !== "student-work") return null; //this delays the renders
+  const {user, groups, documents, ui} = useStores();
+  if (ui.activeNavTab !== "student-work") return null; //this delays the renders upon load
   console.log("-------<StudentGroupView>-------");
-  // const selectedGroupId = ui.tabs.get("student-work")?.openSubTab || ""; // 2 renders
-  // const selectedGroupId = ui.tabs.get("student-work")?.openSubTab || "1"; // causes alotta re-renders
+  // const selectedGroupId = ui.tabs.get("student-work")?.openSubTab || ""; // 2 renders (comment out 44)
+  // const selectedGroupId = ui.tabs.get("student-work")?.openSubTab || "1"; // lots of re-renders (comment out 44)
   const selectedGroupId = ui.tabs.get("student-work")?.openSubTab
                           || (groups.allGroups.length ? groups.allGroups[0].id : ""); //original
 

@@ -71,11 +71,6 @@ export const GroupsModel = types
     }
   }))
   .views((self) => ({
-    get firstGroup(){
-      console.log("firstGroup called");
-      return {id: "1"};
-      // self.allGroups[0] as GroupModelType | undefined;
-    },
     get groupsByUser() {
       const groupsByUser: Record<string, GroupModelType> = {};
       self.allGroups.forEach((group) => {
