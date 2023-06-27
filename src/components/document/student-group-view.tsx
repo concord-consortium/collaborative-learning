@@ -40,13 +40,9 @@ interface IProps {}
 
 export const StudentGroupView:React.FC<IProps> = observer(function StudentGroupView(){
   const {user, groups, documents, ui} = useStores();
-  if (ui.activeNavTab !== "student-work") return null; //this delays the renders upon load
-  console.log("-------<StudentGroupView>-------");
-  // const selectedGroupId = ui.tabs.get("student-work")?.openSubTab || ""; // 2 renders (comment out 44)
-  // const selectedGroupId = ui.tabs.get("student-work")?.openSubTab || "1"; // lots of re-renders (comment out 44)
+  if (ui.activeNavTab !== "student-work") return null; //this delays many re-renders upon load
   const selectedGroupId = ui.tabs.get("student-work")?.openSubTab
-                          || (groups.allGroups.length ? groups.allGroups[0].id : ""); //original
-
+                          || (groups.allGroups.length ? groups.allGroups[0].id : "");
   const groupUsers = getGroupUsers(user.id, groups, documents, selectedGroupId);
   const group = groups.getGroupById(selectedGroupId);
   const openDocId = ui.tabs.get("student-work")?.openDocuments.get(selectedGroupId);
