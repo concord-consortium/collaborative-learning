@@ -14,23 +14,20 @@ import "./simulator-variable.scss";
 
 function variableIcon(variable: VariableType) {
   const name = variable.name ?? "";
-  if ([kEMGKey, kGripperKey, kPressureKey].includes(name)) {
-    return (
-      <div className="variable-icon">
-        {
-          name === kEMGKey
-            ? <EMGIcon />
-            : name === kGripperKey
-            ? <GripperIcon />
-            : name === kPressureKey
-            ? <PressureIcon />
-            : null
-        }
-      </div>
-    );
-  } else {
-    return <div className="leading-box" />;
-  }
+  const useIcon = [kEMGKey, kGripperKey, kPressureKey].includes(name);
+  const children = name === kEMGKey
+    ? <EMGIcon />
+    : name === kGripperKey
+    ? <GripperIcon />
+    : name === kPressureKey
+    ? <PressureIcon />
+    : null;
+  const className = classNames("leading-box", { "variable-icon": useIcon });
+  return (
+    <div className={className}>
+      { children }
+    </div>
+  );
 }
 
 interface ISimulatorVariableProps {
