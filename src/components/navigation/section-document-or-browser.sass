@@ -12,7 +12,27 @@ $scroller-height: 145px
   .scroller-and-document
     overflow-x: hidden
     overflow-y: hidden
+    .collapse-scroller-button
+      border-radius: 50%
+      z-index: 5
+      position: absolute
+      right: 5px
+      top: calc((#{$nav-tab-height} + #{$tab-section-border-width}) * 2)
+      width: 40px
+      height: 40px
+      display: flex
+      align-items: center
+      justify-content: center
+      &.collapsed
+        transform: rotate(180deg)
+      .scroller-icon
+        &.class-work
+          fill: $classwork-purple-dark-1
+        &.my-work
+          fill: $workspace-teal-dark-1
     .scroller
+      &.collapsed
+        height: 0
       .doc-collection-list
         &.horizontal
           height: $scroller-height
@@ -23,6 +43,11 @@ $scroller-height: 145px
           overflow-y: hidden
         &.collapsed
           height: 0
+      .scroller-controls
+        background-color: white
+        opacity: 50%
+        height: inherit
+
     .document-area
       height: calc(100vh - #{$header-offset-with-sub-tabs})
 
