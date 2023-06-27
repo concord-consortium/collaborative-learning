@@ -189,7 +189,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
         return (
           isToggled && viaStudentGroupView
             ? //pass an undefined context to handleOverlayClick to null out selected quadrant
-              <button className="restore-fourup-button" onClick={()=>this.handleOverlayClick()}>
+              <button className="restore-fourup-button" onClick={()=>this.handleFourUpClick()}>
                 <FourUpIcon /> 4-Up
               </button>
             : <div className={className} title={fullName} onClick={()=>this.handleOverlayClick(context)}>
@@ -342,10 +342,22 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     window.addEventListener("mouseup", handleMouseUp);
   };
 
+  private handleFourUpClick = () => {
+    const { ui } = this.stores;
+    const { groupId } = this.props;
+    this.setState(state => {
+      if (groupId) {
+        state.toggledContextMap[groupId] =  undefined;
+      }
+    });
+    groupId && ui.closeSubTabDocument("student-work",  groupId);
+  };
+
   private handleOverlayClick = (context?: string) => {
+    console.log("handleOverlayClick with context:", context);
     const { ui } = this.stores;
 
-    const { groupId, setFocusedGroupUser } = this.props;
+    const { groupId } = this.props;
     const groupUser = context ? this.userByContext[context] : undefined;
     const toggledContext = this.getToggledContext();
     this.setState(state => {
@@ -355,9 +367,16 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       }
       return { toggledContextMap: clone(state.toggledContextMap) };
     });
-    setFocusedGroupUser && setFocusedGroupUser(groupUser?.user);
+    // setFocusedGroupUser && setFocusedGroupUser(groupUser?.user);
+
+    if (groupUser && groupUser.doc && groupId) {
+      console.log("here line 362");
+      console.log("groupUser.doc.key:", groupUser.doc.key);
+      ui.openSubTabDocument("student-work", groupId, groupUser.doc.key);
+    }
+
     //remove focus document to re-render chat panel
-    groupId && ui.closeSubTabDocument("student-work",  groupId);
+    // groupId && ui.closeSubTabDocument("student-work",  groupId);
 
     if (groupUser) {
       const event = toggledContext ? LogEventName.DASHBOARD_SELECT_STUDENT : LogEventName.DASHBOARD_DESELECT_STUDENT;

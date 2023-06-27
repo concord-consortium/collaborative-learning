@@ -114,7 +114,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
       case ENavTab.kTeacherGuide:
         return this.renderTeacherGuide();
       case ENavTab.kStudentWork:
-        return <StudentGroupView groupId={this.stores.ui.activeGroupId} setGroupId={this.selectStudentGroup} />;
+        return <StudentGroupView/>;
       case ENavTab.kClassWork:
       case ENavTab.kLearningLog:
       case ENavTab.kMyWork:
@@ -178,11 +178,6 @@ export class NavTabPanel extends BaseComponent<IProps> {
         }
       }
     }
-  };
-
-  private selectStudentGroup = (groupId: string) => {
-    const { ui } = this.stores;
-    ui.setActiveStudentGroup(groupId);
   };
 
   private handleShowChatColumn = () => {

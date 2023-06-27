@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { observer } from "mobx-react";
 import classNames from "classnames";
 import { getGroupUsers } from "../../models/document/document-utils";
 import { GroupUserModelType } from "../../models/stores/groups";
@@ -6,6 +7,7 @@ import { useProblemStore, useUIStore, useStores } from "../../hooks/use-stores";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import { FourUpComponent, FourUpUser } from "../four-up";
+
 import "./student-group-view.scss";
 
 interface IGroupButtonProps {
@@ -35,16 +37,50 @@ interface IGroupTitlebarProps {
 }
 
 interface IProps {
-  groupId?: string;
-  setGroupId: (groupId: string) => void;
+  // groupId?: string;
+  // setGroupId: (groupId: string) => void;
 }
-export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
+
+//Scott's comments
+// don't pass groupId and setGroupId as props to StudentGroupView
+
+// StudentGroupView gets the ui store and then sets selectedGroupId = ui.tabs.get("student-work").openSubTab
+//to figure out which group it should display.
+
+// handleSelectGroup calls ui.setOpenSubTab("student-work", id) and uui.closeSubTabDocument("student-work", id)
+
+// the focusedGroupUser is computed from openDoc = ui.tabs.get("student-work").openDocuments.get(selectedGroupId)
+//then the id of the openDoc is looked for in groupsUsers the user with this document is the focusedGroupUser
+//when a user is selected in the 4up or in the top bar then ui.openSubTabDocument("student-work", selectedGroupId, documentId)
+// is called with the documentId of the user that was clicked on
+
+// private selectStudentGroup = (groupId: string) => {
+//   const { ui } = this.stores;
+//   ui.setActiveStudentGroup(groupId);
+// };
+
+
+
+export const StudentGroupView:React.FC<IProps> = observer(function StudentGroupView(){
+  console.log("-------<StudentGroupView>-------");
+
   const {user, groups, documents} = useStores();
-  const [focusedGroupUser, setFocusedGroupUser] = useState<GroupUserModelType | undefined>();
-  const selectedGroupId = groupId || (groups.allGroups.length ? groups.allGroups[0].id : "");
-  const groupUsers = getGroupUsers(user.id, groups, documents, selectedGroupId);
   const ui = useUIStore();
+  console.log("\tui:", ui);
+
+  // const [focusedGroupUser, setFocusedGroupUser] = useState<GroupUserModelType | undefined>();
+  // const selectedGroupId = groupId || (groups.allGroups.length ? groups.allGroups[0].id : "");
+  const selectedGroupId = ui.tabs.get("student-work")?.openSubTab ||
+                          (groups.allGroups.length ? groups.allGroups[0].id : "");
+  console.log("\tselectedGroupId:", selectedGroupId);
+  const groupUsers = getGroupUsers(user.id, groups, documents, selectedGroupId);
   const group = groups.getGroupById(selectedGroupId);
+  console.log("\tgroupUsers:", groupUsers);
+  const openDocId = ui.tabs.get("student-work")?.openDocuments.get(selectedGroupId);
+  console.log("\topenDocId:", openDocId);
+  console.log("getStudentWork:", ui.tabs.get("student-work"));
+  const focusedGroupUser = groupUsers.find(obj => obj.doc?.key === openDocId)?.user;
+  console.log("\tfocusedGroupUser:", focusedGroupUser);
   const isStudentViewActiveTab = (ui.activeNavTab === "student-work");
   const isChatPanelShown = ui.showChatPanel;
   const shrinkStudentView  = isStudentViewActiveTab && isChatPanelShown;
@@ -59,18 +95,24 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
       //use group buttons (G1, G2, etc) as a pseudo subTab
       const groupSubTab = foundUser.doc.groupId;
       const documentKey = foundUser.doc.key;
-      ui.openSubTabDocument("student-work", groupSubTab, documentKey);
+      console.log("groupSubTab:", groupSubTab);
+      console.log("documentKey:", documentKey);
+
+      // ui.openSubTabDocument("student-work", groupSubTab, documentKey);
     }
   }
 
   const handleSelectGroup = (id: string) => {
+    console.log("handleSelectGroup with id:", id);
     Logger.log(LogEventName.VIEW_GROUP, {group: id, via: "group-document-titlebar"});
-    setGroupId(id);
-    setFocusedGroupUser(undefined);
+    // setGroupId(id);
+    ui.setOpenSubTab("student-work", id);
+    ui.closeSubTabDocument("student-work", id);
+    // setFocusedGroupUser(undefined);
   };
 
   const handleFocusedUserChange = (selectedUser: FourUpUser) => {
-    setFocusedGroupUser(selectedUser.user);
+    // setFocusedGroupUser(selectedUser.user);
   };
 
   const GroupViewTitlebar: React.FC<IGroupViewTitlebarProps> = ({ selectedId, onSelectGroup }) => {
@@ -84,7 +126,8 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
               />
               { groupUsers.map(u => {
                   const className = classNames("member-button", "in-student-group-view", u.context,
-                                                {focused: u.user.id === focusedGroupUser.id});
+                                                // {focused: u.user.id === focusedGroupUser.id}
+                                                );
                 return (
                   <button key={u.user.name} className={className} title={u.user.name}
                       onClick={()=>handleFocusedUserChange(u)}>
@@ -129,15 +172,16 @@ export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
   return (
     <div key="student-group-view" className={studentGroupViewClasses}>
       <GroupViewTitlebar selectedId={selectedGroupId} onSelectGroup={handleSelectGroup} />
-      <GroupTitlebar selectedId={selectedGroupId} groupUser={focusedGroupUser}/>
+      <GroupTitlebar selectedId={selectedGroupId}
+                     groupUser={focusedGroupUser}/>
       <div className="canvas-area">
         <FourUpComponent groupId={selectedGroupId}
                          isGhostUser={true}
                          viaStudentGroupView={true}
                          focusedUserContext={focusedUserContext}
-                         setFocusedGroupUser={setFocusedGroupUser}
+                        //  setFocusedGroupUser={setFocusedGroupUser}
         />
       </div>
     </div>
   );
-};
+});

@@ -250,6 +250,7 @@ export const UIModel = types
        * @param documentKey
        */
       openSubTabDocument(tab: string, subTab: string, documentKey: string) {
+        console.log("ui.ts > openSubTabDoc:");
         const tabState = getTabState(tab);
         self.activeNavTab = tab;
         tabState.openSubTab = subTab;
