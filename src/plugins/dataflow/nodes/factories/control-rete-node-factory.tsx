@@ -20,7 +20,6 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
       const valueInput = new Rete.Input("num2", "Number2", this.numSocket);
       const out = new Rete.Output("num", "Number", this.numSocket);
 
-      node.data.hasGate = true;
       node.data.gateActive = false;
 
       const dropdownOptions = HoldFunctionOptions

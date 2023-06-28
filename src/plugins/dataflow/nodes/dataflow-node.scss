@@ -252,6 +252,7 @@ $node-inner-width: 140px;
       }
     }
     &.control {
+      // note - conditional styles for this node are in control-node-states.scss
       background-color: $control-green;
       border-color: $control-green-outline;
       .main-color {
@@ -281,32 +282,6 @@ $node-inner-width: 140px;
         text-align: left;
         width: 100%;
       }
-    }
-    // OFF -- when not-holding, default
-    &.has-gate .inputs {
-      .binary .socket {
-        background-image: url("../assets/icons/control/node-arrow.svg");
-        transform:rotate(270deg);
-        transition: all .2s ease-in-out;
-      }
-    }
-    //  ON --- additional for when holding
-    &.has-gate.gate-active .inputs {
-      .number2 .socket {
-        background-image: url("../../shared-assets/icons/dataflow/control/signal.svg");
-      }
-      .binary .socket {
-        transform:rotate(180deg);
-        background-image: url("../assets/icons/control/node-arrow.svg");
-        background-color: $control-green;
-        transition: all .2s ease-in-out;
-      }
-    }
-
-    &.has-gate.gate-active .item.top .label {
-      background-image: url("../../shared-assets/icons/dataflow/control/signal.svg");
-      background-repeat: no-repeat;
-      background-position: 70px;
     }
 
     .top-bar {
