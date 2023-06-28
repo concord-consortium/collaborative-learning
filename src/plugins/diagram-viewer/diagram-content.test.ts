@@ -1,5 +1,6 @@
 import { castToSnapshot, IAnyStateTreeNode, IAnyType, isAlive, onSnapshot, types } from "mobx-state-tree";
 import { when } from "mobx";
+import { VariableType } from "@concord-consortium/diagram-view";
 import { createDiagramContent, defaultDiagramContent,
   DiagramContentModel, DiagramContentModelType } from "./diagram-content";
 import { SharedModelType } from "../../models/shared/shared-model";
@@ -167,7 +168,7 @@ describe("DiagramContent", () => {
     const firstNode = Array.from(content.root.nodes.values())[0];
     assertIsDefined(firstNode);
 
-    variablesAPI.removeVariable(firstNode.variable);
+    variablesAPI.removeVariable(firstNode.variable as VariableType);
 
     // Need to wait for the variable and node to be removed, we use mobx's `when` for this.
     // It should monitor the nodes size and run the predicate when it goes back to 0
