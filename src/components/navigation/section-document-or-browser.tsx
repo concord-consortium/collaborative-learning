@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react";
 import { useQueryClient } from 'react-query';
 import classNames from "classnames";
@@ -39,11 +39,13 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
   const [scrollerCollapsed, setScrollerCollapsed] = useState(false);
   const [showLeftScrollArrow, setShowLeftScrollArrow] = useState(false);
   const [showRightScrollArrow, setShowRightScrollArrow] = useState(false);
+  const documentScrollerRef = useRef<HTMLDivElement>(null);
   const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
   const subTabs = tabSpec.subTabs;
   const tabState = navTabSpec && ui.tabs.get(navTabSpec?.tab);
   const _subTabIndex = subTabs.findIndex((subTab) => tabState?.openSubTab === subTab.label);
   const subTabIndex = _subTabIndex < 0 ? 0 : _subTabIndex;
+  const selectedSubTab = subTabs[subTabIndex];
 
   useEffect(() => {
     // Set the initial open tab. If the tabSpec changes somehow then the open
@@ -78,7 +80,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     // The subTabIndex is computed above on every render. It is the index
     // of the currently open subTab. Its also passed to the Tab component
     // below.
-    const selectedSubTab = subTabs[subTabIndex];
+    // const selectedSubTab = subTabs[subTabIndex];
     ui.openSubTabDocument(tabSpec.tab, selectedSubTab.label, document.key);
     const logEvent = document.isRemote
       ? LogEventName.VIEW_SHOW_TEACHER_NETWORK_COMPARISON_DOCUMENT
@@ -152,35 +154,43 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     const sectionClass = openDocument?.type === "learningLog" ? "learning-log" : "";
 
     const handleCollapseScroller = () => {
-      console.log("in handleCollapseScroller");
       setScrollerCollapsed(!scrollerCollapsed);
     };
     return (
       <div className="scroller-and-document">
-        <div className={classNames("scroller", {"collapsed": scrollerCollapsed})}>
-          <div className={classNames("scroller-controls", "left", {"collapsed": scrollerCollapsed})}>
-            <div className="scroller-controls-overlay left"/>
-            <div className={classNames("scroll-arrow-button", "themed", tabSpec.tab, {"collapsed": scrollerCollapsed},
-                                       {"show": showLeftScrollArrow})}>
-              <ScrollArrowIcon className={`scroll-arrow left themed ${tabSpec.tab}`} />
+        { selectedSubTab.label === "Starred" &&
+          <>
+            <div className={classNames("scroller", {"collapsed": scrollerCollapsed})} ref={documentScrollerRef}>
+              <div className={classNames("scroller-controls", "left", {"collapsed": scrollerCollapsed})}>
+                <div className="scroller-controls-overlay left"/>
+                <div className={classNames("scroll-arrow-button", "themed", tabSpec.tab, {"collapsed": scrollerCollapsed},
+                                          {"show": showLeftScrollArrow})}>
+                  <ScrollArrowIcon className={`scroll-arrow left themed ${tabSpec.tab}`} />
+                </div>
+              </div>
+              <DocumentCollectionList
+                  subTab={subTab}
+                  tabSpec={tabSpec}
+                  horizontal={true}
+                  collapsed={scrollerCollapsed}
+                  selectedDocument={openDocumentKey}
+                  onSelectDocument={handleSelectDocument}
+              />
+              <div className={classNames("scroller-controls", "right", {"collapsed": scrollerCollapsed})}>
+                <div className="scroller-controls-overlay right"/>
+                <div className={classNames("scroll-arrow-button", "themed", tabSpec.tab, {"collapsed": scrollerCollapsed},
+                                          {"show": showRightScrollArrow})}>
+                  <ScrollArrowIcon className={`scroll-arrow-icon right themed ${tabSpec.tab}`} />
+                </div>
+              </div>
             </div>
-          </div>
-          <DocumentCollectionList
-              subTab={subTab}
-              tabSpec={tabSpec}
-              horizontal={true}
-              collapsed={scrollerCollapsed}
-              selectedDocument={openDocumentKey}
-              onSelectDocument={handleSelectDocument}
-          />
-          <div className={classNames("scroller-controls", "right", {"collapsed": scrollerCollapsed})}>
-            <div className="scroller-controls-overlay right"/>
-            <div className={classNames("scroll-arrow-button", "themed", tabSpec.tab, {"collapsed": scrollerCollapsed},
-                                       {"show": showRightScrollArrow})}>
-              <ScrollArrowIcon className={`scroll-arrow-icon right themed ${tabSpec.tab}`} />
+            <div className={classNames("collapse-scroller-button", "themed", tabSpec.tab, {"collapsed": scrollerCollapsed})}
+                onClick={handleCollapseScroller}>
+              <CollapseScrollerIcon className={`scroller-icon ${tabSpec.tab}`}/>
             </div>
-          </div>
-        </div>
+          </>
+
+        }
         <div className="document-area">
           <div className={`document-header ${tabSpec.tab} ${sectionClass}`} onClick={() => ui.setSelectedTile()}>
             <div className={`document-title`}>
@@ -197,10 +207,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
             showPlayback={showPlayback}
           />
         </div>
-        <div className={classNames("collapse-scroller-button", "themed", tabSpec.tab, {"collapsed": scrollerCollapsed})}
-              onClick={handleCollapseScroller}>
-          <CollapseScrollerIcon className={`scroller-icon ${tabSpec.tab}`}/>
-        </div>
+
       </div>
     );
   };
