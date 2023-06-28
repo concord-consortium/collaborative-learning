@@ -158,7 +158,8 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     return (
       <div className="scroller-and-document">
         <div className={classNames("scroller", {"collapsed": scrollerCollapsed})}>
-          <div className="scroller-controls left">
+          <div className={classNames("scroller-controls", "left", {"collapsed": scrollerCollapsed})}>
+            <div className="scroller-controls-overlay left"/>
             <div className={classNames("scroll-arrow-button", "themed", tabSpec.tab, {"collapsed": scrollerCollapsed},
                                        {"show": showLeftScrollArrow})}>
               <ScrollArrowIcon className={`scroll-arrow left themed ${tabSpec.tab}`} />
@@ -172,10 +173,11 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
               selectedDocument={openDocumentKey}
               onSelectDocument={handleSelectDocument}
           />
-          <div className="scroller-controls right">
+          <div className={classNames("scroller-controls", "right", {"collapsed": scrollerCollapsed})}>
+            <div className="scroller-controls-overlay right"/>
             <div className={classNames("scroll-arrow-button", "themed", tabSpec.tab, {"collapsed": scrollerCollapsed},
                                        {"show": showRightScrollArrow})}>
-              <ScrollArrowIcon className={`scroll-arrow right themed ${tabSpec.tab}`} />
+              <ScrollArrowIcon className={`scroll-arrow-icon right themed ${tabSpec.tab}`} />
             </div>
           </div>
         </div>

@@ -31,6 +31,8 @@ $scroller-height: 145px
         &.my-work
           fill: $workspace-teal-dark-1
     .scroller
+      display: flex
+      align-items: center
       &.collapsed
         height: 0
       .doc-collection-list
@@ -41,12 +43,63 @@ $scroller-height: 145px
           width: 100%
           overflow-x: auto
           overflow-y: hidden
+          position: relative
+          top: 0
+          left: 0
         &.collapsed
           height: 0
       .scroller-controls
-        background-color: white
-        opacity: 50%
-        height: inherit
+        position: absolute
+        top: calc(#{$tab-section-border-width} + (#{$nav-tab-height} * 2))
+        height: $scroller-height
+        width: 50px
+        display: flex
+        align-items: center
+        justify-content: center
+        z-index: 3
+        &.collapsed
+          display: none
+        &.left
+          left: 0
+          // .scroller-controls-overlay
+          //   position: relative
+          //   left: 0
+          //   background-color: white
+          //   opacity: 50%
+          //   width: 50px
+          //   height: $scroller-height
+        &.right
+          right: 0
+        .scroller-controls-overlay
+          position: relative
+          right: 0
+          background-color: white
+          opacity: 50%
+          width: 55px
+          height: $scroller-height
+          &.left
+            left: 0
+          &.right
+            right: 0
+        .scroll-arrow-button
+          opacity: 100%
+          border-radius: 50%
+          width: 40px
+          height: 40px
+          display: flex
+          align-items: center
+          justify-content: center
+          position: absolute
+          // left: 2px
+          &.collapsed
+            display: none
+          .scroll-arrow-icon
+            &.right
+              transform: rotate(180deg)
+            &.class-work
+              fill: $classwork-purple-dark-1
+            &.my-work
+              fill: $workspace-teal-dark-1
 
     .document-area
       height: calc(100vh - #{$header-offset-with-sub-tabs})
