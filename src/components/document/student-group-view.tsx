@@ -1,5 +1,6 @@
-import React from "react";
-import { observer } from "mobx-react";
+import React, { useEffect } from "react";
+import { computed, when } from "mobx";
+import { observer, useLocalObservable } from "mobx-react";
 import classNames from "classnames";
 import { getGroupUsers } from "../../models/document/document-utils";
 import { GroupUserModelType } from "../../models/stores/groups";
@@ -39,11 +40,43 @@ interface IGroupTitlebarProps {
 interface IProps {}
 
 export const StudentGroupView:React.FC<IProps> = observer(function StudentGroupView(){
+  console.log("StudentGroupView render");
   const {user, groups, documents, ui} = useStores();
-  if (ui.activeNavTab !== "student-work") return null; //delay many re-renders upon load
-  const selectedGroupId = ui.tabs.get("student-work")?.openSubTab
-                          || (groups.allGroups.length ? groups.allGroups[0].id : "");
-  const groupUsers = getGroupUsers(user.id, groups, documents, selectedGroupId);
+
+  // Use a local observable so selectedGroupId and groupUsers are cached and
+  // only cause re-renders if their value would actually change after the
+  // objects they are using have changed. The user, groups, and documents could
+  // change. Currently it is the documents which change the most as all of the
+  // documents are loaded in.
+  //
+  // Note: a structural comparison is required for groupUsers since it returns a
+  // new array each time it is called. So without a structural comparison the
+  // object will be different each time a new document is loaded. Because this
+  // structural comparison is necessary this approach is in-efficient.  It'd be
+  // better to refactor getGroupUsers, so the groupUsers are part of the global
+  // store and are updated (instead of recreated) as needed.
+  const localObservable = useLocalObservable(() => ({
+    get selectedGroupId() {
+      return ui.tabs.get("student-work")?.openSubTab
+        || (groups.allGroups.length ? groups.allGroups[0].id : "");
+    },
+    get groupUsers() {
+      return getGroupUsers(user.id, groups, documents, this.selectedGroupId);
+    }
+  }), {groupUsers: computed.struct});
+
+  const { groupUsers, selectedGroupId } = localObservable;
+
+  // When we have a valid selectedGroupId
+  // Then set the active group (openSubTab) to be this group
+  // MobX `when` will only run one time, so this won't keep updating the openSubTab.
+  // If the user somehow changes the openSubTab before all of the groups are loaded,
+  // this will just set the openSubTab to be the same value it already is.
+  useEffect(() => when(
+    () => localObservable.selectedGroupId !== "",
+    () => ui.setOpenSubTab("student-work", localObservable.selectedGroupId)
+  ), [localObservable, ui]);
+
   const group = groups.getGroupById(selectedGroupId);
   const openDocId = ui.tabs.get("student-work")?.openDocuments.get(selectedGroupId);
   const focusedGroupUser = groupUsers.find(obj => obj.doc?.key === openDocId)?.user;
