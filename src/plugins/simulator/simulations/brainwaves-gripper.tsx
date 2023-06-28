@@ -71,7 +71,7 @@ export const brainwavesGripperSimulation: ISimulation = {
     },
     {
       displayName: "Gripper",
-      labels: ["output", "live-output:Grabber"],
+      labels: ["output", "live-output:Grabber", "live-output:Gripper 2.0"],
       id: kGripperKey,
       value: 0
     }
