@@ -6,9 +6,9 @@ import { isInputVariable } from "../../shared-variables/simulations/simulation-u
 
 // TODO: This should be defined in the simulation.
 import { kEMGKey, kGripperKey, kPressureKey } from "../simulations/brainwaves-gripper";
-import EMGIcon from "../../dataflow/assets/icons/control/signal.svg";
-import GripperIcon from "../../dataflow/assets/icons/output/grabber.svg";
-import PressureIcon from "../../dataflow/assets/icons/sensor/pressure.svg";
+import EMGIcon from "../../shared-assets/icons/dataflow/control/signal.svg";
+import GripperIcon from "../../shared-assets/icons/dataflow/output/grabber.svg";
+import PressureIcon from "../../shared-assets/icons/dataflow/sensor/pressure.svg";
 
 import "./simulator-variable.scss";
 

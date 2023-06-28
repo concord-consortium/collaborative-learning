@@ -3,7 +3,7 @@ import React from "react";
 import { arduinoFrames, armFrames, gripperFrames } from "./brainwaves-gripper-assets";
 import { ISimulation, ISimulationProps } from "./simulation-types";
 import { findVariable, getFrame } from "./simulation-utilities";
-import { demoStreams } from "../../dataflow/model/utilities/demo-data";
+import { demoStreams } from "../../shared-assets/data/dataflow/demo-data";
 
 import "./brainwaves-gripper.scss";
 
