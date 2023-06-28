@@ -25,6 +25,8 @@ interface IProps {
 
 export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function SectionDocumentOrBrowser(
     { tabSpec, isChatOpen }) {
+  console.log("\n");
+  console.log("--------<SectionDocumentOrBrowser>----------");
   const ui = useUIStore();
   const store = useStores();
   const appConfigStore = useAppConfig();
@@ -110,6 +112,8 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
   };
 
   const renderDocumentBrowserView = (subTab: ISubTabSpec) => {
+    // console.log("🔨renderBrowserView with user.isNetworkedTeacher", user.isNetworkedTeacher);
+
     const openDocumentKey = tabState?.openDocuments.get(subTab.label);
     const classHash = classStore.classHash;
     return (
@@ -137,7 +141,10 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
   };
 
   const showPlayback = user.type ? appConfigStore.enableHistoryRoles.includes(user.type) : false;
+
   const renderDocumentView = (subTab: ISubTabSpec) => {
+    // console.log("🔨renderDocumentView with subTab", subTab);
+
     const openDocumentKey = tabState?.openDocuments.get(subTab.label) || "";
     const openDocument = store.documents.getDocument(openDocumentKey) ||
       store.networkDocuments.getDocument(openDocumentKey);

@@ -23,6 +23,11 @@ interface IProps {
 
 
 export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument, focusTileId, onCloseChatPanel }) => {
+  console.log("---------<ChatPanel>--------");
+  console.log("\tuser network:", user?.network);
+  const [isDocumentView, setIsDocumentView] = useState(false); // switches between "Comments View" vs "Document View"
+  const [chatPanelTitle, setChatPanelTitle] = useState("Comments");
+
   const document = useDocumentOrCurriculumMetadata(focusDocument);
   const content = useCurriculumOrDocumentContent(focusDocument);
   const ordering = content?.getTilesInDocumentOrder();
@@ -75,8 +80,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
       : undefined;
   }, [commentsPath, deleteCommentMutation, focusDocument, focusTileId]);
 
-  const [isDocumentView, setIsDocumentView] = useState(false); // switches between "Comments View" vs "Document View"
-  const [chatPanelTitle, setChatPanelTitle] = useState("Comments");
+
 
   const handleDocumentClick = () => {
     setIsDocumentView((prevState) => !prevState);

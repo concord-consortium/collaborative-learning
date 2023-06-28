@@ -107,7 +107,9 @@ export const EditableDocumentContent: React.FC<IProps> = props => {
   const isReadOnly = !isPrimary || readOnly || document.isPublished;
   const isShowingToolbar = toolbar?.length && !isReadOnly;
   const showToolbarClass = isShowingToolbar ? "show-toolbar" : "hide-toolbar";
-  const isChatEnabled = isNetworkedTeacher;
+  // const isChatEnabled = isNetworkedTeacher;
+  const isChatEnabled = true; //console.log
+
   const documentSelectedForComment = isChatEnabled && ui.showChatPanel && ui.selectedTileIds.length === 0 && !isPrimary;
   const editableDocContentClass = classNames("editable-document-content", showToolbarClass,
     contained ? "contained-editable-document-content" : "full-screen-editable-document-content",

@@ -26,7 +26,12 @@ interface PromisedDocumentDocument extends DocumentDocument {
   title?: string
 }
 
+//theres no active nav tab?
 export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
+  console.log("--------<CommentedDocuments>-------with props");
+  console.log("\tuser:", user);
+  console.log("\thandleDocView:", handleDocView);
+
   const [db] = useFirestore();
   const ui = useUIStore();
   const store = useStores();
@@ -35,13 +40,20 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
 
   //"Problem"/"Teacher-Guide"
   const [docsCommentedOn, setDocsCommentedOn] = useState<PromisedCurriculumDocument[]>();
+  console.log("line 43");
   const cDocsRef = useMemo(() => db.collection("curriculum"), [db]);
+  console.log("line 45");
   const cDocsInScopeRef = useMemo(() => (
     cDocsRef
     .where("unit", "==", unit)
     .where("problem", "==", problem)
     .where("network","==", user?.network)
   ), [cDocsRef, problem, unit, user?.network]);
+
+  console.log("line 53");
+  //TODO: open up
+  //http://localhost:8080/?appMode=demo&demoName=CLUE&fakeClass=1&fakeUser=teacher:1&problem=1.1&unit=msa
+  //open chat panel, then open documents, crash, it never makes it to line 53
 
   //"MyWork"/"ClassWork"
   const [workDocuments, setWorkDocuments] = useState<PromisedDocumentDocument[]>();
@@ -50,8 +62,17 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
     mDocsRef.where("network", "==", user?.network)
   ), [mDocsRef, user?.network]);
 
+  console.log("----------------");
+  console.log("\tcDocsRef:", cDocsRef);
+  console.log("\tcDocsInScopeRef:", cDocsInScopeRef);
+  console.log("\tmDocsRef:", mDocsRef);
+  console.log("\tmDocsInScopeRef:", mDocsInScopeRef);
+
+
+
   //------Curriculum Documents--------
   useEffect(() => {
+    console.log("curriculum documents useEffect triggered");
     const unsubscribeFromDocs = cDocsInScopeRef.onSnapshot(querySnapshot => {
       const docs = querySnapshot.docs.map(doc => {
         return (
@@ -85,6 +106,7 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
 
   // ------MyWork/ClassWork--------
   useEffect(() => {
+    console.log("my work/classwork documents useEffect triggered");
     const unsubscribeFromDocs = mDocsInScopeRef.onSnapshot(querySnapshot=>{
       const docs = querySnapshot.docs.map(doc =>{ //convert each element of docs to an object
         return (
@@ -117,6 +139,8 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
     });
     return () => unsubscribeFromDocs?.();
   },[mDocsRef, mDocsInScopeRef]);
+
+
 
   return (
     <div className="commented-document-list">
