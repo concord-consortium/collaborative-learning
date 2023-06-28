@@ -1,8 +1,8 @@
-import classNames from "classnames";
 import React from "react";
 
+import { arduinoFrames, armFrames, gripperFrames } from "./brainwaves-gripper-assets";
 import { ISimulation, ISimulationProps } from "./simulation-types";
-import { findVariable } from "./simulation-utilities";
+import { findVariable, getFrame } from "./simulation-utilities";
 import { demoStreams } from "../../dataflow/model/utilities/demo-data";
 
 import "./brainwaves-gripper.scss";
@@ -13,23 +13,27 @@ export const kGripperKey = "gripper_variable";
 export const kPressureKey = "pressure_variable";
 
 function BrainwavesGripperComponent({ frame, variables }: ISimulationProps) {
-  const gripperVariable = findVariable(kGripperKey, variables);
-  const pressureVariable = findVariable(kPressureKey, variables);
-  const pressure = pressureVariable?.value && pressureVariable.value >= 1000;
-  const gripperScaler = (gripperVariable?.value ?? 0) / 100 * 0xFF;
-  const backgroundColor = `rgb(${gripperScaler}, ${gripperScaler}, ${gripperScaler})`;
-  const gripperClass = classNames("gripper", { pressure });
-  const gripperStyle = { backgroundColor };
-
   const emgVariable = findVariable(kEMGKey, variables);
-  const normalizedValue = Math.min((emgVariable?.value ?? 0) / 500, 1);
-  const emgStyle = { left: `${150 * normalizedValue - 10}px` };
+  const normalizedEmgValue = Math.min((emgVariable?.value ?? 0) / 450, 1);
+  const armFrame = getFrame(normalizedEmgValue, armFrames.length);
+
+  const gripperVariable = findVariable(kGripperKey, variables);
+  const normalizedGripperValue = (gripperVariable?.value ?? 0) / 100;
+  const gripperFrame = getFrame(normalizedGripperValue, gripperFrames.length);
   return (
     <div className="bwg-component">
-      <div className={gripperClass} style={gripperStyle} />
-      <div className="emg-track">
-        <div className="emg" style={emgStyle} />
-      </div>
+      <img
+        src={ armFrames[armFrame] }
+        className="arm-image"
+      />
+      <img
+        src={ arduinoFrames[0] }
+        className="arduino-image"
+      />
+      <img
+        src={ gripperFrames[gripperFrame] }
+        className="gripper-image"
+      />
     </div>
   );
 }
