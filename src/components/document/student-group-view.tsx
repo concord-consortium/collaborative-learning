@@ -65,6 +65,8 @@ export const StudentGroupView:React.FC<IProps> = observer(function StudentGroupV
     }
   }), {groupUsers: computed.struct});
 
+  // console.log("localOBservable:", localObservable);
+
   const { groupUsers, selectedGroupId } = localObservable;
 
   // When we have a valid selectedGroupId

@@ -185,7 +185,12 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
         const { name: fullName, initials } = groupUser.user;
         const className = classNames("member", {"member-centered": isToggled && !viaStudentGroupView},
                                      {"in-student-group-view": isToggled && viaStudentGroupView});
+
         const name = isToggled ? fullName : initials;
+
+        console.log("isToggled:", isToggled);
+        console.log("viaSTudentGroupView:", viaStudentGroupView);
+        console.log("-------------");
         return (
           isToggled && viaStudentGroupView
             ? //pass an undefined context to handleOverlayClick to null out selected quadrant
@@ -203,6 +208,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       const cornerLabel = indexToCornerLabel[cornerIndex];
       const cell = this.grid.cells[cornerIndex];
       const document = groupDoc(cornerIndex);
+      // console.log("renderCorner with toggleable", toggleable);
 
       const overlay = toggleable &&
         <FourUpOverlayComponent
@@ -354,10 +360,12 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleOverlayClick = (context?: string) => {
+    console.log("handleOverLayClick with context:", context);
     const { ui } = this.stores;
     const { groupId } = this.props;
     const groupUser = context ? this.userByContext[context] : undefined;
     const toggledContext = this.getToggledContext();
+    console.log("toggledContext:", toggledContext);
     this.setState(state => {
       if (groupId) {
         const current = state.toggledContextMap[groupId] ?? null;
@@ -366,9 +374,15 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       return { toggledContextMap: clone(state.toggledContextMap) };
     });
 
+    //TODO: remove toggledContextMap which is a state which looks like {groupId: four-up ne, four up sw, etc }
+    //in line 380, check if subTAb for group ID has an open document, if it does then ui.closeSubTab, then if doesn't then line 381 to open
+
+    //other bugs - quickly load dashboard, then click sticky, then when u cancel it, log error says removeEvent, coming from jxgraph
+
     if (groupUser && groupUser.doc && groupId) {
       ui.openSubTabDocument("student-work", groupId, groupUser.doc.key);
     }
+
 
     if (groupUser) {
       const event = toggledContext ? LogEventName.DASHBOARD_SELECT_STUDENT : LogEventName.DASHBOARD_DESELECT_STUDENT;
