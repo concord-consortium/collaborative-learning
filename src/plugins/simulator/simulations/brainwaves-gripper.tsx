@@ -8,9 +8,9 @@ import { demoStreams } from "../../dataflow/model/utilities/demo-data";
 import "./brainwaves-gripper.scss";
 
 export const kBrainwavesKey = "EMG_and_claw";
-export const kEMGKey = "input_EMG";
-export const kGripperKey = "output_Grabber";
-export const kPressureKey = "input_Surface_Pressure";
+export const kEMGKey = "emg_variable";
+export const kGripperKey = "gripper_variable";
+export const kPressureKey = "pressure_variable";
 
 function BrainwavesGripperComponent({ frame, variables }: ISimulationProps) {
   const gripperVariable = findVariable(kGripperKey, variables);
@@ -55,20 +55,20 @@ export const brainwavesGripperSimulation: ISimulation = {
     {
       displayName: "EMG",
       labels: ["input", "sensor:emg-reading"],
-      name: kEMGKey,
+      id: kEMGKey,
       value: 0
     },
     {
       displayName: "Surface Pressure",
       labels: ["input", "sensor:fsr-reading"],
-      name: kPressureKey,
+      id: kPressureKey,
       value: 0,
       unit: "mPa"
     },
     {
       displayName: "Gripper",
       labels: ["output", "live-output:Grabber"],
-      name: kGripperKey,
+      id: kGripperKey,
       value: 0
     }
   ],
