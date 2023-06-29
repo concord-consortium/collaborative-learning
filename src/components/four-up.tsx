@@ -66,6 +66,14 @@ const indexToLocation = [
   "nw", "ne", "se", "sw"
 ] as const;
 
+function getQuadrant(groupUserIndex: number) {
+  if (groupUserIndex < 0 || groupUserIndex > 3) return undefined;
+  return indexToCornerLabel[groupUserIndex];
+}
+
+
+//TODO:  #1 activeGroupId - is not being set, G1, G2, G3 set to subTab
+
 @inject("stores")
 @observer
 export class FourUpComponent extends BaseComponent<IProps, IState> {
@@ -77,11 +85,6 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
 
   constructor(props: IProps) {
     super(props);
-    this.state = {
-      toggledContextMap: {}
-    };
-
-    // use local grid model
     this.grid = FourUpGridModel.create({
       splitterSize: 3,
     });
@@ -103,29 +106,36 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     this.resizeObserver.disconnect();
   }
 
-  private getToggledContext () {
-    const {toggledContextMap} = this.state;
-    return (this.props.groupId && toggledContextMap[this.props.groupId]) ?? null;
+  private getFocusedUserQuadrant () {
+    const {ui, groups} = this.stores;
+    const docKey = this.props.groupId && ui.tabs.get("student-work")?.openDocuments.get(this.props.groupId);
+    if (docKey){
+      const group = groups.getGroupById(this.props.groupId);
+      const focusedGroupUser = group?.users.find(obj => obj.problemDocument?.key === docKey);
+      const focusedUserIndex = focusedGroupUser && group?.sortedUsers.indexOf(focusedGroupUser);
+      return getQuadrant(focusedUserIndex ?? -1);
+    }
+    else {
+      return undefined;
+    }
   }
+
+
 
   public render() {
     const {focusedUserContext, documentViewMode, viaStudentGroupView,
         userId, groupId, isGhostUser, toggleable, ...others } = this.props;
-    const toggledContext = focusedUserContext || this.getToggledContext();
+
+
     const {width, height} = this.grid;
     const nwCell = this.grid.cells[CellPositions.NorthWest];
     const neCell = this.grid.cells[CellPositions.NorthEast];
     const seCell = this.grid.cells[CellPositions.SouthEast];
     const swCell = this.grid.cells[CellPositions.SouthWest];
     const toggledStyle = {top: 0, left: 0, width, height};
-    const indexToStyle = [
-      toggledContext ? toggledStyle : {top: 0, left: 0, width: nwCell.width, height: nwCell.height},
-      toggledContext ? toggledStyle : {top: 0, left: neCell.left, right: 0, height: neCell.height},
-      toggledContext ? toggledStyle : {top: seCell.top, left: seCell.left, right: 0, bottom: 0},
-      toggledContext ? toggledStyle : {top: swCell.top, left: 0, width: swCell.width, bottom: 0}
-    ];
+
     const scaleStyle = (cell: FourUpGridCellModelType) => {
-      const transform = `scale(${toggledContext ? 1 : cell.scale})`;
+      const transform = `scale(${focusedUserQuadrant ? 1 : cell.scale})`;
       return {width, height, transform, transformOrigin: "0 0"};
     };
 
@@ -139,6 +149,15 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       "four-up-se": groupUsers[2],
       "four-up-sw": groupUsers[3],
     };
+
+    const focusedUserQuadrant = focusedUserContext || this.getFocusedUserQuadrant();
+
+    const indexToStyle = [
+      focusedUserQuadrant ? toggledStyle : {top: 0, left: 0, width: nwCell.width, height: nwCell.height},
+      focusedUserQuadrant ? toggledStyle : {top: 0, left: neCell.left, right: 0, height: neCell.height},
+      focusedUserQuadrant ? toggledStyle : {top: seCell.top, left: seCell.left, right: 0, bottom: 0},
+      focusedUserQuadrant ? toggledStyle : {top: swCell.top, left: 0, width: swCell.width, bottom: 0}
+    ];
 
     const groupDoc = (index: number) => {
       return groupUsers[index] && groupUsers[index].doc;
@@ -171,20 +190,21 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       return <CanvasComponent context={cornerLabel} scale={cellScale(cell, cornerLabel)}
                        readOnly={readOnly}
                        document={document} overlayMessage={canvasMessage(document)}
-                       showPlayback={toggledContext === cornerLabel} {...others} overlay={overlay} />;
+                       showPlayback={focusedUserQuadrant === cornerLabel} {...others} overlay={overlay} />;
     };
 
     // Double the scale if the cell is focused
     const cellScale =
-      (cell: FourUpGridCellModelType, corner: string) => (toggledContext === corner ? 2 : 1) * cell.scale;
+      (cell: FourUpGridCellModelType, corner: string) => (focusedUserQuadrant === corner ? 2 : 1) * cell.scale;
 
     const memberName = (context: string) => {
       const groupUser = this.userByContext[context];
-      const isToggled = context === toggledContext;
+      const isToggled = context === focusedUserQuadrant;
       if (groupUser) {
         const { name: fullName, initials } = groupUser.user;
         const className = classNames("member", {"member-centered": isToggled && !viaStudentGroupView},
                                      {"in-student-group-view": isToggled && viaStudentGroupView});
+
         const name = isToggled ? fullName : initials;
         return (
           isToggled && viaStudentGroupView
@@ -219,10 +239,10 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       // overlay. When we are not looking at a specific student we need the overlay
       // to be unscaled and have dimensions based on the grid so its clickable area
       // covers the whole quadrant of the grid not just the area of the canvas
-      const overlayInsideOfCanvas = toggledContext && overlay;
-      const overlayOnTopOfCanvas = !toggledContext && overlay;
+      const overlayInsideOfCanvas = focusedUserQuadrant && overlay;
+      const overlayOnTopOfCanvas = !focusedUserQuadrant && overlay;
 
-      return !toggledContext || (toggledContext === cornerLabel)
+      return !focusedUserQuadrant || (focusedUserQuadrant === cornerLabel)
         ? <div key={cornerIndex} className={classNames("canvas-container", indexToCornerClass[cornerIndex])}
               style={indexToStyle[cornerIndex]}>
             <div className="canvas-scaler" style={scaleStyle(cell)}>
@@ -239,7 +259,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     return (
       <div className="four-up" ref={(el) => this.container = el}>
         { [0,1,2,3].map(cornerIndex => renderCorner(cornerIndex)) }
-        {!toggledContext ? this.renderSplitters() : null}
+        {!focusedUserQuadrant ? this.renderSplitters() : null}
       </div>
     );
   }
@@ -337,7 +357,6 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       const end = getSplittersFromEvent(upE);
       Logger.log(LogEventName.VIEW_FOUR_UP_RESIZED, { start: _start, end });
     };
-
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mouseup", handleMouseUp);
   };
@@ -345,11 +364,6 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   private handleFourUpClick = () => {
     const { ui } = this.stores;
     const { groupId } = this.props;
-    this.setState(state => {
-      if (groupId) {
-        state.toggledContextMap[groupId] =  undefined;
-      }
-    });
     groupId && ui.closeSubTabDocument("student-work",  groupId);
   };
 
@@ -357,21 +371,19 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     const { ui } = this.stores;
     const { groupId } = this.props;
     const groupUser = context ? this.userByContext[context] : undefined;
-    const toggledContext = this.getToggledContext();
-    this.setState(state => {
-      if (groupId) {
-        const current = state.toggledContextMap[groupId] ?? null;
-        state.toggledContextMap[groupId] = current ? undefined : context;
-      }
-      return { toggledContextMap: clone(state.toggledContextMap) };
-    });
+    const toggledContext = this.getFocusedUserQuadrant();
 
     if (groupUser && groupUser.doc && groupId) {
-      ui.openSubTabDocument("student-work", groupId, groupUser.doc.key);
+      if (toggledContext){
+        ui.closeSubTabDocument("student-work", groupId);
+      } else {
+        ui.openSubTabDocument("student-work", groupId, groupUser.doc.key); //sets the focus document;
+      }
     }
 
     if (groupUser) {
-      const event = toggledContext ? LogEventName.DASHBOARD_SELECT_STUDENT : LogEventName.DASHBOARD_DESELECT_STUDENT;
+      const event = toggledContext ? LogEventName.DASHBOARD_SELECT_STUDENT :
+                                          LogEventName.DASHBOARD_DESELECT_STUDENT;
       Logger.log(event, {groupId, studentId: groupUser.user.id});
     }
   };
