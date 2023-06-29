@@ -146,18 +146,26 @@ $section-padding: 6px
       svg path
         fill: $learninglog-green-dark-1
 
-  .my-work > .list-item
+.my-work .list-item
+  &:hover
+    background-color: $workspace-teal-light-7
+  &:active, &.selected
+    background-color: $workspace-teal-light-5
+.class-work .list-item
+  &:hover
+    background-color: $classwork-purple-light-8
+  &:active, &.selected
+    background-color: $classwork-purple-light-6
+.supports .list-item
+  &:hover
+    background-color: $support-blue-light-8
+  &:active, &.selected
+    background-color: $support-blue-light-6
+
+.horizontal
+  .list-item
     &:hover
-      background-color: $workspace-teal-light-7
+      background-color: $document-select-green
+      opacity: 50%
     &:active, &.selected
-      background-color: $workspace-teal-light-5
-  .class-work > .list-item
-    &:hover
-      background-color: $classwork-purple-light-8
-    &:active, &.selected
-      background-color: $classwork-purple-light-6
-  .supports > .list-item
-    &:hover
-      background-color: $support-blue-light-8
-    &:active, &.selected
-      background-color: $support-blue-light-6
+      background-color: $document-select-green
