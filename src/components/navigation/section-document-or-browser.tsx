@@ -77,10 +77,6 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     if (!document.hasContent && document.isRemote) {
       loadDocumentContent(document);
     }
-    // The subTabIndex is computed above on every render. It is the index
-    // of the currently open subTab. Its also passed to the Tab component
-    // below.
-    // const selectedSubTab = subTabs[subTabIndex];
     ui.openSubTabDocument(tabSpec.tab, selectedSubTab.label, document.key);
     const logEvent = document.isRemote
       ? LogEventName.VIEW_SHOW_TEACHER_NETWORK_COMPARISON_DOCUMENT
@@ -163,8 +159,8 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
             <div className={classNames("scroller", {"collapsed": scrollerCollapsed})} ref={documentScrollerRef}>
               <div className={classNames("scroller-controls", "left", {"collapsed": scrollerCollapsed})}>
                 <div className="scroller-controls-overlay left"/>
-                <div className={classNames("scroll-arrow-button", "themed", tabSpec.tab, {"collapsed": scrollerCollapsed},
-                                          {"show": showLeftScrollArrow})}>
+                <div className={classNames("scroll-arrow-button", "themed", tabSpec.tab,
+                                            {"collapsed": scrollerCollapsed}, {"show": showLeftScrollArrow})}>
                   <ScrollArrowIcon className={`scroll-arrow left themed ${tabSpec.tab}`} />
                 </div>
               </div>
@@ -178,14 +174,14 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
               />
               <div className={classNames("scroller-controls", "right", {"collapsed": scrollerCollapsed})}>
                 <div className="scroller-controls-overlay right"/>
-                <div className={classNames("scroll-arrow-button", "themed", tabSpec.tab, {"collapsed": scrollerCollapsed},
-                                          {"show": showRightScrollArrow})}>
+                <div className={classNames("scroll-arrow-button", "themed", tabSpec.tab,
+                                            {"collapsed": scrollerCollapsed}, {"show": showRightScrollArrow})}>
                   <ScrollArrowIcon className={`scroll-arrow-icon right themed ${tabSpec.tab}`} />
                 </div>
               </div>
             </div>
-            <div className={classNames("collapse-scroller-button", "themed", tabSpec.tab, {"collapsed": scrollerCollapsed})}
-                onClick={handleCollapseScroller}>
+            <div className={classNames("collapse-scroller-button", "themed", tabSpec.tab,
+                    {"collapsed": scrollerCollapsed})} onClick={handleCollapseScroller}>
               <CollapseScrollerIcon className={`scroller-icon ${tabSpec.tab}`}/>
             </div>
           </>
