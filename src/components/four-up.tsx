@@ -17,6 +17,7 @@ import { LogEventName } from "../lib/logger-types";
 import FourUpIcon from "../clue/assets/icons/4-up-icon.svg";
 
 import "./four-up.sass";
+import { group } from "d3";
 
 interface IProps extends IBaseProps {
   userId?: string;
@@ -74,14 +75,15 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   private resizeObserver: ResizeObserver;
   private roIsInitialized = false;
   private userByContext: ContextUserMap = {};
+  private toggledContext: string | undefined;
+
 
   constructor(props: IProps) {
     super(props);
-    this.state = {
-      toggledContextMap: {}
-    };
-
-    // use local grid model
+    // this.state = {
+    //   toggledContextMap: {}
+    // };
+    console.log("\tFourUpConstructor-----");
     this.grid = FourUpGridModel.create({
       splitterSize: 3,
     });
@@ -104,14 +106,32 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   }
 
   private getToggledContext () {
-    const {toggledContextMap} = this.state;
-    return (this.props.groupId && toggledContextMap[this.props.groupId]) ?? null;
+    console.log("🔨getToggledContext invoked");
+    const {ui} = this.stores;
+    this.props.groupId &&
+    console.log("\topen Documents:!!!", ui.tabs.get("student-work")?.openDocuments.get(this.props.groupId));
+
+    this.toggledContext =  this.props.groupId && ui.tabs.get("student-work")?.openDocuments.get(this.props.groupId);
+
+    /// 4-up (undefined) | 1-up "msa/intro"
+    //toggledContextMapState:   (undefined)      | "four-up-nw"
+
+    return this.toggledContext;
   }
 
+
+
   public render() {
+    console.log("------<FourUpComponent>-----");
+    console.log("\tgroupId:", this.props.groupId);
+
+
     const {focusedUserContext, documentViewMode, viaStudentGroupView,
         userId, groupId, isGhostUser, toggleable, ...others } = this.props;
-    const toggledContext = focusedUserContext || this.getToggledContext();
+
+    const toggledContext = focusedUserContext || this.getToggledContext(); //in
+    console.log("\ttoggledContext:", toggledContext);
+
     const {width, height} = this.grid;
     const nwCell = this.grid.cells[CellPositions.NorthWest];
     const neCell = this.grid.cells[CellPositions.NorthEast];
@@ -162,7 +182,11 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     };
 
     const renderCanvas = (cornerIndex: number, overlay?: React.ReactNode) => {
+      console.log("🔨 renderCanvas with cornerIndex:", cornerIndex, "overlay:", overlay);
+
       const cornerLabel = indexToCornerLabel[cornerIndex];
+      console.log("\tcornerLabel:", cornerLabel);
+
       const cell = this.grid.cells[cornerIndex];
       const document = groupDoc(cornerIndex);
       // Only the user's document is editable, but not if they're a ghost user
@@ -188,9 +212,9 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
 
         const name = isToggled ? fullName : initials;
 
-        console.log("isToggled:", isToggled);
-        console.log("viaSTudentGroupView:", viaStudentGroupView);
-        console.log("-------------");
+        console.log("\tisToggled:", isToggled);
+        // console.log("viaSTudentGroupView:", viaStudentGroupView);
+        // console.log("-------------");
         return (
           isToggled && viaStudentGroupView
             ? //pass an undefined context to handleOverlayClick to null out selected quadrant
@@ -205,10 +229,11 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     };
 
     const renderCorner = (cornerIndex: number) => {
+      console.log("🔨renderCorner with cornerIndex:", cornerIndex);
       const cornerLabel = indexToCornerLabel[cornerIndex];
+      console.log("\tcornerLabel:", cornerLabel);
       const cell = this.grid.cells[cornerIndex];
       const document = groupDoc(cornerIndex);
-      // console.log("renderCorner with toggleable", toggleable);
 
       const overlay = toggleable &&
         <FourUpOverlayComponent
@@ -227,9 +252,11 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       // covers the whole quadrant of the grid not just the area of the canvas
       const overlayInsideOfCanvas = toggledContext && overlay;
       const overlayOnTopOfCanvas = !toggledContext && overlay;
+      const fourUpClassNames = classNames("canvas-container", indexToCornerClass[cornerIndex]);
+      console.log("\tfourUpClassNames:", fourUpClassNames);
 
       return !toggledContext || (toggledContext === cornerLabel)
-        ? <div key={cornerIndex} className={classNames("canvas-container", indexToCornerClass[cornerIndex])}
+        ? <div key={cornerIndex} className={fourUpClassNames}
               style={indexToStyle[cornerIndex]}>
             <div className="canvas-scaler" style={scaleStyle(cell)}>
               {hideCanvas(cornerIndex)
@@ -251,6 +278,8 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderSplitters() {
+    console.log("🔨renderSplitters!");
+
     return (
       <>
         <div
@@ -343,7 +372,6 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       const end = getSplittersFromEvent(upE);
       Logger.log(LogEventName.VIEW_FOUR_UP_RESIZED, { start: _start, end });
     };
-
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mouseup", handleMouseUp);
   };
@@ -351,41 +379,52 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   private handleFourUpClick = () => {
     const { ui } = this.stores;
     const { groupId } = this.props;
-    this.setState(state => {
-      if (groupId) {
-        state.toggledContextMap[groupId] =  undefined;
-      }
-    });
+    console.log("🔨handleFourUpClick!");
+    console.log("\t closing subTabDocument");
+
+
+    // this.setState(state => {
+    //   if (groupId) {
+    //     state.toggledContextMap[groupId] =  undefined;
+    //   }
+    // });
     groupId && ui.closeSubTabDocument("student-work",  groupId);
   };
 
   private handleOverlayClick = (context?: string) => {
-    console.log("handleOverLayClick with context:", context);
+    console.log("🔨handleOverLayClick with context:", context);
     const { ui } = this.stores;
     const { groupId } = this.props;
     const groupUser = context ? this.userByContext[context] : undefined;
+    console.log("\tgroupUser:", groupUser);
+    console.log("\tgroupId:", groupId);
+
     const toggledContext = this.getToggledContext();
-    console.log("toggledContext:", toggledContext);
-    this.setState(state => {
-      if (groupId) {
-        const current = state.toggledContextMap[groupId] ?? null;
-        state.toggledContextMap[groupId] = current ? undefined : context;
-      }
-      return { toggledContextMap: clone(state.toggledContextMap) };
-    });
 
-    //TODO: remove toggledContextMap which is a state which looks like {groupId: four-up ne, four up sw, etc }
-    //in line 380, check if subTAb for group ID has an open document, if it does then ui.closeSubTab, then if doesn't then line 381 to open
+    // ✓ remove toggledContextMap which is a state which looks like {groupId: four-up ne, four up sw, etc }
+    // ✓ in line 380, check if subTAb for group ID has an open document, if it does then ui.closeSubTab, then if doesn't then line 381 to open
 
-    //other bugs - quickly load dashboard, then click sticky, then when u cancel it, log error says removeEvent, coming from jxgraph
+    // other bugs - quickly load dashboard, then click sticky, then when u cancel it,
+    // log error says removeEvent, coming from jxgraph
 
+    //activeGroupId - is not being set, G1, G2, G3 set to subTab
+
+    console.log("🔨handleOverLayClick with context:", context);
+    console.log("\tline 396:", toggledContext);
     if (groupUser && groupUser.doc && groupId) {
-      ui.openSubTabDocument("student-work", groupId, groupUser.doc.key);
+      if (toggledContext){
+        console.log("\tcloseSubTab:");
+        ui.closeSubTabDocument("student-work", groupId);
+      } else {
+        console.log("\topenSubTab:");
+        ui.openSubTabDocument("student-work", groupId, groupUser.doc.key); //sets the focus document;
+        // ui.tabs.get("student-work")?.openDocuments.get(this.props.groupId));
+      }
     }
 
-
     if (groupUser) {
-      const event = toggledContext ? LogEventName.DASHBOARD_SELECT_STUDENT : LogEventName.DASHBOARD_DESELECT_STUDENT;
+      const event = toggledContext ? LogEventName.DASHBOARD_SELECT_STUDENT :
+                                          LogEventName.DASHBOARD_DESELECT_STUDENT;
       Logger.log(event, {groupId, studentId: groupUser.user.id});
     }
   };

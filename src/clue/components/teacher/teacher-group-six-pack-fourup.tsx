@@ -41,8 +41,10 @@ export class TeacherGroupSixPackFourUp extends BaseComponent<IProps, IState> {
 
   public render() {
     const { documentViewMode, selectedSectionId, group, row, column } = this.props;
+    console.log("------------------------------");
+
     console.log("TeacherGroupSixPackFourUp");
-    console.log("\tgroup:", group);
+    console.log("\tgroupId:", group.id);
     console.log("\tselectedSectionId:", selectedSectionId);
 
     return (
