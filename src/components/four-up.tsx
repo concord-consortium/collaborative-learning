@@ -75,15 +75,9 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   private resizeObserver: ResizeObserver;
   private roIsInitialized = false;
   private userByContext: ContextUserMap = {};
-  private toggledContext: string | undefined;
-
 
   constructor(props: IProps) {
     super(props);
-    // this.state = {
-    //   toggledContextMap: {}
-    // };
-    console.log("\tFourUpConstructor-----");
     this.grid = FourUpGridModel.create({
       splitterSize: 3,
     });
@@ -111,12 +105,8 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     this.props.groupId &&
     console.log("\topen Documents:!!!", ui.tabs.get("student-work")?.openDocuments.get(this.props.groupId));
 
-    this.toggledContext =  this.props.groupId && ui.tabs.get("student-work")?.openDocuments.get(this.props.groupId);
+    return this.props.groupId && ui.tabs.get("student-work")?.openDocuments.get(this.props.groupId);
 
-    /// 4-up (undefined) | 1-up "msa/intro"
-    //toggledContextMapState:   (undefined)      | "four-up-nw"
-
-    return this.toggledContext;
   }
 
 
@@ -129,7 +119,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     const {focusedUserContext, documentViewMode, viaStudentGroupView,
         userId, groupId, isGhostUser, toggleable, ...others } = this.props;
 
-    const toggledContext = focusedUserContext || this.getToggledContext(); //in
+    const toggledContext = focusedUserContext || this.getToggledContext();  // callfocusedUserQuadrant ? or something like that
     console.log("\ttoggledContext:", toggledContext);
 
     const {width, height} = this.grid;
