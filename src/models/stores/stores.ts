@@ -29,6 +29,7 @@ export interface IStores extends IBaseStores {
   userContextProvider: UserContextProvider;
   tabsToDisplay: NavTabModelType[];
   isShowingTeacherContent: boolean;
+  studentWorkTabSelectedGroupId: string | undefined;
   setAppMode: (appMode: AppMode) => void;
   initializeStudentWorkTab: () => void;
   setUnitAndProblem: (unitId: string | undefined, problemOrdinal?: string) => Promise<void>;

@@ -73,7 +73,6 @@ function getQuadrant(groupUserIndex: number) {
 
 
 //TODO:  #1 activeGroupId - is not being set, G1, G2, G3 set to subTab
-//       #2 get whole selection highlighting commenting enabled again when in workspaces mode
 
 @inject("stores")
 @observer

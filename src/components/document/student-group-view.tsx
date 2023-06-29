@@ -57,9 +57,9 @@ const GroupViewTitlebar: React.FC = observer(function GroupViewTitlebar() {
   };
 
   const handleSelectGroup = (id: string) => {
-    Logger.log(LogEventName.VIEW_GROUP, {group: id, via: "group-document-titlebar"});
     ui.setOpenSubTab("student-work", id);
     ui.closeSubTabDocument("student-work", id);
+    Logger.log(LogEventName.VIEW_GROUP, {group: id, via: "group-document-titlebar"});
   };
 
   return (
