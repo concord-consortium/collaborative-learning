@@ -17,6 +17,7 @@ import { LogEventName } from "../lib/logger-types";
 import FourUpIcon from "../clue/assets/icons/4-up-icon.svg";
 
 import "./four-up.sass";
+import { group } from "d3";
 
 interface IProps extends IBaseProps {
   userId?: string;
@@ -77,11 +78,6 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
 
   constructor(props: IProps) {
     super(props);
-    this.state = {
-      toggledContextMap: {}
-    };
-
-    // use local grid model
     this.grid = FourUpGridModel.create({
       splitterSize: 3,
     });
@@ -103,27 +99,45 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     this.resizeObserver.disconnect();
   }
 
-  private getToggledContext () {
-    const {toggledContextMap} = this.state;
-    return (this.props.groupId && toggledContextMap[this.props.groupId]) ?? null;
+  private getToggledContext (context?: string) {
+    console.log("🔨getToggledContext invoked with context:", context);
+    const {ui} = this.stores;
+    this.props.groupId &&
+    console.log("\topen Documents:", ui.tabs.get("student-work")?.openDocuments.get(this.props.groupId));
+    if (this.props.groupId && ui.tabs.get("student-work")?.openDocuments.get(this.props.groupId)){
+      console.log("\t returning context", context);
+      return  context; //when caled from bottom clickhandler return context
+      //when called in render, we also need to send in context
+    }
+    else {
+      return undefined;
+    }
+
   }
 
+
+
   public render() {
+    console.log("------render-----");
+    console.log("\tgroupId:", this.props.groupId);
+
+
     const {focusedUserContext, documentViewMode, viaStudentGroupView,
         userId, groupId, isGhostUser, toggleable, ...others } = this.props;
-    const toggledContext = focusedUserContext || this.getToggledContext();
+    console.log("\tfocusedUserContext", focusedUserContext);
+
+
+     //want getToggledContext() to return "four-up-nw, four-up-ne, etc"
+    // callfocusedUserQuadrant ? or something like that
+
+
     const {width, height} = this.grid;
     const nwCell = this.grid.cells[CellPositions.NorthWest];
     const neCell = this.grid.cells[CellPositions.NorthEast];
     const seCell = this.grid.cells[CellPositions.SouthEast];
     const swCell = this.grid.cells[CellPositions.SouthWest];
     const toggledStyle = {top: 0, left: 0, width, height};
-    const indexToStyle = [
-      toggledContext ? toggledStyle : {top: 0, left: 0, width: nwCell.width, height: nwCell.height},
-      toggledContext ? toggledStyle : {top: 0, left: neCell.left, right: 0, height: neCell.height},
-      toggledContext ? toggledStyle : {top: seCell.top, left: seCell.left, right: 0, bottom: 0},
-      toggledContext ? toggledStyle : {top: swCell.top, left: 0, width: swCell.width, bottom: 0}
-    ];
+
     const scaleStyle = (cell: FourUpGridCellModelType) => {
       const transform = `scale(${toggledContext ? 1 : cell.scale})`;
       return {width, height, transform, transformOrigin: "0 0"};
@@ -139,6 +153,25 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       "four-up-se": groupUsers[2],
       "four-up-sw": groupUsers[3],
     };
+
+    // const toggledContext = focusedUserContext || this.getToggledContext();
+    // const string = this.props.groupId && indexToCornerLabel[this.props.groupId as number];
+
+    //need to send groupUsers?
+    const toggledContext = focusedUserContext || this.getToggledContext();
+    console.log("\tthis.getToggledContext()", this.getToggledContext());
+
+
+
+
+
+
+    const indexToStyle = [
+      toggledContext ? toggledStyle : {top: 0, left: 0, width: nwCell.width, height: nwCell.height},
+      toggledContext ? toggledStyle : {top: 0, left: neCell.left, right: 0, height: neCell.height},
+      toggledContext ? toggledStyle : {top: seCell.top, left: seCell.left, right: 0, bottom: 0},
+      toggledContext ? toggledStyle : {top: swCell.top, left: 0, width: swCell.width, bottom: 0}
+    ];
 
     const groupDoc = (index: number) => {
       return groupUsers[index] && groupUsers[index].doc;
@@ -162,7 +195,11 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     };
 
     const renderCanvas = (cornerIndex: number, overlay?: React.ReactNode) => {
+      console.log("🔨 renderCanvas with cornerIndex:", cornerIndex, "overlay:", overlay);
+
       const cornerLabel = indexToCornerLabel[cornerIndex];
+      console.log("\tcornerLabel:", cornerLabel);
+
       const cell = this.grid.cells[cornerIndex];
       const document = groupDoc(cornerIndex);
       // Only the user's document is editable, but not if they're a ghost user
@@ -185,6 +222,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
         const { name: fullName, initials } = groupUser.user;
         const className = classNames("member", {"member-centered": isToggled && !viaStudentGroupView},
                                      {"in-student-group-view": isToggled && viaStudentGroupView});
+
         const name = isToggled ? fullName : initials;
         return (
           isToggled && viaStudentGroupView
@@ -337,7 +375,6 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       const end = getSplittersFromEvent(upE);
       Logger.log(LogEventName.VIEW_FOUR_UP_RESIZED, { start: _start, end });
     };
-
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mouseup", handleMouseUp);
   };
@@ -345,33 +382,42 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   private handleFourUpClick = () => {
     const { ui } = this.stores;
     const { groupId } = this.props;
-    this.setState(state => {
-      if (groupId) {
-        state.toggledContextMap[groupId] =  undefined;
-      }
-    });
+    console.log("🔨handleFourUpClick!");
+    console.log("\t closing subTabDocument");
     groupId && ui.closeSubTabDocument("student-work",  groupId);
   };
 
   private handleOverlayClick = (context?: string) => {
+    console.log("🔨handleOverLayClick with context:", context);
     const { ui } = this.stores;
     const { groupId } = this.props;
     const groupUser = context ? this.userByContext[context] : undefined;
-    const toggledContext = this.getToggledContext();
-    this.setState(state => {
-      if (groupId) {
-        const current = state.toggledContextMap[groupId] ?? null;
-        state.toggledContextMap[groupId] = current ? undefined : context;
-      }
-      return { toggledContextMap: clone(state.toggledContextMap) };
-    });
+    console.log("\tgroupUser:", groupUser);
+    console.log("\tgroupId:", groupId);
 
+    const toggledContext = this.getToggledContext(context);
+    // ✓ remove toggledContextMap which is a state which looks like {groupId: four-up ne, four up sw, etc }
+    // ✓ in line 380, check if subTAb for group ID has an open document, if it does then ui.closeSubTab, then if doesn't then line 381 to open
+
+    // other bugs - quickly load dashboard, then click sticky, then when u cancel it,
+    // log error says removeEvent, coming from jxgraph
+
+    //activeGroupId - is not being set, G1, G2, G3 set to subTab
+    console.log("\tthis.getToggledContext(context):", toggledContext);
     if (groupUser && groupUser.doc && groupId) {
-      ui.openSubTabDocument("student-work", groupId, groupUser.doc.key);
+      if (toggledContext){
+        console.log("\tcloseSubTab:");
+        ui.closeSubTabDocument("student-work", groupId);
+      } else {
+        console.log("\topenSubTab:");
+        ui.openSubTabDocument("student-work", groupId, groupUser.doc.key); //sets the focus document;
+        // ui.tabs.get("student-work")?.openDocuments.get(this.props.groupId));
+      }
     }
 
     if (groupUser) {
-      const event = toggledContext ? LogEventName.DASHBOARD_SELECT_STUDENT : LogEventName.DASHBOARD_DESELECT_STUDENT;
+      const event = toggledContext ? LogEventName.DASHBOARD_SELECT_STUDENT :
+                                          LogEventName.DASHBOARD_DESELECT_STUDENT;
       Logger.log(event, {groupId, studentId: groupUser.user.id});
     }
   };

@@ -83,6 +83,8 @@ export const UIModel = types
       return self.dividerPosition < kDividerMax;
     },
     get openSubTab () {
+      console.log("openSubTab returns:", self.tabs.get(self.activeNavTab)?.openSubTab);
+
       return self.tabs.get(self.activeNavTab)?.openSubTab;
     }
   }))
