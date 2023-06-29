@@ -4,13 +4,11 @@ import { arduinoFrames, armFrames, gripperFrames } from "./brainwaves-gripper-as
 import { ISimulation, ISimulationProps } from "./simulation-types";
 import { findVariable, getFrame } from "./simulation-utilities";
 import { demoStreams } from "../../shared-assets/data/dataflow/demo-data";
+import { iconUrl, kEMGKey, kGripperKey, kPressureKey } from "../../shared-assets/icons/icon-utilities";
 
 import "./brainwaves-gripper.scss";
 
 export const kBrainwavesKey = "EMG_and_claw";
-export const kEMGKey = "emg_variable";
-export const kGripperKey = "gripper_variable";
-export const kPressureKey = "pressure_variable";
 
 function BrainwavesGripperComponent({ frame, variables }: ISimulationProps) {
   const emgVariable = findVariable(kEMGKey, variables);
@@ -59,12 +57,14 @@ export const brainwavesGripperSimulation: ISimulation = {
     {
       displayName: "EMG",
       labels: ["input", "sensor:emg-reading"],
+      icon: iconUrl(kEMGKey),
       id: kEMGKey,
       value: 0
     },
     {
       displayName: "Surface Pressure",
       labels: ["input", "sensor:fsr-reading"],
+      icon: iconUrl(kPressureKey),
       id: kPressureKey,
       value: 0,
       unit: "mPa"
@@ -72,6 +72,7 @@ export const brainwavesGripperSimulation: ISimulation = {
     {
       displayName: "Gripper",
       labels: ["output", "live-output:Grabber", "live-output:Gripper 2.0"],
+      icon: iconUrl(kGripperKey),
       id: kGripperKey,
       value: 0
     }
