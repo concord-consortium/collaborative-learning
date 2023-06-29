@@ -55,9 +55,9 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
 
   // This is called even if the tab is already open
   const handleTabSelect = (tabidx: number) => {
-    const selectedSubTab = subTabs[tabidx];
-    const subTabType = selectedSubTab.sections[0].type;
-    const title = selectedSubTab.label;
+    const _selectedSubTab = subTabs[tabidx];
+    const subTabType = _selectedSubTab.sections[0].type;
+    const title = _selectedSubTab.label;
     if (tabState?.openSubTab === title && tabState?.openDocuments.get(title)) {
       // If there is a document open then a click on the tab should close
       // the document
