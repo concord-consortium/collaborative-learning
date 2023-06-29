@@ -90,7 +90,6 @@ export const GroupsModel = types
       self.environment = env;
     },
     updateFromDB(groups: DBOfferingGroupMap, clazz: ClassModelType) {
-      console.log("Groups.updateFromDB");
       // FIXME: update this to be a syncing operation:
       // - change self.allGroups to be a map of id to group
       // - update existing groups with new data from the database

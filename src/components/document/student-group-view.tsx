@@ -10,7 +10,6 @@ import { FourUpComponent } from "../four-up";
 import "./student-group-view.scss";
 
 export const StudentGroupView:React.FC = observer(function StudentGroupView(){
-  console.log("StudentGroupView render");
   const stores = useStores();
   const {groups, ui } = stores;
 

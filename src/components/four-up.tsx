@@ -17,7 +17,6 @@ import { LogEventName } from "../lib/logger-types";
 import FourUpIcon from "../clue/assets/icons/4-up-icon.svg";
 
 import "./four-up.sass";
-import { group } from "d3";
 
 interface IProps extends IBaseProps {
   userId?: string;
@@ -67,6 +66,15 @@ const indexToLocation = [
   "nw", "ne", "se", "sw"
 ] as const;
 
+function getQuadrant(groupUserIndex: number) {
+  if (groupUserIndex < 0 || groupUserIndex > 3) return undefined;
+  return indexToCornerLabel[groupUserIndex];
+}
+
+
+//TODO:  #1 activeGroupId - is not being set, G1, G2, G3 set to subTab
+//       #2 get whole selection highlighting commenting enabled again when in workspaces mode
+
 @inject("stores")
 @observer
 export class FourUpComponent extends BaseComponent<IProps, IState> {
@@ -99,36 +107,25 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     this.resizeObserver.disconnect();
   }
 
-  private getToggledContext (context?: string) {
-    console.log("🔨getToggledContext invoked with context:", context);
-    const {ui} = this.stores;
-    this.props.groupId &&
-    console.log("\topen Documents:", ui.tabs.get("student-work")?.openDocuments.get(this.props.groupId));
-    if (this.props.groupId && ui.tabs.get("student-work")?.openDocuments.get(this.props.groupId)){
-      console.log("\t returning context", context);
-      return  context; //when caled from bottom clickhandler return context
-      //when called in render, we also need to send in context
+  private getFocusedUserQuadrant () {
+    const {ui, groups} = this.stores;
+    const docKey = this.props.groupId && ui.tabs.get("student-work")?.openDocuments.get(this.props.groupId);
+    if (docKey){
+      const group = groups.getGroupById(this.props.groupId);
+      const focusedGroupUser = group?.users.find(obj => obj.problemDocument?.key === docKey);
+      const focusedUserIndex = focusedGroupUser && group?.sortedUsers.indexOf(focusedGroupUser);
+      return getQuadrant(focusedUserIndex ?? -1);
     }
     else {
       return undefined;
     }
-
   }
 
 
 
   public render() {
-    console.log("------render-----");
-    console.log("\tgroupId:", this.props.groupId);
-
-
     const {focusedUserContext, documentViewMode, viaStudentGroupView,
         userId, groupId, isGhostUser, toggleable, ...others } = this.props;
-    console.log("\tfocusedUserContext", focusedUserContext);
-
-
-     //want getToggledContext() to return "four-up-nw, four-up-ne, etc"
-    // callfocusedUserQuadrant ? or something like that
 
 
     const {width, height} = this.grid;
@@ -139,7 +136,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     const toggledStyle = {top: 0, left: 0, width, height};
 
     const scaleStyle = (cell: FourUpGridCellModelType) => {
-      const transform = `scale(${toggledContext ? 1 : cell.scale})`;
+      const transform = `scale(${focusedUserQuadrant ? 1 : cell.scale})`;
       return {width, height, transform, transformOrigin: "0 0"};
     };
 
@@ -154,23 +151,13 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       "four-up-sw": groupUsers[3],
     };
 
-    // const toggledContext = focusedUserContext || this.getToggledContext();
-    // const string = this.props.groupId && indexToCornerLabel[this.props.groupId as number];
-
-    //need to send groupUsers?
-    const toggledContext = focusedUserContext || this.getToggledContext();
-    console.log("\tthis.getToggledContext()", this.getToggledContext());
-
-
-
-
-
+    const focusedUserQuadrant = focusedUserContext || this.getFocusedUserQuadrant();
 
     const indexToStyle = [
-      toggledContext ? toggledStyle : {top: 0, left: 0, width: nwCell.width, height: nwCell.height},
-      toggledContext ? toggledStyle : {top: 0, left: neCell.left, right: 0, height: neCell.height},
-      toggledContext ? toggledStyle : {top: seCell.top, left: seCell.left, right: 0, bottom: 0},
-      toggledContext ? toggledStyle : {top: swCell.top, left: 0, width: swCell.width, bottom: 0}
+      focusedUserQuadrant ? toggledStyle : {top: 0, left: 0, width: nwCell.width, height: nwCell.height},
+      focusedUserQuadrant ? toggledStyle : {top: 0, left: neCell.left, right: 0, height: neCell.height},
+      focusedUserQuadrant ? toggledStyle : {top: seCell.top, left: seCell.left, right: 0, bottom: 0},
+      focusedUserQuadrant ? toggledStyle : {top: swCell.top, left: 0, width: swCell.width, bottom: 0}
     ];
 
     const groupDoc = (index: number) => {
@@ -195,11 +182,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     };
 
     const renderCanvas = (cornerIndex: number, overlay?: React.ReactNode) => {
-      console.log("🔨 renderCanvas with cornerIndex:", cornerIndex, "overlay:", overlay);
-
       const cornerLabel = indexToCornerLabel[cornerIndex];
-      console.log("\tcornerLabel:", cornerLabel);
-
       const cell = this.grid.cells[cornerIndex];
       const document = groupDoc(cornerIndex);
       // Only the user's document is editable, but not if they're a ghost user
@@ -208,16 +191,16 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       return <CanvasComponent context={cornerLabel} scale={cellScale(cell, cornerLabel)}
                        readOnly={readOnly}
                        document={document} overlayMessage={canvasMessage(document)}
-                       showPlayback={toggledContext === cornerLabel} {...others} overlay={overlay} />;
+                       showPlayback={focusedUserQuadrant === cornerLabel} {...others} overlay={overlay} />;
     };
 
     // Double the scale if the cell is focused
     const cellScale =
-      (cell: FourUpGridCellModelType, corner: string) => (toggledContext === corner ? 2 : 1) * cell.scale;
+      (cell: FourUpGridCellModelType, corner: string) => (focusedUserQuadrant === corner ? 2 : 1) * cell.scale;
 
     const memberName = (context: string) => {
       const groupUser = this.userByContext[context];
-      const isToggled = context === toggledContext;
+      const isToggled = context === focusedUserQuadrant;
       if (groupUser) {
         const { name: fullName, initials } = groupUser.user;
         const className = classNames("member", {"member-centered": isToggled && !viaStudentGroupView},
@@ -257,10 +240,10 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       // overlay. When we are not looking at a specific student we need the overlay
       // to be unscaled and have dimensions based on the grid so its clickable area
       // covers the whole quadrant of the grid not just the area of the canvas
-      const overlayInsideOfCanvas = toggledContext && overlay;
-      const overlayOnTopOfCanvas = !toggledContext && overlay;
+      const overlayInsideOfCanvas = focusedUserQuadrant && overlay;
+      const overlayOnTopOfCanvas = !focusedUserQuadrant && overlay;
 
-      return !toggledContext || (toggledContext === cornerLabel)
+      return !focusedUserQuadrant || (focusedUserQuadrant === cornerLabel)
         ? <div key={cornerIndex} className={classNames("canvas-container", indexToCornerClass[cornerIndex])}
               style={indexToStyle[cornerIndex]}>
             <div className="canvas-scaler" style={scaleStyle(cell)}>
@@ -277,7 +260,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     return (
       <div className="four-up" ref={(el) => this.container = el}>
         { [0,1,2,3].map(cornerIndex => renderCorner(cornerIndex)) }
-        {!toggledContext ? this.renderSplitters() : null}
+        {!focusedUserQuadrant ? this.renderSplitters() : null}
       </div>
     );
   }
@@ -382,36 +365,20 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   private handleFourUpClick = () => {
     const { ui } = this.stores;
     const { groupId } = this.props;
-    console.log("🔨handleFourUpClick!");
-    console.log("\t closing subTabDocument");
     groupId && ui.closeSubTabDocument("student-work",  groupId);
   };
 
   private handleOverlayClick = (context?: string) => {
-    console.log("🔨handleOverLayClick with context:", context);
     const { ui } = this.stores;
     const { groupId } = this.props;
     const groupUser = context ? this.userByContext[context] : undefined;
-    console.log("\tgroupUser:", groupUser);
-    console.log("\tgroupId:", groupId);
+    const toggledContext = this.getFocusedUserQuadrant();
 
-    const toggledContext = this.getToggledContext(context);
-    // ✓ remove toggledContextMap which is a state which looks like {groupId: four-up ne, four up sw, etc }
-    // ✓ in line 380, check if subTAb for group ID has an open document, if it does then ui.closeSubTab, then if doesn't then line 381 to open
-
-    // other bugs - quickly load dashboard, then click sticky, then when u cancel it,
-    // log error says removeEvent, coming from jxgraph
-
-    //activeGroupId - is not being set, G1, G2, G3 set to subTab
-    console.log("\tthis.getToggledContext(context):", toggledContext);
     if (groupUser && groupUser.doc && groupId) {
       if (toggledContext){
-        console.log("\tcloseSubTab:");
         ui.closeSubTabDocument("student-work", groupId);
       } else {
-        console.log("\topenSubTab:");
         ui.openSubTabDocument("student-work", groupId, groupUser.doc.key); //sets the focus document;
-        // ui.tabs.get("student-work")?.openDocuments.get(this.props.groupId));
       }
     }
 
