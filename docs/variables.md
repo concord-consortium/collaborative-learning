@@ -34,22 +34,22 @@ The second use case involves premade simulations, which users access through Sim
 #### Simulations
 Simulations are at the heart of this use case. They are defined in the `src/plugins/simulator/simulation/` directory, and generally describe how a simulation should work. Each simulation contains several properties:
 - delay: The number of milliseconds between steps of the simulation.
-- variables: A list of `Variable` snapshots that will be defined when the simulation is initialized. Each should have a name and a value. A unit is optional.
+- variables: A list of `Variable` snapshots that will be defined when the simulation is initialized. Each should have an `id`, a `displayName`, and a `value`. A `unit` is optional. These will often also include relevant `labels` (see _Dataflow Tile_ below), as well as an `icon`.
 - values: A dictionary containing values to assign to variables. Each key should be a variable's name, and each value is a list containing values that will be assigned to the variable in sequence as the simulation progresses. Each step, the variable is assigned the next value in its list, and the values are repeated indefinitely while the simulation runs. For example, `values: { "input_test": [0, 1] }` will make the variable with name "input_test" have value 0 on the first step, 1 on the second step, 0 on the third, etc.
-- step: _NOT CURRENTLY IMPLEMENTED_ An optional custom function run on each step. This can be used to update variables in terms of each other, for example. This is called after values are updated using _values_ as described above.
-- component: _NOT CURRENTLY IMPLEMENTED_ A component used to display the state of the simulation in the Simulator Tile. This will ususally involve animations and visualizations that are controlled by the variables.
+- step: An optional custom function run on each step. It receives a dictionay containing `frame` and `variables` as a parameter. This function can be used to update variables in terms of each other, for example. It is called after values are updated using _values_ as described above.
+- component: A component used to display the state of the simulation in the Simulator Tile. It receives `frame` and `variables` as props. This will ususally involve animations and visualizations that are controlled by the variables.
 
 #### Simulator Tile
 The Simulator Tile is the centerpiece of this use case. It's very simple, with three main jobs:
 1. It loads a simulation (see above), setting up its predefined variables in a `SharedVariable` model.
 2. It runs the simulation, periodically updating the variables.
-3. It renders the state of the simulation using its component.
+3. It renders the state of the simulation using its component, as well as listing all input and output variables in the simulation and their values. If a variable has an icon specified, these will be displayed next to the variable's display name.
 
 The Simulator Tile is defined in `src/plugins/simulator/`.
 
 #### Dataflow Tile
 The Dataflow Tile allows a user to access a simulation's input variables and set its output variables. It will automatically connect to any `SharedVariables` model in the document.
 
-*Input Variables* These can be accessed via sensor nodes in the Dataflow Tile. Currently, variables with names starting with "input_" are input variables and will show up in the dropdown menu for sensor nodes.
+*Input Variables* These can be accessed via sensor nodes in the Dataflow Tile. Variables with the `input` label are input variables and will show up in the dropdown menu for sensor nodes. To connect a variable with a particular type of sensor, add a label like `sensor:emg-reading`, where the part of the string after the colon matches the type of a node sensor (see `NodeSensorTypes` in `plugins/dataflow/model/utilities/node.ts`).
 
-*Output Variables* These can be defined via live output nodes in the Dataflow Tile. Currently, variables with names starting with "output_" are output variables. A live output with a type matching the second part of the variable's name will automatically update its value on every tick of the dataflow program; a user doesn't need to explicitly connect the live output node to the variable for this to work. For example, a variable named "output_LightBulb" will automatically update with values from a "Light Bulb" live output node.
+*Output Variables* These can be defined via live output nodes in the Dataflow Tile. Variables with the `output` label are output variables. To connect a variable with a particular live output type, add a label like `live-output:Gripper 2.0`, where the part of the string after the colon matches the name of a live output type (see `NodeLiveOutputTypes` in `plugins/dataflow/model/utilities/node.ts`). Once these two labels are set up, the user should see an option to connect a live output ndoe in dataflow of the correct type to the variable. Then the output variable will acquire the live output node's value every time the dataflow tile ticks. It's possible to include multiple `live-output:` labels in an output variable, in which case the variable can be connected to any of the types specified.
