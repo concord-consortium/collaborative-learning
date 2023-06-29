@@ -6,10 +6,11 @@ import { VariableType } from "@concord-consortium/diagram-view";
 
 import { NodeChannelInfo } from "./channel";
 
+export const kSimulatedChannelPrefix = "SIM";
 export const kSimulatedChannelType = "simulated-channel";
 
 function simulatedChannelId(variable: VariableType) {
-  return `SIM${variable.id}`;
+  return `${kSimulatedChannelPrefix}${variable.id}`;
 }
 
 function simulatedChannelName(variable: VariableType) {
