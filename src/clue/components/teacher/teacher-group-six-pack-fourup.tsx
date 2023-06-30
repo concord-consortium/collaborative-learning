@@ -41,11 +41,6 @@ export class TeacherGroupSixPackFourUp extends BaseComponent<IProps, IState> {
 
   public render() {
     const { documentViewMode, selectedSectionId, group, row, column } = this.props;
-    console.log("------------------------------");
-
-    console.log("TeacherGroupSixPackFourUp");
-    console.log("\tgroupId:", group.id);
-    console.log("\tselectedSectionId:", selectedSectionId);
 
     return (
       <div className={`teacher-group group-${row}-${column}`} key={`group-${row}-${column}`}>
@@ -83,9 +78,16 @@ interface IGroupHeaderProps {
 const TeacherGroupHeader: React.FC<IGroupHeaderProps> = observer(function TeacherGroupHeader({group}){
   const { ui, db, user, groups, documents }  = useStores();
 
-  // console.log("\tgroups:",groups);
-
-
+  // Use a local observable so selectedGroupId and groupUsers are cached and
+  // only cause re-renders if their value would actually change after the
+  // objects they are using have changed.
+  //
+  // Note: a structural comparison is required for groupUsers since it returns a
+  // new array each time it is called. So without a structural comparison the
+  // object will be different each time a new document is loaded. Because this
+  // structural comparison is necessary this approach is in-efficient.  It'd be
+  // better to refactor getGroupUsers, so the groupUsers are part of the global
+  // store and are updated (instead of recreated) as needed.
   const localObservable = useLocalObservable(() => ({
     get groupUsers() {
       return getGroupUsers(user.id, groups, documents, group.id);
@@ -93,24 +95,9 @@ const TeacherGroupHeader: React.FC<IGroupHeaderProps> = observer(function Teache
   }), {groupUsers: computed.struct});
 
   const { groupUsers } = localObservable;
-
-  // When we have a valid selectedGroupId
-  // Then set the active group (openSubTab) to be this group
-  // MobX `when` will only run one time, so this won't keep updating the openSubTab.
-  // If the user somehow changes the openSubTab before all of the groups are loaded,
-  // this will just set the openSubTab to be the same value it already is.
-
   const openDocId = ui.tabs.get("student-work")?.openDocuments.get(group.id);
-  if(group.id === "1"){
-    console.log("<TeacherGroupHeader>---");
-    console.log("\tgroupUsers:", groupUsers);
-  }
-
   const focusedGroupUser = groupUsers.find(obj => obj.doc?.key === openDocId)?.user;
-
   const messageClickHandler = () => {
-
-    console.log("in message clickhandler focusedGroupUser:", focusedGroupUser);
     if (focusedGroupUser) {
       ui.prompt(`Enter your message for ${focusedGroupUser.name}`, "", `Message ${focusedGroupUser.name}`, 5)
       .then((message) => {
@@ -124,10 +111,8 @@ const TeacherGroupHeader: React.FC<IGroupHeaderProps> = observer(function Teache
       });
     }
     else {
-      console.log("else line 121 groupId:", group.id);
       ui.prompt(`Enter your message for Group ${group.id}`, "", "Message Group", 5)
       .then((message) => {
-        console.log("then block:", message);
         const audience = AudienceModel.create({type: AudienceEnum.group, identifier: group.id});
         db.createSupport(createStickyNote(message), "", audience);
         Logger.log(LogEventName.CREATE_STICKY_NOTE, {
