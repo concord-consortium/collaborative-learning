@@ -1,8 +1,11 @@
+$input-color: #5584e5;
+$output-color: #f29046;
+
 .simulator-variable {
   align-items: center;
   display: flex;
   // For now, use a fixed width to prevent the variables from shifting as their values change
-  width: 200px;
+  width: 220px;
 
   .leading-box {
     height: 16px;
@@ -12,21 +15,21 @@
 
   &.input {
     .leading-box {
-      background-color: #5584e5;
+      background-color: $input-color;
 
       &.variable-icon {
         background-color: transparent;
-        fill: #5584e5;
+        fill: $input-color;
       }
     }
   }
   &.output {
     .leading-box {
-      background-color: #f29046;
+      background-color: $output-color;
 
       &.variable-icon {
         background-color: transparent;
-        fill: #f29046;
+        fill: $output-color;
       }
     }
   }

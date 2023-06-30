@@ -9,7 +9,7 @@ import VariableEditorIcon from "../assets/variable-editor-icon.svg";
 import './variable-dialog.scss';
 
 interface IProps {
-  variable?: any; // TODO Should be VariableType
+  variable?: any; // TODO VariableType Should be VariableType
   onClose?: () => void;
 }
 export const useEditVariableDialog = ({ variable, onClose }: IProps) => {

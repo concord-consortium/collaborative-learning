@@ -29,7 +29,7 @@ interface ISimulatorVariableProps {
 export function SimulatorVariable({ variable }: ISimulatorVariableProps) {
   if (!variable) return null;
 
-  const inputVariable = isInputVariable(variable);
+  const inputVariable = isInputVariable(variable); // We're assuming the variable is either input or output
   const suffix = inputVariable ? "Sensor" : "Output";
   const displayName = variable?.displayName ? `${variable.displayName} ${suffix}` : "";
 

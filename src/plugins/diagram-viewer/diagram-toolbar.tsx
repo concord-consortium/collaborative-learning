@@ -99,7 +99,7 @@ const InsertVariableButton = ({ disabled, handleClick }: IInsertVariableButton) 
 
 interface IEditVariableButton {
   handleClick: () => void;
-  selectedVariable?: any; // TODO Should be VariableType
+  selectedVariable?: any; // TODO VariableType Should be VariableType
 }
 const EditVariableButton = ({ handleClick, selectedVariable }: IEditVariableButton) => {
   return (
@@ -157,7 +157,7 @@ const HideNavigatorButton = ({ hideNavigator, toggleNavigator }: IHideNavigatorB
 
 interface IDeleteButton {
   handleClick: () => void;
-  selectedVariable?: any; // TODO Should be VariableType
+  selectedVariable?: any; // TODO VariableType Should be VariableType
 }
 const DeleteButton = ({ handleClick, selectedVariable }: IDeleteButton) => {
   return (

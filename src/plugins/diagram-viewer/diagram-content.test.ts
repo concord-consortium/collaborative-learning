@@ -168,6 +168,7 @@ describe("DiagramContent", () => {
     const firstNode = Array.from(content.root.nodes.values())[0];
     assertIsDefined(firstNode);
 
+    // TODO VariableType We shouldn't have to cast this
     variablesAPI.removeVariable(firstNode.variable as VariableType);
 
     // Need to wait for the variable and node to be removed, we use mobx's `when` for this.
