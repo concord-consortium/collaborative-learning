@@ -203,11 +203,12 @@ context('History Playback', () => {
       cy.get('[data-testid="playback-component-button"]').should('be.visible');
       cy.get('.playback-toolbar-button.themed.my-work').should('have.css', 'background-color', 'rgb(183, 226, 236)');
       clueCanvas.publishDoc("This Class");
-      cy.openTopTab('class-work');
-      cy.openSection('class-work', "workspaces");
-      cy.openDocumentThumbnail('class-work','workspaces','Network User');
-      cy.get('[data-testid="playback-component-button"]').should('be.visible');
-      cy.get('.playback-toolbar-button.themed.class-work').should('have.css', 'background-color', 'rgb(236, 201, 255)');
+      //removed palyback button in published documents
+      // cy.openTopTab('class-work');
+      // cy.openSection('class-work', "workspaces");
+      // cy.openDocumentThumbnail('class-work','workspaces','Network User');
+      // cy.get('[data-testid="playback-component-button"]').should('be.visible');
+      // cy.get('.playback-toolbar-button.themed.class-work').should('have.css', 'background-color', 'rgb(236, 201, 255)');
       cy.openSection('class-work', "learning-logs");
       cy.openDocumentThumbnail('class-work','learning-logs','Network User');
       cy.get('[data-testid="playback-component-button"]').should('be.visible');

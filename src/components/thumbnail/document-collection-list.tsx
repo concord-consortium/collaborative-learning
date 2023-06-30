@@ -1,5 +1,6 @@
 import { observer } from "mobx-react";
 import React, { useCallback, useEffect, useRef } from "react";
+import classNames from "classnames";
 import { DocumentDragKey, SupportPublication } from "../../models/document/document-types";
 import { useAppConfig, useUIStore, useUserStore } from "../../hooks/use-stores";
 import { ISubTabSpec, NavTabModelType } from "../../models/view/nav-tabs";
@@ -40,7 +41,6 @@ export const DocumentCollectionList: React.FC<IProps> = observer(function Docume
   }, [documentListRef, setScrollLeft, setScrollWidth]);
 
   const handleBrowserScroll = useCallback((documentListEl: HTMLDivElement) => (evt: any) => {
-    console.log("in handle browser scroll");
     setScrollWidth && setScrollWidth(documentListEl.scrollWidth);
     setScrollLeft && setScrollLeft(documentListEl.scrollLeft);
   },[setScrollLeft, setScrollWidth]);
@@ -80,7 +80,7 @@ export const DocumentCollectionList: React.FC<IProps> = observer(function Docume
   }
 
   return (
-    <div className={`doc-collection-list ${horizontal ? "horizontal" : ""} ${collapsed ? "collapsed" : ""}`}
+    <div className={classNames("doc-collection-list", {horizontal, collapsed})}
         ref={documentListRef}>
       {
         subTab.sections.map((section: any, index: any) => {

@@ -1,6 +1,6 @@
 @import ../vars
-$header-offset-with-sub-tabs: calc(#{$header-height} + 2 * (#{$workspace-content-margin} + #{$nav-tab-height} + #{$tab-section-border-width}))
 $header-offset-no-sub-tabs: calc(#{$header-height} + #{$nav-tab-height} + (2 * (#{$workspace-content-margin} + #{$tab-section-border-width})))
+$header-offset-with-sub-tabs: calc(#{$header-offset-no-sub-tabs} + #{$nav-tab-height}))
 
 .document-tabs
   border-color: $charcoal
