@@ -19,7 +19,7 @@ import { SubTabsPanel } from "./sub-tabs-panel";
 import CollapseScrollerIcon from "../../assets/show-hide-document-view-icon.svg";
 import ScrollArrowIcon from "../../assets/scroll-arrow-icon.svg";
 
-import "./section-document-or-browser.sass";
+import "./section-document-or-browser.scss";
 
 interface IProps {
   tabSpec: NavTabModelType;
