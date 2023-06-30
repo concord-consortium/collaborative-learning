@@ -28,52 +28,51 @@ interface PromisedDocumentDocument extends DocumentDocument {
 
 //theres no active nav tab?
 export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
-  console.log("--------<CommentedDocuments>-------with props");
+  console.log("--------<CommentedDocuments>-------with props\n\n\n");
   console.log("\tuser:", user);
-  console.log("\thandleDocView:", handleDocView);
+  // console.log("\thandleDocView:", handleDocView);
 
   const [db] = useFirestore();
   const ui = useUIStore();
   const store = useStores();
+  console.log("store:", store);
   const problem =  store.problemOrdinal;
   const unit = store.unit.code;
 
-  //"Problem"/"Teacher-Guide"
+
+    //------Curriculum Documents: (i.e. //"Problem"/"Teacher-Guide")
   const [docsCommentedOn, setDocsCommentedOn] = useState<PromisedCurriculumDocument[]>();
   console.log("line 43");
   const cDocsRef = useMemo(() => db.collection("curriculum"), [db]);
   console.log("line 45");
-  // const cDocsInScopeRef = user?.network  ?
-  // useMemo(() => (
-  //   cDocsRef
-  //   .where("unit", "==", unit)
-  //   .where("problem", "==", problem)
-  //   .where("network","==", user?.network)
-  // ), [cDocsRef, problem, unit, user?.network])
-  // :
-  // useMemo(() => (
-  //   cDocsRef
-  //   .where("unit", "==", unit)
-  //   .where("problem", "==", problem)
-  //   .where("network","==", user?.network)
-  // ), [cDocsRef, problem, unit, user?.network]);
-
   console.log("\tfirestore call...");
   console.log("\tunit:", unit);
   console.log("\tproblem:", problem);
   console.log("\tnetwork:", user?.network);
 
+   const cDocsInScopeRef = useMemo(() => {
+    if (user?.network){
+      return  cDocsRef
+      .where("unit", "==", unit)
+      .where("problem", "==", problem)
+      .where("network","==", user?.network);
+    } else {
+      console.log("line 60, userID:", user?.id);
+      return  cDocsRef
+      .where("unit", "==", unit)
+      .where("problem", "==", problem)
+      //for teachers not in network, look for documents matching the uid
+      .where ("uid", "==", user?.id);
+    }
+   }, [cDocsRef, problem, unit, user?.network, user?.id]);
 
 
-   const cDocsInScopeRef = useMemo(() => (
-    cDocsRef
-    .where("unit", "==", unit)
-    .where("problem", "==", problem)
-    .where("network","==", user?.network)
-  ), [cDocsRef, problem, unit, user?.network]);
+  console.log("----------------------");
+
+  console.log("cDocsInScopeRef:", cDocsInScopeRef);
 
 
-  console.log("line 53");
+  console.log("line 76");
   //TODO: open up
   //http://localhost:8080/?appMode=demo&demoName=CLUE&fakeClass=1&fakeUser=teacher:1&problem=1.1&unit=msa
   //open chat panel, then open documents, crash, it never makes it to line 53
@@ -81,20 +80,17 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
   //"MyWork"/"ClassWork"
   const [workDocuments, setWorkDocuments] = useState<PromisedDocumentDocument[]>();
   const mDocsRef = useMemo(() => db.collection("documents"), [db]);
-  const mDocsInScopeRef = useMemo(() => (
-    mDocsRef.where("network", "==", user?.network)
-  ), [mDocsRef, user?.network]);
-
-  console.log("----------------");
-  console.log("\tcDocsRef:", cDocsRef);
-  console.log("\tcDocsInScopeRef:", cDocsInScopeRef);
-  console.log("\tmDocsRef:", mDocsRef);
-  console.log("\tmDocsInScopeRef:", mDocsInScopeRef);
+  const mDocsInScopeRef = useMemo(() => {
+    if(user?.network){
+      return mDocsRef.where("network", "==", user?.network);
+    } else {
+      return mDocsRef.where("uid", "==", user?.id);
+    }
+  }, [mDocsRef, user?.network, user?.id]);
 
 
-
-  //------Curriculum Documents--------
-  useEffect(() => {
+    //------Curriculum Documents: (i.e. //"Problem"/"Teacher-Guide")
+    useEffect(() => {
     console.log("curriculum documents useEffect triggered");
     const unsubscribeFromDocs = cDocsInScopeRef.onSnapshot(querySnapshot => {
       const docs = querySnapshot.docs.map(doc => {
@@ -163,10 +159,11 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
     return () => unsubscribeFromDocs?.();
   },[mDocsRef, mDocsInScopeRef]);
 
-
+  console.log("line 159");
 
   return (
     <div className="commented-document-list">
+      {console.log("---render-----")}
       {
         docsCommentedOn &&
         (docsCommentedOn).map((doc: PromisedCurriculumDocument, index:number) => {

@@ -20,11 +20,6 @@ interface IProps {
   focusTileId?: string;
   onCloseChatPanel:(show:boolean) => void;
 }
-//- All teachers can see and use the comment feature on documents within their own classes even if not part of a network.
-// - If teachers are in a network, they get all the comment functionality they have today
-// - If teachers are not in a network, the comment panels will be populated by new queries that look for things that
-// are associated with the teacher ID instead of the network IDx
-
 
 export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument, focusTileId, onCloseChatPanel }) => {
   console.log("---------<ChatPanel>--------");
