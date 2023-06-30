@@ -145,38 +145,42 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     );
   };
 
-  const showPlayback = user.type ? appConfigStore.enableHistoryRoles.includes(user.type) : false;
+  //TODO: Need to refactor this if we want to deploy to all tabs
   const renderDocumentView = (subTab: ISubTabSpec) => {
     const openDocumentKey = tabState?.openDocuments.get(subTab.label) || "";
     const openDocument = store.documents.getDocument(openDocumentKey) ||
       store.networkDocuments.getDocument(openDocumentKey);
+    const publishedDoc = openDocument?.type === "publication" || openDocument?.type === "personalPublication";
+    const showPlayback = user.type && !publishedDoc? appConfigStore.enableHistoryRoles.includes(user.type) : false;
 
-    if (!openDocument || openDocument.getProperty("isDeleted")) return false;
+    if (selectedSubTab.label !== "Starred" && (!openDocument || openDocument.getProperty("isDeleted"))) return false;
 
     const sectionClass = openDocument?.type === "learningLog" ? "learning-log" : "";
-    console.log("in renderDocumentView");
     return (
       <div className="scroller-and-document">
         { selectedSubTab.label === "Starred" &&
           <DocumentBrowserScroller subTab={subTab} tabSpec={tabSpec} openDocumentKey={openDocumentKey}
               onSelectDocument={handleSelectDocument} />
         }
-        <div className="document-area">
-          <div className={`document-header ${tabSpec.tab} ${sectionClass}`} onClick={() => ui.setSelectedTile()}>
-            <div className={`document-title`}>
-              {getDocumentDisplayTitle(openDocument, appConfigStore, problemStore)}
+        { !openDocument || openDocument.getProperty("isDeleted")
+          ? null
+          : <div className="document-area">
+              <div className={`document-header ${tabSpec.tab} ${sectionClass}`} onClick={() => ui.setSelectedTile()}>
+                <div className={`document-title`}>
+                  {getDocumentDisplayTitle(openDocument, appConfigStore, problemStore)}
+                </div>
+                {(!openDocument.isRemote)
+                    && editButton(tabSpec.tab, sectionClass, openDocument)}
+              </div>
+              <EditableDocumentContent
+                mode={"1-up"}
+                isPrimary={false}
+                document={openDocument}
+                readOnly={true}
+                showPlayback={showPlayback}
+              />
             </div>
-            {(!openDocument.isRemote)
-                && editButton(tabSpec.tab, sectionClass, openDocument)}
-          </div>
-          <EditableDocumentContent
-            mode={"1-up"}
-            isPrimary={false}
-            document={openDocument}
-            readOnly={true}
-            showPlayback={showPlayback}
-          />
-        </div>
+        }
       </div>
     );
   };
