@@ -210,32 +210,34 @@ const DocumentBrowserScroller =
   const [scrollLeft, setScrollLeft] = useState(0);
   const documentScrollerRef = useRef<HTMLDivElement>(null);
   const [scrollToLocation, setScrollToLocation] = useState(0);
-  console.log("in DocumentBrowserScroller");
 
   useEffect(()=>{
     const scrollerEl = documentScrollerRef.current;
     if (scrollerEl) {
       setPanelWidth(scrollerEl.getBoundingClientRect().width);
-      console.log("width", scrollerEl.getBoundingClientRect().width);
-      // if (scrollLeft > 0) setShowLeftScrollArrow(true);
-      // if ((scrollWidth - scrollLeft - panelWidth) > 0) setShowRightScrollArrow(true);
     }
-  },[documentScrollerRef, panelWidth, scrollLeft, scrollWidth]);
+  },[documentScrollerRef]);
+
   useEffect(()=>{
-    if (scrollLeft > 0) setShowLeftScrollArrow(true);
-    if ((scrollWidth - scrollLeft - panelWidth) > 0) setShowRightScrollArrow(true);
+    if (scrollLeft > 0) {setShowLeftScrollArrow(true);}
+    else {setShowLeftScrollArrow(false);}
+    if ((scrollWidth - scrollLeft - panelWidth) > 0) {setShowRightScrollArrow(true);}
+    else {setShowRightScrollArrow(false);}
   },[panelWidth, scrollLeft, scrollWidth]);
+
+  const handleScrollTo = (direction: number) => {
+    setScrollToLocation((prevState) => {
+      console.log("setScrollTo", prevState + (direction * panelWidth));
+      if (prevState + (direction * panelWidth) === 0) {
+        return (direction * panelWidth);
+      } else {
+        return prevState + (direction * panelWidth);
+      }
+    });
+  };
 
   const handleCollapseScroller = () => {
     setScrollerCollapsed(!scrollerCollapsed);
-  };
-  console.log("scrollWidth - scrollLeft - panelWidth", scrollWidth - scrollLeft - panelWidth);
-  console.log("showRightScrollArrow", showRightScrollArrow);
-  console.log("showLeftScrollArrow", showLeftScrollArrow);
-  console.log("panelWidth", panelWidth);
-  const handleScrollTo = (direction: number) => {
-    console.log("in handleScrollTo", direction);
-    setScrollToLocation((prevState)=> prevState + (direction * panelWidth));
   };
 
   return (

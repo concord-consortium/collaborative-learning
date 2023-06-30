@@ -44,17 +44,6 @@ export const DocumentCollectionList: React.FC<IProps> = observer(function Docume
     setScrollWidth && setScrollWidth(documentListEl.scrollWidth);
     setScrollLeft && setScrollLeft(documentListEl.scrollLeft);
   },[setScrollLeft, setScrollWidth]);
-  // console.log("documentListEl.scrollWidth", documentListRef.current?.scrollWidth);
-  // console.log("documentListEl.scrollLeft", documentListRef.current?.scrollLeft);
-  console.log("in doc-coll-list scrollToLocation", scrollToLocation);
-
-  useEffect(()=>{
-    console.log("in doc-coll-list useEffect", scrollToLocation);
-    if(scrollToLocation) {
-      documentListRef.current?.scrollBy({left: scrollToLocation, behavior: "smooth"});
-    }
-  },[scrollToLocation]);
-
 
   useEffect(()=>{
     const documentListEl = documentListRef.current;
@@ -85,6 +74,10 @@ export const DocumentCollectionList: React.FC<IProps> = observer(function Docume
         }
       });
   };
+
+  if(scrollToLocation) {
+    documentListRef.current?.scrollBy({left: scrollToLocation, behavior: "smooth"});
+  }
 
   return (
     <div className={`doc-collection-list ${horizontal ? "horizontal" : ""} ${collapsed ? "collapsed" : ""}`}
