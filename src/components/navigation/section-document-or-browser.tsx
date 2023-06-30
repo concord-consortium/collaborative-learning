@@ -214,11 +214,11 @@ const DocumentBrowserScroller =
   const handleScrollTo = (side: string) => {
     const direction = side ==="left" ? -1 : 1;
     setScrollToLocation((prevState) => {
-      console.log("setScrollTo", prevState + (direction * panelWidth));
-      if (prevState + (direction * panelWidth) === 0) {
+      const tempScrollTo = prevState + (direction * panelWidth);
+      if (tempScrollTo === 0) {
         return (direction * panelWidth);
       } else {
-        return prevState + (direction * panelWidth);
+        return tempScrollTo;
       }
     });
   };

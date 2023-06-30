@@ -76,7 +76,7 @@ export const DocumentCollectionList: React.FC<IProps> = observer(function Docume
   };
 
   if(scrollToLocation) {
-    documentListRef.current?.scrollBy({left: scrollToLocation, behavior: "smooth"});
+    documentListRef.current?.scroll({left: scrollToLocation, behavior: "smooth"});
   }
 
   return (
