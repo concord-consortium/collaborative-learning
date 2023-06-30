@@ -43,12 +43,35 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
   console.log("line 43");
   const cDocsRef = useMemo(() => db.collection("curriculum"), [db]);
   console.log("line 45");
-  const cDocsInScopeRef = useMemo(() => (
+  // const cDocsInScopeRef = user?.network  ?
+  // useMemo(() => (
+  //   cDocsRef
+  //   .where("unit", "==", unit)
+  //   .where("problem", "==", problem)
+  //   .where("network","==", user?.network)
+  // ), [cDocsRef, problem, unit, user?.network])
+  // :
+  // useMemo(() => (
+  //   cDocsRef
+  //   .where("unit", "==", unit)
+  //   .where("problem", "==", problem)
+  //   .where("network","==", user?.network)
+  // ), [cDocsRef, problem, unit, user?.network]);
+
+  console.log("\tfirestore call...");
+  console.log("\tunit:", unit);
+  console.log("\tproblem:", problem);
+  console.log("\tnetwork:", user?.network);
+
+
+
+   const cDocsInScopeRef = useMemo(() => (
     cDocsRef
     .where("unit", "==", unit)
     .where("problem", "==", problem)
     .where("network","==", user?.network)
   ), [cDocsRef, problem, unit, user?.network]);
+
 
   console.log("line 53");
   //TODO: open up
