@@ -1,5 +1,4 @@
-import { inject, observer, useLocalObservable } from "mobx-react";
-import { computed } from "mobx";
+import { inject, observer } from "mobx-react";
 import React from "react";
 import { useStores } from "../../../hooks/use-stores";
 import { BaseComponent, IBaseProps } from "../../../components/base";
@@ -11,7 +10,6 @@ import { LogEventName } from "../../../lib/logger-types";
 import { createStickyNote } from "../../../models/curriculum/support";
 import { AudienceModel, AudienceEnum } from "../../../models/stores/supports";
 import { GroupUserModelType, GroupModelType } from "../../../models/stores/groups";
-import { getGroupUsers } from "../../../models/document/document-utils";
 
 import "./teacher-group-six-pack-fourup.sass";
 
@@ -48,7 +46,7 @@ export class TeacherGroupSixPackFourUp extends BaseComponent<IProps, IState> {
         <div className="teacher-group-canvas-container">
           <div className="teacher-group-canvas">
             <FourUpComponent
-              groupId={group.id}
+              group={group}
               isGhostUser={true}
               toggleable={true}
               documentViewMode={documentViewMode}
@@ -76,27 +74,13 @@ interface IGroupHeaderProps {
 }
 
 const TeacherGroupHeader: React.FC<IGroupHeaderProps> = observer(function TeacherGroupHeader({group}){
-  const { ui, db, user, groups, documents }  = useStores();
+  const { ui, db, groups }  = useStores();
 
-  // Use a local observable so selectedGroupId and groupUsers are cached and
-  // only cause re-renders if their value would actually change after the
-  // objects they are using have changed.
-  //
-  // Note: a structural comparison is required for groupUsers since it returns a
-  // new array each time it is called. So without a structural comparison the
-  // object will be different each time a new document is loaded. Because this
-  // structural comparison is necessary this approach is in-efficient.  It'd be
-  // better to refactor getGroupUsers, so the groupUsers are part of the global
-  // store and are updated (instead of recreated) as needed.
-  const localObservable = useLocalObservable(() => ({
-    get groupUsers() {
-      return getGroupUsers(user.id, groups, documents, group.id);
-    }
-  }), {groupUsers: computed.struct});
-
-  const { groupUsers } = localObservable;
+  // FIXME: probably need to handle student-work-publisehd
   const openDocId = ui.tabs.get("student-work")?.openDocuments.get(group.id);
-  const focusedGroupUser = groupUsers.find(obj => obj.doc?.key === openDocId)?.user;
+  const groupModel = groups.getGroupById(group.id);
+  const focusedGroupUser = groupModel?.users.find(obj => obj.problemDocument?.key === openDocId);
+
   const messageClickHandler = () => {
     if (focusedGroupUser) {
       ui.prompt(`Enter your message for ${focusedGroupUser.name}`, "", `Message ${focusedGroupUser.name}`, 5)

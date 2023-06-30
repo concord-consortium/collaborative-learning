@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { clone, debounce } from "lodash";
+import { debounce } from "lodash";
 import { observer, inject } from "mobx-react";
 import React from "react";
 import ResizeObserver from "resize-observer-polyfill";
@@ -7,11 +7,10 @@ import { BaseComponent, IBaseProps } from "./base";
 import { CanvasComponent } from "./document/canvas";
 import { DocumentViewMode } from "./document/document";
 import { DocumentModelType } from "../models/document/document";
-import { GroupUserModelType } from "../models/stores/groups";
+import { GroupModelType, GroupUserModelType } from "../models/stores/groups";
 import { CellPositions, FourUpGridCellModelType, FourUpGridModel, FourUpGridModelType
       } from "../models/view/four-up-grid";
 import { FourUpOverlayComponent } from "./four-up-overlay";
-import { getGroupUsers } from "../models/document/document-utils";
 import { Logger } from "../lib/logger";
 import { LogEventName } from "../lib/logger-types";
 import FourUpIcon from "../clue/assets/icons/4-up-icon.svg";
@@ -19,30 +18,21 @@ import FourUpIcon from "../clue/assets/icons/4-up-icon.svg";
 import "./four-up.sass";
 
 interface IProps extends IBaseProps {
-  userId?: string;
-  groupId?: string;
+  group: GroupModelType;
   isGhostUser?: boolean;
   toggleable?: boolean;
   documentViewMode?: DocumentViewMode;
   selectedSectionId?: string | null;
   viaTeacherDashboard?: boolean;
   viaStudentGroupView?: boolean;
-  focusedUserContext?: string;
   setFocusedGroupUser?: (focusedGroupUser?: GroupUserModelType) => void;
 }
 
 interface IState {
-  toggledContextMap: Record<string, string | undefined>
-}
-
-export interface FourUpUser {
-  user: GroupUserModelType;
-  doc?: DocumentModelType;
-  context: string;
 }
 
 interface ContextUserMap {
-  [key: string]: FourUpUser | undefined;
+  [key: string]: GroupUserModelType | undefined;
 }
 
 // The bottom of the four-up view is covered by the border of the bottom nav, so this lost height must be considered
@@ -66,7 +56,7 @@ const indexToLocation = [
   "nw", "ne", "se", "sw"
 ] as const;
 
-function getQuadrant(groupUserIndex: number) {
+export function getQuadrant(groupUserIndex: number) {
   if (groupUserIndex < 0 || groupUserIndex > 3) return undefined;
   return indexToCornerLabel[groupUserIndex];
 }
@@ -106,26 +96,43 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     this.resizeObserver.disconnect();
   }
 
-  private getFocusedUserQuadrant () {
-    const {ui, groups} = this.stores;
-    const docKey = this.props.groupId && ui.tabs.get("student-work")?.openDocuments.get(this.props.groupId);
-    if (docKey){
-      const group = groups.getGroupById(this.props.groupId);
-      const focusedGroupUser = group?.users.find(obj => obj.problemDocument?.key === docKey);
-      const focusedUserIndex = focusedGroupUser && group?.sortedUsers.indexOf(focusedGroupUser);
-      return getQuadrant(focusedUserIndex ?? -1);
-    }
-    else {
+  private getFocusedUserDocKey() {
+    const {ui} = this.stores;
+    const {group} = this.props;
+    // FIXME: if we use a "student-work-published" fake tab then we need to
+    // update this code.
+    return ui.tabs.get("student-work")?.openDocuments.get(group.id);
+  }
+
+  private getFocusedGroupUser() {
+    const {group} = this.props;
+    const docKey = this.getFocusedUserDocKey();
+    return docKey && group.users.find(obj => obj.problemDocument?.key === docKey);
+  }
+
+  private getFocusedUserQuadrant() {
+    const {group} = this.props;
+    const focusedGroupUser = this.getFocusedGroupUser();
+    if (!focusedGroupUser){
       return undefined;
+    }
+
+    const focusedUserIndex = focusedGroupUser && group.sortedUsers.indexOf(focusedGroupUser);
+    return getQuadrant(focusedUserIndex ?? -1);
+  }
+
+  private getGroupUserDoc(groupUser?: GroupUserModelType) {
+    const {documentViewMode} = this.props;
+    if (documentViewMode === DocumentViewMode.Published) {
+      return groupUser?.lastPublishedProblemDocument;
+    } else {
+      return groupUser?.problemDocument;
     }
   }
 
-
-
   public render() {
-    const {focusedUserContext, documentViewMode, viaStudentGroupView,
-        userId, groupId, isGhostUser, toggleable, ...others } = this.props;
-
+    const {documentViewMode, viaStudentGroupView,
+        group, isGhostUser, toggleable, ...others } = this.props;
 
     const {width, height} = this.grid;
     const nwCell = this.grid.cells[CellPositions.NorthWest];
@@ -139,8 +146,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       return {width, height, transform, transformOrigin: "0 0"};
     };
 
-    const { groups, documents } = this.stores;
-    const groupUsers = getGroupUsers(userId, groups, documents, groupId, documentViewMode);
+    const groupUsers = group.sortedUsers;
 
     // save reference to use for the username display in this render and logger in #handleOverlayClicked
     this.userByContext = {
@@ -150,7 +156,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       "four-up-sw": groupUsers[3],
     };
 
-    const focusedUserQuadrant = focusedUserContext || this.getFocusedUserQuadrant();
+    const focusedUserQuadrant = this.getFocusedUserQuadrant();
 
     const indexToStyle = [
       focusedUserQuadrant ? toggledStyle : {top: 0, left: 0, width: nwCell.width, height: nwCell.height},
@@ -159,9 +165,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       focusedUserQuadrant ? toggledStyle : {top: swCell.top, left: 0, width: swCell.width, bottom: 0}
     ];
 
-    const groupDoc = (index: number) => {
-      return groupUsers[index] && groupUsers[index].doc;
-    };
+    const groupDoc = (index: number) => this.getGroupUserDoc(groupUsers[index]);
 
     const hideCanvas = (index: number) => {
       // Index 0 is never hidden, I'm not sure why
@@ -169,9 +173,14 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
         return false;
       }
       const doc = groupDoc(index);
+      // Note if the group size is less than 4, then groupUsers[x] will return undefined in some cases
+      // so unopenedDoc will be undefined
       const unopenedDoc = groupUsers[index] && !doc;
       // Don't hide anything from ghost users, and treat unopened documents as private by default
-      return !isGhostUser && (unopenedDoc || doc && doc.visibility === "private");
+      // If unopenedDoc is undefined and doc is undefined then result is undefined so hideCanvas is
+      // false
+      const result = !isGhostUser && (unopenedDoc || doc && doc.visibility === "private");
+      return result;
     };
 
     const canvasMessage = (document?: DocumentModelType) => {
@@ -201,7 +210,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       const groupUser = this.userByContext[context];
       const isToggled = context === focusedUserQuadrant;
       if (groupUser) {
-        const { name: fullName, initials } = groupUser.user;
+        const { name: fullName, initials } = groupUser;
         const className = classNames("member", {"member-centered": isToggled && !viaStudentGroupView},
                                      {"in-student-group-view": isToggled && viaStudentGroupView});
 
@@ -291,8 +300,8 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     );
   }
 
-  private renderUnshownMessage = (groupUser: FourUpUser, location: "nw" | "ne" | "se" | "sw") => {
-    const groupUserName = groupUser ? groupUser.user.name : "User";
+  private renderUnshownMessage = (groupUser: GroupUserModelType, location: "nw" | "ne" | "se" | "sw") => {
+    const groupUserName = groupUser ? groupUser.name : "User";
     return (
       <div className={`unshared ${location}`}>
         <svg className={`icon icon-unshare`}>
@@ -363,28 +372,35 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
 
   private handleFourUpClick = () => {
     const { ui } = this.stores;
-    const { groupId } = this.props;
-    groupId && ui.closeSubTabDocument("student-work",  groupId);
+    const { group } = this.props;
+    // FIXME: handle student-work-published
+    ui.closeSubTabDocument("student-work",  group.id);
   };
 
   private handleOverlayClick = (context?: string) => {
     const { ui } = this.stores;
-    const { groupId } = this.props;
+    const { group } = this.props;
     const groupUser = context ? this.userByContext[context] : undefined;
     const toggledContext = this.getFocusedUserQuadrant();
+    const document = this.getGroupUserDoc(groupUser);
 
-    if (groupUser && groupUser.doc && groupId) {
+    // FIXME: if the DocumentViewMode is Published we have a problem
+    // we don't want to set that in the student-work tab
+    // Probably best to make a fake tab `student-work-published` tab
+    // This might cause problems with logging though.
+
+    if (groupUser && document) {
       if (toggledContext){
-        ui.closeSubTabDocument("student-work", groupId);
+        ui.closeSubTabDocument("student-work", group.id);
       } else {
-        ui.openSubTabDocument("student-work", groupId, groupUser.doc.key); //sets the focus document;
+        ui.openSubTabDocument("student-work", group.id, document.key); //sets the focus document;
       }
     }
 
     if (groupUser) {
       const event = toggledContext ? LogEventName.DASHBOARD_SELECT_STUDENT :
                                           LogEventName.DASHBOARD_DESELECT_STUDENT;
-      Logger.log(event, {groupId, studentId: groupUser.user.id});
+      Logger.log(event, {groupId: group.id, studentId: groupUser.id});
     }
   };
 }

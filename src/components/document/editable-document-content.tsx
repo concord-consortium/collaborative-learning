@@ -61,7 +61,7 @@ const EditableFourUpCanvas: React.FC<IEditableFourUpCanvasProps> = props => {
   const groups = useGroupsStore();
   const group = groups.groupForUser(props.userId);
   return (
-    <FourUpComponent groupId={group?.id} {...props} />
+    <FourUpComponent group={group} {...props} />
   );
 };
 

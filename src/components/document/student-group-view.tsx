@@ -5,7 +5,7 @@ import { GroupModelType, GroupUserModelType } from "../../models/stores/groups";
 import { useProblemStore, useStores } from "../../hooks/use-stores";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
-import { FourUpComponent } from "../four-up";
+import { FourUpComponent, getQuadrant } from "../four-up";
 
 import "./student-group-view.scss";
 
@@ -26,34 +26,34 @@ export const StudentGroupView:React.FC = observer(function StudentGroupView(){
   const studentGroupViewClasses = classNames( "editable-document-content", "document", "student-group-view",
   {"shrink-student-view": shrinkStudentView}, {"comment-select" : documentSelectedForComment});
 
-  const focusedUserIndex = focusedGroupUser && group?.sortedUsers.indexOf(focusedGroupUser);
-  const focusedUserQuadrant = focusedUserIndex === undefined ? undefined : getQuadrant(focusedUserIndex);
-
   return (
     <div key="student-group-view" className={studentGroupViewClasses}>
-      <GroupViewTitlebar />
+      <GroupViewTitlebar group={group} groupUser={focusedGroupUser} />
       <GroupTitlebar group={group} groupUser={focusedGroupUser} />
       <div className="canvas-area">
-        <FourUpComponent groupId={selectedGroupId}
+        { group &&
+          <FourUpComponent group={group}
                          isGhostUser={true}
                          viaStudentGroupView={true}
-                         focusedUserContext={focusedUserQuadrant}
-        />
+          />
+        }
       </div>
     </div>
   );
 });
 
-const GroupViewTitlebar: React.FC = observer(function GroupViewTitlebar() {
+interface IGroupComponentProps {
+  group?: GroupModelType;
+  groupUser?: GroupUserModelType;
+}
+
+const GroupViewTitlebar: React.FC<IGroupComponentProps> = observer(function GroupViewTitlebar({group, groupUser}) {
   const {groups, ui} = useStores();
-  const groupId = ui.tabs.get("student-work")?.openSubTab;
-  const group = groups.getGroupById(groupId);
-  const openDocId = ui.tabs.get("student-work")?.openDocuments.get(groupId || "");
-  const focusedGroupUser = group?.users.find(obj => obj.problemDocument?.key === openDocId);
+  const focusedGroupUser = groupUser;
 
   const handleFocusedUserChange = (selectedUser: GroupUserModelType) => {
-    groupId && selectedUser.problemDocument &&
-      ui.openSubTabDocument("student-work", groupId, selectedUser.problemDocument.key);
+    group?.id && selectedUser.problemDocument &&
+      ui.openSubTabDocument("student-work", group.id, selectedUser.problemDocument.key);
   };
 
   const handleSelectGroup = (id: string) => {
@@ -86,7 +86,7 @@ const GroupViewTitlebar: React.FC = observer(function GroupViewTitlebar() {
             .filter(g => g.users.length > 0)
             .map(g => {
               return <GroupButton displayId={g.displayId} id={g.id} key={g.id}
-                                  selected={g.id === groupId}
+                                  selected={g.id === group?.id}
                                   onSelectGroup={handleSelectGroup} />;
             })
         }
@@ -111,12 +111,7 @@ const GroupButton: React.FC<IGroupButtonProps> = ({ displayId, id, selected, onS
   );
 };
 
-interface IGroupTitlebarProps {
-  group?: GroupModelType;
-  groupUser?: GroupUserModelType;
-}
-
-const GroupTitlebar: React.FC<IGroupTitlebarProps> = observer(function GroupTitlebar({group, groupUser}) {
+const GroupTitlebar: React.FC<IGroupComponentProps> = observer(function GroupTitlebar({group, groupUser}) {
   const problem = useProblemStore();
   const document= groupUser?.problemDocument;
   const userDocTitle = document?.title || "Document";
@@ -133,8 +128,3 @@ const GroupTitlebar: React.FC<IGroupTitlebarProps> = observer(function GroupTitl
     </div>
   );
 });
-
-const quadrants: Array<string | undefined> = [ "four-up-nw", "four-up-ne", "four-up-se", "four-up-sw"];
-function getQuadrant(groupUserIndex: number) {
-  return quadrants[groupUserIndex];
-}

@@ -74,13 +74,14 @@ export class GroupVirtualDocumentComponent extends BaseComponent<IProps, IState>
   }
 
   private render4UpCanvas() {
-    const { user } = this.stores;
+    const { user, groups } = this.stores;
     const { document } = this.props;
-    const groupId = document.id;
-    return (
+    const group = groups.getGroupById(document.id);
+
+    return (group &&
       <FourUpComponent
-        userId={ user.id }
-        groupId={ groupId }
+        // userId={ user.id }
+        group={ group }
         isGhostUser={true} />
     );
   }

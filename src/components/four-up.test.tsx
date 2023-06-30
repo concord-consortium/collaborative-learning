@@ -53,7 +53,14 @@ describe("Four Up Component", () => {
     });
 
     const stores = specStores({ groups, documents });
-    const { container } = render(<FourUpComponent userId={document.uid} groupId={document.groupId} stores={stores}/>);
+
+    // This used to be passing a userId of the 3rd user, but the test implies
+    // that it should be showing the 4up view not a single document, so I'd guess
+    // this userId has been ignored or doesn't represent the focused user
+    // stores.ui.openSubTabDocument("student-work", group.id, document.key);
+
+    // const { container } = render(<FourUpComponent userId={document.uid} group={group} stores={stores}/>);
+    const { container } = render(<FourUpComponent group={group} stores={stores}/>);
     expect(screen.queryAllByTestId("canvas")).toHaveLength(4);
     expect(container.querySelectorAll(".member")).toHaveLength(1);
   });
@@ -95,7 +102,13 @@ describe("Four Up Component", () => {
 
     const stores = specStores({ user, groups, documents });
 
-    const { container } = render(<FourUpComponent userId={user.id} groupId={group.id} stores={stores}/>);
+    // This used to be passing a userId of the 3rd user, but the test implies
+    // that it should be showing the 4up view not a single document, so I'd guess
+    // this userId has been ignored or doesn't represent the focused user
+    // stores.ui.openSubTabDocument("student-work", group.id, document.key);
+
+    // const { container } = render(<FourUpComponent userId={user.id} group={group} stores={stores}/>);
+    const { container } = render(<FourUpComponent group={group} stores={stores}/>);
     // A canvas will be rendered unless an "unshared document" message is displayed.
     // User 2 has no document, so it will display an "unshared document" message.
     // User 1 has a shared document, User 3 is the main user, and there is no fourth user. All of those show canvases.
