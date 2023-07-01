@@ -87,35 +87,10 @@ $scroller-height: 145px;
             right: 0;
           }
         }
-        .scroll-arrow-button {
-          opacity: 100%;
-          border-radius: 50%;
-          width: 40px;
-          height: 40px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          position: absolute;
-          &.collapsed {
-            display: none;
-          }
-          .scroll-arrow-icon {
-            &.right {
-              transform: rotate(180deg);
-            }
-            &.class-work {
-              fill: $classwork-purple-dark-1;
-            }
-            &.my-work {
-              fill: $workspace-teal-dark-1;
-            }
-          }
-        }
       }
     }
     .document-area {
       height: calc(100vh - #{$header-offset-with-sub-tabs});
-
       .document-header {
         display: flex;
         align-items: center;
@@ -124,6 +99,8 @@ $scroller-height: 145px;
         margin-top: $title-margin;
         justify-content: center;
         position: relative;
+        top: 0;
+        width: 100%;
         &.my-work {
           background-color: $workspace-teal-light-4;
         }
@@ -190,6 +167,50 @@ $scroller-height: 145px;
               fill: $learninglog-green-dark-1;
             }
           }
+        }
+      }
+      .scroll-arrow-button-wrapper {
+        position: relative;
+        top: calc((100vh/2) - $scroller-height - 20px);
+        &.left {
+          left: 0px;
+          top: calc((100vh/2) - $scroller-height - 20px);
+        }
+        &.right {
+          right: 2px;
+          top: calc((-100vh/2) + 20px + $scroller-height);
+        }
+      }
+    }
+
+    .scroll-arrow-button {
+      opacity: 100%;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      z-index: 5;
+      &.collapsed {
+        display: none;
+      }
+      &.left {
+        left: 2px;
+      }
+      &.right {
+        right: 2px;
+      }
+      .scroll-arrow-icon {
+        &.right {
+          transform: rotate(180deg);
+        }
+        &.class-work {
+          fill: $classwork-purple-dark-1;
+        }
+        &.my-work {
+          fill: $workspace-teal-dark-1;
         }
       }
     }

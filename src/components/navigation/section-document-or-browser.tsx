@@ -7,7 +7,7 @@ import { getDocumentDisplayTitle } from "../../models/document/document-utils";
 import { logDocumentEvent } from "../../models/document/log-document-event";
 import { ISubTabSpec, NavTabModelType } from "../../models/view/nav-tabs";
 import { EditableDocumentContent } from "../document/editable-document-content";
-import { useAppConfig, useClassStore, useProblemStore, useStores,
+import { useAppConfig, useClassStore, useLocalDocuments, useProblemStore, useStores,
   useUIStore, useUserStore } from "../../hooks/use-stores";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
@@ -36,6 +36,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
   const queryClient = useQueryClient();
   const user = useUserStore();
   const classStore = useClassStore();
+  const documents = useLocalDocuments();
   const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
   const subTabs = tabSpec.subTabs;
   const tabState = navTabSpec && ui.tabs.get(navTabSpec?.tab);
@@ -69,18 +70,22 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
   };
 
   const handleSelectDocument = (document: DocumentModelType) => {
-    if (!document.hasContent && document.isRemote) {
-      loadDocumentContent(document);
+    if (ui.focusDocument === document.key) {
+      ui.closeSubTabDocument(tabSpec.tab, selectedSubTab.label);
+    } else {
+      if (!document.hasContent && document.isRemote) {
+        loadDocumentContent(document);
+      }
+      // The subTabIndex is computed above on every render. It is the index
+      // of the currently open subTab. Its also passed to the Tab component
+      // below.
+      // const selectedSubTab = subTabs[subTabIndex];
+      ui.openSubTabDocument(tabSpec.tab, selectedSubTab.label, document.key);
+      const logEvent = document.isRemote
+        ? LogEventName.VIEW_SHOW_TEACHER_NETWORK_COMPARISON_DOCUMENT
+        : LogEventName.VIEW_SHOW_COMPARISON_DOCUMENT;
+      logDocumentEvent(logEvent, { document });
     }
-    // The subTabIndex is computed above on every render. It is the index
-    // of the currently open subTab. Its also passed to the Tab component
-    // below.
-    // const selectedSubTab = subTabs[subTabIndex];
-    ui.openSubTabDocument(tabSpec.tab, selectedSubTab.label, document.key);
-    const logEvent = document.isRemote
-      ? LogEventName.VIEW_SHOW_TEACHER_NETWORK_COMPARISON_DOCUMENT
-      : LogEventName.VIEW_SHOW_COMPARISON_DOCUMENT;
-    logDocumentEvent(logEvent, { document });
   };
 
   const loadDocumentContent = async (document: DocumentModelType) => {
@@ -145,13 +150,30 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
       store.networkDocuments.getDocument(openDocumentKey);
     const publishedDoc = openDocument?.type === "publication" || openDocument?.type === "personalPublication";
     const showPlayback = user.type && !publishedDoc? appConfigStore.enableHistoryRoles.includes(user.type) : false;
-
-    if (selectedSubTab.label !== "Starred" && (!openDocument || openDocument.getProperty("isDeleted"))) return false;
-
+    const isStarredTab = selectedSubTab.label === "Starred";
+    const classWorkDocuments = documents.byType("publication");
+    const starredClassWorkDocuments = classWorkDocuments.filter(doc => doc.isStarred);
+    const currentOpenDocIndex = openDocument && starredClassWorkDocuments.indexOf(openDocument);
+    if (!isStarredTab && (!openDocument || openDocument.getProperty("isDeleted"))) return false;
     const sectionClass = openDocument?.type === "learningLog" ? "learning-log" : "";
+
+    // Published documents are listed in reverse order of index so previous and next toggles are also reversed
+    const handleShowPrevDocument = () => {
+      if (currentOpenDocIndex && currentOpenDocIndex > 0) {
+        const prevDocumentKey = starredClassWorkDocuments[currentOpenDocIndex + 1].key;
+        ui.openSubTabDocument(tabSpec.tab, subTab.label, prevDocumentKey);
+      }
+    };
+    const handleShowNextDocument = () => {
+      if (currentOpenDocIndex && currentOpenDocIndex < starredClassWorkDocuments.length) {
+        const nextDocumentKey = starredClassWorkDocuments[currentOpenDocIndex - 1].key;
+        ui.openSubTabDocument(tabSpec.tab, subTab.label, nextDocumentKey);
+      }
+    };
+
     return (
       <div className="scroller-and-document">
-        { selectedSubTab.label === "Starred" &&
+        { isStarredTab &&
           <DocumentBrowserScroller subTab={subTab} tabSpec={tabSpec} openDocumentKey={openDocumentKey}
               onSelectDocument={handleSelectDocument} />
         }
@@ -165,6 +187,11 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
                 {(!openDocument.isRemote)
                     && editButton(tabSpec.tab, sectionClass, openDocument)}
               </div>
+              {isStarredTab &&
+                <div className="scroll-arrow-button-wrapper left">
+                  <ScrollButton side={"left"} tab={tabSpec.tab} onScroll={handleShowPrevDocument}/>
+                </div>
+              }
               <EditableDocumentContent
                 mode={"1-up"}
                 isPrimary={false}
@@ -172,6 +199,12 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
                 readOnly={true}
                 showPlayback={showPlayback}
               />
+              {isStarredTab &&
+                <div className="scroll-arrow-button-wrapper right">
+                  <ScrollButton side={"right"} tab={tabSpec.tab} onScroll={handleShowNextDocument}/>
+                </div>
+              }
+
             </div>
         }
       </div>
@@ -216,7 +249,7 @@ const DocumentBrowserScroller =
     setScrollToLocation((prevState) => {
       const tempScrollTo = prevState + (direction * panelWidth);
       if (tempScrollTo === 0) {
-        return (direction * panelWidth);
+        return (direction * panelWidth - 100);
       } else {
         return tempScrollTo;
       }
@@ -260,7 +293,7 @@ const DocumentBrowserScroller =
 
 interface IScrollEndControlProps {
   side: string;
-  collapsed: boolean;
+  collapsed?: boolean;
   tab: string;
   onScroll: (side: string) => void
 }
@@ -269,10 +302,21 @@ const ScrollEndControl = ({side, collapsed, tab, onScroll}: IScrollEndControlPro
   return (
     <div className={classNames("scroller-controls", side, {collapsed})}>
       <div className={`scroller-controls-overlay ${side}`}/>
-      <div className={classNames("scroll-arrow-button", "themed", tab, {collapsed})}
+      <ScrollButton side={side} collapsed={collapsed} tab={tab}
+                onScroll={onScroll} />
+     {/* <div className={classNames("scroll-arrow-button", "themed", tab, {collapsed})}
             onClick={()=>onScroll(side)}>
         <ScrollArrowIcon className={`scroll-arrow-icon ${side} themed ${tab}`} />
-      </div>
+      </div> */}
+    </div>
+  );
+};
+
+const ScrollButton = ({side, collapsed, tab, onScroll}: IScrollEndControlProps) => {
+  return (
+    <div className={classNames("scroll-arrow-button", "themed", tab, side, {collapsed})}
+          onClick={()=>onScroll(side)}>
+      <ScrollArrowIcon className={`scroll-arrow-icon ${side} themed ${tab}`} />
     </div>
   );
 };
