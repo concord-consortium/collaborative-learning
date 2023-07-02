@@ -3,7 +3,7 @@ import React from "react";
 import { useStores } from "../../../hooks/use-stores";
 import { BaseComponent, IBaseProps } from "../../../components/base";
 import { DocumentViewMode } from "../../../components/document/document";
-import { FourUpComponent } from "../../../components/four-up";
+import { FourUpComponent, getUIStudentWorkTab } from "../../../components/four-up";
 import { IconButton } from "../../../components/utilities/icon-button";
 import { Logger } from "../../../lib/logger";
 import { LogEventName } from "../../../lib/logger-types";
@@ -42,7 +42,11 @@ export class TeacherGroupSixPackFourUp extends BaseComponent<IProps, IState> {
 
     return (
       <div className={`teacher-group group-${row}-${column}`} key={`group-${row}-${column}`}>
-        <TeacherGroupHeader group={ group } />
+        <TeacherGroupHeader
+          group={ group }
+          navTabName={this.getNavTabName()}
+          documentViewMode={documentViewMode}
+        />
         <div className="teacher-group-canvas-container">
           <div className="teacher-group-canvas">
             <FourUpComponent
@@ -60,9 +64,21 @@ export class TeacherGroupSixPackFourUp extends BaseComponent<IProps, IState> {
     );
   }
 
+/**
+ * When the dashboard is showing published documents, we use a fake tab called
+ * student-work-published to keep track of which documents are open. This
+ * corresponds the focused user.
+ *
+ * @returns
+ */
+  private getNavTabName() {
+    return getUIStudentWorkTab(this.props.documentViewMode);
+  }
+
+  // FIXME: this sounds like it should be opening this user's document
   private setFocusedGroupUser = (focusedGroupUser?: GroupUserModelType) => {
     const {ui} = this.stores;
-    ui.setOpenSubTab("student-work", this.props.group.id);
+    ui.setOpenSubTab(this.getNavTabName(), this.props.group.id);
   };
 }
 
@@ -71,15 +87,26 @@ interface IGroupRecord {
 }
 interface IGroupHeaderProps {
   group: IGroupRecord;
+  navTabName: string;
+  documentViewMode?: DocumentViewMode
 }
 
-const TeacherGroupHeader: React.FC<IGroupHeaderProps> = observer(function TeacherGroupHeader({group}){
+const TeacherGroupHeader: React.FC<IGroupHeaderProps> = observer(function TeacherGroupHeader(
+    {group, navTabName, documentViewMode}){
   const { ui, db, groups }  = useStores();
 
-  // FIXME: probably need to handle student-work-publisehd
-  const openDocId = ui.tabs.get("student-work")?.openDocuments.get(group.id);
+  const getUserDocument = (groupUser?: GroupUserModelType) => {
+    if (documentViewMode === DocumentViewMode.Published) {
+      return groupUser?.lastPublishedProblemDocument;
+    } else {
+      return groupUser?.problemDocument;
+    }
+  };
+
+  const openDocId = ui.tabs.get(navTabName)?.openDocuments.get(group.id);
   const groupModel = groups.getGroupById(group.id);
-  const focusedGroupUser = groupModel?.users.find(obj => obj.problemDocument?.key === openDocId);
+  const focusedGroupUser = groupModel?.users.find(obj => getUserDocument(obj)?.key === openDocId);
+
 
   const messageClickHandler = () => {
     if (focusedGroupUser) {
