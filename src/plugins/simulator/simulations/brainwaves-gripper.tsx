@@ -63,7 +63,7 @@ export const brainwavesGripperSimulation: ISimulation = {
     },
     {
       displayName: "Surface Pressure",
-      labels: ["input", "sensor:fsr-reading"],
+      labels: ["input", "sensor:fsr-reading", "className:long-name"],
       icon: iconUrl(kPressureKey),
       id: kPressureKey,
       value: 0,
