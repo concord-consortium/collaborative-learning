@@ -3,7 +3,7 @@ import React from "react";
 import { useStores } from "../../../hooks/use-stores";
 import { BaseComponent, IBaseProps } from "../../../components/base";
 import { DocumentViewMode } from "../../../components/document/document";
-import { FourUpComponent, getUIStudentWorkTab } from "../../../components/four-up";
+import { FourUpComponent, getFocusedGroupUser, getUIStudentWorkTab } from "../../../components/four-up";
 import { IconButton } from "../../../components/utilities/icon-button";
 import { Logger } from "../../../lib/logger";
 import { LogEventName } from "../../../lib/logger-types";
@@ -95,18 +95,9 @@ const TeacherGroupHeader: React.FC<IGroupHeaderProps> = observer(function Teache
     {group, navTabName, documentViewMode}){
   const { ui, db, groups }  = useStores();
 
-  const getUserDocument = (groupUser?: GroupUserModelType) => {
-    if (documentViewMode === DocumentViewMode.Published) {
-      return groupUser?.lastPublishedProblemDocument;
-    } else {
-      return groupUser?.problemDocument;
-    }
-  };
-
   const openDocId = ui.tabs.get(navTabName)?.openDocuments.get(group.id);
   const groupModel = groups.getGroupById(group.id);
-  const focusedGroupUser = groupModel?.users.find(obj => getUserDocument(obj)?.key === openDocId);
-
+  const focusedGroupUser = getFocusedGroupUser(groupModel, openDocId, documentViewMode);
 
   const messageClickHandler = () => {
     if (focusedGroupUser) {

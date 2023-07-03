@@ -5,7 +5,8 @@ import { GroupModelType, GroupUserModelType } from "../../models/stores/groups";
 import { useProblemStore, useStores } from "../../hooks/use-stores";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
-import { FourUpComponent, getQuadrant } from "../four-up";
+import { FourUpComponent, getFocusedGroupUser, getQuadrant } from "../four-up";
+import { DocumentViewMode } from "./document";
 
 import "./student-group-view.scss";
 
@@ -18,7 +19,7 @@ export const StudentGroupView:React.FC = observer(function StudentGroupView(){
   const selectedGroupId = ui.tabs.get("student-work")?.openSubTab || "";
   const group = groups.getGroupById(selectedGroupId);
   const openDocId = ui.tabs.get("student-work")?.openDocuments.get(selectedGroupId);
-  const focusedGroupUser = group?.users.find(obj => obj.problemDocument?.key === openDocId);
+  const focusedGroupUser = getFocusedGroupUser(group, openDocId, DocumentViewMode.Live);
   const isStudentViewActiveTab = (ui.activeNavTab === "student-work");
   const isChatPanelShown = ui.showChatPanel;
   const shrinkStudentView  = isStudentViewActiveTab && isChatPanelShown;

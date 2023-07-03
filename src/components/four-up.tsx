@@ -70,6 +70,24 @@ export function getUIStudentWorkTab(mode?: DocumentViewMode) {
   return mode === DocumentViewMode.Published ? "student-work-published" : "student-work";
 }
 
+export function getUserDocument(groupUser: GroupUserModelType | undefined, mode: DocumentViewMode | undefined) {
+  if (mode === DocumentViewMode.Published) {
+    return groupUser?.lastPublishedProblemDocument;
+  } else {
+    return groupUser?.problemDocument;
+  }
+}
+
+export function getFocusedGroupUser(group: GroupModelType| undefined, openDocId: string | undefined,
+    mode: DocumentViewMode | undefined) {
+  if (!openDocId || !group) return undefined;
+
+  return group?.users.find(obj => {
+    const userDoc = getUserDocument(obj, mode);
+    return userDoc?.key === openDocId;
+  });
+}
+
 @inject("stores")
 @observer
 export class FourUpComponent extends BaseComponent<IProps, IState> {
@@ -127,11 +145,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
 
   private getGroupUserDoc(groupUser?: GroupUserModelType) {
     const {documentViewMode} = this.props;
-    if (documentViewMode === DocumentViewMode.Published) {
-      return groupUser?.lastPublishedProblemDocument;
-    } else {
-      return groupUser?.problemDocument;
-    }
+    return getUserDocument(groupUser, documentViewMode);
   }
 
   public render() {
