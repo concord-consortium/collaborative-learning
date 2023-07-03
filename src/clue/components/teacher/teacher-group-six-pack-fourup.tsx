@@ -56,7 +56,6 @@ export class TeacherGroupSixPackFourUp extends BaseComponent<IProps, IState> {
               documentViewMode={documentViewMode}
               selectedSectionId={selectedSectionId}
               viaTeacherDashboard={true}
-              setFocusedGroupUser={this.setFocusedGroupUser}
             />
           </div>
         </div>
@@ -74,12 +73,6 @@ export class TeacherGroupSixPackFourUp extends BaseComponent<IProps, IState> {
   private getNavTabName() {
     return getUIStudentWorkTab(this.props.documentViewMode);
   }
-
-  // FIXME: this sounds like it should be opening this user's document
-  private setFocusedGroupUser = (focusedGroupUser?: GroupUserModelType) => {
-    const {ui} = this.stores;
-    ui.setOpenSubTab(this.getNavTabName(), this.props.group.id);
-  };
 }
 
 interface IGroupRecord {
