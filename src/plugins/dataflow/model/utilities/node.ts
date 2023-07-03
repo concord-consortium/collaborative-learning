@@ -31,7 +31,7 @@ import LightIcon from "../../assets/icons/sensor/light.svg";
 import O2Icon from "../../assets/icons/sensor/o2.svg";
 import ParticulatesIcon from "../../assets/icons/sensor/particulates.svg";
 import MoistureIcon from "../../assets/icons/sensor/moisture.svg";
-import EmgIcon from "../../assets/icons/sensor/emg.svg";
+import EmgIcon from "../../../shared-assets/icons/dataflow/control/signal.svg";
 import PressureIcon from "../../../shared-assets/icons/dataflow/sensor/pressure.svg";
 
 import AbsoluteValueIcon from "../../assets/icons/transform/absolute-value.svg";
