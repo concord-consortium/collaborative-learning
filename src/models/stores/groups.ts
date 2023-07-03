@@ -145,6 +145,9 @@ export const GroupsModel = types
         });
       });
       return groupsByUser;
+    },
+    get nonEmptyGroups() {
+      return self.allGroups.filter(g => g.users.length > 0);
     }
   }))
   .views((self) => ({

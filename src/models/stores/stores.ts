@@ -148,7 +148,7 @@ class Stores implements IStores{
   get studentWorkTabSelectedGroupId() {
     const { ui, groups } = this;
     return ui.tabs.get("student-work")?.openSubTab
-        || (groups.allGroups.length ? groups.allGroups[0].id : "");
+        || (groups.nonEmptyGroups.length ? groups.nonEmptyGroups[0].id : "");
   }
 
   /**

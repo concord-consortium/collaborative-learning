@@ -83,8 +83,7 @@ const GroupViewTitlebar: React.FC<IGroupComponentProps> = observer(function Grou
               );
             })}
           </>
-        : groups.allGroups
-            .filter(g => g.users.length > 0)
+        : groups.nonEmptyGroups
             .map(g => {
               return <GroupButton displayId={g.displayId} id={g.id} key={g.id}
                                   selected={g.id === group?.id}

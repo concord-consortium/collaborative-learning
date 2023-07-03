@@ -43,7 +43,7 @@ export class TeacherGroupSixPack extends BaseComponent<IProps, IState> {
     const { page, documentViewMode, selectedSectionId } = this.props;
     const { groups } = this.stores;
     const renders = [];
-    const renderGroups = groups.allGroups.filter(group => group.users.length > 0);
+    const renderGroups = groups.nonEmptyGroups;
     const numberOfGroups = renderGroups.length;
     for (let row = 0; row < ROWS; row++) {
       for (let column = 0; column < COLUMNS; column++) {
