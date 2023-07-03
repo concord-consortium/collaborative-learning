@@ -6,6 +6,7 @@ import { DocumentModelType } from "../../models/document/document";
 import { getDocumentDisplayTitle } from "../../models/document/document-utils";
 import { logDocumentEvent } from "../../models/document/log-document-event";
 import { ISubTabSpec, NavTabModelType } from "../../models/view/nav-tabs";
+import { DocumentType } from "src/models/document/document-types";
 import { EditableDocumentContent } from "../document/editable-document-content";
 import { useAppConfig, useClassStore, useLocalDocuments, useProblemStore, useStores,
   useUIStore, useUserStore } from "../../hooks/use-stores";
@@ -143,6 +144,17 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     );
   };
 
+  const getStarredDocuments = (types: DocumentType[]) => {
+    const docs: any = [];
+      types.forEach((type) => {
+        const docsByTypeArr = documents.byType(type);
+        docsByTypeArr.forEach(doc => {
+          docs.push(doc);
+        });
+      });
+    const starredDocs = docs.filter((doc: { isStarred: any; }) => doc.isStarred);
+      return starredDocs;
+  };
   //TODO: Need to refactor this if we want to deploy to all tabs
   const renderDocumentView = (subTab: ISubTabSpec) => {
     const openDocumentKey = tabState?.openDocuments.get(subTab.label) || "";
@@ -151,26 +163,51 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     const publishedDoc = openDocument?.type === "publication" || openDocument?.type === "personalPublication";
     const showPlayback = user.type && !publishedDoc? appConfigStore.enableHistoryRoles.includes(user.type) : false;
     const isStarredTab = selectedSubTab.label === "Starred";
-    const classWorkDocuments = documents.byType("publication");
-    const starredClassWorkDocuments = classWorkDocuments.filter(doc => doc.isStarred);
-    const currentOpenDocIndex = openDocument && starredClassWorkDocuments.indexOf(openDocument);
+    const documentTypes: DocumentType[] = tabSpec.tab === "class-work"
+                                            ? ["publication"]
+                                            : tabSpec.tab === "my-work" && subTab.label === "Starred"
+                                              ? ["problem", "personal"]
+                                              : [];
+    const starredDocuments = getStarredDocuments(documentTypes);
+    console.log("starredDocuments", starredDocuments);
+    const currentOpenDocIndex = openDocument && starredDocuments.indexOf(openDocument);
     if (!isStarredTab && (!openDocument || openDocument.getProperty("isDeleted"))) return false;
     const sectionClass = openDocument?.type === "learningLog" ? "learning-log" : "";
 
     // Published documents are listed in reverse order of index so previous and next toggles are also reversed
     const handleShowPrevDocument = () => {
-      if (currentOpenDocIndex && currentOpenDocIndex > 0) {
-        const prevDocumentKey = starredClassWorkDocuments[currentOpenDocIndex + 1].key;
-        ui.openSubTabDocument(tabSpec.tab, subTab.label, prevDocumentKey);
+      let prevDocumentKey = "";
+      const prevDocIndex = tabSpec.tab === "class-work" ? currentOpenDocIndex + 1 : currentOpenDocIndex - 1;
+      if (tabSpec.tab === "class-work" && prevDocIndex < starredDocuments.length - 1) {
+          prevDocumentKey = starredDocuments[prevDocIndex].key;
+      } else {
+        if (prevDocIndex > 0) {
+          prevDocumentKey = starredDocuments[prevDocIndex].key;
+        }
       }
+      ui.openSubTabDocument(tabSpec.tab, subTab.label, prevDocumentKey);
     };
     const handleShowNextDocument = () => {
-      if (currentOpenDocIndex && currentOpenDocIndex < starredClassWorkDocuments.length) {
-        const nextDocumentKey = starredClassWorkDocuments[currentOpenDocIndex - 1].key;
-        ui.openSubTabDocument(tabSpec.tab, subTab.label, nextDocumentKey);
+      let nextDocumentKey = "";
+      const nextDocIndex = tabSpec.tab === "class-work" ? currentOpenDocIndex - 1 : currentOpenDocIndex + 1;
+      if (tabSpec.tab === "class-work" && nextDocIndex > 0) {
+        nextDocumentKey = starredDocuments[nextDocIndex].key;
+      } else {
+        if (nextDocIndex < starredDocuments.length - 1) {
+          nextDocumentKey = starredDocuments[nextDocIndex].key;
+        }
       }
+      ui.openSubTabDocument(tabSpec.tab, subTab.label, nextDocumentKey);
     };
 
+    const isLeftFlipperVisible = (tabSpec.tab === "class-work" && (currentOpenDocIndex < starredDocuments.length - 1))
+                                    || (tabSpec.tab !== "class-work" && currentOpenDocIndex > 0);
+    const isRightFlipperVisible = (tabSpec.tab === "class-work" && currentOpenDocIndex > 0)
+                                    || (tabSpec.tab !== "class-work" &&
+                                          currentOpenDocIndex < starredDocuments.length - 1);
+
+    console.log("currentOpenDocIndex", currentOpenDocIndex, "length", starredDocuments.length);
+    console.log("isLeftFlipperVisible", (tabSpec.tab === "class-work" && (currentOpenDocIndex < starredDocuments.length - 1)), (tabSpec.tab !== "class-work" && currentOpenDocIndex > 0));
     return (
       <div className="scroller-and-document">
         { isStarredTab &&
@@ -187,7 +224,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
                 {(!openDocument.isRemote)
                     && editButton(tabSpec.tab, sectionClass, openDocument)}
               </div>
-              {isStarredTab &&
+              {(isStarredTab && isLeftFlipperVisible) &&
                 <div className="scroll-arrow-button-wrapper left">
                   <ScrollButton side={"left"} tab={tabSpec.tab} onScroll={handleShowPrevDocument}/>
                 </div>
@@ -199,7 +236,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
                 readOnly={true}
                 showPlayback={showPlayback}
               />
-              {isStarredTab &&
+              {(isStarredTab && isRightFlipperVisible) &&
                 <div className="scroll-arrow-button-wrapper right">
                   <ScrollButton side={"right"} tab={tabSpec.tab} onScroll={handleShowNextDocument}/>
                 </div>
