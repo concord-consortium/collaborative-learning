@@ -87,6 +87,12 @@ export function getFocusedGroupUser(group: GroupModelType| undefined, openDocId:
   });
 }
 
+/**
+ * The state of the currently focused group member is stored in `stores.ui.tabs`. This is the
+ * case even when a student is running CLUE and they show the FourUp view to see their group
+ * member's work. The default tab id is "student-work", if the documentViewMode is Published
+ * then the tab id is "student-work-published".
+ */
 @inject("stores")
 @observer
 export class FourUpComponent extends BaseComponent<IProps, IState> {
@@ -390,7 +396,6 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleOverlayClick = (groupUser?: GroupUserModelType) => {
-    console.log("handleOverlayClick");
     const { ui } = this.stores;
     const { group } = this.props;
     const focusedUser = this.getFocusedGroupUser();
