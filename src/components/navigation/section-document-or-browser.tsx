@@ -169,7 +169,6 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
                                               ? ["problem", "personal"]
                                               : [];
     const starredDocuments = getStarredDocuments(documentTypes);
-    console.log("starredDocuments", starredDocuments);
     const currentOpenDocIndex = openDocument && starredDocuments.indexOf(openDocument);
     if (!isStarredTab && (!openDocument || openDocument.getProperty("isDeleted"))) return false;
     const sectionClass = openDocument?.type === "learningLog" ? "learning-log" : "";
@@ -178,36 +177,26 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     const handleShowPrevDocument = () => {
       let prevDocumentKey = "";
       const prevDocIndex = tabSpec.tab === "class-work" ? currentOpenDocIndex + 1 : currentOpenDocIndex - 1;
-      if (tabSpec.tab === "class-work" && prevDocIndex < starredDocuments.length - 1) {
-          prevDocumentKey = starredDocuments[prevDocIndex].key;
-      } else {
-        if (prevDocIndex > 0) {
-          prevDocumentKey = starredDocuments[prevDocIndex].key;
-        }
-      }
+      if ((tabSpec.tab === "class-work" && prevDocIndex < starredDocuments.length - 1)
+          || (tabSpec.tab !== "class-work" && prevDocIndex >= 0))
+      { prevDocumentKey = starredDocuments[prevDocIndex].key; }
       ui.openSubTabDocument(tabSpec.tab, subTab.label, prevDocumentKey);
     };
     const handleShowNextDocument = () => {
       let nextDocumentKey = "";
       const nextDocIndex = tabSpec.tab === "class-work" ? currentOpenDocIndex - 1 : currentOpenDocIndex + 1;
-      if (tabSpec.tab === "class-work" && nextDocIndex > 0) {
+      if ((tabSpec.tab === "class-work" && nextDocIndex > 0)
+        || (tabSpec.tab !== "class-work" && nextDocIndex < starredDocuments.length)) {
         nextDocumentKey = starredDocuments[nextDocIndex].key;
-      } else {
-        if (nextDocIndex < starredDocuments.length - 1) {
-          nextDocumentKey = starredDocuments[nextDocIndex].key;
-        }
       }
       ui.openSubTabDocument(tabSpec.tab, subTab.label, nextDocumentKey);
     };
-
     const isLeftFlipperVisible = (tabSpec.tab === "class-work" && (currentOpenDocIndex < starredDocuments.length - 1))
                                     || (tabSpec.tab !== "class-work" && currentOpenDocIndex > 0);
     const isRightFlipperVisible = (tabSpec.tab === "class-work" && currentOpenDocIndex > 0)
                                     || (tabSpec.tab !== "class-work" &&
                                           currentOpenDocIndex < starredDocuments.length - 1);
 
-    console.log("currentOpenDocIndex", currentOpenDocIndex, "length", starredDocuments.length);
-    console.log("isLeftFlipperVisible", (tabSpec.tab === "class-work" && (currentOpenDocIndex < starredDocuments.length - 1)), (tabSpec.tab !== "class-work" && currentOpenDocIndex > 0));
     return (
       <div className="scroller-and-document">
         { isStarredTab &&
