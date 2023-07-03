@@ -1,10 +1,10 @@
 import React from "react";
 
 import { arduinoFrames, armFrames, gripperFrames } from "./brainwaves-gripper-assets";
-import { ISimulation, ISimulationProps } from "./simulation-types";
-import { findVariable, getFrame } from "./simulation-utilities";
-import { demoStreams } from "../../shared-assets/data/dataflow/demo-data";
-import { iconUrl, kEMGKey, kGripperKey, kPressureKey } from "../../shared-assets/icons/icon-utilities";
+import { ISimulation, ISimulationProps } from "../simulation-types";
+import { findVariable, getFrame } from "../simulation-utilities";
+import { demoStreams } from "../../../shared-assets/data/dataflow/demo-data";
+import { iconUrl, kEMGKey, kGripperKey, kPressureKey } from "../../../shared-assets/icons/icon-utilities";
 
 import "./brainwaves-gripper.scss";
 
