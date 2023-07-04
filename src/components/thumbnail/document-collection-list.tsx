@@ -55,6 +55,12 @@ export const DocumentCollectionList: React.FC<IProps> = observer(function Docume
     };
   },[handleBrowserScroll]);
 
+  useEffect(() => {
+    if(scrollToLocation) {
+      documentListRef.current?.scroll({left: scrollToLocation, behavior: "smooth"});
+    }
+  },[scrollToLocation]);
+
   const handleDocumentDragStart = (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => {
     e.dataTransfer.setData(DocumentDragKey, document.key);
   };
@@ -74,10 +80,6 @@ export const DocumentCollectionList: React.FC<IProps> = observer(function Docume
         }
       });
   };
-
-  if(scrollToLocation) {
-    documentListRef.current?.scroll({left: scrollToLocation, behavior: "smooth"});
-  }
 
   return (
     <div className={classNames("doc-collection-list", {horizontal, collapsed})}

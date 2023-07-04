@@ -72,10 +72,6 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     if (!document.hasContent && document.isRemote) {
       loadDocumentContent(document);
     }
-    // The subTabIndex is computed above on every render. It is the index
-    // of the currently open subTab. Its also passed to the Tab component
-    // below.
-    // const selectedSubTab = subTabs[subTabIndex];
     ui.openSubTabDocument(tabSpec.tab, selectedSubTab.label, document.key);
     const logEvent = document.isRemote
       ? LogEventName.VIEW_SHOW_TEACHER_NETWORK_COMPARISON_DOCUMENT
@@ -143,10 +139,11 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     const openDocumentKey = tabState?.openDocuments.get(subTab.label) || "";
     const openDocument = store.documents.getDocument(openDocumentKey) ||
       store.networkDocuments.getDocument(openDocumentKey);
-    const publishedDoc = openDocument?.type === "publication" || openDocument?.type === "personalPublication";
-    const showPlayback = user.type && !publishedDoc? appConfigStore.enableHistoryRoles.includes(user.type) : false;
+    const publishedDoc = openDocument?.type === "publication" || openDocument?.type === "personalPublication"
+                          || openDocument?.type === "learningLogPublication";
+    const showPlayback = user.type && !publishedDoc ? appConfigStore.enableHistoryRoles.includes(user.type) : false;
 
-    if (selectedSubTab.label !== "Starred" && (!openDocument || openDocument.getProperty("isDeleted"))) return false;
+    if (!openDocument || openDocument.getProperty("isDeleted")) return false;
 
     const sectionClass = openDocument?.type === "learningLog" ? "learning-log" : "";
     return (
@@ -155,25 +152,22 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
           <DocumentBrowserScroller subTab={subTab} tabSpec={tabSpec} openDocumentKey={openDocumentKey}
               onSelectDocument={handleSelectDocument} />
         }
-        { !openDocument || openDocument.getProperty("isDeleted")
-          ? null
-          : <div className="document-area">
-              <div className={`document-header ${tabSpec.tab} ${sectionClass}`} onClick={() => ui.setSelectedTile()}>
-                <div className={`document-title`}>
-                  {getDocumentDisplayTitle(openDocument, appConfigStore, problemStore)}
-                </div>
-                {(!openDocument.isRemote)
-                    && editButton(tabSpec.tab, sectionClass, openDocument)}
-              </div>
-              <EditableDocumentContent
-                mode={"1-up"}
-                isPrimary={false}
-                document={openDocument}
-                readOnly={true}
-                showPlayback={showPlayback}
-              />
+        <div className="document-area">
+          <div className={`document-header ${tabSpec.tab} ${sectionClass}`} onClick={() => ui.setSelectedTile()}>
+            <div className={`document-title`}>
+              {getDocumentDisplayTitle(openDocument, appConfigStore, problemStore)}
             </div>
-        }
+            {(!openDocument.isRemote)
+                && editButton(tabSpec.tab, sectionClass, openDocument)}
+          </div>
+          <EditableDocumentContent
+            mode={"1-up"}
+            isPrimary={false}
+            document={openDocument}
+            readOnly={true}
+            showPlayback={showPlayback}
+          />
+        </div>
       </div>
     );
   };
@@ -214,14 +208,21 @@ const DocumentBrowserScroller =
   const handleScrollTo = (side: string) => {
     const direction = side ==="left" ? -1 : 1;
     setScrollToLocation((prevState) => {
-      const tempScrollTo = prevState + (direction * panelWidth);
-      if (tempScrollTo === 0) {
+      const tempScrollTo = prevState < panelWidth
+                            ? prevState < 0
+                              ? (direction * panelWidth)
+                              : (direction * prevState)
+                            : prevState + (direction * panelWidth);
+       if (tempScrollTo === 0) {
         return (direction * panelWidth);
+      } else if (tempScrollTo > scrollWidth - panelWidth) {
+          return scrollWidth - panelWidth;
       } else {
         return tempScrollTo;
       }
     });
   };
+
 
   const handleCollapseScroller = () => {
     setScrollerCollapsed(!scrollerCollapsed);
@@ -245,7 +246,7 @@ const DocumentBrowserScroller =
             setScrollWidth={setScrollWidth}
             setScrollLeft={setScrollLeft}
         />
-        {((scrollWidth - scrollLeft - panelWidth) > 0) &&
+        {(scrollLeft < scrollWidth - panelWidth) &&
             <ScrollEndControl side={"right"} collapsed={scrollerCollapsed} tab={tabSpec.tab}
                 onScroll={handleScrollTo} />
         }
