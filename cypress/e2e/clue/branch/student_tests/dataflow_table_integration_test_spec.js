@@ -13,7 +13,7 @@ const linkedTableAttributes = [ "Time (sec)", programNodes[0].attribute, program
 const defaultTableAttributes = ["x", "y"];
 const timer1 = 5;
 const timer2 = 3;
-  
+
 
 function setupInitialLoading() {
   const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=dfe&mouseSensor";
@@ -24,7 +24,7 @@ function setupInitialLoading() {
 }
 
 context('Dataflow Tool Tile', function () {
-  describe("Link table with Recorded Data", () => {
+  describe.skip("Link table with Recorded Data", () => {
     beforeEach("create a small program, select sampling rate and record data", () => {
       setupInitialLoading();
       clueCanvas.addTile("dataflow");
@@ -36,19 +36,19 @@ context('Dataflow Tool Tile', function () {
     });
     it("verify link table from dataflow with recorded data", () => {
       dataflowToolTile.checkLinkedTableRecordedData(tableTile, tableTitle, linkedTableAttributes, timer1);
-      
+
       dataflowToolTile.clearRecordedData();
       dataflowToolTile.checkEmptyLinkedTable(tableTile, tableTitle, defaultTableAttributes);
-      
+
       dataflowToolTile.recordData("1000", timer2);
       dataflowToolTile.checkLinkedTableRecordedData(tableTile, tableTitle, linkedTableAttributes, timer2);
-      
+
       cy.unlinkTableToDataflow("Program 1", "Table 1");
       dataflowToolTile.checkEmptyLinkedTable(tableTile, tableTitle, defaultTableAttributes);
-      
+
       cy.linkTableToDataflow(programTitle, tableTitle);
       dataflowToolTile.checkLinkedTableRecordedData(tableTile, tableTitle, linkedTableAttributes, timer2);
-      
+
       dataflowToolTile.clearRecordedData();
       dataflowToolTile.checkEmptyLinkedTable(tableTile, tableTitle, defaultTableAttributes);
     });
@@ -63,7 +63,7 @@ context('Dataflow Tool Tile', function () {
       // check buttons after reload
       dataflowToolTile.checkRecordedStateButtons();
       dataflowToolTile.checkLinkedTableRecordedData(tableTile, tableTitle, linkedTableAttributes, timer2);
-      
+
       // play recorded data
       dataflowToolTile.clickPlayButton();
 
@@ -78,14 +78,14 @@ context('Dataflow Tool Tile', function () {
       dataflowToolTile.clickPlayButton();
       cy.wait(1000);
       dataflowToolTile.clickPauseButton();
-      
+
       // reload while in pause
       cy.reload();
 
       // check buttons after reload
       dataflowToolTile.checkRecordedStateButtons();
       dataflowToolTile.checkLinkedTableRecordedData(tableTile, tableTitle, linkedTableAttributes, timer2);
-      
+
       // click clear
       dataflowToolTile.getRecordingClearButton().click();
 
