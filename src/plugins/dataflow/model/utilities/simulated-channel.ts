@@ -10,7 +10,7 @@ export const kSimulatedChannelPrefix = "SIM";
 export const kSimulatedChannelType = "simulated-channel";
 
 function simulatedChannelId(variable: VariableType) {
-  return `${kSimulatedChannelPrefix}${variable.id}`;
+  return `${kSimulatedChannelPrefix}${variable.name}`;
 }
 
 function simulatedChannelName(variable: VariableType) {

@@ -12,7 +12,7 @@ export function findOutputVariable(node: Node, variables?: VariableType[]) {
 }
 
 function simulatedHubId(variable: VariableType) {
-  return `HUB${variable.id}`;
+  return `HUB${variable.name}`;
 }
 
 export function simulatedHubName(node: Node) {
