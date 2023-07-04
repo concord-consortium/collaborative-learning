@@ -4,7 +4,7 @@ import { VariableSnapshot, VariableType } from "@concord-consortium/diagram-view
 
 import { kSimulatorTileType } from "../simulator-types";
 import { kSharedVariablesID, SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
-import { kBrainwavesKey } from "../simulations/brainwaves-gripper";
+import { kBrainwavesKey } from "../simulations/brainwaves-gripper/brainwaves-gripper";
 import { simulations } from "../simulations/simulations";
 import { isInputVariable, isOutputVariable } from "../../shared-variables/simulations/simulation-utilities";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
@@ -54,8 +54,8 @@ export const SimulatorContentModel = TileContentModel
     }
   }))
   .views(self => ({
-    getVariable(id?: string) {
-      return self.variables?.find(v => v.id === id);
+    getVariable(name?: string) {
+      return self.variables?.find(v => v.name === name);
     },
     get inputVariables(): VariableType[] {
       return self.variables?.filter(v => isInputVariable(v)) ?? [];
@@ -99,7 +99,7 @@ export const SimulatorContentModel = TileContentModel
         // Set up starter variables
         const defaultVariableSnapshots = self.simulationData.variables;
         defaultVariableSnapshots.forEach((variableSnapshot: VariableSnapshot) => {
-          const variable = containerSharedModel?.variables.find(v => v.id === variableSnapshot.id);
+          const variable = containerSharedModel?.variables.find(v => v.name === variableSnapshot.name);
           if (!variable) {
             containerSharedModel?.createVariable(variableSnapshot);
           }

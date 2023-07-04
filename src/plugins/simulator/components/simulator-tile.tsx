@@ -39,13 +39,13 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
           { content.inputVariables.map(variable =>
             <SimulatorVariable
               key={variable.id}
-              variable={content.getVariable(variable.id)}
+              variable={content.getVariable(variable.name)}
             />
           )}
           { content.outputVariables.map(variable =>
             <SimulatorVariable
               key={variable.id}
-              variable={content.getVariable(variable.id)}
+              variable={content.getVariable(variable.name)}
             />
           )}
         </div>
