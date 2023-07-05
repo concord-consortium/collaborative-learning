@@ -94,7 +94,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
     <>
       <p>You cannot make comments on groups.</p>
       <br></br>
-      <p>Choose a Student in the group to begin or view comment threads.</p>
+      <p>Choose a student in the group to begin or view comment threads.</p>
     </>
     :
     "Open a document to begin or view comment threads";
