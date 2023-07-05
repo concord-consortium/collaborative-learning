@@ -7,7 +7,7 @@ import {
 
 export const kTerrariumKey = "terrarium";
 
-const kRawTemperatureKey = "raw-temperature-key";
+const kRawTemperatureKey = "raw_temperature_key";
 const stepDuration = 1000;
 const minHumidity = 20;
 const maxHumidity = 90;

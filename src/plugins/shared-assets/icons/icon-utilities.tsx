@@ -13,7 +13,7 @@ export const kPressureKey = "pressure_key";
 
 // Terrarium simulation
 export const kFanKey = "fan_key";
-export const kHeatLampKey = "heat-lamp_key";
+export const kHeatLampKey = "heat_lamp_key";
 export const kHumidifierKey = "humidifier_key";
 export const kHumidityKey = "humidity_key";
 export const kTemperatureKey = "temperature_key";
