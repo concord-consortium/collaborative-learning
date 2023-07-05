@@ -27,6 +27,7 @@ interface PromisedDocumentDocument extends DocumentDocument {
 }
 
 export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
+  console.log("<----CommentedDocuments>------");
   const [db] = useFirestore();
   const ui = useUIStore();
   const store = useStores();
