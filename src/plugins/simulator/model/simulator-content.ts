@@ -55,8 +55,8 @@ export const SimulatorContentModel = TileContentModel
     }
   }))
   .views(self => ({
-    getVariable(id?: string) {
-      return self.variables?.find(v => v.id === id);
+    getVariable(name?: string) {
+      return self.variables?.find(v => v.name === name);
     },
     get inputVariables(): VariableType[] {
       return self.variables?.filter(v => isInputVariable(v)) ?? [];
@@ -100,7 +100,7 @@ export const SimulatorContentModel = TileContentModel
         // Set up starter variables
         const defaultVariableSnapshots = self.simulationData.variables;
         defaultVariableSnapshots.forEach((variableSnapshot: VariableSnapshot) => {
-          const variable = containerSharedModel?.variables.find(v => v.id === variableSnapshot.id);
+          const variable = containerSharedModel?.variables.find(v => v.name === variableSnapshot.name);
           if (!variable) {
             containerSharedModel?.createVariable(variableSnapshot);
           }
