@@ -19,7 +19,7 @@ import MultiplyIcon from "../../assets/icons/math/multiply.svg";
 import DivideIcon from "../../assets/icons/math/divide.svg";
 
 import LightBulbIcon from "../../assets/icons/output/light-bulb.svg";
-import GrabberIcon from "../../assets/icons/output/grabber.svg";
+import GrabberIcon from "../../../shared-assets/icons/dataflow/output/grabber.svg";
 import AdvancedGrabberIcon from "../../assets/icons/output/advanced-grabber.svg";
 import HumidIcon from "../../assets/icons/output/humid.svg";
 import FanIcon from "../../assets/icons/output/fan.svg";
@@ -31,8 +31,8 @@ import LightIcon from "../../assets/icons/sensor/light.svg";
 import O2Icon from "../../assets/icons/sensor/o2.svg";
 import ParticulatesIcon from "../../assets/icons/sensor/particulates.svg";
 import MoistureIcon from "../../assets/icons/sensor/moisture.svg";
-import EmgIcon from "../../assets/icons/sensor/emg.svg";
-import PressureIcon from "../../assets/icons/sensor/pressure.svg";
+import EmgIcon from "../../../shared-assets/icons/dataflow/control/signal.svg";
+import PressureIcon from "../../../shared-assets/icons/dataflow/sensor/pressure.svg";
 
 import AbsoluteValueIcon from "../../assets/icons/transform/absolute-value.svg";
 import NegationIcon from "../../assets/icons/transform/negation.svg";

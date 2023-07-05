@@ -4,7 +4,7 @@ import { VariableSnapshot, VariableType } from "@concord-consortium/diagram-view
 
 import { kSimulatorTileType } from "../simulator-types";
 import { kSharedVariablesID, SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
-import { kBrainwavesKey } from "../simulations/brainwaves-gripper";
+import { kBrainwavesKey } from "../simulations/brainwaves-gripper/brainwaves-gripper";
 import { simulations } from "../simulations/simulations";
 import { isInputVariable, isOutputVariable } from "../../shared-variables/simulations/simulation-utilities";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
@@ -116,6 +116,9 @@ export const SimulatorContentModel = TileContentModel
         const variable = self.getVariable(name);
         variable?.setValue(values[self.frame % values.length]);
       }
+
+      // Call simulation's step function
+      self.simulationData.step?.({ frame: self.frame, variables: self.variables ?? [] });
 
       // Increment the frame
       self.frame++;

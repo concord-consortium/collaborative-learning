@@ -11,6 +11,7 @@ import { NodeChannelInfo } from "../../model/utilities/channel";
 import "./dropdown-list-control.scss";
 
 export interface ListOption {
+  active?: boolean;
   name: string;
   displayName?: string;
   icon?: FunctionComponent<SVGProps<SVGSVGElement>>;
@@ -86,7 +87,7 @@ export class DropdownListControl extends Rete.Control {
       const name = option?.name ?? val.toString();
       const displayName = option?.displayName ?? name;
       const icon = option?.icon?.({}) || null;
-      const activeHub = (option as any).active;
+      const activeHub = option?.active;
       const liveNode = this.getNode().name.substring(0,4) === "Live";
       const disableSelected = this.key === "hubSelect" && liveNode && !activeHub;
       const labelClasses = disableSelected ? "disabled item top" : "item top";

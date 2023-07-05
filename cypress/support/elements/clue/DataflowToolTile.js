@@ -49,6 +49,9 @@ class DataflowToolTile {
   getNodeTitle(workspaceClass) {
     return cy.get(`${workspaceClass || ".primary-workspace"} .node-title`);
   }
+  getNodeValueContainer(nodeType) {
+    return this.getNode(nodeType).find(".value-container");
+  }
   getClearButton() {
     return cy.get('.primary-workspace .qa');
   }

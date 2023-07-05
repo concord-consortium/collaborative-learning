@@ -29,7 +29,9 @@ export interface IStores extends IBaseStores {
   userContextProvider: UserContextProvider;
   tabsToDisplay: NavTabModelType[];
   isShowingTeacherContent: boolean;
+  studentWorkTabSelectedGroupId: string | undefined;
   setAppMode: (appMode: AppMode) => void;
+  initializeStudentWorkTab: () => void;
   setUnitAndProblem: (unitId: string | undefined, problemOrdinal?: string) => Promise<void>;
 }
 
@@ -98,6 +100,7 @@ class Stores implements IStores{
         },
       });
     this.groups = params?.groups || GroupsModel.create({ acceptUnknownStudents: params?.isPreviewing });
+    this.groups.setEnvironment(this);
     this.class = params?.class || ClassModel.create({ name: "Null Class", classHash: "" });
     this.db = params?.db || new DB();
     this.documents = params?.documents || createDocumentsModelWithRequiredDocuments(requiredDocumentTypes);
@@ -137,6 +140,31 @@ class Stores implements IStores{
   get isShowingTeacherContent() {
     const { ui: { showTeacherContent }, user: { isTeacher } } = this;
     return isTeacher && showTeacherContent;
+  }
+
+  /**
+   * The currently open group in the Student Work tab
+   */
+  get studentWorkTabSelectedGroupId() {
+    const { ui, groups } = this;
+    return ui.tabs.get("student-work")?.openSubTab
+        || (groups.nonEmptyGroups.length ? groups.nonEmptyGroups[0].id : "");
+  }
+
+  /**
+   * When we have a valid selectedGroupId,
+   * Then set the active group (openSubTab) to be this group.
+   * MobX `when` will only run one time, so this won't keep updating the openSubTab.
+   * If the user somehow changes the openSubTab before at least one group is loaded,
+   * this will just set the openSubTab to be the same value it already is.
+   */
+  initializeStudentWorkTab() {
+    // TODO: add a way to dispose the stores and then dispose this when if it is still
+    // waiting
+    when(
+      () => this.studentWorkTabSelectedGroupId !== "",
+      () => this.ui.setOpenSubTab("student-work", this.studentWorkTabSelectedGroupId)
+    );
   }
 
   setTeacherGuide(guide: ProblemModelType | undefined) {

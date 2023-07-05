@@ -104,7 +104,8 @@ export class Logger {
   ): LogMessage {
     const {
       appConfig: { appName }, appMode, problemPath,
-      ui: { activeGroupId, activeNavTab, navTabContentShown, problemWorkspace, teacherPanelKey },
+      studentWorkTabSelectedGroupId,
+      ui: { activeNavTab, navTabContentShown, problemWorkspace, teacherPanelKey },
       user: { activityUrl, classHash, id, isStudent, isTeacher, portal, type, currentGroupId,
               loggingRemoteEndpoint, firebaseDisconnects, loggingDisconnects, networkStatusAlerts
     }} = this.stores;
@@ -144,7 +145,7 @@ export class Logger {
     if (isTeacher) {
       logMessage.teacherPanel = teacherPanelKey;
       if (activeNavTab === ENavTab.kStudentWork) {
-        logMessage.selectedGroupId = activeGroupId;
+        logMessage.selectedGroupId = studentWorkTabSelectedGroupId;
       }
     }
 

@@ -53,7 +53,6 @@ export const UIModel = types
     dividerPosition: kDividerHalf,
     error: types.maybeNull(types.string),
     activeNavTab: ENavTab.kProblems,
-    activeGroupId: "",
     selectedTileIds: types.array(types.string),
     selectedCommentId: types.maybe(types.string),
     scrollTo: types.maybe(ScrollToModel),
@@ -194,10 +193,6 @@ export const UIModel = types
       setActiveNavTab(tab: string) {
         self.activeNavTab = tab;
       },
-      setActiveStudentGroup(groupId: string) {
-        self.activeNavTab = ENavTab.kStudentWork;
-        self.activeGroupId = groupId;
-      },
       setSelectedTile(tile?: ITileModel, options?: {append: boolean}) {
         setOrAppendTileIdToSelection(tile && tile.id, options);
       },
@@ -241,6 +236,18 @@ export const UIModel = types
       setOpenSubTab(tab: string, subTab: string) {
         const tabState = getTabState(tab);
         tabState.openSubTab = subTab;
+      },
+      /**
+       * Set the open document in a sub tab. Do not actually open
+       * the navTab or subTab.
+       *
+       * @param tab
+       * @param subTab
+       * @param documentKey
+       */
+      setOpenSubTabDocument(tab: string, subTab: string, documentKey: string) {
+        const tabState = getTabState(tab);
+        tabState.openDocuments.set(subTab, documentKey);
       },
       /**
        * Open to the tab and subTab and open a document.

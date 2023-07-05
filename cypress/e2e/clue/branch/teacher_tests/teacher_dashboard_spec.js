@@ -270,7 +270,7 @@ context('Teacher Dashboard View', () => {
       cy.waitForLoad();
       dashboard.switchView("Dashboard");
       cy.wait(8000);
-      dashboard.sendStudentNoteWorkaround(group, studentName, quadrant, textToStudent);
+      dashboard.sendStudentNote(group, studentName, quadrant, textToStudent);
     });
 
     it('verify student support note appears in student view', function () {
