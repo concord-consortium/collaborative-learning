@@ -1,5 +1,5 @@
 import { observer } from "mobx-react";
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { RefObject, useEffect } from "react";
 import classNames from "classnames";
 import { DocumentDragKey, SupportPublication } from "../../models/document/document-types";
 import { useAppConfig, useUIStore, useUserStore } from "../../hooks/use-stores";
@@ -10,6 +10,7 @@ import { LogEventName } from "../../lib/logger-types";
 import { DocumentCollectionByType } from "./documents-type-collection";
 
 interface IProps {
+  collectionRef?: RefObject<HTMLDivElement>;
   subTab: ISubTabSpec;
   tabSpec: NavTabModelType;
   selectedDocument?: string;
@@ -18,48 +19,23 @@ interface IProps {
   scrollToLocation?: number;
   onSelectNewDocument?: (type: string) => void;
   onSelectDocument?: (document: DocumentModelType) => void;
-  setScrollWidth?: (scrollWidth: number) => void;
-  setScrollLeft?: (scrollLeft: number) => void;
 }
 
 export const kNavItemScale = 0.11;
 
 export const DocumentCollectionList: React.FC<IProps> = observer(function DocumentCollectionList(
-    { subTab, tabSpec, horizontal, collapsed, selectedDocument, scrollToLocation,
-      onSelectNewDocument, onSelectDocument, setScrollWidth,  setScrollLeft}) {
+    { collectionRef, subTab, tabSpec, horizontal, collapsed, selectedDocument, scrollToLocation,
+      onSelectNewDocument, onSelectDocument}) {
   const ui = useUIStore();
   const appConfigStore = useAppConfig();
   const user = useUserStore();
   const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
-  const documentListRef = useRef<HTMLDivElement>(null);
-  useEffect(()=>{
-    const documentListEl = documentListRef.current;
-    if (documentListEl) {
-      setScrollWidth && setScrollWidth(documentListEl.scrollWidth);
-      setScrollLeft && setScrollLeft(documentListEl.scrollLeft);
-    }
-  }, [documentListRef, setScrollLeft, setScrollWidth]);
-
-  const handleBrowserScroll = useCallback((documentListEl: HTMLDivElement) => (evt: any) => {
-    setScrollWidth && setScrollWidth(documentListEl.scrollWidth);
-    setScrollLeft && setScrollLeft(documentListEl.scrollLeft);
-  },[setScrollLeft, setScrollWidth]);
-
-  useEffect(()=>{
-    const documentListEl = documentListRef.current;
-    if (documentListEl) {
-      documentListEl.addEventListener("scroll", handleBrowserScroll(documentListEl));
-    }
-    return () => {
-      documentListEl?.removeEventListener("scroll",  handleBrowserScroll(documentListEl));
-    };
-  },[handleBrowserScroll]);
 
   useEffect(() => {
-    if(scrollToLocation) {
-      documentListRef.current?.scroll({left: scrollToLocation, behavior: "smooth"});
+    if(scrollToLocation !== undefined) {
+      collectionRef?.current?.scrollTo({left: scrollToLocation, behavior: "smooth"});
     }
-  },[scrollToLocation]);
+  },[collectionRef, scrollToLocation]);
 
   const handleDocumentDragStart = (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => {
     e.dataTransfer.setData(DocumentDragKey, document.key);
@@ -83,7 +59,7 @@ export const DocumentCollectionList: React.FC<IProps> = observer(function Docume
 
   return (
     <div className={classNames("doc-collection-list", {horizontal, collapsed})}
-        ref={documentListRef}>
+        ref={collectionRef}>
       {
         subTab.sections.map((section: any, index: any) => {
           const _handleDocumentStarClick = section.showStarsForUser(user)

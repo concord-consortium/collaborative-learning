@@ -192,34 +192,20 @@ interface DocumentBrowserScrollerProps {
 const DocumentBrowserScroller =
     ({subTab, tabSpec, openDocumentKey, onSelectDocument}: DocumentBrowserScrollerProps) => {
   const [scrollerCollapsed, setScrollerCollapsed] = useState(false);
-  const [panelWidth, setPanelWidth] = useState(0);
-  const [scrollWidth, setScrollWidth] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
+  const collectionRef = useRef<HTMLDivElement>(null);
   const documentScrollerRef = useRef<HTMLDivElement>(null);
   const [scrollToLocation, setScrollToLocation] = useState(0);
 
-  useEffect(()=>{
-    const scrollerEl = documentScrollerRef.current;
-    if (scrollerEl) {
-      setPanelWidth(scrollerEl.getBoundingClientRect().width);
-    }
-  },[documentScrollerRef]);
+  const panelWidth = documentScrollerRef.current?.clientWidth ?? 0;
+  const scrollLeft = collectionRef.current?.scrollLeft ?? 0;
+  const scrollWidth = collectionRef.current?.scrollWidth ?? 0;
 
   const handleScrollTo = (side: string) => {
     const direction = side ==="left" ? -1 : 1;
     setScrollToLocation((prevState) => {
-      const tempScrollTo = prevState < panelWidth
-                            ? prevState < 0
-                              ? (direction * panelWidth)
-                              : (direction * prevState)
-                            : prevState + (direction * panelWidth);
-       if (tempScrollTo === 0) {
-        return (direction * panelWidth);
-      } else if (tempScrollTo > scrollWidth - panelWidth) {
-          return scrollWidth - panelWidth;
-      } else {
-        return tempScrollTo;
-      }
+      const attemptedScrollTo = prevState + direction * panelWidth;
+      const scrollTo = Math.max(0, Math.min(scrollWidth - panelWidth, attemptedScrollTo));
+      return scrollTo;
     });
   };
 
@@ -236,6 +222,7 @@ const DocumentBrowserScroller =
                 onScroll={handleScrollTo} />
         }
         <DocumentCollectionList
+            collectionRef={collectionRef}
             subTab={subTab}
             tabSpec={tabSpec}
             horizontal={true}
@@ -243,8 +230,6 @@ const DocumentBrowserScroller =
             selectedDocument={openDocumentKey}
             scrollToLocation={scrollToLocation}
             onSelectDocument={onSelectDocument}
-            setScrollWidth={setScrollWidth}
-            setScrollLeft={setScrollLeft}
         />
         {(scrollLeft < scrollWidth - panelWidth) &&
             <ScrollEndControl side={"right"} collapsed={scrollerCollapsed} tab={tabSpec.tab}
