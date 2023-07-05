@@ -1,19 +1,40 @@
+$input-color: #5584e5;
+$output-color: #f29046;
+
 .simulator-variable {
   align-items: center;
   display: flex;
   // For now, use a fixed width to prevent the variables from shifting as their values change
-  width: 180px;
+  width: 160px;
+
+  &.long-name {
+    width: 220px;
+  }
 
   .leading-box {
-    height: 14px;
+    height: 16px;
     margin-right: 8px;
-    width: 14px;
+    width: 16px;
   }
 
-  &.input .leading-box {
-    background-color: #5584e5;
+  &.input {
+    .leading-box {
+      background-color: $input-color;
+
+      &.variable-icon {
+        background-color: transparent;
+        fill: $input-color;
+      }
+    }
   }
-  &.output .leading-box {
-    background-color: #f29046;
+  &.output {
+    .leading-box {
+      background-color: $output-color;
+
+      &.variable-icon {
+        background-color: transparent;
+        fill: $output-color;
+      }
+    }
   }
 }
