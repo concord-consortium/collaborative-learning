@@ -148,14 +148,14 @@ class Stores implements IStores{
   get studentWorkTabSelectedGroupId() {
     const { ui, groups } = this;
     return ui.tabs.get("student-work")?.openSubTab
-        || (groups.allGroups.length ? groups.allGroups[0].id : "");
+        || (groups.nonEmptyGroups.length ? groups.nonEmptyGroups[0].id : "");
   }
 
   /**
    * When we have a valid selectedGroupId,
    * Then set the active group (openSubTab) to be this group.
    * MobX `when` will only run one time, so this won't keep updating the openSubTab.
-   * If the user somehow changes the openSubTab before all of the groups are loaded,
+   * If the user somehow changes the openSubTab before at least one group is loaded,
    * this will just set the openSubTab to be the same value it already is.
    */
   initializeStudentWorkTab() {

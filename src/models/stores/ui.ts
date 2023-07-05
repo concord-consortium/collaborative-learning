@@ -238,6 +238,18 @@ export const UIModel = types
         tabState.openSubTab = subTab;
       },
       /**
+       * Set the open document in a sub tab. Do not actually open
+       * the navTab or subTab.
+       *
+       * @param tab
+       * @param subTab
+       * @param documentKey
+       */
+      setOpenSubTabDocument(tab: string, subTab: string, documentKey: string) {
+        const tabState = getTabState(tab);
+        tabState.openDocuments.set(subTab, documentKey);
+      },
+      /**
        * Open to the tab and subTab and open a document.
        *
        * @param tab

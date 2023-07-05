@@ -13,7 +13,7 @@ import ReactRenderPlugin from "rete-react-render-plugin";
 import { BaseComponent } from "../../../components/base";
 import { ProgramZoomType, DataflowContentModelType } from "../model/dataflow-content";
 import { DataflowProgramModelType } from "../model/dataflow-program-model";
-import { simulatedChannel } from "../model/utilities/simulated-channel";
+import { kSimulatedChannelPrefix, simulatedChannel } from "../model/utilities/simulated-channel";
 import { findOutputVariable, simulatedHub } from "../model/utilities/simulated-output";
 import { SensorSelectControl } from "../nodes/controls/sensor-select-control";
 import { DataflowReteNodeFactory } from "../nodes/factories/dataflow-rete-node-factory";
@@ -172,6 +172,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             addNode={this.addNode}
             className="editor-graph-container"
             programEditor={this.programEditor}
+            readOnly={readOnly}
             style={this.getEditorStyle}
             tileId={this.tileId}
           >
@@ -692,7 +693,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
     nodes.forEach((n) => {
       const isLiveSensor = /fsr|emg|[th]-[abcd]/; // match ids any live sensor channels
-      if(isLiveSensor.test(n.data.sensor as string)){
+      const sensor = n.data.sensor as string;
+      if(isLiveSensor.test(sensor) && !sensor.startsWith(kSimulatedChannelPrefix)){
         serialNodesCt++;
       }
       //live output block will alert need for serial

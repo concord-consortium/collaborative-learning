@@ -55,6 +55,8 @@ export const GroupModel = types
   .actions((self) => ({
     setEnvironment(env: IGroupsEnvironment) {
       self.environment = env;
+      // update environment of any existing users
+      self.users.forEach(user => user.setEnvironment(env));
     }
   }))
   .views((self) => ({
@@ -88,6 +90,8 @@ export const GroupsModel = types
   .actions((self) => ({
     setEnvironment(env: IGroupsEnvironment) {
       self.environment = env;
+      // update environment of any existing groups
+      self.allGroups.forEach(group => group.setEnvironment(env));
     },
     updateFromDB(groups: DBOfferingGroupMap, clazz: ClassModelType) {
       // FIXME: update this to be a syncing operation:
@@ -141,6 +145,9 @@ export const GroupsModel = types
         });
       });
       return groupsByUser;
+    },
+    get nonEmptyGroups() {
+      return self.allGroups.filter(g => g.users.length > 0);
     }
   }))
   .views((self) => ({

@@ -3,7 +3,7 @@ import { NodeData } from "rete/types/core/data";
 import { DataflowReteNodeFactory } from "./dataflow-rete-node-factory";
 import { InputValueControl } from "../controls/input-value-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
-import { getOutputType } from "../utilities/live-output-utilities";
+import { getHubSelect, getOutputType } from "../utilities/live-output-utilities";
 import { NodeLiveOutputTypes, NodeMicroBitHubs,
   kRelaysIndexed, kBinaryOutputTypes, kRoundedOutputTypes
 } from "../../model/utilities/node";
@@ -83,7 +83,7 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   private updateHubsStatusReport(node: Node){
-    const hubSelect = node.controls.get("hubSelect") as DropdownListControl;
+    const hubSelect = getHubSelect(node);
     const hubsChannels = hubSelect.getChannels();
     if (!hubsChannels) return;
     const hubStatusArray: HubStatus[] = hubsChannels
@@ -101,7 +101,7 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   private getHubRelaysChannel(node: Node){
-    const hubSelect = node.controls.get("hubSelect") as DropdownListControl;
+    const hubSelect = getHubSelect(node);
     const selectedHubIdentifier = hubSelect.getSelectionId();
     const relayChannels = hubSelect.getChannels().filter((c: NodeChannelInfo) => c.type === "relays");
     return relayChannels.find((c: NodeChannelInfo) => c.microbitId === selectedHubIdentifier);

@@ -1,17 +1,15 @@
-import { inject, observer, useLocalObservable } from "mobx-react";
-import { computed } from "mobx";
+import { inject, observer } from "mobx-react";
 import React from "react";
 import { useStores } from "../../../hooks/use-stores";
 import { BaseComponent, IBaseProps } from "../../../components/base";
 import { DocumentViewMode } from "../../../components/document/document";
-import { FourUpComponent } from "../../../components/four-up";
+import { FourUpComponent, getFocusedGroupUser, getUIStudentWorkTab } from "../../../components/four-up";
 import { IconButton } from "../../../components/utilities/icon-button";
 import { Logger } from "../../../lib/logger";
 import { LogEventName } from "../../../lib/logger-types";
 import { createStickyNote } from "../../../models/curriculum/support";
 import { AudienceModel, AudienceEnum } from "../../../models/stores/supports";
 import { GroupUserModelType, GroupModelType } from "../../../models/stores/groups";
-import { getGroupUsers } from "../../../models/document/document-utils";
 
 import "./teacher-group-six-pack-fourup.sass";
 
@@ -41,25 +39,23 @@ export class TeacherGroupSixPackFourUp extends BaseComponent<IProps, IState> {
 
   public render() {
     const { documentViewMode, selectedSectionId, group, row, column } = this.props;
-    console.log("------------------------------");
-
-    console.log("TeacherGroupSixPackFourUp");
-    console.log("\tgroupId:", group.id);
-    console.log("\tselectedSectionId:", selectedSectionId);
 
     return (
       <div className={`teacher-group group-${row}-${column}`} key={`group-${row}-${column}`}>
-        <TeacherGroupHeader group={ group } />
+        <TeacherGroupHeader
+          group={ group }
+          navTabName={this.getNavTabName()}
+          documentViewMode={documentViewMode}
+        />
         <div className="teacher-group-canvas-container">
           <div className="teacher-group-canvas">
             <FourUpComponent
-              groupId={group.id}
+              group={group}
               isGhostUser={true}
               toggleable={true}
               documentViewMode={documentViewMode}
               selectedSectionId={selectedSectionId}
               viaTeacherDashboard={true}
-              setFocusedGroupUser={this.setFocusedGroupUser}
             />
           </div>
         </div>
@@ -67,10 +63,16 @@ export class TeacherGroupSixPackFourUp extends BaseComponent<IProps, IState> {
     );
   }
 
-  private setFocusedGroupUser = (focusedGroupUser?: GroupUserModelType) => {
-    const {ui} = this.stores;
-    ui.setOpenSubTab("student-work", this.props.group.id);
-  };
+/**
+ * When the dashboard is showing published documents, we use a fake tab called
+ * student-work-published to keep track of which documents are open. This
+ * corresponds the focused user.
+ *
+ * @returns
+ */
+  private getNavTabName() {
+    return getUIStudentWorkTab(this.props.documentViewMode);
+  }
 }
 
 interface IGroupRecord {
@@ -78,39 +80,19 @@ interface IGroupRecord {
 }
 interface IGroupHeaderProps {
   group: IGroupRecord;
+  navTabName: string;
+  documentViewMode?: DocumentViewMode
 }
 
-const TeacherGroupHeader: React.FC<IGroupHeaderProps> = observer(function TeacherGroupHeader({group}){
-  const { ui, db, user, groups, documents }  = useStores();
+const TeacherGroupHeader: React.FC<IGroupHeaderProps> = observer(function TeacherGroupHeader(
+    {group, navTabName, documentViewMode}){
+  const { ui, db, groups }  = useStores();
 
-  // console.log("\tgroups:",groups);
-
-
-  const localObservable = useLocalObservable(() => ({
-    get groupUsers() {
-      return getGroupUsers(user.id, groups, documents, group.id);
-    }
-  }), {groupUsers: computed.struct});
-
-  const { groupUsers } = localObservable;
-
-  // When we have a valid selectedGroupId
-  // Then set the active group (openSubTab) to be this group
-  // MobX `when` will only run one time, so this won't keep updating the openSubTab.
-  // If the user somehow changes the openSubTab before all of the groups are loaded,
-  // this will just set the openSubTab to be the same value it already is.
-
-  const openDocId = ui.tabs.get("student-work")?.openDocuments.get(group.id);
-  if(group.id === "1"){
-    console.log("<TeacherGroupHeader>---");
-    console.log("\tgroupUsers:", groupUsers);
-  }
-
-  const focusedGroupUser = groupUsers.find(obj => obj.doc?.key === openDocId)?.user;
+  const openDocId = ui.tabs.get(navTabName)?.openDocuments.get(group.id);
+  const groupModel = groups.getGroupById(group.id);
+  const focusedGroupUser = getFocusedGroupUser(groupModel, openDocId, documentViewMode);
 
   const messageClickHandler = () => {
-
-    console.log("in message clickhandler focusedGroupUser:", focusedGroupUser);
     if (focusedGroupUser) {
       ui.prompt(`Enter your message for ${focusedGroupUser.name}`, "", `Message ${focusedGroupUser.name}`, 5)
       .then((message) => {
@@ -124,10 +106,8 @@ const TeacherGroupHeader: React.FC<IGroupHeaderProps> = observer(function Teache
       });
     }
     else {
-      console.log("else line 121 groupId:", group.id);
       ui.prompt(`Enter your message for Group ${group.id}`, "", "Message Group", 5)
       .then((message) => {
-        console.log("then block:", message);
         const audience = AudienceModel.create({type: AudienceEnum.group, identifier: group.id});
         db.createSupport(createStickyNote(message), "", audience);
         Logger.log(LogEventName.CREATE_STICKY_NOTE, {

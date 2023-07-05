@@ -10,11 +10,12 @@ interface IDataflowDropZoneProps {
   children?: any;
   className?: string;
   programEditor: NodeEditor;
+  readOnly?: boolean;
   style?: any;
   tileId: string;
 }
 export const DataflowDropZone = observer((
-  { addNode, children, className, programEditor, style, tileId }: IDataflowDropZoneProps
+  { addNode, children, className, programEditor, readOnly, style, tileId }: IDataflowDropZoneProps
 ) => {
 
   const droppableId = dataflowDroppableId(tileId);
@@ -25,6 +26,7 @@ export const DataflowDropZone = observer((
   };
   useDndMonitor({
     onDragEnd: (event: DragEndEvent) => {
+      if (readOnly) return;
       const draggableId = event.active.id.toString();
       if (event.over?.id === droppableId && isNodeDraggableId(draggableId)) {
         const nodeType = getNodeType(draggableId);

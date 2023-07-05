@@ -85,6 +85,7 @@ const DataflowNodeDataModel = types.
     demoOutput: types.maybe(types.number),
 
     // Live Output
+    hubSelect: types.maybe(types.string),
     liveOutputType: types.maybe(types.string),
     liveOutput: types.maybe(types.number),
   });

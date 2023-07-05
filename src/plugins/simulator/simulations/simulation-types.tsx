@@ -9,6 +9,7 @@ export interface ISimulationProps {
 export interface ISimulation {
   component?: FunctionComponent<ISimulationProps>,
   delay: number,
+  step?: (props: ISimulationProps) => void,
   variables: VariableSnapshot[],
   values: Record<string, number[]>
 }

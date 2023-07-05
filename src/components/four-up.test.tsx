@@ -53,7 +53,8 @@ describe("Four Up Component", () => {
     });
 
     const stores = specStores({ groups, documents });
-    const { container } = render(<FourUpComponent userId={document.uid} groupId={document.groupId} stores={stores}/>);
+
+    const { container } = render(<FourUpComponent group={group} stores={stores}/>);
     expect(screen.queryAllByTestId("canvas")).toHaveLength(4);
     expect(container.querySelectorAll(".member")).toHaveLength(1);
   });
@@ -95,7 +96,7 @@ describe("Four Up Component", () => {
 
     const stores = specStores({ user, groups, documents });
 
-    const { container } = render(<FourUpComponent userId={user.id} groupId={group.id} stores={stores}/>);
+    const { container } = render(<FourUpComponent group={group} stores={stores}/>);
     // A canvas will be rendered unless an "unshared document" message is displayed.
     // User 2 has no document, so it will display an "unshared document" message.
     // User 1 has a shared document, User 3 is the main user, and there is no fourth user. All of those show canvases.

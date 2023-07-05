@@ -2,32 +2,17 @@ import { Node } from "rete";
 import { VariableType } from "@concord-consortium/diagram-view";
 
 import { getOutputType } from "../../nodes/utilities/live-output-utilities";
-import { outputVariableNamePart } from "../../../shared-variables/simulations/simulation-utilities";
 
 import LightIcon from "../../assets/icons/sensor/light.svg";
 
-// Returns possible names to match with a shared variable based on the given node's outputType.
-// This is so output_LightBulb, output_lightbulb, output_light_bulb, etc will all match.
-function outputNamesToMatch(node: Node) {
-  const lowerName = getOutputType(node)?.toLowerCase();
-  const underscoreName = lowerName.replace(" ", "_");
-  const noSpaceName = lowerName.replace(" ", "");
-  return [underscoreName, noSpaceName];
-}
-
-function outputNameMatches(names: string[], variable: VariableType) {
-  const variableName = outputVariableNamePart(variable)?.toLowerCase();
-  return variableName && names.includes(variableName);
-}
-
 export function findOutputVariable(node: Node, variables?: VariableType[]) {
   if (!variables) return undefined;
-  const names = outputNamesToMatch(node);
-  return variables?.find((variable: VariableType) => outputNameMatches(names, variable));
+  const type = getOutputType(node);
+  return variables?.find((variable: VariableType) => variable.getAllOfType("live-output").includes(type));
 }
 
 function simulatedHubId(variable: VariableType) {
-  return `HUB${outputVariableNamePart(variable)}`;
+  return `HUB${variable.name}`;
 }
 
 export function simulatedHubName(node: Node) {
