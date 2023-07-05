@@ -22,8 +22,6 @@ interface IProps {
 }
 
 export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument, focusTileId, onCloseChatPanel }) => {
-  console.log("---------<ChatPanel>--------");
-  console.log("\tuser network:", user?.network);
   const [isDocumentView, setIsDocumentView] = useState(false); // switches between "Comments View" vs "Document View"
   const [chatPanelTitle, setChatPanelTitle] = useState("Comments");
 
@@ -100,7 +98,6 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
     </>
     :
     "Open a document to begin or view comment threads";
-  console.log("\tisDocumentView:", isDocumentView);
 
   return (
     <div className={`chat-panel ${activeNavTab}`} data-testid="chat-panel">

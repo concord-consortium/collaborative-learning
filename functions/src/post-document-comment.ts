@@ -12,10 +12,6 @@ const version = "1.1.4";
 export async function postDocumentComment(
                         params?: IPostDocumentCommentUnionParams,
                         callableContext?: functions.https.CallableContext) {
-  console.log("async function postDocumentComment");
-  console.log("\tparams:", params);
-  console.log("\tcallableContext", callableContext);
-
   if (isWarmUpParams(params)) return { version };
 
   const { context, document, comment } = params || {};
