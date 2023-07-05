@@ -61,40 +61,40 @@ export const terrariumSimulation: ISimulation = {
       displayName: "Temperature",
       labels: ["input", "sensor:temperature"],
       icon: iconUrl(kTemperatureKey),
-      id: kTemperatureKey,
+      name: kTemperatureKey,
       value: minTemperature
     },
     {
       displayName: "Humidity",
       labels: ["input", "sensor:humidity"],
       icon: iconUrl(kHumidityKey),
-      id: kHumidityKey,
+      name: kHumidityKey,
       value: minHumidity
     },
     {
       displayName: "Raw Temperature",
-      id: kRawTemperatureKey,
+      name: kRawTemperatureKey,
       value: minTemperature
     },
     {
       displayName: "Fan",
       labels: ["output", "live-output:Fan"],
       icon: iconUrl(kFanKey),
-      id: kFanKey,
+      name: kFanKey,
       value: 0
     },
     {
       displayName: "Heat Lamp",
       labels: ["output", "live-output:Heat Lamp"],
       icon: iconUrl(kHeatLampKey),
-      id: kHeatLampKey,
+      name: kHeatLampKey,
       value: 0
     },
     {
       displayName: "Humidifier",
       labels: ["output", "live-output:Humidifier"],
       icon: iconUrl(kHumidifierKey),
-      id: kHumidifierKey,
+      name: kHumidifierKey,
       value: 0
     },
   ],
