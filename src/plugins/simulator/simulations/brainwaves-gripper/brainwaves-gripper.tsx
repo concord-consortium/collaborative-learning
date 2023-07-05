@@ -58,14 +58,14 @@ export const brainwavesGripperSimulation: ISimulation = {
       displayName: "EMG",
       labels: ["input", "sensor:emg-reading"],
       icon: iconUrl(kEMGKey),
-      id: kEMGKey,
+      name: kEMGKey,
       value: 0
     },
     {
       displayName: "Surface Pressure",
-      labels: ["input", "sensor:fsr-reading"],
+      labels: ["input", "sensor:fsr-reading", "className:long-name"],
       icon: iconUrl(kPressureKey),
-      id: kPressureKey,
+      name: kPressureKey,
       value: 0,
       unit: "mPa"
     },
@@ -73,7 +73,7 @@ export const brainwavesGripperSimulation: ISimulation = {
       displayName: "Gripper",
       labels: ["output", "live-output:Grabber", "live-output:Gripper 2.0"],
       icon: iconUrl(kGripperKey),
-      id: kGripperKey,
+      name: kGripperKey,
       value: 0
     }
   ],

@@ -8,14 +8,11 @@ import LightIcon from "../../assets/icons/sensor/light.svg";
 export function findOutputVariable(node: Node, variables?: VariableType[]) {
   if (!variables) return undefined;
   const type = getOutputType(node);
-  return variables?.find((variable: VariableType) => {
-    const types = variable.getAllOfType("live-output");
-    return types.includes(type);
-  });
+  return variables?.find((variable: VariableType) => variable.getAllOfType("live-output").includes(type));
 }
 
 function simulatedHubId(variable: VariableType) {
-  return `HUB${variable.id}`;
+  return `HUB${variable.name}`;
 }
 
 export function simulatedHubName(node: Node) {

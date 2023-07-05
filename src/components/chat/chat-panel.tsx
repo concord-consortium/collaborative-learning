@@ -8,7 +8,7 @@ import {
   useCommentsCollectionPath, useDocumentComments, usePostDocumentComment, useUnreadDocumentComments
 } from "../../hooks/document-comment-hooks";
 import { useDeleteDocument } from "../../hooks/firestore-hooks";
-import {useCurriculumOrDocumentContent, useDocumentOrCurriculumMetadata } from "../../hooks/use-stores";
+import { useCurriculumOrDocumentContent, useDocumentOrCurriculumMetadata } from "../../hooks/use-stores";
 import { CommentedDocuments } from "./commented-documents";
 
 import "./chat-panel.scss";
@@ -87,7 +87,6 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   }, [isDocumentView]);
 
   const newCommentCount = unreadComments?.length || 0;
-
   const isStudentWorkspace = activeNavTab === "student-work";
   const commentInstructions =
     isStudentWorkspace ?
@@ -98,7 +97,6 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
     </>
     :
     "Open a document to begin or view comment threads";
-
 
   return (
     <div className={`chat-panel ${activeNavTab}`} data-testid="chat-panel">

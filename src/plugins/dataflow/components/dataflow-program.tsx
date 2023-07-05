@@ -172,6 +172,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             addNode={this.addNode}
             className="editor-graph-container"
             programEditor={this.programEditor}
+            readOnly={readOnly}
             style={this.getEditorStyle}
             tileId={this.tileId}
           >

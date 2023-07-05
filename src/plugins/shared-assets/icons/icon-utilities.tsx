@@ -7,16 +7,16 @@ import PressureIcon from "./dataflow/sensor/pressure.svg";
 const kIconPrefix = "ccicon";
 
 // Brainwaves gripper simulation
-export const kEMGKey = "emg-key";
-export const kGripperKey = "gripper-key";
-export const kPressureKey = "pressure-key";
+export const kEMGKey = "emg_key";
+export const kGripperKey = "gripper_key";
+export const kPressureKey = "pressure_key";
 
 // Terrarium simulation
-export const kFanKey = "fan-key";
-export const kHeatLampKey = "heat-lamp-key";
-export const kHumidifierKey = "humidifier-key";
-export const kHumidityKey = "humidity-key";
-export const kTemperatureKey = "temperature-key";
+export const kFanKey = "fan_key";
+export const kHeatLampKey = "heat-lamp_key";
+export const kHumidifierKey = "humidifier_key";
+export const kHumidityKey = "humidity_key";
+export const kTemperatureKey = "temperature_key";
 
 const icons: Record<string, FunctionComponent<SVGProps<SVGSVGElement>>> = {
   [kEMGKey]: EMGIcon,

@@ -4,8 +4,11 @@ $output-color: #f29046;
 .simulator-variable {
   align-items: center;
   display: flex;
-  // For now, use a fixed width to prevent the variables from shifting as their values change
-  width: 220px;
+  width: 160px;
+
+  &.long-name {
+    width: 220px;
+  }
 
   .leading-box {
     height: 16px;

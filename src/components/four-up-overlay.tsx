@@ -7,9 +7,8 @@ import { DocumentModelType } from "../models/document/document";
 import "./four-up-overlay.sass";
 
 interface IProps extends IBaseProps {
-  context: string;
   style: any;
-  onClick: (context: string) => void;
+  onClick: () => void;
   documentViewMode?: DocumentViewMode;
   document?: DocumentModelType;
 }
@@ -50,7 +49,7 @@ export class FourUpOverlayComponent extends BaseComponent<IProps> {
     e.preventDefault();
     e.stopPropagation();
     if (this.props.document) {
-      this.props.onClick(this.props.context);
+      this.props.onClick();
     }
   };
 

@@ -41,7 +41,8 @@ export function SimulatorVariable({ variable }: ISimulatorVariableProps) {
   const variableDisplay = `${displayName}: ${displayValue}`;
 
   const className = inputVariable ? "input" : "output";
-  const classes = classNames("simulator-variable", className);
+  const variableClassNames = variable.getAllOfType("className");
+  const classes = classNames("simulator-variable", className, variableClassNames);
   return (
     <div className={classes}>
       <VariableIcon variable={variable} />
