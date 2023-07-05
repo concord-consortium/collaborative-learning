@@ -16,7 +16,7 @@ const problemDoc = '2.1 Drawing Wumps';
 const ptsDoc = 'Points';
 const polyDoc = 'Polygon';
 
-context.skip('Graph Tool', function() {
+context('Graph Tool', function() {
     before(function(){
         const queryParams = `${Cypress.config("queryParams")}`;
         cy.clearQAData('all');
