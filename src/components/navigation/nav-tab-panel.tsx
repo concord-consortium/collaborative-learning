@@ -50,7 +50,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
                                 ? `calc(${dividerPosition}% - ${collapseTabWidth}px + 1px)`
                                 : `calc(${dividerPosition}% - ${resizePanelWidth}px - 4px)`;
     const resourceWidthStyle = {width: resourceWidth};
-    const isChatEnabled = true;
+    const isChatEnabled = user.type === "teacher";
     const openChatPanel = isChatEnabled && showChatPanel;
     const focusTileId = selectedTileIds?.length === 1 ? selectedTileIds[0] : undefined;
 

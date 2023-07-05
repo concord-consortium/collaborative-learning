@@ -26,7 +26,6 @@ interface PromisedDocumentDocument extends DocumentDocument {
   title?: string
 }
 
-//theres no active nav tab?
 export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
   const [db] = useFirestore();
   const ui = useUIStore();
