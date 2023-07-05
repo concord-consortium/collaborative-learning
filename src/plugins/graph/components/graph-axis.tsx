@@ -73,14 +73,14 @@ export const GraphAxis = observer(function GraphAxis({
           const axisModel = graphModel.getAxis(place);
 
           if (axisModel && isNumericAxisModel(axisModel)) {
-            if (xValues && place === "bottom") {
+            if (xValues?.length > 0 && place === "bottom") {
               const minX = Math.min(...xValues);
               const maxX = Math.max(...xValues);
               const newXBounds = computeNiceNumericBounds(minX, maxX);
               axisModel.setDomain(newXBounds.min, newXBounds.max);
             }
 
-            if (yValues && place === "left") {
+            if (yValues?.length > 0 && place === "left") {
               const minY = Math.min(...yValues);
               const maxY = Math.max(...yValues);
               const newYBounds = computeNiceNumericBounds(minY, maxY);
