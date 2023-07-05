@@ -1,4 +1,5 @@
-import {Instance, ISerializedActionCall, SnapshotIn, types, getSnapshot} from "mobx-state-tree";
+import {Instance, ISerializedActionCall, SnapshotIn, types, getSnapshot, addDisposer} from "mobx-state-tree";
+import {reaction} from "mobx";
 import {createContext, useContext} from "react";
 import stringify from "json-stringify-pretty-compact";
 
@@ -172,16 +173,27 @@ export const GraphModel = TileContentModel
   }))
   .actions(self => ({
     updateAfterSharedModelChanges(sharedModel?: SharedModelType, changeType?: SharedModelChangeType) {
-      if (changeType === "link" && self.data) {
-        self.config.setDataset(self.data);
-        self.setAttributeID("x", self.data.attributes[0].id);
-        self.setAttributeID("y", self.data.attributes[1].id);
-      }
-      else if (changeType === "unlink") {
-        self.setAttributeID("y", "");
-        self.setAttributeID("x", "");
-        self.config.setDataset(undefined);
-      }
+      // Nothing to do here so far
+    },
+    afterAttach() {
+      addDisposer(self, reaction(
+        () => self.data,
+        (data, prevData) => {
+          if (data && data !== prevData) {
+            console.log("graph link");
+            // This should occur when the graph is linked to a dataset
+            self.config.setDataset(self.data);
+            self.setAttributeID("x", data.attributes[0].id);
+            self.setAttributeID("y", data.attributes[1].id);
+          } else if (!data) {
+            console.log("graph unlink");
+            // This should occur when the graph is unlinked from a dataset
+            self.setAttributeID("y", "");
+            self.setAttributeID("x", "");
+            self.config.setDataset(undefined);
+          }
+        }
+      ));
     }
   }));
 export interface IGraphModel extends Instance<typeof GraphModel> {}
