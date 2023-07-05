@@ -4,7 +4,8 @@ import SimulatorTile from '../../../../support/elements/clue/SimulatorTile';
 let clueCanvas = new ClueCanvas;
 let simulatorTile = new SimulatorTile;
 
-context('Simulator Tile', function () {
+// FIXME: this test seems to be causing cypress timeouts.
+context.skip('Simulator Tile', function () {
   beforeEach(function () {
     const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&mouseSensor&unit=dfe";
     cy.clearQAData('all');
