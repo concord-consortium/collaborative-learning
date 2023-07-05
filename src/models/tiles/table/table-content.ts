@@ -300,9 +300,11 @@ export const TableContentModel = TileContentModel
         }
         else {
           if (!sharedDataSet) {
-            // The document doesn't have a shared model yet
+            // The table doesn't have a shared model. This could happen because it
+            // was just added to the document or because the table was unlinked from its
+            // dataset. This unlinking can happen if the DataFlow tile unlinks the table
             const dataSet = DataSet.create(!self.importedDataSet.isEmpty
-              ? getSnapshot(self.importedDataSet) : undefined);
+              ? getSnapshot(self.importedDataSet) : createDefaultDataSet(self.title));
             self.clearImportedDataSet();
             sharedDataSet = SharedDataSet.create({ providerId: self.metadata.id, dataSet });
           }
@@ -340,18 +342,6 @@ export const TableContentModel = TileContentModel
       // if (self.metadata.hasExpressions) {
       //   self.metadata.updateDatasetByExpressions(self.dataSet);
       // }
-
-      if (changeType === "unlink") {
-        const title = self.title;
-        const newDataSet = createDefaultDataSet(title);
-        const newSharedDataSet = newDataSet && SharedDataSet.create(
-          { providerId: self.metadata.id, dataSet: newDataSet }
-        );
-        const sharedModelManager = self.tileEnv?.sharedModelManager;
-        if (sharedModelManager?.isReady) {
-          sharedModelManager?.addTileSharedModel(self, newSharedDataSet);
-        }
-      }
     },
     setColumnWidth(attrId: string, width: number) {
       self.columnWidths.set(attrId, width);
