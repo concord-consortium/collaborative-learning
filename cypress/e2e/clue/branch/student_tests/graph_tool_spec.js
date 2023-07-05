@@ -20,7 +20,6 @@ context('Graph Tool', function() {
     before(function(){
         const queryParams = `${Cypress.config("queryParams")}`;
         cy.clearQAData('all');
-
         cy.visit(queryParams);
         cy.waitForLoad();
         cy.closeResourceTabs();
@@ -301,7 +300,6 @@ context('Graph Tool', function() {
                 textToolTile.getTextTile().should("exist");
                 clueCanvas.getUndoTool().should("not.have.class", "disabled");
                 clueCanvas.getRedoTool().should("have.class", "disabled");
-
                 // Deletion - Undo/Redo
                 clueCanvas.deleteTile('geometry');
                 graphToolTile.getGraph().should("not.exist");

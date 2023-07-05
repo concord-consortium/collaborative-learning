@@ -57,7 +57,7 @@ context('single student functional test',()=>{
         cy.openTopTab('my-work');
         cy.openDocumentWithTitle("my-work", "workspaces", this.title);
       });
-        it.skip('verifies views button changes when clicked and shows the correct corresponding workspace view', function(){
+        it('verifies views button changes when clicked and shows the correct corresponding workspace view', function(){
             //1-up view has 4-up button visible and 1-up canvas
             clueCanvas.getFourUpViewToggle().should('be.visible');
             canvas.getSingleCanvas().should('be.visible');
