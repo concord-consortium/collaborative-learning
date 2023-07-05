@@ -152,9 +152,11 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
           docs.push(doc);
         });
       });
-    const starredDocs = docs.filter((doc: { isStarred: any; }) => doc.isStarred);
-      return starredDocs;
+    const visibleDocuments = docs.filter ((doc: { isDeleted: any; }) => !doc.isDeleted);
+    const starredDocs = visibleDocuments.filter((doc: { isStarred: any; }) => doc.isStarred);
+    return starredDocs;
   };
+
   //TODO: Need to refactor this if we want to deploy to all tabs
   const renderDocumentView = (subTab: ISubTabSpec) => {
     const openDocumentKey = tabState?.openDocuments.get(subTab.label) || "";
@@ -230,7 +232,6 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
                   <ScrollButton side={"right"} tab={tabSpec.tab} onScroll={handleShowNextDocument}/>
                 </div>
               }
-
             </div>
         }
       </div>
