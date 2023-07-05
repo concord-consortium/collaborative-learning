@@ -177,7 +177,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     const handleShowPrevDocument = () => {
       let prevDocumentKey = "";
       const prevDocIndex = tabSpec.tab === "class-work" ? currentOpenDocIndex + 1 : currentOpenDocIndex - 1;
-      if ((tabSpec.tab === "class-work" && prevDocIndex < starredDocuments.length - 1)
+      if ((tabSpec.tab === "class-work" && prevDocIndex < starredDocuments.length)
           || (tabSpec.tab !== "class-work" && prevDocIndex >= 0))
       { prevDocumentKey = starredDocuments[prevDocIndex].key; }
       ui.openSubTabDocument(tabSpec.tab, subTab.label, prevDocumentKey);
@@ -185,7 +185,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     const handleShowNextDocument = () => {
       let nextDocumentKey = "";
       const nextDocIndex = tabSpec.tab === "class-work" ? currentOpenDocIndex - 1 : currentOpenDocIndex + 1;
-      if ((tabSpec.tab === "class-work" && nextDocIndex > 0)
+      if ((tabSpec.tab === "class-work" && nextDocIndex >= 0)
         || (tabSpec.tab !== "class-work" && nextDocIndex < starredDocuments.length)) {
         nextDocumentKey = starredDocuments[nextDocIndex].key;
       }
