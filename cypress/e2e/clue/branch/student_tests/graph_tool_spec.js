@@ -25,6 +25,7 @@ context('Graph Tool', function() {
         cy.closeResourceTabs();
     });
 
+
     context('Test graph tool functionalities', function(){
         describe('adding points and polygons to a graph', function(){
 
