@@ -34,10 +34,13 @@ describe("TableContent", () => {
 
     const defaultTable = defaultTableContent();
     expect(defaultTable.type).toBe(kTableTileType);
-    expect(defaultTable.isImported).toBe(true);
-    expect(defaultTable.dataSet.attributes.length).toBe(2);
+    expect(defaultTable.isImported).toBe(false);
+    expect(defaultTable.dataSet.attributes.length).toBe(0);
     expect(defaultTable.dataSet.cases.length).toBe(0);
     expect(defaultTable.isUserResizable).toBe(true);
+
+    // TODO: add a test for the default x,y dataset that is setup
+    // in by the reaction in afterAttach
 
     // expect(convertImportToChanges(undefined as any)).toEqual([]);
     // expect(convertImportToChanges({} as any)).toEqual([]);

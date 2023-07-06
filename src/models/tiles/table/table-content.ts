@@ -43,10 +43,6 @@ export function defaultTableContent(props?: IDefaultContentOptions) {
                             // of the props and they get unique names. So perhaps
                             // the table tile can do something similar.
                             name: props?.title,
-                            columns: [
-                              { name: "x" },
-                              { name: "y" }
-                            ],
                             columnWidths: {}
                           // This type cast could probably go away if MST was upgraded and
                           // types.snapshotProcessor(TableContentModel, ...) was used
