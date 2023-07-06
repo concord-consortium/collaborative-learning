@@ -288,7 +288,7 @@ export const UIModel = types
       },
       closeSubTabSecondaryDocument(tab: string, subTab: string) {
         const tabState = getTabState(tab);
-        tabState.openDocuments.delete(subTab);
+        tabState.openSecondaryDocuments.delete(subTab);
       },
       setProblemPath(problemPath: string) {
         self.problemPath = problemPath;
