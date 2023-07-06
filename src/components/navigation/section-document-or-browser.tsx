@@ -164,8 +164,10 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
       store.networkDocuments.getDocument(openDocumentKey);
     const publishedDoc = openDocument?.type === "publication" || openDocument?.type === "personalPublication"
                           || openDocument?.type === "learningLogPublication";
-    const showPlayback = user.type && !publishedDoc? appConfigStore.enableHistoryRoles.includes(user.type) : false;
+    const showPlayback = user.type && !publishedDoc ? appConfigStore.enableHistoryRoles.includes(user.type) : false;
     const isStarredTab = selectedSubTab.label === "Starred";
+    const skipDocument = !openDocument || openDocument.getProperty("isDeleted");
+    const sectionClass = openDocument?.type === "learningLog" ? "learning-log" : "";
     const documentTypes: DocumentType[] = tabSpec.tab === "class-work"
                                             ? ["publication"]
                                             : tabSpec.tab === "my-work" && subTab.label === "Starred"
@@ -173,8 +175,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
                                               : [];
     const starredDocuments = getStarredDocuments(documentTypes);
     const currentOpenDocIndex = openDocument && starredDocuments.indexOf(openDocument);
-    if (!isStarredTab && (!openDocument || openDocument.getProperty("isDeleted"))) return false;
-    const sectionClass = openDocument?.type === "learningLog" ? "learning-log" : "";
+    if (!isStarredTab && skipDocument) return false;
 
     // Published documents are listed in reverse order of index so previous and next toggles are also reversed
     const handleShowPrevDocument = () => {
@@ -212,13 +213,15 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
                                     || (tabSpec.tab !== "class-work" && (currentOpenDocIndex >= 0 &&
                                           currentOpenDocIndex !== 1));
 
+    if (!isStarredTab && skipDocument) return false;
+
     return (
       <div className="scroller-and-document">
         { isStarredTab &&
           <DocumentBrowserScroller subTab={subTab} tabSpec={tabSpec} openDocumentKey={openDocumentKey}
               onSelectDocument={handleSelectDocument} />
         }
-        {(!openDocument || openDocument.getProperty("isDeleted"))
+        {skipDocument
           ? null
           : <div className="document-area">
               <div className={`document-header ${tabSpec.tab} ${sectionClass}`} onClick={() => ui.setSelectedTile()}>
@@ -277,6 +280,7 @@ const DocumentBrowserScroller =
   const [panelWidth, setPanelWidth] = useState(0);
 
   const scrollWidth = collectionElement?.scrollWidth ?? 0;
+  const maxScrollTo = scrollWidth - panelWidth;
 
   useEffect(() => {
     if(scrollToLocation !== undefined) {
@@ -300,7 +304,7 @@ const DocumentBrowserScroller =
   const handleScrollTo = (side: string) => {
     const direction = side ==="left" ? -1 : 1;
     const attemptedScrollTo = scrollToLocation + direction * panelWidth;
-    const scrollTo = Math.max(0, Math.min(scrollWidth - panelWidth, attemptedScrollTo));
+    const scrollTo = Math.max(0, Math.min(maxScrollTo, attemptedScrollTo));
     setScrollToLocation(scrollTo);
   };
 
@@ -325,7 +329,7 @@ const DocumentBrowserScroller =
             scrollToLocation={scrollToLocation}
             onSelectDocument={onSelectDocument}
         />
-        {(scrollToLocation < scrollWidth - panelWidth) &&
+        {(scrollToLocation < maxScrollTo) &&
             <ScrollEndControl side={"right"} collapsed={scrollerCollapsed} tab={tabSpec.tab}
                 onScroll={handleScrollTo} />
         }
@@ -351,10 +355,6 @@ const ScrollEndControl = ({side, collapsed, tab, onScroll}: IScrollEndControlPro
       <div className={`scroller-controls-overlay ${side}`}/>
       <ScrollButton side={side} collapsed={collapsed} tab={tab}
                 onScroll={onScroll} />
-     {/* <div className={classNames("scroll-arrow-button", "themed", tab, {collapsed})}
-            onClick={()=>onScroll(side)}>
-        <ScrollArrowIcon className={`scroll-arrow-icon ${side} themed ${tab}`} />
-      </div> */}
     </div>
   );
 };

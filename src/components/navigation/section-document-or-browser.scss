@@ -91,6 +91,7 @@ $scroller-height: 145px;
     }
     .document-area {
       height: calc(100vh - #{$header-offset-with-sub-tabs});
+
       .document-header {
         display: flex;
         align-items: center;
