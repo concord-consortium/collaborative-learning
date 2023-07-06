@@ -175,7 +175,6 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     const currentOpenDocIndex = openDocument && starredDocuments.indexOf(openDocument);
     if (!isStarredTab && (!openDocument || openDocument.getProperty("isDeleted"))) return false;
     const sectionClass = openDocument?.type === "learningLog" ? "learning-log" : "";
-    console.log("starred Documents", starredDocuments);
 
     // Published documents are listed in reverse order of index so previous and next toggles are also reversed
     const handleShowPrevDocument = () => {
@@ -218,8 +217,6 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
         { isStarredTab &&
           <DocumentBrowserScroller subTab={subTab} tabSpec={tabSpec} openDocumentKey={openDocumentKey}
               onSelectDocument={handleSelectDocument} />
-        }
-        { !openDocument || openDocument.getProperty("isDeleted")
         }
         {(!openDocument || openDocument.getProperty("isDeleted"))
           ? null
