@@ -192,23 +192,32 @@ interface DocumentBrowserScrollerProps {
 const DocumentBrowserScroller =
     ({subTab, tabSpec, openDocumentKey, onSelectDocument}: DocumentBrowserScrollerProps) => {
   const [scrollerCollapsed, setScrollerCollapsed] = useState(false);
-  const collectionRef = useRef<HTMLDivElement>(null);
+  const [collectionElement, setCollectionElement] = useState<HTMLDivElement>();
   const documentScrollerRef = useRef<HTMLDivElement>(null);
   const [scrollToLocation, setScrollToLocation] = useState(0);
+  const [panelWidth, setPanelWidth] = useState(0);
 
-  const panelWidth = documentScrollerRef.current?.clientWidth ?? 0;
-  const scrollLeft = collectionRef.current?.scrollLeft ?? 0;
-  const scrollWidth = collectionRef.current?.scrollWidth ?? 0;
+  const scrollWidth = collectionElement?.scrollWidth ?? 0;
+
+  // Keep track of the size of the containing element
+  useEffect(() => {
+    let obs: ResizeObserver;
+    if (documentScrollerRef.current) {
+      obs = new ResizeObserver(() => {
+        setPanelWidth(documentScrollerRef.current?.clientWidth ?? 0);
+      });
+      obs.observe(documentScrollerRef.current);
+    }
+
+    return () => obs?.disconnect();
+  }, []);
 
   const handleScrollTo = (side: string) => {
     const direction = side ==="left" ? -1 : 1;
-    setScrollToLocation((prevState) => {
-      const attemptedScrollTo = prevState + direction * panelWidth;
-      const scrollTo = Math.max(0, Math.min(scrollWidth - panelWidth, attemptedScrollTo));
-      return scrollTo;
-    });
+    const attemptedScrollTo = scrollToLocation + direction * panelWidth;
+    const scrollTo = Math.max(0, Math.min(scrollWidth - panelWidth, attemptedScrollTo));
+    setScrollToLocation(scrollTo);
   };
-
 
   const handleCollapseScroller = () => {
     setScrollerCollapsed(!scrollerCollapsed);
@@ -217,12 +226,13 @@ const DocumentBrowserScroller =
   return (
     <>
       <div className={classNames("scroller", {"collapsed": scrollerCollapsed})} ref={documentScrollerRef}>
-        {(scrollLeft > 0) &&
+        {(scrollToLocation > 0) &&
             <ScrollEndControl side={"left"} collapsed={scrollerCollapsed} tab={tabSpec.tab}
                 onScroll={handleScrollTo} />
         }
         <DocumentCollectionList
-            collectionRef={collectionRef}
+            setCollectionElement={setCollectionElement}
+            collectionElement={collectionElement}
             subTab={subTab}
             tabSpec={tabSpec}
             horizontal={true}
@@ -231,7 +241,7 @@ const DocumentBrowserScroller =
             scrollToLocation={scrollToLocation}
             onSelectDocument={onSelectDocument}
         />
-        {(scrollLeft < scrollWidth - panelWidth) &&
+        {(scrollToLocation < scrollWidth - panelWidth) &&
             <ScrollEndControl side={"right"} collapsed={scrollerCollapsed} tab={tabSpec.tab}
                 onScroll={handleScrollTo} />
         }

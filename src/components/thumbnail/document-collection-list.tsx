@@ -1,5 +1,5 @@
 import { observer } from "mobx-react";
-import React, { RefObject, useEffect } from "react";
+import React, { useEffect } from "react";
 import classNames from "classnames";
 import { DocumentDragKey, SupportPublication } from "../../models/document/document-types";
 import { useAppConfig, useUIStore, useUserStore } from "../../hooks/use-stores";
@@ -10,7 +10,8 @@ import { LogEventName } from "../../lib/logger-types";
 import { DocumentCollectionByType } from "./documents-type-collection";
 
 interface IProps {
-  collectionRef?: RefObject<HTMLDivElement>;
+  setCollectionElement?: any;
+  collectionElement?: HTMLDivElement;
   subTab: ISubTabSpec;
   tabSpec: NavTabModelType;
   selectedDocument?: string;
@@ -24,8 +25,8 @@ interface IProps {
 export const kNavItemScale = 0.11;
 
 export const DocumentCollectionList: React.FC<IProps> = observer(function DocumentCollectionList(
-    { collectionRef, subTab, tabSpec, horizontal, collapsed, selectedDocument, scrollToLocation,
-      onSelectNewDocument, onSelectDocument}) {
+    { setCollectionElement, collectionElement, subTab, tabSpec, horizontal, collapsed, selectedDocument,
+      scrollToLocation, onSelectNewDocument, onSelectDocument}) {
   const ui = useUIStore();
   const appConfigStore = useAppConfig();
   const user = useUserStore();
@@ -33,9 +34,9 @@ export const DocumentCollectionList: React.FC<IProps> = observer(function Docume
 
   useEffect(() => {
     if(scrollToLocation !== undefined) {
-      collectionRef?.current?.scrollTo({left: scrollToLocation, behavior: "smooth"});
+      collectionElement?.scrollTo({left: scrollToLocation, behavior: "smooth"});
     }
-  },[collectionRef, scrollToLocation]);
+  },[collectionElement, scrollToLocation]);
 
   const handleDocumentDragStart = (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => {
     e.dataTransfer.setData(DocumentDragKey, document.key);
@@ -59,7 +60,7 @@ export const DocumentCollectionList: React.FC<IProps> = observer(function Docume
 
   return (
     <div className={classNames("doc-collection-list", {horizontal, collapsed})}
-        ref={collectionRef}>
+        ref={element => setCollectionElement?.(element)}>
       {
         subTab.sections.map((section: any, index: any) => {
           const _handleDocumentStarClick = section.showStarsForUser(user)
