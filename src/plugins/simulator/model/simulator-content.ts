@@ -4,8 +4,7 @@ import { VariableSnapshot, VariableType } from "@concord-consortium/diagram-view
 
 import { kSimulatorTileType } from "../simulator-types";
 import { kSharedVariablesID, SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
-import { kTerrariumKey } from "../simulations/terrarium/terrarium";
-// import { kBrainwavesKey } from "../simulations/brainwaves-gripper/brainwaves-gripper";
+import { kBrainwavesKey } from "../simulations/brainwaves-gripper/brainwaves-gripper";
 import { simulations } from "../simulations/simulations";
 import { isInputVariable, isOutputVariable } from "../../shared-variables/simulations/simulation-utilities";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
@@ -19,7 +18,7 @@ export function defaultSimulatorContent(): SimulatorContentModelType {
 export const SimulatorContentModel = TileContentModel
   .named("SimulatorTool")
   .props({
-    simulation: types.optional(types.string, kTerrariumKey),
+    simulation: types.optional(types.string, kBrainwavesKey),
     type: types.optional(types.literal(kSimulatorTileType), kSimulatorTileType),
   })
   .volatile(self => ({
