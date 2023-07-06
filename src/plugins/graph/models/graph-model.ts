@@ -168,6 +168,26 @@ export const GraphModel = TileContentModel
     },
     setShowMeasuresForSelection(show: boolean) {
       self.showMeasuresForSelection = show;
+    },
+  }))
+  .actions(self => ({
+    linkDataSet() {
+      if (!self.data) {
+        console.warn("linkDataSet requires an a dataset");
+        return;
+      }
+      self.config.setDataset(self.data);
+      self.setAttributeID("x", self.data.attributes[0].id);
+      self.setAttributeID("y", self.data.attributes[1].id);
+    },
+    unlinkDataSet() {
+      if (self.data) {
+        console.warn("unlinkDataSet requires the dataset is set");
+        return;
+      }
+      self.setAttributeID("y", "");
+      self.setAttributeID("x", "");
+      self.config.setDataset(undefined);
     }
   }))
   .actions(self => ({
@@ -180,14 +200,10 @@ export const GraphModel = TileContentModel
         (data, prevData) => {
           if (data && data !== prevData) {
             // This should occur when the graph is linked to a dataset
-            self.config.setDataset(self.data);
-            self.setAttributeID("x", data.attributes[0].id);
-            self.setAttributeID("y", data.attributes[1].id);
+            self.linkDataSet();
           } else if (!data) {
             // This should occur when the graph is unlinked from a dataset
-            self.setAttributeID("y", "");
-            self.setAttributeID("x", "");
-            self.config.setDataset(undefined);
+            self.unlinkDataSet();
           }
         }
       ));
