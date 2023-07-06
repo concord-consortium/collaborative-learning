@@ -73,14 +73,27 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
   const handleSelectDocument = (document: DocumentModelType) => {
     if (ui.focusDocument === document.key) {
       ui.closeSubTabDocument(tabSpec.tab, selectedSubTab.label);
+    } else if (selectedSubTab.label === "Starred"){
+      if (tabState?.openDocuments.get("Starred")) {
+        if (ui.focusSecondaryDocument === document.key) {
+          ui.closeSubTabSecondaryDocument(tabSpec.tab, "Starred");
+        } else {
+          ui.openSubTabSecondaryDocument(tabSpec.tab, "Starred", document.key);
+        }
+      } else {
+        if (!document.hasContent && document.isRemote) {
+          loadDocumentContent(document);
+        }
+        ui.openSubTabDocument(tabSpec.tab, selectedSubTab.label, document.key);
+        const logEvent = document.isRemote
+          ? LogEventName.VIEW_SHOW_TEACHER_NETWORK_COMPARISON_DOCUMENT
+          : LogEventName.VIEW_SHOW_COMPARISON_DOCUMENT;
+        logDocumentEvent(logEvent, { document });
+      }
     } else {
       if (!document.hasContent && document.isRemote) {
         loadDocumentContent(document);
       }
-      // The subTabIndex is computed above on every render. It is the index
-      // of the currently open subTab. Its also passed to the Tab component
-      // below.
-      // const selectedSubTab = subTabs[subTabIndex];
       ui.openSubTabDocument(tabSpec.tab, selectedSubTab.label, document.key);
       const logEvent = document.isRemote
         ? LogEventName.VIEW_SHOW_TEACHER_NETWORK_COMPARISON_DOCUMENT
@@ -162,6 +175,9 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     const openDocumentKey = tabState?.openDocuments.get(subTab.label) || "";
     const openDocument = store.documents.getDocument(openDocumentKey) ||
       store.networkDocuments.getDocument(openDocumentKey);
+    const openSecondaryDocumentKey = tabState?.openSecondaryDocuments.get(subTab.label) || "";
+    const openSecondaryDocument = store.documents.getDocument(openSecondaryDocumentKey) ||
+      store.networkDocuments.getDocument(openSecondaryDocumentKey);
     const publishedDoc = openDocument?.type === "publication" || openDocument?.type === "personalPublication"
                           || openDocument?.type === "learningLogPublication";
     const showPlayback = user.type && !publishedDoc? appConfigStore.enableHistoryRoles.includes(user.type) : false;
@@ -173,20 +189,26 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
                                               : [];
     const starredDocuments = getStarredDocuments(documentTypes);
     const currentOpenDocIndex = openDocument && starredDocuments.indexOf(openDocument);
+    const currentOpenSecondaryDocIndex = openSecondaryDocument && starredDocuments.indexOf(openSecondaryDocument);
     if (!isStarredTab && (!openDocument || openDocument.getProperty("isDeleted"))) return false;
     const sectionClass = openDocument?.type === "learningLog" ? "learning-log" : "";
-    console.log("starred Documents", starredDocuments);
+    console.log("openDocument", openDocumentKey);
 
+console.log("openSecondaryDocument", openSecondaryDocumentKey);
     // Published documents are listed in reverse order of index so previous and next toggles are also reversed
-    const handleShowPrevDocument = () => {
+    const handleShowPrevDocument = (secondary?: boolean) => {
       let prevDocumentKey = "";
       const prevDocIndex = currentOpenDocIndex + 1 >= starredDocuments.length ? 0 : currentOpenDocIndex + 1;
       if (prevDocIndex < starredDocuments.length)
       { prevDocumentKey = starredDocuments[prevDocIndex].key; }
-      ui.openSubTabDocument(tabSpec.tab, subTab.label, prevDocumentKey);
+      if (secondary) {
+        ui.openSubTabSecondaryDocument(tabSpec.tab, subTab.label, prevDocumentKey);
+      } else {
+        ui.openSubTabDocument(tabSpec.tab, subTab.label, prevDocumentKey);
+      }
     };
 
-    const handleShowNextDocument = () => {
+    const handleShowNextDocument = (secondary?: boolean | undefined) => {
       let nextDocumentKey = "";
       let nextDocIndex: number;
       // Workspaces Starred tab show the problem document as the first document in the list
@@ -204,7 +226,11 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
       if (nextDocIndex < starredDocuments.length) {
         nextDocumentKey = starredDocuments[nextDocIndex].key;
       }
-      ui.openSubTabDocument(tabSpec.tab, subTab.label, nextDocumentKey);
+      if (secondary) {
+        ui.openSubTabSecondaryDocument(tabSpec.tab, subTab.label, nextDocumentKey);
+      } else {
+        ui.openSubTabDocument(tabSpec.tab, subTab.label, nextDocumentKey);
+      }
     };
 
     const isLeftFlipperVisible = (tabSpec.tab === "class-work" && (currentOpenDocIndex < starredDocuments.length - 1))
@@ -219,34 +245,65 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
           <DocumentBrowserScroller subTab={subTab} tabSpec={tabSpec} openDocumentKey={openDocumentKey}
               onSelectDocument={handleSelectDocument} />
         }
-        { !openDocument || openDocument.getProperty("isDeleted")
-        }
         {(!openDocument || openDocument.getProperty("isDeleted"))
           ? null
           : <div className="document-area">
-              <div className={`document-header ${tabSpec.tab} ${sectionClass}`} onClick={() => ui.setSelectedTile()}>
-                <div className={`document-title`}>
-                  {getDocumentDisplayTitle(openDocument, appConfigStore, problemStore)}
+              <div className={`focus-document ${openSecondaryDocument ? "primary" : ""}`}>
+                <div className={`document-header ${tabSpec.tab} ${sectionClass}
+                                ${openSecondaryDocument ? "primary" : ""}`} onClick={() => ui.setSelectedTile()}>
+                  <div className={`document-title`}>
+                    {getDocumentDisplayTitle(openDocument, appConfigStore, problemStore)}
+                  </div>
+                  {(!openDocument.isRemote)
+                      && editButton(tabSpec.tab, sectionClass, openDocument)}
                 </div>
-                {(!openDocument.isRemote)
-                    && editButton(tabSpec.tab, sectionClass, openDocument)}
+                {(isStarredTab && isLeftFlipperVisible) &&
+                  <div className="scroll-arrow-button-wrapper left">
+                    <ScrollButton side={"left"} tab={tabSpec.tab} onScroll={()=>handleShowPrevDocument()}/>
+                  </div>
+                }
+                <EditableDocumentContent
+                  mode={"1-up"}
+                  isPrimary={false}
+                  document={openDocument}
+                  readOnly={true}
+                  showPlayback={showPlayback}
+                />
+                {(isStarredTab && isRightFlipperVisible) &&
+                  <div className="scroll-arrow-button-wrapper right">
+                    <ScrollButton side={"right"} tab={tabSpec.tab} onScroll={()=>handleShowNextDocument()}/>
+                  </div>
+                }
               </div>
-              {(isStarredTab && isLeftFlipperVisible) &&
-                <div className="scroll-arrow-button-wrapper left">
-                  <ScrollButton side={"left"} tab={tabSpec.tab} onScroll={handleShowPrevDocument}/>
-                </div>
-              }
-              <EditableDocumentContent
-                mode={"1-up"}
-                isPrimary={false}
-                document={openDocument}
-                readOnly={true}
-                showPlayback={showPlayback}
-              />
-              {(isStarredTab && isRightFlipperVisible) &&
-                <div className="scroll-arrow-button-wrapper right">
-                  <ScrollButton side={"right"} tab={tabSpec.tab} onScroll={handleShowNextDocument}/>
-                </div>
+              {(!openSecondaryDocument || openSecondaryDocument.getProperty("isDeleted"))
+                ? null
+                : <div className="focus-document secondary">
+                    <div className={`document-header ${tabSpec.tab} ${sectionClass} secondary`}
+                          onClick={() => ui.setSelectedTile()}>
+                      <div className={`document-title`}>
+                        {getDocumentDisplayTitle(openSecondaryDocument, appConfigStore, problemStore)}
+                      </div>
+                      {(!openSecondaryDocument.isRemote)
+                          && editButton(tabSpec.tab, sectionClass, openSecondaryDocument)}
+                    </div>
+                    {(isStarredTab && isLeftFlipperVisible) &&
+                      <div className="scroll-arrow-button-wrapper left">
+                        <ScrollButton side={"left"} tab={tabSpec.tab} onScroll={()=>handleShowPrevDocument(true)}/>
+                      </div>
+                    }
+                    <EditableDocumentContent
+                      mode={"1-up"}
+                      isPrimary={false}
+                      document={openSecondaryDocument}
+                      readOnly={true}
+                      showPlayback={showPlayback}
+                    />
+                    {(isStarredTab && isRightFlipperVisible) &&
+                      <div className="scroll-arrow-button-wrapper right">
+                        <ScrollButton side={"right"} tab={tabSpec.tab} onScroll={()=>handleShowNextDocument(true)}/>
+                      </div>
+                    }
+                  </div>
               }
             </div>
         }
@@ -354,10 +411,6 @@ const ScrollEndControl = ({side, collapsed, tab, onScroll}: IScrollEndControlPro
       <div className={`scroller-controls-overlay ${side}`}/>
       <ScrollButton side={side} collapsed={collapsed} tab={tab}
                 onScroll={onScroll} />
-     {/* <div className={classNames("scroll-arrow-button", "themed", tab, {collapsed})}
-            onClick={()=>onScroll(side)}>
-        <ScrollArrowIcon className={`scroll-arrow-icon ${side} themed ${tab}`} />
-      </div> */}
     </div>
   );
 };

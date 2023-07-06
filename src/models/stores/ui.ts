@@ -45,7 +45,8 @@ export const UITabModel = types
     id: types.identifier,
     openSubTab: types.maybe(types.string),
     // The key of this map is the sub tab label
-    openDocuments: types.map(types.string)
+    openDocuments: types.map(types.string),
+    openSecondaryDocuments: types.map(types.string)
   });
 
 export const UIModel = types
@@ -94,6 +95,15 @@ export const UIModel = types
       } else {
         const activeTabState = self.tabs.get(self.activeNavTab);
         return self.openSubTab && activeTabState?.openDocuments.get(self.openSubTab);
+      }
+    },
+    get focusSecondaryDocument () {
+      if (self.activeNavTab === ENavTab.kProblems || self.activeNavTab === ENavTab.kTeacherGuide) {
+        const facet = self.activeNavTab === ENavTab.kTeacherGuide ? ENavTab.kTeacherGuide : undefined;
+        return buildSectionPath(self.problemPath, self.openSubTab, facet);
+      } else {
+        const activeTabState = self.tabs.get(self.activeNavTab);
+        return self.openSubTab && activeTabState?.openSecondaryDocuments.get(self.openSubTab);
       }
     }
   }))
@@ -249,6 +259,10 @@ export const UIModel = types
         const tabState = getTabState(tab);
         tabState.openDocuments.set(subTab, documentKey);
       },
+      setOpenSubTabSecondaryDocument(tab: string, subTab: string, documentKey: string) {
+        const tabState = getTabState(tab);
+        tabState.openDocuments.set(subTab, documentKey);
+      },
       /**
        * Open to the tab and subTab and open a document.
        *
@@ -262,7 +276,17 @@ export const UIModel = types
         tabState.openSubTab = subTab;
         tabState.openDocuments.set(subTab, documentKey);
       },
+      openSubTabSecondaryDocument(tab: string, subTab: string, documentKey: string) {
+        const tabState = getTabState(tab);
+        self.activeNavTab = tab;
+        tabState.openSubTab = subTab;
+        tabState.openSecondaryDocuments.set(subTab, documentKey);
+      },
       closeSubTabDocument(tab: string, subTab: string) {
+        const tabState = getTabState(tab);
+        tabState.openDocuments.delete(subTab);
+      },
+      closeSubTabSecondaryDocument(tab: string, subTab: string) {
         const tabState = getTabState(tab);
         tabState.openDocuments.delete(subTab);
       },
