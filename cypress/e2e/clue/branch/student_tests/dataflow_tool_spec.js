@@ -386,15 +386,34 @@ context('Dataflow Tool Tile', function () {
           dataflowToolTile.getDropdownOptions(nodeType, dropdown).eq(0).click();
       });
       it("can connect and trigger modal connection warning", () => {
+        // vars for controlling click and drag to connect nodes
+        const startX = 306;
+        const startY = 182;
+        const deltaX = 70;  //  60 with fixed styles
+        const deltaY = -32; // -10 with fixed styles
         dataflowToolTile.getCreateNodeButton("number").click();
         dataflowToolTile.getNode("number").should("exist");
         dataflowToolTile.getNumberField().type("1{enter}");
         dataflowToolTile.getNumberNodeOutput().should("exist");
-        dataflowToolTile.getDataflowTile().click(306, 182)
-          .trigger("pointerdown", 306, 182, {force: true})
-          .trigger("pointermove", 366, 172, {force: true})
-          .trigger("pointerup", 366, 172, {force: true});
+        dataflowToolTile.getDataflowTile().click(startX, startY)
+          .trigger("pointerdown", startX, startY, {force: true})
+          .trigger("pointermove", startX + deltaX, startY + deltaY, {force: true})
+          .trigger("pointerup", startX + deltaX, startY + deltaY, {force: true});
         dataflowToolTile.getModalOkButton().click();
+      });
+      it("should not show hub selector when gripper is selected", () => {
+        const dropdown = "liveOutputType";
+        dataflowToolTile.getDropdown(nodeType, dropdown).click();
+        dataflowToolTile.getDropdownOptions(nodeType, dropdown).eq(2).click();
+        dataflowToolTile.getDropdown(nodeType, dropdown).contains("Gripper 2.0").should("exist");
+        dataflowToolTile.getDropdown(nodeType, "hubSelect").should("not.be.visible");
+      });
+      it("should show hub selector when humidifier is selected", () => {
+        const dropdown = "liveOutputType";
+        dataflowToolTile.getDropdown(nodeType, dropdown).click();
+        dataflowToolTile.getDropdownOptions(nodeType, dropdown).eq(3).click();
+        dataflowToolTile.getDropdown(nodeType, dropdown).contains("Humidifier").should("exist");
+        dataflowToolTile.getDropdown(nodeType, "hubSelect").should("be.visible");
       });
       it("can recieve a value from a connected block, and display correct on or off string", () => {
         dataflowToolTile.getNode("number").should("exist");
