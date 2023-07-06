@@ -129,7 +129,7 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
     if (tileContentModel.type === "Graph" && sharedModel.type === "SharedDataSet") {
       // Related to the comment above, although we know the type of sharedModel is
       // SharedDataSetType, TypeScript will throw an error if we try to access the dataSet
-      // property on it without first using isSharedDataSet to check the type. So we cast 
+      // property on it without first using isSharedDataSet to check the type. So we cast
       // sharedModel to any (again we don't want to introduce the data set types here).
       const sm = sharedModel as any;
       if (isTileLinkedToOtherDataSet(tileContentModel, sm.dataSet)) {
@@ -155,7 +155,7 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
     // the tile content model automatically by the tree monitor. However when
     // the list of shared models is changed like here addTileSharedModel, the
     // tree monitor doesn't pick that up, so we must call it directly.
-    tileContentModel.updateAfterSharedModelChanges(sharedModel, "link");
+    tileContentModel.updateAfterSharedModelChanges(sharedModel);
   }
 
   // This is not an action because it is deriving state.
@@ -234,7 +234,7 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
       return;
     }
 
-    tileContentModel.updateAfterSharedModelChanges(sharedModel, "unlink");
+    tileContentModel.updateAfterSharedModelChanges(sharedModel);
     sharedModelEntry.removeTile(tile);
   }
 }

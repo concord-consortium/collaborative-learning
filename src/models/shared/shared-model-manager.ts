@@ -44,7 +44,6 @@ export const UnknownSharedModel = types.snapshotProcessor(_UnknownSharedModel, {
   }
 });
 
-export type SharedModelChangeType = "link" | "change" | "unlink";
 export interface IDragSharedModelItem {
   modelId: string;
   providerId?: string;
@@ -130,7 +129,7 @@ export interface ISharedModelManager {
 
   /**
    * Get all of the shared models of a certain type that link to the given tile
-   * 
+   *
    * @param tileContentModel Tile whose shared models will be returned.
    * @param modelType Only shared models with this type will be returned.
    */

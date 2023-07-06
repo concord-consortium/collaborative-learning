@@ -22,7 +22,6 @@ import {
   defaultStrokeColor,
   kellyColors
 } from "../../../utilities/color-utils";
-import { SharedModelChangeType } from "../../../models/shared/shared-model-manager";
 import { AppConfigModelType } from "../../../models/stores/app-config-model";
 
 export type SharedModelChangeHandler = (sharedModel: SharedModelType | undefined, type: string) => void;
@@ -172,7 +171,7 @@ export const GraphModel = TileContentModel
     }
   }))
   .actions(self => ({
-    updateAfterSharedModelChanges(sharedModel?: SharedModelType, changeType?: SharedModelChangeType) {
+    updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
       // Nothing to do here so far
     },
     afterAttach() {
