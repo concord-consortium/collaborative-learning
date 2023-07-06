@@ -1,12 +1,99 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
+import { observer } from "mobx-react";
 import classNames from "classnames";
-import { getGroupUsers } from "../../models/document/document-utils";
-import { GroupUserModelType } from "../../models/stores/groups";
-import { useProblemStore, useUIStore, useStores } from "../../hooks/use-stores";
+import { GroupModelType, GroupUserModelType } from "../../models/stores/groups";
+import { useProblemStore, useStores } from "../../hooks/use-stores";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
-import { FourUpComponent, FourUpUser } from "../four-up";
+import { FourUpComponent, getFocusedGroupUser, getQuadrant } from "../four-up";
+import { DocumentViewMode } from "./document";
+
 import "./student-group-view.scss";
+
+export const StudentGroupView:React.FC = observer(function StudentGroupView(){
+  const stores = useStores();
+  const {groups, ui } = stores;
+
+  useEffect(() => stores.initializeStudentWorkTab(), [stores]);
+
+  const selectedGroupId = ui.tabs.get("student-work")?.openSubTab || "";
+  const group = groups.getGroupById(selectedGroupId);
+  const openDocId = ui.tabs.get("student-work")?.openDocuments.get(selectedGroupId);
+  const focusedGroupUser = getFocusedGroupUser(group, openDocId, DocumentViewMode.Live);
+  const isStudentViewActiveTab = (ui.activeNavTab === "student-work");
+  const isChatPanelShown = ui.showChatPanel;
+  const shrinkStudentView  = isStudentViewActiveTab && isChatPanelShown;
+  const documentSelectedForComment = ui.showChatPanel && ui.selectedTileIds.length === 0 && ui.focusDocument;
+  const studentGroupViewClasses = classNames( "editable-document-content", "document", "student-group-view",
+  {"shrink-student-view": shrinkStudentView}, {"comment-select" : documentSelectedForComment});
+
+  return (
+    <div key="student-group-view" className={studentGroupViewClasses}>
+      <GroupViewTitlebar group={group} groupUser={focusedGroupUser} />
+      <GroupTitlebar group={group} groupUser={focusedGroupUser} />
+      <div className="canvas-area">
+        { group &&
+          <FourUpComponent group={group}
+                         isGhostUser={true}
+                         viaStudentGroupView={true}
+          />
+        }
+      </div>
+    </div>
+  );
+});
+
+interface IGroupComponentProps {
+  group?: GroupModelType;
+  groupUser?: GroupUserModelType;
+}
+
+const GroupViewTitlebar: React.FC<IGroupComponentProps> = observer(function GroupViewTitlebar({group, groupUser}) {
+  const {groups, ui} = useStores();
+  const focusedGroupUser = groupUser;
+
+  const handleFocusedUserChange = (selectedUser: GroupUserModelType) => {
+    group?.id && selectedUser.problemDocument &&
+      ui.openSubTabDocument("student-work", group.id, selectedUser.problemDocument.key);
+  };
+
+  const handleSelectGroup = (id: string) => {
+    ui.setOpenSubTab("student-work", id);
+    ui.closeSubTabDocument("student-work", id);
+    Logger.log(LogEventName.VIEW_GROUP, {group: id, via: "group-document-titlebar"});
+  };
+
+  return (
+    <div className={`titlebar student-group group`}>
+      <div className="actions">
+      {focusedGroupUser && group
+        ? <>
+            <GroupButton displayId={group.displayId} id={group.id} key={group.id}
+                          selected={true}
+            />
+            { group.sortedUsers.map((u, index) => {
+                const className = classNames("member-button", "in-student-group-view", getQuadrant(index),
+                                              {focused: u.id === focusedGroupUser.id}
+                                              );
+              return (
+                <button key={u.name} className={className} title={u.name}
+                    onClick={()=>handleFocusedUserChange(u)}>
+                  {u.name}
+                </button>
+              );
+            })}
+          </>
+        : groups.nonEmptyGroups
+            .map(g => {
+              return <GroupButton displayId={g.displayId} id={g.id} key={g.id}
+                                  selected={g.id === group?.id}
+                                  onSelectGroup={handleSelectGroup} />;
+            })
+        }
+      </div>
+    </div>
+  );
+});
 
 interface IGroupButtonProps {
   displayId: string;
@@ -24,108 +111,20 @@ const GroupButton: React.FC<IGroupButtonProps> = ({ displayId, id, selected, onS
   );
 };
 
-interface IGroupViewTitlebarProps {
-  selectedId?: string;
-  onSelectGroup: (id: string) => void;
-}
-
-interface IGroupTitlebarProps {
-  selectedId: string;
-  groupUser?: GroupUserModelType | undefined;
-}
-
-interface IProps {
-  groupId?: string;
-  setGroupId: (groupId: string) => void;
-}
-export const StudentGroupView:React.FC<IProps> = ({ groupId, setGroupId }) => {
-  const {user, groups, documents} = useStores();
-  const [focusedGroupUser, setFocusedGroupUser] = useState<GroupUserModelType | undefined>();
-  const selectedGroupId = groupId || (groups.allGroups.length ? groups.allGroups[0].id : "");
-  const groupUsers = getGroupUsers(user.id, groups, documents, selectedGroupId);
-  const group = groups.getGroupById(selectedGroupId);
-
-  const ui = useUIStore();
-  const isStudentViewActiveTab = (ui.activeNavTab === "student-work");
-  const isChatPanelShown = ui.showChatPanel;
-  const shrinkStudentView  = isStudentViewActiveTab && isChatPanelShown;
-  const classes = classNames("document", "student-group-view", {"shrink-student-view": shrinkStudentView});
-
-  const handleSelectGroup = (id: string) => {
-    Logger.log(LogEventName.VIEW_GROUP, {group: id, via: "group-document-titlebar"});
-    setGroupId(id);
-    setFocusedGroupUser(undefined);
-  };
-
-  const handleFocusedUserChange = (selectedUser: FourUpUser) => {
-    setFocusedGroupUser(selectedUser.user);
-  };
-
-  const GroupViewTitlebar: React.FC<IGroupViewTitlebarProps> = ({ selectedId, onSelectGroup }) => {
-    return (
-      <div className={`titlebar student-group group`}>
-        <div className="actions">
-        {focusedGroupUser && group
-          ? <>
-              <GroupButton displayId={group.displayId} id={group.id} key={group.id}
-                            selected={group.id === selectedId}
-              />
-              { groupUsers.map(u => {
-                  const className = classNames("member-button", "in-student-group-view", u.context,
-                                                {focused: u.user.id === focusedGroupUser.id});
-                return (
-                  <button key={u.user.name} className={className} title={u.user.name}
-                      onClick={()=>handleFocusedUserChange(u)}>
-                    {u.user.name}
-                  </button>
-                );
-              })}
-            </>
-          : groups.allGroups
-              .filter(g => g.users.length > 0)
-              .map(g => {
-                return <GroupButton displayId={g.displayId} id={g.id} key={g.id}
-                                    selected={g.id === selectedId}
-                                    onSelectGroup={onSelectGroup} />;
-              })
-          }
-        </div>
-      </div>
-    );
-  };
-
-  const GroupTitlebar: React.FC<IGroupTitlebarProps> = ({groupUser}) => {
-    const problem = useProblemStore();
-    const userInfo = groupUsers.find(gUser => gUser.user.id === groupUser?.id);
-    const userDocTitle = userInfo?.doc?.title || "Document";
-    const titleText = focusedGroupUser && groupUser && userInfo
-                        ? `${groupUser.name}: ${userInfo.doc?.type === "problem" ? problem.title : userDocTitle}`
-                        : group?.displayId ? `Student Group ${group?.displayId}` : "No groups";
-    return (
-      <div className="group-title" data-test="group-title">
-        <div className="group-title-center">
-          <div className="group-name">
-            {titleText}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const focusedUserContext = (groupUsers.find(u => u.user.id === focusedGroupUser?.id))?.context;
-
+const GroupTitlebar: React.FC<IGroupComponentProps> = observer(function GroupTitlebar({group, groupUser}) {
+  const problem = useProblemStore();
+  const document= groupUser?.problemDocument;
+  const userDocTitle = document?.title || "Document";
+  const titleText = groupUser
+                      ? `${groupUser.name}: ${document?.type === "problem" ? problem.title : userDocTitle}`
+                      : group?.displayId ? `Student Group ${group?.displayId}` : "No groups";
   return (
-    <div key="student-group-view" className={classes}>
-      <GroupViewTitlebar selectedId={selectedGroupId} onSelectGroup={handleSelectGroup} />
-      <GroupTitlebar selectedId={selectedGroupId} groupUser={focusedGroupUser}/>
-      <div className="canvas-area">
-        <FourUpComponent groupId={selectedGroupId}
-                         isGhostUser={true}
-                         viaStudentGroupView={true}
-                         focusedUserContext={focusedUserContext}
-                         setFocusedGroupUser={setFocusedGroupUser}
-        />
+    <div className="group-title" data-test="group-title">
+      <div className="group-title-center">
+        <div className="group-name">
+          {titleText}
+        </div>
       </div>
     </div>
   );
-};
+});

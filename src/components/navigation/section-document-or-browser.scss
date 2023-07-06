@@ -46,7 +46,7 @@ $scroller-height: 145px;
         height: $scroller-height;
         display: flex;
         flex-direction: row;
-        overflow-x: auto;
+        overflow-x: hidden;
         overflow-y: hidden;
         position: relative;
         top: 0;

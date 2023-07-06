@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { getSnapshot } from "mobx-state-tree";
-import { EditVariableDialogContent, updateVariable, Variable, VariableType } from "@concord-consortium/diagram-view";
+import { EditVariableDialogContent, updateVariable, Variable/*, VariableType*/ }
+  from "@concord-consortium/diagram-view";
 
 import { useCustomModal } from "../../../hooks/use-custom-modal";
 
@@ -8,7 +9,7 @@ import VariableEditorIcon from "../assets/variable-editor-icon.svg";
 import './variable-dialog.scss';
 
 interface IProps {
-  variable?: VariableType;
+  variable?: any; // TODO VariableType Should be VariableType
   onClose?: () => void;
 }
 export const useEditVariableDialog = ({ variable, onClose }: IProps) => {

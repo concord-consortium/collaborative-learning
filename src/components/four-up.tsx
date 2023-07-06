@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { clone, debounce } from "lodash";
+import { debounce } from "lodash";
 import { observer, inject } from "mobx-react";
 import React from "react";
 import ResizeObserver from "resize-observer-polyfill";
@@ -7,11 +7,10 @@ import { BaseComponent, IBaseProps } from "./base";
 import { CanvasComponent } from "./document/canvas";
 import { DocumentViewMode } from "./document/document";
 import { DocumentModelType } from "../models/document/document";
-import { GroupUserModelType } from "../models/stores/groups";
+import { GroupModelType, GroupUserModelType } from "../models/stores/groups";
 import { CellPositions, FourUpGridCellModelType, FourUpGridModel, FourUpGridModelType
       } from "../models/view/four-up-grid";
 import { FourUpOverlayComponent } from "./four-up-overlay";
-import { getGroupUsers } from "../models/document/document-utils";
 import { Logger } from "../lib/logger";
 import { LogEventName } from "../lib/logger-types";
 import FourUpIcon from "../clue/assets/icons/4-up-icon.svg";
@@ -19,30 +18,16 @@ import FourUpIcon from "../clue/assets/icons/4-up-icon.svg";
 import "./four-up.sass";
 
 interface IProps extends IBaseProps {
-  userId?: string;
-  groupId?: string;
+  group: GroupModelType;
   isGhostUser?: boolean;
   toggleable?: boolean;
   documentViewMode?: DocumentViewMode;
   selectedSectionId?: string | null;
   viaTeacherDashboard?: boolean;
   viaStudentGroupView?: boolean;
-  focusedUserContext?: string;
-  setFocusedGroupUser?: (focusedGroupUser?: GroupUserModelType) => void;
 }
 
 interface IState {
-  toggledContextMap: Record<string, string | undefined>
-}
-
-export interface FourUpUser {
-  user: GroupUserModelType;
-  doc?: DocumentModelType;
-  context: string;
-}
-
-interface ContextUserMap {
-  [key: string]: FourUpUser | undefined;
 }
 
 // The bottom of the four-up view is covered by the border of the bottom nav, so this lost height must be considered
@@ -66,6 +51,48 @@ const indexToLocation = [
   "nw", "ne", "se", "sw"
 ] as const;
 
+export function getQuadrant(groupUserIndex: number) {
+  if (groupUserIndex < 0 || groupUserIndex > 3) return undefined;
+  return indexToCornerLabel[groupUserIndex];
+}
+
+/**
+ * When the four-up is used in the dashboard it can be showing live student
+ * problem documents or published documents. In the case of published documents
+ * we use a fake tab called student-work-published to keep track of which
+ * documents are open. These open documents correspond the focused quadrant of
+ * the four-up view
+ *
+ * @returns
+ */
+export function getUIStudentWorkTab(mode?: DocumentViewMode) {
+  return mode === DocumentViewMode.Published ? "student-work-published" : "student-work";
+}
+
+export function getUserDocument(groupUser: GroupUserModelType | undefined, mode: DocumentViewMode | undefined) {
+  if (mode === DocumentViewMode.Published) {
+    return groupUser?.lastPublishedProblemDocument;
+  } else {
+    return groupUser?.problemDocument;
+  }
+}
+
+export function getFocusedGroupUser(group: GroupModelType| undefined, openDocId: string | undefined,
+    mode: DocumentViewMode | undefined) {
+  if (!openDocId || !group) return undefined;
+
+  return group?.users.find(obj => {
+    const userDoc = getUserDocument(obj, mode);
+    return userDoc?.key === openDocId;
+  });
+}
+
+/**
+ * The state of the currently focused group member is stored in `stores.ui.tabs`. This is the
+ * case even when a student is running CLUE and they show the FourUp view to see their group
+ * member's work. The default tab id is "student-work", if the documentViewMode is Published
+ * then the tab id is "student-work-published".
+ */
 @inject("stores")
 @observer
 export class FourUpComponent extends BaseComponent<IProps, IState> {
@@ -73,16 +100,9 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   private container: HTMLDivElement | null;
   private resizeObserver: ResizeObserver;
   private roIsInitialized = false;
-  private userByContext: ContextUserMap = {};
 
   constructor(props: IProps) {
     super(props);
-
-    this.state = {
-      toggledContextMap: {}
-    };
-
-    // use local grid model
     this.grid = FourUpGridModel.create({
       splitterSize: 3,
     });
@@ -104,46 +124,67 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     this.resizeObserver.disconnect();
   }
 
-  private getToggledContext () {
-    const {toggledContextMap} = this.state;
-    return (this.props.groupId && toggledContextMap[this.props.groupId]) ?? null;
+  /**
+   * When the four-up is used in the dashboard it can be showing published
+   * documents. In that case we use a fake tab called student-work-published
+   * to keep track of which documents are open. This corresponds the focused
+   * user.
+   *
+   * @returns
+   */
+  private getNavTabName() {
+    return getUIStudentWorkTab(this.props.documentViewMode);
+  }
+
+  private getFocusedUserDocKey() {
+    const {ui} = this.stores;
+    const {group} = this.props;
+    return ui.tabs.get(this.getNavTabName())?.openDocuments.get(group.id);
+  }
+
+  private getFocusedGroupUser() {
+    const {group} = this.props;
+    const docKey = this.getFocusedUserDocKey();
+    return group.users.find(obj => docKey && this.getGroupUserDoc(obj)?.key === docKey);
+  }
+
+  private getGroupUserDoc(groupUser?: GroupUserModelType) {
+    const {documentViewMode} = this.props;
+    return getUserDocument(groupUser, documentViewMode);
   }
 
   public render() {
-    const {focusedUserContext, documentViewMode, viaStudentGroupView,
-        userId, groupId, isGhostUser, toggleable, ...others } = this.props;
-    const toggledContext = focusedUserContext || this.getToggledContext();
+    const {documentViewMode, viaStudentGroupView,
+        group, isGhostUser, toggleable, ...others } = this.props;
+
     const {width, height} = this.grid;
     const nwCell = this.grid.cells[CellPositions.NorthWest];
     const neCell = this.grid.cells[CellPositions.NorthEast];
     const seCell = this.grid.cells[CellPositions.SouthEast];
     const swCell = this.grid.cells[CellPositions.SouthWest];
     const toggledStyle = {top: 0, left: 0, width, height};
-    const indexToStyle = [
-      toggledContext ? toggledStyle : {top: 0, left: 0, width: nwCell.width, height: nwCell.height},
-      toggledContext ? toggledStyle : {top: 0, left: neCell.left, right: 0, height: neCell.height},
-      toggledContext ? toggledStyle : {top: seCell.top, left: seCell.left, right: 0, bottom: 0},
-      toggledContext ? toggledStyle : {top: swCell.top, left: 0, width: swCell.width, bottom: 0}
-    ];
+
     const scaleStyle = (cell: FourUpGridCellModelType) => {
-      const transform = `scale(${toggledContext ? 1 : cell.scale})`;
+      const transform = `scale(${focusedGroupUser ? 1 : cell.scale})`;
       return {width, height, transform, transformOrigin: "0 0"};
     };
 
-    const { groups, documents } = this.stores;
-    const groupUsers = getGroupUsers(userId, groups, documents, groupId, documentViewMode);
+    // We are using this as a lookup table, so its possible the index being looked
+    // up won't exist.
+    const groupUsers: Array<GroupUserModelType | undefined> = group.sortedUsers;
 
-    // save reference to use for the username display in this render and logger in #handleOverlayClicked
-    this.userByContext = {
-      "four-up-nw": groupUsers[0],
-      "four-up-ne": groupUsers[1],
-      "four-up-se": groupUsers[2],
-      "four-up-sw": groupUsers[3],
-    };
+    const focusedGroupUser = this.getFocusedGroupUser();
 
-    const groupDoc = (index: number) => {
-      return groupUsers[index] && groupUsers[index].doc;
-    };
+    const indexToStyle = [
+      focusedGroupUser ? toggledStyle : {top: 0, left: 0, width: nwCell.width, height: nwCell.height},
+      focusedGroupUser ? toggledStyle : {top: 0, left: neCell.left, right: 0, height: neCell.height},
+      focusedGroupUser ? toggledStyle : {top: seCell.top, left: seCell.left, right: 0, bottom: 0},
+      focusedGroupUser ? toggledStyle : {top: swCell.top, left: 0, width: swCell.width, bottom: 0}
+    ];
+
+    const isFocused = (groupUser?: GroupUserModelType) => focusedGroupUser && focusedGroupUser === groupUser;
+
+    const groupDoc = (index: number) => this.getGroupUserDoc(groupUsers[index]);
 
     const hideCanvas = (index: number) => {
       // Index 0 is never hidden, I'm not sure why
@@ -151,9 +192,14 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
         return false;
       }
       const doc = groupDoc(index);
+      // Note if the group size is less than 4, then groupUsers[x] will return undefined in some cases
+      // so unopenedDoc will be undefined
       const unopenedDoc = groupUsers[index] && !doc;
       // Don't hide anything from ghost users, and treat unopened documents as private by default
-      return !isGhostUser && (unopenedDoc || doc && doc.visibility === "private");
+      // If unopenedDoc is undefined and doc is undefined then result is undefined so hideCanvas is
+      // false
+      const result = !isGhostUser && (unopenedDoc || doc && doc.visibility === "private");
+      return result;
     };
 
     const canvasMessage = (document?: DocumentModelType) => {
@@ -164,36 +210,37 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
 
     const renderCanvas = (cornerIndex: number, overlay?: React.ReactNode) => {
       const cornerLabel = indexToCornerLabel[cornerIndex];
+      const groupUser = groupUsers[cornerIndex];
       const cell = this.grid.cells[cornerIndex];
       const document = groupDoc(cornerIndex);
       // Only the user's document is editable, but not if they're a ghost user
       // (Ghost users do not own group documents and cannot edit others')
       const readOnly = cornerIndex !== 0 || isGhostUser;
-      return <CanvasComponent context={cornerLabel} scale={cellScale(cell, cornerLabel)}
+      return <CanvasComponent context={cornerLabel} scale={cellScale(cell, groupUser)}
                        readOnly={readOnly}
                        document={document} overlayMessage={canvasMessage(document)}
-                       showPlayback={toggledContext === cornerLabel} {...others} overlay={overlay} />;
+                       showPlayback={isFocused(groupUser)}
+                       {...others} overlay={overlay} />;
     };
 
     // Double the scale if the cell is focused
-    const cellScale =
-      (cell: FourUpGridCellModelType, corner: string) => (toggledContext === corner ? 2 : 1) * cell.scale;
+    const cellScale = (cell: FourUpGridCellModelType, groupUser?: GroupUserModelType) =>
+      (isFocused(groupUser) ? 2 : 1) * cell.scale;
 
-    const memberName = (context: string) => {
-      const groupUser = this.userByContext[context];
-      const isToggled = context === toggledContext;
+    const memberName = (groupUser?: GroupUserModelType) => {
+      const userFocused = isFocused(groupUser);
       if (groupUser) {
-        const { name: fullName, initials } = groupUser.user;
-        const className = classNames("member", {"member-centered": isToggled && !viaStudentGroupView},
-                                     {"in-student-group-view": isToggled && viaStudentGroupView});
-        const name = isToggled ? fullName : initials;
+        const { name: fullName, initials } = groupUser;
+        const className = classNames("member", {"member-centered": userFocused && !viaStudentGroupView},
+                                     {"in-student-group-view": userFocused && viaStudentGroupView});
+
+        const name = userFocused ? fullName : initials;
         return (
-          isToggled && viaStudentGroupView
-            ? //pass an undefined context to handleOverlayClick to null out selected quadrant
-              <button className="restore-fourup-button" onClick={()=>this.handleOverlayClick()}>
+          userFocused && viaStudentGroupView
+            ? <button className="restore-fourup-button" onClick={()=>this.handleFourUpClick()}>
                 <FourUpIcon /> 4-Up
               </button>
-            : <div className={className} title={fullName} onClick={()=>this.handleOverlayClick(context)}>
+            : <div className={className} title={fullName} onClick={()=>this.handleOverlayClick(groupUser)}>
                   {name}
               </div>
         );
@@ -201,38 +248,37 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     };
 
     const renderCorner = (cornerIndex: number) => {
-      const cornerLabel = indexToCornerLabel[cornerIndex];
       const cell = this.grid.cells[cornerIndex];
       const document = groupDoc(cornerIndex);
+      const groupUser = groupUsers[cornerIndex];
 
       const overlay = toggleable &&
         <FourUpOverlayComponent
-          context={cornerLabel}
           style={{top: 0, left: 0, width: "100%", height: "100%"}}
-          onClick={this.handleOverlayClick}
+          onClick={() => this.handleOverlayClick(groupUser)}
           documentViewMode={documentViewMode}
           document={document}
         />;
 
-      // If we are looking at a specific student, toggledContext equals the cornerLabel
-      // of that student. When we are looking at a specific student we need the overlay
-      // to be inside of the Canvas so the canvas can put its history UI on top of the
-      // overlay. When we are not looking at a specific student we need the overlay
-      // to be unscaled and have dimensions based on the grid so its clickable area
-      // covers the whole quadrant of the grid not just the area of the canvas
-      const overlayInsideOfCanvas = toggledContext && overlay;
-      const overlayOnTopOfCanvas = !toggledContext && overlay;
+      // When we are looking at a specific student we need the overlay to be
+      // inside of the Canvas so the canvas can put its history UI on top of the
+      // overlay. When we are not looking at a specific student we need the
+      // overlay to be unscaled and have dimensions based on the grid so its
+      // clickable area covers the whole quadrant of the grid not just the area
+      // of the canvas
+      const overlayInsideOfCanvas = focusedGroupUser && overlay;
+      const overlayOnTopOfCanvas = !focusedGroupUser && overlay;
 
-      return !toggledContext || (toggledContext === cornerLabel)
+      return !focusedGroupUser || isFocused(groupUser)
         ? <div key={cornerIndex} className={classNames("canvas-container", indexToCornerClass[cornerIndex])}
               style={indexToStyle[cornerIndex]}>
             <div className="canvas-scaler" style={scaleStyle(cell)}>
               {hideCanvas(cornerIndex)
-                ? this.renderUnshownMessage(groupUsers[cornerIndex], indexToLocation[cornerIndex])
+                ? this.renderUnshownMessage(groupUser, indexToLocation[cornerIndex])
                 : renderCanvas(cornerIndex, overlayInsideOfCanvas)}
             </div>
             {overlayOnTopOfCanvas}
-            {memberName(cornerLabel)}
+            {memberName(groupUser)}
           </div>
         : null;
     };
@@ -240,7 +286,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     return (
       <div className="four-up" ref={(el) => this.container = el}>
         { [0,1,2,3].map(cornerIndex => renderCorner(cornerIndex)) }
-        {!toggledContext ? this.renderSplitters() : null}
+        {!focusedGroupUser ? this.renderSplitters() : null}
       </div>
     );
   }
@@ -272,8 +318,9 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     );
   }
 
-  private renderUnshownMessage = (groupUser: FourUpUser, location: "nw" | "ne" | "se" | "sw") => {
-    const groupUserName = groupUser ? groupUser.user.name : "User";
+  private renderUnshownMessage = (groupUser: GroupUserModelType | undefined,
+      location: "nw" | "ne" | "se" | "sw") => {
+    const groupUserName = groupUser ? groupUser.name : "User";
     return (
       <div className={`unshared ${location}`}>
         <svg className={`icon icon-unshare`}>
@@ -338,27 +385,31 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       const end = getSplittersFromEvent(upE);
       Logger.log(LogEventName.VIEW_FOUR_UP_RESIZED, { start: _start, end });
     };
-
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mouseup", handleMouseUp);
   };
 
-  private handleOverlayClick = (context?: string) => {
-    const { groupId, setFocusedGroupUser } = this.props;
-    const groupUser = context ? this.userByContext[context] : undefined;
-    const toggledContext = this.getToggledContext();
-    this.setState(state => {
-      if (groupId) {
-        const current = state.toggledContextMap[groupId] ?? null;
-        state.toggledContextMap[groupId] = current ? undefined : context;
-      }
-      return { toggledContextMap: clone(state.toggledContextMap) };
-    });
-    setFocusedGroupUser && setFocusedGroupUser(groupUser?.user);
+  private handleFourUpClick = () => {
+    const { ui } = this.stores;
+    const { group } = this.props;
+    ui.closeSubTabDocument(this.getNavTabName(),  group.id);
+  };
 
-    if (groupUser) {
-      const event = toggledContext ? LogEventName.DASHBOARD_SELECT_STUDENT : LogEventName.DASHBOARD_DESELECT_STUDENT;
-      Logger.log(event, {groupId, studentId: groupUser.user.id});
+  private handleOverlayClick = (groupUser?: GroupUserModelType) => {
+    const { ui } = this.stores;
+    const { group } = this.props;
+    const focusedUser = this.getFocusedGroupUser();
+    const document = this.getGroupUserDoc(groupUser);
+
+    if (groupUser && document) {
+      const logInfo = {groupId: group.id, studentId: groupUser.id};
+      if (focusedUser){
+        ui.closeSubTabDocument(this.getNavTabName(), group.id);
+        Logger.log(LogEventName.DASHBOARD_DESELECT_STUDENT, logInfo);
+      } else {
+        ui.setOpenSubTabDocument(this.getNavTabName(), group.id, document.key); //sets the focus document;
+        Logger.log(LogEventName.DASHBOARD_SELECT_STUDENT, logInfo);
+      }
     }
   };
 }

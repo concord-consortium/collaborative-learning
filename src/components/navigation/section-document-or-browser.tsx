@@ -162,7 +162,8 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     const openDocumentKey = tabState?.openDocuments.get(subTab.label) || "";
     const openDocument = store.documents.getDocument(openDocumentKey) ||
       store.networkDocuments.getDocument(openDocumentKey);
-    const publishedDoc = openDocument?.type === "publication" || openDocument?.type === "personalPublication";
+    const publishedDoc = openDocument?.type === "publication" || openDocument?.type === "personalPublication"
+                          || openDocument?.type === "learningLogPublication";
     const showPlayback = user.type && !publishedDoc? appConfigStore.enableHistoryRoles.includes(user.type) : false;
     const isStarredTab = selectedSubTab.label === "Starred";
     const documentTypes: DocumentType[] = tabSpec.tab === "class-work"
@@ -206,6 +207,8 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
               onSelectDocument={handleSelectDocument} />
         }
         { !openDocument || openDocument.getProperty("isDeleted")
+        }
+        {(!openDocument || openDocument.getProperty("isDeleted"))
           ? null
           : <div className="document-area">
               <div className={`document-header ${tabSpec.tab} ${sectionClass}`} onClick={() => ui.setSelectedTile()}>
@@ -224,15 +227,15 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
                 mode={"1-up"}
                 isPrimary={false}
                 document={openDocument}
-                readOnly={true}
-                showPlayback={showPlayback}
-              />
-              {(isStarredTab && isRightFlipperVisible) &&
-                <div className="scroll-arrow-button-wrapper right">
-                  <ScrollButton side={"right"} tab={tabSpec.tab} onScroll={handleShowNextDocument}/>
-                </div>
-              }
             </div>
+            <EditableDocumentContent
+              mode={"1-up"}
+              isPrimary={false}
+              document={openDocument}
+              readOnly={true}
+              showPlayback={showPlayback}
+            />
+          </div>
         }
       </div>
     );
@@ -258,29 +261,37 @@ interface DocumentBrowserScrollerProps {
 const DocumentBrowserScroller =
     ({subTab, tabSpec, openDocumentKey, onSelectDocument}: DocumentBrowserScrollerProps) => {
   const [scrollerCollapsed, setScrollerCollapsed] = useState(false);
-  const [panelWidth, setPanelWidth] = useState(0);
-  const [scrollWidth, setScrollWidth] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
+  const [collectionElement, setCollectionElement] = useState<HTMLDivElement>();
   const documentScrollerRef = useRef<HTMLDivElement>(null);
   const [scrollToLocation, setScrollToLocation] = useState(0);
+  const [panelWidth, setPanelWidth] = useState(0);
 
-  useEffect(()=>{
-    const scrollerEl = documentScrollerRef.current;
-    if (scrollerEl) {
-      setPanelWidth(scrollerEl.getBoundingClientRect().width);
+  const scrollWidth = collectionElement?.scrollWidth ?? 0;
+
+  useEffect(() => {
+    if(scrollToLocation !== undefined) {
+      collectionElement?.scrollTo({left: scrollToLocation, behavior: "smooth"});
     }
-  },[documentScrollerRef]);
+  },[collectionElement, scrollToLocation]);
+
+  // Keep track of the size of the containing element
+  useEffect(() => {
+    let obs: ResizeObserver;
+    if (documentScrollerRef.current) {
+      obs = new ResizeObserver(() => {
+        setPanelWidth(documentScrollerRef.current?.clientWidth ?? 0);
+      });
+      obs.observe(documentScrollerRef.current);
+    }
+
+    return () => obs?.disconnect();
+  }, []);
 
   const handleScrollTo = (side: string) => {
     const direction = side ==="left" ? -1 : 1;
-    setScrollToLocation((prevState) => {
-      const tempScrollTo = prevState + (direction * panelWidth);
-      if (tempScrollTo === 0) {
-        return (direction * panelWidth - 100);
-      } else {
-        return tempScrollTo;
-      }
-    });
+    const attemptedScrollTo = scrollToLocation + direction * panelWidth;
+    const scrollTo = Math.max(0, Math.min(scrollWidth - panelWidth, attemptedScrollTo));
+    setScrollToLocation(scrollTo);
   };
 
   const handleCollapseScroller = () => {
@@ -290,11 +301,12 @@ const DocumentBrowserScroller =
   return (
     <>
       <div className={classNames("scroller", {"collapsed": scrollerCollapsed})} ref={documentScrollerRef}>
-        {(scrollLeft > 0) &&
+        {(scrollToLocation > 0) &&
             <ScrollEndControl side={"left"} collapsed={scrollerCollapsed} tab={tabSpec.tab}
                 onScroll={handleScrollTo} />
         }
         <DocumentCollectionList
+            setCollectionElement={setCollectionElement}
             subTab={subTab}
             tabSpec={tabSpec}
             horizontal={true}
@@ -302,10 +314,8 @@ const DocumentBrowserScroller =
             selectedDocument={openDocumentKey}
             scrollToLocation={scrollToLocation}
             onSelectDocument={onSelectDocument}
-            setScrollWidth={setScrollWidth}
-            setScrollLeft={setScrollLeft}
         />
-        {((scrollWidth - scrollLeft - panelWidth) > 0) &&
+        {(scrollToLocation < scrollWidth - panelWidth) &&
             <ScrollEndControl side={"right"} collapsed={scrollerCollapsed} tab={tabSpec.tab}
                 onScroll={handleScrollTo} />
         }

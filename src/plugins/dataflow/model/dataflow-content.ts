@@ -177,7 +177,6 @@ export const DataflowContentModel = TileContentModel
 
         // We won't create a sharedVariables model, but we'll automatically attach to any we find
         if (sharedVariables && !tileSharedModels?.includes(sharedVariables)) {
-          console.log(`attaching to`, sharedVariables);
           sharedModelManager.addTileSharedModel(self, sharedVariables);
         }
 
