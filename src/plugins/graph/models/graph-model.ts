@@ -179,13 +179,11 @@ export const GraphModel = TileContentModel
         () => self.data,
         (data, prevData) => {
           if (data && data !== prevData) {
-            console.log("graph link");
             // This should occur when the graph is linked to a dataset
             self.config.setDataset(self.data);
             self.setAttributeID("x", data.attributes[0].id);
             self.setAttributeID("y", data.attributes[1].id);
           } else if (!data) {
-            console.log("graph unlink");
             // This should occur when the graph is unlinked from a dataset
             self.setAttributeID("y", "");
             self.setAttributeID("x", "");
