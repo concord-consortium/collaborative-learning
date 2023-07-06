@@ -143,9 +143,10 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
                           || openDocument?.type === "learningLogPublication";
     const showPlayback = user.type && !publishedDoc ? appConfigStore.enableHistoryRoles.includes(user.type) : false;
     const isStarredTab = selectedSubTab.label === "Starred";
-
-    if (!isStarredTab && (!openDocument || openDocument.getProperty("isDeleted"))) return false;
+    const skipDocument = !openDocument || openDocument.getProperty("isDeleted");
     const sectionClass = openDocument?.type === "learningLog" ? "learning-log" : "";
+
+    if (!isStarredTab && skipDocument) return false;
 
     return (
       <div className="scroller-and-document">
@@ -153,7 +154,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
             <DocumentBrowserScroller subTab={subTab} tabSpec={tabSpec} openDocumentKey={openDocumentKey}
                 onSelectDocument={handleSelectDocument} />
         }
-        {(!openDocument || openDocument.getProperty("isDeleted"))
+        {skipDocument
         ? null
         : <div className="document-area">
             <div className={`document-header ${tabSpec.tab} ${sectionClass}`} onClick={() => ui.setSelectedTile()}>
@@ -202,6 +203,7 @@ const DocumentBrowserScroller =
   const [panelWidth, setPanelWidth] = useState(0);
 
   const scrollWidth = collectionElement?.scrollWidth ?? 0;
+  const maxScrollTo = scrollWidth - panelWidth;
 
   useEffect(() => {
     if(scrollToLocation !== undefined) {
@@ -225,7 +227,7 @@ const DocumentBrowserScroller =
   const handleScrollTo = (side: string) => {
     const direction = side ==="left" ? -1 : 1;
     const attemptedScrollTo = scrollToLocation + direction * panelWidth;
-    const scrollTo = Math.max(0, Math.min(scrollWidth - panelWidth, attemptedScrollTo));
+    const scrollTo = Math.max(0, Math.min(maxScrollTo, attemptedScrollTo));
     setScrollToLocation(scrollTo);
   };
 
@@ -250,7 +252,7 @@ const DocumentBrowserScroller =
             scrollToLocation={scrollToLocation}
             onSelectDocument={onSelectDocument}
         />
-        {(scrollToLocation < scrollWidth - panelWidth) &&
+        {(scrollToLocation < maxScrollTo) &&
             <ScrollEndControl side={"right"} collapsed={scrollerCollapsed} tab={tabSpec.tab}
                 onScroll={handleScrollTo} />
         }
