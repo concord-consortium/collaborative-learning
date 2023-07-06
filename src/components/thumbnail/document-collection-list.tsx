@@ -1,5 +1,6 @@
 import { observer } from "mobx-react";
 import React from "react";
+import classNames from "classnames";
 import { DocumentDragKey, SupportPublication } from "../../models/document/document-types";
 import { useAppConfig, useUIStore, useUserStore } from "../../hooks/use-stores";
 import { ISubTabSpec, NavTabModelType } from "../../models/view/nav-tabs";
@@ -9,9 +10,13 @@ import { LogEventName } from "../../lib/logger-types";
 import { DocumentCollectionByType } from "./documents-type-collection";
 
 interface IProps {
+  setCollectionElement?: (element: HTMLDivElement) => void;
   subTab: ISubTabSpec;
   tabSpec: NavTabModelType;
   selectedDocument?: string;
+  horizontal?: boolean;
+  collapsed?: boolean;
+  scrollToLocation?: number;
   onSelectNewDocument?: (type: string) => void;
   onSelectDocument?: (document: DocumentModelType) => void;
 }
@@ -19,7 +24,8 @@ interface IProps {
 export const kNavItemScale = 0.11;
 
 export const DocumentCollectionList: React.FC<IProps> = observer(function DocumentCollectionList(
-    { subTab, tabSpec, selectedDocument, onSelectNewDocument, onSelectDocument }) {
+    { setCollectionElement, subTab, tabSpec, horizontal, collapsed, selectedDocument,
+        onSelectNewDocument, onSelectDocument}) {
   const ui = useUIStore();
   const appConfigStore = useAppConfig();
   const user = useUserStore();
@@ -46,7 +52,8 @@ export const DocumentCollectionList: React.FC<IProps> = observer(function Docume
   };
 
   return (
-    <>
+    <div className={classNames("doc-collection-list", {horizontal, collapsed})}
+        ref={element => element && setCollectionElement?.(element)}>
       {
         subTab.sections.map((section: any, index: any) => {
           const _handleDocumentStarClick = section.showStarsForUser(user)
@@ -60,6 +67,7 @@ export const DocumentCollectionList: React.FC<IProps> = observer(function Docume
               tab={subTab.label}
               section={section}
               index={index}
+              horizontal={horizontal}
               numSections={subTab.sections.length}
               scale={kNavItemScale}
               selectedDocument={selectedDocument}
@@ -72,5 +80,5 @@ export const DocumentCollectionList: React.FC<IProps> = observer(function Docume
           );
         })
       }
-    </>);
+    </div>);
 });
