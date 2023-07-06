@@ -14,6 +14,7 @@ interface IProps {
   scale: number;
   captionText: string;
   isSelected?: boolean;
+  isSecondarySelected?: boolean;
   onIsStarred: () => boolean;
   onDocumentClick: (document: DocumentModelType) => void;
   onDocumentDragStart?: (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => void;
@@ -22,7 +23,8 @@ interface IProps {
 }
 
 export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) => {
-  const { dataTestName, canvasContext, document, scale, captionText, isSelected, onIsStarred,
+  const { dataTestName, canvasContext, document, scale, captionText, isSelected, isSecondarySelected,
+    onIsStarred,
           onDocumentClick, onDocumentDragStart, onDocumentStarClick,
           onDocumentDeleteClick } = props;
   const selectedClass = isSelected ? "selected" : "";
@@ -50,7 +52,8 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
                           ? `Firebase UID: ${document.key}` : undefined;
 
   return (
-    <div className={`list-item ${selectedClass} ${privateClass}`} data-test={dataTestName} key={document.key}
+    <div className={`list-item ${selectedClass} ${privateClass} ${isSecondarySelected ? "secondary" : ""}`}
+      data-test={dataTestName} key={document.key}
       title={documentTitle} onClick={isPrivate ? undefined : handleDocumentClick}>
       <div className="scaled-list-item-container" onDragStart={handleDocumentDragStart}
         draggable={!!onDocumentDragStart && !isPrivate}>

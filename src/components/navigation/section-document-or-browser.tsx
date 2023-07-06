@@ -192,9 +192,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     const currentOpenSecondaryDocIndex = openSecondaryDocument && starredDocuments.indexOf(openSecondaryDocument);
     if (!isStarredTab && (!openDocument || openDocument.getProperty("isDeleted"))) return false;
     const sectionClass = openDocument?.type === "learningLog" ? "learning-log" : "";
-    console.log("openDocument", openDocumentKey);
 
-console.log("openSecondaryDocument", openSecondaryDocumentKey);
     // Published documents are listed in reverse order of index so previous and next toggles are also reversed
     const handleShowPrevDocument = (secondary?: boolean) => {
       let prevDocumentKey = "";
@@ -243,7 +241,7 @@ console.log("openSecondaryDocument", openSecondaryDocumentKey);
       <div className="scroller-and-document">
         { isStarredTab &&
           <DocumentBrowserScroller subTab={subTab} tabSpec={tabSpec} openDocumentKey={openDocumentKey}
-              onSelectDocument={handleSelectDocument} />
+              openSecondaryDocumentKey={openSecondaryDocumentKey} onSelectDocument={handleSelectDocument} />
         }
         {(!openDocument || openDocument.getProperty("isDeleted"))
           ? null
@@ -326,10 +324,11 @@ interface DocumentBrowserScrollerProps {
   subTab: ISubTabSpec;
   tabSpec: NavTabModelType;
   openDocumentKey: string;
+  openSecondaryDocumentKey: string;
   onSelectDocument: (document: DocumentModelType) => void;
 }
 const DocumentBrowserScroller =
-    ({subTab, tabSpec, openDocumentKey, onSelectDocument}: DocumentBrowserScrollerProps) => {
+    ({subTab, tabSpec, openDocumentKey, openSecondaryDocumentKey, onSelectDocument}: DocumentBrowserScrollerProps) => {
   const [scrollerCollapsed, setScrollerCollapsed] = useState(false);
   const [collectionElement, setCollectionElement] = useState<HTMLDivElement>();
   const documentScrollerRef = useRef<HTMLDivElement>(null);
@@ -382,6 +381,7 @@ const DocumentBrowserScroller =
             horizontal={true}
             collapsed={scrollerCollapsed}
             selectedDocument={openDocumentKey}
+            selectedSecondaryDocument={openSecondaryDocumentKey}
             scrollToLocation={scrollToLocation}
             onSelectDocument={onSelectDocument}
         />
