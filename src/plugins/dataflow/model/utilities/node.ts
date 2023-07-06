@@ -359,29 +359,17 @@ export const NodeLiveOutputTypes = [
   }
 ];
 
-
-export const NodeMicroBitHubs = [
-  {
-    id: 'a',
-    name: "micro:bit hub a",
-    active: false
-  },
-  {
-    id: 'b',
-    name: "micro:bit hub b",
-    active: false
-  },
-  {
-    id: 'c',
-    name: "micro:bit hub c",
-    active: false
-  },
-  {
-    id: 'd',
-    name: "micro:bit hub d",
-    active: false
-  }
-];
+function createNodeMicroBitHubs(arr: string[]) {
+  return arr.map((id) => {
+    return {
+      id,
+      name: `micro:bit hub ${id}`,
+      active: false
+    };
+  });
+}
+const hubIdentifiers = ["a", "b", "c", "d", "e", "f", "g", "h"];
+export const NodeMicroBitHubs = createNodeMicroBitHubs(hubIdentifiers);
 
 export const NodeGeneratorTypes = [
   {
