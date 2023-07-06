@@ -227,15 +227,15 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
                 mode={"1-up"}
                 isPrimary={false}
                 document={openDocument}
+                readOnly={true}
+                showPlayback={showPlayback}
+              />
+              {(isStarredTab && isRightFlipperVisible) &&
+                <div className="scroll-arrow-button-wrapper right">
+                  <ScrollButton side={"right"} tab={tabSpec.tab} onScroll={handleShowNextDocument}/>
+                </div>
+              }
             </div>
-            <EditableDocumentContent
-              mode={"1-up"}
-              isPrimary={false}
-              document={openDocument}
-              readOnly={true}
-              showPlayback={showPlayback}
-            />
-          </div>
         }
       </div>
     );
