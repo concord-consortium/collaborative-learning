@@ -1,8 +1,12 @@
-import { defaultTableContent, kTableTileType, TableContentModel, TableMetadataModel } from "./table-content";
+import { IAnyType, types, castToSnapshot } from "mobx-state-tree";
+import { defaultTableContent, kTableTileType, TableContentModel, TableContentModelType,
+  TableMetadataModel } from "./table-content";
 import { TableContentTableImport } from "./table-import";
 import { IDataSet } from "../../data/data-set";
 import { kSerializedXKey } from "../../data/expression-utils";
 import { kDefaultColumnWidth } from "../../../components/tiles/table/table-types";
+import { SharedDataSet, SharedDataSetType } from "../../../models/shared/shared-data-set";
+import { ISharedModelManager } from "../../..//models/shared/shared-model-manager";
 
 // mock Logger calls
 const mockLogTileChangeEvent = jest.fn();
@@ -22,6 +26,59 @@ function getCanonicalCaseNoId(dataSet: IDataSet, index: number) {
   return c;
 }
 
+const TestTileContentModelContainer = types.model("TestTileContentModelContainer", {
+  child: TableContentModel,
+  dataSet: types.maybe(SharedDataSet)
+});
+
+const makeSharedModelManager = (): ISharedModelManager => {
+  let sharedDataSet: SharedDataSetType | undefined;
+  return {
+    isReady: true,
+    findFirstSharedModelByType<IT extends IAnyType>(sharedModelType: IT): IT["Type"] | undefined {
+      return sharedDataSet;
+    },
+    getSharedModelsByType<IT extends IAnyType>(type: string): IT["Type"][] {
+      return sharedDataSet ? [sharedDataSet] : [];
+    },
+    addTileSharedModel(tileContentModel, sharedModel) {
+      sharedDataSet = sharedModel as SharedDataSetType;
+    },
+    removeTileSharedModel(tileContentModel, sharedModel) {
+      sharedDataSet = undefined;
+    },
+    getTileSharedModels(tileContentModel) {
+      return sharedDataSet ? [sharedDataSet] : [];
+    },
+    getTileSharedModelsByType(tileContentModel, modelType) {
+      return sharedDataSet ? [sharedDataSet] : [];
+    },
+    getSharedModelDragDataForTiles(tileIds: string[]) {
+      return [];
+    },
+    getSharedModelTiles(sharedModel) {
+      return [];
+    },
+    getSharedModelTileIds(sharedModel) {
+      // ignore linked tiles for now
+      return [];
+    },
+    addSharedModel(sharedModel) {
+      // ignore this for now
+    },
+  };
+};
+
+// Note: in the diagram tests this method also sets up an onSnapshot listener to automatically
+// update the content when the shared model change.
+const setupContainer = (content: TableContentModelType) => {
+  const sharedModelManager = makeSharedModelManager();
+  TestTileContentModelContainer.create(
+    {child: castToSnapshot(content)},
+    {sharedModelManager}
+  );
+};
+
 describe("TableContent", () => {
 
   it("can create empty/default TableContentModels", () => {
@@ -39,11 +96,18 @@ describe("TableContent", () => {
     expect(defaultTable.dataSet.cases.length).toBe(0);
     expect(defaultTable.isUserResizable).toBe(true);
 
-    // TODO: add a test for the default x,y dataset that is setup
-    // in by the reaction in afterAttach
-
     // expect(convertImportToChanges(undefined as any)).toEqual([]);
     // expect(convertImportToChanges({} as any)).toEqual([]);
+  });
+
+  it("creates a default shared dataset with 2 columns", () => {
+    const defaultTable = defaultTableContent();
+    const metadata = TableMetadataModel.create({ id: "test-metadata" });
+    defaultTable.doPostCreate!(metadata);
+
+    setupContainer(defaultTable);
+    expect(defaultTable.dataSet.attributes.length).toBe(2);
+    expect(defaultTable.dataSet.cases.length).toBe(0);
   });
 
   it("can import an authored table without data", () => {
