@@ -1,5 +1,6 @@
 import { Node } from "rete";
 import { DropdownListControl } from "../controls/dropdown-list-control";
+import { kRelaysIndexed } from "../../model/utilities/node";
 
 interface NodeOutputValue {
   val: number;
@@ -12,11 +13,15 @@ export function getHubSelect(node: Node) {
 
 export function getOutputType(node: Node) {
   const outputTypeControl = node.controls.get("liveOutputType") as DropdownListControl;
-  return outputTypeControl.getValue();
+  if (outputTypeControl) return outputTypeControl.getValue();
 }
 
 export function getNodeValueWithType(node: Node): NodeOutputValue {
   const val = node.data.nodeValue as number;
   const outType = getOutputType(node);
   return { val, outType };
+}
+
+export function nodeUsesHub(node: Node) {
+  return kRelaysIndexed.includes(getOutputType(node));
 }

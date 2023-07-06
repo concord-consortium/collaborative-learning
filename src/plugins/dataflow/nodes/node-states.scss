@@ -60,3 +60,9 @@
     animation: none;
   }
 }
+
+.node.live-output.no-hub-outputs {
+  .hubSelect {
+    display: none;
+  }
+}
