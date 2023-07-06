@@ -175,30 +175,43 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     const currentOpenDocIndex = openDocument && starredDocuments.indexOf(openDocument);
     if (!isStarredTab && (!openDocument || openDocument.getProperty("isDeleted"))) return false;
     const sectionClass = openDocument?.type === "learningLog" ? "learning-log" : "";
+    console.log("starred Documents", starredDocuments);
 
     // Published documents are listed in reverse order of index so previous and next toggles are also reversed
     const handleShowPrevDocument = () => {
       let prevDocumentKey = "";
-      const prevDocIndex = tabSpec.tab === "class-work" ? currentOpenDocIndex + 1 : currentOpenDocIndex - 1;
-      if ((tabSpec.tab === "class-work" && prevDocIndex < starredDocuments.length)
-          || (tabSpec.tab !== "class-work" && prevDocIndex >= 0))
+      const prevDocIndex = currentOpenDocIndex + 1 >= starredDocuments.length ? 0 : currentOpenDocIndex + 1;
+      if (prevDocIndex < starredDocuments.length)
       { prevDocumentKey = starredDocuments[prevDocIndex].key; }
       ui.openSubTabDocument(tabSpec.tab, subTab.label, prevDocumentKey);
     };
+
     const handleShowNextDocument = () => {
       let nextDocumentKey = "";
-      const nextDocIndex = tabSpec.tab === "class-work" ? currentOpenDocIndex - 1 : currentOpenDocIndex + 1;
-      if ((tabSpec.tab === "class-work" && nextDocIndex >= 0)
-        || (tabSpec.tab !== "class-work" && nextDocIndex < starredDocuments.length)) {
+      let nextDocIndex: number;
+      // Workspaces Starred tab show the problem document as the first document in the list
+      // The personal documents are shown in reverse order after the problem document
+      if (tabSpec.tab === "my-work") {
+        if (currentOpenDocIndex === 0) {
+          nextDocIndex = starredDocuments.length - 1;
+        } else {
+          nextDocIndex = currentOpenDocIndex - 1;
+        }
+      } else {
+        nextDocIndex = currentOpenDocIndex - 1;
+      }
+
+      if (nextDocIndex < starredDocuments.length) {
         nextDocumentKey = starredDocuments[nextDocIndex].key;
       }
       ui.openSubTabDocument(tabSpec.tab, subTab.label, nextDocumentKey);
     };
+
     const isLeftFlipperVisible = (tabSpec.tab === "class-work" && (currentOpenDocIndex < starredDocuments.length - 1))
                                     || (tabSpec.tab !== "class-work" && currentOpenDocIndex > 0);
     const isRightFlipperVisible = (tabSpec.tab === "class-work" && currentOpenDocIndex > 0)
-                                    || (tabSpec.tab !== "class-work" &&
-                                          currentOpenDocIndex < starredDocuments.length - 1);
+                                    || (tabSpec.tab !== "class-work" && (currentOpenDocIndex >= 0 &&
+                                          currentOpenDocIndex !== 1));
 
     return (
       <div className="scroller-and-document">
