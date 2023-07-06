@@ -72,7 +72,12 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
 
   const handleSelectDocument = (document: DocumentModelType) => {
     if (ui.focusDocument === document.key) {
-      ui.closeSubTabDocument(tabSpec.tab, selectedSubTab.label);
+      if (ui.focusSecondaryDocument) {
+        ui.openSubTabDocument(tabSpec.tab, selectedSubTab.label, ui.focusSecondaryDocument);
+        ui.closeSubTabSecondaryDocument(tabSpec.tab, selectedSubTab.label);
+      } else {
+        ui.closeSubTabDocument(tabSpec.tab, selectedSubTab.label);
+      }
     } else if (selectedSubTab.label === "Starred"){
       if (tabState?.openDocuments.get("Starred")) {
         if (ui.focusSecondaryDocument === document.key) {
