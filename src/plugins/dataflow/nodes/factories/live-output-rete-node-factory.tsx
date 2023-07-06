@@ -103,7 +103,9 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
   private getHubRelaysChannel(node: Node){
     const hubSelect = getHubSelect(node);
     const selectedHubIdentifier = hubSelect.getSelectionId();
-    const relayChannels = hubSelect.getChannels().filter((c: NodeChannelInfo) => c.type === "relays");
+    const foundChannels = hubSelect.getChannels();
+    if (!foundChannels) return null;
+    const relayChannels = foundChannels.filter((c: NodeChannelInfo) => c.type === "relays");
     return relayChannels.find((c: NodeChannelInfo) => c.microbitId === selectedHubIdentifier);
   }
 
