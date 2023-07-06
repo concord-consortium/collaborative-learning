@@ -146,7 +146,6 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
 
     if (!isStarredTab && (!openDocument || openDocument.getProperty("isDeleted"))) return false;
     const sectionClass = openDocument?.type === "learningLog" ? "learning-log" : "";
-    console.log(!openDocument || openDocument.getProperty("isDeleted"));
 
     return (
       <div className="scroller-and-document">
