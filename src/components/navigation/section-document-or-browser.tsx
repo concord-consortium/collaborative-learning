@@ -142,32 +142,37 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     const publishedDoc = openDocument?.type === "publication" || openDocument?.type === "personalPublication"
                           || openDocument?.type === "learningLogPublication";
     const showPlayback = user.type && !publishedDoc ? appConfigStore.enableHistoryRoles.includes(user.type) : false;
+    const isStarredTab = selectedSubTab.label === "Starred";
 
-    if (!openDocument || openDocument.getProperty("isDeleted")) return false;
-
+    if (!isStarredTab && (!openDocument || openDocument.getProperty("isDeleted"))) return false;
     const sectionClass = openDocument?.type === "learningLog" ? "learning-log" : "";
+    console.log(!openDocument || openDocument.getProperty("isDeleted"));
+
     return (
       <div className="scroller-and-document">
-        { selectedSubTab.label === "Starred" &&
-          <DocumentBrowserScroller subTab={subTab} tabSpec={tabSpec} openDocumentKey={openDocumentKey}
-              onSelectDocument={handleSelectDocument} />
+        { isStarredTab &&
+            <DocumentBrowserScroller subTab={subTab} tabSpec={tabSpec} openDocumentKey={openDocumentKey}
+                onSelectDocument={handleSelectDocument} />
         }
-        <div className="document-area">
-          <div className={`document-header ${tabSpec.tab} ${sectionClass}`} onClick={() => ui.setSelectedTile()}>
-            <div className={`document-title`}>
-              {getDocumentDisplayTitle(openDocument, appConfigStore, problemStore)}
+        {(!openDocument || openDocument.getProperty("isDeleted"))
+        ? null
+        : <div className="document-area">
+            <div className={`document-header ${tabSpec.tab} ${sectionClass}`} onClick={() => ui.setSelectedTile()}>
+              <div className={`document-title`}>
+                {getDocumentDisplayTitle(openDocument, appConfigStore, problemStore)}
+              </div>
+              {(!openDocument.isRemote)
+                  && editButton(tabSpec.tab, sectionClass, openDocument)}
             </div>
-            {(!openDocument.isRemote)
-                && editButton(tabSpec.tab, sectionClass, openDocument)}
+            <EditableDocumentContent
+              mode={"1-up"}
+              isPrimary={false}
+              document={openDocument}
+              readOnly={true}
+              showPlayback={showPlayback}
+            />
           </div>
-          <EditableDocumentContent
-            mode={"1-up"}
-            isPrimary={false}
-            document={openDocument}
-            readOnly={true}
-            showPlayback={showPlayback}
-          />
-        </div>
+        }
       </div>
     );
   };
@@ -198,6 +203,12 @@ const DocumentBrowserScroller =
   const [panelWidth, setPanelWidth] = useState(0);
 
   const scrollWidth = collectionElement?.scrollWidth ?? 0;
+
+  useEffect(() => {
+    if(scrollToLocation !== undefined) {
+      collectionElement?.scrollTo({left: scrollToLocation, behavior: "smooth"});
+    }
+  },[collectionElement, scrollToLocation]);
 
   // Keep track of the size of the containing element
   useEffect(() => {
@@ -232,7 +243,6 @@ const DocumentBrowserScroller =
         }
         <DocumentCollectionList
             setCollectionElement={setCollectionElement}
-            collectionElement={collectionElement}
             subTab={subTab}
             tabSpec={tabSpec}
             horizontal={true}
