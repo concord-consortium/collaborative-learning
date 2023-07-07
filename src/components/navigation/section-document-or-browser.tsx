@@ -1,6 +1,7 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react";
 import { useQueryClient } from 'react-query';
+import classNames from "classnames";
 import { DocumentModelType } from "../../models/document/document";
 import { getDocumentDisplayTitle } from "../../models/document/document-utils";
 import { logDocumentEvent } from "../../models/document/log-document-event";
@@ -15,8 +16,10 @@ import { NetworkDocumentsSection } from "./network-documents-section";
 import EditIcon from "../../clue/assets/icons/edit-right-icon.svg";
 import { DocumentCollectionList, kNavItemScale } from "../thumbnail/document-collection-list";
 import { SubTabsPanel } from "./sub-tabs-panel";
+import CollapseScrollerIcon from "../../assets/show-hide-document-view-icon.svg";
+import ScrollArrowIcon from "../../assets/scroll-arrow-icon.svg";
 
-import "./section-document-or-browser.sass";
+import "./section-document-or-browser.scss";
 
 interface IProps {
   tabSpec: NavTabModelType;
@@ -34,11 +37,10 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
   const user = useUserStore();
   const classStore = useClassStore();
   const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
-
   const subTabs = tabSpec.subTabs;
   const tabState = navTabSpec && ui.tabs.get(navTabSpec?.tab);
-  const _subTabIndex = subTabs.findIndex((subTab) => tabState?.openSubTab === subTab.label);
-  const subTabIndex = _subTabIndex < 0 ? 0 : _subTabIndex;
+  const subTabIndex = Math.max(subTabs.findIndex((subTab) => tabState?.openSubTab === subTab.label), 0);
+  const selectedSubTab = subTabs[subTabIndex];
 
   useEffect(() => {
     // Set the initial open tab. If the tabSpec changes somehow then the open
@@ -48,9 +50,9 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
 
   // This is called even if the tab is already open
   const handleTabSelect = (tabidx: number) => {
-    const selectedSubTab = subTabs[tabidx];
-    const subTabType = selectedSubTab.sections[0].type;
-    const title = selectedSubTab.label;
+    const _selectedSubTab = subTabs[tabidx];
+    const subTabType = _selectedSubTab.sections[0].type;
+    const title = _selectedSubTab.label;
     if (tabState?.openSubTab === title && tabState?.openDocuments.get(title)) {
       // If there is a document open then a click on the tab should close
       // the document
@@ -70,10 +72,6 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     if (!document.hasContent && document.isRemote) {
       loadDocumentContent(document);
     }
-    // The subTabIndex is computed above on every render. It is the index
-    // of the currently open subTab. Its also passed to the Tab component
-    // below.
-    const selectedSubTab = subTabs[subTabIndex];
     ui.openSubTabDocument(tabSpec.tab, selectedSubTab.label, document.key);
     const logEvent = document.isRemote
       ? LogEventName.VIEW_SHOW_TEACHER_NETWORK_COMPARISON_DOCUMENT
@@ -136,33 +134,45 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     );
   };
 
-  const showPlayback = user.type ? appConfigStore.enableHistoryRoles.includes(user.type) : false;
-
+  //TODO: Need to refactor this if we want to deploy to all tabs
   const renderDocumentView = (subTab: ISubTabSpec) => {
     const openDocumentKey = tabState?.openDocuments.get(subTab.label) || "";
     const openDocument = store.documents.getDocument(openDocumentKey) ||
       store.networkDocuments.getDocument(openDocumentKey);
-
-    if (!openDocument || openDocument.getProperty("isDeleted")) return false;
-
+    const publishedDoc = openDocument?.type === "publication" || openDocument?.type === "personalPublication"
+                          || openDocument?.type === "learningLogPublication";
+    const showPlayback = user.type && !publishedDoc ? appConfigStore.enableHistoryRoles.includes(user.type) : false;
+    const isStarredTab = selectedSubTab.label === "Starred";
+    const skipDocument = !openDocument || openDocument.getProperty("isDeleted");
     const sectionClass = openDocument?.type === "learningLog" ? "learning-log" : "";
 
+    if (!isStarredTab && skipDocument) return false;
+
     return (
-      <div>
-        <div className={`document-header ${tabSpec.tab} ${sectionClass}`} onClick={() => ui.setSelectedTile()}>
-          <div className={`document-title`}>
-            {getDocumentDisplayTitle(openDocument, appConfigStore, problemStore)}
+      <div className="scroller-and-document">
+        { isStarredTab &&
+            <DocumentBrowserScroller subTab={subTab} tabSpec={tabSpec} openDocumentKey={openDocumentKey}
+                onSelectDocument={handleSelectDocument} />
+        }
+        {skipDocument
+        ? null
+        : <div className="document-area">
+            <div className={`document-header ${tabSpec.tab} ${sectionClass}`} onClick={() => ui.setSelectedTile()}>
+              <div className={`document-title`}>
+                {getDocumentDisplayTitle(openDocument, appConfigStore, problemStore)}
+              </div>
+              {(!openDocument.isRemote)
+                  && editButton(tabSpec.tab, sectionClass, openDocument)}
+            </div>
+            <EditableDocumentContent
+              mode={"1-up"}
+              isPrimary={false}
+              document={openDocument}
+              readOnly={true}
+              showPlayback={showPlayback}
+            />
           </div>
-          {(!openDocument.isRemote)
-              && editButton(tabSpec.tab, sectionClass, openDocument)}
-        </div>
-        <EditableDocumentContent
-          mode={"1-up"}
-          isPrimary={false}
-          document={openDocument}
-          readOnly={true}
-          showPlayback={showPlayback}
-        />
+        }
       </div>
     );
   };
@@ -173,9 +183,103 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
       tabsExtraClassNames={{"chat-open": isChatOpen}}
       onSelect={handleTabSelect}
       selectedIndex={subTabIndex}
-      renderSubTabPanel={subTab =>
-        renderDocumentView(subTab) || renderDocumentBrowserView(subTab)
-      }
+      renderSubTabPanel={subTab => renderDocumentView(subTab) || renderDocumentBrowserView(subTab)}
     />
   );
 });
+
+interface DocumentBrowserScrollerProps {
+  subTab: ISubTabSpec;
+  tabSpec: NavTabModelType;
+  openDocumentKey: string;
+  onSelectDocument: (document: DocumentModelType) => void;
+}
+const DocumentBrowserScroller =
+    ({subTab, tabSpec, openDocumentKey, onSelectDocument}: DocumentBrowserScrollerProps) => {
+  const [scrollerCollapsed, setScrollerCollapsed] = useState(false);
+  const [collectionElement, setCollectionElement] = useState<HTMLDivElement>();
+  const documentScrollerRef = useRef<HTMLDivElement>(null);
+  const [scrollToLocation, setScrollToLocation] = useState(0);
+  const [panelWidth, setPanelWidth] = useState(0);
+
+  const scrollWidth = collectionElement?.scrollWidth ?? 0;
+  const maxScrollTo = scrollWidth - panelWidth;
+
+  useEffect(() => {
+    if(scrollToLocation !== undefined) {
+      collectionElement?.scrollTo({left: scrollToLocation, behavior: "smooth"});
+    }
+  },[collectionElement, scrollToLocation]);
+
+  // Keep track of the size of the containing element
+  useEffect(() => {
+    let obs: ResizeObserver;
+    if (documentScrollerRef.current) {
+      obs = new ResizeObserver(() => {
+        setPanelWidth(documentScrollerRef.current?.clientWidth ?? 0);
+      });
+      obs.observe(documentScrollerRef.current);
+    }
+
+    return () => obs?.disconnect();
+  }, []);
+
+  const handleScrollTo = (side: string) => {
+    const direction = side ==="left" ? -1 : 1;
+    const attemptedScrollTo = scrollToLocation + direction * panelWidth;
+    const scrollTo = Math.max(0, Math.min(maxScrollTo, attemptedScrollTo));
+    setScrollToLocation(scrollTo);
+  };
+
+  const handleCollapseScroller = () => {
+    setScrollerCollapsed(!scrollerCollapsed);
+  };
+
+  return (
+    <>
+      <div className={classNames("scroller", {"collapsed": scrollerCollapsed})} ref={documentScrollerRef}>
+        {(scrollToLocation > 0) &&
+            <ScrollEndControl side={"left"} collapsed={scrollerCollapsed} tab={tabSpec.tab}
+                onScroll={handleScrollTo} />
+        }
+        <DocumentCollectionList
+            setCollectionElement={setCollectionElement}
+            subTab={subTab}
+            tabSpec={tabSpec}
+            horizontal={true}
+            collapsed={scrollerCollapsed}
+            selectedDocument={openDocumentKey}
+            scrollToLocation={scrollToLocation}
+            onSelectDocument={onSelectDocument}
+        />
+        {(scrollToLocation < maxScrollTo) &&
+            <ScrollEndControl side={"right"} collapsed={scrollerCollapsed} tab={tabSpec.tab}
+                onScroll={handleScrollTo} />
+        }
+      </div>
+      <div className={classNames("collapse-scroller-button", "themed", tabSpec.tab,
+                {"collapsed": scrollerCollapsed})} onClick={handleCollapseScroller}>
+        <CollapseScrollerIcon className={`scroller-icon ${tabSpec.tab}`}/>
+      </div>
+    </>
+  );
+};
+
+interface IScrollEndControlProps {
+  side: string;
+  collapsed: boolean;
+  tab: string;
+  onScroll: (side: string) => void
+}
+
+const ScrollEndControl = ({side, collapsed, tab, onScroll}: IScrollEndControlProps) => {
+  return (
+    <div className={classNames("scroller-controls", side, {collapsed})}>
+      <div className={`scroller-controls-overlay ${side}`}/>
+      <div className={classNames("scroll-arrow-button", "themed", tab, {collapsed})}
+            onClick={()=>onScroll(side)}>
+        <ScrollArrowIcon className={`scroll-arrow-icon ${side} themed ${tab}`} />
+      </div>
+    </div>
+  );
+};

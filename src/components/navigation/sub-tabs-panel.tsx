@@ -16,25 +16,12 @@ interface IProps {
   selectedIndex?: number,
 }
 
-const kHeaderHeight = 55;
-const kWorkspaceContentMargin = 4;
-const kNavTabHeight = 34;
-const kTabSectionBorderWidth = 2;
-
 export const SubTabsPanel: React.FC<IProps> = observer(function SubTabsPanel(
     { tabSpec, renderSubTabPanel, tabsExtraClassNames, onSelect, selectedIndex }) {
   const appConfigStore = useAppConfig();
   const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
   const subTabs = tabSpec.subTabs;
   const hasSubTabs = subTabs.length > 1;
-
-  const vh = window.innerHeight;
-  const headerOffset = hasSubTabs
-                        ? kHeaderHeight + (2 * (kWorkspaceContentMargin + kNavTabHeight + kTabSectionBorderWidth))
-                        : kHeaderHeight + kNavTabHeight + (2 * (kWorkspaceContentMargin + kTabSectionBorderWidth));
-  const documentsPanelHeight = vh - headerOffset;
-  const documentsPanelStyle = { height: documentsPanelHeight };
-
   const navTabClass = navTabSpec?.tab;
 
   return (
@@ -60,7 +47,7 @@ export const SubTabsPanel: React.FC<IProps> = observer(function SubTabsPanel(
             })}
           </TabList>
         </div>
-        <div className="documents-panel" style={documentsPanelStyle}>
+        <div className={classNames("documents-panel", {"no-sub-tabs": !hasSubTabs})}>
           {subTabs.map((subTab, index) => {
             const sectionTitle = subTab.label.toLowerCase().replace(' ', '-');
             return (

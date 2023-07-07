@@ -9,6 +9,8 @@ $section-padding: 6px
   display: flex
   flex-direction: column
   padding: $section-padding
+  &.horizontal
+    flex-direction: row
   &.top-panel
     padding: 4px $section-padding 0 $section-padding
 
@@ -40,11 +42,16 @@ $section-padding: 6px
     &.bottom-panel
       border-top: solid 1px $charcoal-light-1
       overflow-y: hidden
+    &.horizontal
+      flex-direction: row
+      flex-wrap: nowrap
+      overflow-x: auto
+      overflow-y: hidden
 
     .list-item
       position: relative
       min-height: 120px
-      width: 116px
+      min-width: 116px
       border-radius: 5px
       padding: $padding 0
       display: flex
@@ -139,18 +146,26 @@ $section-padding: 6px
       svg path
         fill: $learninglog-green-dark-1
 
-  .my-work > .list-item
+.my-work .list-item
+  &:hover
+    background-color: $workspace-teal-light-7
+  &:active, &.selected
+    background-color: $workspace-teal-light-5
+.class-work .list-item
+  &:hover
+    background-color: $classwork-purple-light-8
+  &:active, &.selected
+    background-color: $classwork-purple-light-6
+.supports .list-item
+  &:hover
+    background-color: $support-blue-light-8
+  &:active, &.selected
+    background-color: $support-blue-light-6
+
+.horizontal
+  .list-item
     &:hover
-      background-color: $workspace-teal-light-7
+      background-color: $document-select-green
+      opacity: 50%
     &:active, &.selected
-      background-color: $workspace-teal-light-5
-  .class-work > .list-item
-    &:hover
-      background-color: $classwork-purple-light-8
-    &:active, &.selected
-      background-color: $classwork-purple-light-6
-  .supports > .list-item
-    &:hover
-      background-color: $support-blue-light-8
-    &:active, &.selected
-      background-color: $support-blue-light-6
+      background-color: $document-select-green
