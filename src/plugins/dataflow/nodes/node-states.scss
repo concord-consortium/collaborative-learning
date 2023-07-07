@@ -61,8 +61,8 @@
   }
 }
 
-.node.live-output.no-hub-outputs {
-  .hubSelect .item {
-    border:2px solid purple;
-  }
+// not ideal, but it works
+.node.live-output {
+  &.uses-gripper .microbit { display: none; }
+  &.uses-microbit .gripper { display: none; }
 }
