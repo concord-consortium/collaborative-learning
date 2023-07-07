@@ -1,11 +1,15 @@
 import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
-import React from "react";
+import React, { ReactElement, useCallback } from "react";
 import { computeStrokeDashArray, DrawingTool, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
 import { Point } from "../model/drawing-basic-types";
-import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
+import { SvgToolModeButton, buttonClasses } from "../components/drawing-toolbar-buttons";
 import LineToolIcon from "../assets/line-icon.svg";
+import SmallCornerTriangle from "../../../assets/icons/small-corner-triangle.svg";
+import { Tooltip } from "react-tippy";
+import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
+import { useTouchHold } from "../../../hooks/use-touch-hold";
 
 // simple line
 export const VectorObject = StrokedObject.named("VectorObject")
@@ -99,7 +103,49 @@ export class VectorDrawingTool extends DrawingTool {
   }
 }
 
-export function VectorToolbarButton({toolbarManager}: IToolbarButtonProps) {
-  return <SvgToolModeButton modalButton="vector" title="Line"
-    toolbarManager={toolbarManager} SvgIcon={LineToolIcon} />;
-}
+export const VectorToolbarButton: React.FC<IToolbarButtonProps> = observer(({
+  toolbarManager, togglePaletteState, clearPaletteState
+}) => {
+  // Mostly copied from SvgToolModeButton
+  const modalButton = "vector";
+  const handleClick = () => toolbarManager.setSelectedButton(modalButton);
+  const { selectedButton, toolbarSettings } = toolbarManager;
+  const selected = selectedButton === modalButton;
+  const _settings = toolbarSettings;
+
+  // Mostly copied from SvgToolbarButton 
+  const { fill, stroke, strokeWidth, strokeDashArray } = _settings;
+  const tooltipOptions = useTooltipOptions();
+
+  // Adapted from image.tsx
+  const handleButtonClick = useCallback(() => {
+    toolbarManager.setSelectedButton(modalButton);
+    //togglePaletteState("showVectorOptions", false);
+  }, [toolbarManager, togglePaletteState]);
+
+  const handleButtonTouchHold = useCallback(() => {
+    toolbarManager.setSelectedButton(modalButton);
+    //togglePaletteState("showVectorOptions");
+    console.log('FIXME this would toggle vector options');
+  }, [toolbarManager, togglePaletteState]);
+
+  const { didTouchHold, ...handlers } = useTouchHold(handleButtonTouchHold, handleButtonClick);
+
+  const handleExpandCollapseClick = (e: React.MouseEvent) => {
+    if (!didTouchHold()) {
+      handleButtonTouchHold();
+      e.stopPropagation();
+    }
+  };
+
+  return (
+    <Tooltip title="Line" {...tooltipOptions}>
+      <button type="button" className={buttonClasses({ modalButton, selected })} {...handlers}>
+        <LineToolIcon fill={fill} stroke={stroke} strokeWidth={strokeWidth}
+          strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)} />
+        <div className="expand-collapse" onClick={handleExpandCollapseClick}>
+          <SmallCornerTriangle />
+        </div>
+      </button>
+    </Tooltip>);
+});

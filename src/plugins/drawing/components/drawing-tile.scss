@@ -63,22 +63,6 @@
           max-height: 23px;
           z-index: 1;
         }
-        .expand-collapse {
-          position: absolute;
-          right: 0;
-          bottom: 0;
-          width: 10px;
-          height: 10px;
-          &:hover {
-            background-color: $workspace-teal-light-4;
-          }
-          svg {
-            position: absolute;
-            left: 1px;
-            top: 1px;
-            fill: $workspace-teal-dark-1;
-          }
-        }
       }
       &.button-delete {
         border-bottom-right-radius: 3px;
@@ -88,6 +72,24 @@
         opacity: 25%;
         cursor: default;
       }
+
+      .expand-collapse {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        width: 10px;
+        height: 10px;
+        &:hover {
+          background-color: $workspace-teal-light-4;
+        }
+        svg {
+          position: absolute;
+          left: 1px;
+          top: 1px;
+          fill: $workspace-teal-dark-1;
+        }
+      }
+
     }
 
     .image-upload {
