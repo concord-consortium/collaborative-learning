@@ -160,12 +160,15 @@
     }
 
     select { //drop down menu of tagged options
-      left: 15px;
+      left: 11px;
       height: 26px;
       position: absolute;
-      margin-top: 3px;
-      width: 174px;
-      width: 88%;
+      margin: 1px 4px 6px;
+      width: calc(100% - 30px);
+      font-family: Lato;
+      border: solid 1.5px $charcoal-light-1;
+      border-radius: 5px;
+      outline: none;
     }
 
     .comment-textbox-footer {
