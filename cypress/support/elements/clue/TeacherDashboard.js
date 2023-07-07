@@ -84,16 +84,8 @@ class TeacherDashboard {
     getFourUpViews() {
         return cy.get('.four-up');
     }
-    getStudentOverlay(quadrant) {
-        return cy.get(quadrant).siblings().last().within(() => {
-            cy.get('.four-up-overlay').eq(0); //this is only getting the first overlay of the group
-        });
-    }
     getStudentCanvas(quadrant) {
         return cy.get(quadrant);
-    }
-    closeStudentCanvas(quadrant){
-        return cy.get('.four-up-overlay').click({force:true});
     }
     getStudentID(index) {
         return cy.get('.member').eq(index);
@@ -110,9 +102,11 @@ class TeacherDashboard {
         dialog.getDialogOKButton().click();
     }
     sendStudentNote(group, student, quadrant, text){
-      const quadrants = ["north-west", "north-east", "south-east", "south-west"];
-        cy.get('.four-up-overlay').eq(quadrants.indexOf(quadrant)).click();
-        this.getStickyNoteIcon().eq(group-1).click();
+        const quadrants = ["north-west", "north-east", "south-east", "south-west"];
+        this.getGroup(group).within(() => {
+            cy.get('.member').eq(quadrants.indexOf(quadrant)).click();
+        });
+        this.getStickyNoteIcon().eq(group).click();
         dialog.getDialogTitle().should('contain','Message '+ student);
         dialog.getDialogTextInput().type(text);
         dialog.getDialogOKButton().click();

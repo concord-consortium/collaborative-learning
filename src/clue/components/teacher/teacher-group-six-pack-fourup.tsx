@@ -52,7 +52,6 @@ export class TeacherGroupSixPackFourUp extends BaseComponent<IProps, IState> {
             <FourUpComponent
               group={group}
               isGhostUser={true}
-              toggleable={true}
               documentViewMode={documentViewMode}
               selectedSectionId={selectedSectionId}
               viaTeacherDashboard={true}
