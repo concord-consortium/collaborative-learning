@@ -1,6 +1,6 @@
 import { Node } from "rete";
 import { DropdownListControl } from "../controls/dropdown-list-control";
-import { kMicroBitHubRelaysIndexed as kMicroBitHubRelaysIndexed, kGripperOutputTypes } from "../../model/utilities/node";
+import { kMicroBitHubRelaysIndexed, kGripperOutputTypes } from "../../model/utilities/node";
 
 interface NodeOutputValue {
   val: number;
