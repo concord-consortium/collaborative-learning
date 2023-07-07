@@ -492,7 +492,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
         // Update live output hub options with simulated hubs
         const outputVariable = findOutputVariable(node, this.props.tileContent?.outputVariables);
-        const options = outputVariable ? [...NodeMicroBitHubs, simulatedHub(outputVariable, node)] : NodeMicroBitHubs;
+        const options = outputVariable ? [...NodeMicroBitHubs, simulatedHub(outputVariable)] : NodeMicroBitHubs;
         // If the selected option no longer exists, switch to the first option
         if (!options.find(option => option.name === hubSelect.getValue())) {
           hubSelect.setValue(options[0].name);

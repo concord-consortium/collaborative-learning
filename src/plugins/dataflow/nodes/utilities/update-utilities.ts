@@ -42,7 +42,7 @@ export function sendDataToSerialDevice(n: Node, serialDevice: SerialDevice) {
 
 export function sendDataToSimulatedOutput(n: Node, outputVariables?: VariableType[]) {
   const outputVariable = findOutputVariable(n, outputVariables);
-  if (outputVariable && getHubSelect(n).getValue() === simulatedHubName(n)) {
+  if (outputVariable && getHubSelect(n).getValue() === simulatedHubName(outputVariable)) {
     const { val } = getNodeValueWithType(n);
     const outputValue = isFinite(val) ? val : 0;
     outputVariable.setValue(outputValue);

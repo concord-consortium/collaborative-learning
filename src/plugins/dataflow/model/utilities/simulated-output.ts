@@ -17,18 +17,21 @@ function simulatedHubId(variable: VariableType) {
   return `HUB${variable.name}`;
 }
 
-export function simulatedHubName(node: Node) {
-  // All varieties of Gripper should display as "Sumulated Gripper"
-  const outputType = getOutputType(node);
-  const menuName = kRoundedOutputTypes.includes(outputType) ? "Gripper": outputType;
-  return `Simulated ${menuName}`;
+// export function simulatedHubName(node: Node) {
+//   // All varieties of Gripper should display as "Sumulated Gripper"
+//   const outputType = getOutputType(node);
+//   const menuName = kRoundedOutputTypes.includes(outputType) ? "Gripper": outputType;
+//   return `Simulated ${menuName}`;
+// }
+
+export function simulatedHubName(variable: VariableType) {
+  return `Simulated ${variable.displayName}`;
 }
 
-export function simulatedHub(variable: VariableType, node: Node) {
-  console.log("| generating simulatedHub", variable, node);
+export function simulatedHub(variable: VariableType) {
   return {
     id: simulatedHubId(variable),
-    name: simulatedHubName(node) || "",
+    name: simulatedHubName(variable) || "",
     icon: LightIcon,
     active: true
   };
