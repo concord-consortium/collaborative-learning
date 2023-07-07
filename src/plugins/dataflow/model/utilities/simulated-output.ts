@@ -4,6 +4,8 @@ import { VariableType } from "@concord-consortium/diagram-view";
 import { getOutputType } from "../../nodes/utilities/live-output-utilities";
 
 import LightIcon from "../../assets/icons/sensor/light.svg";
+import { get } from "lodash";
+import { kRoundedOutputTypes } from "./node";
 
 export function findOutputVariable(node: Node, variables?: VariableType[]) {
   if (!variables) return undefined;
@@ -16,10 +18,14 @@ function simulatedHubId(variable: VariableType) {
 }
 
 export function simulatedHubName(node: Node) {
-  return `Simulated ${getOutputType(node)}`;
+  // All varieties of Gripper should display as "Sumulated Gripper"
+  const outputType = getOutputType(node);
+  const menuName = kRoundedOutputTypes.includes(outputType) ? "Gripper": outputType;
+  return `Simulated ${menuName}`;
 }
 
 export function simulatedHub(variable: VariableType, node: Node) {
+  console.log("| generating simulatedHub", variable, node);
   return {
     id: simulatedHubId(variable),
     name: simulatedHubName(node) || "",
