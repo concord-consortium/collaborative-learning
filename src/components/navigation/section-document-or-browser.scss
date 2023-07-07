@@ -195,14 +195,14 @@ $scroller-height: 145px;
         }
         .scroll-arrow-button-wrapper {
           position: relative;
-          top: calc((100vh/2) - $scroller-height - 20px);
+          top: calc((100vh/2) - $scroller-height - 15px);
           &.left {
             left: 0px;
-            top: calc((100vh/2) - $scroller-height - 20px);
+            top: calc((100vh/2) - $scroller-height - 15px);
           }
           &.right {
             right: 2px;
-            top: calc((-100vh/2) + 20px + $scroller-height);
+            top: calc((-100vh/2) + $scroller-height + 12px);
           }
         }
       }
