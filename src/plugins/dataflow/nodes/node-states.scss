@@ -62,8 +62,7 @@
 }
 
 .node.live-output.no-hub-outputs {
-  .hubSelect {
-    border: 5px dashed rgb(238, 232, 232) !important;
-    //display: none;
+  .hubSelect .item {
+    border:2px solid purple;
   }
 }

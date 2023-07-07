@@ -1,6 +1,6 @@
 import { Node } from "rete";
 import { DropdownListControl } from "../controls/dropdown-list-control";
-import { kRelaysIndexed } from "../../model/utilities/node";
+import { kMicroBitHubRelaysIndexed as kMicroBitHubRelaysIndexed, kGripperOutputTypes } from "../../model/utilities/node";
 
 interface NodeOutputValue {
   val: number;
@@ -22,6 +22,10 @@ export function getNodeValueWithType(node: Node): NodeOutputValue {
   return { val, outType };
 }
 
-export function nodeUsesHub(node: Node) {
-  return kRelaysIndexed.includes(getOutputType(node));
+export function nodeUsesMicroBitHub(node: Node) {
+  return kMicroBitHubRelaysIndexed.includes(getOutputType(node));
+}
+
+export function nodeUsesGripper(node: Node) {
+  return kGripperOutputTypes.includes(getOutputType(node));
 }

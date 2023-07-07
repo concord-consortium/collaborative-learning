@@ -104,6 +104,7 @@ export class DropdownListControl extends Rete.Control {
           {showList ?
           <div className={`option-list ${listClass}`} ref={listRef}>
             {options.map((ops: any, i: any) => {
+              console.log("| ops: ", ops)
               const disabled = ops.active === false || isDisabled?.(ops);
               const className = classNames("item", listClass, {
                 disabled,
