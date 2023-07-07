@@ -29,8 +29,9 @@ describe('verify document curation', function() {//adding a star to a student do
         resourcesPanel.starCanvasItem('class-work','workspaces',studentDoc);
         resourcesPanel.getCanvasStarIcon('class-work','workspaces',studentDoc).should('have.class','starred');
         //make sure only one canvas is starred,
-        // but length 2 because there is one in published section and one in Starred section
-        cy.get('.icon-star.starred').should('have.length',2);
+        //length is one if Starred section has not been loaded.
+        //length becomes 2 when the Starred section is exposed.
+        cy.get('.icon-star.starred').should('have.length',1);
     });
     it('verify starred document has a star in the dashboard', function(){
         dashboard.switchView('Dashboard');
