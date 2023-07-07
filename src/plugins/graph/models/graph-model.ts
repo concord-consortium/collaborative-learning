@@ -192,19 +192,65 @@ export const GraphModel = TileContentModel
   }))
   .actions(self => ({
     updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
-      // Nothing to do here so far
+      console.log("GraphModel updateAfterSharedModelChanges",
+        {"self.data": self.data, "self.config.dataset": self.config.dataset});
+      // We need to figure out how to know if we need to update the
+      // dataSet. The config.dataSet is volatile, but setting it
+      // might also update state in the config I'm not sure
+      // We could just check if they match and then update it if
+      // not. And then we'd also need a reaction that does the same
+      // thing, but we'd need the reaction to only do this if it isn't
+      // being done here.
+
+
+      // Note this will also happen in the reaction below
+      // we do it here just to be safe incase this function is called
+      // first
+      if (self.data !== self.config.dataset) {
+        self.config.setDataset(self.data);
+      }
+
+      if (!self.data) {
+        // When we have no dataset default the graph to x y axes
+        self.setAttributeID("y", "");
+        self.setAttributeID("x", "");
+      } else {
+        // If our graph doesn't have useful axes then set them
+        // This will typically happen when the graph is linked
+        if (!self.getAttributeID("y") && !self.getAttributeID("x")) {
+          self.setAttributeID("x", self.data.attributes[0].id);
+          self.setAttributeID("y", self.data.attributes[1].id);
+        }
+      }
     },
     afterAttach() {
       addDisposer(self, reaction(
         () => self.data,
-        (data, prevData) => {
-          if (data && data !== prevData) {
-            // This should occur when the graph is linked to a dataset
-            self.linkDataSet();
-          } else if (!data) {
-            // This should occur when the graph is unlinked from a dataset
-            self.unlinkDataSet();
+        (data, prevData, more) => {
+          console.log("GraphModel reaction", {data, prevData});
+
+          // CHECKME: this will only work correctly if setDataset doesn't
+          // trigger any state updates
+          if (self.data !== self.config.dataset) {
+            self.config.setDataset(self.data);
           }
+          // FIXME: When a snapshot is applied from firebase
+          // we need to sync the config dataset. But we don't want to do
+          // that if this update is happening because of a user action
+          // either an undo, history playback, or an actual user action.
+          // One possible way to address this is to make the config dataset
+          // be a view. This means we'll need another way to identify
+          // the first time a dataset is linked to the graph. Because we
+          // default the x and y attribute ids in this case. We could
+          // just check if the attributes are set already instead.
+
+          // if (data && data !== prevData) {
+          //   // This should occur when the graph is linked to a dataset
+          //   self.linkDataSet();
+          // } else if (!data) {
+          //   // This should occur when the graph is unlinked from a dataset
+          //   self.unlinkDataSet();
+          // }
         }
       ));
     }

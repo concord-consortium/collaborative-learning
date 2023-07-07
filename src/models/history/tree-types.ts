@@ -1,8 +1,12 @@
 import { getPath, IActionContext, IPatchRecorder } from "mobx-state-tree";
+import { SharedModelMapSnapshotOutType } from "../document/base-document-content";
 import { IActionTrackingMiddleware3Call } from "./create-action-tracking-middleware-3";
 
 export interface CallEnv {
   recorder: IPatchRecorder;
+  // FIXME: this breaks the abstraction, and means the tree monitor
+  // wouldn't work in an iframe tree.
+  initialSharedModelMap: SharedModelMapSnapshotOutType;
   sharedModelModifications: SharedModelModifications;
   historyEntryId: string;
   exchangeId: string;

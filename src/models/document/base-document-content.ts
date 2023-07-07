@@ -1,6 +1,6 @@
 import stringify from "json-stringify-pretty-compact";
 import { cloneDeep, each } from "lodash";
-import { types, getSnapshot, getType, getEnv, SnapshotOrInstance } from "mobx-state-tree";
+import { types, getSnapshot, getType, getEnv, SnapshotOrInstance, Instance, SnapshotOut } from "mobx-state-tree";
 import {
   getPlaceholderSectionId, isPlaceholderTile, PlaceholderContentModel
 } from "../tiles/placeholder/placeholder-content";
@@ -38,6 +38,11 @@ import {
   UpdatedSharedDataSetIds, updateSharedDataSetSnapshotWithNewTileIds
 } from "../shared/shared-data-set";
 
+export const SharedModelMap = types.map(SharedModelEntry);
+export type SharedModelMapType = Instance<typeof SharedModelMap>;
+export type SharedModelMapSnapshotOutType = SnapshotOut<typeof SharedModelMap>;
+
+
 /**
  * This is one part of the DocumentContentModel. The other part is
  * DocumentContentModelWithTileDragging. It was split out to reduce the size of the
@@ -52,7 +57,7 @@ export const BaseDocumentContentModel = types
     rowOrder: types.array(types.string),
     tileMap: types.map(TileModel),
     // The keys to this map should be the id of the shared model
-    sharedModelMap: types.map(SharedModelEntry),
+    sharedModelMap: SharedModelMap,
   })
   .preProcessSnapshot(snapshot => {
     return isImportDocument(snapshot) ? migrateSnapshot(snapshot) : snapshot;
