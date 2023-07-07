@@ -357,13 +357,12 @@ context('Dataflow Tool Tile', function () {
       });
       it("verify live output types", () => {
         const dropdown = "liveOutputType";
-        const outputTypes = ["Light Bulb", "Gripper", "Gripper 2.0", "Humidifier", "Fan", "Heat Lamp"];
+        const outputTypes = ["Gripper", "Gripper 2.0", "Humidifier", "Fan", "Heat Lamp"];
         dataflowToolTile.getDropdown(nodeType, dropdown).click();
-        dataflowToolTile.getDropdownOptions(nodeType, dropdown).should("have.length", 6);
+        dataflowToolTile.getDropdownOptions(nodeType, dropdown).should("have.length", 5);
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).each(($tab, index, $typeList) => {
           expect($tab.text()).to.contain(outputTypes[index]);
         });
-        dataflowToolTile.getOutputNodeValueText().should("contain", "off");
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).last().click();
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).should("have.length", 0);
         dataflowToolTile.getDropdown(nodeType, dropdown).contains("Heat Lamp").should("exist");
@@ -372,7 +371,7 @@ context('Dataflow Tool Tile', function () {
       it("verify live binary outputs indicate hub not present if not connected", () => {
         const dropdown = "liveOutputType";
         dataflowToolTile.getDropdown(nodeType, dropdown).click();
-        dataflowToolTile.getDropdownOptions(nodeType, dropdown).eq(4).click();
+        dataflowToolTile.getDropdownOptions(nodeType, dropdown).eq(3).click();
         dataflowToolTile.getDropdown(nodeType, dropdown).contains("Fan").should("exist");
         dataflowToolTile.getOutputNodeValueText().should("contain", "(no hub)");
       });
@@ -390,7 +389,7 @@ context('Dataflow Tool Tile', function () {
         const startX = 306;
         const startY = 182;
         const deltaX = 70;  //  60 with fixed styles
-        const deltaY = -32; // -10 with fixed styles
+        const deltaY = -22; // -10 with fixed styles
         dataflowToolTile.getCreateNodeButton("number").click();
         dataflowToolTile.getNode("number").should("exist");
         dataflowToolTile.getNumberField().type("1{enter}");
@@ -401,19 +400,12 @@ context('Dataflow Tool Tile', function () {
           .trigger("pointerup", startX + deltaX, startY + deltaY, {force: true});
         dataflowToolTile.getModalOkButton().click();
       });
-      it("should not show hub selector when gripper is selected", () => {
-        const dropdown = "liveOutputType";
-        dataflowToolTile.getDropdown(nodeType, dropdown).click();
-        dataflowToolTile.getDropdownOptions(nodeType, dropdown).eq(2).click();
-        dataflowToolTile.getDropdown(nodeType, dropdown).contains("Gripper 2.0").should("exist");
-        dataflowToolTile.getDropdown(nodeType, "hubSelect").should("not.be.visible");
-      });
-      it("should show hub selector when humidifier is selected", () => {
+      it("should show micro:bit hub selector when fan is selected", () => {
         const dropdown = "liveOutputType";
         dataflowToolTile.getDropdown(nodeType, dropdown).click();
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).eq(3).click();
-        dataflowToolTile.getDropdown(nodeType, dropdown).contains("Humidifier").should("exist");
-        dataflowToolTile.getDropdown(nodeType, "hubSelect").should("be.visible");
+        dataflowToolTile.getDropdown(nodeType, dropdown).contains("Fan").should("exist");
+        dataflowToolTile.getDropdown(nodeType, "hubSelect").should("contain", "micro:bit hub a");
       });
       it("can recieve a value from a connected block, and display correct on or off string", () => {
         dataflowToolTile.getNode("number").should("exist");

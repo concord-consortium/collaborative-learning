@@ -59,7 +59,7 @@ context('Simulator Tile', function () {
       dataflowTile.getDropdown(lo, "liveOutputType").click();
       dataflowTile.getDropdownOptions(lo, "liveOutputType").eq(1).click(); // Gripper
       dataflowTile.getDropdown(lo, "hubSelect").click();
-      dataflowTile.getDropdownOptions(lo, "hubSelect").should("have.length", 4);
+      dataflowTile.getDropdownOptions(lo, "hubSelect").should("have.length", 8);
       // Click the background to not select any option
       cy.get(".flow-tool").click();
 
@@ -72,8 +72,8 @@ context('Simulator Tile', function () {
 
       // Live output options are correct after adding the simulation to the document
       dataflowTile.getDropdown(lo, "hubSelect").click();
-      dataflowTile.getDropdownOptions(lo, "hubSelect").should("have.length", 5);
-      dataflowTile.getDropdownOptions(lo, "hubSelect").eq(4).click();
+      dataflowTile.getDropdownOptions(lo, "hubSelect").should("have.length", 9); // not all visible, but in dom
+      dataflowTile.getDropdownOptions(lo, "hubSelect").eq(0).click({force: true});
 
       // Simulator tile's output variable updates when dataflow sets it
       dataflowTile.getCreateNodeButton("number").click();
