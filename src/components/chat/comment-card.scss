@@ -2,7 +2,7 @@
 
 .comment-card {
   height: calc(100% - 38px);
-  min-height: 106px;
+  min-height: 108px;
   overflow-y: auto;
   white-space: pre-wrap;
   padding: 0 2px;
@@ -17,6 +17,8 @@
       display: flex;
       flex-direction: row;
       align-items: center;
+      margin-top: 3px;
+
       .user-icon {
         display: flex;
         align-items: center;
@@ -60,18 +62,74 @@
           background-color: $charcoal-light-3;
         }
       }
-
     }
-    .new-marker {
+    .comment-dropdown-tag {
+      width: 80%;
+      height: 25px;
+      background-color: white;
+      border-radius: 75px 75px;
       display: flex;
-      flex-direction: row;
-      .new-text {
-        font-size: 9px;
-        font-weight: bold;
-        color: $charcoal-dark-2;
-        background-color: $new-comment-notice;
-      }
+      align-items: center;
+      padding-left: 5px;
+      margin-top: 3px;
+      margin-bottom: 3px;
     }
+
+    //To be used later
+    // .comment-text{
+    // }
+    // .divider-section{
+    //   display: flex;
+    //   flex-direction: row;
+    //   width: 100%;
+    //   height: 20px;
+    //   .divider-line{
+    //     border-top: 1px solid black;
+    //     width: calc(85%);
+    //     margin: 10px 10px 10px 0px;
+    //     height: 10px;
+    //   }
+    //   .new-text{
+    //     height: 11px;
+    //     font-family: Lato;
+    //     font-size: 9px;
+    //     font-weight: bold;
+    //     font-stretch: normal;
+    //     font-style: normal;
+    //     line-height: normal;
+    //     letter-spacing: normal;
+    //     text-align: center;
+    //     color: black;
+    //     background-color: yellow;
+    //     margin-top: 4px;
+    //     margin-left: -8px;
+    //   }
+    // }
+    // .ai-section-header{
+    //   display: flex;
+
+    //   .ai-assistant-text{
+    //     width: 60px;
+    //     height: 13px;
+    //     margin: 5px 5px 10px 3px;
+    //     font-family: Lato;
+    //     font-size: 11px;
+    //     font-weight: bold;
+    //     font-stretch: normal;
+    //     font-style: normal;
+    //     line-height: normal;
+    //     letter-spacing: normal;
+    //     color: $charcoal-dark-1;
+    //     background-color: yellow;
+    //   }
+    //   .ai-assistant-timestamp{
+    //     width: 50%;
+    //     height:13px;
+    //     background-color: blue;
+    //   }
+
+    // }
+
   }
 
   .comment-textbox {
@@ -93,11 +151,21 @@
       box-sizing: border-box;
       font-size: 14px;
       font-family: Lato;
+      padding-top: 28px; //place under dropDownMenu
 
       &::placeholder {
         color: $charcoal;
         font-style: italic;
       }
+    }
+
+    select { //drop down menu of tagged options
+      left: 15px;
+      height: 26px;
+      position: absolute;
+      margin-top: 3px;
+      width: 174px;
+      width: 88%;
     }
 
     .comment-textbox-footer {

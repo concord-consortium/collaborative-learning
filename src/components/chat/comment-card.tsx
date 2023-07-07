@@ -7,6 +7,8 @@ import { getDisplayTimeDate } from "../../utilities/time";
 import { useCautionAlert } from "../utilities/use-caution-alert";
 import UserIcon from "../../assets/icons/clue-dashboard/teacher-student.svg";
 import DeleteMessageIcon from "../../assets/delete-message-icon.svg";
+import AIAssistantIcon from "../../assets/ai-assistant-icon.svg"; //will be used in next ticket
+
 import "./comment-card.scss";
 import "../themes.scss";
 
@@ -54,6 +56,12 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
       showConfirmDeleteAlert();
     }
   };
+
+  //For UI purposes, Leslie gave the go ahead for hard-coded values
+  const dropDownOptions = ["Select Student Strategy", "Part-to-Part",
+  "Part-to-Whole", "Unit Rate", "Guess and Check", "None"];
+
+
   return (
     <div className="comment-card selected" data-testid="comment-card">
       <div className="comment-card-content selected" data-testid="comment-card-content">
@@ -83,7 +91,30 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
                     </div>
                   }
                 </div>
-                <div key={idx} className="comment-text" data-testid="comment">{comment.content}</div>
+                <div className="comment-dropdown-tag">
+                  {dropDownOptions[1]}
+                </div>
+                <div key={idx} className="comment-text" data-testid="comment">
+                  {comment.content}
+                </div>
+
+                {/* <div className="divider-section">
+                  <div className="divider-line">
+                  </div>
+                  <div className="new-text">
+                    New
+                  </div>
+                </div> */}
+                {/* <div className="ai-section-header">
+                  <div className="ai-icon">
+                    <AIAssistantIcon/>
+                  </div>
+                  <div className="ai-assistant-text">
+                    Assistant
+                  </div>
+                  <div className="ai-assistant-timestamp">
+                  </div>
+                </div> */}
               </div>
             );
           })
@@ -92,6 +123,7 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
           activeNavTab={activeNavTab}
           onPostComment={onPostComment}
           numPostedComments={postedComments?.length || 0}
+          dropDownOptions={dropDownOptions}
         />
       </div>
     </div>

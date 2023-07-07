@@ -8,13 +8,16 @@ interface IProps {
   activeNavTab?: string;
   numPostedComments: number;
   onPostComment?: (comment: string) => void;
+  dropDownOptions?: string[];
 }
 
-const minTextAreaHeight = 35;
+const minTextAreaHeight = 100;
 
-export const CommentTextBox: React.FC<IProps> = ({ activeNavTab, numPostedComments, onPostComment }) => {
+export const CommentTextBox: React.FC<IProps> = (props) => {
+  const { activeNavTab, numPostedComments, onPostComment, dropDownOptions } = props;
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [commentTextAreaHeight, setCommentTextAreaHeight] = useState(minTextAreaHeight);
+  const selectElt = useRef<HTMLSelectElement>(null);
   const [commentAdded, setCommentAdded] = useState(false);
   const [commentText, setCommentText] = useState("");
   const textareaStyle = {height: commentTextAreaHeight};
@@ -108,6 +111,20 @@ export const CommentTextBox: React.FC<IProps> = ({ activeNavTab, numPostedCommen
         onChange={handleCommentTextAreaChange}
         onKeyDown={handleCommentTextboxKeyDown}
       />
+
+      <select
+        ref={selectElt}
+        data-test="comment-textbox-dropdown"
+        onChange={e => {
+          console.log("changed to e.value:", e.target.value);
+        }}
+      >
+        {
+          dropDownOptions && dropDownOptions
+          .map(option => <option key={option} value={option}>{option}</option>)
+        }
+      </select>
+
       <div className="comment-textbox-footer">
         <div className="comment-footer-button cancel"
               onClick={handleCancelPost}
