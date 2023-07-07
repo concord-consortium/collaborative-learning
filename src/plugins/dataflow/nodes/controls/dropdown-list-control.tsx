@@ -199,6 +199,7 @@ export class DropdownListControl extends Rete.Control {
   };
 
   public setChannels = (channels: NodeChannelInfo[]) => {
+    console.log("| about to set channels, which has a length of: ", channels.length)
     this.props.channels = channels;
   };
 

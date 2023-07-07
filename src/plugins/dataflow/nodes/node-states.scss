@@ -63,6 +63,7 @@
 
 .node.live-output.no-hub-outputs {
   .hubSelect {
-    display: none;
+    border: 5px dashed rgb(238, 232, 232) !important;
+    //display: none;
   }
 }

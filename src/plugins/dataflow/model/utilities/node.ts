@@ -328,10 +328,6 @@ export const NodeDemoOutputTypes = [
 
 export const NodeLiveOutputTypes = [
   {
-    name: "Light Bulb",
-    icon: LightBulbIcon
-  },
-  {
     name: "Grabber",
     icon: GrabberIcon,
     angleBase: 180,
