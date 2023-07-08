@@ -136,7 +136,7 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
   const handleShowPrevDocument = (secondary?: boolean) => {
     let prevDocumentKey = "";
     const currentIndex = secondary ? currentOpenSecondaryDocIndex : currentOpenDocIndex;
-    const prevDocIndex = currentIndex + 1 >= starredDocuments.length ? 0 : currentOpenDocIndex + 1;
+    const prevDocIndex = currentIndex + 1 >= starredDocuments.length ? 0 : currentIndex + 1;
     if (prevDocIndex < starredDocuments.length)
     { prevDocumentKey = starredDocuments[prevDocIndex].key; }
     if (secondary) {
