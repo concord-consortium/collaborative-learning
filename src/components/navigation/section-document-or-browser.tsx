@@ -36,7 +36,6 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
   const tabState = navTabSpec && ui.tabs.get(navTabSpec?.tab);
   const subTabIndex = Math.max(subTabs.findIndex((subTab) => tabState?.openSubTab === subTab.label), 0);
   const selectedSubTab = subTabs[subTabIndex];
-  // const isStarredTab = selectedSubTab.label === "Starred";
 
   useEffect(() => {
     // Set the initial open tab. If the tabSpec changes somehow then the open
@@ -67,8 +66,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
   const handleSelectDocument = (document: DocumentModelType) => {
     if (ui.focusDocument === document.key) {
         ui.closeSubTabDocument(tabSpec.tab, selectedSubTab.label);
-    }
-    else {
+    } else {
       if (!document.hasContent && document.isRemote) {
         loadDocumentContent(document);
       }

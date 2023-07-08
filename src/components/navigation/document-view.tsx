@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { observer } from "mobx-react";
 import { useQueryClient } from "react-query";
 import classNames from "classnames";
 import { useAppConfig, useClassStore, useLocalDocuments, useProblemStore,
@@ -21,7 +22,7 @@ interface IProps {
   subTab: ISubTabSpec;
 }
 //TODO: Need to refactor this if we want to deploy to all tabs
-export const DocumentView = ({tabSpec, subTab}: IProps) => {
+export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IProps) {
   const ui = useUIStore();
   const store = useStores();
   const appConfigStore = useAppConfig();
@@ -29,13 +30,10 @@ export const DocumentView = ({tabSpec, subTab}: IProps) => {
   const context = useUserContext();
   const queryClient = useQueryClient();
   const user = useUserStore();
-  // const classStore = useClassStore();
+  const classStore = useClassStore();
   const documents = useLocalDocuments();
   const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
-  const subTabs = tabSpec.subTabs;
   const tabState = navTabSpec && ui.tabs.get(navTabSpec?.tab);
-  const subTabIndex = Math.max(subTabs.findIndex((sTab) => tabState?.openSubTab === sTab.label), 0);
-  const selectedSubTab = subTabs[subTabIndex];
   const openDocumentKey = tabState?.openDocuments.get(subTab.label) || "";
   const openDocument = store.documents.getDocument(openDocumentKey) ||
     store.networkDocuments.getDocument(openDocumentKey);
@@ -45,7 +43,7 @@ export const DocumentView = ({tabSpec, subTab}: IProps) => {
   const publishedDoc = openDocument?.type === "publication" || openDocument?.type === "personalPublication"
                         || openDocument?.type === "learningLogPublication";
   const showPlayback = user.type && !publishedDoc? appConfigStore.enableHistoryRoles.includes(user.type) : false;
-  const isStarredTab = selectedSubTab.label === "Starred";
+  const isStarredTab = subTab.label === "Starred";
   const documentTypes: DocumentType[] = tabSpec.tab === "class-work"
                                           ? ["publication"]
                                           : tabSpec.tab === "my-work" && subTab.label === "Starred"
@@ -66,8 +64,9 @@ export const DocumentView = ({tabSpec, subTab}: IProps) => {
   const starredDocuments = getStarredDocuments(documentTypes);
   const currentOpenDocIndex = openDocument && starredDocuments.indexOf(openDocument);
   const currentOpenSecondaryDocIndex = openSecondaryDocument && starredDocuments.indexOf(openSecondaryDocument);
-  if (!isStarredTab && (!openDocument || openDocument.getProperty("isDeleted"))) return null;
   const sectionClass = openDocument?.type === "learningLog" ? "learning-log" : "";
+
+  if (!isStarredTab && (!openDocument || openDocument.getProperty("isDeleted"))) return null;
 
   function handleEditClick(document: DocumentModelType) {
     ui.problemWorkspace.setPrimaryDocument(document);
@@ -99,12 +98,12 @@ export const DocumentView = ({tabSpec, subTab}: IProps) => {
   const handleSelectDocument = (document: DocumentModelType) => {
     if (ui.focusDocument === document.key) {
       if (ui.focusSecondaryDocument) {
-        ui.openSubTabDocument(tabSpec.tab, selectedSubTab.label, ui.focusSecondaryDocument);
-        ui.closeSubTabSecondaryDocument(tabSpec.tab, selectedSubTab.label);
+        ui.openSubTabDocument(tabSpec.tab, subTab.label, ui.focusSecondaryDocument);
+        ui.closeSubTabSecondaryDocument(tabSpec.tab, subTab.label);
       } else {
-        ui.closeSubTabDocument(tabSpec.tab, selectedSubTab.label);
+        ui.closeSubTabDocument(tabSpec.tab, subTab.label);
       }
-    } else if (selectedSubTab.label === "Starred"){
+    } else if (subTab.label === "Starred"){
       if (tabState?.openDocuments.get("Starred")) {
         if (ui.focusSecondaryDocument === document.key) {
           ui.closeSubTabSecondaryDocument(tabSpec.tab, "Starred");
@@ -115,7 +114,7 @@ export const DocumentView = ({tabSpec, subTab}: IProps) => {
         if (!document.hasContent && document.isRemote) {
           loadDocumentContent(document);
         }
-        ui.openSubTabDocument(tabSpec.tab, selectedSubTab.label, document.key);
+        ui.openSubTabDocument(tabSpec.tab, subTab.label, document.key);
         const logEvent = document.isRemote
           ? LogEventName.VIEW_SHOW_TEACHER_NETWORK_COMPARISON_DOCUMENT
           : LogEventName.VIEW_SHOW_COMPARISON_DOCUMENT;
@@ -125,7 +124,7 @@ export const DocumentView = ({tabSpec, subTab}: IProps) => {
       if (!document.hasContent && document.isRemote) {
         loadDocumentContent(document);
       }
-      ui.openSubTabDocument(tabSpec.tab, selectedSubTab.label, document.key);
+      ui.openSubTabDocument(tabSpec.tab, subTab.label, document.key);
       const logEvent = document.isRemote
         ? LogEventName.VIEW_SHOW_TEACHER_NETWORK_COMPARISON_DOCUMENT
         : LogEventName.VIEW_SHOW_COMPARISON_DOCUMENT;
@@ -136,7 +135,8 @@ export const DocumentView = ({tabSpec, subTab}: IProps) => {
   // Published documents are listed in reverse order of index so previous and next toggles are also reversed
   const handleShowPrevDocument = (secondary?: boolean) => {
     let prevDocumentKey = "";
-    const prevDocIndex = currentOpenDocIndex + 1 >= starredDocuments.length ? 0 : currentOpenDocIndex + 1;
+    const currentIndex = secondary ? currentOpenSecondaryDocIndex : currentOpenDocIndex;
+    const prevDocIndex = currentIndex + 1 >= starredDocuments.length ? 0 : currentOpenDocIndex + 1;
     if (prevDocIndex < starredDocuments.length)
     { prevDocumentKey = starredDocuments[prevDocIndex].key; }
     if (secondary) {
@@ -149,16 +149,17 @@ export const DocumentView = ({tabSpec, subTab}: IProps) => {
   const handleShowNextDocument = (secondary?: boolean | undefined) => {
     let nextDocumentKey = "";
     let nextDocIndex: number;
+    const currentIndex = secondary ? currentOpenSecondaryDocIndex : currentOpenDocIndex;
     // Workspaces Starred tab show the problem document as the first document in the list
     // The personal documents are shown in reverse order after the problem document
     if (tabSpec.tab === "my-work") {
-      if (currentOpenDocIndex === 0) {
+      if (currentIndex === 0) {
         nextDocIndex = starredDocuments.length - 1;
       } else {
-        nextDocIndex = currentOpenDocIndex - 1;
+        nextDocIndex = currentIndex - 1;
       }
     } else {
-      nextDocIndex = currentOpenDocIndex - 1;
+      nextDocIndex = currentIndex - 1;
     }
 
     if (nextDocIndex < starredDocuments.length) {
@@ -176,6 +177,17 @@ export const DocumentView = ({tabSpec, subTab}: IProps) => {
   const isRightFlipperVisible = (tabSpec.tab === "class-work" && currentOpenDocIndex > 0)
                                   || (tabSpec.tab !== "class-work" && (currentOpenDocIndex >= 0 &&
                                         currentOpenDocIndex !== 1));
+  const isSecondaryLeftFlipperVisible =
+          (tabSpec.tab === "class-work" && (currentOpenSecondaryDocIndex < starredDocuments.length - 1))
+                                        || (tabSpec.tab !== "class-work" && currentOpenSecondaryDocIndex > 0);
+  const isSecondaryRightFlipperVisible = (tabSpec.tab === "class-work" && currentOpenSecondaryDocIndex > 0)
+                                        || (tabSpec.tab !== "class-work" && (currentOpenSecondaryDocIndex >= 0 &&
+                                          currentOpenSecondaryDocIndex !== 1));
+  const getDisplayTitle = (document: DocumentModelType) => {
+    const documentOwner = classStore.users.get(document.uid);
+    const documentTitle = getDocumentDisplayTitle(document, appConfigStore, problemStore);
+    return openSecondaryDocument && documentOwner ? documentOwner.fullName + documentTitle : documentTitle;
+  };
 
   return (
     <div className="scroller-and-document">
@@ -190,7 +202,7 @@ export const DocumentView = ({tabSpec, subTab}: IProps) => {
               <div className={`document-header ${tabSpec.tab} ${sectionClass}
                               ${openSecondaryDocument ? "primary" : ""}`} onClick={() => ui.setSelectedTile()}>
                 <div className={`document-title`}>
-                  {getDocumentDisplayTitle(openDocument, appConfigStore, problemStore)}
+                  {getDisplayTitle(openDocument)}
                 </div>
                 {(!openDocument.isRemote)
                     && editButton(tabSpec.tab, sectionClass, openDocument)}
@@ -219,12 +231,12 @@ export const DocumentView = ({tabSpec, subTab}: IProps) => {
                   <div className={`document-header ${tabSpec.tab} ${sectionClass} secondary`}
                         onClick={() => ui.setSelectedTile()}>
                     <div className={`document-title`}>
-                      {getDocumentDisplayTitle(openSecondaryDocument, appConfigStore, problemStore)}
+                      {getDisplayTitle(openSecondaryDocument)}
                     </div>
                     {(!openSecondaryDocument.isRemote)
                         && editButton(tabSpec.tab, sectionClass, openSecondaryDocument)}
                   </div>
-                  {(isStarredTab && isLeftFlipperVisible) &&
+                  {(isStarredTab && isSecondaryLeftFlipperVisible) &&
                     <div className="scroll-arrow-button-wrapper left">
                       <ScrollButton side={"left"} tab={tabSpec.tab} onScroll={()=>handleShowPrevDocument(true)}/>
                     </div>
@@ -236,7 +248,7 @@ export const DocumentView = ({tabSpec, subTab}: IProps) => {
                     readOnly={true}
                     showPlayback={showPlayback}
                   />
-                  {(isStarredTab && isRightFlipperVisible) &&
+                  {(isStarredTab && isSecondaryRightFlipperVisible) &&
                     <div className="scroll-arrow-button-wrapper right">
                       <ScrollButton side={"right"} tab={tabSpec.tab} onScroll={()=>handleShowNextDocument(true)}/>
                     </div>
@@ -247,7 +259,7 @@ export const DocumentView = ({tabSpec, subTab}: IProps) => {
       }
     </div>
   );
-};
+});
 
 interface DocumentBrowserScrollerProps {
   subTab: ISubTabSpec;
