@@ -14,6 +14,7 @@ import { DrawingObjectSnapshotForAdd, DrawingObjectType, isFilledObject,
   isStrokedObject, ObjectMap, ToolbarModalButton } from "../objects/drawing-object";
 import { LogEventName } from "../../../lib/logger-types";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
+import { VectorType } from "../components/vector-palette";
 
 // track selection in metadata object so it is not saved to firebase but
 // also is preserved across document/content reloads
@@ -56,6 +57,7 @@ export const DrawingContentModel = TileContentModel
     strokeDashArray: DefaultToolbarSettings.strokeDashArray,
     strokeWidth: DefaultToolbarSettings.strokeWidth,
     stamps: types.array(StampModel),
+    // FIXME vectorType: DefaultToolbarSettings.vectorType,
     // is type.maybe to avoid need for migration
     currentStampIndex: types.maybe(types.number)
   })

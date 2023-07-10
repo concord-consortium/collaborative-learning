@@ -5,6 +5,7 @@ import { FillColorButton, StrokeColorButton} from "./drawing-toolbar-buttons";
 import { StampsPalette } from "./stamps-palette";
 import { StrokeColorPalette } from "./stroke-color-palette";
 import { FillColorPalette } from "./fill-color-palette";
+import { VectorType, VectorTypePalette } from "./vector-palette";
 import {
   IFloatingToolbarProps, useFloatingToolbarLocation
 } from "../../../components/tiles/hooks/use-floating-toolbar-location";
@@ -62,6 +63,10 @@ export const ToolbarView: React.FC<IProps> = (
     togglePaletteState("showFill", show);
   };
 
+  const handleToggleShowVectorTypePalette = (show?: boolean) => {
+    togglePaletteState("showVectors", show);
+  };
+
   const handleSelectStamp = (stampIndex: number) => {
     if (isEnabled) {
       drawingContent.setSelectedStamp(stampIndex);
@@ -76,6 +81,11 @@ export const ToolbarView: React.FC<IProps> = (
   };
   const handleFillColorChange = (color: string) => {
     isEnabled && drawingContent.setFill(color, drawingContent.selectedIds);
+    clearPaletteState();
+  };
+  const handleVectorTypeChange = (type: VectorType) => {
+    console.log("FIXME should set vector type here");
+    // isEnabled && drawingContent.setVectorType(type, drawingContent.selectedIds);
     clearPaletteState();
   };
 
@@ -124,6 +134,8 @@ export const ToolbarView: React.FC<IProps> = (
               return getToolbarButton(button);
             })}
           </div>
+          {paletteState.showVectors &&
+            <VectorTypePalette selectedVectorType={"arrow"} onSelectVectorType={handleVectorTypeChange} settings={drawingContent.toolbarSettings} />}
           {paletteState.showStroke &&
             <StrokeColorPalette selectedColor={drawingContent.stroke} onSelectColor={handleStrokeColorChange} />}
           {paletteState.showFill &&

@@ -13,11 +13,13 @@ export interface ToolbarSettings {
   fill: string;
   strokeDashArray: string;
   strokeWidth: number;
+ // vectorType: string;
 }
 
 export const DefaultToolbarSettings: ToolbarSettings = {
   stroke: "#000000",
   fill: "none",
   strokeDashArray: "",
-  strokeWidth: 2
+  strokeWidth: 2,
+ // vectorType: VectorType.line
 };

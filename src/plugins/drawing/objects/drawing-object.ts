@@ -140,9 +140,10 @@ export interface IPaletteState {
   showStamps: boolean;
   showStroke: boolean;
   showFill: boolean;
+  showVectors: boolean;
 }
 export type PaletteKey = keyof IPaletteState;
-export const kClosedPalettesState = { showStamps: false, showStroke: false, showFill: false };
+export const kClosedPalettesState = { showStamps: false, showStroke: false, showFill: false, showVectors: false };
 
 export interface IToolbarButtonProps {
   toolbarManager: IToolbarManager;

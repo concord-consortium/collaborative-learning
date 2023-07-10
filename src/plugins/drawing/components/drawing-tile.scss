@@ -197,12 +197,18 @@
     border-radius: 0 $toolbar-border-radius $toolbar-border-radius $toolbar-border-radius;
     z-index: $toolbar-z-index;
 
+    &.one-row {
+      height: 40px;
+    }
+    
+    &.vectors {
+      left: 72px;
+      width: 100px;
+    }
+
     &.stamps {
       left: 180px;
       width: 190px;
-      &.one-row {
-        height: 40px;
-      }
     }
 
     &.stroke-color {
