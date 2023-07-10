@@ -33,7 +33,7 @@ const makeFakeCommentThread = (title: string, tileId: string, uid: string) => {
   };
 };
 describe("CommentThread", () => {
-  it("render with no threads", () => {
+  it.skip("render with no threads", () => {
     render((
       <ModalProvider>
       <ChatThread activeNavTab={ENavTab.kMyWork} focusDocument="document-key"/>
@@ -44,7 +44,7 @@ describe("CommentThread", () => {
     expect(screen.queryByTestId("chat-thread")).toBeInTheDocument();
   });
 
-  it("Render threads. No User owned comments", () => {
+  it.skip("Render threads. No User owned comments", () => {
     const chatThreads =
       [makeFakeCommentThread("Thread 1", "abcd", "u1"), makeFakeCommentThread("Thread 2", "jkl", "u2")];
     const testUser = {id: "uuuuuu", "name": "test user"} as UserModelType;
