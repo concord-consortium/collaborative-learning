@@ -8,10 +8,10 @@ import { useCautionAlert } from "../utilities/use-caution-alert";
 import UserIcon from "../../assets/icons/clue-dashboard/teacher-student.svg";
 import DeleteMessageIcon from "../../assets/delete-message-icon.svg";
 import AIAssistantIcon from "../../assets/ai-assistant-icon.svg"; //will be used in next ticket
+import { useAppConfig } from "../../hooks/use-stores";
 
 import "./comment-card.scss";
 import "../themes.scss";
-import { useAppConfig } from "src/hooks/use-stores";
 
 interface IProps {
   user?: UserModelType;
@@ -58,7 +58,6 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
     }
   };
 
-
   //For UI purposes, Leslie gave the go ahead for hard-coded values
   const dropDownOptions = ["Select Student Strategy", "Part-to-Part",
   "Part-to-Whole", "Unit Rate", "Guess and Check", "None"];
@@ -68,7 +67,6 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
   //so theres a hook useAppConfig() in use-stores.ts
   const {config} = useAppConfig();
   //then deconstruct the new properties: showDropDown and the dropDwonOptions
-
 
   return (
     <div className="comment-card selected" data-testid="comment-card">
