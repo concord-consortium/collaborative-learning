@@ -42,7 +42,10 @@
       "table": {
         "numFormat": ".2~f"
       }
-    }
+    },
+    "showDropDown": true,
+    "dropDownChoices": ["Part-to-Part", "Part-to-Whole", "Unit Rate", "Guess and Check", "None"]
+
   },
   "sections": {
     "introduction": {
@@ -592,7 +595,7 @@
                       ]
                     }
                   }
-              
+
                 ]
               }
             }
@@ -1750,7 +1753,7 @@
             {
               "type": "whatIf",
               "content": {
-                "tiles": [ 
+                "tiles": [
                   {
                     "id": "_npqx_5zhDn1pHYT",
                     "title": "Text 11",
@@ -2103,7 +2106,7 @@
             {
               "type": "nowWhatDoYouKnow",
               "content": {
-                "tiles": [ 
+                "tiles": [
                   {
                     "id": "Egt3CNkIr4L3igZj",
                     "title": "Text 53",
@@ -2409,7 +2412,7 @@
                         "<p><em>                                               How might it be useful in solving problems?</em></p>"
                       ]
                     }
-                  }              
+                  }
                 ]
               }
             },
@@ -2984,7 +2987,7 @@
                         "<p>Listen during the Explore for how students are describing what is happening with the money in the class accounts. Are they noticing on a table that as the number of weeks is increasing, the amount of money is decreasing at a constant rate; on a graph the line is decreasing (fall) from left to right; and in an equation the coefficient is negative. Listen for how students contrast these representations to those in previous problems. Use their conversations to lead the Summary.</p>"
                       ]
                     }
-                  }              
+                  }
                 ]
               },
               "summarize": {
@@ -3175,7 +3178,7 @@
                       "type": "Image",
                       "url": "curriculum/moving-straight-ahead/images/MSA_2-1_InitialChallenge_Graph.png"
                     }
-                  }              
+                  }
                 ]
               }
             },
@@ -5135,7 +5138,7 @@
                         "<p>She is incorrect. None of the plans are proportional, because they all have non-zero y-intercepts. Also, you could not write a proportion from the table values.</p>"
                       ]
                     }
-                  }              
+                  }
                 ]
               }
             },
@@ -5279,7 +5282,7 @@
                 ]
               },
               "launch": {
-                "tiles": [ 
+                "tiles": [
                   {
                     "id": "PKDPRjBSTEG8ngSD",
                     "title": "Text 1",
@@ -7544,7 +7547,7 @@
                         "<p>The solutions to this inequality will be all possible femur lengths for a female who is less than 150 cm tall.</p>"
                       ]
                     }
-                  }              
+                  }
                 ]
               }
             },
@@ -7942,16 +7945,16 @@
                         }
                       },
                       "objects": [
-                        { "type": "movableLine", 
+                        { "type": "movableLine",
                           "parents": [
-                            { "type": "point", "parents": [0, 825] }, 
+                            { "type": "point", "parents": [0, 825] },
                             { "type": "point", "parents": [300, 1800] }
                             ],
-                          "properties": {"id":"vMWqEpX7_igY027x","pt1":{"type":"point","id":"vMWqEpX7_igY027x-point1"},"pt2":{"type":"point","id":"vMWqEpX7_igY027x-point2"}} 
+                          "properties": {"id":"vMWqEpX7_igY027x","pt1":{"type":"point","id":"vMWqEpX7_igY027x-point1"},"pt2":{"type":"point","id":"vMWqEpX7_igY027x-point2"}}
                         },
                         { "type": "comment", "parents": [21.336225328947364, -463.1059074954708], "properties": {"id":"tBpHw7TAncgqhS8a","text":"Expense","anchor":"vMWqEpX7_igY027x"} },
-                        { "type": "movableLine", 
-                          "parents": [{ "type": "point", "parents": [0, 0] }, { "type": "point", "parents": [200, 1640] }],"properties": {"id":"pnjRfqTdlHmyZ28t","pt1":{"type":"point","id":"pnjRfqTdlHmyZ28t-point1"},"pt2":{"type":"point","id":"pnjRfqTdlHmyZ28t-point2"}} 
+                        { "type": "movableLine",
+                          "parents": [{ "type": "point", "parents": [0, 0] }, { "type": "point", "parents": [200, 1640] }],"properties": {"id":"pnjRfqTdlHmyZ28t","pt1":{"type":"point","id":"pnjRfqTdlHmyZ28t-point1"},"pt2":{"type":"point","id":"pnjRfqTdlHmyZ28t-point2"}}
                         },
                         { "type": "comment", "parents": [40.59329255756579, -358.36662137681174], "properties": {"id":"517CZN7bjekKFHob","text":"Income","anchor":"pnjRfqTdlHmyZ28t"} },
                         { "type": "point", "parents": [100, 820], "properties": {"id":"Zb_VawWMWUPjtj3n","name":"I","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
@@ -8175,22 +8178,22 @@
             "planningTemplate": {
               "overview": {
                 "tiles": [
-                  
+
                 ]
               },
               "launch": {
                 "tiles": [
-                 
+
                 ]
               },
               "explore": {
                 "tiles": [
-                  
+
                 ]
               },
               "summarize": {
                 "tiles": [
-                 
+
                 ]
               }
             }
@@ -10087,7 +10090,7 @@
                         ]
                       }
                     }
-                  ]           
+                  ]
                 ]
               }
             },

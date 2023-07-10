@@ -78,6 +78,16 @@ export const AppConfigModel = types
     get initialLearningLogTitle() { return self.configMgr.initialLearningLogTitle; },
     get defaultLearningLogDocument() { return self.configMgr.defaultLearningLogDocument; },
     get autoSectionProblemDocuments() { return self.configMgr.autoSectionProblemDocuments; },
+
+    get showDropDown() {
+      console.log("app-config-mode.ts > showDropDown()");
+      return self.configMgr.showDropDown;
+    },
+    get dropDownChoices() {
+      console.log("app-config-mode.ts > dropDownChoices()");
+      return self.configMgr.dropDownChoices;
+    },
+
     get documentLabelProperties() { return self.configMgr.documentLabelProperties; },
     get documentLabels() { return self.configMgr.documentLabels; },
     get disablePublish() { return self.configMgr.disablePublish; },

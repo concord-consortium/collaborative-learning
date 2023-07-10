@@ -39,6 +39,18 @@ export class ConfigurationManager implements UnitConfiguration {
     return this.getProp<UC["defaultProblemOrdinal"]>("defaultProblemOrdinal");
   }
 
+  get showDropDown(){
+    console.log("showDropDown!!");
+    console.log(this.getProp<UC["showDropDown"]>("showDropDown"));
+
+    return this.getProp<UC["showDropDown"]>("showDropDown");
+  }
+
+  get dropDownChoices(){
+    console.log("configuration-manager.ts > getDropDownChoices()");
+    return  (this.showDropDown) ? this.getProp<UC["dropDownChoices"]>("dropDownChoices") : [];
+  }
+
   get autoAssignStudentsToIndividualGroups() {
     return this.getProp<UC["autoAssignStudentsToIndividualGroups"]>("autoAssignStudentsToIndividualGroups");
   }
