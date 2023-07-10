@@ -8,7 +8,7 @@ import { useCautionAlert } from "../utilities/use-caution-alert";
 import UserIcon from "../../assets/icons/clue-dashboard/teacher-student.svg";
 import DeleteMessageIcon from "../../assets/delete-message-icon.svg";
 import AIAssistantIcon from "../../assets/ai-assistant-icon.svg"; //will be used in next ticket
-import { useAppConfig, useStores } from "../../hooks/use-stores";
+import { useStores } from "../../hooks/use-stores";
 
 import "./comment-card.scss";
 import "../themes.scss";
@@ -64,7 +64,7 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
 
 
   //TODO:
-  //so theres a hook useAppConfig() in use-stores.ts
+    //so theres a hook useAppConfig() in use-stores.ts
   // const { config } = useAppConfig();
 
   const { appConfig } = useStores();
