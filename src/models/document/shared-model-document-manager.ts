@@ -232,7 +232,7 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
       return;
     }
 
-    // When a tile tile is removed from the shared model entry this is picked
+    // When a tile is removed from the shared model entry this is picked
     // up by the tree-monitor middleware and updateAfterSharedModelChanges will
     // be called on all of the tiles that were or are referring to the sharedModel
     sharedModelEntry.removeTile(tile);
