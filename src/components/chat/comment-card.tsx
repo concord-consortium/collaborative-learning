@@ -68,12 +68,9 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
   // const { config } = useAppConfig();
 
   const { appConfig } = useStores();
-  // console.log("config showDropDown:", config.showDropDown);
-  // console.log("config isDropDown:", config.isDropDow
-  // console.log("config dropDownChoices:", config.dropDownChoices);
   //then deconstruct the new properties: showDropDown and the dropDwonOptions
-console.log("appConfig.showDropDown:", appConfig.showDropDown);
-console.log("appConfig dropDownChoices:", appConfig.dropDownChoices);
+  console.log("appConfig.showDropDown:", appConfig.showDropDown);
+  console.log("appConfig dropDownChoices:", appConfig.dropDownChoices);
 
   return (
     <div className="comment-card selected" data-testid="comment-card">
