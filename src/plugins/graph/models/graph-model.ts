@@ -192,8 +192,6 @@ export const GraphModel = TileContentModel
   }))
   .actions(self => ({
     updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
-      console.log("GraphModel updateAfterSharedModelChanges",
-        {"self.data": self.data, "self.config.dataset": self.config.dataset});
       // We need to figure out how to know if we need to update the
       // dataSet. The config.dataSet is volatile, but setting it
       // might also update state in the config I'm not sure
@@ -227,8 +225,6 @@ export const GraphModel = TileContentModel
       addDisposer(self, reaction(
         () => self.data,
         (data, prevData, more) => {
-          console.log("GraphModel reaction", {data, prevData});
-
           // CHECKME: this will only work correctly if setDataset doesn't
           // trigger any state updates
           if (self.data !== self.config.dataset) {

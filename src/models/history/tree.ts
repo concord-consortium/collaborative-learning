@@ -100,7 +100,6 @@ export const Tree = types.model("Tree", {
       // action would would trigger the sync. So if the user made this change
       // at just the right time it would could result in duplicate nodes in the
       // diagram.
-      console.log("updateTreeAfterSharedModelChangesInternal", {applyingManagerPatches: self.applyingManagerPatches});
       if (self.applyingManagerPatches) {
           return;
       }
@@ -218,7 +217,6 @@ export const Tree = types.model("Tree", {
           {historyEntryId, action: call});
       }
 
-      console.log("handleSharedModelChanges", {sharedModelPath, model: (model as any)?.toJSON()});
       if (!self.treeManagerAPI) {
         console.warn("handleSharedModelChanges before a treeManagerAPI is set");
         return;
@@ -285,8 +283,6 @@ export const Tree = types.model("Tree", {
       // handler in the first place. However a developer might make
       // a mistake. So it would be useful if we could identify the
       // looping and notify them.
-      console.log("handleSharedModelChanges before updateTreeAfterSharedModelChangesInternal");
-
       self.updateTreeAfterSharedModelChangesInternal(model, initialSharedModelMap);
   })
 }));

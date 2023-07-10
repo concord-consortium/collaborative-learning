@@ -115,7 +115,6 @@ export class TreeMonitor {
             if(pathMatch) {
               const sharedModelPath = pathMatch[1];
 
-              console.log("sharedModelModification", {sharedModelPath, "_patch.path": _patch.path});
               if (!sharedModelModifications[sharedModelPath]) {
                 sharedModelModifications[sharedModelPath] = 1;
               } else {
@@ -222,7 +221,6 @@ export class TreeMonitor {
     // to send them all to the tree at the same time, that way it can
     // inform the tiles of all changes at the same time.
     for (const [sharedModelPath, numModifications] of Object.entries(sharedModelModifications)) {
-      console.log("recordAction", {sharedModelPath, numModifications});
       if (numModifications > 0) {
         // Run the callbacks tracking changes to the shared model.
         // We need to wait for these to complete because the manager
