@@ -61,8 +61,6 @@
   }
 }
 
-// not ideal, but it works
-.node.live-output {
-  &.uses-gripper .microbit { display: none; }
-  &.uses-microbit .gripper { display: none; }
-}
+// .node.live-output {
+//   &.uses-gripper .microbit { display: none; }
+// }
