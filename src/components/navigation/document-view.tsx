@@ -114,20 +114,16 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
   // So we still want to display the previous arrow when we reach n to flip to the problem
   // document.
   const handleChangeDocument = (shift: number) => {
-    if (currentOpenDocIndex) {
-      console.log("in handleChangeDocument currentOpenDocIndex", currentOpenDocIndex, shift);
-      const newDocIndex = (tabSpec.tab === "my-work" && currentOpenDocIndex === 0 && shift === 1)
+    if (currentOpenDocIndex !== undefined) {
+      const newDocIndex = (tabSpec.tab === "my-work" && currentOpenDocIndex === 0 && shift === -1)
                             ? numStarredDocs - 1
-                            : (tabSpec.tab === "my-work" && currentOpenDocIndex === numStarredDocs - 1 && shift === -1)
+                            : (tabSpec.tab === "my-work" && currentOpenDocIndex === numStarredDocs - 1 && shift === 1)
                                 ? 0
                                 : (currentOpenDocIndex + shift) % numStarredDocs;
-      console.log("in handleChangeDocument newDocIndex", newDocIndex);
       const newDocKey = starredDocuments[newDocIndex].key;
       ui.openSubTabDocument(tabSpec.tab, subTab.label, newDocKey);
     }
   };
-
-  console.log("currentOpenDocIndex", currentOpenDocIndex);
 
   const hideLeftFlipper = () => {
     if (tabSpec.tab === "class-work") return (currentOpenDocIndex === numStarredDocs - 1);
@@ -154,13 +150,10 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
               {(!openDocument.isRemote)
                   && editButton(tabSpec.tab, sectionClass, openDocument)}
             </div>
-            {(isStarredTab && !hideLeftFlipper()) &&
-              <div className="scroll-arrow-button-wrapper left">
-                {/* <ScrollButton side={"left"} tab={tabSpec.tab} onScroll={handleShowPrevDocument} */}
-                <ScrollButton side={"left"} tab={tabSpec.tab} onScroll={() => handleChangeDocument(1)}
-                    hidden={!isStarredTab && hideLeftFlipper()} />
-              </div>
-            }
+            <div className="scroll-arrow-button-wrapper left">
+              <ScrollButton side={"left"} tab={tabSpec.tab} onScroll={() => handleChangeDocument(1)}
+                  hidden={!isStarredTab || (isStarredTab && hideLeftFlipper())} />
+            </div>
             <EditableDocumentContent
               mode={"1-up"}
               isPrimary={false}
@@ -168,10 +161,10 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
               readOnly={true}
               showPlayback={showPlayback}
             />
-              <div className="scroll-arrow-button-wrapper right">
-                <ScrollButton side={"right"} tab={tabSpec.tab} onScroll={() => handleChangeDocument(-1)}
-                    hidden={!isStarredTab && hideRightFlipper()}/>
-              </div>
+            <div className="scroll-arrow-button-wrapper right">
+              <ScrollButton side={"right"} tab={tabSpec.tab} onScroll={() => handleChangeDocument(-1)}
+                  hidden={!isStarredTab || (isStarredTab && hideRightFlipper())}/>
+            </div>
           </div>
       }
     </div>

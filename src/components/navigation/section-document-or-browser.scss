@@ -172,14 +172,13 @@ $scroller-height: 145px;
       }
       .scroll-arrow-button-wrapper {
         position: relative;
-        top: calc((100vh/2) - $scroller-height - 20px);
         &.left {
           left: 0px;
-          top: calc((100vh/2) - $scroller-height - 20px);
+          top: calc((100vh/2) - $scroller-height - 25px);
         }
         &.right {
           right: 2px;
-          top: calc((-100vh/2) + 20px + $scroller-height);
+          top: calc((-100vh/2) + $scroller-height);
         }
       }
     }
@@ -204,6 +203,7 @@ $scroller-height: 145px;
         right: 2px;
       }
       .scroll-arrow-icon {
+        border-radius: 50%;
         &.right {
           transform: rotate(180deg);
         }
