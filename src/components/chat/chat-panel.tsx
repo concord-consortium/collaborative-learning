@@ -21,8 +21,10 @@ interface IProps {
   onCloseChatPanel:(show:boolean) => void;
 }
 
-
 export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument, focusTileId, onCloseChatPanel }) => {
+  const [isDocumentView, setIsDocumentView] = useState(false); // switches between "Comments View" vs "Document View"
+  const [chatPanelTitle, setChatPanelTitle] = useState("Comments");
+
   const document = useDocumentOrCurriculumMetadata(focusDocument);
   const content = useCurriculumOrDocumentContent(focusDocument);
   const ordering = content?.getTilesInDocumentOrder();
@@ -75,8 +77,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
       : undefined;
   }, [commentsPath, deleteCommentMutation, focusDocument, focusTileId]);
 
-  const [isDocumentView, setIsDocumentView] = useState(false); // switches between "Comments View" vs "Document View"
-  const [chatPanelTitle, setChatPanelTitle] = useState("Comments");
+
 
   const handleDocumentClick = () => {
     setIsDocumentView((prevState) => !prevState);
@@ -93,7 +94,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
     <>
       <p>You cannot make comments on groups.</p>
       <br></br>
-      <p>Choose a Student in the group to begin or view comment threads.</p>
+      <p>Choose a student in the group to begin or view comment threads.</p>
     </>
     :
     "Open a document to begin or view comment threads";

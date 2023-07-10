@@ -33,24 +33,37 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
   const problem =  store.problemOrdinal;
   const unit = store.unit.code;
 
-  //"Problem"/"Teacher-Guide"
+  //------Curriculum Documents: (i.e. //"Problem"/"Teacher-Guide")
   const [docsCommentedOn, setDocsCommentedOn] = useState<PromisedCurriculumDocument[]>();
   const cDocsRef = useMemo(() => db.collection("curriculum"), [db]);
-  const cDocsInScopeRef = useMemo(() => (
-    cDocsRef
+  const cDocsInScopeRef = useMemo(() => {
+  if (user?.network){
+    return  cDocsRef
     .where("unit", "==", unit)
     .where("problem", "==", problem)
-    .where("network","==", user?.network)
-  ), [cDocsRef, problem, unit, user?.network]);
+    .where("network","==", user?.network);
+  } else {
+    return  cDocsRef
+    .where("unit", "==", unit)
+    .where("problem", "==", problem)
+    //for teachers not in network, look for documents matching the uid
+    .where ("uid", "==", user?.id);
+  }
+  }, [cDocsRef, problem, unit, user?.network, user?.id]);
 
   //"MyWork"/"ClassWork"
   const [workDocuments, setWorkDocuments] = useState<PromisedDocumentDocument[]>();
   const mDocsRef = useMemo(() => db.collection("documents"), [db]);
-  const mDocsInScopeRef = useMemo(() => (
-    mDocsRef.where("network", "==", user?.network)
-  ), [mDocsRef, user?.network]);
+  const mDocsInScopeRef = useMemo(() => {
+    if(user?.network){
+      return mDocsRef.where("network", "==", user?.network);
+    } else {
+      return mDocsRef.where("uid", "==", user?.id);
+    }
+  }, [mDocsRef, user?.network, user?.id]);
 
-  //------Curriculum Documents--------
+
+  //------Curriculum Documents: (i.e. //"Problem"/"Teacher-Guide")
   useEffect(() => {
     const unsubscribeFromDocs = cDocsInScopeRef.onSnapshot(querySnapshot => {
       const docs = querySnapshot.docs.map(doc => {
