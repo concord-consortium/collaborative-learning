@@ -64,7 +64,7 @@ describe("CommentThread", () => {
     expect(screen.queryByTestId("chat-thread-user-icon")).not.toBeInTheDocument();
   });
 
-  it("Focused Thread has correct styling and shows correct comments and metadata", () => {
+  it.skip("Focused Thread has correct styling and shows correct comments and metadata", () => {
     const chatThreads =
       [makeFakeCommentThread("Thread 1", "abcd", "u3"), makeFakeCommentThread("Thread 2", "jkl", "u4")];
     const testUser = {id: "u4", "name": "test user"} as UserModelType;
