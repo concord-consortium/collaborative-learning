@@ -232,9 +232,11 @@ $scroller-height: 145px;
           transform: rotate(180deg);
         }
         &.class-work {
+          border-radius: 50%;
           fill: $classwork-purple-dark-1;
         }
         &.my-work {
+          border-radius: 50%;
           fill: $workspace-teal-dark-1;
         }
       }

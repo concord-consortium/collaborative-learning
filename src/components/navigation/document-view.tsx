@@ -62,6 +62,7 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
     return starredDocs;
   };
   const starredDocuments = getStarredDocuments(documentTypes);
+  const numStarredDocs = starredDocuments.length;
   const currentOpenDocIndex = openDocument && starredDocuments.indexOf(openDocument);
   const currentOpenSecondaryDocIndex = openSecondaryDocument && starredDocuments.indexOf(openSecondaryDocument);
   const sectionClass = openDocument?.type === "learningLog" ? "learning-log" : "";
@@ -143,11 +144,11 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
     let prevDocumentKey = "";
     let tempPrevDocIndex = 0;
     const currentIndex = secondary ? currentOpenSecondaryDocIndex : currentOpenDocIndex;
-    tempPrevDocIndex = currentIndex + 1 >= starredDocuments.length ? 0 : currentIndex + 1;
+    // This takes into account the problem document in My Work tab where documents are listed in [0,n..1]
+    tempPrevDocIndex = currentIndex + 1 >= numStarredDocs ? 0 : currentIndex + 1;
     const prevDocIndex = tempPrevDocIndex === currentOpenDocIndex || tempPrevDocIndex === currentOpenSecondaryDocIndex
                             ? tempPrevDocIndex + 1 : tempPrevDocIndex;
-    if (prevDocIndex < starredDocuments.length)
-    { prevDocumentKey = starredDocuments[prevDocIndex].key; }
+    if (prevDocIndex < numStarredDocs) prevDocumentKey = starredDocuments[prevDocIndex].key;
     if (secondary) {
       ui.openSubTabSecondaryDocument(tabSpec.tab, subTab.label, prevDocumentKey);
     } else {
@@ -159,20 +160,29 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
     let nextDocumentKey = "";
     let nextDocIndex: number;
     const currentIndex = secondary ? currentOpenSecondaryDocIndex : currentOpenDocIndex;
-
-    if (tabSpec.tab === "my-work") {
-      if (currentIndex === 0) {
-        nextDocIndex = starredDocuments.length - 1;
+    if (secondary) {
+      if (tabSpec.tab === "my-work") {
+        if (currentIndex === 0) {
+          nextDocIndex = currentOpenDocIndex === numStarredDocs - 1 ? numStarredDocs - 2 : numStarredDocs - 1;
+        } else {
+          nextDocIndex = currentOpenDocIndex === currentIndex - 1 ? currentIndex - 2 : currentIndex - 1;
+        }
       } else {
-        nextDocIndex = currentIndex - 1;
+        nextDocIndex = currentOpenDocIndex === currentIndex - 1 ? currentIndex - 2 : currentIndex - 1;
       }
     } else {
-      nextDocIndex = currentIndex - 1;
+      if (tabSpec.tab === "my-work") {
+        if (currentIndex === 0) {
+          nextDocIndex = currentOpenSecondaryDocIndex === numStarredDocs - 1 ? numStarredDocs - 2 : numStarredDocs - 1;
+        } else {
+          nextDocIndex = currentOpenSecondaryDocIndex === currentIndex - 1 ? currentIndex - 2 : currentIndex - 1;
+        }
+      } else {
+        nextDocIndex = currentOpenSecondaryDocIndex === currentIndex - 1 ? currentIndex - 2 : currentIndex - 1;
+      }
     }
 
-    if (nextDocIndex < starredDocuments.length) {
-      nextDocumentKey = starredDocuments[nextDocIndex].key;
-    }
+    if (nextDocIndex < numStarredDocs) nextDocumentKey = starredDocuments[nextDocIndex].key;
     if (secondary) {
       ui.openSubTabSecondaryDocument(tabSpec.tab, subTab.label, nextDocumentKey);
     } else {
@@ -180,17 +190,43 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
     }
   };
 
-  const isLeftFlipperVisible = (tabSpec.tab === "class-work" && (currentOpenDocIndex < starredDocuments.length - 1))
-                                  || (tabSpec.tab !== "class-work" && currentOpenDocIndex > 0);
-  const isRightFlipperVisible = (tabSpec.tab === "class-work" && currentOpenDocIndex > 0)
-                                  || (tabSpec.tab !== "class-work" && (currentOpenDocIndex >= 0 &&
-                                        currentOpenDocIndex !== 1));
-  const isSecondaryLeftFlipperVisible =
-          (tabSpec.tab === "class-work" && (currentOpenSecondaryDocIndex < starredDocuments.length - 1))
-                                        || (tabSpec.tab !== "class-work" && currentOpenSecondaryDocIndex > 0);
-  const isSecondaryRightFlipperVisible = (tabSpec.tab === "class-work" && currentOpenSecondaryDocIndex > 0)
-                                        || (tabSpec.tab !== "class-work" && (currentOpenSecondaryDocIndex >= 0 &&
-                                          currentOpenSecondaryDocIndex !== 1));
+  const hideLeftFlipper = () => {
+    if (tabSpec.tab === "class-work") {
+      return (currentOpenDocIndex === numStarredDocs - 1
+                || (currentOpenSecondaryDocIndex === numStarredDocs - 1 && currentOpenDocIndex === numStarredDocs - 2));
+    }
+    if (tabSpec.tab === "my-work") {
+      return (currentOpenDocIndex === 0
+                || (currentOpenSecondaryDocIndex === 0 && currentOpenDocIndex === numStarredDocs - 1));
+    }
+  };
+  const hideRightFlipper = () => {
+    if (tabSpec.tab === "class-work") {
+      return (currentOpenDocIndex === 0 || (currentOpenSecondaryDocIndex === 0 && currentOpenDocIndex === 1));
+    }
+    if (tabSpec.tab === "my-work") {
+      return (currentOpenDocIndex === 1 || (currentOpenSecondaryDocIndex === 1 && currentOpenDocIndex === 2));
+    }
+  };
+  const hideSecondaryLeftFlipper = () => {
+    if (tabSpec.tab === "class-work") {
+      return (currentOpenSecondaryDocIndex === numStarredDocs - 1
+                || (currentOpenDocIndex === numStarredDocs - 1 && currentOpenSecondaryDocIndex === numStarredDocs - 2));
+    }
+    if (tabSpec.tab === "my-work") {
+      return (currentOpenSecondaryDocIndex === 0
+                || (currentOpenDocIndex === 0 && currentOpenSecondaryDocIndex === numStarredDocs - 1));
+    }
+  };
+  const hideSecondaryRightFlipper = () => {
+    if (tabSpec.tab === "class-work") {
+      return (currentOpenSecondaryDocIndex === 0) || (currentOpenDocIndex === 0 && currentOpenSecondaryDocIndex === 1);
+    }
+    if (tabSpec.tab === "my-work") {
+      return (currentOpenSecondaryDocIndex === 1) || (currentOpenDocIndex === 1 && currentOpenSecondaryDocIndex === 2);
+    }
+  };
+
   const getDisplayTitle = (document: DocumentModelType) => {
     const documentOwner = classStore.users.get(document.uid);
     const documentTitle = getDocumentDisplayTitle(document, appConfigStore, problemStore);
@@ -215,7 +251,7 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
                 {(!openDocument.isRemote)
                     && editButton(tabSpec.tab, sectionClass, openDocument)}
               </div>
-              {(isStarredTab && isLeftFlipperVisible) &&
+              {(isStarredTab && !hideLeftFlipper()) &&
                 <div className="scroll-arrow-button-wrapper left">
                   <ScrollButton side={"left"} tab={tabSpec.tab} onScroll={()=>handleShowPrevDocument()}/>
                 </div>
@@ -227,7 +263,7 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
                 readOnly={true}
                 showPlayback={showPlayback}
               />
-              {(isStarredTab && isRightFlipperVisible) &&
+              {(isStarredTab && !hideRightFlipper()) &&
                 <div className="scroll-arrow-button-wrapper right">
                   <ScrollButton side={"right"} tab={tabSpec.tab} onScroll={()=>handleShowNextDocument()}/>
                 </div>
@@ -244,7 +280,7 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
                     {(!openSecondaryDocument.isRemote)
                         && editButton(tabSpec.tab, sectionClass, openSecondaryDocument)}
                   </div>
-                  {(isStarredTab && isSecondaryLeftFlipperVisible) &&
+                  {(isStarredTab && !hideSecondaryLeftFlipper()) &&
                     <div className="scroll-arrow-button-wrapper left">
                       <ScrollButton side={"left"} tab={tabSpec.tab} onScroll={()=>handleShowPrevDocument(true)}/>
                     </div>
@@ -256,7 +292,7 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
                     readOnly={true}
                     showPlayback={showPlayback}
                   />
-                  {(isStarredTab && isSecondaryRightFlipperVisible) &&
+                  {(isStarredTab && !hideSecondaryRightFlipper()) &&
                     <div className="scroll-arrow-button-wrapper right">
                       <ScrollButton side={"right"} tab={tabSpec.tab} onScroll={()=>handleShowNextDocument(true)}/>
                     </div>
