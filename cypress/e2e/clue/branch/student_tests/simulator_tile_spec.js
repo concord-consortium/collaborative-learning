@@ -6,7 +6,7 @@ let clueCanvas = new ClueCanvas;
 const dataflowTile = new DataflowTile;
 let simulatorTile = new SimulatorTile;
 
-context('Simulator Tile', function () {
+context('Simulator Tile with Brainwaves Gripper Simulation', function () {
   beforeEach(function () {
     const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&mouseSensor&unit=dfe";
     cy.clearQAData('all');
@@ -20,7 +20,6 @@ context('Simulator Tile', function () {
       clueCanvas.addTile("simulator");
       simulatorTile.getSimulatorTile().should("exist");
       simulatorTile.getTileTitle().should("exist");
-      // TODO: These should be removed when we change what's displayed in the simulator tile
       simulatorTile.getSimulatorTile().should("contain.text", "EMG Sensor");
       simulatorTile.getSimulatorTile().should("contain.text", "Surface Pressure Sensor");
       simulatorTile.getSimulatorTile().should("contain.text", "Gripper Output");
@@ -87,6 +86,67 @@ context('Simulator Tile', function () {
 
       // Pressure variable updates when the gripper changes
       simulatorTile.getSimulatorTile().should("contain.text", "Surface Pressure Sensor: 400");
+    });
+  });
+});
+
+context('Simulator Tile with Terrarium Simulation', function() {
+  beforeEach(function () {
+    const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&mouseSensor&unit=seeit";
+    cy.clearQAData('all');
+    cy.visit(queryParams);
+    cy.waitForLoad();
+  });
+  it("links to dataflow tile", () => {
+    // Copy a simulator tile over from curriculum
+    simulatorTile.getSimulatorTile().should("not.exist");
+    const dataTransfer = new DataTransfer;
+    const leftSimulatorTile = () => cy.get(".nav-tab-panel .problem-panel .simulator-tool-tile");
+    leftSimulatorTile().trigger("mouseover");
+    const draggable = () => leftSimulatorTile().find(".tool-tile-drag-handle-wrapper");
+    draggable().trigger("dragstart", { dataTransfer, force: true });
+    cy.get(".primary-workspace .document-content").trigger("drop", { dataTransfer });
+    draggable().trigger("dragend", { force: true });
+    simulatorTile.getSimulatorTile().should("exist");
+    cy.closeResourceTabs();
+
+    clueCanvas.addTile("dataflow");
+
+    // Correct sensors have simulated data
+    const sensor = "sensor";
+    dataflowTile.getCreateNodeButton(sensor).click();
+    dataflowTile.getDropdown(sensor, "sensor-type").click();
+    dataflowTile.getSensorDropdownOptions(sensor).eq(0).find(".label").click(); // Temperature
+    dataflowTile.getDropdown(sensor, "sensor-select").click();
+    dataflowTile.getSensorDropdownOptions(sensor).should("have.length", 6);
+    dataflowTile.getDropdown(sensor, "sensor-type").click();
+    dataflowTile.getSensorDropdownOptions(sensor).eq(1).find(".label").click(); // Humidity
+    dataflowTile.getDropdown(sensor, "sensor-select").click();
+    dataflowTile.getSensorDropdownOptions(sensor).should("have.length", 6);
+
+    // Live outputs can be linked to output variables
+    dataflowTile.getCreateNodeButton("number").click();
+    dataflowTile.getNumberField().type("1{enter}");
+    const lo = "live-output";
+    const output = () => dataflowTile.getNode("number").find(".socket.output");
+
+    const liveOutputs = [
+      { displayName: "Humidifier", liveOutputIndex: 3 },
+      { displayName: "Heat Lamp", liveOutputIndex: 5 },
+      { displayName: "Fan", liveOutputIndex: 4 },
+    ];
+    liveOutputs.forEach((liveOutputType, index) => {
+      dataflowTile.getCreateNodeButton(lo).click();
+      simulatorTile.getSimulatorTile().should("contain.text", `${liveOutputType.displayName} Output: 0`);
+      dataflowTile.getDropdown(lo, "liveOutputType").eq(index).click();
+      dataflowTile.getDropdownOptions(lo, "liveOutputType").eq(liveOutputType.liveOutputIndex).click();
+      const input = () => dataflowTile.getNode(lo).eq(index).find(".socket.input");
+      output().click();
+      input().click({ force: true });
+      dataflowTile.getDropdown(lo, "hubSelect").eq(index).click();
+      dataflowTile.getDropdownOptions(lo, "hubSelect").should("have.length", 5);
+      dataflowTile.getDropdownOptions(lo, "hubSelect").eq(4).click();
+      simulatorTile.getSimulatorTile().should("contain.text", `${liveOutputType.displayName} Output: 1`);
     });
   });
 });

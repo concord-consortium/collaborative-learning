@@ -6,9 +6,17 @@ import PressureIcon from "./dataflow/sensor/pressure.svg";
 
 const kIconPrefix = "ccicon";
 
+// Brainwaves gripper simulation
 export const kEMGKey = "emg_key";
 export const kGripperKey = "gripper_key";
 export const kPressureKey = "pressure_key";
+
+// Terrarium simulation
+export const kFanKey = "fan_key";
+export const kHeatLampKey = "heat_lamp_key";
+export const kHumidifierKey = "humidifier_key";
+export const kHumidityKey = "humidity_key";
+export const kTemperatureKey = "temperature_key";
 
 const icons: Record<string, FunctionComponent<SVGProps<SVGSVGElement>>> = {
   [kEMGKey]: EMGIcon,
@@ -30,7 +38,7 @@ function getIconId(url: string) {
 
 export function getIcon(url?: string) {
   if (url === undefined) return null;
-  
+
   if (isIconUrl(url)) {
     const id = getIconId(url);
     const Icon = icons[id];

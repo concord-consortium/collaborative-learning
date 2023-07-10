@@ -190,6 +190,7 @@ export class DropdownListControl extends Rete.Control {
 
   public setOptions = (options: ListOption[]) => {
     this.props.optionArray = options;
+    (this as any).update();
   };
 
   public setActiveOption = (hubId: string, state: boolean) => {

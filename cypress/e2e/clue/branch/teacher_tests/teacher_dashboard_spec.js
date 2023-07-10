@@ -263,14 +263,14 @@ context('Teacher Dashboard View', () => {
     const textToStudent = "This is a note to clue testing1";
 
     before(function () {
-      let group = 1,
+      let groupIndex = 0,
           studentName = "Student 1",
           quadrant = "north-west";
       cy.visit('/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:6');
       cy.waitForLoad();
       dashboard.switchView("Dashboard");
       cy.wait(8000);
-      dashboard.sendStudentNote(group, studentName, quadrant, textToStudent);
+      dashboard.sendStudentNote(groupIndex, studentName, quadrant, textToStudent);
     });
 
     it('verify student support note appears in student view', function () {
