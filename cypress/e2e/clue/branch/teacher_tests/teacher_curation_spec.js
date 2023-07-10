@@ -35,7 +35,7 @@ describe('verify document curation', function() {//adding a star to a student do
     it('verify starred document has a star in the dashboard', function(){
         dashboard.switchView('Dashboard');
         dashboard.switchWorkView('Published');
-        dashboard.getGroup(1).find('.four-up-overlay .icon-star').should('have.class', 'starred');
+        dashboard.getGroup(1).find('.four-up .icon-star').should('have.class', 'starred');
     });
     it('verify unstar in dashboard unstars in workspace', function(){
         dashboard.clearAllStarsFromPublishedWork();

@@ -7,6 +7,7 @@ import { kSharedVariablesID, SharedVariables, SharedVariablesType } from "../../
 import { kBrainwavesKey } from "../simulations/brainwaves-gripper/brainwaves-gripper";
 import { simulations } from "../simulations/simulations";
 import { isInputVariable, isOutputVariable } from "../../shared-variables/simulations/simulation-utilities";
+import { withoutUndo } from "../../../models/history/without-undo";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { TileContentModel } from "../../../models/tiles/tile-content";
 import { SharedModelType } from "../../../models/shared/shared-model";
@@ -111,6 +112,8 @@ export const SimulatorContentModel = TileContentModel
       // nothing to do here
     },
     step() {
+      withoutUndo();
+
       // Update all variables that have specified values
       for (const [name, values] of Object.entries(self.simulationData.values)) {
         const variable = self.getVariable(name);
