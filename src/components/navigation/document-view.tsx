@@ -132,11 +132,20 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
     }
   };
 
-  // Published documents are listed in reverse order of index so previous and next toggles are also reversed
+  // Published documents are listed in reverse order of index [n..1] so previous and next toggles are also reversed
+  // Workspaces Starred tab show the problem document as the first document in the list
+  // and personal documents are shown in reverse order. So when we get the list of starred
+  // documents, the sequence is [0] is the problem document [1..n] are the personal documents.
+  // But when displayed, the sequence is [0, n..1].
+  // So we still want to display the previous arrow when we reach n to flip to the problem
+  // document.
   const handleShowPrevDocument = (secondary?: boolean) => {
     let prevDocumentKey = "";
+    let tempPrevDocIndex = 0;
     const currentIndex = secondary ? currentOpenSecondaryDocIndex : currentOpenDocIndex;
-    const prevDocIndex = currentIndex + 1 >= starredDocuments.length ? 0 : currentIndex + 1;
+    tempPrevDocIndex = currentIndex + 1 >= starredDocuments.length ? 0 : currentIndex + 1;
+    const prevDocIndex = tempPrevDocIndex === currentOpenDocIndex || tempPrevDocIndex === currentOpenSecondaryDocIndex
+                            ? tempPrevDocIndex + 1 : tempPrevDocIndex;
     if (prevDocIndex < starredDocuments.length)
     { prevDocumentKey = starredDocuments[prevDocIndex].key; }
     if (secondary) {
@@ -150,8 +159,7 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
     let nextDocumentKey = "";
     let nextDocIndex: number;
     const currentIndex = secondary ? currentOpenSecondaryDocIndex : currentOpenDocIndex;
-    // Workspaces Starred tab show the problem document as the first document in the list
-    // The personal documents are shown in reverse order after the problem document
+
     if (tabSpec.tab === "my-work") {
       if (currentIndex === 0) {
         nextDocIndex = starredDocuments.length - 1;

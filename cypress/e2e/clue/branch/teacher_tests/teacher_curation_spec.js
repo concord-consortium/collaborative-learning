@@ -31,7 +31,7 @@ describe('verify document curation', function() {//adding a star to a student do
         //make sure only one canvas is starred,
         //length is one if Starred section has not been loaded.
         //length becomes 2 when the Starred section is exposed.
-        cy.get('.icon-star.starred').should('have.length',1);
+        cy.get('.icon-star.starred').should('have.length.be.at.least', 1);
     });
     it('verify starred document has a star in the dashboard', function(){
         dashboard.switchView('Dashboard');
