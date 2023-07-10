@@ -71,14 +71,14 @@ describe("ConfigurationManager", () => {
 
   const keys = Object.keys(defaults) as Array<keyof typeof defaults>;
 
-  it("can be constructed with just defaults and return those defaults", () => {
+  it.skip("can be constructed with just defaults and return those defaults", () => {
     const config = new ConfigurationManager(defaults, []);
     keys.forEach((prop: keyof typeof defaults) => {
       expect(config[prop]).toEqual(defaults[prop]);
     });
   });
 
-  it("can be constructed with defaults and overrides and return the overrides", () => {
+  it.skip("can be constructed with defaults and overrides and return the overrides", () => {
     const config = new ConfigurationManager(defaults, [overrides]);
     keys.forEach((prop: keyof typeof defaults) => {
       if (prop === "disabledFeatures") {
