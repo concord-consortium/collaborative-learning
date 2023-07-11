@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { observer } from "mobx-react";
 import { useQueryClient } from "react-query";
 import classNames from "classnames";
@@ -44,30 +44,29 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
                         || openDocument?.type === "learningLogPublication";
   const showPlayback = user.type && !publishedDoc? appConfigStore.enableHistoryRoles.includes(user.type) : false;
   const isStarredTab = subTab.label === "Starred";
+  const skipDocument = !openDocument || openDocument.getProperty("isDeleted");
+
   const documentTypes: DocumentType[] = tabSpec.tab === "class-work"
                                           ? ["publication"]
                                           : tabSpec.tab === "my-work" && subTab.label === "Starred"
                                             ? ["problem", "personal"]
                                             : [];
-  const getStarredDocuments = (types: DocumentType[]) => {
-    const docs: any = [];
+  const getStarredDocuments = useMemo(() => (types: DocumentType[]) => {
+    const docs: DocumentModelType[] = [];
       types.forEach((type) => {
         const docsByTypeArr = documents.byType(type);
         docsByTypeArr.forEach((doc: any) => {
           docs.push(doc);
         });
       });
-    const visibleDocuments = docs.filter ((doc: { isDeleted: any; }) => !doc.isDeleted);
-    const starredDocs = visibleDocuments.filter((doc: { isStarred: any; }) => doc.isStarred);
+    const starredDocs = docs.filter((doc: DocumentModelType) => !doc.getProperty("isDeleted") && doc.isStarred);
     return starredDocs;
-  };
+  },[documents]);
   const starredDocuments = getStarredDocuments(documentTypes);
   const numStarredDocs = starredDocuments.length;
   const currentOpenDocIndex = openDocument && starredDocuments.indexOf(openDocument);
   const currentOpenSecondaryDocIndex = openSecondaryDocument && starredDocuments.indexOf(openSecondaryDocument);
   const sectionClass = openDocument?.type === "learningLog" ? "learning-log" : "";
-
-  if (!isStarredTab && (!openDocument || openDocument.getProperty("isDeleted"))) return null;
 
   function handleEditClick(document: DocumentModelType) {
     ui.problemWorkspace.setPrimaryDocument(document);
@@ -140,6 +139,16 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
   // But when displayed, the sequence is [0, n..1].
   // So we still want to display the previous arrow when we reach n to flip to the problem
   // document.
+  const handleChangeDocument = (shift: number) => {
+    if (currentOpenDocIndex !== undefined) {
+      const newDocIndex = (tabSpec.tab === "my-work" && currentOpenDocIndex === 0 && shift === -1)
+                            ? numStarredDocs - 1
+                            : (tabSpec.tab === "my-work" && currentOpenDocIndex === numStarredDocs - 1 && shift === 1)
+                                ? 0
+                                : (currentOpenDocIndex + shift) % numStarredDocs;
+      const newDocKey = starredDocuments[newDocIndex].key;
+      ui.openSubTabDocument(tabSpec.tab, subTab.label, newDocKey);
+      
   const handleShowPrevDocument = (secondary?: boolean) => {
     let prevDocumentKey = "";
     let tempPrevDocIndex = 0;
@@ -239,7 +248,7 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
         <DocumentBrowserScroller subTab={subTab} tabSpec={tabSpec} openDocumentKey={openDocumentKey}
             openSecondaryDocumentKey={openSecondaryDocumentKey} onSelectDocument={handleSelectDocument} />
       }
-      {(!openDocument || openDocument.getProperty("isDeleted"))
+      {skipDocument
         ? null
         : <div className="document-area">
             <div className={`focus-document ${openSecondaryDocument ? "primary" : ""}`}>
@@ -251,11 +260,10 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
                 {(!openDocument.isRemote)
                     && editButton(tabSpec.tab, sectionClass, openDocument)}
               </div>
-              {(isStarredTab && !hideLeftFlipper()) &&
-                <div className="scroll-arrow-button-wrapper left">
-                  <ScrollButton side={"left"} tab={tabSpec.tab} onScroll={()=>handleShowPrevDocument()}/>
-                </div>
-              }
+            <div className="scroll-arrow-button-wrapper left">
+              <ScrollButton side={"left"} tab={tabSpec.tab} onScroll={() => handleChangeDocument(1)}
+                  hidden={!isStarredTab || (isStarredTab && hideLeftFlipper())} />
+            </div>
               <EditableDocumentContent
                 mode={"1-up"}
                 isPrimary={false}
@@ -263,11 +271,10 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
                 readOnly={true}
                 showPlayback={showPlayback}
               />
-              {(isStarredTab && !hideRightFlipper()) &&
-                <div className="scroll-arrow-button-wrapper right">
-                  <ScrollButton side={"right"} tab={tabSpec.tab} onScroll={()=>handleShowNextDocument()}/>
-                </div>
-              }
+            <div className="scroll-arrow-button-wrapper right">
+              <ScrollButton side={"right"} tab={tabSpec.tab} onScroll={() => handleChangeDocument(-1)}
+                  hidden={!isStarredTab || (isStarredTab && hideRightFlipper())}/>
+            </div>
             </div>
             {(!openSecondaryDocument || openSecondaryDocument.getProperty("isDeleted"))
               ? null
@@ -280,11 +287,10 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
                     {(!openSecondaryDocument.isRemote)
                         && editButton(tabSpec.tab, sectionClass, openSecondaryDocument)}
                   </div>
-                  {(isStarredTab && !hideSecondaryLeftFlipper()) &&
-                    <div className="scroll-arrow-button-wrapper left">
-                      <ScrollButton side={"left"} tab={tabSpec.tab} onScroll={()=>handleShowPrevDocument(true)}/>
-                    </div>
-                  }
+            <div className="scroll-arrow-button-wrapper left">
+              <ScrollButton side={"left"} tab={tabSpec.tab} onScroll={() => handleChangeDocument(1)}
+                  hidden={!isStarredTab || (isStarredTab && hideSecondaryLeftFlipper())} />
+            </div>
                   <EditableDocumentContent
                     mode={"1-up"}
                     isPrimary={false}
@@ -292,11 +298,10 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
                     readOnly={true}
                     showPlayback={showPlayback}
                   />
-                  {(isStarredTab && !hideSecondaryRightFlipper()) &&
-                    <div className="scroll-arrow-button-wrapper right">
-                      <ScrollButton side={"right"} tab={tabSpec.tab} onScroll={()=>handleShowNextDocument(true)}/>
-                    </div>
-                  }
+            <div className="scroll-arrow-button-wrapper right">
+              <ScrollButton side={"right"} tab={tabSpec.tab} onScroll={() => handleChangeDocument(-1)}
+                  hidden={!isStarredTab || (isStarredTab && hideSecondaryRightFlipper())}/>
+            </div>
                 </div>
             }
           </div>
@@ -357,7 +362,7 @@ const DocumentBrowserScroller =
     <>
       <div className={classNames("scroller", {"collapsed": scrollerCollapsed})} ref={documentScrollerRef}>
         {(scrollToLocation > 0) &&
-            <ScrollEndControl side={"left"} collapsed={scrollerCollapsed} tab={tabSpec.tab}
+            <ScrollEndControl side={"left"} hidden={scrollerCollapsed} tab={tabSpec.tab}
                 onScroll={handleScrollTo} />
         }
         <DocumentCollectionList
@@ -372,7 +377,7 @@ const DocumentBrowserScroller =
             onSelectDocument={onSelectDocument}
         />
         {(scrollToLocation < scrollWidth - panelWidth) &&
-            <ScrollEndControl side={"right"} collapsed={scrollerCollapsed} tab={tabSpec.tab}
+            <ScrollEndControl side={"right"} hidden={scrollerCollapsed} tab={tabSpec.tab}
                 onScroll={handleScrollTo} />
         }
       </div>
@@ -386,24 +391,25 @@ const DocumentBrowserScroller =
 
 interface IScrollEndControlProps {
   side: string;
-  collapsed?: boolean;
+  hidden?: boolean;
   tab: string;
   onScroll: (side: string) => void
 }
 
-const ScrollEndControl = ({side, collapsed, tab, onScroll}: IScrollEndControlProps) => {
+const ScrollEndControl = ({side, hidden, tab, onScroll}: IScrollEndControlProps) => {
+  if (hidden) return null;
   return (
-    <div className={classNames("scroller-controls", side, {collapsed})}>
+    <div className={classNames("scroller-controls", side)}>
       <div className={`scroller-controls-overlay ${side}`}/>
-      <ScrollButton side={side} collapsed={collapsed} tab={tab}
-                onScroll={onScroll} />
+      <ScrollButton side={side} tab={tab} onScroll={onScroll} hidden={hidden}/>
     </div>
   );
 };
 
-const ScrollButton = ({side, collapsed, tab, onScroll}: IScrollEndControlProps) => {
+const ScrollButton = ({side, hidden, tab, onScroll}: IScrollEndControlProps) => {
+  if (hidden) return null;
   return (
-    <div className={classNames("scroll-arrow-button", "themed", tab, side, {collapsed})}
+    <div className={classNames("scroll-arrow-button", "themed", tab, side)}
           onClick={()=>onScroll(side)}>
       <ScrollArrowIcon className={`scroll-arrow-icon ${side} themed ${tab}`} />
     </div>
