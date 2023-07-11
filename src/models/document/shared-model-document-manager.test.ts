@@ -496,7 +496,7 @@ describe("SharedModelDocumentManager", () => {
     expect(sharedModelEntry?.tiles).toHaveLength(1);
     expect(sharedModelEntry?.tiles[0]?.id).toBe("t1");
 
-    expect(spyUpdate).toHaveBeenCalled();
+    expect(spyUpdate).not.toHaveBeenCalled();
   });
 
   it("a shared model can be added to multiple tiles", async () => {
@@ -532,13 +532,13 @@ describe("SharedModelDocumentManager", () => {
     const sharedModelEntry = doc.sharedModelMap.get(sharedModel.id);
     expect(sharedModelEntry?.tiles[0]?.id).toBe("t1");
 
-    // The update function should be called right after it is added
-    await expectUpdateToBeCalledTimes(tileContent1, 1);
+    // The update function is called for adding the shared model and for linking it
+    await expectUpdateToBeCalledTimes(tileContent1, 2);
     await expectUpdateToBeCalledTimes(tileContent2, 0);
 
     // just tile 1 should be monitoring this now
     sharedModel.setValue("something");
-    await expectUpdateToBeCalledTimes(tileContent1, 2);
+    await expectUpdateToBeCalledTimes(tileContent1, 3);
     await expectUpdateToBeCalledTimes(tileContent2, 0);
 
     // Add to the second tile
@@ -550,13 +550,13 @@ describe("SharedModelDocumentManager", () => {
     // The update function of the newly added tile should be called right after
     // it is added
     await expectUpdateToBeCalledTimes(tileContent2, 1);
-    // The existing tile's update function shouldn't be called
-    await expectUpdateToBeCalledTimes(tileContent1, 2);
+    // The existing tile's update function should also be called
+    await expectUpdateToBeCalledTimes(tileContent1, 4);
 
     // now both tile's update functions should be called when the shared
     // model changes
     sharedModel.setValue("something2");
-    await expectUpdateToBeCalledTimes(tileContent1, 3);
+    await expectUpdateToBeCalledTimes(tileContent1, 5);
     await expectUpdateToBeCalledTimes(tileContent2, 2);
 
     destroy(docModel);
@@ -589,7 +589,7 @@ describe("SharedModelDocumentManager", () => {
     expect(sharedModelEntry?.sharedModel).toBe(sharedModel);
     expect(sharedModelEntry?.tiles).toHaveLength(1);
     expect(sharedModelEntry?.tiles[0]?.id).toBe("t1");
-    expect(spyUpdate).toHaveBeenCalled();
+    expect(spyUpdate).not.toHaveBeenCalled();
 
     spyUpdate.mockClear();
 

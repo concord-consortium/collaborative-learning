@@ -30,7 +30,9 @@ import {
 } from "../shared/shared-model-manager";
 import { IDocumentContentAddTileOptions, IDragTilesData, INewRowTile, INewTileOptions,
    ITileCountsPerSection, NewRowTileArray, PartialSharedModelEntry, PartialTile } from "./document-content-types";
-import { SharedModelEntry, SharedModelEntryType, SharedModelEntrySnapshotType } from "./shared-model-entry";
+import {
+  SharedModelEntry, SharedModelEntrySnapshotType, SharedModelEntryType, SharedModelMap
+} from "./shared-model-entry";
 
 // Imports related to hard coding shared model duplication
 import {
@@ -52,7 +54,7 @@ export const BaseDocumentContentModel = types
     rowOrder: types.array(types.string),
     tileMap: types.map(TileModel),
     // The keys to this map should be the id of the shared model
-    sharedModelMap: types.map(SharedModelEntry),
+    sharedModelMap: SharedModelMap
   })
   .preProcessSnapshot(snapshot => {
     return isImportDocument(snapshot) ? migrateSnapshot(snapshot) : snapshot;
