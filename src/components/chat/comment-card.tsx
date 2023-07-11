@@ -62,8 +62,6 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
   const dropDownOptions = ["Select Student Strategy", "Part-to-Part",
   "Part-to-Whole", "Unit Rate", "Guess and Check", "None"];
   const { appConfig } = useStores();
-  console.log("appConfig.showTag:", appConfig.showCommentTag);
-  console.log("appConfig commentTags:", appConfig.commentTags);
 
   //commentTags
   // add to unit json
