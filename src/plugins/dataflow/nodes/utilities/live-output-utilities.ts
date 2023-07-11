@@ -35,11 +35,6 @@ export function outputsToAnyGripper(node: Node) {
 }
 
 export function getLiveOptions(node: Node, sharedVar?: VariableType, device?: string | null) {
-  console.log("| 1 getLiveOptions",
-    "\n       node:", node,
-    "\n  sharedVar:", sharedVar,
-    "\n     device:", device
-  );
   const options: any[] = [];
   const simOption = sharedVar && simulatedHub(sharedVar);
   const anyOuputFound = simOption || device === "arduino" || device === "microbit";
@@ -73,4 +68,14 @@ export function getLiveOptions(node: Node, sharedVar?: VariableType, device?: st
   if (!anyOuputFound) options.push(warningOption);
 
   return options;
+}
+
+export function setLiveOutputOpts(node: Node, device: string | null, sharedVar?: VariableType) {
+  const hubSelect = getHubSelect(node);
+  const options = getLiveOptions(node, sharedVar, device);
+  const selectedOption = options.find(option => option && option.name === hubSelect.getValue());
+  const firstOption = !selectedOption ? options[0] : undefined;
+  if (firstOption) hubSelect.setValue(firstOption.name);
+  //if (device === "arduino" && !sharedVar) hubSelect.setValue("Physical Gripper");
+  hubSelect.setOptions(options);
 }

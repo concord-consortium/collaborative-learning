@@ -29,7 +29,7 @@ import { GeneratorReteNodeFactory } from "../nodes/factories/generator-rete-node
 import { TimerReteNodeFactory } from "../nodes/factories/timer-rete-node-factory";
 import { NumControl } from "../nodes/controls/num-control";
 import { ValueControl } from "../nodes/controls/value-control";
-import { getHubSelect, getLiveOptions } from "../nodes/utilities/live-output-utilities";
+import { getHubSelect, setLiveOutputOpts } from "../nodes/utilities/live-output-utilities";
 import {
   sendDataToSerialDevice, sendDataToSimulatedOutput, updateNodeChannelInfo, updateGeneratorNode, updateNodeRecentValues,
   updateSensorNode, updateTimerNode
@@ -481,7 +481,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.channels = [];
     this.channels = [...virtualSensorChannels, ...this.simulatedChannels, ...serialSensorChannels];
     this.countSerialDataNodes(this.programEditor.nodes);
-    // const anyDevice = this.stores.serialDevice.deviceFamily;
 
     this.programEditor.nodes.forEach((node) => {
       if (node.name === "Sensor") {
@@ -492,21 +491,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       if (node.name === "Live Output"){
         const hubSelect = getHubSelect(node);
         hubSelect.setChannels(this.channels);
-
-        // Update live output hub options with simulated hubs
-
-        // MOVE START
-
-        // const outputVariable = findOutputVariable(node, this.props.tileContent?.outputVariables);
-        // const options = getLiveOptions(node, outputVariable, anyDevice);
-        // //const oldOptions = outputVariable ? [...NodeMicroBitHubs, simulatedHub(outputVariable)] : NodeMicroBitHubs;
-
-        // if (!options.find(option => option.name === hubSelect.getValue())) {
-        //   hubSelect.setValue(options[0].name);
-        // }
-        // hubSelect.setOptions(options);
-
-        // MOVE END
       }
     });
   };
@@ -642,33 +626,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       },
       "Live Output": (n: Node) => {
         updateNodeChannelInfo(n, this.channels, this.stores.serialDevice);
-        const anyDevice = this.stores.serialDevice.deviceFamily;
-        //if (anyDevice){
-          // this conditional works, but the thing we want to do is only
-          // send when Phyisical Gripper is selected or hub is selected
-          sendDataToSerialDevice(n, this.stores.serialDevice);
-        //}
-
+        sendDataToSerialDevice(n, this.stores.serialDevice);
         sendDataToSimulatedOutput(n, this.props.tileContent?.outputVariables);
-
-        const hubSelect = getHubSelect(n);
-        const outputVariable = findOutputVariable(n, this.props.tileContent?.outputVariables);
-        const options = getLiveOptions(n, outputVariable, anyDevice);
-        //const oldOptions = outputVariable ? [...NodeMicroBitHubs, simulatedHub(outputVariable)] : NodeMicroBitHubs;
-
-        if (options) {
-          const selectedOption = options.find(option => option && option.name === hubSelect.getValue());
-          if (!selectedOption) {
-            const firstOption = options[0];
-            if (firstOption) {
-              hubSelect.setValue(firstOption.name);
-            }
-          }
-        }
-
-        if (anyDevice === "arduino" && outputVariable === undefined) hubSelect.setValue("Physical Gripper")
-        hubSelect.setOptions(options);
-
+        const outputVar = findOutputVariable(n, this.props.tileContent?.outputVariables);
+        setLiveOutputOpts(n, this.stores.serialDevice.deviceFamily, outputVar);
       }
     };
     let processNeeded = false;
