@@ -51,7 +51,7 @@ describe("ExpressionToolComponent", () => {
       // () => null;
     },
     onUnregisterTileApi: (facet?: string): void => {
-      throw new Error("Function not implemented.");
+      // throw new Error("Function not implemented.");
     }
   };
 
