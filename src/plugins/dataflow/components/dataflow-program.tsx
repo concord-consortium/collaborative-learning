@@ -660,7 +660,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           }
         }
 
-        if (anyDevice === "arduino") hubSelect.setValue("Physical Gripper")
+        if (anyDevice === "arduino" && outputVariable === undefined) hubSelect.setValue("Physical Gripper")
         hubSelect.setOptions(options);
 
       }
