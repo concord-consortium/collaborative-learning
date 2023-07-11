@@ -144,9 +144,10 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
     if (currentIndex !== undefined) {
 
       const getNewDocIndex = () => {
-        let tempNewDocIndex = 0;
+        let tempNewDocIndex = (currentIndex + shift) % numStarredDocs;
         const currentIndexIsOpen = tempNewDocIndex === currentOpenDocIndex
                                     || tempNewDocIndex === currentOpenSecondaryDocIndex;
+
         if (tabSpec.tab === "my-work") {
           if (currentIndex === 0 && shift === -1) {
             tempNewDocIndex = numStarredDocs - 1;
@@ -161,7 +162,7 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
             tempNewDocIndex = (tempNewDocIndex + shift) % numStarredDocs;
           }
         } else {
-          tempNewDocIndex = (currentIndex + shift) % numStarredDocs;
+          console.log("currentIndexIsOpen", currentIndexIsOpen);
             if (currentIndexIsOpen) {
               tempNewDocIndex = (currentIndex + (2 * shift)) % numStarredDocs;
             }
@@ -319,7 +320,7 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
                         && editButton(tabSpec.tab, sectionClass, openSecondaryDocument)}
                   </div>
             <div className="scroll-arrow-button-wrapper left">
-              <ScrollButton side={"left"} tab={tabSpec.tab} onScroll={() => handleChangeDocument(1)}
+              <ScrollButton side={"left"} tab={tabSpec.tab} onScroll={() => handleChangeDocument(1, true)}
                   hidden={!isStarredTab || (isStarredTab && hideSecondaryLeftFlipper())} />
             </div>
                   <EditableDocumentContent
@@ -330,7 +331,7 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
                     showPlayback={showPlayback}
                   />
             <div className="scroll-arrow-button-wrapper right">
-              <ScrollButton side={"right"} tab={tabSpec.tab} onScroll={() => handleChangeDocument(-1)}
+              <ScrollButton side={"right"} tab={tabSpec.tab} onScroll={() => handleChangeDocument(-1, true)}
                   hidden={!isStarredTab || (isStarredTab && hideSecondaryRightFlipper())}/>
             </div>
                 </div>
