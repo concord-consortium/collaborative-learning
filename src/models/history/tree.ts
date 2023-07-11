@@ -2,8 +2,8 @@ import {
   applyPatch, flow, getSnapshot, IJsonPatch, isAlive, resolvePath, resolveIdentifier, types
 } from "mobx-state-tree";
 import { DEBUG_HISTORY } from "../../lib/debug";
-import { SharedModelMapSnapshotOutType } from "../document/base-document-content";
 import { DocumentContentModelType } from "../document/document-content";
+import { SharedModelMapSnapshotOutType } from "../document/shared-model-entry";
 import { SharedModelType } from "../shared/shared-model";
 import { ITileModel, TileModel } from "../tiles/tile-model";
 import { TreeManagerAPI } from "./tree-manager-api";
@@ -31,11 +31,6 @@ export const Tree = types.model("Tree", {
     // can track this down
     const document = (self as any).content as DocumentContentModelType;
 
-    // FIXME: if a shared model is unlinked from a tile we need to notify that
-    // tile. However when this happens we no longer have this tile in the list
-    // of tiles. So I think we need to update things so we pass this removed
-    // tile through. Either by constructing a list of tiles or just passing
-    // this one specific tile.
     // FIXME: In the case where several changes have been applied we need to notify
     // any new tiles that were just linked and any old tiles that were unlinked
     // This will happen when there is no specific shared model being updated.

@@ -1,5 +1,5 @@
 import { getPath, IActionContext, IPatchRecorder } from "mobx-state-tree";
-import { SharedModelMapSnapshotOutType } from "../document/base-document-content";
+import { SharedModelMapSnapshotOutType } from "../document/shared-model-entry";
 import { IActionTrackingMiddleware3Call } from "./create-action-tracking-middleware-3";
 
 export interface CallEnv {

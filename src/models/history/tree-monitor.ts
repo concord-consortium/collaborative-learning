@@ -9,7 +9,7 @@ import { Tree } from "./tree";
 import { CallEnv, getActionPath, isActionFromManager, runningCalls, SharedModelModifications } from "./tree-types";
 import { createActionTrackingMiddleware3, IActionTrackingMiddleware3Call } from "./create-action-tracking-middleware-3";
 import { DocumentContentModelType } from "../document/document-content";
-import { SharedModelMapSnapshotOutType } from "../document/base-document-content";
+import { SharedModelMapSnapshotOutType } from "../document/shared-model-entry";
 
 export class TreeMonitor {
   tree: Instance<typeof Tree>;
