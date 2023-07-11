@@ -80,6 +80,6 @@ export interface UnitConfiguration extends ProblemConfiguration {
   // configuration of navigation tabs (document navigation UI)
   navTabs: SnapshotIn<typeof NavTabsConfigModel>;
   // used for AI tagging
-  showDropDown?: boolean;
-  dropDownChoices?: string[];
+  showCommentTag?: boolean;
+  commentTags?: string[];
 }

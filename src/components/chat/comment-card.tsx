@@ -61,16 +61,13 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
   //For UI purposes, Leslie gave the go ahead for hard-coded values
   const dropDownOptions = ["Select Student Strategy", "Part-to-Part",
   "Part-to-Whole", "Unit Rate", "Guess and Check", "None"];
-
-
-  //TODO:
-    //so theres a hook useAppConfig() in use-stores.ts
-  // const { config } = useAppConfig();
-
   const { appConfig } = useStores();
-  //then deconstruct the new properties: showDropDown and the dropDwonOptions
-  console.log("appConfig.showDropDown:", appConfig.showDropDown);
-  console.log("appConfig dropDownChoices:", appConfig.dropDownChoices);
+  console.log("appConfig.showTag:", appConfig.showCommentTag);
+  console.log("appConfig commentTags:", appConfig.commentTags);
+
+  //commentTags
+  // add to unit json
+  //Or perhaps “proportional-reasoning” would be better, since “proportional” could come up in other contexts.
 
   return (
     <div className="comment-card selected" data-testid="comment-card">
@@ -107,24 +104,6 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
                 <div key={idx} className="comment-text" data-testid="comment">
                   {comment.content}
                 </div>
-
-                {/* <div className="divider-section">
-                  <div className="divider-line">
-                  </div>
-                  <div className="new-text">
-                    New
-                  </div>
-                </div> */}
-                {/* <div className="ai-section-header">
-                  <div className="ai-icon">
-                    <AIAssistantIcon/>
-                  </div>
-                  <div className="ai-assistant-text">
-                    Assistant
-                  </div>
-                  <div className="ai-assistant-timestamp">
-                  </div>
-                </div> */}
               </div>
             );
           })
@@ -133,7 +112,8 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
           activeNavTab={activeNavTab}
           onPostComment={onPostComment}
           numPostedComments={postedComments?.length || 0}
-          dropDownOptions={dropDownOptions}
+          showCommentTag={appConfig.showCommentTag}
+          commentTags={appConfig.commentTags}
         />
       </div>
     </div>

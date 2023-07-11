@@ -27,7 +27,16 @@
         "width": 25,
         "height": 25
       }
-    ]
+    ],
+    "showCommentTag": true,
+    "commentTags": {
+      "tag0": "Part-to-Part",
+      "tag1": "Part-to-Whole",
+      "tag2": "Unit Rate",
+      "tag3": "Guess and Check",
+      "tag4": "None"
+    }
+
   },
   "sections": {
     "introduction": {
@@ -1439,7 +1448,7 @@
                         "<p>How can you use scale factors to find missing information about angles measures? Side lengths? Area? Perimeter?</p>"
                       ]
                     }
-                  }, 
+                  },
                   {
                     "id": "5S5fW9WBJwdKruj2",
                     "title": "Text 1",
@@ -2006,7 +2015,7 @@
                         "<p><strong>Key Terms</strong></p>",
                         "<p></p>",
                         "<p></p>"
-                        
+
                       ]
                     }
                   },
@@ -2119,7 +2128,7 @@
                         "<p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p>"
                       ]
                     }
-                  } 
+                  }
                 ]
               }
             }

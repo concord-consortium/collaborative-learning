@@ -8,13 +8,14 @@ interface IProps {
   activeNavTab?: string;
   numPostedComments: number;
   onPostComment?: (comment: string) => void;
-  dropDownOptions?: string[];
+  showCommentTag?: boolean;
+  commentTags?: string[];
 }
 
 const minTextAreaHeight = 100;
 
 export const CommentTextBox: React.FC<IProps> = (props) => {
-  const { activeNavTab, numPostedComments, onPostComment, dropDownOptions } = props;
+  const { activeNavTab, numPostedComments, onPostComment, showCommentTag, commentTags} = props;
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [commentTextAreaHeight, setCommentTextAreaHeight] = useState(minTextAreaHeight);
   const selectElt = useRef<HTMLSelectElement>(null);
@@ -120,8 +121,15 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
         }}
       >
         {
-          dropDownOptions && dropDownOptions
-          .map(option => <option key={option} value={option}>{option}</option>)
+          showCommentTag && commentTags && commentTags
+          .map((option, idx) => {
+            console.log("idx:", idx);
+            const key = `tag${idx}` as keyof typeof commentTags;
+            const value = commentTags[key] as string;
+            return (
+              <option key={option} value={value}>{value}</option>
+            );
+          })
         }
       </select>
 
