@@ -40,10 +40,11 @@ export function VectorTypePalette ({ selectedVectorType, onSelectVectorType, set
       <div className="palette-buttons">
         {kVectorTypes.map(type => 
           <div key={type} className="color-swatch">
-            <VectorTypeButton vectorType={type} isSelected={type === selectedVectorType} onSelectVectorType={onSelectVectorType} settings={settings} />
+            <VectorTypeButton vectorType={type} isSelected={type === selectedVectorType} 
+              onSelectVectorType={onSelectVectorType} settings={settings} />
           </div>
         )}
       </div>
     </div>
   );
-};
+}

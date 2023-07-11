@@ -60,16 +60,17 @@ export const VectorComponent = observer(function VectorComponent({model, handleH
     const head = headShape ? placeEndShape(headShape, x+dx, y+dy, angle) : null;
     const tail = tailShape ? placeEndShape(tailShape, x, y, angle+180) : null; // tail points backwards
     // Set fill to stroke since arrowheads should be drawn in stroke color
-    return <g
-      key={id}
-      stroke={stroke}
-      fill={stroke}
-      strokeWidth={strokeWidth}
-      strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
-      onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
-      onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
-      onMouseDown={(e)=> handleDrag?.(e, model)}
-      >{line}{head}{tail}</g>;
+  return <g key={id}
+            stroke={stroke}
+            fill={stroke}
+            strokeWidth={strokeWidth}
+            strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
+            onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
+            onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
+            onMouseDown={(e) => handleDrag?.(e, model)}
+          >
+            {line}{head}{tail}
+         </g>;
 });
 
 // Render a VectorEndShape at the given x, y, and rotational angle.
@@ -103,9 +104,7 @@ export class VectorDrawingTool extends DrawingTool {
       y: start.y,
       dx: 0,
       dy: 0,
-      headShape: headShape,
-      tailShape: tailShape,
-      stroke, strokeWidth, strokeDashArray});
+      headShape, tailShape, stroke, strokeWidth, strokeDashArray});
 
     const handleMouseMove = (e2: MouseEvent) => {
       e2.preventDefault();
@@ -142,14 +141,11 @@ export class VectorDrawingTool extends DrawingTool {
 export const VectorToolbarButton: React.FC<IToolbarButtonProps> = observer(({
   toolbarManager, togglePaletteState, clearPaletteState
 }) => {
-  // Mostly copied from SvgToolModeButton
   const modalButton = "vector";
   const { selectedButton, toolbarSettings } = toolbarManager;
   const selected = selectedButton === modalButton;
   const _settings = toolbarSettings;
 
-  // Mostly copied from SvgToolbarButton 
-  const { fill, stroke, strokeWidth, strokeDashArray, vectorType } = _settings;
   const tooltipOptions = useTooltipOptions();
 
   // Adapted from image.tsx

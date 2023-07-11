@@ -63,10 +63,6 @@ export const ToolbarView: React.FC<IProps> = (
     togglePaletteState("showFill", show);
   };
 
-  const handleToggleShowVectorTypePalette = (show?: boolean) => {
-    togglePaletteState("showVectors", show);
-  };
-
   const handleSelectStamp = (stampIndex: number) => {
     if (isEnabled) {
       drawingContent.setSelectedStamp(stampIndex);
@@ -134,7 +130,8 @@ export const ToolbarView: React.FC<IProps> = (
             })}
           </div>
           {paletteState.showVectors &&
-            <VectorTypePalette selectedVectorType={"arrow"} onSelectVectorType={handleVectorTypeChange} settings={drawingContent.toolbarSettings} />}
+            <VectorTypePalette selectedVectorType={"arrow"} onSelectVectorType={handleVectorTypeChange} 
+              settings={drawingContent.toolbarSettings} />}
           {paletteState.showStroke &&
             <StrokeColorPalette selectedColor={drawingContent.stroke} onSelectColor={handleStrokeColorChange} />}
           {paletteState.showFill &&

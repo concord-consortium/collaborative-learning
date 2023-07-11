@@ -23,7 +23,7 @@ export const DefaultToolbarSettings: ToolbarSettings = {
   strokeDashArray: "",
   strokeWidth: 2,
   vectorType: VectorType.line
-}
+};
 
 // Possible decorations for the start and end of the vector.  Default is no decoration.
 export enum VectorEndShape {
