@@ -238,7 +238,7 @@ export class TreeMonitor {
         // shared model update are recorded in the same HistoryEntry
         //
         const sharedModelChangesExchangeId = nanoid();
-        // TODO: this.manager is not alive during jest tests, at least
+        // TODO: we get here with this.manager not alive during some jest tests ¯\_(ツ)_/¯
         if (!isAlive(this.manager)) return;
         await this.manager.startExchange(historyEntryId, sharedModelChangesExchangeId,
           "recordAction.sharedModelChanges");

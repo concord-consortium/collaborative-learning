@@ -1,4 +1,6 @@
-import { types, IJsonPatch, applyPatch, resolvePath, getSnapshot, flow, resolveIdentifier, isAlive } from "mobx-state-tree";
+import {
+  applyPatch, flow, getSnapshot, IJsonPatch, isAlive, resolvePath, resolveIdentifier, types
+} from "mobx-state-tree";
 import { DEBUG_HISTORY } from "../../lib/debug";
 import { SharedModelMapSnapshotOutType } from "../document/base-document-content";
 import { DocumentContentModelType } from "../document/document-content";
@@ -27,7 +29,6 @@ export const Tree = types.model("Tree", {
 
     // If we don't have a document let the exception happen so we
     // can track this down
-    if (!isAlive(self)) return;
     const document = (self as any).content as DocumentContentModelType;
 
     // FIXME: if a shared model is unlinked from a tile we need to notify that

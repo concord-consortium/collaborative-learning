@@ -153,7 +153,7 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
 
     // When a shared model entry changes updateAfterSharedModelChanges is called on
     // the tile content model automatically by the tree monitor. This will also
-    // pick up this case of adding a tile
+    // pick up this case of adding a tile.
   }
 
   // This is not an action because it is deriving state.
@@ -234,7 +234,7 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
 
     // When a tile is removed from the shared model entry this is picked
     // up by the tree-monitor middleware and updateAfterSharedModelChanges will
-    // be called on all of the tiles that were or are referring to the sharedModel
+    // be called on all of the tiles that were or are referring to the sharedModel.
     sharedModelEntry.removeTile(tile);
   }
 }

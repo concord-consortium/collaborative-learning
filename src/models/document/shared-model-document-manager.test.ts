@@ -1,4 +1,4 @@
-import { destroy, Instance, types, getEnv, flow, SnapshotIn, getParent } from "mobx-state-tree";
+import { destroy, Instance, types, getEnv, flow, SnapshotIn } from "mobx-state-tree";
 import { when } from "mobx";
 import { ITileProps } from "../../components/tiles/tile-component";
 import { SharedModel, SharedModelType } from "../shared/shared-model";
