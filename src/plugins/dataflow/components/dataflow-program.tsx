@@ -51,6 +51,7 @@ import { InputValueControl } from "../nodes/controls/input-value-control";
 import { DemoOutputControl } from "../nodes/controls/demo-output-control";
 import { ProgramMode, UpdateMode } from "./types/dataflow-tile-types";
 import { ITileModel } from "../../../models/tiles/tile-model";
+import { getLiveOptions } from "../nodes/utilities/live-output-utilities";
 
 import "./dataflow-program.sass";
 
@@ -481,19 +482,23 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.channels = [];
     this.channels = [...virtualSensorChannels, ...this.simulatedChannels, ...serialSensorChannels];
     this.countSerialDataNodes(this.programEditor.nodes);
+    const anyDevice = this.stores.serialDevice.deviceFamily;
+
     this.programEditor.nodes.forEach((node) => {
       if (node.name === "Sensor") {
         const sensorSelect = node.controls.get("sensorSelect") as SensorSelectControl;
         sensorSelect.setChannels(this.channels);
       }
+
       if (node.name === "Live Output"){
         const hubSelect = getHubSelect(node);
         hubSelect.setChannels(this.channels);
 
         // Update live output hub options with simulated hubs
         const outputVariable = findOutputVariable(node, this.props.tileContent?.outputVariables);
-        const options = outputVariable ? [...NodeMicroBitHubs, simulatedHub(outputVariable)] : NodeMicroBitHubs;
-        // If the selected option no longer exists, switch to the first option
+        const options = getLiveOptions(node, outputVariable, anyDevice);
+        //const oldOptions = outputVariable ? [...NodeMicroBitHubs, simulatedHub(outputVariable)] : NodeMicroBitHubs;
+
         if (!options.find(option => option.name === hubSelect.getValue())) {
           hubSelect.setValue(options[0].name);
         }

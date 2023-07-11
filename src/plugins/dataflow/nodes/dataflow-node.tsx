@@ -4,7 +4,7 @@ import { Node, Socket, Control } from "rete-react-render-plugin";
 import { DataflowNodePlot } from "./dataflow-node-plot";
 import { NodeType, NodeTypes } from "../model/utilities/node";
 import { hasFlowIn } from "./utilities/view-utilities";
-import { nodeUsesMicroBitHub, nodeUsesGripper } from "./utilities/live-output-utilities";
+import { outputsToAnyRelay, outputsToAnyGripper } from "./utilities/live-output-utilities";
 import "./dataflow-node.scss";
 import "./node-states.scss";
 
@@ -29,8 +29,8 @@ export class DataflowNode extends Node {
     const dynamicClasses = classNames({
       "gate-active": node.data.gateActive,
       "has-flow-in": hasFlowIn(node),
-      "uses-micro-bit": nodeUsesMicroBitHub(node),
-      "uses-gripper": nodeUsesGripper(node),
+      "uses-relays": outputsToAnyRelay(node),
+      "uses-gripper": outputsToAnyGripper(node),
     });
 
     const inputClass = (s: string) => "input " + s.toLowerCase().replace(/ /g, "-");
