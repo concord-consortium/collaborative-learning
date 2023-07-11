@@ -1,9 +1,9 @@
-import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react";
 import { useQueryClient } from "react-query";
 import classNames from "classnames";
-import { useAppConfig, useClassStore, useLocalDocuments, useProblemStore,
-   useStores, useUIStore, useUserStore } from "../../hooks/use-stores";
+import { useAppConfig, useLocalDocuments, useProblemStore, useStores,
+  useUIStore, useUserStore } from "../../hooks/use-stores";
 import { useUserContext } from "../../hooks/use-user-context";
 import { ISubTabSpec, NavTabModelType } from "src/models/view/nav-tabs";
 import { DocumentType } from "../../models/document/document-types";
@@ -30,16 +30,14 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
   const context = useUserContext();
   const queryClient = useQueryClient();
   const user = useUserStore();
-  const classStore = useClassStore();
   const documents = useLocalDocuments();
   const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
   const tabState = navTabSpec && ui.tabs.get(navTabSpec?.tab);
   const openDocumentKey = tabState?.openDocuments.get(subTab.label) || "";
   const openDocument = store.documents.getDocument(openDocumentKey) ||
     store.networkDocuments.getDocument(openDocumentKey);
-  const publishedDoc = openDocument?.type === "publication" || openDocument?.type === "personalPublication"
-                        || openDocument?.type === "learningLogPublication";
-  const showPlayback = user.type && !publishedDoc? appConfigStore.enableHistoryRoles.includes(user.type) : false;
+  const showPlayback = user.type && !openDocument?.isPublished
+                          ? appConfigStore.enableHistoryRoles.includes(user.type) : false;
   const isStarredTab = subTab.label === "Starred";
   const skipDocument = !openDocument || openDocument.getProperty("isDeleted");
 
@@ -48,7 +46,7 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
                                           : tabSpec.tab === "my-work" && subTab.label === "Starred"
                                             ? ["problem", "personal"]
                                             : [];
-  const getStarredDocuments = useMemo(() => (types: DocumentType[]) => {
+  const getStarredDocuments = (types: DocumentType[]) => {
     const docs: DocumentModelType[] = [];
       types.forEach((type) => {
         const docsByTypeArr = documents.byType(type);
@@ -58,7 +56,7 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
       });
     const starredDocs = docs.filter((doc: DocumentModelType) => !doc.getProperty("isDeleted") && doc.isStarred);
     return starredDocs;
-  },[documents]);
+  };
   const starredDocuments = getStarredDocuments(documentTypes);
   const numStarredDocs = starredDocuments.length;
   const currentOpenDocIndex = openDocument && starredDocuments.indexOf(openDocument);
@@ -115,13 +113,9 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
   // document.
   const handleChangeDocument = (shift: number) => {
     if (currentOpenDocIndex !== undefined) {
-      const newDocIndex = (tabSpec.tab === "my-work" && currentOpenDocIndex === 0 && shift === -1)
-                            ? numStarredDocs - 1
-                            : (tabSpec.tab === "my-work" && currentOpenDocIndex === numStarredDocs - 1 && shift === 1)
-                                ? 0
-                                : (currentOpenDocIndex + shift) % numStarredDocs;
-      const newDocKey = starredDocuments[newDocIndex].key;
-      ui.openSubTabDocument(tabSpec.tab, subTab.label, newDocKey);
+      const newDocIndex = (currentOpenDocIndex + shift) % numStarredDocs;
+      const newDocKey = starredDocuments.at(newDocIndex)?.key;
+      newDocKey && ui.openSubTabDocument(tabSpec.tab, subTab.label, newDocKey);
     }
   };
 
@@ -208,7 +202,7 @@ const DocumentBrowserScroller =
   }, []);
 
   const handleScrollTo = (side: string) => {
-    const direction = side ==="left" ? -1 : 1;
+    const direction = side === "left" ? -1 : 1;
     const attemptedScrollTo = scrollToLocation + direction * panelWidth;
     const scrollTo = Math.max(0, Math.min(scrollWidth - panelWidth, attemptedScrollTo));
     setScrollToLocation(scrollTo);
