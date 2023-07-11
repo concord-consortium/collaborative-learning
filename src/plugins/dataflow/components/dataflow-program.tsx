@@ -650,9 +650,15 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         const options = getLiveOptions(n, outputVariable, anyDevice);
         //const oldOptions = outputVariable ? [...NodeMicroBitHubs, simulatedHub(outputVariable)] : NodeMicroBitHubs;
 
-        // if (!options.find(option => option?.name === hubSelect.getValue())) {
-        //   hubSelect.setValue(options[0].name);
-        // }
+        if (options) {
+          const selectedOption = options.find(option => option && option.name === hubSelect.getValue());
+          if (!selectedOption) {
+            const firstOption = options[0];
+            if (firstOption) {
+              hubSelect.setValue(firstOption.name);
+            }
+          }
+        }
 
         if (anyDevice === "arduino") hubSelect.setValue("Physical Gripper")
         hubSelect.setOptions(options);
