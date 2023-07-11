@@ -181,7 +181,7 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
   const getDisplayTitle = (document: DocumentModelType) => {
     const documentOwner = classStore.users.get(document.uid);
     const documentTitle = getDocumentDisplayTitle(document, appConfigStore, problemStore);
-    return openSecondaryDocument && documentOwner ? documentOwner.fullName + documentTitle : documentTitle;
+    return openSecondaryDocument && documentOwner ? documentOwner.fullName + " " + documentTitle : documentTitle;
   };
 
   return (
