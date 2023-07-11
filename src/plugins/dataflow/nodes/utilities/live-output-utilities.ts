@@ -1,10 +1,10 @@
 import { Node } from "rete";
 import { DropdownListControl } from "../controls/dropdown-list-control";
-import { kMicroBitHubRelaysIndexed, kGripperOutputTypes, NodeMicroBitHubs } from "../../model/utilities/node";
+import { kMicroBitHubRelaysIndexed, kGripperOutputTypes,
+  NodeMicroBitHubs, baseLiveOutputOptions
+} from "../../model/utilities/node";
 import { VariableType } from "@concord-consortium/diagram-view";
 import { simulatedHub } from "../../model/utilities/simulated-output";
-import Multiply from "../../assets/icons/math/multiply.svg";
-import AdvancedGrabber from "../../assets/icons/output/advanced-grabber.svg";
 
 interface NodeOutputValue {
   val: number;
@@ -38,20 +38,7 @@ export function getLiveOptions(node: Node, sharedVar?: VariableType, device?: st
   const options: any[] = [];
   const simOption = sharedVar && simulatedHub(sharedVar);
   const anyOuputFound = simOption || device === "arduino" || device === "microbit";
-
-  const liveGripperOption = {
-    active: true,
-    icon: AdvancedGrabber,
-    id: "bb-gripper",
-    name: "Physical Gripper",
-  };
-
-  const warningOption = {
-    active: true,
-    icon: Multiply,
-    id: "no-outputs-found",
-    name: "use device or sim",
-  };
+  const { liveGripperOption, warningOption } = baseLiveOutputOptions;
 
   if (sharedVar) {
     options.push(simOption);

@@ -385,6 +385,21 @@ export const NodeGeneratorTypes = [
   }
 ];
 
+export const baseLiveOutputOptions = {
+   liveGripperOption: {
+    active: true,
+    icon: GrabberIcon,
+    id: "bb-gripper",
+    name: "Physical Gripper",
+  },
+  warningOption: {
+    active: true,
+    icon: MultiplyIcon,
+    id: "no-outputs-found",
+    name: "use device or sim",
+  }
+};
+
 export const NodePeriodUnits = [
   {
     unit: "sec",
