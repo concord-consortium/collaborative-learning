@@ -139,65 +139,96 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
   // But when displayed, the sequence is [0, n..1].
   // So we still want to display the previous arrow when we reach n to flip to the problem
   // document.
-  const handleChangeDocument = (shift: number) => {
-    if (currentOpenDocIndex !== undefined) {
-      const newDocIndex = (tabSpec.tab === "my-work" && currentOpenDocIndex === 0 && shift === -1)
-                            ? numStarredDocs - 1
-                            : (tabSpec.tab === "my-work" && currentOpenDocIndex === numStarredDocs - 1 && shift === 1)
-                                ? 0
-                                : (currentOpenDocIndex + shift) % numStarredDocs;
+  const handleChangeDocument = (shift: number, secondary?: boolean) => {
+    const currentIndex = secondary ? currentOpenSecondaryDocIndex : currentOpenDocIndex;
+    if (currentIndex !== undefined) {
+
+      const getNewDocIndex = () => {
+        let tempNewDocIndex = 0;
+        const currentIndexIsOpen = tempNewDocIndex === currentOpenDocIndex
+                                    || tempNewDocIndex === currentOpenSecondaryDocIndex;
+        if (tabSpec.tab === "my-work") {
+          if (currentIndex === 0 && shift === -1) {
+            tempNewDocIndex = numStarredDocs - 1;
+            if (currentIndexIsOpen)
+              { tempNewDocIndex = tempNewDocIndex - 1; }
+          } else
+          if (currentIndex === numStarredDocs - 1 && shift === 1) {
+            tempNewDocIndex = 0;
+            if (currentIndexIsOpen)
+              { tempNewDocIndex = tempNewDocIndex + 1; }
+          } else {
+            tempNewDocIndex = (tempNewDocIndex + shift) % numStarredDocs;
+          }
+        } else {
+          tempNewDocIndex = (currentIndex + shift) % numStarredDocs;
+            if (currentIndexIsOpen) {
+              tempNewDocIndex = (currentIndex + (2 * shift)) % numStarredDocs;
+            }
+        }
+        console.log("tempNewDocIndex", tempNewDocIndex);
+        return tempNewDocIndex;
+      };
+      const newDocIndex = getNewDocIndex();
       const newDocKey = starredDocuments[newDocIndex].key;
-      ui.openSubTabDocument(tabSpec.tab, subTab.label, newDocKey);
-      
-  const handleShowPrevDocument = (secondary?: boolean) => {
-    let prevDocumentKey = "";
-    let tempPrevDocIndex = 0;
-    const currentIndex = secondary ? currentOpenSecondaryDocIndex : currentOpenDocIndex;
-    // This takes into account the problem document in My Work tab where documents are listed in [0,n..1]
-    tempPrevDocIndex = currentIndex + 1 >= numStarredDocs ? 0 : currentIndex + 1;
-    const prevDocIndex = tempPrevDocIndex === currentOpenDocIndex || tempPrevDocIndex === currentOpenSecondaryDocIndex
-                            ? tempPrevDocIndex + 1 : tempPrevDocIndex;
-    if (prevDocIndex < numStarredDocs) prevDocumentKey = starredDocuments[prevDocIndex].key;
-    if (secondary) {
-      ui.openSubTabSecondaryDocument(tabSpec.tab, subTab.label, prevDocumentKey);
-    } else {
-      ui.openSubTabDocument(tabSpec.tab, subTab.label, prevDocumentKey);
-    }
-  };
+      // if (newDocIndex < numStarredDocs) newDocumentKey = starredDocuments[newDocIndex].key;
 
-  const handleShowNextDocument = (secondary?: boolean | undefined) => {
-    let nextDocumentKey = "";
-    let nextDocIndex: number;
-    const currentIndex = secondary ? currentOpenSecondaryDocIndex : currentOpenDocIndex;
-    if (secondary) {
-      if (tabSpec.tab === "my-work") {
-        if (currentIndex === 0) {
-          nextDocIndex = currentOpenDocIndex === numStarredDocs - 1 ? numStarredDocs - 2 : numStarredDocs - 1;
-        } else {
-          nextDocIndex = currentOpenDocIndex === currentIndex - 1 ? currentIndex - 2 : currentIndex - 1;
-        }
+      if (secondary) {
+        ui.openSubTabSecondaryDocument(tabSpec.tab, subTab.label, newDocKey);
       } else {
-        nextDocIndex = currentOpenDocIndex === currentIndex - 1 ? currentIndex - 2 : currentIndex - 1;
-      }
-    } else {
-      if (tabSpec.tab === "my-work") {
-        if (currentIndex === 0) {
-          nextDocIndex = currentOpenSecondaryDocIndex === numStarredDocs - 1 ? numStarredDocs - 2 : numStarredDocs - 1;
-        } else {
-          nextDocIndex = currentOpenSecondaryDocIndex === currentIndex - 1 ? currentIndex - 2 : currentIndex - 1;
-        }
-      } else {
-        nextDocIndex = currentOpenSecondaryDocIndex === currentIndex - 1 ? currentIndex - 2 : currentIndex - 1;
+        ui.openSubTabDocument(tabSpec.tab, subTab.label, newDocKey);
       }
     }
-
-    if (nextDocIndex < numStarredDocs) nextDocumentKey = starredDocuments[nextDocIndex].key;
-    if (secondary) {
-      ui.openSubTabSecondaryDocument(tabSpec.tab, subTab.label, nextDocumentKey);
-    } else {
-      ui.openSubTabDocument(tabSpec.tab, subTab.label, nextDocumentKey);
-    }
   };
+  // const handleShowPrevDocument = (secondary?: boolean) => {
+  //   let prevDocumentKey = "";
+  //   let tempPrevDocIndex = 0;
+  //   const currentIndex = secondary ? currentOpenSecondaryDocIndex : currentOpenDocIndex;
+  //   // This takes into account the problem document in My Work tab where documents are listed in [0,n..1]
+  //   tempPrevDocIndex = currentIndex + 1 >= numStarredDocs ? 0 : currentIndex + 1;
+  //   const prevDocIndex = tempPrevDocIndex === currentOpenDocIndex || tempPrevDocIndex === currentOpenSecondaryDocIndex
+  //                           ? tempPrevDocIndex + 1 : tempPrevDocIndex;
+  //   // if (prevDocIndex < numStarredDocs) prevDocumentKey = starredDocuments[prevDocIndex].key;
+  //   // if (secondary) {
+  //   //   ui.openSubTabSecondaryDocument(tabSpec.tab, subTab.label, prevDocumentKey);
+  //   // } else {
+  //   //   ui.openSubTabDocument(tabSpec.tab, subTab.label, prevDocumentKey);
+  //   // }
+  // };
+
+  // const handleShowNextDocument = (secondary?: boolean | undefined) => {
+  //   let nextDocumentKey = "";
+  //   let nextDocIndex: number;
+  //   const currentIndex = secondary ? currentOpenSecondaryDocIndex : currentOpenDocIndex;
+  //   if (secondary) {
+  //     if (tabSpec.tab === "my-work") {
+  //       if (currentIndex === 0) {
+  //         nextDocIndex = currentOpenDocIndex === numStarredDocs - 1 ? numStarredDocs - 2 : numStarredDocs - 1;
+  //       } else {
+  //         nextDocIndex = currentOpenDocIndex === currentIndex - 1 ? currentIndex - 2 : currentIndex - 1;
+  //       }
+  //     } else {
+  //       nextDocIndex = currentOpenDocIndex === currentIndex - 1 ? currentIndex - 2 : currentIndex - 1;
+  //     }
+  //   } else {
+  //     if (tabSpec.tab === "my-work") {
+  //       if (currentIndex === 0) {
+  //         nextDocIndex = currentOpenSecondaryDocIndex === numStarredDocs - 1 ? numStarredDocs - 2 : numStarredDocs - 1;
+  //       } else {
+  //         nextDocIndex = currentOpenSecondaryDocIndex === currentIndex - 1 ? currentIndex - 2 : currentIndex - 1;
+  //       }
+  //     } else {
+  //       nextDocIndex = currentOpenSecondaryDocIndex === currentIndex - 1 ? currentIndex - 2 : currentIndex - 1;
+  //     }
+  //   }
+
+  //   if (nextDocIndex < numStarredDocs) nextDocumentKey = starredDocuments[nextDocIndex].key;
+  //   // if (secondary) {
+  //   //   ui.openSubTabSecondaryDocument(tabSpec.tab, subTab.label, nextDocumentKey);
+  //   // } else {
+  //   //   ui.openSubTabDocument(tabSpec.tab, subTab.label, nextDocumentKey);
+  //   // }
+  // };
 
   const hideLeftFlipper = () => {
     if (tabSpec.tab === "class-work") {
@@ -260,10 +291,10 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
                 {(!openDocument.isRemote)
                     && editButton(tabSpec.tab, sectionClass, openDocument)}
               </div>
-            <div className="scroll-arrow-button-wrapper left">
-              <ScrollButton side={"left"} tab={tabSpec.tab} onScroll={() => handleChangeDocument(1)}
-                  hidden={!isStarredTab || (isStarredTab && hideLeftFlipper())} />
-            </div>
+              <div className="scroll-arrow-button-wrapper left">
+                <ScrollButton side={"left"} tab={tabSpec.tab} onScroll={() => handleChangeDocument(1)}
+                    hidden={!isStarredTab || (isStarredTab && hideLeftFlipper())} />
+              </div>
               <EditableDocumentContent
                 mode={"1-up"}
                 isPrimary={false}
@@ -271,10 +302,10 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
                 readOnly={true}
                 showPlayback={showPlayback}
               />
-            <div className="scroll-arrow-button-wrapper right">
-              <ScrollButton side={"right"} tab={tabSpec.tab} onScroll={() => handleChangeDocument(-1)}
-                  hidden={!isStarredTab || (isStarredTab && hideRightFlipper())}/>
-            </div>
+              <div className="scroll-arrow-button-wrapper right">
+                <ScrollButton side={"right"} tab={tabSpec.tab} onScroll={() => handleChangeDocument(-1)}
+                    hidden={!isStarredTab || (isStarredTab && hideRightFlipper())}/>
+              </div>
             </div>
             {(!openSecondaryDocument || openSecondaryDocument.getProperty("isDeleted"))
               ? null
