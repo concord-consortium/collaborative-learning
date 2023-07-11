@@ -642,9 +642,15 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       },
       "Live Output": (n: Node) => {
         updateNodeChannelInfo(n, this.channels, this.stores.serialDevice);
-        sendDataToSerialDevice(n, this.stores.serialDevice);
-        sendDataToSimulatedOutput(n, this.props.tileContent?.outputVariables);
         const anyDevice = this.stores.serialDevice.deviceFamily;
+        //if (anyDevice){
+          // this conditional works, but the thing we want to do is only
+          // send when Phyisical Gripper is selected or hub is selected
+          sendDataToSerialDevice(n, this.stores.serialDevice);
+        //}
+
+        sendDataToSimulatedOutput(n, this.props.tileContent?.outputVariables);
+
         const hubSelect = getHubSelect(n);
         const outputVariable = findOutputVariable(n, this.props.tileContent?.outputVariables);
         const options = getLiveOptions(n, outputVariable, anyDevice);
