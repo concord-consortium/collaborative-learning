@@ -14,7 +14,8 @@ import { DrawingObjectSnapshotForAdd, DrawingObjectType, isFilledObject,
   isStrokedObject, ObjectMap, ToolbarModalButton } from "../objects/drawing-object";
 import { LogEventName } from "../../../lib/logger-types";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
-import { VectorType } from "../components/vector-palette";
+import { VectorType, endShapesForVectorType } from "../components/vector-palette";
+import { isVectorObject } from "../objects/vector";
 
 // track selection in metadata object so it is not saved to firebase but
 // also is preserved across document/content reloads
@@ -57,7 +58,7 @@ export const DrawingContentModel = TileContentModel
     strokeDashArray: DefaultToolbarSettings.strokeDashArray,
     strokeWidth: DefaultToolbarSettings.strokeWidth,
     stamps: types.array(StampModel),
-    // FIXME vectorType: DefaultToolbarSettings.vectorType,
+    vectorType: types.maybe(types.enumeration<VectorType>("VectorType", Object.values(VectorType))),
     // is type.maybe to avoid need for migration
     currentStampIndex: types.maybe(types.number)
   })
@@ -95,8 +96,8 @@ export const DrawingContentModel = TileContentModel
               : null;
     },
     get toolbarSettings(): ToolbarSettings {
-      const { stroke, fill, strokeDashArray, strokeWidth } = self;
-      return { stroke, fill, strokeDashArray, strokeWidth };
+      const { stroke, fill, strokeDashArray, strokeWidth, vectorType } = self;
+      return { stroke, fill, strokeDashArray, strokeWidth, vectorType };
     },
     exportJson(options?: ITileExportOptions) {
       // Translate image urls if necessary
@@ -193,6 +194,19 @@ export const DrawingContentModel = TileContentModel
               object.setStrokeWidth(strokeWidth);
             }
           });
+        },
+        setVectorType(vectorType: VectorType, ids: string[]) {
+          self.vectorType = vectorType;
+          // FIXME not yet working
+          console.log('setting vector type to ', vectorType);
+          forEachObjectId(ids, object => {
+            if (isVectorObject(object)) {
+              console.log('setting vt on vector ', object);
+              object.setEndShapes(...endShapesForVectorType(vectorType));
+            } else {
+              console.log('Not vector object: ', object);
+            }
+            });
         },
 
         setSelectedButton(button: ToolbarModalButton) {

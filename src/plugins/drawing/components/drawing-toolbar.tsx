@@ -84,8 +84,7 @@ export const ToolbarView: React.FC<IProps> = (
     clearPaletteState();
   };
   const handleVectorTypeChange = (type: VectorType) => {
-    console.log("FIXME should set vector type here");
-    // isEnabled && drawingContent.setVectorType(type, drawingContent.selectedIds);
+    isEnabled && drawingContent.setVectorType(type, drawingContent.selectedIds);
     clearPaletteState();
   };
 

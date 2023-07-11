@@ -1,3 +1,4 @@
+import { VectorType } from "../components/vector-palette";
 
 export interface Point { x: number; y: number; }
 
@@ -13,7 +14,7 @@ export interface ToolbarSettings {
   fill: string;
   strokeDashArray: string;
   strokeWidth: number;
- // vectorType: string;
+  vectorType?: VectorType;
 }
 
 export const DefaultToolbarSettings: ToolbarSettings = {
@@ -21,5 +22,10 @@ export const DefaultToolbarSettings: ToolbarSettings = {
   fill: "none",
   strokeDashArray: "",
   strokeWidth: 2,
- // vectorType: VectorType.line
-};
+  vectorType: VectorType.line
+}
+
+// Possible decorations for the start and end of the vector.  Default is no decoration.
+export enum VectorEndShape {
+  triangle = "triangle"
+}
