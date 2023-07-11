@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg viewBox="0 0 36 34" version="1.1" xmlns="http://www.w3.org/2000/svg">
-    <polygon id="Arrow" points="28.7692363 6.19076372 25.5872558 15.7367053 23.1108932 13.2597637 9.70710678 26.6642136 8.29289322 25.25 21.6968932 11.8457637 19.2232947 9.37274424"></polygon>
+<svg width="36" height="34" viewBox="0 0 36 34" xmlns="http://www.w3.org/2000/svg">
+    <path d="M27.001 7.959 9 25.96"/>
+    <path fill-rule="nonzero" d="m28.77 6.19-3.183 9.547-6.364-6.364z"/>
 </svg>
