@@ -2,10 +2,9 @@ import { Node } from "rete";
 import { DropdownListControl } from "../controls/dropdown-list-control";
 import { kMicroBitHubRelaysIndexed, kGripperOutputTypes, NodeMicroBitHubs } from "../../model/utilities/node";
 import { VariableType } from "@concord-consortium/diagram-view";
-import { NodeChannelInfo } from "../../model/utilities/channel";
 import { simulatedHub } from "../../model/utilities/simulated-output";
 import Multiply from "../../assets/icons/math/multiply.svg";
-import AdvancedGrabber from "../../assets/icons/output/advanced-grabber.svg"
+import AdvancedGrabber from "../../assets/icons/output/advanced-grabber.svg";
 
 interface NodeOutputValue {
   val: number;
@@ -41,7 +40,7 @@ export function getLiveOptions(node: Node, sharedVar?: VariableType, device?: st
   //   "\n  sharedVar:", sharedVar,
   //   "\n     device:", device
   // );
-  let options: any[] = [];
+  const options: any[] = [];
   const simOption = sharedVar && simulatedHub(sharedVar);
   const anyOuputFound = simOption || device === "arduino" || device === "microbit";
 
