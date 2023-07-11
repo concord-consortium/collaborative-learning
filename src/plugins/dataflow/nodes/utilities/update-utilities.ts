@@ -53,7 +53,6 @@ export function sendDataToSimulatedOutput(n: Node, outputVariables?: VariableTyp
 }
 
 export function updateNodeChannelInfo(n: Node, channels: NodeChannelInfo[], serialDevice: SerialDevice) {
-  //console.log("| 1 updateNodeChannelInfo?")
   if (channels.length > 0 ){
     channels.filter(c => c.usesSerial).forEach((ch) => {
       passSerialStateToChannel(serialDevice, ch);

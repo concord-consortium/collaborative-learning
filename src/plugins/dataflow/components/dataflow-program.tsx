@@ -616,7 +616,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private updateNodes = () => {
-    console.log("| ND updateNodes")
     const nodeProcessMap: { [name: string]: (n: Node) => void } = {
       Generator: updateGeneratorNode,
       Timer: updateTimerNode,

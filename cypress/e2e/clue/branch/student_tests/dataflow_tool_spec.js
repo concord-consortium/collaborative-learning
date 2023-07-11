@@ -400,12 +400,12 @@ context('Dataflow Tool Tile', function () {
           .trigger("pointerup", startX + deltaX, startY + deltaY, {force: true});
         dataflowToolTile.getModalOkButton().click();
       });
-      it("should show micro:bit hub selector when fan is selected", () => {
+      it("should show needs connection message when fan is selected and there are no outputs", () => {
         const dropdown = "liveOutputType";
         dataflowToolTile.getDropdown(nodeType, dropdown).click();
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).eq(3).click();
         dataflowToolTile.getDropdown(nodeType, dropdown).contains("Fan").should("exist");
-        dataflowToolTile.getDropdown(nodeType, "hubSelect").should("contain", "micro:bit hub a");
+        dataflowToolTile.getDropdown(nodeType, "hubSelect").should("contain", "use device or sim");
       });
       it("can recieve a value from a connected block, and display correct on or off string", () => {
         dataflowToolTile.getNode("number").should("exist");
@@ -414,11 +414,6 @@ context('Dataflow Tool Tile', function () {
         dataflowToolTile.getNumberNodeOutput().should("exist");
         dataflowToolTile.getOutputNodeValueText().should("contain", "off");
         dataflowToolTile.getDeleteNodeButton("number").click();
-      });
-      it("verify live output options", () => {
-        dataflowToolTile.getDropdown(nodeType, "hubSelect").should("exist");
-        dataflowToolTile.getDropdown(nodeType, "hubSelect").should("contain", "micro:bit hub a");
-        dataflowToolTile.getDropdown(nodeType, "hubSelect").get(".disabled").should("exist");
       });
       it("verify node inputs outputs", () => {
         dataflowToolTile.getNodeInput().should("exist");

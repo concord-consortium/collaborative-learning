@@ -58,7 +58,7 @@ context('Simulator Tile with Brainwaves Gripper Simulation', function () {
       dataflowTile.getDropdown(lo, "liveOutputType").click();
       dataflowTile.getDropdownOptions(lo, "liveOutputType").eq(1).click(); // Gripper
       dataflowTile.getDropdown(lo, "hubSelect").click();
-      dataflowTile.getDropdownOptions(lo, "hubSelect").should("have.length", 8);
+      dataflowTile.getDropdownOptions(lo, "hubSelect").should("have.length", 1);
       // Click the background to not select any option
       cy.get(".flow-tool").click();
 
@@ -71,7 +71,7 @@ context('Simulator Tile with Brainwaves Gripper Simulation', function () {
 
       // Live output options are correct after adding the simulation to the document
       dataflowTile.getDropdown(lo, "hubSelect").click();
-      dataflowTile.getDropdownOptions(lo, "hubSelect").should("have.length", 9); // not all visible, but in dom
+      dataflowTile.getDropdownOptions(lo, "hubSelect").should("have.length", 1); // not all visible, but in dom
       dataflowTile.getDropdownOptions(lo, "hubSelect").eq(0).click({force: true});
 
       // Simulator tile's output variable updates when dataflow sets it
@@ -144,8 +144,8 @@ context('Simulator Tile with Terrarium Simulation', function() {
       output().click();
       input().click({ force: true });
       dataflowTile.getDropdown(lo, "hubSelect").eq(index).click();
-      dataflowTile.getDropdownOptions(lo, "hubSelect").should("have.length", 5);
-      dataflowTile.getDropdownOptions(lo, "hubSelect").eq(4).click();
+      dataflowTile.getDropdownOptions(lo, "hubSelect").should("have.length", 1);
+      dataflowTile.getDropdownOptions(lo, "hubSelect").eq(1).click();
       simulatorTile.getSimulatorTile().should("contain.text", `${liveOutputType.displayName} Output: 1`);
     });
   });
