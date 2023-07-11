@@ -4,8 +4,8 @@ import { useQueryClient } from 'react-query';
 import { DocumentModelType } from "../../models/document/document";
 import { logDocumentEvent } from "../../models/document/log-document-event";
 import { ISubTabSpec, NavTabModelType } from "../../models/view/nav-tabs";
-import { useAppConfig, useClassStore, useProblemStore, useStores, useUIStore, useUserStore }
-          from "../../hooks/use-stores";
+import { useAppConfig, useClassStore, useProblemStore, useStores,
+  useUIStore, useUserStore } from "../../hooks/use-stores";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import { useUserContext } from "../../hooks/use-user-context";
@@ -65,7 +65,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
 
   const handleSelectDocument = (document: DocumentModelType) => {
     if (ui.focusDocument === document.key) {
-        ui.closeSubTabDocument(tabSpec.tab, selectedSubTab.label);
+      ui.closeSubTabDocument(tabSpec.tab, selectedSubTab.label);
     } else {
       if (!document.hasContent && document.isRemote) {
         loadDocumentContent(document);

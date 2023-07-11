@@ -10,7 +10,6 @@ import { DocumentModelType } from "../models/document/document";
 import { GroupModelType, GroupUserModelType } from "../models/stores/groups";
 import { CellPositions, FourUpGridCellModelType, FourUpGridModel, FourUpGridModelType
       } from "../models/view/four-up-grid";
-import { FourUpOverlayComponent } from "./four-up-overlay";
 import { Logger } from "../lib/logger";
 import { LogEventName } from "../lib/logger-types";
 import FourUpIcon from "../clue/assets/icons/4-up-icon.svg";
@@ -20,7 +19,6 @@ import "./four-up.sass";
 interface IProps extends IBaseProps {
   group: GroupModelType;
   isGhostUser?: boolean;
-  toggleable?: boolean;
   documentViewMode?: DocumentViewMode;
   selectedSectionId?: string | null;
   viaTeacherDashboard?: boolean;
@@ -155,7 +153,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
 
   public render() {
     const {documentViewMode, viaStudentGroupView,
-        group, isGhostUser, toggleable, ...others } = this.props;
+        group, isGhostUser, ...others } = this.props;
 
     const {width, height} = this.grid;
     const nwCell = this.grid.cells[CellPositions.NorthWest];
@@ -208,7 +206,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       }
     };
 
-    const renderCanvas = (cornerIndex: number, overlay?: React.ReactNode) => {
+    const renderCanvas = (cornerIndex: number) => {
       const cornerLabel = indexToCornerLabel[cornerIndex];
       const groupUser = groupUsers[cornerIndex];
       const cell = this.grid.cells[cornerIndex];
@@ -220,7 +218,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
                        readOnly={readOnly}
                        document={document} overlayMessage={canvasMessage(document)}
                        showPlayback={isFocused(groupUser)}
-                       {...others} overlay={overlay} />;
+                       {...others} />;
     };
 
     // Double the scale if the cell is focused
@@ -247,27 +245,34 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       }
     };
 
+    const renderStar = (document?: DocumentModelType) => {
+      const { user } = this.stores;
+      if (!document || (documentViewMode !== DocumentViewMode.Published)) {
+        return;
+      }
+
+      const handleStarClick = (e: React.MouseEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (document) {
+          document.toggleUserStar(user.id);
+        }
+      };
+
+      const isStarred = document.isStarredByUser(user.id);
+      return (
+        <div className="icon-holder" onClick={handleStarClick}>
+          <svg className={"icon-star " + (isStarred ? "starred" : "")} >
+            <use xlinkHref="#icon-outline-star"/>
+          </svg>
+        </div>
+      );
+    };
+
     const renderCorner = (cornerIndex: number) => {
       const cell = this.grid.cells[cornerIndex];
       const document = groupDoc(cornerIndex);
       const groupUser = groupUsers[cornerIndex];
-
-      const overlay = toggleable &&
-        <FourUpOverlayComponent
-          style={{top: 0, left: 0, width: "100%", height: "100%"}}
-          onClick={() => this.handleOverlayClick(groupUser)}
-          documentViewMode={documentViewMode}
-          document={document}
-        />;
-
-      // When we are looking at a specific student we need the overlay to be
-      // inside of the Canvas so the canvas can put its history UI on top of the
-      // overlay. When we are not looking at a specific student we need the
-      // overlay to be unscaled and have dimensions based on the grid so its
-      // clickable area covers the whole quadrant of the grid not just the area
-      // of the canvas
-      const overlayInsideOfCanvas = focusedGroupUser && overlay;
-      const overlayOnTopOfCanvas = !focusedGroupUser && overlay;
 
       return !focusedGroupUser || isFocused(groupUser)
         ? <div key={cornerIndex} className={classNames("canvas-container", indexToCornerClass[cornerIndex])}
@@ -275,10 +280,10 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
             <div className="canvas-scaler" style={scaleStyle(cell)}>
               {hideCanvas(cornerIndex)
                 ? this.renderUnshownMessage(groupUser, indexToLocation[cornerIndex])
-                : renderCanvas(cornerIndex, overlayInsideOfCanvas)}
+                : renderCanvas(cornerIndex)}
             </div>
-            {overlayOnTopOfCanvas}
             {memberName(groupUser)}
+            {renderStar(document)}
           </div>
         : null;
     };

@@ -1,9 +1,9 @@
-import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react";
 import { useQueryClient } from "react-query";
 import classNames from "classnames";
-import { useAppConfig, useClassStore, useLocalDocuments, useProblemStore,
-   useStores, useUIStore, useUserStore } from "../../hooks/use-stores";
+import { useAppConfig, useLocalDocuments, useProblemStore, useStores,
+  useUIStore, useUserStore, useClassStore } from "../../hooks/use-stores";
 import { useUserContext } from "../../hooks/use-user-context";
 import { ISubTabSpec, NavTabModelType } from "src/models/view/nav-tabs";
 import { DocumentType } from "../../models/document/document-types";
@@ -290,7 +290,7 @@ const DocumentBrowserScroller =
   }, []);
 
   const handleScrollTo = (side: string) => {
-    const direction = side ==="left" ? -1 : 1;
+    const direction = side === "left" ? -1 : 1;
     const attemptedScrollTo = scrollToLocation + direction * panelWidth;
     const scrollTo = Math.max(0, Math.min(scrollWidth - panelWidth, attemptedScrollTo));
     setScrollToLocation(scrollTo);
