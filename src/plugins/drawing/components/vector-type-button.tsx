@@ -30,8 +30,8 @@ export const VectorTypeButton = observer(function VectorTypeButton({ vectorType,
     <div className={classNames("vector-type-button", { select: isSelected })} onClick={() => onSelectVectorType(vectorType)}>
       {icon}
       <svg className={`highlight ${isSelected ? "select" : ""}`}
-            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" width="30" height="30">
-        <rect x="1" y="1" width="28" height="28" strokeWidth="2" fill="none"/>
+            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 34" width="36" height="34">
+        <rect x="1" y="1" width="34" height="32" strokeWidth="2" fill="none"/>
       </svg>
     </div>
   );
