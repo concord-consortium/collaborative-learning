@@ -40,9 +40,8 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
   const openSecondaryDocumentKey = tabState?.openSecondaryDocuments.get(subTab.label) || "";
   const openSecondaryDocument = store.documents.getDocument(openSecondaryDocumentKey) ||
     store.networkDocuments.getDocument(openSecondaryDocumentKey);
-  const publishedDoc = openDocument?.type === "publication" || openDocument?.type === "personalPublication"
-                        || openDocument?.type === "learningLogPublication";
-  const showPlayback = user.type && !publishedDoc? appConfigStore.enableHistoryRoles.includes(user.type) : false;
+  const showPlayback = user.type && !openDocument?.isPublished
+                          ? appConfigStore.enableHistoryRoles.includes(user.type) : false;
   const isStarredTab = subTab.label === "Starred";
   const skipDocument = !openDocument || openDocument.getProperty("isDeleted");
 
@@ -51,7 +50,7 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
                                           : tabSpec.tab === "my-work" && subTab.label === "Starred"
                                             ? ["problem", "personal"]
                                             : [];
-  const getStarredDocuments = useMemo(() => (types: DocumentType[]) => {
+  const getStarredDocuments = (types: DocumentType[]) => {
     const docs: DocumentModelType[] = [];
       types.forEach((type) => {
         const docsByTypeArr = documents.byType(type);
@@ -61,7 +60,7 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
       });
     const starredDocs = docs.filter((doc: DocumentModelType) => !doc.getProperty("isDeleted") && doc.isStarred);
     return starredDocs;
-  },[documents]);
+  };
   const starredDocuments = getStarredDocuments(documentTypes);
   const numStarredDocs = starredDocuments.length;
   const currentOpenDocIndex = openDocument && starredDocuments.indexOf(openDocument);
@@ -96,6 +95,10 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
   };
 
   const handleSelectDocument = (document: DocumentModelType) => {
+    // If the currently open primary document is clicked on, and there is an open secondary document,
+    // we make the secondary document primary, and close the secondary document.
+    // If there is a primary and secondary document open, and the user clicks on a third document,
+    // we close the secondary document, a make the open the third document as the secondary document.
     if (ui.focusDocument === document.key) {
       if (ui.focusSecondaryDocument) {
         ui.openSubTabDocument(tabSpec.tab, subTab.label, ui.focusSecondaryDocument);
@@ -103,22 +106,11 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
       } else {
         ui.closeSubTabDocument(tabSpec.tab, subTab.label);
       }
-    } else if (subTab.label === "Starred"){
-      if (tabState?.openDocuments.get("Starred")) {
-        if (ui.focusSecondaryDocument === document.key) {
-          ui.closeSubTabSecondaryDocument(tabSpec.tab, "Starred");
-        } else {
-          ui.openSubTabSecondaryDocument(tabSpec.tab, "Starred", document.key);
-        }
+    } else if (tabState?.openDocuments.get("Starred")) {
+      if (ui.focusSecondaryDocument === document.key) {
+        ui.closeSubTabSecondaryDocument(tabSpec.tab, "Starred");
       } else {
-        if (!document.hasContent && document.isRemote) {
-          loadDocumentContent(document);
-        }
-        ui.openSubTabDocument(tabSpec.tab, subTab.label, document.key);
-        const logEvent = document.isRemote
-          ? LogEventName.VIEW_SHOW_TEACHER_NETWORK_COMPARISON_DOCUMENT
-          : LogEventName.VIEW_SHOW_COMPARISON_DOCUMENT;
-        logDocumentEvent(logEvent, { document });
+        ui.openSubTabSecondaryDocument(tabSpec.tab, "Starred", document.key);
       }
     } else {
       if (!document.hasContent && document.isRemote) {
@@ -142,129 +134,47 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
   const handleChangeDocument = (shift: number, secondary?: boolean) => {
     const currentIndex = secondary ? currentOpenSecondaryDocIndex : currentOpenDocIndex;
     if (currentIndex !== undefined) {
-
       const getNewDocIndex = () => {
-        let tempNewDocIndex = (currentIndex + shift) % numStarredDocs;
+        let tempNewDocIndex = (((currentIndex + shift) % numStarredDocs) + numStarredDocs) % numStarredDocs;
         const currentIndexIsOpen = tempNewDocIndex === currentOpenDocIndex
                                     || tempNewDocIndex === currentOpenSecondaryDocIndex;
-
-        if (tabSpec.tab === "my-work") {
-          if (currentIndex === 0 && shift === -1) {
-            tempNewDocIndex = numStarredDocs - 1;
-            if (currentIndexIsOpen)
-              { tempNewDocIndex = tempNewDocIndex - 1; }
-          } else
-          if (currentIndex === numStarredDocs - 1 && shift === 1) {
-            tempNewDocIndex = 0;
-            if (currentIndexIsOpen)
-              { tempNewDocIndex = tempNewDocIndex + 1; }
-          } else {
-            tempNewDocIndex = (tempNewDocIndex + shift) % numStarredDocs;
-          }
-        } else {
-          console.log("currentIndexIsOpen", currentIndexIsOpen);
-            if (currentIndexIsOpen) {
-              tempNewDocIndex = (currentIndex + (2 * shift)) % numStarredDocs;
-            }
+        if (currentIndexIsOpen) {
+          tempNewDocIndex = (currentIndex + (2 * shift)) % numStarredDocs;
         }
-        console.log("tempNewDocIndex", tempNewDocIndex);
         return tempNewDocIndex;
       };
       const newDocIndex = getNewDocIndex();
-      const newDocKey = starredDocuments[newDocIndex].key;
-      // if (newDocIndex < numStarredDocs) newDocumentKey = starredDocuments[newDocIndex].key;
+      const newDocKey = starredDocuments.at(newDocIndex)?.key;
 
       if (secondary) {
-        ui.openSubTabSecondaryDocument(tabSpec.tab, subTab.label, newDocKey);
+        newDocKey && ui.openSubTabSecondaryDocument(tabSpec.tab, subTab.label, newDocKey);
       } else {
-        ui.openSubTabDocument(tabSpec.tab, subTab.label, newDocKey);
+        newDocKey && ui.openSubTabDocument(tabSpec.tab, subTab.label, newDocKey);
       }
     }
   };
-  // const handleShowPrevDocument = (secondary?: boolean) => {
-  //   let prevDocumentKey = "";
-  //   let tempPrevDocIndex = 0;
-  //   const currentIndex = secondary ? currentOpenSecondaryDocIndex : currentOpenDocIndex;
-  //   // This takes into account the problem document in My Work tab where documents are listed in [0,n..1]
-  //   tempPrevDocIndex = currentIndex + 1 >= numStarredDocs ? 0 : currentIndex + 1;
-  //   const prevDocIndex = tempPrevDocIndex === currentOpenDocIndex || tempPrevDocIndex === currentOpenSecondaryDocIndex
-  //                           ? tempPrevDocIndex + 1 : tempPrevDocIndex;
-  //   // if (prevDocIndex < numStarredDocs) prevDocumentKey = starredDocuments[prevDocIndex].key;
-  //   // if (secondary) {
-  //   //   ui.openSubTabSecondaryDocument(tabSpec.tab, subTab.label, prevDocumentKey);
-  //   // } else {
-  //   //   ui.openSubTabDocument(tabSpec.tab, subTab.label, prevDocumentKey);
-  //   // }
-  // };
 
-  // const handleShowNextDocument = (secondary?: boolean | undefined) => {
-  //   let nextDocumentKey = "";
-  //   let nextDocIndex: number;
-  //   const currentIndex = secondary ? currentOpenSecondaryDocIndex : currentOpenDocIndex;
-  //   if (secondary) {
-  //     if (tabSpec.tab === "my-work") {
-  //       if (currentIndex === 0) {
-  //         nextDocIndex = currentOpenDocIndex === numStarredDocs - 1 ? numStarredDocs - 2 : numStarredDocs - 1;
-  //       } else {
-  //         nextDocIndex = currentOpenDocIndex === currentIndex - 1 ? currentIndex - 2 : currentIndex - 1;
-  //       }
-  //     } else {
-  //       nextDocIndex = currentOpenDocIndex === currentIndex - 1 ? currentIndex - 2 : currentIndex - 1;
-  //     }
-  //   } else {
-  //     if (tabSpec.tab === "my-work") {
-  //       if (currentIndex === 0) {
-  //         nextDocIndex = currentOpenSecondaryDocIndex === numStarredDocs - 1 ? numStarredDocs - 2 : numStarredDocs - 1;
-  //       } else {
-  //         nextDocIndex = currentOpenSecondaryDocIndex === currentIndex - 1 ? currentIndex - 2 : currentIndex - 1;
-  //       }
-  //     } else {
-  //       nextDocIndex = currentOpenSecondaryDocIndex === currentIndex - 1 ? currentIndex - 2 : currentIndex - 1;
-  //     }
-  //   }
-
-  //   if (nextDocIndex < numStarredDocs) nextDocumentKey = starredDocuments[nextDocIndex].key;
-  //   // if (secondary) {
-  //   //   ui.openSubTabSecondaryDocument(tabSpec.tab, subTab.label, nextDocumentKey);
-  //   // } else {
-  //   //   ui.openSubTabDocument(tabSpec.tab, subTab.label, nextDocumentKey);
-  //   // }
-  // };
-
-  const hideLeftFlipper = () => {
+  const hideLeftFlipper = (position?: string) => {
+    const primaryDocIndex = position === "secondary" ? currentOpenSecondaryDocIndex : currentOpenDocIndex;
+    const secondaryDocIndex = position === "secondary" ? currentOpenDocIndex : currentOpenSecondaryDocIndex;
     if (tabSpec.tab === "class-work") {
-      return (currentOpenDocIndex === numStarredDocs - 1
-                || (currentOpenSecondaryDocIndex === numStarredDocs - 1 && currentOpenDocIndex === numStarredDocs - 2));
+      return (primaryDocIndex === numStarredDocs - 1
+                || (secondaryDocIndex === numStarredDocs - 1 && primaryDocIndex === numStarredDocs - 2));
     }
     if (tabSpec.tab === "my-work") {
-      return (currentOpenDocIndex === 0
-                || (currentOpenSecondaryDocIndex === 0 && currentOpenDocIndex === numStarredDocs - 1));
+      return (primaryDocIndex === 0
+                || (secondaryDocIndex === 0 && primaryDocIndex === numStarredDocs - 1));
     }
   };
-  const hideRightFlipper = () => {
+
+  const hideRightFlipper = (position?: string) => {
+    const primaryDocIndex = position === "secondary" ? currentOpenSecondaryDocIndex : currentOpenDocIndex;
+    const secondaryDocIndex = position === "secondary" ? currentOpenDocIndex : currentOpenSecondaryDocIndex;
     if (tabSpec.tab === "class-work") {
-      return (currentOpenDocIndex === 0 || (currentOpenSecondaryDocIndex === 0 && currentOpenDocIndex === 1));
+      return (primaryDocIndex === 0 || (secondaryDocIndex === 0 && primaryDocIndex === 1));
     }
     if (tabSpec.tab === "my-work") {
-      return (currentOpenDocIndex === 1 || (currentOpenSecondaryDocIndex === 1 && currentOpenDocIndex === 2));
-    }
-  };
-  const hideSecondaryLeftFlipper = () => {
-    if (tabSpec.tab === "class-work") {
-      return (currentOpenSecondaryDocIndex === numStarredDocs - 1
-                || (currentOpenDocIndex === numStarredDocs - 1 && currentOpenSecondaryDocIndex === numStarredDocs - 2));
-    }
-    if (tabSpec.tab === "my-work") {
-      return (currentOpenSecondaryDocIndex === 0
-                || (currentOpenDocIndex === 0 && currentOpenSecondaryDocIndex === numStarredDocs - 1));
-    }
-  };
-  const hideSecondaryRightFlipper = () => {
-    if (tabSpec.tab === "class-work") {
-      return (currentOpenSecondaryDocIndex === 0) || (currentOpenDocIndex === 0 && currentOpenSecondaryDocIndex === 1);
-    }
-    if (tabSpec.tab === "my-work") {
-      return (currentOpenSecondaryDocIndex === 1) || (currentOpenDocIndex === 1 && currentOpenSecondaryDocIndex === 2);
+      return (primaryDocIndex === 1 || (secondaryDocIndex === 1 && primaryDocIndex === 2));
     }
   };
 
@@ -310,7 +220,7 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
             </div>
             {(!openSecondaryDocument || openSecondaryDocument.getProperty("isDeleted"))
               ? null
-              : <div className="focus-document secondary">
+              : <div className={`focus-document secondary ${tabSpec.tab}`}>
                   <div className={`document-header ${tabSpec.tab} ${sectionClass} secondary`}
                         onClick={() => ui.setSelectedTile()}>
                     <div className={`document-title`}>
@@ -321,7 +231,7 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
                   </div>
             <div className="scroll-arrow-button-wrapper left">
               <ScrollButton side={"left"} tab={tabSpec.tab} onScroll={() => handleChangeDocument(1, true)}
-                  hidden={!isStarredTab || (isStarredTab && hideSecondaryLeftFlipper())} />
+                  hidden={!isStarredTab || (isStarredTab && hideLeftFlipper("secondary"))} />
             </div>
                   <EditableDocumentContent
                     mode={"1-up"}
@@ -332,7 +242,7 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
                   />
             <div className="scroll-arrow-button-wrapper right">
               <ScrollButton side={"right"} tab={tabSpec.tab} onScroll={() => handleChangeDocument(-1, true)}
-                  hidden={!isStarredTab || (isStarredTab && hideSecondaryRightFlipper())}/>
+                  hidden={!isStarredTab || (isStarredTab && hideRightFlipper("secondary"))}/>
             </div>
                 </div>
             }
@@ -392,7 +302,7 @@ const DocumentBrowserScroller =
 
   return (
     <>
-      <div className={classNames("scroller", {"collapsed": scrollerCollapsed})} ref={documentScrollerRef}>
+      <div className={classNames("scroller", tabSpec.tab, {"collapsed": scrollerCollapsed})} ref={documentScrollerRef}>
         {(scrollToLocation > 0) &&
             <ScrollEndControl side={"left"} hidden={scrollerCollapsed} tab={tabSpec.tab}
                 onScroll={handleScrollTo} />
