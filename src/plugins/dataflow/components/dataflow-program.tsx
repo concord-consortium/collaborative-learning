@@ -478,6 +478,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private updateChannels = () => {
+    console.log("| updateChannels")
     this.channels = [];
     this.channels = [...virtualSensorChannels, ...this.simulatedChannels, ...serialSensorChannels];
     this.countSerialDataNodes(this.programEditor.nodes);
@@ -490,6 +491,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       }
 
       if (node.name === "Live Output"){
+        console.log("| Live Output found")
         const hubSelect = getHubSelect(node);
         hubSelect.setChannels(this.channels);
 

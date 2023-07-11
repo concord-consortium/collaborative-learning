@@ -35,11 +35,11 @@ export function outputsToAnyGripper(node: Node) {
 }
 
 export function getLiveOptions(node: Node, sharedVar?: VariableType, device?: string | null) {
-  // console.log("| 1 getLiveOptions",
-  //   "\n       node:", node,
-  //   "\n  sharedVar:", sharedVar,
-  //   "\n     device:", device
-  // );
+  console.log("| 1 getLiveOptions",
+    "\n       node:", node,
+    "\n  sharedVar:", sharedVar,
+    "\n     device:", device
+  );
   const options: any[] = [];
   const simOption = sharedVar && simulatedHub(sharedVar);
   const anyOuputFound = simOption || device === "arduino" || device === "microbit";
@@ -48,7 +48,7 @@ export function getLiveOptions(node: Node, sharedVar?: VariableType, device?: st
     active: false,
     icon: AdvancedGrabber,
     id: "bb-gripper",
-    name: "Backyard Brains Gripper",
+    name: "Physical Gripper",
   };
 
   const warningOption = {
