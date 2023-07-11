@@ -478,11 +478,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private updateChannels = () => {
-    console.log("| updateChannels")
     this.channels = [];
     this.channels = [...virtualSensorChannels, ...this.simulatedChannels, ...serialSensorChannels];
     this.countSerialDataNodes(this.programEditor.nodes);
-    const anyDevice = this.stores.serialDevice.deviceFamily;
+    // const anyDevice = this.stores.serialDevice.deviceFamily;
 
     this.programEditor.nodes.forEach((node) => {
       if (node.name === "Sensor") {
@@ -491,19 +490,23 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       }
 
       if (node.name === "Live Output"){
-        console.log("| Live Output found")
         const hubSelect = getHubSelect(node);
         hubSelect.setChannels(this.channels);
 
         // Update live output hub options with simulated hubs
-        const outputVariable = findOutputVariable(node, this.props.tileContent?.outputVariables);
-        const options = getLiveOptions(node, outputVariable, anyDevice);
-        //const oldOptions = outputVariable ? [...NodeMicroBitHubs, simulatedHub(outputVariable)] : NodeMicroBitHubs;
 
-        if (!options.find(option => option.name === hubSelect.getValue())) {
-          hubSelect.setValue(options[0].name);
-        }
-        hubSelect.setOptions(options);
+        // MOVE START
+
+        // const outputVariable = findOutputVariable(node, this.props.tileContent?.outputVariables);
+        // const options = getLiveOptions(node, outputVariable, anyDevice);
+        // //const oldOptions = outputVariable ? [...NodeMicroBitHubs, simulatedHub(outputVariable)] : NodeMicroBitHubs;
+
+        // if (!options.find(option => option.name === hubSelect.getValue())) {
+        //   hubSelect.setValue(options[0].name);
+        // }
+        // hubSelect.setOptions(options);
+
+        // MOVE END
       }
     });
   };
@@ -629,6 +632,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private updateNodes = () => {
+    console.log("| ND updateNodes")
     const nodeProcessMap: { [name: string]: (n: Node) => void } = {
       Generator: updateGeneratorNode,
       Timer: updateTimerNode,
@@ -640,6 +644,19 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         updateNodeChannelInfo(n, this.channels, this.stores.serialDevice);
         sendDataToSerialDevice(n, this.stores.serialDevice);
         sendDataToSimulatedOutput(n, this.props.tileContent?.outputVariables);
+        const anyDevice = this.stores.serialDevice.deviceFamily;
+        const hubSelect = getHubSelect(n);
+        const outputVariable = findOutputVariable(n, this.props.tileContent?.outputVariables);
+        const options = getLiveOptions(n, outputVariable, anyDevice);
+        //const oldOptions = outputVariable ? [...NodeMicroBitHubs, simulatedHub(outputVariable)] : NodeMicroBitHubs;
+
+        // if (!options.find(option => option?.name === hubSelect.getValue())) {
+        //   hubSelect.setValue(options[0].name);
+        // }
+
+        if (anyDevice === "arduino") hubSelect.setValue("Physical Gripper")
+        hubSelect.setOptions(options);
+
       }
     };
     let processNeeded = false;
