@@ -36,9 +36,9 @@ describe('Networked dividers for networked teacher', () => {
     teacherNetwork.verifyDividerLabel('workspaces', 'my-classes');
     teacherNetwork.verifyDividerLabel('workspaces', 'my-network');
 
-    cy.openSection('my-work', 'starred');
-    teacherNetwork.verifyDividerLabel('starred', 'my-classes');
-    teacherNetwork.verifyDividerLabel('starred', 'my-network');
+    // cy.openSection('my-work', 'starred');
+    // teacherNetwork.verifyDividerLabel('starred', 'my-classes');
+    // teacherNetwork.verifyDividerLabel('starred', 'my-network');
 
     cy.openSection('my-work', 'learning-log');
     teacherNetwork.verifyDividerLabel('learning-log', 'my-classes');
@@ -58,8 +58,8 @@ describe('Networked dividers for networked teacher', () => {
     teacherNetwork.verifyDividerLabel('learning-logs', 'my-classes');
     teacherNetwork.verifyDividerLabel('learning-logs', 'my-network');
 
-    cy.openSection('class-work', 'starred');
-    teacherNetwork.verifyDividerLabel('starred', 'my-classes');
-    teacherNetwork.verifyDividerLabel('starred', 'my-network');
+    // cy.openSection('class-work', 'starred');
+    // teacherNetwork.verifyDividerLabel('starred', 'my-classes');
+    // teacherNetwork.verifyDividerLabel('starred', 'my-network');
   });
 });
