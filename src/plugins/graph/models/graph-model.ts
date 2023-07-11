@@ -173,7 +173,7 @@ export const GraphModel = TileContentModel
   .actions(self => ({
     linkDataSet() {
       if (!self.data) {
-        console.warn("linkDataSet requires an a dataset");
+        console.warn("GraphModel.linkDataSet requires a dataset");
         return;
       }
       self.config.setDataset(self.data);
@@ -182,7 +182,7 @@ export const GraphModel = TileContentModel
     },
     unlinkDataSet() {
       if (self.data) {
-        console.warn("unlinkDataSet requires the dataset is set");
+        console.warn("GraphModel. unlinkDataSet expects the dataset to be unlinked");
         return;
       }
       self.setAttributeID("y", "");
