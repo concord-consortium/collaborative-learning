@@ -45,7 +45,7 @@ export function getLiveOptions(node: Node, sharedVar?: VariableType, device?: st
   const anyOuputFound = simOption || device === "arduino" || device === "microbit";
 
   const liveGripperOption = {
-    active: false,
+    active: true,
     icon: AdvancedGrabber,
     id: "bb-gripper",
     name: "Physical Gripper",
