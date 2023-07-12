@@ -38,11 +38,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   const commentThreads = makeChatThreads(postedComments, content);
   const postCommentMutation = usePostDocumentComment();
 
-  // console.log("---------<ChatPanel>----------");
-  // console.log("postCommentMutation:", postCommentMutation);
-  // adding a second arg to postComment,
   const postComment = useCallback((comment: string, tag?: string) => {
-    console.log("chat-panel.tsx > postComment with \ncomment:", comment, "\ntag:", tag);
     if (focusDocument) {
       const numComments = postedComments ? postedComments.length : 0;
       const focusDocumentId = focusDocument;
@@ -54,14 +50,8 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
         action: "add",
         tag
       };
-      // console.log("eventPayload:", eventPayload);
       logCommentEvent(eventPayload);
     }
-
-    // console.log("document:", document);
-    // console.log(postCommentMutation.mutate({ document, comment: { content: comment, tileId: focusTileId } }));
-
-    //add an entry for the tag that was made
     return document
       ? postCommentMutation.mutate({ document, comment: { content: comment, tileId: focusTileId, tag} })
       : undefined;
