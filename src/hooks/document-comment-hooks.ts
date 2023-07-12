@@ -78,7 +78,7 @@ export const useValidateCommentableDocument = (options?: ValidateDocumentUseMuta
  *
  * Checks whether the specified document exists and creates it if not.
  * Implemented via React Query's useQuery hook.
- * 
+ *
  * @param documentKeyOrSectionPath
  * @param userId optional param that overrides the current user and the network.
  * This is used so teachers can find the path of student documents.
@@ -103,13 +103,13 @@ export const useCommentableDocument = (documentKeyOrSectionPath?: string, userId
         // `onSnapshot` above will just sit there waiting for the document to
         // show up if it doesn't exist. The better approach for checking for
         // existence is `get`:
-        
+
         // const documentRef = firestore.doc(documentPath);
         //   documentRef.get()
         //     .then(docSnapshot => {
         //       if (docSnapshot.exists) {
         //          ...
-        
+
         // However, creating the document if it doesn't exist, is actually not
         // necessary. `useCommentableDocument` is only called by
         // `useDocumentComments` and `useDocumentHistory`. In the case of
@@ -118,8 +118,8 @@ export const useCommentableDocument = (documentKeyOrSectionPath?: string, userId
         // the TreeManager will create the document if it doesn't exist.
         //
         // Both `useDocumentComments` and `useDocumentHistory` should be fine
-        // waiting until there is actually a document available. However the 
-        // unsubscribeDocLister will never be called if the document is never 
+        // waiting until there is actually a document available. However the
+        // unsubscribeDocLister will never be called if the document is never
         // created. So even if the component that called this hook is unmounted.
         // this onSnapshot listener is going to sit around.
         //
@@ -147,12 +147,14 @@ type PostDocumentCommentUseMutationOptions =
       UseMutationOptions<firebase.functions.HttpsCallableResult, unknown, IPostDocumentCommentClientParams>;
 
 export const usePostDocumentComment = (options?: PostDocumentCommentUseMutationOptions) => {
+  console.log("document-comment-hooks.ts  > usePostDocumentContent:", options);
   const queryClient = useQueryClient();
   const postDocumentComment = useFirebaseFunction<IPostDocumentCommentParams>("postDocumentComment_v1");
   const context = useUserContext();
   const postComment = useCallback((clientParams: IPostDocumentCommentClientParams) => {
     return postDocumentComment({ context, ...clientParams });
   }, [context, postDocumentComment]);
+
   const { onMutate: clientOnMutate, onError: clientOnError, ...otherClientOptions } = options || {};
   return useMutation(postComment, {
     onMutate: async newCommentParams => {
@@ -161,6 +163,7 @@ export const usePostDocumentComment = (options?: PostDocumentCommentUseMutationO
       // snapshot the current state of the comments in case we need to roll back on error
       const rollbackComments = queryKey && queryClient.getQueryData<CommentWithId[]>(queryKey);
       type CommentWithId = WithId<CommentDocument>;
+      console.log("options:", options);
       const newComment: CommentWithId = {
         id: `pending-${uniqueId()}`,
         uid: context.uid || "",
@@ -170,6 +173,10 @@ export const usePostDocumentComment = (options?: PostDocumentCommentUseMutationO
         tileId: comment.tileId,
         content: comment.content
       };
+
+      console.log("context:", context);
+      console.log("commment:", comment);
+
       // optimistically add the new comment (https://react-query.tanstack.com/guides/optimistic-updates)
       queryKey && queryClient.setQueryData<CommentWithId[]>(queryKey, prev => [...(prev || []), newComment]);
       // call client-specified onMutate (if provided)
@@ -249,16 +256,16 @@ const historyEntryConverter = {
 };
 
 /**
- * 
- * @param documentKeyOrSectionPath 
+ *
+ * @param documentKeyOrSectionPath
  * @param userId optional param that overrides the current user and the network.
  * This is used so teachers can find the path of student documents.
- * @returns 
+ * @returns
  */
 export const useDocumentHistory = (documentKeyOrSectionPath?: string, userId?: string) => {
   const { isSuccess } = useCommentableDocument(documentKeyOrSectionPath, userId);
   const docPath = useCommentableDocumentPath(documentKeyOrSectionPath || "", userId);
-  // docPath could in theory be an empty string which 
+  // docPath could in theory be an empty string which
   const queryPath = isSuccess && docPath ? `${docPath}/history` : "";
   const converter = historyEntryConverter;
   return useCollectionOrderedRealTimeQuery(queryPath, { converter, orderBy: "index" });

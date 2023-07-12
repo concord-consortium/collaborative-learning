@@ -177,6 +177,7 @@ export type IPublishSupportUnionParams = IPublishSupportParams | IFirebaseFuncti
 export interface IClientCommentParams {
   tileId?: string;    // empty for document comments
   content: string;    // plain text for now; potentially html if we need rich text
+  tag?: string;       // tag option that user selects for AI
 }
 
 export interface ICommentableDocumentParams extends IFirebaseFunctionBaseParams {

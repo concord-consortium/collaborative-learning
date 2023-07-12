@@ -40,14 +40,10 @@ export class ConfigurationManager implements UnitConfiguration {
   }
 
   get showCommentTag(){
-    console.log("showCommentTag!!");
-    console.log(this.getProp<UC["showCommentTag"]>("showCommentTag"));
-
     return this.getProp<UC["showCommentTag"]>("showCommentTag");
   }
 
   get commentTags(){
-    console.log("configuration-manager.ts > getcommentTags()");
     return  (this.showCommentTag) ? this.getProp<UC["commentTags"]>("commentTags") : [];
   }
 

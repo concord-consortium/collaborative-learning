@@ -8,7 +8,7 @@ import { useCautionAlert } from "../utilities/use-caution-alert";
 import UserIcon from "../../assets/icons/clue-dashboard/teacher-student.svg";
 import DeleteMessageIcon from "../../assets/delete-message-icon.svg";
 import AIAssistantIcon from "../../assets/ai-assistant-icon.svg"; //will be used in next ticket
-import { useStores } from "../../hooks/use-stores";
+import { useAppConfig, useStores } from "../../hooks/use-stores";
 
 import "./comment-card.scss";
 import "../themes.scss";
@@ -17,7 +17,7 @@ interface IProps {
   user?: UserModelType;
   activeNavTab?: string;
   postedComments?: WithId<CommentDocument>[];
-  onPostComment?: (comment: string) => void;
+  onPostComment?: (comment: string, tag: string) => void;
   onDeleteComment?: (commentId: string, commentContent: string) => void;
   focusDocument?: string;
   focusTileId?: string;
@@ -59,8 +59,14 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
   };
 
   //For UI purposes, Leslie gave the go ahead for hard-coded values
-  const dropDownOptions = ["Select Student Strategy", "Part-to-Part",
-  "Part-to-Whole", "Unit Rate", "Guess and Check", "None"];
+  const mockCommentTags = {
+    "tag0": "Part-to-Part",
+    "tag1": "Part-to-Whole",
+    "tag2": "Unit Rate",
+    "tag3": "Guess and Check",
+    "tag4": "None"
+  };
+
   const { appConfig } = useStores();
 
   //commentTags
@@ -71,6 +77,8 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
     <div className="comment-card selected" data-testid="comment-card">
       <div className="comment-card-content selected" data-testid="comment-card-content">
         {postedComments?.map((comment, idx) => {
+            console.log("comment:", comment);
+
             const userInitialBackgroundColor = ["#f79999", "#ffc18a", "#99d099", "#ff9", "#b2b2ff", "#efa6ef"];
             const commenterInitial = comment.name.charAt(0);
             const userInitialBackgroundColorIndex = parseInt(comment.uid, 10) % 6;
@@ -96,9 +104,11 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
                     </div>
                   }
                 </div>
-                <div className="comment-dropdown-tag">
-                  {dropDownOptions[1]}
-                </div>
+                {
+                !!(comment.tag) && <div className="comment-dropdown-tag">
+                                     { comment.tag }
+                                   </div>
+                }
                 <div key={idx} className="comment-text" data-testid="comment">
                   {comment.content}
                 </div>
@@ -112,6 +122,8 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
           numPostedComments={postedComments?.length || 0}
           showCommentTag={appConfig.showCommentTag}
           commentTags={appConfig.commentTags}
+          // showCommentTag={true} //these are for mock
+          // commentTags={mockCommentTags}
         />
       </div>
     </div>

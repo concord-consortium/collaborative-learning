@@ -106,7 +106,10 @@
     select { //drop down menu of tagged options
       left: 11px;
       height: 26px;
+            // scroll-behavior: auto;
+
       position: absolute;
+      // position: fixed;
       margin: 1px 4px 6px;
       width: calc(100% - 30px);
       font-family: Lato;
