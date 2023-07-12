@@ -102,6 +102,8 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
                               ? "Comment on this tile..."
                               : "Reply...";
 
+  console.log("deployed: comment-textbox:", commentTags);
+
   return (
     <div className="comment-textbox">
       <textarea
