@@ -178,6 +178,86 @@ exports[`Drawing Layer Components Rectangle moves a rectangle 1`] = `
 </svg>
 `;
 
+exports[`Drawing Layer Components Vector arrow adds a Vector arrow 1`] = `
+<svg
+  height="1500"
+  width="1500"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+>
+  <g
+    fill="#777777"
+    stroke="#777777"
+    stroke-dasharray=""
+    stroke-width="2"
+  >
+    <line
+      x1="20"
+      x2="40"
+      y1="20"
+      y2="40"
+    />
+    <g
+      transform="translate(40 40) rotate(135)"
+    >
+      <polygon
+        points="0 0 4.5 9 -4.5 9 0 0"
+      />
+    </g>
+    <g
+      transform="translate(20 20) rotate(315)"
+    >
+      <polygon
+        points="0 0 4.5 9 -4.5 9 0 0"
+      />
+    </g>
+  </g>
+</svg>
+`;
+
+exports[`Drawing Layer Components Vector arrow deletes a vector arrow 1`] = `
+<svg
+  height="1500"
+  width="1500"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+/>
+`;
+
+exports[`Drawing Layer Components Vector arrow moves a vector arrow 1`] = `
+<svg
+  height="1500"
+  width="1500"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+>
+  <g
+    fill="#777777"
+    stroke="#777777"
+    stroke-dasharray=""
+    stroke-width="2"
+  >
+    <line
+      x1="5"
+      x2="25"
+      y1="5"
+      y2="25"
+    />
+    <g
+      transform="translate(25 25) rotate(135)"
+    >
+      <polygon
+        points="0 0 4.5 9 -4.5 9 0 0"
+      />
+    </g>
+    <g
+      transform="translate(5 5) rotate(315)"
+    >
+      <polygon
+        points="0 0 4.5 9 -4.5 9 0 0"
+      />
+    </g>
+  </g>
+</svg>
+`;
+
 exports[`Drawing Layer Components Vector line adds a Vector line 1`] = `
 <svg
   height="1500"
