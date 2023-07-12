@@ -101,6 +101,9 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
                             : ui.selectedTileIds.length !== 0 && numPostedComments < 1
                               ? "Comment on this tile..."
                               : "Reply...";
+
+  console.log("comment-textbox:", commentTags);
+
   return (
     <div className="comment-textbox">
       <textarea
@@ -121,8 +124,8 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
         }}
       >
         {
-          showCommentTag && commentTags && commentTags
-          .map((option, idx) => {
+          showCommentTag && commentTags &&
+          commentTags.map((option, idx) => {
             console.log("idx:", idx);
             const key = `tag${idx}` as keyof typeof commentTags;
             const value = commentTags[key] as string;
