@@ -26,11 +26,8 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
   const ui = useUIStore();
   const store = useStores();
   const appConfigStore = useAppConfig();
-  const problemStore = useProblemStore();
   const context = useUserContext();
   const queryClient = useQueryClient();
-  const user = useUserStore();
-  const classStore = useClassStore();
   const documents = useLocalDocuments();
   const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
   const tabState = navTabSpec && ui.tabs.get(navTabSpec?.tab);
@@ -40,10 +37,9 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
   const openSecondaryDocumentKey = tabState?.openSecondaryDocuments.get(subTab.label) || "";
   const openSecondaryDocument = store.documents.getDocument(openSecondaryDocumentKey) ||
     store.networkDocuments.getDocument(openSecondaryDocumentKey);
-  const showPlayback = user.type && !openDocument?.isPublished
-                          ? appConfigStore.enableHistoryRoles.includes(user.type) : false;
   const isStarredTab = subTab.label === "Starred";
-  const skipDocument = !openDocument || openDocument.getProperty("isDeleted");
+  const noValidDocument = !openDocument || openDocument.getProperty("isDeleted");
+  const noSecondaryDocument = !openSecondaryDocument || openSecondaryDocument.getProperty("isDeleted");
 
   const documentTypes: DocumentType[] = tabSpec.tab === "class-work"
                                           ? ["publication"]
@@ -67,29 +63,6 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
   const currentOpenSecondaryDocIndex = openSecondaryDocument && starredDocuments.indexOf(openSecondaryDocument);
   const sectionClass = openDocument?.type === "learningLog" ? "learning-log" : "";
 
-  function handleEditClick(document: DocumentModelType) {
-    ui.problemWorkspace.setPrimaryDocument(document);
-  }
-  // TODO: this edit button is confusing when the history is being viewed. It
-  // opens the original document for editing, not some old version of the
-  // document they might be looking at. Previously this edit button was disabled
-  // when the history document was being shown because SectionDocumentOrBrowser
-  // knew the state of playback controls. It no longer knows that state, so now
-  // the edit button is shown all of the time.
-  // PT Story: https://www.pivotaltracker.com/story/show/183416176
-  const editButton = (type: string, sClass: string, document: DocumentModelType) => {
-    return (
-      (type === "my-work") || (type === "learningLog")
-        ?
-          <div className={`edit-button ${sClass}`}
-                onClick={() => handleEditClick(document)}>
-            <EditIcon className={`edit-icon ${sClass}`} />
-            <div>Edit</div>
-          </div>
-        : null
-    );
-  };
-
   const loadDocumentContent = async (document: DocumentModelType) => {
     await document.fetchRemoteContent(queryClient, context);
   };
@@ -98,7 +71,7 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
     // If the currently open primary document is clicked on, and there is an open secondary document,
     // we make the secondary document primary, and close the secondary document.
     // If there is a primary and secondary document open, and the user clicks on a third document,
-    // we close the secondary document, a make the open the third document as the secondary document.
+    // we close the secondary document, and make the open the third document as the secondary document.
     if (ui.focusDocument === document.key) {
       if (ui.focusSecondaryDocument) {
         ui.openSubTabDocument(tabSpec.tab, subTab.label, ui.focusSecondaryDocument);
@@ -139,7 +112,7 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
         const currentIndexIsOpen = tempNewDocIndex === currentOpenDocIndex
                                     || tempNewDocIndex === currentOpenSecondaryDocIndex;
         if (currentIndexIsOpen) {
-          tempNewDocIndex = (currentIndex + (2 * shift)) % numStarredDocs;
+          tempNewDocIndex = (((currentIndex + (2 * shift)) % numStarredDocs) + numStarredDocs) % numStarredDocs;
         }
         return tempNewDocIndex;
       };
@@ -178,76 +151,32 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
     }
   };
 
-  const getDisplayTitle = (document: DocumentModelType) => {
-    const documentOwner = classStore.users.get(document.uid);
-    const documentTitle = getDocumentDisplayTitle(document, appConfigStore, problemStore);
-    return openSecondaryDocument && documentOwner ? documentOwner.fullName + " " + documentTitle : documentTitle;
-  };
-
   return (
     <div className="scroller-and-document">
       { isStarredTab &&
         <DocumentBrowserScroller subTab={subTab} tabSpec={tabSpec} openDocumentKey={openDocumentKey}
             openSecondaryDocumentKey={openSecondaryDocumentKey} onSelectDocument={handleSelectDocument} />
       }
-      {skipDocument
-        ? null
-        : <div className="document-area">
-            <div className={`focus-document ${openSecondaryDocument ? "primary" : ""}`}>
-              <div className={`document-header ${tabSpec.tab} ${sectionClass}
-                              ${openSecondaryDocument ? "primary" : ""}`} onClick={() => ui.setSelectedTile()}>
-                <div className={`document-title`}>
-                  {getDisplayTitle(openDocument)}
-                </div>
-                {(!openDocument.isRemote)
-                    && editButton(tabSpec.tab, sectionClass, openDocument)}
-              </div>
-              <div className="scroll-arrow-button-wrapper left">
-                <ScrollButton side={"left"} tab={tabSpec.tab} onScroll={() => handleChangeDocument(1)}
-                    hidden={!isStarredTab || (isStarredTab && hideLeftFlipper())} />
-              </div>
-              <EditableDocumentContent
-                mode={"1-up"}
-                isPrimary={false}
-                document={openDocument}
-                readOnly={true}
-                showPlayback={showPlayback}
-              />
-              <div className="scroll-arrow-button-wrapper right">
-                <ScrollButton side={"right"} tab={tabSpec.tab} onScroll={() => handleChangeDocument(-1)}
-                    hidden={!isStarredTab || (isStarredTab && hideRightFlipper())}/>
-              </div>
-            </div>
-            {(!openSecondaryDocument || openSecondaryDocument.getProperty("isDeleted"))
-              ? null
-              : <div className={`focus-document secondary ${tabSpec.tab}`}>
-                  <div className={`document-header ${tabSpec.tab} ${sectionClass} secondary`}
-                        onClick={() => ui.setSelectedTile()}>
-                    <div className={`document-title`}>
-                      {getDisplayTitle(openSecondaryDocument)}
-                    </div>
-                    {(!openSecondaryDocument.isRemote)
-                        && editButton(tabSpec.tab, sectionClass, openSecondaryDocument)}
-                  </div>
-            <div className="scroll-arrow-button-wrapper left">
-              <ScrollButton side={"left"} tab={tabSpec.tab} onScroll={() => handleChangeDocument(1, true)}
-                  hidden={!isStarredTab || (isStarredTab && hideLeftFlipper("secondary"))} />
-            </div>
-                  <EditableDocumentContent
-                    mode={"1-up"}
-                    isPrimary={false}
-                    document={openSecondaryDocument}
-                    readOnly={true}
-                    showPlayback={showPlayback}
-                  />
-            <div className="scroll-arrow-button-wrapper right">
-              <ScrollButton side={"right"} tab={tabSpec.tab} onScroll={() => handleChangeDocument(-1, true)}
-                  hidden={!isStarredTab || (isStarredTab && hideRightFlipper("secondary"))}/>
-            </div>
-                </div>
-            }
-          </div>
-      }
+      <div className="document-area">
+        {noValidDocument
+          ? null
+          : <DocumentArea openDocument={openDocument} subTab={subTab} tab={tabSpec.tab}
+              sectionClass={sectionClass} hasSecondaryDocument={isStarredTab && !noSecondaryDocument}
+              hideLeftFlipper={!isStarredTab || (isStarredTab && hideLeftFlipper())}
+              hideRightFlipper={!isStarredTab || (isStarredTab && hideRightFlipper())}
+              onChangeDocument={handleChangeDocument}
+            />
+        }
+        {noSecondaryDocument
+          ? null
+          : <DocumentArea openDocument={openSecondaryDocument} subTab={subTab} tab={tabSpec.tab}
+              sectionClass={sectionClass} isSecondaryDocument={true} hasSecondaryDocument={true}
+              hideLeftFlipper={!isStarredTab || (isStarredTab && hideLeftFlipper("secondary"))}
+              hideRightFlipper={!isStarredTab || (isStarredTab && hideRightFlipper("secondary"))}
+              onChangeDocument={handleChangeDocument}
+            />
+        }
+      </div>
     </div>
   );
 });
@@ -335,7 +264,9 @@ interface IScrollEndControlProps {
   side: string;
   hidden?: boolean;
   tab: string;
-  onScroll: (side: string) => void
+  secondary?: boolean;
+  shift?: number;
+  onScroll: (side: string, shift?: number, secondary?: boolean) => void
 }
 
 const ScrollEndControl = ({side, hidden, tab, onScroll}: IScrollEndControlProps) => {
@@ -348,12 +279,111 @@ const ScrollEndControl = ({side, hidden, tab, onScroll}: IScrollEndControlProps)
   );
 };
 
-const ScrollButton = ({side, hidden, tab, onScroll}: IScrollEndControlProps) => {
+const ScrollButton = ({side, hidden, tab, shift, secondary, onScroll}: IScrollEndControlProps) => {
   if (hidden) return null;
   return (
     <div className={classNames("scroll-arrow-button", "themed", tab, side)}
-          onClick={()=>onScroll(side)}>
+          onClick={()=>onScroll(side, shift, secondary)}>
       <ScrollArrowIcon className={`scroll-arrow-icon ${side} themed ${tab}`} />
+    </div>
+  );
+};
+
+interface IDocumentFlipperControl {
+  side: string;
+  hidden?: boolean;
+  tab: string;
+  shift: number;
+  secondary?: boolean
+  onChangeDocument: (shift: number, secondary?: boolean) => void
+}
+
+const DocumentFlipperControl = ({side, hidden, tab, secondary, onChangeDocument}: IDocumentFlipperControl) => {
+  if (hidden) return null;
+  return (
+    <div className={`scroll-arrow-button-wrapper ${side}`}>
+      <ScrollButton side={side} tab={tab} onScroll={()=>onChangeDocument(1, secondary)} hidden={hidden} />
+    </div>
+  );
+};
+
+interface IDocumentAreaProps {
+  openDocument: DocumentModelType;
+  subTab: ISubTabSpec;
+  tab: string;
+  sectionClass: string;
+  isSecondaryDocument?: boolean;
+  hasSecondaryDocument?: boolean;
+  hideLeftFlipper?: boolean;
+  hideRightFlipper?: boolean;
+  onChangeDocument?: (shift: number, secondary?: boolean) => void;
+}
+
+const DocumentArea = ({openDocument, tab, sectionClass, isSecondaryDocument,
+    hasSecondaryDocument, hideLeftFlipper, hideRightFlipper, onChangeDocument}: IDocumentAreaProps) => {
+  const ui = useUIStore();
+  const user = useUserStore();
+  const appConfig = useAppConfig();
+  const classStore = useClassStore();
+  const problemStore = useProblemStore();
+  const showPlayback = user.type && !openDocument?.isPublished
+                          ? appConfig.enableHistoryRoles.includes(user.type) : false;
+  const getDisplayTitle = (document: DocumentModelType) => {
+    const documentOwner = classStore.users.get(document.uid);
+    const documentTitle = getDocumentDisplayTitle(document, appConfig, problemStore);
+    return hasSecondaryDocument && documentOwner ? documentOwner.fullName + " " + documentTitle : documentTitle;
+  };
+
+  function handleEditClick(document: DocumentModelType) {
+    ui.problemWorkspace.setPrimaryDocument(document);
+  }
+  // TODO: this edit button is confusing when the history is being viewed. It
+  // opens the original document for editing, not some old version of the
+  // document they might be looking at. Previously this edit button was disabled
+  // when the history document was being shown because SectionDocumentOrBrowser
+  // knew the state of playback controls. It no longer knows that state, so now
+  // the edit button is shown all of the time.
+  // PT Story: https://www.pivotaltracker.com/story/show/183416176
+  const editButton = (type: string, sClass: string, document: DocumentModelType) => {
+    return (
+      (type === "my-work") || (type === "learningLog")
+        ?
+          <div className={`edit-button ${sClass}`}
+                onClick={() => handleEditClick(document)}>
+            <EditIcon className={`edit-icon ${sClass}`} />
+            <div>Edit</div>
+          </div>
+        : null
+    );
+  };
+
+  return (
+    <div className={classNames("focus-document", tab,
+                                isSecondaryDocument ? "secondary" : hasSecondaryDocument ? "primary" : "")}>
+      <div className={classNames("document-header", tab, sectionClass,
+                                  isSecondaryDocument ? "secondary" : hasSecondaryDocument ? "primary" : "")}
+            onClick={() => ui.setSelectedTile()}>
+        <div className={`document-title`}>
+          {getDisplayTitle(openDocument)}
+        </div>
+        {(!openDocument.isRemote)
+            && editButton(tab, sectionClass, openDocument)}
+      </div>
+      {onChangeDocument &&
+        <DocumentFlipperControl side={"left"} tab={tab} shift={1}
+            onChangeDocument={()=>onChangeDocument(1, isSecondaryDocument)} hidden={hideLeftFlipper}/>
+      }
+      <EditableDocumentContent
+        mode={"1-up"}
+        isPrimary={false}
+        document={openDocument}
+        readOnly={true}
+        showPlayback={showPlayback}
+      />
+      {onChangeDocument &&
+        <DocumentFlipperControl side={"right"} tab={tab} shift={-1}
+            onChangeDocument={()=>onChangeDocument(-1, isSecondaryDocument)} hidden={hideRightFlipper}/>
+      }
     </div>
   );
 };
