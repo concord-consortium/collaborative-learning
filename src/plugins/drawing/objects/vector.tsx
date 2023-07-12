@@ -155,7 +155,8 @@ export const VectorToolbarButton: React.FC<IToolbarButtonProps> = observer(({
   }, [toolbarManager, togglePaletteState]);
 
   const handleButtonTouchHold = useCallback(() => {
-    toolbarManager.setSelectedButton(modalButton);
+    // Do not set the vector button as the selected tool yet.
+    // The user might be opening the palette just to change the type of existing, selected vectors.
     togglePaletteState('showVectors');
   }, [toolbarManager, togglePaletteState]);
 

@@ -81,6 +81,7 @@ export const ToolbarView: React.FC<IProps> = (
   };
   const handleVectorTypeChange = (type: VectorType) => {
     isEnabled && drawingContent.setVectorType(type, drawingContent.selectedIds);
+    drawingContent.setSelectedButton("vector");
     clearPaletteState();
   };
 
