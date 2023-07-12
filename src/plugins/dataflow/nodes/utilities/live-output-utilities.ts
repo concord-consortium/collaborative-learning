@@ -1,5 +1,5 @@
 import { Node } from "rete";
-import { DropdownListControl } from "../controls/dropdown-list-control";
+import { DropdownListControl, ListOption } from "../controls/dropdown-list-control";
 import { kMicroBitHubRelaysIndexed, kGripperOutputTypes,
   NodeMicroBitHubs, baseLiveOutputOptions
 } from "../../model/utilities/node";
@@ -17,7 +17,7 @@ export function getHubSelect(node: Node) {
 
 export function getOutputType(node: Node) {
   const outputTypeControl = node.controls.get("liveOutputType") as DropdownListControl;
-  if (outputTypeControl) return outputTypeControl.getValue();
+  return outputTypeControl?.getValue();
 }
 
 export function getNodeValueWithType(node: Node): NodeOutputValue {
@@ -34,21 +34,21 @@ export function outputsToAnyGripper(node: Node) {
   return kGripperOutputTypes.includes(getOutputType(node));
 }
 
-export function getLiveOptions(node: Node, sharedVar?: VariableType, device?: string | null) {
-  const options: any[] = [];
+export function getLiveOptions(node: Node, deviceFamily: string, sharedVar?: VariableType ) {
+  const options: ListOption[] = [];
   const simOption = sharedVar && simulatedHub(sharedVar);
-  const anyOuputFound = simOption || device === "arduino" || device === "microbit";
+  const anyOuputFound = simOption || deviceFamily === "arduino" || deviceFamily === "microbit";
   const { liveGripperOption, warningOption } = baseLiveOutputOptions;
 
-  if (sharedVar) {
+  if (sharedVar && simOption) {
     options.push(simOption);
   }
 
-  if (outputsToAnyRelay(node) && device === "microbit") {
+  if (outputsToAnyRelay(node) && deviceFamily === "microbit") {
     options.push(...NodeMicroBitHubs);
   }
 
-  if (outputsToAnyGripper(node) && device === "arduino") {
+  if (outputsToAnyGripper(node) && deviceFamily === "arduino") {
     options.push(liveGripperOption);
   }
 
@@ -57,12 +57,12 @@ export function getLiveOptions(node: Node, sharedVar?: VariableType, device?: st
   return options;
 }
 
-export function setLiveOutputOpts(node: Node, device: string | null, sharedVar?: VariableType) {
+export function setLiveOutputOpts(node: Node, deviceFamily: string, sharedVar?: VariableType) {
   const hubSelect = getHubSelect(node);
-  const options = getLiveOptions(node, sharedVar, device);
+  const options = getLiveOptions(node, deviceFamily, sharedVar);
   const selectedOption = options.find(option => option && option.name === hubSelect.getValue());
-  const firstOption = !selectedOption ? options[0] : undefined;
-  if (firstOption) hubSelect.setValue(firstOption.name);
-  //if (device === "arduino" && !sharedVar) hubSelect.setValue("Physical Gripper");
+  if (!selectedOption) hubSelect.setValue(options[0]?.name);
+  // const firstOption = !selectedOption ? options[0] : undefined;
+  // if (firstOption) hubSelect.setValue(firstOption.name);
   hubSelect.setOptions(options);
 }
