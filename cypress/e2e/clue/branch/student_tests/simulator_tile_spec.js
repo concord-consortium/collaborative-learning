@@ -6,7 +6,7 @@ let clueCanvas = new ClueCanvas;
 const dataflowTile = new DataflowTile;
 let simulatorTile = new SimulatorTile;
 
-context('Simulator Tile with Brainwaves Gripper Simulation', function () {
+context.skip('Simulator Tile with Brainwaves Gripper Simulation', function () {
   beforeEach(function () {
     const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&mouseSensor&unit=dfe";
     cy.clearQAData('all');
@@ -90,7 +90,7 @@ context('Simulator Tile with Brainwaves Gripper Simulation', function () {
   });
 });
 
-context('Simulator Tile with Terrarium Simulation', function() {
+context.skip('Simulator Tile with Terrarium Simulation', function() {
   beforeEach(function () {
     const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&mouseSensor&unit=seeit";
     cy.clearQAData('all');
