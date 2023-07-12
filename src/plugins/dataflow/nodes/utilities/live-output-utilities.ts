@@ -61,8 +61,7 @@ export function setLiveOutputOpts(node: Node, deviceFamily: string, sharedVar?: 
   const hubSelect = getHubSelect(node);
   const options = getLiveOptions(node, deviceFamily, sharedVar);
   const selectedOption = options.find(option => option && option.name === hubSelect.getValue());
-  if (!selectedOption) hubSelect.setValue(options[0]?.name);
-  // const firstOption = !selectedOption ? options[0] : undefined;
-  // if (firstOption) hubSelect.setValue(firstOption.name);
+  const firstOption = !selectedOption ? options[0] : undefined;
+  if (firstOption) hubSelect.setValue(firstOption.name);
   hubSelect.setOptions(options);
 }

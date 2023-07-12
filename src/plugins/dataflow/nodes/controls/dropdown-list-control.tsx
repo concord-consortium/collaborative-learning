@@ -178,7 +178,7 @@ export class DropdownListControl extends Rete.Control {
     const optionArray = this.props.optionArray;
     const value = this.props.value;
     if (optionArray && value){
-      const selectedOption = optionArray.find((option: any) => optionValue(option) === value);
+      const selectedOption = optionArray.find((option: ListOption) => optionValue(option) === value);
       const selectionId = selectedOption ? selectedOption.id : undefined;
       return selectionId;
     }
