@@ -1,4 +1,5 @@
 import { reaction } from "mobx";
+import { isAlive } from "mobx-state-tree";
 import { useEffect } from "react";
 import { useMemo } from "use-memo-one";
 import { AxisPlace } from "../axis/axis-types";
@@ -13,8 +14,9 @@ export function useInitGraphLayout(model?: IGraphModel) {
     return reaction(
       () => {
         const repetitions: Partial<Record<AxisPlace, number>> = {};
-        layout.axisScales.forEach((multiScale, place) => {
-          repetitions[place] = model?.config.numRepetitionsForPlace(place) ?? 1;
+        model && isAlive(model) && layout.axisScales.forEach((multiScale, place) => {
+          const { config } = model;
+          repetitions[place] = config.numRepetitionsForPlace(place) ?? 1;
         });
         return repetitions;
       },
@@ -24,7 +26,7 @@ export function useInitGraphLayout(model?: IGraphModel) {
         });
       }
     );
-  }, [layout, model?.config]);
+  }, [layout, model]);
 
   return layout;
 }
