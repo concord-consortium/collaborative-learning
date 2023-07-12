@@ -19,6 +19,7 @@ import { ImageObject } from "../objects/image";
 const SELECTION_COLOR = "#777";
 const HOVER_COLOR = "#bbdd00";
 const SELECTION_BOX_PADDING = 10;
+const SELECTION_BOX_RESIZE_HANDLE_SIZE = 10;
 
 /**  ======= Drawing Layer ======= */
 interface DrawingToolMap {
@@ -307,15 +308,26 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     });
   }
 
-  public renderSelectedObjects(selectedObjects: DrawingObjectType[], color: string) {
+  public renderSelectedObjects(selectedObjects: DrawingObjectType[], enableActions: boolean) {
     return selectedObjects.map((object, index) => {
       let {nw: {x: nwX, y: nwY}, se: {x: seX, y: seY}} = object.boundingBox;
       nwX -= SELECTION_BOX_PADDING;
       nwY -= SELECTION_BOX_PADDING;
       seX += SELECTION_BOX_PADDING;
       seY += SELECTION_BOX_PADDING;
-      return <rect
-                key={index}
+
+      const color = enableActions ? SELECTION_COLOR : HOVER_COLOR;
+
+      const resizers = enableActions && 
+        <g>
+          {this.renderResizeHandle(object, "nw", nwX, nwY, color)}
+          {this.renderResizeHandle(object, "ne", seX, nwY, color)} 
+          {this.renderResizeHandle(object, "sw", nwX, seY, color)}
+          {this.renderResizeHandle(object, "se", seX, seY, color)}
+      </g>;
+
+      return <g key={index}>
+              <rect
                 data-testid="selection-box"
                 x={nwX}
                 y={nwY}
@@ -327,8 +339,34 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
                 strokeWidth="1.5"
                 strokeDasharray="10 5"
                 pointerEvents={"none"}
-               />;
+               />
+               {resizers}
+             </g>;
     });
+  }
+
+  public renderResizeHandle(object: DrawingObjectType, corner: string, x: number, y: number, color: string) {
+    const resizeBoxOffset = SELECTION_BOX_RESIZE_HANDLE_SIZE/2;
+
+    return <rect key={corner} className={"resize-handle " + corner}
+                x={x-resizeBoxOffset} y={y-resizeBoxOffset} 
+                width={SELECTION_BOX_RESIZE_HANDLE_SIZE} height={SELECTION_BOX_RESIZE_HANDLE_SIZE}
+                stroke={color} strokeWidth="1" fill="#FFF" fillOpacity="1"
+                onMouseDown={(e) => this.startResize(e, object)}
+                onMouseUp={(e) => this.completeResize(e, object)}
+          />
+  }
+
+  private startResize(e: React.MouseEvent<SVGRectElement>, object: DrawingObjectType) {
+    e.stopPropagation();
+    e.preventDefault();
+    e.currentTarget.classList.add('active');
+  }
+
+  private completeResize(e: React.MouseEvent<SVGRectElement>, object: DrawingObjectType) {
+    e.stopPropagation();
+    e.preventDefault();
+    e.currentTarget.classList.remove('active');
   }
 
   //we want to populate our objectsBeingDragged state array
@@ -371,9 +409,9 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
           {this.renderObjects(object => object.type === "image" && !idsBeingDragged.includes(object.id))}
           {this.renderObjects(object => object.type !== "image" && !idsBeingDragged.includes(object.id))}
           {this.state.objectsBeingDragged.map((object) => renderDrawingObject(object))}
-          {this.renderSelectedObjects(objectsToRenderSelected, SELECTION_COLOR)}
+          {this.renderSelectedObjects(objectsToRenderSelected, true)}
           {(this.state.hoverObject && !hoveringOverAlreadySelectedObject && isAlive(this.state.hoverObject))
-            ? this.renderSelectedObjects([this.state.hoverObject], HOVER_COLOR)
+            ? this.renderSelectedObjects([this.state.hoverObject], false)
             : null}
           {this.state.currentDrawingObject
             ? renderDrawingObject(this.state.currentDrawingObject)

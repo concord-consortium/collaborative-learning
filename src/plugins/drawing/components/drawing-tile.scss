@@ -4,6 +4,41 @@
   display: flex;
   border: 1px solid #BBB;
   height: 100%;
+
+  .drawing-layer {
+
+    svg {
+
+      .resize-handle {
+        fill: #ffffff;
+
+        &:hover {
+          fill: $workspace-teal-light-6;
+
+          &.nw {
+            cursor: nwse-resize;
+          }
+
+          &.ne {
+            cursor: nesw-resize;
+          }
+
+          &.sw {
+            cursor: nesw-resize;
+          }
+
+          &.se {
+            cursor: nwse-resize;
+          }
+        }
+
+        &.active {
+          fill: $workspace-teal;
+        }
+      }
+
+    }
+  }
 }
 
 .drawing-tool-toolbar {
