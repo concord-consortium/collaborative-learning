@@ -7,6 +7,7 @@ import { useStopEventPropagation, useCloseDropdownOnOutsideEvent } from "./custo
 import DropdownCaretIcon from "../../assets/icons/dropdown-caret.svg";
 import { dataflowLogEvent } from "../../dataflow-logger";
 import { NodeChannelInfo } from "../../model/utilities/channel";
+import { kGripperOutputTypes } from "../../model/utilities/node";
 
 import "./dropdown-list-control.scss";
 
@@ -108,7 +109,9 @@ export class DropdownListControl extends Rete.Control {
               const className = classNames("item", listClass, {
                 disabled,
                 selectable: !disabled,
-                selected: optionValue(ops) === val
+                selected: optionValue(ops) === val,
+                microbit: ops.name.includes("micro:bit"),
+                gripper: kGripperOutputTypes.includes(ops.name)
               });
               return (
                 <div
@@ -172,7 +175,13 @@ export class DropdownListControl extends Rete.Control {
   };
 
   public getSelectionId = () => {
-    return this.props.optionArray.find((opt: any) => optionValue(opt) === this.props.value).id;
+    const optionArray = this.props.optionArray;
+    const value = this.props.value;
+    if (optionArray && value){
+      const selectedOption = optionArray.find((option: ListOption) => optionValue(option) === value);
+      const selectionId = selectedOption ? selectedOption.id : undefined;
+      return selectionId;
+    }
   };
 
   /**
