@@ -625,11 +625,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       },
       "Live Output": (n: Node) => {
         const outputVar = findOutputVariable(n, this.props.tileContent?.outputVariables);
-        const deviceFamily = this.stores.serialDevice.deviceFamily ?? "unknown device";
+        const foundDeviceFamily = this.stores.serialDevice.deviceFamily ?? "unknown device";
         updateNodeChannelInfo(n, this.channels, this.stores.serialDevice);
         sendDataToSerialDevice(n, this.stores.serialDevice);
         sendDataToSimulatedOutput(n, this.props.tileContent?.outputVariables);
-        setLiveOutputOpts(n, deviceFamily, outputVar);
+        setLiveOutputOpts(n, foundDeviceFamily, outputVar);
       }
     };
     let processNeeded = false;
