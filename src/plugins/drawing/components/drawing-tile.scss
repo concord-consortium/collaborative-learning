@@ -115,6 +115,10 @@
     align-items: center;
     padding: 2.5px;
 
+    &.unpadded {
+      padding: 0;
+    }
+
     .stamp-button {
       position: relative;
       width: 30px;
@@ -137,6 +141,37 @@
       &:active {
         stroke: $workspace-teal;
       }
+    }
+
+    .full-width-button {
+      // These palette buttons are the same width as the main toolbar buttons
+      position: relative;
+      width: 32px;
+      height: 33px;
+      margin-top: 1px;
+
+      svg {
+        position: absolute;
+        left: 0;
+        top: 0;
+      }
+
+      .highlight {
+        &.select {
+          stroke: $workspace-teal;
+        }
+      }
+      &:hover {
+        .highlight {
+          stroke: $workspace-teal-light-2;
+        }
+      }
+      &:active {
+        .highlight {
+          stroke: $workspace-teal;
+        }
+      }
+
     }
 
     .color-swatch {
@@ -202,8 +237,8 @@
     }
     
     &.vectors {
-      left: 72px;
-      width: 100px;
+      left: 70px;
+      width: 120px;
     }
 
     &.stamps {

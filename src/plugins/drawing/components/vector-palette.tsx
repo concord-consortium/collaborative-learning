@@ -37,9 +37,9 @@ interface IProps {
 export function VectorTypePalette ({ selectedVectorType, onSelectVectorType, settings }: IProps) {
   return (
     <div className="toolbar-palette vectors one-row">
-      <div className="palette-buttons">
+      <div className="palette-buttons unpadded">
         {kVectorTypes.map(type => 
-          <div key={type} className="color-swatch">
+          <div key={type} className="full-width-button">
             <VectorTypeButton vectorType={type} isSelected={type === selectedVectorType} 
               onSelectVectorType={onSelectVectorType} settings={settings} />
           </div>
