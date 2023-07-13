@@ -1,9 +1,8 @@
 @import "../vars";
 
 .comment-card {
-  height: calc(100% - 10px);
-  // height: 100px;
-  min-height: 40px;
+  height: calc(100% - 38px);
+  min-height: 108px;
   overflow-y: auto;
   white-space: pre-wrap;
   padding: 0 2px;
@@ -85,6 +84,7 @@
     margin: 5px;
     font-size: 14px;
     font-family: Lato;
+    position: relative;
 
     textarea {
       border-style: none;
@@ -105,12 +105,10 @@
     }
 
     select { //drop down menu of tagged options
-      left: -2px;
+      position: absolute;
+      left: 0px;
+      top: 5px;
       height: 26px;
-      bottom: 105px;
-      position: relative;
-      // position: absolute;
-      // position: fixed;
       margin: 1px 4px 6px;
       width: calc(100% - 30px);
       font-family: Lato;
@@ -126,9 +124,7 @@
       justify-content: flex-end;
       height: 35px;
       border-top: solid 1.5px $charcoal-light-4;
-      // background-color: orange;
       padding-bottom: 5px; //centers it
-      margin-top: -30px; //closes the gap
 
       .comment-footer-button {
         display: flex;
