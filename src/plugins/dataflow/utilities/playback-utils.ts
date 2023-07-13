@@ -1,40 +1,36 @@
-
+import { kMaxNodeValues } from "../model/utilities/node";
 
 function getPriorCases(index: number, dataSet: any, playhead: number){
   // if we have less than 17 cases our region begins at 0
-  const pastCalc = playhead - 17;
-  const regionStart = playhead - 17 < 0 ? 0 : pastCalc;
+  const offSet = 1; // I'm 99% sure we need this but math is hard
+  const maxValues = kMaxNodeValues + offSet;
+  const pastCalc = playhead - maxValues;
+  const regionStart = pastCalc < 0 ? 0 : pastCalc;
 
-  console.log("OK:, ",
-      // "   startI: ", regionStart,
-      // "   endI: ", playhead,
-      "get the cases from ", regionStart, " to ", playhead
-  );
+  console.log("PB: 1 get the cases from ", regionStart, " to ", playhead);
 
-  // const priorCases = [];
-  // for (let i = index; i > 17; i--){
-  //   const casee = dataSet.getCaseAtIndex(i);
-  //   priorCases.push(casee);
+  // const fetchUs = [];
+  // for (let i = regionStart; i < playhead; i++) {
+  //   fetchUs.push(i);
   // }
-  // //console.log("priorCases:", priorCases);
-  // return priorCases.slice(0, 10);
+
+  //console.log("PB: 2 which are indices: fetchUs:", fetchUs);
+
+  // thought we needed the playhead here but I think we just need the regionStart
+  //const cases = dataSet.getCasesAtIndices(regionStart, playhead);
+
+  const numberOfCasesToGet = playhead < maxValues ? playhead : maxValues;
+
+  const cases = dataSet.getCasesAtIndices(regionStart, numberOfCasesToGet);
+  return cases;
 }
 
 export function getRecentValuesForNode(node: any, dataSet: any, playbackIndex: number ){
-  // console.log("||| lets calc recent values for node |",
-  //   "\n        node:",          node,
-  //   "\n       dataSet:",        dataSet,
-  //   "\n       playbackIndex:",  playbackIndex
-  // );
 
-  // const attributeValuesInDataSet = dataSet.attributeValues;
-  // console.log("||| attributeValuesInDataSet:", attributeValuesInDataSet);
-
-  // const currentCase = dataSet.getCaseAtIndex(playbackIndex);
-  // const {__id__} = currentCase;
   const priorCases = getPriorCases(playbackIndex, dataSet, playbackIndex);
 
-  //console.log("\nzz priorCases:", priorCases);
+  console.log("PB: 2 and now we have our priorCases:", priorCases, "\n");
+  console.log("\n");
 
   const randomDummyValues = Array.from({length: 10}, () => Math.floor(Math.random() * 10));
   return randomDummyValues;
