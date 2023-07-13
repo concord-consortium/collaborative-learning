@@ -23,6 +23,7 @@ import {
   kellyColors
 } from "../../../utilities/color-utils";
 import { AppConfigModelType } from "../../../models/stores/app-config-model";
+import { getAppConfig } from "../../../models/tiles/tile-environment";
 
 export type SharedModelChangeHandler = (sharedModel: SharedModelType | undefined, type: string) => void;
 
@@ -171,23 +172,30 @@ export const GraphModel = TileContentModel
     },
   }))
   .actions(self => ({
-    linkDataSet() {
+    configureGraphOnLink() {
       if (!self.data) {
-        console.warn("GraphModel.linkDataSet requires a dataset");
+        console.warn("GraphModel.configureGraphOnLink requires a dataset");
         return;
       }
-      self.config.setDataset(self.data);
-      self.setAttributeID("x", self.data.attributes[0].id);
-      self.setAttributeID("y", self.data.attributes[1].id);
+      if (getAppConfig(self)?.getSetting("emptyPlotIsNumeric", "graph")) {
+        // If our graph doesn't have useful axes then set them
+        if (!self.getAttributeID("x") && !self.getAttributeID("y")) {
+          self.setAttributeID("x", self.data.attributes[0].id);
+          self.setAttributeID("y", self.data.attributes[1].id);
+        }
+      }
     },
-    unlinkDataSet() {
+    configureGraphOnUnlink() {
       if (self.data) {
-        console.warn("GraphModel. unlinkDataSet expects the dataset to be unlinked");
+        console.warn("GraphModel.configureGraphOnUnlink expects the dataset to be unlinked");
         return;
       }
-      self.setAttributeID("y", "");
-      self.setAttributeID("x", "");
-      self.config.setDataset(undefined);
+      if (self.getAttributeID("y")) {
+        self.setAttributeID("y", "");
+      }
+      if (self.getAttributeID("x")) {
+        self.setAttributeID("x", "");
+      }
     }
   }))
   .actions(self => ({
@@ -200,7 +208,6 @@ export const GraphModel = TileContentModel
       // thing, but we'd need the reaction to only do this if it isn't
       // being done here.
 
-
       // Note this will also happen in the reaction below
       // we do it here just to be safe incase this function is called
       // first
@@ -208,17 +215,12 @@ export const GraphModel = TileContentModel
         self.config.setDataset(self.data);
       }
 
-      if (!self.data) {
-        // When we have no dataset default the graph to x y axes
-        self.setAttributeID("y", "");
-        self.setAttributeID("x", "");
-      } else {
-        // If our graph doesn't have useful axes then set them
-        // This will typically happen when the graph is linked
-        if (!self.getAttributeID("y") && !self.getAttributeID("x")) {
-          self.setAttributeID("x", self.data.attributes[0].id);
-          self.setAttributeID("y", self.data.attributes[1].id);
-        }
+      // TODO: is it necessary to do this here and in the reaction below?
+      if (self.data) {
+        self.configureGraphOnLink();
+      }
+      else {
+        self.configureGraphOnUnlink();
       }
     },
     afterAttach() {
@@ -239,14 +241,15 @@ export const GraphModel = TileContentModel
           // the first time a dataset is linked to the graph. Because we
           // default the x and y attribute ids in this case. We could
           // just check if the attributes are set already instead.
+          // TODO: refine this comment in light of the (just added) code below
 
-          // if (data && data !== prevData) {
-          //   // This should occur when the graph is linked to a dataset
-          //   self.linkDataSet();
-          // } else if (!data) {
-          //   // This should occur when the graph is unlinked from a dataset
-          //   self.unlinkDataSet();
-          // }
+          // TODO: is it necessary to do this here and in updateAfterSharedModelChanges above?
+          if (self.data) {
+            self.configureGraphOnLink();
+          }
+          else {
+            self.configureGraphOnUnlink();
+          }
         }
       ));
     }
