@@ -182,6 +182,12 @@ $scroller-height: 145px;
               pointer-events: none;
               opacity: 0.35;
             }
+            &.primary {
+              background-color: $document-select-green;
+            }
+            &.secondary {
+              background-color: $document-select-blue;
+            }
             &.learning-log {
               background-color: $learninglog-green-light-5;
               &:hover {

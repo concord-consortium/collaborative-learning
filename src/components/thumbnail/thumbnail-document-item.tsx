@@ -6,6 +6,7 @@ import { DocumentCaption } from "./document-caption";
 import { ThumbnailPlaceHolderIcon } from "./thumbnail-placeholder-icon";
 import { ThumbnailPrivateIcon } from "./thumbnail-private-icon";
 import { useAppMode } from "../../hooks/use-stores";
+import classNames from "classnames";
 
 interface IProps {
   dataTestName: string;
@@ -52,7 +53,7 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
                           ? `Firebase UID: ${document.key}` : undefined;
 
   return (
-    <div className={`list-item ${selectedClass} ${privateClass} ${isSecondarySelected ? "secondary" : ""}`}
+    <div className={classNames("list-item", selectedClass, privateClass, {"secondary": isSecondarySelected})}
       data-test={dataTestName} key={document.key}
       title={documentTitle} onClick={isPrivate ? undefined : handleDocumentClick}>
       <div className="scaled-list-item-container" onDragStart={handleDocumentDragStart}

@@ -162,8 +162,8 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
           ? null
           : <DocumentArea openDocument={openDocument} subTab={subTab} tab={tabSpec.tab}
               sectionClass={sectionClass} hasSecondaryDocument={isStarredTab && !noSecondaryDocument}
-              hideLeftFlipper={!isStarredTab || (isStarredTab && hideLeftFlipper())}
-              hideRightFlipper={!isStarredTab || (isStarredTab && hideRightFlipper())}
+              hideLeftFlipper={!isStarredTab || hideLeftFlipper()}
+              hideRightFlipper={!isStarredTab || hideRightFlipper()}
               onChangeDocument={handleChangeDocument}
             />
         }
@@ -171,8 +171,8 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
           ? null
           : <DocumentArea openDocument={openSecondaryDocument} subTab={subTab} tab={tabSpec.tab}
               sectionClass={sectionClass} isSecondaryDocument={true} hasSecondaryDocument={true}
-              hideLeftFlipper={!isStarredTab || (isStarredTab && hideLeftFlipper("secondary"))}
-              hideRightFlipper={!isStarredTab || (isStarredTab && hideRightFlipper("secondary"))}
+              hideLeftFlipper={!isStarredTab || hideLeftFlipper("secondary")}
+              hideRightFlipper={!isStarredTab || hideRightFlipper("secondary")}
               onChangeDocument={handleChangeDocument}
             />
         }
@@ -344,11 +344,12 @@ const DocumentArea = ({openDocument, tab, sectionClass, isSecondaryDocument,
   // knew the state of playback controls. It no longer knows that state, so now
   // the edit button is shown all of the time.
   // PT Story: https://www.pivotaltracker.com/story/show/183416176
-  const editButton = (type: string, sClass: string, document: DocumentModelType) => {
+  const editButton = (type: string, sClass: {secondary: boolean | undefined; primary: boolean | undefined} | string,
+                      document: DocumentModelType) => {
     return (
       (type === "my-work") || (type === "learningLog")
         ?
-          <div className={`edit-button ${sClass}`}
+          <div className={classNames("edit-button", sClass)}
                 onClick={() => handleEditClick(document)}>
             <EditIcon className={`edit-icon ${sClass}`} />
             <div>Edit</div>
@@ -357,17 +358,16 @@ const DocumentArea = ({openDocument, tab, sectionClass, isSecondaryDocument,
     );
   };
 
+  const sideClasses = { secondary: isSecondaryDocument, primary: hasSecondaryDocument && !isSecondaryDocument };
   return (
-    <div className={classNames("focus-document", tab,
-                                isSecondaryDocument ? "secondary" : hasSecondaryDocument ? "primary" : "")}>
-      <div className={classNames("document-header", tab, sectionClass,
-                                  isSecondaryDocument ? "secondary" : hasSecondaryDocument ? "primary" : "")}
+    <div className={classNames("focus-document", tab, sideClasses)}>
+      <div className={classNames("document-header", tab, sectionClass, sideClasses)}
             onClick={() => ui.setSelectedTile()}>
         <div className={`document-title`}>
           {getDisplayTitle(openDocument)}
         </div>
         {(!openDocument.isRemote)
-            && editButton(tab, sectionClass, openDocument)}
+            && editButton(tab, sectionClass || sideClasses, openDocument)}
       </div>
       {onChangeDocument &&
         <DocumentFlipperControl side={"left"} tab={tab} shift={1}
