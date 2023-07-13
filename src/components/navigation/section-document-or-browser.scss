@@ -13,12 +13,13 @@ $scroller-height: 145px;
   .scroller-and-document {
     overflow-x: hidden;
     overflow-y: hidden;
+    position: relative;
     .collapse-scroller-button {
       border-radius: 50%;
       z-index: 5;
       position: absolute;
       left: 5px;
-      top: calc((#{$nav-tab-height} + #{$tab-section-border-width}) * 2);
+      top: 5px;
       width: 40px;
       height: 40px;
       display: flex;
@@ -64,7 +65,6 @@ $scroller-height: 145px;
       }
       .scroller-controls {
         position: absolute;
-        top: calc(#{$tab-section-border-width} + (#{$nav-tab-height} * 2));
         height: $scroller-height;
         width: 50px;
         display: flex;
@@ -75,14 +75,13 @@ $scroller-height: 145px;
           display: none;
         }
         &.left {
-          left: 2px;
+          left: 0px;
         }
         &.right {
-          right: 2px;
+          right: 0px;
         }
         .scroller-controls-overlay {
           position: relative;
-          right: 0;
           background-color: white;
           opacity: 50%;
           width: 55px;
