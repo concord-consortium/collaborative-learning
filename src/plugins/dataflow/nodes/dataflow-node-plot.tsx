@@ -46,7 +46,7 @@ export const DataflowNodePlot: React.FC<INodePlotProps> = (props) => {
 
   const scaleBtnColorClass= props.data.name.charAt(0).toLowerCase() + props.data.name.slice(1);
 
-  console.log("| C DataflowNodePlot: props.data", props.data);
+  // console.log("| C DataflowNodePlot: props.data", props.data);
 
   return (
     <div className="node-bottom-section">

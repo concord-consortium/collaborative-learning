@@ -571,6 +571,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     if (currentCase){
       const {__id__} = currentCase; //this is the id of the case we are looking at for each frame
       this.programEditor.nodes.forEach((node, idx) => { //update each node in the frame
+
+
+        const fakeData = {
+          "nodeValue": Array.from({ length: 10 }, () => Math.floor(Math.random() * 19) + 2)
+        };
+
         const attrId = getAttributeIdForNode(this.props.tileContent.dataSet, idx);
         const valueToSendToNode = dataSet.getValue(__id__, attrId) as number;
         let nodeControl;
@@ -585,8 +591,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             break;
           case "Generator":
             nodeControl = node.controls.get("nodeValue") as ValueControl;
+            node.data.recentValues = fakeData;
+            console.log("updating recent values:", node.data.recentValues);
             nodeControl.setValue(valueToSendToNode);
-            console.log("| A valueToSendToNode", valueToSendToNode, "recentValues: ", (node.data.recentValues as any).nodeValue);
+            node.update();
             break;
           case "Timer":
             nodeControl = node.controls.get("nodeValue") as ValueControl; //not working
