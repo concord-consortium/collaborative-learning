@@ -60,7 +60,7 @@ export const VectorComponent = observer(function VectorComponent({model, handleH
     const head = headShape ? placeEndShape(headShape, x+dx, y+dy, angle) : null;
     const tail = tailShape ? placeEndShape(tailShape, x, y, angle+180) : null; // tail points backwards
     // Set fill to stroke since arrowheads should be drawn in stroke color
-  return <g key={id}
+  return <g className="vector" key={id}
             stroke={stroke}
             fill={stroke}
             strokeWidth={strokeWidth}
