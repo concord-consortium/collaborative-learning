@@ -3,14 +3,16 @@ import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React, { useCallback } from "react";
 import { computeStrokeDashArray, DrawingObjectType, DrawingTool, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
-import { Point, VectorEndShape } from "../model/drawing-basic-types";
+import { Point, ToolbarSettings, VectorEndShape, VectorType, endShapesForVectorType } 
+  from "../model/drawing-basic-types";
 import { buttonClasses } from "../components/drawing-toolbar-buttons";
 import SmallCornerTriangle from "../../../assets/icons/small-corner-triangle.svg";
 import { Tooltip } from "react-tippy";
 import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
 import { useTouchHold } from "../../../hooks/use-touch-hold";
-import { VectorTypeIcon } from "../components/vector-type-button";
-import { VectorType, endShapesForVectorType } from "../components/vector-palette";
+import LineToolIcon from "../assets/line-icon.svg";
+import SingleArrowIcon from "../assets/line-single-arrow-icon.svg";
+import DoubleArrowIcon from "../assets/line-double-arrow-icon.svg";
 
 // Line or arrow
 export const VectorObject = StrokedObject.named("VectorObject")
@@ -47,7 +49,7 @@ export function isVectorObject(model: DrawingObjectType): model is VectorObjectT
 }
 export const VectorComponent = observer(function VectorComponent({model, handleHover,
   handleDrag} : IDrawingComponentProps) {
-  if (model.type !== "vector") return null;
+  if (!isVectorObject(model)) return null;
   const { id, x, y, dx, dy, stroke, strokeWidth, strokeDashArray, headShape, tailShape,  } = model as VectorObjectType;
   const line = <line
     x1={x}
@@ -181,3 +183,27 @@ export const VectorToolbarButton: React.FC<IToolbarButtonProps> = observer(({
       </button>
     </Tooltip>);
 });
+
+interface IVectorTypeIconProps {
+  vectorType: VectorType;
+  settings: ToolbarSettings;
+}
+
+export function VectorTypeIcon ({ vectorType, settings }: IVectorTypeIconProps) {
+  // SVG attributes to use when drawing the icon.
+  // Note that the arrowheads are filled with the stroke color, we don't use settings.fill for this
+  const attributes = {
+    stroke: settings.stroke, 
+    fill: settings.stroke, // uses stroke for fill
+    strokeWidth: settings.strokeWidth,
+    strokeDasharray: settings.strokeDashArray
+  };
+  switch(vectorType) {
+    case VectorType.line:
+      return <LineToolIcon {...attributes} />;
+    case VectorType.singleArrow:
+      return <SingleArrowIcon {...attributes} />;
+    case VectorType.doubleArrow:
+      return <DoubleArrowIcon {...attributes} />;
+  }
+}

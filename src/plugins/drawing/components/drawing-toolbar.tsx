@@ -5,7 +5,7 @@ import { FillColorButton, StrokeColorButton} from "./drawing-toolbar-buttons";
 import { StampsPalette } from "./stamps-palette";
 import { StrokeColorPalette } from "./stroke-color-palette";
 import { FillColorPalette } from "./fill-color-palette";
-import { VectorType, VectorTypePalette } from "./vector-palette";
+import { VectorTypePalette } from "./vector-palette";
 import {
   IFloatingToolbarProps, useFloatingToolbarLocation
 } from "../../../components/tiles/hooks/use-floating-toolbar-location";
@@ -17,6 +17,7 @@ import { ITileModel } from "../../../models/tiles/tile-model";
 import { useSettingFromStores } from "../../../hooks/use-stores";
 import { IPaletteState, IToolbarButtonProps, kClosedPalettesState, PaletteKey } from "../objects/drawing-object";
 import { getDrawingToolButtonComponent } from "./drawing-object-manager";
+import { VectorType } from "../model/drawing-basic-types";
 
 interface IProps extends IFloatingToolbarProps, IRegisterTileApiProps {
   model: ITileModel;
@@ -131,8 +132,8 @@ export const ToolbarView: React.FC<IProps> = (
             })}
           </div>
           {paletteState.showVectors &&
-            <VectorTypePalette selectedVectorType={"arrow"} onSelectVectorType={handleVectorTypeChange} 
-              settings={drawingContent.toolbarSettings} />}
+            <VectorTypePalette selectedVectorType={drawingContent.toolbarSettings.vectorType} 
+            onSelectVectorType={handleVectorTypeChange} settings={drawingContent.toolbarSettings} />}
           {paletteState.showStroke &&
             <StrokeColorPalette selectedColor={drawingContent.stroke} onSelectColor={handleStrokeColorChange} />}
           {paletteState.showFill &&

@@ -8,13 +8,12 @@ import { tileModelHooks } from "../../../models/tiles/tile-model-hooks";
 import { TileContentModel } from "../../../models/tiles/tile-content";
 import { kDrawingStateVersion, kDrawingTileType } from "./drawing-types";
 import { ImageObjectType, isImageObjectSnapshot } from "../objects/image";
-import { DefaultToolbarSettings, ToolbarSettings } from "./drawing-basic-types";
+import { DefaultToolbarSettings, ToolbarSettings, VectorType, endShapesForVectorType } from "./drawing-basic-types";
 import { DrawingObjectMSTUnion } from "../components/drawing-object-manager";
 import { DrawingObjectSnapshotForAdd, DrawingObjectType, isFilledObject,
   isStrokedObject, ObjectMap, ToolbarModalButton } from "../objects/drawing-object";
 import { LogEventName } from "../../../lib/logger-types";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
-import { VectorType, endShapesForVectorType } from "../components/vector-palette";
 import { isVectorObject } from "../objects/vector";
 
 // track selection in metadata object so it is not saved to firebase but
@@ -197,16 +196,11 @@ export const DrawingContentModel = TileContentModel
         },
         setVectorType(vectorType: VectorType, ids: string[]) {
           self.vectorType = vectorType;
-          // FIXME not yet working
-          console.log('setting vector type to ', vectorType);
           forEachObjectId(ids, object => {
             if (isVectorObject(object)) {
-              console.log('setting vt on vector ', object);
               object.setEndShapes(...endShapesForVectorType(vectorType));
-            } else {
-              console.log('Not vector object: ', object);
             }
-            });
+          });
         },
 
         setSelectedButton(button: ToolbarModalButton) {

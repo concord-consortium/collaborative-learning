@@ -1,36 +1,10 @@
 import React from "react";
 import { VectorTypeButton } from "./vector-type-button";
-import { ToolbarSettings, VectorEndShape } from "../model/drawing-basic-types";
+import { ToolbarSettings, VectorType } from "../model/drawing-basic-types";
 
-export enum VectorType {
-  line = "line",
-  singleArrow = "arrow",
-  doubleArrow ="doublearrow"
-}
-
-const kVectorTypes: VectorType[] = [
-   VectorType.line,
-   VectorType.singleArrow,
-   VectorType.doubleArrow
-];
-
-// Return a two-element list of [head shape, tail shape] for the given VectorType constant.
-export function endShapesForVectorType(vectorType?: VectorType) {
-  if (!vectorType) {
-    return [undefined, undefined];
-  }
-  switch (vectorType) {
-    case VectorType.line:
-      return [undefined, undefined];
-    case VectorType.singleArrow:
-      return [VectorEndShape.triangle, undefined];
-    case VectorType.doubleArrow:
-      return [VectorEndShape.triangle, VectorEndShape.triangle];
-  }
-}
 
 interface IProps {
-  selectedVectorType?: string;
+  selectedVectorType?: VectorType;
   onSelectVectorType: (vectorType: VectorType) => void;
   settings: ToolbarSettings;
 }
@@ -38,7 +12,7 @@ export function VectorTypePalette ({ selectedVectorType, onSelectVectorType, set
   return (
     <div className="toolbar-palette vectors one-row">
       <div className="palette-buttons unpadded">
-        {kVectorTypes.map(type => 
+        {Object.values(VectorType).map(type => 
           <div key={type} className="full-width-button">
             <VectorTypeButton vectorType={type} isSelected={type === selectedVectorType} 
               onSelectVectorType={onSelectVectorType} settings={settings} />
