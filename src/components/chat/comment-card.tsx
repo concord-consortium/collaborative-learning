@@ -86,9 +86,6 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
             const hideCommentTag = (comment.tag === "Select Student Strategy") ||
                                    !(comment.tag); //if its empty
 
-            console.log("showCommentTag:", hideCommentTag);
-
-
             return (
               <div key={idx} className="comment-thread" data-testid="comment-thread">
                 <div className="comment-text-header">
