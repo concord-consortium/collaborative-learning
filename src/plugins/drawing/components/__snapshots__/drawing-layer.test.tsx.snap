@@ -185,6 +185,7 @@ exports[`Drawing Layer Components Vector arrow adds a Vector arrow 1`] = `
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
   <g
+    class="vector"
     fill="#777777"
     stroke="#777777"
     stroke-dasharray=""
@@ -229,6 +230,7 @@ exports[`Drawing Layer Components Vector arrow moves a vector arrow 1`] = `
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
   <g
+    class="vector"
     fill="#777777"
     stroke="#777777"
     stroke-dasharray=""
@@ -265,6 +267,7 @@ exports[`Drawing Layer Components Vector line adds a Vector line 1`] = `
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
   <g
+    class="vector"
     fill="#888888"
     stroke="#888888"
     stroke-dasharray=""
@@ -295,6 +298,7 @@ exports[`Drawing Layer Components Vector line moves a vector line 1`] = `
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
   <g
+    class="vector"
     fill="#888888"
     stroke="#888888"
     stroke-dasharray=""
