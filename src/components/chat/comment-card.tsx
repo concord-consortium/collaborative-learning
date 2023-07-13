@@ -57,16 +57,17 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
     }
   };
 
-  // //For UI purposes, Leslie gave the go ahead for hard-coded values
-  const mockCommentTags = {
-    "tag0": "Part-to-Part",
-    "tag1": "Part-to-Whole",
-    "tag2": "Unit Rate",
-    "tag3": "Guess and Check",
-    "tag4": "None"
-  };
+    // //For UI purposes, Leslie gave the go ahead for hard-coded values
+    const mockCommentTags = {
+      "tag0": "Part-to-Part",
+      "tag1": "Part-to-Whole",
+      "tag2": "Unit Rate",
+      "tag3": "Guess and Check",
+      "tag4": "None"
+    };
 
-  const { appConfig } = useStores();
+  const { appConfig } = useStores(); //holds showCommentTag and commentTags from "clue-curriculum" respository
+
 
   return (
     <div className="comment-card selected" data-testid="comment-card">
@@ -84,7 +85,19 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
                                       : {backgroundColor: userInitialBackgroundColor[userInitialBackgroundColorIndex]};
 
             const hideCommentTag = (comment.tag === "Select Student Strategy") ||
-                                   !(comment.tag); //if its empty
+                                   !(comment.tag) || //if empty comment
+                                   !(appConfig.showCommentTag); //fetched json curriculum file says false or undefined
+
+            console.log("---------------------------------------");
+
+            console.log("for comment:", comment.content);
+            console.log("hideCommentTag:", (comment.tag === "Select Student Strategy"), "|",
+            !(comment.tag), "|", !(appConfig.showCommentTag), "|", "appConfig.showCommentTag:",
+             appConfig.showCommentTag);
+
+             console.log("hideCommentTag:", hideCommentTag);
+
+
 
             return (
               <div key={idx} className="comment-thread" data-testid="comment-thread">
@@ -102,9 +115,9 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
                   }
                 </div>
                 {
-                !hideCommentTag && <div className="comment-dropdown-tag">
-                                     { comment.tag }
-                                   </div>
+                 !hideCommentTag && <div className="comment-dropdown-tag">
+                                      { comment.tag }
+                                    </div>
                 }
                 <div key={idx} className="comment-text" data-testid="comment">
                   {comment.content}
@@ -117,10 +130,10 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
           activeNavTab={activeNavTab}
           onPostComment={onPostComment}
           numPostedComments={postedComments?.length || 0}
-          showCommentTag={appConfig.showCommentTag} //enable these two lines
-          commentTags={appConfig.commentTags}
-          // showCommentTag={true} //these are for mock
-          // commentTags={mockCommentTags}
+          // showCommentTag={appConfig.showCommentTag} //original
+          // commentTags={appConfig.commentTags}
+          showCommentTag={true} //mock
+          commentTags={mockCommentTags}
         />
       </div>
     </div>

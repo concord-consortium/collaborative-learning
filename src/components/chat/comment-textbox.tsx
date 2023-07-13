@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import React, { ReactEventHandler, SyntheticEvent, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useUIStore } from "../../hooks/use-stores";
 import SendIcon from "../../assets/send-icon.svg";
 import "../themes.scss";
@@ -12,10 +12,11 @@ interface IProps {
   commentTags?: object;
 }
 
-const minTextAreaHeight = 100;
 
 export const CommentTextBox: React.FC<IProps> = (props) => {
   const { activeNavTab, numPostedComments, onPostComment, showCommentTag, commentTags} = props;
+
+  const minTextAreaHeight = showCommentTag ? 100 : 35;
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [commentTextAreaHeight, setCommentTextAreaHeight] = useState(minTextAreaHeight);
   const selectElt = useRef<HTMLSelectElement>(null);
@@ -62,18 +63,11 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
     setCommentText("");
   };
 
-  //use another state to hold the tag
-  //add it to onPOstComment as another arg,
 
   const handlePostComment = () => {
     // do not send post if text area is empty, only has spaces or new lines
-
     const [trimmedText, isEmpty] = trimContent(commentText);
     if (!isEmpty) {
-      console.log("--------------------------");
-      console.log("handlePostComment is not empty");
-      console.log("about to invoke onPostComment with tagText:", tagText);
-
       onPostComment?.(trimmedText, tagText);
       setCommentTextAreaHeight(minTextAreaHeight);
       setCommentAdded(false);
@@ -111,16 +105,15 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
                               ? "Comment on this tile..."
                               : "Reply...";
 
-  //ref or state - that holds the tag value
-  //onChangeHandler for select
-
   const handleSelectDropDown = (val: string) => setTagText(val);
 
   const defaultEntry = "Select Student Strategy";
 
+
   return (
     <div className="comment-textbox">
       <textarea
+        className={classNames({"shift-down" : showCommentTag})}
         ref={textareaRef}
         style={textareaStyle}
         placeholder={placeholderText}
@@ -129,26 +122,27 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
         onChange={handleCommentTextAreaChange}
         onKeyDown={handleCommentTextboxKeyDown}
       />
-
-      <select
-        ref={selectElt}
-        data-test="comment-textbox-dropdown"
-        onChange={(e) => {
-          handleSelectDropDown(e.target.value);
-        }}
-      >
-         <option key={"sel-ss"} value={defaultEntry}> { defaultEntry } </option>
-        {
-          showCommentTag && commentTags &&
-          Object.keys(commentTags).map((option, idx) => {
-            const key = `tag${idx}` as keyof typeof commentTags;
-            const value = commentTags[key] as string;
-            return (
-              <option key={option} value={value}> {value} </option>
-            );
-          })
-        }
-      </select>
+      {
+        showCommentTag && commentTags &&
+        <select
+          ref={selectElt}
+          data-test="comment-textbox-dropdown"
+          onChange={(e) => {
+            handleSelectDropDown(e.target.value);
+          }}
+        >
+          <option key={"sel-ss"} value={defaultEntry}> { defaultEntry } </option>
+          {
+            Object.keys(commentTags).map((option, idx) => {
+              const key = `tag${idx}` as keyof typeof commentTags;
+              const value = commentTags[key] as string;
+              return (
+                <option key={option} value={value}> {value} </option>
+              );
+            })
+          }
+        </select>
+      }
 
       <div className="comment-textbox-footer">
         <div className="comment-footer-button cancel"
