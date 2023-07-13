@@ -574,10 +574,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.programEditor.nodes.forEach((node, idx) => { //update each node in the frame
 
         const calculatedRecentValues = {
-          "nodeValue": getRecentValuesForNode(node, dataSet, playBackIndex)
+          "nodeValue": getRecentValuesForNode(node, dataSet, playBackIndex, idx)
         };
 
-        const attrId = getAttributeIdForNode(this.props.tileContent.dataSet, idx);
+        const attrId = getAttributeIdForNode(this.props.tileContent.dataSet, idx); //pass this one through
         const valueToSendToNode = dataSet.getValue(__id__, attrId) as number;
         let nodeControl;
         switch (node.name){
@@ -603,9 +603,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           case "Logic":
             break;
           case "Transform":
-            node.data.recentValues = calculatedRecentValues;
             nodeControl = node.controls.get("nodeValue") as ValueControl;
             nodeControl.setValue(valueToSendToNode);
+            node.data.recentValues = calculatedRecentValues;
             break;
           case "Control":
             break;

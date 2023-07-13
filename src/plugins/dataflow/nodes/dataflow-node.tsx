@@ -35,8 +35,6 @@ export class DataflowNode extends Node {
 
     const inputClass = (s: string) => "input " + s.toLowerCase().replace(/ /g, "-");
 
-    //console.log("| B DataflowNode: node", node);
-
     return (
       <div className={`node ${node.name.toLowerCase().replace(/ /g, "-")} ${dynamicClasses}`}>
         <div className="top-bar">
