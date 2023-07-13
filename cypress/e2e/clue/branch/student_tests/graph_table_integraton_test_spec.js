@@ -74,7 +74,7 @@ context('Graph Table Integration', function () {
         graphToolTile.getGraphTile().siblings(clueCanvas.linkIconEl()).children('svg').attribute('data-indicator-width').should('exist');
         graphToolTile.getGraph().should('have.class', 'is-linked');
       });
-      it.skip('verify points added has label in table and graph', function () {
+      it('verify points added has label in table and graph', function () {
         tableToolTile.getIndexNumberToggle().click();
         tableToolTile.getTableIndexColumnCell().first().should('contain', '1');
         graphToolTile.getGraphPointLabel().contains('A').should('exist');
