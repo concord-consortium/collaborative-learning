@@ -73,7 +73,6 @@ function lineData(node: any) {
   const chartDataSets: ChartDataSets[] = [];
   Object.keys(node.data.watchedValues).forEach((valueKey: string) => {
     const recentValues: any = node.data.recentValues?.[valueKey];
-
     if (recentValues !== undefined) {
       const customOptions = node.data.watchedValues?.[valueKey] || {};
       const dataset: ChartDataSets = {
@@ -100,7 +99,6 @@ function lineData(node: any) {
       chartDataSets.push(dataset);
     }
   });
-
   stepY = (maxY(node) - minY(node)) / 2;
 
   const chartData: ChartData = {

@@ -572,12 +572,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     if (currentCase){
       const {__id__} = currentCase; //this is the id of the case we are looking at for each frame
       this.programEditor.nodes.forEach((node, idx) => { //update each node in the frame
-
-        const calculatedRecentValues = {
-          "nodeValue": getRecentValuesForNode(node, dataSet, playBackIndex, idx)
-        };
-
-        const attrId = getAttributeIdForNode(this.props.tileContent.dataSet, idx); //pass this one through
+        const attrId = getAttributeIdForNode(this.props.tileContent.dataSet, idx);
         const valueToSendToNode = dataSet.getValue(__id__, attrId) as number;
         let nodeControl;
         switch (node.name){
@@ -592,7 +587,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           case "Generator":
             nodeControl = node.controls.get("nodeValue") as ValueControl;
             nodeControl.setValue(valueToSendToNode);
-            node.data.recentValues = calculatedRecentValues;
+
             break;
           case "Timer":
             nodeControl = node.controls.get("nodeValue") as ValueControl; //not working
@@ -605,7 +600,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           case "Transform":
             nodeControl = node.controls.get("nodeValue") as ValueControl;
             nodeControl.setValue(valueToSendToNode);
-            node.data.recentValues = calculatedRecentValues;
             break;
           case "Control":
             break;
@@ -621,6 +615,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             break;
           default:
         }
+        const calculatedRecentValues = {
+          "nodeValue": getRecentValuesForNode(node, dataSet, playBackIndex, idx)
+        };
+        node.data.recentValues = calculatedRecentValues;
         node.update();
       });
     }
