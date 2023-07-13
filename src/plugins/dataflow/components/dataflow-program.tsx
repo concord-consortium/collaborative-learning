@@ -42,6 +42,7 @@ import { DataflowProgramCover } from "./ui/dataflow-program-cover";
 import { DataflowProgramZoom } from "./ui/dataflow-program-zoom";
 import { NodeChannelInfo, serialSensorChannels } from "../model/utilities/channel";
 import { ProgramDataRates } from "../model/utilities/node";
+import { getRecentValuesForNode } from "../utilities/playback-utils";
 import { getAttributeIdForNode, recordCase } from "../model/utilities/recording-utilities";
 import { virtualSensorChannels } from "../model/utilities/virtual-channel";
 import { DocumentContextReact } from "../../../components/document/document-context";
@@ -572,9 +573,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const {__id__} = currentCase; //this is the id of the case we are looking at for each frame
       this.programEditor.nodes.forEach((node, idx) => { //update each node in the frame
 
-
-        const fakeData = {
-          "nodeValue": Array.from({ length: 10 }, () => Math.floor(Math.random() * 19) + 2)
+        const calculatedRecentValues = {
+          "nodeValue": getRecentValuesForNode(node, dataSet, playBackIndex)
         };
 
         const attrId = getAttributeIdForNode(this.props.tileContent.dataSet, idx);
@@ -591,10 +591,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             break;
           case "Generator":
             nodeControl = node.controls.get("nodeValue") as ValueControl;
-            node.data.recentValues = fakeData;
-            //console.log("updating recent values:", node.data.recentValues);
             nodeControl.setValue(valueToSendToNode);
-            //node.update();
+            node.data.recentValues = calculatedRecentValues;
             break;
           case "Timer":
             nodeControl = node.controls.get("nodeValue") as ValueControl; //not working
@@ -605,7 +603,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           case "Logic":
             break;
           case "Transform":
-            node.data.recentValues = fakeData;
+            node.data.recentValues = calculatedRecentValues;
             nodeControl = node.controls.get("nodeValue") as ValueControl;
             nodeControl.setValue(valueToSendToNode);
             break;
