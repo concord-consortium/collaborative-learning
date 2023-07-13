@@ -18,6 +18,7 @@ interface IProps {
   section: NavTabSectionModelType;
   scale: number;
   selectedDocument?: string;
+  selectedSecondaryDocument?: string;
   onSelectDocument?: (document: DocumentModelType) => void;
   onDocumentDragStart?: (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => void;
   onDocumentStarClick?: (document: DocumentModelType) => void;
@@ -50,7 +51,7 @@ export function useDocumentCaption(document: DocumentModelType) {
 
 // observes teacher names via useDocumentCaption()
 export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
-  section, sectionDocument, tab, scale, selectedDocument,
+  section, sectionDocument, tab, scale, selectedDocument, selectedSecondaryDocument,
   onSelectDocument, onDocumentDragStart, onDocumentStarClick, onDocumentDeleteClick
 }: IProps) => {
     const user = useUserStore();
@@ -101,6 +102,7 @@ export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
         document={sectionDocument}
         scale={scale}
         isSelected={sectionDocument.key === selectedDocument}
+        isSecondarySelected={sectionDocument.key === selectedSecondaryDocument}
         captionText={caption}
         onDocumentClick={handleDocumentClick}
         onDocumentDragStart={!sectionDocument.isRemote ? handleDocumentDragStart: undefined}

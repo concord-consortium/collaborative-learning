@@ -1,6 +1,6 @@
 import { getEnv, getSnapshot, Instance, types } from "mobx-state-tree";
 import { SharedModelType } from "../shared/shared-model";
-import { ISharedModelManager, SharedModelChangeType } from "../shared/shared-model-manager";
+import { ISharedModelManager } from "../shared/shared-model-manager";
 import { tileModelHooks } from "./tile-model-hooks";
 import { kUnknownTileType } from "./unknown-types";
 
@@ -60,8 +60,8 @@ export const TileContentModel = types.model("TileContentModel", {
      *
      * @param sharedModel
      */
-    updateAfterSharedModelChanges(sharedModel: SharedModelType | undefined, type: SharedModelChangeType) {
-      console.warn("updateAfterSharedModelChanges not implemented for:", self.type);
+    updateAfterSharedModelChanges(sharedModel: SharedModelType | undefined) {
+      // console.warn("updateAfterSharedModelChanges not implemented for:", self.type);
     }
   }))
   // Add an empty api so the api methods can be used on this generic type

@@ -1,8 +1,6 @@
 import { Node } from "rete";
 import { VariableType } from "@concord-consortium/diagram-view";
-
 import { getOutputType } from "../../nodes/utilities/live-output-utilities";
-
 import LightIcon from "../../assets/icons/sensor/light.svg";
 
 export function findOutputVariable(node: Node, variables?: VariableType[]) {
@@ -15,14 +13,14 @@ function simulatedHubId(variable: VariableType) {
   return `HUB${variable.name}`;
 }
 
-export function simulatedHubName(node: Node) {
-  return `Simulated ${getOutputType(node)}`;
+export function simulatedHubName(variable: VariableType) {
+  return `Simulated ${variable.displayName}`;
 }
 
-export function simulatedHub(variable: VariableType, node: Node) {
+export function simulatedHub(variable: VariableType) {
   return {
     id: simulatedHubId(variable),
-    name: simulatedHubName(node) || "",
+    name: simulatedHubName(variable) || "",
     icon: LightIcon,
     active: true
   };

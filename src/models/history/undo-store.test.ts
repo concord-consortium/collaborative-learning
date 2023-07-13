@@ -811,7 +811,7 @@ it("can track the addition of a new shared model", async () => {
   const sharedModelId = newSharedModel.id;
   sharedModelManager?.addTileSharedModel(tileContent, newSharedModel);
 
-  await expectEntryToBeComplete(manager, 3);
+  await expectEntryToBeComplete(manager, 2);
 
   const changeDocument = manager.document;
   expect(getSnapshot(changeDocument.history)).toEqual([
@@ -821,6 +821,24 @@ it("can track the addition of a new shared model", async () => {
       id: expect.any(String),
       records: [
         {
+          tree: "test",
+          action: "/handleSharedModelChanges",
+          patches: [
+            {
+              op: "replace",
+              path: "/content/tileMap/t1/content/text",
+              value: "new model-tile"
+            }
+          ],
+          inversePatches: [
+            {
+              op: "replace",
+              path: "/content/tileMap/t1/content/text",
+              value: undefined
+            }
+          ]
+        },
+        {
           action: "/content/addSharedModel",
           inversePatches: [
             { op: "remove", path: `/content/sharedModelMap/${sharedModelId}` }
@@ -829,6 +847,7 @@ it("can track the addition of a new shared model", async () => {
             {
               op: "add", path: `/content/sharedModelMap/${sharedModelId}`,
               value: {
+                provider: undefined,
                 sharedModel: {
                   id: sharedModelId,
                   type: "TestSharedModel",
@@ -859,32 +878,6 @@ it("can track the addition of a new shared model", async () => {
             {
               op: "add", path: `/content/sharedModelMap/${sharedModelId}/tiles/0`,
               value: "t1"
-            }
-          ],
-          tree: "test"
-        }
-      ],
-      state: "complete",
-      tree: "test",
-      undoable: true
-    },
-    {
-      action: "/content/tileMap/t1/content/updateAfterSharedModelChanges",
-      created: expect.any(Number),
-      id: expect.any(String),
-      records: [
-        {
-          action: "/content/tileMap/t1/content/updateAfterSharedModelChanges",
-          inversePatches: [
-            {
-              op: "replace", path: "/content/tileMap/t1/content/text",
-              value: undefined
-            }
-          ],
-          patches: [
-            {
-              op: "replace", path: "/content/tileMap/t1/content/text",
-              value: "new model-tile"
             }
           ],
           tree: "test"

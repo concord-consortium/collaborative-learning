@@ -1,4 +1,5 @@
-import {Instance, ISerializedActionCall, SnapshotIn, types, getSnapshot} from "mobx-state-tree";
+import {Instance, ISerializedActionCall, SnapshotIn, types, getSnapshot, addDisposer} from "mobx-state-tree";
+import {reaction} from "mobx";
 import {createContext, useContext} from "react";
 import stringify from "json-stringify-pretty-compact";
 
@@ -21,8 +22,8 @@ import {
   defaultStrokeColor,
   kellyColors
 } from "../../../utilities/color-utils";
-import { SharedModelChangeType } from "../../../models/shared/shared-model-manager";
 import { AppConfigModelType } from "../../../models/stores/app-config-model";
+import { getAppConfig } from "../../../models/tiles/tile-environment";
 
 export type SharedModelChangeHandler = (sharedModel: SharedModelType | undefined, type: string) => void;
 
@@ -168,20 +169,89 @@ export const GraphModel = TileContentModel
     },
     setShowMeasuresForSelection(show: boolean) {
       self.showMeasuresForSelection = show;
+    },
+  }))
+  .actions(self => ({
+    configureGraphOnLink() {
+      if (!self.data) {
+        console.warn("GraphModel.configureGraphOnLink requires a dataset");
+        return;
+      }
+      if (getAppConfig(self)?.getSetting("emptyPlotIsNumeric", "graph")) {
+        // If our graph doesn't have useful axes then set them
+        if (!self.getAttributeID("x") && !self.getAttributeID("y")) {
+          self.setAttributeID("x", self.data.attributes[0].id);
+          self.setAttributeID("y", self.data.attributes[1].id);
+        }
+      }
+    },
+    configureGraphOnUnlink() {
+      if (self.data) {
+        console.warn("GraphModel.configureGraphOnUnlink expects the dataset to be unlinked");
+        return;
+      }
+      if (self.getAttributeID("y")) {
+        self.setAttributeID("y", "");
+      }
+      if (self.getAttributeID("x")) {
+        self.setAttributeID("x", "");
+      }
     }
   }))
   .actions(self => ({
-    updateAfterSharedModelChanges(sharedModel?: SharedModelType, changeType?: SharedModelChangeType) {
-      if (changeType === "link" && self.data) {
+    updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
+      // We need to figure out how to know if we need to update the
+      // dataSet. The config.dataSet is volatile, but setting it
+      // might also update state in the config I'm not sure
+      // We could just check if they match and then update it if
+      // not. And then we'd also need a reaction that does the same
+      // thing, but we'd need the reaction to only do this if it isn't
+      // being done here.
+
+      // Note this will also happen in the reaction below
+      // we do it here just to be safe incase this function is called
+      // first
+      if (self.data !== self.config.dataset) {
         self.config.setDataset(self.data);
-        self.setAttributeID("x", self.data.attributes[0].id);
-        self.setAttributeID("y", self.data.attributes[1].id);
       }
-      else if (changeType === "unlink") {
-        self.setAttributeID("y", "");
-        self.setAttributeID("x", "");
-        self.config.setDataset(undefined);
+
+      // TODO: is it necessary to do this here and in the reaction below?
+      if (self.data) {
+        self.configureGraphOnLink();
       }
+      else {
+        self.configureGraphOnUnlink();
+      }
+    },
+    afterAttach() {
+      addDisposer(self, reaction(
+        () => self.data,
+        (data, prevData, more) => {
+          // CHECKME: this will only work correctly if setDataset doesn't
+          // trigger any state updates
+          if (self.data !== self.config.dataset) {
+            self.config.setDataset(self.data);
+          }
+          // FIXME: When a snapshot is applied from firebase
+          // we need to sync the config dataset. But we don't want to do
+          // that if this update is happening because of a user action
+          // either an undo, history playback, or an actual user action.
+          // One possible way to address this is to make the config dataset
+          // be a view. This means we'll need another way to identify
+          // the first time a dataset is linked to the graph. Because we
+          // default the x and y attribute ids in this case. We could
+          // just check if the attributes are set already instead.
+          // TODO: refine this comment in light of the (just added) code below
+
+          // TODO: is it necessary to do this here and in updateAfterSharedModelChanges above?
+          if (self.data) {
+            self.configureGraphOnLink();
+          }
+          else {
+            self.configureGraphOnUnlink();
+          }
+        }
+      ));
     }
   }));
 export interface IGraphModel extends Instance<typeof GraphModel> {}

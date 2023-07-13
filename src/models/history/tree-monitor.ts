@@ -1,5 +1,5 @@
 import {
-  addDisposer, addMiddleware, IJsonPatch, Instance, IPatchRecorder,
+  addDisposer, addMiddleware, getSnapshot, IJsonPatch, Instance, IPatchRecorder,
   isActionContextThisOrChildOf, isAlive, recordPatches
 } from "mobx-state-tree";
 import { nanoid } from "nanoid";
@@ -8,6 +8,8 @@ import { TreePatchRecordSnapshot } from "./history";
 import { Tree } from "./tree";
 import { CallEnv, getActionPath, isActionFromManager, runningCalls, SharedModelModifications } from "./tree-types";
 import { createActionTrackingMiddleware3, IActionTrackingMiddleware3Call } from "./create-action-tracking-middleware-3";
+import { DocumentContentModelType } from "../document/document-content";
+import { SharedModelMapSnapshotOutType } from "../document/shared-model-entry";
 
 export class TreeMonitor {
   tree: Instance<typeof Tree>;
@@ -44,6 +46,13 @@ export class TreeMonitor {
         // DEBUG:
         // console.log("onStart", getActionName(call));
         const sharedModelModifications: SharedModelModifications = {};
+
+        // Save the sharedModelMap before any changes are made this way if
+        // a link is removed we can identify the old tile before the change
+        // FIXME: this breaks the abstraction, and means the tree monitor
+        // wouldn't work in an iframe tree.
+        const document = (tree as any).content as DocumentContentModelType ;
+        const initialSharedModelMap = getSnapshot(document.sharedModelMap);
 
         let historyEntryId;
         let exchangeId;
@@ -98,19 +107,11 @@ export class TreeMonitor {
             // look for shared models in the sharedModelMap of the
             // document.
             //
-            // This should only match changes to the shared models themselves
-            // not the map and not when a new tile is referencing a shared model.
-            //
             // When a new shared model is added to the document the path will be
             //   /content/sharedModelMap/${sharedModelId}
-            // We a new tile is referencing a shared model the path will be:
+            // We a shared model is linked or unlinked to a tile the path will be:
             //   /content/sharedModelMap/${sharedModelId}/tiles/[index]
-            //
-            // When a new shared model is added via addTileSharedModel the
-            // shared model manager will call updateAfterSharedModelChanges after it
-            // adds model to the document and tile to the entry. So there currently
-            // isn't a need for the tree monitor to handle that case.
-            const pathMatch = _patch.path.match(/(.*\/content\/sharedModelMap\/[^/]+\/sharedModel)\//);
+            const pathMatch = _patch.path.match(/(.*\/content\/sharedModelMap\/[^/]+)/);
             if(pathMatch) {
               const sharedModelPath = pathMatch[1];
 
@@ -135,6 +136,7 @@ export class TreeMonitor {
 
         call.env = {
           recorder,
+          initialSharedModelMap,
           sharedModelModifications,
           historyEntryId,
           exchangeId,
@@ -142,8 +144,10 @@ export class TreeMonitor {
         };
       },
       onFinish(call, error) {
-        const { recorder, sharedModelModifications, historyEntryId, exchangeId, undoable } = call.env || {};
-        if (!recorder || !sharedModelModifications || !historyEntryId || !exchangeId || undoable === undefined) {
+        const { recorder, initialSharedModelMap, sharedModelModifications,
+          historyEntryId, exchangeId, undoable } = call.env || {};
+        if (!recorder || !initialSharedModelMap || !sharedModelModifications || !historyEntryId ||
+          !exchangeId || undoable === undefined) {
           throw new Error(`The call.env is corrupted: ${ JSON.stringify(call.env)}`);
         }
         call.env = undefined;
@@ -151,7 +155,8 @@ export class TreeMonitor {
 
         if (error === undefined) {
           // recordAction is async
-          self.recordAction(call, historyEntryId, exchangeId, recorder, sharedModelModifications, undoable);
+          self.recordAction(call, historyEntryId, exchangeId, recorder,
+            initialSharedModelMap, sharedModelModifications, undoable);
         } else {
           // TODO: This is a new feature that is being added to the tree:
           // any errors that happen during an action will cause the tree to revert back to
@@ -193,7 +198,8 @@ export class TreeMonitor {
   // stored in the recorder.
   async recordAction(call: IActionTrackingMiddleware3Call<CallEnv>,
     historyEntryId: string, exchangeId: string,
-    recorder: IPatchRecorder, sharedModelModifications: SharedModelModifications,
+    recorder: IPatchRecorder,
+    initialSharedModelMap: SharedModelMapSnapshotOutType, sharedModelModifications: SharedModelModifications,
     undoable: boolean) {
     if (!isActionFromManager(call)) {
       // We record the start of the action even if it doesn't have any
@@ -232,6 +238,8 @@ export class TreeMonitor {
         // shared model update are recorded in the same HistoryEntry
         //
         const sharedModelChangesExchangeId = nanoid();
+        // TODO: we get here with this.manager not alive during some jest tests ¯\_(ツ)_/¯
+        if (!isAlive(this.manager)) return;
         await this.manager.startExchange(historyEntryId, sharedModelChangesExchangeId,
           "recordAction.sharedModelChanges");
 
@@ -260,7 +268,7 @@ export class TreeMonitor {
         // addTreePatchRecord will be called. This is how the
         // startExchange above is closed out.
         await this.tree.handleSharedModelChanges(historyEntryId, sharedModelChangesExchangeId,
-          call, sharedModelPath);
+          call, sharedModelPath, initialSharedModelMap);
       }
     }
 
@@ -270,11 +278,11 @@ export class TreeMonitor {
       return;
     }
 
-            // TODO: CLUE Specific filtering of 'changeCount', should we record
-            // this or not?
-            const filterChangeCount = (patch: IJsonPatch) => !patch.path.match(/\/changeCount/);
-            const patches = recorder.patches.filter(filterChangeCount);
-            const inversePatches = recorder.inversePatches.filter(filterChangeCount);
+    // TODO: CLUE Specific filtering of 'changeCount', should we record
+    // this or not?
+    const filterChangeCount = (patch: IJsonPatch) => !patch.path.match(/\/changeCount/);
+    const patches = recorder.patches.filter(filterChangeCount);
+    const inversePatches = recorder.inversePatches.filter(filterChangeCount);
 
     // Always send the record to the manager even if there are no
     // patches. This API is how the manager knows the exchangeId is finished.

@@ -1,4 +1,4 @@
-import { types, Instance, SnapshotIn } from "mobx-state-tree";
+import { types, Instance, SnapshotIn, SnapshotOut } from "mobx-state-tree";
 import { TileModel, ITileModel } from "../tiles/tile-model";
 import { SharedModelUnion } from "../shared/shared-model-manager";
 
@@ -26,3 +26,7 @@ export const SharedModelEntry = types.model("SharedModelEntry", {
   }));
 export interface SharedModelEntryType extends Instance<typeof SharedModelEntry> { }
 export interface SharedModelEntrySnapshotType extends SnapshotIn<typeof SharedModelEntry> { }
+
+export const SharedModelMap = types.map(SharedModelEntry);
+export type SharedModelMapType = Instance<typeof SharedModelMap>;
+export type SharedModelMapSnapshotOutType = SnapshotOut<typeof SharedModelMap>;

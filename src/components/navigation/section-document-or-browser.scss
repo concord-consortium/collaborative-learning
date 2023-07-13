@@ -13,12 +13,13 @@ $scroller-height: 145px;
   .scroller-and-document {
     overflow-x: hidden;
     overflow-y: hidden;
+    position: relative;
     .collapse-scroller-button {
       border-radius: 50%;
       z-index: 5;
       position: absolute;
       left: 5px;
-      top: calc((#{$nav-tab-height} + #{$tab-section-border-width}) * 2);
+      top: 5px;
       width: 40px;
       height: 40px;
       display: flex;
@@ -39,6 +40,13 @@ $scroller-height: 145px;
     .scroller {
       display: flex;
       align-items: center;
+      border-bottom: $document-border-width solid;
+      &.class-work {
+        border-color: $classwork-purple-dark-1
+      }
+      &.my-work {
+        border-color: $workspace-teal-dark-1
+      }
       &.collapsed {
         height: 0;
       }
@@ -57,7 +65,6 @@ $scroller-height: 145px;
       }
       .scroller-controls {
         position: absolute;
-        top: calc(#{$tab-section-border-width} + (#{$nav-tab-height} * 2));
         height: $scroller-height;
         width: 50px;
         display: flex;
@@ -65,17 +72,16 @@ $scroller-height: 145px;
         justify-content: center;
         z-index: 3;
         &.collapsed {
-          display: none
+          display: none;
         }
         &.left {
-          left: 0
+          left: 0px;
         }
         &.right {
-          right: 0
+          right: 0px;
         }
         .scroller-controls-overlay {
           position: relative;
-          right: 0;
           background-color: white;
           opacity: 50%;
           width: 55px;
@@ -87,109 +93,170 @@ $scroller-height: 145px;
             right: 0;
           }
         }
-        .scroll-arrow-button {
-          opacity: 100%;
-          border-radius: 50%;
-          width: 40px;
-          height: 40px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          position: absolute;
-          &.collapsed {
-            display: none;
-          }
-          .scroll-arrow-icon {
-            &.right {
-              transform: rotate(180deg);
-            }
-            &.class-work {
-              fill: $classwork-purple-dark-1;
-            }
-            &.my-work {
-              fill: $workspace-teal-dark-1;
-            }
-          }
-        }
       }
     }
     .document-area {
       height: calc(100vh - #{$header-offset-with-sub-tabs});
+      display: flex;
+      flex-direction: row;
 
-      .document-header {
+      .focus-document {
         display: flex;
-        align-items: center;
-        height: $workspace-titlebar-height;
-        background-color: $charcoal-light-5;
-        margin-top: $title-margin;
-        justify-content: center;
+        flex-direction: column;
         position: relative;
-        &.my-work {
-          background-color: $workspace-teal-light-4;
+        left: 0;
+        top: 0;
+        width: 100%;
+        &.primary {
+          width: 50%;
         }
-        &.class-work {
-          background-color: $classwork-purple-light-5;
+        &.secondary {
+          right: 0;
+          top: 0;
+          width: 50%;
+          border-left: $document-border-width solid;
+          &.class-work {
+            border-color: $classwork-purple-dark-1
+          }
+          &.my-work {
+            border-color: $workspace-teal-dark-1
+          }
         }
-        &.supports {
-          background-color: $support-blue-light-5;
-        }
-        &.learning-log {
-          background-color: $learninglog-green-light-5;
-        }
-        .document-title {
-          font-weight: bold;
-        }
-        .edit-button {
+        .document-header {
           display: flex;
-          flex-direction: row;
           align-items: center;
-          width: 66px;
-          height: 26px;
-          border-radius: 5px;
-          border: solid 1.5px $charcoal-light-1;
-          background-color: $workspace-teal-light-4;
-          position: absolute;
-          right: 5px;
-          padding: 0;
-          box-sizing: border-box;
-          cursor: pointer;
-          &:hover {
-            background-color: $workspace-teal-light-3;
+          height: $workspace-titlebar-height;
+          background-color: $charcoal-light-5;
+          margin-top: $title-margin;
+          justify-content: center;
+          position: relative;
+          top: 0;
+          width: 100%;
+          &.my-work {
+            background-color: $workspace-teal-light-4;
           }
-          &:active {
-            background-color: $workspace-teal-light-1;
-            color: white;
-            .edit-icon {
-              fill: white;
-            }
+          &.class-work {
+            background-color: $classwork-purple-light-5;
           }
-          &.disabled {
-            pointer-events: none;
-            opacity: 0.35;
+          &.supports {
+            background-color: $support-blue-light-5;
           }
           &.learning-log {
             background-color: $learninglog-green-light-5;
+          }
+          &.primary {
+            background-color: $document-select-green;
+          }
+          &.secondary {
+            background-color: $document-select-blue;
+          }
+          .document-title {
+            font-weight: bold;
+          }
+          .edit-button {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            width: 66px;
+            height: 26px;
+            border-radius: 5px;
+            border: solid 1.5px $charcoal-light-1;
+            background-color: $workspace-teal-light-4;
+            position: absolute;
+            right: 5px;
+            padding: 0;
+            box-sizing: border-box;
+            cursor: pointer;
             &:hover {
-              background-color: $learninglog-green-light-4;
+              background-color: $workspace-teal-light-3;
             }
             &:active {
-              background-color: $learninglog-green-dark-1;
+              background-color: $workspace-teal-light-1;
               color: white;
               .edit-icon {
                 fill: white;
               }
             }
-          }
-          .edit-icon {
-            fill: $workspace-teal-dark-1;
-            width: 24px;
-            height: 24px;
-            margin-left: 4px;
-            margin-right: 3px;
+            &.disabled {
+              pointer-events: none;
+              opacity: 0.35;
+            }
+            &.primary {
+              background-color: $document-select-green;
+            }
+            &.secondary {
+              background-color: $document-select-blue;
+            }
             &.learning-log {
-              fill: $learninglog-green-dark-1;
+              background-color: $learninglog-green-light-5;
+              &:hover {
+                background-color: $learninglog-green-light-4;
+              }
+              &:active {
+                background-color: $learninglog-green-dark-1;
+                color: white;
+                .edit-icon {
+                  fill: white;
+                }
+              }
+            }
+            .edit-icon {
+              fill: $workspace-teal-dark-1;
+              width: 24px;
+              height: 24px;
+              margin-left: 4px;
+              margin-right: 3px;
+              &.learning-log {
+                fill: $learninglog-green-dark-1;
+              }
             }
           }
+        }
+      }
+      .scroll-arrow-button-wrapper {
+        position: relative;
+        &.left {
+          left: 0px;
+          top: calc((100vh/2) - $scroller-height - 25px);
+        }
+        &.right {
+          right: 2px;
+          top: calc((-100vh/2) + $scroller-height);
+        }
+      }
+    }
+
+    .scroll-arrow-button {
+      opacity: 100%;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      z-index: 5;
+      &.collapsed {
+        display: none;
+      }
+      &.left {
+        left: 2px;
+      }
+      &.right {
+        right: 2px;
+      }
+      .scroll-arrow-icon {
+        border-radius: 50%;
+        &.right {
+          transform: rotate(180deg);
+        }
+        &.class-work {
+          border-radius: 50%;
+          fill: $classwork-purple-dark-1;
+        }
+        &.my-work {
+          border-radius: 50%;
+          fill: $workspace-teal-dark-1;
         }
       }
     }
@@ -216,5 +283,3 @@ $scroller-height: 145px;
     }
   }
 }
-
-

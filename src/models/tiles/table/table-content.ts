@@ -24,7 +24,6 @@ import { logTileChangeEvent } from "../log/log-tile-change-event";
 import { uniqueId } from "../../../utilities/js-utils";
 import { PartialSharedModelEntry } from "../../document/document-content-types";
 import { createDefaultDataSet } from "../../../plugins/dataflow/model/utilities/create-default-data-set";
-import { SharedModelChangeType } from "../../shared/shared-model-manager";
 
 export const kTableTileType = "Table";
 export const kCaseIdName = "__id__";
@@ -43,10 +42,6 @@ export function defaultTableContent(props?: IDefaultContentOptions) {
                             // of the props and they get unique names. So perhaps
                             // the table tile can do something similar.
                             name: props?.title,
-                            columns: [
-                              { name: "x" },
-                              { name: "y" }
-                            ],
                             columnWidths: {}
                           // This type cast could probably go away if MST was upgraded and
                           // types.snapshotProcessor(TableContentModel, ...) was used
@@ -300,9 +295,11 @@ export const TableContentModel = TileContentModel
         }
         else {
           if (!sharedDataSet) {
-            // The document doesn't have a shared model yet
+            // The table doesn't have a shared model. This could happen because it
+            // was just added to the document or because the table was unlinked from its
+            // dataset. This unlinking can happen if the DataFlow tile unlinks the table
             const dataSet = DataSet.create(!self.importedDataSet.isEmpty
-              ? getSnapshot(self.importedDataSet) : undefined);
+              ? getSnapshot(self.importedDataSet) : createDefaultDataSet(self.title));
             self.clearImportedDataSet();
             sharedDataSet = SharedDataSet.create({ providerId: self.metadata.id, dataSet });
           }
@@ -317,7 +314,7 @@ export const TableContentModel = TileContentModel
       },
       {name: "sharedModelSetup", fireImmediately: true}));
     },
-    updateAfterSharedModelChanges(sharedModel?: SharedModelType, changeType?: SharedModelChangeType) {
+    updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
       // console.warn("updateAfterSharedModelChanges hasn't been implemented for table content.");
 
       // TODO This was moved from doPostCreate and might need to be rethought.
@@ -340,18 +337,6 @@ export const TableContentModel = TileContentModel
       // if (self.metadata.hasExpressions) {
       //   self.metadata.updateDatasetByExpressions(self.dataSet);
       // }
-
-      if (changeType === "unlink") {
-        const title = self.title;
-        const newDataSet = createDefaultDataSet(title);
-        const newSharedDataSet = newDataSet && SharedDataSet.create(
-          { providerId: self.metadata.id, dataSet: newDataSet }
-        );
-        const sharedModelManager = self.tileEnv?.sharedModelManager;
-        if (sharedModelManager?.isReady) {
-          sharedModelManager?.addTileSharedModel(self, newSharedDataSet);
-        }
-      }
     },
     setColumnWidth(attrId: string, width: number) {
       self.columnWidths.set(attrId, width);

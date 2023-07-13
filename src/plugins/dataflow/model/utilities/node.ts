@@ -328,10 +328,6 @@ export const NodeDemoOutputTypes = [
 
 export const NodeLiveOutputTypes = [
   {
-    name: "Light Bulb",
-    icon: LightBulbIcon
-  },
-  {
     name: "Grabber",
     icon: GrabberIcon,
     angleBase: 180,
@@ -359,33 +355,17 @@ export const NodeLiveOutputTypes = [
   }
 ];
 
-
-export const NodeMicroBitHubs = [
-  {
-    id: 'a',
-    name: "micro:bit hub a",
-    icon: LightIcon,
-    active: false
-  },
-  {
-    id: 'b',
-    name: "micro:bit hub b",
-    icon: LightIcon,
-    active: false
-  },
-  {
-    id: 'c',
-    name: "micro:bit hub c",
-    icon: LightIcon,
-    active: false
-  },
-  {
-    id: 'd',
-    name: "micro:bit hub d",
-    icon: LightIcon,
-    active: false
-  }
-];
+function createNodeMicroBitHubs(arr: string[]) {
+  return arr.map((id) => {
+    return {
+      id,
+      name: `micro:bit hub ${id}`,
+      active: false
+    };
+  });
+}
+const hubIdentifiers = ["a", "b", "c", "d", "e", "f", "g", "h"];
+export const NodeMicroBitHubs = createNodeMicroBitHubs(hubIdentifiers);
 
 export const NodeGeneratorTypes = [
   {
@@ -404,6 +384,21 @@ export const NodeGeneratorTypes = [
     icon: TriangleIcon
   }
 ];
+
+export const baseLiveOutputOptions = {
+   liveGripperOption: {
+    active: true,
+    icon: GrabberIcon,
+    id: "bb-gripper",
+    name: "Physical Gripper",
+  },
+  warningOption: {
+    active: true,
+    icon: MultiplyIcon,
+    id: "no-outputs-found",
+    name: "use device or sim",
+  }
+};
 
 export const NodePeriodUnits = [
   {
@@ -475,6 +470,6 @@ export const ProgramDataRates: ProgramDataRate[] = [
 export const kSensorSelectMessage = "Select a sensor";
 export const kSensorMissingMessage = "⚠️";
 export const kAnimatedBinaryTypes = ["Fan", "Humidifier"];
-export const kRelaysIndexed =  ["Heat Lamp", "Fan", "Humidifier"];
-export const kBinaryOutputTypes = [...kRelaysIndexed, "Light Bulb"];
-export const kRoundedOutputTypes = ["Grabber", "Gripper", "Gripper 2.0"];
+export const kMicroBitHubRelaysIndexed =  ["Heat Lamp", "Fan", "Humidifier"];
+export const kBinaryOutputTypes = [...kMicroBitHubRelaysIndexed, "Light Bulb"];
+export const kGripperOutputTypes = ["Grabber", "Gripper", "Gripper 2.0"];

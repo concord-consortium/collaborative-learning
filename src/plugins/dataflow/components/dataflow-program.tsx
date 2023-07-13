@@ -14,7 +14,7 @@ import { BaseComponent } from "../../../components/base";
 import { ProgramZoomType, DataflowContentModelType } from "../model/dataflow-content";
 import { DataflowProgramModelType } from "../model/dataflow-program-model";
 import { kSimulatedChannelPrefix, simulatedChannel } from "../model/utilities/simulated-channel";
-import { findOutputVariable, simulatedHub } from "../model/utilities/simulated-output";
+import { findOutputVariable } from "../model/utilities/simulated-output";
 import { SensorSelectControl } from "../nodes/controls/sensor-select-control";
 import { DataflowReteNodeFactory } from "../nodes/factories/dataflow-rete-node-factory";
 import { NumberReteNodeFactory } from "../nodes/factories/number-rete-node-factory";
@@ -29,7 +29,7 @@ import { GeneratorReteNodeFactory } from "../nodes/factories/generator-rete-node
 import { TimerReteNodeFactory } from "../nodes/factories/timer-rete-node-factory";
 import { NumControl } from "../nodes/controls/num-control";
 import { ValueControl } from "../nodes/controls/value-control";
-import { getHubSelect } from "../nodes/utilities/live-output-utilities";
+import { getHubSelect, setLiveOutputOpts } from "../nodes/utilities/live-output-utilities";
 import {
   sendDataToSerialDevice, sendDataToSimulatedOutput, updateNodeChannelInfo, updateGeneratorNode, updateNodeRecentValues,
   updateSensorNode, updateTimerNode
@@ -41,7 +41,7 @@ import { DataflowProgramTopbar } from "./ui/dataflow-program-topbar";
 import { DataflowProgramCover } from "./ui/dataflow-program-cover";
 import { DataflowProgramZoom } from "./ui/dataflow-program-zoom";
 import { NodeChannelInfo, serialSensorChannels } from "../model/utilities/channel";
-import { NodeMicroBitHubs, ProgramDataRates } from "../model/utilities/node";
+import { ProgramDataRates } from "../model/utilities/node";
 import { getAttributeIdForNode, recordCase } from "../model/utilities/recording-utilities";
 import { virtualSensorChannels } from "../model/utilities/virtual-channel";
 import { DocumentContextReact } from "../../../components/document/document-context";
@@ -481,23 +481,16 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.channels = [];
     this.channels = [...virtualSensorChannels, ...this.simulatedChannels, ...serialSensorChannels];
     this.countSerialDataNodes(this.programEditor.nodes);
+
     this.programEditor.nodes.forEach((node) => {
       if (node.name === "Sensor") {
         const sensorSelect = node.controls.get("sensorSelect") as SensorSelectControl;
         sensorSelect.setChannels(this.channels);
       }
+
       if (node.name === "Live Output"){
         const hubSelect = getHubSelect(node);
         hubSelect.setChannels(this.channels);
-
-        // Update live output hub options with simulated hubs
-        const outputVariable = findOutputVariable(node, this.props.tileContent?.outputVariables);
-        const options = outputVariable ? [...NodeMicroBitHubs, simulatedHub(outputVariable, node)] : NodeMicroBitHubs;
-        // If the selected option no longer exists, switch to the first option
-        if (!options.find(option => option.name === hubSelect.getValue())) {
-          hubSelect.setValue(options[0].name);
-        }
-        hubSelect.setOptions(options);
       }
     });
   };
@@ -631,9 +624,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         updateSensorNode(n, this.channels);
       },
       "Live Output": (n: Node) => {
+        const outputVar = findOutputVariable(n, this.props.tileContent?.outputVariables);
+        const foundDeviceFamily = this.stores.serialDevice.deviceFamily ?? "unknown device";
         updateNodeChannelInfo(n, this.channels, this.stores.serialDevice);
         sendDataToSerialDevice(n, this.stores.serialDevice);
         sendDataToSimulatedOutput(n, this.props.tileContent?.outputVariables);
+        setLiveOutputOpts(n, foundDeviceFamily, outputVar);
       }
     };
     let processNeeded = false;

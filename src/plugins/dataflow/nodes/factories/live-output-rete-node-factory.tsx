@@ -5,7 +5,7 @@ import { InputValueControl } from "../controls/input-value-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
 import { getHubSelect, getOutputType } from "../utilities/live-output-utilities";
 import { NodeLiveOutputTypes, NodeMicroBitHubs,
-  kRelaysIndexed, kBinaryOutputTypes, kRoundedOutputTypes
+  kMicroBitHubRelaysIndexed, kBinaryOutputTypes, kGripperOutputTypes
 } from "../../model/utilities/node";
 import { dataflowLogEvent } from "../../dataflow-logger";
 import { NodeChannelInfo } from "../../model/utilities/channel";
@@ -50,13 +50,13 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
         if (kBinaryOutputTypes.includes(outputType)){
           newValue = isNaN(n1) ? 0 : +(n1 !== 0);
           const offOnString = newValue === 0 ? "off" : "on";
-          const displayMessage = kRelaysIndexed.includes(outputType)
+          const displayMessage = kMicroBitHubRelaysIndexed.includes(outputType)
             ? `${offOnString} ${this.getRelayMessageReceived(_node)}` : offOnString;
 
           nodeValue?.setDisplayMessage(displayMessage);
         }
 
-        if (kRoundedOutputTypes.includes(outputType)){
+        if (kGripperOutputTypes.includes(outputType)){
           newValue = this.getPercentageAsInt(n1);
           const roundedDisplayValue = Math.round((newValue / 10) * 10);
           nodeValue?.setDisplayMessage(`${roundedDisplayValue}% closed`);
@@ -79,7 +79,7 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   private getSelectedRelayIndex(node: Node){
-    return kRelaysIndexed.indexOf(getOutputType(node));
+    return kMicroBitHubRelaysIndexed.indexOf(getOutputType(node));
   }
 
   private updateHubsStatusReport(node: Node){
@@ -103,7 +103,9 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
   private getHubRelaysChannel(node: Node){
     const hubSelect = getHubSelect(node);
     const selectedHubIdentifier = hubSelect.getSelectionId();
-    const relayChannels = hubSelect.getChannels().filter((c: NodeChannelInfo) => c.type === "relays");
+    const foundChannels = hubSelect.getChannels();
+    if (!foundChannels) return null;
+    const relayChannels = foundChannels.filter((c: NodeChannelInfo) => c.type === "relays");
     return relayChannels.find((c: NodeChannelInfo) => c.microbitId === selectedHubIdentifier);
   }
 
