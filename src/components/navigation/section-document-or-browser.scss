@@ -10,6 +10,11 @@ $scroller-height: 145px;
     border-right: 0;
   }
 
+  .document-browser {
+    overflow-y: auto;
+    height: calc(100vh - #{$header-offset-with-sub-tabs});
+  }
+
   .scroller-and-document {
     overflow-x: hidden;
     overflow-y: hidden;
@@ -99,6 +104,7 @@ $scroller-height: 145px;
       height: calc(100vh - #{$header-offset-with-sub-tabs});
       display: flex;
       flex-direction: row;
+      overflow-y: auto;
 
       .focus-document {
         display: flex;
@@ -107,6 +113,7 @@ $scroller-height: 145px;
         left: 0;
         top: 0;
         width: 100%;
+
         &.primary {
           width: 50%;
         }
@@ -266,7 +273,7 @@ $scroller-height: 145px;
     height: calc(100vh - (#{$header-offset-with-sub-tabs} + #{$title-margin} + #{$nav-tab-height}) - #{$scroller-height});
     position: static;
     overflow-y: auto;
-    &.no-scroller {
+    &.full-height {
       height: calc(100vh - (#{$header-offset-with-sub-tabs} + #{$title-margin} + #{$nav-tab-height}));
     }
     .canvas-area {
