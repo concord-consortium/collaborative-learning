@@ -147,7 +147,6 @@ type PostDocumentCommentUseMutationOptions =
       UseMutationOptions<firebase.functions.HttpsCallableResult, unknown, IPostDocumentCommentClientParams>;
 
 export const usePostDocumentComment = (options?: PostDocumentCommentUseMutationOptions) => {
-  console.log("document-comment-hooks.ts  > usePostDocumentContent:", options);
   const queryClient = useQueryClient();
   const postDocumentComment = useFirebaseFunction<IPostDocumentCommentParams>("postDocumentComment_v1");
   const context = useUserContext();
@@ -173,10 +172,6 @@ export const usePostDocumentComment = (options?: PostDocumentCommentUseMutationO
         tileId: comment.tileId,
         content: comment.content
       };
-
-      console.log("context:", context);
-      console.log("commment:", comment);
-
       // optimistically add the new comment (https://react-query.tanstack.com/guides/optimistic-updates)
       queryKey && queryClient.setQueryData<CommentWithId[]>(queryKey, prev => [...(prev || []), newComment]);
       // call client-specified onMutate (if provided)
