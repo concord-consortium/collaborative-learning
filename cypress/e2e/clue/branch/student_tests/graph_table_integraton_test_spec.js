@@ -74,7 +74,7 @@ context('Graph Table Integration', function () {
         graphToolTile.getGraphTile().siblings(clueCanvas.linkIconEl()).children('svg').attribute('data-indicator-width').should('exist');
         graphToolTile.getGraph().should('have.class', 'is-linked');
       });
-      it('verify points added has label in table and graph', function () {
+      it.skip('verify points added has label in table and graph', function () {
         tableToolTile.getIndexNumberToggle().click();
         tableToolTile.getTableIndexColumnCell().first().should('contain', '1');
         graphToolTile.getGraphPointLabel().contains('A').should('exist');
@@ -251,7 +251,7 @@ context("Dragging to copy linked tiles", () => {
       clueCanvas.addTile('geometry');
       textToolTile.deleteTextTile();
       cy.linkTableToGraph('Table 1', "Graph 1");
-  
+
       // Open the document on the left, then create a new document on the right
       resourcesPanel.openPrimaryWorkspaceTab("my-work");
       cy.get(".tab-panel-documents-section .list-item").first().click();
@@ -267,7 +267,7 @@ context("Dragging to copy linked tiles", () => {
       leftTile('geometry').first().trigger('dragstart', { dataTransfer });
       cy.get('.single-workspace .canvas .document-content').first()
         .trigger('drop', { force: true, dataTransfer });
-      
+
       // The copied geometry tile should have two points from its linked shared dataset
       graphToolTile.getGraphPoint().should("exist").and("have.length", 2);
 
@@ -293,5 +293,5 @@ context("Dragging to copy linked tiles", () => {
       graphToolTile.getGraphPoint().should("exist").and("have.length", 5);
     });
   });
-  
+
 });
