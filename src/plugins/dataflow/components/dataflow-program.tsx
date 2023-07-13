@@ -592,9 +592,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           case "Generator":
             nodeControl = node.controls.get("nodeValue") as ValueControl;
             node.data.recentValues = fakeData;
-            console.log("updating recent values:", node.data.recentValues);
+            //console.log("updating recent values:", node.data.recentValues);
             nodeControl.setValue(valueToSendToNode);
-            node.update();
+            //node.update();
             break;
           case "Timer":
             nodeControl = node.controls.get("nodeValue") as ValueControl; //not working
@@ -605,6 +605,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           case "Logic":
             break;
           case "Transform":
+            node.data.recentValues = fakeData;
+            nodeControl = node.controls.get("nodeValue") as ValueControl;
+            nodeControl.setValue(valueToSendToNode);
             break;
           case "Control":
             break;
@@ -620,6 +623,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             break;
           default:
         }
+        node.update();
       });
     }
   };
