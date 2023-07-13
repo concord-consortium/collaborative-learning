@@ -586,6 +586,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           case "Generator":
             nodeControl = node.controls.get("nodeValue") as ValueControl;
             nodeControl.setValue(valueToSendToNode);
+            console.log("| A valueToSendToNode", valueToSendToNode, "recentValues: ", (node.data.recentValues as any).nodeValue);
             break;
           case "Timer":
             nodeControl = node.controls.get("nodeValue") as ValueControl; //not working

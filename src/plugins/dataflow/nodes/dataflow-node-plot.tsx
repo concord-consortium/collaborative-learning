@@ -46,6 +46,8 @@ export const DataflowNodePlot: React.FC<INodePlotProps> = (props) => {
 
   const scaleBtnColorClass= props.data.name.charAt(0).toLowerCase() + props.data.name.slice(1);
 
+  console.log("| C DataflowNodePlot: props.data", props.data);
+
   return (
     <div className="node-bottom-section">
       <div className="node-bottom-buttons">
@@ -73,6 +75,7 @@ function lineData(node: any) {
   const chartDataSets: ChartDataSets[] = [];
   Object.keys(node.data.watchedValues).forEach((valueKey: string) => {
     const recentValues: any = node.data.recentValues?.[valueKey];
+
     if (recentValues !== undefined) {
       const customOptions = node.data.watchedValues?.[valueKey] || {};
       const dataset: ChartDataSets = {
@@ -99,7 +102,7 @@ function lineData(node: any) {
       chartDataSets.push(dataset);
     }
   });
-  
+
   stepY = (maxY(node) - minY(node)) / 2;
 
   const chartData: ChartData = {
