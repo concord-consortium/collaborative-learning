@@ -16,15 +16,12 @@ const minTextAreaHeight = 100;
 
 export const CommentTextBox: React.FC<IProps> = (props) => {
   const { activeNavTab, numPostedComments, onPostComment, showCommentTag, commentTags} = props;
-
-
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [commentTextAreaHeight, setCommentTextAreaHeight] = useState(minTextAreaHeight);
   const selectElt = useRef<HTMLSelectElement>(null);
   const [commentAdded, setCommentAdded] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [tagText, setTagText] = useState("");
-
   const textareaStyle = {height: commentTextAreaHeight};
   const postButtonClass = classNames("comment-footer-button", "themed-negative", activeNavTab,
                                      { disabled: !commentAdded, "no-action": !commentAdded });
@@ -137,7 +134,6 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
         ref={selectElt}
         data-test="comment-textbox-dropdown"
         onChange={(e) => {
-          console.log("onChange!!");
           handleSelectDropDown(e.target.value);
         }}
       >

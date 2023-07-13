@@ -43,7 +43,7 @@ export interface CommentDocument {
   createdAt: FSDate;          // timestamp used for sorting
   tileId?: string;            // empty for document comments
   content: string;            // plain text for now; potentially html if we need rich text
-  tag?: string;               // AI tag selected for the commment
+  tag?: string | undefined;   // AI tag selected for the commment
 }
 // collection key is Firestore-assigned id
 type CommentsCollection = FSCollection<CommentDocument>;

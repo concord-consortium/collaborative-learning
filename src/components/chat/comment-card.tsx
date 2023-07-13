@@ -58,7 +58,7 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
     }
   };
 
-  //For UI purposes, Leslie gave the go ahead for hard-coded values
+  // //For UI purposes, Leslie gave the go ahead for hard-coded values
   const mockCommentTags = {
     "tag0": "Part-to-Part",
     "tag1": "Part-to-Whole",
@@ -69,16 +69,10 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
 
   const { appConfig } = useStores();
 
-  //commentTags
-  // add to unit json
-  //Or perhaps “proportional-reasoning” would be better, since “proportional” could come up in other contexts.
-
   return (
     <div className="comment-card selected" data-testid="comment-card">
       <div className="comment-card-content selected" data-testid="comment-card-content">
         {postedComments?.map((comment, idx) => {
-            console.log("comment:", comment);
-
             const userInitialBackgroundColor = ["#f79999", "#ffc18a", "#99d099", "#ff9", "#b2b2ff", "#efa6ef"];
             const commenterInitial = comment.name.charAt(0);
             const userInitialBackgroundColorIndex = parseInt(comment.uid, 10) % 6;
@@ -89,11 +83,18 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
             const backgroundStyle = shouldShowUserIcon
                                       ? {backgroundColor: "white"}
                                       : {backgroundColor: userInitialBackgroundColor[userInitialBackgroundColorIndex]};
+
+            const hideCommentTag = (comment.tag === "Select Student Strategy") ||
+                                   !(comment.tag); //if its empty
+
+            console.log("showCommentTag:", hideCommentTag);
+
+
             return (
               <div key={idx} className="comment-thread" data-testid="comment-thread">
                 <div className="comment-text-header">
                   <div className="user-icon" style={backgroundStyle}>
-                    {shouldShowUserIcon ? <UserIcon /> : commenterInitial}
+                    { shouldShowUserIcon ? <UserIcon /> : commenterInitial }
                   </div>
                   <div className="user-name">{comment.name}</div>
                   <div className="time-stamp">{getDisplayTimeDate(comment.createdAt.getTime())}</div>
@@ -105,7 +106,7 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
                   }
                 </div>
                 {
-                !!(comment.tag) && <div className="comment-dropdown-tag">
+                !hideCommentTag && <div className="comment-dropdown-tag">
                                      { comment.tag }
                                    </div>
                 }
@@ -120,10 +121,10 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
           activeNavTab={activeNavTab}
           onPostComment={onPostComment}
           numPostedComments={postedComments?.length || 0}
-          showCommentTag={appConfig.showCommentTag}
-          commentTags={appConfig.commentTags}
-          // showCommentTag={true} //these are for mock
-          // commentTags={mockCommentTags}
+          // showCommentTag={appConfig.showCommentTag}
+          // commentTags={appConfig.commentTags}
+          showCommentTag={true} //these are for mock
+          commentTags={mockCommentTags}
         />
       </div>
     </div>
