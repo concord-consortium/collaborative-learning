@@ -53,6 +53,10 @@ describe("ConfigurationManager", () => {
     defaultLearningLogDocument: true,
     autoSectionProblemDocuments: true,
     documentLabelProperties: [] as any,
+
+    showCommentTag: false,
+    commentTags: ["Part-to-Part", "Part-to-Whole", "Unit Rate", "Guess and Check", "None"],
+
     documentLabels: {},
     disablePublish: [] as any,
     copyPreferOriginTitle: false,
@@ -71,14 +75,14 @@ describe("ConfigurationManager", () => {
 
   const keys = Object.keys(defaults) as Array<keyof typeof defaults>;
 
-  it.skip("can be constructed with just defaults and return those defaults", () => {
+  it("can be constructed with just defaults and return those defaults", () => {
     const config = new ConfigurationManager(defaults, []);
     keys.forEach((prop: keyof typeof defaults) => {
       expect(config[prop]).toEqual(defaults[prop]);
     });
   });
 
-  it.skip("can be constructed with defaults and overrides and return the overrides", () => {
+  it("can be constructed with defaults and overrides and return the overrides", () => {
     const config = new ConfigurationManager(defaults, [overrides]);
     keys.forEach((prop: keyof typeof defaults) => {
       if (prop === "disabledFeatures") {

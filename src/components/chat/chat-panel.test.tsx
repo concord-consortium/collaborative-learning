@@ -77,7 +77,7 @@ jest.mock("../../hooks/use-stores", () => ({
 
 describe("ChatPanel", () => {
 
-  it.skip("should render successfully", () => {
+  it("should render successfully", () => {
     const mockCloseChatPanel = jest.fn();
     render((
       <ModalProvider>
@@ -92,7 +92,7 @@ describe("ChatPanel", () => {
     });
     expect(mockCloseChatPanel).toHaveBeenCalled();
   });
-  it.skip("should show select document message if document has not been selected", () => {
+  it("should show select document message if document has not been selected", () => {
     const mockCloseChatPanel = jest.fn();
     render((
       <ModalProvider>
@@ -101,7 +101,7 @@ describe("ChatPanel", () => {
     ));
     expect(screen.getByTestId("select-doc-message")).toBeInTheDocument();
   });
-  it.skip("Should show chat list with thread if document selected", () => {
+  it("Should show chat list with thread if document selected", () => {
     const mockCloseChatPanel = jest.fn();
     render((
       <ModalProvider>

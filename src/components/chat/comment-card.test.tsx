@@ -18,7 +18,7 @@ describe("CommentCard", () => {
   const testUser  = { id: "0", name: "Test Teacher" } as UserModelType;
   const activeNavTab = "my-work";
 
-  it.skip("should render successfully", () => {
+  it("should render successfully", () => {
     render((
       <ModalProvider>
         <CommentCard activeNavTab={activeNavTab} />
@@ -28,7 +28,7 @@ describe("CommentCard", () => {
     expect(screen.getByTestId("comment-card-content")).toBeInTheDocument();
     expect(screen.getByTestId("comment-card-content")).toHaveClass("selected");
   });
-  it.skip("should show the correct header icon when there are no comments", () => {
+  it("should show the correct header icon when there are no comments", () => {
     const postedComments: WithId<CommentDocument>[] = [];
     const commentThread = screen.queryByTestId("comment-thread");
     render((
@@ -38,7 +38,7 @@ describe("CommentCard", () => {
     ));
     expect(commentThread).toBeNull();
   });
-  it.skip("should show the correct header icon when there are comments and comment appears in card", () => {
+  it("should show the correct header icon when there are comments and comment appears in card", () => {
     const testComment = "test comment";
     const postedComments: WithId<CommentDocument>[] = [
             { id: "1", uid: "1", name: "T1", createdAt: new Date(), content: testComment }
