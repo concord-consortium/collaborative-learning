@@ -14,6 +14,7 @@ interface IProps {
   subTab: ISubTabSpec;
   tabSpec: NavTabModelType;
   selectedDocument?: string;
+  selectedSecondaryDocument?: string;
   horizontal?: boolean;
   collapsed?: boolean;
   scrollToLocation?: number;
@@ -24,7 +25,7 @@ interface IProps {
 export const kNavItemScale = 0.11;
 
 export const DocumentCollectionList: React.FC<IProps> = observer(function DocumentCollectionList(
-    { setCollectionElement, subTab, tabSpec, horizontal, collapsed, selectedDocument,
+    { setCollectionElement, subTab, tabSpec, horizontal, collapsed, selectedDocument, selectedSecondaryDocument,
         onSelectNewDocument, onSelectDocument}) {
   const ui = useUIStore();
   const appConfigStore = useAppConfig();
@@ -71,6 +72,7 @@ export const DocumentCollectionList: React.FC<IProps> = observer(function Docume
               numSections={subTab.sections.length}
               scale={kNavItemScale}
               selectedDocument={selectedDocument}
+              selectedSecondaryDocument={selectedSecondaryDocument}
               onSelectNewDocument={onSelectNewDocument}
               onSelectDocument={onSelectDocument}
               onDocumentDragStart={handleDocumentDragStart}

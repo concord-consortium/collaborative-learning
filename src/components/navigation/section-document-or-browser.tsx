@@ -109,7 +109,6 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     );
   };
 
-  //TODO: Need to refactor this if we want to deploy to all tabs
   const renderDocumentView = (subTab: ISubTabSpec) => {
     const openDocumentKey = tabState?.openDocuments.get(subTab.label) || "";
     const openDocument = store.documents.getDocument(openDocumentKey) ||

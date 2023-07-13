@@ -24,6 +24,7 @@ interface IProps {
   numSections: number;
   scale: number;
   selectedDocument?: string;
+  selectedSecondaryDocument?: string;
   onSelectNewDocument?: (type: string) => void;
   onSelectDocument?: (document: DocumentModelType) => void;
   onDocumentDragStart: (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => void;
@@ -85,8 +86,8 @@ function getSectionDocs(section: NavTabSectionModelType, documents: DocumentsMod
 
 export const DocumentCollectionByType: React.FC<IProps> = observer(({
                                   topTab, tab, section, index, numSections=0, scale, selectedDocument,
-                                  horizontal, onSelectNewDocument, onSelectDocument, onDocumentDragStart,
-                                  onDocumentStarClick, onDocumentDeleteClick }: IProps) => {
+                                  selectedSecondaryDocument, horizontal, onSelectNewDocument, onSelectDocument,
+                                  onDocumentDragStart, onDocumentStarClick, onDocumentDeleteClick }: IProps) => {
   const appConfigStore = useAppConfig();
   const classStore = useClassStore();
   const documents = useLocalDocuments();
@@ -131,6 +132,7 @@ export const DocumentCollectionByType: React.FC<IProps> = observer(({
                 tab={tab}
                 scale={scale}
                 selectedDocument={selectedDocument}
+                selectedSecondaryDocument={selectedSecondaryDocument}
                 onSelectDocument={onSelectDocument}
                 onDocumentDragStart={onDocumentDragStart}
                 onDocumentStarClick={onDocumentStarClick}
