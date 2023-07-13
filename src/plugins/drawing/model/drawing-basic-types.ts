@@ -1,3 +1,7 @@
+import LineToolIcon from "../assets/line-icon.svg";
+import SingleArrowIcon from "../assets/line-single-arrow-icon.svg";
+import DoubleArrowIcon from "../assets/line-double-arrow-icon.svg";
+import { FunctionComponent, SVGProps } from "react";
 
 export interface Point { x: number; y: number; }
 
@@ -13,6 +17,23 @@ export enum VectorType {
   singleArrow = "arrow",
   doubleArrow = "doublearrow"
 }
+
+const vectorTypeIcons: Map<VectorType, FunctionComponent<SVGProps<SVGSVGElement>>> = new Map();
+vectorTypeIcons.set(VectorType.line, LineToolIcon);
+vectorTypeIcons.set(VectorType.singleArrow, SingleArrowIcon);
+vectorTypeIcons.set(VectorType.doubleArrow, DoubleArrowIcon);
+export function getVectorTypeIcon(vectorType?: VectorType) {
+  return (vectorType && vectorTypeIcons.get(vectorType)) || LineToolIcon;
+}
+
+const vectorTypeTooltips: Map<VectorType, string> = new Map();
+vectorTypeTooltips.set(VectorType.line, "Line");
+vectorTypeTooltips.set(VectorType.singleArrow, "Arrow");
+vectorTypeTooltips.set(VectorType.doubleArrow, "Double arrow");
+export function getVectorTypeTooltip(vectorType?: VectorType) {
+  return (vectorType && vectorTypeTooltips.get(vectorType)) || "Unknown";
+}
+
 
 // Possible decorations for the start and end of the vector.  Default is no decoration.
 export enum VectorEndShape {

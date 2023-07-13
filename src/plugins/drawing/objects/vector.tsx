@@ -3,16 +3,9 @@ import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React, { useCallback } from "react";
 import { computeStrokeDashArray, DrawingObjectType, DrawingTool, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
-import { Point, ToolbarSettings, VectorEndShape, VectorType, endShapesForVectorType } 
+import { Point, VectorEndShape, endShapesForVectorType, getVectorTypeIcon } 
   from "../model/drawing-basic-types";
-import { buttonClasses } from "../components/drawing-toolbar-buttons";
-import SmallCornerTriangle from "../../../assets/icons/small-corner-triangle.svg";
-import { Tooltip } from "react-tippy";
-import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
-import { useTouchHold } from "../../../hooks/use-touch-hold";
-import LineToolIcon from "../assets/line-icon.svg";
-import SingleArrowIcon from "../assets/line-single-arrow-icon.svg";
-import DoubleArrowIcon from "../assets/line-double-arrow-icon.svg";
+import { SvgToolbarButton } from "../components/drawing-toolbar-buttons";
 
 // Line or arrow
 export const VectorObject = StrokedObject.named("VectorObject")
@@ -146,11 +139,7 @@ export const VectorToolbarButton: React.FC<IToolbarButtonProps> = observer(({
   const modalButton = "vector";
   const { selectedButton, toolbarSettings } = toolbarManager;
   const selected = selectedButton === modalButton;
-  const _settings = toolbarSettings;
 
-  const tooltipOptions = useTooltipOptions();
-
-  // Adapted from image.tsx
   const handleButtonClick = useCallback(() => {
     toolbarManager.setSelectedButton(modalButton);
     togglePaletteState('showVectors', false);
@@ -162,48 +151,12 @@ export const VectorToolbarButton: React.FC<IToolbarButtonProps> = observer(({
     togglePaletteState('showVectors');
   }, [togglePaletteState]);
 
-  const { didTouchHold, ...handlers } = useTouchHold(handleButtonTouchHold, handleButtonClick);
-
-  const handleExpandCollapseClick = (e: React.MouseEvent) => {
-    if (!didTouchHold()) {
-      handleButtonTouchHold();
-      e.stopPropagation();
-    }
-  };
-
-  const vectorTypeIcon = _settings.vectorType || VectorType.line;
+  const icon = getVectorTypeIcon(toolbarSettings.vectorType);
 
   return (
-    <Tooltip title="Line" {...tooltipOptions}>
-      <button type="button" className={buttonClasses({ modalButton, selected })} {...handlers}>
-        <VectorTypeIcon vectorType={vectorTypeIcon} settings={_settings} />
-        <div className="expand-collapse" onClick={handleExpandCollapseClick}>
-          <SmallCornerTriangle />
-        </div>
-      </button>
-    </Tooltip>);
+    <SvgToolbarButton SvgIcon={icon} buttonClass="vector"
+      title="Line or arrow" selected={selected} settings={toolbarSettings}
+      onClick={handleButtonClick}
+      openPalette={handleButtonTouchHold} />
+  );
 });
-
-interface IVectorTypeIconProps {
-  vectorType: VectorType;
-  settings: ToolbarSettings;
-}
-
-export function VectorTypeIcon ({ vectorType, settings }: IVectorTypeIconProps) {
-  // SVG attributes to use when drawing the icon.
-  // Note that the arrowheads are filled with the stroke color, we don't use settings.fill for this
-  const attributes = {
-    stroke: settings.stroke, 
-    fill: settings.stroke, // uses stroke for fill
-    strokeWidth: settings.strokeWidth,
-    strokeDasharray: settings.strokeDashArray
-  };
-  switch(vectorType) {
-    case VectorType.line:
-      return <LineToolIcon {...attributes} />;
-    case VectorType.singleArrow:
-      return <SingleArrowIcon {...attributes} />;
-    case VectorType.doubleArrow:
-      return <DoubleArrowIcon {...attributes} />;
-  }
-}
