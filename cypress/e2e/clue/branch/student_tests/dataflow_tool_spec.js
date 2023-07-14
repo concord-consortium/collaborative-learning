@@ -561,16 +561,11 @@ context('Dataflow Tool Tile', function () {
         dataflowToolTile.getPlayButton().should("be.enabled");
         dataflowToolTile.verifyRecordingClearButtonText();
         dataflowToolTile.verifyRecordingClearButtonIcon();
-
-
-
         dataflowToolTile.getPlayButton().click();
-
         dataflowToolTile.verifyPauseButtonText();
         dataflowToolTile.verifyPauseButtonIcon();
         dataflowToolTile.getPauseButton().should("be.enabled");
         dataflowToolTile.getPauseButton().click();
-
         dataflowToolTile.getPlayButton().should("be.enabled");
         dataflowToolTile.getPlayButton().click();
         cy.wait(5000);
