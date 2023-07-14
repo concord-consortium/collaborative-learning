@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import "regenerator-runtime/runtime";
-import { forEach } from "lodash";
+import { forEach, update } from "lodash";
 import { inject, observer } from "mobx-react";
 import { autorun } from "mobx";
 import { IDisposer, onSnapshot } from "mobx-state-tree";
@@ -42,7 +42,7 @@ import { DataflowProgramCover } from "./ui/dataflow-program-cover";
 import { DataflowProgramZoom } from "./ui/dataflow-program-zoom";
 import { NodeChannelInfo, serialSensorChannels } from "../model/utilities/channel";
 import { ProgramDataRates } from "../model/utilities/node";
-import { getRecentValuesForNode } from "../utilities/playback-utils";
+import { getRecentValuesForNode, updatePlaybackValueControl } from "../utilities/playback-utils";
 import { getAttributeIdForNode, recordCase } from "../model/utilities/recording-utilities";
 import { virtualSensorChannels } from "../model/utilities/virtual-channel";
 import { DocumentContextReact } from "../../../components/document/document-context";
@@ -571,61 +571,53 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private playbackNodesWithCaseData = (dataSet: IDataSet, playBackIndex: number) => {
     const currentCase = dataSet.getCaseAtIndex(playBackIndex);
+    const basicUpdateNodes = ["Number", "Generator", "Transform"];
+
     if (currentCase){
       const {__id__} = currentCase; //this is the id of the case we are looking at for each frame
       this.programEditor.nodes.forEach((node, idx) => { //update each node in the frame
         const attrId = getAttributeIdForNode(this.props.tileContent.dataSet, idx);
-        const valueToSendToNode = dataSet.getValue(__id__, attrId) as number;
-        let nodeControl;
-        switch (node.name){
-          case "Sensor":
-            nodeControl = node.controls.get("nodeValue") as SensorValueControl;
-            nodeControl.setValue(valueToSendToNode);
-            break;
-          case "Number":
-            nodeControl = node.controls.get("nodeValue") as NumControl;
-            nodeControl.setValue(valueToSendToNode);
-            break;
-          case "Generator":
-            nodeControl = node.controls.get("nodeValue") as ValueControl;
-            nodeControl.setValue(valueToSendToNode);
-            break;
-          case "Timer":
-            nodeControl = node.controls.get("nodeValue") as ValueControl;
-            nodeControl.setSentence(valueToSendToNode === 0 ? "off" : "on");
-            break;
-          case "Math":
-            nodeControl = node.controls.get("nodeValue") as ValueControl;
-            nodeControl.setSentence(` → ${valueToSendToNode}`);
-            break;
-          case "Logic":
-            nodeControl = node.controls.get("nodeValue") as ValueControl;
-            // displays identical result as during real execution, but does not show function input values
-            // a further improvement would bring the n1, n2 socket values into the display as in real execution
-            nodeControl.setSentence(valueToSendToNode === 0 ? " ⇒ 0" : " ⇒ 1");
-            break;
-          case "Transform":
-            nodeControl = node.controls.get("nodeValue") as ValueControl;
-            nodeControl.setValue(valueToSendToNode);
-            break;
-          case "Control":
-            // displays identical result as during real execution, but does not show function input values
-            // a further improvement would bring the binary input value as (on/off) into the display
-            nodeControl = node.controls.get("nodeValue") as ValueControl;
-            nodeControl.setSentence(` → ${valueToSendToNode}`);
-            break;
-          case "Demo Output":
-            nodeControl = node.controls.get("demoOutput") as DemoOutputControl;
-            nodeControl.setValue(valueToSendToNode); //---> shows correct animation
-            nodeControl = node.inputs.get("nodeValue")?.control as InputValueControl;
-            nodeControl.setDisplayMessage(valueToSendToNode === 0 ? "off" : "on");
-            break;
-          case "Live Output":
-            nodeControl = node.inputs.get("nodeValue")?.control as InputValueControl;
-            nodeControl.setDisplayMessage(valueToSendToNode === 0 ? "off" : "on");
-            break;
-          default:
+        const valForNode = dataSet.getValue(__id__, attrId) as number;
+
+        if (basicUpdateNodes.includes(node.name)){
+          updatePlaybackValueControl(node, valForNode);
+        } else {
+          let nodeControl;
+          switch (node.name){
+            case "Sensor":
+              nodeControl = node.controls.get("nodeValue") as SensorValueControl;
+              nodeControl.setValue(valForNode);
+              break;
+            case "Timer":
+              nodeControl = node.controls.get("nodeValue") as ValueControl;
+              nodeControl.setSentence(valForNode === 0 ? "off" : "on");
+              break;
+            case "Math":
+              nodeControl = node.controls.get("nodeValue") as ValueControl;
+              nodeControl.setSentence(` → ${valForNode}`);
+              break;
+            case "Logic":
+              nodeControl = node.controls.get("nodeValue") as ValueControl;
+              nodeControl.setSentence(valForNode === 0 ? " ⇒ 0" : " ⇒ 1");
+              break;
+            case "Control":
+              nodeControl = node.controls.get("nodeValue") as ValueControl;
+              nodeControl.setSentence(` → ${valForNode}`);
+              break;
+            case "Demo Output":
+              nodeControl = node.controls.get("demoOutput") as DemoOutputControl;
+              nodeControl.setValue(valForNode); //---> shows correct animation
+              nodeControl = node.inputs.get("nodeValue")?.control as InputValueControl;
+              nodeControl.setDisplayMessage(valForNode === 0 ? "off" : "on");
+              break;
+            case "Live Output":
+              nodeControl = node.inputs.get("nodeValue")?.control as InputValueControl;
+              nodeControl.setDisplayMessage(valForNode === 0 ? "off" : "on");
+              break;
+            default:
+          }
         }
+
         const calculatedRecentValues = {
           "nodeValue": getRecentValuesForNode(dataSet, playBackIndex, attrId)
         };
