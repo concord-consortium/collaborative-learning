@@ -592,7 +592,7 @@
                       ]
                     }
                   }
-
+              
                 ]
               }
             }
@@ -1750,7 +1750,7 @@
             {
               "type": "whatIf",
               "content": {
-                "tiles": [
+                "tiles": [ 
                   {
                     "id": "_npqx_5zhDn1pHYT",
                     "title": "Text 11",
@@ -2103,7 +2103,7 @@
             {
               "type": "nowWhatDoYouKnow",
               "content": {
-                "tiles": [
+                "tiles": [ 
                   {
                     "id": "Egt3CNkIr4L3igZj",
                     "title": "Text 53",
@@ -2319,7 +2319,7 @@
                         "<p>PRESENTING THE CHALLENGE</p>",
                         "<p>Many schools have walkathons or something similar to raise funds for charity. Ask students how they determined what to charge their patrons.</p>",
                         "<p><strong>Suggested questions </strong></p>",
-                        "<ul><li>What variables can affect the amount of money that a student raises? </li><li>How can you use these variables to estimate the amount of money each student will collect?</li><li>Will the amount of money raised be the same for each walker? Explain. </li><li>Which variable is the independent variable? Which is the dependent variable? </li></ul>",
+                        "<ul><li>What variables can affect the amount of money that a student raises? </li><li>How can you use these variables to estimate the amount of money each student will collect?</li><li>Will the amount of money raised be the same for each walker? Explain.  </li><li>Which variable is the independent variable? Which is the dependent variable? </li></ul>",
                         "<p>Display the three pledge plans of Leanne, Alana, and Gilberto. How might you decide who is going to raise the most money?</p>",
                         "<p></p>"
                       ]
@@ -2409,7 +2409,7 @@
                         "<p><em>                                               How might it be useful in solving problems?</em></p>"
                       ]
                     }
-                  }
+                  }              
                 ]
               }
             },
@@ -2984,7 +2984,7 @@
                         "<p>Listen during the Explore for how students are describing what is happening with the money in the class accounts. Are they noticing on a table that as the number of weeks is increasing, the amount of money is decreasing at a constant rate; on a graph the line is decreasing (fall) from left to right; and in an equation the coefficient is negative. Listen for how students contrast these representations to those in previous problems. Use their conversations to lead the Summary.</p>"
                       ]
                     }
-                  }
+                  }              
                 ]
               },
               "summarize": {
@@ -3175,7 +3175,7 @@
                       "type": "Image",
                       "url": "curriculum/moving-straight-ahead/images/MSA_2-1_InitialChallenge_Graph.png"
                     }
-                  }
+                  }              
                 ]
               }
             },
@@ -3485,7 +3485,7 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Problem 2.1 Henri and Emile’s Race:  Developing Strategies to Find a Solution</strong></p>",
-                        "<p>In the Initial Challenge students look at the context of a young boy challenging his older brother toa race. Students explore the question, “How long should the race be so thatthe younger brother wins in a close race?” In the What If Situations students will investigate finding the point of intersection of two linear relationships using a graph, a table, or numeric reasoning.</p>"
+                        "<p>In the Initial Challenge students look at the context of a young boy challenging his older brother to a race. Students explore the question, “How long should the race be so that the younger brother wins in a close race?” In the What If Situations students will investigate finding the point of intersection of two linear relationships using a graph, a table, or numeric reasoning.</p>"
                       ]
                     }
                   },
@@ -3591,7 +3591,7 @@
                         "<p>CONNECTING TO PRIOR KNOWLEDGE</p>",
                         "<p>Begin by having students list several equations from Investigation 1 that represent linear relationships. </p>",
                         "<p><strong>Suggested questions </strong></p>",
-                        "<ul><li>Which relationship has the greatest rate of change? </li><li>Which relationship(s) has a graph that crosses the y-axis at a point witha positive y-coordinate? With a y-coordinate of zero? With a negative y-coordinate?</li></ul>",
+                        "<ul><li>Which relationship has the greatest rate of change? </li><li>Which relationship(s) has a graph that crosses the y-axis at a point with a positive y-coordinate? With a y-coordinate of zero? With a negative y-coordinate?</li></ul>",
                         "<p></p>",
                         "<p>PRESENTING THE CHALLENGE</p>",
                         "<p>Tell the story of the race between Emile and his younger brother, Henri. This Problem is intended to show what knowledge students already have concerning linear relationships.</p>",
@@ -5135,7 +5135,7 @@
                         "<p>She is incorrect. None of the plans are proportional, because they all have non-zero y-intercepts. Also, you could not write a proportion from the table values.</p>"
                       ]
                     }
-                  }
+                  }              
                 ]
               }
             },
@@ -5279,7 +5279,7 @@
                 ]
               },
               "launch": {
-                "tiles": [
+                "tiles": [ 
                   {
                     "id": "PKDPRjBSTEG8ngSD",
                     "title": "Text 1",
@@ -5316,7 +5316,7 @@
                       "text": [
                         "<p><strong>EXPLORE</strong></p>",
                         "<p>PROVIDING FOR INDIVIDUAL NEEDS</p>",
-                        "<p>Students may need help with the negative coefficient in the equation for Plan 2. You can ask students to explain why the line slants down or why the relationship is decreasing. </p>",
+                        "<p>Students may need help with the negative coefficient in the equation for Plan 2. You can ask students to explain why the line slants down or why the relationship is decreasing.  </p>",
                         "<p><strong>Suggested questions</strong></p>",
                         "<ul><li>Does the table help you decide whether the graph of the relationship is increasing or decreasing? </li><li>Pick a point on this line. Can you find this point in the table? Explain. </li><li>How do you know the ordered pair you picked is a solution to the equation?</li></ul>",
                         "<p></p>",
@@ -5339,12 +5339,12 @@
                       "text": [
                         "<p><strong>SUMMARIZE</strong></p>",
                         "<p>SOLUTIONS AND STRATEGIES </p>",
-                        "<p>Revisit constant rate of change in the context of equations and connect the rate to tables and graphs of linear relationships. Suggested questions </p>",
-                        "<ul><li>What is the amount raised per kilometer under each plan? </li><li>How does each rate appear in a table? In a graph? In an equation? </li><li>What information does the y-intercept represent in each plan? </li><li>Do the plans make sense? Explain. </li></ul>",
+                        "<p>Revisit constant rate of change in the context of equations and connect the rate to tables and graphs of linear relationships. Suggested questions  </p>",
+                        "<ul><li>What is the amount raised per kilometer under each plan?  </li><li>How does each rate appear in a table? In a graph? In an equation? </li><li>What information does the y-intercept represent in each plan? </li><li>Do the plans make sense? Explain. </li></ul>",
                         "<p>Let students share their ideas with the main focus on the rate, intercepts of the graphs, and solutions of the equations. Most students will say that the negative rate does not make sense. It means you give money back. However, students are very creative and may suggest something plausible.</p>",
                         "<p></p>",
                         "<p>MAKING THE MATHEMATICS EXPLICIT</p>",
-                        "<p>Be sure to go over the answers to the What If Situations. Check to make sure students understand the relationship between the points on a line, values in a table, and the solutions of the equation for that line. Have students share their solutions and their strategies for each part of the Problem. Ask for explanations. </p>",
+                        "<p>Be sure to go over the answers to the What If Situations. Check to make sure students understand the relationship between the points on a line, values in a table, and the solutions of the equation for that line. Have students share their solutions and their strategies for each part of the Problem. Ask for explanations.  </p>",
                         "<p>Students should be making the connection between a specific solution of an equation and the more general relationship between two variables for the related equation.</p>",
                         "<p><strong>Suggested questions</strong></p>",
                         "<ul><li>How are the equations 12 = 5x - 3, -8 = 5x - 3, and 27 = 5x - 3 related to y = 5x - 3? </li><li>How can you find the missing value of x?</li></ul>",
@@ -6456,7 +6456,7 @@
                         "<p><em>Teacher Moves: Think-Pair-Share</em></p>",
                         "<p>PRESENTING THE CHALLENGE</p>",
                         "<p>Display Learning Aid 3.1: Pouches and Coins. Tell the class about the pouches and gold coins used in the Kingdom of Montarek. </p>",
-                        "<ul><li>The number of gold coins on each side of the equal sign is the same, but some coins are hidden in the pouches. </li><li>In each situation, each pouch contains the same number of one-dollar gold coins. </li><li>The challenge is to find the number of coins in each pouch. </li></ul>",
+                        "<ul><li>The number of gold coins on each side of the equal sign is the same, but some coins are hidden in the pouches.  </li><li>In each situation, each pouch contains the same number of one-dollar gold coins.  </li><li>The challenge is to find the number of coins in each pouch.  </li></ul>",
                         "<p></p>"
                       ]
                     }
@@ -6476,8 +6476,8 @@
                         "<p><em>Teacher Moves: Portrayal</em></p>",
                         "<p>PROVIDING FOR INDIVIDUAL NEEDS</p>",
                         "<p>Encourage students to record their strategies. Using poster paper to have students record their work can help lead the Summary discussions. </p>",
-                        "<p><strong>Suggested questions</strong> </p>",
-                        "<ul><li>What does “equality” mean? What does the equal sign tell us? </li><li>How can we maintain equality? </li><li>How do you know if your answer is correct?</li></ul>",
+                        "<p><strong>Suggested questions</strong>  </p>",
+                        "<ul><li>What does “equality” mean? What does the equal sign tell us?  </li><li>How can we maintain equality?  </li><li>How do you know if your answer is correct?</li></ul>",
                         "<p></p>",
                         "<p><em>Teacher Moves: Selecting and Sequencing</em></p>",
                         "<p>PLANNING FOR THE SUMMARY</p>",
@@ -6502,7 +6502,7 @@
                         "<p>If your students recorded their work on poster paper, display the posters and give the class time to examine the various strategies using a Gallery Walk.</p>",
                         "<p>Have students share all of the correct strategies they used (and some incorrect strategies if discussing them would be helpful in deepening students’ understanding of equality).</p>",
                         "<p>Display <strong>Teaching Aid 3.1B: Nicole’s Strategy</strong> and make sure students understand how the Distributive Property is being used. </p>",
-                        "<p><strong>Suggested questions </strong></p>",
+                        "<p><strong>Suggested questions </strong> </p>",
                         "<ul><li>Can you use the Distributive Property on any of the other equations? </li><li>Can you use the Distributive Property for Aman’s Code in Situation B?</li></ul>",
                         "<p></p>",
                         "<p><em>Teacher Moves: Compare Thinking</em></p>",
@@ -7205,13 +7205,13 @@
                         "<p>SOLUTIONS AND STRATEGIES </p>",
                         "<p>Post the solutions around the room. Call on different students to describe how they solved the equations. Make sure you highlight equations in which students may have done something different for the first step. Some may begin by combining pouches (like terms), while others may start by removing coins. </p>",
                         "<p><strong>Suggested questions</strong> </p>",
-                        "<ul><li>What did you do at each step to maintain equality? </li><li>Is there another way to make the first step in the solution? Explain.</li><li>Are there other equations in which a different first step could be taken? </li><li>Look back over your work for each equation. What general rules were you using to solve the equations?</li></ul>",
+                        "<ul><li>What did you do at each step to maintain equality?  </li><li>Is there another way to make the first step in the solution? Explain.</li><li>Are there other equations in which a different first step could be taken? </li><li>Look back over your work for each equation. What general rules were you using to solve the equations?</li></ul>",
                         "<p></p>",
                         "<p><em>Teacher Moves: Language</em></p>",
                         "<p>MAKING THE MATHEMATICS EXPLICIT</p>",
                         "<p>To move from pouches and coins to solving equations symbolically, discuss the What If Situations.</p>",
                         "<p><strong>Suggested questions:</strong></p>",
-                        "<ul><li>In What if Situation A, what equation can we write to represent the pouches and coins code? </li><li>Using the thinking that you were using with the visual equations, how do we find the value of x. </li><li>Next to your work, write down a similar method using the equation that represents this situation. </li><li>Describe a general method for solving equations.</li></ul>",
+                        "<ul><li>In What if Situation A, what equation can we write to represent the pouches and coins code?  </li><li>Using the thinking that you were using with the visual equations, how do we find the value of x. </li><li>Next to your work, write down a similar method using the equation that represents this situation. </li><li>Describe a general method for solving equations.</li></ul>",
                         "<p></p>",
                         "<p>Discuss that when solving an inequality, students can use what they know about solving equations to make sense of the solutions.</p>",
                         "<ul><li>In What If Situation C, we know that 6 pouches and 30 coins must be less than 102 coins. What if it were equal to 102 coins? How would we write that in symbols? </li><li>What would be the solution to the equation? </li><li>So, if 6 pouches and 30 coins must be less than 102 coins, or 6x + 30 &lt; 102, what are possible answers for how many coins could be in each pouch? </li><li>If it were possible to have partial coins, would 11 ½ coins be a solution? </li><li>So, could there be more solutions than the ones you listed?</li></ul>",
@@ -7544,7 +7544,7 @@
                         "<p>The solutions to this inequality will be all possible femur lengths for a female who is less than 150 cm tall.</p>"
                       ]
                     }
-                  }
+                  }              
                 ]
               }
             },
@@ -7744,7 +7744,7 @@
                         "<p></p>",
                         "<p><em>Teacher Moves: Selecting and Sequencing</em></p>",
                         "<p>PLANNING FOR THE SUMMARY</p>",
-                        "<p>Look for students’ explanations that include keeping expressions equivalent on both sidesof the equal sign (e.g., adding 2 to each side, dividing each side by 3, etc.). Look for student work applying the Distributive Property.</p>"
+                        "<p>Look for students’ explanations that include keeping expressions equivalent on both sides of the equal sign (e.g., adding 2 to each side, dividing each side by 3, etc.). Look for student work applying the Distributive Property.</p>"
                       ]
                     }
                   }
@@ -7763,7 +7763,7 @@
                         "<p><em>﻿Teacher Moves: Agency, Identity, Ownership and Claim, Support, Question</em></p>",
                         "<p>SOLUTIONS AND STRATEGIES </p>",
                         "<p>Go over each part of the Problem. Call on different students to discuss their methods. After a group has presented their solutions, ask the class if they have any questions they want to ask the group. For example, encourage them to ask questions like the following: </p>",
-                        "<ul><li>Why did you do this at step 2?</li><li>Why did you not consider starting with a different step? </li><li>Was there a shorter way of getting to the answer? </li></ul>",
+                        "<ul><li>Why did you do this at step 2? </li><li>Why did you not consider starting with a different step? </li><li>Was there a shorter way of getting to the answer? </li></ul>",
                         "<p></p>",
                         "<p><em>Teacher Moves: Compare Thinking</em></p>",
                         "<p>MAKING THE MATHEMATICS EXPLICIT</p>",
@@ -7942,16 +7942,16 @@
                         }
                       },
                       "objects": [
-                        { "type": "movableLine",
+                        { "type": "movableLine", 
                           "parents": [
-                            { "type": "point", "parents": [0, 825] },
+                            { "type": "point", "parents": [0, 825] }, 
                             { "type": "point", "parents": [300, 1800] }
                             ],
-                          "properties": {"id":"vMWqEpX7_igY027x","pt1":{"type":"point","id":"vMWqEpX7_igY027x-point1"},"pt2":{"type":"point","id":"vMWqEpX7_igY027x-point2"}}
+                          "properties": {"id":"vMWqEpX7_igY027x","pt1":{"type":"point","id":"vMWqEpX7_igY027x-point1"},"pt2":{"type":"point","id":"vMWqEpX7_igY027x-point2"}} 
                         },
                         { "type": "comment", "parents": [21.336225328947364, -463.1059074954708], "properties": {"id":"tBpHw7TAncgqhS8a","text":"Expense","anchor":"vMWqEpX7_igY027x"} },
-                        { "type": "movableLine",
-                          "parents": [{ "type": "point", "parents": [0, 0] }, { "type": "point", "parents": [200, 1640] }],"properties": {"id":"pnjRfqTdlHmyZ28t","pt1":{"type":"point","id":"pnjRfqTdlHmyZ28t-point1"},"pt2":{"type":"point","id":"pnjRfqTdlHmyZ28t-point2"}}
+                        { "type": "movableLine", 
+                          "parents": [{ "type": "point", "parents": [0, 0] }, { "type": "point", "parents": [200, 1640] }],"properties": {"id":"pnjRfqTdlHmyZ28t","pt1":{"type":"point","id":"pnjRfqTdlHmyZ28t-point1"},"pt2":{"type":"point","id":"pnjRfqTdlHmyZ28t-point2"}} 
                         },
                         { "type": "comment", "parents": [40.59329255756579, -358.36662137681174], "properties": {"id":"517CZN7bjekKFHob","text":"Income","anchor":"pnjRfqTdlHmyZ28t"} },
                         { "type": "point", "parents": [100, 820], "properties": {"id":"Zb_VawWMWUPjtj3n","name":"I","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
@@ -8175,22 +8175,22 @@
             "planningTemplate": {
               "overview": {
                 "tiles": [
-
+                  
                 ]
               },
               "launch": {
                 "tiles": [
-
+                 
                 ]
               },
               "explore": {
                 "tiles": [
-
+                  
                 ]
               },
               "summarize": {
                 "tiles": [
-
+                 
                 ]
               }
             }
@@ -10087,7 +10087,7 @@
                         ]
                       }
                     }
-                  ]
+                  ]           
                 ]
               }
             },
