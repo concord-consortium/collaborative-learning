@@ -54,7 +54,7 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
 
   return (
     <div className={classNames("list-item", selectedClass, privateClass, {"secondary": isSecondarySelected})}
-      data-test={dataTestName} key={document.key}
+      data-test={dataTestName} key={document.key} data-docKey={document.key}
       title={documentTitle} onClick={isPrivate ? undefined : handleDocumentClick}>
       <div className="scaled-list-item-container" onDragStart={handleDocumentDragStart}
         draggable={!!onDocumentDragStart && !isPrivate}>
