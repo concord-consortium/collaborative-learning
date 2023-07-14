@@ -3,11 +3,12 @@ import userEvent from "@testing-library/user-event";
 import React from "react";
 import { act } from "react-dom/test-utils";
 import { CommentTextBox } from "./comment-textbox";
-import { AppConfigModel } from "../../models/stores/app-config-model";
-import { unitConfigDefaults } from "../../test-fixtures/sample-unit-configurations";
 
 jest.mock("../../hooks/use-stores", () => ({
-  ui: AppConfigModel.create({ curriculumBaseUrl: "https://curriculum.example.com", config: unitConfigDefaults })
+  useUIStore: () => ({
+    showChatPanel: true,
+    selectedTileIds: []
+  })
 }));
 
 describe("Comment Textbox", () => {
