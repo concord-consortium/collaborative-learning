@@ -99,6 +99,7 @@ function lineData(node: any) {
       chartDataSets.push(dataset);
     }
   });
+
   stepY = (maxY(node) - minY(node)) / 2;
 
   const chartData: ChartData = {

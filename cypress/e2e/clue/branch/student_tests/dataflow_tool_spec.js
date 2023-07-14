@@ -532,6 +532,8 @@ context('Dataflow Tool Tile', function () {
         dataflowToolTile.getNodeTitle().should("contain", "Demo Output");
         dataflowToolTile.getNodeOutput().eq(0).click();
         dataflowToolTile.getNodeInput().eq(0).click();
+        dataflowToolTile.getShowGraphButton("demo-output").click();
+        dataflowToolTile.getMinigraph("demo-output").should("exist");
       });
       it("verify sampling rate", () => {
         const rate = "500";
@@ -559,6 +561,9 @@ context('Dataflow Tool Tile', function () {
         dataflowToolTile.getPlayButton().should("be.enabled");
         dataflowToolTile.verifyRecordingClearButtonText();
         dataflowToolTile.verifyRecordingClearButtonIcon();
+
+
+
         dataflowToolTile.getPlayButton().click();
 
         dataflowToolTile.verifyPauseButtonText();

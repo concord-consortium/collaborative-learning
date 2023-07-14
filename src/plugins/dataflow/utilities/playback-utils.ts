@@ -3,8 +3,8 @@ import { getAttributeIdForNode } from "../model/utilities/recording-utilities";
 
 function getPriorCases(index: number, dataSet: any, playhead: number){
   // kMaxNodeValues determines how many datapoints are plotted each time
-  const offSet = 1;
-  const maxValues = kMaxNodeValues + offSet;
+  const offset = 1;
+  const maxValues = kMaxNodeValues + offset;
   const pastCalc = playhead - maxValues;
   const regionStart = pastCalc < 0 ? 0 : pastCalc;
   const countOfCasesToGet = playhead < maxValues ? playhead : maxValues;
