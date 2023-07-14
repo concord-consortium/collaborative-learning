@@ -59,6 +59,15 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
 
   const { appConfig } = useStores(); //holds showCommentTag and commentTags fetched from "clue-curriculum" repository
 
+  const mockCommentTags = {
+    "part-to-part": "Part-to-Part",
+    "part-to-whole": "Part-to-Whole",
+    "unit-rate": "Unit Rate",
+    "guess-and-check": "Guess and Check",
+    "none": "None"
+  };
+
+
   return (
     <div className="comment-card selected" data-testid="comment-card">
       <div className="comment-card-content selected" data-testid="comment-card-content">
@@ -110,7 +119,10 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
           onPostComment={onPostComment}
           numPostedComments={postedComments?.length || 0}
           showCommentTag={appConfig.showCommentTag}
-          commentTags={appConfig.commentTags}
+          // commentTags={appConfig.commentTags}
+          commentTags={mockCommentTags}
+
+
         />
       </div>
     </div>

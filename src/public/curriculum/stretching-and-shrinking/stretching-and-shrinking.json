@@ -30,11 +30,11 @@
     ],
     "showCommentTag": true,
     "commentTags": {
-      "tag0": "Part-to-Part",
-      "tag1": "Part-to-Whole",
-      "tag2": "Unit Rate",
-      "tag3": "Guess and Check",
-      "tag4": "None"
+      "part-to-part": "Part-to-Part",
+      "part-to-whole": "Part-to-Whole",
+      "unit-rate": "Unit Rate",
+      "guess-and-check": "Guess and Check",
+      "none": "None"
     }
 
   },
