@@ -571,7 +571,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private playbackNodesWithCaseData = (dataSet: IDataSet, playBackIndex: number) => {
     const currentCase = dataSet.getCaseAtIndex(playBackIndex);
-    const basicUpdateNodes = ["Number", "Generator", "Transform"];
+    const basicUpdateNodes = ["Number", "Generator"];
 
     if (currentCase){
       const {__id__} = currentCase; //this is the id of the case we are looking at for each frame
@@ -584,6 +584,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         } else {
           let nodeControl;
           switch (node.name){
+            case "Transform":
+              nodeControl = node.controls.get("nodeValue") as ValueControl;
+              console.log("| transform: ", nodeControl, valForNode);
+              nodeControl.setSentence(` → ${valForNode}`);
+              break;
             case "Sensor":
               nodeControl = node.controls.get("nodeValue") as SensorValueControl;
               nodeControl.setValue(valForNode);
