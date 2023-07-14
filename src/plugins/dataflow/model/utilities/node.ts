@@ -152,6 +152,13 @@ export const NodeOperationTypes = [
     icon: NotIcon
   },
   {
+    name: "Round",
+    type: "transform",
+    method: (n1: number, n2: number) => Number(n1.toFixed(0)),
+    numberSentence: (n1: string, n2: string) => `${n1} ⇒  `,
+    icon: EmgIcon
+  },
+  {
     name: "Greater Than",
     type: "logic",
     method: (n1: number, n2: number) => +(n1 > n2),
