@@ -109,18 +109,6 @@ context('Draw Tool Tile', function () {
         drawToolTile.getVectorDrawing().children().its("length").should("eq", 3); // Now three items in group...
         drawToolTile.getVectorDrawing().find("polygon").its("length").should("eq", 2); // including two arrowheads.        
         });
-      // it("verify moving a vector", () => {
-      //   const vec = drawToolTile.getVectorDrawing().children("line").first().should("have.attr", "x1").then(parseInt).and("within", 200, 300);
-      //   drawToolTile.getDrawToolSelect().click({scrollBehavior: false});
-      //   drawToolTile.getVectorDrawing().click({scrollBehavior: false});
-      //   drawToolTile.getVectorDrawing().trigger("mouseover", "left", {scrollBehavior: false});
-      //   drawToolTile.getVectorDrawing().trigger("mousedown", "left");
-      //   cy.wait(5000);
-      //   drawToolTile.getVectorDrawing().trigger("mousemove", 300, 100);
-      //   drawToolTile.getVectorDrawing().trigger("mouseup",   300, 100);
-      //   cy.wait(5000);
-      //   drawToolTile.getVectorDrawing().children("line").first().should("have.attr", "x1").then(parseInt).and("within", 300, 400);
-      // });
       it("deletes vector drawing", () => {
         drawToolTile.getDrawToolSelect().click({scrollBehavior: false});
         drawToolTile.getVectorDrawing().click({scrollBehavior: false});
