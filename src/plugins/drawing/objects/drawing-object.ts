@@ -64,6 +64,13 @@ export const DrawingObject = types.model("DrawingObject", {
   setPosition(x: number, y: number) {
     self.x = x;
     self.y = y;
+  },
+  adjustSize(corner: string, dx: number, dy: number) {
+    // Implementated in subclasses.
+    // Implementation should return true if the object was actually resized by the given increment,
+    // false if resizing in that way was not possible.
+    console.log("adjustSize is unimplemented for this type");
+    return false;
   }
 }));
 export interface DrawingObjectType extends Instance<typeof DrawingObject> {}

@@ -15,6 +15,7 @@ import { DrawingObjectSnapshotForAdd, DrawingObjectType, DrawingTool,
 import { Point, ToolbarSettings } from "../model/drawing-basic-types";
 import { getDrawingToolInfos, renderDrawingObject } from "./drawing-object-manager";
 import { ImageObject } from "../objects/image";
+import { debounce } from "lodash";
 
 const SELECTION_COLOR = "#777";
 const HOVER_COLOR = "#bbdd00";
@@ -42,6 +43,7 @@ interface DrawingLayerViewState {
   selectionBox: SelectionBox|null;
   hoverObject: DrawingObjectType|null;
   objectsBeingDragged: DrawingObjectType[];
+  objectBeingResized: DrawingObjectType|null;
 }
 
 @observer
@@ -63,6 +65,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       selectedObjects: [],
       hoverObject: null,
       objectsBeingDragged: [],
+      objectBeingResized: null
     };
 
     this.tools = {};
@@ -348,26 +351,52 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   public renderResizeHandle(object: DrawingObjectType, corner: string, x: number, y: number, color: string) {
     const resizeBoxOffset = SELECTION_BOX_RESIZE_HANDLE_SIZE/2;
 
-    return <rect key={corner} className={"resize-handle " + corner}
+    return <rect key={corner} data-corner={corner} className={"resize-handle " + corner}
                 x={x-resizeBoxOffset} y={y-resizeBoxOffset} 
                 width={SELECTION_BOX_RESIZE_HANDLE_SIZE} height={SELECTION_BOX_RESIZE_HANDLE_SIZE}
                 stroke={color} strokeWidth="1" fill="#FFF" fillOpacity="1"
-                onMouseDown={(e) => this.startResize(e, object)}
-                onMouseUp={(e) => this.completeResize(e, object)}
+                onMouseDown={(e) => this.handleResizeStart(e, object)}
           />
   }
 
-  private startResize(e: React.MouseEvent<SVGRectElement>, object: DrawingObjectType) {
+  private handleResizeStart(e: React.MouseEvent<SVGRectElement, MouseEvent>, object: DrawingObjectType) {
     e.stopPropagation();
     e.preventDefault();
-    e.currentTarget.classList.add('active');
+    const handle = e.currentTarget;
+    handle.classList.add('active');
+    const corner = handle.dataset.corner;
+    
+    let start = this.getWorkspacePoint(e);
+    this.setState({objectBeingResized: object});
+
+    const handleResizeMove = debounce((e: MouseEvent) => {
+      e.stopPropagation();
+      e.preventDefault();
+      const object = this.state.objectBeingResized;
+      const current = this.getWorkspacePoint(e);
+      if (!object || !start || !current || !corner) return;
+      const dx = current.x - start.x, dy = current.y - start.y;
+      
+      if (object.adjustSize(corner, dx, dy)) {
+        // If resize was successful, then the current position is the new starting point.
+        start = current;
+      }
+      
+    }, 10);
+  
+    const handleResizecomplete = (e: MouseEvent) => {
+      e.stopPropagation();
+      e.preventDefault();
+      window.removeEventListener("mousemove", handleResizeMove);
+      window.removeEventListener("mouseup", handleResizecomplete);
+      handle.classList.remove('active');
+      this.setState({objectBeingResized: null});
+    }  
+
+    window.addEventListener("mousemove", handleResizeMove);
+    window.addEventListener("mouseup", handleResizecomplete);
   }
 
-  private completeResize(e: React.MouseEvent<SVGRectElement>, object: DrawingObjectType) {
-    e.stopPropagation();
-    e.preventDefault();
-    e.currentTarget.classList.remove('active');
-  }
 
   //we want to populate our objectsBeingDragged state array
 

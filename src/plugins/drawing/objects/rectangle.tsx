@@ -48,6 +48,23 @@ export const RectangleObject = types.compose("RectangleObject", StrokedObject, F
         self.y = y;
         self.width = self.height = squareSize;
       }
+    },
+    adjustSize(corner: string, dx: number, dy: number) {
+      // If dragging one of the "south" handles, increasing y coordinate (ie vertically down) makes the rect bigger.
+      // The "north" handles make the rect smaller when dragged in the positive direction but increase it's starting Y.
+      let dHeight = (corner.charAt(0) === 's') ? dy : -dy;
+      let dYStart = (corner.charAt(0) === 's') ? 0 :   dy;
+      // East handles make the shape bigger when postive; West handles make it smaller but increase starting X.
+      let dWidth =  (corner.charAt(1) === 'e') ? dx : -dx;
+      let dXStart = (corner.charAt(1) === 'e') ? 0 :   dx;
+
+      if (self.width+dWidth < 1 || self.height+dHeight < 1) return false;
+
+      self.x += dXStart;
+      self.y += dYStart;
+      self.width += dWidth;
+      self.height += dHeight;
+      return true;
     }
   }));
 export interface RectangleObjectType extends Instance<typeof RectangleObject> {}
