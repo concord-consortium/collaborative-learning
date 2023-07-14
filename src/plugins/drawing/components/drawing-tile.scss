@@ -20,6 +20,18 @@
     display: flex;
     font-size: 24px;
     text-align: center;
+
+    div:first-child {
+      .drawing-tool-button {
+        border-bottom-left-radius: 3px;
+      }
+    }
+    div:last-child {
+      .drawing-tool-button {
+        border-bottom-right-radius: 3px;
+      }
+    }
+
     .drawing-tool-button {
       position: relative;
       // These are button elements so we have to disable default button styles
@@ -50,10 +62,6 @@
           }
         }
       }
-
-      &.button-select {
-        border-bottom-left-radius: 3px;
-      }
       &.button-stamp {
         display: flex;
         align-items: center;
@@ -64,10 +72,6 @@
           z-index: 1;
         }
       }
-      &.button-delete {
-        border-bottom-right-radius: 3px;
-      }
-
       &.disabled {
         opacity: 25%;
         cursor: default;
@@ -203,7 +207,7 @@
     
     &.vectors {
       left: 70px;
-      width: 120px;
+      height: 38px;
     }
 
     &.stamps {
