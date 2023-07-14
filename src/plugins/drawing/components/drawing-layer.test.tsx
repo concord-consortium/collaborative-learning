@@ -12,7 +12,7 @@ import { ImageObject, ImageObjectType } from "../objects/image";
 // The drawing tile needs to be registered so the TileModel.create
 // knows it is a supported tile type
 import "../drawing-registration";
-import { VectorEndShape } from "../model/drawing-basic-types";
+import { VectorEndShape, VectorType, endShapesForVectorType } from "../model/drawing-basic-types";
 
 let content: DrawingContentModelType, drawingLayerProps, drawingLayer;
 
@@ -104,6 +104,10 @@ describe("Drawing Layer Components", () => {
     });
     it("moves a vector arrow", () => {
       vector.setPosition(5,5);
+      expect(getDrawingObject(content)).toMatchSnapshot();
+    });
+    it("changes vector type", () => {
+      vector.setEndShapes(...endShapesForVectorType(VectorType.doubleArrow));
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("deletes a vector arrow", () => {

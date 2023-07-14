@@ -17,6 +17,9 @@ class DrawToolTile{
     getDrawToolLine(){
       return cy.get('.primary-workspace .drawing-tool-button.button-vector');
     }
+    getDrawToolLineSubmenu(){
+      return cy.get('.primary-workspace .drawing-tool-button.button-vector .expand-collapse');
+    }
     getDrawToolRectangle(){
       return cy.get('.primary-workspace .drawing-tool-button.button-rectangle');
     }
