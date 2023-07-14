@@ -3,7 +3,7 @@ import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React, { useCallback } from "react";
 import { computeStrokeDashArray, DrawingObjectType, DrawingTool, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
-import { Point, VectorEndShape, endShapesForVectorType, getVectorTypeIcon } 
+import { Point, ToolbarSettings, VectorEndShape, endShapesForVectorType, getVectorTypeIcon } 
   from "../model/drawing-basic-types";
 import { SvgToolbarButton } from "../components/drawing-toolbar-buttons";
 
@@ -153,9 +153,18 @@ export const VectorToolbarButton: React.FC<IToolbarButtonProps> = observer(({
 
   const icon = getVectorTypeIcon(toolbarSettings.vectorType);
 
+  // Arrowhead shapes should be drawn entirely with the stroke color
+  const settings: ToolbarSettings = {
+    fill: toolbarSettings.stroke,
+    stroke: toolbarSettings.stroke,
+    strokeDashArray: toolbarSettings.strokeDashArray,
+    strokeWidth: toolbarSettings.strokeWidth,
+    vectorType: toolbarSettings.vectorType
+  };
+
   return (
     <SvgToolbarButton SvgIcon={icon} buttonClass="vector"
-      title="Line or arrow" selected={selected} settings={toolbarSettings}
+      title="Line or arrow" selected={selected} settings={settings}
       onClick={handleButtonClick}
       openPalette={handleButtonTouchHold} />
   );

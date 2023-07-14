@@ -10,13 +10,22 @@ interface IProps {
   settings: ToolbarSettings;
 }
 export const VectorTypeButton = observer(
-    function VectorTypeButton({ vectorType, isSelected, onSelectVectorType, settings }: IProps) {
-  
-    const icon = getVectorTypeIcon(vectorType);
-    const tooltip = getVectorTypeTooltip(vectorType);
+  function VectorTypeButton({ vectorType, isSelected, onSelectVectorType, settings }: IProps) {
+
+  const icon = getVectorTypeIcon(vectorType);
+  const tooltip = getVectorTypeTooltip(vectorType);
+
+  // Arrowhead shapes should be drawn entirely with the stroke color
+  const modSettings: ToolbarSettings = {
+    fill: settings.stroke,
+    stroke: settings.stroke,
+    strokeDashArray: settings.strokeDashArray,
+    strokeWidth: settings.strokeWidth,
+    vectorType: settings.vectorType
+  };
 
     return <SvgToolbarButton SvgIcon={icon} buttonClass="vector-type"
-      title={tooltip} selected={isSelected} settings={settings}   
+      title={tooltip} selected={isSelected} settings={modSettings}
       onClick={() => onSelectVectorType(vectorType)} />;
 });
 
