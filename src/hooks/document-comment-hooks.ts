@@ -162,7 +162,6 @@ export const usePostDocumentComment = (options?: PostDocumentCommentUseMutationO
       // snapshot the current state of the comments in case we need to roll back on error
       const rollbackComments = queryKey && queryClient.getQueryData<CommentWithId[]>(queryKey);
       type CommentWithId = WithId<CommentDocument>;
-      console.log("options:", options);
       const newComment: CommentWithId = {
         id: `pending-${uniqueId()}`,
         uid: context.uid || "",
