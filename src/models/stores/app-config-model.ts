@@ -77,10 +77,8 @@ export const AppConfigModel = types
     get initialLearningLogTitle() { return self.configMgr.initialLearningLogTitle; },
     get defaultLearningLogDocument() { return self.configMgr.defaultLearningLogDocument; },
     get autoSectionProblemDocuments() { return self.configMgr.autoSectionProblemDocuments; },
-
     get showCommentTag() { return self.configMgr.showCommentTag; },
     get commentTags() { return self.configMgr.commentTags; },
-
     get documentLabelProperties() { return self.configMgr.documentLabelProperties; },
     get documentLabels() { return self.configMgr.documentLabels; },
     get disablePublish() { return self.configMgr.disablePublish; },
