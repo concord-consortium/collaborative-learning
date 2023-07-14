@@ -17,7 +17,7 @@ context('Shared Variables', function () {
     cy.clearQAData('all');
     cy.visit(queryParam);
     cy.waitForLoad();
-    // cy.closeResourceTabs();
+    // cy.collapseResourceTabs();
     cy.get('.primary-workspace [data-test=personal-doc-title]')
     .then(($canvasTitle)=>{
         title = $canvasTitle.text().trim();

@@ -28,7 +28,7 @@ context('Diagram Tool Tile', function () {
 
     cy.visit(queryParams);
     cy.waitForLoad();
-    cy.closeResourceTabs();
+    cy.collapseResourceTabs();
   });
   describe("Shared Variable Tiles (Diagram, Drawing)", () => {
     it("Diagram tile, toolbar, and dialogs", () => {
