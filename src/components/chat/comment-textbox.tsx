@@ -133,11 +133,10 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
         >
           <option key={"sel-ss"} value={defaultEntry}> { defaultEntry } </option>
           {
-            Object.keys(commentTags).map((option, idx) => {
-              const key = `tag${idx}` as keyof typeof commentTags;
-              const value = commentTags[key] as string;
+            Object.keys(commentTags).map(key => {
+              const value = commentTags[key as keyof typeof commentTags];
               return (
-                <option key={option} value={value}> {value} </option>
+                <option key={key} value={key}> {value} </option>
               );
             })
           }
