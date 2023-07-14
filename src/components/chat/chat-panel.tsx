@@ -53,7 +53,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
       logCommentEvent(eventPayload);
     }
     return document
-      ? postCommentMutation.mutate({ document, comment: { content: comment, tileId: focusTileId, tag} })
+      ? postCommentMutation.mutate({ document, comment: { content: comment, tileId: focusTileId, tag } })
       : undefined;
   }, [document, focusDocument, focusTileId, postCommentMutation, postedComments]);
 
