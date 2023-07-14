@@ -1,11 +1,20 @@
 name: Continuous Integration
 
-on: push
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      deployOnly:
+        description: 'Whether or not to only run the deployment job'
+        required: true
+        default: false
+        type: boolean
 
 jobs:
   build_test:
     name: Build and Run Jest Tests
     runs-on: ubuntu-latest
+    if: "! contains(toJSON(github.event.commits.*.message), '[skip test]')" 
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
@@ -27,6 +36,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
   cypress:
     runs-on: ubuntu-latest
+    if: "! contains(toJSON(github.event.commits.*.message), '[skip test]')" 
     container: cypress/browsers:node16.14.2-slim-chrome103-ff102
     strategy:
       # when one test fails, DO NOT cancel the other
