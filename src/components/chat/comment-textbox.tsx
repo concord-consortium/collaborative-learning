@@ -9,7 +9,7 @@ interface IProps {
   numPostedComments: number;
   onPostComment?: (comment: string, tag: string) => void;
   showCommentTag?: boolean;
-  commentTags?: object;
+  commentTags?: Record<string, string>
 }
 
 
