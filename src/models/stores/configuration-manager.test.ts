@@ -19,8 +19,6 @@ describe("ConfigurationManager", () => {
     defaultLearningLogDocument: false,
     autoSectionProblemDocuments: false,
     documentLabelProperties: [] as any,
-    showCommentTag: false,
-    commentTags: ["Part-to-Part", "Part-to-Whole", "Unit Rate", "Guess and Check", "None"],
     documentLabels: {},
     disablePublish: [] as any,
     copyPreferOriginTitle: true,
@@ -53,10 +51,6 @@ describe("ConfigurationManager", () => {
     defaultLearningLogDocument: true,
     autoSectionProblemDocuments: true,
     documentLabelProperties: [] as any,
-
-    showCommentTag: false,
-    commentTags: ["Part-to-Part", "Part-to-Whole", "Unit Rate", "Guess and Check", "None"],
-
     documentLabels: {},
     disablePublish: [] as any,
     copyPreferOriginTitle: false,
