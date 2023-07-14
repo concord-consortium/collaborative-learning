@@ -52,8 +52,10 @@ import { InputValueControl } from "../nodes/controls/input-value-control";
 import { DemoOutputControl } from "../nodes/controls/demo-output-control";
 import { ProgramMode, UpdateMode } from "./types/dataflow-tile-types";
 import { ITileModel } from "../../../models/tiles/tile-model";
+import { IDataSet } from "../../../models/data/data-set";
 
 import "./dataflow-program.sass";
+
 
 export interface IStartProgramParams {
   runId: string;
@@ -567,7 +569,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.programEditor.clear();
   };
 
-  private playbackNodesWithCaseData = (dataSet: any, playBackIndex: number) => {
+  private playbackNodesWithCaseData = (dataSet: IDataSet, playBackIndex: number) => {
     const currentCase = dataSet.getCaseAtIndex(playBackIndex);
     if (currentCase){
       const {__id__} = currentCase; //this is the id of the case we are looking at for each frame
@@ -615,7 +617,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           default:
         }
         const calculatedRecentValues = {
-          "nodeValue": getRecentValuesForNode(node, dataSet, playBackIndex, idx)
+          "nodeValue": getRecentValuesForNode(dataSet, playBackIndex, idx)
         };
         node.data.recentValues = calculatedRecentValues;
         node.update();
