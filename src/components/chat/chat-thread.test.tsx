@@ -3,7 +3,9 @@ import React from "react";
 import { ModalProvider } from "react-modal-hook";
 import { ENavTab } from "../../models/view/nav-tabs";
 import { ChatThread } from "./chat-thread";
-import { UserModelType } from "src/models/stores/user";
+import { UserModelType } from "../../models/stores/user";
+import { AppConfigModel } from "../../models/stores/app-config-model";
+import { unitConfigDefaults } from "../../test-fixtures/sample-unit-configurations";
 
 const mockCurriculumDocument = { unit: "unit", problem: "1.1", section: "intro", path: "unit/1/1/intro" };
 const mockUseDocumentOrCurriculumMetadata = jest.fn((docKeyOrSectionPath: string) => {
@@ -11,14 +13,17 @@ const mockUseDocumentOrCurriculumMetadata = jest.fn((docKeyOrSectionPath: string
 });
 
 jest.mock("../../hooks/use-stores", () => ({
-  useUIStore: () => ({
-    showChatPanel: true,
-    selectedTileIds: []
-  }),
   useDocumentOrCurriculumMetadata:
   (docKeyOrSectionPath: string) => mockUseDocumentOrCurriculumMetadata(docKeyOrSectionPath),
 useNetworkDocumentKey: (documentKey: string) => `network_${documentKey}`,
   useTypeOfTileInDocumentOrCurriculum: () => "Text",
+  useUIStore: () => ({
+    showChatPanel: true,
+    selectedTileIds: []
+  }),
+  useStores: () => ({
+    appConfig: AppConfigModel.create({ curriculumBaseUrl: "https://curriculum.example.com", config: unitConfigDefaults })
+  })
 }));
 
 const makeFakeCommentThread = (title: string, tileId: string, uid: string) => {
