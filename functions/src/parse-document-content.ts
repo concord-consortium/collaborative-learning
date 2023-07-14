@@ -23,19 +23,25 @@ export async function parseDocumentContent(contentJson: string, canonicalizeUrl:
   const content = safeJsonParse<IDocumentContent>(contentJson);
 
   // find all image-supporting tiles (Drawing, Geometry, Image)
-  const imageTiles: Array<{ type: string, content: string }> = [];
+  const imageTilesOrSharedModels: Array<{ type: string, content: string }> = [];
   content?.tileMap && Object.keys(content.tileMap).forEach(tileId => {
     const { content: tileContent } = content.tileMap[tileId];
     if (["Drawing", "Geometry", "Image"].indexOf(tileContent.type) >= 0) {
-      imageTiles.push({ type: tileContent.type, content: JSON.stringify(tileContent) });
+      imageTilesOrSharedModels.push({ type: `tile:${tileContent.type}`, content: JSON.stringify(tileContent) });
+    }
+  });
+  content?.sharedModelMap && Object.keys(content.sharedModelMap).forEach(sharedModelId => {
+    const { sharedModel } = content.sharedModelMap[sharedModelId];
+    if (["SharedDataSet"].indexOf(sharedModel.type) >= 0) {
+      imageTilesOrSharedModels.push({type: `sharedModel:${sharedModel.type}`, content: JSON.stringify(sharedModel) });
     }
   });
 
   const activeImages: IImageInfo[] = [];
 
   // find all the firebase image urls in the support content
-  imageTiles.forEach(({ type: tileType, content: tileContent }) => {
-    const imageMatches = matchAll(kImageUrlRegex, tileContent)
+  imageTilesOrSharedModels.forEach(({ type: itemType, content: itemContent }) => {
+    const imageMatches = matchAll(kImageUrlRegex, itemContent)
                           .map(match => {
                             const [ , url, path] = match;
                             const { imageKey: key = path, legacyUrl } = parseFirebaseImageUrl(url);
@@ -46,7 +52,8 @@ export async function parseDocumentContent(contentJson: string, canonicalizeUrl:
       // Note that this doesn't account for image objects that may have been subsequently deleted,
       // so the image will continue to be shared after all objects that display it have been deleted.
       // Handling this case would require more detailed parsing of Drawing content.
-      if (tileType === "Drawing") {
+      // SharedDataSet sharedModels also support multiple images
+      if (itemType === "tile:Drawing" || itemType === "sharedModel:SharedDataSet") {
         activeImages.push(...imageMatches);
       }
       else {

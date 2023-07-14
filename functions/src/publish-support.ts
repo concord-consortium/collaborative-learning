@@ -7,7 +7,7 @@ import { parseFirebaseImageUrl } from "./shared-utils";
 import { validateUserContext } from "./user-context";
 
 // update this when deploying updates to this function
-const version = "1.0.3";
+const version = "1.0.4";
 
 export async function publishSupport(
                         params?: IPublishSupportUnionParams,

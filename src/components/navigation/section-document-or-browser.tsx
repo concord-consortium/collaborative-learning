@@ -86,7 +86,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     const openDocumentKey = tabState?.openDocuments.get(subTab.label);
     const classHash = classStore.classHash;
     return (
-      <div>
+      <div className="document-browser vertical">
         <DocumentCollectionList
           subTab={subTab}
           tabSpec={tabSpec}

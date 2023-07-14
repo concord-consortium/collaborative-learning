@@ -78,10 +78,24 @@ $ npm run lint    # lint the functions code
 $ npm run test    # runs jest (unit) tests for the functions code
 $ npm run build   # build the functions code (transpile TypeScript)
 ```
-Note that there seems to be an uneasy relationship between the `node_modules` folder in the
+### Note 1
+There seems to be an uneasy relationship between the `node_modules` folder in the
 `functions` directory and the one in the parent directory. I had to explicitly specify the
 path to typescript in the `build` function. There's probably a better configuration available,
 but in the meantime this seems to mostly work.
+
+### Note 2
+When running `npm run test` with node 16, the following error is shown
+```
+TypeError: Cannot read properties of undefined (reading 'INTERNAL')
+```
+This error is triggered by the following line in `test-utils.ts`
+```
+import { useEmulators } from "@firebase/rules-unit-testing";
+```
+The current work around is to use node 14 to run the tests.
+
+See functions/dependency-notes.md for more on this.
 
 ### Testing cloud functions
 

@@ -138,10 +138,20 @@ export interface ITileMapEntry {
   id: string;
   content: ITileContent;
 }
+export interface ISharedModel {
+  type: string;
+  id: string;
+  // ... other shared-model specific properties
+}
+export interface ISharedModelMapEntry {
+  sharedModel: any;
+  tiles: Array<string>;
+}
 export interface IDocumentContent {
   rowMap: Record< string, IRowMapEntry>;
   rowOrder: string[];
   tileMap: Record<string, ITileMapEntry>;
+  sharedModelMap: Record<string, ISharedModelMapEntry>;
 }
 
 interface IFirebaseFunctionWarmUpParams {

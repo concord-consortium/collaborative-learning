@@ -50,9 +50,17 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
     const docs: DocumentModelType[] = [];
       types.forEach((type) => {
         const docsByTypeArr = documents.byType(type);
-        docsByTypeArr.forEach((doc: any) => {
-          docs.push(doc);
-        });
+        if (tabSpec.tab === "my-work") {
+          docsByTypeArr.forEach((doc: any) => {
+            if (doc.uid === store.user.id) {
+              docs.push(doc);
+            }
+          });
+        } else {
+          docsByTypeArr.forEach((doc: any) => {
+            docs.push(doc);
+          });
+        }
       });
     const starredDocs = docs.filter((doc: DocumentModelType) => !doc.getProperty("isDeleted") && doc.isStarred);
     return starredDocs;
@@ -147,6 +155,9 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
       return (primaryDocIndex === 0 || (secondaryDocIndex === 0 && primaryDocIndex === 1));
     }
     if (tabSpec.tab === "my-work") {
+      if (numStarredDocs === 1) {
+        return (primaryDocIndex === 0);
+      }
       return (primaryDocIndex === 1 || (secondaryDocIndex === 1 && primaryDocIndex === 2));
     }
   };
@@ -319,7 +330,7 @@ interface IDocumentAreaProps {
   onChangeDocument?: (shift: number, secondary?: boolean) => void;
 }
 
-const DocumentArea = ({openDocument, tab, sectionClass, isSecondaryDocument,
+const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocument,
     hasSecondaryDocument, hideLeftFlipper, hideRightFlipper, onChangeDocument}: IDocumentAreaProps) => {
   const ui = useUIStore();
   const user = useUserStore();
@@ -379,6 +390,7 @@ const DocumentArea = ({openDocument, tab, sectionClass, isSecondaryDocument,
         document={openDocument}
         readOnly={true}
         showPlayback={showPlayback}
+        fullHeight={subTab.label !== "Starred" }
       />
       {onChangeDocument &&
         <DocumentFlipperControl side={"right"} tab={tab} shift={-1}

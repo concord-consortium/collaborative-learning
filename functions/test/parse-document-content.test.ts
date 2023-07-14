@@ -1,6 +1,7 @@
 import { parseDocumentContent } from "../src/parse-document-content";
 import { buildFirebaseImageUrl, parseFirebaseImageUrl, replaceAll } from "../src/shared-utils";
 import { specDocumentContent } from "./test-utils";
+import sharedDatasetExample from "./shared-dataset-example";
 
 describe("parseDocumentContent", () => {
 
@@ -128,6 +129,24 @@ describe("parseDocumentContent", () => {
     };
     expect(await parseDocumentContent(originalContent, canonicalize))
       .toEqual({ content: updatedContent, images: { [legacyUrl1]: canonicalUrl1 } });
+  });
+
+  it("should support multiple images in a shared dataset", async () => {
+    const kClassHash = "class-hash";
+    const canonicalUrl1 = buildFirebaseImageUrl(kClassHash, "image-1");
+    const canonicalUrl2 = buildFirebaseImageUrl(kClassHash, "image-2");
+    const { legacyUrl: legacyUrl1 } = parseFirebaseImageUrl(canonicalUrl1);
+    const { legacyUrl: legacyUrl2 } = parseFirebaseImageUrl(canonicalUrl2);
+    // In this case we've hardcoded the legacyUrl1(ccimg://fbrtdb.concord.org/image-1) and
+    // legacyUrl2(ccimg://fbrtdb.concord.org/image-2) into the content
+    const originalContent = JSON.stringify(sharedDatasetExample);
+    const updatedContent = originalContent.replace(legacyUrl1, canonicalUrl1).replace(legacyUrl2, canonicalUrl2);
+    const canonicalize = (url: string) => {
+      const { imageKey = "" } = parseFirebaseImageUrl(url);
+      return Promise.resolve(buildFirebaseImageUrl(kClassHash, imageKey));
+    };
+    expect(await parseDocumentContent(originalContent, canonicalize))
+      .toEqual({ content: updatedContent, images: { [legacyUrl1]: canonicalUrl1, [legacyUrl2]: canonicalUrl2 } });
   });
 
   it("should support multiple images in multiple tiles", async () => {
