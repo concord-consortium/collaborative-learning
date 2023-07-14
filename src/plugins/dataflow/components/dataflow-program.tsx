@@ -591,16 +591,28 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             nodeControl.setValue(valueToSendToNode);
             break;
           case "Timer":
-            nodeControl = node.controls.get("nodeValue") as ValueControl; //not working
-            nodeControl.setValue(valueToSendToNode);
+            nodeControl = node.controls.get("nodeValue") as ValueControl;
+            nodeControl.setSentence(valueToSendToNode === 0 ? "off" : "on");
             break;
           case "Math":
+            nodeControl = node.controls.get("nodeValue") as ValueControl;
+            nodeControl.setSentence(` → ${valueToSendToNode}`);
             break;
           case "Logic":
+            nodeControl = node.controls.get("nodeValue") as ValueControl;
+            // displays identical result as during real execution, but does not show function input values
+            // a further improvement would bring the n1, n2 socket values into the display as in real execution
+            nodeControl.setSentence(valueToSendToNode === 0 ? " ⇒ 0" : " ⇒ 1");
             break;
           case "Transform":
+            nodeControl = node.controls.get("nodeValue") as ValueControl;
+            nodeControl.setValue(valueToSendToNode);
             break;
           case "Control":
+            // displays identical result as during real execution, but does not show function input values
+            // a further improvement would bring the binary input value as (on/off) into the display
+            nodeControl = node.controls.get("nodeValue") as ValueControl;
+            nodeControl.setSentence(` → ${valueToSendToNode}`);
             break;
           case "Demo Output":
             nodeControl = node.controls.get("demoOutput") as DemoOutputControl;
