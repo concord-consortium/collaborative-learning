@@ -617,7 +617,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           default:
         }
         const calculatedRecentValues = {
-          "nodeValue": getRecentValuesForNode(dataSet, playBackIndex, idx)
+          "nodeValue": getRecentValuesForNode(dataSet, playBackIndex, attrId)
         };
         node.data.recentValues = calculatedRecentValues;
         node.update();

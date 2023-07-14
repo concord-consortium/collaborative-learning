@@ -12,13 +12,13 @@ function getPriorCases(dataSet: IDataSet, playhead: number){
   return dataSet.getCasesAtIndices(regionStart, countOfCasesToGet);
 }
 
-export function getRecentValuesForNode(dataSet: IDataSet, playbackIndex: number, nodeIndex: number ){
-  const attributeId = getAttributeIdForNode(dataSet, nodeIndex);
+export function getRecentValuesForNode(dataSet: IDataSet, playbackIndex: number, attrId: string ){
   const priorCases = getPriorCases(dataSet, playbackIndex);
   const calculatedRecentValues: number[] = [];
   priorCases.forEach((c: any) => {
-    const caseNodeValue = dataSet.getValue(c.__id__, attributeId) as number;
+    const caseNodeValue = dataSet.getValue(c.__id__, attrId) as number;
     if (isFinite(caseNodeValue)) calculatedRecentValues.push(caseNodeValue);
   });
   return calculatedRecentValues;
 }
+
