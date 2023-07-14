@@ -57,7 +57,7 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
     }
   };
 
-  const { appConfig } = useStores(); //holds showCommentTag and commentTags fetched from "clue-curriculum" respository
+  const { appConfig } = useStores(); //holds showCommentTag and commentTags fetched from "clue-curriculum" repository
 
   return (
     <div className="comment-card selected" data-testid="comment-card">
