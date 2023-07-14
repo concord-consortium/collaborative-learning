@@ -599,8 +599,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           case "Logic":
             break;
           case "Transform":
-            nodeControl = node.controls.get("nodeValue") as ValueControl;
-            nodeControl.setValue(valueToSendToNode);
             break;
           case "Control":
             break;
