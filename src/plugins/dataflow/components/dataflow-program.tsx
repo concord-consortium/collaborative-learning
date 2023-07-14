@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import "regenerator-runtime/runtime";
-import { forEach, update } from "lodash";
+import { forEach } from "lodash";
 import { inject, observer } from "mobx-react";
 import { autorun } from "mobx";
 import { IDisposer, onSnapshot } from "mobx-state-tree";
@@ -27,7 +27,6 @@ import { DemoOutputReteNodeFactory } from "../nodes/factories/demo-output-rete-n
 import { LiveOutputReteNodeFactory } from "../nodes/factories/live-output-rete-node-factory";
 import { GeneratorReteNodeFactory } from "../nodes/factories/generator-rete-node-factory";
 import { TimerReteNodeFactory } from "../nodes/factories/timer-rete-node-factory";
-import { NumControl } from "../nodes/controls/num-control";
 import { ValueControl } from "../nodes/controls/value-control";
 import { getHubSelect, setLiveOutputOpts } from "../nodes/utilities/live-output-utilities";
 import {
@@ -611,9 +610,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
               break;
             case "Demo Output":
               nodeControl = node.controls.get("demoOutput") as DemoOutputControl;
-              nodeControl.setValue(valForNode); //---> shows correct animation
+              nodeControl.setValue(valForNode);
               nodeControl = node.inputs.get("nodeValue")?.control as InputValueControl;
-              nodeControl.setDisplayMessage(valForNode === 0 ? "off" : "on");
+              nodeControl.setDisplayMessage(`${valForNode}`);
               break;
             case "Live Output":
               nodeControl = node.inputs.get("nodeValue")?.control as InputValueControl;

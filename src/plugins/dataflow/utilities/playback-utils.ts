@@ -2,14 +2,9 @@ import { Node } from "rete";
 import { IDataSet } from "../../../models/data/data-set";
 import { kMaxNodeValues } from "../model/utilities/node";
 import { ValueControl } from "../nodes/controls/value-control";
-import { NumControl } from "../nodes/controls/num-control";
-import { SensorValueControl } from "../nodes/controls/sensor-value-control";
 
 const valueControl = (node: Node) => node.controls.get("nodeValue") as ValueControl;
-const inputControl = (node: Node) => node.controls.get("inputValue") as NumControl;
-
 const binaryToOnOff = (val: number) => val === 0 ? "off" : "on";
-const arrowedNumber = (val: number) => ` → ${val}`;
 
 function getPriorCases(dataSet: IDataSet, playhead: number){
   // kMaxNodeValues determines how many datapoints are plotted each time
