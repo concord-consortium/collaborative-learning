@@ -6,19 +6,22 @@ import {
   IFloatingToolbarProps, useFloatingToolbarLocation
 } from "../../components/tiles/hooks/use-floating-toolbar-location";
 import { ExpressionContentModelType } from "./expression-content";
+import { expressionButtonsList} from "./expression-types";
 import { ITileModel } from "../../models/tiles/tile-model";
-
-import "./expression-toolbar.scss";
-import { DeleteExpressionButton } from "./expression-buttons";
+import { DeleteExpressionButton, AddMathTextButton } from "./expression-buttons";
 import { MathfieldElement } from "mathlive";
 
+import "./expression-toolbar.scss";
 interface IProps extends IFloatingToolbarProps {
   model: ITileModel;
   mf: React.RefObject<MathfieldElement> | undefined;
+  trackedCursorPos: React.MutableRefObject<number>;
 }
 
 export const ExpressionToolbar: React.FC<IProps> = observer((
-  {model, documentContent, mf, tileElt, onIsEnabled, ...others}: IProps) => {
+  { model, documentContent, mf, tileElt, onIsEnabled,
+    trackedCursorPos, ...others
+  }: IProps) => {
     const content = model.content as ExpressionContentModelType;
     const enabled = onIsEnabled();
 
@@ -50,7 +53,18 @@ export const ExpressionToolbar: React.FC<IProps> = observer((
     ? ReactDOM.createPortal(
       <div className={toolbarClasses} style={location}>
         <div className="toolbar-content">
-          <DeleteExpressionButton onClick={deleteExpression} className={deleteButtonClasses} />
+          {expressionButtonsList.map((btn) => {
+            return (<AddMathTextButton
+              key={btn.name}
+              buttonName={btn.name}
+              enabled={enabled}
+              mf={mf}
+            />);
+          })}
+          <DeleteExpressionButton
+            onClick={deleteExpression}
+            className={deleteButtonClasses}
+          />
         </div>
       </div>, documentContent)
   : null;
