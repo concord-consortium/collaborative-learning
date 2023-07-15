@@ -10,7 +10,7 @@ interface IProps {
   onPostComment?: (comment: string, tag: string) => void;
   showCommentTag?: boolean;
   commentTags?: Record<string, string> | never[];
-  defaultTag?: object;
+  defaultTag?: Record<string, string> | never[];
 }
 
 

@@ -81,6 +81,6 @@ export interface UnitConfiguration extends ProblemConfiguration {
   navTabs: SnapshotIn<typeof NavTabsConfigModel>;
   // used for AI tagging
   showCommentTag?: boolean;
-  defaultTag?: string;
+  defaultTag?: Record<string, string>;
   commentTags?: Record<string, string> | never[];
 }
