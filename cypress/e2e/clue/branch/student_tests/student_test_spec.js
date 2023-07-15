@@ -38,7 +38,7 @@ describe('Check header area for correctness', function(){
         cy.get('.top-tab.tab-teacher-guide').should("not.exist");
         cy.get('.top-tab.tab-student-work').should("not.exist");
         cy.get('[data-test="solutions-button"]').should("not.exist");
-        cy.get('.chat-panel-toggle').should("not.exist");
+        // cy.get('.chat-panel-toggle').should("not.exist"); // this is nolonger true and chat-panel-toggle is being made available to students
     });
 
 });

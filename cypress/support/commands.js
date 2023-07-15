@@ -214,6 +214,12 @@ Cypress.Commands.add("clickDocumentResourceTile", (tileIndex = 0) => {
 Cypress.Commands.add("getDocumentToolTile", (tileIndex = 0) => {
   cy.get('.documents-panel .editable-document-content .tile-row tool-tile').eq(tileIndex).click();
 });
+Cypress.Commands.add('collapseResourceTabs', () => {
+  cy.get('.divider-container').trigger('mouseover').then(() => {
+    cy.get('.divider-container .expand-handle.left.shown').should("exist");
+    cy.get('.divider-container .expand-handle.left.shown').click();
+  })
+});
 Cypress.Commands.add('closeResourceTabs', () => {
   cy.get('.nav-tab-panel .close-button').click();
 });
