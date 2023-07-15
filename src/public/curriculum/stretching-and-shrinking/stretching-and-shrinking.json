@@ -35,8 +35,10 @@
       "unit-rate": "Unit Rate",
       "guess-and-check": "Guess and Check",
       "none": "None"
+    },
+    "defaultTag": {
+      "default": "Select Student Strategy"
     }
-
   },
   "sections": {
     "introduction": {

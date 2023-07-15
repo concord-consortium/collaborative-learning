@@ -10,11 +10,12 @@ interface IProps {
   onPostComment?: (comment: string, tag: string) => void;
   showCommentTag?: boolean;
   commentTags?: Record<string, string> | never[];
+  defaultTag?: object;
 }
 
 
 export const CommentTextBox: React.FC<IProps> = (props) => {
-  const { activeNavTab, numPostedComments, onPostComment, showCommentTag, commentTags} = props;
+  const { activeNavTab, numPostedComments, onPostComment, showCommentTag, commentTags, defaultTag} = props;
 
   const minTextAreaHeight = showCommentTag ? 100 : 35;
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -27,6 +28,7 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
   const postButtonClass = classNames("comment-footer-button", "themed-negative", activeNavTab,
                                      { disabled: !commentAdded, "no-action": !commentAdded });
   const ui = useUIStore();
+
   // resize textarea when user deletes some text
   useEffect(() => {
     if (textareaRef?.current) {
@@ -62,7 +64,6 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
     setCommentAdded(false);
     setCommentText("");
   };
-
 
   const handlePostComment = () => {
     // do not send post if text area is empty, only has spaces or new lines
@@ -105,9 +106,13 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
                               ? "Comment on this tile..."
                               : "Reply...";
 
-  const handleSelectDropDown = (val: string) => setTagText(val);
+  const handleSelectDropDown = (val: string) => {
+    if (defaultTag && val !== Object.keys(defaultTag)[0]){
+      setTagText(val);
+    }
+  };
 
-  const defaultEntry = "Select Student Strategy";
+
 
 
   return (
@@ -131,7 +136,10 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
             handleSelectDropDown(e.target.value);
           }}
         >
-          <option key={"sel-ss"} value={defaultEntry}> { defaultEntry } </option>
+          {
+            defaultTag &&
+            <option key={"sel-ss"} value={Object.keys(defaultTag)[0]}> {Object.values(defaultTag)[0]} </option>
+          }
           {
             Object.keys(commentTags).map(key => {
               const value = commentTags[key as keyof typeof commentTags];

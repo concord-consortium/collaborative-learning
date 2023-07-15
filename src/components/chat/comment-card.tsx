@@ -57,7 +57,8 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
     }
   };
 
-  const { appConfig } = useStores(); //holds showCommentTag and commentTags fetched from "clue-curriculum" repository
+  //appConfig holds showCommentTag, commentTags, defaultTag fetched from "clue-curriculum" repository
+  const { appConfig } = useStores();
 
   const mockCommentTags = {
     "part-to-part": "Part-to-Part",
@@ -65,6 +66,10 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
     "unit-rate": "Unit Rate",
     "guess-and-check": "Guess and Check",
     "none": "None"
+  };
+
+  const mockDefaultTag = {
+   "default": "Select Student Strategy"
   };
 
 
@@ -86,6 +91,11 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
             const hideCommentTag = (comment.tag === "Select Student Strategy") ||
                                    !(comment.tag) || //if empty comment
                                    !(appConfig.showCommentTag); //fetched json curriculum file says false or undefined
+
+            console.log("----------------------");
+            console.log("!hideCommentTag:", !hideCommentTag);
+            console.log(comment.content);
+            console.log(comment.tag);
 
             return (
               <div key={idx} className="comment-thread" data-testid="comment-thread">
@@ -120,8 +130,9 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
           numPostedComments={postedComments?.length || 0}
           // showCommentTag={appConfig.showCommentTag}
           // commentTags={appConfig.commentTags}
-          // showCommentTag={true}
-          // commentTags={mockCommentTags}
+          showCommentTag={true}
+          commentTags={mockCommentTags}
+          defaultTag={mockDefaultTag}
 
 
         />
