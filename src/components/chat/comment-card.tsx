@@ -92,6 +92,11 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
                                    !(comment.tag) || //if empty comment
                                    !(appConfig.showCommentTag); //fetched json curriculum file says false or undefined
 
+
+              //Aside from the fact that this string should not be hard-coded (as discussed elsewhere),
+              //we should not be saving any comments with the default/prompt as a value, so this test
+              //should not be necessary and if it is necessary that suggests there's a bug somewhere else.
+
             console.log("----------------------");
             console.log("!hideCommentTag:", !hideCommentTag);
             console.log(comment.content);
