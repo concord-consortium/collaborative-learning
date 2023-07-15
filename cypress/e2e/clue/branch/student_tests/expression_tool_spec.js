@@ -11,7 +11,7 @@ context('Expression Tool Tile', function () {
     cy.visit(queryParams);
     cy.waitForLoad();
     //TODO - implement within a curriculum unit
-    //cy.closeResourceTabs();
+    //cy.collapseResourceTabs();
   });
   describe("Expression Tool", () => {
     it("renders expression tool tile", () => {

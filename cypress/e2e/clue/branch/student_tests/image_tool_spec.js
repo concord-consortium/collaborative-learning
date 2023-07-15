@@ -19,7 +19,7 @@ context('Test image functionalities', function(){
         cy.clearQAData('all');
         cy.visit(queryParams);
         cy.waitForLoad();
-        cy.closeResourceTabs();
+        cy.collapseResourceTabs();
     });
 
     describe('upload image from user computer',()=>{
@@ -118,7 +118,7 @@ context('Test undo redo functionalities', function(){
         cy.clearQAData('all');
         cy.visit(queryParams);
         cy.waitForLoad();
-        cy.closeResourceTabs();
+        cy.collapseResourceTabs();
     });
 
     describe('Image tile title edit, undo redo and delete tile',()=>{

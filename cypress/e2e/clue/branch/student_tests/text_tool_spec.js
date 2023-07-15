@@ -126,7 +126,7 @@ context('Text Tool Tile selection', function () {
       
           cy.visit(queryParams);
           cy.waitForLoad();
-          cy.closeResourceTabs();
+          cy.collapseResourceTabs();
         });
       
     describe('Test undo redo actions', function () {
@@ -188,7 +188,7 @@ context('Text Tool Tile Undo Redo', function () {
   
       cy.visit(queryParams);
       cy.waitForLoad();
-      cy.closeResourceTabs();
+      cy.collapseResourceTabs();
     });
   
     describe('Test undo redo actions', function () {

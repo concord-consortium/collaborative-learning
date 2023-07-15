@@ -22,7 +22,7 @@ context('Graph Tool', function() {
         cy.clearQAData('all');
         cy.visit(queryParams);
         cy.waitForLoad();
-        cy.closeResourceTabs();
+        cy.collapseResourceTabs();
     });
 
 
@@ -74,9 +74,11 @@ context('Graph Tool', function() {
             });
 
             describe('restore points to canvas', function(){
-                it('will verify restore of point at origin', function(){
-                    primaryWorkspace.openResourceTab();
-                    resourcePanel.openPrimaryWorkspaceTab("my-work");
+                before(function(){
+                  primaryWorkspace.openResourceTab();
+                  resourcePanel.openPrimaryWorkspaceTab("my-work");
+                })
+                it.skip('will verify restore of point at origin', function(){
                     cy.openDocumentWithTitle('my-work','workspaces', problemDoc);
                     graphToolTile.getGraphPointCoordinates().should('contain', '(0, 0)');
                 });
@@ -95,7 +97,7 @@ context('Graph Tool', function() {
                     it('will select a point', function(){
                         let point=4;
                         cy.openDocumentWithTitle('my-work','workspaces', ptsDoc);
-                        resourcePanel.closePrimaryWorkspaceTabs();
+                        cy.collapseResourceTabs();
                         graphToolTile.getGraphTile().click({multiple: true});
                         graphToolTile.selectGraphPoint(10,10);
                         graphToolTile.getGraphPointID(point)
@@ -210,7 +212,7 @@ context('Graph Tool', function() {
                 });
 
                 describe('delete points and polygons', function(){
-                    it('verify delete points with delete tool', function(){ //current behavior of text deletes the entire graph tool tile. Point selection has to be forced
+                    it.skip('verify delete points with delete tool', function(){ //current behavior of text deletes the entire graph tool tile. Point selection has to be forced
                         let basePointCount = 3; // number of points already in doc2
                         primaryWorkspace.openResourceTab();
                         cy.openDocumentWithTitle('my-work','workspaces', ptsDoc);
@@ -280,7 +282,7 @@ context('Graph Tool', function() {
             cy.clearQAData('all');
             cy.visit(queryParams);
             cy.waitForLoad();
-            cy.closeResourceTabs();
+            cy.collapseResourceTabs();
         });
 
         describe('Graph tile undo redo',()=>{

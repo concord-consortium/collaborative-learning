@@ -12,7 +12,7 @@ context.skip('Simulator Tile with Brainwaves Gripper Simulation', function () {
     cy.clearQAData('all');
     cy.visit(queryParams);
     cy.waitForLoad();
-    cy.closeResourceTabs();
+    cy.collapseResourceTabs();
   });
   describe("Simulator Tile", () => {
     it("renders simulator tile", () => {
@@ -108,7 +108,7 @@ context.skip('Simulator Tile with Terrarium Simulation', function() {
     cy.get(".primary-workspace .document-content").trigger("drop", { dataTransfer });
     draggable().trigger("dragend", { force: true });
     simulatorTile.getSimulatorTile().should("exist");
-    cy.closeResourceTabs();
+    cy.collapseResourceTabs();
 
     clueCanvas.addTile("dataflow");
 

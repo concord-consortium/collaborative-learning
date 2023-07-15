@@ -50,7 +50,7 @@ context.skip("Teacher Workspace", () => {
     dashboard.switchView("Workspace & Resources");
     cy.wait(4000);
     clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle');
-    cy.closeResourceTabs();
+    cy.collapseResourceTabs();
     clueCanvas.addTile('drawing');
     cy.wait(2000);
   });

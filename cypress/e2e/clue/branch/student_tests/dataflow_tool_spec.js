@@ -11,7 +11,7 @@ context('Dataflow Tool Tile', function () {
     cy.clearQAData('all');
     cy.visit(queryParams);
     cy.waitForLoad();
-    cy.closeResourceTabs();
+    cy.collapseResourceTabs();
   });
   describe("Dataflow Tool", () => {
     it("renders dataflow tool tile", () => {

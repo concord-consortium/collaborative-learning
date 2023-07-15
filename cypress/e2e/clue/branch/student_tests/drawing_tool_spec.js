@@ -27,7 +27,7 @@ context('Draw Tool Tile', function () {
 
     cy.visit(queryParams);
     cy.waitForLoad();
-    cy.closeResourceTabs();
+    cy.collapseResourceTabs();
   });
   describe("Draw Tool", () => {
     it("renders draw tool tile", () => {
@@ -386,7 +386,7 @@ context('Draw Tool Tile Undo Redo', function () {
 
     cy.visit(queryParams);
     cy.waitForLoad();
-    cy.closeResourceTabs();
+    cy.collapseResourceTabs();
   });
   describe("Drawing tile title edit, undo redo and delete tile", () => {
     it('will undo redo drawing tile creation/deletion', function () {
