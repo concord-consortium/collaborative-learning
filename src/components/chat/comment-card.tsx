@@ -128,11 +128,12 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
           activeNavTab={activeNavTab}
           onPostComment={onPostComment}
           numPostedComments={postedComments?.length || 0}
-          // showCommentTag={appConfig.showCommentTag}
-          // commentTags={appConfig.commentTags}
-          showCommentTag={true}
-          commentTags={mockCommentTags}
-          defaultTag={mockDefaultTag}
+          showCommentTag={appConfig.showCommentTag}
+          commentTags={appConfig.commentTags}
+          defaultTag={appConfig.defaultTag}
+          // showCommentTag={true}
+          // commentTags={mockCommentTags}
+          // defaultTag={mockDefaultTag}
 
 
         />
