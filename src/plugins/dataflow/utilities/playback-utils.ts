@@ -7,8 +7,6 @@ import { SensorValueControl } from "../nodes/controls/sensor-value-control";
 import { InputValueControl } from "../nodes/controls/input-value-control";
 import { DemoOutputControl } from "../nodes/controls/demo-output-control";
 
-// const valueControl = (node: Node) => node.controls.get("nodeValue") as ValueControl;
-// const binaryToOnOff = (val: number) => val === 0 ? "off" : "on";
 
 function getPriorCases(dataSet: IDataSet, playhead: number){
   const offset = 1;
@@ -18,19 +16,6 @@ function getPriorCases(dataSet: IDataSet, playhead: number){
   const countOfCasesToGet = playhead < maxValues ? playhead : maxValues;
   return dataSet.getCasesAtIndices(regionStart, countOfCasesToGet);
 }
-
-// function updatePlaybackValueControl(node: Node, value: string | number){
-//   if (typeof value === "number") valueControl(node).setValue(value);
-//   if (typeof value === "string") valueControl(node).setSentence(value);
-// }
-
-// Each node has a nodeValue control that needs to be updated, but it comes in one of three types
-// This function allows us to pass the type rather than having to explicity get it AS each time
-// type ControlType = ValueControl | SensorValueControl | DemoOutputControl;
-
-// function getNodeControl<T extends ControlType>(node: Node, controlType: new () => T): T {
-//   return node.controls.get("nodeValue") as T;
-// }
 
 // TODO - display on demo is dependent on output type
 
