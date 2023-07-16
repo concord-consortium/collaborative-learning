@@ -585,7 +585,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           switch (node.name){
             case "Transform":
               nodeControl = node.controls.get("nodeValue") as ValueControl;
-              console.log("| transform: ", nodeControl, valForNode);
               nodeControl.setSentence(` → ${valForNode}`);
               break;
             case "Sensor":

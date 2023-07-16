@@ -1,5 +1,5 @@
 import { Node } from "rete";
-import { IDataSet } from "../../../models/data/data-set";
+import { ICase, IDataSet } from "../../../models/data/data-set";
 import { kMaxNodeValues } from "../model/utilities/node";
 import { ValueControl } from "../nodes/controls/value-control";
 
@@ -20,6 +20,7 @@ export function getRecentValuesForNode(dataSet: IDataSet, playbackIndex: number,
   const priorCases = getPriorCases(dataSet, playbackIndex);
   const calculatedRecentValues: number[] = [];
   priorCases.forEach((c: any) => {
+    console.log(typeof c);
     const caseNodeValue = dataSet.getValue(c.__id__, attrId) as number;
     if (isFinite(caseNodeValue)) calculatedRecentValues.push(caseNodeValue);
   });
