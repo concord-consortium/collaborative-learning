@@ -27,7 +27,6 @@ import { DemoOutputReteNodeFactory } from "../nodes/factories/demo-output-rete-n
 import { LiveOutputReteNodeFactory } from "../nodes/factories/live-output-rete-node-factory";
 import { GeneratorReteNodeFactory } from "../nodes/factories/generator-rete-node-factory";
 import { TimerReteNodeFactory } from "../nodes/factories/timer-rete-node-factory";
-import { ValueControl } from "../nodes/controls/value-control";
 import { getHubSelect, setLiveOutputOpts } from "../nodes/utilities/live-output-utilities";
 import {
   sendDataToSerialDevice, sendDataToSimulatedOutput, updateNodeChannelInfo, updateGeneratorNode, updateNodeRecentValues,
@@ -41,14 +40,11 @@ import { DataflowProgramCover } from "./ui/dataflow-program-cover";
 import { DataflowProgramZoom } from "./ui/dataflow-program-zoom";
 import { NodeChannelInfo, serialSensorChannels } from "../model/utilities/channel";
 import { ProgramDataRates } from "../model/utilities/node";
-import { getRecentValuesForNode, updatePlaybackValueControl } from "../utilities/playback-utils";
+import { calculatedRecentValues, runNodePlaybackUpdates,  } from "../utilities/playback-utils";
 import { getAttributeIdForNode, recordCase } from "../model/utilities/recording-utilities";
 import { virtualSensorChannels } from "../model/utilities/virtual-channel";
 import { DocumentContextReact } from "../../../components/document/document-context";
 import { dataflowLogEvent } from "../dataflow-logger";
-import { SensorValueControl } from "../nodes/controls/sensor-value-control";
-import { InputValueControl } from "../nodes/controls/input-value-control";
-import { DemoOutputControl } from "../nodes/controls/demo-output-control";
 import { ProgramMode, UpdateMode } from "./types/dataflow-tile-types";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { IDataSet } from "../../../models/data/data-set";
@@ -569,65 +565,17 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private playbackNodesWithCaseData = (dataSet: IDataSet, playBackIndex: number) => {
-    const currentCase = dataSet.getCaseAtIndex(playBackIndex);
-    const basicUpdateNodes = ["Number", "Generator"];
+    const caseId = dataSet.getCaseAtIndex(playBackIndex)?.__id__;
+    if (!caseId) return;
+    this.programEditor.nodes.forEach((node, idx) => { //update each node in the frame
+      const attrId = getAttributeIdForNode(this.props.tileContent.dataSet, idx);
+      const valForNode = dataSet.getValue(caseId, attrId) as number;
 
-    if (currentCase){
-      const {__id__} = currentCase; //this is the id of the case we are looking at for each frame
-      this.programEditor.nodes.forEach((node, idx) => { //update each node in the frame
-        const attrId = getAttributeIdForNode(this.props.tileContent.dataSet, idx);
-        const valForNode = dataSet.getValue(__id__, attrId) as number;
-
-        if (basicUpdateNodes.includes(node.name)){
-          updatePlaybackValueControl(node, valForNode);
-        } else {
-          let nodeControl;
-          switch (node.name){
-            case "Transform":
-              nodeControl = node.controls.get("nodeValue") as ValueControl;
-              nodeControl.setSentence(` → ${valForNode}`);
-              break;
-            case "Sensor":
-              nodeControl = node.controls.get("nodeValue") as SensorValueControl;
-              nodeControl.setValue(valForNode);
-              break;
-            case "Timer":
-              nodeControl = node.controls.get("nodeValue") as ValueControl;
-              nodeControl.setSentence(valForNode === 0 ? "off" : "on");
-              break;
-            case "Math":
-              nodeControl = node.controls.get("nodeValue") as ValueControl;
-              nodeControl.setSentence(` → ${valForNode}`);
-              break;
-            case "Logic":
-              nodeControl = node.controls.get("nodeValue") as ValueControl;
-              nodeControl.setSentence(valForNode === 0 ? " ⇒ 0" : " ⇒ 1");
-              break;
-            case "Control":
-              nodeControl = node.controls.get("nodeValue") as ValueControl;
-              nodeControl.setSentence(` → ${valForNode}`);
-              break;
-            case "Demo Output":
-              nodeControl = node.controls.get("demoOutput") as DemoOutputControl;
-              nodeControl.setValue(valForNode);
-              nodeControl = node.inputs.get("nodeValue")?.control as InputValueControl;
-              nodeControl.setDisplayMessage(`${valForNode}`);
-              break;
-            case "Live Output":
-              nodeControl = node.inputs.get("nodeValue")?.control as InputValueControl;
-              nodeControl.setDisplayMessage(valForNode === 0 ? "off" : "on");
-              break;
-            default:
-          }
-        }
-
-        const calculatedRecentValues = {
-          "nodeValue": getRecentValuesForNode(dataSet, playBackIndex, attrId)
-        };
-        node.data.recentValues = calculatedRecentValues;
-        node.update();
-      });
-    }
+      // each node needs to have a particular updates performed explicitly for playback
+      runNodePlaybackUpdates(node, valForNode);
+      node.data.recentValues = calculatedRecentValues(dataSet, playBackIndex, attrId);
+      node.update();
+    });
   };
 
   private updateNodes = () => {
