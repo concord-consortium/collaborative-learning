@@ -17,15 +17,9 @@ function getPriorCases(dataSet: IDataSet, playhead: number){
   return dataSet.getCasesAtIndices(regionStart, countOfCasesToGet);
 }
 
-// TODO - display on demo is dependent on output type
-
 export function runNodePlaybackUpdates(node: Node, valForNode: number){
   let nodeControl;
   switch (node.name){
-    case "Number":
-      nodeControl = node.controls.get("nodeValue") as ValueControl;
-      nodeControl.setValue(valForNode);
-      break;
     case "Generator":
       nodeControl = node.controls.get("nodeValue") as ValueControl;
       nodeControl.setSentence(`${valForNode}`);
@@ -34,25 +28,29 @@ export function runNodePlaybackUpdates(node: Node, valForNode: number){
       nodeControl = node.controls.get("nodeValue") as ValueControl;
       nodeControl.setSentence(` → ${valForNode}`);
       break;
-    case "Sensor":
-      nodeControl = node.controls.get("nodeValue") as SensorValueControl;
-      nodeControl.setValue(valForNode);
+    case "Math":
+      nodeControl = node.controls.get("nodeValue") as ValueControl;
+      nodeControl.setSentence(` → ${valForNode}`);
+      break;
+    case "Control":
+      nodeControl = node.controls.get("nodeValue") as ValueControl;
+      nodeControl.setSentence(` → ${valForNode}`);
       break;
     case "Timer":
       nodeControl = node.controls.get("nodeValue") as ValueControl;
       nodeControl.setSentence(valForNode === 0 ? "off" : "on");
       break;
-    case "Math":
-      nodeControl = node.controls.get("nodeValue") as ValueControl;
-      nodeControl.setSentence(` → ${valForNode}`);
-      break;
     case "Logic":
       nodeControl = node.controls.get("nodeValue") as ValueControl;
       nodeControl.setSentence(valForNode === 0 ? " ⇒ 0" : " ⇒ 1");
       break;
-    case "Control":
+    case "Number":
       nodeControl = node.controls.get("nodeValue") as ValueControl;
-      nodeControl.setSentence(` → ${valForNode}`);
+      nodeControl.setValue(valForNode);
+      break;
+    case "Sensor":
+      nodeControl = node.controls.get("nodeValue") as SensorValueControl;
+      nodeControl.setValue(valForNode);
       break;
     case "Demo Output":
       nodeControl = node.controls.get("demoOutput") as DemoOutputControl;
@@ -68,6 +66,7 @@ export function runNodePlaybackUpdates(node: Node, valForNode: number){
   }
 }
 
+
 export function calculatedRecentValues(dataSet: IDataSet, playbackIndex: number, attrId: string ){
   const vals: number[] = [];
   const priorCases = getPriorCases(dataSet, playbackIndex) as ICaseCreation[];
@@ -79,10 +78,3 @@ export function calculatedRecentValues(dataSet: IDataSet, playbackIndex: number,
   return { "nodeValue": vals };
 }
 
-// export function runNodePlaybackUpdates(node: Node, valForNode: number){
-//   if (["Number", "Generator"].includes(node.name)){
-//     updatePlaybackValueControl(node, valForNode);
-//   } else {
-//     updatePlaybackValueControlSpecialCases(node, valForNode);
-//   }
-// }
