@@ -75,4 +75,3 @@ export function calculatedRecentValues(dataSet: IDataSet, playbackIndex: number,
   });
   return { "nodeValue": vals };
 }
-
