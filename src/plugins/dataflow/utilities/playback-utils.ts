@@ -3,11 +3,8 @@ import { IDataSet } from "../../../models/data/data-set";
 import { kMaxNodeValues } from "../model/utilities/node";
 import { ValueControl } from "../nodes/controls/value-control";
 import { ICaseCreation } from "../../../models/data/data-set-types";
-import { SensorValueControl } from "../nodes/controls/sensor-value-control";
 import { InputValueControl } from "../nodes/controls/input-value-control";
 import { DemoOutputControl } from "../nodes/controls/demo-output-control";
-import { Value } from "expr-eval";
-
 
 function getPriorCases(dataSet: IDataSet, playhead: number){
   const offset = 1;
