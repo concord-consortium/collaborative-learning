@@ -1,7 +1,8 @@
 import { Node } from "rete";
-import { ICase, IDataSet } from "../../../models/data/data-set";
+import { IDataSet } from "../../../models/data/data-set";
 import { kMaxNodeValues } from "../model/utilities/node";
 import { ValueControl } from "../nodes/controls/value-control";
+import { ICaseCreation } from "../../../models/data/data-set-types";
 
 const valueControl = (node: Node) => node.controls.get("nodeValue") as ValueControl;
 const binaryToOnOff = (val: number) => val === 0 ? "off" : "on";
@@ -17,11 +18,11 @@ function getPriorCases(dataSet: IDataSet, playhead: number){
 }
 
 export function getRecentValuesForNode(dataSet: IDataSet, playbackIndex: number, attrId: string ){
-  const priorCases = getPriorCases(dataSet, playbackIndex);
   const calculatedRecentValues: number[] = [];
-  priorCases.forEach((c: any) => {
-    console.log(typeof c);
-    const caseNodeValue = dataSet.getValue(c.__id__, attrId) as number;
+  const priorCases = getPriorCases(dataSet, playbackIndex) as ICaseCreation[];
+  const priorCasesIds = priorCases.map((c: ICaseCreation) => c.__id__);
+  priorCasesIds.forEach((c) => {
+    const caseNodeValue = dataSet.getValue(c as string, attrId) as number;
     if (isFinite(caseNodeValue)) calculatedRecentValues.push(caseNodeValue);
   });
   return calculatedRecentValues;
