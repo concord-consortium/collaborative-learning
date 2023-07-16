@@ -15,52 +15,38 @@ function getPriorCases(dataSet: IDataSet, playhead: number){
   return dataSet.getCasesAtIndices(regionStart, countOfCasesToGet);
 }
 
+const asStrings = ["Generator", "Transform", "Math", "Control", "Timer", "Logic"];
+const asNumbers = ["Number", "Sensor"];
+const asOutputs = ["Demo Output", "Live Output"];
+
 export function runNodePlaybackUpdates(node: Node, valForNode: number){
-  let nodeControl;
-  switch (node.name){
-    case "Generator":
-      nodeControl = node.controls.get("nodeValue") as ValueControl;
-      nodeControl.setSentence(`${valForNode}`);
-      break;
-    case "Transform":
-      nodeControl = node.controls.get("nodeValue") as ValueControl;
-      nodeControl.setSentence(` → ${valForNode}`);
-      break;
-    case "Math":
-      nodeControl = node.controls.get("nodeValue") as ValueControl;
-      nodeControl.setSentence(` → ${valForNode}`);
-      break;
-    case "Control":
-      nodeControl = node.controls.get("nodeValue") as ValueControl;
-      nodeControl.setSentence(` → ${valForNode}`);
-      break;
-    case "Timer":
-      nodeControl = node.controls.get("nodeValue") as ValueControl;
-      nodeControl.setSentence(valForNode === 0 ? "off" : "on");
-      break;
-    case "Logic":
-      nodeControl = node.controls.get("nodeValue") as ValueControl;
-      nodeControl.setSentence(valForNode === 0 ? " ⇒ 0" : " ⇒ 1");
-      break;
-    case "Number":
-      nodeControl = node.controls.get("nodeValue") as ValueControl;
+  if (asStrings.includes(node.name)){
+    const nodeControl = node.controls.get("nodeValue") as ValueControl;
+    switch (node.name){
+      case "Generator": nodeControl.setSentence(`${valForNode}`); break;
+      case "Transform": nodeControl.setSentence(` → ${valForNode}`); break;
+      case "Math":      nodeControl.setSentence(` → ${valForNode}`); break;
+      case "Control":   nodeControl.setSentence(` → ${valForNode}`); break;
+      case "Timer":     nodeControl.setSentence(valForNode === 0 ? "off" : "on"); break;
+      case "Logic":     nodeControl.setSentence(valForNode === 0 ? " ⇒ 0" : " ⇒ 1"); break;
+    }
+  }
+
+  if (asNumbers.includes(node.name)){
+    const nodeControl = node.controls.get("nodeValue") as ValueControl;
+    nodeControl.setValue(valForNode);
+  }
+
+  if(asOutputs.includes(node.name)){
+    const inputControl = node.inputs.get("nodeValue")?.control as InputValueControl;
+    if (node.name === "Demo Output"){
+      const nodeControl = node.controls.get("demoOutput") as DemoOutputControl;
       nodeControl.setValue(valForNode);
-      break;
-    case "Sensor":
-      nodeControl = node.controls.get("nodeValue") as ValueControl;
-      nodeControl.setValue(valForNode);
-      break;
-    case "Demo Output":
-      nodeControl = node.controls.get("demoOutput") as DemoOutputControl;
-      nodeControl.setValue(valForNode);
-      nodeControl = node.inputs.get("nodeValue")?.control as InputValueControl;
-      nodeControl.setDisplayMessage(`${valForNode}`);
-      break;
-    case "Live Output":
-      nodeControl = node.inputs.get("nodeValue")?.control as InputValueControl;
-      nodeControl.setDisplayMessage(valForNode === 0 ? "off" : "on");
-      break;
-    default:
+      inputControl.setDisplayMessage(`${valForNode}`);
+    }
+    if (node.name === "Live Output"){
+      inputControl.setDisplayMessage(valForNode === 0 ? "off" : "on");
+    }
   }
 }
 
