@@ -7,11 +7,10 @@ import { SensorValueControl } from "../nodes/controls/sensor-value-control";
 import { InputValueControl } from "../nodes/controls/input-value-control";
 import { DemoOutputControl } from "../nodes/controls/demo-output-control";
 
-const valueControl = (node: Node) => node.controls.get("nodeValue") as ValueControl;
-const binaryToOnOff = (val: number) => val === 0 ? "off" : "on";
+// const valueControl = (node: Node) => node.controls.get("nodeValue") as ValueControl;
+// const binaryToOnOff = (val: number) => val === 0 ? "off" : "on";
 
 function getPriorCases(dataSet: IDataSet, playhead: number){
-  // kMaxNodeValues determines how many datapoints are plotted each time
   const offset = 1;
   const maxValues = kMaxNodeValues + offset;
   const pastCalc = playhead - maxValues;
@@ -20,29 +19,32 @@ function getPriorCases(dataSet: IDataSet, playhead: number){
   return dataSet.getCasesAtIndices(regionStart, countOfCasesToGet);
 }
 
-export function calculatedRecentValues(dataSet: IDataSet, playbackIndex: number, attrId: string ){
-  const vals: number[] = [];
-  const priorCases = getPriorCases(dataSet, playbackIndex) as ICaseCreation[];
-  const priorCasesIds = priorCases.map((c: ICaseCreation) => c.__id__);
-  priorCasesIds.forEach((c) => {
-    const caseNodeValue = dataSet.getValue(c as string, attrId) as number;
-    if (isFinite(caseNodeValue)) vals.push(caseNodeValue);
-  });
-  return { "nodeValue": vals };
-}
+// function updatePlaybackValueControl(node: Node, value: string | number){
+//   if (typeof value === "number") valueControl(node).setValue(value);
+//   if (typeof value === "string") valueControl(node).setSentence(value);
+// }
 
-export function updatePlaybackValueControl(node: Node, value: string | number){
-  if (typeof value === "number") valueControl(node).setValue(value);
-  if (typeof value === "string") valueControl(node).setSentence(value);
-}
+// Each node has a nodeValue control that needs to be updated, but it comes in one of three types
+// This function allows us to pass the type rather than having to explicity get it AS each time
+// type ControlType = ValueControl | SensorValueControl | DemoOutputControl;
 
-export function updatePlaybackValueControlWithOnOff(valForNode: number, node: Node){
-  valueControl(node).setSentence(binaryToOnOff(valForNode));
-}
+// function getNodeControl<T extends ControlType>(node: Node, controlType: new () => T): T {
+//   return node.controls.get("nodeValue") as T;
+// }
 
-export function updatePlaybackValueControlSpecialCases(node: Node, valForNode: number){
+// TODO - display on demo is dependent on output type
+
+export function runNodePlaybackUpdates(node: Node, valForNode: number){
   let nodeControl;
   switch (node.name){
+    case "Number":
+      nodeControl = node.controls.get("nodeValue") as ValueControl;
+      nodeControl.setValue(valForNode);
+      break;
+    case "Generator":
+      nodeControl = node.controls.get("nodeValue") as ValueControl;
+      nodeControl.setSentence(`${valForNode}`);
+      break;
     case "Transform":
       nodeControl = node.controls.get("nodeValue") as ValueControl;
       nodeControl.setSentence(` → ${valForNode}`);
@@ -81,10 +83,21 @@ export function updatePlaybackValueControlSpecialCases(node: Node, valForNode: n
   }
 }
 
-export function runNodePlaybackUpdates(node: Node, valForNode: number){
-  if (["Number", "Generator"].includes(node.name)){
-    updatePlaybackValueControl(node, valForNode);
-  } else {
-    updatePlaybackValueControlSpecialCases(node, valForNode);
-  }
+export function calculatedRecentValues(dataSet: IDataSet, playbackIndex: number, attrId: string ){
+  const vals: number[] = [];
+  const priorCases = getPriorCases(dataSet, playbackIndex) as ICaseCreation[];
+  const priorCasesIds = priorCases.map((c: ICaseCreation) => c.__id__);
+  priorCasesIds.forEach((c) => {
+    const caseNodeValue = dataSet.getValue(c as string, attrId) as number;
+    if (isFinite(caseNodeValue)) vals.push(caseNodeValue);
+  });
+  return { "nodeValue": vals };
 }
+
+// export function runNodePlaybackUpdates(node: Node, valForNode: number){
+//   if (["Number", "Generator"].includes(node.name)){
+//     updatePlaybackValueControl(node, valForNode);
+//   } else {
+//     updatePlaybackValueControlSpecialCases(node, valForNode);
+//   }
+// }
