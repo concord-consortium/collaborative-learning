@@ -6,6 +6,7 @@ import { ICaseCreation } from "../../../models/data/data-set-types";
 import { SensorValueControl } from "../nodes/controls/sensor-value-control";
 import { InputValueControl } from "../nodes/controls/input-value-control";
 import { DemoOutputControl } from "../nodes/controls/demo-output-control";
+import { Value } from "expr-eval";
 
 
 function getPriorCases(dataSet: IDataSet, playhead: number){
@@ -49,7 +50,7 @@ export function runNodePlaybackUpdates(node: Node, valForNode: number){
       nodeControl.setValue(valForNode);
       break;
     case "Sensor":
-      nodeControl = node.controls.get("nodeValue") as SensorValueControl;
+      nodeControl = node.controls.get("nodeValue") as ValueControl;
       nodeControl.setValue(valForNode);
       break;
     case "Demo Output":
