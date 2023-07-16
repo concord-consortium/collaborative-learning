@@ -64,7 +64,6 @@ export function runNodePlaybackUpdates(node: Node, valForNode: number){
   }
 }
 
-
 export function calculatedRecentValues(dataSet: IDataSet, playbackIndex: number, attrId: string ){
   const vals: number[] = [];
   const priorCases = getPriorCases(dataSet, playbackIndex) as ICaseCreation[];
