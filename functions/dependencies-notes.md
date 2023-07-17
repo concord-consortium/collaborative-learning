@@ -3,8 +3,21 @@
 Notes on dependencies, particularly reasons for not updating to their latest versions.
 
 We are currently stuck on older versions of the firebase packages until we update at least our unit testing code.
+It also seems we need to be using node version 14 to run the local tests.
+
+## Running on Node version 14
+There is some strange interaction with node 14, node 16, and probably the npm version and these libraries.
+
+If node 16 is used and `npm i` is run. Then when tests run, a `TypeError: Cannot read properties of undefined (reading 'INTERNAL')` occurs. If you go back to node 14 (I did this with `nvm use 14`), and then installed the dependencies again with `npm i`. Now the tests will run without errors. This also caused an update to package-lock.json perhaps because of an older version of npm. This updated package-lock.json is not committed because I don't fully understand what is going on, keep reading...
+
+If I switched back to node 16 with `nvm use 16`, then ran `npm i`, some of the tests pass without the above error. But if I run `npm i` a second time, now all the tests fail again.
+
+The point of documenting this, is to warn you if you are trying to get things to work in node 16. I think really the best approach is to update how we are running a function unit tests as described below.
 
 ## Upgrading `@firebase/rules-unit-testing` to `1.3.16` or higher
+
+** This information seems out of date:**
+The package.json specifies `~1.3.15` but in package-lock.json `1.3.16` is installed. The same error happens when bouncing between node version 14 and 16 so my guess is that the two issues got conflated.
 
 This causes:
 ```
@@ -32,7 +45,13 @@ Without changing the code the best thing I've found to keep most of the dependen
 
 The best solution is to upgrade all of the firebase dependencies. Then we have to refactor the way the tests are working with the emulator and mocking the firebase admin object.
 
-The official firebase documentation recommends unit testing firebase using a real firebase project. This is fragile, so we'd prefer to keep using our emulator based approach.
+The official firebase documentation recommends unit testing firebase using a real firebase project or mocking things so it can run offline:
+https://firebase.google.com/docs/functions/unit-testing
+However, both options are fragile, so we'd prefer to keep using our emulator based approach.
+
+If we want to stick with using the rules unit testing library to implement our function tests against the emulator, there is this page which talks about unit tests with the emulator:
+https://firebase.google.com/docs/rules/unit-tests
+It refers to the v9 and v8 javascript SDK. It isn't clear what these versions are referring too.
 
 I found this blog post and repo:
 https://timo-santi.medium.com/jest-testing-firebase-functions-with-emulator-suite-409907f31f39

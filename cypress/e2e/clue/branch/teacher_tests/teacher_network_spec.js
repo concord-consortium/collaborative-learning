@@ -36,6 +36,7 @@ describe('Networked dividers for networked teacher', () => {
     teacherNetwork.verifyDividerLabel('workspaces', 'my-classes');
     teacherNetwork.verifyDividerLabel('workspaces', 'my-network');
 
+    // We are not showing network section with the document scroller in the Starred tab
     // cy.openSection('my-work', 'starred');
     // teacherNetwork.verifyDividerLabel('starred', 'my-classes');
     // teacherNetwork.verifyDividerLabel('starred', 'my-network');
@@ -58,6 +59,7 @@ describe('Networked dividers for networked teacher', () => {
     teacherNetwork.verifyDividerLabel('learning-logs', 'my-classes');
     teacherNetwork.verifyDividerLabel('learning-logs', 'my-network');
 
+    // We are not showing network section with the document scroller in the Starred tab
     // cy.openSection('class-work', 'starred');
     // teacherNetwork.verifyDividerLabel('starred', 'my-classes');
     // teacherNetwork.verifyDividerLabel('starred', 'my-network');

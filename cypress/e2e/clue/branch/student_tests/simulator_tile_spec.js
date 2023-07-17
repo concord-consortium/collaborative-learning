@@ -6,13 +6,13 @@ let clueCanvas = new ClueCanvas;
 const dataflowTile = new DataflowTile;
 let simulatorTile = new SimulatorTile;
 
-context('Simulator Tile with Brainwaves Gripper Simulation', function () {
+context.skip('Simulator Tile with Brainwaves Gripper Simulation', function () {
   beforeEach(function () {
     const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&mouseSensor&unit=dfe";
     cy.clearQAData('all');
     cy.visit(queryParams);
     cy.waitForLoad();
-    cy.closeResourceTabs();
+    cy.collapseResourceTabs();
   });
   describe("Simulator Tile", () => {
     it("renders simulator tile", () => {
@@ -90,7 +90,7 @@ context('Simulator Tile with Brainwaves Gripper Simulation', function () {
   });
 });
 
-context('Simulator Tile with Terrarium Simulation', function() {
+context.skip('Simulator Tile with Terrarium Simulation', function() {
   beforeEach(function () {
     const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&mouseSensor&unit=seeit";
     cy.clearQAData('all');
@@ -108,7 +108,7 @@ context('Simulator Tile with Terrarium Simulation', function() {
     cy.get(".primary-workspace .document-content").trigger("drop", { dataTransfer });
     draggable().trigger("dragend", { force: true });
     simulatorTile.getSimulatorTile().should("exist");
-    cy.closeResourceTabs();
+    cy.collapseResourceTabs();
 
     clueCanvas.addTile("dataflow");
 

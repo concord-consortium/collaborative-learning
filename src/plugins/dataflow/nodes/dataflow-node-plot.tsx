@@ -99,7 +99,7 @@ function lineData(node: any) {
       chartDataSets.push(dataset);
     }
   });
-  
+
   stepY = (maxY(node) - minY(node)) / 2;
 
   const chartData: ChartData = {
@@ -136,6 +136,9 @@ function lineOptions(node: any) {
           maxTicksLimit: 3,
           minRotation: 0,
           maxRotation: 0,
+          callback: (value: number) => {
+            return Number(value.toFixed(1));
+          }
         },
         gridLines: {
           display: false,

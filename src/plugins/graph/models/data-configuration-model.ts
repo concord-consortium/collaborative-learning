@@ -461,6 +461,9 @@ export const DataConfigurationModel = types
       }
     }))
   .actions(self => ({
+    beforeDestroy() {
+      self.actionHandlerDisposer?.();
+    },
     handleAction(actionCall: ISerializedActionCall) {
       // forward all actions from dataset except "setCaseValues" which requires intervention
       if (isSetCaseValuesAction(actionCall)) return;

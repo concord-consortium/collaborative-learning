@@ -93,9 +93,10 @@ export interface IProps {
   showPlayback?: boolean;
   toolbar?: IToolbarModel;
   readOnly?: boolean;
+  fullHeight?: boolean
 }
 export const EditableDocumentContent: React.FC<IProps> = props => {
-  const { className, contained, mode, isPrimary, document, toolbar, readOnly, showPlayback } = props;
+  const { className, contained, mode, isPrimary, document, toolbar, readOnly, showPlayback, fullHeight } = props;
 
   const documentContext = useDocumentContext(document);
   const { db: { firebase }, ui, user } = useStores();
@@ -110,7 +111,7 @@ export const EditableDocumentContent: React.FC<IProps> = props => {
   const documentSelectedForComment = isChatEnabled && ui.showChatPanel && ui.selectedTileIds.length === 0 && !isPrimary;
   const editableDocContentClass = classNames("editable-document-content", showToolbarClass,
     contained ? "contained-editable-document-content" : "full-screen-editable-document-content",
-    {"comment-select" : documentSelectedForComment}, className);
+    {"comment-select" : documentSelectedForComment, "full-height": fullHeight}, className);
 
   useDocumentSyncToFirebase(user, firebase, document, readOnly);
   return (

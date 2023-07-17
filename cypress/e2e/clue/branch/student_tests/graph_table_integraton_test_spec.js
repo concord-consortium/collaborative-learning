@@ -22,7 +22,7 @@ context('Graph Table Integration', function () {
 
     cy.visit(queryParams);
     cy.waitForLoad();
-    cy.closeResourceTabs();
+    cy.collapseResourceTabs();
 
     clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle');
   });
@@ -201,7 +201,7 @@ context('Graph Table Integration', function () {
       cy.openResourceTabs();
       cy.openTopTab('my-work');
       cy.openDocumentWithTitle('my-work', 'workspaces', title);
-      cy.closeResourceTabs();
+      cy.collapseResourceTabs();
     });
     it('verify connection of table and graph on restored canvas', function () {
       graphToolTile.getGraphPointLabel().contains('A').should('exist');
@@ -227,7 +227,7 @@ context("Dragging to copy linked tiles", () => {
 
     cy.visit(queryParams);
     cy.waitForLoad();
-    // cy.closeResourceTabs();
+    // cy.collapseResourceTabs();
 
     clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle');
   });

@@ -20,7 +20,7 @@ function setupInitialLoading() {
   cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();
-  cy.closeResourceTabs();
+  cy.collapseResourceTabs();
 }
 
 // FIXME: this test seems to be causing cypress timeouts.

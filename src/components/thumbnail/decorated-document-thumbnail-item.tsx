@@ -18,6 +18,7 @@ interface IProps {
   section: NavTabSectionModelType;
   scale: number;
   selectedDocument?: string;
+  selectedSecondaryDocument?: string;
   onSelectDocument?: (document: DocumentModelType) => void;
   onDocumentDragStart?: (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => void;
   onDocumentStarClick?: (document: DocumentModelType) => void;
@@ -50,7 +51,7 @@ export function useDocumentCaption(document: DocumentModelType) {
 
 // observes teacher names via useDocumentCaption()
 export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
-  section, sectionDocument, tab, scale, selectedDocument,
+  section, sectionDocument, tab, scale, selectedDocument, selectedSecondaryDocument,
   onSelectDocument, onDocumentDragStart, onDocumentStarClick, onDocumentDeleteClick
 }: IProps) => {
     const user = useUserStore();
@@ -81,10 +82,14 @@ export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
     // so that mobx-react triggers child render not parent render.
     const onIsStarred = () => {
       return section.showStarsForUser(user)
-              ? user.isTeacher
-                ? sectionDocument.isStarredByUser(user.id)
-                : sectionDocument.isStarred
-              : false;
+          // We weren't showing stars that a "co-teacher" has placed on a document even though the document
+          // is classified as "isStarred". We commented out lines 88-90 to show all starred documents regardless of who
+          // placed the star.
+              // ? user.isTeacher
+              //   ? sectionDocument.isStarredByUser(user.id)
+              //   : sectionDocument.isStarred
+                ? sectionDocument.isStarred
+                : false;
     };
     const _handleDocumentStarClick = section.showStarsForUser(user) && !sectionDocument.isRemote
                                       ? handleDocumentStarClick
@@ -101,6 +106,7 @@ export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
         document={sectionDocument}
         scale={scale}
         isSelected={sectionDocument.key === selectedDocument}
+        isSecondarySelected={sectionDocument.key === selectedSecondaryDocument}
         captionText={caption}
         onDocumentClick={handleDocumentClick}
         onDocumentDragStart={!sectionDocument.isRemote ? handleDocumentDragStart: undefined}

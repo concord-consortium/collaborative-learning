@@ -1,26 +1,21 @@
 import { ISerializedActionCall } from "mobx-state-tree";
-import { IAddCaseOptions, ICase } from "./data-set-types";
+import { ICase } from "./data-set-types";
 
 // TODO: define the types for the rest of the actions
 
+// NOTE: AddCasesAction differs between CLUE and CODAP DataSets
 export interface AddCasesAction extends ISerializedActionCall {
-  name: "addCases"
-  args: [ICase[], IAddCaseOptions | undefined]
+  name: "addCasesWithIDs" | "addCanonicalCasesWithIDs"
+  args: [cases: ICase[], beforeID: string | string[] | undefined]
 }
-
 export const isAddCasesAction = (action: ISerializedActionCall): action is AddCasesAction =>
-              action.name === "addCases";
+              ["addCasesWithIDs", "addCanonicalCasesWithIDs"].includes(action.name);
 
+// NOTE: SetCaseValuesAction differs between CLUE and CODAP DataSets
 export interface SetCaseValuesAction extends ISerializedActionCall {
-  name: "setCaseValues"
+  name: "setCaseValues" | "setCanonicalCaseValues"
   args: [ICase[], string[]]
 }
-
-export interface SetCanonicalCaseValuesAction extends ISerializedActionCall {
-  name: "setCanonicalCaseValues"
-  args: [ICase[], string[]]
-}
-
 export const isSetCaseValuesAction = (action: ISerializedActionCall): action is SetCaseValuesAction =>
               action.name === "setCaseValues" || action.name === "setCanonicalCaseValues";
 
