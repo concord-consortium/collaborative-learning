@@ -63,6 +63,8 @@ export const LineObject = StrokedObject.named("LineObject")
       // Min size should be enforced.
 
       const bbox = self.boundingBox;
+      const left = bbox.nw.x;
+      const top = bbox.nw.y;
       const width = bbox.se.x - bbox.nw.x;
       const height = bbox.se.y - bbox.nw.y;
       const newWidth  = width -  deltas.left + deltas.right;
@@ -70,6 +72,13 @@ export const LineObject = StrokedObject.named("LineObject")
       const widthFactor = newWidth/width;
       const heightFactor = newHeight/height;
 
+      // x,y get moved to a scaled position within the new bounds
+      const newLeft = left+deltas.left;
+      self.x = newLeft + (self.x-left)*widthFactor;
+      const newTop = top+deltas.top;
+      self.y = newTop  + (self.y-top)*heightFactor;
+
+      // deltas all get scaled by the x & y scale factors
       for (const p of self.deltaPoints) {
         p.dx *= widthFactor;
         p.dy *= heightFactor;
