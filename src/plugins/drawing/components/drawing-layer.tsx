@@ -376,12 +376,18 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       const current = this.getWorkspacePoint(e);
       if (!object || !start || !current || !corner) return;
       const dx = current.x - start.x, dy = current.y - start.y;
+
+      const actualChanges = object.adjustBounds( {
+        top:    corner.charAt(0)==='n' ? dy : 0,
+        right:  corner.charAt(1)==='e' ? dx : 0,
+        bottom: corner.charAt(0)==='s' ? dy : 0,
+        left:   corner.charAt(1)==='w' ? dx : 0
+      })
       
-      if (object.adjustSize(corner, dx, dy)) {
-        // If resize was successful, then the current position is the new starting point.
-        start = current;
-      }
-      
+      // Move "start" by the amount of change that was actually applied
+      start.x += actualChanges.left + actualChanges.right;
+      start.y += actualChanges.top + actualChanges.bottom;
+
     }, 10);
   
     const handleResizecomplete = (e: MouseEvent) => {

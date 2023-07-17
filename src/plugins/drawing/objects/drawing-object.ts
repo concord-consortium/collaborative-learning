@@ -1,10 +1,11 @@
 import { getMembers, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { uniqueId } from "../../../utilities/js-utils";
 import { SelectionBox } from "../components/selection-box";
-import { BoundingBox, DefaultToolbarSettings, Point, ToolbarSettings } from "../model/drawing-basic-types";
+import { BoundingBox, BoundingBoxDelta, DefaultToolbarSettings, Point, ToolbarSettings } from "../model/drawing-basic-types";
 import { StampModelType } from "../model/stamp";
 
 export type ToolbarModalButton = "select" | "line" | "vector" | "rectangle" | "ellipse" | "stamp" | "variable";
+
 
 // This interface is a subset of what the DrawingContentModel provides.
 // It is used to break the circular reference between DrawingContentModel
@@ -65,12 +66,16 @@ export const DrawingObject = types.model("DrawingObject", {
     self.x = x;
     self.y = y;
   },
-  adjustSize(corner: string, dx: number, dy: number) {
-    // Implementated in subclasses.
-    // Implementation should return true if the object was actually resized by the given increment,
-    // false if resizing in that way was not possible.
-    console.log("adjustSize is unimplemented for this type");
-    return false;
+  adjustBounds(deltas: BoundingBoxDelta): BoundingBoxDelta {
+    // Attempt to move the edges of the object's bounding box by the given deltas.
+    // This will change the size and origin position of the object.
+    // Returns the actual deltas by which it was changed,
+    // which in general can be different than what was requested because objects have 
+    // constraints on their size and shape (eg, minimum height and width).
+
+    // Implementated in subclasses since this will affect object types differently.
+    console.error("adjustSize is unimplemented for this type");
+    return {top: 0, right: 0, bottom: 0, left: 0};
   }
 }));
 export interface DrawingObjectType extends Instance<typeof DrawingObject> {}

@@ -8,6 +8,13 @@ export interface BoundingBox {
   end?: Point;
 }
 
+export interface BoundingBoxDelta {
+  top: number, 
+  right: number, 
+  bottom: number, 
+  left: number
+}
+
 export interface ToolbarSettings {
   stroke: string;
   fill: string;

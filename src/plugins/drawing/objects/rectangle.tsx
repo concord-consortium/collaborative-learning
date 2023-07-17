@@ -3,7 +3,7 @@ import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
 import { computeStrokeDashArray, DrawingTool, FilledObject, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
-import { Point } from "../model/drawing-basic-types";
+import { BoundingBoxDelta, Point } from "../model/drawing-basic-types";
 import RectToolIcon from "../assets/rectangle-icon.svg";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
 
@@ -49,22 +49,24 @@ export const RectangleObject = types.compose("RectangleObject", StrokedObject, F
         self.width = self.height = squareSize;
       }
     },
-    adjustSize(corner: string, dx: number, dy: number) {
-      // If dragging one of the "south" handles, increasing y coordinate (ie vertically down) makes the rect bigger.
-      // The "north" handles make the rect smaller when dragged in the positive direction but increase it's starting Y.
-      let dHeight = (corner.charAt(0) === 's') ? dy : -dy;
-      let dYStart = (corner.charAt(0) === 's') ? 0 :   dy;
-      // East handles make the shape bigger when postive; West handles make it smaller but increase starting X.
-      let dWidth =  (corner.charAt(1) === 'e') ? dx : -dx;
-      let dXStart = (corner.charAt(1) === 'e') ? 0 :   dx;
+    adjustBounds(deltas: BoundingBoxDelta) {
+      let change = {top: deltas.top, right: deltas.right, bottom: deltas.bottom, left: deltas.left};
 
-      if (self.width+dWidth < 1 || self.height+dHeight < 1) return false;
+      // self.x and self.y refer to the top left corner
+      
+      // Cannot move top or bottom so as to make height less than 1
+      change.top = Math.min(change.top, self.height-1);
+      change.bottom = Math.max(change.bottom, -(self.height-change.top-1));
 
-      self.x += dXStart;
-      self.y += dYStart;
-      self.width += dWidth;
-      self.height += dHeight;
-      return true;
+      // Cannot move left or right to make width less than 1
+      change.left = Math.min(change.left, self.width-1);
+      change.right = Math.max(change.right, -(self.width-change.left-1));
+
+      self.x += change.left;
+      self.y += change.top;
+      self.width += change.right - change.left;
+      self.height += change.bottom - change.top;
+      return change;
     }
   }));
 export interface RectangleObjectType extends Instance<typeof RectangleObject> {}
