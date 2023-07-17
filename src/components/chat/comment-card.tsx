@@ -60,18 +60,6 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
   //appConfig holds showCommentTag, commentTags, defaultTag fetched from "clue-curriculum" repository
   const { appConfig } = useStores();
 
-  const mockCommentTags = {
-    "part-to-part": "Part-to-Part",
-    "part-to-whole": "Part-to-Whole",
-    "unit-rate": "Unit Rate",
-    "guess-and-check": "Guess and Check",
-    "none": "None"
-  };
-
-  const mockDefaultTag = {
-   "default": "Select Student Strategy"
-  };
-
 
   return (
     <div className="comment-card selected" data-testid="comment-card">
@@ -88,19 +76,7 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
                                       ? {backgroundColor: "white"}
                                       : {backgroundColor: userInitialBackgroundColor[userInitialBackgroundColorIndex]};
 
-            const hideCommentTag = (comment.tag === "Select Student Strategy") ||
-                                   !(comment.tag) || //if empty comment
-                                   !(appConfig.showCommentTag); //fetched json curriculum file says false or undefined
 
-
-              //Aside from the fact that this string should not be hard-coded (as discussed elsewhere),
-              //we should not be saving any comments with the default/prompt as a value, so this test
-              //should not be necessary and if it is necessary that suggests there's a bug somewhere else.
-
-            console.log("----------------------");
-            console.log("!hideCommentTag:", !hideCommentTag);
-            console.log(comment.content);
-            console.log(comment.tag);
 
             return (
               <div key={idx} className="comment-thread" data-testid="comment-thread">
@@ -118,9 +94,10 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
                   }
                 </div>
                 {
-                 !hideCommentTag && <div className="comment-dropdown-tag">
-                                      { comment.tag }
-                                    </div>
+                  appConfig.showCommentTag && comment.tag &&
+                  <div className="comment-dropdown-tag">
+                    { comment.tag }
+                  </div>
                 }
                 <div key={idx} className="comment-text" data-testid="comment">
                   {comment.content}
@@ -136,9 +113,6 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
           showCommentTag={appConfig.showCommentTag}
           commentTags={appConfig.commentTags}
           defaultTag={appConfig.defaultTag}
-          // showCommentTag={true}
-          // commentTags={mockCommentTags}
-          // defaultTag={mockDefaultTag}
 
 
         />

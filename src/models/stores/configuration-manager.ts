@@ -48,7 +48,7 @@ export class ConfigurationManager implements UnitConfiguration {
   }
 
   get commentTags(){
-    return  (this.showCommentTag) ? this.getProp<UC["commentTags"]>("commentTags") : [];
+    return  (this.showCommentTag) ? this.getProp<UC["commentTags"]>("commentTags") : {};
   }
 
   get autoAssignStudentsToIndividualGroups() {
