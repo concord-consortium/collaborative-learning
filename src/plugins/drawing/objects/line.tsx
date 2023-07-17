@@ -4,7 +4,7 @@ import React from "react";
 import { SelectionBox } from "../components/selection-box";
 import { computeStrokeDashArray, DeltaPoint, DrawingTool, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
-import { Point } from "../model/drawing-basic-types";
+import { BoundingBoxDelta, Point } from "../model/drawing-basic-types";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
 import FreehandToolIcon from "../assets/freehand-icon.svg";
 
@@ -50,11 +50,31 @@ export const LineObject = StrokedObject.named("LineObject")
         se.y = Math.max(se.y, point.y);
       }
       return {nw, se};
-    }
-  }))
+    }}))
   .actions(self => ({
     addPoint(point: Instance<typeof DeltaPoint>) {
       self.deltaPoints.push(point);
+    },
+
+    adjustBounds(deltas: BoundingBoxDelta) {
+      // FIXME this calculation is not yet correct
+      // Initial x,y point will need to be moved appropriately
+      // Other points need to be adjusted in reference to initial x,y
+      // Min size should be enforced.
+
+      const bbox = self.boundingBox;
+      const width = bbox.se.x - bbox.nw.x;
+      const height = bbox.se.y - bbox.nw.y;
+      const newWidth  = width -  deltas.left + deltas.right;
+      const newHeight = height - deltas.top + deltas.bottom;
+      const widthFactor = newWidth/width;
+      const heightFactor = newHeight/height;
+
+      for (const p of self.deltaPoints) {
+        p.dx *= widthFactor;
+        p.dy *= heightFactor;
+      }
+      return deltas;
     }
   }));
 export interface LineObjectType extends Instance<typeof LineObject> {}

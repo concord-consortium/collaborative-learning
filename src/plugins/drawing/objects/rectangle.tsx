@@ -50,7 +50,7 @@ export const RectangleObject = types.compose("RectangleObject", StrokedObject, F
       }
     },
     adjustBounds(deltas: BoundingBoxDelta) {
-      let change = {top: deltas.top, right: deltas.right, bottom: deltas.bottom, left: deltas.left};
+      const change = {top: deltas.top, right: deltas.right, bottom: deltas.bottom, left: deltas.left};
 
       // self.x and self.y refer to the top left corner
       

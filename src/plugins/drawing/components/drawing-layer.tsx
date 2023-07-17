@@ -327,7 +327,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
           {this.renderResizeHandle(object, "ne", seX, nwY, color)} 
           {this.renderResizeHandle(object, "sw", nwX, seY, color)}
           {this.renderResizeHandle(object, "se", seX, seY, color)}
-      </g>;
+        </g>;
 
       return <g key={index}>
               <rect
@@ -356,7 +356,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
                 width={SELECTION_BOX_RESIZE_HANDLE_SIZE} height={SELECTION_BOX_RESIZE_HANDLE_SIZE}
                 stroke={color} strokeWidth="1" fill="#FFF" fillOpacity="1"
                 onMouseDown={(e) => this.handleResizeStart(e, object)}
-          />
+          />;
   }
 
   private handleResizeStart(e: React.MouseEvent<SVGRectElement, MouseEvent>, object: DrawingObjectType) {
@@ -366,23 +366,23 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     handle.classList.add('active');
     const corner = handle.dataset.corner;
     
-    let start = this.getWorkspacePoint(e);
+    const start = this.getWorkspacePoint(e);
     this.setState({objectBeingResized: object});
 
-    const handleResizeMove = debounce((e: MouseEvent) => {
-      e.stopPropagation();
-      e.preventDefault();
-      const object = this.state.objectBeingResized;
-      const current = this.getWorkspacePoint(e);
-      if (!object || !start || !current || !corner) return;
+    const handleResizeMove = debounce((e2: MouseEvent) => {
+      e2.stopPropagation();
+      e2.preventDefault();
+      const obj = this.state.objectBeingResized;
+      const current = this.getWorkspacePoint(e2);
+      if (!obj || !start || !current || !corner) return;
       const dx = current.x - start.x, dy = current.y - start.y;
 
-      const actualChanges = object.adjustBounds( {
+      const actualChanges = obj.adjustBounds( {
         top:    corner.charAt(0)==='n' ? dy : 0,
         right:  corner.charAt(1)==='e' ? dx : 0,
         bottom: corner.charAt(0)==='s' ? dy : 0,
         left:   corner.charAt(1)==='w' ? dx : 0
-      })
+      });
       
       // Move "start" by the amount of change that was actually applied
       start.x += actualChanges.left + actualChanges.right;
@@ -390,14 +390,14 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
     }, 10);
   
-    const handleResizecomplete = (e: MouseEvent) => {
-      e.stopPropagation();
-      e.preventDefault();
+    const handleResizecomplete = (e2: MouseEvent) => {
+      e2.stopPropagation();
+      e2.preventDefault();
       window.removeEventListener("mousemove", handleResizeMove);
       window.removeEventListener("mouseup", handleResizecomplete);
       handle.classList.remove('active');
       this.setState({objectBeingResized: null});
-    }  
+    };
 
     window.addEventListener("mousemove", handleResizeMove);
     window.addEventListener("mouseup", handleResizecomplete);

@@ -1,7 +1,8 @@
 import { getMembers, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { uniqueId } from "../../../utilities/js-utils";
 import { SelectionBox } from "../components/selection-box";
-import { BoundingBox, BoundingBoxDelta, DefaultToolbarSettings, Point, ToolbarSettings } from "../model/drawing-basic-types";
+import { BoundingBox, BoundingBoxDelta, DefaultToolbarSettings, Point, ToolbarSettings }
+   from "../model/drawing-basic-types";
 import { StampModelType } from "../model/stamp";
 
 export type ToolbarModalButton = "select" | "line" | "vector" | "rectangle" | "ellipse" | "stamp" | "variable";
