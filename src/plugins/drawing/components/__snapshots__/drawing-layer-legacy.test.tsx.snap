@@ -99,6 +99,7 @@ exports[`Drawing Layer Components Image adds an image 1`] = `
   <image
     height="10"
     href="my/image/url"
+    preserveAspectRatio="none"
     width="10"
     x="10"
     y="10"
@@ -123,6 +124,7 @@ exports[`Drawing Layer Components Image moves a image 1`] = `
   <image
     height="10"
     href="my/image/url"
+    preserveAspectRatio="none"
     width="10"
     x="5"
     y="5"
