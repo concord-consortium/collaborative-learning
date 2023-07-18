@@ -1,9 +1,9 @@
 import React from "react";
 import { reaction, IReactionDisposer } from "mobx";
-import { clone, isAlive, getSnapshot } from "mobx-state-tree";
+import { isAlive, getSnapshot } from "mobx-state-tree";
 import { observer } from "mobx-react";
 import { extractDragTileType, kDragTileContent } from "../../../components/tiles/tile-component";
-import { DrawingContentModelType, DrawingObjectMove } from "../model/drawing-content";
+import { DrawingContentModelType } from "../model/drawing-content";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { ImageContentSnapshotOutType } from "../../../models/tiles/image/image-content";
@@ -42,7 +42,6 @@ interface DrawingLayerViewState {
   selectedObjects: DrawingObjectType[];
   selectionBox: SelectionBox|null;
   hoverObject: DrawingObjectType|null;
-  objectsBeingDragged: DrawingObjectType[];
   objectBeingResized: DrawingObjectType|null;
 }
 
@@ -64,7 +63,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       selectionBox: null,
       selectedObjects: [],
       hoverObject: null,
-      objectsBeingDragged: [],
       objectBeingResized: null
     };
 
@@ -186,13 +184,10 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   };
 
   // handles dragging of selected/hovered objects
-  // TODO: it seems this could be cleaned up. Keeping the state variable objectsBeingDragged
-  // locally in this function and modifying the local variable is not safe.
   public handleSelectedObjectMouseDown = (e: React.MouseEvent<any>, obj: DrawingObjectType) => {
     if (this.props.readOnly || (this.currentTool !== this.tools.select)) return;
     let moved = false;
     const {selectedObjects, hoverObject } = this.state;
-    let { objectsBeingDragged } = this.state;
     let objectsToInteract: DrawingObjectType[];
     let needToAddHoverToSelection = false;
 
@@ -227,13 +222,8 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       const dy = current.y - starting.y;
       moved = moved || ((dx !== 0) || (dy !== 0));
 
-      if (objectsBeingDragged.length === 0) {
-        objectsBeingDragged = objectsToInteract.map(object => clone(object));
-        this.setState( {objectsBeingDragged});
-      }
-
-      objectsBeingDragged.forEach((object, index) => {
-        object.setPosition(objectsToInteract[index].x + dx, objectsToInteract[index].y + dy);
+      objectsToInteract.forEach((object, index) => {
+        object.setDragPosition(object.x + dx, object.y + dy);
       });
 
       if (needToAddHoverToSelection) {
@@ -254,19 +244,12 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
       if (moved) {
-        const moves: DrawingObjectMove[] = objectsToInteract.map((object, index) => {
-          const draggedObject = objectsBeingDragged[index];
-          return {
-            id: object.id,
-            destination: {x: draggedObject.x, y: draggedObject.y}
-          };
+        objectsToInteract.map((object, index) => {
+          object.adoptDragPosition();
         });
-        this.getContent().moveObjects(moves);
-      }
-      else {
+      } else {
         this.handleObjectClick(e2, obj);
       }
-      this.setState({ objectsBeingDragged: []});
     };
 
     window.addEventListener("mousemove", handleMouseMove);
@@ -428,10 +411,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         ? this.state.selectedObjects.indexOf(this.state.hoverObject) !== -1
         : false;
 
-    const idsBeingDragged = this.state.objectsBeingDragged.map(object => object.id);
-    const objectsToRenderSelected = this.state.objectsBeingDragged.length > 0 ?
-      this.state.objectsBeingDragged : this.state.selectedObjects;
-
     return (
       <div className="drawing-layer"
           data-testid="drawing-layer"
@@ -441,10 +420,9 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
           onDrop={this.handleDrop} >
 
         <svg xmlnsXlink="http://www.w3.org/1999/xlink" width={1500} height={1500} ref={this.setSvgRef}>
-          {this.renderObjects(object => object.type === "image" && !idsBeingDragged.includes(object.id))}
-          {this.renderObjects(object => object.type !== "image" && !idsBeingDragged.includes(object.id))}
-          {this.state.objectsBeingDragged.map((object) => renderDrawingObject(object))}
-          {this.renderSelectedObjects(objectsToRenderSelected, true)}
+          {this.renderObjects(object => object.type === "image" )}
+          {this.renderObjects(object => object.type !== "image" )}
+          {this.renderSelectedObjects(this.state.selectedObjects, true)}
           {(this.state.hoverObject && !hoveringOverAlreadySelectedObject && isAlive(this.state.hoverObject))
             ? this.renderSelectedObjects([this.state.hoverObject], false)
             : null}

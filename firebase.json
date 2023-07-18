@@ -32,9 +32,7 @@
       ".git",
       "coverage",
       "node_modules",
-      "src",
-      "test",
-      "tsconfig.*"
+      "test"
     ]
   }
 }

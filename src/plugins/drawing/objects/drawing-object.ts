@@ -42,7 +42,18 @@ export const DrawingObject = types.model("DrawingObject", {
   x: types.number,
   y: types.number
 })
+.volatile(self => ({
+  dragX: undefined as number | undefined,
+  dragY: undefined as number | undefined
+}))
 .views(self => ({
+  get position() {
+    // Uses the volatile dragX and dragY while the object is being dragged
+    return {
+      x: self.dragX ?? self.x,
+      y: self.dragY ?? self.y
+    };
+  },
   get boundingBox(): BoundingBox {
     // SC: I tried an approach of tracking the SVG elements that were rendered,
     // and using a generic SVG getBBox() here, but it had performance issues.
@@ -66,6 +77,15 @@ export const DrawingObject = types.model("DrawingObject", {
   setPosition(x: number, y: number) {
     self.x = x;
     self.y = y;
+  },
+  setDragPosition(x: number, y: number) {
+    self.dragX = x;
+    self.dragY = y;
+  },
+  adoptDragPosition() {
+    self.x = self.dragX ?? self.x;
+    self.y = self.dragY ?? self.y;
+    self.dragX = self.dragY = undefined;
   },
   adjustBounds(deltas: BoundingBoxDelta): BoundingBoxDelta {
     // Attempt to move the edges of the object's bounding box by the given deltas.
