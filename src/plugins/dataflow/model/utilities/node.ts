@@ -154,7 +154,7 @@ export const NodeOperationTypes = [
   {
     name: "Round",
     type: "transform",
-    method: (n1: number, n2: number) => Number(n1.toFixed(0)),
+    method: (n1: number, n2: number) => Math.round(n1),
     numberSentence: (n1: string, n2: string) => `round(${n1}) = `,
     icon: EmgIcon
   },
