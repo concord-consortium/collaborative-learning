@@ -3,7 +3,7 @@ import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
 import { computeStrokeDashArray, DrawingObjectType, DrawingTool, FilledObject, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
-import { Point } from "../model/drawing-basic-types";
+import { BoundingBoxDelta, Point } from "../model/drawing-basic-types";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
 import EllipseToolIcon from "../assets/ellipse-icon.svg";
 
@@ -13,10 +13,15 @@ export const EllipseObject = types.compose("EllipseObject", StrokedObject, Fille
     rx: types.number,
     ry: types.number,
   })
+  .volatile(self => ({
+    dragRx: undefined as number | undefined,
+    dragRy: undefined as number | undefined
+  }))
   .views(self => ({
     get boundingBox() {
-      const {rx, ry} = self;
       const {x, y} = self.position;
+      const rx = self.dragRx ?? self.rx;
+      const ry = self.dragRy ?? self.ry;
       const nw: Point = {x: x - rx, y: y - ry};
       const se: Point = {x: x + rx, y: y + ry};
       return {nw, se};
@@ -29,6 +34,18 @@ export const EllipseObject = types.compose("EllipseObject", StrokedObject, Fille
       if (makeCircle) {
         self.rx = self.ry = Math.max(self.rx, self.ry);
       }
+    },
+    dragBounds(deltas: BoundingBoxDelta) {
+      self.dragX = self.x + deltas.left/2 + deltas.right/2;
+      self.dragY = self.y + deltas.top/2 + deltas.bottom/2;
+      self.dragRx  = self.rx  + deltas.right/2 - deltas.left/2;
+      self.dragRy = self.ry + deltas.bottom/2 - deltas.top/2;
+    },
+    adoptDragBounds() {
+      self.adoptDragPosition();
+      self.rx = self.dragRx ?? self.rx;
+      self.ry = self.dragRy ?? self.ry;
+      self.dragRx = self.dragRy = undefined;
     }
   }));
 export interface EllipseObjectType extends Instance<typeof EllipseObject> {}
@@ -41,8 +58,10 @@ function isEllipseObject(model: DrawingObjectType): model is EllipseObjectType {
 export const EllipseComponent = observer(function EllipseComponent({model, handleHover,
   handleDrag} : IDrawingComponentProps) {
   if (!isEllipseObject(model)) return null;
-  const { id, rx, ry, stroke, strokeWidth, strokeDashArray, fill } = model;
+  const { id, stroke, strokeWidth, strokeDashArray, fill } = model;
   const {x, y} = model.position;
+  const rx = model.dragRx ?? model.rx;
+  const ry = model.dragRy ?? model.ry;
   return <ellipse
     key={id}
     cx={x}

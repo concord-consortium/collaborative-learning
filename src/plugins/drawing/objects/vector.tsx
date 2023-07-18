@@ -3,7 +3,7 @@ import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
 import { computeStrokeDashArray, DrawingTool, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
-import { Point } from "../model/drawing-basic-types";
+import { BoundingBoxDelta, Point } from "../model/drawing-basic-types";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
 import LineToolIcon from "../assets/line-icon.svg";
 
@@ -14,10 +14,15 @@ export const VectorObject = StrokedObject.named("VectorObject")
     dx: types.number,
     dy: types.number
   })
+  .volatile(self => ({
+    dragDx: undefined as number | undefined,
+    dragDy: undefined as number | undefined
+  }))
   .views(self => ({
     get boundingBox() {
-      const { dx, dy } = self;
       const { x, y } = self.position;
+      const dx = self.dragDx ?? self.dx;
+      const dy = self.dragDy ?? self.dy;
       const nw: Point = {x: Math.min(x, x + dx), y: Math.min(y, y + dy)};
       const se: Point = {x: Math.max(x, x + dx), y: Math.max(y, y + dy)};
       return {nw, se};
@@ -27,6 +32,33 @@ export const VectorObject = StrokedObject.named("VectorObject")
     setDeltas(dx: number, dy: number) {
       self.dx = dx;
       self.dy = dy;
+    },
+    dragBounds(deltas: BoundingBoxDelta) {
+      if (self.dx > 0) {
+        // x,y point is towards the left
+        self.dragX = self.x + deltas.left;
+        self.dragDx = self.dx + deltas.right - deltas.left;
+      } else {
+        // x,y point is towards the right
+        self.dragX = self.x + deltas.right;
+        self.dragDx = self.dx - deltas.right + deltas.left;
+      }
+
+      if (self.dy > 0) {
+        // x,y point is towards the top
+        self.dragY = self.y + deltas.top;
+        self.dragDy = self.dy + deltas.bottom - deltas.top;
+      } else {
+        // x,y point is towards the bottom
+        self.dragY = self.y + deltas.bottom;
+        self.dragDy = self.dy - deltas.bottom + deltas.top;
+      }
+    },
+    adoptDragBounds() {
+      self.adoptDragPosition();
+      self.dx = self.dragDx ?? self.dx;
+      self.dy = self.dragDy ?? self.dy;
+      self.dragDx = self.dragDy = undefined;
     }
   }));
 export interface VectorObjectType extends Instance<typeof VectorObject> {}
@@ -35,8 +67,11 @@ export interface VectorObjectSnapshot extends SnapshotIn<typeof VectorObject> {}
 export const VectorComponent = observer(function VectorComponent({model, handleHover,
   handleDrag} : IDrawingComponentProps) {
   if (model.type !== "vector") return null;
-  const { id, dx, dy, stroke, strokeWidth, strokeDashArray } = model as VectorObjectType;
-  const { x, y } = model.position;
+  const vector = model as VectorObjectType;
+  const { id, stroke, strokeWidth, strokeDashArray } = vector;
+  const { x, y } = vector.position;
+  const dx = vector.dragDx ?? vector.dx;
+  const dy = vector.dragDy ?? vector.dy;
   return <line
     key={id}
     x1={x}
