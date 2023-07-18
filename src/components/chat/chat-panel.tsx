@@ -38,7 +38,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   const commentThreads = makeChatThreads(postedComments, content);
   const postCommentMutation = usePostDocumentComment();
 
-  const postComment = useCallback((comment: string, tag?: string) => {
+  const postComment = useCallback((comment: string, tags?: string[]) => {
     if (focusDocument) {
       const numComments = postedComments ? postedComments.length : 0;
       const focusDocumentId = focusDocument;
@@ -48,12 +48,12 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
         isFirst: (numComments < 1),
         commentText: comment,
         action: "add",
-        tag
+        tags
       };
       logCommentEvent(eventPayload);
     }
     return document
-      ? postCommentMutation.mutate({ document, comment: { content: comment, tileId: focusTileId, tag } })
+      ? postCommentMutation.mutate({ document, comment: { content: comment, tileId: focusTileId, tags } })
       : undefined;
   }, [document, focusDocument, focusTileId, postCommentMutation, postedComments]);
 
