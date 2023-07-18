@@ -68,7 +68,6 @@ export const RectangleObject = types.compose("RectangleObject", StrokedObject, F
       self.dragY = self.y + deltas.top;
       self.dragWidth  = self.width  + deltas.right - deltas.left;
       self.dragHeight = self.height + deltas.bottom - deltas.top;
-      return change;
     },
     adoptDragBounds() {
       self.adoptDragPosition();

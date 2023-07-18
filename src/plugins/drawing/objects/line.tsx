@@ -1,5 +1,5 @@
 import { observer } from "mobx-react";
-import { Instance, SnapshotIn, types, getSnapshot, cast } from "mobx-state-tree";
+import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
 import { SelectionBox } from "../components/selection-box";
 import { computeStrokeDashArray, DeltaPoint, DrawingTool, IDrawingComponentProps, IDrawingLayer,
@@ -88,7 +88,6 @@ export const LineObject = StrokedObject.named("LineObject")
       self.adoptDragPosition();
 
       // The delta points get permanently scaled by the x & y scale factors
-      let newPoints = [];
       const scaleX = self.dragScaleX ?? 1;
       const scaleY = self.dragScaleY ?? 1;
       for (const p of self.deltaPoints) {
