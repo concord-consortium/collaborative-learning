@@ -80,6 +80,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
 
 
   const handleDocumentClick = () => {
+    console.log("handleDocumentClick!");
     setIsDocumentView((prevState) => !prevState);
   };
 
