@@ -16,20 +16,20 @@ describe('NodeOperationTypes', () => {
     ];
 
     NodeOperationTypes.forEach(operation => {
-      if (['round', 'ceil', 'floor'].includes(operation.type)) {
+      if (['Round', 'Ceil', 'Floor'].includes(operation.name)) {
         testCases.forEach(testCase => {
           const { input, round, floor, ceil } = testCase;
           const result = operation.method(input, 0);
+          switch (operation.name) {
+            case 'Round':
+              expect(result).toBeCloseTo(round);
 
-          switch (operation.type) {
-            case 'round':
-              expect(result).toEqual(round);
               break;
-            case 'floor':
-              expect(result).toEqual(floor);
+            case 'Floor':
+              expect(result).toBeCloseTo(floor);
               break;
-            case 'ceil':
-              expect(result).toEqual(ceil);
+            case 'Ceil':
+              expect(result).toBeCloseTo(ceil);
               break;
             default:
               break;
