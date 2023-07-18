@@ -42,7 +42,6 @@ interface DrawingLayerViewState {
   selectedObjects: DrawingObjectType[];
   selectionBox: SelectionBox|null;
   hoverObject: DrawingObjectType|null;
-  objectBeingResized: DrawingObjectType|null;
 }
 
 @observer
@@ -63,7 +62,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       selectionBox: null,
       selectedObjects: [],
       hoverObject: null,
-      objectBeingResized: null
     };
 
     this.tools = {};
@@ -350,27 +348,29 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     const corner = handle.dataset.corner;
     
     const start = this.getWorkspacePoint(e);
-    this.setState({objectBeingResized: object});
+    const origBoundingBox = object.boundingBox;
+    // The original size of the element is used to avoid making it 0 or negative size.
+    const origWidth = origBoundingBox.se.x - origBoundingBox.nw.x;
+    const origHeight = origBoundingBox.se.y - origBoundingBox.nw.y;
 
     const handleResizeMove = debounce((e2: MouseEvent) => {
       e2.stopPropagation();
       e2.preventDefault();
-      const obj = this.state.objectBeingResized;
       const current = this.getWorkspacePoint(e2);
-      if (!obj || !start || !current || !corner) return;
-      const dx = current.x - start.x, dy = current.y - start.y;
+      if (!start || !current || !corner) return;
+      const dx = current.x - start.x;
+      const dy = current.y - start.y;
+      // Determine which edges the user wants to move, and how much
+      // Constrain these to make sure the image won't get 0 or negative size.
+      const deltas = {
+        top:    corner.charAt(0)==='n' ? Math.min(dy,   origHeight-1)  : 0,
+        right:  corner.charAt(1)==='e' ? Math.max(dx, -(origWidth -1)) : 0,
+        bottom: corner.charAt(0)==='s' ? Math.max(dy, -(origHeight-1)) : 0,
+        left:   corner.charAt(1)==='w' ? Math.min(dx,   origWidth -1)  : 0
+      };
 
-      const actualChanges = obj.adjustBounds( {
-        top:    corner.charAt(0)==='n' ? dy : 0,
-        right:  corner.charAt(1)==='e' ? dx : 0,
-        bottom: corner.charAt(0)==='s' ? dy : 0,
-        left:   corner.charAt(1)==='w' ? dx : 0
-      });
+      object.dragBounds(deltas);
       
-      // Move "start" by the amount of change that was actually applied
-      start.x += actualChanges.left + actualChanges.right;
-      start.y += actualChanges.top + actualChanges.bottom;
-
     }, 10);
   
     const handleResizecomplete = (e2: MouseEvent) => {
@@ -379,7 +379,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       window.removeEventListener("mousemove", handleResizeMove);
       window.removeEventListener("mouseup", handleResizecomplete);
       handle.classList.remove('active');
-      this.setState({objectBeingResized: null});
+      object.adoptDragBounds();
     };
 
     window.addEventListener("mousemove", handleResizeMove);

@@ -29,6 +29,10 @@ export const ImageObject = DrawingObject.named("ImageObject")
     width: types.number,
     height: types.number
   })
+  .volatile(self => ({
+    dragWidth: undefined as number | undefined,
+    dragHeight: undefined as number | undefined
+  }))
   .views(self => ({
     get boundingBox() {
       const {width, height} = self;

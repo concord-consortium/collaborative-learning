@@ -87,16 +87,16 @@ export const DrawingObject = types.model("DrawingObject", {
     self.y = self.dragY ?? self.y;
     self.dragX = self.dragY = undefined;
   },
-  adjustBounds(deltas: BoundingBoxDelta): BoundingBoxDelta {
-    // Attempt to move the edges of the object's bounding box by the given deltas.
-    // This will change the size and origin position of the object.
-    // Returns the actual deltas by which it was changed,
-    // which in general can be different than what was requested because objects have 
-    // constraints on their size and shape (eg, minimum height and width).
+  dragBounds(deltas: BoundingBoxDelta) {
+    // Temporarily adjust the edges of the object's bounding box by the given deltas.
+    // This will change the size and origin position of the object, with changes stored as volatile fields.
 
     // Implementated in subclasses since this will affect object types differently.
-    console.error("adjustSize is unimplemented for this type");
-    return {top: 0, right: 0, bottom: 0, left: 0};
+    console.error("dragBounds is unimplemented for this type");
+  },
+  adoptDragBounds() {
+    // Move any volatile resizing into the persisted object model.
+    console.error("adoptDragBounds is unimplemented for this type");
   }
 }));
 export interface DrawingObjectType extends Instance<typeof DrawingObject> {}
