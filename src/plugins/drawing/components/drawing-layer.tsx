@@ -302,7 +302,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
       const color = enableActions ? SELECTION_COLOR : HOVER_COLOR;
 
-      const resizers = enableActions && 
+      const resizers = enableActions && object.supportsResize &&
         <g>
           {this.renderResizeHandle(object, "nw", nwX, nwY, color)}
           {this.renderResizeHandle(object, "ne", seX, nwY, color)} 

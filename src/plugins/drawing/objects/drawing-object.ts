@@ -71,6 +71,9 @@ export const DrawingObject = types.model("DrawingObject", {
   inSelection(selectionBox: SelectionBox) {
     const {nw, se} = self.boundingBox;
     return selectionBox.overlaps(nw, se);
+  },
+  get supportsResize() {
+    return true;
   }
 }))
 .actions(self => ({
