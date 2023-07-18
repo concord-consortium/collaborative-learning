@@ -54,6 +54,8 @@ export class NavTabPanel extends BaseComponent<IProps> {
     const openChatPanel = isChatEnabled && showChatPanel;
     const focusTileId = selectedTileIds?.length === 1 ? selectedTileIds[0] : undefined;
 
+    console.log("user:", user);
+
     return (
       <div className={`resource-and-chat-panel ${isResourceExpanded ? "shown" : ""}`} style={resourceWidthStyle}>
         <div className={`nav-tab-panel ${showChatPanel ? "chat-open" : ""}`}

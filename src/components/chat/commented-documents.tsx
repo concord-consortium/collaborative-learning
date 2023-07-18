@@ -131,11 +131,23 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
     return () => unsubscribeFromDocs?.();
   },[mDocsRef, mDocsInScopeRef]);
 
+  console.log("docsCommentedOn:", docsCommentedOn);
+  console.log("workDocuments:", workDocuments);
+
+  console.log("-----------------------")
+
+
   return (
     <div className="commented-document-list">
       {
         docsCommentedOn &&
         (docsCommentedOn).map((doc: PromisedCurriculumDocument, index:number) => {
+          console.log("doc (commented on)", doc);
+          console.log("\t title:", doc.title);
+          console.log("\t uid", doc.uid);
+
+
+
           const {navTab} = getTabsOfCurriculumDoc(doc.path);
           return (
             <div
@@ -162,12 +174,17 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
           );
         })
       }
+      {console.log("------next---map-----")}
       {
         workDocuments &&
         (workDocuments).map((doc: PromisedDocumentDocument, index: number) =>{
           const sectionDoc =  store.documents.getDocument(doc.key);
           const networkDoc = store.networkDocuments.getDocument(doc.key);
           if (sectionDoc){
+            console.log("returning sectionDoc:", sectionDoc);
+            console.log("\t title:", sectionDoc.title);
+            console.log("\t uid:", sectionDoc.uid);
+
             return (
               <WorkDocumentItem
                 key={index}
@@ -180,6 +197,8 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
             );
           }
           if (networkDoc){
+            console.log("returning networkDoc:", networkDoc);
+
             return (
               <WorkDocumentItem
                 key={index}
@@ -226,20 +245,18 @@ export const WorkDocumentItem: React.FC<JProps> = ({doc, index, sectionOrNetwork
     >
     {
       isNetworkDoc ?
-          <div className="document-type-icon-yellow">
-            <DocumentIcon/>
-            <div className="yellow-background"/>
-
-          </div>
-      :
-      <div className="document-type-icon">
-        <DocumentIcon/>
-      </div>
+        <div className="document-type-icon-yellow">
+          <DocumentIcon/>
+          <div className="yellow-background"/>
+        </div>
+        :
+        <div className="document-type-icon">
+          <DocumentIcon/>
+        </div>
     }
-
-
       <div className={"title"}>
         {title}
+        {console.log("title:", title)}
       </div>
       <div className={"numComments"}>
         {doc.numComments}
