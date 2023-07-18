@@ -9,13 +9,13 @@ interface IProps {
   numPostedComments: number;
   onPostComment?: (comment: string, tag: string) => void;
   showCommentTag?: boolean;
-  commentTags?: Record<string, string> | never[];
-  defaultTag?: string;
+  commentTags?: Record<string, string>;
+  tagPrompt?: string;
 }
 
 
 export const CommentTextBox: React.FC<IProps> = (props) => {
-  const { activeNavTab, numPostedComments, onPostComment, showCommentTag, commentTags, defaultTag } = props;
+  const { activeNavTab, numPostedComments, onPostComment, showCommentTag, commentTags, tagPrompt } = props;
 
   const minTextAreaHeight = showCommentTag ? 100 : 35;
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -107,16 +107,13 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
                               : "Reply...";
 
   const handleSelectDropDown = (val: string) => {
-    if (defaultTag && val !== defaultTag){ //do not save comments with default tag
+    if (tagPrompt && val !== tagPrompt){ //do not save comments with default tag
       setTagText(val);
     }
     else {
       setTagText("");
     }
   };
-
-
-
 
   return (
     <div className="comment-textbox">
@@ -140,12 +137,12 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
           }}
         >
           {
-            defaultTag &&
-            <option key={"sel-ss"} value={defaultTag}> { defaultTag } </option>
+            tagPrompt &&
+            <option key={"sel-ss"} value={tagPrompt}> { tagPrompt } </option>
           }
           {
             Object.keys(commentTags).map(key => {
-              const value = commentTags[key as keyof typeof commentTags];
+              const value = commentTags[key];
               return (
                 <option key={key} value={key}> {value} </option>
               );

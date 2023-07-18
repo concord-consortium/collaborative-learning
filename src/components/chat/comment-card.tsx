@@ -57,9 +57,8 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
     }
   };
 
-  //appConfig holds showCommentTag, commentTags, defaultTag fetched from "clue-curriculum" repository
+  //appConfig holds showCommentTag, commentTags, tagPrompt fetched from "clue-curriculum" repository
   const { appConfig } = useStores();
-
 
   return (
     <div className="comment-card selected" data-testid="comment-card">
@@ -75,8 +74,6 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
             const backgroundStyle = shouldShowUserIcon
                                       ? {backgroundColor: "white"}
                                       : {backgroundColor: userInitialBackgroundColor[userInitialBackgroundColorIndex]};
-
-
 
             return (
               <div key={idx} className="comment-thread" data-testid="comment-thread">
@@ -112,9 +109,7 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
           numPostedComments={postedComments?.length || 0}
           showCommentTag={appConfig.showCommentTag}
           commentTags={appConfig.commentTags}
-          defaultTag={appConfig.defaultTag}
-
-
+          tagPrompt={appConfig.tagPrompt}
         />
       </div>
     </div>

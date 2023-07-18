@@ -43,8 +43,8 @@ export class ConfigurationManager implements UnitConfiguration {
     return this.getProp<UC["showCommentTag"]>("showCommentTag");
   }
 
-  get defaultTag(){
-    return this.getProp<UC["defaultTag"]>("defaultTag");
+  get tagPrompt(){
+    return this.getProp<UC["tagPrompt"]>("tagPrompt");
   }
 
   get commentTags(){

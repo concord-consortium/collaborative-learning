@@ -36,7 +36,7 @@
       "guess-and-check": "Guess and Check",
       "none": "None"
     },
-    "defaultTag": {
+    "tagPrompt": {
       "default": "Select Student Strategy"
     }
   },

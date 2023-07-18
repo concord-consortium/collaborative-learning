@@ -79,7 +79,7 @@ export const AppConfigModel = types
     get autoSectionProblemDocuments() { return self.configMgr.autoSectionProblemDocuments; },
     get showCommentTag() { return self.configMgr.showCommentTag; },
     get commentTags() { return self.configMgr.commentTags; },
-    get defaultTag() { return self.configMgr.defaultTag; },
+    get tagPrompt() { return self.configMgr.tagPrompt; },
     get documentLabelProperties() { return self.configMgr.documentLabelProperties; },
     get documentLabels() { return self.configMgr.documentLabels; },
     get disablePublish() { return self.configMgr.disablePublish; },
