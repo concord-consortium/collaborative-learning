@@ -356,6 +356,10 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     const handleResizeMove = debounce((e2: MouseEvent) => {
       e2.stopPropagation();
       e2.preventDefault();
+      // Check if mouse is within the drawtool canvas; if not do nothing.
+      if (!((this.svgRef as unknown) as Element).matches(':hover')) {
+        return;
+      }
       const current = this.getWorkspacePoint(e2);
       if (!start || !current || !corner) return;
       const dx = current.x - start.x;
