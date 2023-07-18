@@ -15,48 +15,63 @@ function getPriorCases(dataSet: IDataSet, playhead: number){
   return dataSet.getCasesAtIndices(regionStart, countOfCasesToGet);
 }
 
-const asStrings = ["Generator", "Transform", "Math", "Control", "Timer", "Logic"];
-const asNumbers = ["Number", "Sensor"];
-const asOutputs = ["Demo Output", "Live Output"];
+const binaryToOnOff = (val: number) => (val === 0 ? "off" : "on");
+const binaryToBinStr = (val: number) => (val === 0 ? " ⇒ 0" : " ⇒ 1");
 
+// Playback currently is a limited representation of the node value recorded during execution
+// Rather than being calcualted by rete, the value and prior 17 recents are retrieved from the dataset
+// We do not currently record, and thus do not display the input values during playback
+// If the original recorded value was derived from input values, we add an -> to indicate that
+// If the original recorded value is a binary displayed as a string (e.g. "on" or "off"), we display it as such
+// (Note that in Demo and Live nodes, InputValueControl manages node value like a ValueControl)
 export function runNodePlaybackUpdates(node: Node, valForNode: number){
-  if (asStrings.includes(node.name)){
-    const nodeControl = node.controls.get("nodeValue") as ValueControl;
-    switch (node.name){
-      case "Generator": nodeControl.setSentence(`${valForNode}`); break;
-      case "Transform": nodeControl.setSentence(` → ${valForNode}`); break;
-      case "Math":      nodeControl.setSentence(` → ${valForNode}`); break;
-      case "Control":   nodeControl.setSentence(` → ${valForNode}`); break;
-      case "Timer":     nodeControl.setSentence(valForNode === 0 ? "off" : "on"); break;
-      case "Logic":     nodeControl.setSentence(valForNode === 0 ? " ⇒ 0" : " ⇒ 1"); break;
-    }
-  }
-
-  if (asNumbers.includes(node.name)){
-    const nodeControl = node.controls.get("nodeValue") as ValueControl;
-    nodeControl.setValue(valForNode);
-  }
-
-  if(asOutputs.includes(node.name)){
-    const inputControl = node.inputs.get("nodeValue")?.control as InputValueControl;
-    if (node.name === "Demo Output"){
-      const nodeControl = node.controls.get("demoOutput") as DemoOutputControl;
+  let nodeControl;
+  switch (node.name){
+    case "Generator":
+      nodeControl = node.controls.get("nodeValue") as ValueControl;
+      nodeControl.setSentence(`${valForNode}`);
+      break;
+    case "Transform":
+    case "Math":
+    case "Control":
+      nodeControl = node.controls.get("nodeValue") as ValueControl;
+      nodeControl.setSentence(` → ${valForNode}`);
+      break;
+    case "Timer":
+      nodeControl = node.controls.get("nodeValue") as ValueControl;
+      nodeControl.setSentence(binaryToOnOff(valForNode));
+      break;
+    case "Logic":
+      nodeControl = node.controls.get("nodeValue") as ValueControl;
+      nodeControl.setSentence(binaryToBinStr(valForNode));
+      break;
+    case "Number":
+    case "Sensor":
+      nodeControl = node.controls.get("nodeValue") as ValueControl;
       nodeControl.setValue(valForNode);
-      inputControl.setDisplayMessage(`${valForNode}`);
-    }
-    if (node.name === "Live Output"){
-      inputControl.setDisplayMessage(valForNode === 0 ? "off" : "on");
-    }
+      break;
+    case "Demo Output":
+      nodeControl = node.controls.get("demoOutput") as DemoOutputControl;
+      nodeControl.setValue(valForNode);
+      nodeControl = node.inputs.get("nodeValue")?.control as InputValueControl;
+      nodeControl.setDisplayMessage(`${valForNode}`);
+      break;
+    case "Live Output":
+      nodeControl = node.inputs.get("nodeValue")?.control as InputValueControl;
+      nodeControl.setDisplayMessage(binaryToOnOff(valForNode));
+      break;
+    default:
   }
 }
 
 export function calculatedRecentValues(dataSet: IDataSet, playbackIndex: number, attrId: string ){
   const vals: number[] = [];
-  const priorCases = getPriorCases(dataSet, playbackIndex) as ICaseCreation[];
-  const priorCasesIds = priorCases.map((c: ICaseCreation) => c.__id__);
-  priorCasesIds.forEach((c) => {
-    const caseNodeValue = dataSet.getValue(c as string, attrId) as number;
-    if (isFinite(caseNodeValue)) vals.push(caseNodeValue);
+  const priorCases = getPriorCases(dataSet, playbackIndex);
+  priorCases.forEach((c: ICaseCreation | undefined) => {
+    if (c && c.__id__) {
+      const caseNodeValue = dataSet.getValue(c.__id__, attrId) as number;
+      if (isFinite(caseNodeValue)) vals.push(caseNodeValue);
+    }
   });
   return { "nodeValue": vals };
 }
