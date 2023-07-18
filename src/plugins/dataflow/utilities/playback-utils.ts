@@ -2,7 +2,7 @@ import { Node } from "rete";
 import { IDataSet } from "../../../models/data/data-set";
 import { kMaxNodeValues } from "../model/utilities/node";
 import { ValueControl } from "../nodes/controls/value-control";
-import { ICaseCreation } from "../../../models/data/data-set-types";
+import { ICase } from "../../../models/data/data-set-types";
 import { InputValueControl } from "../nodes/controls/input-value-control";
 import { DemoOutputControl } from "../nodes/controls/demo-output-control";
 
@@ -67,8 +67,8 @@ export function runNodePlaybackUpdates(node: Node, valForNode: number){
 export function calculatedRecentValues(dataSet: IDataSet, playbackIndex: number, attrId: string ){
   const vals: number[] = [];
   const priorCases = getPriorCases(dataSet, playbackIndex);
-  priorCases.forEach((c: ICaseCreation | undefined) => {
-    if (c && c.__id__) {
+  priorCases.forEach((c: ICase | undefined) => {
+    if (c) {
       const caseNodeValue = dataSet.getValue(c.__id__, attrId) as number;
       if (isFinite(caseNodeValue)) vals.push(caseNodeValue);
     }
