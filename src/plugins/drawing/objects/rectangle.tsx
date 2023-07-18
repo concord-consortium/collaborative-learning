@@ -15,7 +15,8 @@ export const RectangleObject = types.compose("RectangleObject", StrokedObject, F
   })
   .views(self => ({
     get boundingBox() {
-      const {x, y, width, height} = self;
+      const {width, height} = self;
+      const { x, y } = self.position;
       const nw: Point = {x, y};
       const se: Point = {x: x + width, y: y + height};
       return {nw, se};
@@ -57,7 +58,8 @@ export interface RectangleObjectSnapshotForAdd extends SnapshotIn<typeof Rectang
 export const RectangleComponent = observer(function RectangleComponent({model, handleHover,
   handleDrag} : IDrawingComponentProps) {
   if (model.type !== "rectangle") return null;
-  const { id, x, y, width, height, stroke, strokeWidth, strokeDashArray, fill } = model as RectangleObjectType;
+  const { id, width, height, stroke, strokeWidth, strokeDashArray, fill } = model as RectangleObjectType;
+  const { x, y } = model.position;
   return <rect
     key={id}
     x={x}

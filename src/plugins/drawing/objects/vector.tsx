@@ -16,7 +16,8 @@ export const VectorObject = StrokedObject.named("VectorObject")
   })
   .views(self => ({
     get boundingBox() {
-      const {x, y, dx, dy} = self;
+      const { dx, dy } = self;
+      const { x, y } = self.position;
       const nw: Point = {x: Math.min(x, x + dx), y: Math.min(y, y + dy)};
       const se: Point = {x: Math.max(x, x + dx), y: Math.max(y, y + dy)};
       return {nw, se};
@@ -34,7 +35,8 @@ export interface VectorObjectSnapshot extends SnapshotIn<typeof VectorObject> {}
 export const VectorComponent = observer(function VectorComponent({model, handleHover,
   handleDrag} : IDrawingComponentProps) {
   if (model.type !== "vector") return null;
-  const { id, x, y, dx, dy, stroke, strokeWidth, strokeDashArray } = model as VectorObjectType;
+  const { id, dx, dy, stroke, strokeWidth, strokeDashArray } = model as VectorObjectType;
+  const { x, y } = model.position;
   return <line
     key={id}
     x1={x}
