@@ -184,19 +184,15 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
         (workDocuments).map((doc: PromisedDocumentDocument, index: number) =>{
           //"Student Workspaces/"My Work"/"Class Work"
           console.log("------map----");
-
           const sectionDoc =  store.documents.getDocument(doc.key);
           const networkDoc = store.networkDocuments.getDocument(doc.key);
           console.log("workDocument idx:", index);
           console.log("\tsectionDoc", sectionDoc);
           console.log("\tnetworkDoc", networkDoc);
-
-
           if (sectionDoc){
             console.log("\treturning sectionDoc:", sectionDoc);
             console.log("\t title:", sectionDoc.title);
             console.log("\t uid:", sectionDoc.uid);
-
             return (
               <WorkDocumentItem
                 key={index}
@@ -260,6 +256,10 @@ interface JProps {
 export const WorkDocumentItem: React.FC<JProps> = (props) => {
   const { doc, index, sectionOrNetworkDoc, isNetworkDoc, handleDocView } = props;
   console.log("<WorkDocumentItem> with index:", index);
+  console.log("\tsectionOrNetworkDoc.uid:", sectionOrNetworkDoc.uid);
+  console.log("\tsectionOrNetworkDoc.title:", sectionOrNetworkDoc.title);
+
+
   console.log("\tisNetworkDoc: ", isNetworkDoc);
 
   const ui = useUIStore();
@@ -291,7 +291,6 @@ export const WorkDocumentItem: React.FC<JProps> = (props) => {
     }
       <div className={"\ttitle"}>
         {title}
-        {console.log("title:", title)}
       </div>
       <div className={"numComments"}>
         {doc.numComments}
