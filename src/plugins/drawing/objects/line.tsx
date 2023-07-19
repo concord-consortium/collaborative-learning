@@ -15,11 +15,11 @@ function* pointIterator(line: LineObjectType): Generator<Point, string, unknown>
   let currentY = y;
   const scaleX = line.dragScaleX ?? 1;
   const scaleY = line.dragScaleY ?? 1;
+  yield { x: currentX, y: currentY };
   for (const {dx, dy} of points) {
-    const point: Point = {x: currentX, y: currentY};
-    yield point;
     currentX += dx * scaleX;
     currentY += dy * scaleY;
+    yield {x: currentX, y: currentY};
   }
   // Due to some conflict between TS and ESLint it is necessary to return
   // a value here. As far as I can tell this value is not used.

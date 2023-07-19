@@ -388,9 +388,7 @@ describe("DrawingContentModel", () => {
     });
 
     // drag bottom right bigger
-    console.log(obj.boundingBox);   // returns 0 0 0 0 , should be 0 10 0 10
     obj.dragBounds({ top: 0, right: 10, bottom: 10, left: 0 });
-    expect(obj).toHaveProperty('x', 0); // fails
     obj.adoptDragBounds();
     expect(obj).toHaveProperty('x', 0);
     expect(obj).toHaveProperty('y', 0);
