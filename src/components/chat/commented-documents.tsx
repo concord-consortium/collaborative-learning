@@ -236,8 +236,6 @@ export const WorkDocumentItem: React.FC<JProps> = ({doc, index, sectionOrNetwork
         <DocumentIcon/>
       </div>
     }
-
-
       <div className={"title"}>
         {title}
       </div>
