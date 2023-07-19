@@ -31,7 +31,8 @@ export const ImageObject = DrawingObject.named("ImageObject")
   })
   .views(self => ({
     get boundingBox() {
-      const {x, y, width, height} = self;
+      const {width, height} = self;
+      const {x, y} = self.position;
       const nw: Point = {x, y};
       const se: Point = {x: x + width, y: y + height};
       return {nw, se};
@@ -91,7 +92,8 @@ export function isImageObjectSnapshot(object: DrawingObjectSnapshot): object is 
 export const ImageComponent: React.FC<IDrawingComponentProps> = observer(function ImageComponent({model, handleHover,
   handleDrag}){
   if (model.type !== "image") return null;
-  const { id, displayUrl, x, y, width, height } = model as ImageObjectType;
+  const { id, displayUrl, width, height } = model as ImageObjectType;
+  const { x, y } = model.position;
 
   return <image
     key={id}

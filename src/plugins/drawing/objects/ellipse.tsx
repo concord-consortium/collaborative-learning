@@ -15,7 +15,8 @@ export const EllipseObject = types.compose("EllipseObject", StrokedObject, Fille
   })
   .views(self => ({
     get boundingBox() {
-      const {x, y, rx, ry} = self;
+      const {rx, ry} = self;
+      const {x, y} = self.position;
       const nw: Point = {x: x - rx, y: y - ry};
       const se: Point = {x: x + rx, y: y + ry};
       return {nw, se};
@@ -40,7 +41,8 @@ function isEllipseObject(model: DrawingObjectType): model is EllipseObjectType {
 export const EllipseComponent = observer(function EllipseComponent({model, handleHover,
   handleDrag} : IDrawingComponentProps) {
   if (!isEllipseObject(model)) return null;
-  const { id, x, y, rx, ry, stroke, strokeWidth, strokeDashArray, fill } = model;
+  const { id, rx, ry, stroke, strokeWidth, strokeDashArray, fill } = model;
+  const {x, y} = model.position;
   return <ellipse
     key={id}
     cx={x}

@@ -39,7 +39,8 @@ export const VariableChipObject = DrawingObject.named("VariableObject")
   }))
   .views(self => ({
     get boundingBox() {
-      const {x, y, width, height} = self;
+      const {width, height} = self;
+      const {x, y} = self.position;
       const nw: Point = {x, y};
       const se: Point = {x: x + width, y: y + height};
       return {nw, se};
@@ -68,8 +69,8 @@ export const VariableChipComponent: React.FC<IDrawingComponentProps> = observer(
     });
 
     if (model.type !== "variable") return null;
-    const { x, y, width, height, variableId } = model as VariableChipObjectType;
-
+    const { width, height, variableId } = model as VariableChipObjectType;
+    const { x, y } = model.position;
     const selectedVariable = findVariable(drawingContent, variableId);
     if (!selectedVariable) {
       return null;

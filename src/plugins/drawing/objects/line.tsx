@@ -9,7 +9,8 @@ import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
 import FreehandToolIcon from "../assets/freehand-icon.svg";
 
 function* pointIterator(line: LineObjectType): Generator<Point, string, unknown> {
-  const {x, y, deltaPoints} = line;
+  const { x, y } = line.position;
+  const {deltaPoints} = line;
   let currentX = x;
   let currentY = y;
   for (const {dx, dy} of deltaPoints) {
@@ -40,7 +41,7 @@ export const LineObject = StrokedObject.named("LineObject")
     },
 
     get boundingBox() {
-      const {x, y} = self;
+      const {x, y} = self.position;
       const nw: Point = {x, y};
       const se: Point = {x, y};
       for (const point of pointIterator(self as LineObjectType)){
@@ -63,7 +64,8 @@ export interface LineObjectSnapshot extends SnapshotIn<typeof LineObject> {}
 export const LineComponent = observer(function LineComponent({model, handleHover, handleDrag}
   : IDrawingComponentProps) {
   if (model.type !== "line") return null;
-  const { id, x, y, deltaPoints, stroke, strokeWidth, strokeDashArray } = model as LineObjectType;
+  const { id, deltaPoints, stroke, strokeWidth, strokeDashArray } = model as LineObjectType;
+  const { x, y } = model.position;
   const commands = `M ${x} ${y} ${deltaPoints.map((point) => `l ${point.dx} ${point.dy}`).join(" ")}`;
   return <path
     key={id}

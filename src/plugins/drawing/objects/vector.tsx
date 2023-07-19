@@ -18,7 +18,8 @@ export const VectorObject = StrokedObject.named("VectorObject")
   })
   .views(self => ({
     get boundingBox() {
-      const {x, y, dx, dy} = self;
+      const { dx, dy } = self;
+      const { x, y } = self.position;
       const nw: Point = {x: Math.min(x, x + dx), y: Math.min(y, y + dy)};
       const se: Point = {x: Math.max(x, x + dx), y: Math.max(y, y + dy)};
       return {nw, se};
@@ -43,7 +44,8 @@ export function isVectorObject(model: DrawingObjectType): model is VectorObjectT
 export const VectorComponent = observer(function VectorComponent({model, handleHover,
   handleDrag} : IDrawingComponentProps) {
   if (!isVectorObject(model)) return null;
-  const { id, x, y, dx, dy, stroke, strokeWidth, strokeDashArray, headShape, tailShape,  } = model as VectorObjectType;
+  const { id, dx, dy, headShape, tailShape, stroke, strokeWidth, strokeDashArray } = model as VectorObjectType;
+  const { x, y } = model.position;
   const line = <line
     x1={x}
     y1={y}
