@@ -245,15 +245,15 @@ context('Dataflow Tool Tile', function () {
       });
       it("verify logic operator types", () => {
         const dropdown = "transformOperator";
-        const operatorTypes = ["Absolute Value", "Negation", "Not"];
+        const operatorTypes = ["Absolute Value", "Negation", "Not", "Round", "Floor", "Ceil"];
         dataflowToolTile.getDropdown(nodeType, dropdown).click();
-        dataflowToolTile.getDropdownOptions(nodeType, dropdown).should("have.length", 3);
+        dataflowToolTile.getDropdownOptions(nodeType, dropdown).should("have.length", 6);
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).each(($tab, index, $typeList) => {
           expect($tab.text()).to.contain(operatorTypes[index]);
         });
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).last().click();
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).should("have.length", 0);
-        dataflowToolTile.getDropdown(nodeType, dropdown).contains("Not").should("exist");
+        dataflowToolTile.getDropdown(nodeType, dropdown).contains("Ceil").should("exist");
       });
       it("verify node inputs outputs", () => {
         dataflowToolTile.getNodeInput().should("exist");
@@ -532,6 +532,8 @@ context('Dataflow Tool Tile', function () {
         dataflowToolTile.getNodeTitle().should("contain", "Demo Output");
         dataflowToolTile.getNodeOutput().eq(0).click();
         dataflowToolTile.getNodeInput().eq(0).click();
+        dataflowToolTile.getShowGraphButton("demo-output").click();
+        dataflowToolTile.getMinigraph("demo-output").should("exist");
       });
       it("verify sampling rate", () => {
         const rate = "500";

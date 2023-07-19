@@ -6,6 +6,10 @@ import { DocumentContentModel } from "../../models/document/document-content";
 import { ENavTab } from "../../models/view/nav-tabs";
 import { ChatPanel } from "./chat-panel";
 import { createSingleTileContent } from "../../utilities/test-utils";
+import { AppConfigModel } from "../../models/stores/app-config-model";
+import { unitConfigDefaults } from "../../test-fixtures/sample-unit-configurations";
+
+
 
 const mockPostComment = jest.fn();
 
@@ -72,6 +76,9 @@ jest.mock("../../hooks/use-stores", () => ({
   useUIStore: () => ({
     showChatPanel: true,
     selectedTileIds: []
+  }),
+  useStores: () => ({
+    appConfig: AppConfigModel.create({ curriculumBaseUrl: "https://curriculum.example.com", config: unitConfigDefaults })
   })
 }));
 

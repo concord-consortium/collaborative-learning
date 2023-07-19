@@ -12,6 +12,7 @@ import { ImageObject, ImageObjectType } from "../objects/image";
 // The drawing tile needs to be registered so the TileModel.create
 // knows it is a supported tile type
 import "../drawing-registration";
+import { VectorEndShape, VectorType, endShapesForVectorType } from "../model/drawing-basic-types";
 
 let content: DrawingContentModelType, drawingLayerProps, drawingLayer;
 
@@ -78,6 +79,38 @@ describe("Drawing Layer Components", () => {
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("deletes a vector line", () => {
+      content.deleteObjects([vector.id]);
+      expect(getDrawingObject(content)).toMatchSnapshot();
+    });
+  });
+
+  describe("Vector arrow", () => {
+    let vector: VectorObjectType;
+    beforeEach(() => {
+      vector = VectorObject.create({
+        id: "235",
+        x: 20, y:20,
+        dx:20, dy:20,
+        stroke: "#777777",
+        strokeDashArray: "1,1",
+        strokeWidth: 2,
+        headShape: VectorEndShape.triangle,
+        tailShape: VectorEndShape.triangle
+      });
+      content = createDrawingContent({ objects: [vector] });
+    });
+    it("adds a Vector arrow", () => {
+      expect(getDrawingObject(content)).toMatchSnapshot();
+    });
+    it("moves a vector arrow", () => {
+      vector.setPosition(5,5);
+      expect(getDrawingObject(content)).toMatchSnapshot();
+    });
+    it("changes vector type", () => {
+      vector.setEndShapes(...endShapesForVectorType(VectorType.doubleArrow));
+      expect(getDrawingObject(content)).toMatchSnapshot();
+    });
+    it("deletes a vector arrow", () => {
       content.deleteObjects([vector.id]);
       expect(getDrawingObject(content)).toMatchSnapshot();
     });

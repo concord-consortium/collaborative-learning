@@ -125,9 +125,9 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const {viaTeacherDashboard} = this.props;
-    const {ui} = this.stores;
-    const isChatEnabled = true;
+    const { viaTeacherDashboard } = this.props;
+    const { ui, user } = this.stores;
+    const isChatEnabled = user.isTeacher;
     const documentSelectedForComment = isChatEnabled && ui.showChatPanel && ui.selectedTileIds.length === 0
                                           && ui.focusDocument;
     const documentClass = classNames("document-content", {"document-content-smooth-scroll" : viaTeacherDashboard,

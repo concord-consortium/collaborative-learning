@@ -152,6 +152,27 @@ export const NodeOperationTypes = [
     icon: NotIcon
   },
   {
+    name: "Round",
+    type: "transform",
+    method: (n1: number, n2: number) => Math.round(n1),
+    numberSentence: (n1: string, n2: string) => `round(${n1}) = `,
+    icon: EmgIcon
+  },
+  {
+    name: "Floor",
+    type: "transform",
+    method: (n1: number, n2: number) => Math.floor(n1),
+    numberSentence: (n1: string, n2: string) => `floor(${n1}) = `,
+    icon: EmgIcon
+  },
+  {
+    name: "Ceil",
+    type: "transform",
+    method: (n1: number, n2: number) => Math.ceil(n1),
+    numberSentence: (n1: string, n2: string) => `ceil(${n1}) = `,
+    icon: EmgIcon
+  },
+  {
     name: "Greater Than",
     type: "logic",
     method: (n1: number, n2: number) => +(n1 > n2),

@@ -39,6 +39,18 @@ export class ConfigurationManager implements UnitConfiguration {
     return this.getProp<UC["defaultProblemOrdinal"]>("defaultProblemOrdinal");
   }
 
+  get showCommentTag(){
+    return this.getProp<UC["showCommentTag"]>("showCommentTag");
+  }
+
+  get tagPrompt(){
+    return this.getProp<UC["tagPrompt"]>("tagPrompt");
+  }
+
+  get commentTags(){
+    return  (this.showCommentTag) ? this.getProp<UC["commentTags"]>("commentTags") : {};
+  }
+
   get autoAssignStudentsToIndividualGroups() {
     return this.getProp<UC["autoAssignStudentsToIndividualGroups"]>("autoAssignStudentsToIndividualGroups");
   }

@@ -79,4 +79,8 @@ export interface UnitConfiguration extends ProblemConfiguration {
   comparisonPlaceholderContent: string | string[];
   // configuration of navigation tabs (document navigation UI)
   navTabs: SnapshotIn<typeof NavTabsConfigModel>;
+  // used for AI tagging
+  showCommentTag?: boolean;
+  tagPrompt?: string;
+  commentTags?: Record<string, string>;
 }
