@@ -20,6 +20,18 @@
     display: flex;
     font-size: 24px;
     text-align: center;
+
+    div:first-child {
+      .drawing-tool-button {
+        border-bottom-left-radius: 3px;
+      }
+    }
+    div:last-child {
+      .drawing-tool-button {
+        border-bottom-right-radius: 3px;
+      }
+    }
+
     .drawing-tool-button {
       position: relative;
       // These are button elements so we have to disable default button styles
@@ -50,10 +62,6 @@
           }
         }
       }
-
-      &.button-select {
-        border-bottom-left-radius: 3px;
-      }
       &.button-stamp {
         display: flex;
         align-items: center;
@@ -63,31 +71,29 @@
           max-height: 23px;
           z-index: 1;
         }
-        .expand-collapse {
-          position: absolute;
-          right: 0;
-          bottom: 0;
-          width: 10px;
-          height: 10px;
-          &:hover {
-            background-color: $workspace-teal-light-4;
-          }
-          svg {
-            position: absolute;
-            left: 1px;
-            top: 1px;
-            fill: $workspace-teal-dark-1;
-          }
-        }
       }
-      &.button-delete {
-        border-bottom-right-radius: 3px;
-      }
-
       &.disabled {
         opacity: 25%;
         cursor: default;
       }
+
+      .expand-collapse {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        width: 10px;
+        height: 10px;
+        &:hover {
+          background-color: $workspace-teal-light-4;
+        }
+        svg {
+          position: absolute;
+          left: 1px;
+          top: 1px;
+          fill: $workspace-teal-dark-1;
+        }
+      }
+
     }
 
     .image-upload {
@@ -195,12 +201,18 @@
     border-radius: 0 $toolbar-border-radius $toolbar-border-radius $toolbar-border-radius;
     z-index: $toolbar-z-index;
 
+    &.one-row {
+      height: 40px;
+    }
+    
+    &.vectors {
+      left: 70px;
+      height: 38px;
+    }
+
     &.stamps {
       left: 180px;
       width: 190px;
-      &.one-row {
-        height: 40px;
-      }
     }
 
     &.stroke-color {

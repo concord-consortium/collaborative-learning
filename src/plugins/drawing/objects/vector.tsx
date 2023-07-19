@@ -1,18 +1,20 @@
 import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
-import React from "react";
-import { computeStrokeDashArray, DrawingTool, IDrawingComponentProps, IDrawingLayer,
+import React, { useCallback } from "react";
+import { computeStrokeDashArray, DrawingObjectType, DrawingTool, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
-import { Point } from "../model/drawing-basic-types";
-import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
-import LineToolIcon from "../assets/line-icon.svg";
+import { Point, ToolbarSettings, VectorEndShape, endShapesForVectorType, getVectorTypeIcon } 
+  from "../model/drawing-basic-types";
+import { SvgToolbarButton } from "../components/drawing-toolbar-buttons";
 
-// simple line
+// Line or arrow
 export const VectorObject = StrokedObject.named("VectorObject")
   .props({
     type: typeField("vector"),
     dx: types.number,
-    dy: types.number
+    dy: types.number,
+    headShape: types.maybe(types.enumeration<VectorEndShape>("EndShape", Object.values(VectorEndShape))),
+    tailShape: types.maybe(types.enumeration<VectorEndShape>("EndShape", Object.values(VectorEndShape)))
   })
   .views(self => ({
     get boundingBox() {
@@ -26,29 +28,60 @@ export const VectorObject = StrokedObject.named("VectorObject")
     setDeltas(dx: number, dy: number) {
       self.dx = dx;
       self.dy = dy;
+    },
+    setEndShapes(headShape?: VectorEndShape, tailShape? : VectorEndShape) {
+      self.headShape = headShape;
+      self.tailShape = tailShape;
     }
   }));
 export interface VectorObjectType extends Instance<typeof VectorObject> {}
 export interface VectorObjectSnapshot extends SnapshotIn<typeof VectorObject> {}
 
+export function isVectorObject(model: DrawingObjectType): model is VectorObjectType {
+  return model.type === "vector";
+}
 export const VectorComponent = observer(function VectorComponent({model, handleHover,
   handleDrag} : IDrawingComponentProps) {
-  if (model.type !== "vector") return null;
-  const { id, x, y, dx, dy, stroke, strokeWidth, strokeDashArray } = model as VectorObjectType;
-  return <line
-    key={id}
+  if (!isVectorObject(model)) return null;
+  const { id, x, y, dx, dy, stroke, strokeWidth, strokeDashArray, headShape, tailShape,  } = model as VectorObjectType;
+  const line = <line
     x1={x}
     y1={y}
     x2={x + dx}
     y2={y + dy}
-    stroke={stroke}
-    strokeWidth={strokeWidth}
-    strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
-    onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
-    onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
-    onMouseDown={(e)=> handleDrag?.(e, model)}
     />;
+    // Angle of this line as SVG likes to measure it (degrees clockwise from vertical)
+    const angle = 90-Math.atan2(-dy, dx)*180/Math.PI;
+    const head = headShape ? placeEndShape(headShape, x+dx, y+dy, angle) : null;
+    const tail = tailShape ? placeEndShape(tailShape, x, y, angle+180) : null; // tail points backwards
+    // Set fill to stroke since arrowheads should be drawn in stroke color
+  return <g className="vector" key={id}
+            stroke={stroke}
+            fill={stroke}
+            strokeWidth={strokeWidth}
+            strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
+            onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
+            onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
+            onMouseDown={(e) => handleDrag?.(e, model)}
+          >
+            {line}{head}{tail}
+         </g>;
 });
+
+// Render a VectorEndShape at the given x, y, and rotational angle.
+function placeEndShape(shape: VectorEndShape, x: number, y: number, angle: number) {
+  return <g transform={`translate(${x} ${y}) rotate(${angle})`}>{drawEndShape(shape)}</g>;
+}
+
+// This defines what the VectorEndShapes actually are.
+// Shapes created here should be vertical (as for an line pointed straight up)
+// The origin of this shape will be placed on the end of the line.
+function drawEndShape(shape: VectorEndShape) {
+  if (shape === VectorEndShape.triangle) {
+    return <polygon points="0 0 4.5 9 -4.5 9 0 0"/>;
+  }
+  return null;
+}
 
 export class VectorDrawingTool extends DrawingTool {
 
@@ -59,13 +92,14 @@ export class VectorDrawingTool extends DrawingTool {
   public handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
     const start = this.drawingLayer.getWorkspacePoint(e);
     if (!start) return;
-    const {stroke, strokeWidth, strokeDashArray} = this.settings;
+    const {stroke, strokeWidth, strokeDashArray, vectorType} = this.settings;
+    const [headShape, tailShape] = endShapesForVectorType(vectorType);
     const vector = VectorObject.create({
       x: start.x,
       y: start.y,
       dx: 0,
       dy: 0,
-      stroke, strokeWidth, strokeDashArray});
+      headShape, tailShape, stroke, strokeWidth, strokeDashArray});
 
     const handleMouseMove = (e2: MouseEvent) => {
       e2.preventDefault();
@@ -99,7 +133,39 @@ export class VectorDrawingTool extends DrawingTool {
   }
 }
 
-export function VectorToolbarButton({toolbarManager}: IToolbarButtonProps) {
-  return <SvgToolModeButton modalButton="vector" title="Line"
-    toolbarManager={toolbarManager} SvgIcon={LineToolIcon} />;
-}
+export const VectorToolbarButton: React.FC<IToolbarButtonProps> = observer(({
+  toolbarManager, togglePaletteState, clearPaletteState
+}) => {
+  const modalButton = "vector";
+  const { selectedButton, toolbarSettings } = toolbarManager;
+  const selected = selectedButton === modalButton;
+
+  const handleButtonClick = useCallback(() => {
+    toolbarManager.setSelectedButton(modalButton);
+    togglePaletteState('showVectors', false);
+  }, [toolbarManager, togglePaletteState]);
+
+  const handleButtonTouchHold = useCallback(() => {
+    // Do not set the vector button as the selected tool yet.
+    // The user might be opening the palette just to change the type of existing, selected vectors.
+    togglePaletteState('showVectors');
+  }, [togglePaletteState]);
+
+  const icon = getVectorTypeIcon(toolbarSettings.vectorType);
+
+  // Arrowhead shapes should be drawn entirely with the stroke color
+  const settings: ToolbarSettings = {
+    fill: toolbarSettings.stroke,
+    stroke: toolbarSettings.stroke,
+    strokeDashArray: toolbarSettings.strokeDashArray,
+    strokeWidth: toolbarSettings.strokeWidth,
+    vectorType: toolbarSettings.vectorType
+  };
+
+  return (
+    <SvgToolbarButton SvgIcon={icon} buttonClass="vector"
+      title="Line or arrow" selected={selected} settings={settings}
+      onClick={handleButtonClick}
+      openPalette={handleButtonTouchHold} />
+  );
+});

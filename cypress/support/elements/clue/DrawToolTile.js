@@ -17,6 +17,9 @@ class DrawToolTile{
     getDrawToolLine(){
       return cy.get('.primary-workspace .drawing-tool-button.button-vector');
     }
+    getDrawToolLineSubmenu(){
+      return cy.get('.primary-workspace .drawing-tool-button.button-vector .expand-collapse');
+    }
     getDrawToolRectangle(){
       return cy.get('.primary-workspace .drawing-tool-button.button-rectangle');
     }
@@ -58,7 +61,7 @@ class DrawToolTile{
       return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg path');
     }
     getVectorDrawing(){
-      return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg line');
+      return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg g.vector');
     }
     getRectangleDrawing(){
       return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg rect');
