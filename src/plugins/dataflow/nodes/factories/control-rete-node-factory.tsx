@@ -1,10 +1,11 @@
 import Rete, { Node, Socket } from "rete";
 import { NodeData } from "rete/types/core/data";
-import { DataflowReteNodeFactory, kEmptyValueString } from "./dataflow-rete-node-factory";
+import { DataflowReteNodeFactory } from "./dataflow-rete-node-factory";
 import { ValueControl } from "../controls/value-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
-import { HoldFunctionOptions, roundNodeValue } from "../../model/utilities/node";
+import { HoldFunctionOptions } from "../../model/utilities/node";
 import { PlotButtonControl } from "../controls/plot-button-control";
+import { getNumDisplayStr } from "../utilities/view-utilities";
 
 export class ControlReteNodeFactory extends DataflowReteNodeFactory {
   constructor(numSocket: Socket) {
@@ -94,8 +95,8 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
     }
 
     // prepare string to display on node
-    const resultString = isNaN(result) ? kEmptyValueString : `${roundNodeValue(result)}`;
-    const cResultString = isNaN(cResult) ? kEmptyValueString : `${roundNodeValue(cResult)}`;
+    const resultString = getNumDisplayStr(result);
+    const cResultString = getNumDisplayStr(cResult);
     const onString = `on → ${cResultString}`;
     const offString = `off → ${resultString}`;
     const resultSentence = node.data.gateActive ? onString : offString;
