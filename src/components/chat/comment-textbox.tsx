@@ -26,7 +26,8 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
   const [tagText, setTagText] = useState("");
   const textareaStyle = {height: commentTextAreaHeight};
   const postButtonClass = classNames("comment-footer-button", "themed-negative", activeNavTab,
-                                     { disabled: !commentAdded, "no-action": !commentAdded });
+                                     { disabled: (!commentAdded && !commentTags), //able to post empty comment with tags
+                                       "no-action": !commentAdded && !commentTags });
   const ui = useUIStore();
 
   // resize textarea when user deletes some text
@@ -68,7 +69,7 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
   const handlePostComment = () => {
     // do not send post if text area is empty, only has spaces or new lines
     const [trimmedText, isEmpty] = trimContent(commentText);
-    if (!isEmpty) {
+    if (!isEmpty || showCommentTag) {
       onPostComment?.(trimmedText, tagText);
       setCommentTextAreaHeight(minTextAreaHeight);
       setCommentAdded(false);
