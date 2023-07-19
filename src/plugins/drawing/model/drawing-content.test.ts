@@ -305,7 +305,7 @@ describe("DrawingContentModel", () => {
       ry: 10,
     ...mockSettings
     });
-    const model = createDrawingContentWithMetadata({
+    createDrawingContentWithMetadata({
       objects: [obj]
     });
 
@@ -330,7 +330,7 @@ describe("DrawingContentModel", () => {
     const obj = ImageObject.create({
       url: "my/image/url", x: 0, y: 0, width: 10, height: 10
     });
-    const model = createDrawingContentWithMetadata({
+    createDrawingContentWithMetadata({
       objects: [obj]
     });
 
@@ -356,7 +356,7 @@ describe("DrawingContentModel", () => {
       x: 0, y: 0, dx: 10, dy: 10,
       ...mockSettings
     });
-    const model = createDrawingContentWithMetadata({
+    createDrawingContentWithMetadata({
       objects: [obj]
     });
 
@@ -383,7 +383,7 @@ describe("DrawingContentModel", () => {
       ...mockSettings
     });
     obj.addPoint(DeltaPoint.create({dx: 10, dy: 10})); // FIXME this point is not actually getting added.
-    const model = createDrawingContentWithMetadata({
+    createDrawingContentWithMetadata({
       objects: [obj]
     });
 
