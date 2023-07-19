@@ -255,17 +255,21 @@ interface JProps {
 // This is rendering a single document item in the commented document list
 export const WorkDocumentItem: React.FC<JProps> = (props) => {
   const { doc, index, sectionOrNetworkDoc, isNetworkDoc, handleDocView } = props;
+  console.log("--------------------------------------");
+
   console.log("<WorkDocumentItem> with index:", index);
   console.log("\tsectionOrNetworkDoc.uid:", sectionOrNetworkDoc.uid);
   console.log("\tsectionOrNetworkDoc.title:", sectionOrNetworkDoc.title);
-
-
+  console.log("\tsectionOrNetworkDoc.key:", sectionOrNetworkDoc.key);
   console.log("\tisNetworkDoc: ", isNetworkDoc);
 
   const ui = useUIStore();
   // We need the navTab to style the item.
   const navTab = getNavTabOfDocument(doc.type);
   const title =  useDocumentCaption(sectionOrNetworkDoc);
+
+  console.log("\ttitle:", title);
+
 
   return (
     <div
@@ -289,7 +293,7 @@ export const WorkDocumentItem: React.FC<JProps> = (props) => {
           <DocumentIcon/>
         </div>
     }
-      <div className={"\ttitle"}>
+      <div className={"title"}>
         {title}
       </div>
       <div className={"numComments"}>

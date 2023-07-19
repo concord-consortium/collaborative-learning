@@ -26,6 +26,7 @@ interface IProps {
 }
 
 export function useDocumentCaption(document: DocumentModelType) {
+  console.log("----useDocumentCaption----");
   const appConfig = useAppConfig();
   const problem = useProblemStore();
   const classStore = useClassStore();
@@ -34,11 +35,18 @@ export function useDocumentCaption(document: DocumentModelType) {
   const pubVersion = document.pubVersion;
   const teacher = useFirestoreTeacher(uid, user.network || "");
   if (type === SupportPublication) {
+    console.log("returing if type== supportPublication")
     const caption = document.getProperty("caption") || "Support";
     return pubVersion ? `${caption} v${pubVersion}` : `${caption}`;
   }
   const userName = classStore.getUserById(uid)?.displayName || teacher?.name ||
                     (document.isRemote ? teacher?.name : "") || "Unknown User";
+  console.log("\tdocumentIsRemote?", document.isRemote);
+  console.log("\twhat is type: ", type);
+  console.log("\tisPublishedType(type)", isPublishedType(type));
+
+
+
   const namePrefix = document.isRemote || isPublishedType(type) ? `${userName}: ` : "";
   const dateSuffix = document.isRemote && document.createdAt
                       ? ` (${new Date(document.createdAt).toLocaleDateString()})`
@@ -46,6 +54,13 @@ export function useDocumentCaption(document: DocumentModelType) {
                           ? ` v${pubVersion}`
                           : "";
   const title = getDocumentDisplayTitle(document, appConfig, problem);
+
+  console.log("\tuserName:", userName);
+  console.log("\tnamePrefix:", namePrefix);
+  console.log("\tdateSuffix:", dateSuffix);
+  console.log("\ttitle:", title);
+  console.log("\treturning....:", `${namePrefix}${title}${dateSuffix}`);
+
   return `${namePrefix}${title}${dateSuffix}`;
 }
 

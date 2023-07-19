@@ -34,8 +34,13 @@ export function isUnpublishedType(type: string) {
           .indexOf(type) >= 0;
 }
 export function isPublishedType(type: string) {
-  return [ProblemPublication, PersonalPublication, LearningLogPublication, SupportPublication]
-          .indexOf(type) >= 0;
+  console.log("\tisPublishedType returns:",
+  [ProblemPublication, PersonalPublication, LearningLogPublication, SupportPublication].indexOf(type) >= 0);
+  //"publication", "personalPublication", "learningLogPublication", "supportPublication"
+
+  return [ProblemPublication, PersonalPublication, LearningLogPublication, SupportPublication,
+          ProblemDocument //"added "problem" for student workspaces
+  ].indexOf(type) >= 0;
 }
 
 export const DocumentTypeEnum = types.enumeration("type",
