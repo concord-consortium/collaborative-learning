@@ -9,8 +9,11 @@ import { AppConfigModel } from "../../../models/stores/app-config-model";
 import { ImageObject } from "../objects/image";
 import { RectangleObject, RectangleObjectSnapshot, RectangleObjectSnapshotForAdd,
   RectangleObjectType } from "../objects/rectangle";
-import { computeStrokeDashArray } from "../objects/drawing-object";
+import { DeltaPoint, computeStrokeDashArray } from "../objects/drawing-object";
 import { LogEventName } from "../../../lib/logger-types";
+import { EllipseObject } from "../objects/ellipse";
+import { VectorObject } from "../objects/vector";
+import { LineObject } from "../objects/line";
 
 const mockLogTileChangeEvent = jest.fn();
 jest.mock("../../../models/tiles/log/log-tile-change-event", () => ({
@@ -267,6 +270,138 @@ describe("DrawingContentModel", () => {
         },
         tileId: "drawing-1"
       });
+  });
+
+  it("can resize rectangle", () => {
+    const model = createDrawingContentWithMetadata();
+
+    const rectSnapshot1: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot, id:"a"};
+    model.addObject(rectSnapshot1);
+
+    const obj = model.objectMap.a as RectangleObjectType;
+
+    // drag bottom right bigger
+    obj.dragBounds({ top: 0, right: 10, bottom: 10, left: 0 });
+    obj.adoptDragBounds();
+    expect(obj).toHaveProperty('x', 0);
+    expect(obj).toHaveProperty('y', 0);
+    expect(obj).toHaveProperty('width', 20);
+    expect(obj).toHaveProperty('height', 20);
+
+    // drag top left smaller
+    obj.dragBounds({ top: 10, right: 0, bottom: 0, left: 10 });
+    obj.adoptDragBounds();
+    expect(obj).toHaveProperty('x', 10);
+    expect(obj).toHaveProperty('y', 10);
+    expect(obj).toHaveProperty('width', 10);
+    expect(obj).toHaveProperty('height', 10);
+  });
+
+  it("can resize ellipse", () => {
+    const obj = EllipseObject.create({
+      x: 0,
+      y: 0,
+      rx: 10,
+      ry: 10,
+    ...mockSettings
+    });
+    const model = createDrawingContentWithMetadata({
+      objects: [obj]
+    });
+
+    // drag bottom right bigger
+    obj.dragBounds({ top: 0, right: 10, bottom: 10, left: 0 });
+    obj.adoptDragBounds();
+    expect(obj).toHaveProperty('x', 5);
+    expect(obj).toHaveProperty('y', 5);
+    expect(obj).toHaveProperty('rx', 15);
+    expect(obj).toHaveProperty('ry', 15);
+
+    // drag top left smaller
+    obj.dragBounds({ top: 10, right: 0, bottom: 0, left: 10 });
+    obj.adoptDragBounds();
+    expect(obj).toHaveProperty('x', 10);
+    expect(obj).toHaveProperty('y', 10);
+    expect(obj).toHaveProperty('rx', 10);
+    expect(obj).toHaveProperty('ry', 10);
+  });
+
+  it("can resize image", () => {
+    const obj = ImageObject.create({
+      url: "my/image/url", x: 0, y: 0, width: 10, height: 10
+    });
+    const model = createDrawingContentWithMetadata({
+      objects: [obj]
+    });
+
+    // drag bottom right bigger
+    obj.dragBounds({ top: 0, right: 10, bottom: 10, left: 0 });
+    obj.adoptDragBounds();
+    expect(obj).toHaveProperty('x', 0);
+    expect(obj).toHaveProperty('y', 0);
+    expect(obj).toHaveProperty('width', 20);
+    expect(obj).toHaveProperty('height', 20);
+
+    // drag top left smaller
+    obj.dragBounds({ top: 10, right: 0, bottom: 0, left: 10 });
+    obj.adoptDragBounds();
+    expect(obj).toHaveProperty('x', 10);
+    expect(obj).toHaveProperty('y', 10);
+    expect(obj).toHaveProperty('width', 10);
+    expect(obj).toHaveProperty('height', 10);
+  });
+
+  it("can resize vector", () => {
+    const obj = VectorObject.create({
+      x: 0, y: 0, dx: 10, dy: 10,
+      ...mockSettings
+    });
+    const model = createDrawingContentWithMetadata({
+      objects: [obj]
+    });
+
+    // drag bottom right bigger
+    obj.dragBounds({ top: 0, right: 10, bottom: 10, left: 0 });
+    obj.adoptDragBounds();
+    expect(obj).toHaveProperty('x', 0);
+    expect(obj).toHaveProperty('y', 0);
+    expect(obj).toHaveProperty('dx', 20);
+    expect(obj).toHaveProperty('dy', 20);
+
+    // drag top left smaller
+    obj.dragBounds({ top: 10, right: 0, bottom: 0, left: 10 });
+    obj.adoptDragBounds();
+    expect(obj).toHaveProperty('x', 10);
+    expect(obj).toHaveProperty('y', 10);
+    expect(obj).toHaveProperty('dx', 10);
+    expect(obj).toHaveProperty('dy', 10);
+  });
+
+  it("can resize line", () => {
+    const obj = LineObject.create({
+      x: 0, y: 0, 
+      ...mockSettings
+    });
+    obj.addPoint(DeltaPoint.create({dx: 10, dy: 10})); // FIXME this point is not actually getting added.
+    const model = createDrawingContentWithMetadata({
+      objects: [obj]
+    });
+
+    // drag bottom right bigger
+    console.log(obj.boundingBox);   // returns 0 0 0 0 , should be 0 10 0 10
+    obj.dragBounds({ top: 0, right: 10, bottom: 10, left: 0 });
+    expect(obj).toHaveProperty('x', 0); // fails
+    obj.adoptDragBounds();
+    expect(obj).toHaveProperty('x', 0);
+    expect(obj).toHaveProperty('y', 0);
+    expect(obj).toHaveProperty('deltaPoints', [{dx: 20, dy: 20}]);
+
+    // drag top left smaller
+    obj.dragBounds({ top: 10, right: 0, bottom: 0, left: 10 });
+    obj.adoptDragBounds();
+    expect(obj).toHaveProperty('x', 10);
+    expect(obj).toHaveProperty('y', 10);
+    expect(obj).toHaveProperty('deltaPoints', [{dx: 10, dy: 10}]);
   });
 
   it("can change the current stamp", () => {
