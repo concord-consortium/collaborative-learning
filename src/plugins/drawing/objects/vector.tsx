@@ -44,7 +44,7 @@ export function isVectorObject(model: DrawingObjectType): model is VectorObjectT
 export const VectorComponent = observer(function VectorComponent({model, handleHover,
   handleDrag} : IDrawingComponentProps) {
   if (!isVectorObject(model)) return null;
-  const { id, dx, dy, stroke, strokeWidth, strokeDashArray } = model as VectorObjectType;
+  const { id, dx, dy, headShape, tailShape, stroke, strokeWidth, strokeDashArray } = model as VectorObjectType;
   const { x, y } = model.position;
   const line = <line
     x1={x}
