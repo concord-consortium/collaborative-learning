@@ -81,7 +81,6 @@ interface IProps extends SizeMeProps {
   handleChangeIsPlaying: () => void;
   updatePlayBackIndex: (update: string) => void;
   updateRecordIndex: (update: string) => void;
-  numNodes: number;
   tileContent: DataflowContentModelType;
 }
 
@@ -128,8 +127,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { readOnly, documentProperties, numNodes, tileContent, programDataRate, onProgramDataRateChange,
-            isPlaying, handleChangeIsPlaying, handleChangeOfProgramMode, programMode} = this.props;
+    const { readOnly, documentProperties, tileContent, programDataRate, onProgramDataRateChange,
+            isPlaying, playBackIndex, handleChangeIsPlaying, handleChangeOfProgramMode, programMode} = this.props;
 
     const editorClassForDisplayState = "full";
     const editorClass = `editor ${editorClassForDisplayState}`;
@@ -152,9 +151,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           lastIntervalDuration={this.state.lastIntervalDuration}
           serialDevice={this.stores.serialDevice}
           programMode={programMode}
+          playBackIndex={playBackIndex}
           isPlaying={isPlaying}
           handleChangeIsPlaying={handleChangeIsPlaying}
-          numNodes={numNodes}
           tileContent={tileContent}
           handleChangeOfProgramMode={handleChangeOfProgramMode}
         />

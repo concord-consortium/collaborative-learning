@@ -25,15 +25,16 @@ interface TopbarProps {
   serialDevice: SerialDevice;
   handleChangeOfProgramMode: () => void;
   programMode: ProgramMode;
+  playBackIndex: number;
   isPlaying: boolean;
   handleChangeIsPlaying: () => void;
-  numNodes: number;
   tileContent: DataflowContentModelType;
 }
 
 export const DataflowProgramTopbar = (props: TopbarProps) => {
   const { onSerialRefreshDevices, readOnly, serialDevice, programDataRates, dataRate, onRateSelectClick,
-          handleChangeOfProgramMode, programMode, isPlaying, handleChangeIsPlaying, numNodes, tileContent} = props;
+          handleChangeOfProgramMode, programMode, playBackIndex, isPlaying,
+          handleChangeIsPlaying, tileContent} = props;
 
   return (
     <div className="program-editor-topbar">
@@ -59,10 +60,7 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
             onRateSelectClick={onRateSelectClick}
             readOnly={readOnly}
             programMode={programMode}
-            isPlaying={isPlaying}
-            handleChangeIsPlaying={handleChangeIsPlaying}
-            numNodes={numNodes}
-            handleChangeOfProgramMode={handleChangeOfProgramMode}
+            playBackIndex={playBackIndex}
             tileContent={tileContent}
           />
           <RecordStopOrClearButton
