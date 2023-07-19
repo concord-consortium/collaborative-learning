@@ -58,6 +58,8 @@ const GroupViewTitlebar: React.FC<IGroupComponentProps> = observer(function Grou
   };
 
   const handleSelectGroup = (id: string) => {
+    console.log("handleSelectGroup: with id:", id);
+
     ui.setOpenSubTab("student-work", id);
     ui.closeSubTabDocument("student-work", id);
     Logger.log(LogEventName.VIEW_GROUP, {group: id, via: "group-document-titlebar"});
@@ -101,7 +103,9 @@ interface IGroupButtonProps {
   selected: boolean;
   onSelectGroup?: (id: string) => void;
 }
-const GroupButton: React.FC<IGroupButtonProps> = ({ displayId, id, selected, onSelectGroup }) => {
+const GroupButton: React.FC<IGroupButtonProps> = (props) => {
+  const { displayId, id, selected, onSelectGroup } = props;
+  console.log("<GroupButton> with props", props);
   const className = `icon group-number ${selected ? "active" : ""}`;
   const handleClick = () => onSelectGroup && onSelectGroup(id);
   return(

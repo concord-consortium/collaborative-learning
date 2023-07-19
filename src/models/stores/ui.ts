@@ -51,8 +51,8 @@ export const UITabModel = types
 
 export const UIModel = types
   .model("UI", {
-    // dividerPosition: kDividerHalf,
-    dividerPosition: kDividerMax,
+    dividerPosition: kDividerHalf,
+    // dividerPosition: kDividerMax,
     error: types.maybeNull(types.string),
     activeNavTab: ENavTab.kProblems,
     selectedTileIds: types.array(types.string),
@@ -306,9 +306,8 @@ export const UIModel = types
      *
      * @param doc a non curriculum document
      */
-    openResourceDocument(doc: DocumentModelType) {
-      const navTab = getNavTabOfDocument(doc.type)  || "";
-
+    openResourceDocument(doc: DocumentModelType, isStudentWorkspaceDoc?: boolean) {
+      const navTab = getNavTabOfDocument(doc.type, isStudentWorkspaceDoc)  || "";
       let subTab = "";
       if (navTab === ENavTab.kClassWork) {
         if (doc.type === LearningLogPublication) {
@@ -326,6 +325,13 @@ export const UIModel = types
           subTab = "Workspaces";
         }
       }
+      if (navTab === ENavTab.kStudentWork){
+        const groupId = doc.groupId;
+        if (groupId) {
+          subTab = groupId;
+        }
+      }
+
       if (!subTab) {
         console.warn("Can't find subTab for doc", getSnapshot(doc));
         return;
@@ -378,6 +384,10 @@ const docTypeToNavTab: Record<string, ENavTab | undefined> = {
   [SupportPublication]: ENavTab.kClassWork,
 };
 
-export function getNavTabOfDocument(docType: string) {
-  return docTypeToNavTab[docType];
+export function getNavTabOfDocument(docType: string, isStudentWorkspaceDoc?: boolean) {
+  if (isStudentWorkspaceDoc){
+    return ENavTab.kStudentWork;
+  } else {
+    return docTypeToNavTab[docType];
+  }
 }

@@ -5,7 +5,7 @@ import { useDocumentSyncToFirebase } from "../../hooks/use-document-sync-to-fire
 import { useFirestoreTeacher } from "../../hooks/firestore-hooks";
 import { useLastSupportViewTimestamp } from "../../hooks/use-last-support-view-timestamp";
 import { DocumentModelType } from "../../models/document/document";
-import { isPublishedType, SupportPublication } from "../../models/document/document-types";
+import { isProblemType, isPublishedType, SupportPublication } from "../../models/document/document-types";
 import { getDocumentDisplayTitle } from "../../models/document/document-utils";
 import { useAppConfig, useClassStore, useDBStore, useProblemStore, useUserStore } from "../../hooks/use-stores";
 import { NavTabSectionModelType } from "../../models/view/nav-tabs";
@@ -25,8 +25,7 @@ interface IProps {
   onDocumentDeleteClick?: (document: DocumentModelType) => void;
 }
 
-export function useDocumentCaption(document: DocumentModelType) {
-  console.log("----useDocumentCaption----");
+export function useDocumentCaption(document: DocumentModelType, isStudentWorkspaceDoc?: boolean) {
   const appConfig = useAppConfig();
   const problem = useProblemStore();
   const classStore = useClassStore();
@@ -35,32 +34,23 @@ export function useDocumentCaption(document: DocumentModelType) {
   const pubVersion = document.pubVersion;
   const teacher = useFirestoreTeacher(uid, user.network || "");
   if (type === SupportPublication) {
-    console.log("returing if type== supportPublication")
     const caption = document.getProperty("caption") || "Support";
     return pubVersion ? `${caption} v${pubVersion}` : `${caption}`;
   }
   const userName = classStore.getUserById(uid)?.displayName || teacher?.name ||
                     (document.isRemote ? teacher?.name : "") || "Unknown User";
-  console.log("\tdocumentIsRemote?", document.isRemote);
-  console.log("\twhat is type: ", type);
-  console.log("\tisPublishedType(type)", isPublishedType(type));
 
 
+  const hasNamePrefix =  document.isRemote || isPublishedType(type) || isStudentWorkspaceDoc;
+  const namePrefix = hasNamePrefix ? `${userName}: ` : "";
 
-  const namePrefix = document.isRemote || isPublishedType(type) ? `${userName}: ` : "";
+
   const dateSuffix = document.isRemote && document.createdAt
                       ? ` (${new Date(document.createdAt).toLocaleDateString()})`
                       : isPublishedType(type) && pubVersion
                           ? ` v${pubVersion}`
                           : "";
   const title = getDocumentDisplayTitle(document, appConfig, problem);
-
-  console.log("\tuserName:", userName);
-  console.log("\tnamePrefix:", namePrefix);
-  console.log("\tdateSuffix:", dateSuffix);
-  console.log("\ttitle:", title);
-  console.log("\treturning....:", `${namePrefix}${title}${dateSuffix}`);
-
   return `${namePrefix}${title}${dateSuffix}`;
 }
 

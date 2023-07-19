@@ -150,8 +150,6 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
           console.log("\t title:", doc.title);
           console.log("\t uid", doc.uid);
 
-
-
           const {navTab} = getTabsOfCurriculumDoc(doc.path);
           return (
             <div
@@ -178,21 +176,15 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
           );
         })
       }
-      {console.log("------mapping work documents-----")}
       {
         workDocuments &&
         (workDocuments).map((doc: PromisedDocumentDocument, index: number) =>{
           //"Student Workspaces/"My Work"/"Class Work"
-          console.log("------map----");
           const sectionDoc =  store.documents.getDocument(doc.key);
           const networkDoc = store.networkDocuments.getDocument(doc.key);
-          console.log("workDocument idx:", index);
-          console.log("\tsectionDoc", sectionDoc);
-          console.log("\tnetworkDoc", networkDoc);
+          const isStudentWorkspaceDoc = (user?.id !== doc.uid);
+
           if (sectionDoc){
-            console.log("\treturning sectionDoc:", sectionDoc);
-            console.log("\t title:", sectionDoc.title);
-            console.log("\t uid:", sectionDoc.uid);
             return (
               <WorkDocumentItem
                 key={index}
@@ -201,12 +193,11 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
                 sectionOrNetworkDoc={sectionDoc}
                 isNetworkDoc={false}
                 handleDocView={handleDocView}
+                isStudentWorkspaceDoc={isStudentWorkspaceDoc}
               />
             );
           }
           if (networkDoc){
-            console.log("returning networkDoc:", networkDoc);
-
             return (
               <WorkDocumentItem
                 key={index}
@@ -215,19 +206,12 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
                 sectionOrNetworkDoc={networkDoc}
                 isNetworkDoc={true}
                 handleDocView={handleDocView}
+                isStudentWorkspaceDoc={isStudentWorkspaceDoc}
               />
             );
           }
         })
       }
-      {console.log("-----done with map----")}
-
-
-      {testArray.map((num, idx) => {
-        console.log("num ---", num);
-        return <PrintTestArray key={`${idx}fdsfad`} str={num}/>;
-      })}
-
     </div>
   );
 };
@@ -250,35 +234,40 @@ interface JProps {
   sectionOrNetworkDoc: DocumentModelType,
   isNetworkDoc: boolean,
   handleDocView: (() => void) | undefined,
+  isStudentWorkspaceDoc: boolean
 }
 
 // This is rendering a single document item in the commented document list
 export const WorkDocumentItem: React.FC<JProps> = (props) => {
-  const { doc, index, sectionOrNetworkDoc, isNetworkDoc, handleDocView } = props;
+  const { doc, index, sectionOrNetworkDoc, isNetworkDoc, handleDocView, isStudentWorkspaceDoc } = props;
   console.log("--------------------------------------");
 
   console.log("<WorkDocumentItem> with index:", index);
+  console.log("\tsectionOrNetworkDoc:", sectionOrNetworkDoc);
+
   console.log("\tsectionOrNetworkDoc.uid:", sectionOrNetworkDoc.uid);
-  console.log("\tsectionOrNetworkDoc.title:", sectionOrNetworkDoc.title);
   console.log("\tsectionOrNetworkDoc.key:", sectionOrNetworkDoc.key);
+  console.log("\tsectionOrNetworkDoc.groupId:", sectionOrNetworkDoc.groupId);
   console.log("\tisNetworkDoc: ", isNetworkDoc);
+  console.log("\tisStudentWorkspaceDoc: ", isStudentWorkspaceDoc);
+
+  //set isStudentWorkspaceDocument logic up here
+  //if docID!==myuid && isProblemType(type);  -> send to title and to openResourceDocument
 
   const ui = useUIStore();
   // We need the navTab to style the item.
   const navTab = getNavTabOfDocument(doc.type);
-  const title =  useDocumentCaption(sectionOrNetworkDoc);
-
-  console.log("\ttitle:", title);
-
+  const title =  useDocumentCaption(sectionOrNetworkDoc, isStudentWorkspaceDoc);
+  console.log("\ttitle: ", title);
 
   return (
     <div
       className={`document-box my-work-document ${navTab}`}
       onClick={()=>{
-        ui.openResourceDocument(sectionOrNetworkDoc);
+        ui.openResourceDocument(sectionOrNetworkDoc, isStudentWorkspaceDoc);
         ui.setSelectedTile();
         if (handleDocView !== undefined){
-          handleDocView();
+          handleDocView(); //toggle so we see <ChatThread>
         }
       }}
     >
@@ -294,7 +283,7 @@ export const WorkDocumentItem: React.FC<JProps> = (props) => {
         </div>
     }
       <div className={"title"}>
-        {title}
+        { title + "     " + doc.key + "----" + doc.uid }
       </div>
       <div className={"numComments"}>
         {doc.numComments}
