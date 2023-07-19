@@ -127,13 +127,13 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
           activeNavTab={activeNavTab}
           onPostComment={onPostComment}
           numPostedComments={postedComments?.length || 0}
-          // showCommentTag={appConfig.showCommentTag}
-          // commentTags={appConfig.commentTags}
-          // tagPrompt={appConfig.tagPrompt}
+          showCommentTag={appConfig.showCommentTag}
+          commentTags={appConfig.commentTags}
+          tagPrompt={appConfig.tagPrompt}
           //enablebelow
-          showCommentTag={showCommentTagLocal}
-          commentTags={mockCommentTags}
-          tagPrompt={mockTagPrompt}
+          // showCommentTag={showCommentTagLocal}
+          // commentTags={mockCommentTags}
+          // tagPrompt={mockTagPrompt}
         />
       </div>
     </div>
