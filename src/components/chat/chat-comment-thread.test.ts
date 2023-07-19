@@ -23,7 +23,7 @@ describe("Chat comment thread", () => {
         const threads = makeChatThreads([], undefined);
         expect(threads).toEqual([]);
     });
-    
+
     it("Test for no document", () => {
         const fakeComment = makeFakeComment("c1", null);
         const threads = makeChatThreads([fakeComment], undefined);
@@ -43,7 +43,7 @@ describe("Chat comment thread", () => {
             type: "Text",
             title: "test title",
           }));
-    
+
         const c1 = makeFakeComment("c1", null);
         const c2 = makeFakeComment("c2", null);
         const comments = [c1, c2];
@@ -74,9 +74,9 @@ describe("Chat comment thread", () => {
             type: "Text",
             title: "test title",
           }));
-    
+
         const docComments = [makeFakeComment("c1", null), makeFakeComment("c2", null)];
-        const tileComments = [makeFakeComment("c3", "tile1"), makeFakeComment("c2", "tile1")]; 
+        const tileComments = [makeFakeComment("c3", "tile1"), makeFakeComment("c2", "tile1")];
         const threads = makeChatThreads(docComments.concat(tileComments), content);
         expect(threads.length).toEqual(2);
         expect(threads[0].comments).toEqual(docComments);

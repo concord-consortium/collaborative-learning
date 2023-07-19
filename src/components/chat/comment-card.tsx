@@ -7,6 +7,8 @@ import { getDisplayTimeDate } from "../../utilities/time";
 import { useCautionAlert } from "../utilities/use-caution-alert";
 import UserIcon from "../../assets/icons/clue-dashboard/teacher-student.svg";
 import DeleteMessageIcon from "../../assets/delete-message-icon.svg";
+import { useStores } from "../../hooks/use-stores";
+
 import "./comment-card.scss";
 import "../themes.scss";
 
@@ -14,7 +16,7 @@ interface IProps {
   user?: UserModelType;
   activeNavTab?: string;
   postedComments?: WithId<CommentDocument>[];
-  onPostComment?: (comment: string) => void;
+  onPostComment?: (comment: string, tag: string) => void;
   onDeleteComment?: (commentId: string, commentContent: string) => void;
   focusDocument?: string;
   focusTileId?: string;
@@ -54,6 +56,10 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
       showConfirmDeleteAlert();
     }
   };
+
+  //appConfig holds showCommentTag, commentTags, tagPrompt fetched from "clue-curriculum" repository
+  const { appConfig } = useStores();
+
   return (
     <div className="comment-card selected" data-testid="comment-card">
       <div className="comment-card-content selected" data-testid="comment-card-content">
@@ -68,11 +74,12 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
             const backgroundStyle = shouldShowUserIcon
                                       ? {backgroundColor: "white"}
                                       : {backgroundColor: userInitialBackgroundColor[userInitialBackgroundColorIndex]};
+
             return (
               <div key={idx} className="comment-thread" data-testid="comment-thread">
                 <div className="comment-text-header">
                   <div className="user-icon" style={backgroundStyle}>
-                    {shouldShowUserIcon ? <UserIcon /> : commenterInitial}
+                    { shouldShowUserIcon ? <UserIcon /> : commenterInitial }
                   </div>
                   <div className="user-name">{comment.name}</div>
                   <div className="time-stamp">{getDisplayTimeDate(comment.createdAt.getTime())}</div>
@@ -83,7 +90,15 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
                     </div>
                   }
                 </div>
-                <div key={idx} className="comment-text" data-testid="comment">{comment.content}</div>
+                {
+                  appConfig.showCommentTag && comment.tag &&
+                  <div className="comment-dropdown-tag">
+                    { comment.tag }
+                  </div>
+                }
+                <div key={idx} className="comment-text" data-testid="comment">
+                  {comment.content}
+                </div>
               </div>
             );
           })
@@ -92,6 +107,9 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
           activeNavTab={activeNavTab}
           onPostComment={onPostComment}
           numPostedComments={postedComments?.length || 0}
+          showCommentTag={appConfig.showCommentTag}
+          commentTags={appConfig.commentTags}
+          tagPrompt={appConfig.tagPrompt}
         />
       </div>
     </div>

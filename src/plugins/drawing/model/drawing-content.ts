@@ -8,12 +8,13 @@ import { tileModelHooks } from "../../../models/tiles/tile-model-hooks";
 import { TileContentModel } from "../../../models/tiles/tile-content";
 import { kDrawingStateVersion, kDrawingTileType } from "./drawing-types";
 import { ImageObjectType, isImageObjectSnapshot } from "../objects/image";
-import { DefaultToolbarSettings, ToolbarSettings } from "./drawing-basic-types";
+import { DefaultToolbarSettings, ToolbarSettings, VectorType, endShapesForVectorType } from "./drawing-basic-types";
 import { DrawingObjectMSTUnion } from "../components/drawing-object-manager";
 import { DrawingObjectSnapshotForAdd, DrawingObjectType, isFilledObject,
   isStrokedObject, ObjectMap, ToolbarModalButton } from "../objects/drawing-object";
 import { LogEventName } from "../../../lib/logger-types";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
+import { isVectorObject } from "../objects/vector";
 
 // track selection in metadata object so it is not saved to firebase but
 // also is preserved across document/content reloads
@@ -56,6 +57,7 @@ export const DrawingContentModel = TileContentModel
     strokeDashArray: DefaultToolbarSettings.strokeDashArray,
     strokeWidth: DefaultToolbarSettings.strokeWidth,
     stamps: types.array(StampModel),
+    vectorType: types.maybe(types.enumeration<VectorType>("VectorType", Object.values(VectorType))),
     // is type.maybe to avoid need for migration
     currentStampIndex: types.maybe(types.number)
   })
@@ -93,8 +95,8 @@ export const DrawingContentModel = TileContentModel
               : null;
     },
     get toolbarSettings(): ToolbarSettings {
-      const { stroke, fill, strokeDashArray, strokeWidth } = self;
-      return { stroke, fill, strokeDashArray, strokeWidth };
+      const { stroke, fill, strokeDashArray, strokeWidth, vectorType } = self;
+      return { stroke, fill, strokeDashArray, strokeWidth, vectorType };
     },
     exportJson(options?: ITileExportOptions) {
       // Translate image urls if necessary
@@ -189,6 +191,14 @@ export const DrawingContentModel = TileContentModel
           forEachObjectId(ids, object => {
             if(isStrokedObject(object)) {
               object.setStrokeWidth(strokeWidth);
+            }
+          });
+        },
+        setVectorType(vectorType: VectorType, ids: string[]) {
+          self.vectorType = vectorType;
+          forEachObjectId(ids, object => {
+            if (isVectorObject(object)) {
+              object.setEndShapes(...endShapesForVectorType(vectorType));
             }
           });
         },
