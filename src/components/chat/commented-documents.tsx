@@ -26,6 +26,8 @@ interface PromisedDocumentDocument extends DocumentDocument {
   title?: string
 }
 
+const testArray = ["1", "2", "3"];
+
 export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
   const [db] = useFirestore();
   const ui = useUIStore();
@@ -50,18 +52,6 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
     .where ("uid", "==", user?.id);
   }
   }, [cDocsRef, problem, unit, user?.network, user?.id]);
-
-  //"MyWork"/"ClassWork"
-  const [workDocuments, setWorkDocuments] = useState<PromisedDocumentDocument[]>();
-  const mDocsRef = useMemo(() => db.collection("documents"), [db]);
-  const mDocsInScopeRef = useMemo(() => {
-    if(user?.network){
-      return mDocsRef.where("network", "==", user?.network);
-    } else {
-      return mDocsRef.where("uid", "==", user?.id);
-    }
-  }, [mDocsRef, user?.network, user?.id]);
-
 
   //------Curriculum Documents: (i.e. //"Problem"/"Teacher-Guide")
   useEffect(() => {
@@ -96,7 +86,21 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
     return () => unsubscribeFromDocs?.();
   },[cDocsRef, cDocsInScopeRef]);
 
-  // ------MyWork/ClassWork--------
+
+  //------Documents: (i.e. //"Student Workspaces/"My Work"/"Class Work")
+  const [workDocuments, setWorkDocuments] = useState<PromisedDocumentDocument[]>();
+  const mDocsRef = useMemo(() => db.collection("documents"), [db]);
+  const mDocsInScopeRef = useMemo(() => {
+    if(user?.network){
+      return mDocsRef.where("network", "==", user?.network);
+    } else {
+      return mDocsRef.where("uid", "==", user?.id);
+    }
+  }, [mDocsRef, user?.network, user?.id]);
+
+  console.log("mDocsInScopeRef:", mDocsInScopeRef);
+
+  //------Documents: (i.e. //"Student Workspaces/"My Work"/"Class Work")
   useEffect(() => {
     const unsubscribeFromDocs = mDocsInScopeRef.onSnapshot(querySnapshot=>{
       const docs = querySnapshot.docs.map(doc =>{ //convert each element of docs to an object
@@ -134,14 +138,14 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
   console.log("docsCommentedOn:", docsCommentedOn);
   console.log("workDocuments:", workDocuments);
 
-  console.log("-----------------------")
+  console.log("-----------------------");
 
 
   return (
     <div className="commented-document-list">
       {
         docsCommentedOn &&
-        (docsCommentedOn).map((doc: PromisedCurriculumDocument, index:number) => {
+        (docsCommentedOn).map((doc: PromisedCurriculumDocument, index:number) => { //Problem + Teacher Guide documents
           console.log("doc (commented on)", doc);
           console.log("\t title:", doc.title);
           console.log("\t uid", doc.uid);
@@ -174,14 +178,22 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
           );
         })
       }
-      {console.log("------next---map-----")}
+      {console.log("------mapping work documents-----")}
       {
         workDocuments &&
         (workDocuments).map((doc: PromisedDocumentDocument, index: number) =>{
+          //"Student Workspaces/"My Work"/"Class Work"
+          console.log("------map----");
+
           const sectionDoc =  store.documents.getDocument(doc.key);
           const networkDoc = store.networkDocuments.getDocument(doc.key);
+          console.log("workDocument idx:", index);
+          console.log("\tsectionDoc", sectionDoc);
+          console.log("\tnetworkDoc", networkDoc);
+
+
           if (sectionDoc){
-            console.log("returning sectionDoc:", sectionDoc);
+            console.log("\treturning sectionDoc:", sectionDoc);
             console.log("\t title:", sectionDoc.title);
             console.log("\t uid:", sectionDoc.uid);
 
@@ -211,11 +223,30 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
             );
           }
         })
-
       }
+      {console.log("-----done with map----")}
+
+
+      {testArray.map((num, idx) => {
+        console.log("num ---", num);
+        return <PrintTestArray key={`${idx}fdsfad`} str={num}/>;
+      })}
+
     </div>
   );
 };
+
+interface ZProps {
+  str: string;
+}
+
+
+const PrintTestArray: React.FC<ZProps> = (props) => {
+  const { str } = props;
+  console.log("----<PrintTestArray>----");
+  return <div> {str} </div>;
+};
+
 
 interface JProps {
   doc: any,
@@ -226,7 +257,11 @@ interface JProps {
 }
 
 // This is rendering a single document item in the commented document list
-export const WorkDocumentItem: React.FC<JProps> = ({doc, index, sectionOrNetworkDoc, isNetworkDoc, handleDocView}) => {
+export const WorkDocumentItem: React.FC<JProps> = (props) => {
+  const { doc, index, sectionOrNetworkDoc, isNetworkDoc, handleDocView } = props;
+  console.log("<WorkDocumentItem> with index:", index);
+  console.log("\tisNetworkDoc: ", isNetworkDoc);
+
   const ui = useUIStore();
   // We need the navTab to style the item.
   const navTab = getNavTabOfDocument(doc.type);
@@ -254,7 +289,7 @@ export const WorkDocumentItem: React.FC<JProps> = ({doc, index, sectionOrNetwork
           <DocumentIcon/>
         </div>
     }
-      <div className={"title"}>
+      <div className={"\ttitle"}>
         {title}
         {console.log("title:", title)}
       </div>
