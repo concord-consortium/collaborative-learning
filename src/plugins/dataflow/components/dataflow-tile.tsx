@@ -13,7 +13,6 @@ import { measureText } from "../../../components/tiles/hooks/use-measure-text";
 import { defaultTileTitleFont } from "../../../components/constants";
 import { ToolTitleArea } from "../../../components/tiles/tile-title-area";
 import { dataflowLogEvent } from "../dataflow-logger";
-import { addAttributeToDataSet } from "../../../models/data/data-set";
 import { DataflowLinkTableButton } from "./ui/dataflow-program-link-table-button";
 import { ProgramMode, UpdateMode } from "./types/dataflow-tile-types";
 import { ITileLinkMetadata } from "../../../models/tiles/tile-link-types";
@@ -54,7 +53,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     const editableClass = readOnly ? "read-only" : "editable";
     const classes = `dataflow-tool disable-tile-content-drag ${editableClass}`;
     const { program, programDataRate, programZoom } = this.getContent();
-    const numNodes = program.nodes.size;
     const tileContent = this.getContent();
 
     return (
@@ -89,7 +87,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
                   handleChangeIsPlaying={this.handleChangeIsPlaying}
                   updatePlayBackIndex={this.updatePlayBackIndex}
                   updateRecordIndex={this.updateRecordIndex}
-                  numNodes={numNodes}
                   tileContent={tileContent}
 
                 />
@@ -204,52 +201,21 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     this.getContent().setProgramZoom(dx, dy, scale);
   };
 
-  private pairNodesToAttributes = () => {
-    const tileContent = this.getContent();
-    // dataSet looks like
-    // Time   |  Node 1 | Node 2 | Node 3 etc
-    //    0   |   val    | val    |  val
-    addAttributeToDataSet(tileContent.dataSet, { name: "Time (sec)" }); //time quantized to nearest sampling rate
-    let insertionOrder = 1;
-    tileContent.program.nodes.forEach((n) => { //add attributes based on nodes in tile
-      tileContent.addNewAttrFromNode(n.id, n.name, insertionOrder);
-      insertionOrder ++;
-    });
-  };
-
   private handleChangeOfProgramMode = () => {
     const tileContent = this.getContent();
     const programMode = this.determineProgramMode();
 
-    const clearAttributes = () => {
-      const allAttributes = tileContent.dataSet.attributes;
-      allAttributes.forEach((attr)=>{
-        tileContent.dataSet.removeAttribute(attr.id);
-      });
-    };
-    const clearCases = () => {
-      const ids = tileContent.dataSet.cases.map(({__id__}) => ( __id__));
-      tileContent.dataSet.removeCases(ids);
-    };
-
     switch (programMode){
       case ProgramMode.Ready:
-        clearAttributes(); //clear X | Y attributes from previous state
+        tileContent.prepareRecording();
         this.setState({isPlaying: false}); //reset isPlaying
         this.setState({isRecording: true});
-        this.pairNodesToAttributes();
         break;
       case ProgramMode.Recording:
         this.setState({isRecording: false});
         break;
       case ProgramMode.Done:
-        tileContent.setFormattedTime("000:00"); //set formattedTime to 000:00
-        //clear the dataSet;
-        clearAttributes();
-        clearCases();
-        // create a default dataSet x | y table
-        addAttributeToDataSet(tileContent.dataSet, { name: "x" });
-        addAttributeToDataSet(tileContent.dataSet, { name: "y" });
+        tileContent.resetRecording();
         break;
     }
   };
@@ -275,15 +241,28 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
 
   private updatePlayBackIndex = (update: string) => {
     if (update === UpdateMode.Increment){
-      this.setState({playBackIndex: this.state.playBackIndex + 1});
+      const newPlayBackIndex = this.state.playBackIndex + 1;
+      const tileContent = this.getContent();
+      const recordedCases = tileContent.dataSet.cases.length;
+      if (newPlayBackIndex >= recordedCases) {
+        this.setState({isPlaying: false});
+      } else {
+        this.setState({playBackIndex: newPlayBackIndex});
+      }
     }
     if (update === UpdateMode.Reset){
       this.setState({playBackIndex: 0});
     }
   };
+
   private updateRecordIndex = (update: string) => {
     if (update === UpdateMode.Increment){
-      this.setState({recordIndex: this.state.recordIndex + 1});
+      const newRecordIndex = this.state.recordIndex + 1;
+      if (newRecordIndex >= this.getContent().maxRecordableCases) {
+        this.setState({isRecording: false});
+      } else {
+        this.setState({recordIndex: newRecordIndex});
+      }
     }
     if (update === UpdateMode.Reset){
       this.setState({recordIndex: 0});

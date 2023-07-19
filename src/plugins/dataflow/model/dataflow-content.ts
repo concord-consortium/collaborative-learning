@@ -16,7 +16,8 @@ import {
 } from "../../../models/shared/shared-data-set";
 import { updateSharedDataSetColors } from "../../../models/shared/shared-data-set-colors";
 import { SharedModelType } from "../../../models/shared/shared-model";
-import { DataSet } from "../../../models/data/data-set";
+import { DataSet, addAttributeToDataSet } from "../../../models/data/data-set";
+
 import { uniqueId } from "../../../utilities/js-utils";
 import { getTileContentById, getTileModelById } from "../../../utilities/mst-utils";
 
@@ -28,6 +29,11 @@ export function defaultDataflowContent(): DataflowContentModelType {
 
 export const kDataflowDefaultHeight = 480;
 export const kDefaultLabel = "Dataflow Node";
+
+// This is an arbitrary limit on how many values can be recorded in a dataset.
+// The intention is to keep the size of the dataset manageable.
+// A case has one value for time and one value for each node
+const kMaxRecordedValues = 10000;
 
 export function defaultDataSet() {
   const dataSet = DataSet.create();
@@ -49,7 +55,6 @@ export const DataflowContentModel = TileContentModel
     program: types.optional(DataflowProgramModel, getSnapshot(DataflowProgramModel.create())),
     programDataRate: DEFAULT_DATA_RATE,
     programZoom: types.optional(ProgramZoom, DEFAULT_PROGRAM_ZOOM),
-    formattedTime: "000:00"
   })
   .volatile(self => ({
     metadata: undefined as any as ITileMetadataModel,
@@ -79,6 +84,11 @@ export const DataflowContentModel = TileContentModel
         });
       }
       return { values: newValues, ...rest };
+    },
+    get maxRecordableCases() {
+      const numNodes = self.program.nodes.size;
+      // The `+ 1` is for time which is recorded as the first value of each case
+      return (kMaxRecordedValues/(numNodes + 1));
     }
   }))
   .views(self => ({
@@ -137,6 +147,33 @@ export const DataflowContentModel = TileContentModel
       });
       return isTileIdFound;
     },
+    getTimeAtRecordedIndex(index: number) {
+      const { dataSet } = self;
+      if (!dataSet || index < 0 || index >= dataSet.cases.length) {
+        return 0;
+      }
+      const timeQuantizedId = dataSet.attributes[0].id;
+      const time = dataSet.getValueAtIndex(index, timeQuantizedId);
+      if (typeof time !== "number") {
+        return 0;
+      }
+      return time;
+    },
+  }))
+  .views(self => ({
+    get durationOfRecording() {
+      const { dataSet } = self;
+      if (!dataSet) {
+        return 0;
+      }
+      const lastIndex = dataSet.cases.length - 1;
+      return self.getTimeAtRecordedIndex(lastIndex);
+    }
+  }))
+  .views(self => ({
+    get durationOfRecordingFormatted() {
+      return formatTime(self.durationOfRecording);
+    }
   }))
   .actions(self => tileModelHooks({
     doPostCreate(metadata: ITileMetadataModel) {
@@ -199,9 +236,6 @@ export const DataflowContentModel = TileContentModel
       self.programZoom.dy = dy;
       self.programZoom.scale = scale;
     },
-    setFormattedTime(formattedTime: string){
-      self.formattedTime = formattedTime;
-    },
     updateAfterSharedModelChanges(sharedModel?: SharedModelType){
       //do nothing
     },
@@ -242,6 +276,46 @@ export const DataflowContentModel = TileContentModel
         console.warn("DataflowContent.addLinkedTable unable to unlink table");
       }
     },
+    clearAttributes() {
+      const allAttributes = self.dataSet.attributes;
+      allAttributes.forEach((attr)=>{
+        self.dataSet.removeAttribute(attr.id);
+      });
+    },
+    clearCases() {
+      const ids = self.dataSet.cases.map(({__id__}) => ( __id__));
+      self.dataSet.removeCases(ids);
+    },
+  }))
+  .actions(self => ({
+    prepareRecording() {
+      self.clearAttributes();
+      // dataSet looks like
+      // Time   |  Node 1 | Node 2 | Node 3 etc
+      //    0   |   val    | val    |  val
+      addAttributeToDataSet(self.dataSet, { name: "Time (sec)" }); //time quantized to nearest sampling rate
+      let insertionOrder = 1;
+      self.program.nodes.forEach((n) => { //add attributes based on nodes in tile
+        self.addNewAttrFromNode(n.id, n.name, insertionOrder);
+        insertionOrder ++;
+      });
+    },
+    resetRecording() {
+      //clear the dataSet;
+      self.clearAttributes();
+      self.clearCases();
+      // create a default dataSet x | y table
+      addAttributeToDataSet(self.dataSet, { name: "x" });
+      addAttributeToDataSet(self.dataSet, { name: "y" });
+    },
   }));
 
 export type DataflowContentModelType = Instance<typeof DataflowContentModel>;
+
+export function formatTime(seconds: number) {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = Math.round(seconds % 60);
+  const formattedMinutes = minutes.toString().padStart(3, '0');
+  const formattedSeconds = remainingSeconds.toString().padStart(2, '0');
+  return `${formattedMinutes}:${formattedSeconds}`;
+}
