@@ -27,7 +27,18 @@
         "width": 25,
         "height": 25
       }
-    ]
+    ],
+    "showCommentTag": true,
+    "commentTags": {
+      "part-to-part": "Part-to-Part",
+      "part-to-whole": "Part-to-Whole",
+      "unit-rate": "Unit Rate",
+      "guess-and-check": "Guess and Check",
+      "none": "None"
+    },
+    "tagPrompt": {
+      "default": "Select Student Strategy"
+    }
   },
   "sections": {
     "introduction": {
@@ -1439,7 +1450,7 @@
                         "<p>How can you use scale factors to find missing information about angles measures? Side lengths? Area? Perimeter?</p>"
                       ]
                     }
-                  }, 
+                  },
                   {
                     "id": "5S5fW9WBJwdKruj2",
                     "title": "Text 1",
@@ -2006,7 +2017,7 @@
                         "<p><strong>Key Terms</strong></p>",
                         "<p></p>",
                         "<p></p>"
-                        
+
                       ]
                     }
                   },
@@ -2119,7 +2130,7 @@
                         "<p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p>"
                       ]
                     }
-                  } 
+                  }
                 ]
               }
             }

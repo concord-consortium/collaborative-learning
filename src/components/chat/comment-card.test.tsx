@@ -5,12 +5,18 @@ import { WithId } from "../../hooks/firestore-hooks";
 import { CommentDocument } from "../../lib/firestore-schema";
 import { UserModelType } from "../../models/stores/user";
 import { CommentCard } from "./comment-card";
+import { AppConfigModel } from "../../models/stores/app-config-model";
+import { unitConfigDefaults } from "../../test-fixtures/sample-unit-configurations";
+
 
 jest.mock("../../hooks/use-stores", () => ({
   useTypeOfTileInDocumentOrCurriculum: () => "Text",
   useUIStore: () => ({
     showChatPanel: true,
     selectedTileIds: []
+  }),
+  useStores: () => ({
+    appConfig: AppConfigModel.create({ curriculumBaseUrl: "https://curriculum.example.com", config: unitConfigDefaults })
   })
 }));
 

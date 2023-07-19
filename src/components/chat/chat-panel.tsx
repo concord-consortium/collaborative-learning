@@ -24,7 +24,6 @@ interface IProps {
 export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument, focusTileId, onCloseChatPanel }) => {
   const [isDocumentView, setIsDocumentView] = useState(false); // switches between "Comments View" vs "Document View"
   const [chatPanelTitle, setChatPanelTitle] = useState("Comments");
-
   const document = useDocumentOrCurriculumMetadata(focusDocument);
   const content = useCurriculumOrDocumentContent(focusDocument);
   const ordering = content?.getTilesInDocumentOrder();
@@ -39,7 +38,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   const commentThreads = makeChatThreads(postedComments, content);
   const postCommentMutation = usePostDocumentComment();
 
-  const postComment = useCallback((comment: string) => {
+  const postComment = useCallback((comment: string, tags?: string[]) => {
     if (focusDocument) {
       const numComments = postedComments ? postedComments.length : 0;
       const focusDocumentId = focusDocument;
@@ -48,13 +47,13 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
         focusTileId,
         isFirst: (numComments < 1),
         commentText: comment,
-        action: "add"
+        action: "add",
+        tags
       };
       logCommentEvent(eventPayload);
     }
-
     return document
-      ? postCommentMutation.mutate({ document, comment: { content: comment, tileId: focusTileId } })
+      ? postCommentMutation.mutate({ document, comment: { content: comment, tileId: focusTileId, tags } })
       : undefined;
   }, [document, focusDocument, focusTileId, postCommentMutation, postedComments]);
 
@@ -76,8 +75,6 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
       ? deleteCommentMutation.mutate(`${commentsPath}/${commentId}`)
       : undefined;
   }, [commentsPath, deleteCommentMutation, focusDocument, focusTileId]);
-
-
 
   const handleDocumentClick = () => {
     setIsDocumentView((prevState) => !prevState);
