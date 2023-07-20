@@ -9,7 +9,8 @@ export const kTerrariumKey = "terrarium";
 
 const kRawTemperatureKey = "raw_temperature_key";
 const stepDuration = 1000;
-const minHumidity = 20;
+const minHumidity = 0;
+const startHumidity = 20;
 const maxHumidity = 90;
 const minTemperature = 21;
 const maxTemperature = 27;
@@ -69,7 +70,7 @@ export const terrariumSimulation: ISimulation = {
       labels: ["input", "sensor:humidity"],
       icon: iconUrl(kHumidityKey),
       name: kHumidityKey,
-      value: minHumidity
+      value: startHumidity
     },
     {
       displayName: "Raw Temperature",

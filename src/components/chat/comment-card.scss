@@ -17,6 +17,8 @@
       display: flex;
       flex-direction: row;
       align-items: center;
+      margin-top: 3px;
+
       .user-icon {
         display: flex;
         align-items: center;
@@ -60,17 +62,17 @@
           background-color: $charcoal-light-3;
         }
       }
-
     }
-    .new-marker {
+    .comment-dropdown-tag {
+      width: 80%;
+      height: 25px;
+      border-radius: 75px 75px;
       display: flex;
-      flex-direction: row;
-      .new-text {
-        font-size: 9px;
-        font-weight: bold;
-        color: $charcoal-dark-2;
-        background-color: $new-comment-notice;
-      }
+      align-items: center;
+      padding-left: 5px;
+      margin-top: 3px;
+      margin-bottom: 3px;
+      background-color: white;
     }
   }
 
@@ -82,6 +84,7 @@
     margin: 5px;
     font-size: 14px;
     font-family: Lato;
+    position: relative;
 
     textarea {
       border-style: none;
@@ -94,10 +97,27 @@
       font-size: 14px;
       font-family: Lato;
 
+      &.shift-down {
+        padding-top: 28px; //place under dropDownMenu
+      }
+
       &::placeholder {
         color: $charcoal;
         font-style: italic;
       }
+    }
+
+    select { //drop down menu of tagged options
+      position: absolute;
+      left: 0px;
+      top: 5px;
+      height: 26px;
+      margin: 1px 4px 6px;
+      width: calc(100% - 30px);
+      font-family: Lato;
+      border: solid 1.5px $charcoal-light-1;
+      border-radius: 5px;
+      outline: none;
     }
 
     .comment-textbox-footer {
@@ -107,6 +127,7 @@
       justify-content: flex-end;
       height: 35px;
       border-top: solid 1.5px $charcoal-light-4;
+      padding-bottom: 5px; //centers it
 
       .comment-footer-button {
         display: flex;
@@ -129,6 +150,7 @@
         }
       }
     }
+
   }
 }
 .custom-modal.error-alert.confirm-delete-alert {

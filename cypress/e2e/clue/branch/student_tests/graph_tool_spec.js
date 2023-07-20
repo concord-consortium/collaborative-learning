@@ -77,7 +77,7 @@ context('Graph Tool', function() {
                 before(function(){
                   primaryWorkspace.openResourceTab();
                   resourcePanel.openPrimaryWorkspaceTab("my-work");
-                })
+                });
                 it.skip('will verify restore of point at origin', function(){
                     cy.openDocumentWithTitle('my-work','workspaces', problemDoc);
                     graphToolTile.getGraphPointCoordinates().should('contain', '(0, 0)');

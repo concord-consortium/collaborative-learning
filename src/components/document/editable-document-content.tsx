@@ -106,14 +106,12 @@ export const EditableDocumentContent: React.FC<IProps> = props => {
 
   const documentContext = useDocumentContext(document);
   const { db: { firebase }, ui, user } = useStores();
-
   // set by the canvas and used by the toolbar
   const editableTileApiInterfaceRef: EditableTileApiInterfaceRef = useRef(null);
   const isReadOnly = !isPrimary || readOnly || document.isPublished;
   const isShowingToolbar = toolbar?.length && !isReadOnly;
   const showToolbarClass = isShowingToolbar ? "show-toolbar" : "hide-toolbar";
-  const isChatEnabled = true;
-
+  const isChatEnabled = user.isTeacher;
   const documentSelectedForComment = isChatEnabled && ui.showChatPanel && ui.selectedTileIds.length === 0 && !isPrimary;
   const editableDocContentClass = classNames("editable-document-content", showToolbarClass,
     contained ? "contained-editable-document-content" : "full-screen-editable-document-content",

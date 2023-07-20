@@ -7,20 +7,28 @@ import "../themes.scss";
 interface IProps {
   activeNavTab?: string;
   numPostedComments: number;
-  onPostComment?: (comment: string) => void;
+  onPostComment?: (comment: string, tag: string) => void;
+  showCommentTag?: boolean;
+  commentTags?: Record<string, string>;
+  tagPrompt?: string;
 }
 
-const minTextAreaHeight = 35;
 
-export const CommentTextBox: React.FC<IProps> = ({ activeNavTab, numPostedComments, onPostComment }) => {
+export const CommentTextBox: React.FC<IProps> = (props) => {
+  const { activeNavTab, numPostedComments, onPostComment, showCommentTag, commentTags, tagPrompt } = props;
+
+  const minTextAreaHeight = showCommentTag ? 100 : 35;
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [commentTextAreaHeight, setCommentTextAreaHeight] = useState(minTextAreaHeight);
+  const selectElt = useRef<HTMLSelectElement>(null);
   const [commentAdded, setCommentAdded] = useState(false);
   const [commentText, setCommentText] = useState("");
+  const [tagText, setTagText] = useState("");
   const textareaStyle = {height: commentTextAreaHeight};
   const postButtonClass = classNames("comment-footer-button", "themed-negative", activeNavTab,
                                      { disabled: !commentAdded, "no-action": !commentAdded });
   const ui = useUIStore();
+
   // resize textarea when user deletes some text
   useEffect(() => {
     if (textareaRef?.current) {
@@ -61,7 +69,7 @@ export const CommentTextBox: React.FC<IProps> = ({ activeNavTab, numPostedCommen
     // do not send post if text area is empty, only has spaces or new lines
     const [trimmedText, isEmpty] = trimContent(commentText);
     if (!isEmpty) {
-      onPostComment?.(trimmedText);
+      onPostComment?.(trimmedText, tagText);
       setCommentTextAreaHeight(minTextAreaHeight);
       setCommentAdded(false);
       setCommentText("");
@@ -97,9 +105,20 @@ export const CommentTextBox: React.FC<IProps> = ({ activeNavTab, numPostedCommen
                             : ui.selectedTileIds.length !== 0 && numPostedComments < 1
                               ? "Comment on this tile..."
                               : "Reply...";
+
+  const handleSelectDropDown = (val: string) => {
+    if (tagPrompt && val !== tagPrompt){ //do not save comments with default tag
+      setTagText(val);
+    }
+    else {
+      setTagText("");
+    }
+  };
+
   return (
     <div className="comment-textbox">
       <textarea
+        className={classNames({"shift-down" : showCommentTag})}
         ref={textareaRef}
         style={textareaStyle}
         placeholder={placeholderText}
@@ -108,6 +127,30 @@ export const CommentTextBox: React.FC<IProps> = ({ activeNavTab, numPostedCommen
         onChange={handleCommentTextAreaChange}
         onKeyDown={handleCommentTextboxKeyDown}
       />
+      {
+        showCommentTag && commentTags &&
+        <select
+          ref={selectElt}
+          data-test="comment-textbox-dropdown"
+          onChange={(e) => {
+            handleSelectDropDown(e.target.value);
+          }}
+        >
+          {
+            tagPrompt &&
+            <option key={"sel-ss"} value={tagPrompt}> { tagPrompt } </option>
+          }
+          {
+            Object.keys(commentTags).map(key => {
+              const value = commentTags[key];
+              return (
+                <option key={key} value={key}> {value} </option>
+              );
+            })
+          }
+        </select>
+      }
+
       <div className="comment-textbox-footer">
         <div className="comment-footer-button cancel"
               onClick={handleCancelPost}

@@ -30,7 +30,7 @@ export async function postDocumentComment(
     throw new functions.https.HttpsError("invalid-argument", "Some required document information was not provided.");
   }
 
-  if (!comment?.content) {
+  if (!comment?.content && !comment?.tags?.length) { //if we have a tag we can post an empty comment
     throw new functions.https.HttpsError("invalid-argument", "Some required comment information was not provided.");
   }
 

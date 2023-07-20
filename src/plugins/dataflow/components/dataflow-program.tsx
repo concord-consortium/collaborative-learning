@@ -27,8 +27,6 @@ import { DemoOutputReteNodeFactory } from "../nodes/factories/demo-output-rete-n
 import { LiveOutputReteNodeFactory } from "../nodes/factories/live-output-rete-node-factory";
 import { GeneratorReteNodeFactory } from "../nodes/factories/generator-rete-node-factory";
 import { TimerReteNodeFactory } from "../nodes/factories/timer-rete-node-factory";
-import { NumControl } from "../nodes/controls/num-control";
-import { ValueControl } from "../nodes/controls/value-control";
 import { getHubSelect, setLiveOutputOpts } from "../nodes/utilities/live-output-utilities";
 import {
   sendDataToSerialDevice, sendDataToSimulatedOutput, updateNodeChannelInfo, updateGeneratorNode, updateNodeRecentValues,
@@ -42,17 +40,17 @@ import { DataflowProgramCover } from "./ui/dataflow-program-cover";
 import { DataflowProgramZoom } from "./ui/dataflow-program-zoom";
 import { NodeChannelInfo, serialSensorChannels } from "../model/utilities/channel";
 import { ProgramDataRates } from "../model/utilities/node";
+import { calculatedRecentValues, runNodePlaybackUpdates,  } from "../utilities/playback-utils";
 import { getAttributeIdForNode, recordCase } from "../model/utilities/recording-utilities";
 import { virtualSensorChannels } from "../model/utilities/virtual-channel";
 import { DocumentContextReact } from "../../../components/document/document-context";
 import { dataflowLogEvent } from "../dataflow-logger";
-import { SensorValueControl } from "../nodes/controls/sensor-value-control";
-import { InputValueControl } from "../nodes/controls/input-value-control";
-import { DemoOutputControl } from "../nodes/controls/demo-output-control";
 import { ProgramMode, UpdateMode } from "./types/dataflow-tile-types";
 import { ITileModel } from "../../../models/tiles/tile-model";
+import { IDataSet } from "../../../models/data/data-set";
 
 import "./dataflow-program.sass";
+
 
 export interface IStartProgramParams {
   runId: string;
@@ -83,7 +81,6 @@ interface IProps extends SizeMeProps {
   handleChangeIsPlaying: () => void;
   updatePlayBackIndex: (update: string) => void;
   updateRecordIndex: (update: string) => void;
-  numNodes: number;
   tileContent: DataflowContentModelType;
 }
 
@@ -130,8 +127,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { readOnly, documentProperties, numNodes, tileContent, programDataRate, onProgramDataRateChange,
-            isPlaying, handleChangeIsPlaying, handleChangeOfProgramMode, programMode} = this.props;
+    const { readOnly, documentProperties, tileContent, programDataRate, onProgramDataRateChange,
+            isPlaying, playBackIndex, handleChangeIsPlaying, handleChangeOfProgramMode, programMode} = this.props;
 
     const editorClassForDisplayState = "full";
     const editorClass = `editor ${editorClassForDisplayState}`;
@@ -154,9 +151,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           lastIntervalDuration={this.state.lastIntervalDuration}
           serialDevice={this.stores.serialDevice}
           programMode={programMode}
+          playBackIndex={playBackIndex}
           isPlaying={isPlaying}
           handleChangeIsPlaying={handleChangeIsPlaying}
-          numNodes={numNodes}
           tileContent={tileContent}
           handleChangeOfProgramMode={handleChangeOfProgramMode}
         />
@@ -566,53 +563,18 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.programEditor.clear();
   };
 
-  private playbackNodesWithCaseData = (dataSet: any, playBackIndex: number) => {
-    const currentCase = dataSet.getCaseAtIndex(playBackIndex);
-    if (currentCase){
-      const {__id__} = currentCase; //this is the id of the case we are looking at for each frame
-      this.programEditor.nodes.forEach((node, idx) => { //update each node in the frame
-        const attrId = getAttributeIdForNode(this.props.tileContent.dataSet, idx);
-        const valueToSendToNode = dataSet.getValue(__id__, attrId) as number;
-        let nodeControl;
-        switch (node.name){
-          case "Sensor":
-            nodeControl = node.controls.get("nodeValue") as SensorValueControl;
-            nodeControl.setValue(valueToSendToNode);
-            break;
-          case "Number":
-            nodeControl = node.controls.get("nodeValue") as NumControl;
-            nodeControl.setValue(valueToSendToNode);
-            break;
-          case "Generator":
-            nodeControl = node.controls.get("nodeValue") as ValueControl;
-            nodeControl.setValue(valueToSendToNode);
-            break;
-          case "Timer":
-            nodeControl = node.controls.get("nodeValue") as ValueControl; //not working
-            nodeControl.setValue(valueToSendToNode);
-            break;
-          case "Math":
-            break;
-          case "Logic":
-            break;
-          case "Transform":
-            break;
-          case "Control":
-            break;
-          case "Demo Output":
-            nodeControl = node.controls.get("demoOutput") as DemoOutputControl;
-            nodeControl.setValue(valueToSendToNode); //---> shows correct animation
-            nodeControl = node.inputs.get("nodeValue")?.control as InputValueControl;
-            nodeControl.setDisplayMessage(valueToSendToNode === 0 ? "off" : "on");
-            break;
-          case "Live Output":
-            nodeControl = node.inputs.get("nodeValue")?.control as InputValueControl;
-            nodeControl.setDisplayMessage(valueToSendToNode === 0 ? "off" : "on");
-            break;
-          default:
-        }
-      });
-    }
+  private playbackNodesWithCaseData = (dataSet: IDataSet, playBackIndex: number) => {
+    const caseId = dataSet.getCaseAtIndex(playBackIndex)?.__id__;
+    if (!caseId) return;
+    this.programEditor.nodes.forEach((node, idx) => { //update each node in the frame
+      const attrId = getAttributeIdForNode(this.props.tileContent.dataSet, idx);
+      const valForNode = dataSet.getValue(caseId, attrId) as number;
+
+      // each node needs to have a particular updates performed explicitly for playback
+      runNodePlaybackUpdates(node, valForNode);
+      node.data.recentValues = calculatedRecentValues(dataSet, playBackIndex, attrId);
+      node.update();
+    });
   };
 
   private updateNodes = () => {

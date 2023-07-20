@@ -37,7 +37,7 @@ context('Draw Tool Tile', function () {
     });
     describe("Freehand", () => {
       it("verify draw a line", () => {
-        drawToolTile.getDrawToolFreehand().click();
+        drawToolTile.getDrawToolFreehand().click({scrollBehavior: false});
         drawToolTile.getDrawTile()
           .trigger("mousedown", 350, 50)
           .trigger("mousemove", 350, 100)
@@ -46,7 +46,7 @@ context('Draw Tool Tile', function () {
         drawToolTile.getFreehandDrawing().should("exist").and("have.length", 1);
       });
       it("selects freehand drawing", () => {
-        drawToolTile.getDrawToolSelect().click();
+        drawToolTile.getDrawToolSelect().click({scrollBehavior: false});
         // First make sure we don't select it even if we are inside of its
         // bounding box
         drawToolTile.getDrawTile()
@@ -62,9 +62,9 @@ context('Draw Tool Tile', function () {
         drawToolTile.getDrawToolDelete().should("not.have.class", "disabled");
       });
       it("verify change outline color", () => {
-        drawToolTile.getDrawToolStrokeColor().click();
+        drawToolTile.getDrawToolStrokeColor().click({scrollBehavior: false});
         cy.get(".toolbar-palette.stroke-color .palette-buttons").should("be.visible");
-        cy.get(".toolbar-palette.stroke-color .palette-buttons .color-swatch").eq(1).click();
+        cy.get(".toolbar-palette.stroke-color .palette-buttons .color-swatch").eq(1).click({scrollBehavior: false});
         drawToolTile.getFreehandDrawing().first().should("have.attr", "stroke").and("eq", "#eb0000");
       });
       it("deletes freehand drawing", () => {
@@ -76,13 +76,13 @@ context('Draw Tool Tile', function () {
         //   .trigger("mousedown", 350, 100)
         //   .trigger("mouseup", 350, 100);
         drawToolTile.getSelectionBox().should("exist");
-        drawToolTile.getDrawToolDelete().should("not.have.class", "disabled").click();
+        drawToolTile.getDrawToolDelete().should("not.have.class", "disabled").click({scrollBehavior: false});
         drawToolTile.getFreehandDrawing().should("not.exist");
       });
     });
     describe("Vector", () => {
       it("verify draw vector", () => {
-        drawToolTile.getDrawToolLine().click();
+        drawToolTile.getDrawToolLine().click({scrollBehavior: false});
         drawToolTile.getDrawTile()
           .trigger("mousedown", 250, 50)
           .trigger("mousemove", 100, 50)
@@ -90,18 +90,29 @@ context('Draw Tool Tile', function () {
         drawToolTile.getVectorDrawing().should("exist").and("have.length", 1);
       });
       it("verify change outline color", () => {
-        drawToolTile.getDrawToolSelect().click();
+        drawToolTile.getDrawToolSelect().click({scrollBehavior: false});
         drawToolTile.getVectorDrawing().click({scrollBehavior: false});
-        drawToolTile.getDrawToolStrokeColor().click();
+        drawToolTile.getDrawToolStrokeColor().click({scrollBehavior: false});
         cy.get(".toolbar-palette.stroke-color .palette-buttons").should("be.visible");
-        cy.get(".toolbar-palette.stroke-color .palette-buttons .color-swatch").eq(2).click();
+        cy.get(".toolbar-palette.stroke-color .palette-buttons .color-swatch").eq(2).click({scrollBehavior: false});
         drawToolTile.getVectorDrawing().first().should("have.attr", "stroke").and("eq", "#008a00");
-        drawToolTile.getDrawToolStrokeColor().click();
+        drawToolTile.getDrawToolStrokeColor().click({scrollBehavior: false});
         cy.get(".toolbar-palette.stroke-color .palette-buttons").should("be.visible");
-        cy.get(".toolbar-palette.stroke-color .palette-buttons .color-swatch").first().click();
+        cy.get(".toolbar-palette.stroke-color .palette-buttons .color-swatch").first().click({scrollBehavior: false});
       });
+      it("change line to arrow", () => {
+        drawToolTile.getVectorDrawing().children().its("length").should("eq", 1); // Only a line, no arrowheads yet.
+        // drawToolTile.getVectorDrawing().click({scrollBehavior: false});
+        drawToolTile.getDrawToolLineSubmenu().click({scrollBehavior: false});
+        cy.get(".toolbar-palette.vectors .drawing-tool-buttons").should("be.visible");
+        cy.get(".toolbar-palette.vectors .drawing-tool-buttons div:nth-child(3) button").click({scrollBehavior: false});
+        drawToolTile.getVectorDrawing().children().its("length").should("eq", 3); // Now three items in group...
+        drawToolTile.getVectorDrawing().find("polygon").its("length").should("eq", 2); // including two arrowheads.        
+        });
       it("deletes vector drawing", () => {
-        drawToolTile.getDrawToolDelete().click();
+        drawToolTile.getDrawToolSelect().click({scrollBehavior: false});
+        drawToolTile.getVectorDrawing().click({scrollBehavior: false});
+        drawToolTile.getDrawToolDelete().click({scrollBehavior: false});
         drawToolTile.getVectorDrawing().should("not.exist");
       });
     });

@@ -184,15 +184,20 @@ exports[`Drawing Layer Components Vector line adds a Vector line 1`] = `
   width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
-  <line
+  <g
+    class="vector"
+    fill="#888888"
     stroke="#888888"
     stroke-dasharray=""
     stroke-width="1"
-    x1="10"
-    x2="20"
-    y1="10"
-    y2="20"
-  />
+  >
+    <line
+      x1="10"
+      x2="20"
+      y1="10"
+      y2="20"
+    />
+  </g>
 </svg>
 `;
 
@@ -210,14 +215,19 @@ exports[`Drawing Layer Components Vector line moves a vector line 1`] = `
   width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
-  <line
+  <g
+    class="vector"
+    fill="#888888"
     stroke="#888888"
     stroke-dasharray=""
     stroke-width="1"
-    x1="5"
-    x2="15"
-    y1="5"
-    y2="15"
-  />
+  >
+    <line
+      x1="5"
+      x2="15"
+      y1="5"
+      y2="15"
+    />
+  </g>
 </svg>
 `;

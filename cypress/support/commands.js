@@ -218,7 +218,7 @@ Cypress.Commands.add('collapseResourceTabs', () => {
   cy.get('.divider-container').trigger('mouseover').then(() => {
     cy.get('.divider-container .expand-handle.left.shown').should("exist");
     cy.get('.divider-container .expand-handle.left.shown').click();
-  })
+  });
 });
 Cypress.Commands.add('closeResourceTabs', () => {
   cy.get('.nav-tab-panel .close-button').click();
