@@ -66,10 +66,6 @@ export function hasFlowIn(node: Node){
   return inputs.some((input) => input.connections.length > 0);
 }
 
-export function getCleanDecimalString(n: number){
-  return n.toFixed(3).replace(/\.?0+$/, "");
-}
-
 export function getNumDisplayStr(n: number){
-  return isNaN(n) ? kEmptyValueString : getCleanDecimalString(n);
+  return isNaN(n) ? kEmptyValueString : n.toFixed(3).replace(/\.?0+$/, "");
 }
