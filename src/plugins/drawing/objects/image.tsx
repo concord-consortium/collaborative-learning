@@ -62,7 +62,7 @@ export const ImageObject = DrawingObject.named("ImageObject")
       self.filename = filename;
     },
 
-    dragBounds(deltas: BoundingBoxDelta) {
+    setDragBounds(deltas: BoundingBoxDelta) {
       self.dragX = self.x + deltas.left;
       self.dragY = self.y + deltas.top;
       self.dragWidth  = self.width  + deltas.right - deltas.left;

@@ -35,7 +35,7 @@ export const EllipseObject = types.compose("EllipseObject", StrokedObject, Fille
         self.rx = self.ry = Math.max(self.rx, self.ry);
       }
     },
-    dragBounds(deltas: BoundingBoxDelta) {
+    setDragBounds(deltas: BoundingBoxDelta) {
       self.dragX = self.x + deltas.left/2 + deltas.right/2;
       self.dragY = self.y + deltas.top/2 + deltas.bottom/2;
       self.dragRx  = self.rx  + deltas.right/2 - deltas.left/2;

@@ -281,7 +281,7 @@ describe("DrawingContentModel", () => {
     const obj = model.objectMap.a as RectangleObjectType;
 
     // drag bottom right bigger
-    obj.dragBounds({ top: 0, right: 10, bottom: 10, left: 0 });
+    obj.setDragBounds({ top: 0, right: 10, bottom: 10, left: 0 });
     obj.adoptDragBounds();
     expect(obj).toHaveProperty('x', 0);
     expect(obj).toHaveProperty('y', 0);
@@ -289,7 +289,7 @@ describe("DrawingContentModel", () => {
     expect(obj).toHaveProperty('height', 20);
 
     // drag top left smaller
-    obj.dragBounds({ top: 10, right: 0, bottom: 0, left: 10 });
+    obj.setDragBounds({ top: 10, right: 0, bottom: 0, left: 10 });
     obj.adoptDragBounds();
     expect(obj).toHaveProperty('x', 10);
     expect(obj).toHaveProperty('y', 10);
@@ -310,7 +310,7 @@ describe("DrawingContentModel", () => {
     });
 
     // drag bottom right bigger
-    obj.dragBounds({ top: 0, right: 10, bottom: 10, left: 0 });
+    obj.setDragBounds({ top: 0, right: 10, bottom: 10, left: 0 });
     obj.adoptDragBounds();
     expect(obj).toHaveProperty('x', 5);
     expect(obj).toHaveProperty('y', 5);
@@ -318,7 +318,7 @@ describe("DrawingContentModel", () => {
     expect(obj).toHaveProperty('ry', 15);
 
     // drag top left smaller
-    obj.dragBounds({ top: 10, right: 0, bottom: 0, left: 10 });
+    obj.setDragBounds({ top: 10, right: 0, bottom: 0, left: 10 });
     obj.adoptDragBounds();
     expect(obj).toHaveProperty('x', 10);
     expect(obj).toHaveProperty('y', 10);
@@ -335,7 +335,7 @@ describe("DrawingContentModel", () => {
     });
 
     // drag bottom right bigger
-    obj.dragBounds({ top: 0, right: 10, bottom: 10, left: 0 });
+    obj.setDragBounds({ top: 0, right: 10, bottom: 10, left: 0 });
     obj.adoptDragBounds();
     expect(obj).toHaveProperty('x', 0);
     expect(obj).toHaveProperty('y', 0);
@@ -343,7 +343,7 @@ describe("DrawingContentModel", () => {
     expect(obj).toHaveProperty('height', 20);
 
     // drag top left smaller
-    obj.dragBounds({ top: 10, right: 0, bottom: 0, left: 10 });
+    obj.setDragBounds({ top: 10, right: 0, bottom: 0, left: 10 });
     obj.adoptDragBounds();
     expect(obj).toHaveProperty('x', 10);
     expect(obj).toHaveProperty('y', 10);
@@ -361,7 +361,7 @@ describe("DrawingContentModel", () => {
     });
 
     // drag bottom right bigger
-    obj.dragBounds({ top: 0, right: 10, bottom: 10, left: 0 });
+    obj.setDragBounds({ top: 0, right: 10, bottom: 10, left: 0 });
     obj.adoptDragBounds();
     expect(obj).toHaveProperty('x', 0);
     expect(obj).toHaveProperty('y', 0);
@@ -369,7 +369,7 @@ describe("DrawingContentModel", () => {
     expect(obj).toHaveProperty('dy', 20);
 
     // drag top left smaller
-    obj.dragBounds({ top: 10, right: 0, bottom: 0, left: 10 });
+    obj.setDragBounds({ top: 10, right: 0, bottom: 0, left: 10 });
     obj.adoptDragBounds();
     expect(obj).toHaveProperty('x', 10);
     expect(obj).toHaveProperty('y', 10);
@@ -388,14 +388,14 @@ describe("DrawingContentModel", () => {
     });
 
     // drag bottom right bigger
-    obj.dragBounds({ top: 0, right: 10, bottom: 10, left: 0 });
+    obj.setDragBounds({ top: 0, right: 10, bottom: 10, left: 0 });
     obj.adoptDragBounds();
     expect(obj).toHaveProperty('x', 0);
     expect(obj).toHaveProperty('y', 0);
     expect(obj).toHaveProperty('deltaPoints', [{dx: 20, dy: 20}]);
 
     // drag top left smaller
-    obj.dragBounds({ top: 10, right: 0, bottom: 0, left: 10 });
+    obj.setDragBounds({ top: 10, right: 0, bottom: 0, left: 10 });
     obj.adoptDragBounds();
     expect(obj).toHaveProperty('x', 10);
     expect(obj).toHaveProperty('y', 10);

@@ -63,7 +63,7 @@ export const RectangleObject = types.compose("RectangleObject", StrokedObject, F
         self.width = self.height = squareSize;
       }
     },
-    dragBounds(deltas: BoundingBoxDelta) {
+    setDragBounds(deltas: BoundingBoxDelta) {
       self.dragX = self.x + deltas.left;
       self.dragY = self.y + deltas.top;
       self.dragWidth  = self.width  + deltas.right - deltas.left;

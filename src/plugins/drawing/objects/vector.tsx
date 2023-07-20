@@ -39,7 +39,7 @@ export const VectorObject = StrokedObject.named("VectorObject")
       self.headShape = headShape;
       self.tailShape = tailShape;
     },
-    dragBounds(deltas: BoundingBoxDelta) {
+    setDragBounds(deltas: BoundingBoxDelta) {
       if (self.dx > 0) {
         // x,y point is towards the left
         self.dragX = self.x + deltas.left;

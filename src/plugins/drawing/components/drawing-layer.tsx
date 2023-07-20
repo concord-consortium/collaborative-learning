@@ -373,7 +373,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         left:   corner.charAt(1)==='w' ? Math.min(dx,   origWidth -1)  : 0
       };
 
-      object.dragBounds(deltas);
+      object.setDragBounds(deltas);
       
     }, 10);
   

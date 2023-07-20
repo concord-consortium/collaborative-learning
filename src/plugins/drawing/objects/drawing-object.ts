@@ -7,7 +7,6 @@ import { StampModelType } from "../model/stamp";
 
 export type ToolbarModalButton = "select" | "line" | "vector" | "rectangle" | "ellipse" | "stamp" | "variable";
 
-
 // This interface is a subset of what the DrawingContentModel provides.
 // It is used to break the circular reference between DrawingContentModel
 // and the toolbar components.
@@ -90,12 +89,12 @@ export const DrawingObject = types.model("DrawingObject", {
     self.y = self.dragY ?? self.y;
     self.dragX = self.dragY = undefined;
   },
-  dragBounds(deltas: BoundingBoxDelta) {
+  setDragBounds(deltas: BoundingBoxDelta) {
     // Temporarily adjust the edges of the object's bounding box by the given deltas.
     // This will change the size and origin position of the object, with changes stored as volatile fields.
 
     // Implementated in subclasses since this will affect object types differently.
-    console.error("dragBounds is unimplemented for this type");
+    console.error("setDragBounds is unimplemented for this type");
   },
   adoptDragBounds() {
     // Move any volatile resizing into the persisted object model.

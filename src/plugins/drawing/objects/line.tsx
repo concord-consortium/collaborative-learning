@@ -63,7 +63,7 @@ export const LineObject = StrokedObject.named("LineObject")
       self.deltaPoints.push(point);
     },
 
-    dragBounds(deltas: BoundingBoxDelta) {
+    setDragBounds(deltas: BoundingBoxDelta) {
       self.dragX = self.dragY = self.dragScaleX = self.dragScaleY = undefined;
       const bbox = self.boundingBox;
       const left = bbox.nw.x;
