@@ -4,7 +4,7 @@ import React from "react";
 import { DrawingObject, DrawingObjectType, DrawingTool, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, typeField } from "./drawing-object";
 import { Point } from "../model/drawing-basic-types";
-import TextToolIcon from "../../../assets/icons/comment/comment.svg"
+import TextToolIcon from "../../../assets/icons/comment/comment.svg";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
 
 export const TextObject = DrawingObject.named("TextObject")
@@ -52,7 +52,7 @@ export const TextComponent = observer(
           onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
           onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
           onMouseDown={(e)=> handleDrag?.(e, model)}
-        >
+         >
           <rect
             key={id}
             x={x} y={y}
@@ -64,12 +64,11 @@ export const TextComponent = observer(
             x={x+5} y={y+5}
             width={width-10}
             height={height-10}>
-              <p style={{color: stroke}}
-                // @ts-ignore
-                xmlns="http://www.s3.org/1999/xhtml"
-                >{text}</p>
+              <p style={{color: stroke}}>
+                {text}
+              </p>
           </foreignObject>
-        </g>;
+         </g>;
 
 });
 
