@@ -1,8 +1,8 @@
 import React from "react";
 import classNames from "classnames";
 import Rete, { NodeEditor, Node } from "rete";
-import { roundNodeValue } from "../../model/utilities/node";
 import "./value-control.sass";
+import { getNumDisplayStr } from "../utilities/view-utilities";
 
 export class ValueControl extends Rete.Control {
   private emitter: NodeEditor;
@@ -17,18 +17,17 @@ export class ValueControl extends Rete.Control {
 
     this.component = (compProps: { value: number; sentence: string, class: string }) => {
       const sentLen = compProps.sentence.length;
-      const dynamicClasses = classNames({
+      const fontSizeClasses = {
         "smallest": sentLen >= 15,
         "small": sentLen > 13 && sentLen < 15,
-        "medium": sentLen > 11 && sentLen <= 13
-      });
-
+        "medium": sentLen > 11 && sentLen <= 13,
+      };
+      const valueClasses = classNames(
+        "value-container", fontSizeClasses, compProps.class.toLowerCase().replace(/ /g, "-"),
+      );
       return (
-        <div className={`value-container ${compProps.class.toLowerCase().replace(/ /g, "-")} ${dynamicClasses}`}
-             title={"Node Value"}>
-          {compProps.sentence
-            ? compProps.sentence
-            : isFinite(compProps.value) ? roundNodeValue(compProps.value) : ""}
+        <div className={valueClasses} title={"Node Value"}>
+          {compProps.sentence ? compProps.sentence : getNumDisplayStr(compProps.value)}
         </div>
       );
     };

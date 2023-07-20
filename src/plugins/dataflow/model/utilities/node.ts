@@ -441,10 +441,6 @@ export const NodeTimerInfo =
   method: (t: number, tOn: number, tOff: number) => t % (tOn + tOff) < tOn ? 1 : 0,
 };
 
-export const roundNodeValue = (n: number) => {
-  return Math.round(n * 1000) / 1000;
-};
-
 export const ChartPlotColors = ["#d51eff", "#17ddd7", "#d3d114", "#3974ff", "#ff3d3d",
                                "#49d381", "#b05ecb", "#ffd56d", "#ffa56d", "#f57676",
                                "#fa73b0", "#eb80dc", "#cd88e4", "#d49600", "#d45200",
