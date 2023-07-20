@@ -12,7 +12,8 @@ export const TextObject = DrawingObject.named("TextObject")
     type: typeField("text"),
     width: types.number,
     height: types.number,
-    stroke: types.string
+    stroke: types.string,
+    text: types.string
   })
   .views(self => ({
     get boundingBox() {
@@ -42,7 +43,7 @@ export function isTextObject(model: DrawingObjectType): model is TextObjectType 
 export const TextComponent = observer(
     function TextComponent({model, handleHover, handleDrag} : IDrawingComponentProps) {
   if (!isTextObject(model)) return null;
-  const { id, width, height, stroke } = model as TextObjectType;
+  const { id, width, height, stroke, text } = model as TextObjectType;
   const { x, y } = model.position;
   return <g 
           key={id} 
@@ -66,7 +67,7 @@ export const TextComponent = observer(
               <p style={{color: stroke}}
                 // @ts-ignore
                 xmlns="http://www.s3.org/1999/xhtml"
-                >The five boxing wizards jump quickly.</p>
+                >{text}</p>
           </foreignObject>
         </g>;
 
@@ -87,7 +88,8 @@ export class TextDrawingTool extends DrawingTool {
       y: start.y,
       width: 100,
       height: 100,
-      stroke
+      stroke,
+      text: "The five boxing wizards jump quickly."
     });
     this.drawingLayer.addNewDrawingObject(getSnapshot(text));
   }
