@@ -5,7 +5,7 @@ import { useDocumentSyncToFirebase } from "../../hooks/use-document-sync-to-fire
 import { useFirestoreTeacher } from "../../hooks/firestore-hooks";
 import { useLastSupportViewTimestamp } from "../../hooks/use-last-support-view-timestamp";
 import { DocumentModelType } from "../../models/document/document";
-import { isProblemType, isPublishedType, SupportPublication } from "../../models/document/document-types";
+import { isPublishedType, SupportPublication } from "../../models/document/document-types";
 import { getDocumentDisplayTitle } from "../../models/document/document-utils";
 import { useAppConfig, useClassStore, useDBStore, useProblemStore, useUserStore } from "../../hooks/use-stores";
 import { NavTabSectionModelType } from "../../models/view/nav-tabs";

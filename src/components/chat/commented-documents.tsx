@@ -175,7 +175,6 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
               <WorkDocumentItem
                 key={index}
                 doc={doc}
-                index={index}
                 sectionOrNetworkDoc={sectionDoc}
                 isNetworkDoc={false}
                 handleDocView={handleDocView}
@@ -188,7 +187,6 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
               <WorkDocumentItem
                 key={index}
                 doc={doc}
-                index={index}
                 sectionOrNetworkDoc={networkDoc}
                 isNetworkDoc={true}
                 handleDocView={handleDocView}
@@ -204,7 +202,6 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
 
 interface JProps {
   doc: any,
-  index: number,
   sectionOrNetworkDoc: DocumentModelType,
   isNetworkDoc: boolean,
   handleDocView: (() => void) | undefined,
@@ -242,7 +239,7 @@ export const WorkDocumentItem: React.FC<JProps> = (props) => {
         </div>
     }
       <div className={"title"}>
-        { title + "   isStudentDoc:" + isStudentWorkspaceDoc }
+        { title }
       </div>
       <div className={"numComments"}>
         {doc.numComments}

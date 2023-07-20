@@ -405,6 +405,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     const { group } = this.props;
     const focusedUser = this.getFocusedGroupUser();
     const document = this.getGroupUserDoc(groupUser);
+
     if (groupUser && document) {
       const logInfo = {groupId: group.id, studentId: groupUser.id};
       if (focusedUser){
