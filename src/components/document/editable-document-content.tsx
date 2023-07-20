@@ -97,13 +97,6 @@ export interface IProps {
 }
 export const EditableDocumentContent: React.FC<IProps> = props => {
   const { className, contained, mode, isPrimary, document, toolbar, readOnly, showPlayback, fullHeight } = props;
-  console.log("<EditableDocumentContent>");
-  console.log("\tw/ document.type:", document.type);
-  console.log("\tw/ document.key:", document.key);
-  console.log("\tw/ document.uid:", document.uid);
-
-
-
   const documentContext = useDocumentContext(document);
   const { db: { firebase }, ui, user } = useStores();
   // set by the canvas and used by the toolbar

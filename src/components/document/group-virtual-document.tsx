@@ -42,8 +42,6 @@ export class GroupVirtualDocumentComponent extends BaseComponent<IProps, IState>
     const thisId = document.id;
     const selected = thisId === groupId;
     const className = `icon group-number ${selected ? "active" : ""}`;
-    console.log("groupButton with groupID:", groupId, "displayId:", displayId);
-
     const clickHandler = () => this.handleGroupClicked(groupId);
     return(
       <div key={groupId} className={className} onClick={clickHandler}>
@@ -70,7 +68,6 @@ export class GroupVirtualDocumentComponent extends BaseComponent<IProps, IState>
   }
 
   private handleGroupClicked(groupID: string) {
-    console.log("handleGroupClicked with groupId:", groupID);
     const { ui } = this.stores;
     Logger.log(LogEventName.VIEW_GROUP, {group: groupID, via: "group-document-titlebar"});
     ui.problemWorkspace.setComparisonDocument(new GroupVirtualDocument({id: groupID}));

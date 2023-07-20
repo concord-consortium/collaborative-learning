@@ -26,8 +26,6 @@ interface PromisedDocumentDocument extends DocumentDocument {
   title?: string
 }
 
-const testArray = ["1", "2", "3"];
-
 export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
   const [db] = useFirestore();
   const ui = useUIStore();
@@ -98,8 +96,6 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
     }
   }, [mDocsRef, user?.network, user?.id]);
 
-  console.log("mDocsInScopeRef:", mDocsInScopeRef);
-
   //------Documents: (i.e. //"Student Workspaces/"My Work"/"Class Work")
   useEffect(() => {
     const unsubscribeFromDocs = mDocsInScopeRef.onSnapshot(querySnapshot=>{
@@ -135,21 +131,11 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
     return () => unsubscribeFromDocs?.();
   },[mDocsRef, mDocsInScopeRef]);
 
-  console.log("docsCommentedOn:", docsCommentedOn);
-  console.log("workDocuments:", workDocuments);
-
-  console.log("-----------------------");
-
-
   return (
     <div className="commented-document-list">
       {
         docsCommentedOn &&
         (docsCommentedOn).map((doc: PromisedCurriculumDocument, index:number) => { //Problem + Teacher Guide documents
-          console.log("doc (commented on)", doc);
-          console.log("\t title:", doc.title);
-          console.log("\t uid", doc.uid);
-
           const {navTab} = getTabsOfCurriculumDoc(doc.path);
           return (
             <div
@@ -216,12 +202,6 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
   );
 };
 
-interface ZProps {
-  str: string;
-}
-
-
-
 interface JProps {
   doc: any,
   index: number,
@@ -233,19 +213,7 @@ interface JProps {
 
 // This is rendering a single document item in the commented document list
 export const WorkDocumentItem: React.FC<JProps> = (props) => {
-  const { doc, index, sectionOrNetworkDoc, isNetworkDoc, handleDocView, isStudentWorkspaceDoc } = props;
-  console.log("--------------------------------------");
-
-  console.log("<WorkDocumentItem> with index:", index);
-  console.log("\tsectionOrNetworkDoc:", sectionOrNetworkDoc);
-
-  console.log("\tsectionOrNetworkDoc.uid:", sectionOrNetworkDoc.uid);
-  console.log("\tsectionOrNetworkDoc.key:", sectionOrNetworkDoc.key);
-  console.log("\tsectionOrNetworkDoc.groupId:", sectionOrNetworkDoc.groupId);
-  console.log("\tisNetworkDoc: ", isNetworkDoc);
-  console.log("\tisStudentWorkspaceDoc: ", isStudentWorkspaceDoc);
-
-
+  const { doc, sectionOrNetworkDoc, isNetworkDoc, handleDocView, isStudentWorkspaceDoc } = props;
   const ui = useUIStore();
   // We need the navTab to style the item.
   const navTab = getNavTabOfDocument(doc.type);

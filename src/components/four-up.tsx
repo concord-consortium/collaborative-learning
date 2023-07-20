@@ -401,16 +401,10 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleOverlayClick = (groupUser?: GroupUserModelType) => {
-    console.log("handleOverLayClick");
     const { ui } = this.stores;
     const { group } = this.props;
     const focusedUser = this.getFocusedGroupUser();
     const document = this.getGroupUserDoc(groupUser);
-    console.log("\tdocument.type:", document?.type);
-
-    console.log("\tdocument.key:", document?.key);
-
-
     if (groupUser && document) {
       const logInfo = {groupId: group.id, studentId: groupUser.id};
       if (focusedUser){
