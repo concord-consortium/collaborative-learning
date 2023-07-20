@@ -25,6 +25,9 @@ export const TextObject = DrawingObject.named("TextObject")
     }
   }))
   .actions(self => ({
+    setStroke(stroke: string){ 
+      self.stroke = stroke; 
+    },
     resize(start: Point, end: Point) {
       self.x = Math.min(start.x, end.x);
       self.y = Math.min(start.y, end.y);
