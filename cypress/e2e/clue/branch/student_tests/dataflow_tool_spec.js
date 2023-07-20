@@ -26,6 +26,13 @@ context('Dataflow Tool Tile', function () {
       dataflowToolTile.getDataflowTileTitle().type(newName + '{enter}');
       dataflowToolTile.getTileTitle().should("contain", newName);
     });
+    it("makes link button active when table is present", () => {
+      dataflowToolTile.getLinkTileButton().should("exist");
+      dataflowToolTile.getLinkTileButton().should("have.class", "disabled");
+      clueCanvas.addTile("table");
+      dataflowToolTile.getLinkTileButton().should("not.have.class", "disabled");
+      clueCanvas.deleteTile("table");
+    });
     describe("Number Node", () => {
       const nodeType = "number";
       it("can create number node", () => {
