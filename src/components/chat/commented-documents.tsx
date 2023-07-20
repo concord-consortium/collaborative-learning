@@ -283,7 +283,7 @@ export const WorkDocumentItem: React.FC<JProps> = (props) => {
         </div>
     }
       <div className={"title"}>
-        { title + "     " + doc.key + "----" + doc.uid }
+        { title + "     " + doc.uid +  "isStudentDoc:" + isStudentWorkspaceDoc }
       </div>
       <div className={"numComments"}>
         {doc.numComments}
