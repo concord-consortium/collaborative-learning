@@ -221,12 +221,6 @@ interface ZProps {
 }
 
 
-const PrintTestArray: React.FC<ZProps> = (props) => {
-  const { str } = props;
-  console.log("----<PrintTestArray>----");
-  return <div> {str} </div>;
-};
-
 
 interface JProps {
   doc: any,
@@ -251,14 +245,11 @@ export const WorkDocumentItem: React.FC<JProps> = (props) => {
   console.log("\tisNetworkDoc: ", isNetworkDoc);
   console.log("\tisStudentWorkspaceDoc: ", isStudentWorkspaceDoc);
 
-  //set isStudentWorkspaceDocument logic up here
-  //if docID!==myuid && isProblemType(type);  -> send to title and to openResourceDocument
 
   const ui = useUIStore();
   // We need the navTab to style the item.
   const navTab = getNavTabOfDocument(doc.type);
   const title =  useDocumentCaption(sectionOrNetworkDoc, isStudentWorkspaceDoc);
-  console.log("\ttitle: ", title);
 
   return (
     <div
@@ -283,7 +274,7 @@ export const WorkDocumentItem: React.FC<JProps> = (props) => {
         </div>
     }
       <div className={"title"}>
-        { title + "     " + doc.uid +  "isStudentDoc:" + isStudentWorkspaceDoc }
+        { title + "   isStudentDoc:" + isStudentWorkspaceDoc }
       </div>
       <div className={"numComments"}>
         {doc.numComments}
