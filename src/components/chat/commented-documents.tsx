@@ -51,18 +51,6 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
   }
   }, [cDocsRef, problem, unit, user?.network, user?.id]);
 
-  //"MyWork"/"ClassWork"
-  const [workDocuments, setWorkDocuments] = useState<PromisedDocumentDocument[]>();
-  const mDocsRef = useMemo(() => db.collection("documents"), [db]);
-  const mDocsInScopeRef = useMemo(() => {
-    if(user?.network){
-      return mDocsRef.where("network", "==", user?.network);
-    } else {
-      return mDocsRef.where("uid", "==", user?.id);
-    }
-  }, [mDocsRef, user?.network, user?.id]);
-
-
   //------Curriculum Documents: (i.e. //"Problem"/"Teacher-Guide")
   useEffect(() => {
     const unsubscribeFromDocs = cDocsInScopeRef.onSnapshot(querySnapshot => {
@@ -96,7 +84,19 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
     return () => unsubscribeFromDocs?.();
   },[cDocsRef, cDocsInScopeRef]);
 
-  // ------MyWork/ClassWork--------
+
+  //---------StudentWorkspaces/MyWork/ClassWork
+  const [workDocuments, setWorkDocuments] = useState<PromisedDocumentDocument[]>();
+  const mDocsRef = useMemo(() => db.collection("documents"), [db]);
+  const mDocsInScopeRef = useMemo(() => {
+    if(user?.network){
+      return mDocsRef.where("network", "==", user?.network);
+    } else {
+      return mDocsRef.where("uid", "==", user?.id);
+    }
+  }, [mDocsRef, user?.network, user?.id]);
+
+  // --------StudentWorkspaces/MyWork/ClassWork
   useEffect(() => {
     const unsubscribeFromDocs = mDocsInScopeRef.onSnapshot(querySnapshot=>{
       const docs = querySnapshot.docs.map(doc =>{ //convert each element of docs to an object
@@ -122,7 +122,6 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
           }
         }));
       }
-
       Promise.all(promiseArr).then(()=>{
         setWorkDocuments(commentedDocs);
       });
