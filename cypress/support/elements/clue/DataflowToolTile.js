@@ -183,6 +183,9 @@ class DataflowToolTile {
   getRecordingClearButton() {
     return cy.get(".primary-workspace .record-data-btn").contains("Clear").parent();
   }
+  getLinkTileButton() {
+    return cy.get(".primary-workspace .link-table-button");
+  }
   verifyClearButtonDoesNotExist() {
     cy.get(".primary-workspace .record-data-btn").should("not.have.text", "Clear");
   }
