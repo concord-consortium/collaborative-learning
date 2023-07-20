@@ -44,6 +44,9 @@ export const VariableChipObject = DrawingObject.named("VariableObject")
       const nw: Point = {x, y};
       const se: Point = {x: x + width, y: y + height};
       return {nw, se};
+    },
+    get supportsResize() {
+      return false;
     }
   }));
 export interface VariableChipObjectType extends Instance<typeof VariableChipObject> {}

@@ -12,6 +12,13 @@ export interface BoundingBox {
   end?: Point;
 }
 
+export interface BoundingBoxDelta {
+  top: number, 
+  right: number, 
+  bottom: number, 
+  left: number
+}
+
 export enum VectorType {
   line = "line",
   singleArrow = "arrow",
@@ -54,6 +61,7 @@ export function endShapesForVectorType(vectorType?: VectorType) {
       return [VectorEndShape.triangle, VectorEndShape.triangle];
   }
 }
+
 
 export interface ToolbarSettings {
   stroke: string;

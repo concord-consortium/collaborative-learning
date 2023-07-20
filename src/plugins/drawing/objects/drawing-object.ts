@@ -1,7 +1,8 @@
 import { getMembers, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { uniqueId } from "../../../utilities/js-utils";
 import { SelectionBox } from "../components/selection-box";
-import { BoundingBox, DefaultToolbarSettings, Point, ToolbarSettings } from "../model/drawing-basic-types";
+import { BoundingBox, BoundingBoxDelta, DefaultToolbarSettings, Point, ToolbarSettings }
+   from "../model/drawing-basic-types";
 import { StampModelType } from "../model/stamp";
 
 export type ToolbarModalButton = "select" | "line" | "vector" | "rectangle" | "ellipse" | "stamp" | "variable";
@@ -69,6 +70,9 @@ export const DrawingObject = types.model("DrawingObject", {
   inSelection(selectionBox: SelectionBox) {
     const {nw, se} = self.boundingBox;
     return selectionBox.overlaps(nw, se);
+  },
+  get supportsResize() {
+    return true;
   }
 }))
 .actions(self => ({
@@ -84,6 +88,17 @@ export const DrawingObject = types.model("DrawingObject", {
     self.x = self.dragX ?? self.x;
     self.y = self.dragY ?? self.y;
     self.dragX = self.dragY = undefined;
+  },
+  setDragBounds(deltas: BoundingBoxDelta) {
+    // Temporarily adjust the edges of the object's bounding box by the given deltas.
+    // This will change the size and origin position of the object, with changes stored as volatile fields.
+
+    // Implementated in subclasses since this will affect object types differently.
+    console.error("setDragBounds is unimplemented for this type");
+  },
+  adoptDragBounds() {
+    // Move any volatile resizing into the persisted object model.
+    console.error("adoptDragBounds is unimplemented for this type");
   }
 }));
 export interface DrawingObjectType extends Instance<typeof DrawingObject> {}
