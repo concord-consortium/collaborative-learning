@@ -3,7 +3,7 @@ import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
 import { DrawingObject, DrawingObjectType, DrawingTool, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, typeField } from "./drawing-object";
-import { Point, ToolbarSettings } from "../model/drawing-basic-types";
+import { BoundingBoxDelta, Point, ToolbarSettings } from "../model/drawing-basic-types";
 import TextToolIcon from "../../../assets/icons/comment/comment.svg";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
 
@@ -15,10 +15,23 @@ export const TextObject = DrawingObject.named("TextObject")
     stroke: types.string,
     text: types.string
   })
+  .volatile(self => ({
+    dragWidth: undefined as number | undefined,
+    dragHeight: undefined as number | undefined
+  }))
+  .views(self => ({
+    get currentDims() {
+      const { width, height, dragWidth, dragHeight } = self;
+      return {
+        width: dragWidth ?? width,
+        height: dragHeight ?? height
+      };
+    }
+  }))
   .views(self => ({
     get boundingBox() {
-      const {width, height} = self;
       const { x, y } = self.position;
+      const { width, height } = self.currentDims;
       const nw: Point = {x, y};
       const se: Point = {x: x + width, y: y + height};
       return {nw, se};
@@ -33,6 +46,18 @@ export const TextObject = DrawingObject.named("TextObject")
       self.y = Math.min(start.y, end.y);
       self.width = Math.max(start.x, end.x) - self.x;
       self.height = Math.max(start.y, end.y) - self.y;
+    },
+    setDragBounds(deltas: BoundingBoxDelta) {
+      self.dragX = self.x + deltas.left;
+      self.dragY = self.y + deltas.top;
+      self.dragWidth  = self.width  + deltas.right - deltas.left;
+      self.dragHeight = self.height + deltas.bottom - deltas.top;
+    },
+    adoptDragBounds() {
+      self.adoptDragPosition();
+      self.width = self.dragWidth ?? self.width;
+      self.height = self.dragHeight ?? self.height;
+      self.dragWidth = self.dragHeight = undefined;
     }
   }));
 
@@ -46,8 +71,10 @@ export function isTextObject(model: DrawingObjectType): model is TextObjectType 
 export const TextComponent = observer(
     function TextComponent({model, handleHover, handleDrag} : IDrawingComponentProps) {
   if (!isTextObject(model)) return null;
-  const { id, width, height, stroke, text } = model as TextObjectType;
+  const textobj = model as TextObjectType;
+  const { id, stroke, text } = textobj;
   const { x, y } = model.position;
+  const { width, height } = textobj.currentDims;
   return <g 
           key={id} 
           className="text" 
