@@ -1,13 +1,14 @@
 import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
-import React from "react";
-import { DrawingObject, DrawingObjectType, DrawingTool, IDrawingComponentProps, IDrawingLayer,
+import React, { ReactElement, useState } from "react";
+import { DrawingObject, DrawingObjectType, DrawingTool, EditableObject, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, typeField } from "./drawing-object";
 import { BoundingBoxDelta, Point, ToolbarSettings } from "../model/drawing-basic-types";
 import TextToolIcon from "../../../assets/icons/comment/comment.svg";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
+import { uniqueId } from "../../../../src/utilities/js-utils";
 
-export const TextObject = DrawingObject.named("TextObject")
+export const TextObject = EditableObject.named("TextObject")
   .props({
     type: typeField("text"),
     width: types.number,
@@ -41,6 +42,9 @@ export const TextObject = DrawingObject.named("TextObject")
     setStroke(stroke: string){ 
       self.stroke = stroke; 
     },
+    setText(text: string) {
+      self.text = text;
+    },
     resize(start: Point, end: Point) {
       self.x = Math.min(start.x, end.x);
       self.y = Math.min(start.y, end.y);
@@ -58,8 +62,12 @@ export const TextObject = DrawingObject.named("TextObject")
       self.width = self.dragWidth ?? self.width;
       self.height = self.dragHeight ?? self.height;
       self.dragWidth = self.dragHeight = undefined;
+    },
+    setEditing(editing: boolean) {
+      console.log('Editing state is now', editing);
+      self.isEditing = editing;
     }
-  }));
+  }));  
 
 export interface TextObjectType extends Instance<typeof TextObject> {}
 export interface TextObjectSnapshot extends SnapshotIn<typeof TextObject> {}
@@ -75,6 +83,54 @@ export const TextComponent = observer(
   const { id, stroke, text } = textobj;
   const { x, y } = model.position;
   const { width, height } = textobj.currentDims;
+  const textareaId = uniqueId();
+
+  interface IContentProps {
+    editing: boolean,
+    text: string
+  }
+  const Content = function({editing, text}: IContentProps) {
+    if (editing) {
+      return (
+        <textarea id={textareaId}
+          style={{width: "100%", height: "100%", resize: "none"}} 
+          defaultValue={text}
+          onKeyDown={handleKeyDown}
+        ></textarea>);
+    } else {
+      return(
+        <p style={{color: stroke}}>
+          {text}
+          </p>);
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    const { key } = e;
+    switch (key) {
+      case "Escape":
+        handleClose(false);
+        break;
+      case "Enter":
+      case "Tab":
+        handleClose(true);
+        break;
+    }
+  };
+
+  const handleClose = (accept: boolean) => {
+    if (accept) {
+      const textarea = document.getElementById(textareaId);
+      if (textarea instanceof HTMLTextAreaElement) {
+        console.log('Content now: ', textarea.value);
+        model.setText(textarea.value);
+      } else {
+        console.log('Lost track of my textarea: ', textarea);
+      }
+    }
+    model.setEditing(false);
+  };
+
   return <g 
           key={id} 
           className="text" 
@@ -94,9 +150,7 @@ export const TextComponent = observer(
             x={x+5} y={y+5}
             width={width-10}
             height={height-10}>
-              <p style={{color: stroke}}>
-                {text}
-              </p>
+              <Content editing={model.isEditing} text={text}/>
           </foreignObject>
          </g>;
 

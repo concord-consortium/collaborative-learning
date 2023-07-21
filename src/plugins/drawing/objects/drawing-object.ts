@@ -152,6 +152,21 @@ export function isFilledObject(object: DrawingObjectType): object is FilledObjec
   return !!(typeMembers.properties?.fill);
 }
 
+// "Editable" objects go into an "editing" state if you click them while they are already selected.
+// For example, text labels go into a state where you can edit the text.
+export const EditableObject = DrawingObject.named("EditableObject")
+.volatile(self => ({
+  isEditing: false
+}))
+.actions(self=> ({
+  setEditing(editing: boolean){ self.isEditing = editing; }
+}));
+export interface EditableObjectType extends Instance<typeof EditableObject> {}
+export function isEditableObject(object: DrawingObjectType): object is EditableObjectType {
+  const typeMembers = getMembers(object);
+  return !!(typeMembers.actions.includes("setEditing"));
+}
+
 export const DeltaPoint = types.model("DeltaPoint", {
   dx: types.number, dy: types.number
 });

@@ -1,5 +1,5 @@
 import React from "react";
-import { DrawingObjectType, DrawingTool, IDrawingLayer } from "../objects/drawing-object";
+import { DrawingObjectType, DrawingTool, IDrawingLayer, isEditableObject } from "../objects/drawing-object";
 
 export class SelectionDrawingTool extends DrawingTool {
   constructor(drawingLayer: IDrawingLayer) {
@@ -43,7 +43,11 @@ export class SelectionDrawingTool extends DrawingTool {
     }
     else {
       if (!(e.shiftKey||e.metaKey)){
-        selectedObjects.splice(index, 1);
+        if (isEditableObject(obj)) {
+          obj.setEditing(true);
+        } else {
+          selectedObjects.splice(index, 1);
+        }
       }
     }
     this.drawingLayer.setSelectedObjects(selectedObjects);
