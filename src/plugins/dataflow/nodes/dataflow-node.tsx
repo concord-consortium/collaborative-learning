@@ -12,6 +12,7 @@ export class DataflowNode extends Node {
 
   public render() {
     const { node, bindSocket, bindControl } = this.props;
+    console.log("render: node as prop:", node);
     const { outputs, controls, inputs } = this.state;
 
     const settingsControls = controls.filter(isSettingControl);
@@ -23,8 +24,14 @@ export class DataflowNode extends Node {
     const decoratedInputs = inputs.filter(isDecoratedInput(true));
     const plotButton = controls.find((c: any) => c.key === "plot");
     const showPlot = plotButton?.props.showgraph ?? node.data.plot ?? false;
-    const nodeType = NodeTypes.find( (n: NodeType) => n.name === node.name);
-    const displayName = nodeType ? nodeType.displayName : node.name;
+
+    // const displayName = node.displayNameInsertionOrder || node.name;
+
+
+    // new method (but prob woin't work)
+    // const displayNameBase = nodeType ? nodeType.displayName : node.name;
+    // const insertedOrder = getInsertionOrder(node.id);
+    // const displayName = displayNameBase + insertionOrder;
 
     const dynamicClasses = classNames({
       "gate-active": node.data.gateActive,
@@ -32,14 +39,14 @@ export class DataflowNode extends Node {
       "uses-relays": outputsToAnyRelay(node),
       "uses-gripper": outputsToAnyGripper(node),
     });
-
+    // console.log("displayName:", displayName);
     const inputClass = (s: string) => "input " + s.toLowerCase().replace(/ /g, "-");
 
     return (
       <div className={`node ${node.name.toLowerCase().replace(/ /g, "-")} ${dynamicClasses}`}>
         <div className="top-bar">
           <div className="node-title">
-            {displayName}
+            {node.displayNameInsertionOr}
           </div>
           {deleteControl &&
             <Control

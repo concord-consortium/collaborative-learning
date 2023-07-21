@@ -10,6 +10,7 @@ export abstract class DataflowReteNodeFactory extends Rete.Component {
 
   constructor(name: string, numSocket: Socket) {
     super(name);
+    // console.log("constructor > name:", name);
     this.numSocket = numSocket;
     const data: any = this.data;
     data.component = DataflowNode;

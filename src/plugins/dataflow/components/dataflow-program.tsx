@@ -32,14 +32,17 @@ import {
   sendDataToSerialDevice, sendDataToSimulatedOutput, updateNodeChannelInfo, updateGeneratorNode, updateNodeRecentValues,
   updateSensorNode, updateTimerNode
 } from "../nodes/utilities/update-utilities";
-import { getBoundingRectOfNodes, getNewNodePosition, moveNodeToFront } from "../nodes/utilities/view-utilities";
+import {
+  getBoundingRectOfNodes, getInsertionOrder,
+  getNewNodePosition, moveNodeToFront
+} from "../nodes/utilities/view-utilities";
 import { DataflowDropZone } from "./ui/dataflow-drop-zone";
 import { DataflowProgramToolbar } from "./ui/dataflow-program-toolbar";
 import { DataflowProgramTopbar } from "./ui/dataflow-program-topbar";
 import { DataflowProgramCover } from "./ui/dataflow-program-cover";
 import { DataflowProgramZoom } from "./ui/dataflow-program-zoom";
 import { NodeChannelInfo, serialSensorChannels } from "../model/utilities/channel";
-import { ProgramDataRates } from "../model/utilities/node";
+import { NodeType, NodeTypes, ProgramDataRates } from "../model/utilities/node";
 import { calculatedRecentValues, runNodePlaybackUpdates,  } from "../utilities/playback-utils";
 import { getAttributeIdForNode, recordCase } from "../model/utilities/recording-utilities";
 import { virtualSensorChannels } from "../model/utilities/virtual-channel";
@@ -119,6 +122,23 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       editorContainerWidth: 0,
       lastIntervalDuration: 0,
     };
+    console.log("dataflow-program.tsx-----");
+    console.log("\tprops.model:", this.props.model);
+    console.log("\tprops.program:", this.props.program);
+    this.props.program?.nodes.forEach((node)=>{
+      console.log("\t\tnode:", node);
+    });
+
+
+    console.log("\tprops.playbackIndex:", this.props.playBackIndex);
+    console.log("\tprops.recordIndex:", this.props.recordIndex);
+    console.log("\tprops.tileContent:", this.props.tileContent);
+    console.log("\t\ttileContent.dataSet:", this.props.tileContent.dataSet);
+    this.props.tileContent.dataSet.attributes.forEach((attr)=>{
+      console.log("\t\t\tattr:", attr.name);
+    });
+
+    console.log("---------------------------------------------------");
     this.lastIntervalTime = Date.now();
   }
 
@@ -363,6 +383,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.programEditor.on("nodecreated", node => {
         this.processAndSave();
         moveNodeToFront(this.programEditor, node, true);
+        //find insertion order then rewrite displayed name
+        const insertionOrder = getInsertionOrder(this.programEditor, node.id);
+        const nodeType = NodeTypes.find( (n: NodeType) => n.name === node.name);
+        const displayName = nodeType ? nodeType.displayName : node.name;
+        node.displayNameInsertionOrder = displayName + " " + insertionOrder;
         node.meta.inTileWithId = this.tileId;
         dataflowLogEvent("nodecreated", node, this.tileId);
       });
@@ -538,7 +563,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
   };
 
-  private addNode = async (nodeType: string, position?: [number, number]) => {
+  private addNode = async (nodeType: string, position?: [number, number]) => {  //----------------------------------
     const nodeFactory = this.programEditor.components.get(nodeType) as DataflowReteNodeFactory;
     const n1 = await nodeFactory!.createNode();
     n1.position = position ?? getNewNodePosition(this.programEditor);
@@ -567,6 +592,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const caseId = dataSet.getCaseAtIndex(playBackIndex)?.__id__;
     if (!caseId) return;
     this.programEditor.nodes.forEach((node, idx) => { //update each node in the frame
+      console.log("for Each node:", node);
+      console.log("idx:", idx);
+
       const attrId = getAttributeIdForNode(this.props.tileContent.dataSet, idx);
       const valForNode = dataSet.getValue(caseId, attrId) as number;
 
@@ -619,8 +647,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private tick = () => {
     const { readOnly, tileContent: tileModel, playBackIndex, programMode,
             isPlaying, updateRecordIndex, updatePlayBackIndex } = this.props;
-
     const dataSet = tileModel.dataSet;
+    // console.log("tick > dataSet:", dataSet);
+    // console.log("dataSet:", dataSet.attributes.forEach(node=>{
+      // console.log("node:", node.name);
+    // }));
+
+
     const now = Date.now();
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});
     this.lastIntervalTime = now;

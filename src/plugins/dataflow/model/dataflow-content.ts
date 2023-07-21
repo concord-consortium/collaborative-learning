@@ -289,6 +289,8 @@ export const DataflowContentModel = TileContentModel
   }))
   .actions(self => ({
     prepareRecording() {
+      console.log("prepare Recording invoked()");
+
       self.clearAttributes();
       // dataSet looks like
       // Time   |  Node 1 | Node 2 | Node 3 etc
