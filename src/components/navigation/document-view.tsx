@@ -342,8 +342,9 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocum
   const getDisplayTitle = (document: DocumentModelType) => {
     const documentOwner = classStore.users.get(document.uid);
     const documentTitle = getDocumentDisplayTitle(document, appConfig, problemStore);
-    return hasSecondaryDocument && documentOwner ? documentOwner.fullName + " " + documentTitle : documentTitle;
+    return {owner: documentOwner ? documentOwner.fullName : "", title: documentTitle};
   };
+  const displayTitle = getDisplayTitle(openDocument);
 
   function handleEditClick(document: DocumentModelType) {
     ui.problemWorkspace.setPrimaryDocument(document);
@@ -374,8 +375,12 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocum
     <div className={classNames("focus-document", tab, sideClasses)}>
       <div className={classNames("document-header", tab, sectionClass, sideClasses)}
             onClick={() => ui.setSelectedTile()}>
-        <div className={`document-title`}>
-          {getDisplayTitle(openDocument)}
+        <div className="document-title">
+          {(displayTitle.owner && tab === "class-work")
+              && <span className="document-owner">{displayTitle.owner}: </span>}
+          <span className={classNames("document-title", {"class-work": tab === "class-work"})}>
+            {displayTitle.title}
+          </span>
         </div>
         {(!openDocument.isRemote)
             && editButton(tab, sectionClass || sideClasses, openDocument)}
