@@ -223,7 +223,7 @@ export const WorkDocumentItem: React.FC<JProps> = (props) => {
         ui.openResourceDocument(sectionOrNetworkDoc, isStudentWorkspaceDoc);
         ui.setSelectedTile();
         if (handleDocView !== undefined){
-          handleDocView(); //toggle so we see <ChatThread>
+          handleDocView();
         }
       }}
     >
