@@ -16,8 +16,6 @@ export default defineConfig({
     coverage: false,
   },
   defaultCommandTimeout: 60000,
-  pageLoadTimeout: 120000,
-  responseTimeout: 30000,
   queryParams:
     '?appMode=qa&fakeClass=5&fakeUser=student:5&demoOffering=5&problem=2.1&qaGroup=5',
   teacherQueryParams:
@@ -26,6 +24,7 @@ export default defineConfig({
     // We've imported your old cypress plugins here.
     // You may want to clean this up later by importing these.
 
+    numTestsKeptInMemory: 0,
     setupNodeEvents(on, config) {
       const fetchConfigurationByFile = file => {
         const pathOfConfigurationFile = `config/cypress.${file}.json`;

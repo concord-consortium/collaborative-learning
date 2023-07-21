@@ -241,11 +241,12 @@ context('Teacher Dashboard View', () => {
     it('verify group support note appears in student view', function () {
       cy.visit('/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=student:10&qaGroup=3');
       cy.waitForLoad();
-      cy.wait(3000);
-      cy.get('#icon-sticky-note').should('exist');
-      cy.get('#icon-sticky-note').click({force:true});
-      cy.get('.sticky-note-popup').should('exist');
-      cy.get('.sticky-note-popup-item-content').should('contain', textToGroup);
+      cy.wait(5000);
+      cy.get('#icon-sticky-note').should('exist').click({force:true});
+      cy.get('#icon-sticky-note').click({force:true}).then(()=> {
+        cy.get('.sticky-note-popup').should('exist');
+        cy.get('.sticky-note-popup-item-content').should('contain', textToGroup);
+      });
     });
     it('verify group support note not in student view in different group', function () {
       cy.visit('/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=student:7&qaGroup=2');
@@ -276,11 +277,12 @@ context('Teacher Dashboard View', () => {
     it('verify student support note appears in student view', function () {
       cy.visit('/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=student:1&qaGroup=1');
       cy.waitForLoad();
-      cy.wait(3000);
-      cy.get('#icon-sticky-note').should('exist');
-      cy.get('#icon-sticky-note').click({force:true});
-      cy.get('.sticky-note-popup').should('exist');
-      cy.get('.sticky-note-popup-item-content').should('contain', textToStudent);
+      cy.wait(5000);
+      cy.get('#icon-sticky-note').should('exist').click({force:true});
+      cy.get('#icon-sticky-note').click({force:true}).then(()=> {
+        cy.get('.sticky-note-popup').should('exist');
+        cy.get('.sticky-note-popup-item-content').should('contain', textToStudent);
+      });
     });
     it("verify student support note is not in another student's view", function () {
       cy.visit('/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=student:2&qaGroup=1');
