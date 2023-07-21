@@ -3,7 +3,7 @@ import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
 import { DrawingObject, DrawingObjectType, DrawingTool, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, typeField } from "./drawing-object";
-import { Point } from "../model/drawing-basic-types";
+import { Point, ToolbarSettings } from "../model/drawing-basic-types";
 import TextToolIcon from "../../../assets/icons/comment/comment.svg";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
 
@@ -98,6 +98,12 @@ export class TextDrawingTool extends DrawingTool {
 }
 
 export function TextToolbarButton({toolbarManager}: IToolbarButtonProps) {
+  const buttonSettings: ToolbarSettings = {
+    stroke: toolbarManager.toolbarSettings.stroke,
+    fill: toolbarManager.toolbarSettings.stroke,
+    strokeWidth: 0,
+    strokeDashArray: ""
+  };
   return <SvgToolModeButton modalButton="text" title="Text"
-    toolbarManager={toolbarManager} SvgIcon={TextToolIcon}  />;
+    toolbarManager={toolbarManager} SvgIcon={TextToolIcon}  settings={buttonSettings}/>;
 }
