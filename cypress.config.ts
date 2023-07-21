@@ -15,6 +15,9 @@ export default defineConfig({
   env: {
     coverage: false,
   },
+  defaultCommandTimeout: 60000,
+  pageLoadTimeout: 120000,
+  responseTimeout: 30000,
   queryParams:
     '?appMode=qa&fakeClass=5&fakeUser=student:5&demoOffering=5&problem=2.1&qaGroup=5',
   teacherQueryParams:

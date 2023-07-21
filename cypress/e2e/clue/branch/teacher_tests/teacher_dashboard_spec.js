@@ -242,7 +242,7 @@ context('Teacher Dashboard View', () => {
       cy.visit('/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=student:10&qaGroup=3');
       cy.waitForLoad();
       cy.wait(3000);
-      cy.get('#icon-sticky-note').should('exist').click({force:true});
+      cy.get('#icon-sticky-note').should('exist');
       cy.get('#icon-sticky-note').click({force:true});
       cy.get('.sticky-note-popup').should('exist');
       cy.get('.sticky-note-popup-item-content').should('contain', textToGroup);
@@ -277,7 +277,7 @@ context('Teacher Dashboard View', () => {
       cy.visit('/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=student:1&qaGroup=1');
       cy.waitForLoad();
       cy.wait(3000);
-      cy.get('#icon-sticky-note').should('exist').click({force:true});
+      cy.get('#icon-sticky-note').should('exist');
       cy.get('#icon-sticky-note').click({force:true});
       cy.get('.sticky-note-popup').should('exist');
       cy.get('.sticky-note-popup-item-content').should('contain', textToStudent);

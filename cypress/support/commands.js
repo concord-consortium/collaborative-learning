@@ -218,6 +218,7 @@ Cypress.Commands.add('collapseResourceTabs', () => {
   cy.get('.divider-container').trigger('mouseover').then(() => {
     cy.get('.divider-container .expand-handle.left.shown').should("exist");
     cy.get('.divider-container .expand-handle.left.shown').click();
+    cy.get('.primary-workspace .tool.select', { timeout: 30000 });
   });
 });
 Cypress.Commands.add('closeResourceTabs', () => {
