@@ -26,6 +26,13 @@ context('Dataflow Tool Tile', function () {
       dataflowToolTile.getDataflowTileTitle().type(newName + '{enter}');
       dataflowToolTile.getTileTitle().should("contain", newName);
     });
+    it("makes link button active when table is present", () => {
+      dataflowToolTile.getLinkTileButton().should("exist");
+      dataflowToolTile.getLinkTileButton().should("have.class", "disabled");
+      clueCanvas.addTile("table");
+      dataflowToolTile.getLinkTileButton().should("not.have.class", "disabled");
+      clueCanvas.deleteTile("table");
+    });
     describe("Number Node", () => {
       const nodeType = "number";
       it("can create number node", () => {
@@ -93,6 +100,35 @@ context('Dataflow Tool Tile', function () {
         dataflowToolTile.getNode(nodeType).should("exist");
         dataflowToolTile.getDeleteNodeButton(nodeType).click();
         dataflowToolTile.getNode(nodeType).should("not.exist");
+      });
+    });
+    describe("Manage Decimals", () => {
+      it('can create a number node and change it to a decimal', () => {
+        // create a number node
+        dataflowToolTile.getCreateNodeButton("number").click();
+        dataflowToolTile.getNode("number").should("exist");
+        dataflowToolTile.getNodeTitle().should("contain", "Number");
+        dataflowToolTile.getNumberField().type("1.8309{enter}");
+      });
+      it('values should be rounded to three decimals for display', () => {
+        // create transform node and drag to the right
+        dataflowToolTile.getCreateNodeButton("transform").click();
+        dataflowToolTile.getNode("transform").should("exist");
+        dataflowToolTile.getNodeTitle().should("contain", "Transform");
+        dataflowToolTile.getNode("transform").click(50, 10)
+          .trigger("pointerdown", 50, 10 )
+          .trigger("pointermove", dragXDestination, 10, { force: true } )
+          .trigger("pointerup", dragXDestination, 10, { force: true } );
+          cy.wait(2000);
+        // connect the number node to the transform node
+        dataflowToolTile.getNodeOutput().eq(0).click();
+        dataflowToolTile.getNodeInput().eq(0).click();
+        // verify the transform node has the correct value
+        dataflowToolTile.getNode("transform").should("contain", "1.831");
+        dataflowToolTile.getDeleteNodeButton("number").click();
+        dataflowToolTile.getDeleteNodeButton("transform").click();
+        dataflowToolTile.getNode("number").should("not.exist");
+        dataflowToolTile.getNode("transform").should("not.exist");
       });
     });
     describe("Generator Node", () => {

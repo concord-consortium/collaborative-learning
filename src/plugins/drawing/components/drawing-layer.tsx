@@ -15,10 +15,12 @@ import { DrawingObjectSnapshotForAdd, DrawingObjectType, DrawingTool,
 import { Point, ToolbarSettings } from "../model/drawing-basic-types";
 import { getDrawingToolInfos, renderDrawingObject } from "./drawing-object-manager";
 import { ImageObject } from "../objects/image";
+import { debounce } from "lodash";
 
 const SELECTION_COLOR = "#777";
 const HOVER_COLOR = "#bbdd00";
 const SELECTION_BOX_PADDING = 10;
+const SELECTION_BOX_RESIZE_HANDLE_SIZE = 10;
 
 /**  ======= Drawing Layer ======= */
 interface DrawingToolMap {
@@ -290,15 +292,26 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     });
   }
 
-  public renderSelectedObjects(selectedObjects: DrawingObjectType[], color: string) {
+  public renderSelectedObjects(selectedObjects: DrawingObjectType[], enableActions: boolean) {
     return selectedObjects.map((object, index) => {
       let {nw: {x: nwX, y: nwY}, se: {x: seX, y: seY}} = object.boundingBox;
       nwX -= SELECTION_BOX_PADDING;
       nwY -= SELECTION_BOX_PADDING;
       seX += SELECTION_BOX_PADDING;
       seY += SELECTION_BOX_PADDING;
-      return <rect
-                key={index}
+
+      const color = enableActions ? SELECTION_COLOR : HOVER_COLOR;
+
+      const resizers = enableActions && object.supportsResize &&
+        <g>
+          {this.renderResizeHandle(object, "nw", nwX, nwY, color)}
+          {this.renderResizeHandle(object, "ne", seX, nwY, color)} 
+          {this.renderResizeHandle(object, "sw", nwX, seY, color)}
+          {this.renderResizeHandle(object, "se", seX, seY, color)}
+        </g>;
+
+      return <g key={index}>
+              <rect
                 data-testid="selection-box"
                 x={nwX}
                 y={nwY}
@@ -310,9 +323,75 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
                 strokeWidth="1.5"
                 strokeDasharray="10 5"
                 pointerEvents={"none"}
-               />;
+               />
+               {resizers}
+             </g>;
     });
   }
+
+  public renderResizeHandle(object: DrawingObjectType, corner: string, x: number, y: number, color: string) {
+    const resizeBoxOffset = SELECTION_BOX_RESIZE_HANDLE_SIZE/2;
+
+    return <rect key={corner} data-corner={corner} className={"resize-handle " + corner}
+                x={x-resizeBoxOffset} y={y-resizeBoxOffset} 
+                width={SELECTION_BOX_RESIZE_HANDLE_SIZE} height={SELECTION_BOX_RESIZE_HANDLE_SIZE}
+                stroke={color} strokeWidth="1" fill="#FFF" fillOpacity="1"
+                onMouseDown={(e) => this.handleResizeStart(e, object)}
+          />;
+  }
+
+  private handleResizeStart(e: React.MouseEvent<SVGRectElement, MouseEvent>, object: DrawingObjectType) {
+    e.stopPropagation();
+    e.preventDefault();
+    const handle = e.currentTarget;
+    handle.classList.add('active');
+    const corner = handle.dataset.corner;
+    
+    const start = this.getWorkspacePoint(e);
+    const origBoundingBox = object.boundingBox;
+    // The original size of the element is used to avoid making it 0 or negative size.
+    const origWidth = origBoundingBox.se.x - origBoundingBox.nw.x;
+    const origHeight = origBoundingBox.se.y - origBoundingBox.nw.y;
+
+    const handleResizeMove = debounce((e2: MouseEvent) => {
+      e2.stopPropagation();
+      e2.preventDefault();
+      // Check if mouse is within the drawtool canvas; if not do nothing.
+      if (!((this.svgRef as unknown) as Element).matches(':hover')) {
+        return;
+      }
+      const current = this.getWorkspacePoint(e2);
+      if (!start || !current || !corner) return;
+      const dx = current.x - start.x;
+      const dy = current.y - start.y;
+      // Determine which edges the user wants to move, and how much
+      // Constrain these to make sure the image won't get 0 or negative size.
+      const deltas = {
+        top:    corner.charAt(0)==='n' ? Math.min(dy,   origHeight-1)  : 0,
+        right:  corner.charAt(1)==='e' ? Math.max(dx, -(origWidth -1)) : 0,
+        bottom: corner.charAt(0)==='s' ? Math.max(dy, -(origHeight-1)) : 0,
+        left:   corner.charAt(1)==='w' ? Math.min(dx,   origWidth -1)  : 0
+      };
+
+      object.setDragBounds(deltas);
+      
+    }, 10);
+  
+    const handleResizecomplete = (e2: MouseEvent) => {
+      e2.stopPropagation();
+      e2.preventDefault();
+      window.removeEventListener("mousemove", handleResizeMove);
+      window.removeEventListener("mouseup", handleResizecomplete);
+      handle.classList.remove('active');
+      object.adoptDragBounds();
+    };
+
+    window.addEventListener("mousemove", handleResizeMove);
+    window.addEventListener("mouseup", handleResizecomplete);
+  }
+
+
+  //we want to populate our objectsBeingDragged state array
 
   public setCurrentDrawingObject(object: DrawingObjectType | null) {
     this.setState({currentDrawingObject: object});
@@ -347,9 +426,9 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         <svg xmlnsXlink="http://www.w3.org/1999/xlink" width={1500} height={1500} ref={this.setSvgRef}>
           {this.renderObjects(object => object.type === "image" )}
           {this.renderObjects(object => object.type !== "image" )}
-          {this.renderSelectedObjects(this.state.selectedObjects, SELECTION_COLOR)}
+          {this.renderSelectedObjects(this.state.selectedObjects, true)}
           {(this.state.hoverObject && !hoveringOverAlreadySelectedObject && isAlive(this.state.hoverObject))
-            ? this.renderSelectedObjects([this.state.hoverObject], HOVER_COLOR)
+            ? this.renderSelectedObjects([this.state.hoverObject], false)
             : null}
           {this.state.currentDrawingObject
             ? renderDrawingObject(this.state.currentDrawingObject)

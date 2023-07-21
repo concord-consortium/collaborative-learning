@@ -4,20 +4,22 @@ import React from "react";
 import { SelectionBox } from "../components/selection-box";
 import { computeStrokeDashArray, DeltaPoint, DrawingTool, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
-import { Point } from "../model/drawing-basic-types";
+import { BoundingBoxDelta, Point } from "../model/drawing-basic-types";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
 import FreehandToolIcon from "../assets/freehand-icon.svg";
 
 function* pointIterator(line: LineObjectType): Generator<Point, string, unknown> {
   const { x, y } = line.position;
-  const {deltaPoints} = line;
+  const points = line.deltaPoints;
   let currentX = x;
   let currentY = y;
-  for (const {dx, dy} of deltaPoints) {
-    const point: Point = {x: currentX, y: currentY};
-    yield point;
-    currentX += dx;
-    currentY += dy;
+  const scaleX = line.dragScaleX ?? 1;
+  const scaleY = line.dragScaleY ?? 1;
+  yield { x: currentX, y: currentY };
+  for (const {dx, dy} of points) {
+    currentX += dx * scaleX;
+    currentY += dy * scaleY;
+    yield {x: currentX, y: currentY};
   }
   // Due to some conflict between TS and ESLint it is necessary to return
   // a value here. As far as I can tell this value is not used.
@@ -30,6 +32,10 @@ export const LineObject = StrokedObject.named("LineObject")
     type: typeField("line"),
     deltaPoints: types.array(DeltaPoint)
   })
+  .volatile(self => ({
+    dragScaleX: undefined as number | undefined,
+    dragScaleY: undefined as number | undefined
+  }))
   .views(self => ({
     inSelection(selectionBox: SelectionBox) {
       for (const point of pointIterator(self as LineObjectType)){
@@ -51,11 +57,44 @@ export const LineObject = StrokedObject.named("LineObject")
         se.y = Math.max(se.y, point.y);
       }
       return {nw, se};
-    }
-  }))
+    }}))
   .actions(self => ({
     addPoint(point: Instance<typeof DeltaPoint>) {
       self.deltaPoints.push(point);
+    },
+
+    setDragBounds(deltas: BoundingBoxDelta) {
+      self.dragX = self.dragY = self.dragScaleX = self.dragScaleY = undefined;
+      const bbox = self.boundingBox;
+      const left = bbox.nw.x;
+      const top = bbox.nw.y;
+      const width = bbox.se.x - bbox.nw.x;
+      const height = bbox.se.y - bbox.nw.y;
+      const newWidth  = width -  deltas.left + deltas.right;
+      const newHeight = height - deltas.top + deltas.bottom;
+      const widthFactor = newWidth/width;
+      const heightFactor = newHeight/height;
+
+      // x,y get moved to a scaled position within the new bounds
+      const newLeft = left+deltas.left;
+      self.dragX = newLeft + (self.x-left)*widthFactor;
+      const newTop = top+deltas.top;
+      self.dragY = newTop  + (self.y-top)*heightFactor;
+
+      self.dragScaleX = widthFactor;
+      self.dragScaleY = heightFactor;
+    },
+    adoptDragBounds() {
+      self.adoptDragPosition();
+
+      // The delta points get permanently scaled by the x & y scale factors
+      const scaleX = self.dragScaleX ?? 1;
+      const scaleY = self.dragScaleY ?? 1;
+      for (const p of self.deltaPoints) {
+        p.dx *= scaleX;
+        p.dy *= scaleY;
+      }
+      self.dragScaleX = self.dragScaleY = undefined;
     }
   }));
 export interface LineObjectType extends Instance<typeof LineObject> {}
@@ -64,9 +103,12 @@ export interface LineObjectSnapshot extends SnapshotIn<typeof LineObject> {}
 export const LineComponent = observer(function LineComponent({model, handleHover, handleDrag}
   : IDrawingComponentProps) {
   if (model.type !== "line") return null;
-  const { id, deltaPoints, stroke, strokeWidth, strokeDashArray } = model as LineObjectType;
-  const { x, y } = model.position;
-  const commands = `M ${x} ${y} ${deltaPoints.map((point) => `l ${point.dx} ${point.dy}`).join(" ")}`;
+  const line = model as LineObjectType;
+  const { id, deltaPoints, stroke, strokeWidth, strokeDashArray } = line;
+  const { x, y } = line.position;
+  const scaleX = line.dragScaleX ?? 1;
+  const scaleY = line.dragScaleY ?? 1;
+  const commands = `M ${x} ${y} ${deltaPoints.map((point) => `l ${point.dx*scaleX} ${point.dy*scaleY}`).join(" ")}`;
   return <path
     key={id}
     d={commands}

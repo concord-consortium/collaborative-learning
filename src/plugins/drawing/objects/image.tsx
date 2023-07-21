@@ -6,7 +6,7 @@ import { Tooltip } from "react-tippy";
 import { gImageMap } from "../../../models/image-map";
 import { DrawingObject, DrawingObjectSnapshot, DrawingTool, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, typeField } from "./drawing-object";
-import { Point } from "../model/drawing-basic-types";
+import { BoundingBoxDelta, Point } from "../model/drawing-basic-types";
 import placeholderImage from "../../../assets/image_placeholder.png";
 import SmallCornerTriangle from "../../../assets/icons/small-corner-triangle.svg";
 import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
@@ -29,10 +29,15 @@ export const ImageObject = DrawingObject.named("ImageObject")
     width: types.number,
     height: types.number
   })
+  .volatile(self => ({
+    dragWidth: undefined as number | undefined,
+    dragHeight: undefined as number | undefined
+  }))
   .views(self => ({
     get boundingBox() {
-      const {width, height} = self;
       const {x, y} = self.position;
+      const width = self.dragWidth ?? self.width;
+      const height = self.dragHeight ?? self.height;
       const nw: Point = {x, y};
       const se: Point = {x: x + width, y: y + height};
       return {nw, se};
@@ -55,6 +60,19 @@ export const ImageObject = DrawingObject.named("ImageObject")
 
     setFilename(filename?: string) {
       self.filename = filename;
+    },
+
+    setDragBounds(deltas: BoundingBoxDelta) {
+      self.dragX = self.x + deltas.left;
+      self.dragY = self.y + deltas.top;
+      self.dragWidth  = self.width  + deltas.right - deltas.left;
+      self.dragHeight = self.height + deltas.bottom - deltas.top;
+    },
+    adoptDragBounds() {
+      self.adoptDragPosition();
+      self.width = self.dragWidth ?? self.width;
+      self.height = self.dragHeight ?? self.height;
+      self.dragWidth = self.dragHeight = undefined;
     },
 
     afterCreate() {
@@ -92,8 +110,11 @@ export function isImageObjectSnapshot(object: DrawingObjectSnapshot): object is 
 export const ImageComponent: React.FC<IDrawingComponentProps> = observer(function ImageComponent({model, handleHover,
   handleDrag}){
   if (model.type !== "image") return null;
-  const { id, displayUrl, width, height } = model as ImageObjectType;
-  const { x, y } = model.position;
+  const image = model as ImageObjectType;
+  const { id, displayUrl } = image;
+  const { x, y } = image.position;
+  const width = image.dragWidth ?? image.width;
+  const height = image.dragHeight ?? image.height;
 
   return <image
     key={id}
@@ -102,6 +123,7 @@ export const ImageComponent: React.FC<IDrawingComponentProps> = observer(functio
     y={y}
     width={width}
     height={height}
+    preserveAspectRatio="none"
     onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
     onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
     onMouseDown={(e)=> handleDrag?.(e, model)}

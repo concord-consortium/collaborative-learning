@@ -1,6 +1,6 @@
 import { NodeEditor, Node } from "rete";
-
 import { Rect, scaleRect, unionRect } from "../../utilities/rect";
+import { kEmptyValueString } from "../factories/dataflow-rete-node-factory";
 
 function getBoundingRectOfNode(n: Node, editor: NodeEditor): Rect | undefined {
   const { k } = editor.view.area.transform;
@@ -64,4 +64,8 @@ export function hasFlowIn(node: Node){
   if (inputs.length === 0) return false;
   if (node.name === "Control") return inputs[0].connections.length > 0;
   return inputs.some((input) => input.connections.length > 0);
+}
+
+export function getNumDisplayStr(n: number){
+  return isNaN(n) ? kEmptyValueString : n.toFixed(3).replace(/\.?0+$/, "");
 }

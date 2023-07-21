@@ -3,7 +3,7 @@ import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
 import { computeStrokeDashArray, DrawingTool, FilledObject, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
-import { Point } from "../model/drawing-basic-types";
+import { BoundingBoxDelta, Point } from "../model/drawing-basic-types";
 import RectToolIcon from "../assets/rectangle-icon.svg";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
 
@@ -13,10 +13,23 @@ export const RectangleObject = types.compose("RectangleObject", StrokedObject, F
     width: types.number,
     height: types.number,
   })
+  .volatile(self => ({
+    dragWidth: undefined as number | undefined,
+    dragHeight: undefined as number | undefined
+  }))
+  .views(self => ({
+    get currentDims() {
+      const { width, height, dragWidth, dragHeight } = self;
+      return {
+        width: dragWidth ?? width,
+        height: dragHeight ?? height
+      };
+    }
+  }))
   .views(self => ({
     get boundingBox() {
-      const {width, height} = self;
       const { x, y } = self.position;
+      const { width, height } = self.currentDims;
       const nw: Point = {x, y};
       const se: Point = {x: x + width, y: y + height};
       return {nw, se};
@@ -49,6 +62,18 @@ export const RectangleObject = types.compose("RectangleObject", StrokedObject, F
         self.y = y;
         self.width = self.height = squareSize;
       }
+    },
+    setDragBounds(deltas: BoundingBoxDelta) {
+      self.dragX = self.x + deltas.left;
+      self.dragY = self.y + deltas.top;
+      self.dragWidth  = self.width  + deltas.right - deltas.left;
+      self.dragHeight = self.height + deltas.bottom - deltas.top;
+    },
+    adoptDragBounds() {
+      self.adoptDragPosition();
+      self.width = self.dragWidth ?? self.width;
+      self.height = self.dragHeight ?? self.height;
+      self.dragWidth = self.dragHeight = undefined;
     }
   }));
 export interface RectangleObjectType extends Instance<typeof RectangleObject> {}
@@ -58,9 +83,11 @@ export interface RectangleObjectSnapshotForAdd extends SnapshotIn<typeof Rectang
 export const RectangleComponent = observer(function RectangleComponent({model, handleHover,
   handleDrag} : IDrawingComponentProps) {
   if (model.type !== "rectangle") return null;
-  const { id, width, height, stroke, strokeWidth, strokeDashArray, fill } = model as RectangleObjectType;
-  const { x, y } = model.position;
-  return <rect
+  const rect = model as RectangleObjectType;
+  const { id, stroke, strokeWidth, strokeDashArray, fill } = rect;
+  const { x, y } = rect.position;
+  const { width, height } = rect.currentDims;
+return <rect
     key={id}
     x={x}
     y={y}

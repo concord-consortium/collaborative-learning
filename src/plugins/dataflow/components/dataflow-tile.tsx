@@ -156,8 +156,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
 
   private renderTableLinkButton() {
     const { model, documentId, onRequestTilesOfType, onRequestLinkableTiles } = this.props;
-    const isLinkButtonEnabled = (this.determineProgramMode() === ProgramMode.Done);
-
+    const isLinkButtonEnabled = onRequestLinkableTiles && onRequestLinkableTiles().consumers.length > 0;
     const actionHandlers = {
                              handleRequestTableLink: this.handleRequestTableLink,
                              handleRequestTableUnlink: this.handleRequestTableUnlink

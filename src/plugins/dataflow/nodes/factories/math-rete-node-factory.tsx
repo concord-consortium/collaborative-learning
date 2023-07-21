@@ -1,10 +1,11 @@
 import Rete, { Node, Socket } from "rete";
 import { NodeData } from "rete/types/core/data";
-import { DataflowReteNodeFactory, kEmptyValueString } from "./dataflow-rete-node-factory";
+import { DataflowReteNodeFactory } from "./dataflow-rete-node-factory";
 import { ValueControl } from "../controls/value-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
-import { NodeOperationTypes, roundNodeValue } from "../../model/utilities/node";
+import { NodeOperationTypes } from "../../model/utilities/node";
 import { PlotButtonControl } from "../controls/plot-button-control";
+import { getNumDisplayStr } from "../utilities/view-utilities";
 
 export class MathReteNodeFactory extends DataflowReteNodeFactory {
   constructor(numSocket: Socket) {
@@ -51,9 +52,9 @@ export class MathReteNodeFactory extends DataflowReteNodeFactory {
         result = nodeOperationTypes.method(n1, n2) || 0;
       }
 
-      const n1Str = isNaN(n1) ? kEmptyValueString : "" + n1;
-      const n2Str = isNaN(n2) ? kEmptyValueString : "" + n2;
-      const resultStr = isNaN(result) ? kEmptyValueString : roundNodeValue(result);
+      const n1Str = getNumDisplayStr(n1);
+      const n2Str = getNumDisplayStr(n2);
+      const resultStr = getNumDisplayStr(result);
       resultSentence = nodeOperationTypes.numberSentence(n1Str, n2Str) + resultStr;
     }
 
