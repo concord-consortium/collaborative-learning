@@ -91,9 +91,9 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
                   }
                 </div>
                 {
-                  appConfig.showCommentTag && comment.tag &&
+                  appConfig.showCommentTag && comment.tags &&
                   <div className="comment-dropdown-tag">
-                    { comment.tag }
+                    { comment.tags.join(", ") }
                   </div>
                 }
                 <div key={idx} className="comment-text" data-testid="comment">
