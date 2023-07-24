@@ -308,11 +308,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       });
 
       this.programEditor.on("rendernode", ({ el, node, component, bindSocket, bindControl }) => {
-          //find insertion order then rewrite displayed name
-          // const insertionOrder = getInsertionOrder(this.programEditor, node.id);
-          // const nodeType = NodeTypes.find((n: NodeType) => n.name === node.name);
-          // const displayName = nodeType ? nodeType.displayName : node.name;
-          // node.data.displayNameInsertionOrder = displayName + " " + insertionOrder;
           this.updateNodeNames();
         const extComponent = component as any;
         if (!extComponent.render || extComponent.render === "react") {
@@ -561,7 +556,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
   };
 
-  private addNode = async (nodeType: string, position?: [number, number]) => {  //----places node in correct position
+  private addNode = async (nodeType: string, position?: [number, number]) => {
     const nodeFactory = this.programEditor.components.get(nodeType) as DataflowReteNodeFactory;
     const n1 = await nodeFactory!.createNode();
     n1.position = position ?? getNewNodePosition(this.programEditor);
@@ -601,7 +596,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private updateNodes = () => {
-
     const nodeProcessMap: { [name: string]: (n: Node) => void } = {
       Generator: updateGeneratorNode,
       Timer: updateTimerNode,
@@ -619,7 +613,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       }
     };
     let processNeeded = false;
-
     this.programEditor.nodes.forEach((n: Node) => {
       const nodeProcess = nodeProcessMap[n.name];
       if (nodeProcess) {
@@ -644,8 +637,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private tick = () => {
     const { readOnly, tileContent: tileModel, playBackIndex, programMode,
             isPlaying, updateRecordIndex, updatePlayBackIndex } = this.props;
-    const dataSet = tileModel.dataSet;
 
+    const dataSet = tileModel.dataSet;
     const now = Date.now();
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});
     this.lastIntervalTime = now;
