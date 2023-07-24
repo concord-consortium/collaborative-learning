@@ -435,6 +435,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const insertionOrder = getInsertionOrder(this.programEditor, node.id);
       const nodeType = NodeTypes.find( (n: NodeType) => n.name === node.name);
       const displayName = nodeType ? nodeType.displayName : node.name;
+
       node.data.displayNameInsertionOrder = displayName + " " + insertionOrder;
     });
 
