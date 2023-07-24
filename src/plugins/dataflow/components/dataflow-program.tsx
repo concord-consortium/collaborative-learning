@@ -308,6 +308,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       });
 
       this.programEditor.on("rendernode", ({ el, node, component, bindSocket, bindControl }) => {
+          //find insertion order then rewrite displayed name
+          // const insertionOrder = getInsertionOrder(this.programEditor, node.id);
+          // const nodeType = NodeTypes.find((n: NodeType) => n.name === node.name);
+          // const displayName = nodeType ? nodeType.displayName : node.name;
+          // node.data.displayNameInsertionOrder = displayName + " " + insertionOrder;
+          this.updateNodeNames();
         const extComponent = component as any;
         if (!extComponent.render || extComponent.render === "react") {
           this.reactElements.push(el);
@@ -368,11 +374,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.programEditor.on("nodecreated", node => {
         this.processAndSave();
         moveNodeToFront(this.programEditor, node, true);
-        //find insertion order then rewrite displayed name
-        const insertionOrder = getInsertionOrder(this.programEditor, node.id);
-        const nodeType = NodeTypes.find( (n: NodeType) => n.name === node.name);
-        const displayName = nodeType ? nodeType.displayName : node.name;
-        node.displayNameInsertionOrder = displayName + " " + insertionOrder;
+
         node.meta.inTileWithId = this.tileId;
         dataflowLogEvent("nodecreated", node, this.tileId);
       });
@@ -406,7 +408,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       // Program changes are logged from here, except nodecreated, above
       this.programEditor.on("noderemoved", node => {
-        console.log("--------------------on Node Removed!----------------------", node);
         this.updateNodeNames();
         dataflowLogEvent("noderemoved", node, this.tileId);
       });
@@ -439,8 +440,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const insertionOrder = getInsertionOrder(this.programEditor, node.id);
       const nodeType = NodeTypes.find( (n: NodeType) => n.name === node.name);
       const displayName = nodeType ? nodeType.displayName : node.name;
-      node.displayNameInsertionOrder = displayName + " " + insertionOrder;
-      console.log("displayName:", node.displayNameInsertionOrder);
+      node.data.displayNameInsertionOrder = displayName + " " + insertionOrder;
     });
 
   }
@@ -590,9 +590,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const caseId = dataSet.getCaseAtIndex(playBackIndex)?.__id__;
     if (!caseId) return;
     this.programEditor.nodes.forEach((node, idx) => { //update each node in the frame
-      console.log("for Each node:", node);
-      console.log("idx:", idx);
-
       const attrId = getAttributeIdForNode(this.props.tileContent.dataSet, idx);
       const valForNode = dataSet.getValue(caseId, attrId) as number;
 
@@ -604,8 +601,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private updateNodes = () => {
-
-    console.log("-----------------updateNodes!!!-----------------");
 
     const nodeProcessMap: { [name: string]: (n: Node) => void } = {
       Generator: updateGeneratorNode,
@@ -627,11 +622,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
     this.programEditor.nodes.forEach((n: Node) => {
       const nodeProcess = nodeProcessMap[n.name];
-      // console.log("forEachNode > nodeProcess:", nodeProcess);
-      console.log("node displayNameInsertionOrder:", n.displayNameInsertionOrder);
-
       if (nodeProcess) {
-
         processNeeded = true;
         nodeProcess(n);
       }
@@ -654,11 +645,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const { readOnly, tileContent: tileModel, playBackIndex, programMode,
             isPlaying, updateRecordIndex, updatePlayBackIndex } = this.props;
     const dataSet = tileModel.dataSet;
-    // console.log("tick > dataSet:", dataSet);
-    // console.log("dataSet:", dataSet.attributes.forEach(node=>{
-      // console.log("node:", node.name);
-    // }));
-
 
     const now = Date.now();
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});

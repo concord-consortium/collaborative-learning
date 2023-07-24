@@ -54,7 +54,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     const classes = `dataflow-tool disable-tile-content-drag ${editableClass}`;
     const { program, programDataRate, programZoom } = this.getContent();
     const tileContent = this.getContent();
-    // console.log("tileContent:", tileContent);
 
     return (
       <>

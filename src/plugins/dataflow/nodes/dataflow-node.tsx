@@ -12,8 +12,7 @@ export class DataflowNode extends Node {
 
   public render() {
     const { node, bindSocket, bindControl } = this.props;
-    console.log("render: node as prop:", node);
-    const { outputs, controls, inputs, displayNameInsertionOrder } = this.state;
+    const { outputs, controls, inputs } = this.state;
 
     const settingsControls = controls.filter(isSettingControl);
     const outputControls = controls.filter(isOutputControl);
@@ -25,28 +24,19 @@ export class DataflowNode extends Node {
     const plotButton = controls.find((c: any) => c.key === "plot");
     const showPlot = plotButton?.props.showgraph ?? node.data.plot ?? false;
 
-
-    // new method (but prob woin't work)
-    // const displayNameBase = nodeType ? nodeType.displayName : node.name;
-    // const insertedOrder = getInsertionOrder(node.id);
-    // const displayName = displayNameBase + insertionOrder;
-
     const dynamicClasses = classNames({
       "gate-active": node.data.gateActive,
       "has-flow-in": hasFlowIn(node),
       "uses-relays": outputsToAnyRelay(node),
       "uses-gripper": outputsToAnyGripper(node),
     });
-    // console.log("displayName:", displayName);
     const inputClass = (s: string) => "input " + s.toLowerCase().replace(/ /g, "-");
 
     return (
       <div className={`node ${node.name.toLowerCase().replace(/ /g, "-")} ${dynamicClasses}`}>
         <div className="top-bar">
           <div className="node-title">
-            {/* {displayNameInsertionOrder} */}
-            {/* { node.displayNameInsertionOrder } */}
-            { displayNameInsertionOrder }
+            { node.data.displayNameInsertionOrder }
           </div>
           {deleteControl &&
             <Control
