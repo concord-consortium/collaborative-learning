@@ -3,6 +3,8 @@ import { inject, observer } from "mobx-react";
 import { getSnapshot, destroy } from "mobx-state-tree";
 import React from "react";
 import stringify from "json-stringify-pretty-compact";
+
+import { AdornmentLayer } from "./adornmentLayer";
 import { DocumentLoadingSpinner } from "./document-loading-spinner";
 import { BaseComponent } from "../base";
 import { DocumentContentComponent } from "./document-content";
@@ -20,7 +22,7 @@ import { HotKeys } from "../../utilities/hot-keys";
 import { DEBUG_CANVAS, DEBUG_DOCUMENT } from "../../lib/debug";
 import { DocumentError } from "./document-error";
 
-import "./canvas.sass";
+import "./canvas.scss";
 
 interface IProps {
   context: string;
@@ -93,6 +95,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
           {this.renderDebugInfo()}
           {this.renderOverlayMessage()}
         </div>
+        <AdornmentLayer />
       </TileApiInterfaceContext.Provider>
     );
   }
