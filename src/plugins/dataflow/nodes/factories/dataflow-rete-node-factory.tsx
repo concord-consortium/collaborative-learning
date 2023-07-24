@@ -13,6 +13,7 @@ export abstract class DataflowReteNodeFactory extends Rete.Component {
     this.numSocket = numSocket;
     const data: any = this.data;
     data.component = DataflowNode;
+    console.log("****DataflowReteNodeFactory****");
   }
 
   public defaultBuilder(node: Node) {

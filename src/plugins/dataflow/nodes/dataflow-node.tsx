@@ -2,7 +2,6 @@ import React from "react";
 import classNames from "classnames";
 import { Node, Socket, Control } from "rete-react-render-plugin";
 import { DataflowNodePlot } from "./dataflow-node-plot";
-import { NodeType, NodeTypes } from "../model/utilities/node";
 import { hasFlowIn } from "./utilities/view-utilities";
 import { outputsToAnyRelay, outputsToAnyGripper } from "./utilities/live-output-utilities";
 import "./dataflow-node.scss";
@@ -31,6 +30,8 @@ export class DataflowNode extends Node {
       "uses-gripper": outputsToAnyGripper(node),
     });
     const inputClass = (s: string) => "input " + s.toLowerCase().replace(/ /g, "-");
+
+    console.log("*************DataflowNode with displayName: ", node.data.displayNameInsertionOrder);
 
     return (
       <div className={`node ${node.name.toLowerCase().replace(/ /g, "-")} ${dynamicClasses}`}>

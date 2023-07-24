@@ -132,6 +132,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   public render() {
+    console.log("-----<DataflowProgram> render-----");
     const { readOnly, documentProperties, tileContent, programDataRate, onProgramDataRateChange,
             isPlaying, playBackIndex, handleChangeIsPlaying, handleChangeOfProgramMode, programMode} = this.props;
 
@@ -142,7 +143,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const showRateUI = ["qa", "test", "dev"].indexOf(this.stores.appMode) >= 0;
     const showZoomControl = !documentProperties?.dfHasData;
     const disableToolBarModes = programMode === ProgramMode.Recording || programMode === ProgramMode.Done;
+    console.log("programMode:", programMode);
     const showProgramToolbar = showZoomControl && !disableToolBarModes;
+
+    console.log("disableToolbarModes:", disableToolBarModes);
+    // if (programMode === ProgramMode.Done){
+    //   setTimeout(this.updateNodeNames, 3000);
+    // }
 
     return (
       <div className="dataflow-program-container">
@@ -189,6 +196,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
               />
               { this.shouldShowProgramCover() &&
                 <DataflowProgramCover editorClass={editorClassForDisplayState} /> }
+              {console.log("this.shouldShowProgramCover:", this.shouldShowProgramCover())}
+              {console.log("editorClass:", editorClassForDisplayState)}
+
+
               {showZoomControl &&
                 <DataflowProgramZoom
                   onZoomInClick={this.zoomIn}
@@ -307,8 +318,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         }
       });
 
+      //only gets triggered when create node
       this.programEditor.on("rendernode", ({ el, node, component, bindSocket, bindControl }) => {
-          this.updateNodeNames();
         const extComponent = component as any;
         if (!extComponent.render || extComponent.render === "react") {
           this.reactElements.push(el);
@@ -403,7 +414,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       // Program changes are logged from here, except nodecreated, above
       this.programEditor.on("noderemoved", node => {
-        this.updateNodeNames();
+        // this.updateNodeNames(); console.log
         dataflowLogEvent("noderemoved", node, this.tileId);
       });
 
@@ -431,11 +442,17 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private updateNodeNames(){
+    console.log("updateNodeNames-----------------------");
     this.programEditor.nodes.forEach((node) => {
-      const insertionOrder = getInsertionOrder(this.programEditor, node.id);
-      const nodeType = NodeTypes.find( (n: NodeType) => n.name === node.name);
-      const displayName = nodeType ? nodeType.displayName : node.name;
-      node.data.displayNameInsertionOrder = displayName + " " + insertionOrder;
+      if (node){
+        const insertionOrder = getInsertionOrder(this.programEditor, node.id);
+        const nodeType = NodeTypes.find( (n: NodeType) => n.name === node.name);
+        const displayName = nodeType ? nodeType.displayName : node.name;
+        node.data.displayNameInsertionOrder = displayName + " " + insertionOrder;
+        console.log("displayNameInsertionOrder:", node.data.displayNameInsertionOrder);
+
+      }
+
     });
 
   }
@@ -638,10 +655,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const { readOnly, tileContent: tileModel, playBackIndex, programMode,
             isPlaying, updateRecordIndex, updatePlayBackIndex } = this.props;
 
+    console.log("------------tick------------");
+
     const dataSet = tileModel.dataSet;
     const now = Date.now();
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});
     this.lastIntervalTime = now;
+
 
     switch (programMode){
       case ProgramMode.Ready:
@@ -661,6 +681,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         updateRecordIndex(UpdateMode.Reset);
         break;
     }
+    this.updateNodeNames();
+
   };
 
   private countSerialDataNodes(nodes: Node[]){

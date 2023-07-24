@@ -243,7 +243,7 @@ export const DataflowContentModel = TileContentModel
       const newAttributeId = uniqueId() + "*" + nodeId;
       self.dataSet.addAttributeWithID({
         id: newAttributeId,
-        name: `${nodeName} ${idx}`
+        name: `${nodeName} ${idx}`//should this be changed?
       });
     },
     addLinkedTile(tileId: string) {
@@ -289,8 +289,6 @@ export const DataflowContentModel = TileContentModel
   }))
   .actions(self => ({
     prepareRecording() {
-      console.log("prepare Recording invoked()");
-
       self.clearAttributes();
       // dataSet looks like
       // Time   |  Node 1 | Node 2 | Node 3 etc
