@@ -17,6 +17,7 @@ import {
   startAnimation
 } from "../utilities/graph-utils";
 import {useGraphModelContext} from "../models/graph-model";
+import { useAppConfig } from "../../../hooks/use-stores";
 
 export const ScatterDots = function ScatterDots(props: PlotProps) {
   const {dotsRef, enableAnimation} = props,
@@ -37,6 +38,8 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
     target = useRef<any>(),
     selectedDataObjects = useRef<Record<string, { x: number, y: number }>>({}),
     plotNumRef = useRef(0);
+
+  const applicationConfig = useAppConfig();
 
   secondaryAttrIDsRef.current = dataConfiguration?.yAttributeIDs || [];
   pointRadiusRef.current = graphModel.getPointRadius();
@@ -187,10 +190,11 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
       dataset, dotsRef, pointRadius: pointRadiusRef.current,
       selectedPointRadius: selectedPointRadiusRef.current,
       selectedOnly, getScreenX, getScreenY, getLegendColor,
-      getPointColorAtIndex: graphModel.pointColorAtIndex, enableAnimation, pointColor, pointStrokeColor
+      getPointColorAtIndex: graphModel.pointColorAtIndex,
+      enableAnimation, pointColor, pointStrokeColor, applicationConfig
     });
   }, [dataConfiguration, dataset, dotsRef, layout, legendAttrID,
-    enableAnimation, graphModel, yScaleRef]);
+    enableAnimation, graphModel, yScaleRef, applicationConfig]);
 
   // const refreshPointPositionsSVG = useCallback((selectedOnly: boolean) => {
   //   const xAttrID = dataConfiguration?.attributeID('x') ?? '',

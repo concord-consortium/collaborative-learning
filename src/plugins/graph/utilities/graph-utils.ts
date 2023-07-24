@@ -1,4 +1,4 @@
-import {extent, format, select, timeout} from "d3";
+import {extent, format, select, timeout, line, curveLinear} from "d3";
 import React from "react";
 import {isInteger} from "lodash";
 import {CaseData, DotsElt, selectCircles, selectDots} from "../d3-types";
@@ -17,6 +17,8 @@ import {
 } from "../../../utilities/color-utils";
 import {IDataConfigurationModel} from "../models/data-configuration-model";
 import {measureText} from "../../../components/tiles/hooks/use-measure-text";
+import { AppConfigModelType } from "../../../models/stores/app-config-model";
+import { appConfig } from "../../../initialize-app";
 
 /**
  * Utility routines having to do with graph entities
@@ -412,6 +414,7 @@ export interface ISetPointCoordinates {
   getScreenY: ((anID: string, plotNum?:number) => number | null)
   getLegendColor?: ((anID: string) => string)
   enableAnimation: React.MutableRefObject<boolean>
+  applicationConfig?: AppConfigModelType
 }
 
 export function setPointCoordinates(props: ISetPointCoordinates) {
@@ -427,14 +430,22 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
     },
 
     setPoints = () => {
+      const xSeries: number[] = [];
+      const ySeries: number[] = [];
 
       if (theSelection?.size()) {
         theSelection
           .transition()
           .duration(duration)
-          .attr('cx', (aCaseData: CaseData) => getScreenX(aCaseData.caseID))
+          .attr('cx', (aCaseData: CaseData) => {
+            const pointX = getScreenX(aCaseData.caseID);
+            pointX && xSeries.push(pointX);
+            return pointX;
+          })
           .attr('cy', (aCaseData: CaseData) => {
-            return getScreenY(aCaseData.caseID, aCaseData.plotNum);
+            const pointY = getScreenY(aCaseData.caseID);
+            pointY && ySeries.push(pointY);
+            return pointY;
           })
           .attr('r', (aCaseData: CaseData) => dataset?.isCaseSelected(aCaseData.caseID)
             ? selectedPointRadius : pointRadius)
@@ -445,6 +456,11 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
           .style('stroke-width', (aCaseData: CaseData) =>
             (getLegendColor && dataset?.isCaseSelected(aCaseData.caseID))
             ? defaultSelectedStrokeWidth : defaultStrokeWidth);
+
+            const linePoints = xSeries.map((x, i) => [x, ySeries[i]]) as Iterable<[number, number]>;
+            // DRAFT implementation - need to find appropriate config to query/control
+            const isClue = appConfig.appName === "CLUE";
+            isClue && drawDotLine(dotsRef.current, linePoints, pointColor);
       }
     };
 
@@ -457,5 +473,20 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
     duration = enableAnimation.current ? transitionDuration : 0,
 
     theSelection = selectDots(dotsRef.current, selectedOnly);
-  setPoints();
+    setPoints();
+}
+
+export function drawDotLine(el: DotsElt, points: Iterable<[number, number]>, color: string) {
+  const curve = line().curve(curveLinear);
+  const dotArea = select(el);
+  const anyFoundPath = dotArea.selectAll("path");
+  if (anyFoundPath) anyFoundPath.remove();
+  const newPath = dotArea.append("path");
+  newPath
+    .attr('stroke', color)
+    .attr('stroke-width', 2)
+    .attr('d', curve(points))
+    .attr('fill', 'none');
+  const parentSvg = newPath.node()?.parentNode;
+  parentSvg?.insertBefore(newPath.node() as Node, parentSvg.firstChild);
 }
