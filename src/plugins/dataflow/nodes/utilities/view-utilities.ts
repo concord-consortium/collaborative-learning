@@ -71,12 +71,7 @@ export function getNumDisplayStr(n: number){
 }
 
 export function getInsertionOrder(editor: NodeEditor, id: number) {
-  console.log("---------getInsertionOrder---------with id:", id);
   const index = editor.nodes.findIndex((n: Node) => n.id === id);
   return index + 1;
 }
-//pass in ID
-//make an array of all node ids, return the index , add 1 because it needs to be offset.
-
-//edge cases - refresh the page, do ID's start over again
 
