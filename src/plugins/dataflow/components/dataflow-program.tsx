@@ -421,6 +421,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       // Program changes are logged from here, except nodecreated, above
       this.programEditor.on("noderemoved", node => {
+        console.log("--------------------on Node Removed!----------------------", node);
+        this.updateNodeNames();
         dataflowLogEvent("noderemoved", node, this.tileId);
       });
 
@@ -445,6 +447,17 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         this.onSnapshotSetup = true;
       }
     }
+  }
+
+  private updateNodeNames(){
+    this.programEditor.nodes.forEach((node) => {
+      const insertionOrder = getInsertionOrder(this.programEditor, node.id);
+      const nodeType = NodeTypes.find( (n: NodeType) => n.name === node.name);
+      const displayName = nodeType ? nodeType.displayName : node.name;
+      node.displayNameInsertionOrder = displayName + " " + insertionOrder;
+      console.log("displayName:", node.displayNameInsertionOrder);
+    });
+
   }
 
   private destroyEditor() {
@@ -563,7 +576,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
   };
 
-  private addNode = async (nodeType: string, position?: [number, number]) => {  //----------------------------------
+  private addNode = async (nodeType: string, position?: [number, number]) => {  //----places node in correct position
     const nodeFactory = this.programEditor.components.get(nodeType) as DataflowReteNodeFactory;
     const n1 = await nodeFactory!.createNode();
     n1.position = position ?? getNewNodePosition(this.programEditor);
@@ -606,6 +619,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private updateNodes = () => {
+
+    console.log("-----------------updateNodes!!!-----------------");
+
     const nodeProcessMap: { [name: string]: (n: Node) => void } = {
       Generator: updateGeneratorNode,
       Timer: updateTimerNode,
@@ -625,7 +641,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     let processNeeded = false;
     this.programEditor.nodes.forEach((n: Node) => {
       const nodeProcess = nodeProcessMap[n.name];
+      console.log("forEachNode > nodeProcess:", nodeProcess);
+      console.log("node displayNameInsertionOrder:", n.displayNameInsertionOrder);
+
       if (nodeProcess) {
+
         processNeeded = true;
         nodeProcess(n);
       }
