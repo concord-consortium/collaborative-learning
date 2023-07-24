@@ -58,6 +58,7 @@ export const UIModel = types
     selectedTileIds: types.array(types.string),
     selectedCommentId: types.maybe(types.string),
     scrollTo: types.maybe(ScrollToModel),
+    showAdornments: true,
     showDemo: false,
     showDemoCreator: false,
     showTeacherContent: true,
@@ -189,6 +190,9 @@ export const UIModel = types
       },
       setDividerPosition(position: number) {
         self.dividerPosition = position;
+      },
+      setShowAdornments(show: boolean) {
+        self.showAdornments = show;
       },
       toggleShowTeacherContent(show: boolean) {
         self.showTeacherContent = show;
