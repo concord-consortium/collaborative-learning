@@ -58,6 +58,9 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
         case "delete":
           this.handleDelete();
           break;
+        case "sparrow":
+          this.handleSparrow();
+          break;
         case "duplicate":
           this.handleDuplicate();
           break;
@@ -138,9 +141,14 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   }
 
   private isButtonActive(toolButton: IToolbarButtonModel) {
-    return toolButton.id === "solution"
-      ? this.selectedTilesIncludeTeacher()
-      : toolButton === this.state.activeTool;
+    if (toolButton.id === "solution") {
+      return this.selectedTilesIncludeTeacher();
+    } else if (toolButton.id === "sparrow") {
+      const { ui } = this.stores;
+      return ui.adornmentMode === "sparrow";
+    } else {
+      return toolButton === this.state.activeTool;
+    }
   }
 
   private isButtonDisabled(toolButton: IToolbarButtonModel) {
@@ -190,6 +198,15 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
 
   private handleSelect() {
     // nothing to do
+  }
+
+  private handleSparrow() {
+    const { ui } = this.stores;
+    if (ui.adornmentMode === "sparrow") {
+      ui.setAdornmentMode();
+    } else {
+      ui.setAdornmentMode("sparrow");
+    }
   }
 
   private handleUndo() {

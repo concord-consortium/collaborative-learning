@@ -9,6 +9,7 @@ import DuplicateToolIcon from "./assets/icons/duplicate-tool.svg";
 import RedoToolIcon from "./assets/icons/redo-tool.svg";
 import SelectToolIcon from "./assets/icons/select-tool.svg";
 import SolutionToolIcon from "./assets/icons/solution-tool.svg";
+import SparrowToolIcon from "./assets/icons/sparrow-tool.svg";
 import UndoToolIcon from "./assets/icons/undo-tool.svg";
 
 export const appIcons: Record<string, FunctionComponent<SVGProps<SVGSVGElement>>> = {
@@ -24,6 +25,7 @@ export const appIcons: Record<string, FunctionComponent<SVGProps<SVGSVGElement>>
   "icon-redo-tool": RedoToolIcon,
   "icon-select-tool": SelectToolIcon,
   "icon-solution-tool": SolutionToolIcon,
+  "icon-sparrow-tool": SparrowToolIcon,
   "icon-undo-tool": UndoToolIcon
 
   // Icons for tool tiles are not stored here.

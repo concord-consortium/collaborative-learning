@@ -51,6 +51,7 @@ export const UITabModel = types
 
 export const UIModel = types
   .model("UI", {
+    adornmentMode: types.maybe(types.string),
     dividerPosition: kDividerHalf,
     error: types.maybeNull(types.string),
     activeNavTab: ENavTab.kProblems,
@@ -183,6 +184,9 @@ export const UIModel = types
       confirm,
       resolveDialog,
 
+      setAdornmentMode(mode?: string) {
+        self.adornmentMode = mode;
+      },
       setDividerPosition(position: number) {
         self.dividerPosition = position;
       },
