@@ -460,7 +460,7 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
             const linePoints = xSeries.map((x, i) => [x, ySeries[i]]) as Iterable<[number, number]>;
             // DRAFT implementation - need to find appropriate config to query/control
             const isClue = appConfig.appName === "CLUE";
-            isClue && drawDotLine(dotsRef.current, linePoints, pointColor);
+            isClue && drawPath(dotsRef.current, linePoints, pointColor);
       }
     };
 
@@ -476,7 +476,7 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
     setPoints();
 }
 
-export function drawDotLine(el: DotsElt, points: Iterable<[number, number]>, color: string) {
+export function drawPath(el: DotsElt, points: Iterable<[number, number]>, color: string) {
   const curve = line().curve(curveLinear);
   const dotArea = select(el);
   const anyFoundPath = dotArea.selectAll("path");
@@ -487,6 +487,7 @@ export function drawDotLine(el: DotsElt, points: Iterable<[number, number]>, col
     .attr('stroke-width', 2)
     .attr('d', curve(points))
     .attr('fill', 'none');
+  // bring path group to the top/front within the svg
   const parentSvg = newPath.node()?.parentNode;
   parentSvg?.insertBefore(newPath.node() as Node, parentSvg.firstChild);
 }
