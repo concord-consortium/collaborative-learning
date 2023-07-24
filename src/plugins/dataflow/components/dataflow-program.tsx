@@ -90,6 +90,7 @@ interface IProps extends SizeMeProps {
 interface IState {
   editorContainerWidth: number;
   lastIntervalDuration: number;
+  componentDisplayNames: string[];
 }
 
 const numSocket = new Rete.Socket("Number value");
@@ -121,24 +122,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.state = {
       editorContainerWidth: 0,
       lastIntervalDuration: 0,
+      componentDisplayNames: []
     };
-    console.log("dataflow-program.tsx-----");
-    console.log("\tprops.model:", this.props.model);
-    console.log("\tprops.program:", this.props.program);
-    this.props.program?.nodes.forEach((node)=>{
-      console.log("\t\tnode:", node);
-    });
-
-
-    console.log("\tprops.playbackIndex:", this.props.playBackIndex);
-    console.log("\tprops.recordIndex:", this.props.recordIndex);
-    console.log("\tprops.tileContent:", this.props.tileContent);
-    console.log("\t\ttileContent.dataSet:", this.props.tileContent.dataSet);
-    this.props.tileContent.dataSet.attributes.forEach((attr)=>{
-      console.log("\t\t\tattr:", attr.name);
-    });
-
-    console.log("---------------------------------------------------");
     this.lastIntervalTime = Date.now();
   }
 
@@ -639,9 +624,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       }
     };
     let processNeeded = false;
+
     this.programEditor.nodes.forEach((n: Node) => {
       const nodeProcess = nodeProcessMap[n.name];
-      console.log("forEachNode > nodeProcess:", nodeProcess);
+      // console.log("forEachNode > nodeProcess:", nodeProcess);
       console.log("node displayNameInsertionOrder:", n.displayNameInsertionOrder);
 
       if (nodeProcess) {

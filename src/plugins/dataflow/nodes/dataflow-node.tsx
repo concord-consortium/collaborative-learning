@@ -13,7 +13,7 @@ export class DataflowNode extends Node {
   public render() {
     const { node, bindSocket, bindControl } = this.props;
     console.log("render: node as prop:", node);
-    const { outputs, controls, inputs } = this.state;
+    const { outputs, controls, inputs, displayNameInsertionOrder } = this.state;
 
     const settingsControls = controls.filter(isSettingControl);
     const outputControls = controls.filter(isOutputControl);
@@ -24,8 +24,6 @@ export class DataflowNode extends Node {
     const decoratedInputs = inputs.filter(isDecoratedInput(true));
     const plotButton = controls.find((c: any) => c.key === "plot");
     const showPlot = plotButton?.props.showgraph ?? node.data.plot ?? false;
-
-    // const displayName = node.displayNameInsertionOrder || node.name;
 
 
     // new method (but prob woin't work)
@@ -46,7 +44,9 @@ export class DataflowNode extends Node {
       <div className={`node ${node.name.toLowerCase().replace(/ /g, "-")} ${dynamicClasses}`}>
         <div className="top-bar">
           <div className="node-title">
-            {node.displayNameInsertionOrder}
+            {/* {displayNameInsertionOrder} */}
+            {/* { node.displayNameInsertionOrder } */}
+            { displayNameInsertionOrder }
           </div>
           {deleteControl &&
             <Control
