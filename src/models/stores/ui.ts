@@ -391,11 +391,8 @@ export function isStudentWorkspaceDoc (doc: DocumentModelType, userId: string) {
 
 export function getNavTabOfDocument(doc: DocumentModelType, user?: UserModelType) {
     if (user && isStudentWorkspaceDoc(doc, user?.id)){
-      console.log("returning student work");
       return ENavTab.kStudentWork;
     } else {
-      console.log("returning....:", docTypeToNavTab[doc.type]);
-
       return docTypeToNavTab[doc.type];
     }
 }
