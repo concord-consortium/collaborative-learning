@@ -12,6 +12,7 @@ import { buildSectionPath, getCurriculumMetadata } from "../../../functions/src/
 import { LearningLogDocument, LearningLogPublication, PersonalDocument,
   PersonalPublication, PlanningDocument, ProblemDocument,
   ProblemPublication, SupportPublication } from "../document/document-types";
+import { UserModelType } from "./user";
 
 type BooleanDialogResolver = (value: boolean | PromiseLike<boolean>) => void;
 type StringDialogResolver = (value: string | PromiseLike<string>) => void;
@@ -84,7 +85,7 @@ export const UIModel = types
     },
     get openSubTab () {
       return self.tabs.get(self.activeNavTab)?.openSubTab;
-    }
+    },
   }))
   .views((self) => ({
     // document key or section path for resource (left) document
@@ -105,7 +106,7 @@ export const UIModel = types
         const activeTabState = self.tabs.get(self.activeNavTab);
         return self.openSubTab && activeTabState?.openSecondaryDocuments.get(self.openSubTab);
       }
-    }
+    },
   }))
   .actions((self) => {
     const alert = (textOrOpts: string | UIDialogModelSnapshotWithoutType, title?: string) => {
@@ -123,6 +124,8 @@ export const UIModel = types
         dialogResolver = resolve;
       });
     };
+     //========================================================================================================
+
 
     const prompt = (textOrOpts: string | UIDialogModelSnapshotWithoutType,
                     defaultValue = "", title?: string, rows?: number) => {
@@ -305,8 +308,11 @@ export const UIModel = types
      *
      * @param doc a non curriculum document
      */
-    openResourceDocument(doc: DocumentModelType, isStudentWorkspaceDoc?: boolean) {
-      const navTab = getNavTabOfDocument(doc.type, isStudentWorkspaceDoc)  || "";
+    openResourceDocument(doc: DocumentModelType, user?: UserModelType) {
+      // const self.isStudentWorkspaceDoc();
+      // self.isStudentWorkspaceDoc
+
+      const navTab = getNavTabOfDocument(doc, user)  || "";
       let subTab = "";
       if (navTab === ENavTab.kClassWork) {
         if (doc.type === LearningLogPublication) {
@@ -383,10 +389,18 @@ const docTypeToNavTab: Record<string, ENavTab | undefined> = {
   [SupportPublication]: ENavTab.kClassWork,
 };
 
-export function getNavTabOfDocument(docType: string, isStudentWorkspaceDoc?: boolean) {
-  if (isStudentWorkspaceDoc){
-    return ENavTab.kStudentWork;
-  } else {
-    return docTypeToNavTab[docType];
-  }
+
+export function isStudentWorkspaceDoc (doc: DocumentModelType, userId: string) {
+  return userId !== doc.uid && doc.type === ProblemDocument;
+}
+
+export function getNavTabOfDocument(doc: DocumentModelType, user?: UserModelType) {
+    if (user && isStudentWorkspaceDoc(doc, user?.id)){
+      console.log("returning student work");
+      return ENavTab.kStudentWork;
+    } else {
+      console.log("returning....:", docTypeToNavTab[doc.type]);
+
+      return docTypeToNavTab[doc.type];
+    }
 }

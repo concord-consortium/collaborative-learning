@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useStores, useUIStore} from "../../hooks/use-stores";
+import { useStores, useUIStore, useUserStore} from "../../hooks/use-stores";
 import { useFirestore } from "../../hooks/firestore-hooks";
 import { CurriculumDocument, DocumentDocument } from "../../lib/firestore-schema";
 import { getSectionTitle } from "../../models/curriculum/section";
 import { UserModelType } from "../../models/stores/user";
-import { getNavTabOfDocument, getTabsOfCurriculumDoc } from "../../models/stores/ui";
+import { getNavTabOfDocument, getTabsOfCurriculumDoc, isStudentWorkspaceDoc } from "../../models/stores/ui";
 import { DocumentModelType } from "../../models/document/document";
 import { useDocumentCaption } from "../thumbnail/decorated-document-thumbnail-item";
 import DocumentIcon from "../../assets/icons/document-icon.svg";
@@ -168,8 +168,6 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
           //"Student Workspaces/"My Work"/"Class Work"
           const sectionDoc =  store.documents.getDocument(doc.key);
           const networkDoc = store.networkDocuments.getDocument(doc.key);
-          const isStudentWorkspaceDoc = (user?.id !== doc.uid);
-
           if (sectionDoc){
             return (
               <WorkDocumentItem
@@ -178,7 +176,6 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
                 sectionOrNetworkDoc={sectionDoc}
                 isNetworkDoc={false}
                 handleDocView={handleDocView}
-                isStudentWorkspaceDoc={isStudentWorkspaceDoc}
               />
             );
           }
@@ -190,7 +187,6 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
                 sectionOrNetworkDoc={networkDoc}
                 isNetworkDoc={true}
                 handleDocView={handleDocView}
-                isStudentWorkspaceDoc={isStudentWorkspaceDoc}
               />
             );
           }
@@ -200,27 +196,28 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
   );
 };
 
+
 interface JProps {
   doc: any,
   sectionOrNetworkDoc: DocumentModelType,
   isNetworkDoc: boolean,
   handleDocView: (() => void) | undefined,
-  isStudentWorkspaceDoc: boolean
 }
 
 // This is rendering a single document item in the commented document list
 export const WorkDocumentItem: React.FC<JProps> = (props) => {
-  const { doc, sectionOrNetworkDoc, isNetworkDoc, handleDocView, isStudentWorkspaceDoc } = props;
+  const { doc, sectionOrNetworkDoc, isNetworkDoc, handleDocView } = props;
   const ui = useUIStore();
+  const user = useUserStore();
   // We need the navTab to style the item.
-  const navTab = getNavTabOfDocument(doc.type);
-  const title =  useDocumentCaption(sectionOrNetworkDoc, isStudentWorkspaceDoc);
+  const navTab = getNavTabOfDocument(doc, user);
+  const title =  useDocumentCaption(sectionOrNetworkDoc, isStudentWorkspaceDoc(sectionOrNetworkDoc, user.id));
 
   return (
     <div
       className={`document-box my-work-document ${navTab}`}
       onClick={()=>{
-        ui.openResourceDocument(sectionOrNetworkDoc, isStudentWorkspaceDoc);
+        ui.openResourceDocument(sectionOrNetworkDoc, user);
         ui.setSelectedTile();
         if (handleDocView !== undefined){
           handleDocView();
@@ -240,6 +237,7 @@ export const WorkDocumentItem: React.FC<JProps> = (props) => {
     }
       <div className={"title"}>
         { title }
+        {isStudentWorkspaceDoc(sectionOrNetworkDoc, user.id) ? "T" : "F"}
       </div>
       <div className={"numComments"}>
         {doc.numComments}
