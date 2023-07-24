@@ -124,8 +124,6 @@ export const UIModel = types
         dialogResolver = resolve;
       });
     };
-     //========================================================================================================
-
 
     const prompt = (textOrOpts: string | UIDialogModelSnapshotWithoutType,
                     defaultValue = "", title?: string, rows?: number) => {
@@ -309,9 +307,6 @@ export const UIModel = types
      * @param doc a non curriculum document
      */
     openResourceDocument(doc: DocumentModelType, user?: UserModelType) {
-      // const self.isStudentWorkspaceDoc();
-      // self.isStudentWorkspaceDoc
-
       const navTab = getNavTabOfDocument(doc, user)  || "";
       let subTab = "";
       if (navTab === ENavTab.kClassWork) {

@@ -237,7 +237,6 @@ export const WorkDocumentItem: React.FC<JProps> = (props) => {
     }
       <div className={"title"}>
         { title }
-        {isStudentWorkspaceDoc(sectionOrNetworkDoc, user.id) ? "T" : "F"}
       </div>
       <div className={"numComments"}>
         {doc.numComments}
