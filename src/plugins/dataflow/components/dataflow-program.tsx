@@ -90,7 +90,6 @@ interface IProps extends SizeMeProps {
 interface IState {
   editorContainerWidth: number;
   lastIntervalDuration: number;
-  componentDisplayNames: string[];
 }
 
 const numSocket = new Rete.Socket("Number value");
@@ -121,8 +120,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     super(props);
     this.state = {
       editorContainerWidth: 0,
-      lastIntervalDuration: 0,
-      componentDisplayNames: []
+      lastIntervalDuration: 0
     };
     this.lastIntervalTime = Date.now();
   }
@@ -369,7 +367,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.programEditor.on("nodecreated", node => {
         this.processAndSave();
         moveNodeToFront(this.programEditor, node, true);
-
         node.meta.inTileWithId = this.tileId;
         dataflowLogEvent("nodecreated", node, this.tileId);
       });
@@ -435,10 +432,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const insertionOrder = getInsertionOrder(this.programEditor, node.id);
       const nodeType = NodeTypes.find( (n: NodeType) => n.name === node.name);
       const displayName = nodeType ? nodeType.displayName : node.name;
-
       node.data.displayNameInsertionOrder = displayName + " " + insertionOrder;
     });
-
   }
 
   private destroyEditor() {
