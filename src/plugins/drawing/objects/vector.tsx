@@ -92,17 +92,22 @@ export const VectorComponent = observer(function VectorComponent({model, handleH
     const head = headShape ? placeEndShape(headShape, x+dx, y+dy, angle) : null;
     const tail = tailShape ? placeEndShape(tailShape, x, y, angle+180) : null; // tail points backwards
     // Set fill to stroke since arrowheads should be drawn in stroke color
-  return <g className="vector" key={id}
-            stroke={stroke}
-            fill={stroke}
-            strokeWidth={strokeWidth}
-            strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
-            onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
-            onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
-            onMouseDown={(e) => handleDrag?.(e, model)}
-          >
-            {line}{head}{tail}
-         </g>;
+  return (
+    <g
+      className="vector"
+      data-object-id={id}
+      key={id}
+      stroke={stroke}
+      fill={stroke}
+      strokeWidth={strokeWidth}
+      strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
+      onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
+      onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
+      onMouseDown={(e) => handleDrag?.(e, model)}
+    >
+      {line}{head}{tail}
+    </g>
+  );
 });
 
 // Render a VectorEndShape at the given x, y, and rotational angle.

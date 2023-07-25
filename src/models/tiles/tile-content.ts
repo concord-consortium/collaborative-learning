@@ -37,6 +37,9 @@ export const TileContentModel = types.model("TileContentModel", {
     type: types.optional(types.string, kUnknownTileType)
   })
   .views(self => ({
+    get adornableObjectIds(): string[] {
+      return [];
+    },
     get tileEnv() {
       return getEnv(self) as ITileEnvironment | undefined;
     },

@@ -65,6 +65,9 @@ export const DrawingContentModel = TileContentModel
     metadata: undefined as DrawingToolMetadataModelType | undefined
   }))
   .views(self => ({
+    get adornableObjectIds() {
+      return self.objects.map(object => object.id);
+    },
     get objectMap() {
       // TODO this will rebuild the map when any of the objects change
       // We could handle this more efficiently

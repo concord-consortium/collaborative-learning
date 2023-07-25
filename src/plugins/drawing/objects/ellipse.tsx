@@ -63,6 +63,7 @@ export const EllipseComponent = observer(function EllipseComponent({model, handl
   const rx = model.dragRx ?? model.rx;
   const ry = model.dragRy ?? model.ry;
   return <ellipse
+    data-object-id={id}
     key={id}
     cx={x}
     cy={y}
@@ -76,7 +77,7 @@ export const EllipseComponent = observer(function EllipseComponent({model, handl
     onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
     onMouseDown={(e)=> handleDrag?.(e, model)}
     pointerEvents={"visible"}
-    />;
+  />;
 });
 
 export class EllipseDrawingTool extends DrawingTool {

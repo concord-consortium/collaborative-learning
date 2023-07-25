@@ -72,7 +72,7 @@ export const VariableChipComponent: React.FC<IDrawingComponentProps> = observer(
     });
 
     if (model.type !== "variable") return null;
-    const { width, height, variableId } = model as VariableChipObjectType;
+    const { id, width, height, variableId } = model as VariableChipObjectType;
     const { x, y } = model.position;
     const selectedVariable = findVariable(drawingContent, variableId);
     if (!selectedVariable) {
@@ -81,6 +81,7 @@ export const VariableChipComponent: React.FC<IDrawingComponentProps> = observer(
 
     return (
       <foreignObject
+        data-object-id={id}
         x={x}
         y={y}
         width={width}
