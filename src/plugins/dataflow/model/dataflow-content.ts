@@ -295,7 +295,7 @@ export const DataflowContentModel = TileContentModel
       //    0   |   val    | val    |  val
       addAttributeToDataSet(self.dataSet, { name: "Time (sec)" }); //time quantized to nearest sampling rate
       self.program.nodes.forEach((n) => { //add attributes based on nodes in tile
-        n.data.displayNameInsertionOrder && self.addNewAttrFromNode(n.id, n.data.displayNameInsertionOrder);
+        n.data.orderedDisplayName && self.addNewAttrFromNode(n.id, n.data.orderedDisplayName);
       });
     },
     resetRecording() {

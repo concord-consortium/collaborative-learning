@@ -120,7 +120,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     super(props);
     this.state = {
       editorContainerWidth: 0,
-      lastIntervalDuration: 0
+      lastIntervalDuration: 0,
     };
     this.lastIntervalTime = Date.now();
   }
@@ -306,7 +306,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       });
 
       this.programEditor.on("rendernode", ({ el, node, component, bindSocket, bindControl }) => {
-          this.updateNodeNames();
+        this.updateNodeNames();
         const extComponent = component as any;
         if (!extComponent.render || extComponent.render === "react") {
           this.reactElements.push(el);
@@ -431,8 +431,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.programEditor.nodes.forEach((node) => {
       const insertionOrder = getInsertionOrder(this.programEditor, node.id);
       const nodeType = NodeTypes.find( (n: NodeType) => n.name === node.name);
-      const displayName = nodeType ? nodeType.displayName : node.name;
-      node.data.displayNameInsertionOrder = displayName + " " + insertionOrder;
+      const displayNameBase = nodeType ? nodeType.displayName : node.name;
+      node.data.orderedDisplayName = displayNameBase + " " + insertionOrder;
     });
   }
 

@@ -35,7 +35,7 @@ export class DataflowNode extends Node {
       <div className={`node ${node.name.toLowerCase().replace(/ /g, "-")} ${dynamicClasses}`}>
         <div className="top-bar">
           <div className="node-title">
-            { node.data.displayNameInsertionOrder }
+            { node.data.orderedDisplayName }
           </div>
           {deleteControl &&
             <Control
