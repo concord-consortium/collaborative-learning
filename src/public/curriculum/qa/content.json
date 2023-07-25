@@ -29,7 +29,15 @@
       {"id": "duplicate", "title": "Duplicate", "iconId": "icon-duplicate-tool", "isTileTool": false},
       {"id": "delete", "title": "Delete", "iconId": "icon-delete-tool", "isTileTool": false}
     ],
-    "tools": ["Simulator"]
+    "tools": ["Simulator"],
+    "showCommentTag": true,
+    "commentTags": {
+      "part-to-part": "Part-to-Part",
+      "part-to-whole": "Part-to-Whole",
+      "unit-rate": "Unit Rate",
+      "guess-and-check": "Guess and Check",
+      "none": "None"
+    }
   },
   "sections": {
     "introduction": {"initials": "IN", "title": "Introduction", "placeholder": "Work area for\nIntroduction section"},
