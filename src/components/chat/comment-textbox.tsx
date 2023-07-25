@@ -71,7 +71,8 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
   const handlePostComment = () => {
     // do not send post if text area is empty, only has spaces or new lines
     const [trimmedText, isEmpty] = trimContent(commentText);
-    if (!isEmpty || showCommentTag) {
+    if (!isEmpty || (showCommentTag && allTags[0] !== "" )){
+      //do not post to Firestore if select tag is tagPrompt
       onPostComment?.(trimmedText, allTags);
       setCommentTextAreaHeight(minTextAreaHeight);
       setCommentAdded(false);
