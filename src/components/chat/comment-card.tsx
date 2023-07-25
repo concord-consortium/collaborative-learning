@@ -16,7 +16,7 @@ interface IProps {
   user?: UserModelType;
   activeNavTab?: string;
   postedComments?: WithId<CommentDocument>[];
-  onPostComment?: (comment: string, tag: string) => void;
+  onPostComment?: (comment: string, tags: string[]) => void;
   onDeleteComment?: (commentId: string, commentContent: string) => void;
   focusDocument?: string;
   focusTileId?: string;
@@ -59,6 +59,7 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
 
   //appConfig holds showCommentTag, commentTags, tagPrompt fetched from "clue-curriculum" repository
   const { appConfig } = useStores();
+  const { showCommentTag, commentTags, tagPrompt } = appConfig;
 
   return (
     <div className="comment-card selected" data-testid="comment-card">
@@ -74,6 +75,10 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
             const backgroundStyle = shouldShowUserIcon
                                       ? {backgroundColor: "white"}
                                       : {backgroundColor: userInitialBackgroundColor[userInitialBackgroundColorIndex]};
+
+            //if tagPrompt was posted to Firestore - for ex: SAS unit (where tagPrompt = "Select Student Strategy")
+            //our comment.tags should be [""]
+            const isTagPrompt = (comment.tags && comment.tags[0] === "");
 
             return (
               <div key={idx} className="comment-thread" data-testid="comment-thread">
@@ -91,9 +96,14 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
                   }
                 </div>
                 {
-                  appConfig.showCommentTag && comment.tags &&
+                  appConfig.showCommentTag &&  !isTagPrompt &&
                   <div className="comment-dropdown-tag">
-                    { Object.values(comment.tags).join() || comment.tags[0] }
+                    {
+                      comment.tags &&
+                      comment.tags.map((tag) => {
+                        return commentTags && (commentTags[tag]);
+                      }).join(", ")
+                    }
                   </div>
                 }
                 <div key={idx} className="comment-text" data-testid="comment">
@@ -107,9 +117,9 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
           activeNavTab={activeNavTab}
           onPostComment={onPostComment}
           numPostedComments={postedComments?.length || 0}
-          showCommentTag={appConfig.showCommentTag}
-          commentTags={appConfig.commentTags}
-          tagPrompt={appConfig.tagPrompt}
+          showCommentTag={showCommentTag || false}
+          commentTags={commentTags}
+          tagPrompt={tagPrompt}
         />
       </div>
     </div>
