@@ -8,13 +8,15 @@ import { DocumentContentModelType } from "../../models/document/document-content
 import "./adornment-layer.scss";
 
 interface IAdornmentButtonProps {
+  documentScrollX?: number;
+  documentScrollY?: number;
   key?: string;
   objectId: string;
   rowId: string;
   tileId: string;
 }
 const AdornmentButton = observer(function AdornmentButton({
-  objectId, rowId, tileId
+  documentScrollX, documentScrollY, objectId, rowId, tileId
 }: IAdornmentButtonProps) {
   const rowSelector = `[data-row-id='${rowId}']`;
   const rowElements = document.querySelectorAll(rowSelector);
@@ -34,8 +36,10 @@ const AdornmentButton = observer(function AdornmentButton({
 
   const objectBoundingBox = (objectElement as SVGGraphicsElement).getBBox();
   const tileBorder = 2;
-  const left = rowElement.offsetLeft + tileElement.offsetLeft + objectBoundingBox.x + tileBorder;
-  const top = rowElement.offsetTop + tileElement.offsetTop + objectBoundingBox.y + tileBorder;
+  const left = rowElement.offsetLeft + tileElement.offsetLeft - tileElement.scrollLeft
+    + objectBoundingBox.x + tileBorder - (documentScrollX ?? 0);
+  const top = rowElement.offsetTop + tileElement.offsetTop - tileElement.scrollTop
+    + objectBoundingBox.y + tileBorder - (documentScrollY ?? 0);
   const objectStroke = 2;
   const height = objectBoundingBox.height + objectStroke;
   const width = objectBoundingBox.width + objectStroke;
@@ -48,9 +52,11 @@ const AdornmentButton = observer(function AdornmentButton({
 
 interface IAdornmentLayerProps {
   content?: DocumentContentModelType;
+  documentScrollX?: number;
+  documentScrollY?: number;
 }
 export const AdornmentLayer = observer(function AdornmentLayer({
-  content
+  content, documentScrollX, documentScrollY
 }: IAdornmentLayerProps) {
   const ui = useUIStore();
 
@@ -71,6 +77,8 @@ export const AdornmentLayer = observer(function AdornmentLayer({
               return tile.content.adornableObjectIds.map(objectId => {
                 return (
                   <AdornmentButton
+                    documentScrollX={documentScrollX}
+                    documentScrollY={documentScrollY}
                     key={`${tile.id}-${objectId}-button`}
                     objectId={objectId}
                     rowId={rowId}

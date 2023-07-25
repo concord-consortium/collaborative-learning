@@ -37,6 +37,8 @@ interface IProps {
 }
 
 interface IState {
+  documentScrollX: number;
+  documentScrollY: number;
   historyDocumentCopy?: DocumentModelType;
   showPlaybackControls: boolean;
 }
@@ -79,6 +81,8 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
     });
 
     this.state = {
+      documentScrollX: 0,
+      documentScrollY: 0,
       showPlaybackControls: false,
     };
   }
@@ -95,7 +99,11 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
           {this.renderDebugInfo()}
           {this.renderOverlayMessage()}
         </div>
-        <AdornmentLayer content={this.getDocumentContent()} />
+        <AdornmentLayer
+          content={this.getDocumentContent()}
+          documentScrollX={this.state.documentScrollX}
+          documentScrollY={this.state.documentScrollY}
+        />
       </TileApiInterfaceContext.Provider>
     );
   }
@@ -115,13 +123,20 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
     } else if (documentContent) {
       return (
         <>
-          <DocumentContentComponent key={showPlaybackControls ? "history" : "main"} content={documentContent}
-                                    documentId={documentToShow?.key}
-                                    {...{typeClass, viaTeacherDashboard, ...others}} />
-          {showPlayback && <PlaybackComponent document={documentToShow}
-                                              showPlaybackControls={showPlaybackControls}
-                                              onTogglePlaybackControls={this.handleTogglePlaybackControlComponent} />
-          }
+          <DocumentContentComponent
+            key={showPlaybackControls ? "history" : "main"}
+            content={documentContent}
+            documentId={documentToShow?.key}
+            onScroll={(x: number, y: number) => this.setState({ documentScrollX: x, documentScrollY: y })}
+            {...{typeClass, viaTeacherDashboard, ...others}}
+          />
+          {showPlayback && (
+            <PlaybackComponent
+              document={documentToShow}
+              showPlaybackControls={showPlaybackControls}
+              onTogglePlaybackControls={this.handleTogglePlaybackControlComponent}
+            />
+          )}
         </>
       );
     }
