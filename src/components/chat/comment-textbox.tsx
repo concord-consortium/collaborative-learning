@@ -76,6 +76,7 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
       setCommentTextAreaHeight(minTextAreaHeight);
       setCommentAdded(false);
       setCommentText("");
+      setAllTags((oldArray) => [""]); //select will go back to top choice (tagPrompt)
     }
   };
 
@@ -138,6 +139,7 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
           onChange={(e) => {
             handleSelectDropDown(e.target.value);
           }}
+          value={allTags[0]}
         >
           {
             tagPrompt &&
