@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import React, { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useUIStore } from "../../hooks/use-stores";
 import SendIcon from "../../assets/send-icon.svg";
 import "../themes.scss";
