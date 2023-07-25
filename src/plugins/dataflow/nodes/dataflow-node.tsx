@@ -25,6 +25,7 @@ export class DataflowNode extends Node {
     const showPlot = plotButton?.props.showgraph ?? node.data.plot ?? false;
     const nodeType = NodeTypes.find( (n: NodeType) => n.name === node.name);
     const displayName = nodeType ? nodeType.displayName : node.name;
+    console.log("one change for pr");
 
     const dynamicClasses = classNames({
       "gate-active": node.data.gateActive,
