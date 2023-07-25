@@ -1,0 +1,17 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {"content": {"type": "Text", "format": "html", "text": ["For similar figures, what features (attributes) and measures stay the same? What features (attributes) and measures change? How does a multiplier play a role in these changes?"]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>The shape will remain the same except in size. The measures of corresponding angles will also remain the same. Each corresponding length in the image will stretch or shrink by the multiplier. The areas seem to change in some predictable pattern.</p>"]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

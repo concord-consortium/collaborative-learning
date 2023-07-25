@@ -1,0 +1,73 @@
+{
+  "type": "MathReflection1",
+  "content": {
+    "tiles": [
+      {
+        "id": "ADIc8lwVAs3RQvgU",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p><strong>AoL:</strong> Exploration, Analysis</p>", "<p><strong>CCSSM:</strong> <em>Responses to the reflection are informed by the work in the Investigation and thus also reflect</em>:  7.G.A, 7.G.A.1, 7.G.B, 7.RP.A, 7.RP.A.2, 7.RB.A.2.b</p>"]
+        }
+      },
+      {"id": "o86c0X-8bdURsywL", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Mathematical Reflection</strong></p>", "<p>What do you now know about similar figures? What do you know about proportional reasoning?</p>"]}},
+      {
+        "id": "wqzoSz62OfvZY7hK",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Emerging Mathematical Ideas</strong></p>",
+            "<p>Early exploration of proportional relationships between corresponding side length, perimeter, and area of similar figures.</p>",
+            "<p>When exploring a set of geometric figures: original, an enlargement and/or a reduction, begin to use and articulate relationships between attributes, such as:</p>",
+            "<ul><li>corresponding angles of an enlargement or reduction of an original figure stay the same</li><li>side lengths of an enlargement or reduction figure, as compared to the original figure, change in size by the multiplier used with the original</li><li>perimeter of an enlargement or reduction figure, as compared to the original figure, change in size by the multiplier used with the original</li><li>area of an enlargement figure, as compared to the original figure, did change but not by the multiplier used on the original figure,  rather it grew by a greater factor than the multiplier</li><li>area of a reduced figure, as compared to the original figure, did change but not by the multiplier used on the original figure, rather it shrank by a great factor than the multiplier.</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "DuF8I4mOZ2ooNElr",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The Mathematical Reflection provides an opportunity to discuss the goals of the Investigation. Students can pull together their reasoning from the Now What Do You Know? questions to summarize their learning over the time (TIME). </p>",
+            "<p>After the class discussion, students can record their responses to the Mathematical Reflection to create a record of their current understandings of the big ideas of the Unit. </p>",
+            "<p>A teacher can gain an understanding of student thinking during a discussion of the reflection question. Then one can assess individual understanding based on each student’s written work.</p>",
+            "<p>Students have been working with factors and multiples and the multiplicative structure of numbers. Students will reflect upon what they know about the multiplicative structure of numbers. </p>",
+            "<p>Having students pull out their notes from the Now What Do You Know from each Problem in the Investigation can help them to synthesize all their ideas around similarity. </p>"
+          ]
+        }
+      },
+      {
+        "id": "GvwhpNywOnqqI3h3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>There are many vocabulary words in Investigation 1. Generating a word bank can help students pull together all of their thoughts for the reflection.</p>", "<p></p>", "<p>    <em>What do you know about similar figures? What do you know about proportional reasoning? </em></p>"]
+        }
+      },
+      {
+        "id": "pmQ2l1DA-fYFSDoR",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>(Student answers should include discussions of the changes between originals and images in relation to the general shape, side lengths, angle measures, and area. Students should see that they are using proportional reasoning when comparing lengths, angles, and areas of similar figures or scaled drawings. At this point student should know that there seems to be a multiplicative comparison between these features. In 1.2 the side lengths from original to image grew by a factor of 2. Angle size grew by a factor of 1 (they are congruent). Area grew by a factor of 2 x 2.)</p>"
+          ]
+        }
+      },
+      {
+        "id": "Tfr4OPSelPo9CIHB",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Reflecting on Student Learning</strong></p>",
+            "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
+            "<ul><li>What evidence in students’ work shows an understanding of the ideas in this Unit?</li><li>What mathematical ideas will still need emphasis?</li><li>What opportunities exist in the rest of the Unit, or in future Units, to extend and connect the students’ learning?</li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

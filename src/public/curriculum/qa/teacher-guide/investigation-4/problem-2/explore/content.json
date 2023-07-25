@@ -1,0 +1,35 @@
+{
+  "type": "explore",
+  "content": {
+    "tiles": [
+      {
+        "id": "AgnH0r1uQpCaHDsO",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Explore (Digging In)</strong></u></p>",
+            "<p><u>Providing for Individual Needs</u></p>",
+            "<p>Suggested questions</p><ul><li>Would a scale factor or ratio help you find the height? (Yes. Either one could be used.)</li><li>How is this problem similar to Problem 4.1? (We are finding a missing side of a triangle.)</li><li>Do your measurements seem reasonable?(Answers will vary.)</li></ul>",
+            "When students are working with the mirror method in What If Situation A monitor how they are making their measurements.  Remind them to walk backwards until they see the reflection of the top of the object in the mirror. ",
+            "<p>When students are working with the shadow method in What If Situation A monitor how they are making their measurements.  Assist them with measuring from end to end on the shadow. </p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Planning for the Summary</u></p>",
+            "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence? </p>",
+            "<p><em>Now What Do You Know?</em></p>",
+            "<p><em>Describe how similar figures can be used to find missing measurements of  objects that cannot be measured directly. Is there another method? Explain.</em></p>",
+            "(As you are circulating during the Explore find examples of students using scale factors or ratios to find the heights of the objects.  Use this student work in the summary discussion.)"
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "type": "explore",
+  "content": {
+    "tiles": [
+      {
+        "id": "document_Text_1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Problem Exploration</strong></p><p>This Problem is from the QA-Unit.</p>"
+          ]
+        }
+      },
+      {
+        "id": "9QtqdZo6uW3KGFY0",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>This is teacher guide text content</p>"
+          ]
+        }
+      },
+      {
+        "id": "tysYSNoJkfMXSpAL",
+        "title": "Text 2",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>test solution tile</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

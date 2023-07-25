@@ -1,0 +1,47 @@
+{
+  "type": "summarize",
+  "content": {
+    "tiles": [
+      {
+        "id": "aotxNEK8va0bKN4F",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Summarize (Orchestrating the Discussion)</strong></u></p>",
+            "<p><u>Solutions and Strategies</u> </p>",
+            "<p>When all groups have made their calculations, give each group a chance to share their work. If there are a variety of answers, ask the class why groups arrived at different answers. See if students can explain to others how to correct their work. This is a good opportunity to discuss accuracy and attending to precision with the class.</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Making the Mathematics Explicit </u></p>",
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>Describe the relationship between the perimeter of the smaller triangle and the perimeter of the larger triangle in the Initial Challenge? (The larger triangle has a perimeter that is 1.75 times as large.)  In the What If Situation B? (The larger triangle has a perimeter that is 4 times as large.)</li><li>Discuss What If Situation A and students’ thinking around Durrell’s suggestion. (Portrayal) (Answers will vary. This connects back to ideas of unit rate. The rep-tile would have to have measures that keep the 80:120 ratio, and end up fitting into 140 feet, so Durrell could use a triangle with sides 2’ : 3’ (or 1:1.5) and rep-tile that up to 140: 210)</li><li>In What If Situation B, what order do you think these students located the key points and measure the segments and angles?  Explain your reasoning. (Answers will vary.)</li></ul>",
+            "Discuss the Did You Know picture of the Louisville Slugger Museum and Factory.  Relate it to Problem 1.1 and the Mystery teacher."
+          ]
+        }
+      },
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p><u>Now What Do Students Know</u><em></em></p>", "<p><em></em>Ask students to reflect on the discussion and answer the Now What Do You Know question(s). </p>"]}},
+      {
+        "id": "oHDhnsY0kLcroShM",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Reflecting on Student Learning</strong></p>",
+            "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
+            "<ul><li>What evidence do I have that students understand the Now What Do You Know Question?</li></ul>",
+            "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
+            "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit? </li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

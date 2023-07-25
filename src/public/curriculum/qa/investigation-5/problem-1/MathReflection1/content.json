@@ -1,0 +1,28 @@
+{
+  "type": "MathReflection1",
+  "content": {
+    "tiles": [
+      {"content": {"type": "Text", "format": "html", "text": ["In this unit, we used proportional reasoning to solve problems involving similar figures (scale drawings). At the end of this Investigation, what do you know about similar figures? What do you know about proportional reasoning?"]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "markdown",
+          "text": [
+            "Proportional reasoning can be used to compare lengths, angles, and areas of similar figures. Students may discuss some of the ratio relationships between the shapes in the Investigation.",
+            "For figures with the same basic shape (similar figures), student should begin to realize that some measurement change and some stay the same.",
+            "Students should begin to use and articulate relationships between attributes, such as: ",
+            "Stay the same: ",
+            "* same basic look to the shape, ",
+            "* corresponding angles of an enlargement or reduction of an original figure stay the same,",
+            "Changes by the multiplier: *  side lengths of an enlargement or reduction figure, as compared to the original figure, change in size by the multiplier used with the original,",
+            "* perimeter of an enlargement or reduction figure, as compared to the original figure, change in size by the multiplier used with the original, ",
+            "Changes in some way:",
+            "* area of an enlarged or reduced figure, as compared to the original figure, changed but not by the multiplier used on the original figure. "
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

@@ -1,0 +1,23 @@
+{
+  "type": "MathReflection2",
+  "content": {
+    "tiles": [
+      {"content": {"type": "Text", "format": "html", "text": ["In this unit, we used proportional reasoning to solve problems involving involving similar figures (scale drawings). At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "markdown",
+          "text": [
+            "With similar figures, some attributes of the shape change and some stay the same: ",
+            "* corresponding angles of two similar figures are the same measure while angles of non-similar figures may not be.",
+            "* corresponding side lengths of similar figures increase or decrease by the scale factor used to create an image.",
+            "* perimeter of a new similar figure, as compared to the original figure, changes in size by the scale factor between the original and the new image.",
+            "**The relationship between corresponding sides of similar figures can be expressed as a ratio. This ratio can help us find the scale factor.**"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

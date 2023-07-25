@@ -1,0 +1,39 @@
+{
+  "type": "launch",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Launch (Getting Started)</strong></u></p>",
+            "<p><u>Connecting to Prior Knowledge</u></p>",
+            "<p>Students began their work in proportional reasoning in 6th grade. They have used “for every” statements in many situations.  Have them recall some of that work. Examples from Comparing Quantities: for every $3 the Washington students plan to raise the Central students plan to raise $1; for every 10 students who prefer cheese, five students prefer pepperoni; for every 30 Chewy Fruit worms it costs $30. In this problem students will expand their thinking around “for every” statements using similar figures are also called scale drawings or scale figures. This will lay a foundation for future work on proportional reasoning. </p>"
+          ]
+        }
+      },
+      {"content": {"type": "Text", "format": "html", "text": ["<p><u>Presenting the Challenge</u><strong></strong></p>", "<p><strong>Display Learning Aid 1.1: Photograph of Mystery Teacher </strong>or have the students refer to their books. </p>"]}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>What information do we have? (the height of the real-life magazines, the height of the magazines in the photo, and the height of the teacher in the photo)</li><li>What are we trying to find? (the real-life height of the teacher)</li><li>How does the real-life teacher differ from the teacher in the photo? (in the height and width; the real-life teacher is taller and wider)<strong></strong></li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Be careful to leave the task of finding the teacher’s height open enough so that you can learn what your students think about similar figures. Eliciting explicit strategies for finding the teacher’s height too soon could reduce your opportunity to assess your students’ thinking.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

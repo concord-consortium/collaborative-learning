@@ -1,0 +1,31 @@
+{
+  "type": "MathReflection4",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["In this unit, we used proportional reasoning to investigate reasoning to investigate similar figures also called scale drawings. At the end of this Investigation, what do you know about similarity? What do you know about proportional reasoning?"]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "markdown",
+          "text": [
+            "When scaling figures, some attributes change and some stay the same.",
+            "* corresponding angles of two similar figures are the same measure while angles of non-similar figures may not be.",
+            "*  corresponding side lengths, including perimeter, of the similar figure increases or decreases by the scale factor (multiplier). If the scale factor is larger than 1, the shape gets larger. If the scale factor is 1, the shape stays the same size. If the scale factor is smaller than 1, the shape gets smaller.",
+            "* area of similar figures increases or decreases by the scale factor squared (multiplier squared)",
+            "* ratios of corresponding adjacent side lengths within two similar figures are equal ",
+            "* Proportional relationships exist between corresponding lengths of similar figures. We use the quantities within the shapes and quantities across the shapes to describe the scaling.",
+            "We use the proportional relationships to create similar figures in many ways. Some include using; pictures, rubber bands, copy machine, coordinate grid, nested triangles formed across spaces, shadows, and mirror reflections."
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

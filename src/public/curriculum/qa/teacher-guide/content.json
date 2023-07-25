@@ -1,0 +1,163 @@
+{
+  "code": "qa",
+  "abbrevTitle": "QA",
+  "title": "QA Unit",
+  "subtitle": "Understanding Similarity",
+  "placeholderText": "Enter notes here",
+  "settings": {"table": {"numFormat": ".2~f"}},
+  "sections": {
+    "overview": {"initials": "OV", "title": "Overview", "placeholder": "Work area for\nOverview section"},
+    "launch": {"initials": "LC", "title": "Launch", "placeholder": "Work area for\nLaunch section"},
+    "explore": {"initials": "EX", "title": "Explore", "placeholder": "Work area for\nExplore section"},
+    "summarize": {"initials": "SM", "title": "Summarize", "placeholder": "Work area for\nSummarize section"}
+  },
+  "defaultStamps": [
+    {"url": "curriculum/moving-straight-ahead/stamps/plus.png", "width": 25, "height": 25},
+    {"url": "curriculum/moving-straight-ahead/stamps/equals.png", "width": 25, "height": 25},
+    {"url": "curriculum/moving-straight-ahead/stamps/lparen.png", "width": 25, "height": 25},
+    {"url": "curriculum/moving-straight-ahead/stamps/rparen.png", "width": 25, "height": 25}
+  ],
+  "investigations": [
+    {
+      "description": "Investigation 0",
+      "ordinal": 0,
+      "title": "Introduction to CLUE",
+      "introduction": {"tiles": []},
+      "problems": [
+        {
+          "description": "Problem 0.1",
+          "ordinal": 1,
+          "title": "0.1 Intro to CLUE",
+          "subtitle": "Working in the Collaborative Learning User Environment",
+          "sections": ["investigation-0/problem-1/overview/content.json", "investigation-0/problem-1/launch/content.json", "investigation-0/problem-1/explore/content.json", "investigation-0/problem-1/summarize/content.json"]
+        }
+      ]
+    },
+    {
+      "description": "Investigation 1",
+      "ordinal": 1,
+      "title": "QA Investigation 1 Enlarging and Reducing Shapes",
+      "problems": [
+        {
+          "description": "Problem 1.1",
+          "ordinal": 1,
+          "title": "QA 1.1 Solving a Mystery with Proportional Reasoning",
+          "subtitle": "",
+          "sections": ["investigation-1/problem-1/overview/content.json", "investigation-1/problem-1/launch/content.json", "investigation-1/problem-1/explore/content.json", "investigation-1/problem-1/summarize/content.json"]
+        },
+        {
+          "description": "QA Problem 1.2",
+          "ordinal": 2,
+          "title": "QA 1.2 Designing a Poster Using a Rubber Band Stretcher",
+          "subtitle": "",
+          "sections": ["investigation-1/problem-2/overview/content.json", "investigation-1/problem-2/launch/content.json", "investigation-1/problem-2/explore/content.json", "investigation-1/problem-2/summarize/content.json"]
+        },
+        {
+          "description": "QA Problem 1.3",
+          "ordinal": 3,
+          "title": "QA 1.3 Scaling Up and Down with Percents",
+          "subtitle": "",
+          "sections": ["investigation-1/problem-3/overview/content.json", "investigation-1/problem-3/launch/content.json", "investigation-1/problem-3/explore/content.json", "investigation-1/problem-3/summarize/content.json"]
+        }
+      ]
+    },
+    {
+      "description": "Investigation 2 The Mug Wump Family: Similar Figures",
+      "ordinal": 2,
+      "title": "QA Investigation 2 The Mug Wump Family: Similar Figures",
+      "problems": [
+        {
+          "description": "Problem 2.1",
+          "ordinal": 1,
+          "title": "QA 2.1 Drawing Wumps",
+          "subtitle": "Making Similar Figures",
+          "sections": ["investigation-2/problem-1/overview/content.json", "investigation-2/problem-1/launch/content.json", "investigation-2/problem-1/explore/content.json", "investigation-2/problem-1/summarize/content.json"]
+        },
+        {
+          "description": "QA Problem 2.2",
+          "ordinal": 2,
+          "title": "QA 2.2 Hats Off to the Wumps",
+          "subtitle": "Changing a Figure's Size and Location",
+          "sections": ["investigation-2/problem-2/overview/content.json", "investigation-2/problem-2/launch/content.json", "investigation-2/problem-2/explore/content.json", "investigation-2/problem-2/summarize/content.json"]
+        },
+        {
+          "description": "QA Problem 2.3",
+          "ordinal": 3,
+          "title": "QA 2.3 Mouthing Off and Nosing Around",
+          "subtitle": "Scale Factors",
+          "sections": ["investigation-2/problem-3/overview/content.json", "investigation-2/problem-3/launch/content.json", "investigation-2/problem-3/explore/content.json", "investigation-2/problem-3/summarize/content.json"]
+        }
+      ]
+    },
+    {
+      "description": "Investigation 3",
+      "ordinal": 3,
+      "title": "QA Investigation 3 Scaling Perimeter and Area",
+      "problems": [
+        {
+          "description": "Problem 3.1",
+          "ordinal": 1,
+          "title": "QA 3.1 Using Proportional Reasoning to Rep-tile",
+          "subtitle": "The Area Connection",
+          "sections": ["investigation-3/problem-1/overview/content.json", "investigation-3/problem-1/launch/content.json", "investigation-3/problem-1/explore/content.json", "investigation-3/problem-1/summarize/content.json"]
+        },
+        {
+          "description": "QA Problem 3.2",
+          "ordinal": 2,
+          "title": "QA 3.2 Designing Under Constraints",
+          "subtitle": "Scale Factors and Similar Shapes (Scale Drawings)",
+          "sections": ["investigation-3/problem-2/overview/content.json", "investigation-3/problem-2/launch/content.json", "investigation-3/problem-2/explore/content.json", "investigation-3/problem-2/summarize/content.json"]
+        },
+        {
+          "description": "QA Problem 3.3",
+          "ordinal": 3,
+          "title": "QA 3.3 Out of Reach",
+          "subtitle": "Finding Lengths with Similar Triangles",
+          "sections": ["investigation-3/problem-3/overview/content.json", "investigation-3/problem-3/launch/content.json", "investigation-3/problem-3/explore/content.json", "investigation-3/problem-3/summarize/content.json"]
+        }
+      ]
+    },
+    {
+      "description": "Investigation 4",
+      "ordinal": 4,
+      "title": "QA Investigation 4 Similar Figures and Ratios",
+      "problems": [
+        {
+          "description": "Problem 4.1",
+          "ordinal": 1,
+          "title": "QA 4.1 Equivalent Ratios within Similar Figures",
+          "subtitle": "",
+          "sections": ["investigation-4/problem-1/overview/content.json", "investigation-4/problem-1/launch/content.json", "investigation-4/problem-1/explore/content.json", "investigation-4/problem-1/summarize/content.json"]
+        },
+        {
+          "description": "QA Problem 4.2",
+          "ordinal": 2,
+          "title": "QA 4.2 Finding Missing Parts",
+          "subtitle": "Using Similarity to Find Measurements",
+          "sections": ["investigation-4/problem-2/overview/content.json", "investigation-4/problem-2/launch/content.json", "investigation-4/problem-2/explore/content.json", "investigation-4/problem-2/summarize/content.json"]
+        },
+        {
+          "description": "QA Problem 4.3",
+          "ordinal": 3,
+          "title": "QA 4.3 More Imposters",
+          "subtitle": "Pulling it All Together",
+          "sections": ["investigation-4/problem-3/overview/content.json", "investigation-4/problem-3/launch/content.json", "investigation-4/problem-3/explore/content.json", "investigation-4/problem-3/summarize/content.json"]
+        }
+      ]
+    },
+    {
+      "description": "Mathematical Reflections",
+      "ordinal": 5,
+      "title": "QA MR1 - MR4",
+      "problems": [
+        {
+          "description": "Mathematical Reflections",
+          "ordinal": 1,
+          "title": "QA Unit Mathematical Reflections",
+          "subtitle": "",
+          "sections": ["investigation-5/problem-1/MathReflection1/content.json", "investigation-5/problem-1/MathReflection2/content.json", "investigation-5/problem-1/MathReflection3/content.json", "investigation-5/problem-1/MathReflection4/content.json"]
+        }
+      ]
+    }
+  ]
+}

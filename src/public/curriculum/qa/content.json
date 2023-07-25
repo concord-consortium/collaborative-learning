@@ -1,0 +1,1766 @@
+{
+  "code": "qa",
+  "abbrevTitle": "QA",
+  "title": "QA Unit",
+  "subtitle": "Understanding Similarity",
+  "config": {
+    "enableHistoryRoles": ["teacher"],
+    "placeholderText": "Enter notes here",
+    "stamps": [
+      {"url": "curriculum/moving-straight-ahead/stamps/plus.png", "width": 25, "height": 25},
+      {"url": "curriculum/moving-straight-ahead/stamps/equals.png", "width": 25, "height": 25},
+      {"url": "curriculum/moving-straight-ahead/stamps/lparen.png", "width": 25, "height": 25},
+      {"url": "curriculum/moving-straight-ahead/stamps/rparen.png", "width": 25, "height": 25}
+    ],
+    "toolbar": [
+      {"id": "Text", "title": "Text", "isTileTool": true},
+      {"id": "Table", "title": "Table", "isTileTool": true},
+      {"id": "DataCard", "title": "Data Card", "isTileTool": true},
+      {"id": "Dataflow", "title": "Sensor Program", "isTileTool": true},
+      {"id": "Diagram", "title": "Diagram", "isTileTool": true},
+      {"id": "Graph", "title": "XY Plot", "iconId": "icon-plot-tool", "isTileTool": true},
+      {"id": "Geometry", "title": "Graph", "isTileTool": true},
+      {"id": "Image", "title": "Image", "isTileTool": true},
+      {"id": "Drawing", "title": "Drawing", "isTileTool": true},
+      {"id": "Starter", "title": "Starter", "isTileTool": true},
+      {"id": "Expression", "title": "Expression", "isTileTool": true},
+      {"id": "undo", "title": "Undo", "iconId": "icon-undo-tool", "isTileTool": false},
+      {"id": "redo", "title": "Redo", "iconId": "icon-redo-tool", "isTileTool": false},
+      {"id": "duplicate", "title": "Duplicate", "iconId": "icon-duplicate-tool", "isTileTool": false},
+      {"id": "delete", "title": "Delete", "iconId": "icon-delete-tool", "isTileTool": false}
+    ],
+    "tools": ["Simulator"]
+  },
+  "sections": {
+    "introduction": {"initials": "IN", "title": "Introduction", "placeholder": "Work area for\nIntroduction section"},
+    "initialChallenge": {"initials": "IC", "title": "Initial Challenge", "placeholder": "Work area for\nInitial Challenge section"},
+    "whatIf": {"initials": "WI", "title": "What If...?", "placeholder": "Work area for\nWhat If...? section"},
+    "nowWhatDoYouKnow": {"initials": "NW", "title": "Now What Do You Know?", "placeholder": "Work area for\nNow What Do You Know? section"},
+    "MathReflection1": {"initials": "R1", "title": "Math Reflection 1", "placeholder": "Work area for\nMathematical Reflection 1 section"},
+    "MathReflection2": {"initials": "R2", "title": "Math Reflection 2", "placeholder": "Work area for\nMathematical Reflection 2 section"},
+    "MathReflection3": {"initials": "R3", "title": "Math Reflection 3", "placeholder": "Work area for\nMathematical Reflection 3 section"},
+    "MathReflection4": {"initials": "R4", "title": "Math Reflection 4", "placeholder": "Work area for\nMathematical Reflection 4 section"}
+  },
+  "planningDocument": {
+    "enable": "teacher",
+    "default": true,
+    "sectionInfo": {
+      "overview": {"initials": "OV", "title": "Overview", "placeholder": "Work area for\nOverview section"},
+      "launch": {"initials": "LC", "title": "Launch", "placeholder": "Work area for\nLaunch section"},
+      "explore": {"initials": "EX", "title": "Explore", "placeholder": "Work area for\nExplore section"},
+      "summarize": {"initials": "SM", "title": "Summarize", "placeholder": "Work area for\nSummarize section"}
+    },
+    "sections": [{"type": "overview"}, {"type": "launch"}, {"type": "explore"}, {"type": "summarize"}]
+  },
+  "investigations": [
+    {
+      "description": "Investigation 0",
+      "ordinal": 0,
+      "title": "Introduction to CLUE",
+      "introduction": {"tiles": []},
+      "problems": [
+        {
+          "description": "Problem 0.1",
+          "ordinal": 1,
+          "title": "0.1 Intro to CLUE",
+          "subtitle": "Working in the Collaborative Learning User Environment",
+          "sections": ["investigation-0/problem-1/introduction/content.json", "investigation-0/problem-1/initialChallenge/content.json", "investigation-0/problem-1/whatIf/content.json", "investigation-0/problem-1/nowWhatDoYouKnow/content.json"],
+          "supports": []
+        }
+      ],
+      "supports": []
+    },
+    {
+      "description": "Investigation 1",
+      "ordinal": 1,
+      "title": "QA Investigation 1 Enlarging and Reducing Shapes",
+      "introduction": {"tiles": []},
+      "problems": [
+        {
+          "description": "Problem 1.1",
+          "ordinal": 1,
+          "title": "QA 1.1 Solving a Mystery with Proportional Reasoning",
+          "subtitle": "",
+          "sections": ["investigation-1/problem-1/introduction/content.json", "investigation-1/problem-1/initialChallenge/content.json", "investigation-1/problem-1/whatIf/content.json", "investigation-1/problem-1/nowWhatDoYouKnow/content.json"],
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                  {
+                    "id": "jp9Qts8S6wcfwbuB",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem 1.1 Solving a Mystery with Proportional Reasoning</strong></p>",
+                        "<p>This Problem can be used to assess students’ initial ideas about the concept of scaled drawings/similarity. In the Initial Challenge, the P.I. Mystery Club enters a contest to guess the identity of a teacher in disguise. A photo of the mystery teacher is shown, and students use a known measure (height of a magazine) to estimate an unknown measure (height of the mystery teacher). In the What If Situations students are asked to express their informal ideas about the mathematical meaning of similarity.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "YYF7EraIgGb7tZwK",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["<p><strong>NWDYK</strong></p>", "<p>The Mystery Club advisor says that the picture is similar to the actual scene. What do you suppose the advisor means by similar? How is the photo similar to the actual scene that is photographed?</p>"]
+                    }
+                  },
+                  {"id": "8Rq8Uw_LJZwpiSsX", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Arc of Learning</strong></p>", "<p>Similar Figures: <em>Introduction</em> </p>", "<p>Proportional Reasoning: <em>Analysis</em></p>"]}},
+                  {"id": "Qfk0rPo-Jx-0jxU2", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Key Terms</strong></p>", "<p>Similar</p>", "<p>Scale drawing</p>", "<p></p>", "<p></p>", "<p></p>"]}},
+                  {"id": "X9PI6Cb8DoYeJGh9", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Materials</strong></p>", "<p>Learning Aid 1.1: Photograph of Mystery Teacher </p>", "<p></p>", "<p></p>", "<p></p>"]}},
+                  {
+                    "id": "7KnyqQODcWqrcgMZ",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p>",
+                        "<p>1  Day</p>",
+                        "<p><strong>Groups</strong></p>",
+                        "<p>2</p>",
+                        "<p><strong>A</strong> #1-2</p>",
+                        "<p><strong>C</strong> #8-11</p>",
+                        "<p><strong>E</strong> #16</p>",
+                        "<p><strong>CCSSM</strong></p>",
+                        "<p>7.G.A.1</p>",
+                        "<p>7.RP.A.2</p>",
+                        "<p>7.RP.A.2.B</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "launch": {
+                "tiles": [
+                  {
+                    "id": "l5m8ZM18T7UcbLXW",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p>",
+                        "<p><strong>LAUNCH</strong></p>",
+                        "<p>CONNECTING TO PRIOR KNOWLEDGE</p>",
+                        "<p>Students began their work in proportional reasoning in 6th grade. They have used “for every” statements in many situations.  Have them recall some of that work. Examples from Comparing Quantities: for every $3 the Washington students plan to raise the Central students plan to raise $1; for every 10 students who prefer cheese, five students prefer pepperoni; for every 30 Chewy Fruit worms it costs $30. In this Problem students will expand their thinking around “for every” statements using similar figures which are also called scale drawings or scale figures. This will lay a foundation for future work on proportional reasoning. </p>",
+                        "<p>PRESENTING THE CHALLENGE</p>",
+                        "<p>Display Learning Aid 1.1: Photograph of Mystery Teacher or have the students refer to their books.</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>What information do we have?</li><li>What are we trying to find?</li><li>How does the real-life teacher differ from the teacher in the photo?</li></ul>",
+                        "<p>Be careful to leave the task of finding the teacher’s height open enough so that you can learn what your students think about similar figures.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  {
+                    "id": "F4n9NSGq7MUwL5y9",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p>",
+                        "<p><em>Teacher Moves: Agency, Identity, Ownership</em></p>",
+                        "<p>PROVIDING FOR INDIVIDUAL NEEDS</p>",
+                        "<p>Students can use rulers or edges of a piece of paper to make informal estimates of various measurements. Do not push for precise measurement at this time. Pay attention, though, to which students measure naturally and easily and which struggle with measurement. This will help you to plan your teaching in later Problems in the Unit where careful measurement is important.</p>",
+                        "<p><em>Teacher Moves: Language</em></p>",
+                        "<p>PLANNING FOR THE SUMMARY</p>",
+                        "<p>Look for language such as <em>ratio, rates, fractions, percentage, more than, or less than</em> as students express their comparisons. In the Summarize you can come back to the comparisons and ask students to describe them using terms they learned in previous grades. This is a good assessment of what understanding students bring from Grade 6 about ratios, rational numbers and proportional reasoning.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  {
+                    "id": "ZiAtUwKkxmxnep0y",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>S﻿UMMARIZE</strong></p>",
+                        "<p>SOLUTIONS AND STRATEGIES</p>",
+                        "<p>Have students share their strategies and solutions on the height of the teacher. It is helpful for students to hear others’ ideas while they are developing their own. You should expect some variation in the answers because all measurements are approximations. However, answers that are obviously unreasonable should be examined closely and efforts should be made to figure out why they are incorrect.</p>",
+                        "<p>MAKING THE MATHEMATICS EXPLICIT</p>",
+                        "<p><em>Teacher Moves: Compare Thinking, Language</em></p>",
+                        "<p></p>",
+                        "<p></p>",
+                        "<p></p>",
+                        "<p></p>",
+                        "<p>Focus the summary conversations on the use of ratios, “for every” statements and measurement.  Listen for the use of formal and informal language to assess your students’ understanding of these ideas.</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>What measurements were important to you in finding the height of the teacher?</li></ul>",
+                        "<p>Discuss students’ perception of similar figures/scaled drawings. They might say things like, “look alike,” “same shape,” “same features,” “different size,”...</p>",
+                        "<ul><li>Can you think of some other times when you might want to use a photograph to estimate the size of something?</li><li>In the movie theater, the image of the person on screen is taller than the real person. How can you use the same techniques to estimate someone’s height from their image on a movie screen?</li><li>Would you have been able to solve the problem had you not known the magazine was 10 inches tall?</li><li>Can someone explain Daphne’s statement: For every one magazine height, there are 10 inches in real life?</li><li>In What If Situation A, do you agree with Daphne’s reasoning?</li></ul>",
+                        "<p></p>",
+                        "<p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "supports": []
+        },
+        {
+          "description": "QA Problem 1.2",
+          "ordinal": 2,
+          "title": "QA 1.2 Designing a Poster Using a Rubber Band Stretcher",
+          "subtitle": "",
+          "sections": ["investigation-1/problem-2/introduction/content.json", "investigation-1/problem-2/initialChallenge/content.json", "investigation-1/problem-2/whatIf/content.json", "investigation-1/problem-2/nowWhatDoYouKnow/content.json"],
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                  {
+                    "id": "sIZcC115f0hld5F6",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem 1.2 Designing a Poster Using a Rubber Band Stretcher</strong></p>",
+                        "<p>The Problem begins in the Initial Challenge with the Mystery Club enlarging a flier into a poster to attract new members. In this context, students create a similar figure using rubber bands. They make a stretcher by tying two rubber bands together and use it to enlarge two different figures. In the What If Situations they compare how the general shape, line lengths, areas, perimeters, and angles are affected. This focuses students’ attention on the preservation of shape in similar figures.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "OofDBVkxxmi4iCAU",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["<p><strong>NWDYK</strong></p>", "<p>The original figure and its image are s<em>imilar figures</em>  or scale drawings. For two similar figures, what characteristics and measures are the same?  Different? Explain how you know.</p>"]
+                    }
+                  },
+                  {"id": "DhPBFmxLwYzg871Z", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Arc of Learning</strong></p>", "<p>Proportional Reasoning: <em>Analysis</em></p>", "<p>Similar Figures: <em>Introduction and Exploration</em></p>"]}},
+                  {"id": "U4zPM-kEdZva43nt", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Key Terms</strong></p>"]}},
+                  {
+                    "id": "JORy6R9PAUIhXmQz",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Materials</strong></p>",
+                        "<p>Learning Aid 1.2</p>",
+                        "<p>Super Sleuth (right-handed and left-handed versions)</p>",
+                        "<p>Rulers</p>",
+                        "<p>#16 rubber bands (2 per student)</p>",
+                        "<p>tape</p>",
+                        "<p>blank paper</p>",
+                        "<p>angle rulers or protractors</p>",
+                        "<p>transparencies, tracing    paper, patty paper (optional)</p>",
+                        "<p></p>",
+                        "<p></p>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "L53b6lzNnrAIqjpR",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p>",
+                        "<p> 1 Day</p>",
+                        "<p><strong>Groups</strong></p>",
+                        "<p>Individual or pairs</p>",
+                        "<p><strong>A</strong> #3-4</p>",
+                        "<p><strong>C </strong>#12-13</p>",
+                        "<p><strong>E</strong> #17-18</p>",
+                        "<p><strong>CCSSM</strong></p>",
+                        "<p>7.G.A.1 </p>",
+                        "<p>7.RP.A.2 </p>",
+                        "<p>7.RP.A.2.B</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "launch": {
+                "tiles": [
+                  {
+                    "id": "qlyBAqBWZazjjIO0",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p>",
+                        "<p><strong>LAUNCH</strong></p>",
+                        "<p>CONNECTING TO PRIOR KNOWLEDGE</p>",
+                        "<p>In launching this Problem, your goal is to understand what your students intuitively know about scaled drawings or similar figures. Students’ understanding will likely be based on the use of “similarity” in everyday situations. In addition, you will want to assess their measurement skills.</p>",
+                        "<p>PRESENTING THE CHALLENGE</p>",
+                        "<p>Members of the Mystery Club want to make a poster that shows their logo. To do this, they need to enlarge the logo on the flier they designed. Briefly discuss with students the desire to make a larger version of the original picture. Then tell them that you are going to demonstrate one method for doing so.</p>",
+                        "<p>You will need to demonstrate how to draw a figure using a rubber band stretcher, using a marker either on the board or on chart paper taped to the wall.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  {
+                    "id": "0cgR8X-A-B-BPej5",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p>",
+                        "<p>PROVIDING FOR INDIVIDUAL NEEDS</p>",
+                        "<p>As students work, suggest that their drawings will be more accurate if they hold the pencil vertically and keep the rubber band as close to the point of the pencil as possible.</p>",
+                        "<p>Remind students to trace the figure they are trying to copy with the knot, as they may be tempted to draw the object freehand. Accuracy is not the issue here, but students can get better drawings by being careful with the placement of the rubber bands on the pencil and the path of the knot on the figure</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>What would happen if I made a three-band stretcher?</li><li>Do I get exactly the same drawing if I switch the ends of my two-band stretcher?</li></ul>",
+                        "<ul><li>How could we use something like the rubber band stretcher to make an image smaller than the original?</li></ul>",
+                        "<p><em>Teacher Moves: Agency, Identity, Ownership</em></p>",
+                        "<p>PLANNING FOR THE SUMMARY</p>",
+                        "<p>As you are observing students working with the rubber band stretchers and comparing their drawings to the originals listen to how they are describing them. Students will worry about the drawing being “perfect”. Help them to focus on the mathematical changes from the original shape to the image they are creating. How do they describe the change in the lengths of the line segments? The areas? Have they noticed that the angle measures stay the same? Take note of students who have ways to describe what has changed and what has stayed the same so you can have them share this in the Summary discussion.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  {
+                    "id": "toJhy2ktJuOQkLEm",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SUMMARIZE</strong></p>",
+                        "<p><em>﻿Teacher Moves: Compare Thinking</em></p>",
+                        "<p>SOLUTIONS AND STRATEGIES</p>",
+                        "<p>Have students share their findings about the image of the new figure as compared to the original figure.</p>",
+                        "<p>MAKING THE MATHEMATICS EXPLICIT</p>",
+                        "<p>The Summary needs to focus students onto the mathematics around the use of the rubber band stretcher.</p>",
+                        "<p>Suggested questions</p>",
+                        "<ul><li>How do the lengths of the line segments compare between the two figures?</li><li>How do the angles of the two figures compare?</li><li>Which comparison statements in What If Situation A can be written as ratio statements? </li><li>How does the area change from the original to the image?</li><li>The original and the image are similar figures. What do you think “mathematically similar” means?</li></ul>",
+                        "<p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p>",
+                        "<p><strong>Note: </strong> The students measurements won’t be exact because the rubber band stretcher isn’t an exact tool. You may need to take a few measurements from students and then say something like, “It looks like the general shape of Super Sleuth is about the same. We are all getting the side lengths to about double, the angles seem to stay the same, the perimeter seems to about double and the area seems to do more than double.”  </p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "supports": []
+        },
+        {
+          "description": "Problem 1.3",
+          "ordinal": 3,
+          "title": "QA 1.3 Scaling Up and Down with Percents",
+          "subtitle": "",
+          "sections": ["investigation-1/problem-3/introduction/content.json", "investigation-1/problem-3/initialChallenge/content.json", "investigation-1/problem-3/whatIf/content.json", "investigation-1/problem-3/nowWhatDoYouKnow/content.json"],
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                  {
+                    "id": "8E6olY89GsmrRjTx",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem 1.3 Scaling Up and Down with Percents</strong></p>",
+                        "<p>In this Problem, using the context of a copy machine, students work with figures of various sizes that are similar to an original figure. They will work with some scale drawings that are smaller than the original figure and some that are larger. They will use percents to compare similar figures. In the What If Situations they will compare side lengths and angles of similar figures and notice that lengths of sides may differ, but the measures of angles do not.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "z-zlXOh40zBMQ4no",
+                    "title": "Text 1",
+                    "content": {"type": "Text", "format": "html", "text": ["<p><strong>NWDYK</strong></p>", "<p>For similar figures, what features (attributes) and measures stay the same? What features (attributes) and measures change? How does a multiplier play a role in these changes?</p>"]}
+                  },
+                  {"id": "dzn6dK7qC_YXq7Zc", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Arc of Learning</strong></p>", "<p>Proportional Reasoning: <em>Analysis</em></p>", "<p>Similar Figures: <em>Introduction and Exploration</em></p>"]}},
+                  {"id": "y5nDTZJ1pVbaAWny", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Key Terms</strong></p>", "<p>Corresponding sides</p>", "<p>Corresponding angles</p>"]}},
+                  {"id": "eLVPfi0VfWhXJpDU", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Materials</strong></p>", "<p>Learning Aid 1.3</p>", "<p>Super Sleuth Figure and Two Copies </p>", "<p>Tracing paper, patty paper, transparency, etc. (optional)</p>"]}},
+                  {
+                    "id": "NNNsqVge-ocwuVug",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p>",
+                        "<p>1 Day</p>",
+                        "<p><strong>Groups</strong></p>",
+                        "<p>2</p>",
+                        "<p><strong>A</strong> #5-7</p>",
+                        "<p><strong>C</strong> #14-15</p>",
+                        "<p><strong>E</strong> #19</p>",
+                        "<p><strong>CCSSM</strong></p>",
+                        "<p>7.G.A.1</p>",
+                        "<p>7.RP.A.2 </p>",
+                        "<p>7.RP.A.2.B</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "launch": {
+                "tiles": [
+                  {
+                    "id": "-JFiPC0xwjYBfPyS",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p>",
+                        "<p><strong>LAUNCH</strong></p>",
+                        "<p>CONNECTING TO PRIOR KNOWLEDGE</p>",
+                        "<p>Connecting back to the sixth-grade rational number Units, students explore scale factors of 75% and 150%.  During the discussions in Problem 1.2 you may have already introduced the term corresponding to talk about corresponding sides and angles of shapes. If you haven’t, use the Introduction to Problem 1.3 prior to presenting the challenge. </p>",
+                        "<p><em>T﻿eacher Moves: Make Predictions</em></p>",
+                        "<p>PRESENTING THE CHALLENGE</p>",
+                        "<p>Set up the photocopier context by talking with students about the rubber-band stretchers and other methods for enlarging figures.</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>If you wanted to make a very accurate enlargement of a figure, would you use a rubber-band stretcher?</li><li>What are some other ways to make a larger copy of something?</li></ul>",
+                        "<p>Project Learning Aid 1.3: Super Sleuth Figure and Two Copies to do a quick review of basic percent concepts. Cover up the captions under each figure. Tell students that the middle figure is the original.</p>",
+                        "<ul><li>Estimate the percent Daphne entered into the photocopier in order to get the smaller image on the left. </li></ul>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  {
+                    "id": "Tr1jL7J6hjpqkoR7",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p>",
+                        "<p>PROVIDING FOR INDIVIDUAL NEEDS</p>",
+                        "<p>Pay attention to how well your students are measuring. This is the first Problem in this Unit where more precision really makes sense, yet the comparisons are still relatively simple. Use this time to have students practice this important skill. Depending on how comfortable your students are with measuring, they may use rulers or transparent grid paper to measure side lengths; they may use angle rulers or protractors to measure angles.</p>",
+                        "<p>If needed, this is also an opportunity to review operations with percents.</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>What is the measurement of the base of the triangle in the smaller figure?</li><li>How could you use a rubber band stretcher to increase something by 150%? </li></ul>",
+                        "<p>Look for strategies that students use to compare features such as length and angles. </p>",
+                        "<p><em>T﻿eacher Moves: Language</em></p>",
+                        "<p>PLANNING FOR THE SUMMARY</p>",
+                        "<p>As you are circulating, listen for how students are answering the questions in the What If part? How are they describing the changes in the side lengths, area, and perimeter? Listen for their use of  “for every” statements that you can expand on in the Summary</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  {
+                    "id": "Cl6eMmIOIdHVQdYn",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SUMMARIZE</strong></p>",
+                        "<p><em>T﻿eacher Moves: Compare Thinking</em></p>",
+                        "<p>SOLUTIONS AND STRATEGIES</p>",
+                        "<p>Ask students to explain their reasoning. This will give you insight into their understanding of percent. Be sure to discuss angle measures and side lengths.</p>",
+                        "<p>Students may use addition strategies rather than multiplying by a scale factor. For example, they may divide the side lengths of the original figure by four equal segments and then subtract one of the segments to get the side length of the figure that has been reduced to 75%. To get the side length of the figure that is increased to 150% students may divide the side lengths of the original figure into two equal segments and then add one of the segments to the original.</p>",
+                        "<p>MAKING THE MATHEMATICS EXPLICIT</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>How did you describe the comparison between the corresponding side lengths?</li><li>To help students think about these ideas with a multiplicative structure versus additive you could ask them if there is a way to use a “for every” statement to express their idea. </li><li>If I want to enlarge a figure by 25% will the image be larger or smaller than the original? What number do I enter in the photocopier? Explain why this is true.</li></ul>",
+                        "<p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "supports": []
+    },
+    {
+      "description": "Investigation 2",
+      "ordinal": 2,
+      "title": "QA Investigation 2 The Mug Wump Family: Similar Figures",
+      "introduction": {},
+      "problems": [
+        {
+          "description": "Problem 2.1",
+          "ordinal": 1,
+          "title": "QA 2.1 Drawing Wumps",
+          "subtitle": "Making Similar Figures",
+          "disabled": ["GeometryLinkedTables"],
+          "sections": ["investigation-2/problem-1/introduction/content.json", "investigation-2/problem-1/initialChallenge/content.json", "investigation-2/problem-1/whatIf/content.json", "investigation-2/problem-1/nowWhatDoYouKnow/content.json"],
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                  {
+                    "id": "wG02htlUyzSBJWxj",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem 2.1 Drawing Wumps:  Making Similar Figures</strong></p>",
+                        "<p>In this Problem students learn how to make similar and non-similar shapes using a coordinate system. In the Initial Challenge students graph members of the Wump family, plus other figures that claim to be in the Wump family. Students will notice that members of the Wump family are similar to one another and the imposters are not similar.  In the What If Situations students will focus on finding that corresponding angles are not congruent, and that corresponding side lengths are not multiplied by the same factor.  They will also identify the type of rules that create similar shapes. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "MstJDywCPs_IVPSo",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["<p><strong>NWDYK</strong></p>", "<p>How can you determine if an original figure and its image are similar by looking at the coordinate rule that produced the image? What features (attributes) stay the same for Mug and similar figures? What features change? </p>"]
+                    }
+                  },
+                  {"id": "HQEcVqVef3HyZHAg", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Arc of Learning</strong></p>", "<p>Proportional Reasoning: <em>Analysis</em></p>", "<p>Similar Figures: <em>Exploration and Analysis</em></p>"]}},
+                  {"id": "VcNfMmDAptger270", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Key Terms</strong></p>"]}},
+                  {
+                    "id": "MFymJ4pRD8xiqEPY",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Materials</strong></p>",
+                        "<p>Learning Aid 2.1A</p>",
+                        "<p>Table of Coordinates Mug Characters</p>",
+                        "<p></p>",
+                        "<p>Learning Aid 2.1B 1-3           </p>",
+                        "<p>Four choices of grids with one, two, or six grids on a Learning Aid (larger grids may provide accessibility for some students)</p>",
+                        "<p></p>",
+                        "<p>Tracing paper, patty paper, transparency, etc. (optional)</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "PjUoHQJVttAnznt0",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p>",
+                        "<p>1  Day</p>",
+                        "<p><strong>Groups</strong></p>",
+                        "<p>2-4</p>",
+                        "<p><strong>A</strong> #1-3</p>",
+                        "<p><strong>C</strong> #14-16</p>",
+                        "<p><strong>E</strong> #24</p>",
+                        "<p><strong>CCSSM</strong></p>",
+                        "<p>7.G.A.1 </p>",
+                        "<p>7.RP.A.2 </p>",
+                        "<p>7.RP.A.2.B </p>",
+                        "<p>7.EE.B.4.A</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "launch": {
+                "tiles": [
+                  {
+                    "id": "iJZZgN4-YdraaOs4",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p>",
+                        "<p><strong>LAUNCH</strong></p>",
+                        "<p><strong>Optional review of graphing: </strong></p>",
+                        "<p>If your students need to review graphing, you might introduce them to tic-tac-toe on a 4 × 4 board, such as  Teaching Aid 2.1A:  4-by 4- Board.</p>",
+                        "<p>CONNECTING TO PRIOR KNOWLEDGE</p>",
+                        "<p>In this Problem, students create similar and non-similar figures using a coordinate system. </p>",
+                        "<p>PRESENTING THE CHALLENGE</p>",
+                        "<p>Students may need help in drawing Mug Wump because the points are used in sets that are connected in order. </p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>The rule is (2x, 2y). What do you think this rule tells us to do to a Mug point to get a Zug point? </li><li>What do the other rules tell you to do for Lug, Bug, and Glug?</li></ul>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  {
+                    "id": "NJ29MEsYpTHVlkN1",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p>",
+                        "<p>PROVIDING FOR INDIVIDUAL NEEDS</p>",
+                        "<p>As students are working, their figures should look roughly like Mug Wump. Ask students if their new characters generally look like Mug as a quick check to see if they are plotting the points correctly. Be careful to avoid using the word similar as this has a particular mathematical meaning, especially in this Problem.</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>To create the coordinates for Zug, what must you multiply the coordinates of Mug by? </li><li>Describe the shape of Mug. </li><li>What measures help you identify the imposters? </li><li>What features are the same about Mug and the others?</li><li>What features are different? </li></ul>",
+                        "<p>PLANNING FOR THE SUMMARY</p>",
+                        "<p>Listen for the way students are deciding on the imposters.  Take notes on groups that are using ratios, “for every” statements, etc. to describe the figures that are scaled drawings of Mug.  Listen for students finding relationships between both dimensions with the figures that are similar.  Listen for students describing that Mug, Bug, and Zug have congruent corresponding angles and that Zug and Glug do not.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  {
+                    "id": "erZnS9ndIakOZuzf",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SUMMARIZE</strong></p>",
+                        "<p>SOLUTIONS AND STRATEGIES </p>",
+                        "<p>It is very helpful to display copies of the figures for the class to view. You can use <strong>Learning Aid 2.1B: Grids, Teaching Aid 2.1B: Wump Characters, and Teaching Aid 2.1C: Wump Characters on Grids</strong> or student work. </p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>How would you describe to a friend the growth of the figures that you drew? </li><li>Which figures seem to belong to the Wump family and which do not?</li></ul>",
+                        "<p><em>T﻿eacher Moves: Compare Thinking</em></p>",
+                        "<p>MAKING THE MATHEMATICS EXPLICIT</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>Which characters are imposters? How do you know? </li><li>How do the corresponding angles of the five figures compare</li><li>Are the lengths related? Are some of them related and others not? How do the lengths in similar Wumps compare? </li><li>Are the perimeters related? Are some of them related and others not? How do the perimeters in similar Wumps compare? </li><li>Could you use ratios or “for every” statements to describe the characters that are similar to Mug? </li><li>For What If Situation A, which claims are correct? Why? </li><li>What are some rules you could use to create a figure similar to Lug in What If Situation B?  </li></ul>",
+                        "<p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "supports": []
+        },
+        {
+          "description": "Problem 2.2",
+          "ordinal": 2,
+          "title": "QA 2.2 Hats Off to the Wumps",
+          "subtitle": "Changing a Figure's Size and Location",
+          "sections": ["investigation-2/problem-2/initialChallenge/content.json", "investigation-2/problem-2/whatIf/content.json", "investigation-2/problem-2/nowWhatDoYouKnow/content.json"],
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                  {
+                    "id": "dMIBfTO4O_iLdopC",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem 2.2 Hats Off to the Wumps:  Changing a Figure’s Size and Location</strong></p>",
+                        "<p>In this Problem, students investigate the effects that various algebraic rules have on Mug’s hat. In the Initial Challenge students explore what happens to the location of the hat when numbers are added to or subtracted from each coordinate versus when they are multiplied which changes the size of the hat. In the What If Situations they will be able to distinguish rules that produce similar figures from rules that do not produce similar figures, recognizing the role that multiplication plays in scaled drawings or similarity relationships. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "zVcnIOOdugDAXzNV",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>NWDYK</strong></p>",
+                        "<p>If you know the coordinate rules to create an image, how can you tell if the two figures are similar? How can you use the rule to predict the side lengths of the image? How is the effect of a coordinate rule like the effect of a rubber band stretcher or a copy machine setting?</p>"
+                      ]
+                    }
+                  },
+                  {"id": "RGGN6d5POv0r0g_6", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Arc of Learning</strong></p>", "<p> Proportional Reasoning: <em>Analysis</em></p>", "<p>Similar Figures: <em>Analysis</em></p>"]}},
+                  {"id": "27JO8nc0dIYNfmUP", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Key Terms</strong></p>"]}},
+                  {
+                    "id": "B7Ua1FozLl1UQhHo",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Materials</strong></p>",
+                        "<p>Learning Aid 2.2A                   </p>",
+                        "<p>Table for Mug Hats</p>",
+                        "<p></p>",
+                        "<p>Learning Aid 2.2B                      </p>",
+                        "<p>Six First-Quadrant Grids </p>",
+                        "<p></p>",
+                        "<p>Tracing paper, patty paper, transparency, etc. (optional)</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "q9nfg-jyziAne1RA",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p>",
+                        "<p> 1 Day</p>",
+                        "<p><strong>Groups</strong></p>",
+                        "<p>Think-Pair-Share</p>",
+                        "<p><strong>A</strong> #4-7</p>",
+                        "<p><strong>C </strong>#17-19</p>",
+                        "<p><strong>E</strong> #25-27</p>",
+                        "<p><strong>CCSSM</strong></p>",
+                        "<p>7.G.A.1  </p>",
+                        "<p>7.G.B.6 </p>",
+                        "<p>7.RP.A.2 </p>",
+                        "<p>7.RP.A.2.B </p>",
+                        "<p>7.NS.A.2</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "launch": {
+                "tiles": [
+                  {
+                    "id": "PJI_LIV5h9l5ao0-",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p>",
+                        "<p><strong>LAUNCH</strong></p>",
+                        "<p>CONNECTING TO PRIOR KNOWLEDGE</p>",
+                        "<p>Tell the students that this Problem is related to drawing the Wump family and imposters. In this case they are looking at hats for the Wump family.</p>",
+                        "<p><em>Drawing the hats in the Initial Challenge can be time consuming. During the What If you could have students do one of the situations and then have groups share the findings during the summary conversation.</em></p>",
+                        "<p>PRESENTING THE CHALLENGE</p>",
+                        "<p>Have students look at the table and the grids that are provided. They should have little trouble drawing the figures. However, it is important that the students start the Problem knowing that the main point of the Problem is to look back over their drawings and make sense of what adding or multiplying in the rule does to the image.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  {
+                    "id": "1yxUQg_G8QLQVzb4",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p>",
+                        "<p>PROVIDING FOR INDIVIDUAL NEEDS</p>",
+                        "<p>You might have students draw two or more hats on the same grid. If students use a different color for each hat, it will be easier to differentiate the images.</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>What does the rule tell you that you need to do to the x coordinate? y coordinate?  </li><li>Does adding a number to or subtracting a number from x or y coordinate make a difference? </li><li>What rule would give the largest possible image on the grids provided? </li><li>Make up a rule that would place the image in another quadrant.</li></ul>",
+                        "<p>PLANNING FOR THE SUMMARY</p>",
+                        "<p>As you are circulating during the Explore look for how students are connecting the rules to the hats they are creating. Look for students who can explain the effect of fractional coefficients and adding/subtracting to the x or y coordinate. Select students/groups to explain how to move figures, enlarge figures, or shrink figures on a grid using rules.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  {
+                    "id": "6Us7u4JKxuhhHXdB",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SUMMARIZE</strong></p>",
+                        "<p><strong></strong></p>",
+                        "<p>SOLUTIONS AND STRATEGIES </p>",
+                        "<p>Ask students what happened with each of the rules.</p>",
+                        "<ul><li>Are the images similar to the original? Why or why not?</li></ul>",
+                        "<p><em><strong>Teaching Aid 2.2: Wump Hats on Grids </strong></em><em>or student work can be used during the discussions</em></p>",
+                        "<p><em>Claim, Support, Question</em></p>",
+                        "<p>MAKING THE MATHEMATICS EXPLICIT</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>How did adding/subtracting to the coordinates change the hat? </li><li>Do adding and subtracting change a figure in the same way that multiplication changed Mug in Problem 2.1?  </li><li>What rule made a hat get smaller?  Why? </li><li>How can you tell if two rectangles (or triangles) are similar? What information should you collect? </li><li>What rule would make a hat with line segments 1/3 the length of Hat 1’s line segments?</li><li>What rule would make a hat the same size as Hat 1 but moved up 2 units on the grid? </li><li>Describe a rule that moves Hat 1 and does not produce a similar figure. </li><li>What are the effects of multiplying each coordinate by a number? </li><li>What effect does the rule (5x - 5, 5y + 5) have on the original hat? </li><li>Make up a rule that will shrink the figure, keep it similar, and then move it to the right and up.</li><li>Describe how to transform Hats 1–5 back to Mug’s Hat.</li></ul>",
+                        "<p></p>",
+                        "<p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "supports": []
+        },
+        {
+          "description": "Problem 2.3",
+          "ordinal": 3,
+          "title": "QA 2.3 Mouthing Off and Nosing Around",
+          "subtitle": "Scale Factors",
+          "sections": ["investigation-2/problem-3/introduction/content.json", "investigation-2/problem-3/initialChallenge/content.json", "investigation-2/problem-3/whatIf/content.json", "investigation-2/problem-3/nowWhatDoYouKnow/content.json"],
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                  {
+                    "id": "GEDB7BqXw-MMz7fH",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem 2.3 Mouthing Off and Nosing Around:  Scale Factors</strong></p>",
+                        "<p>In the Initial Challenge students continue to work with the Wump family as they investigate side lengths, angles, perimeters, and areas of similar rectangles and triangles. The What If Situations help solidify for students that scaled drawings/similar figures have corresponding angles that have the same measure and that corresponding sides grow or shrink by a scale factor. </p>"
+                      ]
+                    }
+                  },
+                  {"id": "MWIVEeWUPF_4GLpJ", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>NWDYK</strong></p>", "<p>How can you decide if two shapes are similar? How can you determine the scale factor between two similar shapes?</p>"]}},
+                  {"id": "bEj_NL8jmFadh7ht", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Arc of Learning</strong></p>", "<p>Proportional Reasoning: <em>Analysis</em> </p>", "<p>Similar Figures: <em>Analysis</em></p>"]}},
+                  {"id": "EFSRXuBC9QRTIEMA", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Key Terms</strong></p>", "<p>Scale factor</p>"]}},
+                  {"id": "PHXEl6byD8FcqGYV", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Materials</strong></p>", "<p>Learning Aid 2.3                </p>", "<p>Wump Mouths and Noses</p>"]}},
+                  {
+                    "id": "7k2AK-R6X7YCfvNa",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p>",
+                        "<p>1  Day</p>",
+                        "<p><strong>Groups</strong></p>",
+                        "<p>2-3</p>",
+                        "<p><strong>A </strong>#8-13</p>",
+                        "<p><strong>C </strong>#20-23</p>",
+                        "<p><strong>E</strong> #28-30</p>",
+                        "<p><strong>CCSSM</strong></p>",
+                        "<p>7.G.A.1 </p>",
+                        "<p>7.RP.A.2 </p>",
+                        "<p>7.RP.A.2.B</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "launch": {
+                "tiles": [
+                  {
+                    "id": "JlIWqzg6i7U9sDjx",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p>",
+                        "<p><strong>LAUNCH</strong></p>",
+                        "<p>CONNECTING TO PRIOR KNOWLEDGE</p>",
+                        "<p>Introduce the vocabulary of scale factor and connect it to the work from previous Problems.  </p>",
+                        "<p>PRESENTING THE CHALLENGE</p>",
+                        "<p>Tell the class that the challenge is to use the criteria of corresponding angles and side lengths to determine which rectangles (mouths) and which triangles (noses) are similar.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  {
+                    "id": "0mDOGyE03uEvTI1y",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p>",
+                        "<p><em>Teacher Moves: Language, Time</em></p>",
+                        "<p>PROVIDING FOR INDIVIDUAL NEEDS</p>",
+                        "<p>As the students work in pairs, look for students who are having trouble sorting out corresponding sides when finding side lengths.</p>",
+                        "<p>Urge students to organize their work. They can record their measurements on the figures. If they use a chart, they will need some way to distinguish the sides (such as “vertical” and “horizontal” or “base” and “height”). </p>",
+                        "<p>If some students finish early, encourage them to draw two more rectangles—one that is similar to the Wump family’s mouth and one that is not similar. Repeat for triangles. </p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>Have you considered the corresponding angles? </li><li>How might you compare corresponding side lengths? </li></ul>",
+                        "<p>How can you find the scale factor if you used a rubber band stretcher?  Coordinate graphs? </p>",
+                        "<p>PLANNING FOR THE SUMMARY</p>",
+                        "<p>During the Initial Challenge take note of the strategies that students are using to find the scale factor. How are students providing evidence for the similar figures in the Initial Challenge? Do they measure all angles and sides? Are some students informally seeing that angle alone for triangles can determine similarity? For the rectangles are they ignoring the right angles and only looking at the side lengths. During the What If listen for how students describe the ideas using proportional reasoning to find a scale factor.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  {
+                    "id": "95DqdKYBFPdgqzfK",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SUMMARIZE</strong></p>",
+                        "<p><em>Teacher Moves: Language</em></p>",
+                        "<p>SOLUTIONS AND STRATEGIES </p>",
+                        "<p>Discuss the answers. Ask for explanations. For rectangles J and L, students may talk about the width growing by 2 and the length growing by 2. The perimeters also grow by a factor of 2. This gives you an opportunity to help students describe the growth in different ways. We say that the widths, lengths, and perimeters grow by a scale factor of 2. </p>",
+                        "<p><em>Teacher Moves: Claim, Support, Question</em></p>",
+                        "<p>MAKING THE MATHEMATICS EXPLICIT</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>How can you decide if two figures are similar? </li><li>Do you agree with Mia that you can use ratios (proportional reasoning) to show that the scale factor is the same for corresponding side lengths? Why or why not? </li><li>I want to grow a new Wump from Wump 1 (Mug). The scale factor is 9. What are the dimensions and perimeter of the new Wump’s mouth? </li><li>If the scale factor is 75, what are the measurements of the new mouth? </li><li>Why does the perimeter grow the same way as the lengths of the sides of a rectangle? </li><li>Let’s go in the reverse direction. How can you find the scale factor from the original to the image if all you have are the dimensions of the two similar figures? </li><li>For similar rectangles, the perimeter of the image is the scale factor times the perimeter of the original rectangle. Do you think this is true for similar triangles? </li><li>If the perimeter of the mouth of a new Wump family member is 150, what are the length, width, and area of its mouth? What scale factor was used to grow this new Wump from Mug 1? </li><li>What scale factor is needed to produce a new mouth (rectangle) whose perimeter is 5? </li><li>Which mouth belongs to Mug? Zug? Bug? Glug? Lug? How do you know? </li><li>Which nose belongs to Mug? Zug?  Bug? Glug? Lug? How do you know?</li></ul>",
+                        "<p></p>",
+                        "<p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "description": "Investigation 3",
+      "ordinal": 3,
+      "title": "QA Investigation 3 Scaling Perimeter and Area",
+      "problems": [
+        {
+          "description": "Problem 3.1",
+          "ordinal": 1,
+          "title": "QA 3.1 Using Proportional Reasoning to Rep-tile",
+          "subtitle": "The Area Connection",
+          "sections": ["investigation-3/problem-1/introduction/content.json", "investigation-3/problem-1/initialChallenge/content.json", "investigation-3/problem-1/whatIf/content.json", "investigation-3/problem-1/nowWhatDoYouKnow/content.json"],
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                  {
+                    "id": "495tQRf70cMKtCo1",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem 3.1 Using Proportional Reasoning to Rep-tile:  The Area Connection</strong></p>",
+                        "<p>This Problem challenges students to find ways of putting multiple copies of a figure together to make a larger, similar figure. This process is called rep‑tiling. Rep‑tiling allows students to revisit similarity in a new context. In the Initial Challenge, students decide how to put rep‑tiles together and identify relationships between the scale factor, side lengths, and areas of similar figures. The What If Situations will look at student claims to synthesize these ideas.  </p>"
+                      ]
+                    }
+                  },
+                  {"id": "K8g5teMMostICINA", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>NWDYK</strong></p>", "<p>How do rep-tiles show the relationship between the scale factor and the perimeter and area of similar shape?</p>"]}},
+                  {"id": "Tf7WtDHO8xMufRsB", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Arc of Learning</strong></p>", "<p>Proportional Reasoning: <em>Synthesis</em> </p>", "<p>Similar Figures: <em>Analysis</em></p>"]}},
+                  {"id": "TweltiCl0ONgkcuG", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Key Terms</strong></p>", "<p>Rep-tile</p>"]}},
+                  {
+                    "id": "h4QFdINvd9dRuAAF",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Materials</strong></p>",
+                        "<p>Learning Aid 3.1A Quadrilaterals for Rep-tiles (accessibility)</p>",
+                        "<p>Learning Aid 3.1B  Triangles for Rep-Tiles</p>",
+                        "<p>(accessibility)</p>",
+                        "<p></p>",
+                        "<p>Learning Aid 3.1C         Rep-tile Recording Sheet (accessibility)</p>",
+                        "<p>rulers</p>",
+                        "<p>angle rulers or protractors</p>",
+                        "<p>scissors</p>",
+                        "<p>construction paper (optional) </p>",
+                        "<p>colored pencils (optional)</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "zHv5pieDijXlMR9O",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p>",
+                        "<p> 1.5 Days</p>",
+                        "<p><strong>Groups</strong></p>",
+                        "<p>3</p>",
+                        "<p><strong>A</strong> #1-6</p>",
+                        "<p><strong>C</strong> #17-20</p>",
+                        "<p><strong>E</strong> #31-32</p>",
+                        "<p><strong>CCSSM</strong></p>",
+                        "<p>7.G.A.1 </p>",
+                        "<p>7.G.A.2 </p>",
+                        "<p>7.RP.A.1</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "launch": {
+                "tiles": [
+                  {
+                    "id": "9CHammbUW0QlEu8y",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p>",
+                        "<p><strong>LAUNCH</strong></p>",
+                        "<p>CONNECTING TO PRIOR KNOWLEDGE</p>",
+                        "<p>In the previous Investigation, students explored the relationship between the corresponding sides, corresponding angles, perimeters, and areas of similar figures. This Problem continues students’ exploration of scale factors and similarity by rep-tiling, or building shapes from copies of smaller, similar shapes with a focus on the area change. In each of these contexts, students study how the areas of two similar figures are related to the scale factor.</p>",
+                        "<p><em>Creating the rep-tiles takes time for students to cut, manipulate and draw. It may take 1.5 days to complete this task. Having a conversation after students have completed the Initial Challenge can help them focus their thinking between the two class periods. </em></p>",
+                        "<p>PRESENTING THE CHALLENGE</p>",
+                        "<p>Use the diagrams in the student edition. </p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>How are these patterns similar?  </li><li>What is different about these patterns that might make one a rep‑tile and the other not?</li></ul>",
+                        "<p>Students work with quadrilaterals and triangles. The challenge is to determine which types of quadrilaterals and triangles are rep‑tiles. For each shape, find whether it is possible to put together several identical small shapes to form a larger version of the same shape. When it is possible, you will sketch how the shapes fit together and answer some questions about the measurements of the figures.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  {
+                    "id": "U1qkPSXk-LtOYK-s",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p>",
+                        "<p><em>Some teachers have students make a poster with each rep‑tile the group finds. They display these posters as a handy reference for future discussions about the relationship between area and scale factor. </em></p>",
+                        "<p><em>Teacher Moves:Time and Portrayal </em></p>",
+                        "<p>PROVIDING FOR INDIVIDUAL NEEDS</p>",
+                        "<p>To scaffold for students who need some suggestions to move forward you can suggest that they can systematically explore the possibilities. Point out that it is reasonable to assume that edges with the same length must be placed together.</p>",
+                        "<p>You might ask students if they have checked angle measures. Some may use a transparent piece of paper to copy and compare. Others may use angle rulers or protractors. Students should notice that corresponding angles are congruent. They need to make sure that the angles they are comparing are corresponding.</p>",
+                        "<p><em>Teacher Moves: Selecting and Sequencing</em></p>",
+                        "<p>PLANNING FOR THE SUMMARY</p>",
+                        "<p>Listen to students as they are discussing the shapes that would rep-tile in the Initial Challenge.  Find student work examples to highlight the scale factor and area change relationship to use in the Summary.  Listen to how students reason through the student claims in the What If Situations.  Use their responses to frame your summary</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  {
+                    "id": "CkKRmkoREQsqOvoc",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SUMMARIZE</strong></p>",
+                        "<p><em>Teacher Moves: Compare Thinking</em></p>",
+                        "<p>SOLUTIONS AND STRATEGIES </p>",
+                        "<p>You can have different groups of students display their rep‑tiles during the Summarize. Students can use their copies of use Learning Aid 3.1C: Rep-tile Recording Sheet or a large classroom poster during a gallery walk to draw some conclusions. Students should look at the displayed rep‑tiles and record any new information or questions they have about rep‑tiles. Groups can share their observations, but be sure they provide explanations.</p>",
+                        "<p>MAKING THE MATHEMATICS EXPLICIT</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>Do you have any What If questions?</li><li>How does the side of the smaller quadrilateral or triangle compare to the side of the larger figure? </li><li>How do the angles of the original quadrilateral or triangle compare to the angles of the rep‑tile figure? </li><li>How many original shapes are needed to cover the rep-tile? </li><li>How many smaller rectangles do I need to make the next larger rep‑tile figure? </li><li>Predict what will happen for the next rep‑tile figure. </li><li>What pattern do you see when extending the rep‑tile figures? </li><li>What do you know about the relationship of scale factor and area change for two similar figures?  </li></ul>",
+                        "<p></p>",
+                        "<p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "supports": []
+        },
+        {
+          "description": "Problem 3.2",
+          "ordinal": 2,
+          "title": "QA 3.2 Designing Under Constraints",
+          "subtitle": "Scale Factors and Similar Shapes (Scale Drawings)",
+          "sections": ["investigation-3/problem-2/introduction/content.json", "investigation-3/problem-2/initialChallenge/content.json", "investigation-3/problem-2/whatIf/content.json", "investigation-3/problem-2/nowWhatDoYouKnow/content.json"],
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                  {
+                    "id": "4PakhPFIVp7pM7KN",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem 3.2 Designing Under Constraints:  Scale Factors and Similar Shapes (Scale Drawings)</strong></p>",
+                        "<p>In this Problem, students use scale factors or other information to make figures that are similar to a specific triangle or rectangle. In the Initial Challenge students will create new shapes from original shapes to match given criteria. In the What If Situations students find missing side lengths and angle measures in pairs of similar figures.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "qPLmY5F78X4SAzPK",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["<p><strong>NWDYK</strong></p>", "<p>How can you use scale factors to draw similar figures (scale drawings)? </p>", "<p>How can you use scale factors to find missing information about angles measures? Side lengths? Area? Perimeter?</p>"]
+                    }
+                  },
+                  {"id": "5S5fW9WBJwdKruj2", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Arc of Learning</strong></p>", "<p>Proportional Reasoning: <em>Synthesis</em> </p>", "<p>Similar Figures: <em>Analysis and Synthesis</em></p>"]}},
+                  {"id": "cRzZ4_UyPqyY7xq6", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Key Terms</strong></p>"]}},
+                  {
+                    "id": "HgmEQjDpmXPz6XXG",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["<p><strong>Materials</strong></p>", "<p>Learning Aid 3.2A Designing Under Constraints</p>", "<p>Learning Aid 3.2B   Polygon Sets (optional)</p>", "<p>Quarter-inch Grid Paper</p>", "<p>Angle rulers or protractors Rulers</p>"]
+                    }
+                  },
+                  {
+                    "id": "-741FtOaACS1t5PJ",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p>",
+                        "<p>  1 Day</p>",
+                        "<p><strong>Groups</strong></p>",
+                        "<p>Think-Pair-Share</p>",
+                        "<p><strong>A</strong> #7-12</p>",
+                        "<p><strong>C</strong> #21-26</p>",
+                        "<p><strong>E</strong> #33-35</p>",
+                        "<p><strong>CCSSM</strong></p>",
+                        "<p>7.G.A.1 </p>",
+                        "<p>7.G.A.2 </p>",
+                        "<p>7.G.B.6 </p>",
+                        "<p>7.RP.A.2 </p>",
+                        "<p>7.RP.A.2.A </p>",
+                        "<p>7.RP.A.2.B </p>",
+                        "<p>7.RP.A.3</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "launch": {
+                "tiles": [
+                  {
+                    "id": "sG4L2cfdzZeuyRT3",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p>",
+                        "<p><strong>LAUNCH</strong></p>",
+                        "<p>CONNECTING TO PRIOR KNOWLEDGE</p>",
+                        "<p>In this Problem, students continue to build on their understanding of scale factors and scaled drawings or similarity.</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>If you are given a rectangle, how might you draw a similar rectangle with a scale factor of 2? </li><li>How would the areas of the original rectangle and the rectangle you drew relate? </li><li>What would the scale factor be for a pair of similar figures where one figure has an area 16 times as great as the other figure? </li><li>What is the base of a triangle? </li><li>What is the height of a triangle?</li></ul>",
+                        "<p>PRESENTING THE CHALLENGE</p>",
+                        "<p>Display Rectangle A and Triangle B for the class. Tell the class that their challenge is to draw similar figures with the conditions given in the Problem.</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>What are the side lengths of Rectangle A? </li><li>What is the area of Rectangle A? </li><li>What is the area of Triangle B?</li></ul>",
+                        "<p><strong>Implementation Note:</strong> </p>",
+                        "<p>Assign one or two from each set in the Initial Challenge to partner groups.  Have students create posters to present their findings.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  {
+                    "id": "xugg4bczwd1dVwYr",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p>",
+                        "<p>PROVIDING FOR INDIVIDUAL NEEDS</p>",
+                        "<p>Check to make sure that students are identifying the correct scale factor in the parts that give information about area. For example, in the Initial Challenge and Triangle X,  if the area of the sketched figure must be 16 times the area of the original figure, students must understand that the area grows by the square of the scale factor. So, in this case, the scale factor is 4.</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>Can using corresponding sides help you? </li><li>Can using corresponding angles help you? </li><li>What is the scale factor from one shape to the other? </li><li>What do we know about the relationship between scale factor and area change? </li></ul>",
+                        "<p><em>T﻿eacher Moves: Selecting and Sequencing</em></p>",
+                        "<p>PLANNING FOR THE SUMMARY</p>",
+                        "<p>As you are circulating during the summary select student work from the design criteria in the Initial Challenge to use for the summary discussion- select work that is correct and incorrect to help students work on justifying their ideas about scale factor and area relationships. Choose examples from the What If Situations to discuss how to use scale factor to find missing side lengths.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  {
+                    "id": "JR6GRZESZ-ahAnrh",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SUMMARIZE</strong></p>",
+                        "<p><em>T﻿eacher Moves: Claim, Support, Question</em></p>",
+                        "<p>SOLUTIONS AND STRATEGIES </p>",
+                        "<p>As students present their solutions, be sure they explain their reasoning and methods.</p>",
+                        "<p>MAKING THE MATHEMATICS EXPLICIT</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>What does a whole number scale factor do to change a shape? </li><li>What does a fractional scale factor do to change a shape? </li><li>How did you draw _____?  </li><li>How did scale factor help you to draw _____? </li><li>What is the relationship between scale factor and area?  </li><li>How did you find the missing side lengths in the What If Situations?  </li></ul>",
+                        "<p></p>",
+                        "<p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "description": "Problem 3.3",
+          "ordinal": 3,
+          "title": "QA 3.3 Out of Reach",
+          "subtitle": "Finding Lengths with Similar Triangles",
+          "sections": ["investigation-3/problem-3/introduction/content.json", "investigation-3/problem-3/initialChallenge/content.json", "investigation-3/problem-3/whatIf/content.json", "investigation-3/problem-3/nowWhatDoYouKnow/content.json"],
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                  {
+                    "id": "1FlusFNWOZh7QZJ3",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem 3.3 Out of Reach:  Finding Lengths with Similar Triangles</strong></p>",
+                        "<p>In this Problem, students use similar triangles to measure distances on the ground that cannot be measured directly. In the Initial Challenge students look at a finding the distance across a river using nested triangles.  The What If Situations have students refine their thinking about using similar triangles, and the scale factor between the triangles, to find unknown corresponding lengths. </p>"
+                      ]
+                    }
+                  },
+                  {"id": "2njkNN_nflfVgYbg", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>NWDYK</strong></p>", "<p>How can you use similar triangles to find a distance that is difficult to measure?</p>"]}},
+                  {"id": "H5L521S0NvFVQX47", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Arc of Learning</strong></p>", "<p>Proportional Reasoning: <em>Synthesis</em> </p>", "<p>Similar Figures: <em>Synthesis</em></p>"]}},
+                  {"id": "sLUOD1ciUGTNE5nO", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Key Terms</strong></p>", "<p>Nested triangles</p>"]}},
+                  {"id": "BHG6FkKcbt7sVzVW", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Materials</strong></p>", "<p><strong>Learning Aid 3.3     </strong>       </p>", "<p>River Diagrams</p>"]}},
+                  {
+                    "id": "AtDZgKskSs4ozaoJ",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p>",
+                        "<p>1  Day</p>",
+                        "<p><strong>Groups</strong></p>",
+                        "<p>3</p>",
+                        "<p><strong>A</strong> #13-16</p>",
+                        "<p><strong>C</strong> #27-30</p>",
+                        "<p><strong>E</strong> 36</p>",
+                        "<p><strong>CCSSM</strong></p>",
+                        "<p>7.G.A.1 </p>",
+                        "<p>7.G.A.2 </p>",
+                        "<p>7.G.B.6 </p>",
+                        "<p>7.RP.A.2 </p>",
+                        "<p>7.RP.A.2.A </p>",
+                        "<p>7.RP.A.2.B </p>",
+                        "<p>7.RP.A.3</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "launch": {
+                "tiles": [
+                  {
+                    "id": "SR2_yKr0Em7wjZhJ",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p>",
+                        "<p><strong>LAUNCH</strong></p>",
+                        "<p>CONNECTING TO PRIOR KNOWLEDGE</p>",
+                        "<p>Describe the Problem to the class. Ask students to compare the ideas to Problem 3.2. Have the class identify the similar triangles and find the corresponding angles and sides. You may want to introduce the term nested in the Launch for this Problem to describe the two triangles pictured in Problem 3.3 in the Student Edition.</p>",
+                        "<p>PRESENTING THE CHALLENGE</p>",
+                        "<p>Have students use the diagram to find the distance across the river.  Make sure they provide explanations for their methods. </p>",
+                        "<p><em>In general, it is true that if the corresponding angles of two triangles are congruent, then the triangles are similar. In this Unit, we assume that this theorem is true. A proof for the theorem is developed in 8th grade.</em></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  {
+                    "id": "9YlfP_ycDySXTEpX",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p>",
+                        "<p><em>T﻿eacher Moves: Portrayal</em></p>",
+                        "<p>PROVIDING FOR INDIVIDUAL NEEDS</p>",
+                        "<p>Be sure the groups have identified the similar triangles and the corresponding sides and angles they need to measure.  </p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>How many triangles do you see in the river diagram? </li><li>Are the triangles in the river diagram similar?  How do you know?</li><li>Can you sketch the two similar triangles? </li><li>What do you know about the angles of the two triangles? </li><li>Which sides correspond on the two triangles? </li><li>What is the scale factor between the smaller triangle and the larger triangle in the Initial Challenge?</li></ul>",
+                        "<p>PLANNING FOR THE SUMMARY</p>",
+                        "<p>Look for examples of how students use scale factor to find missing sides lengths.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  {
+                    "id": "3UG0CnVgmejBtnVx",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SUMMARIZE</strong></p>",
+                        "<p><em>T﻿eacher Moves: Compare Thinking</em></p>",
+                        "<p>SOLUTIONS AND STRATEGIES </p>",
+                        "<p>When all groups have made their calculations, give each group a chance to share their work. If there are a variety of answers, ask the class why groups arrived at different answers. See if students can explain to others how to correct their work. This is a good opportunity to discuss accuracy and attending to precision with the class.</p>",
+                        "<p><em>T﻿eacher Moves: Portrayal</em></p>",
+                        "<p>MAKING THE MATHEMATICS EXPLICIT</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>Describe the relationship between the perimeter of the smaller triangle and the perimeter of the larger triangle in the Initial Challenge? </li><li>Discuss What If Situation A and students’ thinking around Durrell’s suggestion.  </li><li>In What If Situation B, what order do you think these students located the key points and measure the segments and angles?  Explain your reasoning</li></ul>",
+                        "<p></p>",
+                        "<p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "description": "Investigation 4",
+      "ordinal": 4,
+      "title": "QA Investigation 4 Similar Figures and Ratios",
+      "problems": [
+        {
+          "description": "Problem 4.1",
+          "ordinal": 1,
+          "title": "QA 4.1 Equivalent Ratios within Similar Figures",
+          "subtitle": "",
+          "sections": ["investigation-4/problem-1/introduction/content.json", "investigation-4/problem-1/initialChallenge/content.json", "investigation-4/problem-1/whatIf/content.json", "investigation-4/problem-1/nowWhatDoYouKnow/content.json"],
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                  {
+                    "id": "B1st-D9VYRyY8ZNG",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem 4.1 Equivalent Ratios Within Similar Figures</strong></p>",
+                        "<p>In Problem 4.1, students find a ratio for adjacent side lengths within a figure. In the Initial Challenge students compare this ratio to the ratio for adjacent sides in corresponding positions within another figure. In the What If Situations they recognize that, these ratios are equivalent for similar figures.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "pxkeaV-xobTZdcVK",
+                    "title": "Text 1",
+                    "content": {"type": "Text", "format": "html", "text": ["<p><strong>NWDYK</strong></p>", "<p>What information do the ratios of adjacent side lengths within two similar figures provide about similar figures? How are these ratios helpful in solving problems?</p>"]}
+                  },
+                  {"id": "_3UIgtjXrI8u7fmY", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Arc of Learning</strong></p>", "<p>Proportional Reasoning: <em>Synthesis</em> </p>", "<p>Similar Figures: <em>Analysis</em></p>"]}},
+                  {"id": "3sC7bHa_GiG56TSM", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Key Terms</strong></p>", "<p>Adjacent sides</p>", "<p>Equivalent ratios</p>", "<p>Proportion</p>", "<p>Ratio</p>", "<p></p>", "<p></p>", "<p></p>", "<p></p>"]}},
+                  {
+                    "id": "g7JSkeZ9vFdH3mpu",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Materials</strong></p>",
+                        "<p>Learning Aid 4.1A            </p>",
+                        "<p>Rectangle Set and Triangle Set</p>",
+                        "<p>Learning Aid 4.1B.  </p>",
+                        "<p>What If, Situation B:  Shape Pairs</p>",
+                        "<p>Learning Aid 4.1C.      </p>",
+                        "<p>Ratio Recording Sheet (accessibility)</p>",
+                        "<p></p>",
+                        "<p></p>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "1_FD0lgoJQv0AuSU",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p>",
+                        "<p> 1 Day</p>",
+                        "<p><strong>Groups</strong></p>",
+                        "<p>2</p>",
+                        "<p><strong>A </strong>#1-3</p>",
+                        "<p><strong>C</strong> #11-14</p>",
+                        "<p><strong>E</strong> #24-27</p>",
+                        "<p><strong>CCSSM</strong></p>",
+                        "<p>7.RP.A.2 </p>",
+                        "<p>7.RP.A.2.A </p>",
+                        "<p>7.RP.A.2.B </p>",
+                        "<p>7.RP.A.3</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "launch": {
+                "tiles": [
+                  {
+                    "id": "ll2dUY2HvFd1foWx",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p>",
+                        "<p><strong>LAUNCH</strong></p>",
+                        "<p>CONNECTING TO PRIOR KNOWLEDGE</p>",
+                        "<p>Students extend their notions of similarity of triangles from previous Investigations to similarity of rectangles. Specifically, they explore the ratios of adjacent sides of rectangles.</p>",
+                        "<p>By comparing their ideas about similar triangles to other similar figures, such as rectangles, students deepen their understanding of similarity. For example, two rectangles can have congruent corresponding angles but not be similar. This is not true for triangles.</p>",
+                        "<p>PRESENTING THE CHALLENGE</p>",
+                        "<p>Tell students that they will look at sets of quadrilaterals and triangles to determine if they are similar.  They will use scale factors and ratios of adjacent sides to determine similarity.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  {
+                    "id": "crhMg72ZUCFE-nns",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p>",
+                        "<p><em>Teacher Moves: Agency, Identity, Ownership</em></p>",
+                        "<p>PROVIDING FOR INDIVIDUAL NEEDS</p>",
+                        "<p>As you circulate, check to make sure that students are writing correct ratios  for each rectangle and for each triangle. You can hand out copies of <strong>Learning Aid 4.1D: Ratio Recording Sheet</strong> if your students would benefit from using a table to organize their work. Provide any necessary help in keeping track of the place of corresponding measures in the ratios. The numerators of each ratio need to relate corresponding lengths, and the denominators of each ratio need to relate corresponding lengths.</p>",
+                        "<p>Students should label their work in some way, such as length to width or width to length. Students need to be consistent in what they consider to be the width or length in terms of which one is the long side, and which one is the short side on rectangles and parallelograms.</p>",
+                        "<p>PLANNING FOR THE SUMMARY</p>",
+                        "<p>As you are circulating during the Explore, look for students making sense of using ratios and connecting this reasoning with their understanding of scale factors.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  {
+                    "id": "ABib3PE-7xM4gHMc",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SUMMARIZE</strong></p>",
+                        "<p>SOLUTIONS AND STRATEGIES </p>",
+                        "<p>Discuss which figures were similar in the Initial Challenge. Be sure that students name corresponding side lengths in the numerators of the ratios, and that they name corresponding side lengths in the denominators of the ratios.</p>",
+                        "<p>Students should compare the ratios for both similar and non-similar figures. This is an opportunity to review or assess their understanding of equivalence.</p>",
+                        "<p>MAKING THE MATHEMATICS EXPLICIT</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>Are all rectangles similar? </li><li>We used ratios of short side to long side on the quadrilaterals.  What if we had used long side to short side? Would this still give us the same answers on which ones are similar? </li><li>Describe the criteria that are necessary for two parallelograms to be similar. </li><li>What are the ratios of shortest side to longest side for each of the similar triangles you chose? </li><li>What do you notice about those ratios? </li><li>What is the scale factor from the smaller triangle to the larger triangle? </li><li>How does the scale factor relate to the proportions of the ratios of adjacent sides? </li><li>How can you find the missing angle measure? </li><li>Choose a pair of similar figures.  What is the scale factor? </li><li>How does the method you used to find scale factor relate to the ratio of corresponding sides in two similar figures?</li></ul>",
+                        "<p></p>",
+                        "<p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "description": "Problem 4.2",
+          "ordinal": 2,
+          "title": "QA 4.2 Using Shadows and Mirrors to Find Heights",
+          "subtitle": "",
+          "sections": ["investigation-4/problem-2/introduction/content.json", "investigation-4/problem-2/initialChallenge/content.json", "investigation-4/problem-2/whatIf/content.json", "investigation-4/problem-2/nowWhatDoYouKnow/content.json"],
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                  {
+                    "id": "jy3RNVCp9HTTeHLA",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem 4.2 Using Shadows and Mirrors to Find Heights</strong></p>",
+                        "<p>In this Problem, students use shadows and mirror reflections to estimate the heights of real objects that are difficult to measure directly. Students recognize that the mathematics they have learned so far in this Unit is helpful for solving problems in real life. In the Initial Challenge students look at using mirrors to find the height of a principal.  In the What If Situations students look at finding the height of the Statue of Liberty using shadows and how a camera lens uses similar triangles. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "6Q3_KWST9Dw3Gh9x",
+                    "title": "Text 1",
+                    "content": {"type": "Text", "format": "html", "text": ["<p><strong>NWDYK</strong></p>", "<p>If two figures are similar, how can you use information about the figures to find unknown lengths, perimeters, areas, or angle measures?</p>"]}
+                  },
+                  {"id": "2dsaiR2lXW7GSVPQ", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Arc of Learning</strong></p>", "<p>Proportional Reasoning: <em>Synthesis</em> </p>", "<p>Similar Figures: <em>Synthesis</em></p>"]}},
+                  {"id": "ZVuat_NegWEEGdjm", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Key Terms</strong></p>", "<p></p>", "<p></p>"]}},
+                  {"id": "VRUqJ9bGtqQ7fhdI", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Materials</strong></p>", "<p>Learning Aid 4.2  </p>", "<p>Reflection and Shadow Diagrams</p>", "<p>Meter sticks (optional)</p>", "<p>Small mirrors (optional)</p>"]}},
+                  {
+                    "id": "2NwDH3vwm03ebLCJ",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p>",
+                        "<p>1 Day</p>",
+                        "<p><strong>Groups</strong></p>",
+                        "<p>2</p>",
+                        "<p><strong>A </strong>#4-7</p>",
+                        "<p><strong>C</strong> #15-19</p>",
+                        "<p><strong>E </strong>#28-32</p>",
+                        "<p><strong>CCSSM</strong></p>",
+                        "<p>7.G.A.1 </p>",
+                        "<p>7.RP.A.2 </p>",
+                        "<p>7.RP.A.2.A </p>",
+                        "<p>7.RP.A.2.B </p>",
+                        "<p>7.EE.B.3 </p>",
+                        "<p>7.EE.B.4</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "launch": {
+                "tiles": [
+                  {
+                    "id": "XGtE_8AwB7-Cx1A7",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p>",
+                        "<p><strong>LAUNCH</strong></p>",
+                        "<p>CONNECTING TO PRIOR KNOWLEDGE</p>",
+                        "<p>If needed you can begin this Problem by having students practice one or two missing-part problems such as the one below, also displayed in <strong>Teaching Aid 4.2: Sample Missing Triangle Length</strong>.</p>",
+                        "<p>PRESENTING THE CHALLENGE</p>",
+                        "<p><strong>Suggested questions </strong></p>",
+                        "<ul><li>What do you notice about the drawing of the mirror method to find the height of the principal?  </li><li>Are there similar figures in the drawing?  </li><li>How do you know they are similar? </li></ul>",
+                        "<p></p>",
+                        "<p>Tell students that in this problem they will look for similar figures and use them to find missing measurements.  </p>",
+                        "<p><strong>Implementation Note:  </strong>What If Situation A has two experiments. One is using the shadow method to find the height of a tall object near the school.  The second experiment is using the mirror method to find the heigh of a tall object in your school.  You could do one or both of these with your students.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  {
+                    "id": "fdes5YeQf_GFgOES",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p>",
+                        "<p>PROVIDING FOR INDIVIDUAL NEEDS</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>Would a scale factor or ratio help you find the height? </li><li>How is this problem similar to Problem 4.1? </li><li>Do your measurements seem reasonable</li></ul>",
+                        "<p></p>",
+                        "<p>When students are working with the mirror method and/or shadow in What If Situation A monitor how they are making their measurements.  Remind them to walk backwards until they see the reflection of the top of the object in the mirror. Assist them with measuring from end to end on the shadow.</p>",
+                        "<p><em>T﻿eacher Moves: Selecting and Sequencing</em></p>",
+                        "<p>PLANNING FOR THE SUMMARY</p>",
+                        "<p>As you are circulating during the Explore find examples of students using scale factors or ratios to find the heights of the objects.  Use this student work in the summary discussion</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  {
+                    "id": "mXlQGJ1NsacWngGf",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>SUMMARIZE</p>",
+                        "<p>SOLUTIONS AND STRATEGIES </p>",
+                        "<p>Collect the students’ answers for each of the missing lengths.</p>",
+                        "<p><em>T﻿eacher Moves: Compare Thinking</em></p>",
+                        "<p>MAKING THE MATHEMATICS EXPLICIT</p>",
+                        "<p>The parallel lines of the rays can be used to show that the corresponding angles are equal. This was done in Shapes and Designs. In the Shapes Unit students find that they can only draw one (unique) triangle given three angle measures. This means that if two triangles have corresponding angles equal, then the figures are congruent and hence similar. Or you could choose to tell them that sun and shadows always produce similar triangles.</p>",
+                        "<p>Suggested questions </p>",
+                        "<ul><li>What is a typical unit of measure to describe the height of the building (or other object you choose) based on the class data? Why? </li><li>Why does each angle of the large triangle have the same measure as the corresponding angle of the small triangle? </li><li>What does this suggest about the similarity of the triangles? </li><li>When using the shadow method, what problems might affect the accuracy of your answer? </li><li>How did you use scale factor/ratio to find the height of the principal? Statue of Liberty? Tree?</li><li>How tall is the _______ from the mirror method experiment? </li><li>How tall is the _______ from the shadow experiment? </li><li>How did you find the height of _______ from the mirror method experiment? </li><li>How did you find the height of _______ from the shadow method experiment?</li></ul>",
+                        "<p></p>",
+                        "<p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "description": "Problem 4.3",
+          "ordinal": 3,
+          "title": "QA 4.3 More Imposters",
+          "subtitle": "Pulling it All Together",
+          "sections": ["investigation-4/problem-3/introduction/content.json", "investigation-4/problem-3/initialChallenge/content.json", "investigation-4/problem-3/whatIf/content.json", "investigation-4/problem-3/nowWhatDoYouKnow/content.json"],
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                  {
+                    "id": "RAfgxCvEJm544Fif",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem 4.3 More Imposters:  Putting It All Together</strong></p>",
+                        "<p>In the Initial Challenge students will use their definition of similar figures to decide which shape in a group is not similar.  In the What If Situations students will analyze some student claims about similar figures and then create their own group of similar figures with an imposter. </p>"
+                      ]
+                    }
+                  },
+                  {"id": "A1_wtyH9eQ4Ckmi-", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>NWDYK</strong></p>", "<p>What are strategies for identifying if shapes have been scaled (similar figures) or if the shapes are imposters?</p>"]}},
+                  {"id": "tJjVntVhFszhuzwd", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Arc of Learning</strong></p>", "<p>Proportional Reasoning: <em>Synthesis</em> </p>", "<p>Similar Figures: <em>Synthesis</em></p>"]}},
+                  {"id": "HeGgMvlORA6prvk6", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Key Terms</strong></p>"]}},
+                  {
+                    "id": "5-WtyqjBwMZZtIyD",
+                    "title": "Text 1",
+                    "content": {"type": "Text", "format": "html", "text": ["<p><strong>Materials</strong></p>", "<p><strong>Learning Aid 4.3   </strong>      Sets of Figures</p>", "<p>Rulers</p>", "<p>Angle rulers or protractors</p>", "<p>Tracing paper, patty paper, transparency, etc.</p>"]}
+                  },
+                  {
+                    "id": "EM8pV9fPE-8yXnlS",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p>",
+                        "<p>1  Day</p>",
+                        "<p><strong>Groups</strong></p>",
+                        "<p>2</p>",
+                        "<p><strong>A</strong> #8-10</p>",
+                        "<p><strong>C</strong> #20-23</p>",
+                        "<p><strong>E </strong>#33-36</p>",
+                        "<p><strong>CCSSM</strong></p>",
+                        "<p>7.G.A.1 </p>",
+                        "<p>7.RP.A.1 </p>",
+                        "<p>7.RP.A.2 </p>",
+                        "<p>7.RP.A.2.A </p>",
+                        "<p>7.RP.A.2.B </p>",
+                        "<p>7.RP.A.3 </p>",
+                        "<p>7.EE.B.3</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "launch": {
+                "tiles": [
+                  {
+                    "id": "DtHYf3gIPWLwnGRv",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p>",
+                        "<p><strong>LAUNCH</strong></p>",
+                        "<p>CONNECTING TO PRIOR KNOWLEDGE</p>",
+                        "<p>Remind students of the work they did in Investigation 2 when they were finding the Wump imposters. </p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>How did we decide which Wumps were imposters?</li><li>How could we use these ideas to find imposters with other shapes? </li></ul>",
+                        "<p>PRESENTING THE CHALLENGE</p>",
+                        "<p>Show students the sets of shapes in the Initial Challenge.  Tell them they will be looking for an imposter for each set.  They will then look at some student claims about shapes and finally create their own set of shapes with an imposter.</p>",
+                        "<p><strong>Implementation Note</strong>:  Have each partner group work on 2-3 of the sets in the Initial Challenge</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  {
+                    "id": "oJ4LB3IHADbL97wi",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p>",
+                        "<p><em>Have students put their sketches for What If Situation B on large paper to display and discuss in the Summary.</em></p>",
+                        "<p>PROVIDING FOR INDIVIDUAL NEEDS</p>",
+                        "<p>Suggest to some students that making copies of the shapes and moving them may help them to compare the shapes.</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>What tools might help you? </li><li>What are the corresponding sides of the two figures? </li><li>What is the ratio between the adjacent sides? </li><li>What is the scale factor between the corresponding sides of the two figures? </li><li>What are the corresponding angles of the two figures? </li></ul>",
+                        "<p>PLANNING FOR THE SUMMARY</p>",
+                        "<p>Take note of the strategies that students are using to decide which shape is the imposter so that these can be discussed in the Summary. Look for students who are using scale factors, equivalent ratios of adjacent sides, and rep-tiles.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  {
+                    "id": "hNVRbe4GGhvmBCnI",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SUMMARIZE</strong></p>",
+                        "<p><em>T﻿eacher Moves: Agency, Identity, Ownership</em></p>",
+                        "<p>SOLUTIONS AND STRATEGIES </p>",
+                        "<p>Discuss the imposters they found in the Initial Challenge. Be sure to let different groups share their strategies. You want to have groups share different strategies, including internal ratios of adjacent sides, scale factor, and ratios of corresponding sides across the figures.</p>",
+                        "<p><em>T﻿eacher Moves: Claim, Support, Question</em></p>",
+                        "<p>MAKING THE MATHEMATICS EXPLICIT</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>Do you have any What If questions? </li><li>How did you decide which one was the imposter?</li><li>Find the perimeter of one of the triangles in the Initial Challenge.</li><li>Which claims do you agree with in What If Situation A?</li><li>Look at the work from other groups for What If Situation B.  Do you agree with their sketches?  Why or Why not?</li></ul>",
+                        "<p></p>",
+                        "<p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "description": "Mathematical Reflections",
+      "ordinal": 5,
+      "title": "QA MR1 - MR4",
+      "problems": [
+        {
+          "description": "Mathematical Reflections",
+          "ordinal": 1,
+          "title": "QA Unit Mathematical Reflections",
+          "subtitle": "",
+          "sections": ["investigation-5/problem-1/MathReflection1/content.json", "investigation-5/problem-1/MathReflection2/content.json", "investigation-5/problem-1/MathReflection3/content.json", "investigation-5/problem-1/MathReflection4/content.json"]
+        }
+      ]
+    }
+  ]
+}
