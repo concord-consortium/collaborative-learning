@@ -147,7 +147,7 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
             Object.keys(commentTags).map(key => {
               const value = commentTags[key];
               return (
-                <option key={key} value={key}> {value} </option>
+                <option key={key} value={value}> {value} </option>
               );
             })
           }
