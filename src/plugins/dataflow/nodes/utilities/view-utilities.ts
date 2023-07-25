@@ -69,3 +69,9 @@ export function hasFlowIn(node: Node){
 export function getNumDisplayStr(n: number){
   return isNaN(n) ? kEmptyValueString : n.toFixed(3).replace(/\.?0+$/, "");
 }
+
+export function getInsertionOrder(editor: NodeEditor, id: number) {
+  const index = editor.nodes.findIndex((n: Node) => n.id === id);
+  return index + 1;
+}
+
