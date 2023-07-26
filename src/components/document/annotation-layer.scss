@@ -15,9 +15,14 @@
 
 .annotation-button {
   background-color: rgba(0, 0, 0, 0);
+  border: none;
   border-radius: 3px;
   outline: none;
   position: absolute;
+
+  &.source {
+    outline: 2px solid yellow;
+  }
 
   &:hover {
     outline: 2px solid blue;

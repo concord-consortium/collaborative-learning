@@ -9,18 +9,9 @@ import { DocumentContentModelType } from "../../models/document/document-content
 
 import "./annotation-layer.scss";
 
-interface IAnnotationButtonProps {
-  documentScrollX?: number;
-  documentScrollY?: number;
-  key?: string;
-  objectId: string;
-  onClick?: (tileId: string, objectId: string, objectType?: string) => void;
-  rowId: string;
-  tileId: string;
-}
-const AnnotationButton = observer(function AdornmentButton({
-  documentScrollX, documentScrollY, objectId, onClick, rowId, tileId
-}: IAnnotationButtonProps) {
+function getObjectBoundingBox(
+  rowId: string, tileId: string, objectId: string, documentScrollX?: number, documentScrollY?: number
+) {
   const rowSelector = `[data-row-id='${rowId}']`;
   const rowElements = document.querySelectorAll(rowSelector);
   if (rowElements.length !== 1) return null;
@@ -46,10 +37,32 @@ const AnnotationButton = observer(function AdornmentButton({
   const objectStroke = 2;
   const height = objectBoundingBox.height + objectStroke;
   const width = objectBoundingBox.width + objectStroke;
-  const style = { left, top, height, width };
+  return { left, top, height, width };
+}
 
+interface IAnnotationButtonProps {
+  documentScrollX?: number;
+  documentScrollY?: number;
+  key?: string;
+  objectId: string;
+  onClick?: (tileId: string, objectId: string, objectType?: string) => void;
+  rowId: string;
+  sourceObjectId?: string;
+  sourceTileId?: string;
+  tileId: string;
+}
+const AnnotationButton = observer(function AdornmentButton({
+  documentScrollX, documentScrollY, objectId, onClick, rowId, sourceObjectId, sourceTileId, tileId
+}: IAnnotationButtonProps) {
+  const style = getObjectBoundingBox(rowId, tileId, objectId, documentScrollX, documentScrollY);
+  if (!style) return null;
+
+  const handleClick = () => onClick?.(tileId, objectId);
+
+  const source = sourceObjectId === objectId && sourceTileId === tileId;
+  const classes = classNames("annotation-button", { source });
   return (
-    <button className="annotation-button" onClick={() => onClick?.(tileId, objectId)} style={style} />
+    <button className={classes} onClick={handleClick} style={style} />
   );
 });
 
@@ -106,6 +119,8 @@ export const AnnotationLayer = observer(function AdornmentLayer({
                     objectId={objectId}
                     onClick={handleAnnotationButtonClick}
                     rowId={rowId}
+                    sourceObjectId={sourceObjectId}
+                    sourceTileId={sourceTileId}
                     tileId={tile.id}
                   />
                 );
