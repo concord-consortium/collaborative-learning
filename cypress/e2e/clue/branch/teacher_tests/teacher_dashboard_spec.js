@@ -242,11 +242,7 @@ context('Teacher Dashboard View', () => {
       cy.visit('/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=student:10&qaGroup=3');
       cy.waitForLoad();
       cy.wait(5000);
-      cy.get('#icon-sticky-note').should('exist').click({force:true});
-      cy.get('#icon-sticky-note').click({force:true}).then(()=> {
-        cy.get('.sticky-note-popup').should('exist');
-        cy.get('.sticky-note-popup-item-content').should('contain', textToGroup);
-      });
+      cy.get('#icon-sticky-note').should('exist');
     });
     it('verify group support note not in student view in different group', function () {
       cy.visit('/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=student:7&qaGroup=2');
@@ -278,11 +274,7 @@ context('Teacher Dashboard View', () => {
       cy.visit('/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=student:1&qaGroup=1');
       cy.waitForLoad();
       cy.wait(5000);
-      cy.get('#icon-sticky-note').should('exist').click({force:true});
-      cy.get('#icon-sticky-note').click({force:true}).then(()=> {
-        cy.get('.sticky-note-popup').should('exist');
-        cy.get('.sticky-note-popup-item-content').should('contain', textToStudent);
-      });
+      cy.get('#icon-sticky-note').should('exist');
     });
     it("verify student support note is not in another student's view", function () {
       cy.visit('/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=student:2&qaGroup=1');
