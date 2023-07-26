@@ -4,7 +4,7 @@ import { getSnapshot, destroy } from "mobx-state-tree";
 import React from "react";
 import stringify from "json-stringify-pretty-compact";
 
-import { AdornmentLayer } from "./adornment-layer";
+import { AnnotationLayer } from "./annotation-layer";
 import { DocumentLoadingSpinner } from "./document-loading-spinner";
 import { BaseComponent } from "../base";
 import { DocumentContentComponent } from "./document-content";
@@ -99,7 +99,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
           {this.renderDebugInfo()}
           {this.renderOverlayMessage()}
         </div>
-        <AdornmentLayer
+        <AnnotationLayer
           content={this.getDocumentContent()}
           documentScrollX={this.state.documentScrollX}
           documentScrollY={this.state.documentScrollY}

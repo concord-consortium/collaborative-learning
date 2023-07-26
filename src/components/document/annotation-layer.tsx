@@ -1,23 +1,26 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
-import React from "react";
+import React, { useState } from "react";
 
 import { useUIStore } from "../../hooks/use-stores";
+import { ArrowAnnotation } from "../../models/annotations/arrow-annotation";
+import { ClueObjectModel } from "../../models/annotations/clue-object";
 import { DocumentContentModelType } from "../../models/document/document-content";
 
-import "./adornment-layer.scss";
+import "./annotation-layer.scss";
 
-interface IAdornmentButtonProps {
+interface IAnnotationButtonProps {
   documentScrollX?: number;
   documentScrollY?: number;
   key?: string;
   objectId: string;
+  onClick?: (tileId: string, objectId: string, objectType?: string) => void;
   rowId: string;
   tileId: string;
 }
-const AdornmentButton = observer(function AdornmentButton({
-  documentScrollX, documentScrollY, objectId, rowId, tileId
-}: IAdornmentButtonProps) {
+const AnnotationButton = observer(function AdornmentButton({
+  documentScrollX, documentScrollY, objectId, onClick, rowId, tileId
+}: IAnnotationButtonProps) {
   const rowSelector = `[data-row-id='${rowId}']`;
   const rowElements = document.querySelectorAll(rowSelector);
   if (rowElements.length !== 1) return null;
@@ -46,25 +49,45 @@ const AdornmentButton = observer(function AdornmentButton({
   const style = { left, top, height, width };
 
   return (
-    <div className="adornment-button" style={style} />
+    <button className="annotation-button" onClick={() => onClick?.(tileId, objectId)} style={style} />
   );
 });
 
-interface IAdornmentLayerProps {
+interface IAnnotationLayerProps {
   content?: DocumentContentModelType;
   documentScrollX?: number;
   documentScrollY?: number;
 }
-export const AdornmentLayer = observer(function AdornmentLayer({
+export const AnnotationLayer = observer(function AdornmentLayer({
   content, documentScrollX, documentScrollY
-}: IAdornmentLayerProps) {
+}: IAnnotationLayerProps) {
+  const [sourceTileId, setSourceTileId] = useState("");
+  const [sourceObjectId, setSourceObjectId] = useState("");
+  const [sourceObjectType, setSourceObjectType] = useState<string | undefined>();
   const ui = useUIStore();
 
   const rowIds = content?.rowOrder || [];
 
+  const handleAnnotationButtonClick = (tileId: string, objectId: string, objectType?: string) => {
+    if (!sourceTileId || !sourceObjectId) {
+      setSourceTileId(tileId);
+      setSourceObjectId(objectId);
+      setSourceObjectType(objectType);
+    } else {
+      const sourceObject =
+        ClueObjectModel.create({ tileId: sourceTileId, objectId: sourceObjectId, objectType: sourceObjectType });
+      const targetObject = ClueObjectModel.create({ tileId, objectId, objectType });
+      content?.addArrow(ArrowAnnotation.create({ sourceObject, targetObject }));
+      console.log(`annotations`, content?.annotations);
+      setSourceTileId("");
+      setSourceObjectId("");
+      setSourceObjectType(undefined);
+    }
+  };
+
   const editting = ui.adornmentMode !== undefined;
   const hidden = !ui.showAdornments;
-  const classes = classNames("adornment-layer", { editting, hidden });
+  const classes = classNames("annotation-layer", { editting, hidden });
   return (
     <div className={classes}>
       { editting && rowIds.map(rowId => {
@@ -76,11 +99,12 @@ export const AdornmentLayer = observer(function AdornmentLayer({
             if (tile) {
               return tile.content.adornableObjectIds.map(objectId => {
                 return (
-                  <AdornmentButton
+                  <AnnotationButton
                     documentScrollX={documentScrollX}
                     documentScrollY={documentScrollY}
                     key={`${tile.id}-${objectId}-button`}
                     objectId={objectId}
+                    onClick={handleAnnotationButtonClick}
                     rowId={rowId}
                     tileId={tile.id}
                   />
