@@ -15,6 +15,6 @@ registerTileContentInfo({
 registerTileComponentInfo({
   type: kNumberlineTileType,
   Component: NumberlineToolComponent,
-  tileEltClass: "starter-tool-tile",
+  tileEltClass: "numberline-tool-tile",
   Icon: NumberlineToolIcon
 });

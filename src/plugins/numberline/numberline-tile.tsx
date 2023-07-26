@@ -18,8 +18,9 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
   };
 
   return (
-    <div className="starter-tool">
+    <div className="numberline-tool">
       <textarea value={content.text} onChange={handleChange} />
+      <p> numberline tile </p>
     </div>
   );
 });

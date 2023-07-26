@@ -2,7 +2,7 @@ This is a very basic tile that can be used to start work on a new tile.
 
 # Demo
 
-This starter tile can be demo'd with these URL params:
+This numberline tile can be demo'd with these URL params:
 `?demo&unit=example`
 
 Look for the `St` tool, that is how you can add this tile to the document.
