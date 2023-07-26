@@ -1,20 +1,20 @@
 import { registerTileComponentInfo } from "../../models/tiles/tile-component-info";
 import { registerTileContentInfo } from "../../models/tiles/tile-content-info";
-import { kStarterDefaultHeight, kStarterTileType } from "./starter-types";
-import StarterToolIcon from "./starter-icon.svg";
-import { StarterToolComponent } from "./starter-tile";
-import { defaultStarterContent, StarterContentModel } from "./starter-content";
+import { kNumberlineDefaultHeight, kNumberlineTileType } from "./numberline-types";
+import NumberlineToolIcon from "./assets/numberline-icon.svg";
+import { NumberlineToolComponent } from "./numberline-tile";
+import { defaultNumberlineContent, NumberlineContentModel } from "./numberline-content";
 
 registerTileContentInfo({
-  type: kStarterTileType,
-  modelClass: StarterContentModel,
-  defaultContent: defaultStarterContent,
-  defaultHeight: kStarterDefaultHeight
+  type: kNumberlineTileType,
+  modelClass: NumberlineContentModel,
+  defaultContent: defaultNumberlineContent,
+  defaultHeight: kNumberlineDefaultHeight
 });
 
 registerTileComponentInfo({
-  type: kStarterTileType,
-  Component: StarterToolComponent,
+  type: kNumberlineTileType,
+  Component: NumberlineToolComponent,
   tileEltClass: "starter-tool-tile",
-  Icon: StarterToolIcon
+  Icon: NumberlineToolIcon
 });

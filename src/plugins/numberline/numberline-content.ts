@@ -1,16 +1,16 @@
 import { types, Instance } from "mobx-state-tree";
 import { TileContentModel } from "../../models/tiles/tile-content";
-import { kStarterTileType } from "./starter-types";
+import { kNumberlineTileType } from "./numberline-types";
 
-export function defaultStarterContent(): StarterContentModelType {
-  return StarterContentModel.create({text: "Hello World"});
+export function defaultNumberlineContent(): NumberlineContentModelType {
+  return NumberlineContentModel.create({text: "Hello World"});
 }
 
 
-export const StarterContentModel = TileContentModel
-  .named("StarterTool")
+export const NumberlineContentModel = TileContentModel
+  .named("NumberlineTool")
   .props({
-    type: types.optional(types.literal(kStarterTileType), kStarterTileType),
+    type: types.optional(types.literal(kNumberlineTileType), kNumberlineTileType),
     text: "",
   })
   .views(self => ({
@@ -24,4 +24,4 @@ export const StarterContentModel = TileContentModel
     }
   }));
 
-export interface StarterContentModelType extends Instance<typeof StarterContentModel> {}
+export interface NumberlineContentModelType extends Instance<typeof NumberlineContentModel> {}

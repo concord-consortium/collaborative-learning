@@ -3,15 +3,15 @@ import userEvent from "@testing-library/user-event";
 import React from "react";
 import { ITileApi } from "../../components/tiles/tile-api";
 import { TileModel } from "../../models/tiles/tile-model";
-import { defaultStarterContent } from "./numberline-content";
-import { StarterToolComponent } from "./numberline-tile";
+import { defaultNumberlineContent } from "./numberline-content";
+import { NumberlineToolComponent } from "./numberline-tile";
 
-// The starter tile needs to be registered so the TileModel.create
+// The numberline tile needs to be registered so the TileModel.create
 // knows it is a supported tile type
-import "./starter-registration";
+import "./numberline-registration";
 
-describe("StarterToolComponent", () => {
-  const content = defaultStarterContent();
+describe("NumberlineToolComponent", () => {
+  const content = defaultNumberlineContent();
   const model = TileModel.create({content});
 
   const defaultProps = {
@@ -45,13 +45,13 @@ describe("StarterToolComponent", () => {
 
   it("renders successfully", () => {
     const {getByText} =
-      render(<StarterToolComponent  {...defaultProps} {...{model}}></StarterToolComponent>);
+      render(<NumberlineToolComponent  {...defaultProps} {...{model}}></NumberlineToolComponent>);
     expect(getByText("Hello World")).toBeInTheDocument();
   });
 
   it("updates the text when the model changes", async () => {
     const {getByText, findByText} =
-      render(<StarterToolComponent  {...defaultProps} {...{model}}></StarterToolComponent>);
+      render(<NumberlineToolComponent  {...defaultProps} {...{model}}></NumberlineToolComponent>);
     expect(getByText("Hello World")).toBeInTheDocument();
 
     content.setText("New Text");
@@ -61,7 +61,7 @@ describe("StarterToolComponent", () => {
 
   it("updates the model when the user types", () => {
     const {getByRole, getByText} =
-      render(<StarterToolComponent  {...defaultProps} {...{model}}></StarterToolComponent>);
+      render(<NumberlineToolComponent  {...defaultProps} {...{model}}></NumberlineToolComponent>);
     expect(getByText("New Text")).toBeInTheDocument();
 
     const textBox = getByRole("textbox");

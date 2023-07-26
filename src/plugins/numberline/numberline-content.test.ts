@@ -1,19 +1,19 @@
-import { defaultStarterContent, StarterContentModel } from "./starter-content";
+import { defaultNumberlineContent, NumberlineContentModel } from "./numberline-content";
 
-describe("StarterContent", () => {
+describe("NumberlineContent", () => {
   it("has default content of 'hello world'", () => {
-    const content = defaultStarterContent();
+    const content = defaultNumberlineContent();
     expect(content.text).toBe("Hello World");
   });
 
   it("supports changing the text", () => {
-    const content = StarterContentModel.create();
+    const content = NumberlineContentModel.create();
     content.setText("New Text");
     expect(content.text).toBe("New Text");
   });
 
   it("is always user resizable", () => {
-    const content = StarterContentModel.create();
+    const content = NumberlineContentModel.create();
     expect(content.isUserResizable).toBe(true);
   });
 });

@@ -1,3 +1,3 @@
-export const kStarterTileType = "Starter";
+export const kNumberlineTileType = "Numberline";
 
-export const kStarterDefaultHeight = 320;
+export const kNumberlineDefaultHeight = 320;
