@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { ArrowAnnotationComponent } from "../annotations/arrow-annotation";
 import { useUIStore } from "../../hooks/use-stores";
@@ -85,6 +85,10 @@ interface IAnnotationLayerProps {
 export const AnnotationLayer = observer(function AdornmentLayer({
   content, documentScrollX, documentScrollY
 }: IAnnotationLayerProps) {
+  const [_initialized, setInitialized] = useState(false);
+  useEffect(() => {
+    setTimeout(() => setInitialized(true));
+  }, []);
   const [sourceTileId, setSourceTileId] = useState("");
   const [sourceObjectId, setSourceObjectId] = useState("");
   const [sourceObjectType, setSourceObjectType] = useState<string | undefined>();
@@ -148,19 +152,6 @@ export const AnnotationLayer = observer(function AdornmentLayer({
         { content?.annotations.map((arrow: ArrowAnnotationType) => {
           const key = `${arrow.sourceObject?.objectId}-${arrow.targetObject?.objectId}`;
           return <ArrowAnnotationComponent arrow={arrow} getBoundingBox={getBoundingBox} key={key} />;
-          // const source = arrow.sourceObject;
-          // const sourceBB = getObjectBoundingBoxUnknownRow(
-          //   source?.tileId ?? "", source?.objectId ?? "", content, documentScrollX, documentScrollY
-          // );
-          // const target = arrow.targetObject;
-          // const targetBB = getObjectBoundingBoxUnknownRow(
-          //   target?.tileId ?? "", target?.objectId ?? "", content, documentScrollX, documentScrollY
-          // );
-          // if (sourceBB && targetBB) {
-          //   return (
-          //     <path d={`M ${}`}
-          //   );
-          // }
         })}
       </svg>
     </div>
