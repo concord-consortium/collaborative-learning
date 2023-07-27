@@ -29,7 +29,7 @@ const gTileRegistration: Record<string, () => void> = {
   "Image": () => import(/* webpackChunkName: "Image" */"./models/tiles/image/image-registration"),
   "Numberline": () => Promise.all([
     import(/* webpackChunkName: "Numberline" */"./plugins/numberline/numberline-registration"),
-    import(/* webpackChunkName: "SharedDataSet" */"./models/shared/shared-data-set-registration") //maybe
+    import(/* webpackChunkName: "SharedDataSet" */"./models/shared/shared-data-set-registration")
   ]),
 
   "Simulator": () => Promise.all([
