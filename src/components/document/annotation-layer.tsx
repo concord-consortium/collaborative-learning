@@ -2,9 +2,10 @@ import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { useState } from "react";
 
+import { ArrowAnnotationComponent } from "../annotations/arrow-annotation";
 import { useUIStore } from "../../hooks/use-stores";
-import { ArrowAnnotation } from "../../models/annotations/arrow-annotation";
-import { ClueObjectModel } from "../../models/annotations/clue-object";
+import { ArrowAnnotation, ArrowAnnotationType } from "../../models/annotations/arrow-annotation";
+import { ClueObjectModel, ClueObjectType } from "../../models/annotations/clue-object";
 import { DocumentContentModelType } from "../../models/document/document-content";
 
 import "./annotation-layer.scss";
@@ -38,6 +39,16 @@ function getObjectBoundingBox(
   const height = objectBoundingBox.height + objectStroke;
   const width = objectBoundingBox.width + objectStroke;
   return { left, top, height, width };
+}
+
+function getObjectBoundingBoxUnknownRow(
+  tileId: string, objectId: string, content?: DocumentContentModelType, documentScrollX?: number,
+  documentScrollY?: number
+) {
+  if (!content) return undefined;
+
+  const rowId = content.findRowContainingTile(tileId);
+  return getObjectBoundingBox(rowId ?? "", tileId, objectId, documentScrollX, documentScrollY);
 }
 
 interface IAnnotationButtonProps {
@@ -98,6 +109,10 @@ export const AnnotationLayer = observer(function AdornmentLayer({
     }
   };
 
+  const getBoundingBox = (object: ClueObjectType) => {
+    return getObjectBoundingBoxUnknownRow(object.tileId, object.objectId, content, documentScrollX, documentScrollY);
+  };
+
   const editting = ui.adornmentMode !== undefined;
   const hidden = !ui.showAdornments;
   const classes = classNames("annotation-layer", { editting, hidden });
@@ -129,6 +144,25 @@ export const AnnotationLayer = observer(function AdornmentLayer({
           });
         }
       })}
+      <svg xmlnsXlink="http://www.w3.org/1999/xlink" height="1500" width="1500">
+        { content?.annotations.map((arrow: ArrowAnnotationType) => {
+          const key = `${arrow.sourceObject?.objectId}-${arrow.targetObject?.objectId}`;
+          return <ArrowAnnotationComponent arrow={arrow} getBoundingBox={getBoundingBox} key={key} />;
+          // const source = arrow.sourceObject;
+          // const sourceBB = getObjectBoundingBoxUnknownRow(
+          //   source?.tileId ?? "", source?.objectId ?? "", content, documentScrollX, documentScrollY
+          // );
+          // const target = arrow.targetObject;
+          // const targetBB = getObjectBoundingBoxUnknownRow(
+          //   target?.tileId ?? "", target?.objectId ?? "", content, documentScrollX, documentScrollY
+          // );
+          // if (sourceBB && targetBB) {
+          //   return (
+          //     <path d={`M ${}`}
+          //   );
+          // }
+        })}
+      </svg>
     </div>
   );
 });
