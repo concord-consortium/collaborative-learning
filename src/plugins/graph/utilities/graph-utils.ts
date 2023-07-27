@@ -458,10 +458,10 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
             ? defaultSelectedStrokeWidth : defaultStrokeWidth);
 
             const linePoints = xSeries.map((x, i) => [x, ySeries[i]]) as Iterable<[number, number]>;
-            // DRAFT implementation - need to find appropriate config to query/control
-            console.log('appConfig', appConfig)
-            const linesByDefault = true; //appConfig?.config?.graph?.linesByDefault;
-            linesByDefault && drawPath(dotsRef.current, linePoints, pointColor);
+            // DRAFT - will be more like below, first param is a key from content.json, like emptyPlotIsNumeric
+            // appConfig.getSetting("addLineAdornmentByDefault", "graph");
+            const addLine = true; // hardcoding for dev
+            addLine && drawPath(dotsRef.current, linePoints, pointColor);
       }
     };
 
