@@ -356,15 +356,22 @@ export const TreeManager = types
     // have a parent document.
 
     const query = firestore.collection(`${docPath}/history`)
-      .orderBy("index")
-      .withConverter(historyEntryConverter);
+      .orderBy("index");
 
     // FIXME-HISTORY: this approach probably does not handle paging well,
     // and I'd suspect we'll have a lot of changes so we'll need to handle that.
     // https://www.pivotaltracker.com/story/show/183291353
     const snapshotUnsubscribe = query.onSnapshot(
       querySnapshot => {
-        const cDocument = CDocument.create({history: querySnapshot.docs.map(doc => doc.data())});
+        if (DEBUG_HISTORY) {
+          // eslint-disable-next-line no-console
+          console.log("Loaded History:", querySnapshot.docs.map(doc => ({id: doc.id, ...doc.data()})));
+        }
+        const history = querySnapshot.docs.map(doc => {
+          const { entry } = doc.data();
+          return JSON.parse(entry) as HistoryEntrySnapshot;
+        });
+        const cDocument = CDocument.create({history});
         self.setChangeDocument(cDocument);
       },
       error => {
@@ -602,17 +609,6 @@ export const TreeManager = types
 }));
 
 export interface TreeManagerType extends Instance<typeof TreeManager> {}
-
-const historyEntryConverter = {
-  toFirestore: (entry: HistoryEntrySnapshot) => {
-    throw new Error(
-      "We can't convert a raw HistoryEntry to firestore because we need the index from its parent collection");
-  },
-  fromFirestore: (doc: firebase.firestore.QueryDocumentSnapshot): HistoryEntrySnapshot => {
-    const { entry } = doc.data();
-    return JSON.parse(entry);
-  }
-};
 
 interface IPrepareFirestoreHistoryInfoArgs {
   userContextProvider?: UserContextProvider;
