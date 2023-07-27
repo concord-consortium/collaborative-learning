@@ -459,8 +459,9 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
 
             const linePoints = xSeries.map((x, i) => [x, ySeries[i]]) as Iterable<[number, number]>;
             // DRAFT implementation - need to find appropriate config to query/control
-            const isClue = appConfig.appName === "CLUE";
-            isClue && drawPath(dotsRef.current, linePoints, pointColor);
+            console.log('appConfig', appConfig)
+            const linesByDefault = true; //appConfig?.config?.graph?.linesByDefault;
+            linesByDefault && drawPath(dotsRef.current, linePoints, pointColor);
       }
     };
 
