@@ -87,6 +87,7 @@ export const AnnotationLayer = observer(function AdornmentLayer({
 }: IAnnotationLayerProps) {
   const [_initialized, setInitialized] = useState(false);
   useEffect(() => {
+    // Forces the annotation layer to rerender after initial load, getting access to the locations of elements.
     setTimeout(() => setInitialized(true));
   }, []);
   const [sourceTileId, setSourceTileId] = useState("");
@@ -98,10 +99,17 @@ export const AnnotationLayer = observer(function AdornmentLayer({
 
   const handleAnnotationButtonClick = (tileId: string, objectId: string, objectType?: string) => {
     if (!sourceTileId || !sourceObjectId) {
+      // We don't have a source object yet, so make this one the source object
       setSourceTileId(tileId);
       setSourceObjectId(objectId);
       setSourceObjectType(objectType);
+    } else if (tileId === sourceTileId && objectId === sourceObjectId && objectType === sourceObjectType) {
+      // This object is already selected as the source object, so deselect it
+      setSourceTileId("");
+      setSourceObjectId("");
+      setSourceObjectType(undefined);
     } else {
+      // Create an arrow from the source object to this object
       const sourceObject =
         ClueObjectModel.create({ tileId: sourceTileId, objectId: sourceObjectId, objectType: sourceObjectType });
       const targetObject = ClueObjectModel.create({ tileId, objectId, objectType });
