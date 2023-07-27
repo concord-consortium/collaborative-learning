@@ -46,13 +46,13 @@ describe("NumberlineToolComponent", () => {
   it("renders successfully", () => {
     const {getByText} =
       render(<NumberlineToolComponent  {...defaultProps} {...{model}}></NumberlineToolComponent>);
-    expect(getByText("Hello World")).toBeInTheDocument();
+    expect(getByText("Numberline Tile")).toBeInTheDocument();
   });
 
   it("updates the text when the model changes", async () => {
     const {getByText, findByText} =
       render(<NumberlineToolComponent  {...defaultProps} {...{model}}></NumberlineToolComponent>);
-    expect(getByText("Hello World")).toBeInTheDocument();
+    expect(getByText("Numberline Tile")).toBeInTheDocument();
 
     content.setText("New Text");
 

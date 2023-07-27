@@ -4,6 +4,7 @@ import NumberlineTile from '../../../../support/elements/clue/NumberlineTile';
 let clueCanvas = new ClueCanvas;
 let numberlineTile = new NumberlineTile;
 
+//skipping tests for now, will write when theres an axis
 context.skip('Numberline Tile', function () {
   beforeEach(function () {
     const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup&unit=example";

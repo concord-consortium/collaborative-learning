@@ -3,7 +3,7 @@ import { TileContentModel } from "../../models/tiles/tile-content";
 import { kNumberlineTileType } from "./numberline-types";
 
 export function defaultNumberlineContent(): NumberlineContentModelType {
-  return NumberlineContentModel.create({text: "Hello World"});
+  return NumberlineContentModel.create({text: "Numberline Tile"});
 }
 
 

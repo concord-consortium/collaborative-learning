@@ -1,9 +1,9 @@
 import { defaultNumberlineContent, NumberlineContentModel } from "./numberline-content";
 
 describe("NumberlineContent", () => {
-  it("has default content of 'hello world'", () => {
+  it("has default content of 'Numberline Tile'", () => {
     const content = defaultNumberlineContent();
-    expect(content.text).toBe("Hello World");
+    expect(content.text).toBe("Numberline Tile");
   });
 
   it("supports changing the text", () => {
