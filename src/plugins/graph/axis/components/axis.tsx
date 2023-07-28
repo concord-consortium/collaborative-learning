@@ -26,6 +26,8 @@ export const Axis = ({
     place = axisModel?.place || 'bottom',
     [axisElt, setAxisElt] = useState<SVGGElement | null>(null);
 
+  console.log("<Axis> with props:", axisModel, layout, place, axisElt);
+
   useAxis({
     getAxisModel, axisElt, axisTitle: label, centerCategoryLabels
   });

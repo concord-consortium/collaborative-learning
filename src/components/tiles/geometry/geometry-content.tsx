@@ -286,6 +286,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       if (!this.suspendSnapshotResponse) {
         this.destroyBoard();
         this.setState({ board: undefined });
+        console.log("componentDidMount line 289");
         this.initializeBoard();
       }
     }));
@@ -299,6 +300,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     const { newElements } = this.state;
     if (newElements && newElements.length) {
+      console.log("302");
       this.handleCreateElements(newElements);
       this.setState({ newElements: undefined });
     }
@@ -509,6 +511,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   private async initializeBoard(): Promise<JXG.Board> {
     return new Promise((resolve, reject) => {
       isGeometryContentReady(this.getContent()).then(() => {
+        console.log("513");
         const board = this.getContent().initializeBoard(this.elementId, this.handleCreateElements);
         if (board) {
           this.handleCreateBoard(board);
@@ -536,6 +539,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const eltBounds = domElt && domElt.getBoundingClientRect();
     // JSXGraph fails hard if the DOM element doesn't exist or has zero extent
     if (eltBounds && (eltBounds.width > 0) && (eltBounds.height > 0)) {
+      console.log("initialize content 542");
       this.boardPromise = this.initializeBoard();
       await this.boardPromise;
     }
@@ -565,6 +569,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const content = this.getContent();
       const axes = content.rescaleBoard(board, params);
       if (axes) {
+        console.log("rescaleBoardAndAxes");
         axes.forEach(this.handleCreateAxis);
       }
     });
@@ -642,6 +647,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         }
       }
       const pts = applyChange(board, { operation: "create", target: "linkedPoint", parents, properties, links });
+      console.log("648");
       castArray(pts || []).forEach(pt => !isBoard(pt) && this.handleCreateElements(pt));
     });
   }
@@ -699,6 +705,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     if (board) {
       this.applyChange(() => {
         const elems = content.addMovableLine(board, [[0, 0], [5, 5]]);
+        console.log("706");
         this.handleCreateElements(elems);
       });
     }
@@ -957,6 +964,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         this.applyChange(() => content.addObjectModels(objectsToPaste));
 
         const changesToApply = convertModelObjectsToChanges(objectsToPaste);
+        console.log("965");
         content.applyBatchChanges(board, changesToApply, this.handleCreateElements);
 
         const newPointIds = objects.filter(obj => isPointModel(obj)).map(obj => obj.id);
@@ -1099,6 +1107,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         this.handleCreateText(elt);
       }
       else if (isAxis(elt)) {
+        console.log("handleCreateElements with elts:", elts);
         this.handleCreateAxis(elt);
       }
     });
@@ -1348,6 +1357,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleCreateAxis = (axis: JXG.Line) => {
+    console.log("handleCreateAxis:", axis.name);
+    console.log("]\t", axis)
     const handlePointerDown = (evt: any) => {
       const { readOnly, scale } = this.props;
       const { board } = this.state;
