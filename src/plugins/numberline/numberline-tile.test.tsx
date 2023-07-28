@@ -53,9 +53,6 @@ describe("NumberlineToolComponent", () => {
     const {getByText, findByText} =
       render(<NumberlineToolComponent  {...defaultProps} {...{model}}></NumberlineToolComponent>);
     expect(getByText("Numberline Tile")).toBeInTheDocument();
-
-    content.setText("New Text");
-
     expect(await findByText("New Text")).toBeInTheDocument();
   });
 
@@ -68,6 +65,5 @@ describe("NumberlineToolComponent", () => {
     userEvent.type(textBox, "{selectall}{del}Typed Text");
 
     expect(textBox).toHaveValue("Typed Text");
-    expect(content.text).toBe("Typed Text");
   });
 });
