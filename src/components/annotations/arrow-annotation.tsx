@@ -1,5 +1,5 @@
 import { observer } from "mobx-react";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { ArrowAnnotationType } from "../../models/annotations/arrow-annotation";
 import { ClueObjectType } from "../../models/annotations/clue-object";
@@ -16,6 +16,14 @@ export const ArrowAnnotationComponent = observer(
   function ArrowAnnotationComponent({ arrow, getBoundingBox }: IArrowAnnotationProps) {
     const [edittingText, setEdittingText] = useState(false);
     const [tempText, setTempText] = useState(arrow.text ?? "");
+    const inputRef = useRef<HTMLInputElement|null>(null);
+    useEffect(() => {
+      // Focus on the text input when we start editting
+      if (edittingText) {
+        inputRef.current?.focus();
+      }
+    }, [edittingText]);
+
     if (!arrow.sourceObject || !arrow.targetObject) return null;
 
     // Find bounding boxes for source and target objects
@@ -84,6 +92,7 @@ export const ArrowAnnotationComponent = observer(
                   onBlur={handleBlur}
                   onChange={handleChange}
                   onKeyDown={handleKeyDown}
+                  ref={inputRef}
                   type="text"
                   value={tempText}
                 />
