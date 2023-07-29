@@ -63,7 +63,6 @@ export const EllipseComponent = observer(function EllipseComponent({model, handl
   const rx = model.dragRx ?? model.rx;
   const ry = model.dragRy ?? model.ry;
   return <ellipse
-    data-object-id={id}
     key={id}
     cx={x}
     cy={y}

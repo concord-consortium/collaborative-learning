@@ -110,7 +110,6 @@ export const LineComponent = observer(function LineComponent({model, handleHover
   const scaleY = line.dragScaleY ?? 1;
   const commands = `M ${x} ${y} ${deltaPoints.map((point) => `l ${point.dx*scaleX} ${point.dy*scaleY}`).join(" ")}`;
   return <path
-    data-object-id={id}
     key={id}
     d={commands}
     stroke={stroke}

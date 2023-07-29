@@ -11,6 +11,12 @@
   &.hidden {
     display: none;
   }
+
+  .annotation-svg {
+    height: 100%;
+    overflow: hidden;
+    width: 100%;
+  }
 }
 
 .annotation-button {

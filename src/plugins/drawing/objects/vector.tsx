@@ -95,7 +95,6 @@ export const VectorComponent = observer(function VectorComponent({model, handleH
   return (
     <g
       className="vector"
-      data-object-id={id}
       key={id}
       stroke={stroke}
       fill={stroke}

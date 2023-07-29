@@ -117,7 +117,6 @@ export const ImageComponent: React.FC<IDrawingComponentProps> = observer(functio
   const height = image.dragHeight ?? image.height;
 
   return <image
-    data-object-id={id}
     key={id}
     href={displayUrl}
     x={x}

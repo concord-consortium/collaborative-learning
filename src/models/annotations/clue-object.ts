@@ -10,3 +10,10 @@ export const ClueObjectModel = types
   objectType: types.maybe(types.string)
 });
 export type ClueObjectType = Instance<typeof ClueObjectModel>;
+
+export interface ObjectBoundingBox {
+  height: number;
+  left: number;
+  top: number;
+  width: number;
+}

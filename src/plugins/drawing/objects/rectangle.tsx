@@ -88,7 +88,6 @@ export const RectangleComponent = observer(function RectangleComponent({model, h
   const { x, y } = rect.position;
   const { width, height } = rect.currentDims;
   return <rect
-    data-object-id={id}
     key={id}
     x={x}
     y={y}

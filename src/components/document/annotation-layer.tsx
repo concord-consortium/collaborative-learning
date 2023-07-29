@@ -1,59 +1,18 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 
 import { ArrowAnnotationComponent } from "../annotations/arrow-annotation";
+import { TileApiInterfaceContext } from "../tiles/tile-api";
 import { useUIStore } from "../../hooks/use-stores";
 import { ArrowAnnotation, ArrowAnnotationType } from "../../models/annotations/arrow-annotation";
-import { ClueObjectModel, ClueObjectType } from "../../models/annotations/clue-object";
+import { ObjectBoundingBox, ClueObjectModel, ClueObjectType } from "../../models/annotations/clue-object";
 import { DocumentContentModelType } from "../../models/document/document-content";
 
 import "./annotation-layer.scss";
 
-function getObjectBoundingBox(
-  rowId: string, tileId: string, objectId: string, documentScrollX?: number, documentScrollY?: number
-) {
-  const rowSelector = `[data-row-id='${rowId}']`;
-  const rowElements = document.querySelectorAll(rowSelector);
-  if (rowElements.length !== 1) return null;
-  const rowElement = (rowElements[0] as HTMLElement);
-
-  const tileSelector = `[data-tool-id='${tileId}']`;
-  const tileElements = document.querySelectorAll(tileSelector);
-  if (tileElements.length !== 1) return null;
-  const tileElement = (tileElements[0] as HTMLElement);
-
-  // TODO Each tile type needs to handle this itself
-  const objectSelector = `[data-object-id='${objectId}']`;
-  const objectElements = document.querySelectorAll(objectSelector);
-  if (objectElements.length !== 1) return null;
-  const objectElement = objectElements[0];
-
-  const objectBoundingBox = (objectElement as SVGGraphicsElement).getBBox();
-  const tileBorder = 2;
-  const left = rowElement.offsetLeft + tileElement.offsetLeft - tileElement.scrollLeft
-    + objectBoundingBox.x + tileBorder - (documentScrollX ?? 0);
-  const top = rowElement.offsetTop + tileElement.offsetTop - tileElement.scrollTop
-    + objectBoundingBox.y + tileBorder - (documentScrollY ?? 0);
-  const objectStroke = 2;
-  const height = objectBoundingBox.height + objectStroke;
-  const width = objectBoundingBox.width + objectStroke;
-  return { left, top, height, width };
-}
-
-function getObjectBoundingBoxUnknownRow(
-  tileId: string, objectId: string, content?: DocumentContentModelType, documentScrollX?: number,
-  documentScrollY?: number
-) {
-  if (!content) return undefined;
-
-  const rowId = content.findRowContainingTile(tileId);
-  return getObjectBoundingBox(rowId ?? "", tileId, objectId, documentScrollX, documentScrollY);
-}
-
 interface IAnnotationButtonProps {
-  documentScrollX?: number;
-  documentScrollY?: number;
+  getObjectBoundingBox: (rowId: string, tileId: string, objectId: string) => ObjectBoundingBox | undefined;
   key?: string;
   objectId: string;
   onClick?: (tileId: string, objectId: string, objectType?: string) => void;
@@ -63,9 +22,9 @@ interface IAnnotationButtonProps {
   tileId: string;
 }
 const AnnotationButton = observer(function AdornmentButton({
-  documentScrollX, documentScrollY, objectId, onClick, rowId, sourceObjectId, sourceTileId, tileId
+  getObjectBoundingBox, objectId, onClick, rowId, sourceObjectId, sourceTileId, tileId
 }: IAnnotationButtonProps) {
-  const style = getObjectBoundingBox(rowId, tileId, objectId, documentScrollX, documentScrollY);
+  const style = getObjectBoundingBox(rowId, tileId, objectId);
   if (!style) return null;
 
   const handleClick = () => onClick?.(tileId, objectId);
@@ -94,8 +53,45 @@ export const AnnotationLayer = observer(function AdornmentLayer({
   const [sourceObjectId, setSourceObjectId] = useState("");
   const [sourceObjectType, setSourceObjectType] = useState<string | undefined>();
   const ui = useUIStore();
+  const tileApiInterface = useContext(TileApiInterfaceContext);
 
   const rowIds = content?.rowOrder || [];
+
+  function getObjectBoundingBox(
+    rowId: string, tileId: string, objectId: string
+  ) {
+    const rowSelector = `[data-row-id='${rowId}']`;
+    const rowElements = document.querySelectorAll(rowSelector);
+    if (rowElements.length !== 1) return undefined;
+    const rowElement = (rowElements[0] as HTMLElement);
+  
+    const tileSelector = `[data-tool-id='${tileId}']`;
+    const tileElements = document.querySelectorAll(tileSelector);
+    if (tileElements.length !== 1) return undefined;
+    const tileElement = (tileElements[0] as HTMLElement);
+  
+    const tileApi = tileApiInterface?.getTileApi(tileId);
+    const objectBoundingBox = tileApi?.getObjectBoundingBox?.(objectId);
+    if (!objectBoundingBox) return undefined;
+
+    const tileBorder = 3;
+    const left = rowElement.offsetLeft + tileElement.offsetLeft - tileElement.scrollLeft
+      + objectBoundingBox.left + tileBorder - (documentScrollX ?? 0);
+    const top = rowElement.offsetTop + tileElement.offsetTop - tileElement.scrollTop
+      + objectBoundingBox.top + tileBorder - (documentScrollY ?? 0);
+    const height = objectBoundingBox.height;
+    const width = objectBoundingBox.width;
+    return { left, top, height, width };
+  }
+  
+  function getObjectBoundingBoxUnknownRow(
+    tileId: string, objectId: string
+  ) {
+    if (!content) return undefined;
+  
+    const rowId = content.findRowContainingTile(tileId);
+    return getObjectBoundingBox(rowId ?? "", tileId, objectId);
+  }
 
   const handleAnnotationButtonClick = (tileId: string, objectId: string, objectType?: string) => {
     if (!sourceTileId || !sourceObjectId) {
@@ -122,7 +118,7 @@ export const AnnotationLayer = observer(function AdornmentLayer({
   };
 
   const getBoundingBox = (object: ClueObjectType) => {
-    return getObjectBoundingBoxUnknownRow(object.tileId, object.objectId, content, documentScrollX, documentScrollY);
+    return getObjectBoundingBoxUnknownRow(object.tileId, object.objectId);
   };
 
   const editting = ui.adornmentMode !== undefined;
@@ -140,8 +136,7 @@ export const AnnotationLayer = observer(function AdornmentLayer({
               return tile.content.adornableObjectIds.map(objectId => {
                 return (
                   <AnnotationButton
-                    documentScrollX={documentScrollX}
-                    documentScrollY={documentScrollY}
+                    getObjectBoundingBox={getObjectBoundingBox}
                     key={`${tile.id}-${objectId}-button`}
                     objectId={objectId}
                     onClick={handleAnnotationButtonClick}
@@ -156,7 +151,7 @@ export const AnnotationLayer = observer(function AdornmentLayer({
           });
         }
       })}
-      <svg xmlnsXlink="http://www.w3.org/1999/xlink" height="1500" width="1500">
+      <svg xmlnsXlink="http://www.w3.org/1999/xlink" className="annotation-svg" height="1500" width="1500">
         { content?.annotations.map((arrow: ArrowAnnotationType) => {
           const key = `${arrow.sourceObject?.objectId}-${arrow.targetObject?.objectId}`;
           return <ArrowAnnotationComponent arrow={arrow} getBoundingBox={getBoundingBox} key={key} />;
