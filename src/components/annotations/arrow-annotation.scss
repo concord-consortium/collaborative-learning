@@ -1,0 +1,17 @@
+.text-region {
+  align-items: center;
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  width: 100%;
+
+  .text-display {
+    background-color: white;
+    border: 2px solid blue;
+    border-radius: 10px;
+  }
+
+  .text-input {
+    max-width: 100%;
+  }
+}

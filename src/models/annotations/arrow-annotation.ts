@@ -2,10 +2,14 @@ import { Instance, types } from "mobx-state-tree";
 
 import { ClueObjectModel } from "./clue-object";
 
+export const kArrowAnnotationType = "arrowAnnotation";
+
 export const ArrowAnnotation = types
 .model("ArrowAnnotation", {
   sourceObject: types.maybe(ClueObjectModel),
-  targetObject: types.maybe(ClueObjectModel)
+  targetObject: types.maybe(ClueObjectModel),
+  text: types.maybe(types.string),
+  type: types.optional(types.string, kArrowAnnotationType)
 })
 .actions(self => ({
   setSourceObject(tileId: string, objectId: string, objectType?: string) {
@@ -13,6 +17,9 @@ export const ArrowAnnotation = types
   },
   setTargetObject(tileId: string, objectId: string, objectType?: string) {
     self.targetObject = ClueObjectModel.create({ tileId, objectId, objectType });
+  },
+  setText(text: string) {
+    self.text = text;
   }
 }));
 export type ArrowAnnotationType = Instance<typeof ArrowAnnotation>;
