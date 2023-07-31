@@ -15,6 +15,7 @@ interface IAnnotationButtonProps {
   getObjectBoundingBox: (rowId: string, tileId: string, objectId: string) => ObjectBoundingBox | undefined;
   key?: string;
   objectId: string;
+  objectType?: string;
   onClick?: (tileId: string, objectId: string, objectType?: string) => void;
   rowId: string;
   sourceObjectId?: string;
@@ -22,12 +23,12 @@ interface IAnnotationButtonProps {
   tileId: string;
 }
 const AnnotationButton = observer(function AdornmentButton({
-  getObjectBoundingBox, objectId, onClick, rowId, sourceObjectId, sourceTileId, tileId
+  getObjectBoundingBox, objectId, objectType, onClick, rowId, sourceObjectId, sourceTileId, tileId
 }: IAnnotationButtonProps) {
   const style = getObjectBoundingBox(rowId, tileId, objectId);
   if (!style) return null;
 
-  const handleClick = () => onClick?.(tileId, objectId);
+  const handleClick = () => onClick?.(tileId, objectId, objectType);
 
   const source = sourceObjectId === objectId && sourceTileId === tileId;
   const classes = classNames("annotation-button", { source });
@@ -132,12 +133,13 @@ export const AnnotationLayer = observer(function AdornmentLayer({
           return tiles.map(tileInfo => {
             const tile = content?.tileMap.get(tileInfo.tileId);
             if (tile) {
-              return tile.content.adornableObjectIds.map(objectId => {
+              return tile.content.annotatableObjects.map(({ objectId, objectType }) => {
                 return (
                   <AnnotationButton
                     getObjectBoundingBox={getObjectBoundingBox}
                     key={`${tile.id}-${objectId}-button`}
                     objectId={objectId}
+                    objectType={objectType}
                     onClick={handleAnnotationButtonClick}
                     rowId={rowId}
                     sourceObjectId={sourceObjectId}
