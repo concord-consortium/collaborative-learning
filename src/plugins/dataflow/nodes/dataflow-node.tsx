@@ -2,7 +2,6 @@ import React from "react";
 import classNames from "classnames";
 import { Node, Socket, Control } from "rete-react-render-plugin";
 import { DataflowNodePlot } from "./dataflow-node-plot";
-import { NodeType, NodeTypes } from "../model/utilities/node";
 import { hasFlowIn } from "./utilities/view-utilities";
 import { outputsToAnyRelay, outputsToAnyGripper } from "./utilities/live-output-utilities";
 import "./dataflow-node.scss";
@@ -23,8 +22,6 @@ export class DataflowNode extends Node {
     const decoratedInputs = inputs.filter(isDecoratedInput(true));
     const plotButton = controls.find((c: any) => c.key === "plot");
     const showPlot = plotButton?.props.showgraph ?? node.data.plot ?? false;
-    const nodeType = NodeTypes.find( (n: NodeType) => n.name === node.name);
-    const displayName = nodeType ? nodeType.displayName : node.name;
 
     const dynamicClasses = classNames({
       "gate-active": node.data.gateActive,
@@ -32,14 +29,13 @@ export class DataflowNode extends Node {
       "uses-relays": outputsToAnyRelay(node),
       "uses-gripper": outputsToAnyGripper(node),
     });
-
     const inputClass = (s: string) => "input " + s.toLowerCase().replace(/ /g, "-");
 
     return (
       <div className={`node ${node.name.toLowerCase().replace(/ /g, "-")} ${dynamicClasses}`}>
         <div className="top-bar">
           <div className="node-title">
-            {displayName}
+            { node.data.orderedDisplayName }
           </div>
           {deleteControl &&
             <Control

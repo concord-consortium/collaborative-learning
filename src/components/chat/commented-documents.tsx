@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useStores, useUIStore} from "../../hooks/use-stores";
+import { useStores, useUIStore, useUserStore} from "../../hooks/use-stores";
 import { useFirestore } from "../../hooks/firestore-hooks";
 import { CurriculumDocument, DocumentDocument } from "../../lib/firestore-schema";
 import { getSectionTitle } from "../../models/curriculum/section";
 import { UserModelType } from "../../models/stores/user";
-import { getNavTabOfDocument, getTabsOfCurriculumDoc } from "../../models/stores/ui";
+import { getNavTabOfDocument, getTabsOfCurriculumDoc, isStudentWorkspaceDoc } from "../../models/stores/ui";
 import { DocumentModelType } from "../../models/document/document";
 import { useDocumentCaption } from "../thumbnail/decorated-document-thumbnail-item";
 import DocumentIcon from "../../assets/icons/document-icon.svg";
@@ -51,18 +51,6 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
   }
   }, [cDocsRef, problem, unit, user?.network, user?.id]);
 
-  //"MyWork"/"ClassWork"
-  const [workDocuments, setWorkDocuments] = useState<PromisedDocumentDocument[]>();
-  const mDocsRef = useMemo(() => db.collection("documents"), [db]);
-  const mDocsInScopeRef = useMemo(() => {
-    if(user?.network){
-      return mDocsRef.where("network", "==", user?.network);
-    } else {
-      return mDocsRef.where("uid", "==", user?.id);
-    }
-  }, [mDocsRef, user?.network, user?.id]);
-
-
   //------Curriculum Documents: (i.e. //"Problem"/"Teacher-Guide")
   useEffect(() => {
     const unsubscribeFromDocs = cDocsInScopeRef.onSnapshot(querySnapshot => {
@@ -96,7 +84,19 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
     return () => unsubscribeFromDocs?.();
   },[cDocsRef, cDocsInScopeRef]);
 
-  // ------MyWork/ClassWork--------
+
+  //------Documents: (i.e. //"Student Workspaces/"My Work"/"Class Work")
+  const [workDocuments, setWorkDocuments] = useState<PromisedDocumentDocument[]>();
+  const mDocsRef = useMemo(() => db.collection("documents"), [db]);
+  const mDocsInScopeRef = useMemo(() => {
+    if(user?.network){
+      return mDocsRef.where("network", "==", user?.network);
+    } else {
+      return mDocsRef.where("uid", "==", user?.id);
+    }
+  }, [mDocsRef, user?.network, user?.id]);
+
+  //------Documents: (i.e. //"Student Workspaces/"My Work"/"Class Work")
   useEffect(() => {
     const unsubscribeFromDocs = mDocsInScopeRef.onSnapshot(querySnapshot=>{
       const docs = querySnapshot.docs.map(doc =>{ //convert each element of docs to an object
@@ -135,7 +135,7 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
     <div className="commented-document-list">
       {
         docsCommentedOn &&
-        (docsCommentedOn).map((doc: PromisedCurriculumDocument, index:number) => {
+        (docsCommentedOn).map((doc: PromisedCurriculumDocument, index:number) => { //Problem + Teacher Guide documents
           const {navTab} = getTabsOfCurriculumDoc(doc.path);
           return (
             <div
@@ -165,6 +165,7 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
       {
         workDocuments &&
         (workDocuments).map((doc: PromisedDocumentDocument, index: number) =>{
+          //"Student Workspaces/"My Work"/"Class Work"
           const sectionDoc =  store.documents.getDocument(doc.key);
           const networkDoc = store.networkDocuments.getDocument(doc.key);
           if (sectionDoc){
@@ -172,7 +173,6 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
               <WorkDocumentItem
                 key={index}
                 doc={doc}
-                index={index}
                 sectionOrNetworkDoc={sectionDoc}
                 isNetworkDoc={false}
                 handleDocView={handleDocView}
@@ -184,7 +184,6 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
               <WorkDocumentItem
                 key={index}
                 doc={doc}
-                index={index}
                 sectionOrNetworkDoc={networkDoc}
                 isNetworkDoc={true}
                 handleDocView={handleDocView}
@@ -192,32 +191,33 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
             );
           }
         })
-
       }
     </div>
   );
 };
 
+
 interface JProps {
   doc: any,
-  index: number,
   sectionOrNetworkDoc: DocumentModelType,
   isNetworkDoc: boolean,
   handleDocView: (() => void) | undefined,
 }
 
 // This is rendering a single document item in the commented document list
-export const WorkDocumentItem: React.FC<JProps> = ({doc, index, sectionOrNetworkDoc, isNetworkDoc, handleDocView}) => {
+export const WorkDocumentItem: React.FC<JProps> = (props) => {
+  const { doc, sectionOrNetworkDoc, isNetworkDoc, handleDocView } = props;
   const ui = useUIStore();
+  const user = useUserStore();
   // We need the navTab to style the item.
-  const navTab = getNavTabOfDocument(doc.type);
-  const title =  useDocumentCaption(sectionOrNetworkDoc);
+  const navTab = getNavTabOfDocument(doc, user);
+  const title =  useDocumentCaption(sectionOrNetworkDoc, isStudentWorkspaceDoc(sectionOrNetworkDoc, user.id));
 
   return (
     <div
       className={`document-box my-work-document ${navTab}`}
       onClick={()=>{
-        ui.openResourceDocument(sectionOrNetworkDoc);
+        ui.openResourceDocument(sectionOrNetworkDoc, user);
         ui.setSelectedTile();
         if (handleDocView !== undefined){
           handleDocView();
@@ -226,18 +226,17 @@ export const WorkDocumentItem: React.FC<JProps> = ({doc, index, sectionOrNetwork
     >
     {
       isNetworkDoc ?
-          <div className="document-type-icon-yellow">
-            <DocumentIcon/>
-            <div className="yellow-background"/>
-
-          </div>
-      :
-      <div className="document-type-icon">
-        <DocumentIcon/>
-      </div>
+        <div className="document-type-icon-yellow">
+          <DocumentIcon/>
+          <div className="yellow-background"/>
+        </div>
+        :
+        <div className="document-type-icon">
+          <DocumentIcon/>
+        </div>
     }
       <div className={"title"}>
-        {title}
+        { title }
       </div>
       <div className={"numComments"}>
         {doc.numComments}

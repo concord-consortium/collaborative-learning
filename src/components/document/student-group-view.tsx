@@ -101,7 +101,8 @@ interface IGroupButtonProps {
   selected: boolean;
   onSelectGroup?: (id: string) => void;
 }
-const GroupButton: React.FC<IGroupButtonProps> = ({ displayId, id, selected, onSelectGroup }) => {
+const GroupButton: React.FC<IGroupButtonProps> = (props) => {
+  const { displayId, id, selected, onSelectGroup } = props;
   const className = `icon group-number ${selected ? "active" : ""}`;
   const handleClick = () => onSelectGroup && onSelectGroup(id);
   return(

@@ -7,26 +7,29 @@ import "../themes.scss";
 interface IProps {
   activeNavTab?: string;
   numPostedComments: number;
-  onPostComment?: (comment: string, tag: string) => void;
+  onPostComment?: (comment: string, tags: string[]) => void;
   showCommentTag?: boolean;
   commentTags?: Record<string, string>;
   tagPrompt?: string;
 }
 
-
 export const CommentTextBox: React.FC<IProps> = (props) => {
   const { activeNavTab, numPostedComments, onPostComment, showCommentTag, commentTags, tagPrompt } = props;
-
   const minTextAreaHeight = showCommentTag ? 100 : 35;
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [commentTextAreaHeight, setCommentTextAreaHeight] = useState(minTextAreaHeight);
   const selectElt = useRef<HTMLSelectElement>(null);
   const [commentAdded, setCommentAdded] = useState(false);
   const [commentText, setCommentText] = useState("");
-  const [tagText, setTagText] = useState("");
+   //all the AI tags pertaining to one comment - length is 1 for now
+  const [allTags, setAllTags] = useState([""]);
   const textareaStyle = {height: commentTextAreaHeight};
+
+  const commentEmptyNoTags =  (!commentAdded && !showCommentTag);
   const postButtonClass = classNames("comment-footer-button", "themed-negative", activeNavTab,
-                                     { disabled: !commentAdded, "no-action": !commentAdded });
+                                      { disabled: commentEmptyNoTags,
+                                      "no-action": commentEmptyNoTags });
+
   const ui = useUIStore();
 
   // resize textarea when user deletes some text
@@ -68,11 +71,13 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
   const handlePostComment = () => {
     // do not send post if text area is empty, only has spaces or new lines
     const [trimmedText, isEmpty] = trimContent(commentText);
-    if (!isEmpty) {
-      onPostComment?.(trimmedText, tagText);
+    if (!isEmpty || (showCommentTag && allTags[0] !== "" )){
+      //do not post to Firestore if select tag is tagPrompt
+      onPostComment?.(trimmedText, allTags);
       setCommentTextAreaHeight(minTextAreaHeight);
       setCommentAdded(false);
       setCommentText("");
+      setAllTags((oldArray) => [""]); //select will go back to top choice (tagPrompt)
     }
   };
 
@@ -108,10 +113,10 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
 
   const handleSelectDropDown = (val: string) => {
     if (tagPrompt && val !== tagPrompt){ //do not save comments with default tag
-      setTagText(val);
+      setAllTags((oldArray) => [val]);
     }
     else {
-      setTagText("");
+      setAllTags((oldArray) => [""]);
     }
   };
 
@@ -135,6 +140,7 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
           onChange={(e) => {
             handleSelectDropDown(e.target.value);
           }}
+          value={allTags[0]}
         >
           {
             tagPrompt &&

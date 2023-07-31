@@ -140,6 +140,7 @@ class Canvas {
     dialog.getDialogTitle().should('exist').contains('Published');
     dialog.getDialogOKButton().click();
     dialog.getDialogTitle().should('not.exist');
+    cy.wait(5000);
   }
 
   scrollToBottom(element) {

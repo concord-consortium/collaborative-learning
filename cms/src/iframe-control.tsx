@@ -4,6 +4,7 @@ import { CmsWidgetControlProps } from "netlify-cms-core";
 
 import { urlParams } from "../../src/utilities/url-params";
 import { DEBUG_CMS } from "../../src/lib/debug";
+import { defaultCurriculumBranch } from "./cms-constants";
 
 import "./iframe-control.scss";
 
@@ -60,7 +61,11 @@ export class IframeControl extends React.Component<CmsWidgetControlProps, IState
   };
 
   render() {
-    const iframeUrl = urlParams.unit ? `./cms-editor.html?unit=${urlParams.unit}` : "./cms-editor.html";
+    const curriculumBranch = urlParams.curriculumBranch ?? defaultCurriculumBranch;
+    const iframeBaseUrl = `./cms-editor.html?curriculumBranch=${curriculumBranch}`;
+    const iframeUrl = urlParams.unit
+      ? `${iframeBaseUrl}&unit=${urlParams.unit}`
+      : iframeBaseUrl;
     return (
       <div className="iframe-control custom-widget">
         <iframe id="editor" src={iframeUrl} onLoad={this.sendInitialValueToEditor.bind(this)}></iframe>

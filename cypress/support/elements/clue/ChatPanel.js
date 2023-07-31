@@ -64,6 +64,7 @@ class ChatPanel{
     typeInCommentArea(commentText) {
       // If the comment list is long, the text box is off screen so force.
       cy.get("[data-testid=comment-textarea]").scrollIntoView().type(commentText, {force: true});
+      cy.wait(2000);
     }
     clickPostCommentButton() {
       // If the comment list is long, the button is off screen so force.

@@ -28,8 +28,6 @@ import './commands';
 import installLogsCollector from "cypress-terminal-report/src/installLogsCollector";
 installLogsCollector();
 
-Cypress.config('defaultCommandTimeout', 10000);
-
 // before(function(){ //Can't run this because full tests will not run due to website switching
 //     cy.clearQAData('all');
 // });
