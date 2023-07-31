@@ -526,7 +526,7 @@ context('Dataflow Tool Tile', function () {
         const dropdown = "sensor-select";
         const sensorSelect = [
           "Temperature Demo Data", "Humidity Demo Data", "CO2 Demo Data", "O2 Demo Data", "Light Demo Data", "Particulates Demo Data",
-         "EMG - Varied Clenches Demo Data", "EMG - Long Clench and Hold Demo Data", "EMG - Short Clench and Hold Demo Data", "FSR Demo Data",
+         "EMG - Long Clench and Hold Demo Data", "FSR Demo Data",
          "⚠️ connect arduino for emg",
          "⚠️ connect arduino for fsr",
          "⚠️ connect microbit for temperature-microbit-a",
@@ -540,7 +540,7 @@ context('Dataflow Tool Tile', function () {
         ];
         dataflowToolTile.getCreateNodeButton(nodeType).click();
         dataflowToolTile.getDropdown(nodeType, dropdown).click();
-        dataflowToolTile.getSensorDropdownOptions(nodeType).should("have.length", 20);
+        dataflowToolTile.getSensorDropdownOptions(nodeType).should("have.length", 18);
         dataflowToolTile.getSensorDropdownOptions(nodeType).each(($tab, index, $typeList) => {
           expect($tab.text()).to.contain(sensorSelect[index]);
         });
