@@ -103,7 +103,7 @@ export const ArrowAnnotationComponent = observer(
                   className={classNames("text-display", { "can-edit": canEdit })}
                   onClick={() => setEditingText(true)}
                 >
-                  {arrow.text ?? "Click to enter text"}
+                  {arrow.text?.trim() || "Click to enter text"}
                 </button>
               )
             }
