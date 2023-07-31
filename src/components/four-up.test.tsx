@@ -18,6 +18,11 @@ jest.mock("react-query", () => ({
   })
 }));
 jest.mock("../hooks/use-stores", () => ({
+  useStores: () => ({
+    ui: {
+      setDraggingId: (id?: string) => undefined
+    }
+  }),
   useUIStore: () => ({
     showAdornments: true
   })
