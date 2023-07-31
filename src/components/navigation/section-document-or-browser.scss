@@ -158,7 +158,11 @@ $scroller-height: 145px;
             background-color: $document-select-blue;
           }
           .document-title {
+            font-size: 13px;
             font-weight: bold;
+            .class-work {
+              font-weight: normal;
+            }
           }
           .edit-button {
             display: flex;

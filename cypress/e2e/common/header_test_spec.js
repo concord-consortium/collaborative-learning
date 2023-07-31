@@ -7,8 +7,8 @@ context('Test header elements',()=>{
     const baseUrl = `${Cypress.config("baseUrl")}`;
     const queryParams = `${Cypress.config("queryParams")}`;
     cy.clearQAData('all');
-
     cy.visit(baseUrl+queryParams);
+    cy.waitForLoad();
   });
 
   describe('Test header UI',()=>{
