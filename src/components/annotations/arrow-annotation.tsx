@@ -16,15 +16,15 @@ interface IArrowAnnotationProps {
 }
 export const ArrowAnnotationComponent = observer(
   function ArrowAnnotationComponent({ arrow, canEdit, getBoundingBox }: IArrowAnnotationProps) {
-    const [edittingText, setEdittingText] = useState(false);
+    const [editingText, setEditingText] = useState(false);
     const [tempText, setTempText] = useState(arrow.text ?? "");
     const inputRef = useRef<HTMLInputElement|null>(null);
     useEffect(() => {
-      // Focus on the text input when we start editting
-      if (edittingText) {
+      // Focus on the text input when we start editing
+      if (editingText) {
         inputRef.current?.focus();
       }
-    }, [edittingText]);
+    }, [editingText]);
 
     if (!arrow.sourceObject || !arrow.targetObject) return null;
 
@@ -53,11 +53,11 @@ export const ArrowAnnotationComponent = observer(
     // Set up text handlers
     function acceptText() {
       arrow.setText(tempText);
-      setEdittingText(false);
+      setEditingText(false);
     }
     function rejectText() {
       setTempText(arrow.text ?? "");
-      setEdittingText(false);
+      setEditingText(false);
     }
     function handleBlur() {
       acceptText();
@@ -87,7 +87,7 @@ export const ArrowAnnotationComponent = observer(
         </g>
         <foreignObject height={`${textHeight}`} width={`${textWidth}`} x={`${textX}`} y={`${textY}`}>
           <div className="text-region">
-            { edittingText
+            { editingText
               ? (
                 <input
                   className="text-input"
@@ -101,7 +101,7 @@ export const ArrowAnnotationComponent = observer(
               ) : (
                 <button
                   className={classNames("text-display", { "can-edit": canEdit })}
-                  onClick={() => setEdittingText(true)}
+                  onClick={() => setEditingText(true)}
                 >
                   {arrow.text ?? "Click to enter text"}
                 </button>

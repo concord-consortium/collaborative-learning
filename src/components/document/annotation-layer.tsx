@@ -120,12 +120,12 @@ export const AnnotationLayer = observer(function AdornmentLayer({
     return getObjectBoundingBoxUnknownRow(object.tileId, object.objectId);
   };
 
-  const editting = ui.adornmentMode !== undefined;
+  const editing = ui.adornmentMode !== undefined;
   const hidden = !ui.showAdornments;
-  const classes = classNames("annotation-layer", { editting, hidden });
+  const classes = classNames("annotation-layer", { editing, hidden });
   return (
     <div className={classes}>
-      { editting && rowIds.map(rowId => {
+      { editing && rowIds.map(rowId => {
         const row = content?.rowMap.get(rowId);
         if (row) {
           const tiles = row.tiles;
@@ -156,7 +156,7 @@ export const AnnotationLayer = observer(function AdornmentLayer({
           return (
             <ArrowAnnotationComponent
               arrow={arrow}
-              canEdit={editting}
+              canEdit={editing}
               getBoundingBox={getBoundingBox}
               key={key}
             />
