@@ -1,8 +1,10 @@
 import { observer } from "mobx-react";
-import React from "react";
+import React, { useEffect } from "react";
 import { ITileProps } from "../../components/tiles/tile-component";
 import { NumberlineContentModelType } from "./numberline-content";
-import {scaleLinear, } from "d3";
+import { scaleLinear } from "d3";
+import * as d3 from "d3";
+
 
 import "./numberline-tile.scss";
 
@@ -14,40 +16,38 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
   // and following comments) for details. We should be on the lookout for such issues.
   const content = props.model.content as NumberlineContentModelType;
 
-  // const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-  //   content.setText(event.target.value);
-  // };
+  useEffect(()=>{
+    const width = 600;
 
-  const width = 600;
+    const linearScale = scaleLinear()
+      .domain([-5, 5])
+      .range([0, width]);
 
-  const linearScale = scaleLinear()
-    .domain([-5, 5])
-    .range([0, width]);
+    const clickArea = d3.select('.click-area').node();
 
-  console.log("linearScale:", linearScale);
+    function sayNum() {
+      console.log("sayNum invoked()");
+      const pos = d3.pointer(clickArea);
+      const xPos = pos[0];
+      const value = linearScale.invert(xPos);
+      d3.select('.info').text('You clicked ' + value.toFixed(2));
+    }
 
-  // const clickArea = d3.select('.click-area').node();
+    // Construct axis
+    // const axis = d3.axisBottom(linearScale);
+    // // const axisSelect = d3.select('svg');
 
-  // function sayNum(e) {
-  //   const pos = d3.pointer(e, clickArea);
-  //   const xPos = pos[0];
-  //   const value = linearScale.invert(xPos);
-  //   d3.select('.info').text('You clicked ' + value.toFixed(2));
-  // }
+    // const axis =
+    // const axisSelect = d3.select<SVGElement, DataType>("axis");
 
-  // Construct axis
-  // const axis = d3.axisBottom(linearScale);
-  // console.log("axis:", axis);
+    // d3.select('.axis').call(() => axisSelect);
 
-  // d3.select('.axis').call(axis);
-
-  // // Update click area size
-  // d3.select('.click-area')
-  //   .attr('width', width)
-  //   .attr('height', 40)
-  //   .on('click', ()=>sayNum(e));
-
-
+    // Update click area size
+    d3.select('.click-area')
+      .attr('width', width)
+      .attr('height', 40)
+      .on('click', sayNum);
+  },[]);
 
   return (
     <div className="numberline-tool">

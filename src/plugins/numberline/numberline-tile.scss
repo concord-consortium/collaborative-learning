@@ -15,10 +15,18 @@
     cursor: pointer;
     border: 1px solid black;
     width: 200px;
-    height: 20px;
+    height: 40px;
   }
+
+  svg{
+    background-color: orange;
+  }
+
   .info {
     margin-left: 20px;
+  }
+  g {
+    background-color: blue;
   }
 
 }
