@@ -170,13 +170,6 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     const { document } = this.props;
     const { ui } = this.stores;
     const tileContentInfo = getTileContentInfo(tool.id);
-
-    console.log("| handleAddTile \n",
-      "tool.id: ", tool.id, "\n",
-      "tileContentInfo: ", tileContentInfo, "\n",
-      "document: ", document, "\n",
-    );
-
     if (!tileContentInfo) return;
 
     const newTileOptions: IDocumentContentAddTileOptions = {
