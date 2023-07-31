@@ -110,7 +110,6 @@ export const AnnotationLayer = observer(function AdornmentLayer({
         ClueObjectModel.create({ tileId: sourceTileId, objectId: sourceObjectId, objectType: sourceObjectType });
       const targetObject = ClueObjectModel.create({ tileId, objectId, objectType });
       content?.addArrow(ArrowAnnotation.create({ sourceObject, targetObject }));
-      console.log(`annotations`, content?.annotations);
       setSourceTileId("");
       setSourceObjectId("");
       setSourceObjectType(undefined);
@@ -154,7 +153,14 @@ export const AnnotationLayer = observer(function AdornmentLayer({
       <svg xmlnsXlink="http://www.w3.org/1999/xlink" className="annotation-svg" height="1500" width="1500">
         { content?.annotations.map((arrow: ArrowAnnotationType) => {
           const key = `${arrow.sourceObject?.objectId}-${arrow.targetObject?.objectId}`;
-          return <ArrowAnnotationComponent arrow={arrow} getBoundingBox={getBoundingBox} key={key} />;
+          return (
+            <ArrowAnnotationComponent
+              arrow={arrow}
+              canEdit={editting}
+              getBoundingBox={getBoundingBox}
+              key={key}
+            />
+          );
         })}
       </svg>
     </div>

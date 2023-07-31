@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { useEffect, useRef, useState } from "react";
 
@@ -8,12 +9,13 @@ import "./arrow-annotation.scss";
 
 interface IArrowAnnotationProps {
   arrow: ArrowAnnotationType;
+  canEdit?: boolean;
   getBoundingBox: (object: ClueObjectType) =>
     { height: number, left: number, top: number, width: number} | null | undefined;
   key?: string;
 }
 export const ArrowAnnotationComponent = observer(
-  function ArrowAnnotationComponent({ arrow, getBoundingBox }: IArrowAnnotationProps) {
+  function ArrowAnnotationComponent({ arrow, canEdit, getBoundingBox }: IArrowAnnotationProps) {
     const [edittingText, setEdittingText] = useState(false);
     const [tempText, setTempText] = useState(arrow.text ?? "");
     const inputRef = useRef<HTMLInputElement|null>(null);
@@ -98,7 +100,7 @@ export const ArrowAnnotationComponent = observer(
                 />
               ) : (
                 <button
-                  className="text-display"
+                  className={classNames("text-display", { "can-edit": canEdit })}
                   onClick={() => setEdittingText(true)}
                 >
                   {arrow.text ?? "Click to enter text"}

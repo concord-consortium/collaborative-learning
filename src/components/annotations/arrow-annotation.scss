@@ -1,3 +1,5 @@
+@use "../vars.sass";
+
 .text-region {
   align-items: center;
   display: flex;
@@ -9,6 +11,10 @@
     background-color: white;
     border: 2px solid blue;
     border-radius: 10px;
+
+    &.can-edit {
+      border-color: vars.$workspace-teal-light-5;
+    }
   }
 
   .text-input {

@@ -1,3 +1,5 @@
+@use "../vars.sass";
+
 .annotation-layer {
   height: 100%;
   pointer-events: none;
@@ -23,14 +25,14 @@
   background-color: rgba(0, 0, 0, 0);
   border: none;
   border-radius: 3px;
-  outline: none;
+  outline: 2px solid vars.$workspace-teal-light-5;
   position: absolute;
 
-  &.source {
-    outline: 2px solid yellow;
+  &:hover {
+    outline: 2px solid vars.$workspace-teal-light-3;
   }
 
-  &:hover {
-    outline: 2px solid blue;
+  &.source {
+    outline: 2px solid vars.$workspace-teal-light-1;
   }
 }
