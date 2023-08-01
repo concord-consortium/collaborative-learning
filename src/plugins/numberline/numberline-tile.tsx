@@ -2,9 +2,8 @@ import { observer } from "mobx-react";
 import React, { useEffect } from "react";
 import { ITileProps } from "../../components/tiles/tile-component";
 import { NumberlineContentModelType } from "./numberline-content";
-import { scaleLinear } from "d3";
+// import { scaleLinear } from "d3";
 import * as d3 from "d3";
-
 
 import "./numberline-tile.scss";
 
@@ -19,39 +18,33 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
   useEffect(()=>{
     const width = 600;
 
-    const linearScale = scaleLinear()
+    const linearScale = d3.scaleLinear()
       .domain([-5, 5])
       .range([0, width]);
 
     const clickArea = d3.select('.click-area').node();
 
-    function sayNum() {
+    function sayNum(e: Event) {
       console.log("sayNum invoked()");
-      const pos = d3.pointer(clickArea);
+      const pos = d3.pointer(e, clickArea);
       const xPos = pos[0];
       const value = linearScale.invert(xPos);
       d3.select('.info').text('You clicked ' + value.toFixed(2));
     }
 
     // Construct axis
-    // const axis = d3.axisBottom(linearScale);
-    // // const axisSelect = d3.select('svg');
+    const axis = d3.axisBottom(linearScale);
+    // const axis = d3.axisBottom(linearScale) as unknown as any; //how to infer the type
+    d3.select('.axis').call(axis);
 
-    // const axis =
-    // const axisSelect = d3.select<SVGElement, DataType>("axis");
-
-    // d3.select('.axis').call(() => axisSelect);
-
-    // Update click area size
     d3.select('.click-area')
       .attr('width', width)
       .attr('height', 40)
-      .on('click', sayNum);
+      .on('click', (e) => sayNum(e));
   },[]);
 
   return (
     <div className="numberline-tool">
-      {/* <textarea value={content.text} onChange={handleChange} /> */}
       <svg width="700" height="80">
         <g transform="translate(20, 10)">
         <g className="axis" transform="translate(0, 40)"></g>

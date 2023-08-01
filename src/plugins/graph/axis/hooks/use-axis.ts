@@ -29,6 +29,7 @@ export const useAxis = ({
     place = axisModel?.place ?? 'bottom',
     multiScale = layout.getAxisMultiScale(place),
     ordinalScale = isNumeric || axisModel?.type === 'empty' ? null : multiScale?.scale as ScaleBand<string>;
+
   const
     dataConfiguration = useDataConfigurationContext(),
     axisPlace = axisModel?.place ?? 'bottom',

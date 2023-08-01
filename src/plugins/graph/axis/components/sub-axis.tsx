@@ -29,8 +29,13 @@ export const SubAxis = ({
     subAxisIndex, axisModel, subAxisElt, enableAnimation, showScatterPlotGridLines, centerCategoryLabels
   });
 
+  console.log("subAxisElt:", subAxisElt);
+
   return (
     <g className='sub-axis-wrapper' ref={subWrapperElt}>
+      {
+        console.log("render")
+      }
       <g className='axis' ref={elt => setSubAxisElt(elt)}/>
       {axisModel?.type === 'numeric'
         ? <AxisDragRects
