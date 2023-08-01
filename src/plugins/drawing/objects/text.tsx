@@ -1,13 +1,12 @@
 import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
-import React, { ReactElement, useRef, useState } from "react";
-import { DrawingObject, DrawingObjectType, DrawingTool, EditableObject, IDrawingComponentProps, IDrawingLayer,
+import React, {  } from "react";
+import { DrawingObjectType, DrawingTool, EditableObject, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, typeField } from "./drawing-object";
 import { BoundingBoxDelta, Point, ToolbarSettings } from "../model/drawing-basic-types";
 import TextToolIcon from "../../../assets/icons/comment/comment.svg";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
 import { uniqueId } from "../../../../src/utilities/js-utils";
-import { forEach } from "lodash";
 import { WrappedSvgText } from "../components/wrapped-svg-text";
 
 export const TextObject = EditableObject.named("TextObject")
@@ -86,19 +85,15 @@ export const TextComponent = observer(
   const { x, y } = model.position;
   const { width, height } = textobj.currentDims;
   const textareaId = uniqueId();
+  const margin = 5;
 
   interface IContentProps {
-    x: number,
-    y: number,
-    width: number,
-    height: number,
-    editing: boolean,
-    text: string
+    editing: boolean
   }
-  const Content = function({x, y, width, height, editing, text}: IContentProps) {
+  const Content = function({editing}: IContentProps) {
     if (editing) {
       return (
-        <foreignObject x={x} y={y} width={width} height={height}>
+        <foreignObject x={x+margin} y={y+margin} width={width-2*margin} height={height-2*margin}>
           <textarea id={textareaId}
             style={{width: "100%", height: "100%", resize: "none"}} 
             defaultValue={text}
@@ -107,16 +102,18 @@ export const TextComponent = observer(
           </textarea>
         </foreignObject>);
     } else {
-      return(<WrappedSvgText text={text} x={x} y={y} width={width} height={height} style={{color: stroke}} />);
+      return(<WrappedSvgText text={text} 
+          x={x+margin} y={y+margin} width={width-2*margin} height={height-2*margin} 
+          style={{color: stroke}} />);
     }
-  }
+  };
 
   const handleMouseDown = (e: React.MouseEvent<HTMLTextAreaElement>) => {
-    console.log("Trapping mouse down inside editing box");
     e.stopPropagation();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    e.stopPropagation();
     const { key } = e;
     switch (key) {
       case "Escape":
@@ -157,10 +154,7 @@ export const TextComponent = observer(
             stroke={stroke} fill="#FFFFFF" opacity="80%"
             rx="5" ry="5"
             />
-          <Content x={x+5} y={y+5}
-            width={width-10}
-            height={height-10} 
-            editing={model.isEditing} text={text}/>
+          <Content editing={model.isEditing} />
          </g>;
 
 });

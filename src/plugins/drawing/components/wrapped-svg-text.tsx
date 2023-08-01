@@ -1,6 +1,7 @@
 import React, { CSSProperties, useLayoutEffect, useRef, useState } from "react";
 
-export const LINE_HEIGHT = 15;
+// Inter-line spacing, as a multiplier to the observed line height
+const LINE_SPACING = 1.2;
 
 interface ISvgTextProps {
     text: string,
@@ -11,9 +12,12 @@ interface ISvgTextProps {
     style: CSSProperties
   }
 
+// Creates an SVG <text> element of the given dimentions, 
+// with the requested text broken up into lines that fit within the given width
+// Very long words will not be broken, and may extend past the width bound.
 export const WrappedSvgText = function({text, x, y, width, height, style}: ISvgTextProps) {
 
-    // Strategy for flowing text into a box with the given width:
+    // Strategy for flowing text into the box:
     // Start with an 'experimental line' containing all the words in the given text.
     // Loop:
     //   If experimental line is too long:
@@ -27,13 +31,19 @@ export const WrappedSvgText = function({text, x, y, width, height, style}: ISvgT
     const [completedLines, setCompletedLines] = useState<string[]>([]);
     const [experimentalLine, setExperimentalLine] = useState<string[]>(text.split(/\s+/));
     const [remainingText, setRemainingText] = useState<string[]>([]);
+    const [lineHeight, setLineHeight] = useState<number>(0);
     const textRef = useRef<SVGTextElement>(null);
 
+    // This is implemented as a layout effect so that intermediate states are not rendered as a visible flash.
     useLayoutEffect(() => {
         const tr = textRef.current;
         if (tr) {
+            const observedHeight = tr.getBoundingClientRect().height;
+            if (observedHeight > lineHeight) {
+                setLineHeight(observedHeight);
+            }
             if(experimentalLine.length > 1 && tr.getComputedTextLength() > width) {
-                console.log(`experimental line (${experimentalLine}) too long`);
+                // console.log(`experimental line (${experimentalLine}) too long`);
                 const wordToMove = experimentalLine[experimentalLine.length - 1];
                 setExperimentalLine(experimentalLine.slice(0, -1));
                 setRemainingText([wordToMove, ...remainingText]);
@@ -45,18 +55,19 @@ export const WrappedSvgText = function({text, x, y, width, height, style}: ISvgT
                 }
             }
         }
-    });
+    }, [text, width, completedLines, experimentalLine, remainingText, lineHeight]);
 
-    let lines: JSX.Element[] = [];
+    const lines: JSX.Element[] = [];
     let i=0;
+    const dy=lineHeight*LINE_SPACING;
     completedLines.forEach((textChunk) => {
-        lines.push(<tspan key={i++} x={x} dy={LINE_HEIGHT}>{textChunk}</tspan>);
+        lines.push(<tspan key={i++} x={x} dy={dy}>{textChunk}</tspan>);
     });
-    lines.push(<tspan ref={textRef} key={i++} x={x} dy={LINE_HEIGHT}>{experimentalLine.join(' ')}</tspan>);
-    lines.push(<tspan key={i++} x={x} dy={LINE_HEIGHT}>{remainingText.join(' ')}</tspan>);
+    lines.push(<tspan ref={textRef} key={i++} x={x} dy={dy}>{experimentalLine.join(' ')}</tspan>);
+    // There's no need to render the remainingText; there will be none when the process completes.
 
     return(
         <text x={x} y={y} width={width} height={height} style={style}>
           {lines}
         </text>);
-}
+};
