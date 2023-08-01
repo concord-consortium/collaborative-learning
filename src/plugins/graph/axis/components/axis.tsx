@@ -32,7 +32,6 @@ export const Axis = ({
 
   const getSubAxes = () => {
     const numRepetitions = layout.getAxisMultiScale(place)?.repetitions ?? 1;
-
     return range(numRepetitions).map(i => {
       return <SubAxis key={i}
                       numSubAxes={numRepetitions}
