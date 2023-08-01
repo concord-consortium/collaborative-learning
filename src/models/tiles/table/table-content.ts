@@ -227,25 +227,36 @@ export const TableContentModel = TileContentModel
     },
     parseExpression(expr: string) {
       return self.metadata.parseExpression(expr);
-    }
-  }))
-  .views(self => ({
-    get title() {
-      return getTileModel(self)?.title ?? self.dataSet.name;
-    }
-  }))
-  .views(self => ({
+    },
     get tileSnapshotForCopy() {
       const snapshot = getSnapshot(self);
       return snapshot;
-    }
-  }))
-  .views(self => ({
+    },
     canUndo() {
       return false;
     },
     canUndoLinkedChange() {
       return false;
+    }
+  }))
+  .views(self => ({
+    get title() {
+      return getTileModel(self)?.title ?? self.dataSet.name;
+    },
+    get annotatableObjects() {
+      // TODO Real tile id
+      const tileId = "fakeId";
+      // TODO any
+      const objects: any[] = [];
+      const objectType = "cell";
+      const attributes = Array.from(self.dataSet.attributes);
+      Array.from(self.dataSet.cases).forEach(case => {
+        attributes.forEach(attribute => {
+          const objectId = `caseId:${case.__id__}-attributeId:${attribute.id}`;
+          objects.push({ tileId, objectId, objectType });
+        });
+      });
+      return objects;
     }
   }))
   .actions(self => tileModelHooks({
@@ -442,9 +453,7 @@ export const TableContentModel = TileContentModel
         }
       }
       return false;
-    }
-  }))
-  .views(self => ({
+    },
     // isValidForGeometryLink() {
     //   return self.isValidDataSetForGeometryLink(self.dataSet);
     // },
