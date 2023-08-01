@@ -5,26 +5,41 @@
   height: 100%;
   text-align: left;
   overflow: auto;
+  // background-color: orange;
 
   &.editable {
     border: 1px solid #cccccc;
   }
 
-  rect {
-    fill: #cccccc;
-    cursor: pointer;
-    border: 1px solid black;
+  .num-axis-container {
+    width: 90%;
+    height: 150px;
+    background-color: lightblue;
+    .num-axis {
+
+    }
+    .click-area{
+      // fill: #cccccc;
+      fill: none;
+      height: 20px;
+      width: 100%;
+      cursor: pointer;
+      border: 1px solid black;
+      // transform: translateY(30px);
+    }
+
+
   }
 
-  svg{
-    // background-color: orange;
-  }
+
+
+
+
+
 
   .info {
     margin-left: 20px;
   }
-  g {
-    // background-color: blue;
-  }
+
 
 }

@@ -1,10 +1,7 @@
 import { observer } from "mobx-react";
 import React, { useEffect } from "react";
 import { ITileProps } from "../../components/tiles/tile-component";
-import { NumberlineContentModelType } from "./numberline-content";
-import { scaleLinear, select, pointer, axisBottom } from "d3";
-
-//TODO: import the exact functions we need.
+import { scaleLinear, select, selectAll, pointer, axisBottom } from "d3";
 
 import "./numberline-tile.scss";
 
@@ -14,80 +11,62 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
   // component renders, and calls to handleChange() occur. See the PR discussion at
   // (https://github.com/concord-consortium/collaborative-learning/pull/1222/files#r824873678
   // and following comments) for details. We should be on the lookout for such issues.
-  const content = props.model.content as NumberlineContentModelType;
+
+  const tileId = props.model.id;
+  const axisClass = "axis-" + tileId;
+
+  //Guidelines ✓
+  //double arrowhead access is shown along bottom of tile
+  //regular increments are marked every 1 unit, labeled on every increment/tick
+  //axis extends from -5 to 5
+  //0 tick is highlighted more heavily
+  //build infrastructre to make axis limits variable
+  //axis should extend across 90% of tile and be resizable as the tile resizes
 
   useEffect(()=>{
-    const width = 600;
+    const width0 = 600; //TODO: calculate width so it's always 90%
+    const width = "100%";
 
     const linearScale = scaleLinear()
       .domain([-5, 5])
-      .range([0, width]);
+      .range([0, width0]);
 
     const clickArea = select('.click-area').node();
 
-    function sayNum(e: Event) {
+    function printNum(e: Event) {
       const pos = pointer(e, clickArea);
       const xPos = pos[0];
       const value = linearScale.invert(xPos);
-      select('.info').text('You clicked ' + value.toFixed(2));
+      // select('.info').text('You clicked ' + value.toFixed(2));
+      console.log("You clicked: ", value);
     }
 
-    // Construct axis
-    const axis = axisBottom(linearScale); //original
-    // const axis = d3.axisBottom(linearScale) as any; //how to infer the type
+    // Construct axis and remove two end ticks
+    const axis = axisBottom(linearScale).tickSizeOuter(0);
+    (select(`.${axisClass}`) as d3.Selection<SVGSVGElement, unknown, HTMLElement, unknown>).call(axis);
 
-    (select('.axis') as d3.Selection<SVGSVGElement, unknown, HTMLElement, unknown>).call(axis);
-    // selection.call(axis);
-    // d3.select('.axis').append('g').call(axis);
+    //After the axis is drawn, select all the tick lines - only show tick for x = 0
+    selectAll("g.num-axis g.tick line")
+    .attr("y2", function(x){ return (x === 0) ? 20 : 0; });
+
 
     select('.click-area')
-      .attr('width', width)
+      .attr('width', width0)
       .attr('height', 40)
-      .on('click', (e) => sayNum(e));
+      .on('click', (e) => printNum(e));
 
-  },[]);
+  },[axisClass]);
 
-
-
-// // Hide the tick marks (optional, to make it more explicit)
-// axis.tickSize(0);
-//     //construct axis with only one tick at 0
-//     const axis = d3.axisBottom(linearScale).ticks(1) as any; //how to infer the type
-
-
-    // // Create the number line
-    // const numberLine = svg.append("g")
-    // .attr("transform", `translate(0,${innerHeight / 2})`);
-
-    // // Add the tick for zero
-    // numberLine.append("line")
-    // .attr("x1", xScale(0))
-    // .attr("x2", xScale(0))
-    // .attr("y1", -10)
-    // .attr("y2", 10)
-    // .attr("stroke", "black");
-
-    // // Hide the other ticks
-    // numberLine.selectAll("line")
-    // .data(data)
-    // .enter()
-    // .append("line")
-    // .attr("x1", (d) => xScale(d))
-    // .attr("x2", (d) => xScale(d))
-    // .attr("y1", -10)
-    // .attr("y2", 10)
-    // .attr("stroke", "none");
 
   return (
     <div className="numberline-tool">
-      <svg width="700" height="80">
+      <svg className="num-axis-container">
         <g transform="translate(20, 10)">
-        <g className="axis" transform="translate(0, 40)"></g>
-        <rect className="click-area"></rect>
+          <g className={`${axisClass} num-axis` } ></g>
+          <rect className="click-area"></rect>
         </g>
       </svg>
-
-      <div className="info">Click on the grey band</div>
+      {/* <div className="info">Click on the grey band</div> */}
     </div>
   );
 });
