@@ -2,8 +2,9 @@ import { observer } from "mobx-react";
 import React, { useEffect } from "react";
 import { ITileProps } from "../../components/tiles/tile-component";
 import { NumberlineContentModelType } from "./numberline-content";
-// import { scaleLinear } from "d3";
-import * as d3 from "d3";
+import { scaleLinear, select, pointer, axisBottom } from "d3";
+
+//TODO: import the exact functions we need.
 
 import "./numberline-tile.scss";
 
@@ -18,30 +19,64 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
   useEffect(()=>{
     const width = 600;
 
-    const linearScale = d3.scaleLinear()
+    const linearScale = scaleLinear()
       .domain([-5, 5])
       .range([0, width]);
 
-    const clickArea = d3.select('.click-area').node();
+    const clickArea = select('.click-area').node();
 
     function sayNum(e: Event) {
-      console.log("sayNum invoked()");
-      const pos = d3.pointer(e, clickArea);
+      const pos = pointer(e, clickArea);
       const xPos = pos[0];
       const value = linearScale.invert(xPos);
-      d3.select('.info').text('You clicked ' + value.toFixed(2));
+      select('.info').text('You clicked ' + value.toFixed(2));
     }
 
     // Construct axis
-    const axis = d3.axisBottom(linearScale);
-    // const axis = d3.axisBottom(linearScale) as unknown as any; //how to infer the type
-    d3.select('.axis').call(axis);
+    const axis = axisBottom(linearScale); //original
+    // const axis = d3.axisBottom(linearScale) as any; //how to infer the type
 
-    d3.select('.click-area')
+    (select('.axis') as d3.Selection<SVGSVGElement, unknown, HTMLElement, unknown>).call(axis);
+    // selection.call(axis);
+    // d3.select('.axis').append('g').call(axis);
+
+    select('.click-area')
       .attr('width', width)
       .attr('height', 40)
       .on('click', (e) => sayNum(e));
+
   },[]);
+
+
+
+// // Hide the tick marks (optional, to make it more explicit)
+// axis.tickSize(0);
+//     //construct axis with only one tick at 0
+//     const axis = d3.axisBottom(linearScale).ticks(1) as any; //how to infer the type
+
+
+    // // Create the number line
+    // const numberLine = svg.append("g")
+    // .attr("transform", `translate(0,${innerHeight / 2})`);
+
+    // // Add the tick for zero
+    // numberLine.append("line")
+    // .attr("x1", xScale(0))
+    // .attr("x2", xScale(0))
+    // .attr("y1", -10)
+    // .attr("y2", 10)
+    // .attr("stroke", "black");
+
+    // // Hide the other ticks
+    // numberLine.selectAll("line")
+    // .data(data)
+    // .enter()
+    // .append("line")
+    // .attr("x1", (d) => xScale(d))
+    // .attr("x2", (d) => xScale(d))
+    // .attr("y1", -10)
+    // .attr("y2", 10)
+    // .attr("stroke", "none");
 
   return (
     <div className="numberline-tool">

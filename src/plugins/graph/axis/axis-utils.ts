@@ -104,7 +104,6 @@ export const getCategoricalLabelPlacement = (
  * @returns {number} - The computed optimal number of ticks for the given scale.
  */
 export const computeBestNumberOfTicks = (scale: ScaleLinear<number, number>): number => {
-  console.log("📁 axis-utils > 🔨computeBestNumberOfTicks with scale:", scale);
   const formatter = scale.tickFormat();
 
   // Helper function to detect collisions between tick labels

@@ -56,7 +56,6 @@ export const useSubAxis = ({
         if (!axisIsVertical && numericScale.ticks) {
           axisScale.tickValues(numericScale.ticks(computeBestNumberOfTicks(numericScale)));
         }
-        console.log("📁use-sub-axis.ts > 🔨drawAxis > axisScale: ", axisScale);
         select(subAxisElt)
           .attr("transform", initialTransform)
           .transition().duration(duration)

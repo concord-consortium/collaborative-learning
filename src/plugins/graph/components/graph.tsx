@@ -119,11 +119,9 @@ export const Graph = observer(function Graph({graphController, graphRef, dotsRef
   };
 
   const renderGraphAxes = () => {
-    console.log("xy-plot > graph.tsx > renderGraphAxes");
     const places = AxisPlaces.filter((place: AxisPlace) => {
       return !!graphModel.getAxis(place);
     });
-    console.log("\tplaces:", places);
     return places.map((place: AxisPlace) => {
       return <GraphAxis key={place}
                         place={place}
