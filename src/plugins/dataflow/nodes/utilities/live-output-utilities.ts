@@ -52,12 +52,20 @@ export function getLiveOptions(node: Node, deviceFamily: string, sharedVar?: Var
     options.push(liveGripperOption);
   }
 
-  if (!anyOuputFound) options.push(warningOption);
+  if (outputsToAnyGripper(node) && deviceFamily !== "arduino") {
+    if (!options.includes(warningOption)) {
+      options.push(warningOption);
+    }
+  }
+
+  if (!anyOuputFound && !options.includes(warningOption)) options.push(warningOption);
 
   return options;
 }
 
 export function setLiveOutputOpts(node: Node, deviceFamily: string, sharedVar?: VariableType) {
+  console.log("| 2 | setLiveOutputOpts ... made it this far what is deviceFamily now?", deviceFamily);
+  // OK! we have to update device family on disconnect
   const hubSelect = getHubSelect(node);
   const options = getLiveOptions(node, deviceFamily, sharedVar);
   const selectedOption = options.find(option => option && option.name === hubSelect.getValue());

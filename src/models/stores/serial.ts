@@ -21,6 +21,7 @@ export class SerialDevice {
 
     navigator.serial?.addEventListener("disconnect", (e) => {
       this.updateConnectionInfo(e.timeStamp, e.type);
+      this.deviceFamily = null;
     });
   }
 

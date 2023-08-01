@@ -19,7 +19,7 @@ export interface NodeChannelInfo {
   outputTargetDevice?: string;
   outputTargetActuator?: string;
   timeFactor?: number;
-  deviceFamily?: string;
+  deviceFamily?: string | null;
   lastMessageRecievedAt?: number | null;
   relaysState?: number[];
   microbitId?: string;
