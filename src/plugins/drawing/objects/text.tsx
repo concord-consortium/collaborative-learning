@@ -1,12 +1,14 @@
 import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
-import React, { ReactElement, useState } from "react";
+import React, { ReactElement, useRef, useState } from "react";
 import { DrawingObject, DrawingObjectType, DrawingTool, EditableObject, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, typeField } from "./drawing-object";
 import { BoundingBoxDelta, Point, ToolbarSettings } from "../model/drawing-basic-types";
 import TextToolIcon from "../../../assets/icons/comment/comment.svg";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
 import { uniqueId } from "../../../../src/utilities/js-utils";
+import { forEach } from "lodash";
+import { WrappedSvgText } from "../components/wrapped-svg-text";
 
 export const TextObject = EditableObject.named("TextObject")
   .props({
@@ -86,24 +88,33 @@ export const TextComponent = observer(
   const textareaId = uniqueId();
 
   interface IContentProps {
+    x: number,
+    y: number,
+    width: number,
+    height: number,
     editing: boolean,
     text: string
   }
-  const Content = function({editing, text}: IContentProps) {
+  const Content = function({x, y, width, height, editing, text}: IContentProps) {
     if (editing) {
       return (
-        <textarea id={textareaId}
-          style={{width: "100%", height: "100%", resize: "none"}} 
-          defaultValue={text}
-          onKeyDown={handleKeyDown}
-        ></textarea>);
+        <foreignObject x={x} y={y} width={width} height={height}>
+          <textarea id={textareaId}
+            style={{width: "100%", height: "100%", resize: "none"}} 
+            defaultValue={text}
+            onKeyDown={handleKeyDown}
+            onMouseDown={handleMouseDown}>
+          </textarea>
+        </foreignObject>);
     } else {
-      return(
-        <p style={{color: stroke}}>
-          {text}
-          </p>);
+      return(<WrappedSvgText text={text} x={x} y={y} width={width} height={height} style={{color: stroke}} />);
     }
   }
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLTextAreaElement>) => {
+    console.log("Trapping mouse down inside editing box");
+    e.stopPropagation();
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     const { key } = e;
@@ -145,13 +156,11 @@ export const TextComponent = observer(
             width={width} height={height}
             stroke={stroke} fill="#FFFFFF" opacity="80%"
             rx="5" ry="5"
-            />;
-          <foreignObject
-            x={x+5} y={y+5}
+            />
+          <Content x={x+5} y={y+5}
             width={width-10}
-            height={height-10}>
-              <Content editing={model.isEditing} text={text}/>
-          </foreignObject>
+            height={height-10} 
+            editing={model.isEditing} text={text}/>
          </g>;
 
 });
@@ -172,9 +181,15 @@ export class TextDrawingTool extends DrawingTool {
       width: 100,
       height: 100,
       stroke,
-      text: "The five boxing wizards jump quickly."
+      text: ""
     });
-    this.drawingLayer.addNewDrawingObject(getSnapshot(text));
+    const obj = this.drawingLayer.addNewDrawingObject(getSnapshot(text));
+    if (obj && isTextObject(obj)) {
+      console.log('text obj: ', obj);
+      obj.setEditing(true);  
+    } else {
+      console.error('Object returned from add is not of the expected type');
+    }
   }
 }
 
