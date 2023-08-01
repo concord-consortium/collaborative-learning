@@ -527,16 +527,16 @@ context('Dataflow Tool Tile', function () {
         const sensorSelect = [
           "Temperature Demo Data", "Humidity Demo Data", "CO2 Demo Data", "O2 Demo Data", "Light Demo Data", "Particulates Demo Data",
          "EMG - Long Clench and Hold Demo Data", "FSR Demo Data",
-         "⚠️ connect arduino for emg",
-         "⚠️ connect arduino for fsr",
-         "⚠️ connect microbit for temperature-microbit-a",
-         "⚠️ connect microbit for humidity-microbit-a",
-         "⚠️ connect microbit for temperature-microbit-b",
-         "⚠️ connect microbit for humidity-microbit-b",
-         "⚠️ connect microbit for temperature-microbit-c",
-         "⚠️ connect microbit for humidity-microbit-c",
-         "⚠️ connect microbit for temperature-microbit-d",
-         "⚠️ connect microbit for humidity-microbit-d",
+         "⚠️ Connect Arduino for live EMG",
+         "⚠️ Connect Arduino for live FSR",
+         "⚠️ Connect micro:bit for live Temperature A",
+         "⚠️ Connect micro:bit for live Humidity A",
+         "⚠️ Connect micro:bit for live Temperature B",
+         "⚠️ Connect micro:bit for live Humidity B",
+         "⚠️ Connect micro:bit for live Temperature C",
+         "⚠️ Connect micro:bit for live Humidity C",
+         "⚠️ Connect micro:bit for live Temperature D",
+         "⚠️ Connect micro:bit for live Humidity D",
         ];
         dataflowToolTile.getCreateNodeButton(nodeType).click();
         dataflowToolTile.getDropdown(nodeType, dropdown).click();
