@@ -939,7 +939,6 @@ export const GeometryContentModel = GeometryBaseContentModel
           const changeElems = castArray(changeResult);
           changeElems.forEach(changeElem => {
             if (!isBoard(changeElem)) {
-              console.log("onCreateCallBack with changeElem:", changeElem);
               onCreate?.(changeElem);
             }
           });
