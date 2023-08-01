@@ -22,7 +22,7 @@ interface IAnnotationButtonProps {
   sourceTileId?: string;
   tileId: string;
 }
-const AnnotationButton = observer(function AdornmentButton({
+const AnnotationButton = observer(function AnnotationButton({
   getObjectBoundingBox, objectId, objectType, onClick, rowId, sourceObjectId, sourceTileId, tileId
 }: IAnnotationButtonProps) {
   const style = getObjectBoundingBox(rowId, tileId, objectId);
@@ -42,7 +42,7 @@ interface IAnnotationLayerProps {
   documentScrollX?: number;
   documentScrollY?: number;
 }
-export const AnnotationLayer = observer(function AdornmentLayer({
+export const AnnotationLayer = observer(function AnnotationLayer({
   content, documentScrollX, documentScrollY
 }: IAnnotationLayerProps) {
   const [_initialized, setInitialized] = useState(false);
@@ -121,8 +121,8 @@ export const AnnotationLayer = observer(function AdornmentLayer({
     return getObjectBoundingBoxUnknownRow(object.tileId, object.objectId);
   };
 
-  const editing = ui.adornmentMode !== undefined;
-  const hidden = !ui.showAdornments;
+  const editing = ui.annotationMode !== undefined;
+  const hidden = !ui.showAnnotations;
   const classes = classNames("annotation-layer", { editing, hidden });
   return (
     <div className={classes}>

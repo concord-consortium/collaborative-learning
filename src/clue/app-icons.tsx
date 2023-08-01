@@ -6,7 +6,7 @@ import OpenWorkspaceIcon from "../assets/icons/1-4-up/1-up-icon-default.svg";
 // tool icons
 import DeleteToolIcon from "./assets/icons/delete-tool.svg";
 import DuplicateToolIcon from "./assets/icons/duplicate-tool.svg";
-import HideAdronmentsIcon from "./assets/icons/hide-adornments-tool.svg";
+import HideAnnotationsIcon from "./assets/icons/hide-annotations-tool.svg";
 import RedoToolIcon from "./assets/icons/redo-tool.svg";
 import SelectToolIcon from "./assets/icons/select-tool.svg";
 import SolutionToolIcon from "./assets/icons/solution-tool.svg";
@@ -23,7 +23,9 @@ export const appIcons: Record<string, FunctionComponent<SVGProps<SVGSVGElement>>
   // built in tool action icons
   "icon-delete-tool": DeleteToolIcon,
   "icon-duplicate-tool": DuplicateToolIcon,
-  "icon-hide-adornments-tool": HideAdronmentsIcon,
+  // TODO Remove icon-hide-adornments-tool when example unit in clue-curriculum is updated
+  "icon-hide-adornments-tool": HideAnnotationsIcon,
+  "icon-hide-annotations-tool": HideAnnotationsIcon,
   "icon-redo-tool": RedoToolIcon,
   "icon-select-tool": SelectToolIcon,
   "icon-solution-tool": SolutionToolIcon,

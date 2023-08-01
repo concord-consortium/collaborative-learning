@@ -12,7 +12,7 @@ import { ArrowAnnotation, ArrowAnnotationType } from "../annotations/arrow-annot
  * related to adorning documents (i.e. sparrows).
  */
 export const DocumentContentModelWithAnnotations = DocumentContentModelWithTileDragging
-  .named("DocumentContentModelWithAdornments")
+  .named("DocumentContentModelWithAnnotations")
   .props({
     annotations: types.array(ArrowAnnotation)
   })
