@@ -14,7 +14,7 @@ The main parts of the system are:
 - `UndoStore`(MST): This has a list of references to history entries as well as the index of the current entry that has been undone.  It would normally not be serialized itself. It uses references so we aren't keeping 2 copies of each history entry. It has actions to apply the undo and redo by applying patches to the affected trees.
 - `TreeManager`(MST): This contains a CDocument and an UndoStore. It also tracks the set of trees. It implements the TreeManagerAPI.
 
-- `Document`(MST): this creates the TreeManager in afterCreate, and stores it in its volatile prop.  It sets up the tree monitor with the Document, and TreeManagerAPI. It also adds itself as the main document of the TreeManager. The main document is added as a tree to the TreeManager's array of trees. This is the main entry point to the history system. `Document` is also the MST object that is serialized as the CLUE user document. It is not great that the Document is a tree and also initializes the TreeManager which is managing trees. 
+- `Document`(MST): this creates the TreeManager in afterCreate, and stores it in its volatile prop.  It sets up the tree monitor with the Document, and TreeManagerAPI. It also adds itself as the main document of the TreeManager. The main document is added as a tree to the TreeManager's array of trees. This is the main entry point to the history system. `Document` is also the MST object that is serialized as the CLUE user document. It is not great that the Document is a tree and also initializes the TreeManager which is managing trees.
 - `Tree`(MST): a MST model that Document extends. It provides actions that Trees need. It is providing the implementation of the TreeAPI. It is intended to be generic and usable by any MST model that wants to be a tree. However currently it has references to DocumentContentModel, Tiles, and SharedModel. The worst of this is the DocumentContentModel. The idea would be that a iframe based tile would have a different root instead of DocumentContentModel and this root would include the Tree. So if the Tree had some view to get the sharedModelMap this would then be implemented by each root.
 - `TreeMonitor`: a class which adds a MST middleware for recording actions.
 
@@ -36,10 +36,10 @@ class HistoryEntry {
   initialTree
   state
 }
-class CDocument {  
+class CDocument {
   <<MST>>
 }
-class UndoStore {  
+class UndoStore {
   <<MST>>
 }
 class TreeManager {
@@ -65,7 +65,7 @@ Document --> TreeManager : volatile
 
 class Document {
   <<MST>>
-  ...  
+  ...
 }
 class Tree {
   <<MST>>
@@ -89,7 +89,7 @@ sequenceDiagram
   Note right of TreeManager: same exchangeId
   Tree->>TreeMonitor: onStart
   activate Tree
-  Note right of Tree: shared model<br/>update disabled 
+  Note right of Tree: shared model<br/>update disabled
   Tree->>TreeMonitor: onFinish
   TreeMonitor->>TreeManager: addTreePatchRecord
   deactivate TreeManager
@@ -103,7 +103,7 @@ sequenceDiagram
   activate TreeManager
   Note right of TreeManager: same exchangeId
   Tree->>TreeMonitor: onStart
-  Note right of Tree: shared model<br/>update enabled 
+  Note right of Tree: shared model<br/>update enabled
   deactivate Tree
   Tree->>Tree: updateTreeAfterSharedModelChanges
   Tree->>TreeMonitor: onFinish
@@ -125,7 +125,7 @@ sequenceDiagram
     activate TreeManager
     UndoStore->>Tree: startApplyingPatchesFromManager
     activate Tree
-    Note left of Tree: shared model<br/>update disabled 
+    Note left of Tree: shared model<br/>update disabled
     Tree->>TreeManager: addTreePatchRecord
     deactivate TreeManager
   end
@@ -140,7 +140,7 @@ sequenceDiagram
     UndoStore->>TreeManager: startExchange
     activate TreeManager
     UndoStore->>Tree: finishApplyingPatchesFromManager
-    Note left of Tree: shared model<br/>update enabled 
+    Note left of Tree: shared model<br/>update enabled
     deactivate Tree
     Tree->>TreeManager: addTreePatchRecord
     deactivate TreeManager
@@ -161,11 +161,11 @@ sequenceDiagram
   participant TreeManager
   Note over Tile: some action
   Tile->>TreeMonitor: onStart
-  Note over TreeMonitor: record all changes 
+  Note over TreeMonitor: record all changes
   Tile->>TreeMonitor: onFinish
   TreeMonitor->>TreeManager: addHistoryEntry
   activate TreeManager
-  Note right of TreeManager: same exchangeId 
+  Note right of TreeManager: same exchangeId
   TreeMonitor->>Tree: handleSharedModelChanges
   Tree->>TreeManager: updateSharedModel
   TreeMonitor->>TreeManager: addTreePatchRecord
@@ -177,9 +177,9 @@ sequenceDiagram
 sequenceDiagram
   participant SourceTree
   participant TreeManager
-  SourceTree->>TreeManager: addHistoryEntry  
+  SourceTree->>TreeManager: addHistoryEntry
   activate TreeManager
-  Note right of TreeManager: same exchangeId 
+  Note right of TreeManager: same exchangeId
   SourceTree->>TreeManager: updateSharedModel
   loop other trees
     TreeManager->>TreeManager: startExchange
@@ -198,15 +198,15 @@ We store the history of changes to a document in Firestore. Each history entry i
 
 The history entries are written by the TreeManager which is an MST model. In other places we interact with Firestore through react components and use React hooks. Since the TreeManager is a model it works directly with Firestore.
 
-The history events are downloaded only when needed for replaying the history. This happens when `TreeManager#mirrorHistoryFromFirestore` is called. 
+The history events are downloaded only when needed for replaying the history. This happens when `TreeManager#mirrorHistoryFromFirestore` is called.
 
-The history loading currently doesn't do any batching/paging during the load, so if the history gets large enough this might cause problems. There is a FIXME in the code for this. Once `mirrorHistoryFromFirestore` is called, any changes in the firestore collection will be reflected in the TreeManager's history. When new data shows up, it completely replaces the history in the TreeManager with the new data. In other words the entries aren't really loaded incrementally. We'll probably need to improve this to handle documents with large histories. 
+The history loading currently doesn't do any batching/paging during the load, so if the history gets large enough this might cause problems. There is a FIXME in the code for this. Once `mirrorHistoryFromFirestore` is called, any changes in the firestore collection will be reflected in the TreeManager's history. When new data shows up, it completely replaces the history in the TreeManager with the new data. In other words the entries aren't really loaded incrementally. We'll probably need to improve this to handle documents with large histories.
 
 There is a little flakiness in this setup. The flakiness comes from the tracking of the `numHistoryEntriesApplied`. This property is intended to reflect the last history entry that was applied to the document associated with the TreeManager. Right now when the history controls are opened the current document is copied into a temporary document, and then `mirrorHistoryFromFirestore` is called on that temporary document's treeManager. The current code doesn't have a way to know what history entry actually matches the state of the document that was copied. So it sets `numHistoryEntriesApplied` from the last history entry that Firestore knows about at the time of the copy. If a change was just made to the current document before the copy, it is possible this change hasn't made it to Firestore yet, so then the `numHistoryEntriesApplied` can be behind the actual document.
 
 To create the parent document which contains the history entries in Firestore the TreeManager is using our Firebase function `validateCommentableDocument`. This can create either a document associated with a networked teacher or a generic user document. This function allows teachers or students to create these documents. The history entries are downloaded using a Firestore query. The user is authorized to download these history entries by the context in the JWT provided by the portal compared with the properties in the parent document.
 
-When a document is being edited it does not load all of the previous history entries from Firestore. The new history entries are stored locally and sent up to Firestore.  So once a document has been worked on over multiple sessions with CLUE, there will be more entries in Firestore that are not available locally.
+When a document is being edited it does not load all of the previous history entries from Firestore. The new history entries are stored locally and sent up to Firestore.  In other words, if the user is editing a document that was worked on before, the local history will only contain their new history entries.
 
 ### Ordering of history entries
 
@@ -214,7 +214,7 @@ Locally the history entries are ordered in the `TreeManager.document.history`.  
 
 In addition to the `index` field the history entries in Firestore include a `previousEntryId`, which could help if entries get out of order and we need to figure out what happened. The Firestore entries also include a `created` server timestamp which would be useful for debugging issues.
 
-Because the `index` and `previousEntryId` fields need to know the last entry stored in Firestore, this last entry is downloaded before any new entries are written up to Firestore. Additionally, before this last entry is download the parent document is created. The async scheduling of this is done using a common promise that all history entry writes wait for. Any history entries that are created before this promise is resolved are still saved in `TreeManager.document.history`. The `index` of an entry is computed by adding its position in `TreeManager.document.history` to the index of the "last entry" saved in Firestore. Note that is not really the last entry, it is the last entry that existed in Firestore when a new entry was generated by the user during this session with the document.
+Because the `index` and `previousEntryId` fields need to know the last entry stored in Firestore, this last entry is downloaded before any new entries are written up to Firestore. Additionally, before this last entry is download the parent document is created. The async scheduling of this is done using a common promise that all history entry writes wait for. Any history entries that are created before this promise is resolved are still saved in `TreeManager.document.history`. The `index` of an entry is computed by adding its position in `TreeManager.document.history` to the index of the "last entry" saved in Firestore. Note that is not really the last entry, it is the last entry that existed in Firestore when the first new entry was generated by the user during this session with the document.
 
 **Other history entry ordering options**
 
@@ -234,10 +234,10 @@ Possibly this lookup could be done asynchronously. Just the first entry of the s
 
 **Session start id plus index**
 
-Create a CLUE document session record (Firestore document) at the beginning of working with each CLUE document. Store the history entries under this documentSession document with an index for the session. 
+Create a CLUE document session record (Firestore document) at the beginning of working with each CLUE document. Store the history entries under this documentSession document with an index for the session.
 The documentSession document would have a server timestamp that can be used to order them.
 
-We load all of the documentSession documents ordered by the serverTimestamp and their children history entries. 
+We load all of the documentSession documents ordered by the serverTimestamp and their children history entries.
 
 If the id of the documentSession is generated client side then the history entries don't need to wait.
 
@@ -248,7 +248,7 @@ If one session is started, closed and other started very quickly the sessionDocu
 
 ##### Benefits
 No waiting at the beginning of a session for a round trip to Firestore.
-Order of entries is in firestore 
+Order of entries is in firestore
 
 **Other Notes**
 
@@ -256,7 +256,7 @@ We could use local computer timestamps to avoid the problem out of order events,
 
 There might be an approach that does the "Session start id plus index" without using extra documents by putting this start time or id in each of the history entry documents.
 
-We could also put some session info the parent document itself, like a `numberOfSessions` to the document. So then a session index could be added to each history entry document. Then the history entry events could be ordered by the combination of this session index and a history entry index. 
+We could also put some session info the parent document itself, like a `numberOfSessions` to the document. So then a session index could be added to each history entry document. Then the history entry events could be ordered by the combination of this session index and a history entry index.
 
 An alternative to querying the entries for the last index would be to store the last history entry in the parent document, but this means that document have to be updated with each new entry. And there is a limit of 1 sec per update. If you want to look into that approach more see:
 https://firebase.google.com/docs/firestore/solutions/aggregation

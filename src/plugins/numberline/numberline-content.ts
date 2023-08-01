@@ -3,14 +3,13 @@ import { TileContentModel } from "../../models/tiles/tile-content";
 import { kNumberlineTileType } from "./numberline-types";
 
 export function defaultNumberlineContent(): NumberlineContentModelType {
-  return NumberlineContentModel.create({text: "Numberline Tile"});
+  return NumberlineContentModel.create({});
 }
 
 export const NumberlineContentModel = TileContentModel
   .named("NumberlineTool")
   .props({
     type: types.optional(types.literal(kNumberlineTileType), kNumberlineTileType),
-    text: "",
   })
   .views(self => ({
     get isUserResizable() {
@@ -18,9 +17,6 @@ export const NumberlineContentModel = TileContentModel
     }
   }))
   .actions(self => ({
-    setText(text: string) {
-      self.text = text;
-    }
   }));
 
 export interface NumberlineContentModelType extends Instance<typeof NumberlineContentModel> {}
