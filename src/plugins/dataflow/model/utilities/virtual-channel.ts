@@ -5,7 +5,7 @@ const virtualTempChannel: NodeChannelInfo = {
   hubId: "00000-VIRTUAL-HUB", hubName: "Virtual Sensor", name: "Temperature", channelId: "00001-VIR",
   missing: false, type: "temperature", units: "°C", value: 0, virtual: true, timeFactor: 1000,
   virtualValueMethod: (t: number) => {
-    const vals = [20, 20, 20, 21, 21, 21, 20, 20, 21, 21, 21, 21, 21, 21, 21];
+    const vals = demoStreams.fastBoil;
     return vals[t % vals.length];
   } };
 const virtualHumidChannel: NodeChannelInfo = {
