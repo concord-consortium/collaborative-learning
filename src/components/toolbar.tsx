@@ -61,8 +61,6 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
         case "sparrow":
           this.handleSparrow();
           break;
-        // TODO Remove hide-adornments when the example unit in clue-curriculum is fixed
-        case "hide-adornments":
         case "hide-annotations":
           this.handleHideAnnotations();
           break;
@@ -151,8 +149,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
       return this.selectedTilesIncludeTeacher();
     } else if (toolButton.id === "sparrow") {
       return ui.annotationMode === "sparrow";
-    // TODO Remove hide-adornments when the example unit in clue-curriculum is fixed
-    } else if (toolButton.id === "hide-annotations" || toolButton.id === "hide-adornments") {
+    } else if (toolButton.id === "hide-annotations") {
       return !ui.showAnnotations;
     } else {
       return toolButton === this.state.activeTool;

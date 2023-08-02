@@ -23,8 +23,6 @@ export const appIcons: Record<string, FunctionComponent<SVGProps<SVGSVGElement>>
   // built in tool action icons
   "icon-delete-tool": DeleteToolIcon,
   "icon-duplicate-tool": DuplicateToolIcon,
-  // TODO Remove icon-hide-adornments-tool when example unit in clue-curriculum is updated
-  "icon-hide-adornments-tool": HideAnnotationsIcon,
   "icon-hide-annotations-tool": HideAnnotationsIcon,
   "icon-redo-tool": RedoToolIcon,
   "icon-select-tool": SelectToolIcon,
