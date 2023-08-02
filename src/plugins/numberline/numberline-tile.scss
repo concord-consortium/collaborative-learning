@@ -20,19 +20,7 @@
     font-family: 'Ubunutu', sans-serif;
 
     .num-axis-title-container{
-      height: 20%;
-      font-family: 'Ubunutu', sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-
-      .title-box{
-        border: 1px solid black;
-        width: 120px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
+      height: 20%; //just empty space for <BasicEditableTileTitle>
     }
 
     .num-axis-container {

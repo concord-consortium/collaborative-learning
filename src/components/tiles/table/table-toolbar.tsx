@@ -18,7 +18,7 @@ interface IProps extends IFloatingToolbarProps {
   showLinkDialog?: () => void;
 }
 export const TableToolbar: React.FC<IProps> = observer(({
-  documentContent, isLinkEnabled, deleteSelected, getLinkIndex, onIsEnabled, 
+  documentContent, isLinkEnabled, deleteSelected, getLinkIndex, onIsEnabled,
   onSetExpression, showLinkDialog, ...others
 }) => {
   const enabled = onIsEnabled();
@@ -32,6 +32,7 @@ export const TableToolbar: React.FC<IProps> = observer(({
 
   const buttonSettings = useSettingFromStores("tools", "table") as unknown as string[] | undefined;
   const buttons = buttonSettings || defaultButtons;
+  console.log("<TableToolbar> buttons:", buttons);
 
   const getToolbarButton = (toolName: string) => {
     switch (toolName) {

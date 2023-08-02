@@ -1,15 +1,33 @@
 import { observer } from "mobx-react";
 import React, { useEffect, useRef, useState } from "react";
-import { ITileProps } from "../../components/tiles/tile-component";
 import { scaleLinear, select, selectAll, pointer, axisBottom } from "d3";
+import { ITileModel } from "../../../src/models/tiles/tile-model";
 
 import "./numberline-tile.scss";
 
-export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) => {
+// //Guidelines ✓
+// - new toolbar icon for creating points
+// - point tool is selected by default so students can just start making points.
+// - points can only be created on the axis, not anywhere in the tile
+
+// - use arrow cursor and change to a dot on the end of the arrow when the user hovers over
+     // the numberline axis to indicate that's where you can stick points
+
+// - Any number of points can be placed on the line
+// - points can be selected and dragged along the line
+// - selected points have different rendering to show their selectedness (see specs)
+
+//TODO: create toolbar below, add icon.
+//change arrow cursor behavior to when have a dot at end when user hovers over numberline axis.
+
+interface IProps {
+  model: ITileModel;
+}
+
+export const NumberlineTileComponent: React.FC<IProps> = observer((props) => {
   //---------------- Create unique className for tile ------
   const tileId = props.model.id;
   const axisClass = "axis-" + tileId;
-  const tileTitle = props.model.title;
   //---------------- Calculate width of tile ---------------
   const documentScrollerRef = useRef<HTMLDivElement>(null);
   const [tileWidth, setTileWidth] = useState(0);
@@ -70,9 +88,6 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
     <div className="numberline-tool" ref={documentScrollerRef}>
       <div className="numberline-tool-container">
         <div className="num-axis-title-container">
-          <div className="title-box">
-            {tileTitle}
-          </div>
         </div>
         <div className="num-axis-container">
           <svg>
@@ -89,5 +104,5 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
     </div>
   );
 });
-NumberlineToolComponent.displayName = "NumberlineToolComponent";
+NumberlineTileComponent.displayName = "NumberlineTileComponent";
 

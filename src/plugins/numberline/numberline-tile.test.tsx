@@ -4,13 +4,13 @@ import React from "react";
 import { ITileApi } from "../../components/tiles/tile-api";
 import { TileModel } from "../../models/tiles/tile-model";
 import { defaultNumberlineContent } from "./numberline-content";
-import { NumberlineToolComponent } from "./numberline-tile";
+import { NumberlineTileComponent } from "./numberline-tile";
 
 // The numberline tile needs to be registered so the TileModel.create
 // knows it is a supported tile type
 import "./numberline-registration";
 
-describe("NumberlineToolComponent", () => {
+describe("NumberlineTileComponent", () => {
   const content = defaultNumberlineContent();
   const model = TileModel.create({content});
 
@@ -45,20 +45,20 @@ describe("NumberlineToolComponent", () => {
 
   it.skip("renders successfully", () => {
     const {getByText} =
-      render(<NumberlineToolComponent  {...defaultProps} {...{model}}></NumberlineToolComponent>);
+      render(<NumberlineTileComponent  {...defaultProps} {...{model}}></NumberlineTileComponent>);
     expect(getByText("Numberline Tile")).toBeInTheDocument();
   });
 
   it.skip("updates the text when the model changes", async () => {
     const {findByText} =
-      render(<NumberlineToolComponent  {...defaultProps} {...{model}}></NumberlineToolComponent>);
+      render(<NumberlineTileComponent  {...defaultProps} {...{model}}></NumberlineTileComponent>);
     // expect(getByText("Numberline Tile")).toBeInTheDocument();
     expect(await findByText("New Text")).toBeInTheDocument();
   });
 
   it.skip("updates the model when the user types", () => {
     const {getByRole} =
-      render(<NumberlineToolComponent  {...defaultProps} {...{model}}></NumberlineToolComponent>);
+      render(<NumberlineTileComponent  {...defaultProps} {...{model}}></NumberlineTileComponent>);
     // expect(getByText("New Text")).toBeInTheDocument();
     const textBox = getByRole("textbox");
     userEvent.type(textBox, "{selectall}{del}Typed Text");
