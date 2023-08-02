@@ -6,6 +6,7 @@ import { exportTableContentAsJson } from "./table-export";
 import {
   convertChangesToSnapshot, convertImportToSnapshot, convertLegacyDataSet, isTableImportSnapshot
 } from "./table-import";
+import { getCellId } from "./table-utils";
 import { IDocumentExportOptions, IDefaultContentOptions } from "../tile-content-info";
 import { TileMetadataModel } from "../tile-metadata";
 import { tileModelHooks } from "../tile-model-hooks";
@@ -249,10 +250,9 @@ export const TableContentModel = TileContentModel
       // TODO any
       const objects: any[] = [];
       const objectType = "cell";
-      const attributes = Array.from(self.dataSet.attributes);
-      Array.from(self.dataSet.cases).forEach(case => {
-        attributes.forEach(attribute => {
-          const objectId = `caseId:${case.__id__}-attributeId:${attribute.id}`;
+      self.dataSet.cases.forEach(c => {
+        self.dataSet.attributes.forEach(attribute => {
+          const objectId = getCellId(c.__id__, attribute.id);
           objects.push({ tileId, objectId, objectType });
         });
       });
