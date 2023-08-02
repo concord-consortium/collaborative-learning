@@ -63,13 +63,29 @@ export function getLiveOptions(node: Node, deviceFamily: string, sharedVar?: Var
   return options;
 }
 
+// export function setLiveOutputOpts(node: Node, deviceFamily: string, sharedVar?: VariableType) {
+//   const hubSelect = getHubSelect(node);
+//   const options = getLiveOptions(node, deviceFamily, sharedVar);
+//   const selectedOption = options.find(option => option && option.name === hubSelect.getValue());
+//   const firstOption = !selectedOption ? options[0] : undefined;
+//   // console.log("| what do we have here? |", {options}, {selectedOption}, {firstOption});
+//   console.log("| we just found firstOption: |", firstOption);
+//   if (firstOption) hubSelect.setValue(firstOption.name);
+//   hubSelect.setOptions(options);
+// }
+
 export function setLiveOutputOpts(node: Node, deviceFamily: string, sharedVar?: VariableType) {
-  const hubSelect = getHubSelect(node);
   const options = getLiveOptions(node, deviceFamily, sharedVar);
-  const selectedOption = options.find(option => option && option.name === hubSelect.getValue());
-  const firstOption = !selectedOption ? options[0] : undefined;
-  // console.log("| what do we have here? |", {options}, {selectedOption}, {firstOption});
-  console.log("| at this moment, selected option is |", hubSelect.getValue(), " vs ", selectedOption?.name);
-  if (firstOption) hubSelect.setValue(firstOption.name);
+  const hubSelect = getHubSelect(node);
+  const selectionMade = hubSelect.getValue();
+
   hubSelect.setOptions(options);
+  if (!selectionMade) {
+    console.log("| no selection made, so we need to act");
+  } else {
+    console.log("| selection made and it is:", selectionMade);
+  }
+
+  //console.log("| we are about to set options, and we know:", "\n", {options}, "\n", {selectedOption}, "\n", {deviceFamily}, "\n");
+
 }
