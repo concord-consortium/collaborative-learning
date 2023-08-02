@@ -1,6 +1,6 @@
 import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
-import React, {  } from "react";
+import React, { useRef } from "react";
 import { DrawingObjectType, DrawingTool, EditableObject, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, typeField } from "./drawing-object";
 import { BoundingBoxDelta, Point, ToolbarSettings } from "../model/drawing-basic-types";
@@ -84,9 +84,9 @@ export const TextComponent = observer(
   const { id, stroke, text } = textobj;
   const { x, y } = model.position;
   const { width, height } = textobj.currentDims;
-  const textareaId = uniqueId();
   const clipId = uniqueId();
   const margin = 5;
+  const textEditor = useRef<HTMLTextAreaElement>(null);
 
   interface IContentProps {
     editing: boolean,
@@ -96,7 +96,7 @@ export const TextComponent = observer(
     if (editing) {
       return (
         <foreignObject x={x+margin} y={y+margin} width={width-2*margin} height={height-2*margin}>
-          <textarea id={textareaId}
+          <textarea ref={textEditor}
             style={{width: "100%", height: "100%", resize: "none"}} 
             defaultValue={text}
             onBlur={(e) => handleClose(true)}
@@ -133,9 +133,8 @@ export const TextComponent = observer(
 
   const handleClose = (accept: boolean) => {
     if (accept) {
-      const textarea = document.getElementById(textareaId);
+      const textarea = textEditor.current;
       if (textarea instanceof HTMLTextAreaElement) {
-        console.log('Content now: ', textarea.value);
         model.setText(textarea.value);
       } else {
         console.log('Lost track of my textarea: ', textarea);
@@ -185,7 +184,7 @@ export class TextDrawingTool extends DrawingTool {
     const obj = this.drawingLayer.addNewDrawingObject(getSnapshot(text));
     if (obj && isTextObject(obj)) {
       console.log('text obj: ', obj);
-      obj.setEditing(true);  
+      obj.setEditing(true);
     } else {
       console.error('Object returned from add is not of the expected type');
     }
