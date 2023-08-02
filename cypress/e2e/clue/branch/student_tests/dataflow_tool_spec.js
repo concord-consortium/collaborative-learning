@@ -441,7 +441,7 @@ context('Dataflow Tool Tile', function () {
         dataflowToolTile.getDropdown(nodeType, dropdown).click();
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).eq(3).click();
         dataflowToolTile.getDropdown(nodeType, dropdown).contains("Fan").should("exist");
-        dataflowToolTile.getDropdown(nodeType, "hubSelect").should("contain", "use device or sim");
+        dataflowToolTile.getDropdown(nodeType, "hubSelect").should("contain", "connect device/sim");
       });
       it("can recieve a value from a connected block, and display correct on or off string", () => {
         dataflowToolTile.getNode("number").should("exist");
