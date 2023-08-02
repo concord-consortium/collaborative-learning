@@ -85,6 +85,7 @@ export const TextComponent = observer(
   const { x, y } = model.position;
   const { width, height } = textobj.currentDims;
   const textareaId = uniqueId();
+  const clipId = uniqueId();
   const margin = 5;
 
   interface IContentProps {
@@ -98,6 +99,7 @@ export const TextComponent = observer(
           <textarea id={textareaId}
             style={{width: "100%", height: "100%", resize: "none"}} 
             defaultValue={text}
+            onBlur={(e) => handleClose(true)}
             onKeyDown={handleKeyDown}
             onMouseDown={handleMouseDown}>
           </textarea>
@@ -154,10 +156,10 @@ export const TextComponent = observer(
               width={width} height={height}
               stroke={stroke} fill="#FFFFFF" opacity="80%"
               rx="5" ry="5" /> 
-          <clipPath id={id+'clip'}>
+          <clipPath id={clipId}>
             <rect x={x} y={y} width={width} height={height} />
           </clipPath>
-          <Content clip={id+'clip'} editing={model.isEditing} />
+          <Content clip={clipId} editing={model.isEditing} />
          </g>;
 
 });
