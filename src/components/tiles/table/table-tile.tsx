@@ -39,7 +39,6 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   onRequestRowHeight, onRequestTilesOfType, onRequestLinkableTiles, onRequestUniqueTitle,
   onRegisterTileApi, onUnregisterTileApi
 }) {
-  console.log("<TableToolComponent> with model:", model);
   // Gather data from the model
   const modelRef = useCurrent(model);
   const getContent = useCallback(() => modelRef.current.content as TableContentModelType, [modelRef]);

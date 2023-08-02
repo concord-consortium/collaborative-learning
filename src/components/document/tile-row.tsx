@@ -205,7 +205,6 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleStartResizeRow = (e: React.DragEvent<HTMLDivElement>) => {
-    console.log("resize tile-row.tsx with e : ", e);
     const { model, docId } = this.props;
     const { id } = model;
     e.dataTransfer.setData(dragTileSrcDocId(docId), docId);

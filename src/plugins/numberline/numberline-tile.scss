@@ -5,10 +5,8 @@
   height: 100%;
   text-align: left;
   overflow: auto;
-  // background-color: lightblue;
   display: flex;
   justify-content: center;
-
 
   &.editable {
     border: 1px solid #cccccc;
@@ -19,13 +17,10 @@
     height: 180px;
     display: flex;
     flex-direction: column;
-    // border: 1px solid black;
     font-family: 'Ubunutu', sans-serif;
-
 
     .num-axis-title-container{
       height: 20%;
-      // background-color: red;
       font-family: 'Ubunutu', sans-serif;
       display: flex;
       justify-content: center;
@@ -51,15 +46,11 @@
         stroke-width: 4px;
       }
 
-      // g.tick line{ //console.log
-      // }
-
       .click-area{
         cursor: pointer;
         position: absolute;
         background: transparent;
         height: 20px;
-        // background-color: lightblue;
         top: 10px;
       }
 
@@ -82,15 +73,6 @@
         -webkit-transform: rotate(135deg);
         position: absolute;
       }
-
-
-
-
-
-
-
-
     }
-
   }
 }
