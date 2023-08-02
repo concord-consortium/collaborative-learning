@@ -88,9 +88,10 @@ export const TextComponent = observer(
   const margin = 5;
 
   interface IContentProps {
-    editing: boolean
+    editing: boolean,
+    clip: string
   }
-  const Content = function({editing}: IContentProps) {
+  const Content = function({editing, clip}: IContentProps) {
     if (editing) {
       return (
         <foreignObject x={x+margin} y={y+margin} width={width-2*margin} height={height-2*margin}>
@@ -102,9 +103,11 @@ export const TextComponent = observer(
           </textarea>
         </foreignObject>);
     } else {
-      return(<WrappedSvgText text={text} 
-          x={x+margin} y={y+margin} width={width-2*margin} height={height-2*margin} 
-          style={{color: stroke}} />);
+      return(<g clipPath={'url(#'+clip+')'}>
+              <WrappedSvgText text={text} 
+                  x={x+margin} y={y+margin} width={width-2*margin} height={height-2*margin} 
+                  style={{color: stroke}} />
+            </g>);
     }
   };
 
@@ -147,14 +150,14 @@ export const TextComponent = observer(
           onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
           onMouseDown={(e)=> handleDrag?.(e, model)}
          >
-          <rect
-            key={id}
-            x={x} y={y}
-            width={width} height={height}
-            stroke={stroke} fill="#FFFFFF" opacity="80%"
-            rx="5" ry="5"
-            />
-          <Content editing={model.isEditing} />
+          <rect x={x} y={y}
+              width={width} height={height}
+              stroke={stroke} fill="#FFFFFF" opacity="80%"
+              rx="5" ry="5" /> 
+          <clipPath id={id+'clip'}>
+            <rect x={x} y={y} width={width} height={height} />
+          </clipPath>
+          <Content clip={id+'clip'} editing={model.isEditing} />
          </g>;
 
 });

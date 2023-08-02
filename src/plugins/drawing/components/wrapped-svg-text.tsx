@@ -9,7 +9,7 @@ interface ISvgTextProps {
     y: number,
     width: number,
     height: number,
-    style: CSSProperties
+    style?: CSSProperties
   }
 
 // Creates an SVG <text> element of the given dimentions, 
