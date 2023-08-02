@@ -64,12 +64,12 @@ export function getLiveOptions(node: Node, deviceFamily: string, sharedVar?: Var
 }
 
 export function setLiveOutputOpts(node: Node, deviceFamily: string, sharedVar?: VariableType) {
-  console.log("| 2 | setLiveOutputOpts ... made it this far what is deviceFamily now?", deviceFamily);
-  // OK! we have to update device family on disconnect
   const hubSelect = getHubSelect(node);
   const options = getLiveOptions(node, deviceFamily, sharedVar);
   const selectedOption = options.find(option => option && option.name === hubSelect.getValue());
   const firstOption = !selectedOption ? options[0] : undefined;
+  // console.log("| what do we have here? |", {options}, {selectedOption}, {firstOption});
+  console.log("| at this moment, selected option is |", hubSelect.getValue(), " vs ", selectedOption?.name);
   if (firstOption) hubSelect.setValue(firstOption.name);
   hubSelect.setOptions(options);
 }
