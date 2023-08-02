@@ -6,17 +6,20 @@
   text-align: left;
   overflow: auto;
   // background-color: lightblue;
+  display: flex;
+  justify-content: center;
+
 
   &.editable {
     border: 1px solid #cccccc;
   }
 
   .numberline-tool-container{
-    width: 90%;
+    width: 93%;
     height: 180px;
     display: flex;
     flex-direction: column;
-    border: 1px solid black;
+    // border: 1px solid black;
     font-family: 'Ubunutu', sans-serif;
 
 
@@ -40,7 +43,6 @@
     .num-axis-container {
       height: 80%;
       width: 100%;
-      // background-color: yellow;
       display: flex;
       flex-direction: column;
       position: relative;
@@ -49,20 +51,18 @@
         stroke-width: 4px;
       }
 
-      g.tick line{ //only applies to 0 tick mark
-        stroke-width: 2px;
-        transform: translateY(-10px); //centers tick mark
-      }
+      // g.tick line{ //console.log
+      // }
 
       .click-area{
-        height: 20px;
         cursor: pointer;
         position: absolute;
+        background: transparent;
+        height: 20px;
+        // background-color: lightblue;
         top: 10px;
-        // background-color: transparent;
-        // background-color: blue;
-        // border: 1px solid black;
       }
+
       .arrow {
         border: solid black;
         border-width: 0 3px 3px 0;
@@ -70,14 +70,13 @@
         padding: 3px;
         height: 13px;
         width: 13px;
+        pointer-events: none; //click through div (our rectangular click area)
       }
       .right {
         transform: rotate(-45deg) !important;
         -webkit-transform: rotate(-45deg);
         position: absolute;
-
       }
-
       .left {
         transform: rotate(135deg);
         -webkit-transform: rotate(135deg);
@@ -94,14 +93,4 @@
     }
 
   }
-
-
-
-
-
-
-
-
-
-
 }

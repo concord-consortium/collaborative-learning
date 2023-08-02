@@ -230,6 +230,8 @@ const DocumentBrowserScroller =
   }, []);
 
   console.log("panelWidth:", panelWidth);
+  console.log("documentScrollerRef.current:", documentScrollerRef.current);
+
 
   const handleScrollTo = (side: string) => {
     const direction = side === "left" ? -1 : 1;
