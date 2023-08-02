@@ -68,7 +68,7 @@ export const DrawingContentModel = TileContentModel
   }))
   .views(self => ({
     get annotatableObjects() {
-      const tileId = getTileIdFromContent(self);
+      const tileId = getTileIdFromContent(self) ?? "";
       return self.objects.map(object => ({
         objectId: object.id,
         objectType: object.type,
