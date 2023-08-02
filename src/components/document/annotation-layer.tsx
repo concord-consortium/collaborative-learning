@@ -41,9 +41,10 @@ interface IAnnotationLayerProps {
   content?: DocumentContentModelType;
   documentScrollX?: number;
   documentScrollY?: number;
+  readOnly?: boolean;
 }
 export const AnnotationLayer = observer(function AnnotationLayer({
-  content, documentScrollX, documentScrollY
+  content, documentScrollX, documentScrollY, readOnly
 }: IAnnotationLayerProps) {
   const [_initialized, setInitialized] = useState(false);
   useEffect(() => {
@@ -61,12 +62,14 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   function getObjectBoundingBox(
     rowId: string, tileId: string, objectId: string
   ) {
-    const rowSelector = `[data-row-id='${rowId}']`;
+    const readWriteClass = readOnly ? "read-only" : "read-write";
+    const documentClasses = `.document-content.${readWriteClass} `;
+    const rowSelector = `${documentClasses}[data-row-id='${rowId}']`;
     const rowElements = document.querySelectorAll(rowSelector);
     if (rowElements.length !== 1) return undefined;
     const rowElement = (rowElements[0] as HTMLElement);
   
-    const tileSelector = `[data-tool-id='${tileId}']`;
+    const tileSelector = `${documentClasses}[data-tool-id='${tileId}']`;
     const tileElements = document.querySelectorAll(tileSelector);
     if (tileElements.length !== 1) return undefined;
     const tileElement = (tileElements[0] as HTMLElement);
@@ -126,7 +129,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const classes = classNames("annotation-layer", { editing, hidden });
   return (
     <div className={classes}>
-      { editing && rowIds.map(rowId => {
+      { editing && !readOnly && rowIds.map(rowId => {
         const row = content?.rowMap.get(rowId);
         if (row) {
           const tiles = row.tiles;
@@ -158,7 +161,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
           return (
             <ArrowAnnotationComponent
               arrow={arrow}
-              canEdit={editing}
+              canEdit={!readOnly && editing}
               getBoundingBox={getBoundingBox}
               key={key}
             />

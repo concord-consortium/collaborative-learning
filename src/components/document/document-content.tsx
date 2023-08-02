@@ -131,8 +131,11 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const isChatEnabled = user.isTeacher;
     const documentSelectedForComment = isChatEnabled && ui.showChatPanel && ui.selectedTileIds.length === 0
                                           && ui.focusDocument;
-    const documentClass = classNames("document-content", {"document-content-smooth-scroll" : viaTeacherDashboard,
-                                     "comment-select" : documentSelectedForComment});
+    const documentClass = classNames(
+      "document-content",
+      {"document-content-smooth-scroll" : viaTeacherDashboard, "comment-select" : documentSelectedForComment},
+      this.props.readOnly ? "read-only" : "read-write"
+    );
 
     return (
       <DocumentDndContext>

@@ -103,6 +103,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
           content={this.getDocumentContent()}
           documentScrollX={this.state.documentScrollX}
           documentScrollY={this.state.documentScrollY}
+          readOnly={this.props.readOnly}
         />
       </TileApiInterfaceContext.Provider>
     );
