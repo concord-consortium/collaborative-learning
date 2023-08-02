@@ -16,58 +16,57 @@ interface ISvgTextProps {
 // with the requested text broken up into lines that fit within the given width
 // Very long words will not be broken, and may extend past the width bound.
 export const WrappedSvgText = function({text, x, y, width, height, style}: ISvgTextProps) {
-
-    // Strategy for flowing text into the box:
-    // Start with an 'experimental line' containing all the words in the given text.
-    // Loop:
-    //   If experimental line is too long:
-    //      Move its last word to 'remaining text'.
-    //      Repeat until experimental line is short enough (or only one word is left on the line).
-    //   Once experimental line is ok:
-    //     Move it to 'completed lines'
-    //     Anything in 'remaining text' becomes the next 'experimental line'.
-    // Repeat if there is any 'remaining text'.
-
     const [completedLines, setCompletedLines] = useState<string[]>([]);
-    const [experimentalLine, setExperimentalLine] = useState<string[]>(text.split(/\s+/));
-    const [remainingText, setRemainingText] = useState<string[]>([]);
     const [lineHeight, setLineHeight] = useState<number>(0);
     const textRef = useRef<SVGTextElement>(null);
 
     // This is implemented as a layout effect so that intermediate states are not rendered as a visible flash.
     useLayoutEffect(() => {
+        // Strategy for flowing text into the box:
+        // Start with an 'experimental line' containing all the words in the given text.
+        // Loop:
+        //   If experimental line is too long:
+        //      Move its last word to 'remaining text'.
+        //      Repeat until experimental line is short enough (or only one word is left on the line).
+        //   Once experimental line is ok:
+        //     Move it to 'done'
+        //     Anything in 'remaining text' becomes the next 'experimental line'.
+        // Repeat as long as there is 'remaining text'.
+
         const tr = textRef.current;
         if (tr) {
+            let experimentalLine = text.split(/\s+/);
+            let remainingText: string[] = [];
+            const done: string[] = [];
+            tr.textContent = experimentalLine.join(' ');
             const observedHeight = tr.getBoundingClientRect().height;
             if (observedHeight > lineHeight) {
                 setLineHeight(observedHeight);
             }
-            if(experimentalLine.length > 1 && tr.getComputedTextLength() > width) {
-                // console.log(`experimental line (${experimentalLine}) too long`);
-                const wordToMove = experimentalLine[experimentalLine.length - 1];
-                setExperimentalLine(experimentalLine.slice(0, -1));
-                setRemainingText([wordToMove, ...remainingText]);
-            } else {
-                if (experimentalLine.length) {
-                    setCompletedLines([...completedLines, experimentalLine.join(' ')]);
-                    setExperimentalLine(remainingText);
-                    setRemainingText([]);
+            while(experimentalLine.length) {
+                while(experimentalLine.length > 1 && tr.getComputedTextLength() > width) {
+                    // console.log(`experimental line (${experimentalLine}) too long`);
+                    remainingText.unshift(experimentalLine.pop() || '?');
+                    tr.textContent = experimentalLine.join(' ');
                 }
+                done.push(experimentalLine.join(' '));
+                experimentalLine = remainingText;
+                remainingText = [];
+                tr.textContent = experimentalLine.join(' ');
             }
+            setCompletedLines(done);
         }
-    }, [text, width, completedLines, experimentalLine, remainingText, lineHeight]);
+    }, [text, width, lineHeight]);
 
     const lines: JSX.Element[] = [];
-    let i=0;
     const dy=lineHeight*LINE_SPACING;
-    completedLines.forEach((textChunk) => {
-        lines.push(<tspan key={i++} x={x} dy={dy}>{textChunk}</tspan>);
+    completedLines.forEach((textChunk, i) => {
+        lines.push(<tspan key={i} x={x} dy={dy}>{textChunk}</tspan>);
     });
-    lines.push(<tspan ref={textRef} key={i++} x={x} dy={dy}>{experimentalLine.join(' ')}</tspan>);
-    // There's no need to render the remainingText; there will be none when the process completes.
 
     return(
         <text x={x} y={y} width={width} height={height} style={style}>
           {lines}
+          <tspan ref={textRef} x={x} dy={dy}></tspan>
         </text>);
 };

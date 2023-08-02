@@ -109,7 +109,7 @@ export const TextComponent = observer(
               <WrappedSvgText text={text} 
                   x={x+margin} y={y+margin} width={width-2*margin} height={height-2*margin} 
                   style={{color: stroke}} />
-            </g>);
+             </g>);
     }
   };
 
