@@ -1,4 +1,4 @@
-import { types, Instance, SnapshotIn, getSnapshot, isStateTreeNode} from "mobx-state-tree";
+import { types, Instance, SnapshotIn, getSnapshot, isStateTreeNode, getParent} from "mobx-state-tree";
 import { clone } from "lodash";
 import stringify from "json-stringify-pretty-compact";
 import { StampModel, StampModelType } from "./stamp";
@@ -208,7 +208,21 @@ export const DrawingContentModel = TileContentModel
         },
 
         setSelection(ids: string[]) {
-          self.metadata?.setSelection(ids);
+          if (self.metadata) {
+            const oldselection = self.selectedIds;
+            self.metadata.setSelection(ids);
+            // Call hook functions on objects that are about to be (un)selected.
+            oldselection.forEach((id) => {
+              if (!ids.includes(id)) {
+                self.objectMap[id]?.onUnselected();
+              }
+            });
+            ids.forEach((id) => {
+              if (!oldselection.includes(id)) {
+                self.objectMap[id]?.onSelected();
+              }
+            });
+          }
         },
 
         setSelectedStamp(stampIndex: number) {

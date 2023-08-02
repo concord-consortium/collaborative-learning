@@ -99,6 +99,12 @@ export const DrawingObject = types.model("DrawingObject", {
   adoptDragBounds() {
     // Move any volatile resizing into the persisted object model.
     console.error("adoptDragBounds is unimplemented for this type");
+  },
+  onSelected() {
+    // Called whenever the object is added to the selection.  Does nothing by default.
+  },
+  onUnselected() {
+    // Called whenever the object is removed from the selection. Does nothing by default.
   }
 }));
 export interface DrawingObjectType extends Instance<typeof DrawingObject> {}

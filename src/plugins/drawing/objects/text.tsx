@@ -67,6 +67,9 @@ export const TextObject = EditableObject.named("TextObject")
     setEditing(editing: boolean) {
       console.log('Editing state is now', editing);
       self.isEditing = editing;
+    },
+    onUnselected() {
+      self.setEditing(false);
     }
   }));  
 
