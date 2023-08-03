@@ -24,7 +24,6 @@ import {
 } from "../../../utilities/color-utils";
 import { AppConfigModelType } from "../../../models/stores/app-config-model";
 import { getAppConfig } from "../../../models/tiles/tile-environment";
-import { random } from "lodash";
 
 export type SharedModelChangeHandler = (sharedModel: SharedModelType | undefined, type: string) => void;
 
