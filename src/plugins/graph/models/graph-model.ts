@@ -24,6 +24,7 @@ import {
 } from "../../../utilities/color-utils";
 import { AppConfigModelType } from "../../../models/stores/app-config-model";
 import { getAppConfig } from "../../../models/tiles/tile-environment";
+import { random } from "lodash";
 
 export type SharedModelChangeHandler = (sharedModel: SharedModelType | undefined, type: string) => void;
 
@@ -178,19 +179,23 @@ export const GraphModel = TileContentModel
         return;
       }
       if (getAppConfig(self)?.getSetting("emptyPlotIsNumeric", "graph")) {
-        // We need attributes in the data model before we can set the x and y attributes of the graph
-        // If the source is a Dataflow tile with no recording, then SharedModel is not there yet
-        // and self.data.attributes exists but has no length. This causes an error in the mobx reaction.
-        // So in that case  we need to bail to avoid the mobx error
         const attributesInDataSet = self.data.attributes.length > 0;
         if (!attributesInDataSet) return;
 
-        // attribute ids are novel on new recordings,
-        // so we set new attributes on the condition that id in graph does not match id in data
         const newX = self.getAttributeID("x") !== self.data.attributes[0].id;
         const newY = self.getAttributeID("y") !== self.data.attributes[1].id;
-        if (newX) self.setAttributeID("x", self.data.attributes[0].id);
-        if (newY) self.setAttributeID("y", self.data.attributes[1].id);
+
+        if (newY) {
+          const indexOfChoice = self.data.attrIndexFromID(self.getAttributeID("y")) ?? 1;
+          const desiredId = self.data.attributes[indexOfChoice].id;
+          self.setAttributeID("y", desiredId);
+        }
+
+        if (newX) {
+          const indexOfChoice = self.data.attrIndexFromID(self.getAttributeID("x")) ?? 0;
+          const desiredId = self.data.attributes[indexOfChoice].id;
+          self.setAttributeID("x", desiredId);
+        }
       }
     },
     configureGraphOnUnlink() {
