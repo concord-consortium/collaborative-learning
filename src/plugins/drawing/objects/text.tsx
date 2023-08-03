@@ -134,10 +134,8 @@ export const TextComponent = observer(
   const handleClose = (accept: boolean) => {
     if (accept) {
       const textarea = textEditor.current;
-      if (textarea instanceof HTMLTextAreaElement) {
+      if (textarea) {
         model.setText(textarea.value);
-      } else {
-        console.log('Lost track of my textarea: ', textarea);
       }
     }
     model.setEditing(false);
