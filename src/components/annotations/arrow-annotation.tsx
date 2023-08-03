@@ -7,6 +7,7 @@ import { ClueObjectType } from "../../models/annotations/clue-object";
 
 import "./arrow-annotation.scss";
 
+type DragType = "source" | "target" | "text";
 interface IArrowAnnotationProps {
   arrow: ArrowAnnotationType;
   canEdit?: boolean;
@@ -16,6 +17,7 @@ interface IArrowAnnotationProps {
 }
 export const ArrowAnnotationComponent = observer(
   function ArrowAnnotationComponent({ arrow, canEdit, getBoundingBox }: IArrowAnnotationProps) {
+    const [firstClick, setFirstClick] = useState(false);
     const [editingText, setEditingText] = useState(false);
     const [tempText, setTempText] = useState(arrow.text ?? "");
     const inputRef = useRef<HTMLInputElement|null>(null);
@@ -26,6 +28,20 @@ export const ArrowAnnotationComponent = observer(
       }
     }, [editingText]);
 
+    // State used for dragging to move source, target, and text
+    const [clientX, setClientX] = useState<number|undefined>();
+    const [clientY, setClientY] = useState<number|undefined>();
+    const [dragType, setDragType] = useState<DragType|undefined>();
+    const [dragX, setDragX] = useState<number|undefined>();
+    const [dragY, setDragY] = useState<number|undefined>();
+    const dragDx = clientX !== undefined && dragX !== undefined ? clientX - dragX : 0;
+    const dragDy = clientY !== undefined && dragY !== undefined ? clientY - dragY : 0;
+    const dragging = clientX !== undefined && clientY !== undefined && dragX !== undefined && dragY !== undefined;
+    const [sourceDragOffsetX, sourceDragOffsetY] = dragging && dragType === "source" ? [dragDx, dragDy] : [0, 0];
+    const [targetDragOffsetX, targetDragOffsetY] = dragging && dragType === "target" ? [dragDx, dragDy] : [0, 0];
+    const [textDragOffsetX, textDragOffsetY] = dragging && dragType === "text" ? [dragDx, dragDy] : [0, 0];
+
+    // Bail if there is no source or target
     if (!arrow.sourceObject || !arrow.targetObject) return null;
 
     // Find bounding boxes for source and target objects
@@ -34,10 +50,12 @@ export const ArrowAnnotationComponent = observer(
     if (!sourceBB || !targetBB) return null;
 
     // Find positions for head and tail of arrow
-    const sourceX = sourceBB.left + sourceBB.width / 2;
-    const sourceY = sourceBB.top + sourceBB.height / 2;
-    const targetX = targetBB.left + targetBB.width / 2;
-    const targetY = targetBB.top + targetBB.height / 2;
+    const [sDxOffset, sDyOffset] = arrow.sourceOffset ? [arrow.sourceOffset.dx, arrow.sourceOffset.dy] : [0, 0];
+    const sourceX = sourceBB.left + sourceBB.width / 2 + sDxOffset + sourceDragOffsetX;
+    const sourceY = sourceBB.top + sourceBB.height / 2 + sDyOffset + sourceDragOffsetY;
+    const [tDxOffset, tDyOffset] = arrow.targetOffset ? [arrow.targetOffset.dx, arrow.targetOffset.dy] : [0, 0];
+    const targetX = targetBB.left + targetBB.width / 2 + tDxOffset + targetDragOffsetX;
+    const targetY = targetBB.top + targetBB.height / 2 + tDyOffset + targetDragOffsetY;
     
     // Determine angle of arrowhead
     const dx = targetX - sourceX;
@@ -47,10 +65,22 @@ export const ArrowAnnotationComponent = observer(
     // Set up text location and dimensions
     const textWidth = 120;
     const textHeight = 50;
-    const textX = targetX - dx / 2 - textWidth / 2;
-    const textY = targetY - dy / 2 - textHeight / 2;
+    const [textDxOffset, textDyOffset] = arrow.textOffset ? [arrow.textOffset.dx, arrow.textOffset.dy] : [0, 0];
+    const textX = targetX - dx / 2 - textWidth / 2 + textDxOffset + textDragOffsetX;
+    const textY = targetY - dy / 2 - textHeight / 2 + textDyOffset + textDragOffsetY;
 
     // Set up text handlers
+    function handleTextClick() {
+      if (!canEdit) return;
+
+      if (firstClick) {
+        setEditingText(true);
+        setFirstClick(false);
+      } else {
+        setFirstClick(true);
+        setTimeout(() => setFirstClick(false), 500);
+      }
+    }
     function acceptText() {
       arrow.setText(tempText);
       setEditingText(false);
@@ -78,9 +108,52 @@ export const ArrowAnnotationComponent = observer(
       }
     }
 
+    // Set up drag handlers
+    // const dragHandlerHeight = 10;
+    // const dragHandlerWidth = 10;
+    // const dragHandlerStyle = { height: dragHandlerHeight, width: dragHandlerWidth };
+    function handleMouseDown(e: MouseEvent|React.MouseEvent<HTMLButtonElement, MouseEvent>, _dragType: DragType) {
+      if (!canEdit) return;
+
+      setDragX(e.clientX);
+      setDragY(e.clientY);
+      setDragType(_dragType);
+
+      function handleMouseMove(e2: MouseEvent) {
+        setClientX(e2.clientX);
+        setClientY(e2.clientY);
+      }
+      function handleMouseUp(e2: MouseEvent) {
+        const startingOffset =
+          dragType === "source" ? arrow.sourceOffset
+          : dragType === "target" ? arrow.targetOffset
+          : arrow.textOffset;
+        const [startingDx, startingDy] = startingOffset ? [startingOffset.dx, startingOffset.dy] : [0, 0];
+        const setFunc =
+          dragType === "source" ? arrow.setSourceOffset
+          : dragType === "target" ? arrow.setTargetOffset
+          : arrow.setTextOffset;
+        const dDx = e2.clientX - e.clientX;
+        const dDy = e2.clientY - e.clientY;
+        setFunc(startingDx + dDx, startingDy + dDy);
+  
+        setClientX(undefined);
+        setClientY(undefined);
+        setDragX(undefined);
+        setDragY(undefined);
+        setDragType(undefined);
+  
+        window.removeEventListener("mousemove", handleMouseMove);
+        window.removeEventListener("mouseup", handleMouseUp);
+      }
+
+      window.addEventListener("mousemove", handleMouseMove);
+      window.addEventListener("mouseup", handleMouseUp);
+    }
+
     const color = "blue";
     return (
-      <>
+      <g>
         <path d={`M ${sourceX} ${sourceY} L ${targetX} ${targetY}`} stroke={color} strokeWidth={3} />
         <g transform={`translate(${targetX} ${targetY}) rotate(${angle})`}>
           <polygon points="0 -3 7 12 -7 12 0 -3" fill={color} />
@@ -101,7 +174,8 @@ export const ArrowAnnotationComponent = observer(
               ) : (
                 <button
                   className={classNames("text-display", { "can-edit": canEdit })}
-                  onClick={() => canEdit && setEditingText(true)}
+                  onClick={handleTextClick}
+                  onMouseDown={e => handleMouseDown(e, "text")}
                 >
                   {arrow.text?.trim() || "Click to enter text"}
                 </button>
@@ -109,7 +183,7 @@ export const ArrowAnnotationComponent = observer(
             }
           </div>
         </foreignObject>
-      </>
+      </g>
     );
   }
 );
