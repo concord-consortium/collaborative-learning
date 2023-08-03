@@ -10,7 +10,7 @@ export class SerialDevice {
   serialNodesCount: number;
   writer: WritableStreamDefaultWriter;
   serialModalShown: boolean | null;
-  deviceFamily: string | null;
+  deviceFamily: string | undefined;
 
   constructor() {
     this.localBuffer = "";
