@@ -56,7 +56,7 @@ jobs:
           # upload videos for failing specs
           config: video=true,videoUploadOnPasses=false
           browser: chrome
-        working-directory: cypress/e2e/clue/smoke
+          working-directory: cypress/e2e/clue/smoke
         env:
           # pass the Dashboard record key as an environment variable
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
