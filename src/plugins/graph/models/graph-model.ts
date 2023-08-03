@@ -178,22 +178,19 @@ export const GraphModel = TileContentModel
         return;
       }
       if (getAppConfig(self)?.getSetting("emptyPlotIsNumeric", "graph")) {
-        const attributesInDataSet = self.data.attributes.length > 0;
-        if (!attributesInDataSet) return;
+        const attributeCount = self.data.attributes.length;
+        if (!attributeCount) return;
 
-        const newX = self.getAttributeID("x") !== self.data.attributes[0].id;
-        const newY = self.getAttributeID("y") !== self.data.attributes[1].id;
-
-        if (newY) {
-          const indexOfChoice = self.data.attrIndexFromID(self.getAttributeID("y")) ?? 1;
-          const desiredId = self.data.attributes[indexOfChoice].id;
-          self.setAttributeID("y", desiredId);
+        const xAttrId = self.getAttributeID("x");
+        const isValidXAttr = !!self.data.attrFromID(xAttrId);
+        if (!isValidXAttr) {
+          self.setAttributeID("x", self.data.attributes[0].id);
         }
 
-        if (newX) {
-          const indexOfChoice = self.data.attrIndexFromID(self.getAttributeID("x")) ?? 0;
-          const desiredId = self.data.attributes[indexOfChoice].id;
-          self.setAttributeID("x", desiredId);
+        const yAttrId = self.getAttributeID("y");
+        const isValidYAttr = !!self.data.attrFromID(yAttrId);
+        if (!isValidYAttr && attributeCount > 1) {
+          self.setAttributeID("y", self.data.attributes[1].id);
         }
       }
     },
