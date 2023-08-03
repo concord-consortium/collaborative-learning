@@ -109,10 +109,9 @@ export const ArrowAnnotationComponent = observer(
     }
 
     // Set up drag handlers
-    // const dragHandlerHeight = 10;
-    // const dragHandlerWidth = 10;
-    // const dragHandlerStyle = { height: dragHandlerHeight, width: dragHandlerWidth };
-    function handleMouseDown(e: MouseEvent|React.MouseEvent<HTMLButtonElement, MouseEvent>, _dragType: DragType) {
+    const dragHandlerHeight = 10;
+    const dragHandlerWidth = 10;
+    function handleMouseDown(e: React.MouseEvent<SVGRectElement|HTMLButtonElement, MouseEvent>, _dragType: DragType) {
       if (!canEdit) return;
 
       setDragX(e.clientX);
@@ -125,13 +124,13 @@ export const ArrowAnnotationComponent = observer(
       }
       function handleMouseUp(e2: MouseEvent) {
         const startingOffset =
-          dragType === "source" ? arrow.sourceOffset
-          : dragType === "target" ? arrow.targetOffset
+          _dragType === "source" ? arrow.sourceOffset
+          : _dragType === "target" ? arrow.targetOffset
           : arrow.textOffset;
         const [startingDx, startingDy] = startingOffset ? [startingOffset.dx, startingOffset.dy] : [0, 0];
         const setFunc =
-          dragType === "source" ? arrow.setSourceOffset
-          : dragType === "target" ? arrow.setTargetOffset
+          _dragType === "source" ? arrow.setSourceOffset
+          : _dragType === "target" ? arrow.setTargetOffset
           : arrow.setTextOffset;
         const dDx = e2.clientX - e.clientX;
         const dDy = e2.clientY - e.clientY;
@@ -152,6 +151,25 @@ export const ArrowAnnotationComponent = observer(
     }
 
     const color = "blue";
+
+    interface IDragHandlerProps {
+      startX: number;
+      startY: number;
+      target: "source" | "target";
+    }
+    function DragHandler({ startX, startY, target }: IDragHandlerProps) {
+      return (
+        <rect
+          className="drag-handle"
+          fill="transparent"
+          height={dragHandlerHeight}
+          onMouseDown={e => handleMouseDown(e, target)}
+          width={dragHandlerWidth}
+          x={startX - dragHandlerWidth / 2}
+          y={startY - dragHandlerHeight / 2}
+        />
+      );
+    }
     return (
       <g>
         <path d={`M ${sourceX} ${sourceY} L ${targetX} ${targetY}`} stroke={color} strokeWidth={3} />
@@ -183,6 +201,8 @@ export const ArrowAnnotationComponent = observer(
             }
           </div>
         </foreignObject>
+        <DragHandler startX={sourceX} startY={sourceY} target="source" />
+        <DragHandler startX={targetX} startY={targetY} target="target" />
       </g>
     );
   }

@@ -25,14 +25,14 @@
   background-color: rgba(0, 0, 0, 0);
   border: none;
   border-radius: 3px;
-  outline: 2px solid vars.$workspace-teal-light-5;
+  outline: 3px solid vars.$workspace-teal-light-5;
   position: absolute;
 
   &:hover {
-    outline: 2px solid vars.$workspace-teal-light-3;
+    outline-color: vars.$workspace-teal-light-3;
   }
 
   &.source {
-    outline: 2px solid vars.$workspace-teal-light-1;
+    outline-color: vars.$workspace-teal-light-1;
   }
 }

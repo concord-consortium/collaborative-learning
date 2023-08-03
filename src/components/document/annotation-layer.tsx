@@ -33,7 +33,15 @@ const AnnotationButton = observer(function AnnotationButton({
   const source = sourceObjectId === objectId && sourceTileId === tileId;
   const classes = classNames("annotation-button", { source });
   return (
-    <button className={classes} onClick={handleClick} style={style} />
+    <rect
+      className={classes}
+      fill="transparent"
+      height={style.height}
+      onClick={handleClick}
+      width={style.width}
+      x={style.left}
+      y={style.top}
+    />
   );
 });
 
@@ -129,6 +137,12 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const classes = classNames("annotation-layer", { editing, hidden });
   return (
     <div className={classes}>
+      <svg
+        className="annotation-svg"
+        height="1500"
+        width="1500"
+        xmlnsXlink="http://www.w3.org/1999/xlink"
+      >
       { editing && !readOnly && rowIds.map(rowId => {
         const row = content?.rowMap.get(rowId);
         if (row) {
@@ -155,12 +169,6 @@ export const AnnotationLayer = observer(function AnnotationLayer({
           });
         }
       })}
-      <svg
-        className="annotation-svg"
-        height="1500"
-        width="1500"
-        xmlnsXlink="http://www.w3.org/1999/xlink"
-      >
         { content?.annotations.map((arrow: ArrowAnnotationType) => {
           const key = `${arrow.sourceObject?.objectId}-${arrow.targetObject?.objectId}`;
           return (
