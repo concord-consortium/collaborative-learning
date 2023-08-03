@@ -79,6 +79,7 @@ export function isTextObject(model: DrawingObjectType): model is TextObjectType 
 
 export const TextComponent = observer(
     function TextComponent({model, handleHover, handleDrag} : IDrawingComponentProps) {
+  const textEditor = useRef<HTMLTextAreaElement>(null);
   if (!isTextObject(model)) return null;
   const textobj = model as TextObjectType;
   const { id, stroke, text } = textobj;
@@ -86,7 +87,6 @@ export const TextComponent = observer(
   const { width, height } = textobj.currentDims;
   const clipId = uniqueId();
   const margin = 5;
-  const textEditor = useRef<HTMLTextAreaElement>(null);
 
   interface IContentProps {
     editing: boolean,
