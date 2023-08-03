@@ -1,30 +1,16 @@
-name: Continuous Integration
+name: Regression Tests
 
-on: push
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+    inputs:
+      browser:
+        description: Browser (can be chrome or firefox)
+        default: chrome
+        required: true
 
 jobs:
-  build_test:
-    name: Build and Run Jest Tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
-        with:
-          node-version: '16'
-      - name: Install Dependencies
-        run: npm ci
-      - name: Install CMS Dependencies
-        working-directory: ./cms
-        run: npm ci
-      - name: Build
-        run: npm run build
-      - name: Run Tests
-        run: npm run test:coverage -- --runInBand
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v2
-        with:
-          flags: jest
-          token: ${{ secrets.CODECOV_TOKEN }}
   cypress:
     runs-on: ubuntu-latest
     container: cypress/browsers:node16.14.2-slim-chrome103-ff102
@@ -35,15 +21,18 @@ jobs:
       # https://github.com/cypress-io/github-action/issues/48
       fail-fast: false
       matrix:
-        # run 1 copy of the current job in parallel
-        # One thread is enoguh for now, since there is only one smoke test
-        containers: [1]
+        # run 5 copies of the current job in parallel
+        containers: [1, 2, 3, 4, 5, 6, 7]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Install CMS Dependencies
         working-directory: ./cms
         run: npm ci
+      - name: Set the browser
+        env:
+          DEFAULT_BROWSER: chrome
+        run: echo "BROWSER=${{ github.event.inputs.browser || env.DEFAULT_BROWSER }}" >> $GITHUB_ENV
       - uses: cypress-io/github-action@v4
         with:
           start: npm start
@@ -56,8 +45,7 @@ jobs:
           parallel: ${{ !!secrets.CYPRESS_RECORD_KEY }}
           # upload videos for failing specs
           config: video=true,videoUploadOnPasses=false
-          browser: chrome
-          spec: cypress/e2e/clue/smoke/**
+          browser: ${{ env.BROWSER }}
         env:
           # pass the Dashboard record key as an environment variable
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
@@ -78,38 +66,3 @@ jobs:
         with:
           flags: cypress
           token: ${{ secrets.CODECOV_TOKEN }}
-  s3-deploy:
-    name: S3 Deploy
-    needs:
-      - build_test
-      - cypress
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
-        with:
-          node-version: '16'
-      - name: Install Dependencies
-        run: npm ci
-        env:
-          # skip installing cypress since it isn't needed for just building
-          # This decreases the deploy time quite a bit
-          CYPRESS_INSTALL_BINARY: 0
-      - name: Install CMS Dependencies
-        working-directory: ./cms
-        run: npm ci
-        env:
-          # skip installing cypress since it isn't needed for just building
-          # This decreases the deploy time quite a bit
-          CYPRESS_INSTALL_BINARY: 0
-      - uses: concord-consortium/s3-deploy-action@v1
-        with:
-          bucket: models-resources
-          prefix: collaborative-learning
-          awsAccessKeyId: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          awsSecretAccessKey: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          # Parameters to GHActions have to be strings, so a regular yaml array cannot
-          # be used. Instead the `|` turns the following lines into a string
-          topBranches: |
-            ["master"]
-
