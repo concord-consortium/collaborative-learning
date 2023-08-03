@@ -1,25 +1,52 @@
 import { Instance, types } from "mobx-state-tree";
 
-import { ClueObjectModel } from "./clue-object";
+import { ClueObjectModel, OffsetModel } from "./clue-object";
 
 export const kArrowAnnotationType = "arrowAnnotation";
 
 export const ArrowAnnotation = types
 .model("ArrowAnnotation", {
   sourceObject: types.maybe(ClueObjectModel),
+  sourceOffset: types.maybe(OffsetModel),
   targetObject: types.maybe(ClueObjectModel),
+  targetOffset: types.maybe(OffsetModel),
   text: types.maybe(types.string),
+  textOffset: types.maybe(OffsetModel),
   type: types.optional(types.string, kArrowAnnotationType)
 })
 .actions(self => ({
   setSourceObject(tileId: string, objectId: string, objectType?: string) {
     self.sourceObject = ClueObjectModel.create({ tileId, objectId, objectType });
   },
+  setSourceOffset(dx: number, dy: number) {
+    if (!self.sourceOffset) {
+      self.sourceOffset = OffsetModel.create({ dx, dy });
+    } else {
+      self.sourceOffset.setDx(dx);
+      self.sourceOffset.setDy(dy);
+    }
+  },
   setTargetObject(tileId: string, objectId: string, objectType?: string) {
     self.targetObject = ClueObjectModel.create({ tileId, objectId, objectType });
   },
+  setTargetOffset(dx: number, dy: number) {
+    if (!self.targetOffset) {
+      self.targetOffset = OffsetModel.create({ dx, dy });
+    } else {
+      self.targetOffset.setDx(dx);
+      self.targetOffset.setDy(dy);
+    }
+  },
   setText(text: string) {
     self.text = text;
+  },
+  setTextOffset(dx: number, dy: number) {
+    if (!self.textOffset) {
+      self.textOffset = OffsetModel.create({ dx, dy });
+    } else {
+      self.textOffset.setDx(dx);
+      self.textOffset.setDy(dy);
+    }
   }
 }));
 export type ArrowAnnotationType = Instance<typeof ArrowAnnotation>;
