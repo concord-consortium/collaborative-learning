@@ -52,16 +52,26 @@ export function getLiveOptions(node: Node, deviceFamily: string, sharedVar?: Var
     options.push(liveGripperOption);
   }
 
-  if (!anyOuputFound) options.push(warningOption);
+  if (outputsToAnyGripper(node) && deviceFamily !== "arduino") {
+    if (!options.includes(warningOption)) {
+      options.push(warningOption);
+    }
+  }
+
+  if (!anyOuputFound && !options.includes(warningOption)) options.push(warningOption);
 
   return options;
 }
 
 export function setLiveOutputOpts(node: Node, deviceFamily: string, sharedVar?: VariableType) {
-  const hubSelect = getHubSelect(node);
   const options = getLiveOptions(node, deviceFamily, sharedVar);
-  const selectedOption = options.find(option => option && option.name === hubSelect.getValue());
-  const firstOption = !selectedOption ? options[0] : undefined;
-  if (firstOption) hubSelect.setValue(firstOption.name);
+  const hubSelect = getHubSelect(node);
   hubSelect.setOptions(options);
+
+  const selectionId = hubSelect.getSelectionId();
+  if (!selectionId) hubSelect.setValue(options[0].name);
+  // if user successfully connects arduino with warning selected, switch to physical gripper
+  if (selectionId === "no-outputs-found" && deviceFamily === "arduino") {
+    hubSelect.setValue(baseLiveOutputOptions.liveGripperOption.name);
+  }
 }
