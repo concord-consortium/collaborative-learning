@@ -3,6 +3,12 @@ name: Regression Tests
 on:
   schedule:
     - cron: "0 0 * * *"
+  workflow_dispatch:
+    inputs:
+      browser:
+        description: Browser (can be chrome or firefox)
+        default: chrome
+        required: true
 
 jobs:
   cypress:
@@ -23,6 +29,10 @@ jobs:
       - name: Install CMS Dependencies
         working-directory: ./cms
         run: npm ci
+      - name: Set the browser
+        env:
+          DEFAULT_BROWSER: chrome
+        run: echo "BROWSER=${{ github.event.inputs.browser || env.DEFAULT_BROWSER }}" >> $GITHUB_ENV
       - uses: cypress-io/github-action@v4
         with:
           start: npm start
@@ -35,7 +45,7 @@ jobs:
           parallel: ${{ !!secrets.CYPRESS_RECORD_KEY }}
           # upload videos for failing specs
           config: video=true,videoUploadOnPasses=false
-          browser: chrome
+          browser: $BROWSER
         env:
           # pass the Dashboard record key as an environment variable
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
