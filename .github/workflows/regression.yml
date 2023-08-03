@@ -45,7 +45,7 @@ jobs:
           parallel: ${{ !!secrets.CYPRESS_RECORD_KEY }}
           # upload videos for failing specs
           config: video=true,videoUploadOnPasses=false
-          browser: $BROWSER
+          browser: ${{ env.BROWSER }}
         env:
           # pass the Dashboard record key as an environment variable
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
