@@ -9,6 +9,7 @@ export interface NodeChannelInfo {
   units: string;
   value: number;
   name: string;
+  displayName?: string;
   simulated?: boolean;
   simulatedVariable?: VariableType;
   virtual?: boolean;
@@ -18,7 +19,7 @@ export interface NodeChannelInfo {
   outputTargetDevice?: string;
   outputTargetActuator?: string;
   timeFactor?: number;
-  deviceFamily?: string;
+  deviceFamily?: string | undefined;
   lastMessageRecievedAt?: number | null;
   relaysState?: number[];
   microbitId?: string;
@@ -28,6 +29,7 @@ const emgSensorChannel: NodeChannelInfo = {
   hubId: "SERIAL-ARDUINO",
   hubName: "Arduino",
   name: "emg",
+  displayName: "EMG",
   channelId: "emg",
   missing: true,
   type: "emg-reading",
@@ -43,6 +45,7 @@ export const fsrSensorChannel: NodeChannelInfo = {
   hubId: "SERIAL-ARDUINO",
   hubName: "Arduino",
   name: "fsr",
+  displayName: "FSR",
   channelId: "fsr",
   missing: true,
   type: "fsr-reading",
@@ -95,15 +98,19 @@ function createMicroBitSensorChannels(sensors: MicroBitSensorChannelInfo[] ){
   };
 
   const channels = sensors.map((s) => {
+    const hubDisplayName = s.microBitId.toUpperCase();
+    const sensorTypeDisplayName = `${s.type.charAt(0).toUpperCase()}${s.type.slice(1)}`;
     return {
       ...basis,
       microbitId: s.microBitId,
       hubId: `MICROBIT-RADIO-${s.microBitId}`,
       hubName: `microbit ${s.microBitId}`,
       name: `${s.type}-microbit-${s.microBitId}`,
+      displayName: `${sensorTypeDisplayName} ${hubDisplayName}`,
       channelId: `${s.type.substring(0,1)}-${s.microBitId}`,
       type: `${s.type}`,
-      units: `${s.units}`    };
+      units: `${s.units}`
+    };
   });
   return channels;
 }
@@ -140,3 +147,8 @@ const microBitRelayChannels = createMicroBitRelayInfoChannels(microBitHubs);
 export const serialSensorChannels: NodeChannelInfo[] = [
   emgSensorChannel, fsrSensorChannel, ...microBitSensorChannels, ...microBitRelayChannels
 ];
+
+export const kDeviceDisplayNames: Record<string, string> = {
+  "arduino": "Arduino",
+  "microbit": "micro:bit"
+};
