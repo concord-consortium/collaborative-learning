@@ -204,6 +204,7 @@ describe("DrawingContentModel", () => {
     expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(5,
       LogEventName.DRAWING_TOOL_CHANGE,
       { operation: "deleteObjects", change: { args: [ ["a", "b"] ], path: ""}, tileId: "drawing-1" });
+    expect(mockLogTileChangeEvent).toHaveBeenCalledTimes(5);
   });
 
   it("can update the properties of a set of selected drawing objects", () => {
@@ -245,7 +246,8 @@ describe("DrawingContentModel", () => {
     expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(4,
       LogEventName.DRAWING_TOOL_CHANGE,
       { operation: "setStrokeDashArray", change: { args: ["3,3", ["a", "b"]], path: "" }, tileId: "drawing-1" });
-  });
+    expect(mockLogTileChangeEvent).toHaveBeenCalledTimes(4);
+    });
 
   it("can move objects", () => {
     const model = createDrawingContentWithMetadata();
@@ -270,9 +272,11 @@ describe("DrawingContentModel", () => {
         },
         tileId: "drawing-1"
       });
-  });
+    expect(mockLogTileChangeEvent).toHaveBeenCalledTimes(1);
+    });
 
   it("can resize rectangle", () => {
+    mockLogTileChangeEvent.mockClear();
     const model = createDrawingContentWithMetadata();
 
     const rectSnapshot1: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot, id:"a"};
@@ -295,6 +299,47 @@ describe("DrawingContentModel", () => {
     expect(obj).toHaveProperty('y', 10);
     expect(obj).toHaveProperty('width', 10);
     expect(obj).toHaveProperty('height', 10);
+
+    expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(1,
+      LogEventName.DRAWING_TOOL_CHANGE, {
+      operation: "addObject",
+      change: {
+        args: [{
+          fill: "#666666",
+          height: 10,
+          id: "a",
+          stroke: "#888888",
+          strokeDashArray: "3,3",
+          strokeWidth: 5,
+          type: "rectangle",
+          width: 10,
+          x: 0,
+          y: 0
+        }],
+        path: ""
+      },
+      tileId: "drawing-1"
+    });
+    expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(2,
+      LogEventName.DRAWING_TOOL_CHANGE, {
+      operation: "adoptDragBounds",
+      "change": {
+        "args": [ ],
+        "path": "/objects/0",
+      },
+      "tileId": "drawing-1"
+    });
+    expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(3,
+      LogEventName.DRAWING_TOOL_CHANGE, {
+      operation: "adoptDragBounds",
+      "change": {
+        "args": [ ],
+        "path": "/objects/0",
+      },
+      "tileId": "drawing-1"
+    });
+        
+    expect(mockLogTileChangeEvent).toHaveBeenCalledTimes(3);
   });
 
   it("can resize ellipse", () => {
