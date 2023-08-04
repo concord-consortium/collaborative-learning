@@ -20,7 +20,7 @@ export const NumberlineTileWrapperComponent: React.FC<ITileProps> = (props) => {
   const content = model.content as IGraphModel;
 
   useEffect(() => {
-    console.log("Wrapper time!");
+    // console.log("Wrapper time!");
   }, []);
 
   const placePointClicked = () => {

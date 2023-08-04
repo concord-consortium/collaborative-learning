@@ -5,6 +5,7 @@ import { IFloatingToolbarProps, useFloatingToolbarLocation
         } from "../../components/tiles/hooks/use-floating-toolbar-location";
 import { useSettingFromStores } from "../../hooks/use-stores";
 import { SetPlacePoint } from "./numberline-toolbar-buttons";
+import "./numberline-toolbar.scss";
 
 const defaultButtons = ["place-point"];
 
@@ -14,7 +15,6 @@ interface INumberlineToolbarProps extends IFloatingToolbarProps {
 
 export const NumberlineToolbar: React.FC<INumberlineToolbarProps> = observer((props) => {
 
-  console.log("<NumberlineToolbar>")
   const { documentContent,  tileElt, onIsEnabled, onSetPlacePoint: onSetPointPlace,  ...others
     // model?
    } = props;
@@ -30,9 +30,6 @@ export const NumberlineToolbar: React.FC<INumberlineToolbarProps> = observer((pr
                   });
   const buttonSettings = useSettingFromStores("tools", "numberline") as unknown as string[] | undefined;
   const buttons = buttonSettings || defaultButtons;
-
-  console.log("buttons:", buttons);
-
 
   const getToolbarButton = (toolName: string) => {
     switch (toolName) {

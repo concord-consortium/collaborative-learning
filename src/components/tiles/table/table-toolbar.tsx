@@ -32,7 +32,6 @@ export const TableToolbar: React.FC<IProps> = observer(({
 
   const buttonSettings = useSettingFromStores("tools", "table") as unknown as string[] | undefined;
   const buttons = buttonSettings || defaultButtons;
-  console.log("<TableToolbar> buttons:", buttons);
 
   const getToolbarButton = (toolName: string) => {
     switch (toolName) {
