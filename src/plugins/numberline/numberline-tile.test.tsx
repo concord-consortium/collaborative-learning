@@ -43,7 +43,7 @@ describe("NumberlineToolComponent", () => {
     }
   };
 
-  it.skip("renders successfully", () => {
+  it("renders successfully", () => {
     const {getByText} =
       render(<NumberlineToolComponent  {...defaultProps} {...{model}}></NumberlineToolComponent>);
     expect(getByText("Numberline Tile")).toBeInTheDocument();
