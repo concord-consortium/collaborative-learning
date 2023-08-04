@@ -183,14 +183,16 @@ export const GraphModel = TileContentModel
 
         const xAttrId = self.getAttributeID("x");
         const isValidXAttr = !!self.data.attrFromID(xAttrId);
-        if (!isValidXAttr) {
-          self.setAttributeID("x", self.data.attributes[0].id);
-        }
-
         const yAttrId = self.getAttributeID("y");
         const isValidYAttr = !!self.data.attrFromID(yAttrId);
-        if (!isValidYAttr && attributeCount > 1) {
-          self.setAttributeID("y", self.data.attributes[1].id);
+
+        if (!isValidXAttr && !isValidYAttr) {
+          self.setAttributeID("x", self.data.attributes[0].id);
+
+          if (attributeCount > 1) {
+            console.log("setting the y to attributes[1]");
+            self.setAttributeID("y", self.data.attributes[1].id);
+          }
         }
       }
     },
