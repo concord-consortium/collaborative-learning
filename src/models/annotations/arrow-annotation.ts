@@ -11,8 +11,7 @@ export const ArrowAnnotation = types
   sourceObject: types.maybe(ClueObjectModel),
   targetObject: types.maybe(ClueObjectModel),
   text: types.maybe(types.string),
-  // type: types.union(types.literal(kArrowAnnotationType))
-  type: types.optional(types.string, kArrowAnnotationType)
+  type: types.optional(types.literal(kArrowAnnotationType), kArrowAnnotationType)
 })
 .actions(self => ({
   setSourceObject(tileId: string, objectId: string, objectType?: string) {
