@@ -1,7 +1,7 @@
 import { types } from "mobx-state-tree";
 
 import { DocumentContentModelWithTileDragging } from "./drag-tiles";
-import { ArrowAnnotation, ArrowAnnotationType } from "../annotations/arrow-annotation";
+import { ArrowAnnotation, IArrowAnnotation } from "../annotations/arrow-annotation";
 
 /**
  * This is one part of the DocumentContentModel. The other parts are
@@ -17,7 +17,7 @@ export const DocumentContentModelWithAnnotations = DocumentContentModelWithTileD
     annotations: types.array(ArrowAnnotation)
   })
   .actions(self => ({
-    addArrow(arrow: ArrowAnnotationType) {
+    addArrow(arrow: IArrowAnnotation) {
       self.annotations.push(arrow);
     }
   }));

@@ -9,7 +9,7 @@ export const ClueObjectModel = types
   objectId: types.string,
   objectType: types.maybe(types.string)
 });
-export type ClueObjectType = Instance<typeof ClueObjectModel>;
+export interface IClueObject extends Instance<typeof ClueObjectModel> {}
 
 export interface ObjectBoundingBox {
   height: number;

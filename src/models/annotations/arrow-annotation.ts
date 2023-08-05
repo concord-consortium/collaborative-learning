@@ -22,4 +22,4 @@ export const ArrowAnnotation = types
     self.text = text;
   }
 }));
-export type ArrowAnnotationType = Instance<typeof ArrowAnnotation>;
+export interface IArrowAnnotation extends Instance<typeof ArrowAnnotation> {}

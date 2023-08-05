@@ -5,8 +5,8 @@ import React, { useContext, useEffect, useState } from "react";
 import { ArrowAnnotationComponent } from "../annotations/arrow-annotation";
 import { TileApiInterfaceContext } from "../tiles/tile-api";
 import { useUIStore } from "../../hooks/use-stores";
-import { ArrowAnnotation, ArrowAnnotationType } from "../../models/annotations/arrow-annotation";
-import { ObjectBoundingBox, ClueObjectModel, ClueObjectType } from "../../models/annotations/clue-object";
+import { ArrowAnnotation, IArrowAnnotation } from "../../models/annotations/arrow-annotation";
+import { ObjectBoundingBox, ClueObjectModel, IClueObject } from "../../models/annotations/clue-object";
 import { DocumentContentModelType } from "../../models/document/document-content";
 
 import "./annotation-layer.scss";
@@ -120,7 +120,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     }
   };
 
-  const getBoundingBox = (object: ClueObjectType) => {
+  const getBoundingBox = (object: IClueObject) => {
     return getObjectBoundingBoxUnknownRow(object.tileId, object.objectId);
   };
 
@@ -156,7 +156,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
         }
       })}
       <svg xmlnsXlink="http://www.w3.org/1999/xlink" className="annotation-svg" height="1500" width="1500">
-        { content?.annotations.map((arrow: ArrowAnnotationType) => {
+        { content?.annotations.map((arrow: IArrowAnnotation) => {
           const key = `${arrow.sourceObject?.objectId}-${arrow.targetObject?.objectId}`;
           return (
             <ArrowAnnotationComponent
