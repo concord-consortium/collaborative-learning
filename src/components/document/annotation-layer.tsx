@@ -49,7 +49,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const [_initialized, setInitialized] = useState(false);
   useEffect(() => {
     // Forces the annotation layer to rerender after initial load, getting access to the locations of elements.
-    setTimeout(() => setInitialized(true));
+    setInitialized(true);
   }, []);
   const [sourceTileId, setSourceTileId] = useState("");
   const [sourceObjectId, setSourceObjectId] = useState("");
