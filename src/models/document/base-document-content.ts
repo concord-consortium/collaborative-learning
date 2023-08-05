@@ -77,11 +77,6 @@ export const BaseDocumentContentModel = types
     }
 
     return {
-      get height() {
-        let height = 0;
-        self.rowMap.forEach(row => height += row.height ?? 0);
-        return height;
-      },
       get tileEnv() {
         return getEnv(self) as ITileEnvironment | undefined;
       },
