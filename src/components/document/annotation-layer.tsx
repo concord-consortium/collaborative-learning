@@ -155,7 +155,12 @@ export const AnnotationLayer = observer(function AnnotationLayer({
           });
         }
       })}
-      <svg xmlnsXlink="http://www.w3.org/1999/xlink" className="annotation-svg" height="1500" width="1500">
+      <svg
+        xmlnsXlink="http://www.w3.org/1999/xlink"
+        className="annotation-svg"
+        height={content?.height ?? 1500}
+        width="1500"
+      >
         { Array.from(content?.annotations.values() ?? []).map(arrow => {
           const key = `${arrow.sourceObject?.objectId}-${arrow.targetObject?.objectId}`;
           return (
