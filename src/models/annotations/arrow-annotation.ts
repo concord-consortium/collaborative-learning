@@ -1,15 +1,17 @@
 import { Instance, types } from "mobx-state-tree";
 
 import { ClueObjectModel } from "./clue-object";
+import { uniqueId } from "../../utilities/js-utils";
 
 export const kArrowAnnotationType = "arrowAnnotation";
 
 export const ArrowAnnotation = types
 .model("ArrowAnnotation", {
+  id: types.optional(types.identifier, () => uniqueId()),
   sourceObject: types.maybe(ClueObjectModel),
   targetObject: types.maybe(ClueObjectModel),
   text: types.maybe(types.string),
-  type: types.optional(types.string, kArrowAnnotationType)
+  type: types.union(types.literal(kArrowAnnotationType))
 })
 .actions(self => ({
   setSourceObject(tileId: string, objectId: string, objectType?: string) {
