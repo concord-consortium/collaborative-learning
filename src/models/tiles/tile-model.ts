@@ -51,8 +51,7 @@ export function getTileModel(tileContentModel: ITileContentModel) {
 
 export function getTileIdFromContent(tileContentModel: ITileContentModel) {
   const parent = getTileModel(tileContentModel);
-  if (parent) return parent.id;
-  return undefined;
+  return parent?.id;
 }
 
 export const TileModel = types
