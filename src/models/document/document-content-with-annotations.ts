@@ -14,10 +14,10 @@ import { ArrowAnnotation, IArrowAnnotation } from "../annotations/arrow-annotati
 export const DocumentContentModelWithAnnotations = DocumentContentModelWithTileDragging
   .named("DocumentContentModelWithAnnotations")
   .props({
-    annotations: types.array(ArrowAnnotation)
+    annotations: types.map(ArrowAnnotation)
   })
   .actions(self => ({
     addArrow(arrow: IArrowAnnotation) {
-      self.annotations.push(arrow);
+      self.annotations.put(arrow);
     }
   }));
