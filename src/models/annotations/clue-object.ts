@@ -12,8 +12,8 @@ export const ClueObjectModel = types
 export interface IClueObject extends Instance<typeof ClueObjectModel> {}
 
 export interface ObjectBoundingBox {
-  height: number;
   left: number;
   top: number;
+  height: number;
   width: number;
 }
