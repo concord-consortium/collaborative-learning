@@ -23,6 +23,7 @@
       height: 20%; //just empty space for <BasicEditableTileTitle>
     }
 
+
     .num-axis-container {
       height: 80%;
       width: 100%;
@@ -30,9 +31,28 @@
       flex-direction: column;
       position: relative;
 
+      .hover-circle{
+        height: 17px;
+        width: 17px;
+        border: 1px solid black;
+        fill: rgba(0, 129, 255, 0.5);
+
+        &.disabled{
+          display: none;
+        }
+      }
+
       .num-axis {
         stroke-width: 4px;
       }
+
+      .inner-circle {
+        &.selected {
+          fill: blue;
+        }
+      }
+
+
 
       .click-area{
         cursor: default;

@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import React from "react";
 import { ITileApi } from "../../components/tiles/tile-api";
 import { TileModel } from "../../models/tiles/tile-model";
-import { defaultNumberlineContent } from "./numberline-content";
+import { defaultNumberlineContent } from "./models/numberline-content";
 import { NumberlineTileComponent } from "./numberline-tile";
 
 // The numberline tile needs to be registered so the TileModel.create

@@ -999,6 +999,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    console.log("geometry-content.tsx > handleDragOver");
     const isAcceptableDrag = this.isAcceptableTileDrag(e);
     this.props.onSetCanAcceptDrop(isAcceptableDrag ? this.props.model.id : undefined);
     if (isAcceptableDrag) {
@@ -1008,6 +1009,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    console.log("geometry-content.tsx > handleDragLeave");
     this.props.onSetCanAcceptDrop();
   };
 

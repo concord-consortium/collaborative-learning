@@ -95,6 +95,8 @@ export const GeometryMetadataModel = TileMetadataModel
       return self.disabled.indexOf(feature) >= 0;
     },
     isSelected(id: string) {
+      // console.log("isSelected!:");
+      // console.log("props to the GeometryMetadataModel: are", self);
       return !!self.selection.get(id) || self.isSharedSelected(id);
     },
     hasSelection() {
@@ -518,8 +520,15 @@ export const GeometryContentModel = GeometryBaseContentModel
     function addPoint(board: JXG.Board | undefined,
                       parents: JXGCoordPair,
                       properties?: JXGProperties): JXG.Point | undefined {
+      console.log("geometry model > addPoint");
       const { id = uniqueId(), ...props } = properties || {};
+      console.log("parents[0]", parents[0]);
+      console.log("parents[1]", parents[1]);
+      console.log("props", props);
+
       const pointModel = PointModel.create({ id, x: parents[0], y: parents[1], ...props });
+      console.log("new pointModel = ", pointModel);
+
       self.addObjectModel(pointModel);
 
       const change: JXGChange = {
@@ -536,6 +545,7 @@ export const GeometryContentModel = GeometryBaseContentModel
                        parents: JXGUnsafeCoordPair[],
                        _properties?: JXGProperties | JXGProperties[],
                        links?: ILinkProperties): JXG.Point[] {
+      console.log("geometry model > addPoints");
       const props = castArray(_properties);
       const properties = parents.map((p, i) => ({ id: uniqueId(), ...(props && props[i] || props[0]) }));
 
@@ -589,6 +599,8 @@ export const GeometryContentModel = GeometryBaseContentModel
     }
 
     function removeObjects(board: JXG.Board | undefined, ids: string | string[], links?: ILinkProperties) {
+      console.log("removeOBjects:", ids);
+
       board && self.deselectObjects(board, ids);
       self.deleteObjects(castArray(ids));
 
@@ -825,6 +837,8 @@ export const GeometryContentModel = GeometryBaseContentModel
                                 const id = entry[0];
                                 const obj = board.objects[id];
                                 const isSelected = entry[1];
+                                console.log("Geometry Model > getOneSelectedPolyGon");
+                                console.log("\t return:", obj && (obj.elType === "point") && isSelected);
                                 return obj && (obj.elType === "point") && isSelected;
                               });
         return _size(selectedPolygon.ancestors) === selectedPts.length
