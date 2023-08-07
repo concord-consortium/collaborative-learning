@@ -87,7 +87,7 @@ export const RectangleComponent = observer(function RectangleComponent({model, h
   const { id, stroke, strokeWidth, strokeDashArray, fill } = rect;
   const { x, y } = rect.position;
   const { width, height } = rect.currentDims;
-return <rect
+  return <rect
     key={id}
     x={x}
     y={y}
@@ -101,8 +101,7 @@ return <rect
     onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
     onMouseDown={(e)=> handleDrag?.(e, model)}
     pointerEvents={"visible"} //allows user to select inside of an unfilled object
-
-    />;
+  />;
 
 });
 

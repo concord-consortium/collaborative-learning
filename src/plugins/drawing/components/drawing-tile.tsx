@@ -28,7 +28,19 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
     onRegisterTileApi({
       exportContentAsTileJson: (options?: ITileExportOptions) => {
         return contentRef.current.exportJson(options);
-      }
+      },
+      getObjectBoundingBox(objectId, objectType) {
+        const object = contentRef.current.objectMap[objectId];
+        if (object) {
+          const bb = object.boundingBox;
+          const height = bb.se.y - bb.nw.y;
+          const width = bb.se.x - bb.nw.x;
+          const left = bb.nw.x;
+          const top = bb.nw.y;
+          return { height, left, top, width };
+        }
+        return undefined;
+      },
     });
     if (!readOnly) {
       hotKeys.current.register({
