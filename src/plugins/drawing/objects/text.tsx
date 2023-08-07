@@ -1,6 +1,6 @@
 import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { DrawingObjectType, DrawingTool, EditableObject, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, typeField } from "./drawing-object";
 import { BoundingBoxDelta, Point, ToolbarSettings } from "../model/drawing-basic-types";
@@ -93,6 +93,14 @@ export const TextComponent = observer(
     clip: string
   }
   const Content = function({editing, clip}: IContentProps) {
+
+    useEffect(() => {
+      // Focus text area when it opens, to avoid need for user to click it again.
+      if (editing) {
+        textEditor.current?.focus();
+      }
+    }, [editing]);
+
     if (editing) {
       return (
         <foreignObject x={x+margin} y={y+margin} width={width-2*margin} height={height-2*margin}>
@@ -100,8 +108,8 @@ export const TextComponent = observer(
             style={{width: "100%", height: "100%", resize: "none"}} 
             defaultValue={text}
             onBlur={(e) => handleClose(true)}
-            onKeyDown={handleKeyDown}
-            onMouseDown={handleMouseDown}>
+            onKeyDown={handleTextAreaKeyDown}
+            onMouseDown={handleTextAreaMouseDown}>
           </textarea>
         </foreignObject>);
     } else {
@@ -113,11 +121,11 @@ export const TextComponent = observer(
     }
   };
 
-  const handleMouseDown = (e: React.MouseEvent<HTMLTextAreaElement>) => {
+  const handleTextAreaMouseDown = (e: React.MouseEvent<HTMLTextAreaElement>) => {
     e.stopPropagation();
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleTextAreaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     e.stopPropagation();
     const { key } = e;
     switch (key) {
@@ -179,13 +187,7 @@ export class TextDrawingTool extends DrawingTool {
       stroke,
       text: ""
     });
-    const obj = this.drawingLayer.addNewDrawingObject(getSnapshot(text));
-    if (obj && isTextObject(obj)) {
-      console.log('text obj: ', obj);
-      obj.setEditing(true);
-    } else {
-      console.error('Object returned from add is not of the expected type');
-    }
+    this.drawingLayer.addNewDrawingObject(getSnapshot(text));
   }
 }
 
