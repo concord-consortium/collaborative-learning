@@ -6,6 +6,7 @@ import { ArrowAnnotationType } from "../../models/annotations/arrow-annotation";
 import { ClueObjectType } from "../../models/annotations/clue-object";
 
 import "./arrow-annotation.scss";
+import { CurvedArrow } from "./curved-arrow";
 
 type DragType = "source" | "target" | "text";
 interface IArrowAnnotationProps {
@@ -56,16 +57,13 @@ export const ArrowAnnotationComponent = observer(
     const [tDxOffset, tDyOffset] = arrow.targetOffset ? [arrow.targetOffset.dx, arrow.targetOffset.dy] : [0, 0];
     const targetX = targetBB.left + targetBB.width / 2 + tDxOffset + targetDragOffsetX;
     const targetY = targetBB.top + targetBB.height / 2 + tDyOffset + targetDragOffsetY;
-    
-    // Determine angle of arrowhead
-    const dx = targetX - sourceX;
-    const dy = targetY - sourceY;
-    const angle = 90-Math.atan2(-dy, dx)*180/Math.PI;
 
     // Set up text location and dimensions
     const textWidth = 120;
     const textHeight = 50;
     const [textDxOffset, textDyOffset] = arrow.textOffset ? [arrow.textOffset.dx, arrow.textOffset.dy] : [0, 0];
+    const dx = targetX - sourceX;
+    const dy = targetY - sourceY;
     const textX = targetX - dx / 2 - textWidth / 2 + textDxOffset + textDragOffsetX;
     const textY = targetY - dy / 2 - textHeight / 2 + textDyOffset + textDragOffsetY;
 
@@ -150,8 +148,6 @@ export const ArrowAnnotationComponent = observer(
       window.addEventListener("mouseup", handleMouseUp);
     }
 
-    const color = "blue";
-
     interface IDragHandlerProps {
       startX: number;
       startY: number;
@@ -172,10 +168,7 @@ export const ArrowAnnotationComponent = observer(
     }
     return (
       <g>
-        <path d={`M ${sourceX} ${sourceY} L ${targetX} ${targetY}`} stroke={color} strokeWidth={3} />
-        <g transform={`translate(${targetX} ${targetY}) rotate(${angle})`}>
-          <polygon points="0 -3 7 12 -7 12 0 -3" fill={color} />
-        </g>
+        <CurvedArrow sourceX={sourceX} sourceY={sourceY} targetX={targetX} targetY={targetY} />
         <foreignObject height={`${textHeight}`} width={`${textWidth}`} x={`${textX}`} y={`${textY}`}>
           <div className="text-region">
             { editingText
