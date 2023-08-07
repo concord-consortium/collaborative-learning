@@ -6,7 +6,7 @@ import Rete, { NodeEditor, Node } from "rete";
 
 import { useStopEventPropagation, useCloseDropdownOnOutsideEvent } from "./custom-hooks";
 import { NodeSensorTypes, kSensorSelectMessage, kSensorMissingMessage } from "../../model/utilities/node";
-import { NodeChannelInfo } from "../../model/utilities/channel";
+import { NodeChannelInfo, kDeviceDisplayNames } from "../../model/utilities/channel";
 import DropdownCaretIcon from "../../assets/icons/dropdown-caret.svg";
 import { dataflowLogEvent } from "../../dataflow-logger";
 import { resetGraph } from "../../utilities/graph-utils";
@@ -146,7 +146,10 @@ export class SensorSelectControl extends Rete.Control {
         if (ch === "none") return "None Available";
         if (!ch && (!id || id === "none")) return kSensorSelectMessage;
         if (!ch) return `${kSensorMissingMessage} ${id}`;
-        if (ch.missing) return `${kSensorMissingMessage} connect ${ch.deviceFamily} for ${ch.name}`;
+        if (ch.missing) {
+          const deviceStr = kDeviceDisplayNames[`${ch.deviceFamily}`];
+          return `${kSensorMissingMessage} Connect ${deviceStr} for live ${ch.displayName}`;
+        }
         const chStr = ch.virtual
           ? `${ch.name} Demo Data`
           : ch.simulated
