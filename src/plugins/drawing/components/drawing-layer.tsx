@@ -16,6 +16,7 @@ import { Point, ToolbarSettings } from "../model/drawing-basic-types";
 import { getDrawingToolInfos, renderDrawingObject } from "./drawing-object-manager";
 import { ImageObject } from "../objects/image";
 import { debounce } from "lodash";
+import { isTextObject } from "../objects/text";
 
 const SELECTION_COLOR = "#777";
 const HOVER_COLOR = "#bbdd00";
@@ -187,9 +188,20 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     }
   };
 
-  // handles dragging of selected/hovered objects
+  // Handles click/drag of selected/hovered objects
   public handleSelectedObjectMouseDown = (e: React.MouseEvent<any>, obj: DrawingObjectType) => {
-    if (this.props.readOnly || (this.currentTool !== this.tools.select)) return;
+    if (this.props.readOnly) return;
+
+    // Clicking on a text object when text tool is active allows you to edit it.
+    if (this.currentTool === this.tools.text && isTextObject(obj)) {
+      obj.setEditing(true);
+      e.stopPropagation();
+      return;
+    }
+
+    // Otherwise, only the select tool does anything special when an object is clicked.
+    // Other tools just let the click pass through to the canvas layer.
+    if (this.currentTool !== this.tools.select) return;
     let moved = false;
     const {selectedObjects, hoverObject } = this.state;
     let objectsToInteract: DrawingObjectType[];
