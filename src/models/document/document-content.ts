@@ -1,12 +1,13 @@
 import { Instance, SnapshotIn } from "mobx-state-tree";
-import { DocumentContentModelWithTileDragging } from "./drag-tiles";
+import { DocumentContentModelWithAnnotations } from "./document-content-with-annotations";
 
 /**
- * The DocumentContentModel is the combination of 2 parts:
+ * The DocumentContentModel is the combination of 3 parts:
  * - BaseDocumentContentModel
  * - DocumentContentModelWithTileDragging
+ * - DocumentContentModelWithAnnotations
  *
- * These two parts were split out so we could reduce the size of a single
+ * These three parts were split out so we could reduce the size of a single
  * document content model file. This splitting is constrained by a couple
  * of factors:
  * - the code needs to support actions that can apply "atomically" to the
@@ -22,7 +23,7 @@ import { DocumentContentModelWithTileDragging } from "./drag-tiles";
  * Note: the name "DocumentContent" is important because it is used in other
  * parts of the code to find a MST parent with this name.
  */
-export const DocumentContentModel = DocumentContentModelWithTileDragging.named("DocumentContent");
+export const DocumentContentModel = DocumentContentModelWithAnnotations.named("DocumentContent");
 
 export type DocumentContentModelType = Instance<typeof DocumentContentModel>;
 export type DocumentContentSnapshotType = SnapshotIn<typeof DocumentContentModel>;

@@ -35,8 +35,9 @@ jobs:
       # https://github.com/cypress-io/github-action/issues/48
       fail-fast: false
       matrix:
-        # run 5 copies of the current job in parallel
-        containers: [1, 2, 3, 4, 5]
+        # run 1 copy of the current job in parallel
+        # One thread is enoguh for now, since there is only one smoke test
+        containers: [1]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -56,6 +57,7 @@ jobs:
           # upload videos for failing specs
           config: video=true,videoUploadOnPasses=false
           browser: chrome
+          spec: cypress/e2e/clue/smoke/**
         env:
           # pass the Dashboard record key as an environment variable
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}

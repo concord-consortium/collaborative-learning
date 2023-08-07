@@ -22,14 +22,15 @@ import { safeJsonParse } from "../../utilities/js-utils";
 import "./document-content.sass";
 
 interface IProps extends IBaseProps {
+  content?: DocumentContentModelType;
   context: string;
   documentId?: string;
-  content?: DocumentContentModelType;
-  showPlaybackSpacer?: boolean;
-  typeClass: string;
+  onScroll?: (x: number, y: number) => void;
   readOnly?: boolean;
   scale?: number;
   selectedSectionId?: string | null;
+  showPlaybackSpacer?: boolean;
+  typeClass: string;
   viaTeacherDashboard?: boolean;
 }
 
@@ -130,8 +131,11 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const isChatEnabled = user.isTeacher;
     const documentSelectedForComment = isChatEnabled && ui.showChatPanel && ui.selectedTileIds.length === 0
                                           && ui.focusDocument;
-    const documentClass = classNames("document-content", {"document-content-smooth-scroll" : viaTeacherDashboard,
-                                     "comment-select" : documentSelectedForComment});
+    const documentClass = classNames(
+      "document-content",
+      {"document-content-smooth-scroll" : viaTeacherDashboard, "comment-select" : documentSelectedForComment},
+      this.props.readOnly ? "read-only" : "read-write"
+    );
 
     return (
       <DocumentDndContext>
@@ -238,6 +242,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const xScroll = this.domElement?.scrollLeft || 0;
     const yScroll = this.domElement?.scrollTop || 0;
     tileApiInterface?.forEach(api => api.handleDocumentScroll?.(xScroll, yScroll));
+    this.props.onScroll?.(xScroll, yScroll);
   }, 50);
 
   private getTileTitle(id: string) {

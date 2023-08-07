@@ -120,7 +120,7 @@ export const LineComponent = observer(function LineComponent({model, handleHover
     onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
     onMouseDown={(e)=> handleDrag?.(e, model)}
     pointerEvents={"visible"}
-    />;
+  />;
 });
 
 export class LineDrawingTool extends DrawingTool {
