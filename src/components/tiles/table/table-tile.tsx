@@ -6,7 +6,7 @@ import ReactDataGrid from "react-data-grid";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
 import { exportTableContentAsJson } from "../../../models/tiles/table/table-export";
 import { ITileProps } from "../tile-component";
-import { getTableContentHeight } from "./table-utils";
+import { getTableColumnLeft, getTableContentHeight, getTableRowTop } from "./table-utils";
 import { EditableTableTitle } from "./editable-table-title";
 import { TableToolbar } from "./table-toolbar";
 import { useColumnsFromDataSet } from "./use-columns-from-data-set";
@@ -32,7 +32,6 @@ import { lightenColor } from "../../../utilities/color-utils";
 import { verifyAlive } from "../../../utilities/mst-utils";
 
 import "./table-tile.scss";
-import { decipherCellId } from "../../../models/tiles/table/table-utils";
 
 // observes row selection from shared selection store
 const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComponent({
@@ -177,8 +176,22 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   const exportContentAsTileJson = useCallback(() => {
     return exportTableContentAsJson(content.metadata, dataSet, content.columnWidth);
   }, [dataSet, content]);
-  useToolApi({ content: getContent(), getContentHeight, exportContentAsTileJson,
-                onRegisterTileApi, onUnregisterTileApi });
+  function getRowTop(rowIndex: number) {
+    return getTableRowTop({
+      rowIndex, rows, readOnly, rowHeight, headerHeight, getTitleHeight,
+      hasExpressions: getContent().hasExpressions,
+      padding: 10 + (modelRef.current.display === "teacher" ? 20 : 0)
+    });
+  }
+  function getColumnLeft(columnIndex: number) {
+    return getTableColumnLeft({
+      columnIndex, columns, dataSet, measureColumnWidth
+    });
+  }
+  useToolApi({
+    content: getContent(), dataSet, getColumnLeft, getContentHeight, getRowTop, exportContentAsTileJson,
+    measureColumnWidth, model, onRegisterTileApi, onUnregisterTileApi, readOnly, rowHeight, rows
+  });
 
   useEffect(() => {
     if (containerRef.current && linkColors) {
@@ -203,38 +216,6 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     });
     return () => disposer();
   });
-
-  interface gobbProps {
-    objectId: string;
-    objectType?: string;
-    tileId: string;
-  }
-  function getObjectBoundingBox({ objectId, objectType }: gobbProps) {
-    // console.log(`--- getObjectBoundingBox`, objectId, objectType);
-    if (objectType === "cell") {
-      const { attributeId, caseId } = decipherCellId(objectId);
-      // console.log(` -- ids`, attributeId, caseId);
-      if (!attributeId || !caseId) return undefined;
-      const attributeIndex = dataSet.attrIndexFromID(attributeId);
-      if (attributeIndex === undefined) return undefined;
-      const rowIndex = dataSet.caseIndexFromID(caseId);
-      // const documentSelector = `.document-content.${readOnly ? "read-only" : "read-write"}`;
-      const documentSelector = `.document-content`;
-      const tileSelector = `[data-tool-id="${model.id}"]`;
-      const rowSelector = `.rdg-row:nth-child(${4 + rowIndex})`;
-      const cellSelector = `.rdg-cell:nth-child(${2 + attributeIndex})`;
-      const selector = `${documentSelector} ${tileSelector} ${rowSelector} ${cellSelector}`;
-      // console.log(` -- selector`, selector);
-      const cellElements = document.querySelectorAll(selector);
-      // console.log(` -- elements`, cellElements);
-      if (cellElements.length !== 1) return undefined;
-      const cellElement = cellElements[0];
-      const bb = cellElement.getBoundingClientRect();
-      const boundingBox = { height: bb.height, left: bb.x, top: bb.y, width: bb.width };
-      console.log(`cell ${objectId}`, boundingBox);
-    }
-  }
-  content.annotatableObjects.forEach(object => getObjectBoundingBox(object));
 
   const toolbarProps = useToolbarTileApi({ id: model.id, enabled: !readOnly, onRegisterTileApi, onUnregisterTileApi });
   return (

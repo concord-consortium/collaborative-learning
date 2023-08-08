@@ -10,7 +10,7 @@ import { getCellId } from "./table-utils";
 import { IDocumentExportOptions, IDefaultContentOptions } from "../tile-content-info";
 import { TileMetadataModel } from "../tile-metadata";
 import { tileModelHooks } from "../tile-model-hooks";
-import { getTileModel } from "../tile-model";
+import { getTileIdFromContent, getTileModel } from "../tile-model";
 import { TileContentModel } from "../tile-content";
 import { addCanonicalCasesToDataSet, IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
 import {
@@ -25,6 +25,7 @@ import { logTileChangeEvent } from "../log/log-tile-change-event";
 import { uniqueId } from "../../../utilities/js-utils";
 import { PartialSharedModelEntry } from "../../document/document-content-types";
 import { createDefaultDataSet } from "../../../plugins/dataflow/model/utilities/create-default-data-set";
+import { IClueObject } from "../../annotations/clue-object";
 
 export const kTableTileType = "Table";
 export const kCaseIdName = "__id__";
@@ -245,10 +246,8 @@ export const TableContentModel = TileContentModel
       return getTileModel(self)?.title ?? self.dataSet.name;
     },
     get annotatableObjects() {
-      // TODO Real tile id
-      const tileId = "fakeId";
-      // TODO any
-      const objects: any[] = [];
+      const tileId = getTileIdFromContent(self) ?? "";
+      const objects: IClueObject[] = [];
       const objectType = "cell";
       self.dataSet.cases.forEach(c => {
         self.dataSet.attributes.forEach(attribute => {
