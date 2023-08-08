@@ -1,8 +1,8 @@
 import {MutableRefObject, useCallback, useEffect} from "react";
 import {matchCirclesToData, setNiceDomain, startAnimation} from "../utilities/graph-utils";
 import {IGraphModel, isGraphVisualPropsAction} from "../models/graph-model";
-import {useDataSetContext} from "./use-data-set-context";
-import {INumericAxisModel} from "../axis/models/axis-model";
+import {useDataSetContext} from "../imports/hooks/use-data-set-context";
+import {INumericAxisModel} from "../imports/components/axis/models/axis-model";
 import {IDotsRef} from "../graph-types";
 import {onAnyAction} from "../../../utilities/mst-utils";
 
@@ -29,10 +29,6 @@ export function useGraphModel(props: IProps) {
       enableAnimation, instanceId
     });
   }, [dataConfig, graphModel, dotsRef, enableAnimation, instanceId]);
-
-  useEffect(function createCircles() {
-    callMatchCirclesToData();
-  }, [callMatchCirclesToData, dataConfig.caseDataArray]);
 
   // respond to change in plotType
   useEffect(function installPlotTypeAction() {

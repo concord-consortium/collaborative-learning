@@ -2,14 +2,12 @@ import React, {useCallback, useEffect, useRef} from "react";
 import {autorun, reaction} from "mobx";
 import {isSelectionAction, isSetCaseValuesAction} from "../../../models/data/data-set-actions";
 import {IDotsRef, GraphAttrRoles} from "../graph-types";
-import {INumericAxisModel} from "../axis/models/axis-model";
-import {GraphLayout} from "../models/graph-layout";
-import {IGraphModel} from "../models/graph-model";
+import {INumericAxisModel} from "../imports/components/axis/models/axis-model";
+import {useGraphLayoutContext} from "../models/graph-layout";
+import {useGraphModelContext} from "../models/graph-model";
 import {matchCirclesToData, startAnimation} from "../utilities/graph-utils";
 import {useCurrent} from "../../../hooks/use-current";
-import {useInstanceIdContext} from "./use-instance-id-context";
-import {useDataSetContext} from "./use-data-set-context";
-import {useDataConfigurationContext} from "./use-data-configuration-context";
+import {useInstanceIdContext} from "../imports/hooks/use-instance-id-context";
 import {onAnyAction} from "../../../utilities/mst-utils";
 
 interface IDragHandlers {
@@ -35,8 +33,6 @@ export const useDragHandlers = (target: any, {start, drag, end}: IDragHandlers) 
 };
 
 export interface IPlotResponderProps {
-  graphModel: IGraphModel
-  layout: GraphLayout
   refreshPointPositions: (selectedOnly: boolean) => void
   refreshPointSelection: () => void
   dotsRef: IDotsRef
@@ -44,13 +40,11 @@ export interface IPlotResponderProps {
 }
 
 export const usePlotResponders = (props: IPlotResponderProps) => {
-  const {
-      graphModel, enableAnimation,
-      refreshPointPositions, refreshPointSelection, dotsRef, layout
-    } = props,
-    dataset = useDataSetContext(),
-    dataConfiguration = useDataConfigurationContext(),
-    // numberOfScales = layout.axisScales.entries().size(),
+  const {enableAnimation, refreshPointPositions, refreshPointSelection, dotsRef} = props,
+    graphModel = useGraphModelContext(),
+    layout = useGraphLayoutContext(),
+    dataConfiguration = graphModel.config,
+    dataset = dataConfiguration.dataset,
     xNumeric = graphModel.getAxis('bottom') as INumericAxisModel,
     yNumeric = graphModel.getAxis('left') as INumericAxisModel,
     v2Numeric = graphModel.getAxis('rightNumeric') as INumericAxisModel,
@@ -99,6 +93,17 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
     );
     return () => disposer();
   }, [callRefreshPointPositions, xNumeric?.domain, yNumeric?.domain, v2Numeric?.domain]);
+
+  useEffect(function respondToCategorySetChanges() {
+    return reaction(() => {
+      return layout.categorySetArrays;
+    }, (categorySetsArrays) => {
+      if (categorySetsArrays.length) {
+        startAnimation(enableAnimation);
+        callRefreshPointPositions(false);
+      }
+    });
+  }, [callRefreshPointPositions, enableAnimation, layout.categorySetArrays]);
 
   // respond to attribute assignment changes
   useEffect(() => {
@@ -158,7 +163,7 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
         });
         callRefreshPointPositions(false);
       }
-    })|| (() => true);
+    }) || (() => true);
     return () => disposer();
   }, [dataset, dataConfiguration, enableAnimation, graphModel, callRefreshPointPositions, dotsRef, instanceId]);
 
