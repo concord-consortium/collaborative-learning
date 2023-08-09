@@ -160,32 +160,6 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   };
 
   // Define and submit functions for general tool tile API
-  // const getContentHeight = useCallback(() => {
-  //   return getTableContentHeight({
-  //     readOnly,
-  //     rows,
-  //     rowHeight,
-  //     headerHeight,
-  //     getTitleHeight,
-  //     hasExpressions: getContent().hasExpressions,
-  //     padding: 10 + (modelRef.current.display === "teacher" ? 20 : 0)
-  //   });
-  // }, [rows, rowHeight, headerHeight, getTitleHeight, getContent, modelRef, readOnly]);
-  // const exportContentAsTileJson = useCallback(() => {
-  //   return exportTableContentAsJson(content.metadata, dataSet, content.columnWidth);
-  // }, [dataSet, content]);
-  // function getRowTop(rowIndex: number) {
-  //   return getTableRowTop({
-  //     rowIndex, rows, readOnly, rowHeight, headerHeight, getTitleHeight,
-  //     hasExpressions: getContent().hasExpressions,
-  //     padding: 10 + (modelRef.current.display === "teacher" ? 20 : 0)
-  //   });
-  // }
-  // function getColumnLeft(columnIndex: number) {
-  //   return getTableColumnLeft({
-  //     columnIndex, columns, dataSet, measureColumnWidth
-  //   });
-  // }
   const padding = 10 + (modelRef.current.display === "teacher" ? 20 : 0);
   useToolApi({
     columns, content: getContent(), dataSet, getTitleHeight, headerHeight,
