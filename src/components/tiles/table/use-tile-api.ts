@@ -1,37 +1,63 @@
 import { useCallback, useEffect, useMemo } from "react";
 import { RowHeightArgs } from "react-data-grid";
 
-import { TRow } from "./table-types";
+import { TColumn, TRow } from "./table-types";
+import { getTableColumnLeft, getTableContentHeight, getTableRowTop } from "./table-utils";
 import { ITileApi } from "../tile-api";
 import { useCurrent } from "../../../hooks/use-current";
-import { IDataSet } from "../../../models/data/data-set";
-import { getLinkedTableIndex } from "../../../models/tiles/table-links";
-import { TableContentModelType } from "../../../models/tiles/table/table-content";
-import { decipherCellId } from "../../../models/tiles/table/table-utils";
-import { ITileModel } from "../../../models/tiles/tile-model";
 import { IAttribute } from "../../../models/data/attribute";
+import { IDataSet } from "../../../models/data/data-set";
+import { TableContentModelType } from "../../../models/tiles/table/table-content";
+import { exportTableContentAsJson } from "../../../models/tiles/table/table-export";
+import { getLinkedTableIndex } from "../../../models/tiles/table-links";
+import { decipherCellId } from "../../../models/tiles/table/table-utils";
 
 interface IProps {
+  columns: TColumn[];
   content: TableContentModelType;
   dataSet: IDataSet;
-  getColumnLeft: (columnIndex: number) => number;
-  getContentHeight: () => number | undefined;
-  getRowTop: (rowIndex: number) => number;
-  exportContentAsTileJson: () => string;
+  getTitleHeight: () => number;
+  headerHeight: () => number;
   measureColumnWidth: (attribute: IAttribute) => number;
-  model: ITileModel;
   onRegisterTileApi: (tileApi: ITileApi, facet?: string | undefined) => void;
   onUnregisterTileApi: (facet?: string | undefined) => void;
+  padding?: number;
   readOnly?: boolean;
   rowHeight: (args: RowHeightArgs<TRow>) => number;
   rows: TRow[];
 }
 export const useToolApi = ({
-  content, dataSet, getColumnLeft, getContentHeight, getRowTop, exportContentAsTileJson,
-  measureColumnWidth, model, onRegisterTileApi, onUnregisterTileApi, readOnly, rowHeight, rows
+  columns, content, dataSet, getTitleHeight, headerHeight, measureColumnWidth, onRegisterTileApi,
+  onUnregisterTileApi, padding, readOnly, rowHeight, rows
 }: IProps) => {
   const contentRef = useCurrent(content);
+  const hasExpressions = content.hasExpressions;
 
+  const getContentHeight = useCallback(() => {
+    return getTableContentHeight({
+      readOnly,
+      rows,
+      rowHeight,
+      headerHeight,
+      getTitleHeight,
+      hasExpressions,
+      padding
+    });
+  }, [getTitleHeight, hasExpressions, headerHeight, padding, readOnly, rowHeight, rows]);
+  const exportContentAsTileJson = useCallback(() => {
+    return exportTableContentAsJson(content.metadata, dataSet, content.columnWidth);
+  }, [dataSet, content]);
+
+  const getRowTop = useCallback((rowIndex: number) => {
+    return getTableRowTop({
+      getTitleHeight, hasExpressions, headerHeight, padding, readOnly, rowHeight, rowIndex, rows
+    });
+  }, [getTitleHeight, hasExpressions, headerHeight, padding, readOnly, rowHeight, rows]);
+  const getColumnLeft = useCallback((columnIndex: number) => {
+    return getTableColumnLeft({
+      columnIndex, columns, dataSet, measureColumnWidth
+    });
+  }, [columns, dataSet, measureColumnWidth]);
   const getObjectBoundingBox = useCallback((objectId: string, objectType?: string) => {
     if (objectType === "cell") {
       const { attributeId, caseId } = decipherCellId(objectId);
