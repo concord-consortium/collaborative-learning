@@ -64,8 +64,10 @@ export const ArrowAnnotationComponent = observer(
     const [textDxOffset, textDyOffset] = arrow.textOffset ? [arrow.textOffset.dx, arrow.textOffset.dy] : [0, 0];
     const dx = targetX - sourceX;
     const dy = targetY - sourceY;
-    const textX = targetX - dx / 2 - textWidth / 2 + textDxOffset + textDragOffsetX;
-    const textY = targetY - dy / 2 - textHeight / 2 + textDyOffset + textDragOffsetY;
+    const textCenterX = targetX - dx / 2 + textDxOffset + textDragOffsetX;
+    const textCenterY = targetY - dy / 2 + textDyOffset + textDragOffsetY;
+    const textX = textCenterX - textWidth / 2;
+    const textY = textCenterY - textHeight / 2;
 
     // Set up text handlers
     function handleTextClick() {
@@ -168,7 +170,11 @@ export const ArrowAnnotationComponent = observer(
     }
     return (
       <g>
-        <CurvedArrow sourceX={sourceX} sourceY={sourceY} targetX={targetX} targetY={targetY} />
+        <CurvedArrow
+          peakX={textCenterX} peakY={textCenterY}
+          sourceX={sourceX} sourceY={sourceY}
+          targetX={targetX} targetY={targetY}
+        />
         <foreignObject height={`${textHeight}`} width={`${textWidth}`} x={`${textX}`} y={`${textY}`}>
           <div className="text-region">
             { editingText
