@@ -2,17 +2,17 @@ import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { useEffect, useRef, useState } from "react";
 
-import { ArrowAnnotationType } from "../../models/annotations/arrow-annotation";
-import { ClueObjectType } from "../../models/annotations/clue-object";
+import { CurvedArrow } from "./curved-arrow";
+import { IArrowAnnotation } from "../../models/annotations/arrow-annotation";
+import { IClueObject } from "../../models/annotations/clue-object";
 
 import "./arrow-annotation.scss";
-import { CurvedArrow } from "./curved-arrow";
 
 type DragType = "source" | "target" | "text";
 interface IArrowAnnotationProps {
-  arrow: ArrowAnnotationType;
+  arrow: IArrowAnnotation;
   canEdit?: boolean;
-  getBoundingBox: (object: ClueObjectType) =>
+  getBoundingBox: (object: IClueObject) =>
     { height: number, left: number, top: number, width: number} | null | undefined;
   key?: string;
 }

@@ -5,8 +5,8 @@ import React, { useContext, useEffect, useState } from "react";
 import { ArrowAnnotationComponent } from "../annotations/arrow-annotation";
 import { TileApiInterfaceContext } from "../tiles/tile-api";
 import { useUIStore } from "../../hooks/use-stores";
-import { ArrowAnnotation, ArrowAnnotationType } from "../../models/annotations/arrow-annotation";
-import { ObjectBoundingBox, ClueObjectModel, ClueObjectType } from "../../models/annotations/clue-object";
+import { ArrowAnnotation } from "../../models/annotations/arrow-annotation";
+import { ClueObjectModel, IClueObject, ObjectBoundingBox } from "../../models/annotations/clue-object";
 import { DocumentContentModelType } from "../../models/document/document-content";
 
 import "./annotation-layer.scss";
@@ -57,7 +57,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const [_initialized, setInitialized] = useState(false);
   useEffect(() => {
     // Forces the annotation layer to rerender after initial load, getting access to the locations of elements.
-    setTimeout(() => setInitialized(true));
+    setInitialized(true);
   }, []);
   const [sourceTileId, setSourceTileId] = useState("");
   const [sourceObjectId, setSourceObjectId] = useState("");
@@ -128,7 +128,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     }
   };
 
-  const getBoundingBox = (object: ClueObjectType) => {
+  const getBoundingBox = (object: IClueObject) => {
     return getObjectBoundingBoxUnknownRow(object.tileId, object.objectId);
   };
 
@@ -139,37 +139,37 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     <div className={classes}>
       <svg
         className="annotation-svg"
-        height="1500"
-        width="1500"
+        height="100%"
+        width="100%"
         xmlnsXlink="http://www.w3.org/1999/xlink"
       >
-      { editing && !readOnly && rowIds.map(rowId => {
-        const row = content?.rowMap.get(rowId);
-        if (row) {
-          const tiles = row.tiles;
-          return tiles.map(tileInfo => {
-            const tile = content?.tileMap.get(tileInfo.tileId);
-            if (tile) {
-              return tile.content.annotatableObjects.map(({ objectId, objectType }) => {
-                return (
-                  <AnnotationButton
-                    getObjectBoundingBox={getObjectBoundingBox}
-                    key={`${tile.id}-${objectId}-button`}
-                    objectId={objectId}
-                    objectType={objectType}
-                    onClick={handleAnnotationButtonClick}
-                    rowId={rowId}
-                    sourceObjectId={sourceObjectId}
-                    sourceTileId={sourceTileId}
-                    tileId={tile.id}
-                  />
-                );
-              });
-            }
-          });
-        }
-      })}
-        { content?.annotations.map((arrow: ArrowAnnotationType) => {
+        { editing && !readOnly && rowIds.map(rowId => {
+          const row = content?.rowMap.get(rowId);
+          if (row) {
+            const tiles = row.tiles;
+            return tiles.map(tileInfo => {
+              const tile = content?.tileMap.get(tileInfo.tileId);
+              if (tile) {
+                return tile.content.annotatableObjects.map(({ objectId, objectType }) => {
+                  return (
+                    <AnnotationButton
+                      getObjectBoundingBox={getObjectBoundingBox}
+                      key={`${tile.id}-${objectId}-button`}
+                      objectId={objectId}
+                      objectType={objectType}
+                      onClick={handleAnnotationButtonClick}
+                      rowId={rowId}
+                      sourceObjectId={sourceObjectId}
+                      sourceTileId={sourceTileId}
+                      tileId={tile.id}
+                    />
+                  );
+                });
+              }
+            });
+          }
+        })}
+        { Array.from(content?.annotations.values() ?? []).map(arrow => {
           const key = `${arrow.sourceObject?.objectId}-${arrow.targetObject?.objectId}`;
           return (
             <ArrowAnnotationComponent

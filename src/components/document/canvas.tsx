@@ -19,7 +19,7 @@ import {
 } from "../tiles/tile-api";
 import { StringBuilder } from "../../utilities/string-builder";
 import { HotKeys } from "../../utilities/hot-keys";
-import { DEBUG_CANVAS, DEBUG_DOCUMENT } from "../../lib/debug";
+import { DEBUG_CANVAS, DEBUG_DOCUMENT, DEBUG_HISTORY } from "../../lib/debug";
 import { DocumentError } from "./document-error";
 
 import "./canvas.scss";
@@ -250,6 +250,10 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
       const showPlaybackControls = !prevState.showPlaybackControls;
       const historyDocumentCopy = showPlaybackControls ?
         this.createHistoryDocumentCopy() : undefined;
+
+      if (DEBUG_HISTORY) {
+        (window as any).historyDocument = historyDocumentCopy;
+      }
 
       if (prevState.historyDocumentCopy) {
         destroy(prevState.historyDocumentCopy);

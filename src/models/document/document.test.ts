@@ -105,7 +105,7 @@ describe("document model", () => {
       comments: {},
       stars: [],
       content: {
-        annotations: [],
+        annotations: {},
         rowMap: {},
         rowOrder: [],
         sharedModelMap: {},

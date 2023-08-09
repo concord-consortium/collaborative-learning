@@ -178,9 +178,18 @@ export const GraphModel = TileContentModel
         return;
       }
       if (getAppConfig(self)?.getSetting("emptyPlotIsNumeric", "graph")) {
-        // If our graph doesn't have useful axes then set them
-        if (!self.getAttributeID("x") && !self.getAttributeID("y")) {
+        const attributeCount = self.data.attributes.length;
+        if (!attributeCount) return;
+
+        const xAttrId = self.getAttributeID("x");
+        const isValidXAttr = !!self.data.attrFromID(xAttrId);
+        if (!isValidXAttr) {
           self.setAttributeID("x", self.data.attributes[0].id);
+        }
+
+        const yAttrId = self.getAttributeID("y");
+        const isValidYAttr = !!self.data.attrFromID(yAttrId);
+        if (!isValidYAttr && attributeCount > 1) {
           self.setAttributeID("y", self.data.attributes[1].id);
         }
       }

@@ -125,7 +125,7 @@ describe("DocumentContentModel -- shared Models --", () => {
       documentContent.moveTiles(dragTiles, dropRowInfo);
       expect(getSnapshot(documentContent)).toMatchInlineSnapshot(`
 Object {
-  "annotations": Array [],
+  "annotations": Object {},
   "rowMap": Object {
     "testid-13": Object {
       "height": undefined,
@@ -288,7 +288,7 @@ Object {
       // reset them in beforeEach
       expect(getSnapshot(targetDocument)).toMatchInlineSnapshot(`
 Object {
-  "annotations": Array [],
+  "annotations": Object {},
   "rowMap": Object {
     "testid-32": Object {
       "height": undefined,
@@ -417,7 +417,7 @@ Object {
       // reset them in beforeEach
       expect(getSnapshot(targetDocument)).toMatchInlineSnapshot(`
 Object {
-  "annotations": Array [],
+  "annotations": Object {},
   "rowMap": Object {
     "testid-44": Object {
       "height": undefined,
@@ -557,7 +557,7 @@ Object {
       // reset them in beforeEach
       expect(getSnapshot(targetDocument)).toMatchInlineSnapshot(`
 Object {
-  "annotations": Array [],
+  "annotations": Object {},
   "rowMap": Object {
     "testid-69": Object {
       "height": undefined,
