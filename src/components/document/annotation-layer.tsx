@@ -2,49 +2,16 @@ import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { MouseEventHandler, useContext, useEffect, useRef, useState } from "react";
 
+import { AnnotationButton } from "../annotations/annotation-button";
 import { ArrowAnnotationComponent } from "../annotations/arrow-annotation";
-import { CurvedArrow } from "../annotations/curved-arrow";
+import { PreviewArrow } from "../annotations/preview-arrow";
 import { TileApiInterfaceContext } from "../tiles/tile-api";
 import { useUIStore } from "../../hooks/use-stores";
 import { ArrowAnnotation } from "../../models/annotations/arrow-annotation";
-import { ClueObjectModel, IClueObject, ObjectBoundingBox } from "../../models/annotations/clue-object";
+import { ClueObjectModel, IClueObject } from "../../models/annotations/clue-object";
 import { DocumentContentModelType } from "../../models/document/document-content";
 
 import "./annotation-layer.scss";
-
-interface IAnnotationButtonProps {
-  getObjectBoundingBox: (rowId: string, tileId: string, objectId: string) => ObjectBoundingBox | undefined;
-  key?: string;
-  objectId: string;
-  objectType?: string;
-  onClick?: (tileId: string, objectId: string, objectType?: string) => void;
-  rowId: string;
-  sourceObjectId?: string;
-  sourceTileId?: string;
-  tileId: string;
-}
-const AnnotationButton = observer(function AnnotationButton({
-  getObjectBoundingBox, objectId, objectType, onClick, rowId, sourceObjectId, sourceTileId, tileId
-}: IAnnotationButtonProps) {
-  const style = getObjectBoundingBox(rowId, tileId, objectId);
-  if (!style) return null;
-
-  const handleClick = () => onClick?.(tileId, objectId, objectType);
-
-  const source = sourceObjectId === objectId && sourceTileId === tileId;
-  const classes = classNames("annotation-button", { source });
-  return (
-    <rect
-      className={classes}
-      fill="transparent"
-      height={style.height}
-      onClick={handleClick}
-      width={style.width}
-      x={style.left}
-      y={style.top}
-    />
-  );
-});
 
 interface IAnnotationLayerProps {
   content?: DocumentContentModelType;
@@ -202,15 +169,12 @@ export const AnnotationLayer = observer(function AnnotationLayer({
             />
           );
         })}
-        { // Display arrow when creating a new sparrow
-          sourceBoundingBox && mouseX !== undefined && mouseY !== undefined && (
-          <CurvedArrow
-            sourceX={sourceBoundingBox.left + sourceBoundingBox.width / 2}
-            sourceY={sourceBoundingBox.top + sourceBoundingBox.height / 2}
-            targetX={mouseX}
-            targetY={mouseY}
-          />
-        )}
+        <PreviewArrow
+          sourceX={sourceBoundingBox ? sourceBoundingBox.left + sourceBoundingBox.width / 2 : undefined}
+          sourceY={sourceBoundingBox ? sourceBoundingBox.top + sourceBoundingBox.height / 2 : undefined}
+          targetX={mouseX}
+          targetY={mouseY}
+        />
       </svg>
     </div>
   );
