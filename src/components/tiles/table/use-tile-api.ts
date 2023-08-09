@@ -12,6 +12,9 @@ import { exportTableContentAsJson } from "../../../models/tiles/table/table-expo
 import { getLinkedTableIndex } from "../../../models/tiles/table-links";
 import { decipherCellId } from "../../../models/tiles/table/table-utils";
 
+const kCellTopOffset = -3.5;
+const kCellLeftOffset = -1.5;
+
 interface IProps {
   columns: TColumn[];
   content: TableContentModelType;
@@ -51,12 +54,12 @@ export const useToolApi = ({
   const getRowTop = useCallback((rowIndex: number) => {
     return getTableRowTop({
       getTitleHeight, hasExpressions, headerHeight, padding, readOnly, rowHeight, rowIndex, rows
-    });
+    }) + kCellTopOffset;
   }, [getTitleHeight, hasExpressions, headerHeight, padding, readOnly, rowHeight, rows]);
   const getColumnLeft = useCallback((columnIndex: number) => {
     return getTableColumnLeft({
       columnIndex, columns, dataSet, measureColumnWidth
-    });
+    }) + kCellLeftOffset;
   }, [columns, dataSet, measureColumnWidth]);
   const getObjectBoundingBox = useCallback((objectId: string, objectType?: string) => {
     if (objectType === "cell") {

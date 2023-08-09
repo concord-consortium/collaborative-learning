@@ -7,13 +7,13 @@ const kDefaultPadding = 10;
 const kTableBorder = 2;
 
 interface IGetTableContentHeight {
-  rows: TRow[];
-  rowHeight: (args: RowHeightArgs<TRow>) => number;
-  headerHeight: () => number;
   getTitleHeight: () => number;
-  readOnly?: boolean;
   hasExpressions?: boolean;
+  headerHeight: () => number;
   padding?: number;
+  readOnly?: boolean;
+  rowHeight: (args: RowHeightArgs<TRow>) => number;
+  rows: TRow[];
 }
 export const getTableContentHeight = (props: IGetTableContentHeight) => {
   const { rows, readOnly, padding } = props;
@@ -29,7 +29,7 @@ interface IGetTableRowTop extends IGetTableContentHeight {
 // Returns the y position with respect to the tile for the given row.
 // If rowIndex is equal to the numbe of rows, will return the bottom of the last row.
 export function getTableRowTop({
-  rowIndex, rows, rowHeight, getTitleHeight, headerHeight, hasExpressions, padding
+  getTitleHeight, hasExpressions, headerHeight, padding, rowHeight, rowIndex, rows
 }: IGetTableRowTop) {
   const expressionRows = hasExpressions ? 1 : 0;
   const _padding = padding ?? kDefaultPadding;
