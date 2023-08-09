@@ -16,7 +16,7 @@ export function CurvedArrow({ sourceX, sourceY, targetX, targetY }: ICurvedArrow
 
   const color = "blue";
   return (
-    <g>
+    <g className="curved-arrow">
       <path d={`M ${sourceX} ${sourceY} L ${targetX} ${targetY}`} stroke={color} strokeWidth={3} />
       <g transform={`translate(${targetX} ${targetY}) rotate(${angle})`}>
         <polygon points="0 -3 7 12 -7 12 0 -3" fill={color} />

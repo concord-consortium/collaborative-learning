@@ -1,8 +1,9 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
-import React, { useContext, useEffect, useState } from "react";
+import React, { MouseEventHandler, useContext, useEffect, useRef, useState } from "react";
 
 import { ArrowAnnotationComponent } from "../annotations/arrow-annotation";
+import { CurvedArrow } from "../annotations/curved-arrow";
 import { TileApiInterfaceContext } from "../tiles/tile-api";
 import { useUIStore } from "../../hooks/use-stores";
 import { ArrowAnnotation } from "../../models/annotations/arrow-annotation";
@@ -62,8 +63,19 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const [sourceTileId, setSourceTileId] = useState("");
   const [sourceObjectId, setSourceObjectId] = useState("");
   const [sourceObjectType, setSourceObjectType] = useState<string | undefined>();
+  const [mouseX, setMouseX] = useState<number | undefined>();
+  const [mouseY, setMouseY] = useState<number | undefined>();
+  const divRef = useRef<HTMLDivElement>();
   const ui = useUIStore();
   const tileApiInterface = useContext(TileApiInterfaceContext);
+
+  const handleMouseMove: MouseEventHandler<HTMLDivElement> = event => {
+    if (divRef.current) {
+      const bb = divRef.current.getBoundingClientRect();
+      setMouseX(event.clientX - bb.left);
+      setMouseY(event.clientY - bb.top);
+    }
+  };
 
   const rowIds = content?.rowOrder || [];
 
@@ -132,11 +144,21 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     return getObjectBoundingBoxUnknownRow(object.tileId, object.objectId);
   };
 
+  const sourceBoundingBox = sourceTileId && sourceObjectId
+    ? getObjectBoundingBoxUnknownRow(sourceTileId, sourceObjectId) // TODO add sourceObjectType
+    : undefined;
+
   const editing = ui.annotationMode !== undefined;
   const hidden = !ui.showAnnotations;
   const classes = classNames("annotation-layer", { editing, hidden });
   return (
-    <div className={classes}>
+    <div
+      className={classes}
+      onMouseMove={handleMouseMove}
+      ref={element => {
+        if (element) divRef.current = element;
+      }}
+    >
       <svg
         className="annotation-svg"
         height="100%"
@@ -170,7 +192,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
           }
         })}
         { Array.from(content?.annotations.values() ?? []).map(arrow => {
-          const key = `${arrow.sourceObject?.objectId}-${arrow.targetObject?.objectId}`;
+          const key = `sparrow-${arrow.id}`;
           return (
             <ArrowAnnotationComponent
               arrow={arrow}
@@ -180,6 +202,15 @@ export const AnnotationLayer = observer(function AnnotationLayer({
             />
           );
         })}
+        { // Display arrow when creating a new sparrow
+          sourceBoundingBox && mouseX !== undefined && mouseY !== undefined && (
+          <CurvedArrow
+            sourceX={sourceBoundingBox.left + sourceBoundingBox.width / 2}
+            sourceY={sourceBoundingBox.top + sourceBoundingBox.height / 2}
+            targetX={mouseX}
+            targetY={mouseY}
+          />
+        )}
       </svg>
     </div>
   );
