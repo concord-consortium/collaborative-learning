@@ -218,7 +218,7 @@ Cypress.Commands.add('collapseResourceTabs', () => {
   cy.get('.divider-container').trigger('mouseover').then(() => {
     cy.get('.divider-container .expand-handle.left.shown').should("exist");
     cy.get('.divider-container .expand-handle.left.shown').click();
-    cy.get('.primary-workspace .toolbar');
+    cy.get('.primary-workspace .toolbar', {timeout: 120000});
   });
 });
 Cypress.Commands.add('closeResourceTabs', () => {

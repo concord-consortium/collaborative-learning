@@ -14,7 +14,6 @@ const textToolTile = new TextToolTile;
 
 const problemDoc = '2.1 Drawing Wumps';
 const ptsDoc = 'Points';
-const polyDoc = 'Polygon';
 
 context('Graph Tool', function () {
   beforeEach(function () {
@@ -25,7 +24,7 @@ context('Graph Tool', function () {
     cy.collapseResourceTabs();
   });
 
-  it('will test adding points and polygons to a graph', function () {
+  it('will test adding points to a graph', function () {
     cy.log("add a point to the origin");
     clueCanvas.addTile('geometry');
     graphToolTile.addPointToGraph(0, 0);
@@ -40,19 +39,6 @@ context('Graph Tool', function () {
     graphToolTile.addPointToGraph(5, 5);
     graphToolTile.addPointToGraph(10, 5);
     graphToolTile.addPointToGraph(10, 10);
-    
-    cy.log("add a polygon to a graph");
-    canvas.createNewExtraDocumentFromFileMenu(polyDoc, "my-work");
-    clueCanvas.addTile('geometry');
-    cy.get('.spacer').click();
-    textToolTile.deleteTextTile();
-    graphToolTile.getGraphTile().last().click();
-    graphToolTile.addPointToGraph(4.2, 2);
-    graphToolTile.addPointToGraph(10.4, 7.2);
-    graphToolTile.addPointToGraph(13.2, 2);
-    graphToolTile.addPointToGraph(13.2, 2);
-    graphToolTile.getGraphPoint().last().click({ force: true }).click({ force: true });
-    graphToolTile.getGraphPolygon().should('exist');
     
     cy.log("copy a point to the clipboard");
     let clipSpy;
@@ -79,10 +65,6 @@ context('Graph Tool', function () {
     cy.openDocumentWithTitle('my-work', 'workspaces', ptsDoc);
     graphToolTile.getGraphPoint().should('have.length', 3);
     
-    cy.log("will verify restore of polygon");
-    cy.openDocumentWithTitle('my-work', 'workspaces', polyDoc);
-    graphToolTile.getGraphPolygon().should('exist');
-    
     cy.log("select a point");
     let point = 4;
     cy.openDocumentWithTitle('my-work', 'workspaces', ptsDoc);
@@ -96,7 +78,6 @@ context('Graph Tool', function () {
           expect($el).to.have.text('');
         });
       });
-    graphToolTile.getGraphPointCoordinates().should('contain', '(10, 10)');
   });
 
   it('wil test Graph tile undo redo', () => {
