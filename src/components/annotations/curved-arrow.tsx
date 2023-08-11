@@ -46,15 +46,16 @@ export function CurvedArrow({ peakX, peakY, sourceX, sourceY, targetX, targetY }
   // These go from source along line perpendicular to arrow, and from peak along line parallel to arrow.
   // If the angle between the arrow angle and peak angle is between half pi and 3 halves pi
   //   (the peak is behind the end point), we need to bend the curve the opposite way
-  const firstBeyond = firstAngleDifference > halfPi && firstAngleDifference < 3 * halfPi ? -1 : 1;
-  const firstAnchorX = peakX - firstIntersectDx * firstBeyond;
-  const firstAnchorY = peakY - firstIntersectDy * firstBeyond;
-  const firstAnchorX1 = sourceX + (firstAnchorX - sourceX) * anchorStrength;
-  const firstAnchorY1 = sourceY + (firstAnchorY - sourceY) * anchorStrength;
-  const firstAnchorX2 = peakX - firstIntersectDx * anchorStrength * firstBeyond;
-  const firstAnchorY2 = peakY - firstIntersectDy * anchorStrength * firstBeyond;
-  const firstAnchor1 = `${firstAnchorX1} ${firstAnchorY1}`;
-  const firstAnchor2 = `${firstAnchorX2} ${firstAnchorY2}`;
+  const firstBeyond = firstAngleDifference > halfPi && firstAngleDifference < 3 * halfPi;
+  const firstBeyondFactor = firstBeyond ? -1 : 1;
+  const firstControlX = peakX - firstIntersectDx * firstBeyondFactor;
+  const firstControlY = peakY - firstIntersectDy * firstBeyondFactor;
+  const firstControlX1 = sourceX + (firstControlX - sourceX) * anchorStrength;
+  const firstControlY1 = sourceY + (firstControlY - sourceY) * anchorStrength;
+  const firstControlX2 = peakX - firstIntersectDx * anchorStrength * firstBeyondFactor;
+  const firstControlY2 = peakY - firstIntersectDy * anchorStrength * firstBeyondFactor;
+  const firstControl1 = `${firstControlX1} ${firstControlY1}`;
+  const firstControl2 = `${firstControlX2} ${firstControlY2}`;
 
   // Determine deltas, angle, and length between target and peak
   const secondDx = peakX - targetX;
@@ -72,27 +73,36 @@ export function CurvedArrow({ peakX, peakY, sourceX, sourceY, targetX, targetY }
 
   // Determine anchors for second curve.
   // These go from peak along line parallal to arrow, and from target along line perpendicular to arrow.
-  const secondBeyond = secondAngleDifference < halfPi || secondAngleDifference > 3 * halfPi ? -1 : 1;
-  const secondAnchorX = peakX - secondIntersectDx * secondBeyond;
-  const secondAnchorY = peakY - secondIntersectDy * secondBeyond;
-  const secondAnchorX1 = peakX - secondIntersectDx * anchorStrength * secondBeyond;
-  const secondAnchorY1 = peakY - secondIntersectDy * anchorStrength * secondBeyond;
-  const secondAnchorX2 = targetX - (targetX - secondAnchorX) * anchorStrength;
-  const secondAnchorY2 = targetY - (targetY - secondAnchorY) * anchorStrength;
-  const secondAnchor1 = `${secondAnchorX1} ${secondAnchorY1}`;
-  const secondAnchor2 = `${secondAnchorX2} ${secondAnchorY2}`;
+  const secondBeyond = secondAngleDifference < halfPi || secondAngleDifference > 3 * halfPi;
+  const secondBeyondFactor = secondBeyond ? -1 : 1;
+  const secondControlX = peakX - secondIntersectDx * secondBeyondFactor;
+  const secondControlY = peakY - secondIntersectDy * secondBeyondFactor;
+  const secondControlX1 = peakX - secondIntersectDx * anchorStrength * secondBeyondFactor;
+  const secondControlY1 = peakY - secondIntersectDy * anchorStrength * secondBeyondFactor;
+  const secondControlX2 = targetX - (targetX - secondControlX) * anchorStrength;
+  const secondControlY2 = targetY - (targetY - secondControlY) * anchorStrength;
+  const secondControl1 = `${secondControlX1} ${secondControlY1}`;
+  const secondControl2 = `${secondControlX2} ${secondControlY2}`;
 
   // Determine angle of arrowhead
-  const arrowheadAngle = normalizeAngle(3 * Math.PI / 2 - secondAngle) * 180 / Math.PI;
-  // const arrowheadAngle = normalizeAngle((Math.PI / 2 - secondAngleDifference) / 2 + Math.PI) * 180 / Math.PI;
-  console.log(`arrowheadAngle`, secondAngleDifference, arrowheadAngle);
-  // const dx = targetX - peakX;
-  // const dy = targetY - peakY;
-  // const arrowheadAngle = 90 - Math.atan2(-dy, dx) * 180 / Math.PI;
+  const targetToPeakAngle = normalizeAngle(Math.atan2(secondDy, -secondDx));
+  const adjustedTargetToPeakAngle = normalizeAngle(halfPi - targetToPeakAngle);
+  const peakAboveArrow = normalizeAngle(targetToPeakAngle - arrowAngle) > Math.PI;
+  const controlAngle = normalizeAngle((peakAboveArrow ? 3 * halfPi : halfPi) - normalizeAngle(arrowAngle + halfPi));
+  // If adjustedTargetToPeakAngle and controlAngle are more than pi apart, the arrowhead math breaks down
+  const adjustedControlAngle = Math.abs(adjustedTargetToPeakAngle - controlAngle) < Math.PI
+    ? controlAngle : adjustedTargetToPeakAngle < controlAngle ? controlAngle - twoPi : controlAngle + twoPi;
+  const secondAnglePercentage = normalizeAngle(Math.abs(secondAngleDifference - Math.PI)) / halfPi;
+  const adjustedSecondAnglePercentage = 1 - (1 - secondAnglePercentage) ** 4;
+  const secondBeyondAngle = normalizeAngle(Math.atan2(secondControlY - targetY, secondControlX - targetX));
+  const arrowheadAngle = secondBeyond
+    ? normalizeAngle(secondBeyondAngle - halfPi) * 180 / Math.PI
+    : normalizeAngle(adjustedControlAngle * adjustedSecondAnglePercentage
+      + adjustedTargetToPeakAngle * (1 - adjustedSecondAnglePercentage)) * 180 / Math.PI;
 
   const pathStart = `M ${sourceX} ${sourceY}`;
-  const pathPeak = `C ${firstAnchor1} ${firstAnchor2} ${peakX} ${peakY}`;
-  const pathEnd = `C ${secondAnchor1} ${secondAnchor2} ${targetX} ${targetY}`;
+  const pathPeak = `C ${firstControl1} ${firstControl2} ${peakX} ${peakY}`;
+  const pathEnd = `C ${secondControl1} ${secondControl2} ${targetX} ${targetY}`;
   return (
     <g className="curved-arrow">
       <path
