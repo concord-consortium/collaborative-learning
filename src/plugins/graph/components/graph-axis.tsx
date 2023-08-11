@@ -38,7 +38,6 @@ export const GraphAxis = observer(function GraphAxis({
   const dataConfig = useDataConfigurationContext(),
     isDropAllowed = dataConfig?.graphPlaceCanAcceptAttributeIDDrop ?? (() => true),
     graphModel = useGraphModelContext(),
-    axisModel = graphModel?.getAxis(place),
     instanceId = useInstanceIdContext(),
     layout = useGraphLayoutContext(),
     droppableId = `${instanceId}-${place}-axis-drop`,
@@ -95,28 +94,29 @@ export const GraphAxis = observer(function GraphAxis({
             (isAddCasesAction(action) || isSetCaseValuesAction(action))
            )
         {
+          const _axisModel = graphModel?.getAxis(place);
           const xValues = dataConfig.numericValuesForAttrRole("x");
           const yValues = dataConfig.numericValuesForAttrRole("y");
 
-          if (axisModel && isNumericAxisModel(axisModel)) {
+          if (_axisModel && isNumericAxisModel(_axisModel)) {
             if (xValues.length > 0 && place === "bottom") {
               const minX = Math.min(...xValues);
               const maxX = Math.max(...xValues);
               const newXBounds = computeNiceNumericBounds(minX, maxX);
-              axisModel.setDomain(newXBounds.min, newXBounds.max);
+              _axisModel.setDomain(newXBounds.min, newXBounds.max);
             }
 
             if (yValues.length > 0 && place === "left") {
               const minY = Math.min(...yValues);
               const maxY = Math.max(...yValues);
               const newYBounds = computeNiceNumericBounds(minY, maxY);
-              axisModel.setDomain(newYBounds.min, newYBounds.max);
+              _axisModel.setDomain(newYBounds.min, newYBounds.max);
             }
           }
         }
       });
     }
-  }, [autoAdjust, axisModel, dataConfig, graphModel, layout, place]);
+  }, [autoAdjust, dataConfig, graphModel, layout, place]);
 
   useEffect(function cleanup () {
     return () => {
@@ -128,10 +128,11 @@ export const GraphAxis = observer(function GraphAxis({
     };
   }, [layout, place, graphModel]);
 
+  const axisModel = graphModel?.getAxis(place);
   return (
     <g className='axis-wrapper' ref={elt => setWrapperElt(elt)}>
       <rect className='axis-background'/>
-      {axisModel &&
+      {axisModel && isAlive(axisModel) &&
       <Axis axisModel={axisModel}
             label={''}  // Remove
             enableAnimation={enableAnimation}

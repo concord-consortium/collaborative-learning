@@ -334,10 +334,10 @@ export const useSubAxis = ({
   useEffect(() => {
     const disposer = reaction(
       () => {
-        const { place = 'bottom' } = (isAlive(axisModel) && axisModel) || {};
-        return layout.getComputedBounds(place);
+        const { place } = (isAlive(axisModel) && axisModel) || {};
+        return place ? layout.getComputedBounds(place) : undefined;
       },
-      () => renderSubAxis()
+      bounds => bounds && renderSubAxis();
     );
     return () => disposer();
   }, [axisModel, layout, renderSubAxis]);
@@ -382,10 +382,10 @@ export const useSubAxis = ({
   useEffect(() => {
     const disposer = reaction(
       () => {
-        const { place = 'bottom' } = (isAlive(axisModel) && axisModel) || {};
-        return layout.getAxisLength(place);
+        const { place } = (isAlive(axisModel) && axisModel) || {};
+        return place ? layout.getAxisLength(place) : undefined;
       },
-      () => renderSubAxis()
+      bounds => bounds && renderSubAxis();
     );
     return () => disposer();
   }, [axisModel, layout, renderSubAxis]);

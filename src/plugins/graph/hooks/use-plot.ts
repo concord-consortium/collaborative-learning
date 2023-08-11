@@ -45,9 +45,6 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
     layout = useGraphLayoutContext(),
     dataConfiguration = graphModel.config,
     dataset = dataConfiguration.dataset,
-    xNumeric = graphModel.getAxis('bottom') as INumericAxisModel,
-    yNumeric = graphModel.getAxis('left') as INumericAxisModel,
-    v2Numeric = graphModel.getAxis('rightNumeric') as INumericAxisModel,
     instanceId = useInstanceIdContext(),
     refreshPointPositionsRef = useCurrent(refreshPointPositions);
 
@@ -86,13 +83,18 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
   // respond to numeric axis domain changes (e.g. axis dragging)
   useEffect(() => {
     const disposer = reaction(
-      () => [xNumeric?.domain, yNumeric?.domain, v2Numeric?.domain],
+      () => {
+        const xNumeric = graphModel.getAxis('bottom') as INumericAxisModel;
+        const yNumeric = graphModel.getAxis('left') as INumericAxisModel;
+        const y2Numeric = graphModel.getAxis('rightNumeric') as INumericAxisModel;
+        return [xNumeric?.domain, yNumeric?.domain, y2Numeric?.domain];
+      },
       () => {
         callRefreshPointPositions(false);
       }, {fireImmediately: true}
     );
     return () => disposer();
-  }, [callRefreshPointPositions, xNumeric?.domain, yNumeric?.domain, v2Numeric?.domain]);
+  }, [callRefreshPointPositions, graphModel]);
 
   useEffect(function respondToCategorySetChanges() {
     return reaction(() => {
