@@ -1,5 +1,6 @@
 $graph-label-font: 400 14px Montserrat-Regular, sans-serif;
 $graph-empty-label-font: 12px Montserrat-Regular, sans-serif;
+$graph-background-fill: #F9F9F9;
 
 :export {
   graphLabelFont: $graph-label-font;
@@ -48,7 +49,7 @@ $graph-empty-label-font: 12px Montserrat-Regular, sans-serif;
   }
 
   .axis-background {
-    fill: transparent; //$graph-background-fill;
+    fill: $graph-background-fill;
   }
 
   .grid .tick line {
