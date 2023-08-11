@@ -1,6 +1,6 @@
 $graph-label-font: 400 14px Montserrat-Regular, sans-serif;
 $graph-empty-label-font: 12px Montserrat-Regular, sans-serif;
-$graph-background-fill: #F9F9F9;
+$graph-background-fill: #f9f9f9;
 
 :export {
   graphLabelFont: $graph-label-font;
@@ -11,7 +11,7 @@ $graph-background-fill: #F9F9F9;
   position: relative;
   width: 100%;
   height: 100%;
-  background-color: #F9F9F9;
+  background-color: $graph-background-fill;
 
   .attribute-label {
     fill: blue;
@@ -35,21 +35,24 @@ $graph-background-fill: #F9F9F9;
     font: 12px sans-serif;
   }
 
-  .axis {
-    background-color: white;
+  .axis-wrapper {
 
-    line {
-      stroke: #DDDDDD;
+    .axis-background {
+      fill: $graph-background-fill;
     }
+
+    .axis {
+      line {
+        stroke: #DDDDDD;
+      }
+    }
+
   }
+
   .axis-click-cue {
     fill: #999999 !important;
     font-size: 12px !important;
     font-family: Montserrat-Regular, sans-serif !important;
-  }
-
-  .axis-background {
-    fill: $graph-background-fill;
   }
 
   .grid .tick line {
@@ -108,9 +111,11 @@ $graph-background-fill: #F9F9F9;
   left: 0;
   width: 100%;
   height: 25px;
+
   &.active {
     border: 5px solid rgb(255, 216, 102);
   }
+
   &.over {
     background: yellow;
     opacity: 0.5;
@@ -123,9 +128,11 @@ $graph-background-fill: #F9F9F9;
   left: 0;
   width: 100%;
   height: 25px;
+
   &.active {
     border: 5px solid rgb(255, 216, 102);
   }
+
   &.over {
     background: yellow;
     opacity: 0.5;
@@ -138,12 +145,13 @@ $graph-background-fill: #F9F9F9;
   right: 0;
   width: 25px;
   height: 100%;
+
   &.active {
     border: 5px solid rgb(255, 216, 102);
   }
+
   &.over {
     background: yellow;
     opacity: 0.5;
   }
 }
-
