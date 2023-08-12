@@ -106,7 +106,8 @@ export function CurvedArrow({ peakX, peakY, sourceX, sourceY, targetX, targetY }
         const adjustedControlAngle = Math.abs(adjustedTargetToPeakAngle - controlAngle) < Math.PI
           ? controlAngle : adjustedTargetToPeakAngle < controlAngle ? controlAngle - twoPi : controlAngle + twoPi;
         const secondAnglePercentage = normalizeAngle(Math.abs(secondAngleDifference - Math.PI)) / halfPi;
-        const adjustedSecondAnglePercentage = 1 - (1 - secondAnglePercentage) ** 4;
+        const percentageExponent = firstBeyond ? 8 : 4;
+        const adjustedSecondAnglePercentage = 1 - (1 - secondAnglePercentage) ** percentageExponent;
         return normalizeAngle(adjustedControlAngle * adjustedSecondAnglePercentage
           + adjustedTargetToPeakAngle * (1 - adjustedSecondAnglePercentage)) * 180 / Math.PI;
       }
