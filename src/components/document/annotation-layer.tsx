@@ -179,6 +179,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
               canEdit={!readOnly && editing}
               getBoundingBox={getBoundingBox}
               key={key}
+              readOnly={readOnly}
             />
           );
         })}

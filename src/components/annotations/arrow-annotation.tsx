@@ -15,24 +15,24 @@ interface IArrowAnnotationProps {
   getBoundingBox: (object: IClueObject) =>
     { height: number, left: number, top: number, width: number} | null | undefined;
   key?: string;
+  readOnly?: boolean;
 }
 export const ArrowAnnotationComponent = observer(
-  function ArrowAnnotationComponent({ arrow, canEdit, getBoundingBox }: IArrowAnnotationProps) {
+  function ArrowAnnotationComponent({ arrow, canEdit, getBoundingBox, readOnly }: IArrowAnnotationProps) {
     const [firstClick, setFirstClick] = useState(false);
     const [editingText, setEditingText] = useState(false);
     const [tempText, setTempText] = useState(arrow.text ?? "");
     const inputRef = useRef<HTMLInputElement|null>(null);
     useEffect(() => {
       // Focus on the text input when we start editing
-      if (editingText) {
+      if (editingText && !readOnly) {
         inputRef.current?.focus();
       }
-    }, [editingText]);
+    }, [editingText, readOnly]);
     useEffect(() => {
-      // When a new arrow is created, make it in text editing mode
+      // When a new arrow is created, start editing its text
       if (arrow.isNew) {
         setEditingText(true);
-        arrow.setIsNew(false);
       }
     }, [arrow]);
 
@@ -188,7 +188,7 @@ export const ArrowAnnotationComponent = observer(
         />
         <foreignObject height={`${textHeight}`} width={`${textWidth}`} x={`${textX}`} y={`${textY}`}>
           <div className="text-region">
-            { editingText
+            { editingText && !readOnly
               ? (
                 <input
                   className="text-input"
