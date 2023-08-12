@@ -1,5 +1,6 @@
 import React from "react";
 
+import { getDeafultPeak } from "./annotation-utilities";
 import { CurvedArrow } from "./curved-arrow";
 
 interface IPreviewArrowProps {
@@ -10,21 +11,12 @@ interface IPreviewArrowProps {
 }
 export function PreviewArrow({ sourceX, sourceY, targetX, targetY }: IPreviewArrowProps) {
   if (sourceX !== undefined && sourceY !== undefined && targetX !== undefined && targetY !== undefined) {
-    const dx = targetX - sourceX;
-    const dy = targetY - sourceY;
-    const mx = sourceX + dx / 2;
-    const my = sourceY + dy / 2;
-    const radius = Math.sqrt((dx / 2)**2 + (dy / 2)**2);
-    const arrowAngle = Math.atan2(-dy, dx);
-
-    const perpAngle = -Math.PI / 2 - arrowAngle;
-    const px = mx + Math.cos(perpAngle) * radius;
-    const py = my + Math.sin(perpAngle) * radius;
+    const { peakX, peakY } = getDeafultPeak(sourceX, sourceY, targetX, targetY);
 
     return (
       <CurvedArrow
-        peakX={px}
-        peakY={py}
+        peakX={peakX}
+        peakY={peakY}
         sourceX={sourceX}
         sourceY={sourceY}
         targetX={targetX}

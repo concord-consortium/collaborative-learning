@@ -3,12 +3,13 @@ import { observer } from "mobx-react";
 import React, { MouseEventHandler, useContext, useEffect, useRef, useState } from "react";
 
 import { AnnotationButton } from "../annotations/annotation-button";
+import { getDeafultPeak } from "../annotations/annotation-utilities";
 import { ArrowAnnotationComponent } from "../annotations/arrow-annotation";
 import { PreviewArrow } from "../annotations/preview-arrow";
 import { TileApiInterfaceContext } from "../tiles/tile-api";
 import { useUIStore } from "../../hooks/use-stores";
 import { ArrowAnnotation } from "../../models/annotations/arrow-annotation";
-import { ClueObjectModel, IClueObject } from "../../models/annotations/clue-object";
+import { ClueObjectModel, IClueObject, OffsetModel } from "../../models/annotations/clue-object";
 import { DocumentContentModelType } from "../../models/document/document-content";
 
 import "./annotation-layer.scss";
@@ -84,8 +85,12 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     return getObjectBoundingBox(rowId ?? "", tileId, objectId);
   }
 
+  const sourceBoundingBox = sourceTileId && sourceObjectId
+    ? getObjectBoundingBoxUnknownRow(sourceTileId, sourceObjectId) // TODO add sourceObjectType
+    : undefined;
+
   const handleAnnotationButtonClick = (tileId: string, objectId: string, objectType?: string) => {
-    if (!sourceTileId || !sourceObjectId) {
+    if (!sourceBoundingBox) {
       // We don't have a source object yet, so make this one the source object
       setSourceTileId(tileId);
       setSourceObjectId(objectId);
@@ -100,7 +105,17 @@ export const AnnotationLayer = observer(function AnnotationLayer({
       const sourceObject =
         ClueObjectModel.create({ tileId: sourceTileId, objectId: sourceObjectId, objectType: sourceObjectType });
       const targetObject = ClueObjectModel.create({ tileId, objectId, objectType });
-      content?.addArrow(ArrowAnnotation.create({ sourceObject, targetObject }));
+      const targetBoundingBox = getObjectBoundingBoxUnknownRow(tileId, objectId); // TODO add objectType
+      let textOffset;
+      if (targetBoundingBox) {
+        const sourceX = sourceBoundingBox.left + sourceBoundingBox.width / 2;
+        const sourceY = sourceBoundingBox.top + sourceBoundingBox.height / 2;
+        const targetX = targetBoundingBox.left + targetBoundingBox.width / 2;
+        const targetY = targetBoundingBox.top + targetBoundingBox.height / 2;
+        const { peakDx, peakDy } = getDeafultPeak(sourceX, sourceY, targetX, targetY);
+        textOffset = OffsetModel.create({ dx: peakDx, dy: peakDy });
+      }
+      content?.addArrow(ArrowAnnotation.create({ sourceObject, targetObject, textOffset }));
       setSourceTileId("");
       setSourceObjectId("");
       setSourceObjectType(undefined);
@@ -110,10 +125,6 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const getBoundingBox = (object: IClueObject) => {
     return getObjectBoundingBoxUnknownRow(object.tileId, object.objectId);
   };
-
-  const sourceBoundingBox = sourceTileId && sourceObjectId
-    ? getObjectBoundingBoxUnknownRow(sourceTileId, sourceObjectId) // TODO add sourceObjectType
-    : undefined;
 
   const editing = ui.annotationMode !== undefined;
   const hidden = !ui.showAnnotations;
