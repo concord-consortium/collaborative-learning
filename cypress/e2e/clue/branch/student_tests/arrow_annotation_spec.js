@@ -1,10 +1,12 @@
 import ArrowAnnotation from '../../../../support/elements/clue/ArrowAnnotation';
 import ClueCanvas from '../../../../support/elements/clue/cCanvas';
 import DrawToolTile from '../../../../support/elements/clue/DrawToolTile';
+import TableToolTile from '../../../../support/elements/clue/TableToolTile';
 
 const aa = new ArrowAnnotation,
   clueCanvas = new ClueCanvas,
-  drawToolTile = new DrawToolTile;
+  drawToolTile = new DrawToolTile,
+  tableToolTile = new TableToolTile;
 
 // Note copied from drawing tile test
 // NOTE: For some reason cypress+chrome thinks that the SVG elements are in a
@@ -120,6 +122,37 @@ context('Arrow Annotations (Sparrows)', function () {
       aa.getAnnotationButtons().first().click();
       aa.getAnnotationButtons().eq(2).click();
       aa.getAnnotationArrows().should("have.length", 2);
+    });
+  });
+
+  describe("Arrow Annotations", () => {
+    it("load a new page", () => {
+      const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=dfe";
+      cy.clearQAData('all');
+
+      cy.visit(queryParams);
+      cy.waitForLoad();
+      cy.collapseResourceTabs();
+    });
+
+    it("can add arrows to table tiles", () => {
+      clueCanvas.addTile("table");
+
+      cy.log("Annotation buttons only appear for actual cells");
+      aa.clickArrowToolbarButton();
+      aa.getAnnotationLayer().should("have.class", "editing");
+      aa.getAnnotationButtons().should("not.exist");
+      aa.clickArrowToolbarButton();
+      tableToolTile.typeInTableCell(1, '3');
+      tableToolTile.typeInTableCell(2, '2');
+      aa.clickArrowToolbarButton();
+      aa.getAnnotationButtons().should("have.length", 2);
+
+      cy.log("Can create an annotation arrow between two cells");
+      aa.getAnnotationArrows().should("not.exist");
+      aa.getAnnotationButtons().eq(0).click();
+      aa.getAnnotationButtons().eq(1).click();
+      aa.getAnnotationArrows().should("have.length", 1);
     });
   });
 });
