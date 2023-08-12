@@ -115,7 +115,9 @@ export const AnnotationLayer = observer(function AnnotationLayer({
         const { peakDx, peakDy } = getDeafultPeak(sourceX, sourceY, targetX, targetY);
         textOffset = OffsetModel.create({ dx: peakDx, dy: peakDy });
       }
-      content?.addArrow(ArrowAnnotation.create({ sourceObject, targetObject, textOffset }));
+      const newArrow = ArrowAnnotation.create({ sourceObject, targetObject, textOffset });
+      newArrow.setIsNew(true);
+      content?.addArrow(newArrow);
       setSourceTileId("");
       setSourceObjectId("");
       setSourceObjectType(undefined);

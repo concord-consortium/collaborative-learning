@@ -16,6 +16,9 @@ export const ArrowAnnotation = types
   textOffset: types.maybe(OffsetModel),
   type: types.optional(types.literal(kArrowAnnotationType), kArrowAnnotationType)
 })
+.volatile(self => ({
+  isNew: false
+}))
 .actions(self => ({
   setSourceObject(tileId: string, objectId: string, objectType?: string) {
     self.sourceObject = ClueObjectModel.create({ tileId, objectId, objectType });
@@ -49,6 +52,9 @@ export const ArrowAnnotation = types
       self.textOffset.setDx(dx);
       self.textOffset.setDy(dy);
     }
+  },
+  setIsNew(_new: boolean) {
+    self.isNew = _new;
   }
 }));
 export interface IArrowAnnotation extends Instance<typeof ArrowAnnotation> {}

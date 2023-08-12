@@ -28,6 +28,13 @@ export const ArrowAnnotationComponent = observer(
         inputRef.current?.focus();
       }
     }, [editingText]);
+    useEffect(() => {
+      // When a new arrow is created, make it in text editing mode
+      if (arrow.isNew) {
+        setEditingText(true);
+        arrow.setIsNew(false);
+      }
+    }, [arrow]);
 
     // State used for dragging to move source, target, and text
     const [clientX, setClientX] = useState<number|undefined>();
