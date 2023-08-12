@@ -1,18 +1,15 @@
-const caseIdPrefix = "caseId:";
-const attributeIdPrefix = "-attributeId:";
+const cellIdRegEx = /^cell:{(.+)}:{(.+)}$/;
 
 export function getCellId(caseId: string, attributeId: string) {
-  return `${caseIdPrefix}${caseId}${attributeIdPrefix}${attributeId}`;
-}
-
-function isCellId(id: string) {
-  return id.startsWith(caseIdPrefix) && id.includes(attributeIdPrefix);
+  return `cell:{${caseId}}:{${attributeId}}`;
 }
 
 export function decipherCellId(cellId: string) {
-  if (!isCellId(cellId)) return {};
-  
-  const [casePart, attributeId] = cellId.split(attributeIdPrefix);
-  const [, caseId] = casePart.split(caseIdPrefix);
-  return { caseId, attributeId };
+  const match = cellId.match(cellIdRegEx);
+  if (match && match.length === 3) {
+    const caseId = match[1];
+    const attributeId = match[2];
+    return { caseId, attributeId };
+  }
+  return {};
 }
