@@ -15,6 +15,7 @@ export function PreviewArrow({ sourceX, sourceY, targetX, targetY }: IPreviewArr
 
     return (
       <CurvedArrow
+        className="preview-arrow"
         peakX={peakX}
         peakY={peakY}
         sourceX={sourceX}

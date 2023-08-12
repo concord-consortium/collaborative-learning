@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import React, { useMemo } from "react";
 
 import "./curved-arrow.scss";
@@ -14,6 +15,7 @@ const normalizeAngle = (angle: number) => {
 const color = "blue";
 const controlStrength = .5;
 interface ICurvedArrowProps {
+  className?: string;
   peakX: number;
   peakY: number;
   sourceX: number;
@@ -21,7 +23,7 @@ interface ICurvedArrowProps {
   targetX: number;
   targetY: number;
 }
-export function CurvedArrow({ peakX, peakY, sourceX, sourceY, targetX, targetY }: ICurvedArrowProps) {
+export function CurvedArrow({ className, peakX, peakY, sourceX, sourceY, targetX, targetY }: ICurvedArrowProps) {
 
   const { path, arrowheadAngle } = useMemo(() => {
     // Determine deltas and angle between source and target
@@ -121,7 +123,7 @@ export function CurvedArrow({ peakX, peakY, sourceX, sourceY, targetX, targetY }
   }, [peakX, peakY, sourceX, sourceY, targetX, targetY]);
 
   return (
-    <g className="curved-arrow">
+    <g className={classNames("curved-arrow", className)}>
       <path
         d={path}
         fill="none"

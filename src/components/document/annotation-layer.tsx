@@ -86,7 +86,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   }
 
   const sourceBoundingBox = sourceTileId && sourceObjectId
-    ? getObjectBoundingBoxUnknownRow(sourceTileId, sourceObjectId) // TODO add sourceObjectType
+    ? getObjectBoundingBoxUnknownRow(sourceTileId, sourceObjectId, sourceObjectType)
     : undefined;
 
   const handleAnnotationButtonClick = (tileId: string, objectId: string, objectType?: string) => {
@@ -105,7 +105,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
       const sourceObject =
         ClueObjectModel.create({ tileId: sourceTileId, objectId: sourceObjectId, objectType: sourceObjectType });
       const targetObject = ClueObjectModel.create({ tileId, objectId, objectType });
-      const targetBoundingBox = getObjectBoundingBoxUnknownRow(tileId, objectId); // TODO add objectType
+      const targetBoundingBox = getObjectBoundingBoxUnknownRow(tileId, objectId, objectType);
       let textOffset;
       if (targetBoundingBox) {
         const sourceX = sourceBoundingBox.left + sourceBoundingBox.width / 2;
