@@ -59,11 +59,15 @@ export const ArrowAnnotationComponent = observer(
 
     // Find positions for head and tail of arrow
     const [sDxOffset, sDyOffset] = arrow.sourceOffset ? [arrow.sourceOffset.dx, arrow.sourceOffset.dy] : [0, 0];
-    const sourceX = sourceBB.left + sourceBB.width / 2 + sDxOffset + sourceDragOffsetX;
-    const sourceY = sourceBB.top + sourceBB.height / 2 + sDyOffset + sourceDragOffsetY;
+    const sourceX = Math.max(sourceBB.left, Math.min(sourceBB.left + sourceBB.width,
+      sourceBB.left + sourceBB.width / 2 + sDxOffset + sourceDragOffsetX));
+    const sourceY = Math.max(sourceBB.top, Math.min(sourceBB.top + sourceBB.height,
+      sourceBB.top + sourceBB.height / 2 + sDyOffset + sourceDragOffsetY));
     const [tDxOffset, tDyOffset] = arrow.targetOffset ? [arrow.targetOffset.dx, arrow.targetOffset.dy] : [0, 0];
-    const targetX = targetBB.left + targetBB.width / 2 + tDxOffset + targetDragOffsetX;
-    const targetY = targetBB.top + targetBB.height / 2 + tDyOffset + targetDragOffsetY;
+    const targetX = Math.max(targetBB.left, Math.min(targetBB.left + targetBB.width,
+      targetBB.left + targetBB.width / 2 + tDxOffset + targetDragOffsetX));
+    const targetY = Math.max(targetBB.top, Math.min(targetBB.top + targetBB.height,
+      targetBB.top + targetBB.height / 2 + tDyOffset + targetDragOffsetY));
 
     // Set up text location and dimensions
     const textWidth = 120;
