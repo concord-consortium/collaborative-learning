@@ -6,10 +6,11 @@ import { exportTableContentAsJson } from "./table-export";
 import {
   convertChangesToSnapshot, convertImportToSnapshot, convertLegacyDataSet, isTableImportSnapshot
 } from "./table-import";
+import { getCellId } from "./table-utils";
 import { IDocumentExportOptions, IDefaultContentOptions } from "../tile-content-info";
 import { TileMetadataModel } from "../tile-metadata";
 import { tileModelHooks } from "../tile-model-hooks";
-import { getTileModel } from "../tile-model";
+import { getTileIdFromContent, getTileModel } from "../tile-model";
 import { TileContentModel } from "../tile-content";
 import { addCanonicalCasesToDataSet, IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
 import {
@@ -24,6 +25,7 @@ import { logTileChangeEvent } from "../log/log-tile-change-event";
 import { uniqueId } from "../../../utilities/js-utils";
 import { PartialSharedModelEntry } from "../../document/document-content-types";
 import { createDefaultDataSet } from "../../../plugins/dataflow/model/utilities/create-default-data-set";
+import { IClueObject } from "../../annotations/clue-object";
 
 export const kTableTileType = "Table";
 export const kCaseIdName = "__id__";
@@ -227,25 +229,33 @@ export const TableContentModel = TileContentModel
     },
     parseExpression(expr: string) {
       return self.metadata.parseExpression(expr);
-    }
-  }))
-  .views(self => ({
-    get title() {
-      return getTileModel(self)?.title ?? self.dataSet.name;
-    }
-  }))
-  .views(self => ({
+    },
     get tileSnapshotForCopy() {
       const snapshot = getSnapshot(self);
       return snapshot;
-    }
-  }))
-  .views(self => ({
+    },
     canUndo() {
       return false;
     },
     canUndoLinkedChange() {
       return false;
+    }
+  }))
+  .views(self => ({
+    get title() {
+      return getTileModel(self)?.title ?? self.dataSet.name;
+    },
+    get annotatableObjects() {
+      const tileId = getTileIdFromContent(self) ?? "";
+      const objects: IClueObject[] = [];
+      const objectType = "cell";
+      self.dataSet.cases.forEach(c => {
+        self.dataSet.attributes.forEach(attribute => {
+          const objectId = getCellId(c.__id__, attribute.id);
+          objects.push({ tileId, objectId, objectType });
+        });
+      });
+      return objects;
     }
   }))
   .actions(self => tileModelHooks({
@@ -442,9 +452,7 @@ export const TableContentModel = TileContentModel
         }
       }
       return false;
-    }
-  }))
-  .views(self => ({
+    },
     // isValidForGeometryLink() {
     //   return self.isValidDataSetForGeometryLink(self.dataSet);
     // },

@@ -11,10 +11,11 @@ context('Dataflow Tool Tile', function () {
     cy.clearQAData('all');
     cy.visit(queryParams);
     cy.waitForLoad();
-    cy.collapseResourceTabs();
   });
   describe("Dataflow Tool", () => {
     it("renders dataflow tool tile", () => {
+      cy.wait(120000);
+      cy.collapseResourceTabs();
       clueCanvas.addTile("dataflow");
       dataflowToolTile.getDataflowTile().should("exist");
       dataflowToolTile.getTileTitle().should("exist");

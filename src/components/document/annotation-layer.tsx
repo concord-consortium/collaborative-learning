@@ -48,7 +48,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const rowIds = content?.rowOrder || [];
 
   function getObjectBoundingBox(
-    rowId: string, tileId: string, objectId: string
+    rowId: string, tileId: string, objectId: string, objectType?: string
   ) {
     const readWriteClass = readOnly ? "read-only" : "read-write";
     const documentClasses = `.document-content.${readWriteClass} `;
@@ -63,7 +63,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     const tileElement = (tileElements[0] as HTMLElement);
   
     const tileApi = tileApiInterface?.getTileApi(tileId);
-    const objectBoundingBox = tileApi?.getObjectBoundingBox?.(objectId);
+    const objectBoundingBox = tileApi?.getObjectBoundingBox?.(objectId, objectType);
     if (!objectBoundingBox) return undefined;
 
     const tileBorder = 3;
@@ -77,12 +77,12 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   }
   
   function getObjectBoundingBoxUnknownRow(
-    tileId: string, objectId: string
+    tileId: string, objectId: string, objectType?: string
   ) {
     if (!content) return undefined;
   
     const rowId = content.findRowContainingTile(tileId);
-    return getObjectBoundingBox(rowId ?? "", tileId, objectId);
+    return getObjectBoundingBox(rowId ?? "", tileId, objectId, objectType);
   }
 
   const sourceBoundingBox = sourceTileId && sourceObjectId
@@ -125,7 +125,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   };
 
   const getBoundingBox = (object: IClueObject) => {
-    return getObjectBoundingBoxUnknownRow(object.tileId, object.objectId);
+    return getObjectBoundingBoxUnknownRow(object.tileId, object.objectId, object.objectType);
   };
 
   const editing = ui.annotationMode !== undefined;
