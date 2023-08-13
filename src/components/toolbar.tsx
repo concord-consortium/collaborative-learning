@@ -185,6 +185,12 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     const tileContentInfo = getTileContentInfo(tool.id);
     if (!tileContentInfo) return;
 
+    if (ui.annotationMode !== undefined) {
+      // If we're currently annotating the document, switch to normal edit mode
+      ui.setAnnotationMode();
+      return;
+    }
+    
     const newTileOptions: IDocumentContentAddTileOptions = {
             title: this.getUniqueTitle(tileContentInfo),
             addSidecarNotes: !!tileContentInfo?.addSidecarNotes,
