@@ -212,6 +212,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     } else {
       ui.setAnnotationMode("sparrow");
       ui.setShowAnnotations(true);
+      ui.setSelectedTile();
     }
   }
 
