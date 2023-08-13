@@ -9,6 +9,7 @@ import DuplicateToolIcon from "./assets/icons/duplicate-tool.svg";
 import HideAnnotationsIcon from "./assets/icons/hide-annotations-tool.svg";
 import RedoToolIcon from "./assets/icons/redo-tool.svg";
 import SelectToolIcon from "./assets/icons/select-tool.svg";
+import ShowAnnotationsIcon from "./assets/icons/show-annotations-tool.svg";
 import SolutionToolIcon from "./assets/icons/solution-tool.svg";
 import SparrowToolIcon from "./assets/icons/sparrow-tool.svg";
 import UndoToolIcon from "./assets/icons/undo-tool.svg";
@@ -26,6 +27,7 @@ export const appIcons: Record<string, FunctionComponent<SVGProps<SVGSVGElement>>
   "icon-hide-annotations-tool": HideAnnotationsIcon,
   "icon-redo-tool": RedoToolIcon,
   "icon-select-tool": SelectToolIcon,
+  "icon-show-annotations-tool": ShowAnnotationsIcon,
   "icon-solution-tool": SolutionToolIcon,
   "icon-sparrow-tool": SparrowToolIcon,
   "icon-undo-tool": UndoToolIcon

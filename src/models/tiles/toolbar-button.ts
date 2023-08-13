@@ -8,6 +8,19 @@ const BaseToolbarButtonModel = types.model("BaseToolbarButton", {
 })
 .volatile(self => ({
   Icon: undefined as any
+}))
+.actions(self => ({
+  setIcon(Icon: any) {
+    self.Icon = Icon;
+  },
+  setTitle(title: string) {
+    self.title = title;
+  }
+}))
+.views(self => ({
+  get env() {
+    return getEnv(self);
+  }
 }));
 
 const AppToolbarButtonModel = BaseToolbarButtonModel.named("AppToolbarButtonModel")
@@ -21,8 +34,8 @@ const AppToolbarButtonModel = BaseToolbarButtonModel.named("AppToolbarButtonMode
         // Get the appConfig from the environment
         // Unfortunately the environment cannot be typed very well
         //   https://github.com/mobxjs/mobx-state-tree/issues/431
-        const appIcons = getEnv(self).appIcons;
-        self.Icon = appIcons?.[self.iconId];
+        const appIcons = self.env.appIcons;
+        self.setIcon(appIcons?.[self.iconId]);
       }
     }
   }));
@@ -35,7 +48,7 @@ const TileToolbarButtonModel = BaseToolbarButtonModel.named("TileToolbarButtonMo
     initialize() {
       if (!self.Icon) {
         const info = getTileComponentInfo(self.id);
-        info?.Icon && (self.Icon = info.Icon);
+        info?.Icon && (self.setIcon(info.Icon));
       }
     }
   }));

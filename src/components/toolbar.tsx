@@ -82,8 +82,20 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     const handleDragTool = (e: React.DragEvent<HTMLDivElement>, tool: IToolbarButtonModel) => {
       this.handleDragNewTile(tool, e);
     };
+    const updateToolButton = (toolButton: IToolbarButtonModel) => {
+      if (toolButton.id === "hide-annotations") {
+        // Update hide annotation button's icon and title based on current annotation visibility
+        const { ui } = this.stores;
+        const appIcons = toolButton.env?.appIcons;
+        toolButton.setIcon(
+          appIcons?.[ui.showAnnotations ? "icon-hide-annotations-tool" : "icon-show-annotations-tool"]
+        );
+        toolButton.setTitle(ui.showAnnotations ? "Hide Annotations" : "Show Annotations");
+      }
+    };
     const renderToolButtons = (toolbarModel: IToolbarModel) => {
       return toolbarModel.map(toolButton => {
+        updateToolButton(toolButton);
         const buttonProps: IToolbarButtonProps = {
           toolButton,
           isActive: this.isButtonActive(toolButton),
@@ -149,8 +161,6 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
       return this.selectedTilesIncludeTeacher();
     } else if (toolButton.id === "sparrow") {
       return ui.annotationMode === "sparrow";
-    } else if (toolButton.id === "hide-annotations") {
-      return !ui.showAnnotations;
     } else {
       return toolButton === this.state.activeTool;
     }
@@ -190,7 +200,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
       ui.setAnnotationMode();
       return;
     }
-    
+
     const newTileOptions: IDocumentContentAddTileOptions = {
             title: this.getUniqueTitle(tileContentInfo),
             addSidecarNotes: !!tileContentInfo?.addSidecarNotes,
