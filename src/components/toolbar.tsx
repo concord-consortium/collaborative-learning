@@ -211,6 +211,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
       ui.setAnnotationMode();
     } else {
       ui.setAnnotationMode("sparrow");
+      ui.setShowAnnotations(true);
     }
   }
 
