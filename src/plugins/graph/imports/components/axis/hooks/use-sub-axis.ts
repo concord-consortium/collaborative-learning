@@ -337,7 +337,7 @@ export const useSubAxis = ({
         const { place } = (isAlive(axisModel) && axisModel) || {};
         return place ? layout.getComputedBounds(place) : undefined;
       },
-      bounds => bounds && renderSubAxis();
+      bounds => bounds && renderSubAxis()
     );
     return () => disposer();
   }, [axisModel, layout, renderSubAxis]);
@@ -385,7 +385,7 @@ export const useSubAxis = ({
         const { place } = (isAlive(axisModel) && axisModel) || {};
         return place ? layout.getAxisLength(place) : undefined;
       },
-      bounds => bounds && renderSubAxis();
+      bounds => bounds && renderSubAxis()
     );
     return () => disposer();
   }, [axisModel, layout, renderSubAxis]);
