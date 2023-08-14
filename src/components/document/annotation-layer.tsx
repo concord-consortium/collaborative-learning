@@ -1,42 +1,18 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
-import React, { useContext, useEffect, useState } from "react";
+import React, { MouseEventHandler, useContext, useEffect, useRef, useState } from "react";
 
+import { AnnotationButton } from "../annotations/annotation-button";
+import { getDeafultPeak } from "../annotations/annotation-utilities";
 import { ArrowAnnotationComponent } from "../annotations/arrow-annotation";
+import { PreviewArrow } from "../annotations/preview-arrow";
 import { TileApiInterfaceContext } from "../tiles/tile-api";
 import { useUIStore } from "../../hooks/use-stores";
 import { ArrowAnnotation } from "../../models/annotations/arrow-annotation";
-import { ObjectBoundingBox, ClueObjectModel, IClueObject } from "../../models/annotations/clue-object";
+import { ClueObjectModel, IClueObject, OffsetModel } from "../../models/annotations/clue-object";
 import { DocumentContentModelType } from "../../models/document/document-content";
 
 import "./annotation-layer.scss";
-
-interface IAnnotationButtonProps {
-  getObjectBoundingBox:
-    (rowId: string, tileId: string, objectId: string, objectType?: string) => ObjectBoundingBox | undefined;
-  key?: string;
-  objectId: string;
-  objectType?: string;
-  onClick?: (tileId: string, objectId: string, objectType?: string) => void;
-  rowId: string;
-  sourceObjectId?: string;
-  sourceTileId?: string;
-  tileId: string;
-}
-const AnnotationButton = observer(function AnnotationButton({
-  getObjectBoundingBox, objectId, objectType, onClick, rowId, sourceObjectId, sourceTileId, tileId
-}: IAnnotationButtonProps) {
-  const style = getObjectBoundingBox(rowId, tileId, objectId, objectType);
-  if (!style) return null;
-
-  const handleClick = () => onClick?.(tileId, objectId, objectType);
-
-  const source = sourceObjectId === objectId && sourceTileId === tileId;
-  const classes = classNames("annotation-button", { source });
-  return (
-    <button className={classes} onClick={handleClick} style={style} />
-  );
-});
 
 interface IAnnotationLayerProps {
   content?: DocumentContentModelType;
@@ -55,8 +31,19 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const [sourceTileId, setSourceTileId] = useState("");
   const [sourceObjectId, setSourceObjectId] = useState("");
   const [sourceObjectType, setSourceObjectType] = useState<string | undefined>();
+  const [mouseX, setMouseX] = useState<number | undefined>();
+  const [mouseY, setMouseY] = useState<number | undefined>();
+  const divRef = useRef<HTMLDivElement>();
   const ui = useUIStore();
   const tileApiInterface = useContext(TileApiInterfaceContext);
+
+  const handleMouseMove: MouseEventHandler<HTMLDivElement> = event => {
+    if (divRef.current) {
+      const bb = divRef.current.getBoundingClientRect();
+      setMouseX(event.clientX - bb.left);
+      setMouseY(event.clientY - bb.top);
+    }
+  };
 
   const rowIds = content?.rowOrder || [];
 
@@ -98,8 +85,12 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     return getObjectBoundingBox(rowId ?? "", tileId, objectId, objectType);
   }
 
+  const sourceBoundingBox = sourceTileId && sourceObjectId
+    ? getObjectBoundingBoxUnknownRow(sourceTileId, sourceObjectId, sourceObjectType)
+    : undefined;
+
   const handleAnnotationButtonClick = (tileId: string, objectId: string, objectType?: string) => {
-    if (!sourceTileId || !sourceObjectId) {
+    if (!sourceBoundingBox) {
       // We don't have a source object yet, so make this one the source object
       setSourceTileId(tileId);
       setSourceObjectId(objectId);
@@ -114,7 +105,19 @@ export const AnnotationLayer = observer(function AnnotationLayer({
       const sourceObject =
         ClueObjectModel.create({ tileId: sourceTileId, objectId: sourceObjectId, objectType: sourceObjectType });
       const targetObject = ClueObjectModel.create({ tileId, objectId, objectType });
-      content?.addArrow(ArrowAnnotation.create({ sourceObject, targetObject }));
+      const targetBoundingBox = getObjectBoundingBoxUnknownRow(tileId, objectId, objectType);
+      let textOffset;
+      if (targetBoundingBox) {
+        const sourceX = sourceBoundingBox.left + sourceBoundingBox.width / 2;
+        const sourceY = sourceBoundingBox.top + sourceBoundingBox.height / 2;
+        const targetX = targetBoundingBox.left + targetBoundingBox.width / 2;
+        const targetY = targetBoundingBox.top + targetBoundingBox.height / 2;
+        const { peakDx, peakDy } = getDeafultPeak(sourceX, sourceY, targetX, targetY);
+        textOffset = OffsetModel.create({ dx: peakDx, dy: peakDy });
+      }
+      const newArrow = ArrowAnnotation.create({ sourceObject, targetObject, textOffset });
+      newArrow.setIsNew(true);
+      content?.addArrow(newArrow);
       setSourceTileId("");
       setSourceObjectId("");
       setSourceObjectType(undefined);
@@ -129,50 +132,63 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const hidden = !ui.showAnnotations;
   const classes = classNames("annotation-layer", { editing, hidden });
   return (
-    <div className={classes}>
-      { editing && !readOnly && rowIds.map(rowId => {
-        const row = content?.rowMap.get(rowId);
-        if (row) {
-          const tiles = row.tiles;
-          return tiles.map(tileInfo => {
-            const tile = content?.tileMap.get(tileInfo.tileId);
-            if (tile) {
-              return tile.content.annotatableObjects.map(({ objectId, objectType }) => {
-                return (
-                  <AnnotationButton
-                    getObjectBoundingBox={getObjectBoundingBox}
-                    key={`${tile.id}-${objectId}-button`}
-                    objectId={objectId}
-                    objectType={objectType}
-                    onClick={handleAnnotationButtonClick}
-                    rowId={rowId}
-                    sourceObjectId={sourceObjectId}
-                    sourceTileId={sourceTileId}
-                    tileId={tile.id}
-                  />
-                );
-              });
-            }
-          });
-        }
-      })}
+    <div
+      className={classes}
+      onMouseMove={handleMouseMove}
+      ref={element => {
+        if (element) divRef.current = element;
+      }}
+    >
       <svg
-        xmlnsXlink="http://www.w3.org/1999/xlink"
         className="annotation-svg"
         height="100%"
         width="100%"
+        xmlnsXlink="http://www.w3.org/1999/xlink"
       >
+        { editing && !readOnly && rowIds.map(rowId => {
+          const row = content?.rowMap.get(rowId);
+          if (row) {
+            const tiles = row.tiles;
+            return tiles.map(tileInfo => {
+              const tile = content?.tileMap.get(tileInfo.tileId);
+              if (tile) {
+                return tile.content.annotatableObjects.map(({ objectId, objectType }) => {
+                  return (
+                    <AnnotationButton
+                      getObjectBoundingBox={getObjectBoundingBox}
+                      key={`${tile.id}-${objectId}-button`}
+                      objectId={objectId}
+                      objectType={objectType}
+                      onClick={handleAnnotationButtonClick}
+                      rowId={rowId}
+                      sourceObjectId={sourceObjectId}
+                      sourceTileId={sourceTileId}
+                      tileId={tile.id}
+                    />
+                  );
+                });
+              }
+            });
+          }
+        })}
         { Array.from(content?.annotations.values() ?? []).map(arrow => {
-          const key = `${arrow.sourceObject?.objectId}-${arrow.targetObject?.objectId}`;
+          const key = `sparrow-${arrow.id}`;
           return (
             <ArrowAnnotationComponent
               arrow={arrow}
               canEdit={!readOnly && editing}
               getBoundingBox={getBoundingBox}
               key={key}
+              readOnly={readOnly}
             />
           );
         })}
+        <PreviewArrow
+          sourceX={sourceBoundingBox ? sourceBoundingBox.left + sourceBoundingBox.width / 2 : undefined}
+          sourceY={sourceBoundingBox ? sourceBoundingBox.top + sourceBoundingBox.height / 2 : undefined}
+          targetX={mouseX}
+          targetY={mouseY}
+        />
       </svg>
     </div>
   );
