@@ -32,7 +32,7 @@ context('Arrow Annotations (Sparrows)', function () {
     cy.waitForLoad();
     // cy.collapseResourceTabs();
   });
-  describe.skip("Arrow Annotations", () => {
+  describe("Arrow Annotations", () => {
     it("can add arrows to draw tiles", () => {
       clueCanvas.addTile("drawing");
       drawToolTile.getDrawTile().should("exist");
