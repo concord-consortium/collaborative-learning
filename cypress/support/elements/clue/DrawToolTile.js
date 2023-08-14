@@ -32,6 +32,9 @@ class DrawToolTile{
     getDrawToolStampExpand(){
       return cy.get('.primary-workspace .drawing-tool-button.button-stamp .expand-collapse');
     }
+    getDrawToolText(){
+      return cy.get('.primary-workspace .drawing-tool-button.button-text');
+    }
     getDrawToolStrokeColor(){
       return cy.get('.primary-workspace .drawing-tool-button.button-stroke-color');
     }
@@ -71,6 +74,9 @@ class DrawToolTile{
     }
     getImageDrawing(){
       return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg image');
+    }
+    getTextDrawing(){
+      return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg g.text');
     }
     getSelectionBox(){
       return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg [data-testid=selection-box]');
