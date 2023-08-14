@@ -30,6 +30,7 @@ export function getTileDataSet(tile: ITileContentModel): IDataSet | undefined {
 }
 
 export function getTileCaseMetadata(tile: ITileContentModel) {
+  console.log("| getTileCaseMetadata called", getTileSharedModels(tile));
   const sharedCaseMetadata = getTileSharedModels(tile).find(m => isSharedCaseMetadata(m));
   return isSharedCaseMetadata(sharedCaseMetadata) ? sharedCaseMetadata : undefined;
 }
