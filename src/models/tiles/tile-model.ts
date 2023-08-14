@@ -49,6 +49,11 @@ export function getTileModel(tileContentModel: ITileContentModel) {
   }
 }
 
+export function getTileIdFromContent(tileContentModel: ITileContentModel) {
+  const parent = getTileModel(tileContentModel);
+  return parent?.id;
+}
+
 export const TileModel = types
   .model("TileModel", {
     // if not provided, will be generated

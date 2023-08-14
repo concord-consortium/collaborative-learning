@@ -273,16 +273,17 @@ $scroller-height: 145px;
     }
   }
   .editable-document-content {
-    top: $nav-tab-height * 2;
-    height: calc(100vh - (#{$header-offset-with-sub-tabs} + #{$title-margin} + #{$nav-tab-height}) - #{$scroller-height});
-    position: static;
+    top: $nav-tab-height;
+    height: calc(100% - $workspace-titlebar-height - $scroller-height);
     overflow-y: auto;
     &.full-height {
-      height: calc(100vh - (#{$header-offset-with-sub-tabs} + #{$title-margin} + #{$nav-tab-height}));
+      height: calc(100% - $workspace-titlebar-height);
     }
     .canvas-area {
-      position: static;
-      height: 100%;
+      // Not sure why - 4px is necessary here, but the document would always scroll otherwise
+      height: calc(100% - 4px);
+      width: 100%;
+
       .comment-select {
         .tool-tile.readonly {
           border: 2px solid $comment-select-background;
@@ -290,6 +291,11 @@ $scroller-height: 145px;
             border: 2px solid white;
           }
         }
+      }
+
+      .playback-component {
+        // This is to compensate for the - 4px above
+        bottom: -4px;
       }
     }
   }
