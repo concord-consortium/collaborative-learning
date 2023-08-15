@@ -135,7 +135,6 @@ export class MultiScale {
 
   @action reactToCategorySetChange() {
     return reaction(() => {
-      console.log("| 1 | reactToCategorySetChange sees no categorySet |", this.categorySetValues);
       return Array.from(this.categorySetValues);
     }, (categories) => {
       this.setCategoricalDomain(categories);

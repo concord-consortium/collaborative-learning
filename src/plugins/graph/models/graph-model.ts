@@ -19,14 +19,13 @@ import {
 import { AppConfigModelType } from "../../../models/stores/app-config-model";
 import {ITileContentModel, TileContentModel} from "../../../models/tiles/tile-content";
 import {ITileExportOptions} from "../../../models/tiles/tile-content-info";
-import { getAppConfig } from "../../../models/tiles/tile-environment";
+import { getAppConfig, getSharedModelManager } from "../../../models/tiles/tile-environment";
 import {
   defaultBackgroundColor, defaultPointColor, defaultStrokeColor, kellyColors
 } from "../../../utilities/color-utils";
 import { onAnyAction } from "../../../utilities/mst-utils";
 import { AdornmentModelUnion } from "../adornments/adornment-types";
-import { isSharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
-
+import { SharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
 export interface GraphProperties {
   axes: Record<string, IAxisModelUnion>
   plotType: PlotType
@@ -322,6 +321,12 @@ export const GraphModel = TileContentModel
       addDisposer(self, reaction(
         () => self.data,
         data => {
+          if (!self.metadata && data){
+            const caseMetadata = SharedCaseMetadata.create();
+            caseMetadata.setData(data);
+            const sharedModelManager = getSharedModelManager(self);
+            sharedModelManager?.addTileSharedModel(self, caseMetadata);
+          }
           // CHECKME: this will only work correctly if setDataset doesn't
           // trigger any state updates
           if (self.data !== self.config.dataset) {
