@@ -65,7 +65,6 @@ export const TextObject = EditableObject.named("TextObject")
       self.dragWidth = self.dragHeight = undefined;
     },
     setEditing(editing: boolean) {
-      console.log('Editing state is now', editing);
       self.isEditing = editing;
     }
   }));  
@@ -104,8 +103,7 @@ export const TextComponent = observer(
     if (editing) {
       return (
         <foreignObject x={x+margin} y={y+margin} width={width-2*margin} height={height-2*margin}>
-          <textarea ref={textEditor}
-            style={{width: "100%", height: "100%", resize: "none"}} 
+          <textarea ref={textEditor} 
             defaultValue={text}
             onBlur={(e) => handleClose(true)}
             onKeyDown={handleTextAreaKeyDown}
@@ -153,8 +151,8 @@ export const TextComponent = observer(
           key={id} 
           className="text" 
           pointerEvents={"visible"} //allows user to select inside of an unfilled object
-          onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
-          onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
+          onMouseEnter={(e) => handleHover?.(e, model, true)}
+          onMouseLeave={(e) => handleHover?.(e, model, false)}
           onMouseDown={(e)=> handleDrag?.(e, model)}
          >
           <rect x={x} y={y}

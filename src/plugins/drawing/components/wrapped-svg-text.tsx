@@ -45,7 +45,6 @@ export const WrappedSvgText = function({text, x, y, width, height, style}: ISvgT
             }
             while(experimentalLine.length) {
                 while(experimentalLine.length > 1 && tr.getComputedTextLength() > width) {
-                    // console.log(`experimental line (${experimentalLine}) too long`);
                     remainingText.unshift(experimentalLine.pop() || '?');
                     tr.textContent = experimentalLine.join(' ');
                 }
