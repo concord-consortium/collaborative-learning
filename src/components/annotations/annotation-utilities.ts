@@ -20,9 +20,9 @@ export function getDeafultPeak(sourceX: number, sourceY: number, targetX: number
   const arrowAngle = normalizeAngle(Math.atan2(-dy, dx));
 
   const multiplier = arrowAngle > halfPi && arrowAngle < 3 * halfPi ? 1 : -1;
-  const perpAngle = normalizeAngle(multiplier * Math.PI / 2 - arrowAngle);
-  const peakDx = Math.cos(perpAngle) * radius;
-  const peakDy = Math.sin(perpAngle) * radius;
+  const perpendicularAngle = normalizeAngle(multiplier * Math.PI / 2 - arrowAngle);
+  const peakDx = Math.cos(perpendicularAngle) * radius;
+  const peakDy = Math.sin(perpendicularAngle) * radius;
   const peakX = mx + peakDx;
   const peakY = my + peakDy;
   return {

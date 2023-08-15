@@ -6,11 +6,12 @@
   position: absolute;
 
   &:hover {
-    fill: rgba(21, 0, 255, 0.125);
-    outline: 2px dotted blue;
+    fill: vars.$annotation-blue-very-transparent;
+    outline: 2px dotted vars.$annotation-blue;
   }
 
   &.source {
-    outline: 2px solid blue;
+    fill: rgba(0, 0, 0, 0);
+    outline: 2px solid vars.$annotation-blue;
   }
 }
