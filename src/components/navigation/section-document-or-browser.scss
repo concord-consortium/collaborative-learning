@@ -1,5 +1,4 @@
 @import "../vars";
-$header-offset-with-sub-tabs: calc(#{$header-height} + 2 * (#{$workspace-content-margin} + #{$nav-tab-height} + #{$tab-section-border-width}));
 $title-margin: 2px;
 $scroller-height: 145px;
 
@@ -12,12 +11,15 @@ $scroller-height: 145px;
 
   .document-browser {
     overflow-y: auto;
-    height: calc(100vh - #{$header-offset-with-sub-tabs});
+    height: 100%;
   }
 
   .scroller-and-document {
     overflow-x: hidden;
     overflow-y: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
     position: relative;
     .collapse-scroller-button {
       border-radius: 50%;
@@ -101,10 +103,10 @@ $scroller-height: 145px;
       }
     }
     .document-area {
-      height: calc(100vh - #{$header-offset-with-sub-tabs});
+      flex: 1;
       display: flex;
       flex-direction: row;
-      overflow-y: auto;
+      overflow-y: hidden;
 
       .focus-document {
         display: flex;
@@ -274,11 +276,8 @@ $scroller-height: 145px;
   }
   .editable-document-content {
     top: $nav-tab-height;
-    height: calc(100% - $workspace-titlebar-height - $scroller-height);
-    overflow-y: auto;
-    &.full-height {
-      height: calc(100% - $workspace-titlebar-height);
-    }
+    flex: 1;
+    overflow-y: hidden;
     .canvas-area {
       // Not sure why - 4px is necessary here, but the document would always scroll otherwise
       height: calc(100% - 4px);

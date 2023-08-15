@@ -58,8 +58,6 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
       navTabContentShown
         ? <NavTabPanel
             onDragOver={handleDragOverWorkspace}
-            isResourceExpanded={navTabContentShown}
-            isExpanderShown={showExpanders}
           />
         : <CollapsedResourcesTab
             onExpandResources={toggleExpandResources}
@@ -85,7 +83,7 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
         onExpandWorkspace={toggleExpandWorkspace}
         onExpandResources={toggleExpandResources}
       />}
-      {workspaceShown ? <DocumentWorkspaceComponent isExpanderShown={showExpanders} />
+      {workspaceShown ? <DocumentWorkspaceComponent />
                       : <CollapsedWorkspaceTab
                           onExpandWorkspace={toggleExpandWorkspace}
                           workspaceType={problemWorkspace.type}
