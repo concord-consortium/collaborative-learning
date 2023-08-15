@@ -163,7 +163,7 @@ export class GraphController {
             graphModel.setAxis(place, newAxisModel);
             layout.setAxisScaleType(place, 'band');
           }
-          console.log('| setting categorySet', dataConfig.categorySetForAttrRole(attrRole));
+          console.log('| setting categorySet', attrRole, dataConfig.categorySetForAttrRole(attrRole));
           layout.getAxisMultiScale(place)?.setCategorySet(dataConfig.categorySetForAttrRole(attrRole));
         }
           break;
