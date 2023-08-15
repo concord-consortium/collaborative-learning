@@ -52,12 +52,14 @@ export const UITabModel = types
 
 export const UIModel = types
   .model("UI", {
+    annotationMode: types.maybe(types.string),
     dividerPosition: kDividerHalf,
     error: types.maybeNull(types.string),
     activeNavTab: ENavTab.kProblems,
     selectedTileIds: types.array(types.string),
     selectedCommentId: types.maybe(types.string),
     scrollTo: types.maybe(ScrollToModel),
+    showAnnotations: true,
     showDemo: false,
     showDemoCreator: false,
     showTeacherContent: true,
@@ -184,8 +186,14 @@ export const UIModel = types
       confirm,
       resolveDialog,
 
+      setAnnotationMode(mode?: string) {
+        self.annotationMode = mode;
+      },
       setDividerPosition(position: number) {
         self.dividerPosition = position;
+      },
+      setShowAnnotations(show: boolean) {
+        self.showAnnotations = show;
       },
       toggleShowTeacherContent(show: boolean) {
         self.showTeacherContent = show;
