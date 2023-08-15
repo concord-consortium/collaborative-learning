@@ -1,16 +1,27 @@
 import { reaction } from "mobx";
-import { DataSet, IDataSet } from "../../../models/data/data-set";
+import {getSnapshot, Instance, types} from "mobx-state-tree";
+import { DataSet } from "../../../models/data/data-set";
 import { DataConfigurationModel } from "./data-configuration-model";
+import {SharedCaseMetadata} from "../../../models/shared/shared-case-metadata";
+
+const TreeModel = types.model("Tree", {
+  data: DataSet,
+  metadata: SharedCaseMetadata
+});
+
+let tree: Instance<typeof TreeModel>;
 
 describe("DataConfigurationModel", () => {
-  let data: IDataSet;
-
   beforeEach(() => {
-    data = DataSet.create();
-    data.addAttributeWithID({ id: "nId", name: "n" });
-    data.addAttributeWithID({ id: "xId", name: "x" });
-    data.addAttributeWithID({ id: "yId", name: "y" });
-    data.addCasesWithIDs([
+    tree = TreeModel.create({
+      data: getSnapshot(DataSet.create()),
+      metadata: getSnapshot(SharedCaseMetadata.create())
+    });
+    tree.data.addAttributeWithID({ id: "nId", name: "n" });
+    tree.data.addAttributeWithID({ id: "xId", name: "x" });
+    tree.data.addAttributeWithID({ id: "yId", name: "y" });
+    tree.metadata.setData(tree.data);
+    tree.data.addCasesWithIDs([
       { __id__: "c1", n: "n1", x: 1, y: 1 }, { __id__: "c2", x: 2 }, { __id__: "c3", n: "n3", y: 3 }
     ]);
   });
@@ -33,7 +44,7 @@ describe("DataConfigurationModel", () => {
 
   it("behaves as expected with empty/case plot", () => {
     const config = DataConfigurationModel.create();
-    config.setDataset(data);
+    config.setDataset(tree.data, tree.metadata);
     expect(config.defaultCaptionAttributeID).toBe("nId");
     expect(config.attributeID("x")).toBeUndefined();
     expect(config.attributeID("y")).toBeUndefined();
@@ -54,7 +65,7 @@ describe("DataConfigurationModel", () => {
 
   it("behaves as expected with dot chart on x axis", () => {
     const config = DataConfigurationModel.create();
-    config.setDataset(data);
+    config.setDataset(tree.data, tree.metadata);
     config.setAttribute("x", { attributeID: "nId" });
     expect(config.defaultCaptionAttributeID).toBe("nId");
     expect(config.attributeID("x")).toBe("nId");
@@ -76,7 +87,7 @@ describe("DataConfigurationModel", () => {
 
   it("behaves as expected with dot plot on x axis", () => {
     const config = DataConfigurationModel.create();
-    config.setDataset(data);
+    config.setDataset(tree.data, tree.metadata);
     config.setAttribute("x", { attributeID: "xId" });
     expect(config.defaultCaptionAttributeID).toBe("nId");
     expect(config.attributeID("x")).toBe("xId");
@@ -99,7 +110,7 @@ describe("DataConfigurationModel", () => {
 
   it("behaves as expected with scatter plot and explicit caption attribute", () => {
     const config = DataConfigurationModel.create();
-    config.setDataset(data);
+    config.setDataset(tree.data, tree.metadata);
     // xId on x-axis, yId on y-axis
     config.setAttribute("x", { attributeID: "xId" });
     config.setAttribute("y", { attributeID: "yId" });
@@ -142,7 +153,7 @@ describe("DataConfigurationModel", () => {
     ]);
 
     // updates cases when values change
-    data.setCanonicalCaseValues([{ __id__: "c2", "yId": 2 }]);
+    tree.data.setCanonicalCaseValues([{ __id__: "c2", "yId": 2 }]);
     expect(config.caseDataArray).toEqual([
       {plotNum: 0, caseID: "c1"},
       {plotNum: 0, caseID: "c2"},
@@ -153,13 +164,13 @@ describe("DataConfigurationModel", () => {
     const trigger = jest.fn();
     reaction(() => config.caseDataArray, () => trigger());
     expect(trigger).not.toHaveBeenCalled();
-    data.setCanonicalCaseValues([{ __id__: "c2", "yId": "" }]);
+    tree.data.setCanonicalCaseValues([{ __id__: "c2", "yId": "" }]);
     expect(trigger).toHaveBeenCalledTimes(2); // TODO: should be 1
     expect(config.caseDataArray).toEqual([
       {plotNum: 0, caseID: "c1"},
       {plotNum: 0, caseID: "c3"}
     ]);
-    data.setCanonicalCaseValues([{ __id__: "c2", "yId": "2" }]);
+    tree.data.setCanonicalCaseValues([{ __id__: "c2", "yId": "2" }]);
     expect(trigger).toHaveBeenCalledTimes(4); // TODO: should be 2
     expect(config.caseDataArray).toEqual([
       {plotNum: 0, caseID: "c1"},
@@ -173,8 +184,8 @@ describe("DataConfigurationModel", () => {
     config.setAttribute("x", { attributeID: "xId" });
     expect(config.selection.length).toBe(0);
 
-    config.setDataset(data);
-    data.selectAll();
+    config.setDataset(tree.data, tree.metadata);
+    tree.data.selectAll();
     expect(config.selection.length).toBe(2);
 
     config.setAttribute("x", { attributeID: "xId" });
@@ -191,31 +202,34 @@ describe("DataConfigurationModel", () => {
 
   it("calls action listeners when appropriate", () => {
     const config = DataConfigurationModel.create();
-    config.setDataset(data);
+    config.setDataset(tree.data, tree.metadata);
     config.setAttribute("x", { attributeID: "xId" });
 
     const handleAction = jest.fn();
     config.onAction(handleAction);
 
-    data.setCanonicalCaseValues([{ __id__: "c1", xId: 1.1 }]);
+    tree.data.setCanonicalCaseValues([{ __id__: "c1", xId: 1.1 }]);
     expect(handleAction).toHaveBeenCalled();
     expect(handleAction.mock.lastCall[0].name).toBe("setCaseValues");
+    handleAction.mockClear();
 
-    data.setCanonicalCaseValues([{ __id__: "c3", xId: 3 }]);
+    tree.data.setCanonicalCaseValues([{ __id__: "c3", xId: 3 }]);
     expect(handleAction).toHaveBeenCalled();
     expect(handleAction.mock.lastCall[0].name).toBe("addCases");
+    handleAction.mockClear();
 
-    data.setCanonicalCaseValues([{ __id__: "c1", xId: "" }]);
+    tree.data.setCanonicalCaseValues([{ __id__: "c1", xId: "" }]);
     expect(handleAction).toHaveBeenCalled();
     expect(handleAction.mock.lastCall[0].name).toBe("removeCases");
+    handleAction.mockClear();
 
-    data.setCanonicalCaseValues([{ __id__: "c1", xId: 1 }, { __id__: "c2", xId: "" }, { __id__: "c3", xId: 3.3 }]);
+    tree.data.setCanonicalCaseValues([{ __id__: "c1", xId: 1 }, { __id__: "c2", xId: "" }, { __id__: "c3", xId: 3.3 }]);
     expect(handleAction).toHaveBeenCalled();
   });
 
   it("only allows x and y as primary place", () => {
     const config = DataConfigurationModel.create();
-    config.setDataset(data);
+    config.setDataset(tree.data, tree.metadata);
     config.setPrimaryRole('y');
     expect(config.primaryRole).toBe("y");
     config.setPrimaryRole('caption');
@@ -223,27 +237,37 @@ describe("DataConfigurationModel", () => {
   });
 
   it("returns an attribute values array and category set that ignore empty values", () => {
-    data.addCasesWithIDs([
+    tree.data.addCasesWithIDs([
       { __id__: "c4", n: "n1", x: 1, y: 1 },
       { __id__: "c5", n: "", x: 6, y: 1 },
       { __id__: "c6", n: "n1", x: 6, y: 6 }]);
     const config = DataConfigurationModel.create();
-    config.setDataset(data);
+    config.setDataset(tree.data, tree.metadata);
     config.setAttribute("x", { attributeID: "xId" });
     config.setAttribute("y", { attributeID: "yId" });
     config.setAttribute("caption", { attributeID: "nId" });
     expect(config.valuesForAttrRole("x")).toEqual(["1", "1", "6", "6"]);
     expect(config.valuesForAttrRole("y")).toEqual(["1", "1", "1", "6"]);
     expect(config.valuesForAttrRole("caption")).toEqual(["n1", "n1", "n1"]);
-    expect(config.categorySetForAttrRole("x")).toEqual(new Set(["1", "6"]));
-    expect(config.categorySetForAttrRole("y")).toEqual(new Set(["1", "6"]));
-    expect(config.categorySetForAttrRole("caption")).toEqual(new Set(["n1"]));
+    expect(config.categoryArrayForAttrRole("x")).toEqual(["1", "6"]);
+    expect(config.categoryArrayForAttrRole("y")).toEqual(["1", "6"]);
+    expect(config.categoryArrayForAttrRole("caption")).toEqual(["n1"]);
     expect(config.numericValuesForAttrRole("x")).toEqual([1, 1, 6, 6]);
     expect(config.numericValuesForAttrRole("caption")).toEqual([]);
 
     config.setAttribute("y");
     expect(config.valuesForAttrRole("y")).toEqual([]);
-    expect(config.categorySetForAttrRole("y")).toEqual(new Set(["__main__"]));
+    expect(config.categoryArrayForAttrRole("y")).toEqual(["__main__"]);
+  });
+
+  it("returns an array of cases in a plot", () => {
+    const config = DataConfigurationModel.create();
+    config.setDataset(tree.data, tree.metadata);
+    expect(config.subPlotCases({})).toEqual([
+      {"__id__": "c1", "nId": "n1", "xId": 1, "yId": 1},
+      {"__id__": "c2", "xId": 2},
+      {"__id__": "c3", "nId": "n3", "yId": 3}
+    ]);
   });
 
 });

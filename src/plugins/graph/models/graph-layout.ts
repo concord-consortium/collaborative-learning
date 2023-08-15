@@ -1,9 +1,9 @@
 import {action, computed, makeObservable, observable} from "mobx";
 import {createContext, useContext} from "react";
-import {AxisPlace, AxisPlaces, AxisBounds, IScaleType} from "../axis/axis-types";
-import {GraphPlace, isVertical} from "../axis-graph-shared";
-import {IAxisLayout} from "../axis/models/axis-layout-context";
-import {MultiScale} from "../axis/models/multi-scale";
+import {AxisPlace, AxisPlaces, AxisBounds, IScaleType} from "../imports/components/axis/axis-types";
+import {GraphPlace, isVertical} from "../imports/components/axis-graph-shared";
+import {IAxisLayout} from "../imports/components/axis/models/axis-layout-context";
+import {MultiScale} from "../imports/components/axis/models/multi-scale";
 
 export const kDefaultGraphWidth = 480;
 export const kDefaultGraphHeight = 300;
@@ -15,9 +15,6 @@ export interface Bounds {
   width: number
   height: number
 }
-
-export const CategoricalLayouts = ["parallel", "perpendicular"] as const;
-export type CategoricalLayout = typeof CategoricalLayouts[number]
 
 export class GraphLayout implements IAxisLayout {
   @observable graphWidth = kDefaultGraphWidth;
@@ -34,6 +31,12 @@ export class GraphLayout implements IAxisLayout {
       new MultiScale({scaleType: "ordinal",
         orientation: isVertical(place) ? "vertical" : "horizontal"})));
     makeObservable(this);
+  }
+
+  cleanup() {
+    for (const scale of this.axisScales.values()) {
+      scale.cleanup();
+    }
   }
 
   @computed get plotWidth() {
@@ -57,7 +60,7 @@ export class GraphLayout implements IAxisLayout {
       // We allow the axis to draw gridlines for bivariate numeric plots. Unfortunately, the gridlines end up as
       // part of the axis dom element so that we get in here with bounds that span the entire width or height of
       // the plot. We tried workarounds to get gridlines that were _not_ part of the axis element with the result
-      // that the gridlines got out of synch with axis tick marks during drag. So we have this inelegant solution
+      // that the gridlines got out of sync with axis tick marks during drag. So we have this inelegant solution
       // that shouldn't affect the top and right axes when we get them but it may be worthwhile to
       // (TODO) figure out if there's a better way to render gridlines on background (or plot) so this isn't necessary.
 
@@ -86,6 +89,10 @@ export class GraphLayout implements IAxisLayout {
   getAxisMultiScale(place: AxisPlace) {
     return this.axisScales.get(place) ??
       new MultiScale({scaleType: "ordinal", orientation: "horizontal"});
+  }
+
+  @computed get categorySetArrays() {
+    return Array.from(this.axisScales.values()).map(scale => Array.from(scale.categorySetValues));
   }
 
   getAxisScale(place: AxisPlace) {
