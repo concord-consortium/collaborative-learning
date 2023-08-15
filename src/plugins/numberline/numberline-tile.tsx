@@ -2,6 +2,8 @@ import { observer } from "mobx-react";
 import React, { useEffect, useRef, useState } from "react";
 import { ITileProps } from "../../components/tiles/tile-component";
 import { scaleLinear, select, selectAll, pointer, axisBottom } from "d3";
+import { tickWidthDefault, tickWidthZero, tickHeightDefault, tickHeightZero,
+  tickStyleDefault, tickStyleZero, kContainerWidth, kAxisWidth } from "./numberline-tile-constants";
 
 import "./numberline-tile.scss";
 
@@ -13,11 +15,11 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
   //---------------- Calculate width of tile ---------------
   const documentScrollerRef = useRef<HTMLDivElement>(null);
   const [tileWidth, setTileWidth] = useState(0);
-  const containerWidth = (tileWidth * 0.93);
-  const axisWidth = (tileWidth * 0.9);
+  const containerWidth = (tileWidth * kContainerWidth);
+  const axisWidth = (tileWidth * kAxisWidth);
   //pixels we shift to the right to center axis in numberline-tool-container
   const xShiftRaw = ((containerWidth - axisWidth)/2);
-  const numToPx = (num: number) => num.toFixed(2).toString() + "px";
+  const numToPx = (num: number) => num.toFixed(2) + "px";
 
   useEffect(() => {
     let obs: ResizeObserver;
@@ -46,12 +48,12 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
 
     // After the axis is drawn, customize "x = 0 tick"
     selectAll("g.num-axis g.tick line")
-      .attr("y2", function(x){ return (x === 0) ? 20 : 6;})
-      .attr("stroke-width", function(x){ return (x === 0) ? "3px" : "1px";})
-      .attr("style", function(x){ return (x === 0) ? "transform: translateY(-10px)" : "";});
+      .attr("y2", function(x){ return (x === 0) ? tickHeightZero : tickHeightDefault;})
+      .attr("stroke-width", function(x){ return (x === 0) ? tickWidthZero : tickWidthDefault;})
+      .attr("style", function(x){ return (x === 0) ? tickStyleZero : tickStyleDefault;});
 
     //Set click-area to printNumber out
-    const printNum = (e: Event) => {
+    const handleNumberClick = (e: Event) => {
       const pos = pointer(e, clickArea);
       const xPos = pos[0];
       const value = linearScale.invert(xPos);
@@ -60,14 +62,14 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
 
     select('.click-area')
       .attr('width', axisWidth)
-      .on('click', (e) => printNum(e));
+      .on('click', (e) => handleNumberClick(e));
 
     const clickArea = select('.click-area').node();
 
   },[axisClass, axisWidth, domainMin, domainMax, numOfTicks]);
 
   return (
-    <div className="numberline-tool" ref={documentScrollerRef}>
+    <div className="numberline-tool" ref={documentScrollerRef} data-testid="numberline-tool">
       <div className="numberline-tool-container">
         <div className="num-axis-title-container">
           <div className="title-box">
