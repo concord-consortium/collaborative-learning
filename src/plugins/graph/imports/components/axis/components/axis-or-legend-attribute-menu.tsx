@@ -15,7 +15,7 @@ import { isSetAttributeNameAction } from "../../../../../../models/data/data-set
 
 interface IProps {
   place: GraphPlace,
-  target: SVGGElement | null
+  target: SVGGElement | HTMLElement | null
   portal: HTMLElement | null
   onChangeAttribute: (place: GraphPlace, dataSet: IDataSet, attrId: string) => void
   onRemoveAttribute: (place: GraphPlace, attrId: string) => void

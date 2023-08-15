@@ -1,4 +1,5 @@
 import {observer} from "mobx-react-lite";
+import {appConfig} from "../../../initialize-app";
 import React, {MutableRefObject, useEffect, useMemo, useRef} from "react";
 import {select} from "d3";
 import {GraphController} from "../models/graph-controller";
@@ -24,6 +25,7 @@ import {isSetAttributeIDAction, useGraphModelContext} from "../models/graph-mode
 import {useInstanceIdContext} from "../imports/hooks/use-instance-id-context";
 import {MarqueeState} from "../models/marquee-state";
 import {Legend} from "./legend/legend";
+import {MultiLegend} from "./legend/multi-legend";
 import {AttributeType} from "../../../models/data/attribute";
 import {IDataSet} from "../../../models/data/data-set";
 import {useDataTips} from "../hooks/use-data-tips";
@@ -192,6 +194,14 @@ export const Graph = observer(function Graph({graphController, graphRef, dotsRef
         </svg>
         {renderDroppableAddAttributes()}
         <Adornments />
+        { appConfig.getSetting("defaultSeriesLegend", "graph") &&
+          <MultiLegend
+            graphElt={graphRef.current}
+            onChangeAttribute={handleChangeAttribute as any} //TODO resolve this
+            onRemoveAttribute={handleRemoveAttribute}
+            onTreatAttributeAs={handleTreatAttrAs}
+          />
+        }
       </div>
     </DataConfigurationContext.Provider>
   );

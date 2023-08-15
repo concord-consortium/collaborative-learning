@@ -1,5 +1,6 @@
 import {action, computed, makeObservable, observable} from "mobx";
 import {createContext, useContext} from "react";
+import {appConfig} from "../../../initialize-app";
 import {AxisPlace, AxisPlaces, AxisBounds, IScaleType} from "../imports/components/axis/axis-types";
 import {GraphPlace, isVertical} from "../imports/components/axis-graph-shared";
 import {IAxisLayout} from "../imports/components/axis/models/axis-layout-context";
@@ -8,6 +9,7 @@ import {MultiScale} from "../imports/components/axis/models/multi-scale";
 export const kDefaultGraphWidth = 480;
 export const kDefaultGraphHeight = 300;
 export const kDefaultLegendHeight = 0;
+export const kMultiLegendHeight = 80;
 
 export interface Bounds {
   left: number
@@ -130,10 +132,11 @@ export class GraphLayout implements IAxisLayout {
    */
   @computed get computedBounds() {
     const {desiredExtents, graphWidth, graphHeight} = this,
+      usesMultiLegend = appConfig.getSetting("defaultSeriesLegend", "graph"),
+      legendHeight = usesMultiLegend ? kMultiLegendHeight : desiredExtents.get('legend') ?? 0,
       topAxisHeight = desiredExtents.get('top') ?? 0,
       leftAxisWidth = desiredExtents.get('left') ?? 20,
       bottomAxisHeight = desiredExtents.get('bottom') ?? 20,
-      legendHeight = desiredExtents.get('legend') ?? 0,
       v2AxisWidth = desiredExtents.get('rightNumeric') ?? 0,
       rightAxisWidth = desiredExtents.get('rightCat') ?? 0,
       plotWidth = graphWidth - leftAxisWidth - v2AxisWidth - rightAxisWidth,
