@@ -75,13 +75,7 @@ export const GraphModel = TileContentModel
       return getTileDataSet(self);
     },
     get metadata() {
-      const askedForMetaData = getTileCaseMetadata(self);
-      console.log("| askedForMetaData", askedForMetaData);
       return getTileCaseMetadata(self);
-      // THOUGHT I MIGHT HAVE HAD IT, BELOW IS ALTERNATVE WAY TO GET META DATA, GOTTA KEEP AT IT
-      // const sharedModelManager = self.tileEnv?.sharedModelManager;
-      // const sharedModel = sharedModelManager?.getTileSharedModels(self).find(m => isSharedCaseMetadata(m));
-      // return isSharedCaseMetadata(sharedModel) ? sharedModel : undefined;
     },
     pointColorAtIndex(plotIndex = 0) {
       return self._pointColors[plotIndex] ?? kellyColors[plotIndex % kellyColors.length];
