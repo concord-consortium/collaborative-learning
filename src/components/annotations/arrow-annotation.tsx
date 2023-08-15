@@ -211,7 +211,13 @@ export const ArrowAnnotationComponent = observer(
           sourceX={sourceX} sourceY={sourceY}
           targetX={targetX} targetY={targetY}
         />
-        <foreignObject height={`${textHeight}`} width={`${textWidth}`} x={`${textX}`} y={`${textY}`}>
+        <foreignObject
+          className="text-object"
+          height={`${textHeight}`}
+          width={`${textWidth}`}
+          x={`${textX}`}
+          y={`${textY}`}
+        >
           <div className="text-region">
             { editingText && !readOnly
               ? (
