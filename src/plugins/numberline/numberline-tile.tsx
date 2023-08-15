@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { ITileProps } from "../../components/tiles/tile-component";
 import { scaleLinear, select, selectAll, pointer, axisBottom } from "d3";
 import { tickWidthDefault, tickWidthZero, tickHeightDefault, tickHeightZero,
-  tickStyleDefault, tickStyleZero, kContainerWidth, kAxisWidth } from "./numberline-tile-constants";
+  tickStyleDefault, tickStyleZero, kContainerWidth, kAxisWidth, numberlineDomainMax, numberlineDomainMin } from "./numberline-tile-constants";
 
 import "./numberline-tile.scss";
 
@@ -12,6 +12,7 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
   const tileId = props.model.id;
   const axisClass = "axis-" + tileId;
   const tileTitle = props.model.title;
+
   //---------------- Calculate width of tile ---------------
   const documentScrollerRef = useRef<HTMLDivElement>(null);
   const [tileWidth, setTileWidth] = useState(0);
@@ -20,7 +21,6 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
   //pixels we shift to the right to center axis in numberline-tool-container
   const xShiftRaw = ((containerWidth - axisWidth)/2);
   const numToPx = (num: number) => num.toFixed(2) + "px";
-
   useEffect(() => {
     let obs: ResizeObserver;
     if (documentScrollerRef.current) {
@@ -31,18 +31,15 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
     }
     return () => obs?.disconnect();
   }, []);
-  //----------------- Global Max Min -----------------------
-  const domainMin = -5;
-  const domainMax = 5;
-  const numOfTicks = domainMax - domainMin;
 
   //----------------- Create Numberline Axis  --------------
   useEffect(()=>{
     // Construct axis
     const linearScale = scaleLinear()
-    .domain([domainMin, domainMax])
+    .domain([numberlineDomainMin, numberlineDomainMax])
     .range([0, axisWidth]);
     const axis = axisBottom(linearScale).tickSizeOuter(0);
+    const numOfTicks = numberlineDomainMax - numberlineDomainMin;
     axis.ticks(numOfTicks);
     (select(`.${axisClass}`) as d3.Selection<SVGSVGElement, unknown, HTMLElement, unknown>).call(axis);
 
@@ -66,7 +63,7 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
 
     const clickArea = select('.click-area').node();
 
-  },[axisClass, axisWidth, domainMin, domainMax, numOfTicks]);
+  },[axisClass, axisWidth]);
 
   return (
     <div className="numberline-tool" ref={documentScrollerRef} data-testid="numberline-tool">
