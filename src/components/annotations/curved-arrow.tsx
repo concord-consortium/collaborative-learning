@@ -5,7 +5,7 @@ import { halfPi, twoPi, normalizeAngle } from "./annotation-utilities";
 
 import "./curved-arrow.scss";
 
-const color = "blue";
+const color = "#1500ff";
 const controlStrength = .5;
 interface ICurvedArrowProps {
   className?: string;

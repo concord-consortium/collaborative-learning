@@ -21,7 +21,7 @@ import TileResizeHandle from "../../assets/icons/resize-tile/expand-handle.svg";
 import "../../utilities/dom-utils";
 import dragPlaceholderImage from "../../assets/image_drag.png";
 
-import "./tile-component.sass";
+import "./tile-component.scss";
 
 export const kDragTiles = "org.concord.clue.drag-tiles";
 

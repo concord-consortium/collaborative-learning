@@ -13,20 +13,20 @@
 
     .text-box {
       background-color: white;
-      border: 2px solid #1500ff;
+      border: 2px solid vars.$annotation-blue;
       border-radius: 10px;
       max-width: calc(100% - 8px);
       pointer-events: all;
 
       &.text-display {
-        color: #1500ff;
+        color: vars.$annotation-blue;
 
         &.default-text {
           font-style: italic;
         }
 
         &:hover {
-          outline: 4px solid rgba(21, 0, 255, 0.125)
+          outline: 4px solid vars.$annotation-blue-very-transparent;
         }
 
         &.can-edit {
@@ -36,17 +36,17 @@
         }
 
         &.dragging {
-          background-color: #1500ff;
+          background-color: vars.$annotation-blue;
           color: white;
 
           &:hover {
-            outline: 4px solid rgba(21, 0, 255, 0.25);
+            outline: 4px solid vars.$annotation-blue-transparent;
           }
         }
       }
 
       &.text-input {
-        background-color: #e2e0fd;
+        background-color: vars.$annotation-light-blue;
         text-align: center;
       }
     }
@@ -66,21 +66,21 @@
     cursor: pointer;
 
     .handle-highlight{
-      fill: rgba(21, 0, 255, 0.125);
+      fill: vars.$annotation-blue-very-transparent;
     }
 
     .handle-node {
-      fill: rgba(21, 0, 255, 0.5);
+      fill: vars.$annotation-blue-barely-transparent;
     }
   }
 
   &.dragging {
     .handle-highlight {
-      fill: rgba(21, 0, 255, 0.25);
+      fill: vars.$annotation-blue-transparent;
     }
 
     .handle-node {
-      fill: rgb(21, 0, 255);
+      fill: vars.$annotation-blue;
     }
   }
 }
