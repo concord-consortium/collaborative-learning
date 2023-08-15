@@ -11,10 +11,11 @@ context('Dataflow Tool Tile', function () {
     cy.clearQAData('all');
     cy.visit(queryParams);
     cy.waitForLoad();
-    cy.collapseResourceTabs();
   });
   describe("Dataflow Tool", () => {
     it("renders dataflow tool tile", () => {
+      cy.wait(120000);
+      cy.collapseResourceTabs();
       clueCanvas.addTile("dataflow");
       dataflowToolTile.getDataflowTile().should("exist");
       dataflowToolTile.getTileTitle().should("exist");
@@ -441,7 +442,7 @@ context('Dataflow Tool Tile', function () {
         dataflowToolTile.getDropdown(nodeType, dropdown).click();
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).eq(3).click();
         dataflowToolTile.getDropdown(nodeType, dropdown).contains("Fan").should("exist");
-        dataflowToolTile.getDropdown(nodeType, "hubSelect").should("contain", "use device or sim");
+        dataflowToolTile.getDropdown(nodeType, "hubSelect").should("contain", "connect device/sim");
       });
       it("can recieve a value from a connected block, and display correct on or off string", () => {
         dataflowToolTile.getNode("number").should("exist");
@@ -526,21 +527,21 @@ context('Dataflow Tool Tile', function () {
         const dropdown = "sensor-select";
         const sensorSelect = [
           "Temperature Demo Data", "Humidity Demo Data", "CO2 Demo Data", "O2 Demo Data", "Light Demo Data", "Particulates Demo Data",
-         "EMG - Varied Clenches Demo Data", "EMG - Long Clench and Hold Demo Data", "EMG - Short Clench and Hold Demo Data", "FSR Demo Data",
-         "⚠️ connect arduino for emg",
-         "⚠️ connect arduino for fsr",
-         "⚠️ connect microbit for temperature-microbit-a",
-         "⚠️ connect microbit for humidity-microbit-a",
-         "⚠️ connect microbit for temperature-microbit-b",
-         "⚠️ connect microbit for humidity-microbit-b",
-         "⚠️ connect microbit for temperature-microbit-c",
-         "⚠️ connect microbit for humidity-microbit-c",
-         "⚠️ connect microbit for temperature-microbit-d",
-         "⚠️ connect microbit for humidity-microbit-d",
+         "EMG - Long Clench and Hold Demo Data", "FSR Demo Data",
+         "⚠️ Connect Arduino for live EMG",
+         "⚠️ Connect Arduino for live FSR",
+         "⚠️ Connect micro:bit for live Temperature A",
+         "⚠️ Connect micro:bit for live Humidity A",
+         "⚠️ Connect micro:bit for live Temperature B",
+         "⚠️ Connect micro:bit for live Humidity B",
+         "⚠️ Connect micro:bit for live Temperature C",
+         "⚠️ Connect micro:bit for live Humidity C",
+         "⚠️ Connect micro:bit for live Temperature D",
+         "⚠️ Connect micro:bit for live Humidity D",
         ];
         dataflowToolTile.getCreateNodeButton(nodeType).click();
         dataflowToolTile.getDropdown(nodeType, dropdown).click();
-        dataflowToolTile.getSensorDropdownOptions(nodeType).should("have.length", 20);
+        dataflowToolTile.getSensorDropdownOptions(nodeType).should("have.length", 18);
         dataflowToolTile.getSensorDropdownOptions(nodeType).each(($tab, index, $typeList) => {
           expect($tab.text()).to.contain(sensorSelect[index]);
         });

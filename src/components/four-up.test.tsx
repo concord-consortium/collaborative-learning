@@ -17,6 +17,16 @@ jest.mock("react-query", () => ({
     getQueryState: mockGetQueryState
   })
 }));
+jest.mock("../hooks/use-stores", () => ({
+  useStores: () => ({
+    ui: {
+      setDraggingId: (id?: string) => undefined
+    }
+  }),
+  useUIStore: () => ({
+    showAdornments: true
+  })
+}));
 
 describe("Four Up Component", () => {
   let documents: DocumentsModelType;

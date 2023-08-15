@@ -1,20 +1,22 @@
 import { types, Instance, SnapshotIn, getSnapshot, isStateTreeNode} from "mobx-state-tree";
 import { clone } from "lodash";
 import stringify from "json-stringify-pretty-compact";
-import { StampModel, StampModelType } from "./stamp";
-import { ITileExportOptions, IDefaultContentOptions } from "../../../models/tiles/tile-content-info";
-import { TileMetadataModel } from "../../../models/tiles/tile-metadata";
-import { tileModelHooks } from "../../../models/tiles/tile-model-hooks";
-import { TileContentModel } from "../../../models/tiles/tile-content";
-import { kDrawingStateVersion, kDrawingTileType } from "./drawing-types";
-import { ImageObjectType, isImageObjectSnapshot } from "../objects/image";
+
 import { DefaultToolbarSettings, ToolbarSettings, VectorType, endShapesForVectorType } from "./drawing-basic-types";
+import { kDrawingStateVersion, kDrawingTileType } from "./drawing-types";
+import { StampModel, StampModelType } from "./stamp";
 import { DrawingObjectMSTUnion } from "../components/drawing-object-manager";
 import { DrawingObjectSnapshotForAdd, DrawingObjectType, isFilledObject,
   isStrokedObject, ObjectMap, ToolbarModalButton } from "../objects/drawing-object";
+import { ImageObjectType, isImageObjectSnapshot } from "../objects/image";
+import { isVectorObject } from "../objects/vector";
 import { LogEventName } from "../../../lib/logger-types";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
-import { isVectorObject } from "../objects/vector";
+import { TileContentModel } from "../../../models/tiles/tile-content";
+import { ITileExportOptions, IDefaultContentOptions } from "../../../models/tiles/tile-content-info";
+import { TileMetadataModel } from "../../../models/tiles/tile-metadata";
+import { getTileIdFromContent } from "../../../models/tiles/tile-model";
+import { tileModelHooks } from "../../../models/tiles/tile-model-hooks";
 
 // track selection in metadata object so it is not saved to firebase but
 // also is preserved across document/content reloads
@@ -65,6 +67,14 @@ export const DrawingContentModel = TileContentModel
     metadata: undefined as DrawingToolMetadataModelType | undefined
   }))
   .views(self => ({
+    get annotatableObjects() {
+      const tileId = getTileIdFromContent(self) ?? "";
+      return self.objects.map(object => ({
+        objectId: object.id,
+        objectType: object.type,
+        tileId 
+      }));
+    },
     get objectMap() {
       // TODO this will rebuild the map when any of the objects change
       // We could handle this more efficiently
@@ -126,8 +136,8 @@ export const DrawingContentModel = TileContentModel
     onTileAction(call) {
       const tileId = self.metadata?.id ?? "";
       const {name: operation, ...change} = call;
-      // Ignore the setDisabledFeatures action is doesn't need to be logged
-      if (operation === "setDisabledFeatures") return;
+      // Ignore actions that don't need to be logged
+      if (["setDisabledFeatures", "setDragPosition", "setDragBounds"].includes(operation)) return;
 
       logTileChangeEvent(LogEventName.DRAWING_TOOL_CHANGE, { operation, change, tileId });
     }
