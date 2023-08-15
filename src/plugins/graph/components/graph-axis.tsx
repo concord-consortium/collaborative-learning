@@ -1,31 +1,33 @@
-import React, {MutableRefObject, useCallback, useEffect} from "react";
+import React, {MutableRefObject, useCallback, useEffect, useRef, useState} from "react";
+import {autorun} from "mobx";
 import {observer} from "mobx-react-lite";
 import {isAlive} from "mobx-state-tree";
+import {select} from "d3";
 import {Active} from "@dnd-kit/core";
-import {useInstanceIdContext} from "../hooks/use-instance-id-context";
+import {useInstanceIdContext} from "../imports/hooks/use-instance-id-context";
 import {AttributeType} from "../../../models/data/attribute";
+import { IDataSet } from "../../../models/data/data-set";
 import {useGraphModelContext} from "../models/graph-model";
 import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
 import {useGraphLayoutContext} from "../models/graph-layout";
-import {getDragAttributeId, useDropHandler} from "../hooks/use-drag-drop";
-import {AxisPlace} from "../axis/axis-types";
-import {Axis} from "../axis/components/axis";
+import {getDragAttributeInfo, useDropHandler} from "../imports/hooks/use-drag-drop";
+import {AxisPlace} from "../imports/components/axis/axis-types";
+import {Axis} from "../imports/components/axis/components/axis";
 import {axisPlaceToAttrRole, kGraphClassSelector} from "../graph-types";
-import {GraphPlace} from "../axis-graph-shared";
-import {DroppableAxis} from "../axis/components/droppable-axis";
+import {GraphPlace} from "../imports/components/axis-graph-shared";
 import {AttributeLabel} from "./attribute-label";
-import {useDropHintString} from "../hooks/use-drop-hint-string";
-import {useAxisBoundsProvider} from "../axis/hooks/use-axis-bounds";
+import {useDropHintString} from "../imports/hooks/use-drop-hint-string";
 import { isAddCasesAction, isSetCaseValuesAction } from "../../../models/data/data-set-actions";
 import { computeNiceNumericBounds } from "../utilities/graph-utils";
-import { IAxisModel, isNumericAxisModel } from "../axis/models/axis-model";
+import { isNumericAxisModel } from "../imports/components/axis/models/axis-model";
 import { useSettingFromStores } from "../../../hooks/use-stores";
+import { DroppableAxis } from "./droppable-axis";
 
 interface IProps {
   place: AxisPlace
   enableAnimation: MutableRefObject<boolean>
   autoAdjust?: React.MutableRefObject<boolean>
-  onDropAttribute?: (place: GraphPlace, attrId: string) => void
+  onDropAttribute?: (place: GraphPlace, dataSet: IDataSet, attrId: string) => void
   onRemoveAttribute?: (place: GraphPlace, attrId: string) => void
   onTreatAttributeAs?: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void
 }
@@ -41,24 +43,48 @@ export const GraphAxis = observer(function GraphAxis({
     droppableId = `${instanceId}-${place}-axis-drop`,
     hintString = useDropHintString({role: axisPlaceToAttrRole[place]}),
     emptyPlotIsNumeric = useSettingFromStores("emptyPlotIsNumeric", "graph") as boolean | undefined,
-    axisShouldShowGridlines = emptyPlotIsNumeric || graphModel.axisShouldShowGridLines(place);
-
+    axisShouldShowGridlines = emptyPlotIsNumeric || graphModel.axisShouldShowGridLines(place),
+    parentEltRef = useRef<HTMLDivElement | null>(null),
+    [wrapperElt, _setWrapperElt] = useState<SVGGElement | null>(null),
+    setWrapperElt = useCallback((elt: SVGGElement | null) => {
+      parentEltRef.current = elt?.closest(kGraphClassSelector) as HTMLDivElement ?? null;
+      _setWrapperElt(elt);
+    }, []);
   const handleIsActive = (active: Active) => {
-    const droppedAttrId = getDragAttributeId(active) ?? '';
+    const {dataSet, attributeId: droppedAttrId} = getDragAttributeInfo(active) || {};
     if (isDropAllowed) {
-      return isDropAllowed(place, droppedAttrId);
+      return isDropAllowed(place, dataSet, droppedAttrId);
     } else {
       return !!droppedAttrId;
     }
   };
-
-  const {parentElt, wrapperElt,
-    setWrapperElt} = useAxisBoundsProvider(place, kGraphClassSelector);
-
   useDropHandler(droppableId, active => {
-    const droppedAttrId = getDragAttributeId(active);
-    droppedAttrId && isDropAllowed(place, droppedAttrId) && onDropAttribute?.(place, droppedAttrId);
+    const {dataSet, attributeId: droppedAttrId} = getDragAttributeInfo(active) || {};
+    dataSet && droppedAttrId && isDropAllowed(place, dataSet, droppedAttrId) &&
+    onDropAttribute?.(place, dataSet, droppedAttrId);
   });
+
+  /**
+   * Because the interior of the graph (the plot) can be transparent, we have to put a background behind
+   * axes and legends. Furthermore, there are some rectangles that aren't even part of these that we have
+   * to special case.
+   */
+  useEffect(function installBackground() {
+    return autorun(() => {
+      if (wrapperElt) {
+        const bounds = layout.getComputedBounds(place),
+          graphWidth = layout.graphWidth,
+          left = ['bottom', 'top'].includes(place) ? 0 : bounds.left,
+          width = ['bottom', 'top'].includes(place) ? graphWidth : bounds.width,
+          transform = `translate(${left}, ${bounds.top})`;
+        select(wrapperElt)
+          .selectAll<SVGRectElement, number>('rect')
+          .attr('transform', transform)
+          .attr('width', width)
+          .attr('height', bounds.height);
+      }
+    });
+  }, [layout, place, wrapperElt]);
 
   useEffect(() => {
     if (autoAdjust?.current) {
@@ -68,23 +94,23 @@ export const GraphAxis = observer(function GraphAxis({
             (isAddCasesAction(action) || isSetCaseValuesAction(action))
            )
         {
+          const _axisModel = graphModel?.getAxis(place);
           const xValues = dataConfig.numericValuesForAttrRole("x");
           const yValues = dataConfig.numericValuesForAttrRole("y");
-          const axisModel = graphModel.getAxis(place);
 
-          if (axisModel && isNumericAxisModel(axisModel)) {
+          if (_axisModel && isNumericAxisModel(_axisModel)) {
             if (xValues.length > 0 && place === "bottom") {
               const minX = Math.min(...xValues);
               const maxX = Math.max(...xValues);
               const newXBounds = computeNiceNumericBounds(minX, maxX);
-              axisModel.setDomain(newXBounds.min, newXBounds.max);
+              _axisModel.setDomain(newXBounds.min, newXBounds.max);
             }
 
             if (yValues.length > 0 && place === "left") {
               const minY = Math.min(...yValues);
               const maxY = Math.max(...yValues);
               const newYBounds = computeNiceNumericBounds(minY, maxY);
-              axisModel.setDomain(newYBounds.min, newYBounds.max);
+              _axisModel.setDomain(newYBounds.min, newYBounds.max);
             }
           }
         }
@@ -102,19 +128,17 @@ export const GraphAxis = observer(function GraphAxis({
     };
   }, [layout, place, graphModel]);
 
-  const getAxisModel = useCallback((): IAxisModel | undefined => {
-    if (isAlive(graphModel)) return graphModel.getAxis(place);
-    console.warn("GraphAxis.getAxisModel", "attempt to access defunct graph model");
-  }, [graphModel, place]);
-
+  const axisModel = graphModel?.getAxis(place);
   return (
     <g className='axis-wrapper' ref={elt => setWrapperElt(elt)}>
-      <Axis getAxisModel={getAxisModel}
+      <rect className='axis-background'/>
+      {axisModel && isAlive(axisModel) &&
+      <Axis axisModel={axisModel}
             label={''}  // Remove
             enableAnimation={enableAnimation}
             showScatterPlotGridLines={axisShouldShowGridlines}
             centerCategoryLabels={graphModel.config.categoriesForAxisShouldBeCentered(place)}
-      />
+      />}
       <AttributeLabel
         place={place}
         onChangeAttribute={onDropAttribute}
@@ -126,7 +150,7 @@ export const GraphAxis = observer(function GraphAxis({
             place={`${place}`}
             dropId={droppableId}
             hintString={hintString}
-            portal={parentElt}
+            portal={parentEltRef.current}
             target={wrapperElt}
             onIsActive={handleIsActive}
          />}

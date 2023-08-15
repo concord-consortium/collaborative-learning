@@ -1,7 +1,9 @@
 import { observer } from "mobx-react";
 import React, { useEffect, useRef, useState } from "react";
 import d3, { scaleLinear, select, selectAll, pointer, axisBottom, drag} from "d3";
-//console.log("remove d3");
+import { tickWidthDefault, tickWidthZero, tickHeightDefault, tickHeightZero, tickStyleDefault,
+         tickStyleZero, kContainerWidth, kAxisWidth, numberlineDomainMax, numberlineDomainMin
+       } from "./numberline-tile-constants";
 import { ITileModel } from "../../../src/models/tiles/tile-model";
 import { linearMap } from "./utils/numberline-tile-utils";
 import { NumberlineContentModelType, PointObjectModelType } from "./models/numberline-content";
@@ -32,7 +34,7 @@ interface IProps {
   model: ITileModel;
 }
 
-export const NumberlineTileComponent: React.FC<IProps> = observer((props) => {
+export const NumberlineToolComponent: React.FC<IProps> = observer((props) => {
   // console.log("-----------");
   // console.log("NumberlineTileComponent with props:", props);
   const { model } = props;
@@ -47,11 +49,11 @@ export const NumberlineTileComponent: React.FC<IProps> = observer((props) => {
   //---------------- Calculate width of tile ----------------------------------
   const documentScrollerRef = useRef<HTMLDivElement>(null);
   const [tileWidth, setTileWidth] = useState(0);
-  const containerWidth = (tileWidth * 0.93);
-  const axisWidth = (tileWidth * 0.9);
+  const containerWidth = (tileWidth * kContainerWidth);
+  const axisWidth = (tileWidth * kAxisWidth);
   //pixels we shift to the right to center axis in numberline-tool-container
   const xShiftNum = ((containerWidth - axisWidth)/2);
-  const numToPx = (num: number) => num.toFixed(2).toString() + "px";
+  const numToPx = (num: number) => num.toFixed(2) + "px";
   useEffect(() => {
     let obs: ResizeObserver;
     if (documentScrollerRef.current) {
@@ -63,12 +65,6 @@ export const NumberlineTileComponent: React.FC<IProps> = observer((props) => {
     return () => obs?.disconnect();
   }, []);
 
-
-  //----------------- Global Max Min ------------------------------------------
-  const domainMin = -5;
-  const domainMax = 5;
-  const numOfTicks = domainMax - domainMin;
-
   //----------------- Circle Point State / Properties -------------------------
   const [hoverPointRadius, setHoverPointRadius] = useState(0);
   const [hoverPointX, setHoverPointX] = useState(0);
@@ -79,7 +75,6 @@ export const NumberlineTileComponent: React.FC<IProps> = observer((props) => {
    // - we need to recalculate all points in the model
 
    useEffect(()=>{
-    // console.log("-------useEffect triggered resizing axisWidth:", axisWidth);
     if (content.axisPoints.length > 0 && axisWidth !== 0){
       const reCalculatedPoints = content.axisPoints.map((pointObj: PointObjectModelType) => {
         const id = pointObj.id;
@@ -106,18 +101,15 @@ export const NumberlineTileComponent: React.FC<IProps> = observer((props) => {
   },[axisWidth]); //only trigger when axisWidth is changed
 
 
-
-
   // ----------------- Create Numberline Axis | Hover Circle on Axis | Create Points--------------------------------
   useEffect(()=>{
-    // console.log("---useEffect create numberline");
-
     // Construct Axis
     const linearScale = scaleLinear()
-    .domain([domainMin, domainMax])
+    .domain([numberlineDomainMin, numberlineDomainMax])
     .range([0, axisWidth]);
 
     // Remove outer ticks and create a tick for each integer
+    const numOfTicks = numberlineDomainMax - numberlineDomainMin;
     const axis = axisBottom(linearScale).tickSizeOuter(0).ticks(numOfTicks);
     const selAxis = (select(`.${axisClass}`) as d3.Selection<SVGSVGElement, unknown, HTMLElement, unknown>);
 
@@ -126,9 +118,9 @@ export const NumberlineTileComponent: React.FC<IProps> = observer((props) => {
 
     // After the axis is drawn, customize "x = 0 tick"
     selectAll("g.num-axis g.tick line")
-      .attr("y2", function(x){ return (x === 0) ? 20 : 6;})
-      .attr("stroke-width", function(x){ return (x === 0) ? "3px" : "1px";})
-      .attr("style", function(x){ return (x === 0) ? "transform: translateY(-10px)" : "";});
+      .attr("y2", function(x){ return (x === 0) ? tickHeightZero : tickHeightDefault;})
+      .attr("stroke-width", function(x){ return (x === 0) ? tickWidthZero : tickWidthDefault;})
+      .attr("style", function(x){ return (x === 0) ? tickStyleZero : tickStyleDefault;});
 
     // Set click-area to lay over axis
     select('.click-area')
@@ -136,9 +128,7 @@ export const NumberlineTileComponent: React.FC<IProps> = observer((props) => {
       .on('click', (e) => createPoint(e))
       .on('mousemove', (e) => trackMouse(e))
       .on("mouseout", () => setHoverPointRadius(0)); //hide circle
-
     const clickArea = select('.click-area').node();
-
 
     // Hover Circle On Axis
     selAxis.append("circle")
@@ -172,19 +162,11 @@ export const NumberlineTileComponent: React.FC<IProps> = observer((props) => {
   const dragged = (event: Event) => {
     console.log("dragged -----");
     console.log("\tevent:", event);
-    // d.fx = event.x;
-    // d.fy = event.y;
-    // d.fixed = true;
   };
   const dragEnded = (event: any, d: any) => {
     d.fx = null;
     d.fy = null;
   };
-
-
-
-
-
 
     // ------------------Handlers-------------------------------------
 
@@ -228,13 +210,11 @@ export const NumberlineTileComponent: React.FC<IProps> = observer((props) => {
     return () => {
       selAxis.selectAll(".hover-circle").remove();
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[axisClass, axisWidth, domainMin, domainMax, numOfTicks, hoverPointRadius, hoverPointX, content]);
-  //console.log("fyi we need hoverpointX in the dep array")
 
+  },[axisClass, axisWidth, hoverPointRadius, hoverPointX, content]);
 
   return (
-    <div className="numberline-tool" ref={documentScrollerRef}>
+    <div className="numberline-tool" ref={documentScrollerRef} data-testid="numberline-tool">
       <div className="numberline-tool-container">
         <div className="num-axis-title-container">
         </div>
@@ -291,5 +271,5 @@ export const NumberlineTileComponent: React.FC<IProps> = observer((props) => {
     </div>
   );
 });
-NumberlineTileComponent.displayName = "NumberlineTileComponent";
+NumberlineToolComponent.displayName = "NumberlineToolComponent";
 
