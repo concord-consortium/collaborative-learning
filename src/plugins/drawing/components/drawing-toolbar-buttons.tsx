@@ -133,7 +133,7 @@ export const DuplicateButton: React.FC<IDuplicateButtonProps> = observer(functio
 
   return <SvgToolbarButton SvgIcon={DuplicateIcon} buttonClass="duplicate" title="Duplicate"
     onClick={onClick} disabled={disabled} />;
-})
+});
 
 interface IDeleteToolButtonProps {
   toolbarManager: IToolbarManager;

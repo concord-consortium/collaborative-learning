@@ -9,9 +9,9 @@ import { AppConfigModel } from "../../../models/stores/app-config-model";
 import { ImageObject } from "../objects/image";
 import { RectangleObject, RectangleObjectSnapshot, RectangleObjectSnapshotForAdd,
   RectangleObjectType } from "../objects/rectangle";
-import { DeltaPoint, DrawingObjectSnapshotForAdd, computeStrokeDashArray } from "../objects/drawing-object";
+import { DeltaPoint, computeStrokeDashArray } from "../objects/drawing-object";
 import { LogEventName } from "../../../lib/logger-types";
-import { EllipseObject, EllipseObjectSnapshot } from "../objects/ellipse";
+import { EllipseObject } from "../objects/ellipse";
 import { VectorObject } from "../objects/vector";
 import { LineObject } from "../objects/line";
 

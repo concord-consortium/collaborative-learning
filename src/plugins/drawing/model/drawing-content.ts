@@ -6,7 +6,7 @@ import { DefaultToolbarSettings, ToolbarSettings, VectorType, endShapesForVector
 import { kDrawingStateVersion, kDrawingTileType } from "./drawing-types";
 import { StampModel, StampModelType } from "./stamp";
 import { DrawingObjectMSTUnion } from "../components/drawing-object-manager";
-import { DrawingObject, DrawingObjectSnapshotForAdd, DrawingObjectType, isFilledObject,
+import { DrawingObjectSnapshotForAdd, DrawingObjectType, isFilledObject,
   isStrokedObject, ObjectMap, ToolbarModalButton } from "../objects/drawing-object";
 import { ImageObjectType, isImageObjectSnapshot } from "../objects/image";
 import { isVectorObject } from "../objects/vector";
@@ -236,8 +236,8 @@ export const DrawingContentModel = TileContentModel
         },
 
         duplicateObjects(ids: string[]) {
-          let newIds: string[] = [];
-          forEachObjectId(ids, (object, id) => {
+          const newIds: string[] = [];
+          forEachObjectId(ids, (object) => {
             if (object) {
               const snap = getSnapshot(object);
               const {id, ...newParams} = snap; // remove existing ID
