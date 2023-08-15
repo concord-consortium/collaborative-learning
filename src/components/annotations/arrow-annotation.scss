@@ -48,7 +48,33 @@
 }
 
 .drag-handle {
+  .handle-highlight {
+    fill: rgba(0, 0, 0, 0);
+  }
+
+  .handle-node {
+    fill: rgba(0, 0, 0, 0);
+  }
+
   &:hover {
-    cursor: grab;
+    cursor: pointer;
+
+    .handle-highlight{
+      fill: rgba(21, 0, 255, 0.125);
+    }
+
+    .handle-node {
+      fill: rgba(21, 0, 255, 0.5);
+    }
+  }
+
+  &.dragging {
+    .handle-highlight {
+      fill: rgba(21, 0, 255, 0.25);
+    }
+
+    .handle-node {
+      fill: rgb(21, 0, 255);
+    }
   }
 }

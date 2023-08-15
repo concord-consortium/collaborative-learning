@@ -45,9 +45,11 @@ export const ArrowAnnotationComponent = observer(
     const dragDx = clientX !== undefined && dragX !== undefined ? clientX - dragX : 0;
     const dragDy = clientY !== undefined && dragY !== undefined ? clientY - dragY : 0;
     const dragging = clientX !== undefined && clientY !== undefined && dragX !== undefined && dragY !== undefined;
+    const draggingSource = dragging && dragType === "source";
+    const draggingTarget = dragging && dragType === "target";
     const draggingText = dragging && dragType === "text";
-    const [sourceDragOffsetX, sourceDragOffsetY] = dragging && dragType === "source" ? [dragDx, dragDy] : [0, 0];
-    const [targetDragOffsetX, targetDragOffsetY] = dragging && dragType === "target" ? [dragDx, dragDy] : [0, 0];
+    const [sourceDragOffsetX, sourceDragOffsetY] = draggingSource ? [dragDx, dragDy] : [0, 0];
+    const [targetDragOffsetX, targetDragOffsetY] = draggingTarget ? [dragDx, dragDy] : [0, 0];
     const [textDragOffsetX, textDragOffsetY] = draggingText ? [dragDx, dragDy] : [0, 0];
 
     // Bail if there is no source or target
@@ -120,10 +122,10 @@ export const ArrowAnnotationComponent = observer(
       }
     }
 
-    // Set up drag handlers
-    const dragHandlerHeight = 10;
-    const dragHandlerWidth = 10;
-    function handleMouseDown(e: React.MouseEvent<SVGRectElement|HTMLButtonElement, MouseEvent>, _dragType: DragType) {
+    // Set up drag handles
+    const dragHandleHeight = 24;
+    const dragHandleWidth = 24;
+    function handleMouseDown(e: React.MouseEvent<SVGElement|HTMLButtonElement, MouseEvent>, _dragType: DragType) {
       if (!canEdit) return;
 
       setDragX(e.clientX);
@@ -162,22 +164,38 @@ export const ArrowAnnotationComponent = observer(
       window.addEventListener("mouseup", handleMouseUp);
     }
 
-    interface IDragHandlerProps {
+    interface IDragHandleProps {
+      draggingHandle?: boolean;
+      dragTarget: "source" | "target";
       startX: number;
       startY: number;
-      target: "source" | "target";
     }
-    function DragHandler({ startX, startY, target }: IDragHandlerProps) {
+    function DragHandle({ draggingHandle, dragTarget, startX, startY }: IDragHandleProps) {
       return (
-        <rect
-          className="drag-handle"
-          fill="transparent"
-          height={dragHandlerHeight}
-          onMouseDown={e => handleMouseDown(e, target)}
-          width={dragHandlerWidth}
-          x={startX - dragHandlerWidth / 2}
-          y={startY - dragHandlerHeight / 2}
-        />
+        <g
+          className={classNames("drag-handle", { dragging: draggingHandle })}
+          onMouseDown={e => handleMouseDown(e, dragTarget)}
+        >
+          <rect
+            fill="transparent"
+            height={dragHandleHeight}
+            width={dragHandleWidth}
+            x={startX - dragHandleWidth / 2}
+            y={startY - dragHandleHeight / 2}
+          />
+          <circle
+            className="handle-highlight"
+            cx={startX}
+            cy={startY}
+            r={dragHandleHeight / 2}
+          />
+          <circle
+            className="handle-node"
+            cx={startX}
+            cy={startY}
+            r={dragHandleHeight / 4}
+          />
+        </g>
       );
     }
 
@@ -218,8 +236,8 @@ export const ArrowAnnotationComponent = observer(
             }
           </div>
         </foreignObject>
-        <DragHandler startX={sourceX} startY={sourceY} target="source" />
-        <DragHandler startX={targetX} startY={targetY} target="target" />
+        <DragHandle draggingHandle={draggingSource} dragTarget="source" startX={sourceX} startY={sourceY} />
+        <DragHandle draggingHandle={draggingTarget} dragTarget="target" startX={targetX} startY={targetY} />
       </g>
     );
   }
