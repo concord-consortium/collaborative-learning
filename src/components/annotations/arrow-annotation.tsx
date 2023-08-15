@@ -64,17 +64,19 @@ export const ArrowAnnotationComponent = observer(
     const targetBB = getBoundingBox(arrow.targetObject);
     if (!sourceBB || !targetBB) return null;
 
+    function boundDelta(delta: number, boundingSize?: number) {
+      if (boundingSize === undefined) return delta;
+      const halfBoundingSize = boundingSize / 2;
+      return Math.max(-halfBoundingSize, Math.min(halfBoundingSize, delta));
+    }
+
     // Find positions for head and tail of arrow
     const [sDxOffset, sDyOffset] = arrow.sourceOffset ? [arrow.sourceOffset.dx, arrow.sourceOffset.dy] : [0, 0];
-    const sourceX = Math.max(sourceBB.left, Math.min(sourceBB.left + sourceBB.width,
-      sourceBB.left + sourceBB.width / 2 + sDxOffset + sourceDragOffsetX));
-    const sourceY = Math.max(sourceBB.top, Math.min(sourceBB.top + sourceBB.height,
-      sourceBB.top + sourceBB.height / 2 + sDyOffset + sourceDragOffsetY));
+    const sourceX = sourceBB.left + sourceBB.width / 2 + boundDelta(sDxOffset + sourceDragOffsetX, sourceBB.width);
+    const sourceY = sourceBB.top + sourceBB.height / 2 + boundDelta(sDyOffset + sourceDragOffsetY, sourceBB.height);
     const [tDxOffset, tDyOffset] = arrow.targetOffset ? [arrow.targetOffset.dx, arrow.targetOffset.dy] : [0, 0];
-    const targetX = Math.max(targetBB.left, Math.min(targetBB.left + targetBB.width,
-      targetBB.left + targetBB.width / 2 + tDxOffset + targetDragOffsetX));
-    const targetY = Math.max(targetBB.top, Math.min(targetBB.top + targetBB.height,
-      targetBB.top + targetBB.height / 2 + tDyOffset + targetDragOffsetY));
+    const targetX = targetBB.left + targetBB.width / 2 + boundDelta(tDxOffset + targetDragOffsetX, targetBB.width);
+    const targetY = targetBB.top + targetBB.height / 2 + boundDelta(tDyOffset + targetDragOffsetY, targetBB.height);
 
     // Set up text location and dimensions
     const textWidth = 150;
@@ -139,18 +141,14 @@ export const ArrowAnnotationComponent = observer(
         setClientY(e2.clientY);
       }
       function handleMouseUp(e2: MouseEvent) {
-        const startingOffset =
-          _dragType === "source" ? arrow.sourceOffset
-          : _dragType === "target" ? arrow.targetOffset
-          : arrow.textOffset;
+        const [startingOffset, setFunc, widthBound, heightBound] =
+          _dragType === "source" ? [arrow.sourceOffset, arrow.setSourceOffset, sourceBB?.width, sourceBB?.height]
+          : _dragType === "target" ? [arrow.targetOffset, arrow.setTargetOffset, targetBB?.width, targetBB?.height]
+          : [arrow.textOffset, arrow.setTextOffset];
         const [startingDx, startingDy] = startingOffset ? [startingOffset.dx, startingOffset.dy] : [0, 0];
-        const setFunc =
-          _dragType === "source" ? arrow.setSourceOffset
-          : _dragType === "target" ? arrow.setTargetOffset
-          : arrow.setTextOffset;
         const dDx = e2.clientX - e.clientX;
         const dDy = e2.clientY - e.clientY;
-        setFunc(startingDx + dDx, startingDy + dDy);
+        setFunc(boundDelta(startingDx + dDx, widthBound), boundDelta(startingDy + dDy, heightBound));
   
         setClientX(undefined);
         setClientY(undefined);
