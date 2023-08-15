@@ -45,9 +45,10 @@ export const ArrowAnnotationComponent = observer(
     const dragDx = clientX !== undefined && dragX !== undefined ? clientX - dragX : 0;
     const dragDy = clientY !== undefined && dragY !== undefined ? clientY - dragY : 0;
     const dragging = clientX !== undefined && clientY !== undefined && dragX !== undefined && dragY !== undefined;
+    const draggingText = dragging && dragType === "text";
     const [sourceDragOffsetX, sourceDragOffsetY] = dragging && dragType === "source" ? [dragDx, dragDy] : [0, 0];
     const [targetDragOffsetX, targetDragOffsetY] = dragging && dragType === "target" ? [dragDx, dragDy] : [0, 0];
-    const [textDragOffsetX, textDragOffsetY] = dragging && dragType === "text" ? [dragDx, dragDy] : [0, 0];
+    const [textDragOffsetX, textDragOffsetY] = draggingText ? [dragDx, dragDy] : [0, 0];
 
     // Bail if there is no source or target
     if (!arrow.sourceObject || !arrow.targetObject) return null;
@@ -70,7 +71,7 @@ export const ArrowAnnotationComponent = observer(
       targetBB.top + targetBB.height / 2 + tDyOffset + targetDragOffsetY));
 
     // Set up text location and dimensions
-    const textWidth = 120;
+    const textWidth = 150;
     const textHeight = 50;
     const [textDxOffset, textDyOffset] = arrow.textOffset ? [arrow.textOffset.dx, arrow.textOffset.dy] : [0, 0];
     const dx = targetX - sourceX;
@@ -179,6 +180,12 @@ export const ArrowAnnotationComponent = observer(
         />
       );
     }
+
+    const displayText = arrow.text?.trim();
+    const hasText = !!displayText;
+    const textButtonClasses = classNames("text-box", "text-display", {
+      "can-edit": canEdit, "default-text": !hasText, "dragging": draggingText
+    });
     return (
       <g>
         <CurvedArrow
@@ -191,7 +198,7 @@ export const ArrowAnnotationComponent = observer(
             { editingText && !readOnly
               ? (
                 <input
-                  className="text-input"
+                  className="text-box text-input"
                   onBlur={handleBlur}
                   onChange={handleChange}
                   onKeyDown={handleKeyDown}
@@ -201,11 +208,11 @@ export const ArrowAnnotationComponent = observer(
                 />
               ) : (
                 <button
-                  className={classNames("text-display", { "can-edit": canEdit })}
+                  className={textButtonClasses}
                   onClick={handleTextClick}
                   onMouseDown={e => handleMouseDown(e, "text")}
                 >
-                  {arrow.text?.trim() || "Click to enter text"}
+                  {displayText || "Add text"}
                 </button>
               )
             }
