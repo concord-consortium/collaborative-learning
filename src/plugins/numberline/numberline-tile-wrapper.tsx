@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import classNames from "classnames";
 import { ITileProps } from "../../components/tiles/tile-component";
-import { NumberlineTileComponent } from "./numberline-tile";
+import { NumberlineToolComponent } from "./numberline-tile";
 import { BasicEditableTileTitle } from "../../components/tiles/basic-editable-tile-title";
 import { IGraphModel } from "../graph/models/graph-model";
 import { NumberlineToolbar } from "./numberline-toolbar";
@@ -43,7 +43,7 @@ export const NumberlineTileWrapperComponent: React.FC<ITileProps> = (props) => {
         scale={scale}
         onSetPlacePoint={placePointClicked}
       />
-      <NumberlineTileComponent model={model}/>
+      <NumberlineToolComponent model={model}/>
 
     </div>
 
