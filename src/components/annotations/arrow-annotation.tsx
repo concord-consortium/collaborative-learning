@@ -2,6 +2,8 @@ import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { useEffect, useRef, useState } from "react";
 
+import { AnnotationNode } from "./annotation-node";
+import { kAnnotationNodeHeight, kAnnotationNodeWidth } from "./annotation-utilities";
 import { CurvedArrow } from "./curved-arrow";
 import { IArrowAnnotation } from "../../models/annotations/arrow-annotation";
 import { IClueObject } from "../../models/annotations/clue-object";
@@ -42,6 +44,8 @@ export const ArrowAnnotationComponent = observer(
     const [dragType, setDragType] = useState<DragType|undefined>();
     const [dragX, setDragX] = useState<number|undefined>();
     const [dragY, setDragY] = useState<number|undefined>();
+    const [hoveringSource, setHoveringSource] = useState(false);
+    const [hoveringTarget, setHoveringTarget] = useState(false);
     const dragDx = clientX !== undefined && dragX !== undefined ? clientX - dragX : 0;
     const dragDy = clientY !== undefined && dragY !== undefined ? clientY - dragY : 0;
     const dragging = clientX !== undefined && clientY !== undefined && dragX !== undefined && dragY !== undefined;
@@ -123,8 +127,6 @@ export const ArrowAnnotationComponent = observer(
     }
 
     // Set up drag handles
-    const dragHandleHeight = 24;
-    const dragHandleWidth = 24;
     function handleMouseDown(e: React.MouseEvent<SVGElement|HTMLButtonElement, MouseEvent>, _dragType: DragType) {
       if (!canEdit) return;
 
@@ -167,33 +169,31 @@ export const ArrowAnnotationComponent = observer(
     interface IDragHandleProps {
       draggingHandle?: boolean;
       dragTarget: "source" | "target";
+      hovering?: boolean;
+      setHovering: React.Dispatch<React.SetStateAction<boolean>>;
       startX: number;
       startY: number;
     }
-    function DragHandle({ draggingHandle, dragTarget, startX, startY }: IDragHandleProps) {
+    function DragHandle({ draggingHandle, dragTarget, hovering, setHovering, startX, startY }: IDragHandleProps) {
       return (
         <g
           className={classNames("drag-handle", { dragging: draggingHandle })}
           onMouseDown={e => handleMouseDown(e, dragTarget)}
+          onMouseEnter={e => setHovering(true)}
+          onMouseLeave={e => setHovering(false)}
         >
           <rect
             fill="transparent"
-            height={dragHandleHeight}
-            width={dragHandleWidth}
-            x={startX - dragHandleWidth / 2}
-            y={startY - dragHandleHeight / 2}
+            height={kAnnotationNodeHeight}
+            width={kAnnotationNodeWidth}
+            x={startX - kAnnotationNodeWidth / 2}
+            y={startY - kAnnotationNodeHeight / 2}
           />
-          <circle
-            className="handle-highlight"
+          <AnnotationNode
+            active={draggingHandle}
             cx={startX}
             cy={startY}
-            r={dragHandleHeight / 2}
-          />
-          <circle
-            className="handle-node"
-            cx={startX}
-            cy={startY}
-            r={dragHandleHeight / 4}
+            hovering={hovering}
           />
         </g>
       );
@@ -242,8 +242,22 @@ export const ArrowAnnotationComponent = observer(
             }
           </div>
         </foreignObject>
-        <DragHandle draggingHandle={draggingSource} dragTarget="source" startX={sourceX} startY={sourceY} />
-        <DragHandle draggingHandle={draggingTarget} dragTarget="target" startX={targetX} startY={targetY} />
+        <DragHandle
+          draggingHandle={draggingSource}
+          dragTarget="source"
+          hovering={hoveringSource}
+          setHovering={setHoveringSource}
+          startX={sourceX}
+          startY={sourceY}
+        />
+        <DragHandle
+          draggingHandle={draggingTarget}
+          dragTarget="target"
+          hovering={hoveringTarget}
+          setHovering={setHoveringTarget}
+          startX={targetX}
+          startY={targetY}
+        />
       </g>
     );
   }

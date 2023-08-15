@@ -1,3 +1,6 @@
+export const kAnnotationNodeHeight = 24;
+export const kAnnotationNodeWidth = 24;
+
 export const halfPi = Math.PI / 2;
 export const twoPi = Math.PI * 2;
 export function normalizeAngle(angle: number) {

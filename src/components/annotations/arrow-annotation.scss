@@ -54,33 +54,5 @@
 }
 
 .drag-handle {
-  .handle-highlight {
-    fill: rgba(0, 0, 0, 0);
-  }
-
-  .handle-node {
-    fill: rgba(0, 0, 0, 0);
-  }
-
-  &:hover {
-    cursor: pointer;
-
-    .handle-highlight{
-      fill: vars.$annotation-blue-very-transparent;
-    }
-
-    .handle-node {
-      fill: vars.$annotation-blue-barely-transparent;
-    }
-  }
-
-  &.dragging {
-    .handle-highlight {
-      fill: vars.$annotation-blue-transparent;
-    }
-
-    .handle-node {
-      fill: vars.$annotation-blue;
-    }
-  }
+  cursor: pointer;
 }
