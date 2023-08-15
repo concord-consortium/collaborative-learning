@@ -8,6 +8,10 @@
 
   &.editing {
     pointer-events: all;
+
+    .text-box {
+      pointer-events: all;
+    }
   }
 
   &.hidden {
