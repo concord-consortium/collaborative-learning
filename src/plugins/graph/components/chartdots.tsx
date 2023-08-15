@@ -4,12 +4,12 @@ import {CaseData, selectDots} from "../d3-types";
 import {attrRoleToAxisPlace, PlotProps} from "../graph-types";
 import {usePlotResponders} from "../hooks/use-plot";
 import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
-import {useDataSetContext} from "../hooks/use-data-set-context";
+import {useDataSetContext} from "../imports/hooks/use-data-set-context";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {setPointCoordinates, setPointSelection} from "../utilities/graph-utils";
 import {useGraphModelContext} from "../models/graph-model";
 
-type BinMap = Record<string, Record<string, Record<string, Record<string, number>>>>
+type BinMap = Record<string, Record<string, Record<string, Record<string, number>>>>;
 
 export const ChartDots = function ChartDots(props: PlotProps) {
   const {dotsRef, enableAnimation} = props,
@@ -88,13 +88,13 @@ export const ChartDots = function ChartDots(props: PlotProps) {
       extraPrimaryAttrID = dataConfiguration?.attributeID(extraPrimaryAttrRole) ?? '',
       extraSecondaryAttrID = dataConfiguration?.attributeID(extraSecondaryAttrRole) ?? '',
       primCatsArray: string[] = (dataConfiguration && primaryAttrRole)
-        ? Array.from(dataConfiguration.categorySetForAttrRole(primaryAttrRole)) : [],
+        ? Array.from(dataConfiguration.categoryArrayForAttrRole(primaryAttrRole)) : [],
       secCatsArray: string[] = (dataConfiguration && secondaryAttrRole)
-        ? Array.from(dataConfiguration.categorySetForAttrRole(secondaryAttrRole)) : [],
+        ? Array.from(dataConfiguration.categoryArrayForAttrRole(secondaryAttrRole)) : [],
       extraPrimCatsArray: string[] = (dataConfiguration && extraPrimaryAttrRole)
-        ? Array.from(dataConfiguration.categorySetForAttrRole(extraPrimaryAttrRole)) : [],
+        ? Array.from(dataConfiguration.categoryArrayForAttrRole(extraPrimaryAttrRole)) : [],
       extraSecCatsArray: string[] = (dataConfiguration && extraSecondaryAttrRole)
-        ? Array.from(dataConfiguration.categorySetForAttrRole(extraSecondaryAttrRole)) : [],
+        ? Array.from(dataConfiguration.categoryArrayForAttrRole(extraSecondaryAttrRole)) : [],
       pointDiameter = 2 * graphModel.getPointRadius(),
       selection = selectDots(dotsRef.current, selectedOnly),
       primOrdinalScale = layout.getAxisScale(primaryAxisPlace) as ScaleBand<string>,
@@ -104,12 +104,12 @@ export const ChartDots = function ChartDots(props: PlotProps) {
       primaryCellWidth = ((primOrdinalScale.bandwidth?.()) ?? 0) /
         (dataConfiguration?.numRepetitionsForPlace(primaryAxisPlace) ?? 1),
       primaryHeight = (secOrdinalScale.bandwidth ? secOrdinalScale.bandwidth()
-        : (secondaryAxisPlace ? layout.getAxisLength(secondaryAxisPlace) : 0)) /
-            (dataConfiguration?.numRepetitionsForPlace(secondaryAxisPlace) ?? 1),
+          : (secondaryAxisPlace ? layout.getAxisLength(secondaryAxisPlace) : 0)) /
+        (dataConfiguration?.numRepetitionsForPlace(secondaryAxisPlace) ?? 1),
       extraPrimCellWidth = (extraPrimOrdinalScale.bandwidth?.()) ?? 0,
       extraSecCellWidth = (extraSecOrdinalScale.bandwidth?.()) ?? 0,
       catMap: Record<string, Record<string, Record<string, Record<string,
-          { cell: { p: number, s: number, ep: number, es: number }, numSoFar: number }>>>> = {},
+        { cell: { p: number, s: number, ep: number, es: number }, numSoFar: number }>>>> = {},
       legendAttrID = dataConfiguration?.attributeID('legend'),
       getLegendColor = legendAttrID ? dataConfiguration?.getLegendColorForCase : undefined;
 
@@ -154,8 +154,10 @@ export const ChartDots = function ChartDots(props: PlotProps) {
       cellParams = computeCellParams(),
 
       buildMapOfIndicesByCase = () => {
-        const indices: Record<string, { cell: { p: number, s: number, ep:number, es:number },
-            row: number, column: number }> = {},
+        const indices: Record<string, {
+            cell: { p: number, s: number, ep: number, es: number },
+            row: number, column: number
+          }> = {},
           primaryAttrID = dataConfiguration?.attributeID(primaryAttrRole) ?? '',
           secondaryAttrID = dataConfiguration?.attributeID(secondaryAttrRole) ?? '';
         primaryAttrID && (dataConfiguration?.caseDataArray || []).forEach((aCaseData: CaseData) => {
@@ -213,8 +215,7 @@ export const ChartDots = function ChartDots(props: PlotProps) {
     extraPrimaryAttrRole, extraSecondaryAttrRole, pointColor,
     enableAnimation, primaryIsBottom, layout, pointStrokeColor, computeMaxOverAllCells, dataset]);
 
-  usePlotResponders({
-    graphModel, layout, dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation });
+  usePlotResponders({dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation});
 
   return (
     <>
