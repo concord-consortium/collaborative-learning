@@ -7,9 +7,9 @@ import { tickWidthDefault, tickWidthZero, tickHeightDefault, tickHeightZero, tic
 import { ITileModel } from "../../../src/models/tiles/tile-model";
 import { linearMap } from "./utils/numberline-tile-utils";
 import { NumberlineContentModelType, PointObjectModelType } from "./models/numberline-content";
+import classNames from "classnames";
 
 import "./numberline-tile.scss";
-import classNames from "classnames";
 
 // //Guidelines ✓
 // - ✓ new toolbar icon for creating points
@@ -73,7 +73,6 @@ export const NumberlineToolComponent: React.FC<IProps> = observer((props) => {
    //---------------- TileWidth Trigger ---------------------------------------
    //  If user resizes window, tileWidth state is changed which changes axisWidth
    // - we need to recalculate all points in the model
-
    useEffect(()=>{
     if (content.axisPoints.length > 0 && axisWidth !== 0){
       const reCalculatedPoints = content.axisPoints.map((pointObj: PointObjectModelType) => {
@@ -125,14 +124,14 @@ export const NumberlineToolComponent: React.FC<IProps> = observer((props) => {
     // Set click-area to lay over axis
     select('.click-area')
       .attr('width', axisWidth)
-      .on('click', (e) => createPoint(e))
+      .on('click', (e) => handleClickCreatePoint(e))
       .on('mousemove', (e) => trackMouse(e))
       .on("mouseout", () => setHoverPointRadius(0)); //hide circle
     const clickArea = select('.click-area').node();
 
     // Hover Circle On Axis
     selAxis.append("circle")
-    .attr("class", "hover-circle")
+    .attr("class", "outer-hover-circle")
     .attr("r", hoverPointRadius)
     .attr("cx", hoverPointX)
     .attr("cy", 0)
@@ -143,15 +142,13 @@ export const NumberlineToolComponent: React.FC<IProps> = observer((props) => {
     // const handler = drag();
     // const node = selectAll('.inner-circle')
     const selectInnerCircles = selectAll('.inner-circle') as d3.Selection<Element, unknown, any, any>;
-    console.log("select Inner circles:", selectInnerCircles);
+    // console.log("select Inner circles:", selectInnerCircles);
 
     const dragging = selectInnerCircles
                     .call(drag()
                     .subject(dragsubject)
                     .on("start", (e) => dragStarted(e))
                     .on("drag", (e) => dragged(e)));
-
-
 
   function dragsubject(e: Event) {
     console.log("dragSubject!");
@@ -170,28 +167,28 @@ export const NumberlineToolComponent: React.FC<IProps> = observer((props) => {
 
     // ------------------Handlers-------------------------------------
 
-    // Create circle point on axis - write into model
-    const createPoint = (e: Event) => {
-      // console.log("---------createPoint!-------------");
+    const handleClickCreatePoint = (e: Event) => {
+      // Create circle point on axis - write into model
       trackMouse(e);
       const pos = pointer(e, clickArea);
       const xPos = pos[0];
       const val = xPosToValue(xPos);
       const newPoint = {xPos, val, axisWidth};
       content.createNewPoint(newPoint); //write into model
-      console.log("pointsHoveredArr:", content.pointsIsHoveredArr);
-      console.log("pointsSelectedArr:", content.pointsIsSelectedArr);
     };
 
     // Compare mouse with points in the model
     const trackMouse = (e: Event) => {
       //if mouse close to point in model, set radius 0
       //change that point to isHovered true
+      console.log("--------------trackMouse--------------");
       const pos = pointer(e, clickArea);
       const xPos = pos[0];
       content.mouseOverPoint(xPos);
       console.log("trackMouse....pointsHoveredArr:", content.pointsIsHoveredArr);
+      console.log("trackMouse....pointsSelectedArr:", content.pointsIsSelectedArr);
       if (content.hasPointHovered){
+        console.log("settingRadius to 0");
         setHoverPointRadius(0); //hide hover preview
       }
       else {
@@ -208,7 +205,7 @@ export const NumberlineToolComponent: React.FC<IProps> = observer((props) => {
 
     // Clean up - remove all circles
     return () => {
-      selAxis.selectAll(".hover-circle").remove();
+      selAxis.selectAll(".outer-hover-circle").remove();
     };
 
   },[axisClass, axisWidth, hoverPointRadius, hoverPointX, content]);
@@ -230,19 +227,14 @@ export const NumberlineToolComponent: React.FC<IProps> = observer((props) => {
                 const id = pointObj.id;
                 const isHovered = pointObj.isHovered;
                 const isSelected = pointObj.isSelected;
-                const classNameHoverCircle = classNames("hover-circle", {"disabled": !isHovered || isSelected});
+                const classNameOuterCircle = classNames("outer-hover-circle", {"disabled": !isHovered});
                 const classNameInnerCircle = classNames(axisClass, `inner-circle`,
                             {"selected": isSelected}
                 );
 
-                // if (i === 0){
-                //   console.log("classNameHoverCircle:", classNameHoverCircle);
-                //   console.log("className:", classNameInnerCircle);
-                // }
-
                 return (
                   <React.Fragment key={`fragment-${axisClass}-${id}`}>
-                    <circle key={`${axisClass}-hover-${id}`} className={classNameHoverCircle} r={pointRadius + 5} cy="0"
+                    <circle key={`${axisClass}-hover-${id}`} className={classNameOuterCircle} r={pointRadius + 5} cy="0"
                       cx={xPos} style={{'transform':`translate(${numToPx(xShiftNum)}, 20px)` }}
                     />
                     <circle key={`${axisClass}-inner-${id}`} className={classNameInnerCircle} r={pointRadius} cy="0"

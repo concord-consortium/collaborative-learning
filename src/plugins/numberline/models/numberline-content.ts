@@ -3,7 +3,6 @@ import { TileContentModel } from "../../../models/tiles/tile-content";
 import { PointCoordinateType, kNumberlineTileType } from "../types/numberline-types";
 import { uniqueId } from "../../../utilities/js-utils";
 
-
 export function defaultNumberlineContent(): NumberlineContentModelType {
   return NumberlineContentModel.create({});
 }
@@ -19,24 +18,6 @@ const PointObjectModel = types.model("PointObject", {
   isSelected: false,
 });
 export interface PointObjectModelType extends Instance<typeof PointObjectModel> {}
-
-
-// const ProgramZoom = types.model({
-//   dx: types.number,
-//   dy: types.number,
-//   scale: types.number,
-// });
-// export type ProgramZoomType = typeof ProgramZoom.Type;
-// export const DEFAULT_PROGRAM_ZOOM = { dx: 0, dy: 0, scale: 1 };
-
-// export const DataflowContentModel = TileContentModel
-//   .named("DataflowTool")
-//   .props({
-//     type: types.optional(types.literal(kDataflowTileType), kDataflowTileType),
-//     program: types.optional(DataflowProgramModel, getSnapshot(DataflowProgramModel.create())),
-//     programDataRate: DEFAULT_DATA_RATE,
-//     programZoom: types.optional(ProgramZoom, DEFAULT_PROGRAM_ZOOM),
-//   })
 
 export const NumberlineContentModel = TileContentModel
   .named("NumberlineTool")
@@ -75,7 +56,6 @@ export const NumberlineContentModel = TileContentModel
     get indexOfPointHovered(){
       return self.pointsIsHoveredArr.findIndex((isHovered) =>  isHovered === true);
     }
-
   }))
   .actions(self => ({
     toggleIsSelected(index: number){
@@ -129,15 +109,14 @@ export const NumberlineContentModel = TileContentModel
       if (self.hasPointHovered){
         console.log("create new point where we already have a hover!");
         const index = self.indexOfPointHovered;
-        // console.log("index:", index);
          //turn off hover for index
         //turn on isSelected
         self.points[index].isHovered = false;
         self.toggleIsSelected(index);
       } else {
         const id = uniqueId();
-        const pointModel = PointObjectModel.create({id, pointCoordinates: newPoint,
-                                                  isHovered: false, isSelected: false});
+        const pointModel = PointObjectModel.create({ id, pointCoordinates: newPoint,
+                                                  isHovered: false, isSelected: false });
         self.points.push(pointModel);
       }
     },
