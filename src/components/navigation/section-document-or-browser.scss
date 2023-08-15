@@ -3,8 +3,6 @@ $title-margin: 2px;
 $scroller-height: 145px;
 
 .document-tabs {
-  overflow-x: hidden;
-  overflow-y: hidden;
   &.chat-open {
     border-right: 0;
   }
@@ -15,8 +13,6 @@ $scroller-height: 145px;
   }
 
   .scroller-and-document {
-    overflow-x: hidden;
-    overflow-y: hidden;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -106,7 +102,6 @@ $scroller-height: 145px;
       flex: 1;
       display: flex;
       flex-direction: row;
-      overflow-y: hidden;
 
       .focus-document {
         display: flex;
@@ -277,7 +272,6 @@ $scroller-height: 145px;
   .editable-document-content {
     top: $nav-tab-height;
     flex: 1;
-    overflow-y: hidden;
     .canvas-area {
       // Not sure why - 4px is necessary here, but the document would always scroll otherwise
       height: calc(100% - 4px);

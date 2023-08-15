@@ -2,12 +2,6 @@
 
 .student-group-view {
   .canvas-area {
-    // I need to check this. I know it is applied on the left side student workspaces
-    // My guess is the the other place it used is in the student four up view
-    // The position could probably be made static, but then we have to either:
-    // - make the four-up child relative
-    // - update all of the 4-up stuff to use a flow or grid layout so it doesn't need
-    //   to use absolute positioning
     position: relative;
     top: 0;
     left: 0;
@@ -20,7 +14,6 @@
   .student-group-view {
     position: relative;
     height: 100%;
-    overflow-y: hidden;
     display: flex;
     flex-direction: column;
     margin: 0;
