@@ -1,32 +1,31 @@
-import {useDroppable} from '@dnd-kit/core';
+import {useDndContext, useDroppable} from '@dnd-kit/core';
 import {observer} from "mobx-react-lite";
 import React, {useEffect, useMemo, useRef} from "react";
 import {useResizeDetector} from "react-resize-detector";
-import {useDataSet} from '../hooks/use-data-set';
-import {DataSetContext} from '../hooks/use-data-set-context';
+import {ITileBaseProps} from '../imports/components/tiles/tile-base-props';
+import {useDataSet} from '../imports/hooks/use-data-set';
+import {DataSetContext} from '../imports/hooks/use-data-set-context';
 import {useGraphController} from "../hooks/use-graph-controller";
 import {useInitGraphLayout} from '../hooks/use-init-graph-layout';
-import {InstanceIdContext, useNextInstanceId} from "../hooks/use-instance-id-context";
-import {AxisLayoutContext} from "../axis/models/axis-layout-context";
+import {InstanceIdContext, useNextInstanceId} from "../imports/hooks/use-instance-id-context";
+import {AxisLayoutContext} from "../imports/components/axis/models/axis-layout-context";
 import {GraphController} from "../models/graph-controller";
 import {GraphLayoutContext} from "../models/graph-layout";
 import {GraphModelContext, isGraphModel} from "../models/graph-model";
 import {Graph} from "./graph";
 import {DotsElt} from '../d3-types';
-import { ITileModel } from '../../../models/tiles/tile-model';
+import {AttributeDragOverlay} from "../imports/components/drag-drop/attribute-drag-overlay";
+import "../register-adornment-types";
 
-interface IProps {
-  tile?: ITileModel;
-}
-
-export const GraphComponent = observer(function GraphComponent({tile}: IProps) {
+export const GraphComponent = observer(function GraphComponent({tile}: ITileBaseProps) {
   const graphModel = isGraphModel(tile?.content) ? tile?.content : undefined;
 
   const instanceId = useNextInstanceId("graph");
   const { data } = useDataSet(graphModel?.data);
   const layout = useInitGraphLayout(graphModel);
-  // Removed deboucing, but we can bring it back if we find we need it
-  const {width, height, ref: graphRef} = useResizeDetector(/*{refreshMode: "debounce", refreshRate: 15}*/);
+  // Removed debouncing, but we can bring it back if we find we need it
+  const graphRef = useRef<HTMLDivElement | null>(null);
+  const {width, height} = useResizeDetector<HTMLDivElement>({ targetRef: graphRef });
   const enableAnimation = useRef(true);
   const autoAdjustAxes = useRef(true);
   const dotsRef = useRef<DotsElt>(null);
@@ -41,10 +40,20 @@ export const GraphComponent = observer(function GraphComponent({tile}: IProps) {
     (width != null) && (height != null) && layout.setParentExtent(width, height);
   }, [width, height, layout]);
 
+  useEffect(function cleanup() {
+    return () => {
+      layout.cleanup();
+    };
+  }, [layout]);
+
   // used to determine when a dragged attribute is over the graph component
   const dropId = `${instanceId}-component-drop-overlay`;
   const {setNodeRef} = useDroppable({id: dropId});
-  setNodeRef(graphRef.current);
+  setNodeRef(graphRef.current ?? null);
+
+  const { active } = useDndContext();
+  const overlayDragId = active && `${active.id}`.startsWith(instanceId)
+    ? `${active.id}` : undefined;
 
   if (!graphModel) return null;
 
@@ -58,6 +67,7 @@ export const GraphComponent = observer(function GraphComponent({tile}: IProps) {
                       graphRef={graphRef}
                       dotsRef={dotsRef}
               />
+              <AttributeDragOverlay activeDragId={overlayDragId} />
             </GraphModelContext.Provider>
           </AxisLayoutContext.Provider>
         </GraphLayoutContext.Provider>

@@ -1,3 +1,4 @@
+import { observable, runInAction } from "mobx";
 import { addDisposer, Instance, isValidReference, types } from "mobx-state-tree";
 import { kellyColors } from "../../utilities/color-utils";
 import { onAnyAction } from "../../utilities/mst-utils";
@@ -34,8 +35,9 @@ export const CategorySet = types.model("CategorySet", {
 .extend(self => {
   // map from category value to index
   const _indexMap = new Map<string, number>();
+  const observableValues = observable.array<string>();
   let _values = [] as string[];
-  let _isValid = false;
+  const _isValid = observable.box(false);
 
   function rebuildIndexMap() {
     _indexMap.clear();
@@ -58,14 +60,14 @@ export const CategorySet = types.model("CategorySet", {
   }
 
   function refresh() {
-    if (!_isValid) {
+    if (!_isValid.get()) {
       _indexMap.clear();
       _values = [];
 
       // build default category set order (order of occurrence)
       // could default to alphameric sort order if desired instead
       self.attribute.strValues.forEach(value => {
-        if (_indexMap.get(value) == null) {
+        if (value !== '' && _indexMap.get(value) == null) {
           _indexMap.set(value, _values.length);
           _values.push(value);
         }
@@ -116,7 +118,10 @@ export const CategorySet = types.model("CategorySet", {
         }
       });
 
-      _isValid = true;
+      runInAction(() => {
+        observableValues.replace(_values);
+        _isValid.set(true);
+      });
     }
   }
 
@@ -124,7 +129,7 @@ export const CategorySet = types.model("CategorySet", {
     views: {
       get values() {
         refresh();
-        return _values;
+        return observableValues;
       },
       index(value: string) {
         return _indexMap.get(value);
@@ -132,12 +137,17 @@ export const CategorySet = types.model("CategorySet", {
     },
     actions: {
       invalidate() {
-        _isValid = false;
+        _isValid.set(false);
       }
     }
   };
 })
 .views(self => ({
+  get lastMove() {
+    return self.moves.length > 0
+            ? self.moves[self.moves.length - 1]
+            : undefined;
+  },
   colorForCategory(category: string) {
     const userColor = self.colors.get(category);
     const catIndex = self.index(category);
@@ -164,20 +174,41 @@ export const CategorySet = types.model("CategorySet", {
     const toIndex = (beforeValue != null) ? self.index(beforeValue) ?? self.values.length - 1 : self.values.length - 1;
     const afterIndex = toIndex === 0 ? undefined : toIndex < fromIndex ? toIndex - 1 : toIndex;
     const afterValue = afterIndex != null ? self.values[afterIndex] : undefined;
-    self.moves.push({
+    const move: ICategoryMove = {
       value,
       fromIndex,
       toIndex,
       length: self.values.length,
       after: afterValue,
       before: beforeValue
-    });
+    };
+    // combine with last move if appropriate
+    if (value === self.lastMove?.value) {
+      move.fromIndex = self.lastMove.fromIndex;
+      self.moves[self.moves.length - 1] = move;
+    }
+    else {
+      self.moves.push(move);
+    }
     self.invalidate();
   },
   setColorForCategory(value: string, color: string) {
     if (self.index(value)) {
       self.colors.set(value, color);
     }
+  },
+  storeCurrentColorForCategory(value: string) {
+    const color = self.colorForCategory(value);
+    if (color) {
+      self.colors.set(value, color);
+    }
+  },
+  storeAllCurrentColors() {
+    self.values.forEach(value => {
+      if (!self.colors.get(value)) {
+        this.storeCurrentColorForCategory(value);
+      }
+    });
   }
 }));
 export interface ICategorySet extends Instance<typeof CategorySet> {}

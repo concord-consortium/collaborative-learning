@@ -1,5 +1,6 @@
 import { getType, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { cloneDeep } from "lodash";
+import { Required } from "utility-types";
 
 import { SharedModel, SharedModelType } from "./shared-model";
 import { DataSet, IDataSet, newCaseId } from "../data/data-set";
@@ -12,7 +13,7 @@ export const SharedDataSet = SharedModel
 .props({
   type: types.optional(types.literal(kSharedDataSetType), kSharedDataSetType),
   providerId: "",
-  dataSet: DataSet
+  dataSet: types.optional(DataSet, () => DataSet.create())
 })
 .views(self => ({
   get xLabel() {
@@ -27,7 +28,8 @@ export const SharedDataSet = SharedModel
     self.dataSet = data;
   }
 }));
-export interface SharedDataSetType extends Instance<typeof SharedDataSet> {}
+// all instances have a dataSet, but types.optional() leads to a TypeScript type that doesn't reflect that
+export interface SharedDataSetType extends Required<Instance<typeof SharedDataSet>, "dataSet"> {}
 
 export function isSharedDataSet(model?: SharedModelType): model is SharedDataSetType {
   return model ? getType(model) === SharedDataSet : false;
@@ -53,12 +55,12 @@ export function getUpdatedSharedDataSetIds(sharedDataSet: SharedDataSetSnapshotT
     dataSetId: uniqueId(),
     sharedModelId: uniqueId()
   };
-  sharedDataSet.dataSet.attributes?.forEach(attr => {
+  sharedDataSet.dataSet?.attributes?.forEach(attr => {
     if (attr.id) {
       updatedIds.attributeIdMap[attr.id] = uniqueId();
     }
   });
-  sharedDataSet.dataSet.cases?.forEach(c => {
+  sharedDataSet.dataSet?.cases?.forEach(c => {
     if (c.__id__) updatedIds.caseIdMap[c.__id__] = newCaseId();
   });
   return updatedIds;
@@ -67,13 +69,13 @@ export function getUpdatedSharedDataSetIds(sharedDataSet: SharedDataSetSnapshotT
 export function getSharedDataSetSnapshotWithUpdatedIds(
   sharedDataSet: SharedDataSetSnapshotType, updatedIds: UpdatedSharedDataSetIds
 ) {
-  const newAttributes = sharedDataSet.dataSet.attributes?.map(a => {
+  const newAttributes = sharedDataSet.dataSet?.attributes?.map(a => {
     const formula = cloneDeep(a.formula);
     if (a.id) {
       return { ...a, id: updatedIds.attributeIdMap[a.id], formula };
     }
   });
-  const newCases = sharedDataSet.dataSet.cases?.filter(c => c.__id__).map(c => (
+  const newCases = sharedDataSet.dataSet?.cases?.filter(c => c.__id__).map(c => (
     c.__id__ && { ...c, __id__: updatedIds.caseIdMap[c.__id__] }
   ));
   return {

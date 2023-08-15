@@ -24,7 +24,8 @@ const gTileRegistration: Record<string, () => void> = {
   ]),
   "Graph": () => Promise.all([
     import(/* webpackChunkName: "Graph" */"./plugins/graph/graph-registration"),
-    import(/* webpackChunkName: "SharedDataSet" */"./models/shared/shared-data-set-registration")
+    import(/* webpackChunkName: "SharedDataSet" */"./models/shared/shared-data-set-registration"),
+    import(/* webpackChunkName: "SharedCaseMetadata" */"./models/shared/shared-case-metadata-registration")
   ]),
   "Image": () => import(/* webpackChunkName: "Image" */"./models/tiles/image/image-registration"),
   "Numberline": () => Promise.all([

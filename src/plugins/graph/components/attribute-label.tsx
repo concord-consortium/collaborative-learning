@@ -3,32 +3,31 @@ import {createPortal} from "react-dom";
 import {reaction} from "mobx";
 import {observer} from "mobx-react-lite";
 import {select} from "d3";
-import t from "../utilities/translation/translate";
+import t from "../imports/utilities/translation/translate";
 import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
 import {AttributeType} from "../../../models/data/attribute";
+import {IDataSet} from "../../../models/data/data-set";
 import {isSetAttributeNameAction} from "../../../models/data/data-set-actions";
-import {GraphPlace, isVertical} from "../axis-graph-shared";
+import {GraphPlace, isVertical} from "../imports/components/axis-graph-shared";
 import {graphPlaceToAttrRole, kGraphClassSelector} from "../graph-types";
 import {useGraphModelContext} from "../models/graph-model";
 import {useGraphLayoutContext} from "../models/graph-layout";
-import {useTileModelContext} from "../hooks/use-tile-model-context";
-import {getStringBounds} from "../axis/axis-utils";
-import {AxisOrLegendAttributeMenu} from "../axis/components/axis-or-legend-attribute-menu";
+import {useTileModelContext} from "../imports/hooks/use-tile-model-context";
+import {getStringBounds} from "../imports/components/axis/axis-utils";
+import {AxisOrLegendAttributeMenu} from "../imports/components/axis/components/axis-or-legend-attribute-menu";
 import { useSettingFromStores } from "../../../hooks/use-stores";
 
 import graphVars from "./graph.scss";
 
 interface IAttributeLabelProps {
   place: GraphPlace
-  onChangeAttribute?: (place: GraphPlace, attrId: string) => void
+  onChangeAttribute?: (place: GraphPlace, dataSet: IDataSet, attrId: string) => void
   onRemoveAttribute?: (place: GraphPlace, attrId: string) => void
   onTreatAttributeAs?: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void
 }
 
 export const AttributeLabel = observer(
-  function AttributeLabel({
-    place, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute
-  }: IAttributeLabelProps) {
+  function AttributeLabel({place, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute}: IAttributeLabelProps) {
     const graphModel = useGraphModelContext(),
       dataConfiguration = useDataConfigurationContext(),
       defaultAxisLabels = useSettingFromStores("defaultAxisLabels", "graph") as Record<string, string> | undefined,
