@@ -45,6 +45,7 @@ context('History Playback', () => {
     cy.get('[data-testid="playback-time-info"]').should('be.visible');
   });
   it('verify play button is disabled when slider handle is at the right end', () => {
+    cy.wait(10);
     cy.get('[data-testid="playback-play-button"]').should('have.class', "disabled");
   });
   it('verify added tile is visible in the playback document', () => {

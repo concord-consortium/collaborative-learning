@@ -49,9 +49,9 @@ context('Arrow Annotations (Sparrows)', function () {
       cy.log("Add an ellipse");
       drawToolTile.getDrawToolEllipse().click();
       drawToolTile.getDrawTile()
-        .trigger("mousedown", 450,  50)
-        .trigger("mousemove", 400, 150)
-        .trigger("mouseup",   400, 150);
+        .trigger("mousedown", 250,  50)
+        .trigger("mousemove", 200, 100)
+        .trigger("mouseup",   200, 100);
       drawToolTile.getEllipseDrawing().should("exist").and("have.length", 1);
 
       cy.log("Annotation buttons only appear in sparrow mode");
@@ -63,10 +63,14 @@ context('Arrow Annotations (Sparrows)', function () {
       cy.log("Can draw an arrow between two objects");
       aa.getAnnotationArrows().should("not.exist");
       aa.getAnnotationTextDisplays().should("not.exist");
+      aa.getAnnotationTextInputs().should("not.exist");
+      aa.getPreviewArrow().should("not.exist");
       aa.getAnnotationButtons().first().click({ force: true });
+      aa.getPreviewArrow().should("exist");
       aa.getAnnotationButtons().eq(1).click({ force: true });
+      aa.getPreviewArrow().should("not.exist");
       aa.getAnnotationArrows().should("exist");
-      aa.getAnnotationTextDisplays().should("exist");
+      aa.getAnnotationTextInputs().should("exist");
 
       cy.log("Can only edit text in sparrow mode");
       aa.clickArrowToolbarButton();
@@ -74,7 +78,7 @@ context('Arrow Annotations (Sparrows)', function () {
       aa.getAnnotationTextDisplays().first().should("have.css", "pointer-events", "none");
       aa.getAnnotationTextInputs().should("not.exist");
       aa.clickArrowToolbarButton();
-      aa.getAnnotationTextDisplays().first().click();
+      aa.getAnnotationTextDisplays().first().dblclick();
       aa.getAnnotationTextInputs().should("exist");
 
       cy.log("Can change text by pushing enter");
@@ -85,14 +89,14 @@ context('Arrow Annotations (Sparrows)', function () {
       cy.log("Can change text by blurring");
       const text2 = "1 txet tset";
       const combinedText = text1 + text2;
-      aa.getAnnotationTextDisplays().first().click();
+      aa.getAnnotationTextDisplays().first().dblclick();
       aa.getAnnotationTextInputs().first().type(text2);
       drawToolTile.getDrawTile().click({ force: true });
       aa.getAnnotationTextDisplays().first().should("have.text", combinedText);
 
       cy.log("Can cancel text by pressing escape");
       const text3 = "mistake";
-      aa.getAnnotationTextDisplays().first().click();
+      aa.getAnnotationTextDisplays().first().dblclick();
       aa.getAnnotationTextInputs().first().type(text3).should("have.value", combinedText + text3);
       aa.getAnnotationTextInputs().first().type("{esc}");
       aa.getAnnotationTextDisplays().first().should("have.text", combinedText);
@@ -119,7 +123,7 @@ context('Arrow Annotations (Sparrows)', function () {
         .trigger("mouseup",   100,  50);
       aa.clickArrowToolbarButton();
       aa.getAnnotationButtons().should("have.length", 3);
-      aa.getAnnotationButtons().first().click();
+      aa.getAnnotationButtons().first().click({ force: true });
       aa.getAnnotationButtons().eq(2).click();
       aa.getAnnotationArrows().should("have.length", 2);
     });
