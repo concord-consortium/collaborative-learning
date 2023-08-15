@@ -14,10 +14,20 @@
 
     &.can-edit {
       border-color: vars.$workspace-teal-light-5;
+
+      &:hover {
+        cursor: grab;
+      }
     }
   }
 
   .text-input {
     max-width: 100%;
+  }
+}
+
+.drag-handle {
+  &:hover {
+    cursor: grab;
   }
 }

@@ -4,8 +4,8 @@ import {isInteger} from "lodash";
 import {CaseData, DotsElt, selectCircles, selectDots} from "../d3-types";
 import {IDotsRef, kGraphFont, Point, Rect, rTreeRect, transitionDuration} from "../graph-types";
 import {between} from "./math-utils";
-import {IAxisModel, isNumericAxisModel} from "../axis/models/axis-model";
-import {ScaleNumericBaseType} from "../axis/axis-types";
+import {IAxisModel, isNumericAxisModel} from "../imports/components/axis/models/axis-model";
+import {ScaleNumericBaseType} from "../imports/components/axis/axis-types";
 import {IDataSet} from "../../../models/data/data-set";
 import {
   defaultSelectedColor,
@@ -255,13 +255,13 @@ export function lineToAxisIntercepts(iSlope: number, iIntercept: number,
   };
 }
 
-export function equationString(slope: number, intercept: number) {
+export function equationString(slope: number, intercept: number, attrNames: {x: string, y: string}) {
   const float = format('.4~r');
-  const kSlopeIntercept = `<p style="color:#4782B4"><i>y</i> = ${float(slope)} <i>x</i> + ${float(intercept)}</p>`;/*,
-  // color,y,slope,x,signInt,Int
-    kInfiniteSlope = '<p style = "color:%@"><i>%@</i> = %@ %@</p>', // x,constant,unit
-    kSlopeOnly = '<p style = "color:%@">%@ = %@ %@</p>' // color, left side, numeric slope, slope unit*/
-  return kSlopeIntercept;
+  if (isFinite(slope) && slope !== 0) {
+    return `<em>${attrNames.y}</em> = ${float(slope)} <em>${attrNames.x}</em> + ${float(intercept)}`;
+  } else {
+    return `<em>${slope === 0 ? attrNames.y : attrNames.x}</em> = ${float(intercept)}`;
+  }
 }
 
 export function valueLabelString(value: number) {
@@ -458,4 +458,23 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
 
     theSelection = selectDots(dotsRef.current, selectedOnly);
   setPoints();
+}
+
+
+/**
+ Use the bounds of the given axes to compute slope and intercept.
+*/
+export function computeSlopeAndIntercept(xAxis?: IAxisModel, yAxis?: IAxisModel) {
+  const xLower = xAxis && isNumericAxisModel(xAxis) ? xAxis.min : 0,
+    xUpper = xAxis && isNumericAxisModel(xAxis) ? xAxis.max : 0,
+    yLower = yAxis && isNumericAxisModel(yAxis) ? yAxis.min : 0,
+    yUpper = yAxis && isNumericAxisModel(yAxis) ? yAxis.max : 0;
+
+  // Make the default a bit steeper so it's less likely to look like
+  // it fits a typical set of points
+  const adjustedXUpper = xLower + (xUpper - xLower) / 2,
+    slope = (yUpper - yLower) / (adjustedXUpper - xLower),
+    intercept = yLower - slope * xLower;
+
+  return {slope, intercept};
 }
