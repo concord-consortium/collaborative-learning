@@ -22,7 +22,7 @@ export const SimpleAttributeLabel = observer(
   function SimpleAttributeLabel(props: ISimpleAttributeLabelProps) {
     const {place, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute} = props;
     const simpleLabelRef = useRef<HTMLDivElement>(null);
-    const parentElt = simpleLabelRef.current?.closest(kGraphClassSelector) as HTMLDivElement ?? null;
+    const parentElt = simpleLabelRef.current?.closest(".document-content") as HTMLDivElement ?? null;
     const dataConfiguration = useDataConfigurationContext();
     const dataset = dataConfiguration?.dataset;
     const graphModel = useGraphModelContext();
