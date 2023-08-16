@@ -8,19 +8,22 @@ import { CurvedArrow } from "./curved-arrow";
 import { IArrowAnnotation } from "../../models/annotations/arrow-annotation";
 import { IClueObject } from "../../models/annotations/clue-object";
 
+import DeleteButton from "../../assets/icons/annotations/delete-button.svg";
+
 import "./arrow-annotation.scss";
 
 type DragType = "source" | "target" | "text";
 interface IArrowAnnotationProps {
   arrow: IArrowAnnotation;
   canEdit?: boolean;
+  deleteArrow: (arrowId: string) => void;
   getBoundingBox: (object: IClueObject) =>
     { height: number, left: number, top: number, width: number} | null | undefined;
   key?: string;
   readOnly?: boolean;
 }
 export const ArrowAnnotationComponent = observer(
-  function ArrowAnnotationComponent({ arrow, canEdit, getBoundingBox, readOnly }: IArrowAnnotationProps) {
+  function ArrowAnnotationComponent({ arrow, canEdit, deleteArrow, getBoundingBox, readOnly }: IArrowAnnotationProps) {
     const [firstClick, setFirstClick] = useState(false);
     const [editingText, setEditingText] = useState(false);
     const [tempText, setTempText] = useState(arrow.text ?? "");
@@ -128,6 +131,14 @@ export const ArrowAnnotationComponent = observer(
       }
     }
 
+    const deleteHeight = 24;
+    const deleteWidth = 24;
+    const deleteX = textCenterX - deleteWidth / 2;
+    const deleteY = textY - deleteHeight;
+    function handleDelete(e: React.MouseEvent<SVGElement, MouseEvent>) {
+      deleteArrow(arrow.id);
+    }
+
     // Set up drag handles
     function handleMouseDown(e: React.MouseEvent<SVGElement|HTMLButtonElement, MouseEvent>, _dragType: DragType) {
       if (!canEdit) return;
@@ -209,6 +220,9 @@ export const ArrowAnnotationComponent = observer(
           sourceX={sourceX} sourceY={sourceY}
           targetX={targetX} targetY={targetY}
         />
+        <g transform={`translate(${deleteX} ${deleteY})`}>
+          <DeleteButton onClick={handleDelete} />
+        </g>
         <foreignObject
           className="text-object"
           height={`${textHeight}`}

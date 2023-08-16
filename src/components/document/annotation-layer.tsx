@@ -177,6 +177,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
             <ArrowAnnotationComponent
               arrow={arrow}
               canEdit={!readOnly && editing}
+              deleteArrow={(arrowId: string) => content?.deleteAnnotation(arrowId)}
               getBoundingBox={getBoundingBox}
               key={key}
               readOnly={readOnly}

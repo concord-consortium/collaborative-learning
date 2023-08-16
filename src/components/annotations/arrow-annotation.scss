@@ -55,3 +55,31 @@
 .drag-handle {
   cursor: pointer;
 }
+
+.delete-button {
+  cursor: pointer;
+
+  .delete-button-highlight {
+    fill-opacity: 0;
+  }
+
+  .delete-button-front {
+    fill-opacity: .5;
+  }
+
+  &:hover {
+    .delete-button-highlight {
+      fill-opacity: .125;
+    }
+
+    .delete-button-front {
+      fill-opacity: 1;
+    }
+  }
+
+  &:active {
+    .delete-button-highlight {
+      fill-opacity: .25;
+    }
+  }
+}
