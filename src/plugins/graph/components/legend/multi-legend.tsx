@@ -12,11 +12,6 @@ interface IMultiLegendProps {
   onTreatAttributeAs: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void
 }
 
-/* NOTE: This multi-legend component will have more use in PT#182578812
-  in which we will get all attributes from yAttr Descriptions,
-  and render a label for each
-*/
-
 export const MultiLegend = function MultiLegend(props: IMultiLegendProps) {
   const {onChangeAttribute, onRemoveAttribute, onTreatAttributeAs} = props;
   const layout = useGraphLayoutContext();
