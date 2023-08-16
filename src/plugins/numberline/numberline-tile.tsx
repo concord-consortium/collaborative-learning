@@ -26,6 +26,11 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
   const documentScrollerRef = useRef<HTMLDivElement>(null);
   const [tileWidth, setTileWidth] = useState(0);
   const containerWidth = (tileWidth * kContainerWidth);
+  // new -test
+  // const [axisWidth, setAxisWidth] = useState(0);
+
+
+  //old
   const axisWidth = (tileWidth * kAxisWidth); //used to set the svg
   const xShiftNum = ((containerWidth - axisWidth)/2);
   const numToPx = (num: number) => num.toFixed(2) + "px";
@@ -45,12 +50,56 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
     return () => obs?.disconnect();
   }, []);
 
+  //new
+  // useEffect(() => {
+  //   console.log("inside axisWidth useEffect");
+  //   setAxisWidth((prev)=> tileWidth * kAxisWidth);
+  // },[tileWidth]);
+
   //------------------ Mouse Point Circle State / Properties ----------------------------------------
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [hoverPointX, setHoverPointX] = useState(0); //used to retrigger useEffect below
 
   /* ========================== [ Construct Numberline OnMount ] ================================= */
+
+  // ------------------- new test --------------------------------------------
+  // useEffect(()=>{
+
+  //   const timer = setTimeout(() => {
+  //     console.log('This will run after 1 second!');
+  //     console.log('axisWidth:', axisWidth);
+  //     console.log('tileWidth:', tileWidth);
+
+  //     if (axisWidth !== 0){ //after component has rendered
+  //       console.log("----useEffect 1-------");
+  //       const svg = select(svgRef.current);
+
+  //       // ---------------------  Construct Number Line Axis ------------------------------
+  //       svg.select(`.${axisClass}`).remove(); // Remove the previous axis
+  //       const numOfTicks = numberlineDomainMax - numberlineDomainMin;
+  //       svg.append('g')
+  //       .attr("class", `${axisClass} num-line`)
+  //       .attr("style", `${kAxisStyle}`) //move down
+  //       .call(axisBottom(xScale).tickSizeOuter(0).ticks(numOfTicks)); //remove side ticks
+  //       // --------- After The Axis Is Drawn, Customize "x = 0 tick"-----------------------
+  //       svg.selectAll("g.tick line")
+  //       .attr("y2", function(x){ return (x === 0) ? tickHeightZero : tickHeightDefault;})
+  //       .attr("stroke-width", function(x){ return (x === 0) ? tickWidthZero : tickWidthDefault;})
+  //       .attr("style", function(x){ return (x === 0) ? tickStyleZero : tickStyleDefault;});
+
+  //     }
+
+  //   }, 5000);
+  //   return () => clearTimeout(timer);
+
+  // // eslint-disable-next-line react-hooks/exhaustive-deps
+  // },[tileWidth]);
+
+
+
+  // //--------------------------------old version------------------------------------------
   useEffect(() => {
+
     if (axisWidth !== 0){ //after component has rendered
       console.log("----useEffect 1-------");
       const svg = select(svgRef.current);
@@ -67,20 +116,29 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
       .attr("y2", function(x){ return (x === 0) ? tickHeightZero : tickHeightDefault;})
       .attr("stroke-width", function(x){ return (x === 0) ? tickWidthZero : tickWidthDefault;})
       .attr("style", function(x){ return (x === 0) ? tickStyleZero : tickStyleDefault;});
+
+      console.log("<-------------Render LINE -------->");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [axisWidth]);
+  // //------------------------------end old version------------------------------------------
+
 
 
   /* =========================== [ Update Numberline ] =========================================== */
   useEffect(() => {
+
     if (axisWidth !== 0){ //after component has rendered
-      console.log("----useEffect 2-------");
+      console.log("\n\n----useEffect 2-------");
+      // console.log('tileWidth:', tileWidth);
+
       // console.log("\t", content.pointsXValuesArr);
       // console.log("\t", content.pointsIsSelectedArr);
 
       const updateNumberline = () => {
         // ----- Detect If Mouse Is Within Bounding Box Around Number Line --------------
+        // console.log("\tupdateNumberline");
+
         const svg = select(svgRef.current);
         const svgNode = svg.node();
         const yMidPoint = (kNumberLineContainerHeight / 2);
@@ -89,7 +147,6 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
           const pos = pointer(e, svgNode);
           const xPos = pos[0];
           const yPos = pos[1];
-
           const yTopBound = yMidPoint + 10;
           const yBottomBound = yMidPoint - 10;
           const isBetweenYBounds = (yPos >= yBottomBound && yPos <= yTopBound);
@@ -191,7 +248,10 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
 
         // Initialize Attributes
         existingPointsInnerCircle.enter()
-        .append("circle")
+        .append((d)=> {
+          console.log("appending the inner circles:");
+          return document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        })
         .attr("class", "inner-point")
         .attr('cx', (p) => {
           const xValue = p.pointCoordinates?.xValue;
@@ -204,13 +264,27 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
         .classed("selected", (p)=>!!p.isSelected)
         .call(handleDrag as any); // Attach drag behavior to newly created circles
 
+        // console.log("update functions for inner circles");
+
         // Update Data for Existing circles
         existingPointsInnerCircle
-        .attr('cx', (p) => {
+        .append((d)=> { // //new - test -----add this so that it will alwayys render over the line-------------------
+          console.log("appending the inner circles:");
+          return document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        })
+        .attr('cx', (p, idx) => {
           const xValue = p.pointCoordinates?.xValue;
+          console.log("update cx function inner circle-------");
+          console.log(`\t point-${idx} returning:`, xScale(xValue || numberlineDomainMin));
           return xScale(xValue || numberlineDomainMin);
         })
-        .classed("selected", (p)=>!!p.isSelected);
+        .classed("selected", (p)=>!!p.isSelected)
+        .classed("defaultPointInnerCircle",(p)=>{
+          // console.log("-----update defaultPointInnerCircle----");
+          // console.log("\tp", p.id);
+          return true;
+        });
+
 
         // Remove circles for data that no longer exists
         existingPointsInnerCircle.exit().remove();
