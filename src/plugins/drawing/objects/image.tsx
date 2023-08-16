@@ -68,7 +68,7 @@ export const ImageObject = DrawingObject.named("ImageObject")
       self.dragHeight = self.height + deltas.bottom - deltas.top;
     },
     resizeObject() {
-      self.adoptDragPosition();
+      self.repositionObject();
       self.width = self.dragWidth ?? self.width;
       self.height = self.dragHeight ?? self.height;
       self.dragWidth = self.dragHeight = undefined;

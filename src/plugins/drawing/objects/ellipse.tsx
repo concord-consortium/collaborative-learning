@@ -42,7 +42,7 @@ export const EllipseObject = types.compose("EllipseObject", StrokedObject, Fille
       self.dragRy = self.ry + deltas.bottom/2 - deltas.top/2;
     },
     resizeObject() {
-      self.adoptDragPosition();
+      self.repositionObject();
       self.rx = self.dragRx ?? self.rx;
       self.ry = self.dragRy ?? self.ry;
       self.dragRx = self.dragRy = undefined;
