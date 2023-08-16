@@ -97,9 +97,9 @@ export const DrawingObject = types.model("DrawingObject", {
     // Implementated in subclasses since this will affect object types differently.
     console.error("setDragBounds is unimplemented for this type");
   },
-  resizeObject() {
+  adoptDragBounds() {
     // Move any volatile resizing into the persisted object model.
-    console.error("resizeObject is unimplemented for this type");
+    console.error("adoptDragBounds is unimplemented for this type");
   }
 }));
 export interface DrawingObjectType extends Instance<typeof DrawingObject> {}

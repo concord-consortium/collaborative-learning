@@ -60,7 +60,7 @@ export const VectorObject = StrokedObject.named("VectorObject")
         self.dragDy = self.dy - deltas.bottom + deltas.top;
       }
     },
-    resizeObject() {
+    adoptDragBounds() {
       self.repositionObject();
       self.dx = self.dragDx ?? self.dx;
       self.dy = self.dragDy ?? self.dy;
