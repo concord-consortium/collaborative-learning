@@ -22,7 +22,7 @@ export const SimpleAttributeLabel = observer(
   function SimpleAttributeLabel(props: ISimpleAttributeLabelProps) {
     const {place, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute} = props;
     const simpleLabelRef = useRef<HTMLDivElement>(null);
-    const parentElt = simpleLabelRef.current?.closest(kGraphClassSelector) as HTMLDivElement ?? null;
+    const parentElt = simpleLabelRef.current?.closest('.document-content') as HTMLDivElement ?? null;
     const dataConfiguration = useDataConfigurationContext();
     const dataset = dataConfiguration?.dataset;
     const graphModel = useGraphModelContext();
@@ -30,6 +30,14 @@ export const SimpleAttributeLabel = observer(
     const attr = attrId ? dataset?.attrFromID(attrId) : undefined;
     const attrName = attr?.name ?? "";
     const pointColor = graphModel._pointColors[0]; // In PT#182578812 will passed plotIndex
+
+    console.log("| should load, check each: \n",
+      "parentElt: ", parentElt, "\n",
+      "onChangeAttribute: ", onChangeAttribute, "\n",
+      "onTreatAttributeAs: ", onTreatAttributeAs, "\n",
+      "onRemoveAttribute: ", onRemoveAttribute, "\n",
+      "attrId: ", attrId, "\n",
+    );
 
     return (
       <>

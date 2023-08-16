@@ -4,6 +4,7 @@ import { GraphPlace } from "../../imports/components/axis-graph-shared";
 import { SimpleAttributeLabel } from "../simple-attribute-label";
 import { kMultiLegendHeight, useGraphLayoutContext } from "../../models/graph-layout";
 import { IDataSet } from "../../../../models/data/data-set";
+import { AttributeLabel } from "../attribute-label";
 
 interface IMultiLegendProps {
   graphElt: HTMLDivElement | null

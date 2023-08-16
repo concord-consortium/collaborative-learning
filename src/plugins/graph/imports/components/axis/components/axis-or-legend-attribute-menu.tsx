@@ -66,6 +66,8 @@ const _AxisOrLegendAttributeMenu = ({ place, target, portal,
     });
   }, [attribute?.name, data?.attributes, dataConfig, labelText, setLabelText, attrId]);
 
+  console.log("| axis attribute menu instance: ", instanceId, " |");
+
   return (
     <div className={`axis-legend-attribute-menu ${place}`} ref={menuRef}>
       <Menu boundary="scrollParent">
