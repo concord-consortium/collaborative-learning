@@ -3,7 +3,7 @@ import { observer } from "mobx-react";
 import React, { useEffect, useRef, useState } from "react";
 
 import { AnnotationNode } from "./annotation-node";
-import { kAnnotationNodeHeight, kAnnotationNodeWidth } from "./annotation-utilities";
+import { getCurve, kAnnotationNodeHeight, kAnnotationNodeWidth } from "./annotation-utilities";
 import { CurvedArrow } from "./curved-arrow";
 import { IArrowAnnotation } from "../../models/annotations/arrow-annotation";
 import { IClueObject } from "../../models/annotations/clue-object";
@@ -133,8 +133,9 @@ export const ArrowAnnotationComponent = observer(
 
     const deleteHeight = 24;
     const deleteWidth = 24;
-    const deleteX = textCenterX - deleteWidth / 2;
-    const deleteY = textY - deleteHeight;
+    const curveData = getCurve(sourceX, sourceY, textCenterX, textCenterY, targetX, targetY);
+    const deleteX = curveData.deleteX - deleteWidth / 2;
+    const deleteY = curveData.deleteY - deleteHeight / 2;
     function handleDelete(e: React.MouseEvent<SVGElement, MouseEvent>) {
       deleteArrow(arrow.id);
     }
