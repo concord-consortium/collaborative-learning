@@ -1,21 +1,26 @@
 import { types, Instance } from "mobx-state-tree";
 import { TileContentModel } from "../../../models/tiles/tile-content";
-import { PointCoordinateType } from "../types/numberline-types";
 import { uniqueId } from "../../../utilities/js-utils";
-import { kNumberlineTileType } from "../numberline-tile-constants";
+import { kNumberlineTileType, numberlineDomainMax, numberlineDomainMin } from "../numberline-tile-constants";
+import { scaleLinear } from "d3";
 
 export function defaultNumberlineContent(): NumberlineContentModelType {
   return NumberlineContentModel.create({});
 }
 
-const PointObjectModel = types.model("PointObject", {
+export interface PointCoordinateType {
+  xValue: number, //actual x value from the numberline not raw x position
+}
+
+export const PointObjectModel = types.model("PointObject", {
   id: types.identifier,
   pointCoordinates: types.optional(types.frozen<PointCoordinateType>(), {
-    xPos: 0,
+    xValue: 0,
   }),
   isHovered: false,
   isSelected: false,
 });
+
 export interface PointObjectModelType extends Instance<typeof PointObjectModel> {}
 
 export const NumberlineContentModel = TileContentModel
@@ -34,8 +39,8 @@ export const NumberlineContentModel = TileContentModel
     get hasPoints(){
       return (self.points.length > 0);
     },
-    get pointsXPositionsArr(){
-      return self.points.map((pointObj) => pointObj.pointCoordinates.xPos);
+    get pointsXValuesArr(){
+      return self.points.map((pointObj) => pointObj.pointCoordinates.xValue);
     },
     get pointsIsHoveredArr(){
       return self.points.map((pointObj) => pointObj.isHovered);
@@ -88,12 +93,16 @@ export const NumberlineContentModel = TileContentModel
     replaceAllPoints(newPoints: PointObjectModelType[]){
       self.points.replace(newPoints);
     },
-    mouseOverPoint(mousePosX: number){
+    mouseHoverOverPoint(mouseXPos: number, axisWidth: number ){
       if (self.hasPoints){
-        self.pointsXPositionsArr.forEach((pointXPos: number, idx)=>{
-          const leftBound = pointXPos - 5;
-          const rightBound = pointXPos + 5;
-          if (mousePosX > leftBound && mousePosX < rightBound){
+        const xScale = scaleLinear()
+          .domain([numberlineDomainMin, numberlineDomainMax])
+          .range([0, axisWidth]);
+        self.pointsXValuesArr.forEach((pointXValue: number, idx)=>{
+          const pointXPos = xScale(pointXValue);
+          const pointXLeftBound = pointXPos - 5;
+          const pointXRightBound = pointXPos + 5;
+          if (mouseXPos > pointXLeftBound && mouseXPos < pointXRightBound){
             if (self.pointsIsHoveredArr.filter(Boolean).length === 0){
               self.points[idx].isHovered = true; //only one is true
             }

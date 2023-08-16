@@ -13,9 +13,6 @@ export const NumberlineTileWrapperComponent: React.FC<ITileProps> = (props) => {
     documentContent, model, readOnly, scale, tileElt,
     onRegisterTileApi, onUnregisterTileApi
   } = props;
-
-  console.log("numberlineTilewrapper: with props:", props);
-
   const placePointClicked = () => null;
   const toolbarProps = useToolbarTileApi({ id: model.id, enabled: !readOnly, onRegisterTileApi, onUnregisterTileApi });
 

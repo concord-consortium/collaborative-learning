@@ -25,7 +25,7 @@ export const numberlineDomainMax = 5;
 
 //--------- Numberline Circle constants ---------------------------------------------------------------
 export const innerPointRadius = 5;
-export const outerPointRadius = 12;
+export const outerPointRadius = 9;
 
 
 
