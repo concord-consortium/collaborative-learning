@@ -18,6 +18,7 @@ export interface IToolbarManager {
   hasSelectedObjects: boolean;
   selectedIds: string [];
   deleteObjects(ids: string[]): void;
+  duplicateObjects(ids: string[]): void;
   stamps: StampModelType[];
   currentStamp: StampModelType | null;
   stroke: string;
