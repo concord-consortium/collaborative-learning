@@ -111,10 +111,12 @@ export const TextComponent = observer(
           </textarea>
         </foreignObject>);
     } else {
+      // Note that SVG text is generally 'filled', not 'stroked'.  
+      // But we use the stroke color for text since we think that's more intuitive. Thus the odd-looking 'style' below.
       return(<g clipPath={'url(#'+clip+')'}>
               <WrappedSvgText text={text} 
                   x={x+margin} y={y+margin} width={width-2*margin} height={height-2*margin} 
-                  style={{stroke, fill: stroke}} />
+                  style={{fill: stroke}} />
              </g>);
     }
   };
