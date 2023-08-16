@@ -1,6 +1,6 @@
 import React from "react";
-import { AxisPlace } from "./axis/axis-types";
-import {GraphPlace} from "./axis-graph-shared";
+import { AxisPlace } from "./imports/components/axis/axis-types";
+import {GraphPlace} from "./imports/components/axis-graph-shared";
 import {DotsElt} from "./d3-types";
 
 export const kGraphTileType = "Graph";
@@ -12,11 +12,11 @@ export type PrimaryAttrRole = typeof PrimaryAttrRoles[number];
 export const TipAttrRoles =
   [...PrimaryAttrRoles, 'rightNumeric', 'topSplit', 'rightSplit', 'legend', 'caption'] as const;
 export const GraphAttrRoles = [
-  ...TipAttrRoles, 'polygon', 'yPlus', 'empty'] as const;
+  ...TipAttrRoles, 'polygon', 'yPlus'] as const;
 export type GraphAttrRole = typeof GraphAttrRoles[number];
 export type IsGraphDropAllowed = (place: GraphPlace, attrId?: string) => boolean;
 
-export type IDotsRef = React.MutableRefObject<DotsElt>
+export type IDotsRef = React.MutableRefObject<DotsElt>;
 
 export const attrRoleToAxisPlace: Partial<Record<GraphAttrRole, AxisPlace>> = {
   x: "bottom",
@@ -25,7 +25,6 @@ export const attrRoleToAxisPlace: Partial<Record<GraphAttrRole, AxisPlace>> = {
   rightSplit: "rightCat",
   topSplit: "top"
 };
-
 export const attrRoleToGraphPlace: Partial<Record<GraphAttrRole, GraphPlace>> = {
   ...attrRoleToAxisPlace,
   yPlus: "yPlus",
@@ -59,8 +58,8 @@ export interface InternalizedData {
   cases: string[]
 }
 
-export type Point = { x: number, y: number }
-export type CPLine = { slope: number, intercept: number, pivot1?: Point, pivot2?: Point }
+export type Point = { x: number, y: number };
+export type CPLine = { slope: number, intercept: number, pivot1?: Point, pivot2?: Point };
 export const kNullPoint = {x: -999, y: -999};
 
 export interface Rect {
@@ -82,13 +81,17 @@ export const
   pointRadiusSelectionAddend = 1,
   hoverRadiusFactor = 1.5,
   kGraphFont = "12px sans-serif",
-  kChoroplethHeight = 16;
+  kChoroplethHeight = 16,
+  kAxisTickLength = 4,
+  kAxisGap = 2;
 
 export const PlotTypes = ["casePlot", "dotPlot", "dotChart", "scatterPlot"] as const;
 export type PlotType = typeof PlotTypes[number];
 
 export const kGraphClass = "graph-plot";
 export const kGraphClassSelector = `.${kGraphClass}`;
+export const kGraphAdornmentsClass = "graph-adornments-grid";
+export const kGraphAdornmentsClassSelector = `.${kGraphAdornmentsClass}`;
 
 // TODO: determine this via configuration, e.g. appConfig, since apps may prefer different defaults
 export const kDefaultNumericAxisBounds = [-10, 11] as const;

@@ -1,0 +1,76 @@
+svg[class^="line-"] {
+  left: 0;
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+}
+
+.movable-line {
+  stroke: #4782B4;
+  stroke-width: 1px;
+}
+
+.movable-line-cover {
+  pointer-events: all;
+  stroke: rgba(210, 105, 30, 0.01);
+  stroke-width: 8px;
+}
+
+.movable-line-handle {
+  display: none;
+  fill: #fff;
+  height: 12px;
+  pointer-events: none;
+  stroke: #000;
+  width: 12px;
+}
+
+.movable-line-lower-cover {
+  cursor: url("../assets/pivot-bot-left-cursor.png") 8 8, grab;
+
+  &.negative-slope {
+    cursor: url("../assets/pivot-top-left-cursor.png") 8 8, grab;
+  }
+}
+
+.movable-line-middle-cover {
+  cursor: url("../assets/up-down-cursor.png") 8 8, grab;
+}
+
+.movable-line-upper-cover {
+  cursor: url("../assets/pivot-top-right-cursor.png") 8 8, grab;
+
+  &.negative-slope {
+    cursor: url("../assets/pivot-bot-right-cursor.png") 8 8, grab;
+  }
+}
+
+.movable-line-equation-container {
+  left: 0;
+  overflow: hidden;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+
+  p {
+    background-color: rgba(255, 255, 0, 0.6);
+    color: #4782b4;
+    cursor: grab;
+    font-family: "Montserrat-Bold", sans-serif;
+    font-size: 12px;
+    padding: 2px 5px;
+    pointer-events: all;
+    position: absolute;
+
+    &:active {
+      cursor: grabbing;
+    }
+    &:hover {
+      background-color: rgba(255, 255, 0, 1)
+    }
+
+    em {
+      font-weight: bold;
+    }
+  }
+}

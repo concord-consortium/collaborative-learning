@@ -72,25 +72,36 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       // so we force an update to make sure we draw at least once after we have our domElement.
       this.forceUpdate();
 
+      // TODO: scrollTo would be better if it was set on something specific to the document
+      // since it is global all DocumentContentComponents are listening to this same global
+      // property. So when there are lots of thumbnails then each of them will react to a
+      // change of this global. It could be a volatile prop on the document model. Or the ui
+      // store could have a scrollToMap with keys of the docId and values of the tileId
       this.scrollDisposer = reaction(
-        () => ({ tileId: this.stores.ui.scrollTo?.tileId, docId: this.stores.ui.scrollTo?.docId }),
-        (scrollTo: Record<string, any>, prevScrollTo: Record<string, any>) => {
-        if (scrollTo.tileId && getDocumentIdentifier(this.props.content) === scrollTo.docId) {
-          this.rowRefs.forEach((row: TileRowComponent | null) => {
-            if (row?.tileRowDiv && row.hasTile(scrollTo.tileId)) {
-              // Javascript struggles to scroll multiple elements at the same time,
-              // so we delay scrolling any document on the left and only animate the left document
-              setTimeout(() => {
-                row?.tileRowDiv?.scrollIntoView({
-                  behavior: this.props.readOnly ? "smooth" : "auto",
-                  block: "nearest",
-                  inline: "nearest"
-                });
-              }, this.props.readOnly ? 100 : 1);
-            }
-          });
+        () => {
+          const docId = this.stores.ui.scrollTo?.docId;
+          return getDocumentIdentifier(this.props.content) === docId
+            ? this.stores.ui.scrollTo?.tileId
+            : undefined;
+        },
+        (scrollToTileId: string | undefined) => {
+          if (scrollToTileId) {
+            this.rowRefs.forEach((row: TileRowComponent | null) => {
+              if (row?.tileRowDiv && row.hasTile(scrollToTileId)) {
+                // Javascript struggles to scroll multiple elements at the same time,
+                // so we delay scrolling any document on the left and only animate the left document
+                setTimeout(() => {
+                  row?.tileRowDiv?.scrollIntoView({
+                    behavior: this.props.readOnly ? "smooth" : "auto",
+                    block: "nearest",
+                    inline: "nearest"
+                  });
+                }, this.props.readOnly ? 100 : 1);
+              }
+            });
+          }
         }
-      });
+      );
     }
   }
 

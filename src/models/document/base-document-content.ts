@@ -1114,8 +1114,8 @@ export const BaseDocumentContentModel = types
             newSharedModelEntries.forEach(sharedModelEntry => {
               if (isSharedDataSetSnapshot(sharedModelEntry.sharedModel)) {
                 const sharedDataSet = sharedModelEntry.sharedModel;
-                const oldName = sharedDataSet.dataSet.name;
-                if (oldName === oldTitle) {
+                const oldName = sharedDataSet.dataSet?.name;
+                if (sharedDataSet.dataSet && oldName === oldTitle) {
                   sharedDataSet.dataSet.name = newTitle;
                 }
               }
