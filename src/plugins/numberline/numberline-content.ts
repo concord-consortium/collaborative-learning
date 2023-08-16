@@ -6,7 +6,6 @@ export function defaultNumberlineContent(): NumberlineContentModelType {
   return NumberlineContentModel.create({});
 }
 
-
 export const NumberlineContentModel = TileContentModel
   .named("NumberlineTool")
   .props({

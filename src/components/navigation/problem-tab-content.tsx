@@ -40,7 +40,8 @@ export const ProblemTabContent: React.FC<IProps>
   const tabId = context || ENavTab.kProblems;
 
   useEffect(() => {
-    if (hasSubTabs) {
+    // Set the default subTab if a subtab isn't already set
+    if (hasSubTabs && !ui.tabs.get(tabId)?.openSubTab) {
       ui.setOpenSubTab(tabId, sections[0].type);
     }
   }, [hasSubTabs, sections, tabId, ui]);

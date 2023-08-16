@@ -9,7 +9,7 @@ import { LineComponent, LineDrawingTool, LineObject, LineToolbarButton } from ".
 import { RectangleComponent, RectangleDrawingTool, RectangleObject,
   RectangleToolbarButton} from "../objects/rectangle";
 import { VectorComponent, VectorDrawingTool, VectorObject, VectorToolbarButton } from "../objects/vector";
-import { DeleteButton, SelectToolbarButton } from "./drawing-toolbar-buttons";
+import { DeleteButton, DuplicateButton, SelectToolbarButton } from "./drawing-toolbar-buttons";
 import { SelectionDrawingTool } from "./selection-drawing-tool";
 
 export interface IDrawingObjectInfo {
@@ -84,6 +84,10 @@ const gDrawingToolInfos: Record<string, IDrawingToolInfo | undefined> = {
     name: "stamp",
     toolClass: StampDrawingTool,
     buttonComponent: StampToolbarButton
+  },
+  duplicate: {
+    name: "duplicate",
+    buttonComponent: DuplicateButton
   },
   delete: {
     name: "delete",

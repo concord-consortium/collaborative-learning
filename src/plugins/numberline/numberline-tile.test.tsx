@@ -1,6 +1,6 @@
-import { render } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import React from "react";
+import { render, screen } from "@testing-library/react";
+import { ModalProvider } from "@concord-consortium/react-modal-hook";
 import { ITileApi } from "../../components/tiles/tile-api";
 import { TileModel } from "../../models/tiles/tile-model";
 import { defaultNumberlineContent } from "./numberline-content";
@@ -10,16 +10,32 @@ import { NumberlineToolComponent } from "./numberline-tile";
 // knows it is a supported tile type
 import "./numberline-registration";
 
+jest.mock("../../hooks/use-stores", () => ({
+  useUIStore: () => ({
+    selectedTileIds: []
+  })
+}));
+
+// mock Logger calls
+const mockLogTileDocumentEvent = jest.fn();
+jest.mock("../../models/tiles/log/log-tile-document-event", () => ({
+  logTileDocumentEvent: (...args: any[]) => mockLogTileDocumentEvent()
+}));
+
+
 describe("NumberlineToolComponent", () => {
   const content = defaultNumberlineContent();
   const model = TileModel.create({content});
+  render(<div className="document-content" data-testid="document-content"/>);
+  const documentContent = screen.getByTestId("document-content");
 
   const defaultProps = {
     tileElt: null,
     context: "",
     docId: "",
-    documentContent: null,
+    documentContent,
     isUserResizable: true,
+    readOnly: false,
     onResizeRow: (e: React.DragEvent<HTMLDivElement>): void => {
       throw new Error("Function not implemented.");
     },
@@ -43,26 +59,12 @@ describe("NumberlineToolComponent", () => {
     }
   };
 
-  it.skip("renders successfully", () => {
-    const {getByText} =
-      render(<NumberlineToolComponent  {...defaultProps} {...{model}}></NumberlineToolComponent>);
-    expect(getByText("Numberline Tile")).toBeInTheDocument();
-  });
-
-  it.skip("updates the text when the model changes", async () => {
-    const {findByText} =
-      render(<NumberlineToolComponent  {...defaultProps} {...{model}}></NumberlineToolComponent>);
-    // expect(getByText("Numberline Tile")).toBeInTheDocument();
-    expect(await findByText("New Text")).toBeInTheDocument();
-  });
-
-  it.skip("updates the model when the user types", () => {
-    const {getByRole} =
-      render(<NumberlineToolComponent  {...defaultProps} {...{model}}></NumberlineToolComponent>);
-    // expect(getByText("New Text")).toBeInTheDocument();
-    const textBox = getByRole("textbox");
-    userEvent.type(textBox, "{selectall}{del}Typed Text");
-
-    expect(textBox).toHaveValue("Typed Text");
-  });
+  it("renders successfully", () => {
+    render(
+      <ModalProvider>
+        <NumberlineToolComponent  {...defaultProps} {...{model}}></NumberlineToolComponent>
+      </ModalProvider>
+    );
+    expect(screen.getByTestId("numberline-tool")).toBeInTheDocument();
+    });
 });
