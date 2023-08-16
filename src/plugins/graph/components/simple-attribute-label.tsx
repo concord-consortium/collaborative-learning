@@ -6,15 +6,14 @@ import {AttributeType} from "../../../models/data/attribute";
 import {AxisOrLegendAttributeMenu} from "../imports/components/axis/components/axis-or-legend-attribute-menu";
 import { graphPlaceToAttrRole, kGraphClassSelector } from "../graph-types";
 import { useDataConfigurationContext } from "../hooks/use-data-configuration-context";
+import { useGraphModelContext } from "../models/graph-model";
+import { IDataSet } from "../../../models/data/data-set";
 
 import "../components/legend/multi-legend.scss";
-import { useDataSetContext } from "../imports/hooks/use-data-set-context";
-import { useGraphModelContext } from "../models/graph-model";
-
 
 interface ISimpleAttributeLabelProps {
   place: GraphPlace
-  onChangeAttribute?: (place: GraphPlace, attrId: string) => void
+  onChangeAttribute?: (place: GraphPlace, dataSet: IDataSet, attrId: string) => void
   onRemoveAttribute?: (place: GraphPlace, attrId: string) => void
   onTreatAttributeAs?: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void
 }
@@ -24,13 +23,13 @@ export const SimpleAttributeLabel = observer(
     const {place, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute} = props;
     const simpleLabelRef = useRef<HTMLDivElement>(null);
     const parentElt = simpleLabelRef.current?.closest(kGraphClassSelector) as HTMLDivElement ?? null;
-    const dataSet = useDataSetContext();
-    const dataConfig = useDataConfigurationContext();
+    const dataConfiguration = useDataConfigurationContext();
+    const dataset = dataConfiguration?.dataset;
     const graphModel = useGraphModelContext();
-    const attrId = dataConfig?.attributeID(graphPlaceToAttrRole[place]);
-    const attr = attrId ? dataSet?.attrFromID(attrId) : undefined;
+    const attrId = dataConfiguration?.attributeID(graphPlaceToAttrRole[place]);
+    const attr = attrId ? dataset?.attrFromID(attrId) : undefined;
     const attrName = attr?.name ?? "";
-    const pointColor = graphModel._pointColors[0]; // In PT#182578812 will be dynamic based on plotIndex
+    const pointColor = graphModel._pointColors[0]; // In PT#182578812 will passed plotIndex
 
     const symbolStyles = {
       backgroundColor: pointColor,
@@ -47,14 +46,14 @@ export const SimpleAttributeLabel = observer(
           <div className="attr-symbol" style={symbolStyles}></div>
           <div className="attr-name"> { attrName }</div>
         </div>
-        {parentElt &&
+        {parentElt && onChangeAttribute && onTreatAttributeAs && onRemoveAttribute && attrId &&
           createPortal(<AxisOrLegendAttributeMenu
             target={simpleLabelRef.current}
             portal={parentElt}
             place={place}
-            onChangeAttribute={onChangeAttribute as any}
-            onRemoveAttribute={onRemoveAttribute as any}
-            onTreatAttributeAs={onTreatAttributeAs as any}
+            onChangeAttribute={onChangeAttribute}
+            onRemoveAttribute={onRemoveAttribute}
+            onTreatAttributeAs={onTreatAttributeAs}
           />, parentElt)
         }
       </>

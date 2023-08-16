@@ -197,7 +197,7 @@ export const Graph = observer(function Graph({graphController, graphRef, dotsRef
         { appConfig.getSetting("defaultSeriesLegend", "graph") &&
           <MultiLegend
             graphElt={graphRef.current}
-            onChangeAttribute={handleChangeAttribute as any} //TODO resolve this
+            onChangeAttribute={handleChangeAttribute}
             onRemoveAttribute={handleRemoveAttribute}
             onTreatAttributeAs={handleTreatAttrAs}
           />

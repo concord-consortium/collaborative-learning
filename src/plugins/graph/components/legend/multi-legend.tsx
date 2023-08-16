@@ -2,17 +2,17 @@ import React, { useEffect, useRef } from "react";
 import {AttributeType} from "../../../../models/data/attribute";
 import { GraphPlace } from "../../imports/components/axis-graph-shared";
 import { SimpleAttributeLabel } from "../simple-attribute-label";
-import { autorun } from "mobx";
-import { useGraphLayoutContext } from "../../models/graph-layout";
+import { kMultiLegendHeight, useGraphLayoutContext } from "../../models/graph-layout";
+import { IDataSet } from "../../../../models/data/data-set";
 
 interface IMultiLegendProps {
   graphElt: HTMLDivElement | null
-  onChangeAttribute: (place: GraphPlace, attrId: string) => void
+  onChangeAttribute: (place: GraphPlace, dataSet: IDataSet, attrId: string) => void;
   onRemoveAttribute: (place: GraphPlace, attrId: string) => void
   onTreatAttributeAs: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void
 }
 
-/* NOTE: This component will have more use in PT#182578812
+/* NOTE: This multi-legend component will have more use in PT#182578812
   in which we will get all attributes from yAttr Descriptions,
   and render a label for each
 */
@@ -22,19 +22,18 @@ export const MultiLegend = function MultiLegend(props: IMultiLegendProps) {
   const layout = useGraphLayoutContext();
   const legendBounds = layout.computedBounds.legend;
   const transform = `translate(${legendBounds.left}, ${legendBounds.top})`;
+  const multiLegendRef = useRef<HTMLDivElement>(null);
 
-  // TODO: this is borrowed from legend.tsx, should be abstracted for use accross legends
   useEffect(() =>{
-    const legendBackground = document.querySelector('.multi-legend');
-    if (legendBackground) {
-      legendBackground.setAttribute('transform', `translate(0, ${legendBounds.top})`);
-      legendBackground.setAttribute('width', `${layout.graphWidth}`);
-      legendBackground.setAttribute('height', `${legendBounds.height}`);
-    }
+    const legendTransform = `translateY(${ 0 - (kMultiLegendHeight + 3)}px)`;
+    if (!multiLegendRef.current) return;
+    multiLegendRef.current.style.transform = legendTransform;
+    multiLegendRef.current.style.width = `${layout.graphWidth}px`;
+    multiLegendRef.current.style.height = `${legendBounds.height}px`;
   }, [layout.graphWidth, legendBounds, transform]);
 
   return (
-    <div className="multi-legend">
+    <div className="multi-legend" ref={ multiLegendRef }>
       <SimpleAttributeLabel
         place={'left'}
         onChangeAttribute={onChangeAttribute}
