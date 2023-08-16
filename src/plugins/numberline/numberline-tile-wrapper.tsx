@@ -11,8 +11,10 @@ import "./numberline-tile-wrapper.scss";
 export const NumberlineTileWrapperComponent: React.FC<ITileProps> = (props) => {
   const {
     documentContent, model, readOnly, scale, tileElt,
-    onRegisterTileApi, onUnregisterTileApi,
+    onRegisterTileApi, onUnregisterTileApi
   } = props;
+
+  console.log("numberlineTilewrapper: with props:", props);
 
   const placePointClicked = () => null;
   const toolbarProps = useToolbarTileApi({ id: model.id, enabled: !readOnly, onRegisterTileApi, onUnregisterTileApi });
@@ -33,7 +35,7 @@ export const NumberlineTileWrapperComponent: React.FC<ITileProps> = (props) => {
         scale={scale}
         onSetPlacePoint={placePointClicked}
       />
-      <NumberlineToolComponent model={model}/>
+      <NumberlineToolComponent props={props}/>
     </div>
   );
 };

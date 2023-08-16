@@ -8,7 +8,6 @@ import { kAxisStyle, kAxisWidth, kContainerWidth, kNumberLineContainerHeight,
          tickHeightZero, tickStyleDefault, tickStyleZero, tickWidthDefault,
          tickWidthZero, innerPointRadius, outerPointRadius } from './numberline-tile-constants';
 
-
 import "./numberline-tile.scss";
 
 export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) => {
