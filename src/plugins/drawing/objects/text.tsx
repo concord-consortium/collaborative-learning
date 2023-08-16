@@ -114,7 +114,7 @@ export const TextComponent = observer(
       return(<g clipPath={'url(#'+clip+')'}>
               <WrappedSvgText text={text} 
                   x={x+margin} y={y+margin} width={width-2*margin} height={height-2*margin} 
-                  style={{stroke: stroke, fill: stroke}} />
+                  style={{stroke, fill: stroke}} />
              </g>);
     }
   };
