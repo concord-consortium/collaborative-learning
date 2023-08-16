@@ -1,7 +1,5 @@
 .simple-attribute-label {
-   // POC for feature dev, TODO: position correctly
-   z-index: 10000;
-   border: 2px dotted orange;
-   position: fixed;
-   top:330px;
+   display:flex;
+   padding:10px;
+   transform: translateY(-80px);
  }
