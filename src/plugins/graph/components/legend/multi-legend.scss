@@ -1,5 +1,9 @@
+$graph-multi-legend-height: 80px;
+$graph-axis-width: 30px;
+
 .simple-attribute-label {
-   display:flex;
-   padding:10px;
-   transform: translateY(-80px);
+  height: 100%;
+  display:flex;
+  padding:10px;
+  transform: translate(30px, calc(0px - #{$graph-multi-legend-height})); // move to positioning logic in component
  }

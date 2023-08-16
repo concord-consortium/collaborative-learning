@@ -1,11 +1,9 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import {AttributeType} from "../../../../models/data/attribute";
 import { GraphPlace } from "../../imports/components/axis-graph-shared";
 import { SimpleAttributeLabel } from "../simple-attribute-label";
-// import { kMultiLegendHeight, useGraphLayoutContext } from "../../models/graph-layout"; // positioning down the road
-import { useDataSetContext } from "../../imports/hooks/use-data-set-context";
-import { useDataConfigurationContext } from "../../hooks/use-data-configuration-context";
-import { useGraphModelContext } from "../../models/graph-model";
+import { autorun } from "mobx";
+import { useGraphLayoutContext } from "../../models/graph-layout";
 
 interface IMultiLegendProps {
   graphElt: HTMLDivElement | null
@@ -14,37 +12,36 @@ interface IMultiLegendProps {
   onTreatAttributeAs: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void
 }
 
+/* NOTE: This component will have more use in PT#182578812
+  in which we will get all attributes from yAttr Descriptions,
+  and render a label for each
+*/
+
 export const MultiLegend = function MultiLegend(props: IMultiLegendProps) {
   const {onChangeAttribute, onRemoveAttribute, onTreatAttributeAs} = props;
-  //const graphLayout = useGraphLayoutContext();
-  const dataSet = useDataSetContext();
-  const dataConfig = useDataConfigurationContext();
-  const graphModel = useGraphModelContext();
-  const yAttrs = dataConfig?._yAttributeDescriptions.map(attr => attr.attributeID);
+  const layout = useGraphLayoutContext();
+  const legendBounds = layout.computedBounds.legend;
+  const transform = `translate(${legendBounds.left}, ${legendBounds.top})`;
 
-  console.log("| DATA AT HAND |\n",
-    //"graphLayout:", JSON.parse(JSON.stringify(graphLayout)), "\n", // for positioning down the road
-    "dataSet:    ", JSON.parse(JSON.stringify(dataSet)), "\n",
-    "dataConfig: ", JSON.parse(JSON.stringify(dataConfig)), "\n",
-    "graphModel: ", JSON.parse(JSON.stringify(graphModel)), "\n",
-    "\n\n"
-  );
-
-const attrId = yAttrs ? yAttrs[0] : "";
-
+  // TODO: this is borrowed from legend.tsx, should be abstracted for use accross legends
+  useEffect(() =>{
+    const legendBackground = document.querySelector('.multi-legend');
+    if (legendBackground) {
+      legendBackground.setAttribute('transform', `translate(0, ${legendBounds.top})`);
+      legendBackground.setAttribute('width', `${layout.graphWidth}`);
+      legendBackground.setAttribute('height', `${legendBounds.height}`);
+    }
+  }, [layout.graphWidth, legendBounds, transform]);
 
   return (
     <div className="multi-legend">
-        <SimpleAttributeLabel
-          key={attrId}
-          attrId={attrId}
-          place={'left'}
-          onChangeAttribute={onChangeAttribute}
-          onRemoveAttribute={onRemoveAttribute}
-          onTreatAttributeAs={onTreatAttributeAs}
-        />
+      <SimpleAttributeLabel
+        place={'left'}
+        onChangeAttribute={onChangeAttribute}
+        onRemoveAttribute={onRemoveAttribute}
+        onTreatAttributeAs={onTreatAttributeAs}
+      />
     </div>
-
   );
 };
 MultiLegend.displayName = "MultiLegend";
