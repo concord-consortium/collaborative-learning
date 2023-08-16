@@ -3,84 +3,69 @@
 .numberline-tool {
   width: 100%;
   height: 100%;
-  text-align: left;
-  overflow: auto;
-  display: flex;
-  justify-content: center;
+	background-color: red;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
 
   &.editable {
     border: 1px solid #cccccc;
   }
 
-  .numberline-tool-container{
+	.numberline-tool-container{
+		//height comes from numberlineContainerHeight in numberline-tile.constants.ts
     width: 93%; //should match kContainerWidth in numberline-tile-constants.ts
-    height: 180px;
     display: flex;
+		align-items: center;
+		justify-content: center;
     flex-direction: column;
     font-family: 'Ubunutu', sans-serif;
-
-    .num-axis-title-container{
-      height: 20%; //just empty space for <BasicEditableTileTitle>
-    }
+		background-color: lightblue;
+		position: relative;
 
 
-    .num-axis-container {
-      height: 80%;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      position: relative;
+		.outer-hover-circle{
+			height: 17px;
+			width: 17px;
+			border: 1px solid black;
+			fill: yellow;
 
-      .outer-hover-circle{
-        height: 17px;
-        width: 17px;
-        border: 1px solid black;
-        fill: rgba(0, 129, 255, 0.5);
+			&.disabled{
+				display: none;
+			}
+		}
 
-        &.disabled{
-          display: none;
-        }
-      }
-
-      .num-axis {
-        stroke-width: 4px;
-      }
-
-      .inner-circle {
-        &.selected {
-          fill: blue;
-        }
-      }
+		svg{
+			border: 1px solid black;
+			overflow: visible;
+		}
 
 
+		.click-area{
+			cursor: default;
+			position: absolute;
+			background: transparent;
+			z-index: 0;
+			// pointer-events: none;
+			// border: 1px solid black;
+			// top: (50-12.5)px;
+			// background-color: orange;
+		}
 
-      .click-area{
-        cursor: default;
-        position: absolute;
-        background: transparent;
-        height: 25px;
-        top: 7px;
-      }
+	}
 
-      .arrow {
-        border: solid black;
-        border-width: 0 3px 3px 0;
-        display: inline-block;
-        padding: 3px;
-        height: 13px;
-        width: 13px;
-        pointer-events: none; //click through div (our rectangular click area)
-      }
-      .right {
-        transform: rotate(-45deg);
-        -webkit-transform: rotate(-45deg);
-        position: absolute;
-      }
-      .left {
-        transform: rotate(135deg);
-        -webkit-transform: rotate(135deg);
-        position: absolute;
-      }
-    }
-  }
+	.other-container{ //TODO - delete console.log
+    width: 93%; //should match kContainerWidth in numberline-tile-constants.ts
+    height: 100px;
+    display: flex;
+		align-items: center;
+		justify-content: center;
+    flex-direction: column;
+    font-family: 'Ubunutu', sans-serif;
+		background-color: brown
+	}
+
+
 }
+

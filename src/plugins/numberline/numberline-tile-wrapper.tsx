@@ -2,11 +2,12 @@ import React, { useEffect } from "react";
 import classNames from "classnames";
 import { ITileProps } from "../../components/tiles/tile-component";
 import { NumberlineToolComponent } from "./numberline-tile";
+// import { NumberlineToolComponent } from "./0-numberline-tile-drag-dndkit";
+
 import { BasicEditableTileTitle } from "../../components/tiles/basic-editable-tile-title";
 import { IGraphModel } from "../graph/models/graph-model";
 import { NumberlineToolbar } from "./numberline-toolbar";
-import { useToolbarTileApi } from "../../../src/components/tiles/hooks/use-toolbar-tile-api";
-
+import { useToolbarTileApi } from "../../components/tiles/hooks/use-toolbar-tile-api";
 
 import "./numberline-tile-wrapper.scss";
 
@@ -31,11 +32,13 @@ export const NumberlineTileWrapperComponent: React.FC<ITileProps> = (props) => {
 
   return (
     <div className={classNames("numberline-wrapper", { "read-only": readOnly })}>
-      <BasicEditableTileTitle
-        model={model}
-        readOnly={readOnly}
-        scale={scale}
-      />
+      <div className={"numberline-title"}>
+        <BasicEditableTileTitle
+          model={model}
+          readOnly={readOnly}
+          scale={scale}
+        />
+      </div>
       <NumberlineToolbar
         documentContent={documentContent}
         tileElt={tileElt}
@@ -44,6 +47,8 @@ export const NumberlineTileWrapperComponent: React.FC<ITileProps> = (props) => {
         onSetPlacePoint={placePointClicked}
       />
       <NumberlineToolComponent model={model}/>
+
+
 
     </div>
 

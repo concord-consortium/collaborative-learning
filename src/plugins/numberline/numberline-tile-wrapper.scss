@@ -1,5 +1,11 @@
-.graph-wrapper {
+.numberline-wrapper {
   height: 100%;
   width: 100%;
+
+  .numberline-title{
+    height: 50px;
+    width: 100%;
+    background-color: orange;
+  }
 
 }
