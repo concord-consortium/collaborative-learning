@@ -1,6 +1,8 @@
 import { Instance, types } from "mobx-state-tree";
 import firebase from "firebase/app";
-import { Firestore } from "../../lib/firestore";import { createDocumentModel } from "../document/document";
+import { deferred } from "promise-assist";
+import { Firestore } from "../../lib/firestore";
+import { createDocumentModel } from "../document/document";
 import { DocumentContentModel, DocumentContentSnapshotType } from "../document/document-content";
 import { ProblemDocument } from "../document/document-types";
 import { TileContentModel } from "../tiles/tile-content";
@@ -8,7 +10,6 @@ import { HistoryStatus, TreeManager } from "./tree-manager";
 import { getLastHistoryEntry as _getLastHistoryEntry,
   LastHistoryEntry,
   loadHistory as _loadHistory } from "./history-firestore";
-import { deferred } from "../../utilities/deferred";
 import { UserModelType } from "../stores/user";
 import { when } from "mobx";
 import { HistoryEntrySnapshot } from "./history";
