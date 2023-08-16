@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { select, scaleLinear, axisBottom, drag, pointer } from 'd3';
 import { observer } from 'mobx-react';
-import { ITileModel } from "../../models/tiles/tile-model";
+import { ITileProps } from "../../components/tiles/tile-component";
 import { NumberlineContentModelType, PointObjectModelType,  } from "./models/numberline-content";
 import { kAxisStyle, kAxisWidth, kContainerWidth, kNumberLineContainerHeight,
          numberlineDomainMax, numberlineDomainMin, tickHeightDefault,
@@ -11,16 +11,14 @@ import { kAxisStyle, kAxisWidth, kContainerWidth, kNumberLineContainerHeight,
 
 import "./numberline-tile.scss";
 
-interface IProps {
-  model: ITileModel;
-}
-
-export const NumberlineToolComponent: React.FC<IProps> = observer(({ model }) => {
+export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) => {
+  const { model, readOnly } = props;
   const content = model.content as NumberlineContentModelType;
 
-  //---------------- Create unique className for axis -------------------------
+  //---------------- Create Unique ClassName For Axis -------------------------
+  const readOnlyState = (readOnly) ? "readOnly" : "readWrite";
   const tileId = model.id;
-  const axisClass = "axis-" + tileId;
+  const axisClass = `axis-${tileId}-${readOnlyState}`;
 
   //---------------- Calculate width of tile ----------------------------------
   const documentScrollerRef = useRef<HTMLDivElement>(null);
