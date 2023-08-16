@@ -35,13 +35,9 @@ export const SimpleAttributeLabel = observer(
       <>
         <div ref={simpleLabelRef} className="simple-attribute-label">
           <div className="attr-symbol" style={{ backgroundColor: pointColor }}></div>
-          {/* <div className="attr-name"> { attrName }</div> */}
-          <select value={attrName} onChange={(e) => console.log(e.target.value)}>
-            <option value="attrName">{attrName}</option>
-            <option value="foo">foo</option>
-          </select>
+          <div className="attr-name"> { attrName }</div>
         </div>
-        {/* {parentElt && onChangeAttribute && onTreatAttributeAs && onRemoveAttribute && attrId &&
+        {parentElt && onChangeAttribute && onTreatAttributeAs && onRemoveAttribute && attrId &&
           createPortal(<AxisOrLegendAttributeMenu
             target={simpleLabelRef.current}
             portal={parentElt}
@@ -50,7 +46,7 @@ export const SimpleAttributeLabel = observer(
             onRemoveAttribute={onRemoveAttribute}
             onTreatAttributeAs={onTreatAttributeAs}
           />, parentElt)
-        } */}
+        }
       </>
     );
   });
