@@ -85,7 +85,7 @@ export const DrawingObject = types.model("DrawingObject", {
     self.dragX = x;
     self.dragY = y;
   },
-  repositionObject() {
+  adoptDragPosition() {
     self.x = self.dragX ?? self.x;
     self.y = self.dragY ?? self.y;
     self.dragX = self.dragY = undefined;

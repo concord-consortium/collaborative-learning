@@ -70,7 +70,7 @@ export const RectangleObject = types.compose("RectangleObject", StrokedObject, F
       self.dragHeight = self.height + deltas.bottom - deltas.top;
     },
     adoptDragBounds() {
-      self.repositionObject();
+      self.adoptDragPosition();
       self.width = self.dragWidth ?? self.width;
       self.height = self.dragHeight ?? self.height;
       self.dragWidth = self.dragHeight = undefined;

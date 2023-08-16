@@ -85,7 +85,7 @@ export const LineObject = StrokedObject.named("LineObject")
       self.dragScaleY = heightFactor;
     },
     adoptDragBounds() {
-      self.repositionObject();
+      self.adoptDragPosition();
 
       // The delta points get permanently scaled by the x & y scale factors
       const scaleX = self.dragScaleX ?? 1;
