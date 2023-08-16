@@ -36,6 +36,15 @@ context('Nav Panel', function () {
             expect($tab.text()).to.contain(problemSubTabTitles[index]);
           });
         });
+        it('saves current subtab when the resources panel is collapsed and expand', () => {
+          cy.openTopTab("problems");
+          const section = "Initial Challenge";
+          cy.openProblemSection(section);
+          cy.get('.prob-tab').contains(section).should('have.class', 'selected');
+          cy.collapseResourceTabs();
+          cy.openResourceTabs();
+          cy.get('.prob-tab').contains(section).should('have.class', 'selected');
+        });
       });
     });
     describe('My Work tab tests', function () {
@@ -105,6 +114,11 @@ context('Nav Panel', function () {
         it('verify starred document appears in the Starred section', function () {
           cy.openSection('my-work', 'starred');
           resourcesPanel.getCanvasItemTitle('my-work','starred').contains(copyDocumentTitle).should('exist');
+        });
+        it('remains open after the resources panel is collapsed and expand', () => {
+          cy.collapseResourceTabs();
+          cy.openResourceTabs();
+          cy.get('.doc-tab.my-work.starred').should('have.class', 'selected');
         });
       });
       describe('Learning Log Section', function () {
