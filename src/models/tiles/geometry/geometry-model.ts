@@ -205,7 +205,6 @@ export const PolygonModel = GeometryObjectModel
   }))
   .actions(self => ({
     removeDependencies(ids: string[]) {
-      console.log("GeometryModel> removeDependencies:", self.points, ids);
       self.points.replace(difference(self.points, ids));
     },
     replacePoints(ids: string[]) {

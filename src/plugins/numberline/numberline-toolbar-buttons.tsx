@@ -25,8 +25,6 @@ const NumberlineButton = ({ className, icon, onClick, tooltipOptions}: INumberli
   );
 };
 
-
-
 interface ISetPlacePoint {
   onClick: () => void;
 }

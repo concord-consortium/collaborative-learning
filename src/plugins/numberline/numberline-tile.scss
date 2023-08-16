@@ -2,7 +2,6 @@
 
 .numberline-tool {
   width: 100%;
-	// background-color: red;
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -10,7 +9,6 @@
   &.editable {
     border: 1px solid #cccccc;
   }
-
 	.numberline-tool-container{
 		//height comes from numberlineContainerHeight in numberline-tile.constants.ts
     width: 93%; //should match kContainerWidth in numberline-tile-constants.ts
@@ -20,7 +18,6 @@
     flex-direction: column;
     font-family: 'Ubunutu', sans-serif;
 		position: relative;
-		// background-color: orange;
 
 		svg{
 			overflow: visible;

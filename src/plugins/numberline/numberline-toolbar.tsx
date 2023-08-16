@@ -14,11 +14,8 @@ interface INumberlineToolbarProps extends IFloatingToolbarProps {
 }
 
 export const NumberlineToolbar: React.FC<INumberlineToolbarProps> = observer((props) => {
-
-  const { documentContent,  tileElt, onIsEnabled, onSetPlacePoint: onSetPointPlace,  ...others
-    // model?
-   } = props;
-
+  const { documentContent,  tileElt, onIsEnabled,
+    onSetPlacePoint,  ...others } = props;
   const enabled = onIsEnabled();
   const location = useFloatingToolbarLocation({
                     documentContent,
@@ -34,7 +31,7 @@ export const NumberlineToolbar: React.FC<INumberlineToolbarProps> = observer((pr
   const getToolbarButton = (toolName: string) => {
     switch (toolName) {
       case "place-point":
-        return <SetPlacePoint key={toolName} onClick={onSetPointPlace} />;
+        return <SetPlacePoint key={toolName} onClick={onSetPlacePoint} />;
     }
   };
 

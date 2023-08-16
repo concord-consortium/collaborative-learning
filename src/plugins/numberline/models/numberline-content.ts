@@ -74,7 +74,6 @@ export const NumberlineContentModel = TileContentModel
       //searches "points", removes PointObject at index that matches id
       //replaces it with a new PointObject at index that has newPointCoordinates
       self.points.forEach((pointObj, i) => {
-        // console.log("pointObj.id", pointObj.id);
         if (pointObj.id === id){
           const newPointObj: PointObjectModelType = {
             id,
@@ -90,20 +89,16 @@ export const NumberlineContentModel = TileContentModel
       self.points.replace(newPoints);
     },
     mouseOverPoint(mousePosX: number){
-      // console.log("----mouseOverPoint!");
-      // console.log("\tself.hasPoints", self.hasPoints);
       if (self.hasPoints){
         self.pointsXPositionsArr.forEach((pointXPos: number, idx)=>{
           const leftBound = pointXPos - 5;
           const rightBound = pointXPos + 5;
           if (mousePosX > leftBound && mousePosX < rightBound){
-            // console.log("Hovering over point:", idx);
             if (self.pointsIsHoveredArr.filter(Boolean).length === 0){
               self.points[idx].isHovered = true; //only one is true
             }
           }
           else{
-            // console.log("NOT Hovering over point", idx);
             self.points[idx].isHovered = false;
           }
         });
@@ -112,7 +107,6 @@ export const NumberlineContentModel = TileContentModel
   }))
   .actions(self => ({
     createNewPoint(newPoint: PointCoordinateType){
-      console.log("**********creating new point!");
       const id = uniqueId();
       const pointModel = PointObjectModel.create({ id, pointCoordinates: newPoint,
                                                 isHovered: false, isSelected: false });
