@@ -2,13 +2,11 @@
 
 .numberline-tool {
   width: 100%;
-  height: 100%;
-	background-color: red;
+	// background-color: red;
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	flex-direction: column;
-
   &.editable {
     border: 1px solid #cccccc;
   }
@@ -21,51 +19,59 @@
 		justify-content: center;
     flex-direction: column;
     font-family: 'Ubunutu', sans-serif;
-		background-color: lightblue;
 		position: relative;
-
-
-		.outer-hover-circle{
-			height: 17px;
-			width: 17px;
-			border: 1px solid black;
-			fill: yellow;
-
-			&.disabled{
-				display: none;
-			}
-		}
+		// background-color: orange;
 
 		svg{
-			border: 1px solid black;
 			overflow: visible;
+
+			.num-line {
+        stroke-width: 4px;
+      }
+
+			.defaultPointOuterCircle{
+				fill: rgba(0, 129, 255, 0.5);
+				opacity: 1;
+
+        &.disabled{
+          display: none;
+        }
+			}
+
+			.defaultPointInnerCircle{
+				fill: #ccc;
+				opacity: 1;
+				stroke: #888;
+				stroke-width: 1.5px;
+
+				&.selected{
+          fill: $highlight-blue;
+					stroke: $highlight-blue;
+        }
+			}
+
+		} //end svg container
+
+		.arrow {
+			border: solid black;
+			border-width: 0 3px 3px 0;
+			display: inline-block;
+			padding: 3px;
+			height: 13px;
+			width: 13px;
+			pointer-events: none; //click through div (our rectangular click area)
 		}
-
-
-		.click-area{
-			cursor: default;
+		.right {
+			transform: rotate(-45deg);
+			-webkit-transform: rotate(-45deg);
 			position: absolute;
-			background: transparent;
-			z-index: 0;
-			// pointer-events: none;
-			// border: 1px solid black;
-			// top: (50-12.5)px;
-			// background-color: orange;
+		}
+		.left {
+			transform: rotate(135deg);
+			-webkit-transform: rotate(135deg);
+			position: absolute;
 		}
 
 	}
-
-	.other-container{ //TODO - delete console.log
-    width: 93%; //should match kContainerWidth in numberline-tile-constants.ts
-    height: 100px;
-    display: flex;
-		align-items: center;
-		justify-content: center;
-    flex-direction: column;
-    font-family: 'Ubunutu', sans-serif;
-		background-color: brown
-	}
-
-
 }
 

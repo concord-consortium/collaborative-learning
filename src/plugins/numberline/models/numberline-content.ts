@@ -1,7 +1,8 @@
 import { types, Instance } from "mobx-state-tree";
 import { TileContentModel } from "../../../models/tiles/tile-content";
-import { PointCoordinateType, kNumberlineTileType } from "../types/numberline-types";
+import { PointCoordinateType } from "../types/numberline-types";
 import { uniqueId } from "../../../utilities/js-utils";
+import { kNumberlineTileType } from "../numberline-tile-constants";
 
 export function defaultNumberlineContent(): NumberlineContentModelType {
   return NumberlineContentModel.create({});
@@ -11,8 +12,6 @@ const PointObjectModel = types.model("PointObject", {
   id: types.identifier,
   pointCoordinates: types.optional(types.frozen<PointCoordinateType>(), {
     xPos: 0,
-    val: 0,
-    axisWidth: 0,
   }),
   isHovered: false,
   isSelected: false,
@@ -47,19 +46,26 @@ export const NumberlineContentModel = TileContentModel
     },
   }))
   .views(self =>({
-    get hasPointHovered(){
+    get isHoveringOverPoint(){
       return !(self.pointsIsHoveredArr.filter(Boolean).length === 0);
     },
-    get hasPointSelected(){
-      return !(self.pointsIsSelectedArr.filter(Boolean).length === 0);
+    get noPointsSelected(){
+      return (self.pointsIsSelectedArr.filter(Boolean).length === 0);
     },
     get indexOfPointHovered(){
-      return self.pointsIsHoveredArr.findIndex((isHovered) =>  isHovered === true);
+      return self.pointsIsHoveredArr.findIndex((isHovered) => isHovered === true);
     }
   }))
   .actions(self => ({
-    toggleIsSelected(index: number){
-      self.points[index].isSelected = !self.points[index].isSelected;
+    setAllSelectedFalse(){
+      self.points.forEach((point)=>{
+        point.isSelected = false;
+      });
+    },
+    setAllHoversFalse(){
+      self.points.forEach((point)=>{
+        point.isHovered = false;
+      });
     },
     clearAllPoints(){
       self.points.clear();
@@ -68,7 +74,7 @@ export const NumberlineContentModel = TileContentModel
       //searches "points", removes PointObject at index that matches id
       //replaces it with a new PointObject at index that has newPointCoordinates
       self.points.forEach((pointObj, i) => {
-        console.log("pointObj.id", pointObj.id);
+        // console.log("pointObj.id", pointObj.id);
         if (pointObj.id === id){
           const newPointObj: PointObjectModelType = {
             id,
@@ -84,41 +90,37 @@ export const NumberlineContentModel = TileContentModel
       self.points.replace(newPoints);
     },
     mouseOverPoint(mousePosX: number){
+      // console.log("----mouseOverPoint!");
+      // console.log("\tself.hasPoints", self.hasPoints);
       if (self.hasPoints){
-        self.pointsXPositionsArr.forEach((pointXPos, idx)=>{
-          const leftBound = pointXPos - 3;
-          const rightBound = pointXPos + 3;
+        self.pointsXPositionsArr.forEach((pointXPos: number, idx)=>{
+          const leftBound = pointXPos - 5;
+          const rightBound = pointXPos + 5;
           if (mousePosX > leftBound && mousePosX < rightBound){
-            // console.log("Hovering over point!");
+            // console.log("Hovering over point:", idx);
             if (self.pointsIsHoveredArr.filter(Boolean).length === 0){
               self.points[idx].isHovered = true; //only one is true
             }
           }
           else{
-            // console.log("NOT Hovering over point");
+            // console.log("NOT Hovering over point", idx);
             self.points[idx].isHovered = false;
           }
         });
       }
     },
-
-
   }))
   .actions(self => ({
     createNewPoint(newPoint: PointCoordinateType){
-      if (self.hasPointHovered){
-        console.log("create new point where we already have a hover!");
-        const index = self.indexOfPointHovered;
-         //turn off hover for index
-        //turn on isSelected
-        self.points[index].isHovered = false;
-        self.toggleIsSelected(index);
-      } else {
-        const id = uniqueId();
-        const pointModel = PointObjectModel.create({ id, pointCoordinates: newPoint,
-                                                  isHovered: false, isSelected: false });
-        self.points.push(pointModel);
-      }
+      console.log("**********creating new point!");
+      const id = uniqueId();
+      const pointModel = PointObjectModel.create({ id, pointCoordinates: newPoint,
+                                                isHovered: false, isSelected: false });
+      self.points.push(pointModel);
+    },
+    toggleIsSelected(idx: number){
+      self.setAllSelectedFalse();
+      self.points[idx].isSelected = true;
     },
   }));
 
