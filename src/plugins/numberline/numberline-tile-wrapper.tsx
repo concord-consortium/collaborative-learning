@@ -35,7 +35,7 @@ export const NumberlineTileWrapperComponent: React.FC<ITileProps> = (props) => {
         scale={scale}
         onSetPlacePoint={placePointClicked}
       />
-      <NumberlineToolComponent props={props}/>
+      <NumberlineToolComponent {...props}/>
     </div>
   );
 };
