@@ -3,14 +3,17 @@ import React, { useEffect, useRef, useState } from "react";
 import { ITileProps } from "../../components/tiles/tile-component";
 import { scaleLinear, select, selectAll, pointer, axisBottom } from "d3";
 import { tickWidthDefault, tickWidthZero, tickHeightDefault, tickHeightZero,
-  tickStyleDefault, tickStyleZero, kContainerWidth, kAxisWidth, numberlineDomainMax, numberlineDomainMin } from "./numberline-tile-constants";
+  tickStyleDefault, tickStyleZero, kContainerWidth, kAxisWidth,
+  numberlineDomainMax, numberlineDomainMin } from "./numberline-tile-constants";
 
 import "./numberline-tile.scss";
 
 export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) => {
   //---------------- Create unique className for tile ------
-  const tileId = props.model.id;
-  const axisClass = "axis-" + tileId;
+  const model = props.model;
+  const readOnlyState = (props.readOnly) ? "readOnly" : "readWrite";
+  const tileId = model.id;
+  const axisClass = `axis-${tileId}-${readOnlyState}`;
   const tileTitle = props.model.title;
 
   //---------------- Calculate width of tile ---------------
