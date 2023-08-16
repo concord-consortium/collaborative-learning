@@ -31,19 +31,10 @@ export const SimpleAttributeLabel = observer(
     const attrName = attr?.name ?? "";
     const pointColor = graphModel._pointColors[0]; // In PT#182578812 will passed plotIndex
 
-    const symbolStyles = {
-      backgroundColor: pointColor,
-      width: '15px',
-      height: '15px',
-      borderRadius: '50%',
-      marginRight: '5px',
-      transform: 'translate(-2px, 3px)'
-    };
-
     return (
       <>
         <div ref={simpleLabelRef} className="simple-attribute-label">
-          <div className="attr-symbol" style={symbolStyles}></div>
+          <div className="attr-symbol" style={{ backgroundColor: pointColor }}></div>
           <div className="attr-name"> { attrName }</div>
         </div>
         {parentElt && onChangeAttribute && onTreatAttributeAs && onRemoveAttribute && attrId &&

@@ -1,8 +1,19 @@
 .multi-legend {
   padding: 20px 30px;
   background-color:#F9F9F9;
+
+  .simple-attribute-label {
+    display:flex;
+
+    .attr-symbol {
+      width: 15px;
+      height: 15px;
+      margin-right: 5px;
+      border-radius: 50%;
+      transform: translate(-2px, 3px);
+    }
+   }
 }
 
-.simple-attribute-label {
-  display:flex;
- }
+
+
