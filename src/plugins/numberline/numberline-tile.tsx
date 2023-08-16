@@ -62,38 +62,7 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
 
   /* ========================== [ Construct Numberline OnMount ] ================================= */
 
-  // ------------------- new test --------------------------------------------
-  // useEffect(()=>{
 
-  //   const timer = setTimeout(() => {
-  //     console.log('This will run after 1 second!');
-  //     console.log('axisWidth:', axisWidth);
-  //     console.log('tileWidth:', tileWidth);
-
-  //     if (axisWidth !== 0){ //after component has rendered
-  //       console.log("----useEffect 1-------");
-  //       const svg = select(svgRef.current);
-
-  //       // ---------------------  Construct Number Line Axis ------------------------------
-  //       svg.select(`.${axisClass}`).remove(); // Remove the previous axis
-  //       const numOfTicks = numberlineDomainMax - numberlineDomainMin;
-  //       svg.append('g')
-  //       .attr("class", `${axisClass} num-line`)
-  //       .attr("style", `${kAxisStyle}`) //move down
-  //       .call(axisBottom(xScale).tickSizeOuter(0).ticks(numOfTicks)); //remove side ticks
-  //       // --------- After The Axis Is Drawn, Customize "x = 0 tick"-----------------------
-  //       svg.selectAll("g.tick line")
-  //       .attr("y2", function(x){ return (x === 0) ? tickHeightZero : tickHeightDefault;})
-  //       .attr("stroke-width", function(x){ return (x === 0) ? tickWidthZero : tickWidthDefault;})
-  //       .attr("style", function(x){ return (x === 0) ? tickStyleZero : tickStyleDefault;});
-
-  //     }
-
-  //   }, 5000);
-  //   return () => clearTimeout(timer);
-
-  // // eslint-disable-next-line react-hooks/exhaustive-deps
-  // },[tileWidth]);
 
 
 
@@ -268,14 +237,10 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
 
         // Update Data for Existing circles
         existingPointsInnerCircle
-        .append((d)=> { // //new - test -----add this so that it will alwayys render over the line-------------------
-          console.log("appending the inner circles:");
-          return document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        })
         .attr('cx', (p, idx) => {
           const xValue = p.pointCoordinates?.xValue;
-          console.log("update cx function inner circle-------");
-          console.log(`\t point-${idx} returning:`, xScale(xValue || numberlineDomainMin));
+          // console.log("update cx function inner circle-------");
+          // console.log(`\t point-${idx} returning:`, xScale(xValue || numberlineDomainMin));
           return xScale(xValue || numberlineDomainMin);
         })
         .classed("selected", (p)=>!!p.isSelected)
@@ -287,7 +252,7 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
 
 
         // Remove circles for data that no longer exists
-        existingPointsInnerCircle.exit().remove();
+        // existingPointsInnerCircle.exit().remove();
 
       }; //end updateNumberline()
 
