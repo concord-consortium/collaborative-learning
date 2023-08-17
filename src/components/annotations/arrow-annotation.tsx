@@ -13,6 +13,38 @@ import DeleteButton from "../../assets/icons/annotations/delete-button.svg";
 import "./arrow-annotation.scss";
 
 type DragType = "source" | "target" | "text";
+
+interface IDragHandleProps {
+  draggingHandle?: boolean;
+  dragTarget: "source" | "target";
+  handleMouseDown: (e: React.MouseEvent<SVGElement | HTMLButtonElement, MouseEvent>, _dragType: DragType) => void;
+  startX: number;
+  startY: number;
+}
+function DragHandle({
+  draggingHandle, dragTarget, handleMouseDown, startX, startY
+}: IDragHandleProps) {
+  return (
+    <g
+      className={classNames("drag-handle", { dragging: draggingHandle })}
+      onMouseDown={e => handleMouseDown(e, dragTarget)}
+    >
+      <rect
+        fill="transparent"
+        height={kAnnotationNodeHeight}
+        width={kAnnotationNodeWidth}
+        x={startX - kAnnotationNodeWidth / 2}
+        y={startY - kAnnotationNodeHeight / 2}
+      />
+      <AnnotationNode
+        active={draggingHandle}
+        cx={startX}
+        cy={startY}
+      />
+    </g>
+  );
+}
+
 interface IArrowAnnotationProps {
   arrow: IArrowAnnotation;
   canEdit?: boolean;
@@ -176,39 +208,6 @@ export const ArrowAnnotationComponent = observer(
       window.addEventListener("mouseup", handleMouseUp);
     }
 
-    interface IDragHandleProps {
-      draggingHandle?: boolean;
-      dragTarget: "source" | "target";
-      hovering?: boolean;
-      setHovering: React.Dispatch<React.SetStateAction<boolean>>;
-      startX: number;
-      startY: number;
-    }
-    function DragHandle({ draggingHandle, dragTarget, hovering, setHovering, startX, startY }: IDragHandleProps) {
-      return (
-        <g
-          className={classNames("drag-handle", { dragging: draggingHandle })}
-          onMouseDown={e => handleMouseDown(e, dragTarget)}
-          onMouseEnter={e => setHovering(true)}
-          onMouseLeave={e => setHovering(false)}
-        >
-          <rect
-            fill="transparent"
-            height={kAnnotationNodeHeight}
-            width={kAnnotationNodeWidth}
-            x={startX - kAnnotationNodeWidth / 2}
-            y={startY - kAnnotationNodeHeight / 2}
-          />
-          <AnnotationNode
-            active={draggingHandle}
-            cx={startX}
-            cy={startY}
-            hovering={hovering}
-          />
-        </g>
-      );
-    }
-
     const displayText = arrow.text?.trim();
     const hasText = !!displayText;
     const textButtonClasses = classNames("text-box", "text-display", {
@@ -258,16 +257,14 @@ export const ArrowAnnotationComponent = observer(
         <DragHandle
           draggingHandle={draggingSource}
           dragTarget="source"
-          hovering={hoveringSource}
-          setHovering={setHoveringSource}
+          handleMouseDown={handleMouseDown}
           startX={sourceX}
           startY={sourceY}
         />
         <DragHandle
           draggingHandle={draggingTarget}
           dragTarget="target"
-          hovering={hoveringTarget}
-          setHovering={setHoveringTarget}
+          handleMouseDown={handleMouseDown}
           startX={targetX}
           startY={targetY}
         />

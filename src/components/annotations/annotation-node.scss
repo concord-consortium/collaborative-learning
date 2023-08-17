@@ -9,7 +9,7 @@
     fill: rgba(0, 0, 0, 0);
   }
 
-  &.hovering {
+  &:hover {
     .node-highlight{
       fill: vars.$annotation-blue-very-transparent;
     }
