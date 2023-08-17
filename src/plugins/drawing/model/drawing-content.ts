@@ -23,17 +23,9 @@ import { tileModelHooks } from "../../../models/tiles/tile-model-hooks";
 export const DrawingToolMetadataModel = TileMetadataModel
   .named("DrawingToolMetadata")
   .props({
-    selectedButton: "select",
     selection: types.array(types.string)
   })
   .actions(self => ({
-    setSelectedButton(button: ToolbarModalButton) {
-      if (self.selectedButton !== button) {
-        self.selectedButton = button;
-        // clear selection on tool mode change
-        self.selection.clear();
-      }
-    },
     setSelection(selection: string[]) {
       self.selection.replace(selection);
     },
@@ -64,7 +56,8 @@ export const DrawingContentModel = TileContentModel
     currentStampIndex: types.maybe(types.number)
   })
   .volatile(self => ({
-    metadata: undefined as DrawingToolMetadataModelType | undefined
+    metadata: undefined as DrawingToolMetadataModelType | undefined,
+    selectedButton: "select"
   }))
   .views(self => ({
     get annotatableObjects() {
@@ -87,10 +80,10 @@ export const DrawingContentModel = TileContentModel
       return true;
     },
     isSelectedButton(button: ToolbarModalButton) {
-      return button === self.metadata?.selectedButton;
+      return button === self.selectedButton;
     },
     get selectedButton() {
-      return self.metadata?.selectedButton || "select";
+      return self.selectedButton || "select";
     },
     get hasSelectedObjects() {
       return self.metadata ? self.metadata.selection.length > 0 : false;
@@ -137,7 +130,7 @@ export const DrawingContentModel = TileContentModel
       const tileId = self.metadata?.id ?? "";
       const {name: operation, ...change} = call;
       // Ignore actions that don't need to be logged
-      if (["setDisabledFeatures", "setDragPosition", "setDragBounds"].includes(operation)) return;
+      if (["setDisabledFeatures", "setDragPosition", "setDragBounds", "setSelectedButton"].includes(operation)) return;
 
       logTileChangeEvent(LogEventName.DRAWING_TOOL_CHANGE, { operation, change, tileId });
     }
@@ -215,7 +208,11 @@ export const DrawingContentModel = TileContentModel
         },
 
         setSelectedButton(button: ToolbarModalButton) {
-          self.metadata?.setSelectedButton(button);
+          if (self.selectedButton !== button) {
+            self.selectedButton = button;
+            // clear selection on tool mode change
+            self.metadata?.setSelection([]);
+          }
         },
 
         setSelection(ids: string[]) {
@@ -257,10 +254,6 @@ export const DrawingContentModel = TileContentModel
           });
         },
 
-        // sets the model to how we want it to appear when a user first opens a document
-        reset() {
-          self.metadata?.setSelectedButton("select");
-        },
         updateImageUrl(oldUrl: string, newUrl: string) {
           if (!oldUrl || !newUrl || (oldUrl === newUrl)) return;
           // Modify all images with this url
@@ -276,6 +269,10 @@ export const DrawingContentModel = TileContentModel
     };
   })
   .actions(self => ({
+    // sets the model to how we want it to appear when a user first opens a document
+    reset() {
+      self.setSelectedButton("select");
+    },
     updateAfterSharedModelChanges() {
       // console.warn("TODO: need to implement yet");
     }
