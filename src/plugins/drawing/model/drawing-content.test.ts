@@ -286,7 +286,7 @@ describe("DrawingContentModel", () => {
 
     // drag bottom right bigger
     obj.setDragBounds({ top: 0, right: 10, bottom: 10, left: 0 });
-    obj.adoptDragBounds();
+    obj.resizeObject();
     expect(obj).toHaveProperty('x', 0);
     expect(obj).toHaveProperty('y', 0);
     expect(obj).toHaveProperty('width', 20);
@@ -294,7 +294,7 @@ describe("DrawingContentModel", () => {
 
     // drag top left smaller
     obj.setDragBounds({ top: 10, right: 0, bottom: 0, left: 10 });
-    obj.adoptDragBounds();
+    obj.resizeObject();
     expect(obj).toHaveProperty('x', 10);
     expect(obj).toHaveProperty('y', 10);
     expect(obj).toHaveProperty('width', 10);
@@ -322,7 +322,7 @@ describe("DrawingContentModel", () => {
     });
     expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(2,
       LogEventName.DRAWING_TOOL_CHANGE, {
-      operation: "adoptDragBounds",
+      operation: "resizeObject",
       "change": {
         "args": [ ],
         "path": "/objects/0",
@@ -331,7 +331,7 @@ describe("DrawingContentModel", () => {
     });
     expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(3,
       LogEventName.DRAWING_TOOL_CHANGE, {
-      operation: "adoptDragBounds",
+      operation: "resizeObject",
       "change": {
         "args": [ ],
         "path": "/objects/0",
@@ -356,7 +356,7 @@ describe("DrawingContentModel", () => {
 
     // drag bottom right bigger
     obj.setDragBounds({ top: 0, right: 10, bottom: 10, left: 0 });
-    obj.adoptDragBounds();
+    obj.resizeObject();
     expect(obj).toHaveProperty('x', 5);
     expect(obj).toHaveProperty('y', 5);
     expect(obj).toHaveProperty('rx', 15);
@@ -364,7 +364,7 @@ describe("DrawingContentModel", () => {
 
     // drag top left smaller
     obj.setDragBounds({ top: 10, right: 0, bottom: 0, left: 10 });
-    obj.adoptDragBounds();
+    obj.resizeObject();
     expect(obj).toHaveProperty('x', 10);
     expect(obj).toHaveProperty('y', 10);
     expect(obj).toHaveProperty('rx', 10);
@@ -381,7 +381,7 @@ describe("DrawingContentModel", () => {
 
     // drag bottom right bigger
     obj.setDragBounds({ top: 0, right: 10, bottom: 10, left: 0 });
-    obj.adoptDragBounds();
+    obj.resizeObject();
     expect(obj).toHaveProperty('x', 0);
     expect(obj).toHaveProperty('y', 0);
     expect(obj).toHaveProperty('width', 20);
@@ -389,7 +389,7 @@ describe("DrawingContentModel", () => {
 
     // drag top left smaller
     obj.setDragBounds({ top: 10, right: 0, bottom: 0, left: 10 });
-    obj.adoptDragBounds();
+    obj.resizeObject();
     expect(obj).toHaveProperty('x', 10);
     expect(obj).toHaveProperty('y', 10);
     expect(obj).toHaveProperty('width', 10);
@@ -407,7 +407,7 @@ describe("DrawingContentModel", () => {
 
     // drag bottom right bigger
     obj.setDragBounds({ top: 0, right: 10, bottom: 10, left: 0 });
-    obj.adoptDragBounds();
+    obj.resizeObject();
     expect(obj).toHaveProperty('x', 0);
     expect(obj).toHaveProperty('y', 0);
     expect(obj).toHaveProperty('dx', 20);
@@ -415,7 +415,7 @@ describe("DrawingContentModel", () => {
 
     // drag top left smaller
     obj.setDragBounds({ top: 10, right: 0, bottom: 0, left: 10 });
-    obj.adoptDragBounds();
+    obj.resizeObject();
     expect(obj).toHaveProperty('x', 10);
     expect(obj).toHaveProperty('y', 10);
     expect(obj).toHaveProperty('dx', 10);
@@ -434,14 +434,14 @@ describe("DrawingContentModel", () => {
 
     // drag bottom right bigger
     obj.setDragBounds({ top: 0, right: 10, bottom: 10, left: 0 });
-    obj.adoptDragBounds();
+    obj.resizeObject();
     expect(obj).toHaveProperty('x', 0);
     expect(obj).toHaveProperty('y', 0);
     expect(obj).toHaveProperty('deltaPoints', [{dx: 20, dy: 20}]);
 
     // drag top left smaller
     obj.setDragBounds({ top: 10, right: 0, bottom: 0, left: 10 });
-    obj.adoptDragBounds();
+    obj.resizeObject();
     expect(obj).toHaveProperty('x', 10);
     expect(obj).toHaveProperty('y', 10);
     expect(obj).toHaveProperty('deltaPoints', [{dx: 10, dy: 10}]);
