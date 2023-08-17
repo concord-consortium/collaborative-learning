@@ -21,18 +21,7 @@ import { tileModelHooks } from "../../../models/tiles/tile-model-hooks";
 // track selection in metadata object so it is not saved to firebase but
 // also is preserved across document/content reloads
 export const DrawingToolMetadataModel = TileMetadataModel
-  .named("DrawingToolMetadata")
-  .props({
-    selection: types.array(types.string)
-  })
-  .actions(self => ({
-    setSelection(selection: string[]) {
-      self.selection.replace(selection);
-    },
-    unselectId(id: string) {
-      self.selection.remove(id);
-    }
-  }));
+  .named("DrawingToolMetadata");
 export type DrawingToolMetadataModelType = Instance<typeof DrawingToolMetadataModel>;
 
 export interface DrawingObjectMove {
@@ -57,7 +46,8 @@ export const DrawingContentModel = TileContentModel
   })
   .volatile(self => ({
     metadata: undefined as DrawingToolMetadataModelType | undefined,
-    selectedButton: "select"
+    selectedButton: "select",
+    selection: [] as string[]
   }))
   .views(self => ({
     get annotatableObjects() {
@@ -86,10 +76,10 @@ export const DrawingContentModel = TileContentModel
       return self.selectedButton || "select";
     },
     get hasSelectedObjects() {
-      return self.metadata ? self.metadata.selection.length > 0 : false;
+      return self.metadata ? self.selection.length > 0 : false;
     },
     get selectedIds() {
-      return self.metadata ? getSnapshot(self.metadata.selection) : [];
+      return self.selection;
     },
     get currentStamp() {
       const currentStampIndex = self.currentStampIndex || 0;
@@ -134,6 +124,29 @@ export const DrawingContentModel = TileContentModel
 
       logTileChangeEvent(LogEventName.DRAWING_TOOL_CHANGE, { operation, change, tileId });
     }
+  }))
+  .actions(self => ({
+    setSelection(selection: string[]) {
+      self.selection = selection;
+    },
+    unselectId(id: string) {
+      const index = self.selection.indexOf(id);
+      if (index >= 0) {
+        self.selection.splice(index, 1);
+      }
+    },
+    setSelectedButton(button: ToolbarModalButton) {
+      if (self.selectedButton !== button) {
+        self.selectedButton = button;
+        // clear selection on tool mode change
+        self.selection = [];
+      }
+    },
+
+    setSelectedStamp(stampIndex: number) {
+      self.currentStampIndex = stampIndex;
+    }
+
   }))
   .extend(self => {
 
@@ -207,27 +220,11 @@ export const DrawingContentModel = TileContentModel
           });
         },
 
-        setSelectedButton(button: ToolbarModalButton) {
-          if (self.selectedButton !== button) {
-            self.selectedButton = button;
-            // clear selection on tool mode change
-            self.metadata?.setSelection([]);
-          }
-        },
-
-        setSelection(ids: string[]) {
-          self.metadata?.setSelection(ids);
-        },
-
-        setSelectedStamp(stampIndex: number) {
-          self.currentStampIndex = stampIndex;
-        },
-
         deleteObjects(ids: string[]) {
           forEachObjectId(ids, (object, id) => {
             if (object) {
               self.objects.remove(object);
-              self.metadata?.unselectId(id);
+              self.unselectId(id);
             }
           });
         },
@@ -244,7 +241,7 @@ export const DrawingContentModel = TileContentModel
               newIds.push(newObject.id);
             }
           });
-          self.metadata?.setSelection(newIds);
+          self.setSelection(newIds);
         },
 
         moveObjects(moves: DrawingObjectMove[]) {

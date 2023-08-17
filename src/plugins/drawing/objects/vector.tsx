@@ -161,9 +161,12 @@ export class VectorDrawingTool extends DrawingTool {
     const handleMouseUp = (e2: MouseEvent) => {
       e2.preventDefault();
       if ((vector.dx !== 0) || (vector.dy !== 0)) {
-        this.drawingLayer.addNewDrawingObject(getSnapshot(vector));
+        const obj = this.drawingLayer.addNewDrawingObject(getSnapshot(vector));
+        this.drawingLayer.setCurrentDrawingObject(obj);
+        // this.drawingLayer.syncCurrentTool("select");
+      } else {
+        this.drawingLayer.setCurrentDrawingObject(null);
       }
-      this.drawingLayer.setCurrentDrawingObject(null);
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
     };

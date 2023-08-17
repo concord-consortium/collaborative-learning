@@ -135,7 +135,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   }
 
   public addNewDrawingObject(drawingObject: DrawingObjectSnapshotForAdd) {
-    this.getContent().addObject(drawingObject);
+    return this.getContent().addObject(drawingObject);
   }
 
   public setSelectedObjects(selectedObjects: DrawingObjectType[]) {

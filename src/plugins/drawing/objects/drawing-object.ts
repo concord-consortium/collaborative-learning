@@ -193,7 +193,7 @@ export type DrawingComponentType = React.ComponentType<IDrawingComponentProps>;
 export interface IDrawingLayer {
   getWorkspacePoint: (e:MouseEvent|React.MouseEvent) => Point|null;
   setCurrentDrawingObject: (object: DrawingObjectType|null) => void;
-  addNewDrawingObject: (object: DrawingObjectSnapshotForAdd) => void;
+  addNewDrawingObject: (object: DrawingObjectSnapshotForAdd) => DrawingObjectType;
   getCurrentStamp: () => StampModelType|null;
   startSelectionBox: (start: Point) => void;
   updateSelectionBox: (p: Point) => void;
