@@ -3,15 +3,15 @@
 .annotation-button {
   background-color: rgba(0, 0, 0, 0);
   border: none;
-  border-radius: 3px;
-  outline: 3px solid vars.$workspace-teal-light-5;
   position: absolute;
 
   &:hover {
-    outline-color: vars.$workspace-teal-light-3;
+    fill: vars.$annotation-blue-very-transparent;
+    outline: 2px dotted vars.$annotation-blue;
   }
 
   &.source {
-    outline-color: vars.$workspace-teal-light-1;
+    fill: rgba(0, 0, 0, 0);
+    outline: 2px solid vars.$annotation-blue;
   }
 }

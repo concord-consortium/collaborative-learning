@@ -1,18 +1,11 @@
 import classNames from "classnames";
 import React, { useMemo } from "react";
 
+import { halfPi, twoPi, normalizeAngle } from "./annotation-utilities";
+
 import "./curved-arrow.scss";
 
-const halfPi = Math.PI / 2;
-const twoPi = Math.PI * 2;
-const normalizeAngle = (angle: number) => {
-  let _angle = angle;
-  while (_angle < 0) { _angle += twoPi; }
-  while (_angle > twoPi) { _angle -= twoPi; }
-  return _angle;
-};
-
-const color = "blue";
+const color = "#1500ff";
 const controlStrength = .5;
 interface ICurvedArrowProps {
   className?: string;
