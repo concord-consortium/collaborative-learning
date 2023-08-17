@@ -6,7 +6,7 @@ import { nanoid } from "nanoid";
 import { TreeAPI } from "./tree-api";
 import { IUndoManager, UndoStore } from "./undo-store";
 import { TreePatchRecord, HistoryEntry, TreePatchRecordSnapshot,
-  HistoryOperation, HistoryEntrySnapshot } from "./history";
+  HistoryOperation } from "./history";
 import { DEBUG_HISTORY } from "../../lib/debug";
 import { getFirebaseFunction } from "../../hooks/use-firebase-function";
 import { ICommentableDocumentParams, IDocumentMetadata,
@@ -14,6 +14,7 @@ import { ICommentableDocumentParams, IDocumentMetadata,
 import { Firestore } from "../../lib/firestore";
 import { UserModelType } from "../stores/user";
 import { UserContextProvider } from "../stores/user-context-provider";
+import { getLastHistoryEntry, loadHistory } from "./history-firestore";
 
 /**
  * Helper method to print objects in template strings
@@ -355,27 +356,14 @@ export const TreeManager = types
     // check what happens if history is opened on a document that doesn't
     // have a parent document.
 
-    const query = firestore.collection(`${docPath}/history`)
-      .orderBy("index");
-
-    // FIXME-HISTORY: this approach probably does not handle paging well,
-    // and I'd suspect we'll have a lot of changes so we'll need to handle that.
-    // https://www.pivotaltracker.com/story/show/183291353
-    const snapshotUnsubscribe = query.onSnapshot(
-      querySnapshot => {
-        if (DEBUG_HISTORY) {
-          // eslint-disable-next-line no-console
-          console.log("Loaded History:", querySnapshot.docs.map(doc => ({id: doc.id, ...doc.data()})));
+    const snapshotUnsubscribe = loadHistory(firestore, `${docPath}/history`,
+      (history, error) => {
+        if (error) {
+          self.setLoadingError(error);
+        } else {
+          const cDocument = CDocument.create({history});
+          self.setChangeDocument(cDocument);
         }
-        const history = querySnapshot.docs.map(doc => {
-          const { entry } = doc.data();
-          return JSON.parse(entry) as HistoryEntrySnapshot;
-        });
-        const cDocument = CDocument.create({history});
-        self.setChangeDocument(cDocument);
-      },
-      error => {
-        self.setLoadingError(error);
       }
     );
     addDisposer(self, snapshotUnsubscribe);
@@ -661,28 +649,4 @@ function getDocumentPath(userId: string, documentKey: string, network?: string) 
   const networkDocKey = networkDocumentKey(userId, documentKey, network);
   const documentPath = `documents/${networkDocKey}`;
   return documentPath;
-}
-
-async function getLastHistoryEntry(firestore: Firestore, documentPath: string) {
-  const lastEntryQuery = await firestore.collection(`${documentPath}/history`)
-    .limit(1)
-    .orderBy("index", "desc")
-    .get();
-
-  if (lastEntryQuery.empty) {
-    return undefined;
-  }
-
-  const lastEntry = lastEntryQuery.docs[0];
-  const index = lastEntry.get("index");
-  if (typeof index !== "number") {
-    // This is an invalid entry.
-    // Previously the index was a timestamp instead of a number, however
-    // the Firestore collection of entries was changed from
-    // `historyEntries` to `history`, so we shouldn't pick
-    // up any legacy entries.
-    throw new Error(`lastEntryIndex is not a number: ${index}`);
-  }
-
-  return { index, id: lastEntry.id };
 }
