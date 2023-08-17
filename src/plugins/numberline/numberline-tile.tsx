@@ -48,6 +48,81 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
   //------------------ Mouse Point Circle State / Properties ----------------------------------------
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [hoverPointX, setHoverPointX] = useState(0); //used to retrigger useEffect below
+  const svg = select(svgRef.current);
+  const svgNode = svg.node();
+  const yMidPoint = (kNumberLineContainerHeight / 2);
+  /* ========================== [ Construct Numberline OnMount ] ================================= */
+
+  const mouseInBoundingBox = (e: Event) => {
+    const pos = pointer(e, svgNode);
+    const xPos = pos[0];
+    const yPos = pos[1];
+
+    const yTopBound = yMidPoint + 10;
+    const yBottomBound = yMidPoint - 10;
+    const isBetweenYBounds = (yPos >= yBottomBound && yPos <= yTopBound);
+    const isBetweenXBounds = (xPos >= 0 && xPos <= axisWidth);
+    if (isBetweenYBounds && isBetweenXBounds ){
+      content.mouseHoverOverPoint(xPos, axisWidth); //detect if hovered over an existing point
+      setHoverPointX(xPos);
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  // ---- Handlers to Create New Points, Drag Existing, Draw Hover ----------------
+  const handleClickCreatePoint = (e: Event) => {
+    const pos = pointer(e, svgNode);
+    const xPos = pos[0];
+    const xValue = xScale.invert(xPos);
+    const newPoint = {xValue};
+    content.createNewPoint(newPoint);
+  };
+
+  const handleDrag = drag<SVGCircleElement, PointObjectModelType>()
+  .on('drag', (e, p) => {
+      if (mouseInBoundingBox(e)){
+        const pos = pointer(e, svgNode);
+        const xPos = pos[0];
+        const id = p.id;
+        const xValue = xScale.invert(xPos);
+        const newPoint = {xValue};
+        content.givenIdReplacePointCoordinates(id, newPoint);
+      }
+  });
+
+  const drawMousePoint = (e: Event, r: number) => {
+    const pos = pointer(e, svgNode);
+    const xPos = pos[0];
+    //create a fake hover circle that follows the mouse
+    svg.selectAll(".mouseXCircle").remove();
+    svg.append('circle')
+    .attr('cx', xPos)
+    .attr('cy', yMidPoint)
+    .attr('r', r)
+    .classed("mouseXCircle", true)
+    .classed("defaultPointInnerCircle", true);
+  };
+
+  // --------- Assign handlers to SVG apply only when in bounding box -------------
+  svg
+  .on("click", (e) => {
+    if (!content.isHoveringOverPoint){
+      if (mouseInBoundingBox(e)){
+        handleClickCreatePoint(e); //only create point if we are not hovering over a point and within bounding box
+      }
+    } else{
+      content.toggleIsSelected(content.indexOfPointHovered);
+    }
+  })
+  .on("mousemove", (e) => {
+    const radius = (mouseInBoundingBox(e) && !content.isHoveringOverPoint) ? innerPointRadius : 0;
+    drawMousePoint(e, radius);
+    if (!mouseInBoundingBox(e)){
+      content.setAllHoversFalse();
+    }
+  });
 
   /* ========================== [ Construct Numberline OnMount ] ================================= */
   useEffect(() => {
@@ -71,7 +146,6 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [axisWidth]);
 
-
   /* =========================== [ Update Numberline ] =========================================== */
   useEffect(() => {
     if (axisWidth !== 0){ //after component has rendered
@@ -80,80 +154,6 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
       // console.log("\t", content.pointsIsSelectedArr);
 
       const updateNumberline = () => {
-        // ----- Detect If Mouse Is Within Bounding Box Around Number Line --------------
-        const svg = select(svgRef.current);
-        const svgNode = svg.node();
-        const yMidPoint = (kNumberLineContainerHeight / 2);
-
-        const mouseInBoundingBox = (e: Event) => {
-          const pos = pointer(e, svgNode);
-          const xPos = pos[0];
-          const yPos = pos[1];
-
-          const yTopBound = yMidPoint + 10;
-          const yBottomBound = yMidPoint - 10;
-          const isBetweenYBounds = (yPos >= yBottomBound && yPos <= yTopBound);
-          const isBetweenXBounds = (xPos >= 0 && xPos <= axisWidth);
-          if (isBetweenYBounds && isBetweenXBounds ){
-            content.mouseHoverOverPoint(xPos, axisWidth); //detect if hovered over an existing point
-            setHoverPointX(xPos);
-            return true;
-          } else {
-            return false;
-          }
-        };
-        // ---- Handlers to Create New Points, Drag Existing, Draw Hover ----------------
-        const handleClickCreatePoint = (e: Event) => {
-          const pos = pointer(e, svgNode);
-          const xPos = pos[0];
-          const xValue = xScale.invert(xPos);
-          const newPoint = {xValue};
-          content.createNewPoint(newPoint);
-        };
-
-        const handleDrag = drag<SVGCircleElement, PointObjectModelType>()
-        .on('drag', (e, p) => {
-            if (mouseInBoundingBox(e)){
-              const pos = pointer(e, svgNode);
-              const xPos = pos[0];
-              const id = p.id;
-              const xValue = xScale.invert(xPos);
-              const newPoint = {xValue};
-              content.givenIdReplacePointCoordinates(id, newPoint);
-            }
-        });
-
-        const drawMousePoint = (e: Event, r: number) => {
-          const pos = pointer(e, svgNode);
-          const xPos = pos[0];
-          //create a fake hover circle that follows the mouse
-          svg.selectAll(".mouseXCircle").remove();
-          svg.append('circle')
-          .attr('cx', xPos)
-          .attr('cy', yMidPoint)
-          .attr('r', r)
-          .classed("mouseXCircle", true)
-          .classed("defaultPointInnerCircle", true);
-        };
-
-        // --------- Assign handlers to SVG apply only when in bounding box -------------
-        svg
-        .on("click", (e) => {
-          if (!content.isHoveringOverPoint){
-            if (mouseInBoundingBox(e)){
-              handleClickCreatePoint(e); //only create point if we are not hovering over a point and within bounding box
-            }
-          } else{
-            content.toggleIsSelected(content.indexOfPointHovered);
-          }
-        })
-        .on("mousemove", (e) => {
-          const radius = (mouseInBoundingBox(e) && !content.isHoveringOverPoint) ? innerPointRadius : 0;
-          drawMousePoint(e, radius);
-          if (!mouseInBoundingBox(e)){
-            content.setAllHoversFalse();
-          }
-        });
 
         /* ================== [ P L O T   S T O R E D   P O I N T S ] ================ */
 
