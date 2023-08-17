@@ -170,6 +170,7 @@ export const DrawingContentModel = TileContentModel
           }
 
           self.objects.push(object);
+          return self.objects[self.objects.length-1];
         },
 
         setStroke(stroke: string, ids: string[]) {
@@ -232,6 +233,21 @@ export const DrawingContentModel = TileContentModel
               self.metadata?.unselectId(id);
             }
           });
+        },
+
+        duplicateObjects(ids: string[]) {
+          const newIds: string[] = [];
+          forEachObjectId(ids, (object) => {
+            if (object) {
+              const snap = getSnapshot(object);
+              const {id, ...newParams} = snap; // remove existing ID
+              newParams.x = snap.x + 10;       // offset by 10 pixels so it is not hidden
+              newParams.y = snap.y + 10;
+              const newObject = this.addObject(newParams);
+              newIds.push(newObject.id);
+            }
+          });
+          self.metadata?.setSelection(newIds);
         },
 
         moveObjects(moves: DrawingObjectMove[]) {
