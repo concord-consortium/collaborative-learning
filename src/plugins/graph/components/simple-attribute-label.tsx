@@ -8,6 +8,7 @@ import { graphPlaceToAttrRole, kGraphClassSelector } from "../graph-types";
 import { useDataConfigurationContext } from "../hooks/use-data-configuration-context";
 import { useGraphModelContext } from "../models/graph-model";
 import { IDataSet } from "../../../models/data/data-set";
+import DropdownCaretIcon from "../dropdown-caret.svg";
 
 import "../components/legend/multi-legend.scss";
 
@@ -34,8 +35,13 @@ export const SimpleAttributeLabel = observer(
     return (
       <>
         <div ref={simpleLabelRef} className="simple-attribute-label">
-          <div className="attr-symbol" style={{ backgroundColor: pointColor }}></div>
-          <div className="attr-name"> { attrName }</div>
+          <div className="symbol-title">
+            <div className="attr-symbol" style={{ backgroundColor: pointColor }}></div>
+            <div className="attr-name">{ attrName }</div>
+          </div>
+          <div className="caret">
+            <DropdownCaretIcon />
+          </div>
         </div>
         {parentElt && onChangeAttribute && onTreatAttributeAs && onRemoveAttribute && attrId &&
           createPortal(<AxisOrLegendAttributeMenu

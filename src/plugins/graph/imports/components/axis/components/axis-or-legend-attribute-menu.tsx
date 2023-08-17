@@ -42,10 +42,14 @@ const _AxisOrLegendAttributeMenu = ({ place, target, portal,
   const [labelText, setLabelText] = useState(attribute?.name);
   const removeAttrItemLabel = t(removeAttrItemLabelKeys[role], {vars: [attribute?.name]});
   const treatAs = dataConfig?.attributeType(role) === "numeric" ? "categorical" : "numeric";
-  const overlayStyle: CSSProperties = { position: "absolute", ...useOverlayBounds({target, portal}) };
-  const buttonStyle: CSSProperties = { position: "absolute", width: "100%", height: "100%", color: "transparent" };
   const menuRef = useRef<HTMLDivElement>(null);
   const onCloseRef = useRef<() => void>();
+  const overlayStyle: CSSProperties = {
+    position: "absolute", ...useOverlayBounds({target, portal})
+  };
+  const buttonStyle: CSSProperties = {
+    position: "absolute", width: "100%", height: "100%", color: "transparent", left: 0, top: 0
+  };
 
   const draggableOptions: IUseDraggableAttribute = {
     prefix: instanceId, dataSet: data, attributeId: attrId
