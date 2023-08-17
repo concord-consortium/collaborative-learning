@@ -2,24 +2,28 @@
 
 .student-group-view {
   .canvas-area {
-    position: absolute;
-    top: $workspace-titlebar-height;
-    bottom: 0;
+    position: relative;
+    top: 0;
     left: 0;
-    right: 0;
+    height: auto;
     border-top: $document-border-width solid white;
   }
 }
 
 .nav-tab-panel {
   .student-group-view {
-    top: $workspace-titlebar-height;
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
     margin: 0;
-    padding-right: 3px;
-    border: 1.5px solid $workspace-teal;
+    border-color: $charcoal;
+    border-style: solid;
+    border-width: 0 2px 2px;
     border-radius: 0;
 
     .titlebar.student-group.group {
+      position: static;
       height: 36px;
       padding: 2px 0 0;
       background-color: white;
@@ -108,8 +112,6 @@
       }
     }
     .group-title {
-      position: absolute;
-      top: 36px;
       width: 100%;
       height: 36px;
       text-align: center;
@@ -145,15 +147,10 @@
       }
     }
     .canvas-area {
-      position: absolute;
-      top: 72px;
-      width: 100%
+      flex: 1;
     }
   }
+  .student-group-view.chat-open {
+    border-right: 0;
+  }
 }
-
-.shrink-student-view{
-  width: 64%;
-}
-
-

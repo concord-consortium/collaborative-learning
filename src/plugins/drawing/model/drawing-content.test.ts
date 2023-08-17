@@ -286,7 +286,7 @@ describe("DrawingContentModel", () => {
 
     // drag bottom right bigger
     obj.setDragBounds({ top: 0, right: 10, bottom: 10, left: 0 });
-    obj.adoptDragBounds();
+    obj.resizeObject();
     expect(obj).toHaveProperty('x', 0);
     expect(obj).toHaveProperty('y', 0);
     expect(obj).toHaveProperty('width', 20);
@@ -294,7 +294,7 @@ describe("DrawingContentModel", () => {
 
     // drag top left smaller
     obj.setDragBounds({ top: 10, right: 0, bottom: 0, left: 10 });
-    obj.adoptDragBounds();
+    obj.resizeObject();
     expect(obj).toHaveProperty('x', 10);
     expect(obj).toHaveProperty('y', 10);
     expect(obj).toHaveProperty('width', 10);
@@ -322,7 +322,7 @@ describe("DrawingContentModel", () => {
     });
     expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(2,
       LogEventName.DRAWING_TOOL_CHANGE, {
-      operation: "adoptDragBounds",
+      operation: "resizeObject",
       "change": {
         "args": [ ],
         "path": "/objects/0",
@@ -331,7 +331,7 @@ describe("DrawingContentModel", () => {
     });
     expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(3,
       LogEventName.DRAWING_TOOL_CHANGE, {
-      operation: "adoptDragBounds",
+      operation: "resizeObject",
       "change": {
         "args": [ ],
         "path": "/objects/0",
@@ -356,7 +356,7 @@ describe("DrawingContentModel", () => {
 
     // drag bottom right bigger
     obj.setDragBounds({ top: 0, right: 10, bottom: 10, left: 0 });
-    obj.adoptDragBounds();
+    obj.resizeObject();
     expect(obj).toHaveProperty('x', 5);
     expect(obj).toHaveProperty('y', 5);
     expect(obj).toHaveProperty('rx', 15);
@@ -364,7 +364,7 @@ describe("DrawingContentModel", () => {
 
     // drag top left smaller
     obj.setDragBounds({ top: 10, right: 0, bottom: 0, left: 10 });
-    obj.adoptDragBounds();
+    obj.resizeObject();
     expect(obj).toHaveProperty('x', 10);
     expect(obj).toHaveProperty('y', 10);
     expect(obj).toHaveProperty('rx', 10);
@@ -381,7 +381,7 @@ describe("DrawingContentModel", () => {
 
     // drag bottom right bigger
     obj.setDragBounds({ top: 0, right: 10, bottom: 10, left: 0 });
-    obj.adoptDragBounds();
+    obj.resizeObject();
     expect(obj).toHaveProperty('x', 0);
     expect(obj).toHaveProperty('y', 0);
     expect(obj).toHaveProperty('width', 20);
@@ -389,7 +389,7 @@ describe("DrawingContentModel", () => {
 
     // drag top left smaller
     obj.setDragBounds({ top: 10, right: 0, bottom: 0, left: 10 });
-    obj.adoptDragBounds();
+    obj.resizeObject();
     expect(obj).toHaveProperty('x', 10);
     expect(obj).toHaveProperty('y', 10);
     expect(obj).toHaveProperty('width', 10);
@@ -407,7 +407,7 @@ describe("DrawingContentModel", () => {
 
     // drag bottom right bigger
     obj.setDragBounds({ top: 0, right: 10, bottom: 10, left: 0 });
-    obj.adoptDragBounds();
+    obj.resizeObject();
     expect(obj).toHaveProperty('x', 0);
     expect(obj).toHaveProperty('y', 0);
     expect(obj).toHaveProperty('dx', 20);
@@ -415,7 +415,7 @@ describe("DrawingContentModel", () => {
 
     // drag top left smaller
     obj.setDragBounds({ top: 10, right: 0, bottom: 0, left: 10 });
-    obj.adoptDragBounds();
+    obj.resizeObject();
     expect(obj).toHaveProperty('x', 10);
     expect(obj).toHaveProperty('y', 10);
     expect(obj).toHaveProperty('dx', 10);
@@ -434,17 +434,104 @@ describe("DrawingContentModel", () => {
 
     // drag bottom right bigger
     obj.setDragBounds({ top: 0, right: 10, bottom: 10, left: 0 });
-    obj.adoptDragBounds();
+    obj.resizeObject();
     expect(obj).toHaveProperty('x', 0);
     expect(obj).toHaveProperty('y', 0);
     expect(obj).toHaveProperty('deltaPoints', [{dx: 20, dy: 20}]);
 
     // drag top left smaller
     obj.setDragBounds({ top: 10, right: 0, bottom: 0, left: 10 });
-    obj.adoptDragBounds();
+    obj.resizeObject();
     expect(obj).toHaveProperty('x', 10);
     expect(obj).toHaveProperty('y', 10);
     expect(obj).toHaveProperty('deltaPoints', [{dx: 10, dy: 10}]);
+  });
+
+  it("can copy rectangle", () => {
+    mockLogTileChangeEvent.mockClear();
+    const model = createDrawingContentWithMetadata();
+
+    const rectSnapshot1: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot, id:"a"};
+    model.addObject(rectSnapshot1);
+
+    model.duplicateObjects(["a"]);
+    expect(model.objects).toHaveLength(2);
+
+    const copiedObj = model.objects[1];
+    expect(copiedObj).toHaveProperty("type", "rectangle");
+    expect(copiedObj).toHaveProperty("id");
+    expect(copiedObj.id).not.toEqual("a");
+    expect(copiedObj).toHaveProperty("x", 10);
+    expect(copiedObj).toHaveProperty("y", 10);
+
+    expect(mockLogTileChangeEvent).toHaveBeenCalledTimes(2);
+    expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(1,
+      LogEventName.DRAWING_TOOL_CHANGE, {
+      operation: "addObject",
+      "change": {
+        "args": [
+          {
+            "fill": "#666666",
+            "height": 10,
+            "id": "a",
+            "stroke": "#888888",
+            "strokeDashArray": "3,3",
+            "strokeWidth": 5,
+            "type": "rectangle",
+            "width": 10,
+            "x": 0,
+            "y": 0,
+          }
+         ],
+        "path": "",
+      },
+      "tileId": "drawing-1"
+    });
+    expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(2,
+      LogEventName.DRAWING_TOOL_CHANGE, {
+      operation: "duplicateObjects",
+      "change": {
+        "args": [
+          [ "a" ]
+         ],
+        "path": "",
+      },
+      "tileId": "drawing-1"
+    });
+  });
+
+  it("can copy multiple objects", () => {
+    mockLogTileChangeEvent.mockClear();
+
+    const rectSnapshot: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot, id:"a"};
+
+    const ellipse = EllipseObject.create({
+      id: "b",
+      x: 100,
+      y: 100,
+      rx: 10,
+      ry: 10,
+      ...mockSettings
+    });
+    const model = createDrawingContentWithMetadata({ objects: [rectSnapshot, ellipse] });
+
+    expect(model.objects).toHaveLength(2);
+    model.duplicateObjects(["a", "b"]);
+    expect(model.objects).toHaveLength(4);
+
+    const copiedRect = model.objects[2];
+    expect(copiedRect).toHaveProperty("type", "rectangle");
+    expect(copiedRect).toHaveProperty("id");
+    expect(copiedRect.id).not.toEqual("a");
+    expect(copiedRect).toHaveProperty("x", 10);
+    expect(copiedRect).toHaveProperty("y", 10);
+
+    const copiedEllipse = model.objects[3];
+    expect(copiedEllipse).toHaveProperty("type", "ellipse");
+    expect(copiedEllipse).toHaveProperty("id");
+    expect(copiedEllipse.id).not.toEqual("b");
+    expect(copiedEllipse).toHaveProperty("x", 110);
+    expect(copiedEllipse).toHaveProperty("y", 110);
   });
 
   it("can change the current stamp", () => {

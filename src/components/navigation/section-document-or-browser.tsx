@@ -38,9 +38,10 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
   const selectedSubTab = subTabs[subTabIndex];
 
   useEffect(() => {
-    // Set the initial open tab. If the tabSpec changes somehow then the open
-    // sub tab will get reset
-    ui.setOpenSubTab(tabSpec.tab, subTabs[0].label);
+    // Set the default open subTab if a subTab isn't already set.
+    if (!ui.tabs.get(tabSpec.tab)?.openSubTab) {
+      ui.setOpenSubTab(tabSpec.tab, subTabs[0].label);
+    }
   }, [subTabs, tabSpec.tab, ui]);
 
   // This is called even if the tab is already open
