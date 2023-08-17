@@ -1,12 +1,8 @@
 @import "../vars";
 
 .collapsed-resources-tab {
-  position: absolute;
-  top: $header-height;
-  left: 0;
-  height: calc(100vh - (#{$header-height} + #{$workspace-content-margin} * 2));
   width: 38px;
-  margin: 4px 4px 0 2px;
+  margin-right: 4px;
   padding: 2px;
   border-radius: 0 8px 0 0;
   box-sizing: border-box;
