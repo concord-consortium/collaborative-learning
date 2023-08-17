@@ -11,13 +11,12 @@ interface IAnnotationNodeProps {
   cx: number;
   cy: number;
   highlightRadius?: number;
-  hovering?: boolean;
 }
-export function AnnotationNode({ active, centerRadius, cx, cy, highlightRadius, hovering }: IAnnotationNodeProps) {
+export function AnnotationNode({ active, centerRadius, cx, cy, highlightRadius }: IAnnotationNodeProps) {
   const _centerRadius = centerRadius ?? kAnnotationNodeHeight / 4;
   const _highlightRadius = highlightRadius ?? kAnnotationNodeHeight / 2;
   return (
-    <g className={classNames("annotation-node", { active, hovering })}>
+    <g className={classNames("annotation-node", { active })}>
       <circle
         className="node-highlight"
         cx={cx}

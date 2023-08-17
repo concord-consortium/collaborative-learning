@@ -11,6 +11,38 @@ import { IClueObject } from "../../models/annotations/clue-object";
 import "./arrow-annotation.scss";
 
 type DragType = "source" | "target" | "text";
+
+interface IDragHandleProps {
+  draggingHandle?: boolean;
+  dragTarget: "source" | "target";
+  handleMouseDown: (e: React.MouseEvent<SVGElement | HTMLButtonElement, MouseEvent>, _dragType: DragType) => void;
+  startX: number;
+  startY: number;
+}
+function DragHandle({
+  draggingHandle, dragTarget, handleMouseDown, startX, startY
+}: IDragHandleProps) {
+  return (
+    <g
+      className={classNames("drag-handle", { dragging: draggingHandle })}
+      onMouseDown={e => handleMouseDown(e, dragTarget)}
+    >
+      <rect
+        fill="transparent"
+        height={kAnnotationNodeHeight}
+        width={kAnnotationNodeWidth}
+        x={startX - kAnnotationNodeWidth / 2}
+        y={startY - kAnnotationNodeHeight / 2}
+      />
+      <AnnotationNode
+        active={draggingHandle}
+        cx={startX}
+        cy={startY}
+      />
+    </g>
+  );
+}
+
 interface IArrowAnnotationProps {
   arrow: IArrowAnnotation;
   canEdit?: boolean;
@@ -44,8 +76,6 @@ export const ArrowAnnotationComponent = observer(
     const [dragType, setDragType] = useState<DragType|undefined>();
     const [dragX, setDragX] = useState<number|undefined>();
     const [dragY, setDragY] = useState<number|undefined>();
-    const [hoveringSource, setHoveringSource] = useState(false);
-    const [hoveringTarget, setHoveringTarget] = useState(false);
     const dragDx = clientX !== undefined && dragX !== undefined ? clientX - dragX : 0;
     const dragDy = clientY !== undefined && dragY !== undefined ? clientY - dragY : 0;
     const dragging = clientX !== undefined && clientY !== undefined && dragX !== undefined && dragY !== undefined;
@@ -164,39 +194,6 @@ export const ArrowAnnotationComponent = observer(
       window.addEventListener("mouseup", handleMouseUp);
     }
 
-    interface IDragHandleProps {
-      draggingHandle?: boolean;
-      dragTarget: "source" | "target";
-      hovering?: boolean;
-      setHovering: React.Dispatch<React.SetStateAction<boolean>>;
-      startX: number;
-      startY: number;
-    }
-    function DragHandle({ draggingHandle, dragTarget, hovering, setHovering, startX, startY }: IDragHandleProps) {
-      return (
-        <g
-          className={classNames("drag-handle", { dragging: draggingHandle })}
-          onMouseDown={e => handleMouseDown(e, dragTarget)}
-          onMouseEnter={e => setHovering(true)}
-          onMouseLeave={e => setHovering(false)}
-        >
-          <rect
-            fill="transparent"
-            height={kAnnotationNodeHeight}
-            width={kAnnotationNodeWidth}
-            x={startX - kAnnotationNodeWidth / 2}
-            y={startY - kAnnotationNodeHeight / 2}
-          />
-          <AnnotationNode
-            active={draggingHandle}
-            cx={startX}
-            cy={startY}
-            hovering={hovering}
-          />
-        </g>
-      );
-    }
-
     const displayText = arrow.text?.trim();
     const hasText = !!displayText;
     const textButtonClasses = classNames("text-box", "text-display", {
@@ -243,16 +240,14 @@ export const ArrowAnnotationComponent = observer(
         <DragHandle
           draggingHandle={draggingSource}
           dragTarget="source"
-          hovering={hoveringSource}
-          setHovering={setHoveringSource}
+          handleMouseDown={handleMouseDown}
           startX={sourceX}
           startY={sourceY}
         />
         <DragHandle
           draggingHandle={draggingTarget}
           dragTarget="target"
-          hovering={hoveringTarget}
-          setHovering={setHoveringTarget}
+          handleMouseDown={handleMouseDown}
           startX={targetX}
           startY={targetY}
         />
