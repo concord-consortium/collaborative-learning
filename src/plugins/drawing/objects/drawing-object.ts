@@ -18,6 +18,7 @@ export interface IToolbarManager {
   hasSelectedObjects: boolean;
   selectedIds: string [];
   deleteObjects(ids: string[]): void;
+  duplicateObjects(ids: string[]): void;
   stamps: StampModelType[];
   currentStamp: StampModelType | null;
   stroke: string;
@@ -84,7 +85,7 @@ export const DrawingObject = types.model("DrawingObject", {
     self.dragX = x;
     self.dragY = y;
   },
-  adoptDragPosition() {
+  repositionObject() {
     self.x = self.dragX ?? self.x;
     self.y = self.dragY ?? self.y;
     self.dragX = self.dragY = undefined;
@@ -96,9 +97,9 @@ export const DrawingObject = types.model("DrawingObject", {
     // Implementated in subclasses since this will affect object types differently.
     console.error("setDragBounds is unimplemented for this type");
   },
-  adoptDragBounds() {
+  resizeObject() {
     // Move any volatile resizing into the persisted object model.
-    console.error("adoptDragBounds is unimplemented for this type");
+    console.error("resizeObject is unimplemented for this type");
   }
 }));
 export interface DrawingObjectType extends Instance<typeof DrawingObject> {}

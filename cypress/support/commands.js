@@ -215,7 +215,7 @@ Cypress.Commands.add("getDocumentToolTile", (tileIndex = 0) => {
   cy.get('.documents-panel .editable-document-content .tile-row tool-tile').eq(tileIndex).click();
 });
 Cypress.Commands.add('collapseResourceTabs', () => {
-  cy.get('.divider-container').trigger('mouseover').then(() => {
+  cy.get('.drag-thumbnail').trigger('mouseover').then(() => {
     cy.get('.divider-container .expand-handle.left.shown').should("exist");
     cy.get('.divider-container .expand-handle.left.shown').click();
     cy.get('.primary-workspace .toolbar', {timeout: 120000});

@@ -18,11 +18,6 @@ interface IProps {
   showSolutionsSwitch: boolean;
 }
 
-const kHeaderHeight = 55;
-const kWorkspaceContentMargin = 4;
-const kNavTabHeight = 34;
-const kTabSectionBorderWidth = 2;
-
 export const ProblemTabContent: React.FC<IProps>
   = observer(function ProblemTabContent({ context, sections, showSolutionsSwitch }: IProps) {
   const { isTeacher } = useUserStore();
@@ -31,16 +26,11 @@ export const ProblemTabContent: React.FC<IProps>
   const { showTeacherContent } = ui;
   const hasSubTabs = sections && sections.length > 1;
   const chatBorder = ui.showChatPanel ? "chat-open" : "";
-  const vh = window.innerHeight;
-  const headerOffset = hasSubTabs
-                        ? kHeaderHeight + (2 * (kWorkspaceContentMargin + kNavTabHeight + kTabSectionBorderWidth))
-                        : kHeaderHeight + kNavTabHeight + (2 * (kWorkspaceContentMargin + kTabSectionBorderWidth));
-  const problemsPanelHeight = vh - headerOffset;
-  const problemsPanelStyle = { height: problemsPanelHeight };
   const tabId = context || ENavTab.kProblems;
 
   useEffect(() => {
-    if (hasSubTabs) {
+    // Set the default subTab if a subtab isn't already set
+    if (hasSubTabs && !ui.tabs.get(tabId)?.openSubTab) {
       ui.setOpenSubTab(tabId, sections[0].type);
     }
   }, [hasSubTabs, sections, tabId, ui]);
@@ -99,7 +89,7 @@ export const ProblemTabContent: React.FC<IProps>
         {isTeacher && showSolutionsSwitch &&
           <SolutionsButton onClick={handleToggleSolutions} isToggled={showTeacherContent} />}
       </div>
-      <div className="problem-panel" style={problemsPanelStyle}>
+      <div className="problem-panel">
         {sections?.map((section) => {
           return (
             <TabPanel key={`section-${section.type}`} data-focus-section={section.type}>
