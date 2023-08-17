@@ -152,25 +152,19 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
       console.log("----useEffect 2-------");
       // console.log("\t", content.pointsXValuesArr);
       // console.log("\t", content.pointsIsSelectedArr);
-
       const updateNumberline = () => {
 
-        /* ================== [ P L O T   S T O R E D   P O I N T S ] ================ */
-
+        /* ================== [ P L O T   O U T E R   P O I N T S ] ================ */
         // ---------- Create Outer Hover Circles For Existing Points In Model  ----------
         const existingPointsOuterCircle = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.outer-point')
         .data(content.axisPoints, p => p.id);
         // --- Initialize Attributes
         existingPointsOuterCircle.enter()
-        .append("circle")
-        .attr("class", "outer-point")
+        .append("circle").attr("class", "outer-point")
         .attr('cx', (p) => {
           const xValue = p.pointCoordinates?.xValue;
           return xScale(xValue || numberlineDomainMin); //mapped to axis width
-        })
-        .attr('cy', yMidPoint)
-        .attr('r', outerPointRadius)
-        .attr('id', p => p.id)
+        }).attr('cy', yMidPoint).attr('r', outerPointRadius).attr('id', p => p.id)
         .classed("defaultPointOuterCircle", true)
         .classed("disabled", (p, idx) =>!(idx === content.indexOfPointHovered));
         // --- Update Data for Existing circles
@@ -184,7 +178,7 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
 
         // --- Remove circles for data that no longer exists
         existingPointsOuterCircle.exit().remove();
-
+        /* ================== [ P L O T   I N N E R  P O I N T S ] ================ */
         // ------- Create Inner Circles For Existing Points In Model  -------------------
         const existingPointsInnerCircle = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.inner-point')
         .data(content.axisPoints, p => p.id);
@@ -197,11 +191,8 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
           const xValue = p.pointCoordinates?.xValue;
           return xScale(xValue || numberlineDomainMin); //mapped to axis width
         })
-        .attr('cy', yMidPoint)
-        .attr('r', innerPointRadius)
-        .attr('id', p => p.id)
-        .classed("defaultPointInnerCircle", true)
-        .classed("selected", (p)=>!!p.isSelected)
+        .attr('cy', yMidPoint).attr('r', innerPointRadius).attr('id', p => p.id)
+        .classed("defaultPointInnerCircle", true).classed("selected", (p)=>!!p.isSelected)
         .call(handleDrag as any); // Attach drag behavior to newly created circles
 
         // Update Data for Existing circles
