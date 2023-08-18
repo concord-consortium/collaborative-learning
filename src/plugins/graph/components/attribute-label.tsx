@@ -165,7 +165,7 @@ export const AttributeLabel = observer(
     const skipPortal = appConfig.getSetting("defaultSeriesLegend", "graph") && place === "left";
     return (
       <>
-        <g ref={labelRef} className={`label-ref ${place}`} />
+        <g ref={labelRef} className={`display-label ${place}`} />
         {readyForPortal && !skipPortal &&
           createPortal(<AxisOrLegendAttributeMenu
             target={labelRef.current}

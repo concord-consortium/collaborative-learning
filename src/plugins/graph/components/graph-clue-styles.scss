@@ -2,12 +2,13 @@
 
 .graph-plot {
   background-color: $workspace-teal-light-7;
-  .attribute-label {
-    fill: $workspace-teal-dark-2;
-    text-decoration: none !important; // this is an override file by design
+  .display-label.left text {
+    fill: black;
+    text-decoration: none;
   }
-  .label-ref.left text {
-    fill: black !important;
+  .display-label.bottom text {
+    fill: $workspace-teal-dark-2;
+    text-decoration: underline;
   }
 }
 
