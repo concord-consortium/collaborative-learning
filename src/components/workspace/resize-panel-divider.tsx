@@ -41,15 +41,7 @@ const ExpandHandle: React.FC<IExpanderProps> = ({dividerPosition, direction, sho
 
 export const ResizePanelDivider: React.FC <IProps> =
   ({dividerPosition, showExpanders, onDividerClick, toggleShowExpanders, onExpandWorkspace, onExpandResources}) => {
-    const dividerMinLeftOffset = 39.5;
-    const dividerMaxLeftOffset = 22;
-    const tabWidth = 45;
     const hideDivider = dividerPosition === kDividerMin || dividerPosition === kDividerMax;
-    const dividerPositionStyle = dividerPosition  === kDividerMin
-                                  ? {left: dividerMinLeftOffset}
-                                  : dividerPosition === kDividerMax
-                                      ? {left: `calc(${dividerPosition}% - ${tabWidth}px - ${dividerMaxLeftOffset}px)`}
-                                      : {left: `calc(${dividerPosition}%)`};
 
     const hoveringTimeout = useRef<number | undefined>(undefined);
     const hovering = useRef<boolean>(false);
@@ -83,7 +75,7 @@ export const ResizePanelDivider: React.FC <IProps> =
                 <ExpandHandle dividerPosition={dividerPosition} direction={"right"} shown={showExpanders}
                               onExpand={onExpandResources} toggleShowExpanderHandle={toggleShowExpanders} />
               </div>
-            : <div className="resize-panel-divider" style={dividerPositionStyle}>
+            : <div className="resize-panel-divider" >
                 <div className="divider" onMouseEnter={handleDividerEnter}
                       onMouseLeave={handleDividerLeave} onClick={()=>onDividerClick()}/>
                 <DragThumbnailIcon className="drag-thumbnail" onClick={()=>onDividerClick()}
