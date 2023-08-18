@@ -12,6 +12,7 @@ import { useOverlayBounds } from "../../../hooks/use-overlay-bounds";
 import { AttributeType } from "../../../../../../models/data/attribute";
 import { IDataSet } from "../../../../../../models/data/data-set";
 import { isSetAttributeNameAction } from "../../../../../../models/data/data-set-actions";
+import { is } from "immutable";
 
 interface IProps {
   place: GraphPlace,
@@ -71,16 +72,23 @@ const _AxisOrLegendAttributeMenu = ({ place, target, portal, isInMultilegend,
     });
   }, [attribute?.name, data?.attributes, dataConfig, labelText, setLabelText, attrId]);
 
+  const calcMenuClasses = (isOpen: boolean) => {
+    const classes = ["codap-graph-attribute-label"];
+    classes.push(isOpen ? "open" : "closed");
+    isInMultilegend && classes.push("multilegend");
+    return classes.join(" ");
+  };
+
   return (
     <div className={`axis-legend-attribute-menu ${place}`} ref={menuRef}>
       <Menu boundary="scrollParent">
-        {({ onClose }) => {
+        {({ onClose, isOpen }) => {
+          const menuClasses = calcMenuClasses(isOpen);
           onCloseRef.current = onClose;
-
           return (
-            <div className="codap-graph-attribute-label" ref={setDragNodeRef}
+            <div className={menuClasses} ref={setDragNodeRef}
                 style={overlayStyle} {...attributes} {...listeners}>
-              <MenuButton style={buttonStyle}>{attribute?.name}</MenuButton>
+              <MenuButton style={buttonStyle}>{attribute?.name} </MenuButton>
               <MenuList>
                 { !data &&
                   <MenuItem className="inactive">
