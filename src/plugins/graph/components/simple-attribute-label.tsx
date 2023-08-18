@@ -13,7 +13,7 @@ import DropdownCaretIcon from "../dropdown-caret.svg";
 import "../components/legend/multi-legend.scss";
 
 interface ISimpleAttributeLabelProps {
-  place: GraphPlace,
+  place: GraphPlace
   onChangeAttribute?: (place: GraphPlace, dataSet: IDataSet, attrId: string) => void
   onRemoveAttribute?: (place: GraphPlace, attrId: string) => void
   onTreatAttributeAs?: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void
