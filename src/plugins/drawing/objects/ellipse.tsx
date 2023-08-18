@@ -88,7 +88,7 @@ export class EllipseDrawingTool extends DrawingTool {
   public handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
     const start = this.drawingLayer.getWorkspacePoint(e);
     if (!start) return;
-    const {stroke, fill, strokeWidth, strokeDashArray} = this.settings;
+    const {stroke, fill, strokeWidth, strokeDashArray} = this.drawingLayer.toolbarSettings();
     const ellipse = EllipseObject.create({
       x: start.x,
       y: start.y,

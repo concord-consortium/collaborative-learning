@@ -1,7 +1,7 @@
 import { getMembers, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { uniqueId } from "../../../utilities/js-utils";
 import { SelectionBox } from "../components/selection-box";
-import { BoundingBox, BoundingBoxDelta, DefaultToolbarSettings, Point, ToolbarSettings }
+import { BoundingBox, BoundingBoxDelta, Point, ToolbarSettings }
    from "../model/drawing-basic-types";
 import { StampModelType } from "../model/stamp";
 
@@ -200,6 +200,7 @@ export interface IDrawingLayer {
   endSelectionBox: (addToSelectedObjects: boolean) => void;
   setSelectedObjects: (selectedObjects: DrawingObjectType[]) => void;
   getSelectedObjects: () => DrawingObjectType[];
+  toolbarSettings: () => ToolbarSettings;
 }
 
 export abstract class DrawingTool {
@@ -207,14 +208,7 @@ export abstract class DrawingTool {
   public settings: ToolbarSettings;
 
   constructor(drawingLayer: IDrawingLayer) {
-    const {stroke, fill, strokeDashArray, strokeWidth} = DefaultToolbarSettings;
     this.drawingLayer = drawingLayer;
-    this.settings = {
-      stroke,
-      fill,
-      strokeDashArray,
-      strokeWidth
-    };
   }
 
   public setSettings(settings: ToolbarSettings) {

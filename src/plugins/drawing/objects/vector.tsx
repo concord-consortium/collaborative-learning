@@ -133,7 +133,7 @@ export class VectorDrawingTool extends DrawingTool {
   public handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
     const start = this.drawingLayer.getWorkspacePoint(e);
     if (!start) return;
-    const {stroke, strokeWidth, strokeDashArray, vectorType} = this.settings;
+    const {stroke, strokeWidth, strokeDashArray, vectorType} = this.drawingLayer.toolbarSettings();
     const [headShape, tailShape] = endShapesForVectorType(vectorType);
     const vector = VectorObject.create({
       x: start.x,
@@ -161,9 +161,7 @@ export class VectorDrawingTool extends DrawingTool {
     const handleMouseUp = (e2: MouseEvent) => {
       e2.preventDefault();
       if ((vector.dx !== 0) || (vector.dy !== 0)) {
-        const obj = this.drawingLayer.addNewDrawingObject(getSnapshot(vector));
-        this.drawingLayer.setCurrentDrawingObject(obj);
-        // this.drawingLayer.syncCurrentTool("select");
+        this.drawingLayer.addNewDrawingObject(getSnapshot(vector));
       } else {
         this.drawingLayer.setCurrentDrawingObject(null);
       }

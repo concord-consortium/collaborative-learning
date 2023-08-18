@@ -1,5 +1,4 @@
 import React from "react";
-import { reaction, IReactionDisposer } from "mobx";
 import { isAlive, getSnapshot } from "mobx-state-tree";
 import { observer } from "mobx-react";
 import { extractDragTileType, kDragTileContent } from "../../../components/tiles/tile-component";
@@ -50,7 +49,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   private svgRef: React.RefObject<any>|null;
   private setSvgRef: (element: any) => void;
   private _isMounted: boolean;
-  private disposers: IReactionDisposer[];
 
   constructor(props: DrawingLayerViewProps) {
     super(props);
@@ -77,12 +75,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
   public componentDidMount() {
     this._isMounted = true;
-    this.disposers = [];
-
-    this.disposers.push(reaction(
-      () => this.getContent().toolbarSettings,
-      settings => this.setCurrentToolSettings(settings)
-    ));
   }
 
   public componentDidUpdate(prevProps: DrawingLayerViewProps, prevState: DrawingLayerViewState) {
@@ -93,13 +85,15 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   }
 
   public componentWillUnmount() {
-    this.disposers.forEach(disposer => disposer());
-
     this._isMounted = false;
   }
 
+  // Adds a new object and selects it, activating the select tool.
   public addNewDrawingObject(drawingObject: DrawingObjectSnapshotForAdd) {
-    return this.getContent().addObject(drawingObject);
+    const obj = this.getContent().addObject(drawingObject);
+    this.getContent().setSelectedButton('select');
+    this.setSelectedObjects([obj]);
+    return obj;
   }
 
   public getSelectedObjects(): DrawingObjectType [] {
@@ -115,8 +109,8 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     return this.tools[this.getContent().selectedButton];
   }
 
-  public setCurrentToolSettings(settings: ToolbarSettings) {
-    this.getCurrentTool()?.setSettings(settings);
+  public toolbarSettings(): ToolbarSettings {
+    return this.getContent().toolbarSettings;
   }
 
   public getCurrentStamp() {
