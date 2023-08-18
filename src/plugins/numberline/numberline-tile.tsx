@@ -166,7 +166,9 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
           const xValue = p.pointCoordinates?.xValue;
           return xScale(xValue || numberlineDomainMin); //mapped to axis width
         }).attr('cy', yMidPoint).attr('r', outerPointRadius).attr('id', p => p.id)
-        .classed("defaultPointOuterCircle", true);
+        .classed("defaultPointOuterCircle", true)
+        .classed("disabled", (p, idx) =>!(idx === content.indexOfPointHovered));
+
 
         // --- Update functions outer hover circles
         outerPoints
