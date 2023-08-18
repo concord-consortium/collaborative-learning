@@ -161,7 +161,7 @@ context('Diagram Tool Tile', function () {
       diagramTile.getVariableCard().should("exist");
     });
 
-    it.only("Make sure only one diagram tile is allowed", () => {
+    it("Make sure only one diagram tile is allowed", () => {
       clueCanvas.addTile("diagram");
       clueCanvas.verifyToolDisabled("diagram");
       clueCanvas.deleteTile("diagram");
