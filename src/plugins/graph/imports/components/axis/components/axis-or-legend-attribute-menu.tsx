@@ -48,7 +48,7 @@ const _AxisOrLegendAttributeMenu = ({ place, target, portal,
     position: "absolute", ...useOverlayBounds({target, portal})
   };
   const buttonStyle: CSSProperties = {
-    position: "absolute", width: "100%", height: "100%", color: "transparent", left: 0, top: 0
+    position: "absolute", inset: 0, padding: 0, color: "transparent"
   };
 
   const draggableOptions: IUseDraggableAttribute = {
