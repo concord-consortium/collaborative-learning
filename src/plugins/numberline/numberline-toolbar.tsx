@@ -4,18 +4,21 @@ import ReactDOM from "react-dom";
 import { IFloatingToolbarProps, useFloatingToolbarLocation
         } from "../../components/tiles/hooks/use-floating-toolbar-location";
 import { useSettingFromStores } from "../../hooks/use-stores";
-import { SetPlacePoint } from "./numberline-toolbar-buttons";
+import { PlacePointButton, ClearPointsButton, DeletePointButton } from "./numberline-toolbar-buttons";
+
 import "./numberline-toolbar.scss";
 
-const defaultButtons = ["place-point"];
+const defaultButtons = ["place-point", "clear-points", "delete-points"];
 
 interface INumberlineToolbarProps extends IFloatingToolbarProps {
-  onSetPlacePoint: () => void;
+  handlePlacePoint: () => void;
+  handleClearPoints: () => void;
+  handleDeletePoint: () => void;
 }
 
 export const NumberlineToolbar: React.FC<INumberlineToolbarProps> = observer((props) => {
   const { documentContent,  tileElt, onIsEnabled,
-    onSetPlacePoint,  ...others } = props;
+    handlePlacePoint, handleClearPoints, handleDeletePoint, ...others } = props;
   const enabled = onIsEnabled();
   const location = useFloatingToolbarLocation({
                     documentContent,
@@ -25,15 +28,21 @@ export const NumberlineToolbar: React.FC<INumberlineToolbarProps> = observer((pr
                     enabled,
                     ...others
                   });
+
   const buttonSettings = useSettingFromStores("tools", "numberline") as unknown as string[] | undefined;
   const buttons = buttonSettings || defaultButtons;
 
   const getToolbarButton = (toolName: string) => {
     switch (toolName) {
       case "place-point":
-        return <SetPlacePoint key={toolName} onClick={onSetPlacePoint} />;
+        return <PlacePointButton key={toolName} onClick={handlePlacePoint} />;
+      case "clear-points":
+        return <ClearPointsButton key={toolName} onClick={handleClearPoints} />;
+      case "delete-points":
+        return <DeletePointButton key={toolName} onClick={handleDeletePoint} />;
     }
   };
+
 
   return documentContent
     ? ReactDOM.createPortal(

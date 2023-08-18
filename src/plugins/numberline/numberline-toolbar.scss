@@ -7,6 +7,7 @@
   border: $toolbar-border;
   border-radius: 0 0 $toolbar-border-radius $toolbar-border-radius;
   overflow: hidden;
+  display: flex;
   z-index: $toolbar-z-index;
 
    &.disabled {

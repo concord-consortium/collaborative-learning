@@ -5,6 +5,7 @@ import { NumberlineToolComponent } from "./numberline-tile";
 import { BasicEditableTileTitle } from "../../components/tiles/basic-editable-tile-title";
 import { NumberlineToolbar } from "./numberline-toolbar";
 import { useToolbarTileApi } from "../../components/tiles/hooks/use-toolbar-tile-api";
+import { NumberlineContentModelType } from "./models/numberline-content";
 
 import "./numberline-tile-wrapper.scss";
 
@@ -13,8 +14,19 @@ export const NumberlineTileWrapperComponent: React.FC<ITileProps> = (props) => {
     documentContent, model, readOnly, scale, tileElt,
     onRegisterTileApi, onUnregisterTileApi
   } = props;
-  const placePointClicked = () => null;
   const toolbarProps = useToolbarTileApi({ id: model.id, enabled: !readOnly, onRegisterTileApi, onUnregisterTileApi });
+
+  const handlePlacePoint = () => null;
+
+  const handleUndoPoints = () => {
+    const content = model.content as NumberlineContentModelType;
+    content.clearAllPoints();
+  };
+
+  const handleDeletePoint = () => {
+    //TODO: will implement in future ticket
+  };
+
 
   return (
     <div className={classNames("numberline-wrapper", { "read-only": readOnly })}>
@@ -30,7 +42,9 @@ export const NumberlineTileWrapperComponent: React.FC<ITileProps> = (props) => {
         tileElt={tileElt}
         {...toolbarProps}
         scale={scale}
-        onSetPlacePoint={placePointClicked}
+        handlePlacePoint={handlePlacePoint}
+        handleClearPoints={handleUndoPoints}
+        handleDeletePoint={handleDeletePoint}
       />
       <NumberlineToolComponent {...props}/>
     </div>
