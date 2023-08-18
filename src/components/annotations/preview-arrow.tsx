@@ -1,5 +1,6 @@
 import React from "react";
 
+import { AnnotationNode } from "./annotation-node";
 import { getDeafultPeak } from "./annotation-utilities";
 import { CurvedArrow } from "./curved-arrow";
 
@@ -14,15 +15,22 @@ export function PreviewArrow({ sourceX, sourceY, targetX, targetY }: IPreviewArr
     const { peakX, peakY } = getDeafultPeak(sourceX, sourceY, targetX, targetY);
 
     return (
-      <CurvedArrow
-        className="preview-arrow"
-        peakX={peakX}
-        peakY={peakY}
-        sourceX={sourceX}
-        sourceY={sourceY}
-        targetX={targetX}
-        targetY={targetY}
-      />
+      <>
+        <CurvedArrow
+          className="preview-arrow"
+          peakX={peakX}
+          peakY={peakY}
+          sourceX={sourceX}
+          sourceY={sourceY}
+          targetX={targetX}
+          targetY={targetY}
+        />
+        <AnnotationNode
+          active={true}
+          cx={sourceX}
+          cy={sourceY}
+        />
+      </>
     );
   }
   return null;
