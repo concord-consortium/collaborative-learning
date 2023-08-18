@@ -162,9 +162,8 @@ export class VectorDrawingTool extends DrawingTool {
       e2.preventDefault();
       if ((vector.dx !== 0) || (vector.dy !== 0)) {
         this.drawingLayer.addNewDrawingObject(getSnapshot(vector));
-      } else {
-        this.drawingLayer.setCurrentDrawingObject(null);
       }
+      this.drawingLayer.setCurrentDrawingObject(null);
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
     };
