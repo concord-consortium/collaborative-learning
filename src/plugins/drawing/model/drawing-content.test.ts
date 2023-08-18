@@ -145,13 +145,13 @@ describe("DrawingContentModel", () => {
 
     // delete does nothing if nothing is selected
     expect(model.objects.length).toBe(2);
-    model.deleteObjects(model.selection);
+    model.deleteObjects(model.selectedIds);
     expect(model.objects.length).toBe(2);
 
     model.setSelectedIds(["a", "b"]);
     expect(model.hasSelectedObjects).toBe(true);
 
-    model.deleteObjects(model.selection);
+    model.deleteObjects(model.selectedIds);
     expect(model.objects.length).toBe(0);
 
     // Note: Normally the path will start at the root of the document, but for this test we
@@ -201,7 +201,7 @@ describe("DrawingContentModel", () => {
       { operation: "deleteObjects", change: { args: [ [] ], path: ""}, tileId: "drawing-1" });
     expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(4,
       LogEventName.DRAWING_TOOL_CHANGE,
-      { operation: "setSelection", change: { args: [ ["a", "b"] ], path: ""}, tileId: "drawing-1" });
+      { operation: "setSelectedIds", change: { args: [ ["a", "b"] ], path: ""}, tileId: "drawing-1" });
     expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(5,
       LogEventName.DRAWING_TOOL_CHANGE,
       { operation: "deleteObjects", change: { args: [ ["a", "b"] ], path: ""}, tileId: "drawing-1" });
@@ -237,7 +237,7 @@ describe("DrawingContentModel", () => {
 
     expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(1,
       LogEventName.DRAWING_TOOL_CHANGE,
-      { operation: "setSelection", change: { args: [["a", "b"]], path: "" }, tileId: "drawing-1" });
+      { operation: "setSelectedIds", change: { args: [["a", "b"]], path: "" }, tileId: "drawing-1" });
     expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(2,
       LogEventName.DRAWING_TOOL_CHANGE,
       { operation: "setStroke", change: { args: ["#000000", ["a", "b"]], path: "" }, tileId: "drawing-1" });
