@@ -4,7 +4,10 @@
   background-color: $workspace-teal-light-7;
   .attribute-label {
     fill: $workspace-teal-dark-2;
-    text-decoration: underline;
+    text-decoration: none !important; // this is an override file by design
+  }
+  .label-ref.left text {
+    fill: black !important;
   }
 }
 

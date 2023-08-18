@@ -17,6 +17,7 @@ import {getStringBounds} from "../imports/components/axis/axis-utils";
 import {AxisOrLegendAttributeMenu} from "../imports/components/axis/components/axis-or-legend-attribute-menu";
 import { useSettingFromStores } from "../../../hooks/use-stores";
 import graphVars from "./graph.scss";
+import { MultiLegend } from "./legend/multi-legend";
 
 interface IAttributeLabelProps {
   place: GraphPlace
@@ -37,6 +38,7 @@ export const AttributeLabel = observer(
       {isTileSelected} = useTileModelContext(),
       dataset = dataConfiguration?.dataset,
       labelRef = useRef<SVGGElement>(null),
+      // TODO - I should use this pattern for the usesClickableLabel prop?
       useClickHereCue = dataConfiguration?.placeCanShowClickHereCue(place) ?? false,
       hideClickHereCue = useClickHereCue &&
         !dataConfiguration?.placeAlwaysShowsClickHereCue(place) && !isTileSelected(),
@@ -162,12 +164,12 @@ export const AttributeLabel = observer(
         return () => disposer();
     }, [place, dataConfiguration, refreshAxisTitle]);
 
-    const addPortal = parentElt && onChangeAttribute && onTreatAttributeAs && onRemoveAttribute;
-    const usesAxisMenu = usesClickableLabel && addPortal;
+    const readyForPortal = parentElt && onChangeAttribute && onTreatAttributeAs && onRemoveAttribute;
+    const skipPortal = !usesClickableLabel && place === "left";
     return (
       <>
-        <g ref={labelRef}/>
-        {usesAxisMenu &&
+        <g ref={labelRef} className={`label-ref ${place}`} />
+        {readyForPortal && !skipPortal &&
           createPortal(<AxisOrLegendAttributeMenu
             target={labelRef.current}
             portal={parentElt}
