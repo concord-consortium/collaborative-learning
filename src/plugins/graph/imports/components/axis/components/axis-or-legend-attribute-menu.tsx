@@ -14,9 +14,9 @@ import { IDataSet } from "../../../../../../models/data/data-set";
 import { isSetAttributeNameAction } from "../../../../../../models/data/data-set-actions";
 
 interface IProps {
-  place: GraphPlace,
+  place: GraphPlace
   target: SVGGElement | HTMLElement | null
-  portal: HTMLElement | null,
+  portal: HTMLElement | null
   onChangeAttribute: (place: GraphPlace, dataSet: IDataSet, attrId: string) => void
   onRemoveAttribute: (place: GraphPlace, attrId: string) => void
   onTreatAttributeAs: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void
@@ -83,7 +83,7 @@ const _AxisOrLegendAttributeMenu = ({ place, target, portal,
           onCloseRef.current = onClose;
           return (
             <div ref={setDragNodeRef} style={overlayStyle} {...attributes} {...listeners}>
-              <MenuButton style={buttonStyle}>{attribute?.name} </MenuButton>
+              <MenuButton style={buttonStyle}>{attribute?.name}</MenuButton>
               <MenuList>
                 { !data &&
                   <MenuItem className="inactive">

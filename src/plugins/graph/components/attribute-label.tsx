@@ -15,21 +15,20 @@ import {useGraphLayoutContext} from "../models/graph-layout";
 import {useTileModelContext} from "../imports/hooks/use-tile-model-context";
 import {getStringBounds} from "../imports/components/axis/axis-utils";
 import {AxisOrLegendAttributeMenu} from "../imports/components/axis/components/axis-or-legend-attribute-menu";
-import { useSettingFromStores } from "../../../hooks/use-stores";
+import {useSettingFromStores} from "../../../hooks/use-stores";
+import {appConfig} from "../../../initialize-app";
+
 import graphVars from "./graph.scss";
 
 interface IAttributeLabelProps {
   place: GraphPlace
-  usesClickableLabel?: boolean
   onChangeAttribute?: (place: GraphPlace, dataSet: IDataSet, attrId: string) => void
   onRemoveAttribute?: (place: GraphPlace, attrId: string) => void
   onTreatAttributeAs?: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void
 }
 
 export const AttributeLabel = observer(
-  function AttributeLabel({
-    place, usesClickableLabel, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute
-  }: IAttributeLabelProps) {
+  function AttributeLabel({place, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute}: IAttributeLabelProps) {
     const graphModel = useGraphModelContext(),
       dataConfiguration = useDataConfigurationContext(),
       defaultAxisLabels = useSettingFromStores("defaultAxisLabels", "graph") as Record<string, string> | undefined,
@@ -37,7 +36,6 @@ export const AttributeLabel = observer(
       {isTileSelected} = useTileModelContext(),
       dataset = dataConfiguration?.dataset,
       labelRef = useRef<SVGGElement>(null),
-      // TODO - I should use this pattern for the usesClickableLabel prop?
       useClickHereCue = dataConfiguration?.placeCanShowClickHereCue(place) ?? false,
       hideClickHereCue = useClickHereCue &&
         !dataConfiguration?.placeAlwaysShowsClickHereCue(place) && !isTileSelected(),
@@ -164,7 +162,7 @@ export const AttributeLabel = observer(
     }, [place, dataConfiguration, refreshAxisTitle]);
 
     const readyForPortal = parentElt && onChangeAttribute && onTreatAttributeAs && onRemoveAttribute;
-    const skipPortal = !usesClickableLabel && place === "left";
+    const skipPortal = appConfig.getSetting("defaultSeriesLegend", "graph") && place === "left";
     return (
       <>
         <g ref={labelRef} className={`label-ref ${place}`} />
