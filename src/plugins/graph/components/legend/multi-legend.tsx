@@ -31,7 +31,6 @@ export const MultiLegend = function MultiLegend(props: IMultiLegendProps) {
     <div className="multi-legend" ref={ multiLegendRef }>
       <SimpleAttributeLabel
         place={'left'}
-        isInMultilegend={true}
         onChangeAttribute={onChangeAttribute}
         onRemoveAttribute={onRemoveAttribute}
         onTreatAttributeAs={onTreatAttributeAs}
