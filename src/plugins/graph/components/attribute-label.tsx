@@ -16,18 +16,20 @@ import {useTileModelContext} from "../imports/hooks/use-tile-model-context";
 import {getStringBounds} from "../imports/components/axis/axis-utils";
 import {AxisOrLegendAttributeMenu} from "../imports/components/axis/components/axis-or-legend-attribute-menu";
 import { useSettingFromStores } from "../../../hooks/use-stores";
-
 import graphVars from "./graph.scss";
 
 interface IAttributeLabelProps {
   place: GraphPlace
+  usesClickableLabel?: boolean
   onChangeAttribute?: (place: GraphPlace, dataSet: IDataSet, attrId: string) => void
   onRemoveAttribute?: (place: GraphPlace, attrId: string) => void
   onTreatAttributeAs?: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void
 }
 
 export const AttributeLabel = observer(
-  function AttributeLabel({place, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute}: IAttributeLabelProps) {
+  function AttributeLabel({
+    place, usesClickableLabel, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute
+  }: IAttributeLabelProps) {
     const graphModel = useGraphModelContext(),
       dataConfiguration = useDataConfigurationContext(),
       defaultAxisLabels = useSettingFromStores("defaultAxisLabels", "graph") as Record<string, string> | undefined,
@@ -160,10 +162,12 @@ export const AttributeLabel = observer(
         return () => disposer();
     }, [place, dataConfiguration, refreshAxisTitle]);
 
+    const addPortal = parentElt && onChangeAttribute && onTreatAttributeAs && onRemoveAttribute;
+    const usesAxisMenu = usesClickableLabel && addPortal;
     return (
       <>
         <g ref={labelRef}/>
-        {parentElt && onChangeAttribute && onTreatAttributeAs && onRemoveAttribute &&
+        {usesAxisMenu &&
           createPortal(<AxisOrLegendAttributeMenu
             target={labelRef.current}
             portal={parentElt}

@@ -27,13 +27,14 @@ interface IProps {
   place: AxisPlace
   enableAnimation: MutableRefObject<boolean>
   autoAdjust?: React.MutableRefObject<boolean>
+  usesClickableLabel?: boolean
   onDropAttribute?: (place: GraphPlace, dataSet: IDataSet, attrId: string) => void
   onRemoveAttribute?: (place: GraphPlace, attrId: string) => void
   onTreatAttributeAs?: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void
 }
 
 export const GraphAxis = observer(function GraphAxis({
-  place, enableAnimation, autoAdjust, onDropAttribute, onRemoveAttribute, onTreatAttributeAs
+  place, enableAnimation, autoAdjust, usesClickableLabel, onDropAttribute, onRemoveAttribute, onTreatAttributeAs
 }: IProps) {
   const dataConfig = useDataConfigurationContext(),
     isDropAllowed = dataConfig?.graphPlaceCanAcceptAttributeIDDrop ?? (() => true),
@@ -144,6 +145,7 @@ export const GraphAxis = observer(function GraphAxis({
         onChangeAttribute={onDropAttribute}
         onRemoveAttribute={onRemoveAttribute}
         onTreatAttributeAs={onTreatAttributeAs}
+        usesClickableLabel={usesClickableLabel}
       />
       {onDropAttribute &&
          <DroppableAxis

@@ -12,7 +12,6 @@ import { useOverlayBounds } from "../../../hooks/use-overlay-bounds";
 import { AttributeType } from "../../../../../../models/data/attribute";
 import { IDataSet } from "../../../../../../models/data/data-set";
 import { isSetAttributeNameAction } from "../../../../../../models/data/data-set-actions";
-import { is } from "immutable";
 
 interface IProps {
   place: GraphPlace,
