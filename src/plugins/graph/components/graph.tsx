@@ -54,8 +54,7 @@ export const Graph = observer(function Graph({graphController, graphRef, dotsRef
     plotAreaSVGRef = useRef<SVGSVGElement>(null),
     backgroundSvgRef = useRef<SVGGElement>(null),
     xAttrID = graphModel.getAttributeID('x'),
-    yAttrID = graphModel.getAttributeID('y'),
-    usesClickableLabel = !appConfig.getSetting("defaultSeriesLegend", "graph");
+    yAttrID = graphModel.getAttributeID('y');
 
   useEffect(function setupPlotArea() {
     if (xScale && xScale?.length > 0) {
@@ -130,7 +129,6 @@ export const Graph = observer(function Graph({graphController, graphRef, dotsRef
                         place={place}
                         enableAnimation={enableAnimation}
                         autoAdjust={autoAdjustAxes}
-                        usesClickableLabel={usesClickableLabel}
                         onDropAttribute={handleChangeAttribute}
                         onRemoveAttribute={handleRemoveAttribute}
                         onTreatAttributeAs={handleTreatAttrAs}
