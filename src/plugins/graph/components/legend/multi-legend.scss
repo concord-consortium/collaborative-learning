@@ -16,8 +16,13 @@ $min-menu-width: 144px;
     border-radius:4px;
     color: #3f3f3f;
 
-    svg {
-      margin-top:4px;
+    .caret {
+      transform: rotate(0deg);
+      transition: transform 0.2s ease-in-out;
+      svg {
+        margin-top:4px;
+        stroke:#3f3f3f;
+      }
     }
 
     .symbol-title {
@@ -30,6 +35,18 @@ $min-menu-width: 144px;
       margin-right: 6px;
       margin-top:2px;
       border-radius: 50%;
+    }
+  }
+
+  .simple-attribute-label.open {
+    border-color:rgb(5, 146, 175);
+    background-color: #F5FBFC;
+    .caret {
+      transform: rotate(180deg);
+      transition: transform 0.2s ease-in-out;
+      svg {
+        stroke:rgb(5, 146, 175);
+      }
     }
   }
 }

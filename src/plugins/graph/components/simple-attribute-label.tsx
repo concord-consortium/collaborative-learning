@@ -32,6 +32,7 @@ export const SimpleAttributeLabel = observer(
     const attr = attrId ? dataset?.attrFromID(attrId) : undefined;
     const attrName = attr?.name ?? "";
     const pointColor = graphModel._pointColors[0]; // In PT#182578812 will passed plotIndex
+    const caretRef = useRef<HTMLDivElement>(null);
 
     return (
       <>
@@ -40,7 +41,7 @@ export const SimpleAttributeLabel = observer(
             <div className="attr-symbol" style={{ backgroundColor: pointColor }}></div>
             <div className="attr-name">{ attrName }</div>
           </div>
-          <div className="caret">
+          <div className="caret" ref={caretRef}>
             <DropdownCaretIcon />
           </div>
         </div>

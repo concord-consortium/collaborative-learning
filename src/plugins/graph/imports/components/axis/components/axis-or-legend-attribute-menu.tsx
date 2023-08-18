@@ -72,22 +72,19 @@ const _AxisOrLegendAttributeMenu = ({ place, target, portal, isInMultilegend,
     });
   }, [attribute?.name, data?.attributes, dataConfig, labelText, setLabelText, attrId]);
 
-  const calcMenuClasses = (isOpen: boolean) => {
-    const classes = ["codap-graph-attribute-label"];
-    classes.push(isOpen ? "open" : "closed");
-    isInMultilegend && classes.push("multilegend");
-    return classes.join(" ");
+  const updateTargetMenuClasses = (isOpen: boolean) => {
+    target?.classList.toggle("open", isOpen);
+    target?.classList.toggle("closed", !isOpen);
   };
 
   return (
     <div className={`axis-legend-attribute-menu ${place}`} ref={menuRef}>
       <Menu boundary="scrollParent">
         {({ onClose, isOpen }) => {
-          const menuClasses = calcMenuClasses(isOpen);
+          isInMultilegend && updateTargetMenuClasses(isOpen);
           onCloseRef.current = onClose;
           return (
-            <div className={menuClasses} ref={setDragNodeRef}
-                style={overlayStyle} {...attributes} {...listeners}>
+            <div ref={setDragNodeRef} style={overlayStyle} {...attributes} {...listeners}>
               <MenuButton style={buttonStyle}>{attribute?.name} </MenuButton>
               <MenuList>
                 { !data &&
