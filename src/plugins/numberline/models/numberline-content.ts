@@ -45,7 +45,6 @@ export const NumberlineContentModel = TileContentModel
     get pointsIsHoveredArr(){
       return self.points.map((pointObj) => pointObj.isHovered);
     },
-
     get pointsIsSelectedArr(){
       return self.points.map((pointObj) => pointObj.isSelected);
     },
@@ -53,9 +52,6 @@ export const NumberlineContentModel = TileContentModel
   .views(self =>({
     get isHoveringOverPoint(){
       return !(self.pointsIsHoveredArr.filter(Boolean).length === 0);
-    },
-    get noPointsSelected(){
-      return (self.pointsIsSelectedArr.filter(Boolean).length === 0);
     },
     get indexOfPointHovered(){
       return self.pointsIsHoveredArr.findIndex((isHovered) => isHovered === true);
@@ -75,16 +71,16 @@ export const NumberlineContentModel = TileContentModel
     clearAllPoints(){
       self.points.clear();
     },
-    givenIdReplacePointCoordinates(id: string, newPointCoordinates: PointCoordinateType){
+    isDraggingUseIdReplacePointCoordinates(oldPoint: PointObjectModelType, newPointCoordinates: PointCoordinateType){
       //searches "points", removes PointObject at index that matches id
       //replaces it with a new PointObject at index that has newPointCoordinates
       self.points.forEach((pointObj, i) => {
-        if (pointObj.id === id){
+        if (pointObj.id === oldPoint.id){
           const newPointObj: PointObjectModelType = {
-            id,
+            id: oldPoint.id,
             pointCoordinates: newPointCoordinates,
-            isHovered: false,
-            isSelected: false,
+            isHovered: oldPoint.isHovered,
+            isSelected: oldPoint.isSelected,
           };
           self.points.splice(i, 1, newPointObj);
         }
@@ -93,7 +89,7 @@ export const NumberlineContentModel = TileContentModel
     replaceAllPoints(newPoints: PointObjectModelType[]){
       self.points.replace(newPoints);
     },
-    mouseHoverOverPoint(mouseXPos: number, axisWidth: number ){
+    isMouseHoverOverPoint(mouseXPos: number, axisWidth: number ){
       if (self.hasPoints){
         const xScale = scaleLinear()
           .domain([numberlineDomainMin, numberlineDomainMax])
@@ -118,7 +114,8 @@ export const NumberlineContentModel = TileContentModel
     createNewPoint(newPoint: PointCoordinateType){
       const id = uniqueId();
       const pointModel = PointObjectModel.create({ id, pointCoordinates: newPoint,
-                                                isHovered: false, isSelected: false });
+                                                isHovered: false, isSelected: false }); //old
+
       self.points.push(pointModel);
     },
     toggleIsSelected(idx: number){
