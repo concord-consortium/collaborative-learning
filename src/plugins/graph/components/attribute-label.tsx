@@ -17,7 +17,6 @@ import {getStringBounds} from "../imports/components/axis/axis-utils";
 import {AxisOrLegendAttributeMenu} from "../imports/components/axis/components/axis-or-legend-attribute-menu";
 import { useSettingFromStores } from "../../../hooks/use-stores";
 import graphVars from "./graph.scss";
-import { MultiLegend } from "./legend/multi-legend";
 
 interface IAttributeLabelProps {
   place: GraphPlace
