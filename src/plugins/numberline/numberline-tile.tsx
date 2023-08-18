@@ -147,7 +147,7 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
   svg.on("click", handleMouseClick);
   svg.on("mousemove", handleMouseMove);
 
-  // * ============================ [ useEffect Numberline ] ===================================== */
+  // * ============================ [ useEffect - construct Numberline ] ========================= */
   useEffect(() => {
     if (axisWidth !== 0) {
       const numOfTicks = numberlineDomainMax - numberlineDomainMin;
@@ -158,7 +158,7 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
       .selectAll("g.tick line") //customize 0 ticks
       .attr("y2", function(x){ return (x === 0) ? tickHeightZero : tickHeightDefault;})
       .attr("stroke-width", function(x){ return (x === 0) ? tickWidthZero : tickWidthDefault;})
-      .attr("style", function(x){ return (x === 0) ? tickStyleZero : tickStyleDefault;});
+      .attr("style", function(x){ return (x === 0) ? tickStyleZero : tickStyleDefault;});;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [axisWidth]);
