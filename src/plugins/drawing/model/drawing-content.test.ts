@@ -122,13 +122,13 @@ describe("DrawingContentModel", () => {
       strokeWidth: DefaultToolbarSettings.strokeWidth
     };
     expect(model.toolbarSettings).toEqual(defaultSettings);
-    model.setStroke(stroke, model.selectedIds);
+    model.setStroke(stroke, model.selection);
     expect(model.toolbarSettings).toEqual({ ...defaultSettings, stroke });
-    model.setFill(fill, model.selectedIds);
+    model.setFill(fill, model.selection);
     expect(model.toolbarSettings).toEqual({ ...defaultSettings, fill, stroke });
-    model.setStrokeDashArray(strokeDashArray, model.selectedIds);
+    model.setStrokeDashArray(strokeDashArray, model.selection);
     expect(model.toolbarSettings).toEqual({ ...defaultSettings, fill, stroke, strokeDashArray });
-    model.setStrokeWidth(strokeWidth, model.selectedIds);
+    model.setStrokeWidth(strokeWidth, model.selection);
     expect(model.toolbarSettings).toEqual({ ...defaultSettings, fill, stroke, strokeDashArray, strokeWidth });
   });
 
@@ -145,14 +145,15 @@ describe("DrawingContentModel", () => {
 
     // delete does nothing if nothing is selected
     expect(model.objects.length).toBe(2);
-    model.deleteObjects(model.selectedIds);
+    model.deleteObjects(model.selection);
     expect(model.objects.length).toBe(2);
 
-    model.setSelection(["a", "b"]);
+    model.setSelectedIds(["a", "b"]);
     expect(model.hasSelectedObjects).toBe(true);
 
-    model.deleteObjects(model.selectedIds);
+    model.deleteObjects(model.selection);
     expect(model.objects.length).toBe(0);
+
     // Note: Normally the path will start at the root of the document, but for this test we
     // are mocking the onTileAction so the path is just blank
     expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(1,
@@ -218,10 +219,10 @@ describe("DrawingContentModel", () => {
     model.addObject(rectSnapshot2);
 
     mockLogTileChangeEvent.mockReset();
-    model.setSelection(["a", "b"]);
-    model.setStroke("#000000", model.selectedIds);
-    model.setStrokeWidth(2, model.selectedIds);
-    model.setStrokeDashArray("3,3", model.selectedIds);
+    model.setSelectedIds(["a", "b"]);
+    model.setStroke("#000000", model.selection);
+    model.setStrokeWidth(2, model.selection);
+    model.setStrokeDashArray("3,3", model.selection);
 
     expect(model.objects[0].type).toBe("rectangle");
     const rect1 = model.objects[0] as RectangleObjectType;

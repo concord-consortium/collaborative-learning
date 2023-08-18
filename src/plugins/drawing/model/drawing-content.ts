@@ -72,14 +72,17 @@ export const DrawingContentModel = TileContentModel
     isSelectedButton(button: ToolbarModalButton) {
       return button === self.selectedButton;
     },
-    get selectedButton() {
-      return self.selectedButton || "select";
-    },
+
     get hasSelectedObjects() {
-      return self.metadata ? self.selection.length > 0 : false;
+      return self.selection.length > 0;
     },
     get selectedIds() {
-      return self.selection;
+      // Returning a mutable object can confuse the caller, so copy it
+      const ids: string[] = [...self.selection];
+      return ids;
+    },
+    isIdSelected(id: string) {
+      return self.selection.includes(id);
     },
     get currentStamp() {
       const currentStampIndex = self.currentStampIndex || 0;
@@ -112,6 +115,11 @@ export const DrawingContentModel = TileContentModel
       return stringify({type, objects}, {maxLength: 200});
     }
   }))
+  .views(self => ({
+    getSelectedObjects():DrawingObjectType[] {
+      return self.selection.map((id) => self.objectMap[id]).filter((x)=>!!x) as DrawingObjectType[];
+    }
+  }))
   .actions(self => tileModelHooks({
     doPostCreate(metadata) {
       self.metadata = metadata as DrawingToolMetadataModelType;
@@ -126,15 +134,19 @@ export const DrawingContentModel = TileContentModel
     }
   }))
   .actions(self => ({
-    setSelection(selection: string[]) {
-      self.selection = selection;
+    setSelectedIds(selection: string[]) {
+      self.selection = [...selection];
     },
+
     unselectId(id: string) {
       const index = self.selection.indexOf(id);
       if (index >= 0) {
         self.selection.splice(index, 1);
+      } else {
+        console.error('Failed to remove id ', id, ' from selection: [', self.selection, ']');
       }
     },
+
     setSelectedButton(button: ToolbarModalButton) {
       if (self.selectedButton !== button) {
         self.selectedButton = button;
@@ -225,6 +237,8 @@ export const DrawingContentModel = TileContentModel
             if (object) {
               self.objects.remove(object);
               self.unselectId(id);
+            } else {
+              console.log('  null object, id=', id);
             }
           });
         },
@@ -241,7 +255,7 @@ export const DrawingContentModel = TileContentModel
               newIds.push(newObject.id);
             }
           });
-          self.setSelection(newIds);
+          self.setSelectedIds(newIds);
         },
 
         moveObjects(moves: DrawingObjectMove[]) {

@@ -39,7 +39,6 @@ interface DrawingLayerViewProps {
 interface DrawingLayerViewState {
   toolbarSettings?: ToolbarSettings;
   currentDrawingObject: DrawingObjectType|null;
-  selectedObjects: DrawingObjectType[];
   selectionBox: SelectionBox|null;
   hoverObject: DrawingObjectType|null;
 }
@@ -47,7 +46,6 @@ interface DrawingLayerViewState {
 @observer
 export class DrawingLayerView extends React.Component<DrawingLayerViewProps, DrawingLayerViewState>
     implements IDrawingLayer {
-  public currentTool: DrawingTool|null;
   public tools: DrawingToolMap;
   private svgRef: React.RefObject<any>|null;
   private setSvgRef: (element: any) => void;
@@ -60,7 +58,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     this.state = {
       currentDrawingObject: null,
       selectionBox: null,
-      selectedObjects: [],
       hoverObject: null,
     };
 
@@ -72,8 +69,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       }
     });
 
-    this.currentTool = this.tools.select!;
-
     this.svgRef = null;
     this.setSvgRef = (element) => {
       this.svgRef = element;
@@ -83,24 +78,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   public componentDidMount() {
     this._isMounted = true;
     this.disposers = [];
-
-    this.disposers.push(reaction(
-      () => this.getContent().selectedButton,
-      selectedButton => this.syncCurrentTool(selectedButton)
-    ));
-
-    // TODO: the list of selected objects is operated on directly by the model for example:
-    // deleteSelectedObjects. So it is redundant to have the selection stored here in the state
-    // too. There are still a few places working with this list of selected objects from the
-    // state instead of the model.
-    this.disposers.push(reaction(
-      () => this.getContent().selectedIds,
-      selectedIds => {
-        const selectedObjects = selectedIds.map(
-          id => this.getContent().objectMap[id]).filter(obj => !!obj) as DrawingObjectType[];
-        this.setState({ selectedObjects });
-      }
-    ));
 
     this.disposers.push(reaction(
       () => this.getContent().toolbarSettings,
@@ -121,41 +98,25 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     this._isMounted = false;
   }
 
-  public syncCurrentTool(selectedButton: string) {
-    const settings = this.getContent().toolbarSettings;
-    const tool = this.tools[selectedButton];
-
-    if (!tool) {
-      console.warn("Unknown tool selected", selectedButton);
-      return;
-    }
-
-    tool.setSettings(settings);
-    this.setCurrentTool(tool);
-  }
-
   public addNewDrawingObject(drawingObject: DrawingObjectSnapshotForAdd) {
     return this.getContent().addObject(drawingObject);
   }
 
-  public setSelectedObjects(selectedObjects: DrawingObjectType[]) {
-    this.setState({selectionBox: null, selectedObjects});
-
-    const drawingContent = this.props.model.content as DrawingContentModelType;
-    const selectedObjectIds = selectedObjects.map(object => object.id || "");
-    drawingContent.setSelection(selectedObjectIds);
-  }
-
   public getSelectedObjects(): DrawingObjectType [] {
-    return this.state.selectedObjects;
+    return this.getContent().getSelectedObjects();
   }
 
-  public setCurrentTool(tool: DrawingTool|null) {
-    this.currentTool = tool;
+  public setSelectedObjects(selectedObjects: DrawingObjectType[]) {
+    const selectedObjectIds = selectedObjects.map(object => object.id || "");
+    this.getContent().setSelectedIds(selectedObjectIds);
+  }
+
+  public getCurrentTool(): DrawingTool|undefined {
+    return this.tools[this.getContent().selectedButton];
   }
 
   public setCurrentToolSettings(settings: ToolbarSettings) {
-    this.currentTool?.setSettings(settings);
+    this.getCurrentTool()?.setSettings(settings);
   }
 
   public getCurrentStamp() {
@@ -164,28 +125,29 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   }
 
   public handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!this.props.readOnly && this.currentTool) {
-      this.currentTool.handleMouseDown(e);
+    if (!this.props.readOnly) {
+      this.getCurrentTool()?.handleMouseDown(e);
     }
   };
 
   public handleObjectClick = (e: MouseEvent|React.MouseEvent<any>, obj: DrawingObjectType) => {
-    if (!this.props.readOnly && this.currentTool) {
-      this.currentTool.handleObjectClick(e, obj);
+    if (!this.props.readOnly) {
+      this.getCurrentTool()?.handleObjectClick(e, obj);
     }
   };
 
   public handleObjectHover: HandleObjectHover = (e, obj, hovering) => {
-    if (!this.props.readOnly && this.currentTool === this.tools.select) {
+    if (!this.props.readOnly && this.getCurrentTool() === this.tools.select) {
       this.setState({hoverObject: hovering ? obj : null});
     }
   };
 
   // handles dragging of selected/hovered objects
   public handleSelectedObjectMouseDown = (e: React.MouseEvent<any>, obj: DrawingObjectType) => {
-    if (this.props.readOnly || (this.currentTool !== this.tools.select)) return;
+    if (this.props.readOnly || (this.getCurrentTool() !== this.tools.select)) return;
     let moved = false;
-    const {selectedObjects, hoverObject } = this.state;
+    const {hoverObject } = this.state;
+    const selectedObjects = this.getSelectedObjects();
     let objectsToInteract: DrawingObjectType[];
     let needToAddHoverToSelection = false;
 
@@ -270,15 +232,16 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     const {selectionBox} = this.state;
     if (selectionBox) {
       selectionBox.close();
-      const selectedObjects: DrawingObjectType[] = addToSelectedObjects ? this.state.selectedObjects : [];
+      const selectedIds: string[] = addToSelectedObjects ? this.getContent().selection : [];
       this.forEachObject((object) => {
         if (object.inSelection(selectionBox)) {
-          if (selectedObjects.indexOf(object) === -1) {
-            selectedObjects.push(object);
+          if (selectedIds.indexOf(object.id) === -1) {
+            selectedIds.push(object.id);
           }
         }
       });
-      this.setSelectedObjects(selectedObjects);
+      this.getContent().setSelectedIds(selectedIds);
+      this.setState({selectionBox: null});
     }
   }
 
@@ -411,9 +374,9 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
   public render() {
     const hoveringOverAlreadySelectedObject =
-      this.state.hoverObject
-        ? this.state.selectedObjects.indexOf(this.state.hoverObject) !== -1
-        : false;
+      this.state.hoverObject 
+        && isAlive(this.state.hoverObject)
+        && this.getContent().isIdSelected(this.state.hoverObject.id);
 
     return (
       <div className="drawing-layer"
@@ -426,7 +389,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         <svg xmlnsXlink="http://www.w3.org/1999/xlink" width={1500} height={1500} ref={this.setSvgRef}>
           {this.renderObjects(object => object.type === "image" )}
           {this.renderObjects(object => object.type !== "image" )}
-          {this.renderSelectedObjects(this.state.selectedObjects, true)}
+          {this.renderSelectedObjects(this.getSelectedObjects(), true)}
           {(this.state.hoverObject && !hoveringOverAlreadySelectedObject && isAlive(this.state.hoverObject))
             ? this.renderSelectedObjects([this.state.hoverObject], false)
             : null}
