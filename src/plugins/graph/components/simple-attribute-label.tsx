@@ -31,17 +31,16 @@ export const SimpleAttributeLabel = observer(
     const attrId = dataConfiguration?.attributeID(graphPlaceToAttrRole[place]);
     const attr = attrId ? dataset?.attrFromID(attrId) : undefined;
     const attrName = attr?.name ?? "";
-    const pointColor = graphModel._pointColors[0]; // In PT#182578812 will passed plotIndex
-    const caretRef = useRef<HTMLDivElement>(null);
+    const pointColor = graphModel._pointColors[0]; // In PT#182578812 will pass plotIndex
 
     return (
       <>
         <div ref={simpleLabelRef} className="simple-attribute-label">
           <div className="symbol-title">
             <div className="attr-symbol" style={{ backgroundColor: pointColor }}></div>
-            <div className="attr-name">{ attrName }</div>
+            <div>{ attrName }</div>
           </div>
-          <div className="caret" ref={caretRef}>
+          <div className="caret">
             <DropdownCaretIcon />
           </div>
         </div>
