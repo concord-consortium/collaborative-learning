@@ -13,7 +13,8 @@ import DropdownCaretIcon from "../dropdown-caret.svg";
 import "../components/legend/multi-legend.scss";
 
 interface ISimpleAttributeLabelProps {
-  place: GraphPlace
+  place: GraphPlace,
+  isInMultilegend?: boolean,
   onChangeAttribute?: (place: GraphPlace, dataSet: IDataSet, attrId: string) => void
   onRemoveAttribute?: (place: GraphPlace, attrId: string) => void
   onTreatAttributeAs?: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void
@@ -21,7 +22,7 @@ interface ISimpleAttributeLabelProps {
 
 export const SimpleAttributeLabel = observer(
   function SimpleAttributeLabel(props: ISimpleAttributeLabelProps) {
-    const {place, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute} = props;
+    const {place, isInMultilegend, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute} = props;
     const simpleLabelRef = useRef<HTMLDivElement>(null);
     const parentElt = simpleLabelRef.current?.closest(kGraphClassSelector) as HTMLDivElement ?? null;
     const dataConfiguration = useDataConfigurationContext();
@@ -48,6 +49,7 @@ export const SimpleAttributeLabel = observer(
             target={simpleLabelRef.current}
             portal={parentElt}
             place={place}
+            isInMultilegend={isInMultilegend}
             onChangeAttribute={onChangeAttribute}
             onRemoveAttribute={onRemoveAttribute}
             onTreatAttributeAs={onTreatAttributeAs}

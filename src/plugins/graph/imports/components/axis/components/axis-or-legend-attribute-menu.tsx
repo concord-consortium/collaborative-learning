@@ -16,7 +16,8 @@ import { isSetAttributeNameAction } from "../../../../../../models/data/data-set
 interface IProps {
   place: GraphPlace,
   target: SVGGElement | HTMLElement | null
-  portal: HTMLElement | null
+  portal: HTMLElement | null,
+  isInMultilegend?: boolean
   onChangeAttribute: (place: GraphPlace, dataSet: IDataSet, attrId: string) => void
   onRemoveAttribute: (place: GraphPlace, attrId: string) => void
   onTreatAttributeAs: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void
@@ -31,7 +32,7 @@ const removeAttrItemLabelKeys: Record<string, string> = {
   "rightSplit": "DG.DataDisplayMenu.removeAttribute_right"
 };
 
-const _AxisOrLegendAttributeMenu = ({ place, target, portal,
+const _AxisOrLegendAttributeMenu = ({ place, target, portal, isInMultilegend,
                                       onChangeAttribute, onRemoveAttribute, onTreatAttributeAs }: IProps) => {
   const data = useDataSetContext();
   const dataConfig = useDataConfigurationContext();
@@ -75,6 +76,7 @@ const _AxisOrLegendAttributeMenu = ({ place, target, portal,
       <Menu boundary="scrollParent">
         {({ onClose }) => {
           onCloseRef.current = onClose;
+
           return (
             <div className="codap-graph-attribute-label" ref={setDragNodeRef}
                 style={overlayStyle} {...attributes} {...listeners}>

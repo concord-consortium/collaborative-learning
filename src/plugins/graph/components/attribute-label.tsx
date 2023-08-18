@@ -168,6 +168,7 @@ export const AttributeLabel = observer(
             target={labelRef.current}
             portal={parentElt}
             place={place}
+            isInMultilegend={false}
             onChangeAttribute={onChangeAttribute}
             onRemoveAttribute={onRemoveAttribute}
             onTreatAttributeAs={onTreatAttributeAs}
