@@ -18,8 +18,6 @@ import { TileMetadataModel } from "../../../models/tiles/tile-metadata";
 import { getTileIdFromContent } from "../../../models/tiles/tile-model";
 import { tileModelHooks } from "../../../models/tiles/tile-model-hooks";
 
-// track selection in metadata object so it is not saved to firebase but
-// also is preserved across document/content reloads
 export const DrawingToolMetadataModel = TileMetadataModel
   .named("DrawingToolMetadata");
 export type DrawingToolMetadataModelType = Instance<typeof DrawingToolMetadataModel>;
