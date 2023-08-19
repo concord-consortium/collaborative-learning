@@ -116,7 +116,7 @@ context('Arrow Annotations (Sparrows)', function () {
 
       cy.log("Can create sparrows across two tiles");
       clueCanvas.addTile("drawing");
-      drawToolTile.getDrawToolLine().eq(1).click();
+      drawToolTile.getDrawToolVector().eq(1).click();
       drawToolTile.getDrawTile().eq(1)
         .trigger("mousedown", 150,  50)
         .trigger("mousemove", 100, 150)
