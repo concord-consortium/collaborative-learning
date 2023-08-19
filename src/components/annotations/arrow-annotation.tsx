@@ -2,6 +2,8 @@ import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { useEffect, useRef, useState } from "react";
 
+import { AnnotationNode } from "./annotation-node";
+import { kAnnotationNodeHeight, kAnnotationNodeWidth } from "./annotation-utilities";
 import { CurvedArrow } from "./curved-arrow";
 import { IArrowAnnotation } from "../../models/annotations/arrow-annotation";
 import { IClueObject } from "../../models/annotations/clue-object";
@@ -9,6 +11,38 @@ import { IClueObject } from "../../models/annotations/clue-object";
 import "./arrow-annotation.scss";
 
 type DragType = "source" | "target" | "text";
+
+interface IDragHandleProps {
+  draggingHandle?: boolean;
+  dragTarget: "source" | "target";
+  handleMouseDown: (e: React.MouseEvent<SVGElement | HTMLButtonElement, MouseEvent>, _dragType: DragType) => void;
+  startX: number;
+  startY: number;
+}
+function DragHandle({
+  draggingHandle, dragTarget, handleMouseDown, startX, startY
+}: IDragHandleProps) {
+  return (
+    <g
+      className={classNames("drag-handle", { dragging: draggingHandle })}
+      onMouseDown={e => handleMouseDown(e, dragTarget)}
+    >
+      <rect
+        fill="transparent"
+        height={kAnnotationNodeHeight}
+        width={kAnnotationNodeWidth}
+        x={startX - kAnnotationNodeWidth / 2}
+        y={startY - kAnnotationNodeHeight / 2}
+      />
+      <AnnotationNode
+        active={draggingHandle}
+        cx={startX}
+        cy={startY}
+      />
+    </g>
+  );
+}
+
 interface IArrowAnnotationProps {
   arrow: IArrowAnnotation;
   canEdit?: boolean;
@@ -45,9 +79,12 @@ export const ArrowAnnotationComponent = observer(
     const dragDx = clientX !== undefined && dragX !== undefined ? clientX - dragX : 0;
     const dragDy = clientY !== undefined && dragY !== undefined ? clientY - dragY : 0;
     const dragging = clientX !== undefined && clientY !== undefined && dragX !== undefined && dragY !== undefined;
-    const [sourceDragOffsetX, sourceDragOffsetY] = dragging && dragType === "source" ? [dragDx, dragDy] : [0, 0];
-    const [targetDragOffsetX, targetDragOffsetY] = dragging && dragType === "target" ? [dragDx, dragDy] : [0, 0];
-    const [textDragOffsetX, textDragOffsetY] = dragging && dragType === "text" ? [dragDx, dragDy] : [0, 0];
+    const draggingSource = dragging && dragType === "source";
+    const draggingTarget = dragging && dragType === "target";
+    const draggingText = dragging && dragType === "text";
+    const [sourceDragOffsetX, sourceDragOffsetY] = draggingSource ? [dragDx, dragDy] : [0, 0];
+    const [targetDragOffsetX, targetDragOffsetY] = draggingTarget ? [dragDx, dragDy] : [0, 0];
+    const [textDragOffsetX, textDragOffsetY] = draggingText ? [dragDx, dragDy] : [0, 0];
 
     // Bail if there is no source or target
     if (!arrow.sourceObject || !arrow.targetObject) return null;
@@ -57,20 +94,22 @@ export const ArrowAnnotationComponent = observer(
     const targetBB = getBoundingBox(arrow.targetObject);
     if (!sourceBB || !targetBB) return null;
 
+    function boundDelta(delta: number, boundingSize?: number) {
+      if (boundingSize === undefined) return delta;
+      const halfBoundingSize = boundingSize / 2;
+      return Math.max(-halfBoundingSize, Math.min(halfBoundingSize, delta));
+    }
+
     // Find positions for head and tail of arrow
     const [sDxOffset, sDyOffset] = arrow.sourceOffset ? [arrow.sourceOffset.dx, arrow.sourceOffset.dy] : [0, 0];
-    const sourceX = Math.max(sourceBB.left, Math.min(sourceBB.left + sourceBB.width,
-      sourceBB.left + sourceBB.width / 2 + sDxOffset + sourceDragOffsetX));
-    const sourceY = Math.max(sourceBB.top, Math.min(sourceBB.top + sourceBB.height,
-      sourceBB.top + sourceBB.height / 2 + sDyOffset + sourceDragOffsetY));
+    const sourceX = sourceBB.left + sourceBB.width / 2 + boundDelta(sDxOffset + sourceDragOffsetX, sourceBB.width);
+    const sourceY = sourceBB.top + sourceBB.height / 2 + boundDelta(sDyOffset + sourceDragOffsetY, sourceBB.height);
     const [tDxOffset, tDyOffset] = arrow.targetOffset ? [arrow.targetOffset.dx, arrow.targetOffset.dy] : [0, 0];
-    const targetX = Math.max(targetBB.left, Math.min(targetBB.left + targetBB.width,
-      targetBB.left + targetBB.width / 2 + tDxOffset + targetDragOffsetX));
-    const targetY = Math.max(targetBB.top, Math.min(targetBB.top + targetBB.height,
-      targetBB.top + targetBB.height / 2 + tDyOffset + targetDragOffsetY));
+    const targetX = targetBB.left + targetBB.width / 2 + boundDelta(tDxOffset + targetDragOffsetX, targetBB.width);
+    const targetY = targetBB.top + targetBB.height / 2 + boundDelta(tDyOffset + targetDragOffsetY, targetBB.height);
 
     // Set up text location and dimensions
-    const textWidth = 120;
+    const textWidth = 150;
     const textHeight = 50;
     const [textDxOffset, textDyOffset] = arrow.textOffset ? [arrow.textOffset.dx, arrow.textOffset.dy] : [0, 0];
     const dx = targetX - sourceX;
@@ -119,10 +158,8 @@ export const ArrowAnnotationComponent = observer(
       }
     }
 
-    // Set up drag handlers
-    const dragHandlerHeight = 10;
-    const dragHandlerWidth = 10;
-    function handleMouseDown(e: React.MouseEvent<SVGRectElement|HTMLButtonElement, MouseEvent>, _dragType: DragType) {
+    // Set up drag handles
+    function handleMouseDown(e: React.MouseEvent<SVGElement|HTMLButtonElement, MouseEvent>, _dragType: DragType) {
       if (!canEdit) return;
 
       setDragX(e.clientX);
@@ -134,18 +171,14 @@ export const ArrowAnnotationComponent = observer(
         setClientY(e2.clientY);
       }
       function handleMouseUp(e2: MouseEvent) {
-        const startingOffset =
-          _dragType === "source" ? arrow.sourceOffset
-          : _dragType === "target" ? arrow.targetOffset
-          : arrow.textOffset;
+        const [startingOffset, setFunc, widthBound, heightBound] =
+          _dragType === "source" ? [arrow.sourceOffset, arrow.setSourceOffset, sourceBB?.width, sourceBB?.height]
+          : _dragType === "target" ? [arrow.targetOffset, arrow.setTargetOffset, targetBB?.width, targetBB?.height]
+          : [arrow.textOffset, arrow.setTextOffset];
         const [startingDx, startingDy] = startingOffset ? [startingOffset.dx, startingOffset.dy] : [0, 0];
-        const setFunc =
-          _dragType === "source" ? arrow.setSourceOffset
-          : _dragType === "target" ? arrow.setTargetOffset
-          : arrow.setTextOffset;
         const dDx = e2.clientX - e.clientX;
         const dDy = e2.clientY - e.clientY;
-        setFunc(startingDx + dDx, startingDy + dDy);
+        setFunc(boundDelta(startingDx + dDx, widthBound), boundDelta(startingDy + dDy, heightBound));
   
         setClientX(undefined);
         setClientY(undefined);
@@ -161,24 +194,11 @@ export const ArrowAnnotationComponent = observer(
       window.addEventListener("mouseup", handleMouseUp);
     }
 
-    interface IDragHandlerProps {
-      startX: number;
-      startY: number;
-      target: "source" | "target";
-    }
-    function DragHandler({ startX, startY, target }: IDragHandlerProps) {
-      return (
-        <rect
-          className="drag-handle"
-          fill="transparent"
-          height={dragHandlerHeight}
-          onMouseDown={e => handleMouseDown(e, target)}
-          width={dragHandlerWidth}
-          x={startX - dragHandlerWidth / 2}
-          y={startY - dragHandlerHeight / 2}
-        />
-      );
-    }
+    const displayText = arrow.text?.trim();
+    const hasText = !!displayText;
+    const textButtonClasses = classNames("text-box", "text-display", {
+      "can-edit": canEdit, "default-text": !hasText, "dragging": draggingText
+    });
     return (
       <g>
         <CurvedArrow
@@ -186,12 +206,18 @@ export const ArrowAnnotationComponent = observer(
           sourceX={sourceX} sourceY={sourceY}
           targetX={targetX} targetY={targetY}
         />
-        <foreignObject height={`${textHeight}`} width={`${textWidth}`} x={`${textX}`} y={`${textY}`}>
+        <foreignObject
+          className="text-object"
+          height={`${textHeight}`}
+          width={`${textWidth}`}
+          x={`${textX}`}
+          y={`${textY}`}
+        >
           <div className="text-region">
             { editingText && !readOnly
               ? (
                 <input
-                  className="text-input"
+                  className="text-box text-input"
                   onBlur={handleBlur}
                   onChange={handleChange}
                   onKeyDown={handleKeyDown}
@@ -201,18 +227,30 @@ export const ArrowAnnotationComponent = observer(
                 />
               ) : (
                 <button
-                  className={classNames("text-display", { "can-edit": canEdit })}
+                  className={textButtonClasses}
                   onClick={handleTextClick}
                   onMouseDown={e => handleMouseDown(e, "text")}
                 >
-                  {arrow.text?.trim() || "Click to enter text"}
+                  {displayText || "Add text"}
                 </button>
               )
             }
           </div>
         </foreignObject>
-        <DragHandler startX={sourceX} startY={sourceY} target="source" />
-        <DragHandler startX={targetX} startY={targetY} target="target" />
+        <DragHandle
+          draggingHandle={draggingSource}
+          dragTarget="source"
+          handleMouseDown={handleMouseDown}
+          startX={sourceX}
+          startY={sourceY}
+        />
+        <DragHandle
+          draggingHandle={draggingTarget}
+          dragTarget="target"
+          handleMouseDown={handleMouseDown}
+          startX={targetX}
+          startY={targetY}
+        />
       </g>
     );
   }
