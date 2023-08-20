@@ -135,12 +135,17 @@ export function getSparrowCurve(
   const _arrowheadAngle = findArrowheadAngle();
 
   // Determine position of the delete button
+  // There's no clean way to determine the length mid point of a benzier curve, so this approximates it.
+  // First, it measures the lengths of segments with end points along the curve.
+  // It then figures out which segment contains half the length of the curve.
+  // It then determines a t value that represents the approximate position of the midpoint.
+  // Finally, it returns the point along the curve at that t value.
   const findDeletePosition = () => {
     // Only find the delete position if it's requested, since it's a complex computation.
     if (!includeDelete) return { deleteX: undefined, deleteY: undefined };
 
     const segments = 10;
-    const deletePercentage = .5;
+    const deletePercentage = .5; // The percentage of the total distance of the curve where the delete button should go.
     const pointBetween = (start: number, end: number, t: number) => start + (end - start) * t;
     const tPoint = (t: number) => {
       const firstMidX1 = pointBetween(peakX, secondControlX1, t);
@@ -158,22 +163,28 @@ export function getSparrowCurve(
       return { tX, tY };
     };
 
-    // Break the curve into segments, then measure the length of each segment
-    const tData: any[] = [{ tX: peakX, tY: peakY, length: 0, totalLength: 0 }];
+    // Break the curve into segments, measuring the length of each segment
+    interface SegmentData {
+      length: number; // The length of the segment
+      lengthPercent: number; // The percentage of the total length of the curve goes through the segment
+      runningLength: number; // The length of all segments through this one
+      tX: number; // The x coordinate of the end point of the segment
+      tY: number; // The y coordinate of the end point of the segment
+    }
+    const tData: SegmentData[] = [{ tX: peakX, tY: peakY, length: 0, lengthPercent: 0, runningLength: 0 }];
     for (let i = 1; i <= segments; i++) {
-      const t = i / segments;
-      const { tX, tY } = tPoint(t);
-      const lastData = tData[i - 1];
-      const length = Math.sqrt((tX - lastData.tX)**2 + (tY - lastData.tY)**2);
-      const totalLength = lastData.totalLength + length;
-      tData[i] = { tX, tY, length, totalLength };
+      const { tX, tY } = tPoint(i / segments);
+      const prevData = tData[i - 1];
+      const length = Math.sqrt((tX - prevData.tX) ** 2 + (tY - prevData.tY) ** 2);
+      const runningLength = prevData.runningLength + length;
+      tData[i] = { tX, tY, length, lengthPercent: NaN, runningLength };
     }
 
     // Determine which segment contains the approximate desired percentage for the delete button
-    const finalLength = tData[tData.length - 1].totalLength;
+    const totalLength = tData[tData.length - 1].runningLength;
     for (let i = 0; i < tData.length; i++) {
       const curData = tData[i];
-      curData.lengthPercent = curData.totalLength / finalLength;
+      curData.lengthPercent = curData.runningLength / totalLength;
       if (curData.lengthPercent >= deletePercentage) {
         const prevData = tData[i - 1];
         const percentDiff = deletePercentage - prevData.lengthPercent;
