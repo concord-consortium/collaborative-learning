@@ -33,22 +33,17 @@ export function getDeafultPeak(sourceX: number, sourceY: number, targetX: number
 
 interface CurveData {
   arrowheadAngle: number;
-  deleteX: number;
-  deleteY: number;
+  deleteX?: number;
+  deleteY?: number;
   path: string;
 }
-const curveCache: Record<string, CurveData> = {};
 const controlStrength = .5;
-const deleteT = .6;
-export function getCurve(
-  sourceX: number, sourceY: number, peakX: number, peakY: number, targetX: number, targetY: number
-) {
-  const curveId = `${sourceX},${sourceY} ${peakX},${peakY} ${targetX},${targetY}`;
-
-  // Return cached data if it's available
-  const cachedData = curveCache[curveId];
-  if (cachedData) return cachedData;
-
+export function getSparrowCurve(
+  sourceX: number, sourceY: number,
+  peakX: number, peakY: number,
+  targetX: number, targetY: number,
+  includeDelete?: boolean
+): CurveData {
   // Determine deltas and angle between source and target
   const arrowDx = targetX - sourceX;
   const arrowDy = targetY - sourceY;
@@ -140,26 +135,67 @@ export function getCurve(
   const _arrowheadAngle = findArrowheadAngle();
 
   // Determine position of the delete button
-  const midPoint = (start: number, end: number) => start + (end - start) * deleteT;
-  const firstMidX1 = midPoint(peakX, secondControlX1);
-  const firstMidY1 = midPoint(peakY, secondControlY1);
-  const firstMidX2 = midPoint(secondControlX1, secondControlX2);
-  const firstMidY2 = midPoint(secondControlY1, secondControlY2);
-  const firstMidX3 = midPoint(secondControlX2, targetX);
-  const firstMidY3 = midPoint(secondControlY2, targetY);
-  const secondMidX1 = midPoint(firstMidX1, firstMidX2);
-  const secondMidY1 = midPoint(firstMidY1, firstMidY2);
-  const secondMidX2 = midPoint(firstMidX2, firstMidX3);
-  const secondMidY2 = midPoint(firstMidY2, firstMidY3);
-  const deleteX = midPoint(secondMidX1, secondMidX2);
-  const deleteY = midPoint(secondMidY1, secondMidY2);
+  const findDeletePosition = () => {
+    // Only find the delete position if it's requested, since it's a complex computation.
+    if (!includeDelete) return { deleteX: undefined, deleteY: undefined };
+
+    const segments = 10;
+    const deletePercentage = .5;
+    const pointBetween = (start: number, end: number, t: number) => start + (end - start) * t;
+    const tPoint = (t: number) => {
+      const firstMidX1 = pointBetween(peakX, secondControlX1, t);
+      const firstMidY1 = pointBetween(peakY, secondControlY1, t);
+      const firstMidX2 = pointBetween(secondControlX1, secondControlX2, t);
+      const firstMidY2 = pointBetween(secondControlY1, secondControlY2, t);
+      const firstMidX3 = pointBetween(secondControlX2, targetX, t);
+      const firstMidY3 = pointBetween(secondControlY2, targetY, t);
+      const secondMidX1 = pointBetween(firstMidX1, firstMidX2, t);
+      const secondMidY1 = pointBetween(firstMidY1, firstMidY2, t);
+      const secondMidX2 = pointBetween(firstMidX2, firstMidX3, t);
+      const secondMidY2 = pointBetween(firstMidY2, firstMidY3, t);
+      const tX = pointBetween(secondMidX1, secondMidX2, t);
+      const tY = pointBetween(secondMidY1, secondMidY2, t);
+      return { tX, tY };
+    };
+
+    // Break the curve into segments, then measure the length of each segment
+    const tData: any[] = [{ tX: peakX, tY: peakY, length: 0, totalLength: 0 }];
+    for (let i = 1; i <= segments; i++) {
+      const t = i / segments;
+      const { tX, tY } = tPoint(t);
+      const lastData = tData[i - 1];
+      const length = Math.sqrt((tX - lastData.tX)**2 + (tY - lastData.tY)**2);
+      const totalLength = lastData.totalLength + length;
+      tData[i] = { tX, tY, length, totalLength };
+    }
+
+    // Determine which segment contains the approximate desired percentage for the delete button
+    const finalLength = tData[tData.length - 1].totalLength;
+    for (let i = 0; i < tData.length; i++) {
+      const curData = tData[i];
+      curData.lengthPercent = curData.totalLength / finalLength;
+      if (curData.lengthPercent >= deletePercentage) {
+        const prevData = tData[i - 1];
+        const percentDiff = deletePercentage - prevData.lengthPercent;
+        const tOffset = percentDiff / (curData.lengthPercent - prevData.lengthPercent);
+        const deleteT = (i - 1 + tOffset) / segments;
+        const dPosition = tPoint(deleteT);
+        return { deleteX: dPosition.tX, deleteY: dPosition.tY };
+      }
+    }
+
+    // We should never reach this, but just in case use the t instead of length percentage
+    const deleteData = tPoint(deletePercentage);
+    return { deleteX: deleteData.tX, deleteY: deleteData.tY };
+  };
+  const deletePosition = findDeletePosition();
 
   // Cache and return the data for the curve
   const curveData = {
+    deleteX: deletePosition.deleteX,
+    deleteY: deletePosition.deleteY,
     path: _path,
-    deleteX, deleteY,
     arrowheadAngle: _arrowheadAngle
   };
-  curveCache[curveId] = curveData;
   return curveData;
 }

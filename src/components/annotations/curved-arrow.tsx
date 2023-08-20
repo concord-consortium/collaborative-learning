@@ -1,7 +1,7 @@
 import classNames from "classnames";
 import React, { useMemo } from "react";
 
-import { getCurve } from "./annotation-utilities";
+import { getSparrowCurve } from "./annotation-utilities";
 
 import "./curved-arrow.scss";
 
@@ -21,7 +21,7 @@ export function CurvedArrow({
 }: ICurvedArrowProps) {
 
   const { path, arrowheadAngle } = useMemo(() => {
-    return getCurve(sourceX, sourceY, peakX, peakY, targetX, targetY);
+    return getSparrowCurve(sourceX, sourceY, peakX, peakY, targetX, targetY);
   }, [peakX, peakY, sourceX, sourceY, targetX, targetY]);
 
   return (
