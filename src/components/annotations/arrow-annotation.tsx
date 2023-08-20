@@ -210,6 +210,13 @@ export const ArrowAnnotationComponent = observer(
     return (
       <g>
         <CurvedArrow
+          className="background-arrow"
+          hideArrowhead={true}
+          peakX={textCenterX} peakY={textCenterY}
+          sourceX={sourceX} sourceY={sourceY}
+          targetX={targetX} targetY={targetY}
+        />
+        <CurvedArrow
           peakX={textCenterX} peakY={textCenterY}
           sourceX={sourceX} sourceY={sourceY}
           targetX={targetX} targetY={targetY}

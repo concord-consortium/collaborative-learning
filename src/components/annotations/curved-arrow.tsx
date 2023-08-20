@@ -5,9 +5,9 @@ import { getCurve } from "./annotation-utilities";
 
 import "./curved-arrow.scss";
 
-const color = "#1500ff";
 interface ICurvedArrowProps {
   className?: string;
+  hideArrowhead?: boolean;
   peakX: number;
   peakY: number;
   sourceX: number;
@@ -15,7 +15,9 @@ interface ICurvedArrowProps {
   targetX: number;
   targetY: number;
 }
-export function CurvedArrow({ className, peakX, peakY, sourceX, sourceY, targetX, targetY }: ICurvedArrowProps) {
+export function CurvedArrow({
+  className, hideArrowhead, peakX, peakY, sourceX, sourceY, targetX, targetY
+}: ICurvedArrowProps) {
 
   const { path, arrowheadAngle } = useMemo(() => {
     return getCurve(sourceX, sourceY, peakX, peakY, targetX, targetY);
@@ -24,14 +26,15 @@ export function CurvedArrow({ className, peakX, peakY, sourceX, sourceY, targetX
   return (
     <g className={classNames("curved-arrow", className)}>
       <path
+        className="curved-arrow-stem"
         d={path}
         fill="none"
-        stroke={color}
-        strokeWidth={3}
       />
-      <g transform={`translate(${targetX} ${targetY}) rotate(${arrowheadAngle})`}>
-        <polygon points="0 -3 7 12 -7 12 0 -3" fill={color} />
-      </g>
+      { !hideArrowhead && (
+        <g transform={`translate(${targetX} ${targetY}) rotate(${arrowheadAngle})`}>
+          <polygon className="curved-arrow-arrowhead" points="0 -4 8 13 -8 13 0 -4" />
+        </g>
+      )}
     </g>
   );
 }
