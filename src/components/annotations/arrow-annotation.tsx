@@ -161,8 +161,8 @@ export const ArrowAnnotationComponent = observer(
 
     const deleteHeight = 24;
     const deleteWidth = 24;
-    const deleteX = curveData.deleteX ?? 0 - deleteWidth / 2;
-    const deleteY = curveData.deleteY ?? 0 - deleteHeight / 2;
+    const deleteX = (curveData.deleteX ?? 0) - deleteWidth / 2;
+    const deleteY = (curveData.deleteY ?? 0) - deleteHeight / 2;
     function handleDelete(e: React.MouseEvent<SVGElement, MouseEvent>) {
       deleteArrow(arrow.id);
     }

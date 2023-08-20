@@ -63,7 +63,7 @@ export function getSparrowCurve(
   const firstIntersectDx = firstIntersectLength * Math.cos(arrowAngle);
   const firstIntersectDy = firstIntersectLength * -Math.sin(arrowAngle);
 
-  // Determine anchors for first curve.
+  // Determine control points for first curve.
   // These go from source along line perpendicular to arrow, and from peak along line parallel to arrow.
   // If the angle between the arrow angle and peak angle is between half pi and 3 halves pi
   //   (the peak is behind the end point), we need to bend the curve the opposite way
@@ -92,7 +92,7 @@ export function getSparrowCurve(
   const secondIntersectDx = secondIntersectLength * Math.cos(arrowAngle);
   const secondIntersectDy = secondIntersectLength * -Math.sin(arrowAngle);
 
-  // Determine anchors for second curve.
+  // Determine control points for second curve.
   // These go from peak along line parallal to arrow, and from target along line perpendicular to arrow.
   const secondBeyond = secondAngleDifference < halfPi || secondAngleDifference > 3 * halfPi;
   const secondBeyondFactor = secondBeyond ? -1 : 1;
