@@ -14,9 +14,8 @@
 
   &.background-arrow {
     .curved-arrow-stem {
-      pointer-events: stroke;
       stroke-opacity: 0;
-      stroke-width: 11.5px;
+      stroke-width: 11px;
     }
 
     &:hover {
@@ -24,5 +23,11 @@
         stroke-opacity: .125;
       }
     }
+  }
+}
+
+.annotation-layer.editing {
+  .curved-arrow.background-arrow {
+    pointer-events: stroke;
   }
 }

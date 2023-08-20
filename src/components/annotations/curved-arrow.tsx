@@ -10,13 +10,14 @@ interface ICurvedArrowProps {
   hideArrowhead?: boolean;
   peakX: number;
   peakY: number;
+  setHovering?: (hovering: boolean) => void;
   sourceX: number;
   sourceY: number;
   targetX: number;
   targetY: number;
 }
 export function CurvedArrow({
-  className, hideArrowhead, peakX, peakY, sourceX, sourceY, targetX, targetY
+  className, hideArrowhead, peakX, peakY, setHovering, sourceX, sourceY, targetX, targetY
 }: ICurvedArrowProps) {
 
   const { path, arrowheadAngle } = useMemo(() => {
@@ -29,10 +30,12 @@ export function CurvedArrow({
         className="curved-arrow-stem"
         d={path}
         fill="none"
+        onMouseEnter={e => setHovering?.(true)}
+        onMouseLeave={e => setHovering?.(false)}
       />
       { !hideArrowhead && (
         <g transform={`translate(${targetX} ${targetY}) rotate(${arrowheadAngle})`}>
-          <polygon className="curved-arrow-arrowhead" points="0 -4 8 13 -8 13 0 -4" />
+          <polygon className="curved-arrow-arrowhead" points="0 -5 10 13 -10 13 0 -5" />
         </g>
       )}
     </g>

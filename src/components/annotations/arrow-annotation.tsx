@@ -62,6 +62,7 @@ export const ArrowAnnotationComponent = observer(
     const [firstClick, setFirstClick] = useState(false);
     const [editingText, setEditingText] = useState(false);
     const [tempText, setTempText] = useState(arrow.text ?? "");
+    const [hoveringStem, setHoveringStem] = useState(false);
     const inputRef = useRef<HTMLInputElement|null>(null);
     useEffect(() => {
       // Focus on the text input when we start editing
@@ -213,6 +214,7 @@ export const ArrowAnnotationComponent = observer(
           className="background-arrow"
           hideArrowhead={true}
           peakX={textCenterX} peakY={textCenterY}
+          setHovering={setHoveringStem}
           sourceX={sourceX} sourceY={sourceY}
           targetX={targetX} targetY={targetY}
         />
@@ -222,7 +224,7 @@ export const ArrowAnnotationComponent = observer(
           targetX={targetX} targetY={targetY}
         />
         <g transform={`translate(${deleteX} ${deleteY})`}>
-          <DeleteButton onClick={handleDelete} />
+          <DeleteButton className={classNames({ "visible-delete-button": hoveringStem })} onClick={handleDelete} />
         </g>
         <foreignObject
           className="text-object"
