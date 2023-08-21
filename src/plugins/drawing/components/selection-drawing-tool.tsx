@@ -36,9 +36,10 @@ export class SelectionDrawingTool extends DrawingTool {
     if (index === -1) {
       if (e.shiftKey || e.metaKey){
         selectedObjects.push(obj);
+        this.drawingLayer.setSelectedObjects(selectedObjects);
       }
       else {
-        selectedObjects = [obj];
+        this.drawingLayer.setSelectedObjects([obj]);
       }
     }
     else {
@@ -47,9 +48,9 @@ export class SelectionDrawingTool extends DrawingTool {
           obj.setEditing(true);
         } else {
           selectedObjects.splice(index, 1);
+          this.drawingLayer.setSelectedObjects(selectedObjects);
         }
       }
     }
-    this.drawingLayer.setSelectedObjects(selectedObjects);
   }
 }

@@ -180,11 +180,10 @@ export type HandleObjectDrag =
 
 export interface IDrawingComponentProps {
   model: DrawingObjectType;
+  readOnly?: boolean,
   handleHover?: HandleObjectHover;
   handleDrag?: HandleObjectDrag;
 }
-
-
 
 // TODO: the support for palettes is hard coded to specific tools
 export interface IPaletteState {
@@ -220,15 +219,9 @@ export interface IDrawingLayer {
 
 export abstract class DrawingTool {
   public drawingLayer: IDrawingLayer;
-  public settings: ToolbarSettings;
 
   constructor(drawingLayer: IDrawingLayer) {
     this.drawingLayer = drawingLayer;
-  }
-
-  public setSettings(settings: ToolbarSettings) {
-    this.settings = settings;
-    return this;
   }
 
   public handleMouseDown(e: React.MouseEvent<HTMLDivElement>): void {
