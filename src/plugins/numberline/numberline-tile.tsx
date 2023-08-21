@@ -254,7 +254,6 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
     >
       <div className="numberline-tool-container" >
           <svg ref={svgRef} width={axisWidth}>
-            {/* <g className={`${axisClass}`}></g> */}
             <g ref={axisRef}></g>
           </svg>
           <i className="arrow left" style={{'left': numToPx(xShiftNum - 3), 'top': '53px'}}/>

@@ -6,6 +6,7 @@ import TableToolTile from './TableToolTile';
 import DataflowToolTile from './DataflowToolTile';
 import DiagramToolTile from './DiagramToolTile';
 import SimulatorToolTile from './SimulatorTile';
+import NumberlineToolTile from './NumberlineToolTile';
 import Canvas from '../common/Canvas';
 import Dialog from '../common/Dialog';
 
@@ -17,6 +18,7 @@ let graphToolTile = new GraphToolTile,
     dataflowToolTile = new DataflowToolTile,
     diagramToolTile = new DiagramToolTile,
     simulatorToolTile = new SimulatorToolTile,
+    numberlineToolTile = new NumberlineToolTile,
     canvas = new Canvas,
     dialog = new Dialog;
 
@@ -254,16 +256,19 @@ class ClueCanvas {
               break;
           case 'geometry':
               tileElement = graphToolTile.getGraphTile().last().click({ force: true }).parent();
-              break;  
+              break;
           case 'dataflow':
               tileElement = dataflowToolTile.getDataflowTile().last().click({ force: true });
-              break;  
+              break;
           case 'diagram':
               tileElement = diagramToolTile.getDiagramTile().last().click({ force: true });
-              break;  
+              break;
           case 'simulator':
               tileElement = simulatorToolTile.getSimulatorTile().last().click({ force: true });
-              break;  
+              break;
+            case 'numberline':
+            tileElement = numberlineToolTile.getNumberlineTile().last().click({ force: true });
+            break;
       }
       tileElement.should('have.class','selected');
     }

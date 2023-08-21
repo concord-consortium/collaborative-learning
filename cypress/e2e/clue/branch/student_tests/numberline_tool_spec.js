@@ -1,32 +1,48 @@
 import ClueCanvas from '../../../../support/elements/clue/cCanvas';
-import NumberlineTile from '../../../../support/elements/clue/NumberlineTile';
+import NumberlineToolTile from '../../../../support/elements/clue/NumberlineToolTile';
 
 let clueCanvas = new ClueCanvas;
-let numberlineTile = new NumberlineTile;
+let numberlineToolTile = new NumberlineToolTile;
 
-//skipping tests for now, will write when theres an axis
-context.skip('Numberline Tile', function () {
-  beforeEach(function () {
-    const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup&unit=example";
+context('Numberline Tile', function () {
+  before(function () {
+    const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=example";
     cy.clearQAData('all');
     cy.visit(queryParams);
     cy.waitForLoad();
-    cy.closeResourceTabs();
+    // cy.closeResourceTabs(); //maybe enable this when we have a unit besides example that has a nav tab panel
   });
   describe("Numberline Tile", () => {
     it("renders numberline tile", () => {
-      numberlineTile.getNumberlineTile().should("not.exist");
+      numberlineToolTile.getNumberlineTile().should("not.exist");
       clueCanvas.addTile("numberline");
-      numberlineTile.getNumberlineTile().should("exist");
-      numberlineTile.getTileTitle().should("exist");
+      numberlineToolTile.getNumberlineTile().should("exist");
+      numberlineToolTile.getTileTitle().should("exist");
     });
     it("edit tile title", () => {
-      const newName = "Test Simulation";
-      clueCanvas.addTile("numberline");
-      numberlineTile.getTileTitle().should("contain", "Simulation 1");
-      numberlineTile.getNumberlineTileTitle().click();
-      numberlineTile.getNumberlineTileTitle().type(newName + '{enter}');
-      numberlineTile.getTileTitle().should("contain", newName);
+      const newName = "Numberline test";
+      numberlineToolTile.getTileTitle().should("contain", "Numberline");
+      numberlineToolTile.getNumberlineTileTitle().click();
+      numberlineToolTile.getNumberlineTileTitle().type(newName + '{enter}');
+      numberlineToolTile.getTileTitle().should("contain", newName);
     });
+    it('will test adding points to a graph', () => {
+      cy.log("add points to numberline");
+      numberlineToolTile.addPointToGraph();
+
+    });
+
+
+    it("deletes numberline tile", ()=>{
+      // cy.pause();
+      clueCanvas.deleteTile('numberline');
+      numberlineToolTile.getNumberlineTile().should("not.exist");
+    });
+
   });
+  //places 2 points, checks for two points
+  //drags one of the points, checks that its dragged
+
+
+  //at end of test - delete numberline tile?
 });

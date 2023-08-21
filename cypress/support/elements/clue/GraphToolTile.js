@@ -101,6 +101,9 @@ class GraphToolTile{
     addPointToGraph(x,y){
         let transX=this.transformFromCoordinate('x', x),
             transY=this.transformFromCoordinate('y', y);
+        console.log("addPointToGraph > x:", transX);
+        console.log("addPointToGraph > y:", transY);
+
 
         this.getGraph().last().click(transX,transY, {force:true});
     }
