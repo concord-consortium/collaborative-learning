@@ -15,7 +15,7 @@ import { isSetAttributeNameAction } from "../../../../../../models/data/data-set
 
 interface IProps {
   place: GraphPlace,
-  target: SVGGElement | null
+  target: SVGGElement | HTMLElement | null
   portal: HTMLElement | null
   onChangeAttribute: (place: GraphPlace, dataSet: IDataSet, attrId: string) => void
   onRemoveAttribute: (place: GraphPlace, attrId: string) => void
@@ -42,10 +42,14 @@ const _AxisOrLegendAttributeMenu = ({ place, target, portal,
   const [labelText, setLabelText] = useState(attribute?.name);
   const removeAttrItemLabel = t(removeAttrItemLabelKeys[role], {vars: [attribute?.name]});
   const treatAs = dataConfig?.attributeType(role) === "numeric" ? "categorical" : "numeric";
-  const overlayStyle: CSSProperties = { position: "absolute", ...useOverlayBounds({target, portal}) };
-  const buttonStyle: CSSProperties = { position: "absolute", width: "100%", height: "100%", color: "transparent" };
   const menuRef = useRef<HTMLDivElement>(null);
   const onCloseRef = useRef<() => void>();
+  const overlayStyle: CSSProperties = {
+    position: "absolute", ...useOverlayBounds({target, portal})
+  };
+  const buttonStyle: CSSProperties = {
+    position: "absolute", inset: 0, padding: 0, color: "transparent"
+  };
 
   const draggableOptions: IUseDraggableAttribute = {
     prefix: instanceId, dataSet: data, attributeId: attrId

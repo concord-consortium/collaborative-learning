@@ -60,6 +60,11 @@ context('Arrow Annotations (Sparrows)', function () {
       aa.getAnnotationLayer().should("have.class", "editing");
       aa.getAnnotationButtons().should("have.length", 2);
 
+      cy.log("Pressing a tile button exits sparrow mode");
+      clueCanvas.addTile("drawing");
+      aa.getAnnotationLayer().should("not.have.class", "editing");
+      aa.clickArrowToolbarButton();
+
       cy.log("Can draw an arrow between two objects");
       aa.getAnnotationArrows().should("not.exist");
       aa.getAnnotationTextDisplays().should("not.exist");
@@ -107,7 +112,10 @@ context('Arrow Annotations (Sparrows)', function () {
       aa.clickArrowToolbarButton();
       aa.clickHideAnnotationsButton();
       aa.getAnnotationLayer().should("not.be.visible");
-      aa.clickHideAnnotationsButton();
+
+      cy.log("Arrows become visible when you enter sparrow mode");
+      aa.clickArrowToolbarButton();
+      aa.getAnnotationLayer().should("be.visible");
 
       cy.log("Arrows persist on reload");
       aa.getAnnotationArrows().should("exist");

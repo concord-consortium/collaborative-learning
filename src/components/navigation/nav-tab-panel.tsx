@@ -2,7 +2,7 @@ import { inject, observer } from "mobx-react";
 import React from "react";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { BaseComponent, IBaseProps } from "../base";
-import { kDividerMax, kDividerMin } from "../../models/stores/ui-types";
+import { kDividerMin } from "../../models/stores/ui-types";
 import { ENavTab, NavTabModelType } from "../../models/view/nav-tabs";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
@@ -18,11 +18,8 @@ import "./nav-tab-panel.sass";
 import "../themes.scss";
 
 interface IProps extends IBaseProps {
-  isResourceExpanded: boolean;
-  isExpanderShown: boolean;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
 }
-
 
 @inject("stores")
 @observer
@@ -35,30 +32,20 @@ export class NavTabPanel extends BaseComponent<IProps> {
   }
 
   public render() {
-    const { isResourceExpanded, isExpanderShown } = this.props;
-    const { ui: { activeNavTab, dividerPosition, focusDocument, showChatPanel, selectedTileIds },
+    const { ui: { activeNavTab, focusDocument, showChatPanel, selectedTileIds },
             user } = this.stores;
     const tabs = this.stores.tabsToDisplay;
     const selectedTabIndex = tabs?.findIndex(t => t.tab === activeNavTab);
-    const resizePanelWidth = 6;
-    const collapseTabWidth = 44;
-    const resourceWidth = dividerPosition === kDividerMin
-                            ? kDividerMin
-                            : dividerPosition === kDividerMax
-                              ? `calc(100% - ${collapseTabWidth}px - 4px)`
-                              : isExpanderShown
-                                ? `calc(${dividerPosition}% - ${collapseTabWidth}px + 1px)`
-                                : `calc(${dividerPosition}% - ${resizePanelWidth}px - 4px)`;
-    const resourceWidthStyle = {width: resourceWidth};
     const isChatEnabled = user.isTeacher; //only enable chat for teachers
     const openChatPanel = isChatEnabled && showChatPanel;
     const focusTileId = selectedTileIds?.length === 1 ? selectedTileIds[0] : undefined;
 
     return (
-      <div className={`resource-and-chat-panel ${isResourceExpanded ? "shown" : ""}`} style={resourceWidthStyle}>
-        <div className={`nav-tab-panel ${showChatPanel ? "chat-open" : ""}`}
+      <div className="resource-and-chat-panel">
+        <div className="nav-tab-panel"
             ref={elt => this.navTabPanelElt = elt}>
           <Tabs
+            className={["react-tabs", "top-level-tabs"]}
             selectedIndex={selectedTabIndex}
             onSelect={this.handleSelectTab}
             forceRenderTabPanel={true}
@@ -92,7 +79,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
             </div>
             { tabs?.map((tabSpec) => {
                 return (
-                  <TabPanel key={tabSpec.tab}>
+                  <TabPanel key={tabSpec.tab} className={["react-tabs__tab-panel", "top-level-tab-panel"]}>
                     {this.renderTabContent(tabSpec)}
                   </TabPanel>
                 );

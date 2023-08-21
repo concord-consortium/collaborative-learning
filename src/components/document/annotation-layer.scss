@@ -4,10 +4,15 @@
   height: 100%;
   pointer-events: none;
   position: absolute;
+  top: 0;
   width: 100%;
 
   &.editing {
     pointer-events: all;
+
+    .text-box {
+      pointer-events: all;
+    }
   }
 
   &.hidden {

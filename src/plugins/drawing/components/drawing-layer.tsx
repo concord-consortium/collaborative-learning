@@ -261,7 +261,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       window.removeEventListener("mouseup", handleMouseUp);
       if (moved) {
         objectsToInteract.map((object, index) => {
-          object.adoptDragPosition();
+          object.repositionObject();
         });
       } else {
         this.handleObjectClick(e2, obj);
@@ -401,7 +401,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       window.removeEventListener("mousemove", handleResizeMove);
       window.removeEventListener("mouseup", handleResizecomplete);
       handle.classList.remove('active');
-      object.adoptDragBounds();
+      object.resizeObject();
     };
 
     window.addEventListener("mousemove", handleResizeMove);

@@ -1,0 +1,35 @@
+$menu-label-height: 15px;
+$min-menu-width: 144px;
+
+.multi-legend {
+  padding: 20px 30px;
+  background-color:#F9F9F9;
+
+  .simple-attribute-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 30px;
+    width: $min-menu-width;
+    border:1px solid #3f3f3f;
+    padding:6px;
+    border-radius:4px;
+    color: #3f3f3f;
+
+    svg {
+      margin-top:4px;
+    }
+
+    .symbol-title {
+      display: flex;
+    }
+
+    .attr-symbol {
+      height: $menu-label-height;
+      width: $menu-label-height;
+      margin-right: 6px;
+      margin-top:2px;
+      border-radius: 50%;
+    }
+  }
+}
