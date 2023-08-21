@@ -96,7 +96,7 @@ export const TextComponent = observer(
     useEffect(() => {
       // Focus text area when it opens, to avoid need for user to click it again.
       if (editing) {
-        textEditor.current?.focus();
+        setTimeout(() => textEditor.current?.focus());
       }
     }, [editing]);
 
@@ -187,7 +187,8 @@ export class TextDrawingTool extends DrawingTool {
       stroke,
       text: ""
     });
-    this.drawingLayer.addNewDrawingObject(getSnapshot(text));
+    const obj: TextObjectType = this.drawingLayer.addNewDrawingObject(getSnapshot(text)) as TextObjectType;
+    obj.setEditing(true);
   }
 }
 
