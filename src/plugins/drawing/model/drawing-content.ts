@@ -235,8 +235,6 @@ export const DrawingContentModel = TileContentModel
             if (object) {
               self.objects.remove(object);
               self.unselectId(id);
-            } else {
-              console.log('  null object, id=', id);
             }
           });
         },
