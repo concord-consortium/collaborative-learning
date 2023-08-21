@@ -90,6 +90,23 @@ context.skip('Simulator Tile with Brainwaves Gripper Simulation', function () {
   });
 });
 
+context.skip('Simulator Tile with Brain Simulation', function() {
+  beforeEach(function () {
+    const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&mouseSensor&unit=brain";
+    cy.clearQAData('all');
+    cy.visit(queryParams);
+    cy.waitForLoad();
+  });
+  it("Make sure only one simulator tile is allowed", () => {
+    clueCanvas.addTile("simulator");
+    clueCanvas.verifyToolDisabled("simulator");
+    clueCanvas.deleteTile("simulator");
+    clueCanvas.verifyToolEnabled("simulator");
+    clueCanvas.addTile("simulator");
+    simulatorTile.getSimulatorTile().should("exist");
+  });
+});
+
 context.skip('Simulator Tile with Terrarium Simulation', function() {
   beforeEach(function () {
     const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&mouseSensor&unit=seeit";
