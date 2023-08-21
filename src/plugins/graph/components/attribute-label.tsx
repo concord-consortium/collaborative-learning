@@ -22,9 +22,9 @@ import graphVars from "./graph.scss";
 
 interface IAttributeLabelProps {
   place: GraphPlace
-  onChangeAttribute?: (place: GraphPlace, dataSet: IDataSet, attrId: string) => void
-  onRemoveAttribute?: (place: GraphPlace, attrId: string) => void
-  onTreatAttributeAs?: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void
+  onChangeAttribute: (place: GraphPlace, dataSet: IDataSet, attrId: string) => void
+  onRemoveAttribute: (place: GraphPlace, attrId: string) => void
+  onTreatAttributeAs: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void
 }
 
 export const AttributeLabel = observer(
@@ -163,7 +163,7 @@ export const AttributeLabel = observer(
     }, [place, dataConfiguration, refreshAxisTitle]);
 
     useEffect(() => {
-      if ( parentElt && labelRef.current && onChangeAttribute && onRemoveAttribute && onTreatAttributeAs ) {
+      if ( parentElt && labelRef.current ) {
         setReadyForPortal(true);
       }
     }, [parentElt, labelRef, onChangeAttribute, onRemoveAttribute, onTreatAttributeAs]);
@@ -177,9 +177,9 @@ export const AttributeLabel = observer(
             target={labelRef.current}
             portal={parentElt}
             place={place}
-            onChangeAttribute={onChangeAttribute as any}
-            onRemoveAttribute={onRemoveAttribute as any}
-            onTreatAttributeAs={onTreatAttributeAs as any}
+            onChangeAttribute={onChangeAttribute}
+            onRemoveAttribute={onRemoveAttribute}
+            onTreatAttributeAs={onTreatAttributeAs}
           />, parentElt)
         }
       </>
