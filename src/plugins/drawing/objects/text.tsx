@@ -77,7 +77,7 @@ export function isTextObject(model: DrawingObjectType): model is TextObjectType 
 }
 
 export const TextComponent = observer(
-    function TextComponent({model, handleHover, handleDrag} : IDrawingComponentProps) {
+    function TextComponent({model, readOnly, handleHover, handleDrag} : IDrawingComponentProps) {
   const textEditor = useRef<HTMLTextAreaElement>(null);
   if (!isTextObject(model)) return null;
   const textobj = model as TextObjectType;
@@ -164,7 +164,7 @@ export const TextComponent = observer(
           <clipPath id={clipId}>
             <rect x={x} y={y} width={width} height={height} />
           </clipPath>
-          <Content clip={clipId} editing={model.isEditing} />
+          <Content clip={clipId} editing={model.isEditing && !readOnly} />
          </g>;
 
 });
@@ -178,7 +178,7 @@ export class TextDrawingTool extends DrawingTool {
   public handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
     const start = this.drawingLayer.getWorkspacePoint(e);
     if (!start) return;
-    const {stroke } = this.settings;
+    const { stroke } = this.drawingLayer.toolbarSettings();
     const text = TextObject.create({
       x: start.x,
       y: start.y,
