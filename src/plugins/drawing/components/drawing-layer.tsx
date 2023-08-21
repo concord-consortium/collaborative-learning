@@ -90,10 +90,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
   // Adds a new object and selects it, activating the select tool.
   public addNewDrawingObject(drawingObject: DrawingObjectSnapshotForAdd) {
-    const obj = this.getContent().addObject(drawingObject);
-    this.getContent().setSelectedButton('select');
-    this.setSelectedObjects([obj]);
-    return obj;
+    return this.getContent().addAndSelectObject(drawingObject);
   }
 
   public getSelectedObjects(): DrawingObjectType [] {
