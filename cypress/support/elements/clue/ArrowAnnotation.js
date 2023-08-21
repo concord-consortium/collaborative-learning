@@ -19,7 +19,7 @@ class ArrowAnnotation {
     return cy.get(`${wsClass(workspaceClass)} .annotation-layer .annotation-svg`);
   }
   getAnnotationArrows(workspaceClass) {
-    return cy.get(`${wsClass(workspaceClass)} .annotation-layer .annotation-svg .curved-arrow`);
+    return cy.get(`${wsClass(workspaceClass)} .annotation-layer .annotation-svg .curved-arrow.foreground-arrow`);
   }
   getPreviewArrow(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .annotation-layer .annotation-svg .curved-arrow.preview-arrow`);

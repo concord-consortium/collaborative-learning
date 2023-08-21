@@ -219,6 +219,7 @@ export const ArrowAnnotationComponent = observer(
           targetX={targetX} targetY={targetY}
         />
         <CurvedArrow
+          className="foreground-arrow"
           peakX={textCenterX} peakY={textCenterY}
           sourceX={sourceX} sourceY={sourceY}
           targetX={targetX} targetY={targetY}
