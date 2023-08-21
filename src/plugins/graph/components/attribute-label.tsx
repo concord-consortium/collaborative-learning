@@ -108,7 +108,7 @@ export const AttributeLabel = observer(
       return () => disposer?.();
     }, [dataConfiguration, refreshAxisTitle, getAttributeIDs]);
 
-    // Install reaction to bring about rerender when layout's computedBounds changes
+    // Install reaction to bring about rerender when layout's computedBounds changes<
     useEffect(() => {
       const disposer = reaction(
         () => layout.getComputedBounds(place),
@@ -180,6 +180,7 @@ export const AttributeLabel = observer(
             onChangeAttribute={onChangeAttribute}
             onRemoveAttribute={onRemoveAttribute}
             onTreatAttributeAs={onTreatAttributeAs}
+            onOpenClose={() => console.log("handle the open close state here! if you wanty to")}
           />, parentElt)
         }
       </>

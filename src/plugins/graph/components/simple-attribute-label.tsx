@@ -32,6 +32,10 @@ export const SimpleAttributeLabel = observer(
     const attrName = attr?.name ?? "";
     const pointColor = graphModel._pointColors[0]; // In PT#182578812 will pass plotIndex
 
+    const handleOpenClose = (isOpen: boolean) => {
+      console.log("handle the open close state here!");
+    };
+
     return (
       <>
         <div ref={simpleLabelRef} className="simple-attribute-label">
@@ -51,6 +55,7 @@ export const SimpleAttributeLabel = observer(
             onChangeAttribute={onChangeAttribute}
             onRemoveAttribute={onRemoveAttribute}
             onTreatAttributeAs={onTreatAttributeAs}
+            onOpenClose={handleOpenClose}
           />, parentElt)
         }
       </>
