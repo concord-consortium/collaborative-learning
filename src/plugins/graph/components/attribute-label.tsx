@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useRef} from "react";
+import React, {useCallback, useEffect, useRef, useState} from "react";
 import {createPortal} from "react-dom";
 import {reaction} from "mobx";
 import {observer} from "mobx-react-lite";
@@ -19,6 +19,7 @@ import {useSettingFromStores} from "../../../hooks/use-stores";
 import {appConfig} from "../../../initialize-app";
 
 import graphVars from "./graph.scss";
+import { on } from "superagent";
 
 interface IAttributeLabelProps {
   place: GraphPlace
@@ -40,6 +41,8 @@ export const AttributeLabel = observer(
       hideClickHereCue = useClickHereCue &&
         !dataConfiguration?.placeAlwaysShowsClickHereCue(place) && !isTileSelected(),
       parentElt = labelRef.current?.closest(kGraphClassSelector) as HTMLDivElement ?? null;
+
+    const [canPortal, setCanPortal] = useState(false);
 
     const getAttributeIDs = useCallback(() => {
       const isScatterPlot = graphModel.plotType === 'scatterPlot',
@@ -161,12 +164,23 @@ export const AttributeLabel = observer(
         return () => disposer();
     }, [place, dataConfiguration, refreshAxisTitle]);
 
-    const readyForPortal = parentElt && onChangeAttribute && onTreatAttributeAs && onRemoveAttribute;
+    useEffect(() => {
+      const methodsHere = onChangeAttribute && onTreatAttributeAs && onRemoveAttribute;
+      const domHere = labelRef.current && parentElt;
+      const paramsHere = place && dataset;
+      const attrId = dataConfiguration?.attributeID('y') || '';
+      if (methodsHere && domHere && paramsHere && attrId) {
+        setCanPortal(true);
+      } else {
+        setCanPortal(false);
+      }
+    }, [parentElt, onChangeAttribute, onTreatAttributeAs, onRemoveAttribute, dataset, place, dataConfiguration]);
+    //const readyForPortal = parentElt && onChangeAttribute && onTreatAttributeAs && onRemoveAttribute;
     const skipPortal = appConfig.getSetting("defaultSeriesLegend", "graph") && place === "left";
     return (
       <>
         <g ref={labelRef} className={`display-label ${place}`} />
-        {readyForPortal && !skipPortal &&
+        {canPortal && !skipPortal &&
           createPortal(<AxisOrLegendAttributeMenu
             target={labelRef.current}
             portal={parentElt}
