@@ -72,10 +72,10 @@ context('Duplicate Tiles', function () {
       dataCardToolTile.getSortSelect().select("Label 1");
       dataCardToolTile.getTile().click();
       duplicateTool().click();
-      dataCardToolTile.getTile(1).should("exist");
-      dataCardToolTile.getSortSelect().last().should("contain.text", "Label 1");
-      dataCardToolTile.getSortSelect().last().select("None");
-      dataCardToolTile.getSortSelect().first().should("contain.text", "Label 1");
+      dataCardToolTile.getTiles().should("have.length", 2);
+      dataCardToolTile.getSortSelect(1).should("contain.text", "Label 1");
+      dataCardToolTile.getSortSelect(1).select("None");
+      dataCardToolTile.getSortSelect(0).should("contain.text", "Label 1");
     });
   });
 });
