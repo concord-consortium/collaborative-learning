@@ -38,7 +38,7 @@ export const AttributeLabel = observer(
       useClickHereCue = dataConfiguration?.placeCanShowClickHereCue(place) ?? false,
       hideClickHereCue = useClickHereCue &&
         !dataConfiguration?.placeAlwaysShowsClickHereCue(place) && !isTileSelected(),
-      [labelElt, setLabelRef] = useState<SVGGElement | null>(null),
+      [labelElt, setLabelElt] = useState<SVGGElement | null>(null),
       parentElt = labelElt?.closest('.document-content') as HTMLDivElement ?? null;
 
     const getAttributeIDs = useCallback(() => {
@@ -163,9 +163,10 @@ export const AttributeLabel = observer(
 
     const readyForPortal = parentElt && onChangeAttribute && onTreatAttributeAs && onRemoveAttribute;
     const skipPortal = appConfig.getSetting("defaultSeriesLegend", "graph") && place === "left";
+
     return (
       <>
-        <g ref={(newRef) => setLabelRef(newRef)} className={`display-label ${place}`} />
+        <g ref={(elt) => setLabelElt(elt)} className={`display-label ${place}`} />
         {readyForPortal && !skipPortal &&
           createPortal(<AxisOrLegendAttributeMenu
             target={labelElt}
