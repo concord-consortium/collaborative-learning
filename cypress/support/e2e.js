@@ -55,6 +55,6 @@ if (Cypress.config('hideXHRInCommandLog')) {
   }
 }
 
-// after(function(){
-//   cy.clearQAData('all'); //renable
-// });
+after(function(){
+  cy.clearQAData('all');
+});
