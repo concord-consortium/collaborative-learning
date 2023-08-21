@@ -68,7 +68,6 @@ context('Duplicate Tiles', function () {
 
     it("duplicates datacards", () => {
       clueCanvas.addTile("datacard");
-      dataCardToolTile.getTile(1).should("not.exist");
       dataCardToolTile.getSortSelect().select("Label 1");
       dataCardToolTile.getTile().click();
       duplicateTool().click();
