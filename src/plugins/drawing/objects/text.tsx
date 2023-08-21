@@ -58,8 +58,8 @@ export const TextObject = EditableObject.named("TextObject")
       self.dragWidth  = self.width  + deltas.right - deltas.left;
       self.dragHeight = self.height + deltas.bottom - deltas.top;
     },
-    adoptDragBounds() {
-      self.adoptDragPosition();
+    resizeObject() {
+      self.repositionObject();
       self.width = self.dragWidth ?? self.width;
       self.height = self.dragHeight ?? self.height;
       self.dragWidth = self.dragHeight = undefined;

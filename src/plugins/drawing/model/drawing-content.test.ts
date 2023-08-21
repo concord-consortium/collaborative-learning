@@ -383,7 +383,7 @@ describe("DrawingContentModel", () => {
     });
     // drag bottom right bigger
     obj.setDragBounds({ top: 0, right: 10, bottom: 10, left: 0 });
-    obj.adoptDragBounds();
+    obj.resizeObject();
     expect(obj).toHaveProperty('x', 0);
     expect(obj).toHaveProperty('y', 0);
     expect(obj).toHaveProperty('width', 110);
@@ -391,7 +391,7 @@ describe("DrawingContentModel", () => {
 
     // drag top left smaller
     obj.setDragBounds({ top: 10, right: 0, bottom: 0, left: 10 });
-    obj.adoptDragBounds();
+    obj.resizeObject();
     expect(obj).toHaveProperty('x', 10);
     expect(obj).toHaveProperty('y', 10);
     expect(obj).toHaveProperty('width', 100);
