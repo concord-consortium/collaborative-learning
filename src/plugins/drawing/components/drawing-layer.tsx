@@ -249,7 +249,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     });
   }
 
-  public renderSelectedObjects(selectedObjects: DrawingObjectType[], enableActions: boolean) {
+  public renderSelectionBorders(selectedObjects: DrawingObjectType[], enableActions: boolean) {
     return selectedObjects.map((object, index) => {
       let {nw: {x: nwX, y: nwY}, se: {x: seX, y: seY}} = object.boundingBox;
       nwX -= SELECTION_BOX_PADDING;
@@ -368,7 +368,8 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
   public render() {
     const hoveringOverAlreadySelectedObject =
-      this.state.hoverObject 
+      !this.props.readOnly
+        && this.state.hoverObject 
         && isAlive(this.state.hoverObject)
         && this.getContent().isIdSelected(this.state.hoverObject.id);
 
@@ -383,9 +384,10 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         <svg xmlnsXlink="http://www.w3.org/1999/xlink" width={1500} height={1500} ref={this.setSvgRef}>
           {this.renderObjects(object => object.type === "image" )}
           {this.renderObjects(object => object.type !== "image" )}
-          {this.renderSelectedObjects(this.getSelectedObjects(), true)}
-          {(this.state.hoverObject && !hoveringOverAlreadySelectedObject && isAlive(this.state.hoverObject))
-            ? this.renderSelectedObjects([this.state.hoverObject], false)
+          {!this.props.readOnly && this.renderSelectionBorders(this.getSelectedObjects(), true)}
+          {!this.props.readOnly && (this.state.hoverObject && !hoveringOverAlreadySelectedObject 
+            && isAlive(this.state.hoverObject))
+            ? this.renderSelectionBorders([this.state.hoverObject], false)
             : null}
           {this.state.currentDrawingObject
             ? renderDrawingObject(this.state.currentDrawingObject)
