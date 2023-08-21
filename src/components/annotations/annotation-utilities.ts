@@ -11,7 +11,7 @@ export function normalizeAngle(angle: number) {
 }
 
 // Returns the default peak for a sparrow from sourceX, sourceY to targetX, targetY.
-export function getDeafultPeak(sourceX: number, sourceY: number, targetX: number, targetY: number) {
+export function getDefaultPeak(sourceX: number, sourceY: number, targetX: number, targetY: number) {
   const dx = targetX - sourceX;
   const dy = targetY - sourceY;
   const mx = sourceX + dx / 2;

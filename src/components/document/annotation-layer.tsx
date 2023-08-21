@@ -3,7 +3,7 @@ import { observer } from "mobx-react";
 import React, { MouseEventHandler, useContext, useEffect, useRef, useState } from "react";
 
 import { AnnotationButton } from "../annotations/annotation-button";
-import { getDeafultPeak } from "../annotations/annotation-utilities";
+import { getDefaultPeak } from "../annotations/annotation-utilities";
 import { ArrowAnnotationComponent } from "../annotations/arrow-annotation";
 import { PreviewArrow } from "../annotations/preview-arrow";
 import { TileApiInterfaceContext } from "../tiles/tile-api";
@@ -112,7 +112,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
         const sourceY = sourceBoundingBox.top + sourceBoundingBox.height / 2;
         const targetX = targetBoundingBox.left + targetBoundingBox.width / 2;
         const targetY = targetBoundingBox.top + targetBoundingBox.height / 2;
-        const { peakDx, peakDy } = getDeafultPeak(sourceX, sourceY, targetX, targetY);
+        const { peakDx, peakDy } = getDefaultPeak(sourceX, sourceY, targetX, targetY);
         textOffset = OffsetModel.create({ dx: peakDx, dy: peakDy });
       }
       const newArrow = ArrowAnnotation.create({ sourceObject, targetObject, textOffset });

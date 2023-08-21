@@ -1,7 +1,7 @@
 import React from "react";
 
 import { AnnotationNode } from "./annotation-node";
-import { getDeafultPeak } from "./annotation-utilities";
+import { getDefaultPeak } from "./annotation-utilities";
 import { CurvedArrow } from "./curved-arrow";
 
 interface IPreviewArrowProps {
@@ -12,7 +12,7 @@ interface IPreviewArrowProps {
 }
 export function PreviewArrow({ sourceX, sourceY, targetX, targetY }: IPreviewArrowProps) {
   if (sourceX !== undefined && sourceY !== undefined && targetX !== undefined && targetY !== undefined) {
-    const { peakX, peakY } = getDeafultPeak(sourceX, sourceY, targetX, targetY);
+    const { peakX, peakY } = getDefaultPeak(sourceX, sourceY, targetX, targetY);
 
     return (
       <>
