@@ -17,32 +17,40 @@ context('Numberline Tile', function () {
       numberlineToolTile.getNumberlineTile().should("not.exist");
       clueCanvas.addTile("numberline");
       numberlineToolTile.getNumberlineTile().should("exist");
-      numberlineToolTile.getTileTitle().should("exist");
+      numberlineToolTile.getNumberlineTileTitle().should("exist");
     });
     it("edit tile title", () => {
       const newName = "Numberline test";
-      numberlineToolTile.getTileTitle().should("contain", "Numberline");
+      numberlineToolTile.getNumberlineTileTitleText().should("contain", "Numberline");
       numberlineToolTile.getNumberlineTileTitle().click();
       numberlineToolTile.getNumberlineTileTitle().type(newName + '{enter}');
-      numberlineToolTile.getTileTitle().should("contain", newName);
+      numberlineToolTile.getNumberlineTileTitleText().should("contain", newName);
     });
-    it('will test adding points to a graph', () => {
+    it('will test adding points to a numberline', () => {
       cy.log("add points to numberline");
-      numberlineToolTile.addPointToGraph();
-
+      numberlineToolTile.addPointOnNumberlineTick(-4);
+      numberlineToolTile.addPointOnNumberlineTick(2);
+      numberlineToolTile.getPointsOnGraph().should('have.length', 2);
     });
 
+    //TODO: finish drag test : currently it creates a third point 50 pixels
+           //to the right of -4 which disapears after hovering
+    // it("will drag a point", () => {
+    //   numberlineToolTile.cy.get(".defaultPointInnerCircle").first() //attach to -4
+    //   .trigger('dragstart')
+    //   .trigger('mousemove', 50, 0, { force: true })
+    //   .trigger('drop', {force: true});
+    //   numberlineToolTile.getPointsOnGraph().should('have.length', 2);
+    // });
 
+    it("will delete all points", () =>{
+      cy.log("delete all points in the numberline");
+      numberlineToolTile.deleteAllPointsOnNumberline();
+      numberlineToolTile.getPointsOnGraph().should('have.length', 0);
+    });
     it("deletes numberline tile", ()=>{
-      // cy.pause();
       clueCanvas.deleteTile('numberline');
       numberlineToolTile.getNumberlineTile().should("not.exist");
     });
-
   });
-  //places 2 points, checks for two points
-  //drags one of the points, checks that its dragged
-
-
-  //at end of test - delete numberline tile?
 });

@@ -1,34 +1,35 @@
-const kNumberlinePixPerCoord = { x: 18.33 };
 
-const kNumberlineOriginCoordPix = { x: 40, y: 50 };
+const numberlineVals = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5];
 
 class NumberlineToolTile {
-
-  // transformFromCoordinate(axis, num){
-  //   return kGraphOriginCoordPix[axis] + num * kGraphPixPerCoord[axis];
-  // }
-
   getNumberlineTile(workspaceClass) {
     return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .numberline-tool-tile`);
   }
-  getTileTitle(workspaceClass){
+  getNumberlineTileTitleText(workspaceClass){
     return cy.get(`${workspaceClass || ".primary-workspace"} .editable-tile-title-text`);
   }
   getNumberlineTileTitle(workspaceClass){
     return cy.get(`${workspaceClass || ".primary-workspace"} .editable-tile-title`);
   }
-  getNumberlineAxis(workspaceClass){
-    return cy.get(".num-line");
+  getNumberlineTick(num){
+    const tickIndex = numberlineVals.indexOf(num);
+    console.log("tickIndex:", tickIndex);
+    console.log(cy.get(".numberline-tool-container .tick text").eq(tickIndex));
+    return cy.get(".numberline-tool-container .tick text").eq(tickIndex);
   }
-  addPointToGraph(){
-    // let transX=this.transformFromCoordinate('x', x),
-        // transY=this.transformFromCoordinate('y', y);
-
-    this.getNumberlineAxis().last().click(0, 0, {force:true});
-
+  getPointsOnGraph(){
+    //exclude the hovering circle that follows the mouse on the numberline
+    return cy.get(".numberline-tool-container .defaultPointInnerCircle").not(".mouseXCircle");
   }
-
-
+  getClearButton(){
+    return cy.get(`.clear-points`);
+  }
+  deleteAllPointsOnNumberline(){
+    this.getClearButton().click();
+  }
+  addPointOnNumberlineTick(num){
+    this.getNumberlineTick(num).click();
+  }
 }
 
 export default NumberlineToolTile;
