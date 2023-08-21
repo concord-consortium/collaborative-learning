@@ -1,0 +1,31 @@
+@use "../vars.sass";
+
+.annotation-node {
+  .node-highlight {
+    fill: rgba(0, 0, 0, 0);
+  }
+
+  .node-center {
+    fill: rgba(0, 0, 0, 0);
+  }
+
+  &:hover {
+    .node-highlight{
+      fill: vars.$annotation-blue-very-transparent;
+    }
+
+    .node-center {
+      fill: vars.$annotation-blue-barely-transparent;
+    }
+  }
+
+  &.active {
+    .node-highlight {
+      fill: vars.$annotation-blue-transparent;
+    }
+
+    .node-center {
+      fill: vars.$annotation-blue;
+    }
+  }
+}

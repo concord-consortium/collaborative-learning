@@ -12,8 +12,11 @@ import { exportTableContentAsJson } from "../../../models/tiles/table/table-expo
 import { getLinkedTableIndex } from "../../../models/tiles/table-links";
 import { decipherCellId } from "../../../models/tiles/table/table-utils";
 
-const kCellTopOffset = -3.5;
-const kCellLeftOffset = -1.5;
+// Offsets for annotation bounding boxes
+const kCellTopOffset = -2.5;
+const kCellLeftOffset = -.5;
+const kCellHeightOffset = -2;
+const kCellWidthOffset = -2;
 
 interface IProps {
   columns: TColumn[];
@@ -73,10 +76,10 @@ export const useToolApi = ({
       const row = rows[rowIndex];
 
       const boundingBox = {
-        height: rowHeight({ row, type: 'ROW' }),
+        height: rowHeight({ row, type: 'ROW' }) + kCellHeightOffset,
         left: getColumnLeft(attributeIndex),
         top: getRowTop(rowIndex),
-        width: measureColumnWidth(attribute)
+        width: measureColumnWidth(attribute) + kCellWidthOffset
       };
       return boundingBox;
     }
