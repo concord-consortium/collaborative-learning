@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useRef} from "react";
+import React, {useCallback, useEffect, useRef, useState} from "react";
 import {createPortal} from "react-dom";
 import {reaction} from "mobx";
 import {observer} from "mobx-react-lite";
@@ -9,7 +9,7 @@ import {AttributeType} from "../../../models/data/attribute";
 import {IDataSet} from "../../../models/data/data-set";
 import {isSetAttributeNameAction} from "../../../models/data/data-set-actions";
 import {GraphPlace, isVertical} from "../imports/components/axis-graph-shared";
-import {graphPlaceToAttrRole, kGraphClassSelector} from "../graph-types";
+import {graphPlaceToAttrRole} from "../graph-types";
 import {useGraphModelContext} from "../models/graph-model";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {useTileModelContext} from "../imports/hooks/use-tile-model-context";
@@ -35,11 +35,11 @@ export const AttributeLabel = observer(
       layout = useGraphLayoutContext(),
       {isTileSelected} = useTileModelContext(),
       dataset = dataConfiguration?.dataset,
-      labelRef = useRef<SVGGElement>(null),
       useClickHereCue = dataConfiguration?.placeCanShowClickHereCue(place) ?? false,
       hideClickHereCue = useClickHereCue &&
         !dataConfiguration?.placeAlwaysShowsClickHereCue(place) && !isTileSelected(),
-      parentElt = labelRef.current?.closest(kGraphClassSelector) as HTMLDivElement ?? null;
+      [labelElt, setLabelRef] = useState<SVGGElement | null>(null),
+      parentElt = labelElt?.closest('.document-content') as HTMLDivElement ?? null;
 
     const getAttributeIDs = useCallback(() => {
       const isScatterPlot = graphModel.plotType === 'scatterPlot',
@@ -78,7 +78,7 @@ export const AttributeLabel = observer(
             : place === 'top' ? labelBounds.height : bounds.height - labelBounds.height / 2,
         tRotation = isVertical(place) ? ` rotate(-90,${tX},${tY})` : '',
         className = useClickHereCue ? 'empty-label' : 'attribute-label';
-      select(labelRef.current)
+      select(labelElt)
         .selectAll(`text.${className}`)
         .data([1])
         .join(
@@ -92,7 +92,7 @@ export const AttributeLabel = observer(
               .attr('y', tY)
               .text(label)
         );
-    }, [layout, place, labelRef, getLabel, useClickHereCue, hideClickHereCue]);
+    }, [layout, place, labelElt, getLabel, useClickHereCue, hideClickHereCue]);
 
     useEffect(function observeAttributeNameChange() {
       const disposer = dataConfiguration?.onAction(action => {
@@ -120,16 +120,16 @@ export const AttributeLabel = observer(
 
       const removeUnusedLabel = () => {
         const classNameToRemove = useClickHereCue ? 'attribute-label' : 'empty-label';
-        select(labelRef.current)
+        select(labelElt)
           .selectAll(`text.${classNameToRemove}`)
           .remove();
       };
 
-      if (labelRef) {
+      if (labelElt) {
         removeUnusedLabel();
         const anchor = place === 'legend' ? 'start' : 'middle',
           className = useClickHereCue ? 'empty-label' : 'attribute-label';
-        select(labelRef.current)
+        select(labelElt)
           .selectAll(`text.${className}`)
           .data([1])
           .join(
@@ -141,7 +141,7 @@ export const AttributeLabel = observer(
           );
         refreshAxisTitle();
       }
-    }, [labelRef, place, useClickHereCue, refreshAxisTitle]);
+    }, [labelElt, place, useClickHereCue, refreshAxisTitle]);
 
     // Respond to changes in attributeID assigned to my place
     useEffect(() => {
@@ -165,10 +165,10 @@ export const AttributeLabel = observer(
     const skipPortal = appConfig.getSetting("defaultSeriesLegend", "graph") && place === "left";
     return (
       <>
-        <g ref={labelRef} className={`display-label ${place}`} />
+        <g ref={(newRef) => setLabelRef(newRef)} className={`display-label ${place}`} />
         {readyForPortal && !skipPortal &&
           createPortal(<AxisOrLegendAttributeMenu
-            target={labelRef.current}
+            target={labelElt}
             portal={parentElt}
             place={place}
             onChangeAttribute={onChangeAttribute}
