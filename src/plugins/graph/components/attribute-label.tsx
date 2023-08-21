@@ -19,7 +19,6 @@ import {useSettingFromStores} from "../../../hooks/use-stores";
 import {appConfig} from "../../../initialize-app";
 
 import graphVars from "./graph.scss";
-import { on } from "superagent";
 
 interface IAttributeLabelProps {
   place: GraphPlace
@@ -40,9 +39,8 @@ export const AttributeLabel = observer(
       useClickHereCue = dataConfiguration?.placeCanShowClickHereCue(place) ?? false,
       hideClickHereCue = useClickHereCue &&
         !dataConfiguration?.placeAlwaysShowsClickHereCue(place) && !isTileSelected(),
-      parentElt = labelRef.current?.closest(kGraphClassSelector) as HTMLDivElement ?? null;
-
-    const [canPortal, setCanPortal] = useState(false);
+      parentElt = labelRef.current?.closest(kGraphClassSelector) as HTMLDivElement ?? null,
+      [readyForPortal, setReadyForPortal] = useState(false);
 
     const getAttributeIDs = useCallback(() => {
       const isScatterPlot = graphModel.plotType === 'scatterPlot',
@@ -165,29 +163,23 @@ export const AttributeLabel = observer(
     }, [place, dataConfiguration, refreshAxisTitle]);
 
     useEffect(() => {
-      const methodsHere = onChangeAttribute && onTreatAttributeAs && onRemoveAttribute;
-      const domHere = labelRef.current && parentElt;
-      const paramsHere = place && dataset;
-      const attrId = dataConfiguration?.attributeID('y') || '';
-      if (methodsHere && domHere && paramsHere && attrId) {
-        setCanPortal(true);
-      } else {
-        setCanPortal(false);
+      if ( parentElt && labelRef.current && onChangeAttribute && onRemoveAttribute && onTreatAttributeAs ) {
+        setReadyForPortal(true);
       }
-    }, [parentElt, onChangeAttribute, onTreatAttributeAs, onRemoveAttribute, dataset, place, dataConfiguration]);
-    //const readyForPortal = parentElt && onChangeAttribute && onTreatAttributeAs && onRemoveAttribute;
+    }, [parentElt, labelRef, onChangeAttribute, onRemoveAttribute, onTreatAttributeAs]);
+
     const skipPortal = appConfig.getSetting("defaultSeriesLegend", "graph") && place === "left";
     return (
       <>
         <g ref={labelRef} className={`display-label ${place}`} />
-        {canPortal && !skipPortal &&
+        {readyForPortal && !skipPortal &&
           createPortal(<AxisOrLegendAttributeMenu
             target={labelRef.current}
             portal={parentElt}
             place={place}
-            onChangeAttribute={onChangeAttribute}
-            onRemoveAttribute={onRemoveAttribute}
-            onTreatAttributeAs={onTreatAttributeAs}
+            onChangeAttribute={onChangeAttribute as any}
+            onRemoveAttribute={onRemoveAttribute as any}
+            onTreatAttributeAs={onTreatAttributeAs as any}
           />, parentElt)
         }
       </>
