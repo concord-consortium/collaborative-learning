@@ -1,7 +1,7 @@
 import { getMembers, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { uniqueId } from "../../../utilities/js-utils";
 import { SelectionBox } from "../components/selection-box";
-import { BoundingBox, BoundingBoxDelta, DefaultToolbarSettings, Point, ToolbarSettings }
+import { BoundingBox, BoundingBoxDelta, Point, ToolbarSettings }
    from "../model/drawing-basic-types";
 import { StampModelType } from "../model/stamp";
 
@@ -15,8 +15,8 @@ export interface IToolbarManager {
   setSelectedButton(button: ToolbarModalButton): void;
   selectedButton: string;
   toolbarSettings: ToolbarSettings;
+  selection: string[];
   hasSelectedObjects: boolean;
-  selectedIds: string [];
   deleteObjects(ids: string[]): void;
   duplicateObjects(ids: string[]): void;
   stamps: StampModelType[];
@@ -193,13 +193,14 @@ export type DrawingComponentType = React.ComponentType<IDrawingComponentProps>;
 export interface IDrawingLayer {
   getWorkspacePoint: (e:MouseEvent|React.MouseEvent) => Point|null;
   setCurrentDrawingObject: (object: DrawingObjectType|null) => void;
-  addNewDrawingObject: (object: DrawingObjectSnapshotForAdd) => void;
+  addNewDrawingObject: (object: DrawingObjectSnapshotForAdd) => DrawingObjectType;
   getCurrentStamp: () => StampModelType|null;
   startSelectionBox: (start: Point) => void;
   updateSelectionBox: (p: Point) => void;
   endSelectionBox: (addToSelectedObjects: boolean) => void;
   setSelectedObjects: (selectedObjects: DrawingObjectType[]) => void;
   getSelectedObjects: () => DrawingObjectType[];
+  toolbarSettings: () => ToolbarSettings;
 }
 
 export abstract class DrawingTool {
@@ -207,14 +208,7 @@ export abstract class DrawingTool {
   public settings: ToolbarSettings;
 
   constructor(drawingLayer: IDrawingLayer) {
-    const {stroke, fill, strokeDashArray, strokeWidth} = DefaultToolbarSettings;
     this.drawingLayer = drawingLayer;
-    this.settings = {
-      stroke,
-      fill,
-      strokeDashArray,
-      strokeWidth
-    };
   }
 
   public setSettings(settings: ToolbarSettings) {
