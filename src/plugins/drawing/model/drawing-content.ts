@@ -74,11 +74,6 @@ export const DrawingContentModel = TileContentModel
     get hasSelectedObjects() {
       return self.selection.length > 0;
     },
-    get selectedIds() {
-      // Returning a mutable object can confuse the caller, so copy it
-      const ids: string[] = [...self.selection];
-      return ids;
-    },
     isIdSelected(id: string) {
       return self.selection.includes(id);
     },

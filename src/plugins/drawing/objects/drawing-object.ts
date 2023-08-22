@@ -15,8 +15,8 @@ export interface IToolbarManager {
   setSelectedButton(button: ToolbarModalButton): void;
   selectedButton: string;
   toolbarSettings: ToolbarSettings;
+  selection: string[];
   hasSelectedObjects: boolean;
-  selectedIds: string [];
   deleteObjects(ids: string[]): void;
   duplicateObjects(ids: string[]): void;
   stamps: StampModelType[];

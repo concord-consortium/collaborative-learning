@@ -223,7 +223,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     const {selectionBox} = this.state;
     if (selectionBox) {
       selectionBox.close();
-      const selectedIds: string[] = addToSelectedObjects ? this.getContent().selection : [];
+      const selectedIds: string[] = addToSelectedObjects ? [...this.getContent().selection] : [];
       this.forEachObject((object) => {
         if (object.inSelection(selectionBox)) {
           if (selectedIds.indexOf(object.id) === -1) {
