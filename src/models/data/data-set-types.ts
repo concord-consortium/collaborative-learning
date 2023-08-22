@@ -1,6 +1,6 @@
 import { Instance, types } from "mobx-state-tree";
 import { uniqueSortableId } from "../../utilities/js-utils";
-import { IValueType } from "./attribute";
+import { IValueType } from "./data-types";
 
 export const uniqueCaseId = () => `CASE${uniqueSortableId()}`;
 

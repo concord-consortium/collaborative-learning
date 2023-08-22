@@ -1,10 +1,11 @@
 import { cloneDeep, findIndex } from "lodash";
+import { observable } from "mobx";
 import { applyAction, getEnv, Instance, ISerializedActionCall,
           onAction, types, getSnapshot, SnapshotOut } from "mobx-state-tree";
-import { Attribute, IAttribute, IAttributeSnapshot, IValueType } from "./attribute";
+import { Attribute, IAttribute, IAttributeSnapshot } from "./attribute";
 import { uniqueId, uniqueSortableId } from "../../utilities/js-utils";
 import { CaseGroup } from "./data-set-types";
-import { observable } from "mobx";
+import { IValueType } from "./data-types";
 
 export const newCaseId = uniqueSortableId;
 

@@ -2,7 +2,6 @@
 
 $single-view-card-width: 359px;
 $name-width: 34%;
-$value-width: 66%;
 $data-row-min-height: 24px;
 $charcoal-light-border: rgb(206, 206, 206);
 $cell-padding: 0px 8px;
@@ -59,21 +58,21 @@ $default-button-border-color: #979797;
       font-style: italic;
       border-bottom-width: 0px;
 
-    .title-text-element {
-      .title-input-editing {
-        width: 100%;
+      .title-text-element {
+        .title-input-editing {
+          width: 100%;
+          height: 100%;
+          font-style: normal;
+          font-weight: 300;
+          text-align: center;
+          outline:1px solid $highlight-blue;
+        }
+      }
+      .title-text-element.editing {
+        width:100%;
         height: 100%;
-        font-style: normal;
-        font-weight: 300;
-        text-align: center;
-        outline:1px solid $highlight-blue;
       }
     }
-    .title-text-element.editing {
-      width:100%;
-      height: 100%;
-    }
-  }
 
 
 
@@ -210,12 +209,16 @@ $default-button-border-color: #979797;
         }
 
         .value {
-          width: $value-width;
+          flex: 1;
           font-weight: normal;
           color:$cell-text-color;
           .cell-value {
             padding:$cell-padding;
           }
+        }
+
+        .type-icon {
+          margin: 0 4px;
         }
 
         .delete-attribute {

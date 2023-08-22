@@ -12,6 +12,18 @@ import { getClipboardContent } from "../../../utilities/clipboard-utils";
 
 import '../data-card-tile.scss';
 
+const typeIcons = {
+  "date": "📅",
+  "categorical": "txt",
+  "numeric": "#",
+  "image": "📷",
+  "boundary": "?",
+  "color": "?",
+  "checkbox": "?",
+  "qualitative": "?",
+  "": "?"
+};
+
 interface IProps {
   model: ITileModel;
   caseId?: string;
@@ -213,6 +225,10 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     {"has-image": gImageMap.isImageUrl(valueStr)}
   );
 
+  const typeIconClassNames = classNames(
+    `type-icon ${attrKey}`
+  );
+
   const deleteAttrButtonClassNames = classNames(
     `delete-attribute ${attrKey}`,
     { "show": currEditAttrId === attrKey }
@@ -222,6 +238,8 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     "cell-value",
     { "default-label": looksLikeDefaultLabel(getLabel()) }
   );
+
+  const typeIcon = typeIcons[content.dataSet.attrFromID(attrKey).mostCommonType || ""];
 
   return (
     <div className={pairClassNames}>
@@ -265,6 +283,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
           <img src={imageUrl} className="image-value" />
         }
       </div>
+      <div className={typeIconClassNames} >{typeIcon}</div>
 
       { !readOnly &&
         <RemoveIconButton className={deleteAttrButtonClassNames} onClick={handleDeleteAttribute} />
