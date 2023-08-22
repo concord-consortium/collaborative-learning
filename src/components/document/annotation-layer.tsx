@@ -37,6 +37,26 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const ui = useUIStore();
   const tileApiInterface = useContext(TileApiInterfaceContext);
 
+  const readWriteClass = readOnly ? "read-only" : "read-write";
+  const documentClasses = `.document-content.${readWriteClass} `;
+  function getRowElement(rowId?: string) {
+    if (rowId === undefined) return undefined;
+    const rowSelector = `${documentClasses}[data-row-id='${rowId}']`;
+    const rowElements = document.querySelectorAll(rowSelector);
+    if (rowElements.length !== 1) return undefined;
+    return rowElements[0] as HTMLElement;
+  }
+
+  const firstRow = content?.rowOrder.length && content.rowOrder.length > 0
+    ? getRowElement(content?.getRowByIndex(0)?.id) : undefined;
+  const documentWidth = firstRow?.offsetWidth ?? 0;
+  const documentHeight = content?.rowOrder.reduce((totalHeight: number, rowId: string) => {
+    const row = getRowElement(rowId);
+    // console.log(`--- row`, row?.offsetHeight);
+    return totalHeight + (row?.offsetHeight ?? 0);
+  }, 0) ?? 0;
+  // console.log(`  -- documentHeight`, documentHeight);
+
   const handleMouseMove: MouseEventHandler<HTMLDivElement> = event => {
     if (divRef.current) {
       const bb = divRef.current.getBoundingClientRect();
@@ -48,12 +68,8 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   function getObjectBoundingBox(
     rowId: string, tileId: string, objectId: string, objectType?: string
   ) {
-    const readWriteClass = readOnly ? "read-only" : "read-write";
-    const documentClasses = `.document-content.${readWriteClass} `;
-    const rowSelector = `${documentClasses}[data-row-id='${rowId}']`;
-    const rowElements = document.querySelectorAll(rowSelector);
-    if (rowElements.length !== 1) return undefined;
-    const rowElement = (rowElements[0] as HTMLElement);
+    const rowElement = getRowElement(rowId);
+    if (!rowElement) return undefined;
   
     const tileSelector = `${documentClasses}[data-tool-id='${tileId}']`;
     const tileElements = document.querySelectorAll(tileSelector);
@@ -192,6 +208,8 @@ export const AnnotationLayer = observer(function AnnotationLayer({
               arrow={arrow}
               canEdit={!readOnly && editing}
               deleteArrow={(arrowId: string) => content?.deleteAnnotation(arrowId)}
+              documentHeight={documentHeight}
+              documentWidth={documentWidth}
               getBoundingBox={getBoundingBox}
               key={key}
               readOnly={readOnly}
