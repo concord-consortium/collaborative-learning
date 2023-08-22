@@ -13,8 +13,6 @@ class NumberlineToolTile {
   }
   getNumberlineTick(num){
     const tickIndex = numberlineVals.indexOf(num);
-    console.log("tickIndex:", tickIndex);
-    console.log(cy.get(".numberline-tool-container .tick text").eq(tickIndex));
     return cy.get(".numberline-tool-container .tick text").eq(tickIndex);
   }
   getPointsOnGraph(){
