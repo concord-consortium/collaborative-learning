@@ -14,7 +14,6 @@ import "./numberline-tile.scss";
 export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) => {
   const { model, readOnly } = props;
   const content = model.content as NumberlineContentModelType;
-
   //---------------- Create Unique ClassName For Axis -----------------------------------------------
   const readOnlyState = (readOnly) ? "readOnly" : "readWrite";
   const tileId = model.id;
@@ -44,18 +43,14 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
     return () => obs?.disconnect();
   }, []);
 
-  //--------------------  SVG Ref / Properties ------------------------------------------
+  //--------------------  SVG Ref to Numberline & SVG / Mouse State ---------------------------------
   const svgRef = useRef<SVGSVGElement | any>(null);
   const svg = select(svgRef.current);
   const svgNode = svg.node();
   const axisRef = useRef<SVGGElement | any>(null);
   const axis = select(axisRef.current);
-
-
-  //-------------------- Mouse State ----------------------------------------------------
   const [mouseIsDragging, setMouseIsDragging] = useState(false); //only within numberline
   const [mousePosX, setMousePosX] = useState(0); //used to retrigger useEffect
-
 
   /* ============================= [ Handlers/Utility Functions ]  =============================== */
 
@@ -101,8 +96,6 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
 
   const handleDrag = drag<SVGCircleElement, PointObjectModelType>()
   .on('drag', (e, p) => {
-    console.log("handleDrag p:", p);
-
       if (mouseInBoundingBox(e)){
         setMouseIsDragging(true);
         const idxPointDragged = givenIDFindIndexPoint(p.id);
@@ -168,89 +161,85 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
 
   /* =========================== [ useEffect Numberline ] ======================================== */
   useEffect(() => {
-    if (isAlive(content)){ //this isn't working
-      if (axisWidth !== 0){
-        const updateNumberline = () => {
-
-          /* =========================== [ Outer Hover Circles ] ======================= */
-          //---- Initialize outer hover circles
-          const outerPoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.outer-point')
-          .data(content.axisPoints, p => p.id);
-
-          outerPoints.enter()
-          .append("circle").attr("class", "outer-point")
-          .attr('cx', (p) => {
-            const xValue = p.pointCoordinates?.xValue;
-            return xScale(xValue || numberlineDomainMin); //mapped to axis width
-          }).attr('cy', yMidPoint).attr('r', outerPointRadius).attr('id', p => p.id)
-          .classed("showPointOuterCircle", true)
-          .classed("disabled", (p, idx) => !(idx === content.indexOfPointHovered));
+    if (axisWidth !== 0){
+      const updateNumberline = () => {
+        /* =========================== [ Outer Hover Circles ] ======================= */
+        //---- Initialize outer hover circles
+        const outerPoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.outer-point')
+        .data(content.axisPointsSnapshot, p => p.id);
 
 
-          // --- Update functions outer hover circles
-          outerPoints
-          .attr('cx', (p) => {
-            const xValue = p.pointCoordinates?.xValue;
-            return xScale(xValue || numberlineDomainMin); //mapped to axis width
-          })
-          .classed("disabled", (p, idx) => {
-            if (!mouseInBoundingBox) {
-              return true; // Disable all points when mouse is outside bounding box
-            }
-            if (p.isHovered || (idx === content.indexOfPointHovered && mouseIsDragging)) {
-              return false; // Show blue outer circle when hovering or dragging the hovered point
-            }
-            return true; // Otherwise, disable the point
-          });
+        outerPoints.enter()
+        .append("circle").attr("class", "outer-point")
+        .attr('cx', (p) => {
+          const xValue = p.pointCoordinates?.xValue;
+          return xScale(xValue || numberlineDomainMin); //mapped to axis width
+        }).attr('cy', yMidPoint).attr('r', outerPointRadius).attr('id', p => p.id)
+        .classed("showPointOuterCircle", true)
+        .classed("disabled", (p, idx) => !(idx === content.indexOfPointHovered));
 
-          outerPoints.exit().remove(); //cleanup
 
-          /* =========================== [ Inner Circles ] ============================= */
-          //---- Initialize inner hover circles
-          const innerPoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.inner-point')
-          .data(content.axisPoints, p => {
-            return p.id;
-          });
-
-          // Initialize Attributes
-          innerPoints.enter()
-          .append("circle")
-          .attr("class", "inner-point")
-          .attr('cx', (p) => {
-            const xValue = p.pointCoordinates?.xValue;
-            return xScale(xValue || numberlineDomainMin); //mapped to axis width
-          })
-          .attr('cy', yMidPoint).attr('r', innerPointRadius).attr('id', p => p.id)
-          .classed("defaultPointInnerCircle", true).classed("selected", (p)=>!!p.isSelected)
-          .call(handleDrag as any ); // Attach drag behavior to newly created circles
-
-          // --- Update functions inner circles
-          innerPoints
-          .attr('cx', (p) => {
-            const xValue = p.pointCoordinates?.xValue;
-            return xScale(xValue || numberlineDomainMin);
-          })
-          .classed("selected", (p)=>!!p.isSelected);
-
-          innerPoints.exit().remove(); //cleanup
-
-        }; //end updateNumberline()
-
-        updateNumberline();
-
-        // Attach the updateNumberline function to the window resize event
-        window.addEventListener('resize', ()=>{
-          updateNumberline();
+        // --- Update functions outer hover circles
+        outerPoints
+        .attr('cx', (p) => {
+          const xValue = p.pointCoordinates?.xValue;
+          return xScale(xValue || numberlineDomainMin); //mapped to axis width
+        })
+        .classed("disabled", (p, idx) => {
+          if (!mouseInBoundingBox) {
+            return true; // Disable all points when mouse is outside bounding box
+          }
+          if (p.isHovered|| (idx === content.indexOfPointHovered && mouseIsDragging)) {
+            return false; // Show blue outer circle when hovering or dragging the hovered point
+          }
+          return true; // Otherwise, disable the point
         });
 
-        // Cleanup event listener on component unmount
-        return () => {
-          window.removeEventListener('resize', updateNumberline);
-        };
-      }
+        outerPoints.exit().remove(); //cleanup
 
+        /* =========================== [ Inner Circles ] ============================= */
+        //---- Initialize inner hover circles
+        const innerPoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.inner-point')
+        .data(content.axisPointsSnapshot, p => {
+          return p.id;
+        });
+
+        // Initialize Attributes
+        innerPoints.enter()
+        .append("circle")
+        .attr("class", "inner-point")
+        .attr('cx', (p) => {
+          const xValue = p.pointCoordinates?.xValue;
+          return xScale(xValue || numberlineDomainMin); //mapped to axis width
+        })
+        .attr('cy', yMidPoint).attr('r', innerPointRadius).attr('id', p => p.id)
+        .classed("defaultPointInnerCircle", true).classed("selected", (p)=>!!p.isSelected)
+        .call(handleDrag as any ); // Attach drag behavior to newly created circles
+
+        // --- Update functions inner circles
+        innerPoints
+        .attr('cx', (p) => {
+          const xValue = p.pointCoordinates?.xValue;
+          return xScale(xValue || numberlineDomainMin);
+        })
+        .classed("selected", (p)=>!!p.isSelected);
+
+        innerPoints.exit().remove(); //cleanup
+
+      }; //end updateNumberline()
+
+      updateNumberline();
+
+      // Attach the updateNumberline function to the window resize event
+      window.addEventListener('resize', ()=>{
+        updateNumberline();
+      });
+
+      // Cleanup event listener on component unmount
+      return () => {
+        window.removeEventListener('resize', updateNumberline);
+      };
     }
-
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [axisWidth, mousePosX, content.pointsIsHoveredArr]);
 
@@ -267,7 +256,6 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
           </svg>
           <i className="arrow left" style={{'left': numToPx(xShiftNum - 3), 'top': '53px'}}/>
           <i className="arrow right" style={{'right': numToPx(xShiftNum - 3), 'top': '53px'}}/>
-          <button onClick={content.clearAllPoints}/>
       </div>
     </div>
   );
