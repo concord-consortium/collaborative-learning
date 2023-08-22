@@ -11,7 +11,7 @@ import {
 } from "../../models/annotations/arrow-annotation";
 import { IClueObject } from "../../models/annotations/clue-object";
 
-import DeleteButton from "../../assets/icons/annotations/delete-button.svg";
+import SparrowDeleteButton from "../../assets/icons/annotations/sparrow-delete-button.svg";
 
 import "./arrow-annotation.scss";
 
@@ -247,7 +247,10 @@ export const ArrowAnnotationComponent = observer(
           targetX={targetX} targetY={targetY}
         />
         <g transform={`translate(${deleteX} ${deleteY})`}>
-          <DeleteButton className={classNames({ "visible-delete-button": hoveringStem })} onClick={handleDelete} />
+          <SparrowDeleteButton
+            className={classNames({ "visible-delete-button": hoveringStem })}
+            onClick={handleDelete}
+          />
         </g>
         <foreignObject
           className="text-object"
