@@ -4,7 +4,7 @@ import { observer } from "mobx-react";
 import useResizeObserver from "use-resize-observer";
 import { VariableChip, VariableType } from "@concord-consortium/diagram-view";
 
-import { addChipToContent, findVariable, getOrFindSharedModel } from "./drawing-utils";
+import { addChipToContent, findVariable, getOrFindSharedModel, locationIsAvailable } from "./drawing-utils";
 import { useEditVariableDialog } from "../dialog/use-edit-variable-dialog";
 import { useInsertVariableDialog } from "../dialog/use-insert-variable-dialog";
 import { useNewVariableDialog } from "../dialog/use-new-variable-dialog";
@@ -130,10 +130,14 @@ export const InsertVariableButton = observer(({ toolbarManager }: IInsertVariabl
   const drawingContent = toolbarManager as DrawingContentModelType;
   const sharedModel = getOrFindSharedModel(drawingContent);
   const insertVariables = (variablesToInsert: VariableType[]) => {
-    let x = 250;
-    let y = 50;
+    let x = 25;
+    let y = 25;
     const offset = 25;
     variablesToInsert.forEach(variable => {
+      while (!locationIsAvailable(drawingContent, x, y)) {
+        x += offset;
+        y += offset;
+      }
       addChipToContent(drawingContent, variable.id, x, y);
       x += offset;
       y += offset;

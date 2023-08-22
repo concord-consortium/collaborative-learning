@@ -87,6 +87,11 @@ export const DrawingContentModel = TileContentModel
       const { stroke, fill, strokeDashArray, strokeWidth, vectorType } = self;
       return { stroke, fill, strokeDashArray, strokeWidth, vectorType };
     },
+    objectsAtLocation(x: number, y: number) {
+      return self.objects.filter((obj) => {
+        return (obj.x === x && obj.y === y);
+      });
+    },
     exportJson(options?: ITileExportOptions) {
       // Translate image urls if necessary
       const {type, objects: originalObjects} = getSnapshot(self);
