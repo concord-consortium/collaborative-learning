@@ -27,6 +27,7 @@ export const OffsetModel = types
     self.dy = dy;
   }
 }));
+export interface IOffsetModel extends Instance<typeof OffsetModel> {}
 
 export interface ObjectBoundingBox {
   left: number;

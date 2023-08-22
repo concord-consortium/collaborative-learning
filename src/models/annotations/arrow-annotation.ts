@@ -1,9 +1,22 @@
 import { Instance, types } from "mobx-state-tree";
 
-import { ClueObjectModel, OffsetModel } from "./clue-object";
+import { boundDelta } from "./annotation-utils";
+import { ClueObjectModel, ObjectBoundingBox, OffsetModel } from "./clue-object";
 import { uniqueId } from "../../utilities/js-utils";
 
 export const kArrowAnnotationType = "arrowAnnotation";
+
+export const kArrowAnnotationTextWidth = 150;
+export const kArrowAnnotationTextHeight = 50;
+
+export interface IArrowAnnotationDragOffsets {
+  sourceDragOffsetX: number;
+  sourceDragOffsetY: number;
+  targetDragOffsetX: number;
+  targetDragOffsetY: number;
+  textDragOffsetX: number;
+  textDragOffsetY: number;
+}
 
 export const ArrowAnnotation = types
 .model("ArrowAnnotation", {
@@ -55,6 +68,42 @@ export const ArrowAnnotation = types
   },
   setIsNew(_new: boolean) {
     self.isNew = _new;
+  }
+}))
+.views(self => ({
+  getPoints(
+    dragOffsets: IArrowAnnotationDragOffsets, sourceBB?: ObjectBoundingBox|null, targetBB?: ObjectBoundingBox|null
+  ) {
+    
+    if (!sourceBB || !targetBB) {
+      return {
+        sourceX: undefined, sourceY: undefined, targetX: undefined, targetY: undefined,
+        textX: undefined, textY: undefined, textCenterX: undefined, textCenterY: undefined
+      };
+    }
+
+    const {
+      sourceDragOffsetX, sourceDragOffsetY, targetDragOffsetX, targetDragOffsetY, textDragOffsetX, textDragOffsetY
+    } = dragOffsets;
+  
+    // Find positions for head and tail of arrow
+    const [sDxOffset, sDyOffset] = self.sourceOffset ? [self.sourceOffset.dx, self.sourceOffset.dy] : [0, 0];
+    const sourceX = sourceBB.left + sourceBB.width / 2 + boundDelta(sDxOffset + sourceDragOffsetX, sourceBB.width);
+    const sourceY = sourceBB.top + sourceBB.height / 2 + boundDelta(sDyOffset + sourceDragOffsetY, sourceBB.height);
+    const [tDxOffset, tDyOffset] = self.targetOffset ? [self.targetOffset.dx, self.targetOffset.dy] : [0, 0];
+    const targetX = targetBB.left + targetBB.width / 2 + boundDelta(tDxOffset + targetDragOffsetX, targetBB.width);
+    const targetY = targetBB.top + targetBB.height / 2 + boundDelta(tDyOffset + targetDragOffsetY, targetBB.height);
+  
+    // Set up text location
+    const [textDxOffset, textDyOffset] = self.textOffset ? [self.textOffset.dx, self.textOffset.dy] : [0, 0];
+    const dx = targetX - sourceX;
+    const dy = targetY - sourceY;
+    const textCenterX = targetX - dx / 2 + textDxOffset + textDragOffsetX;
+    const textCenterY = targetY - dy / 2 + textDyOffset + textDragOffsetY;
+    const textX = textCenterX - kArrowAnnotationTextWidth / 2;
+    const textY = textCenterY - kArrowAnnotationTextHeight / 2;
+
+    return { sourceX, sourceY, targetX, targetY, textX, textY, textCenterX, textCenterY };
   }
 }));
 export interface IArrowAnnotation extends Instance<typeof ArrowAnnotation> {}
