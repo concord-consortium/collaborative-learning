@@ -133,9 +133,12 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     }
   };
 
-  // handles dragging of selected/hovered objects
+  // Handles click/drag of selected/hovered objects
   public handleSelectedObjectMouseDown = (e: React.MouseEvent<any>, obj: DrawingObjectType) => {
-    if (this.props.readOnly || (this.getCurrentTool() !== this.tools.select)) return;
+    // Only the select tool does anything special when an object is clicked.
+    // Other tools just let the click pass through to the canvas layer.
+    if (this.props.readOnly || !this.getContent().isSelectedButton('select')) return;
+
     let moved = false;
     const {hoverObject } = this.state;
     const selectedObjects = this.getSelectedObjects();
@@ -242,7 +245,8 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       if (!object || !_filter(object)) {
         return null;
       }
-      return renderDrawingObject(object, this.handleObjectHover, this.handleSelectedObjectMouseDown);
+      return renderDrawingObject(object, this.props.readOnly, 
+        this.handleObjectHover, this.handleSelectedObjectMouseDown);
     });
   }
 
