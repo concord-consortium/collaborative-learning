@@ -52,10 +52,8 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const documentWidth = firstRow?.offsetWidth ?? 0;
   const documentHeight = content?.rowOrder.reduce((totalHeight: number, rowId: string) => {
     const row = getRowElement(rowId);
-    // console.log(`--- row`, row?.offsetHeight);
     return totalHeight + (row?.offsetHeight ?? 0);
   }, 0) ?? 0;
-  // console.log(`  -- documentHeight`, documentHeight);
 
   const handleMouseMove: MouseEventHandler<HTMLDivElement> = event => {
     if (divRef.current) {
