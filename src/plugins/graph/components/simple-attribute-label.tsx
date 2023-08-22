@@ -1,4 +1,4 @@
-import React, {useRef} from "react";
+import React, { useRef} from "react";
 import {createPortal} from "react-dom";
 import {observer} from "mobx-react-lite";
 import {GraphPlace } from "../imports/components/axis-graph-shared";
@@ -32,9 +32,17 @@ export const SimpleAttributeLabel = observer(
     const attrName = attr?.name ?? "";
     const pointColor = graphModel._pointColors[0]; // In PT#182578812 will pass plotIndex
 
+    //const [chakraReportsOpen, setChakraReportsOpen] = React.useState(false);
+
+    const handleOpenClose = (isOpen: boolean) => {
+      simpleLabelRef.current?.classList.toggle("target-open", isOpen);
+      simpleLabelRef.current?.classList.toggle("target-closed", !isOpen);
+      //setChakraReportsOpen(isOpen); <-- error on first render
+    };
+
     return (
       <>
-        <div ref={simpleLabelRef} className="simple-attribute-label">
+        <div ref={simpleLabelRef} className={`simple-attribute-label`}>
           <div className="symbol-title">
             <div className="attr-symbol" style={{ backgroundColor: pointColor }}></div>
             <div>{ attrName }</div>
@@ -51,6 +59,7 @@ export const SimpleAttributeLabel = observer(
             onChangeAttribute={onChangeAttribute}
             onRemoveAttribute={onRemoveAttribute}
             onTreatAttributeAs={onTreatAttributeAs}
+            onOpenClose={handleOpenClose}
           />, parentElt)
         }
       </>

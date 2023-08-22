@@ -20,6 +20,7 @@ interface IProps {
   onChangeAttribute: (place: GraphPlace, dataSet: IDataSet, attrId: string) => void
   onRemoveAttribute: (place: GraphPlace, attrId: string) => void
   onTreatAttributeAs: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void
+  onOpenClose?: (isOpen: boolean) => void
 }
 
 const removeAttrItemLabelKeys: Record<string, string> = {
@@ -31,7 +32,7 @@ const removeAttrItemLabelKeys: Record<string, string> = {
   "rightSplit": "DG.DataDisplayMenu.removeAttribute_right"
 };
 
-const _AxisOrLegendAttributeMenu = ({ place, target, portal,
+const _AxisOrLegendAttributeMenu = ({ place, target, portal, onOpenClose,
                                       onChangeAttribute, onRemoveAttribute, onTreatAttributeAs }: IProps) => {
   const data = useDataSetContext();
   const dataConfig = useDataConfigurationContext();
@@ -70,16 +71,11 @@ const _AxisOrLegendAttributeMenu = ({ place, target, portal,
     });
   }, [attribute?.name, data?.attributes, dataConfig, labelText, setLabelText, attrId]);
 
-  const updateTargetMenuClasses = (isOpen: boolean) => {
-    target?.classList.toggle("target-open", isOpen);
-    target?.classList.toggle("target-closed", !isOpen);
-  };
-
   return (
     <div className={`axis-legend-attribute-menu ${place}`} ref={menuRef}>
       <Menu boundary="scrollParent">
         {({ onClose, isOpen }) => {
-          updateTargetMenuClasses(isOpen);
+          onOpenClose && onOpenClose(isOpen!);
           onCloseRef.current = onClose;
           return (
             <div ref={setDragNodeRef} style={overlayStyle} {...attributes} {...listeners}>
