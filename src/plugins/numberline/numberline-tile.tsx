@@ -1,7 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { select, scaleLinear, axisBottom, drag, pointer } from 'd3';
 import { observer } from 'mobx-react';
-import { isAlive } from 'mobx-state-tree';
 import { ITileProps } from "../../components/tiles/tile-component";
 import { NumberlineContentModelType, PointObjectModelType,  } from "./models/numberline-content";
 import { kAxisStyle, kAxisWidth, kContainerWidth, kNumberLineContainerHeight,
