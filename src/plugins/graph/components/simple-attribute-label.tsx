@@ -1,4 +1,4 @@
-import React, { useRef} from "react";
+import React, {useRef} from "react";
 import {createPortal} from "react-dom";
 import {observer} from "mobx-react-lite";
 import {GraphPlace } from "../imports/components/axis-graph-shared";
@@ -39,7 +39,7 @@ export const SimpleAttributeLabel = observer(
 
     return (
       <>
-        <div ref={simpleLabelRef} className={`simple-attribute-label`}>
+        <div ref={simpleLabelRef} className={"simple-attribute-label"}>
           <div className="symbol-title">
             <div className="attr-symbol" style={{ backgroundColor: pointColor }}></div>
             <div>{ attrName }</div>

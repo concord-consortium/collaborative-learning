@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useRef, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import {createPortal} from "react-dom";
 import {reaction} from "mobx";
 import {observer} from "mobx-react-lite";
@@ -16,7 +16,6 @@ import {useTileModelContext} from "../imports/hooks/use-tile-model-context";
 import {getStringBounds} from "../imports/components/axis/axis-utils";
 import {AxisOrLegendAttributeMenu} from "../imports/components/axis/components/axis-or-legend-attribute-menu";
 import {useSettingFromStores} from "../../../hooks/use-stores";
-import {appConfig} from "../../../initialize-app";
 
 import graphVars from "./graph.scss";
 
@@ -162,7 +161,7 @@ export const AttributeLabel = observer(
     }, [place, dataConfiguration, refreshAxisTitle]);
 
     const readyForPortal = parentElt && onChangeAttribute && onTreatAttributeAs && onRemoveAttribute;
-    const skipPortal = appConfig.getSetting("defaultSeriesLegend", "graph") && place === "left";
+    const skipPortal = useSettingFromStores("defaultSeriesLegend", "graph") && place === "left";
 
     return (
       <>

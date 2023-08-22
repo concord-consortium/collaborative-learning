@@ -9,10 +9,10 @@ import { IUseDraggableAttribute, useDraggableAttribute } from "../../../hooks/us
 import { useInstanceIdContext } from "../../../hooks/use-instance-id-context";
 import { useOutsidePointerDown } from "../../../hooks/use-outside-pointer-down";
 import { useOverlayBounds } from "../../../hooks/use-overlay-bounds";
+import { useSettingFromStores } from "../../../../../../hooks/use-stores";
 import { AttributeType } from "../../../../../../models/data/attribute";
 import { IDataSet } from "../../../../../../models/data/data-set";
 import { isSetAttributeNameAction } from "../../../../../../models/data/data-set-actions";
-import { appConfig } from "../../../../../../initialize-app";
 
 interface IProps {
   place: GraphPlace
@@ -45,7 +45,7 @@ const _AxisOrLegendAttributeMenu = ({ place, target, portal, onOpenClose,
   const removeAttrItemLabel = t(removeAttrItemLabelKeys[role], {vars: [attribute?.name]});
   const treatAs = dataConfig?.attributeType(role) === "numeric" ? "categorical" : "numeric";
   const menuRef = useRef<HTMLDivElement>(null);
-  const showRemoveOption = appConfig.getSetting("defaultSeriesLegend", "graph") !== true;
+  const showRemoveOption = useSettingFromStores("defaultSeriesLegend", "graph") !== true;
 
   const onCloseRef = useRef<() => void>();
   const overlayStyle: CSSProperties = {
@@ -78,7 +78,7 @@ const _AxisOrLegendAttributeMenu = ({ place, target, portal, onOpenClose,
     <div className={`axis-legend-attribute-menu ${place}`} ref={menuRef}>
       <Menu boundary="scrollParent">
         {({ onClose, isOpen }) => {
-          onOpenClose && onOpenClose(isOpen!);
+          onOpenClose && onOpenClose(isOpen);
           onCloseRef.current = onClose;
           return (
             <div ref={setDragNodeRef} style={overlayStyle} {...attributes} {...listeners}>
