@@ -11,6 +11,7 @@ import { TableContentModelType } from "../../../models/tiles/table/table-content
 import { exportTableContentAsJson } from "../../../models/tiles/table/table-export";
 import { getLinkedTableIndex } from "../../../models/tiles/table-links";
 import { decipherCellId } from "../../../models/tiles/table/table-utils";
+import { OffsetModel } from "../../../models/annotations/clue-object";
 
 // Offsets for annotation bounding boxes
 const kCellTopOffset = -2.5;
@@ -84,6 +85,16 @@ export const useToolApi = ({
       return boundingBox;
     }
   }, [dataSet, getColumnLeft, getRowTop, measureColumnWidth, rowHeight, rows]);
+  const getObjectDefaultOffsets = useCallback((objectId: string, objectType?: string) => {
+    const offsets = OffsetModel.create({});
+    if (objectType === "cell") {
+      const boundingBox = getObjectBoundingBox(objectId, objectType);
+      if (boundingBox) {
+        offsets.setDy(boundingBox.height * -.5 + 2);
+      }
+    }
+    return offsets;
+  }, [getObjectBoundingBox]);
 
   const tileApi: ITileApi = useMemo(() => ({
     // TODO: we should be able to remove getTitle from the tool api. All other
@@ -103,8 +114,9 @@ export const useToolApi = ({
               ? getLinkedTableIndex(contentRef.current.metadata.id)
               : -1;
     },
-    getObjectBoundingBox
-  }), [exportContentAsTileJson, getContentHeight, contentRef, getObjectBoundingBox]);
+    getObjectBoundingBox,
+    getObjectDefaultOffsets
+  }), [exportContentAsTileJson, getContentHeight, contentRef, getObjectBoundingBox, getObjectDefaultOffsets]);
 
   useEffect(() => {
     onRegisterTileApi(tileApi);

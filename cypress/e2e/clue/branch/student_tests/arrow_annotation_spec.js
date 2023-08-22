@@ -134,6 +134,10 @@ context('Arrow Annotations (Sparrows)', function () {
       aa.getAnnotationButtons().first().click({ force: true });
       aa.getAnnotationButtons().eq(2).click();
       aa.getAnnotationArrows().should("have.length", 2);
+
+      cy.log("Can delete sparrows");
+      aa.getAnnotationDeleteButtons().eq(1).click({ force: true });
+      aa.getAnnotationArrows().should("have.length", 1);
     });
   });
 

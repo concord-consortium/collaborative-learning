@@ -3,7 +3,7 @@ import { observer } from "mobx-react";
 import React, { MouseEventHandler, useContext, useEffect, useRef, useState } from "react";
 
 import { AnnotationButton } from "../annotations/annotation-button";
-import { getDeafultPeak } from "../annotations/annotation-utilities";
+import { getDefaultPeak } from "../annotations/annotation-utilities";
 import { ArrowAnnotationComponent } from "../annotations/arrow-annotation";
 import { PreviewArrow } from "../annotations/preview-arrow";
 import { TileApiInterfaceContext } from "../tiles/tile-api";
@@ -44,8 +44,6 @@ export const AnnotationLayer = observer(function AnnotationLayer({
       setMouseY(event.clientY - bb.top);
     }
   };
-
-  const rowIds = content?.rowOrder || [];
 
   function getObjectBoundingBox(
     rowId: string, tileId: string, objectId: string, objectType?: string
@@ -88,6 +86,20 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const sourceBoundingBox = sourceTileId && sourceObjectId
     ? getObjectBoundingBoxUnknownRow(sourceTileId, sourceObjectId, sourceObjectType)
     : undefined;
+  function defaultOffset(tileId?: string, objectId?: string, objectType?: string) {
+    return (tileId && objectId
+      ? tileApiInterface?.getTileApi(tileId)?.getObjectDefaultOffsets?.(objectId, objectType)
+      : undefined)
+      ?? OffsetModel.create({});
+  }
+  const sourceOffset = defaultOffset(sourceTileId, sourceObjectId, sourceObjectType);
+
+  const previewArrowSourceX = sourceBoundingBox && sourceOffset
+    ? sourceBoundingBox.left + sourceBoundingBox.width / 2 + sourceOffset.dx
+    : undefined;
+  const previewArrowSourceY = sourceBoundingBox && sourceOffset
+    ? sourceBoundingBox.top + sourceBoundingBox.height / 2 + sourceOffset.dy
+    : undefined;
 
   const handleAnnotationButtonClick = (tileId: string, objectId: string, objectType?: string) => {
     if (!sourceBoundingBox) {
@@ -106,16 +118,17 @@ export const AnnotationLayer = observer(function AnnotationLayer({
         ClueObjectModel.create({ tileId: sourceTileId, objectId: sourceObjectId, objectType: sourceObjectType });
       const targetObject = ClueObjectModel.create({ tileId, objectId, objectType });
       const targetBoundingBox = getObjectBoundingBoxUnknownRow(tileId, objectId, objectType);
+      const targetOffset = defaultOffset(tileId, objectId, objectType);
       let textOffset;
       if (targetBoundingBox) {
         const sourceX = sourceBoundingBox.left + sourceBoundingBox.width / 2;
         const sourceY = sourceBoundingBox.top + sourceBoundingBox.height / 2;
         const targetX = targetBoundingBox.left + targetBoundingBox.width / 2;
         const targetY = targetBoundingBox.top + targetBoundingBox.height / 2;
-        const { peakDx, peakDy } = getDeafultPeak(sourceX, sourceY, targetX, targetY);
+        const { peakDx, peakDy } = getDefaultPeak(sourceX, sourceY, targetX, targetY);
         textOffset = OffsetModel.create({ dx: peakDx, dy: peakDy });
       }
-      const newArrow = ArrowAnnotation.create({ sourceObject, targetObject, textOffset });
+      const newArrow = ArrowAnnotation.create({ sourceObject, sourceOffset, targetObject, targetOffset, textOffset });
       newArrow.setIsNew(true);
       content?.addArrow(newArrow);
       setSourceTileId("");
@@ -128,6 +141,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     return getObjectBoundingBoxUnknownRow(object.tileId, object.objectId, object.objectType);
   };
 
+  const rowIds = content?.rowOrder || [];
   const editing = ui.annotationMode !== undefined;
   const hidden = !ui.showAnnotations;
   const classes = classNames("annotation-layer", { editing, hidden });
@@ -177,6 +191,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
             <ArrowAnnotationComponent
               arrow={arrow}
               canEdit={!readOnly && editing}
+              deleteArrow={(arrowId: string) => content?.deleteAnnotation(arrowId)}
               getBoundingBox={getBoundingBox}
               key={key}
               readOnly={readOnly}
@@ -184,8 +199,8 @@ export const AnnotationLayer = observer(function AnnotationLayer({
           );
         })}
         <PreviewArrow
-          sourceX={sourceBoundingBox ? sourceBoundingBox.left + sourceBoundingBox.width / 2 : undefined}
-          sourceY={sourceBoundingBox ? sourceBoundingBox.top + sourceBoundingBox.height / 2 : undefined}
+          sourceX={previewArrowSourceX}
+          sourceY={previewArrowSourceY}
           targetX={mouseX}
           targetY={mouseY}
         />

@@ -161,6 +161,15 @@ context('Diagram Tool Tile', function () {
       diagramTile.getVariableCard().should("exist");
     });
 
+    it("Make sure only one diagram tile is allowed", () => {
+      clueCanvas.addTile("diagram");
+      clueCanvas.verifyToolDisabled("diagram");
+      clueCanvas.deleteTile("diagram");
+      clueCanvas.verifyToolEnabled("diagram");
+      clueCanvas.addTile("diagram");
+      diagramTile.getDiagramTile().should("exist");
+    });
+
     it("Drawing tile, text tile, toolbar, dialogs, and interactions between tiles", () => {
       clueCanvas.addTile("diagram");
       clueCanvas.addTile("drawing");
