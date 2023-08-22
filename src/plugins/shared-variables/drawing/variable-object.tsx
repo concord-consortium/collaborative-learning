@@ -100,7 +100,7 @@ export const VariableChipComponent: React.FC<IDrawingComponentProps> = observer(
 // If the only object selected is a variable chip, returns the variable associated with it.
 // Otherwise, returns undefined.
 const getSelectedVariable = (drawingContent: DrawingContentModelType) => {
-  const selectedId = drawingContent.selectedIds.length === 1 ? drawingContent.selectedIds[0] : "";
+  const selectedId = drawingContent.selection.length === 1 ? drawingContent.selection[0] : "";
   const selectedObject = drawingContent.objectMap[selectedId];
   return selectedObject?.type === "variable"
     ? findVariable(drawingContent, (selectedObject as VariableChipObjectType).variableId)

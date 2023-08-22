@@ -66,7 +66,7 @@ context('History Playback', () => {
     cy.get('.primary-workspace .editable-document-content .canvas .document-content .drawing-tool-tile').should('be.visible');
 
     cy.log('verify playback document does not have changes to primary document');
-    drawToolTile.getDrawToolLine().click();
+    drawToolTile.getDrawToolVector().click();
     drawToolTile.getDrawTile()
       .trigger('mousedown')
       .trigger('mousemove', 50, 0)
