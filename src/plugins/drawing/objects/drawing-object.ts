@@ -5,7 +5,7 @@ import { BoundingBox, BoundingBoxDelta, Point, ToolbarSettings }
    from "../model/drawing-basic-types";
 import { StampModelType } from "../model/stamp";
 
-export type ToolbarModalButton = "select" | "line" | "vector" | "rectangle" | "ellipse" | "stamp" | "variable";
+export type ToolbarModalButton = "select" | "line" | "vector" | "rectangle" | "ellipse" | "text" | "stamp" | "variable";
 
 // This interface is a subset of what the DrawingContentModel provides.
 // It is used to break the circular reference between DrawingContentModel
@@ -153,6 +153,21 @@ export function isFilledObject(object: DrawingObjectType): object is FilledObjec
   return !!(typeMembers.properties?.fill);
 }
 
+// "Editable" objects go into an "editing" state if you click them while they are already selected.
+// For example, text labels go into a state where you can edit the text.
+export const EditableObject = DrawingObject.named("EditableObject")
+.volatile(self => ({
+  isEditing: false
+}))
+.actions(self=> ({
+  setEditing(editing: boolean){ self.isEditing = editing; }
+}));
+export interface EditableObjectType extends Instance<typeof EditableObject> {}
+export function isEditableObject(object: DrawingObjectType): object is EditableObjectType {
+  const typeMembers = getMembers(object);
+  return !!(typeMembers.actions.includes("setEditing"));
+}
+
 export const DeltaPoint = types.model("DeltaPoint", {
   dx: types.number, dy: types.number
 });
@@ -165,11 +180,10 @@ export type HandleObjectDrag =
 
 export interface IDrawingComponentProps {
   model: DrawingObjectType;
+  readOnly?: boolean,
   handleHover?: HandleObjectHover;
   handleDrag?: HandleObjectDrag;
 }
-
-
 
 // TODO: the support for palettes is hard coded to specific tools
 export interface IPaletteState {
@@ -205,15 +219,9 @@ export interface IDrawingLayer {
 
 export abstract class DrawingTool {
   public drawingLayer: IDrawingLayer;
-  public settings: ToolbarSettings;
 
   constructor(drawingLayer: IDrawingLayer) {
     this.drawingLayer = drawingLayer;
-  }
-
-  public setSettings(settings: ToolbarSettings) {
-    this.settings = settings;
-    return this;
   }
 
   public handleMouseDown(e: React.MouseEvent<HTMLDivElement>): void {
