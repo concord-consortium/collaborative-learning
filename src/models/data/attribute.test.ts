@@ -117,7 +117,10 @@ describe("DataSet Attributes", () => {
     ["2/23", "2/24"],
     ["2/23", "1", "2"],
     ["ccimg://fbrtdb.concord.org/devclass/-NcP-LmubeWUdANUM_vO", "1"],
-    ["ccimg://fbrtdb.concord.org/devclass/-NcP-LmubeWUdANUM_vO", "1", "a"]
+    ["ccimg://fbrtdb.concord.org/devclass/-NcP-LmubeWUdANUM_vO", "1", "a"],
+    // Maybe this should result in numeric but count of numbers is less than
+    // half of the non empty values, so the result is "categorical"
+    ["1", "2", "a", "2/23", "ccimg://fbrtdb.concord.org/img.png"]
   ];
 
   test("type", () => {
@@ -141,6 +144,7 @@ describe("DataSet Attributes", () => {
 ["2/23","1","2"] => "categorical"
 ["ccimg://fbrtdb.concord.org/devclass/-NcP-LmubeWUdANUM_vO","1"] => "categorical"
 ["ccimg://fbrtdb.concord.org/devclass/-NcP-LmubeWUdANUM_vO","1","a"] => "categorical"
+["1","2","a","2/23","ccimg://fbrtdb.concord.org/img.png"] => "categorical"
 `);
   });
 
@@ -166,6 +170,7 @@ describe("DataSet Attributes", () => {
 ["2/23","1","2"] => [["numeric",2],["date",1]]
 ["ccimg://fbrtdb.concord.org/devclass/-NcP-LmubeWUdANUM_vO","1"] => [["image",1],["numeric",1]]
 ["ccimg://fbrtdb.concord.org/devclass/-NcP-LmubeWUdANUM_vO","1","a"] => [["image",1],["numeric",1]]
+["1","2","a","2/23","ccimg://fbrtdb.concord.org/img.png"] => [["numeric",2],["date",1],["image",1]]
 `);
   });
 
@@ -191,6 +196,7 @@ describe("DataSet Attributes", () => {
 ["2/23","1","2"] => "numeric"
 ["ccimg://fbrtdb.concord.org/devclass/-NcP-LmubeWUdANUM_vO","1"] => "image"
 ["ccimg://fbrtdb.concord.org/devclass/-NcP-LmubeWUdANUM_vO","1","a"] => "categorical"
+["1","2","a","2/23","ccimg://fbrtdb.concord.org/img.png"] => "categorical"
 `);
   });
 });
