@@ -52,13 +52,18 @@ interface IArrowAnnotationProps {
   arrow: IArrowAnnotation;
   canEdit?: boolean;
   deleteArrow: (arrowId: string) => void;
+  documentBottom: number;
+  documentTop: number;
+  documentWidth: number;
   getBoundingBox: (object: IClueObject) =>
     { height: number, left: number, top: number, width: number} | null | undefined;
   key?: string;
   readOnly?: boolean;
 }
 export const ArrowAnnotationComponent = observer(
-  function ArrowAnnotationComponent({ arrow, canEdit, deleteArrow, getBoundingBox, readOnly }: IArrowAnnotationProps) {
+  function ArrowAnnotationComponent({
+    arrow, canEdit, deleteArrow, documentBottom, documentTop, documentWidth, getBoundingBox, readOnly
+  }: IArrowAnnotationProps) {
     const [firstClick, setFirstClick] = useState(false);
     const [editingText, setEditingText] = useState(false);
     const [tempText, setTempText] = useState(arrow.text ?? "");
@@ -101,8 +106,10 @@ export const ArrowAnnotationComponent = observer(
     const dragOffsets = {
       sourceDragOffsetX, sourceDragOffsetY, targetDragOffsetX, targetDragOffsetY, textDragOffsetX, textDragOffsetY
     };
-    const { sourceX, sourceY, targetX, targetY, textX, textY, textCenterX, textCenterY } =
-      arrow.getPoints(dragOffsets, sourceBB, targetBB);
+    const {
+      sourceX, sourceY, targetX, targetY, textX, textY, textCenterX, textCenterY,
+      textMinXOffset, textMaxXOffset, textMinYOffset, textMaxYOffset
+    } = arrow.getPoints(documentWidth, documentTop, documentBottom, dragOffsets, sourceBB, targetBB);
     const curveData = useMemo(() => {
       if (
         sourceX === undefined || sourceY === undefined || textCenterX === undefined
@@ -187,7 +194,13 @@ export const ArrowAnnotationComponent = observer(
         const [startingDx, startingDy] = startingOffset ? [startingOffset.dx, startingOffset.dy] : [0, 0];
         const dDx = e2.clientX - e.clientX;
         const dDy = e2.clientY - e.clientY;
-        setFunc(boundDelta(startingDx + dDx, widthBound), boundDelta(startingDy + dDy, heightBound));
+        if (_dragType === "text") {
+          const dx = Math.max(textMinXOffset ?? 0, Math.min(textMaxXOffset ?? 0, startingDx + dDx));
+          const dy = Math.max(textMinYOffset ?? 0, Math.min(textMaxYOffset ?? 0, startingDy + dDy));
+          setFunc(dx, dy);
+        } else {
+          setFunc(boundDelta(startingDx + dDx, widthBound), boundDelta(startingDy + dDy, heightBound));
+        }
   
         setClientX(undefined);
         setClientY(undefined);
