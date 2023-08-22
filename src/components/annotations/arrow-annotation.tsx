@@ -52,7 +52,8 @@ interface IArrowAnnotationProps {
   arrow: IArrowAnnotation;
   canEdit?: boolean;
   deleteArrow: (arrowId: string) => void;
-  documentHeight: number;
+  documentBottom: number;
+  documentTop: number;
   documentWidth: number;
   getBoundingBox: (object: IClueObject) =>
     { height: number, left: number, top: number, width: number} | null | undefined;
@@ -61,7 +62,7 @@ interface IArrowAnnotationProps {
 }
 export const ArrowAnnotationComponent = observer(
   function ArrowAnnotationComponent({
-    arrow, canEdit, deleteArrow, documentHeight, documentWidth, getBoundingBox, readOnly
+    arrow, canEdit, deleteArrow, documentBottom, documentTop, documentWidth, getBoundingBox, readOnly
   }: IArrowAnnotationProps) {
     const [firstClick, setFirstClick] = useState(false);
     const [editingText, setEditingText] = useState(false);
@@ -107,8 +108,8 @@ export const ArrowAnnotationComponent = observer(
     };
     const {
       sourceX, sourceY, targetX, targetY, textX, textY, textCenterX, textCenterY,
-      textOriginX, textOriginY, textMinXOffset, textMaxXOffset, textMinYOffset, textMaxYOffset
-    } = arrow.getPoints(documentWidth, documentHeight, dragOffsets, sourceBB, targetBB);
+      textMinXOffset, textMaxXOffset, textMinYOffset, textMaxYOffset
+    } = arrow.getPoints(documentWidth, documentTop, documentBottom, dragOffsets, sourceBB, targetBB);
     const curveData = useMemo(() => {
       if (
         sourceX === undefined || sourceY === undefined || textCenterX === undefined
@@ -194,18 +195,8 @@ export const ArrowAnnotationComponent = observer(
         const dDx = e2.clientX - e.clientX;
         const dDy = e2.clientY - e.clientY;
         if (_dragType === "text") {
-          // const tx = targetX !== undefined && sourceX !== undefined ? sourceX + (targetX - sourceX) / 2 : 0;
-          // const ty = targetY !== undefined && sourceY !== undefined ? sourceY + (targetY - sourceY) / 2 : 0;
-          // console.log(`--- mouseup`);
-          // console.log(` -- document`, documentWidth, documentHeight);
-          // console.log(` -- xs`, targetX, sourceX);
-          // console.log(` -- textCenter`, tx, ty);
-          // console.log(` -- x range`, -tx, documentWidth - tx);
-          // console.log(` -- y range`, -ty, documentHeight - ty);
-          // console.log(` -- new offsets`, startingDx + dDx, startingDy + dDy);
           const dx = Math.max(textMinXOffset ?? 0, Math.min(textMaxXOffset ?? 0, startingDx + dDx));
           const dy = Math.max(textMinYOffset ?? 0, Math.min(textMaxYOffset ?? 0, startingDy + dDy));
-          console.log(` -- adjusted offsets`, dx, dy);
           setFunc(dx, dy);
         } else {
           setFunc(boundDelta(startingDx + dDx, widthBound), boundDelta(startingDy + dDy, heightBound));
