@@ -32,12 +32,9 @@ export const SimpleAttributeLabel = observer(
     const attrName = attr?.name ?? "";
     const pointColor = graphModel._pointColors[0]; // In PT#182578812 will pass plotIndex
 
-    //const [chakraReportsOpen, setChakraReportsOpen] = React.useState(false);
-
     const handleOpenClose = (isOpen: boolean) => {
       simpleLabelRef.current?.classList.toggle("target-open", isOpen);
       simpleLabelRef.current?.classList.toggle("target-closed", !isOpen);
-      //setChakraReportsOpen(isOpen); <-- error on first render
     };
 
     return (

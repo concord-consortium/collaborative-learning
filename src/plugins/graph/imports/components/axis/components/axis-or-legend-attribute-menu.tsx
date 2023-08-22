@@ -12,6 +12,7 @@ import { useOverlayBounds } from "../../../hooks/use-overlay-bounds";
 import { AttributeType } from "../../../../../../models/data/attribute";
 import { IDataSet } from "../../../../../../models/data/data-set";
 import { isSetAttributeNameAction } from "../../../../../../models/data/data-set-actions";
+import { appConfig } from "../../../../../../initialize-app";
 
 interface IProps {
   place: GraphPlace
@@ -44,6 +45,8 @@ const _AxisOrLegendAttributeMenu = ({ place, target, portal, onOpenClose,
   const removeAttrItemLabel = t(removeAttrItemLabelKeys[role], {vars: [attribute?.name]});
   const treatAs = dataConfig?.attributeType(role) === "numeric" ? "categorical" : "numeric";
   const menuRef = useRef<HTMLDivElement>(null);
+  const showRemoveOption = appConfig.getSetting("defaultSeriesLegend", "graph") !== true;
+
   const onCloseRef = useRef<() => void>();
   const overlayStyle: CSSProperties = {
     position: "absolute", ...useOverlayBounds({target, portal})
@@ -96,9 +99,11 @@ const _AxisOrLegendAttributeMenu = ({ place, target, portal, onOpenClose,
                 { attribute &&
                   <>
                     <MenuDivider />
-                    <MenuItem onClick={() => onRemoveAttribute(place, attrId)}>
-                      {removeAttrItemLabel}
-                    </MenuItem>
+                    { showRemoveOption &&
+                      <MenuItem onClick={() => onRemoveAttribute(place, attrId)}>
+                       {removeAttrItemLabel}
+                      </MenuItem>
+                    }
                     <MenuItem onClick={() => onTreatAttributeAs(place, attribute?.id, treatAs)}>
                       {treatAs === "categorical" && t("DG.DataDisplayMenu.treatAsCategorical")}
                       {treatAs === "numeric" && t("DG.DataDisplayMenu.treatAsNumeric")}
