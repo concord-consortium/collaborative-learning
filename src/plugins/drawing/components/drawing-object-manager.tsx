@@ -131,7 +131,7 @@ export function registerDrawingToolInfo(drawingToolInfo: IDrawingToolInfo) {
   gDrawingToolInfos[drawingToolInfo.name] = drawingToolInfo;
 }
 
-export function renderDrawingObject(drawingObject: DrawingObjectType, readOnly: boolean=false,
+export function renderDrawingObject(drawingObject: DrawingObjectType, readOnly=false,
                                     handleHover?: HandleObjectHover, handleDrag?: HandleObjectDrag) {
   const DrawingObjectComponent = getDrawingObjectComponent(drawingObject);
   return DrawingObjectComponent ?
