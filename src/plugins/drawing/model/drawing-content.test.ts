@@ -14,6 +14,7 @@ import { LogEventName } from "../../../lib/logger-types";
 import { EllipseObject } from "../objects/ellipse";
 import { VectorObject } from "../objects/vector";
 import { LineObject } from "../objects/line";
+import { TextObject } from "../objects/text";
 
 const mockLogTileChangeEvent = jest.fn();
 jest.mock("../../../models/tiles/log/log-tile-change-event", () => ({
@@ -122,13 +123,13 @@ describe("DrawingContentModel", () => {
       strokeWidth: DefaultToolbarSettings.strokeWidth
     };
     expect(model.toolbarSettings).toEqual(defaultSettings);
-    model.setStroke(stroke, model.selectedIds);
+    model.setStroke(stroke, model.selection);
     expect(model.toolbarSettings).toEqual({ ...defaultSettings, stroke });
-    model.setFill(fill, model.selectedIds);
+    model.setFill(fill, model.selection);
     expect(model.toolbarSettings).toEqual({ ...defaultSettings, fill, stroke });
-    model.setStrokeDashArray(strokeDashArray, model.selectedIds);
+    model.setStrokeDashArray(strokeDashArray, model.selection);
     expect(model.toolbarSettings).toEqual({ ...defaultSettings, fill, stroke, strokeDashArray });
-    model.setStrokeWidth(strokeWidth, model.selectedIds);
+    model.setStrokeWidth(strokeWidth, model.selection);
     expect(model.toolbarSettings).toEqual({ ...defaultSettings, fill, stroke, strokeDashArray, strokeWidth });
   });
 
@@ -145,14 +146,15 @@ describe("DrawingContentModel", () => {
 
     // delete does nothing if nothing is selected
     expect(model.objects.length).toBe(2);
-    model.deleteObjects(model.selectedIds);
+    model.deleteObjects([...model.selection]);
     expect(model.objects.length).toBe(2);
 
-    model.setSelection(["a", "b"]);
+    model.setSelectedIds(["a", "b"]);
     expect(model.hasSelectedObjects).toBe(true);
 
-    model.deleteObjects(model.selectedIds);
+    model.deleteObjects([...model.selection]);
     expect(model.objects.length).toBe(0);
+
     // Note: Normally the path will start at the root of the document, but for this test we
     // are mocking the onTileAction so the path is just blank
     expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(1,
@@ -200,7 +202,7 @@ describe("DrawingContentModel", () => {
       { operation: "deleteObjects", change: { args: [ [] ], path: ""}, tileId: "drawing-1" });
     expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(4,
       LogEventName.DRAWING_TOOL_CHANGE,
-      { operation: "setSelection", change: { args: [ ["a", "b"] ], path: ""}, tileId: "drawing-1" });
+      { operation: "setSelectedIds", change: { args: [ ["a", "b"] ], path: ""}, tileId: "drawing-1" });
     expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(5,
       LogEventName.DRAWING_TOOL_CHANGE,
       { operation: "deleteObjects", change: { args: [ ["a", "b"] ], path: ""}, tileId: "drawing-1" });
@@ -218,10 +220,10 @@ describe("DrawingContentModel", () => {
     model.addObject(rectSnapshot2);
 
     mockLogTileChangeEvent.mockReset();
-    model.setSelection(["a", "b"]);
-    model.setStroke("#000000", model.selectedIds);
-    model.setStrokeWidth(2, model.selectedIds);
-    model.setStrokeDashArray("3,3", model.selectedIds);
+    model.setSelectedIds(["a", "b"]);
+    model.setStroke("#000000", model.selection);
+    model.setStrokeWidth(2, model.selection);
+    model.setStrokeDashArray("3,3", model.selection);
 
     expect(model.objects[0].type).toBe("rectangle");
     const rect1 = model.objects[0] as RectangleObjectType;
@@ -236,7 +238,7 @@ describe("DrawingContentModel", () => {
 
     expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(1,
       LogEventName.DRAWING_TOOL_CHANGE,
-      { operation: "setSelection", change: { args: [["a", "b"]], path: "" }, tileId: "drawing-1" });
+      { operation: "setSelectedIds", change: { args: [["a", "b"]], path: "" }, tileId: "drawing-1" });
     expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(2,
       LogEventName.DRAWING_TOOL_CHANGE,
       { operation: "setStroke", change: { args: ["#000000", ["a", "b"]], path: "" }, tileId: "drawing-1" });
@@ -369,6 +371,32 @@ describe("DrawingContentModel", () => {
     expect(obj).toHaveProperty('y', 10);
     expect(obj).toHaveProperty('rx', 10);
     expect(obj).toHaveProperty('ry', 10);
+  });
+
+  it("can resize text", () => {
+    const obj = TextObject.create({
+      text: "This should be rendered as the body of the text object",
+      x: 0, y: 0, width: 100, height: 100,
+      stroke: "#000000"
+    });
+    createDrawingContentWithMetadata({
+      objects: [obj]
+    });
+    // drag bottom right bigger
+    obj.setDragBounds({ top: 0, right: 10, bottom: 10, left: 0 });
+    obj.resizeObject();
+    expect(obj).toHaveProperty('x', 0);
+    expect(obj).toHaveProperty('y', 0);
+    expect(obj).toHaveProperty('width', 110);
+    expect(obj).toHaveProperty('height', 110);
+
+    // drag top left smaller
+    obj.setDragBounds({ top: 10, right: 0, bottom: 0, left: 10 });
+    obj.resizeObject();
+    expect(obj).toHaveProperty('x', 10);
+    expect(obj).toHaveProperty('y', 10);
+    expect(obj).toHaveProperty('width', 100);
+    expect(obj).toHaveProperty('height', 100);    
   });
 
   it("can resize image", () => {

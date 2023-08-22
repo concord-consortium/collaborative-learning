@@ -234,6 +234,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
 
   private handleHideAnnotations() {
     const { ui } = this.stores;
+    ui.setAnnotationMode();
     ui.setShowAnnotations(!ui.showAnnotations);
   }
 
