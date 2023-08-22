@@ -245,7 +245,8 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       if (!object || !_filter(object)) {
         return null;
       }
-      return renderDrawingObject(object, this.props.readOnly, this.handleObjectHover, this.handleSelectedObjectMouseDown);
+      return renderDrawingObject(object, this.props.readOnly, 
+        this.handleObjectHover, this.handleSelectedObjectMouseDown);
     });
   }
 

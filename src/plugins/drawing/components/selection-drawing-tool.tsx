@@ -31,7 +31,7 @@ export class SelectionDrawingTool extends DrawingTool {
   }
 
   public handleObjectClick(e: React.MouseEvent<HTMLDivElement>, obj: DrawingObjectType) {
-    let selectedObjects = this.drawingLayer.getSelectedObjects();
+    const selectedObjects = this.drawingLayer.getSelectedObjects();
     const index = selectedObjects.indexOf(obj);
     if (index === -1) {
       if (e.shiftKey || e.metaKey){
