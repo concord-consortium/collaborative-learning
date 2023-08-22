@@ -62,7 +62,7 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
   };
 
   const handleDelete = () => {
-    contentRef.current.deleteObjects(contentRef.current.selectedIds);
+    contentRef.current.deleteObjects([...contentRef.current.selection]);
   };
 
   const toolbarProps = useToolbarTileApi({ id: model.id, enabled: !readOnly, onRegisterTileApi, onUnregisterTileApi });

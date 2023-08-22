@@ -19,5 +19,8 @@ export const DocumentContentModelWithAnnotations = DocumentContentModelWithTileD
   .actions(self => ({
     addArrow(arrow: IArrowAnnotation) {
       self.annotations.put(arrow);
+    },
+    deleteAnnotation(annotationId: string) {
+      self.annotations.delete(annotationId);
     }
   }));

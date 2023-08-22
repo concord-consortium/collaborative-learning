@@ -1,12 +1,17 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import { AnnotationNode } from "./annotation-node";
-import { kAnnotationNodeHeight, kAnnotationNodeWidth } from "./annotation-utilities";
+import { getSparrowCurve, kAnnotationNodeHeight, kAnnotationNodeWidth } from "./annotation-utilities";
 import { CurvedArrow } from "./curved-arrow";
-import { IArrowAnnotation } from "../../models/annotations/arrow-annotation";
+import { boundDelta } from "../../models/annotations/annotation-utils";
+import {
+  IArrowAnnotation, kArrowAnnotationTextHeight, kArrowAnnotationTextWidth
+} from "../../models/annotations/arrow-annotation";
 import { IClueObject } from "../../models/annotations/clue-object";
+
+import SparrowDeleteButton from "../../assets/icons/annotations/sparrow-delete-button.svg";
 
 import "./arrow-annotation.scss";
 
@@ -46,16 +51,18 @@ function DragHandle({
 interface IArrowAnnotationProps {
   arrow: IArrowAnnotation;
   canEdit?: boolean;
+  deleteArrow: (arrowId: string) => void;
   getBoundingBox: (object: IClueObject) =>
     { height: number, left: number, top: number, width: number} | null | undefined;
   key?: string;
   readOnly?: boolean;
 }
 export const ArrowAnnotationComponent = observer(
-  function ArrowAnnotationComponent({ arrow, canEdit, getBoundingBox, readOnly }: IArrowAnnotationProps) {
+  function ArrowAnnotationComponent({ arrow, canEdit, deleteArrow, getBoundingBox, readOnly }: IArrowAnnotationProps) {
     const [firstClick, setFirstClick] = useState(false);
     const [editingText, setEditingText] = useState(false);
     const [tempText, setTempText] = useState(arrow.text ?? "");
+    const [hoveringStem, setHoveringStem] = useState(false);
     const inputRef = useRef<HTMLInputElement|null>(null);
     useEffect(() => {
       // Focus on the text input when we start editing
@@ -86,38 +93,32 @@ export const ArrowAnnotationComponent = observer(
     const [targetDragOffsetX, targetDragOffsetY] = draggingTarget ? [dragDx, dragDy] : [0, 0];
     const [textDragOffsetX, textDragOffsetY] = draggingText ? [dragDx, dragDy] : [0, 0];
 
-    // Bail if there is no source or target
-    if (!arrow.sourceObject || !arrow.targetObject) return null;
-
     // Find bounding boxes for source and target objects
-    const sourceBB = getBoundingBox(arrow.sourceObject);
-    const targetBB = getBoundingBox(arrow.targetObject);
-    if (!sourceBB || !targetBB) return null;
+    const sourceBB = arrow.sourceObject ? getBoundingBox(arrow.sourceObject) : undefined;
+    const targetBB = arrow.targetObject ? getBoundingBox(arrow.targetObject) : undefined;
 
-    function boundDelta(delta: number, boundingSize?: number) {
-      if (boundingSize === undefined) return delta;
-      const halfBoundingSize = boundingSize / 2;
-      return Math.max(-halfBoundingSize, Math.min(halfBoundingSize, delta));
-    }
+    // The the arrow's points curve data, given current drag and the source and target bounding boxes
+    const dragOffsets = {
+      sourceDragOffsetX, sourceDragOffsetY, targetDragOffsetX, targetDragOffsetY, textDragOffsetX, textDragOffsetY
+    };
+    const { sourceX, sourceY, targetX, targetY, textX, textY, textCenterX, textCenterY } =
+      arrow.getPoints(dragOffsets, sourceBB, targetBB);
+    const curveData = useMemo(() => {
+      if (
+        sourceX === undefined || sourceY === undefined || textCenterX === undefined
+        || textCenterY === undefined || targetX === undefined || targetY === undefined
+      ) {
+        return undefined;
+      }
+      return getSparrowCurve(sourceX, sourceY, textCenterX, textCenterY, targetX, targetY, true);
+    }, [sourceX, sourceY, textCenterX, textCenterY, targetX, targetY]);
 
-    // Find positions for head and tail of arrow
-    const [sDxOffset, sDyOffset] = arrow.sourceOffset ? [arrow.sourceOffset.dx, arrow.sourceOffset.dy] : [0, 0];
-    const sourceX = sourceBB.left + sourceBB.width / 2 + boundDelta(sDxOffset + sourceDragOffsetX, sourceBB.width);
-    const sourceY = sourceBB.top + sourceBB.height / 2 + boundDelta(sDyOffset + sourceDragOffsetY, sourceBB.height);
-    const [tDxOffset, tDyOffset] = arrow.targetOffset ? [arrow.targetOffset.dx, arrow.targetOffset.dy] : [0, 0];
-    const targetX = targetBB.left + targetBB.width / 2 + boundDelta(tDxOffset + targetDragOffsetX, targetBB.width);
-    const targetY = targetBB.top + targetBB.height / 2 + boundDelta(tDyOffset + targetDragOffsetY, targetBB.height);
-
-    // Set up text location and dimensions
-    const textWidth = 150;
-    const textHeight = 50;
-    const [textDxOffset, textDyOffset] = arrow.textOffset ? [arrow.textOffset.dx, arrow.textOffset.dy] : [0, 0];
-    const dx = targetX - sourceX;
-    const dy = targetY - sourceY;
-    const textCenterX = targetX - dx / 2 + textDxOffset + textDragOffsetX;
-    const textCenterY = targetY - dy / 2 + textDyOffset + textDragOffsetY;
-    const textX = textCenterX - textWidth / 2;
-    const textY = textCenterY - textHeight / 2;
+    // Bail if we're missing anything necessary
+    if (
+      !sourceBB || !targetBB || !curveData
+      || sourceX === undefined || sourceY === undefined || targetX === undefined || targetY === undefined
+      || textX === undefined || textY === undefined || textCenterX === undefined || textCenterY === undefined
+    ) return null;
 
     // Set up text handlers
     function handleTextClick() {
@@ -156,6 +157,14 @@ export const ArrowAnnotationComponent = observer(
           acceptText();
           break;
       }
+    }
+
+    const deleteHeight = 24;
+    const deleteWidth = 24;
+    const deleteX = (curveData.deleteX ?? 0) - deleteWidth / 2;
+    const deleteY = (curveData.deleteY ?? 0) - deleteHeight / 2;
+    function handleDelete(e: React.MouseEvent<SVGElement, MouseEvent>) {
+      deleteArrow(arrow.id);
     }
 
     // Set up drag handles
@@ -202,14 +211,29 @@ export const ArrowAnnotationComponent = observer(
     return (
       <g>
         <CurvedArrow
+          className="background-arrow"
+          hideArrowhead={true}
+          peakX={textCenterX} peakY={textCenterY}
+          setHovering={setHoveringStem}
+          sourceX={sourceX} sourceY={sourceY}
+          targetX={targetX} targetY={targetY}
+        />
+        <CurvedArrow
+          className="foreground-arrow"
           peakX={textCenterX} peakY={textCenterY}
           sourceX={sourceX} sourceY={sourceY}
           targetX={targetX} targetY={targetY}
         />
+        <g transform={`translate(${deleteX} ${deleteY})`}>
+          <SparrowDeleteButton
+            className={classNames({ "visible-delete-button": hoveringStem })}
+            onClick={handleDelete}
+          />
+        </g>
         <foreignObject
           className="text-object"
-          height={`${textHeight}`}
-          width={`${textWidth}`}
+          height={`${kArrowAnnotationTextHeight}`}
+          width={`${kArrowAnnotationTextWidth}`}
           x={`${textX}`}
           y={`${textY}`}
         >

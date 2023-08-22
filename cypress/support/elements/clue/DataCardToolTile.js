@@ -1,4 +1,7 @@
 class DataCardToolTile {
+  getTiles(workspaceClass) {
+    return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .data-card-tool-tile`);
+  }
   getTile(tileIndex = 0, workspaceClass) {
     return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .data-card-tool-tile`).eq(tileIndex);
   }

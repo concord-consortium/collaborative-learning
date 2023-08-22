@@ -146,13 +146,13 @@ describe("DrawingContentModel", () => {
 
     // delete does nothing if nothing is selected
     expect(model.objects.length).toBe(2);
-    model.deleteObjects(model.selectedIds);
+    model.deleteObjects([...model.selection]);
     expect(model.objects.length).toBe(2);
 
     model.setSelectedIds(["a", "b"]);
     expect(model.hasSelectedObjects).toBe(true);
 
-    model.deleteObjects(model.selectedIds);
+    model.deleteObjects([...model.selection]);
     expect(model.objects.length).toBe(0);
 
     // Note: Normally the path will start at the root of the document, but for this test we

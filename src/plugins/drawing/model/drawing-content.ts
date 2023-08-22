@@ -74,11 +74,6 @@ export const DrawingContentModel = TileContentModel
     get hasSelectedObjects() {
       return self.selection.length > 0;
     },
-    get selectedIds() {
-      // Returning a mutable object can confuse the caller, so copy it
-      const ids: string[] = [...self.selection];
-      return ids;
-    },
     isIdSelected(id: string) {
       return self.selection.includes(id);
     },
@@ -155,6 +150,30 @@ export const DrawingContentModel = TileContentModel
 
     setSelectedStamp(stampIndex: number) {
       self.currentStampIndex = stampIndex;
+    },
+
+    addObject(object: DrawingObjectSnapshotForAdd) {
+      // The reason only snapshots are allowed is so the logged action
+      // includes the snapshot in the `call` that is passed to `onAction`.
+      // If an instance is passed instead of a snapshot, then MST will just
+      // log something like:
+      // `{ $MST_UNSERIALIZABLE: true, type: "someType" }`.
+      // More details can be found here: https://mobx-state-tree.js.org/API/#onaction
+      if (isStateTreeNode(object as any)) {
+        throw new Error("addObject requires a snapshot");
+      }
+
+      self.objects.push(object);
+      return self.objects[self.objects.length-1];
+    }
+  }))
+  .actions(self => ({
+    // Adds a new object and selects it, activating the select tool.
+    addAndSelectObject(drawingObject: DrawingObjectSnapshotForAdd) {
+      const obj = self.addObject(drawingObject);
+      self.setSelectedButton('select');
+      self.setSelectedIds([obj.id]);
+      return obj;
     }
 
   }))
@@ -174,21 +193,6 @@ export const DrawingContentModel = TileContentModel
 
     return {
       actions: {
-        addObject(object: DrawingObjectSnapshotForAdd) {
-          // The reason only snapshots are allowed is so the logged action
-          // includes the snapshot in the `call` that is passed to `onAction`.
-          // If an instance is passed instead of a snapshot, then MST will just
-          // log something like:
-          // `{ $MST_UNSERIALIZABLE: true, type: "someType" }`.
-          // More details can be found here: https://mobx-state-tree.js.org/API/#onaction
-          if (isStateTreeNode(object as any)) {
-            throw new Error("addObject requires a snapshot");
-          }
-
-          self.objects.push(object);
-          return self.objects[self.objects.length-1];
-        },
-
         setStroke(stroke: string, ids: string[]) {
           self.stroke = stroke;
           forEachObjectId(ids, object => {
@@ -247,7 +251,7 @@ export const DrawingContentModel = TileContentModel
               const {id, ...newParams} = snap; // remove existing ID
               newParams.x = snap.x + 10;       // offset by 10 pixels so it is not hidden
               newParams.y = snap.y + 10;
-              const newObject = this.addObject(newParams);
+              const newObject = self.addObject(newParams);
               newIds.push(newObject.id);
             }
           });
