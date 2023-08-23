@@ -117,7 +117,6 @@ export const Adornments = observer(function Adornments(props: AdornmmentsProps) 
                   const adornmentContentInfo = getAdornmentContentInfo(adornment.type);
                   if (!adornmentContentInfo.plots.includes(graphModel.plotType)) return;
 
-                  console.log("?? do we have dotsRef: ", dotsRef);
                   return <Adornment
                           key={`graph-adornment-${adornment.id}-${yIndex}-${xIndex}-${rightIndex}-${topIndex}`}
                           adornment={adornment}

@@ -162,7 +162,6 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
     };
 
     const getScreenY = (anID: string, plotNum = 0) => {
-      console.log("getScreenY", anID, plotNum);
       const yAttrID = yAttrIDs[plotNum],
         yValue = dataset?.getNumeric(anID, yAttrID) ?? NaN,
         yScale = (hasY2Attribute && plotNum === numberOfPlots - 1 ? v2Scale : yScaleRef.current) as
