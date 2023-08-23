@@ -133,7 +133,7 @@ const INSERT_POSITION_MARGIN = 25;
 
 // Return a valid location to create a new object that is not right on top of an existing object.
 const getValidInsertPosition = (drawingContent: DrawingContentModelType, getVisibleCanvasSize: ()=>Point|undefined) => {
-  let base_pos = {...INITIAL_INSERT_POSITION};
+  const base_pos = {...INITIAL_INSERT_POSITION};
   let pos = {...base_pos};
   // Start at the initial position and try locations on a diagonal path.
   while (drawingContent.objectAtLocation(pos)) {
@@ -154,7 +154,7 @@ const getValidInsertPosition = (drawingContent: DrawingContentModelType, getVisi
     }
   }
   return pos;
-  }
+  };
   
 
 interface IInsertVariableButton {
