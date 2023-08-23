@@ -18,7 +18,8 @@ export const ConnectingLine = observer(function ConnectingLine({model, subPlotKe
   return (
     <div
       className="graph-connecting-line"
-      data-testid={`graph-connecting-line${classFromKey ? `-${classFromKey}` : ""}`}>
+      data-testid={`graph-connecting-line${classFromKey ? `-${classFromKey}` : ""}`}
+    >
       {casesInPlot}
     </div>
   );
