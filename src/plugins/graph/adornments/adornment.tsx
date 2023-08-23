@@ -15,10 +15,11 @@ interface IProps {
   subPlotKey: Record<string, string>
   topCats: string[] | number[]
   rightCats: string[] | number[]
+  dotsRef?: any//React.MutableRefObject<HTMLDivElement | null>
 }
 
 export const Adornment = observer(function Adornment(
-  {adornment, subPlotKey, topCats, rightCats}: IProps
+  {adornment, subPlotKey, topCats, rightCats, dotsRef}: IProps
 ) {
   const graphModel = useGraphModelContext(),
     layout = useGraphLayoutContext(),
@@ -72,6 +73,7 @@ export const Adornment = observer(function Adornment(
         subPlotKey={subPlotKey}
         xAxis={graphModel.getAxis('bottom') as INumericAxisModel}
         yAxis={graphModel.getAxis('left') as INumericAxisModel}
+        dotsRef={dotsRef}
       />
     </div>
   );

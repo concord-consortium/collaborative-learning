@@ -193,7 +193,7 @@ export const Graph = observer(function Graph({graphController, graphRef, dotsRef
           />
         </svg>
         {renderDroppableAddAttributes()}
-        <Adornments />
+        <Adornments dotsRef={dotsRef}/>
         { appConfig.getSetting("defaultSeriesLegend", "graph") &&
           <MultiLegend
             graphElt={graphRef.current}
