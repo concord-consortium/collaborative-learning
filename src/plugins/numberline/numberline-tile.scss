@@ -9,7 +9,7 @@
 	flex-direction: column;
 	&.editable {
 		border: 1px solid #cccccc;
-  }
+	}
 	.numberline-tool-container{
 		width: 93%; //should match kContainerWidth in numberline-tile-constants.ts
 		display: flex;
@@ -26,15 +26,15 @@
 			}
 
 			.num-line {
-        stroke-width: 4px;
-      }
+				stroke-width: 4px;
+			}
 			.showPointOuterCircle{
 				fill: rgba(0, 129, 255, 0.5);
 				opacity: 1;
 
-        &.disabled{
-          display: none;
-        }
+				&.disabled{
+					display: none;
+				}
 			}
 
 			.defaultPointInnerCircle{
@@ -44,9 +44,9 @@
 				stroke-width: 1.5px;
 
 				&.selected{
-          fill: $highlight-blue;
+					fill: $highlight-blue;
 					stroke: $highlight-blue;
-        }
+				}
 			}
 		} //end svg container
 
