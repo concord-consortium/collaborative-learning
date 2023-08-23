@@ -224,27 +224,27 @@ context('Nav Panel', function () {
       cy.openTopTab("problems");
       cy.get(".problem-tabs .tab-header-row").should("not.be.visible");
     });
-    it('Problem Tabs with no sub tabs', function () {
+    it('Customized tabs', function () {
       const exampleProblemSubTabTitles = ["First Section", "Second Section", "Third Section"];
       const exampleMyWorkSubTabTitles = ["Workspaces", "Starred"];
-      const exampleClassWorkSubTabTitles = ["Workspaces", "Starred"];
+      const exampleClassWorkSubTabTitles = ["Workspaces", "Supplemental Work", "Starred"];
 
       cy.visit(`${baseQueryParam}&unit=example-config-subtabs`);
       cy.waitForLoad();
       // cy.get(".collapsed-resources-tab.my-work").click();
       cy.openTopTab("problems");
       cy.get(".problem-tabs .tab-list .prob-tab").each(($tab, index, $tabList) => {
-        expect($tabList).to.have.lengthOf(3);
+        expect($tabList).to.have.lengthOf(exampleProblemSubTabTitles.length);
         expect($tab.text()).to.contain(exampleProblemSubTabTitles[index]);
       });
       cy.openTopTab("my-work");
       cy.get(".document-tabs .tab-list .doc-tab.my-work").each(($tab, index, $tabList) => {
-        expect($tabList).to.have.lengthOf(2);
+        expect($tabList).to.have.lengthOf(exampleMyWorkSubTabTitles.length);
         expect($tab.text()).to.contain(exampleMyWorkSubTabTitles[index]);
       });
       cy.openTopTab("class-work");
       cy.get(".document-tabs .tab-list .doc-tab.class-work").each(($tab, index, $tabList) => {
-        expect($tabList).to.have.lengthOf(2);
+        expect($tabList).to.have.lengthOf(exampleClassWorkSubTabTitles.length);
         expect($tab.text()).to.contain(exampleClassWorkSubTabTitles[index]);
       });
     });
