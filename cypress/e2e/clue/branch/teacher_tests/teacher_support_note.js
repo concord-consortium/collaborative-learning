@@ -47,7 +47,7 @@ context('Support messages in student view', () => {
     });
     
     cy.log('verify group support note not in student view in different group');
-    loadStudentSession(queryParams..student7QueryParams);
+    loadStudentSession(queryParams.student7QueryParams);
     cy.get('#icon-sticky-note').should('not.exist');
   });
 
