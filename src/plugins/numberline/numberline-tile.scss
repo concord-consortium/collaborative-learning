@@ -12,13 +12,12 @@
 	.numberline-tool-container{
 		//height comes from numberlineContainerHeight in numberline-tile.constants.ts
     width: 93%; //should match kContainerWidth in numberline-tile-constants.ts
-    display: flex;
+		display: flex;
 		align-items: center;
 		justify-content: center;
-    flex-direction: column;
-    font-family: 'Ubunutu', sans-serif;
+		flex-direction: column;
+		font-family: 'Ubunutu', sans-serif;
 		position: relative;
-
 		svg{
 			overflow: visible;
 
@@ -29,7 +28,6 @@
 			.num-line {
         stroke-width: 4px;
       }
-
 			.showPointOuterCircle{
 				fill: rgba(0, 129, 255, 0.5);
 				opacity: 1;
