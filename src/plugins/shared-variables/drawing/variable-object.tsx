@@ -4,7 +4,7 @@ import { observer } from "mobx-react";
 import useResizeObserver from "use-resize-observer";
 import { VariableChip, VariableType } from "@concord-consortium/diagram-view";
 
-import { addChipToContent, findVariable, getOrFindSharedModel, locationIsAvailable } from "./drawing-utils";
+import { addChipToContent, findVariable, getOrFindSharedModel } from "./drawing-utils";
 import { useEditVariableDialog } from "../dialog/use-edit-variable-dialog";
 import { useInsertVariableDialog } from "../dialog/use-insert-variable-dialog";
 import { useNewVariableDialog } from "../dialog/use-new-variable-dialog";
@@ -123,24 +123,51 @@ export const drawingVariables = (drawingContent: DrawingContentModelType) => {
   return filteredVariables as VariableType[];
 };
 
+// Constants determining where we create objects that are inserted in default locations
+// rather than being placed by the user. The locations are staggered so that objects
+// don't get created right on top of each other.
+const INITIAL_INSERT_POSITION = { x: 10, y: 10 };
+const INSERT_POSITION_DELTA = { x: 25, y: 25 };
+const INSERT_POSITION_BACKUP_DELTA = { x: 100, y: 0 };
+const INSERT_POSITION_MARGIN = 25;
+
+// Return a valid location to create a new object that is not right on top of an existing object.
+const getValidInsertPosition = (drawingContent: DrawingContentModelType, getVisibleCanvasSize: ()=>Point|undefined) => {
+  let base_pos = {...INITIAL_INSERT_POSITION};
+  let pos = {...base_pos};
+  // Start at the initial position and try locations on a diagonal path.
+  while (drawingContent.objectAtLocation(pos)) {
+    pos.x += INSERT_POSITION_DELTA.x;
+    pos.y += INSERT_POSITION_DELTA.y;
+    const size = getVisibleCanvasSize();
+    if (size) {
+      if (pos.x + INSERT_POSITION_MARGIN > size.x) {
+        // we've traversed the whole visible canvas and not found any available spot.  Give up.
+        return INITIAL_INSERT_POSITION;
+      }
+      if (pos.y + INSERT_POSITION_MARGIN > size.y) {
+        // Try a new diagonal starting from a new base position a little to the right.
+        base_pos.x += INSERT_POSITION_BACKUP_DELTA.x;
+        base_pos.y += INSERT_POSITION_BACKUP_DELTA.y;
+        pos = {...base_pos};  
+      }
+    }
+  }
+  return pos;
+  }
+  
+
 interface IInsertVariableButton {
   toolbarManager: IToolbarManager;
+  getVisibleCanvasSize: () => Point|undefined;
 }
-export const InsertVariableButton = observer(({ toolbarManager }: IInsertVariableButton) => {
+export const InsertVariableButton = observer(({ toolbarManager, getVisibleCanvasSize }: IInsertVariableButton) => {
   const drawingContent = toolbarManager as DrawingContentModelType;
   const sharedModel = getOrFindSharedModel(drawingContent);
   const insertVariables = (variablesToInsert: VariableType[]) => {
-    let x = 25;
-    let y = 25;
-    const offset = 25;
     variablesToInsert.forEach(variable => {
-      while (!locationIsAvailable(drawingContent, x, y)) {
-        x += offset;
-        y += offset;
-      }
-      addChipToContent(drawingContent, variable.id, x, y);
-      x += offset;
-      y += offset;
+      const pos = getValidInsertPosition(drawingContent, getVisibleCanvasSize);
+      addChipToContent(drawingContent, variable.id, pos.x, pos.y);
     });
   };
   const { selfVariables, otherVariables, unusedVariables } = variableBuckets(drawingContent, sharedModel);

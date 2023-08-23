@@ -2,7 +2,7 @@ import { types, Instance, SnapshotIn, getSnapshot, isStateTreeNode} from "mobx-s
 import { clone } from "lodash";
 import stringify from "json-stringify-pretty-compact";
 
-import { DefaultToolbarSettings, ToolbarSettings, VectorType, endShapesForVectorType } from "./drawing-basic-types";
+import { DefaultToolbarSettings, Point, ToolbarSettings, VectorType, endShapesForVectorType } from "./drawing-basic-types";
 import { kDrawingStateVersion, kDrawingTileType } from "./drawing-types";
 import { StampModel, StampModelType } from "./stamp";
 import { DrawingObjectMSTUnion } from "../components/drawing-object-manager";
@@ -87,9 +87,10 @@ export const DrawingContentModel = TileContentModel
       const { stroke, fill, strokeDashArray, strokeWidth, vectorType } = self;
       return { stroke, fill, strokeDashArray, strokeWidth, vectorType };
     },
-    objectsAtLocation(x: number, y: number) {
-      return self.objects.filter((obj) => {
-        return (obj.x === x && obj.y === y);
+    // Return the first object found that has its origin at the given point; or undefined if none.
+    objectAtLocation(pos: Point) {
+      return self.objects.find((obj) => {
+        return (obj.x === pos.x && obj.y === pos.y);
       });
     },
     exportJson(options?: ITileExportOptions) {
