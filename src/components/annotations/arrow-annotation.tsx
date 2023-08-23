@@ -53,8 +53,9 @@ interface IArrowAnnotationProps {
   canEdit?: boolean;
   deleteArrow: (arrowId: string) => void;
   documentBottom: number;
+  documentLeft: number;
+  documentRight: number;
   documentTop: number;
-  documentWidth: number;
   getBoundingBox: (object: IClueObject) =>
     { height: number, left: number, top: number, width: number} | null | undefined;
   key?: string;
@@ -62,7 +63,7 @@ interface IArrowAnnotationProps {
 }
 export const ArrowAnnotationComponent = observer(
   function ArrowAnnotationComponent({
-    arrow, canEdit, deleteArrow, documentBottom, documentTop, documentWidth, getBoundingBox, readOnly
+    arrow, canEdit, deleteArrow, documentBottom, documentLeft, documentRight, documentTop, getBoundingBox, readOnly
   }: IArrowAnnotationProps) {
     const [firstClick, setFirstClick] = useState(false);
     const [editingText, setEditingText] = useState(false);
@@ -109,7 +110,7 @@ export const ArrowAnnotationComponent = observer(
     const {
       sourceX, sourceY, targetX, targetY, textX, textY, textCenterX, textCenterY,
       textMinXOffset, textMaxXOffset, textMinYOffset, textMaxYOffset
-    } = arrow.getPoints(documentWidth, documentTop, documentBottom, dragOffsets, sourceBB, targetBB);
+    } = arrow.getPoints(documentLeft, documentRight, documentTop, documentBottom, dragOffsets, sourceBB, targetBB);
     const curveData = useMemo(() => {
       if (
         sourceX === undefined || sourceY === undefined || textCenterX === undefined
@@ -195,6 +196,7 @@ export const ArrowAnnotationComponent = observer(
         const dDx = e2.clientX - e.clientX;
         const dDy = e2.clientY - e.clientY;
         if (_dragType === "text") {
+          // Bound the text offset to the document
           const dx = Math.max(textMinXOffset ?? 0, Math.min(textMaxXOffset ?? 0, startingDx + dDx));
           const dy = Math.max(textMinYOffset ?? 0, Math.min(textMaxYOffset ?? 0, startingDy + dDy));
           setFunc(dx, dy);

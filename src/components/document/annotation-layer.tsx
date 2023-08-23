@@ -54,6 +54,10 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     const row = getRowElement(rowId);
     return totalHeight + (row?.offsetHeight ?? 0);
   }, 0) ?? 0;
+  const documentLeft = 0;
+  const documentRight = documentWidth;
+  const documentBottom = documentHeight - (documentScrollY ?? 0);
+  const documentTop = -(documentScrollY ?? 0);
 
   const handleMouseMove: MouseEventHandler<HTMLDivElement> = event => {
     if (divRef.current) {
@@ -139,8 +143,13 @@ export const AnnotationLayer = observer(function AnnotationLayer({
         const sourceY = sourceBoundingBox.top + sourceBoundingBox.height / 2;
         const targetX = targetBoundingBox.left + targetBoundingBox.width / 2;
         const targetY = targetBoundingBox.top + targetBoundingBox.height / 2;
+        const textX = sourceX + (targetX - sourceX) / 2;
+        const textY = sourceY + (targetY - sourceY) / 2;
         const { peakDx, peakDy } = getDefaultPeak(sourceX, sourceY, targetX, targetY);
-        textOffset = OffsetModel.create({ dx: peakDx, dy: peakDy });
+        // Bound the text offset to the document
+        const _peakDx = Math.max(documentLeft - textX, Math.min(documentRight - textX, peakDx));
+        const _peakDy = Math.max(documentTop - textY, Math.min(documentBottom - textY, peakDy));
+        textOffset = OffsetModel.create({ dx: _peakDx, dy: _peakDy });
       }
       const newArrow = ArrowAnnotation.create({ sourceObject, sourceOffset, targetObject, targetOffset, textOffset });
       newArrow.setIsNew(true);
@@ -206,9 +215,10 @@ export const AnnotationLayer = observer(function AnnotationLayer({
               arrow={arrow}
               canEdit={!readOnly && editing}
               deleteArrow={(arrowId: string) => content?.deleteAnnotation(arrowId)}
-              documentBottom={documentHeight - (documentScrollY ?? 0)}
-              documentTop={-(documentScrollY ?? 0)}
-              documentWidth={documentWidth}
+              documentBottom={documentBottom}
+              documentLeft={documentLeft}
+              documentRight={documentRight}
+              documentTop={documentTop}
               getBoundingBox={getBoundingBox}
               key={key}
               readOnly={readOnly}
@@ -216,6 +226,8 @@ export const AnnotationLayer = observer(function AnnotationLayer({
           );
         })}
         <PreviewArrow
+          documentHeight={documentHeight}
+          documentWidth={documentWidth}
           sourceX={previewArrowSourceX}
           sourceY={previewArrowSourceY}
           targetX={mouseX}
