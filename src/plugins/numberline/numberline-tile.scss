@@ -6,12 +6,12 @@
 	justify-content: center;
 	align-items: center;
 	flex-direction: column;
-  &.editable {
-    border: 1px solid #cccccc;
+	&.editable {
+		border: 1px solid #cccccc;
   }
+	//height comes from numberlineContainerHeight in numberline-tile.constants.ts
 	.numberline-tool-container{
-		//height comes from numberlineContainerHeight in numberline-tile.constants.ts
-    width: 93%; //should match kContainerWidth in numberline-tile-constants.ts
+		width: 93%; //should match kContainerWidth in numberline-tile-constants.ts
 		display: flex;
 		align-items: center;
 		justify-content: center;
