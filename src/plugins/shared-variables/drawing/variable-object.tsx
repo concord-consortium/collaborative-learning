@@ -182,13 +182,15 @@ export const InsertVariableButton = observer(({ toolbarManager, getVisibleCanvas
 
 interface INewVariableButtonProps {
   toolbarManager: IToolbarManager;
+  getVisibleCanvasSize: () => Point|undefined;
 }
-export const NewVariableButton = observer(({ toolbarManager }: INewVariableButtonProps) => {
+export const NewVariableButton = observer(({ toolbarManager, getVisibleCanvasSize }: INewVariableButtonProps) => {
   const drawingContent = useContext(DrawingContentModelContext);
   const sharedModel = getOrFindSharedModel(drawingContent) as SharedVariablesType;
   const addVariable = (variable: VariableType) => {
     const variableId = variable.id;
-    addChipToContent(drawingContent, variableId);
+    const pos = getValidInsertPosition(drawingContent, getVisibleCanvasSize);
+    addChipToContent(drawingContent, variableId, pos.x, pos.y);
   };
   const [showVariableDialog] = useNewVariableDialog({ addVariable, sharedModel });
 
