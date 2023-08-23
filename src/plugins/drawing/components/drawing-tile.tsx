@@ -69,9 +69,11 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
   const toolbarProps = useToolbarTileApi({ id: model.id, enabled: !readOnly, onRegisterTileApi, onUnregisterTileApi });
 
   const getVisibleCanvasSize = () => {
-    if (!drawingToolElement.current || !drawingToolElement.current.clientWidth || !drawingToolElement.current.clientHeight) return undefined;
+    if (!drawingToolElement.current 
+      || !drawingToolElement.current.clientWidth 
+      || !drawingToolElement.current.clientHeight) return undefined;
     return { x: drawingToolElement.current.clientWidth, y: drawingToolElement.current.clientHeight };
-  }
+  };
 
   return (
     <DrawingContentModelContext.Provider value={contentRef.current} >

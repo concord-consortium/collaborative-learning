@@ -2,7 +2,8 @@ import { types, Instance, SnapshotIn, getSnapshot, isStateTreeNode} from "mobx-s
 import { clone } from "lodash";
 import stringify from "json-stringify-pretty-compact";
 
-import { DefaultToolbarSettings, Point, ToolbarSettings, VectorType, endShapesForVectorType } from "./drawing-basic-types";
+import { DefaultToolbarSettings, Point, ToolbarSettings, VectorType, endShapesForVectorType } 
+  from "./drawing-basic-types";
 import { kDrawingStateVersion, kDrawingTileType } from "./drawing-types";
 import { StampModel, StampModelType } from "./stamp";
 import { DrawingObjectMSTUnion } from "../components/drawing-object-manager";

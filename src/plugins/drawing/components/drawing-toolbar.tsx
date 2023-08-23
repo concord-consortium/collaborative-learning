@@ -89,7 +89,7 @@ export const ToolbarView: React.FC<IProps> = (
 
   const toolbarButtonProps: IToolbarButtonProps = {
     toolbarManager: drawingContent,
-    getVisibleCanvasSize: getVisibleCanvasSize,
+    getVisibleCanvasSize,
     togglePaletteState,
     clearPaletteState
   };
