@@ -73,10 +73,6 @@ export function findVariable(drawingContent: DrawingContentModelType, variableId
   return variable;
 }
 
-export function locationIsAvailable(drawingContent: DrawingContentModelType, x: number, y: number) {
-  return (!drawingContent.objectsAtLocation(x, y).length);
-}
-
 export function addChipToContent(drawingContent: DrawingContentModelType, variableId: string, x?: number, y?: number) {
   const variableChipSnapshot: VariableChipObjectSnapshotForAdd = {
     type: "variable",
