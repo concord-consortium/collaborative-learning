@@ -70,7 +70,6 @@ export class GraphController {
   }
 
   initializeGraph() {
-    console.log("| 0 | initializeGraph")
     const {graphModel, dotsRef, layout} = this,
       dataConfig = graphModel?.config;
     if (dataConfig && layout && dotsRef?.current) {

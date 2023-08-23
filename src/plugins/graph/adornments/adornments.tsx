@@ -12,6 +12,8 @@ import { useTileModelContext } from "../imports/hooks/use-tile-model-context";
 import { useDataConfigurationContext } from "../hooks/use-data-configuration-context";
 
 import "./adornments.scss";
+import { MovableLineModel } from "./movable-line/movable-line-model";
+import { useSettingFromStores } from "../../../hooks/use-stores";
 
 export const Adornments = observer(function Adornments() {
   const graphModel = useGraphModelContext(),
@@ -20,6 +22,17 @@ export const Adornments = observer(function Adornments() {
     layout = useGraphLayoutContext(),
     { isTileSelected } = useTileModelContext(),
     adornments = graphModel.adornments;
+
+  const loadMovableLine = () => {
+    const hackedAdornment = MovableLineModel.create({id: 'test2', type: 'Movable Line', isVisible: true});
+    hackedAdornment.updateCategories(graphModel.getUpdateCategoriesOptions());
+    graphModel.showAdornment(hackedAdornment, 'Movable Line');
+    console.log('| hacked in movable line adornment', graphModel);
+  };
+
+  const usesMultilegend = useSettingFromStores("defaultSeriesLegend", "graph");
+  const allNumeric = dataConfig?.attributeType("x") === "numeric" && dataConfig?.attributeType("y") === "numeric";
+  if (usesMultilegend && allNumeric) loadMovableLine();
 
   if (!adornments?.length) return null;
 
