@@ -69,7 +69,7 @@ describe("data-types", () => {
 
   test("isNumeric", () => {
     const valuesToTest: string[] = [
-      "", // <-- this seems like a bug
+      "",
       "123",
       "1E10",
       "1e10",
@@ -80,6 +80,7 @@ describe("data-types", () => {
       "0xFF",
       "0o10",
       "0b10",
+      "2,000" // <-- this should be a number but is not
     ];
     const testCases = valuesToTest.map(value => {
       return [value, isNumeric(value)];
@@ -96,6 +97,7 @@ describe("data-types", () => {
 "0xFF" => true
 "0o10" => true
 "0b10" => true
+"2,000" => false
 `);
   });
 });
