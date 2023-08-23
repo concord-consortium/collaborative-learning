@@ -1,36 +1,45 @@
 import { types, Instance, getSnapshot } from "mobx-state-tree";
 import { TileContentModel } from "../../../models/tiles/tile-content";
 import { uniqueId } from "../../../utilities/js-utils";
-import { kNumberlineTileType, numberlineDomainMax, numberlineDomainMin } from "../numberline-tile-constants";
-import { scaleLinear } from "d3";
+import { createXScale, kNumberlineTileType, numberlineXHoverBound } from "../numberline-tile-constants";
 
 export function defaultNumberlineContent(): NumberlineContentModelType {
   return NumberlineContentModel.create({});
 }
 
-export interface IPointCoordinate {
-  xValue: number, //actual x value from the numberline not raw x position
-}
 
 export const PointObjectModel = types
   .model("PointObject", {
     id: types.identifier,
-    // pointCoordinates: types.literal(Ipoint)
-    pointCoordinates: types.optional(types.frozen<IPointCoordinate>(), {
-      xValue: 0,
-    })
+    xValue: 0,
   })
   .volatile(self => ({
-    isHovered: false,
-    isSelected: false,
+    dragXValue: undefined as undefined | number,
+    // isHovered: false,
+    // isSelected: false,
+  }))
+  .views(self =>({
+    get currentXValue(){
+      return self.dragXValue || self.xValue;
+    }
   }))
   .actions(self => ({
-    setIsHovered(state: boolean){
-      self.isHovered = state;
+    setDragXValue(num: number | undefined){
+      self.dragXValue = num;
     },
-    setIsSelected(state: boolean){
-      self.isSelected = state;
+    setXValueToDragValue(){ //when mouse is let go
+      if (self.dragXValue){
+        self.xValue = self.dragXValue;
+        self.dragXValue = undefined;
+      }
     }
+
+    // setIsHovered(state: boolean){
+    //   self.isHovered = state;
+    // },
+    // setIsSelected(state: boolean){
+    //   self.isSelected = state;
+    // }
   }));
 
 
@@ -42,54 +51,80 @@ export const NumberlineContentModel = TileContentModel
     type: types.optional(types.literal(kNumberlineTileType), kNumberlineTileType),
     points: types.map(PointObjectModel),
   })
+  .volatile(self => ({
+    selectedPoints: "", //maybe change this to a map or array
+    hoveredPoint: ""
+  }))
   .views(self => ({
     get isUserResizable() {
       return true;
     },
-    get axisPoints() { //returns array of all points
-      return Array.from(self.points.values()).map((pointObj) => pointObj);
+    get pointsArr() { //returns array of all points
+      return Array.from(self.points.values());
     },
     get hasPoints(){
       return (self.points.size > 0);
     },
-
+    // get hoveredPoint(){
+    //   return self.hoveredPoint;
+    // }
+  }))
+  .views(self =>({
     get pointsXValuesArr(){
-      return Array.from(self.points.values()).map((pointObj) => pointObj.pointCoordinates.xValue);
+      return self.pointsArr.map((pointObj) => pointObj.xValue);
     },
-    get pointsIsHoveredArr(){
-      return Array.from(self.points.values()).map((pointObj) => pointObj.isHovered);
-    },
-    get pointsIsSelectedArr(){
-      return Array.from(self.points.values()).map((pointObj) => pointObj.isSelected);
-    },
+
+    // get pointsIsHoveredArr(){
+    //   console.log("pointsIsHoveredArr:");
+    //   console.log("returns:", self.axisPoints.map((pointObj) => pointObj.isHovered));
+    //   return self.axisPoints.map((pointObj) => pointObj.isHovered);
+    // },
+
   }))
   .views(self =>({
      //Pass snapshot of axisPoint models into outer/inner points to avoid D3 and MST error
     get axisPointsSnapshot(){
-      return self.axisPoints.map((p)=> ({
-                                          isHovered: p.isHovered,
-                                          isSelected: p.isSelected,
+
+      return self.pointsArr.map((p)=> ({
+                                          // isHovered: p.isHovered,
+                                          // isSelected: p.isSelected,
                                           ...getSnapshot(p) //doesn't capture the volatile properties
                                         }));
     },
     get isHoveringOverPoint(){
-      return !(self.pointsIsHoveredArr.filter(Boolean).length === 0);
+      return false; //new
+      // return !(self.pointsIsHoveredArr.filter(Boolean).length === 0); //old
     },
     get indexOfPointHovered(){
-      return self.pointsIsHoveredArr.findIndex((isHovered) => isHovered === true);
+      return 1;
+      // return self.pointsIsHoveredArr.findIndex((isHovered) => isHovered === true);
     }
   }))
   .actions(self => ({
-    setAllSelectedFalse(){
-      self.points.forEach((point)=>{
-        point.isSelected = false;
-      });
+    // setAllSelectedFalse(){
+    //   self.points.forEach((point)=>{
+    //     point.isSelected = false;
+    //   });
+    // },
+    // setAllHoversFalse(){
+    //   self.points.forEach((point)=>{
+    //     point.isHovered = false;
+    //   });
+    // },
+    createNewPoint(xValueClicked: number){
+      const id = uniqueId();
+      const pointModel = PointObjectModel
+                        .create({
+                          id,
+                          xValue: xValueClicked
+                        });
+      self.points.set(id, pointModel);
     },
-    setAllHoversFalse(){
-      self.points.forEach((point)=>{
-        point.isHovered = false;
-      });
+
+    setHoverPoint(id: string){ //id can also be empty string
+      self.hoveredPoint = id;
     },
+
     clearAllPoints(){
       self.points.clear();
     },
@@ -98,61 +133,73 @@ export const NumberlineContentModel = TileContentModel
       return self.points.get(id);
     },
 
-    isDraggingUseIdReplacePointCoordinates(oldPoint: PointObjectModelType, newPointCoordinates: IPointCoordinate){
+    isDraggingUseIdReplacePointCoordinates(oldPoint: PointObjectModelType, newPointCoordinates: PointObjectModelType){
       //searches "points", removes PointObject at index that matches id
       //replaces it with a new PointObject at index that has newPointCoordinates
-      self.axisPoints.forEach((pointObj, i) => {
-        if (pointObj.id === oldPoint.id){
-          const newPointObj = PointObjectModel.create({
-            id: oldPoint.id,
-            pointCoordinates: newPointCoordinates,
-          });
-          newPointObj.setIsHovered(oldPoint.isHovered);
-          newPointObj.setIsSelected(oldPoint.isSelected);
-          self.points.set(newPointObj.id, newPointObj);
-        }
-      });
+      // self.axisPoints.forEach((pointObj, i) => {
+        // if (pointObj.id === oldPoint.id){
+        //   const newPointObj = PointObjectModel.create({
+        //     id: oldPoint.id,
+        //     xValue: newPointCoordinates,
+        //   });
+        //   newPointObj.setIsHovered(oldPoint.isHovered);
+        //   newPointObj.setIsSelected(oldPoint.isSelected);
+        //   self.points.set(newPointObj.id, newPointObj);
+        // }
+      // });
     },
     replaceAllPoints(newPoints: PointObjectModelType[]){
       self.points.replace(newPoints);
     },
-    isMouseHoverOverPoint(mouseXPos: number, axisWidth: number ){
-      if (self.hasPoints){
-        const xScale = scaleLinear()
-          .domain([numberlineDomainMin, numberlineDomainMax])
-          .range([0, axisWidth]);
 
-        self.pointsXValuesArr.forEach((pointXValue: number, idx)=>{
-          const pointXPos = xScale(pointXValue);
-          const pointXLeftBound = pointXPos - 5;
-          const pointXRightBound = pointXPos + 5;
-          if (mouseXPos > pointXLeftBound && mouseXPos < pointXRightBound){
-            if (self.pointsIsHoveredArr.filter(Boolean).length === 0){
-              self.axisPoints[idx].isHovered = true; //only one is true
-            }
-          }
-          else{
-            self.axisPoints[idx].isHovered = false;
-          }
-        });
-      }
-    },
   }))
   .actions(self => ({
-    createNewPoint(newPoint: IPointCoordinate){
-      const id = uniqueId();
-      const pointModel = PointObjectModel
-                        .create({
-                          id,
-                          pointCoordinates: newPoint
-                        });
+    analyzeXPosCreateHoverPoint(mouseXPos: number, axisWidth: number ){
+      if (self.hasPoints){
+        const xScale = createXScale(axisWidth);
+        const pointsArr = self.pointsArr;
+        for (let i = 0; i< pointsArr.length; i++){
+          const point = pointsArr[i];
+          const pointXPos = xScale(point.xValue);
+          const pointXLeftBound = pointXPos - numberlineXHoverBound;
+          const pointXRightBound = pointXPos + numberlineXHoverBound;
+          console.log("\tpointXPos:", pointXPos);
+          console.log("\tpointXLeftbound:", pointXLeftBound);
+          console.log("\tpointXRightbound:", pointXRightBound);
+          if (mouseXPos > pointXLeftBound && mouseXPos < pointXRightBound){
+            self.setHoverPoint(point.id);
+            break;
+          }
+          else{
+            self.setHoverPoint("");
+          }
 
-      self.points.set(id, pointModel);
+
+        }
+        // self.pointsArr.forEach((point: PointObjectModelType, idx)=>{
+        //   console.log(`------for each idx: ${idx}---------with xValue ${point.xValue}-------`);
+        //   const pointXPos = xScale(point.xValue);
+        //   const pointXLeftBound = pointXPos - numberlineXHoverBound;
+        //   const pointXRightBound = pointXPos + numberlineXHoverBound;
+        //   console.log("\tpointXPos:", pointXPos);
+        //   console.log("\tpointXLeftbound:", pointXLeftBound);
+        //   console.log("\tpointXRightbound:", pointXRightBound);
+
+
+        //   if (mouseXPos > pointXLeftBound && mouseXPos < pointXRightBound){
+        //     self.setHoverPoint(point.id);
+        //   }
+        //   else{
+        //     self.setHoverPoint("");
+        //     // self.pointsArr[idx].isHovered = false;
+        //   }
+        // });
+      }
     },
 
     toggleIsSelected(idx: number){
-      self.setAllSelectedFalse();
-      self.axisPoints[idx].isSelected = true;
+      // self.setAllSelectedFalse();
+      // self.axisPoints[idx].isSelected = true;
     },
   }));
 
