@@ -55,3 +55,53 @@
 .drag-handle {
   cursor: pointer;
 }
+
+.sparrow-delete-button {
+  cursor: pointer;
+  fill-opacity: 0;
+
+  .sparrow-delete-button-highlight {
+    fill: vars.$annotation-blue;
+  }
+
+  &:hover {
+    .sparrow-delete-button-highlight {
+      fill-opacity: .125;
+    }
+
+    .sparrow-delete-button-front {
+      fill: vars.$annotation-blue;
+      fill-opacity: 1;
+    }
+
+    .sparrow-delete-icon {
+      fill-opacity: 1;
+    }
+  }
+
+  &:active {
+    .sparrow-delete-button-highlight {
+      fill-opacity: .25;
+    }
+
+    .sparrow-delete-button-front {
+      fill: vars.$annotation-blue;
+      fill-opacity: 1;
+    }
+
+    .sparrow-delete-icon {
+      fill-opacity: 1;
+    }
+  }
+}
+
+.visible-delete-button {
+  .sparrow-delete-button-front {
+    fill: vars.$annotation-half-blue;
+    fill-opacity: 1;
+  }
+
+  .sparrow-delete-icon {
+    fill-opacity: 1;
+  }
+}

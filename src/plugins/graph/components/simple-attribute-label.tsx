@@ -30,14 +30,19 @@ export const SimpleAttributeLabel = observer(
     const attrId = dataConfiguration?.attributeID(graphPlaceToAttrRole[place]);
     const attr = attrId ? dataset?.attrFromID(attrId) : undefined;
     const attrName = attr?.name ?? "";
-    const pointColor = graphModel._pointColors[0]; // In PT#182578812 will passed plotIndex
+    const pointColor = graphModel._pointColors[0]; // In PT#182578812 will pass plotIndex
+
+    const handleOpenClose = (isOpen: boolean) => {
+      simpleLabelRef.current?.classList.toggle("target-open", isOpen);
+      simpleLabelRef.current?.classList.toggle("target-closed", !isOpen);
+    };
 
     return (
       <>
-        <div ref={simpleLabelRef} className="simple-attribute-label">
+        <div ref={simpleLabelRef} className={"simple-attribute-label"}>
           <div className="symbol-title">
             <div className="attr-symbol" style={{ backgroundColor: pointColor }}></div>
-            <div className="attr-name">{ attrName }</div>
+            <div>{ attrName }</div>
           </div>
           <div className="caret">
             <DropdownCaretIcon />
@@ -51,6 +56,7 @@ export const SimpleAttributeLabel = observer(
             onChangeAttribute={onChangeAttribute}
             onRemoveAttribute={onRemoveAttribute}
             onTreatAttributeAs={onTreatAttributeAs}
+            onOpenClose={handleOpenClose}
           />, parentElt)
         }
       </>

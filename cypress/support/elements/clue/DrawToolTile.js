@@ -14,10 +14,10 @@ class DrawToolTile{
     getDrawToolFreehand(){
       return cy.get('.primary-workspace .drawing-tool-button.button-line');
     }
-    getDrawToolLine(){
+    getDrawToolVector(){
       return cy.get('.primary-workspace .drawing-tool-button.button-vector');
     }
-    getDrawToolLineSubmenu(){
+    getDrawToolVectorSubmenu(){
       return cy.get('.primary-workspace .drawing-tool-button.button-vector .expand-collapse');
     }
     getDrawToolRectangle(){
@@ -31,6 +31,9 @@ class DrawToolTile{
     }
     getDrawToolStampExpand(){
       return cy.get('.primary-workspace .drawing-tool-button.button-stamp .expand-collapse');
+    }
+    getDrawToolText(){
+      return cy.get('.primary-workspace .drawing-tool-button.button-text');
     }
     getDrawToolStrokeColor(){
       return cy.get('.primary-workspace .drawing-tool-button.button-stroke-color');
@@ -64,13 +67,16 @@ class DrawToolTile{
       return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg g.vector');
     }
     getRectangleDrawing(){
-      return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg rect');
+      return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg rect.rectangle');
     }
     getEllipseDrawing(){
       return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg ellipse');
     }
     getImageDrawing(){
       return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg image');
+    }
+    getTextDrawing(){
+      return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg g.text');
     }
     getSelectionBox(){
       return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg [data-testid=selection-box]');

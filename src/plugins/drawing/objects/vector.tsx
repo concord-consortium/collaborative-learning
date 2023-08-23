@@ -133,7 +133,7 @@ export class VectorDrawingTool extends DrawingTool {
   public handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
     const start = this.drawingLayer.getWorkspacePoint(e);
     if (!start) return;
-    const {stroke, strokeWidth, strokeDashArray, vectorType} = this.settings;
+    const {stroke, strokeWidth, strokeDashArray, vectorType} = this.drawingLayer.toolbarSettings();
     const [headShape, tailShape] = endShapesForVectorType(vectorType);
     const vector = VectorObject.create({
       x: start.x,
