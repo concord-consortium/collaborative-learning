@@ -3,6 +3,7 @@ import { getType } from "mobx-state-tree";
 import { VariableChipObjectSnapshotForAdd } from "./variable-object";
 import { DrawingContentModelType } from "../../drawing/model/drawing-content";
 import { SharedVariables, SharedVariablesType } from "../shared-variables";
+import { Point } from "src/plugins/drawing/model/drawing-basic-types";
 
 function getSharedVariablesModel(drawingContent: DrawingContentModelType) {
   const sharedModelManager = drawingContent.tileEnv?.sharedModelManager;
@@ -73,11 +74,44 @@ export function findVariable(drawingContent: DrawingContentModelType, variableId
   return variable;
 }
 
-export function addChipToContent(drawingContent: DrawingContentModelType, variableId: string, x?: number, y?: number) {
+// Constants determining where we create objects that are inserted in default locations
+// rather than being placed by the user. The locations are staggered so that objects
+// don't get created right on top of each other.
+const INITIAL_INSERT_POSITION = { x: 10, y: 10 };
+const INSERT_POSITION_DELTA = { x: 25, y: 25 };
+const INSERT_POSITION_BACKUP_DELTA = { x: 100, y: 0 };
+const INSERT_POSITION_MARGIN = 25;
+
+// Return a valid location to create a new object that is not right on top of an existing object.
+export function getValidInsertPosition(drawingContent: DrawingContentModelType, getVisibleCanvasSize: ()=>Point|undefined) {
+  const base_pos = {...INITIAL_INSERT_POSITION};
+  let pos = {...base_pos};
+  // Start at the initial position and try locations on a diagonal path.
+  while (drawingContent.objectAtLocation(pos)) {
+    pos.x += INSERT_POSITION_DELTA.x;
+    pos.y += INSERT_POSITION_DELTA.y;
+    const size = getVisibleCanvasSize();
+    if (size) {
+      if (pos.x + INSERT_POSITION_MARGIN > size.x) {
+        // we've traversed the whole visible canvas and not found any available spot.  Give up.
+        return INITIAL_INSERT_POSITION;
+      }
+      if (pos.y + INSERT_POSITION_MARGIN > size.y) {
+        // Try a new diagonal starting from a new base position a little to the right.
+        base_pos.x += INSERT_POSITION_BACKUP_DELTA.x;
+        base_pos.y += INSERT_POSITION_BACKUP_DELTA.y;
+        pos = {...base_pos};  
+      }
+    }
+  }
+  return pos;
+  };
+
+  export function addChipToContent(drawingContent: DrawingContentModelType, variableId: string, position: Point) {
   const variableChipSnapshot: VariableChipObjectSnapshotForAdd = {
     type: "variable",
-    x: x === undefined ? 250 : x,
-    y: y === undefined ? 50 : y,
+    x: position.x,
+    y: position.y,
     variableId
   };
   drawingContent.addObject(variableChipSnapshot);
