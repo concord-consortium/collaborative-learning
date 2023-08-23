@@ -97,7 +97,7 @@ describe("data-types", () => {
 "0xFF" => true
 "0o10" => true
 "0b10" => true
-"2,000" => false
+"2,000" => true
 `);
   });
 });

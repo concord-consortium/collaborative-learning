@@ -1,7 +1,7 @@
 import {Instance, SnapshotIn, types} from "mobx-state-tree";
 import { Formula } from "./formula";
 import { typedId } from "../../utilities/js-utils";
-import { IValueType, ValueType, isDate, isImageUrl, isNumeric } from "./data-types";
+import { IValueType, ValueType, isDate, isImageUrl, isNumeric, toNumeric } from "./data-types";
 
 export const kDefaultFormatStr = ".3~f";
 
@@ -40,8 +40,7 @@ export const Attribute = types.model("Attribute", {
     return importValueToString(value);
   },
   toNumeric(value: string) {
-    if (value == null || value === "") return NaN;
-    return Number(value);
+    toNumeric(value);
   },
   // CODAP3 has an optimization so that strValues and numValues are kept up to date
   // rather than (potentially) recomputing them from scratch on every change.
@@ -49,7 +48,8 @@ export const Attribute = types.model("Attribute", {
     return self.values.map(value => importValueToString(value));
   },
   get numValues() {
-    return self.values.map(value => value == null || value === "" ? NaN : Number(value));
+    // use toNumeric here
+    return self.values.map(value => toNumeric(value));
   }
 }))
 .views(self => ({
