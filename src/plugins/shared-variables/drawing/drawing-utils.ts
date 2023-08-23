@@ -83,7 +83,8 @@ const INSERT_POSITION_BACKUP_DELTA = { x: 100, y: 0 };
 const INSERT_POSITION_MARGIN = 25;
 
 // Return a valid location to create a new object that is not right on top of an existing object.
-export function getValidInsertPosition(drawingContent: DrawingContentModelType, getVisibleCanvasSize: ()=>Point|undefined) {
+export function getValidInsertPosition(drawingContent: DrawingContentModelType, 
+    getVisibleCanvasSize: () => Point | undefined) {
   const base_pos = {...INITIAL_INSERT_POSITION};
   let pos = {...base_pos};
   // Start at the initial position and try locations on a diagonal path.
@@ -105,7 +106,7 @@ export function getValidInsertPosition(drawingContent: DrawingContentModelType, 
     }
   }
   return pos;
-  };
+  }
 
   export function addChipToContent(drawingContent: DrawingContentModelType, variableId: string, position: Point) {
   const variableChipSnapshot: VariableChipObjectSnapshotForAdd = {
