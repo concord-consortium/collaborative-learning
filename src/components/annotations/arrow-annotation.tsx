@@ -172,7 +172,9 @@ export const ArrowAnnotationComponent = observer(
     const deleteX = (curveData.deleteX ?? 0) - deleteWidth / 2;
     const deleteY = (curveData.deleteY ?? 0) - deleteHeight / 2;
     function handleDelete(e: React.MouseEvent<SVGElement, MouseEvent>) {
-      deleteArrow(arrow.id);
+      if (!readOnly) {
+        deleteArrow(arrow.id);
+      }
     }
 
     // Set up drag handles
