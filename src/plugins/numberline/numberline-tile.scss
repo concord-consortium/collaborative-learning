@@ -9,7 +9,6 @@
 	&.editable {
 		border: 1px solid #cccccc;
   }
-	//height comes from numberlineContainerHeight in numberline-tile.constants.ts
 	.numberline-tool-container{
 		width: 93%; //should match kContainerWidth in numberline-tile-constants.ts
 		display: flex;
