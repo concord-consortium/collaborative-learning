@@ -1,6 +1,6 @@
 import stringify from "json-stringify-pretty-compact";
 import { cloneDeep, each } from "lodash";
-import { types, getSnapshot, getType, getEnv, SnapshotOrInstance } from "mobx-state-tree";
+import { types, getType, getEnv, SnapshotOrInstance } from "mobx-state-tree";
 import {
   getPlaceholderSectionId, isPlaceholderTile, PlaceholderContentModel
 } from "../tiles/placeholder/placeholder-content";
@@ -171,65 +171,6 @@ export const BaseDocumentContentModel = types
                                   : self.rowOrder[self.rowOrder.length - 1];
         return  self.rowOrder.indexOf(lastVisibleRowId);
       },
-      snapshotWithUniqueIds(asTemplate = false) {
-        const snapshot = cloneDeep(getSnapshot(self));
-        const tileIdMap: { [id: string]: string } = {};
-
-        snapshot.tileMap = (tileMap => {
-          const _tileMap: { [id: string]: ITileModelSnapshotOut } = {};
-          each(tileMap, (tile, id) => {
-            tileIdMap[id] = tile.id = uniqueId();
-            _tileMap[tile.id] = tile;
-          });
-          return _tileMap;
-        })(snapshot.tileMap);
-
-        // Update the sharedModels with new tile ids
-        each(snapshot.sharedModelMap, (sharedModelEntry, id) => {
-          const _tiles = cloneDeep(sharedModelEntry.tiles);
-          sharedModelEntry.tiles = [];
-          _tiles.forEach(tile => {
-            sharedModelEntry.tiles.push(tileIdMap[tile]);
-          });
-          // Update references to provider
-          if (sharedModelEntry.provider) {
-            sharedModelEntry.provider = tileIdMap[sharedModelEntry.provider];
-          }
-          const sharedModel = sharedModelEntry.sharedModel;
-          // TODO: Figure out why linting is failing
-          // if ("providerId" in sharedModel && typeof sharedModel.providerId === "string") {
-          //   sharedModel.providerId = tileIdMap[sharedModel.providerId];
-          if ("providerId" in sharedModel) {
-            const providedSharedModel = sharedModel as any;
-            if (typeof providedSharedModel.providerId === "string") {
-              providedSharedModel.providerId = tileIdMap[providedSharedModel.providerId];
-            }
-          }
-        });
-        // TODO: Give the shared models new ids
-
-        each(snapshot.tileMap, tile => {
-          getTileContentInfo(tile.content.type)
-            ?.contentSnapshotPostProcessor?.(tile.content, tileIdMap, asTemplate);
-        });
-
-        snapshot.rowMap = (rowMap => {
-          const _rowMap: { [id: string]: TileRowSnapshotOutType } = {};
-          each(rowMap, (row, id) => {
-            tileIdMap[id] = row.id = uniqueId();
-            row.tiles = row.tiles.map(tileLayout => {
-              tileLayout.tileId = tileIdMap[tileLayout.tileId];
-              return tileLayout;
-            });
-            _rowMap[row.id] = row;
-          });
-          return _rowMap;
-        })(snapshot.rowMap);
-
-        snapshot.rowOrder = snapshot.rowOrder.map(rowId => tileIdMap[rowId]);
-
-        return snapshot;
-      },
       getFirstSharedModelByType<IT extends typeof SharedModel>(
         modelType: IT, tileId?: string): IT["Type"] | undefined {
         const sharedModelEntries = Array.from(self.sharedModelMap.values());
@@ -336,9 +277,6 @@ export const BaseDocumentContentModel = types
         });
       });
       return { providers, consumers };
-    },
-    publish() {
-      return JSON.stringify(self.snapshotWithUniqueIds());
     },
     exportTileAsJson(tileInfo: TileLayoutModelType, options?: IDocumentExportOptions) {
       const { includeTileIds, ...otherOptions } = options || {};

@@ -6,6 +6,10 @@ import { uniqueId } from "../../utilities/js-utils";
 
 export const kArrowAnnotationType = "arrowAnnotation";
 
+export function isArrowAnnotation(annotation: any) {
+  return "type" in annotation && annotation.type === kArrowAnnotationType;
+}
+
 export const kArrowAnnotationTextWidth = 150;
 export const kArrowAnnotationTextHeight = 50;
 
