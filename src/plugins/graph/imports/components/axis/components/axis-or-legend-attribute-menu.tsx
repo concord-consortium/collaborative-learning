@@ -9,17 +9,19 @@ import { IUseDraggableAttribute, useDraggableAttribute } from "../../../hooks/us
 import { useInstanceIdContext } from "../../../hooks/use-instance-id-context";
 import { useOutsidePointerDown } from "../../../hooks/use-outside-pointer-down";
 import { useOverlayBounds } from "../../../hooks/use-overlay-bounds";
+import { useSettingFromStores } from "../../../../../../hooks/use-stores";
 import { AttributeType } from "../../../../../../models/data/attribute";
 import { IDataSet } from "../../../../../../models/data/data-set";
 import { isSetAttributeNameAction } from "../../../../../../models/data/data-set-actions";
 
 interface IProps {
-  place: GraphPlace,
+  place: GraphPlace
   target: SVGGElement | HTMLElement | null
   portal: HTMLElement | null
   onChangeAttribute: (place: GraphPlace, dataSet: IDataSet, attrId: string) => void
   onRemoveAttribute: (place: GraphPlace, attrId: string) => void
   onTreatAttributeAs: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void
+  onOpenClose?: (isOpen: boolean) => void
 }
 
 const removeAttrItemLabelKeys: Record<string, string> = {
@@ -31,7 +33,7 @@ const removeAttrItemLabelKeys: Record<string, string> = {
   "rightSplit": "DG.DataDisplayMenu.removeAttribute_right"
 };
 
-const _AxisOrLegendAttributeMenu = ({ place, target, portal,
+const _AxisOrLegendAttributeMenu = ({ place, target, portal, onOpenClose,
                                       onChangeAttribute, onRemoveAttribute, onTreatAttributeAs }: IProps) => {
   const data = useDataSetContext();
   const dataConfig = useDataConfigurationContext();
@@ -43,6 +45,8 @@ const _AxisOrLegendAttributeMenu = ({ place, target, portal,
   const removeAttrItemLabel = t(removeAttrItemLabelKeys[role], {vars: [attribute?.name]});
   const treatAs = dataConfig?.attributeType(role) === "numeric" ? "categorical" : "numeric";
   const menuRef = useRef<HTMLDivElement>(null);
+  const showRemoveOption = useSettingFromStores("defaultSeriesLegend", "graph") !== true;
+
   const onCloseRef = useRef<() => void>();
   const overlayStyle: CSSProperties = {
     position: "absolute", ...useOverlayBounds({target, portal})
@@ -73,11 +77,11 @@ const _AxisOrLegendAttributeMenu = ({ place, target, portal,
   return (
     <div className={`axis-legend-attribute-menu ${place}`} ref={menuRef}>
       <Menu boundary="scrollParent">
-        {({ onClose }) => {
+        {({ onClose, isOpen }) => {
+          onOpenClose && onOpenClose(isOpen);
           onCloseRef.current = onClose;
           return (
-            <div className="codap-graph-attribute-label" ref={setDragNodeRef}
-                style={overlayStyle} {...attributes} {...listeners}>
+            <div ref={setDragNodeRef} style={overlayStyle} {...attributes} {...listeners}>
               <MenuButton style={buttonStyle}>{attribute?.name}</MenuButton>
               <MenuList>
                 { !data &&
@@ -95,9 +99,11 @@ const _AxisOrLegendAttributeMenu = ({ place, target, portal,
                 { attribute &&
                   <>
                     <MenuDivider />
-                    <MenuItem onClick={() => onRemoveAttribute(place, attrId)}>
-                      {removeAttrItemLabel}
-                    </MenuItem>
+                    { showRemoveOption &&
+                      <MenuItem onClick={() => onRemoveAttribute(place, attrId)}>
+                       {removeAttrItemLabel}
+                      </MenuItem>
+                    }
                     <MenuItem onClick={() => onTreatAttributeAs(place, attribute?.id, treatAs)}>
                       {treatAs === "categorical" && t("DG.DataDisplayMenu.treatAsCategorical")}
                       {treatAs === "numeric" && t("DG.DataDisplayMenu.treatAsNumeric")}
