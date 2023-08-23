@@ -10,12 +10,8 @@ import { IAdornmentModel } from "./adornment-models";
 import { useInstanceIdContext } from "../imports/hooks/use-instance-id-context";
 import { useTileModelContext } from "../imports/hooks/use-tile-model-context";
 import { useDataConfigurationContext } from "../hooks/use-data-configuration-context";
-import { MovableLineModel } from "./movable-line/movable-line-model";
-import { useSettingFromStores } from "../../../hooks/use-stores";
-import { ConnectingLineModel } from "./connecting-line/connecting-line-model";
 
 import "./adornments.scss";
-
 
 export const Adornments = observer(function Adornments() {
   const graphModel = useGraphModelContext(),
@@ -25,26 +21,7 @@ export const Adornments = observer(function Adornments() {
     { isTileSelected } = useTileModelContext(),
     adornments = graphModel.adornments;
 
-  const loadMovableLine = () => {
-    const hackedAdornment = MovableLineModel.create({id: 'test2', type: 'Movable Line', isVisible: true});
-    hackedAdornment.updateCategories(graphModel.getUpdateCategoriesOptions());
-    graphModel.showAdornment(hackedAdornment, 'Movable Line');
-    //console.log('| hacked in movable line adornment', graphModel);
-  };
-
-  const loadConnectingLine = () => {
-    const hackedAdornment = ConnectingLineModel.create({id: 'test3', type: 'Connecting Line', isVisible: true});
-    // hackedAdornment.updateCategories(graphModel.getUpdateCategoriesOptions());
-    graphModel.showAdornment(hackedAdornment, 'Connecting Line');
-    console.log('| hacked in connecting line adornment', graphModel);
-  };
-
-  const usesMultilegend = useSettingFromStores("defaultSeriesLegend", "graph");
-  const allNumeric = dataConfig?.attributeType("x") === "numeric" && dataConfig?.attributeType("y") === "numeric";
-  if (usesMultilegend && allNumeric) loadConnectingLine();
-
   if (!adornments?.length) return null;
-
   // The subPlotKey is an object that contains the attribute IDs and categorical values for the
   // current subplot. It's used to uniquely identify the current subplot. Since it's possible to
   // have the same attribute on two axes or splits, we need to make sure the subPlotKey is unique.
@@ -131,11 +108,7 @@ export const Adornments = observer(function Adornments() {
               {
                 adornments.map((adornment: IAdornmentModel) => {
                   // skip adornments that don't support current plot type
-                  console.log("| whats wrong with this adornment?", adornment);
                   const adornmentContentInfo = getAdornmentContentInfo(adornment.type);
-
-                  if (!adornmentContentInfo.plots) return;
-                  console.log("| adornmentContentInfo how does it get stuff?", adornmentContentInfo);
                   if (!adornmentContentInfo.plots.includes(graphModel.plotType)) return;
 
                   return <Adornment

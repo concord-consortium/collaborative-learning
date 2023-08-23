@@ -57,7 +57,6 @@ export class GraphController {
   }
 
   callMatchCirclesToData() {
-    console.log("| 📀 | callMatchCirclesToData");
     const {graphModel, dotsRef, enableAnimation, instanceId} = this;
     if (graphModel && dotsRef?.current) {
       const { config: dataConfiguration, pointColor, pointStrokeColor } = graphModel,
@@ -147,7 +146,6 @@ export class GraphController {
         currentType = currAxisModel?.type ?? 'empty',
         [min, max] = kDefaultNumericAxisBounds;
 
-      console.log("| 1 | steupAxis for type: ", attrType, " and place: ", place);
       switch (attrType) {
         case 'numeric': {
           if (!currAxisModel || !isNumericAxisModel(currAxisModel)) {

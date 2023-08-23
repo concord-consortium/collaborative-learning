@@ -12,11 +12,6 @@ interface IProps {
   subPlotKey: Record<string, string>
 }
 
-/**
- *  drawPath(dotsRef.current, linePoints, pointColor);
- *  linePoints looks like
- */
-
 function drawPath(el: DotsElt, points: Iterable<[number, number]>, color: string) {
   const curve = line().curve(curveLinear);
   const dotArea = select(el);
@@ -33,11 +28,14 @@ function drawPath(el: DotsElt, points: Iterable<[number, number]>, color: string
   parentSvg?.insertBefore(newPath.node() as Node, parentSvg.firstChild);
 }
 
-export const ConnectingLine = observer(function ConnectingLine({model}: IProps) {
-  console.log("| ConnectingLine, got props?:", model);
+export const ConnectingLine = observer(function ConnectingLine({model, subPlotKey}: IProps) {
   const dataConfig = useDataConfigurationContext();
-  // const casesInPlot = dataConfig?.subPlotCases(subPlotKey)?.length ?? 0;
-  // const classFromKey = model.classNameFromKey(subPlotKey);
+
+  console.log("| ConnectingLine |",
+    "\n model: ", model,
+    "\n dataConfig: ", dataConfig,
+    "\n\n",
+  );
 
   return (
     <g className="connecting-line"></g>
