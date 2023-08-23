@@ -21,7 +21,7 @@ const adornmentTypeDispatcher = (adornmentSnap: IAdornmentModel) => {
 };
 
 export const AdornmentModelUnion = types.union({ dispatcher: adornmentTypeDispatcher },
-  CountModel, MovableValueModel, MovableLineModel, MovablePointModel, UnknownAdornmentModel);
+  CountModel, MovableValueModel, MovableLineModel, MovablePointModel, ConnectingLineModel, UnknownAdornmentModel);
 export type IAdornmentModelUnion =
   ICountModel | IMovableValueModel | IMovableLineModel |
-  IMovablePointModel | IUnknownAdornmentModel | IConnectingLineModel;
+  IMovablePointModel | IConnectingLineModel | IUnknownAdornmentModel ;

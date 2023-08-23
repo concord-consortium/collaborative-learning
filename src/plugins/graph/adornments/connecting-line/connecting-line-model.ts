@@ -5,9 +5,10 @@ import { kConnectingLineType } from "./connecting-line-types";
 export const ConnectingLineModel = AdornmentModel
   .named('ConnectingLineModel')
   .props({
-    type: 'Count'
+    type: 'Connecting Line'
   });
+
 export interface IConnectingLineModel extends Instance<typeof ConnectingLineModel> {}
-export function isCount(adornment: IAdornmentModel): adornment is IConnectingLineModel {
+export function isConnectingLine(adornment: IAdornmentModel): adornment is IConnectingLineModel {
   return adornment.type === kConnectingLineType;
 }

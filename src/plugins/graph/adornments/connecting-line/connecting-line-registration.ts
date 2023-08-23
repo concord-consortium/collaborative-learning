@@ -8,7 +8,7 @@ import { ConnectingLine } from "./connecting-line";
 
 registerAdornmentContentInfo({
   type: kConnectingLineType,
-  plots: ["casePlot", "dotChart", "dotPlot", "scatterPlot"],
+  plots: ['scatterPlot'],
   prefix: kConnectingLinePrefix,
   modelClass: ConnectingLineModel
 });
