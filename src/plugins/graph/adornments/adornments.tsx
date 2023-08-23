@@ -27,9 +27,6 @@ export const Adornments = observer(function Adornments(props: AdornmmentsProps) 
     { isTileSelected } = useTileModelContext(),
     adornments = graphModel.adornments;
 
-    console.log("B ?? do we have dotsRef: ", dotsRef);
-
-
   if (!adornments?.length) return null;
   // The subPlotKey is an object that contains the attribute IDs and categorical values for the
   // current subplot. It's used to uniquely identify the current subplot. Since it's possible to
