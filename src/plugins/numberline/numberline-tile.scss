@@ -2,13 +2,13 @@
 @import "../../components/vars.sass";
 
 .numberline-tool {
- width: 100%;
-	display: flex;
-	justify-content: center;
+  width: 100%;
+  display: flex;
+  justify-content: center;
   align-items: center;
-	flex-direction: column;
-	&.editable {
-		border: 1px solid #cccccc;
+  flex-direction: column;
+  &.editable {
+    border: 1px solid #cccccc;
 	}
 	.numberline-tool-container{
 		width: 93%; //should match kContainerWidth in numberline-tile-constants.ts
