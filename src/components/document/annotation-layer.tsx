@@ -215,10 +215,10 @@ export const AnnotationLayer = observer(function AnnotationLayer({
               arrow={arrow}
               canEdit={!readOnly && editing}
               deleteArrow={(arrowId: string) => content?.deleteAnnotation(arrowId)}
-              documentBottom={documentHeight - (documentScrollY ?? 0)}
+              documentBottom={documentBottom}
               documentLeft={documentLeft}
               documentRight={documentRight}
-              documentTop={-(documentScrollY ?? 0)}
+              documentTop={documentTop}
               getBoundingBox={getBoundingBox}
               key={key}
               readOnly={readOnly}

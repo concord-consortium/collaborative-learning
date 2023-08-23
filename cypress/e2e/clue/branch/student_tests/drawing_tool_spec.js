@@ -362,6 +362,33 @@ context('Draw Tool Tile', function () {
         drawToolTile.getImageDrawing().should("not.exist");
       });
     });
+    describe("Text", () => {
+      it("adds text object", () => {
+        drawToolTile.getDrawToolText().click({scrollBehavior: false});
+        drawToolTile.getDrawTile()
+          .trigger("mousedown", 100,  100)
+          .trigger("mouseup", 100, 100);
+          drawToolTile.getTextDrawing().should("exist").and("have.length", 1);
+      });
+      it("edits text content of object", () => {
+        // Click inside drawing box to enter edit mode
+        drawToolTile.getDrawTile()
+          .trigger("mousedown", 150,  150)
+          .trigger("mouseup", 150, 150);
+          drawToolTile.getTextDrawing().get('textarea').type("The five boxing wizards jump quickly.{enter}", {scrollBehavior: false});
+          drawToolTile.getTextDrawing().get('text tspan').should("exist").and("have.length", 6);
+      });
+      it("deletes text object", () => {
+        drawToolTile.getDrawToolSelect().click({scrollBehavior: false});
+        drawToolTile.getDrawTile()
+          .trigger("mousedown", 150,  150)
+          .trigger("mouseup", 150, 150);
+          cy.wait(2000);
+        drawToolTile.getSelectionBox().should("exist");
+        drawToolTile.getDrawToolDelete().should("not.have.class", "disabled").click({scrollBehavior: false});
+        drawToolTile.getTextDrawing().should("not.exist");
+      });
+    });
     describe("Image", () => {
       it("drags images from image tiles", () => {
         const imageFilePath='image.png';
