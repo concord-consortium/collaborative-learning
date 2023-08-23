@@ -85,19 +85,19 @@ const INSERT_POSITION_MARGIN = 25;
 // Return a valid location to create a new object that is not right on top of an existing object.
 export function getValidInsertPosition(drawingContent: DrawingContentModelType, 
     getVisibleCanvasSize: () => Point | undefined) {
+  const canvasSize = getVisibleCanvasSize();
   const base_pos = {...INITIAL_INSERT_POSITION};
   let pos = {...base_pos};
   // Start at the initial position and try locations on a diagonal path.
   while (drawingContent.objectAtLocation(pos)) {
     pos.x += INSERT_POSITION_DELTA.x;
     pos.y += INSERT_POSITION_DELTA.y;
-    const size = getVisibleCanvasSize();
-    if (size) {
-      if (pos.x + INSERT_POSITION_MARGIN > size.x) {
+    if (canvasSize) {
+      if (pos.x + INSERT_POSITION_MARGIN > canvasSize.x) {
         // we've traversed the whole visible canvas and not found any available spot.  Give up.
         return INITIAL_INSERT_POSITION;
       }
-      if (pos.y + INSERT_POSITION_MARGIN > size.y) {
+      if (pos.y + INSERT_POSITION_MARGIN > canvasSize.y) {
         // Try a new diagonal starting from a new base position a little to the right.
         base_pos.x += INSERT_POSITION_BACKUP_DELTA.x;
         base_pos.y += INSERT_POSITION_BACKUP_DELTA.y;
