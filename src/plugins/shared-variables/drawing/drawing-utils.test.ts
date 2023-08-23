@@ -2,7 +2,7 @@ import { RectangleObjectSnapshotForAdd } from "src/plugins/drawing/objects/recta
 import { defaultDrawingContent } from "../../drawing/model/drawing-content";
 import { getValidInsertPosition } from "./drawing-utils";
 
-const mockGetVisibleCanvasSize = jest.fn(() => { return {x:200, y:100}} );
+const mockGetVisibleCanvasSize = jest.fn(() => { return {x:200, y:100};} );
 
 const mockSettings = {
     fill: "#666666",
@@ -35,5 +35,5 @@ describe("getValidInsertPosition", () => {
         content.addObject({...rect1, id: "c", x: 60, y: 60 });
         content.addObject({...rect1, id: "d", x: 85, y: 85 });
         expect(getValidInsertPosition(content, mockGetVisibleCanvasSize)).toStrictEqual({ x: 110, y: 10});
-    })
+    });
 });
