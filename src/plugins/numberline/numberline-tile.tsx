@@ -15,9 +15,19 @@ export const NumberlineTile: React.FC<ITileProps> = observer((props) => {
   const { model, readOnly } = props;
   const content = model.content as NumberlineContentModelType;
   //---------------- Create Unique ClassName For Axis -----------------------------------------------
-  const readOnlyState = (readOnly) ? "readOnly" : "readWrite";
   const tileId = model.id;
-  const axisClass = `axis-${tileId}-${readOnlyState}`;
+  const readOnlyState = (readOnly) ? "readOnly" : "readWrite";
+
+
+  // const axisClass = `axis-${tileId}-${readOnlyState}`; //old
+  const axisClass = `axis-${tileId}`; //new
+
+  const containerKey = `container-${axisClass}`;
+  const whichSide = (readOnly) ? "Left" : "Right";
+
+  const [mouseIsDragging, setMouseIsDragging] = useState(false); //new
+
+
 
   //---------------- Calculate Width Of Tile / Scale ------------------------------------------------
   const documentScrollerRef = useRef<HTMLDivElement>(null);
@@ -89,8 +99,14 @@ export const NumberlineTile: React.FC<ITileProps> = observer((props) => {
 
   const handleDrag = drag<SVGCircleElement, PointObjectModelType>()
   .on('drag', (e, p) => {
+    console.log(`⚡⚡⚡⚡dragging-----${whichSide}`);
     if (mouseInBoundingBox(mousePosX(e), mousePosY(e))){
+      setMouseIsDragging(true); //new
+
       const pointHoveredOver = content.givenIdReturnPoint(content.hoveredPoint);
+      // console.log(`-----readOnly: ${readOnly}---------`);
+      // console.log("pointHoveredOver:", pointHoveredOver);
+
       content.setSelectedPoint(pointHoveredOver);
       //need to account for if we change axisWidth then immediately drag
       const oldAxisWidth = axisWidth;
@@ -101,7 +117,12 @@ export const NumberlineTile: React.FC<ITileProps> = observer((props) => {
       content.replaceXValueWhileDragging(p.id, newXValue);
     }
   })
-  .on("end", (e, p) => p.setXValueToDragValue());
+  .on("end", (e, p) => {
+    console.log("drag end!", readOnly);
+    setMouseIsDragging(false); //new
+    setManualTriggerUseEffect((prevState) => !prevState);
+    p.setXValueToDragValue();
+  });
 
   const handleMouseMove = (e: Event) => {
     const isMouseInBoundingBox = mouseInBoundingBox(mousePosX(e), mousePosY(e));
@@ -123,8 +144,13 @@ export const NumberlineTile: React.FC<ITileProps> = observer((props) => {
     .classed("defaultPointInnerCircle", true);
   };
 
-  svg.on("click", (e) => !readOnly && handleMouseClick(e));
-  svg.on("mousemove", (e) => !readOnly && handleMouseMove(e));
+  //old
+
+  // svg.on("click", (e) => !readOnly && handleMouseClick(e));
+  // svg.on("mousemove", (e) => !readOnly && handleMouseMove(e));
+  //new
+  svg.on("click", (e) => handleMouseClick(e));
+  svg.on("mousemove", (e) => handleMouseMove(e));
 
   // * ============================ [ useEffect - construct Numberline ] ========================= */
   useEffect(() => {
@@ -176,6 +202,8 @@ export const NumberlineTile: React.FC<ITileProps> = observer((props) => {
         const innerPoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.inner-point')
         .data(content.axisPointsSnapshot);
 
+        console.log(`innerPoints - ${whichSide}:`, innerPoints );
+
         // Initialize Attributes
         innerPoints.enter()
         .append("circle")
@@ -183,8 +211,15 @@ export const NumberlineTile: React.FC<ITileProps> = observer((props) => {
         .attr('cx', (p) => xScale(p.xValue || numberlineDomainMin)) //mapped to axis width
         .attr('cy', yMidPoint).attr('r', innerPointRadius).attr('id', p => p.id)
         .classed("defaultPointInnerCircle", true)
-        .classed("selected", (p)=> false)
-        .call(handleDrag as any ); // Attach drag behavior to newly created circles
+        .classed("selected", (p)=> {
+          console.log("initializing class selected on:", whichSide);
+          console.log("\t for each point:", p);
+          return false;
+        })
+        .call((e)=>{
+          console.log("initializing drag for innerCircle on:", whichSide);
+          handleDrag(e);
+        }); // Attach drag behavior to newly created circles
 
         // --- Update functions inner circles
         innerPoints
@@ -214,7 +249,8 @@ export const NumberlineTile: React.FC<ITileProps> = observer((props) => {
   }, [axisWidth, mousePosXTrigger, mousePosYTrigger,
       content.hasPoints,
       manualTriggerUseEffect, //accounts for case when you have change selected point - re-renders to show outer circle
-      content.pointsArr //accounts for selecting point and deleting it - triggers a re-render
+      content.pointsArr, //accounts for selecting point and deleting it - triggers a re-render
+      mouseIsDragging // ?
   ]);
 
   return (
@@ -223,6 +259,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer((props) => {
       ref={documentScrollerRef}
       data-testid="numberline-tool"
       style={{"height": `${kNumberLineContainerHeight}`}}
+      key={containerKey}
     >
       <div className="numberline-tool-container" >
           <svg ref={svgRef} width={axisWidth}>

@@ -114,6 +114,10 @@ export const NumberlineContentModel = TileContentModel
       // this should be revised if we want more than one selected point
       // i.e. maxNumSelectedPoints (in numberline-tile-constants.ts) is greater than 1
       self.clearSelectedPointsObj();
+      // console.log("----setSelectedPoint-------");
+      // console.log("\tpoint:", point);
+      // console.log("\tpoint.id:", point.id);
+
       self.selectedPoints[point.id] = point;
 
     },
