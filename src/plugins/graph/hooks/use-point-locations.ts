@@ -14,6 +14,7 @@ interface GetScreenXYParams {
   plotNum?: number;
 }
 
+// These functions are modelled after the getScreenX and getScreenY functions in scatterdots.tsx
 export const getScreenX = ({ caseId, dataset, layout, dataConfig}: GetScreenXYParams) => {
   const xAttrID = dataConfig?.attributeID('x') ?? '';
   const xValue = dataset?.getNumeric(caseId, xAttrID) ?? NaN;
