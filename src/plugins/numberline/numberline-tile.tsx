@@ -150,7 +150,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer((props) => {
         /* =========================== [ Outer Hover Circles ] ======================= */
         //---- Initialize outer hover circles
         const outerPoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.outer-point')
-        .data(content.axisPointsSnapshot, p => p.id);
+        .data(content.axisPointsSnapshot);
 
         outerPoints.enter()
         .append("circle").attr("class", "outer-point")
@@ -175,10 +175,6 @@ export const NumberlineTile: React.FC<ITileProps> = observer((props) => {
         //---- Initialize inner hover circles
         const innerPoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.inner-point')
         .data(content.axisPointsSnapshot);
-
-        // .data(content.axisPointsSnapshot, p => {
-        //   return p.id;
-        // });
 
         // Initialize Attributes
         innerPoints.enter()
