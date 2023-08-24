@@ -83,6 +83,7 @@ export const TileRowModel = types
     },
     // undefined height == default to content height
     setRowHeight(height?: number) {
+      console.log("| WHO called setRowHeight?", height);
       self.height = height;
     },
     setSectionHeader(sectionId: string) {
