@@ -1,6 +1,7 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { MouseEventHandler, useContext, useEffect, useRef, useState } from "react";
+import useResizeObserver from "use-resize-observer";
 
 import { AnnotationButton } from "../annotations/annotation-button";
 import { getDefaultPeak } from "../annotations/annotation-utilities";
@@ -36,6 +37,14 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const divRef = useRef<HTMLDivElement>();
   const ui = useUIStore();
   const tileApiInterface = useContext(TileApiInterfaceContext);
+
+  // Force rerenders when the layer's size changes
+  const [_resizes, setResizes] = useState(0);
+  useResizeObserver({ref: divRef.current, box: "border-box",
+    onResize() {
+      setResizes(value => value + 1);
+    }
+  });
 
   const readWriteClass = readOnly ? "read-only" : "read-write";
   const documentClasses = `.document-content.${readWriteClass} `;
