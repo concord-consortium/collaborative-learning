@@ -40,7 +40,7 @@ export const getScreenY = ({ caseId, dataset, layout, dataConfig, plotNum = 0 }:
   const rightScreenCoord = ((rightCoordValue && rightScale(rightCoordValue.toString())) || 0);
   const numExtraSecondaryBands = dataConfig?.numRepetitionsForPlace('left') ?? 1;
   if (!yScale) return;
-  return yScale(yValue as any) / numExtraSecondaryBands + rightScreenCoord;
+  return yScale(yValue) / numExtraSecondaryBands + rightScreenCoord;
 };
 
 export const usePointLocations = () => {
