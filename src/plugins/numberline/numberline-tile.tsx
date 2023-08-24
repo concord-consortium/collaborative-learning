@@ -6,7 +6,9 @@ import { NumberlineContentModelType, PointObjectModelType,  } from "./models/num
 import { kAxisStyle, kAxisWidth, kContainerWidth, kNumberLineContainerHeight,
          numberlineDomainMax, numberlineDomainMin, tickHeightDefault,
          tickHeightZero, tickStyleDefault, tickStyleZero, tickWidthDefault,
-         tickWidthZero, innerPointRadius, outerPointRadius, numberlineYBound } from './numberline-tile-constants';
+         tickWidthZero, innerPointRadius, outerPointRadius, numberlineYBound,
+         yMidPoint,
+         createXScale} from './numberline-tile-constants';
 
 import "./numberline-tile.scss";
 
@@ -25,7 +27,6 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
   const axisWidth = (tileWidth * kAxisWidth);
   const xShiftNum = ((containerWidth - axisWidth)/2);
   const numToPx = (num: number) => num.toFixed(2) + "px";
-  const yMidPoint = (kNumberLineContainerHeight / 2);
   const xScale = scaleLinear()
   .domain([numberlineDomainMin, numberlineDomainMax])
   .range([0, axisWidth]); // Adjusted range based on svg width
@@ -48,93 +49,74 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
   const svgNode = svg.node();
   const axisRef = useRef<SVGGElement | any>(null);
   const axis = select(axisRef.current);
-  const [mouseIsDragging, setMouseIsDragging] = useState(false); //only within numberline
-  const [mousePosX, setMousePosX] = useState(0); //used to retrigger useEffect
+  const isMouseOverPoint = !!content.hoveredPoint;
+  const [mousePosXTrigger, setMousePosXTrigger] = useState(0); //used to retrigger useEffect
+  const [mousePosYTrigger, setMousePosYTrigger] = useState(0);
+
 
   /* ============================= [ Handlers/Utility Functions ]  =============================== */
 
-  const mouseInBoundingBox = (e: Event) => {
-    const pos = pointer(e, svgNode);
-    const xPos = pos[0];
-    const yPos = pos[1];
+  const mousePosX = (e: Event) => pointer(e, svgNode)[0];
+  const mousePosY = (e: Event) => pointer(e, svgNode)[1];
+
+  const mouseInBoundingBox = (mouseXPos: number,  mouseYPos: number) => {
     const yTopBound = yMidPoint + numberlineYBound;
     const yBottomBound = yMidPoint - numberlineYBound;
-    const isBetweenYBounds = (yPos >= yBottomBound && yPos <= yTopBound);
-    const isBetweenXBounds = (xPos >= 0 && xPos <= axisWidth);
-    if (isBetweenYBounds && isBetweenXBounds ){
-      console.log("-----calling analyzeXPosCreateHoverPoint:");
-      console.log("\txPos: ", xPos);
-      console.log("\taxisWidth", axisWidth);
-
-      content.analyzeXPosCreateHoverPoint(xPos, axisWidth); //detect if hovered over an existing point
-      setMousePosX(xPos);
+    const isBetweenYBounds = (mouseYPos >= yBottomBound && mouseYPos <= yTopBound);
+    const isBetweenXBounds = (mouseXPos >= 0 && mouseXPos <= axisWidth);
+    if (isBetweenYBounds && isBetweenXBounds){
+      setMousePosXTrigger(mouseXPos); // any changes to mousePosXTrigger & mmousePosYTrigger
+      setMousePosYTrigger(mouseYPos); // trigger the useEffect to update the circles
       return true;
     } else {
       return false;
     }
   };
 
-  const handleClickCreatePoint = (e: Event) => {
-    const pos = pointer(e, svgNode);
-    const xPos = pos[0];
-    const xValueClicked = xScale.invert(xPos);
-    content.createNewPoint(xValueClicked);
-  };
-
   const handleMouseClick = (e: Event) => {
-    if (!content.isHoveringOverPoint){
-      if (mouseInBoundingBox(e)){
-
-        handleClickCreatePoint(e); //only create point if we are not hovering over a point and within bounding box
-      }
+    if (isMouseOverPoint){
+      const pointHoveredOver = content.givenIdReturnPoint(content.hoveredPoint);
+      content.setSelectedPoint(pointHoveredOver);
     } else{
-      content.toggleIsSelected(content.indexOfPointHovered);
+      //only create point if we are not hovering over a point and within bounding box
+      mouseInBoundingBox(mousePosX(e), mousePosY(e)) && handleClickCreatePoint(e);
     }
   };
 
-  const givenIDFindIndexPoint = (id: string)=> {
-    return content.pointsArr.findIndex((p)=> p.id === id);
+  const handleClickCreatePoint = (e: Event) => {
+    const xValueClicked = xScale.invert(mousePosX(e));
+    content.createNewPoint(xValueClicked);
   };
 
   const handleDrag = drag<SVGCircleElement, PointObjectModelType>()
   .on('drag', (e, p) => {
-      if (mouseInBoundingBox(e)){
-        setMouseIsDragging(true);
-        const idxPointDragged = givenIDFindIndexPoint(p.id);
-        content.toggleIsSelected(idxPointDragged);//make the dragged point as the only one selected.
-        const oldAxisWidth = axisWidth;
-        const newAxisWidth = svgNode.getBoundingClientRect().width;
-        const isAxisResized = !!(Math.abs(oldAxisWidth - newAxisWidth) > 2);
-        const xMousePos = pointer(e, svgNode)[0];
-        let newScale;
-        if (isAxisResized){
-          newScale = scaleLinear()
-          .domain([numberlineDomainMin, numberlineDomainMax])
-          .range([0, newAxisWidth]);
-        } else {
-          newScale = xScale;
-        }
-        const xValue = newScale.invert(xMousePos);
-        const newPointCoordinates = {xValue};
-        // content.isDraggingUseIdReplacePointCoordinates(p, newPointCoordinates); //p is the old point
-      }
+    if (mouseInBoundingBox(mousePosX(e), mousePosY(e))){
+      const pointHoveredOver = content.givenIdReturnPoint(content.hoveredPoint);
+      content.setSelectedPoint(pointHoveredOver);
+      //need to account for if we change axisWidth then immediately drag
+      const oldAxisWidth = axisWidth;
+      const newAxisWidth = svgNode.getBoundingClientRect().width;
+      const isAxisResized = !!(Math.abs(oldAxisWidth - newAxisWidth) > 2);
+      const newScale = (isAxisResized) ? createXScale(newAxisWidth) : xScale;
+      const newXValue = newScale.invert(mousePosX(e));
+      content.replaceXValueWhileDragging(p.id, newXValue);
+    }
   })
-  .on("end", () => setMouseIsDragging(false));
-
+  .on("end", (e, p) => p.setXValueToDragValue());
 
   const handleMouseMove = (e: Event) => {
-    const radius = (mouseInBoundingBox(e) && !content.isHoveringOverPoint) ? innerPointRadius : 0;
-    drawMousePoint(e, radius);
-    if (!mouseInBoundingBox(e)){
-      // content.setAllHoversFalse(); //we want the hoverPoints to be ""
-    }
+    const isMouseInBoundingBox = mouseInBoundingBox(mousePosX(e), mousePosY(e));
+    const radius = (isMouseInBoundingBox && !isMouseOverPoint) ? innerPointRadius : 0;
+    isMouseInBoundingBox && content.analyzeXYPosDetermineHoverPoint(mousePosX(e), mousePosY(e), axisWidth);
+    //mouse follow point disappears when hover over existing point, r set to 0
+    drawMouseFollowPoint(e, radius);
   };
 
-  const drawMousePoint = (e: Event, r: number) => {
+  const drawMouseFollowPoint = (e: Event, r: number) => {
     const pos = pointer(e, svgNode);
     const xPos = pos[0];
     svg.selectAll(".mouseXCircle").remove();
-    svg.append('circle') //create a temp hover circle that follows the mouse
+    svg.append('circle') //create a circle that follows the mouse
     .attr('cx', xPos)
     .attr('cy', yMidPoint)
     .attr('r', r)
@@ -144,10 +126,6 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
 
   svg.on("click", handleMouseClick);
   svg.on("mousemove", handleMouseMove);
-  // console.log("self.pointsArr", content.pointsArr);
-  // console.log("self.pointsXValuesArr", content.pointsXValuesArr);
-
-  // console.log("******** what is hoverPoint:", content.hoveredPoint);
 
   // * ============================ [ useEffect - construct Numberline ] ========================= */
   useEffect(() => {
@@ -166,88 +144,78 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [axisWidth]);
 
-  /* =========================== [ useEffect Numberline ] ======================================== */
+  /* ======================= [ useEffect Construct/Update Circles ] ============================== */
   useEffect(() => {
     if (axisWidth !== 0){
-      const updateNumberline = () => {
+      console.log("-----updateCircles---------");
+      const updateCircles = () => {
         /* =========================== [ Outer Hover Circles ] ======================= */
         //---- Initialize outer hover circles
         const outerPoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.outer-point')
         .data(content.axisPointsSnapshot, p => p.id);
-
 
         outerPoints.enter()
         .append("circle").attr("class", "outer-point")
         .attr('cx', (p) => xScale(p.xValue || numberlineDomainMin)) //mapped to axis width
         .attr('cy', yMidPoint).attr('r', outerPointRadius).attr('id', p => p.id)
         .classed("showPointOuterCircle", true)
-        .classed("disabled", (p, idx) => (p.id !== content.hoveredPoint));
+        .classed("disabled", true);
 
         // --- Update functions outer hover circles
         outerPoints
         .attr('cx', (p) => {
-          const xValue = p.xValue;
+          const xValue = p.currentXValue;
           return xScale(xValue || numberlineDomainMin); //mapped to axis width
         })
-        .classed("disabled", (p, idx) => {
-          if (!mouseInBoundingBox) {
-            return true; // Disable all points when mouse is outside bounding box
-          }
-          // if (p.isHovered|| (idx === content.indexOfPointHovered && mouseIsDragging)) {
-          //   return false; // Show blue outer circle when hovering or dragging the hovered point
-          // }
-          return true; // Otherwise, disable the point
-        });
+        .classed("disabled", (p, idx) => (content.hoveredPoint !== p.id));
 
         outerPoints.exit().remove(); //cleanup
 
         /* =========================== [ Inner Circles ] ============================= */
         //---- Initialize inner hover circles
         const innerPoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.inner-point')
-        .data(content.axisPointsSnapshot, p => {
-          return p.id;
-        });
+        .data(content.axisPointsSnapshot);
+
+        // .data(content.axisPointsSnapshot, p => {
+        //   return p.id;
+        // });
 
         // Initialize Attributes
         innerPoints.enter()
         .append("circle")
         .attr("class", "inner-point")
-        .attr('cx', (p) => {
-          const xValue = p.xValue;
-          return xScale(xValue || numberlineDomainMin); //mapped to axis width
-        })
+        .attr('cx', (p) => xScale(p.xValue || numberlineDomainMin)) //mapped to axis width
         .attr('cy', yMidPoint).attr('r', innerPointRadius).attr('id', p => p.id)
         .classed("defaultPointInnerCircle", true)
-        // .classed("selected", (p)=>!!p.isSelected)
+        .classed("selected", (p)=> false)
         .call(handleDrag as any ); // Attach drag behavior to newly created circles
 
         // --- Update functions inner circles
         innerPoints
-        .attr('cx', (p) => {
-          const xValue = p.xValue;
+        .attr('cx', (p, idx) => {
+          const xValue = p.currentXValue;
           return xScale(xValue || numberlineDomainMin);
         })
-        // .classed("selected", (p)=>!!p.isSelected);
+        .classed("selected", (p)=> p.id in content.selectedPoints);
 
         innerPoints.exit().remove(); //cleanup
 
-      }; //end updateNumberline()
+      }; //end updateCircles()
 
-      updateNumberline();
+      updateCircles();
 
-      // Attach the updateNumberline function to the window resize event
+      // Attach the updateCircles function to the window resize event
       window.addEventListener('resize', ()=>{
-        updateNumberline();
+        updateCircles();
       });
 
       // Cleanup event listener on component unmount
       return () => {
-        window.removeEventListener('resize', updateNumberline);
+        window.removeEventListener('resize', updateCircles);
       };
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [axisWidth, mousePosX]);
-  //got rid of content.pointsIsHoveredArr to dependency array
+  }, [axisWidth, mousePosXTrigger, mousePosYTrigger, content.hasPoints]);
 
   return (
     <div

@@ -4,6 +4,8 @@ export const kNumberlineTileType = "Numberline";
 export const kNumberlineTileDefaultHeight = 170;
 
 export const kNumberLineContainerHeight = 120;
+export const yMidPoint = (kNumberLineContainerHeight / 2);
+
 export const kContainerWidth = 0.93; // - container should take up 93% of tileWidth so that axis stretches across 90%;
                                      // - this number should match the "width" attribute in numberline-tile.scss for
                                      // the class .numberline-tool-container
@@ -25,7 +27,9 @@ export const numberlineDomainMin = -5;  //max and min of the numberline
 export const numberlineDomainMax = 5;
 
 export const numberlineYBound = 15;  //# of pixels above and below numberline to determine if mouse is inBoundingBox
-export const numberlineXHoverBound = 5; //# of pixels left and irhgt of a point to determine if it's hovering over
+export const pointXYBoxRadius = 5; //# of pixels in all directions of a point to determine if it's hovering over
+
+export const maxNumSelectedPoints = 1; //this may change
 
 //--------- Numberline Circle constants ---------------------------------------------------------------
 export const innerPointRadius = 5;
