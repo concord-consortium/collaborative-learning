@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import classNames from "classnames";
 import { ITileProps } from "../../components/tiles/tile-component";
 import { NumberlineTile } from "./numberline-tile";
@@ -6,6 +6,9 @@ import { BasicEditableTileTitle } from "../../components/tiles/basic-editable-ti
 import { NumberlineToolbar } from "./numberline-toolbar";
 import { useToolbarTileApi } from "../../components/tiles/hooks/use-toolbar-tile-api";
 import { NumberlineContentModelType } from "./models/numberline-content";
+import { useCurrent } from "../../hooks/use-current";
+import { ITileExportOptions } from "../../models/tiles/tile-content-info";
+
 
 import "./numberline-tile-component.scss";
 
@@ -14,6 +17,9 @@ export const NumberlineTileComponent: React.FC<ITileProps> = (props) => {
     documentContent, model, readOnly, scale, tileElt,
     onRegisterTileApi, onUnregisterTileApi
   } = props;
+
+  const contentRef = useCurrent(model.content as NumberlineContentModelType);
+
   const toolbarProps = useToolbarTileApi({ id: model.id, enabled: !readOnly, onRegisterTileApi, onUnregisterTileApi });
 
   const handlePlacePoint = () => {
@@ -22,14 +28,27 @@ export const NumberlineTileComponent: React.FC<ITileProps> = (props) => {
   };
 
   const handleClearPoints = () => {
-    const content = model.content as NumberlineContentModelType;
-    content.clearAllPoints();
+    contentRef.current.deleteAllPoints();
   };
 
   const handleDeletePoint = () => {
-    //TODO: will implement in future ticket
+    contentRef.current.deleteSelectedPointsFromPointsMap();
   };
 
+  useEffect(()=>{
+    onRegisterTileApi({
+      exportContentAsTileJson: (options?: ITileExportOptions) => {
+        return contentRef.current.exportJson(options);
+      },
+      getTitle: () => {
+        return getTitle();
+      }
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const getTitle = () => {
+    return model.title || "";
+  };
 
   return (
     <div className={classNames("numberline-wrapper", { "read-only": readOnly })}>

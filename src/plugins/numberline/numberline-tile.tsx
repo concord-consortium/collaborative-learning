@@ -7,8 +7,7 @@ import { kAxisStyle, kAxisWidth, kContainerWidth, kNumberLineContainerHeight,
          numberlineDomainMax, numberlineDomainMin, tickHeightDefault,
          tickHeightZero, tickStyleDefault, tickStyleZero, tickWidthDefault,
          tickWidthZero, innerPointRadius, outerPointRadius, numberlineYBound,
-         yMidPoint,
-         createXScale} from './numberline-tile-constants';
+         yMidPoint, createXScale} from './numberline-tile-constants';
 
 import "./numberline-tile.scss";
 
@@ -51,6 +50,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer((props) => {
   const isMouseOverPoint = !!content.hoveredPoint;
   const [mousePosXTrigger, setMousePosXTrigger] = useState(0); //used to retrigger useEffect
   const [mousePosYTrigger, setMousePosYTrigger] = useState(0);
+  const [manualTriggerUseEffect, setManualTriggerUseEffect] = useState(false);
 
   /* ============================= [ Handlers/Utility Functions ]  =============================== */
 
@@ -75,6 +75,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer((props) => {
     if (isMouseOverPoint){
       const pointHoveredOver = content.givenIdReturnPoint(content.hoveredPoint);
       content.setSelectedPoint(pointHoveredOver);
+      setManualTriggerUseEffect((prevState) => !prevState);
     } else{
       //only create point if we are not hovering over a point and within bounding box
       mouseInBoundingBox(mousePosX(e), mousePosY(e)) && handleClickCreatePoint(e);
@@ -214,7 +215,14 @@ export const NumberlineTile: React.FC<ITileProps> = observer((props) => {
       };
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [axisWidth, mousePosXTrigger, mousePosYTrigger, content.hasPoints]);
+  }, [axisWidth, mousePosXTrigger, mousePosYTrigger, content.hasPoints,
+    manualTriggerUseEffect,
+    content.isEmptySelectedPoints
+  ]);
+    //content.hasPoints - accounts for re-render when clear button is hit
+    //manualTriggerUseEffect - when you have 1 point or 0 points selected, then you select one
+                              // (without it - it wouldn't turn blue unless you move your mouse)
+    //TODO: get it trigger re-render when you delete a point
 
   return (
     <div
