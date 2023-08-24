@@ -72,7 +72,7 @@ export const ArrowAnnotation = types
 }))
 .views(self => ({
   getPoints(
-    documentWidth: number, documentTop: number, documentBottom: number,
+    documentLeft: number, documentRight: number, documentTop: number, documentBottom: number,
     dragOffsets: IArrowAnnotationDragOffsets, sourceBB?: ObjectBoundingBox|null, targetBB?: ObjectBoundingBox|null
   ) {
     
@@ -101,8 +101,9 @@ export const ArrowAnnotation = types
     const dy = targetY - sourceY;
     const textOriginX = targetX - dx / 2;
     const textOriginY = targetY - dy / 2;
-    const textMinXOffset = -textOriginX;
-    const textMaxXOffset = documentWidth - textOriginX;
+    // Bound the text offset to the document
+    const textMinXOffset = documentLeft - textOriginX;
+    const textMaxXOffset = documentRight - textOriginX;
     const textMinYOffset = documentTop - textOriginY;
     const textMaxYOffset = documentBottom - textOriginY;
     const textCenterX = textOriginX

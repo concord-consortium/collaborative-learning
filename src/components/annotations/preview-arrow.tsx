@@ -5,21 +5,28 @@ import { getDefaultPeak } from "./annotation-utilities";
 import { CurvedArrow } from "./curved-arrow";
 
 interface IPreviewArrowProps {
+  documentHeight: number;
+  documentWidth: number;
   sourceX?: number;
   sourceY?: number;
   targetX?: number;
   targetY?: number;
 }
-export function PreviewArrow({ sourceX, sourceY, targetX, targetY }: IPreviewArrowProps) {
+export function PreviewArrow({
+  documentHeight, documentWidth, sourceX, sourceY, targetX, targetY
+}: IPreviewArrowProps) {
   if (sourceX !== undefined && sourceY !== undefined && targetX !== undefined && targetY !== undefined) {
     const { peakX, peakY } = getDefaultPeak(sourceX, sourceY, targetX, targetY);
+    // Bound the peak to the document
+    const _peakX = Math.max(0, Math.min(documentWidth, peakX));
+    const _peakY = Math.max(0, Math.min(documentHeight, peakY));
 
     return (
       <>
         <CurvedArrow
           className="preview-arrow"
-          peakX={peakX}
-          peakY={peakY}
+          peakX={_peakX}
+          peakY={_peakY}
           sourceX={sourceX}
           sourceY={sourceY}
           targetX={targetX}
