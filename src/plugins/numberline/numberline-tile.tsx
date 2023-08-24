@@ -12,7 +12,7 @@ import { kAxisStyle, kAxisWidth, kContainerWidth, kNumberLineContainerHeight,
 
 import "./numberline-tile.scss";
 
-export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) => {
+export const NumberlineTile: React.FC<ITileProps> = observer((props) => {
   const { model, readOnly } = props;
   const content = model.content as NumberlineContentModelType;
   //---------------- Create Unique ClassName For Axis -----------------------------------------------
@@ -96,7 +96,7 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
       //need to account for if we change axisWidth then immediately drag
       const oldAxisWidth = axisWidth;
       const newAxisWidth = svgNode.getBoundingClientRect().width;
-      const isAxisResized = !!(Math.abs(oldAxisWidth - newAxisWidth) > 2);
+      const isAxisResized = (Math.abs(oldAxisWidth - newAxisWidth) > 2);
       const newScale = (isAxisResized) ? createXScale(newAxisWidth) : xScale;
       const newXValue = newScale.invert(mousePosX(e));
       content.replaceXValueWhileDragging(p.id, newXValue);
@@ -147,7 +147,6 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
   /* ======================= [ useEffect Construct/Update Circles ] ============================== */
   useEffect(() => {
     if (axisWidth !== 0){
-      console.log("-----updateCircles---------");
       const updateCircles = () => {
         /* =========================== [ Outer Hover Circles ] ======================= */
         //---- Initialize outer hover circles
@@ -235,4 +234,4 @@ export const NumberlineToolComponent: React.FC<ITileProps> = observer((props) =>
   );
 });
 
-export default NumberlineToolComponent;
+export default NumberlineTile;

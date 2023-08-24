@@ -234,43 +234,42 @@ class ClueCanvas {
     }
 
     selectLastTileOfType(tileType) {
-      let tileElement = null;
-
-      switch (tileType) {
-          case 'text':
-              textToolTile.getTextTile().last().focus();
-              tileElement = cy.get('.text-tool-wrapper').last().click({ force: true }).parent();
-              break;
-          case 'graph':
-              tileElement = graphToolTile.getGraphTile().last().click({ force: true }).parent();
-              break;
-          case 'image':
-              tileElement = imageToolTile.getImageTile().last().click({ force: true }).parent();
-              break;
-          case 'draw':
-              // For some reason the getDrawTile returns the tool tile component
-              tileElement = drawToolTile.getDrawTile().last().click({ force: true });
-              break;
-          case 'table':
-              tileElement = tableToolTile.getTableTile().last().click({ force: true }).parent();
-              break;
-          case 'geometry':
-              tileElement = graphToolTile.getGraphTile().last().click({ force: true }).parent();
-              break;
-          case 'dataflow':
-              tileElement = dataflowToolTile.getDataflowTile().last().click({ force: true });
-              break;
-          case 'diagram':
-              tileElement = diagramToolTile.getDiagramTile().last().click({ force: true });
-              break;
-          case 'simulator':
-              tileElement = simulatorToolTile.getSimulatorTile().last().click({ force: true });
-              break;
+        let tileElement = null;
+        switch (tileType) {
+            case 'text':
+                textToolTile.getTextTile().last().focus();
+                tileElement = cy.get('.text-tool-wrapper').last().click({ force: true }).parent();
+                break;
+            case 'graph':
+                tileElement = graphToolTile.getGraphTile().last().click({ force: true }).parent();
+                break;
+            case 'image':
+                tileElement = imageToolTile.getImageTile().last().click({ force: true }).parent();
+                break;
+            case 'draw':
+                // For some reason the getDrawTile returns the tool tile component
+                tileElement = drawToolTile.getDrawTile().last().click({ force: true });
+                break;
+            case 'table':
+                tileElement = tableToolTile.getTableTile().last().click({ force: true }).parent();
+                break;
+            case 'geometry':
+                tileElement = graphToolTile.getGraphTile().last().click({ force: true }).parent();
+                break;
+            case 'dataflow':
+                tileElement = dataflowToolTile.getDataflowTile().last().click({ force: true });
+                break;
+            case 'diagram':
+                tileElement = diagramToolTile.getDiagramTile().last().click({ force: true });
+                break;
+            case 'simulator':
+                tileElement = simulatorToolTile.getSimulatorTile().last().click({ force: true });
+                break;
             case 'numberline':
-            tileElement = numberlineToolTile.getNumberlineTile().last().click({ force: true });
-            break;
-      }
-      tileElement.should('have.class','selected');
+                tileElement = numberlineToolTile.getNumberlineTile().last().click({ force: true });
+                break;
+        }
+        tileElement.should('have.class','selected');
     }
 
     deleteTile(tile) {
