@@ -11,6 +11,10 @@ export function normalizeAngle(angle: number) {
 }
 
 // Returns the default peak for a sparrow from sourceX, sourceY to targetX, targetY.
+const minPeakPercent = 1;
+const maxPeakPercent = .5;
+const minLength = 100;
+const maxLength = 300;
 export function getDefaultPeak(sourceX: number, sourceY: number, targetX: number, targetY: number) {
   const dx = targetX - sourceX;
   const dy = targetY - sourceY;
@@ -21,8 +25,11 @@ export function getDefaultPeak(sourceX: number, sourceY: number, targetX: number
 
   const multiplier = arrowAngle > halfPi && arrowAngle < 3 * halfPi ? 1 : -1;
   const perpendicularAngle = normalizeAngle(multiplier * Math.PI / 2 - arrowAngle);
-  const peakDx = Math.cos(perpendicularAngle) * radius;
-  const peakDy = Math.sin(perpendicularAngle) * radius;
+  const peakPercent = radius <= minLength ? minPeakPercent
+    : radius >= maxLength ? maxPeakPercent
+    : (radius - minLength) / (maxLength - minLength) * (maxPeakPercent - minPeakPercent) + minPeakPercent;
+  const peakDx = Math.cos(perpendicularAngle) * radius * peakPercent;
+  const peakDy = Math.sin(perpendicularAngle) * radius * peakPercent;
   const peakX = mx + peakDx;
   const peakY = my + peakDy;
   return {
