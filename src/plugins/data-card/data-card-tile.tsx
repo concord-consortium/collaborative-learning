@@ -21,10 +21,12 @@ import { useConsumerTileLinking } from "../../hooks/use-consumer-tile-linking";
 
 import "./data-card-tile.scss";
 import { TileResizeEntry } from "../../components/tiles/tile-api";
+import { to } from "color-string";
 
 export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
   const { documentId, model, readOnly, documentContent, tileElt, onSetCanAcceptDrop, onRegisterTileApi,
-            scale, onRequestUniqueTitle, onUnregisterTileApi, onRequestTilesOfType, onRequestLinkableTiles } = props;
+            scale, onRequestUniqueTitle, onUnregisterTileApi, onRequestTilesOfType,
+            height, onRequestRowHeight, onRequestLinkableTiles } = props;
 
   const content = model.content as DataCardContentModelType;
   const ui = useUIStore();
@@ -52,15 +54,22 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
     onRegisterTileApi({
       getTitle: () => {
         return model.title;
-      },
-      handleTileResize: (entry: TileResizeEntry) => {
-        console.log("|| data-card handleTileResize", entry.contentRect);
-        // this.tileContentRect = { x, y, width, height, top, left, bottom, right, toJSON: () => "" };
-        // this.toolbarTileApi?.handleTileResize?.(entry);
       }
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // TODO, find a good dependency for this, also one that doesn't cause a loop
+  const adjustHeight = () => {
+    const uiHeight = tileElt?.querySelector(".data-card-container")?.clientHeight || 0;
+    const heightDiff = height ? height - uiHeight : 0;
+    if (heightDiff < 30) {
+      onRequestRowHeight(model.id, uiHeight + 30);
+    }
+  };
+
+  useEffect(() => {
+    adjustHeight();
+  });
   /* ==[ Drag and Drop ] == */
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
