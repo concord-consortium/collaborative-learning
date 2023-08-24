@@ -1,6 +1,6 @@
 export const kDataCardTileType = "DataCard";
 
-export const kDataCardDefaultHeight = 180;
+export const kDataCardDefaultHeight = 430;
 
 export const kDefaultLabelPrefix = "Label";
 export const kDefaultLabel = `${kDefaultLabelPrefix} 1`;

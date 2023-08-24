@@ -14,8 +14,8 @@ import '../data-card-tile.scss';
 
 const typeIcons = {
   "date": "📅",
-  "categorical": "txt",
-  "numeric": "#",
+  "categorical": "🔤",
+  "numeric": "🔢",
   "image": "📷",
   "boundary": "?",
   "color": "?",
