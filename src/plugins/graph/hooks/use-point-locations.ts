@@ -1,49 +1,61 @@
 import { ScaleLinear, ScaleBand } from "d3";
 import { ScaleNumericBaseType } from "../imports/components/axis/axis-types";
 import { useDataSetContext } from "../imports/hooks/use-data-set-context";
-import { useGraphLayoutContext } from "../models/graph-layout";
+import { GraphLayout, useGraphLayoutContext } from "../models/graph-layout";
 import { useDataConfigurationContext } from "./use-data-configuration-context";
+import { IDataConfigurationModel } from "../models/data-configuration-model";
+import { IDataSet } from "../../../models/data/data-set";
+
+interface GetScreenXYParams {
+  caseId: string;
+  dataset: any; //IDataSet | undefined;
+  layout: GraphLayout;
+  dataConfig: IDataConfigurationModel;
+  plotNum?: any;
+}
+
+export const getScreenX = ({ caseId, dataset, layout, dataConfig}: GetScreenXYParams) => {
+  const xAttrID = dataConfig?.attributeID('x') ?? '';
+  const xValue = dataset?.getNumeric(caseId, xAttrID) ?? NaN;
+  const xScale = layout.getAxisScale('bottom') as ScaleLinear<number, number>;
+  const topSplitID = dataConfig?.attributeID('topSplit') ?? '';
+  const topCoordValue = dataset?.getStrValue(caseId, topSplitID) ?? '';
+  const topScale = layout.getAxisScale('top') as ScaleBand<string>;
+  const numExtraPrimaryBands = dataConfig?.numRepetitionsForPlace('bottom') ?? 1;
+  return xScale(xValue) / numExtraPrimaryBands + (topScale(topCoordValue) || 0);
+};
+
+export const getScreenY = ({ caseId, dataset, layout, dataConfig, plotNum = 0 }: GetScreenXYParams) => {
+  const yAttrIDs = dataConfig?.yAttributeIDs || [];
+  const hasY2 = dataConfig?.hasY2Attribute;
+  const plotsCt = dataConfig?.numberOfPlots || 1;
+  const yAttrID = yAttrIDs[plotNum];
+  const yValue = dataset?.getNumeric(caseId, yAttrID) ?? NaN;
+  const yScale = hasY2 && plotNum === plotsCt - 1
+    ? layout.getAxisScale("rightNumeric")
+    : layout.getAxisScale("left") as ScaleNumericBaseType;
+  const rightSplitID = dataConfig?.attributeID('rightSplit') ?? '';
+  const rightCoordValue = dataset?.getStrValue(caseId, rightSplitID) ?? '';
+  const rightScale = layout.getAxisScale('rightCat') as ScaleBand<string>;
+  const rightScreenCoord = ((rightCoordValue && rightScale(rightCoordValue.toString())) || 0);
+  const numExtraSecondaryBands = dataConfig?.numRepetitionsForPlace('left') ?? 1;
+  if (!yScale) return;
+  return yScale(yValue as any) / numExtraSecondaryBands + rightScreenCoord;
+};
 
 export const usePointLocations = () => {
-  const dataConfiguration = useDataConfigurationContext();
+  const dataConfig = useDataConfigurationContext();
   const layout = useGraphLayoutContext();
   const dataset = useDataSetContext();
-  const numExtraPrimaryBands = dataConfiguration?.numRepetitionsForPlace('bottom') ?? 1;
-  const numExtraSecondaryBands = dataConfiguration?.numRepetitionsForPlace('left') ?? 1;
-  const yAttrIDs = dataConfiguration?.yAttributeIDs || [];
-  const hasY2 = dataConfiguration?.hasY2Attribute;
-  const v2Scale = layout.getAxisScale("rightNumeric") as ScaleNumericBaseType;
-  const yScaleY = layout.getAxisScale("left") as ScaleNumericBaseType;
-  const plotsCt = dataConfiguration?.numberOfPlots || 1;
   const caseIds = dataset?.cases.map(c => c.__id__) ?? [];
-
-  const getScreenX = (anID: string) => {
-    const xAttrID = dataConfiguration?.attributeID('x') ?? '',
-      xValue = dataset?.getNumeric(anID, xAttrID) ?? NaN,
-      xScale = layout.getAxisScale('bottom') as ScaleLinear<number, number>,
-      topSplitID = dataConfiguration?.attributeID('topSplit') ?? '',
-      topCoordValue = dataset?.getStrValue(anID, topSplitID) ?? '',
-      topScale = layout.getAxisScale('top') as ScaleBand<string>;
-    return xScale(xValue) / numExtraPrimaryBands + (topScale(topCoordValue) || 0);
-  };
-
-  const getScreenY = (anID: string, plotNum = 0) => {
-    const yAttrID = yAttrIDs[plotNum],
-      yValue = dataset?.getNumeric(anID, yAttrID) ?? NaN,
-      yScale = (hasY2 && plotNum === plotsCt - 1 ? v2Scale : yScaleY) as ScaleLinear<number, number>,
-      rightSplitID = dataConfiguration?.attributeID('rightSplit') ?? '',
-      rightCoordValue = dataset?.getStrValue(anID, rightSplitID) ?? '',
-      rightScale = layout.getAxisScale('rightCat') as ScaleBand<string>,
-      rightScreenCoord = ((rightCoordValue && rightScale(rightCoordValue)) || 0);
-    return yScale(yValue) / numExtraSecondaryBands + rightScreenCoord;
-  };
 
   const xSeries: number[] = [];
   const ySeries: number[] = [];
 
   caseIds?.forEach((caseId) => {
-    xSeries.push(getScreenX(caseId));
-    ySeries.push(getScreenY(caseId));
+    if (!dataConfig || !dataset) return;
+    xSeries.push(getScreenX({caseId, dataset, layout, dataConfig}));
+    ySeries.push(getScreenY({caseId, dataset, layout, dataConfig}));
   });
 
   return xSeries.map((x, i) => [x, ySeries[i]]) as Iterable<[number, number]>;
