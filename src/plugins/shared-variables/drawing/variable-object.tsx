@@ -121,7 +121,7 @@ export const drawingVariables = (drawingContent: DrawingContentModelType) => {
   const variables = variableIds.map(id => findVariable(drawingContent, id));
   const filteredVariables = variables.filter(variable => variable !== undefined);
   return filteredVariables as VariableType[];
-};  
+};
 
 interface IInsertVariableButton {
   toolbarManager: IToolbarManager;
