@@ -20,6 +20,7 @@ import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-
 import { useConsumerTileLinking } from "../../hooks/use-consumer-tile-linking";
 
 import "./data-card-tile.scss";
+import { TileResizeEntry } from "../../components/tiles/tile-api";
 
 export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
   const { documentId, model, readOnly, documentContent, tileElt, onSetCanAcceptDrop, onRegisterTileApi,
@@ -51,6 +52,11 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
     onRegisterTileApi({
       getTitle: () => {
         return model.title;
+      },
+      handleTileResize: (entry: TileResizeEntry) => {
+        console.log("|| data-card handleTileResize", entry.contentRect);
+        // this.tileContentRect = { x, y, width, height, top, left, bottom, right, toJSON: () => "" };
+        // this.toolbarTileApi?.handleTileResize?.(entry);
       }
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
