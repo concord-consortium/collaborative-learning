@@ -26,7 +26,7 @@ import {
 import { onAnyAction } from "../../../utilities/mst-utils";
 import { AdornmentModelUnion } from "../adornments/adornment-types";
 import { SharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
-import { ConnectingLineModel } from "../adornments/connecting-line/connecting-line-model";
+import { ConnectingLinesModel } from "../adornments/connecting-lines/connecting-lines-model";
 export interface GraphProperties {
   axes: Record<string, IAxisModelUnion>
   plotType: PlotType
@@ -372,10 +372,10 @@ export function createGraphModel(snap?: IGraphModelSnapshot, appConfig?: AppConf
   // const connectLinesByDefault = appConfig?.getSetting("defaultConnectedLines", "graph");
   const connectByDefault = appConfig?.getSetting("defaultSeriesLegend", "graph");
   if (connectByDefault) {
-    const cLines = ConnectingLineModel.create(
-      {id: 'connectingLines', type: 'Connecting Line', isVisible: true}
+    const cLines = ConnectingLinesModel.create(
+      {id: 'connectingLines', type: 'Connecting Lines', isVisible: true}
     );
-    createdGraphModel.showAdornment(cLines, 'Connecting Line'); // TODO - change Adornment-wide to "Connecting Lines"
+    createdGraphModel.showAdornment(cLines, 'Connecting Lines'); // TODO - change Adornment-wide to "Connecting Lines"
   }
   return createdGraphModel;
 }

@@ -4,7 +4,7 @@ import { IMovableLineModel, MovableLineModel } from "./movable-line/movable-line
 import { IMovablePointModel, MovablePointModel } from "./movable-point/movable-point-model";
 import { IMovableValueModel, MovableValueModel } from "./movable-value/movable-value-model";
 import { CountModel, ICountModel } from "./count/count-model";
-import { ConnectingLineModel, IConnectingLineModel } from "./connecting-line/connecting-line-model";
+import { ConnectingLinesModel, IConnectingLinesModel } from "./connecting-lines/connecting-lines-model";
 
 export const kGraphAdornmentsClass = "graph-adornments-grid";
 export const kGraphAdornmentsClassSelector = `.${kGraphAdornmentsClass}`;
@@ -15,13 +15,13 @@ const adornmentTypeDispatcher = (adornmentSnap: IAdornmentModel) => {
     case "Movable Line": return MovableLineModel;
     case "Movable Point": return MovablePointModel;
     case "Movable Value": return MovableValueModel;
-    case "Connecting Line": return ConnectingLineModel;
+    case "Connecting Lines": return ConnectingLinesModel;
     default: return UnknownAdornmentModel;
   }
 };
 
 export const AdornmentModelUnion = types.union({ dispatcher: adornmentTypeDispatcher },
-  CountModel, MovableValueModel, MovableLineModel, MovablePointModel, ConnectingLineModel, UnknownAdornmentModel);
+  CountModel, MovableValueModel, MovableLineModel, MovablePointModel, ConnectingLinesModel, UnknownAdornmentModel);
 export type IAdornmentModelUnion =
   ICountModel | IMovableValueModel | IMovableLineModel |
-  IMovablePointModel | IConnectingLineModel | IUnknownAdornmentModel ;
+  IMovablePointModel | IConnectingLinesModel | IUnknownAdornmentModel ;
