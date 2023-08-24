@@ -31,7 +31,6 @@ export const NumberlineTile: React.FC<ITileProps> = observer((props) => {
   .domain([numberlineDomainMin, numberlineDomainMax])
   .range([0, axisWidth]); // Adjusted range based on svg width
 
-
   useEffect(() => {
     let obs: ResizeObserver;
     if (documentScrollerRef.current) {
@@ -52,7 +51,6 @@ export const NumberlineTile: React.FC<ITileProps> = observer((props) => {
   const isMouseOverPoint = !!content.hoveredPoint;
   const [mousePosXTrigger, setMousePosXTrigger] = useState(0); //used to retrigger useEffect
   const [mousePosYTrigger, setMousePosYTrigger] = useState(0);
-
 
   /* ============================= [ Handlers/Utility Functions ]  =============================== */
 
@@ -124,8 +122,8 @@ export const NumberlineTile: React.FC<ITileProps> = observer((props) => {
     .classed("defaultPointInnerCircle", true);
   };
 
-  svg.on("click", handleMouseClick);
-  svg.on("mousemove", handleMouseMove);
+  svg.on("click", (e) => !readOnly && handleMouseClick(e));
+  svg.on("mousemove", (e) => !readOnly && handleMouseMove(e));
 
   // * ============================ [ useEffect - construct Numberline ] ========================= */
   useEffect(() => {
@@ -166,7 +164,9 @@ export const NumberlineTile: React.FC<ITileProps> = observer((props) => {
           const xValue = p.currentXValue;
           return xScale(xValue || numberlineDomainMin); //mapped to axis width
         })
-        .classed("disabled", (p, idx) => (content.hoveredPoint !== p.id));
+        .classed("disabled", (p, idx) => {
+          return (content.hoveredPoint !== p.id);
+        });
 
         outerPoints.exit().remove(); //cleanup
 

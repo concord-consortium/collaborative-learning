@@ -21,7 +21,7 @@ export const NumberlineTileComponent: React.FC<ITileProps> = (props) => {
     //this should be active by default
   };
 
-  const handleUndoPoints = () => {
+  const handleClearPoints = () => {
     const content = model.content as NumberlineContentModelType;
     content.clearAllPoints();
   };
@@ -46,7 +46,7 @@ export const NumberlineTileComponent: React.FC<ITileProps> = (props) => {
         {...toolbarProps}
         scale={scale}
         handlePlacePoint={handlePlacePoint}
-        handleClearPoints={handleUndoPoints}
+        handleClearPoints={handleClearPoints}
         handleDeletePoint={handleDeletePoint}
       />
       <NumberlineTile {...props}/>
