@@ -7,11 +7,14 @@
   position: relative
   // Split the remaing width in .workspace with the primary workspace
   flex: 1
+  // Allow the width to be less than what is required by the content inside
+  min-width: 0
   transition-duration: .5s
   background-color: white
   border-radius: 0 6px 0 0
 
   .nav-tab-panel
+    // Split width between the tabs and the chat panel
     display: flex
     width: 100%
     .top-row
@@ -102,6 +105,8 @@
       // stretch the tabs out horizontally in their container to take all space not used
       // by the chat panel
       flex: 1
+      // Allow the element to get smaller than what its content requires
+      min-width: 0
       display: flex
       flex-direction: column
 
