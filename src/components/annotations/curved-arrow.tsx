@@ -20,9 +20,10 @@ export function CurvedArrow({
   className, hideArrowhead, peakX, peakY, setHovering, sourceX, sourceY, targetX, targetY
 }: ICurvedArrowProps) {
 
-  const { path, arrowheadAngle } = useMemo(() => {
-    return getSparrowCurve(sourceX, sourceY, peakX, peakY, targetX, targetY);
-  }, [peakX, peakY, sourceX, sourceY, targetX, targetY]);
+  const { path, arrowheadAngle } = getSparrowCurve(sourceX, sourceY, peakX, peakY, targetX, targetY);
+  // const { path, arrowheadAngle } = useMemo(() => {
+  //   return getSparrowCurve(sourceX, sourceY, peakX, peakY, targetX, targetY);
+  // }, [peakX, peakY, sourceX, sourceY, targetX, targetY]);
 
   return (
     <g className={classNames("curved-arrow", className)}>

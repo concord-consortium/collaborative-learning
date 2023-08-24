@@ -111,15 +111,19 @@ export const ArrowAnnotationComponent = observer(
       sourceX, sourceY, targetX, targetY, textX, textY, textCenterX, textCenterY,
       textMinXOffset, textMaxXOffset, textMinYOffset, textMaxYOffset
     } = arrow.getPoints(documentLeft, documentRight, documentTop, documentBottom, dragOffsets, sourceBB, targetBB);
-    const curveData = useMemo(() => {
-      if (
-        sourceX === undefined || sourceY === undefined || textCenterX === undefined
-        || textCenterY === undefined || targetX === undefined || targetY === undefined
-      ) {
-        return undefined;
-      }
-      return getSparrowCurve(sourceX, sourceY, textCenterX, textCenterY, targetX, targetY, true);
-    }, [sourceX, sourceY, textCenterX, textCenterY, targetX, targetY]);
+    const missingData = sourceX === undefined || sourceY === undefined || textCenterX === undefined
+      || textCenterY === undefined || targetX === undefined || targetY === undefined;
+    const curveData = missingData ? undefined
+      : getSparrowCurve(sourceX, sourceY, textCenterX, textCenterY, targetX, targetY, true);
+    // const curveData = useMemo(() => {
+    //   if (
+    //     sourceX === undefined || sourceY === undefined || textCenterX === undefined
+    //     || textCenterY === undefined || targetX === undefined || targetY === undefined
+    //   ) {
+    //     return undefined;
+    //   }
+    //   return getSparrowCurve(sourceX, sourceY, textCenterX, textCenterY, targetX, targetY, true);
+    // }, [sourceX, sourceY, textCenterX, textCenterY, targetX, targetY]);
 
     // Bail if we're missing anything necessary
     if (
