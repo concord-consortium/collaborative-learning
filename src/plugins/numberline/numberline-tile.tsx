@@ -215,14 +215,11 @@ export const NumberlineTile: React.FC<ITileProps> = observer((props) => {
       };
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [axisWidth, mousePosXTrigger, mousePosYTrigger, content.hasPoints,
-    manualTriggerUseEffect,
-    content.isEmptySelectedPoints
+  }, [axisWidth, mousePosXTrigger, mousePosYTrigger,
+      content.hasPoints,
+      manualTriggerUseEffect, //accounts for case when you have change selected point - re-renders to show outer circle
+      content.pointsArr //accounts for selecting point and deleting it - triggers a re-render
   ]);
-    //content.hasPoints - accounts for re-render when clear button is hit
-    //manualTriggerUseEffect - when you have 1 point or 0 points selected, then you select one
-                              // (without it - it wouldn't turn blue unless you move your mouse)
-    //TODO: get it trigger re-render when you delete a point
 
   return (
     <div
