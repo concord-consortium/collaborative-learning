@@ -8,10 +8,10 @@ import { IDataSet } from "../../../models/data/data-set";
 
 interface GetScreenXYParams {
   caseId: string;
-  dataset: any; //IDataSet | undefined;
+  dataset?: IDataSet;
   layout: GraphLayout;
-  dataConfig: IDataConfigurationModel | undefined;
-  plotNum?: number | undefined;
+  dataConfig?: IDataConfigurationModel;
+  plotNum?: number;
 }
 
 export const getScreenX = ({ caseId, dataset, layout, dataConfig}: GetScreenXYParams) => {
@@ -31,15 +31,13 @@ export const getScreenY = ({ caseId, dataset, layout, dataConfig, plotNum = 0 }:
   const plotsCt = dataConfig?.numberOfPlots || 1;
   const yAttrID = yAttrIDs[plotNum];
   const yValue = dataset?.getNumeric(caseId, yAttrID) ?? NaN;
-  const yScale = hasY2 && plotNum === plotsCt - 1
-    ? layout.getAxisScale("rightNumeric")
-    : layout.getAxisScale("left") as ScaleNumericBaseType;
+  const yScaleRole = hasY2 && plotNum === plotsCt - 1 ? "rightNumeric" : "left";
+  const yScale = layout.getAxisScale(yScaleRole) as ScaleNumericBaseType;
   const rightSplitID = dataConfig?.attributeID('rightSplit') ?? '';
   const rightCoordValue = dataset?.getStrValue(caseId, rightSplitID) ?? '';
   const rightScale = layout.getAxisScale('rightCat') as ScaleBand<string>;
   const rightScreenCoord = ((rightCoordValue && rightScale(rightCoordValue.toString())) || 0);
   const numExtraSecondaryBands = dataConfig?.numRepetitionsForPlace('left') ?? 1;
-  if (!yScale) return;
   return yScale(yValue) / numExtraSecondaryBands + rightScreenCoord;
 };
 
