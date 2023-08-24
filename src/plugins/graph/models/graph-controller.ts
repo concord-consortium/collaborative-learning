@@ -145,7 +145,6 @@ export class GraphController {
         currAxisModel = graphModel.getAxis(place),
         currentType = currAxisModel?.type ?? 'empty',
         [min, max] = kDefaultNumericAxisBounds;
-
       switch (attrType) {
         case 'numeric': {
           if (!currAxisModel || !isNumericAxisModel(currAxisModel)) {

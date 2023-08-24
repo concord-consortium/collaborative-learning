@@ -368,14 +368,14 @@ export function createGraphModel(snap?: IGraphModelSnapshot, appConfig?: AppConf
     },
     ...snap
   });
-  // TODO: make a bonofide setting for this rather than using defaultSeriesLegend as a proxy, e.g.:
+  // TODO: make a dedicated setting for this rather than using defaultSeriesLegend as a proxy:
   // const connectLinesByDefault = appConfig?.getSetting("defaultConnectedLines", "graph");
   const connectByDefault = appConfig?.getSetting("defaultSeriesLegend", "graph");
   if (connectByDefault) {
     const cLines = ConnectingLinesModel.create(
       {id: 'connectingLines', type: 'Connecting Lines', isVisible: true}
     );
-    createdGraphModel.showAdornment(cLines, 'Connecting Lines'); // TODO - change Adornment-wide to "Connecting Lines"
+    createdGraphModel.showAdornment(cLines, 'Connecting Lines');
   }
   return createdGraphModel;
 }

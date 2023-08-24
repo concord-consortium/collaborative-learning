@@ -8,8 +8,6 @@ import { useGraphModelContext } from "../../models/graph-model";
 import { lightenColor } from "../../../../utilities/color-utils";
 import { usePointLocations } from "../../hooks/use-point-locations";
 
-import "./connecting-lines.scss";
-
 interface IProps {
   model: IConnectingLinesModel
   subPlotKey: Record<string, string>
