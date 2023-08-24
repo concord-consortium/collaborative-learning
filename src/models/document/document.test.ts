@@ -178,6 +178,16 @@ describe("document model", () => {
     expect(document.content!.tileMap.size).toBe(0);
   });
 
+  it("allows undo and redo", () => {
+    const result = document.addTile("text");
+    console.log('result', result);
+    expect(document.content!.tileMap.size).toBe(1);
+    document.undoLastAction();
+    expect(document.content!.tileMap.size).toBe(0);
+    document.redoLastAction();
+    expect(document.content!.tileMap.size).toBe(1);
+  });
+
   it("allows the visibility to be toggled", () => {
     document.toggleVisibility();
     expect(document.visibility).toBe("private");
