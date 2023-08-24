@@ -5,7 +5,7 @@ import { kConnectingLinesType } from "./connecting-lines-types";
 export const ConnectingLinesModel = AdornmentModel
   .named('ConnectingLinesModel')
   .props({
-    type: 'Connecting Lines'
+    type: kConnectingLinesType
   });
 
 export interface IConnectingLinesModel extends Instance<typeof ConnectingLinesModel> {}

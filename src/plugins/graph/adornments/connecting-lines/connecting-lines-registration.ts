@@ -17,6 +17,6 @@ registerAdornmentComponentInfo({
   adornmentEltClass: kConnectingLinesClass,
   Component: ConnectingLines,
   labelKey: kConnectingLinesLabelKey,
-  order: 10,
+  order: 15,
   type: kConnectingLinesType
 });

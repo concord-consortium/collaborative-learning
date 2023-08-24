@@ -1,8 +1,9 @@
 import { ConnectingLinesModel } from "./connecting-lines-model";
+import { kConnectingLinesType } from "./connecting-lines-types";
 
-describe("ConnectingLineModel", () => {
-  it("is created with its type property set to 'Connecting Line'", () => {
+describe("ConnectingLinesModel", () => {
+  it("is created with its type property set appropriately", () => {
     const cLine = ConnectingLinesModel.create();
-    expect(cLine.type).toEqual("Connecting Line");
+    expect(cLine.type).toEqual(kConnectingLinesType);
   });
 });

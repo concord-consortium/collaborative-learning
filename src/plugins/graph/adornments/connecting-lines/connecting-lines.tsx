@@ -1,17 +1,17 @@
-import React from "react";
 import { line, curveLinear, select } from "d3";
 import { observer } from "mobx-react-lite";
 import { IConnectingLinesModel } from "./connecting-lines-model";
-import { useDataConfigurationContext } from "../../hooks/use-data-configuration-context";
 import { DotsElt } from "../../d3-types";
+import { IDotsRef } from "../../graph-types";
+import { useDataConfigurationContext } from "../../hooks/use-data-configuration-context";
+import { usePointLocations } from "../../hooks/use-point-locations";
 import { useGraphModelContext } from "../../models/graph-model";
 import { lightenColor } from "../../../../utilities/color-utils";
-import { usePointLocations } from "../../hooks/use-point-locations";
 
 interface IProps {
   model: IConnectingLinesModel
   subPlotKey: Record<string, string>
-  dotsRef: React.RefObject<SVGGElement>
+  dotsRef: IDotsRef
 }
 
 function drawPath(el: DotsElt, points: Iterable<[number, number]>, color: string) {
