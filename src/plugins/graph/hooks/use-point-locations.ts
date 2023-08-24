@@ -10,8 +10,8 @@ interface GetScreenXYParams {
   caseId: string;
   dataset: any; //IDataSet | undefined;
   layout: GraphLayout;
-  dataConfig: IDataConfigurationModel;
-  plotNum?: any;
+  dataConfig: IDataConfigurationModel | undefined;
+  plotNum?: number | undefined;
 }
 
 export const getScreenX = ({ caseId, dataset, layout, dataConfig}: GetScreenXYParams) => {
@@ -53,9 +53,10 @@ export const usePointLocations = () => {
   const ySeries: number[] = [];
 
   caseIds?.forEach((caseId) => {
-    if (!dataConfig || !dataset) return;
-    xSeries.push(getScreenX({caseId, dataset, layout, dataConfig}));
-    ySeries.push(getScreenY({caseId, dataset, layout, dataConfig}));
+    if (dataConfig && dataset && layout) {
+      xSeries.push(getScreenX({caseId, dataset, layout, dataConfig}));
+      ySeries.push(getScreenY({caseId, dataset, layout, dataConfig}));
+    }
   });
 
   return xSeries.map((x, i) => [x, ySeries[i]]) as Iterable<[number, number]>;
