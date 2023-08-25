@@ -20,6 +20,7 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
   const contentRef = useCurrent(model.content as DrawingContentModelType);
   const [imageUrlToAdd, setImageUrlToAdd] = useState("");
   const hotKeys = useRef(new HotKeys());
+  const drawingToolElement = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!readOnly) {
@@ -67,6 +68,13 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
 
   const toolbarProps = useToolbarTileApi({ id: model.id, enabled: !readOnly, onRegisterTileApi, onUnregisterTileApi });
 
+  const getVisibleCanvasSize = () => {
+    if (!drawingToolElement.current 
+      || !drawingToolElement.current.clientWidth 
+      || !drawingToolElement.current.clientHeight) return undefined;
+    return { x: drawingToolElement.current.clientWidth, y: drawingToolElement.current.clientHeight };
+  };
+
   return (
     <DrawingContentModelContext.Provider value={contentRef.current} >
       <BasicEditableTileTitle
@@ -75,6 +83,7 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
         scale={scale}
       />
       <div
+        ref={drawingToolElement}
         className={classNames("drawing-tool", { "read-only": readOnly })}
         data-testid="drawing-tool"
         tabIndex={0}
@@ -86,6 +95,7 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
           tileElt={tileElt}
           scale={scale}
           setImageUrlToAdd={setImageUrlToAdd}
+          getVisibleCanvasSize={getVisibleCanvasSize}
           {...toolbarProps}
         />
         <DrawingLayerView
