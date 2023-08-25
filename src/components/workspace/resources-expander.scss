@@ -1,16 +1,15 @@
 @import "../vars";
 
 .resources-expander {
+  position: relative; // so we can center elements
   width: 38px;
-  margin-right: 4px;
   padding: 2px;
   border-radius: 0 8px 0 0;
   box-sizing: border-box;
   border-style: solid;
-  display: flex;
   z-index: 2;
 
-  // Center styling
+  // Styling when in the center
   border-width: 2px 2px 2px 1px;
   border-color: $charcoal;
   background-color: $charcoal-light-6;
@@ -24,6 +23,7 @@
   &.problems {
     // common left side stuff
     border-width: 2px;
+    margin-right: 4px;
     .resources-expander-label {
       opacity: 1;
     }
@@ -40,6 +40,7 @@
   &.teacher-guide {
     // common left side stuff
     border-width: 2px;
+    margin-right: 4px;
     .resources-expander-label {
       opacity: 1;
     }
@@ -56,6 +57,7 @@
   &.student-work {
     // common left side stuff
     border-width: 2px;
+    margin-right: 4px;
     .resources-expander-label {
       opacity: 1;
     }
@@ -72,6 +74,7 @@
   &.my-work {
     // common left side stuff
     border-width: 2px;
+    margin-right: 4px;
     .resources-expander-label {
       opacity: 1;
     }
@@ -88,6 +91,7 @@
   &.class-work {
     // common left side stuff
     border-width: 2px;
+    margin-right: 4px;
     .resources-expander-label {
       opacity: 1;
     }
@@ -104,6 +108,7 @@
   &.supports {
     // common left side stuff
     border-width: 2px;
+    margin-right: 4px;
     .resources-expander-label {
       opacity: 1;
     }
@@ -129,9 +134,8 @@
     height: max-content;
   }
   .expand-left-indicator {
-    position: relative;
-    left: -33px;
-    align-self: center;
-    justify-self: center;
+    position: absolute;
+    // Offset the icon by half its height 34px
+    top: calc(50% - 17px);
   }
 }

@@ -1,16 +1,15 @@
 @import "../vars";
 
 .workspace-expander {
+  position: relative; // so we can center elements
   width: 38px;
-  margin-left: 4px;
   padding: 2px;
   border-radius: 8px 0 0 0;
   box-sizing: border-box;
   border-style: solid;
   z-index: 2;
-  display: flex;
 
-  // Center styling
+  // Styling when in the center
   border-width: 2px 1px 2px 2px;
   border-color: $charcoal;
   background-color: $charcoal-light-6;
@@ -22,6 +21,7 @@
   }
 
   &.problem {
+    margin-left: 4px;
     border-width: 2px;
     border-color: $workspace-teal;
     background-color: $workspace-teal-light-4;
@@ -36,6 +36,7 @@
     }
   }
   &.learninglog {
+    margin-left: 4px;
     border-width: 2px;
     border-color: $learninglog-green;
     background-color: $learninglog-green-light-5;
@@ -53,17 +54,17 @@
   .workspace-expander-label {
     // hidden in the middle
     opacity: 0;
+
     writing-mode: vertical-rl;
     text-orientation: mixed;
     font-size: 14px;
     margin: 20px 7px;
-    width: 50px;
   }
   .expand-right-indicator {
+    position: absolute;
+    // Offset the icon by its height, however it isn't rotating around
+    // the center, so we have to offset it by more on the right indicator
+    top: calc(50% - 20.5px);
     transform: rotate(180deg);
-    position: relative;
-    right: 33px;
-    align-self: center;
-    justify-self: center;
   }
 }
