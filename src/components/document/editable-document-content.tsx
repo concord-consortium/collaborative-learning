@@ -75,6 +75,7 @@ interface IDocumentCanvasProps {
 const DocumentCanvas: React.FC<IDocumentCanvasProps> = props => {
   const { mode, isPrimary, document, readOnly, showPlayback } = props;
   const isFourUp = (document.type === ProblemDocument) && (isPrimary && (mode === "4-up"));
+  console.log("isFourUp:", isFourUp);
   return (
     <div className="canvas-area">
       {isFourUp

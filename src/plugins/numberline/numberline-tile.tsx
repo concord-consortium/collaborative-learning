@@ -12,7 +12,11 @@ import { kAxisStyle, kAxisWidth, kContainerWidth, kNumberLineContainerHeight,
 import "./numberline-tile.scss";
 
 export const NumberlineTile: React.FC<ITileProps> = observer(function NumberlineTile(props){
-  const { model, readOnly } = props;
+
+
+
+
+  const { model, readOnly, context } = props;
   const content = model.content as NumberlineContentModelType;
   const readOnlyState = (readOnly) ? "readOnly" : "readWrite";
   const tileId = model.id;
@@ -20,22 +24,42 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
 
   //---------------- Calculate Width Of Tile / Scale ----------------------------------------------
   const documentScrollerRef = useRef<HTMLDivElement>(null);
+
   const [tileWidth, setTileWidth] = useState(0);
   const containerWidth = (tileWidth * kContainerWidth);
-  const axisWidth = (tileWidth * kAxisWidth);
+  const isFourUpView = context.includes("four-up");
+  const fourUpScalar = isFourUpView ? 0.5 : 1;
+
+  const axisWidth = tileWidth * kAxisWidth;
   const xShiftNum = ((containerWidth - axisWidth)/2);
   const numToPx = (num: number) => num.toFixed(2) + "px";
   const xScale = createXScale(axisWidth);
+  // console.log("axisClass:", axisClass);
+  if (!props.readOnly){
+    console.log("--------------------------");
+
+    // console.log("allProps:", props); //check this thoroughly for fourUp
+    // console.log("documentContent:", props.documentContent);
+    console.log("\tprops.context", props.context);
+    console.log("\tstate tileWidth:", tileWidth);
+    console.log("\taxisWidth:", axisWidth);
+  }
 
   useEffect(() => {
     let obs: ResizeObserver;
     if (documentScrollerRef.current) {
       obs = new ResizeObserver(() => {
-        setTileWidth(documentScrollerRef.current?.clientWidth ?? 0);
+        if (documentScrollerRef.current?.clientWidth){
+          console.log("------------in the observer-----");
+          console.log("\t weh ave fourUpScalar : ", fourUpScalar);
+          const newTileWidth  = documentScrollerRef.current?.clientWidth * fourUpScalar;
+          setTileWidth(newTileWidth ?? 0);
+        }
       });
       obs.observe(documentScrollerRef.current);
     }
     return () => obs?.disconnect();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   //-------------------  SVG Ref to Numberline & SVG / Mouse State --------------------------------
@@ -78,10 +102,14 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     const yTopBound = yMidPoint + numberlineYBound;
     const yBottomBound = yMidPoint - numberlineYBound;
     const isBetweenYBounds = (mouseYPos >= yBottomBound && mouseYPos <= yTopBound);
+    // console.log("mouseInBoundingBox: axisWidth set to:", axisWidth);
     const isBetweenXBounds = (mouseXPos >= 0 && mouseXPos <= axisWidth);
     if (isBetweenYBounds && isBetweenXBounds){
+      // console.log("mouse in bounding BOX!");
       return true;
     } else {
+      // console.log("mouse outta bounds");
+
       return false;
     }
   };
@@ -99,11 +127,16 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
         const pointHoveredOver = content.givenIdReturnPoint(content.hoveredPoint);
         content.setSelectedPoint(pointHoveredOver);
         //need to account for if we change axisWidth then immediately drag
-        const oldAxisWidth = axisWidth;
-        const newAxisWidth = svgNode.getBoundingClientRect().width;
-        const isAxisResized = (Math.abs(oldAxisWidth - newAxisWidth) > 2);
-        const newScale = (isAxisResized) ? createXScale(newAxisWidth) : xScale;
-        const newXValue = newScale.invert(mousePosX(e));
+
+        // const oldAxisWidth = axisWidth;
+        // const newAxisWidth = svgNode.getBoundingClientRect().width;
+        // console.log("-----------handleDrag----------");
+        // console.log("\toldAxisWidth:", oldAxisWidth);
+        // console.log("\tnewAxisWidth:", newAxisWidth);
+        // const isAxisResized = (Math.abs(oldAxisWidth - newAxisWidth) > 2);
+
+        // const newScale = (isAxisResized) ? createXScale(newAxisWidth) : xScale;
+        const newXValue = xScale.invert(mousePosX(e));
         content.replaceXValueWhileDragging(p.id, newXValue);
       }
   })
@@ -127,6 +160,9 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
 
   // * =============================== [ Construct Numberline ] ================================ */
   if (axisWidth !== 0) {
+    console.log("<---------constructing numberline ------------> ");
+    console.log("\t with axisWidth: ", axisWidth);
+
     const numOfTicks = numberlineDomainMax - numberlineDomainMin;
     axis
     .attr("class", `${axisClass} num-line`)
@@ -136,54 +172,59 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     .attr("y2", function(x){ return (x === 0) ? tickHeightZero : tickHeightDefault;})
     .attr("stroke-width", function(x){ return (x === 0) ? tickWidthZero : tickWidthDefault;})
     .attr("style", function(x){ return (x === 0) ? tickStyleZero : tickStyleDefault;});
+
   }
 
   /* ========================== [ Construct/Update Circles ] =================================== */
-  if (axisWidth !== 0){
-    const updateCircles = () => {
-      /* =========================== [ Outer Hover Circles ] ======================= */
-      //---- Initialize outer hover circles
-      const outerPoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.outer-point')
-      .data(content.axisPointsSnapshot);
+  // if (axisWidth !== 0){
+  //   const updateCircles = () => {
+  //     console.log("<---------updateCircles ------------> ");
 
-      outerPoints.enter()
-      .append("circle").attr("class", "outer-point")
-      .attr('cx', (p) => xScale(p.xValue || numberlineDomainMin)) //mapped to axis width
-      .attr('cy', yMidPoint).attr('r', outerPointRadius).attr('id', p => p.id)
-      .classed("showPointOuterCircle", true)
-      .classed("disabled", true);
+  //     /* =========================== [ Outer Hover Circles ] ======================= */
+  //     //---- Initialize outer hover circles
+  //     const outerPoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.outer-point')
+  //     .data(content.axisPointsSnapshot);
 
-      // --- Update functions outer hover circles
-      outerPoints
-      .attr('cx', (p) => xScale(p.currentXValue || numberlineDomainMin)) //mapped to axis width
-      .classed("disabled", (p, idx) => (content.hoveredPoint !== p.id));
+  //     outerPoints.enter()
+  //     .append("circle").attr("class", "outer-point")
+  //     .attr('cx', (p) => xScale(p.xValue || numberlineDomainMin)) //mapped to axis width
+  //     .attr('cy', yMidPoint).attr('r', outerPointRadius).attr('id', p => p.id)
+  //     .classed("showPointOuterCircle", true)
+  //     .classed("disabled", true);
 
-      outerPoints.exit().remove(); //cleanup
+  //     // --- Update functions outer hover circles
+  //     outerPoints
+  //     .attr('cx', (p) => xScale(p.currentXValue || numberlineDomainMin)) //mapped to axis width
+  //     .classed("disabled", (p, idx) => (content.hoveredPoint !== p.id));
 
-      /* =========================== [ Inner Circles ] ============================= */
-      //---- Initialize inner hover circles
-      const innerPoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.inner-point')
-      .data(content.axisPointsSnapshot);
+  //     outerPoints.exit().remove(); //cleanup
 
-      // Initialize Attributes
-      innerPoints.enter()
-      .append("circle")
-      .attr("class", "inner-point")
-      .attr('cx', (p) => xScale(p.xValue || numberlineDomainMin)) //mapped to axis width
-      .attr('cy', yMidPoint).attr('r', innerPointRadius).attr('id', p => p.id)
-      .classed("defaultPointInnerCircle", true)
-      .classed("selected", (p)=> false)
-      .call((e) => handleDrag(e)); // Attach drag behavior to newly created circles
+  //     /* =========================== [ Inner Circles ] ============================= */
+  //     //---- Initialize inner hover circles
+  //     const innerPoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.inner-point')
+  //     .data(content.axisPointsSnapshot);
 
-      // --- Update functions inner circles
-      innerPoints
-      .attr('cx', (p, idx) => xScale(p.currentXValue || numberlineDomainMin))
-      .classed("selected", (p)=> p.id in content.selectedPoints);
+  //     // Initialize Attributes
+  //     innerPoints.enter()
+  //     .append("circle")
+  //     .attr("class", "inner-point")
+  //     .attr('cx', (p) => xScale(p.xValue || numberlineDomainMin)) //mapped to axis width
+  //     .attr('cy', yMidPoint).attr('r', innerPointRadius).attr('id', p => p.id)
+  //     .classed("defaultPointInnerCircle", true)
+  //     .classed("selected", (p)=> false)
+  //     .call((e) => handleDrag(e)); // Attach drag behavior to newly created circles
 
-      innerPoints.exit().remove(); //cleanup
-    };
-    updateCircles();
-  }
+  //     // --- Update functions inner circles
+  //     innerPoints
+  //     .attr('cx', (p, idx) => xScale(p.currentXValue || numberlineDomainMin))
+  //     .classed("selected", (p)=> p.id in content.selectedPoints)
+  //     .call((e) => handleDrag(e)); // pass again in case axisWidth changes
+
+
+  //     innerPoints.exit().remove(); //cleanup
+  //   };
+  //   updateCircles();
+  // }
 
   return (
     <div
