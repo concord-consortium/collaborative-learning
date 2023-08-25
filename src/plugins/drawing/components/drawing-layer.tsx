@@ -240,20 +240,23 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     }
   }
 
-  private conditionallyRenderObject(object: DrawingObjectType, _filter: (object: DrawingObjectType) => boolean) {
+  private conditionallyRenderObject(object: DrawingObjectType,
+       _filter: (object: DrawingObjectType) => boolean, inGroup: boolean) {
     if (!object || !_filter(object)) {
       return null;
     }
-    return renderDrawingObject(object, this.props.readOnly, 
-      this.handleObjectHover, this.handleSelectedObjectMouseDown);
+    // Objects that are members of a group should not respond to mouse events.
+    const hoverAction = inGroup ? undefined : this.handleObjectHover;
+    const mouseDownAction = inGroup ? undefined : this.handleSelectedObjectMouseDown;
+    return renderDrawingObject(object, this.props.readOnly, hoverAction, mouseDownAction);
   }
 
   public renderObjects(_filter: (object: DrawingObjectType) => boolean) {
     return this.getContent().objects.reduce((result, object) => {
-      result.push(this.conditionallyRenderObject(object, _filter));
+      result.push(this.conditionallyRenderObject(object, _filter, false));
       if (isGroupObject(object)) {
         object.objects.forEach((member) => { 
-          result.push(this.conditionallyRenderObject(member, _filter));
+          result.push(this.conditionallyRenderObject(member, _filter, true));
         });
       }
       return result;

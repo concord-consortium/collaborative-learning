@@ -152,10 +152,10 @@ export const TextComponent = observer(
   return <g 
           key={id} 
           className="text" 
-          pointerEvents={"visible"} //allows user to select inside of an unfilled object
           onMouseEnter={(e) => handleHover?.(e, model, true)}
           onMouseLeave={(e) => handleHover?.(e, model, false)}
           onMouseDown={(e)=> handleDrag?.(e, model)}
+          pointerEvents={handleHover ? "visible" : "none"}
          >
           <rect x={x} y={y}
               width={width} height={height}

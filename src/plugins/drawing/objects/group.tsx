@@ -5,6 +5,7 @@ import { DrawingObject, DrawingObjectType, IDrawingComponentProps,
   typeField } from "./drawing-object";
 import { BoundingBoxDelta, Point } from "../model/drawing-basic-types";
 import { DrawingObjectMSTUnion } from "../components/drawing-object-manager";
+import React from "react";
 
 export const GroupObject = DrawingObject.named("GroupObject")
   .props({
@@ -55,23 +56,30 @@ export function isGroupObject(model: DrawingObjectType): model is GroupObjectTyp
 export const GroupComponent = function GroupComponent(
     {model, handleHover, handleDrag} : IDrawingComponentProps) {
   if (!isGroupObject(model)) return null;
-  return null;
+  const group = model as GroupObjectType;
+  const {id, boundingBox: bb} = group;
+  return <rect
+    key={id}
+    className="group"
+    x={bb.nw.x}
+    y={bb.nw.y}
+    width={bb.se.x-bb.nw.x}
+    height={bb.se.y-bb.nw.y}
+    stroke="none"
+    fill="none"
+    onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
+    onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
+    onMouseDown={(e)=> handleDrag?.(e, model)}
+    pointerEvents={"visible"}
+   />;
 };
 
 export function createGroup(toolbarManager: IToolbarManager, objects: string[]) {
     const props: GroupObjectSnapshotForAdd = {
         type: "group",
         x: 0,
-        y: 0,
-        objects: [] // objects.map((id) => castToReferenceSnapshot(toolbarManager.objectMap[id]))
+        y: 0
     };
-    console.log('createing group: ', props);
     const group = toolbarManager.addAndSelectObject(props) as GroupObjectType;
     toolbarManager.moveObjectsIntoGroup(group, objects);
-    console.log('tada: ', group);
 }
-
-// export function GroupToolbarButton({toolbarManager}: IToolbarButtonProps) {
-//   return <SvgToolModeButton modalButton="group" title="Group"
-//       toolbarManager={toolbarManager} SvgIcon={GroupIcon} />;
-// }

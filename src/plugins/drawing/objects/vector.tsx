@@ -103,6 +103,7 @@ export const VectorComponent = observer(function VectorComponent({model, handleH
       onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
       onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
       onMouseDown={(e) => handleDrag?.(e, model)}
+      pointerEvents={handleHover ? "visible" : "none"}
     >
       {line}{head}{tail}
     </g>
