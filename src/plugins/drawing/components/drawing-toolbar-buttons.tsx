@@ -16,7 +16,7 @@ import { computeStrokeDashArray, IToolbarButtonProps, IToolbarManager,
   ToolbarModalButton } from "../objects/drawing-object";
 import { useTouchHold } from "../../../hooks/use-touch-hold";
 import SmallCornerTriangle from "../../../assets/icons/small-corner-triangle.svg";
-import { createGroup } from "../objects/group";
+import { createGroup, isGroupObject } from "../objects/group";
 
 interface IButtonClasses {
   modalButton?: ToolbarModalButton;
@@ -133,7 +133,8 @@ export const GroupObjectsButton: React.FC<IActionButtonProps> = observer(functio
   const onClick = () => {
     createGroup(toolbarManager, toolbarManager.selection);
   };
-  const disabled = !toolbarManager.hasSelectedObjects;
+  // Require at least two objects to group.
+  const disabled = toolbarManager.selection.length <= 1;
   return <SvgToolbarButton SvgIcon={GroupObjectsIcon}  buttonClass="group" title="Group"
           onClick={onClick} disabled={disabled} />;
 });
@@ -142,9 +143,13 @@ export const UngroupObjectsButton: React.FC<IActionButtonProps> = observer(funct
   toolbarManager
 }) {
   const onClick = () => {
-    console.log("ungroup");
+    toolbarManager.ungroupGroups(toolbarManager.selection);
   };
-  const disabled = true; // TODO later !toolbarManager.hasSelectedObjects;
+  // Enabled if at least one selected object is a group
+  const disabled = !toolbarManager.selection.some((id)=> {
+    const selectedObj = toolbarManager.objectMap[id];
+    return selectedObj ? isGroupObject(selectedObj) : false;
+  });
   return <SvgToolbarButton SvgIcon={UngroupObjectsIcon}  buttonClass="ungroup" title="Ungroup"
           onClick={onClick} disabled={disabled} />;
 });

@@ -1,4 +1,4 @@
-import { types, Instance, SnapshotIn, getSnapshot, isStateTreeNode, detach, castToSnapshot, getMembers} from "mobx-state-tree";
+import { types, Instance, SnapshotIn, getSnapshot, isStateTreeNode, detach, castToSnapshot, getMembers, destroy} from "mobx-state-tree";
 import { clone } from "lodash";
 import stringify from "json-stringify-pretty-compact";
 
@@ -177,12 +177,49 @@ export const DrawingContentModel = TileContentModel
       objectIds.forEach((id) => {
         const obj = self.objectMap[id];
         if (obj) {
-          group.objects.push(detach(obj));
+          if (isGroupObject(obj)) {
+            // Transfer old group's members into new group; delete old group.
+            obj.objects.forEach((member) => {
+              group.objects.push(detach(member));
+            });
+            destroy(obj);
+          } else {
+            group.objects.push(detach(obj));
+          }
         }
       });
+    },
+
+    moveObjectsOutOfGroup(group: GroupObjectType): string[] {
+      const ids: string[] = [];
+      group.objects.forEach((member) => {
+        ids.push(member.id);
+        self.objects.push(detach(member));
+      });
+      return ids;
     }
+
   }))
+  
   .actions(self => ({
+
+    // Destroy any groups in the given list, moving their members to the top level.
+    // The ungrouped members are selected, along with any non-group objects in the initial set.
+    ungroupGroups(groupIds: string[]) {
+      const allIds = groupIds.reduce((objectIds, groupId) => {
+          const object = self.objectMap[groupId];
+          if (object && isGroupObject(object)) {
+              const ids = self.moveObjectsOutOfGroup(object);
+              destroy(object);
+              return [...objectIds, ...ids];
+          } else {
+            if (object) objectIds.push(object.id);
+            return objectIds;
+          }
+      }, [] as string[]);
+      self.selection = allIds;
+    },
+
     // Adds a new object and selects it, activating the select tool.
     addAndSelectObject(drawingObject: DrawingObjectSnapshotForAdd) {
       const obj = self.addObject(drawingObject);

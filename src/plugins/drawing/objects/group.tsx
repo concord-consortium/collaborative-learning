@@ -1,4 +1,4 @@
-import { Instance, SnapshotIn, types } from "mobx-state-tree";
+import { Instance, SnapshotIn, destroy, types } from "mobx-state-tree";
 import { DrawingObject, DrawingObjectType, FilledObject, IDrawingComponentProps, 
   IToolbarManager, 
   ObjectMap, 

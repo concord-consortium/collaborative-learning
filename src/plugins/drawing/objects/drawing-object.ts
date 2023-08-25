@@ -22,6 +22,7 @@ export interface IToolbarManager {
   deleteObjects(ids: string[]): void;
   duplicateObjects(ids: string[]): void;
   moveObjectsIntoGroup(group: GroupObjectType, objectIds: string[]): void;
+  ungroupGroups(ids: string[]): void;
   stamps: StampModelType[];
   currentStamp: StampModelType | null;
   stroke: string;
