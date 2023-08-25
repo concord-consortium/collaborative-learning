@@ -511,7 +511,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       if (isGroupObject(obj)) {
         obj.objects.forEach((member) => {
           callback(member);
-        })
+        });
       }
     });
   }

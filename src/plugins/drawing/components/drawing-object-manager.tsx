@@ -9,7 +9,8 @@ import { LineComponent, LineDrawingTool, LineObject, LineToolbarButton } from ".
 import { RectangleComponent, RectangleDrawingTool, RectangleObject,
   RectangleToolbarButton} from "../objects/rectangle";
 import { VectorComponent, VectorDrawingTool, VectorObject, VectorToolbarButton } from "../objects/vector";
-import { DeleteButton, DuplicateButton, GroupObjectsButton, SelectToolbarButton, UngroupObjectsButton } from "./drawing-toolbar-buttons";
+import { DeleteButton, DuplicateButton, GroupObjectsButton, 
+  SelectToolbarButton, UngroupObjectsButton } from "./drawing-toolbar-buttons";
 import { SelectionDrawingTool } from "./selection-drawing-tool";
 import { TextComponent, TextDrawingTool, TextObject, TextToolbarButton } from "../objects/text";
 import { GroupComponent, GroupObject } from "../objects/group";

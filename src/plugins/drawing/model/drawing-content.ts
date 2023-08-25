@@ -1,4 +1,4 @@
-import { types, Instance, SnapshotIn, getSnapshot, isStateTreeNode, detach, castToSnapshot, getMembers, destroy} from "mobx-state-tree";
+import { types, Instance, SnapshotIn, getSnapshot, isStateTreeNode, detach, destroy} from "mobx-state-tree";
 import { clone } from "lodash";
 import stringify from "json-stringify-pretty-compact";
 
@@ -6,7 +6,7 @@ import { DefaultToolbarSettings, ToolbarSettings, VectorType, endShapesForVector
 import { kDrawingStateVersion, kDrawingTileType } from "./drawing-types";
 import { StampModel, StampModelType } from "./stamp";
 import { DrawingObjectMSTUnion } from "../components/drawing-object-manager";
-import { DrawingObjectSnapshot, DrawingObjectSnapshotForAdd, DrawingObjectType, isFilledObject,
+import { DrawingObjectSnapshotForAdd, DrawingObjectType, isFilledObject,
   isStrokedObject, ObjectMap, ToolbarModalButton } from "../objects/drawing-object";
 import { ImageObjectType, isImageObjectSnapshot } from "../objects/image";
 import { isVectorObject } from "../objects/vector";
@@ -17,7 +17,7 @@ import { ITileExportOptions, IDefaultContentOptions } from "../../../models/tile
 import { TileMetadataModel } from "../../../models/tiles/tile-metadata";
 import { getTileIdFromContent } from "../../../models/tiles/tile-model";
 import { tileModelHooks } from "../../../models/tiles/tile-model-hooks";
-import { GroupObjectSnapshot, GroupObjectSnapshotForAdd, GroupObjectType, isGroupObject } from "../objects/group";
+import { GroupObjectType, isGroupObject } from "../objects/group";
 
 export const DrawingToolMetadataModel = TileMetadataModel
   .named("DrawingToolMetadata");
@@ -307,7 +307,7 @@ export const DrawingContentModel = TileContentModel
                   x: 0,
                   y: 0,
                   objects: getSnapshot(object.objects).map((s) => {
-                    let {id, ...params} = s;
+                    const {id, ...params} = s;
                     params.x += 10;
                     params.y += 10;
                     return params;
@@ -315,7 +315,7 @@ export const DrawingContentModel = TileContentModel
                 };
                 newObject = self.addObject(newGroup);
               } else {
-                let {id, ...newParams} = snap; // remove existing ID
+                const {id, ...newParams} = snap; // remove existing ID
                 newParams.x = snap.x + 10;     // offset by 10 pixels so it is not hidden
                 newParams.y = snap.y + 10;
                 newObject = self.addObject(newParams);

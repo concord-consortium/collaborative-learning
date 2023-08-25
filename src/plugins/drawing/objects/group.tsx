@@ -1,12 +1,11 @@
-import { Instance, SnapshotIn, destroy, types } from "mobx-state-tree";
-import { DrawingObject, DrawingObjectType, FilledObject, IDrawingComponentProps, 
+import { Instance, SnapshotIn, types } from "mobx-state-tree";
+import { DrawingObject, DrawingObjectType, IDrawingComponentProps, 
   IToolbarManager, 
   ObjectMap, 
-  StrokedObject, 
   isFilledObject, 
   isStrokedObject, 
   typeField } from "./drawing-object";
-import { BoundingBoxDelta, Point, VectorEndShape } from "../model/drawing-basic-types";
+import { BoundingBoxDelta, VectorEndShape } from "../model/drawing-basic-types";
 import { DrawingObjectMSTUnion } from "../components/drawing-object-manager";
 import React from "react";
 import { isVectorObject } from "./vector";
@@ -45,31 +44,31 @@ export const GroupObject = DrawingObject.named("GroupObject")
         setStroke(stroke: string) {
             self.objects.forEach((member) => {
                 if (isStrokedObject(member))
-                    member.setStroke(stroke);
-            })
+                    {member.setStroke(stroke);}
+            });
         },
         setStrokeDashArray(strokeDashArray: string) {
             self.objects.forEach((member) => {
                 if (isStrokedObject(member))
-                    member.setStrokeDashArray(strokeDashArray);
-            })
+                    {member.setStrokeDashArray(strokeDashArray);}
+            });
         },
         setStrokeWidth(strokeWidth: number) {
             self.objects.forEach((member) => {
                 if (isStrokedObject(member))
-                    member.setStrokeWidth(strokeWidth);
-            })
+                    {member.setStrokeWidth(strokeWidth);}
+            });
         },
         setFill(fill: string) {
             self.objects.forEach((member) => {
                 if (isFilledObject(member))
-                    member.setFill(fill);
-            })
+                    {member.setFill(fill);}
+            });
         },
         setEndShapes(headShape?: VectorEndShape, tailShape? : VectorEndShape) {
             self.objects.forEach((member) => {
                 if (isVectorObject(member))
-                member.setEndShapes(headShape, tailShape);
+                {member.setEndShapes(headShape, tailShape);}
             });
         },
         setDragBounds(deltas: BoundingBoxDelta) {
