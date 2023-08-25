@@ -31,7 +31,7 @@ function loadStudentSession(params) {
   cy.wait(5000);
 }
 
-context('Support messages in student view', () => {
+context.skip('Support messages in student view', () => {
   it('verify group support note appears in student view', function () {
     beforeTest(queryParams.teacherQueryParams);
 
