@@ -1,4 +1,4 @@
-import { types, Instance, SnapshotIn, getSnapshot, isStateTreeNode, detach} from "mobx-state-tree";
+import { types, Instance, SnapshotIn, getSnapshot, isStateTreeNode, detach, castToSnapshot, getMembers} from "mobx-state-tree";
 import { clone } from "lodash";
 import stringify from "json-stringify-pretty-compact";
 
@@ -6,7 +6,7 @@ import { DefaultToolbarSettings, ToolbarSettings, VectorType, endShapesForVector
 import { kDrawingStateVersion, kDrawingTileType } from "./drawing-types";
 import { StampModel, StampModelType } from "./stamp";
 import { DrawingObjectMSTUnion } from "../components/drawing-object-manager";
-import { DrawingObjectSnapshotForAdd, DrawingObjectType, isFilledObject,
+import { DrawingObjectSnapshot, DrawingObjectSnapshotForAdd, DrawingObjectType, isFilledObject,
   isStrokedObject, ObjectMap, ToolbarModalButton } from "../objects/drawing-object";
 import { ImageObjectType, isImageObjectSnapshot } from "../objects/image";
 import { isVectorObject } from "../objects/vector";
@@ -17,7 +17,7 @@ import { ITileExportOptions, IDefaultContentOptions } from "../../../models/tile
 import { TileMetadataModel } from "../../../models/tiles/tile-metadata";
 import { getTileIdFromContent } from "../../../models/tiles/tile-model";
 import { tileModelHooks } from "../../../models/tiles/tile-model-hooks";
-import { GroupObjectType, isGroupObject } from "../objects/group";
+import { GroupObjectSnapshot, GroupObjectSnapshotForAdd, GroupObjectType, isGroupObject } from "../objects/group";
 
 export const DrawingToolMetadataModel = TileMetadataModel
   .named("DrawingToolMetadata");
@@ -243,7 +243,7 @@ export const DrawingContentModel = TileContentModel
         setVectorType(vectorType: VectorType, ids: string[]) {
           self.vectorType = vectorType;
           forEachObjectId(ids, object => {
-            if (isVectorObject(object)) {
+            if (isVectorObject(object) || isGroupObject(object)) {
               object.setEndShapes(...endShapesForVectorType(vectorType));
             }
           });
@@ -262,11 +262,27 @@ export const DrawingContentModel = TileContentModel
           const newIds: string[] = [];
           forEachObjectId(ids, (object) => {
             if (object) {
+              let newObject: DrawingObjectType;
               const snap = getSnapshot(object);
-              const {id, ...newParams} = snap; // remove existing ID
-              newParams.x = snap.x + 10;       // offset by 10 pixels so it is not hidden
-              newParams.y = snap.y + 10;
-              const newObject = self.addObject(newParams);
+              if (isGroupObject(object)) {
+                const newGroup = {
+                  type: "group",
+                  x: 0,
+                  y: 0,
+                  objects: getSnapshot(object.objects).map((s) => {
+                    let {id, ...params} = s;
+                    params.x += 10;
+                    params.y += 10;
+                    return params;
+                  })
+                };
+                newObject = self.addObject(newGroup);
+              } else {
+                let {id, ...newParams} = snap; // remove existing ID
+                newParams.x = snap.x + 10;     // offset by 10 pixels so it is not hidden
+                newParams.y = snap.y + 10;
+                newObject = self.addObject(newParams);
+              }
               newIds.push(newObject.id);
             }
           });

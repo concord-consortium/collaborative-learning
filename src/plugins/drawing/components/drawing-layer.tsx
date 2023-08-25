@@ -143,7 +143,8 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     let moved = false;
     const {hoverObject } = this.state;
     const selectedObjects = this.getSelectedObjects();
-    let objectsToInteract: DrawingObjectType[];
+    let objectsToSelect: DrawingObjectType[];
+    let objectsToMove: DrawingObjectType[];
     let needToAddHoverToSelection = false;
 
     //If the object you are dragging is selected then the selection should not be cleared
@@ -153,17 +154,18 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     if (hoverObject && !selectedObjects.some(object => object.id === hoverObject.id)) {
       needToAddHoverToSelection = true;
       if (e.shiftKey || e.metaKey){
-        objectsToInteract = [hoverObject, ...selectedObjects];
+        objectsToSelect = [hoverObject, ...selectedObjects];
       }
       else {
-        objectsToInteract = [hoverObject];
+        objectsToSelect = [hoverObject];
       }
     } else {
-      objectsToInteract = selectedObjects;
+      objectsToSelect = selectedObjects;
     }
     // If any objects are groups, then their members also get moved.
-    objectsToInteract.filter(isGroupObject).forEach((group) => {
-      objectsToInteract = [...objectsToInteract, ...group.objects];
+    objectsToMove = [...objectsToSelect];
+    objectsToSelect.filter(isGroupObject).forEach((group) => {
+      objectsToMove = [...objectsToMove, ...group.objects];
     });
 
     const starting = this.getWorkspacePoint(e);
@@ -181,14 +183,14 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       const dy = current.y - starting.y;
       moved = moved || ((dx !== 0) || (dy !== 0));
 
-      objectsToInteract.forEach((object, index) => {
+      objectsToMove.forEach((object, index) => {
         object.setDragPosition(object.x + dx, object.y + dy);
       });
 
       if (needToAddHoverToSelection) {
         // we delay until we confirm that the user is dragging the objects before adding the hover object
         // to the selection, to avoid messing with the click to select/deselect logic
-        this.setSelectedObjects(objectsToInteract);
+        this.setSelectedObjects(objectsToSelect);
         // Note: the hoverObject could be kind of in a weird state here. It might
         // be both selected and hovered at the same time. However it is more
         // simple to keep the hoverObject independent of the selection. It just
@@ -203,7 +205,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
       if (moved) {
-        objectsToInteract.map((object, index) => {
+        objectsToMove.map((object, index) => {
           object.repositionObject();
         });
       } else {

@@ -1,47 +1,81 @@
 import { Instance, SnapshotIn, types } from "mobx-state-tree";
-import { DrawingObject, DrawingObjectType, IDrawingComponentProps, 
+import { DrawingObject, DrawingObjectType, FilledObject, IDrawingComponentProps, 
   IToolbarManager, 
   ObjectMap, 
+  StrokedObject, 
+  isFilledObject, 
+  isStrokedObject, 
   typeField } from "./drawing-object";
-import { BoundingBoxDelta, Point } from "../model/drawing-basic-types";
+import { BoundingBoxDelta, Point, VectorEndShape } from "../model/drawing-basic-types";
 import { DrawingObjectMSTUnion } from "../components/drawing-object-manager";
 import React from "react";
+import { isVectorObject } from "./vector";
 
 export const GroupObject = DrawingObject.named("GroupObject")
   .props({
     type: typeField("group"),
     objects: types.array(types.late(() => DrawingObjectMSTUnion)),
   })
-  .views(self => ({
-    get objectMap() {
-        // TODO not sure if this is going to be needed
-        return self.objects.reduce((map, obj) => {
-          map[obj.id] = obj;
-          return map;
-        }, {} as ObjectMap);
-      },
-    get boundingBox() {
-        if (!self.objects.length) return {nw: { x: 0, y: 0}, se: { x: 0, y: 0}};
-        return self.objects.reduce((cur, obj) => {
-            if (obj) {
-                const objBB = obj.boundingBox;
-                if (objBB.nw.x < cur.nw.x) cur.nw.x = objBB.nw.x;
-                if (objBB.nw.y < cur.nw.y) cur.nw.y = objBB.nw.y;
-                if (objBB.se.x > cur.se.x) cur.se.x = objBB.se.x;
-                if (objBB.se.y > cur.se.y) cur.se.y = objBB.se.y;
-            }
-            return cur;
-        }, {nw : { x: Number.MAX_VALUE, y: Number.MAX_VALUE}, se: { x: 0, y: 0}});
-    },
-    get supportsResize() {
-        return false;
-      }
-  }))
-  .actions(self => ({
-    setDragBounds(deltas: BoundingBoxDelta) {
-      // TODO
-    },
-    resizeObject() {
+    .views(self => ({
+        get objectMap() {
+            // TODO not sure if this is going to be needed
+            return self.objects.reduce((map, obj) => {
+                map[obj.id] = obj;
+                return map;
+            }, {} as ObjectMap);
+        },
+        get boundingBox() {
+            if (!self.objects.length) return { nw: { x: 0, y: 0 }, se: { x: 0, y: 0 } };
+            return self.objects.reduce((cur, obj) => {
+                if (obj) {
+                    const objBB = obj.boundingBox;
+                    if (objBB.nw.x < cur.nw.x) cur.nw.x = objBB.nw.x;
+                    if (objBB.nw.y < cur.nw.y) cur.nw.y = objBB.nw.y;
+                    if (objBB.se.x > cur.se.x) cur.se.x = objBB.se.x;
+                    if (objBB.se.y > cur.se.y) cur.se.y = objBB.se.y;
+                }
+                return cur;
+            }, { nw: { x: Number.MAX_VALUE, y: Number.MAX_VALUE }, se: { x: 0, y: 0 } });
+        },
+        get supportsResize() {
+            return false;
+        }
+    }))
+    .actions(self => ({
+        setStroke(stroke: string) {
+            self.objects.forEach((member) => {
+                if (isStrokedObject(member))
+                    member.setStroke(stroke);
+            })
+        },
+        setStrokeDashArray(strokeDashArray: string) {
+            self.objects.forEach((member) => {
+                if (isStrokedObject(member))
+                    member.setStrokeDashArray(strokeDashArray);
+            })
+        },
+        setStrokeWidth(strokeWidth: number) {
+            self.objects.forEach((member) => {
+                if (isStrokedObject(member))
+                    member.setStrokeWidth(strokeWidth);
+            })
+        },
+        setFill(fill: string) {
+            self.objects.forEach((member) => {
+                if (isFilledObject(member))
+                    member.setFill(fill);
+            })
+        },
+        setEndShapes(headShape?: VectorEndShape, tailShape? : VectorEndShape) {
+            self.objects.forEach((member) => {
+                if (isVectorObject(member))
+                member.setEndShapes(headShape, tailShape);
+            });
+        },
+        setDragBounds(deltas: BoundingBoxDelta) {
+            // TODO
+        },
+        resizeObject() {
       // TODO
     }
   }));
