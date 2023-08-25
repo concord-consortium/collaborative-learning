@@ -25,7 +25,7 @@ interface IProps extends IFloatingToolbarProps, IRegisterTileApiProps {
 }
 
 const defaultButtons = ["select", "line", "vector", "rectangle", "ellipse",
-  "stamp", "stroke-color", "fill-color", "text", "image-upload", "duplicate", "delete"];
+  "stamp", "stroke-color", "fill-color", "text", "image-upload", "group", "ungroup", "duplicate", "delete"];
 
 export const ToolbarView: React.FC<IProps> = (
               { documentContent, model, onIsEnabled, setImageUrlToAdd, ...others }: IProps) => {

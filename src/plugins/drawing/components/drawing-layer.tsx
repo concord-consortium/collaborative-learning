@@ -15,6 +15,7 @@ import { Point, ToolbarSettings } from "../model/drawing-basic-types";
 import { getDrawingToolInfos, renderDrawingObject } from "./drawing-object-manager";
 import { ImageObject } from "../objects/image";
 import { debounce } from "lodash";
+import { isGroupObject } from "../objects/group";
 
 const SELECTION_COLOR = "#777";
 const HOVER_COLOR = "#bbdd00";
@@ -239,15 +240,24 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     }
   }
 
-  // when we add text, this filter can be used with this.renderObjects((object) => object.type !== "text")
+  private conditionallyRenderObject(object: DrawingObjectType, _filter: (object: DrawingObjectType) => boolean) {
+    if (!object || !_filter(object)) {
+      return null;
+    }
+    return renderDrawingObject(object, this.props.readOnly, 
+      this.handleObjectHover, this.handleSelectedObjectMouseDown);
+  }
+
   public renderObjects(_filter: (object: DrawingObjectType) => boolean) {
-    return this.getContent().objects.map((object) => {
-      if (!object || !_filter(object)) {
-        return null;
+    return this.getContent().objects.reduce((result, object) => {
+      result.push(this.conditionallyRenderObject(object, _filter));
+      if (isGroupObject(object)) {
+        object.objects.forEach((member) => { 
+          result.push(this.conditionallyRenderObject(member, _filter));
+        });
       }
-      return renderDrawingObject(object, this.props.readOnly, 
-        this.handleObjectHover, this.handleSelectedObjectMouseDown);
-    });
+      return result;
+    }, [] as (JSX.Element|null)[]);
   }
 
   public renderSelectionBorders(selectedObjects: DrawingObjectType[], enableActions: boolean) {
@@ -482,6 +492,17 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     objects.forEach((object) => {
       if (object) {
         callback(object, object.id);
+      }
+    });
+  }
+
+  private forEachObjectInTree(callback: (object: DrawingObjectType, key?: string) => void) {
+    this.forEachObject((obj) => {
+      callback(obj);
+      if (isGroupObject(obj)) {
+        obj.objects.forEach((member) => {
+          callback(member);
+        })
       }
     });
   }

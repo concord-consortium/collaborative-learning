@@ -6,6 +6,8 @@ import { ToolbarSettings } from "../model/drawing-basic-types";
 import SelectToolIcon from "../../../clue/assets/icons/select-tool.svg";
 import ColorFillIcon from "../assets/color-fill-icon.svg";
 import ColorStrokeIcon from "../assets/color-stroke-icon.svg";
+import GroupObjectsIcon from "../assets/group-objects-icon.svg";
+import UngroupObjectsIcon from "../assets/ungroup-objects-icon.svg";
 import DuplicateIcon from "../assets/duplicate-icon.svg";
 import DeleteSelectionIcon from "../../../assets/icons/delete/delete-selection-icon.svg";
 import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
@@ -14,6 +16,7 @@ import { computeStrokeDashArray, IToolbarButtonProps, IToolbarManager,
   ToolbarModalButton } from "../objects/drawing-object";
 import { useTouchHold } from "../../../hooks/use-touch-hold";
 import SmallCornerTriangle from "../../../assets/icons/small-corner-triangle.svg";
+import { createGroup } from "../objects/group";
 
 interface IButtonClasses {
   modalButton?: ToolbarModalButton;
@@ -120,10 +123,33 @@ export const StrokeColorButton: React.FC<IColorButtonProps> = ({ settings, onCli
             settings={{ fill: settings.stroke, stroke }} onClick={onClick} />;
 };
 
-interface IDuplicateButtonProps {
+interface IActionButtonProps {
   toolbarManager: IToolbarManager;
 }
-export const DuplicateButton: React.FC<IDuplicateButtonProps> = observer(function DuplicateButton({
+
+export const GroupObjectsButton: React.FC<IActionButtonProps> = observer(function GroupObjectsButton({
+  toolbarManager 
+}) {
+  const onClick = () => {
+    createGroup(toolbarManager, toolbarManager.selection);
+  };
+  const disabled = !toolbarManager.hasSelectedObjects;
+  return <SvgToolbarButton SvgIcon={GroupObjectsIcon}  buttonClass="group" title="Group"
+          onClick={onClick} disabled={disabled} />;
+});
+
+export const UngroupObjectsButton: React.FC<IActionButtonProps> = observer(function UngroupObjectsButton({
+  toolbarManager
+}) {
+  const onClick = () => {
+    console.log("ungroup");
+  };
+  const disabled = true; // TODO later !toolbarManager.hasSelectedObjects;
+  return <SvgToolbarButton SvgIcon={UngroupObjectsIcon}  buttonClass="ungroup" title="Ungroup"
+          onClick={onClick} disabled={disabled} />;
+});
+
+export const DuplicateButton: React.FC<IActionButtonProps> = observer(function DuplicateButton({
   toolbarManager
 }) {
   const onClick = () => {

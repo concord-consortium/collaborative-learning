@@ -1,4 +1,4 @@
-import { types, Instance, SnapshotIn, getSnapshot, isStateTreeNode} from "mobx-state-tree";
+import { types, Instance, SnapshotIn, getSnapshot, isStateTreeNode, detach} from "mobx-state-tree";
 import { clone } from "lodash";
 import stringify from "json-stringify-pretty-compact";
 
@@ -17,6 +17,7 @@ import { ITileExportOptions, IDefaultContentOptions } from "../../../models/tile
 import { TileMetadataModel } from "../../../models/tiles/tile-metadata";
 import { getTileIdFromContent } from "../../../models/tiles/tile-model";
 import { tileModelHooks } from "../../../models/tiles/tile-model-hooks";
+import { GroupObjectType, isGroupObject } from "../objects/group";
 
 export const DrawingToolMetadataModel = TileMetadataModel
   .named("DrawingToolMetadata");
@@ -61,6 +62,11 @@ export const DrawingContentModel = TileContentModel
       // We could handle this more efficiently
       return self.objects.reduce((map, obj) => {
         map[obj.id] = obj;
+        if (isGroupObject(obj)) {
+          obj.objects.forEach((member) => {
+            map[member.id] = member;
+          });          
+        }
         return map;
       }, {} as ObjectMap);
     },
@@ -165,6 +171,15 @@ export const DrawingContentModel = TileContentModel
 
       self.objects.push(object);
       return self.objects[self.objects.length-1];
+    },
+
+    moveObjectsIntoGroup(group: GroupObjectType, objectIds: string[]) {
+      objectIds.forEach((id) => {
+        const obj = self.objectMap[id];
+        if (obj) {
+          group.objects.push(detach(obj));
+        }
+      });
     }
   }))
   .actions(self => ({

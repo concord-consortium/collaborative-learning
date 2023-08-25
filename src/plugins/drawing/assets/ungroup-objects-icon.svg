@@ -1,0 +1,15 @@
+<svg width="36" height="34" viewBox="0 0 36 34" xmlns="http://www.w3.org/2000/svg">
+    <g fill="none" fill-rule="evenodd">
+        <path d="M0 0h36v34H0z"/>
+        <g transform="translate(6 5)">
+            <circle stroke="#545454" cx="8.5" cy="8.5" r="6"/>
+            <path fill="#545454" fill-rule="nonzero" d="M0 13h3v3H0z"/>
+            <path fill="#000" fill-rule="nonzero" d="M13 13h3v3h-3z"/>
+            <path fill="#545454" fill-rule="nonzero" d="M0 0h3v3H0zM13 0h3v3h-3z"/>
+        </g>
+        <g transform="translate(15 14)" fill-rule="nonzero">
+            <rect stroke="#545454" fill="#999" x="1.5" y="1.5" width="13" height="13" rx="1"/>
+            <path fill="#545454" d="M0 13h3v3H0zM13 13h3v3h-3zM0 0h3v3H0zM13 0h3v3h-3z"/>
+        </g>
+    </g>
+</svg>

@@ -4,6 +4,7 @@ import { SelectionBox } from "../components/selection-box";
 import { BoundingBox, BoundingBoxDelta, Point, ToolbarSettings }
    from "../model/drawing-basic-types";
 import { StampModelType } from "../model/stamp";
+import { GroupObjectType } from "./group";
 
 export type ToolbarModalButton = "select" | "line" | "vector" | "rectangle" | "ellipse" | "text" | "stamp" | "variable";
 
@@ -17,8 +18,10 @@ export interface IToolbarManager {
   toolbarSettings: ToolbarSettings;
   selection: string[];
   hasSelectedObjects: boolean;
+  addAndSelectObject(drawingObject: DrawingObjectSnapshotForAdd): DrawingObjectType;
   deleteObjects(ids: string[]): void;
   duplicateObjects(ids: string[]): void;
+  moveObjectsIntoGroup(group: GroupObjectType, objectIds: string[]): void;
   stamps: StampModelType[];
   currentStamp: StampModelType | null;
   stroke: string;
