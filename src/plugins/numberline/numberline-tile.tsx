@@ -175,7 +175,6 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       .classed("selected", (p)=> false)
       .call((e) => handleDrag(e)); // Attach drag behavior to newly created circles
 
-
       // --- Update functions inner circles
       innerPoints
       .attr('cx', (p, idx) => xScale(p.currentXValue || numberlineDomainMin))
