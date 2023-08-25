@@ -161,6 +161,10 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     } else {
       objectsToInteract = selectedObjects;
     }
+    // If any objects are groups, then their members also get moved.
+    objectsToInteract.filter(isGroupObject).forEach((group) => {
+      objectsToInteract = [...objectsToInteract, ...group.objects];
+    });
 
     const starting = this.getWorkspacePoint(e);
     if (!starting) return;
