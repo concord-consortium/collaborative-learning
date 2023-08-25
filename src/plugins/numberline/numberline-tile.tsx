@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { select, scaleLinear, axisBottom, drag, pointer } from 'd3';
+import { select, axisBottom, drag, pointer } from 'd3';
 import { observer } from 'mobx-react';
 import { ITileProps } from "../../components/tiles/tile-component";
 import { NumberlineContentModelType, PointObjectModelType,  } from "./models/numberline-content";
@@ -11,7 +11,7 @@ import { kAxisStyle, kAxisWidth, kContainerWidth, kNumberLineContainerHeight,
 
 import "./numberline-tile.scss";
 
-export const NumberlineTile: React.FC<ITileProps> = observer((props) => {
+export const NumberlineTile: React.FC<ITileProps> = observer(function NumberlineTile(props){
   const { model, readOnly } = props;
   const content = model.content as NumberlineContentModelType;
   const readOnlyState = (readOnly) ? "readOnly" : "readWrite";
@@ -25,9 +25,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer((props) => {
   const axisWidth = (tileWidth * kAxisWidth);
   const xShiftNum = ((containerWidth - axisWidth)/2);
   const numToPx = (num: number) => num.toFixed(2) + "px";
-  const xScale = scaleLinear()
-  .domain([numberlineDomainMin, numberlineDomainMax])
-  .range([0, axisWidth]); // Adjusted range based on svg width
+  const xScale = createXScale(axisWidth);
 
   useEffect(() => {
     let obs: ResizeObserver;
