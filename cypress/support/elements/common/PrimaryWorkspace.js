@@ -53,7 +53,7 @@ class PrimaryWorkspace{
     }
 
     openResourceTab(){
-      cy.get('.collapsed-resources-tab').click();
+      cy.get('.resources-expander').click();
     }
 
     openSection(tab, section) {

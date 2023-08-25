@@ -15,7 +15,7 @@ context('Test the overall workspace', function () {
 
   describe('Desktop functionalities', function () {
     it('will verify that clicking on collapsed resource tab opens the nav area', function () {
-      // cy.get(".collapsed-resources-tab.my-work").click();
+      // cy.get(".resources-expander.my-work").click();
       cy.openTopTab("my-work");
       cy.get('[data-test=my-work-section-investigations-documents]').should('be.visible');
     });
@@ -40,14 +40,14 @@ context('Test the overall workspace', function () {
       cy.get('.primary-workspace').should('be.visible');
     });
     it('verify collapse workspace', function () {
-      cy.get('.collapsed-resources-tab').click();
+      cy.get('.resources-expander').click();
       cy.collapseWorkspace();
       cy.get('.primary-workspace').should('not.exist');
-      cy.get('.collapsed-workspace-tab').should('exist');
+      cy.get('.workspace-expander').should('exist');
       cy.get('.nav-tab-panel').should('exist');
     });
     it('verify collapsed workspace tab opens on click', function () {
-      cy.get('.collapsed-workspace-tab').click({force:true});
+      cy.get('.workspace-expander').click({force:true});
       cy.get('.primary-workspace').should('exist');
       cy.get('.nav-tab-panel').should('exist');
     });

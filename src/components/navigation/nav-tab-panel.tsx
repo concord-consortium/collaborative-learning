@@ -16,11 +16,18 @@ import ChatIcon from "../../assets/chat-icon.svg";
 import "react-tabs/style/react-tabs.css";
 import "./nav-tab-panel.sass";
 import "../themes.scss";
+import classNames from "classnames";
 
 interface IProps extends IBaseProps {
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
+  collapsed?: boolean;
 }
 
+// We could pass a style property so the parent could override it
+// We could pass a zeroWidth prop so then this component would set its
+// own style. The problem is the panel doesn't shrink well.
+// if we do max-width: 0px and transform: scale(0,1) then it shrinks
+// OK.  So a "collapsed" prop seems good.
 @inject("stores")
 @observer
 export class NavTabPanel extends BaseComponent<IProps> {
@@ -34,6 +41,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
   public render() {
     const { ui: { activeNavTab, focusDocument, showChatPanel, selectedTileIds },
             user } = this.stores;
+    const { collapsed } = this.props;
     const tabs = this.stores.tabsToDisplay;
     const selectedTabIndex = tabs?.findIndex(t => t.tab === activeNavTab);
     const isChatEnabled = user.isTeacher; //only enable chat for teachers
@@ -41,7 +49,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
     const focusTileId = selectedTileIds?.length === 1 ? selectedTileIds[0] : undefined;
 
     return (
-      <div className="resource-and-chat-panel">
+      <div className={classNames("resource-and-chat-panel", {collapsed})}>
         <div className="nav-tab-panel"
             ref={elt => this.navTabPanelElt = elt}>
           <Tabs

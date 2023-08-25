@@ -171,7 +171,7 @@ Cypress.Commands.add("deleteWorkspaces",(baseUrl,queryParams)=>{
     });
 });
 Cypress.Commands.add("openResourceTabs", () => {
-  cy.get('.collapsed-resources-tab').click();
+  cy.get('.resources-expander').click();
 } );
 Cypress.Commands.add("openTopTab", (tab) => {
   cy.get('.top-tab.tab-'+tab).click();

@@ -1,16 +1,28 @@
 @import "../vars";
 
-.collapsed-workspace-tab {
+.workspace-expander {
   width: 38px;
   margin-left: 4px;
   padding: 2px;
   border-radius: 8px 0 0 0;
   box-sizing: border-box;
-  border-width: 2px;
   border-style: solid;
   z-index: 2;
   display: flex;
+
+  // Center styling
+  border-width: 2px 1px 2px 2px;
+  border-color: $charcoal;
+  background-color: $charcoal-light-6;
+  &:hover {
+    background-color: $charcoal-light-4;
+  }
+  &:active {
+    background-color: $charcoal-light-3;
+  }
+
   &.problem {
+    border-width: 2px;
     border-color: $workspace-teal;
     background-color: $workspace-teal-light-4;
     &:hover {
@@ -19,8 +31,12 @@
     &:active {
       background-color: $workspace-teal-light-1-b;
     }
+    .workspace-expander-label {
+      opacity: 1;
+    }
   }
   &.learninglog {
+    border-width: 2px;
     border-color: $learninglog-green;
     background-color: $learninglog-green-light-5;
     &:hover {
@@ -29,9 +45,14 @@
     &:active {
       background-color: $learninglog-green-light-2;
     }
+    .workspace-expander-label {
+      opacity: 1;
+    }
   }
 
-  .collapsed-tab-label {
+  .workspace-expander-label {
+    // hidden in the middle
+    opacity: 0;
     writing-mode: vertical-rl;
     text-orientation: mixed;
     font-size: 14px;

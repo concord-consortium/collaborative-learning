@@ -71,7 +71,7 @@ context('Teacher Workspace', () => {
   // addressed, this context should be moved so it's first in the order.
   describe('teacher specific navigation tabs', () => {
     it('verify problem tab solution switch', () => {
-      // cy.get('.collapsed-resources-tab').click();
+      // cy.get('.resources-expander').click();
       cy.wait(500);
       cy.get('.top-tab.tab-problems').should('exist').click();
       cy.get('.prob-tab').contains('Initial Challenge').click();

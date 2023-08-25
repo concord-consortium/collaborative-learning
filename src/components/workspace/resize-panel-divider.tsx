@@ -4,6 +4,8 @@ import DragThumbnailIcon from "../../assets/drag-thumb-icon.svg";
 import ExpandIndicatorIcon from "../../assets/expand-indicator-icon.svg";
 import { kDividerMax, kDividerMin } from "../../models/stores/ui-types";
 import "./resize-panel-divider.scss";
+import { ResourcesExpander } from "./resources-expander";
+import { WorkspaceExpander } from "./workspace-expander";
 
 interface IProps {
   isResourceExpanded: boolean;
@@ -15,29 +17,29 @@ interface IProps {
   onExpandResources: () => void;
 }
 
-interface IExpanderProps {
-  dividerPosition: number;
-  direction: string;
-  shown: boolean;
-  toggleShowExpanderHandle: (show: boolean)=> void;
-  onExpand: () => void;
-}
+// interface IExpanderProps {
+//   dividerPosition: number;
+//   direction: string;
+//   shown: boolean;
+//   toggleShowExpanderHandle: (show: boolean)=> void;
+//   onExpand: () => void;
+// }
 
-const ExpandHandle: React.FC<IExpanderProps> = ({dividerPosition, direction, shown,
-  toggleShowExpanderHandle, onExpand}) => {
-  // eslint-disable-next-line object-shorthand
-  const expanderClass = classNames("expand-handle", direction, {"shown": shown,
-                                   "disabled": dividerPosition === kDividerMin});
-  const handleExpandHandleClick = () => {
-    toggleShowExpanderHandle(false);
-    onExpand();
-  };
-  return (
-    <div className={expanderClass} onClick={handleExpandHandleClick}>
-      <ExpandIndicatorIcon className={`expand-indicator ${direction}`}/>
-    </div>
-  );
-};
+// const ExpandHandle: React.FC<IExpanderProps> = ({dividerPosition, direction, shown,
+//   toggleShowExpanderHandle, onExpand}) => {
+//   // eslint-disable-next-line object-shorthand
+//   const expanderClass = classNames("expand-handle", direction, {"shown": shown,
+//                                    "disabled": dividerPosition === kDividerMin});
+//   const handleExpandHandleClick = () => {
+//     toggleShowExpanderHandle(false);
+//     onExpand();
+//   };
+//   return (
+//     <div className={expanderClass} onClick={handleExpandHandleClick}>
+//       <ExpandIndicatorIcon className={`expand-indicator ${direction}`}/>
+//     </div>
+//   );
+// };
 
 export const ResizePanelDivider: React.FC <IProps> =
   ({dividerPosition, showExpanders, onDividerClick, toggleShowExpanders, onExpandWorkspace, onExpandResources}) => {
@@ -70,10 +72,25 @@ export const ResizePanelDivider: React.FC <IProps> =
       : <div className={`divider-container ${showExpanders ? "show-expanders" : ""}`}>
           {showExpanders
             ? <div className="expand-handles-container" onMouseLeave={handleDividerLeave}>
-                <ExpandHandle dividerPosition={dividerPosition} direction={"left"} shown={showExpanders}
-                              toggleShowExpanderHandle={toggleShowExpanders} onExpand={onExpandWorkspace} />
-                <ExpandHandle dividerPosition={dividerPosition} direction={"right"} shown={showExpanders}
-                              onExpand={onExpandResources} toggleShowExpanderHandle={toggleShowExpanders} />
+                {/*
+                  TODO: need to fix the style when this is shown in the middle:
+                  - border color,
+                  - non-hover background
+                  - hover background
+                  - hide the text (or make it transparent so we can animate it)
+                  TODO: need to update references in cypress tests for the .expand-handle
+                  - it uses .expand-handle.left and .expand-handle.right
+                  NOTE: it seems like toggleShowExpanders can be ignored it is way to force
+                  a rerender of the divider which then passes the showExpanders prop down here.
+                  However this will change. Even if it didn't change the hideDivider becomes
+                  true when an expander is clicked, so there doesn't seem to be a need for this.
+                */}
+                <WorkspaceExpander onExpandWorkspace={onExpandWorkspace} workspaceType={""} />
+                {/* <ExpandHandle dividerPosition={dividerPosition} direction={"left"} shown={showExpanders}
+                              toggleShowExpanderHandle={toggleShowExpanders} onExpand={onExpandWorkspace} /> */}
+                <ResourcesExpander onExpandResources={onExpandResources} resourceType={""}/>
+                {/* <ExpandHandle dividerPosition={dividerPosition} direction={"right"} shown={showExpanders}
+                              onExpand={onExpandResources} toggleShowExpanderHandle={toggleShowExpanders} /> */}
               </div>
             : <div className="resize-panel-divider" >
                 <div className="divider" onMouseEnter={handleDividerEnter}

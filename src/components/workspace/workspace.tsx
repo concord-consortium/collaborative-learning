@@ -6,8 +6,8 @@ import { kDividerHalf, kDividerMax, kDividerMin } from "../../models/stores/ui-t
 import { DocumentWorkspaceComponent } from "../document/document-workspace";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 import { NavTabPanel } from "../navigation/nav-tab-panel";
-import { CollapsedResourcesTab } from "../navigation/collapsed-resources-tab";
-import { CollapsedWorkspaceTab } from "../document/collapsed-document-workspace-tab";
+import { ResourcesExpander } from "./resources-expander";
+import { WorkspaceExpander } from "./workspace-expander";
 import { ResizePanelDivider } from "./resize-panel-divider";
 
 import "./workspace.sass";
@@ -55,15 +55,18 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
 
   const renderNavTabPanel = () => {
     return (
-      navTabContentShown
-        ? <NavTabPanel
-            onDragOver={handleDragOverWorkspace}
+        <>
+          <NavTabPanel
+              onDragOver={handleDragOverWorkspace}
+              collapsed={!navTabContentShown}
           />
-        : <CollapsedResourcesTab
-            onExpandResources={toggleExpandResources}
-            resourceType={activeNavTab}
-            isResourceExpanded={!navTabContentShown}
-          />
+          { !navTabContentShown &&
+          <ResourcesExpander
+              onExpandResources={toggleExpandResources}
+              resourceType={activeNavTab}
+            />
+          }
+        </>
     );
   };
 
@@ -84,7 +87,7 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
         onExpandResources={toggleExpandResources}
       />}
       {workspaceShown ? <DocumentWorkspaceComponent />
-                      : <CollapsedWorkspaceTab
+                      : <WorkspaceExpander
                           onExpandWorkspace={toggleExpandWorkspace}
                           workspaceType={problemWorkspace.type}
                         />
