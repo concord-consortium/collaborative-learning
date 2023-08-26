@@ -25,14 +25,15 @@ import { DocumentError } from "./document-error";
 import "./canvas.scss";
 
 interface IProps {
-  context: string;
-  scale?: number;
-  readOnly?: boolean;
-  document?: DocumentModelType;
   content?: DocumentContentModelType;
-  showPlayback?: boolean;
+  context: string;
+  document?: DocumentModelType;
+  idClass?: string; // A class applied that identifies this version of the document, ie top-panel-thumbnail
   overlayMessage?: string;
+  readOnly?: boolean;
+  scale?: number;
   selectedSectionId?: string | null;
+  showPlayback?: boolean;
   viaTeacherDashboard?: boolean;
 }
 
@@ -87,11 +88,17 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
     };
   }
 
+  private getIdClass() {
+    return this.props.idClass ?? "basic";
+  }
+
   public render() {
     if (this.context && !this.props.readOnly) {
       // update the editable api interface used by the toolbar
       this.context.current = this.tileApiInterface;
     }
+    const readClass = this.props.readOnly ? "read-only" : "read-write";
+    const documentClasses = `.document-content.${this.getIdClass()}.${readClass}`;
     return (
       <TileApiInterfaceContext.Provider value={this.tileApiInterface}>
         <div key="canvas" className="canvas" data-test="canvas" onKeyDown={this.handleKeyDown}>
@@ -101,6 +108,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
         </div>
         <AnnotationLayer
           content={this.getDocumentContent()}
+          documentClasses={documentClasses}
           documentScrollX={this.state.documentScrollX}
           documentScrollY={this.state.documentScrollY}
           readOnly={this.props.readOnly}
@@ -110,7 +118,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderContent() {
-    const {content, document, showPlayback, viaTeacherDashboard, ...others} = this.props;
+    const {content, document, idClass, showPlayback, viaTeacherDashboard, ...others} = this.props;
     const {showPlaybackControls} = this.state;
     const documentToShow = this.getDocumentToShow();
     const documentContent = content || documentToShow?.content; // we only pass in content if it is a problem panel
@@ -128,6 +136,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
             key={showPlaybackControls ? "history" : "main"}
             content={documentContent}
             documentId={documentToShow?.key}
+            idClass={this.getIdClass()}
             onScroll={(x: number, y: number) => this.setState({ documentScrollX: x, documentScrollY: y })}
             {...{typeClass, viaTeacherDashboard, ...others}}
           />

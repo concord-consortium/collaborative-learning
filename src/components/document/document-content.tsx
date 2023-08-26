@@ -25,6 +25,7 @@ interface IProps extends IBaseProps {
   content?: DocumentContentModelType;
   context: string;
   documentId?: string;
+  idClass?: string;
   onScroll?: (x: number, y: number) => void;
   readOnly?: boolean;
   scale?: number;
@@ -143,7 +144,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const documentSelectedForComment = isChatEnabled && ui.showChatPanel && ui.selectedTileIds.length === 0
                                           && ui.focusDocument;
     const documentClass = classNames(
-      "document-content",
+      "document-content", this.props.idClass,
       {"document-content-smooth-scroll" : viaTeacherDashboard, "comment-select" : documentSelectedForComment},
       this.props.readOnly ? "read-only" : "read-write"
     );

@@ -17,12 +17,13 @@ import "./annotation-layer.scss";
 
 interface IAnnotationLayerProps {
   content?: DocumentContentModelType;
+  documentClasses: string; // Classes that can be used to uniquely identify this rendering of the document
   documentScrollX?: number;
   documentScrollY?: number;
   readOnly?: boolean;
 }
 export const AnnotationLayer = observer(function AnnotationLayer({
-  content, documentScrollX, documentScrollY, readOnly
+  content, documentClasses, documentScrollX, documentScrollY, readOnly
 }: IAnnotationLayerProps) {
   const [_initialized, setInitialized] = useState(false);
   useEffect(() => {
@@ -46,13 +47,11 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     }
   });
 
-  const readWriteClass = readOnly ? "read-only" : "read-write";
-  const documentClasses = `.document-content.${readWriteClass} `;
   function getRowElement(rowId?: string) {
     if (rowId === undefined) return undefined;
-    const rowSelector = `${documentClasses}[data-row-id='${rowId}']`;
+    const rowSelector = `${documentClasses} [data-row-id='${rowId}']`;
     const rowElements = document.querySelectorAll(rowSelector);
-    if (rowElements.length !== 1) return undefined;
+    if (rowElements.length < 1) return undefined;
     return rowElements[0] as HTMLElement;
   }
 
@@ -82,7 +81,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     const rowElement = getRowElement(rowId);
     if (!rowElement) return undefined;
   
-    const tileSelector = `${documentClasses}[data-tool-id='${tileId}']`;
+    const tileSelector = `${documentClasses} [data-tool-id='${tileId}']`;
     const tileElements = document.querySelectorAll(tileSelector);
     if (tileElements.length !== 1) return undefined;
     const tileElement = (tileElements[0] as HTMLElement);
@@ -217,23 +216,25 @@ export const AnnotationLayer = observer(function AnnotationLayer({
             });
           }
         })}
-        { Array.from(content?.annotations.values() ?? []).map(arrow => {
-          const key = `sparrow-${arrow.id}`;
-          return (
-            <ArrowAnnotationComponent
-              arrow={arrow}
-              canEdit={!readOnly && editing}
-              deleteArrow={(arrowId: string) => content?.deleteAnnotation(arrowId)}
-              documentBottom={documentBottom}
-              documentLeft={documentLeft}
-              documentRight={documentRight}
-              documentTop={documentTop}
-              getBoundingBox={getBoundingBox}
-              key={key}
-              readOnly={readOnly}
-            />
-          );
-        })}
+        <g className="arrows">
+          { Array.from(content?.annotations.values() ?? []).map(arrow => {
+            const key = `sparrow-${arrow.id}`;
+            return (
+              <ArrowAnnotationComponent
+                arrow={arrow}
+                canEdit={!readOnly && editing}
+                deleteArrow={(arrowId: string) => content?.deleteAnnotation(arrowId)}
+                documentBottom={documentBottom}
+                documentLeft={documentLeft}
+                documentRight={documentRight}
+                documentTop={documentTop}
+                getBoundingBox={getBoundingBox}
+                key={key}
+                readOnly={readOnly}
+              />
+            );
+          })}
+        </g>
         <PreviewArrow
           documentHeight={documentHeight}
           documentWidth={documentWidth}

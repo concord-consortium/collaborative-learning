@@ -126,11 +126,7 @@ export const ArrowAnnotationComponent = observer(
     // }, [sourceX, sourceY, textCenterX, textCenterY, targetX, targetY]);
 
     // Bail if we're missing anything necessary
-    if (
-      !sourceBB || !targetBB || !curveData
-      || sourceX === undefined || sourceY === undefined || targetX === undefined || targetY === undefined
-      || textX === undefined || textY === undefined || textCenterX === undefined || textCenterY === undefined
-    ) return null;
+    if (!sourceBB || !targetBB || !curveData || missingData) return null;
 
     // Set up text handlers
     function handleTextClick() {

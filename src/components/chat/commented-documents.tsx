@@ -6,7 +6,7 @@ import { getSectionTitle } from "../../models/curriculum/section";
 import { UserModelType } from "../../models/stores/user";
 import { getNavTabOfDocument, getTabsOfCurriculumDoc, isStudentWorkspaceDoc } from "../../models/stores/ui";
 import { DocumentModelType } from "../../models/document/document";
-import { useDocumentCaption } from "../thumbnail/decorated-document-thumbnail-item";
+import { useDocumentCaption } from "../document/use-document-caption";
 import DocumentIcon from "../../assets/icons/document-icon.svg";
 
 import "./commented-documents.scss";

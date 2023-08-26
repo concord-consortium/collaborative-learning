@@ -36,7 +36,12 @@ export class ProblemPanelComponent extends BaseComponent<IProps> {
 
   private renderContent(content: DocumentContentModelType) {
     return (
-      <CanvasComponent context="left-nav" readOnly={true} content={content}/>
+      <CanvasComponent
+        content={content}
+        context="left-nav"
+        idClass="problem-panel"
+        readOnly={true}
+      />
     );
   }
 
