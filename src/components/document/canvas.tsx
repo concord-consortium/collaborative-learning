@@ -97,6 +97,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
       // update the editable api interface used by the toolbar
       this.context.current = this.tileApiInterface;
     }
+    const content = this.getDocumentToShow()?.content ?? this.getDocumentContent();
     const readClass = this.props.readOnly ? "read-only" : "read-write";
     const documentClasses = `.document-content.${this.getIdClass()}.${readClass}`;
     return (
@@ -107,7 +108,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
           {this.renderOverlayMessage()}
         </div>
         <AnnotationLayer
-          content={this.getDocumentContent()}
+          content={content}
           documentClasses={documentClasses}
           documentScrollX={this.state.documentScrollX}
           documentScrollY={this.state.documentScrollY}
