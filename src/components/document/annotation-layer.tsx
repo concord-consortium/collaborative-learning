@@ -51,7 +51,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     if (rowId === undefined) return undefined;
     const rowSelector = `${documentClasses} [data-row-id='${rowId}']`;
     const rowElements = document.querySelectorAll(rowSelector);
-    if (rowElements.length < 1) return undefined;
+    if (rowElements.length !== 1) return undefined;
     return rowElements[0] as HTMLElement;
   }
 
@@ -216,25 +216,23 @@ export const AnnotationLayer = observer(function AnnotationLayer({
             });
           }
         })}
-        <g className="arrows">
-          { Array.from(content?.annotations.values() ?? []).map(arrow => {
-            const key = `sparrow-${arrow.id}`;
-            return (
-              <ArrowAnnotationComponent
-                arrow={arrow}
-                canEdit={!readOnly && editing}
-                deleteArrow={(arrowId: string) => content?.deleteAnnotation(arrowId)}
-                documentBottom={documentBottom}
-                documentLeft={documentLeft}
-                documentRight={documentRight}
-                documentTop={documentTop}
-                getBoundingBox={getBoundingBox}
-                key={key}
-                readOnly={readOnly}
-              />
-            );
-          })}
-        </g>
+        { Array.from(content?.annotations.values() ?? []).map(arrow => {
+          const key = `sparrow-${arrow.id}`;
+          return (
+            <ArrowAnnotationComponent
+              arrow={arrow}
+              canEdit={!readOnly && editing}
+              deleteArrow={(arrowId: string) => content?.deleteAnnotation(arrowId)}
+              documentBottom={documentBottom}
+              documentLeft={documentLeft}
+              documentRight={documentRight}
+              documentTop={documentTop}
+              getBoundingBox={getBoundingBox}
+              key={key}
+              readOnly={readOnly}
+            />
+          );
+        })}
         <PreviewArrow
           documentHeight={documentHeight}
           documentWidth={documentWidth}

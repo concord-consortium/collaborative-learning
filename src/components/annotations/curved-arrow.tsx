@@ -19,6 +19,7 @@ interface ICurvedArrowProps {
 export function CurvedArrow({
   className, hideArrowhead, peakX, peakY, setHovering, sourceX, sourceY, targetX, targetY
 }: ICurvedArrowProps) {
+  
   const { path, arrowheadAngle } = useMemo(() => {
     return getSparrowCurve(sourceX, sourceY, peakX, peakY, targetX, targetY);
   }, [peakX, peakY, sourceX, sourceY, targetX, targetY]);
