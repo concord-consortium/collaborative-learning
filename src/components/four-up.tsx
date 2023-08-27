@@ -217,7 +217,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       return <CanvasComponent
         context={cornerLabel}
         document={document}
-        idClass="four-up"
+        idClass="four-up-document"
         overlayMessage={canvasMessage(document)}
         readOnly={readOnly}
         scale={cellScale(cell, groupUser)}

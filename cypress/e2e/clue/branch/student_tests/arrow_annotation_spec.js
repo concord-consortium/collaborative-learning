@@ -33,8 +33,9 @@ function beforeTest(params) {
   cy.visit(params);
   cy.waitForLoad();
   cy.get(".workspace").then($workspace => {
-    if($workspace.find(".divider-container").length > 0)
+    if($workspace.find(".divider-container").length > 0) {
       cy.collapseResourceTabs();
+    }
   });
 }
 
