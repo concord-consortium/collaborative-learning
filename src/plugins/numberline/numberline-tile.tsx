@@ -12,10 +12,6 @@ import { kAxisStyle, kAxisWidth, kContainerWidth, kNumberLineContainerHeight,
 import "./numberline-tile.scss";
 
 export const NumberlineTile: React.FC<ITileProps> = observer(function NumberlineTile(props){
-
-
-
-
   const { model, readOnly, context } = props;
   const content = model.content as NumberlineContentModelType;
   const readOnlyState = (readOnly) ? "readOnly" : "readWrite";
@@ -35,15 +31,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   const numToPx = (num: number) => num.toFixed(2) + "px";
   const xScale = createXScale(axisWidth);
   // console.log("axisClass:", axisClass);
-  if (!props.readOnly){
-    console.log("--------------------------");
 
-    // console.log("allProps:", props); //check this thoroughly for fourUp
-    // console.log("documentContent:", props.documentContent);
-    console.log("\tprops.context", props.context);
-    console.log("\tstate tileWidth:", tileWidth);
-    console.log("\taxisWidth:", axisWidth);
-  }
 
   useEffect(() => {
     let obs: ResizeObserver;
@@ -51,7 +39,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       obs = new ResizeObserver(() => {
         if (documentScrollerRef.current?.clientWidth){
           console.log("------------in the observer-----");
-          console.log("\t weh ave fourUpScalar : ", fourUpScalar);
+          console.log("\tfourUpScalar : ", fourUpScalar);
           const newTileWidth  = documentScrollerRef.current?.clientWidth * fourUpScalar;
           setTileWidth(newTileWidth ?? 0);
         }
@@ -126,16 +114,6 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       if (!readOnly && mouseInBoundingBox(mousePosX(e), mousePosY(e))){
         const pointHoveredOver = content.givenIdReturnPoint(content.hoveredPoint);
         content.setSelectedPoint(pointHoveredOver);
-        //need to account for if we change axisWidth then immediately drag
-
-        // const oldAxisWidth = axisWidth;
-        // const newAxisWidth = svgNode.getBoundingClientRect().width;
-        // console.log("-----------handleDrag----------");
-        // console.log("\toldAxisWidth:", oldAxisWidth);
-        // console.log("\tnewAxisWidth:", newAxisWidth);
-        // const isAxisResized = (Math.abs(oldAxisWidth - newAxisWidth) > 2);
-
-        // const newScale = (isAxisResized) ? createXScale(newAxisWidth) : xScale;
         const newXValue = xScale.invert(mousePosX(e));
         content.replaceXValueWhileDragging(p.id, newXValue);
       }
@@ -162,7 +140,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   if (axisWidth !== 0) {
     console.log("<---------constructing numberline ------------> ");
     console.log("\t with axisWidth: ", axisWidth);
-
+    console.log("\txScale: ", xScale);
     const numOfTicks = numberlineDomainMax - numberlineDomainMin;
     axis
     .attr("class", `${axisClass} num-line`)
@@ -176,55 +154,55 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   }
 
   /* ========================== [ Construct/Update Circles ] =================================== */
-  // if (axisWidth !== 0){
-  //   const updateCircles = () => {
-  //     console.log("<---------updateCircles ------------> ");
+  if (axisWidth !== 0){
+    const updateCircles = () => {
+      console.log("<---------updateCircles ------------> ");
 
-  //     /* =========================== [ Outer Hover Circles ] ======================= */
-  //     //---- Initialize outer hover circles
-  //     const outerPoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.outer-point')
-  //     .data(content.axisPointsSnapshot);
+      /* =========================== [ Outer Hover Circles ] ======================= */
+      //---- Initialize outer hover circles
+      const outerPoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.outer-point')
+      .data(content.axisPointsSnapshot);
 
-  //     outerPoints.enter()
-  //     .append("circle").attr("class", "outer-point")
-  //     .attr('cx', (p) => xScale(p.xValue || numberlineDomainMin)) //mapped to axis width
-  //     .attr('cy', yMidPoint).attr('r', outerPointRadius).attr('id', p => p.id)
-  //     .classed("showPointOuterCircle", true)
-  //     .classed("disabled", true);
+      outerPoints.enter()
+      .append("circle").attr("class", "outer-point")
+      .attr('cx', (p) => xScale(p.xValue || numberlineDomainMin)) //mapped to axis width
+      .attr('cy', yMidPoint).attr('r', outerPointRadius).attr('id', p => p.id)
+      .classed("showPointOuterCircle", true)
+      .classed("disabled", true);
 
-  //     // --- Update functions outer hover circles
-  //     outerPoints
-  //     .attr('cx', (p) => xScale(p.currentXValue || numberlineDomainMin)) //mapped to axis width
-  //     .classed("disabled", (p, idx) => (content.hoveredPoint !== p.id));
+      // --- Update functions outer hover circles
+      outerPoints
+      .attr('cx', (p) => xScale(p.currentXValue || numberlineDomainMin)) //mapped to axis width
+      .classed("disabled", (p, idx) => (content.hoveredPoint !== p.id));
 
-  //     outerPoints.exit().remove(); //cleanup
+      outerPoints.exit().remove(); //cleanup
 
-  //     /* =========================== [ Inner Circles ] ============================= */
-  //     //---- Initialize inner hover circles
-  //     const innerPoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.inner-point')
-  //     .data(content.axisPointsSnapshot);
+      /* =========================== [ Inner Circles ] ============================= */
+      //---- Initialize inner hover circles
+      const innerPoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.inner-point')
+      .data(content.axisPointsSnapshot);
 
-  //     // Initialize Attributes
-  //     innerPoints.enter()
-  //     .append("circle")
-  //     .attr("class", "inner-point")
-  //     .attr('cx', (p) => xScale(p.xValue || numberlineDomainMin)) //mapped to axis width
-  //     .attr('cy', yMidPoint).attr('r', innerPointRadius).attr('id', p => p.id)
-  //     .classed("defaultPointInnerCircle", true)
-  //     .classed("selected", (p)=> false)
-  //     .call((e) => handleDrag(e)); // Attach drag behavior to newly created circles
+      // Initialize Attributes
+      innerPoints.enter()
+      .append("circle")
+      .attr("class", "inner-point")
+      .attr('cx', (p) => xScale(p.xValue || numberlineDomainMin)) //mapped to axis width
+      .attr('cy', yMidPoint).attr('r', innerPointRadius).attr('id', p => p.id)
+      .classed("defaultPointInnerCircle", true)
+      .classed("selected", (p)=> false)
+      .call((e) => handleDrag(e)); // Attach drag behavior to newly created circles
 
-  //     // --- Update functions inner circles
-  //     innerPoints
-  //     .attr('cx', (p, idx) => xScale(p.currentXValue || numberlineDomainMin))
-  //     .classed("selected", (p)=> p.id in content.selectedPoints)
-  //     .call((e) => handleDrag(e)); // pass again in case axisWidth changes
+      // --- Update functions inner circles
+      innerPoints
+      .attr('cx', (p, idx) => xScale(p.currentXValue || numberlineDomainMin))
+      .classed("selected", (p)=> p.id in content.selectedPoints)
+      .call((e) => handleDrag(e)); // pass again in case axisWidth changes
 
 
-  //     innerPoints.exit().remove(); //cleanup
-  //   };
-  //   updateCircles();
-  // }
+      innerPoints.exit().remove(); //cleanup
+    };
+    updateCircles();
+  }
 
   return (
     <div
@@ -234,11 +212,14 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       style={{"height": `${kNumberLineContainerHeight}`}}
     >
       <div className="numberline-tool-container" >
-          <svg ref={svgRef} width={axisWidth}>
-            <g ref={axisRef}></g>
-          </svg>
-          <i className="arrow left" style={{'left': numToPx(xShiftNum - 3), 'top': '53px'}}/>
-          <i className="arrow right" style={{'right': numToPx(xShiftNum - 3), 'top': '53px'}}/>
+        {console.log("----------render function---------")}
+
+        {console.log("\trender function > JSX our axisWidth is: ", axisWidth)}
+        <svg ref={svgRef} width={axisWidth}>
+          <g ref={axisRef}></g>
+        </svg>
+        <i className="arrow left" style={{'left': numToPx(xShiftNum - 3), 'top': '53px'}}/>
+        <i className="arrow right" style={{'right': numToPx(xShiftNum - 3), 'top': '53px'}}/>
       </div>
     </div>
   );
