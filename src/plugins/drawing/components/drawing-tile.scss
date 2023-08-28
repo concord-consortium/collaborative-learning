@@ -5,6 +5,35 @@
   border: 1px solid #BBB;
   height: 100%;
 
+  .drawing-container {
+    display: flex;
+
+    .object-list {
+      border: 2px solid $workspace-teal-light-6;  
+
+      &.open {
+        flex: 0 0 125px;
+      }
+
+      &.closed {
+        flex: 0 0 20px;
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        background-color: $workspace-teal-light-6;
+
+        h4 {
+          margin: 0;
+        }
+
+        .close {
+          flex: 0 0 20px;
+        }
+      }
+    }
+
   .drawing-layer {
 
     svg {
@@ -45,6 +74,7 @@
 
     }
   }
+}
 }
 
 .drawing-tool-toolbar {

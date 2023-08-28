@@ -12,6 +12,7 @@ import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable
 import { HotKeys } from "../../../utilities/hot-keys";
 import { getClipboardContent, pasteClipboardImage } from "../../../utilities/clipboard-utils";
 import "./drawing-tile.scss";
+import { ObjectListView } from "./object-list-view";
 
 type IProps = ITileProps;
 
@@ -98,11 +99,14 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
           getVisibleCanvasSize={getVisibleCanvasSize}
           {...toolbarProps}
         />
-        <DrawingLayerView
-          {...props}
-          imageUrlToAdd={imageUrlToAdd}
-          setImageUrlToAdd={setImageUrlToAdd}
-        />
+        <div className="drawing-container">
+          <ObjectListView />
+          <DrawingLayerView
+            {...props}
+            imageUrlToAdd={imageUrlToAdd}
+            setImageUrlToAdd={setImageUrlToAdd}
+          />
+        </div>
       </div>
     </DrawingContentModelContext.Provider>
   );
