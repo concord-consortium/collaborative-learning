@@ -2,19 +2,18 @@
 
 .divider-container {
   z-index: 1;
-  display: flex;
-  flex-direction: row;
   position: relative;
   margin-right: 2px;
   margin-left: 2px;
   transition-duration: .5s;
 
   .resize-panel-divider {
+    height: 100%;
+    padding-top: 4px;
     display: flex;
     align-items: center;
     flex-direction: column;
     justify-content: center;
-    margin-top: 4px;
 
     &.divider-min {
       align-items: flex-start;
@@ -41,6 +40,7 @@
     }
   }
   .expand-handles-container {
+    height: 100%;
     display: flex;
     flex-direction: row;
     position: relative;
