@@ -20,11 +20,6 @@ export const NumberlineTileComponent: React.FC<ITileProps> = (props) => {
   const hotKeys = useRef(new HotKeys());
   const toolbarProps = useToolbarTileApi({ id: model.id, enabled: !readOnly, onRegisterTileApi, onUnregisterTileApi });
 
-  const handlePlacePoint = () => {
-    //TODO: will implement in future ticket
-    //this should be active by default
-  };
-
   const handleClearPoints = () => {
     contentRef.current.deleteAllPoints();
   };
@@ -72,7 +67,6 @@ export const NumberlineTileComponent: React.FC<ITileProps> = (props) => {
           tileElt={tileElt}
           {...toolbarProps}
           scale={scale}
-          handlePlacePoint={handlePlacePoint}
           handleClearPoints={handleClearPoints}
           handleDeletePoint={handleDeletePoint}
         />

@@ -11,14 +11,13 @@ import "./numberline-toolbar.scss";
 const defaultButtons = ["place-point", "clear-points", "delete-points"];
 
 interface INumberlineToolbarProps extends IFloatingToolbarProps {
-  handlePlacePoint: () => void;
   handleClearPoints: () => void;
   handleDeletePoint: () => void;
 }
 
 export const NumberlineToolbar: React.FC<INumberlineToolbarProps> = observer((props) => {
   const { documentContent,  tileElt, onIsEnabled,
-    handlePlacePoint, handleClearPoints, handleDeletePoint, ...others } = props;
+          handleClearPoints, handleDeletePoint, ...others } = props;
   const enabled = onIsEnabled();
   const location = useFloatingToolbarLocation({
                     documentContent,
@@ -35,7 +34,7 @@ export const NumberlineToolbar: React.FC<INumberlineToolbarProps> = observer((pr
   const getToolbarButton = (toolName: string) => {
     switch (toolName) {
       case "place-point":
-        return <PlacePointButton key={toolName} onClick={handlePlacePoint} />;
+        return <PlacePointButton key={toolName} />;
       case "clear-points":
         return <ClearPointsButton key={toolName} onClick={handleClearPoints} />;
       case "delete-points":
