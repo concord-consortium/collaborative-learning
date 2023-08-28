@@ -1,4 +1,4 @@
-import { Instance, types } from "mobx-state-tree";
+import { Instance, SnapshotIn, types } from "mobx-state-tree";
 
 import { boundDelta } from "./annotation-utils";
 import { ClueObjectModel, ObjectBoundingBox, OffsetModel } from "./clue-object";
@@ -124,3 +124,4 @@ export const ArrowAnnotation = types
   }
 }));
 export interface IArrowAnnotation extends Instance<typeof ArrowAnnotation> {}
+export interface IArrowAnnotationSnapshot extends SnapshotIn<typeof ArrowAnnotation> {}

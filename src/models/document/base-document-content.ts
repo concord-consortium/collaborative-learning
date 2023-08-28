@@ -1,4 +1,3 @@
-import stringify from "json-stringify-pretty-compact";
 import { cloneDeep, each } from "lodash";
 import { types, getType, getEnv, SnapshotOrInstance } from "mobx-state-tree";
 import {
@@ -9,11 +8,10 @@ import { getTileContentInfo, IDocumentExportOptions } from "../tiles/tile-conten
 import { ITileContentModel, ITileEnvironment, TileContentModel } from "../tiles/tile-content";
 import { ILinkableTiles, ITypedTileLinkMetadata } from "../tiles/tile-link-types";
 import {
-  IDragTileItem, TileModel, ITileModel, ITileModelSnapshotIn, ITileModelSnapshotOut,
-  ITilePosition, IDropTileItem
+  IDragTileItem, TileModel, ITileModel, ITileModelSnapshotIn, ITilePosition, IDropTileItem
 } from "../tiles/tile-model";
 import {
-  IDropRowInfo, TileRowModel, TileRowModelType, TileRowSnapshotType, TileRowSnapshotOutType, TileLayoutModelType
+  IDropRowInfo, TileRowModel, TileRowModelType, TileRowSnapshotType, TileLayoutModelType
 } from "../document/tile-row";
 import { migrateSnapshot } from "./document-content-import";
 import { isImportDocument } from "./document-content-import-types";
@@ -22,7 +20,6 @@ import { logTileDocumentEvent } from "../tiles/log/log-tile-document-event";
 import { getAppConfig } from "../tiles/tile-environment";
 import { LogEventName } from "../../lib/logger-types";
 import { safeJsonParse, uniqueId } from "../../utilities/js-utils";
-import { comma, StringBuilder } from "../../utilities/string-builder";
 import { defaultTitle, titleMatchesDefault } from "../../utilities/title-utils";
 import { SharedModel, SharedModelType } from "../shared/shared-model";
 import {
@@ -319,99 +316,6 @@ export const BaseDocumentContentModel = types
       });
       return counts;
     },
-    exportRowsAsJson(rows: (TileRowModelType | undefined)[], options?: IDocumentExportOptions) {
-      const builder = new StringBuilder();
-      builder.pushLine("{");
-      builder.pushLine(`"tiles": [`, 2);
-
-      const includedTileIds: string[] = [];
-      const exportRowCount = rows.length;
-      rows.forEach((row, rowIndex) => {
-        const isLastRow = rowIndex === exportRowCount - 1;
-        // export each exportable tile
-        const tileExports = row?.tiles.map((tileInfo, tileIndex) => {
-          const isLastTile = tileIndex === row.tiles.length - 1;
-          const showComma = row.tiles.length > 1 ? !isLastTile : !isLastRow;
-          const rowHeight = self.rowHeightToExport(row, tileInfo.tileId);
-          const rowHeightOption = rowHeight ? { rowHeight } : undefined;
-          includedTileIds.push(tileInfo.tileId);
-          return self.exportTileAsJson(tileInfo, { ...options, appendComma: showComma, ...rowHeightOption });
-        }).filter(json => !!json);
-        if (tileExports?.length) {
-          // multiple tiles in a row are exported in an array
-          if (tileExports.length > 1) {
-            builder.pushLine("[", 4);
-            tileExports.forEach(tileExport => {
-              tileExport && builder.pushBlock(tileExport, 6);
-            });
-            builder.pushLine(`]${comma(!isLastRow)}`, 4);
-          }
-          // single tile rows are exported directly
-          else if (tileExports[0]) {
-            builder.pushBlock(tileExports[0], 4);
-          }
-        }
-      });
-      const sharedModels = Object.values(self.getSharedModelsUsedByTiles(includedTileIds));
-
-      const tilesComma = sharedModels.length > 0 ? "," : "";
-      builder.pushLine(`]${tilesComma}`, 2);
-
-      if (sharedModels.length > 0) {
-        builder.pushLine(`"sharedModels": [`, 2);
-        sharedModels.forEach((sharedModel, index) => {
-          const sharedModelLines = stringify(sharedModel).split("\n");
-          sharedModelLines.forEach((sharedModelLine, lineIndex) => {
-            const lineComma =
-              lineIndex === sharedModelLines.length - 1 && index < sharedModels.length - 1
-              ? "," : "";
-            builder.pushLine(`${sharedModelLine}${lineComma}`, 4);
-          });
-        });
-        builder.pushLine("]", 2);
-      }
-
-      builder.pushLine("}");
-      return builder.build();
-    }
-  }))
-  .views(self => ({
-    exportAsJson(options?: IDocumentExportOptions) {
-      // identify rows with exportable tiles
-      const rowsToExport = self.rowOrder.map(rowId => {
-        const row = self.getRow(rowId);
-        return row && !row.isSectionHeader && !row.isEmpty && !self.isPlaceholderRow(row) ? row : undefined;
-      }).filter(row => !!row);
-
-      return self.exportRowsAsJson(rowsToExport, options);
-    },
-    exportSectionsAsJson(options?: IDocumentExportOptions) {
-      const sections: Record<string, string> = {};
-      let section = "";
-      let rows: (TileRowModelType | undefined)[] = [];
-
-      self.rowOrder.forEach(rowId => {
-        const row = self.getRow(rowId);
-        if (row) {
-          if (row.isSectionHeader) {
-            if (section !== "") {
-              // We've finished the last section
-              sections[section] = self.exportRowsAsJson(rows.filter(r => !!r), options);
-            }
-            section = row.sectionId ?? "unknown";
-            rows = [];
-          } else if (!row.isEmpty && !self.isPlaceholderRow(row)) {
-            rows.push(row);
-          }
-        }
-      });
-      if (section !== "") {
-        // Save the final section
-        sections[section] = self.exportRowsAsJson(rows.filter(r => !!r), options);
-      }
-
-      return sections;
-    }
   }))
   .views(self => ({
     getNewTileTitle(tileType: string) {

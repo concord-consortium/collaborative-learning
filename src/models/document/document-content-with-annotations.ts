@@ -1,7 +1,7 @@
 import { types } from "mobx-state-tree";
 
 import { DocumentContentModelWithTileDragging } from "./drag-tiles";
-import { ArrowAnnotation, IArrowAnnotation } from "../annotations/arrow-annotation";
+import { ArrowAnnotation, IArrowAnnotation, IArrowAnnotationSnapshot } from "../annotations/arrow-annotation";
 
 /**
  * This is one part of the DocumentContentModel. The other parts are
@@ -22,5 +22,10 @@ export const DocumentContentModelWithAnnotations = DocumentContentModelWithTileD
     },
     deleteAnnotation(annotationId: string) {
       self.annotations.delete(annotationId);
+    },
+    addAnnotationFromImport(id: string, annotation: IArrowAnnotationSnapshot){
+      if (self.sharedModelMap){
+        self.annotations.set(id, annotation);
+      }
     }
   }));

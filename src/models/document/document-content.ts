@@ -1,12 +1,14 @@
+import stringify from "json-stringify-pretty-compact";
 import { getSnapshot, Instance, SnapshotIn } from "mobx-state-tree";
 import { cloneDeep, each } from "lodash";
 
 import { DocumentContentModelWithAnnotations } from "./document-content-with-annotations";
-import { TileRowSnapshotOutType } from "./tile-row";
-import { isArrowAnnotation } from "../annotations/arrow-annotation";
-import { getTileContentInfo } from "../tiles/tile-content-info";
+import { TileRowModelType, TileRowSnapshotOutType } from "./tile-row";
+import { IArrowAnnotation, isArrowAnnotation } from "../annotations/arrow-annotation";
+import { getTileContentInfo, IDocumentExportOptions } from "../tiles/tile-content-info";
 import { ITileModelSnapshotOut } from "../tiles/tile-model";
 import { uniqueId } from "../../utilities/js-utils";
+import { comma, StringBuilder } from "../../utilities/string-builder";
 
 /**
  * The DocumentContentModel is the combination of 3 parts:
@@ -107,11 +109,134 @@ export const DocumentContentModel = DocumentContentModelWithAnnotations.named("D
 
     return snapshot;
   },
+  getAnnotationsUsedByTiles(tileIds: string[]) {
+    // TODO Make generic to handle any type of annotation, not just arrow annotations
+    const annotations: Record<string, IArrowAnnotation> = {};
+    Array.from(self.annotations.values()).forEach(annotation => {
+      if (tileIds.includes(annotation.sourceObject?.tileId ?? "")
+        && tileIds.includes(annotation.targetObject?.tileId ?? "")
+      ) {
+        annotations[annotation.id] = annotation;
+      }
+    });
+    return annotations;
+  }
 }))
 .views(self => ({
+  exportRowsAsJson(rows: (TileRowModelType | undefined)[], options?: IDocumentExportOptions) {
+    const builder = new StringBuilder();
+    builder.pushLine("{");
+    builder.pushLine(`"tiles": [`, 2);
+
+    const includedTileIds: string[] = [];
+    const exportRowCount = rows.length;
+    rows.forEach((row, rowIndex) => {
+      const isLastRow = rowIndex === exportRowCount - 1;
+      // export each exportable tile
+      const tileExports = row?.tiles.map((tileInfo, tileIndex) => {
+        const isLastTile = tileIndex === row.tiles.length - 1;
+        const showComma = row.tiles.length > 1 ? !isLastTile : !isLastRow;
+        const rowHeight = self.rowHeightToExport(row, tileInfo.tileId);
+        const rowHeightOption = rowHeight ? { rowHeight } : undefined;
+        includedTileIds.push(tileInfo.tileId);
+        return self.exportTileAsJson(tileInfo, { ...options, appendComma: showComma, ...rowHeightOption });
+      }).filter(json => !!json);
+      if (tileExports?.length) {
+        // multiple tiles in a row are exported in an array
+        if (tileExports.length > 1) {
+          builder.pushLine("[", 4);
+          tileExports.forEach(tileExport => {
+            tileExport && builder.pushBlock(tileExport, 6);
+          });
+          builder.pushLine(`]${comma(!isLastRow)}`, 4);
+        }
+        // single tile rows are exported directly
+        else if (tileExports[0]) {
+          builder.pushBlock(tileExports[0], 4);
+        }
+      }
+    });
+    const sharedModels = Object.values(self.getSharedModelsUsedByTiles(includedTileIds));
+    const hasSharedModels = sharedModels.length > 0;
+    const annotations = Object.values(self.getAnnotationsUsedByTiles(includedTileIds));
+    const hasAnnotations = annotations.length > 0;
+
+    const tilesComma = hasSharedModels || hasAnnotations ? "," : "";
+    builder.pushLine(`]${tilesComma}`, 2);
+
+    if (sharedModels.length > 0) {
+      builder.pushLine(`"sharedModels": [`, 2);
+      sharedModels.forEach((sharedModel, index) => {
+        const sharedModelLines = stringify(sharedModel).split("\n");
+        sharedModelLines.forEach((sharedModelLine, lineIndex) => {
+          const lineComma =
+            lineIndex === sharedModelLines.length - 1 && index < sharedModels.length - 1
+            ? "," : "";
+          builder.pushLine(`${sharedModelLine}${lineComma}`, 4);
+        });
+      });
+      const sharedModelsComma = hasAnnotations ? "," : "";
+      builder.pushLine(`]${sharedModelsComma}`, 2);
+    }
+
+    if (hasAnnotations) {
+      builder.pushLine(`"annotations": [`, 2);
+      annotations.forEach((annotation, index) => {
+        const annotationLines = stringify(annotation).split("\n");
+        annotationLines.forEach((annotationLine, lineIndex) => {
+          const lineComma =
+            lineIndex === annotationLines.length - 1 && index < annotations.length - 1
+            ? "," : "";
+          builder.pushLine(`${annotationLine}${lineComma}`, 4);
+        });
+      });
+      builder.pushLine(`]`, 2);
+    }
+
+    builder.pushLine("}");
+    return builder.build();
+  },
   publish() {
     return JSON.stringify(self.snapshotWithUniqueIds());
   },
+}))
+.views(self => ({
+  exportAsJson(options?: IDocumentExportOptions) {
+    // identify rows with exportable tiles
+    const rowsToExport = self.rowOrder.map(rowId => {
+      const row = self.getRow(rowId);
+      return row && !row.isSectionHeader && !row.isEmpty && !self.isPlaceholderRow(row) ? row : undefined;
+    }).filter(row => !!row);
+
+    return self.exportRowsAsJson(rowsToExport, options);
+  },
+  exportSectionsAsJson(options?: IDocumentExportOptions) {
+    const sections: Record<string, string> = {};
+    let section = "";
+    let rows: (TileRowModelType | undefined)[] = [];
+
+    self.rowOrder.forEach(rowId => {
+      const row = self.getRow(rowId);
+      if (row) {
+        if (row.isSectionHeader) {
+          if (section !== "") {
+            // We've finished the last section
+            sections[section] = self.exportRowsAsJson(rows.filter(r => !!r), options);
+          }
+          section = row.sectionId ?? "unknown";
+          rows = [];
+        } else if (!row.isEmpty && !self.isPlaceholderRow(row)) {
+          rows.push(row);
+        }
+      }
+    });
+    if (section !== "") {
+      // Save the final section
+      sections[section] = self.exportRowsAsJson(rows.filter(r => !!r), options);
+    }
+
+    return sections;
+  }
 }));
 
 export type DocumentContentModelType = Instance<typeof DocumentContentModel>;
