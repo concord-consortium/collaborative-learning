@@ -13,7 +13,7 @@ import { IToolbarButtonProps, ToolbarButtonComponent } from "./toolbar-button";
 import { EditableTileApiInterfaceRefContext } from "./tiles/tile-api";
 import { kDragTileCreate  } from "./tiles/tile-component";
 
-import "./toolbar.sass";
+import "./toolbar.scss";
 
 interface IProps extends IBaseProps {
   document: DocumentModelType;
