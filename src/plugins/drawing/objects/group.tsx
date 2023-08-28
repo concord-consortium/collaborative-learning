@@ -1,7 +1,6 @@
 import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import { DrawingObject, DrawingObjectType, IDrawingComponentProps, 
   IToolbarManager, 
-  ObjectMap, 
   isFilledObject, 
   isStrokedObject, 
   typeField } from "./drawing-object";
@@ -15,67 +14,87 @@ export const GroupObject = DrawingObject.named("GroupObject")
     type: typeField("group"),
     objects: types.array(types.late(() => DrawingObjectMSTUnion)),
   })
-    .views(self => ({
-        get objectMap() {
-            // TODO not sure if this is going to be needed
-            return self.objects.reduce((map, obj) => {
-                map[obj.id] = obj;
-                return map;
-            }, {} as ObjectMap);
-        },
-        get boundingBox() {
-            if (!self.objects.length) return { nw: { x: 0, y: 0 }, se: { x: 0, y: 0 } };
-            return self.objects.reduce((cur, obj) => {
-                if (obj) {
-                    const objBB = obj.boundingBox;
-                    if (objBB.nw.x < cur.nw.x) cur.nw.x = objBB.nw.x;
-                    if (objBB.nw.y < cur.nw.y) cur.nw.y = objBB.nw.y;
-                    if (objBB.se.x > cur.se.x) cur.se.x = objBB.se.x;
-                    if (objBB.se.y > cur.se.y) cur.se.y = objBB.se.y;
-                }
-                return cur;
-            }, { nw: { x: Number.MAX_VALUE, y: Number.MAX_VALUE }, se: { x: 0, y: 0 } });
-        },
-        get supportsResize() {
-            return false;
+  .views(self => ({
+    get boundingBox() {
+      if (!self.objects.length) return { nw: { x: 0, y: 0 }, se: { x: 0, y: 0 } };
+      return self.objects.reduce((cur, obj) => {
+        if (obj) {
+          const objBB = obj.boundingBox;
+          if (objBB.nw.x < cur.nw.x) cur.nw.x = objBB.nw.x;
+          if (objBB.nw.y < cur.nw.y) cur.nw.y = objBB.nw.y;
+          if (objBB.se.x > cur.se.x) cur.se.x = objBB.se.x;
+          if (objBB.se.y > cur.se.y) cur.se.y = objBB.se.y;
         }
-    }))
-    .actions(self => ({
-        setStroke(stroke: string) {
-            self.objects.forEach((member) => {
-                if (isStrokedObject(member))
-                    {member.setStroke(stroke);}
-            });
-        },
-        setStrokeDashArray(strokeDashArray: string) {
-            self.objects.forEach((member) => {
-                if (isStrokedObject(member))
-                    {member.setStrokeDashArray(strokeDashArray);}
-            });
-        },
-        setStrokeWidth(strokeWidth: number) {
-            self.objects.forEach((member) => {
-                if (isStrokedObject(member))
-                    {member.setStrokeWidth(strokeWidth);}
-            });
-        },
-        setFill(fill: string) {
-            self.objects.forEach((member) => {
-                if (isFilledObject(member))
-                    {member.setFill(fill);}
-            });
-        },
-        setEndShapes(headShape?: VectorEndShape, tailShape? : VectorEndShape) {
-            self.objects.forEach((member) => {
-                if (isVectorObject(member))
-                {member.setEndShapes(headShape, tailShape);}
-            });
-        },
-        setDragBounds(deltas: BoundingBoxDelta) {
-            // TODO
-        },
-        resizeObject() {
-      // TODO
+        return cur;
+      }, { nw: { x: Number.MAX_VALUE, y: Number.MAX_VALUE }, se: { x: 0, y: 0 } });
+    },
+    get preDragBoundingBox() {
+      if (!self.objects.length) return { nw: { x: 0, y: 0 }, se: { x: 0, y: 0 } };
+      return self.objects.reduce((cur, obj) => {
+        if (obj) {
+          const objBB = obj.preDragBoundingBox;
+          if (objBB.nw.x < cur.nw.x) cur.nw.x = objBB.nw.x;
+          if (objBB.nw.y < cur.nw.y) cur.nw.y = objBB.nw.y;
+          if (objBB.se.x > cur.se.x) cur.se.x = objBB.se.x;
+          if (objBB.se.y > cur.se.y) cur.se.y = objBB.se.y;
+        }
+        return cur;
+      }, { nw: { x: Number.MAX_VALUE, y: Number.MAX_VALUE }, se: { x: 0, y: 0 } });
+    }
+  }))
+  .actions(self => ({
+    setStroke(stroke: string) {
+      self.objects.forEach((member) => {
+        if (isStrokedObject(member)) { member.setStroke(stroke); }
+      });
+    },
+    setStrokeDashArray(strokeDashArray: string) {
+      self.objects.forEach((member) => {
+        if (isStrokedObject(member)) { member.setStrokeDashArray(strokeDashArray); }
+      });
+    },
+    setStrokeWidth(strokeWidth: number) {
+      self.objects.forEach((member) => {
+        if (isStrokedObject(member)) { member.setStrokeWidth(strokeWidth); }
+      });
+    },
+    setFill(fill: string) {
+      self.objects.forEach((member) => {
+        if (isFilledObject(member)) { member.setFill(fill); }
+      });
+    },
+    setEndShapes(headShape?: VectorEndShape, tailShape?: VectorEndShape) {
+      self.objects.forEach((member) => {
+        if (isVectorObject(member)) { member.setEndShapes(headShape, tailShape); }
+      });
+    },
+    setDragBounds(deltas: BoundingBoxDelta) {
+      // Each contained object gets adjusted in proportion to its 
+      // size relative to the whole group's size.
+      const bb = self.preDragBoundingBox;
+      const width = bb.se.x - bb.nw.x;
+      const height = bb.se.y - bb.nw.y;
+
+      self.objects.forEach((obj) => {
+        const objBB = obj.preDragBoundingBox;
+        // The four sides of the target object, expressed as a proportion of the size of the group.
+        const leftSideRelPosition = (objBB.nw.x - bb.nw.x) / width;
+        const rightSideRelPosition = (objBB.se.x - bb.nw.x) / width;
+        const topSideRelPosition = (objBB.nw.y - bb.nw.y) / height;
+        const botSideRelPosition = (objBB.se.y - bb.nw.y) / height;
+        const bounds = {
+          left: deltas.left  * (1 - leftSideRelPosition) + deltas.right * leftSideRelPosition,
+          right: deltas.left * (1 -rightSideRelPosition) + deltas.right * rightSideRelPosition,
+          top: deltas.top    * (1 - topSideRelPosition) + deltas.bottom * topSideRelPosition,
+          bottom: deltas.top * (1 - botSideRelPosition) + deltas.bottom * botSideRelPosition
+        };
+        obj.setDragBounds(bounds);
+      });
+    },
+    resizeObject() {
+      self.objects.forEach((obj) => {
+        obj.resizeObject();
+      });
     }
   }));
 export interface GroupObjectType extends Instance<typeof GroupObject> {}
@@ -96,8 +115,8 @@ export const GroupComponent = function GroupComponent(
     className="group"
     x={bb.nw.x}
     y={bb.nw.y}
-    width={bb.se.x-bb.nw.x}
-    height={bb.se.y-bb.nw.y}
+    width={Math.max(bb.se.x-bb.nw.x, 0)}
+    height={Math.max(bb.se.y-bb.nw.y, 0)}
     stroke="none"
     fill="none"
     onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
@@ -108,11 +127,11 @@ export const GroupComponent = function GroupComponent(
 };
 
 export function createGroup(toolbarManager: IToolbarManager, objects: string[]) {
-    const props: GroupObjectSnapshotForAdd = {
-        type: "group",
-        x: 0,
-        y: 0
-    };
-    const group = toolbarManager.addAndSelectObject(props) as GroupObjectType;
-    toolbarManager.moveObjectsIntoGroup(group, objects);
+  const props: GroupObjectSnapshotForAdd = {
+    type: "group",
+    x: 0,
+    y: 0
+  };
+  const group = toolbarManager.addAndSelectObject(props) as GroupObjectType;
+  toolbarManager.moveObjectsIntoGroup(group, objects);
 }

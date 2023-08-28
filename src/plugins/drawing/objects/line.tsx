@@ -57,7 +57,21 @@ export const LineObject = StrokedObject.named("LineObject")
         se.y = Math.max(se.y, point.y);
       }
       return {nw, se};
-    }}))
+    },
+
+    get preDragBoundingBox() {
+      const {x, y} = self;
+      const nw: Point = { x, y };
+      const se: Point = { x, y };
+      for (const point of pointIterator(self as LineObjectType)) {
+        nw.x = Math.min(nw.x, point.x);
+        nw.y = Math.min(nw.y, point.y);
+        se.x = Math.max(se.x, point.x);
+        se.y = Math.max(se.y, point.y);
+      }
+      return {nw, se};
+    }
+  }))
   .actions(self => ({
     addPoint(point: Instance<typeof DeltaPoint>) {
       self.deltaPoints.push(point);

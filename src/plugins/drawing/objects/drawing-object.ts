@@ -69,6 +69,12 @@ export const DrawingObject = types.model("DrawingObject", {
     // self then MobX observation is not triggered so moving the element doesn't
     // cause the selection highlight to update.
     throw "Subclass needs to implement this";
+  },
+  get preDragBoundingBox(): BoundingBox {
+    // The BoundingBox without considering dragX, dragY or any other dragging
+    // information. This allows resize computations to use both original and
+    // new size information.
+    throw "Subclass needs to implement this";
   }
 }))
 .views(self => ({

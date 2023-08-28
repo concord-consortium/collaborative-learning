@@ -41,6 +41,12 @@ export const ImageObject = DrawingObject.named("ImageObject")
       const se: Point = {x: x + width, y: y + height};
       return {nw, se};
     },
+    get preDragBoundingBox() {
+      return {
+        nw: { x: self.x, y: self.y },
+        se: { x: self.x + self.width, y: self.y + self.height }
+      };
+    },
     get displayUrl() {
       const entry = gImageMap.getImageEntry(self.url, {filename: self.filename});
       // TODO we could return a spinner image if the entry is storing or computing dimensions

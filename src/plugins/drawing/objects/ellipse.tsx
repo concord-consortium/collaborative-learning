@@ -25,6 +25,12 @@ export const EllipseObject = types.compose("EllipseObject", StrokedObject, Fille
       const nw: Point = {x: x - rx, y: y - ry};
       const se: Point = {x: x + rx, y: y + ry};
       return {nw, se};
+    },
+    get preDragBoundingBox() {
+      return {
+        nw: { x: self.x - self.rx, y: self.y - self.ry},
+        se: { x: self.x + self.rx, y: self.y + self.ry}
+      };
     }
   }))
   .actions(self => ({

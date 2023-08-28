@@ -33,6 +33,12 @@ export const RectangleObject = types.compose("RectangleObject", StrokedObject, F
       const nw: Point = {x, y};
       const se: Point = {x: x + width, y: y + height};
       return {nw, se};
+    },
+    get preDragBoundingBox() {
+      return {
+        nw: { x: self.x, y: self.y },
+        se: { x: self.x + self.width, y: self.y + self.height }
+      };
     }
   }))
   .actions(self => ({
@@ -66,8 +72,8 @@ export const RectangleObject = types.compose("RectangleObject", StrokedObject, F
     setDragBounds(deltas: BoundingBoxDelta) {
       self.dragX = self.x + deltas.left;
       self.dragY = self.y + deltas.top;
-      self.dragWidth  = self.width  + deltas.right - deltas.left;
-      self.dragHeight = self.height + deltas.bottom - deltas.top;
+      self.dragWidth  = Math.max(self.width  + deltas.right - deltas.left, 1);
+      self.dragHeight = Math.max(self.height + deltas.bottom - deltas.top, 1);
     },
     resizeObject() {
       self.repositionObject();

@@ -28,6 +28,12 @@ export const VectorObject = StrokedObject.named("VectorObject")
       const nw: Point = {x: Math.min(x, x + dx), y: Math.min(y, y + dy)};
       const se: Point = {x: Math.max(x, x + dx), y: Math.max(y, y + dy)};
       return {nw, se};
+    },
+    get preDragBoundingBox() {
+      const { x, y, dx, dy } = self;
+      const nw: Point = {x: Math.min(x, x + dx), y: Math.min(y, y + dy)};
+      const se: Point = {x: Math.max(x, x + dx), y: Math.max(y, y + dy)};
+      return {nw, se};
     }
   }))
   .actions(self => ({
