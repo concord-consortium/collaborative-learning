@@ -15,6 +15,7 @@ import { EllipseObject } from "../objects/ellipse";
 import { VectorObject } from "../objects/vector";
 import { LineObject } from "../objects/line";
 import { TextObject } from "../objects/text";
+import { GroupObjectType } from "../objects/group";
 
 const mockLogTileChangeEvent = jest.fn();
 jest.mock("../../../models/tiles/log/log-tile-change-event", () => ({
@@ -614,4 +615,117 @@ describe("DrawingContentModel", () => {
 
     expect(() => model.addObject(rect)).toThrow();
   });
+
+  test("can make a group of objects", () => {
+    mockLogTileChangeEvent.mockReset();
+    const model = createDrawingContentWithMetadata();
+    const r1: RectangleObjectSnapshotForAdd = {
+      type: "rectangle",
+      id: "r1",
+      x: 0,
+      y: 0,
+      width: 30,
+      height: 40,
+      ...mockSettings,
+    };
+    const r2: RectangleObjectSnapshotForAdd = {
+      type: "rectangle",
+      id: "r2",
+      x: 10,
+      y: 50,
+      width: 90,
+      height: 50,
+      ...mockSettings,
+    };
+
+    model.addObject(r1);
+    model.addObject(r2);
+    model.createGroup(['r1', 'r2']);
+    const group = model.objects[model.objects.length-1] as GroupObjectType;
+    const groupId = group.id;
+
+    expect(model.objects).toHaveLength(1);
+    expect(group.objects).toHaveLength(2);
+    expect(group.boundingBox).toStrictEqual({ nw: { x: 0, y: 0}, se: { x: 100, y: 100}});
+    expect(group.objectExtents.get('r2')).toStrictEqual({ top: 0.5, right: 1, bottom: 1, left: .1 });
+
+    model.ungroupGroups([groupId]);
+
+    mockLogTileChangeEvent.mock.calls.forEach((call, index) => {
+      console.log('call', index+1, ': ', call[1].operation, '(', call[1]?.change?.args, ')');
+    });
+    expect(mockLogTileChangeEvent).toHaveBeenCalledTimes(4);
+    expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(1,
+      LogEventName.DRAWING_TOOL_CHANGE, {
+      operation: "addObject",
+      "change": {
+        "args": [
+          {
+            "fill": "#666666",
+            "height": 40,
+            "id": "r1",
+            "stroke": "#888888",
+            "strokeDashArray": "3,3",
+            "strokeWidth": 5,
+            "type": "rectangle",
+            "width": 30,
+            "x": 0,
+            "y": 0,
+          }
+         ],
+        "path": "",
+      },
+      "tileId": "drawing-1"
+    });
+    expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(2,
+      LogEventName.DRAWING_TOOL_CHANGE, {
+      operation: "addObject",
+      "change": {
+        "args": [
+          {
+            "fill": "#666666",
+            "height": 50,
+            "id": "r2",
+            "stroke": "#888888",
+            "strokeDashArray": "3,3",
+            "strokeWidth": 5,
+            "type": "rectangle",
+            "width": 90,
+            "x": 10,
+            "y": 50,
+          }
+         ],
+        "path": "",
+      },
+      "tileId": "drawing-1"
+    });
+    expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(3,
+      LogEventName.DRAWING_TOOL_CHANGE, {
+      operation: "createGroup",
+      "change": {
+        "args": [
+          [
+            "r1",
+            "r2"
+          ]
+        ],
+        "path": "",
+      },
+      "tileId": "drawing-1"
+    });
+    expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(4,
+      LogEventName.DRAWING_TOOL_CHANGE, {
+      operation: "ungroupGroups",
+      "change": {
+        "args": [
+          [
+            groupId
+          ]
+        ],
+        "path": "",
+      },
+      "tileId": "drawing-1"
+    });
+  });
+
 });

@@ -18,7 +18,7 @@ import { ITileExportOptions, IDefaultContentOptions } from "../../../models/tile
 import { TileMetadataModel } from "../../../models/tiles/tile-metadata";
 import { getTileIdFromContent } from "../../../models/tiles/tile-model";
 import { tileModelHooks } from "../../../models/tiles/tile-model-hooks";
-import { GroupObjectType, isGroupObject } from "../objects/group";
+import { GroupObjectSnapshotForAdd, GroupObjectType, isGroupObject } from "../objects/group";
 
 export const DrawingToolMetadataModel = TileMetadataModel
   .named("DrawingToolMetadata");
@@ -180,26 +180,6 @@ export const DrawingContentModel = TileContentModel
       return self.objects[self.objects.length-1];
     },
 
-    moveObjectsIntoGroup(group: GroupObjectType, objectIds: string[]) {
-      objectIds.forEach((id) => {
-        const obj = self.objectMap[id];
-        if (obj) {
-          if (isGroupObject(obj)) {
-            // Adding a group to a group:
-            // Transfer old group's members into new group; delete old group.
-            obj.objects.forEach((member) => {
-              group.objects.push(detach(member));
-            });
-            destroy(obj);
-          } else {
-            // Adding a regular object - just move node.
-            group.objects.push(detach(obj));
-          }
-        }
-      });
-      group.computeExtents();
-    },
-
     moveObjectsOutOfGroup(group: GroupObjectType): string[] {
       const ids: string[] = [];
       group.objects.forEach((member) => {
@@ -353,7 +333,31 @@ export const DrawingContentModel = TileContentModel
               image.setUrl(newUrl);
             }
           });
-        }
+        },
+
+        createGroup(objectIds: string[]) {
+          const props: GroupObjectSnapshotForAdd = {
+            type: "group",
+            x: 0,
+            y: 0
+          };
+          const group = self.addAndSelectObject(props) as GroupObjectType;
+          forEachObjectId(objectIds, (obj) => {
+            if (isGroupObject(obj)) {
+              // Adding a group to a group:
+              // Transfer old group's members into new group; delete old group.
+              obj.objects.forEach((member) => {
+                group.objects.push(detach(member));
+              });
+              destroy(obj);
+            } else {
+              // Adding a regular object - just move node.
+              group.objects.push(detach(obj));
+            }
+          });
+          group.computeExtents();
+        },
+  
       }
     };
   })

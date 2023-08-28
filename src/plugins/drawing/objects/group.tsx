@@ -1,6 +1,5 @@
 import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import { DrawingObject, DrawingObjectType, IDrawingComponentProps, 
-  IToolbarManager, 
   isFilledObject, 
   isStrokedObject, 
   typeField } from "./drawing-object";
@@ -142,12 +141,3 @@ export const GroupComponent = observer(function GroupComponent(
    />;
 });
 
-export function createGroup(toolbarManager: IToolbarManager, objects: string[]) {
-  const props: GroupObjectSnapshotForAdd = {
-    type: "group",
-    x: 0,
-    y: 0
-  };
-  const group = toolbarManager.addAndSelectObject(props) as GroupObjectType;
-  toolbarManager.moveObjectsIntoGroup(group, objects);
-}

@@ -16,7 +16,7 @@ import { computeStrokeDashArray, IToolbarButtonProps, IToolbarManager,
   ToolbarModalButton } from "../objects/drawing-object";
 import { useTouchHold } from "../../../hooks/use-touch-hold";
 import SmallCornerTriangle from "../../../assets/icons/small-corner-triangle.svg";
-import { createGroup, isGroupObject } from "../objects/group";
+import { isGroupObject } from "../objects/group";
 
 interface IButtonClasses {
   modalButton?: ToolbarModalButton;
@@ -131,7 +131,7 @@ export const GroupObjectsButton: React.FC<IActionButtonProps> = observer(functio
   toolbarManager 
 }) {
   const onClick = () => {
-    createGroup(toolbarManager, toolbarManager.selection);
+    toolbarManager.createGroup(toolbarManager.selection);
   };
   // Require at least two objects to group.
   const disabled = toolbarManager.selection.length <= 1;
