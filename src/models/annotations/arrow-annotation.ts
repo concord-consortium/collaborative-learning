@@ -8,6 +8,7 @@ export const kArrowAnnotationType = "arrowAnnotation";
 
 export const kArrowAnnotationTextWidth = 150;
 export const kArrowAnnotationTextHeight = 50;
+const kArrowAnnotationTextMargin = 15;
 
 export interface IArrowAnnotationDragOffsets {
   sourceDragOffsetX: number;
@@ -102,10 +103,12 @@ export const ArrowAnnotation = types
     const textOriginX = targetX - dx / 2;
     const textOriginY = targetY - dy / 2;
     // Bound the text offset to the document
-    const textMinXOffset = documentLeft - textOriginX;
-    const textMaxXOffset = documentRight - textOriginX;
-    const textMinYOffset = documentTop - textOriginY;
-    const textMaxYOffset = documentBottom - textOriginY;
+    const textHorizontalMargin = kArrowAnnotationTextMargin + kArrowAnnotationTextWidth / 2;
+    const textVerticalMargin = kArrowAnnotationTextMargin + kArrowAnnotationTextHeight / 2;
+    const textMinXOffset = documentLeft + textHorizontalMargin - textOriginX;
+    const textMaxXOffset = documentRight - textHorizontalMargin - textOriginX;
+    const textMinYOffset = documentTop + textVerticalMargin - textOriginY;
+    const textMaxYOffset = documentBottom - textVerticalMargin - textOriginY;
     const textCenterX = textOriginX
       + Math.max(textMinXOffset, Math.min(textMaxXOffset, textDxOffset + textDragOffsetX));
     const textCenterY = textOriginY
