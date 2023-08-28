@@ -12,7 +12,7 @@ import { kAxisStyle, kAxisWidth, kContainerWidth, kNumberLineContainerHeight,
 import "./numberline-tile.scss";
 
 export const NumberlineTile: React.FC<ITileProps> = observer(function NumberlineTile(props){
-  const { model, readOnly, context } = props;
+  const { model, readOnly } = props;
   const content = model.content as NumberlineContentModelType;
   const readOnlyState = (readOnly) ? "readOnly" : "readWrite";
   const tileId = model.id;
@@ -23,14 +23,10 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
 
   const [tileWidth, setTileWidth] = useState(0);
   const containerWidth = (tileWidth * kContainerWidth);
-  const isFourUpView = context.includes("four-up");
-  const fourUpScalar = isFourUpView ? 0.5 : 1;
-
   const axisWidth = tileWidth * kAxisWidth;
   const xShiftNum = ((containerWidth - axisWidth)/2);
   const numToPx = (num: number) => num.toFixed(2) + "px";
   const xScale = createXScale(axisWidth);
-  // console.log("axisClass:", axisClass);
 
 
   useEffect(() => {
@@ -38,9 +34,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     if (documentScrollerRef.current) {
       obs = new ResizeObserver(() => {
         if (documentScrollerRef.current?.clientWidth){
-          console.log("------------in the observer-----");
-          console.log("\tfourUpScalar : ", fourUpScalar);
-          const newTileWidth  = documentScrollerRef.current?.clientWidth * fourUpScalar;
+          const newTileWidth  = documentScrollerRef.current?.clientWidth;
           setTileWidth(newTileWidth ?? 0);
         }
       });
@@ -90,14 +84,10 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     const yTopBound = yMidPoint + numberlineYBound;
     const yBottomBound = yMidPoint - numberlineYBound;
     const isBetweenYBounds = (mouseYPos >= yBottomBound && mouseYPos <= yTopBound);
-    // console.log("mouseInBoundingBox: axisWidth set to:", axisWidth);
     const isBetweenXBounds = (mouseXPos >= 0 && mouseXPos <= axisWidth);
     if (isBetweenYBounds && isBetweenXBounds){
-      // console.log("mouse in bounding BOX!");
       return true;
     } else {
-      // console.log("mouse outta bounds");
-
       return false;
     }
   };
@@ -138,9 +128,6 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
 
   // * =============================== [ Construct Numberline ] ================================ */
   if (axisWidth !== 0) {
-    console.log("<---------constructing numberline ------------> ");
-    console.log("\t with axisWidth: ", axisWidth);
-    console.log("\txScale: ", xScale);
     const numOfTicks = numberlineDomainMax - numberlineDomainMin;
     axis
     .attr("class", `${axisClass} num-line`)
@@ -156,8 +143,6 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   /* ========================== [ Construct/Update Circles ] =================================== */
   if (axisWidth !== 0){
     const updateCircles = () => {
-      console.log("<---------updateCircles ------------> ");
-
       /* =========================== [ Outer Hover Circles ] ======================= */
       //---- Initialize outer hover circles
       const outerPoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.outer-point')
@@ -212,9 +197,6 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       style={{"height": `${kNumberLineContainerHeight}`}}
     >
       <div className="numberline-tool-container" >
-        {console.log("----------render function---------")}
-
-        {console.log("\trender function > JSX our axisWidth is: ", axisWidth)}
         <svg ref={svgRef} width={axisWidth}>
           <g ref={axisRef}></g>
         </svg>

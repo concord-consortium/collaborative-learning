@@ -414,7 +414,6 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleToggleWorkspaceMode = () => {
-    console.log("---------4up enabled!----------");
     this.props.workspace.toggleMode();
   };
 
