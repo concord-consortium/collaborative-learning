@@ -37,6 +37,13 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const ui = useUIStore();
   const tileApiInterface = useContext(TileApiInterfaceContext);
 
+  // Clear a partially completed annotation when the mode changes
+  useEffect(() => {
+    setSourceTileId("");
+    setSourceObjectId("");
+    setSourceObjectType(undefined);
+  }, [ui.annotationMode]);
+
   const readWriteClass = readOnly ? "read-only" : "read-write";
   const documentClasses = `.document-content.${readWriteClass} `;
   function getRowElement(rowId?: string) {

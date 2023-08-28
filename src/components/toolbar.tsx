@@ -12,6 +12,7 @@ import { DeleteButton } from "./delete-button";
 import { IToolbarButtonProps, ToolbarButtonComponent } from "./toolbar-button";
 import { EditableTileApiInterfaceRefContext } from "./tiles/tile-api";
 import { kDragTileCreate  } from "./tiles/tile-component";
+import { kSparrowAnnotationMode } from "../models/stores/ui";
 
 import "./toolbar.scss";
 
@@ -160,7 +161,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     if (toolButton.id === "solution") {
       return this.selectedTilesIncludeTeacher();
     } else if (toolButton.id === "sparrow") {
-      return ui.annotationMode === "sparrow";
+      return ui.annotationMode === kSparrowAnnotationMode;
     } else {
       return toolButton === this.state.activeTool;
     }
@@ -223,7 +224,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
 
   private handleSparrow() {
     const { ui } = this.stores;
-    if (ui.annotationMode === "sparrow") {
+    if (ui.annotationMode === kSparrowAnnotationMode) {
       ui.setAnnotationMode();
     } else {
       ui.setAnnotationMode("sparrow");
