@@ -198,6 +198,7 @@ export const kClosedPalettesState = { showStamps: false, showStroke: false, show
 
 export interface IToolbarButtonProps {
   toolbarManager: IToolbarManager;
+  getVisibleCanvasSize: () => Point|undefined;
   // TODO: the support for palettes is hard coded to specific tools
   togglePaletteState: (palette: PaletteKey, show?: boolean) => void;
   clearPaletteState: () => void;
