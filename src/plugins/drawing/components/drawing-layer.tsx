@@ -504,15 +504,4 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       }
     });
   }
-
-  private forEachObjectInTree(callback: (object: DrawingObjectType, key?: string) => void) {
-    this.forEachObject((obj) => {
-      callback(obj);
-      if (isGroupObject(obj)) {
-        obj.objects.forEach((member) => {
-          callback(member);
-        });
-      }
-    });
-  }
 }
