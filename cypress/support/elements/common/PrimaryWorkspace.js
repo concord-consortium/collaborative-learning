@@ -40,14 +40,6 @@ class PrimaryWorkspace{
        return cy.get('.resize-panel-divider .drag-thumbnail');
     }
 
-    getResizeLeftPanelHandle(){
-        return cy.get('.divider-container .expand-handle.left');
-    }
-
-    getResizeRightPanelHandle(){
-        return cy.get('.divider-container .expand-handle.right');
-    }
-
     getSectionTitle(tab, section){
         return cy.get('[data-test='+tab+'-section-'+section+'] .title');
     }

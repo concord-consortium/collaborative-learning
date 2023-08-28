@@ -1,16 +1,35 @@
 @import "../vars";
 
-.workspace-expander {
-  position: relative; // so we can center elements
+// Only shown with .show-expanders
+.show-expanders .workspace-expander {
   width: 38px;
   padding: 2px;
   border-radius: 8px 0 0 0;
-  box-sizing: border-box;
   border-style: solid;
+  border-width: 2px 1px 2px 2px;
+}
+
+// Hidden when the divider is on the left
+.show-expanders.divider-position-0 .workspace-expander {
+  width: 0;
+  padding: 0;
+  border: 0;
+}
+
+// Hidden by default
+.workspace-expander {
+  position: relative; // so we can center elements
+  width: 0;
+  box-sizing: border-box;
   z-index: 2;
+  // We skip transitioning the background color because it is used for hover
+  // and active states which should be instantaneous
+  transition-duration: 0.25s, 0s;
+  transition-property: all, background-color;
+  // When the width is 0, don't let the icons show
+  overflow: clip;
 
   // Styling when in the center
-  border-width: 2px 1px 2px 2px;
   border-color: $charcoal;
   background-color: $charcoal-light-6;
   &:hover {
@@ -20,41 +39,10 @@
     background-color: $charcoal-light-3;
   }
 
-  &.problem {
-    margin-left: 4px;
-    border-width: 2px;
-    border-color: $workspace-teal;
-    background-color: $workspace-teal-light-4;
-    &:hover {
-      background-color: $workspace-teal-light-2;
-    }
-    &:active {
-      background-color: $workspace-teal-light-1-b;
-    }
-    .workspace-expander-label {
-      opacity: 1;
-    }
-  }
-  &.learninglog {
-    margin-left: 4px;
-    border-width: 2px;
-    border-color: $learninglog-green;
-    background-color: $learninglog-green-light-5;
-    &:hover {
-      background-color: $learninglog-green-light-3;
-    }
-    &:active {
-      background-color: $learninglog-green-light-2;
-    }
-    .workspace-expander-label {
-      opacity: 1;
-    }
-  }
-
   .workspace-expander-label {
     // hidden in the middle
     opacity: 0;
-
+    transition-duration: 0.25s;
     writing-mode: vertical-rl;
     text-orientation: mixed;
     font-size: 14px;
@@ -65,6 +53,38 @@
     // Offset the icon by its height, however it isn't rotating around
     // the center, so we have to offset it by more on the right indicator
     top: calc(50% - 20.5px);
+    // As the width of the parent animates keep the indicator pinned to the left
+    left: 0;
     transform: rotate(180deg);
   }
+}
+
+.divider-position-100 .workspace-expander {
+  // Replace 1px left border with 2px all around
+  border-width: 2px;
+  .workspace-expander-label {
+    opacity: 1;
+  }
+
+  &.problem {
+    border-color: $workspace-teal;
+    background-color: $workspace-teal-light-4;
+    &:hover {
+      background-color: $workspace-teal-light-2;
+    }
+    &:active {
+      background-color: $workspace-teal-light-1-b;
+    }
+  }
+  &.learninglog {
+    border-color: $learninglog-green;
+    background-color: $learninglog-green-light-5;
+    &:hover {
+      background-color: $learninglog-green-light-3;
+    }
+    &:active {
+      background-color: $learninglog-green-light-2;
+    }
+  }
+
 }

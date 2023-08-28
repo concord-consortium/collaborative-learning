@@ -216,8 +216,7 @@ Cypress.Commands.add("getDocumentToolTile", (tileIndex = 0) => {
 });
 Cypress.Commands.add('collapseResourceTabs', () => {
   cy.get('.drag-thumbnail').trigger('mouseover').then(() => {
-    cy.get('.divider-container .expand-handle.left.shown').should("exist");
-    cy.get('.divider-container .expand-handle.left.shown').click();
+    cy.get('.divider-container .workspace-expander').click();
     cy.get('.primary-workspace .toolbar', {timeout: 120000});
   });
 });
@@ -226,12 +225,11 @@ Cypress.Commands.add('closeResourceTabs', () => {
 });
 Cypress.Commands.add('collapseResourcesPanel', () => {
   cy.get('.divider').click({force:true});
-  cy.get('.divider-container .expand-handle.left').click();
+  cy.get('.divider-container .workspace-expander').click();
 });
 Cypress.Commands.add('collapseWorkspace', () => {
   cy.get('.divider').click({force:true});
-  cy.get('.divider-container .expand-handle.right').click();
-  // cy.get('.divider-container .expand-handle.right').click(); // to ensure workspace is collapsed regardless of initial position
+  cy.get('.divider-container .resources-expander').click();
 });
 Cypress.Commands.add('linkTableToGraph', (table, graph) => {
   cy.get('.primary-workspace .table-title').contains(table).click();

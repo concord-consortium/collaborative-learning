@@ -104,7 +104,6 @@ context('Teacher Workspace', () => {
       cy.waitForLoad();
       dashboard.switchView("Workspace & Resources");
       primaryWorkSpace.getResizePanelDivider().click();
-      // primaryWorkSpace.getResizeRightPanelHandle().click();
       cy.wait(2000);
       cy.get('@clueData').then((clueData) => {
         const groups = clueData.classes[0].problems[0].groups;
