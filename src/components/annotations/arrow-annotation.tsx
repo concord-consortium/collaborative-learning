@@ -16,6 +16,7 @@ import SparrowDeleteButton from "../../assets/icons/annotations/sparrow-delete-b
 import "./arrow-annotation.scss";
 
 type DragType = "source" | "target" | "text";
+const maxCharacters = 30;
 
 interface IDragHandleProps {
   draggingHandle?: boolean;
@@ -152,7 +153,7 @@ export const ArrowAnnotationComponent = observer(
       acceptText();
     }
     function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-      setTempText(e.target.value);
+      setTempText(e.target.value.slice(0,maxCharacters));
     }
     function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
       const { key } = e;
