@@ -178,16 +178,19 @@ export const DrawingContentModel = TileContentModel
         const obj = self.objectMap[id];
         if (obj) {
           if (isGroupObject(obj)) {
+            // Adding a group to a group:
             // Transfer old group's members into new group; delete old group.
             obj.objects.forEach((member) => {
               group.objects.push(detach(member));
             });
             destroy(obj);
           } else {
+            // Adding a regular object - just move node.
             group.objects.push(detach(obj));
           }
         }
       });
+      group.computeExtents();
     },
 
     moveObjectsOutOfGroup(group: GroupObjectType): string[] {

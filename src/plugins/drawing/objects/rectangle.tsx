@@ -3,7 +3,7 @@ import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
 import { computeStrokeDashArray, DrawingTool, FilledObject, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
-import { BoundingBoxDelta, Point } from "../model/drawing-basic-types";
+import { BoundingBoxSides, Point } from "../model/drawing-basic-types";
 import RectToolIcon from "../assets/rectangle-icon.svg";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
 
@@ -33,12 +33,6 @@ export const RectangleObject = types.compose("RectangleObject", StrokedObject, F
       const nw: Point = {x, y};
       const se: Point = {x: x + width, y: y + height};
       return {nw, se};
-    },
-    get preDragBoundingBox() {
-      return {
-        nw: { x: self.x, y: self.y },
-        se: { x: self.x + self.width, y: self.y + self.height }
-      };
     }
   }))
   .actions(self => ({
@@ -69,7 +63,7 @@ export const RectangleObject = types.compose("RectangleObject", StrokedObject, F
         self.width = self.height = squareSize;
       }
     },
-    setDragBounds(deltas: BoundingBoxDelta) {
+    setDragBounds(deltas: BoundingBoxSides) {
       self.dragX = self.x + deltas.left;
       self.dragY = self.y + deltas.top;
       self.dragWidth  = Math.max(self.width  + deltas.right - deltas.left, 1);

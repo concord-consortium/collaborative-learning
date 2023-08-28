@@ -4,7 +4,7 @@ import React from "react";
 import { SelectionBox } from "../components/selection-box";
 import { computeStrokeDashArray, DeltaPoint, DrawingTool, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
-import { BoundingBoxDelta, Point } from "../model/drawing-basic-types";
+import { BoundingBoxSides, Point } from "../model/drawing-basic-types";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
 import FreehandToolIcon from "../assets/freehand-icon.svg";
 
@@ -57,19 +57,6 @@ export const LineObject = StrokedObject.named("LineObject")
         se.y = Math.max(se.y, point.y);
       }
       return {nw, se};
-    },
-
-    get preDragBoundingBox() {
-      const {x, y} = self;
-      const nw: Point = { x, y };
-      const se: Point = { x, y };
-      for (const point of pointIterator(self as LineObjectType)) {
-        nw.x = Math.min(nw.x, point.x);
-        nw.y = Math.min(nw.y, point.y);
-        se.x = Math.max(se.x, point.x);
-        se.y = Math.max(se.y, point.y);
-      }
-      return {nw, se};
     }
   }))
   .actions(self => ({
@@ -77,7 +64,7 @@ export const LineObject = StrokedObject.named("LineObject")
       self.deltaPoints.push(point);
     },
 
-    setDragBounds(deltas: BoundingBoxDelta) {
+    setDragBounds(deltas: BoundingBoxSides) {
       self.dragX = self.dragY = self.dragScaleX = self.dragScaleY = undefined;
       const bbox = self.boundingBox;
       const left = bbox.nw.x;

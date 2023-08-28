@@ -1,7 +1,7 @@
 import { getMembers, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { uniqueId } from "../../../utilities/js-utils";
 import { SelectionBox } from "../components/selection-box";
-import { BoundingBox, BoundingBoxDelta, Point, ToolbarSettings }
+import { BoundingBox, BoundingBoxSides, Point, ToolbarSettings }
    from "../model/drawing-basic-types";
 import { StampModelType } from "../model/stamp";
 import { GroupObjectType } from "./group";
@@ -69,12 +69,6 @@ export const DrawingObject = types.model("DrawingObject", {
     // self then MobX observation is not triggered so moving the element doesn't
     // cause the selection highlight to update.
     throw "Subclass needs to implement this";
-  },
-  get preDragBoundingBox(): BoundingBox {
-    // The BoundingBox without considering dragX, dragY or any other dragging
-    // information. This allows resize computations to use both original and
-    // new size information.
-    throw "Subclass needs to implement this";
   }
 }))
 .views(self => ({
@@ -100,7 +94,7 @@ export const DrawingObject = types.model("DrawingObject", {
     self.y = self.dragY ?? self.y;
     self.dragX = self.dragY = undefined;
   },
-  setDragBounds(deltas: BoundingBoxDelta) {
+  setDragBounds(deltas: BoundingBoxSides) {
     // Temporarily adjust the edges of the object's bounding box by the given deltas.
     // This will change the size and origin position of the object, with changes stored as volatile fields.
 

@@ -3,7 +3,7 @@ import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React, { useCallback } from "react";
 import { computeStrokeDashArray, DrawingObjectType, DrawingTool, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
-import { BoundingBoxDelta, Point, ToolbarSettings, VectorEndShape, endShapesForVectorType, getVectorTypeIcon } 
+import { BoundingBoxSides, Point, ToolbarSettings, VectorEndShape, endShapesForVectorType, getVectorTypeIcon } 
   from "../model/drawing-basic-types";
 import { SvgToolbarButton, } from "../components/drawing-toolbar-buttons";
 
@@ -28,12 +28,6 @@ export const VectorObject = StrokedObject.named("VectorObject")
       const nw: Point = {x: Math.min(x, x + dx), y: Math.min(y, y + dy)};
       const se: Point = {x: Math.max(x, x + dx), y: Math.max(y, y + dy)};
       return {nw, se};
-    },
-    get preDragBoundingBox() {
-      const { x, y, dx, dy } = self;
-      const nw: Point = {x: Math.min(x, x + dx), y: Math.min(y, y + dy)};
-      const se: Point = {x: Math.max(x, x + dx), y: Math.max(y, y + dy)};
-      return {nw, se};
     }
   }))
   .actions(self => ({
@@ -45,7 +39,7 @@ export const VectorObject = StrokedObject.named("VectorObject")
       self.headShape = headShape;
       self.tailShape = tailShape;
     },
-    setDragBounds(deltas: BoundingBoxDelta) {
+    setDragBounds(deltas: BoundingBoxSides) {
       if (self.dx > 0) {
         // x,y point is towards the left
         self.dragX = self.x + deltas.left;
