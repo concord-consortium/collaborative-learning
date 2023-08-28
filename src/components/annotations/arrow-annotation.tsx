@@ -225,25 +225,27 @@ export const ArrowAnnotationComponent = observer(
     });
     return (
       <g>
-        <CurvedArrow
-          className="background-arrow"
-          hideArrowhead={true}
-          peakX={textCenterX} peakY={textCenterY}
-          setHovering={setHoveringStem}
-          sourceX={sourceX} sourceY={sourceY}
-          targetX={targetX} targetY={targetY}
-        />
-        <CurvedArrow
-          className="foreground-arrow"
-          peakX={textCenterX} peakY={textCenterY}
-          sourceX={sourceX} sourceY={sourceY}
-          targetX={targetX} targetY={targetY}
-        />
-        <g transform={`translate(${deleteX} ${deleteY})`}>
-          <SparrowDeleteButton
-            className={classNames({ "visible-delete-button": hoveringStem })}
-            onClick={handleDelete}
+        <g className="actual-sparrow">
+          <CurvedArrow
+            className="background-arrow"
+            hideArrowhead={true}
+            peakX={textCenterX} peakY={textCenterY}
+            setHovering={setHoveringStem}
+            sourceX={sourceX} sourceY={sourceY}
+            targetX={targetX} targetY={targetY}
           />
+          <CurvedArrow
+            className="foreground-arrow"
+            peakX={textCenterX} peakY={textCenterY}
+            sourceX={sourceX} sourceY={sourceY}
+            targetX={targetX} targetY={targetY}
+          />
+          <g transform={`translate(${deleteX} ${deleteY})`}>
+            <SparrowDeleteButton
+              className={classNames({ "visible-delete-button": hoveringStem })}
+              onClick={handleDelete}
+            />
+          </g>
         </g>
         <foreignObject
           className="text-object"
