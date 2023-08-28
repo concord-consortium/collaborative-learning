@@ -10,6 +10,16 @@ export function isArrowAnnotation(annotation: any) {
   return "type" in annotation && annotation.type === kArrowAnnotationType;
 }
 
+export function updateArrowAnnotationTileIds(annotation: IArrowAnnotationSnapshot, tileIdMap: Record<string, string>) {
+  if (annotation.sourceObject?.tileId) {
+    annotation.sourceObject.tileId = tileIdMap[annotation.sourceObject.tileId];
+  }
+  if (annotation.targetObject?.tileId) {
+    annotation.targetObject.tileId = tileIdMap[annotation.targetObject.tileId];
+  }
+  return annotation;
+}
+
 export const kArrowAnnotationTextWidth = 150;
 export const kArrowAnnotationTextHeight = 50;
 
