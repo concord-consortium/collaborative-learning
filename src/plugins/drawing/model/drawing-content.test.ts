@@ -4,7 +4,7 @@ import {
   DrawingContentModelSnapshot, DrawingToolMetadataModel
 } from "./drawing-content";
 import { kDrawingTileType } from "./drawing-types";
-import { DefaultToolbarSettings } from "./drawing-basic-types";
+import { DefaultToolbarSettings, VectorEndShape } from "./drawing-basic-types";
 import { AppConfigModel } from "../../../models/stores/app-config-model";
 import { ImageObject } from "../objects/image";
 import { RectangleObject, RectangleObjectSnapshot, RectangleObjectSnapshotForAdd,
@@ -616,7 +616,7 @@ describe("DrawingContentModel", () => {
     expect(() => model.addObject(rect)).toThrow();
   });
 
-  test("can make a group of objects", () => {
+  test("can group and ungroup objects", () => {
     mockLogTileChangeEvent.mockReset();
     const model = createDrawingContentWithMetadata();
     const r1: RectangleObjectSnapshotForAdd = {
@@ -728,4 +728,78 @@ describe("DrawingContentModel", () => {
     });
   });
 
+  test("can modify and resize grouped objects", () => {
+    mockLogTileChangeEvent.mockReset();
+    // Make a group with one of every type of object.
+    const line = LineObject.create({
+      x: 0, y: 0, 
+      deltaPoints: [{dx: 10, dy: 10}],
+      ...mockSettings
+    });
+    const vector = VectorObject.create({
+      x: 10, y: 10, dx: 10, dy: 10,
+      ...mockSettings
+    });
+    const rect = RectangleObject.create({
+      x: 20,
+      y: 20,
+      width: 10,
+      height: 10,
+      ...mockSettings,
+    });
+    const ellipse = EllipseObject.create({
+      x: 35,
+      y: 35,
+      rx: 5,
+      ry: 5,
+    ...mockSettings});
+    const image = ImageObject.create({
+      url: "my/image/url", x: 40, y: 40, width: 10, height: 10
+    });
+    const text = TextObject.create({
+      text: "This should be rendered as the body of the text object",
+      x: 50, y: 50, width: 10, height: 10,
+      stroke: "#000000"
+    });
+    const model = createDrawingContentWithMetadata({
+      objects: [line, vector, rect, ellipse, image, text]
+    });
+
+    expect(model.objects).toHaveLength(6);
+    model.createGroup([line.id, vector.id, rect.id, ellipse.id, image.id, text.id]);
+    expect(model.objects).toHaveLength(1);
+
+    const group = model.objects[0] as GroupObjectType;
+    expect(group.boundingBox).toStrictEqual({ nw: {x: 0, y: 0}, se: {x: 60, y: 60}});
+    expect(ellipse.boundingBox).toStrictEqual({ nw: {x: 30, y: 30}, se: {x: 40, y: 40}});
+
+    group.setDragBounds({ top: 0, right: 60, bottom: 60, left: 0});
+    group.resizeObject();
+    expect(group.boundingBox).toStrictEqual({ nw: {x: 0, y: 0}, se: {x: 120, y: 120}});
+
+    expect(line.boundingBox).toStrictEqual({ nw: {x: 0, y: 0}, se: {x: 20, y: 20}});
+    expect(vector.boundingBox).toStrictEqual({ nw: {x: 20, y: 20}, se: {x: 40, y: 40}});
+    expect(rect.boundingBox).toStrictEqual({ nw: {x: 40, y: 40}, se: {x: 60, y: 60}});
+    expect(ellipse.boundingBox).toStrictEqual({ nw: {x: 60, y: 60}, se: {x: 80, y: 80}});
+    expect(image.boundingBox).toStrictEqual({ nw: {x: 80, y: 80}, se: {x: 100, y: 100}});
+    expect(text.boundingBox).toStrictEqual({ nw: {x: 100, y: 100}, se: {x: 120, y: 120}});
+
+    group.setStroke('#abcdef');
+    group.setStrokeDashArray('1 2');
+    group.setStrokeWidth(10);
+    expect([line.stroke, line.strokeDashArray, line.strokeWidth]).toEqual(['#abcdef', '1 2', 10]);
+    expect([vector.stroke, vector.strokeDashArray, vector.strokeWidth]).toEqual(['#abcdef', '1 2', 10]);
+    expect([rect.stroke, rect.strokeDashArray, rect.strokeWidth]).toEqual(['#abcdef', '1 2', 10]);
+    expect([ellipse.stroke, ellipse.strokeDashArray, ellipse.strokeWidth]).toEqual(['#abcdef', '1 2', 10]);
+    expect(text.stroke).toEqual('#abcdef');
+
+    group.setFill('#fedcba');
+    expect(rect.fill).toEqual('#fedcba');
+    expect(ellipse.fill).toEqual('#fedcba');
+
+    group.setEndShapes(VectorEndShape.triangle, VectorEndShape.triangle);
+    expect([vector.headShape, vector.tailShape]).toEqual([VectorEndShape.triangle, VectorEndShape.triangle]);
+  });
+
 });
+

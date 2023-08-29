@@ -1,5 +1,6 @@
-import { Instance, SnapshotIn, types } from "mobx-state-tree";
+import { Instance, SnapshotIn, getMembers, types } from "mobx-state-tree";
 import { DrawingObject, DrawingObjectType, IDrawingComponentProps, 
+  StrokedObjectType, 
   isFilledObject, 
   isStrokedObject, 
   typeField } from "./drawing-object";
@@ -51,12 +52,16 @@ export const GroupObject = DrawingObject.named("GroupObject")
     },
     setStrokeDashArray(strokeDashArray: string) {
       self.objects.forEach((member) => {
-        if (isStrokedObject(member)) { member.setStrokeDashArray(strokeDashArray); }
+        if (getMembers(member).actions.includes("setStrokeDashArray")) { 
+          (member as StrokedObjectType).setStrokeDashArray(strokeDashArray); 
+        }
       });
     },
     setStrokeWidth(strokeWidth: number) {
       self.objects.forEach((member) => {
-        if (isStrokedObject(member)) { member.setStrokeWidth(strokeWidth); }
+        if (getMembers(member).actions.includes("setStrokeWidth")) { 
+          (member as StrokedObjectType).setStrokeWidth(strokeWidth); 
+        }
       });
     },
     setFill(fill: string) {
