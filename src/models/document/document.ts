@@ -324,16 +324,24 @@ export const DocumentModel = Tree.named("Document")
     undoLastAction() {
       const undoManager = self.treeManagerAPI?.undoManager;
       if (undoManager?.canUndo) {
-        undoManager.undo();
-        const logParams: IDocumentLogEvent = {document: self as DocumentModelType};
+        const {id, action} = undoManager.undo();
+        const logParams: IDocumentLogEvent = {
+          document: self as DocumentModelType,
+          targetAction: action,
+          targetEventId: id
+        };
         logDocumentEvent(LogEventName.TILE_UNDO, logParams, LogEventMethod.UNDO);
       }
     },
     redoLastAction() {
       const undoManager = self.treeManagerAPI?.undoManager;
       if (undoManager?.canRedo) {
-        undoManager.redo();
-        const logParams: IDocumentLogEvent = {document: self as DocumentModelType};
+        const {id, action} = undoManager.redo();
+        const logParams: IDocumentLogEvent = {
+          document: self as DocumentModelType,
+          targetAction: action,
+          targetEventId: id
+        };
         logDocumentEvent(LogEventName.TILE_REDO, logParams, LogEventMethod.REDO);
       }
     },

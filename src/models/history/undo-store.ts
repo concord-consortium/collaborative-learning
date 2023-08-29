@@ -9,8 +9,14 @@ export interface IUndoManager {
   redoLevels : number;
   canUndo : boolean;
   canRedo : boolean;
-  undo() : void;
-  redo() : void;
+  undo() : IUndoInformation;
+  redo() : IUndoInformation;
+}
+
+// Information that is returned by undo and redo calls
+export interface IUndoInformation {
+  id: string|undefined,
+  action: string|undefined
 }
 
 export const UndoStore = types
@@ -165,6 +171,10 @@ export const UndoStore = types
       applyPatchesToTrees(entryToUndo, HistoryOperation.Undo);
 
       self.undoIdx--;
+      return {
+        id: entryToUndo.id,
+        action: entryToUndo.action
+      };
     },
     redo() {
       if (!self.canRedo) {
@@ -181,6 +191,10 @@ export const UndoStore = types
       applyPatchesToTrees(entryToRedo, HistoryOperation.Redo);
 
       self.undoIdx++;
+      return {
+        id: entryToRedo.id,
+        action: entryToRedo.action
+      };
     },
   };
 });
