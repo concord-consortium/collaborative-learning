@@ -9,11 +9,10 @@ import { getTileContentInfo, IDocumentExportOptions } from "../tiles/tile-conten
 import { ITileContentModel, ITileEnvironment, TileContentModel } from "../tiles/tile-content";
 import { ILinkableTiles, ITypedTileLinkMetadata } from "../tiles/tile-link-types";
 import {
-  IDragTileItem, TileModel, ITileModel, ITileModelSnapshotIn, ITileModelSnapshotOut,
-  ITilePosition, IDropTileItem
+  IDragTileItem, TileModel, ITileModel, ITileModelSnapshotIn, ITilePosition, IDropTileItem
 } from "../tiles/tile-model";
 import {
-  IDropRowInfo, TileRowModel, TileRowModelType, TileRowSnapshotType, TileRowSnapshotOutType, TileLayoutModelType
+  IDropRowInfo, TileRowModel, TileRowModelType, TileRowSnapshotType, TileLayoutModelType
 } from "../document/tile-row";
 import { migrateSnapshot } from "./document-content-import";
 import { isImportDocument } from "./document-content-import-types";

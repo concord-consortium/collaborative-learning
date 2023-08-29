@@ -36,6 +36,6 @@ export const MyWorkDocumentOrBrowser: React.FC<IProps> = props => {
       )} />
     );
   } else {
-    return <EditableDocumentContent document={document} contextClass="my-work" {...others} />;
+    return <EditableDocumentContent document={document} {...others} />;
   }
 };
