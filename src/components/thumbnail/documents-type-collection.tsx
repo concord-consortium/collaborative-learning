@@ -111,8 +111,6 @@ export const DocumentCollectionByType: React.FC<IProps> = observer(({
   const bottomPanel = isBottomPanel && !isSinglePanel && sectionDocs.length > 0;
   const listClass = classNames("list", tabName, {"top-panel": isTopPanel, horizontal,
                                 "bottom-panel": bottomPanel});
-  const positionClass = isTopPanel ? "top-" : bottomPanel ? "bottom-" : "";
-  const contextClass = `${tab}-${positionClass}panel-thumbnail`;
   return (
     <div className={tabPanelDocumentSectionClass}
           key={`${tab}-${section.type}`}
@@ -130,7 +128,6 @@ export const DocumentCollectionByType: React.FC<IProps> = observer(({
           return (
             <DocumentContextReact.Provider key={document.key} value={documentContext}>
               <DecoratedDocumentThumbnailItem
-                contextClass={contextClass}
                 section={section}
                 sectionDocument={document}
                 tab={tab}

@@ -52,7 +52,6 @@ const OneUpCanvas: React.FC<IOneUpCanvasProps> = props => {
     <CanvasComponent
       context="1-up"
       document={document}
-      contextClass={`one-up-${contextClass}`}
       {...others}
     />
   );

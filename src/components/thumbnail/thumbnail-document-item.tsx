@@ -13,7 +13,6 @@ interface IProps {
   captionText: string;
   dataTestName: string;
   document: DocumentModelType;
-  contextClass?: string;
   isSecondarySelected?: boolean;
   isSelected?: boolean;
   onDocumentClick: (document: DocumentModelType) => void;
@@ -26,7 +25,7 @@ interface IProps {
 
 export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) => {
   const {
-    dataTestName, canvasContext, document, scale, captionText, contextClass, isSelected, isSecondarySelected,
+    dataTestName, canvasContext, document, scale, captionText, isSelected, isSecondarySelected,
     onIsStarred, onDocumentClick, onDocumentDragStart, onDocumentStarClick, onDocumentDeleteClick
   } = props;
   const selectedClass = isSelected ? "selected" : "";
@@ -66,7 +65,6 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
                 <CanvasComponent
                   context={canvasContext}
                   document={document}
-                  contextClass={contextClass}
                   readOnly={true}
                   scale={scale}
                 />

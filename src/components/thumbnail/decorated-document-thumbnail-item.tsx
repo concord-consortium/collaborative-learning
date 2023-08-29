@@ -12,7 +12,6 @@ import { NavTabSectionModelType } from "../../models/view/nav-tabs";
 import "./document-type-collection.sass";
 
 interface IProps {
-  contextClass?: string;
   onDocumentDeleteClick?: (document: DocumentModelType) => void;
   onDocumentDragStart?: (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => void;
   onDocumentStarClick?: (document: DocumentModelType) => void;
@@ -27,7 +26,7 @@ interface IProps {
 
 // observes teacher names via useDocumentCaption()
 export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
-  contextClass, section, sectionDocument, tab, scale, selectedDocument, selectedSecondaryDocument,
+  section, sectionDocument, tab, scale, selectedDocument, selectedSecondaryDocument,
   onSelectDocument, onDocumentDragStart, onDocumentStarClick, onDocumentDeleteClick
 }: IProps) => {
     const user = useUserStore();
@@ -80,7 +79,6 @@ export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
         dataTestName={`${tabName}-list-items`}
         canvasContext={tab}
         document={sectionDocument}
-        contextClass={contextClass}
         scale={scale}
         isSelected={sectionDocument.key === selectedDocument}
         isSecondarySelected={sectionDocument.key === selectedSecondaryDocument}
