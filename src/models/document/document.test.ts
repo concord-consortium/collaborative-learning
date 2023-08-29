@@ -189,7 +189,7 @@ describe("document model", () => {
     document.treeMonitor!.enabled = true;
     const manager = document.treeManagerAPI as Instance<typeof TreeManager>;
 
-    const result = document.addTile("text");
+    document.addTile("text");
     await expectEntryToBeComplete(manager, 1);
     expect(document.content!.tileMap.size).toBe(1);
 
