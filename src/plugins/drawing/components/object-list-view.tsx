@@ -4,12 +4,14 @@ import { DrawingObjectType } from "../objects/drawing-object";
 import { ITileModel } from "src/models/tiles/tile-model";
 import { observer } from "mobx-react";
 import classNames from "classnames";
+import ExpandIndicatorIcon from "../../../assets/expand-indicator-icon.svg";
 
 interface IObjectListViewProps {
-  model: ITileModel
+  model: ITileModel,
+  setHoverObject: (value: string|null) => void
 }
 
-export const ObjectListView = observer(function ObjectListView({model}: IObjectListViewProps) {
+export const ObjectListView = observer(function ObjectListView({model, setHoverObject}: IObjectListViewProps) {
 
   const [open, setOpen] = useState(false);
 
@@ -29,13 +31,17 @@ export const ObjectListView = observer(function ObjectListView({model}: IObjectL
     const content = getContent();
     const selection = content.selection;
     const objectList = content.objects.slice().reverse().map(
-      (obj) => { return (<ObjectLine key={obj.id} object={obj} selection={selection}/>); });
+      (obj) => { return (<ObjectLine key={obj.id} object={obj} content={content} selection={selection} 
+        setHoverObject={setHoverObject} />); 
+      });
 
     return (
     <div className="object-list open">
       <div className="header">
-        <h4>Show/Sort</h4>
-        <button type="button" className="close" onClick={handleClose} aria-label="Close show/sort panel">&lt;</button>
+        <button type="button" className="close" onClick={handleClose} aria-label="Close show/sort panel">
+          Show/sort
+          <ExpandIndicatorIcon viewBox="13 10 10 14"/>
+        </button>
       </div>
       <div className="body">
         <ul>
@@ -47,8 +53,10 @@ export const ObjectListView = observer(function ObjectListView({model}: IObjectL
   } else {
     return (
     <div className="object-list closed">
-      <button type="button" onClick={handleOpen} aria-label="Open show/sort panel">&gt;</button>
-      <span className="vert">Show/sort</span>
+      <button type="button" onClick={handleOpen} aria-label="Open show/sort panel">
+        <ExpandIndicatorIcon viewBox="13 10 10 14"/>
+        <span className="vert">Show/sort</span>
+      </button>
     </div>);
   }
 
@@ -56,13 +64,32 @@ export const ObjectListView = observer(function ObjectListView({model}: IObjectL
 
 interface IObjectLineProps {
   object: DrawingObjectType,
-  selection: string[]
+  content: DrawingContentModelType,
+  selection: string[],
+  setHoverObject: (id: string|null) => void
 }
 
-function ObjectLine({object, selection}: IObjectLineProps) {
+function ObjectLine({object, content, selection, setHoverObject}: IObjectLineProps) {
+
+  function handleHoverIn() {
+    setHoverObject(object.id);
+  }
+
+  function handleHoverOut() {
+    setHoverObject(null);
+  }
+
+  function handleClick() {
+    content.setSelectedIds([object.id]);
+  }
+
   const Icon = object.icon;
   return (
-    <li className={classNames({selected: selection.includes(object.id)})}>
+    <li className={classNames({selected: selection.includes(object.id)})}
+        onMouseEnter={handleHoverIn}
+        onMouseLeave={handleHoverOut}
+        onClick={handleClick}
+    >
       <Icon width={20} height={20} viewBox="0 0 36 34" stroke="#000000" fill="#FFFFFF" />
       {object.description}
     </li>

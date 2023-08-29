@@ -20,6 +20,7 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
   const { documentContent, tileElt, model, readOnly, scale, onRegisterTileApi, onUnregisterTileApi } = props;
   const contentRef = useCurrent(model.content as DrawingContentModelType);
   const [imageUrlToAdd, setImageUrlToAdd] = useState("");
+  const [objectListHoveredObject, setObjectListHoveredObject] = useState(null as string|null);
   const hotKeys = useRef(new HotKeys());
   const drawingToolElement = useRef<HTMLDivElement>(null);
 
@@ -100,9 +101,10 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
           {...toolbarProps}
         />
         <div className="drawing-container">
-          <ObjectListView model={model} />
+          {!readOnly && <ObjectListView model={model} setHoverObject={setObjectListHoveredObject} />}
           <DrawingLayerView
             {...props}
+            highlightObject={objectListHoveredObject}
             imageUrlToAdd={imageUrlToAdd}
             setImageUrlToAdd={setImageUrlToAdd}
           />

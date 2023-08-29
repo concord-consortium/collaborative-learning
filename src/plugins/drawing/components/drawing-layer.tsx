@@ -30,6 +30,7 @@ interface DrawingLayerViewProps {
   model: ITileModel;
   readOnly?: boolean;
   scale?: number;
+  highlightObject?: string|null;
   onSetCanAcceptDrop: (tileId?: string) => void;
   imageUrlToAdd?: string;
   setImageUrlToAdd?: (url: string) => void;
@@ -368,11 +369,16 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   };
 
   public render() {
-    const hoveringOverAlreadySelectedObject =
-      !this.props.readOnly
-        && this.state.hoverObject 
-        && isAlive(this.state.hoverObject)
-        && this.getContent().isIdSelected(this.state.hoverObject.id);
+    let highlightObject = null;
+    if (!this.props.readOnly) {
+      if (this.props.highlightObject) {
+        highlightObject = this.getContent().objectMap[this.props.highlightObject];
+      } else if (this.state.hoverObject 
+                && isAlive(this.state.hoverObject)
+                && !this.getContent().isIdSelected(this.state.hoverObject.id)) {
+        highlightObject = this.state.hoverObject;
+      }
+    }
 
     return (
       <div className="drawing-layer"
@@ -386,9 +392,8 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
           {this.renderObjects(object => object.type === "image" )}
           {this.renderObjects(object => object.type !== "image" )}
           {!this.props.readOnly && this.renderSelectionBorders(this.getSelectedObjects(), true)}
-          {!this.props.readOnly && (this.state.hoverObject && !hoveringOverAlreadySelectedObject 
-            && isAlive(this.state.hoverObject))
-            ? this.renderSelectionBorders([this.state.hoverObject], false)
+          {highlightObject
+            ? this.renderSelectionBorders([highlightObject], false)
             : null}
           {this.state.currentDrawingObject
             ? renderDrawingObject(this.state.currentDrawingObject)
