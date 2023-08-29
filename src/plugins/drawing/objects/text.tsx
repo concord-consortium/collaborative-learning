@@ -37,6 +37,9 @@ export const TextObject = EditableObject.named("TextObject")
       const nw: Point = {x, y};
       const se: Point = {x: x + width, y: y + height};
       return {nw, se};
+    },
+    get description() {
+      return "Text";
     }
   }))
   .actions(self => ({

@@ -33,6 +33,9 @@ export const RectangleObject = types.compose("RectangleObject", StrokedObject, F
       const nw: Point = {x, y};
       const se: Point = {x: x + width, y: y + height};
       return {nw, se};
+    },
+    get description() {
+      return self.width===self.height ? "Square" : "Rectangle";
     }
   }))
   .actions(self => ({

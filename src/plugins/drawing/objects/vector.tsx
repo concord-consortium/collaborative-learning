@@ -28,6 +28,9 @@ export const VectorObject = StrokedObject.named("VectorObject")
       const nw: Point = {x: Math.min(x, x + dx), y: Math.min(y, y + dy)};
       const se: Point = {x: Math.max(x, x + dx), y: Math.max(y, y + dy)};
       return {nw, se};
+    },
+    get description() {
+      return  (self.headShape || self.tailShape) ? "Arrow" : "Line";
     }
   }))
   .actions(self => ({

@@ -57,7 +57,13 @@ export const LineObject = StrokedObject.named("LineObject")
         se.y = Math.max(se.y, point.y);
       }
       return {nw, se};
-    }}))
+    },
+
+    get description() {
+      return "Freehand";
+    }
+  
+  }))
   .actions(self => ({
     addPoint(point: Instance<typeof DeltaPoint>) {
       self.deltaPoints.push(point);

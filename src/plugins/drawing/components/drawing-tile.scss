@@ -2,14 +2,16 @@
 
 .drawing-tool {
   display: flex;
-  border: 1px solid #BBB;
   height: 100%;
 
   .drawing-container {
     display: flex;
 
     .object-list {
-      border: 2px solid $workspace-teal-light-6;  
+      border: solid 1px $charcoal-light-1;
+      border-radius: 3px;
+      display: flex;
+      flex-direction: column;
 
       &.open {
         flex: 0 0 125px;
@@ -22,19 +24,39 @@
       .header {
         display: flex;
         justify-content: space-between;
-        background-color: $workspace-teal-light-6;
+        background-color: $workspace-teal-light-7;
 
         h4 {
-          margin: 0;
+          margin: .2em .5em;
         }
 
         .close {
           flex: 0 0 20px;
         }
       }
+
+      .body {
+        overflow-y: scroll;
+        
+        ul {
+          margin: 0;
+          padding: 0;
+          text-align: left;
+
+          li {
+            list-style: none;
+            margin: .2em .5em;
+
+            &.selected {
+              background-color: $problem-orange-light-7;
+            }
+          }
+        }
+      }
     }
 
   .drawing-layer {
+    border: 1px solid #BBB;
 
     svg {
 

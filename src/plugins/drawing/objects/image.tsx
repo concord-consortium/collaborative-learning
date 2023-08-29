@@ -41,6 +41,9 @@ export const ImageObject = DrawingObject.named("ImageObject")
       const se: Point = {x: x + width, y: y + height};
       return {nw, se};
     },
+    get description() {
+      return "Image";
+    },
     get displayUrl() {
       const entry = gImageMap.getImageEntry(self.url, {filename: self.filename});
       // TODO we could return a spinner image if the entry is storing or computing dimensions

@@ -3,6 +3,7 @@ import { DrawingContentModelType } from "../model/drawing-content";
 import { DrawingObjectType } from "../objects/drawing-object";
 import { ITileModel } from "src/models/tiles/tile-model";
 import { observer } from "mobx-react";
+import classNames from "classnames";
 
 
 interface IObjectListViewProps {
@@ -26,8 +27,10 @@ export const ObjectListView = observer(function ObjectListView({model}: IObjectL
   }
 
   if (open) {
-    const objectList = getContent().objects.slice().reverse().map(
-      (obj) => { return (<ObjectLine key={obj.id} object={obj}/>); });
+    const content = getContent();
+    const selection = content.selection;
+    const objectList = content.objects.slice().reverse().map(
+      (obj) => { return (<ObjectLine key={obj.id} object={obj} selection={selection}/>); });
 
     return (
     <div className="object-list open">
@@ -35,9 +38,11 @@ export const ObjectListView = observer(function ObjectListView({model}: IObjectL
         <h4>Show/Sort</h4>
         <button type="button" className="close" onClick={handleClose} aria-label="Close show/sort panel">&lt;</button>
       </div>
-      <ul>
-        {objectList}
-      </ul>
+      <div className="body">
+        <ul>
+          {objectList}
+        </ul>
+      </div>
     </div>);
 
   } else {
@@ -50,11 +55,12 @@ export const ObjectListView = observer(function ObjectListView({model}: IObjectL
 });
 
 interface IObjectLineProps {
-  object: DrawingObjectType
+  object: DrawingObjectType,
+  selection: string[]
 }
 
-function ObjectLine({object}: IObjectLineProps) {
+function ObjectLine({object, selection}: IObjectLineProps) {
   return (
-    <li>{object.type}</li>
+    <li className={classNames({selected: selection.includes(object.id)})}>{object.description}</li>
   );
 }

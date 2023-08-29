@@ -65,6 +65,10 @@ export const DrawingObject = types.model("DrawingObject", {
     // self then MobX observation is not triggered so moving the element doesn't
     // cause the selection highlight to update.
     throw "Subclass needs to implement this";
+  },
+  get description(): string {
+    // Object types should implement this to return a user-friendly short description.
+    return "Unknown object";
   }
 }))
 .views(self => ({

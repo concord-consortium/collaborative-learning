@@ -25,6 +25,9 @@ export const EllipseObject = types.compose("EllipseObject", StrokedObject, Fille
       const nw: Point = {x: x - rx, y: y - ry};
       const se: Point = {x: x + rx, y: y + ry};
       return {nw, se};
+    },
+    get description() {
+      return (self.rx === self.ry) ? "Circle" : "Ellipse";
     }
   }))
   .actions(self => ({
