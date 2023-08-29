@@ -3,7 +3,7 @@ import { cloneDeep, each } from "lodash";
 
 import { DocumentContentModelWithAnnotations } from "./document-content-with-annotations";
 import { TileRowSnapshotOutType } from "./tile-row";
-import { isArrowAnnotation } from "../annotations/arrow-annotation";
+import { isArrowAnnotationSnapshot } from "../annotations/arrow-annotation";
 import { getTileContentInfo } from "../tiles/tile-content-info";
 import { ITileModelSnapshotOut } from "../tiles/tile-model";
 import { uniqueId } from "../../utilities/js-utils";
@@ -73,7 +73,7 @@ export const DocumentContentModel = DocumentContentModelWithAnnotations.named("D
     // Update annotations with new tile ids
     each(snapshot.annotations, (annotation, id) => {
       // TODO Move into functions for specific annotation types
-      if (isArrowAnnotation(annotation)) {
+      if (isArrowAnnotationSnapshot(annotation)) {
         if (annotation.sourceObject?.tileId) {
           annotation.sourceObject.tileId = tileIdMap[annotation.sourceObject.tileId];
         }
