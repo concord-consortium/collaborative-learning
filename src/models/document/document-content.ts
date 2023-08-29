@@ -58,14 +58,8 @@ export const DocumentContentModel = DocumentContentModelWithAnnotations.named("D
         sharedModelEntry.provider = tileIdMap[sharedModelEntry.provider];
       }
       const sharedModel = sharedModelEntry.sharedModel;
-      // TODO: Figure out why linting is failing
-      // if ("providerId" in sharedModel && typeof sharedModel.providerId === "string") {
-      //   sharedModel.providerId = tileIdMap[sharedModel.providerId];
-      if ("providerId" in sharedModel) {
-        const providedSharedModel = sharedModel as any;
-        if (typeof providedSharedModel.providerId === "string") {
-          providedSharedModel.providerId = tileIdMap[providedSharedModel.providerId];
-        }
+      if ("providerId" in sharedModel && typeof sharedModel.providerId === "string") {
+        sharedModel.providerId = tileIdMap[sharedModel.providerId];
       }
     });
     // TODO: Give the shared models new ids
