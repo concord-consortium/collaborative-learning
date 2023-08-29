@@ -2,7 +2,7 @@ import { observer } from "mobx-react";
 import React from "react";
 
 import { ThumbnailDocumentItem } from "./thumbnail-document-item";
-import { useDocumentCaption } from "../document/use-document-caption";
+import { useDocumentCaption } from "../../hooks/use-document-caption";
 import { useDocumentSyncToFirebase } from "../../hooks/use-document-sync-to-firebase";
 import { useLastSupportViewTimestamp } from "../../hooks/use-last-support-view-timestamp";
 import { DocumentModelType } from "../../models/document/document";

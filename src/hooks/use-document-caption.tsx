@@ -1,8 +1,8 @@
-import { useFirestoreTeacher } from "../../hooks/firestore-hooks";
-import { useAppConfig, useClassStore, useProblemStore, useUserStore } from "../../hooks/use-stores";
-import { DocumentModelType } from "../../models/document/document";
-import { isPublishedType, SupportPublication } from "../../models/document/document-types";
-import { getDocumentDisplayTitle } from "../../models/document/document-utils";
+import { useFirestoreTeacher } from "./firestore-hooks";
+import { useAppConfig, useClassStore, useProblemStore, useUserStore } from "./use-stores";
+import { DocumentModelType } from "../models/document/document";
+import { isPublishedType, SupportPublication } from "../models/document/document-types";
+import { getDocumentDisplayTitle } from "../models/document/document-utils";
 
 export function useDocumentCaption(document: DocumentModelType, isStudentWorkspaceDoc?: boolean) {
   const appConfig = useAppConfig();
