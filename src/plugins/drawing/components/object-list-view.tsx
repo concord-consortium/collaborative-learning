@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState } from "react";
 import { DrawingContentModelType } from "../model/drawing-content";
 import { DrawingObjectType } from "../objects/drawing-object";
 import { ITileModel } from "src/models/tiles/tile-model";
