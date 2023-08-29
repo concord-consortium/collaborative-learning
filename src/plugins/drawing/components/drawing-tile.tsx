@@ -100,7 +100,7 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
           {...toolbarProps}
         />
         <div className="drawing-container">
-          <ObjectListView />
+          <ObjectListView model={model} />
           <DrawingLayerView
             {...props}
             imageUrlToAdd={imageUrlToAdd}

@@ -1,10 +1,21 @@
 import React, { useState } from "react"
+import { DrawingContentModelType } from "../model/drawing-content";
+import { DrawingObjectType } from "../objects/drawing-object";
+import { ITileModel } from "src/models/tiles/tile-model";
+import { observer } from "mobx-react";
 
 
+interface IObjectListViewProps {
+  model: ITileModel
+}
 
-export function ObjectListView() {
+export const ObjectListView = observer(function ObjectListView({model}: IObjectListViewProps) {
 
   const [open, setOpen] = useState(false);
+
+  function getContent() {
+    return model.content as DrawingContentModelType;
+  }
 
   function handleOpen() {
     setOpen(true);
@@ -15,13 +26,18 @@ export function ObjectListView() {
   }
 
   if (open) {
+    const objectList = getContent().objects.slice().reverse().map(
+      (obj) => { return (<ObjectLine key={obj.id} object={obj}/>); });
+
     return (
     <div className="object-list open">
       <div className="header">
         <h4>Show/Sort</h4>
         <button type="button" className="close" onClick={handleClose} aria-label="Close show/sort panel">&lt;</button>
       </div>
-      <p>List of objects goes here</p>
+      <ul>
+        {objectList}
+      </ul>
     </div>);
 
   } else {
@@ -31,4 +47,14 @@ export function ObjectListView() {
     </div>);
   }
 
+});
+
+interface IObjectLineProps {
+  object: DrawingObjectType
+}
+
+function ObjectLine({object}: IObjectLineProps) {
+  return (
+    <li>{object.type}</li>
+  );
 }
