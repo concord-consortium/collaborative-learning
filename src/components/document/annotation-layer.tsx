@@ -35,17 +35,12 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const [sourceObjectType, setSourceObjectType] = useState<string | undefined>();
   const [mouseX, setMouseX] = useState<number | undefined>();
   const [mouseY, setMouseY] = useState<number | undefined>();
-  const divRef = useRef<HTMLDivElement>();
+  const divRef = useRef<Element|null>(null);
   const ui = useUIStore();
   const tileApiInterface = useContext(TileApiInterfaceContext);
 
   // Force rerenders when the layer's size changes
-  const [_resizes, setResizes] = useState(0);
-  useResizeObserver({ref: divRef.current, box: "border-box",
-    onResize() {
-      setResizes(value => value + 1);
-    }
-  });
+  useResizeObserver({ref: divRef, box: "border-box"});
 
   function getRowElement(rowId?: string) {
     if (rowId === undefined) return undefined;
