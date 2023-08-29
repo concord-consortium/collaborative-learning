@@ -3,7 +3,8 @@ import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React, { useCallback } from "react";
 import { computeStrokeDashArray, DrawingObjectType, DrawingTool, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
-import { BoundingBoxDelta, Point, ToolbarSettings, VectorEndShape, endShapesForVectorType, getVectorTypeIcon } 
+import { BoundingBoxDelta, Point, ToolbarSettings, VectorEndShape, 
+  VectorType, endShapesForVectorType, getVectorTypeIcon } 
   from "../model/drawing-basic-types";
 import { SvgToolbarButton, } from "../components/drawing-toolbar-buttons";
 
@@ -31,6 +32,9 @@ export const VectorObject = StrokedObject.named("VectorObject")
     },
     get description() {
       return  (self.headShape || self.tailShape) ? "Arrow" : "Line";
+    },
+    get icon() {
+      return getVectorTypeIcon(VectorType.singleArrow);
     }
   }))
   .actions(self => ({

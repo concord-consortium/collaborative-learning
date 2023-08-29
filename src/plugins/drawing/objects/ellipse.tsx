@@ -28,6 +28,9 @@ export const EllipseObject = types.compose("EllipseObject", StrokedObject, Fille
     },
     get description() {
       return (self.rx === self.ry) ? "Circle" : "Ellipse";
+    },
+    get icon() {
+      return EllipseToolIcon;
     }
   }))
   .actions(self => ({

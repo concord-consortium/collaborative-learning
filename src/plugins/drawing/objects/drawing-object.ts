@@ -4,6 +4,7 @@ import { SelectionBox } from "../components/selection-box";
 import { BoundingBox, BoundingBoxDelta, Point, ToolbarSettings }
    from "../model/drawing-basic-types";
 import { StampModelType } from "../model/stamp";
+import FreehandToolIcon from "../assets/freehand-icon.svg";
 
 export type ToolbarModalButton = "select" | "line" | "vector" | "rectangle" | "ellipse" | "text" | "stamp" | "variable";
 
@@ -69,6 +70,9 @@ export const DrawingObject = types.model("DrawingObject", {
   get description(): string {
     // Object types should implement this to return a user-friendly short description.
     return "Unknown object";
+  },
+  get icon(): React.FC<React.SVGProps<SVGSVGElement>> {
+    return FreehandToolIcon;
   }
 }))
 .views(self => ({

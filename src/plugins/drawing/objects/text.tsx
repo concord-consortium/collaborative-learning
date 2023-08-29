@@ -40,6 +40,9 @@ export const TextObject = EditableObject.named("TextObject")
     },
     get description() {
       return "Text";
+    },
+    get icon() {
+      return TextToolIcon;
     }
   }))
   .actions(self => ({

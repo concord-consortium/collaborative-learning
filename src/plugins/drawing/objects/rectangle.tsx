@@ -36,6 +36,9 @@ export const RectangleObject = types.compose("RectangleObject", StrokedObject, F
     },
     get description() {
       return self.width===self.height ? "Square" : "Rectangle";
+    },
+    get icon() {
+      return RectToolIcon;
     }
   }))
   .actions(self => ({

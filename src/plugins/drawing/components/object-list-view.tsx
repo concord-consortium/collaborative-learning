@@ -5,7 +5,6 @@ import { ITileModel } from "src/models/tiles/tile-model";
 import { observer } from "mobx-react";
 import classNames from "classnames";
 
-
 interface IObjectListViewProps {
   model: ITileModel
 }
@@ -49,6 +48,7 @@ export const ObjectListView = observer(function ObjectListView({model}: IObjectL
     return (
     <div className="object-list closed">
       <button type="button" onClick={handleOpen} aria-label="Open show/sort panel">&gt;</button>
+      <span className="vert">Show/sort</span>
     </div>);
   }
 
@@ -60,7 +60,11 @@ interface IObjectLineProps {
 }
 
 function ObjectLine({object, selection}: IObjectLineProps) {
+  const Icon = object.icon;
   return (
-    <li className={classNames({selected: selection.includes(object.id)})}>{object.description}</li>
+    <li className={classNames({selected: selection.includes(object.id)})}>
+      <Icon width={20} height={20} viewBox="0 0 36 34" stroke="#000000" fill="#FFFFFF" />
+      {object.description}
+    </li>
   );
 }

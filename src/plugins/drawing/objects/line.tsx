@@ -61,6 +61,10 @@ export const LineObject = StrokedObject.named("LineObject")
 
     get description() {
       return "Freehand";
+    },
+
+    get icon() {
+      return FreehandToolIcon;
     }
   
   }))

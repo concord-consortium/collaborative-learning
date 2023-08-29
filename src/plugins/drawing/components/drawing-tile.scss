@@ -19,6 +19,14 @@
 
       &.closed {
         flex: 0 0 20px;
+
+        .vert {
+          position: absolute;
+          font-weight: bold;
+          margin: 25px 12px;
+          transform-origin: 0 50%;
+          transform: rotate(90deg);  
+        }
       }
 
       .header {
@@ -45,10 +53,14 @@
 
           li {
             list-style: none;
-            margin: .2em .5em;
+            padding: .2em .5em;
 
             &.selected {
               background-color: $problem-orange-light-7;
+            }
+
+            svg {
+              vertical-align: bottom;
             }
           }
         }
