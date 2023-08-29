@@ -1,5 +1,6 @@
 import { ITileMetadataModel, TileMetadataModel } from "./tile-metadata";
 import { TileContentModel, ITileContentModel } from "./tile-content";
+import { IClueObjectSnapshot } from "../annotations/clue-object";
 import { AppConfigModelType } from "../stores/app-config-model";
 import { PartialSharedModelEntry } from "../document/document-content-types";
 import { UpdatedSharedDataSetIds } from "../shared/shared-data-set";
@@ -25,6 +26,12 @@ type TileContentNewSharedModelIdUpdater = (
   updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds>
 ) => any;
 
+type ClueObjectNewSharedModelIdUpdater = (
+  clueObject: IClueObjectSnapshot,
+  sharedModelEntries: PartialSharedModelEntry[],
+  updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds>
+) => any;
+
 export interface ITileContentInfo {
   type: string;
   modelClass: typeof TileContentModel;
@@ -40,6 +47,7 @@ export interface ITileContentInfo {
   tileSnapshotPreProcessor?: TileModelSnapshotPreProcessor;
   contentSnapshotPostProcessor?: TileContentSnapshotPostProcessor;
   updateContentWithNewSharedModelIds?: TileContentNewSharedModelIdUpdater;
+  updateObjectReferenceWithNewSharedModelIds?: ClueObjectNewSharedModelIdUpdater;
 }
 
 const gTileContentInfoMap: Record<string, ITileContentInfo> = {};

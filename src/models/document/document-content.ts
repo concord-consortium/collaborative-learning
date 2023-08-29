@@ -3,10 +3,10 @@ import { getSnapshot, Instance, SnapshotIn } from "mobx-state-tree";
 import { cloneDeep, each } from "lodash";
 
 import { IDragTilesData, NewRowTileArray, PartialSharedModelEntry, PartialTile } from "./document-content-types";
-import { DocumentContentModelWithAnnotations } from "./document-content-with-annotations";
+import { DocumentContentModelWithTileDragging } from "./drag-tiles";
 import { IDropRowInfo, TileRowModelType, TileRowSnapshotOutType } from "./tile-row";
 import {
-  ArrowAnnotation, IArrowAnnotation, isArrowAnnotation, updateArrowAnnotationTileIds
+  ArrowAnnotation, IArrowAnnotationSnapshot, isArrowAnnotation, updateArrowAnnotationTileIds
 } from "../annotations/arrow-annotation";
 import { sharedModelFactory, UnknownSharedModel } from "../shared/shared-model-manager";
 import { getTileContentInfo, IDocumentExportOptions } from "../tiles/tile-content-info";
@@ -19,6 +19,7 @@ import {
   getSharedDataSetSnapshotWithUpdatedIds, getUpdatedSharedDataSetIds, isSharedDataSetSnapshot, SharedDataSet,
   UpdatedSharedDataSetIds, updateSharedDataSetSnapshotWithNewTileIds
 } from "../shared/shared-data-set";
+import { IClueObjectSnapshot } from "../annotations/clue-object";
 
 /**
  * The DocumentContentModel is the combination of 3 parts:
@@ -42,7 +43,7 @@ import {
  * Note: the name "DocumentContent" is important because it is used in other
  * parts of the code to find a MST parent with this name.
  */
-export const DocumentContentModel = DocumentContentModelWithAnnotations.named("DocumentContent")
+export const DocumentContentModel = DocumentContentModelWithTileDragging.named("DocumentContent")
 .views(self => ({
   snapshotWithUniqueIds(asTemplate = false) {
     const snapshot = cloneDeep(getSnapshot(self));
@@ -113,18 +114,6 @@ export const DocumentContentModel = DocumentContentModelWithAnnotations.named("D
     snapshot.rowOrder = snapshot.rowOrder.map(rowId => tileIdMap[rowId]);
 
     return snapshot;
-  },
-  getAnnotationsUsedByTiles(tileIds: string[]) {
-    // TODO Make generic to handle any type of annotation, not just arrow annotations
-    const annotations: Record<string, IArrowAnnotation> = {};
-    Array.from(self.annotations.values()).forEach(annotation => {
-      if (tileIds.includes(annotation.sourceObject?.tileId ?? "")
-        && tileIds.includes(annotation.targetObject?.tileId ?? "")
-      ) {
-        annotations[annotation.id] = annotation;
-      }
-    });
-    return annotations;
   }
 }))
 .views(self => ({
@@ -248,7 +237,7 @@ export const DocumentContentModel = DocumentContentModelWithAnnotations.named("D
   copyTiles(
     tiles: IDragTileItem[],
     sharedModelEntries: PartialSharedModelEntry[],
-    annotations: IArrowAnnotation[],
+    annotations: IArrowAnnotationSnapshot[],
     rowInfo: IDropRowInfo,
     insertTileFunction: (updatedTiles: IDropTileItem[], rowInfo: IDropRowInfo) => NewRowTileArray
   ) {
@@ -273,6 +262,10 @@ export const DocumentContentModel = DocumentContentModelWithAnnotations.named("D
       }
     });
 
+    const findTileSharedModelEntries = (tileId: string) => {
+      return sharedModelEntries.filter(entry => entry.tiles?.map(t => t.id).includes(tileId));
+    };
+
     // Update tile content with new shared model ids
     const tileIdMap: Record<string, string> = {};
     const updatedTiles: IDropTileItem[] = [];
@@ -282,8 +275,7 @@ export const DocumentContentModel = DocumentContentModelWithAnnotations.named("D
       tileIdMap[tile.tileId] = uniqueId();
 
       // Find the shared models for this tile
-      const tileSharedModelEntries =
-        sharedModelEntries.filter(entry => entry.tiles?.map(t => t.id).includes(tile.tileId));
+      const tileSharedModelEntries = findTileSharedModelEntries(tile.tileId);
 
       // Update the tile's references to its shared models
       const updateFunction = getTileContentInfo(tile.tileType)?.updateContentWithNewSharedModelIds;
@@ -331,12 +323,26 @@ export const DocumentContentModel = DocumentContentModelWithAnnotations.named("D
       }
     });
 
-    // Update tile ids for annotations and add copies to document
+    // Update tile and object ids for annotations and add copies to document
+    const updateObject = (object?: IClueObjectSnapshot) => {
+      if (object) {
+        const tile = tiles.find(t => t.tileId === object?.tileId);
+        if (tile) {
+          const tileSharedModelEntries = findTileSharedModelEntries(tile.tileId);
+          const updateFunction = getTileContentInfo(tile.tileType)?.updateObjectReferenceWithNewSharedModelIds;
+          if (updateFunction) {
+            updateFunction(object, tileSharedModelEntries, updatedSharedModelMap);
+          }
+        }
+      }
+    };
     annotations.forEach(annotation => {
       if (isArrowAnnotation(annotation)) {
-        const newAnnotationSnapshot = cloneDeep(getSnapshot(annotation));
-        newAnnotationSnapshot.id = uniqueId();
+        const newAnnotationSnapshot = cloneDeep(annotation);
+        updateObject(newAnnotationSnapshot.sourceObject);
+        updateObject(newAnnotationSnapshot.targetObject);
         updateArrowAnnotationTileIds(newAnnotationSnapshot, tileIdMap);
+        newAnnotationSnapshot.id = uniqueId();
         self.addArrow(ArrowAnnotation.create(newAnnotationSnapshot));
       }
     });
@@ -347,7 +353,7 @@ export const DocumentContentModel = DocumentContentModelWithAnnotations.named("D
 }))
 .actions(self => ({
   handleDragCopyTiles(dragTiles: IDragTilesData, rowInfo: IDropRowInfo) {
-    const { tiles, sharedModels } = dragTiles;
+    const { tiles, sharedModels, annotations } = dragTiles;
 
     // Convert IDragSharedModelItems to partial SharedModelEnries
     const sharedModelEntries: PartialSharedModelEntry[] = [];
@@ -367,7 +373,7 @@ export const DocumentContentModel = DocumentContentModelWithAnnotations.named("D
       }
     });
 
-    self.copyTiles(tiles, sharedModelEntries, [], rowInfo, self.userCopyTiles);
+    self.copyTiles(tiles, sharedModelEntries, annotations, rowInfo, self.userCopyTiles);
   },
   duplicateTiles(tiles: IDragTileItem[]) {
     // Determine the row to add the duplicated tiles into
@@ -376,7 +382,7 @@ export const DocumentContentModel = DocumentContentModelWithAnnotations.named("D
     // Find shared models used by tiles being duplicated
     const tileIds = tiles.map(tile => tile.tileId);
     const sharedModelEntries = Object.values(self.getSharedModelsUsedByTiles(tileIds));
-    const annotations = Object.values(self.getAnnotationsUsedByTiles(tileIds));
+    const annotations = Object.values(self.getAnnotationsUsedByTiles(tileIds, true));
 
     self.copyTiles(
       tiles,

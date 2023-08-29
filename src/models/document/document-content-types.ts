@@ -1,3 +1,4 @@
+import { IArrowAnnotation } from "../annotations/arrow-annotation";
 import { SharedModelSnapshotType } from "../shared/shared-model";
 import { IDragSharedModelItem } from "../shared/shared-model-manager";
 import { IDragTileItem } from "../tiles/tile-model";
@@ -42,6 +43,7 @@ export interface IDragTilesData {
   sourceDocId: string;
   tiles: IDragTileItem[];
   sharedModels: IDragSharedModelItem[];
+  annotations: IArrowAnnotation[];
 }
 
 export interface PartialTile {

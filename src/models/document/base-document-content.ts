@@ -1,4 +1,4 @@
-import { cloneDeep, each } from "lodash";
+import { each } from "lodash";
 import { types, getType, getEnv, SnapshotOrInstance } from "mobx-state-tree";
 import {
   getPlaceholderSectionId, isPlaceholderTile, PlaceholderContentModel
@@ -22,20 +22,11 @@ import { LogEventName } from "../../lib/logger-types";
 import { safeJsonParse, uniqueId } from "../../utilities/js-utils";
 import { defaultTitle, titleMatchesDefault } from "../../utilities/title-utils";
 import { SharedModel, SharedModelType } from "../shared/shared-model";
-import {
-  sharedModelFactory, UnknownSharedModel
-} from "../shared/shared-model-manager";
-import { IDocumentContentAddTileOptions, IDragTilesData, INewRowTile, INewTileOptions,
-   ITileCountsPerSection, NewRowTileArray, PartialSharedModelEntry, PartialTile } from "./document-content-types";
+import { IDocumentContentAddTileOptions, INewRowTile, INewTileOptions,
+   ITileCountsPerSection, NewRowTileArray } from "./document-content-types";
 import {
   SharedModelEntry, SharedModelEntrySnapshotType, SharedModelEntryType, SharedModelMap
 } from "./shared-model-entry";
-
-// Imports related to hard coding shared model duplication
-import {
-  getSharedDataSetSnapshotWithUpdatedIds, getUpdatedSharedDataSetIds, isSharedDataSetSnapshot, SharedDataSet,
-  UpdatedSharedDataSetIds, updateSharedDataSetSnapshotWithNewTileIds
-} from "../shared/shared-data-set";
 
 /**
  * This is one part of the DocumentContentModel. The other part is
@@ -890,135 +881,5 @@ export const BaseDocumentContentModel = types
         }
       }
       return { oldTitle: undefined, newTitle: undefined };
-    }
-  }))
-  .actions(self => ({
-    // Copies tiles and shared models into the specified row, giving them all new ids
-    copyTiles(
-      tiles: IDragTileItem[],
-      sharedModelEntries: PartialSharedModelEntry[],
-      rowInfo: IDropRowInfo,
-      insertTileFunction: (updatedTiles: IDropTileItem[], rowInfo: IDropRowInfo) => NewRowTileArray
-    ) {
-      // Update shared models with new ids
-      const updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds> = {};
-      const newSharedModelEntries: PartialSharedModelEntry[] = [];
-      sharedModelEntries.forEach(sharedModelEntry => {
-        // For now, only duplicate shared data sets
-        if (isSharedDataSetSnapshot(sharedModelEntry.sharedModel)) {
-          // Determine new ids
-          const sharedDataSet = sharedModelEntry.sharedModel;
-          const updatedIds = getUpdatedSharedDataSetIds(sharedDataSet);
-          if (sharedDataSet.id) updatedSharedModelMap[sharedDataSet.id] = updatedIds;
-
-          // Create a snapshot for the shared model with updated ids, which will be updated with new tile ids
-          // and added to the document later
-          const sharedModel = getSharedDataSetSnapshotWithUpdatedIds(sharedDataSet, updatedIds);
-          newSharedModelEntries.push({
-            tiles: sharedModelEntry.tiles,
-            sharedModel
-          });
-        }
-      });
-
-      // Update tile content with new shared model ids
-      const tileIdMap: Record<string, string> = {};
-      const updatedTiles: IDropTileItem[] = [];
-      tiles.forEach(tile => {
-        const oldContent = JSON.parse(tile.tileContent);
-        const tileContent = cloneDeep(oldContent);
-        tileIdMap[tile.tileId] = uniqueId();
-
-        // Find the shared models for this tile
-        const tileSharedModelEntries =
-          sharedModelEntries.filter(entry => entry.tiles?.map(t => t.id).includes(tile.tileId));
-
-        // Update the tile's references to its shared models
-        const updateFunction = getTileContentInfo(tile.tileType)?.updateContentWithNewSharedModelIds;
-        if (updateFunction) {
-          tileContent.content = updateFunction(oldContent.content, tileSharedModelEntries, updatedSharedModelMap);
-        }
-
-        // Save the updated tile so we can add it to the document
-        updatedTiles.push({ ...tile, newTileId: tileIdMap[tile.tileId], tileContent: JSON.stringify(tileContent) });
-      });
-
-      // Add copied tiles to document
-      const results = insertTileFunction(updatedTiles, rowInfo);
-
-      // Increment default titles when necessary
-      results.forEach((result, i) => {
-        if (result?.tileId) {
-          const { oldTitle, newTitle } = self.updateDefaultTileTitle(result.tileId);
-
-          // If the tile title needed to be updated, we assume we should also update the data set's name
-          if (newTitle && sharedModelEntries) {
-            newSharedModelEntries.forEach(sharedModelEntry => {
-              if (isSharedDataSetSnapshot(sharedModelEntry.sharedModel)) {
-                const sharedDataSet = sharedModelEntry.sharedModel;
-                const oldName = sharedDataSet.dataSet?.name;
-                if (sharedDataSet.dataSet && oldName === oldTitle) {
-                  sharedDataSet.dataSet.name = newTitle;
-                }
-              }
-            });
-          }
-        }
-      });
-
-      // Update tile ids for shared models and add copies to document
-      newSharedModelEntries.forEach(sharedModelEntry => {
-        const updatedTileIds: string[] = sharedModelEntry.tiles.map((oldTile: PartialTile) => tileIdMap[oldTile.id])
-          .filter((tileId: string | undefined) => tileId !== undefined);
-        if (isSharedDataSetSnapshot(sharedModelEntry.sharedModel)) {
-          const updatedSharedModel = { ...sharedModelEntry.sharedModel };
-          updateSharedDataSetSnapshotWithNewTileIds(updatedSharedModel, tileIdMap);
-          const newSharedModelEntry =
-            self.addSharedModel(SharedDataSet.create(updatedSharedModel));
-          updatedTileIds.forEach(tileId => newSharedModelEntry.tiles.push(tileId));
-        }
-      });
-
-      // TODO: Make sure logging is correct
-      self.logCopyTileResults(tiles, results);
-    }
-  }))
-  .actions(self => ({
-    handleDragCopyTiles(dragTiles: IDragTilesData, rowInfo: IDropRowInfo) {
-      const { tiles, sharedModels } = dragTiles;
-
-      // Convert IDragSharedModelItems to partial SharedModelEnries
-      const sharedModelEntries: PartialSharedModelEntry[] = [];
-      sharedModels.forEach(dragSharedModel => {
-        try {
-          const content = JSON.parse(dragSharedModel.content);
-          const Model = sharedModelFactory(content);
-          const sharedModel = Model !== UnknownSharedModel ? Model.create(content) : undefined;
-          if (sharedModel) {
-            sharedModelEntries.push({
-              sharedModel,
-              tiles: dragSharedModel.tileIds.map(tileId => ({ id: tileId }))
-            });
-          }
-        } catch (e) {
-          console.warn(`Unable to copy shared model with content`, dragSharedModel.content);
-        }
-      });
-
-      self.copyTiles(tiles, sharedModelEntries, rowInfo, self.userCopyTiles);
-    },
-    duplicateTiles(tiles: IDragTileItem[]) {
-      // Determine the row to add the duplicated tiles into
-      const rowIndex = self.getRowAfterTiles(tiles);
-
-      // Find shared models used by tiles being duplicated
-      const sharedModelEntries = Object.values(self.getSharedModelsUsedByTiles(tiles.map(tile => tile.tileId)));
-
-      self.copyTiles(
-        tiles,
-        sharedModelEntries,
-        { rowInsertIndex: rowIndex },
-        (t: IDropTileItem[], rowInfo: IDropRowInfo) => self.copyTilesIntoNewRows(t, rowInfo.rowInsertIndex)
-      );
     }
   }));
