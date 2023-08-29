@@ -391,7 +391,7 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocum
       }
       <EditableDocumentContent
         mode={"1-up"}
-        idClass={`${tab}-${subTab.label}-document-area`}
+        contextClass={`${tab}-${subTab.label}-document-area`}
         isPrimary={false}
         document={openDocument}
         readOnly={true}

@@ -40,7 +40,7 @@ export class ClassLogsComponent extends BaseComponent<IProps> {
                     <CanvasComponent
                       context="class-work"
                       document={publication}
-                      idClass="class-log"
+                      contextClass="class-log"
                       readOnly={true}
                       scale={this.props.scale}
                     />

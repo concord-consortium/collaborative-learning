@@ -28,7 +28,7 @@ interface IProps {
   content?: DocumentContentModelType;
   context: string;
   document?: DocumentModelType;
-  idClass?: string; // A class applied that identifies this version of the document, ie top-panel-thumbnail
+  contextClass?: string; // A class applied that identifies this version of the document, ie top-panel-thumbnail
   overlayMessage?: string;
   readOnly?: boolean;
   scale?: number;
@@ -88,8 +88,8 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
     };
   }
 
-  private getIdClass() {
-    return this.props.idClass ?? "basic";
+  private getContextClass() {
+    return this.props.contextClass ?? "default";
   }
 
   public render() {
@@ -99,7 +99,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
     }
     const content = this.getDocumentToShow()?.content ?? this.getDocumentContent();
     const readClass = this.props.readOnly ? "read-only" : "read-write";
-    const documentClasses = `.document-content.${this.getIdClass()}.${readClass}`;
+    const documentClasses = `.document-content.${this.getContextClass()}.${readClass}`;
     return (
       <TileApiInterfaceContext.Provider value={this.tileApiInterface}>
         <div key="canvas" className="canvas" data-test="canvas" onKeyDown={this.handleKeyDown}>
@@ -119,7 +119,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderContent() {
-    const {content, document, idClass, showPlayback, viaTeacherDashboard, ...others} = this.props;
+    const {content, document, contextClass, showPlayback, viaTeacherDashboard, ...others} = this.props;
     const {showPlaybackControls} = this.state;
     const documentToShow = this.getDocumentToShow();
     const documentContent = content || documentToShow?.content; // we only pass in content if it is a problem panel
@@ -137,7 +137,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
             key={showPlaybackControls ? "history" : "main"}
             content={documentContent}
             documentId={documentToShow?.key}
-            idClass={this.getIdClass()}
+            contextClass={this.getContextClass()}
             onScroll={(x: number, y: number) => this.setState({ documentScrollX: x, documentScrollY: y })}
             {...{typeClass, viaTeacherDashboard, ...others}}
           />

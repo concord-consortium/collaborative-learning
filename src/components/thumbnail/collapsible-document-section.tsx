@@ -82,7 +82,7 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
   const hasDocuments = documentKeys.length > 0;
 
   const tab = subTab.label;
-  const idClass = `${tab}-panel-thumbnail`;
+  const contextClass = `${tab}-panel-thumbnail`;
   return (
     <div className="collapsible-documents-section">
       <div className="section-collapse-toggle" onClick={hasDocuments ? handleSectionToggle : undefined}>
@@ -101,7 +101,7 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
               return (
                 <DocumentContextReact.Provider key={document.key} value={documentContext}>
                   <DecoratedDocumentThumbnailItem
-                    idClass={idClass}
+                    contextClass={contextClass}
                     onSelectDocument={() => onSelectDocument?.(document)}
                     scale={scale}
                     section={currentSection}
