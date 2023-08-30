@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 import { ITileProps, extractDragTileType, kDragTiles } from "../../components/tiles/tile-component";
 import { useUIStore } from "../../hooks/use-stores";
@@ -12,7 +12,7 @@ import { SortSelect } from "./components/sort-select";
 import { useToolbarTileApi } from "../../components/tiles/hooks/use-toolbar-tile-api";
 import { AddIconButton, RemoveIconButton } from "./components/add-remove-icons";
 import { useCautionAlert } from "../../components/utilities/use-caution-alert";
-import { EditFacet } from "./data-card-types";
+import { EditFacet, kDataCardDefaultHeight } from "./data-card-types";
 import { DataCardSortArea } from "./components/sort-area";
 import { safeJsonParse } from "../../utilities/js-utils";
 import { mergeTwoDataSets } from "../../models/data/data-set-utils";
@@ -20,8 +20,6 @@ import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-
 import { useConsumerTileLinking } from "../../hooks/use-consumer-tile-linking";
 
 import "./data-card-tile.scss";
-import { TileResizeEntry } from "../../components/tiles/tile-api";
-import { to } from "color-string";
 
 export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
   const { documentId, model, readOnly, documentContent, tileElt, onSetCanAcceptDrop, onRegisterTileApi,
@@ -56,20 +54,25 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
         return model.title;
       }
     });
+    adjustHeight();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // TODO, find a good dependency for this, also one that doesn't cause a loop
-  const adjustHeight = () => {
+  const adjustHeight = useCallback(() => {
     const uiHeight = tileElt?.querySelector(".data-card-container")?.clientHeight || 0;
     const heightDiff = height ? height - uiHeight : 0;
-    if (heightDiff < 30) {
-      onRequestRowHeight(model.id, uiHeight + 30);
+    if (!tileElt) return;
+    if (!readOnly && heightDiff < 30) {
+      onRequestRowHeight(model.id, uiHeight + 60);
     }
-  };
+    if (readOnly){
+      onRequestRowHeight(model.id, kDataCardDefaultHeight);
+    }
+  }, [height, model.id, onRequestRowHeight, readOnly, tileElt]);
 
   useEffect(() => {
     adjustHeight();
-  });
+  }, [currEditAttrId, currEditFacet, height, imageUrlToAdd, onRequestRowHeight, adjustHeight, tileElt]);
+
   /* ==[ Drag and Drop ] == */
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
