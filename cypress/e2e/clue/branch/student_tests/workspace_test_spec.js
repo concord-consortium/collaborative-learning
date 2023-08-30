@@ -36,13 +36,13 @@ context('Test the overall workspace', function () {
     });
     it('verify close of nav tabs', function () {
       cy.collapseResourceTabs();
-      cy.get('.nav-tab-panel').should('not.exist');
+      cy.get('.nav-tab-panel').should('not.be.visible');
       cy.get('.primary-workspace').should('be.visible');
     });
     it('verify collapse workspace', function () {
       cy.get('.resources-expander').click();
       cy.collapseWorkspace();
-      cy.get('.primary-workspace').should('not.exist');
+      cy.get('.primary-workspace').should('not.be.visible');
       cy.get('.workspace-expander').should('exist');
       cy.get('.nav-tab-panel').should('exist');
     });

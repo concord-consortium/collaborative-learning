@@ -6,6 +6,7 @@ import { DocumentWorkspaceComponent } from "../document/document-workspace";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 import { NavTabPanel } from "../navigation/nav-tab-panel";
 import { ResizePanelDivider } from "./resize-panel-divider";
+import { ResizablePanel } from "./resizable-panel";
 
 import "./workspace.sass";
 
@@ -30,12 +31,20 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
         className="drag-handler"
         onDragOver={handleDragOverWorkspace}
       />
-      {navTabSpecs.showNavPanel && <NavTabPanel
-          onDragOver={handleDragOverWorkspace}
-          collapsed={!navTabContentShown}
-      />}
-      {navTabSpecs.showNavPanel && <ResizePanelDivider /> }
-      {workspaceShown && <DocumentWorkspaceComponent /> }
+
+      {navTabSpecs.showNavPanel &&
+        <>
+          <ResizablePanel collapsed={!navTabContentShown} >
+            <NavTabPanel
+              onDragOver={handleDragOverWorkspace}
+            />
+          </ResizablePanel>
+          <ResizePanelDivider />
+        </>
+      }
+      <ResizablePanel collapsed={!workspaceShown}>
+        <DocumentWorkspaceComponent />
+      </ResizablePanel>
     </div>
   );
 });

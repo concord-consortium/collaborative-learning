@@ -223,13 +223,10 @@ Cypress.Commands.add('collapseResourceTabs', () => {
 Cypress.Commands.add('closeResourceTabs', () => {
   cy.get('.nav-tab-panel .close-button').click();
 });
-Cypress.Commands.add('collapseResourcesPanel', () => {
-  cy.get('.divider').click({force:true});
-  cy.get('.divider-container .workspace-expander').click();
-});
 Cypress.Commands.add('collapseWorkspace', () => {
-  cy.get('.divider').click({force:true});
-  cy.get('.divider-container .resources-expander').click();
+  cy.get('.drag-thumbnail').trigger('mouseover').then(() => {
+    cy.get('.divider-container .resources-expander').click();
+  });
 });
 Cypress.Commands.add('linkTableToGraph', (table, graph) => {
   cy.get('.primary-workspace .table-title').contains(table).click();

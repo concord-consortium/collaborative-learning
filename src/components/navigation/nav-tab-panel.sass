@@ -1,28 +1,11 @@
 @import ../vars
 
+
 .resource-and-chat-panel
   position: relative
-  // Split the remaing width in .workspace with the primary workspace
-  flex: 1
-  // Allow the width to be less than what is required by the content inside
-  min-width: 0
-  transition-duration: 0.5s
+  height: 100%
   background-color: white
   border-radius: 0 6px 0 0
-  transition-property: flex
-  overflow-x: clip
-  // In theory this should make the width change linearly with time,
-  // but it didn't work well.
-  // transition-timing-function: cubic-bezier(0.5, 0.2, 0.7, 0.4)
-
-  &.collapsed
-    // A problem with animating using the flex-grow property is that it is not
-    // linear. the percentage of the width is: leftFlexGrow / (leftFlextGrow + rightFlexGrow)
-    // so for example when leftFlexGrow is at 0.5 the width is roughly 0.5 / (0.5 + 1) or 1/3 of
-    // the total width
-    flex: 0
-    // transform: scale(0,1)
-    // transform-origin: left
 
   .nav-tab-panel
     // Split width between the tabs and the chat panel

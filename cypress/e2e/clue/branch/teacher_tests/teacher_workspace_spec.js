@@ -88,7 +88,7 @@ context('Teacher Workspace', () => {
     it('verify teacher guide', () => {
       //There is race condition that sometimes doesn't load the teacher guide
       //So we close the Resources panel, and re-open to force it to rerender
-      cy.collapseResourcesPanel();
+      cy.collapseResourceTabs();
       cy.openResourceTabs();
       cy.get('.top-tab.tab-teacher-guide').should('exist').click({force:true});
       cy.get('.prob-tab.teacher-guide').should('exist').and('have.length', 4).each(function (subTab, index, subTabList) {
