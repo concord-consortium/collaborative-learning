@@ -9,7 +9,7 @@ export const kArrowAnnotationType = "arrowAnnotation";
 export const kArrowAnnotationTextWidth = 150;
 export const kArrowAnnotationTextHeight = 50;
 const kArrowAnnotationTextMargin = 15;
-export const kTextHorizontalMargin = kArrowAnnotationTextMargin + kArrowAnnotationTextWidth / 2;
+export const kTextHorizontalMargin = kArrowAnnotationTextMargin + kArrowAnnotationTextWidth / 4;
 export const kTextVerticalMargin = kArrowAnnotationTextMargin + kArrowAnnotationTextHeight / 2;
 
 export interface IArrowAnnotationDragOffsets {
