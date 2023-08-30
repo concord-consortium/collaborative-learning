@@ -23,6 +23,7 @@ export const EditableTableTitle: React.FC<IProps> = observer(function EditableTa
   getLinkIndex, onBeginEdit, onEndEdit, onLinkGeometryClick
 }) {
 
+  console.log("| EditableTableTitle: titleCellWidth: ", titleCellWidth, " titleCellHeight: ", titleCellHeight);
   verifyAlive(content, "EditableTableTile");
 
   // content.title and observer() allow this component to re-render
@@ -59,7 +60,7 @@ export const EditableTableTitle: React.FC<IProps> = observer(function EditableTa
                             { "table-title-editing": isEditing, "table-title-default": isDefaultTitle });
   const style = { width: titleCellWidth, height: titleCellHeight };
   return (
-    <div className={classes} style={style} onClick={handleClick}>
+    <div className={classes} style={style} onClick={handleClick}>ME
       {isEditing
         ? <HeaderCellInput style={style} value={editingTitle || ""}
             onKeyDown={handleKeyDown} onChange={setEditingTitle} onClose={handleClose} />
