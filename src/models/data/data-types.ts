@@ -20,12 +20,12 @@ export function isNumeric(val: IValueType) {
 export function toNumeric(value: IValueType) {
   if (value == null || value === "") return NaN;
   // Strip commas
-  // HACK: This approach is not safe for internalization.
+  // HACK: This approach is not safe for internationalization.
   // Some locales use `,` for a decimal place.
   // One place to start down that rabbit hole is:
   // https://stackoverflow.com/questions/11665884/how-can-i-parse-a-string-with-a-comma-thousand-separator-to-a-number
   // The approach is also not safe because it would convert `1,2` to the number 12
-  const noCommasValue = typeof value === "string" ? value.replaceAll(",", "") : value;
+  const noCommasValue = typeof value === "string" ? value.replace(/,/g, "") : value;
   return Number(noCommasValue);
 }
 
