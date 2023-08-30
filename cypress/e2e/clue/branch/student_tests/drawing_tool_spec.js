@@ -80,6 +80,12 @@ context('Draw Tool Tile', function () {
           .trigger("mouseup",   450, 100);
         drawToolTile.getFreehandDrawing().should("exist").and("have.length", 1);
       });
+      it("shows up in show/sort panel", () => {
+        drawToolTile.getDrawTileShowSortPanelOpenButton().click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanel().should("have.class", "open")
+          .get("li").should("have.length", 1).and("contain.text", "Freehand");
+        drawToolTile.getDrawTileShowSortPanelCloseButton().click({scrollBehavior: false});
+      });
       it("selects freehand drawing", () => {
         drawToolTile.getDrawToolSelect().click({scrollBehavior: false});
         // First make sure we don't select it even if we are inside of its
@@ -124,6 +130,12 @@ context('Draw Tool Tile', function () {
           .trigger("mouseup",   100, 50);
         drawToolTile.getVectorDrawing().should("exist").and("have.length", 1);
       });
+      it("shows up in show/sort panel", () => {
+        drawToolTile.getDrawTileShowSortPanelOpenButton().click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanel().should("have.class", "open")
+          .get("li").should("have.length", 1).and("contain.text", "Line");
+        drawToolTile.getDrawTileShowSortPanelCloseButton().click({scrollBehavior: false});
+      });
       it("verify after creation, object is selected", () => {
         drawToolTile.getDrawToolSelect().should("have.class", "selected");
         drawToolTile.getDrawToolVector().should("not.have.class", "selected");
@@ -167,6 +179,12 @@ context('Draw Tool Tile', function () {
           .trigger("mousemove", 100, 150)
           .trigger("mouseup",   100,  50);
         drawToolTile.getRectangleDrawing().should("exist").and("have.length", 1);
+      });
+      it("shows up in show/sort panel", () => {
+        drawToolTile.getDrawTileShowSortPanelOpenButton().click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanel().should("have.class", "open")
+          .get("li").should("have.length", 1).and("contain.text", "Rectangle");
+        drawToolTile.getDrawTileShowSortPanelCloseButton().click({scrollBehavior: false});
       });
       it("verify change outline color", () => {
         drawToolTile.getRectangleDrawing().first().should("have.attr", "stroke").and("eq", "#000000");
@@ -340,6 +358,12 @@ context('Draw Tool Tile', function () {
           .trigger("mouseup",   100, 150);
         drawToolTile.getEllipseDrawing().should("exist").and("have.length", 1);
       });
+      it("shows up in show/sort panel", () => {
+        drawToolTile.getDrawTileShowSortPanelOpenButton().click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanel().should("have.class", "open")
+          .get("li").should("have.length", 1).and("contain.text", "Ellipse");
+        drawToolTile.getDrawTileShowSortPanelCloseButton().click({scrollBehavior: false});
+      });
       it("verify draw circle", () => {
         drawToolTile.getDrawToolEllipse().click();
         drawToolTile.getDrawTile()
@@ -367,6 +391,12 @@ context('Draw Tool Tile', function () {
           .trigger("mousedown", 250, 50)
           .trigger("mouseup");
         drawToolTile.getImageDrawing().should("exist").and("have.length", 1);
+      });
+      it("shows up in show/sort panel", () => {
+        drawToolTile.getDrawTileShowSortPanelOpenButton().click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanel().should("have.class", "open")
+          .get("li").should("have.length", 1).and("contain.text", "Image");
+        drawToolTile.getDrawTileShowSortPanelCloseButton().click({scrollBehavior: false});
       });
       it("verify stamp images", () => {
         drawToolTile.getImageDrawing().eq(0).should("have.attr", "href").and("contain", "coin.png");
@@ -404,6 +434,12 @@ context('Draw Tool Tile', function () {
           .trigger("mousedown", 100,  100)
           .trigger("mouseup", 100, 100);
           drawToolTile.getTextDrawing().should("exist").and("have.length", 1);
+      });
+      it("shows up in show/sort panel", () => {
+        drawToolTile.getDrawTileShowSortPanelOpenButton().click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanel().should("have.class", "open")
+          .get("li").should("have.length", 1).and("contain.text", "Text");
+        drawToolTile.getDrawTileShowSortPanelCloseButton().click({scrollBehavior: false});
       });
       it("edits text content of object", () => {
         // Click inside drawing box to enter edit mode
