@@ -1,22 +1,20 @@
-
 const url = "/doc-editor.html";
+const documentContent = () => cy.get(".canvas-area .canvas .document-content");
 
+function beforeTest() {
+  cy.clearQAData('all');
+  cy.visit(url);
+  cy.get('.editable-document-content', { timeout: 60000 });
+}
 context('Doc Editor', () => {
-  beforeEach(() => {
-    cy.clearQAData('all');
-
-    cy.visit(url);
-    cy.get('.editable-document-content', {timeout: 60000});
-  });
-
-  const documentContent = () => cy.get(".canvas-area .canvas .document-content");
-
-  it('verify doc editor loads', function() {
+  it('verify doc editor and solution button work', function () {
+    beforeTest();
+    
+    cy.log("verify doc editor loads")
     cy.get(".toolbar").should("exist");
     documentContent().should("exist");
-  });
 
-  it('solution button works', function() {
+    cy.log("verify solution button works");
     const toolbarButton = tool => cy.get(`.toolbar .${tool}`);
     const solutionButton = () => cy.get(".toolbar .solution");
     const imageTile = () => documentContent().find(".image-tool-tile").last();
