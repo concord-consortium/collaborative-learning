@@ -264,6 +264,7 @@ export const ArrowAnnotationComponent = observer(
                   onChange={handleChange}
                   onKeyDown={handleKeyDown}
                   ref={inputRef}
+                  style={{ width: `calc(${tempText.length}ch + 2ch)`}}
                   type="text"
                   value={tempText}
                 />
