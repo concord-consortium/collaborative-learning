@@ -37,6 +37,7 @@ export const ConnectingLines = observer(function ConnectingLines({dotsRef}: IPro
   const color = _pointColors[plotsCt - 1];
   const adjustedColor = lightenColor(color, 0.5);
   const foundLinePoints = usePointLocations();
+  console.log("| about to draw path!");
   drawPath(dotsRef.current as DotsElt, foundLinePoints, adjustedColor);
   return null;
 });

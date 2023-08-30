@@ -101,8 +101,21 @@ export const Graph = observer(function Graph({graphController, graphRef, dotsRef
   }, [graphController, dataset, layout, enableAnimation, graphModel]);
 
   const handleTreatAttrAs = (place: GraphPlace, attrId: string, treatAs: AttributeType) => {
+    console.log(">> 1 start of handleTreatAttrAs: ");
+    graphModel.adornments.map(a => console.log("| >> ... ", JSON.parse(JSON.stringify(a))));
+    if (place === 'left' && treatAs === 'categorical' && graphModel.adornments.length > 0) {
+      console.log("| gotta hide or remove any connecting lines adornments...");
+      // const anyFoundPath = dotArea.selectAll("path");
+      // if (anyFoundPath) anyFoundPath.remove();
+      // graphModel.adornments.map(a => console.log("| ... ", JSON.parse(JSON.stringify(a))));
+      graphModel.hideAdornment("Connecting Lines"); // this indeed changes isVisible to false,
+      // but the issue is there is no place where we reset it to visible, nor do we even use isVisible
+      // find and remove any adornment where type === "Connecting Lines"
+    }
     graphModel.config.setAttributeType(graphPlaceToAttrRole[place], treatAs);
     dataset && graphController?.handleAttributeAssignment(place, dataset.id, attrId);
+    console.log(">> 2 end of handleTreatAttrAs: ");
+    graphModel.adornments.map(a => console.log("| >>... ", JSON.parse(JSON.stringify(a))));
   };
 
   useDataTips({dotsRef, dataset, graphModel, enableAnimation});

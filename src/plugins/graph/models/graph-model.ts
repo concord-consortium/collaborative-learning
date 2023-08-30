@@ -233,6 +233,7 @@ export const GraphModel = TileContentModel
       self.showMeasuresForSelection = show;
     },
     showAdornment(adornment: IAdornmentModel, type: string) {
+      console.log(">> showAdornment called");
       const adornmentExists = self.adornments.find(a => a.type === type);
       if (adornmentExists) {
         adornmentExists.setVisibility(true);
