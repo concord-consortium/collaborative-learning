@@ -47,7 +47,7 @@ context('single student functional test',()=>{
       });
       it('verify close of nav tabs', function () {
         cy.collapseResourceTabs();
-        cy.get('.nav-tab-panel').should('not.exist');
+        cy.get('.nav-tab-panel').should('not.be.visible');
       });
     });
 

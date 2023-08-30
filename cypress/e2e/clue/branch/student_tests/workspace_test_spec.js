@@ -38,18 +38,21 @@ context('Test the overall workspace', function () {
       cy.collapseResourceTabs();
       cy.get('.nav-tab-panel').should('not.be.visible');
       cy.get('.primary-workspace').should('be.visible');
+      cy.get('.workspace-expander').should('not.be.visible');
+      cy.get('.resources-expander').should('be.visible');
     });
     it('verify collapse workspace', function () {
       cy.get('.resources-expander').click();
       cy.collapseWorkspace();
       cy.get('.primary-workspace').should('not.be.visible');
-      cy.get('.workspace-expander').should('exist');
-      cy.get('.nav-tab-panel').should('exist');
+      cy.get('.workspace-expander').should('be.visible');
+      cy.get('.resources-expander').should('not.be.visible');
+      cy.get('.nav-tab-panel').should('be.visible');
     });
     it('verify collapsed workspace tab opens on click', function () {
-      cy.get('.workspace-expander').click({force:true});
-      cy.get('.primary-workspace').should('exist');
-      cy.get('.nav-tab-panel').should('exist');
+      cy.get('.workspace-expander').click();
+      cy.get('.primary-workspace').should('be.visible');
+      cy.get('.nav-tab-panel').should('be.visible');
     });
     // TODO: Changes in new document add feature.
     // FIXME: The test is failing looking for the selected class
