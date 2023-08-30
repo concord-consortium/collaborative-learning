@@ -21,10 +21,11 @@ interface IUseColumnsFromDataSet {
   RowLabelHeader: React.FC<any>;
   RowLabelFormatter: React.FC<any>;
   measureColumnWidth: (attr: IAttribute) => number;
+  lookupImage: (value: string) => string|undefined;
 }
 export const useColumnsFromDataSet = ({
   gridContext, dataSet, metadata, readOnly, columnChanges, headerHeight, rowHeight, RowLabelHeader, RowLabelFormatter,
-  measureColumnWidth
+  measureColumnWidth, lookupImage
 }: IUseColumnsFromDataSet) => {
   const { attributes } = dataSet;
 
@@ -70,7 +71,7 @@ export const useColumnsFromDataSet = ({
         width,
         resizable: !readOnly,
         headerRenderer: ColumnHeaderCell,
-        formatter: getCellFormatter(width, rowHeight),
+        formatter: getCellFormatter(width, rowHeight, lookupImage=lookupImage),
         editor: !readOnly && !metadata.hasExpression(attr.id) ? CellTextEditor : undefined,
         editorOptions: {
           editOnClick: !readOnly
