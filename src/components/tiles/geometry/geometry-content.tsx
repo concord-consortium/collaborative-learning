@@ -199,6 +199,15 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
+  private getPointScreenCoords(pointId: string) {
+    if (!this.state.board) return undefined;
+    const element = this.state.board?.objects[pointId];
+    if (!element) return undefined;
+    const bounds = element.bounds();
+    const coords = new JXG.Coords(JXG.COORDS_BY_USER, bounds.slice(0, 2), this.state.board);
+    return { x: coords.scrCoords[1], y: coords.scrCoords[2] };
+  }
+
   public componentDidMount() {
     this._isMounted = true;
     this.disposers = [];
@@ -273,6 +282,20 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       },
       getTitle: () => {
         return this.props.model.title;
+      },
+      getObjectBoundingBox: (objectId: string, objectType?: string) => {
+        const pointDim = 14;
+        if (objectType === "point") {
+          const coords = this.getPointScreenCoords(objectId);
+          if (!coords) return undefined;
+          const boundingBox = {
+            height: pointDim,
+            left: coords.x - pointDim / 2 - 1,
+            top: coords.y - pointDim / 2 - 1,
+            width: pointDim
+          };
+          return boundingBox;
+        }
       }
     });
 

@@ -31,6 +31,7 @@ import {
   isVertexAngle, isVisibleEdge, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin,
   kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth, toObj
 } from "./jxg-types";
+import { getTileIdFromContent } from "../tile-model";
 import { SharedModelType } from "../../shared/shared-model";
 import { ISharedModelManager } from "../../shared/shared-model-manager";
 import { IDataSet } from "../../data/data-set";
@@ -38,6 +39,7 @@ import { uniqueId } from "../../../utilities/js-utils";
 import { logTileChangeEvent } from "../log/log-tile-change-event";
 import { LogEventName } from "../../../lib/logger-types";
 import { gImageMap } from "../../image-map";
+import { IClueObject } from "../../annotations/clue-object";
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
 
@@ -192,6 +194,17 @@ export const GeometryContentModel = GeometryBaseContentModel
     }
   }))
   .views(self => ({
+    get annotatableObjects() {
+      const tileId = getTileIdFromContent(self) ?? "";
+      const objects: IClueObject[] = [];
+      // polygon
+      self.objects.forEach(object => {
+        if (object.type === "point") {
+          objects.push({ tileId, objectId: object.id, objectType: object.type });
+        }
+      });
+      return objects;
+    },
     // Returns any object in the model, even a subobject (like a movable line's point)
     getAnyObject(id: string) {
       if (isMovableLinePointId(id)) {
