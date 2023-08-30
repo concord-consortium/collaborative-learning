@@ -62,14 +62,14 @@ export const NumberlineTileComponent: React.FC<ITileProps> = (props) => {
           scale={scale}
         />
       </div>
-        <NumberlineToolbar
-          documentContent={documentContent}
-          tileElt={tileElt}
-          {...toolbarProps}
-          scale={scale}
-          handleClearPoints={handleClearPoints}
-          handleDeletePoint={handleDeletePoint}
-        />
+      <NumberlineToolbar
+        documentContent={documentContent}
+        tileElt={tileElt}
+        {...toolbarProps}
+        scale={scale}
+        handleClearPoints={handleClearPoints}
+        handleDeletePoint={handleDeletePoint}
+      />
         <NumberlineTile {...props}/>
     </div>
   );

@@ -20,14 +20,12 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
 
   //---------------- Calculate Width Of Tile / Scale ----------------------------------------------
   const documentScrollerRef = useRef<HTMLDivElement>(null);
-
   const [tileWidth, setTileWidth] = useState(0);
   const containerWidth = (tileWidth * kContainerWidth);
   const axisWidth = tileWidth * kAxisWidth;
   const xShiftNum = ((containerWidth - axisWidth)/2);
   const numToPx = (num: number) => num.toFixed(2) + "px";
   const xScale = createXScale(axisWidth);
-
 
   useEffect(() => {
     let obs: ResizeObserver;
@@ -41,7 +39,6 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       obs.observe(documentScrollerRef.current);
     }
     return () => obs?.disconnect();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   //-------------------  SVG Ref to Numberline & SVG / Mouse State --------------------------------
@@ -182,7 +179,6 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       .attr('cx', (p, idx) => xScale(p.currentXValue || numberlineDomainMin))
       .classed("selected", (p)=> p.id in content.selectedPoints)
       .call((e) => handleDrag(e)); // pass again in case axisWidth changes
-
 
       innerPoints.exit().remove(); //cleanup
     };
