@@ -41,7 +41,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
     const focusTileId = selectedTileIds?.length === 1 ? selectedTileIds[0] : undefined;
 
     return (
-      <div className="resource-and-chat-panel" >
+      <div className="resource-and-chat-panel">
         <div className="nav-tab-panel"
             ref={elt => this.navTabPanelElt = elt}>
           <Tabs

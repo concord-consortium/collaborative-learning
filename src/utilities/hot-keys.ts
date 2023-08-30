@@ -81,7 +81,6 @@ export class HotKeys {
   }
 
   public dispatch(e: React.KeyboardEvent) {
-    console.log("HotKeys.dispatch", e);
     let keys = "";
     if (e.ctrlKey) {
       keys += (keys ? "-" : "") + "ctrl";
