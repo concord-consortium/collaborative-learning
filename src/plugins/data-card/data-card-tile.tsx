@@ -59,13 +59,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
 
   const adjustHeight = useCallback(() => {
     if (!tileElt) return;
-
-    if (readOnly) {
-      const container = tileElt?.querySelector(".data-card-container");
-      console.log("| get better height from this: ", {container});
-      onRequestRowHeight(model.id, height);
-    }
-
+    if (readOnly) onRequestRowHeight(model.id, height);
     if (!readOnly){
       const uiHeight = tileElt?.querySelector(".data-card-container")?.scrollHeight || 0;
       const heightDiff = height ? height - uiHeight : 0;
@@ -75,7 +69,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
 
   useEffect(() => {
     adjustHeight();
-  }, [currEditAttrId, currEditFacet, height, imageUrlToAdd, onRequestRowHeight, adjustHeight, tileElt]);
+  }, [currEditAttrId, currEditFacet, height, imageUrlToAdd, adjustHeight, tileElt]);
 
   /* ==[ Drag and Drop ] == */
 
