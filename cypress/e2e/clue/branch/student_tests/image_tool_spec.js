@@ -19,7 +19,7 @@ context('Test image functionalities', function(){
         cy.clearQAData('all');
         cy.visit(queryParams);
         cy.waitForLoad();
-        cy.collapseResourceTabs();
+        cy.showOnlyDocumentWorkspace();
     });
 
     describe('upload image from user computer',()=>{
@@ -51,11 +51,11 @@ context('Test image functionalities', function(){
             cy.uploadFile(imageToolTile.imageChooseFileButton(), imageFilePath, 'image/gif');
             cy.wait(2000);
         });
-        // TODO: Figure out how to get the clipboard paste check below to work when the tests 
-        // are run using Chrome. It will pass when using Electron, but not Chrome. In Chrome 
-        // the attempt to write to the clipboard results in an error: "Must be handling a user 
+        // TODO: Figure out how to get the clipboard paste check below to work when the tests
+        // are run using Chrome. It will pass when using Electron, but not Chrome. In Chrome
+        // the attempt to write to the clipboard results in an error: "Must be handling a user
         // gesture to use custom clipboard." See https://github.com/cypress-io/cypress/issues/2752
-        // for more background. Apparently, the basic problem is that Cypress "currently uses 
+        // for more background. Apparently, the basic problem is that Cypress "currently uses
         // programmatic browser APIs which Chrome doesn't consider as genuine user interaction."
         it.skip('will accept a valid image URL pasted from the clipboard', function(){
             const imageFilePath = "curriculum/test/images/image.png";
@@ -109,7 +109,7 @@ context('Test image functionalities', function(){
             imageToolTile.getImageToolImage().should('have.length', 3);
         });
     });
-    
+
 });
 
 context('Test undo redo functionalities', function(){
@@ -118,7 +118,7 @@ context('Test undo redo functionalities', function(){
         cy.clearQAData('all');
         cy.visit(queryParams);
         cy.waitForLoad();
-        cy.collapseResourceTabs();
+        cy.showOnlyDocumentWorkspace();
     });
 
     describe('Image tile title edit, undo redo and delete tile',()=>{
@@ -136,7 +136,7 @@ context('Test undo redo functionalities', function(){
             imageToolTile.getImageToolTile().should("exist");
             clueCanvas.getUndoTool().should("not.have.class", "disabled");
             clueCanvas.getRedoTool().should("have.class", "disabled");
-      
+
             // Deletion - Undo/Redo
             clueCanvas.deleteTile('image');
             imageToolTile.getImageToolTile().should('not.exist');
@@ -175,6 +175,6 @@ context('Test undo redo functionalities', function(){
             imageToolTile.getImageToolTile().should("not.exist");
         });
     });
-    
+
 });
 
