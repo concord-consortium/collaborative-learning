@@ -37,7 +37,7 @@ interface IProps {
 }
 
 interface IState {
-  canvasRef?: HTMLDivElement | null;
+  canvasElement?: HTMLDivElement | null;
   documentScrollX: number;
   documentScrollY: number;
   historyDocumentCopy?: DocumentModelType;
@@ -87,9 +87,9 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
     };
   }
 
-  private setCanvasRef(canvasRef?: HTMLDivElement | null) {
-    if (!this.state.canvasRef) {
-      this.setState({ canvasRef });
+  private setCanvasElement(canvasElement?: HTMLDivElement | null) {
+    if (!this.state.canvasElement) {
+      this.setState({ canvasElement });
     }
   }
 
@@ -106,14 +106,14 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
           className="canvas"
           data-test="canvas"
           onKeyDown={this.handleKeyDown}
-          ref={(el) => this.setCanvasRef(el)}
+          ref={(el) => this.setCanvasElement(el)}
         >
           {this.renderContent()}
           {this.renderDebugInfo()}
           {this.renderOverlayMessage()}
         </div>
         <AnnotationLayer
-          canvasRef={this.state.canvasRef}
+          canvasElement={this.state.canvasElement}
           content={content}
           documentScrollX={this.state.documentScrollX}
           documentScrollY={this.state.documentScrollY}

@@ -16,14 +16,14 @@ import { DocumentContentModelType } from "../../models/document/document-content
 import "./annotation-layer.scss";
 
 interface IAnnotationLayerProps {
-  canvasRef?: HTMLDivElement | null;
+  canvasElement?: HTMLDivElement | null;
   content?: DocumentContentModelType;
   documentScrollX?: number;
   documentScrollY?: number;
   readOnly?: boolean;
 }
 export const AnnotationLayer = observer(function AnnotationLayer({
-  canvasRef, content, documentScrollX, documentScrollY, readOnly
+  canvasElement, content, documentScrollX, documentScrollY, readOnly
 }: IAnnotationLayerProps) {
   const [_initialized, setInitialized] = useState(false);
   useEffect(() => {
@@ -45,7 +45,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   function getRowElement(rowId?: string) {
     if (rowId === undefined) return undefined;
     const rowSelector = `[data-row-id='${rowId}']`;
-    const rowElements = canvasRef?.querySelectorAll(rowSelector);
+    const rowElements = canvasElement?.querySelectorAll(rowSelector);
     if (rowElements && rowElements.length === 1) {
       return rowElements[0] as HTMLElement;
     }
@@ -78,7 +78,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     if (!rowElement) return undefined;
   
     const tileSelector = `[data-tool-id='${tileId}']`;
-    const tileElements = canvasRef?.querySelectorAll(tileSelector);
+    const tileElements = canvasElement?.querySelectorAll(tileSelector);
     const tileElement = tileElements && tileElements.length === 1 ? tileElements[0] as HTMLElement : undefined;
     if (!tileElement) return undefined;
   
