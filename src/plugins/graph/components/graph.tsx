@@ -104,13 +104,9 @@ export const Graph = observer(function Graph({graphController, graphRef, dotsRef
     graphModel.config.setAttributeType(graphPlaceToAttrRole[place], treatAs);
     dataset && graphController?.handleAttributeAssignment(place, dataset.id, attrId);
     const connectingLines = graphModel.adornments.find(a => a.type === "Connecting Lines");
-    if (place === 'left' && treatAs === 'categorical' && connectingLines) {
-      graphModel.hideAdornment("Connecting Lines");
-      console.log("| should be false: ", connectingLines.type, "is visible: ", connectingLines.isVisible);
-    }
-    if (place === 'left' && treatAs === 'numeric' && connectingLines) {
-      connectingLines && graphModel.showAdornment(connectingLines, "Connecting Lines");
-      console.log("| should be true: ", connectingLines.type, "is visible: ", connectingLines.isVisible);
+    if (connectingLines && place === "left") {
+      treatAs === 'categorical' && graphModel.hideAdornment("Connecting Lines");
+      treatAs === 'numeric' && graphModel.showAdornment(connectingLines, "Connecting Lines");
     }
   };
 
