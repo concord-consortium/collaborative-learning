@@ -8,6 +8,15 @@ class DrawToolTile{
     getDrawTileComponent(){
       return cy.get('.primary-workspace [data-testid=drawing-tool]');
     }
+    getDrawTileShowSortPanel(){
+      return cy.get('.primary-workspace .drawing-tool .object-list');
+    }
+    getDrawTileShowSortPanelOpenButton(){
+      return cy.get('.primary-workspace .drawing-tool .object-list.closed button')
+    }
+    getDrawTileShowSortPanelCloseButton(){
+      return cy.get('.primary-workspace .drawing-tool .object-list.open button')
+    }
     getDrawToolSelect(){
       return cy.get('.primary-workspace .drawing-tool-button.button-select');
     }

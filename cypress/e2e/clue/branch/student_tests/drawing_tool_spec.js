@@ -35,6 +35,41 @@ context('Draw Tool Tile', function () {
       drawToolTile.getDrawTile().should("exist");
       drawToolTile.getTileTitle().should("exist");
     });
+    describe("Show/sort", () => {
+      it("open show/sort panel", () => {
+        drawToolTile.getDrawToolRectangle().click({scrollBehavior: false});
+        drawToolTile.getDrawTile()
+          .trigger("mousedown", 100,  50)
+          .trigger("mousemove", 250, 150)
+          .trigger("mouseup",   250, 150);
+        drawToolTile.getDrawToolEllipse().click({scrollBehavior: false});
+        drawToolTile.getDrawTile()
+          .trigger("mousedown", 300,  50)
+          .trigger("mousemove", 400, 150)
+          .trigger("mouseup",   400, 150);
+        // Unselect object
+        drawToolTile.getDrawTile()
+          .trigger("mousedown", 50, 50)
+          .trigger("mouseup", 50, 50);
+        drawToolTile.getSelectionBox().should("not.exist");
+
+        // Open panel
+        drawToolTile.getDrawTileShowSortPanelOpenButton().click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanel().should("have.class", "open").and("contain.text", "Rectangle").and("contain.text", "Circle");
+        // Click to select
+        drawToolTile.getDrawTileShowSortPanel().get('li:first').should("contain.text", "Circle").click({scrollBehavior: false});
+        drawToolTile.getSelectionBox().should("exist");
+        // Delete objects
+        drawToolTile.getDrawToolDelete().should("not.have.class", "disabled").click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanel().get('li').should("have.length", 1);
+        drawToolTile.getDrawTileShowSortPanel().get('li:first').should("contain.text", "Rectangle").click({scrollBehavior: false});
+        drawToolTile.getDrawToolDelete().should("not.have.class", "disabled").click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanel().get('li').should("not.exist");
+        // Close panel
+        drawToolTile.getDrawTileShowSortPanelCloseButton().click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanel().should("have.class", "closed");
+      });
+    });
     describe("Freehand", () => {
       it("verify draw a line", () => {
         drawToolTile.getDrawToolFreehand().click({scrollBehavior: false});
