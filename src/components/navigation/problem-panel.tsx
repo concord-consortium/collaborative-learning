@@ -5,7 +5,7 @@ import { CanvasComponent } from "../document/canvas";
 import { SectionModelType } from "../../models/curriculum/section";
 import { DocumentContentModelType } from "../../models/document/document-content";
 
-import "./problem-panel.sass";
+import "./problem-panel.scss";
 
 interface IProps extends IBaseProps {
   section?: SectionModelType | null;
