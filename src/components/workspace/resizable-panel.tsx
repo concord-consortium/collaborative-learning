@@ -9,7 +9,7 @@ interface IProps {
 
 // Originally this monitored the collapse animation and stopped rendering
 // the children when the animation was finished. And then started rendering
-// the children again when collapsed was true and then expanded.
+// the children again when collapsed was false and then expanded.
 //
 // This added a lot of complexity and resulted in slower animations.
 // The downside is that now developers can't disable all of the extra

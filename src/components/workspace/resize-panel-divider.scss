@@ -25,6 +25,8 @@
     margin-left: 2px;
   }
 
+  // Hide the divider when the expanders are shown
+  // this is done with a width of 0 so it is animated.
   &.show-expanders .resize-panel-divider {
     width: 0;
     padding: 0;

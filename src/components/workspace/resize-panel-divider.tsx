@@ -1,13 +1,13 @@
 import classNames from "classnames";
 import React, { useRef, useState } from "react";
+import { observer } from "mobx-react";
 import { useStores } from "../../hooks/use-stores";
 import DragThumbnailIcon from "../../assets/drag-thumb-icon.svg";
-import ExpandIndicatorIcon from "../../assets/expand-indicator-icon.svg";
 import { kDividerHalf, kDividerMax, kDividerMin } from "../../models/stores/ui-types";
-import "./resize-panel-divider.scss";
 import { ResourcesExpander } from "./resources-expander";
 import { WorkspaceExpander } from "./workspace-expander";
-import { observer } from "mobx-react";
+
+import "./resize-panel-divider.scss";
 
 interface IProps {
 }
@@ -22,7 +22,7 @@ export const ResizePanelDivider: React.FC <IProps> = observer(function ResizePan
     const inCenter = dividerPosition === kDividerHalf;
     const reallyShowExpanders = !inCenter || showExpanders;
 
-    const toggleExpandWorkspace = () => {
+    const handleExpandWorkspace = () => {
       if (dividerPosition === kDividerMax) {
         setDividerPosition(kDividerHalf);
       } else if (dividerPosition === kDividerHalf) {
@@ -32,7 +32,7 @@ export const ResizePanelDivider: React.FC <IProps> = observer(function ResizePan
       setShowExpanders(false);
     };
 
-    const toggleExpandResources = () => {
+    const handleExpandResources = () => {
       if (dividerPosition === kDividerMin) {
         setDividerPosition(kDividerHalf);
       } else if (dividerPosition === kDividerHalf) {
@@ -78,13 +78,13 @@ export const ResizePanelDivider: React.FC <IProps> = observer(function ResizePan
     return (
       <div className={classNames("divider-container", positionClass, {"show-expanders": reallyShowExpanders})}
           onMouseEnter={handleDividerEnter} onMouseLeave={handleDividerLeave} onClick={()=>handleDividerClick()}>
-        <WorkspaceExpander onExpandWorkspace={toggleExpandWorkspace} workspaceType={problemWorkspace.type} />
+        <WorkspaceExpander onExpandWorkspace={handleExpandWorkspace} workspaceType={problemWorkspace.type} />
         <div className="resize-panel-divider" >
           <div className="divider" />
           <DragThumbnailIcon className="drag-thumbnail" onClick={()=>setShowExpanders(true)}
               onMouseEnter={()=>setShowExpanders(true)} />
         </div>
-        <ResourcesExpander onExpandResources={toggleExpandResources} resourceType={activeNavTab}/>
+        <ResourcesExpander onExpandResources={handleExpandResources} resourceType={activeNavTab}/>
       </div>
     );
 });
