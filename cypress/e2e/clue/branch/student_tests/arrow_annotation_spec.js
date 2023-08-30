@@ -90,7 +90,7 @@ context('Arrow Annotations (Sparrows)', function () {
       const text1 = "test text 1";
       aa.getAnnotationTextInputs().type(`${text1}{enter}`);
       aa.getAnnotationTextDisplays().first().should("have.text", text1);
-      
+
       cy.log("Can change text by blurring");
       const text2 = "1 txet tset";
       const combinedText = text1 + text2;
@@ -148,7 +148,7 @@ context('Arrow Annotations (Sparrows)', function () {
 
       cy.visit(queryParams);
       cy.waitForLoad();
-      cy.collapseResourceTabs();
+      cy.showOnlyDocumentWorkspace();
     });
 
     it("can add arrows to table tiles", () => {

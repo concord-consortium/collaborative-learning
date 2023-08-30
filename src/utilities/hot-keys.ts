@@ -50,6 +50,11 @@ function keyCodeToString(keyCode: number) {
   }
 }
 
+export function platformCmdKey() {
+  const isMac = navigator.platform.indexOf("Mac") === 0;
+  return isMac ? "meta" : "ctrl";
+}
+
 export type HotKeyHandler = (e: React.KeyboardEvent, keys: string) => boolean | void | Promise<void>;
 
 export interface IHotKeyMap {
@@ -64,8 +69,7 @@ export class HotKeys {
    * [ctrl|meta|cmd]-[alt|option]-[shift]-[char]
    */
   public register(hotKeys: IHotKeyMap) {
-    const isMac = navigator.platform.indexOf("Mac") === 0;
-    const cmdKey = isMac ? "meta" : "ctrl";
+    const cmdKey = platformCmdKey();
     each(hotKeys, (handler, keys) => {
       const _keys = keys.toLowerCase()
                         .replace("cmd", cmdKey)
@@ -77,6 +81,7 @@ export class HotKeys {
   }
 
   public dispatch(e: React.KeyboardEvent) {
+    console.log("HotKeys.dispatch", e);
     let keys = "";
     if (e.ctrlKey) {
       keys += (keys ? "-" : "") + "ctrl";

@@ -32,6 +32,7 @@ import 'cypress-file-upload';
 import 'cypress-commands';
 import ResourcesPanel from "./elements/clue/ResourcesPanel";
 import ClueCanvas from './elements/clue/cCanvas';
+import {platformCmdKey} from '../../src/utilities/hot-keys';
 
 const clueCanvas = new ClueCanvas;
 
@@ -222,6 +223,10 @@ Cypress.Commands.add('collapseResourceTabs', () => {
 });
 Cypress.Commands.add('closeResourceTabs', () => {
   cy.get('.nav-tab-panel .close-button').click();
+});
+Cypress.Commands.add('showOnlyDocumentWorkspace', () => {
+  const cmdKey = platformCmdKey();
+  cy.get('.primary-workspace .canvas').type(`{${cmdKey}+shift+f}`, {force: true});
 });
 Cypress.Commands.add('collapseWorkspace', () => {
   cy.get('.drag-thumbnail').trigger('mouseover').then(() => {
