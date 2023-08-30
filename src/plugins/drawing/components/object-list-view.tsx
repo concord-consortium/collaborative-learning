@@ -4,7 +4,8 @@ import { DrawingObjectType } from "../objects/drawing-object";
 import { ITileModel } from "src/models/tiles/tile-model";
 import { observer } from "mobx-react";
 import classNames from "classnames";
-import ExpandIndicatorIcon from "../../../assets/expand-indicator-icon.svg";
+import ExpandRightIcon from "../assets/expand-right-icon.svg";
+import ExpandLeftIcon from "../assets/expand-left-icon.svg";
 
 interface IObjectListViewProps {
   model: ITileModel,
@@ -40,7 +41,7 @@ export const ObjectListView = observer(function ObjectListView({model, setHoverO
       <div className="header">
         <button type="button" className="close" onClick={handleClose} aria-label="Close show/sort panel">
           Show/sort
-          <ExpandIndicatorIcon viewBox="13 10 10 14"/>
+          <ExpandLeftIcon/>
         </button>
       </div>
       <div className="body">
@@ -54,7 +55,7 @@ export const ObjectListView = observer(function ObjectListView({model, setHoverO
     return (
     <div className="object-list closed">
       <button type="button" onClick={handleOpen} aria-label="Open show/sort panel">
-        <ExpandIndicatorIcon viewBox="13 10 10 14"/>
+        <ExpandRightIcon/>
         <span className="vert">Show/sort</span>
       </button>
     </div>);

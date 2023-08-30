@@ -8,17 +8,18 @@
     display: flex;
 
     .object-list {
-      border-right: solid 1px $charcoal-light-1;
-      background-color: #efefef;
+      border: solid 1.5px $charcoal-light-1;
+      border-radius: 0px 3px 3px 0px;
       display: flex;
       flex-direction: column;
 
       &.open {
         flex: 0 0 125px;
+        background-color: $workspace-teal-light-9;
       }
 
       &.closed {
-        flex: 0 0 20px;
+        flex: 0 0 26px;
 
         button {
           width: 100%;
@@ -27,10 +28,11 @@
           padding: 0;
           display: flex;
           flex-direction: column;
+          background-color: $workspace-teal-light-7;
+          border: none;
 
           svg {
-            flex: 0 0 20px;
-            width: 20px;
+            flex: 0 0 24px;
           }
 
           .vert {
@@ -54,6 +56,7 @@
           align-items: center;
           width: 100%;
           padding: 0 7px;
+          border: none;
           background-color: $workspace-teal-light-7;
           font-weight: bold;
 
@@ -99,7 +102,6 @@
     }
 
   .drawing-layer {
-    border: 1px solid #BBB;
 
     svg {
 
