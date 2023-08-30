@@ -58,14 +58,18 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const adjustHeight = useCallback(() => {
-    const uiHeight = tileElt?.querySelector(".data-card-container")?.clientHeight || 0;
-    const heightDiff = height ? height - uiHeight : 0;
     if (!tileElt) return;
-    if (!readOnly && heightDiff < 30) {
-      onRequestRowHeight(model.id, uiHeight + 60);
+
+    if (readOnly) {
+      const container = tileElt?.querySelector(".data-card-container");
+      console.log("| get better height from this: ", {container});
+      onRequestRowHeight(model.id, height);
     }
-    if (readOnly){
-      onRequestRowHeight(model.id, kDataCardDefaultHeight);
+
+    if (!readOnly){
+      const uiHeight = tileElt?.querySelector(".data-card-container")?.scrollHeight || 0;
+      const heightDiff = height ? height - uiHeight : 0;
+      heightDiff < 30 && onRequestRowHeight(model.id, uiHeight + 60);
     }
   }, [height, model.id, onRequestRowHeight, readOnly, tileElt]);
 
