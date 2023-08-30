@@ -24,7 +24,7 @@ export default defineConfig({
     // We've imported your old cypress plugins here.
     // You may want to clean this up later by importing these.
 
-    numTestsKeptInMemory: 2,
+    numTestsKeptInMemory: 20,
     setupNodeEvents(on, config) {
       const fetchConfigurationByFile = file => {
         const pathOfConfigurationFile = `config/cypress.${file}.json`;

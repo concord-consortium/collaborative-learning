@@ -226,7 +226,12 @@ Cypress.Commands.add('closeResourceTabs', () => {
 });
 Cypress.Commands.add('showOnlyDocumentWorkspace', () => {
   const cmdKey = platformCmdKey();
-  cy.get('.primary-workspace .canvas').type(`{${cmdKey}+shift+f}`, {force: true});
+  cy.get(".workspace").then($workspace => {
+    // only toggle the full screen of the document workspace if it is necessary
+    if($workspace.find(".divider-container").length > 0) {
+      cy.get('.primary-workspace .canvas').type(`{${cmdKey}+shift+f}`, {force: true});
+    }
+  });
 });
 Cypress.Commands.add('collapseWorkspace', () => {
   cy.get('.drag-thumbnail').trigger('mouseover').then(() => {
