@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
 import { verifyAlive } from "../../../utilities/mst-utils";
 import { HeaderCellInput } from "./header-cell-input";
-import { kDefaultColumnWidth, kHeaderRowHeight } from "./table-types";
 
 interface IProps {
   content: TableContentModelType;
