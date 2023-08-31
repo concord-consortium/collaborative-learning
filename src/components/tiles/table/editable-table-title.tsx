@@ -54,12 +54,10 @@ export const EditableTableTitle: React.FC<IProps> = observer(function EditableTa
     onEndEdit?.(accept && trimTitle ? trimTitle : undefined);
     setIsEditing(false);
   };
-
   const isDefaultTitle = title && /Table\s+(\d+)\s*$/.test(title);
   const classes = classNames("editable-header-cell", className,
                             { "table-title-editing": isEditing, "table-title-default": isDefaultTitle });
   const style = { width: titleCellWidth, height: titleCellHeight };
-
   return (
     <div className={classes} style={style} onClick={handleClick}>
       {isEditing
