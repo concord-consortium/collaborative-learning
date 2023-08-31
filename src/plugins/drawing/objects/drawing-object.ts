@@ -67,8 +67,9 @@ export const DrawingObject = types.model("DrawingObject", {
     // cause the selection highlight to update.
     throw "Subclass needs to implement this";
   },
-  get description(): string {
-    // Object types should implement this to return a user-friendly short description.
+  get label(): string {
+    // Object types should implement this to return a user-friendly short label,
+    // used in the show/sort panel.
     return "Unknown object";
   },
   get icon(): React.FC<React.SVGProps<SVGSVGElement>> {

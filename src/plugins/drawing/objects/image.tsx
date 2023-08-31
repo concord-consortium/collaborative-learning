@@ -42,7 +42,7 @@ export const ImageObject = DrawingObject.named("ImageObject")
       const se: Point = {x: x + width, y: y + height};
       return {nw, se};
     },
-    get description() {
+    get label() {
       return "Image";
     },
     get icon() {

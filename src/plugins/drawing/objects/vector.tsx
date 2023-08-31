@@ -30,7 +30,7 @@ export const VectorObject = StrokedObject.named("VectorObject")
       const se: Point = {x: Math.max(x, x + dx), y: Math.max(y, y + dy)};
       return {nw, se};
     },
-    get description() {
+    get label() {
       return  (self.headShape || self.tailShape) ? "Arrow" : "Line";
     },
     get icon() {

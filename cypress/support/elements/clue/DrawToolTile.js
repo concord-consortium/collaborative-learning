@@ -12,10 +12,10 @@ class DrawToolTile{
       return cy.get('.primary-workspace .drawing-tool .object-list');
     }
     getDrawTileShowSortPanelOpenButton(){
-      return cy.get('.primary-workspace .drawing-tool .object-list.closed button')
+      return cy.get('.primary-workspace .drawing-tool .object-list.closed button');
     }
     getDrawTileShowSortPanelCloseButton(){
-      return cy.get('.primary-workspace .drawing-tool .object-list.open button')
+      return cy.get('.primary-workspace .drawing-tool .object-list.open button');
     }
     getDrawToolSelect(){
       return cy.get('.primary-workspace .drawing-tool-button.button-select');

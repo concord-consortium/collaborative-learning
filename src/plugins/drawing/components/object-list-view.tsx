@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { DrawingContentModelType } from "../model/drawing-content";
-import { DrawingObjectType } from "../objects/drawing-object";
-import { ITileModel } from "src/models/tiles/tile-model";
 import { observer } from "mobx-react";
 import classNames from "classnames";
+import { DrawingContentModelType } from "../model/drawing-content";
+import { DrawingObjectType } from "../objects/drawing-object";
+import { ITileModel } from "../../../models/tiles/tile-model";
 import ExpandRightIcon from "../assets/expand-right-icon.svg";
 import ExpandLeftIcon from "../assets/expand-left-icon.svg";
 
@@ -92,7 +92,7 @@ function ObjectLine({object, content, selection, setHoverObject}: IObjectLinePro
         onClick={handleClick}
     >
       <Icon width={20} height={20} viewBox="0 0 36 34" stroke="#000000" fill="#FFFFFF" />
-      {object.description}
+      {object.label}
     </li>
   );
 }

@@ -59,7 +59,7 @@ export const LineObject = StrokedObject.named("LineObject")
       return {nw, se};
     },
 
-    get description() {
+    get label() {
       return "Freehand";
     },
 

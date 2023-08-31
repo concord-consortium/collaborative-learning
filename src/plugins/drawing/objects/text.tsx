@@ -38,7 +38,7 @@ export const TextObject = EditableObject.named("TextObject")
       const se: Point = {x: x + width, y: y + height};
       return {nw, se};
     },
-    get description() {
+    get label() {
       return "Text";
     },
     get icon() {
