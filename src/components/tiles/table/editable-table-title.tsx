@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
 import { verifyAlive } from "../../../utilities/mst-utils";
 import { HeaderCellInput } from "./header-cell-input";
+import { kDefaultColumnWidth, kHeaderRowHeight } from "./table-types";
 
 interface IProps {
   content: TableContentModelType;
@@ -23,7 +24,6 @@ export const EditableTableTitle: React.FC<IProps> = observer(function EditableTa
   getLinkIndex, onBeginEdit, onEndEdit, onLinkGeometryClick
 }) {
 
-  console.log("| EditableTableTitle: titleCellWidth: ", titleCellWidth, " titleCellHeight: ", titleCellHeight);
   verifyAlive(content, "EditableTableTile");
 
   // content.title and observer() allow this component to re-render
@@ -55,12 +55,17 @@ export const EditableTableTitle: React.FC<IProps> = observer(function EditableTa
     onEndEdit?.(accept && trimTitle ? trimTitle : undefined);
     setIsEditing(false);
   };
+
   const isDefaultTitle = title && /Table\s+(\d+)\s*$/.test(title);
   const classes = classNames("editable-header-cell", className,
                             { "table-title-editing": isEditing, "table-title-default": isDefaultTitle });
-  const style = { width: titleCellWidth, height: titleCellHeight };
+
+  const hCalc = titleCellHeight > (kHeaderRowHeight * 3) ? kHeaderRowHeight : titleCellHeight;
+  const wCalc = titleCellWidth < kDefaultColumnWidth ? kDefaultColumnWidth : titleCellWidth;
+  const style = { width: wCalc, height: hCalc, };
+
   return (
-    <div className={classes} style={style} onClick={handleClick}>ME
+    <div className={classes} style={style} onClick={handleClick}>
       {isEditing
         ? <HeaderCellInput style={style} value={editingTitle || ""}
             onKeyDown={handleKeyDown} onChange={setEditingTitle} onClose={handleClose} />
