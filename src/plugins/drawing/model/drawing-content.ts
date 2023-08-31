@@ -238,7 +238,7 @@ export const DrawingContentModel = TileContentModel
         setStroke(stroke: string, ids: string[]) {
           self.stroke = stroke;
           forEachObjectId(ids, object => {
-            if(isStrokedObject(object)) {
+            if ('setStroke' in object && typeof object.setStroke === 'function') {
               object.setStroke(stroke);
             }
           });
@@ -246,7 +246,7 @@ export const DrawingContentModel = TileContentModel
         setFill(fill: string, ids: string[]) {
           self.fill = fill;
           forEachObjectId(ids, object => {
-            if (isFilledObject(object)) {
+            if ('setFill' in object && typeof object.setFill === 'function') {
               object.setFill(fill);
             }
           });
@@ -254,7 +254,7 @@ export const DrawingContentModel = TileContentModel
         setStrokeDashArray(strokeDashArray: string, ids: string[]) {
           self.strokeDashArray = strokeDashArray;
           forEachObjectId(ids, object => {
-            if(isStrokedObject(object)) {
+            if ('setStrokeDashArray' in object && typeof object.setStrokeDashArray === 'function') {
               object.setStrokeDashArray(strokeDashArray);
             }
           });
@@ -262,7 +262,7 @@ export const DrawingContentModel = TileContentModel
         setStrokeWidth(strokeWidth: number, ids: string[]) {
           self.strokeWidth = strokeWidth;
           forEachObjectId(ids, object => {
-            if(isStrokedObject(object)) {
+            if ('setStrokeWidth' in object && typeof object.setStrokeWidth === 'function') {
               object.setStrokeWidth(strokeWidth);
             }
           });
@@ -270,7 +270,7 @@ export const DrawingContentModel = TileContentModel
         setVectorType(vectorType: VectorType, ids: string[]) {
           self.vectorType = vectorType;
           forEachObjectId(ids, object => {
-            if (isVectorObject(object) || isGroupObject(object)) {
+            if ('setEndShapes' in object && typeof object.setEndShapes === 'function') {
               object.setEndShapes(...endShapesForVectorType(vectorType));
             }
           });
