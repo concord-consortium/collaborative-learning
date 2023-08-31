@@ -12,7 +12,7 @@ import { SortSelect } from "./components/sort-select";
 import { useToolbarTileApi } from "../../components/tiles/hooks/use-toolbar-tile-api";
 import { AddIconButton, RemoveIconButton } from "./components/add-remove-icons";
 import { useCautionAlert } from "../../components/utilities/use-caution-alert";
-import { EditFacet, kExampleDeckHeight, kThreshold } from "./data-card-types";
+import { EditFacet, kExampleDeckHeight, kButtonSpace } from "./data-card-types";
 import { DataCardSortArea } from "./components/sort-area";
 import { safeJsonParse } from "../../utilities/js-utils";
 import { mergeTwoDataSets } from "../../models/data/data-set-utils";
@@ -59,9 +59,9 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
   useEffect(() => {
     if (!tileElt) return;
     const uiHeight = tileElt?.querySelector(".data-card-container")?.scrollHeight || 0;
-    const heightDiff = height ? height - uiHeight : 0;
+    const spaceLeft = height ? height - uiHeight : 0;
     if (readOnly) onRequestRowHeight(model.id, Math.max(uiHeight, kExampleDeckHeight));
-    if (!readOnly) heightDiff < kThreshold && onRequestRowHeight(model.id, uiHeight + kThreshold);
+    if (!readOnly) spaceLeft < kButtonSpace && onRequestRowHeight(model.id, uiHeight + kButtonSpace);
   }, [currEditAttrId, currEditFacet, height, imageUrlToAdd, readOnly, tileElt, onRequestRowHeight, model.id]);
 
   /* ==[ Drag and Drop ] == */
