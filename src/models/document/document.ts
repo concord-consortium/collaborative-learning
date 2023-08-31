@@ -25,6 +25,8 @@ import { ISharedModelDocumentManager, SharedModelDocumentManager } from "./share
 import { ITileEnvironment } from "../tiles/tile-content";
 import { TreeManager } from "../history/tree-manager";
 import { ESupportType } from "../curriculum/support";
+import { IDocumentLogEvent, logDocumentEvent } from "./log-document-event";
+import { LogEventMethod, LogEventName } from "../../lib/logger-types";
 
 interface IMatchPropertiesOptions {
   isTeacherDocument?: boolean;
@@ -322,13 +324,25 @@ export const DocumentModel = Tree.named("Document")
     undoLastAction() {
       const undoManager = self.treeManagerAPI?.undoManager;
       if (undoManager?.canUndo) {
-        undoManager.undo();
+        const {id, action} = undoManager.undo();
+        const logParams: IDocumentLogEvent = {
+          document: self as DocumentModelType,
+          targetAction: action,
+          targetEventId: id
+        };
+        logDocumentEvent(LogEventName.TILE_UNDO, logParams, LogEventMethod.UNDO);
       }
     },
     redoLastAction() {
       const undoManager = self.treeManagerAPI?.undoManager;
       if (undoManager?.canRedo) {
-        undoManager.redo();
+        const {id, action} = undoManager.redo();
+        const logParams: IDocumentLogEvent = {
+          document: self as DocumentModelType,
+          targetAction: action,
+          targetEventId: id
+        };
+        logDocumentEvent(LogEventName.TILE_REDO, logParams, LogEventMethod.REDO);
       }
     },
   }));
