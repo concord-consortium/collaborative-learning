@@ -7,10 +7,10 @@ import { gImageMap } from "../../../models/image-map";
 import './cell-formatter.scss';
 
 export const formatValue = (
-    formatter: (n: number | { valueOf(): number }) => string, 
+    formatter: (n: number | { valueOf(): number }) => string,
     value: any,
-    width?: number, 
-    row?: TRow, 
+    width?: number,
+    row?: TRow,
     rowHeight?: (args: any) => number,
     lookupImage?: (value: string) => string|undefined,
   ) => {
@@ -18,7 +18,7 @@ export const formatValue = (
   const num = Number(value);
   if (!isFinite(num)) {
     const cellWidth = (width || kDefaultColumnWidth) - kCellHorizontalPadding;
-    const height = rowHeight && row ? rowHeight({ row }) : kRowHeight;
+    const height =  20;//rowHeight && row ? rowHeight({ row }) : kRowHeight;
     if (gImageMap.isImageUrl(value)) {
       if (lookupImage) {
         const url = lookupImage(value);
@@ -47,7 +47,7 @@ interface CellFormatterProps {
   row: TRow;
   column: CalculatedColumn<TRow, any>;
 }
-export const getCellFormatter = (width: number, rowHeight: (args: RowHeightArgs<TRow>) => number, 
+export const getCellFormatter = (width: number, rowHeight: (args: RowHeightArgs<TRow>) => number,
                                 lookupImage: (value:string)=>string|undefined) => {
   return ({ row, column }: CellFormatterProps) => {
     const formatter = useNumberFormat();
