@@ -1,3 +1,5 @@
+import React from "react";
+import { observer } from "mobx-react";
 import { Instance, SnapshotIn, getMembers, types } from "mobx-state-tree";
 import { DrawingObject, DrawingObjectType, IDrawingComponentProps, 
   StrokedObjectType, 
@@ -6,9 +8,7 @@ import { DrawingObject, DrawingObjectType, IDrawingComponentProps,
   typeField } from "./drawing-object";
 import { BoundingBoxSides, VectorEndShape } from "../model/drawing-basic-types";
 import { DrawingObjectMSTUnion } from "../components/drawing-object-manager";
-import React from "react";
 import { isVectorObject } from "./vector";
-import { observer } from "mobx-react";
 
 // An "extent" represents the position of each side of a member object's bounding box,
 // as a fraction of the group's overall bounding box.
