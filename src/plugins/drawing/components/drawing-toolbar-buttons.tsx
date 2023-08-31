@@ -6,6 +6,7 @@ import { ToolbarSettings } from "../model/drawing-basic-types";
 import SelectToolIcon from "../../../clue/assets/icons/select-tool.svg";
 import ColorFillIcon from "../assets/color-fill-icon.svg";
 import ColorStrokeIcon from "../assets/color-stroke-icon.svg";
+import DuplicateIcon from "../assets/duplicate-icon.svg";
 import DeleteSelectionIcon from "../../../assets/icons/delete/delete-selection-icon.svg";
 import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
 import { isLightColorRequiringContrastOffset } from "../../../utilities/color-utils";
@@ -119,6 +120,21 @@ export const StrokeColorButton: React.FC<IColorButtonProps> = ({ settings, onCli
             settings={{ fill: settings.stroke, stroke }} onClick={onClick} />;
 };
 
+interface IDuplicateButtonProps {
+  toolbarManager: IToolbarManager;
+}
+export const DuplicateButton: React.FC<IDuplicateButtonProps> = observer(function DuplicateButton({
+  toolbarManager
+}) {
+  const onClick = () => {
+    toolbarManager.duplicateObjects(toolbarManager.selection);
+  };
+  const disabled = !toolbarManager.hasSelectedObjects;
+
+  return <SvgToolbarButton SvgIcon={DuplicateIcon} buttonClass="duplicate" title="Duplicate"
+    onClick={onClick} disabled={disabled} />;
+});
+
 interface IDeleteToolButtonProps {
   toolbarManager: IToolbarManager;
 }
@@ -126,7 +142,7 @@ export const DeleteButton: React.FC<IDeleteToolButtonProps> = observer(function 
   toolbarManager
 }) {
   const onClick = () => {
-    toolbarManager.deleteObjects(toolbarManager.selectedIds);
+    toolbarManager.deleteObjects([...toolbarManager.selection]);
   };
   const disabled = !toolbarManager.hasSelectedObjects;
 

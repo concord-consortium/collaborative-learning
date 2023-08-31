@@ -6,7 +6,7 @@ import {ICase} from "../../../models/data/data-set-types";
 import {isAddCasesAction} from "../../../models/data/data-set-actions";
 import {useDragHandlers, usePlotResponders} from "../hooks/use-plot";
 import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
-import {useDataSetContext} from "../hooks/use-data-set-context";
+import {useDataSetContext} from "../imports/hooks/use-data-set-context";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {handleClickOnDot, setPointCoordinates, setPointSelection} from "../utilities/graph-utils";
 import {useGraphModelContext} from "../models/graph-model";
@@ -127,9 +127,7 @@ export const CaseDots = function CaseDots(props: {
     return () => disposer?.();
   }, [dataset]);
 
-  usePlotResponders({
-    graphModel, dotsRef, layout, refreshPointPositions, refreshPointSelection, enableAnimation
-  });
+  usePlotResponders({dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation});
 
   return (
     <>

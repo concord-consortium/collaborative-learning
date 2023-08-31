@@ -46,6 +46,7 @@ export interface DataflowSocketSnapshotOut extends SnapshotOut<typeof SocketMode
 const DataflowNodeDataModel = types.
   model("DataflowNodeData", {
     plot: types.maybe(types.boolean),
+    orderedDisplayName: types.maybe(types.string),
 
     // Sensor
     type: types.maybe(types.string),

@@ -1,23 +1,21 @@
 @import "../vars";
-$header-offset-with-sub-tabs: calc(#{$header-height} + 2 * (#{$workspace-content-margin} + #{$nav-tab-height} + #{$tab-section-border-width}));
 $title-margin: 2px;
 $scroller-height: 145px;
 
 .document-tabs {
-  overflow-x: hidden;
-  overflow-y: hidden;
   &.chat-open {
     border-right: 0;
   }
 
   .document-browser {
     overflow-y: auto;
-    height: calc(100vh - #{$header-offset-with-sub-tabs});
+    height: 100%;
   }
 
   .scroller-and-document {
-    overflow-x: hidden;
-    overflow-y: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
     position: relative;
     .collapse-scroller-button {
       border-radius: 50%;
@@ -101,10 +99,9 @@ $scroller-height: 145px;
       }
     }
     .document-area {
-      height: calc(100vh - #{$header-offset-with-sub-tabs});
+      flex: 1;
       display: flex;
       flex-direction: row;
-      overflow-y: auto;
 
       .focus-document {
         display: flex;
@@ -158,7 +155,11 @@ $scroller-height: 145px;
             background-color: $document-select-blue;
           }
           .document-title {
+            font-size: 13px;
             font-weight: bold;
+            .class-work {
+              font-weight: normal;
+            }
           }
           .edit-button {
             display: flex;
@@ -269,16 +270,13 @@ $scroller-height: 145px;
     }
   }
   .editable-document-content {
-    top: $nav-tab-height * 2;
-    height: calc(100vh - (#{$header-offset-with-sub-tabs} + #{$title-margin} + #{$nav-tab-height}) - #{$scroller-height});
-    position: static;
-    overflow-y: auto;
-    &.full-height {
-      height: calc(100vh - (#{$header-offset-with-sub-tabs} + #{$title-margin} + #{$nav-tab-height}));
-    }
+    top: $nav-tab-height;
+    flex: 1;
     .canvas-area {
-      position: static;
-      height: 100%;
+      // Not sure why - 4px is necessary here, but the document would always scroll otherwise
+      height: calc(100% - 4px);
+      width: 100%;
+
       .comment-select {
         .tool-tile.readonly {
           border: 2px solid $comment-select-background;
@@ -286,6 +284,11 @@ $scroller-height: 145px;
             border: 2px solid white;
           }
         }
+      }
+
+      .playback-component {
+        // This is to compensate for the - 4px above
+        bottom: -4px;
       }
     }
   }

@@ -84,8 +84,8 @@ export const LineObject = StrokedObject.named("LineObject")
       self.dragScaleX = widthFactor;
       self.dragScaleY = heightFactor;
     },
-    adoptDragBounds() {
-      self.adoptDragPosition();
+    resizeObject() {
+      self.repositionObject();
 
       // The delta points get permanently scaled by the x & y scale factors
       const scaleX = self.dragScaleX ?? 1;
@@ -120,7 +120,7 @@ export const LineComponent = observer(function LineComponent({model, handleHover
     onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
     onMouseDown={(e)=> handleDrag?.(e, model)}
     pointerEvents={"visible"}
-    />;
+  />;
 });
 
 export class LineDrawingTool extends DrawingTool {
@@ -133,7 +133,7 @@ export class LineDrawingTool extends DrawingTool {
   public handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
     const start = this.drawingLayer.getWorkspacePoint(e);
     if (!start) return;
-    const {stroke, strokeWidth, strokeDashArray} = this.settings;
+    const {stroke, strokeWidth, strokeDashArray} = this.drawingLayer.toolbarSettings();
     const line = LineObject.create({x: start.x, y: start.y,
       deltaPoints: [], stroke, strokeWidth, strokeDashArray});
 
@@ -169,6 +169,6 @@ export class LineDrawingTool extends DrawingTool {
 }
 
 export function LineToolbarButton({toolbarManager}: IToolbarButtonProps) {
-  return <SvgToolModeButton modalButton="line" settings={{ fill: toolbarManager.stroke }}
+  return <SvgToolModeButton modalButton="line" 
     title="Freehand" toolbarManager={toolbarManager} SvgIcon={FreehandToolIcon} />;
 }

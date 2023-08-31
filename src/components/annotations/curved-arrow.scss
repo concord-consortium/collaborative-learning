@@ -1,0 +1,33 @@
+@use "../vars.sass";
+
+.curved-arrow {
+  pointer-events: none;
+
+  .curved-arrow-stem {
+    stroke: vars.$annotation-blue;
+    stroke-width: 3;
+  }
+
+  .curved-arrow-arrowhead {
+    fill: vars.$annotation-blue;
+  }
+
+  &.background-arrow {
+    .curved-arrow-stem {
+      stroke-opacity: 0;
+      stroke-width: 11px;
+    }
+
+    &:hover {
+      .curved-arrow-stem {
+        stroke-opacity: .125;
+      }
+    }
+  }
+}
+
+.annotation-layer.editing {
+  .curved-arrow.background-arrow {
+    pointer-events: stroke;
+  }
+}

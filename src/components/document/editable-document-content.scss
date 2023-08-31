@@ -35,16 +35,17 @@
 
   .canvas-area {
     position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    height: 100%;
+    width: 100%;
+    left: 0px;
+    top: 0px;
     border-top: $document-border-width solid white;
   }
 
   &.show-toolbar {
     .canvas-area {
       left: $workspace-toolbar-width + $canvas-separator-offset + $canvas-separator-width;
+      width: calc(100% - ($workspace-toolbar-width + $canvas-separator-offset + $canvas-separator-width));
     }
   }
 }

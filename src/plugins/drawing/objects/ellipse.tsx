@@ -41,8 +41,8 @@ export const EllipseObject = types.compose("EllipseObject", StrokedObject, Fille
       self.dragRx  = self.rx  + deltas.right/2 - deltas.left/2;
       self.dragRy = self.ry + deltas.bottom/2 - deltas.top/2;
     },
-    adoptDragBounds() {
-      self.adoptDragPosition();
+    resizeObject() {
+      self.repositionObject();
       self.rx = self.dragRx ?? self.rx;
       self.ry = self.dragRy ?? self.ry;
       self.dragRx = self.dragRy = undefined;
@@ -76,7 +76,7 @@ export const EllipseComponent = observer(function EllipseComponent({model, handl
     onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
     onMouseDown={(e)=> handleDrag?.(e, model)}
     pointerEvents={"visible"}
-    />;
+  />;
 });
 
 export class EllipseDrawingTool extends DrawingTool {
@@ -88,7 +88,7 @@ export class EllipseDrawingTool extends DrawingTool {
   public handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
     const start = this.drawingLayer.getWorkspacePoint(e);
     if (!start) return;
-    const {stroke, fill, strokeWidth, strokeDashArray} = this.settings;
+    const {stroke, fill, strokeWidth, strokeDashArray} = this.drawingLayer.toolbarSettings();
     const ellipse = EllipseObject.create({
       x: start.x,
       y: start.y,

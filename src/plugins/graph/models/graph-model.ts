@@ -1,32 +1,31 @@
-import {Instance, ISerializedActionCall, SnapshotIn, types, getSnapshot, addDisposer} from "mobx-state-tree";
-import {reaction} from "mobx";
-import {createContext, useContext} from "react";
 import stringify from "json-stringify-pretty-compact";
-
-import {AxisPlace} from "../axis/axis-types";
-import {AxisModelUnion, EmptyAxisModel, IAxisModelUnion, NumericAxisModel} from "../axis/models/axis-model";
+import {reaction} from "mobx";
+import {addDisposer, getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
+import {createContext, useContext} from "react";
+import { IAdornmentModel, IUpdateCategoriesOptions } from "../adornments/adornment-models";
+import {AxisPlace} from "../imports/components/axis/axis-types";
+import {
+  AxisModelUnion, EmptyAxisModel, IAxisModelUnion, NumericAxisModel
+} from "../imports/components/axis/models/axis-model";
 import {
   GraphAttrRole, hoverRadiusFactor, kDefaultNumericAxisBounds, kGraphTileType, PlotType, PlotTypes,
   pointRadiusLogBase, pointRadiusMax, pointRadiusMin, pointRadiusSelectionAddend
 } from "../graph-types";
 import {DataConfigurationModel} from "./data-configuration-model";
-import {IDataSet} from "../../../models/data/data-set";
 import { SharedModelType } from "../../../models/shared/shared-model";
-import { ISharedCaseMetadata, isSharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
-import {isSharedDataSet} from "../../../models/shared/shared-data-set";
+import {
+  getDataSetFromId, getTileCaseMetadata, getTileDataSet, isTileLinkedToDataSet, linkTileToDataSet
+} from "../../../models/shared/shared-data-utils";
+import { AppConfigModelType } from "../../../models/stores/app-config-model";
 import {ITileContentModel, TileContentModel} from "../../../models/tiles/tile-content";
 import {ITileExportOptions} from "../../../models/tiles/tile-content-info";
+import { getAppConfig, getSharedModelManager } from "../../../models/tiles/tile-environment";
 import {
-  defaultBackgroundColor,
-  defaultPointColor,
-  defaultStrokeColor,
-  kellyColors
+  defaultBackgroundColor, defaultPointColor, defaultStrokeColor, kellyColors
 } from "../../../utilities/color-utils";
-import { AppConfigModelType } from "../../../models/stores/app-config-model";
-import { getAppConfig } from "../../../models/tiles/tile-environment";
-
-export type SharedModelChangeHandler = (sharedModel: SharedModelType | undefined, type: string) => void;
-
+import { onAnyAction } from "../../../utilities/mst-utils";
+import { AdornmentModelUnion } from "../adornments/adornment-types";
+import { SharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
 export interface GraphProperties {
   axes: Record<string, IAxisModelUnion>
   plotType: PlotType
@@ -38,7 +37,7 @@ export type BackgroundLockInfo = {
   xAxisUpperBound: number,
   yAxisLowerBound: number,
   yAxisUpperBound: number
-}
+};
 
 export const NumberToggleModel = types
   .model('NumberToggleModel', {});
@@ -47,8 +46,10 @@ export const GraphModel = TileContentModel
   .named("GraphModel")
   .props({
     type: types.optional(types.literal(kGraphTileType), kGraphTileType),
+    adornments: types.array(AdornmentModelUnion),
     // keys are AxisPlaces
     axes: types.map(AxisModelUnion),
+    // TODO: should the default plot be something like "nullPlot" (which doesn't exist yet)?
     plotType: types.optional(types.enumeration([...PlotTypes]), "casePlot"),
     config: types.optional(DataConfigurationModel, () => DataConfigurationModel.create()),
     // Visual properties
@@ -63,18 +64,18 @@ export const GraphModel = TileContentModel
     plotBackgroundLockInfo: types.maybe(types.frozen<BackgroundLockInfo>()),
     // numberToggleModel: types.optional(types.union(NumberToggleModel, null))
     showParentToggles: false,
-    showMeasuresForSelection: false,
+    showMeasuresForSelection: false
   })
+  .volatile(self => ({
+    prevDataSetId: "",
+    disposeDataSetListener: undefined as (() => void) | undefined
+  }))
   .views(self => ({
-    get data(): IDataSet | undefined {
-      const sharedModelManager = self.tileEnv?.sharedModelManager;
-      const sharedModel = sharedModelManager?.getTileSharedModels(self).find(m => isSharedDataSet(m));
-      return isSharedDataSet(sharedModel) ? sharedModel.dataSet : undefined;
+    get data() {
+      return getTileDataSet(self);
     },
-    get metadata(): ISharedCaseMetadata | undefined {
-      const sharedModelManager = self.tileEnv?.sharedModelManager;
-      const sharedModel = sharedModelManager?.getTileSharedModels(self).find(m => isSharedCaseMetadata(m));
-      return isSharedCaseMetadata(sharedModel) ? sharedModel : undefined;
+    get metadata() {
+      return getTileCaseMetadata(self);
     },
     pointColorAtIndex(plotIndex = 0) {
       return self._pointColors[plotIndex] ?? kellyColors[plotIndex % kellyColors.length];
@@ -109,6 +110,9 @@ export const GraphModel = TileContentModel
           return result + pointRadiusSelectionAddend;
       }
     },
+    axisShouldShowGridLines(place: AxisPlace) {
+      return self.plotType === 'scatterPlot' && ['left', 'bottom'].includes(place);
+    },
     exportJson(options?: ITileExportOptions) {
       const snapshot = getSnapshot(self);
 
@@ -119,23 +123,79 @@ export const GraphModel = TileContentModel
     }
   }))
   .views(self => ({
-    axisShouldShowGridLines(place: AxisPlace) {
-      return self.plotType === 'scatterPlot' && ['left', 'bottom'].includes(place);
+    getUpdateCategoriesOptions(resetPoints=false): IUpdateCategoriesOptions {
+      const xAttrId = self.getAttributeID("x"),
+        xAttrType = self.config.attributeType("x"),
+        xCats = xAttrType === "categorical"
+          ? self.config.categoryArrayForAttrRole("x", [])
+          : [""],
+        yAttrId = self.getAttributeID("y"),
+        yAttrType = self.config.attributeType("y"),
+        yCats = yAttrType === "categorical"
+          ? self.config.categoryArrayForAttrRole("y", [])
+          : [""],
+        topAttrId = self.getAttributeID("topSplit"),
+        topCats = self.config.categoryArrayForAttrRole("topSplit", []) ?? [""],
+        rightAttrId = self.getAttributeID("rightSplit"),
+        rightCats = self.config.categoryArrayForAttrRole("rightSplit", []) ?? [""];
+      return {
+        xAxis: self.getAxis("bottom"),
+        xAttrId,
+        xCats,
+        yAxis: self.getAxis("left"),
+        yAttrId,
+        yCats,
+        topAttrId,
+        topCats,
+        rightAttrId,
+        rightCats,
+        resetPoints
+      };
     }
   }))
   .actions(self => ({
+    setDataSetListener() {
+      const actionsAffectingCategories = [
+        "addCases", "removeAttribute", "removeCases", "setCaseValues"
+      ];
+      self.disposeDataSetListener?.();
+      self.disposeDataSetListener = self.data
+        ? onAnyAction(self.data, action => {
+            // TODO: check whether categories have actually changed before updating
+            if (actionsAffectingCategories.includes(action.name)) {
+              this.updateAdornments();
+            }
+          })
+        : undefined;
+    },
+    updateAdornments(resetPoints=false) {
+      const options = self.getUpdateCategoriesOptions(resetPoints);
+      self.adornments.forEach(adornment => adornment.updateCategories(options));
+    }
+  }))
+  .actions(self => ({
+    beforeDestroy() {
+      self.disposeDataSetListener?.();
+    },
     setAxis(place: AxisPlace, axis: IAxisModelUnion) {
       self.axes.set(place, axis);
     },
     removeAxis(place: AxisPlace) {
       self.axes.delete(place);
     },
-    setAttributeID(role: GraphAttrRole, id: string) {
+    setAttributeID(role: GraphAttrRole, dataSetID: string, id: string) {
+      const newDataSet = getDataSetFromId(self, dataSetID);
+      if (newDataSet && !isTileLinkedToDataSet(self, newDataSet)) {
+        linkTileToDataSet(self, newDataSet);
+        self.config.clearAttributes();
+        self.config.setDataset(newDataSet, getTileCaseMetadata(self));
+      }
       if (role === 'yPlus') {
         self.config.addYAttribute({attributeID: id});
       } else {
         self.config.setAttribute(role, {attributeID: id});
       }
+      self.updateAdornments(true);
     },
     setPlotType(type: PlotType) {
       self.plotType = type;
@@ -170,31 +230,52 @@ export const GraphModel = TileContentModel
     setShowMeasuresForSelection(show: boolean) {
       self.showMeasuresForSelection = show;
     },
+    showAdornment(adornment: IAdornmentModel, type: string) {
+      const adornmentExists = self.adornments.find(a => a.type === type);
+      if (adornmentExists) {
+        adornmentExists.setVisibility(true);
+      } else {
+        self.adornments.push(adornment);
+      }
+    },
+    hideAdornment(type: string) {
+      const adornment = self.adornments.find(a => a.type === type);
+      adornment?.setVisibility(false);
+    }
   }))
   .actions(self => ({
-    configureGraphOnLink() {
+    configureLinkedGraph() {
       if (!self.data) {
-        console.warn("GraphModel.configureGraphOnLink requires a dataset");
+        console.warn("GraphModel.configureLinkedGraph requires a dataset");
         return;
       }
       if (getAppConfig(self)?.getSetting("emptyPlotIsNumeric", "graph")) {
-        // If our graph doesn't have useful axes then set them
-        if (!self.getAttributeID("x") && !self.getAttributeID("y")) {
-          self.setAttributeID("x", self.data.attributes[0].id);
-          self.setAttributeID("y", self.data.attributes[1].id);
+        const attributeCount = self.data.attributes.length;
+        if (!attributeCount) return;
+
+        const xAttrId = self.getAttributeID("x");
+        const isValidXAttr = !!self.data.attrFromID(xAttrId);
+        const yAttrId = self.getAttributeID("y");
+        const isValidYAttr = !!self.data.attrFromID(yAttrId);
+
+        if (!isValidXAttr && !isValidYAttr) {
+          self.setAttributeID("x", self.data.id, self.data.attributes[0].id);
+          if (attributeCount > 1) {
+            self.setAttributeID("y", self.data.id, self.data.attributes[1].id);
+          }
         }
       }
     },
-    configureGraphOnUnlink() {
+    configureUnlinkedGraph() {
       if (self.data) {
-        console.warn("GraphModel.configureGraphOnUnlink expects the dataset to be unlinked");
+        console.warn("GraphModel.configureUnlinkedGraph expects the dataset to be unlinked");
         return;
       }
       if (self.getAttributeID("y")) {
-        self.setAttributeID("y", "");
+        self.setAttributeID("y", "", "");
       }
       if (self.getAttributeID("x")) {
-        self.setAttributeID("x", "");
+        self.setAttributeID("x", "", "");
       }
     }
   }))
@@ -212,25 +293,38 @@ export const GraphModel = TileContentModel
       // we do it here just to be safe incase this function is called
       // first
       if (self.data !== self.config.dataset) {
-        self.config.setDataset(self.data);
+        self.config.setDataset(self.data, self.metadata);
       }
 
       // TODO: is it necessary to do this here and in the reaction below?
       if (self.data) {
-        self.configureGraphOnLink();
+        self.configureLinkedGraph();
       }
       else {
-        self.configureGraphOnUnlink();
+        self.configureUnlinkedGraph();
+      }
+
+      // reset listeners if necessary
+      const currDataSetId = self.data?.id ?? "";
+      if (self.prevDataSetId !== currDataSetId) {
+        self.setDataSetListener();
+        self.prevDataSetId = currDataSetId;
       }
     },
-    afterAttach() {
+    afterAttachToDocument() {
       addDisposer(self, reaction(
         () => self.data,
-        (data, prevData, more) => {
+        data => {
+          if (!self.metadata && data){
+            const caseMetadata = SharedCaseMetadata.create();
+            caseMetadata.setData(data);
+            const sharedModelManager = getSharedModelManager(self);
+            sharedModelManager?.addTileSharedModel(self, caseMetadata);
+          }
           // CHECKME: this will only work correctly if setDataset doesn't
           // trigger any state updates
           if (self.data !== self.config.dataset) {
-            self.config.setDataset(self.data);
+            self.config.setDataset(self.data, self.metadata);
           }
           // FIXME: When a snapshot is applied from firebase
           // we need to sync the config dataset. But we don't want to do
@@ -245,10 +339,10 @@ export const GraphModel = TileContentModel
 
           // TODO: is it necessary to do this here and in updateAfterSharedModelChanges above?
           if (self.data) {
-            self.configureGraphOnLink();
+            self.configureLinkedGraph();
           }
           else {
-            self.configureGraphOnUnlink();
+            self.configureUnlinkedGraph();
           }
         }
       ));
@@ -277,7 +371,7 @@ export function createGraphModel(snap?: IGraphModelSnapshot, appConfig?: AppConf
 
 export interface SetAttributeIDAction extends ISerializedActionCall {
   name: "setAttributeID"
-  args: [GraphAttrRole, string]
+  args: [GraphAttrRole, string, string]
 }
 
 export function isSetAttributeIDAction(action: ISerializedActionCall): action is SetAttributeIDAction {

@@ -1,9 +1,10 @@
 import {useCallback, useEffect} from "react";
-import {ScaleNumericBaseType} from "../axis/axis-types";
+import {ScaleNumericBaseType} from "../imports/components/axis/axis-types";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {useGraphModelContext} from "../models/graph-model";
-import {IMovableLineModel, IMovableValueModel} from "../adornments/adornment-models";
 import {onAnyAction} from "../../../utilities/mst-utils";
+import { IMovableLineModel } from "../adornments/movable-line/movable-line-model";
+import { IMovableValueModel } from "../adornments/movable-value/movable-value-model";
 
 interface IProps {
   movableLineModel: IMovableLineModel

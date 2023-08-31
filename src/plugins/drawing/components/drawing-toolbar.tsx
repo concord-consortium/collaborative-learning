@@ -17,18 +17,19 @@ import { ITileModel } from "../../../models/tiles/tile-model";
 import { useSettingFromStores } from "../../../hooks/use-stores";
 import { IPaletteState, IToolbarButtonProps, kClosedPalettesState, PaletteKey } from "../objects/drawing-object";
 import { getDrawingToolButtonComponent } from "./drawing-object-manager";
-import { VectorType } from "../model/drawing-basic-types";
+import { Point, VectorType } from "../model/drawing-basic-types";
 
 interface IProps extends IFloatingToolbarProps, IRegisterTileApiProps {
   model: ITileModel;
+  getVisibleCanvasSize: () => Point|undefined;
   setImageUrlToAdd: (url: string) => void;
 }
 
 const defaultButtons = ["select", "line", "vector", "rectangle", "ellipse",
-  "stamp", "stroke-color", "fill-color", "image-upload", "delete"];
+  "stamp", "stroke-color", "fill-color", "text", "image-upload", "duplicate", "delete"];
 
 export const ToolbarView: React.FC<IProps> = (
-              { documentContent, model, onIsEnabled, setImageUrlToAdd, ...others }: IProps) => {
+              { documentContent, model, onIsEnabled, setImageUrlToAdd, getVisibleCanvasSize, ...others }: IProps) => {
   const drawingContent = model.content as DrawingContentModelType;
   const toolbarButtonSetting = useSettingFromStores("tools", "drawing") as unknown as string[] | undefined;
   const toolbarButtons = toolbarButtonSetting || defaultButtons;
@@ -73,21 +74,22 @@ export const ToolbarView: React.FC<IProps> = (
   };
 
   const handleStrokeColorChange = (color: string) => {
-    isEnabled && drawingContent.setStroke(color, drawingContent.selectedIds);
+    isEnabled && drawingContent.setStroke(color, drawingContent.selection);
     clearPaletteState();
   };
   const handleFillColorChange = (color: string) => {
-    isEnabled && drawingContent.setFill(color, drawingContent.selectedIds);
+    isEnabled && drawingContent.setFill(color, drawingContent.selection);
     clearPaletteState();
   };
   const handleVectorTypeChange = (type: VectorType) => {
-    isEnabled && drawingContent.setVectorType(type, drawingContent.selectedIds);
+    isEnabled && drawingContent.setVectorType(type, drawingContent.selection);
     drawingContent.setSelectedButton("vector");
     clearPaletteState();
   };
 
   const toolbarButtonProps: IToolbarButtonProps = {
     toolbarManager: drawingContent,
+    getVisibleCanvasSize,
     togglePaletteState,
     clearPaletteState
   };

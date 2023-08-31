@@ -48,7 +48,6 @@ context('Chat Panel', () => {
       chatPanel.getChatPanelToggle().click();
       cy.wait(2000);
       chatPanel.getCommentCard().should('exist');
-      chatPanel.getCommentPostButton().should('have.class', 'disabled');
     });
     it('verify the comment card and the document are highlighted', () => {
       chatPanel.verifyProblemCommentClass();

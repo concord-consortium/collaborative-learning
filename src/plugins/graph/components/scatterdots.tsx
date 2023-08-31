@@ -1,11 +1,11 @@
 import {ScaleBand, ScaleLinear, select} from "d3";
 import React, {useCallback, useRef, useState} from "react";
-import {ScaleNumericBaseType} from "../axis/axis-types";
+import {ScaleNumericBaseType} from "../imports/components/axis/axis-types";
 import {CaseData} from "../d3-types";
 import {PlotProps} from "../graph-types";
 import {useDragHandlers, usePlotResponders} from "../hooks/use-plot";
 import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
-import {useDataSetContext} from "../hooks/use-data-set-context";
+import {useDataSetContext} from "../imports/hooks/use-data-set-context";
 // import {useInstanceIdContext} from "../hooks/use-instance-id-context";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {ICase} from "../../../models/data/data-set-types";
@@ -112,7 +112,6 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
     }, [layout, dataConfiguration, dataset, dragID]),
 
     onDragEnd = useCallback(() => {
-      dataset?._endCaching();
 
       if (dragID !== '') {
         target.current
@@ -226,7 +225,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
   }, [refreshPointPositionsD3]);
 
   usePlotResponders({
-    graphModel, layout, dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation
+    dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation
   });
 
   return (

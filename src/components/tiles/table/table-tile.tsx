@@ -4,9 +4,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import ReactDataGrid from "react-data-grid";
 
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
-import { exportTableContentAsJson } from "../../../models/tiles/table/table-export";
 import { ITileProps } from "../tile-component";
-import { getTableContentHeight } from "./table-utils";
 import { EditableTableTitle } from "./editable-table-title";
 import { TableToolbar } from "./table-toolbar";
 import { useColumnsFromDataSet } from "./use-columns-from-data-set";
@@ -162,22 +160,11 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   };
 
   // Define and submit functions for general tool tile API
-  const getContentHeight = useCallback(() => {
-    return getTableContentHeight({
-      readOnly,
-      rows,
-      rowHeight,
-      headerHeight,
-      getTitleHeight,
-      hasExpressions: getContent().hasExpressions,
-      padding: 10 + (modelRef.current.display === "teacher" ? 20 : 0)
-    });
-  }, [rows, rowHeight, headerHeight, getTitleHeight, getContent, modelRef, readOnly]);
-  const exportContentAsTileJson = useCallback(() => {
-    return exportTableContentAsJson(content.metadata, dataSet, content.columnWidth);
-  }, [dataSet, content]);
-  useToolApi({ content: getContent(), getContentHeight, exportContentAsTileJson,
-                onRegisterTileApi, onUnregisterTileApi });
+  const padding = 10 + (modelRef.current.display === "teacher" ? 20 : 0);
+  useToolApi({
+    columns, content: getContent(), dataSet, getTitleHeight, headerHeight,
+    measureColumnWidth, onRegisterTileApi, onUnregisterTileApi, padding, readOnly, rowHeight, rows
+  });
 
   useEffect(() => {
     if (containerRef.current && linkColors) {

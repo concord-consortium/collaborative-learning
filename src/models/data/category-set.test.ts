@@ -15,14 +15,13 @@ describe("CategorySet", () => {
   }));
 
   it("constructs categories, allows them to be moved, and responds to changes", () => {
-    const a = Attribute.create({ name: "a", id: "a", values: ["a", "b", "c", "a", "b", "c"] });
+    const a = Attribute.create({ name: "a", values: ["a", "b", "c", "a", "b", "c"] });
     expect(a.strValues).toEqual(["a", "b", "c", "a", "b", "c"]);
     const tree = Tree.create({
       attribute: a,
       categories: { attribute: a.id }
     });
     const categories = tree.categories;
-    const lastMove = () => categories.moves.at(-1);
     const catKellyColors = () => categories.values.map(cat => categories.colorForCategory(cat));
     const numKellyColors = (n: number) => kellyColors.slice(0, n);
     expect(categories).toBeDefined();
@@ -31,15 +30,18 @@ describe("CategorySet", () => {
     expect(categories.colorForCategory("foo")).toBeUndefined();
     expect(catKellyColors()).toEqual(numKellyColors(3));
     categories.move("c", "b"); // ["a", "c", "b"]
-    expect(lastMove()).toEqual({ value: "c", fromIndex: 2, toIndex: 1, length: 3, after: "a", before: "b" });
+    expect(categories.lastMove)
+      .toEqual({ value: "c", fromIndex: 2, toIndex: 1, length: 3, after: "a", before: "b" });
     expect(categories.values).toEqual(["a", "c", "b"]);
     expect(catKellyColors()).toEqual(numKellyColors(3));
     categories.move("b", "a"); // ["b", "a", "c"]
-    expect(lastMove()).toEqual({ value: "b", fromIndex: 2, toIndex: 0, length: 3, after: undefined, before: "a" });
+    expect(categories.lastMove)
+      .toEqual({ value: "b", fromIndex: 2, toIndex: 0, length: 3, after: undefined, before: "a" });
     expect(categories.values).toEqual(["b", "a", "c"]);
     expect(catKellyColors()).toEqual(numKellyColors(3));
     categories.move("a"); // ["b", "c", "a"]
-    expect(lastMove()).toEqual({ value: "a", fromIndex: 1, toIndex: 2, length: 3, after: "c", before: undefined });
+    expect(categories.lastMove)
+      .toEqual({ value: "a", fromIndex: 1, toIndex: 2, length: 3, after: "c", before: undefined });
     expect(categories.values).toEqual(["b", "c", "a"]);
     expect(catKellyColors()).toEqual(numKellyColors(3));
 
@@ -90,23 +92,30 @@ describe("CategorySet", () => {
     expect(catKellyColors()).toEqual(numKellyColors(4));
     categories.setColorForCategory("b", "red");
     expect(catKellyColors()).toEqual([...numKellyColors(3), "red"]);
+    // moving "b" before "z" combines moves
+    const originalFromIndex = categories.lastMove?.fromIndex;
+    expect(categories.moves.length).toBe(6);
+    categories.move("z", "b");
+    expect(categories.values).toEqual(["x", "y", "z", "b"]);
+    expect(categories.moves.length).toBe(6);
+    expect(categories.lastMove?.fromIndex).toBe(originalFromIndex);
   });
 
   it("supports callback on invalidation of attribute", () => {
     const handleAttributeInvalidated = jest.fn();
 
     // can destroy attribute without having set an invalidation handler
-    const a = Attribute.create({ name: "a", id: "a" });
+    const a = Attribute.create({ name: "a" });
     const aTree = Tree.create({ attribute: a, categories: { attribute: a.id } });
-    aTree.setAttribute(Attribute.create({ name: "b", id: "b" }));
+    aTree.setAttribute(Attribute.create({ name: "b" }));
     expect(handleAttributeInvalidated).not.toHaveBeenCalled();
 
     // handler is called on attribute destruction if one has been specified
-    const c = Attribute.create({ name: "c", id: "c" });
+    const c = Attribute.create({ name: "c" });
     const cId = c.id;
     const cTree = Tree.create({ attribute: c, categories: { attribute: cId } });
     cTree.categories.onAttributeInvalidated((attrId: string) => handleAttributeInvalidated(attrId));
-    cTree.setAttribute(Attribute.create({ name: "d", id: "d" }));
+    cTree.setAttribute(Attribute.create({ name: "d" }));
     expect(handleAttributeInvalidated).toHaveBeenCalledTimes(1);
     expect(handleAttributeInvalidated).toHaveBeenCalledWith(cId);
   });

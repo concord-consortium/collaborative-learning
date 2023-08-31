@@ -3,8 +3,14 @@ import {equationString, getScreenCoord, lineToAxisIntercepts, ptInRect, valueLab
 import {DataSet} from "../../../models/data/data-set";
 
 describe("equationString", () => {
-  it("should give correct html", () => {
-    expect(equationString(1, 0)).toBe('<p style="color:#4782B4"><i>y</i> = 1 <i>x</i> + 0</p>');
+  it("should return a valid equation for a given slope and intercept", () => {
+    expect(equationString(1, 0, {x: "Lifespan", y: "Speed"})).toBe('<em>Speed</em> = 1 <em>Lifespan</em> + 0');
+  });
+  it("should return an equation containing only the y attribute when the slope is 0", () => {
+    expect(equationString(0, 1, {x: "Lifespan", y: "Speed"})).toBe('<em>Speed</em> = 1');
+  });
+  it("should return an equation containing only the x attribute when the slope is Infinity", () => {
+    expect(equationString(Infinity, 1, {x: "Lifespan", y: "Speed"})).toBe('<em>Lifespan</em> = 1');
   });
 });
 

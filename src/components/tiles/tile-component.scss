@@ -1,0 +1,108 @@
+@import "../vars.sass";
+
+.tool-tile {
+  // create z-index stacking context ("what happens in tool tiles, stays in tool tiles")
+  position: relative;
+  z-index: 0;
+  overflow: hidden;
+  height: 100%;
+  flex: 1 1 auto;
+  border: $half-border-width solid white;
+
+  &.teacher {
+    background-color: $learninglog-green-light-8;
+    margin: 5px 0 10px 20px;
+    padding-right: 10px;
+    border-left: $half-border-width solid $learninglog-green;
+
+    &:not(.text-tool-tile) {
+      padding: 10px;
+    }
+  }
+
+  .tool-tile-drag-handle {
+    position: absolute;
+    right: -2px;
+    top: -2px;
+    box-sizing: border-box;
+    width: 24px;
+    height: 24px;
+    z-index: 99;
+    opacity: 0;
+    transition: 0.3s;
+
+    &.hovered {
+      opacity: 0.5;
+    }
+
+    &:hover {
+      cursor: row-resize;
+      opacity: 1;
+    }
+
+    &.selected {
+      opacity: 1;
+    }
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  .tool-tile-resize-handle {
+    position: absolute;
+    right: -2px;
+    bottom: -2px;
+    box-sizing: border-box;
+    width: 24px;
+    height: 24px;
+    z-index: 10;
+    opacity: 0;
+    transition: 0.3s;
+
+    &.hovered {
+      opacity: 0.5;
+    }
+
+    &:hover {
+      cursor: grab;
+      opacity: 1;
+    }
+
+    &.selected {
+      opacity: 1;
+    }
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  &:focus {
+    outline: none;
+  }
+
+  &.hovered {
+    border: $half-border-width solid $workspace-teal-light-3;
+
+    &.readonly {
+      border: $half-border-width solid $charcoal-light-4;
+    }
+  }
+
+  &.selected {
+    border: $half-border-width solid $workspace-teal;
+
+    &.readonly {
+      border: $half-border-width solid $charcoal-light-2;
+    }
+  }
+
+  &.annotatable {
+    border: $half-border-width solid $annotation-blue;
+  }
+
+  &.selected-for-comment.readonly {
+    background-color: $comment-select-background;
+  }
+}

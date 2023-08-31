@@ -1,44 +1,26 @@
 import { types, Instance, SnapshotIn, getSnapshot, isStateTreeNode} from "mobx-state-tree";
 import { clone } from "lodash";
 import stringify from "json-stringify-pretty-compact";
-import { StampModel, StampModelType } from "./stamp";
-import { ITileExportOptions, IDefaultContentOptions } from "../../../models/tiles/tile-content-info";
-import { TileMetadataModel } from "../../../models/tiles/tile-metadata";
-import { tileModelHooks } from "../../../models/tiles/tile-model-hooks";
-import { TileContentModel } from "../../../models/tiles/tile-content";
+
+import { DefaultToolbarSettings, Point, ToolbarSettings, VectorType, endShapesForVectorType } 
+  from "./drawing-basic-types";
 import { kDrawingStateVersion, kDrawingTileType } from "./drawing-types";
-import { ImageObjectType, isImageObjectSnapshot } from "../objects/image";
-import { DefaultToolbarSettings, ToolbarSettings, VectorType, endShapesForVectorType } from "./drawing-basic-types";
+import { StampModel, StampModelType } from "./stamp";
 import { DrawingObjectMSTUnion } from "../components/drawing-object-manager";
 import { DrawingObjectSnapshotForAdd, DrawingObjectType, isFilledObject,
   isStrokedObject, ObjectMap, ToolbarModalButton } from "../objects/drawing-object";
+import { ImageObjectType, isImageObjectSnapshot } from "../objects/image";
+import { isVectorObject } from "../objects/vector";
 import { LogEventName } from "../../../lib/logger-types";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
-import { isVectorObject } from "../objects/vector";
+import { TileContentModel } from "../../../models/tiles/tile-content";
+import { ITileExportOptions, IDefaultContentOptions } from "../../../models/tiles/tile-content-info";
+import { TileMetadataModel } from "../../../models/tiles/tile-metadata";
+import { getTileIdFromContent } from "../../../models/tiles/tile-model";
+import { tileModelHooks } from "../../../models/tiles/tile-model-hooks";
 
-// track selection in metadata object so it is not saved to firebase but
-// also is preserved across document/content reloads
 export const DrawingToolMetadataModel = TileMetadataModel
-  .named("DrawingToolMetadata")
-  .props({
-    selectedButton: "select",
-    selection: types.array(types.string)
-  })
-  .actions(self => ({
-    setSelectedButton(button: ToolbarModalButton) {
-      if (self.selectedButton !== button) {
-        self.selectedButton = button;
-        // clear selection on tool mode change
-        self.selection.clear();
-      }
-    },
-    setSelection(selection: string[]) {
-      self.selection.replace(selection);
-    },
-    unselectId(id: string) {
-      self.selection.remove(id);
-    }
-  }));
+  .named("DrawingToolMetadata");
 export type DrawingToolMetadataModelType = Instance<typeof DrawingToolMetadataModel>;
 
 export interface DrawingObjectMove {
@@ -62,9 +44,19 @@ export const DrawingContentModel = TileContentModel
     currentStampIndex: types.maybe(types.number)
   })
   .volatile(self => ({
-    metadata: undefined as DrawingToolMetadataModelType | undefined
+    metadata: undefined as DrawingToolMetadataModelType | undefined,
+    selectedButton: "select",
+    selection: [] as string[]
   }))
   .views(self => ({
+    get annotatableObjects() {
+      const tileId = getTileIdFromContent(self) ?? "";
+      return self.objects.map(object => ({
+        objectId: object.id,
+        objectType: object.type,
+        tileId 
+      }));
+    },
     get objectMap() {
       // TODO this will rebuild the map when any of the objects change
       // We could handle this more efficiently
@@ -77,16 +69,14 @@ export const DrawingContentModel = TileContentModel
       return true;
     },
     isSelectedButton(button: ToolbarModalButton) {
-      return button === self.metadata?.selectedButton;
+      return button === self.selectedButton;
     },
-    get selectedButton() {
-      return self.metadata?.selectedButton || "select";
-    },
+
     get hasSelectedObjects() {
-      return self.metadata ? self.metadata.selection.length > 0 : false;
+      return self.selection.length > 0;
     },
-    get selectedIds() {
-      return self.metadata ? getSnapshot(self.metadata.selection) : [];
+    isIdSelected(id: string) {
+      return self.selection.includes(id);
     },
     get currentStamp() {
       const currentStampIndex = self.currentStampIndex || 0;
@@ -97,6 +87,12 @@ export const DrawingContentModel = TileContentModel
     get toolbarSettings(): ToolbarSettings {
       const { stroke, fill, strokeDashArray, strokeWidth, vectorType } = self;
       return { stroke, fill, strokeDashArray, strokeWidth, vectorType };
+    },
+    // Return the first object found that has its origin at the given point; or undefined if none.
+    objectAtLocation(pos: Point) {
+      return self.objects.find((obj) => {
+        return (obj.x === pos.x && obj.y === pos.y);
+      });
     },
     exportJson(options?: ITileExportOptions) {
       // Translate image urls if necessary
@@ -119,6 +115,11 @@ export const DrawingContentModel = TileContentModel
       return stringify({type, objects}, {maxLength: 200});
     }
   }))
+  .views(self => ({
+    getSelectedObjects():DrawingObjectType[] {
+      return self.selection.map((id) => self.objectMap[id]).filter((x)=>!!x) as DrawingObjectType[];
+    }
+  }))
   .actions(self => tileModelHooks({
     doPostCreate(metadata) {
       self.metadata = metadata as DrawingToolMetadataModelType;
@@ -126,11 +127,62 @@ export const DrawingContentModel = TileContentModel
     onTileAction(call) {
       const tileId = self.metadata?.id ?? "";
       const {name: operation, ...change} = call;
-      // Ignore the setDisabledFeatures action is doesn't need to be logged
-      if (operation === "setDisabledFeatures") return;
+      // Ignore actions that don't need to be logged
+      if (["setDisabledFeatures", "setDragPosition", "setDragBounds", "setSelectedButton"].includes(operation)) return;
 
       logTileChangeEvent(LogEventName.DRAWING_TOOL_CHANGE, { operation, change, tileId });
     }
+  }))
+  .actions(self => ({
+    setSelectedIds(selection: string[]) {
+      self.selection = [...selection];
+    },
+
+    unselectId(id: string) {
+      const index = self.selection.indexOf(id);
+      if (index >= 0) {
+        self.selection.splice(index, 1);
+      } else {
+        console.error('Failed to remove id ', id, ' from selection: [', self.selection, ']');
+      }
+    },
+
+    setSelectedButton(button: ToolbarModalButton) {
+      if (self.selectedButton !== button) {
+        self.selectedButton = button;
+        // clear selection on tool mode change
+        self.selection = [];
+      }
+    },
+
+    setSelectedStamp(stampIndex: number) {
+      self.currentStampIndex = stampIndex;
+    },
+
+    addObject(object: DrawingObjectSnapshotForAdd) {
+      // The reason only snapshots are allowed is so the logged action
+      // includes the snapshot in the `call` that is passed to `onAction`.
+      // If an instance is passed instead of a snapshot, then MST will just
+      // log something like:
+      // `{ $MST_UNSERIALIZABLE: true, type: "someType" }`.
+      // More details can be found here: https://mobx-state-tree.js.org/API/#onaction
+      if (isStateTreeNode(object as any)) {
+        throw new Error("addObject requires a snapshot");
+      }
+
+      self.objects.push(object);
+      return self.objects[self.objects.length-1];
+    }
+  }))
+  .actions(self => ({
+    // Adds a new object and selects it, activating the select tool.
+    addAndSelectObject(drawingObject: DrawingObjectSnapshotForAdd) {
+      const obj = self.addObject(drawingObject);
+      self.setSelectedButton('select');
+      self.setSelectedIds([obj.id]);
+      return obj;
+    }
+
   }))
   .extend(self => {
 
@@ -148,20 +200,6 @@ export const DrawingContentModel = TileContentModel
 
     return {
       actions: {
-        addObject(object: DrawingObjectSnapshotForAdd) {
-          // The reason only snapshots are allowed is so the logged action
-          // includes the snapshot in the `call` that is passed to `onAction`.
-          // If an instance is passed instead of a snapshot, then MST will just
-          // log something like:
-          // `{ $MST_UNSERIALIZABLE: true, type: "someType" }`.
-          // More details can be found here: https://mobx-state-tree.js.org/API/#onaction
-          if (isStateTreeNode(object as any)) {
-            throw new Error("addObject requires a snapshot");
-          }
-
-          self.objects.push(object);
-        },
-
         setStroke(stroke: string, ids: string[]) {
           self.stroke = stroke;
           forEachObjectId(ids, object => {
@@ -203,25 +241,28 @@ export const DrawingContentModel = TileContentModel
           });
         },
 
-        setSelectedButton(button: ToolbarModalButton) {
-          self.metadata?.setSelectedButton(button);
-        },
-
-        setSelection(ids: string[]) {
-          self.metadata?.setSelection(ids);
-        },
-
-        setSelectedStamp(stampIndex: number) {
-          self.currentStampIndex = stampIndex;
-        },
-
         deleteObjects(ids: string[]) {
           forEachObjectId(ids, (object, id) => {
             if (object) {
               self.objects.remove(object);
-              self.metadata?.unselectId(id);
+              self.unselectId(id);
             }
           });
+        },
+
+        duplicateObjects(ids: string[]) {
+          const newIds: string[] = [];
+          forEachObjectId(ids, (object) => {
+            if (object) {
+              const snap = getSnapshot(object);
+              const {id, ...newParams} = snap; // remove existing ID
+              newParams.x = snap.x + 10;       // offset by 10 pixels so it is not hidden
+              newParams.y = snap.y + 10;
+              const newObject = self.addObject(newParams);
+              newIds.push(newObject.id);
+            }
+          });
+          self.setSelectedIds(newIds);
         },
 
         moveObjects(moves: DrawingObjectMove[]) {
@@ -231,10 +272,6 @@ export const DrawingContentModel = TileContentModel
           });
         },
 
-        // sets the model to how we want it to appear when a user first opens a document
-        reset() {
-          self.metadata?.setSelectedButton("select");
-        },
         updateImageUrl(oldUrl: string, newUrl: string) {
           if (!oldUrl || !newUrl || (oldUrl === newUrl)) return;
           // Modify all images with this url
@@ -250,6 +287,10 @@ export const DrawingContentModel = TileContentModel
     };
   })
   .actions(self => ({
+    // sets the model to how we want it to appear when a user first opens a document
+    reset() {
+      self.setSelectedButton("select");
+    },
     updateAfterSharedModelChanges() {
       // console.warn("TODO: need to implement yet");
     }

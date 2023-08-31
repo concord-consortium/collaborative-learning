@@ -36,6 +36,15 @@ context('Nav Panel', function () {
             expect($tab.text()).to.contain(problemSubTabTitles[index]);
           });
         });
+        it('saves current subtab when the resources panel is collapsed and expand', () => {
+          cy.openTopTab("problems");
+          const section = "Initial Challenge";
+          cy.openProblemSection(section);
+          cy.get('.prob-tab').contains(section).should('have.class', 'selected');
+          cy.collapseResourceTabs();
+          cy.openResourceTabs();
+          cy.get('.prob-tab').contains(section).should('have.class', 'selected');
+        });
       });
     });
     describe('My Work tab tests', function () {
@@ -105,6 +114,11 @@ context('Nav Panel', function () {
         it('verify starred document appears in the Starred section', function () {
           cy.openSection('my-work', 'starred');
           resourcesPanel.getCanvasItemTitle('my-work','starred').contains(copyDocumentTitle).should('exist');
+        });
+        it('remains open after the resources panel is collapsed and expand', () => {
+          cy.collapseResourceTabs();
+          cy.openResourceTabs();
+          cy.get('.doc-tab.my-work.starred').should('have.class', 'selected');
         });
       });
       describe('Learning Log Section', function () {
@@ -210,27 +224,27 @@ context('Nav Panel', function () {
       cy.openTopTab("problems");
       cy.get(".problem-tabs .tab-header-row").should("not.be.visible");
     });
-    it('Problem Tabs with no sub tabs', function () {
+    it('Customized tabs', function () {
       const exampleProblemSubTabTitles = ["First Section", "Second Section", "Third Section"];
       const exampleMyWorkSubTabTitles = ["Workspaces", "Starred"];
-      const exampleClassWorkSubTabTitles = ["Workspaces", "Starred"];
+      const exampleClassWorkSubTabTitles = ["Workspaces", "Supplemental Work", "Starred"];
 
       cy.visit(`${baseQueryParam}&unit=example-config-subtabs`);
       cy.waitForLoad();
       // cy.get(".collapsed-resources-tab.my-work").click();
       cy.openTopTab("problems");
       cy.get(".problem-tabs .tab-list .prob-tab").each(($tab, index, $tabList) => {
-        expect($tabList).to.have.lengthOf(3);
+        expect($tabList).to.have.lengthOf(exampleProblemSubTabTitles.length);
         expect($tab.text()).to.contain(exampleProblemSubTabTitles[index]);
       });
       cy.openTopTab("my-work");
       cy.get(".document-tabs .tab-list .doc-tab.my-work").each(($tab, index, $tabList) => {
-        expect($tabList).to.have.lengthOf(2);
+        expect($tabList).to.have.lengthOf(exampleMyWorkSubTabTitles.length);
         expect($tab.text()).to.contain(exampleMyWorkSubTabTitles[index]);
       });
       cy.openTopTab("class-work");
       cy.get(".document-tabs .tab-list .doc-tab.class-work").each(($tab, index, $tabList) => {
-        expect($tabList).to.have.lengthOf(2);
+        expect($tabList).to.have.lengthOf(exampleClassWorkSubTabTitles.length);
         expect($tab.text()).to.contain(exampleClassWorkSubTabTitles[index]);
       });
     });

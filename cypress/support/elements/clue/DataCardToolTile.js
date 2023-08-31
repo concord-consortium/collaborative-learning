@@ -1,68 +1,75 @@
 class DataCardToolTile {
-  getTile(workspaceClass) {
+  getTiles(workspaceClass) {
     return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .data-card-tool-tile`);
   }
-  getTileTitle(workspaceClass){
-    return cy.get(`${workspaceClass || ".primary-workspace"} .editable-data-card-title-text`);
+  getTile(tileIndex = 0, workspaceClass) {
+    return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .data-card-tool-tile`).eq(tileIndex);
   }
-  getSortSelect(workspaceClass){
-    return cy.get(`${workspaceClass || ".primary-workspace"} .sort-select-input`);
+  getTileTitle(tileIndex = 0, workspaceClass){
+    return this.getTile(tileIndex, workspaceClass).find(`.editable-title-text`);
   }
-  getAttrName(workspaceClass){
+  getSortSelect(tileIndex = 0, workspaceClass){
+    return this.getTile(tileIndex, workspaceClass).find(`.sort-select-input`);
+  }
+  getAttrs(tileIndex, workspaceClass) {
     const nameSelector = ".attribute-name-value-pair .name";
-    return cy.get(`${workspaceClass || ".primary-workspace"} ${nameSelector}`);
+    return this.getTile(tileIndex, workspaceClass).find(`${nameSelector}`);
   }
-  getAttrValue(workspaceClass){
-    const valueSelector = ".attribute-name-value-pair .value";
-    return cy.get(`${workspaceClass || ".primary-workspace"} ${valueSelector}`);
+  getAttrName(tileIndex = 0, workspaceClass){
+    const nameSelector = ".attribute-name-value-pair .name";
+    return this.getTile(tileIndex, workspaceClass).find(`${nameSelector}`);
   }
-  getAttrValueInput(workspaceClass){
+  getAttrValue(tileIndex = 0, workspaceClass){
+    const valueSelector = ".attribute-name-value-pair .value input";
+    return this.getTile(tileIndex, workspaceClass).find(`${valueSelector}`);
+  }
+  getAttrValueInput(tileIndex = 0, workspaceClass){
     const valueSelector = ".attribute-name-value-pair .value .value-input";
-    return cy.get(`${workspaceClass || ".primary-workspace"} ${valueSelector}`);
+    return this.getTile(tileIndex, workspaceClass).find(`${valueSelector}`);
   }
-  getSingleCardView(workspaceClass){
-    const selector = ".data-card-tool-tile .single-card-data-area";
-    return cy.get(`${workspaceClass || ".primary-workspace"} ${selector}`);
+  getSingleCardView(tileIndex = 0, workspaceClass){
+    const selector = ".single-card-data-area";
+    return this.getTile(tileIndex, workspaceClass).find(`${selector}`);
   }
-  getSortView(workspaceClass){
-    const selector = ".data-card-tool-tile .sorting-cards-data-area";
-    return cy.get(`${workspaceClass || ".primary-workspace"} ${selector}`);
+  getSortView(tileIndex = 0, workspaceClass){
+    const selector = ".sorting-cards-data-area";
+    return this.getTile(tileIndex, workspaceClass).find(`${selector}`);
   }
-  getSortMenuItems(workspaceClass){
+  getSortMenuItems(tileIndex = 0, workspaceClass){
     const itemsSelector = ".sort-select-input > option";
-    return cy.get(`${workspaceClass || ".primary-workspace"} ${itemsSelector}`);
+    return this.getTile(tileIndex, workspaceClass).find(`${itemsSelector}`);
   }
-  getAddCardButton(workspaceClass){
+  getAddCardButton(tileIndex = 0, workspaceClass){
     const selector = ".add-remove-card-buttons .add-card";
-    return cy.get(`${workspaceClass || ".primary-workspace"} ${selector}`);
+    return this.getTile(tileIndex, workspaceClass).find(`${selector}`);
   }
-  getDeleteCardButton(workspaceClass){
+  getDeleteCardButton(tileIndex = 0, workspaceClass){
     const selector = ".add-remove-card-buttons .remove-card";
-    return cy.get(`${workspaceClass || ".primary-workspace"} ${selector}`);
+    return this.getTile(tileIndex, workspaceClass).find(`${selector}`);
   }
-  getCardNofTotalListing(workspaceClass){
-    return cy.get(`${workspaceClass || ".primary-workspace"} .card-number-of-listing`);
+  getCardNofTotalListing(tileIndex = 0, workspaceClass){
+    return this.getTile(tileIndex, workspaceClass).find(`.card-number-of-listing`);
   }
-  getNextCardButton(workspaceClass){
-    return cy.get(`${workspaceClass || ".primary-workspace"} .card-nav.next`);
+  getNextCardButton(tileIndex = 0, workspaceClass){
+    return this.getTile(tileIndex, workspaceClass).find(`.card-nav.next`);
   }
-  getPreviousCardButton(workspaceClass){
-    return cy.get(`${workspaceClass || ".primary-workspace"} .card-nav.previous`);
+  getPreviousCardButton(tileIndex = 0, workspaceClass){
+    return this.getTile(tileIndex, workspaceClass).find(`.card-nav.previous`);
   }
-  getSortCardHeading(workspaceClass){
-    return cy.get(`${workspaceClass || ".primary-workspace"} .sortable .heading`);
+  getSortCardHeading(tileIndex = 0, workspaceClass){
+    return this.getTile(tileIndex, workspaceClass).find(`.sortable .heading`);
   }
-  getSortCardCollapseToggle(workspaceClass){
+  getSortCardCollapseToggle(tileIndex = 0, workspaceClass){
     const selector = ".expand-toggle-area button.expand-toggle";
-    return cy.get(`${workspaceClass || ".primary-workspace"} ${selector}`);
+    return this.getTile(tileIndex, workspaceClass).find(`${selector}`);
   }
-  getSortCardData(workspaceClass){
+  getSortCardData(tileIndex = 0, workspaceClass){
     const selector = ".sortable.expanded .attribute-value-row";
-    return cy.get(`${workspaceClass || ".primary-workspace"} ${selector}`);
+    return this.getTile(tileIndex, workspaceClass).find(`${selector}`);
   }
-  getConfirmDeleteButton(workspaceClass){
+  getConfirmDeleteButton(tileIndex = 0, workspaceClass){
     const selector = ".button.modal-button.default";
-    return cy.get(`${workspaceClass || ".primary-workspace"} ${selector}`);
+    return this.getTile(tileIndex, workspaceClass).find(`${selector}`);
   }
 }
 export default DataCardToolTile;

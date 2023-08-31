@@ -4,15 +4,14 @@ import { onAnyAction } from "../../utilities/mst-utils";
 import { IDataSet } from "./data-set";
 import { isSetCaseValuesAction } from "./data-set-actions";
 
-export type FilterFn = (data: IDataSet, caseId: string, casesArrayNumber?: number) => boolean
+export type FilterFn = (data: IDataSet, caseId: string, casesArrayNumber?: number) => boolean;
 
 export interface IFilteredChangedCases {
   added: string[]   // ids of cases that newly pass the filter
   changed: string[] // ids of cases whose filter status wasn't changed
   removed: string[] // ids of cases that no longer pass the filter
 }
-
-export type OnSetCaseValuesFn = (actionCall: ISerializedActionCall, cases: IFilteredChangedCases) => void
+export type OnSetCaseValuesFn = (actionCall: ISerializedActionCall, cases: IFilteredChangedCases) => void;
 
 interface IProps {
   source: IDataSet
@@ -40,8 +39,8 @@ export class FilteredCases {
     makeObservable(this);
 
     this.onActionDisposers = [
-      onAnyAction(this.source, this.handleBeforeAction, { attachAfter: false }), // runs before the action
-      onAnyAction(this.source, this.handleAction, { attachAfter: true }), // runs after the action
+      onAnyAction(this.source, this.handleBeforeAction, { attachAfter: false }),  // runs before the action
+      onAnyAction(this.source, this.handleAction, { attachAfter: true }),         // runs after the action
     ];
   }
 

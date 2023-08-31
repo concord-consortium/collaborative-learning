@@ -1,0 +1,107 @@
+@use "../vars.sass";
+
+.text-object {
+  pointer-events: none;
+
+  .text-region {
+    align-items: center;
+    display: flex;
+    height: 100%;
+    justify-content: center;
+    pointer-events: none;
+    width: 100%;
+
+    .text-box {
+      background-color: white;
+      border: 2px solid vars.$annotation-blue;
+      border-radius: 10px;
+      max-width: calc(100% - 8px);
+
+      &.text-display {
+        color: vars.$annotation-blue;
+
+        &.default-text {
+          font-style: italic;
+        }
+
+        &:hover {
+          outline: 4px solid vars.$annotation-blue-very-transparent;
+        }
+
+        &.can-edit {
+          &:hover {
+            cursor: pointer;
+          }
+        }
+
+        &.dragging {
+          background-color: vars.$annotation-blue;
+          color: white;
+
+          &:hover {
+            outline: 4px solid vars.$annotation-blue-transparent;
+          }
+        }
+      }
+
+      &.text-input {
+        background-color: vars.$annotation-light-blue;
+        text-align: center;
+      }
+    }
+  }
+}
+
+.drag-handle {
+  cursor: pointer;
+}
+
+.sparrow-delete-button {
+  cursor: pointer;
+  fill-opacity: 0;
+
+  .sparrow-delete-button-highlight {
+    fill: vars.$annotation-blue;
+  }
+
+  &:hover {
+    .sparrow-delete-button-highlight {
+      fill-opacity: .125;
+    }
+
+    .sparrow-delete-button-front {
+      fill: vars.$annotation-blue;
+      fill-opacity: 1;
+    }
+
+    .sparrow-delete-icon {
+      fill-opacity: 1;
+    }
+  }
+
+  &:active {
+    .sparrow-delete-button-highlight {
+      fill-opacity: .25;
+    }
+
+    .sparrow-delete-button-front {
+      fill: vars.$annotation-blue;
+      fill-opacity: 1;
+    }
+
+    .sparrow-delete-icon {
+      fill-opacity: 1;
+    }
+  }
+}
+
+.visible-delete-button {
+  .sparrow-delete-button-front {
+    fill: vars.$annotation-half-blue;
+    fill-opacity: 1;
+  }
+
+  .sparrow-delete-icon {
+    fill-opacity: 1;
+  }
+}

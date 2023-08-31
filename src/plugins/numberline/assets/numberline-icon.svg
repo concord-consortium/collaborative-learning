@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="22px" viewBox="0 0 24 22" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>numberline</title>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Numberline-Tile" transform="translate(-34, -109)">
+            <g id="numberline" transform="translate(28, 103)">
+                <polygon id="Path" points="0 0 36 0 36 34 0 34"></polygon>
+                <path d="M27,6 C28.65,6 30,7.35 30,9 L30,25 C30,26.65 28.65,28 27,28 L9,28 C7.35,28 6,26.65 6,25 L6,9 C6,7.35 7.35,6 9,6 L27,6 Z M27,8 L9,8 C8.458,8 8,8.458 8,9 L8,25 C8,25.542 8.458,26 9,26 L27,26 C27.542,26 28,25.542 28,25 L28,9 C28,8.458 27.542,8 27,8 Z" id="Shape" fill="#000000" fill-rule="nonzero"></path>
+                <g id="numberline-icon" transform="translate(9, 8)">
+                    <polygon id="Path" points="0 0 18 0 18 18 0 18"></polygon>
+                    <g id="Group-2" transform="translate(1, 5)" fill="#000000">
+                        <text id="0" font-family="Lato-Bold, Lato" font-size="7" font-weight="bold">
+                            <tspan x="5.97" y="10">0</tspan>
+                        </text>
+                        <g id="Group">
+                            <polygon id="Path" fill-rule="nonzero" points="1 1 1 2 14 2 14 1"></polygon>
+                            <path d="M8,3 C8,2.33333333 8,1.33333333 8,0" id="Path-3" stroke="#000000"></path>
+                            <polygon id="Path-2" stroke="#000000" points="13 0 13 3 16 1.5"></polygon>
+                            <polygon id="Path-2" stroke="#000000" transform="translate(1.5, 1.5) scale(-1, 1) translate(-1.5, -1.5)" points="0 0 0 3 3 1.5"></polygon>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

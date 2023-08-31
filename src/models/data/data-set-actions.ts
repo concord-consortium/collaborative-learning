@@ -50,8 +50,8 @@ export interface SetSelectedCasesAction extends ISerializedActionCall {
   args: [string[]]
 }
 
-export type PartialSelectionAction = SelectCasesAction | SetSelectedCasesAction
-export type SelectionAction = PartialSelectionAction | SelectAllAction
+export type PartialSelectionAction = SelectCasesAction | SetSelectedCasesAction;
+export type SelectionAction = PartialSelectionAction | SelectAllAction;
 
 export const isPartialSelectionAction = (action: ISerializedActionCall): action is PartialSelectionAction =>
               ["selectCases", "setSelectedCases"].includes(action.name);

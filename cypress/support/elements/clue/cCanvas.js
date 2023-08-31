@@ -4,6 +4,8 @@ import DrawToolTile from './DrawToolTile';
 import TextToolTile from './TextToolTile';
 import TableToolTile from './TableToolTile';
 import DataflowToolTile from './DataflowToolTile';
+import DiagramToolTile from './DiagramToolTile';
+import SimulatorToolTile from './SimulatorTile';
 import Canvas from '../common/Canvas';
 import Dialog from '../common/Dialog';
 
@@ -13,6 +15,8 @@ let graphToolTile = new GraphToolTile,
     textToolTile = new TextToolTile,
     tableToolTile = new TableToolTile,
     dataflowToolTile = new DataflowToolTile,
+    diagramToolTile = new DiagramToolTile,
+    simulatorToolTile = new SimulatorToolTile,
     canvas = new Canvas,
     dialog = new Dialog;
 
@@ -136,6 +140,15 @@ class ClueCanvas {
     addTile(tile) { //tile=[text,table,geometry,image,drawing,delete]
         cy.get('.primary-workspace .tool.' + tile).click({ force: true });
     }
+
+    verifyToolDisabled(tile) { //tile=[text,table,geometry,image,drawing,delete]
+        cy.get('.primary-workspace .tool.' + tile).should("have.class", "disabled");
+    }
+
+    verifyToolEnabled(tile) { //tile=[text,table,geometry,image,drawing,delete]
+        cy.get('.primary-workspace .tool.' + tile).should("not.have.class", "disabled");
+    }
+
     addTileByDrag(tile, dropzone){//tile=[text,table,geometry,image,drawing,delete]
         const dropzoneArray = ['top', 'left', 'right', 'bottom'];
         const dataTransfer = new DataTransfer;
@@ -244,6 +257,12 @@ class ClueCanvas {
               break;  
           case 'dataflow':
               tileElement = dataflowToolTile.getDataflowTile().last().click({ force: true });
+              break;  
+          case 'diagram':
+              tileElement = diagramToolTile.getDiagramTile().last().click({ force: true });
+              break;  
+          case 'simulator':
+              tileElement = simulatorToolTile.getSimulatorTile().last().click({ force: true });
               break;  
       }
       tileElement.should('have.class','selected');

@@ -1,9 +1,10 @@
 import {MutableRefObject, useCallback, useEffect} from "react";
-import {matchCirclesToData, setNiceDomain, startAnimation} from "../utilities/graph-utils";
+import {isAddCasesAction, isRemoveCasesAction} from "../../../models/data/data-set-actions";
 import {IGraphModel, isGraphVisualPropsAction} from "../models/graph-model";
-import {useDataSetContext} from "./use-data-set-context";
-import {INumericAxisModel} from "../axis/models/axis-model";
+import {useDataSetContext} from "../imports/hooks/use-data-set-context";
+import {INumericAxisModel} from "../imports/components/axis/models/axis-model";
 import {IDotsRef} from "../graph-types";
+import {matchCirclesToData, setNiceDomain, startAnimation} from "../utilities/graph-utils";
 import {onAnyAction} from "../../../utilities/mst-utils";
 
 interface IProps {
@@ -30,9 +31,14 @@ export function useGraphModel(props: IProps) {
     });
   }, [dataConfig, graphModel, dotsRef, enableAnimation, instanceId]);
 
-  useEffect(function createCircles() {
-    callMatchCirclesToData();
-  }, [callMatchCirclesToData, dataConfig.caseDataArray]);
+  // respond to added/removed cases
+  useEffect(function installAddRemoveCaseHandler() {
+    return dataConfig.onAction(action => {
+      if (isAddCasesAction(action) || isRemoveCasesAction(action)) {
+        callMatchCirclesToData();
+      }
+    });
+  }, [callMatchCirclesToData, dataConfig]);
 
   // respond to change in plotType
   useEffect(function installPlotTypeAction() {

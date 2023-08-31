@@ -18,7 +18,7 @@ describe.skip("Graph", () => {
   });
 
   it("renders with empty broker", () => {
-    render(<GraphComponent />);
+    render(<GraphComponent/>);
     expect(screen.getByTestId("graph")).toBeInTheDocument();
   });
 

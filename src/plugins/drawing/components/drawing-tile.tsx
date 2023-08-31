@@ -20,6 +20,7 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
   const contentRef = useCurrent(model.content as DrawingContentModelType);
   const [imageUrlToAdd, setImageUrlToAdd] = useState("");
   const hotKeys = useRef(new HotKeys());
+  const drawingToolElement = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!readOnly) {
@@ -28,7 +29,20 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
     onRegisterTileApi({
       exportContentAsTileJson: (options?: ITileExportOptions) => {
         return contentRef.current.exportJson(options);
-      }
+      },
+      getObjectBoundingBox(objectId, objectType) {
+        const bbPadding = 5;
+        const object = contentRef.current.objectMap[objectId];
+        if (object) {
+          const bb = object.boundingBox;
+          const height = bb.se.y - bb.nw.y + bbPadding * 2;
+          const width = bb.se.x - bb.nw.x + bbPadding * 2;
+          const left = bb.nw.x - bbPadding;
+          const top = bb.nw.y - bbPadding;
+          return { height, left, top, width };
+        }
+        return undefined;
+      },
     });
     if (!readOnly) {
       hotKeys.current.register({
@@ -49,10 +63,17 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
   };
 
   const handleDelete = () => {
-    contentRef.current.deleteObjects(contentRef.current.selectedIds);
+    contentRef.current.deleteObjects([...contentRef.current.selection]);
   };
 
   const toolbarProps = useToolbarTileApi({ id: model.id, enabled: !readOnly, onRegisterTileApi, onUnregisterTileApi });
+
+  const getVisibleCanvasSize = () => {
+    if (!drawingToolElement.current 
+      || !drawingToolElement.current.clientWidth 
+      || !drawingToolElement.current.clientHeight) return undefined;
+    return { x: drawingToolElement.current.clientWidth, y: drawingToolElement.current.clientHeight };
+  };
 
   return (
     <DrawingContentModelContext.Provider value={contentRef.current} >
@@ -62,6 +83,7 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
         scale={scale}
       />
       <div
+        ref={drawingToolElement}
         className={classNames("drawing-tool", { "read-only": readOnly })}
         data-testid="drawing-tool"
         tabIndex={0}
@@ -73,6 +95,7 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
           tileElt={tileElt}
           scale={scale}
           setImageUrlToAdd={setImageUrlToAdd}
+          getVisibleCanvasSize={getVisibleCanvasSize}
           {...toolbarProps}
         />
         <DrawingLayerView

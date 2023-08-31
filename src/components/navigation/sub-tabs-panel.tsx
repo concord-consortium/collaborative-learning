@@ -51,7 +51,8 @@ export const SubTabsPanel: React.FC<IProps> = observer(function SubTabsPanel(
           {subTabs.map((subTab, index) => {
             const sectionTitle = subTab.label.toLowerCase().replace(' ', '-');
             return (
-              <TabPanel key={`subtab-${subTab.label}`} data-test={`subtab-${sectionTitle}`}>
+              <TabPanel key={`subtab-${subTab.label}`} className={["react-tabs__tab-panel", "sub-tab-panel"]}
+                data-test={`subtab-${sectionTitle}`}>
                 { renderSubTabPanel(subTab) }
               </TabPanel>
             );

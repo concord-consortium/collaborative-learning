@@ -69,8 +69,8 @@ export const RectangleObject = types.compose("RectangleObject", StrokedObject, F
       self.dragWidth  = self.width  + deltas.right - deltas.left;
       self.dragHeight = self.height + deltas.bottom - deltas.top;
     },
-    adoptDragBounds() {
-      self.adoptDragPosition();
+    resizeObject() {
+      self.repositionObject();
       self.width = self.dragWidth ?? self.width;
       self.height = self.dragHeight ?? self.height;
       self.dragWidth = self.dragHeight = undefined;
@@ -87,8 +87,9 @@ export const RectangleComponent = observer(function RectangleComponent({model, h
   const { id, stroke, strokeWidth, strokeDashArray, fill } = rect;
   const { x, y } = rect.position;
   const { width, height } = rect.currentDims;
-return <rect
+  return <rect
     key={id}
+    className="rectangle"
     x={x}
     y={y}
     width={width}
@@ -101,8 +102,7 @@ return <rect
     onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
     onMouseDown={(e)=> handleDrag?.(e, model)}
     pointerEvents={"visible"} //allows user to select inside of an unfilled object
-
-    />;
+  />;
 
 });
 
@@ -115,7 +115,7 @@ export class RectangleDrawingTool extends DrawingTool {
   public handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
     const start = this.drawingLayer.getWorkspacePoint(e);
     if (!start) return;
-    const {stroke, fill, strokeWidth, strokeDashArray} = this.settings;
+    const {stroke, fill, strokeWidth, strokeDashArray} = this.drawingLayer.toolbarSettings();
     const rectangle = RectangleObject.create({
       x: start.x,
       y: start.y,

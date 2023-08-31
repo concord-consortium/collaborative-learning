@@ -2,7 +2,7 @@ import { reaction } from "mobx";
 import { isAlive } from "mobx-state-tree";
 import { useEffect } from "react";
 import { useMemo } from "use-memo-one";
-import { AxisPlace } from "../axis/axis-types";
+import { AxisPlace } from "../imports/components/axis/axis-types";
 import { GraphLayout } from "../models/graph-layout";
 import { IGraphModel } from "../models/graph-model";
 

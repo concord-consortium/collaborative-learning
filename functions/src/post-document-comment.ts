@@ -7,7 +7,7 @@ import { validateUserContext } from "./user-context";
 import { createCommentableDocumentIfNecessary } from "./validate-commentable-document";
 
 // update this when deploying updates to this function
-const version = "1.1.4";
+const version = "1.1.5";
 
 export async function postDocumentComment(
                         params?: IPostDocumentCommentUnionParams,

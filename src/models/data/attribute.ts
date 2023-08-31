@@ -1,18 +1,16 @@
 import {Instance, SnapshotIn, types} from "mobx-state-tree";
 import { Formula } from "./formula";
 import { typedId } from "../../utilities/js-utils";
+import { IValueType, ValueType, isDate, isImageUrl, isNumeric } from "./data-types";
 
 export const kDefaultFormatStr = ".3~f";
-
-const ValueType = types.union(types.number, types.string, types.undefined);
-export type IValueType = number | string | undefined;
 
 export function importValueToString(value: IValueType) {
   return value == null || Number.isNaN(value) ? "" : typeof value === "string" ? value : JSON.stringify(value);
 }
 
 export const attributeTypes = [
-  "categorical", "numeric", "date", "qualitative", "boundary", "checkbox", "color"
+  "categorical", "numeric", "date", "qualitative", "boundary", "checkbox", "color", "image"
 ] as const;
 export type AttributeType = typeof attributeTypes[number]
 
@@ -72,6 +70,52 @@ export const Attribute = types.model("Attribute", {
     // only infer numeric if all non-empty values are numeric (CODAP2)
     return self.numericCount === self.numValues.length - self.emptyCount ? "numeric" : "categorical";
   },
+  /**
+   * A map of types to the number of values of that type.
+   * If there are no values of that type there will be no entry in the map.
+   * The entries in the map will be ordered by count so the first entry
+   * will have the most values of that type.
+   * Some values might match multiple types.
+   * Every value can be considered "categorical" so that type is skipped.
+   *
+   * The handling of strings is going to be a bit weird. Since everything can be
+   * considered categorical. The UI using these types could say if the counts
+   * of other types are low enough then treat it as a string. If this logic
+   * is used in more than one place, then we probably want to move it into
+   * here as a view.
+   *
+   * It might also make sense to make this be an observable map so users
+   * can observe keys. However since we can't re-order the keys after they
+   * are inserted it would mean we couldn't re-order them. And it also seems
+   * odd that a view would get updated like this. I think in MST these kinds
+   * of observable maps would be reserved for serialized properties.
+   */
+  get typeCounts() {
+    const counts = new Map<AttributeType, number>();
+    function increment(type: AttributeType) {
+      if(!counts.has(type)) {
+        counts.set(type, 1);
+      } else {
+        counts.set(type, counts.get(type)!+1);
+      }
+    }
+    self.values.forEach(value => {
+      if(isNumeric(value)){
+        increment("numeric");
+      }
+      if(isDate(value)){
+        increment("date");
+      }
+      if(isImageUrl(value)){
+        increment("image");
+      }
+    });
+    // need to order them by count
+    const entries = [...counts.entries()];
+    const ordered = entries.sort((a,b) => b[1] - a[1]);
+    const map = new Map<AttributeType,number>(ordered);
+    return map;
+  },
   get format() {
     return self.precision != null ? `.${self.precision}~f` : kDefaultFormatStr;
   },
@@ -93,6 +137,35 @@ export const Attribute = types.model("Attribute", {
   },
   derive(name?: string) {
     return { id: self.id, name: name || self.name, values: [] };
+  }
+}))
+.views(self => ({
+  // TODO: we really need to keep track of empty values, or we need to count
+  // categorical (everything not empty) but empty could be categorical
+  get mostCommonType(): undefined | AttributeType {
+    const {typeCounts} = self;
+    if (typeCounts.size === 0) {
+      if (self.values.length > 0) {
+        // typeCounts does not include categorical
+        return "categorical";
+      } else {
+        return undefined;
+      }
+    }
+    // Extract the first element from the map which will be the type
+    // with the highest count
+    // If the counts of multiple types are equal then the which one
+    // is returned is currently undefined
+    const [[firstType,count]] = typeCounts;
+
+    // if the identified type has more than half of the full values
+    // return that, otherwise just return categorical
+    const fullCount = self.values.length - self.emptyCount;
+    if (count >= (fullCount / 2)) {
+      return firstType;
+    } else {
+      return "categorical";
+    }
   }
 }))
 .actions(self => ({

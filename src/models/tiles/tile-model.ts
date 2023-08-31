@@ -49,6 +49,11 @@ export function getTileModel(tileContentModel: ITileContentModel) {
   }
 }
 
+export function getTileIdFromContent(tileContentModel: ITileContentModel) {
+  const parent = getTileModel(tileContentModel);
+  return parent?.id;
+}
+
 export const TileModel = types
   .model("TileModel", {
     // if not provided, will be generated
@@ -123,6 +128,15 @@ export const TileModel = types
       const content = self.content;
       if (metadata && content.doPostCreate) {
         content.doPostCreate(metadata);
+      }
+    },
+    afterAttach() {
+      // The afterAttach() method of the tile content gets called when the content is attached to the tile,
+      // which often occurs before the tile has been attached to the document, which means that references
+      // can't be validated, etc.. Therefore, the tile model will call the content's afterAttachToDocument()
+      // method when the tile model itself is attached.
+      if ("afterAttachToDocument" in self.content && typeof self.content.afterAttachToDocument === "function") {
+        self.content.afterAttachToDocument();
       }
     },
     onTileAction(call: ISerializedActionCall) {

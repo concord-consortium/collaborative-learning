@@ -8,16 +8,10 @@
   bottom: 0
 
 .single-workspace
-  position: absolute
-  top: $header-height
-  left: calc(#{$collapsed-tab-width} + 4px)
-  right: 0
-  bottom: $half-nav-expanded-peek
-  height: calc(100vh - (#{$header-height} + #{$workspace-content-margin} * 2))
-  margin-top: $workspace-content-margin
+  position: relative
+  // This will split the remaining .workspace width with the .resource-and-chat-panel
+  flex: 1
   transition: .5s
-  &.half
-    left: 50%
 
 .left-workspace
   position: absolute

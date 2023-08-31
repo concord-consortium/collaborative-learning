@@ -1,4 +1,5 @@
 import { types, Instance, SnapshotIn, getSnapshot } from "mobx-state-tree";
+import { urlParams } from "../../utilities/url-params";
 import { isValidHttpUrl } from "../../utilities/url-utils";
 import { SectionModelType } from "../curriculum/section";
 import { gImageMap } from "../image-map";
@@ -47,7 +48,10 @@ export const AppConfigModel = types
     getUnit(unitId: string) {
       const unitCode = self.unitCodeMap.get(unitId) || unitId;
       const unitCodeIsUrl = isValidHttpUrl(unitCode);
-      const unitUrl = unitCodeIsUrl ? unitCode : `${self.curriculumBaseUrl}/branch/main/${unitCode}/content.json`;
+      const branchName = urlParams.curriculumBranch ?? "main";
+      const unitUrl = unitCodeIsUrl
+        ? unitCode
+        : `${self.curriculumBaseUrl}/branch/${branchName}/${unitCode}/content.json`;
       const teacherGuideUrl = unitUrl.replace(/content\.json$/, "teacher-guide/content.json");
       gImageMap.setUnitUrl(unitUrl);
       gImageMap.setUnitCodeMap(getSnapshot(self.unitCodeMap));

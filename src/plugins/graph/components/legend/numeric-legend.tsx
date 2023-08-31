@@ -5,10 +5,10 @@ import {useDataConfigurationContext} from "../../hooks/use-data-configuration-co
 import {isSelectionAction} from "../../../../models/data/data-set-actions";
 import {useGraphLayoutContext} from "../../models/graph-layout";
 import {choroplethLegend} from "./choropleth-legend/choropleth-legend";
-import {useDataSetContext} from "../../hooks/use-data-set-context";
+import {useDataSetContext} from "../../imports/hooks/use-data-set-context";
 import {kChoroplethHeight} from "../../graph-types";
-import {axisGap} from "../../axis/axis-types";
-import {getStringBounds} from "../../axis/axis-utils";
+import {axisGap} from "../../imports/components/axis/axis-types";
+import {getStringBounds} from "../../imports/components/axis/axis-utils";
 
 import graphVars from "../graph.scss";
 

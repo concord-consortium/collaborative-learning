@@ -21,7 +21,7 @@ import TileResizeHandle from "../../assets/icons/resize-tile/expand-handle.svg";
 import "../../utilities/dom-utils";
 import dragPlaceholderImage from "../../assets/image_drag.png";
 
-import "./tile-component.sass";
+import "./tile-component.scss";
 
 export const kDragTiles = "org.concord.clue.drag-tiles";
 
@@ -196,7 +196,8 @@ export class TileComponent extends BaseComponent<IProps, IState> {
                       placeholder: isPlaceholderTile,
                       readonly: readOnly,
                       hovered: this.state.hoverTile,
-                      selected: isTileSelected ,
+                      selected: isTileSelected,
+                      annotatable: ui.annotationMode !== undefined && model.content.annotatableObjects.length > 0,
                       "selected-for-comment": tileSelectedForComment});
     const isDraggable = !isPlaceholderTile && !appConfig.disableTileDrags;
     const dragTileButton = isDraggable &&

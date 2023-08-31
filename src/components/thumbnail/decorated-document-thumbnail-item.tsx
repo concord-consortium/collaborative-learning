@@ -25,7 +25,7 @@ interface IProps {
   onDocumentDeleteClick?: (document: DocumentModelType) => void;
 }
 
-export function useDocumentCaption(document: DocumentModelType) {
+export function useDocumentCaption(document: DocumentModelType, isStudentWorkspaceDoc?: boolean) {
   const appConfig = useAppConfig();
   const problem = useProblemStore();
   const classStore = useClassStore();
@@ -39,7 +39,12 @@ export function useDocumentCaption(document: DocumentModelType) {
   }
   const userName = classStore.getUserById(uid)?.displayName || teacher?.name ||
                     (document.isRemote ? teacher?.name : "") || "Unknown User";
-  const namePrefix = document.isRemote || isPublishedType(type) ? `${userName}: ` : "";
+
+
+  const hasNamePrefix =  document.isRemote || isPublishedType(type) || isStudentWorkspaceDoc;
+  const namePrefix = hasNamePrefix ? `${userName}: ` : "";
+
+
   const dateSuffix = document.isRemote && document.createdAt
                       ? ` (${new Date(document.createdAt).toLocaleDateString()})`
                       : isPublishedType(type) && pubVersion

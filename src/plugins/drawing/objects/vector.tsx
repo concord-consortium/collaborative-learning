@@ -60,8 +60,8 @@ export const VectorObject = StrokedObject.named("VectorObject")
         self.dragDy = self.dy - deltas.bottom + deltas.top;
       }
     },
-    adoptDragBounds() {
-      self.adoptDragPosition();
+    resizeObject() {
+      self.repositionObject();
       self.dx = self.dragDx ?? self.dx;
       self.dy = self.dragDy ?? self.dy;
       self.dragDx = self.dragDy = undefined;
@@ -92,17 +92,21 @@ export const VectorComponent = observer(function VectorComponent({model, handleH
     const head = headShape ? placeEndShape(headShape, x+dx, y+dy, angle) : null;
     const tail = tailShape ? placeEndShape(tailShape, x, y, angle+180) : null; // tail points backwards
     // Set fill to stroke since arrowheads should be drawn in stroke color
-  return <g className="vector" key={id}
-            stroke={stroke}
-            fill={stroke}
-            strokeWidth={strokeWidth}
-            strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
-            onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
-            onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
-            onMouseDown={(e) => handleDrag?.(e, model)}
-          >
-            {line}{head}{tail}
-         </g>;
+  return (
+    <g
+      className="vector"
+      key={id}
+      stroke={stroke}
+      fill={stroke}
+      strokeWidth={strokeWidth}
+      strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
+      onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
+      onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
+      onMouseDown={(e) => handleDrag?.(e, model)}
+    >
+      {line}{head}{tail}
+    </g>
+  );
 });
 
 // Render a VectorEndShape at the given x, y, and rotational angle.
@@ -129,7 +133,7 @@ export class VectorDrawingTool extends DrawingTool {
   public handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
     const start = this.drawingLayer.getWorkspacePoint(e);
     if (!start) return;
-    const {stroke, strokeWidth, strokeDashArray, vectorType} = this.settings;
+    const {stroke, strokeWidth, strokeDashArray, vectorType} = this.drawingLayer.toolbarSettings();
     const [headShape, tailShape] = endShapesForVectorType(vectorType);
     const vector = VectorObject.create({
       x: start.x,

@@ -411,13 +411,12 @@ export const baseLiveOutputOptions = {
     active: true,
     icon: GrabberIcon,
     id: "bb-gripper",
-    name: "Physical Gripper",
+    name: "Physical Gripper"
   },
   warningOption: {
     active: true,
-    icon: MultiplyIcon,
     id: "no-outputs-found",
-    name: "use device or sim",
+    name: "⚠️ connect device/sim",
   }
 };
 

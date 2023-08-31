@@ -1,7 +1,6 @@
-import { addDisposer, Instance, SnapshotIn, types } from "mobx-state-tree";
+import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import React, { useCallback } from "react";
 import { observer } from "mobx-react";
-import { autorun } from "mobx";
 import { Tooltip } from "react-tippy";
 import { gImageMap } from "../../../models/image-map";
 import { DrawingObject, DrawingObjectSnapshot, DrawingTool, IDrawingComponentProps, IDrawingLayer,
@@ -68,35 +67,11 @@ export const ImageObject = DrawingObject.named("ImageObject")
       self.dragWidth  = self.width  + deltas.right - deltas.left;
       self.dragHeight = self.height + deltas.bottom - deltas.top;
     },
-    adoptDragBounds() {
-      self.adoptDragPosition();
+    resizeObject() {
+      self.repositionObject();
       self.width = self.dragWidth ?? self.width;
       self.height = self.dragHeight ?? self.height;
       self.dragWidth = self.dragHeight = undefined;
-    },
-
-    afterCreate() {
-      // Monitor the image map entry and save the width and height when it is available
-      // this way when the image is reloaded from state the width and height are immediately
-      // available and there won't be any resize flickering.
-      // In all cases I can find, the correct width and height will be set when the ImageObject is
-      // created. However the old code was modifying the width and height after the image
-      // entry became available, so there might be a case where width and height change.
-      addDisposer(self, autorun(() =>{
-        const imageMapEntry = gImageMap.getCachedImage(self.url);
-        if (imageMapEntry?.width != null) {
-          self.setWidth(imageMapEntry.width);
-        }
-        if (imageMapEntry?.height != null) {
-          self.setHeight(imageMapEntry.height);
-        }
-        // Note: We might want to save the filename here too. It seems possible that
-        // in some cases the image map entry's filename will change. However so far, the code paths
-        // only provide this filename when the object is loaded from state or an image is dropped
-        // on the drawing tile that has a filename in the image entry already. And in that second case
-        // the image object is not created until the image map entry is retrieved and
-        // the filename is known.
-      }));
     }
   }));
 export interface ImageObjectType extends Instance<typeof ImageObject> {}
@@ -127,7 +102,7 @@ export const ImageComponent: React.FC<IDrawingComponentProps> = observer(functio
     onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
     onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
     onMouseDown={(e)=> handleDrag?.(e, model)}
-    />;
+  />;
 
 });
 

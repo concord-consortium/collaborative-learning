@@ -1,0 +1,73 @@
+@import "../vars";
+
+.canvas {
+  align-items: center;
+  background-color: #fff;
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  position: relative;
+  text-align: center;
+  width: 100%;
+
+  .document {
+    text-align: left;
+  }
+
+  .icon.editability {
+    width: 40px;
+    height: 40px;
+    color: white;
+    position: absolute;
+    opacity: .4;
+
+    &.west {
+      left: 0;
+    }
+
+    &.east {
+      right: 0;
+    }
+
+    &.north {
+      top: 0;
+    }
+
+    &.south {
+      bottom: 0;
+    }
+
+    &.north.west {
+      background-color: $id-blue;
+    }
+
+    &.north.east {
+      background-color: $id-orange;
+    }
+
+    &.south.east {
+      background-color: $id-green;
+    }
+
+    &.south.west {
+      background-color: $id-purple;
+    }
+  }
+
+  .icon:hover {
+    opacity: 1;
+  }
+
+  .canvas-debug, .canvas-overlay-message {
+    position: absolute;
+    pointer-events: none;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+}

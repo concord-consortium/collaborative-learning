@@ -239,11 +239,11 @@ export const DataflowContentModel = TileContentModel
     updateAfterSharedModelChanges(sharedModel?: SharedModelType){
       //do nothing
     },
-    addNewAttrFromNode(nodeId: number, nodeName: string, idx: number){
+    addNewAttrFromNode(nodeId: number, nodeName: string){
       const newAttributeId = uniqueId() + "*" + nodeId;
       self.dataSet.addAttributeWithID({
         id: newAttributeId,
-        name: `${nodeName} ${idx}`
+        name: nodeName,
       });
     },
     addLinkedTile(tileId: string) {
@@ -294,10 +294,8 @@ export const DataflowContentModel = TileContentModel
       // Time   |  Node 1 | Node 2 | Node 3 etc
       //    0   |   val    | val    |  val
       addAttributeToDataSet(self.dataSet, { name: "Time (sec)" }); //time quantized to nearest sampling rate
-      let insertionOrder = 1;
       self.program.nodes.forEach((n) => { //add attributes based on nodes in tile
-        self.addNewAttrFromNode(n.id, n.name, insertionOrder);
-        insertionOrder ++;
+        n.data.orderedDisplayName && self.addNewAttrFromNode(n.id, n.data.orderedDisplayName);
       });
     },
     resetRecording() {

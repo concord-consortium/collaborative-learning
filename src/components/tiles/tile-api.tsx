@@ -1,5 +1,6 @@
 import { createContext } from "react";
 import { Optional } from "utility-types";
+import { IOffsetModel, ObjectBoundingBox } from "../../models/annotations/clue-object";
 import { ITileExportOptions } from "../../models/tiles/tile-content-info";
 
 export type TileResizeEntry = Optional<ResizeObserverEntry,
@@ -17,6 +18,8 @@ export interface ITileApi {
   exportContentAsTileJson?: (options?: ITileExportOptions) => string;
   handleDocumentScroll?: (x: number, y: number) => void;
   handleTileResize?: (entry: TileResizeEntry) => void;
+  getObjectBoundingBox?: (objectId: string, objectType?: string) => ObjectBoundingBox | undefined;
+  getObjectDefaultOffsets?: (objectId: string, objectType?: string) => IOffsetModel;
 }
 
 export interface ITileApiInterface {

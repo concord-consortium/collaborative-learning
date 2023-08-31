@@ -1,8 +1,11 @@
-import { getSnapshot } from "mobx-state-tree";
+import { getSnapshot, Instance } from "mobx-state-tree";
 import { createDocumentModel, DocumentModelType } from "./document";
 import { PersonalDocument, ProblemDocument } from "./document-types";
 import { createSingleTileContent } from "../../utilities/test-utils";
 import { TextContentModelType } from "../tiles/text/text-content";
+import { expectEntryToBeComplete } from "../history/undo-store-test-utils";
+import { TreeManager } from "../history/tree-manager";
+import { LogEventName } from "../../lib/logger-types";
 
 // This is needed so MST can deserialize snapshots referring to tools
 import { registerTileTypes } from "../../register-tile-types";
@@ -11,7 +14,11 @@ registerTileTypes(["Geometry", "Text"]);
 // mock Logger calls
 const mockLogTileDocumentEvent = jest.fn();
 jest.mock("../tiles/log/log-tile-document-event", () => ({
-  logTileDocumentEvent: (...args: any[]) => mockLogTileDocumentEvent()
+  logTileDocumentEvent: (...args: any[]) => mockLogTileDocumentEvent(...args)
+}));
+const mockLogDocumentEvent = jest.fn();
+jest.mock("./log-document-event", () => ({
+  logDocumentEvent: (...args: any[]) => mockLogDocumentEvent(...args)
 }));
 
 const mockUserContext = { appMode: "authed", classHash: "class-1" };
@@ -105,6 +112,7 @@ describe("document model", () => {
       comments: {},
       stars: [],
       content: {
+        annotations: {},
         rowMap: {},
         rowOrder: [],
         sharedModelMap: {},
@@ -175,6 +183,35 @@ describe("document model", () => {
     expect(document.content!.tileMap.size).toBe(1);
     document.deleteTile(tileId!);
     expect(document.content!.tileMap.size).toBe(0);
+  });
+
+  it("allows undo and redo", async () => {
+    document.treeMonitor!.enabled = true;
+    const manager = document.treeManagerAPI as Instance<typeof TreeManager>;
+
+    document.addTile("text");
+    await expectEntryToBeComplete(manager, 1);
+    expect(document.content!.tileMap.size).toBe(1);
+
+    document.undoLastAction();
+    await expectEntryToBeComplete(manager, 2);
+    expect(document.content!.tileMap.size).toBe(0);
+
+    document.redoLastAction();
+    await expectEntryToBeComplete(manager, 3);
+    expect(document.content!.tileMap.size).toBe(1);
+
+    expect(mockLogDocumentEvent).toHaveBeenCalledTimes(2);
+    expect(mockLogDocumentEvent).toHaveBeenNthCalledWith(1,
+      LogEventName.TILE_UNDO,
+      expect.objectContaining({ targetAction: "/addTile" }),
+      'undo'
+    );
+    expect(mockLogDocumentEvent).toHaveBeenNthCalledWith(2,
+      LogEventName.TILE_REDO,
+      expect.objectContaining({ targetAction: "/addTile" }),
+      'redo'
+    );
   });
 
   it("allows the visibility to be toggled", () => {

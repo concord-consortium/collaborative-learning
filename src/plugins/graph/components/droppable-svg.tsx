@@ -1,7 +1,7 @@
 import { Active, useDroppable } from "@dnd-kit/core";
 import React, { CSSProperties, memo } from "react";
 import { createPortal } from "react-dom";
-import { useOverlayBounds } from "../hooks/use-overlay-bounds";
+import { useOverlayBounds } from "../imports/hooks/use-overlay-bounds";
 import { DropHint } from "./drop-hint";
 
 import "./droppable-svg.scss";

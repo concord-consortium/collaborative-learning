@@ -1,4 +1,5 @@
 import { getEnv, getSnapshot, Instance, types } from "mobx-state-tree";
+import { IClueObject } from "../annotations/clue-object";
 import { SharedModelType } from "../shared/shared-model";
 import { ISharedModelManager } from "../shared/shared-model-manager";
 import { tileModelHooks } from "./tile-model-hooks";
@@ -37,6 +38,9 @@ export const TileContentModel = types.model("TileContentModel", {
     type: types.optional(types.string, kUnknownTileType)
   })
   .views(self => ({
+    get annotatableObjects(): IClueObject[] {
+      return [];
+    },
     get tileEnv() {
       return getEnv(self) as ITileEnvironment | undefined;
     },

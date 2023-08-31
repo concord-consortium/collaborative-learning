@@ -1,11 +1,15 @@
 @import ../vars
-$header-offset-no-sub-tabs: calc(#{$header-height} + #{$nav-tab-height} + (2 * (#{$workspace-content-margin} + #{$tab-section-border-width})))
-$header-offset-with-sub-tabs: calc(#{$header-offset-no-sub-tabs} + #{$nav-tab-height})
+
+.document-tab-content
+  height: 100%
 
 .document-tabs
   border-color: $charcoal
   border-width: 0 $tab-section-border-width $tab-section-border-width $tab-section-border-width
   border-style: solid
+  height: 100%
+  display: flex
+  flex-direction: column
 
   &.my-work
     border-color: $workspace-teal
@@ -87,8 +91,8 @@ $header-offset-with-sub-tabs: calc(#{$header-offset-no-sub-tabs} + #{$nav-tab-he
           background-color: $support-blue-light-3
   .documents-panel
     margin-top: $document-margin
-    overflow-y: hidden
-    height: calc(100vh - #{$header-offset-with-sub-tabs})
+    flex: 1
+    min-height: 0
 
-    &.no-sub-tab
-      height: calc(100vh - #{$header-offset-no-sub-tabs})
+    .sub-tab-panel
+      height: 100%

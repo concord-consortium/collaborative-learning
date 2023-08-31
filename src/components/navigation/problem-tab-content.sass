@@ -2,8 +2,11 @@
 
 .problem-tabs
   border-color: $problem-orange-light-3
-  border-width: 0 $tab-section-border-width $tab-section-border-width 0
+  border-width: 0 $tab-section-border-width $tab-section-border-width
   border-style: solid
+  display: flex
+  flex-direction: column
+  height: 100%
   .tab-header-row
     display: flex
     flex-direction: row
@@ -91,5 +94,8 @@
   .problem-panel
     margin-top: $document-margin
     overflow-y: auto
+    flex: 1
   &.chat-open
     border-right: 0
+  &.teacher-guide
+    border-color: $learninglog-green-dark-1

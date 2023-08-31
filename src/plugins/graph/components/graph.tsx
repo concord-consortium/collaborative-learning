@@ -1,11 +1,12 @@
 import {observer} from "mobx-react-lite";
+import {appConfig} from "../../../initialize-app";
 import React, {MutableRefObject, useEffect, useMemo, useRef} from "react";
 import {select} from "d3";
 import {GraphController} from "../models/graph-controller";
 import {DroppableAddAttribute} from "./droppable-add-attribute";
 import {Background} from "./background";
 import {DroppablePlot} from "./droppable-plot";
-import {AxisPlace, AxisPlaces} from "../axis/axis-types";
+import {AxisPlace, AxisPlaces} from "../imports/components/axis/axis-types";
 import {GraphAxis} from "./graph-axis";
 import {attrRoleToGraphPlace, graphPlaceToAttrRole, IDotsRef, kGraphClass} from "../graph-types";
 import {ScatterDots} from "./scatterdots";
@@ -14,33 +15,36 @@ import {CaseDots} from "./casedots";
 import {ChartDots} from "./chartdots";
 import {Marquee} from "./marquee";
 import {DataConfigurationContext} from "../hooks/use-data-configuration-context";
-import {useDataSetContext} from "../hooks/use-data-set-context";
+import {useDataSetContext} from "../imports/hooks/use-data-set-context";
 import {useGraphModel} from "../hooks/use-graph-model";
 import {setNiceDomain, startAnimation} from "../utilities/graph-utils";
-import {IAxisModel} from "../axis/models/axis-model";
-import {GraphPlace} from "../axis-graph-shared";
+import {IAxisModel} from "../imports/components/axis/models/axis-model";
+import {GraphPlace} from "../imports/components/axis-graph-shared";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {isSetAttributeIDAction, useGraphModelContext} from "../models/graph-model";
-import {useInstanceIdContext} from "../hooks/use-instance-id-context";
+import {useInstanceIdContext} from "../imports/hooks/use-instance-id-context";
 import {MarqueeState} from "../models/marquee-state";
 import {Legend} from "./legend/legend";
+import {MultiLegend} from "./legend/multi-legend";
 import {AttributeType} from "../../../models/data/attribute";
+import {IDataSet} from "../../../models/data/data-set";
 import {useDataTips} from "../hooks/use-data-tips";
 import {onAnyAction} from "../../../utilities/mst-utils";
+import { Adornments } from "../adornments/adornments";
 
 import "./graph.scss";
 import "./graph-clue-styles.scss";
 
 interface IProps {
   graphController: GraphController
-  graphRef: MutableRefObject<HTMLDivElement>
+  graphRef: MutableRefObject<HTMLDivElement | null>
   dotsRef: IDotsRef
 }
 
 export const Graph = observer(function Graph({graphController, graphRef, dotsRef}: IProps) {
   const graphModel = useGraphModelContext(),
-    { autoAdjustAxes, enableAnimation } = graphController,
-    { plotType } = graphModel,
+    {autoAdjustAxes, enableAnimation} = graphController,
+    {plotType} = graphModel,
     instanceId = useInstanceIdContext(),
     marqueeState = useMemo<MarqueeState>(() => new MarqueeState(), []),
     dataset = useDataSetContext(),
@@ -52,23 +56,21 @@ export const Graph = observer(function Graph({graphController, graphRef, dotsRef
     xAttrID = graphModel.getAttributeID('x'),
     yAttrID = graphModel.getAttributeID('y');
 
-  useGraphModel({dotsRef, graphModel, enableAnimation, instanceId});
-
   useEffect(function setupPlotArea() {
     if (xScale && xScale?.length > 0) {
       const plotBounds = layout.getComputedBounds('plot');
       select(plotAreaSVGRef.current)
         .attr('x', plotBounds?.left || 0)
         .attr('y', plotBounds?.top || 0)
-        .attr('width', layout.plotWidth > -1 ? layout.plotWidth : 0)
-        .attr('height', layout.plotHeight > -1 ? layout.plotHeight : 0);
+        .attr('width', layout.plotWidth > 0 ? layout.plotWidth : 0)
+        .attr('height', layout.plotHeight > 0 ? layout.plotHeight : 0);
     }
-  }, [dataset, plotAreaSVGRef, layout, layout.plotHeight, layout.plotWidth, xScale, graphModel]);
+  }, [dataset, plotAreaSVGRef, layout, layout.plotHeight, layout.plotWidth, xScale]);
 
-  const handleChangeAttribute = (place: GraphPlace, attrId: string) => {
+  const handleChangeAttribute = (place: GraphPlace, dataSet: IDataSet, attrId: string) => {
     const computedPlace = place === 'plot' && graphModel.config.noAttributesAssigned ? 'bottom' : place;
     const attrRole = graphPlaceToAttrRole[computedPlace];
-    graphModel.setAttributeID(attrRole, attrId);
+    graphModel.setAttributeID(attrRole, dataSet.id, attrId);
   };
 
   /**
@@ -81,7 +83,7 @@ export const Graph = observer(function Graph({graphController, graphRef, dotsRef
       const yAxisModel = graphModel.getAxis('left') as IAxisModel;
       setNiceDomain(graphModel.config.numericValuesForAttrRole('y'), yAxisModel);
     } else {
-      handleChangeAttribute(place, '');
+      dataset && handleChangeAttribute(place, dataset, '');
     }
   };
 
@@ -89,10 +91,10 @@ export const Graph = observer(function Graph({graphController, graphRef, dotsRef
   useEffect(function handleNewAttributeID() {
     const disposer = graphModel && onAnyAction(graphModel, action => {
       if (isSetAttributeIDAction(action)) {
-        const [role, attrID] = action.args,
+        const [role, dataSetId, attrID] = action.args,
           graphPlace = attrRoleToGraphPlace[role];
         startAnimation(enableAnimation);
-        graphPlace && graphController?.handleAttributeAssignment(graphPlace, attrID);
+        graphPlace && graphController?.handleAttributeAssignment(graphPlace, dataSetId, attrID);
       }
     });
     return () => disposer?.();
@@ -100,7 +102,7 @@ export const Graph = observer(function Graph({graphController, graphRef, dotsRef
 
   const handleTreatAttrAs = (place: GraphPlace, attrId: string, treatAs: AttributeType) => {
     graphModel.config.setAttributeType(graphPlaceToAttrRole[place], treatAs);
-    graphController?.handleAttributeAssignment(place, attrId);
+    dataset && graphController?.handleAttributeAssignment(place, dataset.id, attrId);
   };
 
   useDataTips({dotsRef, dataset, graphModel, enableAnimation});
@@ -191,6 +193,15 @@ export const Graph = observer(function Graph({graphController, graphRef, dotsRef
           />
         </svg>
         {renderDroppableAddAttributes()}
+        <Adornments />
+        { appConfig.getSetting("defaultSeriesLegend", "graph") &&
+          <MultiLegend
+            graphElt={graphRef.current}
+            onChangeAttribute={handleChangeAttribute}
+            onRemoveAttribute={handleRemoveAttribute}
+            onTreatAttributeAs={handleTreatAttrAs}
+          />
+        }
       </div>
     </DataConfigurationContext.Provider>
   );

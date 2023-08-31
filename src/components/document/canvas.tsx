@@ -3,6 +3,8 @@ import { inject, observer } from "mobx-react";
 import { getSnapshot, destroy } from "mobx-state-tree";
 import React from "react";
 import stringify from "json-stringify-pretty-compact";
+
+import { AnnotationLayer } from "./annotation-layer";
 import { DocumentLoadingSpinner } from "./document-loading-spinner";
 import { BaseComponent } from "../base";
 import { DocumentContentComponent } from "./document-content";
@@ -17,10 +19,10 @@ import {
 } from "../tiles/tile-api";
 import { StringBuilder } from "../../utilities/string-builder";
 import { HotKeys } from "../../utilities/hot-keys";
-import { DEBUG_CANVAS, DEBUG_DOCUMENT } from "../../lib/debug";
+import { DEBUG_CANVAS, DEBUG_DOCUMENT, DEBUG_HISTORY } from "../../lib/debug";
 import { DocumentError } from "./document-error";
 
-import "./canvas.sass";
+import "./canvas.scss";
 
 interface IProps {
   context: string;
@@ -35,6 +37,8 @@ interface IProps {
 }
 
 interface IState {
+  documentScrollX: number;
+  documentScrollY: number;
   historyDocumentCopy?: DocumentModelType;
   showPlaybackControls: boolean;
 }
@@ -77,6 +81,8 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
     });
 
     this.state = {
+      documentScrollX: 0,
+      documentScrollY: 0,
       showPlaybackControls: false,
     };
   }
@@ -93,6 +99,12 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
           {this.renderDebugInfo()}
           {this.renderOverlayMessage()}
         </div>
+        <AnnotationLayer
+          content={this.getDocumentContent()}
+          documentScrollX={this.state.documentScrollX}
+          documentScrollY={this.state.documentScrollY}
+          readOnly={this.props.readOnly}
+        />
       </TileApiInterfaceContext.Provider>
     );
   }
@@ -112,13 +124,20 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
     } else if (documentContent) {
       return (
         <>
-          <DocumentContentComponent key={showPlaybackControls ? "history" : "main"} content={documentContent}
-                                    documentId={documentToShow?.key}
-                                    {...{typeClass, viaTeacherDashboard, ...others}} />
-          {showPlayback && <PlaybackComponent document={documentToShow}
-                                              showPlaybackControls={showPlaybackControls}
-                                              onTogglePlaybackControls={this.handleTogglePlaybackControlComponent} />
-          }
+          <DocumentContentComponent
+            key={showPlaybackControls ? "history" : "main"}
+            content={documentContent}
+            documentId={documentToShow?.key}
+            onScroll={(x: number, y: number) => this.setState({ documentScrollX: x, documentScrollY: y })}
+            {...{typeClass, viaTeacherDashboard, ...others}}
+          />
+          {showPlayback && (
+            <PlaybackComponent
+              document={documentToShow}
+              showPlaybackControls={showPlaybackControls}
+              onTogglePlaybackControls={this.handleTogglePlaybackControlComponent}
+            />
+          )}
         </>
       );
     }
@@ -231,6 +250,10 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
       const showPlaybackControls = !prevState.showPlaybackControls;
       const historyDocumentCopy = showPlaybackControls ?
         this.createHistoryDocumentCopy() : undefined;
+
+      if (DEBUG_HISTORY) {
+        (window as any).historyDocument = historyDocumentCopy;
+      }
 
       if (prevState.historyDocumentCopy) {
         destroy(prevState.historyDocumentCopy);

@@ -58,6 +58,12 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
         case "delete":
           this.handleDelete();
           break;
+        case "sparrow":
+          this.handleSparrow();
+          break;
+        case "hide-annotations":
+          this.handleHideAnnotations();
+          break;
         case "duplicate":
           this.handleDuplicate();
           break;
@@ -76,8 +82,20 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     const handleDragTool = (e: React.DragEvent<HTMLDivElement>, tool: IToolbarButtonModel) => {
       this.handleDragNewTile(tool, e);
     };
+    const updateToolButton = (toolButton: IToolbarButtonModel) => {
+      if (toolButton.id === "hide-annotations") {
+        // Update hide annotation button's icon and title based on current annotation visibility
+        const { ui } = this.stores;
+        const appIcons = toolButton.env?.appIcons;
+        toolButton.setIcon(
+          appIcons?.[ui.showAnnotations ? "icon-hide-annotations-tool" : "icon-show-annotations-tool"]
+        );
+        toolButton.setTitle(ui.showAnnotations ? "Hide Annotations" : "Show Annotations");
+      }
+    };
     const renderToolButtons = (toolbarModel: IToolbarModel) => {
       return toolbarModel.map(toolButton => {
+        updateToolButton(toolButton);
         const buttonProps: IToolbarButtonProps = {
           toolButton,
           isActive: this.isButtonActive(toolButton),
@@ -138,9 +156,14 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   }
 
   private isButtonActive(toolButton: IToolbarButtonModel) {
-    return toolButton.id === "solution"
-      ? this.selectedTilesIncludeTeacher()
-      : toolButton === this.state.activeTool;
+    const { ui } = this.stores;
+    if (toolButton.id === "solution") {
+      return this.selectedTilesIncludeTeacher();
+    } else if (toolButton.id === "sparrow") {
+      return ui.annotationMode === "sparrow";
+    } else {
+      return toolButton === this.state.activeTool;
+    }
   }
 
   private isButtonDisabled(toolButton: IToolbarButtonModel) {
@@ -172,6 +195,12 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     const tileContentInfo = getTileContentInfo(tool.id);
     if (!tileContentInfo) return;
 
+    if (ui.annotationMode !== undefined) {
+      // If we're currently annotating the document, switch to normal edit mode
+      ui.setAnnotationMode();
+      return;
+    }
+
     const newTileOptions: IDocumentContentAddTileOptions = {
             title: this.getUniqueTitle(tileContentInfo),
             addSidecarNotes: !!tileContentInfo?.addSidecarNotes,
@@ -190,6 +219,23 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
 
   private handleSelect() {
     // nothing to do
+  }
+
+  private handleSparrow() {
+    const { ui } = this.stores;
+    if (ui.annotationMode === "sparrow") {
+      ui.setAnnotationMode();
+    } else {
+      ui.setAnnotationMode("sparrow");
+      ui.setShowAnnotations(true);
+      ui.setSelectedTile();
+    }
+  }
+
+  private handleHideAnnotations() {
+    const { ui } = this.stores;
+    ui.setAnnotationMode();
+    ui.setShowAnnotations(!ui.showAnnotations);
   }
 
   private handleUndo() {

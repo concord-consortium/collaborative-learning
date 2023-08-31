@@ -10,7 +10,7 @@ export class SerialDevice {
   serialNodesCount: number;
   writer: WritableStreamDefaultWriter;
   serialModalShown: boolean | null;
-  deviceFamily: string | null;
+  deviceFamily: string | undefined;
 
   constructor() {
     this.localBuffer = "";
@@ -21,6 +21,7 @@ export class SerialDevice {
 
     navigator.serial?.addEventListener("disconnect", (e) => {
       this.updateConnectionInfo(e.timeStamp, e.type);
+      this.deviceFamily = undefined;
     });
   }
 

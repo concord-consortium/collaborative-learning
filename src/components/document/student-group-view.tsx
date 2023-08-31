@@ -20,12 +20,10 @@ export const StudentGroupView:React.FC = observer(function StudentGroupView(){
   const group = groups.getGroupById(selectedGroupId);
   const openDocId = ui.tabs.get("student-work")?.openDocuments.get(selectedGroupId);
   const focusedGroupUser = getFocusedGroupUser(group, openDocId, DocumentViewMode.Live);
-  const isStudentViewActiveTab = (ui.activeNavTab === "student-work");
   const isChatPanelShown = ui.showChatPanel;
-  const shrinkStudentView  = isStudentViewActiveTab && isChatPanelShown;
   const documentSelectedForComment = ui.showChatPanel && ui.selectedTileIds.length === 0 && ui.focusDocument;
   const studentGroupViewClasses = classNames( "editable-document-content", "document", "student-group-view",
-  {"shrink-student-view": shrinkStudentView}, {"comment-select" : documentSelectedForComment});
+    {"chat-open": isChatPanelShown}, {"comment-select" : documentSelectedForComment});
 
   return (
     <div key="student-group-view" className={studentGroupViewClasses}>
@@ -101,7 +99,8 @@ interface IGroupButtonProps {
   selected: boolean;
   onSelectGroup?: (id: string) => void;
 }
-const GroupButton: React.FC<IGroupButtonProps> = ({ displayId, id, selected, onSelectGroup }) => {
+const GroupButton: React.FC<IGroupButtonProps> = (props) => {
+  const { displayId, id, selected, onSelectGroup } = props;
   const className = `icon group-number ${selected ? "active" : ""}`;
   const handleClick = () => onSelectGroup && onSelectGroup(id);
   return(

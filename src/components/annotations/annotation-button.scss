@@ -1,0 +1,17 @@
+@use "../vars.sass";
+
+.annotation-button {
+  background-color: rgba(0, 0, 0, 0);
+  border: none;
+  position: absolute;
+
+  &:hover {
+    fill: vars.$annotation-blue-very-transparent;
+    outline: 2px dotted vars.$annotation-blue;
+  }
+
+  &.source {
+    fill: rgba(0, 0, 0, 0);
+    outline: 2px solid vars.$annotation-blue;
+  }
+}

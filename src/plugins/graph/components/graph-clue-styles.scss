@@ -2,7 +2,11 @@
 
 .graph-plot {
   background-color: $workspace-teal-light-7;
-  .attribute-label {
+  .display-label.left text {
+    fill: black;
+    text-decoration: none;
+  }
+  .display-label.bottom text {
     fill: $workspace-teal-dark-2;
     text-decoration: underline;
   }

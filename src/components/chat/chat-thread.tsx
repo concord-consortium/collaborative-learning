@@ -18,7 +18,7 @@ interface IProps {
   user?: UserModelType;
   activeNavTab?: string;
   chatThreads?: ChatCommentThread[];
-  onPostComment?: (comment: string) => void;
+  onPostComment?: (comment: string, tags: string[]) => void;
   onDeleteComment?: (commentId: string, commentContent: string) => void;
   focusDocument?: string;
   focusTileId?: string;

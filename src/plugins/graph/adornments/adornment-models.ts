@@ -3,13 +3,14 @@
  */
 
 import {Instance, types} from "mobx-state-tree";
+import { IAxisModel } from "../imports/components/axis/models/axis-model";
 import {typedId} from "../../../utilities/js-utils";
 import {Point} from "../graph-types";
 
 export const PointModel = types.model("Point", {
-  x: types.optional(types.number, NaN),
-  y: types.optional(types.number, NaN)
-})
+    x: types.optional(types.number, NaN),
+    y: types.optional(types.number, NaN)
+  })
   .views(self=>({
     isValid() {
       return isFinite(self.x) && isFinite(self.y);
@@ -26,56 +27,66 @@ export const PointModel = types.model("Point", {
 export interface IPointModel extends Instance<typeof PointModel> {}
 export const kInfinitePoint = {x:NaN, y:NaN};
 
-const Adornment = types.model("Adornment", {
-  id: types.optional(types.identifier, () => typedId("ADRN")),
-  type: types.optional(types.string, () => {
-    throw "type must be overridden";
-  }),
-  isVisible: true
-})
+export interface IUpdateCategoriesOptions {
+  xAxis?: IAxisModel
+  xAttrId: string
+  xCats: string[]
+  yAxis?: IAxisModel
+  yAttrId: string
+  yCats: string[]
+  topCats: string[]
+  topAttrId: string
+  rightCats: string[]
+  rightAttrId: string
+  resetPoints?: boolean
+}
+
+export const AdornmentModel = types.model("AdornmentModel", {
+    id: types.optional(types.identifier, () => typedId("ADRN")),
+    type: types.optional(types.string, () => {
+      throw "type must be overridden";
+    }),
+    isVisible: true
+  })
+  .views(self => ({
+    instanceKey(subPlotKey: Record<string, string>) {
+      return JSON.stringify(subPlotKey);
+    },
+    classNameFromKey(subPlotKey: Record<string, string>) {
+      let className = "";
+      Object.entries(subPlotKey).forEach(([key, value]) => {
+        const valueNoSpaces = value.replace(/\s+/g, "-");
+        className += `${className ? "-" : ""}${key}-${valueNoSpaces}`;
+      });
+      return className;
+    }
+  }))
   .actions(self => ({
     setVisibility(isVisible: boolean) {
       self.isVisible = isVisible;
-    }
-  }));
-
-export const MovableValueModel = Adornment
-  .named('MovableValueModel')
-  .props({
-    type: 'value',
-    value: types.number,
-  })
-  .actions(self => ({
-    setValue(aValue: number) {
-      self.value = aValue;
-    }
-  }));
-export interface IMovableValueModel extends Instance<typeof MovableValueModel> {}
-
-export const MovableLineModel = Adornment
-  .named('MovableLineModel')
-  .props({
-    type: 'line',
-    intercept: types.number,
-    slope: types.number,
-    pivot1: types.optional(PointModel, kInfinitePoint),
-    pivot2: types.optional(PointModel, kInfinitePoint)
-  })
-  .actions(self => ({
-    setLine(aLine: {intercept:number, slope:number, pivot1?:Point, pivot2?:Point}) {
-      self.intercept = aLine.intercept;
-      self.slope = aLine.slope;
-        self.pivot1.set(aLine.pivot1 ?? kInfinitePoint);
-        self.pivot2.set(aLine.pivot2 ?? kInfinitePoint);
     },
-    setPivot1(aPoint: Point) {
-      self.pivot1.set(aPoint);
+    updateCategories(options: IUpdateCategoriesOptions) {
+      // derived models should override to update their models when categories change
     },
-    setPivot2(aPoint: Point) {
-      self.pivot2.set(aPoint);
+    setSubPlotKey(options: IUpdateCategoriesOptions, index: number) {
+      const { xAttrId, xCats, yAttrId, yCats, topAttrId, topCats, rightAttrId, rightCats } = options;
+      const subPlotKey: Record<string, string> = {};
+      if (topAttrId) subPlotKey[topAttrId] = topCats?.[index % topCats.length];
+      if (rightAttrId) subPlotKey[rightAttrId] = rightCats?.[Math.floor(index / topCats.length)];
+      if (yAttrId && yCats[0]) subPlotKey[yAttrId] = yCats?.[index % yCats.length];
+      if (xAttrId && xCats[0]) subPlotKey[xAttrId] = xCats?.[index % xCats.length];
+      return subPlotKey;
     }
   }));
-export interface IMovableLineModel extends Instance<typeof MovableLineModel> {}
+export interface IAdornmentModel extends Instance<typeof AdornmentModel> {}
 
-export const AdornmentModelUnion = types.union(MovableValueModel, MovableLineModel);
-export type IAdornmentModelUnion = IMovableValueModel | IMovableLineModel
+export const UnknownAdornmentModel = AdornmentModel
+  .named("UnknownAdornmentModel")
+  .props({
+    type: "Unknown"
+  });
+export interface IUnknownAdornmentModel extends Instance<typeof UnknownAdornmentModel> {}
+
+export function isUnknownAdornmentModel(adornmentModel: IAdornmentModel): adornmentModel is IUnknownAdornmentModel {
+  return adornmentModel.type === "Unknown";
+}

@@ -32,14 +32,17 @@ import {
   sendDataToSerialDevice, sendDataToSimulatedOutput, updateNodeChannelInfo, updateGeneratorNode, updateNodeRecentValues,
   updateSensorNode, updateTimerNode
 } from "../nodes/utilities/update-utilities";
-import { getBoundingRectOfNodes, getNewNodePosition, moveNodeToFront } from "../nodes/utilities/view-utilities";
+import {
+  getBoundingRectOfNodes, getInsertionOrder,
+  getNewNodePosition, moveNodeToFront
+} from "../nodes/utilities/view-utilities";
 import { DataflowDropZone } from "./ui/dataflow-drop-zone";
 import { DataflowProgramToolbar } from "./ui/dataflow-program-toolbar";
 import { DataflowProgramTopbar } from "./ui/dataflow-program-topbar";
 import { DataflowProgramCover } from "./ui/dataflow-program-cover";
 import { DataflowProgramZoom } from "./ui/dataflow-program-zoom";
 import { NodeChannelInfo, serialSensorChannels } from "../model/utilities/channel";
-import { ProgramDataRates } from "../model/utilities/node";
+import { NodeType, NodeTypes, ProgramDataRates } from "../model/utilities/node";
 import { calculatedRecentValues, runNodePlaybackUpdates,  } from "../utilities/playback-utils";
 import { getAttributeIdForNode, recordCase } from "../model/utilities/recording-utilities";
 import { virtualSensorChannels } from "../model/utilities/virtual-channel";
@@ -303,6 +306,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       });
 
       this.programEditor.on("rendernode", ({ el, node, component, bindSocket, bindControl }) => {
+        this.updateNodeNames();
         const extComponent = component as any;
         if (!extComponent.render || extComponent.render === "react") {
           this.reactElements.push(el);
@@ -396,6 +400,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       // Program changes are logged from here, except nodecreated, above
       this.programEditor.on("noderemoved", node => {
+        this.updateNodeNames();
         dataflowLogEvent("noderemoved", node, this.tileId);
       });
 
@@ -420,6 +425,15 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         this.onSnapshotSetup = true;
       }
     }
+  }
+
+  private updateNodeNames(){
+    this.programEditor.nodes.forEach((node) => {
+      const insertionOrder = getInsertionOrder(this.programEditor, node.id);
+      const nodeType = NodeTypes.find( (n: NodeType) => n.name === node.name);
+      const displayNameBase = nodeType ? nodeType.displayName : node.name;
+      node.data.orderedDisplayName = displayNameBase + " " + insertionOrder;
+    });
   }
 
   private destroyEditor() {

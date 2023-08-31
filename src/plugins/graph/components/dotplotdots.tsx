@@ -5,7 +5,7 @@ import {CaseData} from "../d3-types";
 import {PlotProps} from "../graph-types";
 import {useDragHandlers, usePlotResponders} from "../hooks/use-plot";
 import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
-import {useDataSetContext} from "../hooks/use-data-set-context";
+import {useDataSetContext} from "../imports/hooks/use-data-set-context";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {ICase} from "../../../models/data/data-set-types";
 import {
@@ -88,7 +88,6 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
     }, [dataset, dragID, primaryIsBottom, dataConfiguration, layout, primaryAttrRole]),
 
     onDragEnd = useCallback(() => {
-      //dataset?.endCaching();
 
       if (dragID !== '') {
         target.current
@@ -240,12 +239,15 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
         },
         getSecondaryScreenCoord = (anID: string) => {
           if (!binMap[anID]) {
-            return NaN;
+            return null; // Not NaN because NaN causes errors during transitions
           }
           const secondaryCat = binMap[anID].category,
             extraSecondaryCat = binMap[anID].extraCategory,
-            indexInBin = binMap[anID].indexInBin;
-          return binMap[anID] ? computeSecondaryCoord({secondaryCat, extraSecondaryCat, indexInBin}) : null;
+            indexInBin = binMap[anID].indexInBin,
+            onePixelOffset = primaryIsBottom ? -1 : 1; // Separate circles from axis line by 1 pixel
+          return binMap[anID]
+            ? computeSecondaryCoord({secondaryCat, extraSecondaryCat, indexInBin}) + onePixelOffset
+            : null;
         },
         getScreenX = primaryIsBottom ? getPrimaryScreenCoord : getSecondaryScreenCoord,
         getScreenY = primaryIsBottom ? getSecondaryScreenCoord : getPrimaryScreenCoord,
@@ -262,9 +264,7 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
     [graphModel, dataConfiguration, layout, primaryAttrRole, secondaryAttrRole, dataset, dotsRef,
       enableAnimation, primaryIsBottom, pointColor, pointStrokeColor]);
 
-  usePlotResponders({
-    graphModel, layout, dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation
-  });
+  usePlotResponders({dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation});
 
   return (
     <>
