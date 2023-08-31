@@ -12,7 +12,7 @@ import { SortSelect } from "./components/sort-select";
 import { useToolbarTileApi } from "../../components/tiles/hooks/use-toolbar-tile-api";
 import { AddIconButton, RemoveIconButton } from "./components/add-remove-icons";
 import { useCautionAlert } from "../../components/utilities/use-caution-alert";
-import { EditFacet } from "./data-card-types";
+import { EditFacet, kExampleDeckHeight, kThreshold } from "./data-card-types";
 import { DataCardSortArea } from "./components/sort-area";
 import { safeJsonParse } from "../../utilities/js-utils";
 import { mergeTwoDataSets } from "../../models/data/data-set-utils";
@@ -59,17 +59,15 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
 
   const adjustHeight = useCallback(() => {
     if (!tileElt) return;
-    if (readOnly) onRequestRowHeight(model.id, height);
-    if (!readOnly){
-      const uiHeight = tileElt?.querySelector(".data-card-container")?.scrollHeight || 0;
-      const heightDiff = height ? height - uiHeight : 0;
-      heightDiff < 30 && onRequestRowHeight(model.id, uiHeight + 60);
-    }
+    const uiHeight = tileElt?.querySelector(".data-card-container")?.scrollHeight || 0;
+    const heightDiff = height ? height - uiHeight : 0;
+    if (readOnly) onRequestRowHeight(model.id, Math.max(uiHeight, kExampleDeckHeight));
+    if (!readOnly) heightDiff < kThreshold && onRequestRowHeight(model.id, uiHeight + kThreshold);
   }, [height, model.id, onRequestRowHeight, readOnly, tileElt]);
 
   useEffect(() => {
     adjustHeight();
-  }, [currEditAttrId, currEditFacet, height, imageUrlToAdd, adjustHeight, tileElt]);
+  }, [currEditAttrId, currEditFacet, height, imageUrlToAdd, readOnly, adjustHeight, tileElt]);
 
   /* ==[ Drag and Drop ] == */
 
