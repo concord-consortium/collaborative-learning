@@ -54,20 +54,15 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
         return model.title;
       }
     });
-    adjustHeight();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const adjustHeight = useCallback(() => {
+  useEffect(() => {
     if (!tileElt) return;
     const uiHeight = tileElt?.querySelector(".data-card-container")?.scrollHeight || 0;
     const heightDiff = height ? height - uiHeight : 0;
     if (readOnly) onRequestRowHeight(model.id, Math.max(uiHeight, kExampleDeckHeight));
     if (!readOnly) heightDiff < kThreshold && onRequestRowHeight(model.id, uiHeight + kThreshold);
-  }, [height, model.id, onRequestRowHeight, readOnly, tileElt]);
-
-  useEffect(() => {
-    adjustHeight();
-  }, [currEditAttrId, currEditFacet, height, imageUrlToAdd, readOnly, adjustHeight, tileElt]);
+  }, [currEditAttrId, currEditFacet, height, imageUrlToAdd, readOnly, tileElt, onRequestRowHeight, model.id]);
 
   /* ==[ Drag and Drop ] == */
 
