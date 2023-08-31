@@ -39,7 +39,7 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
           const bb = object.boundingBox;
           const height = bb.se.y - bb.nw.y + bbPadding * 2;
           const width = bb.se.x - bb.nw.x + bbPadding * 2;
-          const left = bb.nw.x - bbPadding;
+          const left = bb.nw.x - bbPadding + getObjectListPanelWidth();
           const top = bb.nw.y - bbPadding;
           return { height, left, top, width };
         }
@@ -70,11 +70,23 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
 
   const toolbarProps = useToolbarTileApi({ id: model.id, enabled: !readOnly, onRegisterTileApi, onUnregisterTileApi });
 
+  const getObjectListPanelWidth = () => {
+    if (drawingToolElement.current) {
+      const objectListElement = drawingToolElement.current.querySelector<HTMLDivElement>('div.object-list');
+      return objectListElement ? objectListElement.offsetWidth : 0;
+    } else {
+      return 0;
+    }
+  };
+
   const getVisibleCanvasSize = () => {
     if (!drawingToolElement.current 
       || !drawingToolElement.current.clientWidth 
       || !drawingToolElement.current.clientHeight) return undefined;
-    return { x: drawingToolElement.current.clientWidth, y: drawingToolElement.current.clientHeight };
+    return { 
+      x: drawingToolElement.current.clientWidth-getObjectListPanelWidth(), 
+      y: drawingToolElement.current.clientHeight 
+    };
   };
 
   return (
