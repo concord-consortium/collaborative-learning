@@ -24,7 +24,9 @@ export const formatValue = (
         const url = lookupImage(value);
         if (url) {
           return (
-            <img src={url} style={{maxWidth: '50px', maxHeight: '50px'}}></img>
+            <div className="image-cell" style={{ height, width: cellWidth}}>
+              <img src={url}></img>
+            </div>
           );
         }
       } else {
