@@ -14,7 +14,7 @@ import { preprocessImportFormat } from "./geometry-import";
 import {
   cloneGeometryObject, CommentModel, CommentModelType, GeometryBaseContentModel, GeometryObjectModelType,
   GeometryObjectModelUnion, ImageModel, ImageModelType, isCommentModel, isMovableLineModel, isMovableLinePointId,
-  isPointModel, isPolygonModel, MovableLineModel, PointModel, PolygonModel, VertexAngleModel
+  isPointModel, isPolygonModel, MovableLineModel, PointModel, PolygonModel, PolygonModelType, VertexAngleModel
 } from "./geometry-model";
 import {
   getBoardUnitsAndBuffers, getObjectById, guessUserDesiredBoundingBox, kXAxisTotalBuffer, kYAxisTotalBuffer,
@@ -196,14 +196,23 @@ export const GeometryContentModel = GeometryBaseContentModel
   .views(self => ({
     get annotatableObjects() {
       const tileId = getTileIdFromContent(self) ?? "";
-      const objects: IClueObject[] = [];
-      // polygon
+      const polygons: IClueObject[] = [];
+      const segments: IClueObject[] = [];
+      const points: IClueObject[] = [];
       self.objects.forEach(object => {
-        if (object.type === "point") {
-          objects.push({ tileId, objectId: object.id, objectType: object.type });
+        const objectInfo = { tileId, objectId: object.id, objectType: object.type };
+        if (object.type === "polygon") {
+          polygons.push(objectInfo);
+          const polygon = object as PolygonModelType;
+          polygon.segmentIds.forEach(
+            segmentId => segments.push({ tileId, objectId: segmentId, objectType: "segment" })
+          );
+        } else if (object.type === "point") {
+          points.push(objectInfo);
         }
       });
-      return objects;
+      // The order of the objects is important so buttons to add sparrows don't cover each other
+      return [...polygons, ...segments, ...points];
     },
     // Returns any object in the model, even a subobject (like a movable line's point)
     getAnyObject(id: string) {

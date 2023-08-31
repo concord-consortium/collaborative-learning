@@ -14,7 +14,7 @@ import {
 } from "../../../models/tiles/geometry/geometry-content";
 import { convertModelObjectsToChanges } from "../../../models/tiles/geometry/geometry-migrate";
 import {
-  cloneGeometryObject, GeometryObjectModelType, isPointModel
+  cloneGeometryObject, GeometryObjectModelType, isPointModel, pointIdsFromSegmentId, PolygonModelType
 } from "../../../models/tiles/geometry/geometry-model";
 import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObjectUnderMouse,
           isDragTargetOrAncestor } from "../../../models/tiles/geometry/geometry-utils";
@@ -293,6 +293,39 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             left: coords.x - pointDim / 2 - 1,
             top: coords.y - pointDim / 2 - 1,
             width: pointDim
+          };
+          return boundingBox;
+        } else if (objectType === "polygon") {
+          const content = this.getContent();
+          const polygon = content.getObject(objectId) as PolygonModelType;
+          let [bottom, left, right, top] = [Number.MIN_VALUE, Number.MAX_VALUE, Number.MIN_VALUE, Number.MAX_VALUE];
+          polygon.points.forEach(pointId => {
+            const coords = this.getPointScreenCoords(pointId);
+            if (!coords) return undefined;
+            if (coords.y > bottom) bottom = coords.y;
+            if (coords.x < left) left = coords.x;
+            if (coords.x > right) right = coords.x;
+            if (coords.y < top) top = coords.y;
+          });
+          const boundingBox = {
+            height: bottom - top,
+            left, top,
+            width: right - left
+          };
+          return boundingBox;          
+        } else if (objectType === "segment") {
+          const [ point1Id, point2Id ] = pointIdsFromSegmentId(objectId);
+          const coords1 = this.getPointScreenCoords(point1Id);
+          const coords2 = this.getPointScreenCoords(point2Id);
+          if (!coords1 || !coords2) return undefined;
+          const bottom = Math.max(coords1.y, coords2.y);
+          const left = Math.min(coords1.x, coords2.x);
+          const right = Math.max(coords1.x, coords2.x);
+          const top = Math.min(coords1.y, coords2.y);
+          const boundingBox = {
+            height: bottom - top,
+            left, top,
+            width: right - left
           };
           return boundingBox;
         }
