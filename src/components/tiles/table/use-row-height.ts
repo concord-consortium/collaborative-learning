@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { RowHeightArgs } from "react-data-grid";
 import { kCellHorizontalPadding, kCellLineHeight, kCellVerticalPadding,
+  kDefaultImageCellHeight,
   kHeaderCellHorizontalPadding, kHeaderRowHeight, kRowHeight, TRow } from "./table-types";
 import { useCurrent } from "../../../hooks/use-current";
 import { measureTextLines } from "../hooks/use-measure-text";
@@ -37,7 +38,7 @@ export const useRowHeight = ({ dataSet, measureColumnWidth, model }: IUseRowHeig
         if (attrId !== '__context__' && attrId !== '__id__' && attrId !== '__index__') {
           const testableString = text.length > 0 ? text : ' ';
           if (gImageMap.isImageUrl(testableString)){
-            height = Math.max(height, kRowHeight);
+            height = Math.max(height, kDefaultImageCellHeight);
           } else {
             height = Math.max(height, textHeight(
               text as string,

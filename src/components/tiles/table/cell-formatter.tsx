@@ -9,16 +9,16 @@ import './cell-formatter.scss';
 export const formatValue = (
     formatter: (n: number | { valueOf(): number }) => string,
     value: any,
+    lookupImage: (value: string) => string|undefined,
     width?: number,
     row?: TRow,
     rowHeight?: (args: any) => number,
-    lookupImage?: (value: string) => string|undefined,
   ) => {
   if ((value == null) || (value === "")) return <span></span>;
   const num = Number(value);
   if (!isFinite(num)) {
     const cellWidth = (width || kDefaultColumnWidth) - kCellHorizontalPadding;
-    const height =  20;//rowHeight && row ? rowHeight({ row }) : kRowHeight;
+    const height = rowHeight && row ? rowHeight({ row }) : kRowHeight;
     if (gImageMap.isImageUrl(value)) {
       if (lookupImage) {
         const url = lookupImage(value);
@@ -51,6 +51,6 @@ export const getCellFormatter = (width: number, rowHeight: (args: RowHeightArgs<
                                 lookupImage: (value:string)=>string|undefined) => {
   return ({ row, column }: CellFormatterProps) => {
     const formatter = useNumberFormat();
-    return formatValue(formatter, row[column.key], width, row, rowHeight, lookupImage);
+    return formatValue(formatter, row[column.key], lookupImage, width, row, rowHeight);
   };
 };

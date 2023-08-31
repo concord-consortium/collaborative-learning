@@ -71,7 +71,7 @@ export const useColumnsFromDataSet = ({
         width,
         resizable: !readOnly,
         headerRenderer: ColumnHeaderCell,
-        formatter: getCellFormatter(width, rowHeight, lookupImage=lookupImage),
+        formatter: getCellFormatter(width, rowHeight, lookupImage),
         editor: !readOnly && !metadata.hasExpression(attr.id) ? CellTextEditor : undefined,
         editorOptions: {
           editOnClick: !readOnly
@@ -97,7 +97,7 @@ export const useColumnsFromDataSet = ({
     columnChanges;  // eslint-disable-line no-unused-expressions
     return cols;
   }, [attributes, rowHeight, RowLabelHeader, RowLabelFormatter, readOnly, columnChanges,
-      ColumnHeaderCell, controlsColumn, cellClasses, measureColumnWidth, metadata]);
+      ColumnHeaderCell, controlsColumn, cellClasses, measureColumnWidth, metadata, lookupImage]);
 
   return { columns, controlsColumn, columnEditingName, handleSetColumnEditingName };
 };

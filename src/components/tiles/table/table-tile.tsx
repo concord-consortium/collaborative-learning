@@ -71,23 +71,21 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     ref: gridRef, gridContext, inputRowId, selectedCell, getSelectedRows, ...gridProps
   } = useGridContext({ modelId: model.id, showRowLabels, triggerColumnChange });
 
+  // Maintains the cache of data values that map to image URLs.
+  // For use in a synchronous context, returns undefined immediately if an image is not yet cached,
+  // and then looks it up in the background, adds to cache, and updates state to force a refresh.
   const lookupImage = (value: string) => {
     if (gImageMap.isImageUrl(value)) {
       const cached = imageUrls.get(value);
       if (cached) {
-        console.log('returning cached image for ', value);
         return cached;
       }
       gImageMap.getImage(value).then((image) => {
         if (image && image.displayUrl) {
-          console.log('found image: ', image.displayUrl);
           // This state changes forces a re-render - is that good?
           setImageUrls(new Map(imageUrls).set(value, image.displayUrl));
-        } else {
-          console.log('failed to find image');
         }
       });
-      console.log('no cached image, starting lookup for ', value);
       return undefined;
     }
   };

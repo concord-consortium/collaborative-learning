@@ -99,7 +99,7 @@ export const useDataSet = ({
     const { selectedCellRowIndex, updatedRow, updatedColumn } = getUpdatedRowAndColumn(_rows);
     if (!readOnly && updatedRow && updatedColumn) {
       const originalValue = dataSet.getValue(updatedRow.__id__, updatedColumn.key);
-      const originalStrValue = formatValue(formatter, originalValue, undefined, undefined, undefined, lookupImage);
+      const originalStrValue = formatValue(formatter, originalValue, lookupImage);
       // only make a change if the value has actually changed
       if (updatedRow[updatedColumn.key] !== originalStrValue) {
         const updatedCaseValues: ICase = {
