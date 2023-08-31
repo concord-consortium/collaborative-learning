@@ -82,8 +82,14 @@ export const ToolbarView: React.FC<IProps> = (
     clearPaletteState();
   };
   const handleVectorTypeChange = (type: VectorType) => {
-    isEnabled && drawingContent.setVectorType(type, drawingContent.selection);
-    drawingContent.setSelectedButton("vector");
+    if (isEnabled) {
+      // Change vector type and apply to selected objects, if any.
+      drawingContent.setVectorType(type, drawingContent.selection);
+      if (!drawingContent.hasSelectedObjects) {
+        // If there are no selected objects, user probably wants to create one.
+        drawingContent.setSelectedButton("vector");
+      } 
+    }
     clearPaletteState();
   };
 
