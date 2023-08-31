@@ -35,7 +35,6 @@ export const useTitleSize = ({ readOnly, columns, dataSet, measureColumnWidth, r
 
   const getTitleHeight = useCallback(() => {
     const font = `700 ${defaultFont}`;
-    // TODO - table does not currently render multi-line titles, but leaving this calc in place
     const lines = measureTextLines(dataSet.name || 'Table 8', titleCellWidth - 2 * kTitlePadding, font);
     const calculatedHeight = lines * kCellLineHeight + 2 * kTitlePadding;
     return calculatedHeight > (kHeaderRowHeight + 2 * kTitlePadding) ? kHeaderRowHeight : calculatedHeight;
