@@ -62,7 +62,8 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
     const spaceLeft = height ? height - uiHeight : 0;
     if (readOnly) onRequestRowHeight(model.id, Math.max(uiHeight, kExampleDeckHeight));
     if (!readOnly) spaceLeft < kButtonSpace && onRequestRowHeight(model.id, uiHeight + kButtonSpace);
-  }, [currEditAttrId, currEditFacet, height, imageUrlToAdd, readOnly, tileElt, onRequestRowHeight, model.id]);
+    // first three dependencies are to pick up on content changes that may require a height change
+  }, [currEditAttrId, currEditFacet, imageUrlToAdd, height, readOnly, tileElt, onRequestRowHeight, model.id]);
 
   /* ==[ Drag and Drop ] == */
 
