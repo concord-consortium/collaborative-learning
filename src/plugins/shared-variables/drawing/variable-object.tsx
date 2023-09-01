@@ -4,7 +4,7 @@ import { observer } from "mobx-react";
 import useResizeObserver from "use-resize-observer";
 import { VariableChip, VariableType } from "@concord-consortium/diagram-view";
 
-import { addChipToContent, findVariable, getOrFindSharedModel } from "./drawing-utils";
+import { addChipToContent, findVariable, getOrFindSharedModel, getValidInsertPosition } from "./drawing-utils";
 import { useEditVariableDialog } from "../dialog/use-edit-variable-dialog";
 import { useInsertVariableDialog } from "../dialog/use-insert-variable-dialog";
 import { useNewVariableDialog } from "../dialog/use-new-variable-dialog";
@@ -100,7 +100,7 @@ export const VariableChipComponent: React.FC<IDrawingComponentProps> = observer(
 // If the only object selected is a variable chip, returns the variable associated with it.
 // Otherwise, returns undefined.
 const getSelectedVariable = (drawingContent: DrawingContentModelType) => {
-  const selectedId = drawingContent.selectedIds.length === 1 ? drawingContent.selectedIds[0] : "";
+  const selectedId = drawingContent.selection.length === 1 ? drawingContent.selection[0] : "";
   const selectedObject = drawingContent.objectMap[selectedId];
   return selectedObject?.type === "variable"
     ? findVariable(drawingContent, (selectedObject as VariableChipObjectType).variableId)
@@ -125,18 +125,15 @@ export const drawingVariables = (drawingContent: DrawingContentModelType) => {
 
 interface IInsertVariableButton {
   toolbarManager: IToolbarManager;
+  getVisibleCanvasSize: () => Point|undefined;
 }
-export const InsertVariableButton = observer(({ toolbarManager }: IInsertVariableButton) => {
+export const InsertVariableButton = observer(({ toolbarManager, getVisibleCanvasSize }: IInsertVariableButton) => {
   const drawingContent = toolbarManager as DrawingContentModelType;
   const sharedModel = getOrFindSharedModel(drawingContent);
   const insertVariables = (variablesToInsert: VariableType[]) => {
-    let x = 250;
-    let y = 50;
-    const offset = 25;
     variablesToInsert.forEach(variable => {
-      addChipToContent(drawingContent, variable.id, x, y);
-      x += offset;
-      y += offset;
+      const pos = getValidInsertPosition(drawingContent, getVisibleCanvasSize);
+      addChipToContent(drawingContent, variable.id, pos);
     });
   };
   const { selfVariables, otherVariables, unusedVariables } = variableBuckets(drawingContent, sharedModel);
@@ -151,13 +148,15 @@ export const InsertVariableButton = observer(({ toolbarManager }: IInsertVariabl
 
 interface INewVariableButtonProps {
   toolbarManager: IToolbarManager;
+  getVisibleCanvasSize: () => Point|undefined;
 }
-export const NewVariableButton = observer(({ toolbarManager }: INewVariableButtonProps) => {
+export const NewVariableButton = observer(({ toolbarManager, getVisibleCanvasSize }: INewVariableButtonProps) => {
   const drawingContent = useContext(DrawingContentModelContext);
   const sharedModel = getOrFindSharedModel(drawingContent) as SharedVariablesType;
   const addVariable = (variable: VariableType) => {
     const variableId = variable.id;
-    addChipToContent(drawingContent, variableId);
+    const pos = getValidInsertPosition(drawingContent, getVisibleCanvasSize);
+    addChipToContent(drawingContent, variableId, pos);
   };
   const [showVariableDialog] = useNewVariableDialog({ addVariable, sharedModel });
 

@@ -72,6 +72,7 @@ export const ArrowAnnotation = types
 }))
 .views(self => ({
   getPoints(
+    documentLeft: number, documentRight: number, documentTop: number, documentBottom: number,
     dragOffsets: IArrowAnnotationDragOffsets, sourceBB?: ObjectBoundingBox|null, targetBB?: ObjectBoundingBox|null
   ) {
     
@@ -98,12 +99,24 @@ export const ArrowAnnotation = types
     const [textDxOffset, textDyOffset] = self.textOffset ? [self.textOffset.dx, self.textOffset.dy] : [0, 0];
     const dx = targetX - sourceX;
     const dy = targetY - sourceY;
-    const textCenterX = targetX - dx / 2 + textDxOffset + textDragOffsetX;
-    const textCenterY = targetY - dy / 2 + textDyOffset + textDragOffsetY;
+    const textOriginX = targetX - dx / 2;
+    const textOriginY = targetY - dy / 2;
+    // Bound the text offset to the document
+    const textMinXOffset = documentLeft - textOriginX;
+    const textMaxXOffset = documentRight - textOriginX;
+    const textMinYOffset = documentTop - textOriginY;
+    const textMaxYOffset = documentBottom - textOriginY;
+    const textCenterX = textOriginX
+      + Math.max(textMinXOffset, Math.min(textMaxXOffset, textDxOffset + textDragOffsetX));
+    const textCenterY = textOriginY
+      + Math.max(textMinYOffset, Math.min(textMaxYOffset, textDyOffset + textDragOffsetY));
     const textX = textCenterX - kArrowAnnotationTextWidth / 2;
     const textY = textCenterY - kArrowAnnotationTextHeight / 2;
 
-    return { sourceX, sourceY, targetX, targetY, textX, textY, textCenterX, textCenterY };
+    return {
+      sourceX, sourceY, targetX, targetY, textX, textY, textCenterX, textCenterY,
+      textOriginX, textOriginY, textMinXOffset, textMaxXOffset, textMinYOffset, textMaxYOffset
+    };
   }
 }));
 export interface IArrowAnnotation extends Instance<typeof ArrowAnnotation> {}

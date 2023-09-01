@@ -27,7 +27,7 @@ context('Draw Tool Tile', function () {
 
     cy.visit(queryParams);
     cy.waitForLoad();
-    cy.collapseResourceTabs();
+    cy.showOnlyDocumentWorkspace();
   });
   describe("Draw Tool", () => {
     it("renders draw tool tile", () => {
@@ -42,7 +42,7 @@ context('Draw Tool Tile', function () {
           .trigger("mousedown", 350, 50)
           .trigger("mousemove", 350, 100)
           .trigger("mousemove", 450, 100)
-          .trigger("mouseup",   350, 100);
+          .trigger("mouseup",   450, 100);
         drawToolTile.getFreehandDrawing().should("exist").and("have.length", 1);
       });
       it("selects freehand drawing", () => {
@@ -82,16 +82,20 @@ context('Draw Tool Tile', function () {
     });
     describe("Vector", () => {
       it("verify draw vector", () => {
-        drawToolTile.getDrawToolLine().click({scrollBehavior: false});
+        drawToolTile.getDrawToolVector().click({scrollBehavior: false});
         drawToolTile.getDrawTile()
           .trigger("mousedown", 250, 50)
           .trigger("mousemove", 100, 50)
           .trigger("mouseup",   100, 50);
         drawToolTile.getVectorDrawing().should("exist").and("have.length", 1);
       });
+      it("verify after creation, object is selected", () => {
+        drawToolTile.getDrawToolSelect().should("have.class", "selected");
+        drawToolTile.getDrawToolVector().should("not.have.class", "selected");
+        drawToolTile.getSelectionBox().should("exist");
+        drawToolTile.getDrawToolDelete().should("not.have.class", "disabled");
+      });
       it("verify change outline color", () => {
-        drawToolTile.getDrawToolSelect().click({scrollBehavior: false});
-        drawToolTile.getVectorDrawing().click({scrollBehavior: false});
         drawToolTile.getDrawToolStrokeColor().click({scrollBehavior: false});
         cy.get(".toolbar-palette.stroke-color .palette-buttons").should("be.visible");
         cy.get(".toolbar-palette.stroke-color .palette-buttons .color-swatch").eq(2).click({scrollBehavior: false});
@@ -102,16 +106,20 @@ context('Draw Tool Tile', function () {
       });
       it("change line to arrow", () => {
         drawToolTile.getVectorDrawing().children().its("length").should("eq", 1); // Only a line, no arrowheads yet.
-        // drawToolTile.getVectorDrawing().click({scrollBehavior: false});
-        drawToolTile.getDrawToolLineSubmenu().click({scrollBehavior: false});
+        drawToolTile.getDrawToolVectorSubmenu().click({scrollBehavior: false});
         cy.get(".toolbar-palette.vectors .drawing-tool-buttons").should("be.visible");
         cy.get(".toolbar-palette.vectors .drawing-tool-buttons div:nth-child(3) button").click({scrollBehavior: false});
         drawToolTile.getVectorDrawing().children().its("length").should("eq", 3); // Now three items in group...
-        drawToolTile.getVectorDrawing().find("polygon").its("length").should("eq", 2); // including two arrowheads.        
+        drawToolTile.getVectorDrawing().find("polygon").its("length").should("eq", 2); // including two arrowheads.
+        // selecting from this submenu activates the vector tool, which de-selects the object.
         });
       it("deletes vector drawing", () => {
+        // re-select the object using a selection rectangle.
         drawToolTile.getDrawToolSelect().click({scrollBehavior: false});
-        drawToolTile.getVectorDrawing().click({scrollBehavior: false});
+        drawToolTile.getDrawTile()
+          .trigger("mousedown", 90, 40)
+          .trigger("mousemove", 260, 60)
+          .trigger("mouseup",   260, 60);
         drawToolTile.getDrawToolDelete().click({scrollBehavior: false});
         drawToolTile.getVectorDrawing().should("not.exist");
       });
@@ -127,8 +135,6 @@ context('Draw Tool Tile', function () {
       });
       it("verify change outline color", () => {
         drawToolTile.getRectangleDrawing().first().should("have.attr", "stroke").and("eq", "#000000");
-        drawToolTile.getDrawToolSelect().click();
-        drawToolTile.getRectangleDrawing().click({force:true, scrollBehavior: false});
         drawToolTile.getDrawToolStrokeColor().click();
         cy.get(".toolbar-palette.stroke-color .palette-buttons").should("be.visible");
         cy.get(".toolbar-palette.stroke-color .palette-buttons .color-swatch").last().click();
@@ -179,8 +185,14 @@ context('Draw Tool Tile', function () {
           .trigger("mousemove", 100, 150)
           .trigger("mouseup",   100, 150);
         drawToolTile.getRectangleDrawing().should("exist").and("have.length", 1);
+        drawToolTile.getSelectionBox().should("exist");
 
-        drawToolTile.getDrawToolSelect().click();
+        // Unselect the rectangle just drawn
+        drawToolTile.getDrawTile()
+          // Un-select the rectangle
+          .trigger("mousedown", 500, 100)
+          .trigger("mouseup", 500, 100);
+        drawToolTile.getSelectionBox().should("not.exist");
 
         // Get the rectangle to be hovered, see above for more info.
         drawToolTile.getRectangleDrawing()
@@ -200,12 +212,12 @@ context('Draw Tool Tile', function () {
         drawToolTile.getSelectionBox().should("not.exist");
       });
       it("verify draw squares", () => {
-        drawToolTile.getDrawToolRectangle().click();
 
         // starting from top edge
+        drawToolTile.getDrawToolRectangle().click();
         drawToolTile.getDrawTile()
-          .trigger("mousedown", 100, 50, {ctrlKey: true})
-          .trigger("mousemove", 100, 70,{ctrlKey: true})
+          .trigger("mousedown", 100, 50, {altKey: true})
+          .trigger("mousemove", 100, 70, {altKey: true})
           .trigger("mouseup",   100, 70);
 
         drawToolTile.getRectangleDrawing().should("exist").and("have.length", 1);
@@ -213,45 +225,50 @@ context('Draw Tool Tile', function () {
         drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "20");
 
         // starting from the left edge
+        drawToolTile.getDrawToolRectangle().click();
         drawToolTile.getDrawTile()
-          .trigger("mousedown", 200, 50, {ctrlKey: true})
-          .trigger("mousemove", 230, 50,{ctrlKey: true})
+          .trigger("mousedown", 200, 50, {altKey: true})
+          .trigger("mousemove", 230, 50, {altKey: true})
           .trigger("mouseup",   230, 50);
         drawToolTile.getRectangleDrawing().should("exist").and("have.length", 2);
         drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "30");
         drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "30");
 
         // draw a square starting at the bottom edge
+        drawToolTile.getDrawToolRectangle().click();
         drawToolTile.getDrawTile()
-          .trigger("mousedown", 300, 90, {ctrlKey: true})
-          .trigger("mousemove", 300, 50,{ctrlKey: true})
+          .trigger("mousedown", 300, 90, {altKey: true})
+          .trigger("mousemove", 300, 50, {altKey: true})
           .trigger("mouseup",   300, 50);
         drawToolTile.getRectangleDrawing().should("exist").and("have.length", 3);
         drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "40");
         drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "40");
 
         // draw a square starting at the right edge
+        drawToolTile.getDrawToolRectangle().click();
         drawToolTile.getDrawTile()
-          .trigger("mousedown", 450, 50, {ctrlKey: true})
-          .trigger("mousemove", 400, 50,{ctrlKey: true})
+          .trigger("mousedown", 450, 50, {altKey: true})
+          .trigger("mousemove", 400, 50, {altKey: true})
           .trigger("mouseup",   400, 50);
         drawToolTile.getRectangleDrawing().should("exist").and("have.length", 4);
         drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "50");
         drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "50");
 
         // Diagonal from top right to bottom left with the width 60 and height 50
+        drawToolTile.getDrawToolRectangle().click();
         drawToolTile.getDrawTile()
-          .trigger("mousedown", 560, 50, {ctrlKey: true})
-          .trigger("mousemove", 500, 100,{ctrlKey: true})
+          .trigger("mousedown", 560, 50,  {altKey: true})
+          .trigger("mousemove", 500, 100, {altKey: true})
           .trigger("mouseup",   500, 100);
         drawToolTile.getRectangleDrawing().should("exist").and("have.length", 5);
         drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "60");
         drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "60");
 
         // Diagonal from bottom right to top left with the width 50 and the height 70
+        drawToolTile.getDrawToolRectangle().click();
         drawToolTile.getDrawTile()
-          .trigger("mousedown", 650, 120, {ctrlKey: true})
-          .trigger("mousemove", 600, 50,{ctrlKey: true})
+          .trigger("mousedown", 650, 120, {altKey: true})
+          .trigger("mousemove", 600, 50,  {altKey: true})
           .trigger("mouseup",   600, 50);
         drawToolTile.getRectangleDrawing().should("exist").and("have.length", 6);
         drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "70");
@@ -291,8 +308,8 @@ context('Draw Tool Tile', function () {
       it("verify draw circle", () => {
         drawToolTile.getDrawToolEllipse().click();
         drawToolTile.getDrawTile()
-          .trigger("mousedown", 450,  50, {ctrlKey: true})
-          .trigger("mousemove", 450, 150, {ctrlKey: true})
+          .trigger("mousedown", 450,  50, {altKey: true})
+          .trigger("mousemove", 450, 150, {altKey: true})
           .trigger("mouseup",   450, 150);
         drawToolTile.getEllipseDrawing().should("exist").and("have.length", 2);
         drawToolTile.getEllipseDrawing().last().should("have.attr", "rx").and("eq", "100");
@@ -345,6 +362,33 @@ context('Draw Tool Tile', function () {
         drawToolTile.getImageDrawing().should("not.exist");
       });
     });
+    describe("Text", () => {
+      it("adds text object", () => {
+        drawToolTile.getDrawToolText().click({scrollBehavior: false});
+        drawToolTile.getDrawTile()
+          .trigger("mousedown", 100,  100)
+          .trigger("mouseup", 100, 100);
+          drawToolTile.getTextDrawing().should("exist").and("have.length", 1);
+      });
+      it("edits text content of object", () => {
+        // Click inside drawing box to enter edit mode
+        drawToolTile.getDrawTile()
+          .trigger("mousedown", 150,  150)
+          .trigger("mouseup", 150, 150);
+          drawToolTile.getTextDrawing().get('textarea').type("The five boxing wizards jump quickly.{enter}", {scrollBehavior: false});
+          drawToolTile.getTextDrawing().get('text tspan').should("exist").and("have.length", 6);
+      });
+      it("deletes text object", () => {
+        drawToolTile.getDrawToolSelect().click({scrollBehavior: false});
+        drawToolTile.getDrawTile()
+          .trigger("mousedown", 150,  150)
+          .trigger("mouseup", 150, 150);
+          cy.wait(2000);
+        drawToolTile.getSelectionBox().should("exist");
+        drawToolTile.getDrawToolDelete().should("not.have.class", "disabled").click({scrollBehavior: false});
+        drawToolTile.getTextDrawing().should("not.exist");
+      });
+    });
     describe("Image", () => {
       it("drags images from image tiles", () => {
         const imageFilePath='image.png';
@@ -361,11 +405,11 @@ context('Draw Tool Tile', function () {
         // Uploading images doesn't seem to be working at the moment.
         // drawToolTile.getImageDrawing().should("exist").and("have.length", 1);
       });
-      // TODO: Figure out how to get the clipboard paste check below to work when the tests 
-      // are run using Chrome. It will pass when using Electron, but not Chrome. In Chrome 
-      // the attempt to write to the clipboard results in an error: "Must be handling a user 
+      // TODO: Figure out how to get the clipboard paste check below to work when the tests
+      // are run using Chrome. It will pass when using Electron, but not Chrome. In Chrome
+      // the attempt to write to the clipboard results in an error: "Must be handling a user
       // gesture to use custom clipboard." See https://github.com/cypress-io/cypress/issues/2752
-      // for more background. Apparently, the basic problem is that Cypress "currently uses 
+      // for more background. Apparently, the basic problem is that Cypress "currently uses
       // programmatic browser APIs which Chrome doesn't consider as genuine user interaction."
       it.skip('will accept a valid image URL pasted from the clipboard', function(){
         // For the drawing tool, this path needs to correspond to an actual file in the curriculum repository.
@@ -397,7 +441,7 @@ context('Draw Tool Tile Undo Redo', function () {
 
     cy.visit(queryParams);
     cy.waitForLoad();
-    cy.collapseResourceTabs();
+    cy.showOnlyDocumentWorkspace();
   });
   describe("Drawing tile title edit, undo redo and delete tile", () => {
     it('will undo redo drawing tile creation/deletion', function () {
@@ -422,7 +466,7 @@ context('Draw Tool Tile Undo Redo', function () {
       drawToolTile.getDrawTile().should("exist");
       clueCanvas.getRedoTool().click();
       drawToolTile.getDrawTile().should('not.exist');
-    }); 
+    });
     it("edit tile title", () => {
       const newName = "Drawing Tile";
       clueCanvas.addTile("drawing");

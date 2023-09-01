@@ -25,7 +25,7 @@ context('single student functional test',()=>{
     });
     describe('Nav tabs open and close',()=>{
       it('will verify that clicking on any tab opens the nav area', function () {
-        // cy.get(".collapsed-resources-tab.my-work").click();
+        // cy.get(".resources-expander.my-work").click();
         cy.openTopTab("my-work");
         cy.openSection('my-work', "workspaces");
         cy.get('[data-test=my-work-section-investigations-documents]').should('be.visible');
@@ -47,7 +47,7 @@ context('single student functional test',()=>{
       });
       it('verify close of nav tabs', function () {
         cy.collapseResourceTabs();
-        cy.get('.nav-tab-panel').should('not.exist');
+        cy.get('.nav-tab-panel').should('not.be.visible');
       });
     });
 

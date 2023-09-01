@@ -1,9 +1,11 @@
 $menu-label-height: 15px;
 $min-menu-width: 144px;
+$codap-menu-border-color: #0592af;
+$codap-bg-color: #f9f9f9;
 
 .multi-legend {
   padding: 20px 30px;
-  background-color:#F9F9F9;
+  background-color:$codap-bg-color;
 
   .simple-attribute-label {
     display: flex;
@@ -16,10 +18,6 @@ $min-menu-width: 144px;
     border-radius:4px;
     color: #3f3f3f;
 
-    svg {
-      margin-top:4px;
-    }
-
     .symbol-title {
       display: flex;
     }
@@ -30,6 +28,27 @@ $min-menu-width: 144px;
       margin-right: 6px;
       margin-top:2px;
       border-radius: 50%;
+    }
+
+    .caret {
+      transform: rotate(0deg);
+      transition: transform 0.2s ease-in-out;
+      svg {
+        margin-top:4px;
+        stroke:#3f3f3f;
+      }
+    }
+
+    &.target-open {
+      border-color:$codap-menu-border-color;
+      background-color: $codap-bg-color;
+      .caret {
+        transform: rotate(180deg);
+        transition: transform 0.2s ease-in-out;
+        svg {
+          stroke:$codap-menu-border-color;
+        }
+      }
     }
   }
 }

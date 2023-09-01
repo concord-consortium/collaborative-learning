@@ -1,5 +1,5 @@
 import React from "react";
-import { DrawingObjectType, DrawingTool, IDrawingLayer } from "../objects/drawing-object";
+import { DrawingObjectType, DrawingTool, IDrawingLayer, isEditableObject } from "../objects/drawing-object";
 
 export class SelectionDrawingTool extends DrawingTool {
   constructor(drawingLayer: IDrawingLayer) {
@@ -31,21 +31,26 @@ export class SelectionDrawingTool extends DrawingTool {
   }
 
   public handleObjectClick(e: React.MouseEvent<HTMLDivElement>, obj: DrawingObjectType) {
-    let selectedObjects = this.drawingLayer.getSelectedObjects();
+    const selectedObjects = this.drawingLayer.getSelectedObjects();
     const index = selectedObjects.indexOf(obj);
     if (index === -1) {
       if (e.shiftKey || e.metaKey){
         selectedObjects.push(obj);
+        this.drawingLayer.setSelectedObjects(selectedObjects);
       }
       else {
-        selectedObjects = [obj];
+        this.drawingLayer.setSelectedObjects([obj]);
       }
     }
     else {
       if (!(e.shiftKey||e.metaKey)){
-        selectedObjects.splice(index, 1);
+        if (isEditableObject(obj)) {
+          obj.setEditing(true);
+        } else {
+          selectedObjects.splice(index, 1);
+          this.drawingLayer.setSelectedObjects(selectedObjects);
+        }
       }
     }
-    this.drawingLayer.setSelectedObjects(selectedObjects);
   }
 }

@@ -31,7 +31,7 @@ class ArrowAnnotation {
     return cy.get(`${wsClass(workspaceClass)} .annotation-layer .annotation-svg .text-region .text-input`);
   }
   getAnnotationDeleteButtons(workspaceClass) {
-    return cy.get(`${wsClass(workspaceClass)} .annotation-layer .annotation-svg .delete-button`);
+    return cy.get(`${wsClass(workspaceClass)} .annotation-layer .annotation-svg .sparrow-delete-button`);
   }
 }
 

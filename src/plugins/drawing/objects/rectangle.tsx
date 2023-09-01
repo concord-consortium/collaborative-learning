@@ -89,6 +89,7 @@ export const RectangleComponent = observer(function RectangleComponent({model, h
   const { width, height } = rect.currentDims;
   return <rect
     key={id}
+    className="rectangle"
     x={x}
     y={y}
     width={width}
@@ -114,7 +115,7 @@ export class RectangleDrawingTool extends DrawingTool {
   public handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
     const start = this.drawingLayer.getWorkspacePoint(e);
     if (!start) return;
-    const {stroke, fill, strokeWidth, strokeDashArray} = this.settings;
+    const {stroke, fill, strokeWidth, strokeDashArray} = this.drawingLayer.toolbarSettings();
     const rectangle = RectangleObject.create({
       x: start.x,
       y: start.y,

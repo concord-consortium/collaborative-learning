@@ -56,52 +56,52 @@
   cursor: pointer;
 }
 
-.delete-button {
+.sparrow-delete-button {
   cursor: pointer;
   fill-opacity: 0;
 
-  .delete-button-highlight {
+  .sparrow-delete-button-highlight {
     fill: vars.$annotation-blue;
   }
 
   &:hover {
-    .delete-button-highlight {
+    .sparrow-delete-button-highlight {
       fill-opacity: .125;
     }
 
-    .delete-button-front {
+    .sparrow-delete-button-front {
       fill: vars.$annotation-blue;
       fill-opacity: 1;
     }
 
-    .delete-icon {
+    .sparrow-delete-icon {
       fill-opacity: 1;
     }
   }
 
   &:active {
-    .delete-button-highlight {
+    .sparrow-delete-button-highlight {
       fill-opacity: .25;
     }
 
-    .delete-button-front {
+    .sparrow-delete-button-front {
       fill: vars.$annotation-blue;
       fill-opacity: 1;
     }
 
-    .delete-icon {
+    .sparrow-delete-icon {
       fill-opacity: 1;
     }
   }
 }
 
 .visible-delete-button {
-  .delete-button-front {
+  .sparrow-delete-button-front {
     fill: vars.$annotation-half-blue;
     fill-opacity: 1;
   }
 
-  .delete-icon {
+  .sparrow-delete-icon {
     fill-opacity: 1;
   }
 }

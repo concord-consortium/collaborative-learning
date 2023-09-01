@@ -139,6 +139,7 @@ exports[`Drawing Layer Components Rectangle adds a Rectangle 1`] = `
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
   <rect
+    class="rectangle"
     fill="#cccccc"
     height="10"
     pointer-events="visible"
@@ -167,6 +168,7 @@ exports[`Drawing Layer Components Rectangle moves a rectangle 1`] = `
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
   <rect
+    class="rectangle"
     fill="#cccccc"
     height="10"
     pointer-events="visible"

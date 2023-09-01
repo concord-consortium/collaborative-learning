@@ -21,7 +21,7 @@ context('Table Tool Tile', function () {
 
     cy.visit(queryParams);
     cy.waitForLoad();
-    cy.collapseResourceTabs();
+    cy.showOnlyDocumentWorkspace();
   });
 
   describe('Test table functions', function () {
@@ -218,7 +218,7 @@ context('Table Tool Tile Undo Redo', function () {
 
     cy.visit(queryParams);
     cy.waitForLoad();
-    cy.collapseResourceTabs();
+    cy.showOnlyDocumentWorkspace();
   });
 
   describe('Test undo redo actions', function () {

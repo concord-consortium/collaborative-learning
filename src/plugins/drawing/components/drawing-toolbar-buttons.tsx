@@ -127,7 +127,7 @@ export const DuplicateButton: React.FC<IDuplicateButtonProps> = observer(functio
   toolbarManager
 }) {
   const onClick = () => {
-    toolbarManager.duplicateObjects(toolbarManager.selectedIds);
+    toolbarManager.duplicateObjects(toolbarManager.selection);
   };
   const disabled = !toolbarManager.hasSelectedObjects;
 
@@ -142,7 +142,7 @@ export const DeleteButton: React.FC<IDeleteToolButtonProps> = observer(function 
   toolbarManager
 }) {
   const onClick = () => {
-    toolbarManager.deleteObjects(toolbarManager.selectedIds);
+    toolbarManager.deleteObjects([...toolbarManager.selection]);
   };
   const disabled = !toolbarManager.hasSelectedObjects;
 

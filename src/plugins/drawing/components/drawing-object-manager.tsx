@@ -11,6 +11,7 @@ import { RectangleComponent, RectangleDrawingTool, RectangleObject,
 import { VectorComponent, VectorDrawingTool, VectorObject, VectorToolbarButton } from "../objects/vector";
 import { DeleteButton, DuplicateButton, SelectToolbarButton } from "./drawing-toolbar-buttons";
 import { SelectionDrawingTool } from "./selection-drawing-tool";
+import { TextComponent, TextDrawingTool, TextObject, TextToolbarButton } from "../objects/text";
 
 export interface IDrawingObjectInfo {
   type: string;
@@ -47,6 +48,11 @@ const gDrawingObjectInfos: Record<string, IDrawingObjectInfo | undefined> = {
     component: EllipseComponent,
     modelClass: EllipseObject,
   },
+  text: {
+    type: "text",
+    component: TextComponent,
+    modelClass: TextObject,
+  },
   image: {
     type: "image",
     component: ImageComponent,
@@ -79,6 +85,11 @@ const gDrawingToolInfos: Record<string, IDrawingToolInfo | undefined> = {
     name: "ellipse",
     toolClass: EllipseDrawingTool,
     buttonComponent: EllipseToolbarButton
+  },
+  text: {
+    name: "text",
+    toolClass: TextDrawingTool,
+    buttonComponent: TextToolbarButton
   },
   stamp: {
     name: "stamp",
@@ -120,11 +131,11 @@ export function registerDrawingToolInfo(drawingToolInfo: IDrawingToolInfo) {
   gDrawingToolInfos[drawingToolInfo.name] = drawingToolInfo;
 }
 
-export function renderDrawingObject(drawingObject: DrawingObjectType,
+export function renderDrawingObject(drawingObject: DrawingObjectType, readOnly=false,
                                     handleHover?: HandleObjectHover, handleDrag?: HandleObjectDrag) {
   const DrawingObjectComponent = getDrawingObjectComponent(drawingObject);
   return DrawingObjectComponent ?
-    <DrawingObjectComponent key={drawingObject.id} model={drawingObject}
+    <DrawingObjectComponent key={drawingObject.id} model={drawingObject} readOnly={readOnly}
       handleHover={handleHover} handleDrag={handleDrag}/>
     : null;
 }
