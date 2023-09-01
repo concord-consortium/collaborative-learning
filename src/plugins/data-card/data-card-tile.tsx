@@ -20,8 +20,6 @@ import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-
 import { useConsumerTileLinking } from "../../hooks/use-consumer-tile-linking";
 
 import "./data-card-tile.scss";
-import { getTileEnvironment } from "../../models/tiles/tile-environment";
-import { getDocumentContext } from "../../models/document/document";
 
 export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
   const { documentId, model, readOnly, documentContent, tileElt, onSetCanAcceptDrop, onRegisterTileApi,
