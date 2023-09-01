@@ -20,6 +20,8 @@ import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-
 import { useConsumerTileLinking } from "../../hooks/use-consumer-tile-linking";
 
 import "./data-card-tile.scss";
+import { getTileEnvironment } from "../../models/tiles/tile-environment";
+import { getDocumentContext } from "../../models/document/document";
 
 export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
   const { documentId, model, readOnly, documentContent, tileElt, onSetCanAcceptDrop, onRegisterTileApi,
@@ -60,10 +62,12 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
     if (!tileElt) return;
     const uiHeight = tileElt?.querySelector(".data-card-container")?.scrollHeight || 0;
     const spaceLeft = height ? height - uiHeight : 0;
-    if (readOnly) onRequestRowHeight(model.id, Math.max(uiHeight, kExampleDeckHeight));
+    // no document id means we are in content, so we allow a change to the document model (row height)
+    if (!documentId && readOnly) onRequestRowHeight(model.id, Math.max(uiHeight, kExampleDeckHeight));
     if (!readOnly) spaceLeft < kButtonSpace && onRequestRowHeight(model.id, uiHeight + kButtonSpace);
     // first three dependencies are to pick up on content changes that may require a height change
-  }, [currEditAttrId, currEditFacet, imageUrlToAdd, height, readOnly, tileElt, onRequestRowHeight, model.id]);
+  }, [currEditAttrId, currEditFacet, imageUrlToAdd,
+    height, readOnly, tileElt, onRequestRowHeight, model.id, documentId]);
 
   /* ==[ Drag and Drop ] == */
 
