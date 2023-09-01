@@ -9,6 +9,7 @@ import { RemoveIconButton } from "./add-remove-icons";
 import { useCautionAlert } from "../../../components/utilities/use-caution-alert";
 import { useErrorAlert } from "../../../components/utilities/use-error-alert";
 import { getClipboardContent } from "../../../utilities/clipboard-utils";
+import CreatableSelect from "react-select/creatable";
 
 import '../data-card-tile.scss';
 
@@ -243,10 +244,12 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   const attribute = content.dataSet.attrFromID(attrKey);
   const allAttrValues = attribute?.strValues || [];
-  const freeOfNumbersAndUrls = allAttrValues.filter((value) => {
+  const valuesForAutoFill = allAttrValues.filter((value) => {
     return value.substring(0, 8) !== "ccimg://" && isNaN(Number(value));
   });
-  console.log("| freeOfNumbersAndUrls, ", freeOfNumbersAndUrls);
+  const asOptionsForAutoFill = valuesForAutoFill.map((value) => {
+    return { value, label: value };
+  });
 
 
   return (
@@ -268,17 +271,20 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
       <div className={valueClassNames} onClick={handleValueClick}>
         { !readOnly && !valueIsImage() &&
-          <input
-            className={valueInputClassNames}
-            type="text"
-            value={valueCandidate}
-            onChange={handleChange}
-            onKeyDown={handleKeyDown}
-            onBlur={handleCompleteValue}
-            onDoubleClick={handleInputDoubleClick}
-            onFocus={handleValueInputFocus}
-            onPaste={handleValuePaste}
+          <CreatableSelect isClearable
+            options={asOptionsForAutoFill}
           />
+          // <input
+          //   className={valueInputClassNames}
+          //   type="text"
+          //   value={valueCandidate}
+          //   onChange={handleChange}
+          //   onKeyDown={handleKeyDown}
+          //   onBlur={handleCompleteValue}
+          //   onDoubleClick={handleInputDoubleClick}
+          //   onFocus={handleValueInputFocus}
+          //   onPaste={handleValuePaste}
+          // />
           // <SomeSpecialInputFromLibrary
             // className={valueInputClassNames}
             // type="text"
