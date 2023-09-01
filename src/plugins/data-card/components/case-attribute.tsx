@@ -242,8 +242,15 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   const typeIcon = typeIcons[content.dataSet.attrFromID(attrKey).mostCommonType || ""];
 
-  const fakeAutocompleteList = ['aaa', 'bbb', 'ccc'];
-  const [inputItems, setInputItems] = useState(fakeAutocompleteList);
+  const attribute = content.dataSet.attrFromID(attrKey);
+  const allAttrValues = attribute?.strValues || [];
+  const valuesForAutoFill = allAttrValues.filter((value) => {
+    return value.substring(0, 8) !== "ccimg://" && isNaN(Number(value));
+  });
+
+  //const fakeAutocompleteList = ['aaa', 'bbb', 'ccc'];
+
+  const [inputItems, setInputItems] = useState(valuesForAutoFill);
   const {
     isOpen,
     getToggleButtonProps,
@@ -258,7 +265,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     onInputValueChange: ({inputValue}) => {
       console.log('new input value: ', inputValue);
       setInputItems(
-        fakeAutocompleteList.filter((item) =>
+        valuesForAutoFill.filter((item) =>
           item.toLowerCase().startsWith(valueCandidate.toLowerCase()),
         )
       );
@@ -285,11 +292,11 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
       <div className={valueClassNames} onClick={handleValueClick}>
         { !readOnly && !valueIsImage() &&
           <div>
-            <input 
+            <input
               {...getInputProps()}
               className={valueInputClassNames}
               onFocus={handleValueInputFocus}
-              /> 
+              />
             <button
                 aria-label="toggle menu"
                 className="px-2"
@@ -299,7 +306,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
                 {isOpen ? <>&#8593;</> : <>&#8595;</>}
             </button>
             <ul {...getMenuProps()}>
-              {isOpen && 
+              {isOpen &&
                 inputItems.map((item, index) => (
                   <li style={highlightedIndex === index ? {backgroundColor: '#bde4ff'} : {} }
                       key={`${item}${index}`}
@@ -311,7 +318,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
             </ul>
           </div>
         }
-        { false && 
+        { false &&
           <input
             className={valueInputClassNames}
             type="text"
