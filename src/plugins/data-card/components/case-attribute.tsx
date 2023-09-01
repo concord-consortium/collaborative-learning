@@ -57,10 +57,42 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const editingLabel = currEditFacet === "name" && currEditAttrId === attrKey;
   const editingValue = currEditFacet === "value" && currEditAttrId === attrKey;
 
+  const attribute = content.dataSet.attrFromID(attrKey);
+  const allAttrValues = attribute?.strValues || [];
+  const valuesForAutoFill = allAttrValues.filter((value) => {
+    return value.substring(0, 8) !== "ccimg://" && isNaN(Number(value));
+  });
+
+  const [inputItems, setInputItems] = useState(valuesForAutoFill);
+  const {
+    isOpen,
+    getToggleButtonProps,
+    getLabelProps,
+    getMenuProps,
+    getInputProps,
+    highlightedIndex,
+    getItemProps,
+    selectItem,
+    setInputValue
+  } = useCombobox({
+    items: inputItems,
+    initialInputValue: valueCandidate,
+    onInputValueChange: ({inputValue}) => {
+      console.log('new input value: ', inputValue);
+      const safeValue = inputValue || "";
+      setValueCandidate(safeValue);
+      const vals = valuesForAutoFill.filter((item) =>
+          item.toLowerCase().startsWith(safeValue.toLowerCase()));
+      console.log('from ', valuesForAutoFill, ' prefix ', safeValue.toLowerCase(), ' possibilities: ', vals);
+      setInputItems(vals);
+    }
+  });
+
   // reset contents of input when attribute value changes without direct user input
   // (when it is deleted by toolbar or the underlying case has changed )
   useEffect(()=>{
     setValueCandidate(valueStr);
+    setInputValue(valueStr);
   },[valueStr]);
 
   gImageMap.isImageUrl(valueStr) && gImageMap.getImage(valueStr)
@@ -242,38 +274,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   const typeIcon = typeIcons[content.dataSet.attrFromID(attrKey).mostCommonType || ""];
 
-  const attribute = content.dataSet.attrFromID(attrKey);
-  const allAttrValues = attribute?.strValues || [];
-  const valuesForAutoFill = allAttrValues.filter((value) => {
-    return value.substring(0, 8) !== "ccimg://" && isNaN(Number(value));
-  });
 
-  //const fakeAutocompleteList = ['aaa', 'bbb', 'ccc'];
-
-  const [inputItems, setInputItems] = useState(valuesForAutoFill);
-  const {
-    isOpen,
-    getToggleButtonProps,
-    getLabelProps,
-    getMenuProps,
-    getInputProps,
-    highlightedIndex,
-    getItemProps,
-  } = useCombobox({
-    items: inputItems,
-    initialInputValue: valueCandidate,
-    onInputValueChange: ({inputValue}) => {
-      console.log('new input value: ', inputValue);
-      if(inputValue) {
-        setValueCandidate(inputValue);
-      }
-      setInputItems(
-        valuesForAutoFill.filter((item) =>
-          item.toLowerCase().startsWith(valueCandidate.toLowerCase()),
-        )
-      );
-    }
-  });
 
   return (
     <div className={pairClassNames}>
