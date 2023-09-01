@@ -67,6 +67,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     }
   };
 
+  // Returns a function that will translate a point so it can be passed as a parameter to AnnotationButton
   function getTranslateTilePointToScreenPoint(rowId: string, tileId: string) {
     const tileBorder = 3;
 
@@ -90,31 +91,6 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     };
   }
 
-  function translateTilePointToScreenPoint(
-    rowId: string, tileId: string, point: Point
-  ): Point | undefined {
-    const translatePoint = getTranslateTilePointToScreenPoint(rowId, tileId);
-    if (!translatePoint) return undefined;
-    return translatePoint(point);
-    // const tileBorder = 3;
-
-    // const rowElement = getRowElement(rowId);
-    // if (!rowElement) return undefined;
-  
-    // const tileSelector = `${documentClasses}[data-tool-id='${tileId}']`;
-    // const tileElements = document.querySelectorAll(tileSelector);
-    // if (tileElements.length !== 1) return undefined;
-    // const tileElement = (tileElements[0] as HTMLElement);
-  
-    // const [x, y] = point;
-
-    // const _x = rowElement.offsetLeft + tileElement.offsetLeft - tileElement.scrollLeft
-    //   + x + tileBorder - (documentScrollX ?? 0);
-    // const _y = rowElement.offsetTop + tileElement.offsetTop - tileElement.scrollTop
-    //   + y + tileBorder - (documentScrollY ?? 0);
-    // return [_x, _y];
-  }
-
   function getObjectBoundingBox(
     rowId: string, tileId: string, objectId: string, objectType?: string
   ) {
@@ -122,8 +98,9 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     const objectBoundingBox = tileApi?.getObjectBoundingBox?.(objectId, objectType);
     if (!objectBoundingBox) return undefined;
 
-    const point =
-      translateTilePointToScreenPoint(rowId, tileId, [objectBoundingBox.left, objectBoundingBox.top]);
+    const translatePoint = getTranslateTilePointToScreenPoint(rowId, tileId);
+    if (!translatePoint) return undefined;
+    const point = translatePoint([objectBoundingBox.left, objectBoundingBox.top]);
     if (!point) return undefined;
 
     const [left, top] = point;
