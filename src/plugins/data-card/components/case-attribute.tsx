@@ -241,6 +241,14 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   const typeIcon = typeIcons[content.dataSet.attrFromID(attrKey).mostCommonType || ""];
 
+  const attribute = content.dataSet.attrFromID(attrKey);
+  const allAttrValues = attribute?.strValues || [];
+  const freeOfNumbersAndUrls = allAttrValues.filter((value) => {
+    return value.substring(0, 8) !== "ccimg://" && isNaN(Number(value));
+  });
+  console.log("| freeOfNumbersAndUrls, ", freeOfNumbersAndUrls);
+
+
   return (
     <div className={pairClassNames}>
       <div className={labelClassNames} onClick={handleLabelClick}>
@@ -271,11 +279,22 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
             onFocus={handleValueInputFocus}
             onPaste={handleValuePaste}
           />
+          // <SomeSpecialInputFromLibrary
+            // className={valueInputClassNames}
+            // type="text"
+            // value={valueCandidate}
+            // onChange={handleChange}
+            // onKeyDown={handleKeyDown}
+            // onBlur={handleCompleteValue}
+            // onDoubleClick={handleInputDoubleClick}
+            // onFocus={handleValueInputFocus}
+            // onPaste={handleValuePaste}
+            // specialLibraryArrayOfValues={existingValues}
+          // />
         }
         { !readOnly && valueIsImage() &&
           <img src={imageUrl} className="image-value" />
         }
-
         { readOnly && !valueIsImage() &&
           <div className="cell-value">{valueStr}</div>
         }
@@ -283,7 +302,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
           <img src={imageUrl} className="image-value" />
         }
       </div>
-      <div className={typeIconClassNames} >{typeIcon}</div>
+      <div className={typeIconClassNames}>{typeIcon}</div>
 
       { !readOnly &&
         <RemoveIconButton className={deleteAttrButtonClassNames} onClick={handleDeleteAttribute} />
