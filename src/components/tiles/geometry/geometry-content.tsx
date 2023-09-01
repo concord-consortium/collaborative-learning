@@ -331,7 +331,23 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         }
       },
       getObjectButtonSVG: ({ classes, handleClick, objectId, objectType, translateTilePointToScreenPoint }) => {
-        if (objectType === "polygon") {
+        if (objectType === "point") {
+          const coords = this.getPointScreenCoords(objectId);
+          if (!coords) return;
+          const point = translateTilePointToScreenPoint?.([coords.x, coords.y]);
+          if (!point) return;
+          const [x, y] = point;
+          return (
+            <circle
+              className={classes}
+              cx={x - 1}
+              cy={y - 1}
+              fill="transparent"
+              onClick={handleClick}
+              r={9}
+            />
+          );
+        } else if (objectType === "polygon") {
           const content = this.getContent();
           const polygon = content.getObject(objectId) as PolygonModelType;
           let path = "";
