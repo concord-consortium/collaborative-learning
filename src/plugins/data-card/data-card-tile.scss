@@ -284,3 +284,25 @@ $default-button-border-color: #979797;
     }
   }
 }
+
+// draft implementation
+.value div {
+  position: relative;
+  top:0;
+  height: 24px;
+}
+
+.value div button {
+  position: absolute;
+  z-index:1000;
+  right:0px;
+  top:1px;
+}
+
+.value div ul {
+  position:absolute;
+  z-index: 10001;
+  background-color: white;
+  padding:0px 20px;
+  top: 11px;
+}
