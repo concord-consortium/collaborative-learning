@@ -1,7 +1,6 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
-import React, { useCallback, useEffect, useState } from "react";
-
+import React, { useEffect, useState } from "react";
 import { ITileProps, extractDragTileType, kDragTiles } from "../../components/tiles/tile-component";
 import { useUIStore } from "../../hooks/use-stores";
 import { addCanonicalCasesToDataSet } from "../../models/data/data-set";
