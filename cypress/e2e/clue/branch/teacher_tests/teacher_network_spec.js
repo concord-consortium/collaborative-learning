@@ -28,7 +28,7 @@ describe('Networked dividers for networked teacher', () => {
     cy.waitForLoad();
     dashboard.switchView("Workspace & Resources");
     cy.wait(2000);
-    // cy.get('.collapsed-resources-tab').click();
+    // cy.get('.resources-expander').click();
   });
   it('verify network dividers in \'My Work\' tab for teacher in network', () => {
     cy.openTopTab("my-work");
