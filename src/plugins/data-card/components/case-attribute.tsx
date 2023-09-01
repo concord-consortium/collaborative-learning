@@ -1,6 +1,7 @@
+import React, { useEffect, useState } from "react";
 import { observer } from "mobx-react";
 import classNames from "classnames";
-import React, { useEffect, useState } from "react";
+import { useCombobox } from "downshift";
 import { gImageMap } from "../../../models/image-map";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { DataCardContentModelType } from "../data-card-content";
@@ -241,6 +242,28 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   const typeIcon = typeIcons[content.dataSet.attrFromID(attrKey).mostCommonType || ""];
 
+  const fakeAutocompleteList = ['aaa', 'bbb', 'ccc'];
+  const [inputItems, setInputItems] = useState(fakeAutocompleteList);
+  const {
+    isOpen,
+    getToggleButtonProps,
+    getLabelProps,
+    getMenuProps,
+    getInputProps,
+    highlightedIndex,
+    getItemProps,
+  } = useCombobox({
+    items: inputItems,
+    onInputValueChange: ({inputValue}) => {
+      console.log('new input value: ', inputValue);
+      setInputItems(
+        fakeAutocompleteList.filter((item) =>
+          item.toLowerCase().startsWith(valueCandidate.toLowerCase()),
+        )
+      )
+    }
+  });
+
   return (
     <div className={pairClassNames}>
       <div className={labelClassNames} onClick={handleLabelClick}>
@@ -260,6 +283,34 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
       <div className={valueClassNames} onClick={handleValueClick}>
         { !readOnly && !valueIsImage() &&
+          <div>
+            <input 
+              {...getInputProps()}
+              className={valueInputClassNames}
+              onFocus={handleValueInputFocus}
+              /> 
+            <button
+                aria-label="toggle menu"
+                className="px-2"
+                type="button"
+                {...getToggleButtonProps()}
+            >
+                {isOpen ? <>&#8593;</> : <>&#8595;</>}
+            </button>
+            <ul {...getMenuProps()}>
+              {isOpen && 
+                inputItems.map((item, index) => (
+                  <li style={highlightedIndex === index ? {backgroundColor: '#bde4ff'} : {} }
+                      key={`${item}${index}`}
+                      {...getItemProps({item, index})}
+                  >
+                    {item}
+                  </li>
+              ))}
+            </ul>
+          </div>
+        }
+        { false && 
           <input
             className={valueInputClassNames}
             type="text"
