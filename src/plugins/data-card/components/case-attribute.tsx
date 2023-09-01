@@ -264,6 +264,9 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     initialInputValue: valueCandidate,
     onInputValueChange: ({inputValue}) => {
       console.log('new input value: ', inputValue);
+      if(inputValue) {
+        setValueCandidate(inputValue);
+      }
       setInputItems(
         valuesForAutoFill.filter((item) =>
           item.toLowerCase().startsWith(valueCandidate.toLowerCase()),
@@ -296,6 +299,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
               {...getInputProps()}
               className={valueInputClassNames}
               onFocus={handleValueInputFocus}
+              onBlur={handleCompleteValue}
               />
             <button
                 aria-label="toggle menu"
