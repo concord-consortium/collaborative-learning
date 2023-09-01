@@ -12,6 +12,7 @@ import { useErrorAlert } from "../../../components/utilities/use-error-alert";
 import { getClipboardContent } from "../../../utilities/clipboard-utils";
 
 import '../data-card-tile.scss';
+import { action } from "mobx";
 
 const typeIcons = {
   "date": "📅",
@@ -63,6 +64,17 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     return value.substring(0, 8) !== "ccimg://" && isNaN(Number(value));
   });
 
+  // Special handling for enter key in combobox.
+  const stateReducer = React.useCallback((state, activity) => {
+    if (activity.type === useCombobox.stateChangeTypes.InputKeyDownEnter) {
+      console.log('enter key detected, changes = ', activity);
+      handleCompleteValue();
+      return activity.changes;
+    } else {
+      return activity.changes;
+    }
+  }, []);
+
   const [inputItems, setInputItems] = useState(valuesForAutoFill);
   const {
     isOpen,
@@ -72,11 +84,11 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     getInputProps,
     highlightedIndex,
     getItemProps,
-    selectItem,
     setInputValue
   } = useCombobox({
     items: inputItems,
     initialInputValue: valueCandidate,
+    stateReducer,
     onInputValueChange: ({inputValue}) => {
       console.log('new input value: ', inputValue);
       const safeValue = inputValue || "";
@@ -294,8 +306,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
       </div>
 
       <div className={valueClassNames} onClick={handleValueClick}>
-        { !readOnly && !valueIsImage() &&
-          <div>
+          <div style={{display: (!readOnly && !valueIsImage()) ? 'block' : 'none'}}>
             <input
               {...getInputProps()}
               className={valueInputClassNames}
@@ -322,7 +333,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
               ))}
             </ul>
           </div>
-        }
         { false &&
           <input
             className={valueInputClassNames}
