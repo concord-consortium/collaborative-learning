@@ -2,7 +2,7 @@ import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { MouseEventHandler, useContext, useEffect, useRef, useState } from "react";
 
-import { AnnotationButton } from "../annotations/annotation-button";
+import { AnnotationButton, Point } from "../annotations/annotation-button";
 import { getDefaultPeak } from "../annotations/annotation-utilities";
 import { ArrowAnnotationComponent } from "../annotations/arrow-annotation";
 import { PreviewArrow } from "../annotations/preview-arrow";
@@ -67,9 +67,9 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     }
   };
 
-  function getObjectBoundingBox(
-    rowId: string, tileId: string, objectId: string, objectType?: string
-  ) {
+  function getTranslateTilePointToScreenPoint(rowId: string, tileId: string) {
+    const tileBorder = 3;
+
     const rowElement = getRowElement(rowId);
     if (!rowElement) return undefined;
   
@@ -77,16 +77,56 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     const tileElements = document.querySelectorAll(tileSelector);
     if (tileElements.length !== 1) return undefined;
     const tileElement = (tileElements[0] as HTMLElement);
+
+    return (point: Point): Point | undefined => {
   
+      const [x, y] = point;
+  
+      const _x = rowElement.offsetLeft + tileElement.offsetLeft - tileElement.scrollLeft
+        + x + tileBorder - (documentScrollX ?? 0);
+      const _y = rowElement.offsetTop + tileElement.offsetTop - tileElement.scrollTop
+        + y + tileBorder - (documentScrollY ?? 0);
+      return [_x, _y];
+    };
+  }
+
+  function translateTilePointToScreenPoint(
+    rowId: string, tileId: string, point: Point
+  ): Point | undefined {
+    const translatePoint = getTranslateTilePointToScreenPoint(rowId, tileId);
+    if (!translatePoint) return undefined;
+    return translatePoint(point);
+    // const tileBorder = 3;
+
+    // const rowElement = getRowElement(rowId);
+    // if (!rowElement) return undefined;
+  
+    // const tileSelector = `${documentClasses}[data-tool-id='${tileId}']`;
+    // const tileElements = document.querySelectorAll(tileSelector);
+    // if (tileElements.length !== 1) return undefined;
+    // const tileElement = (tileElements[0] as HTMLElement);
+  
+    // const [x, y] = point;
+
+    // const _x = rowElement.offsetLeft + tileElement.offsetLeft - tileElement.scrollLeft
+    //   + x + tileBorder - (documentScrollX ?? 0);
+    // const _y = rowElement.offsetTop + tileElement.offsetTop - tileElement.scrollTop
+    //   + y + tileBorder - (documentScrollY ?? 0);
+    // return [_x, _y];
+  }
+
+  function getObjectBoundingBox(
+    rowId: string, tileId: string, objectId: string, objectType?: string
+  ) {
     const tileApi = tileApiInterface?.getTileApi(tileId);
     const objectBoundingBox = tileApi?.getObjectBoundingBox?.(objectId, objectType);
     if (!objectBoundingBox) return undefined;
 
-    const tileBorder = 3;
-    const left = rowElement.offsetLeft + tileElement.offsetLeft - tileElement.scrollLeft
-      + objectBoundingBox.left + tileBorder - (documentScrollX ?? 0);
-    const top = rowElement.offsetTop + tileElement.offsetTop - tileElement.scrollTop
-      + objectBoundingBox.top + tileBorder - (documentScrollY ?? 0);
+    const point =
+      translateTilePointToScreenPoint(rowId, tileId, [objectBoundingBox.left, objectBoundingBox.top]);
+    if (!point) return undefined;
+
+    const [left, top] = point;
     const height = objectBoundingBox.height;
     const width = objectBoundingBox.width;
     return { left, top, height, width };
@@ -200,6 +240,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
                       rowId={rowId}
                       sourceObjectId={sourceObjectId}
                       sourceTileId={sourceTileId}
+                      translateTilePointToScreenPoint={getTranslateTilePointToScreenPoint(rowId, tileInfo.tileId)}
                       tileId={tile.id}
                     />
                   );

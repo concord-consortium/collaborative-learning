@@ -313,21 +313,47 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             width: right - left
           };
           return boundingBox;          
-        } else if (objectType === "segment") {
-          const [ point1Id, point2Id ] = pointIdsFromSegmentId(objectId);
-          const coords1 = this.getPointScreenCoords(point1Id);
-          const coords2 = this.getPointScreenCoords(point2Id);
-          if (!coords1 || !coords2) return undefined;
-          const bottom = Math.max(coords1.y, coords2.y);
-          const left = Math.min(coords1.x, coords2.x);
-          const right = Math.max(coords1.x, coords2.x);
-          const top = Math.min(coords1.y, coords2.y);
-          const boundingBox = {
-            height: bottom - top,
-            left, top,
-            width: right - left
-          };
-          return boundingBox;
+        // } else if (objectType === "segment") {
+        //   const [ point1Id, point2Id ] = pointIdsFromSegmentId(objectId);
+        //   const coords1 = this.getPointScreenCoords(point1Id);
+        //   const coords2 = this.getPointScreenCoords(point2Id);
+        //   if (!coords1 || !coords2) return undefined;
+        //   const bottom = Math.max(coords1.y, coords2.y);
+        //   const left = Math.min(coords1.x, coords2.x);
+        //   const right = Math.max(coords1.x, coords2.x);
+        //   const top = Math.min(coords1.y, coords2.y);
+        //   const boundingBox = {
+        //     height: bottom - top,
+        //     left, top,
+        //     width: right - left
+        //   };
+        //   return boundingBox;
+        }
+      },
+      getObjectButtonSVG: ({ classes, handleClick, objectId, objectType, translateTilePointToScreenPoint }) => {
+        if (objectType === "polygon") {
+          const content = this.getContent();
+          const polygon = content.getObject(objectId) as PolygonModelType;
+          let path = "";
+          polygon.points.forEach((pointId, index) => {
+            const coords = this.getPointScreenCoords(pointId);
+            if (!coords) return;
+            const point = translateTilePointToScreenPoint?.([coords.x, coords.y]);
+            if (!point) return;
+
+            const [x, y] = point;
+            const letter = index === 0 ? "M" : "L";
+            path = `${path}${letter} ${x-1} ${y-1} `;
+          });
+          path = `${path}Z`;
+          return (
+            <path
+              className={classes}
+              d={path}
+              fill="transparent"
+              onClick={handleClick}
+            />
+          );
         }
       }
     });
