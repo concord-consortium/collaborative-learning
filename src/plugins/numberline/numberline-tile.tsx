@@ -22,7 +22,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   const documentScrollerRef = useRef<HTMLDivElement>(null);
   const [tileWidth, setTileWidth] = useState(0);
   const containerWidth = (tileWidth * kContainerWidth);
-  const axisWidth = (tileWidth * kAxisWidth);
+  const axisWidth = tileWidth * kAxisWidth;
   const xShiftNum = ((containerWidth - axisWidth)/2);
   const numToPx = (num: number) => num.toFixed(2) + "px";
   const xScale = createXScale(axisWidth);
@@ -31,7 +31,10 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     let obs: ResizeObserver;
     if (documentScrollerRef.current) {
       obs = new ResizeObserver(() => {
-        setTileWidth(documentScrollerRef.current?.clientWidth ?? 0);
+        if (documentScrollerRef.current?.clientWidth){
+          const newTileWidth  = documentScrollerRef.current?.clientWidth;
+          setTileWidth(newTileWidth ?? 0);
+        }
       });
       obs.observe(documentScrollerRef.current);
     }
@@ -98,12 +101,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       if (!readOnly && mouseInBoundingBox(mousePosX(e), mousePosY(e))){
         const pointHoveredOver = content.givenIdReturnPoint(content.hoveredPoint);
         content.setSelectedPoint(pointHoveredOver);
-        //need to account for if we change axisWidth then immediately drag
-        const oldAxisWidth = axisWidth;
-        const newAxisWidth = svgNode.getBoundingClientRect().width;
-        const isAxisResized = (Math.abs(oldAxisWidth - newAxisWidth) > 2);
-        const newScale = (isAxisResized) ? createXScale(newAxisWidth) : xScale;
-        const newXValue = newScale.invert(mousePosX(e));
+        const newXValue = xScale.invert(mousePosX(e));
         content.replaceXValueWhileDragging(p.id, newXValue);
       }
   })
@@ -136,6 +134,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     .attr("y2", function(x){ return (x === 0) ? tickHeightZero : tickHeightDefault;})
     .attr("stroke-width", function(x){ return (x === 0) ? tickWidthZero : tickWidthDefault;})
     .attr("style", function(x){ return (x === 0) ? tickStyleZero : tickStyleDefault;});
+
   }
 
   /* ========================== [ Construct/Update Circles ] =================================== */
@@ -175,11 +174,11 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       .classed("selected", (p)=> false)
       .call((e) => handleDrag(e)); // Attach drag behavior to newly created circles
 
-
       // --- Update functions inner circles
       innerPoints
       .attr('cx', (p, idx) => xScale(p.currentXValue || numberlineDomainMin))
-      .classed("selected", (p)=> p.id in content.selectedPoints);
+      .classed("selected", (p)=> p.id in content.selectedPoints)
+      .call((e) => handleDrag(e)); // pass again in case axisWidth changes
 
       innerPoints.exit().remove(); //cleanup
     };
@@ -194,11 +193,11 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       style={{"height": `${kNumberLineContainerHeight}`}}
     >
       <div className="numberline-tool-container" >
-          <svg ref={svgRef} width={axisWidth}>
-            <g ref={axisRef}></g>
-          </svg>
-          <i className="arrow left" style={{'left': numToPx(xShiftNum - 3), 'top': '53px'}}/>
-          <i className="arrow right" style={{'right': numToPx(xShiftNum - 3), 'top': '53px'}}/>
+        <svg ref={svgRef} width={axisWidth}>
+          <g ref={axisRef}></g>
+        </svg>
+        <i className="arrow left" style={{'left': numToPx(xShiftNum - 3), 'top': '53px'}}/>
+        <i className="arrow right" style={{'right': numToPx(xShiftNum - 3), 'top': '53px'}}/>
       </div>
     </div>
   );

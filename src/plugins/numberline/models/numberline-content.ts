@@ -115,7 +115,6 @@ export const NumberlineContentModel = TileContentModel
       // i.e. maxNumSelectedPoints (in numberline-tile-constants.ts) is greater than 1
       self.clearSelectedPointsObj();
       self.selectedPoints[point.id] = point;
-
     },
     replaceXValueWhileDragging(pointDraggedId: string, newXValue: number){
       const pointDragged = self.givenIdReturnPoint(pointDraggedId);
