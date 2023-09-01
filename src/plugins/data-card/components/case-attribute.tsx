@@ -254,13 +254,14 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     getItemProps,
   } = useCombobox({
     items: inputItems,
+    initialInputValue: valueCandidate,
     onInputValueChange: ({inputValue}) => {
       console.log('new input value: ', inputValue);
       setInputItems(
         fakeAutocompleteList.filter((item) =>
           item.toLowerCase().startsWith(valueCandidate.toLowerCase()),
         )
-      )
+      );
     }
   });
 
