@@ -383,24 +383,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
               y: coords1.y - Math.sin(secondAngle) * segmentButtonWidth},
           ];
           return this.getButtonPath(coords, handleClick, classes, translateTilePointToScreenPoint);
-          // let path = "";
-          // coords.forEach((coord, index) => {
-          //   const point = translateTilePointToScreenPoint?.([coord.x, coord.y]);
-          //   if (!point) return;
-
-          //   path = `${path}${pathPoint(point, index)} `;
-          // });
-          // path = `${path}Z`;
-
-          // // Return a path for the rectangle that contains the segment
-          // return (
-          //   <path
-          //     className={classes}
-          //     d={path}
-          //     fill="transparent"
-          //     onClick={handleClick}
-          //   />
-          // );
         } else if (objectType === "polygon") {
           // Determine the path of the polygon based on its points
           const content = this.getContent();
@@ -409,26 +391,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             polygon.points.map(pointId => this.getPointScreenCoords(pointId)),
             handleClick, classes, translateTilePointToScreenPoint
           );
-          // let path = "";
-          // polygon.points.forEach((pointId, index) => {
-          //   const coords = this.getPointScreenCoords(pointId);
-          //   if (!coords) return;
-          //   const point = translateTilePointToScreenPoint?.([coords.x, coords.y]);
-          //   if (!point) return;
-
-          //   path = `${path}${pathPoint(point, index)} `;
-          // });
-          // path = `${path}Z`;
-
-          // // Return the path
-          // return (
-          //   <path
-          //     className={classes}
-          //     d={path}
-          //     fill="transparent"
-          //     onClick={handleClick}
-          //   />
-          // );
         }
       }
     });
