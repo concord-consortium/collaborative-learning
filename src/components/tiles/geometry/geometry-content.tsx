@@ -5,6 +5,11 @@ import { getSnapshot, onSnapshot } from "mobx-state-tree";
 import objectHash from "object-hash";
 import React from "react";
 import { SizeMeProps } from "react-sizeme";
+
+import {
+  geometryAnnotationXOffset, geometryAnnotationYOffset, pointBoundingBoxSize, pointButtonRadius,
+  segmentButtonWidth
+} from "./geometry-constants";
 import { BaseComponent } from "../../base";
 import { DocumentContentModelType } from "../../../models/document/document-content";
 import { getTableLinkColors } from "../../../models/tiles/table-links";
@@ -51,6 +56,7 @@ import MovableLineDialog from "./movable-line-dialog";
 import placeholderImage from "../../../assets/image_placeholder.png";
 import { LinkTableButton } from "./link-table-button";
 import ErrorAlert from "../../utilities/error-alert";
+import { halfPi, normalizeAngle } from "../../../utilities/math-utils";
 import SingleStringDialog from "../../utilities/single-string-dialog";
 import { getClipboardContent, pasteClipboardImage } from "../../../utilities/clipboard-utils";
 
@@ -284,15 +290,14 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         return this.props.model.title;
       },
       getObjectBoundingBox: (objectId: string, objectType?: string) => {
-        const pointDim = 14;
         if (objectType === "point") {
           const coords = this.getPointScreenCoords(objectId);
           if (!coords) return undefined;
           const boundingBox = {
-            height: pointDim,
-            left: coords.x - pointDim / 2 - 1,
-            top: coords.y - pointDim / 2 - 1,
-            width: pointDim
+            height: pointBoundingBoxSize,
+            left: coords.x - pointBoundingBoxSize / 2 + geometryAnnotationXOffset,
+            top: coords.y - pointBoundingBoxSize / 2 + geometryAnnotationYOffset,
+            width: pointBoundingBoxSize
           };
           return boundingBox;
         } else if (objectType === "polygon") {
@@ -309,67 +314,121 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           });
           const boundingBox = {
             height: bottom - top,
-            left, top,
+            left: left + geometryAnnotationXOffset,
+            top: top + geometryAnnotationYOffset,
             width: right - left
           };
           return boundingBox;          
-        // } else if (objectType === "segment") {
-        //   const [ point1Id, point2Id ] = pointIdsFromSegmentId(objectId);
-        //   const coords1 = this.getPointScreenCoords(point1Id);
-        //   const coords2 = this.getPointScreenCoords(point2Id);
-        //   if (!coords1 || !coords2) return undefined;
-        //   const bottom = Math.max(coords1.y, coords2.y);
-        //   const left = Math.min(coords1.x, coords2.x);
-        //   const right = Math.max(coords1.x, coords2.x);
-        //   const top = Math.min(coords1.y, coords2.y);
-        //   const boundingBox = {
-        //     height: bottom - top,
-        //     left, top,
-        //     width: right - left
-        //   };
-        //   return boundingBox;
+        } else if (objectType === "segment") {
+          const [ point1Id, point2Id ] = pointIdsFromSegmentId(objectId);
+          const coords1 = this.getPointScreenCoords(point1Id);
+          const coords2 = this.getPointScreenCoords(point2Id);
+          if (!coords1 || !coords2) return undefined;
+          const bottom = Math.max(coords1.y, coords2.y);
+          const left = Math.min(coords1.x, coords2.x);
+          const right = Math.max(coords1.x, coords2.x);
+          const top = Math.min(coords1.y, coords2.y);
+          const boundingBox = {
+            height: bottom - top,
+            left: left + geometryAnnotationXOffset,
+            top: top + geometryAnnotationYOffset,
+            width: right - left
+          };
+          return boundingBox;
         }
       },
       getObjectButtonSVG: ({ classes, handleClick, objectId, objectType, translateTilePointToScreenPoint }) => {
         if (objectType === "point") {
+          // Find the center point
           const coords = this.getPointScreenCoords(objectId);
           if (!coords) return;
           const point = translateTilePointToScreenPoint?.([coords.x, coords.y]);
           if (!point) return;
+
+          // Return a circle at the center point
           const [x, y] = point;
           return (
             <circle
               className={classes}
-              cx={x - 1}
-              cy={y - 1}
+              cx={x + geometryAnnotationXOffset}
+              cy={y + geometryAnnotationYOffset}
               fill="transparent"
               onClick={handleClick}
-              r={9}
+              r={pointButtonRadius}
             />
           );
+        } else if (objectType === "segment") {
+          // Find the end points of the segment
+          const [ point1Id, point2Id ] = pointIdsFromSegmentId(objectId);
+          const coords1 = this.getPointScreenCoords(point1Id);
+          const coords2 = this.getPointScreenCoords(point2Id);
+          if (!coords1 || !coords2) return;
+
+          // Find the angles perpendicular to the segment
+          const dx = coords2.x - coords1.x;
+          const dy = coords2.y - coords1.y;
+          const segmentAngle = normalizeAngle(Math.atan2(-dy, dx));
+          const firstAngle = normalizeAngle(segmentAngle + halfPi);
+          const secondAngle = normalizeAngle(segmentAngle - halfPi);
+
+          // Determine the points and path of the rectangle containing the segment
+          const coords = [
+            {x: coords1.x + Math.cos(firstAngle) * segmentButtonWidth,
+              y: coords1.y - Math.sin(firstAngle) * segmentButtonWidth},
+            {x: coords2.x + Math.cos(firstAngle) * segmentButtonWidth,
+              y: coords2.y - Math.sin(firstAngle) * segmentButtonWidth},
+            {x: coords2.x + Math.cos(secondAngle) * segmentButtonWidth,
+              y: coords2.y - Math.sin(secondAngle) * segmentButtonWidth},
+            {x: coords1.x + Math.cos(secondAngle) * segmentButtonWidth,
+              y: coords1.y - Math.sin(secondAngle) * segmentButtonWidth},
+          ];
+          return this.getButtonPath(coords, handleClick, classes, translateTilePointToScreenPoint);
+          // let path = "";
+          // coords.forEach((coord, index) => {
+          //   const point = translateTilePointToScreenPoint?.([coord.x, coord.y]);
+          //   if (!point) return;
+
+          //   path = `${path}${pathPoint(point, index)} `;
+          // });
+          // path = `${path}Z`;
+
+          // // Return a path for the rectangle that contains the segment
+          // return (
+          //   <path
+          //     className={classes}
+          //     d={path}
+          //     fill="transparent"
+          //     onClick={handleClick}
+          //   />
+          // );
         } else if (objectType === "polygon") {
+          // Determine the path of the polygon based on its points
           const content = this.getContent();
           const polygon = content.getObject(objectId) as PolygonModelType;
-          let path = "";
-          polygon.points.forEach((pointId, index) => {
-            const coords = this.getPointScreenCoords(pointId);
-            if (!coords) return;
-            const point = translateTilePointToScreenPoint?.([coords.x, coords.y]);
-            if (!point) return;
-
-            const [x, y] = point;
-            const letter = index === 0 ? "M" : "L";
-            path = `${path}${letter} ${x-1} ${y-1} `;
-          });
-          path = `${path}Z`;
-          return (
-            <path
-              className={classes}
-              d={path}
-              fill="transparent"
-              onClick={handleClick}
-            />
+          return this.getButtonPath(
+            polygon.points.map(pointId => this.getPointScreenCoords(pointId)),
+            handleClick, classes, translateTilePointToScreenPoint
           );
+          // let path = "";
+          // polygon.points.forEach((pointId, index) => {
+          //   const coords = this.getPointScreenCoords(pointId);
+          //   if (!coords) return;
+          //   const point = translateTilePointToScreenPoint?.([coords.x, coords.y]);
+          //   if (!point) return;
+
+          //   path = `${path}${pathPoint(point, index)} `;
+          // });
+          // path = `${path}Z`;
+
+          // // Return the path
+          // return (
+          //   <path
+          //     className={classes}
+          //     d={path}
+          //     fill="transparent"
+          //     onClick={handleClick}
+          //   />
+          // );
         }
       }
     });
@@ -387,6 +446,33 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         this.initializeBoard();
       }
     }));
+  }
+
+  private getButtonPath(
+    coords: ({ x: number, y: number } | undefined)[], handleClick: () => void, classes?: string,
+    translatePoint?: ((point: [x: number, y: number]) => [x: number, y: number] | undefined)
+  ) {
+    if (!translatePoint) return undefined;
+    let path = "";
+    coords.forEach((coord, index) => {
+      if (!coord) return;
+      const point = translatePoint?.([coord.x, coord.y]);
+      if (!point) return;
+
+      const [x, y] = point;
+      const letter = index === 0 ? "M" : "L";
+      path = `${path}${letter} ${x + geometryAnnotationXOffset} ${y + geometryAnnotationYOffset} `;
+    });
+    path = `${path}Z`;
+
+    return (
+      <path
+        className={classes}
+        d={path}
+        fill="transparent"
+        onClick={handleClick}
+      />
+    );
   }
 
   public componentDidUpdate(prevProps: IProps) {

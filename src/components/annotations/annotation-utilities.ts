@@ -1,14 +1,7 @@
+import { halfPi, twoPi, normalizeAngle } from "../../utilities/math-utils";
+
 export const kAnnotationNodeHeight = 24;
 export const kAnnotationNodeWidth = 24;
-
-export const halfPi = Math.PI / 2;
-export const twoPi = Math.PI * 2;
-export function normalizeAngle(angle: number) {
-  let _angle = angle;
-  while (_angle < 0) { _angle += twoPi; }
-  while (_angle > twoPi) { _angle -= twoPi; }
-  return _angle;
-}
 
 // Returns the default peak for a sparrow from sourceX, sourceY to targetX, targetY.
 export function getDefaultPeak(sourceX: number, sourceY: number, targetX: number, targetY: number) {
