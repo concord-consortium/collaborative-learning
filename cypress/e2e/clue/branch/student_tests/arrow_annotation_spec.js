@@ -35,10 +35,7 @@ function beforeTest(params) {
   cy.clearQAData('all');
   cy.visit(params);
   cy.waitForLoad();
-  cy.get(".workspace").then($workspace => {
-    if($workspace.find(".divider-container").length > 0)
-      cy.collapseResourceTabs();
-  });
+  cy.showOnlyDocumentWorkspace();
 }
 
 context('Arrow Annotations (Sparrows)', function () {

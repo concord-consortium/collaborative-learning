@@ -1,18 +1,17 @@
 import React from "react";
 import ExpandIndicatorIcon from "../../assets/expand-indicator-icon.svg";
-import "./collapsed-resources-tab.scss";
+import "./resources-expander.scss";
 
 interface IProps {
   resourceType: string;
-  isResourceExpanded: boolean;
   onExpandResources: () => void;
 }
 
-export const CollapsedResourcesTab: React.FC<IProps> = ({ resourceType, isResourceExpanded, onExpandResources }) => {
+export const ResourcesExpander: React.FC<IProps> = ({ resourceType, onExpandResources }) => {
     return (
-      <div className={`collapsed-resources-tab ${resourceType} ${isResourceExpanded ? "shown" : ""}`}
+      <div className={`resources-expander ${resourceType}`}
            onClick={() => onExpandResources()}>
-        <div className="collapsed-tab-label">My Resources</div>
+        <div className="resources-expander-label">My Resources</div>
         <div className="expand-left-indicator">
           <ExpandIndicatorIcon />
         </div>
