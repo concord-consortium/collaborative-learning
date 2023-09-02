@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { observer } from "mobx-react";
 import classNames from "classnames";
 import { useCombobox } from "downshift";
+import _ from "lodash";
 import { gImageMap } from "../../../models/image-map";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { DataCardContentModelType } from "../data-card-content";
@@ -10,9 +11,9 @@ import { RemoveIconButton } from "./add-remove-icons";
 import { useCautionAlert } from "../../../components/utilities/use-caution-alert";
 import { useErrorAlert } from "../../../components/utilities/use-error-alert";
 import { getClipboardContent } from "../../../utilities/clipboard-utils";
+import { isImageUrl } from "../../../models/data/data-types";
 
 import '../data-card-tile.scss';
-import { action } from "mobx";
 
 const typeIcons = {
   "date": "📅",
@@ -58,24 +59,18 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const editingLabel = currEditFacet === "name" && currEditAttrId === attrKey;
   const editingValue = currEditFacet === "value" && currEditAttrId === attrKey;
 
-  const attribute = content.dataSet.attrFromID(attrKey);
-  const allAttrValues = attribute?.strValues || [];
-  const valuesForAutoFill = allAttrValues.filter((value) => {
-    return value.substring(0, 8) !== "ccimg://" && isNaN(Number(value));
-  });
+  // // Special handling for enter key in combobox.
+  // const stateReducer = React.useCallback((state, activity) => {
+  //   if (activity.type === useCombobox.stateChangeTypes.InputKeyDownEnter) {
+  //     console.log('enter key detected, changes = ', activity);
+  //     handleCompleteValue();
+  //     return activity.changes;
+  //   } else {
+  //     return activity.changes;
+  //   }
+  // }, []);
 
-  // Special handling for enter key in combobox.
-  const stateReducer = React.useCallback((state, activity) => {
-    if (activity.type === useCombobox.stateChangeTypes.InputKeyDownEnter) {
-      console.log('enter key detected, changes = ', activity);
-      handleCompleteValue();
-      return activity.changes;
-    } else {
-      return activity.changes;
-    }
-  }, []);
-
-  const [inputItems, setInputItems] = useState(valuesForAutoFill);
+  const [inputItems, setInputItems] = useState([] as string[]);
   const {
     isOpen,
     getToggleButtonProps,
@@ -88,15 +83,18 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   } = useCombobox({
     items: inputItems,
     initialInputValue: valueCandidate,
-    stateReducer,
+    // stateReducer,
     onInputValueChange: ({inputValue}) => {
-      console.log('new input value: ', inputValue);
       const safeValue = inputValue || "";
       setValueCandidate(safeValue);
-      const vals = valuesForAutoFill.filter((item) =>
-          item.toLowerCase().startsWith(safeValue.toLowerCase()));
-      console.log('from ', valuesForAutoFill, ' prefix ', safeValue.toLowerCase(), ' possibilities: ', vals);
-      setInputItems(vals);
+      // Determine list of completions
+      const allAttrValues = content.dataSet.attrFromID(attrKey)?.values || [];
+      const completions: string[] = _.uniq(allAttrValues.filter((value) => {
+          return value && typeof(value)==='string' && !isImageUrl(value)
+                 && value.toLowerCase().startsWith(safeValue.toLowerCase());
+        })).sort() as string[];
+      console.log('found possible completions: ', completions);
+      setInputItems(completions);
     }
   });
 
