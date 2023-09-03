@@ -56,7 +56,7 @@ import MovableLineDialog from "./movable-line-dialog";
 import placeholderImage from "../../../assets/image_placeholder.png";
 import { LinkTableButton } from "./link-table-button";
 import ErrorAlert from "../../utilities/error-alert";
-import { halfPi, normalizeAngle } from "../../../utilities/math-utils";
+import { halfPi, normalizeAngle, Point } from "../../../utilities/math-utils";
 import SingleStringDialog from "../../utilities/single-string-dialog";
 import { getClipboardContent, pasteClipboardImage } from "../../../utilities/clipboard-utils";
 
@@ -211,7 +211,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     if (!element) return undefined;
     const bounds = element.bounds();
     const coords = new JXG.Coords(JXG.COORDS_BY_USER, bounds.slice(0, 2), this.state.board);
-    return { x: coords.scrCoords[1], y: coords.scrCoords[2] };
+    const point: Point = [coords.scrCoords[1], coords.scrCoords[2]];
+    return point;
   }
 
   public componentDidMount() {
@@ -293,10 +294,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         if (objectType === "point") {
           const coords = this.getPointScreenCoords(objectId);
           if (!coords) return undefined;
+          const [x, y] = coords;
           const boundingBox = {
             height: pointBoundingBoxSize,
-            left: coords.x - pointBoundingBoxSize / 2 + geometryAnnotationXOffset,
-            top: coords.y - pointBoundingBoxSize / 2 + geometryAnnotationYOffset,
+            left: x - pointBoundingBoxSize / 2 + geometryAnnotationXOffset,
+            top: y - pointBoundingBoxSize / 2 + geometryAnnotationYOffset,
             width: pointBoundingBoxSize
           };
           return boundingBox;
@@ -307,10 +309,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           polygon.points.forEach(pointId => {
             const coords = this.getPointScreenCoords(pointId);
             if (!coords) return undefined;
-            if (coords.y > bottom) bottom = coords.y;
-            if (coords.x < left) left = coords.x;
-            if (coords.x > right) right = coords.x;
-            if (coords.y < top) top = coords.y;
+            const [x, y] = coords;
+            if (y > bottom) bottom = y;
+            if (x < left) left = x;
+            if (x > right) right = x;
+            if (y < top) top = y;
           });
           const boundingBox = {
             height: bottom - top,
@@ -324,10 +327,12 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           const coords1 = this.getPointScreenCoords(point1Id);
           const coords2 = this.getPointScreenCoords(point2Id);
           if (!coords1 || !coords2) return undefined;
-          const bottom = Math.max(coords1.y, coords2.y);
-          const left = Math.min(coords1.x, coords2.x);
-          const right = Math.max(coords1.x, coords2.x);
-          const top = Math.min(coords1.y, coords2.y);
+          const [x1, y1] = coords1;
+          const [x2, y2] = coords2;
+          const bottom = Math.max(y1, y2);
+          const left = Math.min(x1, x2);
+          const right = Math.max(x1, x2);
+          const top = Math.min(y1, y2);
           const boundingBox = {
             height: bottom - top,
             left: left + geometryAnnotationXOffset,
@@ -342,7 +347,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           // Find the center point
           const coords = this.getPointScreenCoords(objectId);
           if (!coords) return;
-          const point = translateTilePointToScreenPoint?.([coords.x, coords.y]);
+          const point = translateTilePointToScreenPoint?.(coords);
           if (!point) return;
 
           // Return a circle at the center point
@@ -365,22 +370,20 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           if (!coords1 || !coords2) return;
 
           // Find the angles perpendicular to the segment
-          const dx = coords2.x - coords1.x;
-          const dy = coords2.y - coords1.y;
+          const [x1, y1] = coords1;
+          const [x2, y2] = coords2;
+          const dx = x2 - x1;
+          const dy = y2 - y1;
           const segmentAngle = normalizeAngle(Math.atan2(-dy, dx));
           const firstAngle = normalizeAngle(segmentAngle + halfPi);
           const secondAngle = normalizeAngle(segmentAngle - halfPi);
 
           // Determine the points and path of the rectangle containing the segment
-          const coords = [
-            {x: coords1.x + Math.cos(firstAngle) * segmentButtonWidth,
-              y: coords1.y - Math.sin(firstAngle) * segmentButtonWidth},
-            {x: coords2.x + Math.cos(firstAngle) * segmentButtonWidth,
-              y: coords2.y - Math.sin(firstAngle) * segmentButtonWidth},
-            {x: coords2.x + Math.cos(secondAngle) * segmentButtonWidth,
-              y: coords2.y - Math.sin(secondAngle) * segmentButtonWidth},
-            {x: coords1.x + Math.cos(secondAngle) * segmentButtonWidth,
-              y: coords1.y - Math.sin(secondAngle) * segmentButtonWidth},
+          const coords: Point[] = [
+            [x1 + Math.cos(firstAngle) * segmentButtonWidth, y1 - Math.sin(firstAngle) * segmentButtonWidth],
+            [x2 + Math.cos(firstAngle) * segmentButtonWidth, y2 - Math.sin(firstAngle) * segmentButtonWidth],
+            [x2 + Math.cos(secondAngle) * segmentButtonWidth, y2 - Math.sin(secondAngle) * segmentButtonWidth],
+            [x1 + Math.cos(secondAngle) * segmentButtonWidth, y1 - Math.sin(secondAngle) * segmentButtonWidth],
           ];
           return this.getButtonPath(coords, handleClick, classes, translateTilePointToScreenPoint);
         } else if (objectType === "polygon") {
@@ -411,14 +414,14 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private getButtonPath(
-    coords: ({ x: number, y: number } | undefined)[], handleClick: () => void, classes?: string,
-    translatePoint?: ((point: [x: number, y: number]) => [x: number, y: number] | undefined)
+    coords: (Point | undefined)[], handleClick: () => void, classes?: string,
+    translatePoint?: ((point: Point) => Point | undefined)
   ) {
     if (!translatePoint) return undefined;
     let path = "";
     coords.forEach((coord, index) => {
       if (!coord) return;
-      const point = translatePoint?.([coord.x, coord.y]);
+      const point = translatePoint?.(coord);
       if (!point) return;
 
       const [x, y] = point;

@@ -4,10 +4,10 @@ import React, { useContext } from "react";
 
 import { TileApiInterfaceContext } from "../tiles/tile-api";
 import { ObjectBoundingBox } from "../../models/annotations/clue-object";
+import { Point } from "../../utilities/math-utils";
 
 import "./annotation-button.scss";
 
-export type Point = [x: number, y: number];
 interface IAnnotationButtonProps {
   getObjectBoundingBox:
     (rowId: string, tileId: string, objectId: string, objectType?: string) => ObjectBoundingBox | undefined;

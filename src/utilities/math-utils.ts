@@ -6,3 +6,5 @@ export function normalizeAngle(angle: number) {
   while (_angle > twoPi) { _angle -= twoPi; }
   return _angle;
 }
+
+export type Point = [x: number, y: number];

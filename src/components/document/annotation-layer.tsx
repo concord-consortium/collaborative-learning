@@ -2,7 +2,7 @@ import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { MouseEventHandler, useContext, useEffect, useRef, useState } from "react";
 
-import { AnnotationButton, Point } from "../annotations/annotation-button";
+import { AnnotationButton } from "../annotations/annotation-button";
 import { getDefaultPeak } from "../annotations/annotation-utilities";
 import { ArrowAnnotationComponent } from "../annotations/arrow-annotation";
 import { PreviewArrow } from "../annotations/preview-arrow";
@@ -11,6 +11,7 @@ import { useUIStore } from "../../hooks/use-stores";
 import { ArrowAnnotation } from "../../models/annotations/arrow-annotation";
 import { ClueObjectModel, IClueObject, OffsetModel } from "../../models/annotations/clue-object";
 import { DocumentContentModelType } from "../../models/document/document-content";
+import { Point } from "../../utilities/math-utils";
 
 import "./annotation-layer.scss";
 
@@ -99,8 +100,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     if (!objectBoundingBox) return undefined;
 
     const translatePoint = getTranslateTilePointToScreenPoint(rowId, tileId);
-    if (!translatePoint) return undefined;
-    const point = translatePoint([objectBoundingBox.left, objectBoundingBox.top]);
+    const point = translatePoint?.([objectBoundingBox.left, objectBoundingBox.top]);
     if (!point) return undefined;
 
     const [left, top] = point;
