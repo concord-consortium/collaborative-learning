@@ -152,7 +152,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     const tilesComma = hasSharedModels || hasAnnotations ? "," : "";
     builder.pushLine(`]${tilesComma}`, 2);
 
-    if (sharedModels.length > 0) {
+    if (hasSharedModels) {
       builder.pushLine(`"sharedModels": [`, 2);
       sharedModels.forEach((sharedModel, index) => {
         const sharedModelLines = stringify(sharedModel).split("\n");

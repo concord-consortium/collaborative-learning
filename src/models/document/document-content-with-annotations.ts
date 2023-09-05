@@ -41,7 +41,7 @@ export const DocumentContentModelWithAnnotations = BaseDocumentContentModel
       self.annotations.delete(annotationId);
     },
     addAnnotationFromImport(id: string, annotation: IArrowAnnotationSnapshot){
-      if (self.sharedModelMap){
+      if (self.annotations) {
         self.annotations.set(id, annotation);
       }
     }
