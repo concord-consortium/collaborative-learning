@@ -117,25 +117,24 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     const xPos = pos[0];
     svg.selectAll(".mouseXCircle").remove();
     svg.append('circle') //create a circle that follows the mouse
-    .attr('cx', xPos)
-    .attr('cy', yMidPoint)
-    .attr('r', r)
-    .classed("mouseXCircle", true)
-    .classed("defaultPointInnerCircle", true);
+      .attr('cx', xPos)
+      .attr('cy', yMidPoint)
+      .attr('r', r)
+      .classed("mouseXCircle", true)
+      .classed("defaultPointInnerCircle", true);
   };
 
   // * =============================== [ Construct Numberline ] ================================ */
   if (axisWidth !== 0) {
     const numOfTicks = numberlineDomainMax - numberlineDomainMin;
     axis
-    .attr("class", `${axisClass} num-line`)
-    .attr("style", `${kAxisStyle}`) //move down
-    .call(axisBottom(xScale).tickSizeOuter(0).ticks(numOfTicks)) //remove side ticks
-    .selectAll("g.tick line") //customize 0 ticks
-    .attr("y2", function(x){ return (x === 0) ? tickHeightZero : tickHeightDefault;})
-    .attr("stroke-width", function(x){ return (x === 0) ? tickWidthZero : tickWidthDefault;})
-    .attr("style", function(x){ return (x === 0) ? tickStyleZero : tickStyleDefault;});
-
+      .attr("class", `${axisClass} num-line`)
+      .attr("style", `${kAxisStyle}`) //move down
+      .call(axisBottom(xScale).tickSizeOuter(0).ticks(numOfTicks)) //remove side ticks
+      .selectAll("g.tick line") //customize 0 ticks
+      .attr("y2", function(x){ return (x === 0) ? tickHeightZero : tickHeightDefault;})
+      .attr("stroke-width", function(x){ return (x === 0) ? tickWidthZero : tickWidthDefault;})
+      .attr("style", function(x){ return (x === 0) ? tickStyleZero : tickStyleDefault;});
   }
 
   /* ========================== [ Construct/Update Circles ] =================================== */
@@ -147,16 +146,16 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       .data(content.axisPointsSnapshot);
 
       outerPoints.enter()
-      .append("circle").attr("class", "outer-point")
-      .attr('cx', (p) => xScale(p.xValue || numberlineDomainMin)) //mapped to axis width
-      .attr('cy', yMidPoint).attr('r', outerPointRadius).attr('id', p => p.id)
-      .classed("showPointOuterCircle", true)
-      .classed("disabled", true);
+        .append("circle").attr("class", "outer-point")
+        .attr('cx', (p) => xScale(p.xValue || numberlineDomainMin)) //mapped to axis width
+        .attr('cy', yMidPoint).attr('r', outerPointRadius).attr('id', p => p.id)
+        .classed("showPointOuterCircle", true)
+        .classed("disabled", true);
 
       // --- Update functions outer hover circles
       outerPoints
-      .attr('cx', (p) => xScale(p.currentXValue || numberlineDomainMin)) //mapped to axis width
-      .classed("disabled", (p, idx) => (content.hoveredPoint !== p.id));
+        .attr('cx', (p) => xScale(p.currentXValue || numberlineDomainMin)) //mapped to axis width
+        .classed("disabled", (p, idx) => (content.hoveredPoint !== p.id));
 
       outerPoints.exit().remove(); //cleanup
 
@@ -167,19 +166,19 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
 
       // Initialize Attributes
       innerPoints.enter()
-      .append("circle")
-      .attr("class", "inner-point")
-      .attr('cx', (p) => xScale(p.xValue || numberlineDomainMin)) //mapped to axis width
-      .attr('cy', yMidPoint).attr('r', innerPointRadius).attr('id', p => p.id)
-      .classed("defaultPointInnerCircle", true)
-      .classed("selected", (p)=> false)
-      .call((e) => handleDrag(e)); // Attach drag behavior to newly created circles
+        .append("circle")
+        .attr("class", "inner-point")
+        .attr('cx', (p) => xScale(p.xValue || numberlineDomainMin)) //mapped to axis width
+        .attr('cy', yMidPoint).attr('r', innerPointRadius).attr('id', p => p.id)
+        .classed("defaultPointInnerCircle", true)
+        .classed("selected", (p)=> false)
+        .call((e) => handleDrag(e)); // Attach drag behavior to newly created circles
 
       // --- Update functions inner circles
       innerPoints
-      .attr('cx', (p, idx) => xScale(p.currentXValue || numberlineDomainMin))
-      .classed("selected", (p)=> p.id in content.selectedPoints)
-      .call((e) => handleDrag(e)); // pass again in case axisWidth changes
+        .attr('cx', (p, idx) => xScale(p.currentXValue || numberlineDomainMin))
+        .classed("selected", (p)=> p.id in content.selectedPoints)
+        .call((e) => handleDrag(e)); // pass again in case axisWidth changes
 
       innerPoints.exit().remove(); //cleanup
     };
