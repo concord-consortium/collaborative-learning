@@ -37,8 +37,12 @@ export class ClassLogsComponent extends BaseComponent<IProps> {
                   draggable={true}
                 >
                   <div className="scaled-list-item">
-                    <CanvasComponent context="class-work" document={publication}
-                                      readOnly={true} scale={this.props.scale} />
+                    <CanvasComponent
+                      context="class-work"
+                      document={publication}
+                      readOnly={true}
+                      scale={this.props.scale}
+                    />
                   </div>
                 </div>
                 <div className="info">

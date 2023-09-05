@@ -112,22 +112,15 @@ export const ArrowAnnotationComponent = observer(
       sourceX, sourceY, targetX, targetY, textX, textY, textCenterX, textCenterY,
       textMinXOffset, textMaxXOffset, textMinYOffset, textMaxYOffset
     } = arrow.getPoints(documentLeft, documentRight, documentTop, documentBottom, dragOffsets, sourceBB, targetBB);
+    const missingData = sourceX === undefined || sourceY === undefined || textCenterX === undefined
+      || textCenterY === undefined || targetX === undefined || targetY === undefined;
     const curveData = useMemo(() => {
-      if (
-        sourceX === undefined || sourceY === undefined || textCenterX === undefined
-        || textCenterY === undefined || targetX === undefined || targetY === undefined
-      ) {
-        return undefined;
-      }
+      if (missingData) return undefined;
       return getSparrowCurve(sourceX, sourceY, textCenterX, textCenterY, targetX, targetY, true);
-    }, [sourceX, sourceY, textCenterX, textCenterY, targetX, targetY]);
+    }, [missingData, sourceX, sourceY, textCenterX, textCenterY, targetX, targetY]);
 
     // Bail if we're missing anything necessary
-    if (
-      !sourceBB || !targetBB || !curveData
-      || sourceX === undefined || sourceY === undefined || targetX === undefined || targetY === undefined
-      || textX === undefined || textY === undefined || textCenterX === undefined || textCenterY === undefined
-    ) return null;
+    if (!sourceBB || !targetBB || !curveData || missingData) return null;
 
     // Set up text handlers
     function handleTextClick() {
@@ -173,7 +166,9 @@ export const ArrowAnnotationComponent = observer(
     const deleteX = (curveData.deleteX ?? 0) - deleteWidth / 2;
     const deleteY = (curveData.deleteY ?? 0) - deleteHeight / 2;
     function handleDelete(e: React.MouseEvent<SVGElement, MouseEvent>) {
-      deleteArrow(arrow.id);
+      if (!readOnly) {
+        deleteArrow(arrow.id);
+      }
     }
 
     // Set up drag handles

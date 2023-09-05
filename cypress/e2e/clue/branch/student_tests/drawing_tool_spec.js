@@ -383,12 +383,46 @@ context('Draw Tool Tile', function () {
         drawToolTile.getDrawTile()
           .trigger("mousedown", 150,  150)
           .trigger("mouseup", 150, 150);
-          cy.wait(2000);
         drawToolTile.getSelectionBox().should("exist");
         drawToolTile.getDrawToolDelete().should("not.have.class", "disabled").click({scrollBehavior: false});
         drawToolTile.getTextDrawing().should("not.exist");
       });
     });
+    describe("Group", () => {
+      it("can group and ungroup", () => {
+        drawToolTile.getDrawToolRectangle().click({scrollBehavior: false});
+        drawToolTile.getDrawTile()
+          .trigger("mousedown", 250, 50)
+          .trigger("mousemove", 100, 150)
+          .trigger("mouseup",   100, 150);
+        drawToolTile.getDrawToolEllipse().click({scrollBehavior: false});
+        drawToolTile.getDrawTile()
+          .trigger("mousedown", 50,  100)
+          .trigger("mousemove", 100, 150)
+          .trigger("mouseup",   100, 150);
+        drawToolTile.getDrawToolFreehand().click({ scrollBehavior: false });
+        drawToolTile.getDrawTile()
+          .trigger("mousedown", 150, 50)
+          .trigger("mousemove", 200, 150)
+          .trigger("mouseup",   200, 150);
+
+        // Select all 3
+        cy.wait(1000);
+        drawToolTile.getDrawTile()
+          .trigger("mousedown", 40,  40)
+          .trigger("mousemove", 250, 150)
+          .trigger("mouseup",   250, 150);
+          cy.wait(1000);
+          drawToolTile.getSelectionBox().should("have.length", 3);
+
+        drawToolTile.getDrawToolUngroup().should("have.class", "disabled");
+        drawToolTile.getDrawToolGroup().should("not.have.class", "disabled").click({ scrollBehavior: false });
+        console.log('seleciton box: ', drawToolTile.getSelectionBox());
+        drawToolTile.getSelectionBox().should("have.length", 1);
+        drawToolTile.getDrawToolGroup().should("have.class", "disabled");
+        drawToolTile.getDrawToolUngroup().should("not.have.class", "disabled").click({ scrollBehavior: false });
+        drawToolTile.getSelectionBox().should("have.length", 3);
+      });
     describe("Image", () => {
       it("drags images from image tiles", () => {
         const imageFilePath='image.png';
@@ -431,8 +465,11 @@ context('Draw Tool Tile', function () {
         drawToolTile.getImageDrawing().last().should("exist").invoke("attr", "href").should("contain", "sas/images/survey.png");
       });
     });
+    });
   });
 });
+
+
 
 context('Draw Tool Tile Undo Redo', function () {
   before(function () {

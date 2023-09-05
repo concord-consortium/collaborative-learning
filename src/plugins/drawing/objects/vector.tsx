@@ -3,7 +3,7 @@ import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React, { useCallback } from "react";
 import { computeStrokeDashArray, DrawingObjectType, DrawingTool, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
-import { BoundingBoxDelta, Point, ToolbarSettings, VectorEndShape, endShapesForVectorType, getVectorTypeIcon } 
+import { BoundingBoxSides, Point, ToolbarSettings, VectorEndShape, endShapesForVectorType, getVectorTypeIcon } 
   from "../model/drawing-basic-types";
 import { SvgToolbarButton, } from "../components/drawing-toolbar-buttons";
 
@@ -39,7 +39,7 @@ export const VectorObject = StrokedObject.named("VectorObject")
       self.headShape = headShape;
       self.tailShape = tailShape;
     },
-    setDragBounds(deltas: BoundingBoxDelta) {
+    setDragBounds(deltas: BoundingBoxSides) {
       if (self.dx > 0) {
         // x,y point is towards the left
         self.dragX = self.x + deltas.left;
@@ -103,6 +103,7 @@ export const VectorComponent = observer(function VectorComponent({model, handleH
       onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
       onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
       onMouseDown={(e) => handleDrag?.(e, model)}
+      pointerEvents={handleHover ? "visible" : "none"}
     >
       {line}{head}{tail}
     </g>

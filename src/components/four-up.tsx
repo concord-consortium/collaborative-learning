@@ -214,11 +214,15 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       // Only the user's document is editable, but not if they're a ghost user
       // (Ghost users do not own group documents and cannot edit others')
       const readOnly = cornerIndex !== 0 || isGhostUser;
-      return <CanvasComponent context={cornerLabel} scale={cellScale(cell, groupUser)}
-                       readOnly={readOnly}
-                       document={document} overlayMessage={canvasMessage(document)}
-                       showPlayback={isFocused(groupUser)}
-                       {...others} />;
+      return <CanvasComponent
+        context={cornerLabel}
+        document={document}
+        overlayMessage={canvasMessage(document)}
+        readOnly={readOnly}
+        scale={cellScale(cell, groupUser)}
+        showPlayback={isFocused(groupUser)}
+        {...others}
+      />;
     };
 
     // Double the scale if the cell is focused
