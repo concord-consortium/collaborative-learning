@@ -1,0 +1,96 @@
+@import "../vars";
+$scroller-height: 145px;
+
+.scroll-arrow-button {
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  .scroll-arrow-icon {
+    border-radius: 50%;
+    &.right {
+      transform: rotate(180deg);
+    }
+    // This is customizing the default themed fill color
+    // It actually matches the `themed-negative` fill color,
+    // but then the active style doesn't match the spec.
+    &.class-work {
+      fill: $classwork-purple-dark-1;
+    }
+    &.my-work {
+      fill: $workspace-teal-dark-1;
+    }
+  }
+}
+
+.collapse-scroller-button {
+  border-radius: 50%;
+  z-index: 5;
+  position: absolute;
+  left: 5px;
+  top: 5px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  &.collapsed {
+    transform: rotate(180deg);
+  }
+  .scroller-icon {
+    &.class-work {
+      fill: $classwork-purple-dark-1;
+    }
+    &.my-work {
+      fill: $workspace-teal-dark-1;
+    }
+  }
+}
+
+.document-scroller {
+  position: relative;
+  height: $scroller-height;
+  display: flex;
+  align-items: center;
+  border-bottom: $document-border-width solid;
+  &.class-work {
+    border-color: $classwork-purple-dark-1
+  }
+  &.my-work {
+    border-color: $workspace-teal-dark-1
+  }
+  &.collapsed {
+    height: 0;
+  }
+  .doc-collection-list.horizontal {
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    position: relative;
+    top: 0;
+    left: 0;
+    &.collapsed {
+      height: 0;
+    }
+  }
+  .scroller-controls {
+    position: absolute;
+    height: 100%;
+    width: 50px;
+    background-color: rgba(255,255,255,0.5);
+    display: flex;
+    align-items: center;
+    &.left {
+      left: 0px;
+      justify-content: left;
+    }
+    &.right {
+      right: 0px;
+      justify-content: right;
+    }
+  }
+}
