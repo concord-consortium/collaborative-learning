@@ -1,10 +1,11 @@
 import React from "react";
 import classNames from "classnames";
 import { Tooltip, TooltipProps } from "react-tippy";
-import { useTooltipOptions } from "../../hooks/use-tooltip-options";
-import PlacePointIcon from "./assets/numberline-toolbar-point-icon.svg";
-import ClearPointsIcon from "./assets/numberline-toolbar-clear-icon.svg"; //undo icon for now
-import DeletePointsIcon from "./assets/numberline-toolbar-delete-icon.svg";
+
+import PlacePointIcon from "../assets/numberline-toolbar-point-icon.svg";
+import ClearPointsIcon from "../assets/numberline-toolbar-clear-icon.svg"; //undo icon for now
+import DeletePointsIcon from "../assets/numberline-toolbar-delete-icon.svg";
+import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
 
 import "./numberline-toolbar.scss";
 

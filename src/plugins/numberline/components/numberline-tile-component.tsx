@@ -1,14 +1,14 @@
 import React, { useEffect, useRef } from "react";
 import classNames from "classnames";
-import { ITileProps } from "../../components/tiles/tile-component";
+
 import { NumberlineTile } from "./numberline-tile";
-import { BasicEditableTileTitle } from "../../components/tiles/basic-editable-tile-title";
 import { NumberlineToolbar } from "./numberline-toolbar";
-import { useToolbarTileApi } from "../../components/tiles/hooks/use-toolbar-tile-api";
-import { NumberlineContentModelType } from "./models/numberline-content";
-import { useCurrent } from "../../hooks/use-current";
-import { ITileExportOptions } from "../../models/tiles/tile-content-info";
-import { HotKeys } from "../../utilities/hot-keys";
+import { NumberlineContentModelType } from "../models/numberline-content";
+import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
+import { useToolbarTileApi } from "../../../components/tiles/hooks/use-toolbar-tile-api";
+import { ITileProps } from "../../../components/tiles/tile-component";
+import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
+import { HotKeys } from "../../../utilities/hot-keys";
 
 import "./numberline-tile-component.scss";
 
@@ -16,16 +16,16 @@ export const NumberlineTileComponent: React.FC<ITileProps> = (props) => {
   const { documentContent, model, readOnly, scale, tileElt,
           onRegisterTileApi, onUnregisterTileApi } = props;
 
-  const contentRef = useCurrent(model.content as NumberlineContentModelType);
+  const content = model.content as NumberlineContentModelType;
   const hotKeys = useRef(new HotKeys());
   const toolbarProps = useToolbarTileApi({ id: model.id, enabled: !readOnly, onRegisterTileApi, onUnregisterTileApi });
 
   const handleClearPoints = () => {
-    contentRef.current.deleteAllPoints();
+    content.deleteAllPoints();
   };
 
   const handleDeletePoint = () => {
-    contentRef.current.deleteSelectedPointsFromPointsMap();
+    content.deleteSelectedPoints();
   };
 
   useEffect(()=>{
@@ -37,7 +37,7 @@ export const NumberlineTileComponent: React.FC<ITileProps> = (props) => {
     }
     onRegisterTileApi({
       exportContentAsTileJson: (options?: ITileExportOptions) => {
-        return contentRef.current.exportJson(options);
+        return content.exportJson(options);
       },
       getTitle: () => {
         return getTitle();

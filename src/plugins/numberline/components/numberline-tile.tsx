@@ -1,13 +1,14 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { select, axisBottom, drag, pointer } from 'd3';
 import { observer } from 'mobx-react';
-import { ITileProps } from "../../components/tiles/tile-component";
-import { NumberlineContentModelType, PointObjectModelType,  } from "./models/numberline-content";
+
+import { NumberlineContentModelType, PointObjectModelType,  } from "../models/numberline-content";
 import { kAxisStyle, kAxisWidth, kContainerWidth, kNumberLineContainerHeight,
          numberlineDomainMax, numberlineDomainMin, tickHeightDefault,
          tickHeightZero, tickStyleDefault, tickStyleZero, tickWidthDefault,
          tickWidthZero, innerPointRadius, outerPointRadius, numberlineYBound,
-         yMidPoint, createXScale} from './numberline-tile-constants';
+         yMidPoint, createXScale} from '../numberline-tile-constants';
+import { ITileProps } from "../../../components/tiles/tile-component";
 
 import "./numberline-tile.scss";
 
@@ -58,7 +59,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   const handleMouseClick = (e: Event) => {
     if (!readOnly){
       if (isMouseOverPoint){
-        const pointHoveredOver = content.givenIdReturnPoint(content.hoveredPoint);
+        const pointHoveredOver = content.getPointFromId(content.hoveredPoint);
         content.setSelectedPoint(pointHoveredOver);
       } else{
         //only create point if we are not hovering over a point and within bounding box
@@ -99,7 +100,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   const handleDrag = drag<SVGCircleElement, PointObjectModelType>()
   .on('drag', (e, p) => {
       if (!readOnly && mouseInBoundingBox(mousePosX(e), mousePosY(e))){
-        const pointHoveredOver = content.givenIdReturnPoint(content.hoveredPoint);
+        const pointHoveredOver = content.getPointFromId(content.hoveredPoint);
         content.setSelectedPoint(pointHoveredOver);
         const newXValue = xScale.invert(mousePosX(e));
         content.replaceXValueWhileDragging(p.id, newXValue);

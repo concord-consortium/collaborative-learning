@@ -24,7 +24,7 @@ export const PointObjectModel = types
     }
   }))
   .actions(self => ({
-    setDragXValue(num: number | undefined){
+    setDragXValue(num?: number){
       self.dragXValue = num;
     },
     setXValueToDragValue(){ //when mouse is let go
@@ -69,7 +69,7 @@ export const NumberlineContentModel = TileContentModel
     get pointsXValuesArr(){
       return self.pointsArr.map((pointObj) => pointObj.xValue);
     },
-    givenIdReturnPoint(id: string){
+    getPointFromId(id: string){
       return self.pointsArr.find((point)=> point.id === id) as PointObjectModelType;
     },
     //Pass snapshot of axisPoint models into outer/inner points to avoid D3 and MST error
@@ -98,13 +98,9 @@ export const NumberlineContentModel = TileContentModel
     }
   }))
   .actions(self => ({
-    createNewPoint(xValueClicked: number){
+    createNewPoint(xValue: number){
       const id = uniqueId();
-      const pointModel = PointObjectModel
-                        .create({
-                          id,
-                          xValue: xValueClicked
-                        });
+      const pointModel = PointObjectModel.create({ id, xValue });
       self.points.set(id, pointModel);
     },
     setHoverPoint(id: string){ //id can also be empty string
@@ -117,17 +113,16 @@ export const NumberlineContentModel = TileContentModel
       self.selectedPoints[point.id] = point;
     },
     replaceXValueWhileDragging(pointDraggedId: string, newXValue: number){
-      const pointDragged = self.givenIdReturnPoint(pointDraggedId);
+      const pointDragged = self.getPointFromId(pointDraggedId);
       pointDragged.setDragXValue(newXValue);
     },
-    deleteSelectedPointsFromPointsMap(){
+    deleteSelectedPoints(){
       //For now - only one point can be selected
       for (const selectedPointId in self.selectedPoints){
         self.points.delete(selectedPointId); //delete all selectedIds from the points map
       }
       self.clearSelectedPointsObj();
     },
-
     deleteAllPoints(){
       self.points.clear();
     },
