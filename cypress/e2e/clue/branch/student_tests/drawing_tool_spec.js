@@ -27,7 +27,7 @@ context('Draw Tool Tile', function () {
 
     cy.visit(queryParams);
     cy.waitForLoad();
-    cy.collapseResourceTabs();
+    cy.showOnlyDocumentWorkspace();
   });
   describe("Draw Tool", () => {
     it("renders draw tool tile", () => {
@@ -110,8 +110,8 @@ context('Draw Tool Tile', function () {
         cy.get(".toolbar-palette.vectors .drawing-tool-buttons").should("be.visible");
         cy.get(".toolbar-palette.vectors .drawing-tool-buttons div:nth-child(3) button").click({scrollBehavior: false});
         drawToolTile.getVectorDrawing().children().its("length").should("eq", 3); // Now three items in group...
-        drawToolTile.getVectorDrawing().find("polygon").its("length").should("eq", 2); // including two arrowheads.  
-        // selecting from this submenu activates the vector tool, which de-selects the object.      
+        drawToolTile.getVectorDrawing().find("polygon").its("length").should("eq", 2); // including two arrowheads.
+        // selecting from this submenu activates the vector tool, which de-selects the object.
         });
       it("deletes vector drawing", () => {
         // re-select the object using a selection rectangle.
@@ -383,12 +383,46 @@ context('Draw Tool Tile', function () {
         drawToolTile.getDrawTile()
           .trigger("mousedown", 150,  150)
           .trigger("mouseup", 150, 150);
-          cy.wait(2000);
         drawToolTile.getSelectionBox().should("exist");
         drawToolTile.getDrawToolDelete().should("not.have.class", "disabled").click({scrollBehavior: false});
         drawToolTile.getTextDrawing().should("not.exist");
       });
     });
+    describe("Group", () => {
+      it("can group and ungroup", () => {
+        drawToolTile.getDrawToolRectangle().click({scrollBehavior: false});
+        drawToolTile.getDrawTile()
+          .trigger("mousedown", 250, 50)
+          .trigger("mousemove", 100, 150)
+          .trigger("mouseup",   100, 150);
+        drawToolTile.getDrawToolEllipse().click({scrollBehavior: false});
+        drawToolTile.getDrawTile()
+          .trigger("mousedown", 50,  100)
+          .trigger("mousemove", 100, 150)
+          .trigger("mouseup",   100, 150);
+        drawToolTile.getDrawToolFreehand().click({ scrollBehavior: false });
+        drawToolTile.getDrawTile()
+          .trigger("mousedown", 150, 50)
+          .trigger("mousemove", 200, 150)
+          .trigger("mouseup",   200, 150);
+
+        // Select all 3
+        cy.wait(1000);
+        drawToolTile.getDrawTile()
+          .trigger("mousedown", 40,  40)
+          .trigger("mousemove", 250, 150)
+          .trigger("mouseup",   250, 150);
+          cy.wait(1000);
+          drawToolTile.getSelectionBox().should("have.length", 3);
+
+        drawToolTile.getDrawToolUngroup().should("have.class", "disabled");
+        drawToolTile.getDrawToolGroup().should("not.have.class", "disabled").click({ scrollBehavior: false });
+        console.log('seleciton box: ', drawToolTile.getSelectionBox());
+        drawToolTile.getSelectionBox().should("have.length", 1);
+        drawToolTile.getDrawToolGroup().should("have.class", "disabled");
+        drawToolTile.getDrawToolUngroup().should("not.have.class", "disabled").click({ scrollBehavior: false });
+        drawToolTile.getSelectionBox().should("have.length", 3);
+      });
     describe("Image", () => {
       it("drags images from image tiles", () => {
         const imageFilePath='image.png';
@@ -405,11 +439,11 @@ context('Draw Tool Tile', function () {
         // Uploading images doesn't seem to be working at the moment.
         // drawToolTile.getImageDrawing().should("exist").and("have.length", 1);
       });
-      // TODO: Figure out how to get the clipboard paste check below to work when the tests 
-      // are run using Chrome. It will pass when using Electron, but not Chrome. In Chrome 
-      // the attempt to write to the clipboard results in an error: "Must be handling a user 
+      // TODO: Figure out how to get the clipboard paste check below to work when the tests
+      // are run using Chrome. It will pass when using Electron, but not Chrome. In Chrome
+      // the attempt to write to the clipboard results in an error: "Must be handling a user
       // gesture to use custom clipboard." See https://github.com/cypress-io/cypress/issues/2752
-      // for more background. Apparently, the basic problem is that Cypress "currently uses 
+      // for more background. Apparently, the basic problem is that Cypress "currently uses
       // programmatic browser APIs which Chrome doesn't consider as genuine user interaction."
       it.skip('will accept a valid image URL pasted from the clipboard', function(){
         // For the drawing tool, this path needs to correspond to an actual file in the curriculum repository.
@@ -431,8 +465,11 @@ context('Draw Tool Tile', function () {
         drawToolTile.getImageDrawing().last().should("exist").invoke("attr", "href").should("contain", "sas/images/survey.png");
       });
     });
+    });
   });
 });
+
+
 
 context('Draw Tool Tile Undo Redo', function () {
   before(function () {
@@ -441,7 +478,7 @@ context('Draw Tool Tile Undo Redo', function () {
 
     cy.visit(queryParams);
     cy.waitForLoad();
-    cy.collapseResourceTabs();
+    cy.showOnlyDocumentWorkspace();
   });
   describe("Drawing tile title edit, undo redo and delete tile", () => {
     it('will undo redo drawing tile creation/deletion', function () {
@@ -466,7 +503,7 @@ context('Draw Tool Tile Undo Redo', function () {
       drawToolTile.getDrawTile().should("exist");
       clueCanvas.getRedoTool().click();
       drawToolTile.getDrawTile().should('not.exist');
-    }); 
+    });
     it("edit tile title", () => {
       const newName = "Drawing Tile";
       clueCanvas.addTile("drawing");

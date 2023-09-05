@@ -6,7 +6,7 @@ import { useGraphLayoutContext } from "../models/graph-layout";
 import { useGraphModelContext } from "../models/graph-model";
 import { INumericAxisModel } from "../imports/components/axis/models/axis-model";
 import { getAdornmentComponentInfo } from "./adornment-component-info";
-import { transitionDuration } from "../graph-types";
+import { IDotsRef, transitionDuration } from "../graph-types";
 
 import "./adornment.scss";
 
@@ -15,10 +15,11 @@ interface IProps {
   subPlotKey: Record<string, string>
   topCats: string[] | number[]
   rightCats: string[] | number[]
+  dotsRef?: IDotsRef
 }
 
 export const Adornment = observer(function Adornment(
-  {adornment, subPlotKey, topCats, rightCats}: IProps
+  {adornment, subPlotKey, topCats, rightCats, dotsRef}: IProps
 ) {
   const graphModel = useGraphModelContext(),
     layout = useGraphLayoutContext(),
@@ -72,6 +73,7 @@ export const Adornment = observer(function Adornment(
         subPlotKey={subPlotKey}
         xAxis={graphModel.getAxis('bottom') as INumericAxisModel}
         yAxis={graphModel.getAxis('left') as INumericAxisModel}
+        dotsRef={dotsRef}
       />
     </div>
   );

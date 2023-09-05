@@ -15,7 +15,7 @@ context('Test the overall workspace', function () {
 
   describe('Desktop functionalities', function () {
     it('will verify that clicking on collapsed resource tab opens the nav area', function () {
-      // cy.get(".collapsed-resources-tab.my-work").click();
+      // cy.get(".resources-expander.my-work").click();
       cy.openTopTab("my-work");
       cy.get('[data-test=my-work-section-investigations-documents]').should('be.visible');
     });
@@ -36,20 +36,23 @@ context('Test the overall workspace', function () {
     });
     it('verify close of nav tabs', function () {
       cy.collapseResourceTabs();
-      cy.get('.nav-tab-panel').should('not.exist');
+      cy.get('.nav-tab-panel').should('not.be.visible');
       cy.get('.primary-workspace').should('be.visible');
+      cy.get('.workspace-expander').should('not.be.visible');
+      cy.get('.resources-expander').should('be.visible');
     });
     it('verify collapse workspace', function () {
-      cy.get('.collapsed-resources-tab').click();
+      cy.get('.resources-expander').click();
       cy.collapseWorkspace();
-      cy.get('.primary-workspace').should('not.exist');
-      cy.get('.collapsed-workspace-tab').should('exist');
-      cy.get('.nav-tab-panel').should('exist');
+      cy.get('.primary-workspace').should('not.be.visible');
+      cy.get('.workspace-expander').should('be.visible');
+      cy.get('.resources-expander').should('not.be.visible');
+      cy.get('.nav-tab-panel').should('be.visible');
     });
     it('verify collapsed workspace tab opens on click', function () {
-      cy.get('.collapsed-workspace-tab').click({force:true});
-      cy.get('.primary-workspace').should('exist');
-      cy.get('.nav-tab-panel').should('exist');
+      cy.get('.workspace-expander').click();
+      cy.get('.primary-workspace').should('be.visible');
+      cy.get('.nav-tab-panel').should('be.visible');
     });
     // TODO: Changes in new document add feature.
     // FIXME: The test is failing looking for the selected class

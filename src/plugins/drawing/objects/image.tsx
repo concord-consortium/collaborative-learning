@@ -5,7 +5,7 @@ import { Tooltip } from "react-tippy";
 import { gImageMap } from "../../../models/image-map";
 import { DrawingObject, DrawingObjectSnapshot, DrawingTool, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, typeField } from "./drawing-object";
-import { BoundingBoxDelta, Point } from "../model/drawing-basic-types";
+import { BoundingBoxSides, Point } from "../model/drawing-basic-types";
 import placeholderImage from "../../../assets/image_placeholder.png";
 import SmallCornerTriangle from "../../../assets/icons/small-corner-triangle.svg";
 import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
@@ -61,7 +61,7 @@ export const ImageObject = DrawingObject.named("ImageObject")
       self.filename = filename;
     },
 
-    setDragBounds(deltas: BoundingBoxDelta) {
+    setDragBounds(deltas: BoundingBoxSides) {
       self.dragX = self.x + deltas.left;
       self.dragY = self.y + deltas.top;
       self.dragWidth  = self.width  + deltas.right - deltas.left;
@@ -102,6 +102,7 @@ export const ImageComponent: React.FC<IDrawingComponentProps> = observer(functio
     onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
     onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
     onMouseDown={(e)=> handleDrag?.(e, model)}
+    pointerEvents={handleHover ? "visible" : "none"}
   />;
 
 });

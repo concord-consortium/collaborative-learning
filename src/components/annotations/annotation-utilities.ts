@@ -11,18 +11,26 @@ export function normalizeAngle(angle: number) {
 }
 
 // Returns the default peak for a sparrow from sourceX, sourceY to targetX, targetY.
+const shortArcPeakScale = 1;
+const longArcPeakScale = .5;
+const shortArcLength = 100;
+const longArcLength = 300;
 export function getDefaultPeak(sourceX: number, sourceY: number, targetX: number, targetY: number) {
   const dx = targetX - sourceX;
   const dy = targetY - sourceY;
   const mx = sourceX + dx / 2;
   const my = sourceY + dy / 2;
-  const radius = Math.sqrt((dx / 2)**2 + (dy / 2)**2);
+  const arcLength = Math.sqrt((dx / 2)**2 + (dy / 2)**2);
   const arrowAngle = normalizeAngle(Math.atan2(-dy, dx));
 
   const multiplier = arrowAngle > halfPi && arrowAngle < 3 * halfPi ? 1 : -1;
   const perpendicularAngle = normalizeAngle(multiplier * Math.PI / 2 - arrowAngle);
-  const peakDx = Math.cos(perpendicularAngle) * radius;
-  const peakDy = Math.sin(perpendicularAngle) * radius;
+  const peakPercent = arcLength <= shortArcLength ? shortArcPeakScale
+    : arcLength >= longArcLength ? longArcPeakScale
+    : (arcLength - shortArcLength) / (longArcLength - shortArcLength)
+      * (longArcPeakScale - shortArcPeakScale) + shortArcPeakScale;
+  const peakDx = Math.cos(perpendicularAngle) * arcLength * peakPercent;
+  const peakDy = Math.sin(perpendicularAngle) * arcLength * peakPercent;
   const peakX = mx + peakDx;
   const peakY = my + peakDy;
   return {

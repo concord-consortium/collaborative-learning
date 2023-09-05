@@ -32,7 +32,10 @@ function beforeTest() {
   cy.fixture("teacher-dash-data.json").as("clueData");
 }
 
-context('Teacher Dashboard View', () => {
+// This test creates a lot of dom elements because it it showing 6 4-up views. So it is showing
+// 23 documents at once. This seems to give cypress problems, setting numTestsKeptInMemory to 0
+// improves things.
+context('Teacher Dashboard View', {numTestsKeptInMemory: 0}, () => {
   it('verify header elements', () => {
     beforeTest();
     cy.get('@clueData').then((clueData) => {
