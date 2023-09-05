@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import classNames from "classnames";
+import { clamp } from "lodash";
 import { DocumentModelType } from "../../models/document/document";
 import { ISubTabSpec, NavTabModelType } from "../../models/view/nav-tabs";
 import { DocumentCollectionList } from "../thumbnail/document-collection-list";
@@ -25,6 +26,7 @@ export const DocumentBrowserScroller =
   const [panelWidth, setPanelWidth] = useState(0);
 
   const scrollWidth = collectionElement?.scrollWidth ?? 0;
+  const maxScrollTo = scrollWidth - panelWidth;
 
   useEffect(() => {
     if(scrollToLocation !== undefined) {
@@ -48,7 +50,7 @@ export const DocumentBrowserScroller =
   const handleScrollTo = (side: string) => {
     const direction = side === "left" ? -1 : 1;
     const attemptedScrollTo = scrollToLocation + direction * panelWidth;
-    const scrollTo = Math.max(0, Math.min(scrollWidth - panelWidth, attemptedScrollTo));
+    const scrollTo = clamp(attemptedScrollTo, 0, maxScrollTo);
     setScrollToLocation(scrollTo);
   };
 
@@ -74,7 +76,7 @@ export const DocumentBrowserScroller =
         {(scrollToLocation > 0) && !scrollerCollapsed &&
             <ScrollEndControl side={"left"} tab={tabSpec.tab} onScroll={handleScrollTo} />
         }
-        {(scrollToLocation < scrollWidth - panelWidth) && !scrollerCollapsed &&
+        {(scrollToLocation < maxScrollTo) && !scrollerCollapsed &&
             <ScrollEndControl side={"right"} tab={tabSpec.tab} onScroll={handleScrollTo} />
         }
       </div>
