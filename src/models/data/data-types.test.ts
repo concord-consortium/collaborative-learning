@@ -1,4 +1,4 @@
-import { dateFrom, isDate, isImageUrl, isNumeric } from "./data-types";
+import { isDate, isImageUrl, isNumeric } from "./data-types";
 import dayjs from "dayjs";
 
 expect.addSnapshotSerializer({
