@@ -1,6 +1,5 @@
 @import "../vars";
 $title-margin: 2px;
-$scroller-height: 145px;
 
 .document-tabs {
   &.chat-open {
@@ -17,87 +16,7 @@ $scroller-height: 145px;
     display: flex;
     flex-direction: column;
     position: relative;
-    .collapse-scroller-button {
-      border-radius: 50%;
-      z-index: 5;
-      position: absolute;
-      left: 5px;
-      top: 5px;
-      width: 40px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      &.collapsed {
-        transform: rotate(180deg);
-      }
-      .scroller-icon {
-        &.class-work {
-          fill: $classwork-purple-dark-1;
-        }
-        &.my-work {
-          fill: $workspace-teal-dark-1;
-        }
-      }
-    }
-    .scroller {
-      display: flex;
-      align-items: center;
-      border-bottom: $document-border-width solid;
-      &.class-work {
-        border-color: $classwork-purple-dark-1
-      }
-      &.my-work {
-        border-color: $workspace-teal-dark-1
-      }
-      &.collapsed {
-        height: 0;
-      }
-      .doc-collection-list.horizontal {
-        height: $scroller-height;
-        display: flex;
-        flex-direction: row;
-        overflow-x: hidden;
-        overflow-y: hidden;
-        position: relative;
-        top: 0;
-        left: 0;
-        &.collapsed {
-          height: 0;
-        }
-      }
-      .scroller-controls {
-        position: absolute;
-        height: $scroller-height;
-        width: 50px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 3;
-        &.collapsed {
-          display: none;
-        }
-        &.left {
-          left: 0px;
-        }
-        &.right {
-          right: 0px;
-        }
-        .scroller-controls-overlay {
-          position: relative;
-          background-color: white;
-          opacity: 50%;
-          width: 55px;
-          height: $scroller-height;
-          &.left {
-            left: 0;
-          }
-          &.right {
-            right: 0;
-          }
-        }
-      }
-    }
+
     .document-area {
       flex: 1;
       display: flex;
@@ -221,50 +140,16 @@ $scroller-height: 145px;
           }
         }
       }
-      .scroll-arrow-button-wrapper {
-        position: relative;
+      .scroll-arrow-button.document-flipper {
+        position: absolute;
+        z-index: 5;
+        top: 50%;
+        transform: translateY(-50%);
         &.left {
           left: 0px;
-          top: calc((100vh/2) - $scroller-height - 25px);
         }
         &.right {
-          right: 2px;
-          top: calc((-100vh/2) + $scroller-height);
-        }
-      }
-    }
-
-    .scroll-arrow-button {
-      opacity: 100%;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: absolute;
-      z-index: 5;
-      &.collapsed {
-        display: none;
-      }
-      &.left {
-        left: 2px;
-      }
-      &.right {
-        right: 2px;
-      }
-      .scroll-arrow-icon {
-        border-radius: 50%;
-        &.right {
-          transform: rotate(180deg);
-        }
-        &.class-work {
-          border-radius: 50%;
-          fill: $classwork-purple-dark-1;
-        }
-        &.my-work {
-          border-radius: 50%;
-          fill: $workspace-teal-dark-1;
+          right: 0px;
         }
       }
     }
