@@ -308,7 +308,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
               className={valueInputClassNames}
               onFocus={handleValueInputFocus}
               onBlur={handleCompleteValue}
-              />
+            />
             <button aria-label="toggle menu" type="button" {...getToggleButtonProps()}>
               { isOpen ?
                 <span className="up">&#x25B2;</span> :
@@ -319,27 +319,15 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
               {isOpen &&
                 inputItems.map((item, index) => (
                   <li style={highlightedIndex === index ? {backgroundColor: '#bde4ff'} : {} }
-                      key={`${item}${index}`}
-                      {...getItemProps({item, index})}
+                    key={`${item}${index}`}
+                    {...getItemProps({item, index})}
                   >
                     {item}
                   </li>
               ))}
             </ul>
           </div>
-        { false &&
-          <input
-            className={valueInputClassNames}
-            type="text"
-            value={valueCandidate}
-            onChange={handleChange}
-            onKeyDown={handleKeyDown}
-            onBlur={handleCompleteValue}
-            onDoubleClick={handleInputDoubleClick}
-            onFocus={handleValueInputFocus}
-            onPaste={handleValuePaste}
-          />
-        }
+
         { !readOnly && valueIsImage() &&
           <img src={imageUrl} className="image-value" />
         }
