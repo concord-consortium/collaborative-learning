@@ -32,6 +32,7 @@ import 'cypress-file-upload';
 import 'cypress-commands';
 import ResourcesPanel from "./elements/clue/ResourcesPanel";
 import ClueCanvas from './elements/clue/cCanvas';
+import {platformCmdKey} from '../../src/utilities/hot-keys';
 
 const clueCanvas = new ClueCanvas;
 
@@ -171,7 +172,7 @@ Cypress.Commands.add("deleteWorkspaces",(baseUrl,queryParams)=>{
     });
 });
 Cypress.Commands.add("openResourceTabs", () => {
-  cy.get('.collapsed-resources-tab').click();
+  cy.get('.resources-expander').click();
 } );
 Cypress.Commands.add("openTopTab", (tab) => {
   cy.get('.top-tab.tab-'+tab).click();
@@ -216,22 +217,26 @@ Cypress.Commands.add("getDocumentToolTile", (tileIndex = 0) => {
 });
 Cypress.Commands.add('collapseResourceTabs', () => {
   cy.get('.drag-thumbnail').trigger('mouseover').then(() => {
-    cy.get('.divider-container .expand-handle.left.shown').should("exist");
-    cy.get('.divider-container .expand-handle.left.shown').click();
+    cy.get('.divider-container .workspace-expander').click();
     cy.get('.primary-workspace .toolbar', {timeout: 120000});
   });
 });
 Cypress.Commands.add('closeResourceTabs', () => {
   cy.get('.nav-tab-panel .close-button').click();
 });
-Cypress.Commands.add('collapseResourcesPanel', () => {
-  cy.get('.divider').click({force:true});
-  cy.get('.divider-container .expand-handle.left').click();
+Cypress.Commands.add('showOnlyDocumentWorkspace', () => {
+  const cmdKey = platformCmdKey();
+  cy.get(".workspace").then($workspace => {
+    // only toggle the full screen of the document workspace if it is necessary
+    if($workspace.find(".divider-container").length > 0) {
+      cy.get('.primary-workspace .canvas').type(`{${cmdKey}+shift+f}`, {force: true});
+    }
+  });
 });
 Cypress.Commands.add('collapseWorkspace', () => {
-  cy.get('.divider').click({force:true});
-  cy.get('.divider-container .expand-handle.right').click();
-  // cy.get('.divider-container .expand-handle.right').click(); // to ensure workspace is collapsed regardless of initial position
+  cy.get('.drag-thumbnail').trigger('mouseover').then(() => {
+    cy.get('.divider-container .resources-expander').click();
+  });
 });
 Cypress.Commands.add('linkTableToGraph', (table, graph) => {
   cy.get('.primary-workspace .table-title').contains(table).click();

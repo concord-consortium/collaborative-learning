@@ -1,7 +1,7 @@
 import React from "react";
 import { clsx } from "clsx";
 import { observer } from "mobx-react-lite";
-import { kGraphAdornmentsClass } from "../graph-types";
+import { kGraphAdornmentsClass, IDotsRef } from "../graph-types";
 import { useGraphLayoutContext } from "../models/graph-layout";
 import { useGraphModelContext } from "../models/graph-model";
 import { Adornment } from "./adornment";
@@ -13,8 +13,14 @@ import { useDataConfigurationContext } from "../hooks/use-data-configuration-con
 
 import "./adornments.scss";
 
-export const Adornments = observer(function Adornments() {
-  const graphModel = useGraphModelContext(),
+export interface AdornmmentsProps {
+  dotsRef?: IDotsRef
+}
+
+export const Adornments = observer(function Adornments(props: AdornmmentsProps) {
+  const
+    { dotsRef } = props,
+    graphModel = useGraphModelContext(),
     dataConfig = useDataConfigurationContext(),
     instanceId = useInstanceIdContext(),
     layout = useGraphLayoutContext(),
@@ -22,7 +28,6 @@ export const Adornments = observer(function Adornments() {
     adornments = graphModel.adornments;
 
   if (!adornments?.length) return null;
-
   // The subPlotKey is an object that contains the attribute IDs and categorical values for the
   // current subplot. It's used to uniquely identify the current subplot. Since it's possible to
   // have the same attribute on two axes or splits, we need to make sure the subPlotKey is unique.
@@ -118,6 +123,7 @@ export const Adornments = observer(function Adornments() {
                           subPlotKey={subPlotKey}
                           topCats={topCats}
                           rightCats={rightCats}
+                          dotsRef={dotsRef}
                         />;
                 })
               }

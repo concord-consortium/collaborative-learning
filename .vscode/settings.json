@@ -26,6 +26,7 @@
     "mcimages",
     "mcsupports",
     "rollbar",
+    "scroller",
     "subcollection",
     "subtab",
     "tablelink",
