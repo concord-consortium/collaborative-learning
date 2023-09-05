@@ -74,7 +74,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const {
     isOpen,
     getToggleButtonProps,
-    getLabelProps,
+    // getLabelProps,
     getMenuProps,
     getInputProps,
     highlightedIndex,
@@ -103,7 +103,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   useEffect(()=>{
     setValueCandidate(valueStr);
     setInputValue(valueStr);
-  },[valueStr]);
+  },[setInputValue, valueStr]);
 
   gImageMap.isImageUrl(valueStr) && gImageMap.getImage(valueStr)
     .then((image)=>{
@@ -284,8 +284,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   const typeIcon = typeIcons[content.dataSet.attrFromID(attrKey).mostCommonType || ""];
 
-
-
   return (
     <div className={pairClassNames}>
       <div className={labelClassNames} onClick={handleLabelClick}>
@@ -311,13 +309,11 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
               onFocus={handleValueInputFocus}
               onBlur={handleCompleteValue}
               />
-            <button
-                aria-label="toggle menu"
-                className="px-2"
-                type="button"
-                {...getToggleButtonProps()}
-            >
-                {isOpen ? <>&#8593;</> : <>&#8595;</>}
+            <button aria-label="toggle menu" type="button" {...getToggleButtonProps()}>
+              { isOpen ?
+                <span className="up">&#x25B2;</span> :
+                <span className="down">&#x25BC;</span>
+              }
             </button>
             <ul {...getMenuProps()}>
               {isOpen &&
