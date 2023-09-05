@@ -1,10 +1,14 @@
-import { Instance, types } from "mobx-state-tree";
+import { Instance, SnapshotIn, types } from "mobx-state-tree";
 
 import { boundDelta } from "./annotation-utils";
 import { ClueObjectModel, ObjectBoundingBox, OffsetModel } from "./clue-object";
 import { uniqueId } from "../../utilities/js-utils";
 
 export const kArrowAnnotationType = "arrowAnnotation";
+
+export function isArrowAnnotationSnapshot(snapshot: any): snapshot is IArrowAnnotationSnapshot {
+  return "type" in snapshot && snapshot.type === kArrowAnnotationType;
+}
 
 export const kArrowAnnotationTextWidth = 150;
 export const kArrowAnnotationTextHeight = 50;
@@ -120,3 +124,4 @@ export const ArrowAnnotation = types
   }
 }));
 export interface IArrowAnnotation extends Instance<typeof ArrowAnnotation> {}
+export interface IArrowAnnotationSnapshot extends SnapshotIn<typeof ArrowAnnotation> {}
