@@ -1,4 +1,4 @@
-import { types, Instance, SnapshotIn, getSnapshot, isStateTreeNode} from "mobx-state-tree";
+import { types, Instance, SnapshotIn, getSnapshot, isStateTreeNode, detach, destroy} from "mobx-state-tree";
 import { clone } from "lodash";
 import stringify from "json-stringify-pretty-compact";
 
@@ -18,6 +18,7 @@ import { ITileExportOptions, IDefaultContentOptions } from "../../../models/tile
 import { TileMetadataModel } from "../../../models/tiles/tile-metadata";
 import { getTileIdFromContent } from "../../../models/tiles/tile-model";
 import { tileModelHooks } from "../../../models/tiles/tile-model-hooks";
+import { GroupObjectSnapshotForAdd, GroupObjectType, isGroupObject } from "../objects/group";
 
 export const DrawingToolMetadataModel = TileMetadataModel
   .named("DrawingToolMetadata");
@@ -62,6 +63,11 @@ export const DrawingContentModel = TileContentModel
       // We could handle this more efficiently
       return self.objects.reduce((map, obj) => {
         map[obj.id] = obj;
+        if (isGroupObject(obj)) {
+          obj.objects.forEach((member) => {
+            map[member.id] = member;
+          });          
+        }
         return map;
       }, {} as ObjectMap);
     },
@@ -172,9 +178,38 @@ export const DrawingContentModel = TileContentModel
 
       self.objects.push(object);
       return self.objects[self.objects.length-1];
+    },
+
+    moveObjectsOutOfGroup(group: GroupObjectType): string[] {
+      const ids: string[] = [];
+      group.objects.forEach((member) => {
+        ids.push(member.id);
+        self.objects.push(detach(member));
+      });
+      return ids;
     }
+
   }))
+  
   .actions(self => ({
+
+    // Destroy any groups in the given list, moving their members to the top level.
+    // The ungrouped members are selected, along with any non-group objects in the initial set.
+    ungroupGroups(groupIds: string[]) {
+      const allIds = groupIds.reduce((objectIds, groupId) => {
+          const object = self.objectMap[groupId];
+          if (object && isGroupObject(object)) {
+              const ids = self.moveObjectsOutOfGroup(object);
+              destroy(object);
+              return [...objectIds, ...ids];
+          } else {
+            if (object) objectIds.push(object.id);
+            return objectIds;
+          }
+      }, [] as string[]);
+      self.selection = allIds;
+    },
+
     // Adds a new object and selects it, activating the select tool.
     addAndSelectObject(drawingObject: DrawingObjectSnapshotForAdd) {
       const obj = self.addObject(drawingObject);
@@ -203,7 +238,7 @@ export const DrawingContentModel = TileContentModel
         setStroke(stroke: string, ids: string[]) {
           self.stroke = stroke;
           forEachObjectId(ids, object => {
-            if(isStrokedObject(object)) {
+            if ('setStroke' in object && typeof object.setStroke === 'function') {
               object.setStroke(stroke);
             }
           });
@@ -211,7 +246,7 @@ export const DrawingContentModel = TileContentModel
         setFill(fill: string, ids: string[]) {
           self.fill = fill;
           forEachObjectId(ids, object => {
-            if (isFilledObject(object)) {
+            if ('setFill' in object && typeof object.setFill === 'function') {
               object.setFill(fill);
             }
           });
@@ -219,7 +254,7 @@ export const DrawingContentModel = TileContentModel
         setStrokeDashArray(strokeDashArray: string, ids: string[]) {
           self.strokeDashArray = strokeDashArray;
           forEachObjectId(ids, object => {
-            if(isStrokedObject(object)) {
+            if ('setStrokeDashArray' in object && typeof object.setStrokeDashArray === 'function') {
               object.setStrokeDashArray(strokeDashArray);
             }
           });
@@ -227,7 +262,7 @@ export const DrawingContentModel = TileContentModel
         setStrokeWidth(strokeWidth: number, ids: string[]) {
           self.strokeWidth = strokeWidth;
           forEachObjectId(ids, object => {
-            if(isStrokedObject(object)) {
+            if ('setStrokeWidth' in object && typeof object.setStrokeWidth === 'function') {
               object.setStrokeWidth(strokeWidth);
             }
           });
@@ -235,7 +270,7 @@ export const DrawingContentModel = TileContentModel
         setVectorType(vectorType: VectorType, ids: string[]) {
           self.vectorType = vectorType;
           forEachObjectId(ids, object => {
-            if (isVectorObject(object)) {
+            if ('setEndShapes' in object && typeof object.setEndShapes === 'function') {
               object.setEndShapes(...endShapesForVectorType(vectorType));
             }
           });
@@ -254,11 +289,27 @@ export const DrawingContentModel = TileContentModel
           const newIds: string[] = [];
           forEachObjectId(ids, (object) => {
             if (object) {
+              let newObject: DrawingObjectType;
               const snap = getSnapshot(object);
-              const {id, ...newParams} = snap; // remove existing ID
-              newParams.x = snap.x + 10;       // offset by 10 pixels so it is not hidden
-              newParams.y = snap.y + 10;
-              const newObject = self.addObject(newParams);
+              if (isGroupObject(object)) {
+                const newGroup = {
+                  type: "group",
+                  x: 0,
+                  y: 0,
+                  objects: getSnapshot(object.objects).map((s) => {
+                    const {id, ...params} = s;
+                    params.x += 10;
+                    params.y += 10;
+                    return params;
+                  })
+                };
+                newObject = self.addObject(newGroup);
+              } else {
+                const {id, ...newParams} = snap; // remove existing ID
+                newParams.x = snap.x + 10;     // offset by 10 pixels so it is not hidden
+                newParams.y = snap.y + 10;
+                newObject = self.addObject(newParams);
+              }
               newIds.push(newObject.id);
             }
           });
@@ -282,7 +333,31 @@ export const DrawingContentModel = TileContentModel
               image.setUrl(newUrl);
             }
           });
-        }
+        },
+
+        createGroup(objectIds: string[]) {
+          const props: GroupObjectSnapshotForAdd = {
+            type: "group",
+            x: 0,
+            y: 0
+          };
+          const group = self.addAndSelectObject(props) as GroupObjectType;
+          forEachObjectId(objectIds, (obj) => {
+            if (isGroupObject(obj)) {
+              // Adding a group to a group:
+              // Transfer old group's members into new group; delete old group.
+              obj.objects.forEach((member) => {
+                group.objects.push(detach(member));
+              });
+              destroy(obj);
+            } else {
+              // Adding a regular object - just move node.
+              group.objects.push(detach(obj));
+            }
+          });
+          group.computeExtents();
+        },
+  
       }
     };
   })
