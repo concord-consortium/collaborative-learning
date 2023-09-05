@@ -6,8 +6,8 @@ import { uniqueId } from "../../utilities/js-utils";
 
 export const kArrowAnnotationType = "arrowAnnotation";
 
-export function isArrowAnnotation(annotation: any) {
-  return "type" in annotation && annotation.type === kArrowAnnotationType;
+export function isArrowAnnotationSnapshot(snapshot: any): snapshot is IArrowAnnotationSnapshot {
+  return "type" in snapshot && snapshot.type === kArrowAnnotationType;
 }
 
 export function updateArrowAnnotationTileIds(annotation: IArrowAnnotationSnapshot, tileIdMap: Record<string, string>) {

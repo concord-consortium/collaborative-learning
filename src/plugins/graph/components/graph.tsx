@@ -103,6 +103,19 @@ export const Graph = observer(function Graph({graphController, graphRef, dotsRef
   const handleTreatAttrAs = (place: GraphPlace, attrId: string, treatAs: AttributeType) => {
     graphModel.config.setAttributeType(graphPlaceToAttrRole[place], treatAs);
     dataset && graphController?.handleAttributeAssignment(place, dataset.id, attrId);
+
+    const connectingLines = graphModel.adornments.find(a => a.type === "Connecting Lines");
+    if (connectingLines && place === "left") {
+      treatAs === 'categorical' && graphModel.hideAdornment("Connecting Lines");
+      treatAs === 'numeric' && graphModel.showAdornment(connectingLines, "Connecting Lines");
+    }
+
+    // TODO: use isVisible state, set above, instead of this hack
+    if (!connectingLines?.isVisible){
+      const dotArea = select(dotsRef.current);
+      const anyFoundPath = dotArea.selectAll("path");
+      if (anyFoundPath) anyFoundPath.remove();
+    }
   };
 
   useDataTips({dotsRef, dataset, graphModel, enableAnimation});
@@ -193,7 +206,7 @@ export const Graph = observer(function Graph({graphController, graphRef, dotsRef
           />
         </svg>
         {renderDroppableAddAttributes()}
-        <Adornments />
+        <Adornments dotsRef={dotsRef}/>
         { appConfig.getSetting("defaultSeriesLegend", "graph") &&
           <MultiLegend
             graphElt={graphRef.current}

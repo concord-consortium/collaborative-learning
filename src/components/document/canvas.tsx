@@ -28,7 +28,6 @@ interface IProps {
   content?: DocumentContentModelType;
   context: string;
   document?: DocumentModelType;
-  idClass?: string; // A class applied that identifies this version of the document, ie top-panel-thumbnail
   overlayMessage?: string;
   readOnly?: boolean;
   scale?: number;
@@ -38,6 +37,7 @@ interface IProps {
 }
 
 interface IState {
+  canvasElement?: HTMLDivElement | null;
   documentScrollX: number;
   documentScrollY: number;
   historyDocumentCopy?: DocumentModelType;
@@ -47,7 +47,6 @@ interface IState {
 @inject("stores")
 @observer
 export class CanvasComponent extends BaseComponent<IProps, IState> {
-
   private toolApiMap: ITileApiMap = {};
   private tileApiInterface: ITileApiInterface;
   private hotKeys: HotKeys = new HotKeys();
@@ -77,6 +76,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
       "cmd-shift-s": this.handleCopyDocumentJson,
       "cmd-shift-p": this.handleCopyRawDocumentJson,
       "cmd-option-shift-s": this.handleExportSectionJson,
+      "cmd-shift-f": this.handleFullWindow,
       "cmd-z": this.handleDocumentUndo,
       "cmd-shift-z": this.handleDocumentRedo
     });
@@ -88,8 +88,10 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
     };
   }
 
-  private getIdClass() {
-    return this.props.idClass ?? "basic";
+  private setCanvasElement(canvasElement?: HTMLDivElement | null) {
+    if (!this.state.canvasElement) {
+      this.setState({ canvasElement });
+    }
   }
 
   public render() {
@@ -98,18 +100,22 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
       this.context.current = this.tileApiInterface;
     }
     const content = this.getDocumentToShow()?.content ?? this.getDocumentContent();
-    const readClass = this.props.readOnly ? "read-only" : "read-write";
-    const documentClasses = `.document-content.${this.getIdClass()}.${readClass}`;
     return (
       <TileApiInterfaceContext.Provider value={this.tileApiInterface}>
-        <div key="canvas" className="canvas" data-test="canvas" onKeyDown={this.handleKeyDown}>
+        <div
+          key="canvas"
+          className="canvas"
+          data-test="canvas"
+          onKeyDown={this.handleKeyDown}
+          ref={(el) => this.setCanvasElement(el)}
+        >
           {this.renderContent()}
           {this.renderDebugInfo()}
           {this.renderOverlayMessage()}
         </div>
         <AnnotationLayer
+          canvasElement={this.state.canvasElement}
           content={content}
-          documentClasses={documentClasses}
           documentScrollX={this.state.documentScrollX}
           documentScrollY={this.state.documentScrollY}
           readOnly={this.props.readOnly}
@@ -119,7 +125,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderContent() {
-    const {content, document, idClass, showPlayback, viaTeacherDashboard, ...others} = this.props;
+    const {content, document, showPlayback, viaTeacherDashboard, ...others} = this.props;
     const {showPlaybackControls} = this.state;
     const documentToShow = this.getDocumentToShow();
     const documentContent = content || documentToShow?.content; // we only pass in content if it is a problem panel
@@ -137,7 +143,6 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
             key={showPlaybackControls ? "history" : "main"}
             content={documentContent}
             documentId={documentToShow?.key}
-            idClass={this.getIdClass()}
             onScroll={(x: number, y: number) => this.setState({ documentScrollX: x, documentScrollY: y })}
             {...{typeClass, viaTeacherDashboard, ...others}}
           />
@@ -243,6 +248,11 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
         console.error(`Unable to export section json`, error);
       }
     }
+  };
+
+  private handleFullWindow = () => {
+    const { appConfig } = this.stores;
+    appConfig.navTabs.toggleShowNavPanel();
   };
 
   private handleDocumentUndo = () => {

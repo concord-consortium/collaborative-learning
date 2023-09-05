@@ -39,7 +39,6 @@ export class ProblemPanelComponent extends BaseComponent<IProps> {
       <CanvasComponent
         content={content}
         context="left-nav"
-        idClass="problem-panel"
         readOnly={true}
       />
     );

@@ -26,7 +26,7 @@ class ResourcesPanel{
     }
 
     getCollapsedResourcesTab() {
-      return cy.get('.collapsed-resources-tab');
+      return cy.get('.resources-expander');
     }
 
     // TODO: this is duplicated in commands.js, however in that case the tab

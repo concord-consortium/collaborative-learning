@@ -16,14 +16,14 @@ import { DocumentContentModelType } from "../../models/document/document-content
 import "./annotation-layer.scss";
 
 interface IAnnotationLayerProps {
+  canvasElement?: HTMLDivElement | null;
   content?: DocumentContentModelType;
-  documentClasses: string; // Classes that can be used to uniquely identify this rendering of the document
   documentScrollX?: number;
   documentScrollY?: number;
   readOnly?: boolean;
 }
 export const AnnotationLayer = observer(function AnnotationLayer({
-  content, documentClasses, documentScrollX, documentScrollY, readOnly
+  canvasElement, content, documentScrollX, documentScrollY, readOnly
 }: IAnnotationLayerProps) {
   const [_initialized, setInitialized] = useState(false);
   useEffect(() => {
@@ -35,24 +35,20 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const [sourceObjectType, setSourceObjectType] = useState<string | undefined>();
   const [mouseX, setMouseX] = useState<number | undefined>();
   const [mouseY, setMouseY] = useState<number | undefined>();
-  const divRef = useRef<HTMLDivElement>();
+  const divRef = useRef<Element|null>(null);
   const ui = useUIStore();
   const tileApiInterface = useContext(TileApiInterfaceContext);
 
   // Force rerenders when the layer's size changes
-  const [_resizes, setResizes] = useState(0);
-  useResizeObserver({ref: divRef.current, box: "border-box",
-    onResize() {
-      setResizes(value => value + 1);
-    }
-  });
+  useResizeObserver({ref: divRef, box: "border-box"});
 
   function getRowElement(rowId?: string) {
     if (rowId === undefined) return undefined;
-    const rowSelector = `${documentClasses} [data-row-id='${rowId}']`;
-    const rowElements = document.querySelectorAll(rowSelector);
-    if (rowElements.length !== 1) return undefined;
-    return rowElements[0] as HTMLElement;
+    const rowSelector = `[data-row-id='${rowId}']`;
+    const rowElements = canvasElement?.querySelectorAll(rowSelector);
+    if (rowElements && rowElements.length === 1) {
+      return rowElements[0] as HTMLElement;
+    }
   }
 
   const firstRow = content?.rowOrder.length && content.rowOrder.length > 0
@@ -81,10 +77,10 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     const rowElement = getRowElement(rowId);
     if (!rowElement) return undefined;
   
-    const tileSelector = `${documentClasses} [data-tool-id='${tileId}']`;
-    const tileElements = document.querySelectorAll(tileSelector);
-    if (tileElements.length !== 1) return undefined;
-    const tileElement = (tileElements[0] as HTMLElement);
+    const tileSelector = `[data-tool-id='${tileId}']`;
+    const tileElements = canvasElement?.querySelectorAll(tileSelector);
+    const tileElement = tileElements && tileElements.length === 1 ? tileElements[0] as HTMLElement : undefined;
+    if (!tileElement) return undefined;
   
     const tileApi = tileApiInterface?.getTileApi(tileId);
     const objectBoundingBox = tileApi?.getObjectBoundingBox?.(objectId, objectType);

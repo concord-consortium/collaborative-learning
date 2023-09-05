@@ -2,7 +2,7 @@ import { observer } from "mobx-react";
 import React from "react";
 
 import { ThumbnailDocumentItem } from "./thumbnail-document-item";
-import { useDocumentCaption } from "../document/use-document-caption";
+import { useDocumentCaption } from "../../hooks/use-document-caption";
 import { useDocumentSyncToFirebase } from "../../hooks/use-document-sync-to-firebase";
 import { useLastSupportViewTimestamp } from "../../hooks/use-last-support-view-timestamp";
 import { DocumentModelType } from "../../models/document/document";
@@ -12,7 +12,6 @@ import { NavTabSectionModelType } from "../../models/view/nav-tabs";
 import "./document-type-collection.sass";
 
 interface IProps {
-  idClass?: string;
   onDocumentDeleteClick?: (document: DocumentModelType) => void;
   onDocumentDragStart?: (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => void;
   onDocumentStarClick?: (document: DocumentModelType) => void;
@@ -27,7 +26,7 @@ interface IProps {
 
 // observes teacher names via useDocumentCaption()
 export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
-  idClass, section, sectionDocument, tab, scale, selectedDocument, selectedSecondaryDocument,
+  section, sectionDocument, tab, scale, selectedDocument, selectedSecondaryDocument,
   onSelectDocument, onDocumentDragStart, onDocumentStarClick, onDocumentDeleteClick
 }: IProps) => {
     const user = useUserStore();
@@ -80,7 +79,6 @@ export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
         dataTestName={`${tabName}-list-items`}
         canvasContext={tab}
         document={sectionDocument}
-        idClass={idClass}
         scale={scale}
         isSelected={sectionDocument.key === selectedDocument}
         isSecondarySelected={sectionDocument.key === selectedSecondaryDocument}

@@ -6,7 +6,7 @@ import { IDragTilesData, NewRowTileArray, PartialSharedModelEntry, PartialTile }
 import { DocumentContentModelWithTileDragging } from "./drag-tiles";
 import { IDropRowInfo, TileRowModelType, TileRowSnapshotOutType } from "./tile-row";
 import {
-  ArrowAnnotation, IArrowAnnotationSnapshot, isArrowAnnotation, updateArrowAnnotationTileIds
+  ArrowAnnotation, IArrowAnnotationSnapshot, isArrowAnnotationSnapshot, updateArrowAnnotationTileIds
 } from "../annotations/arrow-annotation";
 import { sharedModelFactory, UnknownSharedModel } from "../shared/shared-model-manager";
 import { getTileContentInfo, IDocumentExportOptions } from "../tiles/tile-content-info";
@@ -71,14 +71,8 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
         sharedModelEntry.provider = tileIdMap[sharedModelEntry.provider];
       }
       const sharedModel = sharedModelEntry.sharedModel;
-      // TODO: Figure out why linting is failing
-      // if ("providerId" in sharedModel && typeof sharedModel.providerId === "string") {
-      //   sharedModel.providerId = tileIdMap[sharedModel.providerId];
-      if ("providerId" in sharedModel) {
-        const providedSharedModel = sharedModel as any;
-        if (typeof providedSharedModel.providerId === "string") {
-          providedSharedModel.providerId = tileIdMap[providedSharedModel.providerId];
-        }
+      if ("providerId" in sharedModel && typeof sharedModel.providerId === "string") {
+        sharedModel.providerId = tileIdMap[sharedModel.providerId];
       }
     });
     // TODO: Give the shared models new ids
@@ -86,7 +80,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     // Update annotations with new tile ids
     each(snapshot.annotations, (annotation, id) => {
       // TODO Move into functions for specific annotation types
-      if (isArrowAnnotation(annotation)) {
+      if (isArrowAnnotationSnapshot(annotation)) {
         updateArrowAnnotationTileIds(annotation, tileIdMap);
       }
       annotationIdMap[annotation.id] = uniqueId();
@@ -337,7 +331,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       }
     };
     annotations.forEach(annotation => {
-      if (isArrowAnnotation(annotation)) {
+      if (isArrowAnnotationSnapshot(annotation)) {
         const newAnnotationSnapshot = cloneDeep(annotation);
         updateObject(newAnnotationSnapshot.sourceObject);
         updateObject(newAnnotationSnapshot.targetObject);

@@ -1,12 +1,14 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useStores, useUIStore, useUserStore} from "../../hooks/use-stores";
+
 import { useFirestore } from "../../hooks/firestore-hooks";
+import { useStores, useUIStore, useUserStore} from "../../hooks/use-stores";
+import { useDocumentCaption } from "../../hooks/use-document-caption";
 import { CurriculumDocument, DocumentDocument } from "../../lib/firestore-schema";
 import { getSectionTitle } from "../../models/curriculum/section";
 import { UserModelType } from "../../models/stores/user";
 import { getNavTabOfDocument, getTabsOfCurriculumDoc, isStudentWorkspaceDoc } from "../../models/stores/ui";
 import { DocumentModelType } from "../../models/document/document";
-import { useDocumentCaption } from "../document/use-document-caption";
+
 import DocumentIcon from "../../assets/icons/document-icon.svg";
 
 import "./commented-documents.scss";
