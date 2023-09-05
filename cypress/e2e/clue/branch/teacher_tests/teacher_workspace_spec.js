@@ -71,7 +71,7 @@ context('Teacher Workspace', () => {
   // addressed, this context should be moved so it's first in the order.
   describe('teacher specific navigation tabs', () => {
     it('verify problem tab solution switch', () => {
-      // cy.get('.collapsed-resources-tab').click();
+      // cy.get('.resources-expander').click();
       cy.wait(500);
       cy.get('.top-tab.tab-problems').should('exist').click();
       cy.get('.prob-tab').contains('Initial Challenge').click();
@@ -88,7 +88,7 @@ context('Teacher Workspace', () => {
     it('verify teacher guide', () => {
       //There is race condition that sometimes doesn't load the teacher guide
       //So we close the Resources panel, and re-open to force it to rerender
-      cy.collapseResourcesPanel();
+      cy.collapseResourceTabs();
       cy.openResourceTabs();
       cy.get('.top-tab.tab-teacher-guide').should('exist').click({force:true});
       cy.get('.prob-tab.teacher-guide').should('exist').and('have.length', 4).each(function (subTab, index, subTabList) {
@@ -104,7 +104,6 @@ context('Teacher Workspace', () => {
       cy.waitForLoad();
       dashboard.switchView("Workspace & Resources");
       primaryWorkSpace.getResizePanelDivider().click();
-      // primaryWorkSpace.getResizeRightPanelHandle().click();
       cy.wait(2000);
       cy.get('@clueData').then((clueData) => {
         const groups = clueData.classes[0].problems[0].groups;

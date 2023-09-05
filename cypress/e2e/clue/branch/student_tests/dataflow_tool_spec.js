@@ -15,7 +15,7 @@ context('Dataflow Tool Tile', function () {
   describe("Dataflow Tool", () => {
     it("renders dataflow tool tile", () => {
       cy.wait(120000);
-      cy.collapseResourceTabs();
+      cy.showOnlyDocumentWorkspace();
       clueCanvas.addTile("dataflow");
       dataflowToolTile.getDataflowTile().should("exist");
       dataflowToolTile.getTileTitle().should("exist");

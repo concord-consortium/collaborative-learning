@@ -28,7 +28,7 @@ context('Diagram Tool Tile', function () {
 
     cy.visit(queryParams);
     cy.waitForLoad();
-    cy.collapseResourceTabs();
+    cy.showOnlyDocumentWorkspace();
   });
   describe("Shared Variable Tiles (Diagram, Drawing)", () => {
     it("Diagram tile, toolbar, and dialogs", () => {
@@ -284,7 +284,7 @@ context('Diagram Tool Tile', function () {
       diagramTile.getVariableCardField("name").should("have.value", "");
       textTile.getTextTile().should("contain", "Hell");
     });
-   
+
     it("Undo Redo Actions", () => {
       // Creation - Undo/Redo
       clueCanvas.addTile('diagram');
