@@ -99,6 +99,7 @@ exports[`Drawing Layer Components Image adds an image 1`] = `
   <image
     height="10"
     href="my/image/url"
+    pointer-events="visible"
     preserveAspectRatio="none"
     width="10"
     x="10"
@@ -124,6 +125,7 @@ exports[`Drawing Layer Components Image moves a image 1`] = `
   <image
     height="10"
     href="my/image/url"
+    pointer-events="visible"
     preserveAspectRatio="none"
     width="10"
     x="5"
@@ -191,6 +193,7 @@ exports[`Drawing Layer Components Vector line adds a Vector line 1`] = `
   <g
     class="vector"
     fill="#888888"
+    pointer-events="visible"
     stroke="#888888"
     stroke-dasharray=""
     stroke-width="1"
@@ -222,6 +225,7 @@ exports[`Drawing Layer Components Vector line moves a vector line 1`] = `
   <g
     class="vector"
     fill="#888888"
+    pointer-events="visible"
     stroke="#888888"
     stroke-dasharray=""
     stroke-width="1"

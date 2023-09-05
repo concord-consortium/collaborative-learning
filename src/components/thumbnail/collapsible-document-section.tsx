@@ -29,7 +29,7 @@ interface IProps {
 }
 
 export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
-  ({userName, classNameStr, stores, scale, selectedDocument, onSelectDocument, subTab,
+  ({userName, classNameStr, scale, selectedDocument, onSelectDocument, subTab,
     networkResource, userId, classHash}) => {
   const [isOpen, setIsOpen] = useState(false);
   const user = useUserStore();
@@ -80,7 +80,6 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
   const networkDocuments = useNetworkDocuments();
   const currentSection = subTab.sections[0] as NavTabSectionModelType;
   const hasDocuments = documentKeys.length > 0;
-
   return (
     <div className="collapsible-documents-section">
       <div className="section-collapse-toggle" onClick={hasDocuments ? handleSectionToggle : undefined}>
@@ -98,9 +97,13 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
               const documentContext = getDocumentContext(document);
               return (
                 <DocumentContextReact.Provider key={document.key} value={documentContext}>
-                  <DecoratedDocumentThumbnailItem section={currentSection} sectionDocument={document}
-                    tab={subTab.label} scale={scale} selectedDocument={selectedDocument}
+                  <DecoratedDocumentThumbnailItem
                     onSelectDocument={() => onSelectDocument?.(document)}
+                    scale={scale}
+                    section={currentSection}
+                    sectionDocument={document}
+                    selectedDocument={selectedDocument}
+                    tab={subTab.label}
                   />
                 </DocumentContextReact.Provider>
               );
