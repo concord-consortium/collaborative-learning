@@ -39,6 +39,13 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const ui = useUIStore();
   const tileApiInterface = useContext(TileApiInterfaceContext);
 
+  // Clear a partially completed annotation when the mode changes
+  useEffect(() => {
+    setSourceTileId("");
+    setSourceObjectId("");
+    setSourceObjectType(undefined);
+  }, [ui.annotationMode]);
+
   // Force rerenders when the layer's size changes
   useResizeObserver({ref: divRef, box: "border-box"});
 

@@ -1,5 +1,9 @@
 @use "../vars.sass";
 
+.actual-sparrow {
+  opacity: .5;
+}
+
 .text-object {
   pointer-events: none;
 
