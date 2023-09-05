@@ -1,19 +1,51 @@
 @import "../vars.sass";
 
 .divider-container {
+  display: flex;
   z-index: 1;
   position: relative;
-  margin-right: 2px;
-  margin-left: 2px;
   transition-duration: .5s;
+
+  &.divider-position-0 {
+    margin-right: 2px;
+  }
+
+  &.divider-position-50 {
+    // padding is used instead of margin to increase the clickable area
+    padding-right: 2px;
+    padding-left: 2px;
+    cursor: col-resize;
+
+    &.show-expanders {
+      cursor: default;
+    }
+  }
+
+  &.divider-position-100 {
+    margin-left: 2px;
+  }
+
+  // Hide the divider when the expanders are shown
+  // this is done with a width of 0 so it is animated.
+  &.show-expanders .resize-panel-divider {
+    width: 0;
+    padding: 0;
+    // With a flex display the children of the divider were still shown
+    display: block;
+  }
 
   .resize-panel-divider {
     height: 100%;
+    // Need to set an explicit width so it can be animated
+    width: 4px;
     padding-top: 4px;
     display: flex;
     align-items: center;
     flex-direction: column;
     justify-content: center;
+    transition-duration: 0.25s;
+    // When width is zero don't let divider show
+    overflow: clip;
 
     &.divider-min {
       align-items: flex-start;
@@ -28,7 +60,6 @@
       border-radius: 2px;
       background-color: $charcoal-light-4;
       z-index: 1;
-      cursor: col-resize;
     }
 
     .drag-thumbnail {
@@ -37,44 +68,6 @@
       margin-top: 9px;
       align-items: center;
       background-color: white;
-    }
-  }
-  .expand-handles-container {
-    height: 100%;
-    display: flex;
-    flex-direction: row;
-    position: relative;
-
-    .expand-handle {
-      width: 38px;
-      padding: 2px;
-      box-sizing: border-box;
-      border-style: solid;
-      display: flex;
-      border: solid $charcoal;
-      background-color: $charcoal-light-6;
-
-      &.left {
-        border-radius: 8px 0 0 0;
-        border-width: 2px 1px 2px 2px;
-      }
-      &.right {
-        border-radius: 0 8px 0 0;
-        border-width: 2px 2px 2px 1px;
-      }
-      &:hover {
-        background-color: $charcoal-light-4;
-      }
-      &:active {
-        background-color: $charcoal-light-3;
-      }
-      .expand-indicator {
-        align-self: center;
-        justify-self: center;
-        &.left {
-          transform: rotate(180deg);
-        }
-      }
     }
   }
 }

@@ -14,7 +14,7 @@ import { when } from "mobx";
 import { CDocument, TreeManager } from "./tree-manager";
 import { HistoryEntrySnapshot } from "./history";
 import { withoutUndo } from "./without-undo";
-
+import { expectEntryToBeComplete } from "./undo-store-test-utils";
 // way to get a writable reference to libDebug
 const libDebug = require("../../lib/debug");
 
@@ -895,27 +895,3 @@ async function expectUpdateToBeCalledTimes(testTile: TestTileType, times: number
   return expect(updateCalledTimes).resolves.toBeUndefined();
 }
 
-// TODO: it would nicer to use a custom Jest matcher here so we can
-// provide a better error message when it fails
-async function expectEntryToBeComplete(manager: Instance<typeof TreeManager>, length: number) {
-  const changeDocument = manager.document as Instance<typeof CDocument>;
-  let timedOut = false;
-  try {
-    await when(
-      () => changeDocument.history.length >= length && changeDocument.history.at(length-1)?.state === "complete",
-      {timeout: 100});
-  } catch (e) {
-    timedOut = true;
-  }
-  expect({
-    historyLength: changeDocument.history.length,
-    lastEntryState: changeDocument.history.at(-1)?.state,
-    activeExchanges: changeDocument.history.at(-1)?.activeExchanges.toJSON(),
-    timedOut
-  }).toEqual({
-    historyLength: length,
-    lastEntryState: "complete",
-    activeExchanges: [],
-    timedOut: false
-  });
-}

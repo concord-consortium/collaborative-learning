@@ -1,19 +1,70 @@
 @import "../vars";
 
-.collapsed-resources-tab {
+// Only shown with .show-expanders
+.show-expanders .resources-expander {
   width: 38px;
-  margin-right: 4px;
   padding: 2px;
   border-radius: 0 8px 0 0;
-  box-sizing: border-box;
-  border-width: 2px;
   border-style: solid;
-  display: flex;
+  border-width: 2px 2px 2px 1px;
+}
+
+// Hidden when the divider is on the right
+.show-expanders.divider-position-100 .resources-expander {
+  width: 0;
+  padding: 0;
+  border: 0;
+}
+
+.resources-expander {
+  position: relative; // so we can center elements
+  width: 0;
+  box-sizing: border-box;
   z-index: 2;
-  visibility: hidden;
-  &.shown {
-    visibility: visible;
+  // We skip transitioning the background color because it is used for hover
+  // and active states which should be instantaneous
+  transition-duration: 0.25s, 0s;
+  transition-property: all, background-color;
+  // When the width is 0, don't let the icons show
+  overflow: clip;
+
+  // Styling when in the center
+  border-color: $charcoal;
+  background-color: $charcoal-light-6;
+  &:hover {
+    background-color: $charcoal-light-4;
   }
+  &:active {
+    background-color: $charcoal-light-3;
+  }
+
+  .resources-expander-label {
+    // hidden by default
+    opacity: 0;
+    transition-duration: 0.25s;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-size: 14px;
+    margin: 20px 7px;
+    height: max-content;
+  }
+
+  .expand-left-indicator {
+    position: absolute;
+    // Offset the icon by half its height 34px
+    top: calc(50% - 17px);
+    // As the width animates keep the indicator pinned to the right
+    right: 0;
+  }
+}
+
+.divider-position-0 .resources-expander {
+  // Replace 1px right border with 2px all around
+  border-width: 2px;
+  .resources-expander-label {
+    opacity: 1;
+  }
+
   &.problems {
     border-color: $problem-orange;
     background-color: $problem-orange-light-4;
@@ -73,19 +124,5 @@
     &:active {
       background-color: $support-blue-light-2;
     }
-  }
-
-  .collapsed-tab-label {
-    writing-mode: vertical-rl;
-    transform: rotate(180deg);
-    font-size: 14px;
-    margin: 20px 7px;
-    height: max-content;
-  }
-  .expand-left-indicator {
-    position: relative;
-    left: -33px;
-    align-self: center;
-    justify-self: center;
   }
 }

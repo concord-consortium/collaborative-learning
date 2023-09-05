@@ -80,7 +80,12 @@ describe("data-types", () => {
       "0xFF",
       "0o10",
       "0b10",
-      "2,000" // <-- this should be a number but is not
+      "2,000",
+      "1,200,000.00",
+      // ⬇ This should really not be considered a number in the US locale
+      //    However the current comma handling approach is simple so this
+      //    is considered the same as 12
+      "1,2"
     ];
     const testCases = valuesToTest.map(value => {
       return [value, isNumeric(value)];
@@ -97,7 +102,9 @@ describe("data-types", () => {
 "0xFF" => true
 "0o10" => true
 "0b10" => true
-"2,000" => false
+"2,000" => true
+"1,200,000.00" => true
+"1,2" => true
 `);
   });
 });

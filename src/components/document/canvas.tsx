@@ -76,6 +76,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
       "cmd-shift-s": this.handleCopyDocumentJson,
       "cmd-shift-p": this.handleCopyRawDocumentJson,
       "cmd-option-shift-s": this.handleExportSectionJson,
+      "cmd-shift-f": this.handleFullWindow,
       "cmd-z": this.handleDocumentUndo,
       "cmd-shift-z": this.handleDocumentRedo
     });
@@ -247,6 +248,11 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
         console.error(`Unable to export section json`, error);
       }
     }
+  };
+
+  private handleFullWindow = () => {
+    const { appConfig } = this.stores;
+    appConfig.navTabs.toggleShowNavPanel();
   };
 
   private handleDocumentUndo = () => {
