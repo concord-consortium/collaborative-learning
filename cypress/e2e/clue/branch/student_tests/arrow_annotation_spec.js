@@ -184,5 +184,11 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.clickArrowToolbarButton();
     // 3 points + 3 segments + 1 polygon = 7
     aa.getAnnotationButtons().should("have.length", 7);
+
+    cy.log("Can add an arrow to geometry objects");
+    aa.getAnnotationArrows().should("not.exist");
+    aa.getAnnotationButtons().eq(1).click();
+    aa.getAnnotationButtons().eq(6).click();
+    aa.getAnnotationArrows().should("have.length", 1);
   });
 });
