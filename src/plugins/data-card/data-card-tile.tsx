@@ -1,7 +1,6 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { useEffect, useState } from "react";
-
 import { ITileProps, extractDragTileType, kDragTiles } from "../../components/tiles/tile-component";
 import { useUIStore } from "../../hooks/use-stores";
 import { addCanonicalCasesToDataSet } from "../../models/data/data-set";
@@ -18,12 +17,14 @@ import { safeJsonParse } from "../../utilities/js-utils";
 import { mergeTwoDataSets } from "../../models/data/data-set-utils";
 import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
 import { useConsumerTileLinking } from "../../hooks/use-consumer-tile-linking";
+import { useDataCardTileHeight } from "./use-data-card-tile-height";
 
 import "./data-card-tile.scss";
 
 export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
   const { documentId, model, readOnly, documentContent, tileElt, onSetCanAcceptDrop, onRegisterTileApi,
-            scale, onRequestUniqueTitle, onUnregisterTileApi, onRequestTilesOfType, onRequestLinkableTiles } = props;
+            scale, onRequestUniqueTitle, onUnregisterTileApi, onRequestTilesOfType,
+            height, onRequestRowHeight, onRequestLinkableTiles } = props;
 
   const content = model.content as DataCardContentModelType;
   const ui = useUIStore();
@@ -54,6 +55,17 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
       }
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useDataCardTileHeight({
+    tileElt,
+    height: height && isFinite(height) ? height : 0,
+    currEditAttrId: currEditAttrId ?? "",
+    modelId: model.id,
+    documentId,
+    readOnly: readOnly ?? false,
+    onRequestRowHeight,
+    attrCount: content.attributes.length,
+  });
 
   /* ==[ Drag and Drop ] == */
 
