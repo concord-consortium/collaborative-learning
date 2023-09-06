@@ -29,14 +29,15 @@ export const useDataCardTileHeight = ({
     if (!tileElt) return;
     const uiHeight = tileElt.querySelector(".data-card-container")?.scrollHeight || 0;
     const spaceLeft = height ? height - uiHeight : 0;
-    const requiringHeightChange = attrCtRef.current < attrCount || spaceLeft < kButtonSpace;
+    const adjustForEdits = !readOnly && (attrCtRef.current < attrCount || spaceLeft < kButtonSpace);
+    // documentId is undefined when loading in left-side content tabs
     const loadingInContent = !documentId && readOnly;
 
     if (loadingInContent) {
       onRequestRowHeight(modelId, Math.max(uiHeight, kExampleDeckHeight));
     }
 
-    if (requiringHeightChange) {
+    else if (adjustForEdits) {
       onRequestRowHeight(modelId, uiHeight + kButtonSpace);
     }
 

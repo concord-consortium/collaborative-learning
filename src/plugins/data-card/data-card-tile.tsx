@@ -64,7 +64,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
     documentId,
     readOnly: readOnly ?? false,
     onRequestRowHeight,
-    attrCount: attrIdsNames.length,
+    attrCount: content.attributes.length,
   });
 
   /* ==[ Drag and Drop ] == */
