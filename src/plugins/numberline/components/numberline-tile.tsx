@@ -27,9 +27,9 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   const [_selectedPointId, setSelectedPointId] = useState(""); // Just used to rerender when a point is selected
 
   // Basic model manipulation functions
-  const deleteSelectedPoints = () => {
+  const deleteSelectedPoints = useCallback(() => {
     content.deleteSelectedPoints();
-  };
+  }, [content]);
 
   const createPoint = (xValue: number) => {
     if (!readOnly) {
@@ -48,7 +48,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
         "backspace": deleteSelectedPoints,
       });
     }
-  }, []);
+  }, [deleteSelectedPoints, readOnly]);
 
   //---------------- Calculate Width Of Tile / Scale ----------------------------------------------
   const documentScrollerRef = useRef<HTMLDivElement>(null);
@@ -60,13 +60,13 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     return scaleLinear()
       .domain([numberlineDomainMin, numberlineDomainMax])
       .range([0, axisWidth]);
-  }, [axisWidth, numberlineDomainMax, numberlineDomainMin]);
-  const axisLeft = useMemo(() => tileWidth * (1 - kAxisWidth) / 2, [kAxisWidth, tileWidth]);
+  }, [axisWidth]);
+  const axisLeft = useMemo(() => tileWidth * (1 - kAxisWidth) / 2, [tileWidth]);
 
   const pointPosition = useCallback((point: PointObjectModelType) => {
     const x = xScale(point.currentXValue);
     return { x, y: yMidPoint };
-  }, [xScale, yMidPoint]);
+  }, [xScale]);
 
   useEffect(() => {
     let obs: ResizeObserver;
@@ -88,7 +88,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     if (!point) return undefined;
     const { x, y } = pointPosition(point);
     return { x: x + axisLeft + kBoundingBoxOffset, y: y + kTitleHeight + kBoundingBoxOffset };
-  }, [axisLeft, content, kBoundingBoxOffset, kTitleHeight, pointPosition]);
+  }, [axisLeft, content, pointPosition]);
 
   const getObjectBoundingBox = useCallback((objectId: string, objectType?: string) => {
     if (objectType === "point") {
@@ -100,10 +100,10 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
         left: x - outerPointRadius,
         top: y - outerPointRadius,
         width: 2 * outerPointRadius
-      }
+      };
       return boundingBox;
     }
-  }, [axisLeft, outerPointRadius, pointPosition]);
+  }, [annotationPointCenter]);
 
   useEffect(() => {
     onRegisterTileApi({
@@ -119,11 +119,11 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
           // Find the center point
           const coords = annotationPointCenter(objectId);
           if (!coords) return;
-          const pointPosition = translateTilePointToScreenPoint?.([coords.x, coords.y]);
-          if (!pointPosition) return;
+          const pointCenter = translateTilePointToScreenPoint?.([coords.x, coords.y]);
+          if (!pointCenter) return;
 
           // Return a circle at the center point
-          const [x, y] = pointPosition;
+          const [x, y] = pointCenter;
           return (
             <circle
               className={classes}
@@ -144,7 +144,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
         return offsets;
       }
     });
-  }, [annotationPointCenter, getObjectBoundingBox, innerPointRadius, kPointButtonRadius, model.title]);
+  }, [annotationPointCenter, content, getObjectBoundingBox, model.title, onRegisterTileApi]);
 
   //-------------------  SVG Ref to Numberline & SVG --------------------------------
   const svgRef = useRef<SVGSVGElement | null>(null);
