@@ -8,7 +8,8 @@ import { NumberlineContentModelType, PointObjectModelType,  } from "../models/nu
 import {
   kAxisStyle, kAxisWidth, kContainerWidth, kNumberLineContainerHeight, numberlineDomainMax, numberlineDomainMin,
   tickHeightDefault, tickHeightZero, tickStyleDefault, tickStyleZero, tickWidthDefault, tickWidthZero,
-  innerPointRadius, outerPointRadius, numberlineYBound, yMidPoint, kTitleHeight, kBoundingBoxOffset, kArrowheadTop, kArrowheadOffset
+  innerPointRadius, outerPointRadius, numberlineYBound, yMidPoint, kTitleHeight, kBoundingBoxOffset, kArrowheadTop,
+  kArrowheadOffset, kPointButtonRadius
 } from '../numberline-tile-constants';
 import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
 import { useToolbarTileApi } from "../../../components/tiles/hooks/use-toolbar-tile-api";
@@ -82,15 +83,22 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   }, []);
 
   // Register Tile API functions
+  const annotationPointCenter = useCallback((pointId: string) => {
+    const point = content.getPoint(pointId);
+    if (!point) return undefined;
+    const { x, y } = pointPosition(point);
+    return { x: x + axisLeft + kBoundingBoxOffset, y: y + kTitleHeight + kBoundingBoxOffset };
+  }, [axisLeft, content, kBoundingBoxOffset, kTitleHeight, pointPosition]);
+
   const getObjectBoundingBox = useCallback((objectId: string, objectType?: string) => {
     if (objectType === "point") {
-      const point = content.getPoint(objectId);
-      if (!point) return undefined;
-      const { x, y } = pointPosition(point);
+      const coords = annotationPointCenter(objectId);
+      if (!coords) return undefined;
+      const { x, y } = coords;
       const boundingBox = {
         height: 2 * outerPointRadius,
-        left: x + axisLeft - outerPointRadius + kBoundingBoxOffset,
-        top: y + kTitleHeight - outerPointRadius + kBoundingBoxOffset,
+        left: x - outerPointRadius,
+        top: y - outerPointRadius,
         width: 2 * outerPointRadius
       }
       return boundingBox;
@@ -106,6 +114,28 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
         return model.title || "";
       },
       getObjectBoundingBox,
+      getObjectButtonSVG: ({ classes, handleClick, objectId, objectType, translateTilePointToScreenPoint }) => {
+        if (objectType === "point") {
+          // Find the center point
+          const coords = annotationPointCenter(objectId);
+          if (!coords) return;
+          const pointPosition = translateTilePointToScreenPoint?.([coords.x, coords.y]);
+          if (!pointPosition) return;
+
+          // Return a circle at the center point
+          const [x, y] = pointPosition;
+          return (
+            <circle
+              className={classes}
+              cx={x}
+              cy={y}
+              fill="transparent"
+              onClick={handleClick}
+              r={kPointButtonRadius}
+            />
+          );
+        }
+      },
       getObjectDefaultOffsets: (objectId: string, objectType?: string) => {
         const offsets = OffsetModel.create({});
         if (objectType === "point") {
@@ -114,7 +144,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
         return offsets;
       }
     });
-  }, [getObjectBoundingBox, model.title, innerPointRadius]);
+  }, [annotationPointCenter, getObjectBoundingBox, innerPointRadius, kPointButtonRadius, model.title]);
 
   //-------------------  SVG Ref to Numberline & SVG --------------------------------
   const svgRef = useRef<SVGSVGElement | null>(null);
