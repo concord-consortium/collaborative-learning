@@ -7,7 +7,7 @@ dayjs.extend(customParseFormat);
 // locale date identification. It isn't clear if dayjs supports this.
 // In particular some locales put the day first instead of the month.
 // We can just let dayjs check all of its known formats but then it
-// will match any string with a date anywhere in it. There are is
+// will match any string with a date anywhere in it. There is
 // a locale format plugin which is close but is probably still too
 // strict.
 // See data-types.test.ts to see examples
