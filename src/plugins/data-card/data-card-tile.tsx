@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ITileProps, extractDragTileType, kDragTiles } from "../../components/tiles/tile-component";
 import { useUIStore } from "../../hooks/use-stores";
 import { addCanonicalCasesToDataSet } from "../../models/data/data-set";
@@ -33,6 +33,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
   const [currEditFacet, setCurrEditFacet] = useState<EditFacet>("");
   const [imageUrlToAdd, setImageUrlToAdd] = useState<string>("");
   const [highlightDataCard, setHighlightDataCard] = useState(false);
+  const attrCount = useRef(content.existingAttributesWithNames().length);
 
   const shouldShowAddCase = !readOnly && isTileSelected;
   const shouldShowDeleteCase = !readOnly && isTileSelected && content.dataSet.cases.length > 1;
@@ -66,6 +67,14 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
   }, [currEditAttrId, currEditFacet, imageUrlToAdd,
     height, readOnly, tileElt, onRequestRowHeight, model.id, documentId]);
 
+  useEffect(() => {
+    const uiHeight = tileElt?.querySelector(".data-card-container")?.scrollHeight || 0;
+    const spaceLeft = height ? height - uiHeight : 0;
+    if (attrCount.current < attrIdsNames.length) {
+      attrCount.current = attrIdsNames.length;
+      if (!readOnly) spaceLeft < kButtonSpace && onRequestRowHeight(model.id, uiHeight + kButtonSpace);
+    }
+  }, [attrCount, attrIdsNames.length, currEditAttrId, height, model.id, onRequestRowHeight, readOnly, tileElt]);
   /* ==[ Drag and Drop ] == */
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
