@@ -55,26 +55,26 @@ context('Teacher Workspace', () => {
   describe('teacher document functionality', function () {
     
     it('verify teacher workspace tab', function () {
-    cy.log('verify save and restore');
-    beforeTest(queryParams.teacherQueryParams);
-    beforeAdd();
+      cy.log('verify save and restore');
+      beforeTest(queryParams.teacherQueryParams);
+      beforeAdd();
 
-    cy.log('verify save and restore investigation');
-    cy.openSection("my-work", "workspaces");
-    cy.wait(2000);
-    tableToolTile.getTableTile().should('exist');
-    drawToolTile.getDrawTile().should('exist');
+      cy.log('verify save and restore investigation');
+      cy.openSection("my-work", "workspaces");
+      cy.wait(2000);
+      tableToolTile.getTableTile().should('exist');
+      drawToolTile.getDrawTile().should('exist');
 
-    cy.log('verify save and restore extra workspace');
-    cy.openTopTab("my-work");
-    cy.openSection("my-work", "workspaces");
-    cy.getCanvasItemTitle("workspaces").contains(teacherDoc).should('exist');
-    cy.openDocumentWithTitle("my-work", "workspaces", teacherDoc);
-    cy.wait(2000);
-    tableToolTile.getTableTile().should('exist');
-    drawToolTile.getDrawTile().should('exist');
+      cy.log('verify save and restore extra workspace');
+      cy.openTopTab("my-work");
+      cy.openSection("my-work", "workspaces");
+      cy.getCanvasItemTitle("workspaces").contains(teacherDoc).should('exist');
+      cy.openDocumentWithTitle("my-work", "workspaces", teacherDoc);
+      cy.wait(2000);
+      tableToolTile.getTableTile().should('exist');
+      drawToolTile.getDrawTile().should('exist');
 
-    afterDelete();
+      afterDelete();
   // });
 
     
@@ -86,7 +86,7 @@ context('Teacher Workspace', () => {
   // See the TODO comment above addDisposer in src/models/stores/stores.ts. After that is
   // addressed, this context should be moved so it's first in the order.
   // describe('teacher specific navigation tabs', () => {
-    cy.log('verify problem tab solution switch');
+      cy.log('verify problem tab solution switch');
       // cy.get('.resources-expander').click();
       cy.wait(500);
       cy.get('.top-tab.tab-problems').should('exist').click();
@@ -100,7 +100,7 @@ context('Teacher Workspace', () => {
       cy.get('[data-test=solutions-button]').should('have.not.class', "toggled");
       cy.get('.has-teacher-tiles').should("not.exist");
 
-    cy.log('verify teacher guide');
+      cy.log('verify teacher guide');
       //There is race condition that sometimes doesn't load the teacher guide
       //So we close the Resources panel, and re-open to force it to rerender
       cy.collapseResourceTabs();

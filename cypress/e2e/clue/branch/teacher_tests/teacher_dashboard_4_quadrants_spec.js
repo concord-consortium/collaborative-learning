@@ -24,8 +24,8 @@ context('Teacher Dashboard View 4 Quadrants', () => {
 
     describe('4 quadrants functionality', () => {
       it('verify 4 quadrants functionality', () => {
-      beforeTest(queryParams);   
-      cy.log('verifies students are in correct groups');
+        beforeTest(queryParams);   
+        cy.log('verifies students are in correct groups');
         cy.get('@clueData').then((clueData) => {
           let groups = clueData.classes[0].problems[0].groups;
           let groupIndex = 0;
@@ -40,7 +40,7 @@ context('Teacher Dashboard View 4 Quadrants', () => {
             .should('contain', "S4");
           });
         });
-      cy.log('verify each canvas in a 4 up view is read only');
+        cy.log('verify each canvas in a 4 up view is read only');
         cy.get('@clueData').then((clueData) => {
           let tempGroupIndex = 0;
           let tempGroup = clueData.classes[0].problems[0].groups[tempGroupIndex];
@@ -49,7 +49,7 @@ context('Teacher Dashboard View 4 Quadrants', () => {
         });
 
       // FIXME: this test was crashing my local cypress.
-      cy.log('verify toggling the 4 quardrants in a 4 up view');
+        cy.log('verify toggling the 4 quardrants in a 4 up view');
 
         //North West Quardrants
         dashboard.getGroups().eq(0).within(() => {
