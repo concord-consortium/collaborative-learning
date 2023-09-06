@@ -12,6 +12,7 @@ import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable
 import { HotKeys } from "../../../utilities/hot-keys";
 import { getClipboardContent, pasteClipboardImage } from "../../../utilities/clipboard-utils";
 import "./drawing-tile.scss";
+import { ObjectListView } from "./object-list-view";
 
 type IProps = ITileProps;
 
@@ -19,6 +20,7 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
   const { documentContent, tileElt, model, readOnly, scale, onRegisterTileApi, onUnregisterTileApi } = props;
   const contentRef = useCurrent(model.content as DrawingContentModelType);
   const [imageUrlToAdd, setImageUrlToAdd] = useState("");
+  const [objectListHoveredObject, setObjectListHoveredObject] = useState(null as string|null);
   const hotKeys = useRef(new HotKeys());
   const drawingToolElement = useRef<HTMLDivElement>(null);
 
@@ -37,7 +39,7 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
           const bb = object.boundingBox;
           const height = bb.se.y - bb.nw.y + bbPadding * 2;
           const width = bb.se.x - bb.nw.x + bbPadding * 2;
-          const left = bb.nw.x - bbPadding;
+          const left = bb.nw.x - bbPadding + getObjectListPanelWidth();
           const top = bb.nw.y - bbPadding;
           return { height, left, top, width };
         }
@@ -68,11 +70,23 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
 
   const toolbarProps = useToolbarTileApi({ id: model.id, enabled: !readOnly, onRegisterTileApi, onUnregisterTileApi });
 
+  const getObjectListPanelWidth = () => {
+    if (drawingToolElement.current) {
+      const objectListElement = drawingToolElement.current.querySelector<HTMLDivElement>('div.object-list');
+      return objectListElement ? objectListElement.offsetWidth : 0;
+    } else {
+      return 0;
+    }
+  };
+
   const getVisibleCanvasSize = () => {
     if (!drawingToolElement.current 
       || !drawingToolElement.current.clientWidth 
       || !drawingToolElement.current.clientHeight) return undefined;
-    return { x: drawingToolElement.current.clientWidth, y: drawingToolElement.current.clientHeight };
+    return { 
+      x: drawingToolElement.current.clientWidth-getObjectListPanelWidth(), 
+      y: drawingToolElement.current.clientHeight 
+    };
   };
 
   return (
@@ -98,11 +112,15 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
           getVisibleCanvasSize={getVisibleCanvasSize}
           {...toolbarProps}
         />
-        <DrawingLayerView
-          {...props}
-          imageUrlToAdd={imageUrlToAdd}
-          setImageUrlToAdd={setImageUrlToAdd}
-        />
+        <div className="drawing-container">
+          {!readOnly && <ObjectListView model={model} setHoverObject={setObjectListHoveredObject} />}
+          <DrawingLayerView
+            {...props}
+            highlightObject={objectListHoveredObject}
+            imageUrlToAdd={imageUrlToAdd}
+            setImageUrlToAdd={setImageUrlToAdd}
+          />
+        </div>
       </div>
     </DrawingContentModelContext.Provider>
   );

@@ -8,6 +8,7 @@ export const kCellHorizontalPadding = 8; // includes both sides
 export const kCellVerticalPadding = 2; // only includes a single side
 export const kCellLineHeight = 18;
 export const kRowHeight = kCellLineHeight + 2 * kCellVerticalPadding;
+export const kDefaultImageCellHeight = 32;
 export const kHeaderRowHeight = 34;
 export const kHeaderCellHorizontalPadding = 32; // half on either side of text
 export const kExpressionCellPadding = 20;
