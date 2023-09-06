@@ -14,7 +14,7 @@ import { preprocessImportFormat } from "./geometry-import";
 import {
   cloneGeometryObject, CommentModel, CommentModelType, GeometryBaseContentModel, GeometryObjectModelType,
   GeometryObjectModelUnion, ImageModel, ImageModelType, isCommentModel, isMovableLineModel, isMovableLinePointId,
-  isPointModel, isPolygonModel, MovableLineModel, PointModel, PolygonModel, VertexAngleModel
+  isPointModel, isPolygonModel, MovableLineModel, PointModel, PolygonModel, PolygonModelType, VertexAngleModel
 } from "./geometry-model";
 import {
   getBoardUnitsAndBuffers, getObjectById, guessUserDesiredBoundingBox, kXAxisTotalBuffer, kYAxisTotalBuffer,
@@ -31,6 +31,7 @@ import {
   isVertexAngle, isVisibleEdge, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin,
   kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth, toObj
 } from "./jxg-types";
+import { getTileIdFromContent } from "../tile-model";
 import { SharedModelType } from "../../shared/shared-model";
 import { ISharedModelManager } from "../../shared/shared-model-manager";
 import { IDataSet } from "../../data/data-set";
@@ -38,6 +39,7 @@ import { uniqueId } from "../../../utilities/js-utils";
 import { logTileChangeEvent } from "../log/log-tile-change-event";
 import { LogEventName } from "../../../lib/logger-types";
 import { gImageMap } from "../../image-map";
+import { IClueObject } from "../../annotations/clue-object";
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
 
@@ -192,6 +194,26 @@ export const GeometryContentModel = GeometryBaseContentModel
     }
   }))
   .views(self => ({
+    get annotatableObjects() {
+      const tileId = getTileIdFromContent(self) ?? "";
+      const polygons: IClueObject[] = [];
+      const segments: IClueObject[] = [];
+      const points: IClueObject[] = [];
+      self.objects.forEach(object => {
+        const objectInfo = { tileId, objectId: object.id, objectType: object.type };
+        if (object.type === "polygon") {
+          polygons.push(objectInfo);
+          const polygon = object as PolygonModelType;
+          polygon.segmentIds.forEach(
+            segmentId => segments.push({ tileId, objectId: segmentId, objectType: "segment" })
+          );
+        } else if (object.type === "point") {
+          points.push(objectInfo);
+        }
+      });
+      // The order of the objects is important so buttons to add sparrows don't cover each other
+      return [...polygons, ...segments, ...points];
+    },
     // Returns any object in the model, even a subobject (like a movable line's point)
     getAnyObject(id: string) {
       if (isMovableLinePointId(id)) {

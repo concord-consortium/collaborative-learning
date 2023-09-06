@@ -16,6 +16,7 @@ import SparrowDeleteButton from "../../assets/icons/annotations/sparrow-delete-b
 import "./arrow-annotation.scss";
 
 type DragType = "source" | "target" | "text";
+const maxCharacters = 30;
 
 interface IDragHandleProps {
   draggingHandle?: boolean;
@@ -111,22 +112,15 @@ export const ArrowAnnotationComponent = observer(
       sourceX, sourceY, targetX, targetY, textX, textY, textCenterX, textCenterY,
       textMinXOffset, textMaxXOffset, textMinYOffset, textMaxYOffset
     } = arrow.getPoints(documentLeft, documentRight, documentTop, documentBottom, dragOffsets, sourceBB, targetBB);
+    const missingData = sourceX === undefined || sourceY === undefined || textCenterX === undefined
+      || textCenterY === undefined || targetX === undefined || targetY === undefined;
     const curveData = useMemo(() => {
-      if (
-        sourceX === undefined || sourceY === undefined || textCenterX === undefined
-        || textCenterY === undefined || targetX === undefined || targetY === undefined
-      ) {
-        return undefined;
-      }
+      if (missingData) return undefined;
       return getSparrowCurve(sourceX, sourceY, textCenterX, textCenterY, targetX, targetY, true);
-    }, [sourceX, sourceY, textCenterX, textCenterY, targetX, targetY]);
+    }, [missingData, sourceX, sourceY, textCenterX, textCenterY, targetX, targetY]);
 
     // Bail if we're missing anything necessary
-    if (
-      !sourceBB || !targetBB || !curveData
-      || sourceX === undefined || sourceY === undefined || targetX === undefined || targetY === undefined
-      || textX === undefined || textY === undefined || textCenterX === undefined || textCenterY === undefined
-    ) return null;
+    if (!sourceBB || !targetBB || !curveData || missingData) return null;
 
     // Set up text handlers
     function handleTextClick() {
@@ -152,7 +146,7 @@ export const ArrowAnnotationComponent = observer(
       acceptText();
     }
     function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-      setTempText(e.target.value);
+      setTempText(e.target.value.slice(0,maxCharacters));
     }
     function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
       const { key } = e;
@@ -172,7 +166,9 @@ export const ArrowAnnotationComponent = observer(
     const deleteX = (curveData.deleteX ?? 0) - deleteWidth / 2;
     const deleteY = (curveData.deleteY ?? 0) - deleteHeight / 2;
     function handleDelete(e: React.MouseEvent<SVGElement, MouseEvent>) {
-      deleteArrow(arrow.id);
+      if (!readOnly) {
+        deleteArrow(arrow.id);
+      }
     }
 
     // Set up drag handles
@@ -225,25 +221,27 @@ export const ArrowAnnotationComponent = observer(
     });
     return (
       <g>
-        <CurvedArrow
-          className="background-arrow"
-          hideArrowhead={true}
-          peakX={textCenterX} peakY={textCenterY}
-          setHovering={setHoveringStem}
-          sourceX={sourceX} sourceY={sourceY}
-          targetX={targetX} targetY={targetY}
-        />
-        <CurvedArrow
-          className="foreground-arrow"
-          peakX={textCenterX} peakY={textCenterY}
-          sourceX={sourceX} sourceY={sourceY}
-          targetX={targetX} targetY={targetY}
-        />
-        <g transform={`translate(${deleteX} ${deleteY})`}>
-          <SparrowDeleteButton
-            className={classNames({ "visible-delete-button": hoveringStem })}
-            onClick={handleDelete}
+        <g className="actual-sparrow">
+          <CurvedArrow
+            className="background-arrow"
+            hideArrowhead={true}
+            peakX={textCenterX} peakY={textCenterY}
+            setHovering={setHoveringStem}
+            sourceX={sourceX} sourceY={sourceY}
+            targetX={targetX} targetY={targetY}
           />
+          <CurvedArrow
+            className="foreground-arrow"
+            peakX={textCenterX} peakY={textCenterY}
+            sourceX={sourceX} sourceY={sourceY}
+            targetX={targetX} targetY={targetY}
+          />
+          <g transform={`translate(${deleteX} ${deleteY})`}>
+            <SparrowDeleteButton
+              className={classNames({ "visible-delete-button": hoveringStem })}
+              onClick={handleDelete}
+            />
+          </g>
         </g>
         <foreignObject
           className="text-object"
@@ -261,6 +259,7 @@ export const ArrowAnnotationComponent = observer(
                   onChange={handleChange}
                   onKeyDown={handleKeyDown}
                   ref={inputRef}
+                  style={{ width: `calc(${tempText.length}ch + 2ch)`}}
                   type="text"
                   value={tempText}
                 />

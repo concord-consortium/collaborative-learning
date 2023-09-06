@@ -48,9 +48,11 @@ const OneUpCanvas: React.FC<IOneUpCanvasProps> = props => {
 
 
   return (
-    <CanvasComponent context="1-up"
-                      document={document}
-                      {...others} />
+    <CanvasComponent
+      context="1-up"
+      document={document}
+      {...others}
+    />
   );
 };
 
@@ -66,9 +68,9 @@ const EditableFourUpCanvas: React.FC<IEditableFourUpCanvasProps> = props => {
 };
 
 interface IDocumentCanvasProps {
+  document: DocumentModelType;
   mode: WorkspaceMode;
   isPrimary: boolean;
-  document: DocumentModelType;
   readOnly: boolean;
   showPlayback?: boolean;
 }
@@ -95,9 +97,9 @@ export interface IProps {
   readOnly?: boolean;
   fullHeight?: boolean
 }
-export const EditableDocumentContent: React.FC<IProps> = props => {
-  const { className, contained, mode, isPrimary, document, toolbar, readOnly, showPlayback, fullHeight } = props;
-
+export function EditableDocumentContent({
+  className, contained, mode, isPrimary, document, toolbar, readOnly, showPlayback, fullHeight
+}: IProps) {
   const documentContext = useDocumentContext(document);
   const { db: { firebase }, ui, user } = useStores();
   // set by the canvas and used by the toolbar
@@ -119,9 +121,12 @@ export const EditableDocumentContent: React.FC<IProps> = props => {
               data-focus-document={document.key} >
           {isShowingToolbar && <DocumentToolbar document={document} toolbar={toolbar} />}
           {isShowingToolbar && <div className="canvas-separator"/>}
-          <DocumentCanvas readOnly={isReadOnly} {...{mode, isPrimary, document, showPlayback}} />
+          <DocumentCanvas
+            readOnly={isReadOnly}
+            {...{mode, isPrimary, document, showPlayback}}
+          />
         </div>
       </EditableTileApiInterfaceRefContext.Provider>
     </DocumentContextReact.Provider>
   );
-};
+}
