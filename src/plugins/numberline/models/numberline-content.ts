@@ -21,16 +21,16 @@ export const PointObjectModel = types
     dragXValue: undefined as undefined | number,
   }))
   .views(self =>({
-    get currentXValue(){
+    get currentXValue() {
       return self.dragXValue || self.xValue;
     }
   }))
   .actions(self => ({
-    setDragXValue(num?: number){
+    setDragXValue(num?: number) {
       self.dragXValue = num;
     },
     setXValueToDragValue(){ //when mouse is let go
-      if (self.dragXValue){
+      if (self.dragXValue !== undefined) {
         self.xValue = self.dragXValue;
         self.dragXValue = undefined;
       }
@@ -57,13 +57,13 @@ export const NumberlineContentModel = TileContentModel
     get pointsArr() { //returns array of all points
       return Array.from(self.points.values());
     },
-    get hasPoints(){
+    get hasPoints() {
       return (self.points.size > 0);
     },
-    get isFilledSelectedPoints(){
+    get isFilledSelectedPoints() {
       return (Object.keys(self.selectedPoints).length >= maxNumSelectedPoints);
     },
-    get isEmptySelectedPoints(){
+    get isEmptySelectedPoints() {
       return (Object.keys(self.selectedPoints).length === 0);
     }
   }))
@@ -76,14 +76,14 @@ export const NumberlineContentModel = TileContentModel
         tileId
       }));
     },
-    get pointsXValuesArr(){
+    get pointsXValuesArr() {
       return self.pointsArr.map((pointObj) => pointObj.xValue);
     },
-    getPointFromId(id: string) {
+    getPoint(id: string) {
       return self.pointsArr.find(point => point.id === id);
     },
     //Pass snapshot of axisPoint models into outer/inner points to avoid D3 and MST error
-    get axisPointsSnapshot(){
+    get axisPointsSnapshot() {
       return self.pointsArr.map((p) =>{
         return {
                 dragXValue: p.dragXValue,
@@ -101,44 +101,40 @@ export const NumberlineContentModel = TileContentModel
 
   }))
   .actions(self =>({
-    clearSelectedPointsObj(){
+    clearSelectedPoints() {
       for (const id in self.selectedPoints){
         delete self.selectedPoints[id];
       }
     }
   }))
   .actions(self => ({
-    createNewPoint(xValue: number){
+    createNewPoint(xValue: number) {
       const id = uniqueId();
       const pointModel = PointObjectModel.create({ id, xValue });
       self.points.set(id, pointModel);
     },
-    setHoverPoint(id: string){ //id can also be empty string
+    setHoverPoint(id: string) { //id can also be empty string
       self.hoveredPoint = id;
     },
-    setSelectedPoint(point: PointObjectModelType){
+    setSelectedPoint(point: PointObjectModelType) {
       // this should be revised if we want more than one selected point
       // i.e. maxNumSelectedPoints (in numberline-tile-constants.ts) is greater than 1
-      self.clearSelectedPointsObj();
+      self.clearSelectedPoints();
       self.selectedPoints[point.id] = point;
     },
-    replaceXValueWhileDragging(pointDraggedId: string, newXValue: number){
-      const pointDragged = self.getPointFromId(pointDraggedId);
-      if (pointDragged) pointDragged.setDragXValue(newXValue);
-    },
-    deleteSelectedPoints(){
+    deleteSelectedPoints() {
       //For now - only one point can be selected
       for (const selectedPointId in self.selectedPoints){
         self.points.delete(selectedPointId); //delete all selectedIds from the points map
       }
-      self.clearSelectedPointsObj();
+      self.clearSelectedPoints();
     },
-    deleteAllPoints(){
+    deleteAllPoints() {
       self.points.clear();
     },
   }))
   .actions(self => ({
-    analyzeXYPosDetermineHoverPoint(mouseXPos: number, mouseYPos: number, axisWidth: number ){
+    analyzeXYPosDetermineHoverPoint(mouseXPos: number, mouseYPos: number, axisWidth: number ) {
       if (self.hasPoints){
         const xScale = createXScale(axisWidth);
         const pointsArr = self.pointsArr;

@@ -86,7 +86,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       },
       getObjectBoundingBox: (objectId: string, objectType?: string) => {
         if (objectType === "point") {
-          const point = content.getPointFromId(objectId);
+          const point = content.getPoint(objectId);
           if (!point) return undefined;
           const percentage = (point.currentXValue - numberlineDomainMin) / (numberlineDomainMax - numberlineDomainMin);
           const x = percentage * axisWidth + tileWidth * (1 - kAxisWidth) / 2;
@@ -112,7 +112,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   const handleMouseClick = (e: Event) => {
     if (!readOnly){
       if (isMouseOverPoint){
-        const pointHoveredOver = content.getPointFromId(content.hoveredPoint);
+        const pointHoveredOver = content.getPoint(content.hoveredPoint);
         if (pointHoveredOver) content.setSelectedPoint(pointHoveredOver);
       } else{
         //only create point if we are not hovering over a point and within bounding box
@@ -153,10 +153,10 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   const handleDrag = drag<SVGCircleElement, PointObjectModelType>()
   .on('drag', (e, p) => {
       if (!readOnly && mouseInBoundingBox(mousePosX(e), mousePosY(e))){
-        const pointHoveredOver = content.getPointFromId(content.hoveredPoint);
+        const pointHoveredOver = content.getPoint(content.hoveredPoint);
         if (pointHoveredOver) content.setSelectedPoint(pointHoveredOver);
         const newXValue = xScale.invert(mousePosX(e));
-        content.replaceXValueWhileDragging(p.id, newXValue);
+        p.setDragXValue(newXValue);
       }
   })
   .on("end", (e, p) => {
