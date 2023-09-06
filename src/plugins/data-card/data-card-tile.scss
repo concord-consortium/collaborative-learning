@@ -232,7 +232,7 @@ $default-button-border-color: #979797;
 
         input {
           width: 100%;
-          height: calc(100%);
+          height: $data-row-min-height;
           padding: $cell-padding;
           font-style: normal;
           font-weight: 300;
@@ -246,8 +246,6 @@ $default-button-border-color: #979797;
         }
 
         .editing input {
-          // border: 2px solid $highlight-blue;
-          height: 100%;
           padding: 2px 8px;
         }
 
@@ -289,19 +287,13 @@ $default-button-border-color: #979797;
 .downshift-dropdown {
   position: relative;
 
-  .value-input {
-    margin:0px;
-  }
-
   ul {
     padding: 0px;
     margin: 0px;
-    padding-left: 0px;
 
     li {
       list-style: none;
       background-color: $workspace-teal-light-6;
-      padding:0px;
       padding-left:7px;
     }
   }
@@ -312,6 +304,7 @@ $default-button-border-color: #979797;
     border: 0px;
     background-color: transparent;
     top:3px;
+    cursor: pointer;
 
     span {
       color: #434343;
