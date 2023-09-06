@@ -41,16 +41,16 @@
         stroke-width: 4px;
       }
 
-      .showPointOuterCircle {
+      .point-outer-circle {
+        display: none;
         fill: rgba(0, 129, 255, 0.5);
-        opacity: 1;
 
-        &.disabled {
-          display: none;
+        &.hovered {
+          display: block;
         }
       }
 
-      .defaultPointInnerCircle {
+      .point-inner-circle {
         fill: #ccc;
         opacity: 1;
         stroke: #888;
@@ -68,21 +68,20 @@
       border-width: 0 3px 3px 0;
       display: inline-block;
       padding: 3px;
+      position: absolute;
       height: 13px;
       width: 13px;
       pointer-events: none; //click through div (our rectangular click area)
-    }
 
-    .right {
-      transform: rotate(-45deg);
-      -webkit-transform: rotate(-45deg);
-      position: absolute;
-    }
-
-    .left {
-      transform: rotate(135deg);
-      -webkit-transform: rotate(135deg);
-      position: absolute;
+      &.right {
+        transform: rotate(-45deg);
+        -webkit-transform: rotate(-45deg);
+      }
+  
+      &.left {
+        transform: rotate(135deg);
+        -webkit-transform: rotate(135deg);
+      }
     }
   }
 }

@@ -1,8 +1,7 @@
 import stringify from "json-stringify-pretty-compact";
 import { types, Instance, getSnapshot } from "mobx-state-tree";
 
-import { createXScale, kNumberlineTileType, maxNumSelectedPoints,
-  pointXYBoxRadius, yMidPoint} from "../numberline-tile-constants";
+import { kNumberlineTileType, maxNumSelectedPoints } from "../numberline-tile-constants";
 import { getTileIdFromContent } from "../../../models/tiles/tile-model";
 import { TileContentModel } from "../../../models/tiles/tile-content";
 import { uniqueId } from "../../../utilities/js-utils";
@@ -22,7 +21,7 @@ export const PointObjectModel = types
   }))
   .views(self =>({
     get currentXValue() {
-      return self.dragXValue || self.xValue;
+      return self.dragXValue ?? self.xValue;
     }
   }))
   .actions(self => ({
@@ -47,7 +46,6 @@ export const NumberlineContentModel = TileContentModel
     points: types.map(PointObjectModel),
   })
   .volatile(self => ({
-    hoveredPoint: "", //holds one point id that is hovered over
     selectedPoints: {} as Record<string, PointObjectModelType> //dictionary of id - point
   }))
   .views(self => ({
@@ -113,9 +111,6 @@ export const NumberlineContentModel = TileContentModel
       const pointModel = PointObjectModel.create({ id, xValue });
       self.points.set(id, pointModel);
     },
-    setHoverPoint(id: string) { //id can also be empty string
-      self.hoveredPoint = id;
-    },
     setSelectedPoint(point: PointObjectModelType) {
       // this should be revised if we want more than one selected point
       // i.e. maxNumSelectedPoints (in numberline-tile-constants.ts) is greater than 1
@@ -131,31 +126,6 @@ export const NumberlineContentModel = TileContentModel
     },
     deleteAllPoints() {
       self.points.clear();
-    },
-  }))
-  .actions(self => ({
-    analyzeXYPosDetermineHoverPoint(mouseXPos: number, mouseYPos: number, axisWidth: number ) {
-      if (self.hasPoints){
-        const xScale = createXScale(axisWidth);
-        const pointsArr = self.pointsArr;
-        for (let i = 0; i< pointsArr.length; i++){
-          const point = pointsArr[i];
-          const pointXPos = xScale(point.xValue); //pixel x-offset of user's mouse
-          const pointXLeftBound = pointXPos - pointXYBoxRadius;
-          const pointXRightBound = pointXPos + pointXYBoxRadius;
-          const pointYTopBound = yMidPoint - pointXYBoxRadius; //reversed since top of tile is where y=0
-          const pointYBottomBound = yMidPoint + pointXYBoxRadius;
-          const isMouseWithinLeftRightBound = (mouseXPos > pointXLeftBound && mouseXPos < pointXRightBound);
-          const isMouseWithinTopBottomBound = (mouseYPos < pointYBottomBound && mouseYPos > pointYTopBound);
-          if (isMouseWithinLeftRightBound && isMouseWithinTopBottomBound){
-            self.setHoverPoint(point.id);
-            break;
-          }
-          else{
-            self.setHoverPoint("");
-          }
-        }
-      }
     },
   }));
 

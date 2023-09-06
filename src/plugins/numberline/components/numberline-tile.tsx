@@ -1,7 +1,7 @@
 import classNames from 'classnames';
-import React, { useRef, useEffect, useState } from 'react';
-import { select, axisBottom, drag, pointer } from 'd3';
+import { axisBottom, drag, pointer, select } from 'd3';
 import { observer } from 'mobx-react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { NumberlineToolbar } from "./numberline-toolbar";
 import { NumberlineContentModelType, PointObjectModelType,  } from "../models/numberline-content";
@@ -35,12 +35,13 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
 
   //---------------- Calculate Width Of Tile / Scale ----------------------------------------------
   const documentScrollerRef = useRef<HTMLDivElement>(null);
+  const [hoverPointId, setHoverPointId] = useState("");
   const [tileWidth, setTileWidth] = useState(0);
   const containerWidth = tileWidth * kContainerWidth;
   const axisWidth = tileWidth * kAxisWidth;
   const xShiftNum = (containerWidth - axisWidth) / 2;
-  const numToPx = (num: number) => num.toFixed(2) + "px";
-  const xScale = createXScale(axisWidth);
+  const xScale = useMemo(() => createXScale(axisWidth), [axisWidth]);
+  const axisLeft = useMemo(() => tileWidth * (1 - kAxisWidth) / 2, [kAxisWidth, tileWidth]);
 
   useEffect(() => {
     let obs: ResizeObserver;
@@ -57,18 +58,39 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   }, []);
 
   //-------------------  SVG Ref to Numberline & SVG / Mouse State --------------------------------
-  const svgRef = useRef<SVGSVGElement | any>(null);
+  const svgRef = useRef<SVGSVGElement | null>(null);
   const svg = select(svgRef.current);
   const svgNode = svg.node();
   const axisRef = useRef<SVGGElement | any>(null);
   const axis = select(axisRef.current);
-  const isMouseOverPoint = !!content.hoveredPoint;
 
   /* ============================ [ Handlers / Mouse Functions ]  ============================== */
   svg.on("click", (e) => handleMouseClick(e));
   svg.on("mousemove", (e) => handleMouseMove(e));
   const mousePosX = (e: Event) => pointer(e, svgNode)[0];
   const mousePosY = (e: Event) => pointer(e, svgNode)[1];
+
+  const pointPosition = useCallback((point: PointObjectModelType) => {
+    const x = xScale(point.currentXValue);
+    return { x, y: yMidPoint };
+  }, [xScale, yMidPoint]);
+
+  function findHoverPoint(e: MouseEvent) {
+    const [mouseX, mouseY] = [mousePosX(e), mousePosY(e)];
+    let hoverPoint: PointObjectModelType | undefined;
+    content.pointsArr.forEach(point => {
+      const { x, y } = pointPosition(point);
+      if (
+        mouseX >= x - outerPointRadius && mouseX <= x + outerPointRadius
+        && mouseY >= y - outerPointRadius && mouseY <= y + outerPointRadius
+      ) {
+        hoverPoint = point;
+      }
+    });
+    const id = hoverPoint?.id ?? "";
+    setHoverPointId(id);
+    return id;
+  }
 
   useEffect(()=>{
     if (!readOnly) {
@@ -77,6 +99,25 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
         "backspace": handleDeletePoint,
       });
     }
+  }, []);
+  
+  const getObjectBoundingBox = useCallback((objectId: string, objectType?: string) => {
+    if (objectType === "point") {
+      const point = content.getPoint(objectId);
+      if (!point) return undefined;
+      const halfSide = outerPointRadius;
+      const { x, y } = pointPosition(point);
+      const boundingBox = {
+        height: 2 * halfSide,
+        left: x + axisLeft - halfSide - 1,
+        top: y + 50 - halfSide - 1,
+        width: 2 * halfSide
+      }
+      return boundingBox;
+    }
+  }, [axisLeft, pointPosition, pointXYBoxRadius]);
+
+  useEffect(() => {
     onRegisterTileApi({
       exportContentAsTileJson: (options?: ITileExportOptions) => {
         return content.exportJson(options);
@@ -84,21 +125,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       getTitle: () => {
         return model.title || "";
       },
-      getObjectBoundingBox: (objectId: string, objectType?: string) => {
-        if (objectType === "point") {
-          const point = content.getPoint(objectId);
-          if (!point) return undefined;
-          const percentage = (point.currentXValue - numberlineDomainMin) / (numberlineDomainMax - numberlineDomainMin);
-          const x = percentage * axisWidth + tileWidth * (1 - kAxisWidth) / 2;
-          const boundingBox = {
-            height: 2 * pointXYBoxRadius,
-            left: x - pointXYBoxRadius - 1,
-            top: yMidPoint + 50 - pointXYBoxRadius - 1,
-            width: 2 * pointXYBoxRadius
-          }
-          return boundingBox;
-        }
-      },
+      getObjectBoundingBox,
       getObjectDefaultOffsets: (objectId: string, objectType?: string) => {
         const offsets = OffsetModel.create({});
         if (objectType === "point") {
@@ -107,13 +134,13 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
         return offsets;
       }
     });
-  }, [tileWidth]);
+  }, [getObjectBoundingBox, model.title, pointXYBoxRadius]);
 
   const handleMouseClick = (e: Event) => {
     if (!readOnly){
-      if (isMouseOverPoint){
-        const pointHoveredOver = content.getPoint(content.hoveredPoint);
-        if (pointHoveredOver) content.setSelectedPoint(pointHoveredOver);
+      if (hoverPointId) {
+        const hoverPoint = content.getPoint(hoverPointId);
+        if (hoverPoint) content.setSelectedPoint(hoverPoint);
       } else{
         //only create point if we are not hovering over a point and within bounding box
         mouseInBoundingBox(mousePosX(e), mousePosY(e)) && handleClickCreatePoint(e);
@@ -121,13 +148,15 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     }
   };
 
-  const handleMouseMove = (e: Event) => {
+  const handleMouseMove = (e: MouseEvent) => {
     if (!readOnly){
-      const isMouseInBoundingBox = mouseInBoundingBox(mousePosX(e), mousePosY(e));
-      const radius = (isMouseInBoundingBox && !isMouseOverPoint) ? innerPointRadius : 0;
-      isMouseInBoundingBox && content.analyzeXYPosDetermineHoverPoint(mousePosX(e), mousePosY(e), axisWidth);
-      //mouse follow point disappears when hover over existing point, r set to 0
-      drawMouseFollowPoint(e, radius);
+      const [mouseX, mouseY] = [mousePosX(e), mousePosY(e)];
+      const isMouseInBoundingBox = mouseInBoundingBox(mouseX, mouseY);
+      const id = findHoverPoint(e);
+
+      // Draw the follow point if no point is being hovered
+      svg.selectAll(".mouseXCircle").remove();
+      if (isMouseInBoundingBox && !id) drawMouseFollowPoint(mouseX);
     }
   };
 
@@ -136,11 +165,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     const yBottomBound = yMidPoint - numberlineYBound;
     const isBetweenYBounds = (mouseYPos >= yBottomBound && mouseYPos <= yTopBound);
     const isBetweenXBounds = (mouseXPos >= 0 && mouseXPos <= axisWidth);
-    if (isBetweenYBounds && isBetweenXBounds){
-      return true;
-    } else {
-      return false;
-    }
+    return isBetweenYBounds && isBetweenXBounds;
   };
 
   const handleClickCreatePoint = (e: Event) => {
@@ -152,29 +177,26 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
 
   const handleDrag = drag<SVGCircleElement, PointObjectModelType>()
   .on('drag', (e, p) => {
-      if (!readOnly && mouseInBoundingBox(mousePosX(e), mousePosY(e))){
-        const pointHoveredOver = content.getPoint(content.hoveredPoint);
-        if (pointHoveredOver) content.setSelectedPoint(pointHoveredOver);
-        const newXValue = xScale.invert(mousePosX(e));
-        p.setDragXValue(newXValue);
-      }
+    if (!readOnly && mouseInBoundingBox(mousePosX(e), mousePosY(e))) {
+      const hoverPoint = content.getPoint(hoverPointId);
+      if (hoverPoint) content.setSelectedPoint(hoverPoint);
+      const newXValue = xScale.invert(mousePosX(e));
+      p.setDragXValue(newXValue);
+    }
   })
   .on("end", (e, p) => {
-    if (!readOnly){
+    if (!readOnly) {
       p.setXValueToDragValue();
     }
   });
 
-  const drawMouseFollowPoint = (e: Event, r: number) => {
-    const pos = pointer(e, svgNode);
-    const xPos = pos[0];
-    svg.selectAll(".mouseXCircle").remove();
+  const drawMouseFollowPoint = (mouseX: number) => {
     svg.append('circle') //create a circle that follows the mouse
-      .attr('cx', xPos)
+      .attr('cx', mouseX)
       .attr('cy', yMidPoint)
-      .attr('r', r)
+      .attr('r', innerPointRadius)
       .classed("mouseXCircle", true)
-      .classed("defaultPointInnerCircle", true);
+      .classed("point-inner-circle", true);
   };
 
   // * =============================== [ Construct Numberline ] ================================ */
@@ -196,19 +218,18 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       /* =========================== [ Outer Hover Circles ] ======================= */
       //---- Initialize outer hover circles
       const outerPoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.outer-point')
-      .data(content.axisPointsSnapshot);
+        .data(content.axisPointsSnapshot);
 
       outerPoints.enter()
         .append("circle").attr("class", "outer-point")
-        .attr('cx', (p) => xScale(p.xValue || numberlineDomainMin)) //mapped to axis width
+        .attr('cx', (p) => xScale(p.currentXValue ?? numberlineDomainMin)) //mapped to axis width
         .attr('cy', yMidPoint).attr('r', outerPointRadius).attr('id', p => p.id)
-        .classed("showPointOuterCircle", true)
-        .classed("disabled", true);
+        .classed("point-outer-circle", true);
 
       // --- Update functions outer hover circles
       outerPoints
-        .attr('cx', (p) => xScale(p.currentXValue || numberlineDomainMin)) //mapped to axis width
-        .classed("disabled", (p, idx) => (content.hoveredPoint !== p.id));
+        .attr('cx', (p) => xScale(p.currentXValue ?? numberlineDomainMin)) //mapped to axis width
+        .classed("hovered", (p, idx) => (hoverPointId === p.id));
 
       outerPoints.exit().remove(); //cleanup
 
@@ -223,8 +244,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
         .attr("class", "inner-point")
         .attr('cx', (p) => xScale(p.xValue || numberlineDomainMin)) //mapped to axis width
         .attr('cy', yMidPoint).attr('r', innerPointRadius).attr('id', p => p.id)
-        .classed("defaultPointInnerCircle", true)
-        .classed("selected", (p)=> false)
+        .classed("point-inner-circle", true)
         .call((e) => handleDrag(e)); // Attach drag behavior to newly created circles
 
       // --- Update functions inner circles
@@ -266,8 +286,8 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
         style={{"height": `${kNumberLineContainerHeight}`}}
       >
         <div className="numberline-tool-container" >
-          <i className="arrow left" style={{'left': numToPx(xShiftNum - 3), 'top': '53px'}}/>
-          <i className="arrow right" style={{'right': numToPx(xShiftNum - 3), 'top': '53px'}}/>
+          <i className="arrow left" style={{'left': xShiftNum - 3, 'top': '53px'}}/>
+          <i className="arrow right" style={{'right': xShiftNum - 3, 'top': '53px'}}/>
           <svg ref={svgRef} width={axisWidth}>
             <g ref={axisRef}></g>
           </svg>
