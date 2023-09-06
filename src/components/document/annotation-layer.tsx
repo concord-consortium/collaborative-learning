@@ -12,6 +12,7 @@ import { useUIStore } from "../../hooks/use-stores";
 import { ArrowAnnotation } from "../../models/annotations/arrow-annotation";
 import { ClueObjectModel, IClueObject, OffsetModel } from "../../models/annotations/clue-object";
 import { DocumentContentModelType } from "../../models/document/document-content";
+import { Point } from "../../utilities/math-utils";
 
 import "./annotation-layer.scss";
 
@@ -78,26 +79,42 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     }
   };
 
-  function getObjectBoundingBox(
-    rowId: string, tileId: string, objectId: string, objectType?: string
-  ) {
+  // Returns a function that will translate a point so it can be passed as a parameter to AnnotationButton
+  function getTranslateTilePointToScreenPoint(rowId: string, tileId: string) {
+    const tileBorder = 3;
+
     const rowElement = getRowElement(rowId);
     if (!rowElement) return undefined;
-  
+
     const tileSelector = `[data-tool-id='${tileId}']`;
     const tileElements = canvasElement?.querySelectorAll(tileSelector);
     const tileElement = tileElements && tileElements.length === 1 ? tileElements[0] as HTMLElement : undefined;
     if (!tileElement) return undefined;
-  
+
+    return (point: Point): Point | undefined => {
+
+      const [x, y] = point;
+
+      const _x = rowElement.offsetLeft + tileElement.offsetLeft - tileElement.scrollLeft
+        + x + tileBorder - (documentScrollX ?? 0);
+      const _y = rowElement.offsetTop + tileElement.offsetTop - tileElement.scrollTop
+        + y + tileBorder - (documentScrollY ?? 0);
+      return [_x, _y];
+    };
+  }
+
+  function getObjectBoundingBox(
+    rowId: string, tileId: string, objectId: string, objectType?: string
+  ) {
     const tileApi = tileApiInterface?.getTileApi(tileId);
     const objectBoundingBox = tileApi?.getObjectBoundingBox?.(objectId, objectType);
     if (!objectBoundingBox) return undefined;
 
-    const tileBorder = 3;
-    const left = rowElement.offsetLeft + tileElement.offsetLeft - tileElement.scrollLeft
-      + objectBoundingBox.left + tileBorder - (documentScrollX ?? 0);
-    const top = rowElement.offsetTop + tileElement.offsetTop - tileElement.scrollTop
-      + objectBoundingBox.top + tileBorder - (documentScrollY ?? 0);
+    const translatePoint = getTranslateTilePointToScreenPoint(rowId, tileId);
+    const point = translatePoint?.([objectBoundingBox.left, objectBoundingBox.top]);
+    if (!point) return undefined;
+
+    const [left, top] = point;
     const height = objectBoundingBox.height;
     const width = objectBoundingBox.width;
     return { left, top, height, width };
@@ -211,6 +228,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
                       rowId={rowId}
                       sourceObjectId={sourceObjectId}
                       sourceTileId={sourceTileId}
+                      translateTilePointToScreenPoint={getTranslateTilePointToScreenPoint(rowId, tileInfo.tileId)}
                       tileId={tile.id}
                     />
                   );

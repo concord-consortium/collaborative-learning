@@ -7,11 +7,15 @@
 
   &:hover {
     fill: vars.$annotation-blue-very-transparent;
-    outline: 2px dotted vars.$annotation-blue;
+    stroke: vars.$annotation-blue;
+    stroke-dasharray: 2;
+    stroke-width: 2px;
   }
 
   &.source {
     fill: rgba(0, 0, 0, 0);
-    outline: 2px solid vars.$annotation-blue;
+    stroke: vars.$annotation-blue;
+    stroke-dasharray: none;
+    stroke-width: 2px;
   }
 }
