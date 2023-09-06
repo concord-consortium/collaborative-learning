@@ -1,4 +1,5 @@
 import { isDate, isImageUrl, isNumeric } from "./data-types";
+import dayjs from "dayjs";
 
 expect.addSnapshotSerializer({
   serialize(val, config, indentation, depth, refs, printer) {
@@ -13,37 +14,120 @@ expect.addSnapshotSerializer({
 });
 
 // run `npm run test -- -u data-types.test` to update the snapshots in this file
+describe("dayjs", () => {
+  const valuesToTest: string[] = [
+    "2/23",
+    "some string with a date 2/23",
+    "extra chars between 2/nb23"
+  ];
+  test("non strict, no format", () => {
+    const testCases = valuesToTest.map(value => {
+      return [value, dayjs(value).isValid()];
+    });
+    expect({ testCases }).toMatchInlineSnapshot(`
+"2/23" => true
+"some string with a date 2/23" => true
+"extra chars between 2/nb23" => false
+`);
+  });
+  test("non strict, format", () => {
+    // Note: data-types.ts extends dayjs so we don't have to do that here
+    const testCases = valuesToTest.map(value => {
+      return [value, dayjs(value, "M/D").isValid()];
+    });
+    expect({ testCases }).toMatchInlineSnapshot(`
+"2/23" => true
+"some string with a date 2/23" => true
+"extra chars between 2/nb23" => true
+`);
+  });
+  test("strict, format", () => {
+    // Note: data-types.ts extends dayjs so we don't have to do that here
+    const testCases = valuesToTest.map(value => {
+      return [value, dayjs(value, "M/D", true).isValid()];
+    });
+    expect({ testCases }).toMatchInlineSnapshot(`
+"2/23" => true
+"some string with a date 2/23" => false
+"extra chars between 2/nb23" => false
+`);
+  });
+});
+
 
 describe("data-types", () => {
   test("isDate", () => {
     const valuesToTest: string[] = [
       "2/3",
+      "2/3/76",
+      "2/3/1976",
+      "2/03",
+      "2/03/76",
+      "2/03/1976",
+      "02/3",
+      "02/3/76",
+      "02/3/1976",
+      "02/03",
+      "02/03/76",
+      "02/03/1976",
+      "Feb 3",
+      "Feb 3, 76",
+      "Feb 3, 1976",
+      "Feb 03",
+      "Feb 03, 76",
+      "Feb 03, 1976",
+      "February 3",
+      "February 3, 76",
+      "February 3, 1976",
+      "February 03",
+      "February 03, 76",
+      "February 03, 1976",
       "2 / 3",
-      "02/23/1976",
-      "02/23/76",
-      "23/02/1976",
-      "02/31/1976",
-      "02/32/1976",
+      "Feb3,1976",
       "02-23-1976",
-      "02/23",
+      // invalid dates
+      "02/30/1976",
+      "23/02/1976",
       "23/02",
-      "123"
+      "123",
+      "ccimg://fbrtdb.concord.org/democlass1/-NdC3tVdE70ngANCam6q"
     ];
     const testCases = valuesToTest.map(value => {
       return [value, isDate(value)];
     });
     expect({ testCases }).toMatchInlineSnapshot(`
 "2/3" => true
+"2/3/76" => true
+"2/3/1976" => true
+"2/03" => true
+"2/03/76" => true
+"2/03/1976" => true
+"02/3" => true
+"02/3/76" => true
+"02/3/1976" => true
+"02/03" => true
+"02/03/76" => true
+"02/03/1976" => true
+"Feb 3" => true
+"Feb 3, 76" => true
+"Feb 3, 1976" => true
+"Feb 03" => true
+"Feb 03, 76" => true
+"Feb 03, 1976" => true
+"February 3" => true
+"February 3, 76" => true
+"February 3, 1976" => true
+"February 03" => true
+"February 03, 76" => true
+"February 03, 1976" => true
 "2 / 3" => true
-"02/23/1976" => true
-"02/23/76" => true
-"23/02/1976" => true
-"02/31/1976" => true
-"02/32/1976" => true
+"Feb3,1976" => true
 "02-23-1976" => true
-"02/23" => true
-"23/02" => true
+"02/30/1976" => false
+"23/02/1976" => false
+"23/02" => false
 "123" => false
+"ccimg://fbrtdb.concord.org/democlass1/-NdC3tVdE70ngANCam6q" => false
 `);
   });
 
