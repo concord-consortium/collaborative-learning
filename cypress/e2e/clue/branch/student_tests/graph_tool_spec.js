@@ -80,7 +80,7 @@ context('Graph Tool', function () {
       });
   });
 
-  it('wil test Graph tile undo redo', () => {
+  it('will test Graph tile undo redo', () => {
     cy.log("undo redo graph tile creation/deletion");
     // Creation - Undo/Redo
     clueCanvas.addTile('geometry');

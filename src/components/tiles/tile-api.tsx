@@ -1,10 +1,17 @@
-import { createContext } from "react";
+import { createContext, ReactElement } from "react";
 import { Optional } from "utility-types";
 import { IOffsetModel, ObjectBoundingBox } from "../../models/annotations/clue-object";
 import { ITileExportOptions } from "../../models/tiles/tile-content-info";
 
 export type TileResizeEntry = Optional<ResizeObserverEntry,
                                         "borderBoxSize" | "contentBoxSize" | "devicePixelContentBoxSize">;
+interface IGetObjectButtonSVGParams {
+  classes?: string;
+  handleClick: () => void;
+  objectId: string;
+  objectType?: string;
+  translateTilePointToScreenPoint?: (point: [x: number, y: number]) => [x: number, y: number] | undefined;
+}
 export interface ITileApi {
   getTitle?: () => string | undefined;
   hasSelection?: () => boolean;
@@ -19,6 +26,7 @@ export interface ITileApi {
   handleDocumentScroll?: (x: number, y: number) => void;
   handleTileResize?: (entry: TileResizeEntry) => void;
   getObjectBoundingBox?: (objectId: string, objectType?: string) => ObjectBoundingBox | undefined;
+  getObjectButtonSVG?: (params: IGetObjectButtonSVGParams) => ReactElement | undefined;
   getObjectDefaultOffsets?: (objectId: string, objectType?: string) => IOffsetModel;
 }
 
