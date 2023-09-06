@@ -20,17 +20,13 @@ export const formatValue = (
     const cellWidth = (width || kDefaultColumnWidth) - kCellHorizontalPadding;
     const height = rowHeight && row ? rowHeight({ row }) : kRowHeight;
     if (gImageMap.isImageUrl(value)) {
-      if (lookupImage) {
-        const url = lookupImage(value);
-        if (url) {
-          return (
-            <div className="image-cell" style={{ height, width: cellWidth}}>
-              <img src={url}></img>
-            </div>
-          );
-        }
-      } else {
-        console.log('lookupImage not defined');
+      const url = lookupImage(value);
+      if (url) {
+        return (
+          <div className="image-cell" style={{ height, width: cellWidth}}>
+            <img src={url}></img>
+          </div>
+        );
       }
       return (<span>[loading...]</span>);
     }
