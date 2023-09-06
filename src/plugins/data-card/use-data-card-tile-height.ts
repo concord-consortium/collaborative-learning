@@ -27,26 +27,18 @@ export const useDataCardTileHeight = ({
 
   useEffect(() => {
     if (!tileElt) return;
-
     const uiHeight = tileElt.querySelector(".data-card-container")?.scrollHeight || 0;
     const spaceLeft = height ? height - uiHeight : 0;
+    const requiringHeightChange = attrCtRef.current < attrCount || spaceLeft < kButtonSpace;
+    const loadingInContent = !documentId && readOnly;
 
-    if (attrCtRef.current < attrCount) {
-      attrCtRef.current = attrCount;
-      if (!readOnly) {
-        if (spaceLeft < kButtonSpace) {
-          onRequestRowHeight(modelId, uiHeight + kButtonSpace);
-        }
-      }
-    } else {
-      if (!documentId && readOnly) {
-        onRequestRowHeight(modelId, Math.max(uiHeight, kExampleDeckHeight));
-      }
-      if (!readOnly) {
-        if (spaceLeft < kButtonSpace) {
-          onRequestRowHeight(modelId, uiHeight + kButtonSpace);
-        }
-      }
+    if (loadingInContent) {
+      onRequestRowHeight(modelId, Math.max(uiHeight, kExampleDeckHeight));
     }
+
+    if (requiringHeightChange) {
+      onRequestRowHeight(modelId, uiHeight + kButtonSpace);
+    }
+
   }, [attrCount, currEditAttrId, height, modelId, onRequestRowHeight, readOnly, tileElt, documentId]);
 };
