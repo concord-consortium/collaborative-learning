@@ -75,7 +75,7 @@ context('Graph Table Integration', function () {
         graphToolTile.getGraph().should('have.class', 'is-linked');
       });
       it('verify points added has label in table and graph', function () {
-        tableToolTile.getIndexNumberToggle().click();
+        tableToolTile.getIndexNumberToggle().should('exist').click({force: true});
         tableToolTile.getTableIndexColumnCell().first().should('contain', '1');
         graphToolTile.getGraphPointLabel().contains('A').should('exist');
         graphToolTile.getGraphPointLabel().contains('B').should('exist');

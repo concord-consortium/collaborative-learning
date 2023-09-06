@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { RowHeightArgs } from "react-data-grid";
 import { kCellHorizontalPadding, kCellLineHeight, kCellVerticalPadding,
+  kDefaultImageCellHeight,
   kHeaderCellHorizontalPadding, kHeaderRowHeight, kRowHeight, TRow } from "./table-types";
 import { useCurrent } from "../../../hooks/use-current";
 import { measureTextLines } from "../hooks/use-measure-text";
@@ -9,6 +10,7 @@ import { IAttribute } from "../../../models/data/attribute";
 import { IDataSet } from "../../../models/data/data-set";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
+import { gImageMap } from "../../../models/image-map";
 
 interface IUseRowHeight {
   dataSet: IDataSet;
@@ -34,11 +36,16 @@ export const useRowHeight = ({ dataSet, measureColumnWidth, model }: IUseRowHeig
     if (args.row) {
       for (const [attrId, text] of Object.entries(args.row)) {
         if (attrId !== '__context__' && attrId !== '__id__' && attrId !== '__index__') {
-          height = Math.max(height, textHeight(
-            text as string,
-            measureColumnWidth(dataSet.attrFromID(attrId)) - kCellHorizontalPadding,
-            defaultFont
-          ));
+          const testableString = text.length > 0 ? text : ' ';
+          if (gImageMap.isImageUrl(testableString)){
+            height = Math.max(height, kDefaultImageCellHeight);
+          } else {
+            height = Math.max(height, textHeight(
+              text as string,
+              measureColumnWidth(dataSet.attrFromID(attrId)) - kCellHorizontalPadding,
+              defaultFont
+            ));
+          }
         }
       }
     }

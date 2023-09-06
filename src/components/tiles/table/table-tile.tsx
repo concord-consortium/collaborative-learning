@@ -28,6 +28,7 @@ import { useCurrent } from "../../../hooks/use-current";
 import { useToolbarTileApi } from "../hooks/use-toolbar-tile-api";
 import { lightenColor } from "../../../utilities/color-utils";
 import { verifyAlive } from "../../../utilities/mst-utils";
+import { gImageMap } from "../../../models/image-map";
 
 import "./table-tile.scss";
 
@@ -41,6 +42,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   const modelRef = useCurrent(model);
   const getContent = useCallback(() => modelRef.current.content as TableContentModelType, [modelRef]);
   const content = useMemo(() => getContent(), [getContent]);
+  const [imageUrls, setImageUrls] = useState(new Map<string,string>());
   verifyAlive(content, "TableToolComponent");
   const metadata = getContent().metadata;
 
@@ -69,6 +71,25 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     ref: gridRef, gridContext, inputRowId, selectedCell, getSelectedRows, ...gridProps
   } = useGridContext({ modelId: model.id, showRowLabels, triggerColumnChange });
 
+  // Maintains the cache of data values that map to image URLs.
+  // For use in a synchronous context, returns undefined immediately if an image is not yet cached,
+  // and then looks it up in the background, adds to cache, and updates state to force a refresh.
+  const lookupImage = (value: string) => {
+    if (gImageMap.isImageUrl(value)) {
+      const cached = imageUrls.get(value);
+      if (cached) {
+        return cached;
+      }
+      gImageMap.getImage(value).then((image) => {
+        if (image && image.displayUrl) {
+          // This state changes forces a re-render - is that good?
+          setImageUrls(new Map(imageUrls).set(value, image.displayUrl));
+        }
+      });
+      return undefined;
+    }
+  };
+
   // React components used for the index (left most) column
   const rowLabelProps = useRowLabelColumn({
     inputRowId: inputRowId.current, selectedCell, showRowLabels, setShowRowLabels
@@ -83,7 +104,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   // columns are required by ReactDataGrid and are used by other hooks as well
   const { columns, controlsColumn, columnEditingName, handleSetColumnEditingName } = useColumnsFromDataSet({
     gridContext, dataSet, metadata, readOnly: !!readOnly, columnChanges, headerHeight, rowHeight,
-    ...rowLabelProps, measureColumnWidth });
+    ...rowLabelProps, measureColumnWidth, lookupImage});
 
   // The size of the title bar
   const { titleCellWidth, getTitleHeight } =
@@ -146,7 +167,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   // hasLinkableRows is used to determine if the table can meaningfully be linked to a geometry tile
   const { deleteSelected, hasLinkableRows, ...dataGridProps } = useDataSet({
     gridRef, model, dataSet, triggerColumnChange, rows, rowChanges, triggerRowChange,
-    readOnly: !!readOnly, changeHandlers, columns, onColumnResize, selectedCell, inputRowId });
+    readOnly: !!readOnly, changeHandlers, columns, onColumnResize, selectedCell, inputRowId, lookupImage });
 
   // Variables for handling linking to geometry tiles
   const { isLinkEnabled, linkColors, getLinkIndex, showLinkTileDialog } =
