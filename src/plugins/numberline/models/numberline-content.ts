@@ -80,23 +80,10 @@ export const NumberlineContentModel = TileContentModel
     getPoint(id: string) {
       return self.pointsArr.find(point => point.id === id);
     },
-    //Pass snapshot of axisPoint models into outer/inner points to avoid D3 and MST error
-    get axisPointsSnapshot() {
-      return self.pointsArr.map((p) =>{
-        return {
-                dragXValue: p.dragXValue,
-                currentXValue: p.currentXValue,
-                setDragXValue: p.setDragXValue,
-                setXValueToDragValue: p.setXValueToDragValue,
-                ...getSnapshot(p) //doesn't capture the volatile properties and methods
-              };
-      });
-    },
     exportJson(options?: ITileExportOptions) {
       const snapshot = getSnapshot(self);
       return stringify(snapshot, {maxLength: 200});
-    },
-
+    }
   }))
   .actions(self =>({
     clearSelectedPoints() {
@@ -110,6 +97,7 @@ export const NumberlineContentModel = TileContentModel
       const id = uniqueId();
       const pointModel = PointObjectModel.create({ id, xValue });
       self.points.set(id, pointModel);
+      return pointModel;
     },
     setSelectedPoint(point: PointObjectModelType) {
       // this should be revised if we want more than one selected point

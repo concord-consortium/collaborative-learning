@@ -36,6 +36,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   //---------------- Calculate Width Of Tile / Scale ----------------------------------------------
   const documentScrollerRef = useRef<HTMLDivElement>(null);
   const [hoverPointId, setHoverPointId] = useState("");
+  const [_selectedPointId, setSelectedPointId] = useState(""); // Just used to rerender when a point is selected
   const [tileWidth, setTileWidth] = useState(0);
   const containerWidth = tileWidth * kContainerWidth;
   const axisWidth = tileWidth * kAxisWidth;
@@ -140,10 +141,13 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     if (!readOnly){
       if (hoverPointId) {
         const hoverPoint = content.getPoint(hoverPointId);
-        if (hoverPoint) content.setSelectedPoint(hoverPoint);
-      } else{
-        //only create point if we are not hovering over a point and within bounding box
-        mouseInBoundingBox(mousePosX(e), mousePosY(e)) && handleClickCreatePoint(e);
+        if (hoverPoint) {
+          content.setSelectedPoint(hoverPoint);
+          setSelectedPointId(hoverPoint.id);
+        }
+      } else if (mouseInBoundingBox(mousePosX(e), mousePosY(e))) {
+        // only create point if we are not hovering over a point and within bounding box
+        handleClickCreatePoint(e);
       }
     }
   };
@@ -171,24 +175,26 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   const handleClickCreatePoint = (e: Event) => {
     if (!readOnly){
       const xValueClicked = xScale.invert(mousePosX(e));
-      content.createNewPoint(xValueClicked);
+      const point = content.createNewPoint(xValueClicked);
+      content.setSelectedPoint(point);
+      setHoverPointId(point.id);
     }
   };
 
   const handleDrag = drag<SVGCircleElement, PointObjectModelType>()
-  .on('drag', (e, p) => {
-    if (!readOnly && mouseInBoundingBox(mousePosX(e), mousePosY(e))) {
-      const hoverPoint = content.getPoint(hoverPointId);
-      if (hoverPoint) content.setSelectedPoint(hoverPoint);
-      const newXValue = xScale.invert(mousePosX(e));
-      p.setDragXValue(newXValue);
-    }
-  })
-  .on("end", (e, p) => {
-    if (!readOnly) {
-      p.setXValueToDragValue();
-    }
-  });
+    .on('drag', (e, p) => {
+      if (!readOnly && mouseInBoundingBox(mousePosX(e), mousePosY(e))) {
+        const hoverPoint = content.getPoint(hoverPointId);
+        if (hoverPoint) content.setSelectedPoint(hoverPoint);
+        const newXValue = xScale.invert(mousePosX(e));
+        p.setDragXValue(newXValue);
+      }
+    })
+    .on("end", (e, p) => {
+      if (!readOnly) {
+        p.setXValueToDragValue();
+      }
+    });
 
   const drawMouseFollowPoint = (mouseX: number) => {
     svg.append('circle') //create a circle that follows the mouse
@@ -218,25 +224,27 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       /* =========================== [ Outer Hover Circles ] ======================= */
       //---- Initialize outer hover circles
       const outerPoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.outer-point')
-        .data(content.axisPointsSnapshot);
+        .data(content.pointsArr);
 
       outerPoints.enter()
         .append("circle").attr("class", "outer-point")
         .attr('cx', (p) => xScale(p.currentXValue ?? numberlineDomainMin)) //mapped to axis width
         .attr('cy', yMidPoint).attr('r', outerPointRadius).attr('id', p => p.id)
-        .classed("point-outer-circle", true);
+        .classed("point-outer-circle", true)
+        .call((e) => handleDrag(e)); // Attach drag behavior to newly created circles
 
       // --- Update functions outer hover circles
       outerPoints
         .attr('cx', (p) => xScale(p.currentXValue ?? numberlineDomainMin)) //mapped to axis width
-        .classed("hovered", (p, idx) => (hoverPointId === p.id));
+        .classed("hovered", (p, idx) => (hoverPointId === p.id))
+        .call((e) => handleDrag(e)); // pass again in case axisWidth changes
 
       outerPoints.exit().remove(); //cleanup
 
       /* =========================== [ Inner Circles ] ============================= */
       //---- Initialize inner hover circles
       const innerPoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.inner-point')
-      .data(content.axisPointsSnapshot);
+        .data(content.pointsArr);
 
       // Initialize Attributes
       innerPoints.enter()
