@@ -2,8 +2,104 @@
 
 .drawing-tool {
   display: flex;
-  border: 1px solid #BBB;
   height: 100%;
+
+  .drawing-container {
+    display: flex;
+
+    .object-list {
+      border: solid 1.5px $charcoal-light-1;
+      border-radius: 0px 3px 3px 0px;
+      display: flex;
+      flex-direction: column;
+
+      &.open {
+        flex: 0 0 125px;
+        background-color: $workspace-teal-light-9;
+      }
+
+      &.closed {
+        flex: 0 0 26px;
+
+        button {
+          width: 100%;
+          height: 100%;
+          margin: 0;
+          padding: 0;
+          display: flex;
+          flex-direction: column;
+          background-color: $workspace-teal-light-7;
+          border: none;
+
+          svg {
+            flex: 0 0 24px;
+          }
+
+          .vert {
+            width: 12px;
+            font-weight: bold;
+            color: #707070;
+            margin: 10px 0 0 10px;
+            transform-origin: 0 50%;
+            transform: rotate(90deg);  
+          }
+        }
+
+      }
+
+      .header {
+        border-bottom: solid 1px $charcoal-light-1;
+
+        button {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          width: 100%;
+          padding: 0 7px;
+          border: none;
+          background-color: $workspace-teal-light-7;
+          font-weight: bold;
+
+          svg {
+            flex: 0 0 1em;
+            vertical-align: middle;
+            transform: rotate(180deg);
+          }
+
+        }
+
+        .close {
+          flex: 0 0 20px;
+        }
+      }
+
+      .body {
+        overflow-y: scroll;
+        
+        ul {
+          margin: 0;
+          padding: 0;
+          text-align: left;
+
+          li {
+            list-style: none;
+            padding: .2em .5em;
+
+            &:hover {
+              background-color: $workspace-teal-light-6;
+            }
+
+            &.selected {
+              background-color: $workspace-teal-light-4;
+            }
+
+            svg {
+              vertical-align: bottom;
+            }
+          }
+        }
+      }
+    }
 
   .drawing-layer {
 
@@ -45,6 +141,7 @@
 
     }
   }
+}
 }
 
 .drawing-tool-toolbar {

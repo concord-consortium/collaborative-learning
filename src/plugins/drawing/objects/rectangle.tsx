@@ -33,6 +33,12 @@ export const RectangleObject = types.compose("RectangleObject", StrokedObject, F
       const nw: Point = {x, y};
       const se: Point = {x: x + width, y: y + height};
       return {nw, se};
+    },
+    get label() {
+      return self.width===self.height ? "Square" : "Rectangle";
+    },
+    get icon() {
+      return RectToolIcon;
     }
   }))
   .actions(self => ({
