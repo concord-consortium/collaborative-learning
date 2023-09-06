@@ -9,6 +9,7 @@ import { DrawingObject, DrawingObjectType, IDrawingComponentProps,
 import { BoundingBoxSides, VectorEndShape } from "../model/drawing-basic-types";
 import { DrawingObjectMSTUnion } from "../components/drawing-object-manager";
 import { isVectorObject } from "./vector";
+import GroupObjectsIcon from "../assets/group-objects-icon.svg";
 
 // An "extent" represents the position of each side of a member object's bounding box,
 // as a fraction of the group's overall bounding box.
@@ -42,6 +43,12 @@ export const GroupObject = DrawingObject.named("GroupObject")
         }
         return cur;
       }, { nw: { x: Number.MAX_VALUE, y: Number.MAX_VALUE }, se: { x: 0, y: 0 } });
+    },
+    get label() {
+      return "Group";
+    },
+    get icon() {
+      return GroupObjectsIcon;
     }
   }))
   .actions(self => ({

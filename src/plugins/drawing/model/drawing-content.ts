@@ -7,10 +7,9 @@ import { DefaultToolbarSettings, Point, ToolbarSettings, VectorType, endShapesFo
 import { kDrawingStateVersion, kDrawingTileType } from "./drawing-types";
 import { StampModel, StampModelType } from "./stamp";
 import { DrawingObjectMSTUnion } from "../components/drawing-object-manager";
-import { DrawingObjectSnapshotForAdd, DrawingObjectType, isFilledObject,
-  isStrokedObject, ObjectMap, ToolbarModalButton } from "../objects/drawing-object";
+import { DrawingObjectSnapshotForAdd, DrawingObjectType, 
+  ObjectMap, ToolbarModalButton } from "../objects/drawing-object";
 import { ImageObjectType, isImageObjectSnapshot } from "../objects/image";
-import { isVectorObject } from "../objects/vector";
 import { LogEventName } from "../../../lib/logger-types";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
 import { TileContentModel } from "../../../models/tiles/tile-content";
