@@ -232,7 +232,7 @@ $default-button-border-color: #979797;
 
         input {
           width: 100%;
-          height: calc(100% - 1px);
+          height: calc(100%);
           padding: $cell-padding;
           font-style: normal;
           font-weight: 300;
@@ -246,9 +246,9 @@ $default-button-border-color: #979797;
         }
 
         .editing input {
-          border: 2px solid $highlight-blue;
+          // border: 2px solid $highlight-blue;
           height: 100%;
-          padding: 0px 6px;
+          padding: 2px 8px;
         }
 
         input:hover {
@@ -285,24 +285,38 @@ $default-button-border-color: #979797;
   }
 }
 
-// draft implementation
-.value div {
+
+.downshift-dropdown {
   position: relative;
-  top:0;
-  height: 24px;
+
+  .value-input {
+    margin:0px;
+  }
+
+  ul {
+    padding: 0px;
+    margin: 0px;
+    padding-left: 0px;
+
+    li {
+      list-style: none;
+      background-color: $workspace-teal-light-6;
+      padding:0px;
+      padding-left:7px;
+    }
+  }
+
+  button {
+    position: absolute;
+    right:0px;
+    border: 0px;
+    background-color: transparent;
+    top:5px;
+
+    span {
+      color: #434343;
+    }
+  }
 }
 
-.value div button {
-  position: absolute;
-  z-index:1000;
-  right:0px;
-  top:1px;
-}
 
-.value div ul {
-  position:absolute;
-  z-index: 10001;
-  background-color: white;
-  padding:0px 20px;
-  top: 11px;
-}

@@ -302,7 +302,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
       </div>
 
       <div className={valueClassNames} onClick={handleValueClick}>
-          <div style={{display: (!readOnly && !valueIsImage()) ? 'block' : 'none'}}>
+          <div style={{display: (!readOnly && !valueIsImage()) ? 'block' : 'none'}} className="downshift-dropdown">
             <input
               {...getInputProps()}
               className={valueInputClassNames}
@@ -315,10 +315,10 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
                 <span className="down">&#x25BC;</span>
               }
             </button>
-            <ul {...getMenuProps()}>
+            <ul {...getMenuProps()} className={ isOpen ? "open" : "closed"}>
               {isOpen &&
                 inputItems.map((item, index) => (
-                  <li style={highlightedIndex === index ? {backgroundColor: '#bde4ff'} : {} }
+                  <li className="dropdown-item" style={highlightedIndex === index ? {backgroundColor: '#bde4ff'} : {} }
                     key={`${item}${index}`}
                     {...getItemProps({item, index})}
                   >
@@ -328,16 +328,15 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
             </ul>
           </div>
 
-        { !readOnly && valueIsImage() &&
-          <img src={imageUrl} className="image-value" />
-        }
-
-        { readOnly && !valueIsImage() &&
-          <div className="cell-value">{valueStr}</div>
-        }
-        { readOnly && valueIsImage() &&
-          <img src={imageUrl} className="image-value" />
-        }
+          { !readOnly && valueIsImage() &&
+            <img src={imageUrl} className="image-value" />
+          }
+          { readOnly && !valueIsImage() &&
+            <div className="cell-value">{valueStr}</div>
+          }
+          { readOnly && valueIsImage() &&
+            <img src={imageUrl} className="image-value" />
+          }
       </div>
       <div className={typeIconClassNames} >{typeIcon}</div>
 
