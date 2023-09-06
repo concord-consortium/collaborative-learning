@@ -13,6 +13,11 @@ export const NavTabsConfigModel = types
     getNavTabSpec(tabId: ENavTab) {
       return self.tabSpecs.find(tab => tabId === tab.tab);
     }
+  }))
+  .actions(self => ({
+    toggleShowNavPanel() {
+      self.showNavPanel = !self.showNavPanel;
+    }
   }));
 
 export type NavTabConfigModelType = Instance<typeof NavTabsConfigModel>;

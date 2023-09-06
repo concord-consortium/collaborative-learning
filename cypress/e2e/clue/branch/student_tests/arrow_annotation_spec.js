@@ -1,16 +1,19 @@
 import ArrowAnnotation from '../../../../support/elements/clue/ArrowAnnotation';
 import ClueCanvas from '../../../../support/elements/clue/cCanvas';
 import DrawToolTile from '../../../../support/elements/clue/DrawToolTile';
+import GraphToolTile from '../../../../support/elements/clue/GraphToolTile';
 import TableToolTile from '../../../../support/elements/clue/TableToolTile';
 
 const aa = new ArrowAnnotation,
   clueCanvas = new ClueCanvas,
   drawToolTile = new DrawToolTile,
-  tableToolTile = new TableToolTile;
+  tableToolTile = new TableToolTile,
+  graphToolTile = new GraphToolTile;
 
 const queryParams = {
   unit1:"?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=example",
-  unit2:"?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=dfe"
+  unit2:"?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=dfe",
+  unit3:"?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=example-config-subtabs"
 };
 
 // Note copied from drawing tile test
@@ -32,10 +35,7 @@ function beforeTest(params) {
   cy.clearQAData('all');
   cy.visit(params);
   cy.waitForLoad();
-  cy.get(".workspace").then($workspace => {
-    if($workspace.find(".divider-container").length > 0)
-      cy.collapseResourceTabs();
-  });
+  cy.showOnlyDocumentWorkspace();
 }
 
 context('Arrow Annotations (Sparrows)', function () {
@@ -164,6 +164,31 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationArrows().should("not.exist");
     aa.getAnnotationButtons().eq(0).click();
     aa.getAnnotationButtons().eq(1).click();
+    aa.getAnnotationArrows().should("have.length", 1);
+  });
+  it("can add arrows to geometry tiles", () => {
+    beforeTest(queryParams.unit3);
+    clueCanvas.addTile("geometry");
+
+    cy.log("Annotation buttons appear for points, polygons, and segments");
+    aa.clickArrowToolbarButton();
+    aa.getAnnotationLayer().should("have.class", "editing");
+    aa.getAnnotationButtons().should("not.exist");
+    aa.clickArrowToolbarButton();
+    // For some reason adding the first point is ignored, so we add four but get three to make a triangle
+    graphToolTile.addPointToGraph(5, 5);
+    graphToolTile.addPointToGraph(10, 5);
+    graphToolTile.addPointToGraph(15, 10);
+    graphToolTile.addPointToGraph(20, 5);
+    graphToolTile.getGraphPoint().last().dblclick({ force: true });
+    aa.clickArrowToolbarButton();
+    // 3 points + 3 segments + 1 polygon = 7
+    aa.getAnnotationButtons().should("have.length", 7);
+
+    cy.log("Can add an arrow to geometry objects");
+    aa.getAnnotationArrows().should("not.exist");
+    aa.getAnnotationButtons().eq(1).click();
+    aa.getAnnotationButtons().eq(6).click();
     aa.getAnnotationArrows().should("have.length", 1);
   });
 });

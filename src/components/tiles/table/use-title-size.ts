@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react";
-import { isDataColumn, kCellLineHeight, kControlsColumnWidth, kDefaultColumnWidth, kTitlePadding,
+import { isDataColumn, kCellLineHeight, kControlsColumnWidth, kDefaultColumnWidth, kHeaderRowHeight, kTitlePadding,
   TColumn } from "./table-types";
 import { measureTextLines } from "../hooks/use-measure-text";
 import { IDataSet } from "../../../models/data/data-set";
@@ -29,13 +29,15 @@ export const useTitleSize = ({ readOnly, columns, dataSet, measureColumnWidth, r
                       1 - (readOnly ? 0 : kControlsColumnWidth));
     };
     rowChanges; // eslint-disable-line no-unused-expressions
-    return getTitleCellWidthFromColumns();
+    const widthFromColumns = getTitleCellWidthFromColumns();
+    return widthFromColumns < kDefaultColumnWidth ? kDefaultColumnWidth : widthFromColumns;
   }, [readOnly, columns, dataSet, measureColumnWidth, rowChanges]);
 
   const getTitleHeight = useCallback(() => {
     const font = `700 ${defaultFont}`;
     const lines = measureTextLines(dataSet.name || 'Table 8', titleCellWidth - 2 * kTitlePadding, font);
-    return lines * kCellLineHeight + 2 * kTitlePadding;
+    const calculatedHeight = lines * kCellLineHeight + 2 * kTitlePadding;
+    return calculatedHeight > (kHeaderRowHeight + 2 * kTitlePadding) ? kHeaderRowHeight : calculatedHeight;
   }, [dataSet, titleCellWidth]);
 
   return { titleCellWidth, getTitleHeight };

@@ -26,6 +26,8 @@ import {
 import { onAnyAction } from "../../../utilities/mst-utils";
 import { AdornmentModelUnion } from "../adornments/adornment-types";
 import { SharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
+import { ConnectingLinesModel } from "../adornments/connecting-lines/connecting-lines-model";
+import { kConnectingLinesType } from "../adornments/connecting-lines/connecting-lines-types";
 export interface GraphProperties {
   axes: Record<string, IAxisModelUnion>
   plotType: PlotType
@@ -360,13 +362,21 @@ export function createGraphModel(snap?: IGraphModelSnapshot, appConfig?: AppConf
   const leftAxisModel = emptyPlotIsNumeric
                           ? NumericAxisModel.create({place: "left", min, max})
                           : EmptyAxisModel.create({place: "left"});
-  return GraphModel.create({
+  const createdGraphModel = GraphModel.create({
     axes: {
       bottom: bottomAxisModel,
       left: leftAxisModel
     },
     ...snap
   });
+  // TODO: make a dedicated setting for this rather than using defaultSeriesLegend as a proxy:
+  // const connectLinesByDefault = appConfig?.getSetting("defaultConnectedLines", "graph");
+  const connectByDefault = appConfig?.getSetting("defaultSeriesLegend", "graph");
+  if (connectByDefault) {
+    const cLines = ConnectingLinesModel.create({type: kConnectingLinesType, isVisible: true});
+    createdGraphModel.showAdornment(cLines, kConnectingLinesType);
+  }
+  return createdGraphModel;
 }
 
 export interface SetAttributeIDAction extends ISerializedActionCall {

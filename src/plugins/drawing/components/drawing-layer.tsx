@@ -15,6 +15,7 @@ import { Point, ToolbarSettings } from "../model/drawing-basic-types";
 import { getDrawingToolInfos, renderDrawingObject } from "./drawing-object-manager";
 import { ImageObject } from "../objects/image";
 import { debounce } from "lodash";
+import { isGroupObject } from "../objects/group";
 
 const SELECTION_COLOR = "#777";
 const HOVER_COLOR = "#bbdd00";
@@ -143,7 +144,8 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     let moved = false;
     const {hoverObject } = this.state;
     const selectedObjects = this.getSelectedObjects();
-    let objectsToInteract: DrawingObjectType[];
+    let objectsToSelect: DrawingObjectType[];
+    let objectsToMove: DrawingObjectType[];
     let needToAddHoverToSelection = false;
 
     //If the object you are dragging is selected then the selection should not be cleared
@@ -153,14 +155,19 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     if (hoverObject && !selectedObjects.some(object => object.id === hoverObject.id)) {
       needToAddHoverToSelection = true;
       if (e.shiftKey || e.metaKey){
-        objectsToInteract = [hoverObject, ...selectedObjects];
+        objectsToSelect = [hoverObject, ...selectedObjects];
       }
       else {
-        objectsToInteract = [hoverObject];
+        objectsToSelect = [hoverObject];
       }
     } else {
-      objectsToInteract = selectedObjects;
+      objectsToSelect = selectedObjects;
     }
+    // If any objects are groups, then their members also get moved.
+    objectsToMove = [...objectsToSelect];
+    objectsToSelect.filter(isGroupObject).forEach((group) => {
+      objectsToMove = [...objectsToMove, ...group.objects];
+    });
 
     const starting = this.getWorkspacePoint(e);
     if (!starting) return;
@@ -177,14 +184,14 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       const dy = current.y - starting.y;
       moved = moved || ((dx !== 0) || (dy !== 0));
 
-      objectsToInteract.forEach((object, index) => {
+      objectsToMove.forEach((object, index) => {
         object.setDragPosition(object.x + dx, object.y + dy);
       });
 
       if (needToAddHoverToSelection) {
         // we delay until we confirm that the user is dragging the objects before adding the hover object
         // to the selection, to avoid messing with the click to select/deselect logic
-        this.setSelectedObjects(objectsToInteract);
+        this.setSelectedObjects(objectsToSelect);
         // Note: the hoverObject could be kind of in a weird state here. It might
         // be both selected and hovered at the same time. However it is more
         // simple to keep the hoverObject independent of the selection. It just
@@ -199,7 +206,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
       if (moved) {
-        objectsToInteract.map((object, index) => {
+        objectsToMove.map((object, index) => {
           object.repositionObject();
         });
       } else {
@@ -240,15 +247,27 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     }
   }
 
-  // when we add text, this filter can be used with this.renderObjects((object) => object.type !== "text")
+  private conditionallyRenderObject(object: DrawingObjectType,
+       _filter: (object: DrawingObjectType) => boolean, inGroup: boolean) {
+    if (!object || !_filter(object)) {
+      return null;
+    }
+    // Objects that are members of a group should not respond to mouse events.
+    const hoverAction = inGroup ? undefined : this.handleObjectHover;
+    const mouseDownAction = inGroup ? undefined : this.handleSelectedObjectMouseDown;
+    return renderDrawingObject(object, this.props.readOnly, hoverAction, mouseDownAction);
+  }
+
   public renderObjects(_filter: (object: DrawingObjectType) => boolean) {
-    return this.getContent().objects.map((object) => {
-      if (!object || !_filter(object)) {
-        return null;
+    return this.getContent().objects.reduce((result, object) => {
+      result.push(this.conditionallyRenderObject(object, _filter, false));
+      if (isGroupObject(object)) {
+        object.objects.forEach((member) => { 
+          result.push(this.conditionallyRenderObject(member, _filter, true));
+        });
       }
-      return renderDrawingObject(object, this.props.readOnly, 
-        this.handleObjectHover, this.handleSelectedObjectMouseDown);
-    });
+      return result;
+    }, [] as (JSX.Element|null)[]);
   }
 
   public renderSelectionBorders(selectedObjects: DrawingObjectType[], enableActions: boolean) {

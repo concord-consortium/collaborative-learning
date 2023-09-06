@@ -65,6 +65,12 @@ class DrawToolTile{
     getDrawToolUploadImage(){
       return cy.get('.primary-workspace .drawing-tool-button.image-upload input');
     }
+    getDrawToolGroup(){
+      return cy.get('.primary-workspace .drawing-tool-button.button-group');
+    }
+    getDrawToolUngroup(){
+      return cy.get('.primary-workspace .drawing-tool-button.button-ungroup');
+    }
     getDrawToolDelete(){
       return cy.get('.primary-workspace .drawing-tool-button.button-delete');
     }

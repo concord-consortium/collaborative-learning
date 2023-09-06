@@ -187,6 +187,14 @@ export const PolygonModel = GeometryObjectModel
     get dependencies(): string[] {
       return self.points;
     },
+    get segmentIds(): string[] {
+      const segmentIds: string[] = [];
+      self.points.forEach((point, index) => {
+        const otherPointIndex = index < self.points.length - 1 ? index+1 : 0;
+        segmentIds.push(segmentIdFromPointIds([point, self.points[otherPointIndex]]));
+      });
+      return segmentIds;
+    },
     hasSegmentLabel(ptIds: [string, string]) {
       return !!self.labels?.find(label => label.id === segmentIdFromPointIds(ptIds));
     },

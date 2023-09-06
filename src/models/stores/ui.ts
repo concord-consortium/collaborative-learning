@@ -14,6 +14,8 @@ import { LearningLogDocument, LearningLogPublication, PersonalDocument,
   ProblemPublication, SupportPublication } from "../document/document-types";
 import { UserModelType } from "./user";
 
+export const kSparrowAnnotationMode = "sparrow";
+
 type BooleanDialogResolver = (value: boolean | PromiseLike<boolean>) => void;
 type StringDialogResolver = (value: string | PromiseLike<string>) => void;
 let dialogResolver: BooleanDialogResolver | StringDialogResolver | undefined;

@@ -4,7 +4,7 @@ import React from "react";
 import { SelectionBox } from "../components/selection-box";
 import { computeStrokeDashArray, DeltaPoint, DrawingTool, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
-import { BoundingBoxDelta, Point } from "../model/drawing-basic-types";
+import { BoundingBoxSides, Point } from "../model/drawing-basic-types";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
 import FreehandToolIcon from "../assets/freehand-icon.svg";
 
@@ -73,7 +73,7 @@ export const LineObject = StrokedObject.named("LineObject")
       self.deltaPoints.push(point);
     },
 
-    setDragBounds(deltas: BoundingBoxDelta) {
+    setDragBounds(deltas: BoundingBoxSides) {
       self.dragX = self.dragY = self.dragScaleX = self.dragScaleY = undefined;
       const bbox = self.boundingBox;
       const left = bbox.nw.x;
@@ -129,7 +129,7 @@ export const LineComponent = observer(function LineComponent({model, handleHover
     onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
     onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
     onMouseDown={(e)=> handleDrag?.(e, model)}
-    pointerEvents={"visible"}
+    pointerEvents={handleHover ? "visible" : "none"}
   />;
 });
 

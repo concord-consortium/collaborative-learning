@@ -180,6 +180,7 @@
       user-select: none;
       width: $toolbar-button-width;
       height: $toolbar-button-height;
+      background-color: #efefef;
       cursor: pointer;
       &.selected {
         background-color: $workspace-teal-light-4;
