@@ -25,18 +25,19 @@ import { DocumentError } from "./document-error";
 import "./canvas.scss";
 
 interface IProps {
-  context: string;
-  scale?: number;
-  readOnly?: boolean;
-  document?: DocumentModelType;
   content?: DocumentContentModelType;
-  showPlayback?: boolean;
+  context: string;
+  document?: DocumentModelType;
   overlayMessage?: string;
+  readOnly?: boolean;
+  scale?: number;
   selectedSectionId?: string | null;
+  showPlayback?: boolean;
   viaTeacherDashboard?: boolean;
 }
 
 interface IState {
+  canvasElement?: HTMLDivElement | null;
   documentScrollX: number;
   documentScrollY: number;
   historyDocumentCopy?: DocumentModelType;
@@ -46,7 +47,6 @@ interface IState {
 @inject("stores")
 @observer
 export class CanvasComponent extends BaseComponent<IProps, IState> {
-
   private toolApiMap: ITileApiMap = {};
   private tileApiInterface: ITileApiInterface;
   private hotKeys: HotKeys = new HotKeys();
@@ -88,20 +88,34 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
     };
   }
 
+  private setCanvasElement(canvasElement?: HTMLDivElement | null) {
+    if (!this.state.canvasElement) {
+      this.setState({ canvasElement });
+    }
+  }
+
   public render() {
     if (this.context && !this.props.readOnly) {
       // update the editable api interface used by the toolbar
       this.context.current = this.tileApiInterface;
     }
+    const content = this.getDocumentToShow()?.content ?? this.getDocumentContent();
     return (
       <TileApiInterfaceContext.Provider value={this.tileApiInterface}>
-        <div key="canvas" className="canvas" data-test="canvas" onKeyDown={this.handleKeyDown}>
+        <div
+          key="canvas"
+          className="canvas"
+          data-test="canvas"
+          onKeyDown={this.handleKeyDown}
+          ref={(el) => this.setCanvasElement(el)}
+        >
           {this.renderContent()}
           {this.renderDebugInfo()}
           {this.renderOverlayMessage()}
         </div>
         <AnnotationLayer
-          content={this.getDocumentContent()}
+          canvasElement={this.state.canvasElement}
+          content={content}
           documentScrollX={this.state.documentScrollX}
           documentScrollY={this.state.documentScrollY}
           readOnly={this.props.readOnly}

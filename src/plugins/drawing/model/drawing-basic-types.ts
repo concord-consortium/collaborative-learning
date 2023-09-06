@@ -12,7 +12,7 @@ export interface BoundingBox {
   end?: Point;
 }
 
-export interface BoundingBoxDelta {
+export interface BoundingBoxSides {
   top: number, 
   right: number, 
   bottom: number, 

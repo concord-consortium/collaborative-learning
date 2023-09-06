@@ -9,25 +9,25 @@ import { useAppMode } from "../../hooks/use-stores";
 import classNames from "classnames";
 
 interface IProps {
-  dataTestName: string;
   canvasContext: string;
-  document: DocumentModelType;
-  scale: number;
   captionText: string;
-  isSelected?: boolean;
+  dataTestName: string;
+  document: DocumentModelType;
   isSecondarySelected?: boolean;
-  onIsStarred: () => boolean;
+  isSelected?: boolean;
   onDocumentClick: (document: DocumentModelType) => void;
+  onDocumentDeleteClick?: (document: DocumentModelType) => void;
   onDocumentDragStart?: (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => void;
   onDocumentStarClick?: (document: DocumentModelType) => void;
-  onDocumentDeleteClick?: (document: DocumentModelType) => void;
+  onIsStarred: () => boolean;
+  scale: number;
 }
 
 export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) => {
-  const { dataTestName, canvasContext, document, scale, captionText, isSelected, isSecondarySelected,
-    onIsStarred,
-          onDocumentClick, onDocumentDragStart, onDocumentStarClick,
-          onDocumentDeleteClick } = props;
+  const {
+    dataTestName, canvasContext, document, scale, captionText, isSelected, isSecondarySelected,
+    onIsStarred, onDocumentClick, onDocumentDragStart, onDocumentStarClick, onDocumentDeleteClick
+  } = props;
   const selectedClass = isSelected ? "selected" : "";
   const appMode = useAppMode();
 

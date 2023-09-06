@@ -1,6 +1,7 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { MouseEventHandler, useContext, useEffect, useRef, useState } from "react";
+import useResizeObserver from "use-resize-observer";
 
 import { AnnotationButton } from "../annotations/annotation-button";
 import { getDefaultPeak } from "../annotations/annotation-utilities";
@@ -11,17 +12,19 @@ import { useUIStore } from "../../hooks/use-stores";
 import { ArrowAnnotation } from "../../models/annotations/arrow-annotation";
 import { ClueObjectModel, IClueObject, OffsetModel } from "../../models/annotations/clue-object";
 import { DocumentContentModelType } from "../../models/document/document-content";
+import { Point } from "../../utilities/math-utils";
 
 import "./annotation-layer.scss";
 
 interface IAnnotationLayerProps {
+  canvasElement?: HTMLDivElement | null;
   content?: DocumentContentModelType;
   documentScrollX?: number;
   documentScrollY?: number;
   readOnly?: boolean;
 }
 export const AnnotationLayer = observer(function AnnotationLayer({
-  content, documentScrollX, documentScrollY, readOnly
+  canvasElement, content, documentScrollX, documentScrollY, readOnly
 }: IAnnotationLayerProps) {
   const [_initialized, setInitialized] = useState(false);
   useEffect(() => {
@@ -33,18 +36,27 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const [sourceObjectType, setSourceObjectType] = useState<string | undefined>();
   const [mouseX, setMouseX] = useState<number | undefined>();
   const [mouseY, setMouseY] = useState<number | undefined>();
-  const divRef = useRef<HTMLDivElement>();
+  const divRef = useRef<Element|null>(null);
   const ui = useUIStore();
   const tileApiInterface = useContext(TileApiInterfaceContext);
 
-  const readWriteClass = readOnly ? "read-only" : "read-write";
-  const documentClasses = `.document-content.${readWriteClass} `;
+  // Clear a partially completed annotation when the mode changes
+  useEffect(() => {
+    setSourceTileId("");
+    setSourceObjectId("");
+    setSourceObjectType(undefined);
+  }, [ui.annotationMode]);
+
+  // Force rerenders when the layer's size changes
+  useResizeObserver({ref: divRef, box: "border-box"});
+
   function getRowElement(rowId?: string) {
     if (rowId === undefined) return undefined;
-    const rowSelector = `${documentClasses}[data-row-id='${rowId}']`;
-    const rowElements = document.querySelectorAll(rowSelector);
-    if (rowElements.length !== 1) return undefined;
-    return rowElements[0] as HTMLElement;
+    const rowSelector = `[data-row-id='${rowId}']`;
+    const rowElements = canvasElement?.querySelectorAll(rowSelector);
+    if (rowElements && rowElements.length === 1) {
+      return rowElements[0] as HTMLElement;
+    }
   }
 
   const firstRow = content?.rowOrder.length && content.rowOrder.length > 0
@@ -67,26 +79,42 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     }
   };
 
+  // Returns a function that will translate a point so it can be passed as a parameter to AnnotationButton
+  function getTranslateTilePointToScreenPoint(rowId: string, tileId: string) {
+    const tileBorder = 3;
+
+    const rowElement = getRowElement(rowId);
+    if (!rowElement) return undefined;
+
+    const tileSelector = `[data-tool-id='${tileId}']`;
+    const tileElements = canvasElement?.querySelectorAll(tileSelector);
+    const tileElement = tileElements && tileElements.length === 1 ? tileElements[0] as HTMLElement : undefined;
+    if (!tileElement) return undefined;
+
+    return (point: Point): Point | undefined => {
+
+      const [x, y] = point;
+
+      const _x = rowElement.offsetLeft + tileElement.offsetLeft - tileElement.scrollLeft
+        + x + tileBorder - (documentScrollX ?? 0);
+      const _y = rowElement.offsetTop + tileElement.offsetTop - tileElement.scrollTop
+        + y + tileBorder - (documentScrollY ?? 0);
+      return [_x, _y];
+    };
+  }
+
   function getObjectBoundingBox(
     rowId: string, tileId: string, objectId: string, objectType?: string
   ) {
-    const rowElement = getRowElement(rowId);
-    if (!rowElement) return undefined;
-  
-    const tileSelector = `${documentClasses}[data-tool-id='${tileId}']`;
-    const tileElements = document.querySelectorAll(tileSelector);
-    if (tileElements.length !== 1) return undefined;
-    const tileElement = (tileElements[0] as HTMLElement);
-  
     const tileApi = tileApiInterface?.getTileApi(tileId);
     const objectBoundingBox = tileApi?.getObjectBoundingBox?.(objectId, objectType);
     if (!objectBoundingBox) return undefined;
 
-    const tileBorder = 3;
-    const left = rowElement.offsetLeft + tileElement.offsetLeft - tileElement.scrollLeft
-      + objectBoundingBox.left + tileBorder - (documentScrollX ?? 0);
-    const top = rowElement.offsetTop + tileElement.offsetTop - tileElement.scrollTop
-      + objectBoundingBox.top + tileBorder - (documentScrollY ?? 0);
+    const translatePoint = getTranslateTilePointToScreenPoint(rowId, tileId);
+    const point = translatePoint?.([objectBoundingBox.left, objectBoundingBox.top]);
+    if (!point) return undefined;
+
+    const [left, top] = point;
     const height = objectBoundingBox.height;
     const width = objectBoundingBox.width;
     return { left, top, height, width };
@@ -200,6 +228,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
                       rowId={rowId}
                       sourceObjectId={sourceObjectId}
                       sourceTileId={sourceTileId}
+                      translateTilePointToScreenPoint={getTranslateTilePointToScreenPoint(rowId, tileInfo.tileId)}
                       tileId={tile.id}
                     />
                   );
