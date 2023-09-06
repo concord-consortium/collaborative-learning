@@ -1,30 +1,44 @@
+import classNames from 'classnames';
 import React, { useRef, useEffect, useState } from 'react';
 import { select, axisBottom, drag, pointer } from 'd3';
 import { observer } from 'mobx-react';
 
+import { NumberlineToolbar } from "./numberline-toolbar";
 import { NumberlineContentModelType, PointObjectModelType,  } from "../models/numberline-content";
-import { kAxisStyle, kAxisWidth, kContainerWidth, kNumberLineContainerHeight,
-         numberlineDomainMax, numberlineDomainMin, tickHeightDefault,
-         tickHeightZero, tickStyleDefault, tickStyleZero, tickWidthDefault,
-         tickWidthZero, innerPointRadius, outerPointRadius, numberlineYBound,
-         yMidPoint, createXScale} from '../numberline-tile-constants';
+import {
+  kAxisStyle, kAxisWidth, kContainerWidth, kNumberLineContainerHeight, numberlineDomainMax, numberlineDomainMin,
+  tickHeightDefault, tickHeightZero, tickStyleDefault, tickStyleZero, tickWidthDefault, tickWidthZero,
+  innerPointRadius, outerPointRadius, numberlineYBound, yMidPoint, createXScale, pointXYBoxRadius
+} from '../numberline-tile-constants';
+import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
+import { useToolbarTileApi } from "../../../components/tiles/hooks/use-toolbar-tile-api";
 import { ITileProps } from "../../../components/tiles/tile-component";
+import { OffsetModel } from '../../../models/annotations/clue-object';
+import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
+import { HotKeys } from "../../../utilities/hot-keys";
 
 import "./numberline-tile.scss";
 
 export const NumberlineTile: React.FC<ITileProps> = observer(function NumberlineTile(props){
-  const { model, readOnly } = props;
+  const { documentContent, model, readOnly, scale, tileElt, onRegisterTileApi, onUnregisterTileApi } = props;
   const content = model.content as NumberlineContentModelType;
   const readOnlyState = (readOnly) ? "readOnly" : "readWrite";
   const tileId = model.id;
   const axisClass = `axis-${tileId}-${readOnlyState}`;
 
+  const hotKeys = useRef(new HotKeys());
+  const toolbarProps = useToolbarTileApi({ id: model.id, enabled: !readOnly, onRegisterTileApi, onUnregisterTileApi });
+
+  const handleDeletePoint = () => {
+    content.deleteSelectedPoints();
+  };
+
   //---------------- Calculate Width Of Tile / Scale ----------------------------------------------
   const documentScrollerRef = useRef<HTMLDivElement>(null);
   const [tileWidth, setTileWidth] = useState(0);
-  const containerWidth = (tileWidth * kContainerWidth);
+  const containerWidth = tileWidth * kContainerWidth;
   const axisWidth = tileWidth * kAxisWidth;
-  const xShiftNum = ((containerWidth - axisWidth)/2);
+  const xShiftNum = (containerWidth - axisWidth) / 2;
   const numToPx = (num: number) => num.toFixed(2) + "px";
   const xScale = createXScale(axisWidth);
 
@@ -56,11 +70,50 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   const mousePosX = (e: Event) => pointer(e, svgNode)[0];
   const mousePosY = (e: Event) => pointer(e, svgNode)[1];
 
+  useEffect(()=>{
+    if (!readOnly) {
+      hotKeys.current.register({
+        "delete": handleDeletePoint,
+        "backspace": handleDeletePoint,
+      });
+    }
+    onRegisterTileApi({
+      exportContentAsTileJson: (options?: ITileExportOptions) => {
+        return content.exportJson(options);
+      },
+      getTitle: () => {
+        return model.title || "";
+      },
+      getObjectBoundingBox: (objectId: string, objectType?: string) => {
+        if (objectType === "point") {
+          const point = content.getPointFromId(objectId);
+          if (!point) return undefined;
+          const percentage = (point.currentXValue - numberlineDomainMin) / (numberlineDomainMax - numberlineDomainMin);
+          const x = percentage * axisWidth + tileWidth * (1 - kAxisWidth) / 2;
+          const boundingBox = {
+            height: 2 * pointXYBoxRadius,
+            left: x - pointXYBoxRadius - 1,
+            top: yMidPoint + 50 - pointXYBoxRadius - 1,
+            width: 2 * pointXYBoxRadius
+          }
+          return boundingBox;
+        }
+      },
+      getObjectDefaultOffsets: (objectId: string, objectType?: string) => {
+        const offsets = OffsetModel.create({});
+        if (objectType === "point") {
+          offsets.setDy(-pointXYBoxRadius);
+        }
+        return offsets;
+      }
+    });
+  }, [tileWidth]);
+
   const handleMouseClick = (e: Event) => {
     if (!readOnly){
       if (isMouseOverPoint){
         const pointHoveredOver = content.getPointFromId(content.hoveredPoint);
-        content.setSelectedPoint(pointHoveredOver);
+        if (pointHoveredOver) content.setSelectedPoint(pointHoveredOver);
       } else{
         //only create point if we are not hovering over a point and within bounding box
         mouseInBoundingBox(mousePosX(e), mousePosY(e)) && handleClickCreatePoint(e);
@@ -101,7 +154,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   .on('drag', (e, p) => {
       if (!readOnly && mouseInBoundingBox(mousePosX(e), mousePosY(e))){
         const pointHoveredOver = content.getPointFromId(content.hoveredPoint);
-        content.setSelectedPoint(pointHoveredOver);
+        if (pointHoveredOver) content.setSelectedPoint(pointHoveredOver);
         const newXValue = xScale.invert(mousePosX(e));
         content.replaceXValueWhileDragging(p.id, newXValue);
       }
@@ -187,17 +240,38 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
 
   return (
     <div
-      className="numberline-tool"
-      ref={documentScrollerRef}
-      data-testid="numberline-tool"
-      style={{"height": `${kNumberLineContainerHeight}`}}
+      className={classNames("numberline-wrapper", { "read-only": readOnly })}
+      onKeyDown={(e) => hotKeys.current.dispatch(e)}
+      tabIndex={0}
     >
-      <div className="numberline-tool-container" >
-        <svg ref={svgRef} width={axisWidth}>
-          <g ref={axisRef}></g>
-        </svg>
-        <i className="arrow left" style={{'left': numToPx(xShiftNum - 3), 'top': '53px'}}/>
-        <i className="arrow right" style={{'right': numToPx(xShiftNum - 3), 'top': '53px'}}/>
+      <div className={"numberline-title"}>
+        <BasicEditableTileTitle
+          model={model}
+          readOnly={readOnly}
+          scale={scale}
+        />
+      </div>
+      <NumberlineToolbar
+        documentContent={documentContent}
+        tileElt={tileElt}
+        {...toolbarProps}
+        scale={scale}
+        handleClearPoints={() => content.deleteAllPoints()}
+        handleDeletePoint={handleDeletePoint}
+      />
+      <div
+        className="numberline-tool"
+        ref={documentScrollerRef}
+        data-testid="numberline-tool"
+        style={{"height": `${kNumberLineContainerHeight}`}}
+      >
+        <div className="numberline-tool-container" >
+          <i className="arrow left" style={{'left': numToPx(xShiftNum - 3), 'top': '53px'}}/>
+          <i className="arrow right" style={{'right': numToPx(xShiftNum - 3), 'top': '53px'}}/>
+          <svg ref={svgRef} width={axisWidth}>
+            <g ref={axisRef}></g>
+          </svg>
+        </div>
       </div>
     </div>
   );

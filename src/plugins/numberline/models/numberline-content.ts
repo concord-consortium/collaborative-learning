@@ -1,10 +1,12 @@
+import stringify from "json-stringify-pretty-compact";
 import { types, Instance, getSnapshot } from "mobx-state-tree";
+
+import { createXScale, kNumberlineTileType, maxNumSelectedPoints,
+  pointXYBoxRadius, yMidPoint} from "../numberline-tile-constants";
+import { getTileIdFromContent } from "../../../models/tiles/tile-model";
 import { TileContentModel } from "../../../models/tiles/tile-content";
 import { uniqueId } from "../../../utilities/js-utils";
-import { createXScale, kNumberlineTileType, maxNumSelectedPoints,
-         pointXYBoxRadius, yMidPoint} from "../numberline-tile-constants";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
-import stringify from "json-stringify-pretty-compact";
 
 export function defaultNumberlineContent(): NumberlineContentModelType {
   return NumberlineContentModel.create({});
@@ -66,11 +68,19 @@ export const NumberlineContentModel = TileContentModel
     }
   }))
   .views(self =>({
+    get annotatableObjects() {
+      const tileId = getTileIdFromContent(self) ?? "";
+      return self.pointsArr.map(point => ({
+        objectId: point.id,
+        objectType: "point",
+        tileId
+      }));
+    },
     get pointsXValuesArr(){
       return self.pointsArr.map((pointObj) => pointObj.xValue);
     },
-    getPointFromId(id: string){
-      return self.pointsArr.find((point)=> point.id === id) as PointObjectModelType;
+    getPointFromId(id: string) {
+      return self.pointsArr.find(point => point.id === id);
     },
     //Pass snapshot of axisPoint models into outer/inner points to avoid D3 and MST error
     get axisPointsSnapshot(){
@@ -114,7 +124,7 @@ export const NumberlineContentModel = TileContentModel
     },
     replaceXValueWhileDragging(pointDraggedId: string, newXValue: number){
       const pointDragged = self.getPointFromId(pointDraggedId);
-      pointDragged.setDragXValue(newXValue);
+      if (pointDragged) pointDragged.setDragXValue(newXValue);
     },
     deleteSelectedPoints(){
       //For now - only one point can be selected
