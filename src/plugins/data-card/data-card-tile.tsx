@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ITileProps, extractDragTileType, kDragTiles } from "../../components/tiles/tile-component";
 import { useUIStore } from "../../hooks/use-stores";
 import { addCanonicalCasesToDataSet } from "../../models/data/data-set";
@@ -11,12 +11,13 @@ import { SortSelect } from "./components/sort-select";
 import { useToolbarTileApi } from "../../components/tiles/hooks/use-toolbar-tile-api";
 import { AddIconButton, RemoveIconButton } from "./components/add-remove-icons";
 import { useCautionAlert } from "../../components/utilities/use-caution-alert";
-import { EditFacet, kExampleDeckHeight, kButtonSpace } from "./data-card-types";
+import { EditFacet } from "./data-card-types";
 import { DataCardSortArea } from "./components/sort-area";
 import { safeJsonParse } from "../../utilities/js-utils";
 import { mergeTwoDataSets } from "../../models/data/data-set-utils";
 import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
 import { useConsumerTileLinking } from "../../hooks/use-consumer-tile-linking";
+import { useDataCardTileHeight } from "./use-data-card-tile-height";
 
 import "./data-card-tile.scss";
 
@@ -33,7 +34,6 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
   const [currEditFacet, setCurrEditFacet] = useState<EditFacet>("");
   const [imageUrlToAdd, setImageUrlToAdd] = useState<string>("");
   const [highlightDataCard, setHighlightDataCard] = useState(false);
-  const attrCount = useRef(content.existingAttributesWithNames().length);
 
   const shouldShowAddCase = !readOnly && isTileSelected;
   const shouldShowDeleteCase = !readOnly && isTileSelected && content.dataSet.cases.length > 1;
@@ -56,25 +56,17 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => {
-    if (!tileElt) return;
-    const uiHeight = tileElt?.querySelector(".data-card-container")?.scrollHeight || 0;
-    const spaceLeft = height ? height - uiHeight : 0;
-    // no document id means we are in content, so we allow a change to the document model (row height)
-    if (!documentId && readOnly) onRequestRowHeight(model.id, Math.max(uiHeight, kExampleDeckHeight));
-    if (!readOnly) spaceLeft < kButtonSpace && onRequestRowHeight(model.id, uiHeight + kButtonSpace);
-    // first three dependencies are to pick up on content changes that may require a height change
-  }, [currEditAttrId, currEditFacet, imageUrlToAdd,
-    height, readOnly, tileElt, onRequestRowHeight, model.id, documentId]);
+  useDataCardTileHeight({
+    tileElt,
+    height: height && isFinite(height) ? height : 0,
+    currEditAttrId: currEditAttrId ?? "",
+    modelId: model.id,
+    documentId,
+    readOnly: readOnly ?? false,
+    onRequestRowHeight,
+    attrCount: attrIdsNames.length,
+  });
 
-  useEffect(() => {
-    const uiHeight = tileElt?.querySelector(".data-card-container")?.scrollHeight || 0;
-    const spaceLeft = height ? height - uiHeight : 0;
-    if (attrCount.current < attrIdsNames.length) {
-      attrCount.current = attrIdsNames.length;
-      if (!readOnly) spaceLeft < kButtonSpace && onRequestRowHeight(model.id, uiHeight + kButtonSpace);
-    }
-  }, [attrCount, attrIdsNames.length, currEditAttrId, height, model.id, onRequestRowHeight, readOnly, tileElt]);
   /* ==[ Drag and Drop ] == */
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
