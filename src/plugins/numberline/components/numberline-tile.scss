@@ -4,8 +4,8 @@
 .numberline-wrapper {
   width: 100%;
 
-  .numberline-title{
-    height: 50px;
+  .numberline-title {
+    height: 50px; // Corresponds to kTitleHeight in numberline-tile-constants.ts
     width: 100%;
   }
 }
@@ -21,7 +21,7 @@
     border: 1px solid #cccccc;
   }
 
-  .numberline-tool-container{
+  .numberline-tool-container {
     width: 93%; //should match kContainerWidth in numberline-tile-constants.ts
     display: flex;
     align-items: center;
@@ -30,7 +30,7 @@
     font-family: 'Ubunutu', sans-serif;
     position: relative;
 
-    svg{
+    svg {
       overflow: visible;
 
       text {

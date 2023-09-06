@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import { axisBottom, drag, pointer, select } from 'd3';
+import { axisBottom, drag, pointer, scaleLinear, select } from 'd3';
 import { observer } from 'mobx-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -8,7 +8,7 @@ import { NumberlineContentModelType, PointObjectModelType,  } from "../models/nu
 import {
   kAxisStyle, kAxisWidth, kContainerWidth, kNumberLineContainerHeight, numberlineDomainMax, numberlineDomainMin,
   tickHeightDefault, tickHeightZero, tickStyleDefault, tickStyleZero, tickWidthDefault, tickWidthZero,
-  innerPointRadius, outerPointRadius, numberlineYBound, yMidPoint, createXScale, pointXYBoxRadius
+  innerPointRadius, outerPointRadius, numberlineYBound, yMidPoint, kTitleHeight, kBoundingBoxOffset, kArrowheadTop, kArrowheadOffset
 } from '../numberline-tile-constants';
 import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
 import { useToolbarTileApi } from "../../../components/tiles/hooks/use-toolbar-tile-api";
@@ -55,7 +55,11 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   const containerWidth = tileWidth * kContainerWidth;
   const axisWidth = tileWidth * kAxisWidth;
   const xShiftNum = (containerWidth - axisWidth) / 2;
-  const xScale = useMemo(() => createXScale(axisWidth), [axisWidth]);
+  const xScale = useMemo(() => {
+    return scaleLinear()
+      .domain([numberlineDomainMin, numberlineDomainMax])
+      .range([0, axisWidth]);
+  }, [axisWidth, numberlineDomainMax, numberlineDomainMin]);
   const axisLeft = useMemo(() => tileWidth * (1 - kAxisWidth) / 2, [kAxisWidth, tileWidth]);
 
   const pointPosition = useCallback((point: PointObjectModelType) => {
@@ -76,6 +80,41 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     }
     return () => obs?.disconnect();
   }, []);
+
+  // Register Tile API functions
+  const getObjectBoundingBox = useCallback((objectId: string, objectType?: string) => {
+    if (objectType === "point") {
+      const point = content.getPoint(objectId);
+      if (!point) return undefined;
+      const { x, y } = pointPosition(point);
+      const boundingBox = {
+        height: 2 * outerPointRadius,
+        left: x + axisLeft - outerPointRadius + kBoundingBoxOffset,
+        top: y + kTitleHeight - outerPointRadius + kBoundingBoxOffset,
+        width: 2 * outerPointRadius
+      }
+      return boundingBox;
+    }
+  }, [axisLeft, outerPointRadius, pointPosition]);
+
+  useEffect(() => {
+    onRegisterTileApi({
+      exportContentAsTileJson: (options?: ITileExportOptions) => {
+        return content.exportJson(options);
+      },
+      getTitle: () => {
+        return model.title || "";
+      },
+      getObjectBoundingBox,
+      getObjectDefaultOffsets: (objectId: string, objectType?: string) => {
+        const offsets = OffsetModel.create({});
+        if (objectType === "point") {
+          offsets.setDy(-innerPointRadius);
+        }
+        return offsets;
+      }
+    });
+  }, [getObjectBoundingBox, model.title, innerPointRadius]);
 
   //-------------------  SVG Ref to Numberline & SVG --------------------------------
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -153,42 +192,6 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
 
   svg.on("click", (e) => handleMouseClick(e));
   svg.on("mousemove", (e) => handleMouseMove(e));
-
-  // Register Tile API functions
-  const getObjectBoundingBox = useCallback((objectId: string, objectType?: string) => {
-    if (objectType === "point") {
-      const point = content.getPoint(objectId);
-      if (!point) return undefined;
-      const halfSide = outerPointRadius;
-      const { x, y } = pointPosition(point);
-      const boundingBox = {
-        height: 2 * halfSide,
-        left: x + axisLeft - halfSide - 1,
-        top: y + 50 - halfSide - 1,
-        width: 2 * halfSide
-      }
-      return boundingBox;
-    }
-  }, [axisLeft, pointPosition, pointXYBoxRadius]);
-
-  useEffect(() => {
-    onRegisterTileApi({
-      exportContentAsTileJson: (options?: ITileExportOptions) => {
-        return content.exportJson(options);
-      },
-      getTitle: () => {
-        return model.title || "";
-      },
-      getObjectBoundingBox,
-      getObjectDefaultOffsets: (objectId: string, objectType?: string) => {
-        const offsets = OffsetModel.create({});
-        if (objectType === "point") {
-          offsets.setDy(-pointXYBoxRadius);
-        }
-        return offsets;
-      }
-    });
-  }, [getObjectBoundingBox, model.title, pointXYBoxRadius]);
 
   // * =============================== [ Construct Numberline ] ================================ */
   if (axisWidth !== 0) {
@@ -300,8 +303,8 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
         style={{"height": `${kNumberLineContainerHeight}`}}
       >
         <div className="numberline-tool-container" >
-          <i className="arrow left" style={{'left': xShiftNum - 3, 'top': '53px'}}/>
-          <i className="arrow right" style={{'right': xShiftNum - 3, 'top': '53px'}}/>
+          <i className="arrow left" style={{ left: xShiftNum + kArrowheadOffset, top: kArrowheadTop }}/>
+          <i className="arrow right" style={{ right: xShiftNum + kArrowheadOffset, top: kArrowheadTop }}/>
           <svg ref={svgRef} width={axisWidth}>
             <g ref={axisRef}></g>
           </svg>
