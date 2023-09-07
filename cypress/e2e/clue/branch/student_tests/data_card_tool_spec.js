@@ -71,5 +71,17 @@ context('Data Card Tool Tile', function () {
       dc.getSortCardCollapseToggle().click();
       dc.getSortCardData().should('exist');
     });
+    it("can add a second attribute", () => {
+      dc.getSortSelect().select("None");
+      dc.getAddAttributeButton().click();
+      dc.getAttrName().eq(1).dblclick().type("animal{enter}");
+      // complete this test
+    });
+    it("can add two different values to two cases of two different attributes", () => {
+      // complete this test
+    });
+    it("shows type-ahead options using existing values for current attribute only", () => {
+      // complete this test
+    });
   });
 });

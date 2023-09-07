@@ -43,6 +43,10 @@ class DataCardToolTile {
     const selector = ".add-remove-card-buttons .add-card";
     return this.getTile(tileIndex, workspaceClass).find(`${selector}`);
   }
+  getAddAttributeButton(tileIndex = 0, workspaceClass){
+    const selector = ".add-field";
+    return this.getTile(tileIndex, workspaceClass).find(`${selector}`);
+  }
   getDeleteCardButton(tileIndex = 0, workspaceClass){
     const selector = ".add-remove-card-buttons .remove-card";
     return this.getTile(tileIndex, workspaceClass).find(`${selector}`);
