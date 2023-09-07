@@ -3,6 +3,7 @@ import { observer } from "mobx-react";
 import classNames from "classnames";
 import { useCombobox } from "downshift";
 import { uniq } from "lodash";
+import { VisuallyHidden } from "@chakra-ui/react";
 import { gImageMap } from "../../../models/image-map";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { DataCardContentModelType } from "../data-card-content";
@@ -55,6 +56,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const [labelCandidate, setLabelCandidate] = useState(() => getLabel());
   const [valueCandidate, setValueCandidate] = useState(() => getValue());
   const [imageUrl, setImageUrl] = useState("");
+  const [inputItems, setInputItems] = useState([] as string[]);
 
   const editingLabel = currEditFacet === "name" && currEditAttrId === attrKey;
   const editingValue = currEditFacet === "value" && currEditAttrId === attrKey;
@@ -68,17 +70,10 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     }) as string[];
   };
 
-  useEffect(()=>{
-    const attrValues = content.dataSet.attrFromID(attrKey)?.values || [];
-    const completions = validCompletions(attrValues as string[], valueCandidate);
-    setInputItems(completions);
-  },[content.dataSet, attrKey, valueCandidate]);
-
-  const [inputItems, setInputItems] = useState([] as string[]);
   const {
     isOpen,
     getToggleButtonProps,
-    // getLabelProps,
+    getLabelProps,
     getMenuProps,
     getInputProps,
     highlightedIndex,
@@ -96,12 +91,18 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     }
   });
 
+  useEffect(()=>{
+    const attrValues = content.dataSet.attrFromID(attrKey)?.values || [];
+    const completions = validCompletions(attrValues as string[], valueCandidate);
+    setInputItems(completions);
+  }, [content.dataSet, attrKey, valueCandidate]);
+
   // reset contents of input when attribute value changes without direct user input
   // (when it is deleted by toolbar or the underlying case has changed )
   useEffect(()=>{
     setValueCandidate(valueStr);
     setInputValue(valueStr);
-  },[setInputValue, valueStr]);
+  }, [setInputValue, valueStr]);
 
   gImageMap.isImageUrl(valueStr) && gImageMap.getImage(valueStr)
     .then((image)=>{
@@ -110,7 +111,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     editingLabel && setLabelCandidate(event.target.value);
-    editingValue && setValueCandidate(event.target.value);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -315,6 +315,11 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
       <div className={valueClassNames} onClick={handleValueClick}>
           <div style={{display: (!readOnly && !valueIsImage()) ? 'block' : 'none'}} className="downshift-dropdown">
+            <VisuallyHidden>
+              <label {...getLabelProps()} className="">
+                Value for {labelCandidate}
+              </label>
+            </VisuallyHidden>
             <input
               {...customizedGetInputProps()}
               className={valueInputClassNames}
@@ -340,14 +345,11 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
             </ul>
           </div>
 
-          { !readOnly && valueIsImage() &&
+          { valueIsImage() &&
             <img src={imageUrl} className="image-value" />
           }
           { readOnly && !valueIsImage() &&
             <div className="cell-value">{valueStr}</div>
-          }
-          { readOnly && valueIsImage() &&
-            <img src={imageUrl} className="image-value" />
           }
       </div>
       <div className={typeIconClassNames} >{typeIcon}</div>
