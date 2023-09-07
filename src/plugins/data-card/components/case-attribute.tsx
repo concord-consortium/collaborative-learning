@@ -289,6 +289,20 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   const typeIcon = typeIcons[content.dataSet.attrFromID(attrKey).mostCommonType || ""];
 
+  // Add some custom behavior to the properties returned by useCombobox
+  function customizedGetInputProps() {
+    const props = getInputProps();
+
+    const defaultBlur = props.onBlur;
+    const newBlur = function(e: React.FocusEvent<Element, Element>) {
+      handleCompleteValue();
+      if (defaultBlur) defaultBlur(e);
+    };
+    props.onBlur = newBlur;
+
+    return props;
+  }
+
   return (
     <div className={pairClassNames}>
       <div className={labelClassNames} onClick={handleLabelClick}>
@@ -309,10 +323,10 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
       <div className={valueClassNames} onClick={handleValueClick}>
           <div style={{display: (!readOnly && !valueIsImage()) ? 'block' : 'none'}} className="downshift-dropdown">
             <input
-              {...getInputProps()}
+              {...customizedGetInputProps()}
               className={valueInputClassNames}
               onFocus={handleValueInputFocus}
-              onBlur={handleCompleteValue}
+              onPaste={handleValuePaste}
             />
             <button aria-label="toggle menu" type="button" {...getToggleButtonProps()}>
               { isOpen ?
