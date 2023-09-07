@@ -24,9 +24,9 @@ context('Data Card Tool Tile', function () {
       dc.getAttrName().contains("Attr1 Name");
     });
     it("can add a value to an attribute", () => {
-      dc.getAttrValue().click().type("Attr1 Value{enter}");
+      dc.getAttrValue().click().type("ocean{enter}");
       dc.getTile().click();
-      dc.getAttrValueInput().invoke('val').should('eq', 'Attr1 Value');
+      dc.getAttrValueInput().invoke('val').should('eq', "ocean");
     });
     it("can toggle between single and sort views", () => {
       dc.getSingleCardView().should('exist');
@@ -36,9 +36,9 @@ context('Data Card Tool Tile', function () {
       dc.getSingleCardView().should('exist');
     });
     it("has attribute names that stay in sync on sort menu and card", () => {
-      dc.getAttrName().dblclick().type("Attr1 Renamed{enter}");
-      dc.getAttrName().contains("Attr1 Renamed");
-      dc.getSortSelect().select("Attr1 Renamed");
+      dc.getAttrName().dblclick().type("habitat{enter}");
+      dc.getAttrName().contains("habitat");
+      dc.getSortSelect().select("habitat");
       dc.getSortView().should('exist');
       dc.getSortSelect().select("None");
       dc.getSingleCardView().should('exist');
@@ -64,24 +64,33 @@ context('Data Card Tool Tile', function () {
       dc.getCardNofTotalListing().contains("Card 1 of 1");
     });
     it("can expand and collapse a card in sort view", () =>{
-      dc.getSortSelect().select("Attr1 Renamed");
+      dc.getSortSelect().select("habitat");
       dc.getSortView().should('exist');
       dc.getSortCardCollapseToggle().click();
       dc.getSortCardData().should('not.exist');
       dc.getSortCardCollapseToggle().click();
       dc.getSortCardData().should('exist');
     });
-    it("can add a second attribute", () => {
+    it("can add a second attribute and give it a value", () => {
       dc.getSortSelect().select("None");
       dc.getAddAttributeButton().click();
+      dc.getAddAttributeButton().click();
+      dc.getAddAttributeButton().click();
+      dc.getAddAttributeButton().click();
+      dc.getAddAttributeButton().click();
       dc.getAttrName().eq(1).dblclick().type("animal{enter}");
-      // complete this test
-    });
-    it("can add two different values to two cases of two different attributes", () => {
-      // complete this test
+      dc.getAttrName().eq(1).contains("animal");
+      dc.getAttrValue().eq(1).click().type("whale{enter}");
+      dc.getAttrValueInput().eq(1).invoke('val').should('eq', 'whale');
     });
     it("shows type-ahead options using existing values for current attribute only", () => {
-      // complete this test
+      dc.getAddCardButton().click();
+      dc.getAttrValue().eq(0).click().type("desert{enter}");
+      dc.getAttrValueInput().eq(0).invoke('val').should('eq', 'desert');
+      dc.getAttrValue().eq(1).click().type("camel{enter}");
+      dc.getAttrValueInput().eq(1).invoke('val').should('eq', 'camel');
+      dc.getAttrValue().eq(0).click().type("{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}");
+      cy.wait(3000);
     });
   });
 });
