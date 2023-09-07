@@ -69,10 +69,10 @@ export const DocumentContentModel = DocumentContentModelWithAnnotations.named("D
       // TODO Move into functions for specific annotation types
       if (isArrowAnnotationSnapshot(annotation)) {
         if (annotation.sourceObject?.tileId) {
-          annotation.sourceObject.tileId = tileIdMap[annotation.sourceObject.tileId];
+          annotation.sourceObject.tileId = tileIdMap[annotation.sourceObject.tileId] ?? "";
         }
         if (annotation.targetObject?.tileId) {
-          annotation.targetObject.tileId = tileIdMap[annotation.targetObject.tileId];
+          annotation.targetObject.tileId = tileIdMap[annotation.targetObject.tileId] ?? "";
         }
       }
       annotationIdMap[annotation.id] = uniqueId();
