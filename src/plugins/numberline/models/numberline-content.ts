@@ -78,7 +78,7 @@ export const NumberlineContentModel = TileContentModel
       return self.pointsArr.map((pointObj) => pointObj.xValue);
     },
     getPoint(id: string) {
-      return self.pointsArr.find(point => point.id === id);
+      return self.points.get(id);
     },
     exportJson(options?: ITileExportOptions) {
       const snapshot = getSnapshot(self);

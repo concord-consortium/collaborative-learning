@@ -264,14 +264,14 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
 
       outerPoints.enter()
         .append("circle").attr("class", "outer-point")
-        .attr('cx', (p) => xScale(p.currentXValue ?? numberlineDomainMin)) //mapped to axis width
+        .attr('cx', (p) => xScale(p.currentXValue)) //mapped to axis width
         .attr('cy', yMidPoint).attr('r', outerPointRadius).attr('id', p => p.id)
         .classed("point-outer-circle", true)
         .call((e) => handleDrag(e)); // Attach drag behavior to newly created circles
 
       // --- Update functions outer hover circles
       outerPoints
-        .attr('cx', (p) => xScale(p.currentXValue ?? numberlineDomainMin)) //mapped to axis width
+        .attr('cx', (p) => xScale(p.currentXValue)) //mapped to axis width
         .classed("hovered", (p, idx) => (hoverPointId === p.id))
         .call((e) => handleDrag(e)); // pass again in case axisWidth changes
 
@@ -286,14 +286,14 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       innerPoints.enter()
         .append("circle")
         .attr("class", "inner-point")
-        .attr('cx', (p) => xScale(p.xValue || numberlineDomainMin)) //mapped to axis width
+        .attr('cx', (p) => xScale(p.currentXValue)) //mapped to axis width
         .attr('cy', yMidPoint).attr('r', innerPointRadius).attr('id', p => p.id)
         .classed("point-inner-circle", true)
         .call((e) => handleDrag(e)); // Attach drag behavior to newly created circles
 
       // --- Update functions inner circles
       innerPoints
-        .attr('cx', (p, idx) => xScale(p.currentXValue || numberlineDomainMin))
+        .attr('cx', (p, idx) => xScale(p.currentXValue))
         .classed("selected", (p)=> p.id in content.selectedPoints)
         .call((e) => handleDrag(e)); // pass again in case axisWidth changes
 
