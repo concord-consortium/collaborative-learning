@@ -74,14 +74,18 @@ context('Data Card Tool Tile', function () {
     it("can add a second attribute and give it a value", () => {
       dc.getSortSelect().select("None");
       dc.getAddAttributeButton().click();
-      dc.getAddAttributeButton().click();
-      dc.getAddAttributeButton().click();
-      dc.getAddAttributeButton().click();
-      dc.getAddAttributeButton().click();
       dc.getAttrName().eq(1).dblclick().type("animal{enter}");
       dc.getAttrName().eq(1).contains("animal");
       dc.getAttrValue().eq(1).click().type("whale{enter}");
       dc.getAttrValueInput().eq(1).invoke('val').should('eq', 'whale');
+    });
+    it("should resize when attributes are added", () => {
+      dc.getAddAttributeButton().click();
+      dc.getAddAttributeButton().click();
+      dc.getAddAttributeButton().click();
+      dc.getAddAttributeButton().click();
+      dc.getAttrName().eq(5).contains("Label 4");
+      dc.getAttrName().eq(5).should('be.visible');
     });
     it("shows type-ahead options using existing values for current attribute only", () => {
       dc.getAddCardButton().click();
@@ -90,7 +94,12 @@ context('Data Card Tool Tile', function () {
       dc.getAttrValue().eq(1).click().type("camel{enter}");
       dc.getAttrValueInput().eq(1).invoke('val').should('eq', 'camel');
       dc.getAttrValue().eq(0).click().type("{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}");
-      cy.wait(3000);
+      dc.getDownshiftOptions().should('have.length', 2);
+      dc.getDownshiftOptions().eq(0).contains("desert");
+      dc.getDownshiftOptions().eq(1).contains("ocean");
+      dc.getAttrValueInput().eq(0).click().type("d");
+      dc.getDownshiftOptions().should('have.length', 1);
+      dc.getDownshiftOptions().eq(0).contains("desert");
     });
   });
 });
