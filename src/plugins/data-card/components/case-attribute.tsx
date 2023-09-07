@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { observer } from "mobx-react";
 import classNames from "classnames";
 import { useCombobox } from "downshift";
-import _ from "lodash";
+import { uniq } from "lodash";
 import { gImageMap } from "../../../models/image-map";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { DataCardContentModelType } from "../data-card-content";
@@ -70,6 +70,11 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   //   }
   // }, []);
 
+  useEffect(()=>{
+    const attrValues = content.dataSet.attrFromID(attrKey)?.values || [];
+    setInputItems(attrValues as any);
+  },[content.dataSet, attrKey]);
+
   const [inputItems, setInputItems] = useState([] as string[]);
   const {
     isOpen,
@@ -89,7 +94,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
       setValueCandidate(safeValue);
       // Determine list of completions
       const allAttrValues = content.dataSet.attrFromID(attrKey)?.values || [];
-      const completions: string[] = _.uniq(allAttrValues.filter((value) => {
+      const completions: string[] = uniq(allAttrValues.filter((value) => {
           return value && typeof(value)==='string' && !isImageUrl(value)
                  && value.toLowerCase().startsWith(safeValue.toLowerCase());
         })).sort() as string[];
