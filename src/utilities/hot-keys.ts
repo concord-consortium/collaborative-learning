@@ -104,8 +104,12 @@ export class HotKeys {
     if (handler) {
       const result = handler(e, keys);
       if (result) {
+        console.log('running hot key handler: ', e);
+        e.nativeEvent.preventDefault();
         e.preventDefault();
         e.stopPropagation();
+      } else {
+        console.log('no hot key handler: ' , keys);
       }
       return true;
     }
