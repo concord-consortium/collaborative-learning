@@ -329,7 +329,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
               onPaste={handleValuePaste}
             />
             <button aria-label="toggle menu" type="button" {...getToggleButtonProps()}>
-              { isOpen ?
+              { isOpen && inputItems.length > 0 ?
                 <span className="up">&#x25B2;</span> :
                 <span className="down">&#x25BC;</span>
               }
