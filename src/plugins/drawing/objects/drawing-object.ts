@@ -1,9 +1,10 @@
 import { getMembers, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { uniqueId } from "../../../utilities/js-utils";
 import { SelectionBox } from "../components/selection-box";
-import { BoundingBox, BoundingBoxDelta, Point, ToolbarSettings }
+import { BoundingBox, BoundingBoxSides, Point, ToolbarSettings }
    from "../model/drawing-basic-types";
 import { StampModelType } from "../model/stamp";
+import FreehandToolIcon from "../assets/freehand-icon.svg";
 
 export type ToolbarModalButton = "select" | "line" | "vector" | "rectangle" | "ellipse" | "text" | "stamp" | "variable";
 
@@ -17,8 +18,11 @@ export interface IToolbarManager {
   toolbarSettings: ToolbarSettings;
   selection: string[];
   hasSelectedObjects: boolean;
+  addAndSelectObject(drawingObject: DrawingObjectSnapshotForAdd): DrawingObjectType;
   deleteObjects(ids: string[]): void;
   duplicateObjects(ids: string[]): void;
+  createGroup(objectIds: string[]): void;
+  ungroupGroups(ids: string[]): void;
   stamps: StampModelType[];
   currentStamp: StampModelType | null;
   stroke: string;
@@ -65,6 +69,14 @@ export const DrawingObject = types.model("DrawingObject", {
     // self then MobX observation is not triggered so moving the element doesn't
     // cause the selection highlight to update.
     throw "Subclass needs to implement this";
+  },
+  get label(): string {
+    // Object types should implement this to return a user-friendly short label,
+    // used in the show/sort panel.
+    return "Unknown object";
+  },
+  get icon(): React.FC<React.SVGProps<SVGSVGElement>> {
+    return FreehandToolIcon;
   }
 }))
 .views(self => ({
@@ -90,7 +102,7 @@ export const DrawingObject = types.model("DrawingObject", {
     self.y = self.dragY ?? self.y;
     self.dragX = self.dragY = undefined;
   },
-  setDragBounds(deltas: BoundingBoxDelta) {
+  setDragBounds(deltas: BoundingBoxSides) {
     // Temporarily adjust the edges of the object's bounding box by the given deltas.
     // This will change the size and origin position of the object, with changes stored as volatile fields.
 
@@ -126,7 +138,7 @@ export const StrokedObject = DrawingObject.named("StrokedObject")
 export interface StrokedObjectType extends Instance<typeof StrokedObject> {}
 
 // There might be a better way to do this. It is currently just looking for a
-// stroked property defined in the object's properties. In a real type system
+// setStroke action. In a real type system
 // like Java it'd be possible to identify if the object is an instanceof
 // StrokedObject. There is an un-resolved MST issue about exposing the type
 // hierarchy: https://github.com/mobxjs/mobx-state-tree/issues/1114
@@ -135,8 +147,7 @@ export interface StrokedObjectType extends Instance<typeof StrokedObject> {}
 // out as false, set it to true in the stroked object, and then pickup up this
 // default in each of the instances of stroked object.
 export function isStrokedObject(object: DrawingObjectType): object is StrokedObjectType {
-  const typeMembers = getMembers(object);
-  return !!(typeMembers.properties?.stroke);
+  return getMembers(object).actions.includes("setStroke");
 }
 
 export const FilledObject = DrawingObject.named("FilledObject")
@@ -149,8 +160,7 @@ export const FilledObject = DrawingObject.named("FilledObject")
 export interface FilledObjectType extends Instance<typeof FilledObject> {}
 
 export function isFilledObject(object: DrawingObjectType): object is FilledObjectType {
-  const typeMembers = getMembers(object);
-  return !!(typeMembers.properties?.fill);
+  return getMembers(object).actions.includes("setFill");
 }
 
 // "Editable" objects go into an "editing" state if you click them while they are already selected.
@@ -164,8 +174,7 @@ export const EditableObject = DrawingObject.named("EditableObject")
 }));
 export interface EditableObjectType extends Instance<typeof EditableObject> {}
 export function isEditableObject(object: DrawingObjectType): object is EditableObjectType {
-  const typeMembers = getMembers(object);
-  return !!(typeMembers.actions.includes("setEditing"));
+  return getMembers(object).actions.includes("setEditing");
 }
 
 export const DeltaPoint = types.model("DeltaPoint", {

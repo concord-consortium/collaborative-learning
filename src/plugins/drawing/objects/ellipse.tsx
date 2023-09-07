@@ -3,7 +3,7 @@ import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
 import { computeStrokeDashArray, DrawingObjectType, DrawingTool, FilledObject, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
-import { BoundingBoxDelta, Point } from "../model/drawing-basic-types";
+import { BoundingBoxSides, Point } from "../model/drawing-basic-types";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
 import EllipseToolIcon from "../assets/ellipse-icon.svg";
 
@@ -25,6 +25,12 @@ export const EllipseObject = types.compose("EllipseObject", StrokedObject, Fille
       const nw: Point = {x: x - rx, y: y - ry};
       const se: Point = {x: x + rx, y: y + ry};
       return {nw, se};
+    },
+    get label() {
+      return (self.rx === self.ry) ? "Circle" : "Ellipse";
+    },
+    get icon() {
+      return EllipseToolIcon;
     }
   }))
   .actions(self => ({
@@ -35,7 +41,7 @@ export const EllipseObject = types.compose("EllipseObject", StrokedObject, Fille
         self.rx = self.ry = Math.max(self.rx, self.ry);
       }
     },
-    setDragBounds(deltas: BoundingBoxDelta) {
+    setDragBounds(deltas: BoundingBoxSides) {
       self.dragX = self.x + deltas.left/2 + deltas.right/2;
       self.dragY = self.y + deltas.top/2 + deltas.bottom/2;
       self.dragRx  = self.rx  + deltas.right/2 - deltas.left/2;
@@ -75,7 +81,7 @@ export const EllipseComponent = observer(function EllipseComponent({model, handl
     onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
     onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
     onMouseDown={(e)=> handleDrag?.(e, model)}
-    pointerEvents={"visible"}
+    pointerEvents={handleHover ? "visible" : "none"}
   />;
 });
 

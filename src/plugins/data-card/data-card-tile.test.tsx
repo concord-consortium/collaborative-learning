@@ -46,7 +46,7 @@ describe("DataCardToolComponent", () => {
       return "Data Card Collection 1";
     },
     onRequestRowHeight: (tileId: string, height?: number, deltaHeight?: number): void => {
-      throw new Error("Function not implemented.");
+      // throw new Error("Function not implemented.");
     },
     onRegisterTileApi: (tileApi: ITileApi, facet?: string): void => {
       // throw new Error("Function not implemented.");

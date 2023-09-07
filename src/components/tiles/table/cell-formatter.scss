@@ -7,3 +7,17 @@
   line-height: 18px;
   margin: 0 4px;
 }
+
+.image-cell {
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    max-height: 100%;
+    max-width: 100%;
+    padding: 6px;
+  }
+  
+}

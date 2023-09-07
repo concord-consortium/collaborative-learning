@@ -4,7 +4,7 @@ import {
   DrawingContentModelSnapshot, DrawingToolMetadataModel
 } from "./drawing-content";
 import { kDrawingTileType } from "./drawing-types";
-import { DefaultToolbarSettings } from "./drawing-basic-types";
+import { DefaultToolbarSettings, VectorEndShape } from "./drawing-basic-types";
 import { AppConfigModel } from "../../../models/stores/app-config-model";
 import { ImageObject } from "../objects/image";
 import { RectangleObject, RectangleObjectSnapshot, RectangleObjectSnapshotForAdd,
@@ -15,6 +15,7 @@ import { EllipseObject } from "../objects/ellipse";
 import { VectorObject } from "../objects/vector";
 import { LineObject } from "../objects/line";
 import { TextObject } from "../objects/text";
+import { GroupObjectType } from "../objects/group";
 
 const mockLogTileChangeEvent = jest.fn();
 jest.mock("../../../models/tiles/log/log-tile-change-event", () => ({
@@ -614,4 +615,191 @@ describe("DrawingContentModel", () => {
 
     expect(() => model.addObject(rect)).toThrow();
   });
+
+  test("can group and ungroup objects", () => {
+    mockLogTileChangeEvent.mockReset();
+    const model = createDrawingContentWithMetadata();
+    const r1: RectangleObjectSnapshotForAdd = {
+      type: "rectangle",
+      id: "r1",
+      x: 0,
+      y: 0,
+      width: 30,
+      height: 40,
+      ...mockSettings,
+    };
+    const r2: RectangleObjectSnapshotForAdd = {
+      type: "rectangle",
+      id: "r2",
+      x: 10,
+      y: 50,
+      width: 90,
+      height: 50,
+      ...mockSettings,
+    };
+
+    model.addObject(r1);
+    model.addObject(r2);
+    model.createGroup(['r1', 'r2']);
+    const group = model.objects[model.objects.length-1] as GroupObjectType;
+    const groupId = group.id;
+
+    expect(model.objects).toHaveLength(1);
+    expect(group.objects).toHaveLength(2);
+    expect(group.boundingBox).toStrictEqual({ nw: { x: 0, y: 0}, se: { x: 100, y: 100}});
+    expect(group.objectExtents.get('r2')).toStrictEqual({ top: 0.5, right: 1, bottom: 1, left: .1 });
+
+    model.ungroupGroups([groupId]);
+
+    mockLogTileChangeEvent.mock.calls.forEach((call, index) => {
+      console.log('call', index+1, ': ', call[1].operation, '(', call[1]?.change?.args, ')');
+    });
+    expect(mockLogTileChangeEvent).toHaveBeenCalledTimes(4);
+    expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(1,
+      LogEventName.DRAWING_TOOL_CHANGE, {
+      operation: "addObject",
+      "change": {
+        "args": [
+          {
+            "fill": "#666666",
+            "height": 40,
+            "id": "r1",
+            "stroke": "#888888",
+            "strokeDashArray": "3,3",
+            "strokeWidth": 5,
+            "type": "rectangle",
+            "width": 30,
+            "x": 0,
+            "y": 0,
+          }
+         ],
+        "path": "",
+      },
+      "tileId": "drawing-1"
+    });
+    expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(2,
+      LogEventName.DRAWING_TOOL_CHANGE, {
+      operation: "addObject",
+      "change": {
+        "args": [
+          {
+            "fill": "#666666",
+            "height": 50,
+            "id": "r2",
+            "stroke": "#888888",
+            "strokeDashArray": "3,3",
+            "strokeWidth": 5,
+            "type": "rectangle",
+            "width": 90,
+            "x": 10,
+            "y": 50,
+          }
+         ],
+        "path": "",
+      },
+      "tileId": "drawing-1"
+    });
+    expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(3,
+      LogEventName.DRAWING_TOOL_CHANGE, {
+      operation: "createGroup",
+      "change": {
+        "args": [
+          [
+            "r1",
+            "r2"
+          ]
+        ],
+        "path": "",
+      },
+      "tileId": "drawing-1"
+    });
+    expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(4,
+      LogEventName.DRAWING_TOOL_CHANGE, {
+      operation: "ungroupGroups",
+      "change": {
+        "args": [
+          [
+            groupId
+          ]
+        ],
+        "path": "",
+      },
+      "tileId": "drawing-1"
+    });
+  });
+
+  test("can modify and resize grouped objects", () => {
+    mockLogTileChangeEvent.mockReset();
+    // Make a group with one of every type of object.
+    const line = LineObject.create({
+      x: 0, y: 0, 
+      deltaPoints: [{dx: 10, dy: 10}],
+      ...mockSettings
+    });
+    const vector = VectorObject.create({
+      x: 10, y: 10, dx: 10, dy: 10,
+      ...mockSettings
+    });
+    const rect = RectangleObject.create({
+      x: 20,
+      y: 20,
+      width: 10,
+      height: 10,
+      ...mockSettings,
+    });
+    const ellipse = EllipseObject.create({
+      x: 35,
+      y: 35,
+      rx: 5,
+      ry: 5,
+    ...mockSettings});
+    const image = ImageObject.create({
+      url: "my/image/url", x: 40, y: 40, width: 10, height: 10
+    });
+    const text = TextObject.create({
+      text: "This should be rendered as the body of the text object",
+      x: 50, y: 50, width: 10, height: 10,
+      stroke: "#000000"
+    });
+    const model = createDrawingContentWithMetadata({
+      objects: [line, vector, rect, ellipse, image, text]
+    });
+
+    expect(model.objects).toHaveLength(6);
+    model.createGroup([line.id, vector.id, rect.id, ellipse.id, image.id, text.id]);
+    expect(model.objects).toHaveLength(1);
+
+    const group = model.objects[0] as GroupObjectType;
+    expect(group.boundingBox).toStrictEqual({ nw: {x: 0, y: 0}, se: {x: 60, y: 60}});
+    expect(ellipse.boundingBox).toStrictEqual({ nw: {x: 30, y: 30}, se: {x: 40, y: 40}});
+
+    group.setDragBounds({ top: 0, right: 60, bottom: 60, left: 0});
+    group.resizeObject();
+    expect(group.boundingBox).toStrictEqual({ nw: {x: 0, y: 0}, se: {x: 120, y: 120}});
+
+    expect(line.boundingBox).toStrictEqual({ nw: {x: 0, y: 0}, se: {x: 20, y: 20}});
+    expect(vector.boundingBox).toStrictEqual({ nw: {x: 20, y: 20}, se: {x: 40, y: 40}});
+    expect(rect.boundingBox).toStrictEqual({ nw: {x: 40, y: 40}, se: {x: 60, y: 60}});
+    expect(ellipse.boundingBox).toStrictEqual({ nw: {x: 60, y: 60}, se: {x: 80, y: 80}});
+    expect(image.boundingBox).toStrictEqual({ nw: {x: 80, y: 80}, se: {x: 100, y: 100}});
+    expect(text.boundingBox).toStrictEqual({ nw: {x: 100, y: 100}, se: {x: 120, y: 120}});
+
+    group.setStroke('#abcdef');
+    group.setStrokeDashArray('1 2');
+    group.setStrokeWidth(10);
+    expect([line.stroke, line.strokeDashArray, line.strokeWidth]).toEqual(['#abcdef', '1 2', 10]);
+    expect([vector.stroke, vector.strokeDashArray, vector.strokeWidth]).toEqual(['#abcdef', '1 2', 10]);
+    expect([rect.stroke, rect.strokeDashArray, rect.strokeWidth]).toEqual(['#abcdef', '1 2', 10]);
+    expect([ellipse.stroke, ellipse.strokeDashArray, ellipse.strokeWidth]).toEqual(['#abcdef', '1 2', 10]);
+    expect(text.stroke).toEqual('#abcdef');
+
+    group.setFill('#fedcba');
+    expect(rect.fill).toEqual('#fedcba');
+    expect(ellipse.fill).toEqual('#fedcba');
+
+    group.setEndShapes(VectorEndShape.triangle, VectorEndShape.triangle);
+    expect([vector.headShape, vector.tailShape]).toEqual([VectorEndShape.triangle, VectorEndShape.triangle]);
+  });
+
 });
+

@@ -3,7 +3,7 @@ import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React, { useEffect, useRef } from "react";
 import { DrawingObjectType, DrawingTool, EditableObject, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, typeField } from "./drawing-object";
-import { BoundingBoxDelta, Point, ToolbarSettings } from "../model/drawing-basic-types";
+import { BoundingBoxSides, Point, ToolbarSettings } from "../model/drawing-basic-types";
 import TextToolIcon from "../../../assets/icons/comment/comment.svg";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
 import { uniqueId } from "../../../../src/utilities/js-utils";
@@ -37,6 +37,12 @@ export const TextObject = EditableObject.named("TextObject")
       const nw: Point = {x, y};
       const se: Point = {x: x + width, y: y + height};
       return {nw, se};
+    },
+    get label() {
+      return "Text";
+    },
+    get icon() {
+      return TextToolIcon;
     }
   }))
   .actions(self => ({
@@ -52,7 +58,7 @@ export const TextObject = EditableObject.named("TextObject")
       self.width = Math.max(start.x, end.x) - self.x;
       self.height = Math.max(start.y, end.y) - self.y;
     },
-    setDragBounds(deltas: BoundingBoxDelta) {
+    setDragBounds(deltas: BoundingBoxSides) {
       self.dragX = self.x + deltas.left;
       self.dragY = self.y + deltas.top;
       self.dragWidth  = self.width  + deltas.right - deltas.left;
@@ -152,10 +158,10 @@ export const TextComponent = observer(
   return <g 
           key={id} 
           className="text" 
-          pointerEvents={"visible"} //allows user to select inside of an unfilled object
           onMouseEnter={(e) => handleHover?.(e, model, true)}
           onMouseLeave={(e) => handleHover?.(e, model, false)}
           onMouseDown={(e)=> handleDrag?.(e, model)}
+          pointerEvents={handleHover ? "visible" : "none"}
          >
           <rect x={x} y={y}
               width={width} height={height}

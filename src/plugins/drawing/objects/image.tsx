@@ -5,12 +5,13 @@ import { Tooltip } from "react-tippy";
 import { gImageMap } from "../../../models/image-map";
 import { DrawingObject, DrawingObjectSnapshot, DrawingTool, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, typeField } from "./drawing-object";
-import { BoundingBoxDelta, Point } from "../model/drawing-basic-types";
+import { BoundingBoxSides, Point } from "../model/drawing-basic-types";
 import placeholderImage from "../../../assets/image_placeholder.png";
 import SmallCornerTriangle from "../../../assets/icons/small-corner-triangle.svg";
 import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
 import { buttonClasses } from "../components/drawing-toolbar-buttons";
 import { useTouchHold } from "../../../hooks/use-touch-hold";
+import imageToolSvg from "../../../clue/assets/icons/image-tool.svg";
 
 export const ImageObject = DrawingObject.named("ImageObject")
   .props({
@@ -41,6 +42,12 @@ export const ImageObject = DrawingObject.named("ImageObject")
       const se: Point = {x: x + width, y: y + height};
       return {nw, se};
     },
+    get label() {
+      return "Image";
+    },
+    get icon() {
+      return imageToolSvg;
+    },
     get displayUrl() {
       const entry = gImageMap.getImageEntry(self.url, {filename: self.filename});
       // TODO we could return a spinner image if the entry is storing or computing dimensions
@@ -61,7 +68,7 @@ export const ImageObject = DrawingObject.named("ImageObject")
       self.filename = filename;
     },
 
-    setDragBounds(deltas: BoundingBoxDelta) {
+    setDragBounds(deltas: BoundingBoxSides) {
       self.dragX = self.x + deltas.left;
       self.dragY = self.y + deltas.top;
       self.dragWidth  = self.width  + deltas.right - deltas.left;
@@ -102,6 +109,7 @@ export const ImageComponent: React.FC<IDrawingComponentProps> = observer(functio
     onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
     onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
     onMouseDown={(e)=> handleDrag?.(e, model)}
+    pointerEvents={handleHover ? "visible" : "none"}
   />;
 
 });

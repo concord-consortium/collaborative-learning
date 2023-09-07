@@ -35,6 +35,41 @@ context('Draw Tool Tile', function () {
       drawToolTile.getDrawTile().should("exist");
       drawToolTile.getTileTitle().should("exist");
     });
+    describe("Show/sort", () => {
+      it("open show/sort panel", () => {
+        drawToolTile.getDrawToolRectangle().click({scrollBehavior: false});
+        drawToolTile.getDrawTile()
+          .trigger("mousedown", 100,  50)
+          .trigger("mousemove", 250, 150)
+          .trigger("mouseup",   250, 150);
+        drawToolTile.getDrawToolEllipse().click({scrollBehavior: false});
+        drawToolTile.getDrawTile()
+          .trigger("mousedown", 300,  50)
+          .trigger("mousemove", 400, 150)
+          .trigger("mouseup",   400, 150);
+        // Unselect object
+        drawToolTile.getDrawTile()
+          .trigger("mousedown", 50, 50)
+          .trigger("mouseup", 50, 50);
+        drawToolTile.getSelectionBox().should("not.exist");
+
+        // Open panel
+        drawToolTile.getDrawTileShowSortPanelOpenButton().click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanel().should("have.class", "open").and("contain.text", "Rectangle").and("contain.text", "Circle");
+        // Click to select
+        drawToolTile.getDrawTileShowSortPanel().get('li:first').should("contain.text", "Circle").click({scrollBehavior: false});
+        drawToolTile.getSelectionBox().should("exist");
+        // Delete objects
+        drawToolTile.getDrawToolDelete().should("not.have.class", "disabled").click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanel().get('li').should("have.length", 1);
+        drawToolTile.getDrawTileShowSortPanel().get('li:first').should("contain.text", "Rectangle").click({scrollBehavior: false});
+        drawToolTile.getDrawToolDelete().should("not.have.class", "disabled").click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanel().get('li').should("not.exist");
+        // Close panel
+        drawToolTile.getDrawTileShowSortPanelCloseButton().click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanel().should("have.class", "closed");
+      });
+    });
     describe("Freehand", () => {
       it("verify draw a line", () => {
         drawToolTile.getDrawToolFreehand().click({scrollBehavior: false});
@@ -44,6 +79,12 @@ context('Draw Tool Tile', function () {
           .trigger("mousemove", 450, 100)
           .trigger("mouseup",   450, 100);
         drawToolTile.getFreehandDrawing().should("exist").and("have.length", 1);
+      });
+      it("shows up in show/sort panel", () => {
+        drawToolTile.getDrawTileShowSortPanelOpenButton().click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanel().should("have.class", "open")
+          .get("li").should("have.length", 1).and("contain.text", "Freehand");
+        drawToolTile.getDrawTileShowSortPanelCloseButton().click({scrollBehavior: false});
       });
       it("selects freehand drawing", () => {
         drawToolTile.getDrawToolSelect().click({scrollBehavior: false});
@@ -89,6 +130,12 @@ context('Draw Tool Tile', function () {
           .trigger("mouseup",   100, 50);
         drawToolTile.getVectorDrawing().should("exist").and("have.length", 1);
       });
+      it("shows up in show/sort panel", () => {
+        drawToolTile.getDrawTileShowSortPanelOpenButton().click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanel().should("have.class", "open")
+          .get("li").should("have.length", 1).and("contain.text", "Line");
+        drawToolTile.getDrawTileShowSortPanelCloseButton().click({scrollBehavior: false});
+      });
       it("verify after creation, object is selected", () => {
         drawToolTile.getDrawToolSelect().should("have.class", "selected");
         drawToolTile.getDrawToolVector().should("not.have.class", "selected");
@@ -132,6 +179,12 @@ context('Draw Tool Tile', function () {
           .trigger("mousemove", 100, 150)
           .trigger("mouseup",   100,  50);
         drawToolTile.getRectangleDrawing().should("exist").and("have.length", 1);
+      });
+      it("shows up in show/sort panel", () => {
+        drawToolTile.getDrawTileShowSortPanelOpenButton().click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanel().should("have.class", "open")
+          .get("li").should("have.length", 1).and("contain.text", "Rectangle");
+        drawToolTile.getDrawTileShowSortPanelCloseButton().click({scrollBehavior: false});
       });
       it("verify change outline color", () => {
         drawToolTile.getRectangleDrawing().first().should("have.attr", "stroke").and("eq", "#000000");
@@ -305,6 +358,12 @@ context('Draw Tool Tile', function () {
           .trigger("mouseup",   100, 150);
         drawToolTile.getEllipseDrawing().should("exist").and("have.length", 1);
       });
+      it("shows up in show/sort panel", () => {
+        drawToolTile.getDrawTileShowSortPanelOpenButton().click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanel().should("have.class", "open")
+          .get("li").should("have.length", 1).and("contain.text", "Ellipse");
+        drawToolTile.getDrawTileShowSortPanelCloseButton().click({scrollBehavior: false});
+      });
       it("verify draw circle", () => {
         drawToolTile.getDrawToolEllipse().click();
         drawToolTile.getDrawTile()
@@ -332,6 +391,12 @@ context('Draw Tool Tile', function () {
           .trigger("mousedown", 250, 50)
           .trigger("mouseup");
         drawToolTile.getImageDrawing().should("exist").and("have.length", 1);
+      });
+      it("shows up in show/sort panel", () => {
+        drawToolTile.getDrawTileShowSortPanelOpenButton().click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanel().should("have.class", "open")
+          .get("li").should("have.length", 1).and("contain.text", "Image");
+        drawToolTile.getDrawTileShowSortPanelCloseButton().click({scrollBehavior: false});
       });
       it("verify stamp images", () => {
         drawToolTile.getImageDrawing().eq(0).should("have.attr", "href").and("contain", "coin.png");
@@ -370,6 +435,12 @@ context('Draw Tool Tile', function () {
           .trigger("mouseup", 100, 100);
           drawToolTile.getTextDrawing().should("exist").and("have.length", 1);
       });
+      it("shows up in show/sort panel", () => {
+        drawToolTile.getDrawTileShowSortPanelOpenButton().click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanel().should("have.class", "open")
+          .get("li").should("have.length", 1).and("contain.text", "Text");
+        drawToolTile.getDrawTileShowSortPanelCloseButton().click({scrollBehavior: false});
+      });
       it("edits text content of object", () => {
         // Click inside drawing box to enter edit mode
         drawToolTile.getDrawTile()
@@ -383,12 +454,46 @@ context('Draw Tool Tile', function () {
         drawToolTile.getDrawTile()
           .trigger("mousedown", 150,  150)
           .trigger("mouseup", 150, 150);
-          cy.wait(2000);
         drawToolTile.getSelectionBox().should("exist");
         drawToolTile.getDrawToolDelete().should("not.have.class", "disabled").click({scrollBehavior: false});
         drawToolTile.getTextDrawing().should("not.exist");
       });
     });
+    describe("Group", () => {
+      it("can group and ungroup", () => {
+        drawToolTile.getDrawToolRectangle().click({scrollBehavior: false});
+        drawToolTile.getDrawTile()
+          .trigger("mousedown", 250, 50)
+          .trigger("mousemove", 100, 150)
+          .trigger("mouseup",   100, 150);
+        drawToolTile.getDrawToolEllipse().click({scrollBehavior: false});
+        drawToolTile.getDrawTile()
+          .trigger("mousedown", 50,  100)
+          .trigger("mousemove", 100, 150)
+          .trigger("mouseup",   100, 150);
+        drawToolTile.getDrawToolFreehand().click({ scrollBehavior: false });
+        drawToolTile.getDrawTile()
+          .trigger("mousedown", 150, 50)
+          .trigger("mousemove", 200, 150)
+          .trigger("mouseup",   200, 150);
+
+        // Select all 3
+        cy.wait(1000);
+        drawToolTile.getDrawTile()
+          .trigger("mousedown", 40,  40)
+          .trigger("mousemove", 250, 150)
+          .trigger("mouseup",   250, 150);
+          cy.wait(1000);
+          drawToolTile.getSelectionBox().should("have.length", 3);
+
+        drawToolTile.getDrawToolUngroup().should("have.class", "disabled");
+        drawToolTile.getDrawToolGroup().should("not.have.class", "disabled").click({ scrollBehavior: false });
+        console.log('seleciton box: ', drawToolTile.getSelectionBox());
+        drawToolTile.getSelectionBox().should("have.length", 1);
+        drawToolTile.getDrawToolGroup().should("have.class", "disabled");
+        drawToolTile.getDrawToolUngroup().should("not.have.class", "disabled").click({ scrollBehavior: false });
+        drawToolTile.getSelectionBox().should("have.length", 3);
+      });
     describe("Image", () => {
       it("drags images from image tiles", () => {
         const imageFilePath='image.png';
@@ -431,8 +536,11 @@ context('Draw Tool Tile', function () {
         drawToolTile.getImageDrawing().last().should("exist").invoke("attr", "href").should("contain", "sas/images/survey.png");
       });
     });
+    });
   });
 });
+
+
 
 context('Draw Tool Tile Undo Redo', function () {
   before(function () {

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React from "react";
 import { observer } from "mobx-react";
 import { useQueryClient } from "react-query";
 import classNames from "classnames";
@@ -12,9 +12,7 @@ import { logDocumentEvent } from "../../models/document/log-document-event";
 import { DocumentModelType } from "../../models/document/document";
 import { EditableDocumentContent } from "../document/editable-document-content";
 import { getDocumentDisplayTitle } from "../../models/document/document-utils";
-import { DocumentCollectionList } from "../thumbnail/document-collection-list";
-import CollapseScrollerIcon from "../../assets/show-hide-document-view-icon.svg";
-import ScrollArrowIcon from "../../assets/scroll-arrow-icon.svg";
+import { DocumentBrowserScroller, ScrollButton } from "./document-browser-scroller";
 import EditIcon from "../../clue/assets/icons/edit-right-icon.svg";
 
 interface IProps {
@@ -192,132 +190,6 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
   );
 });
 
-interface DocumentBrowserScrollerProps {
-  subTab: ISubTabSpec;
-  tabSpec: NavTabModelType;
-  openDocumentKey: string;
-  openSecondaryDocumentKey: string;
-  onSelectDocument: (document: DocumentModelType) => void;
-}
-
-const DocumentBrowserScroller =
-    ({subTab, tabSpec, openDocumentKey, openSecondaryDocumentKey, onSelectDocument}: DocumentBrowserScrollerProps) => {
-  const [scrollerCollapsed, setScrollerCollapsed] = useState(false);
-  const [collectionElement, setCollectionElement] = useState<HTMLDivElement>();
-  const documentScrollerRef = useRef<HTMLDivElement>(null);
-  const [scrollToLocation, setScrollToLocation] = useState(0);
-  const [panelWidth, setPanelWidth] = useState(0);
-
-  const scrollWidth = collectionElement?.scrollWidth ?? 0;
-
-  useEffect(() => {
-    if(scrollToLocation !== undefined) {
-      collectionElement?.scrollTo({left: scrollToLocation, behavior: "smooth"});
-    }
-  },[collectionElement, scrollToLocation]);
-
-  // Keep track of the size of the containing element
-  useEffect(() => {
-    let obs: ResizeObserver;
-    if (documentScrollerRef.current) {
-      obs = new ResizeObserver(() => {
-        setPanelWidth(documentScrollerRef.current?.clientWidth ?? 0);
-      });
-      obs.observe(documentScrollerRef.current);
-    }
-
-    return () => obs?.disconnect();
-  }, []);
-
-  const handleScrollTo = (side: string) => {
-    const direction = side === "left" ? -1 : 1;
-    const attemptedScrollTo = scrollToLocation + direction * panelWidth;
-    const scrollTo = Math.max(0, Math.min(scrollWidth - panelWidth, attemptedScrollTo));
-    setScrollToLocation(scrollTo);
-  };
-
-  const handleCollapseScroller = () => {
-    setScrollerCollapsed(!scrollerCollapsed);
-  };
-
-  return (
-    <>
-      <div className={classNames("scroller", tabSpec.tab, {"collapsed": scrollerCollapsed})} ref={documentScrollerRef}>
-        {(scrollToLocation > 0) &&
-            <ScrollEndControl side={"left"} hidden={scrollerCollapsed} tab={tabSpec.tab}
-                onScroll={handleScrollTo} />
-        }
-        <DocumentCollectionList
-            setCollectionElement={setCollectionElement}
-            subTab={subTab}
-            tabSpec={tabSpec}
-            horizontal={true}
-            collapsed={scrollerCollapsed}
-            selectedDocument={openDocumentKey}
-            selectedSecondaryDocument={openSecondaryDocumentKey}
-            scrollToLocation={scrollToLocation}
-            onSelectDocument={onSelectDocument}
-        />
-        {(scrollToLocation < scrollWidth - panelWidth) &&
-            <ScrollEndControl side={"right"} hidden={scrollerCollapsed} tab={tabSpec.tab}
-                onScroll={handleScrollTo} />
-        }
-      </div>
-      <div className={classNames("collapse-scroller-button", "themed", tabSpec.tab,
-                {"collapsed": scrollerCollapsed})} onClick={handleCollapseScroller}>
-        <CollapseScrollerIcon className={`scroller-icon ${tabSpec.tab}`}/>
-      </div>
-    </>
-  );
-};
-
-interface IScrollEndControlProps {
-  side: string;
-  hidden?: boolean;
-  tab: string;
-  secondary?: boolean;
-  shift?: number;
-  onScroll: (side: string, shift?: number, secondary?: boolean) => void
-}
-
-const ScrollEndControl = ({side, hidden, tab, onScroll}: IScrollEndControlProps) => {
-  if (hidden) return null;
-  return (
-    <div className={classNames("scroller-controls", side)}>
-      <div className={`scroller-controls-overlay ${side}`}/>
-      <ScrollButton side={side} tab={tab} onScroll={onScroll} hidden={hidden}/>
-    </div>
-  );
-};
-
-const ScrollButton = ({side, hidden, tab, shift, secondary, onScroll}: IScrollEndControlProps) => {
-  if (hidden) return null;
-  return (
-    <div className={classNames("scroll-arrow-button", "themed", tab, side)}
-          onClick={()=>onScroll(side, shift, secondary)}>
-      <ScrollArrowIcon className={`scroll-arrow-icon ${side} themed ${tab}`} />
-    </div>
-  );
-};
-
-interface IDocumentFlipperControl {
-  side: string;
-  hidden?: boolean;
-  tab: string;
-  shift: number;
-  secondary?: boolean
-  onChangeDocument: (shift: number, secondary?: boolean) => void
-}
-
-const DocumentFlipperControl = ({side, hidden, tab, secondary, onChangeDocument}: IDocumentFlipperControl) => {
-  if (hidden) return null;
-  return (
-    <div className={`scroll-arrow-button-wrapper ${side}`}>
-      <ScrollButton side={side} tab={tab} onScroll={()=>onChangeDocument(1, secondary)} hidden={hidden} />
-    </div>
-  );
-};
-
 interface IDocumentAreaProps {
   openDocument: DocumentModelType;
   subTab: ISubTabSpec;
@@ -385,9 +257,9 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocum
         {(!openDocument.isRemote)
             && editButton(tab, sectionClass || sideClasses, openDocument)}
       </div>
-      {onChangeDocument &&
-        <DocumentFlipperControl side={"left"} tab={tab} shift={1}
-            onChangeDocument={()=>onChangeDocument(1, isSecondaryDocument)} hidden={hideLeftFlipper}/>
+      {onChangeDocument && !hideLeftFlipper &&
+        <ScrollButton side="left" theme={tab} className="document-flipper"
+            onClick={()=>onChangeDocument(1, isSecondaryDocument)}/>
       }
       <EditableDocumentContent
         mode={"1-up"}
@@ -397,9 +269,9 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocum
         showPlayback={showPlayback}
         fullHeight={subTab.label !== "Starred" }
       />
-      {onChangeDocument &&
-        <DocumentFlipperControl side={"right"} tab={tab} shift={-1}
-            onChangeDocument={()=>onChangeDocument(-1, isSecondaryDocument)} hidden={hideRightFlipper}/>
+      {onChangeDocument && !hideRightFlipper &&
+        <ScrollButton side="right" theme={tab} className="document-flipper"
+            onClick={()=>onChangeDocument(-1, isSecondaryDocument)}/>
       }
     </div>
   );
