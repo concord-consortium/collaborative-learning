@@ -70,10 +70,21 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   //   }
   // }, []);
 
+  const safeValues = (aValues: string[]) => {
+    const values = uniq(aValues).sort();
+    return values.filter((value) => {
+      return value && typeof(value)==='string' && !isImageUrl(value);
+    }) as string[];
+  };
+
   useEffect(()=>{
     const attrValues = content.dataSet.attrFromID(attrKey)?.values || [];
-    setInputItems(attrValues as any);
-  },[content.dataSet, attrKey]);
+    const uniquAttrValues = safeValues(attrValues as string[]);
+    const completions: string[] = uniquAttrValues.filter((value) => {
+      return value.toLowerCase().startsWith(valueCandidate.toLowerCase());
+    });
+    setInputItems(completions);
+  },[content.dataSet, attrKey, valueCandidate]);
 
   const [inputItems, setInputItems] = useState([] as string[]);
   const {
@@ -291,16 +302,16 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   // Add some custom behavior to the properties returned by useCombobox
   function customizedGetInputProps() {
-    const props = getInputProps();
+    const propsCreated = getInputProps();
 
-    const defaultBlur = props.onBlur;
+    const defaultBlur = propsCreated.onBlur;
     const newBlur = function(e: React.FocusEvent<Element, Element>) {
       handleCompleteValue();
       if (defaultBlur) defaultBlur(e);
     };
-    props.onBlur = newBlur;
+    propsCreated.onBlur = newBlur;
 
-    return props;
+    return propsCreated;
   }
 
   return (
