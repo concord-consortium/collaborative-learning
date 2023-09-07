@@ -59,30 +59,18 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const editingLabel = currEditFacet === "name" && currEditAttrId === attrKey;
   const editingValue = currEditFacet === "value" && currEditAttrId === attrKey;
 
-  // // Special handling for enter key in combobox.
-  // const stateReducer = React.useCallback((state, activity) => {
-  //   if (activity.type === useCombobox.stateChangeTypes.InputKeyDownEnter) {
-  //     console.log('enter key detected, changes = ', activity);
-  //     handleCompleteValue();
-  //     return activity.changes;
-  //   } else {
-  //     return activity.changes;
-  //   }
-  // }, []);
-
-  const safeValues = (aValues: string[]) => {
+  const validCompletions = (aValues: string[], prefixString: string) => {
+    const prefixStringLC = prefixString.toLowerCase();
     const values = uniq(aValues).sort();
     return values.filter((value) => {
-      return value && typeof(value)==='string' && !isImageUrl(value);
+      return value && typeof(value)==='string' && !isImageUrl(value)
+             && value.toLowerCase().startsWith(prefixStringLC);
     }) as string[];
   };
 
   useEffect(()=>{
     const attrValues = content.dataSet.attrFromID(attrKey)?.values || [];
-    const uniquAttrValues = safeValues(attrValues as string[]);
-    const completions: string[] = uniquAttrValues.filter((value) => {
-      return value.toLowerCase().startsWith(valueCandidate.toLowerCase());
-    });
+    const completions = validCompletions(attrValues as string[], valueCandidate);
     setInputItems(completions);
   },[content.dataSet, attrKey, valueCandidate]);
 
@@ -99,17 +87,11 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   } = useCombobox({
     items: inputItems,
     initialInputValue: valueCandidate,
-    // stateReducer,
     onInputValueChange: ({inputValue}) => {
       const safeValue = inputValue || "";
       setValueCandidate(safeValue);
-      // Determine list of completions
-      const allAttrValues = content.dataSet.attrFromID(attrKey)?.values || [];
-      const completions: string[] = uniq(allAttrValues.filter((value) => {
-          return value && typeof(value)==='string' && !isImageUrl(value)
-                 && value.toLowerCase().startsWith(safeValue.toLowerCase());
-        })).sort() as string[];
-      console.log('found possible completions: ', completions);
+      const allAttrValues = content.dataSet.attrFromID(attrKey)?.values as string[] || [];
+      const completions = validCompletions(allAttrValues, safeValue);
       setInputItems(completions);
     }
   });
