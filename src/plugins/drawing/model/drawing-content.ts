@@ -186,6 +186,21 @@ export const DrawingContentModel = TileContentModel
         self.objects.push(detach(member));
       });
       return ids;
+    },
+
+    // Moves one object in Z-order so that it will be in the stacking order
+    // position currently occupied by the other object.
+    // Eg starting with [A B C D E]
+    // changeZOrder(A, C) --> [B C A D E]
+    // changeZOrder(E, C) --> [A B E C D]
+    changeZOrder(moveObjectId: string, replaceObjectId: string) {
+      const obj = self.objectMap[moveObjectId];
+      const dest = self.objectMap[replaceObjectId];
+      if (obj && dest) {
+        const destPosition = self.objects.indexOf(dest);
+        const detached = detach(obj);
+        self.objects.splice(destPosition, 0, detached);
+      }
     }
 
   }))

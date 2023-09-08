@@ -1,11 +1,20 @@
 import React, { useState } from "react";
 import { observer } from "mobx-react";
 import classNames from "classnames";
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import {CSS} from '@dnd-kit/utilities';
 import { DrawingContentModelType } from "../model/drawing-content";
 import { DrawingObjectType } from "../objects/drawing-object";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import ExpandRightIcon from "../assets/expand-right-icon.svg";
 import ExpandLeftIcon from "../assets/expand-left-icon.svg";
+import MoveIcon from "../assets/move-icon.svg";
+import { DndContext, DragEndEvent } from "@dnd-kit/core";
+import { restrictToParentElement, restrictToVerticalAxis } from "@dnd-kit/modifiers";
 
 interface IObjectListViewProps {
   model: ITileModel,
@@ -28,13 +37,18 @@ export const ObjectListView = observer(function ObjectListView({model, setHoverO
     setOpen(false);
   }
 
+  function handleDragEnd(event: DragEndEvent) {
+    const {active, over} = event;
+    if (over && active.id !== over.id) {
+      const content = getContent();
+      content.changeZOrder(active.id as string, over.id as string);
+    }
+  }
+
   if (open) {
     const content = getContent();
     const selection = content.selection;
-    const objectList = content.objects.slice().reverse().map(
-      (obj) => { return (<ObjectLine key={obj.id} object={obj} content={content} selection={selection} 
-        setHoverObject={setHoverObject} />); 
-      });
+    const objectIdList = content.objects.map((obj)=>obj.id).reverse();
 
     return (
     <div className="object-list open">
@@ -46,7 +60,21 @@ export const ObjectListView = observer(function ObjectListView({model, setHoverO
       </div>
       <div className="body">
         <ul>
-          {objectList}
+          <DndContext modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+            onDragEnd={handleDragEnd}>
+            <SortableContext items={objectIdList} 
+              strategy={verticalListSortingStrategy}
+              >
+              {objectIdList.map((id) => { return (
+                  <ObjectLine 
+                    key={id} 
+                    object={content.objectMap[id] as DrawingObjectType} 
+                    content={content} 
+                    selection={selection} 
+                    setHoverObject={setHoverObject} />);
+              })}
+            </SortableContext>
+          </DndContext>
         </ul>
       </div>
     </div>);
@@ -84,15 +112,34 @@ function ObjectLine({object, content, selection, setHoverObject}: IObjectLinePro
     content.setSelectedIds([object.id]);
   }
 
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({id: object.id});
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+  
   const Icon = object.icon;
   return (
-    <li className={classNames({selected: selection.includes(object.id)})}
+    <li ref={setNodeRef}
+        style={style}
+        className={classNames({selected: selection.includes(object.id)})}
         onMouseEnter={handleHoverIn}
         onMouseLeave={handleHoverOut}
         onClick={handleClick}
     >
-      <Icon width={20} height={20} viewBox="0 0 36 34" stroke="#000000" fill="#FFFFFF" />
-      {object.label}
+      <Icon className="type-icon" width={20} height={20} viewBox="0 0 36 34" stroke="#000000" fill="#FFFFFF" />
+      <span className="label">{object.label}</span>
+      <MoveIcon className="move-icon"
+              {...attributes}
+              {...listeners}
+      />
     </li>
   );
 }

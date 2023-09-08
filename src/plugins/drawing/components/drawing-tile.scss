@@ -84,6 +84,7 @@
           li {
             list-style: none;
             padding: .2em .5em;
+            display: flex;
 
             &:hover {
               background-color: $workspace-teal-light-6;
@@ -93,8 +94,17 @@
               background-color: $workspace-teal-light-4;
             }
 
-            svg {
+            .type-icon {
               vertical-align: bottom;
+              flex: 0 0 20px;
+            }
+
+            .label {
+              flex-grow: 1;
+            }
+
+            .move-icon {
+              flex: 0 0 20px;
             }
           }
         }
