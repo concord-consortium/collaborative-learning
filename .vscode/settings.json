@@ -40,6 +40,14 @@
     "wumps"
   ],
 
+  // Editor {{{
+
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true,
+  },
+
+  // }}}
+
   // Files {{{
 
   "files.insertFinalNewline": true,
