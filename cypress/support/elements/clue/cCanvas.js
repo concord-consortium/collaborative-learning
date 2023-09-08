@@ -142,6 +142,10 @@ class ClueCanvas {
     addTile(tile) { //tile=[text,table,geometry,image,drawing,delete]
         cy.get('.primary-workspace .tool.' + tile).click({ force: true });
     }
+    
+    getDuplicateTool() {
+        return cy.get('.primary-workspace .tool.duplicate');
+    }
 
     verifyToolDisabled(tile) { //tile=[text,table,geometry,image,drawing,delete]
         cy.get('.primary-workspace .tool.' + tile).should("have.class", "disabled");
