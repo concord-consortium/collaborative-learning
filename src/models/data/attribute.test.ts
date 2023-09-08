@@ -105,6 +105,7 @@ describe("DataSet Attributes", () => {
     [0, 1, 2],
     ["0", "1", "2"],
     [1, "2", "3"],
+    ["1/4", "22/33"],
     ["a", "b", "c"],
     ["a", "1", "2"],
     ["", "1", "2"],
@@ -114,15 +115,15 @@ describe("DataSet Attributes", () => {
     ["1", "a", "a"],
     ["", "1", "a"],
     ["", "", "", "1", "a"],
-    ["2/23", "2/24"],
-    ["2/23", "1", "2"],
+    ["2/23/76", "2/24/76"],
+    ["2/23/76", "1", "2"],
     ["ccimg://fbrtdb.concord.org/devclass/-NcP-LmubeWUdANUM_vO", "1"],
     ["ccimg://fbrtdb.concord.org/devclass/-NcP-LmubeWUdANUM_vO", "1", "a"],
     // This was being categorized as both a date and an image. It no longer is.
     ["ccimg://fbrtdb.concord.org/democlass1/-NdC3tVdE70ngANCam6q"],
     // Maybe this should result in numeric but count of numbers is less than
     // half of the non empty values, so the result is "categorical"
-    ["1", "2", "a", "2/23", "ccimg://fbrtdb.concord.org/img.png"]
+    ["1", "2", "a", "2/23/76", "ccimg://fbrtdb.concord.org/img.png"]
   ];
 
   test("type", () => {
@@ -133,6 +134,7 @@ describe("DataSet Attributes", () => {
 [0,1,2] => "numeric"
 ["0","1","2"] => "numeric"
 [1,"2","3"] => "numeric"
+["1/4","22/33"] => "numeric"
 ["a","b","c"] => "categorical"
 ["a","1","2"] => "categorical"
 ["","1","2"] => "numeric"
@@ -142,12 +144,12 @@ describe("DataSet Attributes", () => {
 ["1","a","a"] => "categorical"
 ["","1","a"] => "categorical"
 ["","","","1","a"] => "categorical"
-["2/23","2/24"] => "categorical"
-["2/23","1","2"] => "categorical"
+["2/23/76","2/24/76"] => "categorical"
+["2/23/76","1","2"] => "categorical"
 ["ccimg://fbrtdb.concord.org/devclass/-NcP-LmubeWUdANUM_vO","1"] => "categorical"
 ["ccimg://fbrtdb.concord.org/devclass/-NcP-LmubeWUdANUM_vO","1","a"] => "categorical"
 ["ccimg://fbrtdb.concord.org/democlass1/-NdC3tVdE70ngANCam6q"] => "categorical"
-["1","2","a","2/23","ccimg://fbrtdb.concord.org/img.png"] => "categorical"
+["1","2","a","2/23/76","ccimg://fbrtdb.concord.org/img.png"] => "categorical"
 `);
   });
 
@@ -160,6 +162,7 @@ describe("DataSet Attributes", () => {
 [0,1,2] => [["numeric",3]]
 ["0","1","2"] => [["numeric",3]]
 [1,"2","3"] => [["numeric",3]]
+["1/4","22/33"] => [["numeric",2]]
 ["a","b","c"] => []
 ["a","1","2"] => [["numeric",2]]
 ["","1","2"] => [["numeric",2]]
@@ -169,12 +172,12 @@ describe("DataSet Attributes", () => {
 ["1","a","a"] => [["numeric",1]]
 ["","1","a"] => [["numeric",1]]
 ["","","","1","a"] => [["numeric",1]]
-["2/23","2/24"] => [["date",2]]
-["2/23","1","2"] => [["numeric",2],["date",1]]
+["2/23/76","2/24/76"] => [["date",2]]
+["2/23/76","1","2"] => [["numeric",2],["date",1]]
 ["ccimg://fbrtdb.concord.org/devclass/-NcP-LmubeWUdANUM_vO","1"] => [["image",1],["numeric",1]]
 ["ccimg://fbrtdb.concord.org/devclass/-NcP-LmubeWUdANUM_vO","1","a"] => [["image",1],["numeric",1]]
 ["ccimg://fbrtdb.concord.org/democlass1/-NdC3tVdE70ngANCam6q"] => [["image",1]]
-["1","2","a","2/23","ccimg://fbrtdb.concord.org/img.png"] => [["numeric",2],["date",1],["image",1]]
+["1","2","a","2/23/76","ccimg://fbrtdb.concord.org/img.png"] => [["numeric",2],["date",1],["image",1]]
 `);
   });
 
@@ -187,6 +190,7 @@ describe("DataSet Attributes", () => {
 [0,1,2] => "numeric"
 ["0","1","2"] => "numeric"
 [1,"2","3"] => "numeric"
+["1/4","22/33"] => "numeric"
 ["a","b","c"] => "categorical"
 ["a","1","2"] => "numeric"
 ["","1","2"] => "numeric"
@@ -196,12 +200,12 @@ describe("DataSet Attributes", () => {
 ["1","a","a"] => "categorical"
 ["","1","a"] => "numeric"
 ["","","","1","a"] => "numeric"
-["2/23","2/24"] => "date"
-["2/23","1","2"] => "numeric"
+["2/23/76","2/24/76"] => "date"
+["2/23/76","1","2"] => "numeric"
 ["ccimg://fbrtdb.concord.org/devclass/-NcP-LmubeWUdANUM_vO","1"] => "image"
 ["ccimg://fbrtdb.concord.org/devclass/-NcP-LmubeWUdANUM_vO","1","a"] => "categorical"
 ["ccimg://fbrtdb.concord.org/democlass1/-NdC3tVdE70ngANCam6q"] => "image"
-["1","2","a","2/23","ccimg://fbrtdb.concord.org/img.png"] => "categorical"
+["1","2","a","2/23/76","ccimg://fbrtdb.concord.org/img.png"] => "categorical"
 `);
   });
 });

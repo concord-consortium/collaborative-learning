@@ -1,4 +1,4 @@
-import { isDate, isImageUrl, isNumeric } from "./data-types";
+import { isDate, isImageUrl, isNumeric, toNumeric } from "./data-types";
 import dayjs from "dayjs";
 
 expect.addSnapshotSerializer({
@@ -58,16 +58,12 @@ describe("dayjs", () => {
 describe("data-types", () => {
   test("isDate", () => {
     const valuesToTest: string[] = [
-      "2/3",
       "2/3/76",
       "2/3/1976",
-      "2/03",
       "2/03/76",
       "2/03/1976",
-      "02/3",
       "02/3/76",
       "02/3/1976",
-      "02/03",
       "02/03/76",
       "02/03/1976",
       "Feb 3",
@@ -83,29 +79,39 @@ describe("data-types", () => {
       "February 03, 76",
       "February 03, 1976",
       "2 / 3",
+      "2 / 3 / 76",
       "Feb3,1976",
       "02-23-1976",
-      // invalid dates
+
+      // **** Invalid Dates *****
+
+      // The following group is invalid because we support fractions
+      "2/3",
+      "2/03",
+      "02/3",
+      "02/03",
+
+      // These are not real date on the calendar
       "02/30/1976",
       "23/02/1976",
       "23/02",
+
+      // Numbers are not considered dates
       "123",
+
+      // This image was causing a problem before
       "ccimg://fbrtdb.concord.org/democlass1/-NdC3tVdE70ngANCam6q"
     ];
     const testCases = valuesToTest.map(value => {
       return [value, isDate(value)];
     });
     expect({ testCases }).toMatchInlineSnapshot(`
-"2/3" => true
 "2/3/76" => true
 "2/3/1976" => true
-"2/03" => true
 "2/03/76" => true
 "2/03/1976" => true
-"02/3" => true
 "02/3/76" => true
 "02/3/1976" => true
-"02/03" => true
 "02/03/76" => true
 "02/03/1976" => true
 "Feb 3" => true
@@ -120,9 +126,14 @@ describe("data-types", () => {
 "February 03" => true
 "February 03, 76" => true
 "February 03, 1976" => true
-"2 / 3" => true
+"2 / 3" => false
+"2 / 3 / 76" => true
 "Feb3,1976" => true
 "02-23-1976" => true
+"2/3" => false
+"2/03" => false
+"02/3" => false
+"02/03" => false
 "02/30/1976" => false
 "23/02/1976" => false
 "23/02" => false
@@ -151,7 +162,7 @@ describe("data-types", () => {
 `);
   });
 
-  test("isNumeric", () => {
+  describe("numeric handling", () => {
     const valuesToTest: string[] = [
       "",
       "123",
@@ -166,15 +177,70 @@ describe("data-types", () => {
       "0b10",
       "2,000",
       "1,200,000.00",
+      "1/2",
+      "22/33",
+      "-1/4",
+      "1 / 4",
+      "-1 / 4",
+      " -1",
+      " -1 ",
+      " - 1/4",
+
+      // Invalid numbers: only certain fractions are allowed
+      "1 1/4",
+      "1/3/4",
+      "1.0/2.0",
+      "-1/-2",
+      "1+1",
+      "1*1",
       // ⬇ This should really not be considered a number in the US locale
       //    However the current comma handling approach is simple so this
       //    is considered the same as 12
       "1,2"
     ];
-    const testCases = valuesToTest.map(value => {
-      return [value, isNumeric(value)];
+
+    test("toNumeric", () => {
+      const testCases = valuesToTest.map(value => {
+        return [value, toNumeric(value)];
+      });
+      expect({ testCases }).toMatchInlineSnapshot(`
+"" => null
+"123" => 123
+"1E10" => 10000000000
+"1e10" => 10000000000
+"1 E10" => null
+"1E 10" => null
+"1 E 10" => null
+"-1.0" => -1
+"0xFF" => 255
+"0o10" => 8
+"0b10" => 2
+"2,000" => 2000
+"1,200,000.00" => 1200000
+"1/2" => 0.5
+"22/33" => 0.6666666666666666
+"-1/4" => -0.25
+"1 / 4" => 0.25
+"-1 / 4" => -0.25
+" -1" => -1
+" -1 " => -1
+" - 1/4" => -0.25
+"1 1/4" => null
+"1/3/4" => null
+"1.0/2.0" => null
+"-1/-2" => null
+"1+1" => null
+"1*1" => null
+"1,2" => 12
+`);
     });
-    expect({ testCases }).toMatchInlineSnapshot(`
+
+
+    test("isNumeric", () => {
+      const testCases = valuesToTest.map(value => {
+        return [value, isNumeric(value)];
+      });
+      expect({ testCases }).toMatchInlineSnapshot(`
 "" => false
 "123" => true
 "1E10" => true
@@ -188,7 +254,23 @@ describe("data-types", () => {
 "0b10" => true
 "2,000" => true
 "1,200,000.00" => true
+"1/2" => true
+"22/33" => true
+"-1/4" => true
+"1 / 4" => true
+"-1 / 4" => true
+" -1" => true
+" -1 " => true
+" - 1/4" => true
+"1 1/4" => false
+"1/3/4" => false
+"1.0/2.0" => false
+"-1/-2" => false
+"1+1" => false
+"1*1" => false
 "1,2" => true
 `);
+    });
+
   });
 });
