@@ -92,9 +92,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     if (!tileElement) return undefined;
 
     return (point: Point): Point | undefined => {
-
       const [x, y] = point;
-
       const _x = rowElement.offsetLeft + tileElement.offsetLeft - tileElement.scrollLeft
         + x + tileBorder - (documentScrollX ?? 0);
       const _y = rowElement.offsetTop + tileElement.offsetTop - tileElement.scrollTop
