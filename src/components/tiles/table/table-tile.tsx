@@ -74,7 +74,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   // Maintains the cache of data values that map to image URLs.
   // For use in a synchronous context, returns undefined immediately if an image is not yet cached,
   // and then looks it up in the background, adds to cache, and updates state to force a refresh.
-  const lookupImage = (value: string) => {
+  const lookupImage = useCallback((value: string) => {
     if (gImageMap.isImageUrl(value)) {
       const cached = imageUrls.get(value);
       if (cached) {
@@ -88,7 +88,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
       });
       return undefined;
     }
-  };
+  }, [imageUrls]);
 
   // React components used for the index (left most) column
   const rowLabelProps = useRowLabelColumn({
