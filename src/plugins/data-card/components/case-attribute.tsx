@@ -15,7 +15,6 @@ import { getClipboardContent } from "../../../utilities/clipboard-utils";
 import { isImageUrl } from "../../../models/data/data-types";
 
 import '../data-card-tile.scss';
-import { is } from "immutable";
 
 const typeIcons = {
   "date": "📅",
