@@ -25,7 +25,7 @@ export const PointObjectModel = types
     }
   }))
   .actions(self => ({
-    setDragXValue(num?: number) {
+    setDragXValue(num: number | undefined) {
       self.dragXValue = num;
     },
     setXValueToDragValue(){ //when mouse is let go
