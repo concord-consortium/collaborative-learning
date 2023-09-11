@@ -15,11 +15,12 @@ import { getClipboardContent } from "../../../utilities/clipboard-utils";
 import { isImageUrl } from "../../../models/data/data-types";
 
 import '../data-card-tile.scss';
+import { is } from "immutable";
 
 const typeIcons = {
   "date": "📅",
-  "categorical": "txt",
-  "numeric": "#",
+  "categorical": "🔤",
+  "numeric": "#️⃣",
   "image": "📷",
   "boundary": "?",
   "color": "?",
@@ -296,6 +297,15 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     return propsCreated;
   }
 
+  const displayArrow = () => {
+    if (inputItems.length > 0) {
+      return isOpen
+        ? <span className="up">&#x25B2;</span>
+        : <span className="down">&#x25BC;</span>;
+    }
+    return <span></span>; // There may be more cases in the future, e.g. date picker
+  };
+
   return (
     <div className={pairClassNames}>
       <div className={labelClassNames} onClick={handleLabelClick}>
@@ -327,10 +337,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
               onPaste={handleValuePaste}
             />
             <button aria-label="toggle menu" type="button" {...getToggleButtonProps()}>
-              { isOpen && inputItems.length > 0 ?
-                <span className="up">&#x25B2;</span> :
-                <span className="down">&#x25BC;</span>
-              }
+              {displayArrow()}
             </button>
             <ul {...getMenuProps()} className={ isOpen ? "open" : "closed"}>
               {isOpen &&
