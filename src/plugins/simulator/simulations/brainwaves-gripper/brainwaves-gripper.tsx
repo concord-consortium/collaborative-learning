@@ -3,7 +3,7 @@ import React from "react";
 import { arduinoFrames, armFrames, gripperFrames } from "./brainwaves-gripper-assets";
 import { ISimulation, ISimulationProps } from "../simulation-types";
 import { findVariable, getFrame } from "../simulation-utilities";
-import { demoStreams } from "../../../shared-assets/data/dataflow/demo-data";
+import { VariableSlider } from "../../components/variable-slider";
 import { iconUrl, kEMGKey, kGripperKey, kPressureKey } from "../../../shared-assets/icons/icon-utilities";
 
 import "./brainwaves-gripper.scss";
@@ -20,18 +20,29 @@ function BrainwavesGripperComponent({ frame, variables }: ISimulationProps) {
   const gripperFrame = getFrame(normalizedGripperValue, gripperFrames.length);
   return (
     <div className="bwg-component">
-      <img
-        src={ armFrames[armFrame] }
-        className="arm-image"
-      />
-      <img
-        src={ arduinoFrames[0] }
-        className="arduino-image"
-      />
-      <img
-        src={ gripperFrames[gripperFrame] }
-        className="gripper-image"
-      />
+      <div className="animation">
+        <img
+          src={ armFrames[armFrame] }
+          className="arm-image"
+        />
+        <img
+          src={ arduinoFrames[0] }
+          className="arduino-image"
+        />
+        <img
+          src={ gripperFrames[gripperFrame] }
+          className="gripper-image"
+        />
+      </div>
+      <div className="controls">
+        <VariableSlider
+          className="emg-slider"
+          max={440}
+          min={40}
+          step={40}
+          variable={emgVariable}
+        />
+      </div>
     </div>
   );
 }
@@ -77,7 +88,5 @@ export const brainwavesGripperSimulation: ISimulation = {
       value: 0
     }
   ],
-  values: {
-    [kEMGKey]: demoStreams.emgLongHold
-  }
+  values: {}
 };
