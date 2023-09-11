@@ -1,11 +1,11 @@
 import stringify from "json-stringify-pretty-compact";
 import { types, Instance, getSnapshot } from "mobx-state-tree";
 
-import { kNumberlineTileType, maxNumSelectedPoints } from "../numberline-tile-constants";
 import { getTileIdFromContent } from "../../../models/tiles/tile-model";
 import { TileContentModel } from "../../../models/tiles/tile-content";
 import { uniqueId } from "../../../utilities/js-utils";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
+import { kNumberlineTileType, maxNumSelectedPoints } from "../numberline-tile-constants";
 
 export function defaultNumberlineContent(): NumberlineContentModelType {
   return NumberlineContentModel.create({});

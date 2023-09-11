@@ -3,7 +3,12 @@ import { axisBottom, drag, pointer, scaleLinear, select } from 'd3';
 import { observer } from 'mobx-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { NumberlineToolbar } from "./numberline-toolbar";
+import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
+import { useToolbarTileApi } from "../../../components/tiles/hooks/use-toolbar-tile-api";
+import { ITileProps } from "../../../components/tiles/tile-component";
+import { OffsetModel } from '../../../models/annotations/clue-object';
+import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
+import { HotKeys } from "../../../utilities/hot-keys";
 import { NumberlineContentModelType, PointObjectModelType,  } from "../models/numberline-content";
 import {
   kAxisStyle, kAxisWidth, kContainerWidth, kNumberLineContainerHeight, numberlineDomainMax, numberlineDomainMin,
@@ -11,12 +16,7 @@ import {
   innerPointRadius, outerPointRadius, numberlineYBound, yMidPoint, kTitleHeight, kBoundingBoxOffset, kArrowheadTop,
   kArrowheadOffset, kPointButtonRadius
 } from '../numberline-tile-constants';
-import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
-import { useToolbarTileApi } from "../../../components/tiles/hooks/use-toolbar-tile-api";
-import { ITileProps } from "../../../components/tiles/tile-component";
-import { OffsetModel } from '../../../models/annotations/clue-object';
-import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
-import { HotKeys } from "../../../utilities/hot-keys";
+import { NumberlineToolbar } from "./numberline-toolbar";
 
 import "./numberline-tile.scss";
 

@@ -2,10 +2,11 @@ import { observer } from "mobx-react";
 import React from "react";
 import ReactDOM from "react-dom";
 
-import { PlacePointButton, ClearPointsButton, DeletePointButton } from "./numberline-toolbar-buttons";
-import { IFloatingToolbarProps, useFloatingToolbarLocation
-        } from "../../../components/tiles/hooks/use-floating-toolbar-location";
+import {
+  IFloatingToolbarProps, useFloatingToolbarLocation
+} from "../../../components/tiles/hooks/use-floating-toolbar-location";
 import { useSettingFromStores } from "../../../hooks/use-stores";
+import { PlacePointButton, ClearPointsButton, DeletePointButton } from "./numberline-toolbar-buttons";
 
 import "./numberline-toolbar.scss";
 
