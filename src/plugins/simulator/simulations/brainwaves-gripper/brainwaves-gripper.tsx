@@ -1,9 +1,9 @@
+import { VariableSlider } from "@concord-consortium/diagram-view";
 import React from "react";
 
 import { arduinoFrames, armFrames, gripperFrames } from "./brainwaves-gripper-assets";
 import { ISimulation, ISimulationProps } from "../simulation-types";
 import { findVariable, getFrame } from "../simulation-utilities";
-import { VariableSlider } from "../../components/variable-slider";
 import { iconUrl, kEMGKey, kGripperKey, kPressureKey } from "../../../shared-assets/icons/icon-utilities";
 
 import "./brainwaves-gripper.scss";
@@ -12,11 +12,11 @@ export const kBrainwavesKey = "EMG_and_claw";
 
 function BrainwavesGripperComponent({ frame, variables }: ISimulationProps) {
   const emgVariable = findVariable(kEMGKey, variables);
-  const normalizedEmgValue = Math.min((emgVariable?.value ?? 0) / 450, 1);
+  const normalizedEmgValue = Math.min((emgVariable?.currentValue ?? 0) / 450, 1);
   const armFrame = getFrame(normalizedEmgValue, armFrames.length);
 
   const gripperVariable = findVariable(kGripperKey, variables);
-  const normalizedGripperValue = (gripperVariable?.value ?? 0) / 100;
+  const normalizedGripperValue = (gripperVariable?.currentValue ?? 0) / 100;
   const gripperFrame = getFrame(normalizedGripperValue, gripperFrames.length);
   return (
     <div className="bwg-component">
