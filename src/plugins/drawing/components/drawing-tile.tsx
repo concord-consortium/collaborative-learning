@@ -72,13 +72,17 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
 
   const handleGroup = () => {
     const content = contentRef.current;
-    content.createGroup(content.selection);
+    if (content.selection.length > 1) {
+      content.createGroup(content.selection);
+    }
     return true; // true return means 'prevent default action'
   };
 
   const handleUngroup = () => {
     const content = contentRef.current;
-    content.ungroupGroups(content.selection);
+    if (content.selection.length > 0) {
+      content.ungroupGroups(content.selection);
+    }
     return true; // true return means 'prevent default action'
   };
 
