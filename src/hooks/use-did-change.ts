@@ -1,4 +1,4 @@
-import { usePrevious } from "./hooks/use-previous";
+import { usePrevious } from "./use-previous";
 
 // This hook will tell you when something has changed between renders.
 // It can be useful to help you determine which dependency is causing a hook to fire.
