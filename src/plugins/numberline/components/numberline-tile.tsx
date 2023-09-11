@@ -33,8 +33,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
 
   const createPoint = (xValue: number) => {
     if (!readOnly) {
-      const point = content.createNewPoint(xValue);
-      content.setSelectedPoint(point);
+      const point = content.createAndSelectPoint(xValue);
       setHoverPointId(point.id);
     }
   };

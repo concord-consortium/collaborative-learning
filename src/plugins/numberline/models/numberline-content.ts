@@ -115,6 +115,13 @@ export const NumberlineContentModel = TileContentModel
     deleteAllPoints() {
       self.points.clear();
     },
+  }))
+  .actions(self => ({
+    createAndSelectPoint(xValue: number) {
+      const newPoint = self.createNewPoint(xValue);
+      self.setSelectedPoint(newPoint);
+      return newPoint;
+    }
   }));
 
 export interface NumberlineContentModelType extends Instance<typeof NumberlineContentModel> {}
