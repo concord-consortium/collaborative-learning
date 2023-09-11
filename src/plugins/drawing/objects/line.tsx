@@ -106,7 +106,14 @@ export const LineObject = StrokedObject.named("LineObject")
       }
       self.dragScaleX = self.dragScaleY = undefined;
     }
-  }));
+  }))
+  .preProcessSnapshot(sn => {
+    const snClone = { ...sn };
+    snClone.deltaPoints = snClone.deltaPoints?.filter((point) => {
+      return (isFinite(point.dx) && isFinite(point.dy));
+    });
+    return snClone;
+  });
 export interface LineObjectType extends Instance<typeof LineObject> {}
 export interface LineObjectSnapshot extends SnapshotIn<typeof LineObject> {}
 
