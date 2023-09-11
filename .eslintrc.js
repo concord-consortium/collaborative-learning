@@ -6,7 +6,7 @@ module.exports = {
       ecmaVersion: 2018,
       sourceType: "module",
     },
-    plugins: ["@typescript-eslint", "json", "react", "react-hooks"],
+    plugins: ["@typescript-eslint", "json", "react", "react-hooks", "import"],
     env: {
       browser: true,
       es6: true
@@ -44,6 +44,17 @@ module.exports = {
       "eol-last": "warn",
       eqeqeq: ["error", "smart"],
       "eslint-comments/no-unused-disable": "off",   // enabled in .eslintrc.build.js
+      "import/order": [ "error", {
+        // FIXME: This is not working. We need something like this to
+        // put the scss and sass imports below everything else.
+        "pathGroups": [
+          {
+            "pattern": "./*.scss",
+            "group": "sibling",
+            "position": "after"
+          }
+        ]
+      }],
       "max-len": ["warn", { code: 120, ignoreUrls: true }],
       "no-bitwise": "error",
       "no-debugger": "off", // enabled in .eslintrc.build.js
