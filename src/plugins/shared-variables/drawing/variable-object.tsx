@@ -45,6 +45,12 @@ export const VariableChipObject = DrawingObject.named("VariableObject")
       const se: Point = {x: x + width, y: y + height};
       return {nw, se};
     },
+    get label() {
+      return "Variable";
+    },
+    get icon() {
+      return AddVariableChipIcon;
+    },
     get supportsResize() {
       return false;
     }
