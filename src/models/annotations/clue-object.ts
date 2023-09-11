@@ -1,4 +1,4 @@
-import { Instance, types } from "mobx-state-tree";
+import { Instance, SnapshotIn, types } from "mobx-state-tree";
 
 /**
  * This model represents a generic object within a CLUE tile.
@@ -10,6 +10,7 @@ export const ClueObjectModel = types
   objectType: types.maybe(types.string)
 });
 export interface IClueObject extends Instance<typeof ClueObjectModel> {}
+export interface IClueObjectSnapshot extends SnapshotIn<typeof ClueObjectModel> {}
 
 /**
  * A simple model to represent a 2d offset

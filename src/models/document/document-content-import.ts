@@ -69,7 +69,7 @@ function migrateRow(content: DocumentContentModelType, tiles: OriginalTileModel[
 // in after attach will wait for the shared model manager to be ready.
 export function migrateSnapshot(snapshot: IDocumentImportSnapshot): any {
   const docContent = DocumentContentModel.create();
-  const { tiles: tilesOrRows, sharedModels } = snapshot;
+  const { tiles: tilesOrRows, sharedModels, annotations } = snapshot;
   tilesOrRows.forEach(tileOrRow => {
     if (Array.isArray(tileOrRow)) {
       migrateRow(docContent, tileOrRow);
@@ -86,6 +86,15 @@ export function migrateSnapshot(snapshot: IDocumentImportSnapshot): any {
       return;
     }
     docContent.addSharedModelFromImport(id, entry);
+  });
+
+  annotations?.forEach(entry => {
+    const id = entry.id;
+    if (!id) {
+      console.warn("cannot import an annotation without an id", entry);
+      return;
+    }
+    docContent.addAnnotationFromImport(id, entry);
   });
 
   return getSnapshot(docContent);
