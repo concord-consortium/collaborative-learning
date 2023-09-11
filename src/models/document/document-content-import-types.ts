@@ -6,8 +6,9 @@
  * determined by the tile itself.
  */
 
-import { DisplayUserType } from "../stores/user-types";
 import { SharedModelEntrySnapshotType } from "./shared-model-entry";
+import { IArrowAnnotationSnapshot } from "../annotations/arrow-annotation";
+import { DisplayUserType } from "../stores/user-types";
 
 // authored content is converted to current content on the fly
 export interface IAuthoredBaseTileContent {
@@ -57,6 +58,7 @@ export function isOriginalAuthoredTileModel(tile: OriginalTileModel): tile is Or
 export type OriginalTilesSnapshot = Array<OriginalTileModel | OriginalTileModel[]>;
 
 export interface IDocumentImportSnapshot {
+  annotations?: IArrowAnnotationSnapshot[];
   sharedModels?: SharedModelEntrySnapshotType[];
   tiles: OriginalTilesSnapshot;
 }

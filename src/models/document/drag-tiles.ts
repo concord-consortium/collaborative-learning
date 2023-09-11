@@ -3,7 +3,7 @@ import { cloneTileSnapshotWithNewId, IDragTileItem, ITilePosition } from "../til
 import { IDragTilesData } from "./document-content-types";
 import { getTileContentInfo } from "../tiles/tile-content-info";
 import { DEBUG_DROP } from "../../lib/debug";
-import { BaseDocumentContentModel } from "./base-document-content";
+import { DocumentContentModelWithAnnotations } from "./document-content-with-annotations";
 
 /**
  * This is one part of the DocumentContentModel. The other part is
@@ -17,7 +17,7 @@ import { BaseDocumentContentModel } from "./base-document-content";
  * consider extending this to include tile copying since that is fundamental
  * part of dragging and dropping.
  */
-export const DocumentContentModelWithTileDragging = BaseDocumentContentModel
+export const DocumentContentModelWithTileDragging = DocumentContentModelWithAnnotations
 .named("DocumentContentModelWithTileDragging")
 .views(self => ({
   getTilePositions(tileIds: string[]) {
@@ -89,7 +89,8 @@ export const DocumentContentModelWithTileDragging = BaseDocumentContentModel
     const dragTiles: IDragTilesData = {
       sourceDocId,
       tiles: self.getDragTileItems(tileIds),
-      sharedModels: sharedManager?.getSharedModelDragDataForTiles(tileIds) ?? []
+      sharedModels: sharedManager?.getSharedModelDragDataForTiles(tileIds) ?? [],
+      annotations: Object.values(self.getAnnotationsUsedByTiles(tileIds))
     };
 
     // create a sorted array of selected tiles
