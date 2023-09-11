@@ -109,13 +109,13 @@ export const LineObject = StrokedObject.named("LineObject")
   }))
   .preProcessSnapshot(sn => {
     const snClone = { ...sn };
+    if (typeof snClone.x !== 'number') {
+      snClone.x = 0;
+    }
+    if (typeof snClone.y !== 'number') {
+      snClone.y = 0;
+    }
     snClone.deltaPoints = snClone.deltaPoints?.filter((point) => {
-      if (typeof snClone.x !== 'number') {
-        snClone.x = 0;
-      }
-      if (typeof snClone.y !== 'number') {
-        snClone.y = 0;
-      }
       return (typeof point.dx === 'number' && typeof point.dy === 'number');
     });
     return snClone;
