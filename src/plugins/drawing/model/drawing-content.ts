@@ -164,7 +164,7 @@ export const DrawingContentModel = TileContentModel
       self.currentStampIndex = stampIndex;
     },
 
-    addObject(object: DrawingObjectSnapshotForAdd) {
+    addObject(object: DrawingObjectSnapshotForAdd, addAtBack=false) {
       // The reason only snapshots are allowed is so the logged action
       // includes the snapshot in the `call` that is passed to `onAction`.
       // If an instance is passed instead of a snapshot, then MST will just
@@ -174,9 +174,13 @@ export const DrawingContentModel = TileContentModel
       if (isStateTreeNode(object as any)) {
         throw new Error("addObject requires a snapshot");
       }
-
-      self.objects.push(object);
-      return self.objects[self.objects.length-1];
+      if (addAtBack) {
+        self.objects.unshift(object);
+        return self.objects[0];
+      } else {
+        self.objects.push(object);
+        return self.objects[self.objects.length-1];
+      }
     },
 
     moveObjectsOutOfGroup(group: GroupObjectType): string[] {
@@ -225,8 +229,8 @@ export const DrawingContentModel = TileContentModel
     },
 
     // Adds a new object and selects it, activating the select tool.
-    addAndSelectObject(drawingObject: DrawingObjectSnapshotForAdd) {
-      const obj = self.addObject(drawingObject);
+    addAndSelectObject(drawingObject: DrawingObjectSnapshotForAdd, addAtBack=false) {
+      const obj = self.addObject(drawingObject, addAtBack);
       self.setSelectedButton('select');
       self.setSelectedIds([obj.id]);
       return obj;
