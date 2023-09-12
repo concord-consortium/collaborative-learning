@@ -51,6 +51,8 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
         "cmd-v": handlePaste, //allows user to paste image with cmd+v
         "delete": handleDelete, // I'm not sure if this will handle "Del" IE 9 and Edge
         "backspace": handleDelete,
+        "cmd-g": handleGroup,
+        "cmd-shift-g": handleUngroup
       });
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -66,6 +68,22 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
 
   const handleDelete = () => {
     contentRef.current.deleteObjects([...contentRef.current.selection]);
+  };
+
+  const handleGroup = () => {
+    const content = contentRef.current;
+    if (content.selection.length > 1) {
+      content.createGroup(content.selection);
+    }
+    return true; // true return means 'prevent default action'
+  };
+
+  const handleUngroup = () => {
+    const content = contentRef.current;
+    if (content.selection.length > 0) {
+      content.ungroupGroups(content.selection);
+    }
+    return true; // true return means 'prevent default action'
   };
 
   const toolbarProps = useToolbarTileApi({ id: model.id, enabled: !readOnly, onRegisterTileApi, onUnregisterTileApi });

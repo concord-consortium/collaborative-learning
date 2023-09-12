@@ -1,6 +1,6 @@
 import React from "react";
 import { observer } from "mobx-react";
-import { Instance, SnapshotIn, getMembers, types } from "mobx-state-tree";
+import { Instance, SnapshotIn, getMembers, isAlive, types } from "mobx-state-tree";
 import { DrawingObject, DrawingObjectType, IDrawingComponentProps, 
   StrokedObjectType, 
   isFilledObject, 
@@ -32,7 +32,7 @@ export const GroupObject = DrawingObject.named("GroupObject")
   })
   .views(self => ({
     get boundingBox() {
-      if (!self.objects.length) return { nw: { x: 0, y: 0 }, se: { x: 0, y: 0 } };
+      if (!isAlive(self) || !self.objects.length) return { nw: { x: 0, y: 0 }, se: { x: 0, y: 0 } };
       return self.objects.reduce((cur, obj) => {
         if (obj) {
           const objBB = obj.boundingBox;
