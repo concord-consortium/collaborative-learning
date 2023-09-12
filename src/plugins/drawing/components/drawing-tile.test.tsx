@@ -1,3 +1,5 @@
+// Some mocks have to be set up before things are imported.
+
 // mock the measureText function
 const mockMeasureText = jest.fn((text: string, fontSize: number) => {
   // assume every character is half the width of the font's height
@@ -30,8 +32,8 @@ const createElementSpy = jest.spyOn(document, "createElement")
           : origCreateElement.call(document, tagName, options);
 });
 
-import { render, screen } from "@testing-library/react";
 import React from "react";
+import { render, screen, within } from "@testing-library/react";
 import { ITileApi } from "../../../components/tiles/tile-api";
 import { TileModel } from "../../../models/tiles/tile-model";
 import { Provider } from "mobx-react";
@@ -39,6 +41,7 @@ import { specStores } from "../../../models/stores/spec-stores";
 import { ModalProvider } from "react-modal-hook";
 import { createDrawingContent } from "../model/drawing-content";
 import DrawingToolComponent from "./drawing-tile";
+import { RectangleObjectSnapshotForAdd } from "../objects/rectangle";
 
 // The starter tile needs to be registered so the TileModel.create
 // knows it is a supported tile type
@@ -47,8 +50,33 @@ import "../drawing-registration";
 // mock Logger calls
 const mockLogTileDocumentEvent = jest.fn();
 jest.mock("../../../models/tiles/log/log-tile-document-event", () => ({
-  logTileDocumentEvent: (...args: any[]) => mockLogTileDocumentEvent()
+  logTileDocumentEvent: (...args: any[]) => mockLogTileDocumentEvent(...args)
 }));
+
+const mockSettings = {
+  fill: "#666666",
+  stroke: "#888888",
+  strokeDashArray: "3,3",
+  strokeWidth: 5
+};
+
+const rectangleSnapshot: RectangleObjectSnapshotForAdd = {
+  type: "rectangle",
+  x: 0,
+  y: 0,
+  width: 30,
+  height: 10,
+  ...mockSettings,
+};
+
+const squareSnapshot: RectangleObjectSnapshotForAdd = {
+  type: "rectangle",
+  x: 0,
+  y: 0,
+  width: 10,
+  height: 10,
+  ...mockSettings,
+};
 
 describe("DrawingToolComponent", () => {
 
@@ -101,9 +129,74 @@ describe("DrawingToolComponent", () => {
           <DrawingToolComponent {...defaultProps} {...{model}} />
         </Provider>
       </ModalProvider>
-  );
+    );
     expect(screen.getByTestId("drawing-tool")).toBeInTheDocument();
     expect(screen.getByTestId("drawing-toolbar")).toBeInTheDocument();
+    expect(screen.getByLabelText("Open show/sort panel")).toBeInTheDocument();
     expect(screen.getByText("A Title for Testing")).toBeInTheDocument();
+  });
+
+  it("can open and close show/sort panel", () => {
+    render(
+      <ModalProvider>
+        <Provider stores={stores}>
+          <DrawingToolComponent {...defaultProps} {...{model}} />
+        </Provider>
+      </ModalProvider>
+    );
+    expect(screen.getByTestId("drawing-tool")).toContainHTML("Open show/sort panel");
+    expect(screen.getByTestId("drawing-tool")).not.toContainHTML("Close show/sort panel");
+
+    screen.getByLabelText("Open show/sort panel").click();
+    expect(screen.getByTestId("drawing-tool")).toContainHTML("Close show/sort panel");
+    expect(screen.getByTestId("drawing-tool")).not.toContainHTML("Open show/sort panel");
+    
+    screen.getByLabelText("Close show/sort panel").click();
+    expect(screen.getByTestId("drawing-tool")).toContainHTML("Open show/sort panel");
+    expect(screen.getByTestId("drawing-tool")).not.toContainHTML("Close show/sort panel");
+  });
+
+  it("shows objects in show/sort panel", () => {
+    render(
+      <ModalProvider>
+        <Provider stores={stores}>
+          <DrawingToolComponent {...defaultProps} {...{model}} />
+        </Provider>
+      </ModalProvider>
+    );
+
+    expect(screen.getByTestId("object-list-view")).not.toContainHTML("Square");
+    content.addAndSelectObject(squareSnapshot);
+    screen.getByLabelText("Open show/sort panel").click();
+    expect(screen.getByTestId("object-list-view")).toContainHTML("Square");
+  });
+
+  it("shows correct order of objects in show/sort panel", () => {
+    render(
+      <ModalProvider>
+        <Provider stores={stores}>
+          <DrawingToolComponent {...defaultProps} {...{model}} />
+        </Provider>
+      </ModalProvider>
+    );
+
+    // Content already has a square in it from previous test.
+    content.addAndSelectObject(rectangleSnapshot);
+    screen.getByLabelText("Open show/sort panel").click();
+    let items = within(screen.getByTestId("object-list-view")).getAllByRole("listitem");
+    expect(items).toHaveLength(2);
+    expect(items[0]).toContainHTML("Rectangle");
+    expect(items[1]).toContainHTML("Square");
+
+    // Move square to top.
+    if (content.objects.length >= 2) {
+      content.changeZOrder(content.objects[1].id, content.objects[0].id);
+    }
+    items = within(screen.getByTestId("object-list-view")).getAllByRole("listitem");
+    expect(items).toHaveLength(2);
+
+    expect(items[0]).toContainHTML("Square");
+    expect(items[1]).toContainHTML("Rectangle");
+
   });
 });

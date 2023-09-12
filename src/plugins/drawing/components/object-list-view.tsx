@@ -51,7 +51,7 @@ export const ObjectListView = observer(function ObjectListView({model, setHoverO
     const objectIdList = content.objects.map((obj)=>obj.id).reverse();
 
     return (
-    <div className="object-list open">
+    <div data-testid="object-list-view" className="object-list open">
       <div className="header">
         <button type="button" className="close" onClick={handleClose} aria-label="Close show/sort panel">
           Show/sort
@@ -81,7 +81,7 @@ export const ObjectListView = observer(function ObjectListView({model, setHoverO
 
   } else {
     return (
-    <div className="object-list closed">
+    <div data-testid="object-list-view" className="object-list closed">
       <button type="button" onClick={handleOpen} aria-label="Open show/sort panel">
         <ExpandRightIcon/>
         <span className="vert">Show/sort</span>
