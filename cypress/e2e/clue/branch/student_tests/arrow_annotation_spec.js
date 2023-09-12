@@ -147,7 +147,7 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationArrows().should("have.length", 1);
   });
   it("can add arrows to table tiles", () => {
-    beforeTest(queryParams.unit2);
+    beforeTest(queryParams.unit1);
     clueCanvas.addTile("table");
 
     cy.log("Annotation buttons only appear for actual cells");
@@ -165,6 +165,31 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationButtons().eq(0).click();
     aa.getAnnotationButtons().eq(1).click();
     aa.getAnnotationArrows().should("have.length", 1);
+
+    cy.log("Can duplicate annotations contained within one tile");
+    aa.clickArrowToolbarButton();
+    tableToolTile.getTableCell().eq(1).click();
+    clueCanvas.getDuplicateTool().click();
+    aa.clickArrowToolbarButton(); // To force a rerender of the annotation layer
+    aa.clickArrowToolbarButton();
+    aa.getAnnotationArrows().should("have.length", 2);
+
+    cy.log("Can duplicate annotations that span multiple tiles");
+    aa.clickArrowToolbarButton();
+    // Delete the copied sparrow so only the original remains
+    aa.getAnnotationDeleteButtons().eq(1).click();
+    // Create a sparrow between the two tables
+    aa.getAnnotationButtons().eq(3).click();
+    aa.getAnnotationButtons().eq(1).click({ force: true });
+    aa.getAnnotationArrows().should("have.length", 2);
+    aa.clickArrowToolbarButton();
+    // Copy the original table. This has one internal sparrow and one sparrow shared with the other tile.
+    tableToolTile.getTableCell().eq(0).click();
+    clueCanvas.getDuplicateTool().click();
+    aa.clickArrowToolbarButton(); // To force a rerender of the annotation layer
+    aa.clickArrowToolbarButton();
+    // Both sparrows should have been copied.
+    aa.getAnnotationArrows().should("have.length", 4);
   });
   it("can add arrows to geometry tiles", () => {
     beforeTest(queryParams.unit3);
