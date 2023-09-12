@@ -1,6 +1,6 @@
 import { registerTileComponentInfo } from "../tile-component-info";
 import { registerTileContentInfo } from "../tile-content-info";
-import { kPlaceholderTileType, PlaceholderContentModel } from "./placeholder-content";
+import { kPlaceholderTileType, kPlaceholderTileDefaultHeight, PlaceholderContentModel } from "./placeholder-content";
 import PlaceholderTileComponent from "../../../components/tiles/placeholder/placeholder-tile";
 
 function defaultPlaceholderContent() {
@@ -10,7 +10,8 @@ function defaultPlaceholderContent() {
 registerTileContentInfo({
   type: kPlaceholderTileType,
   modelClass: PlaceholderContentModel,
-  defaultContent: defaultPlaceholderContent
+  defaultContent: defaultPlaceholderContent,
+  defaultHeight: kPlaceholderTileDefaultHeight
 });
 
 registerTileComponentInfo({

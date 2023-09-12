@@ -1,0 +1,21 @@
+@import "../../vars";
+
+.tool-tile.placeholder {
+  outline: none;
+}
+
+.placeholder-tool {
+  width: 100%;
+  // This value should match the height specified in placeholder-content.ts
+  height: 50px;
+  min-height: 50px;
+  background-color: white;
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $charcoal;
+  border-color: $charcoal-light-2;
+  border-style: dashed;
+  border-width: 1px;
+}

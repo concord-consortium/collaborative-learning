@@ -1,0 +1,35 @@
+@import "../vars";
+
+.row-section-header {
+  width: 100%;
+  // This should match the height specified in kSecitonHeaderHeight in document-constants.ts
+  height: 26px;
+  margin: 0 2px;
+  background-color: $problem-orange-light-7;
+  display: flex;
+  font-size: 14px;
+
+  &.planning-doc {
+    background-color: $learninglog-green-light-7;
+  }
+
+  .initials {
+    color: white;
+    background-color: $problem-orange-light-3;
+    width: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+
+    &.planning-doc {
+      background-color: $learninglog-green-light-4;
+    }
+  }
+
+  .title {
+    color: $charcoal-dark-2;
+    flex: 1;
+    margin: auto;
+    padding-right: 60px;
+  }
+}

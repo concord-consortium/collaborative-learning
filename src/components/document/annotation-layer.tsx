@@ -62,10 +62,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const firstRow = content?.rowOrder.length && content.rowOrder.length > 0
     ? getRowElement(content?.getRowByIndex(0)?.id) : undefined;
   const documentWidth = firstRow?.offsetWidth ?? 0;
-  const documentHeight = content?.rowOrder.reduce((totalHeight: number, rowId: string) => {
-    const row = getRowElement(rowId);
-    return totalHeight + (row?.offsetHeight ?? 0);
-  }, 0) ?? 0;
+  const documentHeight = content?.height ?? 0;
   const documentLeft = 0;
   const documentRight = documentWidth;
   const documentBottom = documentHeight - (documentScrollY ?? 0);
