@@ -1,7 +1,8 @@
 import { each } from "lodash";
 import { types, getType, getEnv, SnapshotOrInstance } from "mobx-state-tree";
+import { kPlaceholderTileDefaultHeight } from "../tiles/placeholder/placeholder-constants";
 import {
-  getPlaceholderSectionId, isPlaceholderTile, kPlaceholderTileDefaultHeight, PlaceholderContentModel
+  getPlaceholderSectionId, isPlaceholderTile, PlaceholderContentModel
 } from "../tiles/placeholder/placeholder-content";
 import { kTextTileType } from "../tiles/text/text-content";
 import { getTileContentInfo, IDocumentExportOptions } from "../tiles/tile-content-info";

@@ -3,8 +3,6 @@ import { ITileModel } from "../tile-model";
 import { TileContentModel } from "../tile-content";
 
 export const kPlaceholderTileType = "Placeholder";
-// This value should match the height specified in placeholder-tile.scss
-export const kPlaceholderTileDefaultHeight = 50;
 
 export const PlaceholderContentModel = TileContentModel
   .named("PlaceholderContent")
