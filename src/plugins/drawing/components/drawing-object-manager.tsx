@@ -1,25 +1,15 @@
 import { types } from "mobx-state-tree";
 import React from "react";
-import { DrawingComponentType, DrawingObject, DrawingObjectType,
+import { DrawingObject, DrawingObjectType,
   DrawingTool, HandleObjectHover, HandleObjectDrag,
   IDrawingLayer, IToolbarButtonProps } from "../objects/drawing-object";
-import { EllipseComponent, EllipseDrawingTool, EllipseObject, EllipseToolbarButton } from "../objects/ellipse";
-import { ImageComponent, ImageObject, StampDrawingTool, StampToolbarButton } from "../objects/image";
-import { LineComponent, LineDrawingTool, LineObject, LineToolbarButton } from "../objects/line";
-import { RectangleComponent, RectangleDrawingTool, RectangleObject,
-  RectangleToolbarButton} from "../objects/rectangle";
-import { VectorComponent, VectorDrawingTool, VectorObject, VectorToolbarButton } from "../objects/vector";
-import { DeleteButton, DuplicateButton, GroupObjectsButton, 
-  SelectToolbarButton, UngroupObjectsButton } from "./drawing-toolbar-buttons";
-import { SelectionDrawingTool } from "./selection-drawing-tool";
-import { TextComponent, TextDrawingTool, TextObject, TextToolbarButton } from "../objects/text";
+import { IDrawingObjectInfo, gDrawingObjectInfosNoGroup, gDrawingToolInfosNoGroup } 
+  from "./drawing-object-manager-no-group";
+import { GroupObjectsButton, 
+  UngroupObjectsButton } from "./drawing-toolbar-buttons";
 import { GroupComponent, GroupObject } from "../objects/group";
 
-export interface IDrawingObjectInfo {
-  type: string;
-  component: DrawingComponentType;
-  modelClass: typeof DrawingObject;
-}
+
 
 export interface IDrawingToolInfo {
   name: string;
@@ -29,37 +19,9 @@ export interface IDrawingToolInfo {
   buttonComponent: React.ComponentType<IToolbarButtonProps>;
 }
 
+
 const gDrawingObjectInfos: Record<string, IDrawingObjectInfo | undefined> = {
-  line: {
-    type: "line",
-    component: LineComponent,
-    modelClass: LineObject,
-  },
-  vector: {
-    type: "vector",
-    component: VectorComponent,
-    modelClass: VectorObject,
-  },
-  rectangle: {
-    type: "rectangle",
-    component: RectangleComponent,
-    modelClass: RectangleObject,
-  },
-  ellipse: {
-    type: "ellipse",
-    component: EllipseComponent,
-    modelClass: EllipseObject,
-  },
-  text: {
-    type: "text",
-    component: TextComponent,
-    modelClass: TextObject,
-  },
-  image: {
-    type: "image",
-    component: ImageComponent,
-    modelClass: ImageObject,
-  },
+  ...gDrawingObjectInfosNoGroup,
   group: {
     type: "group",
     component: GroupComponent,
@@ -68,41 +30,7 @@ const gDrawingObjectInfos: Record<string, IDrawingObjectInfo | undefined> = {
 };
 
 const gDrawingToolInfos: Record<string, IDrawingToolInfo | undefined> = {
-  select: {
-    name: "select",
-    toolClass: SelectionDrawingTool,
-    buttonComponent: SelectToolbarButton
-  },
-  line: {
-    name: "line",
-    toolClass: LineDrawingTool,
-    buttonComponent: LineToolbarButton
-  },
-  vector: {
-    name: "vector",
-    toolClass: VectorDrawingTool,
-    buttonComponent: VectorToolbarButton
-  },
-  rectangle: {
-    name: "rectangle",
-    toolClass: RectangleDrawingTool,
-    buttonComponent: RectangleToolbarButton
-  },
-  ellipse: {
-    name: "ellipse",
-    toolClass: EllipseDrawingTool,
-    buttonComponent: EllipseToolbarButton
-  },
-  text: {
-    name: "text",
-    toolClass: TextDrawingTool,
-    buttonComponent: TextToolbarButton
-  },
-  stamp: {
-    name: "stamp",
-    toolClass: StampDrawingTool,
-    buttonComponent: StampToolbarButton
-  },
+  ...gDrawingToolInfosNoGroup,
   group: {
     name: "group",
     buttonComponent: GroupObjectsButton
@@ -110,14 +38,6 @@ const gDrawingToolInfos: Record<string, IDrawingToolInfo | undefined> = {
   ungroup: {
     name: "ungroup",
     buttonComponent: UngroupObjectsButton
-  },
-  duplicate: {
-    name: "duplicate",
-    buttonComponent: DuplicateButton
-  },
-  delete: {
-    name: "delete",
-    buttonComponent: DeleteButton
   }
 };
 
@@ -154,6 +74,8 @@ export function renderDrawingObject(drawingObject: DrawingObjectType, readOnly=f
       handleHover={handleHover} handleDrag={handleDrag}/>
     : null;
 }
+
+
 
 export const DrawingObjectMSTUnion = types.late<typeof DrawingObject>(() => {
   const drawingObjectModels = Object.values(gDrawingObjectInfos).map(info => info!.modelClass);

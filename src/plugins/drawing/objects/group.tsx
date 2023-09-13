@@ -7,7 +7,7 @@ import { DrawingObject, DrawingObjectType, IDrawingComponentProps,
   isStrokedObject, 
   typeField } from "./drawing-object";
 import { BoundingBoxSides, VectorEndShape } from "../model/drawing-basic-types";
-import { DrawingObjectMSTUnion } from "../components/drawing-object-manager";
+import { DrawingObjectMSTUnionNoGroup } from "../components/drawing-object-manager-no-group";
 import { isVectorObject } from "./vector";
 import GroupObjectsIcon from "../assets/group-objects-icon.svg";
 
@@ -27,7 +27,7 @@ const Extents = types.model("Extents")
 export const GroupObject = DrawingObject.named("GroupObject")
   .props({
     type: typeField("group"),
-    objects: types.array(types.late(() => DrawingObjectMSTUnion)),
+    objects: types.array(DrawingObjectMSTUnionNoGroup),
     objectExtents: types.map(Extents)
   })
   .views(self => ({
