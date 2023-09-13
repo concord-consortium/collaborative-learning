@@ -92,7 +92,6 @@ export const ArrowAnnotation = types
     documentLeft: number, documentRight: number, documentTop: number, documentBottom: number,
     dragOffsets: IArrowAnnotationDragOffsets, sourceBB?: ObjectBoundingBox|null, targetBB?: ObjectBoundingBox|null
   ) {
-    
     if (!sourceBB || !targetBB) {
       return {
         sourceX: undefined, sourceY: undefined, targetX: undefined, targetY: undefined,
