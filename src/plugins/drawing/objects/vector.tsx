@@ -4,7 +4,7 @@ import React, { useCallback } from "react";
 import { computeStrokeDashArray, DrawingObjectType, DrawingTool, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
 import { BoundingBoxSides, Point, ToolbarSettings, VectorEndShape, 
-  VectorType, endShapesForVectorType, getVectorTypeIcon, vectorTypeForEndShapes } 
+  endShapesForVectorType, getVectorTypeIcon, vectorTypeForEndShapes } 
   from "../model/drawing-basic-types";
 import { SvgToolbarButton, } from "../components/drawing-toolbar-buttons";
 

@@ -1,20 +1,20 @@
 import React, { useState } from "react";
 import { observer } from "mobx-react";
 import classNames from "classnames";
+import { DndContext, DragEndEvent } from "@dnd-kit/core";
 import {
   SortableContext,
   useSortable,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import {CSS} from '@dnd-kit/utilities';
+import { restrictToParentElement, restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { DrawingContentModelType } from "../model/drawing-content";
 import { DrawingObjectType } from "../objects/drawing-object";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import ExpandRightIcon from "../assets/expand-right-icon.svg";
 import ExpandLeftIcon from "../assets/expand-left-icon.svg";
 import MoveIcon from "../assets/move-icon.svg";
-import { DndContext, DragEndEvent } from "@dnd-kit/core";
-import { restrictToParentElement, restrictToVerticalAxis } from "@dnd-kit/modifiers";
 
 interface IObjectListViewProps {
   model: ITileModel,
