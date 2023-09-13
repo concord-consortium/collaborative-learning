@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useMemo } from "react";
 import { TooltipProps } from "react-tippy";
 
 import "react-tippy/dist/tippy.css";
@@ -14,13 +14,8 @@ const kDefaultTooltipOptions: TooltipProps = {
 };
 
 export const useTooltipOptions = (options?: TooltipProps) => {
-  const cachedOptions = useRef(options);
   const optionsJson = JSON.stringify(options);
-  const cachedJson = useRef(optionsJson);
-  if (optionsJson !== cachedJson.current) {
-    cachedOptions.current = options;
-    cachedJson.current = optionsJson;
-  }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  return useMemo(() => ({ ...kDefaultTooltipOptions, ...cachedOptions.current }), [cachedOptions.current]);
+  const tooltipOptions = useMemo(() => ({ ...kDefaultTooltipOptions, ...options }), [optionsJson]);
+  return tooltipOptions;
 };

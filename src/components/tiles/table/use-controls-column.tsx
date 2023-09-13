@@ -10,8 +10,11 @@ interface IUseControlsColumn {
   readOnly?: boolean;
   onAddColumn?: () => void;
   onRemoveRows: (rowIds: string[]) => void;
+  triggerColumnChange: () => void;
 }
-export const useControlsColumn = ({ controlsColumn, readOnly, onAddColumn, onRemoveRows }: IUseControlsColumn) => {
+export const useControlsColumn = ({
+  controlsColumn, readOnly, onAddColumn, onRemoveRows, triggerColumnChange
+}: IUseControlsColumn) => {
   const onRemoveRow = useCallback((rowId: string) => onRemoveRows([rowId]), [onRemoveRows]);
 
   const kTooltipDistance = -35; // required to get tooltip to line up just below the cell
@@ -39,8 +42,9 @@ export const useControlsColumn = ({ controlsColumn, readOnly, onAddColumn, onRem
     if (controlsColumn) {
       controlsColumn.headerRenderer = ControlsHeaderRenderer;
       controlsColumn.formatter = ControlsRowFormatter;
+      triggerColumnChange();
     }
-  }, [controlsColumn, ControlsHeaderRenderer, ControlsRowFormatter]);
+  }, [controlsColumn, ControlsHeaderRenderer, ControlsRowFormatter, triggerColumnChange]);
 };
 
 interface IAddColumnButtonProps {

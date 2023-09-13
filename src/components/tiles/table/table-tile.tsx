@@ -134,7 +134,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     columns, content, requestRowHeight, resizeColumn, resizeColumnWidth, triggerRowChange
   });
   // Finishes setting up the controlsColumn with changeHandlers (which weren't defined when controlColumn was created)
-  useControlsColumn({ controlsColumn, readOnly: !!readOnly, onAddColumn, onRemoveRows });
+  useControlsColumn({ controlsColumn, readOnly: !!readOnly, onAddColumn, onRemoveRows, triggerColumnChange });
 
   // Functions for getting and modifying the title
   const { onBeginTitleEdit, onEndTitleEdit } = useTableTitle({
