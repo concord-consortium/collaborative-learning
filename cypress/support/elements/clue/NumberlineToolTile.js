@@ -17,7 +17,7 @@ class NumberlineToolTile {
   }
   getPointsOnGraph(){
     //exclude the hovering circle that follows the mouse on the numberline
-    return cy.get(".numberline-tool-container .defaultPointInnerCircle").not(".mouseXCircle");
+    return cy.get(".numberline-tool-container .point-inner-circle").not(".mouse-follow-point");
   }
   getClearButton(){
     return cy.get(`.clear-points`);

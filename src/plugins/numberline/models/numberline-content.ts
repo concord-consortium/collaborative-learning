@@ -1,10 +1,11 @@
+import stringify from "json-stringify-pretty-compact";
 import { types, Instance, getSnapshot } from "mobx-state-tree";
+
+import { getTileIdFromContent } from "../../../models/tiles/tile-model";
 import { TileContentModel } from "../../../models/tiles/tile-content";
 import { uniqueId } from "../../../utilities/js-utils";
-import { createXScale, kNumberlineTileType, maxNumSelectedPoints,
-         pointXYBoxRadius, yMidPoint} from "../numberline-tile-constants";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
-import stringify from "json-stringify-pretty-compact";
+import { kNumberlineTileType, maxNumSelectedPoints } from "../numberline-tile-constants";
 
 export function defaultNumberlineContent(): NumberlineContentModelType {
   return NumberlineContentModel.create({});
@@ -19,16 +20,16 @@ export const PointObjectModel = types
     dragXValue: undefined as undefined | number,
   }))
   .views(self =>({
-    get currentXValue(){
-      return self.dragXValue || self.xValue;
+    get currentXValue() {
+      return self.dragXValue ?? self.xValue;
     }
   }))
   .actions(self => ({
-    setDragXValue(num: number | undefined){
+    setDragXValue(num: number | undefined) {
       self.dragXValue = num;
     },
     setXValueToDragValue(){ //when mouse is let go
-      if (self.dragXValue){
+      if (self.dragXValue !== undefined) {
         self.xValue = self.dragXValue;
         self.dragXValue = undefined;
       }
@@ -45,7 +46,6 @@ export const NumberlineContentModel = TileContentModel
     points: types.map(PointObjectModel),
   })
   .volatile(self => ({
-    hoveredPoint: "", //holds one point id that is hovered over
     selectedPoints: {} as Record<string, PointObjectModelType> //dictionary of id - point
   }))
   .views(self => ({
@@ -55,107 +55,73 @@ export const NumberlineContentModel = TileContentModel
     get pointsArr() { //returns array of all points
       return Array.from(self.points.values());
     },
-    get hasPoints(){
+    get hasPoints() {
       return (self.points.size > 0);
     },
-    get isFilledSelectedPoints(){
+    get isFilledSelectedPoints() {
       return (Object.keys(self.selectedPoints).length >= maxNumSelectedPoints);
     },
-    get isEmptySelectedPoints(){
+    get isEmptySelectedPoints() {
       return (Object.keys(self.selectedPoints).length === 0);
     }
   }))
   .views(self =>({
-    get pointsXValuesArr(){
+    get annotatableObjects() {
+      const tileId = getTileIdFromContent(self) ?? "";
+      return self.pointsArr.map(point => ({
+        objectId: point.id,
+        objectType: "point",
+        tileId
+      }));
+    },
+    get pointsXValuesArr() {
       return self.pointsArr.map((pointObj) => pointObj.xValue);
     },
-    givenIdReturnPoint(id: string){
-      return self.pointsArr.find((point)=> point.id === id) as PointObjectModelType;
-    },
-    //Pass snapshot of axisPoint models into outer/inner points to avoid D3 and MST error
-    get axisPointsSnapshot(){
-      return self.pointsArr.map((p) =>{
-        return {
-                dragXValue: p.dragXValue,
-                currentXValue: p.currentXValue,
-                setDragXValue: p.setDragXValue,
-                setXValueToDragValue: p.setXValueToDragValue,
-                ...getSnapshot(p) //doesn't capture the volatile properties and methods
-              };
-      });
+    getPoint(id: string) {
+      return self.points.get(id);
     },
     exportJson(options?: ITileExportOptions) {
       const snapshot = getSnapshot(self);
       return stringify(snapshot, {maxLength: 200});
-    },
-
+    }
   }))
   .actions(self =>({
-    clearSelectedPointsObj(){
+    clearSelectedPoints() {
       for (const id in self.selectedPoints){
         delete self.selectedPoints[id];
       }
     }
   }))
   .actions(self => ({
-    createNewPoint(xValueClicked: number){
+    createNewPoint(xValue: number) {
       const id = uniqueId();
-      const pointModel = PointObjectModel
-                        .create({
-                          id,
-                          xValue: xValueClicked
-                        });
+      const pointModel = PointObjectModel.create({ id, xValue });
       self.points.set(id, pointModel);
+      return pointModel;
     },
-    setHoverPoint(id: string){ //id can also be empty string
-      self.hoveredPoint = id;
-    },
-    setSelectedPoint(point: PointObjectModelType){
+    setSelectedPoint(point: PointObjectModelType) {
       // this should be revised if we want more than one selected point
       // i.e. maxNumSelectedPoints (in numberline-tile-constants.ts) is greater than 1
-      self.clearSelectedPointsObj();
+      self.clearSelectedPoints();
       self.selectedPoints[point.id] = point;
     },
-    replaceXValueWhileDragging(pointDraggedId: string, newXValue: number){
-      const pointDragged = self.givenIdReturnPoint(pointDraggedId);
-      pointDragged.setDragXValue(newXValue);
-    },
-    deleteSelectedPointsFromPointsMap(){
+    deleteSelectedPoints() {
       //For now - only one point can be selected
       for (const selectedPointId in self.selectedPoints){
         self.points.delete(selectedPointId); //delete all selectedIds from the points map
       }
-      self.clearSelectedPointsObj();
+      self.clearSelectedPoints();
     },
-
-    deleteAllPoints(){
+    deleteAllPoints() {
       self.points.clear();
     },
   }))
   .actions(self => ({
-    analyzeXYPosDetermineHoverPoint(mouseXPos: number, mouseYPos: number, axisWidth: number ){
-      if (self.hasPoints){
-        const xScale = createXScale(axisWidth);
-        const pointsArr = self.pointsArr;
-        for (let i = 0; i< pointsArr.length; i++){
-          const point = pointsArr[i];
-          const pointXPos = xScale(point.xValue); //pixel x-offset of user's mouse
-          const pointXLeftBound = pointXPos - pointXYBoxRadius;
-          const pointXRightBound = pointXPos + pointXYBoxRadius;
-          const pointYTopBound = yMidPoint - pointXYBoxRadius; //reversed since top of tile is where y=0
-          const pointYBottomBound = yMidPoint + pointXYBoxRadius;
-          const isMouseWithinLeftRightBound = (mouseXPos > pointXLeftBound && mouseXPos < pointXRightBound);
-          const isMouseWithinTopBottomBound = (mouseYPos < pointYBottomBound && mouseYPos > pointYTopBound);
-          if (isMouseWithinLeftRightBound && isMouseWithinTopBottomBound){
-            self.setHoverPoint(point.id);
-            break;
-          }
-          else{
-            self.setHoverPoint("");
-          }
-        }
-      }
-    },
+    createAndSelectPoint(xValue: number) {
+      const newPoint = self.createNewPoint(xValue);
+      self.setSelectedPoint(newPoint);
+      return newPoint;
+    }
   }));
 
 export interface NumberlineContentModelType extends Instance<typeof NumberlineContentModel> {}
