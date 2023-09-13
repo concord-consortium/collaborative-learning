@@ -1,5 +1,14 @@
 
-@import "../../components/vars.sass";
+@import "../../../components/vars.sass";
+
+.numberline-wrapper {
+  width: 100%;
+
+  .numberline-title {
+    height: 50px; // Corresponds to kTitleHeight in numberline-tile-constants.ts
+    width: 100%;
+  }
+}
 
 .numberline-tool {
   width: 100%;
@@ -7,10 +16,12 @@
   justify-content: center;
   align-items: center;
   flex-direction: column;
+
   &.editable {
     border: 1px solid #cccccc;
   }
-  .numberline-tool-container{
+
+  .numberline-tool-container {
     width: 93%; //should match kContainerWidth in numberline-tile-constants.ts
     display: flex;
     align-items: center;
@@ -18,32 +29,34 @@
     flex-direction: column;
     font-family: 'Ubunutu', sans-serif;
     position: relative;
-    svg{
+
+    svg {
       overflow: visible;
 
-      text{
+      text {
         font-size: 14px;
       }
 
       .num-line {
         stroke-width: 4px;
       }
-      .showPointOuterCircle{
-        fill: rgba(0, 129, 255, 0.5);
-        opacity: 1;
 
-        &.disabled{
-          display: none;
+      .point-outer-circle {
+        display: none;
+        fill: rgba(0, 129, 255, 0.5);
+
+        &.hovered {
+          display: block;
         }
       }
 
-      .defaultPointInnerCircle{
+      .point-inner-circle {
         fill: #ccc;
         opacity: 1;
         stroke: #888;
         stroke-width: 1.5px;
 
-        &.selected{
+        &.selected {
           fill: $highlight-blue;
           stroke: $highlight-blue;
         }
@@ -55,21 +68,21 @@
       border-width: 0 3px 3px 0;
       display: inline-block;
       padding: 3px;
+      position: absolute;
       height: 13px;
       width: 13px;
       pointer-events: none; //click through div (our rectangular click area)
-    }
-    .right {
-      transform: rotate(-45deg);
-      -webkit-transform: rotate(-45deg);
-      position: absolute;
-    }
-    .left {
-      transform: rotate(135deg);
-      -webkit-transform: rotate(135deg);
-      position: absolute;
-    }
 
+      &.right {
+        transform: rotate(-45deg);
+        -webkit-transform: rotate(-45deg);
+      }
+  
+      &.left {
+        transform: rotate(135deg);
+        -webkit-transform: rotate(135deg);
+      }
+    }
   }
 }
 
