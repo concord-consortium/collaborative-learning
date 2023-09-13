@@ -82,19 +82,22 @@ export const useContentChangeHandlers = ({
     if (readOnly) return;
     getContent().setExpressions(rawExpressions, xName);
     requestRowHeight();
-  }, [readOnly, getContent, requestRowHeight]);
+    triggerColumnChange();
+  }, [readOnly, getContent, requestRowHeight, triggerColumnChange]);
 
   const addColumn = useCallback(() => {
     if (readOnly) return;
     const attrId = uniqueId();
     const attrName = uniqueName("y", (name: string) => !dataSet.attrFromName(name));
     getContent().addAttribute(attrId, attrName);
-  }, [dataSet, getContent, readOnly]);
+    triggerColumnChange();
+  }, [dataSet, getContent, readOnly, triggerColumnChange]);
 
   const removeColumn = useCallback((colId: string) => {
     if (readOnly) return;
     getContent().removeAttributes([colId]);
-  }, [getContent, readOnly]);
+    triggerColumnChange();
+  }, [getContent, readOnly, triggerColumnChange]);
 
   const addRows = useCallback((newCases: ICaseCreation[]) => {
     if (readOnly) return;

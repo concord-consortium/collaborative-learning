@@ -12,7 +12,8 @@ export const useMeasureColumnWidth = ({ content }: IUseMeasureColumnWidth) => {
   // The current width of the column being modified
   const resizeColumnWidth = useRef<number>();
 
-  const measureColumnWidth = useCallback((attr: IAttribute) => {
+  const measureColumnWidth = useCallback((attr?: IAttribute) => {
+    if (!attr) return 0;
     if (resizeColumn.current === attr.id && resizeColumnWidth.current !== undefined) {
       return resizeColumnWidth.current;
     } else {
