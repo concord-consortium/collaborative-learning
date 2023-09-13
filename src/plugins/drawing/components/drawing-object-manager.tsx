@@ -5,11 +5,8 @@ import { DrawingObject, DrawingObjectType,
   IDrawingLayer, IToolbarButtonProps } from "../objects/drawing-object";
 import { IDrawingObjectInfo, gDrawingObjectInfosNoGroup, gDrawingToolInfosNoGroup } 
   from "./drawing-object-manager-no-group";
-import { GroupObjectsButton, 
-  UngroupObjectsButton } from "./drawing-toolbar-buttons";
 import { GroupComponent, GroupObject } from "../objects/group";
-
-
+import { GroupObjectsButton, UngroupObjectsButton } from "./drawing-toolbar-group-buttons";
 
 export interface IDrawingToolInfo {
   name: string;
@@ -59,10 +56,12 @@ export function getDrawingToolButtonComponent(toolName: string) {
 }
 
 export function registerDrawingObjectInfo(drawingObjectInfo: IDrawingObjectInfo) {
+  gDrawingObjectInfosNoGroup[drawingObjectInfo.type] = drawingObjectInfo;
   gDrawingObjectInfos[drawingObjectInfo.type] = drawingObjectInfo;
 }
 
 export function registerDrawingToolInfo(drawingToolInfo: IDrawingToolInfo) {
+  gDrawingToolInfosNoGroup[drawingToolInfo.name] = drawingToolInfo;
   gDrawingToolInfos[drawingToolInfo.name] = drawingToolInfo;
 }
 
