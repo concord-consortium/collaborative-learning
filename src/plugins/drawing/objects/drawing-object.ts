@@ -44,7 +44,8 @@ export const DrawingObject = types.model("DrawingObject", {
   type: types.optional(types.string, () => {throw "Type must be overridden";}),
   id: types.optional(types.identifier, () => uniqueId()),
   x: types.number,
-  y: types.number
+  y: types.number,
+  visible: true
 })
 .volatile(self => ({
   dragX: undefined as number | undefined,
@@ -89,6 +90,9 @@ export const DrawingObject = types.model("DrawingObject", {
   }
 }))
 .actions(self => ({
+  setVisible(_visible: boolean) {
+    self.visible = _visible;
+  },
   setPosition(x: number, y: number) {
     self.x = x;
     self.y = y;

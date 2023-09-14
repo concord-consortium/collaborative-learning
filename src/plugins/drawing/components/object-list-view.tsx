@@ -6,6 +6,9 @@ import { DrawingObjectType } from "../objects/drawing-object";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import ExpandRightIcon from "../assets/expand-right-icon.svg";
 import ExpandLeftIcon from "../assets/expand-left-icon.svg";
+import HideObjectIcon from "../assets/hide-object-icon.svg";
+import ShowObjectIcon from "../assets/show-object-icon.svg";
+
 
 interface IObjectListViewProps {
   model: ITileModel,
@@ -84,7 +87,23 @@ function ObjectLine({object, content, selection, setHoverObject}: IObjectLinePro
     content.setSelectedIds([object.id]);
   }
 
+  function handleShow(e: React.MouseEvent) {
+    e.stopPropagation();
+    object.setVisible(true);
+  }
+
+  function handleHide(e: React.MouseEvent) {
+    e.stopPropagation();
+    object.setVisible(false);
+  }
+
   const Icon = object.icon;
+
+  const visibilityIcon = 
+    object.visible 
+      ? <button type="button" onClick={handleHide}><HideObjectIcon className="visibility-icon"/></button>
+      : <button type="button" onClick={handleShow}><ShowObjectIcon className="visibility-icon"/></button>;
+
   return (
     <li className={classNames({selected: selection.includes(object.id)})}
         onMouseEnter={handleHoverIn}
@@ -93,6 +112,7 @@ function ObjectLine({object, content, selection, setHoverObject}: IObjectLinePro
     >
       <Icon width={20} height={20} viewBox="0 0 36 34" stroke="#000000" fill="#FFFFFF" />
       {object.label}
+      {visibilityIcon}
     </li>
   );
 }

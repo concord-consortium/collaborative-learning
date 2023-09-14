@@ -148,6 +148,7 @@ export function registerDrawingToolInfo(drawingToolInfo: IDrawingToolInfo) {
 
 export function renderDrawingObject(drawingObject: DrawingObjectType, readOnly=false,
                                     handleHover?: HandleObjectHover, handleDrag?: HandleObjectDrag) {
+  if (!drawingObject.visible) return null;
   const DrawingObjectComponent = getDrawingObjectComponent(drawingObject);
   return DrawingObjectComponent ?
     <DrawingObjectComponent key={drawingObject.id} model={drawingObject} readOnly={readOnly}
