@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { observer } from "mobx-react";
 import classNames from "classnames";
-import { DndContext, DragEndEvent } from "@dnd-kit/core";
+import { DndContext, DragEndEvent, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import {
   SortableContext,
   useSortable,
   verticalListSortingStrategy,
+  sortableKeyboardCoordinates
 } from '@dnd-kit/sortable';
 import {CSS} from '@dnd-kit/utilities';
 import { restrictToParentElement, restrictToVerticalAxis } from "@dnd-kit/modifiers";
@@ -24,6 +25,12 @@ interface IObjectListViewProps {
 export const ObjectListView = observer(function ObjectListView({model, setHoverObject}: IObjectListViewProps) {
 
   const [open, setOpen] = useState(false);
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates
+    })
+  );
 
   function getContent() {
     return model.content as DrawingContentModelType;
@@ -60,7 +67,9 @@ export const ObjectListView = observer(function ObjectListView({model, setHoverO
       </div>
       <div className="body">
         <ul>
-          <DndContext modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+          <DndContext 
+            sensors={sensors}
+            modifiers={[restrictToVerticalAxis, restrictToParentElement]}
             onDragEnd={handleDragEnd}>
             <SortableContext items={objectIdList} 
               strategy={verticalListSortingStrategy}
