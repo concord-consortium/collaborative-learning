@@ -91,8 +91,8 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   }
 
   // Adds a new object and selects it, activating the select tool.
-  public addNewDrawingObject(drawingObject: DrawingObjectSnapshotForAdd) {
-    return this.getContent().addAndSelectObject(drawingObject);
+  public addNewDrawingObject(drawingObject: DrawingObjectSnapshotForAdd, addAtBack=false) {
+    return this.getContent().addAndSelectObject(drawingObject, addAtBack);
   }
 
   public getSelectedObjects(): DrawingObjectType [] {
@@ -247,23 +247,20 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     }
   }
 
-  private conditionallyRenderObject(object: DrawingObjectType,
-       _filter: (object: DrawingObjectType) => boolean, inGroup: boolean) {
-    if (!object || !_filter(object)) {
-      return null;
-    }
+  private conditionallyRenderObject(object: DrawingObjectType, inGroup: boolean) {
+    if (!object) return null;
     // Objects that are members of a group should not respond to mouse events.
     const hoverAction = inGroup ? undefined : this.handleObjectHover;
     const mouseDownAction = inGroup ? undefined : this.handleSelectedObjectMouseDown;
     return renderDrawingObject(object, this.props.readOnly, hoverAction, mouseDownAction);
   }
 
-  public renderObjects(_filter: (object: DrawingObjectType) => boolean) {
+  public renderObjects() {
     return this.getContent().objects.reduce((result, object) => {
-      result.push(this.conditionallyRenderObject(object, _filter, false));
+      result.push(this.conditionallyRenderObject(object, false));
       if (isGroupObject(object)) {
         object.objects.forEach((member) => { 
-          result.push(this.conditionallyRenderObject(member, _filter, true));
+          result.push(this.conditionallyRenderObject(member, true));
         });
       }
       return result;
@@ -408,8 +405,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
           onDrop={this.handleDrop} >
 
         <svg xmlnsXlink="http://www.w3.org/1999/xlink" width={1500} height={1500} ref={this.setSvgRef}>
-          {this.renderObjects(object => object.type === "image" )}
-          {this.renderObjects(object => object.type !== "image" )}
+          {this.renderObjects()}
           {!this.props.readOnly && this.renderSelectionBorders(this.getSelectedObjects(), true)}
           {highlightObject
             ? this.renderSelectionBorders([highlightObject], false)
@@ -497,7 +493,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
           width: imageEntry.width!,
           height: imageEntry.height!
         });
-        this.addNewDrawingObject(getSnapshot(image));
+        this.addNewDrawingObject(getSnapshot(image), true);
       });
   }
 
