@@ -1,19 +1,23 @@
 import React from "react";
 import { types } from "mobx-state-tree";
-import {
-  DrawingObject, DrawingObjectType,
+import { DrawingComponentType, DrawingObject, DrawingObjectType,
   DrawingTool, HandleObjectHover, HandleObjectDrag,
-  IDrawingLayer, IToolbarButtonProps, DrawingComponentType
-} from "../objects/drawing-object";
+  IDrawingLayer, IToolbarButtonProps } from "../objects/drawing-object";
 import { EllipseComponent, EllipseDrawingTool, EllipseObject, EllipseToolbarButton } from "../objects/ellipse";
 import { ImageComponent, ImageObject, StampDrawingTool, StampToolbarButton } from "../objects/image";
 import { LineComponent, LineDrawingTool, LineObject, LineToolbarButton } from "../objects/line";
-import { RectangleComponent, RectangleDrawingTool, RectangleObject, RectangleToolbarButton }
-  from "../objects/rectangle";
-import { TextComponent, TextDrawingTool, TextObject, TextToolbarButton } from "../objects/text";
+import { RectangleComponent, RectangleDrawingTool, RectangleObject,
+  RectangleToolbarButton} from "../objects/rectangle";
 import { VectorComponent, VectorDrawingTool, VectorObject, VectorToolbarButton } from "../objects/vector";
-import { SelectToolbarButton, DuplicateButton, DeleteButton } from "./drawing-toolbar-buttons";
+import { DeleteButton, DuplicateButton, SelectToolbarButton } from "./drawing-toolbar-buttons";
 import { SelectionDrawingTool } from "./selection-drawing-tool";
+import { TextComponent, TextDrawingTool, TextObject, TextToolbarButton } from "../objects/text";
+
+export interface IDrawingObjectInfo {
+  type: string;
+  component: DrawingComponentType;
+  modelClass: typeof DrawingObject;
+}
 
 export interface IDrawingToolInfo {
   name: string;
@@ -21,12 +25,6 @@ export interface IDrawingToolInfo {
   // is an abstract class so can't be instantiated.
   toolClass?: { new(drawingLayer: IDrawingLayer): DrawingTool };
   buttonComponent: React.ComponentType<IToolbarButtonProps>;
-}
-
-interface IDrawingObjectInfo {
-  type: string;
-  component: DrawingComponentType;
-  modelClass: typeof DrawingObject;
 }
 
 const gDrawingObjectInfos: Record<string, IDrawingObjectInfo | undefined> = {
@@ -125,7 +123,7 @@ export function getDrawingToolButtonComponent(toolName: string) {
   return gDrawingToolInfos[toolName]?.buttonComponent;
 }
 
-export function registerDrawingObjectInfo(drawingObjectInfo: IDrawingObjectInfo) { 
+export function registerDrawingObjectInfo(drawingObjectInfo: IDrawingObjectInfo) {
   gDrawingObjectInfos[drawingObjectInfo.type] = drawingObjectInfo;
 }
 
@@ -141,8 +139,6 @@ export function renderDrawingObject(drawingObject: DrawingObjectType, readOnly=f
       handleHover={handleHover} handleDrag={handleDrag}/>
     : null;
 }
-
-
 
 export const DrawingObjectMSTUnion = types.late<typeof DrawingObject>(() => {
   const drawingObjectModels = Object.values(gDrawingObjectInfos).map(info => info!.modelClass);
