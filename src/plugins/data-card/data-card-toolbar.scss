@@ -13,7 +13,7 @@
     position: relative;
     // These are button elements so we have to disable default button styles
     // of border, padding, and display
-    border: 0;    
+    border: 0;
     padding: 0;
     display: block;
     user-select: none;
@@ -119,7 +119,7 @@
       }
       &:hover svg {
         background-color:$workspace-teal-light-6;
-      }      
+      }
     }
     &.card-actions-disabled {
       opacity: 0.35;
@@ -127,4 +127,12 @@
     }
   }
 
+}
+
+// TODO - temporary until real asset here
+.merge-data-button {
+  svg {
+    width: 24px;
+    transform: translateY(-15px);
+  }
 }

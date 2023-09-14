@@ -11,7 +11,8 @@ import { DataCardContentModelType } from "./data-card-content";
 import { ITileModel } from "../../models/tiles/tile-model";
 import { ImageUploadButton } from "../../components/tiles/image/image-toolbar";
 import { EditFacet } from "./data-card-types";
-import { DeleteAttrButton, DuplicateCardButton, LinkTileButton } from "./components/data-card-toolbar-buttons";
+import { DeleteAttrButton, DuplicateCardButton,
+  LinkTileButton, MergeInButton } from "./components/data-card-toolbar-buttons";
 
 import "./data-card-toolbar.scss";
 
@@ -59,6 +60,10 @@ export const DataCardToolbar: React.FC<IProps> = observer(({
     showLinkTileDialog && showLinkTileDialog();
   };
 
+  const handleMergeDataClick = () => {
+    console.log("| handleMergeDataClick |");
+  };
+
   const toolbarClasses = classNames(
     "data-card-toolbar",
     enabled && location ? "enabled" : "disabled",
@@ -84,6 +89,7 @@ export const DataCardToolbar: React.FC<IProps> = observer(({
         <div className={valueActionsButtonsClasses}>
           <ImageUploadButton onUploadImageFile={file => uploadImage(file)} />
           <DeleteAttrButton onClick={handleDeleteValue} />
+          <MergeInButton onClick={handleMergeDataClick} />
         </div>
       </div>, documentContent)
   : null;

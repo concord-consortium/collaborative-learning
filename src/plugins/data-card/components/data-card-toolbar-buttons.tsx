@@ -5,6 +5,7 @@ import classNames from "classnames";
 import LinkGraphIcon from "../../../clue/assets/icons/table/link-graph-icon.svg";
 import DuplicateCardIcon from "../assets/duplicate-card-icon.svg";
 import DeleteSelectionIcon from "../assets/delete-selection-icon.svg";
+import MergeInIcon from "../assets/merge-in-icon.svg";
 import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
 
 interface IToolbarButtonProps {
@@ -79,6 +80,24 @@ export const LinkTileButton = ({ isEnabled, getLinkIndex, onClick }: ILinkDataCa
       icon={<LinkGraphIcon />}
       onClick={handleClick}
       tooltipOptions={{ title: "Link data card" }}
+    />
+  );
+};
+
+interface IMergeDataButtonProps {
+  onClick?: () => void;
+}
+export const MergeInButton = ({ onClick }: IMergeDataButtonProps) => {
+  const handleClick = (e: React.MouseEvent) => {
+    onClick?.();
+    e.stopPropagation();
+  };
+  return (
+    <ToolbarButton
+      className="merge-data-button"
+      icon={<MergeInIcon />}
+      onClick={handleClick}
+      tooltipOptions={{ title: "Add Data from..." }}
     />
   );
 };
