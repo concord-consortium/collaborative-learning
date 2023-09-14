@@ -1,3 +1,4 @@
+import React from "react";
 import { getMembers, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { uniqueId } from "../../../utilities/js-utils";
 import { SelectionBox } from "../components/selection-box";
@@ -76,8 +77,8 @@ export const DrawingObject = types.model("DrawingObject", {
     // used in the show/sort panel.
     return "Unknown object";
   },
-  get icon(): React.FC<React.SVGProps<SVGSVGElement>> {
-    return FreehandToolIcon;
+  get icon(): JSX.Element {
+    return (<FreehandToolIcon/>);
   }
 }))
 .views(self => ({

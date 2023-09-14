@@ -110,7 +110,8 @@ function ObjectLine({object, content, selection, setHoverObject}: IObjectLinePro
         onMouseLeave={handleHoverOut}
         onClick={handleClick}
     >
-      <Icon width={20} height={20} viewBox="0 0 36 34" stroke="#000000" fill="#FFFFFF" />
+      {object.icon}
+      {/* <Icon width={20} height={20} viewBox="0 0 36 34" stroke="#000000" fill="#FFFFFF" /> */}
       {object.label}
       {visibilityIcon}
     </li>

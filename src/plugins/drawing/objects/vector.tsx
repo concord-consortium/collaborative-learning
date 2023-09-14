@@ -34,7 +34,9 @@ export const VectorObject = StrokedObject.named("VectorObject")
       return  (self.headShape || self.tailShape) ? "Arrow" : "Line";
     },
     get icon() {
-      return getVectorTypeIcon(VectorType.singleArrow);
+      const Icon = getVectorTypeIcon(VectorType.singleArrow);
+      return (<Icon viewBox="0 0 36 34"
+       stroke={self.stroke} fill={self.stroke} />);
     }
   }))
   .actions(self => ({

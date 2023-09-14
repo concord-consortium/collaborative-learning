@@ -64,7 +64,8 @@ export const LineObject = StrokedObject.named("LineObject")
     },
 
     get icon() {
-      return FreehandToolIcon;
+      return <FreehandToolIcon viewBox="0 0 36 34"
+        stroke={self.stroke} strokeWidth={self.strokeWidth} strokeDasharray={self.strokeDashArray}/>;
     }
   
   }))

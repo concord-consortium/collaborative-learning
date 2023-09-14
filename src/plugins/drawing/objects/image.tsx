@@ -11,7 +11,7 @@ import SmallCornerTriangle from "../../../assets/icons/small-corner-triangle.svg
 import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
 import { buttonClasses } from "../components/drawing-toolbar-buttons";
 import { useTouchHold } from "../../../hooks/use-touch-hold";
-import imageToolSvg from "../../../clue/assets/icons/image-tool.svg";
+import ImageToolIcon from "../../../clue/assets/icons/image-tool.svg";
 
 export const ImageObject = DrawingObject.named("ImageObject")
   .props({
@@ -46,7 +46,7 @@ export const ImageObject = DrawingObject.named("ImageObject")
       return "Image";
     },
     get icon() {
-      return imageToolSvg;
+      return (<ImageToolIcon viewBox="0 0 36 34"/>);
     },
     get displayUrl() {
       const entry = gImageMap.getImageEntry(self.url, {filename: self.filename});

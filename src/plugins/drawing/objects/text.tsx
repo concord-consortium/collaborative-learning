@@ -42,7 +42,8 @@ export const TextObject = EditableObject.named("TextObject")
       return "Text";
     },
     get icon() {
-      return TextToolIcon;
+      return (<TextToolIcon viewBox="0 0 36 34"
+        fill={self.stroke} />);
     }
   }))
   .actions(self => ({

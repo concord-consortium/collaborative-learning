@@ -48,7 +48,7 @@ export const GroupObject = DrawingObject.named("GroupObject")
       return "Group";
     },
     get icon() {
-      return GroupObjectsIcon;
+      return (<GroupObjectsIcon viewBox="0 0 36 34"/>);
     }
   }))
   .actions(self => ({

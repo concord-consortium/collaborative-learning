@@ -38,7 +38,9 @@ export const RectangleObject = types.compose("RectangleObject", StrokedObject, F
       return self.width===self.height ? "Square" : "Rectangle";
     },
     get icon() {
-      return RectToolIcon;
+      return (<RectToolIcon viewBox="0 0 36 34"
+        fill={self.fill} 
+        stroke={self.stroke} strokeWidth={self.strokeWidth} strokeDasharray={self.strokeDashArray} />);
     }
   }))
   .actions(self => ({
