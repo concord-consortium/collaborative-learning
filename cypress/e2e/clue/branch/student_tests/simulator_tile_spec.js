@@ -6,9 +6,9 @@ let clueCanvas = new ClueCanvas;
 const dataflowTile = new DataflowTile;
 let simulatorTile = new SimulatorTile;
 
-context.skip('Simulator Tile with Brainwaves Gripper Simulation', function () {
+context('Simulator Tile with Brainwaves Gripper Simulation', function () {
   beforeEach(function () {
-    const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&mouseSensor&unit=dfe";
+    const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&mouseSensor&unit=brain";
     cy.clearQAData('all');
     cy.visit(queryParams);
     cy.waitForLoad();
