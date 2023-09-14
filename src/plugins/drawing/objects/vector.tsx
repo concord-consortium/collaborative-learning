@@ -4,7 +4,7 @@ import React, { useCallback } from "react";
 import { computeStrokeDashArray, DrawingObjectType, DrawingTool, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
 import { BoundingBoxSides, Point, ToolbarSettings, VectorEndShape, 
-  VectorType, endShapesForVectorType, getVectorTypeIcon } 
+  endShapesForVectorType, getVectorTypeIcon, vectorTypeForEndShapes } 
   from "../model/drawing-basic-types";
 import { SvgToolbarButton, } from "../components/drawing-toolbar-buttons";
 
@@ -34,7 +34,7 @@ export const VectorObject = StrokedObject.named("VectorObject")
       return  (self.headShape || self.tailShape) ? "Arrow" : "Line";
     },
     get icon() {
-      const Icon = getVectorTypeIcon(VectorType.singleArrow);
+      const Icon = getVectorTypeIcon(vectorTypeForEndShapes(self.headShape, self.tailShape));
       return (<Icon viewBox="0 0 36 34"
        stroke={self.stroke} fill={self.stroke} />);
     }

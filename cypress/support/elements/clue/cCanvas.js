@@ -9,6 +9,7 @@ import SimulatorToolTile from './SimulatorTile';
 import NumberlineToolTile from './NumberlineToolTile';
 import Canvas from '../common/Canvas';
 import Dialog from '../common/Dialog';
+import XYPlotToolTile from './XYPlotToolTile';
 
 let graphToolTile = new GraphToolTile,
     imageToolTile = new ImageToolTile,
@@ -19,6 +20,7 @@ let graphToolTile = new GraphToolTile,
     diagramToolTile = new DiagramToolTile,
     simulatorToolTile = new SimulatorToolTile,
     numberlineToolTile = new NumberlineToolTile,
+    xyPlotToolTile = new XYPlotToolTile,
     canvas = new Canvas,
     dialog = new Dialog;
 
@@ -272,6 +274,9 @@ class ClueCanvas {
             case 'numberline':
                 tileElement = numberlineToolTile.getNumberlineTile().last().click({ force: true });
                 break;
+            case 'xyplot':
+                tileElement = xyPlotToolTile.getTile().last().click({ force: true });
+                break;    
         }
         tileElement.should('have.class','selected');
     }
