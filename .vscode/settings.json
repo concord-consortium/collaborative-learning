@@ -38,12 +38,5 @@
     "unlistener",
     "unlisteners",
     "wumps"
-  ],
-
-  // Files {{{
-
-  "files.insertFinalNewline": true,
-  "files.trimTrailingWhitespace": true,
-
-  // }}}
+  ]
 }
