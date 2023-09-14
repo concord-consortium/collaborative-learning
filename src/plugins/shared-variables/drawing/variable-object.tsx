@@ -94,6 +94,7 @@ export const VariableChipComponent: React.FC<IDrawingComponentProps> = observer(
         onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null }
         onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null }
         onMouseDown={(e)=> handleDrag?.(e, model)}
+        pointerEvents={handleHover ? "visible" : "none"}
       >
         <span ref={variableChipRef} className="drawing-variable-container">
           <VariableChip variable={selectedVariable} className="drawing-variable" />
