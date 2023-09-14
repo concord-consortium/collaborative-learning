@@ -110,7 +110,7 @@ interface IObjectLineProps {
   setHoverObject: (id: string|null) => void
 }
 
-function ObjectLine({object, content, selection, setHoverObject}: IObjectLineProps) {
+const ObjectLine = observer(function ObjectLine({object, content, selection, setHoverObject}: IObjectLineProps) {
 
   function handleHoverIn() {
     setHoverObject(object.id);
@@ -123,8 +123,6 @@ function ObjectLine({object, content, selection, setHoverObject}: IObjectLinePro
   function handleClick() {
     content.setSelectedIds([object.id]);
   }
-
- 
 
   function handleShow(e: React.MouseEvent) {
     e.stopPropagation();
@@ -150,12 +148,14 @@ function ObjectLine({object, content, selection, setHoverObject}: IObjectLinePro
     transition,
   };
   
-  const Icon = object.icon;
-
   const visibilityIcon = 
     object.visible 
-      ? <button type="button" onClick={handleHide}><HideObjectIcon className="visibility-icon"/></button>
-      : <button type="button" onClick={handleShow}><ShowObjectIcon className="visibility-icon"/></button>;
+      ? <button type="button" className="visibility-icon" onClick={handleHide}>
+          <HideObjectIcon viewBox="0 0 24 24"/>
+        </button>
+      : <button type="button" className="visibility-icon" onClick={handleShow}>
+          <ShowObjectIcon viewBox="0 0 24 24"/>
+        </button>;
 
   return (
     <li ref={setNodeRef}
@@ -168,14 +168,15 @@ function ObjectLine({object, content, selection, setHoverObject}: IObjectLinePro
         onMouseLeave={handleHoverOut}
         onClick={handleClick}
     >
-      {object.icon}
-      {/* <Icon className="type-icon" width={20} height={20} viewBox="0 0 36 34" stroke="#000000" fill="#FFFFFF" /> */}
+      <span className="type-icon">
+        {object.icon}
+      </span>
       <span className="label">{object.label}</span>
+      {visibilityIcon}
       <MoveIcon className="move-icon"
               {...attributes}
               {...listeners}
       />
-      {visibilityIcon}
     </li>
   );
-}
+});
