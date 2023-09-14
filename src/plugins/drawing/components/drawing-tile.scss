@@ -93,6 +93,12 @@
               background-color: $workspace-teal-light-4;
             }
 
+            &.dragging {
+              box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.25);
+              border: solid 1px #979797;
+              padding: 2px 4px;
+            }
+
             .type-icon {
               vertical-align: bottom;
               flex: 0 0 20px;

@@ -127,6 +127,7 @@ function ObjectLine({object, content, selection, setHoverObject}: IObjectLinePro
     setNodeRef,
     transform,
     transition,
+    isDragging
   } = useSortable({id: object.id});
 
   const style = {
@@ -138,7 +139,10 @@ function ObjectLine({object, content, selection, setHoverObject}: IObjectLinePro
   return (
     <li ref={setNodeRef}
         style={style}
-        className={classNames({selected: selection.includes(object.id)})}
+        className={classNames({
+          selected: selection.includes(object.id),
+          dragging: isDragging
+        })}
         onMouseEnter={handleHoverIn}
         onMouseLeave={handleHoverOut}
         onClick={handleClick}
