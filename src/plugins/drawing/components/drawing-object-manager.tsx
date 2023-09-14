@@ -1,12 +1,19 @@
-import { types } from "mobx-state-tree";
 import React from "react";
-import { DrawingObject, DrawingObjectType,
+import { types } from "mobx-state-tree";
+import {
+  DrawingObject, DrawingObjectType,
   DrawingTool, HandleObjectHover, HandleObjectDrag,
-  IDrawingLayer, IToolbarButtonProps } from "../objects/drawing-object";
-import { IDrawingObjectInfo, gDrawingObjectInfosNoGroup, gDrawingToolInfosNoGroup } 
-  from "./drawing-object-manager-no-group";
-import { GroupComponent, GroupObject } from "../objects/group";
-import { GroupObjectsButton, UngroupObjectsButton } from "./drawing-toolbar-group-buttons";
+  IDrawingLayer, IToolbarButtonProps, DrawingComponentType
+} from "../objects/drawing-object";
+import { EllipseComponent, EllipseDrawingTool, EllipseObject, EllipseToolbarButton } from "../objects/ellipse";
+import { ImageComponent, ImageObject, StampDrawingTool, StampToolbarButton } from "../objects/image";
+import { LineComponent, LineDrawingTool, LineObject, LineToolbarButton } from "../objects/line";
+import { RectangleComponent, RectangleDrawingTool, RectangleObject, RectangleToolbarButton }
+  from "../objects/rectangle";
+import { TextComponent, TextDrawingTool, TextObject, TextToolbarButton } from "../objects/text";
+import { VectorComponent, VectorDrawingTool, VectorObject, VectorToolbarButton } from "../objects/vector";
+import { SelectToolbarButton, DuplicateButton, DeleteButton } from "./drawing-toolbar-buttons";
+import { SelectionDrawingTool } from "./selection-drawing-tool";
 
 export interface IDrawingToolInfo {
   name: string;
@@ -16,25 +23,88 @@ export interface IDrawingToolInfo {
   buttonComponent: React.ComponentType<IToolbarButtonProps>;
 }
 
+interface IDrawingObjectInfo {
+  type: string;
+  component: DrawingComponentType;
+  modelClass: typeof DrawingObject;
+}
 
 const gDrawingObjectInfos: Record<string, IDrawingObjectInfo | undefined> = {
-  ...gDrawingObjectInfosNoGroup,
-  group: {
-    type: "group",
-    component: GroupComponent,
-    modelClass: GroupObject
+  line: {
+    type: "line",
+    component: LineComponent,
+    modelClass: LineObject,
+  },
+  vector: {
+    type: "vector",
+    component: VectorComponent,
+    modelClass: VectorObject,
+  },
+  rectangle: {
+    type: "rectangle",
+    component: RectangleComponent,
+    modelClass: RectangleObject,
+  },
+  ellipse: {
+    type: "ellipse",
+    component: EllipseComponent,
+    modelClass: EllipseObject,
+  },
+  text: {
+    type: "text",
+    component: TextComponent,
+    modelClass: TextObject,
+  },
+  image: {
+    type: "image",
+    component: ImageComponent,
+    modelClass: ImageObject,
   }
 };
 
 const gDrawingToolInfos: Record<string, IDrawingToolInfo | undefined> = {
-  ...gDrawingToolInfosNoGroup,
-  group: {
-    name: "group",
-    buttonComponent: GroupObjectsButton
+  select: {
+    name: "select",
+    toolClass: SelectionDrawingTool,
+    buttonComponent: SelectToolbarButton
   },
-  ungroup: {
-    name: "ungroup",
-    buttonComponent: UngroupObjectsButton
+  line: {
+    name: "line",
+    toolClass: LineDrawingTool,
+    buttonComponent: LineToolbarButton
+  },
+  vector: {
+    name: "vector",
+    toolClass: VectorDrawingTool,
+    buttonComponent: VectorToolbarButton
+  },
+  rectangle: {
+    name: "rectangle",
+    toolClass: RectangleDrawingTool,
+    buttonComponent: RectangleToolbarButton
+  },
+  ellipse: {
+    name: "ellipse",
+    toolClass: EllipseDrawingTool,
+    buttonComponent: EllipseToolbarButton
+  },
+  text: {
+    name: "text",
+    toolClass: TextDrawingTool,
+    buttonComponent: TextToolbarButton
+  },
+  stamp: {
+    name: "stamp",
+    toolClass: StampDrawingTool,
+    buttonComponent: StampToolbarButton
+  },
+  duplicate: {
+    name: "duplicate",
+    buttonComponent: DuplicateButton
+  },
+  delete: {
+    name: "delete",
+    buttonComponent: DeleteButton
   }
 };
 
@@ -55,13 +125,11 @@ export function getDrawingToolButtonComponent(toolName: string) {
   return gDrawingToolInfos[toolName]?.buttonComponent;
 }
 
-export function registerDrawingObjectInfo(drawingObjectInfo: IDrawingObjectInfo) {
-  gDrawingObjectInfosNoGroup[drawingObjectInfo.type] = drawingObjectInfo;
+export function registerDrawingObjectInfo(drawingObjectInfo: IDrawingObjectInfo) { 
   gDrawingObjectInfos[drawingObjectInfo.type] = drawingObjectInfo;
 }
 
 export function registerDrawingToolInfo(drawingToolInfo: IDrawingToolInfo) {
-  gDrawingToolInfosNoGroup[drawingToolInfo.name] = drawingToolInfo;
   gDrawingToolInfos[drawingToolInfo.name] = drawingToolInfo;
 }
 
