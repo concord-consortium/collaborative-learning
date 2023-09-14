@@ -5,8 +5,11 @@ import ReactDOM from "react-dom";
 import { DeleteSelectedButton, LinkTileButton, SetExpressionButton } from "./table-toolbar-buttons";
 import { useSettingFromStores } from "../../../hooks/use-stores";
 import { IFloatingToolbarProps, useFloatingToolbarLocation } from "../hooks/use-floating-toolbar-location";
+import { DataSetViewButton } from "../../../components/shared/data-set-view-button";
 
 import "./table-toolbar.scss";
+
+type IButtonSetting = string | [string, string];
 
 const defaultButtons = ["set-expression", "link-tile", "delete"];
 
@@ -30,22 +33,30 @@ export const TableToolbar: React.FC<IProps> = observer(({
                     ...others
                   });
 
-  const buttonSettings = useSettingFromStores("tools", "table") as unknown as string[] | undefined;
+  const buttonSettings = useSettingFromStores("tools", "table") as unknown as IButtonSetting[] | undefined;
   const buttons = buttonSettings || defaultButtons;
 
-  const getToolbarButton = (toolName: string) => {
-    switch (toolName) {
-      case "set-expression":
-        return <SetExpressionButton key={toolName} onClick={onSetExpression} />;
-      case "delete":
-        return <DeleteSelectedButton key={toolName} onClick={deleteSelected} />;
-      case "link-tile":
-        return <LinkTileButton
-                 key={toolName}
-                 isEnabled={isLinkEnabled}
-                 getLinkIndex={getLinkIndex}
-                 onClick={showLinkDialog}
-               />;
+  const getToolbarButton = (toolName: IButtonSetting) => {
+    if (typeof toolName === "string") {
+      switch (toolName) {
+        case "set-expression":
+          return <SetExpressionButton key={toolName} onClick={onSetExpression} />;
+        case "delete":
+          return <DeleteSelectedButton key={toolName} onClick={deleteSelected} />;
+        case "link-tile":
+          return <LinkTileButton
+                  key={toolName}
+                  isEnabled={isLinkEnabled}
+                  getLinkIndex={getLinkIndex}
+                  onClick={showLinkDialog}
+                />;
+      }
+    } else {
+      const realToolName = toolName[0];
+      if (realToolName === "data-set-view") {
+        const tileType = toolName[1];
+        return <DataSetViewButton key={`${toolName[0]}_${toolName[1]}`} newTileType={tileType} />;
+      }
     }
   };
 

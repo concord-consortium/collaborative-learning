@@ -15,7 +15,7 @@ import { logHistoryEvent } from "../../models/history/log-history-event";
 import { TreeManagerType } from "../../models/history/tree-manager";
 import { PlaybackComponent } from "../playback/playback";
 import {
-  ITileApi, ITileApiInterface, TileApiInterfaceContext, EditableTileApiInterfaceRefContext
+  ITileApi, ITileApiInterface, TileApiInterfaceContext, EditableTileApiInterfaceRefContext, AddTilesContext
 } from "../tiles/tile-api";
 import { StringBuilder } from "../../utilities/string-builder";
 import { HotKeys } from "../../utilities/hot-keys";
@@ -102,24 +102,26 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
     const content = this.getDocumentToShow()?.content ?? this.getDocumentContent();
     return (
       <TileApiInterfaceContext.Provider value={this.tileApiInterface}>
-        <div
-          key="canvas"
-          className="canvas"
-          data-test="canvas"
-          onKeyDown={this.handleKeyDown}
-          ref={(el) => this.setCanvasElement(el)}
-        >
-          {this.renderContent()}
-          {this.renderDebugInfo()}
-          {this.renderOverlayMessage()}
-        </div>
-        <AnnotationLayer
-          canvasElement={this.state.canvasElement}
-          content={content}
-          documentScrollX={this.state.documentScrollX}
-          documentScrollY={this.state.documentScrollY}
-          readOnly={this.props.readOnly}
-        />
+        <AddTilesContext.Provider value={this.getDocumentContent() || null}>
+          <div
+            key="canvas"
+            className="canvas"
+            data-test="canvas"
+            onKeyDown={this.handleKeyDown}
+            ref={(el) => this.setCanvasElement(el)}
+          >
+            {this.renderContent()}
+            {this.renderDebugInfo()}
+            {this.renderOverlayMessage()}
+          </div>
+          <AnnotationLayer
+            canvasElement={this.state.canvasElement}
+            content={content}
+            documentScrollX={this.state.documentScrollX}
+            documentScrollY={this.state.documentScrollY}
+            readOnly={this.props.readOnly}
+          />
+        </AddTilesContext.Provider>
       </TileApiInterfaceContext.Provider>
     );
   }
