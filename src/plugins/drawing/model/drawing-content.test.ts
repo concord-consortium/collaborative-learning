@@ -651,9 +651,6 @@ describe("DrawingContentModel", () => {
 
     model.ungroupGroups([groupId]);
 
-    mockLogTileChangeEvent.mock.calls.forEach((call, index) => {
-      console.log('call', index+1, ': ', call[1].operation, '(', call[1]?.change?.args, ')');
-    });
     expect(mockLogTileChangeEvent).toHaveBeenCalledTimes(4);
     expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(1,
       LogEventName.DRAWING_TOOL_CHANGE, {

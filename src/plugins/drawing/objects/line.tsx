@@ -82,8 +82,8 @@ export const LineObject = StrokedObject.named("LineObject")
       const height = bbox.se.y - bbox.nw.y;
       const newWidth  = width -  deltas.left + deltas.right;
       const newHeight = height - deltas.top + deltas.bottom;
-      const widthFactor = newWidth/width;
-      const heightFactor = newHeight/height;
+      const widthFactor = width ? newWidth/width : 1;
+      const heightFactor = height ? newHeight/height : 1;
 
       // x,y get moved to a scaled position within the new bounds
       const newLeft = left+deltas.left;
@@ -106,7 +106,20 @@ export const LineObject = StrokedObject.named("LineObject")
       }
       self.dragScaleX = self.dragScaleY = undefined;
     }
-  }));
+  }))
+  .preProcessSnapshot(sn => {
+    const snClone = { ...sn };
+    if (typeof snClone.x !== 'number') {
+      snClone.x = 0;
+    }
+    if (typeof snClone.y !== 'number') {
+      snClone.y = 0;
+    }
+    snClone.deltaPoints = snClone.deltaPoints?.filter((point) => {
+      return (typeof point.dx === 'number' && typeof point.dy === 'number');
+    });
+    return snClone;
+  });
 export interface LineObjectType extends Instance<typeof LineObject> {}
 export interface LineObjectSnapshot extends SnapshotIn<typeof LineObject> {}
 

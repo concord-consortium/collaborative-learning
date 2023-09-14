@@ -12,10 +12,10 @@ export function isArrowAnnotationSnapshot(snapshot: any): snapshot is IArrowAnno
 
 export function updateArrowAnnotationTileIds(annotation: IArrowAnnotationSnapshot, tileIdMap: Record<string, string>) {
   if (annotation.sourceObject?.tileId && annotation.sourceObject.tileId in tileIdMap) {
-    annotation.sourceObject.tileId = tileIdMap[annotation.sourceObject.tileId];
+    annotation.sourceObject.tileId = tileIdMap[annotation.sourceObject.tileId] ?? "";
   }
   if (annotation.targetObject?.tileId && annotation.targetObject.tileId in tileIdMap) {
-    annotation.targetObject.tileId = tileIdMap[annotation.targetObject.tileId];
+    annotation.targetObject.tileId = tileIdMap[annotation.targetObject.tileId] ?? "";
   }
   return annotation;
 }
@@ -92,7 +92,6 @@ export const ArrowAnnotation = types
     documentLeft: number, documentRight: number, documentTop: number, documentBottom: number,
     dragOffsets: IArrowAnnotationDragOffsets, sourceBB?: ObjectBoundingBox|null, targetBB?: ObjectBoundingBox|null
   ) {
-    
     if (!sourceBB || !targetBB) {
       return {
         sourceX: undefined, sourceY: undefined, targetX: undefined, targetY: undefined,
