@@ -112,7 +112,18 @@ interface IObjectLineProps {
 
 const ObjectLine = observer(function ObjectLine({object, content, selection, setHoverObject}: IObjectLineProps) {
 
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    active,
+    isDragging
+  } = useSortable({id: object.id});
+
   function handleHoverIn() {
+    if (active) return; // avoid flashes of highlight while dragging
     setHoverObject(object.id);
   }
 
@@ -120,8 +131,13 @@ const ObjectLine = observer(function ObjectLine({object, content, selection, set
     setHoverObject(null);
   }
 
-  function handleClick() {
-    content.setSelectedIds([object.id]);
+  // Select the clicked object, or add to existing selection with modifier key.
+  function handleClick(e: React.MouseEvent) {
+    if (e.shiftKey || e.metaKey) {
+      content.selectId(object.id);
+    } else {
+      content.setSelectedIds([object.id]);
+    }
   }
 
   function handleShow(e: React.MouseEvent) {
@@ -136,15 +152,6 @@ const ObjectLine = observer(function ObjectLine({object, content, selection, set
       content.unselectId(object.id);
     }
   }
-
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging
-  } = useSortable({id: object.id});
 
   const style = {
     transform: CSS.Transform.toString(transform),

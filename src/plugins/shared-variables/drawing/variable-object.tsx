@@ -49,7 +49,7 @@ export const VariableChipObject = DrawingObject.named("VariableObject")
       return "Variable";
     },
     get icon() {
-      return AddVariableChipIcon;
+      return (<AddVariableChipIcon viewBox="0 0 36 34"/>);
     },
     get supportsResize() {
       return false;
