@@ -18,6 +18,7 @@ import { mergeTwoDataSets } from "../../models/data/data-set-utils";
 import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
 import { useConsumerTileLinking } from "../../hooks/use-consumer-tile-linking";
 import { useDataCardTileHeight } from "./use-data-card-tile-height";
+import { useTileDataMerging } from "../../hooks/use-tile-data-merging";
 
 import "./data-card-tile.scss";
 
@@ -248,7 +249,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
     documentId, model, hasLinkableRows, onRequestTilesOfType, onRequestLinkableTiles
   });
 
-  const { isMergeEnabled, showMergeTileDialog } = useTileDataMerging({documentId, model});
+  const { showMergeTileDialog } = useTileDataMerging({documentId, model});
 
   return (
     <div className={toolClasses}>
@@ -265,6 +266,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
         isLinkEnabled={isLinkEnabled}
         getLinkIndex={getLinkIndex}
         showLinkTileDialog={showLinkTileDialog}
+        showMergeTileDialog={showMergeTileDialog}
       />
       <div
         className="data-card-content"

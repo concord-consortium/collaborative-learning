@@ -26,11 +26,13 @@ interface IProps extends IFloatingToolbarProps {
   handleDuplicateCard: () => void;
   setImageUrlToAdd: (url: string) => void;
   showLinkTileDialog?: () => void;
+  showMergeTileDialog?: () => void;
 }
 
 export const DataCardToolbar: React.FC<IProps> = observer(({
-  isLinkEnabled, model, documentContent, tileElt, currEditAttrId, currEditFacet, showLinkTileDialog,
-  getLinkIndex, onIsEnabled, setImageUrlToAdd, handleDeleteValue, handleDuplicateCard, ...others
+  isLinkEnabled, model, documentContent, tileElt, currEditAttrId, currEditFacet,
+  showLinkTileDialog, showMergeTileDialog, getLinkIndex, onIsEnabled, setImageUrlToAdd,
+  handleDeleteValue, handleDuplicateCard, ...others
   }: IProps) => {
     const content = model.content as DataCardContentModelType;
     const currentCaseId = content.dataSet.caseIDFromIndex(content.caseIndex);
@@ -61,7 +63,7 @@ export const DataCardToolbar: React.FC<IProps> = observer(({
   };
 
   const handleMergeDataClick = () => {
-    console.log("| handleMergeDataClick |");
+    showMergeTileDialog && showMergeTileDialog();
   };
 
   const toolbarClasses = classNames(

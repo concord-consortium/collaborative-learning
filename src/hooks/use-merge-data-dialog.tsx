@@ -1,94 +1,85 @@
 import React, { useRef, useState } from "react";
 
-import LinkGraphIcon from "../clue/assets/icons/table/link-graph-icon.svg";
 import { useCustomModal } from "./use-custom-modal";
-import { isLinkedToTile } from "../models/shared/shared-data-utils";
 import { ITileLinkMetadata } from "../models/tiles/tile-link-types";
 import { ITileModel } from "../models/tiles/tile-model";
+import MergeInIcon from "../../src/plugins/data-card/assets/merge-in-icon.svg";
+
 
 import "./link-tile-dialog.scss";
 
 interface IContentProps {
-  linkedTiles: ITileLinkMetadata[];
   selectValue: string;
   tileTitle?: string;
-  unlinkedTiles: ITileLinkMetadata[];
+  mergableTiles: ITileLinkMetadata[];
   setSelectValue: React.Dispatch<React.SetStateAction<string>>;
 }
-const Content: React.FC<IContentProps>
-              = ({ linkedTiles, selectValue, tileTitle, unlinkedTiles, setSelectValue })=> {
-  const displayTileTitle = tileTitle || "this tile";
+const Content: React.FC<IContentProps> = ({ selectValue, tileTitle, mergableTiles, setSelectValue })=> {
   const selectElt = useRef<HTMLSelectElement>(null);
 
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectValue(e.target.value);
+    setTimeout(() => selectElt.current?.focus());
+  };
+
+  const renderOptionsGroup = () => {
+    if (!mergableTiles || mergableTiles.length < 1) return null;
+
     return (
-      <>
-        <div className="prompt">
-          To link {displayTileTitle} to another tile, select a tile from the link list.
-          To unlink {displayTileTitle} from another tile, select a tile from the unlink list.
-        </div>
-        <select ref={selectElt} value={selectValue} data-test="link-tile-select"
-                                onChange={e => {
-                                  setSelectValue(e.target.value);
-                                  setTimeout(() => selectElt.current?.focus());
-                                }}>
-          <option key="prompt" value={""}>Select a tile</option>
-            {unlinkedTiles.length > 0 &&
-              <optgroup label="Link Tiles">
-                {unlinkedTiles
-                  .map(tileInfo => <option key={tileInfo.id} value={tileInfo.id}>{tileInfo.title}</option>)}
-              </optgroup>
-            }
-            {(unlinkedTiles.length > 0) && (linkedTiles.length > 0) &&
-              <option disabled>──────────────────────────────</option> }
-            {linkedTiles.length > 0 &&
-                <optgroup label="Unlink Tiles">
-                  {linkedTiles
-                    .map(tileInfo => <option key={tileInfo.id} value={tileInfo.id}>{tileInfo.title}</option>)}
-                </optgroup>
-            }
-        </select>
-      </>
+      <optgroup label="select data source">
+        {mergableTiles.map(tileInfo => {
+          return (
+            <option key={tileInfo.id} value={tileInfo.id}>
+              {tileInfo.id}
+            </option>
+          );
+        })}
+      </optgroup>
     );
+  };
+
+  return (
+    <>
+      <div className="message">
+        Select a data source from the list to add data to this tile.
+      </div>
+      <select value={selectValue} onChange={handleSelectChange}>
+        <option key="prompt" value={""}>Select a data source</option>
+        { renderOptionsGroup() }
+      </select>
+    </>
+  );
 };
 
 interface IProps {
-  linkableTiles: ITileLinkMetadata[];
+  mergableTiles: ITileLinkMetadata[];
   model: ITileModel;
-  onLinkTile: (tileInfo: ITileLinkMetadata) => void;
-  onUnlinkTile: (tileInfo: ITileLinkMetadata) => void;
+  onMergeTile: (tileInfo: ITileLinkMetadata) => void;
 }
-export const useLinkConsumerTileDialog = ({ linkableTiles, model, onLinkTile, onUnlinkTile }: IProps) => {
+export const useMergeTileDialog = ({ mergableTiles, model, onMergeTile }: IProps) => {
   const tileTitle = model.title;
   const [selectValue, setSelectValue] = useState("");
-  const handleClick = () => {
-    const tileInfo = linkableTiles.find(tile => tile.id === selectValue);
-    if (tileInfo) {
-      if (isLinkedToTile(model, tileInfo.id)) {
-        onUnlinkTile(tileInfo);
-      } else {
-        onLinkTile(tileInfo);
-      }
-    }
+
+  const handleClickMerge = () => {
+    const selectedTileInfo = mergableTiles.find(tile => tile.id === selectValue);
+    selectedTileInfo && onMergeTile(selectedTileInfo);
   };
-  const unlinkedTiles = linkableTiles
-                                  .filter(tileInfo => !isLinkedToTile(model, tileInfo.id));
-  const linkedTiles = linkableTiles
-                                  .filter(tileInfo => isLinkedToTile(model, tileInfo.id) && tileInfo.id !== model.id);
+
   const [showModal, hideModal] = useCustomModal({
     className: "link-tile",
-    Icon: LinkGraphIcon,
-    title: "Link or Unlink Tile",
+    Icon: MergeInIcon,
+    title: "Add data from...",
     Content,
-    contentProps: { linkedTiles, selectValue, tileTitle, unlinkedTiles, setSelectValue },
+    contentProps: { selectValue, tileTitle, mergableTiles, setSelectValue },
     buttons: [
-      { label: "Cancel" },
-      { label: !isLinkedToTile(model, selectValue) ? "Link" : "Unlink",
+      { label: "Cancel", onClick: () => hideModal() },
+      {
+        label: "Add Data",
         isDefault: true,
-        isDisabled: !selectValue,
-        onClick: handleClick
+        onClick: handleClickMerge
       }
     ]
-  }, [linkableTiles]);
+  }, [mergableTiles]);
 
   return [showModal, hideModal];
 };
