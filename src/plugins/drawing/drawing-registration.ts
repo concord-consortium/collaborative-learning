@@ -5,6 +5,9 @@ import { kDrawingTileType, kDrawingDefaultHeight } from "./model/drawing-types";
 import DrawingToolComponent from "./components/drawing-tile";
 import DrawingToolIcon from "../../clue/assets/icons/draw-tool.svg";
 import { DrawingMigrator } from "./model/drawing-migrator";
+import { registerDrawingObjectInfo, registerDrawingToolInfo } from "./components/drawing-object-manager";
+import { GroupObjectsButton, UngroupObjectsButton } from "./components/drawing-toolbar-group-buttons";
+import { GroupComponent, GroupObject } from "./objects/group";
 
 registerTileContentInfo({
   type: kDrawingTileType,
@@ -26,4 +29,24 @@ registerTileComponentInfo({
   Component: DrawingToolComponent,
   tileEltClass: "drawing-tool-tile",
   Icon: DrawingToolIcon
+});
+
+// These are added via registration functions rather than
+// directly specified in drawing-object-manager.tsx in order
+// to avoid circular "import" loops like
+// group -> DrawingObjectMSTUnion -> group
+registerDrawingObjectInfo({
+  type: "group",
+  component: GroupComponent,
+  modelClass: GroupObject
+});
+
+registerDrawingToolInfo({
+  name: "group",
+  buttonComponent: GroupObjectsButton
+});
+
+registerDrawingToolInfo({
+  name: "ungroup",
+  buttonComponent: UngroupObjectsButton
 });

@@ -27,7 +27,7 @@ const Extents = types.model("Extents")
 export const GroupObject = DrawingObject.named("GroupObject")
   .props({
     type: typeField("group"),
-    objects: types.array(types.late(() => DrawingObjectMSTUnion)),
+    objects: types.array(DrawingObjectMSTUnion),
     objectExtents: types.map(Extents)
   })
   .views(self => ({
