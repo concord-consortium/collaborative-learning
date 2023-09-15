@@ -132,6 +132,9 @@ const ObjectLine = observer(function ObjectLine({object, content, selection, set
   function handleHide(e: React.MouseEvent) {
     e.stopPropagation();
     object.setVisible(false);
+    if (content.isIdSelected(object.id)) {
+      content.unselectId(object.id);
+    }
   }
 
   const {
@@ -162,6 +165,7 @@ const ObjectLine = observer(function ObjectLine({object, content, selection, set
         style={style}
         className={classNames({
           selected: selection.includes(object.id),
+          invisible: !object.visible,
           dragging: isDragging
         })}
         onMouseEnter={handleHoverIn}
