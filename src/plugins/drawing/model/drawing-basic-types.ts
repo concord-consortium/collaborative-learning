@@ -62,6 +62,17 @@ export function endShapesForVectorType(vectorType?: VectorType) {
   }
 }
 
+export function vectorTypeForEndShapes(headShape?: VectorEndShape, tailShape?: VectorEndShape) {
+  if (headShape) {
+    if (tailShape) {
+      return VectorType.doubleArrow;
+    } else {
+      return VectorType.singleArrow;
+    }
+    return VectorType.line;
+  }
+}
+
 
 export interface ToolbarSettings {
   stroke: string;

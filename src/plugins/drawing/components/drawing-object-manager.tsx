@@ -1,5 +1,5 @@
-import { types } from "mobx-state-tree";
 import React from "react";
+import { types } from "mobx-state-tree";
 import { DrawingComponentType, DrawingObject, DrawingObjectType,
   DrawingTool, HandleObjectHover, HandleObjectDrag,
   IDrawingLayer, IToolbarButtonProps } from "../objects/drawing-object";
@@ -9,11 +9,9 @@ import { LineComponent, LineDrawingTool, LineObject, LineToolbarButton } from ".
 import { RectangleComponent, RectangleDrawingTool, RectangleObject,
   RectangleToolbarButton} from "../objects/rectangle";
 import { VectorComponent, VectorDrawingTool, VectorObject, VectorToolbarButton } from "../objects/vector";
-import { DeleteButton, DuplicateButton, GroupObjectsButton, 
-  SelectToolbarButton, UngroupObjectsButton } from "./drawing-toolbar-buttons";
+import { DeleteButton, DuplicateButton, SelectToolbarButton } from "./drawing-toolbar-buttons";
 import { SelectionDrawingTool } from "./selection-drawing-tool";
 import { TextComponent, TextDrawingTool, TextObject, TextToolbarButton } from "../objects/text";
-import { GroupComponent, GroupObject } from "../objects/group";
 
 export interface IDrawingObjectInfo {
   type: string;
@@ -59,11 +57,6 @@ const gDrawingObjectInfos: Record<string, IDrawingObjectInfo | undefined> = {
     type: "image",
     component: ImageComponent,
     modelClass: ImageObject,
-  },
-  group: {
-    type: "group",
-    component: GroupComponent,
-    modelClass: GroupObject
   }
 };
 
@@ -102,14 +95,6 @@ const gDrawingToolInfos: Record<string, IDrawingToolInfo | undefined> = {
     name: "stamp",
     toolClass: StampDrawingTool,
     buttonComponent: StampToolbarButton
-  },
-  group: {
-    name: "group",
-    buttonComponent: GroupObjectsButton
-  },
-  ungroup: {
-    name: "ungroup",
-    buttonComponent: UngroupObjectsButton
   },
   duplicate: {
     name: "duplicate",

@@ -63,7 +63,6 @@
           svg {
             flex: 0 0 1em;
             vertical-align: middle;
-            transform: rotate(180deg);
           }
 
         }
@@ -83,7 +82,8 @@
 
           li {
             list-style: none;
-            padding: .2em .5em;
+            padding: 3px 5px;
+            display: flex;
 
             &:hover {
               background-color: $workspace-teal-light-6;
@@ -93,8 +93,23 @@
               background-color: $workspace-teal-light-4;
             }
 
-            svg {
+            &.dragging {
+              box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.25);
+              border: solid 1px #979797;
+              padding: 2px 4px;
+            }
+
+            .type-icon {
               vertical-align: bottom;
+              flex: 0 0 20px;
+            }
+
+            .label {
+              flex-grow: 1;
+            }
+
+            .move-icon {
+              flex: 0 0 25px;
             }
           }
         }
