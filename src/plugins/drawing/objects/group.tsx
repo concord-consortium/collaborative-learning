@@ -52,6 +52,10 @@ export const GroupObject = DrawingObject.named("GroupObject")
     }
   }))
   .actions(self => ({
+    setVisible(visible: boolean) {
+      self.visible = visible;
+      self.objects.forEach((member) => { member.setVisible(visible); });
+    },
     setStroke(stroke: string) {
       self.objects.forEach((member) => {
         if (isStrokedObject(member)) { member.setStroke(stroke); }

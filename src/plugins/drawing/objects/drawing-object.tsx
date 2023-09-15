@@ -91,8 +91,8 @@ export const DrawingObject = types.model("DrawingObject", {
   }
 }))
 .actions(self => ({
-  setVisible(_visible: boolean) {
-    self.visible = _visible;
+  setVisible(visible: boolean) {
+    self.visible = visible;
   },
   setPosition(x: number, y: number) {
     self.x = x;
