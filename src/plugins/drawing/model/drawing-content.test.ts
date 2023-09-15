@@ -16,6 +16,7 @@ import { VectorObject } from "../objects/vector";
 import { LineObject } from "../objects/line";
 import { TextObject } from "../objects/text";
 import { GroupObjectType } from "../objects/group";
+import "../drawing-registration";
 
 const mockLogTileChangeEvent = jest.fn();
 jest.mock("../../../models/tiles/log/log-tile-change-event", () => ({
