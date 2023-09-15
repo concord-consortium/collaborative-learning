@@ -3,7 +3,6 @@ import {ITileLinkMetadata } from "../models/tiles/tile-link-types";
 import { ITileModel } from "../models/tiles/tile-model";
 import { useMergeTileDialog } from "./use-merge-data-dialog";
 import { mergeTwoDataSets } from "../models/data/data-set-utils";
-import { getSnapshot } from "@concord-consortium/mobx-state-tree";
 import { safeJsonParse } from "../utilities/js-utils";
 
 interface IProps {

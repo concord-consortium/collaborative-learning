@@ -61,8 +61,8 @@ export const useMergeTileDialog = ({ mergableTiles, model, onMergeTile }: IProps
   const [selectValue, setSelectValue] = useState("");
 
   const handleClickMerge = () => {
-    const selectedTileInfo = mergableTiles.find(tile => tile.id === selectValue);
-    selectedTileInfo && onMergeTile(selectedTileInfo);
+    const selectedTile = mergableTiles.find(tile => tile.id === selectValue);
+    selectedTile && onMergeTile(selectedTile);
   };
 
   const [showModal, hideModal] = useCustomModal({
