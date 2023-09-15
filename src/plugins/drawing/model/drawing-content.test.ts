@@ -6,7 +6,7 @@ import {
 import { kDrawingTileType } from "./drawing-types";
 import { DefaultToolbarSettings, VectorEndShape } from "./drawing-basic-types";
 import { AppConfigModel } from "../../../models/stores/app-config-model";
-import { ImageObject } from "../objects/image";
+import { ImageObject, ImageObjectSnapshotForAdd } from "../objects/image";
 import { RectangleObject, RectangleObjectSnapshot, RectangleObjectSnapshotForAdd,
   RectangleObjectType } from "../objects/rectangle";
 import { DeltaPoint, computeStrokeDashArray } from "../objects/drawing-object";
@@ -132,6 +132,45 @@ describe("DrawingContentModel", () => {
     expect(model.toolbarSettings).toEqual({ ...defaultSettings, fill, stroke, strokeDashArray });
     model.setStrokeWidth(strokeWidth, model.selection);
     expect(model.toolbarSettings).toEqual({ ...defaultSettings, fill, stroke, strokeDashArray, strokeWidth });
+  });
+
+  it("can add objects", () => {
+    const model = createDrawingContentWithMetadata();
+    const rectSnapshot1: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot, id:"a", x:0, y:0};
+    model.addObject(rectSnapshot1);
+
+    const rectSnapshot2: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot, id:"b", x:20, y:20};
+    model.addObject(rectSnapshot2);
+
+    const imageSnapshot: ImageObjectSnapshotForAdd = {
+      type: "image",
+      id: "c",
+      x: 0,
+      y: 0,
+      width: 10,
+      height: 10,
+      url: "",
+     ...mockSettings
+    };
+    model.addObject(imageSnapshot, true);
+
+    expect(model.objects.length).toBe(3);
+    expect(model.objects.map((obj) => obj.id)).toStrictEqual(["c", "a", "b"]);
+  });
+
+  it("can reorder objects", () => {
+    const model = createDrawingContentWithMetadata();
+    model.addObject({...baseRectangleSnapshot, id:"a", x:0, y:0});
+    model.addObject({...baseRectangleSnapshot, id:"b", x:10, y:10});
+    model.addObject({...baseRectangleSnapshot, id:"c", x:20, y:20});
+    model.addObject({...baseRectangleSnapshot, id:"d", x:30, y:30});
+    expect(model.objects.map((obj) => obj.id)).toStrictEqual(["a", "b", "c", "d"]);
+
+    model.changeZOrder("a", "c");
+    expect(model.objects.map((obj) => obj.id)).toStrictEqual(["b", "c", "a", "d"]);
+
+    model.changeZOrder("a", "b");
+    expect(model.objects.map((obj) => obj.id)).toStrictEqual(["a", "b", "c", "d"]);
   });
 
   it("can delete a set of selected drawing objects", () => {
