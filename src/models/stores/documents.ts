@@ -186,7 +186,8 @@ export const DocumentsModel = types
           key: document.key,
           title: document.title,
           uid: document.uid,
-          type: document.type
+          type: document.type,
+          content: JSON.parse(JSON.stringify(document.content))
         });
       }
       if (!self.getDocument(document.key)) {

@@ -10,11 +10,11 @@ import "./link-tile-dialog.scss";
 
 interface IContentProps {
   selectValue: string;
-  tileTitle?: string;
+  hostTileTitle?: string;
   mergableTiles: ITileLinkMetadata[];
   setSelectValue: React.Dispatch<React.SetStateAction<string>>;
 }
-const Content: React.FC<IContentProps> = ({ selectValue, tileTitle, mergableTiles, setSelectValue })=> {
+const Content: React.FC<IContentProps> = ({ selectValue, hostTileTitle, mergableTiles, setSelectValue })=> {
   const selectElt = useRef<HTMLSelectElement>(null);
 
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -41,7 +41,7 @@ const Content: React.FC<IContentProps> = ({ selectValue, tileTitle, mergableTile
   return (
     <>
       <div className="message">
-        Select a data source from the list to add data to this tile.
+        Select a data source from the list to add data to { hostTileTitle }.
       </div>
       <select value={selectValue} onChange={handleSelectChange}>
         <option key="prompt" value={""}>Select a data source</option>
@@ -57,7 +57,7 @@ interface IProps {
   onMergeTile: (tileInfo: ITileLinkMetadata) => void;
 }
 export const useMergeTileDialog = ({ mergableTiles, model, onMergeTile }: IProps) => {
-  const tileTitle = model.title;
+  const hostTileTitle = model.title;
   const [selectValue, setSelectValue] = useState("");
 
   const handleClickMerge = () => {
@@ -70,9 +70,11 @@ export const useMergeTileDialog = ({ mergableTiles, model, onMergeTile }: IProps
     Icon: MergeInIcon,
     title: "Add data from...",
     Content,
-    contentProps: { selectValue, tileTitle, mergableTiles, setSelectValue },
+    contentProps: { selectValue, hostTileTitle, mergableTiles, setSelectValue },
     buttons: [
-      { label: "Cancel", onClick: () => hideModal() },
+      {
+        label: "Cancel", onClick: () => hideModal()
+      },
       {
         label: "Add Data",
         isDefault: true,
