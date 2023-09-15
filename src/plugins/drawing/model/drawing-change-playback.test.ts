@@ -33,7 +33,8 @@ describe("playbackChanges", () => {
       dx: 10, dy: 10,
       stroke: "#888888",
       strokeDashArray: "3,3",
-      strokeWidth: 1
+      strokeWidth: 1,
+      visible: true
     };
     const changes: DrawingToolChange[] = [
       { action: "create", data: vectorData }
@@ -81,7 +82,8 @@ describe("playbackChanges", () => {
       deltaPoints: [{ dx: 1, dy: 1 }, { dx: 2, dy: 2 }],
       stroke: "#888888",
       strokeDashArray: "3,3",
-      strokeWidth: 1
+      strokeWidth: 1,
+      visible: true
     };
     const changes: DrawingToolChange[] = [
       { action: "create", data: lineData }
@@ -125,7 +127,8 @@ describe("playbackChanges", () => {
       fill: "#cccccc",
       stroke: "#888888",
       strokeDashArray: "3,3",
-      strokeWidth: 1
+      strokeWidth: 1,
+      visible: true
     };
     const changes: DrawingToolChange[] = [
       { action: "create", data: rectData }
@@ -173,7 +176,8 @@ describe("playbackChanges", () => {
       fill: "#cccccc",
       stroke: "#888888",
       strokeDashArray: "3,3",
-      strokeWidth: 1
+      strokeWidth: 1,
+      visible: true
     };
     const changes: DrawingToolChange[] = [
       { action: "create", data: ellipseData }
@@ -225,6 +229,7 @@ describe("playbackChanges", () => {
       // So it seems safe to ignore it here.
       x: 10, y: 10,
       width: 10, height: 10,
+      visible: true
     };
     const changes: DrawingToolChange[] = [
       { action: "create", data: imageData }
