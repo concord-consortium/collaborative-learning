@@ -4,6 +4,7 @@ import { ITileModel } from "../models/tiles/tile-model";
 import { useMergeTileDialog } from "./use-merge-data-dialog";
 import { mergeTwoDataSets } from "../models/data/data-set-utils";
 import { safeJsonParse } from "../utilities/js-utils";
+import { getSnapshot } from "@concord-consortium/mobx-state-tree";
 
 interface IProps {
   documentId?: string;
@@ -11,6 +12,7 @@ interface IProps {
 }
 
 export const useTileDataMerging = ({documentId, model}: IProps) => {
+   // TODO - typing, stringifying, find the right pattern to follow
   const localSharedModels = model.content.tileEnv?.sharedModelManager?.getSharedModelsByType("SharedDataSet") || [];
   const mergableTiles = localSharedModels.filter((m) => (m as any).providerId !== model.id);
 
@@ -18,12 +20,9 @@ export const useTileDataMerging = ({documentId, model}: IProps) => {
     const sourceDataSnapshot = safeJsonParse(JSON.stringify((selectedTile))).dataSet;
     const localSharedModel = model.content.tileEnv?.sharedModelManager?.getTileSharedModels(model.content)[0] as any;
     const targetDataSet = localSharedModel?.dataSet;
-
     if (sourceDataSnapshot && targetDataSet) {
       mergeTwoDataSets(sourceDataSnapshot, targetDataSet);
     }
-    //console.log("| localSharedModel |", localSharedModel.dataSet);
-    //targetDataSet && mergeTwoDataSets(mergableData, targetDataSet);
   }, [model]);
 
   const [showMergeTileDialog] = useMergeTileDialog({

@@ -126,13 +126,11 @@
       pointer-events: none;
     }
   }
-
-}
-
-// TODO - temporary until real asset here
-.merge-data-button {
-  svg {
-    width: 24px;
-    transform: translateY(-15px);
+  // TODO - temporary until real asset is ready
+  .merge-data-button {
+    svg {
+      width: 24px;
+      transform: translateY(-15px);
+    }
   }
 }
