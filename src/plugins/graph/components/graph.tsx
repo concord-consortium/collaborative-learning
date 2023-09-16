@@ -68,6 +68,17 @@ export const Graph = observer(function Graph({
     return tileModel?.title || "";
   }, [tileModel]);
 
+  const getDotCenter = useCallback((dotId: string) => {
+    const idParts = decipherDotId(dotId);
+    if (!idParts) return;
+    const { caseId, xAttributeId, yAttributeId } = idParts;
+    if (xAttributeId !== xAttrID || yAttributeId !== yAttrID) return;
+    const dataConfig = graphModel.config;
+    const x = getScreenX({ caseId, dataset, layout, dataConfig });
+    const y = getScreenY({ caseId, dataset, layout, dataConfig });
+    return { x, y };
+  }, [dataset, graphModel.config, layout, xAttrID, yAttrID]);
+
   useEffect(() => {
     onRegisterTileApi?.({
       exportContentAsTileJson: (options?: ITileExportOptions) => {
@@ -78,12 +89,9 @@ export const Graph = observer(function Graph({
       },
       getObjectBoundingBox: (objectId: string, objectType?: string) => {
         if (objectType === "dot") {
-          const idParts = decipherDotId(objectId);
-          if (!idParts) return;
-          const { caseId, xAttributeId, yAttributeId } = idParts;
-          if (xAttributeId !== xAttrID || yAttributeId !== yAttrID) return;
-          const x = getScreenX({caseId, dataset, layout, dataConfig: graphModel.config});
-          const y = getScreenY({caseId, dataset, layout, dataConfig: graphModel.config});
+          const coords = getDotCenter(objectId);
+          if (!coords) return;
+          const { x, y } = coords;
           const halfSide = graphModel.getPointRadius("hover-drag");
           const boundingBox = {
             height: 2 * halfSide,
@@ -93,9 +101,33 @@ export const Graph = observer(function Graph({
           };
           return boundingBox;
         }
+      },
+      getObjectButtonSVG: ({ classes, handleClick, objectId, objectType, translateTilePointToScreenPoint }) => {
+        if (objectType === "dot") {
+          // Find the center point
+          const coords = getDotCenter(objectId);
+          if (!coords) return;
+          const dotCenter = translateTilePointToScreenPoint?.([coords.x, coords.y]);
+          if (!dotCenter) return;
+          const [ x, y ] = dotCenter;
+          const cx = x + layout.getComputedBounds("left").width;
+          const radius = graphModel.getPointRadius("hover-drag");
+
+          // Return a circle at the center point
+          return (
+            <circle
+              className={classes}
+              cx={cx}
+              cy={y}
+              fill="transparent"
+              onClick={handleClick}
+              r={radius}
+            />
+          );
+        }
       }
     });
-  }, [dataset, getTitle, graphModel, layout, onRegisterTileApi, xAttrID, yAttrID]);
+  }, [getDotCenter, getTitle, graphModel, layout, onRegisterTileApi]);
 
   useEffect(function setupPlotArea() {
     if (xScale && xScale?.length > 0) {
