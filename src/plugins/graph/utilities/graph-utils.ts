@@ -480,3 +480,19 @@ export function computeSlopeAndIntercept(xAxis?: IAxisModel, yAxis?: IAxisModel)
 
   return {slope, intercept};
 }
+
+export function getDotId(caseId: string, xAttributeId: string, yAttributeId: string) {
+  return `dot:{${caseId}}:{${xAttributeId}}:{${yAttributeId}}`;
+}
+
+const dotIdRegEx = /^dot:{(.+)}:{(.+)}:{(.+)}$/;
+export function decipherDotId(dotId: string) {
+  const match = dotId.match(dotIdRegEx);
+  if (match && match.length === 4) {
+    const caseId = match[1];
+    const xAttributeId = match[2];
+    const yAttributeId = match[3];
+    return { caseId, xAttributeId, yAttributeId };
+  }
+  return {};
+}

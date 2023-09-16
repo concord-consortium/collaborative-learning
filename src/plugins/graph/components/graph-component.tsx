@@ -2,6 +2,8 @@ import {useDndContext, useDroppable} from '@dnd-kit/core';
 import {observer} from "mobx-react-lite";
 import React, {useEffect, useMemo, useRef} from "react";
 import {useResizeDetector} from "react-resize-detector";
+import { ITileApi } from '../../../components/tiles/tile-api';
+import { ITileModel } from '../../../models/tiles/tile-model';
 import {ITileBaseProps} from '../imports/components/tiles/tile-base-props';
 import {useDataSet} from '../imports/hooks/use-data-set';
 import {DataSetContext} from '../imports/hooks/use-data-set-context';
@@ -17,7 +19,13 @@ import {DotsElt} from '../d3-types';
 import {AttributeDragOverlay} from "../imports/components/drag-drop/attribute-drag-overlay";
 import "../register-adornment-types";
 
-export const GraphComponent = observer(function GraphComponent({tile}: ITileBaseProps) {
+interface IGraphComponentProps extends ITileBaseProps {
+  tileModel?: ITileModel
+  onRegisterTileApi?: (tileApi: ITileApi, facet?: string | undefined) => void
+}
+export const GraphComponent = observer(function GraphComponent({
+  onRegisterTileApi, tile, tileModel
+}: IGraphComponentProps) {
   const graphModel = isGraphModel(tile?.content) ? tile?.content : undefined;
 
   const instanceId = useNextInstanceId("graph");
@@ -66,6 +74,8 @@ export const GraphComponent = observer(function GraphComponent({tile}: ITileBase
               <Graph graphController={graphController}
                       graphRef={graphRef}
                       dotsRef={dotsRef}
+                      tileModel={tileModel}
+                      onRegisterTileApi={onRegisterTileApi}
               />
               <AttributeDragOverlay activeDragId={overlayDragId} />
             </GraphModelContext.Provider>
