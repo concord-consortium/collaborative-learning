@@ -9,8 +9,6 @@ export const kContainerWidth = 0.93; // - container should take up 93% of tileWi
                                      // - this number should match the "width" attribute in numberline-tile.scss for
                                      // the class .numberline-tool-container
 
-export const kBoundingBoxOffset = -1;
-
 //--------- Numberline Axis constants -----------------------------------------------------------------
 export const kAxisWidth = 0.9;
 export const kAxisStyle = "transform: translate(0px, 60px)";

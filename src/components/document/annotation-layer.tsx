@@ -78,7 +78,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
 
   // Returns a function that will translate a point so it can be passed as a parameter to AnnotationButton
   function getTranslateTilePointToScreenPoint(rowId: string, tileId: string) {
-    const tileBorder = 3;
+    const tileBorder = 2;
 
     const rowElement = getRowElement(rowId);
     if (!rowElement) return undefined;

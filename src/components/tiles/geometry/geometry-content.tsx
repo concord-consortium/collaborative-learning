@@ -6,10 +6,7 @@ import objectHash from "object-hash";
 import React from "react";
 import { SizeMeProps } from "react-sizeme";
 
-import {
-  geometryAnnotationXOffset, geometryAnnotationYOffset, pointBoundingBoxSize, pointButtonRadius,
-  segmentButtonWidth
-} from "./geometry-constants";
+import { pointBoundingBoxSize, pointButtonRadius, segmentButtonWidth } from "./geometry-constants";
 import { BaseComponent } from "../../base";
 import { DocumentContentModelType } from "../../../models/document/document-content";
 import { getTableLinkColors } from "../../../models/tiles/table-links";
@@ -301,8 +298,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           const [x, y] = coords;
           const boundingBox = {
             height: pointBoundingBoxSize,
-            left: x - pointBoundingBoxSize / 2 + geometryAnnotationXOffset,
-            top: y - pointBoundingBoxSize / 2 + geometryAnnotationYOffset,
+            left: x - pointBoundingBoxSize / 2,
+            top: y - pointBoundingBoxSize / 2,
             width: pointBoundingBoxSize
           };
           return boundingBox;
@@ -321,8 +318,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           });
           const boundingBox = {
             height: bottom - top,
-            left: left + geometryAnnotationXOffset,
-            top: top + geometryAnnotationYOffset,
+            left,
+            top,
             width: right - left
           };
           return boundingBox;          
@@ -339,8 +336,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           const top = Math.min(y1, y2);
           const boundingBox = {
             height: bottom - top,
-            left: left + geometryAnnotationXOffset,
-            top: top + geometryAnnotationYOffset,
+            left,
+            top,
             width: right - left
           };
           return boundingBox;
@@ -359,8 +356,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           return (
             <circle
               className={classes}
-              cx={x + geometryAnnotationXOffset}
-              cy={y + geometryAnnotationYOffset}
+              cx={x}
+              cy={y}
               fill="transparent"
               onClick={handleClick}
               r={pointButtonRadius}
@@ -430,7 +427,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
       const [x, y] = point;
       const letter = index === 0 ? "M" : "L";
-      path = `${path}${letter} ${x + geometryAnnotationXOffset} ${y + geometryAnnotationYOffset} `;
+      path = `${path}${letter} ${x} ${y} `;
     });
     path = `${path}Z`;
 

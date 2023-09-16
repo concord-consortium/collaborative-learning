@@ -13,7 +13,7 @@ import { NumberlineContentModelType, PointObjectModelType,  } from "../models/nu
 import {
   kAxisStyle, kAxisWidth, kContainerWidth, kNumberLineContainerHeight, numberlineDomainMax, numberlineDomainMin,
   tickHeightDefault, tickHeightZero, tickStyleDefault, tickStyleZero, tickWidthDefault, tickWidthZero,
-  innerPointRadius, outerPointRadius, numberlineYBound, yMidPoint, kTitleHeight, kBoundingBoxOffset, kArrowheadTop,
+  innerPointRadius, outerPointRadius, numberlineYBound, yMidPoint, kTitleHeight, kArrowheadTop,
   kArrowheadOffset, kPointButtonRadius
 } from '../numberline-tile-constants';
 import { NumberlineToolbar } from "./numberline-toolbar";
@@ -86,7 +86,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     const point = content.getPoint(pointId);
     if (!point) return undefined;
     const { x, y } = pointPosition(point);
-    return { x: x + axisLeft + kBoundingBoxOffset, y: y + kTitleHeight + kBoundingBoxOffset };
+    return { x: x + axisLeft, y: y + kTitleHeight };
   }, [axisLeft, content, pointPosition]);
 
   const getObjectBoundingBox = useCallback((objectId: string, objectType?: string) => {
