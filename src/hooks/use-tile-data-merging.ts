@@ -4,17 +4,20 @@ import { ITileModel } from "../models/tiles/tile-model";
 import { useMergeTileDialog } from "./use-merge-data-dialog";
 import { mergeTwoDataSets } from "../models/data/data-set-utils";
 import { safeJsonParse } from "../utilities/js-utils";
-import { getSnapshot } from "@concord-consortium/mobx-state-tree";
 import { IDataSet, IDataSetSnapshot } from "../models/data/data-set";
+import { SharedModelType } from "../models/shared/shared-model";
 
 interface IProps {
-  documentId?: string;
   model: ITileModel;
 }
 
-export const useTileDataMerging = ({documentId, model}: IProps) => {
-   // TODO - typing, stringifying, find the right pattern to follow
-  const localDataSets = model.content.tileEnv?.sharedModelManager?.getSharedModelsByType("SharedDataSet") || [];
+const getLocalSharedDataSets = (model: ITileModel): SharedModelType[] => {
+  return model.content.tileEnv?.sharedModelManager?.getSharedModelsByType("SharedDataSet") || [];
+};
+
+export const useTileDataMerging = ({model}: IProps) => {
+  const localDataSets = getLocalSharedDataSets(model);
+  // instead of below, look for other times when shared models are mapped over, you should do a local branch...
   const mergableTiles = localDataSets.filter((m) => (m as any).providerId !== model.id);
 
   const mergeTileFunc = useCallback((selectedTile: ITileLinkMetadata) => {

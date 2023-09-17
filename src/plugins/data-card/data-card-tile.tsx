@@ -249,7 +249,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
     documentId, model, hasLinkableRows, onRequestTilesOfType, onRequestLinkableTiles
   });
 
-  const { showMergeTileDialog } = useTileDataMerging({documentId, model});
+  const { showMergeTileDialog } = useTileDataMerging({model});
 
   return (
     <div className={toolClasses}>
