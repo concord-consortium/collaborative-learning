@@ -30,8 +30,6 @@ const Content: React.FC<IContentProps> = ({ selectValue, hostTileTitle, mergable
   const renderOptionsGroup = () => {
     if (!mergableTiles || mergableTiles.length < 1) return null;
 
-    console.log("| mergableTiles", mergableTiles);
-
     return (
       <optgroup label="select data source">
         {mergableTiles.map(tileInfo => {
