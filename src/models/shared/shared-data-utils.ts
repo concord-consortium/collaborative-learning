@@ -93,6 +93,11 @@ export function linkTileToDataSet(tile: ITileContentModel, dataSet: IDataSet) {
   }
 }
 
+export function getMergableDataSets(model: ITileModel) {
+  const docDataSets = getSharedDataSets(model.content);
+  return docDataSets.filter((m) => (m as SharedDataSetType).providerId !== model.id);
+}
+
 export function wrapSerialization<T>(node: IAnyStateTreeNode, serializeFn: () => T) {
   // const sharedDataSets = getSharedDataSets(node);
   try {
