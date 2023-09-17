@@ -5,27 +5,37 @@ import { useMergeTileDialog } from "./use-merge-data-dialog";
 import { mergeTwoDataSets } from "../models/data/data-set-utils";
 import { safeJsonParse } from "../utilities/js-utils";
 import { IDataSet, IDataSetSnapshot } from "../models/data/data-set";
-import { SharedModelType } from "../models/shared/shared-model";
+import { getSharedDataSets } from "../models/shared/shared-data-utils";
+import { SharedDataSetType } from "../models/shared/shared-data-set";
 
 interface IProps {
   model: ITileModel;
 }
 
-const getLocalSharedDataSets = (model: ITileModel): SharedModelType[] => {
-  return model.content.tileEnv?.sharedModelManager?.getSharedModelsByType("SharedDataSet") || [];
-};
+function getMergables(model: ITileModel) {
+  const docDataSets = getSharedDataSets(model.content);
+  return docDataSets.filter((m) => (m as SharedDataSetType).providerId !== model.id);
+}
+
+function getSourceSnap(selectedTile: ITileLinkMetadata) {
+  const sourceDataSnapshot = safeJsonParse(JSON.stringify((selectedTile))).dataSet as IDataSetSnapshot;
+  return sourceDataSnapshot;
+}
+
+function getTargetDataSet(model: ITileModel) {
+  const manager = model.content.tileEnv?.sharedModelManager;
+  const targetModel = manager?.getTileSharedModels(model.content)[0] as SharedDataSetType;
+  return targetModel?.dataSet as IDataSet;
+}
 
 export const useTileDataMerging = ({model}: IProps) => {
-  const localDataSets = getLocalSharedDataSets(model);
-  // instead of below, look for other times when shared models are mapped over, you should do a local branch...
-  const mergableTiles = localDataSets.filter((m) => (m as any).providerId !== model.id);
+  const mergableTiles = getMergables(model);
 
   const mergeTileFunc = useCallback((selectedTile: ITileLinkMetadata) => {
-    const sourceDataSnapshot = safeJsonParse(JSON.stringify((selectedTile))).dataSet as IDataSetSnapshot;
-    const localSharedModel = model.content.tileEnv?.sharedModelManager?.getTileSharedModels(model.content)[0] as any;
-    const targetDataSet = localSharedModel?.dataSet as IDataSet;
-    if (sourceDataSnapshot && targetDataSet) {
-      mergeTwoDataSets(sourceDataSnapshot, targetDataSet);
+    const sourceSnap = getSourceSnap(selectedTile);
+    const targetDataSet = getTargetDataSet(model);
+    if (sourceSnap && targetDataSet) {
+      mergeTwoDataSets(sourceSnap, targetDataSet);
     }
   }, [model]);
 
