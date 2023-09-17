@@ -87,11 +87,11 @@ export const DataCardToolbar: React.FC<IProps> = observer(({
         <div className={cardActionsButtonsClasses}>
           <DuplicateCardButton onClick={handleDuplicateCard} />
           <LinkTileButton getLinkIndex={getLinkIndex} isEnabled={isLinkEnabled} onClick={handleLinkButtonCLick} />
+          <MergeInButton onClick={handleMergeDataClick} />
         </div>
         <div className={valueActionsButtonsClasses}>
           <ImageUploadButton onUploadImageFile={file => uploadImage(file)} />
           <DeleteAttrButton onClick={handleDeleteValue} />
-          <MergeInButton onClick={handleMergeDataClick} />
         </div>
       </div>, documentContent)
   : null;
