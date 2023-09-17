@@ -1,6 +1,9 @@
+import { IDataSet } from "../data/data-set";
+
 export interface ITileLinkMetadata {
   id: string;
   title?: string;
+  dataSet?: IDataSet;
 }
 
 export interface ITypedTileLinkMetadata extends ITileLinkMetadata {
