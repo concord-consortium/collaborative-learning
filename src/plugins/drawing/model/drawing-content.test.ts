@@ -16,6 +16,7 @@ import { VectorObject } from "../objects/vector";
 import { LineObject } from "../objects/line";
 import { TextObject } from "../objects/text";
 import { GroupObjectType } from "../objects/group";
+import "../drawing-registration";
 
 const mockLogTileChangeEvent = jest.fn();
 jest.mock("../../../models/tiles/log/log-tile-change-event", () => ({
@@ -651,9 +652,6 @@ describe("DrawingContentModel", () => {
 
     model.ungroupGroups([groupId]);
 
-    mockLogTileChangeEvent.mock.calls.forEach((call, index) => {
-      console.log('call', index+1, ': ', call[1].operation, '(', call[1]?.change?.args, ')');
-    });
     expect(mockLogTileChangeEvent).toHaveBeenCalledTimes(4);
     expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(1,
       LogEventName.DRAWING_TOOL_CHANGE, {

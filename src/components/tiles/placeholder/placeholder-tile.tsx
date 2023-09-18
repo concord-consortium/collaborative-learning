@@ -4,7 +4,7 @@ import { getSectionPlaceholder } from "../../../models/curriculum/section";
 import { PlaceholderContentModelType } from "../../../models/tiles/placeholder/placeholder-content";
 import { ITileProps } from "../tile-component";
 
-import "./placeholder-tile.sass";
+import "./placeholder-tile.scss";
 
 export default class PlaceholderTileComponent extends BaseComponent<ITileProps> {
   public render() {

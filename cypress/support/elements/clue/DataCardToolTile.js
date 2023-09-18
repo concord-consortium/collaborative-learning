@@ -27,6 +27,10 @@ class DataCardToolTile {
     const valueSelector = ".attribute-name-value-pair .value .value-input";
     return this.getTile(tileIndex, workspaceClass).find(`${valueSelector}`);
   }
+  getDownshiftOptions(tileIndex = 0, workspaceClass){
+    const optionsSelector = ".downshift-dropdown ul li";
+    return this.getTile(tileIndex, workspaceClass).find(`${optionsSelector}`);
+  }
   getSingleCardView(tileIndex = 0, workspaceClass){
     const selector = ".single-card-data-area";
     return this.getTile(tileIndex, workspaceClass).find(`${selector}`);
@@ -41,6 +45,10 @@ class DataCardToolTile {
   }
   getAddCardButton(tileIndex = 0, workspaceClass){
     const selector = ".add-remove-card-buttons .add-card";
+    return this.getTile(tileIndex, workspaceClass).find(`${selector}`);
+  }
+  getAddAttributeButton(tileIndex = 0, workspaceClass){
+    const selector = ".add-field";
     return this.getTile(tileIndex, workspaceClass).find(`${selector}`);
   }
   getDeleteCardButton(tileIndex = 0, workspaceClass){

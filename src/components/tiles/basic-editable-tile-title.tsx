@@ -30,7 +30,7 @@ export function BasicEditableTileTitle({ model, readOnly, scale, titleKey }: IBa
         readOnly={readOnly}
         measureText={(text) => measureText(text, defaultTileTitleFont)}
         onEndEdit={handleTitleChange}
-    />
+      />
     </ToolTitleArea>
   );
 }
