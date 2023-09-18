@@ -59,7 +59,7 @@ function handleFractions(value: IValueType) {
   }
   const result = value.match(/^ *(-?) *(\d+) *\/ *(\d+) *$/);
   if (result) {
-    const numericValue =  Number(result[2]) / Number(result[3]);
+    const numericValue = Number(result[2]) / Number(result[3]);
     return result[1] === "-" ? -numericValue : numericValue;
   }
   return value;
