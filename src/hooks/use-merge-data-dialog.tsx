@@ -7,7 +7,6 @@ import MergeInIcon from "../../src/plugins/data-card/assets/merge-in-icon.svg";
 
 import "./link-tile-dialog.scss";
 
-
 interface IContentProps {
   model: ITileModel;
   selectValue: string;
@@ -35,7 +34,7 @@ const Content: React.FC<IContentProps> = ({
 
   return (
     <>
-      <div className="message">
+      <div className="prompt">
         Select a data source from the list to add data to { hostTileTitle }.
       </div>
       <select value={selectValue} onChange={handleSelectChange}>
@@ -69,7 +68,7 @@ export const useMergeTileDialog = ({ mergableTiles, model, onMergeTile }: IProps
   };
 
   const [showModal, hideModal] = useCustomModal({
-    className: "link-tile",
+    className: "merge-tile",
     Icon: MergeInIcon,
     title: "Add data from...",
     Content,

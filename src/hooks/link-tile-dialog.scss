@@ -1,6 +1,7 @@
 @import "../components/vars.sass";
 
-.custom-modal.link-tile {
+.custom-modal.link-tile,
+.custom-modal.merge-tile {
   width: 420px;
   height: 200px;
   outline: none;
@@ -22,3 +23,7 @@
     opacity: 35%;
   }
 };
+
+.custom-modal.merge-tile .modal-icon {
+  padding:4px;
+}
