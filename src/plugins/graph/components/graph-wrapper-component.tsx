@@ -1,17 +1,23 @@
-import React from "react";
+import React, { useCallback, useEffect } from "react";
 import classNames from "classnames";
+import { observer } from "mobx-react-lite";
 
-import { GraphComponent } from "./graph-component";
-import { ITileProps } from "../../../components/tiles/tile-component";
-import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
-import { IGraphModel } from "../models/graph-model";
 import { useToolbarTileApi } from "../../../components/tiles/hooks/use-toolbar-tile-api";
-import { GraphToolbar } from "./graph-toolbar";
+import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
+import { ITileProps } from "../../../components/tiles/tile-component";
 import { useProviderTileLinking } from "../../../hooks/use-provider-tile-linking";
+import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
+import { useInitGraphLayout } from "../hooks/use-init-graph-layout";
+import { getScreenX, getScreenY } from "../hooks/use-point-locations";
+import { useDataSet } from "../imports/hooks/use-data-set";
+import { IGraphModel } from "../models/graph-model";
+import { decipherDotId } from "../utilities/graph-utils";
+import { GraphComponent } from "./graph-component";
+import { GraphToolbar } from "./graph-toolbar";
 
 import "./graph-wrapper-component.scss";
 
-export const GraphWrapperComponent: React.FC<ITileProps> = (props) => {
+export const GraphWrapperComponent: React.FC<ITileProps> = observer((props) => {
   const {
     documentContent, documentId, model, readOnly, scale, tileElt,
     onRegisterTileApi, onUnregisterTileApi, onRequestTilesOfType, onRequestLinkableTiles
@@ -23,6 +29,79 @@ export const GraphWrapperComponent: React.FC<ITileProps> = (props) => {
   const { isLinkEnabled, showLinkTileDialog } = useProviderTileLinking({
     documentId, model, readOnly, onRequestTilesOfType, onRequestLinkableTiles
   });
+
+  const { data } = useDataSet(content?.data);
+  const layout = useInitGraphLayout(content);
+  const xAttrID = content.getAttributeID('x');
+  const yAttrID = content.getAttributeID('y');
+
+  const getTitle  = useCallback(() => {
+    return model?.title || "";
+  }, [model]);
+
+  const getDotCenter = useCallback((dotId: string) => {
+    const idParts = decipherDotId(dotId);
+    if (!idParts) return;
+    const { caseId, xAttributeId, yAttributeId } = idParts;
+    if (xAttributeId !== xAttrID || yAttributeId !== yAttrID) return;
+    const dataConfig = content.config;
+    const x = getScreenX({ caseId, dataset: data, layout, dataConfig });
+    const y = getScreenY({ caseId, dataset: data, layout, dataConfig });
+    return { x, y };
+  }, [data, content.config, layout, xAttrID, yAttrID]);
+
+  useEffect(() => {
+    onRegisterTileApi?.({
+      exportContentAsTileJson: (options?: ITileExportOptions) => {
+        return content.exportJson(options);
+      },
+      getTitle: () => {
+        return getTitle();
+      },
+      getObjectBoundingBox: (objectId: string, objectType?: string) => {
+        if (objectType === "dot") {
+          const coords = getDotCenter(objectId);
+          if (!coords) return;
+          const { x, y } = coords;
+          const halfSide = content.getPointRadius("hover-drag");
+          const boundingBox = {
+            height: 2 * halfSide,
+            left: x - halfSide + layout.getComputedBounds("left").width,
+            top: y - halfSide,
+            width: 2 * halfSide
+          };
+          return boundingBox;
+        }
+      },
+      getObjectButtonSVG: ({ classes, handleClick, objectId, objectType }) => {
+        if (objectType === "dot") {
+          // Find the center point
+          const coords = getDotCenter(objectId);
+          if (!coords) return;
+          const { x, y } = coords;
+          const cx = x + layout.getComputedBounds("left").width;
+          const radius = content.getPointRadius("hover-drag");
+
+          // Return a circle at the center point
+          return (
+            <circle
+              className={classes}
+              cx={cx}
+              cy={y}
+              onClick={handleClick}
+              r={radius}
+            />
+          );
+        }
+      }
+    });
+  }, [getDotCenter, getTitle, content, layout, onRegisterTileApi]);
+
+  useEffect(function cleanup() {
+    return () => {
+      layout.cleanup();
+    };
+  }, [layout]);
 
   return (
     <div className={classNames("graph-wrapper", { "read-only": readOnly })}>
@@ -42,7 +121,7 @@ export const GraphWrapperComponent: React.FC<ITileProps> = (props) => {
         readOnly={readOnly}
         scale={scale}
       />
-      <GraphComponent onRegisterTileApi={onRegisterTileApi} tile={model} tileModel={model} />
+      <GraphComponent data={data} layout={layout} tile={model} />
     </div>
   );
-};
+});

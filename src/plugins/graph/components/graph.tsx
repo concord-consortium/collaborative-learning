@@ -1,11 +1,7 @@
 import {observer} from "mobx-react-lite";
 import {appConfig} from "../../../initialize-app";
-import React, {MutableRefObject, useCallback, useEffect, useMemo, useRef} from "react";
+import React, {MutableRefObject, useEffect, useMemo, useRef} from "react";
 import {select} from "d3";
-import { ITileApi } from "../../../components/tiles/tile-api";
-import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
-import { ITileModel } from "../../../models/tiles/tile-model";
-import { getScreenX, getScreenY } from "../hooks/use-point-locations";
 import {GraphController} from "../models/graph-controller";
 import {DroppableAddAttribute} from "./droppable-add-attribute";
 import {Background} from "./background";
@@ -21,7 +17,7 @@ import {Marquee} from "./marquee";
 import {DataConfigurationContext} from "../hooks/use-data-configuration-context";
 import {useDataSetContext} from "../imports/hooks/use-data-set-context";
 import {useGraphModel} from "../hooks/use-graph-model";
-import {decipherDotId, setNiceDomain, startAnimation} from "../utilities/graph-utils";
+import {setNiceDomain, startAnimation} from "../utilities/graph-utils";
 import {IAxisModel} from "../imports/components/axis/models/axis-model";
 import {GraphPlace} from "../imports/components/axis-graph-shared";
 import {useGraphLayoutContext} from "../models/graph-layout";
@@ -43,13 +39,9 @@ interface IProps {
   graphController: GraphController
   graphRef: MutableRefObject<HTMLDivElement | null>
   dotsRef: IDotsRef
-  onRegisterTileApi?: (tileApi: ITileApi, facet?: string | undefined) => void
-  tileModel?: ITileModel
 }
 
-export const Graph = observer(function Graph({
-  graphController, graphRef, dotsRef, onRegisterTileApi, tileModel
-}: IProps) {
+export const Graph = observer(function Graph({ graphController, graphRef, dotsRef }: IProps) {
   const graphModel = useGraphModelContext(),
     {autoAdjustAxes, enableAnimation} = graphController,
     {plotType} = graphModel,
@@ -63,68 +55,6 @@ export const Graph = observer(function Graph({
     backgroundSvgRef = useRef<SVGGElement>(null),
     xAttrID = graphModel.getAttributeID('x'),
     yAttrID = graphModel.getAttributeID('y');
-
-  const getTitle  = useCallback(() => {
-    return tileModel?.title || "";
-  }, [tileModel]);
-
-  const getDotCenter = useCallback((dotId: string) => {
-    const idParts = decipherDotId(dotId);
-    if (!idParts) return;
-    const { caseId, xAttributeId, yAttributeId } = idParts;
-    if (xAttributeId !== xAttrID || yAttributeId !== yAttrID) return;
-    const dataConfig = graphModel.config;
-    const x = getScreenX({ caseId, dataset, layout, dataConfig });
-    const y = getScreenY({ caseId, dataset, layout, dataConfig });
-    return { x, y };
-  }, [dataset, graphModel.config, layout, xAttrID, yAttrID]);
-
-  useEffect(() => {
-    onRegisterTileApi?.({
-      exportContentAsTileJson: (options?: ITileExportOptions) => {
-        return graphModel.exportJson(options);
-      },
-      getTitle: () => {
-        return getTitle();
-      },
-      getObjectBoundingBox: (objectId: string, objectType?: string) => {
-        if (objectType === "dot") {
-          const coords = getDotCenter(objectId);
-          if (!coords) return;
-          const { x, y } = coords;
-          const halfSide = graphModel.getPointRadius("hover-drag");
-          const boundingBox = {
-            height: 2 * halfSide,
-            left: x - halfSide + layout.getComputedBounds("left").width,
-            top: y - halfSide,
-            width: 2 * halfSide
-          };
-          return boundingBox;
-        }
-      },
-      getObjectButtonSVG: ({ classes, handleClick, objectId, objectType }) => {
-        if (objectType === "dot") {
-          // Find the center point
-          const coords = getDotCenter(objectId);
-          if (!coords) return;
-          const { x, y } = coords;
-          const cx = x + layout.getComputedBounds("left").width;
-          const radius = graphModel.getPointRadius("hover-drag");
-
-          // Return a circle at the center point
-          return (
-            <circle
-              className={classes}
-              cx={cx}
-              cy={y}
-              onClick={handleClick}
-              r={radius}
-            />
-          );
-        }
-      }
-    });
-  }, [getDotCenter, getTitle, graphModel, layout, onRegisterTileApi]);
 
   useEffect(function setupPlotArea() {
     if (xScale && xScale?.length > 0) {

@@ -2,35 +2,28 @@ import {useDndContext, useDroppable} from '@dnd-kit/core';
 import {observer} from "mobx-react-lite";
 import React, {useEffect, useMemo, useRef} from "react";
 import {useResizeDetector} from "react-resize-detector";
-import { ITileApi } from '../../../components/tiles/tile-api';
-import { ITileModel } from '../../../models/tiles/tile-model';
 import {ITileBaseProps} from '../imports/components/tiles/tile-base-props';
-import {useDataSet} from '../imports/hooks/use-data-set';
 import {DataSetContext} from '../imports/hooks/use-data-set-context';
 import {useGraphController} from "../hooks/use-graph-controller";
-import {useInitGraphLayout} from '../hooks/use-init-graph-layout';
 import {InstanceIdContext, useNextInstanceId} from "../imports/hooks/use-instance-id-context";
 import {AxisLayoutContext} from "../imports/components/axis/models/axis-layout-context";
 import {GraphController} from "../models/graph-controller";
-import {GraphLayoutContext} from "../models/graph-layout";
+import {GraphLayout, GraphLayoutContext} from "../models/graph-layout";
 import {GraphModelContext, isGraphModel} from "../models/graph-model";
 import {Graph} from "./graph";
 import {DotsElt} from '../d3-types';
 import {AttributeDragOverlay} from "../imports/components/drag-drop/attribute-drag-overlay";
 import "../register-adornment-types";
+import { IDataSet } from '../../../models/data/data-set';
 
 interface IGraphComponentProps extends ITileBaseProps {
-  tileModel?: ITileModel
-  onRegisterTileApi?: (tileApi: ITileApi, facet?: string | undefined) => void
+  data?: IDataSet;
+  layout: GraphLayout;
 }
-export const GraphComponent = observer(function GraphComponent({
-  onRegisterTileApi, tile, tileModel
-}: IGraphComponentProps) {
+export const GraphComponent = observer(function GraphComponent({ data, layout, tile }: IGraphComponentProps) {
   const graphModel = isGraphModel(tile?.content) ? tile?.content : undefined;
 
   const instanceId = useNextInstanceId("graph");
-  const { data } = useDataSet(graphModel?.data);
-  const layout = useInitGraphLayout(graphModel);
   // Removed debouncing, but we can bring it back if we find we need it
   const graphRef = useRef<HTMLDivElement | null>(null);
   const {width, height} = useResizeDetector<HTMLDivElement>({ targetRef: graphRef });
@@ -47,12 +40,6 @@ export const GraphComponent = observer(function GraphComponent({
   useEffect(() => {
     (width != null) && (height != null) && layout.setParentExtent(width, height);
   }, [width, height, layout]);
-
-  useEffect(function cleanup() {
-    return () => {
-      layout.cleanup();
-    };
-  }, [layout]);
 
   // used to determine when a dragged attribute is over the graph component
   const dropId = `${instanceId}-component-drop-overlay`;
@@ -74,8 +61,6 @@ export const GraphComponent = observer(function GraphComponent({
               <Graph graphController={graphController}
                       graphRef={graphRef}
                       dotsRef={dotsRef}
-                      tileModel={tileModel}
-                      onRegisterTileApi={onRegisterTileApi}
               />
               <AttributeDragOverlay activeDragId={overlayDragId} />
             </GraphModelContext.Provider>
