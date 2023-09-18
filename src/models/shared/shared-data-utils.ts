@@ -93,9 +93,15 @@ export function linkTileToDataSet(tile: ITileContentModel, dataSet: IDataSet) {
   }
 }
 
+// Find datasets in document that can be merged into the given tile.
+// Omit dataSet belonging to the tile itself and omit any orphaned dataSets remaining in document.
 export function getMergableDataSets(model: ITileModel) {
+  const sharedModelManager = getSharedModelManager(model);
   const docDataSets = getSharedDataSets(model.content);
-  return docDataSets.filter((m) => (m as SharedDataSetType).providerId !== model.id);
+  const mergableDataSets = docDataSets
+    .filter((m) => (m as SharedDataSetType).providerId !== model.id)
+    .filter((m) => sharedModelManager?.getSharedModelTileIds(m)?.includes(m.providerId));
+  return mergableDataSets;
 }
 
 export function wrapSerialization<T>(node: IAnyStateTreeNode, serializeFn: () => T) {
