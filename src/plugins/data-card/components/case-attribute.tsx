@@ -62,12 +62,10 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const editingValue = currEditFacet === "value" && currEditAttrId === attrKey;
 
   const validCompletions = (aValues: string[], prefixString: string) => {
-    const prefixStringLC = prefixString.toLowerCase();
     const values = uniq(aValues).sort();
-    return values.filter((value) => {
-      return value && typeof(value)==='string' && !isImageUrl(value)
-             && value.toLowerCase().startsWith(prefixStringLC);
-    }) as string[];
+    // TODO: - we could still use the prefix, and in the case that there is a value being entered, then
+    // use the prefix string to filter down the result.
+    return values.filter((value) => typeof(value)==='string' && !isImageUrl(value)) as string[];
   };
 
   const {
