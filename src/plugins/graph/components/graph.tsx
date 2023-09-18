@@ -102,14 +102,12 @@ export const Graph = observer(function Graph({
           return boundingBox;
         }
       },
-      getObjectButtonSVG: ({ classes, handleClick, objectId, objectType, translateTilePointToScreenPoint }) => {
+      getObjectButtonSVG: ({ classes, handleClick, objectId, objectType }) => {
         if (objectType === "dot") {
           // Find the center point
           const coords = getDotCenter(objectId);
           if (!coords) return;
-          const dotCenter = translateTilePointToScreenPoint?.([coords.x, coords.y]);
-          if (!dotCenter) return;
-          const [ x, y ] = dotCenter;
+          const { x, y } = coords;
           const cx = x + layout.getComputedBounds("left").width;
           const radius = graphModel.getPointRadius("hover-drag");
 
@@ -119,7 +117,6 @@ export const Graph = observer(function Graph({
               className={classes}
               cx={cx}
               cy={y}
-              fill="transparent"
               onClick={handleClick}
               r={radius}
             />

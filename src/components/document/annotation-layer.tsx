@@ -76,52 +76,59 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     }
   };
 
-  // Returns a function that will translate a point so it can be passed as a parameter to AnnotationButton
-  function getTranslateTilePointToScreenPoint(rowId: string, tileId: string) {
+  // Returns the x and y offset of the top left corner of a tile with respect to the document
+  function getTileOffset(rowId: string, tileId: string): Point | undefined {
     const tileBorder = 2;
 
     const rowElement = getRowElement(rowId);
-    if (!rowElement) return undefined;
+    if (!rowElement) return;
 
     const tileSelector = `[data-tool-id='${tileId}']`;
     const tileElements = canvasElement?.querySelectorAll(tileSelector);
     const tileElement = tileElements && tileElements.length === 1 ? tileElements[0] as HTMLElement : undefined;
-    if (!tileElement) return undefined;
+    if (!tileElement) return;
 
-    return (point: Point): Point | undefined => {
-      const [x, y] = point;
-      const _x = rowElement.offsetLeft + tileElement.offsetLeft - tileElement.scrollLeft
-        + x + tileBorder - (documentScrollX ?? 0);
-      const _y = rowElement.offsetTop + tileElement.offsetTop - tileElement.scrollTop
-        + y + tileBorder - (documentScrollY ?? 0);
-      return [_x, _y];
-    };
+    const x = rowElement.offsetLeft + tileElement.offsetLeft - tileElement.scrollLeft
+      + tileBorder - (documentScrollX ?? 0);
+    const y = rowElement.offsetTop + tileElement.offsetTop - tileElement.scrollTop
+      + tileBorder - (documentScrollY ?? 0);
+    return [x, y];
   }
 
+  // Returns an object bounding box with respect to the containing tile
   function getObjectBoundingBox(
-    rowId: string, tileId: string, objectId: string, objectType?: string
+    tileId: string, objectId: string, objectType?: string
   ) {
     const tileApi = tileApiInterface?.getTileApi(tileId);
     const objectBoundingBox = tileApi?.getObjectBoundingBox?.(objectId, objectType);
-    if (!objectBoundingBox) return undefined;
+    if (!objectBoundingBox) return;
 
-    const translatePoint = getTranslateTilePointToScreenPoint(rowId, tileId);
-    const point = translatePoint?.([objectBoundingBox.left, objectBoundingBox.top]);
-    if (!point) return undefined;
+    return objectBoundingBox;
+  }
 
-    const [left, top] = point;
-    const height = objectBoundingBox.height;
-    const width = objectBoundingBox.width;
+  // Returns an object bounding box with respect to the containing document
+  function getTileAdjustedBoundingBox(
+    rowId: string, tileId: string, objectId: string, objectType?: string
+  ) {
+    const unadjustedBoundingBox = getObjectBoundingBox(tileId, objectId, objectType);
+    if (!unadjustedBoundingBox) return;
+    const tileOffset = getTileOffset(rowId, tileId);
+    if (!tileOffset) return;
+
+    const [left, top] = [unadjustedBoundingBox.left + tileOffset[0], unadjustedBoundingBox.top + tileOffset[1]];
+    const height = unadjustedBoundingBox.height;
+    const width = unadjustedBoundingBox.width;
     return { left, top, height, width };
   }
-  
+
+  // Returns an object bounding box with respect to the containing document without knowledge of the tile's row
   function getObjectBoundingBoxUnknownRow(
     tileId: string, objectId: string, objectType?: string
   ) {
     if (!content) return undefined;
   
     const rowId = content.findRowContainingTile(tileId);
-    return getObjectBoundingBox(rowId ?? "", tileId, objectId, objectType);
+    return getTileAdjustedBoundingBox(rowId ?? "", tileId, objectId, objectType);
   }
 
   const sourceBoundingBox = sourceTileId && sourceObjectId
@@ -216,14 +223,13 @@ export const AnnotationLayer = observer(function AnnotationLayer({
                   return (
                     <AnnotationButton
                       getObjectBoundingBox={getObjectBoundingBox}
+                      getTileOffset={() => getTileOffset(rowId, tileInfo.tileId)}
                       key={`${tile.id}-${objectId}-button`}
                       objectId={objectId}
                       objectType={objectType}
                       onClick={handleAnnotationButtonClick}
-                      rowId={rowId}
                       sourceObjectId={sourceObjectId}
                       sourceTileId={sourceTileId}
-                      translateTilePointToScreenPoint={getTranslateTilePointToScreenPoint(rowId, tileInfo.tileId)}
                       tileId={tile.id}
                     />
                   );

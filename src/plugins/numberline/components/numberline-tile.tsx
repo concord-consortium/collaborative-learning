@@ -113,22 +113,16 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
         return model.title || "";
       },
       getObjectBoundingBox,
-      getObjectButtonSVG: ({ classes, handleClick, objectId, objectType, translateTilePointToScreenPoint }) => {
+      getObjectButtonSVG: ({ classes, handleClick, objectId, objectType }) => {
         if (objectType === "point") {
-          // Find the center point
           const coords = annotationPointCenter(objectId);
           if (!coords) return;
-          const pointCenter = translateTilePointToScreenPoint?.([coords.x, coords.y]);
-          if (!pointCenter) return;
-
-          // Return a circle at the center point
-          const [x, y] = pointCenter;
+          const { x, y } = coords;
           return (
             <circle
               className={classes}
               cx={x}
               cy={y}
-              fill="transparent"
               onClick={handleClick}
               r={kPointButtonRadius}
             />

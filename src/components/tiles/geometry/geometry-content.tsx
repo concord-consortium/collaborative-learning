@@ -343,22 +343,19 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           return boundingBox;
         }
       },
-      getObjectButtonSVG: ({ classes, handleClick, objectId, objectType, translateTilePointToScreenPoint }) => {
+      getObjectButtonSVG: ({ classes, handleClick, objectId, objectType }) => {
         if (objectType === "point") {
           // Find the center point
           const coords = this.getPointScreenCoords(objectId);
           if (!coords) return;
-          const point = translateTilePointToScreenPoint?.(coords);
-          if (!point) return;
 
           // Return a circle at the center point
-          const [x, y] = point;
+          const [x, y] = coords;
           return (
             <circle
               className={classes}
               cx={x}
               cy={y}
-              fill="transparent"
               onClick={handleClick}
               r={pointButtonRadius}
             />
@@ -386,14 +383,13 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             [x2 + Math.cos(secondAngle) * segmentButtonWidth, y2 - Math.sin(secondAngle) * segmentButtonWidth],
             [x1 + Math.cos(secondAngle) * segmentButtonWidth, y1 - Math.sin(secondAngle) * segmentButtonWidth],
           ];
-          return this.getButtonPath(coords, handleClick, classes, translateTilePointToScreenPoint);
+          return this.getButtonPath(coords, handleClick, classes);
         } else if (objectType === "polygon") {
           // Determine the path of the polygon based on its points
           const content = this.getContent();
           const polygon = content.getObject(objectId) as PolygonModelType;
           return this.getButtonPath(
-            polygon.points.map(pointId => this.getPointScreenCoords(pointId)),
-            handleClick, classes, translateTilePointToScreenPoint
+            polygon.points.map(pointId => this.getPointScreenCoords(pointId)), handleClick, classes
           );
         }
       }
@@ -415,17 +411,13 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private getButtonPath(
-    coords: (Point | undefined)[], handleClick: () => void, classes?: string,
-    translatePoint?: ((point: Point) => Point | undefined)
+    coords: (Point | undefined)[], handleClick: () => void, classes?: string
   ) {
-    if (!translatePoint) return undefined;
     let path = "";
     coords.forEach((coord, index) => {
       if (!coord) return;
-      const point = translatePoint?.(coord);
-      if (!point) return;
 
-      const [x, y] = point;
+      const [x, y] = coord;
       const letter = index === 0 ? "M" : "L";
       path = `${path}${letter} ${x} ${y} `;
     });
@@ -435,7 +427,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       <path
         className={classes}
         d={path}
-        fill="transparent"
         onClick={handleClick}
       />
     );
