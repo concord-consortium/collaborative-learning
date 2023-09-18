@@ -2,17 +2,22 @@ import React, { useRef, useState } from "react";
 import { useCustomModal } from "./use-custom-modal";
 import { ITileLinkMetadata } from "../models/tiles/tile-link-types";
 import { ITileModel } from "../models/tiles/tile-model";
+import { getTileModelById } from "../utilities/mst-utils";
 import MergeInIcon from "../../src/plugins/data-card/assets/merge-in-icon.svg";
 
 import "./link-tile-dialog.scss";
 
+
 interface IContentProps {
+  model: ITileModel;
   selectValue: string;
   hostTileTitle?: string;
   mergableTiles: ITileLinkMetadata[];
   setSelectValue: React.Dispatch<React.SetStateAction<string>>;
 }
-const Content: React.FC<IContentProps> = ({ selectValue, hostTileTitle, mergableTiles, setSelectValue })=> {
+const Content: React.FC<IContentProps> = ({
+  model, selectValue, hostTileTitle, mergableTiles, setSelectValue
+}) => {
   const selectElt = useRef<HTMLSelectElement>(null);
 
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -20,26 +25,28 @@ const Content: React.FC<IContentProps> = ({ selectValue, hostTileTitle, mergable
     setTimeout(() => selectElt.current?.focus());
   };
 
-  // const mergableTilesInfo = mergableTiles.map(tileInfo => {
-  //   return {
-  //     id: tileInfo.id,
-  //     title: getSharedModelTiles(tileInfo).map(tile => tile.title).join(", ")
-  //   };
-  // })
+  const mergableTilesInfo = mergableTiles.map(tileInfo => {
+    if (tileInfo.title) return tileInfo;
+    if (!tileInfo.title && tileInfo.providerId) {
+      const tileModel = getTileModelById(model.content, tileInfo.providerId);
+      return { ...tileInfo, title: tileModel?.title };
+    }
+  });
 
   const renderOptionsGroup = () => {
     if (!mergableTiles || mergableTiles.length < 1) return null;
 
     return (
-      <optgroup label="select data source">
-        {mergableTiles.map(tileInfo => {
+      <>
+        {mergableTilesInfo.map(tileInfo => {
+          if (!tileInfo) return null;
           return (
             <option key={tileInfo.id} value={tileInfo.id}>
-              { tileInfo.id }
+              { tileInfo.title }
             </option>
           );
         })}
-      </optgroup>
+      </>
     );
   };
 
@@ -75,7 +82,7 @@ export const useMergeTileDialog = ({ mergableTiles, model, onMergeTile }: IProps
     Icon: MergeInIcon,
     title: "Add data from...",
     Content,
-    contentProps: { selectValue, hostTileTitle, mergableTiles, setSelectValue },
+    contentProps: { model, selectValue, hostTileTitle, mergableTiles, setSelectValue },
     buttons: [
       {
         label: "Cancel", onClick: () => hideModal()

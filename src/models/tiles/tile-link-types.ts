@@ -4,6 +4,7 @@ export interface ITileLinkMetadata {
   id: string;
   title?: string;
   dataSet?: IDataSet;
+  providerId?: string;
 }
 
 export interface ITypedTileLinkMetadata extends ITileLinkMetadata {
