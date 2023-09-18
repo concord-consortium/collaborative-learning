@@ -288,9 +288,11 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
           {this.renderResizeHandle(object, "se", seX, seY, color)}
         </g>;
 
+      const testId = enableActions ? "selection-box" : "highlight-box";
+
       return <g key={index}>
               <rect
-                data-testid="selection-box"
+                data-testid={testId}
                 x={nwX}
                 y={nwY}
                 width={seX - nwX}

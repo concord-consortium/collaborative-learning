@@ -150,6 +150,10 @@
 
     svg {
 
+      .ghost {
+        opacity: 0.1;
+      }
+
       .resize-handle {
         fill: #ffffff;
 

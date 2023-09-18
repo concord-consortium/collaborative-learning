@@ -156,7 +156,7 @@ export function renderDrawingObject(drawingObject: DrawingObjectType, readOnly=f
     return element;
   } else {
     // invisible objects, when rendered, are rendered as 'ghosts'
-    return (<g opacity="0.1">{element}</g>);
+    return (<g className="ghost">{element}</g>);
   }
 }
 
