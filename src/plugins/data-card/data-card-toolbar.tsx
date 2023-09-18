@@ -19,6 +19,7 @@ import "./data-card-toolbar.scss";
 interface IProps extends IFloatingToolbarProps {
   currEditAttrId: string;
   currEditFacet: EditFacet;
+  isMergeEnabled?: boolean;
   isLinkEnabled?: boolean;
   model: ITileModel;
   getLinkIndex: () => number;
@@ -30,7 +31,7 @@ interface IProps extends IFloatingToolbarProps {
 }
 
 export const DataCardToolbar: React.FC<IProps> = observer(({
-  isLinkEnabled, model, documentContent, tileElt, currEditAttrId, currEditFacet,
+  isLinkEnabled, isMergeEnabled, model, documentContent, tileElt, currEditAttrId, currEditFacet,
   showLinkTileDialog, showMergeTileDialog, getLinkIndex, onIsEnabled, setImageUrlToAdd,
   handleDeleteValue, handleDuplicateCard, ...others
   }: IProps) => {
@@ -87,7 +88,7 @@ export const DataCardToolbar: React.FC<IProps> = observer(({
         <div className={cardActionsButtonsClasses}>
           <DuplicateCardButton onClick={handleDuplicateCard} />
           <LinkTileButton getLinkIndex={getLinkIndex} isEnabled={isLinkEnabled} onClick={handleLinkButtonCLick} />
-          <MergeInButton onClick={handleMergeDataClick} />
+          <MergeInButton onClick={handleMergeDataClick} isEnabled={isMergeEnabled} />
         </div>
         <div className={valueActionsButtonsClasses}>
           <ImageUploadButton onUploadImageFile={file => uploadImage(file)} />

@@ -85,16 +85,18 @@ export const LinkTileButton = ({ isEnabled, getLinkIndex, onClick }: ILinkDataCa
 };
 
 interface IMergeDataButtonProps {
+  isEnabled?: boolean;
   onClick?: () => void;
 }
-export const MergeInButton = ({ onClick }: IMergeDataButtonProps) => {
+export const MergeInButton = ({ isEnabled, onClick }: IMergeDataButtonProps) => {
+  const classes = classNames("merge-data-button", { disabled: !isEnabled });
   const handleClick = (e: React.MouseEvent) => {
-    onClick?.();
+    isEnabled && onClick?.();
     e.stopPropagation();
   };
   return (
     <ToolbarButton
-      className="merge-data-button"
+      className={classes}
       icon={<MergeInIcon />}
       onClick={handleClick}
       tooltipOptions={{ title: "Add Data from..." }}

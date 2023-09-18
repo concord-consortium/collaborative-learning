@@ -25,6 +25,7 @@ export const useTileDataMerging = ({model}: IProps) => {
   const [showMergeTileDialog] = useMergeTileDialog({
     mergableTiles, model, onMergeTile: mergeTileFunc
   });
+  const isMergeEnabled = mergableTiles.length > 0;
 
-  return { showMergeTileDialog };
+  return { isMergeEnabled, showMergeTileDialog };
 };
