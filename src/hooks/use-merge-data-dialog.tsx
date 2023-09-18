@@ -33,23 +33,6 @@ const Content: React.FC<IContentProps> = ({
     }
   });
 
-  const renderOptionsGroup = () => {
-    if (!mergableTiles || mergableTiles.length < 1) return null;
-
-    return (
-      <>
-        {mergableTilesInfo.map(tileInfo => {
-          if (!tileInfo) return null;
-          return (
-            <option key={tileInfo.id} value={tileInfo.id}>
-              { tileInfo.title }
-            </option>
-          );
-        })}
-      </>
-    );
-  };
-
   return (
     <>
       <div className="message">
@@ -57,7 +40,15 @@ const Content: React.FC<IContentProps> = ({
       </div>
       <select value={selectValue} onChange={handleSelectChange}>
         <option key="prompt" value={""}>Select a data source</option>
-        { renderOptionsGroup() }
+        { mergableTilesInfo.length > 0 &&
+          mergableTilesInfo.map(tileInfo => {
+            return tileInfo && tileInfo.title && (
+              <option key={tileInfo.id} value={tileInfo.id}>
+                { tileInfo.title }
+              </option>
+            );
+          })
+        }
       </select>
     </>
   );
