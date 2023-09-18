@@ -51,7 +51,7 @@ context('XYPlot Tool Tile', function () {
       cy.log("verify graph dot is displayed");
       xyTile.getGraphDot().should('have.length', 1);
 
-      cy.log("Add Second Row Table Cell")
+      cy.log("Add Second Row Table Cell");
       cy.get(".primary-workspace").within((workspace) => {
         tableToolTile.typeInTableCell(5, '7');
         tableToolTile.getTableCell().eq(5).should('contain', '7');
