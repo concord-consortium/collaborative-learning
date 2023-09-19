@@ -16,6 +16,9 @@ import { ITileModel } from "../../../models/tiles/tile-model";
 import ExpandRightIcon from "../assets/expand-right-icon.svg";
 import ExpandLeftIcon from "../assets/expand-left-icon.svg";
 import MoveIcon from "../assets/move-icon.svg";
+import HideObjectIcon from "../assets/hide-object-icon.svg";
+import ShowObjectIcon from "../assets/show-object-icon.svg";
+
 
 interface IObjectListViewProps {
   model: ITileModel,
@@ -107,19 +110,7 @@ interface IObjectLineProps {
   setHoverObject: (id: string|null) => void
 }
 
-function ObjectLine({object, content, selection, setHoverObject}: IObjectLineProps) {
-
-  function handleHoverIn() {
-    setHoverObject(object.id);
-  }
-
-  function handleHoverOut() {
-    setHoverObject(null);
-  }
-
-  function handleClick() {
-    content.setSelectedIds([object.id]);
-  }
+const ObjectLine = observer(function ObjectLine({object, content, selection, setHoverObject}: IObjectLineProps) {
 
   const {
     attributes,
@@ -127,32 +118,76 @@ function ObjectLine({object, content, selection, setHoverObject}: IObjectLinePro
     setNodeRef,
     transform,
     transition,
+    active,
     isDragging
   } = useSortable({id: object.id});
+
+  function handleHoverIn() {
+    if (active) return; // avoid flashes of highlight while dragging
+    setHoverObject(object.id);
+  }
+
+  function handleHoverOut() {
+    setHoverObject(null);
+  }
+
+  // Select the clicked object, or add to existing selection with modifier key.
+  function handleClick(e: React.MouseEvent) {
+    if (e.shiftKey || e.metaKey) {
+      content.selectId(object.id);
+    } else {
+      content.setSelectedIds([object.id]);
+    }
+  }
+
+  function handleShow(e: React.MouseEvent) {
+    e.stopPropagation();
+    object.setVisible(true);
+  }
+
+  function handleHide(e: React.MouseEvent) {
+    e.stopPropagation();
+    object.setVisible(false);
+    if (content.isIdSelected(object.id)) {
+      content.unselectId(object.id);
+    }
+  }
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
   };
   
-  const Icon = object.icon;
+  const visibilityIcon = 
+    object.visible 
+      ? <button type="button" className="visibility-icon" onClick={handleHide}>
+          <HideObjectIcon viewBox="0 0 24 24"/>
+        </button>
+      : <button type="button" className="visibility-icon" onClick={handleShow}>
+          <ShowObjectIcon viewBox="0 0 24 24"/>
+        </button>;
+
   return (
     <li ref={setNodeRef}
         style={style}
         className={classNames({
           selected: selection.includes(object.id),
+          invisible: !object.visible,
           dragging: isDragging
         })}
         onMouseEnter={handleHoverIn}
         onMouseLeave={handleHoverOut}
         onClick={handleClick}
     >
-      <Icon className="type-icon" width={20} height={20} viewBox="0 0 36 34" stroke="#000000" fill="#FFFFFF" />
+      <span className="type-icon">
+        {object.icon}
+      </span>
       <span className="label">{object.label}</span>
+      {visibilityIcon}
       <MoveIcon className="move-icon"
               {...attributes}
               {...listeners}
       />
     </li>
   );
-}
+});

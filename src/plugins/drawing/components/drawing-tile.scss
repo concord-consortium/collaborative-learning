@@ -14,7 +14,7 @@
       flex-direction: column;
 
       &.open {
-        flex: 0 0 125px;
+        flex: 0 0 170px;
         background-color: $workspace-teal-light-9;
       }
 
@@ -81,6 +81,7 @@
           text-align: left;
 
           li {
+            display: flex;
             list-style: none;
             padding: 3px 5px;
             display: flex;
@@ -99,17 +100,46 @@
               padding: 2px 4px;
             }
 
-            .type-icon {
-              vertical-align: bottom;
-              flex: 0 0 20px;
+            &.invisible {
+
+              span.type-icon, span.label {
+                opacity: .5;
+              }
             }
 
-            .label {
+            span.type-icon {
+              flex: 0 0 25px;
+              height: 24px;
+              width: 24px;
+
+              svg {
+                vertical-align: bottom;
+                height: 100%;
+                width: 100%;
+              }
+            }
+
+            span.label {
               flex-grow: 1;
+            }
+
+            button.visibility-icon {
+              flex: 0 0 25px;
+              height: 24px;
+              width: 24px;
+              padding: 0;
+              border: none;
+              background: transparent;
+
+              svg {
+                height: 100%;
+                width: 100%;
+              }
             }
 
             .move-icon {
               flex: 0 0 25px;
+              touch-action: none;
             }
           }
         }
@@ -119,6 +149,10 @@
   .drawing-layer {
 
     svg {
+
+      .ghost {
+        opacity: 0.1;
+      }
 
       .resize-handle {
         fill: #ffffff;

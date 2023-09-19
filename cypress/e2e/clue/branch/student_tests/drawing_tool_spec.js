@@ -36,7 +36,7 @@ context('Draw Tool Tile', function () {
       drawToolTile.getTileTitle().should("exist");
     });
     describe("Show/sort", () => {
-      it("open show/sort panel", () => {
+      it("can open show/sort panel and select objects", () => {
         drawToolTile.getDrawToolRectangle().click({scrollBehavior: false});
         drawToolTile.getDrawTile()
           .trigger("mousedown", 100,  50)
@@ -47,7 +47,7 @@ context('Draw Tool Tile', function () {
           .trigger("mousedown", 300,  50)
           .trigger("mousemove", 400, 150)
           .trigger("mouseup",   400, 150);
-        // Unselect object
+        // Unselect all
         drawToolTile.getDrawTile()
           .trigger("mousedown", 50, 50)
           .trigger("mouseup", 50, 50);
@@ -59,10 +59,36 @@ context('Draw Tool Tile', function () {
         // Click to select
         drawToolTile.getDrawTileShowSortPanel().get('li:first').should("contain.text", "Circle").click({scrollBehavior: false});
         drawToolTile.getSelectionBox().should("exist");
+      });
+      it("can hide and show objects", () => {
+        drawToolTile.getEllipseDrawing().should("exist");
+        // Click 'hide' button - unselects ellipse and makes it invisible
+        drawToolTile.getDrawTileShowSortPanel().get('li:first button.visibility-icon').click({scrollBehavior: false});
+        drawToolTile.getEllipseDrawing().should("not.exist");
+        drawToolTile.getSelectionBox().should("not.exist");
+        // Now select it - should show as a faint 'ghost'
+        drawToolTile.getDrawTileShowSortPanel().get('li:first').click({scrollBehavior: false});
+        drawToolTile.getSelectionBox().should("exist");
+        drawToolTile.getGhostGroup().should("exist").get('ellipse').should("exist");
+        // Make visible again
+        drawToolTile.getDrawTileShowSortPanel().get('li:first button.visibility-icon').click({scrollBehavior: false});
+        drawToolTile.getEllipseDrawing().should("exist");
+        drawToolTile.getGhostGroup().should("not.exist");        
+      });
+      it("can re-order objects", () => {
+        // Test via keyboard since dragging is harder
+        drawToolTile.getDrawTileShowSortPanel().get('li:first').should("contain.text", "Circle");
+        drawToolTile.getDrawTileShowSortPanel().get('li:last').should("contain.text", "Rectangle");
+        drawToolTile.getDrawTileShowSortPanel().get('li:first svg.move-icon').focus().type(' {downArrow}{enter}');
+        drawToolTile.getDrawTileShowSortPanel().get('li:first').should("contain.text", "Rectangle");
+        drawToolTile.getDrawTileShowSortPanel().get('li:last').should("contain.text", "Circle");
+      });
+      it("can delete objects and close panel", () => {
         // Delete objects
+        drawToolTile.getDrawTileShowSortPanel().get('li:first').should("contain.text", "Rectangle").click({scrollBehavior: false});
         drawToolTile.getDrawToolDelete().should("not.have.class", "disabled").click({scrollBehavior: false});
         drawToolTile.getDrawTileShowSortPanel().get('li').should("have.length", 1);
-        drawToolTile.getDrawTileShowSortPanel().get('li:first').should("contain.text", "Rectangle").click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanel().get('li:first').should("contain.text", "Circle").click({scrollBehavior: false});
         drawToolTile.getDrawToolDelete().should("not.have.class", "disabled").click({scrollBehavior: false});
         drawToolTile.getDrawTileShowSortPanel().get('li').should("not.exist");
         // Close panel
@@ -223,12 +249,12 @@ context('Draw Tool Tile', function () {
           .trigger("mouseover", {scrollBehavior: false});
 
         // The hover box is rendered as a selection-box with a different color
-        drawToolTile.getSelectionBox().should("exist").should("have.attr", "stroke").and("eq", "#bbdd00");
+        drawToolTile.getHighlightBox().should("exist").should("have.attr", "stroke").and("eq", "#bbdd00");
 
         // The best way I found to remove the hover was to delete the rectangle
         drawToolTile.getRectangleDrawing().first().click({force: true, scrollBehavior: false});
         drawToolTile.getDrawToolDelete().click();
-        drawToolTile.getSelectionBox().should("not.exist");
+        drawToolTile.getHighlightBox().should("not.exist");
 
       });
       it("verify moving not selected object", () => {
@@ -250,7 +276,7 @@ context('Draw Tool Tile', function () {
         // Get the rectangle to be hovered, see above for more info.
         drawToolTile.getRectangleDrawing()
           .trigger("mouseover", {scrollBehavior: false});
-        drawToolTile.getSelectionBox().should("exist").should("have.attr", "stroke").and("eq", "#bbdd00");
+        drawToolTile.getHighlightBox().should("exist").should("have.attr", "stroke").and("eq", "#bbdd00");
 
         drawToolTile.getDrawTile()
           .trigger("mousedown", 100, 135)
@@ -263,9 +289,9 @@ context('Draw Tool Tile', function () {
         drawToolTile.getDrawToolDelete().click();
         drawToolTile.getRectangleDrawing().should("not.exist");
         drawToolTile.getSelectionBox().should("not.exist");
+        drawToolTile.getHighlightBox().should("not.exist");
       });
       it("verify draw squares", () => {
-
         // starting from top edge
         drawToolTile.getDrawToolRectangle().click();
         drawToolTile.getDrawTile()

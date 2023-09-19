@@ -35,7 +35,8 @@ describe("import drawing", () => {
       dx: 10, dy: 10,
       stroke: "#888888",
       strokeDashArray: "3,3",
-      strokeWidth: 1
+      strokeWidth: 1,
+      visible: true
     };
     const input = { type: "Drawing" as const, objects: [vectorData] };
     // assigns a unique id if none is provided
@@ -54,7 +55,8 @@ describe("import drawing", () => {
       deltaPoints: [{ dx: 10, dy: 10 }, { dx: 5, dy: 5 }],
       stroke: "#888888",
       strokeDashArray: "3,3",
-      strokeWidth: 1
+      strokeWidth: 1,
+      visible: true
     };
     const input = { type: "Drawing" as const, objects: [lineData] };
     // assigns a unique id if none is provided
@@ -74,7 +76,8 @@ describe("import drawing", () => {
       fill: "#cccccc",
       stroke: "#888888",
       strokeDashArray: "3,3",
-      strokeWidth: 1
+      strokeWidth: 1,
+      visible: true
     };
     const input = { type: "Drawing" as const, objects: [rectData] };
     // assigns a unique id if none is provided
@@ -94,7 +97,8 @@ describe("import drawing", () => {
       fill: "#cccccc",
       stroke: "#888888",
       strokeDashArray: "3,3",
-      strokeWidth: 1
+      strokeWidth: 1,
+      visible: true
     };
     const input = { type: "Drawing" as const, objects: [ellipseData] };
     // assigns a unique id if none is provided
@@ -111,7 +115,8 @@ describe("import drawing", () => {
       type: "image",
       url: "my/image/url",
       x: 10, y: 10,
-      width: 10, height: 10
+      width: 10, height: 10,
+      visible: true
     };
     const input = { type: "Drawing" as const, objects: [imageData] };
     // assigns a unique id if none is provided

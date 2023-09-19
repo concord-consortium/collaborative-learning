@@ -134,10 +134,15 @@ export function registerDrawingToolInfo(drawingToolInfo: IDrawingToolInfo) {
 export function renderDrawingObject(drawingObject: DrawingObjectType, readOnly=false,
                                     handleHover?: HandleObjectHover, handleDrag?: HandleObjectDrag) {
   const DrawingObjectComponent = getDrawingObjectComponent(drawingObject);
-  return DrawingObjectComponent ?
-    <DrawingObjectComponent key={drawingObject.id} model={drawingObject} readOnly={readOnly}
-      handleHover={handleHover} handleDrag={handleDrag}/>
-    : null;
+  if (!DrawingObjectComponent) return null;
+  const element = (<DrawingObjectComponent key={drawingObject.id} model={drawingObject} readOnly={readOnly} 
+                    handleHover={handleHover} handleDrag={handleDrag}/>);
+  if (drawingObject.visible) {
+    return element;
+  } else {
+    // invisible objects, when rendered, are rendered as 'ghosts'
+    return (<g className="ghost">{element}</g>);
+  }
 }
 
 export const DrawingObjectMSTUnion = types.late<typeof DrawingObject>(() => {
