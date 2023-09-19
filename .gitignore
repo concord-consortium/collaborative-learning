@@ -5,7 +5,6 @@ npm-error.log
 .DS_Store
 serviceAccountKey.json
 .idea
-.vscode
 .yalc
 yalc.lock
 .nyc_output
@@ -15,3 +14,10 @@ cypress/screenshots
 stats.json
 top-test/
 docs/drafts
+
+# VSCode project settings
+.vscode/*
+!.vscode/launch.json
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/tasks.json
