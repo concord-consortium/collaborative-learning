@@ -15,7 +15,7 @@ context('Simulator Tile with Brainwaves Gripper Simulation', function () {
     cy.collapseResourceTabs();
   });
   describe("Simulator Tile", () => {
-    it.skip("renders simulator tile", () => {
+    it("renders simulator tile", () => {
       simulatorTile.getSimulatorTile().should("not.exist");
       clueCanvas.addTile("simulator");
       simulatorTile.getSimulatorTile().should("exist");
@@ -30,7 +30,7 @@ context('Simulator Tile with Brainwaves Gripper Simulation', function () {
       cy.get(".arduino-image").should("exist");
       cy.get(".gripper-image").should("exist");
     });
-    it.skip("edit tile title", () => {
+    it("edit tile title", () => {
       const newName = "Test Simulation";
       clueCanvas.addTile("simulator");
       simulatorTile.getTileTitle().should("contain", "Simulation 1");
@@ -40,6 +40,7 @@ context('Simulator Tile with Brainwaves Gripper Simulation', function () {
     });
     it("links to dataflow tile", () => {
       clueCanvas.addTile("dataflow");
+      dataflowTile.selectSamplingRate("50ms");
 
       // Simulation options are not present in the sensor before the simulation has been added to the document
       const sensor = "sensor";
@@ -67,11 +68,14 @@ context('Simulator Tile with Brainwaves Gripper Simulation', function () {
       dataflowTile.getDropdown(sensor, "sensor-select").click();
       dataflowTile.getSensorDropdownOptions(sensor).should("have.length", 3);
       dataflowTile.getSensorDropdownOptions(sensor).eq(1).click();
-      dataflowTile.getNodeValueContainer(sensor).invoke('text').then(parseFloat).should("be.gt", 0);
+      dataflowTile.getNodeValueContainer(sensor).invoke('text').then(parseFloat).should("equal", 0);
+      simulatorTile.getEMGSlider().click("right");
+      cy.wait(50);
+      dataflowTile.getNodeValueContainer(sensor).invoke('text').then(parseFloat).should("equal", 440);
 
       // Live output options are correct after adding the simulation to the document
       dataflowTile.getDropdown(lo, "hubSelect").click();
-      dataflowTile.getDropdownOptions(lo, "hubSelect").should("have.length", 1);
+      dataflowTile.getDropdownOptions(lo, "hubSelect").should("have.length", 2);
       dataflowTile.getDropdownOptions(lo, "hubSelect").eq(0).click({force: true});
 
       // Simulator tile's output variable updates when dataflow sets it
@@ -90,7 +94,7 @@ context('Simulator Tile with Brainwaves Gripper Simulation', function () {
   });
 });
 
-context.skip('Simulator Tile with Brain Simulation', function() {
+context('Simulator Tile with Brain Simulation', function() {
   beforeEach(function () {
     const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&mouseSensor&unit=brain";
     cy.clearQAData('all');
@@ -107,7 +111,7 @@ context.skip('Simulator Tile with Brain Simulation', function() {
   });
 });
 
-context.skip('Simulator Tile with Terrarium Simulation', function() {
+context('Simulator Tile with Terrarium Simulation', function() {
   beforeEach(function () {
     const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&mouseSensor&unit=seeit";
     cy.clearQAData('all');
