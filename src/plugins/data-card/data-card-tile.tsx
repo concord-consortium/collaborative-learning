@@ -249,7 +249,6 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
     documentId, model, hasLinkableRows, onRequestTilesOfType, onRequestLinkableTiles
   });
 
-  const { isMergeEnabled, showMergeTileDialog } = useTileDataMerging({model});
 
   return (
     <div className={toolClasses}>
@@ -264,10 +263,8 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
         handleDuplicateCard={duplicateCard}
         scale={scale}
         isLinkEnabled={isLinkEnabled}
-        isMergeEnabled={isMergeEnabled}
         getLinkIndex={getLinkIndex}
         showLinkTileDialog={showLinkTileDialog}
-        showMergeTileDialog={showMergeTileDialog}
       />
       <div
         className="data-card-content"

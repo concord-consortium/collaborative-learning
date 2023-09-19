@@ -1,5 +1,5 @@
-import { useCallback } from "react";
-import {ITileLinkMetadata } from "../models/tiles/tile-link-types";
+import { useCallback, memo } from "react";
+import { ITileLinkMetadata } from "../models/tiles/tile-link-types";
 import { ITileModel } from "../models/tiles/tile-model";
 import { useMergeTileDialog } from "./use-merge-data-dialog";
 import { mergeTwoDataSets } from "../models/data/data-set-utils";

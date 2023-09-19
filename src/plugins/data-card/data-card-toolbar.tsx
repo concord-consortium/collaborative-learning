@@ -13,6 +13,7 @@ import { ImageUploadButton } from "../../components/tiles/image/image-toolbar";
 import { EditFacet } from "./data-card-types";
 import { DeleteAttrButton, DuplicateCardButton,
   LinkTileButton, MergeInButton } from "./components/data-card-toolbar-buttons";
+import { useTileDataMerging } from "../../hooks/use-tile-data-merging";
 
 import "./data-card-toolbar.scss";
 
@@ -31,8 +32,8 @@ interface IProps extends IFloatingToolbarProps {
 }
 
 export const DataCardToolbar: React.FC<IProps> = observer(({
-  isLinkEnabled, isMergeEnabled, model, documentContent, tileElt, currEditAttrId, currEditFacet,
-  showLinkTileDialog, showMergeTileDialog, getLinkIndex, onIsEnabled, setImageUrlToAdd,
+  isLinkEnabled, model, documentContent, tileElt, currEditAttrId, currEditFacet,
+  showLinkTileDialog, getLinkIndex, onIsEnabled, setImageUrlToAdd,
   handleDeleteValue, handleDuplicateCard, ...others
   }: IProps) => {
     const content = model.content as DataCardContentModelType;
@@ -46,6 +47,8 @@ export const DataCardToolbar: React.FC<IProps> = observer(({
       enabled,
        ...others
   });
+
+  const { isMergeEnabled, showMergeTileDialog } = useTileDataMerging({model});
 
   const isEditingValue = !!currEditAttrId && currEditFacet === "value";
   const valueActionsEnabled = enabled && isEditingValue;

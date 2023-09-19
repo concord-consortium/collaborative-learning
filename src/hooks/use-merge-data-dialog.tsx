@@ -17,11 +17,8 @@ interface IContentProps {
 const Content: React.FC<IContentProps> = ({
   model, selectValue, hostTileTitle, mergableTiles, setSelectValue
 }) => {
-  const selectElt = useRef<HTMLSelectElement>(null);
-
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectValue(e.target.value);
-    setTimeout(() => selectElt.current?.focus());
   };
 
   const mergableTilesInfo = mergableTiles.map(tileInfo => {
@@ -35,7 +32,7 @@ const Content: React.FC<IContentProps> = ({
   return (
     <>
       <div className="prompt">
-        Select a data source from the list to add data to { hostTileTitle }.
+        Select a data source from the list to add data to { hostTileTitle ?? "this tile" }.
       </div>
       <select value={selectValue} onChange={handleSelectChange}>
         <option key="prompt" value={""}>Select a data source</option>
@@ -59,6 +56,7 @@ interface IProps {
   onMergeTile: (tileInfo: ITileLinkMetadata) => void;
 }
 export const useMergeTileDialog = ({ mergableTiles, model, onMergeTile }: IProps) => {
+  console.log("| useMergeTileDialog", mergableTiles, model, onMergeTile);
   const hostTileTitle = model.title;
   const [selectValue, setSelectValue] = useState("");
 
@@ -83,7 +81,7 @@ export const useMergeTileDialog = ({ mergableTiles, model, onMergeTile }: IProps
         onClick: handleClickMerge
       }
     ]
-  }, [mergableTiles]);
+  }, [model, selectValue, hostTileTitle, mergableTiles, setSelectValue]);
 
   return [showModal, hideModal];
 };
