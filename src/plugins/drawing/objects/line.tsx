@@ -3,7 +3,7 @@ import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
 import { SelectionBox } from "../components/selection-box";
 import { computeStrokeDashArray, DeltaPoint, DrawingTool, IDrawingComponentProps, IDrawingLayer,
-  IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
+  IToolbarButtonProps, ObjectTypeIconViewBox, StrokedObject, typeField } from "./drawing-object";
 import { BoundingBoxSides, Point } from "../model/drawing-basic-types";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
 import FreehandToolIcon from "../assets/freehand-icon.svg";
@@ -64,7 +64,8 @@ export const LineObject = StrokedObject.named("LineObject")
     },
 
     get icon() {
-      return FreehandToolIcon;
+      return <FreehandToolIcon viewBox={ObjectTypeIconViewBox}
+        stroke={self.stroke} strokeWidth={self.strokeWidth} strokeDasharray={self.strokeDashArray}/>;
     }
   
   }))

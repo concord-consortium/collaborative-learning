@@ -2,7 +2,7 @@ import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
 import { computeStrokeDashArray, DrawingTool, FilledObject, IDrawingComponentProps, IDrawingLayer,
-  IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
+  IToolbarButtonProps, ObjectTypeIconViewBox, StrokedObject, typeField } from "./drawing-object";
 import { BoundingBoxSides, Point } from "../model/drawing-basic-types";
 import RectToolIcon from "../assets/rectangle-icon.svg";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
@@ -38,7 +38,9 @@ export const RectangleObject = types.compose("RectangleObject", StrokedObject, F
       return self.width===self.height ? "Square" : "Rectangle";
     },
     get icon() {
-      return RectToolIcon;
+      return (<RectToolIcon viewBox={ObjectTypeIconViewBox}
+        fill={self.fill} 
+        stroke={self.stroke} strokeWidth={self.strokeWidth} strokeDasharray={self.strokeDashArray} />);
     }
   }))
   .actions(self => ({

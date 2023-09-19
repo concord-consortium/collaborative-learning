@@ -15,7 +15,7 @@ class DrawToolTile{
       return cy.get('.primary-workspace .drawing-tool .object-list.closed button');
     }
     getDrawTileShowSortPanelCloseButton(){
-      return cy.get('.primary-workspace .drawing-tool .object-list.open button');
+      return cy.get('.primary-workspace .drawing-tool .object-list.open button.close');
     }
     getDrawToolSelect(){
       return cy.get('.primary-workspace .drawing-tool-button.button-select');
@@ -96,8 +96,14 @@ class DrawToolTile{
     getSelectionBox(){
       return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg [data-testid=selection-box]');
     }
+    getHighlightBox(){
+      return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg [data-testid=highlight-box]');
+    }
     getVariableChip() {
       return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer .drawing-variable.variable-chip');
+    }
+    getGhostGroup() {
+      return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg g.ghost');
     }
     getDrawTileTitle(workspaceClass){
       return cy.get(`${workspaceClass || ".primary-workspace"} .drawing-tool-tile .editable-tile-title`);
