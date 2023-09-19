@@ -18,7 +18,6 @@ import { mergeTwoDataSets } from "../../models/data/data-set-utils";
 import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
 import { useConsumerTileLinking } from "../../hooks/use-consumer-tile-linking";
 import { useDataCardTileHeight } from "./use-data-card-tile-height";
-import { useTileDataMerging } from "../../hooks/use-tile-data-merging";
 
 import "./data-card-tile.scss";
 
