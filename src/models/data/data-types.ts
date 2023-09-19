@@ -12,16 +12,12 @@ dayjs.extend(customParseFormat);
 // strict.
 // See data-types.test.ts to see examples
 const dayjsFormats = [
-  "M/D",
   "M/D/YY",
   "M/D/YYYY",
-  "M/DD",
   "M/DD/YY",
   "M/DD/YYYY",
-  "MM/D",
   "MM/D/YY",
   "MM/D/YYYY",
-  "MM/DD",
   "MM/DD/YY",
   "MM/DD/YYYY",
   "M-D",
@@ -57,6 +53,18 @@ export function isNumeric(val: IValueType) {
   return !isNaN(toNumeric(val));
 }
 
+function handleFractions(value: IValueType) {
+  if (typeof value !== "string") {
+    return value;
+  }
+  const result = value.match(/^ *(-?) *(\d+) *\/ *(\d+) *$/);
+  if (result) {
+    const numericValue = Number(result[2]) / Number(result[3]);
+    return result[1] === "-" ? -numericValue : numericValue;
+  }
+  return value;
+}
+
 export function toNumeric(value: IValueType) {
   if (value == null || value === "") return NaN;
   // Strip commas
@@ -65,8 +73,12 @@ export function toNumeric(value: IValueType) {
   // One place to start down that rabbit hole is:
   // https://stackoverflow.com/questions/11665884/how-can-i-parse-a-string-with-a-comma-thousand-separator-to-a-number
   // The approach is also not safe because it would convert `1,2` to the number 12
-  const noCommasValue = typeof value === "string" ? value.replace(/,/g, "") : value;
-  return Number(noCommasValue);
+  const commasStripped = typeof value === "string" ? value.replace(/,/g, "") : value;
+
+  // Handle fractions like 1/4.
+  const fractionHandled = handleFractions(commasStripped);
+
+  return Number(fractionHandled);
 }
 
 export function isDate(val: IValueType) {
