@@ -21,7 +21,7 @@ import { useDataCardTileHeight } from "./use-data-card-tile-height";
 
 import "./data-card-tile.scss";
 
-export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
+export const DataCardToolComponent: React.FC<ITileProps> = observer(function DataCardToolComponent(props) {
   const { documentId, model, readOnly, documentContent, tileElt, onSetCanAcceptDrop, onRegisterTileApi,
             scale, onRequestUniqueTitle, onUnregisterTileApi, onRequestTilesOfType,
             height, onRequestRowHeight, onRequestLinkableTiles } = props;
@@ -341,4 +341,3 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
     </div>
   );
 });
-DataCardToolComponent.displayName = "DataCardToolComponent";
