@@ -47,6 +47,7 @@ context('Merge Data Card Tool Tile', function () {
     dc.getMergeDataButton(1).click();
     dc.getMergeDataModalSelect().select("Data Card Collection 1");
     dc.getMergeDataModalAddDataButton().click();
+
     dc.getAttrs(1).should("have.length", 2);
     dc.getAttrName(1).eq(0).should("have.text", "vegetable");
     dc.getAttrValue(1).eq(0).invoke("attr", "value").should("contain", "beet");
