@@ -34,7 +34,7 @@ const Content: React.FC<IContentProps> = ({
       <div className="prompt">
         Select a data source from the list to add data to { hostTileTitle ?? "this tile" }.
       </div>
-      <select value={selectValue} onChange={handleSelectChange}>
+      <select className="merge-data-select" value={selectValue} onChange={handleSelectChange}>
         <option key="prompt" value={""}>Select a data source</option>
         { mergableTilesInfo.length > 0 &&
           mergableTilesInfo.map(tileInfo => {

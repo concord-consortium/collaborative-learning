@@ -25,6 +25,35 @@ function openMyWork() {
 }
 
 context('Merge Data Card Tool Tile', function () {
+  it("can merge in data using the merge button", () => {
+    beforeTest();
+    clueCanvas.addTile("datacard");
+    dc.getTile(0).should("exist");
+    dc.getTileTitle(0).should("have.text", "Data Card Collection 1");
+
+    dc.getAttrName(0).dblclick().type("animal{enter}");
+    dc.getAttrName(0).contains("animal");
+    dc.getAttrValue(0).click().type("cat{enter}");
+
+    clueCanvas.addTile("datacard");
+    dc.getTile(1).should("exist");
+    dc.getTileTitle(1).should("have.text", "Data Card Collection 2");
+
+    dc.getAttrName(1).dblclick().type("vegetable{enter}");
+    dc.getAttrName(1).contains("vegetable");
+    dc.getAttrValue(1).click().type("beet{enter}");
+
+    dc.getAttrValue(1).click();
+    dc.getMergeDataButton(1).click();
+    dc.getMergeDataModalSelect().select("Data Card Collection 1");
+    dc.getMergeDataModalAddDataButton().click();
+    dc.getAttrs(1).should("have.length", 2);
+    dc.getAttrName(1).eq(0).should("have.text", "vegetable");
+    dc.getAttrValue(1).eq(0).invoke("attr", "value").should("contain", "beet");
+    dc.getAttrName(1).eq(1).should("have.text", "animal");
+    dc.getNextCardButton(1).click();
+    dc.getAttrValue(1).eq(1).invoke("attr", "value").should("contain", "cat");
+  });
   it("merges two empty Data Card tool tiles", () => {
     beforeTest();
     clueCanvas.addTile("datacard");
