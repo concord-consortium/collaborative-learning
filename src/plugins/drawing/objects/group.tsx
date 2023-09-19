@@ -5,7 +5,8 @@ import { DrawingObject, DrawingObjectType, IDrawingComponentProps,
   StrokedObjectType, 
   isFilledObject, 
   isStrokedObject, 
-  typeField } from "./drawing-object";
+  typeField, 
+  ObjectTypeIconViewBox} from "./drawing-object";
 import { BoundingBoxSides, VectorEndShape } from "../model/drawing-basic-types";
 import { DrawingObjectMSTUnion } from "../components/drawing-object-manager";
 import { isVectorObject } from "./vector";
@@ -48,7 +49,7 @@ export const GroupObject = DrawingObject.named("GroupObject")
       return "Group";
     },
     get icon() {
-      return (<GroupObjectsIcon viewBox="0 0 36 34"/>);
+      return (<GroupObjectsIcon viewBox={ObjectTypeIconViewBox}/>);
     }
   }))
   .actions(self => ({

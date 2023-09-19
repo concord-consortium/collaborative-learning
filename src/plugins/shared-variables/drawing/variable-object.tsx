@@ -11,6 +11,7 @@ import { useNewVariableDialog } from "../dialog/use-new-variable-dialog";
 import { SharedVariablesType } from "../shared-variables";
 import { variableBuckets } from "../shared-variables-utils";
 import { DrawingObject, IDrawingComponentProps, IToolbarManager,
+  ObjectTypeIconViewBox,
   typeField } from "../../drawing/objects/drawing-object";
 import { Point } from "../../drawing/model/drawing-basic-types";
 import { SvgToolbarButton } from "../../drawing/components/drawing-toolbar-buttons";
@@ -49,7 +50,7 @@ export const VariableChipObject = DrawingObject.named("VariableObject")
       return "Variable";
     },
     get icon() {
-      return (<AddVariableChipIcon viewBox="0 0 36 34"/>);
+      return (<AddVariableChipIcon viewBox={ObjectTypeIconViewBox} />);
     },
     get supportsResize() {
       return false;

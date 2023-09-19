@@ -4,7 +4,7 @@ import { observer } from "mobx-react";
 import { Tooltip } from "react-tippy";
 import { gImageMap } from "../../../models/image-map";
 import { DrawingObject, DrawingObjectSnapshot, DrawingTool, IDrawingComponentProps, IDrawingLayer,
-  IToolbarButtonProps, typeField } from "./drawing-object";
+  IToolbarButtonProps, ObjectTypeIconViewBox, typeField } from "./drawing-object";
 import { BoundingBoxSides, Point } from "../model/drawing-basic-types";
 import placeholderImage from "../../../assets/image_placeholder.png";
 import SmallCornerTriangle from "../../../assets/icons/small-corner-triangle.svg";
@@ -46,7 +46,7 @@ export const ImageObject = DrawingObject.named("ImageObject")
       return "Image";
     },
     get icon() {
-      return (<ImageToolIcon viewBox="0 0 36 34"/>);
+      return (<ImageToolIcon viewBox={ObjectTypeIconViewBox}/>);
     },
     get displayUrl() {
       const entry = gImageMap.getImageEntry(self.url, {filename: self.filename});

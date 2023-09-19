@@ -5,9 +5,11 @@ import { SelectionBox } from "../components/selection-box";
 import { BoundingBox, BoundingBoxSides, Point, ToolbarSettings }
    from "../model/drawing-basic-types";
 import { StampModelType } from "../model/stamp";
-import FreehandToolIcon from "../assets/freehand-icon.svg";
+import ErrorIcon from "../../../assets/icons/error.svg";
 
 export type ToolbarModalButton = "select" | "line" | "vector" | "rectangle" | "ellipse" | "text" | "stamp" | "variable";
+
+export const ObjectTypeIconViewBox = "0 0 36 34";
 
 // This interface is a subset of what the DrawingContentModel provides.
 // It is used to break the circular reference between DrawingContentModel
@@ -78,7 +80,8 @@ export const DrawingObject = types.model("DrawingObject", {
     return "Unknown object";
   },
   get icon(): JSX.Element {
-    return (<FreehandToolIcon/>);
+    // Should be overridden by all subclasses
+    return (<ErrorIcon viewBox={ObjectTypeIconViewBox}/>);
   }
 }))
 .views(self => ({

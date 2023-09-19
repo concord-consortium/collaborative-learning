@@ -2,7 +2,7 @@ import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React, { useCallback } from "react";
 import { computeStrokeDashArray, DrawingObjectType, DrawingTool, IDrawingComponentProps, IDrawingLayer,
-  IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
+  IToolbarButtonProps, ObjectTypeIconViewBox, StrokedObject, typeField } from "./drawing-object";
 import { BoundingBoxSides, Point, ToolbarSettings, VectorEndShape, 
   endShapesForVectorType, getVectorTypeIcon, vectorTypeForEndShapes } 
   from "../model/drawing-basic-types";
@@ -35,8 +35,7 @@ export const VectorObject = StrokedObject.named("VectorObject")
     },
     get icon() {
       const Icon = getVectorTypeIcon(vectorTypeForEndShapes(self.headShape, self.tailShape));
-      return (<Icon viewBox="0 0 36 34"
-       stroke={self.stroke} fill={self.stroke} />);
+      return (<Icon viewBox={ObjectTypeIconViewBox} stroke={self.stroke} fill={self.stroke} />);
     }
   }))
   .actions(self => ({

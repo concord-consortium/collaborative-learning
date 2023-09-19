@@ -2,7 +2,7 @@ import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React, { useEffect, useRef } from "react";
 import { DrawingObjectType, DrawingTool, EditableObject, IDrawingComponentProps, IDrawingLayer,
-  IToolbarButtonProps, typeField } from "./drawing-object";
+  IToolbarButtonProps, ObjectTypeIconViewBox, typeField } from "./drawing-object";
 import { BoundingBoxSides, Point, ToolbarSettings } from "../model/drawing-basic-types";
 import TextToolIcon from "../../../assets/icons/comment/comment.svg";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
@@ -42,8 +42,7 @@ export const TextObject = EditableObject.named("TextObject")
       return "Text";
     },
     get icon() {
-      return (<TextToolIcon viewBox="0 0 36 34"
-        fill={self.stroke} />);
+      return (<TextToolIcon viewBox={ObjectTypeIconViewBox} fill={self.stroke} />);
     }
   }))
   .actions(self => ({
