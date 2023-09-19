@@ -39,3 +39,6 @@ Each object gets an "annotation button" that allows the user to add an annotatio
 
 #### `getObjectDefaultOffsets` (optional)
 By default, annotations are attached to the center of a target object. Defining this function allows the default position of the annotation anchor to be adjusted based on the obect. The function takes the usual `objectId` and optional `objectType`, and should return an MST `OffsetModel` (see `clue-object.ts`), which specifies a `dx` and `dy` with respect to the object's center. Note that offsets are generally bounded by the object's bounding box, so you should make sure `dx` and `dy` are within this rectangle.
+
+## Implementation Details
+_TO BE ADDED_
