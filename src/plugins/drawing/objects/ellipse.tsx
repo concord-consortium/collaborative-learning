@@ -2,7 +2,7 @@ import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
 import { computeStrokeDashArray, DrawingObjectType, DrawingTool, FilledObject, IDrawingComponentProps, IDrawingLayer,
-  IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
+  IToolbarButtonProps, ObjectTypeIconViewBox, StrokedObject, typeField } from "./drawing-object";
 import { BoundingBoxSides, Point } from "../model/drawing-basic-types";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
 import EllipseToolIcon from "../assets/ellipse-icon.svg";
@@ -29,11 +29,11 @@ export const EllipseObject = types.compose("EllipseObject", StrokedObject, Fille
     get label() {
       return (self.rx === self.ry) ? "Circle" : "Ellipse";
     },
-    // get icon() {
-    //   return (<EllipseToolIcon viewBox="0 0 36 34"
-    //     fill={self.fill}
-    //     stroke={self.stroke} strokeWidth={self.strokeWidth} strokeDasharray={self.strokeDashArray}/>);
-    // }
+    get icon() {
+      return (<EllipseToolIcon viewBox={ObjectTypeIconViewBox}
+        fill={self.fill}
+        stroke={self.stroke} strokeWidth={self.strokeWidth} strokeDasharray={self.strokeDashArray}/>);
+    }
   }))
   .actions(self => ({
     resize(start: Point, end: Point, makeCircle: boolean) {
