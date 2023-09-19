@@ -5,14 +5,14 @@ import { createDrawingContent, DrawingContentModelType } from "../model/drawing-
 import { DrawingLayerView } from "./drawing-layer";
 import { LineObject, LineObjectType } from "../objects/line";
 import { VectorObject, VectorObjectType } from "../objects/vector";
-import { RectangleObject, RectangleObjectType } from "../objects/rectangle";
+import { VectorEndShape, VectorType, endShapesForVectorType } from "../model/drawing-basic-types";
+import { RectangleObject, RectangleObjectSnapshotForAdd, RectangleObjectType } from "../objects/rectangle";
 import { EllipseObject, EllipseObjectType } from "../objects/ellipse";
 import { ImageObject, ImageObjectType } from "../objects/image";
 
 // The drawing tile needs to be registered so the TileModel.create
 // knows it is a supported tile type
 import "../drawing-registration";
-import { VectorEndShape, VectorType, endShapesForVectorType } from "../model/drawing-basic-types";
 
 let content: DrawingContentModelType, drawingLayerProps, drawingLayer;
 
@@ -106,7 +106,11 @@ describe("Drawing Layer Components", () => {
       vector.setPosition(5,5);
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
-    it("changes vector type", () => {
+    it("changes vector to single arrow", () => {
+      vector.setEndShapes(...endShapesForVectorType(VectorType.singleArrow));
+      expect(getDrawingObject(content)).toMatchSnapshot();
+    });
+    it("changes vector to double arrow", () => {
       vector.setEndShapes(...endShapesForVectorType(VectorType.doubleArrow));
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
@@ -166,6 +170,69 @@ describe("Drawing Layer Components", () => {
     });
     it("deletes a ellipse", () => {
       content.deleteObjects([ellipse.id]);
+      expect(getDrawingObject(content)).toMatchSnapshot();
+    });
+  });
+
+  // TODO: should test TextObject, but it fails 
+  // because the virual DOM doesn't implement getComputedTextLength
+
+  describe("Group", () => {
+    let rectangle: RectangleObjectType;
+    let ellipse: EllipseObjectType;
+    beforeEach(() => {
+      rectangle = RectangleObject.create({
+        id: "r",
+        x: 10, y: 10,
+        width: 10, height: 10,
+        fill: "#cccccc",
+        stroke: "#888888",
+        strokeDashArray: "3,3",
+        strokeWidth: 1
+      });
+      ellipse = EllipseObject.create({
+        id: "e",
+        x: 10, y: 10,
+        rx: 10, ry: 10,
+        fill: "#cccccc",
+        stroke: "#888888",
+        strokeDashArray: "3,3",
+        strokeWidth: 1
+      });
+      content = createDrawingContent({ objects: [rectangle, ellipse] });
+    });
+    it("creates a group", () => {
+      content.createGroup(["r", "e"]);
+      expect(getDrawingObject(content)).toMatchSnapshot();
+    });
+    it("moves a group", () => {
+      content.createGroup(["r", "e"]);
+      expect(content.objects[0].type).toBe("group");
+      content.objects[0].setDragPosition(5, 5);
+      content.objects[0].repositionObject();
+      expect(getDrawingObject(content)).toMatchSnapshot();
+    });
+    it("ungroups a group", () => {
+      content.createGroup(["r", "e"]);
+      const r2: RectangleObjectSnapshotForAdd = {
+        type: "rectangle",
+        id: "not-in-group",
+        x: 10, y: 10,
+        width: 10, height: 10,
+        fill: "#cccccc",
+        stroke: "#888888",
+        strokeDashArray: "3,3",
+        strokeWidth: 1
+      };
+      content.addObject(r2);
+      content.ungroupGroups([content.objects[0].id, "not-in-group"]);
+      expect(content.objects.length).toBe(3);
+      expect(content.objects.map((obj) => obj.id)).toStrictEqual(["not-in-group", "r", "e"]);
+    });
+    it("deletes a group", () => {
+      content.createGroup(["r", "e"]);
+      content.deleteObjects([content.objects[0].id]);
+      expect(content.objects.length).toBe(0);
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
   });
