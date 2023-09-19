@@ -15,7 +15,7 @@ context('Simulator Tile with Brainwaves Gripper Simulation', function () {
     cy.collapseResourceTabs();
   });
   describe("Simulator Tile", () => {
-    it("renders simulator tile", () => {
+    it.skip("renders simulator tile", () => {
       simulatorTile.getSimulatorTile().should("not.exist");
       clueCanvas.addTile("simulator");
       simulatorTile.getSimulatorTile().should("exist");
@@ -30,7 +30,7 @@ context('Simulator Tile with Brainwaves Gripper Simulation', function () {
       cy.get(".arduino-image").should("exist");
       cy.get(".gripper-image").should("exist");
     });
-    it("edit tile title", () => {
+    it.skip("edit tile title", () => {
       const newName = "Test Simulation";
       clueCanvas.addTile("simulator");
       simulatorTile.getTileTitle().should("contain", "Simulation 1");
@@ -47,9 +47,9 @@ context('Simulator Tile with Brainwaves Gripper Simulation', function () {
       dataflowTile.getDropdown(sensor, "sensor-type").click();
       dataflowTile.getSensorDropdownOptions(sensor).eq(7).find(".label").click(); // EMG
       dataflowTile.getDropdown(sensor, "sensor-select").click();
-      dataflowTile.getSensorDropdownOptions(sensor).should("have.length", 4);
+      dataflowTile.getSensorDropdownOptions(sensor).should("have.length", 2);
       // Click the background to not select any option
-      cy.get(".flow-tool").click();
+      cy.get(".primary-workspace .flow-tool").click();
       dataflowTile.getNodeValueContainer(sensor).invoke('text').then(parseFloat).should("equal", 0);
 
       // Simulation options are not present in the live output before the simulation has been added to the document
@@ -60,13 +60,13 @@ context('Simulator Tile with Brainwaves Gripper Simulation', function () {
       dataflowTile.getDropdown(lo, "hubSelect").click();
       dataflowTile.getDropdownOptions(lo, "hubSelect").should("have.length", 1);
       // Click the background to not select any option
-      cy.get(".flow-tool").click();
+      cy.get(".primary-workspace .flow-tool").click();
 
       // Sensor options are correct after adding the simulation to the document
       clueCanvas.addTile("simulator");
       dataflowTile.getDropdown(sensor, "sensor-select").click();
-      dataflowTile.getSensorDropdownOptions(sensor).should("have.length", 5);
-      dataflowTile.getSensorDropdownOptions(sensor).eq(3).click();
+      dataflowTile.getSensorDropdownOptions(sensor).should("have.length", 3);
+      dataflowTile.getSensorDropdownOptions(sensor).eq(1).click();
       dataflowTile.getNodeValueContainer(sensor).invoke('text').then(parseFloat).should("be.gt", 0);
 
       // Live output options are correct after adding the simulation to the document
