@@ -90,6 +90,228 @@ exports[`Drawing Layer Components Freehand Line moves a freehand line 1`] = `
 </svg>
 `;
 
+exports[`Drawing Layer Components Group creates a group 1`] = `
+<svg
+  height="1500"
+  width="1500"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+>
+  <rect
+    class="group"
+    fill="none"
+    height="20"
+    pointer-events="visible"
+    stroke="none"
+    width="20"
+    x="0"
+    y="0"
+  />
+  <rect
+    class="rectangle"
+    fill="#cccccc"
+    height="10"
+    pointer-events="none"
+    stroke="#888888"
+    stroke-dasharray=""
+    stroke-width="1"
+    width="10"
+    x="10"
+    y="10"
+  />
+  <ellipse
+    cx="10"
+    cy="10"
+    fill="#cccccc"
+    pointer-events="none"
+    rx="10"
+    ry="10"
+    stroke="#888888"
+    stroke-dasharray=""
+    stroke-width="1"
+  />
+  <g>
+    <rect
+      data-testid="selection-box"
+      fill="#777"
+      fill-opacity="0"
+      height="40"
+      pointer-events="none"
+      stroke="#777"
+      stroke-dasharray="10 5"
+      stroke-width="1.5"
+      width="40"
+      x="-10"
+      y="-10"
+    />
+    <g>
+      <rect
+        class="resize-handle nw"
+        data-corner="nw"
+        fill="#FFF"
+        fill-opacity="1"
+        height="10"
+        stroke="#777"
+        stroke-width="1"
+        width="10"
+        x="-15"
+        y="-15"
+      />
+      <rect
+        class="resize-handle ne"
+        data-corner="ne"
+        fill="#FFF"
+        fill-opacity="1"
+        height="10"
+        stroke="#777"
+        stroke-width="1"
+        width="10"
+        x="25"
+        y="-15"
+      />
+      <rect
+        class="resize-handle sw"
+        data-corner="sw"
+        fill="#FFF"
+        fill-opacity="1"
+        height="10"
+        stroke="#777"
+        stroke-width="1"
+        width="10"
+        x="-15"
+        y="25"
+      />
+      <rect
+        class="resize-handle se"
+        data-corner="se"
+        fill="#FFF"
+        fill-opacity="1"
+        height="10"
+        stroke="#777"
+        stroke-width="1"
+        width="10"
+        x="25"
+        y="25"
+      />
+    </g>
+  </g>
+</svg>
+`;
+
+exports[`Drawing Layer Components Group deletes a group 1`] = `
+<svg
+  height="1500"
+  width="1500"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+/>
+`;
+
+exports[`Drawing Layer Components Group moves a group 1`] = `
+<svg
+  height="1500"
+  width="1500"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+>
+  <rect
+    class="group"
+    fill="none"
+    height="20"
+    pointer-events="visible"
+    stroke="none"
+    width="20"
+    x="0"
+    y="0"
+  />
+  <rect
+    class="rectangle"
+    fill="#cccccc"
+    height="10"
+    pointer-events="none"
+    stroke="#888888"
+    stroke-dasharray=""
+    stroke-width="1"
+    width="10"
+    x="10"
+    y="10"
+  />
+  <ellipse
+    cx="10"
+    cy="10"
+    fill="#cccccc"
+    pointer-events="none"
+    rx="10"
+    ry="10"
+    stroke="#888888"
+    stroke-dasharray=""
+    stroke-width="1"
+  />
+  <g>
+    <rect
+      data-testid="selection-box"
+      fill="#777"
+      fill-opacity="0"
+      height="40"
+      pointer-events="none"
+      stroke="#777"
+      stroke-dasharray="10 5"
+      stroke-width="1.5"
+      width="40"
+      x="-10"
+      y="-10"
+    />
+    <g>
+      <rect
+        class="resize-handle nw"
+        data-corner="nw"
+        fill="#FFF"
+        fill-opacity="1"
+        height="10"
+        stroke="#777"
+        stroke-width="1"
+        width="10"
+        x="-15"
+        y="-15"
+      />
+      <rect
+        class="resize-handle ne"
+        data-corner="ne"
+        fill="#FFF"
+        fill-opacity="1"
+        height="10"
+        stroke="#777"
+        stroke-width="1"
+        width="10"
+        x="25"
+        y="-15"
+      />
+      <rect
+        class="resize-handle sw"
+        data-corner="sw"
+        fill="#FFF"
+        fill-opacity="1"
+        height="10"
+        stroke="#777"
+        stroke-width="1"
+        width="10"
+        x="-15"
+        y="25"
+      />
+      <rect
+        class="resize-handle se"
+        data-corner="se"
+        fill="#FFF"
+        fill-opacity="1"
+        height="10"
+        stroke="#777"
+        stroke-width="1"
+        width="10"
+        x="25"
+        y="25"
+      />
+    </g>
+  </g>
+</svg>
+`;
+
 exports[`Drawing Layer Components Image adds an image 1`] = `
 <svg
   height="1500"
@@ -222,7 +444,7 @@ exports[`Drawing Layer Components Vector arrow adds a Vector arrow 1`] = `
 </svg>
 `;
 
-exports[`Drawing Layer Components Vector arrow changes vector type 1`] = `
+exports[`Drawing Layer Components Vector arrow changes vector to double arrow 1`] = `
 <svg
   height="1500"
   width="1500"
@@ -251,6 +473,37 @@ exports[`Drawing Layer Components Vector arrow changes vector type 1`] = `
     </g>
     <g
       transform="translate(20 20) rotate(315)"
+    >
+      <polygon
+        points="0 0 4.5 9 -4.5 9 0 0"
+      />
+    </g>
+  </g>
+</svg>
+`;
+
+exports[`Drawing Layer Components Vector arrow changes vector to single arrow 1`] = `
+<svg
+  height="1500"
+  width="1500"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+>
+  <g
+    class="vector"
+    fill="#777777"
+    pointer-events="visible"
+    stroke="#777777"
+    stroke-dasharray=""
+    stroke-width="2"
+  >
+    <line
+      x1="20"
+      x2="40"
+      y1="20"
+      y2="40"
+    />
+    <g
+      transform="translate(40 40) rotate(135)"
     >
       <polygon
         points="0 0 4.5 9 -4.5 9 0 0"

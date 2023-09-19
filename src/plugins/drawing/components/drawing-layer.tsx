@@ -236,7 +236,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       selectionBox.close();
       const selectedIds: string[] = addToSelectedObjects ? [...this.getContent().selection] : [];
       this.forEachObject((object) => {
-        if (object.inSelection(selectionBox)) {
+        if (object.visible && object.inSelection(selectionBox)) {
           if (selectedIds.indexOf(object.id) === -1) {
             selectedIds.push(object.id);
           }
@@ -247,20 +247,23 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     }
   }
 
-  private conditionallyRenderObject(object: DrawingObjectType, inGroup: boolean) {
+  private conditionallyRenderObject(object: DrawingObjectType, selected: boolean, inGroup: boolean) {
     if (!object) return null;
-    // Objects that are members of a group should not respond to mouse events.
+    if (!selected && !object.visible) return null;
+    // Objects that are members of a group do not individually respond to mouse events.
     const hoverAction = inGroup ? undefined : this.handleObjectHover;
     const mouseDownAction = inGroup ? undefined : this.handleSelectedObjectMouseDown;
     return renderDrawingObject(object, this.props.readOnly, hoverAction, mouseDownAction);
   }
 
   public renderObjects() {
-    return this.getContent().objects.reduce((result, object) => {
-      result.push(this.conditionallyRenderObject(object, false));
+    const content = this.getContent();
+    return content.objects.reduce((result, object) => {
+      const selected = content.isIdSelected(object.id);
+      result.push(this.conditionallyRenderObject(object, selected, false));
       if (isGroupObject(object)) {
         object.objects.forEach((member) => { 
-          result.push(this.conditionallyRenderObject(member, true));
+          result.push(this.conditionallyRenderObject(member, selected, true));
         });
       }
       return result;
@@ -285,9 +288,11 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
           {this.renderResizeHandle(object, "se", seX, seY, color)}
         </g>;
 
+      const testId = enableActions ? "selection-box" : "highlight-box";
+
       return <g key={index}>
               <rect
-                data-testid="selection-box"
+                data-testid={testId}
                 x={nwX}
                 y={nwY}
                 width={seX - nwX}

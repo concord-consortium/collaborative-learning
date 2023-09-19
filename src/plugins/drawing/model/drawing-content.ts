@@ -143,15 +143,6 @@ export const DrawingContentModel = TileContentModel
       self.selection = [...selection];
     },
 
-    unselectId(id: string) {
-      const index = self.selection.indexOf(id);
-      if (index >= 0) {
-        self.selection.splice(index, 1);
-      } else {
-        console.error('Failed to remove id ', id, ' from selection: [', self.selection, ']');
-      }
-    },
-
     setSelectedButton(button: ToolbarModalButton) {
       if (self.selectedButton !== button) {
         self.selectedButton = button;
@@ -210,6 +201,26 @@ export const DrawingContentModel = TileContentModel
   }))
   
   .actions(self => ({
+    /* Add a single object (identified by its id) to the selection. */
+    selectId(id: string) {
+      if (self.objectMap[id] && !self.isIdSelected(id)) {
+        // Just doing self.selection.push does not notify observers - not sure why.
+        const selection = self.selection;
+        selection.push(id);
+        self.setSelectedIds(selection);
+      }
+    },
+
+    /* Remove a single object (identified by its id) from the selection */
+    unselectId(id: string) {
+      const index = self.selection.indexOf(id);
+      if (index >= 0) {
+        self.selection.splice(index, 1);
+      } else {
+        console.error('Failed to remove id ', id, ' from selection: [', self.selection, ']');
+      }
+    },
+
 
     // Destroy any groups in the given list, moving their members to the top level.
     // The ungrouped members are selected, along with any non-group objects in the initial set.
@@ -360,19 +371,23 @@ export const DrawingContentModel = TileContentModel
             y: 0
           };
           const group = self.addAndSelectObject(props) as GroupObjectType;
+          let hasVisibleMember = false;
           forEachObjectId(objectIds, (obj) => {
             if (isGroupObject(obj)) {
               // Adding a group to a group:
               // Transfer old group's members into new group; delete old group.
               obj.objects.forEach((member) => {
                 group.objects.push(detach(member));
+                if (member.visible) hasVisibleMember = true;
               });
               destroy(obj);
             } else {
               // Adding a regular object - just move node.
               group.objects.push(detach(obj));
+              if (obj.visible) hasVisibleMember = true;
             }
           });
+          group.visible = hasVisibleMember;
           group.computeExtents();
         },
   
