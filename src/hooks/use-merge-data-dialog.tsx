@@ -56,7 +56,6 @@ interface IProps {
   onMergeTile: (tileInfo: ITileLinkMetadata) => void;
 }
 export const useMergeTileDialog = ({ mergableTiles, model, onMergeTile }: IProps) => {
-  console.log("| useMergeTileDialog", mergableTiles, model, onMergeTile);
   const hostTileTitle = model.title;
   const [selectValue, setSelectValue] = useState("");
 
