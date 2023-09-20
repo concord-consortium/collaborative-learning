@@ -44,6 +44,7 @@ export function sendDataToSimulatedOutput(n: Node, outputVariables?: VariableTyp
   const outputVariable = findOutputVariable(n, outputVariables);
   if (outputVariable && getHubSelect(n).getValue() === simulatedHubName(outputVariable)) {
     const { val } = getNodeValueWithType(n);
+    if (isNaN(val)) return;
     const outputValue = isFinite(val) ? val : 0;
     outputVariable.setValue(outputValue);
     // TODO: Should we also set the unit?

@@ -21,6 +21,7 @@ export function getOutputType(node: Node) {
 }
 
 export function getNodeValueWithType(node: Node): NodeOutputValue {
+  console.log("| node.data", node.data.nodeValue);
   const val = node.data.nodeValue as number;
   const outType = getOutputType(node);
   return { val, outType };

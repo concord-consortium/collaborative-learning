@@ -27,6 +27,10 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
 
   const component = content.simulationData.component;
 
+  content.outputVariables.forEach(variable => {
+    console.log("| variable", variable.name, variable.value);
+  });
+
   return (
     <div className="simulator-content-container">
       <BasicEditableTileTitle
