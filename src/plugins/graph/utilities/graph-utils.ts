@@ -1,20 +1,18 @@
 import {extent, format, select, timeout} from "d3";
 import React from "react";
 import {isInteger} from "lodash";
+
+import { IClueObjectSnapshot } from "../../../models/annotations/clue-object";
+import { PartialSharedModelEntry } from "../../../models/document/document-content-types";
+import { UpdatedSharedDataSetIds } from "../../../models/shared/shared-data-set";
 import {CaseData, DotsElt, selectCircles, selectDots} from "../d3-types";
 import {IDotsRef, kGraphFont, Point, Rect, rTreeRect, transitionDuration} from "../graph-types";
 import {between} from "./math-utils";
 import {IAxisModel, isNumericAxisModel} from "../imports/components/axis/models/axis-model";
 import {ScaleNumericBaseType} from "../imports/components/axis/axis-types";
 import {IDataSet} from "../../../models/data/data-set";
-import {
-  defaultSelectedColor,
-  defaultSelectedStroke,
-  defaultSelectedStrokeOpacity,
-  defaultSelectedStrokeWidth,
-  defaultStrokeOpacity,
-  defaultStrokeWidth
-} from "../../../utilities/color-utils";
+import { defaultSelectedColor, defaultSelectedStroke, defaultSelectedStrokeOpacity, defaultSelectedStrokeWidth,
+  defaultStrokeOpacity, defaultStrokeWidth } from "../../../utilities/color-utils";
 import {IDataConfigurationModel} from "../models/data-configuration-model";
 import {measureText} from "../../../components/tiles/hooks/use-measure-text";
 
@@ -495,4 +493,40 @@ export function decipherDotId(dotId: string) {
     return { caseId, xAttributeId, yAttributeId };
   }
   return {};
+}
+
+export function updateGraphObjectWithNewSharedModelIds(
+  object: IClueObjectSnapshot,
+  sharedDataSetEntries: PartialSharedModelEntry[],
+  updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds>
+) {
+  if (object.objectType === "dot") {
+    const { caseId, xAttributeId, yAttributeId } = decipherDotId(object.objectId);
+    console.log(`--- caseId, xAttributeId, yAttributeId`, caseId, xAttributeId, yAttributeId);
+    let newCaseId, newXAttributeId, newYAttributeId;
+    sharedDataSetEntries.forEach(sharedDataSetEntry => {
+      const originalSharedDataSetId = sharedDataSetEntry.sharedModel.id;
+      if (originalSharedDataSetId) {
+        console.log(` -- originalSharedDataSetId`, originalSharedDataSetId);
+        console.log(` -- updatedSharedModelMap`, updatedSharedModelMap);
+        const attributeIdMap = updatedSharedModelMap[originalSharedDataSetId].attributeIdMap;
+        console.log(` -- attributeIdMap`, attributeIdMap);
+        if (xAttributeId && attributeIdMap[xAttributeId]) {
+          newXAttributeId = attributeIdMap[xAttributeId];
+        }
+        if (yAttributeId && attributeIdMap[yAttributeId]) {
+          newYAttributeId = attributeIdMap[yAttributeId];
+        }
+        const caseIdMap = updatedSharedModelMap[originalSharedDataSetId].caseIdMap;
+        if (caseId && caseIdMap[caseId]) {
+          newCaseId = caseIdMap[caseId];
+        }
+      }
+    });
+    if (newCaseId && newXAttributeId && newYAttributeId) {
+      const newId = getDotId(newCaseId, newXAttributeId, newYAttributeId);
+      object.objectId = newId;
+      return newId;
+    }
+  }
 }
