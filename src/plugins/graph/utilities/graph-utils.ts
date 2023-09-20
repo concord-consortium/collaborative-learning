@@ -502,24 +502,22 @@ export function updateGraphObjectWithNewSharedModelIds(
 ) {
   if (object.objectType === "dot") {
     const { caseId, xAttributeId, yAttributeId } = decipherDotId(object.objectId);
-    console.log(`--- caseId, xAttributeId, yAttributeId`, caseId, xAttributeId, yAttributeId);
     let newCaseId, newXAttributeId, newYAttributeId;
     sharedDataSetEntries.forEach(sharedDataSetEntry => {
       const originalSharedDataSetId = sharedDataSetEntry.sharedModel.id;
       if (originalSharedDataSetId) {
-        console.log(` -- originalSharedDataSetId`, originalSharedDataSetId);
-        console.log(` -- updatedSharedModelMap`, updatedSharedModelMap);
-        const attributeIdMap = updatedSharedModelMap[originalSharedDataSetId].attributeIdMap;
-        console.log(` -- attributeIdMap`, attributeIdMap);
-        if (xAttributeId && attributeIdMap[xAttributeId]) {
-          newXAttributeId = attributeIdMap[xAttributeId];
-        }
-        if (yAttributeId && attributeIdMap[yAttributeId]) {
-          newYAttributeId = attributeIdMap[yAttributeId];
-        }
-        const caseIdMap = updatedSharedModelMap[originalSharedDataSetId].caseIdMap;
-        if (caseId && caseIdMap[caseId]) {
-          newCaseId = caseIdMap[caseId];
+        const attributeIdMap = updatedSharedModelMap[originalSharedDataSetId]?.attributeIdMap;
+        if (attributeIdMap) {
+          if (xAttributeId && attributeIdMap[xAttributeId]) {
+            newXAttributeId = attributeIdMap[xAttributeId];
+          }
+          if (yAttributeId && attributeIdMap[yAttributeId]) {
+            newYAttributeId = attributeIdMap[yAttributeId];
+          }
+          const caseIdMap = updatedSharedModelMap[originalSharedDataSetId].caseIdMap;
+          if (caseId && caseIdMap[caseId]) {
+            newCaseId = caseIdMap[caseId];
+          }
         }
       }
     });
