@@ -1,4 +1,3 @@
-import TeacherDashboard from "../../../../support/elements/clue/TeacherDashboard";
 import ClueCanvas from "../../../../support/elements/clue/cCanvas";
 import TableToolTile from "../../../../support/elements/clue/TableToolTile";
 import DrawToolTile from "../../../../support/elements/clue/DrawToolTile";
