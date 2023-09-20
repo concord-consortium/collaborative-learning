@@ -44,7 +44,12 @@ By default, annotations are attached to the center of a target object. Defining 
 All tiles have a `tile-registration.ts` file, where certain basic information about the tile is defined.
 
 #### `updateObjectReferenceWithNewSharedModelIds`
-When tiles are copied (either with the duplicate button or by dragging them from one document to another--these cases are handled in `document-content.ts`), the tile's object ids are generally not updated. The current exception to this rule is that `SharedDataSets` update their `caseIds` and `attributeIds`. For tiles with annotations that connect to objects related to datasets (such as table cells or xy plot dots), these ids need to be updated when the tile is copied. `updateObjectReferenceWithNewSharedModelIds` takes care of this requirement. The function takes...
+When tiles are copied (either with the duplicate button or by dragging them from one document to another--these cases are handled in `document-content.ts`), the tile's object ids are generally not updated. The current exception to this rule is that `SharedDataSets` update their `caseIds` and `attributeIds`. For tiles with annotations that connect to objects related to datasets (such as table cells or xy plot dots), these ids need to be updated when the tile is copied. `updateObjectReferenceWithNewSharedModelIds` takes care of this requirement. The function takes three parameters:
+- `object` is a `ClueObject` (see above). This is the object that is being updated, and its `objectId` should be mutated appropriately by the function.
+- `sharedDataSetEntries` is a list of `PartialSharedModelEntries` which are connected to the tile being copied.
+- `updatedSharedModelMap` is a dictionary where keys are original shared model ids and values are `UpdatedSharedDataSetIds`, which contain an `attributeIdMap` and `caseIdMap` that can be used to translate old attribute and case ids to new ones.
+This function to update `object.objectId` with new attribute and case ids, and also return the updated `objectId`.
+_REMEMBER:_ This function is only necessary to define for tiles with object ids that get updated when tiles are copied. Currently, that's only an issue for tiles with object ids that come from shared data sets, because other tile internal ids do not get updated when a tile is duplicated.
 
 ## Implementation Details
 _TO BE ADDED_
