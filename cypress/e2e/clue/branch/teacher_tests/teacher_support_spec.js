@@ -8,7 +8,7 @@ let dashboard = new TeacherDashboard();
 const queryParams = {
     teacherQueryParams: `${Cypress.config("teacherQueryParams")}`,
     studentQueryParams: `${Cypress.config("queryParams")}`
-}
+};
 
 function beforeTest(params) {
     cy.clearQAData('all');

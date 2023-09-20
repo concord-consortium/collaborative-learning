@@ -64,10 +64,16 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const validCompletions = (aValues: string[], prefixString: string) => {
     const prefixStringLC = prefixString.toLowerCase();
     const values = uniq(aValues).sort();
-    return values.filter((value) => {
-      return value && typeof(value)==='string' && !isImageUrl(value)
-             && value.toLowerCase().startsWith(prefixStringLC);
-    }) as string[];
+    if (editingValue && valueCandidate.length > 0){
+      return values.filter((value) => {
+        return value && typeof(value)==='string' && !isImageUrl(value)
+               && value.toLowerCase().startsWith(prefixStringLC);
+      }) as string[];
+    } else {
+      return values.filter((value) => {
+        return value && typeof(value)==='string' && !isImageUrl(value);
+      }) as string[];
+    }
   };
 
   const {
