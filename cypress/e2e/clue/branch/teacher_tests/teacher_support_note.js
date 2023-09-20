@@ -1,5 +1,4 @@
 import TeacherDashboard from "../../../../support/elements/clue/TeacherDashboard";
-import ClueCanvas from "../../../../support/elements/clue/cCanvas";
 
 let dashboard = new TeacherDashboard();
 
@@ -9,7 +8,7 @@ const queryParams = {
   student7QueryParams: "/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=student:7&qaGroup=2",
   student1QueryParams: "/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=student:1&qaGroup=1",
   student2QueryParams: '/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=student:2&qaGroup=1',
-}
+};
 
 const textToGroup = "This is a note to Group 3";
 const textToStudent = "This is a note to clue testing1";
@@ -35,7 +34,7 @@ context.skip('Support messages in student view', () => {
   it('verify group support note appears in student view', function () {
     beforeTest(queryParams.teacherQueryParams);
 
-    cy.log('send group note')
+    cy.log('send group note');
     dashboard.sendGroupNote(2, textToGroup);
 
     cy.log('verify group support note appears in student view');
@@ -54,7 +53,7 @@ context.skip('Support messages in student view', () => {
   it('verify individual support note appears in student view', function () {
     beforeTest(queryParams.teacherQueryParams);
 
-    cy.log('send group note')
+    cy.log('send group note');
     dashboard.sendStudentNote(groupIndex, studentName, quadrant, textToStudent);
 
     cy.log('verify student support note appears in student view');

@@ -10,7 +10,7 @@ context('Doc Editor', () => {
   it('verify doc editor and solution button work', function () {
     beforeTest();
     
-    cy.log("verify doc editor loads")
+    cy.log("verify doc editor loads");
     cy.get(".toolbar").should("exist");
     documentContent().should("exist");
 
