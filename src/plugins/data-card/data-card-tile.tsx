@@ -248,6 +248,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
     documentId, model, hasLinkableRows, onRequestTilesOfType, onRequestLinkableTiles
   });
 
+
   return (
     <div className={toolClasses}>
       <DataCardToolbar
