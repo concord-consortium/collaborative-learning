@@ -71,7 +71,7 @@ export const brainwavesGripperSimulation: ISimulation = {
       labels: ["input", "sensor:emg-reading"],
       icon: iconUrl(kEMGKey),
       name: kEMGKey,
-      value: 0
+      value: 40
     },
     {
       displayName: "Surface Pressure",
