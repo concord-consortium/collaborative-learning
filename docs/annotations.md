@@ -40,5 +40,11 @@ Each object gets an "annotation button" that allows the user to add an annotatio
 #### `getObjectDefaultOffsets` (optional)
 By default, annotations are attached to the center of a target object. Defining this function allows the default position of the annotation anchor to be adjusted based on the obect. The function takes the usual `objectId` and optional `objectType`, and should return an MST `OffsetModel` (see `clue-object.ts`), which specifies a `dx` and `dy` with respect to the object's center. Note that offsets are generally bounded by the object's bounding box, so you should make sure `dx` and `dy` are within this rectangle.
 
+### Updates to `registerTileContentInfo`
+All tiles have a `tile-registration.ts` file, where certain basic information about the tile is defined.
+
+#### `updateObjectReferenceWithNewSharedModelIds`
+When tiles are copied (either with the duplicate button or by dragging them from one document to another--these cases are handled in `document-content.ts`), the tile's object ids are generally not updated. The current exception to this rule is that `SharedDataSets` update their `caseIds` and `attributeIds`. For tiles with annotations that connect to objects related to datasets (such as table cells or xy plot dots), these ids need to be updated when the tile is copied. `updateObjectReferenceWithNewSharedModelIds` takes care of this requirement. The function takes...
+
 ## Implementation Details
 _TO BE ADDED_
