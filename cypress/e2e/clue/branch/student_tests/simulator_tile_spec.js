@@ -68,7 +68,7 @@ context('Simulator Tile with Brainwaves Gripper Simulation', function () {
       dataflowTile.getDropdown(sensor, "sensor-select").click();
       dataflowTile.getSensorDropdownOptions(sensor).should("have.length", 3);
       dataflowTile.getSensorDropdownOptions(sensor).eq(1).click();
-      dataflowTile.getNodeValueContainer(sensor).invoke('text').then(parseFloat).should("equal", 0);
+      dataflowTile.getNodeValueContainer(sensor).invoke('text').then(parseFloat).should("equal", 40);
       simulatorTile.getEMGSlider().click("right");
       cy.wait(50);
       dataflowTile.getNodeValueContainer(sensor).invoke('text').then(parseFloat).should("equal", 440);
