@@ -32,14 +32,18 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer((props) => {
 
   const { data } = useDataSet(content?.data);
   const layout = useInitGraphLayout(content);
-  const xAttrID = content.getAttributeID('x');
-  const yAttrID = content.getAttributeID('y');
+  const xAttrID = content.getAttributeID("x");
+  const yAttrID = content.getAttributeID("y");
+  const xAttrType = content.config.attributeType("x");
+  const yAttrType = content.config.attributeType("y");
 
   const getTitle  = useCallback(() => {
     return model?.title || "";
   }, [model]);
 
   const getDotCenter = useCallback((dotId: string) => {
+    // FIXME Currently, getScreenX and getScreenY only handle numeric axes, so just bail if they are a different type.
+    if (xAttrType !== "numeric" || yAttrType !== "numeric") return;
     const idParts = decipherDotId(dotId);
     if (!idParts) return;
     const { caseId, xAttributeId, yAttributeId } = idParts;
@@ -48,7 +52,7 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer((props) => {
     const x = getScreenX({ caseId, dataset: data, layout, dataConfig });
     const y = getScreenY({ caseId, dataset: data, layout, dataConfig });
     return { x, y };
-  }, [data, content.config, layout, xAttrID, yAttrID]);
+  }, [data, content.config, layout, xAttrID, yAttrID, xAttrType, yAttrType]);
 
   useEffect(() => {
     onRegisterTileApi?.({
