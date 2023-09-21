@@ -34,7 +34,6 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   public worker(node: NodeData, inputs: any, outputs: any) {
-    // This node type is a "live" output and does not output a value into a rete output
     const n1 = inputs.nodeValue.length ? inputs.nodeValue[0] : node.data.nodeValue;
     if (this.editor) {
       const _node = this.editor.nodes.find((n: { id: any; }) => n.id === node.id);
