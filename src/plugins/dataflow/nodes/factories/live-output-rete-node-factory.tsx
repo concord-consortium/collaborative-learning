@@ -34,11 +34,9 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   public worker(node: NodeData, inputs: any, outputs: any) {
-    // This node type is a "live" output and does not output a value into a rete outputs
-    // Then the default NodeProcess takes the updated data and sends it out via Serial.
-    // TODO this data also makes it to the simulator and is sometimes a NaN
+    // This node type is a "live" output and does not output a value into a rete output
     const n1 = inputs.nodeValue.length ? inputs.nodeValue[0] : node.data.nodeValue;
-    console.log("> worker", n1, inputs.nodeValue.length, node.data.nodeValue);
+
     if (this.editor) {
       const _node = this.editor.nodes.find((n: { id: any; }) => n.id === node.id);
       if (_node) {
@@ -48,7 +46,7 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
         const outputType = getOutputType(_node);
         const nodeValue = _node.inputs.get("nodeValue")?.control as InputValueControl;
 
-        let newValue = isNaN(n1) ? 0 : n1; // we don't want to be returning zero either,
+        let newValue = isNaN(n1) ? 0 : n1;
 
         if (kBinaryOutputTypes.includes(outputType)){
           newValue = isNaN(n1) ? 0 : +(n1 !== 0);
@@ -60,8 +58,7 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
         }
 
         if (kGripperOutputTypes.includes(outputType)){
-          newValue = this.getPercentageAsInt(n1); // sometimes this is NaN
-          console.log("> newValue", newValue);
+          newValue = this.getPercentageAsInt(n1);
           const roundedDisplayValue = Math.round((newValue / 10) * 10);
           nodeValue?.setDisplayMessage(`${roundedDisplayValue}% closed`);
         }
@@ -77,7 +74,6 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   private getPercentageAsInt(num: number){
-    console.log("> getPercentageAsInt", num);
     if (num > 1)  return 100;
     if (num < 0)  return 0;
     return Math.round(num * 100);
