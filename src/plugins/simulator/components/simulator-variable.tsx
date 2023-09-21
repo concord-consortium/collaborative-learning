@@ -34,7 +34,7 @@ export function SimulatorVariable({ variable }: ISimulatorVariableProps) {
   const displayName = variable?.displayName ? `${variable.displayName} ${suffix}` : "";
 
   // Limit the value to two decimal places
-  const value = variable?.value;
+  const value = variable?.currentValue;
   const scaleFactor = 100;
   const displayValue = value !== undefined ? Math.round(value * scaleFactor) / scaleFactor : "";
 
