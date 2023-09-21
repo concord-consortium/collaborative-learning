@@ -51,6 +51,7 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
     const dataConfig = content.config;
     const x = getScreenX({ caseId, dataset: data, layout, dataConfig });
     const y = getScreenY({ caseId, dataset: data, layout, dataConfig });
+    if (!isFinite(x) || !isFinite(y)) return;
     return { x, y };
   }, [data, content.config, layout, xAttrID, yAttrID, xAttrType, yAttrType]);
 
