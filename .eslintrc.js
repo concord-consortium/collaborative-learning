@@ -6,7 +6,7 @@ module.exports = {
       ecmaVersion: 2018,
       sourceType: "module",
     },
-    plugins: ["@typescript-eslint", "json", "react", "react-hooks", "import"],
+    plugins: ["@typescript-eslint", "json", "react", "react-hooks", "import", "simple-import-sort"],
     env: {
       browser: true,
       es6: true
@@ -39,22 +39,50 @@ module.exports = {
       "@typescript-eslint/no-unused-vars": ["warn",
         { args: "none", ignoreRestSiblings: true, "destructuredArrayIgnorePattern": "^_" }],
       "@typescript-eslint/prefer-optional-chain": "off",  // 300 as of 2020-09-13
+      // "comma-spacing": "error",
       curly: ["error", "multi-line", "consistent"],
       "dot-notation": "error",
       "eol-last": "warn",
       eqeqeq: ["error", "smart"],
       "eslint-comments/no-unused-disable": "off",   // enabled in .eslintrc.build.js
-      "import/order": [ "error", {
-        // FIXME: This is not working. We need something like this to
-        // put the scss and sass imports below everything else.
-        "pathGroups": [
-          {
-            "pattern": "./*.scss",
-            "group": "sibling",
-            "position": "after"
-          }
-        ]
+      "indent": ["error", 2, {
+        SwitchCase: 1,
+        FunctionDeclaration: { parameters: 2 },
+        FunctionExpression: { parameters: 2 },
       }],
+      // "indent": ["error", 2, {
+      //   ignoredNodes: [
+      //     // Ignore ternaries, we have different types of indentation
+      //     "ConditionalExpression",
+      //     // Ignore indentation within variable declarations.
+      //     // This effectively disables a whole lot of the indentation checking.
+      //     // Generally the indentation of our code blocks by this rule is pretty good,
+      //     // but there are cases like arrow functions inside of variable declarations
+      //     // which don't look good with the default indentation
+      //     "VariableDeclaration *"
+      //   ],
+      //   ArrayExpression: "off",
+      //   CallExpression: {
+      //     arguments: "off"
+      //   },
+      //   FunctionDeclaration: {
+      //     parameters: "off"
+      //   },
+      //   FunctionExpression: {
+      //     parameters: "off"
+      //   },
+      //   ImportDeclaration: "first",
+      //   MemberExpression: "off",
+      //   ObjectExpression: "first",
+      //   SwitchCase: 1,
+      //   VariableDeclarator: "first"
+      // }],
+
+      // This looks like the right thing to enable
+      // "indent": ["error", 2, {
+      //   ignoredNodes: [ ":not(ImportDeclaration, ImportDeclaration *)" ],
+      //   ImportDeclaration: "first",
+      // }],
       "max-len": ["warn", { code: 120, ignoreUrls: true }],
       "no-bitwise": "error",
       "no-debugger": "off", // enabled in .eslintrc.build.js
@@ -72,6 +100,7 @@ module.exports = {
       "no-var": "error",
       "no-whitespace-before-property": "error",
       "object-shorthand": "error",
+      // "object-curly-spacing": ["error", "always"],
       "prefer-const": ["error", {"destructuring": "all"}],
       "prefer-object-spread": "error",
       "prefer-regex-literals": "error",
@@ -86,7 +115,34 @@ module.exports = {
       "react/no-unsafe": ["off", { checkAliases: true }], // 1 as of 2020-09-13
       "react/no-unused-state": "error",
       "react/prop-types": "off",
-      semi: ["error", "always"]
+      semi: ["error", "always"],
+      // "simple-import-sort/imports": ["error", {
+      //   // TODO: Non assigned or side effect imports will be in the anything groupin their matching group but not be sorted
+      //   // within the group, is this OK?
+      //   groups: [
+      //     // Non assigned, this will match a shorter string than the css group
+      //     ["^\\u0000"],
+      //     // Node.js builtins prefixed with `node:`.
+      //     ["^node:"],
+      //     // Packages.
+      //     // Things that start with a letter (or digit or underscore), or `@` followed by a letter.
+      //     // Always put react first
+      //     ["^react$", "^@?\\w"],
+      //     // Absolute imports and other imports such as Vue-style `@/foo`.
+      //     // Anything not matched in another group.
+      //     ["^"],
+      //     // Relative imports.
+      //     // Anything that starts with a dot.
+      //     ["^\\."],
+      //     // Assets
+      //     ["\.png$", "\.svg$"],
+      //     // Non assigning css
+      //     ["^\\u0000.*\.(css|sass|scss)"],
+      //     // Non assigning local registration imports
+      //     ["^\\u0000\..*/register-", "^\\u0000\..*-registration$"]
+
+      //   ]
+      // }],
     },
     overrides: [
       { // test files
