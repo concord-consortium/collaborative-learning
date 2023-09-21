@@ -26,7 +26,7 @@ describe('verify document curation', function() {//adding a star to a student do
 
     it('verify starring and unstar',function(){
         beforeTest(queryParams);
-        cy.log('verify starring a student published investigation')
+        cy.log('verify starring a student published investigation');
         cy.openTopTab('class-work');
         cy.openSection('class-work','workspaces');
         resourcesPanel.starCanvasItem('class-work','workspaces',studentDoc);
@@ -36,7 +36,7 @@ describe('verify document curation', function() {//adding a star to a student do
         //length becomes 2 when the Starred section is exposed.
         cy.get('.icon-star.starred').should('have.length.be.at.least', 1);
 
-        cy.log('verify starred document has a star in the dashboard')
+        cy.log('verify starred document has a star in the dashboard');
         dashboard.switchView('Dashboard');
         dashboard.switchWorkView('Published');
         dashboard.getGroup(1).find('.four-up .icon-star').should('have.class', 'starred');

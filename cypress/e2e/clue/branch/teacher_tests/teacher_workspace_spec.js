@@ -17,7 +17,7 @@ let teacherDoc = "Teacher Investigation Copy";
 const queryParams = {
   teacherQueryParams: "/?appMode=qa&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:7&unit=msa",
   studentWorkspaceQueryParams: "/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:7&unit=msa"
-}
+};
 
 function beforeTest(params) {
   cy.clearQAData('all');

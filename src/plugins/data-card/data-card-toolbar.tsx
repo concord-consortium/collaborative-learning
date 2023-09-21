@@ -11,13 +11,16 @@ import { DataCardContentModelType } from "./data-card-content";
 import { ITileModel } from "../../models/tiles/tile-model";
 import { ImageUploadButton } from "../../components/tiles/image/image-toolbar";
 import { EditFacet } from "./data-card-types";
-import { DeleteAttrButton, DuplicateCardButton, LinkTileButton } from "./components/data-card-toolbar-buttons";
+import { DeleteAttrButton, DuplicateCardButton,
+  LinkTileButton, MergeInButton } from "./components/data-card-toolbar-buttons";
+import { useTileDataMerging } from "../../hooks/use-tile-data-merging";
 
 import "./data-card-toolbar.scss";
 
 interface IProps extends IFloatingToolbarProps {
   currEditAttrId: string;
   currEditFacet: EditFacet;
+  isMergeEnabled?: boolean;
   isLinkEnabled?: boolean;
   model: ITileModel;
   getLinkIndex: () => number;
@@ -25,11 +28,12 @@ interface IProps extends IFloatingToolbarProps {
   handleDuplicateCard: () => void;
   setImageUrlToAdd: (url: string) => void;
   showLinkTileDialog?: () => void;
+  showMergeTileDialog?: () => void;
 }
 
 export const DataCardToolbar: React.FC<IProps> = observer(function DataCardToolbar({
     isLinkEnabled, model, documentContent, tileElt, currEditAttrId, currEditFacet, showLinkTileDialog,
-    getLinkIndex, onIsEnabled, setImageUrlToAdd, handleDeleteValue, handleDuplicateCard, 
+    getLinkIndex, onIsEnabled, setImageUrlToAdd, handleDeleteValue, handleDuplicateCard,
     ...others }: IProps) {
   const content = model.content as DataCardContentModelType;
   const { caseIndex, dataSet, totalCases } = content;
@@ -43,6 +47,8 @@ export const DataCardToolbar: React.FC<IProps> = observer(function DataCardToolb
     enabled,
       ...others
   });
+
+  const { isMergeEnabled, showMergeTileDialog } = useTileDataMerging({model});
 
   const isEditingValue = !!currEditAttrId && currEditFacet === "value";
   const valueActionsEnabled = enabled && isEditingValue;
@@ -58,6 +64,10 @@ export const DataCardToolbar: React.FC<IProps> = observer(function DataCardToolb
 
   const handleLinkButtonCLick = () => {
     showLinkTileDialog && showLinkTileDialog();
+  };
+
+  const handleMergeDataClick = () => {
+    showMergeTileDialog && showMergeTileDialog();
   };
 
   const toolbarClasses = classNames(
@@ -81,6 +91,7 @@ export const DataCardToolbar: React.FC<IProps> = observer(function DataCardToolb
         <div className={cardActionsButtonsClasses}>
           <DuplicateCardButton onClick={handleDuplicateCard} />
           <LinkTileButton getLinkIndex={getLinkIndex} isEnabled={isLinkEnabled} onClick={handleLinkButtonCLick} />
+          <MergeInButton onClick={handleMergeDataClick} isEnabled={isMergeEnabled} />
         </div>
         <div className={valueActionsButtonsClasses}>
           <ImageUploadButton onUploadImageFile={file => uploadImage(file)} />
