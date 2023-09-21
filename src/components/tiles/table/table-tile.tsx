@@ -1,6 +1,6 @@
 import { observer } from "mobx-react";
 import { onSnapshot } from "mobx-state-tree";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import ReactDataGrid from "react-data-grid";
 
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
@@ -31,6 +31,13 @@ import { verifyAlive } from "../../../utilities/mst-utils";
 import { gImageMap } from "../../../models/image-map";
 
 import "./table-tile.scss";
+import { TileToolbar } from "../../toolbar/tile-toolbar";
+import { TileToolbarButton } from "../../toolbar/tile-toolbar-button";
+import DeleteSelectedIconSvg from "../../../assets/icons/delete/delete-selection-icon.svg";
+import { IToolbarButtonProps, registerTileToolbarButtonInfos } from "../../toolbar/toolbar-button-manager";
+
+function missing() { console.log('missing delete function'); }
+const DeleteCellContext = createContext(missing);
 
 // observes row selection from shared selection store
 const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComponent({
@@ -225,6 +232,15 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
         getLinkIndex={getLinkIndex}
         showLinkDialog={showLinkTileDialog}
       />
+      <DeleteCellContext.Provider value={deleteSelected}>
+        <TileToolbar
+          id={model.id}
+          tileType="table"
+          tileElement={tileElt}
+          defaultButtons={['delete']}
+          model={model}
+          />
+      </DeleteCellContext.Provider>
       <div className="table-grid-container" ref={containerRef} onClick={handleBackgroundClick}>
         <EditableTableTitle
           content={content}
@@ -246,3 +262,25 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   );
 });
 export default TableToolComponent;
+
+registerTileToolbarButtonInfos("table",
+  [
+    {
+      name: 'delete',
+      component: TableCellDeleteButton
+    }
+  ]
+);
+
+function TableCellDeleteButton({model} : IToolbarButtonProps) {
+
+  const deleteSelected = useContext(DeleteCellContext);
+
+  function handleClick() {
+    console.log('delete cell');
+    deleteSelected();
+  }
+  return (
+    <TileToolbarButton title="Delete" Icon={DeleteSelectedIconSvg} onClick={handleClick}></TileToolbarButton>
+  );
+}
