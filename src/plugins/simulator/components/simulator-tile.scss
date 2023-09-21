@@ -7,15 +7,15 @@
   overflow: auto;
 
   .simulator-content {
-    height: 100%;
+    height: calc(100% - 45px); // The 45 pixels is to accommodate the tile title
     width: 100%;
 
     .simulator-variables {
       display: flex;
-      font-family: 'Ubunutu', sans-serif;
+      font-family: 'Ubuntu', sans-serif;
       height: 20px;
       justify-content: space-between;
-      margin: 45px 20px 10px;
+      padding: 45px 20px 10px;
       width: 100%;
     }
 

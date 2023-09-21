@@ -132,7 +132,7 @@ export function updateSensorNode(n: Node, channels: NodeChannelInfo[]) {
 
     // update simulated sensors
     if (chInfo?.simulatedVariable) {
-      chInfo.value = chInfo.simulatedVariable.value || 0;
+      chInfo.value = chInfo.simulatedVariable.currentValue || 0;
     }
 
     if (chInfo && isFinite(chInfo.value)) {
