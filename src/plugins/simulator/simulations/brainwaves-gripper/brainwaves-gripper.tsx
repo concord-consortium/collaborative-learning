@@ -1,37 +1,49 @@
+import { VariableSlider } from "@concord-consortium/diagram-view";
 import React from "react";
 
 import { arduinoFrames, armFrames, gripperFrames } from "./brainwaves-gripper-assets";
 import { ISimulation, ISimulationProps } from "../simulation-types";
 import { findVariable, getFrame } from "../simulation-utilities";
-import { demoStreams } from "../../../shared-assets/data/dataflow/demo-data";
 import { iconUrl, kEMGKey, kGripperKey, kPressureKey } from "../../../shared-assets/icons/icon-utilities";
 
+import "rc-slider/assets/index.css";
 import "./brainwaves-gripper.scss";
 
 export const kBrainwavesKey = "EMG_and_claw";
 
 function BrainwavesGripperComponent({ frame, variables }: ISimulationProps) {
   const emgVariable = findVariable(kEMGKey, variables);
-  const normalizedEmgValue = Math.min((emgVariable?.value ?? 0) / 450, 1);
+  const normalizedEmgValue = Math.min((emgVariable?.currentValue ?? 0) / 450, 1);
   const armFrame = getFrame(normalizedEmgValue, armFrames.length);
 
   const gripperVariable = findVariable(kGripperKey, variables);
-  const normalizedGripperValue = (gripperVariable?.value ?? 0) / 100;
+  const normalizedGripperValue = (gripperVariable?.currentValue ?? 0) / 100;
   const gripperFrame = getFrame(normalizedGripperValue, gripperFrames.length);
   return (
     <div className="bwg-component">
-      <img
-        src={ armFrames[armFrame] }
-        className="arm-image"
-      />
-      <img
-        src={ arduinoFrames[0] }
-        className="arduino-image"
-      />
-      <img
-        src={ gripperFrames[gripperFrame] }
-        className="gripper-image"
-      />
+      <div className="animation">
+        <img
+          src={ armFrames[armFrame] }
+          className="arm-image"
+        />
+        <img
+          src={ arduinoFrames[0] }
+          className="arduino-image"
+        />
+        <img
+          src={ gripperFrames[gripperFrame] }
+          className="gripper-image"
+        />
+      </div>
+      <div className="controls">
+        <VariableSlider
+          className="emg-slider"
+          max={440}
+          min={40}
+          step={40}
+          variable={emgVariable}
+        />
+      </div>
     </div>
   );
 }
@@ -59,7 +71,7 @@ export const brainwavesGripperSimulation: ISimulation = {
       labels: ["input", "sensor:emg-reading"],
       icon: iconUrl(kEMGKey),
       name: kEMGKey,
-      value: 0
+      value: 40
     },
     {
       displayName: "Surface Pressure",
@@ -77,7 +89,5 @@ export const brainwavesGripperSimulation: ISimulation = {
       value: 0
     }
   ],
-  values: {
-    [kEMGKey]: demoStreams.emgLongHold
-  }
+  values: {}
 };
