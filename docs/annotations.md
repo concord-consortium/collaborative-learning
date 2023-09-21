@@ -17,7 +17,7 @@ Annotations can be connected to anything set up as a CLUE Object. These can be a
 - objectType: This optional string can help tiles interpret the objectId. For example, the geometry tile allows annotations to be attached to several different types of objects (points, segments, polygons), and the objectType field helps the geometry tile know where to look for the object.
 
 ### Tile Model Modifications
-To set a tile up with annotations, its content model must have a `get annotatableObjects` view. This function should return an array of all the tile's objects (see CLUE Objects above) that can have an annotation attached. This array is used to create buttons the attach annotations when the user enters annotation mode.
+To set a tile up with annotations, its content model must have a `get annotatableObjects` view. This function should return an array of all the tile's objects (see CLUE Objects above) that can have an annotation attached. This array is used to create buttons that attach annotations when the user enters annotation mode.
 
 ### Tile Component Modifications
 Setting up a tile with annotations also requires defining one function, `getObjectBoundingBox` in the `tileApi`. Additionally, there are two optional functions that can be defined in the `tileApi` to customize how annotations work with the tile.
