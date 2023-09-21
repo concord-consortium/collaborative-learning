@@ -25,6 +25,7 @@ const virtualCO2Channel: NodeChannelInfo = {
 const virtualO2Channel: NodeChannelInfo = {
   hubId: "00000-VIRTUAL-HUB", hubName: "Virtual Sensor", name: "O2", channelId: "00004-VIR",
   missing: false, type: "O2", units: "PPM", value: 0, virtual: true, timeFactor: 1000,
+  // NaN-issue: is it that this is sometimes returning a NaN?
   virtualValueMethod: (t: number) => {
     const vals = [21, 21, 21, 22, 22, 22, 21, 21, 21, 21, 22, 22, 22, 22, 22];
     return vals[t % vals.length];

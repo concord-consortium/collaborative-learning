@@ -23,6 +23,7 @@ export class SensorReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   public worker(node: NodeData, inputs: any, outputs: any) {
+    // NaN-issue - is it that the case of !=== fsr-reading && isNaN is allowing a NaN through?
     const makeZero = node.data.type === "fsr-reading" && isNaN(node.data.nodeValue as number);
     outputs.num = makeZero ? 0 : node.data.nodeValue;
 

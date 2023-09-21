@@ -44,7 +44,14 @@ export function sendDataToSimulatedOutput(n: Node, outputVariables?: VariableTyp
   const outputVariable = findOutputVariable(n, outputVariables);
   if (outputVariable && getHubSelect(n).getValue() === simulatedHubName(outputVariable)) {
     const { val } = getNodeValueWithType(n);
+
+    // BROKEN, BUT TEST IF BEHAVIOR DIFFERENT WITH HARDWARE:
+    // const outputValue = isFinite(val) ? val : 0;
+    // outputVariable.setValue(outputValue);
+
+    // FIX FOR NOW:
     if (isFinite(val)) outputVariable.setValue(val);
+
     // TODO: Should we also set the unit?
     // We'd use n.data.nodeValueUnits but it might be undefined
     // We could add a units field to getNodeValueWithType(n) ?
@@ -137,6 +144,7 @@ export function updateSensorNode(n: Node, channels: NodeChannelInfo[]) {
     if (chInfo && isFinite(chInfo.value)) {
       sensorSelect.setSensorValue(chInfo.value);
     } else {
+      // NaN-issue: is it that we are hitting this path when we should not?
       sensorSelect.setSensorValue(NaN);
     }
   }
