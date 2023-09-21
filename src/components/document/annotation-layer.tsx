@@ -101,8 +101,6 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   ) {
     const tileApi = tileApiInterface?.getTileApi(tileId);
     const objectBoundingBox = tileApi?.getObjectBoundingBox?.(objectId, objectType);
-    if (!objectBoundingBox) return;
-
     return objectBoundingBox;
   }
 
@@ -126,7 +124,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     tileId: string, objectId: string, objectType?: string
   ) {
     if (!content) return undefined;
-  
+
     const rowId = content.findRowContainingTile(tileId);
     return getTileAdjustedBoundingBox(rowId ?? "", tileId, objectId, objectType);
   }

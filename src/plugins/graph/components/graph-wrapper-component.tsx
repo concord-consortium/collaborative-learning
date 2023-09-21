@@ -17,7 +17,7 @@ import { GraphToolbar } from "./graph-toolbar";
 
 import "./graph-wrapper-component.scss";
 
-export const GraphWrapperComponent: React.FC<ITileProps> = observer((props) => {
+export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(props) {
   const {
     documentContent, documentId, model, readOnly, scale, tileElt,
     onRegisterTileApi, onUnregisterTileApi, onRequestTilesOfType, onRequestLinkableTiles
