@@ -44,7 +44,7 @@ export function sendDataToSimulatedOutput(n: Node, outputVariables?: VariableTyp
   const outputVariable = findOutputVariable(n, outputVariables);
   if (outputVariable && getHubSelect(n).getValue() === simulatedHubName(outputVariable)) {
     const { val } = getNodeValueWithType(n);
-    // TODO: handle NaN source in sensor node rather than avoid it here
+    // TODO: handle NaN source in sensor node in addition to avoiding it here
     if (isFinite(val)) outputVariable.setValue(val);
     // TODO: Should we also set the unit?
     // We'd use n.data.nodeValueUnits but it might be undefined
