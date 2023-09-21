@@ -20,7 +20,6 @@ export const DataSetViewButton: React.FC<IProps> = ({newTileType}) => {
 
   function handleClick () {
     const tileId = tile?.id;
-    console.log("handleClick", {tileId, addTilesContext});
     if (!tileId || !addTilesContext) return;
 
     // Find the first shared dataset of the target tile
@@ -35,8 +34,9 @@ export const DataSetViewButton: React.FC<IProps> = ({newTileType}) => {
   const Icon = newTileInfo?.Icon;
 
   return (
-    <TileToolbarButton 
-        className="dataset-view-button" onClick={handleClick} tooltipOptions={{ title: `View data in ${newTileType}`}}>
+    <TileToolbarButton
+        className="dataset-view-button" onClick={handleClick}
+        tooltipOptions={{ title: `Create a linked ${newTileType} tile`}}>
       { Icon ? <Icon/> : "??" }
       <ViewBadgeIcon className="button-badge"/>
     </TileToolbarButton>

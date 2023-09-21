@@ -52,6 +52,8 @@ export const TableToolbar: React.FC<IProps> = observer(({
                 />;
       }
     } else {
+      // If `toolName` is an array, the first item is the tool name.
+      // The remaining items are parameters to the pass to the tool
       const realToolName = toolName[0];
       if (realToolName === "data-set-view") {
         const tileType = toolName[1];

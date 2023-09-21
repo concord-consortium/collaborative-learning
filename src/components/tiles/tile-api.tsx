@@ -52,24 +52,24 @@ export const TileModelContext = createContext<ITileModel | null>(null);
 export interface IAddTilesContext {
   /**
    * Add a new tile in a new row after the target tile.
-   * 
+   *
    * @param tileType type of the new tile
    * @param target tile after which the new tile will be added
    * @param sharedModels shared models to link to the new tile
-   * 
-   * The shared models passed here will be configured for the tile before the 
-   * tile tries to add its own default shared models. Tiles add these default shared models
-   * in a reaction in their afterAttach. This behavior prevents the tile from adding extra shared 
-   * models that are not needed. The tile's reaction will see the existing shared models and 
-   * decide the best thing to do. 
    *
-   * This shared model behavior is due to a complex ordering of when the new tile is added 
-   * to the tree, when afterAttach is called by MST, delayed reactions after action batches, and 
-   * the fact that all tiles check if the shared model manager is ready before doing anything. 
-   * A small obscure change in the code could cause the passed shared models to be configured 
-   * after the reaction runs. 
-   * 
-   * TODO: The configuration of shared models should improved so we can get this behavior in a 
+   * The shared models passed here will be configured for the tile before the
+   * tile tries to add its own default shared models. Tiles add these default shared models
+   * in a reaction in their afterAttach. This behavior prevents the tile from adding extra shared
+   * models that are not needed. The tile's reaction will see the existing shared models and
+   * decide the best thing to do.
+   *
+   * This shared model behavior is due to a complex ordering of when the new tile is added
+   * to the tree, when afterAttach is called by MST, delayed reactions after action batches, and
+   * the fact that all tiles check if the shared model manager is ready before doing anything.
+   * A small obscure change in the code could cause the passed shared models to be configured
+   * after the reaction runs.
+   *
+   * TODO: The configuration of shared models should be improved so we can get this behavior in a
    * more obvious way.
    */
   addTileAfter: (tileType: string, target: ITileModel, sharedModels?: SharedModelType[]) => void;
