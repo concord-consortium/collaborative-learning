@@ -144,7 +144,6 @@ export function updateSensorNode(n: Node, channels: NodeChannelInfo[]) {
     if (chInfo && isFinite(chInfo.value)) {
       sensorSelect.setSensorValue(chInfo.value);
     } else {
-      // NaN-issue: is it that we are hitting this path when we should not?
       sensorSelect.setSensorValue(NaN);
     }
   }
