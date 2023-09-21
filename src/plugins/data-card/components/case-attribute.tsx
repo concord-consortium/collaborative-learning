@@ -1,6 +1,9 @@
+import React, { useEffect, useState } from "react";
 import { observer } from "mobx-react";
 import classNames from "classnames";
-import React, { useEffect, useState } from "react";
+import { useCombobox } from "downshift";
+import { uniq } from "lodash";
+import { VisuallyHidden } from "@chakra-ui/react";
 import { gImageMap } from "../../../models/image-map";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { DataCardContentModelType } from "../data-card-content";
@@ -9,13 +12,14 @@ import { RemoveIconButton } from "./add-remove-icons";
 import { useCautionAlert } from "../../../components/utilities/use-caution-alert";
 import { useErrorAlert } from "../../../components/utilities/use-error-alert";
 import { getClipboardContent } from "../../../utilities/clipboard-utils";
+import { isImageUrl } from "../../../models/data/data-types";
 
 import '../data-card-tile.scss';
 
 const typeIcons = {
   "date": "📅",
-  "categorical": "txt",
-  "numeric": "#",
+  "categorical": "🔤",
+  "numeric": "#️⃣",
   "image": "📷",
   "boundary": "?",
   "color": "?",
@@ -52,15 +56,59 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const [labelCandidate, setLabelCandidate] = useState(() => getLabel());
   const [valueCandidate, setValueCandidate] = useState(() => getValue());
   const [imageUrl, setImageUrl] = useState("");
+  const [inputItems, setInputItems] = useState([] as string[]);
 
   const editingLabel = currEditFacet === "name" && currEditAttrId === attrKey;
   const editingValue = currEditFacet === "value" && currEditAttrId === attrKey;
+
+  const validCompletions = (aValues: string[], prefixString: string) => {
+    const prefixStringLC = prefixString.toLowerCase();
+    const values = uniq(aValues).sort();
+    if (editingValue && valueCandidate.length > 0){
+      return values.filter((value) => {
+        return value && typeof(value)==='string' && !isImageUrl(value)
+               && value.toLowerCase().startsWith(prefixStringLC);
+      }) as string[];
+    } else {
+      return values.filter((value) => {
+        return value && typeof(value)==='string' && !isImageUrl(value);
+      }) as string[];
+    }
+  };
+
+  const {
+    isOpen,
+    getToggleButtonProps,
+    getLabelProps,
+    getMenuProps,
+    getInputProps,
+    highlightedIndex,
+    getItemProps,
+    setInputValue
+  } = useCombobox({
+    items: inputItems,
+    initialInputValue: valueCandidate,
+    onInputValueChange: ({inputValue}) => {
+      const safeValue = inputValue || "";
+      setValueCandidate(safeValue);
+      const allAttrValues = content.dataSet.attrFromID(attrKey)?.values as string[] || [];
+      const completions = validCompletions(allAttrValues, safeValue);
+      setInputItems(completions);
+    }
+  });
+
+  useEffect(()=>{
+    const attrValues = content.dataSet.attrFromID(attrKey)?.values || [];
+    const completions = validCompletions(attrValues as string[], valueCandidate);
+    setInputItems(completions);
+  }, [content.dataSet, attrKey, valueCandidate]);
 
   // reset contents of input when attribute value changes without direct user input
   // (when it is deleted by toolbar or the underlying case has changed )
   useEffect(()=>{
     setValueCandidate(valueStr);
-  },[valueStr]);
+    setInputValue(valueStr);
+  }, [setInputValue, valueStr]);
 
   gImageMap.isImageUrl(valueStr) && gImageMap.getImage(valueStr)
     .then((image)=>{
@@ -69,7 +117,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     editingLabel && setLabelCandidate(event.target.value);
-    editingValue && setValueCandidate(event.target.value);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -241,6 +288,29 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   const typeIcon = typeIcons[content.dataSet.attrFromID(attrKey).mostCommonType || ""];
 
+  // Add some custom behavior to the properties returned by useCombobox
+  function customizedGetInputProps() {
+    const propsCreated = getInputProps();
+
+    const defaultBlur = propsCreated.onBlur;
+    const newBlur = function(e: React.FocusEvent<Element, Element>) {
+      handleCompleteValue();
+      if (defaultBlur) defaultBlur(e);
+    };
+    propsCreated.onBlur = newBlur;
+
+    return propsCreated;
+  }
+
+  const displayArrow = () => {
+    if (inputItems.length > 0) {
+      return isOpen
+        ? <span className="up">&#x25B2;</span>
+        : <span className="down">&#x25BC;</span>;
+    }
+    return <span></span>; // There may be more cases in the future, e.g. date picker
+  };
+
   return (
     <div className={pairClassNames}>
       <div className={labelClassNames} onClick={handleLabelClick}>
@@ -259,29 +329,40 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
       </div>
 
       <div className={valueClassNames} onClick={handleValueClick}>
-        { !readOnly && !valueIsImage() &&
-          <input
-            className={valueInputClassNames}
-            type="text"
-            value={valueCandidate}
-            onChange={handleChange}
-            onKeyDown={handleKeyDown}
-            onBlur={handleCompleteValue}
-            onDoubleClick={handleInputDoubleClick}
-            onFocus={handleValueInputFocus}
-            onPaste={handleValuePaste}
-          />
-        }
-        { !readOnly && valueIsImage() &&
-          <img src={imageUrl} className="image-value" />
-        }
+          <div style={{display: (!readOnly && !valueIsImage()) ? 'block' : 'none'}} className="downshift-dropdown">
+            <VisuallyHidden>
+              <label {...getLabelProps()} className="">
+                Value for {labelCandidate}
+              </label>
+            </VisuallyHidden>
+            <input
+              {...customizedGetInputProps()}
+              className={valueInputClassNames}
+              onFocus={handleValueInputFocus}
+              onPaste={handleValuePaste}
+            />
+            <button aria-label="toggle menu" type="button" {...getToggleButtonProps()}>
+              {displayArrow()}
+            </button>
+            <ul {...getMenuProps()} className={ isOpen ? "open" : "closed"}>
+              {isOpen &&
+                inputItems.map((item, index) => (
+                  <li className="dropdown-item" style={highlightedIndex === index ? {backgroundColor: '#bde4ff'} : {} }
+                    key={`${item}${index}`}
+                    {...getItemProps({item, index})}
+                  >
+                    {item}
+                  </li>
+              ))}
+            </ul>
+          </div>
 
-        { readOnly && !valueIsImage() &&
-          <div className="cell-value">{valueStr}</div>
-        }
-        { readOnly && valueIsImage() &&
-          <img src={imageUrl} className="image-value" />
-        }
+          { valueIsImage() &&
+            <img src={imageUrl} className="image-value" />
+          }
+          { readOnly && !valueIsImage() &&
+            <div className="cell-value">{valueStr}</div>
+          }
       </div>
       <div className={typeIconClassNames} >{typeIcon}</div>
 

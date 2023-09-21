@@ -3,7 +3,7 @@ import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
 import { SelectionBox } from "../components/selection-box";
 import { computeStrokeDashArray, DeltaPoint, DrawingTool, IDrawingComponentProps, IDrawingLayer,
-  IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
+  IToolbarButtonProps, ObjectTypeIconViewBox, StrokedObject, typeField } from "./drawing-object";
 import { BoundingBoxSides, Point } from "../model/drawing-basic-types";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
 import FreehandToolIcon from "../assets/freehand-icon.svg";
@@ -64,7 +64,8 @@ export const LineObject = StrokedObject.named("LineObject")
     },
 
     get icon() {
-      return FreehandToolIcon;
+      return <FreehandToolIcon viewBox={ObjectTypeIconViewBox}
+        stroke={self.stroke} strokeWidth={self.strokeWidth} strokeDasharray={self.strokeDashArray}/>;
     }
   
   }))
@@ -82,8 +83,8 @@ export const LineObject = StrokedObject.named("LineObject")
       const height = bbox.se.y - bbox.nw.y;
       const newWidth  = width -  deltas.left + deltas.right;
       const newHeight = height - deltas.top + deltas.bottom;
-      const widthFactor = newWidth/width;
-      const heightFactor = newHeight/height;
+      const widthFactor = width ? newWidth/width : 1;
+      const heightFactor = height ? newHeight/height : 1;
 
       // x,y get moved to a scaled position within the new bounds
       const newLeft = left+deltas.left;
@@ -106,7 +107,20 @@ export const LineObject = StrokedObject.named("LineObject")
       }
       self.dragScaleX = self.dragScaleY = undefined;
     }
-  }));
+  }))
+  .preProcessSnapshot(sn => {
+    const snClone = { ...sn };
+    if (typeof snClone.x !== 'number') {
+      snClone.x = 0;
+    }
+    if (typeof snClone.y !== 'number') {
+      snClone.y = 0;
+    }
+    snClone.deltaPoints = snClone.deltaPoints?.filter((point) => {
+      return (typeof point.dx === 'number' && typeof point.dy === 'number');
+    });
+    return snClone;
+  });
 export interface LineObjectType extends Instance<typeof LineObject> {}
 export interface LineObjectSnapshot extends SnapshotIn<typeof LineObject> {}
 

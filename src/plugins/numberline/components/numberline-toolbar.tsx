@@ -1,9 +1,11 @@
 import { observer } from "mobx-react";
 import React from "react";
 import ReactDOM from "react-dom";
-import { IFloatingToolbarProps, useFloatingToolbarLocation
-        } from "../../components/tiles/hooks/use-floating-toolbar-location";
-import { useSettingFromStores } from "../../hooks/use-stores";
+
+import {
+  IFloatingToolbarProps, useFloatingToolbarLocation
+} from "../../../components/tiles/hooks/use-floating-toolbar-location";
+import { useSettingFromStores } from "../../../hooks/use-stores";
 import { PlacePointButton, ClearPointsButton, DeletePointButton } from "./numberline-toolbar-buttons";
 
 import "./numberline-toolbar.scss";
@@ -41,7 +43,6 @@ export const NumberlineToolbar: React.FC<INumberlineToolbarProps> = observer((pr
         return <DeletePointButton key={toolName} onClick={handleDeletePoint} />;
     }
   };
-
 
   return documentContent
     ? ReactDOM.createPortal(

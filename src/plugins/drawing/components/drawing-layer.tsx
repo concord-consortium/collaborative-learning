@@ -91,8 +91,8 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   }
 
   // Adds a new object and selects it, activating the select tool.
-  public addNewDrawingObject(drawingObject: DrawingObjectSnapshotForAdd) {
-    return this.getContent().addAndSelectObject(drawingObject);
+  public addNewDrawingObject(drawingObject: DrawingObjectSnapshotForAdd, addAtBack=false) {
+    return this.getContent().addAndSelectObject(drawingObject, addAtBack);
   }
 
   public getSelectedObjects(): DrawingObjectType [] {
@@ -236,7 +236,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       selectionBox.close();
       const selectedIds: string[] = addToSelectedObjects ? [...this.getContent().selection] : [];
       this.forEachObject((object) => {
-        if (object.inSelection(selectionBox)) {
+        if (object.visible && object.inSelection(selectionBox)) {
           if (selectedIds.indexOf(object.id) === -1) {
             selectedIds.push(object.id);
           }
@@ -247,23 +247,23 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     }
   }
 
-  private conditionallyRenderObject(object: DrawingObjectType,
-       _filter: (object: DrawingObjectType) => boolean, inGroup: boolean) {
-    if (!object || !_filter(object)) {
-      return null;
-    }
-    // Objects that are members of a group should not respond to mouse events.
+  private conditionallyRenderObject(object: DrawingObjectType, selected: boolean, inGroup: boolean) {
+    if (!object) return null;
+    if (!selected && !object.visible) return null;
+    // Objects that are members of a group do not individually respond to mouse events.
     const hoverAction = inGroup ? undefined : this.handleObjectHover;
     const mouseDownAction = inGroup ? undefined : this.handleSelectedObjectMouseDown;
     return renderDrawingObject(object, this.props.readOnly, hoverAction, mouseDownAction);
   }
 
-  public renderObjects(_filter: (object: DrawingObjectType) => boolean) {
-    return this.getContent().objects.reduce((result, object) => {
-      result.push(this.conditionallyRenderObject(object, _filter, false));
+  public renderObjects() {
+    const content = this.getContent();
+    return content.objects.reduce((result, object) => {
+      const selected = content.isIdSelected(object.id);
+      result.push(this.conditionallyRenderObject(object, selected, false));
       if (isGroupObject(object)) {
         object.objects.forEach((member) => { 
-          result.push(this.conditionallyRenderObject(member, _filter, true));
+          result.push(this.conditionallyRenderObject(member, selected, true));
         });
       }
       return result;
@@ -288,9 +288,11 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
           {this.renderResizeHandle(object, "se", seX, seY, color)}
         </g>;
 
+      const testId = enableActions ? "selection-box" : "highlight-box";
+
       return <g key={index}>
               <rect
-                data-testid="selection-box"
+                data-testid={testId}
                 x={nwX}
                 y={nwY}
                 width={seX - nwX}
@@ -408,8 +410,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
           onDrop={this.handleDrop} >
 
         <svg xmlnsXlink="http://www.w3.org/1999/xlink" width={1500} height={1500} ref={this.setSvgRef}>
-          {this.renderObjects(object => object.type === "image" )}
-          {this.renderObjects(object => object.type !== "image" )}
+          {this.renderObjects()}
           {!this.props.readOnly && this.renderSelectionBorders(this.getSelectedObjects(), true)}
           {highlightObject
             ? this.renderSelectionBorders([highlightObject], false)
@@ -497,7 +498,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
           width: imageEntry.width!,
           height: imageEntry.height!
         });
-        this.addNewDrawingObject(getSnapshot(image));
+        this.addNewDrawingObject(getSnapshot(image), true);
       });
   }
 

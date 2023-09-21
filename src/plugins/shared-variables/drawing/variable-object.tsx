@@ -11,6 +11,7 @@ import { useNewVariableDialog } from "../dialog/use-new-variable-dialog";
 import { SharedVariablesType } from "../shared-variables";
 import { variableBuckets } from "../shared-variables-utils";
 import { DrawingObject, IDrawingComponentProps, IToolbarManager,
+  ObjectTypeIconViewBox,
   typeField } from "../../drawing/objects/drawing-object";
 import { Point } from "../../drawing/model/drawing-basic-types";
 import { SvgToolbarButton } from "../../drawing/components/drawing-toolbar-buttons";
@@ -44,6 +45,12 @@ export const VariableChipObject = DrawingObject.named("VariableObject")
       const nw: Point = {x, y};
       const se: Point = {x: x + width, y: y + height};
       return {nw, se};
+    },
+    get label() {
+      return "Variable";
+    },
+    get icon() {
+      return (<AddVariableChipIcon viewBox={ObjectTypeIconViewBox} />);
     },
     get supportsResize() {
       return false;
@@ -88,6 +95,7 @@ export const VariableChipComponent: React.FC<IDrawingComponentProps> = observer(
         onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null }
         onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null }
         onMouseDown={(e)=> handleDrag?.(e, model)}
+        pointerEvents={handleHover ? "visible" : "none"}
       >
         <span ref={variableChipRef} className="drawing-variable-container">
           <VariableChip variable={selectedVariable} className="drawing-variable" />

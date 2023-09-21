@@ -62,10 +62,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const firstRow = content?.rowOrder.length && content.rowOrder.length > 0
     ? getRowElement(content?.getRowByIndex(0)?.id) : undefined;
   const documentWidth = firstRow?.offsetWidth ?? 0;
-  const documentHeight = content?.rowOrder.reduce((totalHeight: number, rowId: string) => {
-    const row = getRowElement(rowId);
-    return totalHeight + (row?.offsetHeight ?? 0);
-  }, 0) ?? 0;
+  const documentHeight = content?.height ?? 0;
   const documentLeft = 0;
   const documentRight = documentWidth;
   const documentBottom = documentHeight - (documentScrollY ?? 0);
@@ -92,9 +89,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     if (!tileElement) return undefined;
 
     return (point: Point): Point | undefined => {
-
       const [x, y] = point;
-
       const _x = rowElement.offsetLeft + tileElement.offsetLeft - tileElement.scrollLeft
         + x + tileBorder - (documentScrollX ?? 0);
       const _y = rowElement.offsetTop + tileElement.offsetTop - tileElement.scrollTop

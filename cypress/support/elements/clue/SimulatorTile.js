@@ -1,12 +1,19 @@
+function wsClass(wsc) {
+  return wsc ?? ".primary-workspace";
+}
+
 class SimulatorTile {
   getSimulatorTile(workspaceClass) {
-    return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .simulator-tool-tile`);
+    return cy.get(`${wsClass(workspaceClass)} .canvas-area .simulator-tool-tile`);
   }
   getTileTitle(workspaceClass){
-    return cy.get(`${workspaceClass || ".primary-workspace"} .editable-tile-title-text`);
+    return cy.get(`${wsClass(workspaceClass)} .simulator-tool-tile .editable-tile-title-text`);
   }
   getSimulatorTileTitle(workspaceClass){
-    return cy.get(`${workspaceClass || ".primary-workspace"} .editable-tile-title`);
+    return cy.get(`${wsClass(workspaceClass)} .simulator-tool-tile .editable-tile-title`);
+  }
+  getEMGSlider(workspaceClass) {
+    return cy.get(`${wsClass(workspaceClass)} .simulator-tool-tile .emg-slider .rc-slider-rail`);
   }
 }
 

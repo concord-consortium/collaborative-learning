@@ -1,12 +1,15 @@
+import React from "react";
 import { getMembers, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { uniqueId } from "../../../utilities/js-utils";
 import { SelectionBox } from "../components/selection-box";
 import { BoundingBox, BoundingBoxSides, Point, ToolbarSettings }
    from "../model/drawing-basic-types";
 import { StampModelType } from "../model/stamp";
-import FreehandToolIcon from "../assets/freehand-icon.svg";
+import ErrorIcon from "../../../assets/icons/error.svg";
 
 export type ToolbarModalButton = "select" | "line" | "vector" | "rectangle" | "ellipse" | "text" | "stamp" | "variable";
+
+export const ObjectTypeIconViewBox = "0 0 36 34";
 
 // This interface is a subset of what the DrawingContentModel provides.
 // It is used to break the circular reference between DrawingContentModel
@@ -44,7 +47,8 @@ export const DrawingObject = types.model("DrawingObject", {
   type: types.optional(types.string, () => {throw "Type must be overridden";}),
   id: types.optional(types.identifier, () => uniqueId()),
   x: types.number,
-  y: types.number
+  y: types.number,
+  visible: true
 })
 .volatile(self => ({
   dragX: undefined as number | undefined,
@@ -75,8 +79,9 @@ export const DrawingObject = types.model("DrawingObject", {
     // used in the show/sort panel.
     return "Unknown object";
   },
-  get icon(): React.FC<React.SVGProps<SVGSVGElement>> {
-    return FreehandToolIcon;
+  get icon(): JSX.Element {
+    // Should be overridden by all subclasses
+    return (<ErrorIcon viewBox={ObjectTypeIconViewBox}/>);
   }
 }))
 .views(self => ({
@@ -89,6 +94,9 @@ export const DrawingObject = types.model("DrawingObject", {
   }
 }))
 .actions(self => ({
+  setVisible(visible: boolean) {
+    self.visible = visible;
+  },
   setPosition(x: number, y: number) {
     self.x = x;
     self.y = y;

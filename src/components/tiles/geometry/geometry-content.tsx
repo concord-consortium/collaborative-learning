@@ -19,7 +19,7 @@ import {
 } from "../../../models/tiles/geometry/geometry-content";
 import { convertModelObjectsToChanges } from "../../../models/tiles/geometry/geometry-migrate";
 import {
-  cloneGeometryObject, GeometryObjectModelType, isPointModel, pointIdsFromSegmentId, PolygonModelType
+  cloneGeometryObject, GeometryObjectModelType, isPointModel, pointIdsFromSegmentId, PointModelType, PolygonModelType
 } from "../../../models/tiles/geometry/geometry-model";
 import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObjectUnderMouse,
           isDragTargetOrAncestor } from "../../../models/tiles/geometry/geometry-utils";
@@ -206,9 +206,13 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private getPointScreenCoords(pointId: string) {
-    if (!this.state.board) return undefined;
+    // Access the model to ensure that model changes trigger a rerender
+    const p = (this.props.model.content as GeometryContentModelType).getObject(pointId) as PointModelType;
+    if (p.x == null || p.y == null) return;
+
+    if (!this.state.board) return;
     const element = this.state.board?.objects[pointId];
-    if (!element) return undefined;
+    if (!element) return;
     const bounds = element.bounds();
     const coords = new JXG.Coords(JXG.COORDS_BY_USER, bounds.slice(0, 2), this.state.board);
     const point: Point = [coords.scrCoords[1], coords.scrCoords[2]];

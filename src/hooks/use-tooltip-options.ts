@@ -14,5 +14,8 @@ const kDefaultTooltipOptions: TooltipProps = {
 };
 
 export const useTooltipOptions = (options?: TooltipProps) => {
-  return useMemo(() => ({ ...kDefaultTooltipOptions, ...options }), [options]);
+  const optionsJson = JSON.stringify(options);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const tooltipOptions = useMemo(() => ({ ...kDefaultTooltipOptions, ...options }), [optionsJson]);
+  return tooltipOptions;
 };

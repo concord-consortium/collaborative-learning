@@ -83,7 +83,7 @@ context('6-pack view functionality', () => {
         dashboard.verifyPublishStatus(group);
 
         cy.log('select stars for students');
-        groups = clueData.classes[classIndex].problems[problemIndex].groups;
+        let groups = clueData.classes[classIndex].problems[problemIndex].groups;
         dashboard.clearAllStarsFromPublishedWork();
         dashboard.starPublishedWork(groups);
 

@@ -1,5 +1,6 @@
 import { each } from "lodash";
 import { types, getType, getEnv, SnapshotOrInstance } from "mobx-state-tree";
+import { kPlaceholderTileDefaultHeight } from "../tiles/placeholder/placeholder-constants";
 import {
   getPlaceholderSectionId, isPlaceholderTile, PlaceholderContentModel
 } from "../tiles/placeholder/placeholder-content";
@@ -22,6 +23,7 @@ import { LogEventName } from "../../lib/logger-types";
 import { safeJsonParse, uniqueId } from "../../utilities/js-utils";
 import { defaultTitle, titleMatchesDefault } from "../../utilities/title-utils";
 import { SharedModel, SharedModelType } from "../shared/shared-model";
+import { kSectionHeaderHeight } from "./document-constants";
 import { IDocumentContentAddTileOptions, INewRowTile, INewTileOptions,
    ITileCountsPerSection, NewRowTileArray } from "./document-content-types";
 import {
@@ -187,6 +189,14 @@ export const BaseDocumentContentModel = types
     };
   })
   .views(self => ({
+    getRowHeight(rowId: string) {
+      const row = self.getRow(rowId);
+      if (!row) return 0;
+      if (row.isSectionHeader) return kSectionHeaderHeight;
+      if (self.isPlaceholderRow(row)) return kPlaceholderTileDefaultHeight;
+      // NOTE: This may not be accurate for rows with tiles that rely on the getContentHeight tileAPI function.
+      return row.height;
+    },
     getSectionTypeForPlaceholderRow(row: TileRowModelType) {
       if (!self.isPlaceholderRow(row)) return;
       const tile = self.getTile(row.tiles[0].tileId);
@@ -277,6 +287,11 @@ export const BaseDocumentContentModel = types
     }
   }))
   .views(self => ({
+    get height() {
+      return self.rowOrder.reduce((totalHeight: number, rowId: string) => {
+        return totalHeight + (self.getRowHeight(rowId) ?? 0);
+      }, 0) ?? 0;
+    },
     rowHeightToExport(row: TileRowModelType, tileId: string) {
       if (!row?.height) return;
       // we only export heights for specific tiles configured to do so

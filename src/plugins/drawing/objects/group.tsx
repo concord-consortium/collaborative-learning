@@ -1,11 +1,12 @@
 import React from "react";
 import { observer } from "mobx-react";
-import { Instance, SnapshotIn, getMembers, types } from "mobx-state-tree";
+import { Instance, SnapshotIn, getMembers, isAlive, types } from "mobx-state-tree";
 import { DrawingObject, DrawingObjectType, IDrawingComponentProps, 
   StrokedObjectType, 
   isFilledObject, 
   isStrokedObject, 
-  typeField } from "./drawing-object";
+  typeField, 
+  ObjectTypeIconViewBox} from "./drawing-object";
 import { BoundingBoxSides, VectorEndShape } from "../model/drawing-basic-types";
 import { DrawingObjectMSTUnion } from "../components/drawing-object-manager";
 import { isVectorObject } from "./vector";
@@ -27,12 +28,12 @@ const Extents = types.model("Extents")
 export const GroupObject = DrawingObject.named("GroupObject")
   .props({
     type: typeField("group"),
-    objects: types.array(types.late(() => DrawingObjectMSTUnion)),
+    objects: types.array(DrawingObjectMSTUnion),
     objectExtents: types.map(Extents)
   })
   .views(self => ({
     get boundingBox() {
-      if (!self.objects.length) return { nw: { x: 0, y: 0 }, se: { x: 0, y: 0 } };
+      if (!isAlive(self) || !self.objects.length) return { nw: { x: 0, y: 0 }, se: { x: 0, y: 0 } };
       return self.objects.reduce((cur, obj) => {
         if (obj) {
           const objBB = obj.boundingBox;
@@ -48,10 +49,14 @@ export const GroupObject = DrawingObject.named("GroupObject")
       return "Group";
     },
     get icon() {
-      return GroupObjectsIcon;
+      return (<GroupObjectsIcon viewBox={ObjectTypeIconViewBox}/>);
     }
   }))
   .actions(self => ({
+    setVisible(visible: boolean) {
+      self.visible = visible;
+      self.objects.forEach((member) => { member.setVisible(visible); });
+    },
     setStroke(stroke: string) {
       self.objects.forEach((member) => {
         if (isStrokedObject(member)) { member.setStroke(stroke); }

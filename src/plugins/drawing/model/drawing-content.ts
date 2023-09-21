@@ -143,15 +143,6 @@ export const DrawingContentModel = TileContentModel
       self.selection = [...selection];
     },
 
-    unselectId(id: string) {
-      const index = self.selection.indexOf(id);
-      if (index >= 0) {
-        self.selection.splice(index, 1);
-      } else {
-        console.error('Failed to remove id ', id, ' from selection: [', self.selection, ']');
-      }
-    },
-
     setSelectedButton(button: ToolbarModalButton) {
       if (self.selectedButton !== button) {
         self.selectedButton = button;
@@ -164,7 +155,7 @@ export const DrawingContentModel = TileContentModel
       self.currentStampIndex = stampIndex;
     },
 
-    addObject(object: DrawingObjectSnapshotForAdd) {
+    addObject(object: DrawingObjectSnapshotForAdd, addAtBack=false) {
       // The reason only snapshots are allowed is so the logged action
       // includes the snapshot in the `call` that is passed to `onAction`.
       // If an instance is passed instead of a snapshot, then MST will just
@@ -174,9 +165,13 @@ export const DrawingContentModel = TileContentModel
       if (isStateTreeNode(object as any)) {
         throw new Error("addObject requires a snapshot");
       }
-
-      self.objects.push(object);
-      return self.objects[self.objects.length-1];
+      if (addAtBack) {
+        self.objects.unshift(object);
+        return self.objects[0];
+      } else {
+        self.objects.push(object);
+        return self.objects[self.objects.length-1];
+      }
     },
 
     moveObjectsOutOfGroup(group: GroupObjectType): string[] {
@@ -186,11 +181,46 @@ export const DrawingContentModel = TileContentModel
         self.objects.push(detach(member));
       });
       return ids;
+    },
+
+    // Moves one object in Z-order so that it will be in the stacking order
+    // position currently occupied by the other object.
+    // Eg starting with [A B C D E]
+    // changeZOrder(A, C) --> [B C A D E]
+    // changeZOrder(E, C) --> [A B E C D]
+    changeZOrder(moveObjectId: string, replaceObjectId: string) {
+      const obj = self.objectMap[moveObjectId];
+      const dest = self.objectMap[replaceObjectId];
+      if (obj && dest) {
+        const destPosition = self.objects.indexOf(dest);
+        const detached = detach(obj);
+        self.objects.splice(destPosition, 0, detached);
+      }
     }
 
   }))
   
   .actions(self => ({
+    /* Add a single object (identified by its id) to the selection. */
+    selectId(id: string) {
+      if (self.objectMap[id] && !self.isIdSelected(id)) {
+        // Just doing self.selection.push does not notify observers - not sure why.
+        const selection = self.selection;
+        selection.push(id);
+        self.setSelectedIds(selection);
+      }
+    },
+
+    /* Remove a single object (identified by its id) from the selection */
+    unselectId(id: string) {
+      const index = self.selection.indexOf(id);
+      if (index >= 0) {
+        self.selection.splice(index, 1);
+      } else {
+        console.error('Failed to remove id ', id, ' from selection: [', self.selection, ']');
+      }
+    },
+
 
     // Destroy any groups in the given list, moving their members to the top level.
     // The ungrouped members are selected, along with any non-group objects in the initial set.
@@ -210,8 +240,8 @@ export const DrawingContentModel = TileContentModel
     },
 
     // Adds a new object and selects it, activating the select tool.
-    addAndSelectObject(drawingObject: DrawingObjectSnapshotForAdd) {
-      const obj = self.addObject(drawingObject);
+    addAndSelectObject(drawingObject: DrawingObjectSnapshotForAdd, addAtBack=false) {
+      const obj = self.addObject(drawingObject, addAtBack);
       self.setSelectedButton('select');
       self.setSelectedIds([obj.id]);
       return obj;
@@ -341,19 +371,23 @@ export const DrawingContentModel = TileContentModel
             y: 0
           };
           const group = self.addAndSelectObject(props) as GroupObjectType;
+          let hasVisibleMember = false;
           forEachObjectId(objectIds, (obj) => {
             if (isGroupObject(obj)) {
               // Adding a group to a group:
               // Transfer old group's members into new group; delete old group.
               obj.objects.forEach((member) => {
                 group.objects.push(detach(member));
+                if (member.visible) hasVisibleMember = true;
               });
               destroy(obj);
             } else {
               // Adding a regular object - just move node.
               group.objects.push(detach(obj));
+              if (obj.visible) hasVisibleMember = true;
             }
           });
+          group.visible = hasVisibleMember;
           group.computeExtents();
         },
   

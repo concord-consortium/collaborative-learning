@@ -14,7 +14,7 @@
       flex-direction: column;
 
       &.open {
-        flex: 0 0 125px;
+        flex: 0 0 170px;
         background-color: $workspace-teal-light-9;
       }
 
@@ -63,7 +63,6 @@
           svg {
             flex: 0 0 1em;
             vertical-align: middle;
-            transform: rotate(180deg);
           }
 
         }
@@ -82,8 +81,10 @@
           text-align: left;
 
           li {
+            display: flex;
             list-style: none;
-            padding: .2em .5em;
+            padding: 3px 5px;
+            display: flex;
 
             &:hover {
               background-color: $workspace-teal-light-6;
@@ -93,8 +94,52 @@
               background-color: $workspace-teal-light-4;
             }
 
-            svg {
-              vertical-align: bottom;
+            &.dragging {
+              box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.25);
+              border: solid 1px #979797;
+              padding: 2px 4px;
+            }
+
+            &.invisible {
+
+              span.type-icon, span.label {
+                opacity: .5;
+              }
+            }
+
+            span.type-icon {
+              flex: 0 0 25px;
+              height: 24px;
+              width: 24px;
+
+              svg {
+                vertical-align: bottom;
+                height: 100%;
+                width: 100%;
+              }
+            }
+
+            span.label {
+              flex-grow: 1;
+            }
+
+            button.visibility-icon {
+              flex: 0 0 25px;
+              height: 24px;
+              width: 24px;
+              padding: 0;
+              border: none;
+              background: transparent;
+
+              svg {
+                height: 100%;
+                width: 100%;
+              }
+            }
+
+            .move-icon {
+              flex: 0 0 25px;
+              touch-action: none;
             }
           }
         }
@@ -104,6 +149,10 @@
   .drawing-layer {
 
     svg {
+
+      .ghost {
+        opacity: 0.1;
+      }
 
       .resize-handle {
         fill: #ffffff;

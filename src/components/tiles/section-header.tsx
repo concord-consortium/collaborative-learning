@@ -4,7 +4,7 @@ import classNames from "classnames";
 import { BaseComponent } from "../base";
 import { SectionType, getSectionInitials, getSectionTitle } from "../../models/curriculum/section";
 
-import "./section-header.sass";
+import "./section-header.scss";
 
 interface IProps {
   type: SectionType;
