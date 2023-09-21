@@ -36,7 +36,6 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
   public worker(node: NodeData, inputs: any, outputs: any) {
     // This node type is a "live" output and does not output a value into a rete output
     const n1 = inputs.nodeValue.length ? inputs.nodeValue[0] : node.data.nodeValue;
-
     if (this.editor) {
       const _node = this.editor.nodes.find((n: { id: any; }) => n.id === node.id);
       if (_node) {
@@ -45,7 +44,6 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
         // handle data and display of data
         const outputType = getOutputType(_node);
         const nodeValue = _node.inputs.get("nodeValue")?.control as InputValueControl;
-
         let newValue = isNaN(n1) ? 0 : n1;
 
         if (kBinaryOutputTypes.includes(outputType)){
