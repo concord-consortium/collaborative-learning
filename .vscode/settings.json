@@ -38,5 +38,10 @@
     "unlistener",
     "unlisteners",
     "wumps"
-  ]
+  ],
+
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true,
+  },
+
 }
