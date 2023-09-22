@@ -6,13 +6,15 @@ import { mergeTwoDataSets } from "../models/data/data-set-utils";
 import { IDataSet } from "../models/data/data-set";
 import { getMergableDataSets, getTileDataSet } from "../models/shared/shared-data-utils";
 import { getSnapshot } from "@concord-consortium/mobx-state-tree";
+import { get } from "lodash";
 
 interface IProps {
   model: ITileModel;
 }
 
 export const useTileDataMerging = ({model}: IProps) => {
-  const mergableTiles = useMemo(() => getMergableDataSets(model),[model]);
+  //const mergableTiles = useMemo(() => getMergableDataSets(model),[model]);
+  const mergableTiles = getMergableDataSets(model);
   const mergeTileFunc = useCallback((selectedTile: ITileLinkMetadata) => {
     const sourceSnap = getSnapshot(selectedTile.dataSet as IDataSet);
     const targetDataSet = getTileDataSet(model.content);
