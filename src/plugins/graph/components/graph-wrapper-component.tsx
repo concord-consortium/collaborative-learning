@@ -2,10 +2,12 @@ import React, { useCallback, useEffect } from "react";
 import classNames from "classnames";
 import { observer } from "mobx-react-lite";
 
+import { kSmallAnnotationNodeRadius } from "../../../components/annotations/annotation-utilities";
 import { useToolbarTileApi } from "../../../components/tiles/hooks/use-toolbar-tile-api";
 import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
 import { ITileProps } from "../../../components/tiles/tile-component";
 import { useProviderTileLinking } from "../../../hooks/use-provider-tile-linking";
+import { OffsetModel } from "../../../models/annotations/clue-object";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { useInitGraphLayout } from "../hooks/use-init-graph-layout";
 import { getScreenX, getScreenY } from "../hooks/use-point-locations";
@@ -97,6 +99,21 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
               r={radius}
             />
           );
+        }
+      },
+      getObjectDefaultOffsets: (objectId: string, objectType?: string) => {
+        const offsets = OffsetModel.create({});
+        if (objectType === "dot") {
+          offsets.setDy(-kSmallAnnotationNodeRadius);
+        }
+        return offsets;
+      },
+      getObjectNodeRadii: (objectId: string, objectType?: string) => {
+        if (objectType === "dot") {
+          return {
+            centerRadius: kSmallAnnotationNodeRadius / 2,
+            highlightRadius: kSmallAnnotationNodeRadius
+          };
         }
       }
     });

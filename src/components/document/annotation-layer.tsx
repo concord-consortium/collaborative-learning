@@ -95,10 +95,15 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     return [x, y];
   }
 
+  function getObjectNodeRadii(object?: IClueObject) {
+    if (!object) return;
+    const { tileId, objectId, objectType } = object;
+    const tileApi = tileApiInterface?.getTileApi(tileId);
+    return tileApi?.getObjectNodeRadii?.(objectId, objectType);
+  }
+
   // Returns an object bounding box with respect to the containing tile
-  function getObjectBoundingBox(
-    tileId: string, objectId: string, objectType?: string
-  ) {
+  function getObjectBoundingBox(tileId: string, objectId: string, objectType?: string) {
     const tileApi = tileApiInterface?.getTileApi(tileId);
     const objectBoundingBox = tileApi?.getObjectBoundingBox?.(objectId, objectType);
     return objectBoundingBox;
@@ -146,6 +151,9 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const previewArrowSourceY = sourceBoundingBox && sourceOffset
     ? sourceBoundingBox.top + sourceBoundingBox.height / 2 + sourceOffset.dy
     : undefined;
+  const previewArrowNodeRadii = getObjectNodeRadii(
+    { tileId: sourceTileId, objectId: sourceObjectId, objectType: sourceObjectType }
+  );
 
   const handleAnnotationButtonClick = (tileId: string, objectId: string, objectType?: string) => {
     if (!sourceBoundingBox) {
@@ -248,6 +256,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
               documentRight={documentRight}
               documentTop={documentTop}
               getBoundingBox={getBoundingBox}
+              getObjectNodeRadii={getObjectNodeRadii}
               key={key}
               readOnly={readOnly}
             />
@@ -256,6 +265,8 @@ export const AnnotationLayer = observer(function AnnotationLayer({
         <PreviewArrow
           documentHeight={documentHeight}
           documentWidth={documentWidth}
+          sourceCenterRadius={previewArrowNodeRadii?.centerRadius}
+          sourceHighlightRadius={previewArrowNodeRadii?.highlightRadius}
           sourceX={previewArrowSourceX}
           sourceY={previewArrowSourceY}
           targetX={mouseX}
