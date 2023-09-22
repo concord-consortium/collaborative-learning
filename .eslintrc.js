@@ -6,7 +6,7 @@ module.exports = {
       ecmaVersion: 2018,
       sourceType: "module",
     },
-    plugins: ["@typescript-eslint", "json", "react", "react-hooks"],
+    plugins: ["@typescript-eslint", "json", "react", "react-hooks", "unused-imports"],
     env: {
       browser: true,
       es6: true
@@ -36,8 +36,7 @@ module.exports = {
       "@typescript-eslint/no-non-null-assertion": "off",  // 27 as of 2020-09-13
       "@typescript-eslint/no-require-imports": "error",
       "@typescript-eslint/no-shadow": ["error", { builtinGlobals: false, hoist: "all", allow: ["resolve", "reject"] }],
-      "@typescript-eslint/no-unused-vars": ["warn",
-        { args: "none", ignoreRestSiblings: true, "destructuredArrayIgnorePattern": "^_" }],
+      "@typescript-eslint/no-unused-vars": "off", // moved to unused-imports
       "@typescript-eslint/prefer-optional-chain": "off",  // 300 as of 2020-09-13
       curly: ["error", "multi-line", "consistent"],
       "dot-notation": "error",
@@ -75,7 +74,10 @@ module.exports = {
       "react/no-unsafe": ["off", { checkAliases: true }], // 1 as of 2020-09-13
       "react/no-unused-state": "error",
       "react/prop-types": "off",
-      semi: ["error", "always"]
+      semi: ["error", "always"],
+      "unused-imports/no-unused-imports": "warn",
+      "unused-imports/no-unused-vars": ["warn",
+        { args: "none", ignoreRestSiblings: true, "destructuredArrayIgnorePattern": "^_" }],
     },
     overrides: [
       { // test files
