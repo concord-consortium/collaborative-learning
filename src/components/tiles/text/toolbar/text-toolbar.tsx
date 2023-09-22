@@ -20,6 +20,8 @@ import NumberedListToolIcon from "../../../../assets/icons/text/numbered-list-te
 import BulletedListToolIcon from "../../../../assets/icons/text/bulleted-list-text-icon.svg";
 
 import "./text-toolbar.sass";
+import { IToolbarButtonProps, registerTileToolbarButtonInfos } from "../../../toolbar/toolbar-button-manager";
+import { TileToolbarButton } from "../../../toolbar/tile-toolbar-button";
 
 interface IButtonDef {
   pluginName: string,
@@ -145,3 +147,109 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
         </div>, documentContent)
     : null;
 };
+
+/////////// new code
+/// TODO once this is complete the code above this line can be deleted.
+
+interface IGenericTextToolbarButtonProps {
+  Icon: React.FunctionComponent<React.SVGProps<SVGSVGElement>>,
+  slateType: EFormat,
+  toggleFunc: (editor: Editor, format: EFormat) => void
+}
+
+function GenericTextToolbarButton({Icon, slateType, toggleFunc}: IGenericTextToolbarButtonProps) {
+  const editor = useSlate();
+  const selected = editor.isMarkActive(slateType) || editor.isElementActive(slateType);
+  function handleClick (e : React.MouseEvent) {
+    e.stopPropagation();
+    toggleFunc(editor, slateType);
+  }
+  return (
+    <TileToolbarButton
+      Icon={Icon}
+      selected={selected}
+      onClick={handleClick} />);
+}
+
+function BoldToolbarButton({ model } : IToolbarButtonProps) {
+  return <GenericTextToolbarButton
+    Icon={BoldToolIcon} slateType={EFormat.bold} toggleFunc={toggleMark}/>;
+}
+
+function ItalicToolbarButton({ model } : IToolbarButtonProps) {
+  return <GenericTextToolbarButton
+    Icon={ItalicToolIcon} slateType={EFormat.italic} toggleFunc={toggleMark}/>;
+}
+
+function UnderlineToolbarButton({ model } : IToolbarButtonProps) {
+  return <GenericTextToolbarButton
+    Icon={UnderlineToolIcon} slateType={EFormat.underlined} toggleFunc={toggleMark}/>;
+}
+
+function SubscriptToolbarButton({ model } : IToolbarButtonProps) {
+  return <GenericTextToolbarButton
+    Icon={SubscriptToolIcon} slateType={EFormat.subscript} toggleFunc={toggleSupSub}/>;
+}
+
+function SuperscriptToolbarButton({ model } : IToolbarButtonProps) {
+  return <GenericTextToolbarButton
+    Icon={SuperscriptToolIcon} slateType={EFormat.superscript} toggleFunc={toggleSupSub}/>;
+}
+
+function NumberedListToolbarButton({ model } : IToolbarButtonProps) {
+  return <GenericTextToolbarButton
+    Icon={NumberedListToolIcon} slateType={EFormat.numberedList} toggleFunc={toggleElement}/>;
+}
+
+function BulletedListToolbarButton({ model } : IToolbarButtonProps) {
+  return <GenericTextToolbarButton
+    Icon={BulletedListToolIcon} slateType={EFormat.bulletedList} toggleFunc={toggleElement}/>;
+}
+
+registerTileToolbarButtonInfos('text',
+[
+  {
+    name: 'bold',
+    title: 'Bold',
+    keyHint: `${kShortcutPrefix}b`,
+    component: BoldToolbarButton
+  },
+  {
+    name: 'italic',
+    title: 'Italic',
+    keyHint: `${kShortcutPrefix}i`,
+    component: ItalicToolbarButton
+  },
+  {
+    name: 'underline',
+    title: 'Underline',
+    keyHint: `${kShortcutPrefix}u`,
+    component: UnderlineToolbarButton
+  },
+  {
+    name: 'subscript',
+    title: 'Subscript',
+    component: SubscriptToolbarButton
+  },
+  {
+    name: 'superscript',
+    title: 'Superscript',
+    component: SuperscriptToolbarButton
+  },
+  {
+    name: 'list-ol',
+    title: 'Numbered List',
+    component: NumberedListToolbarButton
+  },
+  {
+    name: 'list-ul',
+    title: 'Bulleted List',
+    component: BulletedListToolbarButton
+  },
+  {
+    name: 'link',
+    title: 'Link',
+    component: LinkButton
+  }
+]);
+

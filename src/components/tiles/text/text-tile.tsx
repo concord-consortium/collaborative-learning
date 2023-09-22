@@ -16,6 +16,7 @@ import { ITileProps } from "../tile-component";
 import { createTextPluginInstances, ITextPlugin } from "../../../models/tiles/text/text-plugin-info";
 import { LogEventName } from "../../../lib/logger-types";
 import { TextPluginsContext } from "./text-plugins-context";
+import { TileToolbar } from "../../toolbar/tile-toolbar";
 
 import "./text-tile.sass";
 
@@ -214,6 +215,9 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
                 onRegisterTileApi={this.handleRegisterToolApi}
                 onUnregisterTileApi={this.handleUnregisterToolApi}
               />
+              <TileToolbar id={this.props.model.id} tileType="text" tileElement={this.textTileDiv}
+                readOnly={!!readOnly} model={this.props.model}
+                defaultButtons={['bold']} />
             </Slate>
           </div>
         </TextPluginsContext.Provider>

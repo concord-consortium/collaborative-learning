@@ -36,18 +36,23 @@
     padding: 0;
     background-color: #efefef;
     cursor: pointer;
-    
-    &.selected {
-      background-color: $workspace-teal-light-4;  
-    }
-    
+
     &:hover {
       background-color: $workspace-teal-light-6;
     }
-  
+
+    &:disabled {
+      opacity: 25%;
+      cursor: default;
+    }
+
+    &.selected {
+      background-color: $workspace-teal-light-4;
+    }
+
     &:active {
       background-color: $workspace-teal-light-4;
-  
+
       &.button-select {
         svg path {
           fill: $workspace-teal-dark-1;

@@ -11,6 +11,7 @@ import { ITileModel } from "../../models/tiles/tile-model";
 export interface IToolbarButtonInfo {
   name: string,  // a unique named used in configuration to identify the button
   title: string, // user-visible tooltip for the button
+  keyHint?: string, // If provided, displayed to the user as the hotkey equivalent
   component: React.ComponentType<IToolbarButtonProps>, // component to render
 }
 

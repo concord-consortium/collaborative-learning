@@ -29,10 +29,7 @@ export const TileToolbar = observer(
 
     // Get styles to position the toolbar
     const { refs, toolbarStyles } = useTileToolbar(tileElement);
-
     const tipOptions = useTooltipOptions();
-
-
 
     // Determine the buttons to be shown
     const ui = useUIStore();
@@ -50,8 +47,9 @@ export const TileToolbar = observer(
       const info = getToolbarButtonInfo(tileType, name);
       if (info) {
         const Button = info?.component;
+        const tooltip = info.title + (info.keyHint ? ` (${info.keyHint})` : '');
         return (
-          <Tooltip key={name} title={info.title} {...tipOptions} >
+          <Tooltip key={name} title={tooltip} {...tipOptions} >
             <Button model={model} />
           </Tooltip>);
       } else {

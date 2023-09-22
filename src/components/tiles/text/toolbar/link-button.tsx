@@ -5,6 +5,7 @@ import { TextToolbarButton } from "./text-toolbar-button";
 import { useLinkDialog } from "../dialog/use-link-dialog";
 
 import LinkToolIcon from "../../../../assets/icons/text/link-text-icon.svg";
+import { TileToolbarButton } from "../../../toolbar/tile-toolbar-button";
 
 export const LinkButton = () => {
   const editor = useSlate();
@@ -24,6 +25,6 @@ export const LinkButton = () => {
     event.preventDefault();
     showModal();
   };
-  return <TextToolbarButton iconName="link" Icon={LinkToolIcon} enabled={enabled}
-    tooltip="Link" isSelected={isSelected} onClick={handleClick} />;
+  return <TileToolbarButton Icon={LinkToolIcon} enabled={enabled}
+    selected={isSelected} onClick={handleClick} />;
 };
