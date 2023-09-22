@@ -86,8 +86,8 @@ const INSERT_POSITION_MARGIN = 25;
 export function getValidInsertPosition(drawingContent: DrawingContentModelType, 
     getVisibleCanvasSize: () => Point | undefined) {
   const canvasSize = getVisibleCanvasSize();
-  const base_pos = {...INITIAL_INSERT_POSITION};
-  let pos = {...base_pos};
+  const base_pos = { ...INITIAL_INSERT_POSITION };
+  let pos = { ...base_pos };
   // Start at the initial position and try locations on a diagonal path.
   while (drawingContent.objectAtLocation(pos)) {
     pos.x += INSERT_POSITION_DELTA.x;
@@ -101,7 +101,7 @@ export function getValidInsertPosition(drawingContent: DrawingContentModelType,
         // Try a new diagonal starting from a new base position a little to the right.
         base_pos.x += INSERT_POSITION_BACKUP_DELTA.x;
         base_pos.y += INSERT_POSITION_BACKUP_DELTA.y;
-        pos = {...base_pos};  
+        pos = { ...base_pos };  
       }
     }
   }

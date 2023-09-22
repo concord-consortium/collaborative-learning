@@ -1,11 +1,11 @@
-import {MutableRefObject, useCallback, useEffect} from "react";
-import {isAddCasesAction, isRemoveCasesAction} from "../../../models/data/data-set-actions";
-import {IGraphModel, isGraphVisualPropsAction} from "../models/graph-model";
-import {useDataSetContext} from "../imports/hooks/use-data-set-context";
-import {INumericAxisModel} from "../imports/components/axis/models/axis-model";
-import {IDotsRef} from "../graph-types";
-import {matchCirclesToData, setNiceDomain, startAnimation} from "../utilities/graph-utils";
-import {onAnyAction} from "../../../utilities/mst-utils";
+import { MutableRefObject, useCallback, useEffect } from "react";
+import { isAddCasesAction, isRemoveCasesAction } from "../../../models/data/data-set-actions";
+import { IGraphModel, isGraphVisualPropsAction } from "../models/graph-model";
+import { useDataSetContext } from "../imports/hooks/use-data-set-context";
+import { INumericAxisModel } from "../imports/components/axis/models/axis-model";
+import { IDotsRef } from "../graph-types";
+import { matchCirclesToData, setNiceDomain, startAnimation } from "../utilities/graph-utils";
+import { onAnyAction } from "../../../utilities/mst-utils";
 
 interface IProps {
   graphModel: IGraphModel
@@ -15,7 +15,7 @@ interface IProps {
 }
 
 export function useGraphModel(props: IProps) {
-  const {graphModel, enableAnimation, dotsRef, instanceId} = props,
+  const { graphModel, enableAnimation, dotsRef, instanceId } = props,
     dataConfig = graphModel.config,
     yAttrID = graphModel.getAttributeID('y'),
     dataset = useDataSetContext();

@@ -86,7 +86,7 @@ class GraphToolTile{
         let transX=this.transformFromCoordinate('x', x),
             transY=this.transformFromCoordinate('y', y);
 
-        this.getGraph().last().click(transX, transY, {force:true});
+        this.getGraph().last().click(transX, transY, { force:true });
     }
     getGraphPointID(point){
          return cy.get('.geometry-content.editable ellipse').eq(point)
@@ -102,7 +102,7 @@ class GraphToolTile{
         let transX=this.transformFromCoordinate('x', x),
             transY=this.transformFromCoordinate('y', y);
 
-        this.getGraph().last().click(transX, transY, {force:true});
+        this.getGraph().last().click(transX, transY, { force:true });
     }
     getRotateTool(){
         return cy.get('.single-workspace .rotate-polygon-icon.enabled');
@@ -111,7 +111,7 @@ class GraphToolTile{
         return cy.get('.geometry-menu-button');
     }
     showAngle(){
-        cy.get('.single-workspace.primary-workspace .geometry-toolbar .button.angle-label').click({force: true});
+        cy.get('.single-workspace.primary-workspace .geometry-toolbar .button.angle-label').click({ force: true });
     }
     hideAngle(){
         cy.get('.single-workspace.primary-workspace .geometry-toolbar .button.angle-label.enabled').click();

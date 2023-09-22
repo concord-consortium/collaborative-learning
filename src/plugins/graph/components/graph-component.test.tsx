@@ -24,7 +24,7 @@ describe.skip("Graph", () => {
 
   it("renders graph point for each case", () => {
     const data = DataSet.create();
-    data.addAttributeWithID({ name: "xVariable"});
+    data.addAttributeWithID({ name: "xVariable" });
     data.addAttributeWithID({ name: "yVariable" });
     data.addCasesWithIDs([{ xVariable: 1, yVariable: 2, __id__: "c1" }, { xVariable: 3, yVariable: 4, __id__: "c2" }]);
     broker.addDataSet(data);

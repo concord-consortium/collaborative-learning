@@ -1,9 +1,9 @@
-import React, {MutableRefObject, useState} from "react";
-import {range} from "d3";
-import {useAxis} from "../hooks/use-axis";
-import {useAxisLayoutContext} from "../models/axis-layout-context";
-import {IAxisModel} from "../models/axis-model";
-import {SubAxis} from "./sub-axis";
+import React, { MutableRefObject, useState } from "react";
+import { range } from "d3";
+import { useAxis } from "../hooks/use-axis";
+import { useAxisLayoutContext } from "../models/axis-layout-context";
+import { IAxisModel } from "../models/axis-model";
+import { SubAxis } from "./sub-axis";
 
 import "./axis.scss";
 

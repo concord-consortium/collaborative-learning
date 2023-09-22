@@ -56,7 +56,7 @@ export class NumControl extends Rete.Control {
                                    label: string;
                                    currentUnits: string;
                                    units: string[] | null,
-                                   tooltip: string}) => {
+                                   tooltip: string }) => {
       const inputRef = useRef<HTMLInputElement>(null);
       useStopEventPropagation(inputRef, "pointerdown");
       return (

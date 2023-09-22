@@ -1,7 +1,7 @@
 import { Menu, MenuItem, MenuList, MenuButton, MenuDivider } from "@chakra-ui/react";
 import React, { CSSProperties, useRef, memo, useEffect, useState } from "react";
 import t from "../../../utilities/translation/translate";
-import {GraphPlace} from "../../axis-graph-shared";
+import { GraphPlace } from "../../axis-graph-shared";
 import { graphPlaceToAttrRole } from "../../../../graph-types";
 import { useDataConfigurationContext } from "../../../../hooks/use-data-configuration-context";
 import { useDataSetContext } from "../../../hooks/use-data-set-context";
@@ -42,14 +42,14 @@ const _AxisOrLegendAttributeMenu = ({ place, target, portal, onOpenClose,
   const instanceId = useInstanceIdContext();
   const attribute = attrId ? data?.attrFromID(attrId) : null;
   const [labelText, setLabelText] = useState(attribute?.name);
-  const removeAttrItemLabel = t(removeAttrItemLabelKeys[role], {vars: [attribute?.name]});
+  const removeAttrItemLabel = t(removeAttrItemLabelKeys[role], { vars: [attribute?.name] });
   const treatAs = dataConfig?.attributeType(role) === "numeric" ? "categorical" : "numeric";
   const menuRef = useRef<HTMLDivElement>(null);
   const showRemoveOption = useSettingFromStores("defaultSeriesLegend", "graph") !== true;
 
   const onCloseRef = useRef<() => void>();
   const overlayStyle: CSSProperties = {
-    position: "absolute", ...useOverlayBounds({target, portal})
+    position: "absolute", ...useOverlayBounds({ target, portal })
   };
   const buttonStyle: CSSProperties = {
     position: "absolute", inset: 0, padding: 0, color: "transparent"
@@ -60,7 +60,7 @@ const _AxisOrLegendAttributeMenu = ({ place, target, portal, onOpenClose,
   };
   const { attributes, listeners, setNodeRef: setDragNodeRef } = useDraggableAttribute(draggableOptions);
 
-  useOutsidePointerDown({ref: menuRef, handler: () => onCloseRef.current?.()});
+  useOutsidePointerDown({ ref: menuRef, handler: () => onCloseRef.current?.() });
 
   useEffect(() => {
     dataConfig?.onAction(action => {

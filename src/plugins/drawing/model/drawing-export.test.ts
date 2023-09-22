@@ -28,7 +28,7 @@ describe("exportDrawingTileSpec", () => {
   });
 
   it("should export empty drawings", () => {
-    const drawing = createDrawingContent({ objects: []});
+    const drawing = createDrawingContent({ objects: [] });
     expect(exportDrawing2(drawing)).toEqual({ type: "Drawing", objects: [] });
   });
 
@@ -47,12 +47,12 @@ describe("exportDrawingTileSpec", () => {
     const v2Data: VectorObjectSnapshot = { ...vectorData, id: "v2" };
     const drawing = createDrawingContent({ objects: [
       v1Data, v2Data
-    ]});
+    ] });
     expect(exportDrawing2(drawing)).toEqual({ type: "Drawing", objects: [v1Data, v2Data] });
 
     const drawing2 = createDrawingContent({ objects: [
       v1Data, v2Data
-    ]});
+    ] });
     drawing2.objects[0].setPosition(5, 5);
     (drawing2.objects[1] as VectorObjectType).setStrokeWidth(2);
     const v1DataMoved = { ...v1Data, x: 5, y: 5 };
@@ -61,7 +61,7 @@ describe("exportDrawingTileSpec", () => {
 
     const drawing3 = createDrawingContent({ objects: [
       v1Data, v2Data
-    ]});
+    ] });
     drawing3.deleteObjects([drawing3.objects[0].id]);
     expect(exportDrawing2(drawing3)).toEqual({ type: "Drawing", objects: [v2Data] });
   });
@@ -81,12 +81,12 @@ describe("exportDrawingTileSpec", () => {
     const l2Data: LineObjectSnapshot = { ...lineData, id: "l2" };
     const drawing = createDrawingContent({ objects: [
       l1Data, l2Data
-    ]});
+    ] });
     expect(exportDrawing2(drawing)).toEqual({ type: "Drawing", objects: [l1Data, l2Data] });
 
     const drawing2 = createDrawingContent({ objects: [
       l1Data, l2Data
-    ]});
+    ] });
     drawing2.objects[0].setPosition(5, 5);
     (drawing2.objects[1] as LineObjectType).setStrokeWidth(2);
     const l1DataMoved = { ...l1Data, x: 5, y: 5 };
@@ -95,7 +95,7 @@ describe("exportDrawingTileSpec", () => {
 
     const drawing3 = createDrawingContent({ objects: [
       l1Data, l2Data
-    ]});
+    ] });
     drawing3.deleteObjects([drawing3.objects[0].id]);
     expect(exportDrawing2(drawing3)).toEqual({ type: "Drawing", objects: [l2Data] });
   });
@@ -117,12 +117,12 @@ describe("exportDrawingTileSpec", () => {
     const r3Data: RectangleObjectSnapshot = { ...rectData, id: "r3" };
     const drawing = createDrawingContent({ objects: [
       r1Data, r2Data, r3Data
-    ]});
+    ] });
     expect(exportDrawing2(drawing)).toEqual({ type: "Drawing", objects: [r1Data, r2Data, r3Data] });
 
     const drawing2 = createDrawingContent({ objects: [
       r1Data, r2Data, r3Data
-    ]});
+    ] });
     drawing2.objects[0].setPosition(5, 5);
     drawing2.objects[1].setPosition(5, 5);
     (drawing2.objects[1] as RectangleObjectType).setStrokeWidth(2);
@@ -135,7 +135,7 @@ describe("exportDrawingTileSpec", () => {
 
     const drawing3 = createDrawingContent({ objects: [
       r1Data, r2Data, r3Data
-    ]});
+    ] });
     drawing3.deleteObjects([drawing3.objects[1].id, drawing3.objects[2].id]);
     expect(exportDrawing2(drawing3)).toEqual({ type: "Drawing", objects: [r1Data] });
   });
@@ -156,12 +156,12 @@ describe("exportDrawingTileSpec", () => {
     const e3Data: EllipseObjectSnapshot = { ...ellipseData, id: "e3" };
     const drawing = createDrawingContent({ objects: [
       e1Data, e2Data, e3Data
-    ]});
+    ] });
     expect(exportDrawing2(drawing)).toEqual({ type: "Drawing", objects: [e1Data, e2Data, e3Data] });
 
     const drawing2 = createDrawingContent({ objects: [
       e1Data, e2Data, e3Data
-    ]});
+    ] });
     drawing2.objects[0].setPosition(5, 5);
     drawing2.objects[1].setPosition(5, 5);
     (drawing2.objects[1] as EllipseObjectType).setStrokeWidth(2);
@@ -175,7 +175,7 @@ describe("exportDrawingTileSpec", () => {
 
     const drawing3 = createDrawingContent({ objects: [
       e1Data, e2Data, e3Data
-    ]});
+    ] });
     drawing3.deleteObjects([drawing3.objects[1].id, drawing3.objects[2].id]);
     expect(exportDrawing2(drawing3)).toEqual({ type: "Drawing", objects: [e1Data] });
   });
@@ -193,12 +193,12 @@ describe("exportDrawingTileSpec", () => {
     const i3Data: ImageObjectSnapshot = { ...imageData, id: "i3" };
     const drawing = createDrawingContent({ objects: [
       i1Data, i2Data, i3Data
-    ]});
+    ] });
     expect(exportDrawing2(drawing)).toEqual({ type: "Drawing", objects: [i1Data, i2Data, i3Data] });
 
     const drawing2 = createDrawingContent({ objects: [
       i1Data, i2Data, i3Data
-    ]});
+    ] });
     drawing2.objects[0].setPosition(5, 5);
     drawing2.objects[1].setPosition(5, 5);
     const i1DataMoved = { ...i1Data, x: 5, y: 5 };
@@ -208,7 +208,7 @@ describe("exportDrawingTileSpec", () => {
 
     const drawing3 = createDrawingContent({ objects: [
       i1Data, i2Data, i3Data
-    ]});
+    ] });
     drawing3.deleteObjects([drawing3.objects[1].id]);
     expect(exportDrawing2(drawing3)).toEqual({ type: "Drawing", objects: [i1Data, i3Data] });
   });
@@ -240,7 +240,7 @@ describe("exportDrawingTileSpec", () => {
     const i3Data: ImageObjectSnapshot = { ...imageData, id: "i3" };
     const drawing = createDrawingContent({ objects: [
       i1Data, i2Data, i3Data
-    ]});
+    ] });
 
     const i1OutData = { ...exportImageData, id: "i1" };
     const i2OutData = { ...exportImageData, id: "i2" };
@@ -250,7 +250,7 @@ describe("exportDrawingTileSpec", () => {
 
     const drawing2 = createDrawingContent({ objects: [
       i1Data, i2Data, i3Data
-    ]});
+    ] });
     drawing2.objects[0].setPosition(5, 5);
     drawing2.objects[1].setPosition(5, 5);
     const i1DataMoved = { ...i1OutData, x: 5, y: 5 };
@@ -260,7 +260,7 @@ describe("exportDrawingTileSpec", () => {
 
     const drawing3 = createDrawingContent({ objects: [
       i1Data, i2Data, i3Data
-    ]});
+    ] });
     drawing3.deleteObjects([drawing3.objects[1].id]);
     expect(exportDrawingWithTransform(drawing3))
             .toEqual({ type: "Drawing", objects: [i1OutData, i3OutData] });

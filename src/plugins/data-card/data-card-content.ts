@@ -151,7 +151,7 @@ export const DataCardContentModel = TileContentModel
         return { sharedModelManager, sharedDataSet, tileSharedModels };
       },
       // reaction/effect
-      ({sharedModelManager, sharedDataSet, tileSharedModels}) => {
+      ({ sharedModelManager, sharedDataSet, tileSharedModels }) => {
         if (!sharedModelManager?.isReady) {
           // We aren't added to a document yet so we can't do anything yet
           return;
@@ -180,7 +180,7 @@ export const DataCardContentModel = TileContentModel
         const dataSets = sharedModelManager.getSharedModelsByType(kSharedDataSetType) as SharedDataSetType[];
         updateSharedDataSetColors(dataSets);
       },
-      {name: "sharedModelSetup", fireImmediately: true}));
+      { name: "sharedModelSetup", fireImmediately: true }));
     },
     updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
       if (self.caseIndex >= self.totalCases) {
@@ -205,7 +205,7 @@ export const DataCardContentModel = TileContentModel
       ]);
     },
     addNewCaseFromAttrKeys(atts: string[], beforeId?: string ){
-      const obj = atts.reduce((o, key) => Object.assign(o, {[key]: ""}), {});
+      const obj = atts.reduce((o, key) => Object.assign(o, { [key]: "" }), {});
       if (beforeId){
         addCanonicalCasesToDataSet(self.dataSet, [obj], beforeId);
       } else {

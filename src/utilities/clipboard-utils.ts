@@ -23,7 +23,7 @@ export const pasteClipboardImage = async (imageData: IClipboardContents, onCompl
     }
     const fileUrl = url[1];
     const filename = fileUrl.split("/").pop();
-    const imageEntry = await gImageMap.getImage(fileUrl, {filename});
+    const imageEntry = await gImageMap.getImage(fileUrl, { filename });
     onComplete({ image: imageEntry });
   } else {
     console.error(`ERROR: unknown clipboard content type(s): ${imageData.types}`);

@@ -107,10 +107,10 @@ export const DocumentCollectionByType: React.FC<IProps> = observer(({
     onSelectNewDocument?.(section.documentTypes[0]);
   }
   const tabPanelDocumentSectionClass = classNames("tab-panel-documents-section", tabName,
-                                                  {"top-panel": isTopPanel, horizontal});
+                                                  { "top-panel": isTopPanel, horizontal });
   const bottomPanel = isBottomPanel && !isSinglePanel && sectionDocs.length > 0;
-  const listClass = classNames("list", tabName, {"top-panel": isTopPanel, horizontal,
-                                "bottom-panel": bottomPanel});
+  const listClass = classNames("list", tabName, { "top-panel": isTopPanel, horizontal,
+                                "bottom-panel": bottomPanel });
   return (
     <div className={tabPanelDocumentSectionClass}
           key={`${tab}-${section.type}`}

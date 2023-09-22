@@ -109,7 +109,7 @@ export function updateNodeRecentValues(n: Node) {
         recentValues[valueKey] = [recentValue];
       }
     } else {
-      n.data.recentValues = {[valueKey]: [recentValue]};
+      n.data.recentValues = { [valueKey]: [recentValue] };
     }
 
     if (n.data.watchedValues) {

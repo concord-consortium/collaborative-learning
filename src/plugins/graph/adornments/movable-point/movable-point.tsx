@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import {drag, select, Selection} from "d3";
-import {tip as d3tip} from "d3-v6-tip";
+import { drag, select, Selection } from "d3";
+import { tip as d3tip } from "d3-v6-tip";
 import { autorun } from "mobx";
 import { observer } from "mobx-react-lite";
 import { INumericAxisModel } from "../../imports/components/axis/models/axis-model";
@@ -33,7 +33,7 @@ interface IProps {
 }
 
 export const MovablePoint = observer(function MovablePoint(props: IProps) {
-  const {model, plotHeight, plotWidth, subPlotKey = {}, xAxis, yAxis} = props,
+  const { model, plotHeight, plotWidth, subPlotKey = {}, xAxis, yAxis } = props,
     dataConfig = useDataConfigurationContext(),
     layout = useAxisLayoutContext(),
     xScale = layout.getAxisScale("bottom") as ScaleNumericBaseType,
@@ -96,7 +96,7 @@ export const MovablePoint = observer(function MovablePoint(props: IProps) {
       .classed('dragging', true);
     dataTip.show(string, event.target);
     movePoint(xPoint, yPoint);
-    model.setPoint({x: xValue, y: yValue}, instanceKey);
+    model.setPoint({ x: xValue, y: yValue }, instanceKey);
   }, [classFromKey, instanceKey, model, movePoint, plotHeight, plotWidth, xAttrName,
       xScale, xSubAxesCount, yAttrName, yScale, ySubAxesCount]);
 
@@ -159,7 +159,7 @@ export const MovablePoint = observer(function MovablePoint(props: IProps) {
   return (
     <svg
       className={`point-${classFromKey}`}
-      style={{height: `${plotHeight}px`, width: `${plotWidth}px`}}
+      style={{ height: `${plotHeight}px`, width: `${plotWidth}px` }}
       x={0}
       y={0}
     >

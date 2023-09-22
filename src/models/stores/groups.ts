@@ -29,7 +29,7 @@ export const GroupUserModel = types
   }))
   .views((self) => ({
     get connected() {
-      const {connectedTimestamp, disconnectedTimestamp} = self;
+      const { connectedTimestamp, disconnectedTimestamp } = self;
       return !disconnectedTimestamp || (connectedTimestamp > disconnectedTimestamp);
     },
     get problemDocument() {
@@ -108,7 +108,7 @@ export const GroupsModel = types
         const users: GroupUserModelType[] = [];
         Object.keys(groupUsers).forEach((groupUserId) => {
           const groupUser = groupUsers[groupUserId];
-          const {connectedTimestamp, disconnectedTimestamp} = groupUser;
+          const { connectedTimestamp, disconnectedTimestamp } = groupUser;
           // self may be undefined if the database was deleted while a tab remains open
           // causing the disconnectedAt timestamp to be set at the groupUser level
           if (groupUser.self) {
@@ -129,7 +129,7 @@ export const GroupsModel = types
             }
           }
         });
-        const groupModel = GroupModel.create({id: groupId, users});
+        const groupModel = GroupModel.create({ id: groupId, users });
         groupModel.setEnvironment(self.environment);
         return groupModel;
       });

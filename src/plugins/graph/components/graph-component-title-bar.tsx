@@ -5,7 +5,7 @@ import { observer } from "mobx-react-lite";
 import { ITileTitleBarProps } from "../imports/components/tiles/tile-base-props";
 
 export const GraphComponentTitleBar = observer(function GraphComponentTitleBar(props: ITileTitleBarProps) {
-  const {tile, ...others} = props;
+  const { tile, ...others } = props;
   const data = isGraphModel(tile?.content) ? tile?.content.data : undefined;
   const getTitle = () => tile?.title || data?.name;
 

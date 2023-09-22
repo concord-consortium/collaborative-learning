@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react";
 import { AxisBounds, AxisPlace, AxisScaleType, IScaleType } from "../axis-types";
-import {MultiScale} from "./multi-scale";
+import { MultiScale } from "./multi-scale";
 
 export interface IAxisLayout {
   setParentExtent: (width: number, height: number) => void

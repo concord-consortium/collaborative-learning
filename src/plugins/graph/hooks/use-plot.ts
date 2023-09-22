@@ -1,14 +1,14 @@
-import React, {useCallback, useEffect, useRef} from "react";
-import {autorun, reaction} from "mobx";
-import {isSelectionAction, isSetCaseValuesAction} from "../../../models/data/data-set-actions";
-import {IDotsRef, GraphAttrRoles} from "../graph-types";
-import {INumericAxisModel} from "../imports/components/axis/models/axis-model";
-import {useGraphLayoutContext} from "../models/graph-layout";
-import {useGraphModelContext} from "../models/graph-model";
-import {matchCirclesToData, startAnimation} from "../utilities/graph-utils";
-import {useCurrent} from "../../../hooks/use-current";
-import {useInstanceIdContext} from "../imports/hooks/use-instance-id-context";
-import {onAnyAction} from "../../../utilities/mst-utils";
+import React, { useCallback, useEffect, useRef } from "react";
+import { autorun, reaction } from "mobx";
+import { isSelectionAction, isSetCaseValuesAction } from "../../../models/data/data-set-actions";
+import { IDotsRef, GraphAttrRoles } from "../graph-types";
+import { INumericAxisModel } from "../imports/components/axis/models/axis-model";
+import { useGraphLayoutContext } from "../models/graph-layout";
+import { useGraphModelContext } from "../models/graph-model";
+import { matchCirclesToData, startAnimation } from "../utilities/graph-utils";
+import { useCurrent } from "../../../hooks/use-current";
+import { useInstanceIdContext } from "../imports/hooks/use-instance-id-context";
+import { onAnyAction } from "../../../utilities/mst-utils";
 
 interface IDragHandlers {
   start: (event: MouseEvent) => void
@@ -16,7 +16,7 @@ interface IDragHandlers {
   end: (event: MouseEvent) => void
 }
 
-export const useDragHandlers = (target: any, {start, drag, end}: IDragHandlers) => {
+export const useDragHandlers = (target: any, { start, drag, end }: IDragHandlers) => {
   useEffect(() => {
     if (target) {
       target.addEventListener('mousedown', start);
@@ -40,7 +40,7 @@ export interface IPlotResponderProps {
 }
 
 export const usePlotResponders = (props: IPlotResponderProps) => {
-  const {enableAnimation, refreshPointPositions, refreshPointSelection, dotsRef} = props,
+  const { enableAnimation, refreshPointPositions, refreshPointSelection, dotsRef } = props,
     graphModel = useGraphModelContext(),
     layout = useGraphLayoutContext(),
     dataConfiguration = graphModel.config,
@@ -91,7 +91,7 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
       },
       () => {
         callRefreshPointPositions(false);
-      }, {fireImmediately: true}
+      }, { fireImmediately: true }
     );
     return () => disposer();
   }, [callRefreshPointPositions, graphModel]);

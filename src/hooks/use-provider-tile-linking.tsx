@@ -22,7 +22,7 @@ interface IProps {
 export const useProviderTileLinking = ({
   actionHandlers, documentId, model, readOnly, onRequestTilesOfType, onRequestLinkableTiles
 }: IProps) => {
-  const {handleRequestTileLink, handleRequestTileUnlink} = actionHandlers || {};
+  const { handleRequestTileLink, handleRequestTileUnlink } = actionHandlers || {};
   const modelId = model.id;
   const { providers: linkableTiles } = useLinkableTiles({ model, onRequestTilesOfType, onRequestLinkableTiles });
   const isLinkEnabled = (linkableTiles.length > 0);
@@ -88,7 +88,7 @@ const useLinkableTiles = ({ model, onRequestTilesOfType, onRequestLinkableTiles 
     } else {
       countsOfType[type]++;
     }
-    return { id, type, title: title || `${titleBase || type} ${countsOfType[type]}`};
+    return { id, type, title: title || `${titleBase || type} ${countsOfType[type]}` };
   }
 
   return {

@@ -1,18 +1,18 @@
-import {scaleQuantile, ScaleQuantile, schemeBlues} from "d3";
-import {getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
-import {AttributeType, attributeTypes} from "../../../models/data/attribute";
-import {ICase} from "../../../models/data/data-set-types";
-import {IDataSet} from "../../../models/data/data-set";
-import {getCategorySet, ISharedCaseMetadata} from "../../../models/shared/shared-case-metadata";
-import {isSetCaseValuesAction} from "../../../models/data/data-set-actions";
-import {FilteredCases, IFilteredChangedCases} from "../../../models/data/filtered-cases";
-import {typedId, uniqueId} from "../../../utilities/js-utils";
-import {missingColor} from "../../../utilities/color-utils";
-import {onAnyAction} from "../../../utilities/mst-utils";
-import {CaseData} from "../d3-types";
-import {GraphAttrRole, graphPlaceToAttrRole, PrimaryAttrRoles, TipAttrRoles} from "../graph-types";
-import {AxisPlace} from "../imports/components/axis/axis-types";
-import {GraphPlace} from "../imports/components/axis-graph-shared";
+import { scaleQuantile, ScaleQuantile, schemeBlues } from "d3";
+import { getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types } from "mobx-state-tree";
+import { AttributeType, attributeTypes } from "../../../models/data/attribute";
+import { ICase } from "../../../models/data/data-set-types";
+import { IDataSet } from "../../../models/data/data-set";
+import { getCategorySet, ISharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
+import { isSetCaseValuesAction } from "../../../models/data/data-set-actions";
+import { FilteredCases, IFilteredChangedCases } from "../../../models/data/filtered-cases";
+import { typedId, uniqueId } from "../../../utilities/js-utils";
+import { missingColor } from "../../../utilities/color-utils";
+import { onAnyAction } from "../../../utilities/mst-utils";
+import { CaseData } from "../d3-types";
+import { GraphAttrRole, graphPlaceToAttrRole, PrimaryAttrRoles, TipAttrRoles } from "../graph-types";
+import { AxisPlace } from "../imports/components/axis/axis-types";
+import { GraphPlace } from "../imports/components/axis-graph-shared";
 
 export const AttributeDescription = types
   .model('AttributeDescription', {
@@ -90,7 +90,7 @@ export const DataConfigurationModel = types
      * The rightNumeric attribute description is also not returned.
      */
     get attributeDescriptions() {
-      const descriptions = {...getSnapshot(self._attributeDescriptions)};
+      const descriptions = { ...getSnapshot(self._attributeDescriptions) };
       delete descriptions.rightNumeric;
       if (self._yAttributeDescriptions.length > 0) {
         descriptions.y = self._yAttributeDescriptions[0];
@@ -207,14 +207,14 @@ export const DataConfigurationModel = types
     filterCase(data: IDataSet, caseID: string, caseArrayNumber?: number) {
       const hasY2 = !!self._attributeDescriptions.get('rightNumeric'),
         numY = self._yAttributeDescriptions.length,
-        descriptions = {...self.attributeDescriptions};
+        descriptions = { ...self.attributeDescriptions };
       if (hasY2 && caseArrayNumber === self._yAttributeDescriptions.length) {
         descriptions.y = self._attributeDescriptions.get('rightNumeric') ?? descriptions.y;
       } else if (caseArrayNumber != null && caseArrayNumber < numY) {
         descriptions.y = self._yAttributeDescriptions[caseArrayNumber];
       }
       delete descriptions.rightNumeric;
-      return Object.entries(descriptions).every(([role, {attributeID}]) => {
+      return Object.entries(descriptions).every(([role, { attributeID }]) => {
         // can still plot the case without a caption or a legend
         if (["caption", "legend"].includes(role)) return true;
         switch (self.attributeType(role as GraphAttrRole)) {
@@ -237,7 +237,7 @@ export const DataConfigurationModel = types
     get tipAttributes(): RoleAttrIDPair[] {
       return TipAttrRoles
         .map(role => {
-          return {role, attributeID: self.attributeID(role) || ''};
+          return { role, attributeID: self.attributeID(role) || '' };
         })
         .filter(pair => !!pair.attributeID);
     },
@@ -343,7 +343,7 @@ export const DataConfigurationModel = types
     getUnsortedCaseDataArray(caseArrayNumber: number): CaseData[] {
       return self.filteredCases
         ? (self.filteredCases[caseArrayNumber]?.caseIds || []).map(id => {
-          return {plotNum: caseArrayNumber, caseID: id};
+          return { plotNum: caseArrayNumber, caseID: id };
         })
         : [];
     },
@@ -364,7 +364,7 @@ export const DataConfigurationModel = types
       const joinedCaseData: CaseData[] = [];
       self.filteredCases?.forEach((aFilteredCases, index) => {
           aFilteredCases.caseIds.forEach(
-            (id) => joinedCaseData.push({plotNum: index, caseID: id}));
+            (id) => joinedCaseData.push({ plotNum: index, caseID: id }));
         }
       );
       return joinedCaseData;
@@ -543,15 +543,15 @@ export const DataConfigurationModel = types
       // a single call to setCaseValues can result in up to three calls to the handlers
       if (cases.added.length) {
         const newCases = self.dataset?.getCases(cases.added);
-        self.handlers.forEach(handler => handler({name: "addCases", args: [newCases]}));
+        self.handlers.forEach(handler => handler({ name: "addCases", args: [newCases] }));
       }
       if (cases.removed.length) {
-        self.handlers.forEach(handler => handler({name: "removeCases", args: [cases.removed]}));
+        self.handlers.forEach(handler => handler({ name: "removeCases", args: [cases.removed] }));
       }
       if (cases.changed.length) {
         const idSet = new Set(cases.changed);
         const changedCases = affectedCases.filter(aCase => idSet.has(aCase.__id__));
-        self.handlers.forEach(handler => handler({name: "setCaseValues", args: [changedCases]}));
+        self.handlers.forEach(handler => handler({ name: "setCaseValues", args: [changedCases] }));
       }
       // Changes to case values require that existing cached categorySets be wiped.
       // But if we know the ids of the attributes involved, we can determine whether
@@ -622,7 +622,7 @@ export const DataConfigurationModel = types
         const otherRole = role === 'x' ? 'y' : 'x',
           otherDesc = self.attributeDescriptionForRole(otherRole);
         if (otherDesc?.attributeID === desc?.attributeID) {
-          const currentDesc = self.attributeDescriptionForRole(role) ?? {attributeID: '', type: 'categorical'};
+          const currentDesc = self.attributeDescriptionForRole(role) ?? { attributeID: '', type: 'categorical' };
           self._setAttributeDescription(otherRole, currentDesc);
         }
       }

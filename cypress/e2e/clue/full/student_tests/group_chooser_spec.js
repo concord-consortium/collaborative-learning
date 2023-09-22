@@ -26,7 +26,7 @@ describe('Test student join a group', function(){
     };
 
     function setup(student, opts={} ){
-        const options = {...defaultSetupOptions, ...opts};
+        const options = { ...defaultSetupOptions, ...opts };
         cy.visit('?appMode=qa&fakeClass='+fakeClass+'&fakeUser=student:'+student+'&problem='+options.problem);
         if (options.alreadyInGroup) {
           // This is looking for the version div in the header
@@ -35,7 +35,7 @@ describe('Test student join a group', function(){
           // If the student is not in a group already the header will not show up
           // instead only a group chooser dialog is shown. The timeout of 60s is the same
           // used by waitForLoad and gives the app extra time to load
-          cy.get('.join-title', {timeout: 60000});
+          cy.get('.join-title', { timeout: 60000 });
         }
     }
 
@@ -100,7 +100,7 @@ describe('Test student join a group', function(){
     });
     it('will verify cancel of leave group dialog', function(){
         //have student leave first group and join second group
-        setup(student5, {alreadyInGroup: true});
+        setup(student5, { alreadyInGroup: true });
         cy.get('.app .group > .name').contains('Group '+group1).click();
         cy.get('#cancelButton').should('contain', 'No').click();
         clueHeader.getGroupName().should('contain', 'Group '+group1);
@@ -110,7 +110,7 @@ describe('Test student join a group', function(){
     });
     it('will verify a student can switch groups', function(){
         //have student leave first group and join second group
-        setup(student5, {alreadyInGroup: true});
+        setup(student5, { alreadyInGroup: true });
         cy.get('.app .group > .name').contains('Group '+group1).click();
         cy.get("#okButton").should('contain', 'Yes').click();
         cy.get('.groups > .group-list > .group').contains('Group '+group2).click();
@@ -128,7 +128,7 @@ describe('Test student join a group', function(){
         clueHeader.getGroupMembers().should('contain', 'S'+student1).and('contain', 'S'+student2).and('contain', 'S'+student4).and('contain', 'S'+student6);
     });
     it('Student will automatically join last group number in new problem', function(){
-        setup(student1, {alreadyInGroup: true, problem: '2.3'});
+        setup(student1, { alreadyInGroup: true, problem: '2.3' });
         clueHeader.getGroupName().should('contain', 'Group '+group1);
         header.getUserName().should('contain', 'Student '+student1);
         clueHeader.getGroupMembers().should('contain', 'S'+student1).and('have.length', 1);

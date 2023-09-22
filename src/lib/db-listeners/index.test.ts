@@ -10,12 +10,12 @@ describe("DBListeners", () => {
     appConfig: specAppConfig(),
     appMode: "test",
     documents: DocumentsModel.create(),
-    user: UserModel.create({id: "1", portal: "example.com"})
+    user: UserModel.create({ id: "1", portal: "example.com" })
   });
   const db = new DB();
 
   beforeEach(async () => {
-    await db.connect({appMode: "test", stores, dontStartListeners: true});
+    await db.connect({ appMode: "test", stores, dontStartListeners: true });
   });
 
   afterEach(() => {

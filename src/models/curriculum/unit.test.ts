@@ -46,8 +46,8 @@ describe("UnitModel", () => {
   });
 
   it("getProblem() should work as expected", () => {
-    expect(unit.getProblem("")).toEqual({investigation: undefined, problem: undefined});
-    expect(unit.getProblem("0")).toEqual({investigation: undefined, problem: undefined});
+    expect(unit.getProblem("")).toEqual({ investigation: undefined, problem: undefined });
+    expect(unit.getProblem("0")).toEqual({ investigation: undefined, problem: undefined });
     const result1 = unit.getProblem("1");
     expect(result1.problem && result1.problem.title).toBe(problemTitle);
     expect(result1.investigation && result1.investigation.title).toBe(investigation1Title);

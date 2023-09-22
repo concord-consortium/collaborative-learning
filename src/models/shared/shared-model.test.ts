@@ -9,7 +9,7 @@ describe("Shared Models", () => {
       });
 
       const container = Container.create({
-        model: { id: "1", type: "foo", extra: "stuff"}
+        model: { id: "1", type: "foo", extra: "stuff" }
       } as any);
 
       expect(container.model).toBeDefined();
@@ -22,7 +22,7 @@ describe("Shared Models", () => {
       });
 
       const container = Container.create({
-        model: { id: "1", type: "foo", extra: "stuff"}
+        model: { id: "1", type: "foo", extra: "stuff" }
       } as any);
 
       expect(container.model.type).toBe("unknownSharedModel");

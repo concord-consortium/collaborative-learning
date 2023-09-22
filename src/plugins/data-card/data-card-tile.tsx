@@ -106,8 +106,8 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
 
   const highlightContainerClasses = classNames(
     "data-card-container",
-    {"highlight": highlightDataCard},
-    {"no-highlight": !highlightDataCard}
+    { "highlight": highlightDataCard },
+    { "no-highlight": !highlightDataCard }
   );
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {

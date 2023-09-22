@@ -24,7 +24,7 @@ export function BasicEditableTileTitle({ model, readOnly, scale, titleKey }: IBa
     <ToolTitleArea>
       <EditableTileTitle
         key={titleKey}
-        size={{width:null, height:null}}
+        size={{ width:null, height:null }}
         scale={scale}
         getTitle={getTitle}
         readOnly={readOnly}

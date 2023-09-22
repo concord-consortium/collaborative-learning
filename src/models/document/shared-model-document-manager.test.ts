@@ -56,7 +56,7 @@ registerSharedModelInfo({
 
 const TestSharedModel2 = SharedModel
   .named("TestSharedModel2")
-  .props({type: "TestSharedModel2"});
+  .props({ type: "TestSharedModel2" });
 
 registerSharedModelInfo({
   type: "TestSharedModel2",
@@ -66,7 +66,7 @@ registerSharedModelInfo({
 // Snapshot processor type
 const _TestSharedModel3 = SharedModel
   .named("TestSharedModel3")
-  .props({type: "TestSharedModel3"});
+  .props({ type: "TestSharedModel3" });
 const TestSharedModel3 = types.snapshotProcessor(_TestSharedModel3, {
   preProcessor(snapshot: any) {
     // Remove any extra properties
@@ -172,11 +172,11 @@ describe("SharedModelDocumentManager", () => {
     // Enable the tree monitor so changes to the shared model trigger the update.
     docModel.treeMonitor!.enabled = true;
 
-    return {doc, docModel};
+    return { doc, docModel };
   }
 
   it("calls tileContent#updateAfterSharedModelChanges when the shared model changes", async () => {
-    const {doc, docModel} = setupDocument();
+    const { doc, docModel } = setupDocument();
     const tile = doc.tileMap.get("t1");
     assertIsDefined(tile);
     const tileContent = tile.content as TestTileType;
@@ -194,7 +194,7 @@ describe("SharedModelDocumentManager", () => {
   });
 
   it("calls tileContent#updateAfterSharedModelChanges only for shared model changes", async () => {
-    const {doc, docModel} = setupDocument();
+    const { doc, docModel } = setupDocument();
 
     const tile = doc.tileMap.get("t1");
     assertIsDefined(tile);
@@ -234,7 +234,7 @@ describe("SharedModelDocumentManager", () => {
   });
 
   it("starts monitoring shared models added after the document", async () => {
-    const {doc, docModel} = setupDocument({
+    const { doc, docModel } = setupDocument({
       tileMap: {
         "t1": {
           id: "t1",
@@ -267,7 +267,7 @@ describe("SharedModelDocumentManager", () => {
   });
 
   it("updates tiles added after the document", async () => {
-    const {doc, docModel} = setupDocument({
+    const { doc, docModel } = setupDocument({
       sharedModelMap: {
         "sm1": {
           sharedModel: {
@@ -775,7 +775,7 @@ describe("SharedModelDocumentManager", () => {
   });
 
   it("handles a tile being deleted that references a shared model", async () => {
-    const {doc, docModel} = setupDocument({
+    const { doc, docModel } = setupDocument({
       sharedModelMap: {
         "sm1": {
           sharedModel: {
@@ -830,7 +830,7 @@ describe("SharedModelDocumentManager", () => {
   });
 
   it("handles a loading a shared model entry with a broken reference", async () => {
-    const {doc, docModel} = setupDocument({
+    const { doc, docModel } = setupDocument({
       sharedModelMap: {
         "sm1": {
           sharedModel: {
@@ -890,7 +890,7 @@ describe("SharedModelDocumentManager", () => {
 
 // Just to get this done we could just make a helper function for this
 async function expectUpdateToBeCalledTimes(testTile: TestTileType, times: number) {
-  const updateCalledTimes = when(() => testTile.updateCount === times, {timeout: 100});
+  const updateCalledTimes = when(() => testTile.updateCount === times, { timeout: 100 });
   return expect(updateCalledTimes).resolves.toBeUndefined();
 }
 

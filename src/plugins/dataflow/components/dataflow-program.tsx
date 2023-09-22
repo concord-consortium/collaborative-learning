@@ -131,7 +131,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   public render() {
     const { readOnly, documentProperties, tileContent, programDataRate, onProgramDataRateChange,
-            isPlaying, playBackIndex, handleChangeIsPlaying, handleChangeOfProgramMode, programMode} = this.props;
+            isPlaying, playBackIndex, handleChangeIsPlaying, handleChangeOfProgramMode, programMode } = this.props;
 
     const editorClassForDisplayState = "full";
     const editorClass = `editor ${editorClassForDisplayState}`;
@@ -298,7 +298,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       // Work around for cleaning up React components created
       // by the react-render-plugin. The other part of this is
       // in `destroyEditor`.
-      this.programEditor.on("rendercontrol", ({el, control}) => {
+      this.programEditor.on("rendercontrol", ({ el, control }) => {
         const extControl = control as any;
         if (!extControl.render || extControl.render === "react") {
           this.reactElements.push(el);
@@ -519,12 +519,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private keepNodesInView = () => {
     const margin = 5;
     let { k } = this.programEditor.view.area.transform;
-    const { container: { clientWidth, clientHeight }, area: { transform }} = this.programEditor.view;
+    const { container: { clientWidth, clientHeight }, area: { transform } } = this.programEditor.view;
 
     // If we're at zero scale but have any window to fill,
     // give a little scale so we can tell the program's proportions with a valid rect
     if (k === 0 && clientWidth > 0 && clientHeight > 0) {
-      this.programEditor.view.area.transform = {k: .01, x: transform.x, y: transform.y};
+      this.programEditor.view.area.transform = { k: .01, x: transform.x, y: transform.y };
       this.programEditor.view.area.update();
       k = this.programEditor.view.area.transform.k;
     }
@@ -540,13 +540,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const tooBig = newZoom < k && rect.right > 0 && newZoom > 0;
 
       if (tooSmall) {
-        this.programEditor.view.area.transform = {k: .9, x: transform.x, y: transform.y};
+        this.programEditor.view.area.transform = { k: .9, x: transform.x, y: transform.y };
         this.programEditor.view.area.update();
         return;
       }
 
       if (tooBig) {
-        this.programEditor.view.area.transform = {k: newZoom, x: transform.x, y: transform.y};
+        this.programEditor.view.area.transform = { k: newZoom, x: transform.x, y: transform.y };
         this.programEditor.view.area.update();
       }
     }
@@ -636,7 +636,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
     const dataSet = tileModel.dataSet;
     const now = Date.now();
-    this.setState({lastIntervalDuration: now - this.lastIntervalTime});
+    this.setState({ lastIntervalDuration: now - this.lastIntervalTime });
     this.lastIntervalTime = now;
 
     switch (programMode){
@@ -731,7 +731,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private setZoom = (zoom: number) => {
     const currentTransform = this.programEditor.view.area.transform;
-    this.programEditor.view.area.transform = {k: zoom, x: currentTransform.x, y: currentTransform.y};
+    this.programEditor.view.area.transform = { k: zoom, x: currentTransform.x, y: currentTransform.y };
     this.programEditor.view.area.update();
     const { transform } = this.programEditor.view.area;
     this.props.onZoomChange(transform.x, transform.y, transform.k);

@@ -34,7 +34,7 @@ interface TopbarProps {
 export const DataflowProgramTopbar = (props: TopbarProps) => {
   const { onSerialRefreshDevices, readOnly, serialDevice, programDataRates, dataRate, onRateSelectClick,
           handleChangeOfProgramMode, programMode, playBackIndex, isPlaying,
-          handleChangeIsPlaying, tileContent} = props;
+          handleChangeIsPlaying, tileContent } = props;
 
   return (
     <div className="program-editor-topbar">
@@ -150,7 +150,7 @@ interface IPlaybackProps {
 }
 
 const PlaybackButton = (props: IPlaybackProps) => {
-  const {programMode, isPlaying, handleChangeIsPlaying} = props;
+  const { programMode, isPlaying, handleChangeIsPlaying } = props;
   return (
     <div className="playback-btn-container">
       <button

@@ -12,7 +12,7 @@ import "./student-group-view.scss";
 
 export const StudentGroupView:React.FC = observer(function StudentGroupView(){
   const stores = useStores();
-  const {groups, ui } = stores;
+  const { groups, ui } = stores;
 
   useEffect(() => stores.initializeStudentWorkTab(), [stores]);
 
@@ -23,7 +23,7 @@ export const StudentGroupView:React.FC = observer(function StudentGroupView(){
   const isChatPanelShown = ui.showChatPanel;
   const documentSelectedForComment = ui.showChatPanel && ui.selectedTileIds.length === 0 && ui.focusDocument;
   const studentGroupViewClasses = classNames( "editable-document-content", "document", "student-group-view",
-    {"chat-open": isChatPanelShown}, {"comment-select" : documentSelectedForComment});
+    { "chat-open": isChatPanelShown }, { "comment-select" : documentSelectedForComment });
 
   return (
     <div key="student-group-view" className={studentGroupViewClasses}>
@@ -46,8 +46,8 @@ interface IGroupComponentProps {
   groupUser?: GroupUserModelType;
 }
 
-const GroupViewTitlebar: React.FC<IGroupComponentProps> = observer(function GroupViewTitlebar({group, groupUser}) {
-  const {groups, ui} = useStores();
+const GroupViewTitlebar: React.FC<IGroupComponentProps> = observer(function GroupViewTitlebar({ group, groupUser }) {
+  const { groups, ui } = useStores();
   const focusedGroupUser = groupUser;
 
   const handleFocusedUserChange = (selectedUser: GroupUserModelType) => {
@@ -58,7 +58,7 @@ const GroupViewTitlebar: React.FC<IGroupComponentProps> = observer(function Grou
   const handleSelectGroup = (id: string) => {
     ui.setOpenSubTab("student-work", id);
     ui.closeSubTabDocument("student-work", id);
-    Logger.log(LogEventName.VIEW_GROUP, {group: id, via: "group-document-titlebar"});
+    Logger.log(LogEventName.VIEW_GROUP, { group: id, via: "group-document-titlebar" });
   };
 
   return (
@@ -71,7 +71,7 @@ const GroupViewTitlebar: React.FC<IGroupComponentProps> = observer(function Grou
             />
             { group.sortedUsers.map((u, index) => {
                 const className = classNames("member-button", "in-student-group-view", getQuadrant(index),
-                                              {focused: u.id === focusedGroupUser.id}
+                                              { focused: u.id === focusedGroupUser.id }
                                               );
               return (
                 <button key={u.name} className={className} title={u.name}
@@ -110,7 +110,7 @@ const GroupButton: React.FC<IGroupButtonProps> = (props) => {
   );
 };
 
-const GroupTitlebar: React.FC<IGroupComponentProps> = observer(function GroupTitlebar({group, groupUser}) {
+const GroupTitlebar: React.FC<IGroupComponentProps> = observer(function GroupTitlebar({ group, groupUser }) {
   const problem = useProblemStore();
   const document= groupUser?.problemDocument;
   const userDocTitle = document?.title || "Document";

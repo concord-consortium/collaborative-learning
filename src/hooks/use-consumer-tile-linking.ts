@@ -116,7 +116,7 @@ const useLinkableTiles = ({ model, onRequestTilesOfType, onRequestLinkableTiles 
     } else {
       countsOfType[type]++;
     }
-    return { id, type, title: title || `${titleBase || type} ${countsOfType[type]}`};
+    return { id, type, title: title || `${titleBase || type} ${countsOfType[type]}` };
   }
 
   return {

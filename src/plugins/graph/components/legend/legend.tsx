@@ -1,20 +1,20 @@
-import {autorun} from "mobx";
-import React, {useEffect, useRef} from "react";
-import {select} from "d3";
-import {Active} from "@dnd-kit/core";
-import {useDataConfigurationContext} from "../../hooks/use-data-configuration-context";
-import {useGraphLayoutContext} from "../../models/graph-layout";
-import {AttributeLabel} from "../attribute-label";
-import {CategoricalLegend} from "./categorical-legend";
-import {NumericLegend} from "./numeric-legend";
-import {DroppableSvg} from "../droppable-svg";
-import {useInstanceIdContext} from "../../imports/hooks/use-instance-id-context";
-import {getDragAttributeInfo, useDropHandler} from "../../imports/hooks/use-drag-drop";
-import {useDropHintString} from "../../imports/hooks/use-drop-hint-string";
-import {AttributeType} from "../../../../models/data/attribute";
-import {IDataSet} from "../../../../models/data/data-set";
-import {GraphAttrRole} from "../../graph-types";
-import {GraphPlace} from "../../imports/components/axis-graph-shared";
+import { autorun } from "mobx";
+import React, { useEffect, useRef } from "react";
+import { select } from "d3";
+import { Active } from "@dnd-kit/core";
+import { useDataConfigurationContext } from "../../hooks/use-data-configuration-context";
+import { useGraphLayoutContext } from "../../models/graph-layout";
+import { AttributeLabel } from "../attribute-label";
+import { CategoricalLegend } from "./categorical-legend";
+import { NumericLegend } from "./numeric-legend";
+import { DroppableSvg } from "../droppable-svg";
+import { useInstanceIdContext } from "../../imports/hooks/use-instance-id-context";
+import { getDragAttributeInfo, useDropHandler } from "../../imports/hooks/use-drag-drop";
+import { useDropHintString } from "../../imports/hooks/use-drop-hint-string";
+import { AttributeType } from "../../../../models/data/attribute";
+import { IDataSet } from "../../../../models/data/data-set";
+import { GraphAttrRole } from "../../graph-types";
+import { GraphPlace } from "../../imports/components/axis-graph-shared";
 
 interface ILegendProps {
   legendAttrID: string
@@ -36,10 +36,10 @@ export const Legend = function Legend({
     instanceId = useInstanceIdContext(),
     droppableId = `${instanceId}-legend-area-drop`,
     role = 'legend' as GraphAttrRole,
-    hintString = useDropHintString({role});
+    hintString = useDropHintString({ role });
 
   const handleIsActive = (active: Active) => {
-    const {dataSet, attributeId: droppedAttrId} = getDragAttributeInfo(active) || {};
+    const { dataSet, attributeId: droppedAttrId } = getDragAttributeInfo(active) || {};
     if (isDropAllowed) {
       return isDropAllowed('legend', dataSet, droppedAttrId);
     } else {
@@ -48,7 +48,7 @@ export const Legend = function Legend({
   };
 
   useDropHandler(droppableId, active => {
-    const {dataSet, attributeId: dragAttributeID} = getDragAttributeInfo(active) || {};
+    const { dataSet, attributeId: dragAttributeID } = getDragAttributeInfo(active) || {};
     dataSet && dragAttributeID && isDropAllowed('legend', dataSet, dragAttributeID) &&
     onDropAttribute('legend', dataSet, dragAttributeID);
   });

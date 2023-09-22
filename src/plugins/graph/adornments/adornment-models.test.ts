@@ -7,20 +7,20 @@ import { MovableValueModel, isMovableValue } from "./movable-value/movable-value
 
 describe("PointModel", () => {
   it("is valid if x and y are finite", () => {
-    const point = PointModel.create({x: 1, y: 1});
+    const point = PointModel.create({ x: 1, y: 1 });
     expect(point.isValid()).toBe(true);
   });
   it("is invalid if x is not finite", () => {
-    const point = PointModel.create({x: NaN, y: 1});
+    const point = PointModel.create({ x: NaN, y: 1 });
     expect(point.isValid()).toBe(false);
   });
   it("is invalid if y is not finite", () => {
-    const point = PointModel.create({x: 1, y: NaN});
+    const point = PointModel.create({ x: 1, y: NaN });
     expect(point.isValid()).toBe(false);
   });
   it("can have its x and y values changed", () => {
-    const point = PointModel.create({x: 1, y: 1});
-    point.set({x: 2, y: 2});
+    const point = PointModel.create({ x: 1, y: 1 });
+    point.set({ x: 2, y: 2 });
     expect(point.x).toBe(2);
     expect(point.y).toBe(2);
   });
@@ -31,11 +31,11 @@ describe("AdornmentModel", () => {
     expect(() => AdornmentModel.create()).toThrow("type must be overridden");
   });
   it("has an ID that begins with 'ADRN'", () => {
-    const adornment = AdornmentModel.create({type: "Movable Line"});
+    const adornment = AdornmentModel.create({ type: "Movable Line" });
     expect(adornment.id).toMatch(/^ADRN/);
   });
   it("is visible by default and can have its visibility property changed", () => {
-    const adornment = AdornmentModel.create({type: "Movable Line"});
+    const adornment = AdornmentModel.create({ type: "Movable Line" });
     expect(adornment.isVisible).toBe(true);
     adornment.setVisibility(false);
     expect(adornment.isVisible).toBe(false);
@@ -51,23 +51,23 @@ describe("AdornmentModel", () => {
       rightAttrId: "jkl012",
       rightCats: ["new", "used"]
     };
-    const adornment = AdornmentModel.create({type: "Movable Line"});
+    const adornment = AdornmentModel.create({ type: "Movable Line" });
     const subPlotKey = adornment.setSubPlotKey(options, 0);
-    expect(subPlotKey).toEqual({abc123: "pizza", def456: "red", ghi789: "small", jkl012: "new"});
+    expect(subPlotKey).toEqual({ abc123: "pizza", def456: "red", ghi789: "small", jkl012: "new" });
   });
   it("will create an instance key value from given category values", () => {
-    const adornment = AdornmentModel.create({type: "Movable Line"});
+    const adornment = AdornmentModel.create({ type: "Movable Line" });
     const xCategories = ["pizza", "pasta", "salad"];
     const yCategories = ["red", "green", "blue"];
-    const subPlotKey = {abc123: xCategories[0], def456: yCategories[0]};
+    const subPlotKey = { abc123: xCategories[0], def456: yCategories[0] };
     expect(adornment.instanceKey({})).toEqual("{}");
     expect(adornment.instanceKey(subPlotKey)).toEqual("{\"abc123\":\"pizza\",\"def456\":\"red\"}");
   });
   it("will create a class name from a given subplot key", () => {
-    const adornment = AdornmentModel.create({type: "Movable Line"});
+    const adornment = AdornmentModel.create({ type: "Movable Line" });
     const xCategories = ["pizza", "pasta", "salad"];
     const yCategories = ["red", "green", "blue"];
-    const subPlotKey = {abc123: xCategories[0], def456: yCategories[0]};
+    const subPlotKey = { abc123: xCategories[0], def456: yCategories[0] };
     expect(adornment.classNameFromKey(subPlotKey)).toEqual("abc123-pizza-def456-red");
   });
 });

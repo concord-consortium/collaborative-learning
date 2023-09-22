@@ -1,7 +1,7 @@
 import classNames from "classnames";
 import React, { useCallback, useState } from "react";
 import ReactDOM from "react-dom";
-import { FillColorButton, StrokeColorButton} from "./drawing-toolbar-buttons";
+import { FillColorButton, StrokeColorButton } from "./drawing-toolbar-buttons";
 import { StampsPalette } from "./stamps-palette";
 import { StrokeColorPalette } from "./stroke-color-palette";
 import { FillColorPalette } from "./fill-color-palette";
@@ -124,7 +124,7 @@ export const ToolbarView: React.FC<IProps> = (
         return <ImageUploadButton
           key="upload-image"
           onUploadImageFile={file => uploadImage(file)}
-          tooltipOffset={{x: 0, y: 0}}
+          tooltipOffset={{ x: 0, y: 0 }}
           extraClasses="drawing-tool-button"
         />;
     }

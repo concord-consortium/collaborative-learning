@@ -72,10 +72,10 @@ export const objectChangeAgent: JXGChangeAgent = {
           validateTransformations(obj);
           if (isPositionGraphable(position)) {
             obj.setPosition(JXG.COORDS_BY_USER, position as JXGCoordPair);
-            obj.setAttribute({visible: true});
+            obj.setAttribute({ visible: true });
           } else {
             obj.setPosition(JXG.COORDS_BY_USER, getGraphablePosition(position));
-            obj.setAttribute({visible: false});
+            obj.setAttribute({ visible: false });
           }
         }
 

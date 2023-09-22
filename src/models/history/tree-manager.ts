@@ -105,7 +105,7 @@ export const TreeManager = types
     }
 
     const historyLength = self.document.history.length;
-    const {numHistoryEventsApplied} = self;
+    const { numHistoryEventsApplied } = self;
     if (numHistoryEventsApplied === undefined) {
       // We are waiting for the query to figure out the last history entry.
       return HistoryStatus.FINDING_HISTORY_LENGTH;
@@ -138,7 +138,7 @@ export const TreeManager = types
         return "History is loaded";
       case HistoryStatus.HISTORY_LOADING: {
         const historyLength = self.document.history.length;
-        const {numHistoryEventsApplied} = self;
+        const { numHistoryEventsApplied } = self;
         return `Loading history (${historyLength}/${numHistoryEventsApplied})`;
       }
       default:
@@ -159,7 +159,7 @@ export const TreeManager = types
 
   return {
     completeHistoryEntry(entry: Instance<typeof HistoryEntry>) {
-      const {firestore} = self;
+      const { firestore } = self;
       entry.state = "complete";
 
       // Remove the entry from the activeHistoryEntries
@@ -205,7 +205,7 @@ export const TreeManager = types
       }
 
       // Create the document in firestore if necessary
-      getFirestoreHistoryInfo().then(({documentPath, lastEntryIndex, lastEntryId}) => {
+      getFirestoreHistoryInfo().then(({ documentPath, lastEntryIndex, lastEntryId }) => {
         // add a new document for this history entry
         const historyEntryPath = firestore.getFullPath(`${documentPath}/history`);
 
@@ -237,7 +237,7 @@ export const TreeManager = types
     self.loadingError = error;
   },
 
-  setPropsForFirestoreSaving({userContextProvider, firestore}: IFirestoreSavingProps) {
+  setPropsForFirestoreSaving({ userContextProvider, firestore }: IFirestoreSavingProps) {
     self.userContextProvider = userContextProvider;
     self.firestore = firestore;
   },
@@ -260,12 +260,12 @@ export const TreeManager = types
     // Find if there is already an entry with this historyEntryId
     const entry = self.findActiveHistoryEntry(historyEntryId);
     if (!entry) {
-      throw new Error(`History Entry doesn't exist ${ json({historyEntryId})} `);
+      throw new Error(`History Entry doesn't exist ${ json({ historyEntryId })} `);
     }
 
     // Make sure this entry wasn't marked complete before
     if (entry.state === "complete") {
-      throw new Error(`The entry was already marked complete ${ json({historyEntryId, exchangeId})}`);
+      throw new Error(`The entry was already marked complete ${ json({ historyEntryId, exchangeId })}`);
     }
 
     // start a new open exchange with this exchangeId
@@ -281,7 +281,7 @@ export const TreeManager = types
   endExchange(entry: Instance<typeof HistoryEntry>, exchangeId: string) {
     const openExchangeValue = entry.activeExchanges.get(exchangeId);
     if (!openExchangeValue) {
-      throw new Error(`There is no active exchange matching ${ json({historyEntryId: entry.id, exchangeId}) }`);
+      throw new Error(`There is no active exchange matching ${ json({ historyEntryId: entry.id, exchangeId }) }`);
     }
 
     entry.activeExchanges.delete(exchangeId);
@@ -296,7 +296,7 @@ export const TreeManager = types
   createHistoryEntry(historyEntryId: string, exchangeId: string, name: string,
     treeId: string, undoable: boolean) {
     if (self.findHistoryEntry(historyEntryId) || self.findActiveHistoryEntry(historyEntryId)) {
-      throw new Error(`The entry already exists ${ json({historyEntryId})}`);
+      throw new Error(`The entry already exists ${ json({ historyEntryId })}`);
     }
     const entry = HistoryEntry.create({
       id: historyEntryId,
@@ -361,7 +361,7 @@ export const TreeManager = types
         if (error) {
           self.setLoadingError(error);
         } else {
-          const cDocument = CDocument.create({history});
+          const cDocument = CDocument.create({ history });
           self.setChangeDocument(cDocument);
         }
       }
@@ -426,12 +426,12 @@ export const TreeManager = types
     // Find if there is already an entry with this historyEntryId
     const entry = self.findActiveHistoryEntry(historyEntryId);
     if (!entry) {
-      throw new Error(`There isn't an active entry for ${ json({historyEntryId, exchangeId})}`);
+      throw new Error(`There isn't an active entry for ${ json({ historyEntryId, exchangeId })}`);
     }
 
     // Make sure this entry wasn't marked complete before
     if (entry.state === "complete") {
-      throw new Error(`The entry was already marked complete ${ json({historyEntryId, exchangeId})}`);
+      throw new Error(`The entry was already marked complete ${ json({ historyEntryId, exchangeId })}`);
     }
 
     // The tree patch record will be sent even if there are no patches.
@@ -444,7 +444,7 @@ export const TreeManager = types
       // eslint-disable-next-line no-console
       console.log("addTreePatchRecord",
         { action: record.action, historyEntryId, exchangeId,
-          exchangeName: entry.activeExchanges.get(exchangeId)});
+          exchangeName: entry.activeExchanges.get(exchangeId) });
     }
 
     self.endExchange(entry, exchangeId);
@@ -604,8 +604,9 @@ interface IPrepareFirestoreHistoryInfoArgs {
   firestore?: Firestore;
 }
 
-async function prepareFirestoreHistoryInfo(
-    {userContextProvider, mainDocument, firestore}: IPrepareFirestoreHistoryInfoArgs): Promise<IFirestoreHistoryInfo> {
+async function prepareFirestoreHistoryInfo({
+  userContextProvider, mainDocument, firestore
+}: IPrepareFirestoreHistoryInfoArgs): Promise<IFirestoreHistoryInfo> {
   // TODO: Wait for userContext to be valid.
   // The userContext initially starts out with a user id of 0 and doesn't have a portal and other
   // properties defined. After the user is authenticated the userContext will have valid fields.
@@ -630,7 +631,7 @@ async function prepareFirestoreHistoryInfo(
 
 
     // FIXME-HISTORY: rename this function to validateFirestoreDocumentMetadata_v1
-    await validateCommentableDocument({context: userContext, document: mainDocument.metadata});
+    await validateCommentableDocument({ context: userContext, document: mainDocument.metadata });
   }
 
   const lastHistoryEntry = await getLastHistoryEntry(firestore, documentPath);

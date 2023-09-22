@@ -135,36 +135,36 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   }
 
   private getFocusedUserDocKey() {
-    const {ui} = this.stores;
-    const {group} = this.props;
+    const { ui } = this.stores;
+    const { group } = this.props;
     return ui.tabs.get(this.getNavTabName())?.openDocuments.get(group.id);
   }
 
   private getFocusedGroupUser() {
-    const {group} = this.props;
+    const { group } = this.props;
     const docKey = this.getFocusedUserDocKey();
     return group.users.find(obj => docKey && this.getGroupUserDoc(obj)?.key === docKey);
   }
 
   private getGroupUserDoc(groupUser?: GroupUserModelType) {
-    const {documentViewMode} = this.props;
+    const { documentViewMode } = this.props;
     return getUserDocument(groupUser, documentViewMode);
   }
 
   public render() {
-    const {documentViewMode, viaStudentGroupView,
+    const { documentViewMode, viaStudentGroupView,
         group, isGhostUser, ...others } = this.props;
 
-    const {width, height} = this.grid;
+    const { width, height } = this.grid;
     const nwCell = this.grid.cells[CellPositions.NorthWest];
     const neCell = this.grid.cells[CellPositions.NorthEast];
     const seCell = this.grid.cells[CellPositions.SouthEast];
     const swCell = this.grid.cells[CellPositions.SouthWest];
-    const toggledStyle = {top: 0, left: 0, width, height};
+    const toggledStyle = { top: 0, left: 0, width, height };
 
     const scaleStyle = (cell: FourUpGridCellModelType) => {
       const transform = `scale(${focusedGroupUser ? 1 : cell.scale})`;
-      return {width, height, transform, transformOrigin: "0 0"};
+      return { width, height, transform, transformOrigin: "0 0" };
     };
 
     // We are using this as a lookup table, so its possible the index being looked
@@ -174,10 +174,10 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     const focusedGroupUser = this.getFocusedGroupUser();
 
     const indexToStyle = [
-      focusedGroupUser ? toggledStyle : {top: 0, left: 0, width: nwCell.width, height: nwCell.height},
-      focusedGroupUser ? toggledStyle : {top: 0, left: neCell.left, right: 0, height: neCell.height},
-      focusedGroupUser ? toggledStyle : {top: seCell.top, left: seCell.left, right: 0, bottom: 0},
-      focusedGroupUser ? toggledStyle : {top: swCell.top, left: 0, width: swCell.width, bottom: 0}
+      focusedGroupUser ? toggledStyle : { top: 0, left: 0, width: nwCell.width, height: nwCell.height },
+      focusedGroupUser ? toggledStyle : { top: 0, left: neCell.left, right: 0, height: neCell.height },
+      focusedGroupUser ? toggledStyle : { top: seCell.top, left: seCell.left, right: 0, bottom: 0 },
+      focusedGroupUser ? toggledStyle : { top: swCell.top, left: 0, width: swCell.width, bottom: 0 }
     ];
 
     const isFocused = (groupUser?: GroupUserModelType) => focusedGroupUser && focusedGroupUser === groupUser;
@@ -233,8 +233,8 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       const userFocused = isFocused(groupUser);
       if (groupUser) {
         const { name: fullName, initials } = groupUser;
-        const className = classNames("member", {"member-centered": userFocused && !viaStudentGroupView},
-                                     {"in-student-group-view": userFocused && viaStudentGroupView});
+        const className = classNames("member", { "member-centered": userFocused && !viaStudentGroupView },
+                                     { "in-student-group-view": userFocused && viaStudentGroupView });
 
         const name = userFocused ? fullName : initials;
         return (
@@ -305,12 +305,12 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       <>
         <div
           className="horizontal splitter" data-test="4up-horizontal-splitter"
-          style={{top: this.grid.hSplitter, height: this.grid.splitterSize}}
+          style={{ top: this.grid.hSplitter, height: this.grid.splitterSize }}
           onMouseDown={this.handleHSplitter}
         />
         <div
           className="vertical splitter" data-test="4up-vertical-splitter"
-          style={{left: this.grid.vSplitter, width: this.grid.splitterSize}}
+          style={{ left: this.grid.vSplitter, width: this.grid.splitterSize }}
           onMouseDown={this.handleVSplitter}
         />
         <div
@@ -343,7 +343,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleResizeDebounced = debounce((entry: ResizeObserverEntry) => {
-    const {width, height} = entry.contentRect;
+    const { width, height } = entry.contentRect;
     if (width > 0 && height > 0) {
       this.grid.update({
         height: height - BORDER_SIZE,
@@ -411,7 +411,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     const document = this.getGroupUserDoc(groupUser);
 
     if (groupUser && document) {
-      const logInfo = {groupId: group.id, studentId: groupUser.id};
+      const logInfo = { groupId: group.id, studentId: groupUser.id };
       if (focusedUser){
         ui.closeSubTabDocument(this.getNavTabName(), group.id);
         Logger.log(LogEventName.DASHBOARD_DESELECT_STUDENT, logInfo);

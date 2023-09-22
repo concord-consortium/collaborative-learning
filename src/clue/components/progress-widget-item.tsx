@@ -13,7 +13,7 @@ interface IState {}
 export class ProgressWidgetItem extends React.Component<IProps, IState> {
 
   public render() {
-    const {item, selected} = this.props;
+    const { item, selected } = this.props;
     const circleClassName = `section-circle${selected ? " selected" : ""}`;
     return(
       <div className="progress-widget-item" key={item.label} onClick={this.handleClicked}>

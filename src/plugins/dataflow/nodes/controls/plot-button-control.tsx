@@ -9,7 +9,7 @@ const handleChange = (onChange: any) => {
   return (e: any) => { onChange(e.target.value); };
 };
 
-export const PlotButtonControlComponent = (compProps: {showgraph: any; onGraphButtonClick: any; }) => (
+export const PlotButtonControlComponent = (compProps: { showgraph: any; onGraphButtonClick: any; }) => (
   <div className="node-graph-container"
        title={compProps.showgraph ? "Hide Block Value Graph" : "Show Block Value Graph"}>
     <div

@@ -56,7 +56,7 @@ export class DemoCreatorComponent extends BaseComponent<IProps> {
                         .replace("%investigationTitle%", investigation.title)
                         .replace("%problemTitle%", problem.fullTitle);
         const ordinal = `${investigation.ordinal}.${problem.ordinal}`;
-        this.problemOptions.push({investigation, problem, ordinal, title});
+        this.problemOptions.push({ investigation, problem, ordinal, title });
         if (!demo.problemOrdinal) {
           demo.setProblemOrdinal(ordinal);
         }

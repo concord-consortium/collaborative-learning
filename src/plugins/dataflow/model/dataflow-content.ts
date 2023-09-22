@@ -1,6 +1,6 @@
 import { types, Instance, applySnapshot, getSnapshot, addDisposer } from "mobx-state-tree";
 import { reaction } from "mobx";
-import { cloneDeep} from "lodash";
+import { cloneDeep } from "lodash";
 import stringify from "json-stringify-pretty-compact";
 
 import { DataflowProgramModel } from "./dataflow-program-model";
@@ -198,7 +198,7 @@ export const DataflowContentModel = TileContentModel
 
         return { sharedModelManager, sharedDataSet, sharedVariables, tileSharedModels };
       },
-      ({sharedModelManager, sharedDataSet, sharedVariables, tileSharedModels}) => {
+      ({ sharedModelManager, sharedDataSet, sharedVariables, tileSharedModels }) => {
         if (!sharedModelManager?.isReady) {
           return;
         }
@@ -221,7 +221,7 @@ export const DataflowContentModel = TileContentModel
         const dataSets = sharedModelManager.getSharedModelsByType(kSharedDataSetType) as SharedDataSetType[];
         updateSharedDataSetColors(dataSets);
       },
-      {name: "sharedModelSetup", fireImmediately: true}));
+      { name: "sharedModelSetup", fireImmediately: true }));
     },
     setProgram(program: any) {
       if (program) {
@@ -283,7 +283,7 @@ export const DataflowContentModel = TileContentModel
       });
     },
     clearCases() {
-      const ids = self.dataSet.cases.map(({__id__}) => ( __id__));
+      const ids = self.dataSet.cases.map(({ __id__ }) => ( __id__));
       self.dataSet.removeCases(ids);
     },
   }))

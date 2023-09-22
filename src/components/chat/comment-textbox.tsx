@@ -23,7 +23,7 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
   const [commentText, setCommentText] = useState("");
    //all the AI tags pertaining to one comment - length is 1 for now
   const [allTags, setAllTags] = useState([""]);
-  const textareaStyle = {height: commentTextAreaHeight};
+  const textareaStyle = { height: commentTextAreaHeight };
 
   const commentEmptyNoTags =  (!commentAdded && !showCommentTag);
   const postButtonClass = classNames("comment-footer-button", "themed-negative", activeNavTab,
@@ -123,7 +123,7 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
   return (
     <div className="comment-textbox">
       <textarea
-        className={classNames({"shift-down" : showCommentTag})}
+        className={classNames({ "shift-down" : showCommentTag })}
         ref={textareaRef}
         style={textareaStyle}
         placeholder={placeholderText}

@@ -77,10 +77,10 @@ export const SimulatorContentModel = TileContentModel
         const tileSharedModels = sharedModelManager?.isReady ?
           sharedModelManager?.getTileSharedModels(self) : undefined;
 
-        const values = {sharedModelManager, containerSharedModel, tileSharedModels};
+        const values = { sharedModelManager, containerSharedModel, tileSharedModels };
         return values;
       },
-      ({sharedModelManager, containerSharedModel, tileSharedModels}) => {
+      ({ sharedModelManager, containerSharedModel, tileSharedModels }) => {
         if (!sharedModelManager?.isReady) {
           // We aren't added to a document yet so we can't do anything yet
           return;
@@ -106,7 +106,7 @@ export const SimulatorContentModel = TileContentModel
           }
         });
       },
-      {name: "sharedModelSetup", fireImmediately: true}));
+      { name: "sharedModelSetup", fireImmediately: true }));
     },
     updateAfterSharedModelChanges() {
       // nothing to do here

@@ -15,8 +15,8 @@ import {
   // range,
   select, range, min, max, ScaleQuantile, NumberValue
 } from "d3";
-import {kChoroplethHeight} from "../../../graph-types";
-import {neededSigDigitsArrayForQuantiles} from "../../../utilities/math-utils";
+import { kChoroplethHeight } from "../../../graph-types";
+import { neededSigDigitsArrayForQuantiles } from "../../../utilities/math-utils";
 
 export type ChoroplethLegendProps = {
   tickSize?: number,

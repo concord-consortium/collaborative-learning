@@ -40,7 +40,7 @@ export class DBCommentsListener extends BaseListener {
       const docModel = snapshot.ref.key && documents.getDocument(snapshot.ref.key);
       if (docModel) {
         forEach(dbDocComments, (tileComments, tileId) => {
-          const tileCommentsModel = TileCommentsModel.create({tileId});
+          const tileCommentsModel = TileCommentsModel.create({ tileId });
           forEach(tileComments, (tileComment, commentKey) => {
             if (!tileComment.deleted) {
               const { uid, content, selectionInfo } = tileComment;

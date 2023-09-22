@@ -61,8 +61,8 @@ export const WorkspaceModel = types
         }
       },
 
-      toggleComparisonVisible({override, muteLog = false, hidePrimary = false}:
-          {override?: boolean; muteLog?: boolean, hidePrimary?: boolean} = {}) {
+      toggleComparisonVisible({ override, muteLog = false, hidePrimary = false }:
+          { override?: boolean; muteLog?: boolean, hidePrimary?: boolean } = {}) {
         const visible = typeof override !== "undefined" ? override : !self.comparisonVisible;
         self.comparisonVisible = visible;
         self.hidePrimaryForCompare = hidePrimary;

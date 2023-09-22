@@ -1,4 +1,4 @@
-import { types, Instance, SnapshotIn, getSnapshot, isStateTreeNode, detach, destroy} from "mobx-state-tree";
+import { types, Instance, SnapshotIn, getSnapshot, isStateTreeNode, detach, destroy } from "mobx-state-tree";
 import { clone } from "lodash";
 import stringify from "json-stringify-pretty-compact";
 
@@ -25,7 +25,7 @@ export type DrawingToolMetadataModelType = Instance<typeof DrawingToolMetadataMo
 
 export interface DrawingObjectMove {
   id: string,
-  destination: {x: number, y: number}
+  destination: { x: number, y: number }
 }
 
 export const DrawingContentModel = TileContentModel
@@ -101,7 +101,7 @@ export const DrawingContentModel = TileContentModel
     },
     exportJson(options?: ITileExportOptions) {
       // Translate image urls if necessary
-      const {type, objects: originalObjects} = getSnapshot(self);
+      const { type, objects: originalObjects } = getSnapshot(self);
       const objects = originalObjects.map(object => {
         if (isImageObjectSnapshot(object) && options?.transformImageUrl) {
           if (object.filename) {
@@ -117,7 +117,7 @@ export const DrawingContentModel = TileContentModel
       // json-stringify-pretty-compact is used, so the exported content is more
       // compact. It results in something close to what we used to get when the
       // export was created using a string builder.
-      return stringify({type, objects}, {maxLength: 200});
+      return stringify({ type, objects }, { maxLength: 200 });
     }
   }))
   .views(self => ({
@@ -131,7 +131,7 @@ export const DrawingContentModel = TileContentModel
     },
     onTileAction(call) {
       const tileId = self.metadata?.id ?? "";
-      const {name: operation, ...change} = call;
+      const { name: operation, ...change } = call;
       // Ignore actions that don't need to be logged
       if (["setDisabledFeatures", "setDragPosition", "setDragBounds", "setSelectedButton"].includes(operation)) return;
 
@@ -326,7 +326,7 @@ export const DrawingContentModel = TileContentModel
                   x: 0,
                   y: 0,
                   objects: getSnapshot(object.objects).map((s) => {
-                    const {id, ...params} = s;
+                    const { id, ...params } = s;
                     params.x += 10;
                     params.y += 10;
                     return params;
@@ -334,7 +334,7 @@ export const DrawingContentModel = TileContentModel
                 };
                 newObject = self.addObject(newGroup);
               } else {
-                const {id, ...newParams} = snap; // remove existing ID
+                const { id, ...newParams } = snap; // remove existing ID
                 newParams.x = snap.x + 10;     // offset by 10 pixels so it is not hidden
                 newParams.y = snap.y + 10;
                 newObject = self.addObject(newParams);

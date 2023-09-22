@@ -194,7 +194,7 @@ export const DocumentsModel = types
         const tileEnv = getTileEnvironment(document);
         if (tileEnv) tileEnv.appConfig = self.appConfig;
 
-        const {firestore, userContextProvider} = self;
+        const { firestore, userContextProvider } = self;
 
         if (!firestore || !userContextProvider) {
           // TODO: There is a chance that we'll lose history if the documents

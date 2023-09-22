@@ -330,7 +330,7 @@ export const exportGeometry = (changes: string[], options?: ITileExportOptions) 
     let inParents = _changes[0].parents as JXGCoordPair | undefined;
     let props: any = {};
     _changes.forEach(change => {
-      props = {...props, ...change.properties };
+      props = { ...props, ...change.properties };
     });
     const { position, ...others } = props;
     if (others.id !== id) others.id = id;
@@ -364,7 +364,7 @@ export const exportGeometry = (changes: string[], options?: ITileExportOptions) 
     const transformedUrl = options?.transformImageUrl?.(url, inFilename) || url;
     let props: any = {};
     _changes.forEach(change => {
-      props = {...props, ...change.properties };
+      props = { ...props, ...change.properties };
     });
     const { filename, position, ...others } = props;
     if (others.id !== id) others.id = id;
@@ -394,10 +394,10 @@ export const exportGeometry = (changes: string[], options?: ITileExportOptions) 
         const ptIndex = Array.isArray(change.targetID)
                           ? change.targetID.indexOf(id)
                           : change.properties.findIndex(p => p.id === id);
-        (ptIndex >= 0) && (props = {...props, ...change.properties[ptIndex] });
+        (ptIndex >= 0) && (props = { ...props, ...change.properties[ptIndex] });
       }
       else {
-        props = {...props, ...change.properties };
+        props = { ...props, ...change.properties };
       }
     });
     const { position, ...others } = props;
@@ -488,7 +488,7 @@ export const exportGeometry = (changes: string[], options?: ITileExportOptions) 
         labelMap.set(key, { points: parents as string[], option: labelOption });
       }
       else {
-        props = {...props, ...properties };
+        props = { ...props, ...properties };
       }
     });
     if (props.id !== id) props.id = id;
@@ -516,7 +516,7 @@ export const exportGeometry = (changes: string[], options?: ITileExportOptions) 
     const _changes = objectInfoMap[id].changes;
     let props: any = {};
     _changes.forEach(change => {
-      props = {...props, ...change.properties };
+      props = { ...props, ...change.properties };
     });
     if (props.id !== id) props.id = id;
 
@@ -549,7 +549,7 @@ export const exportGeometry = (changes: string[], options?: ITileExportOptions) 
     const _changes = objectInfoMap[id].changes;
     let props: any = {};
     _changes.forEach(change => {
-      props = {...props, ...change.properties };
+      props = { ...props, ...change.properties };
     });
     if (props.id !== id) props.id = id;
     const pointIds = getMovableLinePointIds(id);

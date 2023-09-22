@@ -1,13 +1,13 @@
-import {BaseType, drag, format, ScaleLinear, select, Selection} from "d3";
-import {autorun, reaction} from "mobx";
-import {isAlive} from "mobx-state-tree";
-import {MutableRefObject, useCallback, useEffect, useMemo, useRef} from "react";
-import {AxisBounds, axisPlaceToAxisFn, AxisScaleType, otherPlace} from "../axis-types";
-import {useAxisLayoutContext} from "../models/axis-layout-context";
-import {IAxisModel, isCategoricalAxisModel, isNumericAxisModel} from "../models/axis-model";
-import {isVertical} from "../../axis-graph-shared";
-import {between} from "../../../../utilities/math-utils";
-import {kAxisTickLength, transitionDuration} from "../../../../graph-types";
+import { BaseType, drag, format, ScaleLinear, select, Selection } from "d3";
+import { autorun, reaction } from "mobx";
+import { isAlive } from "mobx-state-tree";
+import { MutableRefObject, useCallback, useEffect, useMemo, useRef } from "react";
+import { AxisBounds, axisPlaceToAxisFn, AxisScaleType, otherPlace } from "../axis-types";
+import { useAxisLayoutContext } from "../models/axis-layout-context";
+import { IAxisModel, isCategoricalAxisModel, isNumericAxisModel } from "../models/axis-model";
+import { isVertical } from "../../axis-graph-shared";
+import { between } from "../../../../utilities/math-utils";
+import { kAxisTickLength, transitionDuration } from "../../../../graph-types";
 import {
   DragInfo, collisionExists, computeBestNumberOfTicks, getCategoricalLabelPlacement,
   getCoordFunctions, IGetCoordFunctionsProps
@@ -128,8 +128,8 @@ export const useSubAxis = ({
             categories = Array.from(categorySet?.values ?? []),
             numCategories = categories.length,
             bandWidth = subAxisLength / numCategories,
-            collision = collisionExists({bandWidth, categories, centerCategoryLabels}),
-            {rotation, textAnchor} = getCategoricalLabelPlacement(place, centerCategoryLabels,
+            collision = collisionExists({ bandWidth, categories, centerCategoryLabels }),
+            { rotation, textAnchor } = getCategoricalLabelPlacement(place, centerCategoryLabels,
               collision),
             duration = (enableAnimation.current && !swapInProgress.current &&
               dragInfo.current.indexOfCategory === -1) ? transitionDuration : 0;
@@ -278,7 +278,7 @@ export const useSubAxis = ({
         categorySet = multiScale?.categorySet,
         categories = Array.from(categorySet?.values ?? []),
         categoryData: CatObject[] = categories.map((cat, index) =>
-          ({cat, index: isVertical(place) ? categories.length - index - 1 : index}));
+          ({ cat, index: isVertical(place) ? categories.length - index - 1 : index }));
 
       subAxisSelectionRef.current = select(subAxisElt);
       const sAS = subAxisSelectionRef.current;
@@ -319,10 +319,10 @@ export const useSubAxis = ({
   useEffect(() => {
     const disposer = reaction(
       () => {
-        const {place: aPlace, scale: scaleType} = axisModel;
-        return {place: aPlace, scaleType};
+        const { place: aPlace, scale: scaleType } = axisModel;
+        return { place: aPlace, scaleType };
       },
-      ({place: aPlace, scaleType}) => {
+      ({ place: aPlace, scaleType }) => {
         layout.getAxisMultiScale(aPlace)?.setScaleType(scaleType);
         renderSubAxis();
       }
@@ -347,7 +347,7 @@ export const useSubAxis = ({
     if (isNumeric) {
       const disposer = autorun(() => {
         if (isAlive(axisModel) && axisModel.domain) {
-          const {domain} = axisModel;
+          const { domain } = axisModel;
           layout.getAxisMultiScale(axisModel.place)?.setNumericDomain(domain);
           renderSubAxis();
         }

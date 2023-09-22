@@ -20,7 +20,7 @@ let content, drawingLayerProps, drawingLayer;
 
 const getDrawingObject = (objectContent: DrawingContentModelType) => {
   drawingLayerProps = {
-    model: TileModel.create({content: objectContent}),
+    model: TileModel.create({ content: objectContent }),
     onSetCanAcceptDrop: (tileId?: string) => {
       throw new Error("Function not implemented.");
     }
@@ -43,25 +43,25 @@ describe("Drawing Layer Components", () => {
     };
 
     it("adds a freehand line", () => {
-      content = DrawingMigrator.create({changes:[
-        JSON.stringify({action: "create", data: lineData})
-      ]});
+      content = DrawingMigrator.create({ changes:[
+        JSON.stringify({ action: "create", data: lineData })
+      ] });
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("moves a freehand line", () => {
-      const moves: DrawingToolMove = [{ id: "123", destination: {x: 5, y: 5} }];
-      content = DrawingMigrator.create({changes:[
-        JSON.stringify({action: "create", data: lineData}),
-        JSON.stringify({action: "move", data: moves})
-      ]});
+      const moves: DrawingToolMove = [{ id: "123", destination: { x: 5, y: 5 } }];
+      content = DrawingMigrator.create({ changes:[
+        JSON.stringify({ action: "create", data: lineData }),
+        JSON.stringify({ action: "move", data: moves })
+      ] });
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("deletes a freehand line", () => {
       const deleteObject: DrawingToolDeletion = [ "123" ];
-      content = DrawingMigrator.create({changes:[
-        JSON.stringify({action: "create", data: lineData}),
-        JSON.stringify({action: "delete", data: deleteObject})
-      ]});
+      content = DrawingMigrator.create({ changes:[
+        JSON.stringify({ action: "create", data: lineData }),
+        JSON.stringify({ action: "delete", data: deleteObject })
+      ] });
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
   });
@@ -77,25 +77,25 @@ describe("Drawing Layer Components", () => {
       strokeWidth: 1
     };
     it("adds a Vector line", () => {
-      content = DrawingMigrator.create({changes:[
-        JSON.stringify({action: "create", data: vectorData})
-      ]});
+      content = DrawingMigrator.create({ changes:[
+        JSON.stringify({ action: "create", data: vectorData })
+      ] });
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("moves a vector line", () => {
-      const moves: DrawingToolMove = [{ id: "234", destination: {x: 5, y: 5} }];
-      content = DrawingMigrator.create({changes:[
-        JSON.stringify({action: "create", data: vectorData}),
-        JSON.stringify({action: "move", data: moves})
-      ]});
+      const moves: DrawingToolMove = [{ id: "234", destination: { x: 5, y: 5 } }];
+      content = DrawingMigrator.create({ changes:[
+        JSON.stringify({ action: "create", data: vectorData }),
+        JSON.stringify({ action: "move", data: moves })
+      ] });
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("deletes a vector line", () => {
       const deleteObject: DrawingToolDeletion = [ "234" ];
-      content = DrawingMigrator.create({changes:[
-        JSON.stringify({action: "create", data: vectorData}),
-        JSON.stringify({action: "delete", data: deleteObject})
-      ]});
+      content = DrawingMigrator.create({ changes:[
+        JSON.stringify({ action: "create", data: vectorData }),
+        JSON.stringify({ action: "delete", data: deleteObject })
+      ] });
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
   });
@@ -112,25 +112,25 @@ describe("Drawing Layer Components", () => {
       strokeWidth: 1
     };
     it("adds a Rectangle", () => {
-      content = DrawingMigrator.create({changes:[
-        JSON.stringify({action: "create", data: rectData})
-      ]});
+      content = DrawingMigrator.create({ changes:[
+        JSON.stringify({ action: "create", data: rectData })
+      ] });
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("moves a rectangle", () => {
-      const moves: DrawingToolMove = [{ id: "345", destination: {x: 5, y: 5} }];
-      content = DrawingMigrator.create({changes:[
-        JSON.stringify({action: "create", data: rectData}),
-        JSON.stringify({action: "move", data: moves})
-      ]});
+      const moves: DrawingToolMove = [{ id: "345", destination: { x: 5, y: 5 } }];
+      content = DrawingMigrator.create({ changes:[
+        JSON.stringify({ action: "create", data: rectData }),
+        JSON.stringify({ action: "move", data: moves })
+      ] });
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("deletes a rectangle", () => {
       const deleteObject: DrawingToolDeletion = [ "345" ];
-      content = DrawingMigrator.create({changes:[
-        JSON.stringify({action: "create", data: rectData}),
-        JSON.stringify({action: "delete", data: deleteObject})
-      ]});
+      content = DrawingMigrator.create({ changes:[
+        JSON.stringify({ action: "create", data: rectData }),
+        JSON.stringify({ action: "delete", data: deleteObject })
+      ] });
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
   });
@@ -147,25 +147,25 @@ describe("Drawing Layer Components", () => {
       strokeWidth: 1
     };
     it("adds a ellipse", () => {
-      content = DrawingMigrator.create({changes:[
-        JSON.stringify({action: "create", data: ellipseData})
-      ]});
+      content = DrawingMigrator.create({ changes:[
+        JSON.stringify({ action: "create", data: ellipseData })
+      ] });
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("moves a ellipse", () => {
-      const moves: DrawingToolMove = [{ id: "456", destination: {x: 5, y: 5} }];
-      content = DrawingMigrator.create({changes:[
-        JSON.stringify({action: "create", data: ellipseData}),
-        JSON.stringify({action: "move", data: moves})
-      ]});
+      const moves: DrawingToolMove = [{ id: "456", destination: { x: 5, y: 5 } }];
+      content = DrawingMigrator.create({ changes:[
+        JSON.stringify({ action: "create", data: ellipseData }),
+        JSON.stringify({ action: "move", data: moves })
+      ] });
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("deletes a ellipse", () => {
       const deleteObject: DrawingToolDeletion = [ "456" ];
-      content = DrawingMigrator.create({changes:[
-        JSON.stringify({action: "create", data: ellipseData}),
-        JSON.stringify({action: "delete", data: deleteObject})
-      ]});
+      content = DrawingMigrator.create({ changes:[
+        JSON.stringify({ action: "create", data: ellipseData }),
+        JSON.stringify({ action: "delete", data: deleteObject })
+      ] });
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
   });
@@ -196,25 +196,25 @@ describe("Drawing Layer Components", () => {
       jest.spyOn(gImageMap, "getImageEntry").mockImplementation(() => imageMapEntry);
     });
     it("adds an image", () => {
-      content = DrawingMigrator.create({changes:[
-        JSON.stringify({action: "create", data: imageData})
-      ]});
+      content = DrawingMigrator.create({ changes:[
+        JSON.stringify({ action: "create", data: imageData })
+      ] });
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("moves a image", () => {
-      const moves: DrawingToolMove = [{ id: "567", destination: {x: 5, y: 5} }];
-      content = DrawingMigrator.create({changes:[
-        JSON.stringify({action: "create", data: imageData}),
-        JSON.stringify({action: "move", data: moves})
-      ]});
+      const moves: DrawingToolMove = [{ id: "567", destination: { x: 5, y: 5 } }];
+      content = DrawingMigrator.create({ changes:[
+        JSON.stringify({ action: "create", data: imageData }),
+        JSON.stringify({ action: "move", data: moves })
+      ] });
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("deletes a image", () => {
       const deleteObject: DrawingToolDeletion = [ "567" ];
-      content = DrawingMigrator.create({changes:[
-        JSON.stringify({action: "create", data: imageData}),
-        JSON.stringify({action: "delete", data: deleteObject})
-      ]});
+      content = DrawingMigrator.create({ changes:[
+        JSON.stringify({ action: "create", data: imageData }),
+        JSON.stringify({ action: "delete", data: deleteObject })
+      ] });
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
   });

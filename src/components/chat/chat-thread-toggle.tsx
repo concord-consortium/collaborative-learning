@@ -9,7 +9,7 @@ interface IProps {
   activeNavTab?: string;
 }
 
-export const ChatThreadToggle: React.FC<IProps> = ({ isThreadExpanded, activeNavTab}) => {
+export const ChatThreadToggle: React.FC<IProps> = ({ isThreadExpanded, activeNavTab }) => {
   return (
     <div className={classNames(`chat-thread-toggle ${activeNavTab}`, {
           expanded: isThreadExpanded

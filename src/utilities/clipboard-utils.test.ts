@@ -81,7 +81,7 @@ describe("pasteClipboardImage", () => {
   });
 
   it ("does not call addFileImage or getImage when the clipboard does not contain an image or text item", () => {
-    pasteClipboardImage({image: null, text: null, types: ["text/html"]}, onComplete);
+    pasteClipboardImage({ image: null, text: null, types: ["text/html"] }, onComplete);
     expect(gImageMap.addFileImage).not.toHaveBeenCalled();
     expect(gImageMap.getImage).not.toHaveBeenCalled();
     expect(mockConsoleError).toHaveBeenCalledWith("ERROR: unknown clipboard content type(s): text/html");

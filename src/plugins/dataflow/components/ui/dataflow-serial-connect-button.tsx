@@ -21,8 +21,8 @@ export const DataflowSerialConnectButton = (props: SerialConnectProps) => {
   const lastMsg = localStorage.getItem("last-connect-message");
   const classes = classNames(
     "icon-serial",
-    { "physical-connection": lastMsg === "connect"},
-    { "no-physical-connection": lastMsg === "disconnect" && knownBoard},
+    { "physical-connection": lastMsg === "connect" },
+    { "no-physical-connection": lastMsg === "disconnect" && knownBoard },
     serialDevice.serialNodesCount > 0 ? "nodes-in-need" : "no-serial-needed",
     serialDevice.hasPort() ? "has-port" : "no-port"
   );

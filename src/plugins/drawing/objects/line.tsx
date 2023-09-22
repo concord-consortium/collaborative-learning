@@ -16,10 +16,10 @@ function* pointIterator(line: LineObjectType): Generator<Point, string, unknown>
   const scaleX = line.dragScaleX ?? 1;
   const scaleY = line.dragScaleY ?? 1;
   yield { x: currentX, y: currentY };
-  for (const {dx, dy} of points) {
+  for (const { dx, dy } of points) {
     currentX += dx * scaleX;
     currentY += dy * scaleY;
-    yield {x: currentX, y: currentY};
+    yield { x: currentX, y: currentY };
   }
   // Due to some conflict between TS and ESLint it is necessary to return
   // a value here. As far as I can tell this value is not used.
@@ -47,16 +47,16 @@ export const LineObject = StrokedObject.named("LineObject")
     },
 
     get boundingBox() {
-      const {x, y} = self.position;
-      const nw: Point = {x, y};
-      const se: Point = {x, y};
+      const { x, y } = self.position;
+      const nw: Point = { x, y };
+      const se: Point = { x, y };
       for (const point of pointIterator(self as LineObjectType)){
         nw.x = Math.min(nw.x, point.x);
         nw.y = Math.min(nw.y, point.y);
         se.x = Math.max(se.x, point.x);
         se.y = Math.max(se.y, point.y);
       }
-      return {nw, se};
+      return { nw, se };
     },
 
     get label() {
@@ -124,7 +124,7 @@ export const LineObject = StrokedObject.named("LineObject")
 export interface LineObjectType extends Instance<typeof LineObject> {}
 export interface LineObjectSnapshot extends SnapshotIn<typeof LineObject> {}
 
-export const LineComponent = observer(function LineComponent({model, handleHover, handleDrag}
+export const LineComponent = observer(function LineComponent({ model, handleHover, handleDrag }
   : IDrawingComponentProps) {
   if (model.type !== "line") return null;
   const line = model as LineObjectType;
@@ -157,15 +157,15 @@ export class LineDrawingTool extends DrawingTool {
   public handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
     const start = this.drawingLayer.getWorkspacePoint(e);
     if (!start) return;
-    const {stroke, strokeWidth, strokeDashArray} = this.drawingLayer.toolbarSettings();
-    const line = LineObject.create({x: start.x, y: start.y,
-      deltaPoints: [], stroke, strokeWidth, strokeDashArray});
+    const { stroke, strokeWidth, strokeDashArray } = this.drawingLayer.toolbarSettings();
+    const line = LineObject.create({ x: start.x, y: start.y,
+      deltaPoints: [], stroke, strokeWidth, strokeDashArray });
 
     let lastPoint = start;
     const addPoint = (e2: MouseEvent|React.MouseEvent<HTMLDivElement>) => {
       const p = this.drawingLayer.getWorkspacePoint(e2);
       if (p && (p.x >= 0) && (p.y >= 0)) {
-        line.addPoint({dx: p.x - lastPoint.x, dy: p.y - lastPoint.y});
+        line.addPoint({ dx: p.x - lastPoint.x, dy: p.y - lastPoint.y });
         lastPoint = p;
         this.drawingLayer.setCurrentDrawingObject(line);
       }
@@ -192,7 +192,7 @@ export class LineDrawingTool extends DrawingTool {
   }
 }
 
-export function LineToolbarButton({toolbarManager}: IToolbarButtonProps) {
+export function LineToolbarButton({ toolbarManager }: IToolbarButtonProps) {
   return <SvgToolModeButton modalButton="line" 
     title="Freehand" toolbarManager={toolbarManager} SvgIcon={FreehandToolIcon} />;
 }

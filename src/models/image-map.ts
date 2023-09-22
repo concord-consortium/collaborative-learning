@@ -198,7 +198,7 @@ export const ImageMapModel = types
       if (existingEntry) {
         retries = existingEntry.retries;
       }
-      const { success: successfulStore, ...otherProps} = storeResult;
+      const { success: successfulStore, ...otherProps } = storeResult;
       const snapshot: ImageMapEntrySnapshot = {
         ...otherProps,
         status: successfulStore ? EntryStatus.PendingDimensions : EntryStatus.Error,
@@ -349,8 +349,8 @@ export const ImageMapModel = types
         retries = imageEntry.retries + 1;
       }
 
-      self.images.set(url, {status: EntryStatus.PendingStorage, displayUrl: placeholderImage,
-        retries});
+      self.images.set(url, { status: EntryStatus.PendingStorage, displayUrl: placeholderImage,
+        retries });
 
       const storingPromise = self._storeAndAddImage(url, handler, options);
 

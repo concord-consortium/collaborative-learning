@@ -147,7 +147,7 @@ export const getFirebaseJWTWithBearerToken = (basePortalUrl: string, type: strin
           reject("No Firebase token found in Firebase JWT request response");
         }
         else {
-          const {token} = res.body;
+          const { token } = res.body;
           const firebaseJWT = jwt_decode(token);
           if (firebaseJWT) {
             resolve([token, firebaseJWT as PortalFirebaseJWT]);
@@ -168,7 +168,7 @@ export interface GetClassInfoParams {
 }
 
 export const getClassInfo = (params: GetClassInfoParams) => {
-  const {classInfoUrl, rawPortalJWT, portal, offeringId} = params;
+  const { classInfoUrl, rawPortalJWT, portal, offeringId } = params;
   return new Promise<ClassInfo>((resolve, reject) => {
     superagent
     .get(classInfoUrl)
@@ -245,7 +245,7 @@ export const authenticate = (appMode: AppMode, appConfig: AppConfigModelType, ur
     const bearerToken = urlParams.token;
     let basePortalUrl: string;
 
-    let {fakeClass, fakeUser} = urlParams;
+    let { fakeClass, fakeUser } = urlParams;
     // handle preview launch from portal
     if (urlParams.domain && urlParams.domain_uid && !bearerToken) {
       appMode = "demo";
@@ -308,7 +308,7 @@ export const authenticate = (appMode: AppMode, appConfig: AppConfigModelType, ur
       if (!urlParams.offering) {
         return reject("Missing offering parameter!");
       }
-      const {protocol, host} = parseUrl(urlParams.class);
+      const { protocol, host } = parseUrl(urlParams.class);
       basePortalUrl = `${protocol}//${host}/`;
     }
     else if (urlParams.domain) {
@@ -341,7 +341,7 @@ export const authenticate = (appMode: AppMode, appConfig: AppConfigModelType, ur
           throw new Error("Unable to get classInfoUrl or offeringId");
         }
 
-        return getClassInfo({classInfoUrl, rawPortalJWT, portal, offeringId})
+        return getClassInfo({ classInfoUrl, rawPortalJWT, portal, offeringId })
           .then((classInfo) => {
             const { user_type, uid, domain } = portalJWT;
             const { classHash } = classInfo;
@@ -371,7 +371,7 @@ export const authenticate = (appMode: AppMode, appConfig: AppConfigModelType, ur
                 authenticatedUser.portalClassOfferings =
                   getPortalClassOfferings(portalOfferingsResult, appConfig, urlParams);
 
-                Logger.log(LogEventName.INTERNAL_AUTHENTICATED, {id: authenticatedUser.id, portal});
+                Logger.log(LogEventName.INTERNAL_AUTHENTICATED, { id: authenticatedUser.id, portal });
                 resolve({
                   authenticatedUser,
                   classInfo,
@@ -412,7 +412,7 @@ export const generateDevAuthentication = (unitCode: string, problemOrdinal: stri
     }
   }
 
-  return {authenticatedUser, classInfo: DEV_CLASS_INFO};
+  return { authenticatedUser, classInfo: DEV_CLASS_INFO };
 };
 
 const createOfferingIdFromProblem = (unitCode: string, problemOrdinal: string) => {
@@ -459,7 +459,7 @@ const getFakeTeacherClassHashes = (appMode: AppMode, classId: string) => {
 };
 
 export const createFakeUser = (options: CreateFakeUserOptions) => {
-  const {appMode, classId, userType, userId, network, offeringId} = options;
+  const { appMode, classId, userType, userId, network, offeringId } = options;
   const className = `${appMode === "demo" ? "Demo" : "QA"} Class ${classId}`;
   if (userType === "student") {
     const student: StudentUser = {
@@ -506,12 +506,12 @@ export interface CreateFakeAuthenticationOptions {
 }
 
 export const createFakeAuthentication = (options: CreateFakeAuthenticationOptions) => {
-  const {appMode, classId, userType, userId, network: _network, unitCode, problemOrdinal} = options;
+  const { appMode, classId, userType, userId, network: _network, unitCode, problemOrdinal } = options;
   const network = userType === "teacher"
                     ? _network || (parseInt(userId, 10) > 1 ? "demo-network" : undefined) || undefined
                     : undefined;
   const offeringId = createOfferingIdFromProblem(unitCode, problemOrdinal);
-  const authenticatedUser = createFakeUser({appMode, classId, userType, network, userId, offeringId});
+  const authenticatedUser = createFakeUser({ appMode, classId, userType, network, userId, offeringId });
   const classInfo: ClassInfo = {
     name: authenticatedUser.className,
     classHash: authenticatedUser.classHash,
@@ -555,5 +555,5 @@ export const createFakeAuthentication = (options: CreateFakeAuthenticationOption
       }) as TeacherUser
     );
   }
-  return {authenticatedUser, classInfo};
+  return { authenticatedUser, classInfo };
 };

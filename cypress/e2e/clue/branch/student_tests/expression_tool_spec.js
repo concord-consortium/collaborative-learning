@@ -42,8 +42,8 @@ context('Expression Tool Tile', function () {
     it("should accept basic keyboard input", () => {
       // Can now perform keyboard input
       // but thus far cannot get sequences like {del} to work in test
-      exp.getMathField().eq(0).click({force: true});
-      exp.getMathField().eq(0).type("hi", {force: true});
+      exp.getMathField().eq(0).click({ force: true });
+      exp.getMathField().eq(0).type("hi", { force: true });
       exp.getMathField().eq(0).should("have.value", "hia=\\pi r^2");
       cy.wait(2000);
     });
@@ -55,19 +55,19 @@ context('Expression Tool Tile', function () {
     });
     it("can create a mixed fraction with the button", () => {
       exp.clearValue();
-      exp.getMathField().eq(0).click({force: true});
+      exp.getMathField().eq(0).click({ force: true });
       exp.getMixedFractionButton().eq(0).click();
       exp.getMathField().eq(0).should("have.value", "\\placeholder{}\\frac{\\placeholder{}}{\\placeholder{}}");
     });
     it("can add an empty division expression when division button clicked in empty expression", () => {
       exp.clearValue();
-      exp.getMathField().eq(0).click({force: true});
+      exp.getMathField().eq(0).click({ force: true });
       exp.getDivisionButton().eq(0).click();
       exp.getMathField().eq(0).should("have.value", "\\placeholder{}\\div\\placeholder{}");
     });
     it("can add a division sign and a placeholder when division button clicked following existing value", () => {
       exp.clearValue();
-      exp.getMathField().eq(0).click({force: true});
+      exp.getMathField().eq(0).click({ force: true });
       exp.getMathField().eq(0).invoke("val", "123");
       exp.getDivisionButton().eq(0).click();
       exp.getMathField().eq(0).should("have.value", "123\\div\\placeholder{}");
@@ -79,27 +79,27 @@ context('Expression Tool Tile', function () {
       cy.contains("(Eq. 2)").should("exist");
     });
     it("should become the active tile when equation is clicked", () => {
-      exp.getMathField().eq(1).click({force: true});
+      exp.getMathField().eq(1).click({ force: true });
       exp.getExpressionTile().eq(1).should("have.class", "selected");
       exp.getExpressionTile().eq(0).should("not.have.class", "selected");
     });
     it("should have a toggleable toolbar", () => {
       exp.getExpressionToolbar().eq(1).should("be.visible");
       exp.getExpressionToolbar().eq(0).should("not.be.visible");
-      exp.getMathField().eq(0).click({force: true});
+      exp.getMathField().eq(0).click({ force: true });
       exp.getExpressionToolbar().eq(0).should("be.visible");
       exp.getExpressionToolbar().eq(1).should("not.be.visible");
     });
     it("delete expression button deletes the whole expression", () => {
-      exp.getMathField().eq(0).click({force: true});
+      exp.getMathField().eq(0).click({ force: true });
       exp.getDeleteExpressionButton().eq(0).click();
       exp.getMathFieldMath().eq(0).should("not.contain.text");
       exp.getMathField().should("not.have.value", "a=\\pi r^2");
     });
     it("adds placeholder to negative sign", () => {
       exp.getDeleteExpressionButton().eq(0).click();
-      exp.getMathField().eq(0).click({force: true});
-      exp.getMathField().eq(0).type("-", {force: true});
+      exp.getMathField().eq(0).click({ force: true });
+      exp.getMathField().eq(0).type("-", { force: true });
       exp.getMathField().eq(0).should("have.value", "-\\placeholder{}");
     });
     it("adds placeholders to multiplication symbol", () => {

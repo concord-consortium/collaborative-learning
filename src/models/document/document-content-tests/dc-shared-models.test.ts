@@ -102,9 +102,9 @@ describe("DocumentContentModel -- shared Models --", () => {
                 }
               ],
               cases: [
-                {__id__: "HR3at2-RqvnRaT9z" },
-                {__id__: "O3SmGUb4iRPw29HU" },
-                {__id__: "76WRbhQpTu2Wqy1c" }
+                { __id__: "HR3at2-RqvnRaT9z" },
+                { __id__: "O3SmGUb4iRPw29HU" },
+                { __id__: "76WRbhQpTu2Wqy1c" }
               ]
             }
           }
@@ -279,7 +279,7 @@ Object {
   describe("single tile copies", () => {
     it("can copy a tile into another empty document", () => {
       const dragTileInfo = documentContent.getDragTiles(["tableTool"]);
-      const targetDocument = createDocumentContentModel({tiles: []});
+      const targetDocument = createDocumentContentModel({ tiles: [] });
       const dropRowInfo: IDropRowInfo = {
         rowInsertIndex: 0
       };
@@ -405,7 +405,7 @@ Object {
       // The import doc needs to have a tile in the row for the first
       // row to be created
       const targetDocument = createDocumentContentModel({
-        tiles: [{ "id": "textTool", "content": {"type": "Text" }}]
+        tiles: [{ "id": "textTool", "content": { "type": "Text" } }]
       });
       const dropRowInfo: IDropRowInfo = {
         rowInsertIndex: 0,
@@ -548,7 +548,7 @@ Object {
   describe("multiple tile copies", () => {
     it("can copy two tiles into another document", () => {
       const dragTileInfo = documentContent.getDragTiles(["tableTool", "graphTool"]);
-      const targetDocument = createDocumentContentModel({tiles: []});
+      const targetDocument = createDocumentContentModel({ tiles: [] });
       const dropRowInfo: IDropRowInfo = {
         rowInsertIndex: 0
       };

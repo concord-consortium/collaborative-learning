@@ -66,7 +66,7 @@ describe("Firestore class", () => {
       const firestore = new Firestore(mockDB);
       expect(firestore.userId).toBe("no-user-id");
       expect(firestore.isConnected).toBe(false);
-      firestore.setFirebaseUser({ uid: "user-1"} as any);
+      firestore.setFirebaseUser({ uid: "user-1" } as any);
       expect(firestore.userId).toBe("user-1");
       expect(firestore.isConnected).toBe(true);
     });

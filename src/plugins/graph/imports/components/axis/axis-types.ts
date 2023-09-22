@@ -1,5 +1,5 @@
-import {axisBottom, axisLeft, axisRight, axisTop,
-  ScaleBand, ScaleContinuousNumeric, ScaleOrdinal, select, Selection} from "d3";
+import { axisBottom, axisLeft, axisRight, axisTop,
+  ScaleBand, ScaleContinuousNumeric, ScaleOrdinal, select, Selection } from "d3";
 
 export const axisGap = 5;
 

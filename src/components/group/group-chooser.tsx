@@ -29,7 +29,7 @@ export class GroupChooserComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const {user, groups} = this.stores;
+    const { user, groups } = this.stores;
     return (
       <div className="join">
         <div className="join-title">Join Group</div>
@@ -44,7 +44,7 @@ export class GroupChooserComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderChooseNewGroup() {
-    const {allGroups} = this.stores.groups;
+    const { allGroups } = this.stores.groups;
     const groupIds = allGroups.map((group) => group.id);
     const items: JSX.Element[] = [];
     const haveExistingGroups = groupIds.length > 0;
@@ -65,7 +65,7 @@ export class GroupChooserComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderChooseExistingGroup() {
-    const {groups} = this.stores;
+    const { groups } = this.stores;
     const groupElements = groups.allGroups.map((group) => {
       const users = group.users.map((user) => {
         const className = `user ${user.connected ? "connected" : "disconnected"}`;
@@ -97,7 +97,7 @@ export class GroupChooserComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderError() {
-    const {error} = this.state;
+    const { error } = this.state;
     if (error) {
       return (
         <div className="error">{error}</div>
@@ -107,15 +107,15 @@ export class GroupChooserComponent extends BaseComponent<IProps, IState> {
 
   private selectGroup = (groupId: string) => {
     this.stores.db.joinGroup(groupId)
-      .then(() => { if (this._isMounted) this.setState({error: undefined}); })
-      .catch((err) => { if (this._isMounted) this.setState({error: err.toString()}); });
+      .then(() => { if (this._isMounted) this.setState({ error: undefined }); })
+      .catch((err) => { if (this._isMounted) this.setState({ error: err.toString() }); });
   };
 
   private handleChooseExistingGroup = (group: GroupModelType) => {
     return (e: React.MouseEvent<HTMLElement>) => {
       e.preventDefault();
       if (group.users.length >= 4) {
-        this.setState({error: "Sorry, that group is full with four students"});
+        this.setState({ error: "Sorry, that group is full with four students" });
       }
       else {
         this.selectGroup(group.id);

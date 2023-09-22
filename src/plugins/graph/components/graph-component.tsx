@@ -1,23 +1,23 @@
-import {useDndContext, useDroppable} from '@dnd-kit/core';
-import {observer} from "mobx-react-lite";
-import React, {useEffect, useMemo, useRef} from "react";
-import {useResizeDetector} from "react-resize-detector";
-import {ITileBaseProps} from '../imports/components/tiles/tile-base-props';
-import {useDataSet} from '../imports/hooks/use-data-set';
-import {DataSetContext} from '../imports/hooks/use-data-set-context';
-import {useGraphController} from "../hooks/use-graph-controller";
-import {useInitGraphLayout} from '../hooks/use-init-graph-layout';
-import {InstanceIdContext, useNextInstanceId} from "../imports/hooks/use-instance-id-context";
-import {AxisLayoutContext} from "../imports/components/axis/models/axis-layout-context";
-import {GraphController} from "../models/graph-controller";
-import {GraphLayoutContext} from "../models/graph-layout";
-import {GraphModelContext, isGraphModel} from "../models/graph-model";
-import {Graph} from "./graph";
-import {DotsElt} from '../d3-types';
-import {AttributeDragOverlay} from "../imports/components/drag-drop/attribute-drag-overlay";
+import { useDndContext, useDroppable } from '@dnd-kit/core';
+import { observer } from "mobx-react-lite";
+import React, { useEffect, useMemo, useRef } from "react";
+import { useResizeDetector } from "react-resize-detector";
+import { ITileBaseProps } from '../imports/components/tiles/tile-base-props';
+import { useDataSet } from '../imports/hooks/use-data-set';
+import { DataSetContext } from '../imports/hooks/use-data-set-context';
+import { useGraphController } from "../hooks/use-graph-controller";
+import { useInitGraphLayout } from '../hooks/use-init-graph-layout';
+import { InstanceIdContext, useNextInstanceId } from "../imports/hooks/use-instance-id-context";
+import { AxisLayoutContext } from "../imports/components/axis/models/axis-layout-context";
+import { GraphController } from "../models/graph-controller";
+import { GraphLayoutContext } from "../models/graph-layout";
+import { GraphModelContext, isGraphModel } from "../models/graph-model";
+import { Graph } from "./graph";
+import { DotsElt } from '../d3-types';
+import { AttributeDragOverlay } from "../imports/components/drag-drop/attribute-drag-overlay";
 import "../register-adornment-types";
 
-export const GraphComponent = observer(function GraphComponent({tile}: ITileBaseProps) {
+export const GraphComponent = observer(function GraphComponent({ tile }: ITileBaseProps) {
   const graphModel = isGraphModel(tile?.content) ? tile?.content : undefined;
 
   const instanceId = useNextInstanceId("graph");
@@ -25,16 +25,16 @@ export const GraphComponent = observer(function GraphComponent({tile}: ITileBase
   const layout = useInitGraphLayout(graphModel);
   // Removed debouncing, but we can bring it back if we find we need it
   const graphRef = useRef<HTMLDivElement | null>(null);
-  const {width, height} = useResizeDetector<HTMLDivElement>({ targetRef: graphRef });
+  const { width, height } = useResizeDetector<HTMLDivElement>({ targetRef: graphRef });
   const enableAnimation = useRef(true);
   const autoAdjustAxes = useRef(true);
   const dotsRef = useRef<DotsElt>(null);
   const graphController = useMemo(
-    () => new GraphController({layout, enableAnimation, instanceId, autoAdjustAxes}),
+    () => new GraphController({ layout, enableAnimation, instanceId, autoAdjustAxes }),
     [layout, instanceId]
   );
 
-  useGraphController({graphController, graphModel, dotsRef});
+  useGraphController({ graphController, graphModel, dotsRef });
 
   useEffect(() => {
     (width != null) && (height != null) && layout.setParentExtent(width, height);
@@ -48,7 +48,7 @@ export const GraphComponent = observer(function GraphComponent({tile}: ITileBase
 
   // used to determine when a dragged attribute is over the graph component
   const dropId = `${instanceId}-component-drop-overlay`;
-  const {setNodeRef} = useDroppable({id: dropId});
+  const { setNodeRef } = useDroppable({ id: dropId });
   setNodeRef(graphRef.current ?? null);
 
   const { active } = useDndContext();

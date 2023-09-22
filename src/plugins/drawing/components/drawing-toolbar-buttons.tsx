@@ -97,7 +97,7 @@ export const SvgToolModeButton: React.FC<ISvgToolModeButtonProps> = observer(fun
     selected={selected} settings={_settings} {...others} />;
 });
 
-export const SelectToolbarButton: React.FC<IToolbarButtonProps> = ({toolbarManager}) => {
+export const SelectToolbarButton: React.FC<IToolbarButtonProps> = ({ toolbarManager }) => {
   return <SvgToolModeButton modalButton="select" title="Select"
     toolbarManager={toolbarManager} SvgIcon={SelectToolIcon} settings={{}}/>;
 };

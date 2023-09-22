@@ -1,14 +1,14 @@
-import React, {useCallback, useEffect, useRef, useState} from "react";
-import {autorun} from "mobx";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { autorun } from "mobx";
 import { observer } from "mobx-react-lite";
-import {drag, select} from "d3";
-import {useAxisLayoutContext} from "../../imports/components/axis/models/axis-layout-context";
-import {ScaleNumericBaseType} from "../../imports/components/axis/axis-types";
-import {INumericAxisModel} from "../../imports/components/axis/models/axis-model";
-import {computeSlopeAndIntercept, equationString, IAxisIntercepts,
-        lineToAxisIntercepts} from "../../utilities/graph-utils";
-import {useDataConfigurationContext} from "../../hooks/use-data-configuration-context";
-import {useInstanceIdContext} from "../../imports/hooks/use-instance-id-context";
+import { drag, select } from "d3";
+import { useAxisLayoutContext } from "../../imports/components/axis/models/axis-layout-context";
+import { ScaleNumericBaseType } from "../../imports/components/axis/axis-types";
+import { INumericAxisModel } from "../../imports/components/axis/models/axis-model";
+import { computeSlopeAndIntercept, equationString, IAxisIntercepts,
+        lineToAxisIntercepts } from "../../utilities/graph-utils";
+import { useDataConfigurationContext } from "../../hooks/use-data-configuration-context";
+import { useInstanceIdContext } from "../../imports/hooks/use-instance-id-context";
 import { IMovableLineModel } from "./movable-line-model";
 
 import "./movable-line.scss";
@@ -31,7 +31,7 @@ interface IProps {
 }
 
 export const MovableLine = observer(function MovableLine(props: IProps) {
-  const {containerId, model, plotHeight, plotWidth, subPlotKey={}, xAxis, yAxis} = props,
+  const { containerId, model, plotHeight, plotWidth, subPlotKey={}, xAxis, yAxis } = props,
     dataConfig = useDataConfigurationContext(),
     layout = useAxisLayoutContext(),
     instanceId = useInstanceIdContext(),
@@ -45,7 +45,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
     kHandleSize = 12,
     instanceKey = model.instanceKey(subPlotKey),
     classFromKey = model.classNameFromKey(subPlotKey),
-    {equationContainerClass, equationContainerSelector} = equationContainer(model, subPlotKey, containerId),
+    { equationContainerClass, equationContainerSelector } = equationContainer(model, subPlotKey, containerId),
     lineRef = useRef() as React.RefObject<SVGSVGElement>,
     [lineObject, setLineObject] = useState<{ [index: string]: any }>({
       line: null, lower: null, middle: null, upper: null, equation: null
@@ -75,8 +75,8 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
         if (!lineObject.line || !lineModel) return;
 
         const { slope, intercept } = lineModel,
-          {domain: xDomain} = xAxis,
-          {domain: yDomain} = yAxis;
+          { domain: xDomain } = xAxis,
+          { domain: yDomain } = yAxis;
         pointsOnAxes.current = lineToAxisIntercepts(slope, intercept, xDomain, yDomain);
 
         function fixEndPoints(iLine: any, index: number) {
@@ -100,7 +100,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
           const
             screenX = xScale((pointsOnAxes.current.pt1.x + pointsOnAxes.current.pt2.x) / 2) / xSubAxesCount,
             screenY = yScale((pointsOnAxes.current.pt1.y + pointsOnAxes.current.pt2.y) / 2) / ySubAxesCount,
-            attrNames = {x: xAttrName, y: yAttrName},
+            attrNames = { x: xAttrName, y: yAttrName },
             string = equationString(slope, intercept, attrNames),
             equation = select(equationContainerSelector).select('p');
 
@@ -138,10 +138,10 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
             y: pixelPtsOnAxes.pt1.y + (5 / 8) * (pixelPtsOnAxes.pt2.y - pixelPtsOnAxes.pt1.y)
           },
           endPointsArray = [
-            {pt1: pixelPtsOnAxes.pt1, pt2: pixelPtsOnAxes.pt2},
-            {pt1: pixelPtsOnAxes.pt1, pt2: breakPt1},
-            {pt1: breakPt1, pt2: breakPt2},
-            {pt1: breakPt2, pt2: pixelPtsOnAxes.pt2}
+            { pt1: pixelPtsOnAxes.pt1, pt2: pixelPtsOnAxes.pt2 },
+            { pt1: pixelPtsOnAxes.pt1, pt2: breakPt1 },
+            { pt1: breakPt1, pt2: breakPt2 },
+            { pt1: breakPt2, pt2: pixelPtsOnAxes.pt2 }
           ];
         fixEndPoints(lineObject.line, 0);
         fixEndPoints(lineObject.lower, 1);
@@ -175,12 +175,12 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
           tWorldY > yScaleCopy.domain()[1]
       ) {
         const { intercept, slope: initSlope } = computeSlopeAndIntercept(xAxis, yAxis);
-        model.setLine({slope: initSlope, intercept}, instanceKey);
+        model.setLine({ slope: initSlope, intercept }, instanceKey);
         return;
       }
 
       const newIntercept = isFinite(slope) ? tWorldY - slope * tWorldX : tWorldX;
-      model.setLine({slope, intercept: newIntercept, equationCoords}, instanceKey);
+      model.setLine({ slope, intercept: newIntercept, equationCoords }, instanceKey);
     }, [instanceKey, model, xAxis, xScaleCopy, yAxis, yScaleCopy]),
 
     continueRotation = useCallback((
@@ -258,7 +258,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
           x = left / plotWidth,
           y = top / plotHeight;
 
-        lineModel?.setEquationCoords({x, y});
+        lineModel?.setEquationCoords({ x, y });
         equation.style('left', `${left}px`)
           .style('top', `${top}px`);
       }
@@ -344,7 +344,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
   return (
     <svg
       className={`line-${model.classNameFromKey(subPlotKey)}`}
-      style={{height: `${plotHeight}px`, width: `${plotWidth}px`}}
+      style={{ height: `${plotHeight}px`, width: `${plotWidth}px` }}
       x={0}
       y={0}
     >

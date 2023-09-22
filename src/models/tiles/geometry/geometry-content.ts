@@ -276,7 +276,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       return board.objectsList.filter(obj => self.isSelected(obj.id));
     },
     exportJson(options?: ITileExportOptions) {
-      const changes = convertModelToChanges(self, { addBuffers: false, includeUnits: false});
+      const changes = convertModelToChanges(self, { addBuffers: false, includeUnits: false });
       const jsonChanges = changes.map(change => JSON.stringify(change));
       return exportGeometryJson(jsonChanges, options);
     }
@@ -400,7 +400,7 @@ export const GeometryContentModel = GeometryBaseContentModel
     // actions
     function initializeBoard(domElementID: string, onCreate?: onCreateCallback): JXG.Board | undefined {
       let board: JXG.Board | undefined;
-      const changes = convertModelToChanges(self, { addBuffers: true, includeUnits: true});
+      const changes = convertModelToChanges(self, { addBuffers: true, includeUnits: true });
       applyChanges(domElementID, changes, getDispatcherContext())
         .filter(result => result != null)
         .forEach(changeResult => {
@@ -590,7 +590,7 @@ export const GeometryContentModel = GeometryBaseContentModel
         operation: "create",
         target: "movableLine",
         parents,
-        properties: {id, ...props}
+        properties: { id, ...props }
       };
       const elems = applyAndLogChange(board, change);
       return elems ? elems as JXG.GeometryElement[] : undefined;
@@ -604,7 +604,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       const change: JXGChange = {
         operation: "create",
         target: "comment",
-        properties: {id, anchor: anchorId, ...textProp }
+        properties: { id, anchor: anchorId, ...textProp }
       };
       const elems = applyAndLogChange(board, change);
       return elems ? elems as JXG.GeometryElement[] : undefined;
@@ -935,7 +935,7 @@ export const GeometryContentModel = GeometryBaseContentModel
     function applyAndLogChange(board: JXG.Board | undefined, _change: JXGChange) {
       const result = board && syncChange(board, _change);
 
-      let loggedChange = {..._change};
+      let loggedChange = { ..._change };
       if (!Array.isArray(_change.properties)) {
         // flatten change.properties
         delete loggedChange.properties;
@@ -1126,7 +1126,7 @@ export const GeometryContentModel = GeometryBaseContentModel
         });
         self.replaceLinks(remainingLinks);
       },
-      {name: "sharedModelSetup", fireImmediately: true}));
+      { name: "sharedModelSetup", fireImmediately: true }));
     },
     updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
       self.forceSharedModelUpdate();

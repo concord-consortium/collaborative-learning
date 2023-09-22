@@ -81,9 +81,9 @@ describe("workspaces model", () => {
     expect(workspace.comparisonVisible).toBe(true);
     workspace.toggleComparisonVisible();
     expect(workspace.comparisonVisible).toBe(false);
-    workspace.toggleComparisonVisible({override: true});
+    workspace.toggleComparisonVisible({ override: true });
     expect(workspace.comparisonVisible).toBe(true);
-    workspace.toggleComparisonVisible({override: false});
+    workspace.toggleComparisonVisible({ override: false });
     expect(workspace.comparisonVisible).toBe(false);
   });
 

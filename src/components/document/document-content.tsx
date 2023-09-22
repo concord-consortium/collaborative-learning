@@ -120,7 +120,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       }
 
       // scroll to selected section if it changed
-      const {selectedSectionId} = this.props;
+      const { selectedSectionId } = this.props;
       if (selectedSectionId && (selectedSectionId !== prevProps.selectedSectionId)) {
         this.scrollToSection(selectedSectionId);
       }
@@ -129,7 +129,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       requestAnimationFrame(() => {
         if (this.props.content !== prevProps.content) {
           if (!this.scrollToSection(this.props.selectedSectionId)) {
-            domElement.scrollTo({top: 0});
+            domElement.scrollTo({ top: 0 });
           }
         }
       });
@@ -144,7 +144,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
                                           && ui.focusDocument;
     const documentClass = classNames(
       "document-content",
-      {"document-content-smooth-scroll" : viaTeacherDashboard, "comment-select" : documentSelectedForComment},
+      { "document-content-smooth-scroll" : viaTeacherDashboard, "comment-select" : documentSelectedForComment },
       this.props.readOnly ? "read-only" : "read-write"
     );
 
@@ -244,7 +244,8 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderSpacer = () => {
-    const spacerClass = classNames({"spacer" : !this.props.readOnly, "playback-spacer": this.props.showPlaybackSpacer});
+    const spacerClass = classNames({ "spacer" : !this.props.readOnly,
+      "playback-spacer": this.props.showPlaybackSpacer });
     return <div className={spacerClass} onClick={this.handleClick} />;
   };
 
@@ -447,7 +448,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const isInsertingInExistingRow = insertRowInfo?.rowDropLocation &&
                                       (["left", "right"].indexOf(insertRowInfo.rowDropLocation) >= 0);
     const addSidecarNotes = (toolId.toLowerCase() === "geometry") && !isInsertingInExistingRow;
-    const rowTile = content.userAddTile(toolId, {title, addSidecarNotes, insertRowInfo});
+    const rowTile = content.userAddTile(toolId, { title, addSidecarNotes, insertRowInfo });
 
     if (rowTile?.tileId) {
       ui.setSelectedTileId(rowTile.tileId);
@@ -504,7 +505,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
     const sectionElementTop = this.findSectionElementTop(this.domElement, sectionId);
     if (sectionElementTop !== undefined) {
-      this.domElement.scrollTo({top: sectionElementTop});
+      this.domElement.scrollTo({ top: sectionElementTop });
       return true;
     }
     return false;

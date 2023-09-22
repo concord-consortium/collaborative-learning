@@ -193,7 +193,7 @@ describe("problem model", () => {
       ordinal: 1,
       title: "Test",
       disabled: ["roo"],
-      settings: { roo: "baz"},
+      settings: { roo: "baz" },
       config: {
         disabledFeatures: ["foo"],
         settings: { foo: "bar" }

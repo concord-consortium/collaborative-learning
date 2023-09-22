@@ -33,7 +33,7 @@ export class TimerReteNodeFactory extends DataflowReteNodeFactory {
       if (_node) {
         const nodeValue = _node.controls.get("nodeValue") as ValueControl;
         nodeValue && nodeValue.setSentence(+result === 0 ? "off" : "on");
-        this.editor.view.updateConnections( {node: _node} );
+        this.editor.view.updateConnections( { node: _node } );
       }
     }
   }

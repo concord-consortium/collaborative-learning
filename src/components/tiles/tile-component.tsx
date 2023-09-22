@@ -198,12 +198,12 @@ export class TileComponent extends BaseComponent<IProps, IState> {
                       hovered: this.state.hoverTile,
                       selected: isTileSelected,
                       annotatable: ui.annotationMode !== undefined && model.content.annotatableObjects.length > 0,
-                      "selected-for-comment": tileSelectedForComment});
+                      "selected-for-comment": tileSelectedForComment });
     const isDraggable = !isPlaceholderTile && !appConfig.disableTileDrags;
     const dragTileButton = isDraggable &&
                             <DragTileButton divRef={elt => this.dragElement = elt}
                               hovered={hoverTile} selected={isTileSelected}
-                              onClick={e => ui.setSelectedTile(model, {append: hasSelectionModifier(e)})} />;
+                              onClick={e => ui.setSelectedTile(model, { append: hasSelectionModifier(e) })} />;
     const resizeTileButton = isUserResizable &&
                               <ResizeTileButton divRef={elt => this.resizeElement = elt}
                                 hovered={hoverTile}
@@ -318,7 +318,7 @@ export class TileComponent extends BaseComponent<IProps, IState> {
 
     // Select the tile if the tool doesn't handle the selection itself
     if (!getTileComponentInfo(model.content.type)?.tileHandlesOwnSelection) {
-      ui.setSelectedTile(model, {append: hasSelectionModifier(e)});
+      ui.setSelectedTile(model, { append: hasSelectionModifier(e) });
     }
   };
 

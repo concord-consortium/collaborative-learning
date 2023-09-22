@@ -30,7 +30,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
                       ? `Firebase UID: ${db.firebase.userId}` : undefined;
 
   const renderPanelButtons = () => {
-    const { panels, onPanelChange, current} = props;
+    const { panels, onPanelChange, current } = props;
     if (!panels || (panels.length < 2)) return;
 
     const panelButtons = panels
@@ -180,7 +180,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
           </div>
           <div className="separator"/>
           <CustomSelect
-            items={[{text: `${problem.title}${problem.subtitle ? `: ${problem.subtitle}`: ""}`}]}
+            items={[{ text: `${problem.title}${problem.subtitle ? `: ${problem.subtitle}`: ""}` }]}
             isDisabled={true}
           />
         </div>

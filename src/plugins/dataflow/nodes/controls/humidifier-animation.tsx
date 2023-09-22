@@ -22,7 +22,7 @@ function nodeHasAnimation(nodeId: number) {
   return humidAnimations.has(nodeId);
 }
 
-export const HumidiferAnimation: React.FC<IProps> = ({nodeValue, nodeId, editor}) => {
+export const HumidiferAnimation: React.FC<IProps> = ({ nodeValue, nodeId, editor }) => {
   const priorValue = useRef<number | undefined>();
 
   editor.on("noderemoved", (node: any) => {

@@ -14,7 +14,7 @@ interface IToolbarButtonProps {
   tooltipOptions: TooltipProps;
   onClick: (e: React.MouseEvent) => void;
 }
-const ToolbarButton = ({ className, icon, onClick, tooltipOptions}: IToolbarButtonProps) => {
+const ToolbarButton = ({ className, icon, onClick, tooltipOptions }: IToolbarButtonProps) => {
   const to = useTooltipOptions(tooltipOptions);
   const classes = classNames("toolbar-button", className);
   return (

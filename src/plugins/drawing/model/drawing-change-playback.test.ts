@@ -58,7 +58,7 @@ describe("playbackChanges", () => {
       { action: "create", data: v1Data },
       { action: "create", data: v2Data },
       { action: "move", data: [{ id: "v1", destination: { x: 5, y: 5 } }] },
-      { action: "update", data: { ids: ["v2"], update: { prop: "strokeWidth", newValue: 2 } }}
+      { action: "update", data: { ids: ["v2"], update: { prop: "strokeWidth", newValue: 2 } } }
     ];
     const v1DataMoved = { ...v1Data, x: 5, y: 5 };
     const v2DataUpdated = { ...v2Data, strokeWidth: 2 };
@@ -68,9 +68,9 @@ describe("playbackChanges", () => {
     const changesWithDeletion: DrawingToolChange[] = [
       { action: "create", data: v1Data },
       { action: "create", data: v2Data },
-      { action: "delete", data: ["v1"]},
+      { action: "delete", data: ["v1"] },
       // TODO: verify with previous loading code
-      { action: "delete", data: ["v3"]}   // handles invalid ids
+      { action: "delete", data: ["v3"] }   // handles invalid ids
     ];
     expect(playbackObjectChanges(changesWithDeletion)).toEqual({ type: "Drawing", objects: [v2Data] });
   });
@@ -103,7 +103,7 @@ describe("playbackChanges", () => {
       { action: "create", data: l1Data },
       { action: "create", data: l2Data },
       { action: "move", data: [{ id: "l1", destination: { x: 5, y: 5 } }] },
-      { action: "update", data: { ids: ["l2"], update: { prop: "strokeWidth", newValue: 2 } }}
+      { action: "update", data: { ids: ["l2"], update: { prop: "strokeWidth", newValue: 2 } } }
     ];
     const l1DataMoved = { ...l1Data, x: 5, y: 5 };
     const l2DataUpdated = { ...l2Data, strokeWidth: 2 };
@@ -113,8 +113,8 @@ describe("playbackChanges", () => {
     const changesWithDeletion: DrawingToolChange[] = [
       { action: "create", data: l1Data },
       { action: "create", data: l2Data },
-      { action: "delete", data: ["l1"]},
-      { action: "delete", data: ["l3"]}   // handles invalid ids
+      { action: "delete", data: ["l1"] },
+      { action: "delete", data: ["l3"] }   // handles invalid ids
     ];
     expect(playbackObjectChanges(changesWithDeletion)).toEqual({ type: "Drawing", objects: [l2Data] });
   });
@@ -151,7 +151,7 @@ describe("playbackChanges", () => {
       { action: "create", data: r2Data },
       { action: "create", data: r3Data },
       { action: "move", data: [{ id: "r1", destination: { x: 5, y: 5 } }, { id: "r2", destination: { x: 5, y: 5 } }] },
-      { action: "update", data: { ids: ["r2", "r3"], update: { prop: "strokeWidth", newValue: 2 } }}
+      { action: "update", data: { ids: ["r2", "r3"], update: { prop: "strokeWidth", newValue: 2 } } }
     ];
     const r1DataMoved = { ...r1Data, x: 5, y: 5 };
     const r2DataMovedAndUpdated = { ...r2Data, x: 5, y: 5, strokeWidth: 2 };
@@ -163,7 +163,7 @@ describe("playbackChanges", () => {
       { action: "create", data: r1Data },
       { action: "create", data: r2Data },
       { action: "create", data: r3Data },
-      { action: "delete", data: ["r2", "r3", "r4"]}
+      { action: "delete", data: ["r2", "r3", "r4"] }
     ];
     expect(playbackObjectChanges(changesWithDeletion)).toEqual({ type: "Drawing", objects: [r1Data] });
   });
@@ -200,7 +200,7 @@ describe("playbackChanges", () => {
       { action: "create", data: e2Data },
       { action: "create", data: e3Data },
       { action: "move", data: [{ id: "e1", destination: { x: 5, y: 5 } }, { id: "e2", destination: { x: 5, y: 5 } }] },
-      { action: "update", data: { ids: ["e2", "e3"], update: { prop: "strokeWidth", newValue: 2 } }}
+      { action: "update", data: { ids: ["e2", "e3"], update: { prop: "strokeWidth", newValue: 2 } } }
     ];
     const e1DataMoved = { ...e1Data, x: 5, y: 5 };
     const e2DataMovedAndUpdated = { ...e2Data, x: 5, y: 5, strokeWidth: 2 };
@@ -212,7 +212,7 @@ describe("playbackChanges", () => {
       { action: "create", data: e1Data },
       { action: "create", data: e2Data },
       { action: "create", data: e3Data },
-      { action: "delete", data: ["e2", "e3", "e4"]}
+      { action: "delete", data: ["e2", "e3", "e4"] }
     ];
     expect(playbackObjectChanges(changesWithDeletion)).toEqual({ type: "Drawing", objects: [e1Data] });
   });
@@ -262,7 +262,7 @@ describe("playbackChanges", () => {
       { action: "create", data: i1Data },
       { action: "create", data: i2Data },
       { action: "create", data: i3Data },
-      { action: "delete", data: ["i2", "i4"]}
+      { action: "delete", data: ["i2", "i4"] }
     ];
     expect(playbackObjectChanges(changesWithDeletion)).toEqual({ type: "Drawing", objects: [i1Data, i3Data] });
   });

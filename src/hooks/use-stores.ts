@@ -7,7 +7,7 @@ import {
 import { ProblemModelType } from "../models/curriculum/problem";
 import { AppConfigModelType } from "../models/stores/app-config-model";
 import { DocumentsModelType } from "../models/stores/documents";
-import { DocumentContentModelType} from "../models/document/document-content";
+import { DocumentContentModelType } from "../models/document/document-content";
 
 import { GroupsModelType } from "../models/stores/groups";
 import { SelectionStoreModelType } from "../models/stores/selection";

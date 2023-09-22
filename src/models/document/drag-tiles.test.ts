@@ -62,7 +62,7 @@ describe("tile dragging", () => {
           }
         ],
         "cases": [
-          {"__id__": "case-1"}
+          { "__id__": "case-1" }
         ]
       }
     };

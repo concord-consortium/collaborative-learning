@@ -53,7 +53,7 @@ describe("db", () => {
     stores = specStores({
       appMode: "test",
       documents: DocumentsModel.create(),
-      user: UserModel.create({id: "1", portal: "example.com"})
+      user: UserModel.create({ id: "1", portal: "example.com" })
     });
     db = new DB();
     mockDatabase.mockReset();
@@ -69,7 +69,7 @@ describe("db", () => {
     expect.assertions(5);
     expect(db.firebase.isConnected).toBe(false);
     expect(db.isAuthStateSubscribed()).toBe(false);
-    await db.connect({appMode: "test", stores, dontStartListeners: true});
+    await db.connect({ appMode: "test", stores, dontStartListeners: true });
     expect(db.firebase.isConnected).toBe(true);
     expect(db.isAuthStateSubscribed()).toBe(true);
     db.disconnect();
@@ -87,7 +87,7 @@ describe("db", () => {
     expect.assertions(8);
     expect(db.firebase.isConnected).toBe(false);
     expect(db.isAuthStateSubscribed()).toBe(false);
-    await db.connect({appMode: "test", stores, dontStartListeners: true});
+    await db.connect({ appMode: "test", stores, dontStartListeners: true });
     expect(mockUseDatabaseEmulator).toHaveBeenCalled();
     expect(mockUseFirestoreEmulator).toHaveBeenCalled();
     expect(mockUseFunctionsEmulator).toHaveBeenCalled();
@@ -102,7 +102,7 @@ describe("db", () => {
 
   it("resolves paths in test mode", async () => {
     expect.assertions(2);
-    await db.connect({appMode: "test", stores, dontStartListeners: true});
+    await db.connect({ appMode: "test", stores, dontStartListeners: true });
     expect(db.firebase.getRootFolder()).toMatch(/^\/test\/([^/])+\/portals\/example_com\/$/);
     expect(db.firebase.getFullPath("foo")).toMatch(/^\/test\/([^/])+\/portals\/example_com\/foo$/);
   });
@@ -110,14 +110,14 @@ describe("db", () => {
   it("resolves paths in dev mode", async () => {
     expect.assertions(2);
     stores.setAppMode("dev");
-    await db.connect({appMode: "dev", stores, dontStartListeners: true});
+    await db.connect({ appMode: "dev", stores, dontStartListeners: true });
     expect(db.firebase.getRootFolder()).toMatch(/^\/dev\/([^/])+\/portals\/example_com\/$/);
     expect(db.firebase.getFullPath("foo")).toMatch(/^\/dev\/([^/])+\/portals\/example_com\/foo$/);
   });
 
   it("can get a reference to the database", async () => {
     expect.assertions(1);
-    await db.connect({appMode: "test", stores, dontStartListeners: true});
+    await db.connect({ appMode: "test", stores, dontStartListeners: true });
     const testString = "this is a test";
 
     mockDatabase.mockImplementation(() => ({
@@ -135,9 +135,9 @@ describe("db", () => {
 
   it("can parse document text content", async () => {
     expect.assertions(4);
-    await db.connect({appMode: "test", stores, dontStartListeners: true});
+    await db.connect({ appMode: "test", stores, dontStartListeners: true });
     const storedJsonString = JSON.stringify(createSingleTileContent({ type: "Text", text: "Testing" }));
-    const docContentSnapshot = db.parseDocumentContent({content: storedJsonString} as DBDocument);
+    const docContentSnapshot = db.parseDocumentContent({ content: storedJsonString } as DBDocument);
     const docContent = DocumentContentModel.create(docContentSnapshot);
 
     if (docContent == null) {
@@ -171,14 +171,14 @@ describe("db", () => {
                 stores.documents.resolveRequiredDocumentPromise(newDocument);
                 return docPromise;
               }
-            })};
+            }) };
           }
         })
       })
     }));
     stores.documents = createDocumentsModelWithRequiredDocuments([ProblemDocument, PlanningDocument]);
     stores.documents.resolveRequiredDocumentPromisesWithNull();
-    await db.connect({appMode: "test", stores, dontStartListeners: true});
+    await db.connect({ appMode: "test", stores, dontStartListeners: true });
     expect((await db.guaranteeOpenDefaultDocument(ProblemDocument))?.type).toBe(ProblemDocument);
     expect(await stores.documents.requiredDocuments[ProblemDocument].promise).toEqual(newDocument);
     expect(await stores.documents.requiredDocuments[PlanningDocument].promise).toBeNull();
@@ -201,14 +201,14 @@ describe("db", () => {
                 stores.documents.resolveRequiredDocumentPromise(newDocument);
                 return docPromise;
               }
-            })};
+            }) };
           }
         })
       })
     }));
     stores.documents = createDocumentsModelWithRequiredDocuments([ProblemDocument, PlanningDocument]);
     stores.documents.resolveRequiredDocumentPromisesWithNull();
-    await db.connect({appMode: "test", stores, dontStartListeners: true});
+    await db.connect({ appMode: "test", stores, dontStartListeners: true });
     expect((await db.guaranteePlanningDocument())?.type).toBe(PlanningDocument);
     expect(await stores.documents.requiredDocuments[PlanningDocument].promise).toEqual(newDocument);
     expect(await stores.documents.requiredDocuments[ProblemDocument].promise).toBeNull();
@@ -218,12 +218,12 @@ describe("db", () => {
     const personalDocument = createDocumentModel({ uid: "1", type: PersonalDocument, key: "doc-1" });
     stores.documents = createDocumentsModelWithRequiredDocuments([PersonalDocument]);
     stores.documents.resolveRequiredDocumentPromise(personalDocument);
-    await db.connect({appMode: "test", stores, dontStartListeners: true});
+    await db.connect({ appMode: "test", stores, dontStartListeners: true });
     expect(await db.guaranteeOpenDefaultDocument(PersonalDocument)).toBe(personalDocument);
   });
 
   it("logs errors when asked to open default documents without required document promises", async () => {
-    await db.connect({appMode: "test", stores, dontStartListeners: true});
+    await db.connect({ appMode: "test", stores, dontStartListeners: true });
 
     await jestSpyConsole("error", async spy => {
       await db.guaranteeOpenDefaultDocument(ProblemDocument);

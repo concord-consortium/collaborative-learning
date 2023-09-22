@@ -311,7 +311,7 @@ export const DocumentModel = Tree.named("Document")
   .actions(self => ({
     afterCreate() {
       // TODO: it would be nice to unify this with the code in createDocumentModel
-      const manager = TreeManager.create({document: {}, undoStore: {}});
+      const manager = TreeManager.create({ document: {}, undoStore: {} });
       self.treeManagerAPI = manager;
       self.treeMonitor = new TreeMonitor(self, manager, false);
       manager.setMainDocument(self);
@@ -324,7 +324,7 @@ export const DocumentModel = Tree.named("Document")
     undoLastAction() {
       const undoManager = self.treeManagerAPI?.undoManager;
       if (undoManager?.canUndo) {
-        const {id, action} = undoManager.undo();
+        const { id, action } = undoManager.undo();
         const logParams: IDocumentLogEvent = {
           document: self as DocumentModelType,
           targetAction: action,
@@ -336,7 +336,7 @@ export const DocumentModel = Tree.named("Document")
     redoLastAction() {
       const undoManager = self.treeManagerAPI?.undoManager;
       if (undoManager?.canRedo) {
-        const {id, action} = undoManager.redo();
+        const { id, action } = undoManager.redo();
         const logParams: IDocumentLogEvent = {
           document: self as DocumentModelType,
           targetAction: action,
@@ -395,18 +395,18 @@ export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
     }
 
     if (!snapshot.content) {
-      console.error("Document with empty content failed to be created", {docKey: snapshot.key});
+      console.error("Document with empty content failed to be created", { docKey: snapshot.key });
       throw e;
     }
 
     // Putting the error in an object like this prevents Chrome from expanding the
     // error and taking up a bunch of console lines.
-    console.error("Failed to load document", {docKey: snapshot.key, error: e});
+    console.error("Failed to load document", { docKey: snapshot.key, error: e });
 
     // Create a document without the content, so this can be returned and passed
     // through the rest of the CLUE system. The Canvas component checks the contentStatus
     // and renders a DocumentError component if the status is Error
-    const {content, ...snapshotWithoutContent} = snapshot;
+    const { content, ...snapshotWithoutContent } = snapshot;
     const documentWithoutContent = DocumentModel.create(snapshotWithoutContent, fullEnvironment);
     documentWithoutContent.setContentError(content, (e as Error)?.message);
     return documentWithoutContent;

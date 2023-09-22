@@ -74,7 +74,7 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
 
     const offset = 25;
     variablesToInsert.forEach(variable => {
-      content.root.insertNode(variable, {x, y});
+      content.root.insertNode(variable, { x, y });
       x += offset;
       y += offset;
       content.root.setSelectedNode(content.root.getNodeFromVariableId(variable.id));
@@ -114,7 +114,7 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
         const pointerEvent = event.activatorEvent as PointerEvent;
         const clientX = pointerEvent.clientX + event.delta.x;
         const clientY = pointerEvent.clientY + event.delta.y;
-        const position = diagramHelper?.convertClientToDiagramPosition({x: clientX, y: clientY});
+        const position = diagramHelper?.convertClientToDiagramPosition({ x: clientX, y: clientY });
         const { x, y } = position;
 
         const variable = Variable.create({});

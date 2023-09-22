@@ -106,10 +106,10 @@ export class VariablesPlugin implements ITextPlugin {
   }
 
   get chipVariables() {
-    const {editor} = this.textContent;
+    const { editor } = this.textContent;
     const variableIds: string[] = [];
     if (editor) {
-      for (const [node] of Editor.nodes(editor, {at: [], mode: 'all'})) {
+      for (const [node] of Editor.nodes(editor, { at: [], mode: 'all' })) {
         if (Editor.isInline(editor, node) && isVariableElement(node)) {
           variableIds.push(node.reference);
         }
@@ -143,7 +143,7 @@ export const VariableComponent = observer(function({ attributes, children, eleme
 
   if (!isVariableElement(element)) return null;
 
-  const {reference} = element;
+  const { reference } = element;
 
   const classes = classNames(kSlateVoidClass, kVariableClass);
   const selectedClass = isHighlighted && !isSerializing ? "slate-selected" : undefined;

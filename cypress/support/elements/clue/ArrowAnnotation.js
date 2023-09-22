@@ -7,7 +7,7 @@ class ArrowAnnotation {
     cy.get(`${wsClass(workspaceClass)} .tool.sparrow`).click({ force: true });
   }
   clickHideAnnotationsButton(workspaceClass) {
-    cy.get(`${wsClass(workspaceClass)} .tool.hide-annotations`).click({force: true});
+    cy.get(`${wsClass(workspaceClass)} .tool.hide-annotations`).click({ force: true });
   }
   getAnnotationLayer(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .annotation-layer`);

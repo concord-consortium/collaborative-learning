@@ -20,10 +20,10 @@ export const ComponentTitleBar = observer(function ComponentTitleBar(
   const tileId = tile?.id || "";
   const tileType = tile?.content.type;
   const draggableId = `${tileType}-${tileId}`;
-  const draggableOptions = {id: draggableId, disabled: isEditing};
-  const {attributes, listeners, setActivatorNodeRef} = useDraggable(draggableOptions);
+  const draggableOptions = { id: draggableId, disabled: isEditing };
+  const { attributes, listeners, setActivatorNodeRef } = useDraggable(draggableOptions);
   const { isTileSelected } = useTileModelContext();
-  const classes = clsx("component-title-bar", `${tileType}-title-bar`, {focusTile: isTileSelected()});
+  const classes = clsx("component-title-bar", `${tileType}-title-bar`, { focusTile: isTileSelected() });
 
   const handleChangeTitle = (nextValue?: string) => {
     if (tile != null && nextValue) {

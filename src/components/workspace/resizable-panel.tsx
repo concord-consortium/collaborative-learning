@@ -16,9 +16,9 @@ interface IProps {
 // documents shown on the left sided just by collapsing it.
 // There is now a hotkey cmd-shit-f which makes the right side take
 // the full width and does not render the left side at all.
-export const ResizablePanel: React.FC <IProps> = ({collapsed, children}) => {
+export const ResizablePanel: React.FC <IProps> = ({ collapsed, children }) => {
   return (
-    <div className={classNames("resizable-panel", {collapsed})} >
+    <div className={classNames("resizable-panel", { collapsed })} >
       {children}
     </div>
   );

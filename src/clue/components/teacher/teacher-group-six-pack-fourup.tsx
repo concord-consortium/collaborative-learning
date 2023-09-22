@@ -84,7 +84,7 @@ interface IGroupHeaderProps {
 }
 
 const TeacherGroupHeader: React.FC<IGroupHeaderProps> = observer(function TeacherGroupHeader(
-    {group, navTabName, documentViewMode}){
+    { group, navTabName, documentViewMode }){
   const { ui, db, groups }  = useStores();
 
   const openDocId = ui.tabs.get(navTabName)?.openDocuments.get(group.id);
@@ -95,7 +95,7 @@ const TeacherGroupHeader: React.FC<IGroupHeaderProps> = observer(function Teache
     if (focusedGroupUser) {
       ui.prompt(`Enter your message for ${focusedGroupUser.name}`, "", `Message ${focusedGroupUser.name}`, 5)
       .then((message) => {
-        const audience = AudienceModel.create({type: AudienceEnum.user, identifier: focusedGroupUser.id});
+        const audience = AudienceModel.create({ type: AudienceEnum.user, identifier: focusedGroupUser.id });
         db.createSupport(createStickyNote(message), "", audience);
         Logger.log(LogEventName.CREATE_STICKY_NOTE, {
           type: "user",
@@ -107,7 +107,7 @@ const TeacherGroupHeader: React.FC<IGroupHeaderProps> = observer(function Teache
     else {
       ui.prompt(`Enter your message for Group ${group.id}`, "", "Message Group", 5)
       .then((message) => {
-        const audience = AudienceModel.create({type: AudienceEnum.group, identifier: group.id});
+        const audience = AudienceModel.create({ type: AudienceEnum.group, identifier: group.id });
         db.createSupport(createStickyNote(message), "", audience);
         Logger.log(LogEventName.CREATE_STICKY_NOTE, {
           type: "group",

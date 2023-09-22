@@ -26,7 +26,7 @@ export class ClassMenuContainer extends BaseComponent <IProps> {
   }
 
   private getPortalClasses() {
-    const {user} = this.stores;
+    const { user } = this.stores;
     const classNames = uniq(user.portalClassOfferings.map(o => o.className));
     const currentProblemPath = this.stores.problemPath;
     const links: IDropdownItem[] = [];
@@ -47,7 +47,7 @@ export class ClassMenuContainer extends BaseComponent <IProps> {
       const handleClick = (name: string, url: string) => {
         const log = {
           event: LogEventName.DASHBOARD_SWITCH_CLASS,
-          parameters: {className, link: url}
+          parameters: { className, link: url }
         };
         Logger.log(log.event, log.parameters, LogEventMethod.DO);
         window.location.replace(url);

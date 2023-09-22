@@ -41,7 +41,7 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
   // by the history stuff, but it is being used to trigger document saves to Firebase
   // I think.  In some sense this is like a hash of the document content.
 
-  const {numHistoryEventsApplied, currentHistoryEntry} = treeManager;
+  const { numHistoryEventsApplied, currentHistoryEntry } = treeManager;
   // numHistoryEventsApplied can be 0 or undefined, the event is undefined in both cases
   const sliderValue = numHistoryEventsApplied ?? 0;
   const eventCreatedTime = currentHistoryEntry?.created;
@@ -76,7 +76,7 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
     if (markers.length >= 9) {
       alert("You already have 9 markers. Please delete some markers to add more.");
     } else {
-      setMarkers([...markers, {id: markers.length+1, location: value}]);
+      setMarkers([...markers, { id: markers.length+1, location: value }]);
     }
   };
 
@@ -102,8 +102,8 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
   };
 
   const renderTimeInfo = () => {
-    const monthMap: Record<number, string> = {0: "Jan", 1: "Feb", 2: "Mar", 3: "Apr", 4: "May", 5: "Jun",
-                      6: "Jul", 7: "Aug", 8: "Sep", 9: "Oct", 10: "Nov", 11: "Dec"};
+    const monthMap: Record<number, string> = { 0: "Jan", 1: "Feb", 2: "Mar", 3: "Apr", 4: "May", 5: "Jun",
+                      6: "Jul", 7: "Aug", 8: "Sep", 9: "Oct", 10: "Nov", 11: "Dec" };
     const date = eventCreatedTime;
     const month = date?.getMonth();
     const monthStr = month && monthMap[month];
@@ -132,8 +132,8 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
   };
 
   const renderPlayPauseButton = () => {
-    const playButtonStyle = classNames("play-button", "themed", activeNavTab, {"disabled" : playbackDisabled});
-    const pauseButtonStyle = classNames("pause-button", "themed", activeNavTab, {"playing" : sliderPlaying});
+    const playButtonStyle = classNames("play-button", "themed", activeNavTab, { "disabled" : playbackDisabled });
+    const pauseButtonStyle = classNames("pause-button", "themed", activeNavTab, { "playing" : sliderPlaying });
     if (sliderPlaying) {
       return <PauseButton className={pauseButtonStyle} onClick={()=>handlePlayPauseToggle()}
                 data-testid="playback-pause-button" />;
@@ -144,7 +144,7 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
   };
 
   const renderSliderContainer = () => {
-    const markerContainerClass = classNames("marker-container", activeNavTab, {"selected": markerSelected});
+    const markerContainerClass = classNames("marker-container", activeNavTab, { "selected": markerSelected });
     const markerClass = classNames("marker", activeNavTab);
 
     const getMarkerLocation = (location: number) => {
@@ -171,7 +171,7 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
         </div>
         { markers.map(marker => {
           const markerLocation = getMarkerLocation(marker.location);
-          const markerStyle = {left: `${markerLocation}%`};
+          const markerStyle = { left: `${markerLocation}%` };
           return (
             <div key={`marker-${marker.id}`} className={markerContainerClass} style={markerStyle}
                 onClick={handleMarkerSelected}>
@@ -185,7 +185,7 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
     );
   };
 
-  const playbackControlsClass = classNames("playback-controls", activeNavTab, {"disabled" : false});
+  const playbackControlsClass = classNames("playback-controls", activeNavTab, { "disabled" : false });
   const sliderComponentClass = classNames(`slider-component ${activeNavTab}`);
 
   return (

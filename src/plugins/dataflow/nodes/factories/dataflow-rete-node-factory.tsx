@@ -24,7 +24,7 @@ export abstract class DataflowReteNodeFactory extends Rete.Component {
     // data.watchedValues determines which values the node cares about tracking
     // The key is the id of the control
     // The value is options related to the value, currently just for the minigraph
-    node.data.watchedValues = {"nodeValue": defaultMinigraphOptions};
+    node.data.watchedValues = { "nodeValue": defaultMinigraphOptions };
 
     return node;
   }

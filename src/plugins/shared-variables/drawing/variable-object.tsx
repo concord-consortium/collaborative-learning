@@ -40,11 +40,11 @@ export const VariableChipObject = DrawingObject.named("VariableObject")
   }))
   .views(self => ({
     get boundingBox() {
-      const {width, height} = self;
-      const {x, y} = self.position;
-      const nw: Point = {x, y};
-      const se: Point = {x: x + width, y: y + height};
-      return {nw, se};
+      const { width, height } = self;
+      const { x, y } = self.position;
+      const nw: Point = { x, y };
+      const se: Point = { x: x + width, y: y + height };
+      return { nw, se };
     },
     get label() {
       return "Variable";
@@ -61,15 +61,15 @@ export interface VariableChipObjectSnapshot extends SnapshotIn<typeof VariableCh
 export interface VariableChipObjectSnapshotForAdd extends SnapshotIn<typeof VariableChipObject> {type: string}
 
 export const VariableChipComponent: React.FC<IDrawingComponentProps> = observer(
-  function VariableChipComponent({model, handleHover, handleDrag}){
+  function VariableChipComponent({ model, handleHover, handleDrag }){
     const drawingContent = useContext(DrawingContentModelContext);
     const variableChipRef = useRef(null);
-    useResizeObserver({ref: variableChipRef, box: "border-box",
+    useResizeObserver({ ref: variableChipRef, box: "border-box",
       // Volatile model props are used to track with the size. This way
       // the bounding box view will be updated when the size changes.
       // This is necessary so a selection box around the variable gets
       // re-rendered when the size changes.
-      onResize({width: chipWidth, height: chipHeight}){
+      onResize({ width: chipWidth, height: chipHeight }){
         if (!chipWidth || !chipHeight) {
           return;
         }

@@ -16,7 +16,7 @@ export class SelectionBox {
   }
 
   public render() {
-    const {nw, se} = this;
+    const { nw, se } = this;
     return <rect
       x={nw.x}
       y={nw.y}
@@ -30,12 +30,12 @@ export class SelectionBox {
   }
 
   public contains(p: Point): boolean {
-    const {nw, se} = this;
+    const { nw, se } = this;
     return (p.x >= nw.x) && (p.y >= nw.y) && (p.x <= se.x) && (p.y <= se.y);
   }
 
   public overlaps(nw2: Point, se2: Point) {
-    const {nw, se} = this;
+    const { nw, se } = this;
     return  ((nw.x < se2.x) && (se.x > nw2.x) && (nw.y < se2.y) && (se.y > nw2.y));
   }
 
@@ -53,7 +53,7 @@ export class SelectionBox {
     const minY = Math.min(this.start.y, this.end.y);
     const maxX = Math.max(this.start.x, this.end.x);
     const maxY = Math.max(this.start.y, this.end.y);
-    this.nw = {x: minX, y: minY};
-    this.se = {x: maxX, y: maxY};
+    this.nw = { x: minX, y: minY };
+    this.se = { x: maxX, y: maxY };
   }
 }

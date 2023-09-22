@@ -25,7 +25,7 @@ describe('GraphModel', () => {
   it('should show and hide adornments', () => {
     const graphModel = GraphModel.create();
     expect(graphModel.adornments.length).toBe(0);
-    const testAdornment = MovablePointModel.create({id: 'test', type: 'Movable Point', isVisible: true});
+    const testAdornment = MovablePointModel.create({ id: 'test', type: 'Movable Point', isVisible: true });
     graphModel.showAdornment(testAdornment, 'Movable Point');
     expect(graphModel.adornments.length).toBe(1);
     expect(graphModel.adornments[0]).toBe(testAdornment);

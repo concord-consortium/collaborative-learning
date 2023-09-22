@@ -608,7 +608,7 @@ export const DataSet = types.model("DataSet", {
 
       selectAll(select = true) {
         if (select) {
-          self.cases.forEach(({__id__}) => self.selection.add(__id__));
+          self.cases.forEach(({ __id__ }) => self.selection.add(__id__));
         }
         else {
           self.selection.clear();
@@ -720,7 +720,7 @@ export function addCanonicalCasesToDataSet(dataset: IDataSet, cases: ICaseCreati
 }
 
 export function getDataSetBounds(dataSet: IDataSet) {
-  const result: Array<{ min: number, max: number}> = [];
+  const result: Array<{ min: number, max: number }> = [];
   dataSet.attributes.forEach(( attr, attrIndex) => {
     let min = Infinity;
     let max = -Infinity;

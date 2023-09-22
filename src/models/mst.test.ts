@@ -2,14 +2,14 @@ import { action, autorun, makeObservable, observable } from "mobx";
 import { addDisposer, applySnapshot, getType, isAlive, types, getRoot,
   isStateTreeNode, SnapshotOut, Instance, getParent, destroy, hasParent,
   getSnapshot, addMiddleware, getEnv,
-  createActionTrackingMiddleware2, resolvePath} from "mobx-state-tree";
+  createActionTrackingMiddleware2, resolvePath } from "mobx-state-tree";
 
 describe("mst", () => {
   it("snapshotProcessor unexpectedly modifies the base type", () => {
     const Todo1 = types.model({ text: types.maybe(types.string) });
     const Todo2 = types.snapshotProcessor(Todo1, {
       preProcessor(sn) {
-        return {text: "todo2 text"};
+        return { text: "todo2 text" };
       }
     });
     const todo1a = Todo1.create();
@@ -30,7 +30,7 @@ describe("mst", () => {
     const Todo1 = types.model({ text: types.maybe(types.string) });
     const Todo2 = types.snapshotProcessor(Todo1, {
       preProcessor(sn) {
-        return {text: "todo2 text"};
+        return { text: "todo2 text" };
       }
     });
     const todo2 =Todo2.create();
@@ -55,7 +55,7 @@ describe("mst", () => {
     });
     expect(lateCalled).toBe(false);
 
-    TypeUsingLate.create({withLate: {prop: "val"}});
+    TypeUsingLate.create({ withLate: { prop: "val" } });
     expect(lateCalled).toBe(true);
   });
 
@@ -116,7 +116,7 @@ describe("mst", () => {
     });
     expect(lateCalled).toBe(false);
 
-    TypeWithLate.create({prop: {"hi": "hello"}});
+    TypeWithLate.create({ prop: { "hi": "hello" } });
     expect(lateCalled).toBe(true);
   });
 
@@ -135,10 +135,10 @@ describe("mst", () => {
     });
     expect(lateCalled).toBe(false);
 
-    TypeUsingLate.create({withLateMap: {}});
+    TypeUsingLate.create({ withLateMap: {} });
     expect(lateCalled).toBe(false);
 
-    TypeUsingLate.create({withLateMap: {"key": {prop: "value"}}});
+    TypeUsingLate.create({ withLateMap: { "key": { prop: "value" } } });
     expect(lateCalled).toBe(true);
   });
 
@@ -148,9 +148,9 @@ describe("mst", () => {
       text2: types.maybe(types.string)
     });
 
-    const todo = Todo1.create({text1: "1", text2:"2"});
+    const todo = Todo1.create({ text1: "1", text2:"2" });
     expect(todo.text1).toBe("1");
-    applySnapshot(todo, {text2: "changed"});
+    applySnapshot(todo, { text2: "changed" });
     expect(todo.text1).toBeUndefined();
   });
 
@@ -167,16 +167,16 @@ describe("mst", () => {
       }
     }));
 
-    const todo = Todo.create({values: {"first": {name: "1"}}});
+    const todo = Todo.create({ values: { "first": { name: "1" } } });
     const firstValue = todo.values.get("first");
     expect(firstValue!.name).toBe("1");
 
-    todo.setValue("first", {name: "changed"});
+    todo.setValue("first", { name: "changed" });
     const updatedValue = todo.values.get("first");
     expect(updatedValue).toBe(firstValue);
     expect(firstValue!.name).toBe("changed");
 
-    todo.setValue("first", TodoValue.create({name: "created"}));
+    todo.setValue("first", TodoValue.create({ name: "created" }));
     const createdValue = todo.values.get("first");
     expect(createdValue).not.toBe(firstValue);
     expect(isAlive(firstValue)).toBe(false);
@@ -207,7 +207,7 @@ describe("mst", () => {
       }
     }));
 
-    const todo = Todo.create({name: "hello"});
+    const todo = Todo.create({ name: "hello" });
     expect(autorunCount).toBe(1);
 
     const todoList = TodoList.create();
@@ -248,7 +248,7 @@ describe("mst", () => {
       }
     }));
 
-    const todo = Todo.create({name: "hello"});
+    const todo = Todo.create({ name: "hello" });
     expect(autorunCount).toBe(1);
 
     const todoList = TodoList.create();
@@ -289,17 +289,17 @@ describe("mst", () => {
 
     // We are not passing an environment here so MST creates an
     // empty object as the environment.
-    const todo = Todo.create({name: "hello"});
+    const todo = Todo.create({ name: "hello" });
     expect(autorunCount).toBe(1);
     expect(doSomething).toBeCalledTimes(1);
     expect(getEnv(todo)).toEqual({});
 
     // Now we pass an environment with someValue
-    const todoList = TodoList.create({}, {someValue: 1});
+    const todoList = TodoList.create({}, { someValue: 1 });
     todoList.addTodo(todo);
 
     // The environment of the todo has now changed
-    expect(getEnv(todo)).toEqual({someValue: 1});
+    expect(getEnv(todo)).toEqual({ someValue: 1 });
 
     return new Promise(resolve => {
       setTimeout(resolve, 50);
@@ -346,7 +346,7 @@ describe("mst", () => {
     const env = observable({}) as any;
     const todoList = TodoList.create({
       todos: [
-        {name: "hello"}
+        { name: "hello" }
       ]
     }, env);
     const todo = todoList.todos.at(0);
@@ -359,7 +359,7 @@ describe("mst", () => {
       env.someValue = 1;
     });
 
-    expect(getEnv(todo)).toEqual({someValue: 1});
+    expect(getEnv(todo)).toEqual({ someValue: 1 });
 
     return new Promise(resolve => {
       setTimeout(resolve, 50);
@@ -381,8 +381,8 @@ describe("mst", () => {
     }));
     interface TodoSnapshot extends SnapshotOut<typeof Todo> {}
 
-    const todo1 = Todo.create({name: "hello"});
-    const todo2 = Todo.create({name: "bye"});
+    const todo1 = Todo.create({ name: "hello" });
+    const todo2 = Todo.create({ name: "bye" });
     applySnapshot(todo1, todo2);
     expect(todo1.name).toBe("bye");
 
@@ -416,8 +416,8 @@ describe("mst", () => {
       todos: types.array(Todo)
     });
 
-    const todo = Todo.create({name: "todo1"});
-    const todoList = TodoList.create({todos: [todo]});
+    const todo = Todo.create({ name: "todo1" });
+    const todoList = TodoList.create({ todos: [todo] });
     expect(todoList.todos.at(0)).toBe(todo);
   });
 
@@ -497,10 +497,10 @@ describe("mst", () => {
           call.env = { id: topLevelCallId };
           topLevelCallId++;
         }
-        started.push({action: call.name, topLevelId: call.env.id});
+        started.push({ action: call.name, topLevelId: call.env.id });
       },
       onFinish(call) {
-        finished.push({action: call.name, topLevelId: call.env.id});
+        finished.push({ action: call.name, topLevelId: call.env.id });
       }
     });
     const disposer = addMiddleware(todoList, middleware, true);
@@ -513,17 +513,17 @@ describe("mst", () => {
 
     // This is what we generally want: 3 calls all with the same topLevelId
     const singleTopLevelOnStartedCalls: ICallRecord[] = [
-      {action: "updateAllTodos", topLevelId: 0},
-      {action: "setName", topLevelId: 0},
-      {action: "setName", topLevelId: 0}
+      { action: "updateAllTodos", topLevelId: 0 },
+      { action: "setName", topLevelId: 0 },
+      { action: "setName", topLevelId: 0 }
     ];
 
     // This is what we generally don't want: 3 calls all with different
     // topLevelIds
     const multipleTopLevelOnStartedCalls: ICallRecord[] = [
-      {action: "updateAllTodos", topLevelId: 0},
-      {action: "setName", topLevelId: 1},
-      {action: "setName", topLevelId: 2}
+      { action: "updateAllTodos", topLevelId: 0 },
+      { action: "setName", topLevelId: 1 },
+      { action: "setName", topLevelId: 2 }
     ];
 
     // Case 0: Run an action in the Main Tree that does not pass through a

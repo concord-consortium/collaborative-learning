@@ -7,7 +7,7 @@ import { EllipseComponent, EllipseDrawingTool, EllipseObject, EllipseToolbarButt
 import { ImageComponent, ImageObject, StampDrawingTool, StampToolbarButton } from "../objects/image";
 import { LineComponent, LineDrawingTool, LineObject, LineToolbarButton } from "../objects/line";
 import { RectangleComponent, RectangleDrawingTool, RectangleObject,
-  RectangleToolbarButton} from "../objects/rectangle";
+  RectangleToolbarButton } from "../objects/rectangle";
 import { VectorComponent, VectorDrawingTool, VectorObject, VectorToolbarButton } from "../objects/vector";
 import { DeleteButton, DuplicateButton, SelectToolbarButton } from "./drawing-toolbar-buttons";
 import { SelectionDrawingTool } from "./selection-drawing-tool";

@@ -21,15 +21,15 @@ interface IProps {
 // TODO: Need to handle delete marker. Currently, we don't track which marker was selected, so we don't delete any
 // TODO: need to handle comment marker.
 // TODO: need to add editable marker labels.
-export const PlaybackMarkerToolbar: React.FC<IProps> = ({markerSelected, addMarkerSelected, onAddMarkerSelected}) => {
+export const PlaybackMarkerToolbar: React.FC<IProps> = ({ markerSelected, addMarkerSelected, onAddMarkerSelected }) => {
   const { activeNavTab } = useUIStore();
 
   const AddMarkerButton: React.FC = () => {
     const handleAddMarker = () => {
       onAddMarkerSelected(!addMarkerSelected);
     };
-    const markerButtonClass = classNames("add-marker-button", activeNavTab, {"disabled" : markerSelected},
-                                         {"selected": addMarkerSelected});
+    const markerButtonClass = classNames("add-marker-button", activeNavTab, { "disabled" : markerSelected },
+                                         { "selected": addMarkerSelected });
     return (
       <div className={markerButtonClass}
         onClick={handleAddMarker}>

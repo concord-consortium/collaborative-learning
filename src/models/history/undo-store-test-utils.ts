@@ -10,7 +10,7 @@ export async function expectEntryToBeComplete(manager: Instance<typeof TreeManag
   try {
     await when(
       () => changeDocument.history.length >= length && changeDocument.history.at(length-1)?.state === "complete",
-      {timeout: 100});
+      { timeout: 100 });
   } catch (e) {
     timedOut = true;
   }

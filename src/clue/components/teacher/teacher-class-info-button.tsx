@@ -32,7 +32,7 @@ export class ClassInfoButton extends BaseComponent <IProps> {
   }
 
   private handleExportClick = async () => {
-    const {db, user} = this.stores; // access the database
+    const { db, user } = this.stores; // access the database
     const latestGroupsArray: string[] = []; // store the group ids
 
     const offeringsPath = db.firebase.getOfferingsPath(db.stores.user);
@@ -116,7 +116,7 @@ export class ClassInfoButton extends BaseComponent <IProps> {
   };
 
   private exportCSV = (csv: string, fileName: string) => {
-    const csvBlob = new Blob([csv], {type: "text/csv;charset=utf-8;"});
+    const csvBlob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     // if (navigator.msSaveBlob) {
     //   navigator.msSaveBlob(csvBlob, fileName);
     // }

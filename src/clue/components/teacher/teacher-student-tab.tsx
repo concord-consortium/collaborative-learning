@@ -22,7 +22,7 @@ export class TeacherStudentTabComponent extends BaseComponent<IProps, IState> {
 
   public UNSAFE_componentWillReceiveProps(nextProps: IProps) {
     if (nextProps.groupId !== this.props.groupId) {
-      this.setState({selectedUserId: undefined});
+      this.setState({ selectedUserId: undefined });
     }
   }
 
@@ -82,7 +82,7 @@ export class TeacherStudentTabComponent extends BaseComponent<IProps, IState> {
         </div>
         <div className="content">
           <TeacherSupports
-            audience={UserAudienceModel.create({identifier: user.id})}
+            audience={UserAudienceModel.create({ identifier: user.id })}
             supports={supports.userSupports.filter(support => {
               return !support.deleted && support.audience.identifier === user.id;
             })}
@@ -94,7 +94,7 @@ export class TeacherStudentTabComponent extends BaseComponent<IProps, IState> {
 
   private handleChooseUser = (user: GroupUserModelType) => {
     return (e: React.MouseEvent<HTMLElement>) => {
-      this.setState({selectedUserId: user.id});
+      this.setState({ selectedUserId: user.id });
     };
   };
 }

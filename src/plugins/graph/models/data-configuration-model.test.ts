@@ -1,8 +1,8 @@
 import { reaction } from "mobx";
-import {getSnapshot, Instance, types} from "mobx-state-tree";
+import { getSnapshot, Instance, types } from "mobx-state-tree";
 import { DataSet } from "../../../models/data/data-set";
 import { DataConfigurationModel } from "./data-configuration-model";
-import {SharedCaseMetadata} from "../../../models/shared/shared-case-metadata";
+import { SharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
 
 const TreeModel = types.model("Tree", {
   data: DataSet,
@@ -54,12 +54,12 @@ describe("DataConfigurationModel", () => {
     expect(config.places).toEqual(["caption"]);
     expect(config.attributes).toEqual(["nId"]);
     expect(config.uniqueAttributes).toEqual(["nId"]);
-    expect(config.tipAttributes).toEqual([{attributeID: "nId", role: "caption"}]);
-    expect(config.uniqueTipAttributes).toEqual([{attributeID: "nId", role: "caption"}]);
+    expect(config.tipAttributes).toEqual([{ attributeID: "nId", role: "caption" }]);
+    expect(config.uniqueTipAttributes).toEqual([{ attributeID: "nId", role: "caption" }]);
     expect(config.caseDataArray).toEqual([
-      {plotNum: 0, caseID: "c1"},
-      {plotNum: 0, caseID: "c2"},
-      {plotNum: 0, caseID: "c3"}
+      { plotNum: 0, caseID: "c1" },
+      { plotNum: 0, caseID: "c2" },
+      { plotNum: 0, caseID: "c3" }
     ]);
   });
 
@@ -76,12 +76,12 @@ describe("DataConfigurationModel", () => {
     expect(config.places).toEqual(["x", "caption"]);
     expect(config.attributes).toEqual(["nId", "nId"]);
     expect(config.uniqueAttributes).toEqual(["nId"]);
-    expect(config.tipAttributes).toEqual([{attributeID: "nId", role: "x"},
-      {attributeID: "nId", role: "caption"}]);
-    expect(config.uniqueTipAttributes).toEqual([{attributeID: "nId", role: "caption"}]);
+    expect(config.tipAttributes).toEqual([{ attributeID: "nId", role: "x" },
+      { attributeID: "nId", role: "caption" }]);
+    expect(config.uniqueTipAttributes).toEqual([{ attributeID: "nId", role: "caption" }]);
     expect(config.caseDataArray).toEqual([
-      {plotNum: 0, caseID: "c1"},
-      {plotNum: 0, caseID: "c3"}
+      { plotNum: 0, caseID: "c1" },
+      { plotNum: 0, caseID: "c3" }
     ]);
   });
 
@@ -98,13 +98,13 @@ describe("DataConfigurationModel", () => {
     expect(config.places).toEqual(["x", "caption"]);
     expect(config.attributes).toEqual(["xId", "nId"]);
     expect(config.uniqueAttributes).toEqual(["xId", "nId"]);
-    expect(config.tipAttributes).toEqual([{attributeID: "xId", role: "x"},
-      {attributeID: "nId", role: "caption"}]);
-    expect(config.uniqueTipAttributes).toEqual([{attributeID: "xId", role: "x"},
-      {attributeID: "nId", role: "caption"}]);
+    expect(config.tipAttributes).toEqual([{ attributeID: "xId", role: "x" },
+      { attributeID: "nId", role: "caption" }]);
+    expect(config.uniqueTipAttributes).toEqual([{ attributeID: "xId", role: "x" },
+      { attributeID: "nId", role: "caption" }]);
     expect(config.caseDataArray).toEqual([
-      {plotNum: 0, caseID: "c1"},
-      {plotNum: 0, caseID: "c2"}
+      { plotNum: 0, caseID: "c1" },
+      { plotNum: 0, caseID: "c2" }
     ]);
   });
 
@@ -125,11 +125,11 @@ describe("DataConfigurationModel", () => {
     expect(config.places).toEqual(["x", "caption", "y"]);
     expect(config.attributes).toEqual(["xId", "nId", "yId"]);
     expect(config.uniqueAttributes).toEqual(["xId", "nId", "yId"]);
-    expect(config.tipAttributes).toEqual([{attributeID: "xId", role: "x"},
-      {attributeID: "yId", role: "y"}, {attributeID: "nId", role: "caption"}]);
-    expect(config.uniqueTipAttributes).toEqual([{attributeID: "xId", role: "x"},
-      {attributeID: "yId", role: "y"}, {attributeID: "nId", role: "caption"}]);
-    expect(config.caseDataArray).toEqual([{plotNum: 0, caseID: "c1"}]);
+    expect(config.tipAttributes).toEqual([{ attributeID: "xId", role: "x" },
+      { attributeID: "yId", role: "y" }, { attributeID: "nId", role: "caption" }]);
+    expect(config.uniqueTipAttributes).toEqual([{ attributeID: "xId", role: "x" },
+      { attributeID: "yId", role: "y" }, { attributeID: "nId", role: "caption" }]);
+    expect(config.caseDataArray).toEqual([{ plotNum: 0, caseID: "c1" }]);
 
     // behaves as expected after removing x axis attribute (yId on y-axis)
     config.setAttribute("x");
@@ -143,21 +143,21 @@ describe("DataConfigurationModel", () => {
     expect(config.places).toEqual(["caption", "y"]);
     expect(config.attributes).toEqual(["nId", "yId"]);
     expect(config.uniqueAttributes).toEqual(["nId", "yId"]);
-    expect(config.tipAttributes).toEqual([{attributeID: "yId", role: "y"},
-      {attributeID: "nId", role: "caption"}]);
-    expect(config.uniqueTipAttributes).toEqual([{attributeID: "yId", role: "y"},
-      {attributeID: "nId", role: "caption"}]);
+    expect(config.tipAttributes).toEqual([{ attributeID: "yId", role: "y" },
+      { attributeID: "nId", role: "caption" }]);
+    expect(config.uniqueTipAttributes).toEqual([{ attributeID: "yId", role: "y" },
+      { attributeID: "nId", role: "caption" }]);
     expect(config.caseDataArray).toEqual([
-      {plotNum: 0, caseID: "c1"},
-      {plotNum: 0, caseID: "c3"}
+      { plotNum: 0, caseID: "c1" },
+      { plotNum: 0, caseID: "c3" }
     ]);
 
     // updates cases when values change
     tree.data.setCanonicalCaseValues([{ __id__: "c2", "yId": 2 }]);
     expect(config.caseDataArray).toEqual([
-      {plotNum: 0, caseID: "c1"},
-      {plotNum: 0, caseID: "c2"},
-      {plotNum: 0, caseID: "c3"}
+      { plotNum: 0, caseID: "c1" },
+      { plotNum: 0, caseID: "c2" },
+      { plotNum: 0, caseID: "c3" }
     ]);
 
     // triggers observers when values change
@@ -167,15 +167,15 @@ describe("DataConfigurationModel", () => {
     tree.data.setCanonicalCaseValues([{ __id__: "c2", "yId": "" }]);
     expect(trigger).toHaveBeenCalledTimes(2); // TODO: should be 1
     expect(config.caseDataArray).toEqual([
-      {plotNum: 0, caseID: "c1"},
-      {plotNum: 0, caseID: "c3"}
+      { plotNum: 0, caseID: "c1" },
+      { plotNum: 0, caseID: "c3" }
     ]);
     tree.data.setCanonicalCaseValues([{ __id__: "c2", "yId": "2" }]);
     expect(trigger).toHaveBeenCalledTimes(4); // TODO: should be 2
     expect(config.caseDataArray).toEqual([
-      {plotNum: 0, caseID: "c1"},
-      {plotNum: 0, caseID: "c2"},
-      {plotNum: 0, caseID: "c3"}
+      { plotNum: 0, caseID: "c1" },
+      { plotNum: 0, caseID: "c2" },
+      { plotNum: 0, caseID: "c3" }
     ]);
   });
 
@@ -264,9 +264,9 @@ describe("DataConfigurationModel", () => {
     const config = DataConfigurationModel.create();
     config.setDataset(tree.data, tree.metadata);
     expect(config.subPlotCases({})).toEqual([
-      {"__id__": "c1", "nId": "n1", "xId": 1, "yId": 1},
-      {"__id__": "c2", "xId": 2},
-      {"__id__": "c3", "nId": "n3", "yId": 3}
+      { "__id__": "c1", "nId": "n1", "xId": 1, "yId": 1 },
+      { "__id__": "c2", "xId": 2 },
+      { "__id__": "c3", "nId": "n3", "yId": 3 }
     ]);
   });
 

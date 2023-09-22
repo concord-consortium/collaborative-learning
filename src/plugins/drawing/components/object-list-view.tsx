@@ -8,7 +8,7 @@ import {
   verticalListSortingStrategy,
   sortableKeyboardCoordinates
 } from '@dnd-kit/sortable';
-import {CSS} from '@dnd-kit/utilities';
+import { CSS } from '@dnd-kit/utilities';
 import { restrictToParentElement, restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { DrawingContentModelType } from "../model/drawing-content";
 import { DrawingObjectType } from "../objects/drawing-object";
@@ -25,7 +25,7 @@ interface IObjectListViewProps {
   setHoverObject: (value: string|null) => void
 }
 
-export const ObjectListView = observer(function ObjectListView({model, setHoverObject}: IObjectListViewProps) {
+export const ObjectListView = observer(function ObjectListView({ model, setHoverObject }: IObjectListViewProps) {
 
   const [open, setOpen] = useState(false);
   const sensors = useSensors(
@@ -48,7 +48,7 @@ export const ObjectListView = observer(function ObjectListView({model, setHoverO
   }
 
   function handleDragEnd(event: DragEndEvent) {
-    const {active, over} = event;
+    const { active, over } = event;
     if (over && active.id !== over.id) {
       const content = getContent();
       content.changeZOrder(active.id as string, over.id as string);
@@ -110,7 +110,7 @@ interface IObjectLineProps {
   setHoverObject: (id: string|null) => void
 }
 
-const ObjectLine = observer(function ObjectLine({object, content, selection, setHoverObject}: IObjectLineProps) {
+const ObjectLine = observer(function ObjectLine({ object, content, selection, setHoverObject }: IObjectLineProps) {
 
   const {
     attributes,
@@ -120,7 +120,7 @@ const ObjectLine = observer(function ObjectLine({object, content, selection, set
     transition,
     active,
     isDragging
-  } = useSortable({id: object.id});
+  } = useSortable({ id: object.id });
 
   function handleHoverIn() {
     if (active) return; // avoid flashes of highlight while dragging

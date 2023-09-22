@@ -73,8 +73,8 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
             // can't delete comment until we have a valid server-generated id
             const shouldShowDeleteIcon = isOwnComment && !comment.id.startsWith("pending-");
             const backgroundStyle = shouldShowUserIcon
-                                      ? {backgroundColor: "white"}
-                                      : {backgroundColor: userInitialBackgroundColor[userInitialBackgroundColorIndex]};
+              ? { backgroundColor: "white" }
+              : { backgroundColor: userInitialBackgroundColor[userInitialBackgroundColorIndex] };
 
             //if tagPrompt was posted to Firestore - for ex: SAS unit (where tagPrompt = "Select Student Strategy")
             //our comment.tags should be [""]

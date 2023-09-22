@@ -69,8 +69,8 @@ export class GroupVirtualDocumentComponent extends BaseComponent<IProps, IState>
 
   private handleGroupClicked(groupID: string) {
     const { ui } = this.stores;
-    Logger.log(LogEventName.VIEW_GROUP, {group: groupID, via: "group-document-titlebar"});
-    ui.problemWorkspace.setComparisonDocument(new GroupVirtualDocument({id: groupID}));
+    Logger.log(LogEventName.VIEW_GROUP, { group: groupID, via: "group-document-titlebar" });
+    ui.problemWorkspace.setComparisonDocument(new GroupVirtualDocument({ id: groupID }));
   }
 
   private render4UpCanvas() {

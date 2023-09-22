@@ -44,7 +44,7 @@ interface IOneUpCanvasProps {
   readOnly: boolean;
 }
 const OneUpCanvas: React.FC<IOneUpCanvasProps> = props => {
-  const {document, ...others} = props;
+  const { document, ...others } = props;
 
 
   return (
@@ -81,7 +81,7 @@ const DocumentCanvas: React.FC<IDocumentCanvasProps> = props => {
     <div className="canvas-area">
       {isFourUp
         ? <EditableFourUpCanvas userId={document.uid} />
-        : <OneUpCanvas {...{document, readOnly, showPlayback}} />}
+        : <OneUpCanvas {...{ document, readOnly, showPlayback }} />}
     </div>
   );
 };
@@ -111,7 +111,7 @@ export function EditableDocumentContent({
   const documentSelectedForComment = isChatEnabled && ui.showChatPanel && ui.selectedTileIds.length === 0 && !isPrimary;
   const editableDocContentClass = classNames("editable-document-content", showToolbarClass,
     contained ? "contained-editable-document-content" : "full-screen-editable-document-content",
-    {"comment-select" : documentSelectedForComment, "full-height": fullHeight}, className);
+    { "comment-select" : documentSelectedForComment, "full-height": fullHeight }, className);
 
   useDocumentSyncToFirebase(user, firebase, document, readOnly);
   return (
@@ -123,7 +123,7 @@ export function EditableDocumentContent({
           {isShowingToolbar && <div className="canvas-separator"/>}
           <DocumentCanvas
             readOnly={isReadOnly}
-            {...{mode, isPrimary, document, showPlayback}}
+            {...{ mode, isPrimary, document, showPlayback }}
           />
         </div>
       </EditableTileApiInterfaceRefContext.Provider>

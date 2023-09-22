@@ -53,8 +53,8 @@ const makeSharedModelManager = (variables?: SharedVariablesType): ISharedModelMa
 const setupContainer = (content: DiagramContentModelType, variables?: SharedVariablesType) => {
   const sharedModelManager = makeSharedModelManager(variables);
   TestContainer.create(
-    {content: castToSnapshot(content), variables: castToSnapshot(variables)},
-    {sharedModelManager}
+    { content: castToSnapshot(content), variables: castToSnapshot(variables) },
+    { sharedModelManager }
   );
 
   // Need to monitor the variables just like sharedModelDocumentManager does
@@ -67,7 +67,7 @@ const setupContainer = (content: DiagramContentModelType, variables?: SharedVari
   // So far it hasn't been necessary to wait for the MobX reaction to run inside of
   // DocumentContent#afterAttach. It seems to run immediately in the line above, so
   // we can write expectations on this content without waiting.
-  return {content, sharedModelManager};
+  return { content, sharedModelManager };
 };
 
 describe("DiagramContent", () => {
@@ -78,7 +78,7 @@ describe("DiagramContent", () => {
 
   it("can export content", () => {
     const content = createDiagramContent();
-    const expected = JSON.stringify({nodes: {}});
+    const expected = JSON.stringify({ nodes: {} });
     expect(content.exportJson()).toEqual(expected);
   });
 
@@ -106,7 +106,7 @@ describe("DiagramContent", () => {
     expect(content.root.nodes.size).toBe(0);
     expect(content.sharedModel?.variables.length).toBe(0);
 
-    content.root.createNode({x: 1, y: 1});
+    content.root.createNode({ x: 1, y: 1 });
     expect(content.root.nodes.size).toBe(1);
     const newNode = Array.from(content.root.nodes.values())[0];
     assertIsDefined(newNode);
@@ -187,8 +187,8 @@ describe("DiagramContent", () => {
     const sharedModelManager = makeSharedModelManager();
     const addTileSharedModelSpy = jest.spyOn(sharedModelManager, "addTileSharedModel");
     TestContainer.create(
-      {content: castToSnapshot(content)},
-      {sharedModelManager}
+      { content: castToSnapshot(content) },
+      { sharedModelManager }
     );
 
     expect(addTileSharedModelSpy).toHaveBeenCalled();

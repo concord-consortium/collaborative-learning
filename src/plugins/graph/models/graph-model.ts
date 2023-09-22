@@ -1,9 +1,9 @@
 import stringify from "json-stringify-pretty-compact";
-import {reaction} from "mobx";
-import {addDisposer, getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
-import {createContext, useContext} from "react";
+import { reaction } from "mobx";
+import { addDisposer, getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types } from "mobx-state-tree";
+import { createContext, useContext } from "react";
 import { IAdornmentModel, IUpdateCategoriesOptions } from "../adornments/adornment-models";
-import {AxisPlace} from "../imports/components/axis/axis-types";
+import { AxisPlace } from "../imports/components/axis/axis-types";
 import {
   AxisModelUnion, EmptyAxisModel, IAxisModelUnion, NumericAxisModel
 } from "../imports/components/axis/models/axis-model";
@@ -11,14 +11,14 @@ import {
   GraphAttrRole, hoverRadiusFactor, kDefaultNumericAxisBounds, kGraphTileType, PlotType, PlotTypes,
   pointRadiusLogBase, pointRadiusMax, pointRadiusMin, pointRadiusSelectionAddend
 } from "../graph-types";
-import {DataConfigurationModel} from "./data-configuration-model";
+import { DataConfigurationModel } from "./data-configuration-model";
 import { SharedModelType } from "../../../models/shared/shared-model";
 import {
   getDataSetFromId, getTileCaseMetadata, getTileDataSet, isTileLinkedToDataSet, linkTileToDataSet
 } from "../../../models/shared/shared-data-utils";
 import { AppConfigModelType } from "../../../models/stores/app-config-model";
-import {ITileContentModel, TileContentModel} from "../../../models/tiles/tile-content";
-import {ITileExportOptions} from "../../../models/tiles/tile-content-info";
+import { ITileContentModel, TileContentModel } from "../../../models/tiles/tile-content";
+import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { getAppConfig, getSharedModelManager } from "../../../models/tiles/tile-environment";
 import {
   defaultBackgroundColor, defaultPointColor, defaultStrokeColor, kellyColors
@@ -121,7 +121,7 @@ export const GraphModel = TileContentModel
       // json-stringify-pretty-compact is used, so the exported content is more
       // compact. It results in something close to what we used to get when the
       // export was created using a string builder.
-      return stringify(snapshot, {maxLength: 200});
+      return stringify(snapshot, { maxLength: 200 });
     }
   }))
   .views(self => ({
@@ -193,9 +193,9 @@ export const GraphModel = TileContentModel
         self.config.setDataset(newDataSet, getTileCaseMetadata(self));
       }
       if (role === 'yPlus') {
-        self.config.addYAttribute({attributeID: id});
+        self.config.addYAttribute({ attributeID: id });
       } else {
-        self.config.setAttribute(role, {attributeID: id});
+        self.config.setAttribute(role, { attributeID: id });
       }
       self.updateAdornments(true);
     },
@@ -357,11 +357,11 @@ export function createGraphModel(snap?: IGraphModelSnapshot, appConfig?: AppConf
   const [min, max] = kDefaultNumericAxisBounds;
   const emptyPlotIsNumeric = appConfig?.getSetting("emptyPlotIsNumeric", "graph");
   const bottomAxisModel = emptyPlotIsNumeric
-                            ? NumericAxisModel.create({place: "bottom", min, max})
-                            : EmptyAxisModel.create({place: "bottom"});
+                            ? NumericAxisModel.create({ place: "bottom", min, max })
+                            : EmptyAxisModel.create({ place: "bottom" });
   const leftAxisModel = emptyPlotIsNumeric
-                          ? NumericAxisModel.create({place: "left", min, max})
-                          : EmptyAxisModel.create({place: "left"});
+                          ? NumericAxisModel.create({ place: "left", min, max })
+                          : EmptyAxisModel.create({ place: "left" });
   const createdGraphModel = GraphModel.create({
     axes: {
       bottom: bottomAxisModel,
@@ -373,7 +373,7 @@ export function createGraphModel(snap?: IGraphModelSnapshot, appConfig?: AppConf
   // const connectLinesByDefault = appConfig?.getSetting("defaultConnectedLines", "graph");
   const connectByDefault = appConfig?.getSetting("defaultSeriesLegend", "graph");
   if (connectByDefault) {
-    const cLines = ConnectingLinesModel.create({type: kConnectingLinesType, isVisible: true});
+    const cLines = ConnectingLinesModel.create({ type: kConnectingLinesType, isVisible: true });
     createdGraphModel.showAdornment(cLines, kConnectingLinesType);
   }
   return createdGraphModel;

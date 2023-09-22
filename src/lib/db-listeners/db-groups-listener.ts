@@ -15,7 +15,7 @@ export class DBGroupsListener extends BaseListener {
 
   public start() {
     return new Promise<void>((resolve, reject) => {
-      const {user, groups} = this.db.stores;
+      const { user, groups } = this.db.stores;
       const groupsRef = this.groupsRef = this.db.firebase.ref(this.db.firebase.getGroupsPath(user));
 
       // use once() so we are ensured that groups are set before we resolve
@@ -56,7 +56,7 @@ export class DBGroupsListener extends BaseListener {
   }
 
   private handleGroupsRef = (snapshot: firebase.database.DataSnapshot) => {
-    const {user} = this.db.stores;
+    const { user } = this.db.stores;
     const groups: DBOfferingGroupMap = snapshot.val() || {};
     const myGroupIds: string[] = [];
     const overSubscribedUserUpdates: any = {};
@@ -68,7 +68,7 @@ export class DBGroupsListener extends BaseListener {
       const rawUsers = groups[groupId].users || {};
       // rawUsers can get interpreted as an array instead of a map if user IDs are small (e.g. in demo mode)
       // So, make sure to filter out empty array spaces and convert number IDs to strings for standardization
-      const groupUsers = map(rawUsers, (groupUser, uid) => ({uid: `${uid}`, user: groupUser}))
+      const groupUsers = map(rawUsers, (groupUser, uid) => ({ uid: `${uid}`, user: groupUser }))
         .filter(groupUser => !!groupUser.user);
       if (groupUsers.find(groupUser => groupUser.uid === user.id)) {
         myGroupIds.push(groupId);

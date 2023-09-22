@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 
 import { useFirestore } from "../../hooks/firestore-hooks";
-import { useStores, useUIStore, useUserStore} from "../../hooks/use-stores";
+import { useStores, useUIStore, useUserStore } from "../../hooks/use-stores";
 import { useDocumentCaption } from "../../hooks/use-document-caption";
 import { CurriculumDocument, DocumentDocument } from "../../lib/firestore-schema";
 import { getSectionTitle } from "../../models/curriculum/section";
@@ -28,7 +28,7 @@ interface PromisedDocumentDocument extends DocumentDocument {
   title?: string
 }
 
-export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
+export const CommentedDocuments: React.FC<IProps> = ({ user, handleDocView }) => {
   const [db] = useFirestore();
   const ui = useUIStore();
   const store = useStores();
@@ -74,7 +74,7 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
           if (qs.empty === false) {
             const firstCharPosition = doc.id.split("_", 4).join("_").length + 1; //first char after 4th _
             const sectionType =  doc.id.substring(firstCharPosition, doc.id.length);
-            doc = {...doc, title: getSectionTitle(sectionType), numComments: qs.size};
+            doc = { ...doc, title: getSectionTitle(sectionType), numComments: qs.size };
             commentedDocs.push(doc as PromisedCurriculumDocument);
           }
         }));
@@ -119,7 +119,7 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
         const docCommentsRef = mDocsRef.doc(doc.id).collection("comments");
         promiseArr.push(docCommentsRef.get().then((qs)=>{
           if (qs.empty === false){
-            doc = {...doc, numComments: qs.size};
+            doc = { ...doc, numComments: qs.size };
             commentedDocs.push(doc as PromisedDocumentDocument);
           }
         }));
@@ -138,7 +138,7 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
       {
         docsCommentedOn &&
         (docsCommentedOn).map((doc: PromisedCurriculumDocument, index:number) => { //Problem + Teacher Guide documents
-          const {navTab} = getTabsOfCurriculumDoc(doc.path);
+          const { navTab } = getTabsOfCurriculumDoc(doc.path);
           return (
             <div
               className={`document-box ${navTab}`}

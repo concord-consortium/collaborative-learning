@@ -35,12 +35,12 @@ export const ImageObject = DrawingObject.named("ImageObject")
   }))
   .views(self => ({
     get boundingBox() {
-      const {x, y} = self.position;
+      const { x, y } = self.position;
       const width = self.dragWidth ?? self.width;
       const height = self.dragHeight ?? self.height;
-      const nw: Point = {x, y};
-      const se: Point = {x: x + width, y: y + height};
-      return {nw, se};
+      const nw: Point = { x, y };
+      const se: Point = { x: x + width, y: y + height };
+      return { nw, se };
     },
     get label() {
       return "Image";
@@ -49,7 +49,7 @@ export const ImageObject = DrawingObject.named("ImageObject")
       return (<ImageToolIcon viewBox={ObjectTypeIconViewBox}/>);
     },
     get displayUrl() {
-      const entry = gImageMap.getImageEntry(self.url, {filename: self.filename});
+      const entry = gImageMap.getImageEntry(self.url, { filename: self.filename });
       // TODO we could return a spinner image if the entry is storing or computing dimensions
       return entry?.displayUrl || (placeholderImage as string);
     },
@@ -89,8 +89,8 @@ export function isImageObjectSnapshot(object: DrawingObjectSnapshot): object is 
   return object.type === "image";
 }
 
-export const ImageComponent: React.FC<IDrawingComponentProps> = observer(function ImageComponent({model, handleHover,
-  handleDrag}){
+export const ImageComponent: React.FC<IDrawingComponentProps> = observer(function ImageComponent({ model, handleHover,
+  handleDrag }){
   if (model.type !== "image") return null;
   const image = model as ImageObjectType;
   const { id, displayUrl } = image;

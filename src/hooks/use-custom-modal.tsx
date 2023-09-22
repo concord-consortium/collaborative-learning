@@ -66,7 +66,7 @@ export const useCustomModal = <IContentProps, >({
     return () => contentElt?.removeEventListener("keydown", handleKeyDown, true);
   }, [blurModal, buttons, contentElt]);
 
-  const handleAfterOpen = ({overlayEl, contentEl}: { overlayEl: Element, contentEl: HTMLDivElement }) => {
+  const handleAfterOpen = ({ overlayEl, contentEl }: { overlayEl: Element, contentEl: HTMLDivElement }) => {
     setContentElt(contentEl);
 
     const element = focusElement && contentEl.querySelector(focusElement) as HTMLElement || contentEl;

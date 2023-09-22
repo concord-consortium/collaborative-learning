@@ -24,7 +24,7 @@ export const DocumentError: React.FC<IProps> = ({ document }) => {
       {document.invalidContent &&
         <>
           <h2>Document Content</h2>
-          <pre>{stringify(document.invalidContent, {maxLength: 150})}</pre>
+          <pre>{stringify(document.invalidContent, { maxLength: 150 })}</pre>
         </>
       }
     </div>

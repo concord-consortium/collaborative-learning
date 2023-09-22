@@ -6,7 +6,7 @@ import { DrawingObject, DrawingObjectType, IDrawingComponentProps,
   isFilledObject, 
   isStrokedObject, 
   typeField, 
-  ObjectTypeIconViewBox} from "./drawing-object";
+  ObjectTypeIconViewBox } from "./drawing-object";
 import { BoundingBoxSides, VectorEndShape } from "../model/drawing-basic-types";
 import { DrawingObjectMSTUnion } from "../components/drawing-object-manager";
 import { isVectorObject } from "./vector";
@@ -137,10 +137,10 @@ export function isGroupObject(model: DrawingObjectType): model is GroupObjectTyp
 }
 
 export const GroupComponent = observer(function GroupComponent(
-    {model, handleHover, handleDrag} : IDrawingComponentProps) {
+    { model, handleHover, handleDrag } : IDrawingComponentProps) {
   if (!isGroupObject(model)) return null;
   const group = model as GroupObjectType;
-  const {id, boundingBox: bb} = group;
+  const { id, boundingBox: bb } = group;
   // Renders as a rectangle that is invisible, but reacts to mouse events
   return <rect
     key={id}

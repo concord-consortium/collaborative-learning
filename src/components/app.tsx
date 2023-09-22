@@ -24,7 +24,7 @@ interface IState {
 }
 
 function initRollbar(stores: IStores, problemId: string) {
-  const {user, unit, appVersion} = stores;
+  const { user, unit, appVersion } = stores;
   if (typeof (window as any).Rollbar !== "undefined") {
     const _Rollbar = (window as any).Rollbar;
     if (_Rollbar.configure) {
@@ -37,7 +37,7 @@ function initRollbar(stores: IStores, problemId: string) {
               role: user.type,
               unit: unit.title,
               version: appVersion
-            }};
+            } };
       _Rollbar.configure(config);
     }
   }
@@ -47,20 +47,20 @@ function resolveAppMode(
   stores: IStores,
   rawFirebaseJWT: string | undefined,
   onQAClear?: (result: boolean, err?: string) => void) {
-  const { appMode, db, ui} = stores;
+  const { appMode, db, ui } = stores;
   if (appMode === "authed")  {
     if (rawFirebaseJWT) {
-      return db.connect({appMode, stores, rawFirebaseJWT}).catch(error => ui.setError(error));
+      return db.connect({ appMode, stores, rawFirebaseJWT }).catch(error => ui.setError(error));
     }
     else {
       ui.setError("No firebase token available to connect to db!");
     }
   }
   else {
-    return db.connect({appMode, stores})
+    return db.connect({ appMode, stores })
       .then(() => {
         if (appMode === "qa") {
-          const {qaClear, qaGroup} = urlParams;
+          const { qaClear, qaGroup } = urlParams;
           if (qaClear) {
             const cleared = (err?: string) => {
               if (onQAClear) {
@@ -81,11 +81,11 @@ function resolveAppMode(
 }
 
 export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, err?: string) => void) => {
-  const {appConfig, appMode, db, user, ui} = stores;
+  const { appConfig, appMode, db, user, ui } = stores;
   let rawPortalJWT: string | undefined;
 
   authenticate(appMode, appConfig, urlParams)
-    .then(async ({appMode: newAppMode, authenticatedUser, classInfo, problemId, unitCode}) => {
+    .then(async ({ appMode: newAppMode, authenticatedUser, classInfo, problemId, unitCode }) => {
       // authentication can trigger appMode change (e.g. preview => demo)
       if (newAppMode && (newAppMode !== appMode)) {
         stores.setAppMode(newAppMode);
@@ -140,7 +140,7 @@ export class AppComponent extends BaseComponent<IProps, IState> {
     super(props);
 
     authAndConnect(this.stores, (qaCleared, qaClearError) => {
-      this.setState({qaCleared, qaClearError});
+      this.setState({ qaCleared, qaClearError });
     });
   }
 
@@ -160,7 +160,7 @@ export class AppComponent extends BaseComponent<IProps, IState> {
   // time.
 
   public render() {
-    const {appConfig, user, ui, db} = this.stores;
+    const { appConfig, user, ui, db } = this.stores;
 
     if (ui.showDemoCreator) {
       return this.renderApp(<DemoCreatorComponent />);
@@ -175,7 +175,7 @@ export class AppComponent extends BaseComponent<IProps, IState> {
     }
 
     if (urlParams.qaClear) {
-      const {qaCleared, qaClearError} = this.state;
+      const { qaCleared, qaClearError } = this.state;
       return this.renderApp(
         <span className="qa-clear">
           {qaCleared ? `QA Cleared: ${qaClearError || "OK"}` : "QA Clearing..."}

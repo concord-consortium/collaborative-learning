@@ -9,7 +9,7 @@ import { DocumentsModelType, DocumentsModel } from "../models/stores/documents";
 import { specStores } from "../models/stores/spec-stores";
 import { UserModel } from "../models/stores/user";
 
-configure({testIdAttribute: "data-test"});
+configure({ testIdAttribute: "data-test" });
 
 const mockGetQueryState = jest.fn();
 jest.mock("react-query", () => ({

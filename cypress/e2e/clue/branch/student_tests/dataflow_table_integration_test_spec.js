@@ -7,8 +7,8 @@ let dataflowToolTile = new DataflowToolTile;
 let tableTile = new TableToolTile;
 const tableTitle = "Table 1";
 const programTitle = "Program 1";
-const programNodes = [{ name: "timer", title: "Timer (on/off)", attribute: "Timer 1"},
-                      { name: "demo-output", title: "Demo Output", attribute: "Demo Output 2"}];
+const programNodes = [{ name: "timer", title: "Timer (on/off)", attribute: "Timer 1" },
+                      { name: "demo-output", title: "Demo Output", attribute: "Demo Output 2" }];
 const linkedTableAttributes = [ "Time (sec)", programNodes[0].attribute, programNodes[1].attribute ];
 const defaultTableAttributes = ["x", "y"];
 const timer1 = 5;

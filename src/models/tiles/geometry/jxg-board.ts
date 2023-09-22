@@ -255,7 +255,7 @@ function addAxes(board: JXG.Board, params: IAddAxesParams) {
   const xAxis = board.create("axis", [ [0, 0], [1, 0] ], {
     name: xName || "x",
     withLabel: true,
-    label: {fontSize: 13, anchorX: "right", position: "rt", offset: [0, 15]},
+    label: { fontSize: 13, anchorX: "right", position: "rt", offset: [0, 15] },
     ...toObj("clientName", xName),
     ...toObj("clientAnnotation", xAnnotation)
   });
@@ -271,7 +271,7 @@ function addAxes(board: JXG.Board, params: IAddAxesParams) {
   const yAxis = board.create("axis", [ [0, 0], [0, 1] ], {
     name: yName || "y",
     withLabel: true,
-    label: {fontSize: 13, position: "rt", offset: [15, 0]},
+    label: { fontSize: 13, position: "rt", offset: [15, 0] },
     ...toObj("clientName", yName),
     ...toObj("clientAnnotation", yAnnotation)
   });

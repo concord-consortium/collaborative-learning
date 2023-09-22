@@ -105,9 +105,9 @@ class Stores implements IStores{
     this.db = params?.db || new DB();
     this.documents = params?.documents || createDocumentsModelWithRequiredDocuments(requiredDocumentTypes);
     this.networkDocuments = params?.networkDocuments || DocumentsModel.create({});
-    this.unit = params?.unit || UnitModel.create({code: "NULL", title: "Null Unit"});
+    this.unit = params?.unit || UnitModel.create({ code: "NULL", title: "Null Unit" });
     const demoName = params?.demoName || this.appConfig.appName;
-    this.demo = params?.demo || DemoModel.create({name: demoName, class: {id: "0", name: "Null Class"}});
+    this.demo = params?.demo || DemoModel.create({ name: demoName, class: { id: "0", name: "Null Class" } });
     this.showDemoCreator = params?.showDemoCreator || false;
     this.supports = params?.supports || SupportsModel.create({});
     this.clipboard = ClipboardModel.create();
@@ -211,7 +211,7 @@ class Stores implements IStores{
     runInAction(() => {
       // read the unit content with full contents now that we have tools
       this.unit = UnitModel.create(unitJson);
-      const {investigation, problem} = this.unit.getProblem(_problemOrdinal);
+      const { investigation, problem } = this.unit.getProblem(_problemOrdinal);
 
       // TODO: make this dynamic like the way the components work. The components
       // access these values from the stores when they need them. This way the values

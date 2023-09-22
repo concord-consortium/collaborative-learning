@@ -11,7 +11,7 @@ export const kImageTileType = "Image";
 
 // This is only used directly by tests
 export function defaultImageContent(options?: IDefaultContentOptions) {
-  return ImageContentModel.create({url: options?.url || placeholderImage});
+  return ImageContentModel.create({ url: options?.url || placeholderImage });
 }
 
 export const ImageContentModel = TileContentModel

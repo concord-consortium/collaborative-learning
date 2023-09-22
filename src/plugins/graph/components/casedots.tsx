@@ -1,16 +1,16 @@
-import {randomUniform, select} from "d3";
-import React, {useCallback, useEffect, useRef, useState} from "react";
-import {CaseData} from "../d3-types";
-import {IDotsRef} from "../graph-types";
-import {ICase} from "../../../models/data/data-set-types";
-import {isAddCasesAction} from "../../../models/data/data-set-actions";
-import {useDragHandlers, usePlotResponders} from "../hooks/use-plot";
-import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
-import {useDataSetContext} from "../imports/hooks/use-data-set-context";
-import {useGraphLayoutContext} from "../models/graph-layout";
-import {handleClickOnDot, setPointCoordinates, setPointSelection} from "../utilities/graph-utils";
-import {useGraphModelContext} from "../models/graph-model";
-import {onAnyAction} from "../../../utilities/mst-utils";
+import { randomUniform, select } from "d3";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { CaseData } from "../d3-types";
+import { IDotsRef } from "../graph-types";
+import { ICase } from "../../../models/data/data-set-types";
+import { isAddCasesAction } from "../../../models/data/data-set-actions";
+import { useDragHandlers, usePlotResponders } from "../hooks/use-plot";
+import { useDataConfigurationContext } from "../hooks/use-data-configuration-context";
+import { useDataSetContext } from "../imports/hooks/use-data-set-context";
+import { useGraphLayoutContext } from "../models/graph-layout";
+import { handleClickOnDot, setPointCoordinates, setPointSelection } from "../utilities/graph-utils";
+import { useGraphModelContext } from "../models/graph-model";
+import { onAnyAction } from "../../../utilities/mst-utils";
 
 export const CaseDots = function CaseDots(props: {
   dotsRef: IDotsRef
@@ -27,7 +27,7 @@ export const CaseDots = function CaseDots(props: {
     randomPointsRef = useRef<Record<string, { x: number, y: number }>>({}),
     dragPointRadius = graphModel.getPointRadius('hover-drag'),
     [dragID, setDragID] = useState(''),
-    currPos = useRef({x: 0, y: 0}),
+    currPos = useRef({ x: 0, y: 0 }),
     target = useRef<any>();
 
   const onDragStart = useCallback((event: MouseEvent) => {
@@ -38,14 +38,14 @@ export const CaseDots = function CaseDots(props: {
         target.current.transition()
           .attr('r', dragPointRadius);
         setDragID(aCaseData.caseID);
-        currPos.current = {x: event.clientX, y: event.clientY};
+        currPos.current = { x: event.clientX, y: event.clientY };
         handleClickOnDot(event, aCaseData.caseID, dataset);
       }
     }, [dragPointRadius, dataset, enableAnimation]),
 
     onDrag = useCallback((event: MouseEvent) => {
       if (dotsRef.current && dragID !== '') {
-        const newPos = {x: event.clientX, y: event.clientY},
+        const newPos = { x: event.clientX, y: event.clientY },
           dx = newPos.x - currPos.current.x,
           dy = newPos.y - currPos.current.y;
         currPos.current = newPos;
@@ -73,10 +73,10 @@ export const CaseDots = function CaseDots(props: {
       }
     }, [dragID, graphModel]);
 
-  useDragHandlers(window, {start: onDragStart, drag: onDrag, end: onDragEnd});
+  useDragHandlers(window, { start: onDragStart, drag: onDrag, end: onDragEnd });
 
   const refreshPointSelection = useCallback(() => {
-    const {pointColor, pointStrokeColor} = graphModel,
+    const { pointColor, pointStrokeColor } = graphModel,
       selectedPointRadius = graphModel.getPointRadius('select');
     dataConfiguration && setPointSelection({
       dotsRef, dataConfiguration, pointRadius: graphModel.getPointRadius(), selectedPointRadius,
@@ -89,7 +89,7 @@ export const CaseDots = function CaseDots(props: {
     const
       pointRadius = graphModel.getPointRadius(),
       selectedPointRadius = graphModel.getPointRadius('select'),
-      {pointColor, pointStrokeColor} = graphModel,
+      { pointColor, pointStrokeColor } = graphModel,
       xLength = layout.getAxisMultiScale('bottom')?.length ?? 0,
       yLength = layout.getAxisMultiScale('left')?.length ?? 0,
       getScreenX = (anID: string) => {
@@ -108,12 +108,12 @@ export const CaseDots = function CaseDots(props: {
   }, [dataset, dataConfiguration, graphModel, layout, dotsRef, enableAnimation]);
 
   useEffect(function initDistribution() {
-    const {cases} = dataset || {};
+    const { cases } = dataset || {};
     const uniform = randomUniform();
 
     const initCases = (_cases?: typeof cases | ICase[]) => {
-      _cases?.forEach(({__id__}) => {
-        randomPointsRef.current[__id__] = {x: uniform(), y: uniform()};
+      _cases?.forEach(({ __id__ }) => {
+        randomPointsRef.current[__id__] = { x: uniform(), y: uniform() };
       });
     };
 
@@ -127,7 +127,7 @@ export const CaseDots = function CaseDots(props: {
     return () => disposer?.();
   }, [dataset]);
 
-  usePlotResponders({dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation});
+  usePlotResponders({ dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation });
 
   return (
     <>

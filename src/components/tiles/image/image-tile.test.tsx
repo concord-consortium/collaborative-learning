@@ -9,7 +9,7 @@ describe("Image Component", () => {
 
   it("calls onUrlChange when content changes", () => {
     const imageContent = ImageContentModel.create();
-    const imageStyle = {background: "url(${imageContent.url})", width: 10, height: 10};
+    const imageStyle = { background: "url(${imageContent.url})", width: 10, height: 10 };
     render(
       <ImageComponent
         ref={null}

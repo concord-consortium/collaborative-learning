@@ -898,7 +898,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           const comment = elems?.find(isComment);
           if (comment) {
             this.handleCreateText(comment);
-            this.setState({selectedComment: comment});
+            this.setState({ selectedComment: comment });
           }
         });
       } else if (activeComment) {
@@ -933,7 +933,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const { board } = this.state;
     const content = this.getContent();
     const ids = [line.point1.id, line.point2.id];
-    const props = [{position: point1}, {position: point2}];
+    const props = [{ position: point1 }, { position: point2 }];
     this.applyChange(() => content.updateObjects(board, ids, props));
     this.setState({ selectedLine: undefined });
   };
@@ -1801,7 +1801,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       if (isComment(text)) {
         const coords = copyCoords(text.coords);
         if (this.isDoubleClick(this.lastPointDown, { evt, coords }) && !readOnly) {
-          this.setState({selectedComment: text});
+          this.setState({ selectedComment: text });
           this.lastPointDown = undefined;
         } else {
           this.lastPointDown = { evt, coords };
@@ -1837,7 +1837,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         if (evt.timeStamp - this.lastBoardDown.evt.timeStamp < clickTimeThreshold) {
           const parentLine = values(text.ancestors)[0];
           if (isLine(parentLine) && !readOnly) {
-            this.setState({selectedLine: parentLine});
+            this.setState({ selectedLine: parentLine });
           }
         }
       }

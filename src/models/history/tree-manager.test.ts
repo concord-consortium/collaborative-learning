@@ -122,7 +122,7 @@ function setupDocument(initialContent? : DocumentContentSnapshotType) {
   const manager = docModel.treeManagerAPI as Instance<typeof TreeManager>;
   const undoStore = manager.undoStore;
 
-  return {docContent, sharedModel, tileContent, manager, undoStore};
+  return { docContent, sharedModel, tileContent, manager, undoStore };
 }
 
 const updateFlag = {
@@ -132,10 +132,10 @@ const updateFlag = {
   records: [
     { action: "/content/tileMap/t1/content/setFlag",
       inversePatches: [
-        { op: "replace", path: "/content/tileMap/t1/content/flag", value: undefined}
+        { op: "replace", path: "/content/tileMap/t1/content/flag", value: undefined }
       ],
       patches: [
-        { op: "replace", path: "/content/tileMap/t1/content/flag", value: true}
+        { op: "replace", path: "/content/tileMap/t1/content/flag", value: true }
       ],
       tree: "test"
     },
@@ -152,10 +152,10 @@ const action1 =   {
   records: [
     { action: "/content/tileMap/t1/content/setActionText",
       inversePatches: [
-        { op: "replace", path: "/content/tileMap/t1/content/actionText", value: undefined}
+        { op: "replace", path: "/content/tileMap/t1/content/actionText", value: undefined }
       ],
       patches: [
-        { op: "replace", path: "/content/tileMap/t1/content/actionText", value: "action 1"}
+        { op: "replace", path: "/content/tileMap/t1/content/actionText", value: "action 1" }
       ],
       tree: "test"
     },
@@ -172,10 +172,10 @@ const action2 =   {
   records: [
     { action: "/content/tileMap/t1/content/setActionText",
       inversePatches: [
-        { op: "replace", path: "/content/tileMap/t1/content/actionText", value: "action 1"}
+        { op: "replace", path: "/content/tileMap/t1/content/actionText", value: "action 1" }
       ],
       patches: [
-        { op: "replace", path: "/content/tileMap/t1/content/actionText", value: "action 2"}
+        { op: "replace", path: "/content/tileMap/t1/content/actionText", value: "action 2" }
       ],
       tree: "test"
     },
@@ -192,10 +192,10 @@ const action3 = {
   records: [
     { action: "/content/tileMap/t1/content/setActionText",
       inversePatches: [
-        { op: "replace", path: "/content/tileMap/t1/content/actionText", value: "action 2"}
+        { op: "replace", path: "/content/tileMap/t1/content/actionText", value: "action 2" }
       ],
       patches: [
-        { op: "replace", path: "/content/tileMap/t1/content/actionText", value: "action 3"}
+        { op: "replace", path: "/content/tileMap/t1/content/actionText", value: "action 3" }
       ],
       tree: "test"
     },
@@ -212,10 +212,10 @@ const action4 = {
   records: [
     { action: "/content/tileMap/t1/content/setActionText",
       inversePatches: [
-        { op: "replace", path: "/content/tileMap/t1/content/actionText", value: "action 3"}
+        { op: "replace", path: "/content/tileMap/t1/content/actionText", value: "action 3" }
       ],
       patches: [
-        { op: "replace", path: "/content/tileMap/t1/content/actionText", value: "action 4"}
+        { op: "replace", path: "/content/tileMap/t1/content/actionText", value: "action 4" }
       ],
       tree: "test"
     },
@@ -254,7 +254,7 @@ jest.mock("firebase/app", () => ({
 }));
 
 it("records multiple history entries", async () => {
-  const {tileContent, manager} = setupDocument();
+  const { tileContent, manager } = setupDocument();
   tileContent.setFlag(true);
   tileContent.setActionText("action 1");
   tileContent.setActionText("action 2");
@@ -269,7 +269,7 @@ it("records multiple history entries", async () => {
 });
 
 it("can replay the history entries", async () => {
-  const {tileContent, manager} = setupDocument();
+  const { tileContent, manager } = setupDocument();
   const history = [
     makeRealHistoryEntry(updateFlag),
     makeRealHistoryEntry(action1),
@@ -278,7 +278,7 @@ it("can replay the history entries", async () => {
     makeRealHistoryEntry(action4),
   ];
 
-  manager.setChangeDocument(CDocument.create({history}));
+  manager.setChangeDocument(CDocument.create({ history }));
   await manager.replayHistoryToTrees();
 
   expect(tileContent.flag).toBe(true);
@@ -302,7 +302,7 @@ async function expectEntryToBeComplete(manager: Instance<typeof TreeManager>, le
   try {
     await when(
       () => changeDocument.history.length >= length && changeDocument.history.at(-1)?.state === "complete",
-      {timeout: 100});
+      { timeout: 100 });
   } catch (e) {
     timedOut = true;
   }

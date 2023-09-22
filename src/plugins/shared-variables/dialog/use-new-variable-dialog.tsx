@@ -17,7 +17,7 @@ interface IUseNewVariableDialog {
 export const useNewVariableDialog = ({
   addVariable, sharedModel, descriptionPrefill, noUndo = false, onClose
 }: IUseNewVariableDialog) => {
-  const [newVariable, setNewVariable] = useState(Variable.create({description: descriptionPrefill || undefined}));
+  const [newVariable, setNewVariable] = useState(Variable.create({ description: descriptionPrefill || undefined }));
 
   const handleClick = () => {
     sharedModel?.addAndInsertVariable(
@@ -25,7 +25,7 @@ export const useNewVariableDialog = ({
       (variable: VariableType) => addVariable(variable),
       noUndo
     );
-    setNewVariable(Variable.create({description: descriptionPrefill || undefined}));
+    setNewVariable(Variable.create({ description: descriptionPrefill || undefined }));
   };
 
   const [show, hideModal] = useCustomModal({

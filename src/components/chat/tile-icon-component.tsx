@@ -8,7 +8,7 @@ interface IProps {
   tileId?: string;
 }
 
-export const TileIconComponent: React.FC<IProps> = ({documentKey, tileId}) => {
+export const TileIconComponent: React.FC<IProps> = ({ documentKey, tileId }) => {
   const tileType = useTypeOfTileInDocumentOrCurriculum(documentKey, tileId);
   const Icon = tileType && getTileComponentInfo(tileType)?.Icon;
   return Icon ? <Icon/> : <DocumentIcon/>;

@@ -1,5 +1,5 @@
 import { IAnyType, types, castToSnapshot } from "mobx-state-tree";
-import {screen} from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { specTextTile } from "../../../components/tiles/text/spec-text-tile";
 import { ISharedModelManager } from "../../../models/shared/shared-model-manager";
 import { TextContentModel, TextContentModelType } from "../../../models/tiles/text/text-content";
@@ -70,14 +70,14 @@ const makeSharedModelManager = (variables?: SharedVariablesType): ISharedModelMa
 const setupContainer = (content: TextContentModelType, variables?: SharedVariablesType) => {
   const sharedModelManager = makeSharedModelManager(variables);
   TestTextContentModelContainer.create(
-    {child: castToSnapshot(content), variables: castToSnapshot(variables)},
-    {sharedModelManager}
+    { child: castToSnapshot(content), variables: castToSnapshot(variables) },
+    { sharedModelManager }
   );
 
   // So far it hasn't been necessary to wait for the MobX reaction to run inside of
   // DocumentContent#afterAttach. It seems to run immediately in the line above, so
   // we can write expectations on this content without waiting.
-  return {content, sharedModelManager};
+  return { content, sharedModelManager };
 };
 
 describe("VariablesPlugin", () => {
@@ -145,7 +145,7 @@ describe("VariablesPlugin", () => {
       const variables = SharedVariables.create();
 
       // setup the environment with a shared model
-      const {sharedModelManager} = setupContainer(textContent, variables);
+      const { sharedModelManager } = setupContainer(textContent, variables);
 
       // override getTileSharedModels so it always returns undefined
       sharedModelManager.getTileSharedModels = jest.fn();
@@ -164,7 +164,7 @@ describe("VariablesPlugin", () => {
   describe("used in TextToolComponent", () => {
 
     it("renders successfully and creates the VariablesPlugin", () => {
-      const {plugins, textTile} = specTextTile({});
+      const { plugins, textTile } = specTextTile({});
       expect(screen.getByTestId("text-tool-wrapper")).toBeInTheDocument();
       expect(screen.getByTestId("ccrte-editor")).toBeInTheDocument();
       const plugin = plugins?.[kVariableTextPluginName];
@@ -174,7 +174,7 @@ describe("VariablesPlugin", () => {
     });
 
     it("finds no chips with empty content and no configured shared model", () => {
-      const {plugins} = specTextTile({});
+      const { plugins } = specTextTile({});
       const plugin = plugins?.[kVariableTextPluginName] as VariablesPlugin;
       expect(plugin.chipVariables).toHaveLength(0);
     });
@@ -185,16 +185,16 @@ describe("VariablesPlugin", () => {
 
       // setup the environment with a shared model
       const sharedModelManager = makeSharedModelManager(variables);
-      const tileModel = TileModel.create({content});
+      const tileModel = TileModel.create({ content });
 
       // Create an MST tree with both the TileModel and the shared variables
       // and the sharedModelManager in the MST tree environment
       TestTileModelContainer.create(
-        {child: castToSnapshot(tileModel), variables: castToSnapshot(variables)},
-        {sharedModelManager}
+        { child: castToSnapshot(tileModel), variables: castToSnapshot(variables) },
+        { sharedModelManager }
       );
 
-      const {plugins} = specTextTile({tileModel});
+      const { plugins } = specTextTile({ tileModel });
 
       const plugin = plugins?.[kVariableTextPluginName] as VariablesPlugin;
       const editor = content.editor;

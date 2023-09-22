@@ -1,14 +1,14 @@
-import React, {memo, useCallback, useEffect, useRef, useState} from "react";
-import {reaction} from "mobx";
-import {ScaleQuantile, scaleQuantile, schemeBlues} from "d3";
-import {useDataConfigurationContext} from "../../hooks/use-data-configuration-context";
-import {isSelectionAction} from "../../../../models/data/data-set-actions";
-import {useGraphLayoutContext} from "../../models/graph-layout";
-import {choroplethLegend} from "./choropleth-legend/choropleth-legend";
-import {useDataSetContext} from "../../imports/hooks/use-data-set-context";
-import {kChoroplethHeight} from "../../graph-types";
-import {axisGap} from "../../imports/components/axis/axis-types";
-import {getStringBounds} from "../../imports/components/axis/axis-utils";
+import React, { memo, useCallback, useEffect, useRef, useState } from "react";
+import { reaction } from "mobx";
+import { ScaleQuantile, scaleQuantile, schemeBlues } from "d3";
+import { useDataConfigurationContext } from "../../hooks/use-data-configuration-context";
+import { isSelectionAction } from "../../../../models/data/data-set-actions";
+import { useGraphLayoutContext } from "../../models/graph-layout";
+import { choroplethLegend } from "./choropleth-legend/choropleth-legend";
+import { useDataSetContext } from "../../imports/hooks/use-data-set-context";
+import { kChoroplethHeight } from "../../graph-types";
+import { axisGap } from "../../imports/components/axis/axis-types";
+import { getStringBounds } from "../../imports/components/axis/axis-utils";
 
 import graphVars from "../graph.scss";
 
@@ -17,7 +17,7 @@ interface INumericLegendProps {
   legendAttrID: string
 }
 
-export const NumericLegend = memo(function NumericLegend({legendAttrID}: INumericLegendProps) {
+export const NumericLegend = memo(function NumericLegend({ legendAttrID }: INumericLegendProps) {
   const dataConfiguration = useDataConfigurationContext(),
     layout = useGraphLayoutContext(),
     dataset = useDataSetContext(),
@@ -64,13 +64,13 @@ export const NumericLegend = memo(function NumericLegend({legendAttrID}: INumeri
   useEffect(function respondToLayoutChange() {
     const disposer = reaction(
       () => {
-        const {graphHeight, graphWidth} = layout,
+        const { graphHeight, graphWidth } = layout,
           legendID = dataConfiguration?.attributeID('legend');
         return [graphHeight, graphWidth, legendID];
       },
       () => {
         refreshScale();
-      }, {fireImmediately: true}
+      }, { fireImmediately: true }
     );
     return () => disposer();
   }, [layout, dataConfiguration, refreshScale]);

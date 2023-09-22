@@ -3,7 +3,7 @@ import { TileContentModel } from "../../models/tiles/tile-content";
 import { kStarterTileType } from "./starter-types";
 
 export function defaultStarterContent(): StarterContentModelType {
-  return StarterContentModel.create({text: "Hello World"});
+  return StarterContentModel.create({ text: "Hello World" });
 }
 
 

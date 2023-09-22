@@ -37,12 +37,12 @@ context('Draw Tool Tile', function () {
     });
     describe("Show/sort", () => {
       it("can open show/sort panel and select objects", () => {
-        drawToolTile.getDrawToolRectangle().click({scrollBehavior: false});
+        drawToolTile.getDrawToolRectangle().click({ scrollBehavior: false });
         drawToolTile.getDrawTile()
           .trigger("mousedown", 100,  50)
           .trigger("mousemove", 250, 150)
           .trigger("mouseup",   250, 150);
-        drawToolTile.getDrawToolEllipse().click({scrollBehavior: false});
+        drawToolTile.getDrawToolEllipse().click({ scrollBehavior: false });
         drawToolTile.getDrawTile()
           .trigger("mousedown", 300,  50)
           .trigger("mousemove", 400, 150)
@@ -54,24 +54,24 @@ context('Draw Tool Tile', function () {
         drawToolTile.getSelectionBox().should("not.exist");
 
         // Open panel
-        drawToolTile.getDrawTileShowSortPanelOpenButton().click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanelOpenButton().click({ scrollBehavior: false });
         drawToolTile.getDrawTileShowSortPanel().should("have.class", "open").and("contain.text", "Rectangle").and("contain.text", "Circle");
         // Click to select
-        drawToolTile.getDrawTileShowSortPanel().get('li:first').should("contain.text", "Circle").click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanel().get('li:first').should("contain.text", "Circle").click({ scrollBehavior: false });
         drawToolTile.getSelectionBox().should("exist");
       });
       it("can hide and show objects", () => {
         drawToolTile.getEllipseDrawing().should("exist");
         // Click 'hide' button - unselects ellipse and makes it invisible
-        drawToolTile.getDrawTileShowSortPanel().get('li:first button.visibility-icon').click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanel().get('li:first button.visibility-icon').click({ scrollBehavior: false });
         drawToolTile.getEllipseDrawing().should("not.exist");
         drawToolTile.getSelectionBox().should("not.exist");
         // Now select it - should show as a faint 'ghost'
-        drawToolTile.getDrawTileShowSortPanel().get('li:first').click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanel().get('li:first').click({ scrollBehavior: false });
         drawToolTile.getSelectionBox().should("exist");
         drawToolTile.getGhostGroup().should("exist").get('ellipse').should("exist");
         // Make visible again
-        drawToolTile.getDrawTileShowSortPanel().get('li:first button.visibility-icon').click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanel().get('li:first button.visibility-icon').click({ scrollBehavior: false });
         drawToolTile.getEllipseDrawing().should("exist");
         drawToolTile.getGhostGroup().should("not.exist");        
       });
@@ -85,20 +85,20 @@ context('Draw Tool Tile', function () {
       });
       it("can delete objects and close panel", () => {
         // Delete objects
-        drawToolTile.getDrawTileShowSortPanel().get('li:first').should("contain.text", "Rectangle").click({scrollBehavior: false});
-        drawToolTile.getDrawToolDelete().should("not.have.class", "disabled").click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanel().get('li:first').should("contain.text", "Rectangle").click({ scrollBehavior: false });
+        drawToolTile.getDrawToolDelete().should("not.have.class", "disabled").click({ scrollBehavior: false });
         drawToolTile.getDrawTileShowSortPanel().get('li').should("have.length", 1);
-        drawToolTile.getDrawTileShowSortPanel().get('li:first').should("contain.text", "Circle").click({scrollBehavior: false});
-        drawToolTile.getDrawToolDelete().should("not.have.class", "disabled").click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanel().get('li:first').should("contain.text", "Circle").click({ scrollBehavior: false });
+        drawToolTile.getDrawToolDelete().should("not.have.class", "disabled").click({ scrollBehavior: false });
         drawToolTile.getDrawTileShowSortPanel().get('li').should("not.exist");
         // Close panel
-        drawToolTile.getDrawTileShowSortPanelCloseButton().click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanelCloseButton().click({ scrollBehavior: false });
         drawToolTile.getDrawTileShowSortPanel().should("have.class", "closed");
       });
     });
     describe("Freehand", () => {
       it("verify draw a line", () => {
-        drawToolTile.getDrawToolFreehand().click({scrollBehavior: false});
+        drawToolTile.getDrawToolFreehand().click({ scrollBehavior: false });
         drawToolTile.getDrawTile()
           .trigger("mousedown", 350, 50)
           .trigger("mousemove", 350, 100)
@@ -107,13 +107,13 @@ context('Draw Tool Tile', function () {
         drawToolTile.getFreehandDrawing().should("exist").and("have.length", 1);
       });
       it("shows up in show/sort panel", () => {
-        drawToolTile.getDrawTileShowSortPanelOpenButton().click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanelOpenButton().click({ scrollBehavior: false });
         drawToolTile.getDrawTileShowSortPanel().should("have.class", "open")
           .get("li").should("have.length", 1).and("contain.text", "Freehand");
-        drawToolTile.getDrawTileShowSortPanelCloseButton().click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanelCloseButton().click({ scrollBehavior: false });
       });
       it("selects freehand drawing", () => {
-        drawToolTile.getDrawToolSelect().click({scrollBehavior: false});
+        drawToolTile.getDrawToolSelect().click({ scrollBehavior: false });
         // First make sure we don't select it even if we are inside of its
         // bounding box
         drawToolTile.getDrawTile()
@@ -129,9 +129,9 @@ context('Draw Tool Tile', function () {
         drawToolTile.getDrawToolDelete().should("not.have.class", "disabled");
       });
       it("verify change outline color", () => {
-        drawToolTile.getDrawToolStrokeColor().click({scrollBehavior: false});
+        drawToolTile.getDrawToolStrokeColor().click({ scrollBehavior: false });
         cy.get(".toolbar-palette.stroke-color .palette-buttons").should("be.visible");
-        cy.get(".toolbar-palette.stroke-color .palette-buttons .color-swatch").eq(1).click({scrollBehavior: false});
+        cy.get(".toolbar-palette.stroke-color .palette-buttons .color-swatch").eq(1).click({ scrollBehavior: false });
         drawToolTile.getFreehandDrawing().first().should("have.attr", "stroke").and("eq", "#eb0000");
       });
       it("deletes freehand drawing", () => {
@@ -143,13 +143,13 @@ context('Draw Tool Tile', function () {
         //   .trigger("mousedown", 350, 100)
         //   .trigger("mouseup", 350, 100);
         drawToolTile.getSelectionBox().should("exist");
-        drawToolTile.getDrawToolDelete().should("not.have.class", "disabled").click({scrollBehavior: false});
+        drawToolTile.getDrawToolDelete().should("not.have.class", "disabled").click({ scrollBehavior: false });
         drawToolTile.getFreehandDrawing().should("not.exist");
       });
     });
     describe("Vector", () => {
       it("verify draw vector", () => {
-        drawToolTile.getDrawToolVector().click({scrollBehavior: false});
+        drawToolTile.getDrawToolVector().click({ scrollBehavior: false });
         drawToolTile.getDrawTile()
           .trigger("mousedown", 250, 50)
           .trigger("mousemove", 100, 50)
@@ -157,10 +157,10 @@ context('Draw Tool Tile', function () {
         drawToolTile.getVectorDrawing().should("exist").and("have.length", 1);
       });
       it("shows up in show/sort panel", () => {
-        drawToolTile.getDrawTileShowSortPanelOpenButton().click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanelOpenButton().click({ scrollBehavior: false });
         drawToolTile.getDrawTileShowSortPanel().should("have.class", "open")
           .get("li").should("have.length", 1).and("contain.text", "Line");
-        drawToolTile.getDrawTileShowSortPanelCloseButton().click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanelCloseButton().click({ scrollBehavior: false });
       });
       it("verify after creation, object is selected", () => {
         drawToolTile.getDrawToolSelect().should("have.class", "selected");
@@ -169,31 +169,31 @@ context('Draw Tool Tile', function () {
         drawToolTile.getDrawToolDelete().should("not.have.class", "disabled");
       });
       it("verify change outline color", () => {
-        drawToolTile.getDrawToolStrokeColor().click({scrollBehavior: false});
+        drawToolTile.getDrawToolStrokeColor().click({ scrollBehavior: false });
         cy.get(".toolbar-palette.stroke-color .palette-buttons").should("be.visible");
-        cy.get(".toolbar-palette.stroke-color .palette-buttons .color-swatch").eq(2).click({scrollBehavior: false});
+        cy.get(".toolbar-palette.stroke-color .palette-buttons .color-swatch").eq(2).click({ scrollBehavior: false });
         drawToolTile.getVectorDrawing().first().should("have.attr", "stroke").and("eq", "#008a00");
-        drawToolTile.getDrawToolStrokeColor().click({scrollBehavior: false});
+        drawToolTile.getDrawToolStrokeColor().click({ scrollBehavior: false });
         cy.get(".toolbar-palette.stroke-color .palette-buttons").should("be.visible");
-        cy.get(".toolbar-palette.stroke-color .palette-buttons .color-swatch").first().click({scrollBehavior: false});
+        cy.get(".toolbar-palette.stroke-color .palette-buttons .color-swatch").first().click({ scrollBehavior: false });
       });
       it("change line to arrow", () => {
         drawToolTile.getVectorDrawing().children().its("length").should("eq", 1); // Only a line, no arrowheads yet.
-        drawToolTile.getDrawToolVectorSubmenu().click({scrollBehavior: false});
+        drawToolTile.getDrawToolVectorSubmenu().click({ scrollBehavior: false });
         cy.get(".toolbar-palette.vectors .drawing-tool-buttons").should("be.visible");
-        cy.get(".toolbar-palette.vectors .drawing-tool-buttons div:nth-child(3) button").click({scrollBehavior: false});
+        cy.get(".toolbar-palette.vectors .drawing-tool-buttons div:nth-child(3) button").click({ scrollBehavior: false });
         drawToolTile.getVectorDrawing().children().its("length").should("eq", 3); // Now three items in group...
         drawToolTile.getVectorDrawing().find("polygon").its("length").should("eq", 2); // including two arrowheads.
         // selecting from this submenu activates the vector tool, which de-selects the object.
         });
       it("deletes vector drawing", () => {
         // re-select the object using a selection rectangle.
-        drawToolTile.getDrawToolSelect().click({scrollBehavior: false});
+        drawToolTile.getDrawToolSelect().click({ scrollBehavior: false });
         drawToolTile.getDrawTile()
           .trigger("mousedown", 90, 40)
           .trigger("mousemove", 260, 60)
           .trigger("mouseup",   260, 60);
-        drawToolTile.getDrawToolDelete().click({scrollBehavior: false});
+        drawToolTile.getDrawToolDelete().click({ scrollBehavior: false });
         drawToolTile.getVectorDrawing().should("not.exist");
       });
     });
@@ -207,10 +207,10 @@ context('Draw Tool Tile', function () {
         drawToolTile.getRectangleDrawing().should("exist").and("have.length", 1);
       });
       it("shows up in show/sort panel", () => {
-        drawToolTile.getDrawTileShowSortPanelOpenButton().click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanelOpenButton().click({ scrollBehavior: false });
         drawToolTile.getDrawTileShowSortPanel().should("have.class", "open")
           .get("li").should("have.length", 1).and("contain.text", "Rectangle");
-        drawToolTile.getDrawTileShowSortPanelCloseButton().click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanelCloseButton().click({ scrollBehavior: false });
       });
       it("verify change outline color", () => {
         drawToolTile.getRectangleDrawing().first().should("have.attr", "stroke").and("eq", "#000000");
@@ -246,13 +246,13 @@ context('Draw Tool Tile', function () {
           // Get the rectangle to be hovered. In the code we are listening to
           // `onMouseEnter` but in Cypress triggering a "mouseenter" event
           // doesn't work. Triggering a "mouseover" does work for some reason.
-          .trigger("mouseover", {scrollBehavior: false});
+          .trigger("mouseover", { scrollBehavior: false });
 
         // The hover box is rendered as a selection-box with a different color
         drawToolTile.getHighlightBox().should("exist").should("have.attr", "stroke").and("eq", "#bbdd00");
 
         // The best way I found to remove the hover was to delete the rectangle
-        drawToolTile.getRectangleDrawing().first().click({force: true, scrollBehavior: false});
+        drawToolTile.getRectangleDrawing().first().click({ force: true, scrollBehavior: false });
         drawToolTile.getDrawToolDelete().click();
         drawToolTile.getHighlightBox().should("not.exist");
 
@@ -275,7 +275,7 @@ context('Draw Tool Tile', function () {
 
         // Get the rectangle to be hovered, see above for more info.
         drawToolTile.getRectangleDrawing()
-          .trigger("mouseover", {scrollBehavior: false});
+          .trigger("mouseover", { scrollBehavior: false });
         drawToolTile.getHighlightBox().should("exist").should("have.attr", "stroke").and("eq", "#bbdd00");
 
         drawToolTile.getDrawTile()
@@ -295,8 +295,8 @@ context('Draw Tool Tile', function () {
         // starting from top edge
         drawToolTile.getDrawToolRectangle().click();
         drawToolTile.getDrawTile()
-          .trigger("mousedown", 100, 50, {altKey: true})
-          .trigger("mousemove", 100, 70, {altKey: true})
+          .trigger("mousedown", 100, 50, { altKey: true })
+          .trigger("mousemove", 100, 70, { altKey: true })
           .trigger("mouseup",   100, 70);
 
         drawToolTile.getRectangleDrawing().should("exist").and("have.length", 1);
@@ -306,8 +306,8 @@ context('Draw Tool Tile', function () {
         // starting from the left edge
         drawToolTile.getDrawToolRectangle().click();
         drawToolTile.getDrawTile()
-          .trigger("mousedown", 200, 50, {altKey: true})
-          .trigger("mousemove", 230, 50, {altKey: true})
+          .trigger("mousedown", 200, 50, { altKey: true })
+          .trigger("mousemove", 230, 50, { altKey: true })
           .trigger("mouseup",   230, 50);
         drawToolTile.getRectangleDrawing().should("exist").and("have.length", 2);
         drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "30");
@@ -316,8 +316,8 @@ context('Draw Tool Tile', function () {
         // draw a square starting at the bottom edge
         drawToolTile.getDrawToolRectangle().click();
         drawToolTile.getDrawTile()
-          .trigger("mousedown", 300, 90, {altKey: true})
-          .trigger("mousemove", 300, 50, {altKey: true})
+          .trigger("mousedown", 300, 90, { altKey: true })
+          .trigger("mousemove", 300, 50, { altKey: true })
           .trigger("mouseup",   300, 50);
         drawToolTile.getRectangleDrawing().should("exist").and("have.length", 3);
         drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "40");
@@ -326,8 +326,8 @@ context('Draw Tool Tile', function () {
         // draw a square starting at the right edge
         drawToolTile.getDrawToolRectangle().click();
         drawToolTile.getDrawTile()
-          .trigger("mousedown", 450, 50, {altKey: true})
-          .trigger("mousemove", 400, 50, {altKey: true})
+          .trigger("mousedown", 450, 50, { altKey: true })
+          .trigger("mousemove", 400, 50, { altKey: true })
           .trigger("mouseup",   400, 50);
         drawToolTile.getRectangleDrawing().should("exist").and("have.length", 4);
         drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "50");
@@ -336,8 +336,8 @@ context('Draw Tool Tile', function () {
         // Diagonal from top right to bottom left with the width 60 and height 50
         drawToolTile.getDrawToolRectangle().click();
         drawToolTile.getDrawTile()
-          .trigger("mousedown", 560, 50,  {altKey: true})
-          .trigger("mousemove", 500, 100, {altKey: true})
+          .trigger("mousedown", 560, 50,  { altKey: true })
+          .trigger("mousemove", 500, 100, { altKey: true })
           .trigger("mouseup",   500, 100);
         drawToolTile.getRectangleDrawing().should("exist").and("have.length", 5);
         drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "60");
@@ -346,8 +346,8 @@ context('Draw Tool Tile', function () {
         // Diagonal from bottom right to top left with the width 50 and the height 70
         drawToolTile.getDrawToolRectangle().click();
         drawToolTile.getDrawTile()
-          .trigger("mousedown", 650, 120, {altKey: true})
-          .trigger("mousemove", 600, 50,  {altKey: true})
+          .trigger("mousedown", 650, 120, { altKey: true })
+          .trigger("mousemove", 600, 50,  { altKey: true })
           .trigger("mouseup",   600, 50);
         drawToolTile.getRectangleDrawing().should("exist").and("have.length", 6);
         drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "70");
@@ -359,17 +359,17 @@ context('Draw Tool Tile', function () {
         // delete the first 4 with the toolbar button
         for (let i=0; i<4; i++) {
           drawToolTile.getDrawToolSelect().click();
-          drawToolTile.getRectangleDrawing().first().click({force:true, scrollBehavior: false});
+          drawToolTile.getRectangleDrawing().first().click({ force:true, scrollBehavior: false });
           drawToolTile.getDrawToolDelete().click();
         }
         // Delete with backspace key
         drawToolTile.getDrawToolSelect().click();
-        drawToolTile.getRectangleDrawing().first().click({force:true, scrollBehavior: false});
+        drawToolTile.getRectangleDrawing().first().click({ force:true, scrollBehavior: false });
         drawToolTile.getDrawTileComponent().type("{backspace}");
 
         // Delete with delete key
         drawToolTile.getDrawToolSelect().click();
-        drawToolTile.getRectangleDrawing().first().click({force:true, scrollBehavior: false});
+        drawToolTile.getRectangleDrawing().first().click({ force:true, scrollBehavior: false });
         drawToolTile.getDrawTileComponent().type("{del}");
 
         drawToolTile.getRectangleDrawing().should("not.exist");
@@ -385,16 +385,16 @@ context('Draw Tool Tile', function () {
         drawToolTile.getEllipseDrawing().should("exist").and("have.length", 1);
       });
       it("shows up in show/sort panel", () => {
-        drawToolTile.getDrawTileShowSortPanelOpenButton().click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanelOpenButton().click({ scrollBehavior: false });
         drawToolTile.getDrawTileShowSortPanel().should("have.class", "open")
           .get("li").should("have.length", 1).and("contain.text", "Ellipse");
-        drawToolTile.getDrawTileShowSortPanelCloseButton().click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanelCloseButton().click({ scrollBehavior: false });
       });
       it("verify draw circle", () => {
         drawToolTile.getDrawToolEllipse().click();
         drawToolTile.getDrawTile()
-          .trigger("mousedown", 450,  50, {altKey: true})
-          .trigger("mousemove", 450, 150, {altKey: true})
+          .trigger("mousedown", 450,  50, { altKey: true })
+          .trigger("mousemove", 450, 150, { altKey: true })
           .trigger("mouseup",   450, 150);
         drawToolTile.getEllipseDrawing().should("exist").and("have.length", 2);
         drawToolTile.getEllipseDrawing().last().should("have.attr", "rx").and("eq", "100");
@@ -403,9 +403,9 @@ context('Draw Tool Tile', function () {
       it("deletes ellipse drawing", () => {
         drawToolTile.getDrawTile().click();
         drawToolTile.getDrawToolSelect().click();
-        drawToolTile.getEllipseDrawing().first().click({force:true, scrollBehavior: false});
+        drawToolTile.getEllipseDrawing().first().click({ force:true, scrollBehavior: false });
         drawToolTile.getDrawToolDelete().click();
-        drawToolTile.getEllipseDrawing().first().click({force:true, scrollBehavior: false});
+        drawToolTile.getEllipseDrawing().first().click({ force:true, scrollBehavior: false });
         drawToolTile.getDrawToolDelete().click();
         drawToolTile.getEllipseDrawing().should("not.exist");
       });
@@ -419,10 +419,10 @@ context('Draw Tool Tile', function () {
         drawToolTile.getImageDrawing().should("exist").and("have.length", 1);
       });
       it("shows up in show/sort panel", () => {
-        drawToolTile.getDrawTileShowSortPanelOpenButton().click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanelOpenButton().click({ scrollBehavior: false });
         drawToolTile.getDrawTileShowSortPanel().should("have.class", "open")
           .get("li").should("have.length", 1).and("contain.text", "Image");
-        drawToolTile.getDrawTileShowSortPanelCloseButton().click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanelCloseButton().click({ scrollBehavior: false });
       });
       it("verify stamp images", () => {
         drawToolTile.getImageDrawing().eq(0).should("have.attr", "href").and("contain", "coin.png");
@@ -444,55 +444,55 @@ context('Draw Tool Tile', function () {
       it("deletes stamp drawing", () => {
         drawToolTile.getDrawToolSelect().click();
         // drawToolTile.getImageDrawing().click({force:true, scrollBehavior: false});
-        drawToolTile.getImageDrawing().eq(0).click({force:true, scrollBehavior: false});
+        drawToolTile.getImageDrawing().eq(0).click({ force:true, scrollBehavior: false });
         drawToolTile.getDrawToolDelete().click();
-        drawToolTile.getImageDrawing().eq(1).click({force:true, scrollBehavior: false});
+        drawToolTile.getImageDrawing().eq(1).click({ force:true, scrollBehavior: false });
         drawToolTile.getDrawToolDelete().click();
-        drawToolTile.getImageDrawing().click({force:true, scrollBehavior: false});
+        drawToolTile.getImageDrawing().click({ force:true, scrollBehavior: false });
         drawToolTile.getDrawToolDelete().click();
         drawToolTile.getImageDrawing().should("not.exist");
       });
     });
     describe("Text", () => {
       it("adds text object", () => {
-        drawToolTile.getDrawToolText().click({scrollBehavior: false});
+        drawToolTile.getDrawToolText().click({ scrollBehavior: false });
         drawToolTile.getDrawTile()
           .trigger("mousedown", 100,  100)
           .trigger("mouseup", 100, 100);
           drawToolTile.getTextDrawing().should("exist").and("have.length", 1);
       });
       it("shows up in show/sort panel", () => {
-        drawToolTile.getDrawTileShowSortPanelOpenButton().click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanelOpenButton().click({ scrollBehavior: false });
         drawToolTile.getDrawTileShowSortPanel().should("have.class", "open")
           .get("li").should("have.length", 1).and("contain.text", "Text");
-        drawToolTile.getDrawTileShowSortPanelCloseButton().click({scrollBehavior: false});
+        drawToolTile.getDrawTileShowSortPanelCloseButton().click({ scrollBehavior: false });
       });
       it("edits text content of object", () => {
         // Click inside drawing box to enter edit mode
         drawToolTile.getDrawTile()
           .trigger("mousedown", 150,  150)
           .trigger("mouseup", 150, 150);
-          drawToolTile.getTextDrawing().get('textarea').type("The five boxing wizards jump quickly.{enter}", {scrollBehavior: false});
+          drawToolTile.getTextDrawing().get('textarea').type("The five boxing wizards jump quickly.{enter}", { scrollBehavior: false });
           drawToolTile.getTextDrawing().get('text tspan').should("exist").and("have.length", 6);
       });
       it("deletes text object", () => {
-        drawToolTile.getDrawToolSelect().click({scrollBehavior: false});
+        drawToolTile.getDrawToolSelect().click({ scrollBehavior: false });
         drawToolTile.getDrawTile()
           .trigger("mousedown", 150,  150)
           .trigger("mouseup", 150, 150);
         drawToolTile.getSelectionBox().should("exist");
-        drawToolTile.getDrawToolDelete().should("not.have.class", "disabled").click({scrollBehavior: false});
+        drawToolTile.getDrawToolDelete().should("not.have.class", "disabled").click({ scrollBehavior: false });
         drawToolTile.getTextDrawing().should("not.exist");
       });
     });
     describe("Group", () => {
       it("can group and ungroup", () => {
-        drawToolTile.getDrawToolRectangle().click({scrollBehavior: false});
+        drawToolTile.getDrawToolRectangle().click({ scrollBehavior: false });
         drawToolTile.getDrawTile()
           .trigger("mousedown", 250, 50)
           .trigger("mousemove", 100, 150)
           .trigger("mouseup",   100, 150);
-        drawToolTile.getDrawToolEllipse().click({scrollBehavior: false});
+        drawToolTile.getDrawToolEllipse().click({ scrollBehavior: false });
         drawToolTile.getDrawTile()
           .trigger("mousedown", 50,  100)
           .trigger("mousemove", 100, 150)

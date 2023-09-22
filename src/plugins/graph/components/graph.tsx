@@ -1,35 +1,35 @@
-import {observer} from "mobx-react-lite";
-import {appConfig} from "../../../initialize-app";
-import React, {MutableRefObject, useEffect, useMemo, useRef} from "react";
-import {select} from "d3";
-import {GraphController} from "../models/graph-controller";
-import {DroppableAddAttribute} from "./droppable-add-attribute";
-import {Background} from "./background";
-import {DroppablePlot} from "./droppable-plot";
-import {AxisPlace, AxisPlaces} from "../imports/components/axis/axis-types";
-import {GraphAxis} from "./graph-axis";
-import {attrRoleToGraphPlace, graphPlaceToAttrRole, IDotsRef, kGraphClass} from "../graph-types";
-import {ScatterDots} from "./scatterdots";
-import {DotPlotDots} from "./dotplotdots";
-import {CaseDots} from "./casedots";
-import {ChartDots} from "./chartdots";
-import {Marquee} from "./marquee";
-import {DataConfigurationContext} from "../hooks/use-data-configuration-context";
-import {useDataSetContext} from "../imports/hooks/use-data-set-context";
-import {useGraphModel} from "../hooks/use-graph-model";
-import {setNiceDomain, startAnimation} from "../utilities/graph-utils";
-import {IAxisModel} from "../imports/components/axis/models/axis-model";
-import {GraphPlace} from "../imports/components/axis-graph-shared";
-import {useGraphLayoutContext} from "../models/graph-layout";
-import {isSetAttributeIDAction, useGraphModelContext} from "../models/graph-model";
-import {useInstanceIdContext} from "../imports/hooks/use-instance-id-context";
-import {MarqueeState} from "../models/marquee-state";
-import {Legend} from "./legend/legend";
-import {MultiLegend} from "./legend/multi-legend";
-import {AttributeType} from "../../../models/data/attribute";
-import {IDataSet} from "../../../models/data/data-set";
-import {useDataTips} from "../hooks/use-data-tips";
-import {onAnyAction} from "../../../utilities/mst-utils";
+import { observer } from "mobx-react-lite";
+import { appConfig } from "../../../initialize-app";
+import React, { MutableRefObject, useEffect, useMemo, useRef } from "react";
+import { select } from "d3";
+import { GraphController } from "../models/graph-controller";
+import { DroppableAddAttribute } from "./droppable-add-attribute";
+import { Background } from "./background";
+import { DroppablePlot } from "./droppable-plot";
+import { AxisPlace, AxisPlaces } from "../imports/components/axis/axis-types";
+import { GraphAxis } from "./graph-axis";
+import { attrRoleToGraphPlace, graphPlaceToAttrRole, IDotsRef, kGraphClass } from "../graph-types";
+import { ScatterDots } from "./scatterdots";
+import { DotPlotDots } from "./dotplotdots";
+import { CaseDots } from "./casedots";
+import { ChartDots } from "./chartdots";
+import { Marquee } from "./marquee";
+import { DataConfigurationContext } from "../hooks/use-data-configuration-context";
+import { useDataSetContext } from "../imports/hooks/use-data-set-context";
+import { useGraphModel } from "../hooks/use-graph-model";
+import { setNiceDomain, startAnimation } from "../utilities/graph-utils";
+import { IAxisModel } from "../imports/components/axis/models/axis-model";
+import { GraphPlace } from "../imports/components/axis-graph-shared";
+import { useGraphLayoutContext } from "../models/graph-layout";
+import { isSetAttributeIDAction, useGraphModelContext } from "../models/graph-model";
+import { useInstanceIdContext } from "../imports/hooks/use-instance-id-context";
+import { MarqueeState } from "../models/marquee-state";
+import { Legend } from "./legend/legend";
+import { MultiLegend } from "./legend/multi-legend";
+import { AttributeType } from "../../../models/data/attribute";
+import { IDataSet } from "../../../models/data/data-set";
+import { useDataTips } from "../hooks/use-data-tips";
+import { onAnyAction } from "../../../utilities/mst-utils";
 import { Adornments } from "../adornments/adornments";
 
 import "./graph.scss";
@@ -41,10 +41,10 @@ interface IProps {
   dotsRef: IDotsRef
 }
 
-export const Graph = observer(function Graph({graphController, graphRef, dotsRef}: IProps) {
+export const Graph = observer(function Graph({ graphController, graphRef, dotsRef }: IProps) {
   const graphModel = useGraphModelContext(),
-    {autoAdjustAxes, enableAnimation} = graphController,
-    {plotType} = graphModel,
+    { autoAdjustAxes, enableAnimation } = graphController,
+    { plotType } = graphModel,
     instanceId = useInstanceIdContext(),
     marqueeState = useMemo<MarqueeState>(() => new MarqueeState(), []),
     dataset = useDataSetContext(),
@@ -118,7 +118,7 @@ export const Graph = observer(function Graph({graphController, graphRef, dotsRef
     }
   };
 
-  useDataTips({dotsRef, dataset, graphModel, enableAnimation});
+  useDataTips({ dotsRef, dataset, graphModel, enableAnimation });
 
   const renderPlotComponent = () => {
     const props = {
@@ -171,7 +171,7 @@ export const Graph = observer(function Graph({graphController, graphRef, dotsRef
     return droppables;
   };
 
-  useGraphModel({dotsRef, graphModel, enableAnimation, instanceId});
+  useGraphModel({ dotsRef, graphModel, enableAnimation, instanceId });
 
   return (
     <DataConfigurationContext.Provider value={graphModel.config}>

@@ -99,7 +99,7 @@ export class Logger {
 
   private createLogMessage(
     event: string,
-    parameters?: {section?: string},
+    parameters?: { section?: string },
     method: LogEventMethod = LogEventMethod.DO
   ): LogMessage {
     const {
@@ -108,7 +108,7 @@ export class Logger {
       ui: { activeNavTab, navTabContentShown, problemWorkspace, teacherPanelKey },
       user: { activityUrl, classHash, id, isStudent, isTeacher, portal, type, currentGroupId,
               loggingRemoteEndpoint, firebaseDisconnects, loggingDisconnects, networkStatusAlerts
-    }} = this.stores;
+    } } = this.stores;
     // only log disconnect counts if there have been any disconnections
     const totalDisconnects = firebaseDisconnects + loggingDisconnects + networkStatusAlerts;
     const disconnects = totalDisconnects

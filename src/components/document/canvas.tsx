@@ -125,8 +125,8 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderContent() {
-    const {content, document, showPlayback, viaTeacherDashboard, ...others} = this.props;
-    const {showPlaybackControls} = this.state;
+    const { content, document, showPlayback, viaTeacherDashboard, ...others } = this.props;
+    const { showPlaybackControls } = this.state;
     const documentToShow = this.getDocumentToShow();
     const documentContent = content || documentToShow?.content; // we only pass in content if it is a problem panel
     const typeClass = document?.type === "planning" ? "planning-doc" : "";
@@ -144,7 +144,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
             content={documentContent}
             documentId={documentToShow?.key}
             onScroll={(x: number, y: number) => this.setState({ documentScrollX: x, documentScrollY: y })}
-            {...{typeClass, viaTeacherDashboard, ...others}}
+            {...{ typeClass, viaTeacherDashboard, ...others }}
           />
           {showPlayback && (
             <PlaybackComponent
@@ -166,7 +166,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
     if (document && DEBUG_CANVAS) {
       return (
         <div className="canvas-debug">
-          <span style={{fontSize: "1.5em"}}>{document.key}</span>
+          <span style={{ fontSize: "1.5em" }}>{document.key}</span>
         </div>
       );
     }
@@ -177,7 +177,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
     if (overlayMessage) {
       return (
         <div className="canvas-overlay-message">
-          <span style={{fontSize: "1.5em"}}>{overlayMessage}</span>
+          <span style={{ fontSize: "1.5em" }}>{overlayMessage}</span>
         </div>
       );
     }
@@ -213,7 +213,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
       return;
     }
     const json = getSnapshot(documentContent);
-    const jsonString =  stringify(json, {maxLength: 100});
+    const jsonString =  stringify(json, { maxLength: 100 });
     navigator.clipboard.writeText(jsonString);
   };
 
@@ -278,7 +278,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
       if (prevState.historyDocumentCopy) {
         destroy(prevState.historyDocumentCopy);
       }
-      logHistoryEvent({documentId: this.props.document?.key || '',
+      logHistoryEvent({ documentId: this.props.document?.key || '',
         action: showPlaybackControls ? "showControls": "hideControls" });
       return {
         showPlaybackControls,
@@ -303,7 +303,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
   };
 
   private getDocumentToShow = () => {
-    const {showPlaybackControls, historyDocumentCopy: documentToShow} = this.state;
+    const { showPlaybackControls, historyDocumentCopy: documentToShow } = this.state;
     if (showPlaybackControls && documentToShow) {
       return documentToShow;
     } else {

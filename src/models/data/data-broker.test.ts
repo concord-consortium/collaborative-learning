@@ -9,7 +9,7 @@ describe("DataBroker", () => {
 
   beforeEach(() => {
     broker = new DataBroker();
-    dsEmpty = DataSet.create({ name: "empty"});
+    dsEmpty = DataSet.create({ name: "empty" });
     dsCases = DataSet.create({ name: "cases" });
     dsCases.addAttributeWithID({ name: "a" });
     dsCases.addCasesWithIDs([{ a: 1, __id__: "c1" }, { a: 2, __id__: "c2" }, { a: 3, __id__: "c3" }]);

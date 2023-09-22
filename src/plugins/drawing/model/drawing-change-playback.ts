@@ -63,7 +63,7 @@ export const playbackChanges = (changes: string[]) => {
           });
           break;
         case "update": {
-          const { ids, update: { prop, newValue }} = change.data;
+          const { ids, update: { prop, newValue } } = change.data;
           ids.forEach(_id => {
             if (_id === id) {
               applyPropertyChange(object, prop, newValue);

@@ -17,8 +17,8 @@ interface DocumentBrowserScrollerProps {
   onSelectDocument: (document: DocumentModelType) => void;
 }
 
-export const DocumentBrowserScroller =
-    ({subTab, tabSpec, openDocumentKey, openSecondaryDocumentKey, onSelectDocument}: DocumentBrowserScrollerProps) => {
+export const DocumentBrowserScroller = ({ subTab, tabSpec, openDocumentKey, openSecondaryDocumentKey,
+    onSelectDocument }: DocumentBrowserScrollerProps) => {
   const [scrollerCollapsed, setScrollerCollapsed] = useState(false);
   const [collectionElement, setCollectionElement] = useState<HTMLDivElement>();
   const documentScrollerRef = useRef<HTMLDivElement>(null);
@@ -30,7 +30,7 @@ export const DocumentBrowserScroller =
 
   useEffect(() => {
     if(scrollToLocation !== undefined) {
-      collectionElement?.scrollTo({left: scrollToLocation, behavior: "smooth"});
+      collectionElement?.scrollTo({ left: scrollToLocation, behavior: "smooth" });
     }
   }, [collectionElement, scrollToLocation]);
 
@@ -60,7 +60,7 @@ export const DocumentBrowserScroller =
 
   return (
     <>
-      <div className={classNames("document-scroller", tabSpec.tab, {"collapsed": scrollerCollapsed})}
+      <div className={classNames("document-scroller", tabSpec.tab, { "collapsed": scrollerCollapsed })}
           ref={documentScrollerRef}>
         <DocumentCollectionList
             setCollectionElement={setCollectionElement}
@@ -81,7 +81,7 @@ export const DocumentBrowserScroller =
         }
       </div>
       <div className={classNames("collapse-scroller-button", "themed", tabSpec.tab,
-                {"collapsed": scrollerCollapsed})} onClick={handleCollapseScroller}>
+                { "collapsed": scrollerCollapsed })} onClick={handleCollapseScroller}>
         <CollapseScrollerIcon className={`scroller-icon ${tabSpec.tab}`}/>
       </div>
     </>
@@ -94,7 +94,7 @@ interface IScrollEndControlProps {
   onScroll: (side: string) => void
 }
 
-const ScrollEndControl = ({side, tab, onScroll}: IScrollEndControlProps) => {
+const ScrollEndControl = ({ side, tab, onScroll }: IScrollEndControlProps) => {
   return (
     <div className={classNames("scroller-controls", side)}>
       <ScrollButton side={side} theme={tab} onClick={() => onScroll(side)} />
@@ -109,7 +109,7 @@ interface IScrollButtonProps {
   theme: string;
 }
 
-export const ScrollButton = ({className, onClick, side, theme}: IScrollButtonProps) => {
+export const ScrollButton = ({ className, onClick, side, theme }: IScrollButtonProps) => {
   return (
     <div className={classNames("scroll-arrow-button", "themed", theme, side, className)}
           onClick={onClick}>

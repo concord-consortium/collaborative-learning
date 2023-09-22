@@ -151,7 +151,7 @@ export const UIModel = types
       dialogResolver = undefined;
     };
 
-    const setOrAppendTileIdToSelection = (tileId?: string, options?: {append: boolean}) => {
+    const setOrAppendTileIdToSelection = (tileId?: string, options?: { append: boolean }) => {
       if (tileId) {
         const tileIdIndex = self.selectedTileIds.indexOf(tileId);
         const isCurrentlySelected = tileIdIndex >= 0;
@@ -176,7 +176,7 @@ export const UIModel = types
     const getTabState = (tab: string) => {
       let tabState = self.tabs.get(tab);
       if (!tabState) {
-        tabState = UITabModel.create({id: tab});
+        tabState = UITabModel.create({ id: tab });
         self.tabs.put(tabState);
       }
       return tabState;
@@ -214,10 +214,10 @@ export const UIModel = types
       setActiveNavTab(tab: string) {
         self.activeNavTab = tab;
       },
-      setSelectedTile(tile?: ITileModel, options?: {append: boolean}) {
+      setSelectedTile(tile?: ITileModel, options?: { append: boolean }) {
         setOrAppendTileIdToSelection(tile && tile.id, options);
       },
-      setSelectedTileId(tileId: string, options?: {append: boolean}) {
+      setSelectedTileId(tileId: string, options?: { append: boolean }) {
         setOrAppendTileIdToSelection(tileId, options);
       },
       removeTileIdFromSelection(tileId: string) {
@@ -237,7 +237,7 @@ export const UIModel = types
         else if (document.isPublished) {
           if (self.problemWorkspace.primaryDocumentKey) {
             self.problemWorkspace.setComparisonDocument(document);
-            self.problemWorkspace.toggleComparisonVisible({override: true});
+            self.problemWorkspace.toggleComparisonVisible({ override: true });
           }
           else {
             alert("Please select a primary document first.", "Select Primary Document");
@@ -350,7 +350,7 @@ export const UIModel = types
     },
 
     openCurriculumDocument(docPath: string) {
-      const {navTab, subTab} = getTabsOfCurriculumDoc(docPath);
+      const { navTab, subTab } = getTabsOfCurriculumDoc(docPath);
       if (!subTab) {
         console.warn("Can't find subTab in curriculum documentPath", docPath);
         return;
@@ -373,7 +373,7 @@ export const debouncedSelectTile = debounce(selectTile, 50);
 
 // Maybe this should return the navTab and subTab
 export function getTabsOfCurriculumDoc(docPath: string) {
-  const {facet, section} = getCurriculumMetadata(docPath) || {};
+  const { facet, section } = getCurriculumMetadata(docPath) || {};
   return {
     navTab: facet === "guide" ? ENavTab.kTeacherGuide : ENavTab.kProblems,
     subTab: section

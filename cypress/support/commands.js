@@ -32,7 +32,7 @@ import 'cypress-file-upload';
 import 'cypress-commands';
 import ResourcesPanel from "./elements/clue/ResourcesPanel";
 import ClueCanvas from './elements/clue/cCanvas';
-import {platformCmdKey} from '../../src/utilities/hot-keys';
+import { platformCmdKey } from '../../src/utilities/hot-keys';
 
 const clueCanvas = new ClueCanvas;
 
@@ -91,7 +91,7 @@ Cypress.Commands.add("clearQAData", (data)=>{ //clears data from Firebase (curre
         //   or a weakset, but undefined given
         // The log shows the assertion passing and then shows it failing right after
         // using contains fixes this problem.
-        cy.contains('span', 'QA Cleared: OK', {timeout: 60000});
+        cy.contains('span', 'QA Cleared: OK', { timeout: 60000 });
     }
 });
 
@@ -108,7 +108,7 @@ Cypress.Commands.add("login", (baseUrl, testTeacher) => {
       the login will fail in a strange way. It returns success, but doesn't set a valid
       cookie.
     */
-    cy.clearCookies({domain: null});
+    cy.clearCookies({ domain: null });
 
     cy.request({
         url: `${baseUrl}/api/v1/users/sign_in`,
@@ -144,7 +144,7 @@ Cypress.Commands.add("launchReport", (reportUrl) => {
     });
 });
 Cypress.Commands.add("waitForLoad", () => {
-  cy.get('.version', {timeout: 60000});
+  cy.get('.version', { timeout: 60000 });
 });
 Cypress.Commands.add("deleteWorkspaces", (baseUrl, queryParams)=>{
     let primaryWorkspace = new PrimaryWorkspace;
@@ -178,10 +178,10 @@ Cypress.Commands.add("openTopTab", (tab) => {
   cy.get('.top-tab.tab-'+tab).click();
 } );
 Cypress.Commands.add("openProblemSection", (section) => {//doc-tab my-work workspaces problem-documents selected
-  cy.get('.prob-tab').contains(section).click({force:true});
+  cy.get('.prob-tab').contains(section).click({ force:true });
 });
 Cypress.Commands.add("openSection", (tab, section) => {//doc-tab my-work workspaces problem-documents selected
-  cy.get('.doc-tab.'+tab+'.'+section).click({force:true});
+  cy.get('.doc-tab.'+tab+'.'+section).click({ force:true });
 });
 
 // TODO: this is duplicated in ResourcesPanel.js, however in that case the tab
@@ -191,16 +191,16 @@ Cypress.Commands.add("getCanvasItemTitle", (section) => {
   cy.get('.list.'+section+' [data-test='+section+'-list-items] .footer');
 });
 Cypress.Commands.add("openDocumentThumbnail", (navTab, section, title) => { //opens thumbnail into the nav panel
-  cy.get('.document-tabs.'+navTab+' .list.'+section+' [data-test='+section+'-list-items] .footer').contains(title).parent().parent().siblings('.scaled-list-item-container').click({force:true});
+  cy.get('.document-tabs.'+navTab+' .list.'+section+' [data-test='+section+'-list-items] .footer').contains(title).parent().parent().siblings('.scaled-list-item-container').click({ force:true });
 });
 Cypress.Commands.add("openDocumentWithTitle", (tab, section, title) => {
   cy.openSection(tab, section);
-  cy.get('.document-tabs.'+tab+' .list.'+section+' [data-test='+section+'-list-items] .footer').contains(title).parent().parent().siblings('.scaled-list-item-container').click({force:true});
+  cy.get('.document-tabs.'+tab+' .list.'+section+' [data-test='+section+'-list-items] .footer').contains(title).parent().parent().siblings('.scaled-list-item-container').click({ force:true });
   cy.get('.document-tabs.'+tab+' [data-test=subtab-'+section+'] .edit-button').click();
 });
 Cypress.Commands.add("openDocumentWithIndex", (tab, section, docIndex) => {
   cy.openSection(tab, section);
-  cy.get('.list.'+section+' [data-test='+section+'-list-items] .footer').eq(docIndex).siblings('.scaled-list-item-container').click({force:true});
+  cy.get('.list.'+section+' [data-test='+section+'-list-items] .footer').eq(docIndex).siblings('.scaled-list-item-container').click({ force:true });
   cy.get('.edit-button').click();
 });
 Cypress.Commands.add("clickProblemResourceTile", (subsection, tileIndex = 0) => {
@@ -218,7 +218,7 @@ Cypress.Commands.add("getDocumentToolTile", (tileIndex = 0) => {
 Cypress.Commands.add('collapseResourceTabs', () => {
   cy.get('.drag-thumbnail').trigger('mouseover').then(() => {
     cy.get('.divider-container .workspace-expander').click();
-    cy.get('.primary-workspace .toolbar', {timeout: 120000});
+    cy.get('.primary-workspace .toolbar', { timeout: 120000 });
   });
 });
 Cypress.Commands.add('closeResourceTabs', () => {
@@ -229,7 +229,7 @@ Cypress.Commands.add('showOnlyDocumentWorkspace', () => {
   cy.get(".workspace").then($workspace => {
     // only toggle the full screen of the document workspace if it is necessary
     if($workspace.find(".divider-container").length > 0) {
-      cy.get('.primary-workspace .canvas').type(`{${cmdKey}+shift+f}`, {force: true});
+      cy.get('.primary-workspace .canvas').type(`{${cmdKey}+shift+f}`, { force: true });
     }
   });
 });
@@ -277,5 +277,5 @@ Cypress.Commands.add('unlinkTableToDataflow', (program, table) => {
   });
 });
 Cypress.Commands.add("deleteDocumentThumbnail", (tab, section, title) => {
-  cy.get('.'+tab+' .list.'+section+' [data-test='+section+'-list-items] .footer .icon-delete-document').eq(1).click({force:true});
+  cy.get('.'+tab+' .list.'+section+' [data-test='+section+'-list-items] .footer .icon-delete-document').eq(1).click({ force:true });
 });

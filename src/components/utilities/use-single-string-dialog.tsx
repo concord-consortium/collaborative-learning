@@ -46,7 +46,7 @@ export const useSingleStringDialog = ({
     buttons: [
       { label: "Cancel" },
       { label: "OK", isDefault: true,
-        onClick: () => onAccept(inputRef.current?.value || valueRef.current || "", context)}
+        onClick: () => onAccept(inputRef.current?.value || valueRef.current || "", context) }
     ],
     onClose
   });

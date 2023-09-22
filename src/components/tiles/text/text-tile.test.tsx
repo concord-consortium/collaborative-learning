@@ -1,4 +1,4 @@
-import {screen} from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { defaultTextContent } from "../../../models/tiles/text/text-content";
 import { TileModel } from "../../../models/tiles/tile-model";
 import { specTextTile } from "./spec-text-tile";
@@ -17,9 +17,9 @@ describe("TextToolComponent", () => {
 
   it("sets the editor on the content after rendering", () => {
     const content = defaultTextContent();
-    const tileModel = TileModel.create({content});
+    const tileModel = TileModel.create({ content });
     expect(content.editor).toBeUndefined();
-    specTextTile({tileModel});
+    specTextTile({ tileModel });
     expect(content.editor).toBeDefined();
   });
 

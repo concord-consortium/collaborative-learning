@@ -108,7 +108,7 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
         const nodeValue = _node.controls.get("nodeValue") as ValueControl;
         nodeValue?.setValue(result);
         nodeValue?.setSentence(resultSentence);
-        this.editor.view.updateConnections( {node: _node} );
+        this.editor.view.updateConnections( { node: _node } );
       }
     }
     outputs.num = result;

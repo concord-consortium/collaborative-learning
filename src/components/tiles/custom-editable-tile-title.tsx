@@ -69,7 +69,7 @@ export const CustomEditableTileTitle: React.FC<IProps> = observer((props) => {
   };
 
   const elementClasses = classNames(
-    "title-text-element", {editing: isEditingTitle}
+    "title-text-element", { editing: isEditingTitle }
   );
 
   const titleString = content.type === "Expression"

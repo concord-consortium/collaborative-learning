@@ -76,7 +76,7 @@ context('Simulator Tile with Brainwaves Gripper Simulation', function () {
       // Live output options are correct after adding the simulation to the document
       dataflowTile.getDropdown(lo, "hubSelect").click();
       dataflowTile.getDropdownOptions(lo, "hubSelect").should("have.length", 2);
-      dataflowTile.getDropdownOptions(lo, "hubSelect").eq(0).click({force: true});
+      dataflowTile.getDropdownOptions(lo, "hubSelect").eq(0).click({ force: true });
 
       // Simulator tile's output variable updates when dataflow sets it
       dataflowTile.getCreateNodeButton("number").click();

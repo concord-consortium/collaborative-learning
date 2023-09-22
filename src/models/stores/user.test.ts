@@ -34,7 +34,7 @@ describe("UserPortalOffering", () => {
 describe("user model", () => {
 
   it("sets default values", () => {
-    const user = UserModel.create({type: "student"});
+    const user = UserModel.create({ type: "student" });
     expect(user.authenticated).toBe(false);
     expect(user.type).toBe("student");
     expect(user.name).toBe("Anonymous User");
@@ -241,7 +241,7 @@ describe("user model", () => {
   });
 
   it("can set connected status", () => {
-    const user = UserModel.create({type: "student"});
+    const user = UserModel.create({ type: "student" });
     expect(user.isFirebaseConnected).toBe(false);
     expect(user.isLoggingConnected).toBe(false);
     user.setIsFirebaseConnected(true);
@@ -251,7 +251,7 @@ describe("user model", () => {
   });
 
   it("can set view timestamps", () => {
-    const user = UserModel.create({type: "student"});
+    const user = UserModel.create({ type: "student" });
     expect(user.lastSupportViewTimestamp).toBeUndefined();
     expect(user.lastStickyNoteViewTimestamp).toBeUndefined();
     const timestamp = new Date().getTime();

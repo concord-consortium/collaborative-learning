@@ -1,4 +1,4 @@
-import { Editor} from "@concord-consortium/slate-editor";
+import { Editor } from "@concord-consortium/slate-editor";
 import { SharedModelType } from "../../shared/shared-model";
 import { TextContentModelType } from "./text-content";
 

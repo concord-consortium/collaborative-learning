@@ -39,8 +39,8 @@ context.skip('Support messages in student view', () => {
 
     cy.log('verify group support note appears in student view');
     loadStudentSession(queryParams.student10QueryParams);
-    cy.get('#icon-sticky-note').should('exist').click({force:true});
-    cy.get('#icon-sticky-note').click({force:true}).then(()=> {
+    cy.get('#icon-sticky-note').should('exist').click({ force:true });
+    cy.get('#icon-sticky-note').click({ force:true }).then(()=> {
       cy.get('.sticky-note-popup').should('exist');
       cy.get('.sticky-note-popup-item-content').should('contain', textToGroup);
     });
@@ -58,8 +58,8 @@ context.skip('Support messages in student view', () => {
 
     cy.log('verify student support note appears in student view');
     loadStudentSession(queryParams.student1QueryParams);
-    cy.get('#icon-sticky-note').should('exist').click({force:true});
-    cy.get('#icon-sticky-note').click({force:true}).then(()=> {
+    cy.get('#icon-sticky-note').should('exist').click({ force:true });
+    cy.get('#icon-sticky-note').click({ force:true }).then(()=> {
       cy.get('.sticky-note-popup').should('exist');
       cy.get('.sticky-note-popup-item-content').should('contain', textToStudent);
     });

@@ -278,7 +278,7 @@ export const BaseDocumentContentModel = types
     },
     exportTileAsJson(tileInfo: TileLayoutModelType, options?: IDocumentExportOptions) {
       const { includeTileIds, ...otherOptions } = options || {};
-      const tileOptions = { includeId: includeTileIds, ...otherOptions};
+      const tileOptions = { includeId: includeTileIds, ...otherOptions };
       const tile = self.getTile(tileInfo.tileId);
       const json = tile?.exportJson(tileOptions);
       if (json) {
@@ -405,7 +405,7 @@ export const BaseDocumentContentModel = types
       const afterRow = (rowIndex < self.rowCount) && self.getRowByIndex(rowIndex);
       if ((beforeRow && beforeRow.isSectionHeader) && (!afterRow || afterRow.isSectionHeader)) {
         const beforeSectionId = beforeRow.sectionId;
-        const content = PlaceholderContentModel.create({sectionId: beforeSectionId});
+        const content = PlaceholderContentModel.create({ sectionId: beforeSectionId });
         const tile = TileModel.create({ content });
         self.addNewTileInNewRowAtIndex(tile, rowIndex);
       }
@@ -788,7 +788,7 @@ export const BaseDocumentContentModel = types
     moveTiles(tiles: IDragTileItem[], rowInfo: IDropRowInfo) {
       if (tiles.length > 0) {
         // organize tiles by row
-        const tileRows: {[index: number]: IDragTileItem[]} = {};
+        const tileRows: { [index: number]: IDragTileItem[] } = {};
         tiles.forEach(tile => {
           tileRows[tile.rowIndex] = tileRows[tile.rowIndex] || [];
           tileRows[tile.rowIndex].push(tile);
@@ -835,7 +835,7 @@ export const BaseDocumentContentModel = types
       let sharedModelEntry = self.sharedModelMap.get(sharedModel.id);
 
       if (!sharedModelEntry) {
-        sharedModelEntry = SharedModelEntry.create({sharedModel});
+        sharedModelEntry = SharedModelEntry.create({ sharedModel });
         self.sharedModelMap.set(sharedModel.id, sharedModelEntry);
       }
 

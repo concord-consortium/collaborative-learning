@@ -15,7 +15,7 @@ interface ITableButtonProps {
   onClick: (e: React.MouseEvent) => void;
   tooltipOptions: TooltipProps;
 }
-const TableButton = ({ className, icon, onClick, tooltipOptions}: ITableButtonProps) => {
+const TableButton = ({ className, icon, onClick, tooltipOptions }: ITableButtonProps) => {
   const to = useTooltipOptions(tooltipOptions);
   const classes = classNames("toolbar-button", className);
   return (

@@ -1,12 +1,12 @@
-import {Active} from "@dnd-kit/core";
-import React, {memo} from "react";
-import {getDragAttributeInfo, useDropHandler} from "../imports/hooks/use-drag-drop";
-import {useDropHintString} from "../imports/hooks/use-drop-hint-string";
-import {useInstanceIdContext} from "../imports/hooks/use-instance-id-context";
-import {DroppableSvg} from "./droppable-svg";
-import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
-import {GraphPlace} from "../imports/components/axis-graph-shared";
-import {IDataSet} from "../../../models/data/data-set";
+import { Active } from "@dnd-kit/core";
+import React, { memo } from "react";
+import { getDragAttributeInfo, useDropHandler } from "../imports/hooks/use-drag-drop";
+import { useDropHintString } from "../imports/hooks/use-drop-hint-string";
+import { useInstanceIdContext } from "../imports/hooks/use-instance-id-context";
+import { DroppableSvg } from "./droppable-svg";
+import { useDataConfigurationContext } from "../hooks/use-data-configuration-context";
+import { GraphPlace } from "../imports/components/axis-graph-shared";
+import { IDataSet } from "../../../models/data/data-set";
 
 interface IProps {
   graphElt: HTMLDivElement | null
@@ -14,13 +14,13 @@ interface IProps {
   onDropAttribute: (place: GraphPlace, dataSet: IDataSet, attrId: string) => void
 }
 
-const _DroppablePlot = ({graphElt, plotElt, onDropAttribute}: IProps) => {
+const _DroppablePlot = ({ graphElt, plotElt, onDropAttribute }: IProps) => {
   const instanceId = useInstanceIdContext();
   const dataConfig = useDataConfigurationContext();
   const isDropAllowed = dataConfig?.graphPlaceCanAcceptAttributeIDDrop ?? (() => true);
   const droppableId = `${instanceId}-plot-area-drop`;
   const role = dataConfig?.noAttributesAssigned ? 'x' : 'legend';
-  const hintString = useDropHintString({role});
+  const hintString = useDropHintString({ role });
 
   const handleIsActive = (active: Active) => {
     const { dataSet, attributeId: droppedAttrId } = getDragAttributeInfo(active) || {};

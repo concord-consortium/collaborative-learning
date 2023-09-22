@@ -54,7 +54,7 @@ describe("DiagramMigrator", () => {
 
   it("blanks out any kind of state without a version", () => {
     jestSpyConsole("warn", mockConsole => {
-      const migrated = DiagramMigrator.create({foo: "bar"});
+      const migrated = DiagramMigrator.create({ foo: "bar" });
       expect(mockConsole).toHaveBeenCalled();
       expect(migrated.root?.nodes.size).toBe(0);
     });

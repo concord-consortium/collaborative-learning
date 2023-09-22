@@ -274,7 +274,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     // If the text has changed since the editor was focused, log the new text.
     const text = this.getContent().text;
     if (text !== this.textOnFocus) {
-      const change = {args:[{ text }]};
+      const change = { args:[{ text }] };
       logTileChangeEvent(LogEventName.TEXT_TOOL_CHANGE, { operation: 'update', change, tileId: this.props.model.id });
     }
     this.setState({ revision: this.state.revision + 1 }); // Force a rerender

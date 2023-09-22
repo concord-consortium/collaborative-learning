@@ -19,7 +19,7 @@ interface IProps {
 }
 
 export const Adornment = observer(function Adornment(
-  {adornment, subPlotKey, topCats, rightCats, dotsRef}: IProps
+  { adornment, subPlotKey, topCats, rightCats, dotsRef }: IProps
 ) {
   const graphModel = useGraphModelContext(),
     layout = useGraphLayoutContext(),
@@ -61,7 +61,7 @@ export const Adornment = observer(function Adornment(
     <div
       id={adornmentKey}
       className={adornmentWrapperClass}
-      style={{animationDuration: `${transitionDuration}ms`}}
+      style={{ animationDuration: `${transitionDuration}ms` }}
       data-testid={'adornment-wrapper'}
     >
       <Component

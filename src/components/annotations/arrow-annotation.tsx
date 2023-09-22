@@ -58,7 +58,7 @@ interface IArrowAnnotationProps {
   documentRight: number;
   documentTop: number;
   getBoundingBox: (object: IClueObject) =>
-    { height: number, left: number, top: number, width: number} | null | undefined;
+    { height: number, left: number, top: number, width: number } | null | undefined;
   key?: string;
   readOnly?: boolean;
 }
@@ -259,7 +259,7 @@ export const ArrowAnnotationComponent = observer(
                   onChange={handleChange}
                   onKeyDown={handleKeyDown}
                   ref={inputRef}
-                  style={{ width: `calc(${tempText.length}ch + 2ch)`}}
+                  style={{ width: `calc(${tempText.length}ch + 2ch)` }}
                   type="text"
                   value={tempText}
                 />

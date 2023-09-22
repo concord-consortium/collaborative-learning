@@ -12,7 +12,7 @@ interface LineOptionProps {
   defaultValue: string;
   setValue: React.Dispatch<React.SetStateAction<string>>;
 }
-const LineOption: React.FC<LineOptionProps> = ({display, id, defaultValue, setValue}) => {
+const LineOption: React.FC<LineOptionProps> = ({ display, id, defaultValue, setValue }) => {
   return (
     <div className="movable-line-option">
       <label className="dialog-label" htmlFor={id}>{display}</label>

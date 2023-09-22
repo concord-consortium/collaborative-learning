@@ -53,14 +53,14 @@ function initialize() {
   }));
 
   const ItemComponent = observer(function ItemComponent(
-    {item}: {item: Instance<typeof Item>}
+    { item }: { item: Instance<typeof Item> }
   ) {
     log.push(`ItemComponent rendering ${item.name}`);
     return <div>{item.nameWithDescription}</div>;
   });
 
   const ListComponent = observer(function ListComponent(
-    {list}: {list: Instance<typeof List>}
+    { list }: { list: Instance<typeof List> }
   ) {
     log.push("ListComponent rendering");
     return (
@@ -102,9 +102,9 @@ const initialLog = [
 
 describe("behavior of mobx-react with mst objects", () => {
   it("updates a list when items are destroyed", () => {
-    const {List, ListComponent, log, clearLog } = initialize();
+    const { List, ListComponent, log, clearLog } = initialize();
     const list = List.create({
-      items: [ {name: "one"}, {name: "two"}]
+      items: [ { name: "one" }, { name: "two" }]
     });
 
     render(<ListComponent list={list}/>);
@@ -127,9 +127,9 @@ describe("behavior of mobx-react with mst objects", () => {
   });
 
   it("updates a list and prints warning with removeFirstDescriptionAndItem", () => {
-    const {List, ListComponent, log, clearLog } = initialize();
+    const { List, ListComponent, log, clearLog } = initialize();
     const list = List.create({
-      items: [ {name: "one"}, {name: "two"}]
+      items: [ { name: "one" }, { name: "two" }]
     });
 
     render(<ListComponent list={list}/>);
@@ -156,13 +156,13 @@ describe("behavior of mobx-react with mst objects", () => {
   });
 
   it("updates a list and doesn't print warning with removeFirstDescriptionAndItem and isAlive short circuit", () => {
-    const {List, Item, log, clearLog } = initialize();
+    const { List, Item, log, clearLog } = initialize();
     const testList = List.create({
-      items: [ {name: "one"}, {name: "two"}]
+      items: [ { name: "one" }, { name: "two" }]
     });
 
     const ItemComponent = observer(function ItemComponent(
-      {item}: {item: Instance<typeof Item>}
+      { item }: { item: Instance<typeof Item> }
     ) {
       log.push(`ItemComponent rendering ${item.name}`);
       // Note: we aren't bailing out here. Just checking if
@@ -176,7 +176,7 @@ describe("behavior of mobx-react with mst objects", () => {
     });
 
     const ListComponent = observer(function ListComponent(
-      {list}: {list: Instance<typeof List>}
+      { list }: { list: Instance<typeof List> }
     ) {
       log.push("ListComponent rendering");
       return (
@@ -210,9 +210,9 @@ describe("behavior of mobx-react with mst objects", () => {
   });
 
   it("updates a list and doesn't print warning with removeFirstDescriptionAndItemSoon", () => {
-    const {List, ListComponent, log, clearLog } = initialize();
+    const { List, ListComponent, log, clearLog } = initialize();
     const testList = List.create({
-      items: [ {name: "one"}, {name: "two"}]
+      items: [ { name: "one" }, { name: "two" }]
     });
 
     render(<ListComponent list={testList}/>);

@@ -184,7 +184,7 @@ export class DB {
   }
 
   public joinGroup(groupId: string) {
-    const {user} = this.stores;
+    const { user } = this.stores;
     const groupRef = this.firebase.ref(this.firebase.getGroupPath(user, groupId));
     let userRef: firebase.database.Reference;
 
@@ -231,7 +231,7 @@ export class DB {
   }
 
   public leaveGroup() {
-    const {user} = this.stores;
+    const { user } = this.stores;
     const groupsRef = this.firebase.ref(this.firebase.getGroupsPath(user));
 
     this.firebase.cancelGroupDisconnect();
@@ -265,7 +265,7 @@ export class DB {
 
   public async guaranteeOpenDefaultDocument(documentType: typeof ProblemDocument | typeof PersonalDocument,
                                             defaultContent?: DocumentContentModelType) {
-    const {documents} = this.stores;
+    const { documents } = this.stores;
 
     // problem document
     if (documentType === ProblemDocument) {
@@ -297,7 +297,7 @@ export class DB {
   }
 
   public async guaranteePlanningDocument(sections?: SectionModelType[]) {
-    const {appConfig, documents} = this.stores;
+    const { appConfig, documents } = this.stores;
 
     const requiredPlanningDocument = documents.requiredDocuments[PlanningDocument];
     if (requiredPlanningDocument) {
@@ -313,7 +313,7 @@ export class DB {
   }
 
   public async guaranteeLearningLog(initialTitle?: string, defaultContent?: DocumentContentModelType) {
-    const {documents} = this.stores;
+    const { documents } = this.stores;
 
     const requiredLearningLogDocument = documents.requiredDocuments[LearningLogDocument];
     if (requiredLearningLogDocument) {
@@ -328,7 +328,7 @@ export class DB {
 
   public createProblemOrPlanningDocument(type: ProblemOrPlanningDocumentType, content?: DocumentContentModelType) {
     return new Promise<DocumentModelType | null>((resolve, reject) => {
-      const {user, documents} = this.stores;
+      const { user, documents } = this.stores;
       const offeringUserRef = this.firebase.ref(this.firebase.getOfferingUserPath(user));
 
       return offeringUserRef.once("value")
@@ -349,7 +349,7 @@ export class DB {
         .then(() => {
           // create the new document
           return this.createDocument({ type, content: JSON.stringify(content) })
-            .then(({document, metadata}) => {
+            .then(({ document, metadata }) => {
                 const newDocument: DBOfferingUserProblemDocument = {
                   version: "1.0",
                   self: {
@@ -380,16 +380,16 @@ export class DB {
 
   public createDocument(params: { type: DBDocumentType, content?: string }) {
     const { type, content } = params;
-    const {user} = this.stores;
-    return new Promise<{document: DBDocument, metadata: DBDocumentMetadata}>((resolve, reject) => {
+    const { user } = this.stores;
+    return new Promise<{ document: DBDocument, metadata: DBDocumentMetadata }>((resolve, reject) => {
       const documentRef = this.firebase.ref(this.firebase.getUserDocumentPath(user)).push();
       const documentKey = documentRef.key!;
       const metadataRef = this.firebase.ref(this.firebase.getUserDocumentMetadataPath(user, documentKey));
       const version = "1.0";
       const createdAt = firebase.database.ServerValue.TIMESTAMP as number;
-      const {classHash, offeringId} = user;
-      const self = {uid: user.id, documentKey, classHash};
-      const document: DBDocument = {version, self, type};
+      const { classHash, offeringId } = user;
+      const self = { uid: user.id, documentKey, classHash };
+      const document: DBDocument = { version, self, type };
       if (content) {
         document.content = content;
       }
@@ -401,20 +401,20 @@ export class DB {
         case LearningLogDocument:
         case PersonalPublication:
         case LearningLogPublication:
-          metadata = {version, self, createdAt, type};
+          metadata = { version, self, createdAt, type };
           break;
         case PlanningDocument:
         case ProblemDocument:
         case ProblemPublication:
         case SupportPublication:
-          metadata = {version, self, createdAt, type, classHash, offeringId};
+          metadata = { version, self, createdAt, type, classHash, offeringId };
           break;
       }
 
       return documentRef.set(document)
         .then(() => metadataRef.set(metadata))
         .then(() => {
-          resolve({document, metadata});
+          resolve({ document, metadata });
         })
         .catch(reject);
     });
@@ -425,7 +425,7 @@ export class DB {
   }
 
   public publishProblemDocument(documentModel: DocumentModelType) {
-    const {user, groups} = this.stores;
+    const { user, groups } = this.stores;
     // JSON content with modified unique ids which will break the history
     const content = documentModel.content?.publish();
     if (!content) {
@@ -433,8 +433,8 @@ export class DB {
     }
     let pubCount = documentModel.getNumericProperty("pubCount");
     documentModel.setNumericProperty("pubCount", ++pubCount);
-    return new Promise<{document: DBDocument, metadata: DBPublicationDocumentMetadata}>((resolve, reject) => {
-      this.createDocument({ type: ProblemPublication, content }).then(({document, metadata}) => {
+    return new Promise<{ document: DBDocument, metadata: DBPublicationDocumentMetadata }>((resolve, reject) => {
+      this.createDocument({ type: ProblemPublication, content }).then(({ document, metadata }) => {
         const publicationRef = this.firebase.ref(this.firebase.getProblemPublicationsPath(user)).push();
         const userGroup = groups.getGroupById(user.currentGroupId);
         const groupUserConnections: DBGroupUserConnections | undefined = userGroup && userGroup.users
@@ -459,7 +459,7 @@ export class DB {
         publicationRef.set(publication)
           .then(() => {
             logDocumentEvent(LogEventName.PUBLISH_DOCUMENT, { document: documentModel });
-            resolve({document, metadata: metadata as DBPublicationDocumentMetadata});
+            resolve({ document, metadata: metadata as DBPublicationDocumentMetadata });
           })
           .catch(reject);
       });
@@ -467,7 +467,7 @@ export class DB {
   }
 
   public publishOtherDocument(documentModel: DocumentModelType) {
-    const {user} = this.stores;
+    const { user } = this.stores;
     const content = documentModel.content?.publish();
     if (!content) {
       throw new Error("Could not publish the specified document because its content is not available.");
@@ -475,8 +475,8 @@ export class DB {
     const publicationType = documentModel.type + "Publication" as DBDocumentType;
     let pubCount = documentModel.getNumericProperty("pubCount");
     documentModel.setNumericProperty("pubCount", ++pubCount);
-    return new Promise<{document: DBDocument, metadata: DBPublicationDocumentMetadata}>((resolve, reject) => {
-      this.createDocument({ type: publicationType, content }).then(({document, metadata}) => {
+    return new Promise<{ document: DBDocument, metadata: DBPublicationDocumentMetadata }>((resolve, reject) => {
+      this.createDocument({ type: publicationType, content }).then(({ document, metadata }) => {
         const publicationPath = publicationType === "personalPublication"
                                 ? this.firebase.getPersonalPublicationsPath(user)
                                 : this.firebase.getLearningLogPublicationsPath(user);
@@ -496,7 +496,7 @@ export class DB {
         publicationRef.set(publication)
           .then(() => {
             logDocumentEvent(LogEventName.PUBLISH_DOCUMENT, { document: documentModel });
-            resolve({document, metadata: metadata as DBPublicationDocumentMetadata});
+            resolve({ document, metadata: metadata as DBPublicationDocumentMetadata });
           })
           .catch(reject);
       });
@@ -530,9 +530,9 @@ export class DB {
 
   public openDocument(options: OpenDocumentOptions) {
     const { documents } = this.stores;
-    const {documentKey, type, title, properties, userId, groupId, visibility, originDoc, pubVersion} = options;
+    const { documentKey, type, title, properties, userId, groupId, visibility, originDoc, pubVersion } = options;
     return new Promise<DocumentModelType>((resolve, reject) => {
-      const {user} = this.stores;
+      const { user } = this.stores;
       const documentPath = this.firebase.getUserDocumentPath(user, documentKey, userId);
       const metadataPath = this.firebase.getUserDocumentMetadataPath(user, documentKey, userId);
       const documentRef = this.firebase.ref(documentPath);
@@ -598,7 +598,7 @@ export class DB {
   // personal documents and learning logs
   public createOtherDocument(documentType: OtherDocumentType, params: ICreateOtherDocumentParams = {}) {
     const { title, properties, content } = params;
-    const {appConfig, documents, user} = this.stores;
+    const { appConfig, documents, user } = this.stores;
     const baseTitle = documentType === PersonalDocument
                         ? appConfig.defaultDocumentTitle
                         : appConfig.defaultLearningLogTitle;
@@ -606,8 +606,8 @@ export class DB {
 
     return new Promise<DocumentModelType | null>((resolve, reject) => {
       return this.createDocument({ type: documentType, content: JSON.stringify(content) })
-        .then(({document, metadata}) => {
-          const {documentKey} = document.self;
+        .then(({ document, metadata }) => {
+          const { documentKey } = document.self;
           const newDocument: DBOtherDocument = {
             version: "1.0",
             self: {
@@ -686,7 +686,7 @@ export class DB {
 
   public clear(level: DBClearLevel) {
     return new Promise<void>((resolve, reject) => {
-      const {user} = this.stores;
+      const { user } = this.stores;
       const clearPath = (path?: string) => {
         this.firebase.ref(path).remove().then(resolve).catch(reject);
       };
@@ -716,7 +716,7 @@ export class DB {
   public createDocumentModelFromProblemMetadata(
           type: ProblemOrPlanningDocumentType, userId: string,
           metadata: DBOfferingUserProblemDocument) {
-    const {documentKey} = metadata;
+    const { documentKey } = metadata;
     const group = this.stores.groups.groupForUser(userId);
     return this.openDocument({
       type,
@@ -734,23 +734,23 @@ export class DB {
 
   // handles personal documents and learning logs
   public createDocumentModelFromOtherDocument(dbDocument: DBOtherDocument, type: OtherDocumentType) {
-    const {title, properties, self: {uid, documentKey}} = dbDocument;
+    const { title, properties, self: { uid, documentKey } } = dbDocument;
     const group = this.stores.groups.groupForUser(uid);
     const groupId = group && group.id;
-    return this.openDocument({type, userId: uid, documentKey, groupId, title, properties});
+    return this.openDocument({ type, userId: uid, documentKey, groupId, title, properties });
   }
 
   // handles published personal documents and published learning logs
   public createDocumentModelFromOtherPublication(publication: DBOtherPublication, type: OtherPublicationType) {
-    const {title, properties, uid, originDoc, self: {documentKey}, pubVersion} = publication;
+    const { title, properties, uid, originDoc, self: { documentKey }, pubVersion } = publication;
 
     const group = this.stores.groups.groupForUser(uid);
     const groupId = group && group.id;
-    return this.openDocument({type, userId: uid, documentKey, groupId, title, properties, originDoc, pubVersion});
+    return this.openDocument({ type, userId: uid, documentKey, groupId, title, properties, originDoc, pubVersion });
   }
 
   public createDocumentFromPublication(publication: DBPublication) {
-    const {groupId, groupUserConnections, userId, documentKey, pubVersion} = publication;
+    const { groupId, groupUserConnections, userId, documentKey, pubVersion } = publication;
     // groupUserConnections returns as an array and must be converted back to a map
     const groupUserConnectionsMap = Object.keys(groupUserConnections || [])
       .reduce((allUsers, groupUserId) => {

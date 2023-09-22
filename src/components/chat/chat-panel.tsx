@@ -1,9 +1,9 @@
-import React, { useCallback, useEffect, useState} from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { ILogComment, logCommentEvent } from "../../models/tiles/log/log-comment-event";
 import { UserModelType } from "../../models/stores/user";
 import { ChatPanelHeader } from "./chat-panel-header";
 import { ChatThread } from "./chat-thread";
-import { makeChatThreads} from "./chat-comment-thread";
+import { makeChatThreads } from "./chat-comment-thread";
 import {
   useCommentsCollectionPath, useDocumentComments, usePostDocumentComment, useUnreadDocumentComments
 } from "../../hooks/document-comment-hooks";

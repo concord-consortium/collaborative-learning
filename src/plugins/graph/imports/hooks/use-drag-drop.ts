@@ -68,7 +68,7 @@ export const useDropHandler = (dropId: string, onDrop: (active: Active) => void)
   useDndMonitor({ onDragEnd: ({ active, over }) => {
     // only call onDrop for the handler that registered it
     (over?.id === dropId) && onDrop(active);
-  }});
+  } });
 };
 
 // Tile Dragging
@@ -102,7 +102,7 @@ export const useTileDragStartHandler = (dragId: string, onStartDrag: (active: Ac
   useDndMonitor({ onDragStart: ({ active }) => {
     // only call onDragStart for the handler that registered it
     (active.id === dragId) && onStartDrag(active);
-  }});
+  } });
 };
 
 export const useContainerDroppable = (
@@ -118,10 +118,10 @@ export const useTileDropHandler = (dropId: string, onDrop: (event: DragEndEvent)
   useDndMonitor({ onDragEnd: (event: DragEndEvent) => {
     // only call onDrop for the handler that registered it
     (event.over?.id === dropId) && onDrop(event);
-  }});
+  } });
 };
 
-export const containerSnapToGridModifier: Modifier = ({transform, active}) => {
+export const containerSnapToGridModifier: Modifier = ({ transform, active }) => {
   // in pixels
   const gridSize = active && isDragTileData(active.data) ? 5 : 1;
   return {

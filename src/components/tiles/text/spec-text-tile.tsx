@@ -1,5 +1,5 @@
 import React from "react";
-import {render, screen} from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 
 import { defaultTextContent } from "../../../models/tiles/text/text-content";
 import { ITileModel, TileModel } from "../../../models/tiles/tile-model";
@@ -14,7 +14,7 @@ export interface ISpecTextTileOptions {
 }
 
 export function specTextTile(options: ISpecTextTileOptions) {
-  const model = options.tileModel || TileModel.create({content: defaultTextContent()});
+  const model = options.tileModel || TileModel.create({ content: defaultTextContent() });
 
   const stores = specStores();
 

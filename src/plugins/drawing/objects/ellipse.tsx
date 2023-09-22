@@ -19,12 +19,12 @@ export const EllipseObject = types.compose("EllipseObject", StrokedObject, Fille
   }))
   .views(self => ({
     get boundingBox() {
-      const {x, y} = self.position;
+      const { x, y } = self.position;
       const rx = self.dragRx ?? self.rx;
       const ry = self.dragRy ?? self.ry;
-      const nw: Point = {x: x - rx, y: y - ry};
-      const se: Point = {x: x + rx, y: y + ry};
-      return {nw, se};
+      const nw: Point = { x: x - rx, y: y - ry };
+      const se: Point = { x: x + rx, y: y + ry };
+      return { nw, se };
     },
     get label() {
       return (self.rx === self.ry) ? "Circle" : "Ellipse";
@@ -63,11 +63,11 @@ function isEllipseObject(model: DrawingObjectType): model is EllipseObjectType {
   return model.type === "ellipse";
 }
 
-export const EllipseComponent = observer(function EllipseComponent({model, handleHover,
-  handleDrag} : IDrawingComponentProps) {
+export const EllipseComponent = observer(function EllipseComponent({ model, handleHover,
+  handleDrag } : IDrawingComponentProps) {
   if (!isEllipseObject(model)) return null;
   const { id, stroke, strokeWidth, strokeDashArray, fill } = model;
-  const {x, y} = model.position;
+  const { x, y } = model.position;
   const rx = model.dragRx ?? model.rx;
   const ry = model.dragRy ?? model.ry;
   return <ellipse
@@ -96,7 +96,7 @@ export class EllipseDrawingTool extends DrawingTool {
   public handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
     const start = this.drawingLayer.getWorkspacePoint(e);
     if (!start) return;
-    const {stroke, fill, strokeWidth, strokeDashArray} = this.drawingLayer.toolbarSettings();
+    const { stroke, fill, strokeWidth, strokeDashArray } = this.drawingLayer.toolbarSettings();
     const ellipse = EllipseObject.create({
       x: start.x,
       y: start.y,
@@ -129,7 +129,7 @@ export class EllipseDrawingTool extends DrawingTool {
   }
 }
 
-export function EllipseToolbarButton({toolbarManager}: IToolbarButtonProps) {
+export function EllipseToolbarButton({ toolbarManager }: IToolbarButtonProps) {
   return <SvgToolModeButton modalButton="ellipse" title="Ellipse"
       toolbarManager={toolbarManager} SvgIcon={EllipseToolIcon} />;
 }

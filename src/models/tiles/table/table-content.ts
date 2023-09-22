@@ -122,7 +122,7 @@ export const TableMetadataModel = TileMetadataModel
             } else {
               let expressionVal: number;
               try {
-                expressionVal = parsedExpression.evaluate({[kSerializedXKey]: xVal});
+                expressionVal = parsedExpression.evaluate({ [kSerializedXKey]: xVal });
               }
               catch(e) {
                 expressionVal = NaN;
@@ -286,7 +286,7 @@ export const TableContentModel = TileContentModel
         return { sharedModelManager, sharedDataSet, tileSharedModels };
       },
       // reaction/effect
-      ({sharedModelManager, sharedDataSet, tileSharedModels}) => {
+      ({ sharedModelManager, sharedDataSet, tileSharedModels }) => {
         if (!sharedModelManager?.isReady) {
           // We aren't added to a document yet so we can't do anything yet
           return;
@@ -319,7 +319,7 @@ export const TableContentModel = TileContentModel
         const dataSets = sharedModelManager.getSharedModelsByType(kSharedDataSetType) as SharedDataSetType[];
         updateSharedDataSetColors(dataSets);
       },
-      {name: "sharedModelSetup", fireImmediately: true}));
+      { name: "sharedModelSetup", fireImmediately: true }));
     },
     updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
       // console.warn("updateAfterSharedModelChanges hasn't been implemented for table content.");

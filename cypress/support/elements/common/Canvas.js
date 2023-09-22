@@ -131,9 +131,9 @@ class Canvas {
 
   publishCanvas(type) {
     if (type==="investigation" ) {
-      this.getPublishIcon().click({force:true});
+      this.getPublishIcon().click({ force:true });
     } else {
-      this.getPersonalPublishIcon().click({force:true});
+      this.getPersonalPublishIcon().click({ force:true });
     }
     dialog.getModalTitle().should('exist').contains('Publish ');
     dialog.getModalButton().contains("OK").click();

@@ -19,7 +19,7 @@ export const convertLegacyImageTile = (snapshot: ILegacyImageTileImport) => {
     changeUrl = changeObj.url;
     changeFilename = changeObj.filename;
   }
-  return ({url: changeUrl, fileName: changeFilename, ...others});
+  return ({ url: changeUrl, fileName: changeFilename, ...others });
 
 };
 

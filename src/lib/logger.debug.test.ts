@@ -25,7 +25,7 @@ describe("dev/qa/test logger with DEBUG_LOGGER true", () => {
     stores = createStores({
       appMode: "test",
       appConfig: specAppConfig({ config: { appName: "TestLogger" } }),
-      user: UserModel.create({id: "0", type: "teacher", portal: "test"})
+      user: UserModel.create({ id: "0", type: "teacher", portal: "test" })
     });
 
     // intercept and suppress console logs

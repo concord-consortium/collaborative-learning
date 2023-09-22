@@ -4,7 +4,7 @@ import { kExpressionTileType } from "./expression-types";
 import { IDefaultContentOptions, ITileExportOptions } from "../../models/tiles/tile-content-info";
 
 export function defaultExpressionContent(props?: IDefaultContentOptions): ExpressionContentModelType {
-  return ExpressionContentModel.create({latexStr: `a=\\pi r^2`});
+  return ExpressionContentModel.create({ latexStr: `a=\\pi r^2` });
 }
 
 export const ExpressionContentModel = TileContentModel

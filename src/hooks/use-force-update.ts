@@ -1,4 +1,4 @@
-import {useCallback, useState} from "react";
+import { useCallback, useState } from "react";
 
 /*
  * For those rare times you really need to force a component to re-render.

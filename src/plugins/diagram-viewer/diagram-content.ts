@@ -42,7 +42,7 @@ export const DiagramContentModel = TileContentModel
       // In the future this can look at all of the existing nodes and find an empty spot.
       // For now just return 100, 100
       // TODO: this should be moved into DQRoot
-      return {x: 100, y: 100};
+      return { x: 100, y: 100 };
     },
     get variables() {
       return self.root?.variables || [];
@@ -61,10 +61,10 @@ export const DiagramContentModel = TileContentModel
         const tileSharedModels = sharedModelManager?.isReady ?
           sharedModelManager?.getTileSharedModels(self) : undefined;
 
-        const values = {sharedModelManager, containerSharedModel, tileSharedModels};
+        const values = { sharedModelManager, containerSharedModel, tileSharedModels };
         return values;
       },
-      ({sharedModelManager, containerSharedModel, tileSharedModels}) => {
+      ({ sharedModelManager, containerSharedModel, tileSharedModels }) => {
         if (!sharedModelManager?.isReady) {
           // We aren't added to a document yet so we can't do anything yet
           return;
@@ -100,7 +100,7 @@ export const DiagramContentModel = TileContentModel
         // a document from storage.
         self.root.setVariablesAPI(containerSharedModel);
       },
-      {name: "sharedModelSetup", fireImmediately: true}));
+      { name: "sharedModelSetup", fireImmediately: true }));
     }
   }))
   .actions(self => ({

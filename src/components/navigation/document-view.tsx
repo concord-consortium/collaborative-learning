@@ -20,7 +20,7 @@ interface IProps {
   subTab: ISubTabSpec;
 }
 //TODO: Need to refactor this if we want to deploy to all tabs
-export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IProps) {
+export const DocumentView = observer(function DocumentView({ tabSpec, subTab }: IProps) {
   const ui = useUIStore();
   const store = useStores();
   const appConfigStore = useAppConfig();
@@ -202,8 +202,8 @@ interface IDocumentAreaProps {
   onChangeDocument?: (shift: number, secondary?: boolean) => void;
 }
 
-const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocument,
-    hasSecondaryDocument, hideLeftFlipper, hideRightFlipper, onChangeDocument}: IDocumentAreaProps) => {
+const DocumentArea = ({ openDocument, subTab, tab, sectionClass, isSecondaryDocument,
+    hasSecondaryDocument, hideLeftFlipper, hideRightFlipper, onChangeDocument }: IDocumentAreaProps) => {
   const ui = useUIStore();
   const user = useUserStore();
   const appConfig = useAppConfig();
@@ -214,7 +214,7 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocum
   const getDisplayTitle = (document: DocumentModelType) => {
     const documentOwner = classStore.users.get(document.uid);
     const documentTitle = getDocumentDisplayTitle(document, appConfig, problemStore);
-    return {owner: documentOwner ? documentOwner.fullName : "", title: documentTitle};
+    return { owner: documentOwner ? documentOwner.fullName : "", title: documentTitle };
   };
   const displayTitle = getDisplayTitle(openDocument);
 
@@ -228,7 +228,7 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocum
   // knew the state of playback controls. It no longer knows that state, so now
   // the edit button is shown all of the time.
   // PT Story: https://www.pivotaltracker.com/story/show/183416176
-  const editButton = (type: string, sClass: {secondary: boolean | undefined; primary: boolean | undefined} | string,
+  const editButton = (type: string, sClass: { secondary: boolean | undefined; primary: boolean | undefined } | string,
                       document: DocumentModelType) => {
     return (
       (type === "my-work") || (type === "learningLog")
@@ -250,7 +250,7 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocum
         <div className="document-title">
           {(displayTitle.owner && tab === "class-work")
               && <span className="document-owner">{displayTitle.owner}: </span>}
-          <span className={classNames("document-title", {"class-work": tab === "class-work"})}>
+          <span className={classNames("document-title", { "class-work": tab === "class-work" })}>
             {displayTitle.title}
           </span>
         </div>

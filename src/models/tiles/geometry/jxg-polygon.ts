@@ -205,7 +205,7 @@ export const polygonChangeAgent: JXGChangeAgent = {
     if (poly) {
       const segments = getPolygonEdges(poly);
       segments.forEach(seg => {
-        seg.setAttribute({strokeColor: "#0000FF"});
+        seg.setAttribute({ strokeColor: "#0000FF" });
         seg._set("clientStrokeColor", "#0000FF");
         seg._set("clientSelectedStrokeColor", "#0000FF");
       });

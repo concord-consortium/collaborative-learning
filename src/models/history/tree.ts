@@ -20,8 +20,8 @@ export const Tree = types.model("Tree", {
   }
 }))
 .actions(self => ({
-  updateTreeAfterSharedModelChanges(options?: {sharedModel: SharedModelType,
-      initialSharedModelMap: SharedModelMapSnapshotOutType}) {
+  updateTreeAfterSharedModelChanges(options?: { sharedModel: SharedModelType,
+      initialSharedModelMap: SharedModelMapSnapshotOutType }) {
     // If there is no sharedModel param, run the update function on all tiles which
     // have shared model references.
     // If there is a sharedModel param, only run the update function on tiles which
@@ -113,7 +113,7 @@ export const Tree = types.model("Tree", {
       // exchangeId parameters automatically. And then when it sends any
       // changes captured during the update, it should include these ids
       if (isAlive(self)) {
-        self.updateTreeAfterSharedModelChanges({sharedModel, initialSharedModelMap});
+        self.updateTreeAfterSharedModelChanges({ sharedModel, initialSharedModelMap });
       }
     };
 
@@ -215,7 +215,7 @@ export const Tree = types.model("Tree", {
       if (DEBUG_HISTORY) {
         // eslint-disable-next-line no-console
         console.log(`observed changes in sharedModel: ${model.id} of tree: ${self.treeId}`,
-          {historyEntryId, action: call});
+          { historyEntryId, action: call });
       }
 
       if (!self.treeManagerAPI) {

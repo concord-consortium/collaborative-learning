@@ -1,13 +1,13 @@
-import {ScaleBand, ScaleLinear, scaleLinear, scaleOrdinal} from "d3";
-import {autorun, reaction} from "mobx";
-import {MutableRefObject, useCallback, useEffect, useRef} from "react";
-import {axisGap} from "../axis-types";
-import {useAxisLayoutContext} from "../models/axis-layout-context";
-import {IAxisModel, isNumericAxisModel} from "../models/axis-model";
-import {graphPlaceToAttrRole} from "../../../../graph-types";
-import {maxWidthOfStringsD3} from "../../../../utilities/graph-utils";
-import {useDataConfigurationContext} from "../../../../hooks/use-data-configuration-context";
-import {collisionExists, getStringBounds} from "../axis-utils";
+import { ScaleBand, ScaleLinear, scaleLinear, scaleOrdinal } from "d3";
+import { autorun, reaction } from "mobx";
+import { MutableRefObject, useCallback, useEffect, useRef } from "react";
+import { axisGap } from "../axis-types";
+import { useAxisLayoutContext } from "../models/axis-layout-context";
+import { IAxisModel, isNumericAxisModel } from "../models/axis-model";
+import { graphPlaceToAttrRole } from "../../../../graph-types";
+import { maxWidthOfStringsD3 } from "../../../../utilities/graph-utils";
+import { useDataConfigurationContext } from "../../../../hooks/use-data-configuration-context";
+import { collisionExists, getStringBounds } from "../axis-utils";
 import graphVars from "../../../../components/graph.scss";
 
 export interface IUseAxis {
@@ -62,7 +62,7 @@ export const useAxis = ({
       numbersHeight = getStringBounds('0').height,
       repetitions = multiScale?.repetitions ?? 1,
       bandWidth = ((ordinalScale?.bandwidth?.()) ?? 0) / repetitions,
-      collision = collisionExists({bandWidth, categories, centerCategoryLabels}),
+      collision = collisionExists({ bandWidth, categories, centerCategoryLabels }),
       maxLabelExtent = maxWidthOfStringsD3(dataConfiguration?.categoryArrayForAttrRole(attrRole) ?? []),
       d3Scale = multiScale?.scale ?? (type === 'numeric' ? scaleLinear() : scaleOrdinal());
     let desiredExtent = axisTitleHeight + 2 * axisGap;
@@ -90,10 +90,10 @@ export const useAxis = ({
     if (axisModel) {
       const disposer = reaction(
         () => {
-          const {place: aPlace, scale: scaleType} = axisModel;
-          return {place: aPlace, scaleType};
+          const { place: aPlace, scale: scaleType } = axisModel;
+          return { place: aPlace, scaleType };
         },
-        ({place: aPlace, scaleType}) => {
+        ({ place: aPlace, scaleType }) => {
           layout.getAxisMultiScale(aPlace)?.setScaleType(scaleType);
         }
       );

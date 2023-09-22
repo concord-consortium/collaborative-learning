@@ -48,7 +48,7 @@ export const DataCardToolbar: React.FC<IProps> = observer(({
        ...others
   });
 
-  const { isMergeEnabled, showMergeTileDialog } = useTileDataMerging({model});
+  const { isMergeEnabled, showMergeTileDialog } = useTileDataMerging({ model });
 
   const isEditingValue = !!currEditAttrId && currEditFacet === "value";
   const valueActionsEnabled = enabled && isEditingValue;
