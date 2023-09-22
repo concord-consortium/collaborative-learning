@@ -196,26 +196,6 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
     content.addNewAttr();
   };
 
-  const deleteSelectedValue = () => {
-    const thisCaseId = content.dataSet.caseIDFromIndex(content.caseIndex);
-    if (thisCaseId){
-      content.setAttValue(thisCaseId, currEditAttrId, "");
-    }
-  };
-
-  const duplicateCard = () => {
-    const originalCaseIndex = content.caseIndex;
-    const copyableCase = content.caseByIndex(originalCaseIndex);
-    if (copyableCase) {
-      // strip __id__ so a new id will be generated on insertion
-      const { __id__, ...canonicalCase } = copyableCase;
-      const desiredIndex = originalCaseIndex + 1;
-      const beforeId = content.dataSet.caseIDFromIndex(desiredIndex);
-      addCanonicalCasesToDataSet(content.dataSet, [canonicalCase], beforeId);
-      content.setCaseIndex(desiredIndex);
-    }
-  };
-
   const previousButtonClasses = classNames(
     "card-nav", "previous",
     content.caseIndex > 0 ? "active" : "disabled",
@@ -258,12 +238,10 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
         currEditAttrId={currEditAttrId}
         currEditFacet={currEditFacet}
         setImageUrlToAdd={setImageUrlToAdd} {...toolbarProps}
-        handleDeleteValue={deleteSelectedValue}
-        handleDuplicateCard={duplicateCard}
         scale={scale}
-        isLinkEnabled={isLinkEnabled}
-        getLinkIndex={getLinkIndex}
-        showLinkTileDialog={showLinkTileDialog}
+        documentId={documentId}
+        onRequestTilesOfType={onRequestTilesOfType}
+        onRequestLinkableTiles={onRequestLinkableTiles}
       />
       <div
         className="data-card-content"

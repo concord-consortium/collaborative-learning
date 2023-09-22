@@ -12,28 +12,30 @@ import { ITileModel } from "../../models/tiles/tile-model";
 import { ImageUploadButton } from "../../components/tiles/image/image-toolbar";
 import { EditFacet } from "./data-card-types";
 import { DeleteAttrButton, DuplicateCardButton,
+  IDataCardToolbarButtonContext,
   LinkTileButton, MergeInButton } from "./components/data-card-toolbar-buttons";
-import { useTileDataMerging } from "../../hooks/use-tile-data-merging";
+import { ITileProps } from "../../components/tiles/tile-component";
+import { useSettingFromStores } from "../../hooks/use-stores";
 
 import "./data-card-toolbar.scss";
 
+type IButtonSetting = string | [string, string];
+
+const defaultButtons = ["duplicate", "link-tile", "merge-in", "image-upload", "delete-attribute"];
 interface IProps extends IFloatingToolbarProps {
   currEditAttrId: string;
   currEditFacet: EditFacet;
   isMergeEnabled?: boolean;
-  isLinkEnabled?: boolean;
   model: ITileModel;
-  getLinkIndex: () => number;
-  handleDeleteValue: () => void;
-  handleDuplicateCard: () => void;
   setImageUrlToAdd: (url: string) => void;
-  showLinkTileDialog?: () => void;
-  showMergeTileDialog?: () => void;
+  onRequestTilesOfType: ITileProps['onRequestTilesOfType'];
+  onRequestLinkableTiles?: ITileProps['onRequestLinkableTiles'];
+  documentId?: string;
 }
 
 export const DataCardToolbar: React.FC<IProps> = observer(function DataCardToolbar({
-    isLinkEnabled, model, documentContent, tileElt, currEditAttrId, currEditFacet, showLinkTileDialog,
-    getLinkIndex, onIsEnabled, setImageUrlToAdd, handleDeleteValue, handleDuplicateCard,
+    model, documentContent, tileElt, currEditAttrId, currEditFacet,
+    onIsEnabled, setImageUrlToAdd, documentId, onRequestTilesOfType, onRequestLinkableTiles,
     ...others }: IProps) {
   const content = model.content as DataCardContentModelType;
   const { caseIndex, dataSet, totalCases } = content;
@@ -48,10 +50,10 @@ export const DataCardToolbar: React.FC<IProps> = observer(function DataCardToolb
       ...others
   });
 
-  const { isMergeEnabled, showMergeTileDialog } = useTileDataMerging({model});
+  const buttonSettings = useSettingFromStores("tools", "datacard") as unknown as IButtonSetting[] | undefined;
+  const buttons = buttonSettings || defaultButtons;
 
   const isEditingValue = !!currEditAttrId && currEditFacet === "value";
-  const valueActionsEnabled = enabled && isEditingValue;
 
   const uploadImage = (file: File) => {
     gImageMap.addFileImage(file)
@@ -62,41 +64,43 @@ export const DataCardToolbar: React.FC<IProps> = observer(function DataCardToolb
       });
   };
 
-  const handleLinkButtonCLick = () => {
-    showLinkTileDialog && showLinkTileDialog();
-  };
-
-  const handleMergeDataClick = () => {
-    showMergeTileDialog && showMergeTileDialog();
-  };
-
   const toolbarClasses = classNames(
     "data-card-toolbar",
     enabled && location ? "enabled" : "disabled",
   );
 
-  const valueActionsButtonsClasses = classNames(
-    "value-actions-buttons",
-    { "value-actions-disabled": !valueActionsEnabled }
-  );
+  const valueActionsDisabled = !enabled || !isEditingValue;
+  const cardActionsDisabled = content.attributes.length < 1;
 
-  const cardActionsButtonsClasses = classNames(
-    "card-actions-buttons",
-    { "card-actions-disabled": content.attributes.length < 1 }
-  );
+  const context: IDataCardToolbarButtonContext = {
+    currEditAttrId,
+    documentId,
+    onRequestTilesOfType,
+    onRequestLinkableTiles
+  };
+
+  const getToolbarButton = (toolName: IButtonSetting) => {
+    switch (toolName) {
+      case "duplicate":
+        return <DuplicateCardButton content={content} context={context} isDisabled={cardActionsDisabled} />;
+      case "link-tile":
+        return <LinkTileButton content={content} context={context} isDisabled={cardActionsDisabled} />;
+      case "merge-in":
+        return <MergeInButton content={content} context={context} isDisabled={cardActionsDisabled} />;
+      case "image-upload":
+        // need to disable this button when the valueActions are disabled,
+        // the button doesn't have disabled property
+        return <ImageUploadButton onUploadImageFile={file => uploadImage(file)}
+          extraClasses={valueActionsDisabled ? "disabled" : ""}/>;
+      case "delete-attribute":
+        return <DeleteAttrButton content={content} context={context} isDisabled={valueActionsDisabled} />;
+    }
+  };
 
   return documentContent
     ? ReactDOM.createPortal(
       <div className={toolbarClasses} style={location}>
-        <div className={cardActionsButtonsClasses}>
-          <DuplicateCardButton onClick={handleDuplicateCard} />
-          <LinkTileButton getLinkIndex={getLinkIndex} isEnabled={isLinkEnabled} onClick={handleLinkButtonCLick} />
-          <MergeInButton onClick={handleMergeDataClick} isEnabled={isMergeEnabled} />
-        </div>
-        <div className={valueActionsButtonsClasses}>
-          <ImageUploadButton onUploadImageFile={file => uploadImage(file)} />
-          <DeleteAttrButton onClick={handleDeleteValue} />
-        </div>
+        {buttons.map(button => getToolbarButton(button))}
       </div>, documentContent)
   : null;
 });

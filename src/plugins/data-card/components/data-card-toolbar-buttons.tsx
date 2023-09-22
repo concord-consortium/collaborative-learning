@@ -1,105 +1,109 @@
-import React from "react";
-import { Tooltip, TooltipProps } from "react-tippy";
+import React, { useContext } from "react";
 import classNames from "classnames";
 
 import LinkGraphIcon from "../../../clue/assets/icons/table/link-graph-icon.svg";
 import DuplicateCardIcon from "../assets/duplicate-card-icon.svg";
 import DeleteSelectionIcon from "../assets/delete-selection-icon.svg";
 import MergeInIcon from "../assets/merge-in-icon.svg";
-import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
+import { TileToolbarButton } from "../../../components/shared/tile-toolbar-button";
+import { DataCardContentModelType } from "../data-card-content";
+import { TileModelContext } from "../../../components/tiles/tile-api";
+import { ITileProps } from "../../../components/tiles/tile-component";
+import { useConsumerTileLinking } from "../../../hooks/use-consumer-tile-linking";
+import { useTileDataMerging } from "../../../hooks/use-tile-data-merging";
+import { observer } from "mobx-react";
 
-interface IToolbarButtonProps {
-  className?: string;
-  icon: any;
-  tooltipOptions: TooltipProps;
-  onClick: (e: React.MouseEvent) => void;
+export interface IDataCardToolbarButtonContext {
+  currEditAttrId: string;
+  onRequestTilesOfType: ITileProps['onRequestTilesOfType'];
+  onRequestLinkableTiles?: ITileProps['onRequestLinkableTiles'];
+  documentId?: string;
 }
-const ToolbarButton = ({ className, icon, onClick, tooltipOptions}: IToolbarButtonProps) => {
-  const to = useTooltipOptions(tooltipOptions);
-  const classes = classNames("toolbar-button", className);
-  return (
-    <Tooltip {...to}>
-      <button className={classes} onClick={onClick}>
-        {icon}
-      </button>
-    </Tooltip>
-  );
-};
 
-interface IDuplicateDataCardButtonProps {
-  onClick?: () => void;
+interface IDataCardToolbarButtonProps {
+  isDisabled?: boolean;
+  content: DataCardContentModelType;
+  context: IDataCardToolbarButtonContext;
 }
-export const DuplicateCardButton = ({ onClick }: IDuplicateDataCardButtonProps) => {
-  const handleClick = (e: React.MouseEvent) => {
-    onClick?.();
-    e.stopPropagation();
-  };
+
+export const DuplicateCardButton = ({ content, isDisabled }: IDataCardToolbarButtonProps) => {
   return (
-    <ToolbarButton
+    <TileToolbarButton
       className="duplicate-data-card-button"
-      icon={<DuplicateCardIcon />}
-      onClick={handleClick}
-      tooltipOptions={{ title: "Duplicate card" }}
-    />
+      onClick={content.duplicateCard}
+      title="Duplicate card"
+      isDisabled={isDisabled}
+    >
+      <DuplicateCardIcon />
+    </TileToolbarButton>
   );
 };
 
-interface IDeleteAttrButtonProps {
-  onClick?: () => void;
-}
-export const DeleteAttrButton = ({ onClick }: IDeleteAttrButtonProps) => {
-  const handleClick = (e: React.MouseEvent) => {
-    onClick?.();
-    e.stopPropagation();
+export const DeleteAttrButton = ({ content, context, isDisabled }: IDataCardToolbarButtonProps) => {
+  const handleClick = () => {
+    const thisCaseId = content.dataSet.caseIDFromIndex(content.caseIndex);
+    if (thisCaseId){
+      content.setAttValue(thisCaseId, context.currEditAttrId, "");
+    }
   };
+
   return (
-    <ToolbarButton
+    <TileToolbarButton
       className="delete-value-button"
-      icon={<DeleteSelectionIcon />}
       onClick={handleClick}
-      tooltipOptions={{ title: "Delete value" }}
-    />
+      title="Delete value"
+      isDisabled={isDisabled}
+    >
+      <DeleteSelectionIcon />
+    </TileToolbarButton>
   );
 };
 
-interface ILinkDataCardButtonProps {
-  isEnabled?: boolean;
-  getLinkIndex: () => number;
-  onClick?: () => void;
-}
-export const LinkTileButton = ({ isEnabled, getLinkIndex, onClick }: ILinkDataCardButtonProps) => {
-  const linkIndex = getLinkIndex();
-  const classes = classNames("link-tile-button", `link-color-${linkIndex}`, { disabled: !isEnabled });
-  const handleClick = (e: React.MouseEvent) => {
-    isEnabled && onClick?.();
-    e.stopPropagation();
-  };
-  return (
-    <ToolbarButton
-      className={classes}
-      icon={<LinkGraphIcon />}
-      onClick={handleClick}
-      tooltipOptions={{ title: "Link data card" }}
-    />
-  );
-};
+export const LinkTileButton = observer(function LinkTileButton(
+    { content, context, isDisabled }: IDataCardToolbarButtonProps) {
+  const hasLinkableRows = content.dataSet.attributes.length > 1;
+  // FIXME: since the model could be null we had to add this ! hack
+  const model = useContext(TileModelContext)!;
+  const { documentId, onRequestTilesOfType, onRequestLinkableTiles } = context;
+  const { isLinkEnabled, getLinkIndex, showLinkTileDialog } = useConsumerTileLinking({
+    documentId, model, hasLinkableRows, onRequestTilesOfType, onRequestLinkableTiles
+  });
+  const linkColorClass = `link-color-${getLinkIndex()}`;
 
-interface IMergeDataButtonProps {
-  isEnabled?: boolean;
-  onClick?: () => void;
-}
-export const MergeInButton = ({ isEnabled, onClick }: IMergeDataButtonProps) => {
-  const classes = classNames("merge-data-button", { disabled: !isEnabled });
-  const handleClick = (e: React.MouseEvent) => {
-    isEnabled && onClick?.();
-    e.stopPropagation();
+  const handleClick = () => {
+    showLinkTileDialog && showLinkTileDialog();
   };
+
+  const classes = classNames("link-tile-button", linkColorClass);
   return (
-    <ToolbarButton
+    <TileToolbarButton
       className={classes}
-      icon={<MergeInIcon />}
       onClick={handleClick}
-      tooltipOptions={{ title: "Add Data from..." }}
-    />
+      title="Link data card"
+      isDisabled={isDisabled || !isLinkEnabled}
+    >
+      <LinkGraphIcon />
+    </TileToolbarButton>
   );
-};
+});
+
+export const MergeInButton = observer(function MergeButton({ isDisabled }: IDataCardToolbarButtonProps) {
+  const model = useContext(TileModelContext)!;
+  const { isMergeEnabled, showMergeTileDialog } = useTileDataMerging({model});
+
+  console.log("MergeInButton", {isDisabled, isMergeEnabled});
+  const handleClick = () => {
+    showMergeTileDialog && showMergeTileDialog();
+  };
+
+  return (
+    <TileToolbarButton
+      className="merge-data-button"
+      onClick={handleClick}
+      title="Add Data from..."
+      isDisabled={isDisabled || !isMergeEnabled}
+    >
+      <MergeInIcon />
+    </TileToolbarButton>
+  );
+});
