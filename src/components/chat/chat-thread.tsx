@@ -30,7 +30,7 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
 
   useEffect(() => {
     setExpandedThread(focusTileId || 'document');
-  },[focusTileId]);
+  }, [focusTileId]);
 
   // make focusId null if undefined so it can be compared with tileId below.
   const focusId = focusTileId === undefined ? null : focusTileId;

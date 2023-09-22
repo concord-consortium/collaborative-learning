@@ -72,7 +72,7 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
 
   it("getTilesInDocumentOrder handles rows with multiple tiles", () => {
     expect(documentContent.getTilesInDocumentOrder()).toEqual(
-      ["textTool1", "drawingTool1", "tableTool", "imageTool","graphTool", "textTool2",
+      ["textTool1", "drawingTool1", "tableTool", "imageTool", "graphTool", "textTool2",
       "drawingTool2", "whatIfPlaceholder", "nowWhatDoYouKnowPlaceholder"]);
   });
 

@@ -66,7 +66,7 @@ class GraphToolTile{
             .then(($point)=>{
                 x = $point.attr('cx');
                 y = $point.attr('cy');
-                return '"(' + this.transformToCoordinate('x',x) + ', ' + this.transformToCoordinate('y',y) + ')"';
+                return '"(' + this.transformToCoordinate('x', x) + ', ' + this.transformToCoordinate('y', y) + ')"';
             });
     }
     getGraphPointLabel(){ //This is the letter label for a point
@@ -75,14 +75,14 @@ class GraphToolTile{
     getGraphPoint(){
         return cy.get('.geometry-content.editable ellipse[display="inline"]');
     }
-    hoverGraphPoint(x,y){
+    hoverGraphPoint(x, y){
         let transX=this.transformFromCoordinate('x', x),
         transY=this.transformFromCoordinate('y', y);
 
         this.getGraph().last()
-            .trigger('mouseover',transX,transY);
+            .trigger('mouseover', transX, transY);
     }
-    selectGraphPoint(x,y){
+    selectGraphPoint(x, y){
         let transX=this.transformFromCoordinate('x', x),
             transY=this.transformFromCoordinate('y', y);
 
@@ -98,11 +98,11 @@ class GraphToolTile{
     getGraphPolygon(){
         return cy.get('.single-workspace .geometry-content.editable polygon');
     }
-    addPointToGraph(x,y){
+    addPointToGraph(x, y){
         let transX=this.transformFromCoordinate('x', x),
             transY=this.transformFromCoordinate('y', y);
 
-        this.getGraph().last().click(transX,transY, {force:true});
+        this.getGraph().last().click(transX, transY, {force:true});
     }
     getRotateTool(){
         return cy.get('.single-workspace .rotate-polygon-icon.enabled');

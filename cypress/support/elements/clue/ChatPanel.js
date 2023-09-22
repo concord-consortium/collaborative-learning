@@ -85,7 +85,7 @@ class ChatPanel{
       this.getProblemDocumentContent().should('have.class', DOCUMENT_COMMENT_CLASS);
     }
     verifyDocumentCommentClass() {
-      this.getEditableDocumentContent().should('have.class',DOCUMENT_COMMENT_CLASS);
+      this.getEditableDocumentContent().should('have.class', DOCUMENT_COMMENT_CLASS);
     }
     showAndVerifyTileCommentClass(tileIndex = 0) {
       cy.getToolTile(tileIndex).click().should('have.class', TILE_COMMENT_CLASS);

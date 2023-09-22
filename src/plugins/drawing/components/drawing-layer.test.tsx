@@ -75,7 +75,7 @@ describe("Drawing Layer Components", () => {
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("moves a vector line", () => {
-      vector.setPosition(5,5);
+      vector.setPosition(5, 5);
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("deletes a vector line", () => {
@@ -103,7 +103,7 @@ describe("Drawing Layer Components", () => {
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("moves a vector arrow", () => {
-      vector.setPosition(5,5);
+      vector.setPosition(5, 5);
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("changes vector to single arrow", () => {
@@ -138,7 +138,7 @@ describe("Drawing Layer Components", () => {
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("moves a rectangle", () => {
-      rect.setPosition(5,5);
+      rect.setPosition(5, 5);
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("deletes a rectangle", () => {
@@ -165,7 +165,7 @@ describe("Drawing Layer Components", () => {
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("moves a ellipse", () => {
-      ellipse.setPosition(5,5);
+      ellipse.setPosition(5, 5);
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("deletes a ellipse", () => {
@@ -252,7 +252,7 @@ describe("Drawing Layer Components", () => {
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("moves a image", () => {
-      image.setPosition(5,5);
+      image.setPosition(5, 5);
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("deletes a image", () => {

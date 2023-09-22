@@ -42,7 +42,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   const modelRef = useCurrent(model);
   const getContent = useCallback(() => modelRef.current.content as TableContentModelType, [modelRef]);
   const content = useMemo(() => getContent(), [getContent]);
-  const [imageUrls, setImageUrls] = useState(new Map<string,string>());
+  const [imageUrls, setImageUrls] = useState(new Map<string, string>());
   verifyAlive(content, "TableToolComponent");
   const metadata = getContent().metadata;
 

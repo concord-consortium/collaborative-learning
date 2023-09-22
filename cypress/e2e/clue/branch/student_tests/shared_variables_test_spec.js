@@ -123,8 +123,8 @@ context('Shared Variables', function () {
       textToolTile.getTextTile().last().find(`.variable-chip:contains("${textTileVName2}=${textTileVValue2}")`).should('have.length', 2);
     });
 
-    it('verifies restore of variable chip content',()=>{
-      canvas.createNewExtraDocumentFromFileMenuWithoutTabs('text tool test','my-work');
+    it('verifies restore of variable chip content', ()=>{
+      canvas.createNewExtraDocumentFromFileMenuWithoutTabs('text tool test', 'my-work');
       cy.wait(2000);
       textToolTile.getTextTile().should('not.exist');
       //re-open investigation

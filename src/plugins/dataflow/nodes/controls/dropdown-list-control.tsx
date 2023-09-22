@@ -89,7 +89,7 @@ export class DropdownListControl extends Rete.Control {
       const displayName = option?.displayName ?? name;
       const icon = option?.icon?.({}) || null;
       const activeHub = option?.active;
-      const liveNode = this.getNode().name.substring(0,4) === "Live";
+      const liveNode = this.getNode().name.substring(0, 4) === "Live";
       const disableSelected = this.key === "hubSelect" && liveNode && !activeHub;
       const labelClasses = disableSelected ? "disabled item top" : "item top";
 

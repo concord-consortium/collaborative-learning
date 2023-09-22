@@ -112,7 +112,7 @@ export const AppConfigModel = types
     getDisabledFeaturesOfSection(section?: SectionModelType) {
       let disabledFeatures = self.disabledFeatures;
       if (section) {
-        const disabled: Record<string ,string> = {};
+        const disabled: Record<string, string> = {};
         mergeDisabledFeatures(disabled, disabledFeatures);
         mergeDisabledFeatures(disabled, section.disabled);
         disabledFeatures = Object.values(disabled);

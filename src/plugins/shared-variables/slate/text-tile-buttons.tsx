@@ -32,7 +32,7 @@ export function insertTextVariable(variable: VariableType, editor?: Editor) {
   const newNodes = [];
 
   // If the insertion point is preceded by a character that's not a space, add a space.
-  const range = editor.selection || [0,0];
+  const range = editor.selection || [0, 0];
   const beforeInsertPoint = Editor.before(editor, range, { unit: "character" });
   const charBefore = editor.selection && beforeInsertPoint &&
                        Editor.string(editor, {anchor: editor.selection.anchor, focus: beforeInsertPoint });

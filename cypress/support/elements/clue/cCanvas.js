@@ -164,7 +164,7 @@ class ClueCanvas {
         cy.log(nthType);
         cy.get('.primary-workspace .tool.' + tile)
             .trigger('dragstart', { dataTransfer });
-        cy.get('.drop-feedback:nth-of-type('+nthType+')').eq(1).invoke('attr','class','drop-feedback show '+dropzone)
+        cy.get('.drop-feedback:nth-of-type('+nthType+')').eq(1).invoke('attr', 'class', 'drop-feedback show '+dropzone)
             .trigger('drop', { dataTransfer, force: true })
             .trigger('dragend', { dataTransfer, force: true });
     }
@@ -278,7 +278,7 @@ class ClueCanvas {
                 tileElement = xyPlotToolTile.getTile().last().click({ force: true });
                 break;    
         }
-        tileElement.should('have.class','selected');
+        tileElement.should('have.class', 'selected');
     }
 
     deleteTile(tile) {

@@ -145,7 +145,7 @@ context('Table Tool Tile', function () {
         .siblings('.expression-cell.has-expression')
         .should('contain', formula);
     });
-    it('verify selection of y axis when there is more than one',function(){
+    it('verify selection of y axis when there is more than one', function(){
       cy.get(".primary-workspace").within((workspace) => {
         tableToolTile.getAddColumnButton().click();
         tableToolTile.renameColumn('y', headerY); //makes it easier to find the correct column header
@@ -169,7 +169,7 @@ context('Table Tool Tile', function () {
         .siblings('.expression-cell.has-expression')
         .should('not.exist');
     });
-    it('verify selection of y2 axis and will enter a formula',function(){
+    it('verify selection of y2 axis and will enter a formula', function(){
       cy.get(".primary-workspace").within((workspace) => {
         tableToolTile.getTableToolbarButton('set-expression').click();
       });
@@ -190,7 +190,7 @@ context('Table Tool Tile', function () {
         tableToolTile.getTableCell().eq(3).should('contain', '7');
         });
     });
-    it('verifies restore of table field content in copy document',()=>{
+    it('verifies restore of table field content in copy document', ()=>{
         const title = "table test";
         //copy investigation
         canvas.copyDocument(copyTitle);

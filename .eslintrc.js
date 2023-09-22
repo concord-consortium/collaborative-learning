@@ -39,6 +39,7 @@ module.exports = {
       "@typescript-eslint/no-unused-vars": ["warn",
         { args: "none", ignoreRestSiblings: true, "destructuredArrayIgnorePattern": "^_" }],
       "@typescript-eslint/prefer-optional-chain": "off",  // 300 as of 2020-09-13
+      "comma-spacing": "warn",
       curly: ["error", "multi-line", "consistent"],
       "dot-notation": "error",
       "eol-last": "warn",

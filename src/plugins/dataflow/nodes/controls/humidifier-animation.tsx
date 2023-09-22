@@ -94,7 +94,7 @@ export const HumidiferAnimation: React.FC<IProps> = ({nodeValue, nodeId, editor}
     }
 
     priorValue.current = nodeValue;
-  },[nodeValue, setImageSrc, startLooping, stopLooping]);
+  }, [nodeValue, setImageSrc, startLooping, stopLooping]);
 
   return (
     <img className={`mist-${nodeId} mist`} src={humidAnimationPhases.stayOff.frames[0]} />

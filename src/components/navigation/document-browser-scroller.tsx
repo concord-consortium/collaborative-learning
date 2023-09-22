@@ -32,7 +32,7 @@ export const DocumentBrowserScroller =
     if(scrollToLocation !== undefined) {
       collectionElement?.scrollTo({left: scrollToLocation, behavior: "smooth"});
     }
-  },[collectionElement, scrollToLocation]);
+  }, [collectionElement, scrollToLocation]);
 
   // Keep track of the size of the containing element
   useEffect(() => {

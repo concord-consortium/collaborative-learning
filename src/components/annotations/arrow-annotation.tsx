@@ -146,7 +146,7 @@ export const ArrowAnnotationComponent = observer(
       acceptText();
     }
     function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-      setTempText(e.target.value.slice(0,maxCharacters));
+      setTempText(e.target.value.slice(0, maxCharacters));
     }
     function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
       const { key } = e;

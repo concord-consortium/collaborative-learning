@@ -26,7 +26,7 @@ context('Test the overall workspace', function () {
       cy.get('.list.'+section+' [data-test='+section+'-list-items] .footer').should('contain', "My First Learning Log");
     });
     it('verify click on document thumbnail opens document in nav panel', function () {
-      cy.openDocumentWithTitle('my-work', 'learning-log','My First Learning Log');
+      cy.openDocumentWithTitle('my-work', 'learning-log', 'My First Learning Log');
       cy.get('.editable-document-content [data-test=canvas]').should('be.visible');
       cy.get('.edit-button.learning-log').should('be.visible');
     });

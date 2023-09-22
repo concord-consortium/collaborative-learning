@@ -93,11 +93,11 @@ class TeacherDashboard {
     getZoomedStudentID() {
         return cy.get('.member-centered');
     }
-    sendGroupNote(group,text){
+    sendGroupNote(group, text){
         this.getGroup(group).within(() => {
             this.getStickyNoteIcon().click();
         });
-        dialog.getDialogTitle().should('contain','Message Group');
+        dialog.getDialogTitle().should('contain', 'Message Group');
         dialog.getDialogTextInput().type(text);
         dialog.getDialogOKButton().click();
     }
@@ -107,7 +107,7 @@ class TeacherDashboard {
             cy.get('.member').eq(quadrants.indexOf(quadrant)).click();
         });
         this.getStickyNoteIcon().eq(group).click();
-        dialog.getDialogTitle().should('contain','Message '+ student);
+        dialog.getDialogTitle().should('contain', 'Message '+ student);
         dialog.getDialogTextInput().type(text);
         dialog.getDialogOKButton().click();
     }
@@ -155,7 +155,7 @@ class TeacherDashboard {
             }
         }
         // subtract 4 because there are 4 published docs that are not in view
-        this.getStarPublishIcon().should('have.length', totalPublished-4).click({force:true,multiple:true});
+        this.getStarPublishIcon().should('have.length', totalPublished-4).click({force:true, multiple:true});
     }
     clearAllStarsFromPublishedWork() {
         cy.get('.icon-star').each(star => {
@@ -182,10 +182,10 @@ class TeacherDashboard {
         for(let i = 0; i < group.students.length; i++) {
             if (group.students[i].published === 0) {
                 this.getGroup(0).within(() => {
-                    this.getStudentCanvas(group.students[i].quadrant).find('[data-test=canvas] span').should('contain','Not Published');
+                    this.getStudentCanvas(group.students[i].quadrant).find('[data-test=canvas] span').should('contain', 'Not Published');
                 });
             } else {
-                this.getStudentCanvas(group.students[i].quadrant).find('[data-test=canvas] .document-content').should('not.contain',"Not Published");
+                this.getStudentCanvas(group.students[i].quadrant).find('[data-test=canvas] .document-content').should('not.contain', "Not Published");
             }
         }
     }

@@ -103,7 +103,7 @@ function lineData(node: any) {
   stepY = (maxY(node) - minY(node)) / 2;
 
   const chartData: ChartData = {
-    labels: new Array(kMaxNodeValues).fill(undefined).map((val,idx) => idx),
+    labels: new Array(kMaxNodeValues).fill(undefined).map((val, idx) => idx),
     datasets: chartDataSets
   };
 

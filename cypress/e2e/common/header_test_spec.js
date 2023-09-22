@@ -2,7 +2,7 @@ import Header from '../../support/elements/common/Header';
 
 const header = new Header;
 
-context('Test header elements',()=>{
+context('Test header elements', ()=>{
   before(function(){
     const baseUrl = `${Cypress.config("baseUrl")}`;
     const queryParams = `${Cypress.config("queryParams")}`;
@@ -11,8 +11,8 @@ context('Test header elements',()=>{
     cy.waitForLoad();
   });
 
-  describe('Test header UI',()=>{
-    it('verify correct information is in header elements',()=>{
+  describe('Test header UI', ()=>{
+    it('verify correct information is in header elements', ()=>{
       cy.location('search').then((queryParam)=>{
         const params = (queryParam.split('&'));
         let headerInfoObj = {};

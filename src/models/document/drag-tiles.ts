@@ -145,7 +145,7 @@ export function logDataTransfer(_dataTransfer: DataTransfer) {
   }
 
   // As far as I can tell getData(type) is the same as the value passed to callback of getAsString
-  dataTransfer.dataValues = {} as Record<string,string>;
+  dataTransfer.dataValues = {} as Record<string, string>;
   for (const type of dataTransfer.types) {
     dataTransfer.dataValues[type] = _dataTransfer.getData(type);
   }

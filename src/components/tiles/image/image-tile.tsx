@@ -271,7 +271,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
 
   private renderTitle() {
     const { readOnly, scale } = this.props;
-    const size = {width: this.state.imageEltWidth || null , height: this.state.imageEltHeight || null};
+    const size = {width: this.state.imageEltWidth || null, height: this.state.imageEltHeight || null};
     return (
       <EditableTileTitle key="geometry-title" size={size} scale={scale} getTitle={() => this.getTitle()}
                               readOnly={readOnly} measureText={(text) => measureText(text, defaultTileTitleFont)}

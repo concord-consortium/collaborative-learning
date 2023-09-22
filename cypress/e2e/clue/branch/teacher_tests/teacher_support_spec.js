@@ -31,14 +31,14 @@ context('Teacher Support', function() {
     const title = "Drawing Wumps";
 
     describe('verify supports functionality', function() {
-        it('test support functionality',function(){
+        it('test support functionality', function(){
             cy.log('will verify publish of support appears in Class Work>Workspaces');
             beforeTest(queryParams.teacherQueryParams);
             clueCanvas.addTile('table');
             clueCanvas.publishDoc("This Class");
             cy.openTopTab("class-work");
-            cy.openSection('class-work','workspaces');
-            resourcesPanel.getCanvasItemTitle('class-work','workspaces').should('contain',title);
+            cy.openSection('class-work', 'workspaces');
+            resourcesPanel.getCanvasItemTitle('class-work', 'workspaces').should('contain', title);
         
             cy.log('verify teacher support is visible in student nav');
             loadStudentSession(queryParams.studentQueryParams);

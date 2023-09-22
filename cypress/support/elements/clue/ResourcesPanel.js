@@ -35,11 +35,11 @@ class ResourcesPanel{
         return cy.get('.document-tabs.'+tab+' .list.'+section+' [data-test='+section+'-list-items] .footer');
     }
 
-    starCanvasItem(tab, section,title){
+    starCanvasItem(tab, section, title){
         cy.get('.list.'+section+' .list-item[data-test='+section+'-list-items]').contains('.footer', title).siblings('.icon-holder').find('.icon-star').click();
     }
 
-    getCanvasStarIcon(tab,section,title){
+    getCanvasStarIcon(tab, section, title){
         return this.getCanvasItemTitle(tab, section).contains(title).parent().parent().siblings('.icon-holder').find('.icon-star');
     }
 

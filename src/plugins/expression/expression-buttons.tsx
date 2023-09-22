@@ -24,7 +24,7 @@ interface AddMathTextButtonProps {
 export const AddMathTextButton = (props: AddMathTextButtonProps) => {
   const { mf, buttonName, enabled } = props;
   const button = expressionButtonsList.find((btn) => btn.name === buttonName);
-  const tooltipOptions = useTooltipOptions({distance: 5,offset: 5});
+  const tooltipOptions = useTooltipOptions({distance: 5, offset: 5});
   const tooltipText = "Add  " + button?.title + "  to expression";
 
   const buttonClasses = classNames(
