@@ -19,6 +19,7 @@ import {
 import { NumberlineToolbar } from "./numberline-toolbar";
 
 import "./numberline-tile.scss";
+import { kSmallAnnotationNodeRadius } from '../../../components/annotations/annotation-utilities';
 
 export const NumberlineTile: React.FC<ITileProps> = observer(function NumberlineTile(props){
   const { documentContent, model, readOnly, scale, tileElt, onRegisterTileApi, onUnregisterTileApi } = props;
@@ -135,7 +136,15 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
           offsets.setDy(-innerPointRadius);
         }
         return offsets;
-      }
+      },
+      getObjectNodeRadii(objectId: string, objectType?: string) {
+        if (objectType === "point") {
+          return {
+            centerRadius: kSmallAnnotationNodeRadius / 2,
+            highlightRadius: kSmallAnnotationNodeRadius
+          };
+        }
+      },
     });
   }, [annotationPointCenter, content, getObjectBoundingBox, model.title, onRegisterTileApi]);
 

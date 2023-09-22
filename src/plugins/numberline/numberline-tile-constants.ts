@@ -35,4 +35,4 @@ export const kArrowheadTop = 53;
 //--------- Numberline Circle constants ---------------------------------------------------------------
 export const innerPointRadius = 5;
 export const outerPointRadius = 9;
-export const kPointButtonRadius = 16;
+export const kPointButtonRadius = 11;

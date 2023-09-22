@@ -1,7 +1,7 @@
 import { halfPi, twoPi, normalizeAngle } from "../../utilities/math-utils";
 
 export const kAnnotationNodeDefaultRadius = 24;
-export const kSmallAnnotationNodeRadius = 6;
+export const kSmallAnnotationNodeRadius = 7;
 
 // Returns the default peak for a sparrow from sourceX, sourceY to targetX, targetY.
 const shortArcPeakScale = 1;
