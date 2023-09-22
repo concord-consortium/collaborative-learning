@@ -36,8 +36,8 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
 
   const dropZoneClasses = classNames(
    "stack-drop-zone",
-   {"show-droppable": draggingActive },
-   { "is-over" : isOver}
+   { "show-droppable": draggingActive },
+   { "is-over" : isOver }
   );
 
   return (

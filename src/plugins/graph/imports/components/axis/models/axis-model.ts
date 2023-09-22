@@ -1,6 +1,6 @@
-import {Instance, isAlive, SnapshotIn, types} from "mobx-state-tree";
+import { Instance, isAlive, SnapshotIn, types } from "mobx-state-tree";
 import { kDefaultNumericAxisBounds } from "../../../../graph-types";
-import {AxisOrientation, AxisPlaces, IScaleType, ScaleTypes} from "../axis-types";
+import { AxisOrientation, AxisPlaces, IScaleType, ScaleTypes } from "../axis-types";
 
 export const AxisModel = types.model("AxisModel", {
   type: types.optional(types.string, () => {

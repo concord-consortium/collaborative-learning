@@ -21,7 +21,7 @@ export class TextControl extends Rete.Control {
     const handleChange = (onChange: any) => {
       return (e: any) => { onChange(e.target.value); };
     };
-    this.component = (compProps: { value: any; onChange: any; label: any, color: string, tooltip: string}) => {
+    this.component = (compProps: { value: any; onChange: any; label: any, color: string, tooltip: string }) => {
       const inputRef = useRef<HTMLInputElement>(null);
       useStopEventPropagation(inputRef, "pointerdown");
       return (
@@ -38,7 +38,7 @@ export class TextControl extends Rete.Control {
             onChange={handleChange(compProps.onChange)}
           />
           {
-          compProps.color && <div className="color-dot" style={{backgroundColor: compProps.color}}/>
+          compProps.color && <div className="color-dot" style={{ backgroundColor: compProps.color }}/>
           }
         </div>
       );

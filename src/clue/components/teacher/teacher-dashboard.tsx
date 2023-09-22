@@ -18,7 +18,7 @@ interface TabInfo {
 }
 
 const tabs: TabInfo[] = [
-  {type: "Groups", id: "groups"},
+  { type: "Groups", id: "groups" },
   // TODO: add back tab when support stories (#160073804 && 160073880) are worked on
   // {type: "Supports", id: "supports"}
 ];
@@ -32,7 +32,7 @@ export class TeacherDashboardComponent extends BaseComponent<IProps, IState> {
   };
 
   public render() {
-    const {activeTab} = this.state;
+    const { activeTab } = this.state;
 
     return (
       <div className="teacher-dashboard">

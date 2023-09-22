@@ -432,9 +432,9 @@ context('Dataflow Tool Tile', function () {
         dataflowToolTile.getNumberField().type("1{enter}");
         dataflowToolTile.getNumberNodeOutput().should("exist");
         dataflowToolTile.getDataflowTile().click(startX, startY)
-          .trigger("pointerdown", startX, startY, {force: true})
-          .trigger("pointermove", startX + deltaX, startY + deltaY, {force: true})
-          .trigger("pointerup", startX + deltaX, startY + deltaY, {force: true});
+          .trigger("pointerdown", startX, startY, { force: true })
+          .trigger("pointermove", startX + deltaX, startY + deltaY, { force: true })
+          .trigger("pointerup", startX + deltaX, startY + deltaY, { force: true });
         dataflowToolTile.getModalOkButton().click();
       });
       it("should show needs connection message when fan is selected and there are no outputs", () => {

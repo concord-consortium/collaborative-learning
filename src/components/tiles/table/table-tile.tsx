@@ -99,12 +99,12 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   // rowProps are expanded and passed to ReactDataGrid
   const { rows, ...rowProps } = useRowsFromDataSet({
     dataSet, readOnly: !!readOnly, inputRowId: inputRowId.current,
-    rowChanges, context: gridContext});
+    rowChanges, context: gridContext });
 
   // columns are required by ReactDataGrid and are used by other hooks as well
   const { columns, controlsColumn, columnEditingName, handleSetColumnEditingName } = useColumnsFromDataSet({
     gridContext, dataSet, metadata, readOnly: !!readOnly, columnChanges, headerHeight, rowHeight,
-    ...rowLabelProps, measureColumnWidth, lookupImage});
+    ...rowLabelProps, measureColumnWidth, lookupImage });
 
   // The size of the title bar
   const { titleCellWidth, getTitleHeight } =

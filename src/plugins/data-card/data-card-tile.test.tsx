@@ -24,7 +24,7 @@ jest.mock("../../models/tiles/log/log-tile-document-event", () => ({
 
 describe("DataCardToolComponent", () => {
   const content = defaultDataCardContent();
-  const model = TileModel.create({content});
+  const model = TileModel.create({ content });
 
   const defaultProps = {
     tileElt: null,
@@ -57,10 +57,10 @@ describe("DataCardToolComponent", () => {
   };
 
   it("renders successfully", () => {
-    const {getByText} =
+    const { getByText } =
       render(
         <ModalProvider>
-          <DataCardToolComponent  {...defaultProps} {...{model}}></DataCardToolComponent>
+          <DataCardToolComponent  {...defaultProps} {...{ model }}></DataCardToolComponent>
         </ModalProvider>
       );
       expect(getByText("Data Card Collection 1")).toBeInTheDocument();

@@ -20,7 +20,7 @@ export const ProblemMenuContainer: React.FC<IProps> = observer(function ProblemM
   };
 
   const handleMenuItemClick = (item: IDropdownItem, problemName: string) => {
-    const {link, text} = item;
+    const { link, text } = item;
     if (link) {
       window.location.replace(link);
     } else {
@@ -28,7 +28,7 @@ export const ProblemMenuContainer: React.FC<IProps> = observer(function ProblemM
     }
     const logItem = {
       event: LogEventName.DASHBOARD_SWITCH_CLASS,
-      parameters: {text, link}
+      parameters: { text, link }
     };
     Logger.log(logItem.event, logItem.parameters, LogEventMethod.DO);
   };

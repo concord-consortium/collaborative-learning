@@ -25,8 +25,8 @@ export class TabComponent extends React.Component<IProps, IState> {
   }
 
   public render() {
-    const {id, active, title} = this.props;
-    const {hovering} = this.state;
+    const { id, active, title } = this.props;
+    const { hovering } = this.state;
     const className = `tab${active ? " active" : ""}${hovering ? " hovering" : ""}`;
     return (
       <div
@@ -53,10 +53,10 @@ export class TabComponent extends React.Component<IProps, IState> {
   // manual hover state is maintained so that we can set a class to override
   // a child element's style - the :hover pseudo class won't work in this case
   private handleMouseOver = (e: React.MouseEvent<HTMLDivElement>) => {
-    this.setState({hovering: true});
+    this.setState({ hovering: true });
   };
 
   private handleMouseOut = (e: React.MouseEvent<HTMLDivElement>) => {
-    this.setState({hovering: false});
+    this.setState({ hovering: false });
   };
 }

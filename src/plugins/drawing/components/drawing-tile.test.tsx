@@ -83,7 +83,7 @@ describe("DrawingToolComponent", () => {
   const stores = specStores();
 
   const content = createDrawingContent();
-  const model = TileModel.create({content});
+  const model = TileModel.create({ content });
   model.setTitle('A Title for Testing');
   render(<div className="document-content" data-testid="document-content"/>);
   const documentContent = screen.getByTestId("document-content");
@@ -126,7 +126,7 @@ describe("DrawingToolComponent", () => {
     render(
       <ModalProvider>
         <Provider stores={stores}>
-          <DrawingToolComponent {...defaultProps} {...{model}} />
+          <DrawingToolComponent {...defaultProps} {...{ model }} />
         </Provider>
       </ModalProvider>
     );
@@ -140,7 +140,7 @@ describe("DrawingToolComponent", () => {
     render(
       <ModalProvider>
         <Provider stores={stores}>
-          <DrawingToolComponent {...defaultProps} {...{model}} />
+          <DrawingToolComponent {...defaultProps} {...{ model }} />
         </Provider>
       </ModalProvider>
     );
@@ -160,7 +160,7 @@ describe("DrawingToolComponent", () => {
     render(
       <ModalProvider>
         <Provider stores={stores}>
-          <DrawingToolComponent {...defaultProps} {...{model}} />
+          <DrawingToolComponent {...defaultProps} {...{ model }} />
         </Provider>
       </ModalProvider>
     );
@@ -175,7 +175,7 @@ describe("DrawingToolComponent", () => {
     render(
       <ModalProvider>
         <Provider stores={stores}>
-          <DrawingToolComponent {...defaultProps} {...{model}} />
+          <DrawingToolComponent {...defaultProps} {...{ model }} />
         </Provider>
       </ModalProvider>
     );

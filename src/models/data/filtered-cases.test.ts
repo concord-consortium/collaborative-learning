@@ -118,7 +118,7 @@ describe("DerivedDataSet", () => {
     expect(filtered.caseIds.length).toBe(2);
     expect(filtered.caseIds).toEqual(["c1", "c3"]);
 
-    data.setCaseValues([{ __id__: "c1", x: undefined}]);
+    data.setCaseValues([{ __id__: "c1", x: undefined }]);
     expect(filtered.caseIds.length).toBe(1);
     expect(filtered.caseIds).toEqual(["c3"]);
     expect(trigger).toHaveBeenCalledTimes(4);

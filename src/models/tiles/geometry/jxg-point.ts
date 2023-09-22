@@ -58,7 +58,7 @@ export function createPoint(board: JXG.Board, parents: JXGUnsafeCoordPair, chang
     props.snapSizeY = kSnapUnit;
   }
   const isGraphable = isPositionGraphable(parents);
-  const point = board.create("point", getGraphablePosition(parents), {...props, visible: isGraphable});
+  const point = board.create("point", getGraphablePosition(parents), { ...props, visible: isGraphable });
   return point;
 }
 

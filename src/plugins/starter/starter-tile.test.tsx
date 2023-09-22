@@ -12,7 +12,7 @@ import "./starter-registration";
 
 describe("StarterToolComponent", () => {
   const content = defaultStarterContent();
-  const model = TileModel.create({content});
+  const model = TileModel.create({ content });
 
   const defaultProps = {
     tileElt: null,
@@ -44,14 +44,14 @@ describe("StarterToolComponent", () => {
   };
 
   it("renders successfully", () => {
-    const {getByText} =
-      render(<StarterToolComponent  {...defaultProps} {...{model}}></StarterToolComponent>);
+    const { getByText } =
+      render(<StarterToolComponent  {...defaultProps} {...{ model }}></StarterToolComponent>);
     expect(getByText("Hello World")).toBeInTheDocument();
   });
 
   it("updates the text when the model changes", async () => {
-    const {getByText, findByText} =
-      render(<StarterToolComponent  {...defaultProps} {...{model}}></StarterToolComponent>);
+    const { getByText, findByText } =
+      render(<StarterToolComponent  {...defaultProps} {...{ model }}></StarterToolComponent>);
     expect(getByText("Hello World")).toBeInTheDocument();
 
     content.setText("New Text");
@@ -60,8 +60,8 @@ describe("StarterToolComponent", () => {
   });
 
   it("updates the model when the user types", () => {
-    const {getByRole, getByText} =
-      render(<StarterToolComponent  {...defaultProps} {...{model}}></StarterToolComponent>);
+    const { getByRole, getByText } =
+      render(<StarterToolComponent  {...defaultProps} {...{ model }}></StarterToolComponent>);
     expect(getByText("New Text")).toBeInTheDocument();
 
     const textBox = getByRole("textbox");

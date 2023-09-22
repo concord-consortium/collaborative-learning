@@ -40,8 +40,8 @@ describe("uninitialized logger", () => {
     mockXhr.setup();
     stores = createStores({
       appMode: "authed",
-      appConfig: specAppConfig({ config: { appName: "TestLogger"} }),
-      user: UserModel.create({id: "0", portal: "test"})
+      appConfig: specAppConfig({ config: { appName: "TestLogger" } }),
+      user: UserModel.create({ id: "0", portal: "test" })
     });
   });
 
@@ -80,7 +80,7 @@ describe("dev/qa/test logger with DEBUG_LOGGER false", () => {
     mockXhr.setup();
     stores = createStores({
       appMode: "test",
-      appConfig: specAppConfig({ config: { appName: "TestLogger"} }),
+      appConfig: specAppConfig({ config: { appName: "TestLogger" } }),
       ui: UIModel.create({
         activeNavTab: ENavTab.kStudentWork,
         problemWorkspace: {
@@ -92,7 +92,7 @@ describe("dev/qa/test logger with DEBUG_LOGGER false", () => {
           mode: "1-up"
         },
       }),
-      user: UserModel.create({id: "0", type: "teacher", portal: "test"})
+      user: UserModel.create({ id: "0", type: "teacher", portal: "test" })
     });
 
     Logger.initializeLogger(stores, { investigation: investigation.title, problem: problem?.title });
@@ -129,7 +129,7 @@ describe("demo logger with DEBUG_LOGGER false", () => {
     mockXhr.setup();
     stores = createStores({
       appMode: "demo",
-      appConfig: specAppConfig({ config: { appName: "TestLogger"} }),
+      appConfig: specAppConfig({ config: { appName: "TestLogger" } }),
       ui: UIModel.create({
         activeNavTab: ENavTab.kStudentWork,
         problemWorkspace: {
@@ -141,7 +141,7 @@ describe("demo logger with DEBUG_LOGGER false", () => {
           mode: "1-up"
         },
       }),
-      user: UserModel.create({id: "0", type: "teacher", portal: "test"})
+      user: UserModel.create({ id: "0", type: "teacher", portal: "test" })
     });
 
     Logger.initializeLogger(stores, { investigation: investigation.title, problem: problem?.title });
@@ -185,7 +185,7 @@ describe("authed logger", () => {
 
     stores = createStores({
       appMode: "authed",
-      appConfig: specAppConfig({ config: { appName: "TestLogger"} }),
+      appConfig: specAppConfig({ config: { appName: "TestLogger" } }),
       user: UserModel.create({
         id: "0", type: "student", portal: "test",
         loggingRemoteEndpoint: "foo"
@@ -240,7 +240,7 @@ describe("authed logger", () => {
         expect(request.time).toEqual(expect.anything());
         expect(request.event).toBe("CREATE_TILE");
         expect(request.method).toBe("do");
-        expect(request.parameters).toEqual({foo: "bar"});
+        expect(request.parameters).toEqual({ foo: "bar" });
 
         done();
         return res.status(201);

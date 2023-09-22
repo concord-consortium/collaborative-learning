@@ -26,9 +26,9 @@ export const VectorObject = StrokedObject.named("VectorObject")
       const { x, y } = self.position;
       const dx = self.dragDx ?? self.dx;
       const dy = self.dragDy ?? self.dy;
-      const nw: Point = {x: Math.min(x, x + dx), y: Math.min(y, y + dy)};
-      const se: Point = {x: Math.max(x, x + dx), y: Math.max(y, y + dy)};
-      return {nw, se};
+      const nw: Point = { x: Math.min(x, x + dx), y: Math.min(y, y + dy) };
+      const se: Point = { x: Math.max(x, x + dx), y: Math.max(y, y + dy) };
+      return { nw, se };
     },
     get label() {
       return  (self.headShape || self.tailShape) ? "Arrow" : "Line";
@@ -81,8 +81,8 @@ export interface VectorObjectSnapshot extends SnapshotIn<typeof VectorObject> {}
 export function isVectorObject(model: DrawingObjectType): model is VectorObjectType {
   return model.type === "vector";
 }
-export const VectorComponent = observer(function VectorComponent({model, handleHover,
-  handleDrag} : IDrawingComponentProps) {
+export const VectorComponent = observer(function VectorComponent({ model, handleHover,
+  handleDrag } : IDrawingComponentProps) {
   if (!isVectorObject(model)) return null;
   const vector = model as VectorObjectType;
   const { id, headShape, tailShape, stroke, strokeWidth, strokeDashArray } = vector;
@@ -142,14 +142,14 @@ export class VectorDrawingTool extends DrawingTool {
   public handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
     const start = this.drawingLayer.getWorkspacePoint(e);
     if (!start) return;
-    const {stroke, strokeWidth, strokeDashArray, vectorType} = this.drawingLayer.toolbarSettings();
+    const { stroke, strokeWidth, strokeDashArray, vectorType } = this.drawingLayer.toolbarSettings();
     const [headShape, tailShape] = endShapesForVectorType(vectorType);
     const vector = VectorObject.create({
       x: start.x,
       y: start.y,
       dx: 0,
       dy: 0,
-      headShape, tailShape, stroke, strokeWidth, strokeDashArray});
+      headShape, tailShape, stroke, strokeWidth, strokeDashArray });
 
     const handleMouseMove = (e2: MouseEvent) => {
       e2.preventDefault();

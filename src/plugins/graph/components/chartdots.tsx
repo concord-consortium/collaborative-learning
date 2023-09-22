@@ -1,20 +1,20 @@
-import {ScaleBand} from "d3";
-import React, {useCallback} from "react";
-import {CaseData, selectDots} from "../d3-types";
-import {attrRoleToAxisPlace, PlotProps} from "../graph-types";
-import {usePlotResponders} from "../hooks/use-plot";
-import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
-import {useDataSetContext} from "../imports/hooks/use-data-set-context";
-import {useGraphLayoutContext} from "../models/graph-layout";
-import {setPointCoordinates, setPointSelection} from "../utilities/graph-utils";
-import {useGraphModelContext} from "../models/graph-model";
+import { ScaleBand } from "d3";
+import React, { useCallback } from "react";
+import { CaseData, selectDots } from "../d3-types";
+import { attrRoleToAxisPlace, PlotProps } from "../graph-types";
+import { usePlotResponders } from "../hooks/use-plot";
+import { useDataConfigurationContext } from "../hooks/use-data-configuration-context";
+import { useDataSetContext } from "../imports/hooks/use-data-set-context";
+import { useGraphLayoutContext } from "../models/graph-layout";
+import { setPointCoordinates, setPointSelection } from "../utilities/graph-utils";
+import { useGraphModelContext } from "../models/graph-model";
 
 type BinMap = Record<string, Record<string, Record<string, Record<string, number>>>>;
 
 export const ChartDots = function ChartDots(props: PlotProps) {
-  const {dotsRef, enableAnimation} = props,
+  const { dotsRef, enableAnimation } = props,
     graphModel = useGraphModelContext(),
-    {pointColor, pointStrokeColor} = graphModel,
+    { pointColor, pointStrokeColor } = graphModel,
     dataConfiguration = useDataConfigurationContext(),
     dataset = useDataSetContext(),
     layout = useGraphLayoutContext(),
@@ -131,7 +131,7 @@ export const ChartDots = function ChartDots(props: PlotProps) {
               extraSecCatsArray.forEach((exSecCat, l) => {
                 if (!catMap[primeCat][secCat][exPrimeCat][exSecCat]) {
                   catMap[primeCat][secCat][exPrimeCat][exSecCat] =
-                    {cell: {p: i, s: j, ep: k, es: l}, numSoFar: 0};
+                    { cell: { p: i, s: j, ep: k, es: l }, numSoFar: 0 };
                 }
               });
             });
@@ -149,7 +149,7 @@ export const ChartDots = function ChartDots(props: PlotProps) {
           actualPointsPerColumn = Math.ceil(maxInCell / numPointsInRow),
           overlap = -Math.max(0, ((actualPointsPerColumn + 1) * pointDiameter - primaryHeight) /
             actualPointsPerColumn);
-        return {numPointsInRow, overlap};
+        return { numPointsInRow, overlap };
       },
       cellParams = computeCellParams(),
 
@@ -173,7 +173,7 @@ export const ChartDots = function ChartDots(props: PlotProps) {
               numInCell = mapEntry.numSoFar++,
               row = Math.floor(numInCell / cellParams.numPointsInRow),
               column = numInCell % cellParams.numPointsInRow;
-            indices[anID] = {cell: mapEntry.cell, row, column};
+            indices[anID] = { cell: mapEntry.cell, row, column };
           }
         });
         return indices;
@@ -184,8 +184,8 @@ export const ChartDots = function ChartDots(props: PlotProps) {
       pointRadius = graphModel.getPointRadius(),
       getPrimaryScreenCoord = (anID: string) => {
         if (cellIndices[anID]) {
-          const {column} = cellIndices[anID],
-            {p, ep} = cellIndices[anID].cell;
+          const { column } = cellIndices[anID],
+            { p, ep } = cellIndices[anID].cell;
           return baseCoord + signForOffset * ((p + 0.5) * primaryCellWidth + ep * extraPrimCellWidth) +
             (column + 0.5) * pointDiameter - cellParams.numPointsInRow * pointDiameter / 2;
         } else {
@@ -194,8 +194,8 @@ export const ChartDots = function ChartDots(props: PlotProps) {
       },
       getSecondaryScreenCoord = (anID: string) => {
         if (cellIndices[anID] && secOrdinalScale) {
-          const {row} = cellIndices[anID],
-            {s, es} = cellIndices[anID].cell;
+          const { row } = cellIndices[anID],
+            { s, es } = cellIndices[anID].cell;
           return secOrdinalScale.range()[0] -
             signForOffset * (s * primaryHeight + es * extraSecCellWidth +
               (row + 0.5) * pointDiameter + row * cellParams.overlap);
@@ -215,7 +215,7 @@ export const ChartDots = function ChartDots(props: PlotProps) {
     extraPrimaryAttrRole, extraSecondaryAttrRole, pointColor,
     enableAnimation, primaryIsBottom, layout, pointStrokeColor, computeMaxOverAllCells, dataset]);
 
-  usePlotResponders({dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation});
+  usePlotResponders({ dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation });
 
   return (
     <>

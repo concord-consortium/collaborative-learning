@@ -1,14 +1,14 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import classNames from "classnames";
 import { ILogComment, logCommentEvent } from "../../models/tiles/log/log-comment-event";
 import { UserModelType } from "../../models/stores/user";
 import { getTileComponentInfo } from "../../models/tiles/tile-component-info";
 import { WithId } from "../../hooks/firestore-hooks";
 import { useUIStore } from "../../hooks/use-stores";
-import { CommentDocument} from "../../lib/firestore-schema";
+import { CommentDocument } from "../../lib/firestore-schema";
 import { CommentCard } from "./comment-card";
 import UserIcon from "../../assets/icons/clue-dashboard/teacher-student.svg";
-import {ChatCommentThread} from "./chat-comment-thread";
+import { ChatCommentThread } from "./chat-comment-thread";
 import { TileIconComponent } from "./tile-icon-component";
 import { ChatThreadToggle } from "./chat-thread-toggle";
 
@@ -26,7 +26,7 @@ interface IProps {
 }
 
 export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
-  onPostComment, onDeleteComment, focusDocument, focusTileId, isDocumentView}) => {
+  onPostComment, onDeleteComment, focusDocument, focusTileId, isDocumentView }) => {
 
   useEffect(() => {
     setExpandedThread(focusTileId || 'document');

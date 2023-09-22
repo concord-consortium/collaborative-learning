@@ -34,9 +34,9 @@ export const TextObject = EditableObject.named("TextObject")
     get boundingBox() {
       const { x, y } = self.position;
       const { width, height } = self.currentDims;
-      const nw: Point = {x, y};
-      const se: Point = {x: x + width, y: y + height};
-      return {nw, se};
+      const nw: Point = { x, y };
+      const se: Point = { x: x + width, y: y + height };
+      return { nw, se };
     },
     get label() {
       return "Text";
@@ -83,7 +83,7 @@ export function isTextObject(model: DrawingObjectType): model is TextObjectType 
 }
 
 export const TextComponent = observer(
-    function TextComponent({model, readOnly, handleHover, handleDrag} : IDrawingComponentProps) {
+    function TextComponent({ model, readOnly, handleHover, handleDrag } : IDrawingComponentProps) {
   const textEditor = useRef<HTMLTextAreaElement>(null);
   if (!isTextObject(model)) return null;
   const textobj = model as TextObjectType;
@@ -97,7 +97,7 @@ export const TextComponent = observer(
     editing: boolean,
     clip: string
   }
-  const Content = function({editing, clip}: IContentProps) {
+  const Content = function({ editing, clip }: IContentProps) {
 
     useEffect(() => {
       // Focus text area when it opens, to avoid need for user to click it again.
@@ -122,7 +122,7 @@ export const TextComponent = observer(
       return(<g clipPath={'url(#'+clip+')'}>
               <WrappedSvgText text={text} 
                   x={x+margin} y={y+margin} width={width-2*margin} height={height-2*margin} 
-                  style={{fill: stroke}} />
+                  style={{ fill: stroke }} />
              </g>);
     }
   };
@@ -198,7 +198,7 @@ export class TextDrawingTool extends DrawingTool {
   }
 }
 
-export function TextToolbarButton({toolbarManager}: IToolbarButtonProps) {
+export function TextToolbarButton({ toolbarManager }: IToolbarButtonProps) {
   const buttonSettings: ToolbarSettings = {
     stroke: toolbarManager.toolbarSettings.stroke,
     fill: toolbarManager.toolbarSettings.stroke,

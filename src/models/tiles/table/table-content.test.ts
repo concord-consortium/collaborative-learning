@@ -74,8 +74,8 @@ const makeSharedModelManager = (): ISharedModelManager => {
 const setupContainer = (content: TableContentModelType) => {
   const sharedModelManager = makeSharedModelManager();
   TestTileContentModelContainer.create(
-    {child: castToSnapshot(content)},
-    {sharedModelManager}
+    { child: castToSnapshot(content) },
+    { sharedModelManager }
   );
 };
 
@@ -380,7 +380,7 @@ describe("TableContent", () => {
 
     table.addCanonicalCases([{ __id__: "row4", xCol: "x4", yCol: "y4" }]);
     expect(table.dataSet.cases.length).toBe(3);
-    expect(getCaseNoId(table.dataSet, 2)).toEqual({ x: "x4", y: "y4"});
+    expect(getCaseNoId(table.dataSet, 2)).toEqual({ x: "x4", y: "y4" });
   });
 
   it("can apply changes with expressions to a DataSet", () => {

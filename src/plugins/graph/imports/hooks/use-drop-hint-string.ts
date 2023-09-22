@@ -1,10 +1,10 @@
-import {useDndContext} from "@dnd-kit/core";
+import { useDndContext } from "@dnd-kit/core";
 import { AttributeType } from "../../../../models/data/attribute";
-import {useDataSetContext} from "./use-data-set-context";
-import {getDragAttributeInfo} from "./use-drag-drop";
-import {useDataConfigurationContext} from "../../../graph/hooks/use-data-configuration-context";
-import {attrRoleToGraphPlace, GraphAttrRole} from "../../../graph/graph-types";
-import {GraphPlace} from "../components/axis-graph-shared";
+import { useDataSetContext } from "./use-data-set-context";
+import { getDragAttributeInfo } from "./use-drag-drop";
+import { useDataConfigurationContext } from "../../../graph/hooks/use-data-configuration-context";
+import { attrRoleToGraphPlace, GraphAttrRole } from "../../../graph/graph-types";
+import { GraphPlace } from "../components/axis-graph-shared";
 import t from "../utilities/translation/translate";
 
 export interface IUseDropHintStringProps {
@@ -79,7 +79,7 @@ export function determineBaseString(role: GraphAttrRole, dropType?: AttributeTyp
   return stringKey ? `DG.GraphView.${stringKey}` : undefined;
 }
 
-export const useDropHintString = ({role} : IUseDropHintStringProps) => {
+export const useDropHintString = ({ role } : IUseDropHintStringProps) => {
   const dataSet = useDataSetContext(),
     dataConfig = useDataConfigurationContext(),
     { active } = useDndContext(),

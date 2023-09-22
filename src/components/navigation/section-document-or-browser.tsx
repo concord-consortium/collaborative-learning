@@ -124,7 +124,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
   return (
     <SubTabsPanel
       tabSpec={tabSpec}
-      tabsExtraClassNames={{"chat-open": isChatOpen}}
+      tabsExtraClassNames={{ "chat-open": isChatOpen }}
       onSelect={handleTabSelect}
       selectedIndex={subTabIndex}
       renderSubTabPanel={subTab => renderDocumentView(subTab) || renderDocumentBrowserView(subTab)}

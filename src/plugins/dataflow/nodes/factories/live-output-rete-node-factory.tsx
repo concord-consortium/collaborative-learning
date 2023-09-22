@@ -64,7 +64,7 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
         nodeValue?.setConnected(inputs.nodeValue.length);
 
         _node.data.outputType = outputType;
-        this.editor.view.updateConnections( {node: _node} );
+        this.editor.view.updateConnections( { node: _node } );
         _node.update();
       }
     }

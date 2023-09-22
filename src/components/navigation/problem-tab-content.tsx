@@ -72,8 +72,8 @@ export const ProblemTabContent: React.FC<IProps>
           onSelect={handleTabSelected}
           data-focus-document={problemPath}
     >
-      <div className={classNames("tab-header-row", {"no-sub-tabs": !hasSubTabs})}>
-        <TabList className={classNames("tab-list", {"chat-open" : ui.showChatPanel})}>
+      <div className={classNames("tab-header-row", { "no-sub-tabs": !hasSubTabs })}>
+        <TabList className={classNames("tab-list", { "chat-open" : ui.showChatPanel })}>
           {sections?.map((section, index) => {
             const sectionTitle = getSectionTitle(section.type);
             return (

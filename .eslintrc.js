@@ -35,9 +35,10 @@ module.exports = {
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-non-null-assertion": "off",  // 27 as of 2020-09-13
       "@typescript-eslint/no-require-imports": "error",
-      "@typescript-eslint/no-shadow": ["error", { builtinGlobals: false, hoist: "all", allow: ["resolve", "reject"] }],
+      "@typescript-eslint/no-shadow": ["error", {builtinGlobals: false, hoist: "all", allow: ["resolve", "reject"]}],
       "@typescript-eslint/no-unused-vars": ["warn",
-        { args: "none", ignoreRestSiblings: true, "destructuredArrayIgnorePattern": "^_" }],
+        {args: "none", ignoreRestSiblings: true, "destructuredArrayIgnorePattern": "^_"}],
+      "@typescript-eslint/object-curly-spacing": ["warn", "always"],
       "@typescript-eslint/prefer-optional-chain": "off",  // 300 as of 2020-09-13
       "comma-spacing": "warn",
       curly: ["error", "multi-line", "consistent"],
@@ -45,7 +46,7 @@ module.exports = {
       "eol-last": "warn",
       eqeqeq: ["error", "smart"],
       "eslint-comments/no-unused-disable": "off",   // enabled in .eslintrc.build.js
-      "max-len": ["warn", { code: 120, ignoreUrls: true }],
+      "max-len": ["warn", {code: 120, ignoreUrls: true}],
       "no-bitwise": "error",
       "no-debugger": "off", // enabled in .eslintrc.build.js
       "no-duplicate-imports": "error",
@@ -53,7 +54,7 @@ module.exports = {
       "no-shadow": "off", // superseded by @typescript-eslint/no-shadow
       "no-tabs": "error",
       "no-unneeded-ternary": "error",
-      "no-unused-expressions": ["error", { allowShortCircuit: true }],
+      "no-unused-expressions": ["error", {allowShortCircuit: true}],
       "no-unused-vars": "off",  // superseded by @typescript-eslint/no-unused-vars
       "no-useless-call": "error",
       "no-useless-concat": "error",
@@ -73,7 +74,7 @@ module.exports = {
       "react/jsx-no-useless-fragment": "error",
       "react/no-access-state-in-setstate": "error",
       "react/no-danger": "error",
-      "react/no-unsafe": ["off", { checkAliases: true }], // 1 as of 2020-09-13
+      "react/no-unsafe": ["off", {checkAliases: true}], // 1 as of 2020-09-13
       "react/no-unused-state": "error",
       "react/prop-types": "off",
       semi: ["error", "always"]

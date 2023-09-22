@@ -24,7 +24,7 @@ jest.mock("mathlive", () => jest.fn());
 
 describe("ExpressionToolComponent", () => {
   const content = defaultExpressionContent();
-  const model = TileModel.create({content});
+  const model = TileModel.create({ content });
   const defaultProps = {
     tileElt: null,
     context: "",
@@ -56,12 +56,12 @@ describe("ExpressionToolComponent", () => {
   };
 
   it("renders a math field web component", () => {
-    render(<ExpressionToolComponent  {...defaultProps} {...{model}}></ExpressionToolComponent>);
+    render(<ExpressionToolComponent  {...defaultProps} {...{ model }}></ExpressionToolComponent>);
     expect(document.querySelector("math-field")).toBeInTheDocument();
   });
 
   it("loads default LaTeX string in the math-field value", () => {
-    render(<ExpressionToolComponent  {...defaultProps} {...{model}}></ExpressionToolComponent>);
+    render(<ExpressionToolComponent  {...defaultProps} {...{ model }}></ExpressionToolComponent>);
     expect(document.querySelector("math-field")).toHaveAttribute("value", "a=\\pi r^2");
   });
 

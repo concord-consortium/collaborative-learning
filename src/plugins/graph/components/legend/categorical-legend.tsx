@@ -1,16 +1,16 @@
-import {observer} from "mobx-react-lite";
-import {reaction} from "mobx";
-import {drag, range, select} from "d3";
-import React, {useCallback, useEffect, useMemo, useRef} from "react";
-import {isSelectionAction} from "../../../../models/data/data-set-actions";
-import {useDataConfigurationContext} from "../../hooks/use-data-configuration-context";
-import {useGraphLayoutContext} from "../../models/graph-layout";
-import {missingColor} from "../../../../utilities/color-utils";
-import {onAnyAction} from "../../../../utilities/mst-utils";
-import {measureText} from "../../../../components/tiles/hooks/use-measure-text";
-import {kGraphFont, transitionDuration} from "../../graph-types";
-import {getStringBounds} from "../../imports/components/axis/axis-utils";
-import {axisGap} from "../../imports/components/axis/axis-types";
+import { observer } from "mobx-react-lite";
+import { reaction } from "mobx";
+import { drag, range, select } from "d3";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import { isSelectionAction } from "../../../../models/data/data-set-actions";
+import { useDataConfigurationContext } from "../../hooks/use-data-configuration-context";
+import { useGraphLayoutContext } from "../../models/graph-layout";
+import { missingColor } from "../../../../utilities/color-utils";
+import { onAnyAction } from "../../../../utilities/mst-utils";
+import { measureText } from "../../../../components/tiles/hooks/use-measure-text";
+import { kGraphFont, transitionDuration } from "../../graph-types";
+import { getStringBounds } from "../../imports/components/axis/axis-utils";
+import { axisGap } from "../../imports/components/axis/axis-types";
 
 import './legend.scss';
 import graphVars from "../graph.scss";
@@ -55,7 +55,7 @@ interface LayoutData {
 const labelHeight = getStringBounds('Wy', graphVars.graphLabelFont).height;
 
 const coordinatesToCatIndex = (lod: LayoutData, numCategories: number, localPoint: { x: number, y: number }) => {
-    const {x, y} = localPoint,
+    const { x, y } = localPoint,
       col = Math.floor(x / lod.columnWidth),
       row = Math.floor(y / (keySize + padding)),
       catIndex = row * lod.numColumns + col;
@@ -69,7 +69,7 @@ const coordinatesToCatIndex = (lod: LayoutData, numCategories: number, localPoin
   };
 
 export const CategoricalLegend = observer(function CategoricalLegend(
-  {transform}: ICategoricalLegendProps) {
+  { transform }: ICategoricalLegendProps) {
   const transformRef = useRef(transform),
     dataConfiguration = useDataConfigurationContext(),
     dataset = dataConfiguration?.dataset,
@@ -86,8 +86,8 @@ export const CategoricalLegend = observer(function CategoricalLegend(
     ),
     dragInfo = useRef<DragInfo>({
       indexOfCategory: -1,
-      initialOffset: {x: 0, y: 0},
-      currentDragPosition: {x: 0, y: 0}
+      initialOffset: { x: 0, y: 0 },
+      currentDragPosition: { x: 0, y: 0 }
     }),
     duration = useRef(0);
 
@@ -201,7 +201,7 @@ export const CategoricalLegend = observer(function CategoricalLegend(
         catIndex = coordinatesToCatIndex(lod, numCategories, localPt),
         keyLocation = catLocation(lod, categoryData.current, catIndex);
       dI.indexOfCategory = catIndex;
-      dI.initialOffset = {x: localPt.x - keyLocation.x, y: localPt.y - keyLocation.y};
+      dI.initialOffset = { x: localPt.x - keyLocation.x, y: localPt.y - keyLocation.y };
       dI.currentDragPosition = localPt;
       duration.current = 0;
     }, [layout]),
@@ -294,7 +294,7 @@ export const CategoricalLegend = observer(function CategoricalLegend(
   useEffect(function respondToLayoutChange() {
     const disposer = reaction(
       () => {
-        const {graphHeight, graphWidth} = layout,
+        const { graphHeight, graphWidth } = layout,
           legendAttrID = dataConfiguration?.attributeID('legend');
         return [graphHeight, graphWidth, legendAttrID];
       },
@@ -303,7 +303,7 @@ export const CategoricalLegend = observer(function CategoricalLegend(
         // todo: Figure out whether this is cause extra calls to setupKeys and refreshKeys
         setupKeys();
         refreshKeys();
-      }, {fireImmediately: true}
+      }, { fireImmediately: true }
     );
     return () => disposer();
   }, [layout, refreshKeys, computeDesiredExtent, dataConfiguration, setupKeys]);

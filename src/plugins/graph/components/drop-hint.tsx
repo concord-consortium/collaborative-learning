@@ -1,5 +1,5 @@
-import {useDndMonitor} from "@dnd-kit/core";
-import React, {useRef, useState} from "react";
+import { useDndMonitor } from "@dnd-kit/core";
+import React, { useRef, useState } from "react";
 
 import "./drop-hint.scss";
 

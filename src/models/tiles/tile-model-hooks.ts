@@ -56,5 +56,5 @@ export function tileModelHooks(clientHooks: Partial<ITileModelHooks>) {
     },
     ...clientHooks
   };
-  return {...hooks};
+  return { ...hooks };
 }

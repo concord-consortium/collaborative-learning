@@ -1,9 +1,9 @@
-import {action, computed, IReactionDisposer, makeObservable, observable, reaction} from "mobx";
+import { action, computed, IReactionDisposer, makeObservable, observable, reaction } from "mobx";
 import {
   format, NumberValue, ScaleBand, scaleBand, scaleLinear, scaleLog, ScaleOrdinal, scaleOrdinal
 } from "d3";
-import {AxisScaleType, IScaleType, ScaleNumericBaseType} from "../axis-types";
-import {ICategorySet} from "../../../../../../models/data/category-set";
+import { AxisScaleType, IScaleType, ScaleNumericBaseType } from "../axis-types";
+import { ICategorySet } from "../../../../../../models/data/category-set";
 
 interface IDataCoordinate {
   cell: number
@@ -51,7 +51,7 @@ export class MultiScale {
   scale: AxisScaleType;  // d3 scale whose range is the entire axis length.
   disposers: IReactionDisposer[] = [];
 
-  constructor({scaleType, orientation}: IMultiScaleProps) {
+  constructor({ scaleType, orientation }: IMultiScaleProps) {
     this.scaleType = scaleType;
     this.orientation = orientation;
     this.scale = scaleTypeToD3Scale(scaleType);
@@ -156,9 +156,9 @@ export class MultiScale {
     const numericScale = this.numericScale;
     if (numericScale) {
       const cell = this.cellLength && screenCoordinate ? Math.floor(this.cellLength / screenCoordinate) : 0;
-      return {cell, data: numericScale.invert(screenCoordinate)};
+      return { cell, data: numericScale.invert(screenCoordinate) };
     }
-    return {cell: 0, data: NaN};
+    return { cell: 0, data: NaN };
   }
 
   /** To display values for a numeric axis we use just the number of significant figures required to distinguish

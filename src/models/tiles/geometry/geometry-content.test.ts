@@ -789,7 +789,7 @@ describe("GeometryContent", () => {
     const [comment] = content.addComment(board, p0.id, "p0 comment") || [];
     expect(content.copySelection(board)).toEqualWithUniqueIds([
       PointModel.create({ id: p0.id, x: 0, y: 0 }),
-      CommentModel.create({ id: comment.id, anchors: [p0.id], text: "p0 comment"})
+      CommentModel.create({ id: comment.id, anchors: [p0.id], text: "p0 comment" })
     ]);
     content.removeObjects(board, [comment.id]);
 
@@ -845,7 +845,7 @@ describe("GeometryContent", () => {
     const [comment] = content.addComment(board, p0.id, "p0 comment") || [];
     expect(content.copySelection(board)).toEqualWithUniqueIds([
       PointModel.create({ id: p0.id, x: 0, y: 0 }),
-      CommentModel.create({ id: comment.id, anchors: [p0.id], text: "p0 comment"})
+      CommentModel.create({ id: comment.id, anchors: [p0.id], text: "p0 comment" })
     ]);
     content.removeObjects(board, [comment.id]);
 

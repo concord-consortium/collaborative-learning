@@ -82,7 +82,7 @@ export const NumberlineContentModel = TileContentModel
     },
     exportJson(options?: ITileExportOptions) {
       const snapshot = getSnapshot(self);
-      return stringify(snapshot, {maxLength: 200});
+      return stringify(snapshot, { maxLength: 200 });
     }
   }))
   .actions(self =>({

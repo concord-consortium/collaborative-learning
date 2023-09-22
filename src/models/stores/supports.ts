@@ -23,9 +23,9 @@ export enum AudienceEnum {
 }
 
 export const audienceInfo = {
-  [AudienceEnum.class]: { display: "Class"},
-  [AudienceEnum.group]: { display: "Group"},
-  [AudienceEnum.user]: { display: "User"},
+  [AudienceEnum.class]: { display: "Class" },
+  [AudienceEnum.group]: { display: "Group" },
+  [AudienceEnum.user]: { display: "User" },
 };
 
 export enum SupportType {
@@ -387,7 +387,7 @@ export function addSupportDocumentsToStore(params: ICreateFromUnitParams) {
         // we skip it for firestore supports (using the fromDB parameter), which means
         // that we won't include any properties other than the ones configured above.
         // For now this seems fine since no other properties are relevant to supports.
-        properties = {...properties, ...await getSupportDocumentProperties(support, db)};
+        properties = { ...properties, ...await getSupportDocumentProperties(support, db) };
       }
     }
 
@@ -421,7 +421,7 @@ export function addSupportDocumentsToStore(params: ICreateFromUnitParams) {
 }
 
 export async function getSupportDocumentProperties(support: TeacherSupportModelType, db: DB) {
-  const {audience, sectionTarget, key, support: { type }} = support;
+  const { audience, sectionTarget, key, support: { type } } = support;
 
   if (type === ESupportType.multiclass) {
     const snapshot = await db.firestore.getDocument(db.firestore.getMulticlassSupportDocumentPath(key));

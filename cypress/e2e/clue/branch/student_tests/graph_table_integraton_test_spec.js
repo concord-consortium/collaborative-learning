@@ -75,7 +75,7 @@ context('Graph Table Integration', function () {
         graphToolTile.getGraph().should('have.class', 'is-linked');
       });
       it('verify points added has label in table and graph', function () {
-        tableToolTile.getIndexNumberToggle().should('exist').click({force: true});
+        tableToolTile.getIndexNumberToggle().should('exist').click({ force: true });
         tableToolTile.getTableIndexColumnCell().first().should('contain', '1');
         graphToolTile.getGraphPointLabel().contains('A').should('exist');
         graphToolTile.getGraphPointLabel().contains('B').should('exist');
@@ -179,7 +179,7 @@ context('Graph Table Integration', function () {
         graphToolTile.getGraphPoint().last().click({ force: true }).click({ force: true });
       });
       it('will add an angle to a point created from a table', function () {
-        graphToolTile.getGraphPolygon().last().click({force: true});
+        graphToolTile.getGraphPolygon().last().click({ force: true });
         graphToolTile.showAngle();
         graphToolTile.getAngleAdornment().should('exist');
       });
@@ -187,7 +187,7 @@ context('Graph Table Integration', function () {
     describe.skip('test non-numeric entries in table', function () {
       it('will enter non-numeric number in the table', function () {
         tableToolTile.getTableCellWithColIndex(2, 6).scrollIntoView();
-        tableToolTile.getTableCellWithColIndex(2, 6).click({force: true}).type(9);
+        tableToolTile.getTableCellWithColIndex(2, 6).click({ force: true }).type(9);
         tableToolTile.getTableCell().eq(3).should('contain', x[1]);
       });
     });

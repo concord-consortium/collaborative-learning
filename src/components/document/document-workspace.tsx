@@ -175,10 +175,10 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
 
   private handleDropSide = (side: WorkspaceSide) => {
     return (e: React.DragEvent<HTMLDivElement>) => {
-      const {ui, documents} = this.stores;
+      const { ui, documents } = this.stores;
       const documentKey = e.dataTransfer && e.dataTransfer.getData(DocumentDragKey);
       if (documentKey) {
-        const {problemWorkspace} = ui;
+        const { problemWorkspace } = ui;
         const document = documents.getDocument(documentKey);
         if (document) {
           if ((side === "primary") && !document.isPublished) {
@@ -202,7 +202,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   };
 
   private handleImageDrop = (e: React.DragEvent<HTMLDivElement>, rowId?: string) => {
-    const {ui} = this.stores;
+    const { ui } = this.stores;
     this.imageDragDrop.drop(e)
       .then((url) => {
         const primaryDocument = this.getPrimaryDocument(ui.problemWorkspace.primaryDocumentKey);
@@ -258,7 +258,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   private handleNewDocumentOpen = async (type: OtherDocumentType, title: string) => {
     const { db, ui: { problemWorkspace } } = this.stores;
     const content = this.defaultOtherDocumentContent(type);
-    const newDocument = await db.createOtherDocument(type, {title, content});
+    const newDocument = await db.createOtherDocument(type, { title, content });
     if (newDocument) {
       problemWorkspace.setPrimaryDocument(newDocument);
     }

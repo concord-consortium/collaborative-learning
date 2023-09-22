@@ -31,7 +31,7 @@ export class  TeacherGroupTabComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const {page, documentViewMode, selectedSectionId} = this.state;
+    const { page, documentViewMode, selectedSectionId } = this.state;
     return (
       <div className="teacher-group-tab">
         <TeacherGroupSixPack
@@ -55,17 +55,17 @@ export class  TeacherGroupTabComponent extends BaseComponent<IProps, IState> {
     );
   }
 
-  private setPage = (nextPage: number) => this.setState({page: nextPage});
+  private setPage = (nextPage: number) => this.setState({ page: nextPage });
 
   private get numPages(){
     return Math.ceil(this.stores.groups.allGroups.length / GROUPS_PER_PAGE);
   }
 
   private setDocumentViewMode = (documentViewMode: DocumentViewMode) => {
-    this.setState({documentViewMode});
+    this.setState({ documentViewMode });
   };
 
   private setSelectedSectionId = (selectedSectionId: string) => {
-    this.setState({selectedSectionId});
+    this.setState({ selectedSectionId });
   };
 }

@@ -81,7 +81,7 @@ describe("Firestore hooks", () => {
       const kNetwork = "network";
       const kRealTeacher = { uid: kId, name: kRealName, type: "teacher", network: kNetwork, networks: [kNetwork] };
       const kDefaultTeacher = { ...kRealTeacher, name: kDefaultName };
-      mockGet.mockImplementation(() => Promise.resolve({ data: () => kRealTeacher}));
+      mockGet.mockImplementation(() => Promise.resolve({ data: () => kRealTeacher }));
       const { result, rerender } = renderHook(() => useFirestoreTeacher(kId, kNetwork));
       expect(mockGet).toHaveBeenCalledTimes(1);
       // initial response is the default response

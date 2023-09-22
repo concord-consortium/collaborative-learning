@@ -53,7 +53,7 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
                           ? `Firebase UID: ${document.key}` : undefined;
 
   return (
-    <div className={classNames("list-item", selectedClass, privateClass, {"secondary": isSecondarySelected})}
+    <div className={classNames("list-item", selectedClass, privateClass, { "secondary": isSecondarySelected })}
       data-test={dataTestName} key={document.key} data-document-key={document.key}
       title={documentTitle} onClick={isPrivate ? undefined : handleDocumentClick}>
       <div className="scaled-list-item-container" onDragStart={handleDocumentDragStart}

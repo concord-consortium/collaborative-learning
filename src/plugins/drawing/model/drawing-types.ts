@@ -9,7 +9,7 @@ export const kDrawingStateVersion = "1.0.0";
 export const kDrawingDefaultHeight = 180;
 
 // These types are used by legacy import code in drawing-change-playback.ts
-export type DrawingToolMove = Array<{id: string, destination: Point}>;
+export type DrawingToolMove = Array<{ id: string, destination: Point }>;
 export interface DrawingToolUpdate {
   ids: string[];
   update: {

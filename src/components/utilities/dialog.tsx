@@ -34,12 +34,12 @@ export class DialogComponent extends BaseComponent<IProps, IState> {
 
   public UNSAFE_componentWillReceiveProps(nextProps: IProps) {
     if (nextProps.dialog !== this.props.dialog) {
-      this.setState({promptValue: nextProps.dialog && nextProps.dialog.defaultValue});
+      this.setState({ promptValue: nextProps.dialog && nextProps.dialog.defaultValue });
     }
   }
 
   public render() {
-    const {dialog} = this.stores.ui;
+    const { dialog } = this.stores.ui;
     if (dialog) {
       let title = dialog.title;
       let contents: JSX.Element;
@@ -139,7 +139,7 @@ export class DialogComponent extends BaseComponent<IProps, IState> {
 
   private handlePromptValueChanged = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (this.input) {
-      this.setState({promptValue: this.input.value});
+      this.setState({ promptValue: this.input.value });
     }
   };
 
@@ -155,7 +155,7 @@ export class DialogComponent extends BaseComponent<IProps, IState> {
   }
 
   private handlePromptDialogOk = (e?: React.MouseEvent<HTMLButtonElement>) => {
-    const {promptValue} = this;
+    const { promptValue } = this;
     if (promptValue.length > 0) {
       this.stores.ui.resolveDialog(promptValue);
     }

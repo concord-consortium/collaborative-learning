@@ -55,7 +55,7 @@ export const AppConfigModel = types
       const teacherGuideUrl = unitUrl.replace(/content\.json$/, "teacher-guide/content.json");
       gImageMap.setUnitUrl(unitUrl);
       gImageMap.setUnitCodeMap(getSnapshot(self.unitCodeMap));
-      return {"content": unitUrl, "guide": teacherGuideUrl};
+      return { "content": unitUrl, "guide": teacherGuideUrl };
     }
   }))
   .views(self => ({

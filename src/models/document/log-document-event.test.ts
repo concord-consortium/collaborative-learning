@@ -34,7 +34,7 @@ describe("logDocumentEvent", () => {
 
     stores = createStores({
       appMode: "authed",
-      appConfig: specAppConfig({ config: { appName: "TestLogger"} }),
+      appConfig: specAppConfig({ config: { appName: "TestLogger" } }),
       user: UserModel.create({
         id: "0", type: "student", portal: "test",
         loggingRemoteEndpoint: "foo"

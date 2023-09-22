@@ -29,8 +29,8 @@ interface IProps {
 }
 
 export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
-  ({userName, classNameStr, scale, selectedDocument, onSelectDocument, subTab,
-    networkResource, userId, classHash}) => {
+  ({ userName, classNameStr, scale, selectedDocument, onSelectDocument, subTab,
+    networkResource, userId, classHash }) => {
   const [isOpen, setIsOpen] = useState(false);
   const user = useUserStore();
   const handleSectionToggle = () => {
@@ -108,7 +108,7 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
                 </DocumentContextReact.Provider>
               );
             })
-            : <div style={{padding: "5px 10px"}}>No Documents Found</div>
+            : <div style={{ padding: "5px 10px" }}>No Documents Found</div>
           }
         </div>
       }

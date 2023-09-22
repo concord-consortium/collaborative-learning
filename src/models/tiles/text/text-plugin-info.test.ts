@@ -1,13 +1,13 @@
 import { getAllTextPluginInfos, getTextPluginIds, getTextPluginInfo,
   createTextPluginInstances, registerTextPluginInfo } from "./text-plugin-info";
 
-const testTextPluginInstance = {from: "testTextPluginInfo"} as any;
+const testTextPluginInstance = { from: "testTextPluginInfo" } as any;
 const testTextPluginInfo = {
   pluginName: "test",
   createSlatePlugin: jest.fn(() => testTextPluginInstance),
   buttonDefs: {}
 };
-const testTextPluginWithUpdateInstance = {from: "testTextPluginInfoWithUpdate"}  as any;
+const testTextPluginWithUpdateInstance = { from: "testTextPluginInfoWithUpdate" }  as any;
 const testTextPluginInfoWithUpdate = {
   pluginName: "testWithUpdate",
   createSlatePlugin: jest.fn(() => testTextPluginWithUpdateInstance),
@@ -26,7 +26,7 @@ describe("TextPluginInfo", () => {
   });
 
   test("getTextPluginInstances", () => {
-    const textContent: any = {foo: "bar"};
+    const textContent: any = { foo: "bar" };
     const pluginInstances = createTextPluginInstances(textContent);
     expect(testTextPluginInfo.createSlatePlugin).toBeCalledWith(textContent);
     expect(testTextPluginInfoWithUpdate.createSlatePlugin).toBeCalledWith(textContent);

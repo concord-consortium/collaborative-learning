@@ -1,12 +1,12 @@
-import {extent, format, select, timeout} from "d3";
+import { extent, format, select, timeout } from "d3";
 import React from "react";
-import {isInteger} from "lodash";
-import {CaseData, DotsElt, selectCircles, selectDots} from "../d3-types";
-import {IDotsRef, kGraphFont, Point, Rect, rTreeRect, transitionDuration} from "../graph-types";
-import {between} from "./math-utils";
-import {IAxisModel, isNumericAxisModel} from "../imports/components/axis/models/axis-model";
-import {ScaleNumericBaseType} from "../imports/components/axis/axis-types";
-import {IDataSet} from "../../../models/data/data-set";
+import { isInteger } from "lodash";
+import { CaseData, DotsElt, selectCircles, selectDots } from "../d3-types";
+import { IDotsRef, kGraphFont, Point, Rect, rTreeRect, transitionDuration } from "../graph-types";
+import { between } from "./math-utils";
+import { IAxisModel, isNumericAxisModel } from "../imports/components/axis/models/axis-model";
+import { ScaleNumericBaseType } from "../imports/components/axis/axis-types";
+import { IDataSet } from "../../../models/data/data-set";
 import {
   defaultSelectedColor,
   defaultSelectedStroke,
@@ -15,8 +15,8 @@ import {
   defaultStrokeOpacity,
   defaultStrokeWidth
 } from "../../../utilities/color-utils";
-import {IDataConfigurationModel} from "../models/data-configuration-model";
-import {measureText} from "../../../components/tiles/hooks/use-measure-text";
+import { IDataConfigurationModel } from "../models/data-configuration-model";
+import { measureText } from "../../../components/tiles/hooks/use-measure-text";
 
 /**
  * Utility routines having to do with graph entities
@@ -69,7 +69,7 @@ export function computeNiceNumericBounds(min: number, max: number): { min: numbe
 
   const kAddend = 5,  // amount to extend scale
     kFactor = 2.5,
-    bounds = {min, max};
+    bounds = { min, max };
   if (min === max && min === 0) {
     bounds.min = -10;
     bounds.max = 10;
@@ -98,7 +98,7 @@ export function computeNiceNumericBounds(min: number, max: number): { min: numbe
 export function setNiceDomain(values: number[], axisModel: IAxisModel) {
   if (isNumericAxisModel(axisModel)) {
     const [minValue, maxValue] = extent(values, d => d) as [number, number];
-    const {min: niceMin, max: niceMax} = computeNiceNumericBounds(minValue, maxValue);
+    const { min: niceMin, max: niceMax } = computeNiceNumericBounds(minValue, maxValue);
     axisModel.setDomain(niceMin, niceMax);
   }
 }
@@ -143,8 +143,8 @@ export interface IMatchCirclesProps {
 
 export function matchCirclesToData(props: IMatchCirclesProps) {
 
-  const {dataConfiguration, enableAnimation, instanceId,
-      dotsElement, pointRadius, pointColor, pointStrokeColor} = props,
+  const { dataConfiguration, enableAnimation, instanceId,
+      dotsElement, pointRadius, pointColor, pointStrokeColor } = props,
     allCaseData = dataConfiguration.joinedCaseDataArrays,
     caseDataKeyFunc = (d: CaseData) => `${d.plotNum}-${d.caseID}`,
     circles = selectCircles(dotsElement);
@@ -250,12 +250,12 @@ export function lineToAxisIntercepts(iSlope: number, iIntercept: number,
     tY2 = tmp;
   }
   return {
-    pt1: {x: tX1, y: tY1},
-    pt2: {x: tX2, y: tY2}
+    pt1: { x: tX1, y: tY1 },
+    pt2: { x: tX2, y: tY2 }
   };
 }
 
-export function equationString(slope: number, intercept: number, attrNames: {x: string, y: string}) {
+export function equationString(slope: number, intercept: number, attrNames: { x: string, y: string }) {
   const float = format('.4~r');
   if (isFinite(slope) && slope !== 0) {
     return `<em>${attrNames.y}</em> = ${float(slope)} <em>${attrNames.x}</em> + ${float(intercept)}`;
@@ -290,7 +290,7 @@ export function rectangleIntersect(iA: rTreeRect, iB: rTreeRect) {
     bottom = Math.min(iA.y + iA.h, iB.y + iB.h);
 
   if (right - left <= 0 || bottom - top <= 0) return null;
-  return {x: left, y: top, w: right - left, h: bottom - top};
+  return { x: left, y: top, w: right - left, h: bottom - top };
 }
 
 /**
@@ -307,8 +307,8 @@ export function rectangleSubtract(iA: rTreeRect, iB: rTreeRect) {
     rectangleALR;
 
   if (intersectRect) {
-    intersectLR = {x: intersectRect.x + intersectRect.w, y: intersectRect.y + intersectRect.h};
-    rectangleALR = {x: iA.x + iA.w, y: iA.y + iA.h};
+    intersectLR = { x: intersectRect.x + intersectRect.w, y: intersectRect.y + intersectRect.h };
+    rectangleALR = { x: iA.x + iA.w, y: iA.y + iA.h };
     if (iA.x < intersectRect.x) {
       result.push({
         x: iA.x, y: iA.y, w: intersectRect.x - iA.x, h: iA.h
@@ -363,8 +363,8 @@ export interface ISetPointSelection {
 
 export function setPointSelection(props: ISetPointSelection) {
   const
-    {dotsRef, dataConfiguration, pointRadius, selectedPointRadius,
-      pointColor, pointStrokeColor, getPointColorAtIndex} = props,
+    { dotsRef, dataConfiguration, pointRadius, selectedPointRadius,
+      pointColor, pointStrokeColor, getPointColorAtIndex } = props,
     dataset = dataConfiguration.dataset,
     dots = selectCircles(dotsRef.current),
     legendID = dataConfiguration.attributeID('legend');
@@ -478,5 +478,5 @@ export function computeSlopeAndIntercept(xAxis?: IAxisModel, yAxis?: IAxisModel)
     slope = (yUpper - yLower) / (adjustedXUpper - xLower),
     intercept = yLower - slope * xLower;
 
-  return {slope, intercept};
+  return { slope, intercept };
 }

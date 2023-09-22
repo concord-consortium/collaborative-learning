@@ -75,7 +75,7 @@ export const DocEditorApp = ({ appConfig }: IDocEditorAppProps) => {
       // TODO: we probably want to keep track if we loaded an exported or raw file
       // and then save it the same way
       const contentJson = getSnapshot(document.content);
-      contents = stringify(contentJson, {maxLength: 100});
+      contents = stringify(contentJson, { maxLength: 100 });
     }
 
     const writable = await (_fileHandle as any).createWritable();
@@ -86,7 +86,7 @@ export const DocEditorApp = ({ appConfig }: IDocEditorAppProps) => {
   }
 
   useEffect(() => {
-    const {document: documentURL} = urlParams;
+    const { document: documentURL } = urlParams;
     if (!documentURL) {
       return;
     }

@@ -22,7 +22,7 @@ export class ClueAppContentComponent extends BaseComponent<IProps> {
   }
 
   public render() {
-    const { appConfig: {autoAssignStudentsToIndividualGroups}, user, ui } = this.stores;
+    const { appConfig: { autoAssignStudentsToIndividualGroups }, user, ui } = this.stores;
 
     const panels: IPanelGroupSpec = [{
                     panelId: EPanelId.workspace,

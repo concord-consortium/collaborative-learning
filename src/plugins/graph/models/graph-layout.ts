@@ -1,10 +1,10 @@
-import {action, computed, makeObservable, observable} from "mobx";
-import {createContext, useContext} from "react";
-import {appConfig} from "../../../initialize-app";
-import {AxisPlace, AxisPlaces, AxisBounds, IScaleType} from "../imports/components/axis/axis-types";
-import {GraphPlace, isVertical} from "../imports/components/axis-graph-shared";
-import {IAxisLayout} from "../imports/components/axis/models/axis-layout-context";
-import {MultiScale} from "../imports/components/axis/models/multi-scale";
+import { action, computed, makeObservable, observable } from "mobx";
+import { createContext, useContext } from "react";
+import { appConfig } from "../../../initialize-app";
+import { AxisPlace, AxisPlaces, AxisBounds, IScaleType } from "../imports/components/axis/axis-types";
+import { GraphPlace, isVertical } from "../imports/components/axis-graph-shared";
+import { IAxisLayout } from "../imports/components/axis/models/axis-layout-context";
+import { MultiScale } from "../imports/components/axis/models/multi-scale";
 
 export const kDefaultGraphWidth = 480;
 export const kDefaultGraphHeight = 300;
@@ -30,8 +30,8 @@ export class GraphLayout implements IAxisLayout {
 
   constructor() {
     AxisPlaces.forEach(place => this.axisScales.set(place,
-      new MultiScale({scaleType: "ordinal",
-        orientation: isVertical(place) ? "vertical" : "horizontal"})));
+      new MultiScale({ scaleType: "ordinal",
+        orientation: isVertical(place) ? "vertical" : "horizontal" })));
     makeObservable(this);
   }
 
@@ -90,7 +90,7 @@ export class GraphLayout implements IAxisLayout {
 
   getAxisMultiScale(place: AxisPlace) {
     return this.axisScales.get(place) ??
-      new MultiScale({scaleType: "ordinal", orientation: "horizontal"});
+      new MultiScale({ scaleType: "ordinal", orientation: "horizontal" });
   }
 
   @computed get categorySetArrays() {
@@ -131,7 +131,7 @@ export class GraphLayout implements IAxisLayout {
    * Todo: Eventually there will be additional room set aside at the top for formulas
    */
   @computed get computedBounds() {
-    const {desiredExtents, graphWidth, graphHeight} = this,
+    const { desiredExtents, graphWidth, graphHeight } = this,
       usesMultiLegend = appConfig.getSetting("defaultSeriesLegend", "graph"),
       legendHeight = usesMultiLegend ? kMultiLegendHeight : desiredExtents.get('legend') ?? 0,
       topAxisHeight = desiredExtents.get('top') ?? 0,
@@ -142,14 +142,14 @@ export class GraphLayout implements IAxisLayout {
       plotWidth = graphWidth - leftAxisWidth - v2AxisWidth - rightAxisWidth,
       plotHeight = graphHeight - topAxisHeight - bottomAxisHeight - legendHeight,
       newBounds: Record<GraphPlace, Bounds> = {
-        left: {left: 0, top: topAxisHeight, width: leftAxisWidth, height: plotHeight},
-        top: {left: leftAxisWidth, top: 0, width: graphWidth - leftAxisWidth - rightAxisWidth, height: topAxisHeight},
-        plot: {left: leftAxisWidth, top: topAxisHeight, width: plotWidth, height: plotHeight},
-        bottom: {left: leftAxisWidth, top: topAxisHeight + plotHeight, width: plotWidth, height: bottomAxisHeight},
-        legend: {left: 6, top: graphHeight - legendHeight, width: graphWidth - 6, height: legendHeight},
-        rightNumeric: {left: leftAxisWidth + plotWidth, top: topAxisHeight, width: v2AxisWidth, height: plotHeight},
-        rightCat: {left: leftAxisWidth + plotWidth, top: topAxisHeight, width: rightAxisWidth, height: plotHeight},
-        yPlus: {left: 0, top: topAxisHeight, width: leftAxisWidth, height: plotHeight} // This value is not used
+        left: { left: 0, top: topAxisHeight, width: leftAxisWidth, height: plotHeight },
+        top: { left: leftAxisWidth, top: 0, width: graphWidth - leftAxisWidth - rightAxisWidth, height: topAxisHeight },
+        plot: { left: leftAxisWidth, top: topAxisHeight, width: plotWidth, height: plotHeight },
+        bottom: { left: leftAxisWidth, top: topAxisHeight + plotHeight, width: plotWidth, height: bottomAxisHeight },
+        legend: { left: 6, top: graphHeight - legendHeight, width: graphWidth - 6, height: legendHeight },
+        rightNumeric: { left: leftAxisWidth + plotWidth, top: topAxisHeight, width: v2AxisWidth, height: plotHeight },
+        rightCat: { left: leftAxisWidth + plotWidth, top: topAxisHeight, width: rightAxisWidth, height: plotHeight },
+        yPlus: { left: 0, top: topAxisHeight, width: leftAxisWidth, height: plotHeight } // This value is not used
       };
     return newBounds;
   }

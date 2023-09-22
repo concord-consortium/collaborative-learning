@@ -329,7 +329,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
         className="numberline-tool"
         ref={documentScrollerRef}
         data-testid="numberline-tool"
-        style={{"height": `${kNumberLineContainerHeight}`}}
+        style={{ "height": `${kNumberLineContainerHeight}` }}
       >
         <div className="numberline-tool-container" >
           <i className="arrow left" style={{ left: xShiftNum + kArrowheadOffset, top: kArrowheadTop }}/>

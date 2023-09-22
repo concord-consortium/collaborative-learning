@@ -1,17 +1,17 @@
-import {autorun} from "mobx";
-import React, {forwardRef, MutableRefObject, useCallback, useEffect, useMemo, useRef} from "react";
-import {drag, select, color, range} from "d3";
+import { autorun } from "mobx";
+import React, { forwardRef, MutableRefObject, useCallback, useEffect, useMemo, useRef } from "react";
+import { drag, select, color, range } from "d3";
 import RTreeLib from 'rtree';
 type RTree = ReturnType<typeof RTreeLib>;
-import {CaseData} from "../d3-types";
-import {InternalizedData, rTreeRect} from "../graph-types";
-import {useGraphLayoutContext} from "../models/graph-layout";
-import {rectangleSubtract, rectNormalize} from "../utilities/graph-utils";
-import {useCurrent} from "../../../hooks/use-current";
-import {useDataSetContext} from "../imports/hooks/use-data-set-context";
-import {MarqueeState} from "../models/marquee-state";
-import {useGraphModelContext} from "../models/graph-model";
-import {useInstanceIdContext} from "../imports/hooks/use-instance-id-context";
+import { CaseData } from "../d3-types";
+import { InternalizedData, rTreeRect } from "../graph-types";
+import { useGraphLayoutContext } from "../models/graph-layout";
+import { rectangleSubtract, rectNormalize } from "../utilities/graph-utils";
+import { useCurrent } from "../../../hooks/use-current";
+import { useDataSetContext } from "../imports/hooks/use-data-set-context";
+import { MarqueeState } from "../models/marquee-state";
+import { useGraphModelContext } from "../models/graph-model";
+import { useInstanceIdContext } from "../imports/hooks/use-instance-id-context";
 
 interface IProps {
   marqueeState: MarqueeState
@@ -43,7 +43,7 @@ const prepareTree = (areaSelector: string, circleSelector: string): RTree => {
   };
 
 export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
-  const {marqueeState} = props,
+  const { marqueeState } = props,
     instanceId = useInstanceIdContext() || 'background',
     dataset = useCurrent(useDataSetContext()),
     layout = useGraphLayoutContext(),
@@ -57,7 +57,7 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
     previousMarqueeRect = useRef<rTreeRect>();
 
   const onDragStart = useCallback((event: { x: number; y: number; sourceEvent: { shiftKey: boolean } }) => {
-      const {computedBounds} = layout,
+      const { computedBounds } = layout,
         plotBounds = computedBounds.plot;
       selectionTree.current = prepareTree(`.${instanceId}`, 'circle');
       startX.current = event.x - plotBounds.left;
@@ -67,13 +67,13 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
       if (!event.sourceEvent.shiftKey) {
         dataset.current?.setSelectedCases([]);
       }
-      marqueeState.setMarqueeRect({x: startX.current, y: startY.current, width: 0, height: 0});
+      marqueeState.setMarqueeRect({ x: startX.current, y: startY.current, width: 0, height: 0 });
     }, [dataset, instanceId, layout, marqueeState]),
 
     onDrag = useCallback((event: { dx: number; dy: number }) => {
       if (event.dx !== 0 || event.dy !== 0) {
         previousMarqueeRect.current = rectNormalize(
-          {x: startX.current, y: startY.current, w: width.current, h: height.current});
+          { x: startX.current, y: startY.current, w: width.current, h: height.current });
         width.current = width.current + event.dx;
         height.current = height.current + event.dy;
         const marqueeRect = marqueeState.marqueeRect;
@@ -95,7 +95,7 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
     }, [dataset, marqueeState]),
 
     onDragEnd = useCallback(() => {
-      marqueeState.setMarqueeRect({x: 0, y: 0, width: 0, height: 0});
+      marqueeState.setMarqueeRect({ x: 0, y: 0, width: 0, height: 0 });
       selectionTree.current = null;
     }, [marqueeState]),
     dragBehavior = useMemo(() => drag<SVGRectElement, number>()

@@ -30,7 +30,7 @@ function drawPath(el: DotsElt, points: Iterable<[number, number]>, color: string
   parentSvg?.insertBefore(newPath.node() as Node, parentSvg.firstChild);
 }
 
-export const ConnectingLines = observer(function ConnectingLines({dotsRef}: IProps) {
+export const ConnectingLines = observer(function ConnectingLines({ dotsRef }: IProps) {
   const dataConfiguration = useDataConfigurationContext();
   const { _pointColors } = useGraphModelContext();
   const plotsCt = dataConfiguration?.numberOfPlots || 1;

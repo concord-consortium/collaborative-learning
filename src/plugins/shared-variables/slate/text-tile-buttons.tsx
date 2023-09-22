@@ -35,22 +35,22 @@ export function insertTextVariable(variable: VariableType, editor?: Editor) {
   const range = editor.selection || [0, 0];
   const beforeInsertPoint = Editor.before(editor, range, { unit: "character" });
   const charBefore = editor.selection && beforeInsertPoint &&
-                       Editor.string(editor, {anchor: editor.selection.anchor, focus: beforeInsertPoint });
+                       Editor.string(editor, { anchor: editor.selection.anchor, focus: beforeInsertPoint });
   if (charBefore && charBefore !== " ") {
-    newNodes.push({text: " "});
+    newNodes.push({ text: " " });
   }
 
   // Add the variable chip.
   const reference = variable.id;
-  const varElt: VariableElement = { type: kVariableFormat, reference, children: [{text: "" }]};
+  const varElt: VariableElement = { type: kVariableFormat, reference, children: [{ text: "" }] };
   newNodes.push(varElt);
 
   // If insertion point is followed by a character that's not a space or punctuation, add a space.
   const afterInsertPoint = Editor.after(editor, range, { unit: "character" });
   const charAfter = editor.selection && afterInsertPoint &&
-                      Editor.string(editor, {anchor: editor.selection.anchor, focus: afterInsertPoint });
+                      Editor.string(editor, { anchor: editor.selection.anchor, focus: afterInsertPoint });
   if (charAfter && !(/^[.,;:!? ]/.test(charAfter))) {
-    newNodes.push({text: " "});
+    newNodes.push({ text: " " });
   }
 
   Transforms.insertNodes(editor, newNodes);
@@ -76,7 +76,7 @@ export function findSelectedVariable(selectedElements: any, variables: VariableT
   selectedElements?.forEach((selectedItem: any) => {
     const baseElement = (selectedItem as any)[0];
     if (isVariableElement(baseElement)) {
-      const {reference} = baseElement;
+      const { reference } = baseElement;
       selected = variables.find(v => v.id === reference);
     }
   });
@@ -107,7 +107,7 @@ function handleClose(editor: Editor) {
 }
 
 export const NewVariableTextButton = observer(function NewVariableTextButton(
-    {pluginInstance}: IButtonDefProps) {
+    { pluginInstance }: IButtonDefProps) {
 
   const editor = useSlate();
   const variablesPlugin = castToVariablesPlugin(pluginInstance);
@@ -138,7 +138,7 @@ export const NewVariableTextButton = observer(function NewVariableTextButton(
 });
 
 export const InsertVariableTextButton = observer(function InsertVariableTextButton(
-    {pluginInstance}: IButtonDefProps) {
+    { pluginInstance }: IButtonDefProps) {
   const editor = useSlate();
   const variablesPlugin = castToVariablesPlugin(pluginInstance);
 
@@ -169,7 +169,7 @@ export const InsertVariableTextButton = observer(function InsertVariableTextButt
 });
 
 export const EditVariableTextButton = observer(function EditVariableTextButton(
-    {pluginInstance}: IButtonDefProps) {
+    { pluginInstance }: IButtonDefProps) {
     const editor = useSlate();
     const variablesPlugin = castToVariablesPlugin(pluginInstance);
 

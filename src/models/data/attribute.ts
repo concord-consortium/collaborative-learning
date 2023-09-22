@@ -1,4 +1,4 @@
-import {Instance, SnapshotIn, types} from "mobx-state-tree";
+import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import { Formula } from "./formula";
 import { typedId } from "../../utilities/js-utils";
 import { IValueType, ValueType, isDate, isImageUrl, isNumeric, toNumeric } from "./data-types";
@@ -143,7 +143,7 @@ export const Attribute = types.model("Attribute", {
   // TODO: we really need to keep track of empty values, or we need to count
   // categorical (everything not empty) but empty could be categorical
   get mostCommonType(): undefined | AttributeType {
-    const {typeCounts} = self;
+    const { typeCounts } = self;
     if (typeCounts.size === 0) {
       if (self.values.length > 0) {
         // typeCounts does not include categorical

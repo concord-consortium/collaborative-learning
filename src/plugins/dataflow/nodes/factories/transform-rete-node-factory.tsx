@@ -59,7 +59,7 @@ export class TransformReteNodeFactory extends DataflowReteNodeFactory {
         const nodeValue = _node.controls.get("nodeValue") as ValueControl;
         nodeValue && nodeValue.setValue(result);
         nodeValue && nodeValue.setSentence(resultSentence);
-        this.editor.view.updateConnections( {node: _node} );
+        this.editor.view.updateConnections( { node: _node } );
       }
     }
 

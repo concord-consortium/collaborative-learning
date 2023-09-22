@@ -23,39 +23,39 @@ describe("supports model", () => {
   it("uses override values", () => {
     const supports = SupportsModel.create({
       curricularSupports: [
-        {support: {type: ESupportType.text, content: "support #1"}, type: SupportTarget.unit, visible: true},
-        {support: {type: ESupportType.text, content: "support #2"}, type: SupportTarget.investigation},
-        {support: {type: ESupportType.text, content: "support #3"}, type: SupportTarget.problem, visible: true},
-        {support: {type: ESupportType.text, content: "support #4"}, type: SupportTarget.section},
+        { support: { type: ESupportType.text, content: "support #1" }, type: SupportTarget.unit, visible: true },
+        { support: { type: ESupportType.text, content: "support #2" }, type: SupportTarget.investigation },
+        { support: { type: ESupportType.text, content: "support #3" }, type: SupportTarget.problem, visible: true },
+        { support: { type: ESupportType.text, content: "support #4" }, type: SupportTarget.section },
       ],
       classSupports: [
-        {uid: "1", key: "1", support: {type: ESupportType.text, content: "support #5"}, type: SupportTarget.problem,
-          audience: ClassAudienceModel.create(), authoredTime: 42}
+        { uid: "1", key: "1", support: { type: ESupportType.text, content: "support #5" }, type: SupportTarget.problem,
+          audience: ClassAudienceModel.create(), authoredTime: 42 }
       ]
     });
     expect(omitUndefined(getSnapshot(supports))).toEqual({
       curricularSupports: [
         {
           supportType: "curricular",
-          support: {type: ESupportType.text, content: "support #1"},
+          support: { type: ESupportType.text, content: "support #1" },
           type: "unit",
           visible: true,
         },
         {
           supportType: "curricular",
-          support: {type: ESupportType.text, content: "support #2"},
+          support: { type: ESupportType.text, content: "support #2" },
           type: "investigation",
           visible: false,
         },
         {
           supportType: "curricular",
-          support: {type: ESupportType.text, content: "support #3"},
+          support: { type: ESupportType.text, content: "support #3" },
           type: "problem",
           visible: true,
         },
         {
           supportType: "curricular",
-          support: {type: ESupportType.text, content: "support #4"},
+          support: { type: ESupportType.text, content: "support #4" },
           type: "section",
           visible: false,
         },
@@ -65,7 +65,7 @@ describe("supports model", () => {
           uid: "1",
           key: "1",
           supportType: "teacher",
-          support: {type: ESupportType.text, content: "support #5"},
+          support: { type: ESupportType.text, content: "support #5" },
           type: "problem",
           audience: {
             type: "class"
@@ -96,21 +96,21 @@ describe("supports model", () => {
         {
           type: "introduction",
           supports: [
-            {type: ESupportType.text, content: "Investigation 1, Problem 1, section: introduction, support #1"},
-            {type: ESupportType.text, content: "Investigation 1, Problem 1, section: introduction, support #2"}
+            { type: ESupportType.text, content: "Investigation 1, Problem 1, section: introduction, support #1" },
+            { type: ESupportType.text, content: "Investigation 1, Problem 1, section: introduction, support #2" }
           ]
         },
         {
           type: "initialChallenge",
           supports: [
-            {type: ESupportType.text, content: "Investigation 1, Problem 1, section: initial challenge, support #1"},
-            {type: ESupportType.text, content: "Investigation 1, Problem 1, section: initial challenge, support #2"}
+            { type: ESupportType.text, content: "Investigation 1, Problem 1, section: initial challenge, support #1" },
+            { type: ESupportType.text, content: "Investigation 1, Problem 1, section: initial challenge, support #2" }
           ]
         }
       ],
       supports: [
-        {type: ESupportType.text, content: "Investigation 1, Problem 1, support #1"},
-        {type: ESupportType.text, content: "Investigation 1, Problem 1, support #2"}
+        { type: ESupportType.text, content: "Investigation 1, Problem 1, support #1" },
+        { type: ESupportType.text, content: "Investigation 1, Problem 1, support #2" }
       ]
     };
     const investigation1 = {
@@ -125,29 +125,29 @@ describe("supports model", () => {
             {
               type: "introduction",
               supports: [
-                {type: ESupportType.text, content: "Investigation 1, Problem 2, section: introduction, support #1"},
-                {type: ESupportType.text, content: "Investigation 1, Problem 2, section: introduction, support #2"}
+                { type: ESupportType.text, content: "Investigation 1, Problem 2, section: introduction, support #1" },
+                { type: ESupportType.text, content: "Investigation 1, Problem 2, section: introduction, support #2" }
               ]
             },
             {
               type: "initialChallenge",
               supports: [
-                {type: ESupportType.text,
-                  content: "Investigation 1, Problem 2, section: initial challenge, support #1"},
-                {type: ESupportType.text,
-                  content: "Investigation 1, Problem 2, section: initial challenge, support #2"}
+                { type: ESupportType.text,
+                  content: "Investigation 1, Problem 2, section: initial challenge, support #1" },
+                { type: ESupportType.text,
+                  content: "Investigation 1, Problem 2, section: initial challenge, support #2" }
               ]
             }
           ],
           supports: [
-            {type: ESupportType.text, content: "Investigation 1, Problem 1, support #1"},
-            {type: ESupportType.text, content: "Investigation 1, Problem 1, support #2"}
+            { type: ESupportType.text, content: "Investigation 1, Problem 1, support #1" },
+            { type: ESupportType.text, content: "Investigation 1, Problem 1, support #2" }
           ]
         }
       ],
       supports: [
-        {type: ESupportType.text, content: "Investigation 1, support #1"},
-        {type: ESupportType.text, content: "Investigation 1, support #2"}
+        { type: ESupportType.text, content: "Investigation 1, support #1" },
+        { type: ESupportType.text, content: "Investigation 1, support #2" }
       ]
     };
     const investigation2 = {
@@ -161,23 +161,23 @@ describe("supports model", () => {
             {
               type: "introduction",
               supports: [
-                {type: ESupportType.text, content: "Investigation 2, Problem 1, section: introduction, support #1"},
-                {type: ESupportType.text, content: "Investigation 2, Problem 1, section: introduction, support #2"}
+                { type: ESupportType.text, content: "Investigation 2, Problem 1, section: introduction, support #1" },
+                { type: ESupportType.text, content: "Investigation 2, Problem 1, section: introduction, support #2" }
               ]
             },
             {
               type: "initialChallenge",
               supports: [
-                {type: ESupportType.text,
-                  content: "Investigation 2, Problem 1, section: initial challenge, support #1"},
-                {type: ESupportType.text,
-                  content: "Investigation 2, Problem 1, section: initial challenge, support #2"}
+                { type: ESupportType.text,
+                  content: "Investigation 2, Problem 1, section: initial challenge, support #1" },
+                { type: ESupportType.text,
+                  content: "Investigation 2, Problem 1, section: initial challenge, support #2" }
               ]
             }
           ],
           supports: [
-            {type: ESupportType.text, content: "Investigation 2, Problem 1, support #1"},
-            {type: ESupportType.text, content: "Investigation 2, Problem 1, support #2"}
+            { type: ESupportType.text, content: "Investigation 2, Problem 1, support #1" },
+            { type: ESupportType.text, content: "Investigation 2, Problem 1, support #2" }
           ]
         },
         {
@@ -187,29 +187,29 @@ describe("supports model", () => {
             {
               type: "introduction",
               supports: [
-                {type: ESupportType.text, content: "Investigation 2, Problem 2, section: introduction, support #1"},
-                {type: ESupportType.text, content: "Investigation 2, Problem 2, section: introduction, support #2"}
+                { type: ESupportType.text, content: "Investigation 2, Problem 2, section: introduction, support #1" },
+                { type: ESupportType.text, content: "Investigation 2, Problem 2, section: introduction, support #2" }
               ]
             },
             {
               type: "initialChallenge",
               supports: [
-                {type: ESupportType.text,
-                  content: "Investigation 2, Problem 2, section: initial challenge, support #1"},
-                {type: ESupportType.text,
-                  content: "Investigation 2, Problem 2, section: initial challenge, support #2"}
+                { type: ESupportType.text,
+                  content: "Investigation 2, Problem 2, section: initial challenge, support #1" },
+                { type: ESupportType.text,
+                  content: "Investigation 2, Problem 2, section: initial challenge, support #2" }
               ]
             }
           ],
           supports: [
-            {type: ESupportType.text, content: "Investigation 2, Problem 2, support #1"},
-            {type: ESupportType.text, content: "Investigation 2, Problem 2, support #2"}
+            { type: ESupportType.text, content: "Investigation 2, Problem 2, support #1" },
+            { type: ESupportType.text, content: "Investigation 2, Problem 2, support #2" }
           ]
         }
       ],
       supports: [
-        {type: ESupportType.text, content: "Investigation 2, support #1"},
-        {type: ESupportType.text, content: "Investigation 2, support #2"}
+        { type: ESupportType.text, content: "Investigation 2, support #1" },
+        { type: ESupportType.text, content: "Investigation 2, support #2" }
       ]
     };
 
@@ -218,12 +218,12 @@ describe("supports model", () => {
         title: "Unit 1",
         investigations: [investigation1, investigation2],
         supports: [
-          {type: ESupportType.text, content: "Unit 1, support #1"},
-          {type: ESupportType.text, content: "Unit 1, support #2"}
+          { type: ESupportType.text, content: "Unit 1, support #1" },
+          { type: ESupportType.text, content: "Unit 1, support #2" }
         ]
       }),
       investigation: InvestigationModel.create(cloneDeep(investigation1)),
-      problem: ProblemModel.create(cloneDeep(problem1))});
+      problem: ProblemModel.create(cloneDeep(problem1)) });
 
     expect(supports.getSupportsForUserProblem(
                       { sectionId: "introduction", groupId: "groupId", userId: "userId" }))
@@ -286,16 +286,16 @@ describe("supports model", () => {
   });
 
   it("Gets supports by audience and section type", () => {
-    const classSupportAll = {uid: "1", key: "1", support: createTextSupport(""), type: SupportTarget.problem,
-      audience: ClassAudienceModel.create(), authoredTime: 42};
-    const classSupportIntro = {uid: "1", key: "2", support: createTextSupport(""),
+    const classSupportAll = { uid: "1", key: "1", support: createTextSupport(""), type: SupportTarget.problem,
+      audience: ClassAudienceModel.create(), authoredTime: 42 };
+    const classSupportIntro = { uid: "1", key: "2", support: createTextSupport(""),
       type: SupportTarget.section, sectionId: "introduction",
-      audience: ClassAudienceModel.create(), authoredTime: 43};
-    const groupSupport = {uid: "1", key: "3", support: createTextSupport(""), type: SupportTarget.problem,
-      audience: GroupAudienceModel.create({identifier: "group1"}), authoredTime: 44};
-    const userSupport = {uid: "1", key: "4", support: createTextSupport(""),
+      audience: ClassAudienceModel.create(), authoredTime: 43 };
+    const groupSupport = { uid: "1", key: "3", support: createTextSupport(""), type: SupportTarget.problem,
+      audience: GroupAudienceModel.create({ identifier: "group1" }), authoredTime: 44 };
+    const userSupport = { uid: "1", key: "4", support: createTextSupport(""),
       type: SupportTarget.section, sectionId: "didYouKnow",
-      audience: UserAudienceModel.create({identifier: "user1"}), authoredTime: 45};
+      audience: UserAudienceModel.create({ identifier: "user1" }), authoredTime: 45 };
 
     const supports = SupportsModel.create({
       classSupports: [

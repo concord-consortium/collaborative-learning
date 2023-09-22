@@ -1,22 +1,22 @@
-import React, {MutableRefObject, useCallback, useEffect, useRef, useState} from "react";
-import {autorun} from "mobx";
-import {observer} from "mobx-react-lite";
-import {isAlive} from "mobx-state-tree";
-import {select} from "d3";
-import {Active} from "@dnd-kit/core";
-import {useInstanceIdContext} from "../imports/hooks/use-instance-id-context";
-import {AttributeType} from "../../../models/data/attribute";
+import React, { MutableRefObject, useCallback, useEffect, useRef, useState } from "react";
+import { autorun } from "mobx";
+import { observer } from "mobx-react-lite";
+import { isAlive } from "mobx-state-tree";
+import { select } from "d3";
+import { Active } from "@dnd-kit/core";
+import { useInstanceIdContext } from "../imports/hooks/use-instance-id-context";
+import { AttributeType } from "../../../models/data/attribute";
 import { IDataSet } from "../../../models/data/data-set";
-import {useGraphModelContext} from "../models/graph-model";
-import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
-import {useGraphLayoutContext} from "../models/graph-layout";
-import {getDragAttributeInfo, useDropHandler} from "../imports/hooks/use-drag-drop";
-import {AxisPlace} from "../imports/components/axis/axis-types";
-import {Axis} from "../imports/components/axis/components/axis";
-import {axisPlaceToAttrRole, kGraphClassSelector} from "../graph-types";
-import {GraphPlace} from "../imports/components/axis-graph-shared";
-import {AttributeLabel} from "./attribute-label";
-import {useDropHintString} from "../imports/hooks/use-drop-hint-string";
+import { useGraphModelContext } from "../models/graph-model";
+import { useDataConfigurationContext } from "../hooks/use-data-configuration-context";
+import { useGraphLayoutContext } from "../models/graph-layout";
+import { getDragAttributeInfo, useDropHandler } from "../imports/hooks/use-drag-drop";
+import { AxisPlace } from "../imports/components/axis/axis-types";
+import { Axis } from "../imports/components/axis/components/axis";
+import { axisPlaceToAttrRole, kGraphClassSelector } from "../graph-types";
+import { GraphPlace } from "../imports/components/axis-graph-shared";
+import { AttributeLabel } from "./attribute-label";
+import { useDropHintString } from "../imports/hooks/use-drop-hint-string";
 import { isAddCasesAction, isSetCaseValuesAction } from "../../../models/data/data-set-actions";
 import { computeNiceNumericBounds } from "../utilities/graph-utils";
 import { isNumericAxisModel } from "../imports/components/axis/models/axis-model";
@@ -41,7 +41,7 @@ export const GraphAxis = observer(function GraphAxis({
     instanceId = useInstanceIdContext(),
     layout = useGraphLayoutContext(),
     droppableId = `${instanceId}-${place}-axis-drop`,
-    hintString = useDropHintString({role: axisPlaceToAttrRole[place]}),
+    hintString = useDropHintString({ role: axisPlaceToAttrRole[place] }),
     emptyPlotIsNumeric = useSettingFromStores("emptyPlotIsNumeric", "graph") as boolean | undefined,
     axisShouldShowGridlines = emptyPlotIsNumeric || graphModel.axisShouldShowGridLines(place),
     parentEltRef = useRef<HTMLDivElement | null>(null),
@@ -51,7 +51,7 @@ export const GraphAxis = observer(function GraphAxis({
       _setWrapperElt(elt);
     }, []);
   const handleIsActive = (active: Active) => {
-    const {dataSet, attributeId: droppedAttrId} = getDragAttributeInfo(active) || {};
+    const { dataSet, attributeId: droppedAttrId } = getDragAttributeInfo(active) || {};
     if (isDropAllowed) {
       return isDropAllowed(place, dataSet, droppedAttrId);
     } else {
@@ -59,7 +59,7 @@ export const GraphAxis = observer(function GraphAxis({
     }
   };
   useDropHandler(droppableId, active => {
-    const {dataSet, attributeId: droppedAttrId} = getDragAttributeInfo(active) || {};
+    const { dataSet, attributeId: droppedAttrId } = getDragAttributeInfo(active) || {};
     dataSet && droppedAttrId && isDropAllowed(place, dataSet, droppedAttrId) &&
     onDropAttribute?.(place, dataSet, droppedAttrId);
   });

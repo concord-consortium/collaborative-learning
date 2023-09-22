@@ -88,7 +88,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   } = useCombobox({
     items: inputItems,
     initialInputValue: valueCandidate,
-    onInputValueChange: ({inputValue}) => {
+    onInputValueChange: ({ inputValue }) => {
       const safeValue = inputValue || "";
       setValueCandidate(safeValue);
       const allAttrValues = content.dataSet.attrFromID(attrKey)?.values as string[] || [];
@@ -228,7 +228,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const DeleteAttributeAlertContent = () => {
     return (
       <p>
-        Are you sure you want to remove the <em style={{ fontWeight: "bold"}}>{ getLabel() }</em>&nbsp;
+        Are you sure you want to remove the <em style={{ fontWeight: "bold" }}>{ getLabel() }</em>&nbsp;
         attribute from the Data Card? If you remove it from this card it will delete the data in the field,
         and it will also be removed from all the Cards in this collection.
       </p>
@@ -269,7 +269,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const valueClassNames = classNames(
     `value ${attrKey}`,
     { "editing": editingValue },
-    {"has-image": gImageMap.isImageUrl(valueStr)}
+    { "has-image": gImageMap.isImageUrl(valueStr) }
   );
 
   const typeIconClassNames = classNames(
@@ -329,7 +329,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
       </div>
 
       <div className={valueClassNames} onClick={handleValueClick}>
-          <div style={{display: (!readOnly && !valueIsImage()) ? 'block' : 'none'}} className="downshift-dropdown">
+          <div style={{ display: (!readOnly && !valueIsImage()) ? 'block' : 'none' }} className="downshift-dropdown">
             <VisuallyHidden>
               <label {...getLabelProps()} className="">
                 Value for {labelCandidate}
@@ -347,9 +347,10 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
             <ul {...getMenuProps()} className={ isOpen ? "open" : "closed"}>
               {isOpen &&
                 inputItems.map((item, index) => (
-                  <li className="dropdown-item" style={highlightedIndex === index ? {backgroundColor: '#bde4ff'} : {} }
+                  <li className="dropdown-item"
+                    style={highlightedIndex === index ? { backgroundColor: '#bde4ff' } : {} }
                     key={`${item}${index}`}
-                    {...getItemProps({item, index})}
+                    {...getItemProps({ item, index })}
                   >
                     {item}
                   </li>

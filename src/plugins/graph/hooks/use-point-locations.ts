@@ -15,7 +15,7 @@ interface GetScreenXYParams {
 }
 
 // These functions are modelled after the getScreenX and getScreenY functions in scatterdots.tsx
-export const getScreenX = ({ caseId, dataset, layout, dataConfig}: GetScreenXYParams) => {
+export const getScreenX = ({ caseId, dataset, layout, dataConfig }: GetScreenXYParams) => {
   const xAttrID = dataConfig?.attributeID('x') ?? '';
   const xValue = dataset?.getNumeric(caseId, xAttrID) ?? NaN;
   const xScale = layout.getAxisScale('bottom') as ScaleLinear<number, number>;
@@ -53,8 +53,8 @@ export const usePointLocations = () => {
 
   caseIds?.forEach((caseId) => {
     if (dataConfig && dataset && layout) {
-      xSeries.push(getScreenX({caseId, dataset, layout, dataConfig}));
-      ySeries.push(getScreenY({caseId, dataset, layout, dataConfig}));
+      xSeries.push(getScreenX({ caseId, dataset, layout, dataConfig }));
+      ySeries.push(getScreenY({ caseId, dataset, layout, dataConfig }));
     }
   });
 

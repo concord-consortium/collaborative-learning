@@ -3,7 +3,7 @@ import { DEBUG_HISTORY } from "../../lib/debug";
 import { Firestore } from "../../lib/firestore";
 import { HistoryEntrySnapshot } from "./history";
 
-export type LastHistoryEntry = undefined | { index: number, id: string};
+export type LastHistoryEntry = undefined | { index: number, id: string };
 
 export async function getLastHistoryEntry(firestore: Firestore, documentPath: string): Promise<LastHistoryEntry> {
   const lastEntryQuery = await firestore.collection(`${documentPath}/history`)
@@ -56,7 +56,7 @@ export function loadHistory(firestore: Firestore, historyPath: string,
     querySnapshot => {
       if (DEBUG_HISTORY) {
         // eslint-disable-next-line no-console
-        console.log("Loaded History:", querySnapshot.docs.map(doc => ({id: doc.id, ...doc.data()})));
+        console.log("Loaded History:", querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
       }
       const history = querySnapshot.docs.map(doc => {
         const { entry } = doc.data();

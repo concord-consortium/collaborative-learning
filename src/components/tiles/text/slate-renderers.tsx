@@ -31,17 +31,17 @@ export function renderSlateBlock(blockName: string, attributes: any, children: a
     case "paragraph":
       return (<p {...attributes}>{children}</p>);
     case "heading1":
-      return (<h1 {...{attributes}}>{children}</h1>);
+      return (<h1 {...{ attributes }}>{children}</h1>);
     case "heading2":
-      return (<h2 {...{attributes}}>{children}</h2>);
+      return (<h2 {...{ attributes }}>{children}</h2>);
     case "heading3":
-      return (<h3 {...{attributes}}>{children}</h3>);
+      return (<h3 {...{ attributes }}>{children}</h3>);
     case "heading4":
-      return (<h4 {...{attributes}}>{children}</h4>);
+      return (<h4 {...{ attributes }}>{children}</h4>);
     case "heading5":
-      return (<h5 {...{attributes}}>{children}</h5>);
+      return (<h5 {...{ attributes }}>{children}</h5>);
     case "heading6":
-      return (<h6 {...{attributes}}>{children}</h6>);
+      return (<h6 {...{ attributes }}>{children}</h6>);
     case "code":
       return (<code {...attributes}>{children}</code>);
     case "ordered-list":
@@ -50,7 +50,7 @@ export function renderSlateBlock(blockName: string, attributes: any, children: a
     case "todo-list":
       return (<ul {...attributes}>{children}</ul>);
     case "list-item":
-      return (<li {...{attributes}}>{children}</li>);
+      return (<li {...{ attributes }}>{children}</li>);
     case "horizontal-rule":
       return (<hr />);
 

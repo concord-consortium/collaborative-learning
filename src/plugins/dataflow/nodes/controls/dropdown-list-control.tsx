@@ -144,13 +144,13 @@ export class DropdownListControl extends Rete.Control {
       readonly,
       value: initial,
       onItemClick: (v: any) => {
-        this.emitter.trigger("selectnode", {node: this.getNode()});
+        this.emitter.trigger("selectnode", { node: this.getNode() });
         this.props.showList = !this.props.showList;
         (this as any).update();
         dataflowLogEvent("nodedropdownclick", this as Control, this.getNode().meta.inTileWithId as string);
       },
       onListClick: (v: any) => () => {
-        this.emitter.trigger("selectnode", {node: this.getNode()});
+        this.emitter.trigger("selectnode", { node: this.getNode() });
         this.props.showList = !this.props.showList;
         this.setValue(v);
         this.emitter.trigger("process");

@@ -92,7 +92,7 @@ describe("DrawingContentModel", () => {
   });
 
   it("imports the drawing tool import format", () => {
-    const { fill, stroke, strokeDashArray, strokeWidth} = mockSettings;
+    const { fill, stroke, strokeDashArray, strokeWidth } = mockSettings;
     const model = createDrawingContentWithMetadata({
       type: "Drawing", objects: [
         { type: "rectangle", x: 10, y: 10, width: 100, height: 100,
@@ -116,7 +116,7 @@ describe("DrawingContentModel", () => {
   });
 
   it("can manage the toolbar settings", () => {
-    const { fill, stroke, strokeDashArray, strokeWidth} = mockSettings;
+    const { fill, stroke, strokeDashArray, strokeWidth } = mockSettings;
     const model = createDrawingContentWithMetadata();
     const defaultSettings = {
       stroke: DefaultToolbarSettings.stroke,
@@ -137,10 +137,10 @@ describe("DrawingContentModel", () => {
 
   it("can add objects", () => {
     const model = createDrawingContentWithMetadata();
-    const rectSnapshot1: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot, id:"a", x:0, y:0};
+    const rectSnapshot1: RectangleObjectSnapshotForAdd = { ...baseRectangleSnapshot, id:"a", x:0, y:0 };
     model.addObject(rectSnapshot1);
 
-    const rectSnapshot2: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot, id:"b", x:20, y:20};
+    const rectSnapshot2: RectangleObjectSnapshotForAdd = { ...baseRectangleSnapshot, id:"b", x:20, y:20 };
     model.addObject(rectSnapshot2);
 
     const imageSnapshot: ImageObjectSnapshotForAdd = {
@@ -161,10 +161,10 @@ describe("DrawingContentModel", () => {
 
   it("can reorder objects", () => {
     const model = createDrawingContentWithMetadata();
-    model.addObject({...baseRectangleSnapshot, id:"a", x:0, y:0});
-    model.addObject({...baseRectangleSnapshot, id:"b", x:10, y:10});
-    model.addObject({...baseRectangleSnapshot, id:"c", x:20, y:20});
-    model.addObject({...baseRectangleSnapshot, id:"d", x:30, y:30});
+    model.addObject({ ...baseRectangleSnapshot, id:"a", x:0, y:0 });
+    model.addObject({ ...baseRectangleSnapshot, id:"b", x:10, y:10 });
+    model.addObject({ ...baseRectangleSnapshot, id:"c", x:20, y:20 });
+    model.addObject({ ...baseRectangleSnapshot, id:"d", x:30, y:30 });
     expect(model.objects.map((obj) => obj.id)).toStrictEqual(["a", "b", "c", "d"]);
 
     model.changeZOrder("a", "c");
@@ -179,10 +179,10 @@ describe("DrawingContentModel", () => {
 
     mockLogTileChangeEvent.mockReset();
 
-    const rectSnapshot1: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot, id:"a", x:0, y:0};
+    const rectSnapshot1: RectangleObjectSnapshotForAdd = { ...baseRectangleSnapshot, id:"a", x:0, y:0 };
     model.addObject(rectSnapshot1);
 
-    const rectSnapshot2: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot, id:"b", x:20, y:20};
+    const rectSnapshot2: RectangleObjectSnapshotForAdd = { ...baseRectangleSnapshot, id:"b", x:20, y:20 };
     model.addObject(rectSnapshot2);
 
     // delete does nothing if nothing is selected
@@ -240,13 +240,13 @@ describe("DrawingContentModel", () => {
       });
     expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(3,
       LogEventName.DRAWING_TOOL_CHANGE,
-      { operation: "deleteObjects", change: { args: [ [] ], path: ""}, tileId: "drawing-1" });
+      { operation: "deleteObjects", change: { args: [ [] ], path: "" }, tileId: "drawing-1" });
     expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(4,
       LogEventName.DRAWING_TOOL_CHANGE,
-      { operation: "setSelectedIds", change: { args: [ ["a", "b"] ], path: ""}, tileId: "drawing-1" });
+      { operation: "setSelectedIds", change: { args: [ ["a", "b"] ], path: "" }, tileId: "drawing-1" });
     expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(5,
       LogEventName.DRAWING_TOOL_CHANGE,
-      { operation: "deleteObjects", change: { args: [ ["a", "b"] ], path: ""}, tileId: "drawing-1" });
+      { operation: "deleteObjects", change: { args: [ ["a", "b"] ], path: "" }, tileId: "drawing-1" });
     expect(mockLogTileChangeEvent).toHaveBeenCalledTimes(5);
   });
 
@@ -254,10 +254,10 @@ describe("DrawingContentModel", () => {
     const model = createDrawingContentWithMetadata();
     expect(model.currentStamp).toBeNull();
 
-    const rectSnapshot1: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot, id:"a", x:0, y:0};
+    const rectSnapshot1: RectangleObjectSnapshotForAdd = { ...baseRectangleSnapshot, id:"a", x:0, y:0 };
     model.addObject(rectSnapshot1);
 
-    const rectSnapshot2: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot, id:"b", x:10, y:10};
+    const rectSnapshot2: RectangleObjectSnapshotForAdd = { ...baseRectangleSnapshot, id:"b", x:10, y:10 };
     model.addObject(rectSnapshot2);
 
     mockLogTileChangeEvent.mockReset();
@@ -295,22 +295,22 @@ describe("DrawingContentModel", () => {
   it("can move objects", () => {
     const model = createDrawingContentWithMetadata();
 
-    const rectSnapshot1: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot, id:"a", x:0, y:0};
+    const rectSnapshot1: RectangleObjectSnapshotForAdd = { ...baseRectangleSnapshot, id:"a", x:0, y:0 };
     model.addObject(rectSnapshot1);
 
-    const rectSnapshot2: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot, id:"b", x:10, y:10};
+    const rectSnapshot2: RectangleObjectSnapshotForAdd = { ...baseRectangleSnapshot, id:"b", x:10, y:10 };
     model.addObject(rectSnapshot2);
 
     mockLogTileChangeEvent.mockReset();
     model.moveObjects([
-      {id: "a", destination: {x: 20, y: 20}},
-      {id: "b", destination: {x: 30, y: 30}}
+      { id: "a", destination: { x: 20, y: 20 } },
+      { id: "b", destination: { x: 30, y: 30 } }
     ]);
     expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(1,
       LogEventName.DRAWING_TOOL_CHANGE, {
         operation: "moveObjects",
         change: {
-          args: [[{id: "a", destination: {x: 20, y: 20}}, {id: "b", destination: {x: 30, y: 30}}]],
+          args: [[{ id: "a", destination: { x: 20, y: 20 } }, { id: "b", destination: { x: 30, y: 30 } }]],
           path: ""
         },
         tileId: "drawing-1"
@@ -322,7 +322,7 @@ describe("DrawingContentModel", () => {
     mockLogTileChangeEvent.mockClear();
     const model = createDrawingContentWithMetadata();
 
-    const rectSnapshot1: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot, id:"a"};
+    const rectSnapshot1: RectangleObjectSnapshotForAdd = { ...baseRectangleSnapshot, id:"a" };
     model.addObject(rectSnapshot1);
 
     const obj = model.objectMap.a as RectangleObjectType;
@@ -496,7 +496,7 @@ describe("DrawingContentModel", () => {
       x: 0, y: 0, 
       ...mockSettings
     });
-    obj.addPoint(DeltaPoint.create({dx: 10, dy: 10})); // FIXME this point is not actually getting added.
+    obj.addPoint(DeltaPoint.create({ dx: 10, dy: 10 })); // FIXME this point is not actually getting added.
     createDrawingContentWithMetadata({
       objects: [obj]
     });
@@ -506,21 +506,21 @@ describe("DrawingContentModel", () => {
     obj.resizeObject();
     expect(obj).toHaveProperty('x', 0);
     expect(obj).toHaveProperty('y', 0);
-    expect(obj).toHaveProperty('deltaPoints', [{dx: 20, dy: 20}]);
+    expect(obj).toHaveProperty('deltaPoints', [{ dx: 20, dy: 20 }]);
 
     // drag top left smaller
     obj.setDragBounds({ top: 10, right: 0, bottom: 0, left: 10 });
     obj.resizeObject();
     expect(obj).toHaveProperty('x', 10);
     expect(obj).toHaveProperty('y', 10);
-    expect(obj).toHaveProperty('deltaPoints', [{dx: 10, dy: 10}]);
+    expect(obj).toHaveProperty('deltaPoints', [{ dx: 10, dy: 10 }]);
   });
 
   it("can copy rectangle", () => {
     mockLogTileChangeEvent.mockClear();
     const model = createDrawingContentWithMetadata();
 
-    const rectSnapshot1: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot, id:"a"};
+    const rectSnapshot1: RectangleObjectSnapshotForAdd = { ...baseRectangleSnapshot, id:"a" };
     model.addObject(rectSnapshot1);
 
     model.duplicateObjects(["a"]);
@@ -572,7 +572,7 @@ describe("DrawingContentModel", () => {
   it("can copy multiple objects", () => {
     mockLogTileChangeEvent.mockClear();
 
-    const rectSnapshot: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot, id:"a"};
+    const rectSnapshot: RectangleObjectSnapshotForAdd = { ...baseRectangleSnapshot, id:"a" };
 
     const ellipse = EllipseObject.create({
       id: "b",
@@ -686,7 +686,7 @@ describe("DrawingContentModel", () => {
 
     expect(model.objects).toHaveLength(1);
     expect(group.objects).toHaveLength(2);
-    expect(group.boundingBox).toStrictEqual({ nw: { x: 0, y: 0}, se: { x: 100, y: 100}});
+    expect(group.boundingBox).toStrictEqual({ nw: { x: 0, y: 0 }, se: { x: 100, y: 100 } });
     expect(group.objectExtents.get('r2')).toStrictEqual({ top: 0.5, right: 1, bottom: 1, left: .1 });
 
     model.ungroupGroups([groupId]);
@@ -770,7 +770,7 @@ describe("DrawingContentModel", () => {
     // Make a group with one of every type of object.
     const line = LineObject.create({
       x: 0, y: 0, 
-      deltaPoints: [{dx: 10, dy: 10}],
+      deltaPoints: [{ dx: 10, dy: 10 }],
       ...mockSettings
     });
     const vector = VectorObject.create({
@@ -789,7 +789,7 @@ describe("DrawingContentModel", () => {
       y: 35,
       rx: 5,
       ry: 5,
-    ...mockSettings});
+    ...mockSettings });
     const image = ImageObject.create({
       url: "my/image/url", x: 40, y: 40, width: 10, height: 10
     });
@@ -807,19 +807,19 @@ describe("DrawingContentModel", () => {
     expect(model.objects).toHaveLength(1);
 
     const group = model.objects[0] as GroupObjectType;
-    expect(group.boundingBox).toStrictEqual({ nw: {x: 0, y: 0}, se: {x: 60, y: 60}});
-    expect(ellipse.boundingBox).toStrictEqual({ nw: {x: 30, y: 30}, se: {x: 40, y: 40}});
+    expect(group.boundingBox).toStrictEqual({ nw: { x: 0, y: 0 }, se: { x: 60, y: 60 } });
+    expect(ellipse.boundingBox).toStrictEqual({ nw: { x: 30, y: 30 }, se: { x: 40, y: 40 } });
 
-    group.setDragBounds({ top: 0, right: 60, bottom: 60, left: 0});
+    group.setDragBounds({ top: 0, right: 60, bottom: 60, left: 0 });
     group.resizeObject();
-    expect(group.boundingBox).toStrictEqual({ nw: {x: 0, y: 0}, se: {x: 120, y: 120}});
+    expect(group.boundingBox).toStrictEqual({ nw: { x: 0, y: 0 }, se: { x: 120, y: 120 } });
 
-    expect(line.boundingBox).toStrictEqual({ nw: {x: 0, y: 0}, se: {x: 20, y: 20}});
-    expect(vector.boundingBox).toStrictEqual({ nw: {x: 20, y: 20}, se: {x: 40, y: 40}});
-    expect(rect.boundingBox).toStrictEqual({ nw: {x: 40, y: 40}, se: {x: 60, y: 60}});
-    expect(ellipse.boundingBox).toStrictEqual({ nw: {x: 60, y: 60}, se: {x: 80, y: 80}});
-    expect(image.boundingBox).toStrictEqual({ nw: {x: 80, y: 80}, se: {x: 100, y: 100}});
-    expect(text.boundingBox).toStrictEqual({ nw: {x: 100, y: 100}, se: {x: 120, y: 120}});
+    expect(line.boundingBox).toStrictEqual({ nw: { x: 0, y: 0 }, se: { x: 20, y: 20 } });
+    expect(vector.boundingBox).toStrictEqual({ nw: { x: 20, y: 20 }, se: { x: 40, y: 40 } });
+    expect(rect.boundingBox).toStrictEqual({ nw: { x: 40, y: 40 }, se: { x: 60, y: 60 } });
+    expect(ellipse.boundingBox).toStrictEqual({ nw: { x: 60, y: 60 }, se: { x: 80, y: 80 } });
+    expect(image.boundingBox).toStrictEqual({ nw: { x: 80, y: 80 }, se: { x: 100, y: 100 } });
+    expect(text.boundingBox).toStrictEqual({ nw: { x: 100, y: 100 }, se: { x: 120, y: 120 } });
 
     group.setStroke('#abcdef');
     group.setStrokeDashArray('1 2');

@@ -79,7 +79,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     // model has changed beneath UI - update mathfield, yet restore cursor position
     const disposer = onSnapshot((content as any), () => {
       if (mf.current?.getValue() === content.latexStr) return;
-      mf.current?.setValue(content.latexStr, {silenceNotifications: true});
+      mf.current?.setValue(content.latexStr, { silenceNotifications: true });
       if (!readOnly && mf.current) mf.current.position = trackedCursorPos.current - 1;
     });
     return () => disposer();

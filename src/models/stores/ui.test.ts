@@ -66,7 +66,7 @@ describe("ui model", () => {
 
   it("allows selected tile to be set", () => {
     expect(ui.selectedTileIds).toStrictEqual([]);
-    const content = TextContentModel.create({text: "test"});
+    const content = TextContentModel.create({ text: "test" });
     const tile = TileModel.create({
       id: "1",
       content

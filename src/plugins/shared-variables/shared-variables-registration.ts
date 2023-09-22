@@ -2,7 +2,7 @@ import { registerSharedModelInfo } from "../../models/shared/shared-model-regist
 import { registerTextPluginInfo } from "../../models/tiles/text/text-plugin-info";
 import { kSharedVariablesID, SharedVariables } from "./shared-variables";
 import { NewVariableTextButton, InsertVariableTextButton, EditVariableTextButton,
-  kNewVariableButtonName, kInsertVariableButtonName, kEditVariableButtonName} from "./slate/text-tile-buttons";
+  kNewVariableButtonName, kInsertVariableButtonName, kEditVariableButtonName } from "./slate/text-tile-buttons";
 import { kVariableTextPluginName, VariablesPlugin } from "./slate/variables-plugin";
 import { registerDrawingObjectInfo, registerDrawingToolInfo } from "../drawing/components/drawing-object-manager";
 import { EditVariableButton, InsertVariableButton, NewVariableButton, VariableChipComponent, VariableChipObject }

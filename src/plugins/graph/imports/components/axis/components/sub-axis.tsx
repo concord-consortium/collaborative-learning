@@ -1,7 +1,7 @@
-import React, {memo, MutableRefObject, useRef, useState} from "react";
-import {useSubAxis} from "../hooks/use-sub-axis";
-import {IAxisModel, INumericAxisModel} from "../models/axis-model";
-import {NumericAxisDragRects} from "./numeric-axis-drag-rects";
+import React, { memo, MutableRefObject, useRef, useState } from "react";
+import { useSubAxis } from "../hooks/use-sub-axis";
+import { IAxisModel, INumericAxisModel } from "../models/axis-model";
+import { NumericAxisDragRects } from "./numeric-axis-drag-rects";
 
 import "./axis.scss";
 

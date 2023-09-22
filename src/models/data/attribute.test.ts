@@ -128,7 +128,7 @@ describe("DataSet Attributes", () => {
 
   test("type", () => {
     const testCases = valuesToTest.map(values => {
-      return [values, Attribute.create({name: "foo", values}).type];
+      return [values, Attribute.create({ name: "foo", values }).type];
     });
     expect({ testCases }).toMatchInlineSnapshot(`
 [0,1,2] => "numeric"
@@ -155,7 +155,7 @@ describe("DataSet Attributes", () => {
 
   test("typeCounts", () => {
     const testCases = valuesToTest.map(values => {
-      return [values, Attribute.create({name: "foo", values}).typeCounts];
+      return [values, Attribute.create({ name: "foo", values }).typeCounts];
     });
     // This can be updated with `npm run test -- -u attribute.test`
     expect({ testCases }).toMatchInlineSnapshot(`
@@ -183,7 +183,7 @@ describe("DataSet Attributes", () => {
 
   test("mostCommonType", () => {
     const testCases = valuesToTest.map(values => {
-      return [values, Attribute.create({name: "foo", values}).mostCommonType];
+      return [values, Attribute.create({ name: "foo", values }).mostCommonType];
     });
     // This can be updated with `npm run test -- -u attribute.test`
     expect({ testCases }).toMatchInlineSnapshot(`

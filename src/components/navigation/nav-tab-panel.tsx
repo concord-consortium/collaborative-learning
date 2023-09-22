@@ -123,7 +123,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
   };
 
   private renderProblem = () => {
-    const { user: { isTeacher }, problem: { sections }} = this.stores;
+    const { user: { isTeacher }, problem: { sections } } = this.stores;
     return (
       <ProblemTabContent
         sections={sections}

@@ -1,5 +1,5 @@
-import {Instance, types} from "mobx-state-tree";
-import {typedId} from "../../../utilities/js-utils";
+import { Instance, types } from "mobx-state-tree";
+import { typedId } from "../../../utilities/js-utils";
 
 export const PlotModel = types
   .model('PlotModel', {

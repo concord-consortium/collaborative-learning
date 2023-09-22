@@ -1,11 +1,11 @@
-import React, {useCallback, useEffect, useRef, useState} from "react";
-import {drag, select} from "d3";
-import {autorun, reaction} from "mobx";
-import {useAxisLayoutContext} from "../../imports/components/axis/models/axis-layout-context";
-import {INumericAxisModel} from "../../imports/components/axis/models/axis-model";
-import {ScaleNumericBaseType} from "../../imports/components/axis/axis-types";
-import {kGraphClassSelector} from "../../graph-types";
-import {valueLabelString} from "../../utilities/graph-utils";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { drag, select } from "d3";
+import { autorun, reaction } from "mobx";
+import { useAxisLayoutContext } from "../../imports/components/axis/models/axis-layout-context";
+import { INumericAxisModel } from "../../imports/components/axis/models/axis-model";
+import { ScaleNumericBaseType } from "../../imports/components/axis/axis-types";
+import { kGraphClassSelector } from "../../graph-types";
+import { valueLabelString } from "../../utilities/graph-utils";
 import { IMovableValueModel } from "./movable-value-model";
 
 import "./movable-value.scss";
@@ -16,7 +16,7 @@ interface IProps {
   transform: string
 }
 
-export function MovableValue ({model, axis, transform}: IProps) {
+export function MovableValue ({ model, axis, transform }: IProps) {
   const layout = useAxisLayoutContext(),
     xScale = layout.getAxisScale("bottom") as ScaleNumericBaseType,
     yScale = layout.getAxisScale("left"),

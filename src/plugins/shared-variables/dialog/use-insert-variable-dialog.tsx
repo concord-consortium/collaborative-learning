@@ -29,7 +29,7 @@ const InsertVariableContent =
           Variables already used by this tile:
           <div className="variable-chip-list-container">
             <VariableChipList
-              className={classNames({disabled: disallowSelf})}
+              className={classNames({ disabled: disallowSelf })}
               onClick={disallowSelf ? undefined : onClick}
               nameOnly={true}
               selectedVariables={selectedVariables}

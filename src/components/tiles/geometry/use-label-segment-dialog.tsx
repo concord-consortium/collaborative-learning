@@ -11,7 +11,7 @@ interface LabelRadioButtonProps {
   checkedLabel: string;
   setLabelOption: React.Dispatch<React.SetStateAction<string>>;
 }
-const LabelRadioButton: React.FC<LabelRadioButtonProps> = ({display, label, checkedLabel, setLabelOption}) => {
+const LabelRadioButton: React.FC<LabelRadioButtonProps> = ({ display, label, checkedLabel, setLabelOption }) => {
   return (
     <div className="radio-button-container">
       <input

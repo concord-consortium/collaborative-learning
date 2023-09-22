@@ -16,7 +16,7 @@ interface INumberlineButtonProps{
   tooltipOptions?: TooltipProps
 }
 
-const NumberlineButton = ({ className, icon, onClick, tooltipOptions}: INumberlineButtonProps) => {
+const NumberlineButton = ({ className, icon, onClick, tooltipOptions }: INumberlineButtonProps) => {
   const to = useTooltipOptions(tooltipOptions);
   const classes = classNames("toolbar-button", className);
   return (
@@ -37,7 +37,7 @@ export const PlacePointButton = ({ onClick }: ISetNumberlineHandler) => (
     className="place-point"
     icon={<PlacePointIcon/>}
     onClick={onClick}
-    tooltipOptions={{ title: "Place Point"}}
+    tooltipOptions={{ title: "Place Point" }}
   />
 );
 
@@ -46,7 +46,7 @@ export const ClearPointsButton = ({ onClick }: ISetNumberlineHandler) => (
     className="clear-points"
     icon={<ClearPointsIcon/>}
     onClick={onClick}
-    tooltipOptions={{ title: "Clear Points"}}
+    tooltipOptions={{ title: "Clear Points" }}
   />
 );
 
@@ -55,6 +55,6 @@ export const DeletePointButton = ({ onClick }: ISetNumberlineHandler) => (
     className="delete-points"
     icon={<DeletePointsIcon/>}
     onClick={onClick}
-    tooltipOptions={{ title: "Delete Point(s)"}}
+    tooltipOptions={{ title: "Delete Point(s)" }}
   />
 );

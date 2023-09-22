@@ -66,7 +66,7 @@ export class DBOtherDocumentsListener extends BaseListener {
   }
 
   private handleDocumentAdded = (snapshot: firebase.database.DataSnapshot) => {
-    const {documents, user} = this.db.stores;
+    const { documents, user } = this.db.stores;
     const dbDoc: DBOtherDocument|null = snapshot.val();
     this.debugLogSnapshot("#handleDocumentAdded", snapshot);
     if (dbDoc) {
@@ -90,7 +90,7 @@ export class DBOtherDocumentsListener extends BaseListener {
   };
 
   private handleDocumentChanged = (snapshot: firebase.database.DataSnapshot) => {
-    const {documents} = this.db.stores;
+    const { documents } = this.db.stores;
     const dbDoc: DBOtherDocument|null = snapshot.val();
     this.debugLogSnapshot("#handleDocumentChanged", snapshot);
     if (dbDoc) {
@@ -102,7 +102,7 @@ export class DBOtherDocumentsListener extends BaseListener {
   };
 
   private handleDocumentRemoved = (snapshot: firebase.database.DataSnapshot) => {
-    const {documents} = this.db.stores;
+    const { documents } = this.db.stores;
     const dbDoc: DBOtherDocument|null = snapshot.val();
     this.debugLogSnapshot("#handleDocumentRemoved", snapshot);
     if (dbDoc) {

@@ -18,12 +18,12 @@ export const setPageTitle = (stores: IStores, argProblem?: ProblemModelType) => 
 };
 
 export const updateProblem = (stores: IStores, problemId: string) => {
-  const {unit} = stores;
-  const {investigation, problem} = unit.getProblem(problemId);
+  const { unit } = stores;
+  const { investigation, problem } = unit.getProblem(problemId);
   if (investigation && problem) {
     Logger.updateAppContext({ investigation: investigation.title, problem: problem.title });
     setPageTitle(stores, problem);
-    stores.supports.createFromUnit({unit, investigation, problem, documents: stores.documents});
+    stores.supports.createFromUnit({ unit, investigation, problem, documents: stores.documents });
     stores.problem = problem;
   }
 };

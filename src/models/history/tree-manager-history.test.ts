@@ -63,7 +63,7 @@ function setupDocument(initialContent? : DocumentContentSnapshotType) {
   const manager = docModel.treeManagerAPI as Instance<typeof TreeManager>;
   const undoStore = manager.undoStore;
 
-  return {docContent, tileContent, manager, undoStore};
+  return { docContent, tileContent, manager, undoStore };
 }
 
 describe("history loading", () => {
@@ -81,11 +81,11 @@ describe("history loading", () => {
   describe("setNumHistoryEntriesAppliedFromFirestore", () => {
     it("updates numHistoryEntriesAppliedFromFirestore based on returned entry", async () => {
       const { manager } = setupDocument();
-      getLastHistoryEntry.mockResolvedValue({index: 0, id: "1234"});
+      getLastHistoryEntry.mockResolvedValue({ index: 0, id: "1234" });
       await manager.setNumHistoryEntriesAppliedFromFirestore({} as Firestore, "");
       expect(manager.numHistoryEventsApplied).toBe(1);
 
-      getLastHistoryEntry.mockResolvedValue({index: 10, id: "12345"});
+      getLastHistoryEntry.mockResolvedValue({ index: 10, id: "12345" });
       await manager.setNumHistoryEntriesAppliedFromFirestore({} as Firestore, "");
       expect(manager.numHistoryEventsApplied).toBe(11);
     });
@@ -127,7 +127,7 @@ describe("history loading", () => {
       const { manager } = setupDocument();
       // this makes loadHistory be a no op.
       loadHistory.mockReturnValue(() => undefined);
-      manager.mirrorHistoryFromFirestore({id: "1234"} as UserModelType, {} as Firestore);
+      manager.mirrorHistoryFromFirestore({ id: "1234" } as UserModelType, {} as Firestore);
       expect(manager.document.history).toHaveLength(0);
     });
 
@@ -142,7 +142,7 @@ describe("history loading", () => {
         ]);
         return () => undefined;
       });
-      manager.mirrorHistoryFromFirestore({id: "1234"} as UserModelType, {} as Firestore);
+      manager.mirrorHistoryFromFirestore({ id: "1234" } as UserModelType, {} as Firestore);
       expect(manager.document.history).toHaveLength(2);
     });
 
@@ -184,7 +184,7 @@ describe("history loading", () => {
           historyLoaded(entries, loadingError);
           return () => undefined;
         });
-        manager.mirrorHistoryFromFirestore({id: "1234"} as UserModelType, {} as Firestore);
+        manager.mirrorHistoryFromFirestore({ id: "1234" } as UserModelType, {} as Firestore);
 
         await called.promise;
         // If we actually delayed the historyLoaded callback above we should be able to
@@ -205,14 +205,14 @@ describe("history loading", () => {
           entries: [
             { id: "a1" },
             { id: "a2" }
-          ]});
+          ] });
 
         // The history length is greater than the numHistoryEventsApplied
         expect(manager.historyStatus).toBe(HistoryStatus.HISTORY_LOADED);
       });
 
       it("is NO_HISTORY when there are no events and the firestore length is 0", async () => {
-        const { manager } = await mirrorMockHistory({entries: []});
+        const { manager } = await mirrorMockHistory({ entries: [] });
 
         expect(manager.historyStatus).toBe(HistoryStatus.NO_HISTORY);
       });
@@ -223,7 +223,7 @@ describe("history loading", () => {
             { id: "a1" },
             { id: "a2" }
           ],
-          lastHistoryEntry: {index: 1, id: "1234"}
+          lastHistoryEntry: { index: 1, id: "1234" }
         });
 
         // The history length is 1 plus the index of last history entry
@@ -234,8 +234,8 @@ describe("history loading", () => {
       it("is ERROR when loadHistory returns an error", async () => {
         const { manager } = await mirrorMockHistory({
           entries:[],
-          loadingError: { message: "fake error"} as firebase.firestore.FirestoreError,
-          lastHistoryEntry: {index: 1, id: "1234"}
+          loadingError: { message: "fake error" } as firebase.firestore.FirestoreError,
+          lastHistoryEntry: { index: 1, id: "1234" }
         });
 
         expect(manager.historyStatus).toBe(HistoryStatus.HISTORY_ERROR);
@@ -252,7 +252,7 @@ describe("history loading", () => {
             { id: "a1" },
             { id: "a2" }
           ],
-          lastHistoryEntry: {index: 2, id: "1234"}
+          lastHistoryEntry: { index: 2, id: "1234" }
         });
 
         // The history length is 1 plus the index of last history entry

@@ -126,19 +126,19 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   }
 
   private handleBeginEditTitle = () => {
-    this.setState({isEditingTitle: true});
+    this.setState({ isEditingTitle: true });
   };
 
   private handleTitleChange = (title?: string) => {
     if (title){
       this.props.model.setTitle(title);
       dataflowLogEvent("changeprogramtitle", { programTitleValue: this.getTitle() }, this.props.model.id);
-      this.setState({isEditingTitle: false});
+      this.setState({ isEditingTitle: false });
     }
   };
 
   private renderTitle() {
-    const size = {width: null, height: null};
+    const size = { width: null, height: null };
     const { readOnly, scale } = this.props;
     return (
       <EditableTileTitle
@@ -207,11 +207,11 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     switch (programMode){
       case ProgramMode.Ready:
         tileContent.prepareRecording();
-        this.setState({isPlaying: false}); //reset isPlaying
-        this.setState({isRecording: true});
+        this.setState({ isPlaying: false }); //reset isPlaying
+        this.setState({ isRecording: true });
         break;
       case ProgramMode.Recording:
-        this.setState({isRecording: false});
+        this.setState({ isRecording: false });
         break;
       case ProgramMode.Done:
         tileContent.resetRecording();
@@ -235,7 +235,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   };
 
   private handleChangeIsPlaying = () => {
-    this.setState({isPlaying: !this.state.isPlaying});
+    this.setState({ isPlaying: !this.state.isPlaying });
   };
 
   private updatePlayBackIndex = (update: string) => {
@@ -244,13 +244,13 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
       const tileContent = this.getContent();
       const recordedCases = tileContent.dataSet.cases.length;
       if (newPlayBackIndex >= recordedCases) {
-        this.setState({isPlaying: false});
+        this.setState({ isPlaying: false });
       } else {
-        this.setState({playBackIndex: newPlayBackIndex});
+        this.setState({ playBackIndex: newPlayBackIndex });
       }
     }
     if (update === UpdateMode.Reset){
-      this.setState({playBackIndex: 0});
+      this.setState({ playBackIndex: 0 });
     }
   };
 
@@ -258,13 +258,13 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     if (update === UpdateMode.Increment){
       const newRecordIndex = this.state.recordIndex + 1;
       if (newRecordIndex >= this.getContent().maxRecordableCases) {
-        this.setState({isRecording: false});
+        this.setState({ isRecording: false });
       } else {
-        this.setState({recordIndex: newRecordIndex});
+        this.setState({ recordIndex: newRecordIndex });
       }
     }
     if (update === UpdateMode.Reset){
-      this.setState({recordIndex: 0});
+      this.setState({ recordIndex: 0 });
     }
   };
   private getContent() {

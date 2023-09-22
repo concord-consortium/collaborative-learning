@@ -84,10 +84,10 @@ export const FourUpGridModel = types
       const eastLeft = self.vSplitter + self.splitterSize;
       const eastWidth = Math.max(0, self.width - eastLeft);
       const southHeight = Math.max(0, self.height - southTop);
-      const nwPos = {top: 0,        left: 0,        width: self.vSplitter, height: self.hSplitter};
-      const nePos = {top: 0,        left: eastLeft, width: eastWidth,      height: self.hSplitter};
-      const sePos = {top: southTop, left: eastLeft, width: eastWidth,      height: southHeight};
-      const swPos = {top: southTop, left: 0,        width: self.vSplitter, height: southHeight};
+      const nwPos = { top: 0,        left: 0,        width: self.vSplitter, height: self.hSplitter };
+      const nePos = { top: 0,        left: eastLeft, width: eastWidth,      height: self.hSplitter };
+      const sePos = { top: southTop, left: eastLeft, width: eastWidth,      height: southHeight };
+      const swPos = { top: southTop, left: 0,        width: self.vSplitter, height: southHeight };
       return {
         [CellPositions.NorthWest]: getCellScaling(nwPos),
         [CellPositions.NorthEast]: getCellScaling(nePos),
@@ -135,8 +135,8 @@ export const FourUpGridModel = types
     };
 
     // set the splitters
-    const {height, width, splitterSize} = self;
-    let {hSplitter, vSplitter} = self;
+    const { height, width, splitterSize } = self;
+    let { hSplitter, vSplitter } = self;
     if (hSplitter === 0) {
       hSplitter = splitInMiddle(height);
     }

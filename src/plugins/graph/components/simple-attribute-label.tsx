@@ -1,9 +1,9 @@
-import React, {useRef} from "react";
-import {createPortal} from "react-dom";
-import {observer} from "mobx-react-lite";
-import {GraphPlace } from "../imports/components/axis-graph-shared";
-import {AttributeType} from "../../../models/data/attribute";
-import {AxisOrLegendAttributeMenu} from "../imports/components/axis/components/axis-or-legend-attribute-menu";
+import React, { useRef } from "react";
+import { createPortal } from "react-dom";
+import { observer } from "mobx-react-lite";
+import { GraphPlace } from "../imports/components/axis-graph-shared";
+import { AttributeType } from "../../../models/data/attribute";
+import { AxisOrLegendAttributeMenu } from "../imports/components/axis/components/axis-or-legend-attribute-menu";
 import { graphPlaceToAttrRole, kGraphClassSelector } from "../graph-types";
 import { useDataConfigurationContext } from "../hooks/use-data-configuration-context";
 import { useGraphModelContext } from "../models/graph-model";
@@ -21,7 +21,7 @@ interface ISimpleAttributeLabelProps {
 
 export const SimpleAttributeLabel = observer(
   function SimpleAttributeLabel(props: ISimpleAttributeLabelProps) {
-    const {place, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute} = props;
+    const { place, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute } = props;
     const simpleLabelRef = useRef<HTMLDivElement>(null);
     const parentElt = simpleLabelRef.current?.closest(kGraphClassSelector) as HTMLDivElement ?? null;
     const dataConfiguration = useDataConfigurationContext();

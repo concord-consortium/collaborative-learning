@@ -11,12 +11,12 @@ export function createDefaultSectionedContent({ sections, content }: ISectionedC
   // for blank sectioned documents, default content is a section header row and a placeholder
   // tile for each section that is present in the template (the passed sections)
   sections?.forEach(section => {
-    tiles.push({ content: { isSectionHeader: true, sectionId: section.type }});
+    tiles.push({ content: { isSectionHeader: true, sectionId: section.type } });
     if (content?.[section.type]) {
       tiles.push(...(content[section.type].tiles || []));
     }
     else {
-      tiles.push({ content: { type: "Placeholder", sectionId: section.type }});
+      tiles.push({ content: { type: "Placeholder", sectionId: section.type } });
     }
   });
   // cast required because we're using the import format

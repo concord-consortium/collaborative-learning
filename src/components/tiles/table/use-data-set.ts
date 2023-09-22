@@ -135,5 +135,5 @@ export const useDataSet = ({
     return returnVal;
   }, [onColumnResize, triggerColumnChange]);
   
-  return { hasLinkableRows, onColumnResize: handleColumnResize, onRowsChange, deleteSelected, onSelectedCellChange};
+  return { hasLinkableRows, onColumnResize: handleColumnResize, onRowsChange, deleteSelected, onSelectedCellChange };
 };

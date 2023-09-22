@@ -116,7 +116,7 @@ describe("four-up grid model", () => {
       splitterSize: 3,
       width: 200,
     });
-    grid.update({initSplitters: true});
+    grid.update({ initSplitters: true });
     expect(grid.hSplitter).toBe(48.5);
     expect(grid.vSplitter).toBe(98.5);
   });
@@ -127,7 +127,7 @@ describe("four-up grid model", () => {
       splitterSize: 3,
       width: 200,
     });
-    grid.update({initSplitters: true});
+    grid.update({ initSplitters: true });
     grid.update({
       height: 200,
       resizeSplitters: true,
@@ -143,7 +143,7 @@ describe("four-up grid model", () => {
       splitterSize: 3,
       width: 200,
     });
-    grid.update({initSplitters: true});
+    grid.update({ initSplitters: true });
     grid.update({
       hSplitter: 25,
       vSplitter: 75,
@@ -158,9 +158,9 @@ describe("four-up grid model", () => {
       splitterSize: 3,
       width: 200,
     });
-    grid.cells[CellPositions.NorthWest].update({right: 10});
+    grid.cells[CellPositions.NorthWest].update({ right: 10 });
     grid.cells[CellPositions.NorthEast].update({});
-    grid.cells[CellPositions.SouthEast].update({bottom: 0});
-    grid.cells[CellPositions.SouthWest].update({right: 10, bottom: 0});
+    grid.cells[CellPositions.SouthEast].update({ bottom: 0 });
+    grid.cells[CellPositions.SouthWest].update({ right: 10, bottom: 0 });
   });
 });

@@ -212,8 +212,8 @@ class DataflowToolTile {
       this.getNode(node.name).should("exist");
       this.getNodeTitle().should("contain", node.title);
     });
-    this.getNodeOutput().eq(0).click({force: true});
-    this.getNodeInput().eq(0).click({force: true});
+    this.getNodeOutput().eq(0).click({ force: true });
+    this.getNodeInput().eq(0).click({ force: true });
   }
   recordData(samplingRate, timer) {
     this.selectSamplingRate(samplingRate);

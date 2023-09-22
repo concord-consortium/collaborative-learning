@@ -37,7 +37,7 @@ export const HistoryEntry = types.model("HistoryEntry", {
   // for debugging an activeExchange that hasn't been ended. 
   // The {name: "activeExchanges"} is a feature of MobX that can also 
   // help with debugging.
-  activeExchanges: observable.map<string, string>({}, {name: "activeExchanges"})
+  activeExchanges: observable.map<string, string>({}, { name: "activeExchanges" })
 }));
 export interface HistoryEntrySnapshot extends SnapshotIn<typeof HistoryEntry> {}
 export interface HistoryEntryType extends Instance<typeof HistoryEntry> {}

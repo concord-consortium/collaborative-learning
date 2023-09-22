@@ -2,9 +2,9 @@ import { autorun, runInAction, when } from "mobx";
 import { applySnapshot, destroy, getSnapshot, protect, unprotect } from "mobx-state-tree";
 import { externalUrlImagesHandler, localAssetsImagesHandler,
         firebaseRealTimeDBImagesHandler, firebaseStorageImagesHandler,
-        IImageHandler, ImageMapEntry, ImageMapModel, ImageMapModelType, 
-        EntryStatus, IImageHandlerStoreOptions, 
-        IImageHandlerStoreResult, ImageMapEntryType, ImageMapEntrySnapshot} from "./image-map";
+        IImageHandler, ImageMapEntry, ImageMapModel, ImageMapModelType,
+        EntryStatus, IImageHandlerStoreOptions,
+        IImageHandlerStoreResult, ImageMapEntryType, ImageMapEntrySnapshot } from "./image-map";
 import { parseFirebaseImageUrl } from "../../functions/src/shared-utils";
 import { DB } from "../lib/db";
 import * as ImageUtils from "../utilities/image-utils";
@@ -52,12 +52,12 @@ describe("ImageMap", () => {
     if (sImageMap) { destroy(sImageMap); }
     sImageMap = ImageMapModel.create();
     sImageMap.setUnitUrl(kCurriculumUnitUrl);
-    sImageMap.setUnitCodeMap({"stretching-and-shrinking": "sas"});
+    sImageMap.setUnitCodeMap({ "stretching-and-shrinking": "sas" });
   });
-          
+
   function createMockDB(overrides?: Record<string, any>) {
     return {
-      stores: { user: { id: "user", classHash: "classHash" }},
+      stores: { user: { id: "user", classHash: "classHash" } },
       firebase: { getPublicUrlFromStore: (path?: string, url?: string) => Promise.resolve(kFBStorageUrl) },
       getCloudImageBlob: jest.fn(() => Promise.resolve(kBlobUrl)),
       getImageBlob: jest.fn(() => Promise.resolve(kBlobUrl)),
@@ -115,7 +115,7 @@ describe("ImageMap", () => {
     {
       const storeSpy = jest.spyOn(ImageUtils, "storeImage")
                             .mockImplementation(() =>
-                              Promise.resolve({ imageUrl: kCCImgFBRTDBUrl, imageData: kBlobUrl}));
+                              Promise.resolve({ imageUrl: kCCImgFBRTDBUrl, imageData: kBlobUrl }));
       p1 = externalUrlImagesHandler.store(kHttpsImageUrl, { db: createMockDB() })
         .then(storeResult => {
           expect(storeSpy).toHaveBeenCalled();
@@ -145,8 +145,8 @@ describe("ImageMap", () => {
       const kHttpsImage2 = kHttpsImageUrl + "2";
       const storeSpy = jest.spyOn(ImageUtils, "storeImage")
                             .mockImplementation(() =>
-                              Promise.resolve({ imageUrl: placeholderImage, imageData: placeholderImage}));
-      p1 = externalUrlImagesHandler.store(kHttpsImage2, {db: createMockDB() })
+                              Promise.resolve({ imageUrl: placeholderImage, imageData: placeholderImage }));
+      p1 = externalUrlImagesHandler.store(kHttpsImage2, { db: createMockDB() })
         .then(storeResult => {
           expect(storeSpy).toHaveBeenCalled();
           expect(storeResult.contentUrl).toBe(kHttpsImage2);
@@ -157,8 +157,8 @@ describe("ImageMap", () => {
       const kHttpsImage3 = kHttpsImageUrl + "3";
       const storeSpy = jest.spyOn(ImageUtils, "storeImage")
                             .mockImplementation(() =>
-                              Promise.resolve({ imageUrl: placeholderImage, imageData: placeholderImage}));
-      p2 = externalUrlImagesHandler.store(kHttpsImage3, { db: createMockDB({ stores: { user: { id: "" }} }) })
+                              Promise.resolve({ imageUrl: placeholderImage, imageData: placeholderImage }));
+      p2 = externalUrlImagesHandler.store(kHttpsImage3, { db: createMockDB({ stores: { user: { id: "" } } }) })
         .then(storeResult => {
           expect(storeSpy).toHaveBeenCalled();
           expect(storeResult.contentUrl).toBe(kHttpsImage3);
@@ -171,8 +171,9 @@ describe("ImageMap", () => {
   it("test firebaseStorageImagesHandler on firebase storage URL", () => {
     expectToMatch(firebaseStorageImagesHandler, [kFBStorageUrl, kFBStorageRef]);
 
-    const storeSpy = jest.spyOn(ImageUtils, "storeCorsImage")
-                          .mockImplementation(() => Promise.resolve({ imageUrl: kCCImgFBRTDBUrl, imageData: kBlobUrl}));
+    const storeSpy = jest
+      .spyOn(ImageUtils, "storeCorsImage")
+      .mockImplementation(() => Promise.resolve({ imageUrl: kCCImgFBRTDBUrl, imageData: kBlobUrl }));
     return firebaseStorageImagesHandler.store(kFBStorageUrl, { db: createMockDB() })
       .then(storeResult => {
         expect(storeSpy).toHaveBeenCalled();
@@ -183,8 +184,9 @@ describe("ImageMap", () => {
   });
 
   it("test firebaseStorageImagesHandler on firebase storage reference", () => {
-    const storeSpy = jest.spyOn(ImageUtils, "storeCorsImage")
-                          .mockImplementation(() => Promise.resolve({ imageUrl: kCCImgFBRTDBUrl, imageData: kBlobUrl}));
+    const storeSpy = jest
+      .spyOn(ImageUtils, "storeCorsImage")
+      .mockImplementation(() => Promise.resolve({ imageUrl: kCCImgFBRTDBUrl, imageData: kBlobUrl }));
     return firebaseStorageImagesHandler.store(kFBStorageRef, { db: createMockDB() })
       .then(storeResult => {
         expect(storeSpy).toHaveBeenCalled();
@@ -335,7 +337,7 @@ describe("ImageMap", () => {
                 expect(consoleSpy).toBeCalledTimes(1);
               });
     });
-  
+
     it("can retrieve placeholder image from cache", () => {
       expect(sImageMap.hasImage(placeholderImage));
       expect(sImageMap.getCachedImage(placeholderImage)).toEqual({
@@ -352,55 +354,55 @@ describe("ImageMap", () => {
                 expect(image.height).toBe(150);
               });
     });
-    
+
     it("can handle duplicate renders when image map is slow to compute the dimensions", async () => {
       // Expose the image dimensions resolve function so we can call it when we want to
       let imageDimensionResolve: (entrySnapshot: ImageUtils.IImageDimensions) => void;
-      const imageDimensionPromise = 
-        new Promise<ImageUtils.IImageDimensions>((resolve) => imageDimensionResolve = resolve);    
+      const imageDimensionPromise =
+        new Promise<ImageUtils.IImageDimensions>((resolve) => imageDimensionResolve = resolve);
       const dimSpy = jest.spyOn(ImageUtils, "getImageDimensions")
                           .mockImplementation(() => imageDimensionPromise);
-      
+
       expect.assertions(10);
-  
+
       // After this first call we should expect that the getImage promise will not be
       // resolved until we call imageDimensionResolve
       const firstGetImagePromise = sImageMap.getImage(kLocalImageUrl);
       const secondGetImagePromise = sImageMap.getImage(kLocalImageUrl);
-  
+
       let firstGetImagePromiseResolved = false;
       let secondGetImagePromiseResolved = false;
       firstGetImagePromise.then(() => firstGetImagePromiseResolved = true);
       secondGetImagePromise.then(() => secondGetImagePromiseResolved = true);
-  
+
       // Wait for there to be a cached entry for this url using MobX's wait
       // This will happen after the image is stored, but before the dimensions
       // are requested
       await when(() => !!sImageMap.getCachedImage(kLocalImageUrl));
-      
+
       const imageEntry = sImageMap.getCachedImage(kLocalImageUrl);
       expect(imageEntry?.status).toBe(EntryStatus.PendingDimensions);
-  
+
       expect(dimSpy).toHaveBeenCalled();
       // We wait for 20ms just to give the javascript engine time to resolve
-      // the promises. 
+      // the promises.
       // Just because the entry was created doesn't mean that the javascript
-      // engine had enough time to run the promises (if it was going to 
-      // do so).  It depends if the observer for the `when` is run before 
+      // engine had enough time to run the promises (if it was going to
+      // do so).  It depends if the observer for the `when` is run before
       // the `then` attached to the promises above.
       await new Promise((resolve) => setTimeout(resolve, 20));
       expect(firstGetImagePromiseResolved).toBe(false);
       expect(secondGetImagePromiseResolved).toBe(false);
-  
+
       imageDimensionResolve!({ src: placeholderImage, width: 200, height: 150 });
-  
+
       const image = await firstGetImagePromise;
       expect(image.contentUrl).toBe(kLocalImageUrl);
       expect(image.displayUrl).toBe(`${kLocalImageUrl}`);
       expect(image.width).toBe(200);
       expect(image.height).toBe(150);
       expect(image.status).toBe(EntryStatus.Ready);
-  
+
       const image2 = await secondGetImagePromise;
       expect(image2).toBe(image);
     });
@@ -417,7 +419,7 @@ describe("ImageMap", () => {
     it("handles when a previous getImage failed due to a getImageDimensions error", async () => {
       expect.assertions(3);
 
-      // We reset the mocks because when the ImageMap is created it will request the 
+      // We reset the mocks because when the ImageMap is created it will request the
       // dimensions of the placeholder image
       jest.resetAllMocks();
       jest.spyOn(ImageUtils, "getImageDimensions").mockImplementation(() =>
@@ -427,7 +429,7 @@ describe("ImageMap", () => {
       const returnedEntry = await sImageMap.getImage(kLocalImageUrl);
       expect(returnedEntry?.status).toBe(EntryStatus.Error);
 
-      // A second call should try again and succeed   
+      // A second call should try again and succeed
       jest.spyOn(ImageUtils, "getImageDimensions").mockImplementation(() =>
         Promise.resolve({ src: placeholderImage, width: 200, height: 150 })
       );
@@ -440,7 +442,7 @@ describe("ImageMap", () => {
     it("handles when a previous getImage that converts the url failed due to a getImageDimensions error", async () => {
       expect.assertions(6);
 
-      // We reset the mocks because when the ImageMap is created it will request the 
+      // We reset the mocks because when the ImageMap is created it will request the
       // dimensions of the placeholder image
       jest.resetAllMocks();
       jest.spyOn(ImageUtils, "getImageDimensions").mockImplementation(() =>
@@ -450,17 +452,17 @@ describe("ImageMap", () => {
       const mockHandler: any = {
         async store(url: string, options?: IImageHandlerStoreOptions): Promise<IImageHandlerStoreResult> {
           return {
-            contentUrl: "convertedUrl", 
-            displayUrl: "convertedUrl", 
-            success: true};
+            contentUrl: "convertedUrl",
+            displayUrl: "convertedUrl",
+            success: true };
         }
       };
       jest.spyOn(sImageMap, "getHandler").mockImplementation((url: string) => mockHandler);
 
       const returnedEntry = await sImageMap.getImage(kLocalImageUrl);
       const expectedEntry = {
-        contentUrl: "convertedUrl", 
-        displayUrl: "convertedUrl", 
+        contentUrl: "convertedUrl",
+        displayUrl: "convertedUrl",
         status: EntryStatus.Error,
         retries: 0
       };
@@ -468,21 +470,21 @@ describe("ImageMap", () => {
       expect(sImageMap.getCachedImage(kLocalImageUrl)).toEqual(expectedEntry);
       expect(sImageMap.getCachedImage("convertedUrl")).toEqual(expectedEntry);
 
-      // A second call should try again and succeed   
+      // A second call should try again and succeed
       jest.spyOn(ImageUtils, "getImageDimensions").mockImplementation(() =>
         Promise.resolve({ src: placeholderImage, width: 200, height: 150 })
       );
       const getImagePromise2 = sImageMap.getImage(kLocalImageUrl);
-      
-      // TODO: it'd be good to check the intermediate state to see that the 
+
+      // TODO: it'd be good to check the intermediate state to see that the
       // main entry has a `PendingStorage` status. And then when addImage is called
       // the main entry and the copied entry have a `PendingDimensions` state
       // Doing this would require setting up a delayed getDimensions like above
 
       const returnedEntry2 = await getImagePromise2;
       const expectedEntry2 = {
-        contentUrl: "convertedUrl", 
-        displayUrl: "convertedUrl", 
+        contentUrl: "convertedUrl",
+        displayUrl: "convertedUrl",
         width: 200,
         height: 150,
         status: EntryStatus.Ready,
@@ -526,8 +528,8 @@ describe("ImageMap", () => {
       const mockHandler: any = {
         async store(url: string, options?: IImageHandlerStoreOptions): Promise<IImageHandlerStoreResult> {
           return {
-            displayUrl: placeholderImage, 
-            success: false};
+            displayUrl: placeholderImage,
+            success: false };
         }
       };
       jest.spyOn(sImageMap, "getHandler").mockImplementation((url: string) => mockHandler);
@@ -536,7 +538,7 @@ describe("ImageMap", () => {
       let countOfGetImage = 0;
       let countOfAutorun = 0;
       let imageEntry: ImageMapEntryType | undefined;
-      let displayUrl: string | undefined; 
+      let displayUrl: string | undefined;
       let lastStatus: EntryStatus | undefined;
       const disposer = autorun(() => {
         // This is a pattern that an observing component could use to display an
@@ -550,10 +552,10 @@ describe("ImageMap", () => {
           imageEntry = sImageMap.getCachedImage(mockUrl);
         }
         // This displayURL is what the the observing component would use to
-        // render the image.  
+        // render the image.
         displayUrl = imageEntry?.displayUrl;
-        
-        // **This line is important.** 
+
+        // **This line is important.**
         // Without this line, there will be no looping. This line tells MobX the
         // autorun should be re-run whenever the status changes. The status is
         // being checked above, but only if imageEntry already exists. So the
@@ -567,7 +569,7 @@ describe("ImageMap", () => {
           // to the image entry, this is why the limit is 15 instead of something lower
           disposer();
         }
-      });  
+      });
 
       return new Promise(resolve => setTimeout(resolve, 500))
       .then(() => {
@@ -597,8 +599,8 @@ describe("ImageMap", () => {
       const mockHandler: any = {
         async store(url: string, options?: IImageHandlerStoreOptions): Promise<IImageHandlerStoreResult> {
           return {
-            displayUrl: placeholderImage, 
-            success: false};
+            displayUrl: placeholderImage,
+            success: false };
         }
       };
       jest.spyOn(sImageMap, "getHandler").mockImplementation((url: string) => mockHandler);
@@ -606,7 +608,7 @@ describe("ImageMap", () => {
 
       let countOfAutorun = 0;
       let imageEntry: ImageMapEntryType | undefined;
-      let displayUrl: string | undefined; 
+      let displayUrl: string | undefined;
       let lastStatus: EntryStatus | undefined;
       const imageEntries: (ImageMapEntrySnapshot | null)[] = [];
       const disposer = autorun(() => {
@@ -622,10 +624,10 @@ describe("ImageMap", () => {
         imageEntries.push(imageEntry ? getSnapshot(imageEntry) : null);
 
         // This displayURL is what the the observing component would use to
-        // render the image.  
+        // render the image.
         displayUrl = imageEntry?.displayUrl;
-        
-        // **This line is important.** 
+
+        // **This line is important.**
         // Without this line, there will be no looping. This line tells MobX the
         // autorun should be re-run whenever the status changes. The status is
         // being checked above, but only if imageEntry already exists. So the
@@ -639,7 +641,7 @@ describe("ImageMap", () => {
           // to the image entry, this is why the limit is 15 instead of something lower
           disposer();
         }
-      });  
+      });
 
       return new Promise(resolve => setTimeout(resolve, 500))
       .then(() => {
@@ -678,13 +680,13 @@ describe("ImageMap", () => {
   });
 
   it("can update an image entry with syncContentUrl", () => {
-    const kLocalImageUrl2 = kLocalImageUrl + "2";    
+    const kLocalImageUrl2 = kLocalImageUrl + "2";
     const imageEntry2 = ImageMapEntry.create({
                           contentUrl: kLocalImageUrl2,
                           displayUrl: kLocalImageUrl2,
                           status: EntryStatus.Ready
                         });
-    
+
     // It should add a new entry at the contentUrl
     // It doesn't create or modify the entry at the original url
     sImageMap._syncContentUrl(kLocalImageUrl, imageEntry2);
@@ -692,7 +694,7 @@ describe("ImageMap", () => {
     const altEntry = sImageMap.getCachedImage(kLocalImageUrl2);
     expect(altEntry).toEqual(imageEntry2);
     // We never added an entry for the original url so it remains undefined
-    expect(sImageMap.getCachedImage(kLocalImageUrl)).toBeUndefined();                   
+    expect(sImageMap.getCachedImage(kLocalImageUrl)).toBeUndefined();
 
     // syncs should update existing entries in place if they are in an error
     // status
@@ -711,7 +713,7 @@ describe("ImageMap", () => {
   it("can add a file image", () => {
     const storeSpy = jest.spyOn(ImageUtils, "storeFileImage")
                           .mockImplementation(() =>
-                            Promise.resolve({ imageUrl: kCCImgFBRTDBUrl, imageData: kBlobUrl}));
+                            Promise.resolve({ imageUrl: kCCImgFBRTDBUrl, imageData: kBlobUrl }));
     const file: any = { name: "foo" };
     return sImageMap.addFileImage(file)
             .then(image => {
@@ -725,7 +727,7 @@ describe("ImageMap", () => {
   describe("_addImage", () => {
     it("can update an image entry", () => {
       const kLocalImageUrl2 = kLocalImageUrl + "2";
-  
+
       // Directly add an initial entry
       const initialEntry = {
         contentUrl: kLocalImageUrl,
@@ -735,7 +737,7 @@ describe("ImageMap", () => {
         status: EntryStatus.Ready
       };
       unsafeUpdate(() => sImageMap.images.set(kLocalImageUrl, initialEntry));
-  
+
       // It synchronously updates the entry and changes the status to `PendingDimensions`.
       const changedStoreResult = {
         contentUrl: kLocalImageUrl2,
@@ -743,16 +745,16 @@ describe("ImageMap", () => {
         success: true
       };
       const addImagePromise = sImageMap._addImage(kLocalImageUrl, changedStoreResult);
-  
+
       expect(sImageMap.getCachedImage(kLocalImageUrl)).toEqual({
         contentUrl: kLocalImageUrl2,
         displayUrl: kLocalImageUrl2,
         status: EntryStatus.PendingDimensions,
         retries: 0
       });
-  
+
       // Then asynchronously after the getImageDimensions call returns,
-      // the status will be set to Ready, and the width and height will be set 
+      // the status will be set to Ready, and the width and height will be set
       // to the values returned by getImageDimensions
       return addImagePromise.then(() => {
         expect(sImageMap.getCachedImage(kLocalImageUrl)).toEqual({
@@ -765,11 +767,11 @@ describe("ImageMap", () => {
         });
       });
     });
-  
+
     it("handles entries with the error status", async () => {
       expect.assertions(7);
 
-      // We reset the mocks because when the ImageMap is created it will request the 
+      // We reset the mocks because when the ImageMap is created it will request the
       // dimensions of the placeholder image
       jest.resetAllMocks();
       const dimSpy = jest.spyOn(ImageUtils, "getImageDimensions");
@@ -786,11 +788,11 @@ describe("ImageMap", () => {
         status: EntryStatus.Error,
         retries: 0
       };
-      
+
       // It synchronously adds the entry to the map
       const entryInMap = sImageMap.getCachedImage(kLocalImageUrl);
       expect(entryInMap).toEqual(expectedEntry);
-      
+
       const entryReturned = await addImagePromise;
       // It returns the entry, without computing the dimensions
       expect(entryReturned).toEqual(expectedEntry);
@@ -832,7 +834,7 @@ describe("ImageMap", () => {
       expect(returnedEntry.status).toBe(EntryStatus.Error);
       expect(sImageMap.getCachedImage(kLocalImageUrl)).toBe(returnedEntry);
       expect(consoleSpy).toBeCalledTimes(1);
-  
+
       // Even error entries are expected to have an displayUrl
       jest.resetAllMocks();
       const otherUrl = "fake-url";
@@ -844,11 +846,11 @@ describe("ImageMap", () => {
       expect(sImageMap.getCachedImage(otherUrl)).toBe(returnedEntry2);
       expect(consoleSpy).toBeCalledTimes(1);
     });
-    
+
     it("handles an error in getDimensions", async () => {
       expect.assertions(3);
 
-      // We reset the mocks because when the ImageMap is created it will request the 
+      // We reset the mocks because when the ImageMap is created it will request the
       // dimensions of the placeholder image
       jest.resetAllMocks();
       const dimSpy = jest.spyOn(ImageUtils, "getImageDimensions").mockImplementation(() =>

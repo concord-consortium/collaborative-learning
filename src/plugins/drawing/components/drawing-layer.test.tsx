@@ -20,7 +20,7 @@ const kLocalImageUrl = "assets/logo_tw.png";
 
 const getDrawingObject = (objectContent: DrawingContentModelType) => {
   drawingLayerProps = {
-    model: TileModel.create({content: objectContent}),
+    model: TileModel.create({ content: objectContent }),
     onSetCanAcceptDrop: (tileId?: string) => {
       throw new Error("Function not implemented.");
     }

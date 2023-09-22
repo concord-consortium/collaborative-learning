@@ -1,23 +1,23 @@
 import React from "react";
-import {IGraphModel} from "./graph-model";
-import {GraphLayout} from "./graph-layout";
-import {getDataSetFromId} from "../../../models/shared/shared-data-utils";
-import {AxisPlace, AxisPlaces} from "../imports/components/axis/axis-types";
+import { IGraphModel } from "./graph-model";
+import { GraphLayout } from "./graph-layout";
+import { getDataSetFromId } from "../../../models/shared/shared-data-utils";
+import { AxisPlace, AxisPlaces } from "../imports/components/axis/axis-types";
 import {
   CategoricalAxisModel, EmptyAxisModel, isCategoricalAxisModel, isEmptyAxisModel, isNumericAxisModel, NumericAxisModel
 } from "../imports/components/axis/models/axis-model";
 import {
   axisPlaceToAttrRole, graphPlaceToAttrRole, IDotsRef, kDefaultNumericAxisBounds, PlotType
 } from "../graph-types";
-import {GraphPlace} from "../imports/components/axis-graph-shared";
-import {matchCirclesToData, setNiceDomain} from "../utilities/graph-utils";
+import { GraphPlace } from "../imports/components/axis-graph-shared";
+import { matchCirclesToData, setNiceDomain } from "../utilities/graph-utils";
 import { getAppConfig } from "../../../models/tiles/tile-environment";
 
 // keys are [primaryAxisType][secondaryAxisType]
 const plotChoices: Record<string, Record<string, PlotType>> = {
-  empty: {empty: 'casePlot', numeric: 'dotPlot', categorical: 'dotChart'},
-  numeric: {empty: 'dotPlot', numeric: 'scatterPlot', categorical: 'dotPlot'},
-  categorical: {empty: 'dotChart', numeric: 'dotPlot', categorical: 'dotChart'}
+  empty: { empty: 'casePlot', numeric: 'dotPlot', categorical: 'dotChart' },
+  numeric: { empty: 'dotPlot', numeric: 'scatterPlot', categorical: 'dotPlot' },
+  categorical: { empty: 'dotChart', numeric: 'dotPlot', categorical: 'dotChart' }
 };
 
 interface IGraphControllerConstructorProps {
@@ -40,7 +40,7 @@ export class GraphController {
   instanceId: string;
   autoAdjustAxes: React.MutableRefObject<boolean>;
 
-  constructor({layout, enableAnimation, instanceId, autoAdjustAxes}: IGraphControllerConstructorProps) {
+  constructor({ layout, enableAnimation, instanceId, autoAdjustAxes }: IGraphControllerConstructorProps) {
     this.layout = layout;
     this.instanceId = instanceId;
     this.enableAnimation = enableAnimation;
@@ -57,7 +57,7 @@ export class GraphController {
   }
 
   callMatchCirclesToData() {
-    const {graphModel, dotsRef, enableAnimation, instanceId} = this;
+    const { graphModel, dotsRef, enableAnimation, instanceId } = this;
     if (graphModel && dotsRef?.current) {
       const { config: dataConfiguration, pointColor, pointStrokeColor } = graphModel,
         pointRadius = graphModel.getPointRadius();
@@ -69,7 +69,7 @@ export class GraphController {
   }
 
   initializeGraph() {
-    const {graphModel, dotsRef, layout} = this,
+    const { graphModel, dotsRef, layout } = this,
       dataConfig = graphModel?.config;
     if (dataConfig && layout && dotsRef?.current) {
       AxisPlaces.forEach((axisPlace: AxisPlace) => {
@@ -94,7 +94,7 @@ export class GraphController {
   }
 
   handleAttributeAssignment(graphPlace: GraphPlace, dataSetID: string, attrID: string) {
-    const {graphModel, layout} = this,
+    const { graphModel, layout } = this,
       dataset = getDataSetFromId(graphModel, dataSetID),
       dataConfig = graphModel?.config,
       appConfig = getAppConfig(graphModel),
@@ -133,7 +133,7 @@ export class GraphController {
         graphModel.setPlotType(plotChoices[primaryType][otherAttributeType]);
       }
       if (dataConfig.attributeID(graphAttributeRole) !== attrID) {
-        dataConfig.setAttribute(graphAttributeRole, {attributeID: attrID});
+        dataConfig.setAttribute(graphAttributeRole, { attributeID: attrID });
       }
     };
 
@@ -148,7 +148,7 @@ export class GraphController {
       switch (attrType) {
         case 'numeric': {
           if (!currAxisModel || !isNumericAxisModel(currAxisModel)) {
-            const newAxisModel = NumericAxisModel.create({place, min, max});
+            const newAxisModel = NumericAxisModel.create({ place, min, max });
             graphModel.setAxis(place, newAxisModel);
             layout.setAxisScaleType(place, 'linear');
             setNiceDomain(attr?.numValues || [], newAxisModel);
@@ -159,7 +159,7 @@ export class GraphController {
           break;
         case 'categorical': {
           if (currentType !== 'categorical') {
-            const newAxisModel = CategoricalAxisModel.create({place});
+            const newAxisModel = CategoricalAxisModel.create({ place });
             graphModel.setAxis(place, newAxisModel);
             layout.setAxisScaleType(place, 'band');
           }
@@ -174,8 +174,8 @@ export class GraphController {
             }
             else {
               const newAxisModel = emptyPlotIsNumeric
-                                     ? NumericAxisModel.create({place, min, max})
-                                     : EmptyAxisModel.create({place});
+                                     ? NumericAxisModel.create({ place, min, max })
+                                     : EmptyAxisModel.create({ place });
               graphModel.setAxis(place, newAxisModel);
             }
           }

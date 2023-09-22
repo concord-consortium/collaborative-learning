@@ -216,7 +216,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderProblemTitleBar(type: string, hideButtons?: boolean) {
-    const {problem, appMode, clipboard, user: { isTeacher }} = this.stores;
+    const { problem, appMode, clipboard, user: { isTeacher } } = this.stores;
     const problemTitle = problem.title;
     const { document, workspace } = this.props;
     const isShared = document.visibility === "public";
@@ -269,7 +269,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
   private getStickyNoteData() {
     if (!this.isPrimary()) {
-      return {stickyNotes: [], hasNotes: false, showNotes: false};
+      return { stickyNotes: [], hasNotes: false, showNotes: false };
     }
     const { user, supports } = this.stores;
     const { stickyNotesVisible } = this.state;
@@ -283,11 +283,11 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const hasNotes = stickyNotes.length > 0;
     const hasNewStickyNotes = supports.hasNewStickyNotes(user.lastStickyNoteViewTimestamp);
     const showNotes = hasNotes && (stickyNotesVisible || hasNewStickyNotes);
-    return {stickyNotes, hasNotes, showNotes};
+    return { stickyNotes, hasNotes, showNotes };
   }
 
   private renderStickyNotes() {
-    const {hasNotes, showNotes} = this.getStickyNoteData();
+    const { hasNotes, showNotes } = this.getStickyNoteData();
     if (!hasNotes) {
       return;
     }
@@ -301,7 +301,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
   private renderStickyNotesPopup() {
     const { user } = this.stores;
-    const { stickyNotes, showNotes} = this.getStickyNoteData();
+    const { stickyNotes, showNotes } = this.getStickyNoteData();
     if (!showNotes || !this.stickyNoteIcon || !this.documentContainer) {
       return;
     }
@@ -312,7 +312,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const top = 55;
     const left = (iconRect.left - documentRect.left) - (maxWidth / 2);
     return (
-      <div className="sticky-note-popup" style={{top, left, maxWidth}}>
+      <div className="sticky-note-popup" style={{ top, left, maxWidth }}>
         <div className="sticky-note-popup-titlebar">
           <div className="sticky-note-popup-titlebar-title" >{title}</div>
           <div className="sticky-note-popup-titlebar-close-icon" onClick={this.handleViewStickyNoteClose} />
@@ -342,7 +342,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderMode() {
-    const {workspace} = this.props;
+    const { workspace } = this.props;
     const mode = workspace.mode === "1-up" ? "up1" : "up4";
     const modeTitle = workspace.mode === "1-up" ? "Join Group View" : "Return to Student View";
     return (
@@ -375,7 +375,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
               <PublishButton document={document} />}
           </div>
         }
-        {hasDisplayId && <div className="display-id" style={{opacity: 0}}>{displayId}</div>}
+        {hasDisplayId && <div className="display-id" style={{ opacity: 0 }}>{displayId}</div>}
         {
           document.type === LearningLogDocument || document.type === LearningLogPublication
           ? <div className="title" data-test="learning-log-title">
@@ -424,17 +424,17 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleShowTwoUp = () => {
-    this.props.workspace.toggleComparisonVisible({override: true});
+    this.props.workspace.toggleComparisonVisible({ override: true });
   };
   private handleHideTwoUp = () => {
-    this.props.workspace.toggleComparisonVisible({override: false});
+    this.props.workspace.toggleComparisonVisible({ override: false });
   };
 
   private handleDownloadTileJson = () => {
     const { clipboard } = this.stores;
     const tileJson = clipboard.getJsonTileContent();
     if (tileJson) {
-      const blobJson = new Blob([tileJson], {type: "text/plain;charset=utf-8"});
+      const blobJson = new Blob([tileJson], { type: "text/plain;charset=utf-8" });
       FileSaver.saveAs(blobJson, "tile-content.json");
     }
     clipboard.clear();
@@ -488,7 +488,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private setStickyNotesVisible = (stickyNotesVisible: boolean) => {
-    this.setState({stickyNotesVisible});
+    this.setState({ stickyNotesVisible });
     this.stores.db.setLastStickyNoteViewTimestamp();
   };
 

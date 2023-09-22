@@ -30,9 +30,9 @@ export const RectangleObject = types.compose("RectangleObject", StrokedObject, F
     get boundingBox() {
       const { x, y } = self.position;
       const { width, height } = self.currentDims;
-      const nw: Point = {x, y};
-      const se: Point = {x: x + width, y: y + height};
-      return {nw, se};
+      const nw: Point = { x, y };
+      const se: Point = { x: x + width, y: y + height };
+      return { nw, se };
     },
     get label() {
       return self.width===self.height ? "Square" : "Rectangle";
@@ -50,8 +50,8 @@ export const RectangleObject = types.compose("RectangleObject", StrokedObject, F
       self.width = Math.max(start.x, end.x) - self.x;
       self.height = Math.max(start.y, end.y) - self.y;
       if (makeSquare) {
-        let {x, y} = self;
-        const {width, height} = self;
+        let { x, y } = self;
+        const { width, height } = self;
         const squareSize = Math.max(width, height);
 
         if (x === start.x) {
@@ -88,8 +88,8 @@ export interface RectangleObjectType extends Instance<typeof RectangleObject> {}
 export interface RectangleObjectSnapshot extends SnapshotIn<typeof RectangleObject> {}
 export interface RectangleObjectSnapshotForAdd extends SnapshotIn<typeof RectangleObject> {type: string}
 
-export const RectangleComponent = observer(function RectangleComponent({model, handleHover,
-  handleDrag} : IDrawingComponentProps) {
+export const RectangleComponent = observer(function RectangleComponent({ model, handleHover,
+  handleDrag } : IDrawingComponentProps) {
   if (model.type !== "rectangle") return null;
   const rect = model as RectangleObjectType;
   const { id, stroke, strokeWidth, strokeDashArray, fill } = rect;
@@ -123,7 +123,7 @@ export class RectangleDrawingTool extends DrawingTool {
   public handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
     const start = this.drawingLayer.getWorkspacePoint(e);
     if (!start) return;
-    const {stroke, fill, strokeWidth, strokeDashArray} = this.drawingLayer.toolbarSettings();
+    const { stroke, fill, strokeWidth, strokeDashArray } = this.drawingLayer.toolbarSettings();
     const rectangle = RectangleObject.create({
       x: start.x,
       y: start.y,
@@ -156,7 +156,7 @@ export class RectangleDrawingTool extends DrawingTool {
   }
 }
 
-export function RectangleToolbarButton({toolbarManager}: IToolbarButtonProps) {
+export function RectangleToolbarButton({ toolbarManager }: IToolbarButtonProps) {
   return <SvgToolModeButton modalButton="rectangle" title="Rectangle"
     toolbarManager={toolbarManager} SvgIcon={RectToolIcon}  />;
 }

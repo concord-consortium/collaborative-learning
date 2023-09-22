@@ -48,7 +48,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   }, [ui.annotationMode]);
 
   // Force rerenders when the layer's size changes
-  useResizeObserver({ref: divRef, box: "border-box"});
+  useResizeObserver({ ref: divRef, box: "border-box" });
 
   function getRowElement(rowId?: string) {
     if (rowId === undefined) return undefined;

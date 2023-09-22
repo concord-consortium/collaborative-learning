@@ -36,7 +36,7 @@ export function withoutUndo() {
     //     DocumentModel so there is no middleware.
     if (DEBUG_UNDO) {
       try {
-        const {context} = actionCall;
+        const { context } = actionCall;
         const root = getRoot(context);
         // Use duck typing to figure out if the root is a tree
         // and its tree monitor is enabled

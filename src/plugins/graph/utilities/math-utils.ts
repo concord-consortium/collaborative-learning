@@ -1,4 +1,4 @@
-import {format} from "d3";
+import { format } from "d3";
 
 export function between(num: number, min: number, max: number) {
   return min < max ? (min <= num && num <= max) : (max <= num && num <= min);

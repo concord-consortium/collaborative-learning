@@ -7,7 +7,7 @@ import { authenticate,
         getAppMode,
         createFakeUser,
         getFirebaseJWTParams,
-        generateDevAuthentication} from "./auth";
+        generateDevAuthentication } from "./auth";
 import { IPortalClassInfo, IPortalClassUser, PortalStudentJWT, PortalTeacherJWT } from "./portal-types";
 import nock from "nock";
 import { NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS } from "../components/demo/demo-creator";
@@ -190,7 +190,7 @@ describe("demo mode", () => {
   });
 
   it("should authenticate demo students", (done) => {
-    authenticate("demo", appConfig, urlParams).then(({authenticatedUser}) => {
+    authenticate("demo", appConfig, urlParams).then(({ authenticatedUser }) => {
       const demoUser = createFakeUser({
         appMode: "demo",
         classId: "1",
@@ -206,7 +206,7 @@ describe("demo mode", () => {
   it("should handle preview launch from portal", (done) => {
     urlParams.domain = "preview";
     urlParams.domain_uid = "2222";
-    authenticate("demo", appConfig, urlParams).then(({authenticatedUser}) => {
+    authenticate("demo", appConfig, urlParams).then(({ authenticatedUser }) => {
       expect(authenticatedUser.className).toBe("Demo Class preview-2222");
       expect(authenticatedUser.type).toBe("student");
       expect(authenticatedUser.id).toBe("2222");
@@ -262,7 +262,7 @@ describe("student authentication", () => {
   });
 
   it("works in dev mode", (done) => {
-    authenticate("dev", appConfig).then(({authenticatedUser}) => {
+    authenticate("dev", appConfig).then(({ authenticatedUser }) => {
       expect(authenticatedUser).toEqual(DEV_STUDENT);
       done();
     });
@@ -289,8 +289,8 @@ describe("student authentication", () => {
       token: RAW_STUDENT_FIREBASE_JWT,
     });
 
-    authenticate("authed", appConfig, {token: GOOD_STUDENT_TOKEN, domain: BASE_PORTAL_URL})
-    .then(({authenticatedUser}) => {
+    authenticate("authed", appConfig, { token: GOOD_STUDENT_TOKEN, domain: BASE_PORTAL_URL })
+    .then(({ authenticatedUser }) => {
       expect(authenticatedUser).toEqual({
         type: "student",
         id: `${STUDENT_PORTAL_JWT.uid}`,
@@ -361,7 +361,7 @@ describe("student authentication", () => {
     .get(FIREBASE_JWT_PATH + FIREBASE_JWT_QUERY)
     .reply(400);
 
-    authenticate("authed", appConfig, {token: BAD_STUDENT_TOKEN, domain: BASE_PORTAL_URL})
+    authenticate("authed", appConfig, { token: BAD_STUDENT_TOKEN, domain: BASE_PORTAL_URL })
       .then(() => {
         done.fail();
       })
@@ -369,7 +369,7 @@ describe("student authentication", () => {
   });
 
   it("fails with no token", (done) => {
-    authenticate("authed", appConfig, {token: undefined, domain: BASE_PORTAL_URL})
+    authenticate("authed", appConfig, { token: undefined, domain: BASE_PORTAL_URL })
       .then(() => {
         done.fail();
       })
@@ -377,7 +377,7 @@ describe("student authentication", () => {
   });
 
   it("fails with no domain", (done) => {
-    authenticate("authed", appConfig, {token: BAD_STUDENT_TOKEN, domain: undefined})
+    authenticate("authed", appConfig, { token: BAD_STUDENT_TOKEN, domain: undefined })
       .then(() => {
         done.fail();
       })
@@ -454,7 +454,8 @@ describe("teacher authentication", () => {
   const appConfig = specAppConfig();
 
   beforeEach(() => {
-    urlParams = {token: GOOD_TEACHER_TOKEN, reportType: "offering", class: CLASS_INFO_URL, offering: OFFERING_INFO_URL};
+    urlParams = { token: GOOD_TEACHER_TOKEN, reportType: "offering", class: CLASS_INFO_URL,
+      offering: OFFERING_INFO_URL };
 
     nock(BASE_PORTAL_HOST, {
       reqheaders: {
@@ -509,9 +510,9 @@ describe("teacher authentication", () => {
       }
     })
     .get(CLASSES_MINE_PATH)
-    .reply(200, {classes: []});
+    .reply(200, { classes: [] });
 
-    authenticate("authed", appConfig, urlParams).then(({authenticatedUser, problemId}) => {
+    authenticate("authed", appConfig, urlParams).then(({ authenticatedUser, problemId }) => {
       expect(authenticatedUser).toEqual({
         type: "teacher",
         id: `${TEACHER_PORTAL_JWT.uid}`,

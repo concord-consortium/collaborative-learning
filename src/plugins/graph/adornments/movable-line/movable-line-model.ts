@@ -35,7 +35,7 @@ export const MovableLineModel = AdornmentModel
 })
 .actions(self => ({
   setLine(
-    aLine: {intercept: number, slope: number, pivot1?: Point, pivot2?: Point, equationCoords?: Point}, key=''
+    aLine: { intercept: number, slope: number, pivot1?: Point, pivot2?: Point, equationCoords?: Point }, key=''
   ) {
     self.lines.set(key, aLine);
     const line = self.lines.get(key);

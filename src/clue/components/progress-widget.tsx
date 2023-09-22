@@ -51,7 +51,7 @@ export class ProgressWidget extends BaseComponent<IProps, IState> {
     const sectionInitials = sections.map(section => section.initials);
 
     // get the tile section counts per user
-    const countsPerUser: {[key: string]: ITileCountsPerSection} = {};
+    const countsPerUser: { [key: string]: ITileCountsPerSection } = {};
     groups.allGroups.forEach(group => {
       documents.getProblemDocumentsForGroup(group.id).forEach(document => {
         // In the normal course of events there should only ever be one problem document per user,

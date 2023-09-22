@@ -10,7 +10,7 @@ import { gImageMap } from "../../../models/image-map";
 import { SelectionBox } from "./selection-box";
 import { DrawingObjectSnapshotForAdd, DrawingObjectType, DrawingTool,
   HandleObjectHover,
-  IDrawingLayer} from "../objects/drawing-object";
+  IDrawingLayer } from "../objects/drawing-object";
 import { Point, ToolbarSettings } from "../model/drawing-basic-types";
 import { getDrawingToolInfos, renderDrawingObject } from "./drawing-object-manager";
 import { ImageObject } from "../objects/image";
@@ -131,7 +131,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
   public handleObjectHover: HandleObjectHover = (e, obj, hovering) => {
     if (!this.props.readOnly && this.getCurrentTool() === this.tools.select) {
-      this.setState({hoverObject: hovering ? obj : null});
+      this.setState({ hoverObject: hovering ? obj : null });
     }
   };
 
@@ -142,7 +142,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     if (this.props.readOnly || !this.getContent().isSelectedButton('select')) return;
 
     let moved = false;
-    const {hoverObject } = this.state;
+    const { hoverObject } = this.state;
     const selectedObjects = this.getSelectedObjects();
     let objectsToSelect: DrawingObjectType[];
     let objectsToMove: DrawingObjectType[];
@@ -219,19 +219,19 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   };
 
   public startSelectionBox(p: Point) {
-    this.setState({selectionBox: new SelectionBox(p)});
+    this.setState({ selectionBox: new SelectionBox(p) });
   }
 
   public updateSelectionBox(p: Point) {
-    const {selectionBox} = this.state;
+    const { selectionBox } = this.state;
     if (selectionBox) {
       selectionBox.update(p);
-      this.setState({selectionBox});
+      this.setState({ selectionBox });
     }
   }
 
   public endSelectionBox(addToSelectedObjects: boolean) {
-    const {selectionBox} = this.state;
+    const { selectionBox } = this.state;
     if (selectionBox) {
       selectionBox.close();
       const selectedIds: string[] = addToSelectedObjects ? [...this.getContent().selection] : [];
@@ -243,7 +243,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         }
       });
       this.getContent().setSelectedIds(selectedIds);
-      this.setState({selectionBox: null});
+      this.setState({ selectionBox: null });
     }
   }
 
@@ -272,7 +272,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
   public renderSelectionBorders(selectedObjects: DrawingObjectType[], enableActions: boolean) {
     return selectedObjects.map((object, index) => {
-      let {nw: {x: nwX, y: nwY}, se: {x: seX, y: seY}} = object.boundingBox;
+      let { nw: { x: nwX, y: nwY }, se: { x: seX, y: seY } } = object.boundingBox;
       nwX -= SELECTION_BOX_PADDING;
       nwY -= SELECTION_BOX_PADDING;
       seX += SELECTION_BOX_PADDING;
@@ -374,7 +374,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   //we want to populate our objectsBeingDragged state array
 
   public setCurrentDrawingObject(object: DrawingObjectType | null) {
-    this.setState({currentDrawingObject: object});
+    this.setState({ currentDrawingObject: object });
   }
 
   public getWorkspacePoint = (e: MouseEvent|React.MouseEvent<any>): Point|null => {
@@ -503,7 +503,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   }
 
   private forEachObject(callback: (object: DrawingObjectType, key?: string) => void) {
-    const {objects} = this.getContent();
+    const { objects } = this.getContent();
     objects.forEach((object) => {
       if (object) {
         callback(object, object.id);

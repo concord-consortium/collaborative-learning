@@ -130,7 +130,7 @@ describe("Geometry import", () => {
       objects: [
         { type: "point", parents: [0, 0] },
         { type: "point", parents: [2, 2], properties: { id: "p1" } },
-        { type: "point", parents: [5, 5], properties: { foo: "bar" }}
+        { type: "point", parents: [5, 5], properties: { foo: "bar" } }
       ]
     };
     jestSpyConsole("warn", spy => {

@@ -1,8 +1,8 @@
-import {useCallback, useEffect} from "react";
-import {ScaleNumericBaseType} from "../imports/components/axis/axis-types";
-import {useGraphLayoutContext} from "../models/graph-layout";
-import {useGraphModelContext} from "../models/graph-model";
-import {onAnyAction} from "../../../utilities/mst-utils";
+import { useCallback, useEffect } from "react";
+import { ScaleNumericBaseType } from "../imports/components/axis/axis-types";
+import { useGraphLayoutContext } from "../models/graph-layout";
+import { useGraphModelContext } from "../models/graph-model";
+import { onAnyAction } from "../../../utilities/mst-utils";
 import { IMovableLineModel } from "../adornments/movable-line/movable-line-model";
 import { IMovableValueModel } from "../adornments/movable-value/movable-value-model";
 
@@ -12,7 +12,7 @@ interface IProps {
 }
 
 export function useMovables(props: IProps) {
-  const { movableValueModel, movableLineModel} = props,
+  const { movableValueModel, movableLineModel } = props,
     graphModel = useGraphModelContext(),
     layout = useGraphLayoutContext(),
     xScale = layout.getAxisScale('bottom') as ScaleNumericBaseType,
@@ -21,8 +21,8 @@ export function useMovables(props: IProps) {
   const updateMovables = useCallback(() => {
     const xDomainDelta = xScale.domain()[1] - xScale.domain()[0],
       yDomainDelta = yScale.domain()[1] - yScale.domain()[0];
-    movableLineModel.setLine({intercept: yScale.domain()[0] + yDomainDelta / 3, slope: yDomainDelta / xDomainDelta,
-      pivot1:undefined, pivot2:undefined});
+    movableLineModel.setLine({ intercept: yScale.domain()[0] + yDomainDelta / 3, slope: yDomainDelta / xDomainDelta,
+      pivot1:undefined, pivot2:undefined });
     movableValueModel.setValue(xScale.domain()[0] + xDomainDelta / 3);
   }, [xScale, yScale, movableLineModel, movableValueModel]);
 

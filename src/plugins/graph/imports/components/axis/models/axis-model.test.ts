@@ -1,5 +1,5 @@
-import {AxisModel, AxisModelUnion, IAxisModelUnion, isNumericAxisModel, NumericAxisModel} from "./axis-model";
-import {getSnapshot, types} from "mobx-state-tree";
+import { AxisModel, AxisModelUnion, IAxisModelUnion, isNumericAxisModel, NumericAxisModel } from "./axis-model";
+import { getSnapshot, types } from "mobx-state-tree";
 
 describe("AxisModel", () => {
   it("should error if AxisModel is instantiated directly", () => {

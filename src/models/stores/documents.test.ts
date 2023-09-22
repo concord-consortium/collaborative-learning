@@ -137,7 +137,7 @@ describe("documents model", () => {
       clazz = ClassModel.create({
         name: "test",
         classHash: "testHash",
-        users: {1: student1, 2: student2, 3: student3}
+        users: { 1: student1, 2: student2, 3: student3 }
       });
     });
 

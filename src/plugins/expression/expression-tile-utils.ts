@@ -30,5 +30,5 @@ export function getCommand(mf: MathfieldElement, buttonName: string) {
   if (selectStatus === "cursor") insertMode = "insertAfter";
   if (selectStatus === "some") insertMode = "replaceSelection";
 
-  return ["insert", insertString, {insertionMode: insertMode}];
+  return ["insert", insertString, { insertionMode: insertMode }];
 }

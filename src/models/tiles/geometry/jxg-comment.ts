@@ -97,7 +97,7 @@ export const commentChangeAgent: JXGChangeAgent = {
       const line = _board.create(
         "line",
         [anchorPoint, commentPoint],
-        { ...lineProps, id: `${id}-labelLine`});
+        { ...lineProps, id: `${id}-labelLine` });
       return [comment, commentPoint, anchorPoint, line];
     }
   },

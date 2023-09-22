@@ -1,14 +1,14 @@
-import {ScaleBand, ScaleLinear, select} from "d3";
-import React, {useCallback, useRef, useState} from "react";
-import {ScaleNumericBaseType} from "../imports/components/axis/axis-types";
-import {CaseData} from "../d3-types";
-import {PlotProps} from "../graph-types";
-import {useDragHandlers, usePlotResponders} from "../hooks/use-plot";
-import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
-import {useDataSetContext} from "../imports/hooks/use-data-set-context";
+import { ScaleBand, ScaleLinear, select } from "d3";
+import React, { useCallback, useRef, useState } from "react";
+import { ScaleNumericBaseType } from "../imports/components/axis/axis-types";
+import { CaseData } from "../d3-types";
+import { PlotProps } from "../graph-types";
+import { useDragHandlers, usePlotResponders } from "../hooks/use-plot";
+import { useDataConfigurationContext } from "../hooks/use-data-configuration-context";
+import { useDataSetContext } from "../imports/hooks/use-data-set-context";
 // import {useInstanceIdContext} from "../hooks/use-instance-id-context";
-import {useGraphLayoutContext} from "../models/graph-layout";
-import {ICase} from "../../../models/data/data-set-types";
+import { useGraphLayoutContext } from "../models/graph-layout";
+import { ICase } from "../../../models/data/data-set-types";
 import {
   // getScreenCoord,
   handleClickOnDot,
@@ -16,10 +16,10 @@ import {
   setPointSelection,
   startAnimation
 } from "../utilities/graph-utils";
-import {useGraphModelContext} from "../models/graph-model";
+import { useGraphModelContext } from "../models/graph-model";
 
 export const ScatterDots = function ScatterDots(props: PlotProps) {
-  const {dotsRef, enableAnimation} = props,
+  const { dotsRef, enableAnimation } = props,
     graphModel = useGraphModelContext(),
     // instanceId = useInstanceIdContext(),
     dataConfiguration = useDataConfigurationContext(),
@@ -32,7 +32,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
     legendAttrID = dataConfiguration?.attributeID('legend') as string,
     yScaleRef = useRef<ScaleNumericBaseType>(),
     [dragID, setDragID] = useState(''),
-    currPos = useRef({x: 0, y: 0}),
+    currPos = useRef({ x: 0, y: 0 }),
     didDrag = useRef(false),
     target = useRef<any>(),
     selectedDataObjects = useRef<Record<string, { x: number, y: number }>>({}),
@@ -61,11 +61,11 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
           .transition()
           .attr('r', dragPointRadiusRef.current);
         setDragID(tItsID);
-        currPos.current = {x: event.clientX, y: event.clientY};
+        currPos.current = { x: event.clientX, y: event.clientY };
 
         handleClickOnDot(event, tItsID, dataset);
         // Record the current values, so we can change them during the drag and restore them when done
-        const {selection} = dataConfiguration || {},
+        const { selection } = dataConfiguration || {},
           xAttrID = dataConfiguration?.attributeID('x') ?? '';
         selection?.forEach(anID => {
           selectedDataObjects.current[anID] = {
@@ -80,7 +80,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
       const xAxisScale = layout.getAxisScale('bottom') as ScaleLinear<number, number>,
         xAttrID = dataConfiguration?.attributeID('x') ?? '';
       if (dragID !== '') {
-        const newPos = {x: event.clientX, y: event.clientY},
+        const newPos = { x: event.clientX, y: event.clientY },
           dx = newPos.x - currPos.current.x,
           dy = newPos.y - currPos.current.y;
         currPos.current = newPos;
@@ -89,7 +89,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
           const deltaX = Number(xAxisScale.invert(dx)) - Number(xAxisScale.invert(0)),
             deltaY = Number(yScaleRef.current?.invert(dy)) - Number(yScaleRef.current?.invert(0)),
             caseValues: ICase[] = [],
-            {selection} = dataConfiguration || {};
+            { selection } = dataConfiguration || {};
           selection?.forEach(anID => {
             const currX = Number(dataset?.getNumeric(anID, xAttrID)),
               currY = Number(dataset?.getNumeric(anID, secondaryAttrIDsRef.current[plotNumRef.current]));
@@ -121,7 +121,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
 
         if (didDrag.current) {
           const caseValues: ICase[] = [],
-            {selection} = dataConfiguration || {},
+            { selection } = dataConfiguration || {},
             xAttrID = dataConfiguration?.attributeID('x') ?? '';
           selection?.forEach(anID => {
             caseValues.push({
@@ -138,10 +138,10 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
       }
     }, [dataConfiguration, dataset, dragID, enableAnimation,]);
 
-  useDragHandlers(window, {start: onDragStart, drag: onDrag, end: onDragEnd});
+  useDragHandlers(window, { start: onDragStart, drag: onDrag, end: onDragEnd });
 
   const refreshPointSelection = useCallback(() => {
-    const {pointColor, pointStrokeColor} = graphModel;
+    const { pointColor, pointStrokeColor } = graphModel;
     dataConfiguration && setPointSelection(
       {
         dotsRef, dataConfiguration, pointRadius: pointRadiusRef.current,
@@ -174,7 +174,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
     };
 
     const yAttrIDs = dataConfiguration?.yAttributeIDs || [],
-      {pointColor, pointStrokeColor} = graphModel,
+      { pointColor, pointStrokeColor } = graphModel,
       hasY2Attribute = dataConfiguration?.hasY2Attribute,
       v2Scale = layout.getAxisScale("rightNumeric") as ScaleNumericBaseType,
       numExtraPrimaryBands = dataConfiguration?.numRepetitionsForPlace('bottom') ?? 1,

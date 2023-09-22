@@ -33,7 +33,7 @@ export const SubTabsPanel: React.FC<IProps> = observer(function SubTabsPanel(
         onSelect={onSelect}
         selectedIndex={selectedIndex}
       >
-        <div className={classNames("tab-header-row", {"no-sub-tabs": !hasSubTabs})}>
+        <div className={classNames("tab-header-row", { "no-sub-tabs": !hasSubTabs })}>
           <TabList className={classNames("tab-list", navTabClass)}>
             {subTabs.map((subTab) => {
               const sectionTitle = subTab.label.toLowerCase().replace(' ', '-');
@@ -47,7 +47,7 @@ export const SubTabsPanel: React.FC<IProps> = observer(function SubTabsPanel(
             })}
           </TabList>
         </div>
-        <div className={classNames("documents-panel", {"no-sub-tabs": !hasSubTabs})}>
+        <div className={classNames("documents-panel", { "no-sub-tabs": !hasSubTabs })}>
           {subTabs.map((subTab, index) => {
             const sectionTitle = subTab.label.toLowerCase().replace(' ', '-');
             return (

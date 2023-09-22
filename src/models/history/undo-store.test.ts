@@ -176,7 +176,7 @@ function setupDocument(initialContent? : DocumentContentSnapshotType) {
   const manager = docModel.treeManagerAPI as Instance<typeof TreeManager>;
   const undoStore = manager.undoStore;
 
-  return {docModel, docContent, sharedModel, tileContent, manager, undoStore};
+  return { docModel, docContent, sharedModel, tileContent, manager, undoStore };
 }
 
 const setFlagTrueEntry = {
@@ -186,10 +186,10 @@ const setFlagTrueEntry = {
   records: [
     { action: "/content/tileMap/t1/content/setFlag",
       inversePatches: [
-        { op: "replace", path: "/content/tileMap/t1/content/flag", value: undefined}
+        { op: "replace", path: "/content/tileMap/t1/content/flag", value: undefined }
       ],
       patches: [
-        { op: "replace", path: "/content/tileMap/t1/content/flag", value: true}
+        { op: "replace", path: "/content/tileMap/t1/content/flag", value: true }
       ],
       tree: "test"
     },
@@ -200,7 +200,7 @@ const setFlagTrueEntry = {
 };
 
 it("records a tile change as one history event with one TreeRecordEntry", async () => {
-  const {tileContent, manager} = setupDocument();
+  const { tileContent, manager } = setupDocument();
   // This should record a history entry with this change and any changes to tiles
   // triggered by this change
   tileContent.setFlag(true);
@@ -220,10 +220,10 @@ const undoEntry = {
   records: [
     { action: "/applyPatchesFromManager",
       inversePatches: [
-        { op: "replace", path: "/content/tileMap/t1/content/flag", value: true}
+        { op: "replace", path: "/content/tileMap/t1/content/flag", value: true }
       ],
       patches: [
-        { op: "replace", path: "/content/tileMap/t1/content/flag", value: undefined}
+        { op: "replace", path: "/content/tileMap/t1/content/flag", value: undefined }
       ],
       tree: "test"
     },
@@ -234,7 +234,7 @@ const undoEntry = {
 };
 
 it("can undo a tile change", async () => {
-  const {tileContent, manager, undoStore} = setupDocument();
+  const { tileContent, manager, undoStore } = setupDocument();
   // This should record a history entry with this change and any changes to tiles
   // triggered by this change
   tileContent.setFlag(true);
@@ -261,10 +261,10 @@ const redoEntry = {
   records: [
     { action: "/applyPatchesFromManager",
       inversePatches: [
-        { op: "replace", path: "/content/tileMap/t1/content/flag", value: undefined}
+        { op: "replace", path: "/content/tileMap/t1/content/flag", value: undefined }
       ],
       patches: [
-        { op: "replace", path: "/content/tileMap/t1/content/flag", value: true}
+        { op: "replace", path: "/content/tileMap/t1/content/flag", value: true }
       ],
       tree: "test"
     },
@@ -275,7 +275,7 @@ const redoEntry = {
 };
 
 it("can redo a tile change", async () => {
-  const {tileContent, manager, undoStore} = setupDocument();
+  const { tileContent, manager, undoStore } = setupDocument();
   // This should record a history entry with this change and any changes to tiles
   // triggered by this change
   tileContent.setFlag(true);
@@ -303,7 +303,7 @@ it("can redo a tile change", async () => {
 
 
 it("records a async tile change as one history event with one TreeRecordEntry", async () => {
-  const {tileContent, manager} = setupDocument();
+  const { tileContent, manager } = setupDocument();
   // This should record a history entry with this change and any changes to tiles
   // triggered by this change
   await tileContent.updateCounterAsync();
@@ -319,12 +319,12 @@ it("records a async tile change as one history event with one TreeRecordEntry", 
       records: [
         { action: "/content/tileMap/t1/content/updateCounterAsync",
           inversePatches: [
-            { op: "replace", path: "/content/tileMap/t1/content/counter", value: 0},
-            { op: "replace", path: "/content/tileMap/t1/content/counter", value: 1}
+            { op: "replace", path: "/content/tileMap/t1/content/counter", value: 0 },
+            { op: "replace", path: "/content/tileMap/t1/content/counter", value: 1 }
           ],
           patches: [
-            { op: "replace", path: "/content/tileMap/t1/content/counter", value: 1},
-            { op: "replace", path: "/content/tileMap/t1/content/counter", value: 2}
+            { op: "replace", path: "/content/tileMap/t1/content/counter", value: 1 },
+            { op: "replace", path: "/content/tileMap/t1/content/counter", value: 2 }
           ],
           tree: "test"
         },
@@ -337,7 +337,7 @@ it("records a async tile change as one history event with one TreeRecordEntry", 
 });
 
 it("records an async tile change and an interleaved history event with 2 entries", async () => {
-  const {tileContent, manager} = setupDocument();
+  const { tileContent, manager } = setupDocument();
   // This should record a history entry with this change and any changes to tiles
   // triggered by this change
   const updateCounterPromise = tileContent.updateCounterAsync();
@@ -358,12 +358,12 @@ it("records an async tile change and an interleaved history event with 2 entries
       records: [
         { action: "/content/tileMap/t1/content/updateCounterAsync",
           inversePatches: [
-            { op: "replace", path: "/content/tileMap/t1/content/counter", value: 0},
-            { op: "replace", path: "/content/tileMap/t1/content/counter", value: 1}
+            { op: "replace", path: "/content/tileMap/t1/content/counter", value: 0 },
+            { op: "replace", path: "/content/tileMap/t1/content/counter", value: 1 }
           ],
           patches: [
-            { op: "replace", path: "/content/tileMap/t1/content/counter", value: 1},
-            { op: "replace", path: "/content/tileMap/t1/content/counter", value: 2}
+            { op: "replace", path: "/content/tileMap/t1/content/counter", value: 1 },
+            { op: "replace", path: "/content/tileMap/t1/content/counter", value: 2 }
           ],
           tree: "test"
         },
@@ -376,7 +376,7 @@ it("records an async tile change and an interleaved history event with 2 entries
 });
 
 it("can skip adding an action to the undo list", async () => {
-  const {tileContent, manager, undoStore} = setupDocument();
+  const { tileContent, manager, undoStore } = setupDocument();
   // This should record a history entry with this change and any changes to tiles
   // triggered by this change
   tileContent.setFlagWithoutUndo(true);
@@ -404,7 +404,7 @@ it("can skip adding an action to the undo list", async () => {
 });
 
 it("can handle withoutUndo even when tree isn't monitored", async () => {
-  const {tileContent, manager, undoStore, docModel} = setupDocument();
+  const { tileContent, manager, undoStore, docModel } = setupDocument();
 
   // disable the monitor
   docModel.treeMonitor!.enabled = false;
@@ -426,7 +426,7 @@ it("can handle withoutUndo even when tree isn't monitored", async () => {
 });
 
 it("does not warn about withoutUndo when tree isn't monitored and DEBUG_UNDO is on", async () => {
-  const {tileContent, docModel} = setupDocument();
+  const { tileContent, docModel } = setupDocument();
 
   // disable the monitor
   docModel.treeMonitor!.enabled = false;
@@ -475,7 +475,7 @@ it("will print a warning and still add the action to the undo list if any child 
     }
   };
 
-  const {tileContent, manager, undoStore} = setupDocument(documentWithTileChild);
+  const { tileContent, manager, undoStore } = setupDocument(documentWithTileChild);
 
   jestSpyConsole("warn", spy => {
     tileContent.setChildValue("new child value");
@@ -502,11 +502,11 @@ it("will print a warning and still add the action to the undo list if any child 
         { action: "/content/tileMap/t1/content/setChildValue",
           inversePatches: [
             { op: "replace", path: "/content/tileMap/t1/content/child/value",
-              value: "initial child value"}
+              value: "initial child value" }
           ],
           patches: [
             { op: "replace", path: "/content/tileMap/t1/content/child/value",
-              value: "new child value"}
+              value: "new child value" }
           ],
           tree: "test"
         },
@@ -521,7 +521,7 @@ it("will print a warning and still add the action to the undo list if any child 
 
 
 it("records undoable actions that happen in the middle async actions which are not undoable", async () => {
-  const {tileContent, manager, undoStore} = setupDocument();
+  const { tileContent, manager, undoStore } = setupDocument();
 
   const updateCounterPromise = tileContent.updateCounterWithoutUndoAsync();
 
@@ -549,12 +549,12 @@ it("records undoable actions that happen in the middle async actions which are n
       records: [
         { action: "/content/tileMap/t1/content/updateCounterWithoutUndoAsync",
           inversePatches: [
-            { op: "replace", path: "/content/tileMap/t1/content/counter", value: 0},
-            { op: "replace", path: "/content/tileMap/t1/content/counter", value: 1}
+            { op: "replace", path: "/content/tileMap/t1/content/counter", value: 0 },
+            { op: "replace", path: "/content/tileMap/t1/content/counter", value: 1 }
           ],
           patches: [
-            { op: "replace", path: "/content/tileMap/t1/content/counter", value: 1},
-            { op: "replace", path: "/content/tileMap/t1/content/counter", value: 2}
+            { op: "replace", path: "/content/tileMap/t1/content/counter", value: 1 },
+            { op: "replace", path: "/content/tileMap/t1/content/counter", value: 2 }
           ],
           tree: "test"
         },
@@ -584,7 +584,7 @@ it("can replay the history entries", async () => {
     // document state. We should create a history entry that setups up this initial
     // document state so we can test creating a document's content complete from
     // scratch.
-    const {tileContent, manager} = setupDocument();
+    const { tileContent, manager } = setupDocument();
 
     // Add the history entries used in the tests above so we can replay them all at
     // the same time.
@@ -593,7 +593,7 @@ it("can replay the history entries", async () => {
       makeRealHistoryEntry(undoEntry),
       makeRealHistoryEntry(redoEntry)
     ];
-    manager.setChangeDocument(CDocument.create({history}));
+    manager.setChangeDocument(CDocument.create({ history }));
     await manager.replayHistoryToTrees();
 
     expect(tileContent.flag).toBe(true);
@@ -611,19 +611,19 @@ const initialSharedModelUpdateEntry = {
   records: [
     { action: "/handleSharedModelChanges",
       inversePatches: [
-        { op: "replace", path: "/content/tileMap/t1/content/text", value: undefined}
+        { op: "replace", path: "/content/tileMap/t1/content/text", value: undefined }
       ],
       patches: [
-        { op: "replace", path: "/content/tileMap/t1/content/text", value: "something-tile"}
+        { op: "replace", path: "/content/tileMap/t1/content/text", value: "something-tile" }
       ],
       tree: "test"
     },
     { action: "/content/sharedModelMap/sm1/sharedModel/setValue",
       inversePatches: [
-        { op: "replace", path: "/content/sharedModelMap/sm1/sharedModel/value", value: undefined}
+        { op: "replace", path: "/content/sharedModelMap/sm1/sharedModel/value", value: undefined }
       ],
       patches: [
-        { op: "replace", path: "/content/sharedModelMap/sm1/sharedModel/value", value: "something"}
+        { op: "replace", path: "/content/sharedModelMap/sm1/sharedModel/value", value: "something" }
       ],
       tree: "test"
     }
@@ -634,7 +634,7 @@ const initialSharedModelUpdateEntry = {
 };
 
 it("records a shared model change as one history event with two TreeRecordEntries", async () => {
-  const {sharedModel, manager} = setupDocument();
+  const { sharedModel, manager } = setupDocument();
   // This should record a history entry with this change and any changes to tiles
   // triggered by this change
   sharedModel.setValue("something");
@@ -654,19 +654,19 @@ const undoSharedModelEntry = {
   records: [
     { action: "/applyPatchesFromManager",
       inversePatches: [
-        { op: "replace", path: "/content/tileMap/t1/content/text", value: "something-tile"}
+        { op: "replace", path: "/content/tileMap/t1/content/text", value: "something-tile" }
       ],
       patches: [
-        { op: "replace", path: "/content/tileMap/t1/content/text", value: undefined}
+        { op: "replace", path: "/content/tileMap/t1/content/text", value: undefined }
       ],
       tree: "test"
     },
     { action: "/applyPatchesFromManager",
       inversePatches: [
-        { op: "replace", path: "/content/sharedModelMap/sm1/sharedModel/value", value: "something"}
+        { op: "replace", path: "/content/sharedModelMap/sm1/sharedModel/value", value: "something" }
       ],
       patches: [
-        { op: "replace", path: "/content/sharedModelMap/sm1/sharedModel/value", value: undefined}
+        { op: "replace", path: "/content/sharedModelMap/sm1/sharedModel/value", value: undefined }
       ],
       tree: "test"
     }
@@ -677,7 +677,7 @@ const undoSharedModelEntry = {
 };
 
 it("can undo a shared model change", async () => {
-  const {sharedModel, tileContent, manager, undoStore} = setupDocument();
+  const { sharedModel, tileContent, manager, undoStore } = setupDocument();
   // This should record a history entry with this change and any changes to tiles
   // triggered by this change
   sharedModel.setValue("something");
@@ -709,19 +709,19 @@ const redoSharedModelEntry = {
   records: [
     { action: "/applyPatchesFromManager",
       inversePatches: [
-        { op: "replace", path: "/content/tileMap/t1/content/text", value: undefined}
+        { op: "replace", path: "/content/tileMap/t1/content/text", value: undefined }
       ],
       patches: [
-        { op: "replace", path: "/content/tileMap/t1/content/text", value: "something-tile"}
+        { op: "replace", path: "/content/tileMap/t1/content/text", value: "something-tile" }
       ],
       tree: "test"
     },
     { action: "/applyPatchesFromManager",
       inversePatches: [
-        { op: "replace", path: "/content/sharedModelMap/sm1/sharedModel/value", value: undefined}
+        { op: "replace", path: "/content/sharedModelMap/sm1/sharedModel/value", value: undefined }
       ],
       patches: [
-        { op: "replace", path: "/content/sharedModelMap/sm1/sharedModel/value", value: "something"}
+        { op: "replace", path: "/content/sharedModelMap/sm1/sharedModel/value", value: "something" }
       ],
       tree: "test"
     }
@@ -732,7 +732,7 @@ const redoSharedModelEntry = {
 };
 
 it("can redo a shared model change", async () => {
-  const {sharedModel, tileContent, manager, undoStore} = setupDocument();
+  const { sharedModel, tileContent, manager, undoStore } = setupDocument();
   // This should record a history entry with this change and any changes to tiles
   // triggered by this change
   sharedModel.setValue("something");
@@ -770,7 +770,7 @@ it("can replay history entries that include shared model changes", async () => {
   // document state. We should create a history entry that setups up this initial
   // document state so we can test creating a document's content complete from
   // scratch.
-  const {tileContent, sharedModel, manager} = setupDocument();
+  const { tileContent, sharedModel, manager } = setupDocument();
 
   // Add the history entries used in the tests above so we can replay them all at
   // the same time.
@@ -780,7 +780,7 @@ it("can replay history entries that include shared model changes", async () => {
     makeRealHistoryEntry(redoSharedModelEntry)
   ];
 
-  manager.setChangeDocument(CDocument.create({history}));
+  manager.setChangeDocument(CDocument.create({ history }));
   await manager.replayHistoryToTrees();
 
   expect(sharedModel.value).toBe("something");
@@ -795,7 +795,7 @@ it("can replay history entries that include shared model changes", async () => {
 // However we don't have a good solution for that yet.
 it("can track the addition of a new shared model", async () => {
   // Start with just a tile and no shared model
-  const {tileContent, manager} = setupDocument({
+  const { tileContent, manager } = setupDocument({
     tileMap: {
       "t1": {
         id: "t1",
@@ -807,7 +807,7 @@ it("can track the addition of a new shared model", async () => {
   });
 
   const sharedModelManager = tileContent.tileEnv?.sharedModelManager;
-  const newSharedModel = TestSharedModel.create({value: "new model"});
+  const newSharedModel = TestSharedModel.create({ value: "new model" });
   const sharedModelId = newSharedModel.id;
   sharedModelManager?.addTileSharedModel(tileContent, newSharedModel);
 
@@ -872,7 +872,7 @@ it("can track the addition of a new shared model", async () => {
         {
           action: `/content/sharedModelMap/${sharedModelId}/addTile`,
           inversePatches: [
-            { op: "remove", path: `/content/sharedModelMap/${sharedModelId}/tiles/0`}
+            { op: "remove", path: `/content/sharedModelMap/${sharedModelId}/tiles/0` }
           ],
           patches: [
             {
@@ -891,7 +891,7 @@ it("can track the addition of a new shared model", async () => {
 });
 
 async function expectUpdateToBeCalledTimes(testTile: TestTileType, times: number) {
-  const updateCalledTimes = when(() => testTile.updateCount === times, {timeout: 100});
+  const updateCalledTimes = when(() => testTile.updateCount === times, { timeout: 100 });
   return expect(updateCalledTimes).resolves.toBeUndefined();
 }
 

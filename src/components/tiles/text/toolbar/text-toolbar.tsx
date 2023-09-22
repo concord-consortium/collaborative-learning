@@ -100,7 +100,7 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
       // only add this plugin button def if there isn't one there already
       // buttonDefs is a global so every toolbar component will share this
       if (!buttonDefs.has(iconName)) {
-        buttonDefs.set(iconName, {pluginName: plugin.pluginName, ButtonComponent: pluginButtonDefComponent});
+        buttonDefs.set(iconName, { pluginName: plugin.pluginName, ButtonComponent: pluginButtonDefComponent });
       }
     }
   });

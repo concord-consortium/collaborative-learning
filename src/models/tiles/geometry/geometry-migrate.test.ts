@@ -539,7 +539,7 @@ describe("Geometry migration", () => {
         target: "board",
         properties: { axis: true, boundingBox: [-2, 15, 22, -1], unitX: 20, unitY: 20 }
       },
-      { operation: "create", target: "tableLink", properties: { ids: ["lp1", "lp2", "lp3"] }},
+      { operation: "create", target: "tableLink", properties: { ids: ["lp1", "lp2", "lp3"] } },
       { operation: "create", target: "polygon", parents: ["lp1", "lp2", "lp3"], properties: { id: "p1" } },
     ];
     expect(convertChangesToJson(changes)).toEqual({
@@ -554,7 +554,7 @@ describe("Geometry migration", () => {
 
     expect(convertChangesToModelSnapshot(changes)).toEqual({
       ...kDefaultModelProps, objects: {
-        p1: { type: "polygon", id: "p1", points: ["lp1", "lp2", "lp3"]},
+        p1: { type: "polygon", id: "p1", points: ["lp1", "lp2", "lp3"] },
       }
     });
   });
@@ -647,8 +647,8 @@ describe("Geometry migration", () => {
         v1: { type: "point", id: "v1", x: 0, y: 0 },
         v2: { type: "point", id: "v2", x: 5, y: 0 },
         v3: { type: "point", id: "v3", x: 0, y: 5 },
-        p1: { type: "polygon", id: "p1", points: ["v1", "v2", "v3"]},
-        p2: { type: "polygon", id: "p2", points: ["v1", "v2", "v3"]}
+        p1: { type: "polygon", id: "p1", points: ["v1", "v2", "v3"] },
+        p2: { type: "polygon", id: "p2", points: ["v1", "v2", "v3"] }
       }
     });
   });
@@ -685,7 +685,7 @@ describe("Geometry migration", () => {
         v1: { type: "point", id: "v1", x: 0, y: 0 },
         v2: { type: "point", id: "v2", x: 5, y: 0 },
         v3: { type: "point", id: "v3", x: 0, y: 5 },
-        p2: { type: "polygon", id: "p2", points: ["v1", "v2", "v3"]}
+        p2: { type: "polygon", id: "p2", points: ["v1", "v2", "v3"] }
       }
     });
   });
@@ -722,7 +722,7 @@ describe("Geometry migration", () => {
         v1: { type: "point", id: "v1", x: 0, y: 0 },
         v2: { type: "point", id: "v2", x: 5, y: 0 },
         v3: { type: "point", id: "v3", x: 0, y: 5 },
-        p1: { type: "polygon", id: "p1", points: ["v1", "v2", "v3"]}
+        p1: { type: "polygon", id: "p1", points: ["v1", "v2", "v3"] }
       }
     });
   });
@@ -807,7 +807,7 @@ describe("Geometry migration", () => {
         v2: { type: "point", id: "v2", x: 6, y: 6 },
         v3: { type: "point", id: "v3", x: 6, y: 0 },
         v4: { type: "point", id: "v4", x: 0, y: 0 },
-        p1: { type: "polygon", id: "p1", points: ["v1", "v2", "v3", "v4"]},
+        p1: { type: "polygon", id: "p1", points: ["v1", "v2", "v3", "v4"] },
         c1: { type: "comment", id: "c1", anchors: ["p1"] }
       }
     });
@@ -848,7 +848,7 @@ describe("Geometry migration", () => {
         v2: { type: "point", id: "v2", x: 6, y: 6 },
         v3: { type: "point", id: "v3", x: 6, y: 0 },
         v4: { type: "point", id: "v4", x: 0, y: 0 },
-        p1: { type: "polygon", id: "p1", points: ["v1", "v2", "v3", "v4"]},
+        p1: { type: "polygon", id: "p1", points: ["v1", "v2", "v3", "v4"] },
         c1: { type: "comment", id: "c1", anchors: ["p1"], x: 3, y: 3 }
       }
     });
@@ -890,7 +890,7 @@ describe("Geometry migration", () => {
         v2: { type: "point", id: "v2", x: 6, y: 6 },
         v3: { type: "point", id: "v3", x: 6, y: 0 },
         v4: { type: "point", id: "v4", x: 0, y: 0 },
-        p1: { type: "polygon", id: "p1", points: ["v1", "v2", "v3", "v4"]},
+        p1: { type: "polygon", id: "p1", points: ["v1", "v2", "v3", "v4"] },
         c1: { type: "comment", id: "c1", anchors: ["p1"], x: 2, y: 2 }
       }
     });
@@ -928,7 +928,7 @@ describe("Geometry migration", () => {
         v1: { type: "point", id: "v1", x: 0, y: 0 },
         v2: { type: "point", id: "v2", x: 5, y: 0 },
         v3: { type: "point", id: "v3", x: 0, y: 5 },
-        p1: { type: "polygon", id: "p1", points: ["v1", "v2", "v3"]},
+        p1: { type: "polygon", id: "p1", points: ["v1", "v2", "v3"] },
         a1: { type: "vertexAngle", id: "a1", points: ["v1", "v2", "v3"] }
       }
     });

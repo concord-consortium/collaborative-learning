@@ -104,7 +104,7 @@ interface IEditVariableButton {
 const EditVariableButton = ({ handleClick, selectedVariable }: IEditVariableButton) => {
   return (
     <SvgToolbarButton SvgIcon={VariableEditorIcon} buttonClass="button-edit-variable" disabled={!selectedVariable}
-      title="Edit Variable" onClick={handleClick} style={{fill: "#000000", strokeWidth: 0.1}} />
+      title="Edit Variable" onClick={handleClick} style={{ fill: "#000000", strokeWidth: 0.1 }} />
   );
 };
 

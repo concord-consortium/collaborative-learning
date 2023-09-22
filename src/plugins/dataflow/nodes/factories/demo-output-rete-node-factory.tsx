@@ -87,7 +87,7 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
         _node.data.outputType = outputType;
         demoOutput?.setOutputType(outputType);
 
-        this.editor.view.updateConnections( {node: _node} );
+        this.editor.view.updateConnections( { node: _node } );
 
         _node.update();
       }

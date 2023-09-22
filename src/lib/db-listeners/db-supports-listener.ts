@@ -54,7 +54,7 @@ export class DBSupportsListener extends BaseListener {
   }
 
   private handleSupportsUpdate = (eventType: string) => (snapshot: firebase.database.DataSnapshot) => {
-    const {supports} = this.db.stores;
+    const { supports } = this.db.stores;
     const dbSupports = snapshot.val();
     this.debugLogSnapshot("#handleSupportsUpdate", snapshot);
     // The top-level key will be the audience for with an updated support
@@ -80,8 +80,8 @@ export class DBSupportsListener extends BaseListener {
             const dbSupport: DBSupport = dbSupports[audienceId][key];
             const uid = dbSupport.uid;
             const audience = audienceType === AudienceEnum.group
-              ? GroupAudienceModel.create({identifier: audienceId})
-              : UserAudienceModel.create({identifier: audienceId});
+              ? GroupAudienceModel.create({ identifier: audienceId })
+              : UserAudienceModel.create({ identifier: audienceId });
             const supportModel = this.createSupportModel(uid, "all", dbSupport, audience);
             supportModel && teacherSupports.push(supportModel);
           });
@@ -99,7 +99,7 @@ export class DBSupportsListener extends BaseListener {
             const teacherSupport = support as TeacherSupportModelType;
             if (teacherSupport.uid === user.id) {
               // teachers sync their support document properties to Firebase to track isDeleted
-              const {audience, sectionTarget, key} = teacherSupport;
+              const { audience, sectionTarget, key } = teacherSupport;
               const path = this.db.firebase.getSupportsPath(user, audience, sectionTarget, key);
               this.db.listeners.syncSupportDocumentProperties(document, "firebase", path);
             }

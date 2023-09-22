@@ -6,7 +6,7 @@ import {
   IFloatingToolbarProps, useFloatingToolbarLocation
 } from "../../components/tiles/hooks/use-floating-toolbar-location";
 import { ExpressionContentModelType } from "./expression-content";
-import { expressionButtonsList} from "./expression-types";
+import { expressionButtonsList } from "./expression-types";
 import { ITileModel } from "../../models/tiles/tile-model";
 import { DeleteExpressionButton, AddMathTextButton } from "./expression-buttons";
 import { MathfieldElement } from "mathlive";

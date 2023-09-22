@@ -1,23 +1,23 @@
-import {max, range, ScaleBand, ScaleLinear, select} from "d3";
-import {observer} from "mobx-react-lite";
-import React, {useCallback, useRef, useState} from "react";
-import {CaseData} from "../d3-types";
-import {PlotProps} from "../graph-types";
-import {useDragHandlers, usePlotResponders} from "../hooks/use-plot";
-import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
-import {useDataSetContext} from "../imports/hooks/use-data-set-context";
-import {useGraphLayoutContext} from "../models/graph-layout";
-import {ICase} from "../../../models/data/data-set-types";
+import { max, range, ScaleBand, ScaleLinear, select } from "d3";
+import { observer } from "mobx-react-lite";
+import React, { useCallback, useRef, useState } from "react";
+import { CaseData } from "../d3-types";
+import { PlotProps } from "../graph-types";
+import { useDragHandlers, usePlotResponders } from "../hooks/use-plot";
+import { useDataConfigurationContext } from "../hooks/use-data-configuration-context";
+import { useDataSetContext } from "../imports/hooks/use-data-set-context";
+import { useGraphLayoutContext } from "../models/graph-layout";
+import { ICase } from "../../../models/data/data-set-types";
 import {
   handleClickOnDot,
   setPointCoordinates,
   setPointSelection,
   startAnimation
 } from "../utilities/graph-utils";
-import {useGraphModelContext} from "../models/graph-model";
+import { useGraphModelContext } from "../models/graph-model";
 
 export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
-  const {dotsRef, enableAnimation} = props,
+  const { dotsRef, enableAnimation } = props,
     graphModel = useGraphModelContext(),
     dataConfiguration = useDataConfigurationContext(),
     dataset = useDataSetContext(),
@@ -25,7 +25,7 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
     primaryAttrRole = dataConfiguration?.primaryRole ?? 'x',
     primaryIsBottom = primaryAttrRole === 'x',
     secondaryAttrRole = primaryAttrRole === 'x' ? 'y' : 'x',
-    {pointColor, pointStrokeColor} = graphModel,
+    { pointColor, pointStrokeColor } = graphModel,
     // Used for tracking drag events
     [dragID, setDragID] = useState(''),
     currPos = useRef(0),
@@ -51,7 +51,7 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
 
         handleClickOnDot(event, tItsID, dataset);
         // Record the current values, so we can change them during the drag and restore them when done
-        const {selection} = dataConfiguration || {},
+        const { selection } = dataConfiguration || {},
           primaryAttrID = dataConfiguration?.attributeID(dataConfiguration?.primaryRole ?? 'x') ?? '';
         selection?.forEach(anID => {
           const itsValue = dataset?.getNumeric(anID, primaryAttrID) || undefined;
@@ -75,11 +75,11 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
           const delta = Number(primaryAxisScale.invert(deltaPixels)) -
               Number(primaryAxisScale.invert(0)),
             caseValues: ICase[] = [],
-            {selection} = dataConfiguration || {};
+            { selection } = dataConfiguration || {};
           selection?.forEach(anID => {
             const currValue = Number(dataset?.getNumeric(anID, primaryAttrID));
             if (isFinite(currValue)) {
-              caseValues.push({__id__: anID, [primaryAttrID]: currValue + delta});
+              caseValues.push({ __id__: anID, [primaryAttrID]: currValue + delta });
             }
           });
           caseValues.length && dataset?.setCaseValues(caseValues, [primaryAttrID]);
@@ -100,7 +100,7 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
 
         if (didDrag.current) {
           const caseValues: ICase[] = [],
-            {selection} = dataConfiguration || {};
+            { selection } = dataConfiguration || {};
           selection?.forEach(anID => {
             caseValues.push({
               __id__: anID,
@@ -114,7 +114,7 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
       }
     }, [graphModel, dataConfiguration, primaryAttrRole, dataset, dragID, enableAnimation]);
 
-  useDragHandlers(window, {start: onDragStart, drag: onDrag, end: onDragEnd});
+  useDragHandlers(window, { start: onDragStart, drag: onDrag, end: onDragEnd });
 
   const refreshPointSelection = useCallback(() => {
     dataConfiguration && setPointSelection({
@@ -209,7 +209,7 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
 
       const computeSecondaryCoord =
         (caseInfo: { secondaryCat: string, extraSecondaryCat: string, indexInBin: number }) => {
-          const {secondaryCat, extraSecondaryCat, indexInBin} = caseInfo;
+          const { secondaryCat, extraSecondaryCat, indexInBin } = caseInfo;
           let catCoord = (!!secondaryCat && secondaryCat !== '__main__' ? secondaryAxisScale(secondaryCat) ?? 0 : 0) /
             numExtraSecondaryBands;
           let extraCoord = !!extraSecondaryCat && extraSecondaryCat !== '__main__'
@@ -246,7 +246,7 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
             indexInBin = binMap[anID].indexInBin,
             onePixelOffset = primaryIsBottom ? -1 : 1; // Separate circles from axis line by 1 pixel
           return binMap[anID]
-            ? computeSecondaryCoord({secondaryCat, extraSecondaryCat, indexInBin}) + onePixelOffset
+            ? computeSecondaryCoord({ secondaryCat, extraSecondaryCat, indexInBin }) + onePixelOffset
             : null;
         },
         getScreenX = primaryIsBottom ? getPrimaryScreenCoord : getSecondaryScreenCoord,
@@ -264,7 +264,7 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
     [graphModel, dataConfiguration, layout, primaryAttrRole, secondaryAttrRole, dataset, dotsRef,
       enableAnimation, primaryIsBottom, pointColor, pointStrokeColor]);
 
-  usePlotResponders({dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation});
+  usePlotResponders({ dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation });
 
   return (
     <>

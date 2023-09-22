@@ -1,9 +1,9 @@
-import {ScaleLinear} from "d3";
-import {MutableRefObject} from "react";
-import {AxisPlace} from "./axis-types";
-import {measureText, measureTextExtent} from "../../../../../components/tiles/hooks/use-measure-text";
-import {kAxisGap, kAxisTickLength, kGraphFont} from "../../../graph-types";
-import {ICategorySet} from "../../../../../models/data/category-set";
+import { ScaleLinear } from "d3";
+import { MutableRefObject } from "react";
+import { AxisPlace } from "./axis-types";
+import { measureText, measureTextExtent } from "../../../../../components/tiles/hooks/use-measure-text";
+import { kAxisGap, kAxisTickLength, kGraphFont } from "../../../graph-types";
+import { ICategorySet } from "../../../../../models/data/category-set";
 
 export const getStringBounds = (s = 'Wy', font = kGraphFont) => {
   return measureTextExtent(s, font);
@@ -20,7 +20,7 @@ export const collisionExists = (props: ICollisionProps) => {
    * This can occur when labels are centered on the tick, or when they are left-aligned.
    * The former requires computation of two adjacent label widths.
    */
-  const {bandWidth, categories, centerCategoryLabels} = props,
+  const { bandWidth, categories, centerCategoryLabels } = props,
     narrowedBandwidth = bandWidth - 5,
     labelWidths = categories.map(category => getStringBounds(category).width);
   return centerCategoryLabels ? labelWidths.some((width, i) => {
@@ -44,22 +44,22 @@ export const getCategoricalLabelPlacement = (
   const labelPlacementMap: Partial<Record<AxisPlace, CenterCollisionPlacementMap>> = {
     left: {
       center: {
-        collision: {textAnchor: 'end'},
-        fit: {rotation, textAnchor: 'middle'}
+        collision: { textAnchor: 'end' },
+        fit: { rotation, textAnchor: 'middle' }
       },
       justify: {
-        collision: {textAnchor: 'end'},
-        fit: {rotation, textAnchor: 'start'}
+        collision: { textAnchor: 'end' },
+        fit: { rotation, textAnchor: 'start' }
       }
     },
     rightCat: {
       center: {
-        collision: {textAnchor: 'start'},
-        fit: {rotation, textAnchor: 'middle'}
+        collision: { textAnchor: 'start' },
+        fit: { rotation, textAnchor: 'middle' }
       },
       justify: {
-        collision: {textAnchor: 'end'},
-        fit: {rotation, textAnchor: 'start'}
+        collision: { textAnchor: 'end' },
+        fit: { rotation, textAnchor: 'start' }
       }
     },
     bottom: {
@@ -67,11 +67,11 @@ export const getCategoricalLabelPlacement = (
         collision: {
           rotation, textAnchor: 'end'
         },
-        fit: {textAnchor: 'middle'}
+        fit: { textAnchor: 'middle' }
       },
       justify: {
-        collision: {rotation, textAnchor: 'end'},
-        fit: {textAnchor: 'start'}
+        collision: { rotation, textAnchor: 'end' },
+        fit: { textAnchor: 'start' }
       }
     },
     top: {
@@ -80,11 +80,11 @@ export const getCategoricalLabelPlacement = (
           rotation,
           textAnchor: 'start'
         },
-        fit: {textAnchor: 'middle'}
+        fit: { textAnchor: 'middle' }
       },
       justify: {
-        collision: {rotation, textAnchor: 'end'},
-        fit: {textAnchor: 'start'}
+        collision: { rotation, textAnchor: 'end' },
+        fit: { textAnchor: 'start' }
       }
     }
   };
@@ -92,7 +92,7 @@ export const getCategoricalLabelPlacement = (
   const centerOrJustify = centerCategoryLabels ? "center" : "justify";
   const collisionOrFit = collision ? "collision" : "fit";
   const labelPlacement = labelPlacementMap[axisPlace]?.[centerOrJustify][collisionOrFit];
-  return {rotation: '', textAnchor: 'none', ...labelPlacement};
+  return { rotation: '', textAnchor: 'none', ...labelPlacement };
 };
 
 export interface DragInfo {
@@ -131,10 +131,10 @@ interface ICoordFunctions {
 }
 
 export const getCoordFunctions = (props: IGetCoordFunctionsProps): ICoordFunctions => {
-  const {numCategories, centerCategoryLabels, collision,
+  const { numCategories, centerCategoryLabels, collision,
     axisIsVertical,
     rangeMin, rangeMax, subAxisLength,
-    isRightCat, isTop, dragInfo} = props,
+    isRightCat, isTop, dragInfo } = props,
     bandWidth = subAxisLength / numCategories,
     labelTextHeight = getStringBounds('12px sans-serif').height,
     indexOffset = centerCategoryLabels ? 0.5 : 0/*(axisIsVertical ? 1 : 0)*/,

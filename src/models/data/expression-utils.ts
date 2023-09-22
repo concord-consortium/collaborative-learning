@@ -42,7 +42,7 @@ export const validateDisplayExpression = (displayExpression: string, xName: stri
       return `Unrecognized variable "${unknownVar}" in expression.`;
     }
     // Attempt an evaluation to check for errors e.g. invalid function names
-    parsed.evaluate({[kSerializedXKey]: 1});
+    parsed.evaluate({ [kSerializedXKey]: 1 });
   } catch {
     return "Could not understand expression. Make sure you supply all operands " +
     "and use a multiplication sign where necessary, e.g. 3 * x + 4 instead of 3x + 4.";

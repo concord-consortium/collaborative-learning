@@ -94,9 +94,9 @@ export const movableLineChangeAgent: JXGChangeAgent = {
   create: (board, change, context) => {
     const { id, pt1, pt2, line, ...shared }: any = change.properties || {};
     const lineId = id || uniqueId();
-    const props = syncClientColors({...sharedProps, ...shared });
-    const lineProps = {...props, ...lineSpecificProps, ...line };
-    const pointProps = {...props, ...pointSpecificProps};
+    const props = syncClientColors({ ...sharedProps, ...shared });
+    const lineProps = { ...props, ...lineSpecificProps, ...line };
+    const pointProps = { ...props, ...pointSpecificProps };
     const pointIds = getMovableLinePointIds(lineId);
 
     if (change.parents && change.parents.length === 2) {

@@ -105,7 +105,7 @@ context('Teacher Workspace', () => {
       //So we close the Resources panel, and re-open to force it to rerender
       cy.collapseResourceTabs();
       cy.openResourceTabs();
-      cy.get('.top-tab.tab-teacher-guide').should('exist').click({force:true});
+      cy.get('.top-tab.tab-teacher-guide').should('exist').click({ force:true });
       cy.get('.prob-tab.teacher-guide').should('exist').and('have.length', 4).each(function (subTab, index, subTabList) {
         const teacherGuideSubTabs = ["Launch", "Explore", "Summarize", "Unit Plan"];
         cy.wrap(subTab).text().should('contain', teacherGuideSubTabs[index]);
@@ -122,7 +122,7 @@ context('Teacher Workspace', () => {
       cy.wait(2000);
       cy.get('@clueData').then((clueData) => {
         const groups = clueData.classes[0].problems[0].groups;
-        cy.get('.top-tab.tab-student-work').should('exist').click({force:true});
+        cy.get('.top-tab.tab-student-work').should('exist').click({ force:true });
         cy.get('.student-group-view').should('be.visible');
         cy.get('.student-group .group-number').should('be.visible').and('have.length', groups.length);
         cy.get('.student-group .group-number').eq(0).should('have.class', 'active');

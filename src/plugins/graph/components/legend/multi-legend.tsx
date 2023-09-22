@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import {AttributeType} from "../../../../models/data/attribute";
+import { AttributeType } from "../../../../models/data/attribute";
 import { GraphPlace } from "../../imports/components/axis-graph-shared";
 import { SimpleAttributeLabel } from "../simple-attribute-label";
 import { kMultiLegendHeight, useGraphLayoutContext } from "../../models/graph-layout";
@@ -13,7 +13,7 @@ interface IMultiLegendProps {
 }
 
 export const MultiLegend = function MultiLegend(props: IMultiLegendProps) {
-  const {onChangeAttribute, onRemoveAttribute, onTreatAttributeAs} = props;
+  const { onChangeAttribute, onRemoveAttribute, onTreatAttributeAs } = props;
   const layout = useGraphLayoutContext();
   const legendBounds = layout.computedBounds.legend;
   const transform = `translate(${legendBounds.left}, ${legendBounds.top})`;

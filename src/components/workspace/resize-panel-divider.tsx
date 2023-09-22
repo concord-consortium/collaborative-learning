@@ -76,7 +76,7 @@ export const ResizePanelDivider: React.FC <IProps> = observer(function ResizePan
     // TODO: rename the class names so the top level one is resize-panel-divider since
     // that is the name of the component
     return (
-      <div className={classNames("divider-container", positionClass, {"show-expanders": reallyShowExpanders})}
+      <div className={classNames("divider-container", positionClass, { "show-expanders": reallyShowExpanders })}
           onMouseEnter={handleDividerEnter} onMouseLeave={handleDividerLeave} onClick={()=>handleDividerClick()}>
         <WorkspaceExpander onExpandWorkspace={handleExpandWorkspace} workspaceType={problemWorkspace.type} />
         <div className="resize-panel-divider" >
