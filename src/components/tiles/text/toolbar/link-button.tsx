@@ -1,7 +1,6 @@
 import React from "react";
 import { Editor, EFormat, Node, Range, selectedNodesOfType, useSlate } from "@concord-consortium/slate-editor";
 
-import { TextToolbarButton } from "./text-toolbar-button";
 import { useLinkDialog } from "../dialog/use-link-dialog";
 
 import LinkToolIcon from "../../../../assets/icons/text/link-text-icon.svg";

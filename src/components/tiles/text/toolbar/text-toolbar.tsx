@@ -206,50 +206,60 @@ function BulletedListToolbarButton({ model } : IToolbarButtonProps) {
     Icon={BulletedListToolIcon} slateType={EFormat.bulletedList} toggleFunc={toggleElement}/>;
 }
 
+
+
 registerTileToolbarButtonInfos('text',
 [
   {
     name: 'bold',
     title: 'Bold',
     keyHint: `${kShortcutPrefix}b`,
-    component: BoldToolbarButton
+    component: BoldToolbarButton,
+    defaultPosition: 1
   },
   {
     name: 'italic',
     title: 'Italic',
     keyHint: `${kShortcutPrefix}i`,
-    component: ItalicToolbarButton
+    component: ItalicToolbarButton,
+    defaultPosition: 2
   },
   {
     name: 'underline',
     title: 'Underline',
     keyHint: `${kShortcutPrefix}u`,
-    component: UnderlineToolbarButton
+    component: UnderlineToolbarButton,
+    defaultPosition: 3
   },
   {
     name: 'subscript',
     title: 'Subscript',
-    component: SubscriptToolbarButton
+    component: SubscriptToolbarButton,
+    defaultPosition: 4
   },
   {
     name: 'superscript',
     title: 'Superscript',
-    component: SuperscriptToolbarButton
+    component: SuperscriptToolbarButton,
+    defaultPosition: 5
   },
   {
     name: 'list-ol',
     title: 'Numbered List',
-    component: NumberedListToolbarButton
+    component: NumberedListToolbarButton,
+    defaultPosition: 6
   },
   {
     name: 'list-ul',
     title: 'Bulleted List',
-    component: BulletedListToolbarButton
+    component: BulletedListToolbarButton,
+    defaultPosition: 7
   },
   {
     name: 'link',
     title: 'Link',
-    component: LinkButton
+    component: LinkButton,
+    defaultPosition: 8
   }
 ]);
 

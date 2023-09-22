@@ -11,8 +11,9 @@ import { ITileModel } from "../../models/tiles/tile-model";
 export interface IToolbarButtonInfo {
   name: string,  // a unique named used in configuration to identify the button
   title: string, // user-visible tooltip for the button
-  keyHint?: string, // If provided, displayed to the user as the hotkey equivalent
   component: React.ComponentType<IToolbarButtonProps>, // component to render
+  keyHint?: string, // If provided, displayed to the user as the hotkey equivalent
+  defaultPosition?: number, // If defined, shown on default toolbar in this position
 }
 
 export interface IToolbarButtonProps {
@@ -27,8 +28,20 @@ export interface IToolbarButtonProps {
 const toolbarButtonInfos: Map<string,Map<string, IToolbarButtonInfo>> = new Map;
 
 // Return the information for a given button
-export function getToolbarButtonInfo(tile: string, buttonName: string) {
-  return toolbarButtonInfos.get(tile)?.get(buttonName);
+export function getToolbarButtonInfo(tileType: string, buttonName: string) {
+  return toolbarButtonInfos.get(tileType)?.get(buttonName);
+}
+
+// Return the names of all the default buttons for this tile in order.
+export function getToolbarDefaultButtons(tileType: string) {
+  const buttonMap = toolbarButtonInfos.get(tileType);
+  if (buttonMap) {
+    const defaultButtons = [...buttonMap.values()].filter(button => button.defaultPosition);
+    defaultButtons.sort((a,b) => { return (a.defaultPosition??0) - (b.defaultPosition??0); } );
+    return defaultButtons.map(button=>button.name);
+  } else {
+    return [];
+  }
 }
 
 export function registerTileToolbarButtonInfos(
@@ -37,15 +50,15 @@ export function registerTileToolbarButtonInfos(
    * Generally called by tiles once when the application loads,
    * but this can also be called by plugins or other code that wants to contribute button defs.
    */
-  tile: string,
+  tileType: string,
   infos: IToolbarButtonInfo[]) {
     let tileButtons: Map<string, IToolbarButtonInfo>;
-    const existingTileButtons = toolbarButtonInfos.get(tile);
+    const existingTileButtons = toolbarButtonInfos.get(tileType);
     if (existingTileButtons) {
       tileButtons = existingTileButtons;
     } else {
       tileButtons = new Map;
-      toolbarButtonInfos.set(tile, tileButtons);
+      toolbarButtonInfos.set(tileType, tileButtons);
     }
     infos.forEach((info) => {
       tileButtons.set(info.name, info);

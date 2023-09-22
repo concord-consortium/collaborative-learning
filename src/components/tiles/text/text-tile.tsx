@@ -216,8 +216,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
                 onUnregisterTileApi={this.handleUnregisterToolApi}
               />
               <TileToolbar id={this.props.model.id} tileType="text" tileElement={this.textTileDiv}
-                readOnly={!!readOnly} model={this.props.model}
-                defaultButtons={['bold']} />
+                readOnly={!!readOnly} model={this.props.model} />
             </Slate>
           </div>
         </TextPluginsContext.Provider>

@@ -238,7 +238,6 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
           tileType="table"
           readOnly={!!readOnly}
           tileElement={tileElt}
-          defaultButtons={['delete']}
           model={model}
           />
       </DeleteCellContext.Provider>

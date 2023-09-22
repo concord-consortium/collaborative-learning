@@ -5,7 +5,7 @@ import { FloatingPortal } from "@floating-ui/react";
 import { Tooltip } from "react-tippy";
 import { useSettingFromStores, useUIStore } from "../../hooks/use-stores";
 import { useTileToolbar } from "./use-tile-toolbar";
-import { getToolbarButtonInfo } from "./toolbar-button-manager";
+import { getToolbarButtonInfo, getToolbarDefaultButtons } from "./toolbar-button-manager";
 import { ITileModel } from "../../models/tiles/tile-model";
 import { useTooltipOptions } from "../../hooks/use-tooltip-options";
 
@@ -14,12 +14,11 @@ interface ToolbarWrapperProps {
   tileType: string,
   readOnly: boolean,
   tileElement: HTMLElement | null,
-  defaultButtons: string[],
   model: ITileModel
 }
 
 export const TileToolbar = observer(
-  function TileToolbar({ id, tileType, readOnly, tileElement, defaultButtons, model }: ToolbarWrapperProps) {
+  function TileToolbar({ id, tileType, readOnly, tileElement, model }: ToolbarWrapperProps) {
     /**
      * Generates a standard toolbar for a tile.
      * The buttons to be included are not specified here:
@@ -34,7 +33,6 @@ export const TileToolbar = observer(
     // Determine the buttons to be shown
     const ui = useUIStore();
     const configuredButtonNames = useSettingFromStores("tools", tileType) as unknown as string[] | undefined;
-    const buttonNames = configuredButtonNames || defaultButtons;
 
     // Determine if toolbar should be rendered or not.
     const enabled = !readOnly && id && ui.selectedTileIds.length === 1 && ui.selectedTileIds.includes(id);
@@ -42,6 +40,8 @@ export const TileToolbar = observer(
     // Not rendering sounds faster, but if React is smart enough to just toggle the 'disabled' class attribute
     // when you click in the tile, that would be super responsive.
     if (!enabled) return(null);
+
+    const buttonNames = configuredButtonNames ?? getToolbarDefaultButtons(tileType);
 
     const buttons = buttonNames.map((name) => {
       const info = getToolbarButtonInfo(tileType, name);
