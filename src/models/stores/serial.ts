@@ -165,7 +165,7 @@ export class SerialDevice {
     const gripperVer = NodeLiveOutputTypes.find(o => o.name === liveOutputType);
     if (this.hasPort() && gripperVer?.angleBase){
       const percent = n / 100;
-      const openTo = Math.round(gripperVer.angleBase - (percent * 60));
+      const openTo = Math.round(gripperVer.angleBase - (percent * gripperVer.sweep));
       this.writer.write(`${openTo.toString()}\n`);
     }
   }
