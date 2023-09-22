@@ -211,11 +211,13 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     return () => disposer();
   });
 
+  // TODO: I should use this hook to get stuff for the table, but for now am experimenting with passing model
   const toolbarProps = useToolbarTileApi({ id: model.id, enabled: !readOnly, onRegisterTileApi, onUnregisterTileApi });
   return (
     <div className="table-tool">
       <TableToolbar
         documentContent={documentContent}
+        model={model}
         tileElt={tileElt}
         {...toolbarProps}
         deleteSelected={deleteSelected}
