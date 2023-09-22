@@ -126,14 +126,4 @@
       pointer-events: none;
     }
   }
-  // TODO - temporary until real asset is ready
-  .merge-data-button {
-    svg {
-      width: 27px;
-      transform: translateY(-16px);
-      path: {
-        stroke: $charcoal-dark-1;
-      }
-    }
-  }
 }
