@@ -1,61 +1,75 @@
+import React from "react";
 import { observer } from "mobx-react";
-import React, { ReactElement, ReactNode } from "react";
-import { useFloating, autoUpdate, FloatingPortal, flip } from "@floating-ui/react";
-import { useSettingFromStores, useUIStore } from "../../hooks/use-stores";
-import { useTooltipOptions } from "../../hooks/use-tooltip-options";
-import { useTileToolbar } from "./use-tile-toolbar";
 import classNames from "classnames";
+import { FloatingPortal } from "@floating-ui/react";
 import { Tooltip } from "react-tippy";
+import { useSettingFromStores, useUIStore } from "../../hooks/use-stores";
+import { useTileToolbar } from "./use-tile-toolbar";
 import { getToolbarButtonInfo } from "./toolbar-button-manager";
 import { ITileModel } from "../../models/tiles/tile-model";
-// import { useTileToolbar } from "./use-tile-toolbar";
+import { useTooltipOptions } from "../../hooks/use-tooltip-options";
 
 interface ToolbarWrapperProps {
   id: string | undefined,
   tileType: string,
-  tileElement: HTMLElement|null,
+  readOnly: boolean,
+  tileElement: HTMLElement | null,
   defaultButtons: string[],
   model: ITileModel
 }
 
 export const TileToolbar = observer(
-    function TileToolbar ({id, tileType, tileElement, defaultButtons, model }: ToolbarWrapperProps) {
+  function TileToolbar({ id, tileType, readOnly, tileElement, defaultButtons, model }: ToolbarWrapperProps) {
+    /**
+     * Generates a standard toolbar for a tile.
+     * The buttons to be included are not specified here:
+     * all potential buttons must be registered with the toolbar-button-manager and
+     * then can be selected and ordered by unit or lesson configuration.
+     */
 
-  // Get styles to position the toolbar
-  const { refs, toolbarStyles } = useTileToolbar(tileElement);
+    // Get styles to position the toolbar
+    const { refs, toolbarStyles } = useTileToolbar(tileElement);
 
-  // Determine the buttons to be shown
-  const ui = useUIStore();
-  const enabled = id && ui.selectedTileIds.length === 1 && ui.selectedTileIds.includes(id);
-  const configuredButtonNames = useSettingFromStores("tools", tileType) as unknown as string[] | undefined;
-  const buttonNames = configuredButtonNames || defaultButtons;
+    const tipOptions = useTooltipOptions();
 
-  const buttons = buttonNames.map((name) => {
-    // return buttonMap[name];
-    const info = getToolbarButtonInfo(tileType, name);
-    if (info) {
-      const Button = info?.component;
-      return (
-        <div key={name}>
-          <Button model={model} />
-        </div>);
-    } else {
-      console.warn('Did not find info for button name: ', name);
-      return null;
-    }
+
+
+    // Determine the buttons to be shown
+    const ui = useUIStore();
+    const configuredButtonNames = useSettingFromStores("tools", tileType) as unknown as string[] | undefined;
+    const buttonNames = configuredButtonNames || defaultButtons;
+
+    // Determine if toolbar should be rendered or not.
+    const enabled = !readOnly && id && ui.selectedTileIds.length === 1 && ui.selectedTileIds.includes(id);
+    // TODO question: is it more efficient to short-circuit here, or render with a class to hide it?
+    // Not rendering sounds faster, but if React is smart enough to just toggle the 'disabled' class attribute
+    // when you click in the tile, that would be super responsive.
+    if (!enabled) return(null);
+
+    const buttons = buttonNames.map((name) => {
+      const info = getToolbarButtonInfo(tileType, name);
+      if (info) {
+        const Button = info?.component;
+        return (
+          <Tooltip key={name} title={info.title} {...tipOptions} >
+            <Button model={model} />
+          </Tooltip>);
+      } else {
+        console.warn('Did not find info for button name: ', name);
+        return null;
+      }
+    });
+
+    return (
+      <FloatingPortal>
+        <div
+          ref={refs.setFloating}
+          style={toolbarStyles}
+          className={classNames("tile-toolbar",
+            `tile-toolbar-${tileType}`,
+            { "disabled": !enabled })}
+        >
+          {buttons}
+        </div>
+      </FloatingPortal>);
   });
-
-  const Toolbar =
-    <FloatingPortal>
-      <div
-        ref={refs.setFloating}
-        style={toolbarStyles}
-        className={classNames("tile-toolbar", {"disabled": !enabled})}
-      >
-        {buttons}
-      </div>
-    </FloatingPortal>;
-
-  return ( Toolbar );
-
-});

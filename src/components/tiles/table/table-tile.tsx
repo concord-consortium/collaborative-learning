@@ -236,6 +236,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
         <TileToolbar
           id={model.id}
           tileType="table"
+          readOnly={!!readOnly}
           tileElement={tileElt}
           defaultButtons={['delete']}
           model={model}
@@ -267,6 +268,7 @@ registerTileToolbarButtonInfos("table",
   [
     {
       name: 'delete',
+      title: 'Clear cell',
       component: TableCellDeleteButton
     }
   ]
@@ -281,6 +283,6 @@ function TableCellDeleteButton({model} : IToolbarButtonProps) {
     deleteSelected();
   }
   return (
-    <TileToolbarButton title="Delete" Icon={DeleteSelectedIconSvg} onClick={handleClick}></TileToolbarButton>
+    <TileToolbarButton Icon={DeleteSelectedIconSvg} onClick={handleClick}></TileToolbarButton>
   );
 }
