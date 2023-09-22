@@ -31,21 +31,21 @@ interface IProps extends IFloatingToolbarProps {
   showMergeTileDialog?: () => void;
 }
 
-export const DataCardToolbar: React.FC<IProps> = observer(({
-  isLinkEnabled, model, documentContent, tileElt, currEditAttrId, currEditFacet,
-  showLinkTileDialog, getLinkIndex, onIsEnabled, setImageUrlToAdd,
-  handleDeleteValue, handleDuplicateCard, ...others
-  }: IProps) => {
-    const content = model.content as DataCardContentModelType;
-    const currentCaseId = content.dataSet.caseIDFromIndex(content.caseIndex);
-    const enabled = onIsEnabled(); //"enabled" is the visibility of the toolbar at lower left
-    const location = useFloatingToolbarLocation({
-      documentContent,
-      tileElt,
-      toolbarHeight: 34,
-      toolbarTopOffset: 2,
-      enabled,
-       ...others
+export const DataCardToolbar: React.FC<IProps> = observer(function DataCardToolbar({
+    isLinkEnabled, model, documentContent, tileElt, currEditAttrId, currEditFacet, showLinkTileDialog,
+    getLinkIndex, onIsEnabled, setImageUrlToAdd, handleDeleteValue, handleDuplicateCard,
+    ...others }: IProps) {
+  const content = model.content as DataCardContentModelType;
+  const { caseIndex, dataSet, totalCases } = content;
+  const currentCaseId = caseIndex >= 0 && caseIndex < totalCases ? dataSet.caseIDFromIndex(caseIndex) : undefined ;
+  const enabled = onIsEnabled(); //"enabled" is the visibility of the toolbar at lower left
+  const location = useFloatingToolbarLocation({
+    documentContent,
+    tileElt,
+    toolbarHeight: 34,
+    toolbarTopOffset: 2,
+    enabled,
+      ...others
   });
 
   const { isMergeEnabled, showMergeTileDialog } = useTileDataMerging({model});

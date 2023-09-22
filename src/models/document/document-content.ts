@@ -9,8 +9,9 @@ import {
   ArrowAnnotation, IArrowAnnotationSnapshot, isArrowAnnotationSnapshot, updateArrowAnnotationTileIds
 } from "../annotations/arrow-annotation";
 import { sharedModelFactory, UnknownSharedModel } from "../shared/shared-model-manager";
+import { SharedModelType } from "../shared/shared-model";
 import { getTileContentInfo, IDocumentExportOptions } from "../tiles/tile-content-info";
-import { IDragTileItem, IDropTileItem, ITileModelSnapshotOut } from "../tiles/tile-model";
+import { IDragTileItem, IDropTileItem, ITileModel, ITileModelSnapshotOut } from "../tiles/tile-model";
 import { uniqueId } from "../../utilities/js-utils";
 import { comma, StringBuilder } from "../../utilities/string-builder";
 
@@ -385,6 +386,39 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       { rowInsertIndex: rowIndex },
       (t: IDropTileItem[], rowInfo: IDropRowInfo) => self.copyTilesIntoNewRows(t, rowInfo.rowInsertIndex)
     );
+  },
+  addTileAfter(tileType: string, target: ITileModel, sharedModels?: SharedModelType[]) {
+    // 
+    const targetRowId = self.findRowContainingTile(target.id);
+    if (!targetRowId) {
+      console.warn("Can't find row to add tile after");
+      return;
+    }
+    const rowInsertIndex = self.getRowIndex(targetRowId) + 1;
+
+    // This addTile function happens to add the tile content to a tile model before
+    // adding it to the document. This ordering is one part of a complex series
+    // that means the reaction in tile content's afterAttach will be delayed until
+    // after this action is complete. See the comment in IAddTilesContext for a
+    // little more info
+    const newRowTile = self.addTile(tileType, {insertRowInfo: {rowInsertIndex}});
+    const newTileId = newRowTile?.tileId;
+    if (!newTileId) {
+      console.warn("New tile couldn't be added");
+      return;
+    }
+    if (!sharedModels) {
+      // Nothing to do
+      return;
+    }
+    sharedModels.forEach(sharedModel => {
+      // This will create a new entry if necessary otherwise it will just return
+      // the existing entry
+      const entry = self.addSharedModel(sharedModel);
+      // TODO: unify the updating of the entry with BaseDocumentContent.addTileSharedModel,
+      // and SharedModelEntry.addTile
+      entry.tiles.push(newTileId);
+    });
   }
 }));
 

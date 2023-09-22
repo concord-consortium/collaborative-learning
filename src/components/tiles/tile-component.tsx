@@ -10,7 +10,7 @@ import { ILinkableTiles } from "../../models/tiles/tile-link-types";
 import { ITileModel } from "../../models/tiles/tile-model";
 import { BaseComponent } from "../base";
 import PlaceholderTileComponent from "./placeholder/placeholder-tile";
-import { ITileApi, TileResizeEntry, TileApiInterfaceContext } from "./tile-api";
+import { ITileApi, TileResizeEntry, TileApiInterfaceContext, TileModelContext } from "./tile-api";
 import { HotKeys } from "../../utilities/hot-keys";
 import { TileCommentsComponent } from "./tile-comments";
 import { LinkIndicatorComponent } from "./link-indicator";
@@ -215,24 +215,26 @@ export class TileComponent extends BaseComponent<IProps, IState> {
       style.width = `${Math.round(100 * widthPct / 100)}%`;
     }
     return (
-      <div className={classes} data-testid="tool-tile"
-          ref={elt => this.domElement = elt}
-          data-tool-id={model.id}
-          style={style}
-          tabIndex={-1}
-          onMouseEnter={isDraggable ? e => this.setState({ hoverTile: true }) : undefined}
-          onMouseLeave={isDraggable ? e => this.setState({ hoverTile: false }) : undefined}
-          onKeyDown={this.handleKeyDown}
-          onDragStart={this.handleTileDragStart}
-          onDragEnd={this.triggerResizeHandler}
-          draggable={true}
-      >
-        {this.renderLinkIndicators()}
-        {dragTileButton}
-        {resizeTileButton}
-        {this.renderTile(Component)}
-        {this.renderTileComments()}
-      </div>
+      <TileModelContext.Provider value={model}>
+        <div className={classes} data-testid="tool-tile"
+            ref={elt => this.domElement = elt}
+            data-tool-id={model.id}
+            style={style}
+            tabIndex={-1}
+            onMouseEnter={isDraggable ? e => this.setState({ hoverTile: true }) : undefined}
+            onMouseLeave={isDraggable ? e => this.setState({ hoverTile: false }) : undefined}
+            onKeyDown={this.handleKeyDown}
+            onDragStart={this.handleTileDragStart}
+            onDragEnd={this.triggerResizeHandler}
+            draggable={true}
+        >
+          {this.renderLinkIndicators()}
+          {dragTileButton}
+          {resizeTileButton}
+          {this.renderTile(Component)}
+          {this.renderTileComments()}
+        </div>
+      </TileModelContext.Provider>
     );
   }
 
