@@ -161,6 +161,10 @@ export const BaseDocumentContentModel = types
                                   : self.rowOrder[self.rowOrder.length - 1];
         return  self.rowOrder.indexOf(lastVisibleRowId);
       },
+      // TODO: Split this into two functions:
+      // - getFirstDocumentSharedModelByType
+      // - getFirstTileSharedModelByType
+      // The logic with the tileId is confusing when they are combined
       getFirstSharedModelByType<IT extends typeof SharedModel>(
         modelType: IT, tileId?: string): IT["Type"] | undefined {
         const sharedModelEntries = Array.from(self.sharedModelMap.values());

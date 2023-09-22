@@ -183,8 +183,8 @@ export const DataCardContentModel = TileContentModel
       {name: "sharedModelSetup", fireImmediately: true}));
     },
     updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
-      if (self.caseIndex >= self.totalCases) {
-        this.setCaseIndex(self.totalCases - 1);
+      if (self.caseIndex >= self.totalCases && self.totalCases > 0) {
+          this.setCaseIndex(self.totalCases - 1);
       }
     },
     setCaseIndex(caseIndex: number) {
