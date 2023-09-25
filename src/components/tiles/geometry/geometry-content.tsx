@@ -6,10 +6,7 @@ import objectHash from "object-hash";
 import React from "react";
 import { SizeMeProps } from "react-sizeme";
 
-import {
-  geometryAnnotationXOffset, geometryAnnotationYOffset, pointBoundingBoxSize, pointButtonRadius,
-  segmentButtonWidth
-} from "./geometry-constants";
+import { pointBoundingBoxSize, pointButtonRadius, segmentButtonWidth } from "./geometry-constants";
 import { BaseComponent } from "../../base";
 import { DocumentContentModelType } from "../../../models/document/document-content";
 import { getTableLinkColors } from "../../../models/tiles/table-links";
@@ -301,8 +298,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           const [x, y] = coords;
           const boundingBox = {
             height: pointBoundingBoxSize,
-            left: x - pointBoundingBoxSize / 2 + geometryAnnotationXOffset,
-            top: y - pointBoundingBoxSize / 2 + geometryAnnotationYOffset,
+            left: x - pointBoundingBoxSize / 2,
+            top: y - pointBoundingBoxSize / 2,
             width: pointBoundingBoxSize
           };
           return boundingBox;
@@ -322,8 +319,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           });
           const boundingBox = {
             height: bottom - top,
-            left: left + geometryAnnotationXOffset,
-            top: top + geometryAnnotationYOffset,
+            left,
+            top,
             width: right - left
           };
           return boundingBox;
@@ -340,29 +337,26 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           const top = Math.min(y1, y2);
           const boundingBox = {
             height: bottom - top,
-            left: left + geometryAnnotationXOffset,
-            top: top + geometryAnnotationYOffset,
+            left,
+            top,
             width: right - left
           };
           return boundingBox;
         }
       },
-      getObjectButtonSVG: ({ classes, handleClick, objectId, objectType, translateTilePointToScreenPoint }) => {
+      getObjectButtonSVG: ({ classes, handleClick, objectId, objectType }) => {
         if (objectType === "point") {
           // Find the center point
           const coords = this.getPointScreenCoords(objectId);
           if (!coords) return;
-          const point = translateTilePointToScreenPoint?.(coords);
-          if (!point) return;
 
           // Return a circle at the center point
-          const [x, y] = point;
+          const [x, y] = coords;
           return (
             <circle
               className={classes}
-              cx={x + geometryAnnotationXOffset}
-              cy={y + geometryAnnotationYOffset}
-              fill="transparent"
+              cx={x}
+              cy={y}
               onClick={handleClick}
               r={pointButtonRadius}
             />
@@ -390,15 +384,14 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             [x2 + Math.cos(secondAngle) * segmentButtonWidth, y2 - Math.sin(secondAngle) * segmentButtonWidth],
             [x1 + Math.cos(secondAngle) * segmentButtonWidth, y1 - Math.sin(secondAngle) * segmentButtonWidth],
           ];
-          return this.getButtonPath(coords, handleClick, classes, translateTilePointToScreenPoint);
+          return this.getButtonPath(coords, handleClick, classes);
         } else if (objectType === "polygon") {
           // Determine the path of the polygon based on its points
           const content = this.getContent();
           const polygon = content.getObject(objectId) as PolygonModelType;
           if (!polygon) return;
           return this.getButtonPath(
-            polygon.points.map(pointId => this.getPointScreenCoords(pointId)),
-            handleClick, classes, translateTilePointToScreenPoint
+            polygon.points.map(pointId => this.getPointScreenCoords(pointId)), handleClick, classes
           );
         }
       }
@@ -420,19 +413,15 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private getButtonPath(
-    coords: (Point | undefined)[], handleClick: () => void, classes?: string,
-    translatePoint?: ((point: Point) => Point | undefined)
+    coords: (Point | undefined)[], handleClick: () => void, classes?: string
   ) {
-    if (!translatePoint) return undefined;
     let path = "";
     coords.forEach((coord, index) => {
       if (!coord) return;
-      const point = translatePoint?.(coord);
-      if (!point) return;
 
-      const [x, y] = point;
+      const [x, y] = coord;
       const letter = index === 0 ? "M" : "L";
-      path = `${path}${letter} ${x + geometryAnnotationXOffset} ${y + geometryAnnotationYOffset} `;
+      path = `${path}${letter} ${x} ${y} `;
     });
     path = `${path}Z`;
 
@@ -440,7 +429,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       <path
         className={classes}
         d={path}
-        fill="transparent"
         onClick={handleClick}
       />
     );

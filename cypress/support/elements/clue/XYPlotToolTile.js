@@ -1,12 +1,16 @@
+function wsClass(wsc) {
+  return wsc || ".primary-workspace";
+}
+
 class XYPlotToolTile {
   getTile(workspaceClass) {
-    return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .graph-tool-tile`);
+    return cy.get(`${wsClass(workspaceClass)} .canvas-area .graph-tool-tile`);
   }
   getXYPlotTitle(workspaceClass) {
-    return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .editable-tile-title`);
+    return cy.get(`${wsClass(workspaceClass)} .canvas-area .editable-tile-title`);
   }
   getLinkTileButton(workspaceClass) {
-    return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .graph-toolbar .link-tile-button`);
+    return cy.get(`${wsClass(workspaceClass)} .canvas-area .graph-toolbar .link-tile-button`);
   }
   getCustomModal() {
     return cy.get('.custom-modal.link-tile');
@@ -16,7 +20,12 @@ class XYPlotToolTile {
       cy.get('.modal-button').contains("Link").click();
   }
   getGraphDot(workspaceClass) {
-    return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .graph-dot`);
+    return cy.get(`${wsClass(workspaceClass)} .canvas-area .graph-dot`);
+  }
+  selectYAttribute(attribute, workspaceClass) {
+    const yMenuButtons = `${wsClass(workspaceClass)} .axis-legend-attribute-menu.left button`;
+    cy.get(yMenuButtons).first().click();
+    cy.get(yMenuButtons).contains(attribute).click();
   }
 }
 export default XYPlotToolTile;

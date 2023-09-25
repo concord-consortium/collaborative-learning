@@ -8,13 +8,15 @@ import { kTextHorizontalMargin, kTextVerticalMargin } from "../../models/annotat
 interface IPreviewArrowProps {
   documentHeight: number;
   documentWidth: number;
+  sourceCenterRadius?: number;
+  sourceHighlightRadius?: number;
   sourceX?: number;
   sourceY?: number;
   targetX?: number;
   targetY?: number;
 }
 export function PreviewArrow({
-  documentHeight, documentWidth, sourceX, sourceY, targetX, targetY
+  documentHeight, documentWidth, sourceCenterRadius, sourceHighlightRadius, sourceX, sourceY, targetX, targetY
 }: IPreviewArrowProps) {
   if (sourceX !== undefined && sourceY !== undefined && targetX !== undefined && targetY !== undefined) {
     const { peakX, peakY } = getDefaultPeak(sourceX, sourceY, targetX, targetY);
@@ -35,8 +37,10 @@ export function PreviewArrow({
         />
         <AnnotationNode
           active={true}
+          centerRadius={sourceCenterRadius}
           cx={sourceX}
           cy={sourceY}
+          highlightRadius={sourceHighlightRadius}
         />
       </>
     );

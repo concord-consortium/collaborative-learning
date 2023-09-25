@@ -1,7 +1,7 @@
 import { halfPi, twoPi, normalizeAngle } from "../../utilities/math-utils";
 
-export const kAnnotationNodeHeight = 24;
-export const kAnnotationNodeWidth = 24;
+export const kAnnotationNodeDefaultRadius = 24;
+export const kSmallAnnotationNodeRadius = 7;
 
 // Returns the default peak for a sparrow from sourceX, sourceY to targetX, targetY.
 const shortArcPeakScale = 1;
@@ -202,7 +202,7 @@ export function getSparrowCurve(
   };
   const deletePosition = findDeletePosition();
 
-  // Cache and return the data for the curve
+  // Return the data for the curve
   const curveData = {
     deleteX: deletePosition.deleteX,
     deleteY: deletePosition.deleteY,
