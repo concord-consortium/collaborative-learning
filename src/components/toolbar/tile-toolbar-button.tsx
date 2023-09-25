@@ -17,6 +17,7 @@ export const TileToolbarButton =
     return (
         <button
           className={classNames({selected, enabled})}
+          // TODO: confer with Scott about aria-disabled vs. disabled
           disabled={enabled===false}
           onClick={onClick}
           onMouseDown={(e)=>{ e.preventDefault(); }}

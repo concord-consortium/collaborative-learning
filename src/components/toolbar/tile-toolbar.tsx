@@ -63,6 +63,7 @@ export const TileToolbar = observer(
       <FloatingPortal>
         <div
           ref={toolbarRefs.setFloating}
+          data-testid="tile-toolbar"
           style={toolbarStyles}
           className={classNames("tile-toolbar",
             `tile-toolbar-${tileType}`,
