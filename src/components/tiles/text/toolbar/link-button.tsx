@@ -24,6 +24,9 @@ export const LinkButton = () => {
     event.preventDefault();
     showModal();
   };
-  return <TileToolbarButton Icon={LinkToolIcon} enabled={enabled}
-    selected={isSelected} onClick={handleClick} />;
+  return(
+    <TileToolbarButton enabled={enabled} selected={isSelected} onClick={handleClick}>
+      <LinkToolIcon/>
+    </TileToolbarButton>
+  );
 };

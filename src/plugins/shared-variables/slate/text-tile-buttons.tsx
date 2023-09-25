@@ -14,7 +14,6 @@ import AddVariableChipIcon from "../assets/add-variable-chip-icon.svg";
 import InsertVariableChipIcon from "../assets/insert-variable-chip-icon.svg";
 import VariableEditorIcon from "../assets/variable-editor-icon.svg";
 import { TileToolbarButton } from "../../../components/toolbar/tile-toolbar-button";
-import { IToolbarButtonProps } from "../../../components/toolbar/toolbar-button-manager";
 import { TextPluginsContext } from "../../../components/tiles/text/text-plugins-context";
 
 export const kNewVariableButtonName = "new-variable";
@@ -108,8 +107,7 @@ function handleClose(editor: Editor) {
   }, 10);
 }
 
-export const NewVariableTextButton = observer(function NewVariableTextButton(
-    {model}: IToolbarButtonProps) {
+export const NewVariableTextButton = observer(function NewVariableTextButton() {
 
   const editor = useSlate();
   const plugins = useContext(TextPluginsContext);
@@ -135,14 +133,13 @@ export const NewVariableTextButton = observer(function NewVariableTextButton(
     showDialog();
   };
   return (
-    <TileToolbarButton Icon={AddVariableChipIcon}
-      enabled={enabled} selected={isSelected}
-      onClick={handleClick} />
+    <TileToolbarButton enabled={enabled} selected={isSelected} onClick={handleClick}>
+      <AddVariableChipIcon/>
+    </TileToolbarButton>
   );
 });
 
-export const InsertVariableTextButton = observer(function InsertVariableTextButton(
-    {model}: IToolbarButtonProps) {
+export const InsertVariableTextButton = observer(function InsertVariableTextButton() {
   const editor = useSlate();
   const plugins = useContext(TextPluginsContext);
   const pluginInstance = plugins[kVariableTextPluginName];
@@ -168,14 +165,13 @@ export const InsertVariableTextButton = observer(function InsertVariableTextButt
     showDialog();
   };
   return (
-    <TileToolbarButton Icon={InsertVariableChipIcon}
-      enabled={enabled} selected={isSelected}
-      onClick={handleClick} />
+    <TileToolbarButton enabled={enabled} selected={isSelected} onClick={handleClick}>
+      <InsertVariableChipIcon/>
+    </TileToolbarButton>
   );
 });
 
-export const EditVariableTextButton = observer(function EditVariableTextButton(
-    {model}: IToolbarButtonProps) {
+export const EditVariableTextButton = observer(function EditVariableTextButton() {
   const editor = useSlate();
   const plugins = useContext(TextPluginsContext);
   const pluginInstance = plugins[kVariableTextPluginName];
@@ -198,8 +194,8 @@ export const EditVariableTextButton = observer(function EditVariableTextButton(
   };
 
   return (
-    <TileToolbarButton Icon={VariableEditorIcon}
-      enabled={enabled} selected={isSelected}
-      onClick={handleClick} />
+    <TileToolbarButton enabled={enabled} selected={isSelected} onClick={handleClick}>
+      <VariableEditorIcon/>
+    </TileToolbarButton>
   );
 });
