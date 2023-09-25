@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
-import { act, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { TileToolbarButton } from "./tile-toolbar-button";
-import { IToolbarButtonProps, registerTileToolbarButtons } from "./toolbar-button-manager";
+import { registerTileToolbarButtons } from "./toolbar-button-manager";
 import CopyIcon from "../../../assets/icons/copy/copy-icon-default.svg";
 import { TileToolbar } from "./tile-toolbar";
 import { ITileModel, TileModel } from "../../models/tiles/tile-model";
@@ -16,8 +16,8 @@ import { TileModelContext } from "../tiles/tile-api";
 
 const clickHandler = jest.fn();
 
-function SampleToolbarButton({ model } : IToolbarButtonProps) {
-  return <TileToolbarButton Icon={CopyIcon} onClick={clickHandler} />;
+function SampleToolbarButton() {
+  return <TileToolbarButton onClick={clickHandler}><CopyIcon/></TileToolbarButton>;
 }
 
 interface ISampleTileProps {
@@ -39,9 +39,7 @@ function SampleTile({model}: ISampleTileProps) {
 describe("Tile toolbar button", () => {
 
   it("can render a button", () => {
-    render(<TileToolbarButton
-      Icon={CopyIcon}
-      onClick={clickHandler} />);
+    render(<TileToolbarButton onClick={clickHandler}><CopyIcon/></TileToolbarButton>);
 
     expect(screen.getByRole("button")).toBeInTheDocument();
     expect(screen.getByRole("button")).toContainHTML("<svg");

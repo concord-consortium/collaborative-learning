@@ -6,7 +6,6 @@ import { Tooltip } from "react-tippy";
 import { useSettingFromStores, useUIStore } from "../../hooks/use-stores";
 import { useTileToolbarPositioning } from "./use-tile-toolbar-positioning";
 import { getToolbarButtonInfo, getToolbarDefaultButtons } from "./toolbar-button-manager";
-import { ITileModel } from "../../models/tiles/tile-model";
 import { useTooltipOptions } from "../../hooks/use-tooltip-options";
 import { TileModelContext } from "../tiles/tile-api";
 
@@ -53,7 +52,7 @@ export const TileToolbar = observer(
         const tooltip = info.title + (info.keyHint ? ` (${info.keyHint})` : '');
         return (
           <Tooltip key={name} title={tooltip} {...tipOptions} >
-            <Button model={model} />
+            <Button />
           </Tooltip>);
       } else {
         console.warn('Did not find info for button name: ', name);

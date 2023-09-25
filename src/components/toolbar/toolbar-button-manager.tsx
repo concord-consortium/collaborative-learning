@@ -1,5 +1,3 @@
-import { ITileModel } from "../../models/tiles/tile-model";
-
 // The toolbar button manager registers all known buttons used on tile toolbars.
 // Tiles and plugins can register buttons by specifying their basic attributes
 // and the Component to render for the button.
@@ -11,16 +9,9 @@ import { ITileModel } from "../../models/tiles/tile-model";
 export interface IToolbarButtonInfo {
   name: string,  // a unique named used in configuration to identify the button
   title: string, // user-visible tooltip for the button
-  component: React.ComponentType<IToolbarButtonProps>, // component to render
+  component: React.ComponentType, // component to render
   keyHint?: string, // If set, displayed to the user as the hotkey equivalent
   defaultPosition?: number, // If set, shown on the tile's default toolbar in this position
-}
-
-export interface IToolbarButtonProps {
-  /**
-   * Properties that are provided to all toolbar buttons.
-   */
-  model: ITileModel
 }
 
 // This is the actual registry.

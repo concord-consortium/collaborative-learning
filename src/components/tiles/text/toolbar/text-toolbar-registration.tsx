@@ -1,9 +1,9 @@
-import React from "react";
+import React, { PropsWithChildren } from "react";
 import { Editor, EFormat, useSlate } from "@concord-consortium/slate-editor";
 
 import { LinkButton } from "./link-button";
 import { isMac } from "../../../../utilities/browser";
-import { IToolbarButtonProps, registerTileToolbarButtons } from "../../../toolbar/toolbar-button-manager";
+import { registerTileToolbarButtons } from "../../../toolbar/toolbar-button-manager";
 import { TileToolbarButton } from "../../../toolbar/tile-toolbar-button";
 
 import BoldToolIcon from "../../../../assets/icons/text/bold-text-icon.svg";
@@ -39,43 +39,42 @@ function GenericTextToolbarButton({Icon, slateType, toggleFunc}: IGenericTextToo
     toggleFunc(editor, slateType);
   }
   return (
-    <TileToolbarButton
-      Icon={Icon}
-      selected={selected}
-      onClick={handleClick} />);
+    <TileToolbarButton selected={selected} onClick={handleClick}>
+      <Icon/>
+    </TileToolbarButton>);
 }
 
-function BoldToolbarButton({ model } : IToolbarButtonProps) {
+function BoldToolbarButton() {
   return <GenericTextToolbarButton
     Icon={BoldToolIcon} slateType={EFormat.bold} toggleFunc={toggleMark}/>;
 }
 
-function ItalicToolbarButton({ model } : IToolbarButtonProps) {
+function ItalicToolbarButton() {
   return <GenericTextToolbarButton
     Icon={ItalicToolIcon} slateType={EFormat.italic} toggleFunc={toggleMark}/>;
 }
 
-function UnderlineToolbarButton({ model } : IToolbarButtonProps) {
+function UnderlineToolbarButton() {
   return <GenericTextToolbarButton
     Icon={UnderlineToolIcon} slateType={EFormat.underlined} toggleFunc={toggleMark}/>;
 }
 
-function SubscriptToolbarButton({ model } : IToolbarButtonProps) {
+function SubscriptToolbarButton() {
   return <GenericTextToolbarButton
     Icon={SubscriptToolIcon} slateType={EFormat.subscript} toggleFunc={toggleSupSub}/>;
 }
 
-function SuperscriptToolbarButton({ model } : IToolbarButtonProps) {
+function SuperscriptToolbarButton() {
   return <GenericTextToolbarButton
     Icon={SuperscriptToolIcon} slateType={EFormat.superscript} toggleFunc={toggleSupSub}/>;
 }
 
-function NumberedListToolbarButton({ model } : IToolbarButtonProps) {
+function NumberedListToolbarButton() {
   return <GenericTextToolbarButton
     Icon={NumberedListToolIcon} slateType={EFormat.numberedList} toggleFunc={toggleElement}/>;
 }
 
-function BulletedListToolbarButton({ model } : IToolbarButtonProps) {
+function BulletedListToolbarButton() {
   return <GenericTextToolbarButton
     Icon={BulletedListToolIcon} slateType={EFormat.bulletedList} toggleFunc={toggleElement}/>;
 }
