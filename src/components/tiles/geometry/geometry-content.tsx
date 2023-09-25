@@ -309,6 +309,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         } else if (objectType === "polygon") {
           const content = this.getContent();
           const polygon = content.getObject(objectId) as PolygonModelType;
+          if (!polygon) return;
           let [bottom, left, right, top] = [Number.MIN_VALUE, Number.MAX_VALUE, Number.MIN_VALUE, Number.MAX_VALUE];
           polygon.points.forEach(pointId => {
             const coords = this.getPointScreenCoords(pointId);
@@ -325,7 +326,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             top: top + geometryAnnotationYOffset,
             width: right - left
           };
-          return boundingBox;          
+          return boundingBox;
         } else if (objectType === "segment") {
           const [ point1Id, point2Id ] = pointIdsFromSegmentId(objectId);
           const coords1 = this.getPointScreenCoords(point1Id);
@@ -394,6 +395,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           // Determine the path of the polygon based on its points
           const content = this.getContent();
           const polygon = content.getObject(objectId) as PolygonModelType;
+          if (!polygon) return;
           return this.getButtonPath(
             polygon.points.map(pointId => this.getPointScreenCoords(pointId)),
             handleClick, classes, translateTilePointToScreenPoint
