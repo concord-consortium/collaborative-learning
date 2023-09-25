@@ -4,12 +4,17 @@ import React from "react";
 import { arduinoFrames, armFrames, gripperFrames } from "./brainwaves-gripper-assets";
 import { ISimulation, ISimulationProps } from "../simulation-types";
 import { findVariable, getFrame } from "../simulation-utilities";
-import { iconUrl, kEMGKey, kGripperKey, kPressureKey } from "../../../shared-assets/icons/icon-utilities";
+import { iconUrl, kEMGKey, kGripperKey, kPressureKey, kTemperatureKey } from "../../../shared-assets/icons/icon-utilities";
 
 import "rc-slider/assets/index.css";
 import "./brainwaves-gripper.scss";
 
 export const kBrainwavesKey = "EMG_and_claw";
+
+const kSimulationModeKey = "simulation_mode_key";
+const kSimulationModePressure = 0;
+const kSimulationModeTemperature = 1;
+const baseTemperature = 60;
 
 function BrainwavesGripperComponent({ frame, variables }: ISimulationProps) {
   const emgVariable = findVariable(kEMGKey, variables);
@@ -87,6 +92,18 @@ export const brainwavesGripperSimulation: ISimulation = {
       icon: iconUrl(kGripperKey),
       name: kGripperKey,
       value: 0
+    },
+    {
+      displayName: "Temperature",
+      labels: ["input", "sensor:temperature"],
+      icon: iconUrl(kTemperatureKey),
+      name: kTemperatureKey,
+      value: baseTemperature
+    },
+    {
+      displayName: "Simulation Mode",
+      name: kSimulationModeKey,
+      value: kSimulationModePressure
     }
   ],
   values: {}
