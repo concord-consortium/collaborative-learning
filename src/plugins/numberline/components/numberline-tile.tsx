@@ -3,6 +3,7 @@ import { axisBottom, drag, pointer, scaleLinear, select } from 'd3';
 import { observer } from 'mobx-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { kSmallAnnotationNodeRadius } from '../../../components/annotations/annotation-utilities';
 import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
 import { useToolbarTileApi } from "../../../components/tiles/hooks/use-toolbar-tile-api";
 import { ITileProps } from "../../../components/tiles/tile-component";
@@ -19,7 +20,6 @@ import {
 import { NumberlineToolbar } from "./numberline-toolbar";
 
 import "./numberline-tile.scss";
-import { kSmallAnnotationNodeRadius } from '../../../components/annotations/annotation-utilities';
 
 export const NumberlineTile: React.FC<ITileProps> = observer(function NumberlineTile(props){
   const { documentContent, model, readOnly, scale, tileElt, onRegisterTileApi, onUnregisterTileApi } = props;
