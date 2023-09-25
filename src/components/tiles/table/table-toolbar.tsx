@@ -1,6 +1,6 @@
+import { observer } from "mobx-react";
 import React from "react";
 import ReactDOM from "react-dom";
-import { observer } from "mobx-react";
 
 import { DeleteSelectedButton, LinkTileButton, SetExpressionButton } from "./table-toolbar-buttons";
 import { useSettingFromStores } from "../../../hooks/use-stores";
