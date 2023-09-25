@@ -12,6 +12,7 @@ import { defaultTextContent } from "../../models/tiles/text/text-content";
 import "../../models/tiles/text/text-registration";
 import { specStores } from "../../models/stores/spec-stores";
 import { Provider } from "mobx-react";
+import { TileModelContext } from "../tiles/tile-api";
 
 const clickHandler = jest.fn();
 
@@ -26,12 +27,12 @@ interface ISampleTileProps {
 function SampleTile({model}: ISampleTileProps) {
   const tileElt = useRef<HTMLDivElement>(null);
   return (
-    <>
+    <TileModelContext.Provider value={model}>
       <div ref={tileElt}>
         Tile content.
       </div>
-      <TileToolbar id={model.id} readOnly={false} tileElement={tileElt.current} tileType="test" model={model}/>
-    </>
+      <TileToolbar readOnly={false} tileElement={tileElt.current} tileType="test" />
+    </TileModelContext.Provider>
   );
 }
 

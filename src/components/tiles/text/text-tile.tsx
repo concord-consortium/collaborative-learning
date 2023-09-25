@@ -17,7 +17,7 @@ import { LogEventName } from "../../../lib/logger-types";
 import { TextPluginsContext } from "./text-plugins-context";
 import { TileToolbar } from "../../toolbar/tile-toolbar";
 
-import "./toolbar/text-toolbar";
+import "./toolbar/text-toolbar-registration";
 import "./text-tile.sass";
 
 /*
@@ -207,17 +207,13 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
                 onBlur={this.handleBlur}
                 className={`ccrte-editor slate-editor ${classes || ""}`}
               />
-              <TileToolbar id={this.props.model.id} tileType="text" tileElement={this.textTileDiv}
-                readOnly={!!readOnly} model={this.props.model} />
+              <TileToolbar tileType="text" tileElement={this.textTileDiv} readOnly={!!readOnly} />
             </Slate>
           </div>
         </TextPluginsContext.Provider>
       </TextContentModelContext.Provider>
     );
   }
-
-
-
 
   private handleChange = (value: EditorValue) => {
     const { model } = this.props;

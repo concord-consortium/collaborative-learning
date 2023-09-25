@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useContext, useMemo } from "react";
 import { observer } from "mobx-react";
 import classNames from "classnames";
 import { FloatingPortal } from "@floating-ui/react";
@@ -8,23 +8,25 @@ import { useTileToolbarPositioning } from "./use-tile-toolbar-positioning";
 import { getToolbarButtonInfo, getToolbarDefaultButtons } from "./toolbar-button-manager";
 import { ITileModel } from "../../models/tiles/tile-model";
 import { useTooltipOptions } from "../../hooks/use-tooltip-options";
+import { TileModelContext } from "../tiles/tile-api";
 
 interface ToolbarWrapperProps {
-  id: string | undefined,
   tileType: string,
   readOnly: boolean,
   tileElement: HTMLElement | null,
-  model: ITileModel
 }
 
 export const TileToolbar = observer(
-  function TileToolbar({ id, tileType, readOnly, tileElement, model }: ToolbarWrapperProps) {
+  function TileToolbar({ tileType, readOnly, tileElement }: ToolbarWrapperProps) {
     /**
      * Generates a standard toolbar for a tile.
      * The buttons to be included are not specified here:
      * all potential buttons must be registered with the toolbar-button-manager and
      * then can be selected and ordered by unit or lesson configuration.
      */
+
+    const model = useContext(TileModelContext);
+    const id = model?.id;
 
     // Get styles to position the toolbar
     const { toolbarRefs, toolbarStyles, toolbarPlacement } = useTileToolbarPositioning(tileElement);
