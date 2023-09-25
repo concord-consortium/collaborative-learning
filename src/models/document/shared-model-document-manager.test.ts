@@ -317,6 +317,9 @@ describe("SharedModelDocumentManager", () => {
 
     const sharedModel2 = manager.findFirstSharedModelByType(TestSharedModel2);
     expect(sharedModel2).toBeUndefined();
+
+    const sharedModelWithTile = manager.findFirstSharedModelByType(TestSharedModel, "bogus-id");
+    expect(sharedModelWithTile).toBeUndefined();
   });
 
   it("finds a snapshotProcessor shared model by the original type", () => {

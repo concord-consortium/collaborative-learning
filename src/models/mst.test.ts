@@ -662,4 +662,130 @@ describe("mst", () => {
     ]);
   });
 
+  test("lifecycle hooks are called immediately, not after the action batch", () => {
+    const events: string[] = [];
+    function log(e: string) {
+      events.push(e);
+    }
+
+    const Child = types
+      .model("Todo", {
+        title: ""
+      })
+      .actions((self) => ({
+        afterCreate() {
+          log("child: afterCreate");
+        },
+        afterAttach() {
+          log("child: afterAttach");
+        }
+      }));
+
+    const Parent = types
+        .model("Parent", {
+            child: types.maybe(Child)
+        })
+        .actions((self) => ({
+            addChild() {
+              log("parent: before create");
+              const child = Child.create();
+              log("parent: before child assignment");
+              self.child = child;
+              log("parent: after child assignment");
+            }
+        }));
+
+    log("-");
+
+    const parent = Parent.create();
+    parent.addChild();
+    expect(events).toEqual([
+        "-",
+        "parent: before create",
+        "child: afterCreate",
+        "parent: before child assignment",
+        "child: afterAttach",
+        "parent: after child assignment"
+      ]);
+  });
+
+  test("lifecycle hooks of snapshot children are delayed until they are accessed", () => {
+    const events: string[] = [];
+    function log(e: string) {
+      events.push(e);
+    }
+
+    const Child = types
+      .model("Todo", {
+        title: ""
+      })
+      .actions((self) => ({
+        afterCreate() {
+          log("child: afterCreate");
+        },
+        afterAttach() {
+          log("child: afterAttach");
+        }
+      }));
+
+    const Parent = types
+        .model("Parent", {
+            child: types.maybe(Child)
+        });
+
+    log("before Parent.create");
+    const parent = Parent.create({child: {title: "snapshot"}});
+
+    log("before child access");
+    // eslint-disable-next-line no-unused-expressions
+    parent.child;
+
+    expect(events).toEqual([
+      "before Parent.create",
+      "before child access",
+      "child: afterCreate",
+      "child: afterAttach",
+    ]);
+});
+
+  test("afterAttach of instance children in snapshots is called immediately", () => {
+    const events: string[] = [];
+    function log(e: string) {
+      events.push(e);
+    }
+
+    const Child = types
+      .model("Todo", {
+        title: ""
+      })
+      .actions((self) => ({
+        afterCreate() {
+          log("child: afterCreate");
+        },
+        afterAttach() {
+          log("child: afterAttach");
+        }
+      }));
+
+    const Parent = types
+        .model("Parent", {
+            child: types.maybe(Child)
+        });
+
+    log("before Child.create");
+    const child = Child.create();
+    log("before Parent.create");
+    const parent = Parent.create({child});
+    log("before child access");
+    // eslint-disable-next-line no-unused-expressions
+    parent.child;
+
+    expect(events).toEqual([
+        "before Child.create",
+        "child: afterCreate",
+        "before Parent.create",
+        "child: afterAttach",
+        "before child access"
+      ]);
+  });
 });
