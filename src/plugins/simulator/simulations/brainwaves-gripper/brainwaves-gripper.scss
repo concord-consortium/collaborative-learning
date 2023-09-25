@@ -31,5 +31,14 @@
     .emg-slider {
       width: 150px;
     }
+
+    .toggle-container {
+      align-items: center;
+      display: flex;
+
+      .mode-toggle {
+        margin: 0 5px;
+      }
+    }
   }
 }

@@ -1,10 +1,11 @@
 import { VariableSlider } from "@concord-consortium/diagram-view";
 import React from "react";
 
-import { arduinoFrames, armFrames, gripperFrames } from "./brainwaves-gripper-assets";
+import ToggleControl from "../../../../components/utilities/toggle-control";
+import { iconUrl, kEMGKey, kGripperKey, kPressureKey, kTemperatureKey } from "../../../shared-assets/icons/icon-utilities";
 import { ISimulation, ISimulationProps } from "../simulation-types";
 import { findVariable, getFrame } from "../simulation-utilities";
-import { iconUrl, kEMGKey, kGripperKey, kPressureKey, kTemperatureKey } from "../../../shared-assets/icons/icon-utilities";
+import { arduinoFrames, armFrames, gripperFrames } from "./brainwaves-gripper-assets";
 
 import "rc-slider/assets/index.css";
 import "./brainwaves-gripper.scss";
@@ -17,6 +18,7 @@ const kSimulationModeTemperature = 1;
 const baseTemperature = 60;
 
 function BrainwavesGripperComponent({ frame, variables }: ISimulationProps) {
+  const modeVariable = findVariable(kSimulationModeKey, variables);
   const emgVariable = findVariable(kEMGKey, variables);
   const normalizedEmgValue = Math.min((emgVariable?.currentValue ?? 0) / 450, 1);
   const armFrame = getFrame(normalizedEmgValue, armFrames.length);
@@ -48,6 +50,15 @@ function BrainwavesGripperComponent({ frame, variables }: ISimulationProps) {
           step={40}
           variable={emgVariable}
         />
+        <div className="toggle-container">
+          <div>Pressure</div>
+          <ToggleControl
+            className="mode-toggle"
+            initialValue={!!modeVariable?.currentValue}
+            onChange={(value: boolean) => modeVariable?.setValue(value ? kSimulationModeTemperature : kSimulationModePressure)}
+          />
+          <div>Temperature</div>
+        </div>
       </div>
     </div>
   );
