@@ -4,25 +4,42 @@
 
   height: $toolbar-height;
   border: $toolbar-border;
-  border-radius: 0 0 $toolbar-border-radius $toolbar-border-radius;
   background-color: $workspace-teal-light-9;
   // do we need a 'buttons' container at this level?
   display: flex;
-  font-size: 24px;
   text-align: center;
 
   &.disabled {
     display: none;
   }
 
-  div:first-child {
-    button {
-      border-bottom-left-radius: 3px;
+  &.bottom-start, &.bottom-end {
+    border-radius: 0 0 $toolbar-border-radius $toolbar-border-radius;
+
+    div:first-child {
+      button {
+        border-bottom-left-radius: $toolbar-border-radius;
+      }
+    }
+    div:last-child {
+      button {
+        border-bottom-right-radius: $toolbar-border-radius;
+      }
     }
   }
-  div:last-child {
-    button {
-      border-bottom-right-radius: 3px;
+
+  &.top-start, &.top-end {
+    border-radius: $toolbar-border-radius $toolbar-border-radius 0 0;
+
+    div:first-child {
+      button {
+        border-top-left-radius: $toolbar-border-radius;
+      }
+    }
+    div:last-child {
+      button {
+        border-top-right-radius: $toolbar-border-radius;
+      }
     }
   }
 

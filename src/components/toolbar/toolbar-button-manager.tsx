@@ -12,8 +12,8 @@ export interface IToolbarButtonInfo {
   name: string,  // a unique named used in configuration to identify the button
   title: string, // user-visible tooltip for the button
   component: React.ComponentType<IToolbarButtonProps>, // component to render
-  keyHint?: string, // If provided, displayed to the user as the hotkey equivalent
-  defaultPosition?: number, // If defined, shown on default toolbar in this position
+  keyHint?: string, // If set, displayed to the user as the hotkey equivalent
+  defaultPosition?: number, // If set, shown on the tile's default toolbar in this position
 }
 
 export interface IToolbarButtonProps {
@@ -44,7 +44,7 @@ export function getToolbarDefaultButtons(tileType: string) {
   }
 }
 
-export function registerTileToolbarButtonInfos(
+export function registerTileToolbarButtons(
   /**
    * Register one or more buttons for a tile.
    * Generally called by tiles once when the application loads,

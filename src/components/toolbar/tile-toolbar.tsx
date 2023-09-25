@@ -4,7 +4,7 @@ import classNames from "classnames";
 import { FloatingPortal } from "@floating-ui/react";
 import { Tooltip } from "react-tippy";
 import { useSettingFromStores, useUIStore } from "../../hooks/use-stores";
-import { useTileToolbar } from "./use-tile-toolbar";
+import { useTileToolbarPositioning } from "./use-tile-toolbar-positioning";
 import { getToolbarButtonInfo, getToolbarDefaultButtons } from "./toolbar-button-manager";
 import { ITileModel } from "../../models/tiles/tile-model";
 import { useTooltipOptions } from "../../hooks/use-tooltip-options";
@@ -27,7 +27,7 @@ export const TileToolbar = observer(
      */
 
     // Get styles to position the toolbar
-    const { refs, toolbarStyles } = useTileToolbar(tileElement);
+    const { toolbarRefs, toolbarStyles, toolbarPlacement } = useTileToolbarPositioning(tileElement);
     const tipOptions = useTooltipOptions();
 
     // Determine the buttons to be shown
@@ -61,10 +61,11 @@ export const TileToolbar = observer(
     return (
       <FloatingPortal>
         <div
-          ref={refs.setFloating}
+          ref={toolbarRefs.setFloating}
           style={toolbarStyles}
           className={classNames("tile-toolbar",
             `tile-toolbar-${tileType}`,
+            toolbarPlacement,
             { "disabled": !enabled })}
         >
           {buttons}
