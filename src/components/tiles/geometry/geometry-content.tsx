@@ -207,8 +207,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   private getPointScreenCoords(pointId: string) {
     // Access the model to ensure that model changes trigger a rerender
-    const p = (this.props.model.content as GeometryContentModelType).getObject(pointId) as PointModelType;
-    if (p.x == null || p.y == null) return;
+    const p = this.getContent().getObject(pointId) as PointModelType;
+    if (!p || p.x == null || p.y == null) return;
 
     if (!this.state.board) return;
     const element = this.state.board?.objects[pointId];
