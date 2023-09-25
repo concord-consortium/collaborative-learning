@@ -8,7 +8,7 @@ import './cell-formatter.scss';
 
 export const formatValue = (
     formatter: (n: number | { valueOf(): number }) => string,
-    value: any,
+    value: unknown,
     lookupImage: (value: string) => string|undefined,
     width?: number,
     row?: TRow,
@@ -17,6 +17,13 @@ export const formatValue = (
   if ((value == null) || (value === "")) return <span></span>;
   const num = Number(value);
   if (!isFinite(num)) {
+    // There have been cases where value is not a string, or a valid number.
+    // The cases couldn't be reproduced, so hopefully this will help us track
+    // them down.
+    if (typeof value !== "string") {
+      console.error("Unknown cell value", value);
+      return <span>[error]</span>;
+    }
     const cellWidth = (width || kDefaultColumnWidth) - kCellHorizontalPadding;
     const height = rowHeight && row ? rowHeight({ row }) : kRowHeight;
     if (gImageMap.isImageUrl(value)) {

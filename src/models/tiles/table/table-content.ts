@@ -299,6 +299,45 @@ export const TableContentModel = TileContentModel
             sharedDataSet.dataSet = DataSet.create(getSnapshot(self.importedDataSet));
             self.clearImportedDataSet();
           }
+
+          // Originally this code was in doPostCreate. When shared datasets were implemented in
+          // CLUE 3.0.0 this code was disabled.
+          // - The `attr.formula.synchronize` is skipped, because it would add a new undo/redo entry.
+          //   I think this synchronizing was here to handle backwards compatibility. Since it hadn't
+          //   been running for many months it seems safe to skip it. There is a chance that some old
+          //   document with an out of sync formula might be loaded. I'm not sure what will happen in
+          //   that case.
+          // - the updateDatasetByExpressions is skipped for the same reason. It would modify the dataset
+          //   which would generate multiple undo/redo entries. Currently it seems the table is responsible
+          //   for computing the formula and updating the dataset values. Because the table formula code
+          //   was broken for a while, there will be documents where the values are out of sync with the
+          //   formula. Without the updateDatasetByExpressions these out of sync values will not be
+          //   updated.
+          // A change to make here is to move this out of metadata just use volatile on the table
+          // content model. And possibly even better would be to move the formula calculation out of the
+          // table.
+
+          // Initialize our metadata with this shared dataset
+          if (self.dataSet.attributes.length >= 2) {
+
+            // const xAttr = self.dataSet.attributes[0];
+            // const xName = xAttr.name;
+            self.dataSet.attributes.forEach((attr, i) => {
+              if (i > 0) {
+                // attr.formula.synchronize(xName);
+                if (attr.formula.display) {
+                  self.metadata.setRawExpression(attr.id, attr.formula.display);
+                }
+                if (attr.formula.canonical) {
+                  self.metadata.setExpression(attr.id, attr.formula.canonical);
+                }
+             }
+            });
+          }
+
+          // if (self.metadata.hasExpressions) {
+          //   self.metadata.updateDatasetByExpressions(self.dataSet);
+          // }
         }
         else {
           if (!sharedDataSet) {
@@ -323,27 +362,6 @@ export const TableContentModel = TileContentModel
     },
     updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
       // console.warn("updateAfterSharedModelChanges hasn't been implemented for table content.");
-
-      // TODO This was moved from doPostCreate and might need to be rethought.
-      // if (self.dataSet.attributes.length >= 2) {
-      //   const xAttr = self.dataSet.attributes[0];
-      //   const xName = xAttr.name;
-      //   self.dataSet.attributes.forEach((attr, i) => {
-      //     if (i > 0) {
-      //       attr.formula.synchronize(xName);
-      //       if (attr.formula.display) {
-      //         self.metadata.setRawExpression(attr.id, attr.formula.display);
-      //       }
-      //       if (attr.formula.canonical) {
-      //         self.metadata.setExpression(attr.id, attr.formula.canonical);
-      //       }
-      //     }
-      //   });
-      // }
-
-      // if (self.metadata.hasExpressions) {
-      //   self.metadata.updateDatasetByExpressions(self.dataSet);
-      // }
     },
     setColumnWidth(attrId: string, width: number) {
       self.columnWidths.set(attrId, width);
