@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { observer } from "mobx-react";
 import classNames from "classnames";
 import { FloatingPortal } from "@floating-ui/react";
@@ -30,9 +30,12 @@ export const TileToolbar = observer(
     const { toolbarRefs, toolbarStyles, toolbarPlacement } = useTileToolbarPositioning(tileElement);
     const tipOptions = useTooltipOptions();
 
-    // Determine the buttons to be shown
+    // Determine the buttons to be shown. Avoid recalculating the list over and over.
     const ui = useUIStore();
-    const configuredButtonNames = useSettingFromStores("tools", tileType) as unknown as string[] | undefined;
+    const buttonNames = useMemo(() => {
+      const configuredButtonNames = useSettingFromStores("tools", tileType) as unknown as string[] | undefined;
+      return configuredButtonNames ?? getToolbarDefaultButtons(tileType);
+    }, []);
 
     // Determine if toolbar should be rendered or not.
     const enabled = !readOnly && id && ui.selectedTileIds.length === 1 && ui.selectedTileIds.includes(id);
@@ -40,8 +43,6 @@ export const TileToolbar = observer(
     // Not rendering sounds faster, but if React is smart enough to just toggle the 'disabled' class attribute
     // when you click in the tile, that would be super responsive.
     if (!enabled) return(null);
-
-    const buttonNames = configuredButtonNames ?? getToolbarDefaultButtons(tileType);
 
     const buttons = buttonNames.map((name) => {
       const info = getToolbarButtonInfo(tileType, name);
