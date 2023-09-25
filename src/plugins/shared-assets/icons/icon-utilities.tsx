@@ -1,8 +1,13 @@
 import React, { FunctionComponent, SVGProps } from "react";
 
 import EMGIcon from "./dataflow/control/signal.svg";
+import FanIcon from "./dataflow/output/fan.svg";
 import GripperIcon from "./dataflow/output/grabber.svg";
+import HumidifierIcon from "./dataflow/output/humid.svg";
+import HeatLampIcon from "./dataflow/output/light-bulb.svg";
+import HumidityIcon from "./dataflow/sensor/humidity.svg";
 import PressureIcon from "./dataflow/sensor/pressure.svg";
+import TemperatureIcon from "./dataflow/sensor/temperature.svg";
 
 const kIconPrefix = "ccicon";
 
@@ -20,8 +25,13 @@ export const kTemperatureKey = "temperature_key";
 
 const icons: Record<string, FunctionComponent<SVGProps<SVGSVGElement>>> = {
   [kEMGKey]: EMGIcon,
+  [kFanKey]: FanIcon,
   [kGripperKey]: GripperIcon,
-  [kPressureKey]: PressureIcon
+  [kHeatLampKey]: HeatLampIcon,
+  [kHumidifierKey]: HumidifierIcon,
+  [kHumidityKey]: HumidityIcon,
+  [kPressureKey]: PressureIcon,
+  [kTemperatureKey]: TemperatureIcon
 };
 
 export function iconUrl(id: string) {
