@@ -7,7 +7,7 @@
     "placeholderText": "This is where users can type text",
     "defaultDocumentType": "personal",
     "settings": {
-      "table": { "numFormat": ".2~f" },
+      "table": { "numFormat": ".2~f", "tools": ["set-expression", "link-tile", ["data-set-view", "DataCard"], "delete"]},
       "text": {"tools": ["bold", "subscript", "superscript", "new-variable", "insert-variable", "edit-variable"]},
       "drawing": {"tools": ["select", "line", "vector", "rectangle", "ellipse", "stamp", "stroke-color", "fill-color", "new-variable", "insert-variable", "edit-variable", "delete"]}
     },
