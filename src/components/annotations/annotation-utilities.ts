@@ -202,7 +202,7 @@ export function getSparrowCurve(
   };
   const deletePosition = findDeletePosition();
 
-  // Cache and return the data for the curve
+  // Return the data for the curve
   const curveData = {
     deleteX: deletePosition.deleteX,
     deleteY: deletePosition.deleteY,

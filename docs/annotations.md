@@ -40,6 +40,9 @@ Each object gets an "annotation button" that allows the user to add an annotatio
 #### `getObjectDefaultOffsets` (optional)
 By default, annotations are attached to the center of a target object. Defining this function allows the default position of the annotation anchor to be adjusted based on the obect. The function takes the usual `objectId` and optional `objectType`, and should return an MST `OffsetModel` (see `clue-object.ts`), which specifies a `dx` and `dy` with respect to the object's center. Note that offsets are generally bounded by the object's bounding box, so you should make sure `dx` and `dy` are within this rectangle.
 
+#### `getObjectNodeRadii` (optional)
+For small objects, such as numberline points or xy plot dots, the default node size might be so big that the node blocks the add annotation button, preventing the user from adding multiple annotations. Defining `getObjectNodeRadii` allows for a custom sized node. The function takes an `objectId` and optional `objectType` and should return an object which cotains `centerRadius` and `highlightRadius`. `kSmallAnnotationNodeRadius / 2` and `kSmallAnnotationNodeRadius` are good values for these, respectively.
+
 ### Updates to `registerTileContentInfo`
 All tiles have a `tile-registration.ts` file, where certain basic information about the tile is defined.
 
@@ -52,4 +55,29 @@ This function should update `object.objectId` with new attribute and case ids. I
 _REMEMBER:_ This function is only necessary to define for tiles with object ids that get updated when tiles are copied. Currently, that's only an issue for tiles with object ids that come from shared data sets, because other tile internal ids do not get updated when a tile is duplicated.
 
 ## Implementation Details
-_TO BE ADDED_
+
+### Annotations in Document Model
+Annotations are added to the document model in `document-content-with-annotations.ts`. Annotations are stored at the top level of the `DocumentModel` in a map, similar to tiles and shared models. And just like tiles and shared models, annotations need to be handled when exporting and importing documents, copying tiles, etc. Most of these functions are handled in `document-content.ts`.
+_NOTE:_ Currently, `annotations` in `DocumentModel` is defined as a map of `ArrowAnnotations`. When it comes time to add additional annotations to CLUE, it will be necessary to make this a union including `ArrowAnnotation` and any other new annotation models.
+
+### Rendering Annotations
+Annotations are rendered in the `AnnotationLayer`. This component is contained in the `CanvasComponent` and lives alongside the `DocumentContent`, covering it completely.
+
+The `AnnotationLayer` is in charge of several important tasks related to annotations:
+- It determines the size of the document, which bounds the placement of text.
+- It determines the offset of tiles with respect to the document, which is used to position annotation buttons and annotations (since object bounding boxes are positioned with respect to the containing tile).
+- It displays a preview arrow while the user has selected the source object of an arrow but hasn't yet selected a target object (note that this will need to be refactored when more annotations are added).
+- It displays the annotation buttons when appropriate and handles what happens when they are pressed (this is also very closely tied to sparrows and will need to be refactored when more annotations are added).
+
+### Curved Arrows
+Arrow annotations are formed by bezier curves. Most of the heavy lifting for this takes place in `src/components/annotation-utilities.ts`. Below are some high level notes that might help others understand what's going on here:
+- Each arrow annotation is made of two bezier curves, one that goes from the source to the text, and another that goes from the text to the target.
+- The points mentioned above are defined in the `getPoints` view of the `ArrowAnnotation` model:
+  - The source point is the center of the source's bounding box plus the arrow annotation's source offset. The target point is the center of the target's bounding box plus the arrow annotation's target offset.
+  - The text point is the half way point of the source point and target point, plus the arrow annotation's text offset.
+  - These points can also be modified by the user as they drag one of the points.
+  - The source and target offsets are bound by their objects' bounding boxes. The text offset is bound by the document size.
+- The control points for the bezier curves go parallel and perpendicular to the line between the source and target points.
+- An important concept for this math is whether the text is "between" the source and target points (that is, the line perpendicular to the source-target line that goes through the text point intersects the source-target line between the source and target points) or is "beyond" either the source or target point. The direction of the control points changes based on this, as well as how the arrowhead angle is computed.
+- The math to determine the arrowhead angle is pretty messy and isn't perfect. It's a very challenging problem.
+- The delete button point is approximately half way between the text and target points. This is also a surprisingly challenging problem.

@@ -59,9 +59,8 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     }
   }
 
-  const firstRow = content?.rowOrder.length && content.rowOrder.length > 0
-    ? getRowElement(content?.getRowByIndex(0)?.id) : undefined;
-  const documentWidth = firstRow?.offsetWidth ?? 0;
+  const documentWidth = canvasElement?.offsetWidth ?? 0;
+  // TODO Would it be better to use canvasElement?.offsetHeight here?
   const documentHeight = content?.height ?? 0;
   const documentLeft = 0;
   const documentRight = documentWidth;
@@ -212,12 +211,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
         if (element) divRef.current = element;
       }}
     >
-      <svg
-        className="annotation-svg"
-        height="100%"
-        width="100%"
-        xmlnsXlink="http://www.w3.org/1999/xlink"
-      >
+      <svg className="annotation-svg" xmlnsXlink="http://www.w3.org/1999/xlink">
         { editing && !readOnly && rowIds.map(rowId => {
           const row = content?.rowMap.get(rowId);
           if (row) {
