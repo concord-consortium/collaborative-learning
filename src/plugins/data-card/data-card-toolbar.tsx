@@ -88,8 +88,6 @@ export const DataCardToolbar: React.FC<IProps> = observer(function DataCardToolb
       case "merge-in":
         return <MergeInButton content={content} context={context} isDisabled={cardActionsDisabled} />;
       case "image-upload":
-        // need to disable this button when the valueActions are disabled,
-        // the button doesn't have disabled property
         return <ImageUploadButton onUploadImageFile={file => uploadImage(file)}
           extraClasses={valueActionsDisabled ? "disabled" : ""}/>;
       case "delete-attribute":
