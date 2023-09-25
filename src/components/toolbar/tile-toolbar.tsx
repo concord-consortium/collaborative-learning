@@ -30,12 +30,12 @@ export const TileToolbar = observer(
     const { toolbarRefs, toolbarStyles, toolbarPlacement } = useTileToolbarPositioning(tileElement);
     const tipOptions = useTooltipOptions();
 
-    // Determine the buttons to be shown. Avoid recalculating the list over and over.
+    // Determine the buttons to be shown. Avoid recalculating defaults over and over.
     const ui = useUIStore();
+    const configuredButtonNames = useSettingFromStores("tools", tileType) as unknown as string[] | undefined;
     const buttonNames = useMemo(() => {
-      const configuredButtonNames = useSettingFromStores("tools", tileType) as unknown as string[] | undefined;
       return configuredButtonNames ?? getToolbarDefaultButtons(tileType);
-    }, []);
+    }, [configuredButtonNames, tileType]);
 
     // Determine if toolbar should be rendered or not.
     const enabled = !readOnly && id && ui.selectedTileIds.length === 1 && ui.selectedTileIds.includes(id);
