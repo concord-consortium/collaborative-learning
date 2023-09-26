@@ -29,7 +29,10 @@ jobs:
     outputs:
       uuid: ${{ steps.uuid.outputs.value }}
       pr_labels: ${{ steps.pr.outputs.labels }}
+    permissions:
+      pull-requests: read
     steps:
+      - uses: actions/checkout@v2
       - name: Dump GitHub context
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
