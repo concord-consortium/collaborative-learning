@@ -71,6 +71,10 @@ jobs:
         # One thread is enoguh for now, since there is only one smoke test
         containers: [1]
     steps:
+      - name: Print PR labels
+        run: |
+          echo "PR labels ${{ needs.prepare.outputs.pr_labels }}"
+          echo "PR first_label ${{ fromJSON(needs.prepare.outputs.pr_labels)[0] }}"
       - name: Checkout
         uses: actions/checkout@v2
       - name: Install CMS Dependencies
@@ -149,7 +153,7 @@ jobs:
   regression:
     # only run the regression tests if the PR is labeled.
     # I'm not sure if this approach will work for a json output
-    if: contains(needs.prepare.outputs.pr_labels.*.name, 'run regression')
+    if: contains(fromJSON(needs.prepare.outputs.pr_labels).*.name, 'run regression')
     runs-on: ubuntu-latest
     timeout-minutes: 240
     needs:
