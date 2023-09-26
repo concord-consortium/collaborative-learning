@@ -207,8 +207,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   private getPointScreenCoords(pointId: string) {
     // Access the model to ensure that model changes trigger a rerender
-    const p = (this.props.model.content as GeometryContentModelType).getObject(pointId) as PointModelType;
-    if (p.x == null || p.y == null) return;
+    const p = this.getContent().getObject(pointId) as PointModelType;
+    if (!p || p.x == null || p.y == null) return;
 
     if (!this.state.board) return;
     const element = this.state.board?.objects[pointId];
@@ -309,6 +309,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         } else if (objectType === "polygon") {
           const content = this.getContent();
           const polygon = content.getObject(objectId) as PolygonModelType;
+          if (!polygon) return;
           let [bottom, left, right, top] = [Number.MIN_VALUE, Number.MAX_VALUE, Number.MIN_VALUE, Number.MAX_VALUE];
           polygon.points.forEach(pointId => {
             const coords = this.getPointScreenCoords(pointId);
@@ -325,7 +326,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             top: top + geometryAnnotationYOffset,
             width: right - left
           };
-          return boundingBox;          
+          return boundingBox;
         } else if (objectType === "segment") {
           const [ point1Id, point2Id ] = pointIdsFromSegmentId(objectId);
           const coords1 = this.getPointScreenCoords(point1Id);
@@ -394,6 +395,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           // Determine the path of the polygon based on its points
           const content = this.getContent();
           const polygon = content.getObject(objectId) as PolygonModelType;
+          if (!polygon) return;
           return this.getButtonPath(
             polygon.points.map(pointId => this.getPointScreenCoords(pointId)),
             handleClick, classes, translateTilePointToScreenPoint
