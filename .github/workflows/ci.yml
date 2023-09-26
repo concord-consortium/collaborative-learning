@@ -6,13 +6,15 @@ on:
     types: [ labeled ]
 jobs:
   prepare:
-    # only conintue if a push or run regression label
+    # only conintue if a push or PR labeled with 'run regression'
     if: github.event_name == 'push' || (github.event.action == 'labeled' && github.event.label.name == 'run regression')
     runs-on: ubuntu-latest
     outputs:
       uuid: ${{ steps.uuid.outputs.value }}
       pr_labels: ${{ steps.pr.outputs.labels }}
-      # if we are triggered by a pull_request labeled event, there is no branch, so the Get PR labels step will fail
+      # if we are triggered by a pull_request labeled event, there is no branch, so we fall back to checking the
+      # label in the github.event. Also steps.run_regression.outputs.value will be "false" in this case which
+      # being a string is actually considered true, so fromJSON is needed to turn `"false"` into `false`.
       run_regression: ${{ fromJSON(steps.run_regression.outputs.value) || github.event.label.name == 'run regression' }}
     permissions:
       pull-requests: read
@@ -25,8 +27,11 @@ jobs:
         # current branch.
         # - If the branch doesn't have a PR yet, then the `gh pr view` command fails with
         # the message: no pull requests found for branch "pr-label-test"
+        # - If the trigger is a labeled pull_request, a branch is not checked out, so the
+        # `gh pr view` command can't find the PR. This case is handled in the job output
+        # above.
         # - If the same branch is part of multiple PR, it isn't clear what will
-        # will happen, but that should be very unusual.
+        # happen, but that should be very unusual.
         run: echo "labels=$(gh pr view --json labels -q '.labels' || echo "[]")" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -44,12 +49,11 @@ jobs:
       - name: Print unique ID
         run: echo "generated id ${{ steps.uuid.outputs.value }}"
   build_test:
+    # We need 'prepare' so this job will be skipped if the trigger is a PR labeled with some other label
     needs: ['prepare']
     name: Build and Run Jest Tests
     runs-on: ubuntu-latest
     steps:
-      - name: Print run_regression
-        run: echo "run_regression ${{ needs.prepare.outputs.run_regression }}"
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v2
         with:
@@ -163,6 +167,8 @@ jobs:
     # only run the regression tests if the PR is labeled.
     if: fromJSON(needs.prepare.outputs.run_regression)
     runs-on: ubuntu-latest
+    # temporarily expand the timeout to 4hrs until cypress cloud is available again
+    # it was 1hr before.
     timeout-minutes: 240
     container: cypress/browsers:node16.14.2-slim-chrome103-ff102
     strategy:
@@ -172,7 +178,9 @@ jobs:
       # https://github.com/cypress-io/github-action/issues/48
       fail-fast: false
       matrix:
-        # run 5 copies of the current job in parallel
+        # temporarily use only 1 worker until cypress cloud is available again
+        # it was:
+        # container: [1, 2, 3, 4, 5]
         containers: [1]
     steps:
       - name: Checkout Repository
