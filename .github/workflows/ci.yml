@@ -34,7 +34,7 @@ jobs:
         run: echo "PR labels ${{ steps.pr.outputs.labels }}"
       - name: Get run_regression
         id: run_regression
-        run: echo "value=${{ contains(fromJSON(steps.pr.outputs.labels).*.name, 'run regression') }}"
+        run: echo "value=${{ contains(fromJSON(steps.pr.outputs.labels).*.name, 'run regression') }} >> $GITHUB_OUTPUT"
       - name: Generate unique ID 💎
         id: uuid
         # take the current commit + timestamp together
