@@ -6,7 +6,7 @@ jobs:
     name: Build and Run Jest Tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v2
         with:
           node-version: '16'
@@ -32,14 +32,10 @@ jobs:
     permissions:
       pull-requests: read
     steps:
-      - uses: actions/checkout@v2
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
+      - uses: actions/checkout@v4
       - name: Get PR labels
         id: pr
-        # the github.event.pull_request.labels does not seem to be available when a build
+        # the github.event.pull_request.labels is not available when a build
         # is triggered by a push. So we use the `gh` CLI to get info about the PR for the
         # current branch. If the same branch is part of multiple PR or the branch doesn't
         # have a PR, I'm not sure what will happen yet.
@@ -71,12 +67,8 @@ jobs:
         # One thread is enoguh for now, since there is only one smoke test
         containers: [1]
     steps:
-      - name: Print PR labels
-        run: |
-          echo "PR labels ${{ needs.prepare.outputs.pr_labels }}"
-          echo "PR first_label ${{ fromJSON(needs.prepare.outputs.pr_labels)[0] }}"
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Install CMS Dependencies
         working-directory: ./cms
         run: npm ci
@@ -123,7 +115,7 @@ jobs:
       - cypress
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v2
         with:
           node-version: '16'
@@ -170,7 +162,7 @@ jobs:
         containers: [1]
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - uses: actions/setup-node@v2
         with:
           node-version: '16'
