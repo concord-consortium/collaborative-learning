@@ -1,7 +1,7 @@
 import classNames from "classnames";
 import React from "react";
 
-import { kAnnotationNodeHeight } from "./annotation-utilities";
+import { kAnnotationNodeDefaultRadius } from "./annotation-utilities";
 
 import "./annotation-node.scss";
 
@@ -13,8 +13,8 @@ interface IAnnotationNodeProps {
   highlightRadius?: number;
 }
 export function AnnotationNode({ active, centerRadius, cx, cy, highlightRadius }: IAnnotationNodeProps) {
-  const _centerRadius = centerRadius ?? kAnnotationNodeHeight / 4;
-  const _highlightRadius = highlightRadius ?? kAnnotationNodeHeight / 2;
+  const _centerRadius = centerRadius ?? kAnnotationNodeDefaultRadius / 4;
+  const _highlightRadius = highlightRadius ?? kAnnotationNodeDefaultRadius / 2;
   return (
     <g className={classNames("annotation-node", { active })}>
       <circle

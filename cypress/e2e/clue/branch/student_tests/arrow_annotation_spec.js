@@ -4,13 +4,15 @@ import DrawToolTile from '../../../../support/elements/clue/DrawToolTile';
 import GraphToolTile from '../../../../support/elements/clue/GraphToolTile';
 import NumberlineToolTile from '../../../../support/elements/clue/NumberlineToolTile';
 import TableToolTile from '../../../../support/elements/clue/TableToolTile';
+import XYPlotToolTile from '../../../../support/elements/clue/XYPlotToolTile';
 
-const aa = new ArrowAnnotation,
-  clueCanvas = new ClueCanvas,
-  drawToolTile = new DrawToolTile,
-  tableToolTile = new TableToolTile,
-  graphToolTile = new GraphToolTile,
-  numberlineToolTile = new NumberlineToolTile;
+const aa = new ArrowAnnotation;
+const clueCanvas = new ClueCanvas;
+const drawToolTile = new DrawToolTile;
+const tableToolTile = new TableToolTile;
+const graphToolTile = new GraphToolTile;
+const numberlineToolTile = new NumberlineToolTile;
+const xyTile = new XYPlotToolTile;
 
 const queryParams = {
   unit1:"?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=example",
@@ -240,5 +242,43 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationButtons().eq(1).click();
     aa.getAnnotationButtons().eq(0).click();
     aa.getAnnotationArrows().should("have.length", 1);
+  });
+
+  it("can add arrows to xy plot tiles", () => {
+    beforeTest(queryParams.unit1);
+    clueCanvas.addTile("graph");
+    clueCanvas.addTile("table");
+    tableToolTile.getAddColumnButton().click();
+    tableToolTile.typeInTableCell(1, '3');
+    tableToolTile.typeInTableCell(2, '2');
+    tableToolTile.typeInTableCell(3, '2');
+    tableToolTile.typeInTableCell(6, '2');
+    tableToolTile.typeInTableCell(7, '4');
+    tableToolTile.typeInTableCell(8, '2');
+    tableToolTile.typeInTableCell(11, '1');
+    tableToolTile.typeInTableCell(12, '5');
+    tableToolTile.typeInTableCell(13, '2');
+
+    cy.log("Annotation buttons appear for dots");
+    aa.clickArrowToolbarButton();
+    // Table cells should have buttons, but there are no dots until the xy plot is connected to the table's dataset
+    aa.getAnnotationButtons().should("have.length", 9);
+    aa.clickArrowToolbarButton();
+    xyTile.getTile().click();
+    xyTile.getLinkTileButton().click();
+    xyTile.linkTable("Table 1");
+    aa.clickArrowToolbarButton();
+    aa.getAnnotationButtons().should("have.length", 12);
+
+    cy.log("Can add an arrow to xy plot dots");
+    aa.getAnnotationArrows().should("not.exist");
+    aa.getAnnotationButtons().eq(0).click();
+    aa.getAnnotationButtons().eq(1).click();
+    aa.getAnnotationArrows().should("have.length", 1);
+
+    cy.log("Dots are considered different objects when the axes change");
+    aa.clickArrowToolbarButton();
+    xyTile.selectYAttribute("y2");
+    aa.getAnnotationArrows().should("not.exist");
   });
 });

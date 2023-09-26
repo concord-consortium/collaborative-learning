@@ -3,6 +3,7 @@ import { axisBottom, drag, pointer, scaleLinear, select } from 'd3';
 import { observer } from 'mobx-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { kSmallAnnotationNodeRadius } from '../../../components/annotations/annotation-utilities';
 import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
 import { useToolbarTileApi } from "../../../components/tiles/hooks/use-toolbar-tile-api";
 import { ITileProps } from "../../../components/tiles/tile-component";
@@ -13,7 +14,7 @@ import { NumberlineContentModelType, PointObjectModelType,  } from "../models/nu
 import {
   kAxisStyle, kAxisWidth, kContainerWidth, kNumberLineContainerHeight, numberlineDomainMax, numberlineDomainMin,
   tickHeightDefault, tickHeightZero, tickStyleDefault, tickStyleZero, tickWidthDefault, tickWidthZero,
-  innerPointRadius, outerPointRadius, numberlineYBound, yMidPoint, kTitleHeight, kBoundingBoxOffset, kArrowheadTop,
+  innerPointRadius, outerPointRadius, numberlineYBound, yMidPoint, kTitleHeight, kArrowheadTop,
   kArrowheadOffset, kPointButtonRadius
 } from '../numberline-tile-constants';
 import { NumberlineToolbar } from "./numberline-toolbar";
@@ -86,7 +87,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     const point = content.getPoint(pointId);
     if (!point) return undefined;
     const { x, y } = pointPosition(point);
-    return { x: x + axisLeft + kBoundingBoxOffset, y: y + kTitleHeight + kBoundingBoxOffset };
+    return { x: x + axisLeft, y: y + kTitleHeight };
   }, [axisLeft, content, pointPosition]);
 
   const getObjectBoundingBox = useCallback((objectId: string, objectType?: string) => {
@@ -113,22 +114,16 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
         return model.title || "";
       },
       getObjectBoundingBox,
-      getObjectButtonSVG: ({ classes, handleClick, objectId, objectType, translateTilePointToScreenPoint }) => {
+      getObjectButtonSVG: ({ classes, handleClick, objectId, objectType }) => {
         if (objectType === "point") {
-          // Find the center point
           const coords = annotationPointCenter(objectId);
           if (!coords) return;
-          const pointCenter = translateTilePointToScreenPoint?.([coords.x, coords.y]);
-          if (!pointCenter) return;
-
-          // Return a circle at the center point
-          const [x, y] = pointCenter;
+          const { x, y } = coords;
           return (
             <circle
               className={classes}
               cx={x}
               cy={y}
-              fill="transparent"
               onClick={handleClick}
               r={kPointButtonRadius}
             />
@@ -141,7 +136,15 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
           offsets.setDy(-innerPointRadius);
         }
         return offsets;
-      }
+      },
+      getObjectNodeRadii(objectId: string, objectType?: string) {
+        if (objectType === "point") {
+          return {
+            centerRadius: kSmallAnnotationNodeRadius / 2,
+            highlightRadius: kSmallAnnotationNodeRadius
+          };
+        }
+      },
     });
   }, [annotationPointCenter, content, getObjectBoundingBox, model.title, onRegisterTileApi]);
 
