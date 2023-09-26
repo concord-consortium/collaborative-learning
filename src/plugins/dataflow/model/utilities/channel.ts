@@ -64,7 +64,7 @@ export const tmpSensorChannel: NodeChannelInfo = {
   displayName: "Temperature",
   channelId: "tmp",
   missing: true,
-  type: "tmp-reading",
+  type: "temperature",
   units: "n",
   value: 0,
   virtual: false,
