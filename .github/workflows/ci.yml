@@ -15,7 +15,8 @@ jobs:
       # if we are triggered by a pull_request labeled event, there is no branch, so we fall back to checking the
       # label in the github.event. Also steps.run_regression.outputs.value will be "false" in this case which
       # being a string is actually considered true, so fromJSON is needed to turn `"false"` into `false`.
-      run_regression: ${{ fromJSON(steps.run_regression.outputs.value) || github.event.label.name == 'run regression' }}
+      # finally if we are on the 'master' branch then run the regression tests regardless of the PR label
+      run_regression: ${{ fromJSON(steps.run_regression.outputs.value) || github.event.label.name == 'run regression' || github.ref_name == 'master' }}
     permissions:
       pull-requests: read
     steps:
