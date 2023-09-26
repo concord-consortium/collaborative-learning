@@ -15,7 +15,7 @@ jobs:
       pull-requests: read
     steps:
       - name: Bail if not a push or run regression label
-        if: github.event_name == 'push' || (github.event.action == 'labeled' && github.event.label.name == 'run regression')
+        if: (!(github.event_name == 'push' || (github.event.action == 'labeled' && github.event.label.name == 'run regression')))
         # note we might want to use an ::error or ::notice message to improve this behavior
         # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
         run: exit 1
