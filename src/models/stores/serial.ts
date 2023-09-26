@@ -133,16 +133,17 @@ export class SerialDevice {
   }
 
   public handleArduinoStreamObj(value: string, channels: Array<NodeChannelInfo>){
+    console.log("| channels: ", channels);
     this.localBuffer += value;
 
-    const pattern = /(emg|fsr):([0-9]+)[\r][\n]/g;
+    const pattern = /(emg|fsr|tmp):([0-9.]+)[\r][\n]/g;
     let match: RegExpExecArray | null;
 
     do {
       match = pattern.exec(this.localBuffer);
       if (!match) break;
 
-      const [fullMatch, channel, numValue] = match;
+      const [fullMatch, channel, numStr] = match;
       this.localBuffer = this.localBuffer.substring(match.index + fullMatch.length);
 
       const targetChannel = channels.find((c: NodeChannelInfo) => {
@@ -150,7 +151,9 @@ export class SerialDevice {
       });
 
       if (targetChannel){
-        targetChannel.value = parseInt(numValue, 10);
+        const rounded = Math.round(Number(numStr));
+        console.log(`| writing to ${channel}: ${rounded}`);
+        targetChannel.value = rounded;
       }
     } while (match);
   }

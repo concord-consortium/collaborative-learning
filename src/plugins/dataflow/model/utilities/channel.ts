@@ -57,6 +57,22 @@ export const fsrSensorChannel: NodeChannelInfo = {
   deviceFamily: "arduino"
 };
 
+export const tmpSensorChannel: NodeChannelInfo = {
+  hubId: "SERIAL-ARDUINO",
+  hubName: "Arduino",
+  name: "tmp",
+  displayName: "Temperature",
+  channelId: "tmp",
+  missing: true,
+  type: "tmp-reading",
+  units: "n",
+  value: 0,
+  virtual: false,
+  usesSerial: true,
+  serialConnected: null,
+  deviceFamily: "arduino"
+};
+
 interface MicroBitSensorChannelInfo {
   microBitId: string,
   type: string,
@@ -145,7 +161,8 @@ const microBitSensorChannels = createMicroBitSensorChannels(microBitSensors);
 const microBitRelayChannels = createMicroBitRelayInfoChannels(microBitHubs);
 
 export const serialSensorChannels: NodeChannelInfo[] = [
-  emgSensorChannel, fsrSensorChannel, ...microBitSensorChannels, ...microBitRelayChannels
+  emgSensorChannel, fsrSensorChannel, tmpSensorChannel,
+  ...microBitSensorChannels, ...microBitRelayChannels
 ];
 
 export const kDeviceDisplayNames: Record<string, string> = {
