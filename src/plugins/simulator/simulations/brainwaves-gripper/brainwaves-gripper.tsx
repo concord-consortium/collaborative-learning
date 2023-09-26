@@ -15,12 +15,15 @@ import "./brainwaves-gripper.scss";
 
 export const kBrainwavesKey = "EMG_and_claw";
 
+const minPressureValue = 60;
+
 const kRawTemperatureKey = "raw_temperature_key";
 const kSimulationModeKey = "simulation_mode_key";
 const kSimulationModePressure = 0;
 const kSimulationModeTemperature = 1;
 const baseTemperature = 15.5; // 60 degrees F
 const maxTemperature = Math.max(...demoStreams.fastBoil);
+const minTemperatureValue = 81; // Percentage closed for the gripper to feel the temperature
 
 interface IAnimationProps extends ISimulationProps {
   mode: number;
@@ -120,10 +123,8 @@ function step({ frame, variables }: ISimulationProps) {
   const gripperVariable = findVariable(kGripperKey, variables);
   const pressureVariable = findVariable(kPressureKey, variables);
   if (gripperVariable && pressureVariable) {
-    const minPressureValue = 60;
     const gripperValue = gripperVariable.value;
-    const gripperClosed = gripperValue && gripperValue > minPressureValue;
-    const pressureValue = gripperClosed
+    const pressureValue = gripperValue && gripperValue > minPressureValue
       ? (gripperValue - minPressureValue) * 100
       : 0;
     pressureVariable.setValue(pressureValue);
@@ -131,7 +132,9 @@ function step({ frame, variables }: ISimulationProps) {
     const modeVariable = findVariable(kSimulationModeKey, variables);
     const rawTemperatureVariable = findVariable(kRawTemperatureKey, variables);
     const temperatureVariable = findVariable(kTemperatureKey, variables);
-    if (modeVariable?.currentValue === kSimulationModeTemperature && gripperClosed && rawTemperatureVariable && temperatureVariable) {
+    const gripperFeeling = gripperValue && gripperValue > minTemperatureValue;
+    if (modeVariable?.currentValue === kSimulationModeTemperature && gripperFeeling
+      && rawTemperatureVariable && temperatureVariable) {
       temperatureVariable.setValue(rawTemperatureVariable.currentValue);
     } else {
       temperatureVariable?.setValue(baseTemperature);
