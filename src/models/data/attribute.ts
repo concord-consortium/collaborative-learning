@@ -112,8 +112,8 @@ export const Attribute = types.model("Attribute", {
     });
     // need to order them by count
     const entries = [...counts.entries()];
-    const ordered = entries.sort((a,b) => b[1] - a[1]);
-    const map = new Map<AttributeType,number>(ordered);
+    const ordered = entries.sort((a, b) => b[1] - a[1]);
+    const map = new Map<AttributeType, number>(ordered);
     return map;
   },
   get format() {
@@ -156,7 +156,7 @@ export const Attribute = types.model("Attribute", {
     // with the highest count
     // If the counts of multiple types are equal then the which one
     // is returned is currently undefined
-    const [[firstType,count]] = typeCounts;
+    const [[firstType, count]] = typeCounts;
 
     // if the identified type has more than half of the full values
     // return that, otherwise just return categorical

@@ -294,7 +294,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
 
     return (
       <div className="four-up" ref={(el) => this.container = el}>
-        { [0,1,2,3].map(cornerIndex => renderCorner(cornerIndex)) }
+        { [0, 1, 2, 3].map(cornerIndex => renderCorner(cornerIndex)) }
         {!focusedGroupUser ? this.renderSplitters() : null}
       </div>
     );

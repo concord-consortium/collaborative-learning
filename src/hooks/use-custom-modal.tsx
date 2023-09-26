@@ -34,7 +34,7 @@ interface IProps<IContentProps> {
   buttons: IModalButton[];
   onClose?: () => void;
 }
-export const useCustomModal = <IContentProps,>({
+export const useCustomModal = <IContentProps, >({
   className, Icon, title, Content, contentProps, focusElement, canCancel, buttons,
   onClose
 }: IProps<IContentProps>, dependencies?: any[]) => {

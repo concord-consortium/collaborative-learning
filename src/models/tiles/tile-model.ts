@@ -116,7 +116,7 @@ export const TileModel = types
   .actions(self => ({
     setTitle(title: string) {
       self.title = title;
-      logTileDocumentEvent(LogEventName.RENAME_TILE,{ tile: self as ITileModel });
+      logTileDocumentEvent(LogEventName.RENAME_TILE, { tile: self as ITileModel });
     },
     setDisplay(display: DisplayUserType) {
       self.display = display;

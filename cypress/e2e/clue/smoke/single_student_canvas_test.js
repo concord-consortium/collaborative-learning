@@ -14,7 +14,7 @@ let drawToolTile = new DrawToolTile;
 let textToolTile = new TextToolTile;
 let tableToolTile = new TableToolTile;
 
-context('single student functional test',()=>{
+context('single student functional test', ()=>{
     before(function(){
             const queryParams = `${Cypress.config("queryParams")}`;
             cy.clearQAData('all');
@@ -23,7 +23,7 @@ context('single student functional test',()=>{
             // cy.wait(4000);
         clueCanvas.getInvestigationCanvasTitle().text().as('title');
     });
-    describe('Nav tabs open and close',()=>{
+    describe('Nav tabs open and close', ()=>{
       it('will verify that clicking on any tab opens the nav area', function () {
         // cy.get(".resources-expander.my-work").click();
         cy.openTopTab("my-work");
@@ -37,7 +37,7 @@ context('single student functional test',()=>{
         cy.get('.list.'+section+' [data-test='+section+'-list-items] .footer').should('contain', "My First Learning Log");
       });
       it('verify click on document thumbnail opens document in nav panel', function () {
-        cy.openDocumentWithTitle('my-work', 'learning-log','My First Learning Log');
+        cy.openDocumentWithTitle('my-work', 'learning-log', 'My First Learning Log');
         cy.get('.editable-document-content [data-test=canvas]').should('be.visible');
         cy.get('.edit-button.learning-log').should('be.visible');
       });
@@ -80,13 +80,13 @@ context('single student functional test',()=>{
 
         it('verify share button', function(){
             clueCanvas.getShareButton().should('be.visible');
-            clueCanvas.getShareButton().should('have.class','private');
+            clueCanvas.getShareButton().should('have.class', 'private');
             clueCanvas.shareCanvas();
             clueCanvas.getShareButton().should('be.visible');
-            clueCanvas.getShareButton().should('have.class','public');
+            clueCanvas.getShareButton().should('have.class', 'public');
             clueCanvas.unshareCanvas();
             clueCanvas.getShareButton().should('be.visible');
-            clueCanvas.getShareButton().should('have.class','private');
+            clueCanvas.getShareButton().should('have.class', 'private');
         });
         it('verify publish button', function(){
             canvas.publishCanvas("investigation");
@@ -105,7 +105,7 @@ context('single student functional test',()=>{
         it('adds a graph tool', function(){
             clueCanvas.addTile('geometry');
             graphToolTile.getGraphTile().should('exist');
-            graphToolTile.addPointToGraph(0,0);
+            graphToolTile.addPointToGraph(0, 0);
         });
         it('adds an image tool', function(){
             clueCanvas.addTile('image');
@@ -147,20 +147,20 @@ context('single student functional test',()=>{
         describe('publish canvas', ()=>{
             it('verify published canvas thumbnail', () => {
               cy.openTopTab('class-work');
-              cy.openSection('class-work','workspaces');
-              cy.getCanvasItemTitle('workspaces').should('have.length',1);
+              cy.openSection('class-work', 'workspaces');
+              cy.getCanvasItemTitle('workspaces').should('have.length', 1);
             });
-            it('verify publish canvas thumbnail appears in Class Work Published List',()=>{
+            it('verify publish canvas thumbnail appears in Class Work Published List', ()=>{
                 canvas.publishCanvas("investigation");
                 cy.openTopTab('class-work');
-                cy.openSection('class-work','workspaces');
-                cy.getCanvasItemTitle('workspaces').should('have.length',2);
+                cy.openSection('class-work', 'workspaces');
+                cy.getCanvasItemTitle('workspaces').should('have.length', 2);
                 cy.getCanvasItemTitle('workspaces').first().should('contain', 'v2');
             });
-            it('verify student name appears under thumbnail',()=>{
+            it('verify student name appears under thumbnail', ()=>{
                 cy.get('[data-test=user-name]').then(($el)=>{
                     const user = $el.text();
-                    cy.getCanvasItemTitle('workspaces').first().find('.info div').should('contain',user);
+                    cy.getCanvasItemTitle('workspaces').first().find('.info div').should('contain', user);
                 });
             } );
             it('verify restore of published canvas', ()=>{
@@ -170,7 +170,7 @@ context('single student functional test',()=>{
                     const user = $el.text();
                     cy.getCanvasItemTitle('workspaces', user).first().click();
                 });
-                cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.text-tool').should('exist').and('contain','This is a smoke test');
+                cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.text-tool').should('exist').and('contain', 'This is a smoke test');
                 cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.geometry-content').should('exist');
                 cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.drawing-tool').should('exist');
                 cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.image-tool').should('exist');

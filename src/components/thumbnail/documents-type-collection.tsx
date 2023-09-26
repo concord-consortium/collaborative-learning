@@ -32,7 +32,7 @@ interface IProps {
   onDocumentDeleteClick?: (document: DocumentModelType) => void;
 }
 
-function getNewDocumentLabel(section: NavTabSectionModelType , appConfigStore: AppConfigModelType) {
+function getNewDocumentLabel(section: NavTabSectionModelType, appConfigStore: AppConfigModelType) {
   let documentLabel = "";
   section.documentTypes.forEach(type => {
     const label = type !== PersonalDocument ? appConfigStore.getDocumentLabel(type, 1) : "";
@@ -98,7 +98,7 @@ export const DocumentCollectionByType: React.FC<IProps> = observer(({
   const tabName = tab?.toLowerCase().replace(' ', '-');
   const isTeacherDocument = useCallback((document: DocumentModelType) => {
       return classStore.isTeacher(document.uid);
-    },[classStore]);
+    }, [classStore]);
   const sectionDocs: DocumentModelType[] = getSectionDocs(section, documents, user, isTeacherDocument);
   const isTopPanel = index === 0 && numSections > 1;
   const isBottomPanel = index > 0 && index === numSections - 1;

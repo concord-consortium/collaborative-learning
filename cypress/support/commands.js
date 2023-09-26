@@ -48,22 +48,22 @@ Cypress.Commands.add("setupGroup", (students, group) => {
         // These checks are here to make sure the workspace has loaded enough to create
         // the student
         cy.waitForLoad();
-        header.getGroupName().should('contain','Group '+group);
-        header.getGroupMembers().find('div.member').should('contain','S'+students[i]);
+        header.getGroupName().should('contain', 'Group '+group);
+        header.getGroupMembers().find('div.member').should('contain', 'S'+students[i]);
         clueCanvas.shareCanvas();
     }
     // Verify Group num and the correct 4 students are listed, now that all 4 are loaded
-    header.getGroupName().should('contain','Group '+group);
+    header.getGroupName().should('contain', 'Group '+group);
     for (j=0; j<students.length; j++) {
-        header.getGroupMembers().find('div.member').should('contain','S'+students[j]);
+        header.getGroupMembers().find('div.member').should('contain', 'S'+students[j]);
     }
 });
 
-Cypress.Commands.add("uploadFile",(selector, filename, type="")=>{
+Cypress.Commands.add("uploadFile", (selector, filename, type="")=>{
     // cy.fixture(filename).as("image");
 
     return cy.get(selector).then(subject => {
-        return cy.fixture(filename,'base64')
+        return cy.fixture(filename, 'base64')
             .then(str => Promise.resolve(Cypress.Blob.base64StringToBlob))
         // From Cypress document: https://docs.cypress.io/api/utilities/blob.html#Examples
         // return Cypress.Blob.base64StringToBlob(cy.fixture(filename), "image/png")
@@ -146,7 +146,7 @@ Cypress.Commands.add("launchReport", (reportUrl) => {
 Cypress.Commands.add("waitForLoad", () => {
   cy.get('.version', {timeout: 60000});
 });
-Cypress.Commands.add("deleteWorkspaces",(baseUrl,queryParams)=>{
+Cypress.Commands.add("deleteWorkspaces", (baseUrl, queryParams)=>{
     let primaryWorkspace = new PrimaryWorkspace;
     let resourcesPanel = new ResourcesPanel;
     let canvas = new Canvas;
@@ -157,12 +157,12 @@ Cypress.Commands.add("deleteWorkspaces",(baseUrl,queryParams)=>{
     dashboard.switchView("Workspace & Resources");
     cy.wait(2000);
     resourcesPanel.openPrimaryWorkspaceTab("my-work");
-    cy.openSection("my-work","workspaces");
+    cy.openSection("my-work", "workspaces");
     cy.wait(2000);
-    primaryWorkspace.getAllSectionCanvasItems("my-work","workspaces").then((document_list)=>{
+    primaryWorkspace.getAllSectionCanvasItems("my-work", "workspaces").then((document_list)=>{
         let listLength = document_list.length;
         while(listLength>1){
-            primaryWorkspace.getAllSectionCanvasItems("my-work","workspaces").eq(0).click();
+            primaryWorkspace.getAllSectionCanvasItems("my-work", "workspaces").eq(0).click();
             cy.wait(1111);
             canvas.deleteDocument();
             listLength=listLength-1;
@@ -190,16 +190,16 @@ Cypress.Commands.add("openSection", (tab, section) => {//doc-tab my-work workspa
 Cypress.Commands.add("getCanvasItemTitle", (section) => {
   cy.get('.list.'+section+' [data-test='+section+'-list-items] .footer');
 });
-Cypress.Commands.add("openDocumentThumbnail", (navTab,section,title) => { //opens thumbnail into the nav panel
+Cypress.Commands.add("openDocumentThumbnail", (navTab, section, title) => { //opens thumbnail into the nav panel
   cy.get('.document-tabs.'+navTab+' .list.'+section+' [data-test='+section+'-list-items] .footer').contains(title).parent().parent().siblings('.scaled-list-item-container').click({force:true});
 });
 Cypress.Commands.add("openDocumentWithTitle", (tab, section, title) => {
-  cy.openSection(tab,section);
+  cy.openSection(tab, section);
   cy.get('.document-tabs.'+tab+' .list.'+section+' [data-test='+section+'-list-items] .footer').contains(title).parent().parent().siblings('.scaled-list-item-container').click({force:true});
   cy.get('.document-tabs.'+tab+' [data-test=subtab-'+section+'] .edit-button').click();
 });
 Cypress.Commands.add("openDocumentWithIndex", (tab, section, docIndex) => {
-  cy.openSection(tab,section);
+  cy.openSection(tab, section);
   cy.get('.list.'+section+' [data-test='+section+'-list-items] .footer').eq(docIndex).siblings('.scaled-list-item-container').click({force:true});
   cy.get('.edit-button').click();
 });
@@ -276,6 +276,6 @@ Cypress.Commands.add('unlinkTableToDataflow', (program, table) => {
     cy.get('button').contains('Unlink').click();
   });
 });
-Cypress.Commands.add("deleteDocumentThumbnail", (tab, section,title) => {
+Cypress.Commands.add("deleteDocumentThumbnail", (tab, section, title) => {
   cy.get('.'+tab+' .list.'+section+' [data-test='+section+'-list-items] .footer .icon-delete-document').eq(1).click({force:true});
 });

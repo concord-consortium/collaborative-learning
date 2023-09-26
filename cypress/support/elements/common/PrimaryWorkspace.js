@@ -52,7 +52,7 @@ class PrimaryWorkspace{
       cy.get('.doc-tab.'+tab+'.'+section).click();
     }
 
-    closeSection(tab,section){
+    closeSection(tab, section){
         cy.get('[data-test='+tab+'-section-'+section+']').click();
     }
 

@@ -24,13 +24,13 @@ describe('verify document curation', function() {//adding a star to a student do
 
     let studentDoc = "Student 5: SAS 2.1 Drawing Wumps";
 
-    it('verify starring and unstar',function(){
+    it('verify starring and unstar', function(){
         beforeTest(queryParams);
         cy.log('verify starring a student published investigation');
         cy.openTopTab('class-work');
-        cy.openSection('class-work','workspaces');
-        resourcesPanel.starCanvasItem('class-work','workspaces',studentDoc);
-        resourcesPanel.getCanvasStarIcon('class-work','workspaces',studentDoc).should('have.class','starred');
+        cy.openSection('class-work', 'workspaces');
+        resourcesPanel.starCanvasItem('class-work', 'workspaces', studentDoc);
+        resourcesPanel.getCanvasStarIcon('class-work', 'workspaces', studentDoc).should('have.class', 'starred');
         //make sure only one canvas is starred,
         //length is one if Starred section has not been loaded.
         //length becomes 2 when the Starred section is exposed.
@@ -46,9 +46,9 @@ describe('verify document curation', function() {//adding a star to a student do
         cy.wait(1000);
         dashboard.switchView('Workspace & Resources');
         cy.openTopTab('class-work');
-        cy.openSection('class-work','starred');
+        cy.openSection('class-work', 'starred');
         cy.getCanvasItemTitle('class-work', 'starred', studentDoc).should('not.exist');
-        cy.openSection('class-work','workspaces');
-        resourcesPanel.getCanvasStarIcon('class-work','workspaces',studentDoc).should('not.have.class','starred');
+        cy.openSection('class-work', 'workspaces');
+        resourcesPanel.getCanvasStarIcon('class-work', 'workspaces', studentDoc).should('not.have.class', 'starred');
     });
 });

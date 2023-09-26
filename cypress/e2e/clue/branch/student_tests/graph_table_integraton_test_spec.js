@@ -196,7 +196,7 @@ context('Graph Table Integration', function () {
   context('Save and restore keeps the connection between table and graph', function () {
     before(function () {
       let title = '2.3 Mouthing Off and Nosing Around';
-      canvas.createNewExtraDocumentFromFileMenu("empty",'my-work');
+      canvas.createNewExtraDocumentFromFileMenu("empty", 'my-work');
       cy.wait(2000);
       cy.openResourceTabs();
       cy.openTopTab('my-work');

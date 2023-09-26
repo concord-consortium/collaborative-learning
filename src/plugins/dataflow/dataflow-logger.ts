@@ -4,7 +4,7 @@ import { logTileChangeEvent } from "../../models/tiles/log/log-tile-change-event
 
 type DataflowLogPayload = any; //Node | Connection | Control | object;
 
-interface DataflowProgramChange extends Record<string ,any> {
+interface DataflowProgramChange extends Record<string, any> {
   targetType: string,
   nodeTypes?: string[],
   nodeIds?: number[],

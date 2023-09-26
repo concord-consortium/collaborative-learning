@@ -43,7 +43,7 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
     return  cDocsRef
     .where("unit", "==", unit)
     .where("problem", "==", problem)
-    .where("network","==", user?.network);
+    .where("network", "==", user?.network);
   } else {
     return  cDocsRef
     .where("unit", "==", unit)
@@ -84,7 +84,7 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
       });
     });
     return () => unsubscribeFromDocs?.();
-  },[cDocsRef, cDocsInScopeRef]);
+  }, [cDocsRef, cDocsInScopeRef]);
 
 
   //------Documents: (i.e. //"Student Workspaces/"My Work"/"Class Work")
@@ -131,7 +131,7 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
 
     });
     return () => unsubscribeFromDocs?.();
-  },[mDocsRef, mDocsInScopeRef]);
+  }, [mDocsRef, mDocsInScopeRef]);
 
   return (
     <div className="commented-document-list">

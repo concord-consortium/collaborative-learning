@@ -373,7 +373,7 @@ export const debouncedSelectTile = debounce(selectTile, 50);
 
 // Maybe this should return the navTab and subTab
 export function getTabsOfCurriculumDoc(docPath: string) {
-  const {facet,section} = getCurriculumMetadata(docPath) || {};
+  const {facet, section} = getCurriculumMetadata(docPath) || {};
   return {
     navTab: facet === "guide" ? ENavTab.kTeacherGuide : ENavTab.kProblems,
     subTab: section

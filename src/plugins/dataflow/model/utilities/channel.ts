@@ -69,10 +69,10 @@ interface MicroBitHubInfo {
 }
 
 const microBitHubs = [
-  { microBitId: "a", relaysState: [0,0,0] },
-  { microBitId: "b", relaysState: [0,0,0] },
-  { microBitId: "c", relaysState: [0,0,0] },
-  { microBitId: "d", relaysState: [0,0,0] },
+  { microBitId: "a", relaysState: [0, 0, 0] },
+  { microBitId: "b", relaysState: [0, 0, 0] },
+  { microBitId: "c", relaysState: [0, 0, 0] },
+  { microBitId: "d", relaysState: [0, 0, 0] },
 ];
 
 const microBitSensors: MicroBitSensorChannelInfo[] = [
@@ -107,7 +107,7 @@ function createMicroBitSensorChannels(sensors: MicroBitSensorChannelInfo[] ){
       hubName: `microbit ${s.microBitId}`,
       name: `${s.type}-microbit-${s.microBitId}`,
       displayName: `${sensorTypeDisplayName} ${hubDisplayName}`,
-      channelId: `${s.type.substring(0,1)}-${s.microBitId}`,
+      channelId: `${s.type.substring(0, 1)}-${s.microBitId}`,
       type: `${s.type}`,
       units: `${s.units}`
     };

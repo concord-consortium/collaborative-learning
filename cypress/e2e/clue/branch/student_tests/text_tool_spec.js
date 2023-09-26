@@ -34,9 +34,9 @@ context('Text tool tile functionalities', function(){
     it('clicks the same text field and allows user to edit text', function(){
         textToolTile.getTextTile().last().focus();
         textToolTile.enterText('! Adding more text to see if it gets added. ');
-        textToolTile.getTextEditor().last().should('contain','! Adding more text to see if it gets added. ');
+        textToolTile.getTextEditor().last().should('contain', '! Adding more text to see if it gets added. ');
         textToolTile.enterText('Adding more text to delete');
-        textToolTile.getTextEditor().last().should('contain','Adding more text to delete');
+        textToolTile.getTextEditor().last().should('contain', 'Adding more text to delete');
         textToolTile.deleteText('{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}...');
         textToolTile.getTextTile().last().should('not.contain', 'delete');
     });
@@ -85,12 +85,12 @@ context('Text tool tile functionalities', function(){
         textToolTile.clickToolbarTool("Bulleted List");
         textToolTile.getTextEditor().last().should('have.descendants', 'ul');
     });
-    it('verifies restore of text field content',()=>{
-        canvas.createNewExtraDocumentFromFileMenu('text tool test','my-work');
+    it('verifies restore of text field content', ()=>{
+        canvas.createNewExtraDocumentFromFileMenu('text tool test', 'my-work');
         cy.wait(2000);
         textToolTile.getTextTile().should('not.exist');
         //re-open investigation
-        canvas.openDocumentWithTitle('workspaces',title);
+        canvas.openDocumentWithTitle('workspaces', title);
         textToolTile.getTextTile().last().should('exist').and('contain', 'Hello World');
         textToolTile.getTextEditor().last().should('have.descendants', 'strong');
         textToolTile.getTextEditor().last().should('have.descendants', 'em');
@@ -100,7 +100,7 @@ context('Text tool tile functionalities', function(){
         textToolTile.getTextEditor().last().should('have.descendants', 'ol');
         textToolTile.getTextEditor().last().should('have.descendants', 'ul');
     });
-    it('verifies restore of text field content in copy document',()=>{
+    it('verifies restore of text field content in copy document', ()=>{
         //copy investigation
         canvas.copyDocument(copyTitle);
         canvas.getPersonalDocTitle().should('contain', copyTitle);
@@ -114,7 +114,7 @@ context('Text tool tile functionalities', function(){
         textToolTile.getTextEditor().last().should('have.descendants', 'ul');
         canvas.deleteDocument();
     });
-    it('delete text tile',()=>{
+    it('delete text tile', ()=>{
         clueCanvas.deleteTile('text');
         textToolTile.getTextTile().should('not.exist');
     });

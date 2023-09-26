@@ -21,7 +21,7 @@ context('Test group functionalities', function(){
     let qaClass = 10,
         qaGroup = 10,
         problem = 3.3,
-        studentArr=[15,16,17,18];
+        studentArr=[15, 16, 17, 18];
     context('test the views', function(){
         describe('set-up for 4-up view tests', function(){
             it('will set up groups', function(){
@@ -36,7 +36,7 @@ context('Test group functionalities', function(){
                     cy.wait(5000);
                     clueCanvas.addTile('text');
                     textToolTile.enterText('This is to test the 4-up view of S'+studentArr[i]);
-                    textToolTile.getTextTile().last().should('contain', '4-up').and('contain','S'+studentArr[i]);
+                    textToolTile.getTextTile().last().should('contain', '4-up').and('contain', 'S'+studentArr[i]);
                     clueCanvas.addTile('geometry');
                     clueCanvas.addTile('table');
                     clueCanvas.addTile('drawing');
@@ -49,10 +49,10 @@ context('Test group functionalities', function(){
             it('verify 4-up view comes up correctly with students', function(){
                 clueCanvas.openFourUpView();
                 clueCanvas.getFourToOneUpViewToggle().should('be.visible');
-                clueCanvas.getNorthEastCanvas().should('be.visible').and('contain','S'+studentArr[0]);
-                clueCanvas.getSouthEastCanvas().should('be.visible').and('contain','S'+studentArr[1]);
-                clueCanvas.getSouthWestCanvas().should('be.visible').and('contain','S'+studentArr[2]);
-                clueCanvas.getNorthWestCanvas().should('be.visible').and('contain','S'+studentArr[3]);
+                clueCanvas.getNorthEastCanvas().should('be.visible').and('contain', 'S'+studentArr[0]);
+                clueCanvas.getSouthEastCanvas().should('be.visible').and('contain', 'S'+studentArr[1]);
+                clueCanvas.getSouthWestCanvas().should('be.visible').and('contain', 'S'+studentArr[2]);
+                clueCanvas.getNorthWestCanvas().should('be.visible').and('contain', 'S'+studentArr[3]);
             });
         });
         // describe('test the 4-up view', function(){
@@ -111,7 +111,7 @@ context('Test group functionalities', function(){
 
         // TODO: Need to write tests
         describe('test sharing and unsharing canvases', function(){
-            it('verify share icon toggles correctly',()=>{
+            it('verify share icon toggles correctly', ()=>{
                 clueCanvas.getShareButton().should('have.class', 'public');
                 clueCanvas.shareCanvas();
                 clueCanvas.getShareButton().should('have.class', 'private');
@@ -125,10 +125,10 @@ context('Test group functionalities', function(){
                 cy.wait(5000);
                 clueCanvas.openFourUpView();
                 clueCanvas.getFourToOneUpViewToggle().should('be.visible');
-                cy.get('.canvas-area .four-up .canvas-container.north-west').should('be.visible').and('not.contain','not shared their workspace');
-                clueCanvas.getNorthEastCanvas().should('be.visible').and('not.contain','not shared their workspace');
-                clueCanvas.getSouthEastCanvas().should('be.visible').and('not.contain','not shared their workspace');
-                clueCanvas.getSouthWestCanvas().should('be.visible').and('not.contain','not shared their workspace');
+                cy.get('.canvas-area .four-up .canvas-container.north-west').should('be.visible').and('not.contain', 'not shared their workspace');
+                clueCanvas.getNorthEastCanvas().should('be.visible').and('not.contain', 'not shared their workspace');
+                clueCanvas.getSouthEastCanvas().should('be.visible').and('not.contain', 'not shared their workspace');
+                clueCanvas.getSouthWestCanvas().should('be.visible').and('not.contain', 'not shared their workspace');
             });
             it('will unshare canvas and verify canvas is not visible in groupmates 4-up view', function(){
                 cy.log('need to write this test');
@@ -138,7 +138,7 @@ context('Test group functionalities', function(){
                 cy.wait(5000);
                 clueCanvas.openFourUpView();
                 clueCanvas.getFourToOneUpViewToggle().should('be.visible');
-                clueCanvas.getSouthWestCanvas().should('be.visible').and('contain','Student 18 has not shared their workspace.');
+                clueCanvas.getSouthWestCanvas().should('be.visible').and('contain', 'Student 18 has not shared their workspace.');
             });
             it('restore a 4-up canvas where a groupmate has shared a canvas while it was not open', function(){
                 let copyTitle = 'Workspace Copy Document';
@@ -154,7 +154,7 @@ context('Test group functionalities', function(){
                 clueCanvas.openFourUpView();
                 clueCanvas.getFourToOneUpViewToggle().should('be.visible');
                 clueCanvas.getNorthEastCanvas().should('contain', 'S15');
-                clueCanvas.getNorthEastCanvas().should('be.visible').and('not.contain','not shared their workspace');        
+                clueCanvas.getNorthEastCanvas().should('be.visible').and('not.contain', 'not shared their workspace');        
                 clueCanvas.shareCanvas();
                 cy.visit(baseUrl+'?appMode=qa&qaGroup='+qaGroup+'&fakeClass='+qaClass+'&fakeUser=student:15&problem=2.3');
                 cy.waitForLoad();
@@ -162,7 +162,7 @@ context('Test group functionalities', function(){
                 clueCanvas.openFourUpView();
                 clueCanvas.getFourToOneUpViewToggle().should('be.visible');
                 clueCanvas.getSouthWestCanvas().should('contain', 'S18');
-                clueCanvas.getSouthWestCanvas().should('be.visible').and('not.contain','not shared their workspace');
+                clueCanvas.getSouthWestCanvas().should('be.visible').and('not.contain', 'not shared their workspace');
             });
             it('restore a 4-up canvas where a groupmate has unshared a canvas while it was not open', function(){
                 cy.log('need to write this test');
@@ -177,7 +177,7 @@ context('Test group functionalities', function(){
                 clueCanvas.openFourUpView();
                 clueCanvas.getFourToOneUpViewToggle().should('be.visible');
                 clueCanvas.getNorthEastCanvas().should('contain', 'S15');
-                clueCanvas.getNorthEastCanvas().should('be.visible').and('not.contain','not shared their workspace');        
+                clueCanvas.getNorthEastCanvas().should('be.visible').and('not.contain', 'not shared their workspace');        
                 clueCanvas.shareCanvas();
                 cy.visit(baseUrl+'?appMode=qa&qaGroup='+qaGroup+'&fakeClass='+qaClass+'&fakeUser=student:15&problem=2.3');
                 cy.waitForLoad();
@@ -185,7 +185,7 @@ context('Test group functionalities', function(){
                 clueCanvas.openFourUpView();
                 clueCanvas.getFourToOneUpViewToggle().should('be.visible');
                 clueCanvas.getSouthWestCanvas().should('contain', 'S18');
-                clueCanvas.getSouthWestCanvas().should('be.visible').and('contain','Student 18 has not shared their workspace.');
+                clueCanvas.getSouthWestCanvas().should('be.visible').and('contain', 'Student 18 has not shared their workspace.');
                 header.leaveGroup();
 
             });
@@ -202,7 +202,7 @@ context('Test group functionalities', function(){
                 clueCanvas.openFourUpView();
                 clueCanvas.getFourToOneUpViewToggle().should('be.visible');
                 clueCanvas.getSouthWestCanvas().should('contain', 'S18');
-                clueCanvas.getSouthWestCanvas().should('be.visible').and('not.contain','not shared their workspace');
+                clueCanvas.getSouthWestCanvas().should('be.visible').and('not.contain', 'not shared their workspace');
             });
         });
 
@@ -215,7 +215,7 @@ context('Test group functionalities', function(){
                     cy.wait(5000);
                     clueCanvas.addTile('text');
                     textToolTile.enterText('This is to test the 4-up view of S'+studentArr[i]);
-                    textToolTile.getTextTile().last().should('contain', '4-up').and('contain','S'+studentArr[i]);
+                    textToolTile.getTextTile().last().should('contain', '4-up').and('contain', 'S'+studentArr[i]);
                     cy.wait(500);
                     clueCanvas.shareCanvas();//all students will share their canvas
                     cy.wait(1000);

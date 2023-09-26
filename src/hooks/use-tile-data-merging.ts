@@ -12,7 +12,7 @@ interface IProps {
 }
 
 export const useTileDataMerging = ({model}: IProps) => {
-  const mergableTiles = useMemo(() => getMergableDataSets(model),[model]);
+  const mergableTiles = useMemo(() => getMergableDataSets(model), [model]);
   const mergeTileFunc = useCallback((selectedTile: ITileLinkMetadata) => {
     const sourceSnap = getSnapshot(selectedTile.dataSet as IDataSet);
     const targetDataSet = getTileDataSet(model.content);

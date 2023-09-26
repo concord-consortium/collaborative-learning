@@ -117,7 +117,7 @@ export type SectionModelType = typeof SectionModel.Type;
 
 export function findSectionIndex(sections: SectionModelType[], fullPath: string | undefined){
   if (fullPath !==undefined) {
-    const [,,,,sectionSelected] = parseSectionPath(fullPath) || [];
+    const [,,,, sectionSelected] = parseSectionPath(fullPath) || [];
     const index =  sections.findIndex((section: any) => section.type === sectionSelected);
     return index;
   }

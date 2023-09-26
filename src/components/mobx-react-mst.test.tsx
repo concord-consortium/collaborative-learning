@@ -111,7 +111,7 @@ describe("behavior of mobx-react with mst objects", () => {
 
     const items = screen.getAllByRole("listitem");
     expect(items).toHaveLength(2);
-    expect(items.map(item => item.textContent)).toEqual(["one: description1","two: description2"]);
+    expect(items.map(item => item.textContent)).toEqual(["one: description1", "two: description2"]);
     expect(log).toEqual(initialLog);
     clearLog();
 
@@ -136,7 +136,7 @@ describe("behavior of mobx-react with mst objects", () => {
 
     const items = screen.getAllByRole("listitem");
     expect(items).toHaveLength(2);
-    expect(items.map(item => item.textContent)).toEqual(["one: description1","two: description2"]);
+    expect(items.map(item => item.textContent)).toEqual(["one: description1", "two: description2"]);
     expect(log).toEqual(initialLog);
     clearLog();
 
@@ -191,7 +191,7 @@ describe("behavior of mobx-react with mst objects", () => {
 
     const items = screen.getAllByRole("listitem");
     expect(items).toHaveLength(2);
-    expect(items.map(item => item.textContent)).toEqual(["one: description1","two: description2"]);
+    expect(items.map(item => item.textContent)).toEqual(["one: description1", "two: description2"]);
     expect(log).toEqual(initialLog);
     clearLog();
 
@@ -219,7 +219,7 @@ describe("behavior of mobx-react with mst objects", () => {
 
     const items = screen.getAllByRole("listitem");
     expect(items).toHaveLength(2);
-    expect(items.map(item => item.textContent)).toEqual(["one: description1","two: description2"]);
+    expect(items.map(item => item.textContent)).toEqual(["one: description1", "two: description2"]);
     expect(log).toEqual(initialLog);
     clearLog();
 

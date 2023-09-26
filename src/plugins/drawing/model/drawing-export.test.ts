@@ -53,7 +53,7 @@ describe("exportDrawingTileSpec", () => {
     const drawing2 = createDrawingContent({ objects: [
       v1Data, v2Data
     ]});
-    drawing2.objects[0].setPosition(5,5);
+    drawing2.objects[0].setPosition(5, 5);
     (drawing2.objects[1] as VectorObjectType).setStrokeWidth(2);
     const v1DataMoved = { ...v1Data, x: 5, y: 5 };
     const v2DataUpdated = { ...v2Data, strokeWidth: 2 };
@@ -87,7 +87,7 @@ describe("exportDrawingTileSpec", () => {
     const drawing2 = createDrawingContent({ objects: [
       l1Data, l2Data
     ]});
-    drawing2.objects[0].setPosition(5,5);
+    drawing2.objects[0].setPosition(5, 5);
     (drawing2.objects[1] as LineObjectType).setStrokeWidth(2);
     const l1DataMoved = { ...l1Data, x: 5, y: 5 };
     const l2DataUpdated = { ...l2Data, strokeWidth: 2 };
@@ -123,8 +123,8 @@ describe("exportDrawingTileSpec", () => {
     const drawing2 = createDrawingContent({ objects: [
       r1Data, r2Data, r3Data
     ]});
-    drawing2.objects[0].setPosition(5,5);
-    drawing2.objects[1].setPosition(5,5);
+    drawing2.objects[0].setPosition(5, 5);
+    drawing2.objects[1].setPosition(5, 5);
     (drawing2.objects[1] as RectangleObjectType).setStrokeWidth(2);
     (drawing2.objects[2] as RectangleObjectType).setStrokeWidth(2);
     const r1DataMoved = { ...r1Data, x: 5, y: 5 };
@@ -162,8 +162,8 @@ describe("exportDrawingTileSpec", () => {
     const drawing2 = createDrawingContent({ objects: [
       e1Data, e2Data, e3Data
     ]});
-    drawing2.objects[0].setPosition(5,5);
-    drawing2.objects[1].setPosition(5,5);
+    drawing2.objects[0].setPosition(5, 5);
+    drawing2.objects[1].setPosition(5, 5);
     (drawing2.objects[1] as EllipseObjectType).setStrokeWidth(2);
     (drawing2.objects[2] as EllipseObjectType).setStrokeWidth(2);
 
@@ -199,8 +199,8 @@ describe("exportDrawingTileSpec", () => {
     const drawing2 = createDrawingContent({ objects: [
       i1Data, i2Data, i3Data
     ]});
-    drawing2.objects[0].setPosition(5,5);
-    drawing2.objects[1].setPosition(5,5);
+    drawing2.objects[0].setPosition(5, 5);
+    drawing2.objects[1].setPosition(5, 5);
     const i1DataMoved = { ...i1Data, x: 5, y: 5 };
     const i2DataMoved = { ...i2Data, x: 5, y: 5 };
     expect(exportDrawing2(drawing2))
@@ -251,8 +251,8 @@ describe("exportDrawingTileSpec", () => {
     const drawing2 = createDrawingContent({ objects: [
       i1Data, i2Data, i3Data
     ]});
-    drawing2.objects[0].setPosition(5,5);
-    drawing2.objects[1].setPosition(5,5);
+    drawing2.objects[0].setPosition(5, 5);
+    drawing2.objects[1].setPosition(5, 5);
     const i1DataMoved = { ...i1OutData, x: 5, y: 5 };
     const i2DataMoved = { ...i2OutData, x: 5, y: 5 };
     expect(exportDrawingWithTransform(drawing2))
