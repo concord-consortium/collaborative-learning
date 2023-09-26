@@ -13,6 +13,8 @@ import { HotKeys } from "../../../utilities/hot-keys";
 import { getClipboardContent, pasteClipboardImage } from "../../../utilities/clipboard-utils";
 import "./drawing-tile.scss";
 import { ObjectListView } from "./object-list-view";
+import { useUIStore } from "../../../hooks/use-stores";
+import { hasSelectionModifier } from "../../../utilities/event-utils";
 
 type IProps = ITileProps;
 
@@ -23,6 +25,8 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
   const [objectListHoveredObject, setObjectListHoveredObject] = useState(null as string|null);
   const hotKeys = useRef(new HotKeys());
   const drawingToolElement = useRef<HTMLDivElement>(null);
+
+  const ui = useUIStore();
 
   useEffect(() => {
     if (!readOnly) {
@@ -86,6 +90,15 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
     return true; // true return means 'prevent default action'
   };
 
+  const handleMouseDown = (e: React.MouseEvent) => {
+    // Follows standard rules for clicking on tiles - with Cmd/Shift click,
+    // adds or removes this tile from list of selected tiles. Without, just selects it.
+    // Note, when user clicks on specific objects, we handle those events locally
+    // and don't allow the events to bubble up to this handler.
+    const append = hasSelectionModifier(e);
+    ui.setSelectedTileId(model.id, { append });
+  };
+
   const toolbarProps = useToolbarTileApi({ id: model.id, enabled: !readOnly, onRegisterTileApi, onUnregisterTileApi });
 
   const getObjectListPanelWidth = () => {
@@ -98,12 +111,12 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
   };
 
   const getVisibleCanvasSize = () => {
-    if (!drawingToolElement.current 
-      || !drawingToolElement.current.clientWidth 
+    if (!drawingToolElement.current
+      || !drawingToolElement.current.clientWidth
       || !drawingToolElement.current.clientHeight) return undefined;
-    return { 
-      x: drawingToolElement.current.clientWidth-getObjectListPanelWidth(), 
-      y: drawingToolElement.current.clientHeight 
+    return {
+      x: drawingToolElement.current.clientWidth-getObjectListPanelWidth(),
+      y: drawingToolElement.current.clientHeight
     };
   };
 
@@ -120,6 +133,7 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
         data-testid="drawing-tool"
         tabIndex={0}
         onKeyDown={(e) => hotKeys.current.dispatch(e)}
+        onMouseDown={handleMouseDown}
       >
         <ToolbarView
           model={model}

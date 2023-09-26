@@ -1,6 +1,6 @@
 import React from "react";
 import { isAlive, getSnapshot } from "mobx-state-tree";
-import { observer } from "mobx-react";
+import { MobXProviderContext, observer } from "mobx-react";
 import { extractDragTileType, kDragTileContent } from "../../../components/tiles/tile-component";
 import { DrawingContentModelType } from "../model/drawing-content";
 import { ITileModel } from "../../../models/tiles/tile-model";
@@ -47,6 +47,7 @@ interface DrawingLayerViewState {
 @observer
 export class DrawingLayerView extends React.Component<DrawingLayerViewProps, DrawingLayerViewState>
     implements IDrawingLayer {
+  static contextType = MobXProviderContext;
   public tools: DrawingToolMap;
   private svgRef: React.RefObject<any>|null;
   private setSvgRef: (element: any) => void;
@@ -88,6 +89,11 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
   public componentWillUnmount() {
     this._isMounted = false;
+  }
+
+  public selectTile(append: boolean) {
+    const ui = this.context.stores.ui;
+    ui.setSelectedTileId(this.props.model.id, { append });
   }
 
   // Adds a new object and selects it, activating the select tool.
@@ -172,7 +178,10 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     const starting = this.getWorkspacePoint(e);
     if (!starting) return;
 
+    // Normally clicks bubble up to the tile, which will select it or de-select if there are modifier keys.
+    // In this case we never want to de-select the tile, but we do want to select it if it isn't already.
     e.stopPropagation();
+    this.selectTile(false);
 
     const handleMouseMove = (e2: MouseEvent) => {
       e2.preventDefault();
@@ -262,7 +271,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       const selected = content.isIdSelected(object.id);
       result.push(this.conditionallyRenderObject(object, selected, false));
       if (isGroupObject(object)) {
-        object.objects.forEach((member) => { 
+        object.objects.forEach((member) => {
           result.push(this.conditionallyRenderObject(member, selected, true));
         });
       }
@@ -283,7 +292,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       const resizers = enableActions && object.supportsResize &&
         <g>
           {this.renderResizeHandle(object, "nw", nwX, nwY, color)}
-          {this.renderResizeHandle(object, "ne", seX, nwY, color)} 
+          {this.renderResizeHandle(object, "ne", seX, nwY, color)}
           {this.renderResizeHandle(object, "sw", nwX, seY, color)}
           {this.renderResizeHandle(object, "se", seX, seY, color)}
         </g>;
@@ -313,7 +322,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     const resizeBoxOffset = SELECTION_BOX_RESIZE_HANDLE_SIZE/2;
 
     return <rect key={corner} data-corner={corner} className={"resize-handle " + corner}
-                x={x-resizeBoxOffset} y={y-resizeBoxOffset} 
+                x={x-resizeBoxOffset} y={y-resizeBoxOffset}
                 width={SELECTION_BOX_RESIZE_HANDLE_SIZE} height={SELECTION_BOX_RESIZE_HANDLE_SIZE}
                 stroke={color} strokeWidth="1" fill="#FFF" fillOpacity="1"
                 onMouseDown={(e) => this.handleResizeStart(e, object)}
@@ -326,7 +335,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     const handle = e.currentTarget;
     handle.classList.add('active');
     const corner = handle.dataset.corner;
-    
+
     const start = this.getWorkspacePoint(e);
     const origBoundingBox = object.boundingBox;
     // The original size of the element is used to avoid making it 0 or negative size.
@@ -354,9 +363,9 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       };
 
       object.setDragBounds(deltas);
-      
+
     }, 10);
-  
+
     const handleResizecomplete = (e2: MouseEvent) => {
       e2.stopPropagation();
       e2.preventDefault();
@@ -394,7 +403,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     if (!this.props.readOnly) {
       if (this.props.highlightObject) {
         highlightObject = this.getContent().objectMap[this.props.highlightObject];
-      } else if (this.state.hoverObject 
+      } else if (this.state.hoverObject
                 && isAlive(this.state.hoverObject)
                 && !this.getContent().isIdSelected(this.state.hoverObject.id)) {
         highlightObject = this.state.hoverObject;

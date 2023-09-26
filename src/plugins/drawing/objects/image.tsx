@@ -121,6 +121,10 @@ export class StampDrawingTool extends DrawingTool {
   }
 
   public handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
+    // Select the drawing tile, but don't propagate event to do normal Cmd-click procesing.
+    this.drawingLayer.selectTile(false);
+    e.stopPropagation();
+
     const start = this.drawingLayer.getWorkspacePoint(e);
     if (!start) return;
     const stamp = this.drawingLayer.getCurrentStamp();

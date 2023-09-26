@@ -67,7 +67,7 @@ export const LineObject = StrokedObject.named("LineObject")
       return <FreehandToolIcon viewBox={ObjectTypeIconViewBox}
         stroke={self.stroke} strokeWidth={self.strokeWidth} strokeDasharray={self.strokeDashArray}/>;
     }
-  
+
   }))
   .actions(self => ({
     addPoint(point: Instance<typeof DeltaPoint>) {
@@ -155,6 +155,10 @@ export class LineDrawingTool extends DrawingTool {
   }
 
   public handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
+    // Select the drawing tile, but don't propagate event to do normal Cmd-click procesing.
+    this.drawingLayer.selectTile(false);
+    e.stopPropagation();
+
     const start = this.drawingLayer.getWorkspacePoint(e);
     if (!start) return;
     const {stroke, strokeWidth, strokeDashArray} = this.drawingLayer.toolbarSettings();
@@ -193,6 +197,6 @@ export class LineDrawingTool extends DrawingTool {
 }
 
 export function LineToolbarButton({toolbarManager}: IToolbarButtonProps) {
-  return <SvgToolModeButton modalButton="line" 
+  return <SvgToolModeButton modalButton="line"
     title="Freehand" toolbarManager={toolbarManager} SvgIcon={FreehandToolIcon} />;
 }
