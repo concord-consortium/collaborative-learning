@@ -48,6 +48,8 @@ jobs:
     name: Build and Run Jest Tests
     runs-on: ubuntu-latest
     steps:
+      - name: Print run_regression
+        run: echo "run_regression ${{ needs.prepare.outputs.run_regression }}"
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v2
         with:
