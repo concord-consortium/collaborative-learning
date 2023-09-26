@@ -28,11 +28,23 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       uuid: ${{ steps.uuid.outputs.value }}
+      pr_labels: ${{ steps.pr.outputs.labels }}
     steps:
       - name: Dump GitHub context
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
+      - name: Get PR labels
+        id: pr
+        # the github.event.pull_request.labels does not seem to be available when a build
+        # is triggered by a push. So we use the `gh` CLI to get info about the PR for the
+        # current branch. If the same branch is part of multiple PR or the branch doesn't
+        # have a PR, I'm not sure what will happen yet.
+        run: echo "labels=$(gh pr view --json labels -q '.labels' || echo "[]")" >> $GITHUB_OUTPUT
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Print PR labels
+        run: echo "PR labels ${{ steps.pr.outputs.labels }}"
       - name: Generate unique ID 💎
         id: uuid
         # take the current commit + timestamp together
@@ -133,9 +145,8 @@ jobs:
             ["master"]
   regression:
     # only run the regression tests if the PR is labeled.
-    # the github.event.pull_request.labels does not seem to be availale when a build
-    # from a commit pushed before the PR was opened is rebuilt.
-    if: contains(github.event.pull_request.labels.*.name, 'run regression')
+    # I'm not sure if this approach will work for a json output
+    if: contains(needs.prepare.outputs.pr_labels.*.name, 'run regression')
     runs-on: ubuntu-latest
     timeout-minutes: 240
     needs:
