@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import { render, screen } from "@testing-library/react";
 import { TileToolbarButton } from "./tile-toolbar-button";
-import { registerTileToolbarButtons } from "./toolbar-button-manager";
+import { registerTileToolbarButtons, registerTileToolbarConfig } from "./toolbar-button-manager";
 import CopyIcon from "../../../assets/icons/copy/copy-icon-default.svg";
 import { TileToolbar } from "./tile-toolbar";
 import { ITileModel, TileModel } from "../../models/tiles/tile-model";
@@ -58,7 +58,6 @@ describe("Tile toolbar button", () => {
         name: "default",
         title: "Default Button",
         component: SampleToolbarButton,
-        defaultPosition: 1,
       },
       {
         name: "non-default",
@@ -66,6 +65,7 @@ describe("Tile toolbar button", () => {
         component: SampleToolbarButton,
       }
     ]);
+    registerTileToolbarConfig("test", ["default"]);
 
     render(
       <Provider stores={stores}>

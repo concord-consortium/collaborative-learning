@@ -1,11 +1,11 @@
-import React, { useContext, useMemo } from "react";
+import React, { useContext } from "react";
 import { observer } from "mobx-react";
 import classNames from "classnames";
 import { FloatingPortal } from "@floating-ui/react";
 import { Tooltip } from "react-tippy";
 import { useSettingFromStores, useUIStore } from "../../hooks/use-stores";
 import { useTileToolbarPositioning } from "./use-tile-toolbar-positioning";
-import { getToolbarButtonInfo, getToolbarDefaultButtons } from "./toolbar-button-manager";
+import { getToolbarButtonInfo, getDefaultTileToolbarConfig } from "./toolbar-button-manager";
 import { useTooltipOptions } from "../../hooks/use-tooltip-options";
 import { TileModelContext } from "../tiles/tile-api";
 
@@ -34,9 +34,7 @@ export const TileToolbar = observer(
     // Determine the buttons to be shown. Avoid recalculating defaults over and over.
     const ui = useUIStore();
     const configuredButtonNames = useSettingFromStores("tools", tileType) as unknown as string[] | undefined;
-    const buttonNames = useMemo(() => {
-      return configuredButtonNames ?? getToolbarDefaultButtons(tileType);
-    }, [configuredButtonNames, tileType]);
+    const buttonNames = configuredButtonNames ?? getDefaultTileToolbarConfig(tileType);
 
     // Determine if toolbar should be rendered or not.
     const enabled = !readOnly && id && ui.selectedTileIds.length === 1 && ui.selectedTileIds.includes(id);

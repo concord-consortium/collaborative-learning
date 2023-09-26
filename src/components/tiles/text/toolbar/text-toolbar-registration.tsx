@@ -3,7 +3,7 @@ import { Editor, EFormat, useSlate } from "@concord-consortium/slate-editor";
 
 import { LinkButton } from "./link-button";
 import { isMac } from "../../../../utilities/browser";
-import { registerTileToolbarButtons } from "../../../toolbar/toolbar-button-manager";
+import { registerTileToolbarButtons, registerTileToolbarConfig } from "../../../toolbar/toolbar-button-manager";
 import { TileToolbarButton } from "../../../toolbar/tile-toolbar-button";
 
 import BoldToolIcon from "../../../../assets/icons/text/bold-text-icon.svg";
@@ -86,51 +86,45 @@ registerTileToolbarButtons('text',
     title: 'Bold',
     keyHint: `${kShortcutPrefix}b`,
     component: BoldToolbarButton,
-    defaultPosition: 1
   },
   {
     name: 'italic',
     title: 'Italic',
     keyHint: `${kShortcutPrefix}i`,
     component: ItalicToolbarButton,
-    defaultPosition: 2
   },
   {
     name: 'underline',
     title: 'Underline',
     keyHint: `${kShortcutPrefix}u`,
     component: UnderlineToolbarButton,
-    defaultPosition: 3
   },
   {
     name: 'subscript',
     title: 'Subscript',
     component: SubscriptToolbarButton,
-    defaultPosition: 4
   },
   {
     name: 'superscript',
     title: 'Superscript',
     component: SuperscriptToolbarButton,
-    defaultPosition: 5
   },
   {
     name: 'list-ol',
     title: 'Numbered List',
     component: NumberedListToolbarButton,
-    defaultPosition: 6
   },
   {
     name: 'list-ul',
     title: 'Bulleted List',
     component: BulletedListToolbarButton,
-    defaultPosition: 7
   },
   {
     name: 'link',
     title: 'Link',
     component: LinkButton,
-    defaultPosition: 8
   }
 ]);
 
+registerTileToolbarConfig('text',
+  ['bold', 'italic', 'underline', 'subscript', 'superscript', 'list-ol', 'list-ul', 'link']);
