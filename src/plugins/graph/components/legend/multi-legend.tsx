@@ -4,6 +4,8 @@ import { GraphPlace } from "../../imports/components/axis-graph-shared";
 import { SimpleAttributeLabel } from "../simple-attribute-label";
 import { kMultiLegendHeight, useGraphLayoutContext } from "../../models/graph-layout";
 import { IDataSet } from "../../../../models/data/data-set";
+import { useDataConfigurationContext } from "../../hooks/use-data-configuration-context";
+import { getSnapshot } from "@concord-consortium/mobx-state-tree";
 
 interface IMultiLegendProps {
   graphElt: HTMLDivElement | null
@@ -27,6 +29,14 @@ export const MultiLegend = function MultiLegend(props: IMultiLegendProps) {
     multiLegendRef.current.style.height = `${legendBounds.height}px`;
   }, [layout.graphWidth, legendBounds, transform]);
 
+  const dataConfiguration = useDataConfigurationContext();
+  const dataset = dataConfiguration?.dataset;
+  console.log(`${dataConfiguration?.yAttributeDescriptions.length} series is currently showing on graph:`);
+  dataConfiguration?.yAttributeDescriptions.forEach((config) => {
+    const attrName = dataset?.attrFromID(config.attributeID).name;
+    console.log(`  Attribute ID: ${config.attributeID}; name: ${attrName}`);
+  });
+
   return (
     <div className="multi-legend" ref={ multiLegendRef }>
       <SimpleAttributeLabel
@@ -35,6 +45,7 @@ export const MultiLegend = function MultiLegend(props: IMultiLegendProps) {
         onRemoveAttribute={onRemoveAttribute}
         onTreatAttributeAs={onTreatAttributeAs}
       />
+
     </div>
   );
 };
