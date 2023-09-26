@@ -19,7 +19,7 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
   const [_steps, setSteps] = useState(0);
   useEffect(() => {
     const id = setInterval(() => {
-      content?.step();
+      content?.step(readOnly);
       setSteps(v => v + 1);
     }, content.simulationData.delay);
     return () => clearInterval(id);

@@ -2,6 +2,7 @@ import { VariableSlider } from "@concord-consortium/diagram-view";
 import React from "react";
 
 import ToggleControl from "../../../../components/utilities/toggle-control";
+import { demoStreams } from "../../../shared-assets/data/dataflow/demo-data";
 import { iconUrl, kEMGKey, kGripperKey, kPressureKey, kTemperatureKey } from "../../../shared-assets/icons/icon-utilities";
 import { ISimulation, ISimulationProps } from "../simulation-types";
 import { findVariable, getFrame } from "../simulation-utilities";
@@ -14,10 +15,12 @@ import "./brainwaves-gripper.scss";
 
 export const kBrainwavesKey = "EMG_and_claw";
 
+const kRawTemperatureKey = "raw_temperature_key";
 const kSimulationModeKey = "simulation_mode_key";
 const kSimulationModePressure = 0;
 const kSimulationModeTemperature = 1;
 const baseTemperature = 15.5; // 60 degrees F
+const maxTemperature = Math.max(...demoStreams.fastBoil);
 
 interface IAnimationProps extends ISimulationProps {
   mode: number;
@@ -30,6 +33,17 @@ function BrainwavesGripperAnimation({ frame, mode, variables }: IAnimationProps)
   const gripperVariable = findVariable(kGripperKey, variables);
   const normalizedGripperValue = (gripperVariable?.currentValue ?? 0) / 100;
   const gripperFrame = getFrame(normalizedGripperValue, gripperFrames.length);
+
+  const rawTemperatureVariable = findVariable(kRawTemperatureKey, variables);
+  const rawTemperature = rawTemperatureVariable?.currentValue;
+  const normalizedRawTemperatureValue = ((rawTemperature ?? baseTemperature) - baseTemperature)
+    / (maxTemperature - baseTemperature);
+  const panFrame = getFrame(normalizedRawTemperatureValue, panFrames.length);
+
+  const firstSteamFrame = demoStreams.fastBoil.length - 5 * steamFrames.length;
+  const currentTempFrame = frame % demoStreams.fastBoil.length;
+  const steamFrame = currentTempFrame >= firstSteamFrame
+    ? (currentTempFrame - firstSteamFrame) % steamFrames.length : -1;
   return (
     <div className="animation">
       <img
@@ -49,17 +63,19 @@ function BrainwavesGripperAnimation({ frame, mode, variables }: IAnimationProps)
         ) : (
           <div className="temperature-part">
             <img
+              src={ panFrames[panFrame] }
+              className="animation-image"
+            />
+            <img
               src={ temperatureGripperFrames[gripperFrame] }
               className="animation-image"
             />
-            <img
-              src={ panFrames[0] }
-              className="animation-image"
-            />
-            <img
-              src={ steamFrames[frame % steamFrames.length] }
-              className="animation-image steam-image"
-            />
+            { steamFrame >= 0 && (
+              <img
+                src={ steamFrames[steamFrame] }
+                className="animation-image steam-image"
+              />
+            )}
           </div>
         )
       }
@@ -106,10 +122,20 @@ function step({ frame, variables }: ISimulationProps) {
   if (gripperVariable && pressureVariable) {
     const minPressureValue = 60;
     const gripperValue = gripperVariable.value;
-    const pressureValue = gripperValue && gripperValue > minPressureValue
+    const gripperClosed = gripperValue && gripperValue > minPressureValue;
+    const pressureValue = gripperClosed
       ? (gripperValue - minPressureValue) * 100
       : 0;
     pressureVariable.setValue(pressureValue);
+
+    const modeVariable = findVariable(kSimulationModeKey, variables);
+    const rawTemperatureVariable = findVariable(kRawTemperatureKey, variables);
+    const temperatureVariable = findVariable(kTemperatureKey, variables);
+    if (modeVariable?.currentValue === kSimulationModeTemperature && gripperClosed && rawTemperatureVariable && temperatureVariable) {
+      temperatureVariable.setValue(rawTemperatureVariable.currentValue);
+    } else {
+      temperatureVariable?.setValue(baseTemperature);
+    }
   }
 }
 
@@ -141,6 +167,11 @@ export const brainwavesGripperSimulation: ISimulation = {
       value: 0
     },
     {
+      displayName: "Raw Temperature",
+      name: kRawTemperatureKey,
+      value: baseTemperature
+    },
+    {
       displayName: "Temperature",
       labels: ["input", "sensor:temperature"],
       icon: iconUrl(kTemperatureKey),
@@ -153,5 +184,7 @@ export const brainwavesGripperSimulation: ISimulation = {
       value: kSimulationModePressure
     }
   ],
-  values: {}
+  values: {
+    [kRawTemperatureKey]: demoStreams.fastBoil
+  }
 };
