@@ -133,7 +133,6 @@ export class SerialDevice {
   }
 
   public handleArduinoStreamObj(value: string, channels: Array<NodeChannelInfo>){
-    console.log("| channels: ", channels);
     this.localBuffer += value;
 
     const pattern = /(emg|fsr|tmp):([0-9.]+)[\r][\n]/g;
@@ -152,7 +151,6 @@ export class SerialDevice {
 
       if (targetChannel){
         const rounded = Math.round(Number(numStr));
-        console.log(`| writing to ${channel}: ${rounded}`);
         targetChannel.value = rounded;
       }
     } while (match);
