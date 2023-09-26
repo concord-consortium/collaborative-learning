@@ -23,7 +23,7 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
       setSteps(v => v + 1);
     }, content.simulationData.delay);
     return () => clearInterval(id);
-  }, [content]);
+  }, [content, readOnly]);
 
   const component = content.simulationData.component;
 

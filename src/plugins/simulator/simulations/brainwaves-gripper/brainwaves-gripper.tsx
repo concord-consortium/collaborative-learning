@@ -3,7 +3,9 @@ import React from "react";
 
 import ToggleControl from "../../../../components/utilities/toggle-control";
 import { demoStreams } from "../../../shared-assets/data/dataflow/demo-data";
-import { iconUrl, kEMGKey, kGripperKey, kPressureKey, kTemperatureKey } from "../../../shared-assets/icons/icon-utilities";
+import {
+  iconUrl, kEMGKey, kGripperKey, kPressureKey, kTemperatureKey
+} from "../../../shared-assets/icons/icon-utilities";
 import { ISimulation, ISimulationProps } from "../simulation-types";
 import { findVariable, getFrame } from "../simulation-utilities";
 import {
@@ -110,7 +112,8 @@ function BrainwavesGripperComponent({ frame, variables }: ISimulationProps) {
           <ToggleControl
             className="mode-toggle"
             initialValue={!!modeVariable?.currentValue}
-            onChange={(value: boolean) => modeVariable?.setValue(value ? kSimulationModeTemperature : kSimulationModePressure)}
+            onChange={(value: boolean) =>
+              modeVariable?.setValue(value ? kSimulationModeTemperature : kSimulationModePressure)}
           />
           <div>Temperature</div>
         </div>
