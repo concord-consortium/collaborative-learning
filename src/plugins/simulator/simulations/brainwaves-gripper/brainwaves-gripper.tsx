@@ -5,7 +5,9 @@ import ToggleControl from "../../../../components/utilities/toggle-control";
 import { iconUrl, kEMGKey, kGripperKey, kPressureKey, kTemperatureKey } from "../../../shared-assets/icons/icon-utilities";
 import { ISimulation, ISimulationProps } from "../simulation-types";
 import { findVariable, getFrame } from "../simulation-utilities";
-import { arduinoFrames, armFrames, gripperFrames } from "./brainwaves-gripper-assets";
+import {
+  arduinoFrames, armFrames, gripperFrames, panFrames, steamFrames, temperatureGripperFrames
+} from "./brainwaves-gripper-assets";
 
 import "rc-slider/assets/index.css";
 import "./brainwaves-gripper.scss";
@@ -15,10 +17,12 @@ export const kBrainwavesKey = "EMG_and_claw";
 const kSimulationModeKey = "simulation_mode_key";
 const kSimulationModePressure = 0;
 const kSimulationModeTemperature = 1;
-const baseTemperature = 60;
+const baseTemperature = 15.5; // 60 degrees F
 
-function BrainwavesGripperComponent({ frame, variables }: ISimulationProps) {
-  const modeVariable = findVariable(kSimulationModeKey, variables);
+interface IAnimationProps extends ISimulationProps {
+  mode: number;
+}
+function BrainwavesGripperAnimation({ frame, mode, variables }: IAnimationProps) {
   const emgVariable = findVariable(kEMGKey, variables);
   const normalizedEmgValue = Math.min((emgVariable?.currentValue ?? 0) / 450, 1);
   const armFrame = getFrame(normalizedEmgValue, armFrames.length);
@@ -27,21 +31,53 @@ function BrainwavesGripperComponent({ frame, variables }: ISimulationProps) {
   const normalizedGripperValue = (gripperVariable?.currentValue ?? 0) / 100;
   const gripperFrame = getFrame(normalizedGripperValue, gripperFrames.length);
   return (
+    <div className="animation">
+      <img
+        src={ armFrames[armFrame] }
+        className="animation-image arm-image"
+      />
+      <img
+        src={ arduinoFrames[0] }
+        className="animation-image arduino-image"
+      />
+      { mode === kSimulationModePressure
+        ? (
+          <img
+            src={ gripperFrames[gripperFrame] }
+            className="animation-image gripper-image"
+          />
+        ) : (
+          <div className="temperature-part">
+            <img
+              src={ temperatureGripperFrames[gripperFrame] }
+              className="animation-image"
+            />
+            <img
+              src={ panFrames[0] }
+              className="animation-image"
+            />
+            <img
+              src={ steamFrames[frame % steamFrames.length] }
+              className="animation-image steam-image"
+            />
+          </div>
+        )
+      }
+    </div>
+  );
+}
+
+function BrainwavesGripperComponent({ frame, variables }: ISimulationProps) {
+  const modeVariable = findVariable(kSimulationModeKey, variables);
+  const emgVariable = findVariable(kEMGKey, variables);
+
+  return (
     <div className="bwg-component">
-      <div className="animation">
-        <img
-          src={ armFrames[armFrame] }
-          className="arm-image"
-        />
-        <img
-          src={ arduinoFrames[0] }
-          className="arduino-image"
-        />
-        <img
-          src={ gripperFrames[gripperFrame] }
-          className="gripper-image"
-        />
-      </div>
+      <BrainwavesGripperAnimation
+        frame={frame}
+        mode={modeVariable?.currentValue ?? 0}
+        variables={variables}
+      />
       <div className="controls">
         <VariableSlider
           className="emg-slider"

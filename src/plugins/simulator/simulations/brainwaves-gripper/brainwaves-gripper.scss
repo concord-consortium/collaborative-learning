@@ -5,22 +5,41 @@
   .animation {
     align-items: center;
     display: flex;
+    min-height: 200px;
     justify-content: center;
+    position: relative;
+    width: 380px;
+
+    .animation-image {
+      position: absolute;
+    }
 
     .arm-image {
       height: 160px;
-      margin-right: -10px;
-      margin-top: -24px;
+      left: -10px;
+      top: 10px;
       width: 160px;
     }
 
     .arduino-image {
-      margin-top: 30px;
+      left: 140px;
+      top: 90px;
     }
 
     .gripper-image {
-      margin-left: -11px;
-      margin-top: 20px;
+      left: 197px;
+      top: 20px;
+    }
+
+    .temperature-part {
+      left: 124px;
+      position: absolute;
+      top: -5px;
+
+      .steam-image {
+        left: 250px;
+        top: 10px;
+      }
     }
   }
 
