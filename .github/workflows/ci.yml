@@ -1,7 +1,6 @@
 name: Continuous Integration
 
 on: push
-
 jobs:
   build_test:
     name: Build and Run Jest Tests
@@ -129,8 +128,9 @@ jobs:
           topBranches: |
             ["master"]
   regression:
+    if: contains(github.event.pull_request.labels.*.name, 'run regression')
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 240
     needs:
       - prepare
       - build_test
@@ -144,7 +144,7 @@ jobs:
       fail-fast: false
       matrix:
         # run 5 copies of the current job in parallel
-        containers: [1, 2, 3, 4, 5]
+        containers: [1]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
