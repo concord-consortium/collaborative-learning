@@ -24,7 +24,7 @@ context('Simulator Tile with Brainwaves Gripper Simulation', function () {
       simulatorTile.getSimulatorTile().should("contain.text", "Surface Pressure Sensor");
       simulatorTile.getSimulatorTile().should("contain.text", "Gripper Output");
       // Icons are being rendered
-      simulatorTile.getSimulatorTile().find(".leading-box.variable-icon").should("have.length", 3);
+      simulatorTile.getSimulatorTile().find(".leading-box.variable-icon").should("have.length", 4);
 
       cy.get(".arm-image").should("exist");
       cy.get(".arduino-image").should("exist");
