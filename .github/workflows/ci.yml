@@ -12,7 +12,8 @@ jobs:
     outputs:
       uuid: ${{ steps.uuid.outputs.value }}
       pr_labels: ${{ steps.pr.outputs.labels }}
-      run_regression: ${{ steps.run_regression.outputs.value }}
+      # if we are triggered by a pull_request labeled event, there is no branch, so the Get PR labels step will fail
+      run_regression: ${{ steps.run_regression.outputs.value || github.event.label.name == 'run regression' }}
     permissions:
       pull-requests: read
     steps:
