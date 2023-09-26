@@ -116,7 +116,7 @@ export const NewVariableTextButton = observer(function NewVariableTextButton() {
 
   const isSelected = false;
   const sharedModel = variablesPlugin?.sharedModel;
-  const enabled = !!sharedModel;
+  const disabled = !sharedModel;
 
   const highlightedText = (editor && editor.selection) ? Editor.string(editor, editor.selection) : "";
   const descriptionPrefill = highlightedText;
@@ -133,7 +133,7 @@ export const NewVariableTextButton = observer(function NewVariableTextButton() {
     showDialog();
   };
   return (
-    <TileToolbarButton enabled={enabled} selected={isSelected} onClick={handleClick}>
+    <TileToolbarButton disabled={disabled} selected={isSelected} onClick={handleClick}>
       <AddVariableChipIcon/>
     </TileToolbarButton>
   );
@@ -148,7 +148,7 @@ export const InsertVariableTextButton = observer(function InsertVariableTextButt
   const isSelected = false;
   const textContent = useContext(TextContentModelContext);
   const sharedModel = variablesPlugin?.sharedModel;
-  const enabled = !!sharedModel;
+  const disabled = !sharedModel;
 
   const { selfVariables, otherVariables, unusedVariables } = variableBuckets(textContent, sharedModel);
 
@@ -165,7 +165,7 @@ export const InsertVariableTextButton = observer(function InsertVariableTextButt
     showDialog();
   };
   return (
-    <TileToolbarButton enabled={enabled} selected={isSelected} onClick={handleClick}>
+    <TileToolbarButton disabled={disabled} selected={isSelected} onClick={handleClick}>
       <InsertVariableChipIcon/>
     </TileToolbarButton>
   );
@@ -182,7 +182,7 @@ export const EditVariableTextButton = observer(function EditVariableTextButton()
   const variables = variablesPlugin?.variables || [];
   const hasVariable = editor?.isElementActive(kVariableFormat);
   const selectedVariable = hasVariable ? findSelectedVariable(selectedElements, variables) : undefined;
-  const enabled = !!selectedVariable;
+  const disabled = !selectedVariable;
 
   const [showDialog] = useEditVariableDialog({
     variable: selectedVariable,
@@ -194,7 +194,7 @@ export const EditVariableTextButton = observer(function EditVariableTextButton()
   };
 
   return (
-    <TileToolbarButton enabled={enabled} selected={isSelected} onClick={handleClick}>
+    <TileToolbarButton disabled={disabled} selected={isSelected} onClick={handleClick}>
       <VariableEditorIcon/>
     </TileToolbarButton>
   );

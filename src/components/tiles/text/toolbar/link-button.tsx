@@ -13,7 +13,7 @@ export const LinkButton = () => {
   const selectedLinks = selectedNodesOfType(editor, EFormat.link);
   const selectedLink = selectedLinks[0] || undefined;
   const isSelected = !!selectedLink;
-  const enabled = !isCollapsed || isSelected;
+  const disabled = isCollapsed && !isSelected;
   const text = isSelected
     ? Node.string(selectedLink)
     : selection
@@ -25,7 +25,7 @@ export const LinkButton = () => {
     showModal();
   };
   return(
-    <TileToolbarButton enabled={enabled} selected={isSelected} onClick={handleClick}>
+    <TileToolbarButton disabled={disabled} selected={isSelected} onClick={handleClick}>
       <LinkToolIcon/>
     </TileToolbarButton>
   );
