@@ -6,6 +6,8 @@ on:
     types: [ labeled ]
 jobs:
   prepare:
+    # only conintue if a push or run regression label
+    if: github.event_name == 'push' || (github.event.action == 'labeled' && github.event.label.name == 'run regression')
     runs-on: ubuntu-latest
     outputs:
       uuid: ${{ steps.uuid.outputs.value }}
@@ -14,11 +16,6 @@ jobs:
     permissions:
       pull-requests: read
     steps:
-      - name: Bail if not a push or run regression label
-        if: (!(github.event_name == 'push' || (github.event.action == 'labeled' && github.event.label.name == 'run regression')))
-        # note we might want to use an ::error or ::notice message to improve this behavior
-        # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
-        run: exit 1
       - uses: actions/checkout@v4
       - name: Get PR labels
         id: pr
