@@ -3,6 +3,7 @@ import { registerTileContentInfo } from "../../models/tiles/tile-content-info";
 import { kGraphDefaultHeight, kGraphTileType } from "./graph-types";
 import { GraphWrapperComponent } from "./components/graph-wrapper-component";
 import { createGraphModel, GraphModel } from "./models/graph-model";
+import { updateGraphObjectWithNewSharedModelIds } from "./utilities/graph-utils";
 
 import GraphToolIcon from "./graph-icon.svg";
 
@@ -12,7 +13,8 @@ registerTileContentInfo({
   modelClass: GraphModel,
   titleBase: "X-Y Plot",
   type: kGraphTileType,
-  isDataConsumer: true
+  isDataConsumer: true,
+  updateObjectReferenceWithNewSharedModelIds: updateGraphObjectWithNewSharedModelIds
 });
 
 registerTileComponentInfo({

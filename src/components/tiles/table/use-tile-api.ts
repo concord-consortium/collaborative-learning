@@ -14,8 +14,8 @@ import { decipherCellId } from "../../../models/tiles/table/table-utils";
 import { OffsetModel } from "../../../models/annotations/clue-object";
 
 // Offsets for annotation bounding boxes
-const kCellTopOffset = -2.5;
-const kCellLeftOffset = -.5;
+const kCellTopOffset = -1.5;
+const kCellLeftOffset = .5;
 const kCellHeightOffset = -2;
 const kCellWidthOffset = -2;
 
