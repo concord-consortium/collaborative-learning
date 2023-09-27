@@ -3,7 +3,7 @@
 //
 // Tiles and plugins can register buttons by specifying their basic attributes
 // and the Component to render for the button.
-// These buttons are rendered as part of the tile so they can make use information provided
+// These buttons are rendered as part of the tile so they can make use of information provided
 // through Contexts.
 // Each toolbar has a default set of buttons, but which buttons are actually rendered,
 // and in what order, can be customized by the unit, lesson, and problem content configurations.
@@ -24,7 +24,7 @@ export function getToolbarButtonInfo(tileType: string, buttonName: string) {
   return toolbarButtonInfos.get(tileType)?.get(buttonName);
 }
 
-function prettyPrint(info: IToolbarButtonInfo|undefined) {
+function prettyPrint(info?: IToolbarButtonInfo) {
   return info ? `${info.name} (${info.title})` : '[undefined]';
 }
 
