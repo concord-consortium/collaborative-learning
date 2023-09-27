@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 
 import { ISimulation, ISimulationProps } from "../simulation-types";
 import { findVariable } from "../simulation-utilities";
@@ -9,14 +9,14 @@ import {
 import jarForeground from "./assets/jar_foreground/jar_foreground.png";
 import lampOff from "./assets/lamp_frames/lamp_00000.png";
 import lampOn from "./assets/lamp_frames/lamp_00001.png";
-import { fanFrames, jarFrames } from "./terrarium-assets";
+import { fanFrames, humidifierFrames, jarFrames } from "./terrarium-assets";
 
 import "./terrarium.scss";
 
 export const kTerrariumKey = "terrarium";
 
 const kRawTemperatureKey = "raw_temperature_key";
-const tickDuration = 50; // This sim "ticks" more often than it "steps" to make the animation more smooth
+const tickDuration = 100; // This sim "ticks" more often than it "steps" to make the animation more smooth
 const stepDuration = 1000;
 const ticksPerStep = stepDuration / tickDuration;
 const minHumidity = 0;
@@ -31,14 +31,30 @@ const heatLampTemperatureImpactPerStep = 1 / 60000 * stepDuration; // +1 degree/
 const humidifierHumidityImpactPerStep = 15 / 60000 * stepDuration; // +15%/minute
 
 function TerrariumComponent({ frame, variables }: ISimulationProps) {
+  const humidifierFrameRef = useRef(0);
+
+  const jarFrame = frame % jarFrames.length;
+
+  // Update humidifier
+  const humidifierVariable = findVariable(kHumidifierKey, variables);
+  const humidifierOn = !!humidifierVariable?.currentValue;
+  // Continue the animation if we've already started
+  if (humidifierFrameRef.current > 0) {
+    humidifierFrameRef.current = (humidifierFrameRef.current + 1) % humidifierFrames.length;
+  // Start the animation if we haven't started and the humidifier is on
+  } else if (humidifierOn) {
+    humidifierFrameRef.current++;
+  }
+
   const fanVariable = findVariable(kFanKey, variables);
   const fanOn = !!fanVariable?.currentValue;
+
   const heatLampVariable = findVariable(kHeatLampKey, variables);
   const heatLampOn = !!heatLampVariable?.currentValue;
-  const jarFrame = frame % jarFrames.length;
   return (
     <div className="terrarium-component">
       <img className="animation-image jar" src={jarFrames[jarFrame]} />
+      <img className="animation-image humidifier" src={humidifierFrames[humidifierFrameRef.current]} />
       <img className="animation-image fan" src={fanFrames[fanOn ? frame % fanFrames.length : 0]} />
       <img className="animation-image jar-foreground" src={jarForeground} />
       <img className="animation-image heat-lamp" src={heatLampOn ? lampOn : lampOff} />
