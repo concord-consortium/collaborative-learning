@@ -81,7 +81,7 @@ export const Graph = observer(function Graph({ graphController, graphRef, dotsRe
     if (place === 'left' && graphModel.config?.yAttributeDescriptions.length > 1) {
       graphModel.config?.removeYAttributeWithID(idOfAttributeToRemove);
       const yAxisModel = graphModel.getAxis('left') as IAxisModel;
-      setNiceDomain(graphModel.config.numericValuesForAttrRole('y'), yAxisModel);
+      setNiceDomain(graphModel.config.numericValuesForYAxis, yAxisModel);
     } else {
       dataset && handleChangeAttribute(place, dataset, '');
     }

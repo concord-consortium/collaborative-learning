@@ -1,11 +1,12 @@
 import React, { useEffect, useRef } from "react";
+import { observer } from "mobx-react";
 import {AttributeType} from "../../../../models/data/attribute";
 import { GraphPlace } from "../../imports/components/axis-graph-shared";
 import { SimpleAttributeLabel } from "../simple-attribute-label";
 import { kMultiLegendHeight, useGraphLayoutContext } from "../../models/graph-layout";
 import { IDataSet } from "../../../../models/data/data-set";
 import { useDataConfigurationContext } from "../../hooks/use-data-configuration-context";
-import { getSnapshot } from "@concord-consortium/mobx-state-tree";
+import { AddSeriesButton } from "./add-series-button";
 
 interface IMultiLegendProps {
   graphElt: HTMLDivElement | null
@@ -14,7 +15,7 @@ interface IMultiLegendProps {
   onTreatAttributeAs: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void
 }
 
-export const MultiLegend = function MultiLegend(props: IMultiLegendProps) {
+export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProps) {
   const {onChangeAttribute, onRemoveAttribute, onTreatAttributeAs} = props;
   const layout = useGraphLayoutContext();
   const legendBounds = layout.computedBounds.legend;
@@ -30,23 +31,26 @@ export const MultiLegend = function MultiLegend(props: IMultiLegendProps) {
   }, [layout.graphWidth, legendBounds, transform]);
 
   const dataConfiguration = useDataConfigurationContext();
-  const dataset = dataConfiguration?.dataset;
-  console.log(`${dataConfiguration?.yAttributeDescriptions.length} series is currently showing on graph:`);
-  dataConfiguration?.yAttributeDescriptions.forEach((config) => {
-    const attrName = dataset?.attrFromID(config.attributeID).name;
-    console.log(`  Attribute ID: ${config.attributeID}; name: ${attrName}`);
-  });
+  let pulldowns = null;
+  if (dataConfiguration) {
+    const yAttributes = dataConfiguration.yAttributeDescriptions;
 
-  return (
-    <div className="multi-legend" ref={ multiLegendRef }>
+    pulldowns = yAttributes.map((description) =>
       <SimpleAttributeLabel
+        key={description.attributeID}
         place={'left'}
+        attrId={description.attributeID}
         onChangeAttribute={onChangeAttribute}
         onRemoveAttribute={onRemoveAttribute}
         onTreatAttributeAs={onTreatAttributeAs}
-      />
-
+      />);
+  }
+  return (
+    <div className="multi-legend" ref={ multiLegendRef }>
+      {pulldowns}
+      <AddSeriesButton/>
     </div>
   );
-};
-MultiLegend.displayName = "MultiLegend";
+});
+
+// MultiLegend.displayName = "MultiLegend";

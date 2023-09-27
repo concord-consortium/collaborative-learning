@@ -16,6 +16,7 @@ import { isSetAttributeNameAction } from "../../../../../../models/data/data-set
 
 interface IProps {
   place: GraphPlace
+  attributeId?: string
   target: SVGGElement | HTMLElement | null
   portal: HTMLElement | null
   onChangeAttribute: (place: GraphPlace, dataSet: IDataSet, attrId: string) => void
@@ -33,12 +34,12 @@ const removeAttrItemLabelKeys: Record<string, string> = {
   "rightSplit": "DG.DataDisplayMenu.removeAttribute_right"
 };
 
-const _AxisOrLegendAttributeMenu = ({ place, target, portal, onOpenClose,
+const _AxisOrLegendAttributeMenu = ({ place, attributeId, target, portal, onOpenClose,
                                       onChangeAttribute, onRemoveAttribute, onTreatAttributeAs }: IProps) => {
   const data = useDataSetContext();
   const dataConfig = useDataConfigurationContext();
   const role = graphPlaceToAttrRole[place];
-  const attrId = dataConfig?.attributeID(role) || '';
+  const attrId = attributeId || dataConfig?.attributeID(role) || '';
   const instanceId = useInstanceIdContext();
   const attribute = attrId ? data?.attrFromID(attrId) : null;
   const [labelText, setLabelText] = useState(attribute?.name);
