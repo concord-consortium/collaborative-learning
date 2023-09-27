@@ -150,8 +150,7 @@ export class SerialDevice {
       });
 
       if (targetChannel){
-        const rounded = Math.round(Number(numStr));
-        targetChannel.value = rounded;
+        targetChannel.value = Math.round(Number(numStr));
       }
     } while (match);
   }
