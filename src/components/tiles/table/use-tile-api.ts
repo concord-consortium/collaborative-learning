@@ -9,13 +9,12 @@ import { IAttribute } from "../../../models/data/attribute";
 import { IDataSet } from "../../../models/data/data-set";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
 import { exportTableContentAsJson } from "../../../models/tiles/table/table-export";
-import { getLinkedTableIndex } from "../../../models/tiles/table-links";
 import { decipherCellId } from "../../../models/tiles/table/table-utils";
 import { OffsetModel } from "../../../models/annotations/clue-object";
 
 // Offsets for annotation bounding boxes
-const kCellTopOffset = -2.5;
-const kCellLeftOffset = -.5;
+const kCellTopOffset = -1.5;
+const kCellLeftOffset = .5;
 const kCellHeightOffset = -2;
 const kCellWidthOffset = -2;
 
@@ -108,11 +107,6 @@ export const useToolApi = ({
     exportContentAsTileJson,
     isLinked: () => {
       return contentRef.current.isLinked;
-    },
-    getLinkIndex: (index?: number) => {
-      return contentRef.current.isLinked
-              ? getLinkedTableIndex(contentRef.current.metadata.id)
-              : -1;
     },
     getObjectBoundingBox,
     getObjectDefaultOffsets

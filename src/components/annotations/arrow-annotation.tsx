@@ -3,7 +3,7 @@ import { observer } from "mobx-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import { AnnotationNode } from "./annotation-node";
-import { getSparrowCurve, kAnnotationNodeHeight, kAnnotationNodeWidth } from "./annotation-utilities";
+import { getSparrowCurve, kAnnotationNodeDefaultRadius } from "./annotation-utilities";
 import { CurvedArrow } from "./curved-arrow";
 import { boundDelta } from "../../models/annotations/annotation-utils";
 import {
@@ -19,15 +19,18 @@ type DragType = "source" | "target" | "text";
 const maxCharacters = 30;
 
 interface IDragHandleProps {
+  centerRadius?: number;
   draggingHandle?: boolean;
   dragTarget: "source" | "target";
   handleMouseDown: (e: React.MouseEvent<SVGElement | HTMLButtonElement, MouseEvent>, _dragType: DragType) => void;
+  highlightRadius?: number;
   startX: number;
   startY: number;
 }
 function DragHandle({
-  draggingHandle, dragTarget, handleMouseDown, startX, startY
+  centerRadius, draggingHandle, dragTarget, handleMouseDown, highlightRadius, startX, startY
 }: IDragHandleProps) {
+  const halfHeight = highlightRadius ?? kAnnotationNodeDefaultRadius;
   return (
     <g
       className={classNames("drag-handle", { dragging: draggingHandle })}
@@ -35,15 +38,17 @@ function DragHandle({
     >
       <rect
         fill="transparent"
-        height={kAnnotationNodeHeight}
-        width={kAnnotationNodeWidth}
-        x={startX - kAnnotationNodeWidth / 2}
-        y={startY - kAnnotationNodeHeight / 2}
+        height={2 * halfHeight}
+        width={2 * halfHeight}
+        x={startX - halfHeight}
+        y={startY - halfHeight}
       />
       <AnnotationNode
         active={draggingHandle}
+        centerRadius={centerRadius}
         cx={startX}
         cy={startY}
+        highlightRadius={highlightRadius}
       />
     </g>
   );
@@ -59,12 +64,14 @@ interface IArrowAnnotationProps {
   documentTop: number;
   getBoundingBox: (object: IClueObject) =>
     { height: number, left: number, top: number, width: number} | null | undefined;
+  getObjectNodeRadii: (object?: IClueObject) => { centerRadius?: number, highlightRadius?: number} | undefined;
   key?: string;
   readOnly?: boolean;
 }
 export const ArrowAnnotationComponent = observer(
   function ArrowAnnotationComponent({
-    arrow, canEdit, deleteArrow, documentBottom, documentLeft, documentRight, documentTop, getBoundingBox, readOnly
+    arrow, canEdit, deleteArrow, documentBottom, documentLeft, documentRight, documentTop, getBoundingBox,
+    getObjectNodeRadii, readOnly
   }: IArrowAnnotationProps) {
     const [firstClick, setFirstClick] = useState(false);
     const [editingText, setEditingText] = useState(false);
@@ -199,13 +206,13 @@ export const ArrowAnnotationComponent = observer(
         } else {
           setFunc(boundDelta(startingDx + dDx, widthBound), boundDelta(startingDy + dDy, heightBound));
         }
-  
+
         setClientX(undefined);
         setClientY(undefined);
         setDragX(undefined);
         setDragY(undefined);
         setDragType(undefined);
-  
+
         window.removeEventListener("mousemove", handleMouseMove);
         window.removeEventListener("mouseup", handleMouseUp);
       }
@@ -213,6 +220,9 @@ export const ArrowAnnotationComponent = observer(
       window.addEventListener("mousemove", handleMouseMove);
       window.addEventListener("mouseup", handleMouseUp);
     }
+
+    const sourceNodeRadii = getObjectNodeRadii(arrow.sourceObject);
+    const targetNodeRadii = getObjectNodeRadii(arrow.targetObject);
 
     const displayText = arrow.text?.trim();
     const hasText = !!displayText;
@@ -276,16 +286,20 @@ export const ArrowAnnotationComponent = observer(
           </div>
         </foreignObject>
         <DragHandle
+          centerRadius={sourceNodeRadii?.centerRadius}
           draggingHandle={draggingSource}
           dragTarget="source"
           handleMouseDown={handleMouseDown}
+          highlightRadius={sourceNodeRadii?.highlightRadius}
           startX={sourceX}
           startY={sourceY}
         />
         <DragHandle
+          centerRadius={targetNodeRadii?.centerRadius}
           draggingHandle={draggingTarget}
           dragTarget="target"
           handleMouseDown={handleMouseDown}
+          highlightRadius={targetNodeRadii?.highlightRadius}
           startX={targetX}
           startY={targetY}
         />

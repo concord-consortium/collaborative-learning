@@ -18,15 +18,15 @@ import SubtractIcon from "../../assets/icons/math/subtract.svg";
 import MultiplyIcon from "../../assets/icons/math/multiply.svg";
 import DivideIcon from "../../assets/icons/math/divide.svg";
 
-import LightBulbIcon from "../../assets/icons/output/light-bulb.svg";
+import LightBulbIcon from "../../../shared-assets/icons/dataflow/output/light-bulb.svg";
 import GrabberIcon from "../../../shared-assets/icons/dataflow/output/grabber.svg";
 import AdvancedGrabberIcon from "../../assets/icons/output/advanced-grabber.svg";
-import HumidIcon from "../../assets/icons/output/humid.svg";
-import FanIcon from "../../assets/icons/output/fan.svg";
+import HumidIcon from "../../../shared-assets/icons/dataflow/output/humid.svg";
+import FanIcon from "../../../shared-assets/icons/dataflow/output/fan.svg";
 
-import TemperatureIcon from "../../assets/icons/sensor/temperature.svg";
+import TemperatureIcon from "../../../shared-assets/icons/dataflow/sensor/temperature.svg";
 import CO2Icon from "../../assets/icons/sensor/co2.svg";
-import HumidityIcon from "../../assets/icons/sensor/humidity.svg";
+import HumidityIcon from "../../../shared-assets/icons/dataflow/sensor/humidity.svg";
 import LightIcon from "../../assets/icons/sensor/light.svg";
 import O2Icon from "../../assets/icons/sensor/o2.svg";
 import ParticulatesIcon from "../../assets/icons/sensor/particulates.svg";

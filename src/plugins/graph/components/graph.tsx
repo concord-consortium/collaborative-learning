@@ -41,7 +41,7 @@ interface IProps {
   dotsRef: IDotsRef
 }
 
-export const Graph = observer(function Graph({graphController, graphRef, dotsRef}: IProps) {
+export const Graph = observer(function Graph({ graphController, graphRef, dotsRef }: IProps) {
   const graphModel = useGraphModelContext(),
     {autoAdjustAxes, enableAnimation} = graphController,
     {plotType} = graphModel,

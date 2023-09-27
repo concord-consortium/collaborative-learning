@@ -10,20 +10,18 @@ import "./annotation-button.scss";
 
 interface IAnnotationButtonProps {
   getObjectBoundingBox:
-    (rowId: string, tileId: string, objectId: string, objectType?: string) => ObjectBoundingBox | undefined;
+    (tileId: string, objectId: string, objectType?: string) => ObjectBoundingBox | undefined;
+  getTileOffset: () => Point | undefined;
   key?: string;
   objectId: string;
   objectType?: string;
   onClick?: (tileId: string, objectId: string, objectType?: string) => void;
-  rowId: string;
   sourceObjectId?: string;
   sourceTileId?: string;
   tileId: string;
-  translateTilePointToScreenPoint?: (point: Point) => Point | undefined;
 }
 export const AnnotationButton = observer(function AnnotationButton({
-  getObjectBoundingBox, objectId, objectType, onClick, rowId, sourceObjectId, sourceTileId, tileId,
-  translateTilePointToScreenPoint
+  getObjectBoundingBox, getTileOffset, objectId, objectType, onClick, sourceObjectId, sourceTileId, tileId
 }: IAnnotationButtonProps) {
   const tileApiInterface = useContext(TileApiInterfaceContext);
 
@@ -32,26 +30,38 @@ export const AnnotationButton = observer(function AnnotationButton({
   const source = sourceObjectId === objectId && sourceTileId === tileId;
   const classes = classNames("annotation-button", { source });
 
-  // Use a tile specified button if there is one
-  const tileApi = tileApiInterface?.getTileApi(tileId);
-  const button = tileApi?.getObjectButtonSVG?.({
-    classes, handleClick, objectId, objectType, translateTilePointToScreenPoint
-  });
-  if (button) return button;
+  function getButton() {
+    // Use a tile specified button if there is one
+    const tileApi = tileApiInterface?.getTileApi(tileId);
+    const _button = tileApi?.getObjectButtonSVG?.({ classes, handleClick, objectId, objectType });
+    if (_button) return _button;
 
-  // Otherwise, use the object's bounding box
-  const style = getObjectBoundingBox(rowId, tileId, objectId, objectType);
-  if (!style) return null;
+    // Otherwise, use the object's bounding box
+    const style = getObjectBoundingBox(tileId, objectId, objectType);
+    if (!style) return null;
 
-  return (
-    <rect
-      className={classes}
-      fill="transparent"
-      height={style.height}
-      onClick={handleClick}
-      width={style.width}
-      x={style.left}
-      y={style.top}
-    />
-  );
+    return (
+      <rect
+        className={classes}
+        height={style.height}
+        onClick={handleClick}
+        width={style.width}
+        x={style.left}
+        y={style.top}
+      />
+    );
+  }
+  const button = getButton();
+  if (!button) return null;
+
+  const tileOffset = getTileOffset();
+  if (tileOffset) {
+    return (
+      <g transform={`translate(${tileOffset[0]} ${tileOffset[1]})`}>
+        {button}
+      </g>
+    );
+  }
+
+  return null;
 });

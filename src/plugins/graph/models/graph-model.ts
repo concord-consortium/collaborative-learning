@@ -2,6 +2,8 @@ import stringify from "json-stringify-pretty-compact";
 import {reaction} from "mobx";
 import {addDisposer, getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
 import {createContext, useContext} from "react";
+import { IClueObject } from "../../../models/annotations/clue-object";
+import { getTileIdFromContent } from "../../../models/tiles/tile-model";
 import { IAdornmentModel, IUpdateCategoriesOptions } from "../adornments/adornment-models";
 import {AxisPlace} from "../imports/components/axis/axis-types";
 import {
@@ -28,6 +30,7 @@ import { AdornmentModelUnion } from "../adornments/adornment-types";
 import { SharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
 import { ConnectingLinesModel } from "../adornments/connecting-lines/connecting-lines-model";
 import { kConnectingLinesType } from "../adornments/connecting-lines/connecting-lines-types";
+import { getDotId } from "../utilities/graph-utils";
 export interface GraphProperties {
   axes: Record<string, IAxisModelUnion>
   plotType: PlotType
@@ -125,6 +128,22 @@ export const GraphModel = TileContentModel
     }
   }))
   .views(self => ({
+    get annotatableObjects() {
+      const tileId = getTileIdFromContent(self) ?? "";
+      const xAttributeID = self.getAttributeID("x");
+      const yAttributeID = self.getAttributeID("y");
+      if (!self.data) return [];
+      const objects: IClueObject[] = [];
+      self.data.cases.forEach(c => {
+        const objectId = getDotId(c.__id__, xAttributeID, yAttributeID);
+        objects.push({
+          tileId,
+          objectId,
+          objectType: "dot"
+        });
+      });
+      return objects;
+    },
     getUpdateCategoriesOptions(resetPoints=false): IUpdateCategoriesOptions {
       const xAttrId = self.getAttributeID("x"),
         xAttrType = self.config.attributeType("x"),
