@@ -1,5 +1,5 @@
 import {
-  applyPatch, flow, getSnapshot, IJsonPatch, isAlive, resolvePath, resolveIdentifier, types
+  applyPatch, flow, getSnapshot, IJsonPatch, isAlive, resolvePath, resolveIdentifier, types, IAnyModelType
 } from "mobx-state-tree";
 import { DEBUG_HISTORY } from "../../lib/debug";
 import { DocumentContentModelType } from "../document/document-content";
@@ -58,7 +58,9 @@ export const Tree = types.model("Tree", {
           if (tiles.find(existingTile => existingTile.id === tileId)) {
             // This tile has already been added to our list
           } else {
-            const tile = resolveIdentifier(TileModel, document, tileId);
+            // HACK: the snapshot processor returns a type which isn't compatible with
+            // resolveIdentifier
+            const tile = resolveIdentifier(TileModel as IAnyModelType, document, tileId);
             if (tile) {
               tiles.push(tile);
             }

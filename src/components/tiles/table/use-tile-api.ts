@@ -95,7 +95,7 @@ export const useToolApi = ({
     return offsets;
   }, [getObjectBoundingBox]);
 
-  const tileApi: ITileApi = useMemo(() => ({
+  const tileApi = useMemo<ITileApi>(() => ({
     // TODO: we should be able to remove getTitle from the tool api. All other
     // tiles can just access the title from the TileModel (wrapper). This table
     // tile is more complicated because if the title of the tile isn't, set then

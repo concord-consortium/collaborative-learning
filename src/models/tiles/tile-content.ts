@@ -2,7 +2,7 @@ import { getEnv, getSnapshot, Instance, types } from "mobx-state-tree";
 import { IClueObject } from "../annotations/clue-object";
 import { SharedModelType } from "../shared/shared-model";
 import { ISharedModelManager } from "../shared/shared-model-manager";
-import { tileModelHooks } from "./tile-model-hooks";
+import { tileContentAPIActions, tileContentAPIViews } from "./tile-model-hooks";
 import { kUnknownTileType } from "./unknown-types";
 
 export interface ITileEnvironment {
@@ -68,7 +68,8 @@ export const TileContentModel = types.model("TileContentModel", {
       // console.warn("updateAfterSharedModelChanges not implemented for:", self.type);
     }
   }))
-  // Add an empty api so the api methods can be used on this generic type
-  .actions(self => tileModelHooks({}));
+  // Add empty apis so they are available on the generic type
+  .actions(self => tileContentAPIActions({}))
+  .views(self => tileContentAPIViews({}));
 
 export interface ITileContentModel extends Instance<typeof TileContentModel> {}

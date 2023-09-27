@@ -9,7 +9,7 @@ import {
 import { getCellId } from "./table-utils";
 import { IDocumentExportOptions, IDefaultContentOptions } from "../tile-content-info";
 import { TileMetadataModel } from "../tile-metadata";
-import { tileModelHooks } from "../tile-model-hooks";
+import { tileContentAPIActions } from "../tile-model-hooks";
 import { getTileIdFromContent, getTileModel } from "../tile-model";
 import { TileContentModel } from "../tile-content";
 import { IClueObject } from "../../annotations/clue-object";
@@ -255,7 +255,7 @@ export const TableContentModel = TileContentModel
       return objects;
     }
   }))
-  .actions(self => tileModelHooks({
+  .actions(self => tileContentAPIActions({
     doPostCreate(metadata) {
       self.metadata = metadata as TableMetadataModelType;
     }

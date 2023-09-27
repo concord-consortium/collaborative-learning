@@ -6,7 +6,7 @@ import { kDataCardTileType, kDefaultLabel, kDefaultLabelPrefix } from "./data-ca
 import { withoutUndo } from "../../models/history/without-undo";
 import { IDefaultContentOptions, ITileExportOptions } from "../../models/tiles/tile-content-info";
 import { ITileMetadataModel } from "../../models/tiles/tile-metadata";
-import { tileModelHooks } from "../../models/tiles/tile-model-hooks";
+import { tileContentAPIActions } from "../../models/tiles/tile-model-hooks";
 import { TileContentModel } from "../../models/tiles/tile-content";
 import {
   addAttributeToDataSet, addCanonicalCasesToDataSet, addCasesToDataSet, DataSet
@@ -129,7 +129,7 @@ export const DataCardContentModel = TileContentModel
       ].join("\n");
     }
   }))
-  .actions(self => tileModelHooks({
+  .actions(self => tileContentAPIActions({
     doPostCreate(metadata: ITileMetadataModel){
       self.metadata = metadata;
     }
