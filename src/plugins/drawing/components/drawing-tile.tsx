@@ -61,6 +61,17 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
+    if (tileElt) {
+      tileElt.addEventListener("mousedown", handlePointerDown);
+      tileElt.addEventListener("touchstart", handlePointerDown);
+      return (() => {
+        tileElt.removeEventListener("mousedown", handlePointerDown);
+        tileElt.removeEventListener("touchstart", handlePointerDown);
+      });
+    }
+  }, [tileElt]);
+
   const handlePaste = async () => {
     const osClipboardContents = await getClipboardContent();
     if (osClipboardContents) {
@@ -90,10 +101,12 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
     return true; // true return means 'prevent default action'
   };
 
-  const handleMouseDown = (e: React.MouseEvent) => {
+  const handlePointerDown = (e: MouseEvent | TouchEvent) => {
     // Follows standard rules for clicking on tiles - with Cmd/Shift click,
     // adds or removes this tile from list of selected tiles. Without, just selects it.
-    // Note, when user clicks on specific objects, we handle those events locally
+    // Unlike default implementation in tile-component, does not capture events, so
+    // we can avoid calling this when necessary.
+    // When user clicks on specific objects, we handle those events locally
     // and don't allow the events to bubble up to this handler.
     const append = hasSelectionModifier(e);
     ui.setSelectedTileId(model.id, { append });
@@ -133,7 +146,6 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
         data-testid="drawing-tool"
         tabIndex={0}
         onKeyDown={(e) => hotKeys.current.dispatch(e)}
-        onMouseDown={handleMouseDown}
       >
         <ToolbarView
           model={model}
