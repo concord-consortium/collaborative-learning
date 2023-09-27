@@ -1,3 +1,4 @@
+import React from "react";
 
 import { ISimulation, ISimulationProps } from "../simulation-types";
 import { findVariable } from "../simulation-utilities";
@@ -5,10 +6,19 @@ import {
   iconUrl, kFanKey, kHeatLampKey, kHumidifierKey, kHumidityKey, kTemperatureKey
 } from "../../../shared-assets/icons/icon-utilities";
 
+import jarForeground from "./assets/jar_foreground/jar_foreground.png";
+import lampOff from "./assets/lamp_frames/lamp_00000.png";
+import lampOn from "./assets/lamp_frames/lamp_00001.png";
+import { fanFrames, jarFrames } from "./terrarium-assets";
+
+import "./terrarium.scss";
+
 export const kTerrariumKey = "terrarium";
 
 const kRawTemperatureKey = "raw_temperature_key";
+const tickDuration = 50; // This sim "ticks" more often than it "steps" to make the animation more smooth
 const stepDuration = 1000;
+const ticksPerStep = stepDuration / tickDuration;
 const minHumidity = 0;
 const startHumidity = 20;
 const maxHumidity = 90;
@@ -20,7 +30,25 @@ const fanTemperatureImpactPerStep = -1 / 60000 * stepDuration; // -1 degree/minu
 const heatLampTemperatureImpactPerStep = 1 / 60000 * stepDuration; // +1 degree/minute
 const humidifierHumidityImpactPerStep = 15 / 60000 * stepDuration; // +15%/minute
 
+function TerrariumComponent({ frame, variables }: ISimulationProps) {
+  const fanVariable = findVariable(kFanKey, variables);
+  const fanOn = !!fanVariable?.currentValue;
+  const heatLampVariable = findVariable(kHeatLampKey, variables);
+  const heatLampOn = !!heatLampVariable?.currentValue;
+  const jarFrame = frame % jarFrames.length;
+  return (
+    <div className="terrarium-component">
+      <img className="animation-image jar" src={jarFrames[jarFrame]} />
+      <img className="animation-image fan" src={fanFrames[fanOn ? frame % fanFrames.length : 0]} />
+      <img className="animation-image jar-foreground" src={jarForeground} />
+      <img className="animation-image heat-lamp" src={heatLampOn ? lampOn : lampOff} />
+    </div>
+  );
+}
+
 function step({ frame, variables }: ISimulationProps) {
+  if (frame % ticksPerStep !== 0) return; // Don't actually step every tick.
+
   const rawTemperatureVariable = findVariable(kRawTemperatureKey, variables);
   const humidifierVariable = findVariable(kHumidifierKey, variables);
   const fanVariable = findVariable(kFanKey, variables);
@@ -55,7 +83,8 @@ function step({ frame, variables }: ISimulationProps) {
 }
 
 export const terrariumSimulation: ISimulation = {
-  delay: stepDuration,
+  component: TerrariumComponent,
+  delay: tickDuration,
   step,
   variables: [
     {

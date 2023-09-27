@@ -1,0 +1,10 @@
+.terrarium-component {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  position: relative;
+
+  .animation-image {
+    position: absolute;
+  }
+}
