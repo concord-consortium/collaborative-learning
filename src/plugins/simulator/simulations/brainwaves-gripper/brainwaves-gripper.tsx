@@ -21,6 +21,9 @@ const minPressureValue = 60;
 
 const kRawTemperatureKey = "raw_temperature_key";
 const kSimulationModeKey = "simulation_mode_key";
+const kArmKey = "arm_key";
+const emgDropFactor = .1; //percentage drops for simulated emg signal
+
 const kSimulationModePressure = 0;
 const kSimulationModeTemperature = 1;
 const baseTemperature = 15.5; // 60 degrees F
@@ -31,8 +34,8 @@ interface IAnimationProps extends ISimulationProps {
   mode: number;
 }
 function BrainwavesGripperAnimation({ frame, mode, variables }: IAnimationProps) {
-  const emgVariable = findVariable(kEMGKey, variables);
-  const normalizedEmgValue = Math.min((emgVariable?.currentValue ?? 0) / 450, 1);
+  const armVariable = findVariable(kArmKey, variables);
+  const normalizedEmgValue = Math.min((armVariable?.currentValue ?? 0) / 450, 1);
   const armFrame = getFrame(normalizedEmgValue, armFrames.length);
 
   const gripperVariable = findVariable(kGripperKey, variables);
@@ -90,7 +93,7 @@ function BrainwavesGripperAnimation({ frame, mode, variables }: IAnimationProps)
 
 function BrainwavesGripperComponent({ frame, variables }: ISimulationProps) {
   const modeVariable = findVariable(kSimulationModeKey, variables);
-  const emgVariable = findVariable(kEMGKey, variables);
+  const armVariable = findVariable(kArmKey, variables);
 
   return (
     <div className="bwg-component">
@@ -105,7 +108,7 @@ function BrainwavesGripperComponent({ frame, variables }: ISimulationProps) {
           max={440}
           min={40}
           step={40}
-          variable={emgVariable}
+          variable={armVariable}
         />
         <div className="toggle-container">
           <div>Pressure</div>
@@ -122,10 +125,23 @@ function BrainwavesGripperComponent({ frame, variables }: ISimulationProps) {
   );
 }
 
+// this is like the "tick" that updates the simulation
 function step({ frame, variables }: ISimulationProps) {
+  const armVariable = findVariable(kArmKey, variables);
+  const emgVariable = findVariable(kEMGKey, variables);
+
+  if (armVariable && emgVariable) {
+    const armValue = armVariable.currentValue;
+    if (armValue !== undefined){
+      const newEmgValue = Math.round(armValue - Math.random() * emgDropFactor * armValue);
+      emgVariable.setValue(newEmgValue);
+    }
+  }
+
   const modeVariable = findVariable(kSimulationModeKey, variables);
   const gripperVariable = findVariable(kGripperKey, variables);
   const pressureVariable = findVariable(kPressureKey, variables);
+
   if (gripperVariable && pressureVariable) {
     const gripperValue = gripperVariable.value;
     const getPressureValue = () => {
@@ -138,8 +154,8 @@ function step({ frame, variables }: ISimulationProps) {
     };
     pressureVariable.setValue(getPressureValue());
 
-    const rawTemperatureVariable = findVariable(kRawTemperatureKey, variables);
-    const temperatureVariable = findVariable(kTemperatureKey, variables);
+    const rawTemperatureVariable = findVariable(kRawTemperatureKey, variables); // pan temperature
+    const temperatureVariable = findVariable(kTemperatureKey, variables); // sensor temperature
     const gripperFeeling = gripperValue && gripperValue > minTemperatureValue;
     if (modeVariable?.currentValue === kSimulationModeTemperature && gripperFeeling
       && rawTemperatureVariable && temperatureVariable) {
@@ -155,6 +171,11 @@ export const brainwavesGripperSimulation: ISimulation = {
   delay: 67,
   step,
   variables: [
+    {
+      displayName: "Arm Angle",
+      name: kArmKey,
+      value: 40
+    },
     {
       displayName: "EMG",
       labels: ["input", "sensor:emg-reading"],
