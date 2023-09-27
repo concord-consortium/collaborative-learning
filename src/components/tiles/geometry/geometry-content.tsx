@@ -276,12 +276,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       isLinked: () => {
         return this.getContent().isLinked;
       },
-      // getLinkIndex: (index?: number) => {
-      //   const tableLink = (index != null) && (index < metadata.linkedTableCount)
-      //                       ? metadata.links[index]
-      //                       : undefined;
-      //   return tableLink?.id ? getLinkedTableIndex(tableLink?.id) : -1;
-      // },
       getLinkedTiles: () => {
         return this.getContent().linkedTableIds;
       },

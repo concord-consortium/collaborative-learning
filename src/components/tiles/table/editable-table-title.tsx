@@ -13,14 +13,13 @@ interface IProps {
   isLinkEnabled?: boolean;
   titleCellWidth: number;
   titleCellHeight: number;
-  getLinkIndex: () => number;
   onBeginEdit?: () => void;
   onEndEdit?: (title?: string) => void;
   onLinkGeometryClick?: () => void;
 }
 export const EditableTableTitle: React.FC<IProps> = observer(function EditableTableTitle({
   content, className, readOnly, showLinkButton, isLinkEnabled, titleCellWidth, titleCellHeight,
-  getLinkIndex, onBeginEdit, onEndEdit, onLinkGeometryClick
+  onBeginEdit, onEndEdit, onLinkGeometryClick
 }) {
 
   verifyAlive(content, "EditableTableTile");
