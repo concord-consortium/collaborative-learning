@@ -21,7 +21,6 @@ export interface ITileApi {
   getSelectionInfo?: () => string;
   setSelectionHighlight?: (selectionInfo: string, isHighlighted: boolean) => void;
   isLinked?: () => boolean;
-  getLinkIndex?: (index?: number) => number;
   getLinkedTiles?: () => string[] | undefined;
   getContentHeight?: () => number | undefined;
   exportContentAsTileJson?: (options?: ITileExportOptions) => string;

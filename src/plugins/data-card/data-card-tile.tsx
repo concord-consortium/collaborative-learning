@@ -244,7 +244,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
   };
 
   const hasLinkableRows = content.dataSet.attributes.length > 1;
-  const { isLinkEnabled, getLinkIndex, showLinkTileDialog } = useConsumerTileLinking({
+  const { isLinkEnabled, showLinkTileDialog } = useConsumerTileLinking({
     documentId, model, hasLinkableRows, onRequestTilesOfType, onRequestLinkableTiles
   });
 
@@ -262,7 +262,6 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
         handleDuplicateCard={duplicateCard}
         scale={scale}
         isLinkEnabled={isLinkEnabled}
-        getLinkIndex={getLinkIndex}
         showLinkTileDialog={showLinkTileDialog}
       />
       <div

@@ -5,7 +5,7 @@ import {
   ILinkableTiles, ITileLinkMetadata, ITypedTileLinkMetadata, kNoLinkableTiles
 } from "../models/tiles/tile-link-types";
 import {
-  addTableToDocumentMap, getLinkedTableIndex, removeTableFromDocumentMap
+  addTableToDocumentMap, removeTableFromDocumentMap
 } from "../models/tiles/table-links";
 import { ITileModel } from "../models/tiles/tile-model";
 import { useLinkConsumerTileDialog } from "./use-link-consumer-tile-dialog";
@@ -93,11 +93,7 @@ export const useConsumerTileLinking = ({
     return () => removeTableFromDocumentMap(modelId);
   }, [documentId, modelId]);
 
-  const getLinkIndex = useCallback(() => {
-    return getLinkedTableIndex(modelId);
-  }, [modelId]);
-
-  return { isLinkEnabled, linkColors, getLinkIndex, showLinkTileDialog };
+  return { isLinkEnabled, linkColors, showLinkTileDialog };
 };
 
 interface IUseLinkableTilesProps {

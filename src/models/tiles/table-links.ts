@@ -1,4 +1,3 @@
-import { IObservableArray, observable } from "mobx";
 import { IAnyStateTreeNode } from "mobx-state-tree";
 import { GeometryContentModelType } from "./geometry/geometry-content";
 import { kGeometryTileType } from "./geometry/geometry-types";
@@ -32,9 +31,6 @@ export function getAxisLabelsFromDataSet(dataSet: IDataSet): [string | undefined
 
 // map from tableId to documentId
 const sTableDocumentMap: Map<string, string> = new Map();
-type LinkedTableIds = IObservableArray<string>;
-// map from documentId to array of linked tableIds
-const sDocumentLinkedTables: Map<string, LinkedTableIds> = new Map();
 
 export function getTableDocument(tableId: string) {
   return sTableDocumentMap.get(tableId);
@@ -48,42 +44,10 @@ export function removeTableFromDocumentMap(tableId: string) {
   sTableDocumentMap.delete(tableId);
 }
 
-export function getLinkedTables(documentId: string) {
-  return sDocumentLinkedTables.get(documentId);
-}
-
-export function getLinkedTableIndex(tableId: string) {
-  // TODO This function is out of date and should be like the following
-  // But getTableContent requires an MST for the first argument, which I wasn't able to provide
-  // const tableContent = getTableContent(undefined, tableId);
-  // return tableContent?.sharedModel?.indexOfType || -1;
-  const documentId = getTableDocument(tableId);
-  if (!documentId) return -1;
-  const linkedTables = getLinkedTables(documentId);
-  return linkedTables ? linkedTables.indexOf(tableId) : -1;
-}
-
-export function addLinkedTable(tableId: string) {
-  const documentId = getTableDocument(tableId);
-  if (!documentId) return;
-  const linkedTables = getLinkedTables(documentId);
-  if (!linkedTables) {
-    sDocumentLinkedTables.set(documentId, observable.array([tableId]));
-  }
-  else if (linkedTables.indexOf(tableId) < 0) {
-    linkedTables.push(tableId);
-  }
-}
-
-export function removeLinkedTable(tableId: string) {
-  const documentId = getTableDocument(tableId);
-  if (!documentId) return;
-  const linkedTables = getLinkedTables(documentId);
-  if (!linkedTables) return;
-  const index = linkedTables.indexOf(tableId);
-  (index >= 0) && linkedTables.splice(index, 1);
-}
-
+// FIXME: this should use the shared datasets to figure out the correct
+// color. Since datasets can be provided by different tiles these colors
+// should not be specific to tables. Look for `link-color-` in the style
+// sheets.
 export function getTableLinkColors(tableId?: string) {
   const colors = [
           { fill: styles.linkColor0Light, stroke: styles.linkColor0Dark },
@@ -93,8 +57,6 @@ export function getTableLinkColors(tableId?: string) {
           { fill: styles.linkColor4Light, stroke: styles.linkColor4Dark },
           { fill: styles.linkColor5Light, stroke: styles.linkColor5Dark }
         ];
-  // TODO Fix this! See note in getLinkedTableIndex for more notes
-  // const linkIndex = tableId ? getLinkedTableIndex(tableId) : -1;
   const linkIndex = 0;
   return linkIndex >= 0
           ? colors[linkIndex % colors.length]

@@ -170,7 +170,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     readOnly: !!readOnly, changeHandlers, columns, onColumnResize, selectedCell, inputRowId, lookupImage });
 
   // Variables for handling linking to geometry tiles
-  const { isLinkEnabled, linkColors, getLinkIndex, showLinkTileDialog } =
+  const { isLinkEnabled, linkColors, showLinkTileDialog } =
     useConsumerTileLinking({ documentId, model, hasLinkableRows,
                           onRequestTilesOfType, onRequestLinkableTiles });
 
@@ -222,7 +222,6 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
         onSetExpression={showExpressionsDialog}
         scale={scale}
         isLinkEnabled={isLinkEnabled}
-        getLinkIndex={getLinkIndex}
         showLinkDialog={showLinkTileDialog}
       />
       <div className="table-grid-container" ref={containerRef} onClick={handleBackgroundClick}>
@@ -232,7 +231,6 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
           readOnly={readOnly}
           showLinkButton={true}
           isLinkEnabled={isLinkEnabled}
-          getLinkIndex={getLinkIndex}
           onLinkGeometryClick={showLinkTileDialog}
           titleCellWidth={titleCellWidth}
           titleCellHeight={getTitleHeight()}

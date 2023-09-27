@@ -4,7 +4,7 @@ import {
   ILinkableTiles, ITileLinkMetadata, ITypedTileLinkMetadata, kNoLinkableTiles
 } from "../models/tiles/tile-link-types";
 import {
-  addTableToDocumentMap, getLinkedTableIndex, getTableLinkColors, removeTableFromDocumentMap
+  addTableToDocumentMap, removeTableFromDocumentMap
 } from "../models/tiles/table-links";
 import { ITileModel } from "../models/tiles/tile-model";
 import { useLinkProviderTileDialog } from "./use-link-provider-tile-dialog";
@@ -26,7 +26,6 @@ export const useProviderTileLinking = ({
   const modelId = model.id;
   const { providers: linkableTiles } = useLinkableTiles({ model, onRequestTilesOfType, onRequestLinkableTiles });
   const isLinkEnabled = (linkableTiles.length > 0);
-  const linkColors = getTableLinkColors(modelId);
 
   const linkTile = useCallback((tileInfo: ITileLinkMetadata) => {
     const providerTile = getTileContentById(model.content, tileInfo.id);
@@ -65,11 +64,7 @@ export const useProviderTileLinking = ({
     return () => removeTableFromDocumentMap(modelId);
   }, [documentId, modelId]);
 
-  const getLinkIndex = useCallback(() => {
-    return getLinkedTableIndex(modelId);
-  }, [modelId]);
-
-  return { isLinkEnabled, linkColors, getLinkIndex, showLinkTileDialog };
+  return { isLinkEnabled, showLinkTileDialog };
 };
 
 interface IUseLinkableTilesProps {
