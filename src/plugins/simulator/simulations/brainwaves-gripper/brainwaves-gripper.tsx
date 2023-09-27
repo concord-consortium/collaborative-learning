@@ -128,14 +128,14 @@ function step({ frame, variables }: ISimulationProps) {
   const pressureVariable = findVariable(kPressureKey, variables);
   if (gripperVariable && pressureVariable) {
     const gripperValue = gripperVariable.value;
-    function getPressureValue() {
+    const getPressureValue = () => {
       if (!gripperValue) return 0;
       if (modeVariable?.currentValue === kSimulationModeTemperature) {
         return gripperValue > minTemperatureValue ? (gripperValue - minTemperatureValue) * 200 : 0;
       } else {
         return gripperValue > minPressureValue ? (gripperValue - minPressureValue) * 100 : 0;
       }
-    }
+    };
     pressureVariable.setValue(getPressureValue());
 
     const rawTemperatureVariable = findVariable(kRawTemperatureKey, variables);
