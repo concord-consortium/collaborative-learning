@@ -103,13 +103,19 @@ function BrainwavesGripperComponent({ frame, variables }: ISimulationProps) {
         variables={variables}
       />
       <div className="controls">
-        <VariableSlider
-          className="emg-slider"
-          max={440}
-          min={40}
-          step={40}
-          variable={armVariable}
-        />
+        <div className="slider-wrapper">
+          <VariableSlider
+            className="emg-slider"
+            max={440}
+            min={40}
+            step={40}
+            variable={armVariable}
+          />
+          <div className="slider-labels">
+            <div className="open">relaxed</div>
+            <div className="closed">flexed</div>
+          </div>
+        </div>
         <div className="toggle-container">
           <div>Pressure</div>
           <ToggleControl

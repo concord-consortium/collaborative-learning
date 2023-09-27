@@ -49,6 +49,18 @@
     display: flex;
     justify-content: space-between;
 
+    .slider-labels {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      .open {
+        transform: translateX(-20px);
+      }
+      .closed {
+        transform: translateX(19px);
+      }
+    }
+
     .emg-slider {
       width: 150px;
     }
