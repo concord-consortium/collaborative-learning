@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 
 import { ISimulation, ISimulationProps } from "../simulation-types";
-import { findVariable } from "../simulation-utilities";
+import { findVariable, getFrame } from "../simulation-utilities";
 import {
   iconUrl, kFanKey, kHeatLampKey, kHumidifierKey, kHumidityKey, kTemperatureKey
 } from "../../../shared-assets/icons/icon-utilities";
@@ -33,7 +33,10 @@ const humidifierHumidityImpactPerStep = 15 / 60000 * stepDuration; // +15%/minut
 function TerrariumComponent({ frame, variables }: ISimulationProps) {
   const humidifierFrameRef = useRef(0);
 
-  const jarFrame = frame % jarFrames.length;
+  const humidityVariable = findVariable(kHumidityKey, variables);
+  const humidityValue = humidityVariable?.currentValue ?? startHumidity;
+  const humidityPercent = (humidityValue - minHumidity) / (maxHumidity - minHumidity);
+  const jarFrame = getFrame(humidityPercent, jarFrames.length);
 
   // Update humidifier
   const humidifierVariable = findVariable(kHumidifierKey, variables);
@@ -82,7 +85,7 @@ function step({ frame, variables }: ISimulationProps) {
   const humidifierOn = !!humidifierVariable?.value;
   const humidifierHumidityImpact = humidifierOn ? humidifierHumidityImpactPerStep : 0;
 
-  if (humidityVariable?.value) {
+  if (humidityVariable?.value !== undefined) {
     const humidity = Math.min(maxHumidity, Math.max(minHumidity,
       humidityVariable.value + baseHumidityImpactPerStep + fanHumidityImpact + humidifierHumidityImpact));
     humidityVariable.setValue(humidity);
