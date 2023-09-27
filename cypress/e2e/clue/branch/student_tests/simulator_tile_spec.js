@@ -31,9 +31,10 @@ context('Simulator Tile with Brainwaves Gripper Simulation', function () {
       cy.get(".gripper-image").should("exist");
 
       cy.log("Can switch to temperature variant.");
-      simulatorTile.getAnimationImages().should("have.length", 3);
+      cy.get(".temperature-part").should("not.exist");
       simulatorTile.clickModeToggle();
-      simulatorTile.getAnimationImages().should("have.length", 4);
+      cy.get(".gripper-image").should("not.exist");
+      cy.get(".temperature-part").should("exist");
     });
     it("edit tile title", () => {
       const newName = "Test Simulation";
