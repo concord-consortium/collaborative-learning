@@ -154,9 +154,13 @@ function getUnitSpec(unitId: string | undefined, appConfig: AppConfigModelType) 
 
 const getExternalProblemSectionData =
   async (invIdx: number, probIdx: number, sectIdx: number, dataUrl: string, sectionPath?: string) => {
-    const sectionData = await fetch(dataUrl).then(res => res.json());
-    sectionData.sectionPath = sectionPath;
-    return { invIdx, probIdx, sectIdx, sectionData };
+    try {
+      const sectionData = await fetch(dataUrl).then(res => res.json());
+      sectionData.sectionPath = sectionPath;
+      return { invIdx, probIdx, sectIdx, sectionData };
+    } catch (error) {
+      throw new Error(`Failed to load problem-section ${dataUrl} cause:\n ${error}`);
+    }
 };
 
 const populateProblemSections = async (content: Record<string, any>, unitUrl: string) => {
@@ -214,7 +218,7 @@ export function getUnitJson(unitId: string | undefined, appConfig: AppConfigMode
              }
            })
            .catch(error => {
-             throw Error(`Request rejected with exception ${error}`);
+             throw Error(`Failed to load unit ${unitUrl} cause:\n ${error}`);
            });
 }
 
