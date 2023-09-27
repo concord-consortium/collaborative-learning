@@ -1,12 +1,9 @@
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 
 import { getColorMapEntry } from "../models/shared/shared-data-set-colors";
 import {
   ILinkableTiles, ITileLinkMetadata, ITypedTileLinkMetadata, kNoLinkableTiles
 } from "../models/tiles/tile-link-types";
-import {
-  addTableToDocumentMap, removeTableFromDocumentMap
-} from "../models/tiles/table-links";
 import { ITileModel } from "../models/tiles/tile-model";
 import { useLinkConsumerTileDialog } from "./use-link-consumer-tile-dialog";
 import { getTileContentById } from "../utilities/mst-utils";
@@ -14,7 +11,6 @@ import { SharedDataSet } from "../models/shared/shared-data-set";
 import { getTileContentInfo } from "../models/tiles/tile-content-info";
 
 interface IProps {
-  documentId?: string;
   hasLinkableRows: boolean;
   model: ITileModel;
   readOnly?: boolean;
@@ -24,7 +20,7 @@ interface IProps {
   onUnlinkTile?: (tileInfo: ITileLinkMetadata) => void;
 }
 export const useConsumerTileLinking = ({
-  documentId, model, hasLinkableRows, readOnly, onRequestTilesOfType, onRequestLinkableTiles, onLinkTile, onUnlinkTile
+  model, hasLinkableRows, readOnly, onRequestTilesOfType, onRequestLinkableTiles, onLinkTile, onUnlinkTile
 }: IProps) => {
   const modelId = model.id;
   const { consumers: linkableTiles } = useLinkableTiles({ model, onRequestTilesOfType, onRequestLinkableTiles });
@@ -87,11 +83,6 @@ export const useConsumerTileLinking = ({
   const [showLinkTileDialog] = useLinkConsumerTileDialog({
     linkableTiles, model, onLinkTile: onLinkTileHandler, onUnlinkTile: onUnlinkTileHandler
   });
-
-  useEffect(() => {
-    documentId && addTableToDocumentMap(documentId, modelId);
-    return () => removeTableFromDocumentMap(modelId);
-  }, [documentId, modelId]);
 
   return { isLinkEnabled, linkColors, showLinkTileDialog };
 };

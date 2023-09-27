@@ -29,21 +29,6 @@ export function getAxisLabelsFromDataSet(dataSet: IDataSet): [string | undefined
   return [xLabel, yLabel];
 }
 
-// map from tableId to documentId
-const sTableDocumentMap: Map<string, string> = new Map();
-
-export function getTableDocument(tableId: string) {
-  return sTableDocumentMap.get(tableId);
-}
-
-export function addTableToDocumentMap(documentId: string, tableId: string) {
-  sTableDocumentMap.set(tableId, documentId);
-}
-
-export function removeTableFromDocumentMap(tableId: string) {
-  sTableDocumentMap.delete(tableId);
-}
-
 // FIXME: this should use the shared datasets to figure out the correct
 // color. Since datasets can be provided by different tiles these colors
 // should not be specific to tables. Look for `link-color-` in the style

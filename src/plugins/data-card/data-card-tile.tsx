@@ -245,7 +245,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
 
   const hasLinkableRows = content.dataSet.attributes.length > 1;
   const { isLinkEnabled, showLinkTileDialog } = useConsumerTileLinking({
-    documentId, model, hasLinkableRows, onRequestTilesOfType, onRequestLinkableTiles
+    model, hasLinkableRows, onRequestTilesOfType, onRequestLinkableTiles
   });
 
 

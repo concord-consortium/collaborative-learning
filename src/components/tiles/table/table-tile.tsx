@@ -34,7 +34,7 @@ import "./table-tile.scss";
 
 // observes row selection from shared selection store
 const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComponent({
-  documentId, documentContent, tileElt, model, readOnly, height, scale,
+  documentContent, tileElt, model, readOnly, height, scale,
   onRequestRowHeight, onRequestTilesOfType, onRequestLinkableTiles, onRequestUniqueTitle,
   onRegisterTileApi, onUnregisterTileApi
 }) {
@@ -171,7 +171,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
 
   // Variables for handling linking to geometry tiles
   const { isLinkEnabled, linkColors, showLinkTileDialog } =
-    useConsumerTileLinking({ documentId, model, hasLinkableRows,
+    useConsumerTileLinking({ model, hasLinkableRows,
                           onRequestTilesOfType, onRequestLinkableTiles });
 
   const containerRef = useRef<HTMLDivElement>(null);
