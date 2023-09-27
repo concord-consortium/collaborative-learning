@@ -123,16 +123,21 @@ function BrainwavesGripperComponent({ frame, variables }: ISimulationProps) {
 }
 
 function step({ frame, variables }: ISimulationProps) {
+  const modeVariable = findVariable(kSimulationModeKey, variables);
   const gripperVariable = findVariable(kGripperKey, variables);
   const pressureVariable = findVariable(kPressureKey, variables);
   if (gripperVariable && pressureVariable) {
     const gripperValue = gripperVariable.value;
-    const pressureValue = gripperValue && gripperValue > minPressureValue
-      ? (gripperValue - minPressureValue) * 100
-      : 0;
-    pressureVariable.setValue(pressureValue);
+    function getPressureValue() {
+      if (!gripperValue) return 0;
+      if (modeVariable?.currentValue === kSimulationModeTemperature) {
+        return gripperValue > minTemperatureValue ? (gripperValue - minTemperatureValue) * 200 : 0;
+      } else {
+        return gripperValue > minPressureValue ? (gripperValue - minPressureValue) * 100 : 0;
+      }
+    }
+    pressureVariable.setValue(getPressureValue());
 
-    const modeVariable = findVariable(kSimulationModeKey, variables);
     const rawTemperatureVariable = findVariable(kRawTemperatureKey, variables);
     const temperatureVariable = findVariable(kTemperatureKey, variables);
     const gripperFeeling = gripperValue && gripperValue > minTemperatureValue;
