@@ -42,6 +42,7 @@ interface IProps {
 }
 
 export const Graph = observer(function Graph({ graphController, graphRef, dotsRef }: IProps) {
+
   const graphModel = useGraphModelContext(),
     {autoAdjustAxes, enableAnimation} = graphController,
     {plotType} = graphModel,
@@ -56,7 +57,14 @@ export const Graph = observer(function Graph({ graphController, graphRef, dotsRe
     xAttrID = graphModel.getAttributeID('x'),
     yAttrID = graphModel.getAttributeID('y');
 
+  console.log("----------------<Graph>-----------");
+  console.log("\twith dataset:", dataset);
+  console.log("\t dataSet attributeIDMap:", dataset?.attrIDMap);
+
+
   useEffect(function setupPlotArea() {
+    console.log("📁graph.tsx >");
+    console.log("\tuseEffect setupPlotArea");
     if (xScale && xScale?.length > 0) {
       const plotBounds = layout.getComputedBounds('plot');
       select(plotAreaSVGRef.current)
@@ -89,6 +97,8 @@ export const Graph = observer(function Graph({ graphController, graphRef, dotsRe
 
   // respond to assignment of new attribute ID
   useEffect(function handleNewAttributeID() {
+    console.log("📁graph.tsx >");
+    console.log("useEffect handleNewAttributeId");
     const disposer = graphModel && onAnyAction(graphModel, action => {
       if (isSetAttributeIDAction(action)) {
         const [role, dataSetId, attrID] = action.args,

@@ -16,6 +16,7 @@ interface IMultiLegendProps {
 }
 
 export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProps) {
+  console.log("-----<MultiLegend>--------");
   const {onChangeAttribute, onRemoveAttribute, onTreatAttributeAs} = props;
   const layout = useGraphLayoutContext();
   const legendBounds = layout.computedBounds.legend;

@@ -5,8 +5,11 @@ import { IAttributeDescriptionSnapshot } from "../../models/data-configuration-m
 
 export const AddSeriesButton = observer(function AddSeriesButton() {
   const dataConfiguration = useDataConfigurationContext();
+  console.log("----<AddSeriesButton>--------");
+  console.log("🚀 ~ file: add-series-button.tsx:8 ~ AddSeriesButton ~ dataConfiguration:", dataConfiguration);
 
   function handleClick() {
+    console.log("🚀 ~ file: add-series-button.tsx:12 ~ handleClick ~ handleClick:", handleClick);
     // Find first unplotted attribute
     if (!dataConfiguration || !dataConfiguration.dataset) return;
     const datasetAttributes = dataConfiguration.dataset.attributes;

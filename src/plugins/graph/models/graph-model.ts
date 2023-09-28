@@ -83,7 +83,16 @@ export const GraphModel = TileContentModel
       return getTileCaseMetadata(self);
     },
     pointColorAtIndex(plotIndex = 0) {
-      return self._pointColors[plotIndex] ?? kellyColors[plotIndex % kellyColors.length];
+      console.log("📁graph-model.ts -------------------------");
+      // console.log("\tplotIndex:", plotIndex);
+      // console.log("\treturn _pointColors[plotIndex]:", self._pointColors[plotIndex]);
+      // //if self._pointcolors.length < plotIndex then return kellyColors
+      if (self._pointColors.length > plotIndex){
+        console.log("\tmulitplePlots!");
+        return kellyColors[plotIndex % kellyColors.length];
+      } else {
+        return self._pointColors[plotIndex];
+      }
     },
     get pointColor() {
       return this.pointColorAtIndex(0);
