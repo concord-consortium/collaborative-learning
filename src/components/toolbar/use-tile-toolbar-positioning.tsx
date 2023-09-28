@@ -9,7 +9,7 @@ export function useTileToolbarPositioning(tileElement: HTMLElement|null) {
     placement: "bottom-start",
     whileElementsMounted: autoUpdate,
     // Offset accounts for margin. Shift and flip attempt to keep toolbar in the viewport.
-    middleware: [offset({ crossAxis: -2}), flip(), shift()],
+    middleware: [offset({ alignmentAxis: -2}), flip(), shift()],
     elements: {
       reference: tileElement
     }

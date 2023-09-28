@@ -1,11 +1,10 @@
 @import "../vars";
 
 .tile-toolbar {
-
   height: $toolbar-height;
   border: $toolbar-border;
+  border-radius: $toolbar-border-radius;
   background-color: $workspace-teal-light-9;
-  // do we need a 'buttons' container at this level?
   display: flex;
   text-align: center;
 
@@ -13,33 +12,70 @@
     display: none;
   }
 
-  &.bottom-start, &.bottom-end {
-    border-radius: 0 0 $toolbar-border-radius $toolbar-border-radius;
+  &.bottom-start {
+    border-top-left-radius: 0;
 
     div:first-child {
       button {
-        border-bottom-left-radius: $toolbar-border-radius;
+        // Border radius reduced by width of toolbar border, so it nests nicely
+        border-bottom-left-radius: calc($toolbar-border-radius - 2px);
       }
     }
     div:last-child {
       button {
-        border-bottom-right-radius: $toolbar-border-radius;
+        border-radius: 0 calc($toolbar-border-radius - 2px) calc($toolbar-border-radius - 2px) 0;
       }
     }
   }
 
-  &.top-start, &.top-end {
-    border-radius: $toolbar-border-radius $toolbar-border-radius 0 0;
+  &.bottom-end {
+    border-top-right-radius: 0;
 
     div:first-child {
       button {
-        border-top-left-radius: $toolbar-border-radius;
+        border-bottom-left-radius: calc($toolbar-border-radius - 2px);
       }
     }
     div:last-child {
       button {
-        border-top-right-radius: $toolbar-border-radius;
+        border-radius: 0 calc($toolbar-border-radius - 2px) calc($toolbar-border-radius - 2px) 0;
       }
+    }
+  }
+
+  &.top-start {
+    border-bottom-left-radius: 0;
+
+    div:first-child {
+      button {
+        border-top-left-radius: calc($toolbar-border-radius - 2px);
+      }
+    }
+    div:last-child {
+      button {
+        border-radius: 0 calc($toolbar-border-radius - 2px) calc($toolbar-border-radius - 2px) 0;
+      }
+    }
+  }
+
+  &.top-end {
+    border-bottom-right-radius: 0;
+
+    div:first-child {
+      button {
+        border-radius: calc($toolbar-border-radius - 2px) 0 0 calc($toolbar-border-radius - 2px);
+      }
+    }
+    div:last-child {
+      button {
+        border-top-right-radius: calc($toolbar-border-radius - 2px);
+      }
+    }
+  }
+
+  div:first-child {
+    button {
+      margin-left: 0;
     }
   }
 
@@ -49,12 +85,12 @@
     user-select: none;
     width: $toolbar-button-width;
     height: $toolbar-button-height;
-    margin: 0;
+    margin-left: 1px;
     padding: 0;
-    background-color: #efefef;
+    background-color: $workspace-teal-light-9;
     cursor: pointer;
 
-    &:hover {
+    &:hover:not(:disabled) {
       background-color: $workspace-teal-light-6;
     }
 
