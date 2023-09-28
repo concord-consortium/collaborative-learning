@@ -90,7 +90,7 @@
     background-color: $workspace-teal-light-9;
     cursor: pointer;
 
-    &:hover:not(:disabled) {
+    &:hover:not(:disabled):not(.selected) {
       background-color: $workspace-teal-light-6;
     }
 
@@ -100,10 +100,6 @@
     }
 
     &.selected {
-      background-color: $workspace-teal-light-4;
-    }
-
-    &:active {
       background-color: $workspace-teal-light-4;
 
       &.button-select {
