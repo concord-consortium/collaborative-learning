@@ -16,12 +16,11 @@ const defaultButtons = ["set-expression", "link-tile", "delete"];
 interface IProps extends IFloatingToolbarProps {
   isLinkEnabled: boolean;
   deleteSelected: () => void;
-  getLinkIndex: () => number;
   onSetExpression: () => void;
   showLinkDialog?: () => void;
 }
 export const TableToolbar: React.FC<IProps> = observer(({
-  documentContent, isLinkEnabled, deleteSelected, getLinkIndex, onIsEnabled,
+  documentContent, isLinkEnabled, deleteSelected, onIsEnabled,
   onSetExpression, showLinkDialog, ...others
 }) => {
   const enabled = onIsEnabled();
@@ -47,7 +46,6 @@ export const TableToolbar: React.FC<IProps> = observer(({
           return <LinkTileButton
                   key={toolName}
                   isEnabled={isLinkEnabled}
-                  getLinkIndex={getLinkIndex}
                   onClick={showLinkDialog}
                 />;
       }

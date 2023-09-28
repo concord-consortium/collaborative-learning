@@ -1,13 +1,61 @@
 name: Continuous Integration
 
-on: push
-
+on:
+  push:
+  pull_request:
+    types: [ labeled ]
 jobs:
+  prepare:
+    # only conintue if a push or PR labeled with 'run regression'
+    if: github.event_name == 'push' || (github.event.action == 'labeled' && github.event.label.name == 'run regression')
+    runs-on: ubuntu-latest
+    outputs:
+      uuid: ${{ steps.uuid.outputs.value }}
+      pr_labels: ${{ steps.pr.outputs.labels }}
+      # if we are triggered by a pull_request labeled event, there is no branch, so we fall back to checking the
+      # label in the github.event. Also steps.run_regression.outputs.value will be "false" in this case which
+      # being a string is actually considered true, so fromJSON is needed to turn `"false"` into `false`.
+      # finally if we are on the 'master' branch then run the regression tests regardless of the PR label
+      run_regression: ${{ fromJSON(steps.run_regression.outputs.value) || github.event.label.name == 'run regression' || github.ref_name == 'master' }}
+    permissions:
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get PR labels
+        id: pr
+        # the github.event.pull_request.labels is not available when a build
+        # is triggered by a push. So we use the `gh` CLI to get info about the PR for the
+        # current branch.
+        # - If the branch doesn't have a PR yet, then the `gh pr view` command fails with
+        # the message: no pull requests found for branch "pr-label-test"
+        # - If the trigger is a labeled pull_request, a branch is not checked out, so the
+        # `gh pr view` command can't find the PR. This case is handled in the job output
+        # above.
+        # - If the same branch is part of multiple PR, it isn't clear what will
+        # happen, but that should be very unusual.
+        run: echo "labels=$(gh pr view --json labels -q '.labels' || echo "[]")" >> $GITHUB_OUTPUT
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Print PR labels
+        run: echo "PR labels ${{ steps.pr.outputs.labels }}"
+      - name: Get run_regression
+        id: run_regression
+        run: echo "value=${{ contains(fromJSON(steps.pr.outputs.labels).*.name, 'run regression') }}" >> $GITHUB_OUTPUT
+      - name: Generate unique ID 💎
+        id: uuid
+        # take the current commit + timestamp together
+        # the typical value would be something like
+        # "sha-5d3fe...35d3-time-1620841214"
+        run: echo "value=sha-$GITHUB_SHA-time-$(date +"%s")" >> $GITHUB_OUTPUT
+      - name: Print unique ID
+        run: echo "generated id ${{ steps.uuid.outputs.value }}"
   build_test:
+    # We need 'prepare' so this job will be skipped if the trigger is a PR labeled with some other label
+    needs: ['prepare']
     name: Build and Run Jest Tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v2
         with:
           node-version: '16'
@@ -25,19 +73,6 @@ jobs:
         with:
           flags: jest
           token: ${{ secrets.CODECOV_TOKEN }}
-  prepare:
-    runs-on: ubuntu-latest
-    outputs:
-      uuid: ${{ steps.uuid.outputs.value }}
-    steps:
-      - name: Generate unique ID 💎
-        id: uuid
-        # take the current commit + timestamp together
-        # the typical value would be something like
-        # "sha-5d3fe...35d3-time-1620841214"
-        run: echo "value=sha-$GITHUB_SHA-time-$(date +"%s")" >> $GITHUB_OUTPUT
-      - name: Print unique ID
-        run: echo "generated id ${{ steps.uuid.outputs.value }}"
   cypress:
     needs: ['prepare']
     runs-on: ubuntu-latest
@@ -54,7 +89,7 @@ jobs:
         containers: [1]
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Install CMS Dependencies
         working-directory: ./cms
         run: npm ci
@@ -101,7 +136,7 @@ jobs:
       - cypress
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v2
         with:
           node-version: '16'
@@ -129,12 +164,13 @@ jobs:
           topBranches: |
             ["master"]
   regression:
+    needs: ['prepare']
+    # only run the regression tests if the PR is labeled.
+    if: fromJSON(needs.prepare.outputs.run_regression)
     runs-on: ubuntu-latest
+    # temporarily expand the timeout to 4hrs until cypress cloud is available again
+    # it was 1hr before.
     timeout-minutes: 240
-    needs:
-      - prepare
-      - build_test
-      - cypress
     container: cypress/browsers:node16.14.2-slim-chrome103-ff102
     strategy:
       # when one test fails, DO NOT cancel the other
@@ -143,11 +179,13 @@ jobs:
       # https://github.com/cypress-io/github-action/issues/48
       fail-fast: false
       matrix:
-        # run 5 copies of the current job in parallel
+        # temporarily use only 1 worker until cypress cloud is available again
+        # it was:
+        # container: [1, 2, 3, 4, 5]
         containers: [1]
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - uses: actions/setup-node@v2
         with:
           node-version: '16'
