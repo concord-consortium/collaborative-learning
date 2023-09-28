@@ -1,7 +1,7 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
-import React, { useState } from "react";
-import { SizeMeProps } from "react-sizeme";
+import React, { useContext, useState } from "react";
+import { TileModelContext } from "../tiles/tile-api";
 import { TileLabelInput } from "./tile-label-input";
 
 import "./editable-tile-title.scss";
@@ -11,28 +11,22 @@ import "./editable-tile-title.scss";
 // directly rather than relying on their inclusion by this component.
 import "./tile-title-area.scss";
 
-interface IProps extends SizeMeProps {
+interface IProps {
   className?: string;
   readOnly?: boolean;
-  scale?: number;
-  getTitle: () => string | undefined;
   measureText: (text: string) => number;
   onBeginEdit?: () => void;
   onEndEdit?: (title?: string) => void;
 }
 export const EditableTileTitle: React.FC<IProps> = observer(({
-  className, readOnly, size: contentSize, scale, getTitle, measureText, onBeginEdit, onEndEdit
+  className, readOnly, measureText, onBeginEdit, onEndEdit
 }) => {
-  // getTitle() and observer() allow this component to re-render
+  // model and observer() allow this component to re-render
   // when the title changes without re-rendering the entire tile
-  const title = getTitle() || "Tile Title";
+  const model = useContext(TileModelContext);
+  const title = model?.title || "Tile Title";
   const kTitlePadding = 30;
-  // There can be one render before we know our container size, which will then be
-  // immediately replaced by a subsequent render with a known container size.
-  // Place it roughly in the middle of the screen until we have a proper position.
-  const kContainerlessPosition = 450;
   const width = Math.ceil(measureText(title)) + kTitlePadding;
-  const left = contentSize.width ? (contentSize.width / (scale || 1) - width) / 2: kContainerlessPosition;
   const [isEditing, setIsEditing] = useState(false);
   const [editingTitle, setEditingTitle] = useState(title);
 
@@ -57,6 +51,8 @@ export const EditableTileTitle: React.FC<IProps> = observer(({
   };
   const handleClose = (accept: boolean) => {
     const trimTitle = editingTitle?.trim();
+    // This automatically logs the change
+    trimTitle && model?.setTitle(trimTitle);
     onEndEdit?.(accept && trimTitle ? trimTitle : undefined);
     setIsEditing(false);
   };
@@ -64,7 +60,7 @@ export const EditableTileTitle: React.FC<IProps> = observer(({
   const classes = classNames("editable-tile-title", className,
                             { "editable-tile-title-editing": isEditing,
                             "editable-tile-title-default": isDefaultTitle });
-  const containerStyle: React.CSSProperties = { left, width };
+  const containerStyle: React.CSSProperties = { width };
   const kMinInputWidth = 200; // so there's room to expand very short titles
   const inputWidth = width >= kMinInputWidth ? "100%" : kMinInputWidth;
   const inputStyle: React.CSSProperties = { width: inputWidth };

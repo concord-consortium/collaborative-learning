@@ -9,7 +9,7 @@ import {
 import { getCellId } from "./table-utils";
 import { IDocumentExportOptions, IDefaultContentOptions } from "../tile-content-info";
 import { TileMetadataModel } from "../tile-metadata";
-import { tileContentAPIActions } from "../tile-model-hooks";
+import { tileContentAPIActions, tileContentAPIViews } from "../tile-model-hooks";
 import { getTileIdFromContent, getTileModel } from "../tile-model";
 import { TileContentModel } from "../tile-content";
 import { IClueObject } from "../../annotations/clue-object";
@@ -239,9 +239,6 @@ export const TableContentModel = TileContentModel
     }
   }))
   .views(self => ({
-    get title() {
-      return getTileModel(self)?.title ?? self.dataSet.name;
-    },
     get annotatableObjects() {
       const tileId = getTileIdFromContent(self) ?? "";
       const objects: IClueObject[] = [];
@@ -253,6 +250,11 @@ export const TableContentModel = TileContentModel
         });
       });
       return objects;
+    }
+  }))
+  .views(self => tileContentAPIViews({
+    get contentTitle() {
+      return self.dataSet.name;
     }
   }))
   .actions(self => tileContentAPIActions({
@@ -304,9 +306,13 @@ export const TableContentModel = TileContentModel
           if (!sharedDataSet) {
             // The table doesn't have a shared model. This could happen because it
             // was just added to the document or because the table was unlinked from its
-            // dataset. This unlinking can happen if the DataFlow tile unlinks the table
+            // dataset. This unlinking can happen if the DataFlow tile unlinks the table.
+            // Also if there is no title on the table, the dataset name will be set to
+            // undefined. Then when the component is rendered there is some code in
+            // useTableTitle which updates it to a unique title
+            const model = getTileModel(self);
             const dataSet = DataSet.create(!self.importedDataSet.isEmpty
-              ? getSnapshot(self.importedDataSet) : createDefaultDataSet(self.title));
+              ? getSnapshot(self.importedDataSet) : createDefaultDataSet(model?.title));
             self.clearImportedDataSet();
             sharedDataSet = SharedDataSet.create({ providerId: self.metadata.id, dataSet });
           }

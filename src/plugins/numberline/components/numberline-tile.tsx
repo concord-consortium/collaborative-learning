@@ -314,11 +314,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       tabIndex={0}
     >
       <div className={"numberline-title"}>
-        <BasicEditableTileTitle
-          model={model}
-          readOnly={readOnly}
-          scale={scale}
-        />
+        <BasicEditableTileTitle readOnly={readOnly} />
       </div>
       <NumberlineToolbar
         documentContent={documentContent}

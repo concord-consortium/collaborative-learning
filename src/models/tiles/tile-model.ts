@@ -1,4 +1,4 @@
-import { clone, cloneDeep } from "lodash";
+import { cloneDeep } from "lodash";
 import { getParent, getSnapshot, getType,
   Instance, SnapshotIn, SnapshotOut, types, ISerializedActionCall } from "mobx-state-tree";
 import { findMetadata, getTileContentInfo, ITileExportOptions } from "./tile-content-info";
@@ -159,7 +159,7 @@ export const TileModel = types.snapshotProcessor(TileModelInternal, {
     // internally we store the title in the `internalTitle` property
     // this way we can provide view that computes the title
     // when serialized we save it out simply as `title`
-    const {title, ...others} = clone(snapshot);
+    const {title, ...others} = snapshot;
     const newSnapshot = {internalTitle: title, ...others};
 
     const tileType = newSnapshot.content.type;
@@ -168,7 +168,7 @@ export const TileModel = types.snapshotProcessor(TileModelInternal, {
   },
 
   postProcessor(snapshot: SnapshotOut<typeof TileModelInternal>) {
-    const {internalTitle, ...others} = clone(snapshot);
+    const {internalTitle, ...others} = snapshot;
     return {title: internalTitle, ...others};
   }
 });

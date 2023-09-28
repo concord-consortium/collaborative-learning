@@ -6,6 +6,7 @@ import { getTableColumnLeft, getTableContentHeight, getTableRowTop } from "./tab
 import { ITileApi } from "../tile-api";
 import { useCurrent } from "../../../hooks/use-current";
 import { IAttribute } from "../../../models/data/attribute";
+import { getTileModel } from "../../../models/tiles/tile-model";
 import { IDataSet } from "../../../models/data/data-set";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
 import { exportTableContentAsJson } from "../../../models/tiles/table/table-export";
@@ -102,7 +103,7 @@ export const useToolApi = ({
     // the title is pulled from the table's dataset. So to remove this from the
     // api, we'll need a title view on TileModel that optionally lets the content
     // override the title stored on the TileModel.
-    getTitle: () => contentRef.current.title,
+    getTitle: () => getTileModel(contentRef.current)?.title,
     getContentHeight,
     exportContentAsTileJson,
     isLinked: () => {

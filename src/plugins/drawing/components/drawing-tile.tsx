@@ -98,22 +98,18 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
   };
 
   const getVisibleCanvasSize = () => {
-    if (!drawingToolElement.current 
-      || !drawingToolElement.current.clientWidth 
+    if (!drawingToolElement.current
+      || !drawingToolElement.current.clientWidth
       || !drawingToolElement.current.clientHeight) return undefined;
-    return { 
-      x: drawingToolElement.current.clientWidth-getObjectListPanelWidth(), 
-      y: drawingToolElement.current.clientHeight 
+    return {
+      x: drawingToolElement.current.clientWidth-getObjectListPanelWidth(),
+      y: drawingToolElement.current.clientHeight
     };
   };
 
   return (
     <DrawingContentModelContext.Provider value={contentRef.current} >
-      <BasicEditableTileTitle
-        model={model}
-        readOnly={readOnly}
-        scale={scale}
-      />
+      <BasicEditableTileTitle readOnly={readOnly} />
       <div
         ref={drawingToolElement}
         className={classNames("drawing-tool", { "read-only": readOnly })}

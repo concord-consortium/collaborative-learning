@@ -56,6 +56,7 @@ import ErrorAlert from "../../utilities/error-alert";
 import { halfPi, normalizeAngle, Point } from "../../../utilities/math-utils";
 import SingleStringDialog from "../../utilities/single-string-dialog";
 import { getClipboardContent, pasteClipboardImage } from "../../../utilities/clipboard-utils";
+import { ToolTitleArea } from "../tile-title-area";
 
 import "./geometry-tile.sass";
 
@@ -591,26 +592,22 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleTitleChange = (title?: string) => {
-    title && this.props.model.setTitle(title);
     this.setState({ isEditingTitle: false });
   };
 
   private renderTitleArea() {
     return (
-      <div className="title-area-wrapper" key="title-area">
-        <div className="title-area">
-          {this.renderTitle()}
-          {this.renderTileLinkButton()}
-        </div>
-      </div>
+      <ToolTitleArea>
+        {this.renderTitle()}
+        {this.renderTileLinkButton()}
+      </ToolTitleArea>
     );
   }
 
   private renderTitle() {
-    const getTitle = () => this.props.model.title || "";
-    const { measureText, readOnly, size, scale } = this.props;
+    const { measureText, readOnly } = this.props;
     return (
-      <EditableTileTitle key="geometry-title" size={size} scale={scale} getTitle={getTitle}
+      <EditableTileTitle key="geometry-title"
                               readOnly={readOnly} measureText={measureText}
                               onBeginEdit={this.handleBeginEditTitle} onEndEdit={this.handleTitleChange} />
     );

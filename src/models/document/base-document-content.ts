@@ -455,6 +455,10 @@ export const BaseDocumentContentModel = types
       if (!content.type) {
         console.warn("addTileContentInNewRow requires the content to have a type");
       }
+      // In the case of the table tile, it sets the name of the dataSet after a new one
+      // has been created. However because getNewTileTitle always returns a string
+      // the table will never use the dataset name unless it has been manually
+      // configured to do so.
       const title = options?.title || self.getNewTileTitle(content.type!);
       return self.addTileInNewRow(TileModel.create({ title, content, id: options?.tileId }), options);
     },
