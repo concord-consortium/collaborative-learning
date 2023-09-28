@@ -73,6 +73,7 @@ interface IProps extends SizeMeProps {
   programDataRate: number;
   programZoom?: ProgramZoomType;
   readOnly?: boolean;
+  runnable?: boolean;
   tileHeight?: number;
   //state
   programMode: ProgramMode;
@@ -639,23 +640,25 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});
     this.lastIntervalTime = now;
 
-    switch (programMode){
-      case ProgramMode.Ready:
-        this.updateNodes();
-        break;
-      case ProgramMode.Recording:
-        if (!readOnly) {
-          recordCase(this.props.tileContent, this.programEditor, this.props.recordIndex);
-        }
-        this.updateNodes();
-        updateRecordIndex(UpdateMode.Increment);
-        break;
-      case ProgramMode.Done:
-        isPlaying && this.playbackNodesWithCaseData(dataSet, playBackIndex);
-        isPlaying && updatePlayBackIndex(UpdateMode.Increment);
-        !isPlaying && updatePlayBackIndex(UpdateMode.Reset);
-        updateRecordIndex(UpdateMode.Reset);
-        break;
+    if (this.props.runnable) {
+      switch (programMode){
+        case ProgramMode.Ready:
+          this.updateNodes();
+          break;
+        case ProgramMode.Recording:
+          if (!readOnly) {
+            recordCase(this.props.tileContent, this.programEditor, this.props.recordIndex);
+          }
+          this.updateNodes();
+          updateRecordIndex(UpdateMode.Increment);
+          break;
+        case ProgramMode.Done:
+          isPlaying && this.playbackNodesWithCaseData(dataSet, playBackIndex);
+          isPlaying && updatePlayBackIndex(UpdateMode.Increment);
+          !isPlaying && updatePlayBackIndex(UpdateMode.Reset);
+          updateRecordIndex(UpdateMode.Reset);
+          break;
+      }
     }
   };
 
