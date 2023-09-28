@@ -280,11 +280,9 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
   private handleRequestUniqueTitle = (tileId: string) => {
     const { content } = this.props;
-    const tileApiInterface = this.context;
     const tileType = content?.getTile(tileId)?.content.type;
     const titleBase = getTileContentInfo(tileType)?.titleBase;
-    const getTileTitle = (_tileId: string) => tileApiInterface?.getTileApi?.(_tileId)?.getTitle?.();
-    return tileType && titleBase && content?.getUniqueTitle(tileType, titleBase, getTileTitle);
+    return tileType && titleBase && content?.getUniqueTitle(tileType, titleBase);
   };
 
   private handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
