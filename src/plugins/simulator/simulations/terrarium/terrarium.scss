@@ -7,5 +7,27 @@
 
   .animation-image {
     position: absolute;
+
+    &.humidifier {
+      top: -23px;
+    }
+
+    &.plant {
+      top: 46px;
+      left: -38px;
+    }
+  }
+
+  .display-container {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    left: 108px;
+    position: absolute;
+    top: 125px;
+
+    .display-message {
+      position: absolute;
+    }
   }
 }
