@@ -110,9 +110,6 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       exportContentAsTileJson: (options?: ITileExportOptions) => {
         return content.exportJson(options);
       },
-      getTitle: () => {
-        return model.title || "";
-      },
       getObjectBoundingBox,
       getObjectButtonSVG: ({ classes, handleClick, objectId, objectType }) => {
         if (objectType === "point") {

@@ -109,9 +109,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     this.imageElt && this.resizeObserver.observe(this.imageElt);
 
     this.props.onRegisterTileApi({
-      getTitle: () => {
-        return this.getTitle();
-      },
       exportContentAsTileJson: (options?: ITileExportOptions) => {
         return this.getContent().exportJson(options);
       },
@@ -241,10 +238,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     return aspectRatio && imageEltWidth
             ? Math.min(Math.ceil(imageEltWidth / aspectRatio), naturalHeight) + kMarginsAndBorders
             : naturalHeight + kMarginsAndBorders;
-  }
-
-  private getTitle() {
-    return this.props.model.title || "";
   }
 
   private getContent() {

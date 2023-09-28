@@ -6,7 +6,6 @@ import { getTableColumnLeft, getTableContentHeight, getTableRowTop } from "./tab
 import { ITileApi } from "../tile-api";
 import { useCurrent } from "../../../hooks/use-current";
 import { IAttribute } from "../../../models/data/attribute";
-import { getTileModel } from "../../../models/tiles/tile-model";
 import { IDataSet } from "../../../models/data/data-set";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
 import { exportTableContentAsJson } from "../../../models/tiles/table/table-export";
@@ -97,13 +96,6 @@ export const useToolApi = ({
   }, [getObjectBoundingBox]);
 
   const tileApi = useMemo<ITileApi>(() => ({
-    // TODO: we should be able to remove getTitle from the tool api. All other
-    // tiles can just access the title from the TileModel (wrapper). This table
-    // tile is more complicated because if the title of the tile isn't, set then
-    // the title is pulled from the table's dataset. So to remove this from the
-    // api, we'll need a title view on TileModel that optionally lets the content
-    // override the title stored on the TileModel.
-    getTitle: () => getTileModel(contentRef.current)?.title,
     getContentHeight,
     exportContentAsTileJson,
     isLinked: () => {

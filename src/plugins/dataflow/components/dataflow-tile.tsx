@@ -99,15 +99,13 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
 
   public componentDidMount() {
     this.props.onRegisterTileApi({
-      getTitle: () => {
-        return this.getTitle();
-      },
       exportContentAsTileJson: (options?: ITileExportOptions) => {
         return this.getContent().exportJson(options);
       }
     });
 
-    if (this.getTitle() === '') {
+    const { model } = this.props;
+    if (model.title === '') {
       const { model: { id }, onRequestUniqueTitle } = this.props;
       const title = onRequestUniqueTitle(id);
       title && this.props.model.setTitle(title);
@@ -174,10 +172,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   private handleRequestTableUnlink = (tileInfo: ITileLinkMetadata) => {
     this.getContent().removeLinkedTable(tileInfo.id);
   };
-
-  private getTitle() {
-    return this.props.model.title || "";
-  }
 
   private handleProgramChange = (program: any) => {
     this.getContent().setProgram(program);

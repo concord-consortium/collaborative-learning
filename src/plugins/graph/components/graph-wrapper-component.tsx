@@ -39,10 +39,6 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
   const xAttrType = content.config.attributeType("x");
   const yAttrType = content.config.attributeType("y");
 
-  const getTitle  = useCallback(() => {
-    return model?.title || "";
-  }, [model]);
-
   const getDotCenter = useCallback((dotId: string) => {
     // FIXME Currently, getScreenX and getScreenY only handle numeric axes, so just bail if they are a different type.
     if (xAttrType !== "numeric" || yAttrType !== "numeric") return;
@@ -61,9 +57,6 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
     onRegisterTileApi?.({
       exportContentAsTileJson: (options?: ITileExportOptions) => {
         return content.exportJson(options);
-      },
-      getTitle: () => {
-        return getTitle();
       },
       getObjectBoundingBox: (objectId: string, objectType?: string) => {
         if (objectType === "dot") {
@@ -117,7 +110,7 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
         }
       }
     });
-  }, [getDotCenter, getTitle, content, layout, onRegisterTileApi]);
+  }, [getDotCenter, content, layout, onRegisterTileApi]);
 
   useEffect(function cleanup() {
     return () => {

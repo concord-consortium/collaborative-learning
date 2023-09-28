@@ -257,8 +257,8 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   }, 50);
 
   private getTileTitle(id: string) {
-    const tileApiInterface = this.context;
-    return tileApiInterface?.getTileApi(id)?.getTitle?.();
+    const tile = this.props.content?.getTile(id);
+    return tile?.title;
   }
 
   private handleRequestTilesOfType = (tileType: string) => {

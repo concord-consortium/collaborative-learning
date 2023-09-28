@@ -48,14 +48,6 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
     }
   }, [model, onRequestUniqueTitle]);
 
-  useEffect(() => {
-    onRegisterTileApi({
-      getTitle: () => {
-        return model.title;
-      }
-    });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
   useDataCardTileHeight({
     tileElt,
     height: height && isFinite(height) ? height : 0,

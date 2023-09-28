@@ -283,9 +283,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       exportContentAsTileJson: (options?: ITileExportOptions) => {
         return this.getContent().exportJson(options);
       },
-      getTitle: () => {
-        return this.props.model.title;
-      },
       getObjectBoundingBox: (objectId: string, objectType?: string) => {
         if (objectType === "point") {
           const coords = this.getPointScreenCoords(objectId);
