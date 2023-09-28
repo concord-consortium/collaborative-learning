@@ -23,7 +23,7 @@ export const EditableTableTitle: React.FC<IProps> = observer(function EditableTa
 
   // model.title and observer() allow this component to re-render
   // when the title changes without re-rendering the entire TableTool
-  const title = model.title;
+  const title = model.computedTitle;
   const [isEditing, setIsEditing] = useState(false);
   const [editingTitle, setEditingTitle] = useState(title);
   const handleClick = () => {

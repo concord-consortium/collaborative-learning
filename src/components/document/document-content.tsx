@@ -258,7 +258,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
   private getTileTitle(id: string) {
     const tile = this.props.content?.getTile(id);
-    return tile?.title;
+    return tile?.computedTitle;
   }
 
   private handleRequestTilesOfType = (tileType: string) => {

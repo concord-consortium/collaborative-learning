@@ -24,7 +24,7 @@ export const EditableTileTitle: React.FC<IProps> = observer(({
   // model and observer() allow this component to re-render
   // when the title changes without re-rendering the entire tile
   const model = useContext(TileModelContext);
-  const title = model?.title || "Tile Title";
+  const title = model?.computedTitle || "Tile Title";
   const kTitlePadding = 30;
   const width = Math.ceil(measureText(title)) + kTitlePadding;
   const [isEditing, setIsEditing] = useState(false);

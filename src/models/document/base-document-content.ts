@@ -312,7 +312,7 @@ export const BaseDocumentContentModel = types
       const tileIds = self.getTilesOfType(tileType);
       const tiles = tileIds.map(tileId => self.getTile(tileId));
       const maxDefaultTitleIndex = tiles.reduce((maxIndex, tile) => {
-        const title = tile?.title;
+        const title = tile?.computedTitle;
         const match = titleMatchesDefault(title, titleBase);
         return match?.[1]
                 ? Math.max(maxIndex, +match[1])
@@ -894,7 +894,7 @@ export const BaseDocumentContentModel = types
       if (tile) {
         const tileContentInfo = getTileContentInfo(tile.content.type);
         if (tileContentInfo) {
-          const oldTitle = tile.title;
+          const oldTitle = tile.computedTitle;
           const match = titleMatchesDefault(oldTitle, tileContentInfo.titleBase);
           if (match) {
             const newTitle = self.getNewTileTitle(tile.content.type);

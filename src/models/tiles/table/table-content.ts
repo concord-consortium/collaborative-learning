@@ -312,7 +312,7 @@ export const TableContentModel = TileContentModel
             // useTableTitle which updates it to a unique title
             const model = getTileModel(self);
             const dataSet = DataSet.create(!self.importedDataSet.isEmpty
-              ? getSnapshot(self.importedDataSet) : createDefaultDataSet(model?.title));
+              ? getSnapshot(self.importedDataSet) : createDefaultDataSet(model?.computedTitle));
             self.clearImportedDataSet();
             sharedDataSet = SharedDataSet.create({ providerId: self.metadata.id, dataSet });
           }

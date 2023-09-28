@@ -143,7 +143,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
         }
       },
     });
-  }, [annotationPointCenter, content, getObjectBoundingBox, model.title, onRegisterTileApi]);
+  }, [annotationPointCenter, content, getObjectBoundingBox, onRegisterTileApi]);
 
   //-------------------  SVG Ref to Numberline & SVG --------------------------------
   const svgRef = useRef<SVGSVGElement | null>(null);

@@ -16,10 +16,10 @@ interface IProps {
 export const useTableTitle = ({
   gridContext, model, content, readOnly, onRequestUniqueTitle, onSetTableTitle, requestRowHeight
 }: IProps) => {
-  const editingTitle = useCurrent(model.title);
+  const editingTitle = useCurrent(model.computedTitle);
 
   const onBeginTitleEdit = () => {
-    editingTitle.current = model?.title;
+    editingTitle.current = model?.computedTitle;
     gridContext.onClearSelection();
     return !readOnly;
   };

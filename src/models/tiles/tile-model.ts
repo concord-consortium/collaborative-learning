@@ -54,20 +54,29 @@ export function getTileIdFromContent(tileContentModel: ITileContentModel) {
   return parent?.id;
 }
 
-const TileModelInternal = types
+export const TileModel = types
   .model("TileModel", {
     // if not provided, will be generated
     id: types.optional(types.identifier, () => uniqueId()),
     // all tiles can have a title
-    internalTitle: types.maybe(types.string),
+    title: types.maybe(types.string),
     // whether to restrict display to certain users
     display: DisplayUserTypeEnum,
     // e.g. "TextContentModel", ...
     content: TileContentUnion
   })
+  .preProcessSnapshot(snapshot => {
+    const tileType = snapshot.content.type;
+    const preProcessor = getTileContentInfo(tileType)?.tileSnapshotPreProcessor;
+    return preProcessor ? preProcessor(snapshot) : snapshot;
+  })
   .views(self => ({
-    get title() {
-      return self.internalTitle ?? self.content.contentTitle ?? "";
+    /**
+     * Users can manually set a tile title. If the title isn't set, then content model
+     * can provide a title. The empty string is considered an "unset" title.
+     */
+    get computedTitle() {
+      return self.title || self.content.contentTitle || "";
     },
     // generally negotiated with tile, e.g. single column width for table
     get minWidth() {
@@ -98,8 +107,8 @@ const TileModelInternal = types
       if (includeId) {
         builder.pushLine(`"id": "${self.id}",`, 2);
       }
-      if (!excludeTitle && self.internalTitle) {
-        builder.pushLine(`"title": "${self.internalTitle}",`, 2);
+      if (!excludeTitle && self.title) {
+        builder.pushLine(`"title": "${self.title}",`, 2);
       }
       if (self.display) {
         builder.pushLine(`"display": "${self.display}",`, 2);
@@ -113,7 +122,7 @@ const TileModelInternal = types
   }))
   .actions(self => ({
     setTitle(title: string) {
-      self.internalTitle = title;
+      self.title = title;
       logTileDocumentEvent(LogEventName.RENAME_TILE,{ tile: self as ITileModel });
     },
     setDisplay(display: DisplayUserType) {
@@ -148,30 +157,6 @@ const TileModelInternal = types
       metadata && metadata.setDisabledFeatures && metadata.setDisabledFeatures(disabled);
     }
   }));
-
-// The types.snapshotProcessor is used here so the types are handled better
-// It updates the TileModel.create(...) parameter type and the
-// SnapshotIn type to match the type of parameter of preProcessor.
-// It also updates the SnapshotOut type to be the return type of postProcessor
-// I didn't test extensively perhaps there is a way to do this with the alternative approach
-export const TileModel = types.snapshotProcessor(TileModelInternal, {
-  preProcessor(snapshot: Omit<SnapshotIn<typeof TileModelInternal>, "internalTitle"> & {title?: string}) {
-    // internally we store the title in the `internalTitle` property
-    // this way we can provide view that computes the title
-    // when serialized we save it out simply as `title`
-    const {title, ...others} = snapshot;
-    const newSnapshot = {internalTitle: title, ...others};
-
-    const tileType = newSnapshot.content.type;
-    const preProcessor = getTileContentInfo(tileType)?.tileSnapshotPreProcessor;
-    return preProcessor ? preProcessor(newSnapshot) : newSnapshot;
-  },
-
-  postProcessor(snapshot: SnapshotOut<typeof TileModelInternal>) {
-    const {internalTitle, ...others} = snapshot;
-    return {title: internalTitle, ...others};
-  }
-});
 
 export interface ITileModel extends Instance<typeof TileModel> {}
 export interface ITileModelSnapshotIn extends SnapshotIn<typeof TileModel> {}
