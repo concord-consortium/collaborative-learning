@@ -207,7 +207,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
                 onBlur={this.handleBlur}
                 className={`ccrte-editor slate-editor ${classes || ""}`}
               />
-              <TileToolbar tileType="text" tileElement={this.textTileDiv} readOnly={!!readOnly} />
+              <TileToolbar tileType="text" tileElement={this.props.tileElt} readOnly={!!readOnly} />
             </Slate>
           </div>
         </TextPluginsContext.Provider>

@@ -8,8 +8,8 @@ export function useTileToolbarPositioning(tileElement: HTMLElement|null) {
     open: true,
     placement: "bottom-start",
     whileElementsMounted: autoUpdate,
-    // Offset accounts for margin. Shift and flip attempt to keep toolbar in the viewport.
-    middleware: [offset({ alignmentAxis: -2}), flip(), shift()],
+    // Offset accounts for margin width. Shift and flip attempt to keep toolbar in the viewport.
+    middleware: [offset({ mainAxis: -2}), flip(), shift()],
     elements: {
       reference: tileElement
     }
