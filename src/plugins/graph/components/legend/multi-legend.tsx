@@ -3,7 +3,7 @@ import { observer } from "mobx-react";
 import {AttributeType} from "../../../../models/data/attribute";
 import { GraphPlace } from "../../imports/components/axis-graph-shared";
 import { SimpleAttributeLabel } from "../simple-attribute-label";
-import { kMultiLegendHeight, useGraphLayoutContext } from "../../models/graph-layout";
+import { useGraphLayoutContext } from "../../models/graph-layout";
 import { IDataSet } from "../../../../models/data/data-set";
 import { useDataConfigurationContext } from "../../hooks/use-data-configuration-context";
 import { AddSeriesButton } from "./add-series-button";
@@ -24,7 +24,7 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
   const multiLegendRef = useRef<HTMLDivElement>(null);
 
   useEffect(() =>{
-    const legendTransform = `translateY(${ 0 - (kMultiLegendHeight + 3)}px)`;
+    const legendTransform = `translateY(${-layout.computedBounds.legend.height}px)`;
     if (!multiLegendRef.current) return;
     multiLegendRef.current.style.transform = legendTransform;
     multiLegendRef.current.style.width = `${layout.graphWidth}px`;

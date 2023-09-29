@@ -1,3 +1,7 @@
+// Menu sizing here must match calculations in graph-layout.ts:
+$menu-height: 30px;
+$menu-vertical-padding: 20px;
+$menu-vertical-gap: 10px;
 $menu-label-height: 15px;
 $min-menu-width: 144px;
 $codap-menu-border-color: #0592af;
@@ -5,15 +9,25 @@ $codap-bg-color: #f9f9f9;
 
 .multi-legend {
 
-  padding: 20px 30px;
-  // background-color:$codap-bg-color;
-  background-color: lightblue;
+  padding: $menu-vertical-padding 10%;
+  background-color:$codap-bg-color;
+  display: flex;
+  flex-flow: row wrap;
+  row-gap: $menu-vertical-gap;
+  column-gap: 20%;
+  // justify-content: space-evenly;
+
+  .add-series-button {
+    flex: 0 0 auto;
+    height: $menu-height;
+  }
 
   .simple-attribute-label {
+    flex: 0 0 auto;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 30px;
+    height: $menu-height;
     width: $min-menu-width;
     border:1px solid #3f3f3f;
     padding:6px;

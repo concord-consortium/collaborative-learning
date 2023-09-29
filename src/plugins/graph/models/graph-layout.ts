@@ -9,8 +9,9 @@ import {MultiScale} from "../imports/components/axis/models/multi-scale";
 export const kDefaultGraphWidth = 480;
 export const kDefaultGraphHeight = 300;
 export const kDefaultLegendHeight = 0;
-export const kMultiLegendHeight = 80;
-
+export const kMultiLegendMenuHeight = 30;
+export const kMultiLegendPadding = 20;
+export const kMultiLegendVerticalGap = 10;
 export interface Bounds {
   left: number
   top: number
@@ -131,9 +132,13 @@ export class GraphLayout implements IAxisLayout {
    * Todo: Eventually there will be additional room set aside at the top for formulas
    */
   @computed get computedBounds() {
+    const multiLegendRows = 2; // FIXME how do we get the actual number of Y attributes in order to determine this?
+    const multiLegendHeight = kMultiLegendPadding * 2
+      + kMultiLegendMenuHeight  * multiLegendRows
+      + kMultiLegendVerticalGap * (multiLegendRows-1);
     const {desiredExtents, graphWidth, graphHeight} = this,
       usesMultiLegend = appConfig.getSetting("defaultSeriesLegend", "graph"),
-      legendHeight = usesMultiLegend ? kMultiLegendHeight : desiredExtents.get('legend') ?? 0,
+      legendHeight = usesMultiLegend ? multiLegendHeight : desiredExtents.get('legend') ?? 0,
       topAxisHeight = desiredExtents.get('top') ?? 0,
       leftAxisWidth = desiredExtents.get('left') ?? 20,
       bottomAxisHeight = desiredExtents.get('bottom') ?? 20,

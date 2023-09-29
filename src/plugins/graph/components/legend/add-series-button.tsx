@@ -39,7 +39,7 @@ export const AddSeriesButton = observer(function AddSeriesButton() {
 
   if (hasUnplottedAttributes) {
     return (
-      <button onClick={handleClick}>Add Series</button>
+      <button onClick={handleClick} className="add-series-button">Add Series</button>
     );
   } else {
     return null;
