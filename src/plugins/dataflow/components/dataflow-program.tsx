@@ -74,7 +74,6 @@ interface IProps extends SizeMeProps {
   programZoom?: ProgramZoomType;
   readOnly?: boolean;
   runnable?: boolean;
-  programId?: string;
   tileHeight?: number;
   //state
   programMode: ProgramMode;
@@ -95,7 +94,7 @@ interface IState {
 }
 
 const numSocket = new Rete.Socket("Number value");
-const GENERIC_RETE_APP_ID = "dataflow@0.1.0";
+const RETE_APP_IDENTIFIER = "dataflow@0.1.0";
 const MAX_ZOOM = 2;
 const MIN_ZOOM = .1;
 
@@ -260,15 +259,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     return style;
   };
 
-  private getReteAppId = () => {
-    return this.props.programId ?? GENERIC_RETE_APP_ID;
-  };
-
   private initProgram = () => {
-    const reteAppId = this.getReteAppId();
     this.initComponents();
-    this.initProgramEngine(reteAppId);
-    this.initProgramEditor(true, reteAppId);
+    this.initProgramEngine();
+    this.initProgramEditor(true);
 
     this.setDataRate(this.props.programDataRate);
   };
@@ -286,19 +280,19 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       new TimerReteNodeFactory(numSocket)];
   };
 
-  private initProgramEngine = (reteId: string) => {
-    this.programEngine = new Rete.Engine(reteId);
+  private initProgramEngine = () => {
+    this.programEngine = new Rete.Engine(RETE_APP_IDENTIFIER);
 
     this.components.map(c => {
       this.programEngine.register(c);
     });
   };
 
-  private initProgramEditor = (clearHistory = false, reteId: string) => {
+  private initProgramEditor = (clearHistory = false) => {
     (async () => {
       if (!this.toolDiv) return;
 
-      this.programEditor = new Rete.NodeEditor(reteId, this.toolDiv);
+      this.programEditor = new Rete.NodeEditor(RETE_APP_IDENTIFIER, this.toolDiv);
       this.programEditor.use(ConnectionPlugin);
       this.programEditor.use(ReactRenderPlugin);
 
@@ -453,7 +447,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private updateProgramEditor = () => {
-    const reteAppId = this.getReteAppId();
     // TODO: allow updates to write tiles for undo/redo
     if (this.toolDiv && this.props.readOnly) {
       if (this.programEditor) {
@@ -461,7 +454,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         this.destroyEditor();
       }
       this.toolDiv.innerHTML = "";
-      this.initProgramEditor(true, reteAppId);
+      this.initProgramEditor();
     }
   };
 
