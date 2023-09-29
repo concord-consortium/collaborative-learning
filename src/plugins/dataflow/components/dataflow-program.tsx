@@ -74,6 +74,7 @@ interface IProps extends SizeMeProps {
   programZoom?: ProgramZoomType;
   readOnly?: boolean;
   runnable?: boolean;
+  programId?: string;
   tileHeight?: number;
   //state
   programMode: ProgramMode;
@@ -94,7 +95,7 @@ interface IState {
 }
 
 const numSocket = new Rete.Socket("Number value");
-const RETE_APP_IDENTIFIER = "dataflow@0.1.0";
+const GENERIC_RETE_APP_ID = "dataflow@0.1.0";
 const MAX_ZOOM = 2;
 const MIN_ZOOM = .1;
 
@@ -259,10 +260,24 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     return style;
   };
 
+  private getReteAppId = () => {
+    if (!this.props.runnable ) {
+      return GENERIC_RETE_APP_ID;
+    }
+    else {
+      // TODO / WIP
+      // below, returning a dynamic id allows programs to run without crosstalk on right
+      // but does not work when program is on left side, it fails to load nodes and run
+      return GENERIC_RETE_APP_ID;
+      //return this.props.programId + "@0.1.0";
+    }
+  };
+
   private initProgram = () => {
+    const reteAppId = this.getReteAppId();
     this.initComponents();
-    this.initProgramEngine();
-    this.initProgramEditor(true);
+    this.initProgramEngine(reteAppId);
+    this.initProgramEditor(true, reteAppId);
 
     this.setDataRate(this.props.programDataRate);
   };
@@ -280,19 +295,19 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       new TimerReteNodeFactory(numSocket)];
   };
 
-  private initProgramEngine = () => {
-    this.programEngine = new Rete.Engine(RETE_APP_IDENTIFIER);
+  private initProgramEngine = (reteId: string) => {
+    this.programEngine = new Rete.Engine(reteId);
 
     this.components.map(c => {
       this.programEngine.register(c);
     });
   };
 
-  private initProgramEditor = (clearHistory = false) => {
+  private initProgramEditor = (clearHistory = false, reteId: string) => {
     (async () => {
       if (!this.toolDiv) return;
 
-      this.programEditor = new Rete.NodeEditor(RETE_APP_IDENTIFIER, this.toolDiv);
+      this.programEditor = new Rete.NodeEditor(reteId, this.toolDiv);
       this.programEditor.use(ConnectionPlugin);
       this.programEditor.use(ReactRenderPlugin);
 
@@ -447,6 +462,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private updateProgramEditor = () => {
+    const reteAppId = this.getReteAppId();
     // TODO: allow updates to write tiles for undo/redo
     if (this.toolDiv && this.props.readOnly) {
       if (this.programEditor) {
@@ -454,7 +470,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         this.destroyEditor();
       }
       this.toolDiv.innerHTML = "";
-      this.initProgramEditor();
+      this.initProgramEditor(true, reteAppId);
     }
   };
 
