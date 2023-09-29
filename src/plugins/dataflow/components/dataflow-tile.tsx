@@ -91,6 +91,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
                   updatePlayBackIndex={this.updatePlayBackIndex}
                   updateRecordIndex={this.updateRecordIndex}
                   tileContent={tileContent}
+
                 />
               );
             }}
@@ -207,19 +208,9 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     }
   };
 
-  // TODO, likely will not need all this, but keeping handy during dev
-  private getProgramInfo() {
-    const isCurriculum = this.props.documentId === undefined;
-    const { metadata, program } = this.getContent();
-    const nodeCount = Object.keys(JSON.parse(JSON.stringify(program.nodes))).length;
-    const metaId = metadata.id;
-    return { isCurriculum, metaId, nodeCount };
-  }
-
   private getRunnable = () => {
-    const { isCurriculum } = this.getProgramInfo();
-    const { readOnly } = this.props;
-    return !readOnly || isCurriculum;
+    const isCurriculum = this.props.documentId === undefined;
+    return !this.props.readOnly || isCurriculum;
   };
 
   private determineProgramMode = () => {
