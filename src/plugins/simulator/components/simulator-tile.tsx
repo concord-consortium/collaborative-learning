@@ -29,11 +29,7 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
 
   return (
     <div className="simulator-content-container">
-      <BasicEditableTileTitle
-        model={model}
-        readOnly={readOnly}
-        scale={scale}
-      />
+      <BasicEditableTileTitle readOnly={readOnly} />
       <div className="simulator-content">
         <div className="simulator-variables">
           { content.inputVariables.map(variable =>

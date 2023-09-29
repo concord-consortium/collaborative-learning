@@ -1,5 +1,6 @@
 import ChatPanel from "../../../../support/elements/clue/ChatPanel";
 import TeacherNetwork from "../../../../support/elements/clue/TeacherNetwork";
+import TeacherDashboard from "../../../../support/elements/clue/TeacherDashboard";
 /**
  * Notes:
  *
@@ -15,41 +16,47 @@ import TeacherNetwork from "../../../../support/elements/clue/TeacherNetwork";
 
 let chatPanel = new ChatPanel;
 let teacherNetwork = new TeacherNetwork;
+let dashboard = new TeacherDashboard();
 
-const portalUrl = "https://learn.staging.concord.org";
-const offeringId1 = "2000";
-const reportUrl1 = "https://learn.staging.concord.org/portal/offerings/" + offeringId1 + "/external_report/49";
+const portalUrl = "https://learn.portal.staging.concord.org";
+const offeringId1 = "221";
+const reportUrl1 = "https://learn.portal.staging.concord.org/portal/offerings/" + offeringId1 + "/external_report/11";
 const clueTeacher1 = {
-  username: "TejalTeacher1",
-  password: "ccpassword",
-  firstname: "Tejal",
+  username: "clueteachertest1",
+  password: "password",
+  firstname: "Clue",
   lastname: "Teacher1"
 };
 
+function beforeTest() {
+  cy.login(portalUrl, clueTeacher1);
+  cy.launchReport(reportUrl1);
+  cy.waitForLoad();
+  dashboard.switchView("Workspace & Resources");
+  cy.wait(4000);
+}
+
 describe('Teachers can see network dividers', () => {
   // TODO: Re-instate the skipped tests below once learn.staging.concord.org is fully functional again
-  it.skip('verify network dividers in My Work tab for teacher in network', () => {
-    chatPanel.openTeacherChat(portalUrl, clueTeacher1, reportUrl1);
+  it('verify network dividers in My Work tab for teacher in network', () => {
+    beforeTest();
     cy.openTopTab("my-work");
     cy.openSection('my-work', 'workspaces');
     teacherNetwork.verifyDividerLabel('workspaces', 'my-classes');
     teacherNetwork.verifyDividerLabel('workspaces', 'my-network');
 
-    cy.openSection('my-work', 'starred');
-    teacherNetwork.verifyDividerLabel('starred', 'my-classes');
-    teacherNetwork.verifyDividerLabel('starred', 'my-network');
+    // cy.openSection('my-work', 'starred');
+    // teacherNetwork.verifyDividerLabel('starred', 'my-classes');
+    // teacherNetwork.verifyDividerLabel('starred', 'my-network');
 
     cy.openSection('my-work', 'learning-log');
     teacherNetwork.verifyDividerLabel('learning-log', 'my-classes');
     teacherNetwork.verifyDividerLabel('learning-log', 'my-network');
   });
 
-  it.skip('verify network dividers in Class Work tab for teacher in network', () => {
+  it('verify network dividers in Class Work tab for teacher in network', () => {
+    beforeTest();
     cy.openTopTab("class-work");
-    cy.openSection('class-work', 'workspaces');
-    teacherNetwork.verifyDividerLabel('workspaces', 'my-classes');
-    teacherNetwork.verifyDividerLabel('workspaces', 'my-network');
-
     cy.openSection('class-work', 'workspaces');
     teacherNetwork.verifyDividerLabel('workspaces', 'my-classes');
     teacherNetwork.verifyDividerLabel('workspaces', 'my-network');
@@ -58,8 +65,8 @@ describe('Teachers can see network dividers', () => {
     teacherNetwork.verifyDividerLabel('learning-logs', 'my-classes');
     teacherNetwork.verifyDividerLabel('learning-logs', 'my-network');
 
-    cy.openSection('class-work', 'starred');
-    teacherNetwork.verifyDividerLabel('starred', 'my-classes');
-    teacherNetwork.verifyDividerLabel('starred', 'my-network');
+    // cy.openSection('class-work', 'starred');
+    // teacherNetwork.verifyDividerLabel('starred', 'my-classes');
+    // teacherNetwork.verifyDividerLabel('starred', 'my-network');
   });
 });

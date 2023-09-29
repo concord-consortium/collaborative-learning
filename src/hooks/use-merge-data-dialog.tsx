@@ -25,7 +25,7 @@ const Content: React.FC<IContentProps> = ({
     if (tileInfo.title) return tileInfo;
     if (!tileInfo.title && tileInfo.providerId) {
       const tileModel = getTileModelById(model.content, tileInfo.providerId);
-      return { ...tileInfo, title: tileModel?.title };
+      return { ...tileInfo, title: tileModel?.computedTitle };
     }
   });
 
@@ -56,7 +56,7 @@ interface IProps {
   onMergeTile: (tileInfo: ITileLinkMetadata) => void;
 }
 export const useMergeTileDialog = ({ mergableTiles, model, onMergeTile }: IProps) => {
-  const hostTileTitle = model.title;
+  const hostTileTitle = model.computedTitle;
   const [selectValue, setSelectValue] = useState("");
 
   const handleClickMerge = () => {

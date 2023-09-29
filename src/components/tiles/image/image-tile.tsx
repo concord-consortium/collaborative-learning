@@ -9,14 +9,12 @@ import { ImageToolbar } from "./image-toolbar";
 import { ImageComponent } from "./image-component";
 import { ITileApi, TileResizeEntry } from "../tile-api";
 import { ITileProps } from "../tile-component";
-import { measureText } from "../hooks/use-measure-text";
+import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
 import { IDocumentContext } from "../../../models/document/document-types";
 import { debouncedSelectTile } from "../../../models/stores/ui";
 import { gImageMap, ImageMapEntryType } from "../../../models/image-map";
 import { ImageContentModelType } from "../../../models/tiles/image/image-content";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
-import { EditableTileTitle } from "../editable-tile-title";
-import { defaultTileTitleFont } from "../../constants";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { ImageDragDrop } from "../../utilities/image-drag-drop";
 import { isPlaceholderImage } from "../../../utilities/image-utils";
@@ -111,9 +109,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     this.imageElt && this.resizeObserver.observe(this.imageElt);
 
     this.props.onRegisterTileApi({
-      getTitle: () => {
-        return this.getTitle();
-      },
       exportContentAsTileJson: (options?: ITileExportOptions) => {
         return this.getContent().exportJson(options);
       },
@@ -181,8 +176,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
             onIsEnabled={this.handleIsEnabled}
             onUploadImageFile={this.handleUploadImageFile}
           />
-          {this.renderTitleArea()}
-
+          <BasicEditableTileTitle readOnly={readOnly} />
           <ImageComponent
             ref={elt => this.imageElt = elt}
             content={this.getContent()}
@@ -246,39 +240,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
             : naturalHeight + kMarginsAndBorders;
   }
 
-  private handleBeginEditTitle = () => {
-    this.setState({ isEditingTitle: true });
-  };
-
-  private handleTitleChange = (title?: string) => {
-    title && this.props.model.setTitle(title);
-    this.setState({ isEditingTitle: false });
-  };
-
-  private renderTitleArea() {
-    return (
-      <div className="title-area-wrapper" key="title-area">
-        <div className="title-area">
-          {this.renderTitle()}
-        </div>
-      </div>
-    );
-  }
-
-  private getTitle() {
-    return this.props.model.title || "";
-  }
-
-  private renderTitle() {
-    const { readOnly, scale } = this.props;
-    const size = {width: this.state.imageEltWidth || null , height: this.state.imageEltHeight || null};
-    return (
-      <EditableTileTitle key="geometry-title" size={size} scale={scale} getTitle={() => this.getTitle()}
-                              readOnly={readOnly} measureText={(text) => measureText(text, defaultTileTitleFont)}
-                              onBeginEdit={this.handleBeginEditTitle} onEndEdit={this.handleTitleChange} />
-    );
-  }
-
   private getContent() {
     return this.props.model.content as ImageContentModelType;
   }
@@ -289,7 +250,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     }
     this.updateImage(url, filename);
   }
-
 
   private handleUrlChange = (url: string, filename?: string, context?: IDocumentContext) => {
     this.setState({
