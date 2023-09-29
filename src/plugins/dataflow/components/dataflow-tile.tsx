@@ -49,12 +49,13 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     };
   }
   public render() {
+    console.log("| tile render!");
     const { readOnly, height, model } = this.props;
     const editableClass = readOnly ? "read-only" : "editable";
     const classes = `dataflow-tool disable-tile-content-drag ${editableClass}`;
     const { program, programDataRate, programZoom } = this.getContent();
     const tileContent = this.getContent();
-    const runnable = !readOnly || this.props.documentId === undefined;
+    const runnable = this.getRunnable();
 
     return (
       <>
@@ -219,6 +220,32 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
         tileContent.resetRecording();
         break;
     }
+  };
+
+  private getProgramInfo() {
+    const isCurriculum = this.props.documentId === undefined;
+    const { metadata, program } = this.getContent();
+    const nodeCount = Object.keys(JSON.parse(JSON.stringify(program.nodes))).length;
+    const metaId = metadata.id;
+    const programId = program.id;
+    return { isCurriculum, metaId, programId, nodeCount };
+  }
+
+  private getRunnable = () => {
+    const { isCurriculum, metaId, programId, nodeCount } = this.getProgramInfo();
+
+    console.log("| OK, getRunnable, let us use to create a good id:",
+      "\n  isCurriculum:            ",isCurriculum,
+      "\n  metaId:                  ",metaId,
+      "\n  programId:               ",programId,
+      "\n  nodeCount:               ",nodeCount,
+      "\n  model.id:                ",this.props.model.id,
+      "\n  shouldBeRunnable:        ", !this.props.readOnly || isCurriculum,
+    );
+
+    // for seeing what is going on, going to return true for now
+    //return !readOnly || isCurriculum;
+    return true;
   };
 
   private determineProgramMode = () => {
