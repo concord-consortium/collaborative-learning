@@ -54,7 +54,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     const { program, programDataRate, programZoom } = this.getContent();
     const tileContent = this.getContent();
     const runnable = this.getRunnable();
-    const programId = model.id;
+    const programId = model.id + "@0.1.0";
 
     return (
       <>
@@ -91,7 +91,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
                   updatePlayBackIndex={this.updatePlayBackIndex}
                   updateRecordIndex={this.updateRecordIndex}
                   tileContent={tileContent}
-
                 />
               );
             }}

@@ -261,16 +261,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private getReteAppId = () => {
-    if (!this.props.runnable ) {
-      return GENERIC_RETE_APP_ID;
-    }
-    else {
-      // TODO / WIP
-      // below, returning a dynamic id allows programs to run without crosstalk on right
-      // but does not work when program is on left side, it fails to load nodes and run
-      return GENERIC_RETE_APP_ID;
-      //return this.props.programId + "@0.1.0";
-    }
+    return this.props.programId ?? GENERIC_RETE_APP_ID;
   };
 
   private initProgram = () => {
