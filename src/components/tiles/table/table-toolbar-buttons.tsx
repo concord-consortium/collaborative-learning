@@ -1,4 +1,4 @@
-import React from "react";
+import React, { createContext, useContext } from "react";
 import { Tooltip, TooltipProps } from "react-tippy";
 import classNames from "classnames";
 
@@ -6,9 +6,18 @@ import DeleteSelectedIconSvg from "../../../assets/icons/delete/delete-selection
 import SetExpressionIconSvg from "../../../clue/assets/icons/table/set-expression-icon.svg";
 import LinkGraphIcon from "../../../clue/assets/icons/table/link-graph-icon.svg";
 import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
+import { useConsumerTileLinking } from "../../../hooks/use-consumer-tile-linking";
+import { getTileDataSet } from "../../../models/shared/shared-data-utils";
+import { TileModelContext } from "../tile-api";
 
 import "./table-toolbar.scss";
 
+export interface IToolbarContext {
+  showExpressionsDialog: () => void;
+  deleteSelected: () => void;
+}
+
+export const ToolbarContext = createContext<IToolbarContext | null>(null);
 interface ITableButtonProps {
   className?: string;
   icon: any;
@@ -26,38 +35,52 @@ const TableButton = ({ className, icon, onClick, tooltipOptions}: ITableButtonPr
     </Tooltip>
   );
 };
-interface IDeleteSelectedProps {
-  onClick: () => void;
-}
-export const DeleteSelectedButton = ({ onClick }: IDeleteSelectedProps) => (
-  <TableButton
-    className="delete"
-    icon={<DeleteSelectedIconSvg />}
-    onClick={onClick}
-    tooltipOptions={{ title: "Clear cell" }}
-  />
-);
 
-interface ISetExpressionButtonProps {
-  onClick: () => void;
-}
-export const SetExpressionButton = ({ onClick }: ISetExpressionButtonProps) => (
-  <TableButton
-    className="set-expression"
-    icon={<SetExpressionIconSvg />}
-    onClick={onClick}
-    tooltipOptions={{ title: "Set expression" }}
-  />
-);
+export const DeleteSelectedButton = () => {
+  const toolbarContext = useContext(ToolbarContext);
 
-interface ILinkTableButtonProps {
-  isEnabled?: boolean;
-  onClick?: () => void;
-}
-export const LinkTileButton = ({ isEnabled, onClick }: ILinkTableButtonProps) => {
-  const classes = classNames("link-tile-button", { disabled: !isEnabled });
+  return (
+    <TableButton
+      className="delete"
+      icon={<DeleteSelectedIconSvg />}
+      onClick={() => toolbarContext?.deleteSelected()}
+      tooltipOptions={{ title: "Clear cell" }}
+    />
+  );
+};
+
+export const SetExpressionButton = () => {
+  const toolbarContext = useContext(ToolbarContext);
+
+  return (
+    <TableButton
+      className="set-expression"
+      icon={<SetExpressionIconSvg />}
+      onClick={() => toolbarContext?.showExpressionsDialog()}
+      tooltipOptions={{ title: "Set expression" }}
+    />
+  );
+};
+
+// TODO: this exact component can be used in the data-card toolbar
+// The only difference currently is the tooltip text
+export const LinkTileButton = () => {
+
+  // Assume we always have a model
+  const model = useContext(TileModelContext)!;
+  const dataSet = getTileDataSet(model.content);
+
+  // Currently we only enable the link button if there are 2 or more attributes
+  // this is because the linking is generally used for graph and geometry tiles
+  // both of them in 2 attributes (in CLUE)
+  const hasLinkableRows = dataSet ? dataSet.attributes.length > 1 : false;
+
+  const { isLinkEnabled, showLinkTileDialog } =
+    useConsumerTileLinking({ model, hasLinkableRows });
+  const classes = classNames("link-tile-button", { disabled: !isLinkEnabled });
+
   const handleClick = (e: React.MouseEvent) => {
-    isEnabled && onClick?.();
+    isLinkEnabled && showLinkTileDialog();
     e.stopPropagation();
   };
   return (

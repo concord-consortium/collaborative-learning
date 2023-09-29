@@ -261,6 +261,11 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     return tile?.computedTitle;
   }
 
+  // TODO: this should be moved into DocumentContent now that
+  // the document component is not needed to get the title of a tile.
+  // Code currently uses this through onRequestTilesOfType, all of that code
+  // is inside of a tile so it can use the TileModelContext to get the tileModel
+  // then use getDocumentContentFromNode(model) to get the content.
   private handleRequestTilesOfType = (tileType: string) => {
     const { content } = this.props;
     const tileApiInterface = this.context;
@@ -269,13 +274,13 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     return tilesOfType.map(id => ({ id, title: this.getTileTitle(id) }));
   };
 
+  // TODO: remove this.
+  // Code currently uses this through onRequestLinkableTiles
+  // Instead it can use the TileModelContext to get the tileModel
+  // then use getDocumentContentFromNode(model) to get the content.
   private handleRequestLinkableTiles = () => {
     const { content } = this.props;
-    const { providers, consumers } = content?.getLinkableTiles() || kNoLinkableTiles;
-    return {
-      providers: providers.map(tileInfo => ({ title: this.getTileTitle(tileInfo.id), ...tileInfo })),
-      consumers: consumers.map(tileInfo => ({ title: this.getTileTitle(tileInfo.id), ...tileInfo }))
-    };
+    return content?.getLinkableTiles() || kNoLinkableTiles;
   };
 
   private handleRequestUniqueTitle = (tileId: string) => {
