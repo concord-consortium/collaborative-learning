@@ -15,6 +15,7 @@ import { TileTitleArea } from "../../../components/tiles/tile-title-area";
 import { DataflowLinkTableButton } from "./ui/dataflow-program-link-table-button";
 import { ProgramMode, UpdateMode } from "./types/dataflow-tile-types";
 import { ITileLinkMetadata } from "../../../models/tiles/tile-link-types";
+import { getDocumentContentFromNode } from "../../../utilities/mst-utils";
 
 import "./dataflow-tile.scss";
 
@@ -144,9 +145,10 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   }
 
   private renderTableLinkButton() {
-    const { model, documentId, onRequestLinkableTiles } = this.props;
-    // TODO: replace with documentContent.getLinkableTiles()
-    const isLinkButtonEnabled = onRequestLinkableTiles && onRequestLinkableTiles().consumers.length > 0;
+    const { model, documentId } = this.props;
+    const documentContent = getDocumentContentFromNode(model);
+    const linkableTiles = documentContent?.getLinkableTiles();
+    const isLinkButtonEnabled = linkableTiles && linkableTiles.consumers.length > 0;
     const actionHandlers = {
                              handleRequestTableLink: this.handleRequestTableLink,
                              handleRequestTableUnlink: this.handleRequestTableUnlink

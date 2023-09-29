@@ -1,12 +1,12 @@
 import { useCallback } from "react";
 
-import { ITileLinkMetadata, ITypedTileLinkMetadata, kNoLinkableTiles
-} from "../models/tiles/tile-link-types";
+import { ITileLinkMetadata} from "../models/tiles/tile-link-types";
 import { ITileModel } from "../models/tiles/tile-model";
 import { useLinkConsumerTileDialog } from "./use-link-consumer-tile-dialog";
-import { getDocumentContentFromNode, getTileContentById } from "../utilities/mst-utils";
+import { getTileContentById } from "../utilities/mst-utils";
 import { SharedDataSet } from "../models/shared/shared-data-set";
 import { getTileContentInfo } from "../models/tiles/tile-content-info";
+import { useLinkableTiles } from "./use-linkable-tiles";
 
 interface IProps {
   // TODO: This should be replaced with a generic disabled
@@ -88,26 +88,4 @@ export const useConsumerTileLinking = ({
   return { isLinkEnabled, showLinkTileDialog };
 };
 
-interface IUseLinkableTilesProps {
-  model: ITileModel;
-}
-const useLinkableTiles = ({ model }: IUseLinkableTilesProps) => {
-  const documentContent = getDocumentContentFromNode(model);
-  const { providers, consumers } = documentContent?.getLinkableTiles() || kNoLinkableTiles;
 
-  // add default title if there isn't a title
-  const countsOfType = {} as Record<string, number>;
-  function addDefaultTitle({ id, type, title, titleBase }: ITypedTileLinkMetadata) {
-    if (!countsOfType[type]) {
-      countsOfType[type] = 1;
-    } else {
-      countsOfType[type]++;
-    }
-    return { id, type, title: title || `${titleBase || type} ${countsOfType[type]}`};
-  }
-
-  return {
-    providers: providers.map(addDefaultTitle),
-    consumers: consumers.map(addDefaultTitle)
-  };
-};
