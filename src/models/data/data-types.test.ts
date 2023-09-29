@@ -1,10 +1,19 @@
 import { isDate, isImageUrl, isNumeric, toNumeric } from "./data-types";
 import dayjs from "dayjs";
 
+// JSON.stringify is nice because it adds quotes around strings
+// But things like NaN and Infinity not written out correctly
+function niceString(value: any) {
+  if (typeof value === "number" && !isFinite(value)){
+    return value.toString();
+  }
+  return JSON.stringify(value);
+}
+
 expect.addSnapshotSerializer({
   serialize(val, config, indentation, depth, refs, printer) {
     return val.testCases.map(([inputValue, result]: [any, any]) =>
-      `${JSON.stringify(inputValue)} => ${JSON.stringify(result)}`)
+      `${niceString(inputValue)} => ${niceString(result)}`)
     .join("\n");
   },
   // Look for a value that has a testCases key with a value of an array
@@ -196,7 +205,11 @@ describe("data-types", () => {
       // ⬇ This should really not be considered a number in the US locale
       //    However the current comma handling approach is simple so this
       //    is considered the same as 12
-      "1,2"
+      "1,2",
+
+      // Strings become null
+      "a",
+      "hello"
     ];
 
     test("toNumeric", () => {
@@ -204,13 +217,13 @@ describe("data-types", () => {
         return [value, toNumeric(value)];
       });
       expect({ testCases }).toMatchInlineSnapshot(`
-"" => null
+"" => NaN
 "123" => 123
 "1E10" => 10000000000
 "1e10" => 10000000000
-"1 E10" => null
-"1E 10" => null
-"1 E 10" => null
+"1 E10" => NaN
+"1E 10" => NaN
+"1 E 10" => NaN
 "-1.0" => -1
 "0xFF" => 255
 "0o10" => 8
@@ -225,13 +238,15 @@ describe("data-types", () => {
 " -1" => -1
 " -1 " => -1
 " - 1/4" => -0.25
-"1 1/4" => null
-"1/3/4" => null
-"1.0/2.0" => null
-"-1/-2" => null
-"1+1" => null
-"1*1" => null
+"1 1/4" => NaN
+"1/3/4" => NaN
+"1.0/2.0" => NaN
+"-1/-2" => NaN
+"1+1" => NaN
+"1*1" => NaN
 "1,2" => 12
+"a" => NaN
+"hello" => NaN
 `);
     });
 
@@ -269,6 +284,8 @@ describe("data-types", () => {
 "1+1" => false
 "1*1" => false
 "1,2" => true
+"a" => false
+"hello" => false
 `);
     });
 
