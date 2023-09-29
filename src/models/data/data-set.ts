@@ -57,9 +57,10 @@ export const DataSet = types.model("DataSet", {
   },
   get attrIDMap() {
     const attrIDMap: { [index: string]: IAttribute } = {};
-    console.log("--------------attrIDMap-------");
+    console.log("📁 data-set.ts----------------");
+    console.log("\t🔨attrIDMap");
     self.attributes.forEach(attr => {
-      console.log("attr:", attr.id, attr.values[0], attr.values[1]);
+      console.log("\tattr:", attr.id, attr.values[0], attr.values[1]);
       attrIDMap[attr.id] = attr;
     });
     return attrIDMap;
@@ -73,8 +74,9 @@ export const DataSet = types.model("DataSet", {
   },
   get caseIDMap() {
     const caseIDMap: { [index: string]: number } = {};
+    console.log("📁 data-set.ts----------------");
+    console.log("\tcaseIDMap:");
     self.cases.forEach((aCase, index) => {
-      console.log("caseIDMap:", aCase);
       caseIDMap[aCase.__id__] = index;
     });
     return caseIDMap;

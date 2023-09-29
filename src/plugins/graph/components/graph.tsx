@@ -57,9 +57,9 @@ export const Graph = observer(function Graph({ graphController, graphRef, dotsRe
     xAttrID = graphModel.getAttributeID('x'),
     yAttrID = graphModel.getAttributeID('y');
 
-  console.log("----------------<Graph>-----------");
+  console.log("📁 Graph.tsx (XY-PLOT)-------------------------");
   console.log("\twith dataset:", dataset);
-  console.log("\t dataSet attributeIDMap:", dataset?.attrIDMap);
+  console.log("\tdataSet attributeIDMap:", dataset?.attrIDMap);
 
 
   useEffect(function setupPlotArea() {

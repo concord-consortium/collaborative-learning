@@ -40,7 +40,7 @@ export const ConnectingLines = observer(function CoingLines({dotsRef}: IProps) {
   const plotsCt = dataConfiguration?.numberOfPlots || 1;
   // const color = _pointColors[plotsCt - 1];
   console.log("\tplotsCt:", plotsCt);
-  const color = graphModel.pointColorAtIndex(plotsCt-1);
+  const color = graphModel.pointColorAtIndex(plotsCt);
   console.log("\tnew color:", color);
 
   const adjustedColor = lightenColor(color, 0.5);
