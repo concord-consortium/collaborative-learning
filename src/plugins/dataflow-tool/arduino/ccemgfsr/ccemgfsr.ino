@@ -1,12 +1,13 @@
   /*
   * ----------------------------------------------------------------------------------------------------
   * Muscle SpikerShield Arduino UNO Code for Interface with Dataflow
+  * This code is up to date for use with the "Claw Pro R3"
   *
   * This sketch allows for two way communication between Concord Consortium's Dataflow Tile and
   * Backyard Brains' Muscle Spiker Shield & associated hardware.
   *
   * Based on original script by Backyard Brains 2015, by Marcio Amorim and Stanislav Mircic
-  * Adapted by Concord Consortium, 2022.
+  * Adapted by Concord Consortium, 2023.
   *
   * These two resources were very helpful for writing the serial reception code:
   * https://www.programmingelectronics.com/serial-read/
@@ -17,42 +18,51 @@
   */
 
   #include <Servo.h>
-  #define SERVO_PIN 2                         //pin for servo motor
-  #define SENSITIVITY_BUTTON_PIN 7            //pin for button that selects sensitivity
+  #include <Adafruit_MLX90614.h>
+
+  #define SERVO_PIN 2
+  #define SENSITIVITY_BUTTON_PIN 7
   #define NUM_LED 6                           //number of LEDs in LED bar
-  #define GRIPPER_MINIMUM_STEP 5              //5 degree dead zone (used to avoid aiming oscillation)
   #define MINIMUM_SERVO_UPDATE_TIME 100       //update servo position every 100ms
 
-  Servo Gripper;                              //servo for gripper
-  byte ledPins[] = {8, 9, 10, 11, 12, 13};    //pins for LEDs in LED bar
+  Servo Gripper;
+  Adafruit_MLX90614 mlx = Adafruit_MLX90614();
 
-  int sensitivities[] = {200, 350, 520, 680, 840, 1000}; // will appear as approximate max to user
-  int lastSensitivitiesIndex = 3;             //initial sensitivity index
+  byte ledPins[] = {8, 9, 10, 11, 12, 13};
 
-  int emgSaturationValue = 0;                 //selected sensitivity/EMG saturation value
-  int emgReading;                             //measured value for EMG
-  int fsrReading;                             //measured value for surface pressure sensor
+  // Chosen sensitivity will appear as approximate max to user
+  int sensitivities[] = {200, 350, 520, 680, 840, 1000};
+  int lastSensitivitiesIndex = 3;
+
+  int emgSaturationValue = 0;
+  int emgReading;
+  int fsrReading;
+  float tmpReading;
   byte ledbarHeight = 0;                      //temporary variable for led bar height
 
   unsigned long oldTime = 0;                  //timestamp of last servo angle update (ms)
   int oldDegrees = 0;                         //old value of angle for servo
   int newDegree;                              //new value of angle for servo
 
-  String emgId = "emg";                       //key for Dataflow to know what sensor this came from
-  String fsrId = "fsr";                       //key for Dataflow to know what sensor this came from
-  String kvSeparator = ":";                   //separator for key and value
-  String emgStringOut = "";                   // init empty string for default output
-  String fsrStringOut = "";                   // init empty string for default output
+  // these will be used to assmble strings for Dataflow
+  String emgId = "emg";
+  String fsrId = "fsr";
+  String tmpId = "tmp";
+  String kvSeparator = ":";
+  String emgStringOut = "";
+  String fsrStringOut = "";
+  String tmpStringOut = "";
 
-  const int BUFFER_SIZE = 4;                  // Accommodate length of new angles coming in which will be `120` - `180`, plus delimiter
+  const int BUFFER_SIZE = 4;                  // Accommodate <=3 digit angle, plus delimiter
   char buf[BUFFER_SIZE];                      // a char array buffer
 
-  const unsigned int MAX_ANGLE_BYTE_LENGTH = 4;  // size of incoming angle data
+  const unsigned int MAX_ANGLE_BYTE_LENGTH = 4;
 
   /* setup */
   void setup(){
     Serial.begin(9600);
     Gripper.attach(SERVO_PIN);
+    mlx.begin();
     pinMode(SENSITIVITY_BUTTON_PIN, INPUT);
     for(int i = 0; i < NUM_LED; i++){
       pinMode(ledPins[i], OUTPUT);
@@ -107,10 +117,11 @@
       delay(100);
     }
 
-    // 3 Collect EMG and FSR readings
+    // 3 Collect EMG, Force, and Temperature readings
     // (note that A2 is pin used for FSR in newer Muscle SpikerShield)
     emgReading = analogRead(A0);
     fsrReading = analogRead(A2);
+    tmpReading = mlx.readObjectTempC();
 
     // 4 Turn off LEDs, then light up 1 -6 of them to reflect sensitivity
     for(int j = 0; j < NUM_LED; j++){
@@ -130,8 +141,11 @@
       // assemble keyed strings so Dataflow knows what is what
       emgStringOut = String(emgId + kvSeparator + emgReading);
       fsrStringOut = String(fsrId + kvSeparator + fsrReading);
+      tmpStringOut = String(tmpId + kvSeparator + tmpReading);
 
+      // send to Dataflow via serial out
       Serial.println(emgStringOut);
       Serial.println(fsrStringOut);
+      Serial.println(tmpStringOut);
     }
 }
