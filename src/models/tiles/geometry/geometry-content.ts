@@ -6,7 +6,7 @@ import { SelectionStoreModelType } from "../../stores/selection";
 import { ITableLinkProperties, linkedPointId } from "../table-link-types";
 import { ITileExportOptions, IDefaultContentOptions } from "../tile-content-info";
 import { TileMetadataModel } from "../tile-metadata";
-import { tileModelHooks } from "../tile-model-hooks";
+import { tileContentAPIActions } from "../tile-model-hooks";
 import { ICreateRowsProperties, IRowProperties, ITableChange } from "../table/table-change";
 import { canonicalizeValue } from "../table/table-model-types";
 import { convertModelToChanges, exportGeometryJson } from "./geometry-migrate";
@@ -328,7 +328,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       }
     }
   }))
-  .actions(self => tileModelHooks({
+  .actions(self => tileContentAPIActions({
     doPostCreate(metadata) {
       self.metadata = metadata as GeometryMetadataModelType;
     }

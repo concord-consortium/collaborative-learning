@@ -15,7 +15,6 @@ interface IGetObjectButtonSVGParams {
   translateTilePointToScreenPoint?: (point: [x: number, y: number]) => [x: number, y: number] | undefined;
 }
 export interface ITileApi {
-  getTitle?: () => string | undefined;
   hasSelection?: () => boolean;
   deleteSelection?: () => void;
   getSelectionInfo?: () => string;

@@ -308,10 +308,11 @@ export const BaseDocumentContentModel = types
     }
   }))
   .views(self => ({
-    getUniqueTitle(tileType: string, titleBase: string, getTileTitle: (tileId: string) => string | undefined) {
-      const tiles = self.getTilesOfType(tileType);
-      const maxDefaultTitleIndex = tiles.reduce((maxIndex: number, tileId: string) => {
-        const title = getTileTitle(tileId);
+    getUniqueTitle(tileType: string, titleBase: string) {
+      const tileIds = self.getTilesOfType(tileType);
+      const tiles = tileIds.map(tileId => self.getTile(tileId));
+      const maxDefaultTitleIndex = tiles.reduce((maxIndex, tile) => {
+        const title = tile?.computedTitle;
         const match = titleMatchesDefault(title, titleBase);
         return match?.[1]
                 ? Math.max(maxIndex, +match[1])
@@ -330,8 +331,7 @@ export const BaseDocumentContentModel = types
   .views(self => ({
     getNewTileTitle(tileType: string) {
       const titleBase = getTileContentInfo(tileType)?.titleBase || tileType;
-      const getTitle = (tileId: string) => (self.getTile(tileId) as any)?.title;
-      const newTitle = self.getUniqueTitle(tileType, titleBase, getTitle);
+      const newTitle = self.getUniqueTitle(tileType, titleBase);
       return newTitle;
     }
   }))
@@ -455,6 +455,10 @@ export const BaseDocumentContentModel = types
       if (!content.type) {
         console.warn("addTileContentInNewRow requires the content to have a type");
       }
+      // In the case of the table tile, it sets the name of the dataSet after a new one
+      // has been created. However because getNewTileTitle always returns a string
+      // the table will never use the dataset name unless it has been manually
+      // configured to do so.
       const title = options?.title || self.getNewTileTitle(content.type!);
       return self.addTileInNewRow(TileModel.create({ title, content, id: options?.tileId }), options);
     },
@@ -890,7 +894,7 @@ export const BaseDocumentContentModel = types
       if (tile) {
         const tileContentInfo = getTileContentInfo(tile.content.type);
         if (tileContentInfo) {
-          const oldTitle = tile.title;
+          const oldTitle = tile.computedTitle;
           const match = titleMatchesDefault(oldTitle, tileContentInfo.titleBase);
           if (match) {
             const newTitle = self.getNewTileTitle(tile.content.type);

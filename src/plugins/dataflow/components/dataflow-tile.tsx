@@ -12,7 +12,6 @@ import { DataflowContentModelType } from "../model/dataflow-content";
 import { measureText } from "../../../components/tiles/hooks/use-measure-text";
 import { defaultTileTitleFont } from "../../../components/constants";
 import { ToolTitleArea } from "../../../components/tiles/tile-title-area";
-import { dataflowLogEvent } from "../dataflow-logger";
 import { DataflowLinkTableButton } from "./ui/dataflow-program-link-table-button";
 import { ProgramMode, UpdateMode } from "./types/dataflow-tile-types";
 import { ITileLinkMetadata } from "../../../models/tiles/tile-link-types";
@@ -100,15 +99,13 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
 
   public componentDidMount() {
     this.props.onRegisterTileApi({
-      getTitle: () => {
-        return this.getTitle();
-      },
       exportContentAsTileJson: (options?: ITileExportOptions) => {
         return this.getContent().exportJson(options);
       }
     });
 
-    if (this.getTitle() === '') {
+    const { model } = this.props;
+    if (model.computedTitle === '') {
       const { model: { id }, onRequestUniqueTitle } = this.props;
       const title = onRequestUniqueTitle(id);
       title && this.props.model.setTitle(title);
@@ -130,22 +127,14 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   };
 
   private handleTitleChange = (title?: string) => {
-    if (title){
-      this.props.model.setTitle(title);
-      dataflowLogEvent("changeprogramtitle", { programTitleValue: this.getTitle() }, this.props.model.id);
-      this.setState({isEditingTitle: false});
-    }
+    this.setState({isEditingTitle: false});
   };
 
   private renderTitle() {
-    const size = {width: null, height: null};
-    const { readOnly, scale } = this.props;
+    const { readOnly } = this.props;
     return (
       <EditableTileTitle
         key="dataflow-title"
-        size={size}
-        scale={scale}
-        getTitle={this.getTitle.bind(this)}
         readOnly={readOnly}
         measureText={(text) => measureText(text, defaultTileTitleFont)}
         onBeginEdit={this.handleBeginEditTitle}
@@ -183,10 +172,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   private handleRequestTableUnlink = (tileInfo: ITileLinkMetadata) => {
     this.getContent().removeLinkedTable(tileInfo.id);
   };
-
-  private getTitle() {
-    return this.props.model.title || "";
-  }
 
   private handleProgramChange = (program: any) => {
     this.getContent().setProgram(program);
