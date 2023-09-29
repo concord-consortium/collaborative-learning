@@ -29,7 +29,7 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
   const toolbarProps = useToolbarTileApi({ id: model.id, enabled, onRegisterTileApi, onUnregisterTileApi });
 
   const { isLinkEnabled, showLinkTileDialog } = useProviderTileLinking({
-    documentId, model, readOnly, onRequestTilesOfType, onRequestLinkableTiles
+    model, readOnly, onRequestTilesOfType, onRequestLinkableTiles
   });
 
   const { data } = useDataSet(content?.data);
