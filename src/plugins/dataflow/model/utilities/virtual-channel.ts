@@ -1,13 +1,13 @@
 import { NodeChannelInfo } from "./channel";
 import { demoStreams } from "../../../shared-assets/data/dataflow/demo-data";
 
-const virtualTempChannel: NodeChannelInfo = {
-  hubId: "00000-VIRTUAL-HUB", hubName: "Virtual Sensor", name: "Temperature", channelId: "00001-VIR",
-  missing: false, type: "temperature", units: "°C", value: 0, virtual: true, timeFactor: 1000,
-  virtualValueMethod: (t: number) => {
-    const vals = demoStreams.fastBoil;
-    return vals[t % vals.length];
-  } };
+// const virtualTempChannel: NodeChannelInfo = {
+//   hubId: "00000-VIRTUAL-HUB", hubName: "Virtual Sensor", name: "Temperature", channelId: "00001-VIR",
+//   missing: false, type: "temperature", units: "°C", value: 0, virtual: true, timeFactor: 1000,
+//   virtualValueMethod: (t: number) => {
+//     const vals = demoStreams.fastBoil;
+//     return vals[t % vals.length];
+//   } };
 const virtualHumidChannel: NodeChannelInfo = {
   hubId: "00000-VIRTUAL-HUB", hubName: "Virtual Sensor", name: "Humidity", channelId: "00002-VIR",
   missing: false, type: "humidity", units: "%", value: 0, virtual: true, timeFactor: 1000,
@@ -43,23 +43,22 @@ const virtualPartChannel: NodeChannelInfo = {
     const vals = [10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11];
     return vals[t % vals.length];
   } };
-const virtualEmgChannelLongHold: NodeChannelInfo = {
-  hubId: "00000-VIRTUAL-HUB", hubName: "Virtual Sensor", name: "EMG - Long Clench and Hold", channelId: "00008VIR",
-  missing: false, type: "emg-reading", units: "f(mv)", value: 0, virtual: true, timeFactor: 100,
-  virtualValueMethod: (t: number) => {
-    const vals = demoStreams.emgLongHold;
-    return vals[t % vals.length];
-} };
-const virtualFsrChannel: NodeChannelInfo = {
-  hubId: "00000-VIRTUAL-HUB", hubName: "Virtual Sensor", name: "FSR", channelId: "00010VIR",
-  missing: false, type: "fsr-reading", units: "f(n)", value: 0, virtual: true, timeFactor: 100,
-  virtualValueMethod: (t: number) => {
-    const vals = demoStreams.fsrSqueeze;
-    return vals[t % vals.length];
-} };
+// const virtualEmgChannelLongHold: NodeChannelInfo = {
+//   hubId: "00000-VIRTUAL-HUB", hubName: "Virtual Sensor", name: "EMG - Long Clench and Hold", channelId: "00008VIR",
+//   missing: false, type: "emg-reading", units: "f(mv)", value: 0, virtual: true, timeFactor: 100,
+//   virtualValueMethod: (t: number) => {
+//     const vals = demoStreams.emgLongHold;
+//     return vals[t % vals.length];
+// } };
+// const virtualFsrChannel: NodeChannelInfo = {
+//   hubId: "00000-VIRTUAL-HUB", hubName: "Virtual Sensor", name: "FSR", channelId: "00010VIR",
+//   missing: false, type: "fsr-reading", units: "f(n)", value: 0, virtual: true, timeFactor: 100,
+//   virtualValueMethod: (t: number) => {
+//     const vals = demoStreams.fsrSqueeze;
+//     return vals[t % vals.length];
+// } };
 
 export const virtualSensorChannels: NodeChannelInfo[] = [
-  virtualTempChannel, virtualHumidChannel, virtualCO2Channel, virtualO2Channel,
-  virtualLightChannel, virtualPartChannel, virtualEmgChannelLongHold,
-  virtualFsrChannel
+  virtualHumidChannel, virtualCO2Channel, virtualO2Channel,
+  virtualLightChannel, virtualPartChannel
 ];
