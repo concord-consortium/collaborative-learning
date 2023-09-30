@@ -45,7 +45,7 @@ export const fsrSensorChannel: NodeChannelInfo = {
   hubId: "SERIAL-ARDUINO",
   hubName: "Arduino",
   name: "fsr",
-  displayName: "FSR",
+  displayName: "pressure",
   channelId: "fsr",
   missing: true,
   type: "fsr-reading",
