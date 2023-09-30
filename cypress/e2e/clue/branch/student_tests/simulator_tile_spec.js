@@ -139,7 +139,7 @@ context('Simulator Tile with Terrarium Simulation', function() {
     dataflowTile.getDropdown(sensor, "sensor-type").click();
     dataflowTile.getSensorDropdownOptions(sensor).eq(0).find(".label").click(); // Temperature
     dataflowTile.getDropdown(sensor, "sensor-select").click();
-    dataflowTile.getSensorDropdownOptions(sensor).should("have.length", 6);
+    dataflowTile.getSensorDropdownOptions(sensor).should("have.length", 7);
     dataflowTile.getDropdown(sensor, "sensor-type").click();
     dataflowTile.getSensorDropdownOptions(sensor).eq(1).find(".label").click(); // Humidity
     dataflowTile.getDropdown(sensor, "sensor-select").click();
