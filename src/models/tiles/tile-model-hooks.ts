@@ -1,7 +1,7 @@
 import { ISerializedActionCall } from "mobx-state-tree";
 import { ITileMetadataModel } from "./tile-metadata";
 
-export interface ITileModelHooks {
+export interface ITileContentAPIActions {
   /**
    * This is called after the wrapper around the content model is created. This wrapper is
    * a TileModel. This should only be called once.
@@ -29,13 +29,13 @@ export interface ITileModelHooks {
 // This is a way to work with MST action syntax
 // The input argument has to match the api and the result
 // is a literal object type which is compatible with the ModelActions
-// type that is required.
+// type that is required by MST.
 
 /**
  * A TypeScript helper method for adding hooks to a content model. It should be
  * used like:
  * ```
- * .actions(self => tileModelHooks({
+ * .actions(self => tileContentAPIActions({
  *   // add your hook functions here
  * }))
  * ```
@@ -43,8 +43,8 @@ export interface ITileModelHooks {
  * @returns the hook functions in a literal object format that is compatible
  * with the ModelActions type of MST
  */
-export function tileModelHooks(clientHooks: Partial<ITileModelHooks>) {
-  const hooks: ITileModelHooks = {
+export function tileContentAPIActions(clientHooks: Partial<ITileContentAPIActions>) {
+  const hooks: ITileContentAPIActions = {
     doPostCreate(metadata: ITileMetadataModel) {
       // no-op
     },
@@ -57,4 +57,40 @@ export function tileModelHooks(clientHooks: Partial<ITileModelHooks>) {
     ...clientHooks
   };
   return {...hooks};
+}
+
+export interface ITileContentAPIViews {
+  /**
+   * If the TileModel has no stored title,
+   * the TileModel will call contentTitle on the content model.
+   * This can be used so a content model can provide a computed title.
+   *
+   * TODO: how does this hook into any shared title editing
+   * components
+   */
+  get contentTitle(): string | undefined,
+}
+
+/**
+ * A TypeScript helper method for adding standard views to a content model. It should be
+ * used like:
+ * ```
+ * .views(self => tileContentAPIViews({
+ *   // add your hook functions here
+ * }))
+ * ```
+ * @param clientViews the views your tile is implementing
+ * @returns the views in a literal object format that is compatible
+ * with the ModelViews type of MST
+ */
+export function tileContentAPIViews(clientViews: Partial<ITileContentAPIViews>) {
+  const defaultHooks: ITileContentAPIViews = {
+    get contentTitle() {
+      return undefined;
+    },
+  };
+
+  // Using Object.defineProperties is needed so we can correctly copy the getters from the clientViews
+  // into the new object
+  return Object.defineProperties(defaultHooks, Object.getOwnPropertyDescriptors(clientViews));
 }

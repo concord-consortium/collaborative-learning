@@ -110,9 +110,6 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       exportContentAsTileJson: (options?: ITileExportOptions) => {
         return content.exportJson(options);
       },
-      getTitle: () => {
-        return model.title || "";
-      },
       getObjectBoundingBox,
       getObjectButtonSVG: ({ classes, handleClick, objectId, objectType }) => {
         if (objectType === "point") {
@@ -146,7 +143,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
         }
       },
     });
-  }, [annotationPointCenter, content, getObjectBoundingBox, model.title, onRegisterTileApi]);
+  }, [annotationPointCenter, content, getObjectBoundingBox, onRegisterTileApi]);
 
   //-------------------  SVG Ref to Numberline & SVG --------------------------------
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -314,11 +311,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       tabIndex={0}
     >
       <div className={"numberline-title"}>
-        <BasicEditableTileTitle
-          model={model}
-          readOnly={readOnly}
-          scale={scale}
-        />
+        <BasicEditableTileTitle readOnly={readOnly} />
       </div>
       <NumberlineToolbar
         documentContent={documentContent}
