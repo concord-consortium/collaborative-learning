@@ -2,6 +2,7 @@ import React from "react";
 import { SizeMe, SizeMeProps } from "react-sizeme";
 import { observer, inject } from "mobx-react";
 
+import { isCurriculumDocument } from "../../../models/document/document-types";
 import { DataflowProgram } from "./dataflow-program";
 import { BaseComponent } from "../../../components/base";
 import { ITileModel } from "../../../models/tiles/tile-model";
@@ -207,7 +208,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   };
 
   private getRunnable = () => {
-    const isCurriculum = this.props.documentId === undefined;
+    const isCurriculum = isCurriculumDocument(this.props.documentId);
     return !this.props.readOnly || isCurriculum;
   };
 
