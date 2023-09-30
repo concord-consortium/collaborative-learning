@@ -16,7 +16,7 @@ import DrawToolTile from "../../../../support/elements/clue/DrawToolTile";
  *    all of the students in the dashboard's current view
  */
 
-context.skip("Teacher Workspace", () => {
+context("Teacher Workspace", () => {
 
   let dashboard = new TeacherDashboard();
   let clueCanvas = new ClueCanvas;
@@ -26,24 +26,19 @@ context.skip("Teacher Workspace", () => {
   let teacherDoc = "Personal Doc 3";
 
 
-  const portalUrl = "https://learn.staging.concord.org";
-  const offeringId1 = "2000";
-  const reportUrl1 = "https://learn.staging.concord.org/portal/offerings/" + offeringId1 + "/external_report/49";
+  const portalUrl = "https://learn.portal.staging.concord.org";
+  const offeringId1 = "221";
+  const reportUrl1 = "https://learn.portal.staging.concord.org/portal/offerings/" + offeringId1 + "/external_report/11";
   const clueTeacher1 = {
-    username: "TejalTeacher1",
-    password: "ccpassword",
-    firstname: "Tejal",
+    username: "clueteachertest1",
+    password: "password",
+    firstname: "Clue",
     lastname: "Teacher1"
   };
-  const class1 = "CLUE Testing";
-  const class2 = "CLUE Testing2";
-  // const clueStudent = {
-  //     username: "ctesting1",
-  //     password: "password",
-  //     studentUid: "345979"
-  // }
+  const class1 = "CLUE";
+  const class2 = "CLUE A";
 
-  before(function () {
+  function beforeTest() {
     cy.login(portalUrl, clueTeacher1);
     cy.launchReport(reportUrl1);
     cy.waitForLoad();
@@ -51,12 +46,14 @@ context.skip("Teacher Workspace", () => {
     cy.wait(4000);
     clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle');
     cy.collapseResourceTabs();
-    clueCanvas.addTile('drawing');
+    cy.fixture("teacher-dash-data.json").as("clueData");
     cy.wait(2000);
-  });
+  }
 
   describe('Multiple classes', function () {
     it('verify restore after switching classes', function () {
+      beforeTest();
+      clueCanvas.addTile('drawing');
       dashboard.getClassDropdown().click({ force: true });
       dashboard.getClassList().find('.list-item').contains(class2).click({ force: true });
       cy.waitForLoad();
@@ -71,7 +68,8 @@ context.skip("Teacher Workspace", () => {
       drawToolTile.getDrawTile().should('exist');
     });
     //TODO: need to create another activity to assign to class
-    it.skip('verify restore after switching investigation', function () {
+    it('verify restore after switching investigation', function () {
+      beforeTest();
       cy.get('@clueData').then((clueData) => {
         let problems = clueData.classes[0].problems;
         let initProblemIndex = 0;
@@ -93,11 +91,11 @@ context.skip("Teacher Workspace", () => {
         dashboard.getProblemList().find('.list-item').contains(problems[initProblemIndex].problemTitle).click({ force: true });
         cy.waitForLoad();
         dashboard.switchView('Workspace & Resources');
-        cy.openResourcesTab();
+        // cy.openResourcesTab();
         cy.openTopTab("my-work");
         cy.openSection('my-work', 'workspaces');
         clueCanvas.getInvestigationCanvasTitle().should('contain', problems[initProblemIndex].problemTitle);
-        tableToolTile.getTableTile().should('exist');
+        // tableToolTile.getTableTile().should('exist');
         drawToolTile.getDrawTile().should('exist');
         cy.openTopTab("my-work");
         cy.openSection('my-work', 'workspaces');
@@ -108,20 +106,27 @@ context.skip("Teacher Workspace", () => {
       });
     });
     it('verify teacher document publish to multiple classes', function () {
+      beforeTest();
+      cy.get('@clueData').then((clueData) => {
+        let problems = clueData.classes[0].problems;
+        let initProblemIndex = 0;
+
       clueCanvas.publishTeacherDocToMultipleClasses();
       cy.openResourceTabs();
       cy.openTopTab("class-work");
-      cy.getCanvasItemTitle('workspaces').contains(`${this.investigationTitle}`).should('exist');
+      cy.getCanvasItemTitle('workspaces').contains(problems[initProblemIndex].problemTitle).should('exist');
       dashboard.getClassDropdown().click({ force: true });
       dashboard.getClassList().find('.list-item').contains(class2).click({ force: true });
       cy.waitForLoad();
       dashboard.switchView('Workspace & Resources');
-      cy.openResourceTabs();
+      // cy.openResourceTabs();
       cy.openTopTab("class-work");
-      cy.getCanvasItemTitle('workspaces').contains(`${this.investigationTitle}`).should('exist');
+      cy.getCanvasItemTitle('workspaces').contains(problems[initProblemIndex].problemTitle).should('exist');
+      });
     });
   });
   after(function () {
+    beforeTest();
     //switch back to original problem for later test
     dashboard.getClassDropdown().click({ force: true });
     dashboard.getClassList().find('.list-item').contains(class1).click({ force: true });

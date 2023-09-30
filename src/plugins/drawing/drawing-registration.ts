@@ -28,7 +28,8 @@ registerTileComponentInfo({
   type: kDrawingTileType,
   Component: DrawingToolComponent,
   tileEltClass: "drawing-tool-tile",
-  Icon: DrawingToolIcon
+  Icon: DrawingToolIcon,
+  tileHandlesOwnSelection: true
 });
 
 // These are added via registration functions rather than

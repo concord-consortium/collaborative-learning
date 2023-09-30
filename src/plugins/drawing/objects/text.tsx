@@ -46,8 +46,8 @@ export const TextObject = EditableObject.named("TextObject")
     }
   }))
   .actions(self => ({
-    setStroke(stroke: string){ 
-      self.stroke = stroke; 
+    setStroke(stroke: string){
+      self.stroke = stroke;
     },
     setText(text: string) {
       self.text = text;
@@ -73,7 +73,7 @@ export const TextObject = EditableObject.named("TextObject")
     setEditing(editing: boolean) {
       self.isEditing = editing;
     }
-  }));  
+  }));
 
 export interface TextObjectType extends Instance<typeof TextObject> {}
 export interface TextObjectSnapshot extends SnapshotIn<typeof TextObject> {}
@@ -109,7 +109,7 @@ export const TextComponent = observer(
     if (editing) {
       return (
         <foreignObject x={x+margin} y={y+margin} width={width-2*margin} height={height-2*margin}>
-          <textarea ref={textEditor} 
+          <textarea ref={textEditor}
             defaultValue={text}
             onBlur={(e) => handleClose(true)}
             onKeyDown={handleTextAreaKeyDown}
@@ -117,11 +117,11 @@ export const TextComponent = observer(
           </textarea>
         </foreignObject>);
     } else {
-      // Note that SVG text is generally 'filled', not 'stroked'.  
+      // Note that SVG text is generally 'filled', not 'stroked'.
       // But we use the stroke color for text since we think that's more intuitive. Thus the odd-looking 'style' below.
       return(<g clipPath={'url(#'+clip+')'}>
-              <WrappedSvgText text={text} 
-                  x={x+margin} y={y+margin} width={width-2*margin} height={height-2*margin} 
+              <WrappedSvgText text={text}
+                  x={x+margin} y={y+margin} width={width-2*margin} height={height-2*margin}
                   style={{fill: stroke}} />
              </g>);
     }
@@ -155,9 +155,9 @@ export const TextComponent = observer(
     model.setEditing(false);
   };
 
-  return <g 
-          key={id} 
-          className="text" 
+  return <g
+          key={id}
+          className="text"
           onMouseEnter={(e) => handleHover?.(e, model, true)}
           onMouseLeave={(e) => handleHover?.(e, model, false)}
           onMouseDown={(e)=> handleDrag?.(e, model)}
@@ -166,7 +166,7 @@ export const TextComponent = observer(
           <rect x={x} y={y}
               width={width} height={height}
               stroke={stroke} fill="#FFFFFF" opacity="80%"
-              rx="5" ry="5" /> 
+              rx="5" ry="5" />
           <clipPath id={clipId}>
             <rect x={x} y={y} width={width} height={height} />
           </clipPath>
@@ -182,6 +182,10 @@ export class TextDrawingTool extends DrawingTool {
   }
 
   public handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
+    // Select the drawing tile, but don't propagate event to do normal Cmd-click procesing.
+    this.drawingLayer.selectTile(false);
+    e.stopPropagation();
+
     const start = this.drawingLayer.getWorkspacePoint(e);
     if (!start) return;
     const { stroke } = this.drawingLayer.toolbarSettings();

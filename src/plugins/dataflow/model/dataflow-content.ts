@@ -9,7 +9,7 @@ import { SharedVariables, SharedVariablesType } from "../../shared-variables/sha
 import { isInputVariable, isOutputVariable } from "../../shared-variables/simulations/simulation-utilities";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { ITileMetadataModel } from "../../../models/tiles/tile-metadata";
-import { tileModelHooks } from "../../../models/tiles/tile-model-hooks";
+import { tileContentAPIActions } from "../../../models/tiles/tile-model-hooks";
 import { TileContentModel } from "../../../models/tiles/tile-content";
 import {
   SharedDataSet, kSharedDataSetType, SharedDataSetType,
@@ -175,7 +175,7 @@ export const DataflowContentModel = TileContentModel
       return formatTime(self.durationOfRecording);
     }
   }))
-  .actions(self => tileModelHooks({
+  .actions(self => tileContentAPIActions({
     doPostCreate(metadata: ITileMetadataModel) {
       self.metadata = metadata;
     }

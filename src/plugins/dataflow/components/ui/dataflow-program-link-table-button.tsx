@@ -27,7 +27,6 @@ export const DataflowLinkTableButton: React.FC<IProps> = (props: IProps) => {
   const classes = classNames("link-table-button", { disabled: !isLinkButtonEnabled });
 
   const { showLinkTileDialog } = useConsumerTileLinking({
-                                    documentId,
                                     hasLinkableRows: true,
                                     model,
                                     onRequestTilesOfType,
