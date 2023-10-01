@@ -604,8 +604,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         const outputVar = findOutputVariable(n, this.props.tileContent?.outputVariables);
         const foundDeviceFamily = this.stores.serialDevice.deviceFamily ?? "unknown device";
         updateNodeChannelInfo(n, this.channels, this.stores.serialDevice);
-        sendDataToSerialDevice(n, this.stores.serialDevice);
-        sendDataToSimulatedOutput(n, this.props.tileContent?.outputVariables);
+        if (this.props.runnable) {
+          sendDataToSerialDevice(n, this.stores.serialDevice);
+          sendDataToSimulatedOutput(n, this.props.tileContent?.outputVariables);
+        }
         setLiveOutputOpts(n, foundDeviceFamily, outputVar);
       }
     };
@@ -640,25 +642,26 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});
     this.lastIntervalTime = now;
 
-    if (this.props.runnable) {
-      switch (programMode){
-        case ProgramMode.Ready:
-          this.updateNodes();
-          break;
-        case ProgramMode.Recording:
-          if (!readOnly) {
-            recordCase(this.props.tileContent, this.programEditor, this.props.recordIndex);
-          }
-          this.updateNodes();
-          updateRecordIndex(UpdateMode.Increment);
-          break;
-        case ProgramMode.Done:
-          isPlaying && this.playbackNodesWithCaseData(dataSet, playBackIndex);
-          isPlaying && updatePlayBackIndex(UpdateMode.Increment);
-          !isPlaying && updatePlayBackIndex(UpdateMode.Reset);
-          updateRecordIndex(UpdateMode.Reset);
-          break;
-      }
+    switch (programMode){
+      case ProgramMode.Ready:
+        this.updateNodes();
+        break;
+      case ProgramMode.Recording:
+        if (this.props.runnable) {
+          recordCase(this.props.tileContent, this.programEditor, this.props.recordIndex);
+        }
+        this.updateNodes();
+        updateRecordIndex(UpdateMode.Increment);
+        break;
+      case ProgramMode.Done:
+        if (isPlaying) {
+          this.playbackNodesWithCaseData(dataSet, playBackIndex);
+          updatePlayBackIndex(UpdateMode.Increment);
+        } else {
+          updatePlayBackIndex(UpdateMode.Reset);
+        }
+        updateRecordIndex(UpdateMode.Reset);
+        break;
     }
   };
 
