@@ -178,8 +178,8 @@ export const DocumentModel = Tree.named("Document")
       if (docDisplayIdPropertyName === "key") return self.key;
       return self.getProperty(docDisplayIdPropertyName);
     },
-    getUniqueTitle(tileType: string, titleBase: string, getTileTitle: (tileId: string) => string | undefined) {
-      return self.content?.getUniqueTitle(tileType, titleBase, getTileTitle);
+    getUniqueTitle(tileType: string, titleBase: string) {
+      return self.content?.getUniqueTitle(tileType, titleBase);
     }
   }))
   .views(self => ({

@@ -2,7 +2,7 @@ import TeacherDashboard from "../../../../support/elements/clue/TeacherDashboard
 
 let dashboard = new TeacherDashboard();
 const clueTeacher = {
-  username: "clueteachertest",
+  username: "clueteachertest1",
   password: "password"
 };
 /**
@@ -20,9 +20,9 @@ const clueTeacher = {
 
 
 function beforeTest() {
-  cy.login("https://learn.concord.org", clueTeacher);
+  cy.login("https://learn.portal.staging.concord.org", clueTeacher);
   // insert offering number for your activity below
-  cy.launchReport('https://learn.concord.org/portal/offerings/40557/external_report/25');
+  cy.launchReport('https://learn.portal.staging.concord.org/portal/offerings/221/external_report/11');
   cy.waitForLoad();
 
   dashboard.switchView("Dashboard");

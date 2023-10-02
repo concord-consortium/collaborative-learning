@@ -19,7 +19,6 @@ export interface ITextPluginInfo {
     (textContent: TextContentModelType) => ITextPlugin;
   updateTextContentAfterSharedModelChanges?:
     (textContent: TextContentModelType, sharedModel?: SharedModelType) => void;
-  buttonDefs: Record<string, ButtonDefComponent>,
 }
 
 const gTextPluginInfoMap: Record<string, ITextPluginInfo | undefined> = {};

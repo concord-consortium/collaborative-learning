@@ -1,32 +1,29 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { useState } from "react";
-import { TableContentModelType } from "../../../models/tiles/table/table-content";
+import { ITileModel } from "../../../models/tiles/tile-model";
 import { verifyAlive } from "../../../utilities/mst-utils";
 import { HeaderCellInput } from "./header-cell-input";
 
 interface IProps {
-  content: TableContentModelType;
+  model: ITileModel;
   className?: string;
   readOnly?: boolean;
-  showLinkButton: boolean;
-  isLinkEnabled?: boolean;
   titleCellWidth: number;
   titleCellHeight: number;
   onBeginEdit?: () => void;
   onEndEdit?: (title?: string) => void;
-  onLinkGeometryClick?: () => void;
 }
 export const EditableTableTitle: React.FC<IProps> = observer(function EditableTableTitle({
-  content, className, readOnly, showLinkButton, isLinkEnabled, titleCellWidth, titleCellHeight,
-  onBeginEdit, onEndEdit, onLinkGeometryClick
+  model, className, readOnly, titleCellWidth, titleCellHeight,
+  onBeginEdit, onEndEdit
 }) {
 
-  verifyAlive(content, "EditableTableTile");
+  verifyAlive(model, "EditableTableTile");
 
-  // content.title and observer() allow this component to re-render
+  // model.title and observer() allow this component to re-render
   // when the title changes without re-rendering the entire TableTool
-  const title = content.title;
+  const title = model.computedTitle;
   const [isEditing, setIsEditing] = useState(false);
   const [editingTitle, setEditingTitle] = useState(title);
   const handleClick = () => {

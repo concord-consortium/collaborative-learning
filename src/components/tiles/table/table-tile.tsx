@@ -138,7 +138,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
 
   // Functions for getting and modifying the title
   const { onBeginTitleEdit, onEndTitleEdit } = useTableTitle({
-    gridContext, content, readOnly,
+    gridContext, model, content, readOnly,
     onSetTableTitle, onRequestUniqueTitle: handleRequestUniqueTitle, requestRowHeight
   });
 
@@ -226,12 +226,9 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
       />
       <div className="table-grid-container" ref={containerRef} onClick={handleBackgroundClick}>
         <EditableTableTitle
-          content={content}
+          model={model}
           className="table-title"
           readOnly={readOnly}
-          showLinkButton={true}
-          isLinkEnabled={isLinkEnabled}
-          onLinkGeometryClick={showLinkTileDialog}
           titleCellWidth={titleCellWidth}
           titleCellHeight={getTitleHeight()}
           onBeginEdit={onBeginTitleEdit}

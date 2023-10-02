@@ -8,6 +8,7 @@ import { ModalProvider } from "@concord-consortium/react-modal-hook";
 import { Provider } from "mobx-react";
 import TextToolComponent from "./text-tile";
 import { ITileProps } from "../tile-component";
+import { TileModelContext } from "../tile-api";
 
 export interface ISpecTextTileOptions {
   tileModel?: ITileModel
@@ -56,9 +57,11 @@ export function specTextTile(options: ISpecTextTileOptions) {
 
   render(
     <ModalProvider>
-      <Provider stores={stores}>
-        <TextToolComponent ref={textTile} {...defaultProps} />
-      </Provider>
+      <TileModelContext.Provider value={model}>
+        <Provider stores={stores}>
+          <TextToolComponent ref={textTile} {...defaultProps} />
+        </Provider>
+      </TileModelContext.Provider>
     </ModalProvider>
   );
 

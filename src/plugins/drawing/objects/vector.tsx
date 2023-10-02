@@ -3,8 +3,8 @@ import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React, { useCallback } from "react";
 import { computeStrokeDashArray, DrawingObjectType, DrawingTool, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, ObjectTypeIconViewBox, StrokedObject, typeField } from "./drawing-object";
-import { BoundingBoxSides, Point, ToolbarSettings, VectorEndShape, 
-  endShapesForVectorType, getVectorTypeIcon, vectorTypeForEndShapes } 
+import { BoundingBoxSides, Point, ToolbarSettings, VectorEndShape,
+  endShapesForVectorType, getVectorTypeIcon, vectorTypeForEndShapes }
   from "../model/drawing-basic-types";
 import { SvgToolbarButton, } from "../components/drawing-toolbar-buttons";
 
@@ -140,6 +140,10 @@ export class VectorDrawingTool extends DrawingTool {
   }
 
   public handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
+    // Select the drawing tile, but don't propagate event to do normal Cmd-click procesing.
+    this.drawingLayer.selectTile(false);
+    e.stopPropagation();
+
     const start = this.drawingLayer.getWorkspacePoint(e);
     if (!start) return;
     const {stroke, strokeWidth, strokeDashArray, vectorType} = this.drawingLayer.toolbarSettings();
