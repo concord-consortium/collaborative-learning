@@ -276,6 +276,12 @@ export const GraphModel = TileContentModel
         console.warn("GraphModel.configureLinkedGraph requires a dataset");
         return;
       }
+
+      // WIP, figure out if we need this condition
+      // It is in master, and has it's origins in PR:
+      // https://github.com/concord-consortium/collaborative-learning/pull/1857
+      // If we omit it, then units without emptyPlotIsNumeric set will load data on link
+      // But we need to test/understand the scenario that gave rise to this condition
       //if (getAppConfig(self)?.getSetting("emptyPlotIsNumeric", "graph")) {
         const attributeCount = self.data.attributes.length;
         if (!attributeCount) return;
