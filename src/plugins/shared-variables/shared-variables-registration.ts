@@ -7,6 +7,7 @@ import { kVariableTextPluginName, VariablesPlugin } from "./slate/variables-plug
 import { registerDrawingObjectInfo, registerDrawingToolInfo } from "../drawing/components/drawing-object-manager";
 import { EditVariableButton, InsertVariableButton, NewVariableButton, VariableChipComponent, VariableChipObject }
   from "./drawing/variable-object";
+import { registerTileToolbarButtons } from "../../components/toolbar/toolbar-button-manager";
 
 registerSharedModelInfo({
   type: kSharedVariablesID,
@@ -20,12 +21,25 @@ registerTextPluginInfo({
     plugin.addTileSharedModelWhenReady();
     return plugin;
   },
-  buttonDefs: {
-    [kNewVariableButtonName]: NewVariableTextButton,
-    [kInsertVariableButtonName]: InsertVariableTextButton,
-    [kEditVariableButtonName]: EditVariableTextButton
-  }
 });
+
+registerTileToolbarButtons('text', [
+  {
+    name: kNewVariableButtonName,
+    title: "New Variable",
+    component: NewVariableTextButton
+  },
+  {
+    name: kInsertVariableButtonName,
+    title: "Insert Variable",
+    component: InsertVariableTextButton
+  },
+  {
+    name: kEditVariableButtonName,
+    title: "Edit Variable",
+    component: EditVariableTextButton
+  },
+]);
 
 registerDrawingObjectInfo({
   type: "variable",

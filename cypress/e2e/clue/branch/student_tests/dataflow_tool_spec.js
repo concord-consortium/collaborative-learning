@@ -530,6 +530,7 @@ context('Dataflow Tool Tile', function () {
          "EMG - Long Clench and Hold Demo Data", "FSR Demo Data",
          "⚠️ Connect Arduino for live EMG",
          "⚠️ Connect Arduino for live FSR",
+         "⚠️ Connect Arduino for live Temperature",
          "⚠️ Connect micro:bit for live Temperature A",
          "⚠️ Connect micro:bit for live Humidity A",
          "⚠️ Connect micro:bit for live Temperature B",
@@ -541,7 +542,7 @@ context('Dataflow Tool Tile', function () {
         ];
         dataflowToolTile.getCreateNodeButton(nodeType).click();
         dataflowToolTile.getDropdown(nodeType, dropdown).click();
-        dataflowToolTile.getSensorDropdownOptions(nodeType).should("have.length", 18);
+        dataflowToolTile.getSensorDropdownOptions(nodeType).should("have.length", 19);
         dataflowToolTile.getSensorDropdownOptions(nodeType).each(($tab, index, $typeList) => {
           expect($tab.text()).to.contain(sensorSelect[index]);
         });

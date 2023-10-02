@@ -86,7 +86,8 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
     expect(documentContent.getTileCountsPerSection(["initialChallenge"])).toEqual({ initialChallenge: 5 });
     expect(documentContent.getTilesOfType("Text")).toEqual(["textTool1", "textTool2"]);
     expect(documentContent.getTilesOfType("Drawing")).toEqual(["drawingTool1", "drawingTool2"]);
-    expect(documentContent.getUniqueTitle("Geometry", "Graph", () => "Graph 1")).toBe("Graph 2");
+    // There are no titles in the test content being loaded so Graph 1 is expected
+    expect(documentContent.getUniqueTitle("Geometry", "Graph")).toBe("Graph 1");
   });
 
   it("can export more complicated content", () => {

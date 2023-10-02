@@ -152,8 +152,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     if (!tileApiInterface) return;
     const { document } = this.props;
     const { type, titleBase } = tileContentInfo;
-    const getTileTitle = (tileId: string) => tileApiInterface?.getTileApi(tileId)?.getTitle?.();
-    return titleBase && document.getUniqueTitle(type, titleBase, getTileTitle);
+    return titleBase && document.getUniqueTitle(type, titleBase);
   }
 
   private isButtonActive(toolButton: IToolbarButtonModel) {

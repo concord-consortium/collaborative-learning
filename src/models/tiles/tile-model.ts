@@ -71,6 +71,13 @@ export const TileModel = types
     return preProcessor ? preProcessor(snapshot) : snapshot;
   })
   .views(self => ({
+    /**
+     * Users can manually set a tile title. If the title isn't set, then content model
+     * can provide a title. The empty string is considered an "unset" title.
+     */
+    get computedTitle() {
+      return self.title || self.content.contentTitle || "";
+    },
     // generally negotiated with tile, e.g. single column width for table
     get minWidth() {
       return kDefaultMinWidth;

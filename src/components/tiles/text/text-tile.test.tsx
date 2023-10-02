@@ -1,4 +1,5 @@
 import {screen} from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { defaultTextContent } from "../../../models/tiles/text/text-content";
 import { TileModel } from "../../../models/tiles/tile-model";
 import { specTextTile } from "./spec-text-tile";
@@ -21,6 +22,12 @@ describe("TextToolComponent", () => {
     expect(content.editor).toBeUndefined();
     specTextTile({tileModel});
     expect(content.editor).toBeDefined();
+  });
+
+  it("renders its toolbar", () => {
+    specTextTile({});
+    userEvent.click(screen.getByTestId("ccrte-editor"));
+    expect(screen.getAllByRole("button")).toHaveLength(8);
   });
 
 });

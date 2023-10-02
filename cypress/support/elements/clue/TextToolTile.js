@@ -15,7 +15,7 @@ class TextToolTile {
         cy.wait(300);
     }
     enterAdditionalText(text){
-        this.getTextTile().last().focus();    
+        this.getTextTile().last().focus();
         this.getTextEditor().last().type('{moveToEnd}'+text);
         cy.wait(300);
     }
@@ -28,16 +28,16 @@ class TextToolTile {
     clickToolbarTool(titlePrefix){
         // Note that the title is dynamic based on the OS sometimes it has Cmd- and
         // sometimes Ctrl-
-        cy.get(`.primary-workspace .text-toolbar [data-original-title^="${titlePrefix}"]`).click();
+        cy.get(`.tile-toolbar-text [data-original-title^="${titlePrefix}"] button`).click();
     }
     getVariableChip() {
       return cy.get('.primary-workspace [data-testid=ccrte-editor] .slate-variable-chip .variable-chip');
     }
     getTextToolInsertVariable(){
-        return cy.get('.primary-workspace .text-toolbar [data-original-title="Insert Variable"]');
+        return cy.get('.tile-toolbar-text [data-original-title="Insert Variable"]');
     }
     getTextToolNewVariable(){
-        return cy.get('.primary-workspace .text-toolbar [data-original-title="New Variable"]');
+        return cy.get('.tile-toolbar-text [data-original-title="New Variable"]');
     }
     deleteTextTile() {
         this.getTextTile().last().click();
