@@ -391,8 +391,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         this.props.onZoomChange(transform.x, transform.y, transform.k);
       });
 
-      // Can this be in a control with stores injected?
-      autorun(this.updateChannels);
+      // TODO: if we use this condition, we do not get "crosstalk"
+      // however, programs in My Work on left do not update properly
+      if (this.props.runnable) {
+        autorun(this.updateChannels);
+      }
 
       this.programEditor.view.resize();
       this.programEditor.trigger("process");

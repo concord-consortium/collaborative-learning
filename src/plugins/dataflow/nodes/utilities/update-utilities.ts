@@ -60,7 +60,7 @@ export function updateNodeChannelInfo(n: Node, channels: NodeChannelInfo[], seri
   }
 
   const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
-  if (sensorSelect) {
+  if (sensorSelect && channels.length > 0) {
     sensorSelect.setChannels(channels);
     (sensorSelect as any).update();
   }
