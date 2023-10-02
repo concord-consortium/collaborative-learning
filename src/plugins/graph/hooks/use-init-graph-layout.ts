@@ -14,10 +14,15 @@ export function useInitGraphLayout(model?: IGraphModel) {
     return reaction(
       () => {
         const repetitions: Partial<Record<AxisPlace, number>> = {};
-        model && isAlive(model) && layout.axisScales.forEach((multiScale, place) => {
+        if (model && isAlive(model)) {
           const { config } = model;
-          repetitions[place] = config.numRepetitionsForPlace(place) ?? 1;
-        });
+          // TODO: could use this to tell the Layout how many Y attributes there are (for legend sizing)
+          // Or maybe it already knows this information?
+          // const yAttributeCount = config.yAttributeDescriptions.length;
+          layout.axisScales.forEach((multiScale, place) => {
+            repetitions[place] = config.numRepetitionsForPlace(place) ?? 1;
+          });
+        }
         return repetitions;
       },
       (repetitions) => {
