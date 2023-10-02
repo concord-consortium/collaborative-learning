@@ -392,9 +392,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       });
 
       // Can this be in a control with stores injected?
-      if (!this.props.readOnly) {
-        autorun(this.updateChannels);
-      }
+      autorun(this.updateChannels);
 
       this.programEditor.view.resize();
       this.programEditor.trigger("process");
