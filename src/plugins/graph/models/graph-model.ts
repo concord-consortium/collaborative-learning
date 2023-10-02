@@ -21,7 +21,7 @@ import {
 import { AppConfigModelType } from "../../../models/stores/app-config-model";
 import {ITileContentModel, TileContentModel} from "../../../models/tiles/tile-content";
 import {ITileExportOptions} from "../../../models/tiles/tile-content-info";
-import { getAppConfig, getSharedModelManager } from "../../../models/tiles/tile-environment";
+import { getSharedModelManager } from "../../../models/tiles/tile-environment";
 import {
   defaultBackgroundColor, defaultPointColor, defaultStrokeColor, kellyColors
 } from "../../../utilities/color-utils";
@@ -276,7 +276,7 @@ export const GraphModel = TileContentModel
         console.warn("GraphModel.configureLinkedGraph requires a dataset");
         return;
       }
-      if (getAppConfig(self)?.getSetting("emptyPlotIsNumeric", "graph")) {
+      //if (getAppConfig(self)?.getSetting("emptyPlotIsNumeric", "graph")) {
         const attributeCount = self.data.attributes.length;
         if (!attributeCount) return;
 
@@ -291,7 +291,7 @@ export const GraphModel = TileContentModel
             self.setAttributeID("y", self.data.id, self.data.attributes[1].id);
           }
         }
-      }
+      //}
     },
     configureUnlinkedGraph() {
       if (self.data) {
