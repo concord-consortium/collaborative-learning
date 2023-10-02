@@ -12,7 +12,7 @@ import { ITileModel } from "../../models/tiles/tile-model";
 import { ImageUploadButton } from "../../components/tiles/image/image-toolbar";
 import { EditFacet } from "./data-card-types";
 import { DeleteAttrButton, DuplicateCardButton,
-  LinkTileButton, MergeInButton } from "./components/data-card-toolbar-buttons";
+  LinkTileButton, MergeInButton, ViewInGraphButton } from "./components/data-card-toolbar-buttons";
 import { useTileDataMerging } from "../../hooks/use-tile-data-merging";
 
 import "./data-card-toolbar.scss";
@@ -91,6 +91,7 @@ export const DataCardToolbar: React.FC<IProps> = observer(function DataCardToolb
           <DuplicateCardButton onClick={handleDuplicateCard} />
           <LinkTileButton isEnabled={isLinkEnabled} onClick={handleLinkButtonCLick} />
           <MergeInButton onClick={handleMergeDataClick} isEnabled={isMergeEnabled} />
+          <ViewInGraphButton isEnabled={true} />
         </div>
         <div className={valueActionsButtonsClasses}>
           <ImageUploadButton onUploadImageFile={file => uploadImage(file)} />
