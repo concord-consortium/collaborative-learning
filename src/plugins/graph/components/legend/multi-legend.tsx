@@ -36,10 +36,11 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
   if (dataConfiguration) {
     const yAttributes = dataConfiguration.yAttributeDescriptions;
 
-    pulldowns = yAttributes.map((description) =>
+    pulldowns = yAttributes.map((description, index) =>
       <SimpleAttributeLabel
         key={description.attributeID}
         place={'left'}
+        index={index}
         attrId={description.attributeID}
         onChangeAttribute={onChangeAttribute}
         onRemoveAttribute={onRemoveAttribute}

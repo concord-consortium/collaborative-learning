@@ -14,6 +14,7 @@ import "../components/legend/multi-legend.scss";
 
 interface ISimpleAttributeLabelProps {
   place: GraphPlace
+  index: number
   attrId: string
   onChangeAttribute?: (place: GraphPlace, dataSet: IDataSet, attrId: string) => void
   onRemoveAttribute?: (place: GraphPlace, attrId: string) => void
@@ -22,7 +23,7 @@ interface ISimpleAttributeLabelProps {
 
 export const SimpleAttributeLabel = observer(
   function SimpleAttributeLabel(props: ISimpleAttributeLabelProps) {
-    const {place, attrId, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute} = props;
+    const {place, index, attrId, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute} = props;
     const simpleLabelRef = useRef<HTMLDivElement>(null);
     const parentElt = simpleLabelRef.current?.closest(kGraphClassSelector) as HTMLDivElement ?? null;
     const dataConfiguration = useDataConfigurationContext();
@@ -30,7 +31,7 @@ export const SimpleAttributeLabel = observer(
     const graphModel = useGraphModelContext();
     const attr = attrId ? dataset?.attrFromID(attrId) : undefined;
     const attrName = attr?.name ?? "";
-    const pointColor = graphModel._pointColors[0]; // In PT#182578812 will pass plotIndex
+    const pointColor = graphModel.pointColorAtIndex(index);
 
     const handleOpenClose = (isOpen: boolean) => {
       simpleLabelRef.current?.classList.toggle("target-open", isOpen);
