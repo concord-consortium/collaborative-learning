@@ -53,9 +53,7 @@ export const Graph = observer(function Graph({ graphController, graphRef, dotsRe
     xScale = layout.getAxisScale("bottom"),
     svgRef = useRef<SVGSVGElement>(null),
     plotAreaSVGRef = useRef<SVGSVGElement>(null),
-    backgroundSvgRef = useRef<SVGGElement>(null),
-    xAttrID = graphModel.getAttributeID('x'),
-    yAttrID = graphModel.getAttributeID('y');
+    backgroundSvgRef = useRef<SVGGElement>(null);
 
   console.log("📁 Graph.tsx (XY-PLOT)-------------------------");
   console.log("\twith dataset:", dataset);
@@ -132,7 +130,7 @@ export const Graph = observer(function Graph({ graphController, graphRef, dotsRe
 
   const renderPlotComponent = () => {
     const props = {
-        xAttrID, yAttrID, dotsRef, enableAnimation
+        dotsRef, enableAnimation
       },
       typeToPlotComponentMap = {
         casePlot: <CaseDots {...props}/>,
