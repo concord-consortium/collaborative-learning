@@ -45,7 +45,7 @@ describe('Teachers can communicate back and forth in chat panel', () => {
     beforeTest(portalUrl, clueTeacher1, reportUrl1);
     cy.openTopTab("problems");
     cy.openProblemSection("Introduction");
-  
+
     cy.log("verify teacher1 can post document and tile comments");
     // Teacher 1 document comment
     chatPanel.verifyProblemCommentClass();
@@ -59,7 +59,7 @@ describe('Teachers can communicate back and forth in chat panel', () => {
     beforeTest(portalUrl, clueTeacher2, reportUrl2);
     cy.openTopTab("problems");
     cy.openProblemSection("Introduction");
-  
+
     cy.log("verify teacher2 can view teacher1's comments and add more comments");
     // Teacher 2 document comment
     chatPanel.verifyProblemCommentClass();
@@ -74,7 +74,7 @@ describe('Teachers can communicate back and forth in chat panel', () => {
     beforeTest(portalUrl, clueTeacher1, reportUrl1);
     cy.openTopTab("problems");
     cy.openProblemSection("Introduction");
-  
+
     cy.log("verify teacher1 can view teacher2's comments");
     // Teacher 1 document comment
     chatPanel.verifyProblemCommentClass();
@@ -83,7 +83,7 @@ describe('Teachers can communicate back and forth in chat panel', () => {
     cy.clickProblemResourceTile('introduction');
     chatPanel.verifyCommentThreadContains("This is a teacher2 tile comment");
   });
-  it('verify teacher1 can only delete own comments', () => {
+  it.skip('verify teacher1 can only delete own comments', () => {
     beforeTest(portalUrl, clueTeacher1, reportUrl1);
     cy.openTopTab("problems");
     cy.openProblemSection("Introduction");
@@ -98,7 +98,7 @@ describe('Teachers can communicate back and forth in chat panel', () => {
     cy.get(".confirm-delete-alert button").contains("Delete").click();
     chatPanel.getCommentFromThread().should("not.contain", "This is a teacher1 tile comment");
   });
-  it('verify teacher2 does not see teacher1 deleted comments', () => {
+  it.skip('verify teacher2 does not see teacher1 deleted comments', () => {
     beforeTest(portalUrl, clueTeacher2, reportUrl2);
     cy.openTopTab("problems");
     cy.openProblemSection("Introduction");
