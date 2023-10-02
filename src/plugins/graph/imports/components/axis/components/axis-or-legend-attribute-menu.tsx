@@ -46,7 +46,7 @@ const _AxisOrLegendAttributeMenu = ({ place, attributeId, target, portal, onOpen
   const removeAttrItemLabel = t(removeAttrItemLabelKeys[role], {vars: [attribute?.name]});
   const treatAs = dataConfig?.attributeType(role) === "numeric" ? "categorical" : "numeric";
   const menuRef = useRef<HTMLDivElement>(null);
-  const showRemoveOption = useSettingFromStores("defaultSeriesLegend", "graph") !== true;
+  const showRemoveOption = true;
 
   const onCloseRef = useRef<() => void>();
   const overlayStyle: CSSProperties = {
