@@ -10,14 +10,14 @@ export function isSelectionModifierKeyDown() {
   return selectionModiferKeyDown;
 }
 
-export function hasSelectionModifier(e: MouseEvent | TouchEvent | KeyboardEvent | React.MouseEvent) {
+export function hasSelectionModifier(e: MouseEvent | TouchEvent | KeyboardEvent | React.MouseEvent | React.TouchEvent) {
   return e.ctrlKey || e.metaKey || e.shiftKey;
 }
 
-export function hasContiguousModifier(e: MouseEvent | TouchEvent | KeyboardEvent | React.MouseEvent) {
+export function hasContiguousModifier(e: MouseEvent | TouchEvent | KeyboardEvent | React.MouseEvent | React.TouchEvent) {
   return e.shiftKey;
 }
 
-export function hasDiscontiguousModifier(e: MouseEvent | TouchEvent | KeyboardEvent | React.MouseEvent) {
+export function hasDiscontiguousModifier(e: MouseEvent | TouchEvent | KeyboardEvent | React.MouseEvent | React.TouchEvent) {
   return e.ctrlKey || e.metaKey;
 }

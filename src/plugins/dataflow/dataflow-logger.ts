@@ -56,20 +56,12 @@ export function dataflowLogEvent( operation: string, payload: DataflowLogPayload
     }
   }
 
-  // we pass a plain object for title change and sensor selections
+  // we pass a plain object for sensor selections
   // so we differentiate by keys sent in object
   else {
     const changeProperties = Object.keys(payload);
 
-    if (changeProperties.includes("programTitleValue")){
-      const change: DataflowProgramChange = {
-        targetType: 'program',
-        programTitle: payload.programTitleValue
-      };
-      logTileChangeEvent(logEventName, { operation, change, tileId });
-    }
-
-   else if (changeProperties.includes("sensorTypeValue")){
+    if (changeProperties.includes("sensorTypeValue")){
       const change: DataflowProgramChange = {
         targetType: 'nodedropdown',
         nodeTypes: [payload.node.name],

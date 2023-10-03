@@ -16,7 +16,7 @@ import "./geometry-tile.sass";
 const _GeometryToolComponent: React.FC<IGeometryProps> = ({
   model, readOnly, ...others
 }) => {
-  const { documentId, documentContent, tileElt, scale, onRequestLinkableTiles, onRequestTilesOfType,
+  const { documentContent, tileElt, scale, onRequestLinkableTiles, onRequestTilesOfType,
     onRegisterTileApi, onUnregisterTileApi } = others;
   const modelRef = useCurrent(model);
   const domElement = useRef<HTMLDivElement>(null);
@@ -50,7 +50,7 @@ const _GeometryToolComponent: React.FC<IGeometryProps> = ({
   const enabled = !readOnly && !!board && !!actionHandlers;
   const toolbarProps = useToolbarTileApi({ id: model.id, enabled, onRegisterTileApi, onUnregisterTileApi });
   const { isLinkEnabled, showLinkTileDialog } = useProviderTileLinking({
-    documentId, model, readOnly, onRequestTilesOfType, onRequestLinkableTiles
+    model, readOnly, onRequestTilesOfType, onRequestLinkableTiles
   });
   // We must listen for pointer events because we want to get the events before
   // JSXGraph, which appears to listen to pointer events on browsers that support them.

@@ -23,7 +23,6 @@ interface IProps extends IFloatingToolbarProps {
   isMergeEnabled?: boolean;
   isLinkEnabled?: boolean;
   model: ITileModel;
-  getLinkIndex: () => number;
   handleDeleteValue: () => void;
   handleDuplicateCard: () => void;
   setImageUrlToAdd: (url: string) => void;
@@ -33,7 +32,7 @@ interface IProps extends IFloatingToolbarProps {
 
 export const DataCardToolbar: React.FC<IProps> = observer(function DataCardToolbar({
     isLinkEnabled, model, documentContent, tileElt, currEditAttrId, currEditFacet, showLinkTileDialog,
-    getLinkIndex, onIsEnabled, setImageUrlToAdd, handleDeleteValue, handleDuplicateCard,
+    onIsEnabled, setImageUrlToAdd, handleDeleteValue, handleDuplicateCard,
     ...others }: IProps) {
   const content = model.content as DataCardContentModelType;
   const { caseIndex, dataSet, totalCases } = content;
@@ -90,7 +89,7 @@ export const DataCardToolbar: React.FC<IProps> = observer(function DataCardToolb
       <div className={toolbarClasses} style={location}>
         <div className={cardActionsButtonsClasses}>
           <DuplicateCardButton onClick={handleDuplicateCard} />
-          <LinkTileButton getLinkIndex={getLinkIndex} isEnabled={isLinkEnabled} onClick={handleLinkButtonCLick} />
+          <LinkTileButton isEnabled={isLinkEnabled} onClick={handleLinkButtonCLick} />
           <MergeInButton onClick={handleMergeDataClick} isEnabled={isMergeEnabled} />
         </div>
         <div className={valueActionsButtonsClasses}>

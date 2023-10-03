@@ -101,14 +101,11 @@ The `on*` properties are a way for the tool component to communicate with the ho
 A tile API allows tile components to implement one or more functions that can be called generically for any tile that supports the ITileApi without knowing the specific tile type. This can be thought of as the beginnings of a generic plugin API model for tiles. The tile API interface is defined as follows:
 ```typescript
 export interface ITileApi {
-  getTitle?: () => string | undefined;
   hasSelection?: () => boolean;
   deleteSelection?: () => void;
   getSelectionInfo?: () => string;
   setSelectionHighlight?: (selectionInfo: string, isHighlighted: boolean) => void;
   isLinked?: () => boolean;
-  getLinkIndex?: (index?: number) => number;
-  getLinkedTables?: () => string[] | undefined;
   getContentHeight?: () => number | undefined;
   exportContentAsTileJson?: (options?: ITileExportOptions) => string;
   handleDocumentScroll?: (x: number, y: number) => void;

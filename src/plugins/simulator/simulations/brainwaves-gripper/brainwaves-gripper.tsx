@@ -6,12 +6,14 @@ import { demoStreams } from "../../../shared-assets/data/dataflow/demo-data";
 import {
   iconUrl, kEMGKey, kGripperKey, kPressureKey, kTemperatureKey
 } from "../../../shared-assets/icons/icon-utilities";
+import { SelectionButton } from "../../components/ui/selection-button";
 import { ISimulation, ISimulationProps } from "../simulation-types";
 import { findVariable, getFrame } from "../simulation-utilities";
 import {
   arduinoFrames, armFrames, gripperFrames, panFrames, steamFrames, temperatureGripperFrames
 } from "./brainwaves-gripper-assets";
 
+// We shouldn't need to import the rc-slider css, but for some reason we do.
 import "rc-slider/assets/index.css";
 import "./brainwaves-gripper.scss";
 
@@ -103,28 +105,28 @@ function BrainwavesGripperComponent({ frame, variables }: ISimulationProps) {
         variables={variables}
       />
       <div className="controls">
-        <div className="slider-wrapper">
-          <VariableSlider
-            className="emg-slider"
-            max={440}
-            min={40}
-            step={40}
-            variable={armVariable}
-          />
-          <div className="slider-labels">
-            <div className="open">relaxed</div>
-            <div className="closed">flexed</div>
-          </div>
-        </div>
-        <div className="toggle-container">
-          <div>Pressure</div>
-          <ToggleControl
-            className="mode-toggle"
-            initialValue={!!modeVariable?.currentValue}
-            onChange={(value: boolean) =>
-              modeVariable?.setValue(value ? kSimulationModeTemperature : kSimulationModePressure)}
-          />
-          <div>Temperature</div>
+        <VariableSlider
+          className="emg-slider"
+          max={440}
+          min={40}
+          step={40}
+          variable={armVariable}
+        />
+        <div className="mode-selection-container">
+          <SelectionButton
+            onClick={() => modeVariable?.setValue(kSimulationModePressure)}
+            position="left"
+            selected={modeVariable?.currentValue === kSimulationModePressure}
+          >
+            Pressure
+          </SelectionButton>
+          <SelectionButton
+            onClick={() => modeVariable?.setValue(kSimulationModeTemperature)}
+            position="right"
+            selected={modeVariable?.currentValue === kSimulationModeTemperature}
+          >
+            Temperature
+          </SelectionButton>
         </div>
       </div>
     </div>
@@ -178,11 +180,13 @@ export const brainwavesGripperSimulation: ISimulation = {
   step,
   variables: [
     {
-      displayName: "Arm Angle",
+      // This is the EMG targetted by the user adjusting the slider
+      displayName: "Target EMG",
       name: kArmKey,
       value: 40
     },
     {
+      // This is the target EMG minus a random amount on every frame to simulate real EMG data
       displayName: "EMG",
       labels: ["input", "sensor:emg-reading"],
       icon: iconUrl(kEMGKey),
@@ -205,11 +209,13 @@ export const brainwavesGripperSimulation: ISimulation = {
       value: 0
     },
     {
+      // This is the true temperature of the pan
       displayName: "Raw Temperature",
       name: kRawTemperatureKey,
       value: baseTemperature
     },
     {
+      // This is the temperature sensed by the gripper's sensors
       displayName: "Temperature",
       labels: ["input", "sensor:temperature"],
       icon: iconUrl(kTemperatureKey),

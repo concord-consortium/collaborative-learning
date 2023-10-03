@@ -18,8 +18,8 @@ class SimulatorTile {
   getEMGSlider(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .simulator-tool-tile .emg-slider .rc-slider-rail`);
   }
-  clickModeToggle(workspaceClass) {
-    cy.get(`${wsClass(workspaceClass)} .mode-toggle .ball`).click();
+  getSelectionButtons(workspaceClass) {
+    return cy.get(`${wsClass(workspaceClass)} .selection-button`);
   }
 }
 

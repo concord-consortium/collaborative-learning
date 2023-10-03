@@ -9,6 +9,7 @@
     display: flex;
     min-height: 200px;
     justify-content: center;
+    pointer-events: none;
     position: relative;
     width: 380px;
 
@@ -65,13 +66,8 @@
       width: 150px;
     }
 
-    .toggle-container {
-      align-items: center;
+    .mode-selection-container {
       display: flex;
-
-      .mode-toggle {
-        margin: 0 5px;
-      }
     }
   }
 }

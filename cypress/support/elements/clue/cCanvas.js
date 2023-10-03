@@ -44,7 +44,7 @@ class ClueCanvas {
     publishTeacherDocToMultipleClasses() {
       this.getPublishTeacherDocument().click();
       dialog.getModalTitle().should('be.visible').and('contain', 'Publish');
-      dialog.getModalButton().contains("All my classes").click();
+      dialog.getModalButton().contains("All Classes").click();
       dialog.getDialogTitle().should('exist').contains('Published');
       dialog.getDialogOKButton().click();
       dialog.getDialogTitle().should('not.exist');
