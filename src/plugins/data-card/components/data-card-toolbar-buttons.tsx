@@ -5,12 +5,11 @@ import { observer } from "mobx-react";
 import LinkGraphIcon from "../../../clue/assets/icons/table/link-graph-icon.svg";
 import DuplicateCardIcon from "../assets/duplicate-card-icon.svg";
 import DeleteSelectionIcon from "../assets/delete-selection-icon.svg";
-import MergeInIcon from "../assets/merge-in-icon.svg";
 import { TileToolbarButton } from "../../../components/shared/tile-toolbar-button";
 import { DataCardContentModelType } from "../data-card-content";
 import { TileModelContext } from "../../../components/tiles/tile-api";
+import { MergeInButton } from "../../../components/shared/merge-in-button";
 import { useConsumerTileLinking } from "../../../hooks/use-consumer-tile-linking";
-import { useTileDataMerging } from "../../../hooks/use-tile-data-merging";
 import { getTileDataSet } from "../../../models/shared/shared-data-utils";
 import { kDataCardTileType } from "../data-card-types";
 
@@ -101,23 +100,6 @@ export const LinkTileButton = observer(function LinkTileButton(
   );
 });
 
-export const MergeInButton = observer(function MergeButton({ isDisabled }: IDataCardToolbarButtonProps) {
-  const model = useContext(TileModelContext)!;
-  const { isMergeEnabled, showMergeTileDialog } = useTileDataMerging({model});
-
-  console.log("MergeInButton", {isDisabled, isMergeEnabled});
-  const handleClick = () => {
-    showMergeTileDialog && showMergeTileDialog();
-  };
-
-  return (
-    <TileToolbarButton
-      className="merge-data-button"
-      onClick={handleClick}
-      title="Add Data from..."
-      isDisabled={isDisabled || !isMergeEnabled}
-    >
-      <MergeInIcon />
-    </TileToolbarButton>
-  );
-});
+export function DataCardMergeInButton ({ isDisabled }: IDataCardToolbarButtonProps) {
+  return <MergeInButton isDisabled={isDisabled} />;
+}

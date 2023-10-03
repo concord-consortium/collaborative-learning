@@ -11,9 +11,9 @@ import { DataCardContentModelType } from "./data-card-content";
 import { ITileModel } from "../../models/tiles/tile-model";
 import { ImageUploadButton } from "../../components/tiles/image/image-toolbar";
 import { EditFacet } from "./data-card-types";
-import { DeleteAttrButton, DuplicateCardButton,
+import { DataCardMergeInButton, DeleteAttrButton, DuplicateCardButton,
   IDataCardToolbarButtonContext,
-  LinkTileButton, MergeInButton } from "./components/data-card-toolbar-buttons";
+  LinkTileButton } from "./components/data-card-toolbar-buttons";
 import { useSettingFromStores } from "../../hooks/use-stores";
 import { DataSetViewButton } from "../../components/shared/data-set-view-button";
 
@@ -82,7 +82,7 @@ export const DataCardToolbar: React.FC<IProps> = observer(function DataCardToolb
         case "link-tile":
           return <LinkTileButton key={toolName} context={context} isDisabled={cardActionsDisabled} />;
         case "merge-in":
-          return <MergeInButton key={toolName} context={context} isDisabled={cardActionsDisabled} />;
+          return <DataCardMergeInButton key={toolName} context={context} isDisabled={cardActionsDisabled} />;
         case "image-upload":
           return <ImageUploadButton key={toolName} onUploadImageFile={file => uploadImage(file)}
             extraClasses={valueActionsDisabled ? "disabled" : ""}/>;
