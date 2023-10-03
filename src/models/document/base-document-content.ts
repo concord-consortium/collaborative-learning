@@ -269,11 +269,15 @@ export const BaseDocumentContentModel = types
           const tileType = self.getTileType(tileEntry.tileId);
           const titleBase = getTileContentInfo(tileType)?.titleBase || tileType;
           if (tileType) {
+            const tile = self.getTile(tileEntry.tileId);
+            const typedTileLinkMetadata: ITypedTileLinkMetadata = {
+              id: tileEntry.tileId, type: tileType, title: tile?.title, titleBase
+            };
             if (getTileContentInfo(tileType)?.isDataProvider) {
-              providers.push({ id: tileEntry.tileId, type: tileType, titleBase });
+              providers.push(typedTileLinkMetadata);
             }
             if (getTileContentInfo(tileType)?.isDataConsumer) {
-              consumers.push({ id: tileEntry.tileId, type: tileType, titleBase });
+              consumers.push(typedTileLinkMetadata);
             }
           }
         });
