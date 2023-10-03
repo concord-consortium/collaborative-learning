@@ -73,7 +73,6 @@ export const NumericAxisModel = AxisModel
   })
   .views(self => ({
     get domain() {
-      console.log("| axis-model domain requested!");
       // TODO: figure out why this is sometimes called on defunct objects during linking, etc.
       if (isAlive(self)) return [self.min, self.max] as const;
       console.warn("NumericAxisModel.domain", "attempt to access defunct axis model domain");

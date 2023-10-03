@@ -52,16 +52,13 @@ const _AxisOrLegendAttributeMenu = ({ place, target, portal, onOpenClose,
     position: "absolute", ...useOverlayBounds({target, portal})
   };
   const buttonStyle: CSSProperties = {
-    position: "absolute", inset: 0, padding: 0, border: "3px dotted pink", color: "transparent"
+    position: "absolute", inset: 0, padding: 0, color: "transparent"
   };
 
   const draggableOptions: IUseDraggableAttribute = {
     prefix: instanceId, dataSet: data, attributeId: attrId
   };
   const { attributes, listeners, setNodeRef: setDragNodeRef } = useDraggableAttribute(draggableOptions);
-
-  // So this is working, the issue is getting it to load right away
-  // on the other hand the multi-legend is a world of pain
 
   useOutsidePointerDown({ref: menuRef, handler: () => onCloseRef.current?.()});
 
