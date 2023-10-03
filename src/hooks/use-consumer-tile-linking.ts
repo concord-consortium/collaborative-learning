@@ -18,7 +18,7 @@ interface IProps {
   readOnly?: boolean;
 
   // These callbacks are used by components to override the default link
-  // and unlink behavior. If they are set, the caller is
+  // and unlink behavior. If they are set, the caller
   // is responsible for actually linking the tile.
   onLinkTile?: (tileInfo: ITileLinkMetadata) => void;
   onUnlinkTile?: (tileInfo: ITileLinkMetadata) => void;

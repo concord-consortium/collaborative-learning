@@ -22,7 +22,9 @@ This is really simple to use. The calling code has full access to all of the pro
 ### Downsides
 This can make the code harder to test. A MST tree has to be created to test the model that is using it. If types are used to find the parent, a tree with those types has to be made, which can require lots of extra intermediate nodes.
 
-The approach of `getDocumentContentFromNode` means we can't use type "inheritance" to provide stripped down models which provide the necessary features. It would be possible to provide a mock model which has the name of DocumentContent to work around this, but that seems fragile.
+The approach of `getDocumentContentFromNode` means we can't use type "inheritance" to provide stripped down models which provide the necessary features. It would be possible to provide a mock model which has the name of `"DocumentContent"`` to work around this, but that seems fragile.
+
+There is also issue of children having explicit knowledge of their parents which can cause import cycles. In most cases CLUE doesn't have this import cycle because the document doesn't have explicit knowledge of its tiles. The tiles register themselves with the system.
 
 ## MST Environment
 Models have access to the MST environment of their root node. In CLUE this environment includes:

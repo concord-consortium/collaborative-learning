@@ -1,7 +1,6 @@
 import { useCallback } from "react";
 
-import { ITileLinkMetadata
-} from "../models/tiles/tile-link-types";
+import { ITileLinkMetadata } from "../models/tiles/tile-link-types";
 import { ITileModel } from "../models/tiles/tile-model";
 import { useLinkProviderTileDialog } from "./use-link-provider-tile-dialog";
 import { getTileContentById } from "../utilities/mst-utils";

@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from "react";
+import React, { useContext } from "react";
 import { Tooltip, TooltipProps } from "react-tippy";
 import classNames from "classnames";
 
@@ -9,15 +9,10 @@ import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
 import { useConsumerTileLinking } from "../../../hooks/use-consumer-tile-linking";
 import { getTileDataSet } from "../../../models/shared/shared-data-utils";
 import { TileModelContext } from "../tile-api";
+import { TableToolbarContext } from "./table-toolbar-context";
 
 import "./table-toolbar.scss";
 
-export interface IToolbarContext {
-  showExpressionsDialog: () => void;
-  deleteSelected: () => void;
-}
-
-export const ToolbarContext = createContext<IToolbarContext | null>(null);
 interface ITableButtonProps {
   className?: string;
   icon: any;
@@ -37,7 +32,7 @@ const TableButton = ({ className, icon, onClick, tooltipOptions}: ITableButtonPr
 };
 
 export const DeleteSelectedButton = () => {
-  const toolbarContext = useContext(ToolbarContext);
+  const toolbarContext = useContext(TableToolbarContext);
 
   return (
     <TableButton
@@ -50,7 +45,7 @@ export const DeleteSelectedButton = () => {
 };
 
 export const SetExpressionButton = () => {
-  const toolbarContext = useContext(ToolbarContext);
+  const toolbarContext = useContext(TableToolbarContext);
 
   return (
     <TableButton

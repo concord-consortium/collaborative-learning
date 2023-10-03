@@ -29,7 +29,7 @@ import { lightenColor } from "../../../utilities/color-utils";
 import { verifyAlive } from "../../../utilities/mst-utils";
 import { gImageMap } from "../../../models/image-map";
 import { getColorMapEntry } from "../../../models/shared/shared-data-set-colors";
-import { ToolbarContext } from "./table-toolbar-buttons";
+import { TableToolbarContext } from "./table-toolbar-context";
 
 import "./table-tile.scss";
 
@@ -222,14 +222,14 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   const toolbarProps = useToolbarTileApi({ id: model.id, enabled: !readOnly, onRegisterTileApi, onUnregisterTileApi });
   return (
     <div className="table-tool">
-      <ToolbarContext.Provider value={toolbarContext} >
+      <TableToolbarContext.Provider value={toolbarContext} >
         <TableToolbar
           documentContent={documentContent}
           tileElt={tileElt}
           {...toolbarProps}
           scale={scale}
         />
-      </ToolbarContext.Provider>
+      </TableToolbarContext.Provider>
       <div className="table-grid-container" ref={containerRef} onClick={handleBackgroundClick}>
         <EditableTableTitle
           model={model}
