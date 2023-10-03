@@ -56,7 +56,7 @@ import ErrorAlert from "../../utilities/error-alert";
 import { halfPi, normalizeAngle, Point } from "../../../utilities/math-utils";
 import SingleStringDialog from "../../utilities/single-string-dialog";
 import { getClipboardContent, pasteClipboardImage } from "../../../utilities/clipboard-utils";
-import { ToolTitleArea } from "../tile-title-area";
+import { TileTitleArea } from "../tile-title-area";
 
 import "./geometry-tile.sass";
 
@@ -594,10 +594,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   private renderTitleArea() {
     return (
-      <ToolTitleArea>
+      <TileTitleArea>
         {this.renderTitle()}
         {this.renderTileLinkButton()}
-      </ToolTitleArea>
+      </TileTitleArea>
     );
   }
 

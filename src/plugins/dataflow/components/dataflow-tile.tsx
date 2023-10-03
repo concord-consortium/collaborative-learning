@@ -12,10 +12,11 @@ import { EditableTileTitle } from "../../../components/tiles/editable-tile-title
 import { DataflowContentModelType } from "../model/dataflow-content";
 import { measureText } from "../../../components/tiles/hooks/use-measure-text";
 import { defaultTileTitleFont } from "../../../components/constants";
-import { ToolTitleArea } from "../../../components/tiles/tile-title-area";
+import { TileTitleArea } from "../../../components/tiles/tile-title-area";
 import { DataflowLinkTableButton } from "./ui/dataflow-program-link-table-button";
 import { ProgramMode, UpdateMode } from "./types/dataflow-tile-types";
 import { ITileLinkMetadata } from "../../../models/tiles/tile-link-types";
+import { getDocumentContentFromNode } from "../../../utilities/mst-utils";
 
 import "./dataflow-tile.scss";
 
@@ -58,10 +59,10 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
 
     return (
       <>
-        <ToolTitleArea>
+        <TileTitleArea>
           {this.renderTitle()}
           {this.renderTableLinkButton()}
-        </ToolTitleArea>
+        </TileTitleArea>
         <div className={classes}>
           <SizeMe monitorHeight={true}>
             {({ size }: SizeMeProps) => {
@@ -147,8 +148,10 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   }
 
   private renderTableLinkButton() {
-    const { model, documentId, onRequestTilesOfType, onRequestLinkableTiles } = this.props;
-    const isLinkButtonEnabled = onRequestLinkableTiles && onRequestLinkableTiles().consumers.length > 0;
+    const { model, documentId } = this.props;
+    const documentContent = getDocumentContentFromNode(model);
+    const linkableTiles = documentContent?.getLinkableTiles();
+    const isLinkButtonEnabled = linkableTiles && linkableTiles.consumers.length > 0;
     const actionHandlers = {
                              handleRequestTableLink: this.handleRequestTableLink,
                              handleRequestTableUnlink: this.handleRequestTableUnlink
@@ -161,8 +164,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
         //use in useTableLinking
         documentId={documentId}
         model={model}
-        onRequestTilesOfType={onRequestTilesOfType}
-        onRequestLinkableTiles={onRequestLinkableTiles}
         actionHandlers={actionHandlers}
       />
     );
