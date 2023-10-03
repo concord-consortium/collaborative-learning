@@ -12,7 +12,7 @@ interface IVariableIconProps {
 }
 function VariableIcon({ variable }: IVariableIconProps) {
   if (!variable) return null;
-  
+
   const icon = getIcon(variable.icon);
   const className = classNames("leading-box", { "variable-icon": !!icon });
   return (
@@ -38,15 +38,16 @@ export function SimulatorVariable({ variable }: ISimulatorVariableProps) {
   const scaleFactor = 100;
   const displayValue = value !== undefined ? Math.round(value * scaleFactor) / scaleFactor : "";
 
-  const variableDisplay = `${displayName}: ${displayValue}`;
-
   const className = inputVariable ? "input" : "output";
   const variableClassNames = variable.getAllOfType("className");
   const classes = classNames("simulator-variable", className, variableClassNames);
   return (
     <div className={classes}>
-      <VariableIcon variable={variable} />
-      <div>{variableDisplay}</div>
+      <div className="display-name">{displayName}</div>
+      <div className="value-row">
+        <VariableIcon variable={variable} />
+        <div className="display-value">{displayValue}</div>
+      </div>
     </div>
   );
 }

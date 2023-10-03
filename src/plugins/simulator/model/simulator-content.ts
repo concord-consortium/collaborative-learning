@@ -111,20 +111,22 @@ export const SimulatorContentModel = TileContentModel
     updateAfterSharedModelChanges() {
       // nothing to do here
     },
-    step() {
+    step(readOnly?: boolean) {
       withoutUndo();
 
       // Update all variables that have specified values
-      for (const [name, values] of Object.entries(self.simulationData.values)) {
-        const variable = self.getVariable(name);
-        variable?.setValue(values[self.frame % values.length]);
+      if (!readOnly) {
+        for (const [name, values] of Object.entries(self.simulationData.values)) {
+          const variable = self.getVariable(name);
+          variable?.setValue(values[self.frame % values.length]);
+        }
       }
 
       // Call simulation's step function
-      self.simulationData.step?.({ frame: self.frame, variables: self.variables ?? [] });
+      self.simulationData.step?.({ frame: self.frame, readOnly, variables: self.variables ?? [] });
 
       // Increment the frame
-      self.frame++;
+      if (!readOnly) self.frame++;
     }
   }));
 

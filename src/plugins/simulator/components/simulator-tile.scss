@@ -7,24 +7,25 @@
   overflow: auto;
 
   .simulator-content {
+    display: flex;
     height: calc(100% - 45px); // The 45 pixels is to accommodate the tile title
+    position: relative;
+    margin-top: 45px;
     width: 100%;
 
     .simulator-variables {
       display: flex;
+      flex-direction: column;
       font-family: 'Ubuntu', sans-serif;
-      height: 20px;
-      justify-content: space-between;
-      padding: 45px 20px 10px;
-      width: 100%;
+      width: 175px;
     }
 
     .simulator-component-container {
-      align-content: center;
+      align-items: center;
       display: flex;
-      height: calc(100% - 75px);
+      height: 100%;
       justify-content: center;
-      width: 100%;
+      width: calc(100% - 175px);
     }
   }
 }

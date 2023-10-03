@@ -2,8 +2,9 @@ import { FunctionComponent } from "react";
 import { VariableSnapshot, VariableType } from "@concord-consortium/diagram-view";
 
 export interface ISimulationProps {
-  frame: number,
-  variables: VariableType[]
+  frame: number;
+  readOnly?: boolean;
+  variables: VariableType[];
 }
 
 export interface ISimulation {
