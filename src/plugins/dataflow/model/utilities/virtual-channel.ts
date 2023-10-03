@@ -1,6 +1,8 @@
 import { NodeChannelInfo } from "./channel";
-import { demoStreams } from "../../../shared-assets/data/dataflow/demo-data";
+// import { demoStreams } from "../../../shared-assets/data/dataflow/demo-data";
 
+// Virtual channels have just been commented out rather than fully removed in case we want to add them back
+// in at least some contexts in the future.
 // const virtualTempChannel: NodeChannelInfo = {
 //   hubId: "00000-VIRTUAL-HUB", hubName: "Virtual Sensor", name: "Temperature", channelId: "00001-VIR",
 //   missing: false, type: "temperature", units: "°C", value: 0, virtual: true, timeFactor: 1000,
