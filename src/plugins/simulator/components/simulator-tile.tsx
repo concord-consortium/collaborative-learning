@@ -23,8 +23,8 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
     const id = setInterval(() => {
       if (canRunIndependently) {
         content?.step();
-        setSteps(v => v + 1);
       }
+      setSteps(v => v + 1);
     }, content.simulationData.delay);
     return () => clearInterval(id);
   }, [canRunIndependently, content]);
