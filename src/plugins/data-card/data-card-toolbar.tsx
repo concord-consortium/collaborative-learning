@@ -11,9 +11,9 @@ import { DataCardContentModelType } from "./data-card-content";
 import { ITileModel } from "../../models/tiles/tile-model";
 import { ImageUploadButton } from "../../components/tiles/image/image-toolbar";
 import { EditFacet } from "./data-card-types";
-import { DataCardMergeInButton, DeleteAttrButton, DuplicateCardButton,
-  IDataCardToolbarButtonContext,
-  LinkTileButton } from "./components/data-card-toolbar-buttons";
+import {
+  DataCardLinkTileButton, DataCardMergeInButton, DeleteAttrButton, DuplicateCardButton,
+} from "./components/data-card-toolbar-buttons";
 import { useSettingFromStores } from "../../hooks/use-stores";
 import { DataSetViewButton } from "../../components/shared/data-set-view-button";
 
@@ -68,26 +68,21 @@ export const DataCardToolbar: React.FC<IProps> = observer(function DataCardToolb
   );
 
   const valueActionsDisabled = !enabled || !isEditingValue;
-  const cardActionsDisabled = content.attributes.length < 1;
-
-  const context: IDataCardToolbarButtonContext = {
-    currEditAttrId
-  };
 
   const getToolbarButton = (toolName: IButtonSetting) => {
     if (typeof toolName === "string") {
       switch (toolName) {
         case "duplicate":
-          return <DuplicateCardButton key={toolName} context={context} isDisabled={cardActionsDisabled} />;
+          return <DuplicateCardButton key={toolName} />;
         case "link-tile":
-          return <LinkTileButton key={toolName} context={context} isDisabled={cardActionsDisabled} />;
+          return <DataCardLinkTileButton key={toolName} />;
         case "merge-in":
-          return <DataCardMergeInButton key={toolName} context={context} isDisabled={cardActionsDisabled} />;
+          return <DataCardMergeInButton key={toolName} />;
         case "image-upload":
           return <ImageUploadButton key={toolName} onUploadImageFile={file => uploadImage(file)}
             extraClasses={valueActionsDisabled ? "disabled" : ""}/>;
         case "delete-attribute":
-          return <DeleteAttrButton key={toolName} context={context} isDisabled={valueActionsDisabled} />;
+          return <DeleteAttrButton key={toolName} />;
       }
     } else {
       // If `toolName` is an array, the first item is the tool name.

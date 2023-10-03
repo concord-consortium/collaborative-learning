@@ -18,6 +18,7 @@ import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-
 import { useDataCardTileHeight } from "./use-data-card-tile-height";
 
 import "./data-card-tile.scss";
+import { DataCardToolbarContext } from "./data-card-toolbar-context";
 
 export const DataCardToolComponent: React.FC<ITileProps> = observer(function DataCardToolComponent(props) {
   const { documentId, model, readOnly, documentContent, tileElt, onSetCanAcceptDrop, onRegisterTileApi,
@@ -215,15 +216,17 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
 
   return (
     <div className={toolClasses}>
-      <DataCardToolbar
-        model={model}
-        documentContent={documentContent}
-        tileElt={tileElt}
-        currEditAttrId={currEditAttrId}
-        currEditFacet={currEditFacet}
-        setImageUrlToAdd={setImageUrlToAdd} {...toolbarProps}
-        scale={scale}
-      />
+      <DataCardToolbarContext.Provider value={{currEditAttrId, currEditFacet}}>
+        <DataCardToolbar
+          model={model}
+          documentContent={documentContent}
+          tileElt={tileElt}
+          currEditAttrId={currEditAttrId}
+          currEditFacet={currEditFacet}
+          setImageUrlToAdd={setImageUrlToAdd} {...toolbarProps}
+          scale={scale}
+        />
+      </DataCardToolbarContext.Provider>
       <div
         className="data-card-content"
         onClick={handleBackgroundClick}

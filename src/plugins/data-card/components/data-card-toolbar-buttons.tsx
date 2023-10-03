@@ -12,15 +12,7 @@ import { MergeInButton } from "../../../components/shared/merge-in-button";
 import { useConsumerTileLinking } from "../../../hooks/use-consumer-tile-linking";
 import { getTileDataSet } from "../../../models/shared/shared-data-utils";
 import { kDataCardTileType } from "../data-card-types";
-
-export interface IDataCardToolbarButtonContext {
-  currEditAttrId: string;
-}
-
-interface IDataCardToolbarButtonProps {
-  isDisabled?: boolean;
-  context: IDataCardToolbarButtonContext;
-}
+import { DataCardToolbarContext } from "../data-card-toolbar-context";
 
 function useModelContent() {
   const model = useContext(TileModelContext);
@@ -29,8 +21,17 @@ function useModelContent() {
   }
 }
 
-export const DuplicateCardButton = ({ isDisabled }: IDataCardToolbarButtonProps) => {
+function useCardAction() {
   const content = useModelContent();
+  const numAttributes = content?.attributes.length || 0;
+  const isDisabled = numAttributes < 1;
+
+  return {content, isDisabled};
+}
+
+export const DuplicateCardButton = () => {
+  const {content, isDisabled} = useCardAction();
+
   return (
     <TileToolbarButton
       className="duplicate-data-card-button"
@@ -43,12 +44,14 @@ export const DuplicateCardButton = ({ isDisabled }: IDataCardToolbarButtonProps)
   );
 };
 
-export const DeleteAttrButton = ({ context, isDisabled }: IDataCardToolbarButtonProps) => {
+export const DeleteAttrButton = () => {
   const content = useModelContent();
+  const context = useContext(DataCardToolbarContext);
+  const isEditingValue = !!context?.currEditAttrId && context?.currEditFacet === "value";
 
   const handleClick = () => {
     const thisCaseId = content?.dataSet.caseIDFromIndex(content.caseIndex);
-    if (thisCaseId){
+    if (thisCaseId && context){
       content?.setAttValue(thisCaseId, context.currEditAttrId, "");
     }
   };
@@ -58,20 +61,24 @@ export const DeleteAttrButton = ({ context, isDisabled }: IDataCardToolbarButton
       className="delete-value-button"
       onClick={handleClick}
       title="Delete value"
-      isDisabled={isDisabled}
+      isDisabled={!isEditingValue}
     >
       <DeleteSelectionIcon />
     </TileToolbarButton>
   );
 };
 
+
+interface ILinkTileButtonProps {
+  isDisabled?: boolean
+}
 // TODO: a very similar component is used in the table toolbar
 // The differences are:
 // - the use of the TileToolbarButton
 // - the isDisabled property
 // - tooltip text
-export const LinkTileButton = observer(function LinkTileButton(
-    { isDisabled }: IDataCardToolbarButtonProps) {
+const LinkTileButton = observer(function LinkTileButton(
+    { isDisabled }: ILinkTileButtonProps) {
 
   // Assume we always have a model
   const model = useContext(TileModelContext)!;
@@ -100,6 +107,14 @@ export const LinkTileButton = observer(function LinkTileButton(
   );
 });
 
-export function DataCardMergeInButton ({ isDisabled }: IDataCardToolbarButtonProps) {
+export function DataCardLinkTileButton () {
+  const { isDisabled } = useCardAction();
+
+  return <LinkTileButton isDisabled={isDisabled} />;
+}
+
+export function DataCardMergeInButton () {
+  const { isDisabled } = useCardAction();
+
   return <MergeInButton isDisabled={isDisabled} />;
 }
