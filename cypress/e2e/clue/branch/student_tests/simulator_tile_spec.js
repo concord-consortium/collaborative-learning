@@ -32,7 +32,7 @@ context('Simulator Tile with Brainwaves Gripper Simulation', function () {
 
       cy.log("Can switch to temperature variant.");
       cy.get(".temperature-part").should("not.exist");
-      simulatorTile.clickModeToggle();
+      simulatorTile.getSelectionButtons().should("have.length", 2).eq(1).click();
       cy.get(".gripper-image").should("not.exist");
       cy.get(".temperature-part").should("exist");
     });
@@ -145,7 +145,7 @@ context('Simulator Tile with Terrarium Simulation', function() {
     dataflowTile.getDropdown(sensor, "sensor-type").click();
     dataflowTile.getSensorDropdownOptions(sensor).eq(0).find(".label").click(); // Temperature
     dataflowTile.getDropdown(sensor, "sensor-select").click();
-    dataflowTile.getSensorDropdownOptions(sensor).should("have.length", 5);
+    dataflowTile.getSensorDropdownOptions(sensor).should("have.length", 6);
     dataflowTile.getDropdown(sensor, "sensor-type").click();
     dataflowTile.getSensorDropdownOptions(sensor).eq(1).find(".label").click(); // Humidity
     dataflowTile.getDropdown(sensor, "sensor-select").click();

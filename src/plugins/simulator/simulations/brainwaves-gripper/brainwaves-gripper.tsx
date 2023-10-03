@@ -6,12 +6,14 @@ import { demoStreams } from "../../../shared-assets/data/dataflow/demo-data";
 import {
   iconUrl, kEMGKey, kGripperKey, kPressureKey, kTemperatureKey
 } from "../../../shared-assets/icons/icon-utilities";
+import { SelectionButton } from "../../components/ui/selection-button";
 import { ISimulation, ISimulationProps } from "../simulation-types";
 import { findVariable, getFrame } from "../simulation-utilities";
 import {
   arduinoFrames, armFrames, gripperFrames, panFrames, steamFrames, temperatureGripperFrames
 } from "./brainwaves-gripper-assets";
 
+// We shouldn't need to import the rc-slider css, but for some reason we do.
 import "rc-slider/assets/index.css";
 import "./brainwaves-gripper.scss";
 
@@ -107,15 +109,21 @@ function BrainwavesGripperComponent({ frame, variables }: ISimulationProps) {
           step={40}
           variable={emgVariable}
         />
-        <div className="toggle-container">
-          <div>Pressure</div>
-          <ToggleControl
-            className="mode-toggle"
-            initialValue={!!modeVariable?.currentValue}
-            onChange={(value: boolean) =>
-              modeVariable?.setValue(value ? kSimulationModeTemperature : kSimulationModePressure)}
-          />
-          <div>Temperature</div>
+        <div className="mode-selection-container">
+          <SelectionButton
+            onClick={() => modeVariable?.setValue(kSimulationModePressure)}
+            position="left"
+            selected={modeVariable?.currentValue === kSimulationModePressure}
+          >
+            Pressure
+          </SelectionButton>
+          <SelectionButton
+            onClick={() => modeVariable?.setValue(kSimulationModeTemperature)}
+            position="right"
+            selected={modeVariable?.currentValue === kSimulationModeTemperature}
+          >
+            Temperature
+          </SelectionButton>
         </div>
       </div>
     </div>
