@@ -4,7 +4,6 @@ import LinkTableIcon from "../../assets/icons/link-table-icon.svg"; //we may nee
 import { useFeatureFlag } from "../../../../hooks/use-stores";
 import { useConsumerTileLinking } from "../../../../hooks/use-consumer-tile-linking";
 import { ITileModel } from "../../../../models/tiles/tile-model";
-import { ILinkableTiles, ITileLinkMetadata } from "../../../../models/tiles/tile-link-types";
 import { IDataFlowActionHandlers } from "../dataflow-shared";
 
 import "./dataflow-program-link-table-button.scss";
@@ -16,21 +15,16 @@ interface IProps {
   isLinkButtonEnabled?: boolean;
   documentId?: string;
   model: ITileModel;
-  onRequestTilesOfType: (tileType: string) => ITileLinkMetadata[];
-  onRequestLinkableTiles?: () => ILinkableTiles;
   actionHandlers: IDataFlowActionHandlers;
 }
 
 export const DataflowLinkTableButton: React.FC<IProps> = (props: IProps) => {
-  const { isLinkButtonEnabled,
-          documentId,  model, onRequestTilesOfType, onRequestLinkableTiles, actionHandlers } = props;
+  const { isLinkButtonEnabled, documentId,  model, actionHandlers } = props;
   const classes = classNames("link-table-button", { disabled: !isLinkButtonEnabled });
 
   const { showLinkTileDialog } = useConsumerTileLinking({
                                     hasLinkableRows: true,
                                     model,
-                                    onRequestTilesOfType,
-                                    onRequestLinkableTiles,
                                     onLinkTile: actionHandlers.handleRequestTableLink,
                                     onUnlinkTile: actionHandlers.handleRequestTableUnlink
                                   });

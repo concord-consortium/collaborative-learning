@@ -1,32 +1,33 @@
 import { useCallback } from "react";
 
-import { getColorMapEntry } from "../models/shared/shared-data-set-colors";
-import {
-  ILinkableTiles, ITileLinkMetadata, ITypedTileLinkMetadata, kNoLinkableTiles
-} from "../models/tiles/tile-link-types";
+import { ITileLinkMetadata} from "../models/tiles/tile-link-types";
 import { ITileModel } from "../models/tiles/tile-model";
 import { useLinkConsumerTileDialog } from "./use-link-consumer-tile-dialog";
 import { getTileContentById } from "../utilities/mst-utils";
 import { SharedDataSet } from "../models/shared/shared-data-set";
 import { getTileContentInfo } from "../models/tiles/tile-content-info";
+import { useLinkableTiles } from "./use-linkable-tiles";
 
 interface IProps {
+  // TODO: This should be replaced with a generic disabled
+  // property. If it is disabled that would override the linkableTiles.length check
+  // Or we could just remove it and let the caller do this overriding itself
+  // In that case it should return hasLinkableTiles instead of isLinkEnabled
   hasLinkableRows: boolean;
   model: ITileModel;
   readOnly?: boolean;
-  onRequestTilesOfType: (tileType: string) => ITileLinkMetadata[];
-  onRequestLinkableTiles?: () => ILinkableTiles;
+
+  // These callbacks are used by components to override the default link
+  // and unlink behavior. If they are set, the caller
+  // is responsible for actually linking the tile.
   onLinkTile?: (tileInfo: ITileLinkMetadata) => void;
   onUnlinkTile?: (tileInfo: ITileLinkMetadata) => void;
 }
 export const useConsumerTileLinking = ({
-  model, hasLinkableRows, readOnly, onRequestTilesOfType, onRequestLinkableTiles, onLinkTile, onUnlinkTile
+  model, hasLinkableRows, readOnly, onLinkTile, onUnlinkTile
 }: IProps) => {
-  const modelId = model.id;
-  const { consumers: linkableTiles } = useLinkableTiles({ model, onRequestTilesOfType, onRequestLinkableTiles });
+  const { consumers: linkableTiles } = useLinkableTiles({ model });
   const isLinkEnabled = hasLinkableRows && (linkableTiles.length > 0);
-  const colorMapEntry = getColorMapEntry(modelId);
-  const linkColors = colorMapEntry?.colorSet;
 
   // sort linkableTiles so all Graph tiles are first, then all Geometry tiles
   linkableTiles.sort((a, b) => {
@@ -84,30 +85,7 @@ export const useConsumerTileLinking = ({
     linkableTiles, model, onLinkTile: onLinkTileHandler, onUnlinkTile: onUnlinkTileHandler
   });
 
-  return { isLinkEnabled, linkColors, showLinkTileDialog };
+  return { isLinkEnabled, showLinkTileDialog };
 };
 
-interface IUseLinkableTilesProps {
-  model: ITileModel;
-  onRequestTilesOfType: (tileType: string) => ITileLinkMetadata[];
-  onRequestLinkableTiles?: () => ILinkableTiles;
-}
-const useLinkableTiles = ({ model, onRequestTilesOfType, onRequestLinkableTiles }: IUseLinkableTilesProps) => {
-  const { providers, consumers } = onRequestLinkableTiles?.() || kNoLinkableTiles;
 
-  // add default title if there isn't a title
-  const countsOfType = {} as Record<string, number>;
-  function addDefaultTitle({ id, type, title, titleBase }: ITypedTileLinkMetadata) {
-    if (!countsOfType[type]) {
-      countsOfType[type] = 1;
-    } else {
-      countsOfType[type]++;
-    }
-    return { id, type, title: title || `${titleBase || type} ${countsOfType[type]}`};
-  }
-
-  return {
-    providers: providers.map(addDefaultTitle),
-    consumers: consumers.map(addDefaultTitle)
-  };
-};

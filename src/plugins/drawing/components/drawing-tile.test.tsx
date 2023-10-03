@@ -101,9 +101,6 @@ describe("DrawingToolComponent", () => {
     onSetCanAcceptDrop: (tileId?: string): void => {
       throw new Error("Function not implemented.");
     },
-    onRequestTilesOfType: (tileType: string): { id: string; title?: string | undefined; }[] => {
-      throw new Error("Function not implemented.");
-    },
     onRequestUniqueTitle: (tileId: string): string | undefined => {
       throw new Error("Function not implemented.");
     },
