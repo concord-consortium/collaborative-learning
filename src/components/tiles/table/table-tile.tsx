@@ -51,12 +51,6 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     dataSet, columnChanges, triggerColumnChange, rowChanges, triggerRowChange, ...gridModelProps
   } = useModelDataSet(model, content);
 
-
-  console.log("📁 table-tile.tsx --------------------");
-  console.log("\tdataSet attributeIdMap:", dataSet.attrIDMap);
-  console.log("\tdataSet caseIdMap:", dataSet.caseIDMap);
-
-
   // Set up user specified columns and function to measure a column
   const { measureColumnWidth, resizeColumn, resizeColumnWidth } = useMeasureColumnWidth({ content });
 

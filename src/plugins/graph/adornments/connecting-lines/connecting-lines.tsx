@@ -5,7 +5,6 @@ import { DotsElt } from "../../d3-types";
 import { IDotsRef } from "../../graph-types";
 import { useDataConfigurationContext } from "../../hooks/use-data-configuration-context";
 import { usePointLocations } from "../../hooks/use-point-locations";
-
 import { useGraphModelContext } from "../../models/graph-model";
 import { lightenColor } from "../../../../utilities/color-utils";
 
@@ -32,16 +31,11 @@ function drawPath(el: DotsElt, points: Iterable<[number, number]>, color: string
 }
 
 export const ConnectingLines = observer(function CoingLines({dotsRef}: IProps) {
-  console.log("📁connecting-lines.tsx-------------------------");
   const dataConfiguration = useDataConfigurationContext();
-  console.log("\tdataConfiguration: ,", dataConfiguration);
   const graphModel = useGraphModelContext();
   const { _pointColors } = useGraphModelContext();
   const plotsCt = dataConfiguration?.numberOfPlots || 1;
-  // const color = _pointColors[plotsCt - 1];
-  console.log("\tplotsCt:", plotsCt);
   const color = graphModel.pointColorAtIndex(plotsCt);
-  console.log("\tnew color:", color);
 
   const adjustedColor = lightenColor(color, 0.5);
   const foundLinePoints = usePointLocations();
