@@ -42,7 +42,12 @@ export const getScreenY = ({ caseId, dataset, layout, dataConfig, plotNum = 0 }:
   return yScale(yValue) / numExtraSecondaryBands + rightScreenCoord;
 };
 
-export const usePointLocations = () => {
+
+
+
+
+
+export const usePointLocations = (rightSide: boolean) => {
   const dataConfig = useDataConfigurationContext();
   const layout = useGraphLayoutContext();
   const dataset = useDataSetContext();
@@ -51,12 +56,28 @@ export const usePointLocations = () => {
   const xSeries: number[] = [];
   const ySeries: number[] = [];
 
+
+
   caseIds?.forEach((caseId) => {
+    // console.log("📁 use-point-locations.ts ------------------------");
     if (dataConfig && dataset && layout) {
       xSeries.push(getScreenX({caseId, dataset, layout, dataConfig}));
       ySeries.push(getScreenY({caseId, dataset, layout, dataConfig}));
     }
   });
+
+  if (rightSide){
+    // console.log("📁use-point-locations.ts-------------------------");
+    // console.log("\t🏭usePointLocations()");
+    // console.log("\t🥩el:", el);
+    // console.log("\t🔪dataSet:", dataset);
+
+    // console.log("\t🔪layout:", layout);
+    // console.log("\txSeries:", xSeries);
+    // console.log("\treturn xSeries.map((x, i) => [x, ySeries[i]]):", xSeries.map((x, i) => [x, ySeries[i]]));
+
+
+  }
 
   return xSeries.map((x, i) => [x, ySeries[i]]) as Iterable<[number, number]>;
 };

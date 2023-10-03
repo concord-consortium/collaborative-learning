@@ -16,9 +16,12 @@ interface IContentProps {
   setSelectValue: React.Dispatch<React.SetStateAction<string>>;
 }
 const Content: React.FC<IContentProps>
-              = ({ linkedTiles, selectValue, tileTitle, unlinkedTiles, setSelectValue })=> {
+              = (props)=> {
+  const { linkedTiles, selectValue, tileTitle, unlinkedTiles, setSelectValue } = props;
   const displayTileTitle = tileTitle || "this tile";
   const selectElt = useRef<HTMLSelectElement>(null);
+  // console.log("linkedTiles:", linkedTiles);
+  // console.log("selectValue:", selectValue);
 
     return (
       <>
@@ -60,6 +63,12 @@ interface IProps {
 export const useLinkConsumerTileDialog = ({ linkableTiles, model, onLinkTile, onUnlinkTile }: IProps) => {
   const tileTitle = model.title;
   const [selectValue, setSelectValue] = useState("");
+  if (selectValue){
+    // console.log("--------LINKED----------------");
+  } else{
+    // console.log("-------Unlinked----------------");
+
+  }
   const handleClick = () => {
     const tileInfo = linkableTiles.find(tile => tile.id === selectValue);
     if (tileInfo) {

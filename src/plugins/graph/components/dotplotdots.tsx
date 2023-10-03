@@ -32,6 +32,8 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
     didDrag = useRef(false),
     target = useRef<any>(),
     selectedDataObjects = useRef<Record<string, number>>({});
+  console.log("📁dotplotdots.tsx-------------------------");
+
 
   const onDragStart = useCallback((event: any) => {
       target.current = select(event.target as SVGSVGElement);

@@ -19,8 +19,10 @@ import {
 import {useGraphModelContext} from "../models/graph-model";
 
 export const ScatterDots = function ScatterDots(props: PlotProps) {
-  const {dotsRef, enableAnimation} = props,
-    graphModel = useGraphModelContext(),
+  const {dotsRef, enableAnimation} = props;
+  const rightSide = dotsRef.current?.classList.contains("graph-2");
+
+    const graphModel = useGraphModelContext(),
     // instanceId = useInstanceIdContext(),
     dataConfiguration = useDataConfigurationContext(),
     dataset = useDataSetContext(),
@@ -37,6 +39,12 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
     target = useRef<any>(),
     selectedDataObjects = useRef<Record<string, { x: number, y: number }>>({}),
     plotNumRef = useRef(0);
+  if(rightSide){
+    // console.log("📁scatterdots.tsx-------------------------");
+    // console.log("\t🏭ScatterDots()");
+
+  }
+
 
   secondaryAttrIDsRef.current = dataConfiguration?.yAttributeIDs || [];
   pointRadiusRef.current = graphModel.getPointRadius();
@@ -182,6 +190,8 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
       numberOfPlots = dataConfiguration?.numberOfPlots || 1,
       getLegendColor = legendAttrID ? dataConfiguration?.getLegendColorForCase : undefined;
 
+    // console.log("\t🔁 setPointCoordinates");
+    // console.log("\t with dataset:", dataset);
     setPointCoordinates({
       dataset, dotsRef, pointRadius: pointRadiusRef.current,
       selectedPointRadius: selectedPointRadiusRef.current,
@@ -219,6 +229,15 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
   const refreshPointPositions = useCallback((selectedOnly: boolean) => {
     refreshPointPositionsD3(selectedOnly);
   }, [refreshPointPositionsD3]);
+  if (rightSide){
+    // console.log("\taboutToCall usePlotResponders with ----");
+    // console.log("\t🥩 props dotRef:", dotsRef);
+    // console.log("\t🔪 refreshPointPositions:", refreshPointPositions);
+    // console.log("\t🔪 refreshPointSelection:", refreshPointSelection);
+    // console.log("\t🔪 enableAnimation:", enableAnimation);
+
+  }
+
 
   usePlotResponders({
     dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation

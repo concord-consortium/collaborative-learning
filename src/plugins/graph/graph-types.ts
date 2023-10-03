@@ -74,7 +74,7 @@ export interface counterProps {
 }
 
 export const
-  transitionDuration = 1000,
+  transitionDuration = 1500,
   pointRadiusMax = 10,
   pointRadiusMin = 3,
   pointRadiusLogBase = 2.0, // reduce point radius from max by log of (num. cases) base (LogBase).

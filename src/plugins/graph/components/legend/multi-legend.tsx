@@ -16,7 +16,20 @@ interface IMultiLegendProps {
 }
 
 export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProps) {
-  console.log("-----<MultiLegend>--------");
+
+  const rightSide = (props.graphElt?.getElementsByClassName("graph-2").length || 0) > 0;
+  // console.log("\tclassList:",  );
+
+  if (rightSide){
+    // console.log("📁multi-legend.tsx-------------------------");
+    // console.log("\t🏭<MultiLegend>");
+    // console.log("\t🥩props.graphElt:", props.graphElt);
+  }
+
+  // console.log("\t🥩props.graphElt:", props.graphElt?.get);
+
+
+
   const {onChangeAttribute, onRemoveAttribute, onTreatAttributeAs} = props;
   const layout = useGraphLayoutContext();
   const legendBounds = layout.computedBounds.legend;

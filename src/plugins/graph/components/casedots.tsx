@@ -29,6 +29,8 @@ export const CaseDots = function CaseDots(props: {
     [dragID, setDragID] = useState(''),
     currPos = useRef({x: 0, y: 0}),
     target = useRef<any>();
+  console.log("📁 casedots.tsx-------------------------");
+
 
   const onDragStart = useCallback((event: MouseEvent) => {
       enableAnimation.current = false; // We don't want to animate points until end of drag

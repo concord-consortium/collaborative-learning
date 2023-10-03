@@ -40,8 +40,13 @@ export interface IPlotResponderProps {
 }
 
 export const usePlotResponders = (props: IPlotResponderProps) => {
-  const {enableAnimation, refreshPointPositions, refreshPointSelection, dotsRef} = props,
-    graphModel = useGraphModelContext(),
+
+
+  const {enableAnimation, refreshPointPositions, refreshPointSelection, dotsRef} = props;
+  const rightSide = dotsRef.current?.classList.contains("graph-2");
+
+
+    const graphModel = useGraphModelContext(),
     layout = useGraphLayoutContext(),
     dataConfiguration = graphModel.config,
     dataset = dataConfiguration.dataset,
@@ -55,6 +60,15 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
   * have been synced with the data configuration's notion of which cases are plottable. Delaying the actual
   * plotting of points until the next event cycle ensures that the data configuration's filter process will
   * have had a chance to take place. */
+  if (rightSide){
+    // console.log("📁use-plot.ts-------------------------");
+    // console.log("\t🏭usePlotResponders");
+    // console.log("\t🥩refreshPointPositions:", refreshPointPositions);
+    // console.log("\t🥩refreshPointSelection:", refreshPointSelection);
+    // console.log("\t🥩 dotsRef:", dotsRef);
+    // console.log("\t🔪refreshPointPositionsRef:", refreshPointPositionsRef.current);
+  }
+
   const timer = useRef<any>();
   const callRefreshPointPositions = useCallback((selectedOnly: boolean) => {
     if (timer.current) {

@@ -16,10 +16,18 @@ interface IProps {
 }
 
 function drawPath(el: DotsElt, points: Iterable<[number, number]>, color: string) {
+  // console.log("\t🏭 drawPath");
+
+  // console.log("📁 connecting-lines.tsx ------------------------");
+  const rightSide = el?.classList.contains("graph-2");
   const curve = line().curve(curveLinear);
   const dotArea = select(el);
+
+
   const anyFoundPath = dotArea.selectAll("path");
+
   if (anyFoundPath) anyFoundPath.remove();
+
   const newPath = dotArea.append("path");
   newPath
     .attr('stroke', color)
@@ -29,22 +37,45 @@ function drawPath(el: DotsElt, points: Iterable<[number, number]>, color: string
   // bring path group to the top/front within the svg
   const parentSvg = newPath.node()?.parentNode;
   parentSvg?.insertBefore(newPath.node() as Node, parentSvg.firstChild);
+
+  if (rightSide){
+    // console.log("📁connecting-lines.tsx-------------------------");
+    // console.log("\t🏭drawPath");
+    // console.log("\t🥩el:", el); //SVGElement
+    // console.log("\t🥩points:", points);
+    // console.log("\t🥩color:", color);
+    // console.log("\t🔪dotArea:", dotArea); //D3 selection
+    // console.log("\tanyFoundPath:", anyFoundPath);
+  }
 }
 
 export const ConnectingLines = observer(function CoingLines({dotsRef}: IProps) {
-  console.log("📁connecting-lines.tsx-------------------------");
+  const rightSide = dotsRef.current?.classList.contains("graph-2") || false;
   const dataConfiguration = useDataConfigurationContext();
-  console.log("\tdataConfiguration: ,", dataConfiguration);
   const graphModel = useGraphModelContext();
   const { _pointColors } = useGraphModelContext();
   const plotsCt = dataConfiguration?.numberOfPlots || 1;
-  // const color = _pointColors[plotsCt - 1];
-  console.log("\tplotsCt:", plotsCt);
   const color = graphModel.pointColorAtIndex(plotsCt);
-  console.log("\tnew color:", color);
-
   const adjustedColor = lightenColor(color, 0.5);
-  const foundLinePoints = usePointLocations();
+  const foundLinePoints = usePointLocations(rightSide);
+
+  if(rightSide){
+    // console.log("📁connecting-lines.tsx-------------------------");
+    // console.log("\t🏭<ConnectingLines>");
+
+    // console.log("\t🥩props:dotsRef: ,", dotsRef);
+    // console.log("\t🔪dataConfiguration: ,", dataConfiguration);
+    // console.log("\t🔪foundLinePoints:", foundLinePoints);
+    // console.log("\t🔪adjustedColor:", adjustedColor);
+  }
+
   drawPath(dotsRef.current as DotsElt, foundLinePoints, adjustedColor);
+
+  //test Drawing another line//-----------added--------------------------------------
+  const testPoints = [[100, 100], [700, 150]] as Iterable<[number, number]>;
+  // drawPath(dotsRef.current as DotsElt, testPoints, "#000000");
+  //-----------added--------------------------------------
+
   return null;
 });
+

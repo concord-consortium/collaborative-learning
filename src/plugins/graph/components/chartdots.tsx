@@ -25,6 +25,10 @@ export const ChartDots = function ChartDots(props: PlotProps) {
     extraPrimaryAttrRole = primaryAttrRole === 'x' ? 'topSplit' : 'rightSplit',
     extraSecondaryAttrRole = primaryAttrRole === 'x' ? 'rightSplit' : 'topSplit';
 
+    console.log("📁chartdots.tsx-------------------------");
+
+
+
   /**
    * Compute the maximum number of points in any cell of the grid. The grid has four
    * dimensions: primary, secondary, extraPrimary, and extraSecondary.

@@ -52,9 +52,9 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   } = useModelDataSet(model, content);
 
 
-  console.log("📁 table-tile.tsx --------------------");
-  console.log("\tdataSet attributeIdMap:", dataSet.attrIDMap);
-  console.log("\tdataSet caseIdMap:", dataSet.caseIDMap);
+  // console.log("📁 table-tile.tsx --------------------");
+  // console.log("\tdataSet attributeIdMap:", dataSet.attrIDMap);
+  // console.log("\tdataSet caseIdMap:", dataSet.caseIDMap);
 
 
   // Set up user specified columns and function to measure a column

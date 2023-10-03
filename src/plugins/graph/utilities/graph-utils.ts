@@ -413,6 +413,7 @@ export interface ISetPointCoordinates {
 }
 
 export function setPointCoordinates(props: ISetPointCoordinates) {
+  console.log("\t🏭 setPointCoordinates");
 
   const lookupLegendColor = (aCaseData: CaseData) => {
       const id = aCaseData.caseID,
@@ -422,11 +423,15 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
         : isSelected ? defaultSelectedColor
           : aCaseData.plotNum && getPointColorAtIndex
             ? getPointColorAtIndex(aCaseData.plotNum) : pointColor;
-    },
+    };
 
-    setPoints = () => {
+    const setPoints = () => {
+      console.log("\t🏭 setPoints with dataset:", dataset);
+      console.log("\t🏭 setPoints with selection:", theSelection);
 
-      if (theSelection?.size()) {
+      if (theSelection?.size() && dataset) {
+        console.log("\tsetPoints > size > 0!");
+
         theSelection
           .transition()
           .duration(duration)
@@ -448,16 +453,49 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
       }
     };
 
+    const clearPoints = () => {
+      console.log("CLEARING POINTS!!!!!");
+      if (theSelection){
+        theSelection.remove();
+      }
+    };
+
   const
     {
       dataset, dotsRef, selectedOnly = false, pointRadius, selectedPointRadius,
       pointStrokeColor, pointColor, getPointColorAtIndex,
       getScreenX, getScreenY, getLegendColor, enableAnimation
-    } = props,
-    duration = enableAnimation.current ? transitionDuration : 0,
+    } = props;
 
-    theSelection = selectDots(dotsRef.current, selectedOnly);
-  setPoints();
+    const rightSide = dotsRef.current?.classList.contains("graph-2");
+
+
+
+    const duration = enableAnimation.current ? transitionDuration : 0;
+
+    if(rightSide){
+      // console.log("📁 graph-utils.tsx before assigning theSelection");
+
+      // console.log("\t🥩dotsRef.current:", dotsRef.current);
+      // console.log("\t🥩selectedOnly:", selectedOnly);
+      // console.log("\t🥩dataset:", dataset);
+      // console.log("\t🔪duration:", duration);
+
+
+    }
+    const theSelection = selectDots(dotsRef.current, selectedOnly); //original
+
+
+    // const theSelection = dataset && selectDots(dotsRef.current, selectedOnly); //modified
+
+
+
+  if (dataset){
+    setPoints();
+  }
+  else {
+    clearPoints();
+  }
 }
 
 

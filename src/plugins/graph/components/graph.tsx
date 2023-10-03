@@ -55,14 +55,14 @@ export const Graph = observer(function Graph({ graphController, graphRef, dotsRe
     plotAreaSVGRef = useRef<SVGSVGElement>(null),
     backgroundSvgRef = useRef<SVGGElement>(null);
 
-  console.log("📁 Graph.tsx (XY-PLOT)-------------------------");
-  console.log("\twith dataset:", dataset);
-  console.log("\tdataSet attributeIDMap:", dataset?.attrIDMap);
+  // console.log("📁graph.tsx (XY-PLOT)-------------------------");
+  // console.log("\twith dataset:", dataset);
+  // console.log("\tdataSet attributeIDMap:", dataset?.attrIDMap);
 
 
   useEffect(function setupPlotArea() {
-    console.log("📁graph.tsx >");
-    console.log("\tuseEffect setupPlotArea");
+    // console.log("📁graph.tsx (XY-PLOT)-------------------------");
+    // console.log("\tuseEffect setupPlotArea");
     if (xScale && xScale?.length > 0) {
       const plotBounds = layout.getComputedBounds('plot');
       select(plotAreaSVGRef.current)
@@ -95,8 +95,8 @@ export const Graph = observer(function Graph({ graphController, graphRef, dotsRe
 
   // respond to assignment of new attribute ID
   useEffect(function handleNewAttributeID() {
-    console.log("📁graph.tsx >");
-    console.log("useEffect handleNewAttributeId");
+    // console.log("📁graph.tsx >");
+    // console.log("useEffect handleNewAttributeId");
     const disposer = graphModel && onAnyAction(graphModel, action => {
       if (isSetAttributeIDAction(action)) {
         const [role, dataSetId, attrID] = action.args,
