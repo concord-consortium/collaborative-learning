@@ -9,12 +9,19 @@ import ViewBadgeIcon from "../../assets/icons/view/view-badge.svg";
 import "./data-set-view-button.scss";
 
 interface IProps {
-  newTileType: string;
+  args: string[];
 }
 
-export const DataSetViewButton: React.FC<IProps> = ({newTileType}) => {
+export const DataSetViewButton: React.FC<IProps> = ({args}) => {
   const addTilesContext = useContext(AddTilesContext);
   const tile = useContext(TileModelContext);
+
+  if (args.length !== 2 || args[0] !== "data-set-view") {
+    console.error("Unknown args", args);
+    return null;
+  }
+
+  const newTileType = args[1];
 
   // TODO: if the document or tile are undefined then disable the button
 
