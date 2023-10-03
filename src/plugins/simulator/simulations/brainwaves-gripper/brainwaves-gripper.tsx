@@ -1,7 +1,6 @@
 import { VariableSlider } from "@concord-consortium/diagram-view";
 import React from "react";
 
-import ToggleControl from "../../../../components/utilities/toggle-control";
 import { demoStreams } from "../../../shared-assets/data/dataflow/demo-data";
 import {
   iconUrl, kEMGKey, kGripperKey, kPressureKey, kTemperatureKey
