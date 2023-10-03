@@ -9,11 +9,11 @@
     position: absolute;
 
     &.humidifier {
-      top: -23px;
+      top: -103px;
     }
 
     &.plant {
-      top: 46px;
+      top: -36px;
       left: -38px;
     }
   }
@@ -24,10 +24,18 @@
     justify-content: center;
     left: 108px;
     position: absolute;
-    top: 125px;
+    top: 45px;
 
-    .display-message {
-      position: absolute;
+    display {
+      z-index: 1;
+    }
+
+    .display-message-container {
+      align-items: flex-end;
+      display: flex;
+      flex-direction: column;
+      width: 33px;
+      z-index: 2;
     }
   }
 }

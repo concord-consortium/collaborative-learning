@@ -37,12 +37,13 @@ function TerrariumComponent({ frame, variables }: ISimulationProps) {
 
   const temperatureVariable = findVariable(kTemperatureKey, variables);
   const temperatureValue = temperatureVariable?.currentValue ?? 0;
-  const temperatureReading = `${Math.round(temperatureValue)}°`;
+  const temperatureReading = `${Math.round(temperatureValue)}°F`;
 
   const humidityVariable = findVariable(kHumidityKey, variables);
   const humidityValue = humidityVariable?.currentValue ?? startHumidity;
   const humidityPercent = (humidityValue - minHumidity) / (maxHumidity - minHumidity);
   const jarFrame = getFrame(humidityPercent, jarFrames.length);
+  const humidityReading = `${Math.round(humidityValue)}%`;
 
   if (humidityValue < startHumidity) {
     plantFrameRef.current = Math.min(plantFrames.length - 1, plantFrameRef.current + 1);
@@ -71,7 +72,10 @@ function TerrariumComponent({ frame, variables }: ISimulationProps) {
     <div className="terrarium-component">
       <div className="display-container">
         <img className="animation-image display" src={display} />
-        <div className="display-message">{temperatureReading}</div>
+        <div className="display-message-container">
+          <div className="display-message">{temperatureReading}</div>
+          <div className="display-message">{humidityReading}</div>
+        </div>
       </div>
       <img className="animation-image jar" src={jarFrames[jarFrame]} />
       <Plant className="animation-image plant" />
