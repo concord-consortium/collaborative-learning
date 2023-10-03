@@ -1,4 +1,5 @@
 import { IAnyType, types, castToSnapshot } from "mobx-state-tree";
+import { Value } from "expr-eval";
 import { defaultTableContent, kTableTileType, TableContentModel, TableContentModelType,
   TableContentSnapshotType, TableMetadataModel } from "./table-content";
 import { TableContentTableImport } from "./table-import";
@@ -496,5 +497,79 @@ describe("TableContent", () => {
     expect(table.dataSet.getValue("row1", "y2Col")).toBeNaN();
     expect(table.dataSet.getValue("row2", "y2Col")).toBeNaN();
     expect(table.dataSet.getValue("row3", "y2Col")).toBeNaN();
+  });
+
+  it("can evaluate expressions", () => {
+    const table = TableContentModel.create();
+    const metadata = TableMetadataModel.create({ id: "table-1" });
+    table.doPostCreate!(metadata);
+    const expression = table.parseExpression("x+1");
+    expect(expression).toBeDefined();
+    const evaluate = (val: Value) => expression!.evaluate(val);
+
+    expect(evaluate({x:1})).toBe(2);
+    expect(evaluate({x:"1"})).toBe(2);
+    expect(evaluate({x:"a"})).toBe(NaN);
+    expect(evaluate({x:"1 a"})).toBe(NaN);
+    expect(evaluate({x:NaN})).toBe(NaN);
+
+    const expression3 = table.parseExpression('x + "more"');
+    expect(expression3).toBeDefined();
+    const evaluate3 = (val: Value) => expression3!.evaluate(val);
+    expect(evaluate3({x:1})).toBe(NaN);
+    expect(evaluate3({x:"1"})).toBe(NaN);
+    expect(evaluate3({x:"a"})).toBe(NaN);
+
+    const expression4 = table.parseExpression("x[0]");
+    expect(expression4).toBeDefined();
+    const evaluate4 = (val: Value) => expression4!.evaluate(val);
+    expect(evaluate4({x:1})).toBe(undefined);
+    expect(evaluate4({x:"1"})).toBe("1");
+    expect(evaluate4({x:"a"})).toBe("a");
+
+
+  });
+
+  it("various formulas handle various input types", () => {
+    const tableSnapshot: TableContentSnapshotType = {
+      type: "Table",
+    };
+    const dataSetSnapshot: SharedDataSetSnapshotType = {
+      type: "SharedDataSet",
+      dataSet: {
+        attributes: [
+          { name: "xCol", values: [1,2,"1/2","a"]},
+          { name: "yCol", values: [0,0,    0,  0],
+            formula: {display: "xCol*2", canonical: "(__x__ * 2)"}
+          },
+          { name: "zCol", values: [0,0,    0,  0],
+            formula: {display: "xCol", canonical: "__x__"}
+          }
+        ],
+        cases: [
+          {}, {}, {}, {}
+        ]
+      }
+    };
+    const table = TableContentModel.create(tableSnapshot);
+    const metadata = TableMetadataModel.create({ id: "test-metadata" });
+    table.doPostCreate!(metadata);
+    // The metadata has not expression info until the table has a dataset
+    expect(metadata.hasExpressions).toBe(false);
+
+    setupContainer(table, dataSetSnapshot);
+
+    expect(table.dataSet.cases.length).toBe(4);
+
+    // force an update of the values based on the expression
+    // this does not currently happen automatically on load
+    metadata.updateDatasetByExpressions(table.dataSet);
+
+    expect(getCaseNoId(table.dataSet, 0)).toEqual({ xCol: 1,     yCol: 2,   zCol: 1   });
+    expect(getCaseNoId(table.dataSet, 1)).toEqual({ xCol: 2,     yCol: 4,   zCol: 2   });
+    expect(getCaseNoId(table.dataSet, 2)).toEqual({ xCol: "1/2", yCol: 1,   zCol: 0.5 });
+    // Internally the formula engine can handle string inputs to formulas, however
+    // CLUE will return NaN for any non numeric input or non numeric output
+    expect(getCaseNoId(table.dataSet, 3)).toEqual({ xCol: "a",   yCol: NaN, zCol: NaN });
   });
 });
