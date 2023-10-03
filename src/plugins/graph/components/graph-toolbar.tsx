@@ -6,7 +6,6 @@ import {
   IFloatingToolbarProps, useFloatingToolbarLocation
   } from "../../../components/tiles/hooks/use-floating-toolbar-location";
 import { IGraphModel } from "../models/graph-model";
-import { ITileLinkMetadata } from "../../../models/tiles/tile-link-types";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import LinkTableIcon from "../../../clue/assets/icons/geometry/link-table-icon.svg";
 
@@ -18,12 +17,11 @@ interface IProps extends IFloatingToolbarProps {
   isLinkEnabled: boolean;
   model: ITileModel;
   onLinkTableButtonClick: () => void;
-  onRequestTilesOfType: (tileType: string) => ITileLinkMetadata[];
 }
 
 export const GraphToolbar: React.FC<IProps> = observer(({
   documentContent, documentId, isLinkEnabled, tileElt, content, model,
-  onIsEnabled, onLinkTableButtonClick, onRequestTilesOfType, ...others
+  onIsEnabled, onLinkTableButtonClick, ...others
 }) => {
   const enabled = onIsEnabled();
   const location = useFloatingToolbarLocation({
