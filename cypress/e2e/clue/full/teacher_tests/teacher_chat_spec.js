@@ -29,6 +29,10 @@ const clueTeacher2 = {
   username: "clueteachertest2",
   password: "password"
 };
+const teacher1DocComment = "This is a teacher1 document comment " + Math.random();
+const teacher1TileComment = "This is a teacher1 tile comment " + Math.random();
+const teacher2DocComment = "This is a teacher2 document comment " + Math.random();
+const teacher2TileComment = "This is a teacher2 tile comment " + Math.random();
 
 function beforeTest(portalUrl, clueTeacher, reportUrl) {
   cy.login(portalUrl, clueTeacher);
@@ -45,71 +49,71 @@ describe('Teachers can communicate back and forth in chat panel', () => {
     beforeTest(portalUrl, clueTeacher1, reportUrl1);
     cy.openTopTab("problems");
     cy.openProblemSection("Introduction");
-  
+
     cy.log("verify teacher1 can post document and tile comments");
     // Teacher 1 document comment
     chatPanel.verifyProblemCommentClass();
     cy.wait(1000);
-    chatPanel.addCommentAndVerify("This is a teacher1 document comment");
+    chatPanel.addCommentAndVerify(teacher1DocComment);
     // Teacher 1 tile comment
     cy.clickProblemResourceTile('introduction');
-    chatPanel.addCommentAndVerify("This is a teacher1 tile comment");
+    chatPanel.addCommentAndVerify(teacher1TileComment);
   });
   it("login teacher2 and setup clue chat", () => {
     beforeTest(portalUrl, clueTeacher2, reportUrl2);
     cy.openTopTab("problems");
     cy.openProblemSection("Introduction");
-  
+
     cy.log("verify teacher2 can view teacher1's comments and add more comments");
     // Teacher 2 document comment
     chatPanel.verifyProblemCommentClass();
-    chatPanel.verifyCommentThreadContains("This is a teacher1 document comment");
-    chatPanel.addCommentAndVerify("This is a teacher2 document comment");
+    chatPanel.verifyCommentThreadContains(teacher1DocComment);
+    chatPanel.addCommentAndVerify(teacher2DocComment);
     // Teacher 2 tile comment
     cy.clickProblemResourceTile('introduction');
-    chatPanel.verifyCommentThreadContains("This is a teacher1 tile comment");
-    chatPanel.addCommentAndVerify("This is a teacher2 tile comment");
+    chatPanel.verifyCommentThreadContains(teacher1TileComment);
+    chatPanel.addCommentAndVerify(teacher2TileComment);
   });
   it("verify reopening teacher1's clue chat in the same network", () => {
     beforeTest(portalUrl, clueTeacher1, reportUrl1);
     cy.openTopTab("problems");
     cy.openProblemSection("Introduction");
-  
+
     cy.log("verify teacher1 can view teacher2's comments");
     // Teacher 1 document comment
     chatPanel.verifyProblemCommentClass();
-    chatPanel.verifyCommentThreadContains("This is a teacher2 document comment");
+    chatPanel.verifyCommentThreadContains(teacher2DocComment);
     // Teacher 1 tile comment
     cy.clickProblemResourceTile('introduction');
-    chatPanel.verifyCommentThreadContains("This is a teacher2 tile comment");
+    chatPanel.verifyCommentThreadContains(teacher2TileComment);
   });
   it('verify teacher1 can only delete own comments', () => {
     beforeTest(portalUrl, clueTeacher1, reportUrl1);
     cy.openTopTab("problems");
     cy.openProblemSection("Introduction");
     cy.wait(2000);
-    cy.get(".user-name").contains("Clue Teacher2").siblings("[data-testid=delete-message-button]").should("not.exist");
-    cy.get(".user-name").contains("Clue Teacher1").siblings("[data-testid=delete-message-button]").click();
+    chatPanel.getDeleteMessageButtonForUser("Clue Teacher2").should("not.exist");
+    chatPanel.getDeleteMessageButton(teacher1DocComment).click();
     cy.get(".confirm-delete-alert button").contains("Delete").click();
-    chatPanel.getCommentFromThread().should("not.contain", "This is a teacher1 document comment");
+    chatPanel.getCommentFromThread().should("not.contain", teacher1DocComment);
     cy.clickProblemResourceTile('introduction');
-    cy.get(".user-name").contains("Clue Teacher2").siblings("[data-testid=delete-message-button]").should("not.exist");
-    cy.get(".user-name").contains("Clue Teacher1").siblings("[data-testid=delete-message-button]").click();
+    chatPanel.getDeleteMessageButtonForUser("Clue Teacher2").should("not.exist");
+    chatPanel.getDeleteMessageButton(teacher1TileComment).click();
     cy.get(".confirm-delete-alert button").contains("Delete").click();
-    chatPanel.getCommentFromThread().should("not.contain", "This is a teacher1 tile comment");
+    chatPanel.getCommentFromThread().should("not.contain", teacher1TileComment);
   });
   it('verify teacher2 does not see teacher1 deleted comments', () => {
     beforeTest(portalUrl, clueTeacher2, reportUrl2);
     cy.openTopTab("problems");
     cy.openProblemSection("Introduction");
-    chatPanel.getCommentFromThread().should("not.contain", "This is a teacher1 document comment");
-    cy.get(".user-name").contains("Clue Teacher2").siblings("[data-testid=delete-message-button]").click();
+    chatPanel.getCommentFromThread().should("not.contain", teacher1DocComment);
+    chatPanel.getDeleteMessageButton(teacher2DocComment).click();
     cy.get(".confirm-delete-alert button").contains("Delete").click();
-    chatPanel.getCommentFromThread().should("not.exist");
+    chatPanel.getCommentFromThread().should("not.contain", teacher2DocComment);
     cy.clickProblemResourceTile('introduction');
-    chatPanel.getCommentFromThread().should("not.contain", "This is a teacher1 tile comment");
-    cy.get(".user-name").contains("Clue Teacher2").siblings("[data-testid=delete-message-button]").click();
+    chatPanel.getCommentFromThread().should("not.contain", teacher1TileComment);
+    chatPanel.getDeleteMessageButton(teacher2TileComment).click();
     cy.get(".confirm-delete-alert button").contains("Delete").click();
-    chatPanel.getCommentFromThread().should("not.exist");
+    chatPanel.getCommentFromThread().should("not.contain", teacher2TileComment);
   });
 });
