@@ -114,8 +114,12 @@ export const TableMetadataModel = TileMetadataModel
           const xAttr = dataSet.attributes[0];
           const parsedExpression = self.parseExpression(expression);
           for (let i = 0; i < attr.values.length; i++) {
-            const xVal = xAttr.value(i) as number | string;
-            if (xVal == null || xVal === "") {
+            // Internally the formula engine can handle strings in some cases.
+            // CLUE only allows formulas to produce numeric values so we
+            // always get the numeric value of a cell. If the value isn't
+            // numeric numVal will return NaN.
+            const xVal = xAttr.numValue(i);
+            if (xVal == null) {
               attr.setValue(i, undefined);
             } else if (!parsedExpression) {
               attr.setValue(i, NaN);
