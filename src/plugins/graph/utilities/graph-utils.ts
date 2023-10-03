@@ -427,6 +427,11 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
     setPoints = () => {
 
       if (theSelection?.size()) {
+        // Remove dots that do not have valid data (eg, screen Y = NaN)
+        const orphans = theSelection
+          .filter((aCaseData: CaseData)=>{ return !getScreenY(aCaseData.caseID, aCaseData.plotNum); });
+        orphans.remove();
+
         theSelection
           .transition()
           .duration(duration)

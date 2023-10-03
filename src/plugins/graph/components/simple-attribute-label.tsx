@@ -4,7 +4,7 @@ import {observer} from "mobx-react-lite";
 import {GraphPlace } from "../imports/components/axis-graph-shared";
 import {AttributeType} from "../../../models/data/attribute";
 import {AxisOrLegendAttributeMenu} from "../imports/components/axis/components/axis-or-legend-attribute-menu";
-import { graphPlaceToAttrRole, kGraphClassSelector } from "../graph-types";
+import { kGraphClassSelector } from "../graph-types";
 import { useDataConfigurationContext } from "../hooks/use-data-configuration-context";
 import { useGraphModelContext } from "../models/graph-model";
 import { IDataSet } from "../../../models/data/data-set";

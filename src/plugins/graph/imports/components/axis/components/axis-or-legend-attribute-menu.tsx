@@ -9,7 +9,6 @@ import { IUseDraggableAttribute, useDraggableAttribute } from "../../../hooks/us
 import { useInstanceIdContext } from "../../../hooks/use-instance-id-context";
 import { useOutsidePointerDown } from "../../../hooks/use-outside-pointer-down";
 import { useOverlayBounds } from "../../../hooks/use-overlay-bounds";
-import { useSettingFromStores } from "../../../../../../hooks/use-stores";
 import { AttributeType } from "../../../../../../models/data/attribute";
 import { IDataSet } from "../../../../../../models/data/data-set";
 import { isSetAttributeNameAction } from "../../../../../../models/data/data-set-actions";
@@ -46,7 +45,7 @@ const _AxisOrLegendAttributeMenu = ({ place, attributeId, target, portal, onOpen
   const removeAttrItemLabel = t(removeAttrItemLabelKeys[role], {vars: [attribute?.name]});
   const treatAs = dataConfig?.attributeType(role) === "numeric" ? "categorical" : "numeric";
   const menuRef = useRef<HTMLDivElement>(null);
-  const showRemoveOption = true;
+  const showRemoveOption = true; // Used to be a setting; now I bel we always want it available.
 
   const onCloseRef = useRef<() => void>();
   const overlayStyle: CSSProperties = {
