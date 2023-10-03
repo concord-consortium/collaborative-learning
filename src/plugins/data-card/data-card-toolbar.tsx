@@ -12,27 +12,28 @@ import { ITileModel } from "../../models/tiles/tile-model";
 import { ImageUploadButton } from "../../components/tiles/image/image-toolbar";
 import { EditFacet } from "./data-card-types";
 import { DeleteAttrButton, DuplicateCardButton,
+  IDataCardToolbarButtonContext,
   LinkTileButton, MergeInButton } from "./components/data-card-toolbar-buttons";
-import { useTileDataMerging } from "../../hooks/use-tile-data-merging";
+import { useSettingFromStores } from "../../hooks/use-stores";
+import { DataSetViewButton } from "../../components/shared/data-set-view-button";
 
 import "./data-card-toolbar.scss";
 
+type IButtonSetting = string | [string, string];
+
+const defaultButtons: IButtonSetting[] = ["duplicate", "link-tile", "merge-in", ["data-set-view", "Table"],
+  "image-upload", "delete-attribute"];
 interface IProps extends IFloatingToolbarProps {
   currEditAttrId: string;
   currEditFacet: EditFacet;
   isMergeEnabled?: boolean;
-  isLinkEnabled?: boolean;
   model: ITileModel;
-  handleDeleteValue: () => void;
-  handleDuplicateCard: () => void;
   setImageUrlToAdd: (url: string) => void;
-  showLinkTileDialog?: () => void;
-  showMergeTileDialog?: () => void;
 }
 
 export const DataCardToolbar: React.FC<IProps> = observer(function DataCardToolbar({
-    isLinkEnabled, model, documentContent, tileElt, currEditAttrId, currEditFacet, showLinkTileDialog,
-    onIsEnabled, setImageUrlToAdd, handleDeleteValue, handleDuplicateCard,
+    model, documentContent, tileElt, currEditAttrId, currEditFacet,
+    onIsEnabled, setImageUrlToAdd,
     ...others }: IProps) {
   const content = model.content as DataCardContentModelType;
   const { caseIndex, dataSet, totalCases } = content;
@@ -47,10 +48,10 @@ export const DataCardToolbar: React.FC<IProps> = observer(function DataCardToolb
       ...others
   });
 
-  const { isMergeEnabled, showMergeTileDialog } = useTileDataMerging({model});
+  const buttonSettings = useSettingFromStores("tools", "datacard") as unknown as IButtonSetting[] | undefined;
+  const buttons = buttonSettings || defaultButtons;
 
   const isEditingValue = !!currEditAttrId && currEditFacet === "value";
-  const valueActionsEnabled = enabled && isEditingValue;
 
   const uploadImage = (file: File) => {
     gImageMap.addFileImage(file)
@@ -61,41 +62,48 @@ export const DataCardToolbar: React.FC<IProps> = observer(function DataCardToolb
       });
   };
 
-  const handleLinkButtonCLick = () => {
-    showLinkTileDialog && showLinkTileDialog();
-  };
-
-  const handleMergeDataClick = () => {
-    showMergeTileDialog && showMergeTileDialog();
-  };
-
   const toolbarClasses = classNames(
     "data-card-toolbar",
     enabled && location ? "enabled" : "disabled",
   );
 
-  const valueActionsButtonsClasses = classNames(
-    "value-actions-buttons",
-    { "value-actions-disabled": !valueActionsEnabled }
-  );
+  const valueActionsDisabled = !enabled || !isEditingValue;
+  const cardActionsDisabled = content.attributes.length < 1;
 
-  const cardActionsButtonsClasses = classNames(
-    "card-actions-buttons",
-    { "card-actions-disabled": content.attributes.length < 1 }
-  );
+  const context: IDataCardToolbarButtonContext = {
+    currEditAttrId
+  };
+
+  const getToolbarButton = (toolName: IButtonSetting) => {
+    if (typeof toolName === "string") {
+      switch (toolName) {
+        case "duplicate":
+          return <DuplicateCardButton key={toolName} context={context} isDisabled={cardActionsDisabled} />;
+        case "link-tile":
+          return <LinkTileButton key={toolName} context={context} isDisabled={cardActionsDisabled} />;
+        case "merge-in":
+          return <MergeInButton key={toolName} context={context} isDisabled={cardActionsDisabled} />;
+        case "image-upload":
+          return <ImageUploadButton key={toolName} onUploadImageFile={file => uploadImage(file)}
+            extraClasses={valueActionsDisabled ? "disabled" : ""}/>;
+        case "delete-attribute":
+          return <DeleteAttrButton key={toolName} context={context} isDisabled={valueActionsDisabled} />;
+      }
+    } else {
+      // If `toolName` is an array, the first item is the tool name.
+      // The remaining items are parameters to the pass to the tool
+      const realToolName = toolName[0];
+      switch (realToolName) {
+        case "data-set-view":
+          return <DataSetViewButton key={toolName.join("_")} args={toolName} />;
+      }
+    }
+  };
 
   return documentContent
     ? ReactDOM.createPortal(
       <div className={toolbarClasses} style={location}>
-        <div className={cardActionsButtonsClasses}>
-          <DuplicateCardButton onClick={handleDuplicateCard} />
-          <LinkTileButton isEnabled={isLinkEnabled} onClick={handleLinkButtonCLick} />
-          <MergeInButton onClick={handleMergeDataClick} isEnabled={isMergeEnabled} />
-        </div>
-        <div className={valueActionsButtonsClasses}>
-          <ImageUploadButton onUploadImageFile={file => uploadImage(file)} />
-          <DeleteAttrButton onClick={handleDeleteValue} />
-        </div>
+        {buttons.map(button => getToolbarButton(button))}
       </div>, documentContent)
   : null;
 });
