@@ -277,27 +277,20 @@ export const GraphModel = TileContentModel
         return;
       }
 
-      // WIP, figure out if we need this condition
-      // It is in master, and has it's origins in PR:
-      // https://github.com/concord-consortium/collaborative-learning/pull/1857
-      // If we omit it, then units without emptyPlotIsNumeric set will load data on link
-      // But we need to test/understand the scenario that gave rise to this condition
-      //if (getAppConfig(self)?.getSetting("emptyPlotIsNumeric", "graph")) {
-        const attributeCount = self.data.attributes.length;
-        if (!attributeCount) return;
+      const attributeCount = self.data.attributes.length;
+      if (!attributeCount) return;
 
-        const xAttrId = self.getAttributeID("x");
-        const isValidXAttr = !!self.data.attrFromID(xAttrId);
-        const yAttrId = self.getAttributeID("y");
-        const isValidYAttr = !!self.data.attrFromID(yAttrId);
+      const xAttrId = self.getAttributeID("x");
+      const isValidXAttr = !!self.data.attrFromID(xAttrId);
+      const yAttrId = self.getAttributeID("y");
+      const isValidYAttr = !!self.data.attrFromID(yAttrId);
 
-        if (!isValidXAttr && !isValidYAttr) {
-          self.setAttributeID("x", self.data.id, self.data.attributes[0].id);
-          if (attributeCount > 1) {
-            self.setAttributeID("y", self.data.id, self.data.attributes[1].id);
-          }
+      if (!isValidXAttr && !isValidYAttr) {
+        self.setAttributeID("x", self.data.id, self.data.attributes[0].id);
+        if (attributeCount > 1) {
+          self.setAttributeID("y", self.data.id, self.data.attributes[1].id);
         }
-      //}
+      }
     },
     configureUnlinkedGraph() {
       if (self.data) {
