@@ -239,7 +239,11 @@
     ],
     "placeholderText": "",
     "stamps": [],
-    "settings": {}
+    "settings": {
+      "graph": {
+        "autoAssignAttributes": true
+      }
+    }
   },
   "curriculumBaseUrl": "https://models-resources.concord.org/clue-curriculum",
   "unitCodeMap": {
