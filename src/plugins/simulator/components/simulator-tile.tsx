@@ -9,7 +9,9 @@ import { SimulatorVariable } from "./simulator-variable";
 
 import "./simulator-tile.scss";
 
-export const SimulatorTileComponent = observer(function SimulatorTileComponent({ documentId, model, readOnly }: ITileProps) {
+export const SimulatorTileComponent = observer(function SimulatorTileComponent({
+  documentId, model, readOnly
+}: ITileProps) {
   // Note: capturing the content here and using it in handleChange() below may run the risk
   // of encountering a stale closure issue depending on the order in which content changes,
   // component renders, and calls to handleChange() occur. See the PR discussion at

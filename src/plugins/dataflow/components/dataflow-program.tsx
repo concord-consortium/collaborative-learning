@@ -635,7 +635,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private tick = () => {
-    const { readOnly, tileContent: tileModel, playBackIndex, programMode,
+    const { runnable, tileContent: tileModel, playBackIndex, programMode,
             isPlaying, updateRecordIndex, updatePlayBackIndex } = this.props;
 
     const dataSet = tileModel.dataSet;
@@ -648,7 +648,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         this.updateNodes();
         break;
       case ProgramMode.Recording:
-        if (this.props.runnable) {
+        if (runnable) {
           recordCase(this.props.tileContent, this.programEditor, this.props.recordIndex);
         }
         this.updateNodes();
