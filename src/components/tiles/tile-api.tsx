@@ -15,13 +15,11 @@ interface IGetObjectButtonSVGParams {
   translateTilePointToScreenPoint?: (point: [x: number, y: number]) => [x: number, y: number] | undefined;
 }
 export interface ITileApi {
-  getTitle?: () => string | undefined;
   hasSelection?: () => boolean;
   deleteSelection?: () => void;
   getSelectionInfo?: () => string;
   setSelectionHighlight?: (selectionInfo: string, isHighlighted: boolean) => void;
   isLinked?: () => boolean;
-  getLinkIndex?: (index?: number) => number;
   getLinkedTiles?: () => string[] | undefined;
   getContentHeight?: () => number | undefined;
   exportContentAsTileJson?: (options?: ITileExportOptions) => string;

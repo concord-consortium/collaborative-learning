@@ -42,19 +42,11 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
   const attrIdsNames = content.existingAttributesWithNames();
 
   useEffect(() => {
-    if (!model.title) {
+    if (!model.computedTitle) {
       const title = onRequestUniqueTitle(model.id);
       title && model.setTitle(title);
     }
   }, [model, onRequestUniqueTitle]);
-
-  useEffect(() => {
-    onRegisterTileApi({
-      getTitle: () => {
-        return model.title;
-      }
-    });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useDataCardTileHeight({
     tileElt,
@@ -244,8 +236,8 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
   };
 
   const hasLinkableRows = content.dataSet.attributes.length > 1;
-  const { isLinkEnabled, getLinkIndex, showLinkTileDialog } = useConsumerTileLinking({
-    documentId, model, hasLinkableRows, onRequestTilesOfType, onRequestLinkableTiles
+  const { isLinkEnabled, showLinkTileDialog } = useConsumerTileLinking({
+    model, hasLinkableRows, onRequestTilesOfType, onRequestLinkableTiles
   });
 
 
@@ -262,7 +254,6 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
         handleDuplicateCard={duplicateCard}
         scale={scale}
         isLinkEnabled={isLinkEnabled}
-        getLinkIndex={getLinkIndex}
         showLinkTileDialog={showLinkTileDialog}
       />
       <div

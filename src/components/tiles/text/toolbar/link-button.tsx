@@ -1,10 +1,10 @@
 import React from "react";
 import { Editor, EFormat, Node, Range, selectedNodesOfType, useSlate } from "@concord-consortium/slate-editor";
 
-import { TextToolbarButton } from "./text-toolbar-button";
 import { useLinkDialog } from "../dialog/use-link-dialog";
 
 import LinkToolIcon from "../../../../assets/icons/text/link-text-icon.svg";
+import { TileToolbarButton } from "../../../toolbar/tile-toolbar-button";
 
 export const LinkButton = () => {
   const editor = useSlate();
@@ -13,7 +13,7 @@ export const LinkButton = () => {
   const selectedLinks = selectedNodesOfType(editor, EFormat.link);
   const selectedLink = selectedLinks[0] || undefined;
   const isSelected = !!selectedLink;
-  const enabled = !isCollapsed || isSelected;
+  const disabled = isCollapsed && !isSelected;
   const text = isSelected
     ? Node.string(selectedLink)
     : selection
@@ -24,6 +24,9 @@ export const LinkButton = () => {
     event.preventDefault();
     showModal();
   };
-  return <TextToolbarButton iconName="link" Icon={LinkToolIcon} enabled={enabled}
-    tooltip="Link" isSelected={isSelected} onClick={handleClick} />;
+  return(
+    <TileToolbarButton disabled={disabled} selected={isSelected} onClick={handleClick}>
+      <LinkToolIcon/>
+    </TileToolbarButton>
+  );
 };

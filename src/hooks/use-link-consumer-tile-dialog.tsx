@@ -58,7 +58,7 @@ interface IProps {
   onUnlinkTile: (tileInfo: ITileLinkMetadata) => void;
 }
 export const useLinkConsumerTileDialog = ({ linkableTiles, model, onLinkTile, onUnlinkTile }: IProps) => {
-  const tileTitle = model.title;
+  const tileTitle = model.computedTitle;
   const [selectValue, setSelectValue] = useState("");
   const handleClick = () => {
     const tileInfo = linkableTiles.find(tile => tile.id === selectValue);

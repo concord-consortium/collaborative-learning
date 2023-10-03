@@ -28,6 +28,7 @@ import {
 import { onAnyAction } from "../../../utilities/mst-utils";
 import { AdornmentModelUnion } from "../adornments/adornment-types";
 import { SharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
+import { tileContentAPIViews } from "../../../models/tiles/tile-model-hooks";
 import { ConnectingLinesModel } from "../adornments/connecting-lines/connecting-lines-model";
 import { kConnectingLinesType } from "../adornments/connecting-lines/connecting-lines-types";
 import { getDotId } from "../utilities/graph-utils";
@@ -183,6 +184,11 @@ export const GraphModel = TileContentModel
         rightCats,
         resetPoints
       };
+    }
+  }))
+  .views(self => tileContentAPIViews({
+    get contentTitle() {
+      return self.data?.name;
     }
   }))
   .actions(self => ({

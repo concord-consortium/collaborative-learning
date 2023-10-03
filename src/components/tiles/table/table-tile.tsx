@@ -34,7 +34,7 @@ import "./table-tile.scss";
 
 // observes row selection from shared selection store
 const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComponent({
-  documentId, documentContent, tileElt, model, readOnly, height, scale,
+  documentContent, tileElt, model, readOnly, height, scale,
   onRequestRowHeight, onRequestTilesOfType, onRequestLinkableTiles, onRequestUniqueTitle,
   onRegisterTileApi, onUnregisterTileApi
 }) {
@@ -144,7 +144,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
 
   // Functions for getting and modifying the title
   const { onBeginTitleEdit, onEndTitleEdit } = useTableTitle({
-    gridContext, content, readOnly,
+    gridContext, model, content, readOnly,
     onSetTableTitle, onRequestUniqueTitle: handleRequestUniqueTitle, requestRowHeight
   });
 
@@ -176,8 +176,8 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     readOnly: !!readOnly, changeHandlers, columns, onColumnResize, selectedCell, inputRowId, lookupImage });
 
   // Variables for handling linking to geometry tiles
-  const { isLinkEnabled, linkColors, getLinkIndex, showLinkTileDialog } =
-    useConsumerTileLinking({ documentId, model, hasLinkableRows,
+  const { isLinkEnabled, linkColors, showLinkTileDialog } =
+    useConsumerTileLinking({ model, hasLinkableRows,
                           onRequestTilesOfType, onRequestLinkableTiles });
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -228,18 +228,13 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
         onSetExpression={showExpressionsDialog}
         scale={scale}
         isLinkEnabled={isLinkEnabled}
-        getLinkIndex={getLinkIndex}
         showLinkDialog={showLinkTileDialog}
       />
       <div className="table-grid-container" ref={containerRef} onClick={handleBackgroundClick}>
         <EditableTableTitle
-          content={content}
+          model={model}
           className="table-title"
           readOnly={readOnly}
-          showLinkButton={true}
-          isLinkEnabled={isLinkEnabled}
-          getLinkIndex={getLinkIndex}
-          onLinkGeometryClick={showLinkTileDialog}
           titleCellWidth={titleCellWidth}
           titleCellHeight={getTitleHeight()}
           onBeginEdit={onBeginTitleEdit}

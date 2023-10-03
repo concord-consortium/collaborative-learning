@@ -1,0 +1,24 @@
+.selection-button {
+  background-color: #eee;
+  border-bottom: 1px solid black;
+  border-left: none;
+  border-right: 1px solid black;
+  border-top: 1px solid black;
+  cursor: pointer;
+  outline: none;
+  padding: 3px 8px;
+
+  &.left {
+    border-left: 1px solid black;
+    border-radius: 6px 0 0 6px;
+  }
+
+  &.right {
+    border-radius: 0 6px 6px 0;
+  }
+
+  &.selected {
+    background-color: #ccc;
+    cursor: default;
+  }
+}

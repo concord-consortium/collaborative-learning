@@ -2,18 +2,20 @@ $input-color: #5584e5;
 $output-color: #f29046;
 
 .simulator-variable {
-  align-items: center;
   display: flex;
-  width: 160px;
+  flex-direction: column;
+  margin: 8px 0 0 8px;
 
-  &.long-name {
-    width: 220px;
-  }
+  .value-row {
+    align-items: center;
+    display: flex;
+    margin-top: 4px;
 
-  .leading-box {
-    height: 16px;
-    margin-right: 8px;
-    width: 16px;
+    .leading-box {
+      height: 16px;
+      margin-right: 8px;
+      width: 16px;
+    }
   }
 
   &.input {

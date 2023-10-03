@@ -29,7 +29,7 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
   const toolbarProps = useToolbarTileApi({ id: model.id, enabled, onRegisterTileApi, onUnregisterTileApi });
 
   const { isLinkEnabled, showLinkTileDialog } = useProviderTileLinking({
-    documentId, model, readOnly, onRequestTilesOfType, onRequestLinkableTiles
+    model, readOnly, onRequestTilesOfType, onRequestLinkableTiles
   });
 
   const { data } = useDataSet(content?.data);
@@ -38,10 +38,6 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
   const yAttrID = content.getAttributeID("y");
   const xAttrType = content.config.attributeType("x");
   const yAttrType = content.config.attributeType("y");
-
-  const getTitle  = useCallback(() => {
-    return model?.title || "";
-  }, [model]);
 
   const getDotCenter = useCallback((dotId: string) => {
     // FIXME Currently, getScreenX and getScreenY only handle numeric axes, so just bail if they are a different type.
@@ -61,9 +57,6 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
     onRegisterTileApi?.({
       exportContentAsTileJson: (options?: ITileExportOptions) => {
         return content.exportJson(options);
-      },
-      getTitle: () => {
-        return getTitle();
       },
       getObjectBoundingBox: (objectId: string, objectType?: string) => {
         if (objectType === "dot") {
@@ -117,7 +110,7 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
         }
       }
     });
-  }, [getDotCenter, getTitle, content, layout, onRegisterTileApi]);
+  }, [getDotCenter, content, layout, onRegisterTileApi]);
 
   useEffect(function cleanup() {
     return () => {
@@ -138,11 +131,7 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
         onLinkTableButtonClick={showLinkTileDialog}
         onRequestTilesOfType={onRequestTilesOfType}
       />
-      <BasicEditableTileTitle
-        model={model}
-        readOnly={readOnly}
-        scale={scale}
-      />
+      <BasicEditableTileTitle readOnly={readOnly} />
       <GraphComponent data={data} layout={layout} tile={model} />
     </div>
   );

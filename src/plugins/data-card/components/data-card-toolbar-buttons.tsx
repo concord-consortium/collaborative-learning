@@ -64,12 +64,10 @@ export const DeleteAttrButton = ({ onClick }: IDeleteAttrButtonProps) => {
 
 interface ILinkDataCardButtonProps {
   isEnabled?: boolean;
-  getLinkIndex: () => number;
   onClick?: () => void;
 }
-export const LinkTileButton = ({ isEnabled, getLinkIndex, onClick }: ILinkDataCardButtonProps) => {
-  const linkIndex = getLinkIndex();
-  const classes = classNames("link-tile-button", `link-color-${linkIndex}`, { disabled: !isEnabled });
+export const LinkTileButton = ({ isEnabled, onClick }: ILinkDataCardButtonProps) => {
+  const classes = classNames("link-tile-button", { disabled: !isEnabled });
   const handleClick = (e: React.MouseEvent) => {
     isEnabled && onClick?.();
     e.stopPropagation();

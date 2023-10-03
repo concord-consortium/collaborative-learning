@@ -55,7 +55,7 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
     onClose,
     variable: content.root.selectedNode?.variable
   });
-  
+
   const insertVariables = (variablesToInsert: VariableType[], startX?: number, startY?: number) => {
     // Start at an arbitrary point...
     let x = 250;
@@ -129,11 +129,7 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
   const preventKeyboardDelete = dialogOpen || !isTileSelected || readOnly;
   return (
     <div className="diagram-tool">
-      <BasicEditableTileTitle
-        model={model}
-        readOnly={readOnly}
-        scale={scale}
-      />
+      <BasicEditableTileTitle readOnly={readOnly} />
       <DiagramToolbar
         content={content}
         diagramHelper={diagramHelper}

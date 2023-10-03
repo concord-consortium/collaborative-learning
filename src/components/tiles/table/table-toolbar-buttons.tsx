@@ -52,12 +52,10 @@ export const SetExpressionButton = ({ onClick }: ISetExpressionButtonProps) => (
 
 interface ILinkTableButtonProps {
   isEnabled?: boolean;
-  getLinkIndex: () => number;
   onClick?: () => void;
 }
-export const LinkTileButton = ({ isEnabled, getLinkIndex, onClick }: ILinkTableButtonProps) => {
-  const linkIndex = getLinkIndex();
-  const classes = classNames("link-tile-button", `link-color-${linkIndex}`, { disabled: !isEnabled });
+export const LinkTileButton = ({ isEnabled, onClick }: ILinkTableButtonProps) => {
+  const classes = classNames("link-tile-button", { disabled: !isEnabled });
   const handleClick = (e: React.MouseEvent) => {
     isEnabled && onClick?.();
     e.stopPropagation();

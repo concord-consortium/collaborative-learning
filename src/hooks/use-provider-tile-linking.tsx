@@ -1,11 +1,8 @@
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 
 import {
   ILinkableTiles, ITileLinkMetadata, ITypedTileLinkMetadata, kNoLinkableTiles
 } from "../models/tiles/tile-link-types";
-import {
-  addTableToDocumentMap, getLinkedTableIndex, getTableLinkColors, removeTableFromDocumentMap
-} from "../models/tiles/table-links";
 import { ITileModel } from "../models/tiles/tile-model";
 import { useLinkProviderTileDialog } from "./use-link-provider-tile-dialog";
 import { getTileContentById } from "../utilities/mst-utils";
@@ -13,20 +10,17 @@ import { SharedDataSet } from "../models/shared/shared-data-set";
 
 interface IProps {
   actionHandlers?: any;
-  documentId?: string;
   model: ITileModel;
   readOnly?: boolean;
   onRequestTilesOfType: (tileType: string) => ITileLinkMetadata[];
   onRequestLinkableTiles?: () => ILinkableTiles;
 }
 export const useProviderTileLinking = ({
-  actionHandlers, documentId, model, readOnly, onRequestTilesOfType, onRequestLinkableTiles
+  actionHandlers, model, readOnly, onRequestTilesOfType, onRequestLinkableTiles
 }: IProps) => {
   const {handleRequestTileLink, handleRequestTileUnlink} = actionHandlers || {};
-  const modelId = model.id;
   const { providers: linkableTiles } = useLinkableTiles({ model, onRequestTilesOfType, onRequestLinkableTiles });
   const isLinkEnabled = (linkableTiles.length > 0);
-  const linkColors = getTableLinkColors(modelId);
 
   const linkTile = useCallback((tileInfo: ITileLinkMetadata) => {
     const providerTile = getTileContentById(model.content, tileInfo.id);
@@ -60,16 +54,7 @@ export const useProviderTileLinking = ({
             linkableTiles, model, onLinkTile, onUnlinkTile
           });
 
-  useEffect(() => {
-    documentId && addTableToDocumentMap(documentId, modelId);
-    return () => removeTableFromDocumentMap(modelId);
-  }, [documentId, modelId]);
-
-  const getLinkIndex = useCallback(() => {
-    return getLinkedTableIndex(modelId);
-  }, [modelId]);
-
-  return { isLinkEnabled, linkColors, getLinkIndex, showLinkTileDialog };
+  return { isLinkEnabled, showLinkTileDialog };
 };
 
 interface IUseLinkableTilesProps {

@@ -1,5 +1,6 @@
 import ChatPanel from "../../../../support/elements/clue/ChatPanel";
 import TeacherNetwork from "../../../../support/elements/clue/TeacherNetwork";
+import TeacherDashboard from "../../../../support/elements/clue/TeacherDashboard";
 /**
  * Notes:
  *
@@ -15,33 +16,43 @@ import TeacherNetwork from "../../../../support/elements/clue/TeacherNetwork";
 
 let chatPanel = new ChatPanel;
 let teacherNetwork = new TeacherNetwork;
+let dashboard = new TeacherDashboard();
 
-const portalUrl = "https://learn.staging.concord.org";
-const offeringId1 = "2000";
-const offeringId2 = "2004";
-const reportUrl1 = "https://learn.staging.concord.org/portal/offerings/" + offeringId1 + "/external_report/49";
-const reportUrl2 = "https://learn.staging.concord.org/portal/offerings/" + offeringId2 + "/external_report/49";
+const portalUrl = "https://learn.portal.staging.concord.org";
+const offeringId1 = "221";
+const offeringId2 = "226";
+const reportUrl1 = "https://learn.portal.staging.concord.org/portal/offerings/" + offeringId1 + "/external_report/11";
+const reportUrl2 = "https://learn.portal.staging.concord.org/portal/offerings/" + offeringId2 + "/external_report/11";
 const clueTeacher1 = {
-  username: "TejalTeacher1",
-  password: "ccpassword",
-  firstname: "Tejal",
+  username: "clueteachertest1",
+  password: "password",
+  firstname: "Clue",
   lastname: "Teacher1"
 };
 const clueTeacher2 = {
-  username: "TejalTeacher2",
-  password: "ccpassword",
-  firstname: "Tejal",
+  username: "clueteachertest2",
+  password: "password",
+  firstname: "Clue",
   lastname: "Teacher2"
 };
-const classInfo1 = clueTeacher1.firstname + ' ' + clueTeacher1.lastname + ' / CLUE Testing3';
-const workDoc = 'MSA 1.4 Walkathon Money';
-const classInfo2 = clueTeacher2.firstname + ' ' + clueTeacher2.lastname + ' / CLUE Testing Class 2';
-const planningDoc = 'MSA 1.4 Walkathon Money: Planning';
+const classInfo1 = clueTeacher1.firstname + ' ' + clueTeacher1.lastname + ' / CLUE';
+const workDoc = 'SAS 1.1 Solving a Mystery with Proportional Reasoning';
+const classInfo2 = clueTeacher2.firstname + ' ' + clueTeacher2.lastname + ' / CLUE Teacher 2';
+const planningDoc = 'SAS 1.1 Solving a Mystery with Proportional Reasoning: Planning';
+
+function beforeTest(portalUrl, clueTeacher, reportUrl) {
+  cy.login(portalUrl, clueTeacher);
+  cy.launchReport(reportUrl);
+  cy.waitForLoad();
+  dashboard.switchView("Workspace & Resources");
+  chatPanel.getChatPanelToggle().click();
+  cy.wait(4000);
+}
 
 describe('Teachers can communicate back and forth in chat panel', () => {
   // TODO: Re-instate the skipped tests below once learn.staging.concord.org is fully functional again
-  it.skip('verify teacher1 can add comments in My Work tab documents', () => {
-    chatPanel.openTeacherChat(portalUrl, clueTeacher1, reportUrl1);
+  it('verify teacher1 can add comments in My Work tab documents', () => {
+    beforeTest(portalUrl, clueTeacher1, reportUrl1);
     cy.openTopTab("my-work");
     cy.openSection('my-work', 'workspaces');
 
@@ -68,8 +79,8 @@ describe('Teachers can communicate back and forth in chat panel', () => {
     cy.wait(1000);
     chatPanel.addCommentAndVerify("This is a teacher1 planning document comment");
   });
-  it.skip("verify teacher2 can view teacher1's comments and add more comments in My Work tab", () => {
-    chatPanel.openTeacherChat(portalUrl, clueTeacher2, reportUrl2);
+  it("verify teacher2 can view teacher1's comments and add more comments in My Work tab", () => {
+    beforeTest(portalUrl, clueTeacher2, reportUrl2);
     cy.openTopTab("my-work");
     cy.openSection('my-work', 'workspaces');
 
@@ -92,8 +103,8 @@ describe('Teachers can communicate back and forth in chat panel', () => {
     chatPanel.verifyCommentThreadContains("This is a teacher1 planning document comment");
     chatPanel.addCommentAndVerify("This is teacher2's comment on teacher1's planning document");
   });
-  it.skip("verify teacher1 can view teacher2's comments in My Work tab", () => {
-    chatPanel.openTeacherChat(portalUrl, clueTeacher1, reportUrl1);
+  it("verify teacher1 can view teacher2's comments in My Work tab", () => {
+    beforeTest(portalUrl, clueTeacher1, reportUrl1);
     cy.openTopTab("my-work");
     cy.openSection('my-work', 'workspaces');
 
@@ -105,36 +116,36 @@ describe('Teachers can communicate back and forth in chat panel', () => {
     teacherNetwork.expandSectionClass('workspaces', 'my-classes', classInfo1);
     teacherNetwork.selectDocument('workspaces', 'my-classes', classInfo1, planningDoc);
     chatPanel.verifyCommentThreadContains("This is teacher2's comment on teacher1's planning document");
-  });
+  
   //TODO: verify delete is disabled for now until work is merged to master, but keep the delete to clean up chat space
-  it.skip('verify teacher1 can only delete own comments', () => {
-    cy.get(".user-name").contains("Tejal Teacher2").siblings("[data-testid=delete-message-button]").should("not.exist");
-    cy.get(".user-name").contains("Tejal Teacher1").siblings("[data-testid=delete-message-button]").click();
+    cy.log('verify teacher1 can only delete own comments');
+    cy.get(".user-name").contains("Clue Teacher2").siblings("[data-testid=delete-message-button]").should("not.exist");
+    cy.get(".user-name").contains("Clue Teacher1").siblings("[data-testid=delete-message-button]").click();
     cy.get(".confirm-delete-alert button").contains("Delete").click();
     // chatPanel.getCommentFromThread().should("not.contain", "This is a teacher1 planning document comment");
     cy.openSection('my-work', 'workspaces');
     teacherNetwork.expandSectionClass('workspaces', 'my-classes', classInfo1);
     teacherNetwork.selectDocument('workspaces', 'my-classes', classInfo1, workDoc);
-    cy.get(".user-name").contains("Tejal Teacher2").siblings("[data-testid=delete-message-button]").should("not.exist");
-    cy.get(".user-name").contains("Tejal Teacher1").siblings("[data-testid=delete-message-button]").click();
+    cy.get(".user-name").contains("Clue Teacher2").siblings("[data-testid=delete-message-button]").should("not.exist");
+    cy.get(".user-name").contains("Clue Teacher1").siblings("[data-testid=delete-message-button]").click();
     cy.get(".confirm-delete-alert button").contains("Delete").click();
     // chatPanel.getCommentFromThread().should("not.contain", "This is a teacher1 working document comment");
   });
-  it.skip('verify teacher2 does not see teacher1 deleted comments', () => {
-    chatPanel.openTeacherChat(portalUrl, clueTeacher2, reportUrl2);
+  it('verify teacher2 does not see teacher1 deleted comments', () => {
+    beforeTest(portalUrl, clueTeacher2, reportUrl2);
     cy.openTopTab("my-work");
     cy.openSection('my-work', 'workspaces');
     teacherNetwork.expandSectionClass('workspaces', 'my-network', classInfo1);
     teacherNetwork.selectDocument('workspaces', 'my-network', classInfo1, workDoc);
     // chatPanel.getCommentFromThread().should("not.contain", "This is a teacher1 working document comment");
-    cy.get(".user-name").contains("Tejal Teacher2").siblings("[data-testid=delete-message-button]").click();
+    cy.get(".user-name").contains("Clue Teacher2").siblings("[data-testid=delete-message-button]").click();
     cy.get(".confirm-delete-alert button").contains("Delete").click();
     // chatPanel.getCommentFromThread().should("not.exist");
     cy.openSection('my-work', 'workspaces');
     teacherNetwork.expandSectionClass('workspaces', 'my-network', classInfo1);
     teacherNetwork.selectDocument('workspaces', 'my-network', classInfo1, planningDoc);
     // chatPanel.getCommentFromThread().should("not.contain", "This is a teacher1 planning document comment");
-    cy.get(".user-name").contains("Tejal Teacher2").siblings("[data-testid=delete-message-button]").click();
+    cy.get(".user-name").contains("Clue Teacher2").siblings("[data-testid=delete-message-button]").click();
     cy.get(".confirm-delete-alert button").contains("Delete").click();
     // chatPanel.getCommentFromThread().should("not.exist");
   });
