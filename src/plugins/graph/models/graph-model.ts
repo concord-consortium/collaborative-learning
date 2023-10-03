@@ -21,7 +21,7 @@ import {
 import { AppConfigModelType } from "../../../models/stores/app-config-model";
 import {ITileContentModel, TileContentModel} from "../../../models/tiles/tile-content";
 import {ITileExportOptions} from "../../../models/tiles/tile-content-info";
-import { getSharedModelManager } from "../../../models/tiles/tile-environment";
+import { getAppConfig, getSharedModelManager } from "../../../models/tiles/tile-environment";
 import {
   defaultBackgroundColor, defaultPointColor, defaultStrokeColor, kellyColors
 } from "../../../utilities/color-utils";
@@ -277,18 +277,20 @@ export const GraphModel = TileContentModel
         return;
       }
 
-      const attributeCount = self.data.attributes.length;
-      if (!attributeCount) return;
+      if (getAppConfig(self)?.getSetting("autoAssignAttributes", "graph")) {
+        const attributeCount = self.data.attributes.length;
+        if (!attributeCount) return;
 
-      const xAttrId = self.getAttributeID("x");
-      const isValidXAttr = !!self.data.attrFromID(xAttrId);
-      const yAttrId = self.getAttributeID("y");
-      const isValidYAttr = !!self.data.attrFromID(yAttrId);
+        const xAttrId = self.getAttributeID("x");
+        const isValidXAttr = !!self.data.attrFromID(xAttrId);
+        const yAttrId = self.getAttributeID("y");
+        const isValidYAttr = !!self.data.attrFromID(yAttrId);
 
-      if (!isValidXAttr && !isValidYAttr) {
-        self.setAttributeID("x", self.data.id, self.data.attributes[0].id);
-        if (attributeCount > 1) {
-          self.setAttributeID("y", self.data.id, self.data.attributes[1].id);
+        if (!isValidXAttr && !isValidYAttr) {
+          self.setAttributeID("x", self.data.id, self.data.attributes[0].id);
+          if (attributeCount > 1) {
+            self.setAttributeID("y", self.data.id, self.data.attributes[1].id);
+          }
         }
       }
     },
