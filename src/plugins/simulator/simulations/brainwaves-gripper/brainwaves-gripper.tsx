@@ -1,7 +1,6 @@
 import { VariableSlider } from "@concord-consortium/diagram-view";
 import React from "react";
 
-import ToggleControl from "../../../../components/utilities/toggle-control";
 import { demoStreams } from "../../../shared-assets/data/dataflow/demo-data";
 import {
   iconUrl, kEMGKey, kGripperKey, kPressureKey, kTemperatureKey
@@ -105,13 +104,19 @@ function BrainwavesGripperComponent({ frame, variables }: ISimulationProps) {
         variables={variables}
       />
       <div className="controls">
-        <VariableSlider
-          className="emg-slider"
-          max={440}
-          min={40}
-          step={40}
-          variable={armVariable}
-        />
+        <div className="slider-wrapper">
+          <VariableSlider
+            className="emg-slider"
+            max={440}
+            min={40}
+            step={40}
+            variable={armVariable}
+          />
+          <div className="slider-labels">
+            <div className="open">relaxed</div>
+            <div className="closed">flexed</div>
+          </div>
+        </div>
         <div className="mode-selection-container">
           <SelectionButton
             onClick={() => modeVariable?.setValue(kSimulationModePressure)}
