@@ -8,7 +8,7 @@ import './cell-formatter.scss';
 
 export const formatValue = (
     formatter: (n: number | { valueOf(): number }) => string,
-    value: any,
+    value: unknown,
     lookupImage: (value: string) => string|undefined,
     width?: number,
     row?: TRow,
@@ -17,6 +17,17 @@ export const formatValue = (
   if ((value == null) || (value === "")) return <span></span>;
   const num = Number(value);
   if (!isFinite(num)) {
+    // There are cases where value is not a string, or a valid number.
+    // Currently one way for this to happen is when a formula is applied to a string
+    // instead of a number. That results in a NaN value. This specific case should
+    // be expected and not trigger a console.error, but there have been other cases
+    // that couldn't be replicated. Hopefully we can deal with the NaN formula value
+    // before it gets to this point. And then this error will only be triggered on
+    // the other cases that we can't reproduce yet.
+    if (typeof value !== "string") {
+      console.error("Unknown cell value", value);
+      return <span>[error]</span>;
+    }
     const cellWidth = (width || kDefaultColumnWidth) - kCellHorizontalPadding;
     const height = rowHeight && row ? rowHeight({ row }) : kRowHeight;
     if (gImageMap.isImageUrl(value)) {

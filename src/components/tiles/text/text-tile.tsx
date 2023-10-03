@@ -10,13 +10,14 @@ import { debouncedSelectTile } from "../../../models/stores/ui";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
 import { TextContentModelType } from "../../../models/tiles/text/text-content";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
-import { TextToolbarComponent } from "./toolbar/text-toolbar";
 import { ITileApi, TileResizeEntry } from "../tile-api";
 import { ITileProps } from "../tile-component";
 import { createTextPluginInstances, ITextPlugin } from "../../../models/tiles/text/text-plugin-info";
 import { LogEventName } from "../../../lib/logger-types";
 import { TextPluginsContext } from "./text-plugins-context";
+import { TileToolbar } from "../../toolbar/tile-toolbar";
 
+import "./toolbar/text-toolbar-registration";
 import "./text-tile.sass";
 
 /*
@@ -171,7 +172,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   }
 
   public render() {
-    const { documentContent, tileElt, readOnly, scale } = this.props;
+    const { readOnly } = this.props;
     const { appConfig: { placeholderText } } = this.stores;
     const editableClass = readOnly ? "read-only" : "editable";
     // Ideally this would just be 'text-tool-editor', but 'text-tool' has been
@@ -206,38 +207,13 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
                 onBlur={this.handleBlur}
                 className={`ccrte-editor slate-editor ${classes || ""}`}
               />
-              <TextToolbarComponent
-                documentContent={documentContent}
-                tileElt={tileElt}
-                scale={scale}
-                onIsEnabled={this.handleIsEnabled}
-                onRegisterTileApi={this.handleRegisterToolApi}
-                onUnregisterTileApi={this.handleUnregisterToolApi}
-              />
+              <TileToolbar tileType="text" tileElement={this.props.tileElt} readOnly={!!readOnly} />
             </Slate>
           </div>
         </TextPluginsContext.Provider>
       </TextContentModelContext.Provider>
     );
   }
-
-  private handleRegisterToolApi = (tileApi: ITileApi) => {
-    this.toolbarTileApi = tileApi;
-
-    // call resize handler immediately with current size
-    const { tileElt } = this.props;
-    tileElt && this.tileContentRect &&
-      this.toolbarTileApi?.handleTileResize?.({ target: tileElt, contentRect: this.tileContentRect });
-  };
-
-  private handleUnregisterToolApi = () => {
-    this.toolbarTileApi = undefined;
-  };
-
-  private handleIsEnabled = () => {
-    // text toolbar is based on editor focus rather than tile selection
-    return ReactEditor.isFocused(this.editor as ReactEditor);
-  };
 
   private handleChange = (value: EditorValue) => {
     const { model } = this.props;
