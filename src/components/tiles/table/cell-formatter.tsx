@@ -15,15 +15,25 @@ export const formatValue = (
     rowHeight?: (args: any) => number,
   ) => {
   if ((value == null) || (value === "")) return <span></span>;
+
+  // Print NaN, Infinity, or -Infinity if we receive them.
+  // NaN can happen when a formula is applied to something not a number
+  // When saved, the NaN is turned into a blank value, so it won't be seen after
+  // reload. In the case of invalid formula we should probably provide an error
+  // message instead of just showing NaN. Hopefully we can bring in CODAPs new
+  // formula engine and that will help with this.
+  // We make sure the type of the value is a number otherwise basic strings like
+  // "a" would get handled by this.
+  if (typeof value === "number" && !isFinite(value)) {
+    return <span>{value.toString()}</span>;
+  }
+
   const num = Number(value);
   if (!isFinite(num)) {
-    // There are cases where value is not a string, or a valid number.
-    // Currently one way for this to happen is when a formula is applied to a string
-    // instead of a number. That results in a NaN value. This specific case should
-    // be expected and not trigger a console.error, but there have been other cases
-    // that couldn't be replicated. Hopefully we can deal with the NaN formula value
-    // before it gets to this point. And then this error will only be triggered on
-    // the other cases that we can't reproduce yet.
+    // There have been cases where value is not a string, or a valid number.
+    // NaN, Infinity, and -Infinity are handled above.
+    // But because the type of value is unknown it is in theory possible for
+    // objects or arrays to be passed in.
     if (typeof value !== "string") {
       console.error("Unknown cell value", value);
       return <span>[error]</span>;
