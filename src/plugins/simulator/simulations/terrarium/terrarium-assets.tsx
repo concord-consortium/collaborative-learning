@@ -34,10 +34,3 @@ export const jarFrames = [
   jar00, jar01, jar02, jar03, jar04, jar05,
   jar06, jar07, jar08, jar09, jar10, jar11
 ];
-
-import Plant00 from "./assets/plant/pothos-plant-frame-1.svg";
-import Plant01 from "./assets/plant/pothos-plant-frame-2.svg";
-import Plant02 from "./assets/plant/pothos-plant-frame-3.svg";
-import Plant03 from "./assets/plant/pothos-plant-frame-4.svg";
-import Plant04 from "./assets/plant/pothos-plant-frame-5.svg";
-export const plantFrames = [Plant00, Plant01, Plant02, Plant03, Plant04];

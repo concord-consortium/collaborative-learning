@@ -11,31 +11,24 @@
     &.humidifier {
       top: -103px;
     }
-
-    &.plant {
-      top: -36px;
-      left: -38px;
-    }
   }
 
   .display-container {
     align-items: center;
     display: flex;
+    gap: -5px;
     justify-content: center;
-    left: 108px;
+    left: 34px;
     position: absolute;
-    top: 45px;
-
-    display {
-      z-index: 1;
-    }
+    top: 35px;
 
     .display-message-container {
       align-items: flex-end;
       display: flex;
       flex-direction: column;
+      margin-top: -4px;
       width: 33px;
-      z-index: 2;
+      z-index: 1; // For some reason, this is needed to make the text appear over the display image.
     }
   }
 }
