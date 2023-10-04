@@ -496,16 +496,20 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         if (node.name === "Sensor") {
           const sensorSelect = node.controls.get("sensorSelect") as SensorSelectControl;
           sensorSelect.setChannels(this.channels);
-          updateNodeChannelInfo(node, this.channels, this.stores.serialDevice);
         }
 
         if (node.name === "Live Output"){
           const hubSelect = getHubSelect(node);
           hubSelect.setChannels(this.channels);
-          updateNodeChannelInfo(node, this.channels, this.stores.serialDevice);
         }
       });
     }
+
+    this.programEditor.nodes.forEach(node => {
+      if (["Sensor", "Live Output"].includes(node.name)) {
+        updateNodeChannelInfo(node, this.channels, this.stores.serialDevice);
+      }
+    })
   };
 
   private shouldShowProgramCover() {
