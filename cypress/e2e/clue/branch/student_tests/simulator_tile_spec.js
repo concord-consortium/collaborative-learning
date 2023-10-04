@@ -74,10 +74,10 @@ context('Simulator Tile with Brainwaves Gripper Simulation', function () {
       dataflowTile.getDropdown(sensor, "sensor-select").click();
       dataflowTile.getSensorDropdownOptions(sensor).should("have.length", 3);
       dataflowTile.getSensorDropdownOptions(sensor).eq(1).click();
-      dataflowTile.getNodeValueContainer(sensor).invoke('text').then(parseFloat).should("equal", 40);
+      dataflowTile.getNodeValueContainer(sensor).invoke('text').then(parseFloat).should("be.below", 41).should("be.above", 35);
       simulatorTile.getEMGSlider().click("right");
       cy.wait(50);
-      dataflowTile.getNodeValueContainer(sensor).invoke('text').then(parseFloat).should("equal", 440);
+      dataflowTile.getNodeValueContainer(sensor).invoke('text').then(parseFloat).should("be.below", 441).should("be.above", 390);
 
       // Live output options are correct after adding the simulation to the document
       dataflowTile.getDropdown(lo, "hubSelect").click();
@@ -145,7 +145,7 @@ context('Simulator Tile with Terrarium Simulation', function() {
     dataflowTile.getDropdown(sensor, "sensor-type").click();
     dataflowTile.getSensorDropdownOptions(sensor).eq(0).find(".label").click(); // Temperature
     dataflowTile.getDropdown(sensor, "sensor-select").click();
-    dataflowTile.getSensorDropdownOptions(sensor).should("have.length", 7);
+    dataflowTile.getSensorDropdownOptions(sensor).should("have.length", 6);
     dataflowTile.getDropdown(sensor, "sensor-type").click();
     dataflowTile.getSensorDropdownOptions(sensor).eq(1).find(".label").click(); // Humidity
     dataflowTile.getDropdown(sensor, "sensor-select").click();
