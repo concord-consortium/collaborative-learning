@@ -426,6 +426,7 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
   const setPoints = () => {
     if (theSelection?.size()) {
         // Remove dots that do not have valid data (eg, screen Y = NaN)
+        // This prevents dots from remaining after a series is removed.
         const orphans = theSelection
           .filter((aCaseData: CaseData)=>{ return !getScreenY(aCaseData.caseID, aCaseData.plotNum); });
         orphans.remove();

@@ -1,6 +1,6 @@
 // Menu sizing here must match calculations in graph-layout.ts:
 $menu-height: 30px;
-$menu-vertical-padding: 20px;
+$menu-vertical-padding: 10px;
 $menu-vertical-gap: 10px;
 $menu-label-height: 15px;
 $min-menu-width: 144px;
@@ -9,60 +9,62 @@ $codap-bg-color: #f9f9f9;
 
 .multi-legend {
 
-  padding: $menu-vertical-padding 10%;
+  padding: $menu-vertical-padding 0;
   background-color:$codap-bg-color;
-  display: flex;
-  flex-flow: row wrap;
-  row-gap: $menu-vertical-gap;
-  column-gap: 20%;
-  // justify-content: space-evenly;
 
-  .add-series-button {
-    flex: 0 0 auto;
-    height: $menu-height;
-  }
-
-  .simple-attribute-label {
-    flex: 0 0 auto;
+  .legend-row {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: $menu-height;
-    width: $min-menu-width;
-    border:1px solid #3f3f3f;
-    padding:6px;
-    border-radius:4px;
-    color: #3f3f3f;
+    margin-top: $menu-vertical-gap;
+    margin-left: 10%;
+    flex-flow: row;
+    justify-content: flex-start;
+    gap: 10%;
 
-    .symbol-title {
+    .add-series-button {
+      height: $menu-height;
+    }
+
+    .simple-attribute-label {
       display: flex;
-    }
+      align-items: center;
+      justify-content: space-between;
+      height: $menu-height;
+      width: $min-menu-width;
+      border:1px solid #3f3f3f;
+      padding:6px;
+      border-radius:4px;
+      color: #3f3f3f;
 
-    .attr-symbol {
-      height: $menu-label-height;
-      width: $menu-label-height;
-      margin-right: 6px;
-      margin-top:2px;
-      border-radius: 50%;
-    }
-
-    .caret {
-      transform: rotate(0deg);
-      transition: transform 0.2s ease-in-out;
-      svg {
-        margin-top:4px;
-        stroke:#3f3f3f;
+      .symbol-title {
+        display: flex;
       }
-    }
 
-    &.target-open {
-      border-color:$codap-menu-border-color;
-      background-color: $codap-bg-color;
+      .attr-symbol {
+        height: $menu-label-height;
+        width: $menu-label-height;
+        margin-right: 6px;
+        margin-top:2px;
+        border-radius: 50%;
+      }
+
       .caret {
-        transform: rotate(180deg);
+        transform: rotate(0deg);
         transition: transform 0.2s ease-in-out;
         svg {
-          stroke:$codap-menu-border-color;
+          margin-top:4px;
+          stroke:#3f3f3f;
+        }
+      }
+
+      &.target-open {
+        border-color:$codap-menu-border-color;
+        background-color: $codap-bg-color;
+        .caret {
+          transform: rotate(180deg);
+          transition: transform 0.2s ease-in-out;
+          svg {
+            stroke:$codap-menu-border-color;
+          }
         }
       }
     }

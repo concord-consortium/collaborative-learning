@@ -29,14 +29,14 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
     multiLegendRef.current.style.transform = legendTransform;
     multiLegendRef.current.style.width = `${layout.graphWidth}px`;
     multiLegendRef.current.style.height = `${legendBounds.height}px`;
-  }, [layout.graphWidth, legendBounds, transform]);
+  }, [layout.computedBounds.legend.height, layout.graphWidth, legendBounds, transform]);
 
   const dataConfiguration = useDataConfigurationContext();
-  let pulldowns = null;
+  let legendItems = [] as JSX.Element[];
   if (dataConfiguration) {
     const yAttributes = dataConfiguration.yAttributeDescriptions;
 
-    pulldowns = yAttributes.map((description, index) =>
+    legendItems = yAttributes.map((description, index) =>
       <SimpleAttributeLabel
         key={description.attributeID}
         place={'left'}
@@ -46,11 +46,22 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
         onRemoveAttribute={onRemoveAttribute}
         onTreatAttributeAs={onTreatAttributeAs}
       />);
+    legendItems.push(<AddSeriesButton/>);
+  }
+  // Make rows with two legend items in each row
+  const legendItemRows = [] as JSX.Element[];
+  let i=0;
+  while(legendItems.length) {
+    legendItemRows.push(
+      <div key={i++} className="legend-row">
+        {legendItems?.shift()}
+        {legendItems?.shift() || null}
+      </div>
+    );
   }
   return (
     <div className="multi-legend" ref={ multiLegendRef }>
-      {pulldowns}
-      <AddSeriesButton/>
+      {legendItemRows}
     </div>
   );
 });
