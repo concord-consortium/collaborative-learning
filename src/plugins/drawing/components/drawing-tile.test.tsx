@@ -34,7 +34,7 @@ const createElementSpy = jest.spyOn(document, "createElement")
 
 import React from "react";
 import { render, screen, within } from "@testing-library/react";
-import { ITileApi } from "../../../components/tiles/tile-api";
+import { ITileApi, TileModelContext } from "../../../components/tiles/tile-api";
 import { TileModel } from "../../../models/tiles/tile-model";
 import { Provider } from "mobx-react";
 import { specStores } from "../../../models/stores/spec-stores";
@@ -101,9 +101,6 @@ describe("DrawingToolComponent", () => {
     onSetCanAcceptDrop: (tileId?: string): void => {
       throw new Error("Function not implemented.");
     },
-    onRequestTilesOfType: (tileType: string): { id: string; title?: string | undefined; }[] => {
-      throw new Error("Function not implemented.");
-    },
     onRequestUniqueTitle: (tileId: string): string | undefined => {
       throw new Error("Function not implemented.");
     },
@@ -126,7 +123,9 @@ describe("DrawingToolComponent", () => {
     render(
       <ModalProvider>
         <Provider stores={stores}>
-          <DrawingToolComponent {...defaultProps} {...{model}} />
+          <TileModelContext.Provider value={model}>
+            <DrawingToolComponent {...defaultProps} {...{model}} />
+          </TileModelContext.Provider>
         </Provider>
       </ModalProvider>
     );
@@ -150,7 +149,7 @@ describe("DrawingToolComponent", () => {
     screen.getByLabelText("Open show/sort panel").click();
     expect(screen.getByTestId("drawing-tool")).toContainHTML("Close show/sort panel");
     expect(screen.getByTestId("drawing-tool")).not.toContainHTML("Open show/sort panel");
-    
+
     screen.getByLabelText("Close show/sort panel").click();
     expect(screen.getByTestId("drawing-tool")).toContainHTML("Open show/sort panel");
     expect(screen.getByTestId("drawing-tool")).not.toContainHTML("Close show/sort panel");

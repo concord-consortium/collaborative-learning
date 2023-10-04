@@ -6,7 +6,7 @@ import { kDataCardTileType, kDefaultLabel, kDefaultLabelPrefix } from "./data-ca
 import { withoutUndo } from "../../models/history/without-undo";
 import { IDefaultContentOptions, ITileExportOptions } from "../../models/tiles/tile-content-info";
 import { ITileMetadataModel } from "../../models/tiles/tile-metadata";
-import { tileModelHooks } from "../../models/tiles/tile-model-hooks";
+import { tileContentAPIActions } from "../../models/tiles/tile-model-hooks";
 import { TileContentModel } from "../../models/tiles/tile-content";
 import {
   addAttributeToDataSet, addCanonicalCasesToDataSet, addCasesToDataSet, DataSet
@@ -129,7 +129,7 @@ export const DataCardContentModel = TileContentModel
       ].join("\n");
     }
   }))
-  .actions(self => tileModelHooks({
+  .actions(self => tileContentAPIActions({
     doPostCreate(metadata: ITileMetadataModel){
       self.metadata = metadata;
     }
@@ -231,6 +231,20 @@ export const DataCardContentModel = TileContentModel
           });
         }
       });
+    }
+  }))
+  .actions(self => ({
+    duplicateCard() {
+      const originalCaseIndex = self.caseIndex;
+      const copyableCase = self.caseByIndex(originalCaseIndex);
+      if (copyableCase) {
+        // strip __id__ so a new id will be generated on insertion
+        const { __id__, ...canonicalCase } = copyableCase;
+        const desiredIndex = originalCaseIndex + 1;
+        const beforeId = self.dataSet.caseIDFromIndex(desiredIndex);
+        addCanonicalCasesToDataSet(self.dataSet, [canonicalCase], beforeId);
+        self.setCaseIndex(desiredIndex);
+      }
     }
   }));
 

@@ -11,7 +11,6 @@ import { TileRowComponent, kDragResizeRowId, extractDragResizeRowId, extractDrag
 import { DocumentContentModelType } from "../../models/document/document-content";
 import { IDragToolCreateInfo, IDragTilesData } from "../../models/document/document-content-types";
 import { getTileContentInfo } from "../../models/tiles/tile-content-info";
-import { kNoLinkableTiles } from "../../models/tiles/tile-link-types";
 import { getDocumentIdentifier } from "../../models/document/document-utils";
 import { IDropRowInfo } from "../../models/document/tile-row";
 import { logDataTransfer } from "../../models/document/drag-tiles";
@@ -235,8 +234,6 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
                                   documentContent={this.domElement}
                                   rowIndex={index} height={rowHeight} tileMap={tileMap}
                                   dropHighlight={dropHighlight}
-                                  onRequestTilesOfType={this.handleRequestTilesOfType}
-                                  onRequestLinkableTiles={this.handleRequestLinkableTiles}
                                   onRequestUniqueTitle={this.handleRequestUniqueTitle}
                                   ref={(elt) => this.rowRefs.push(elt)} {...others} />
               : null;
@@ -257,34 +254,15 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   }, 50);
 
   private getTileTitle(id: string) {
-    const tileApiInterface = this.context;
-    return tileApiInterface?.getTileApi(id)?.getTitle?.();
+    const tile = this.props.content?.getTile(id);
+    return tile?.computedTitle;
   }
-
-  private handleRequestTilesOfType = (tileType: string) => {
-    const { content } = this.props;
-    const tileApiInterface = this.context;
-    if (!content || !tileType || !tileApiInterface) return [];
-    const tilesOfType = content.getTilesOfType(tileType);
-    return tilesOfType.map(id => ({ id, title: this.getTileTitle(id) }));
-  };
-
-  private handleRequestLinkableTiles = () => {
-    const { content } = this.props;
-    const { providers, consumers } = content?.getLinkableTiles() || kNoLinkableTiles;
-    return {
-      providers: providers.map(tileInfo => ({ title: this.getTileTitle(tileInfo.id), ...tileInfo })),
-      consumers: consumers.map(tileInfo => ({ title: this.getTileTitle(tileInfo.id), ...tileInfo }))
-    };
-  };
 
   private handleRequestUniqueTitle = (tileId: string) => {
     const { content } = this.props;
-    const tileApiInterface = this.context;
     const tileType = content?.getTile(tileId)?.content.type;
     const titleBase = getTileContentInfo(tileType)?.titleBase;
-    const getTileTitle = (_tileId: string) => tileApiInterface?.getTileApi?.(_tileId)?.getTitle?.();
-    return tileType && titleBase && content?.getUniqueTitle(tileType, titleBase, getTileTitle);
+    return tileType && titleBase && content?.getUniqueTitle(tileType, titleBase);
   };
 
   private handleClick = (e: React.MouseEvent<HTMLDivElement>) => {

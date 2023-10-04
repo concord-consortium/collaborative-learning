@@ -2,12 +2,12 @@ import { types, Instance, SnapshotIn, getSnapshot, isStateTreeNode, detach, dest
 import { clone } from "lodash";
 import stringify from "json-stringify-pretty-compact";
 
-import { DefaultToolbarSettings, Point, ToolbarSettings, VectorType, endShapesForVectorType } 
+import { DefaultToolbarSettings, Point, ToolbarSettings, VectorType, endShapesForVectorType }
   from "./drawing-basic-types";
 import { kDrawingStateVersion, kDrawingTileType } from "./drawing-types";
 import { StampModel, StampModelType } from "./stamp";
 import { DrawingObjectMSTUnion } from "../components/drawing-object-manager";
-import { DrawingObjectSnapshotForAdd, DrawingObjectType, 
+import { DrawingObjectSnapshotForAdd, DrawingObjectType,
   ObjectMap, ToolbarModalButton } from "../objects/drawing-object";
 import { ImageObjectType, isImageObjectSnapshot } from "../objects/image";
 import { LogEventName } from "../../../lib/logger-types";
@@ -16,7 +16,7 @@ import { TileContentModel } from "../../../models/tiles/tile-content";
 import { ITileExportOptions, IDefaultContentOptions } from "../../../models/tiles/tile-content-info";
 import { TileMetadataModel } from "../../../models/tiles/tile-metadata";
 import { getTileIdFromContent } from "../../../models/tiles/tile-model";
-import { tileModelHooks } from "../../../models/tiles/tile-model-hooks";
+import { tileContentAPIActions } from "../../../models/tiles/tile-model-hooks";
 import { GroupObjectSnapshotForAdd, GroupObjectType, isGroupObject } from "../objects/group";
 
 export const DrawingToolMetadataModel = TileMetadataModel
@@ -54,7 +54,7 @@ export const DrawingContentModel = TileContentModel
       return self.objects.map(object => ({
         objectId: object.id,
         objectType: object.type,
-        tileId 
+        tileId
       }));
     },
     get objectMap() {
@@ -65,7 +65,7 @@ export const DrawingContentModel = TileContentModel
         if (isGroupObject(obj)) {
           obj.objects.forEach((member) => {
             map[member.id] = member;
-          });          
+          });
         }
         return map;
       }, {} as ObjectMap);
@@ -125,7 +125,7 @@ export const DrawingContentModel = TileContentModel
       return self.selection.map((id) => self.objectMap[id]).filter((x)=>!!x) as DrawingObjectType[];
     }
   }))
-  .actions(self => tileModelHooks({
+  .actions(self => tileContentAPIActions({
     doPostCreate(metadata) {
       self.metadata = metadata as DrawingToolMetadataModelType;
     },
@@ -199,7 +199,6 @@ export const DrawingContentModel = TileContentModel
     }
 
   }))
-  
   .actions(self => ({
     /* Add a single object (identified by its id) to the selection. */
     selectId(id: string) {
@@ -390,7 +389,6 @@ export const DrawingContentModel = TileContentModel
           group.visible = hasVisibleMember;
           group.computeExtents();
         },
-  
       }
     };
   })

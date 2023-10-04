@@ -208,7 +208,7 @@ There are a number of URL parameters that can aid in testing:
 |`demoName` |string (default: `CLUE`)  |Used to partition the demo portion of the database.|
 |`network`  |string                    |Specify the network with which a teacher user is affiliated.|
 |`fakeClass`|string                    |Class id for demo, qa, or test modes.|
-|`fakeUser` |`(student, teacher):<id>`  |Configure user type and (optionally) id.|
+|`fakeUser` |`(student\|teacher):<id>` |Configure user type and (optionally) id.|
 |`qaGroup`  |string                    |Group id for qa, e.g. automated tests.|
 |`qaClear`  |`all`, `class`, `offering`|Extent of database clearing for automated tests.|
 |`firebase` |`emulator` (for default) or `host:port`|Target emulator for firebase realtime database calls.|

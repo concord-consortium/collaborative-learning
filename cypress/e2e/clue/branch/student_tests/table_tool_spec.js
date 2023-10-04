@@ -179,7 +179,7 @@ context('Table Tool Tile', function () {
       cy.get('.modal-content .prompt').should('contain', 'y2');
       cy.get('#expression-input').click().type(`${headerX}+2{enter}`);
     });
-    it('verify value caluculated based on formula correctly', function () {
+    it('verify value calculated based on formula correctly', function () {
       cy.get(".primary-workspace").within((workspace) => {
         tableToolTile.typeInTableCell(1, '3');
         tableToolTile.getTableCell().eq(1).should('contain', '3');
@@ -188,6 +188,9 @@ context('Table Tool Tile', function () {
         tableToolTile.typeInTableCell(1, '5');
         tableToolTile.getTableCell().eq(2).should('contain', '17');
         tableToolTile.getTableCell().eq(3).should('contain', '7');
+        tableToolTile.typeInTableCell(6, 'a');
+        tableToolTile.getTableCell().eq(7).should('contain', 'NaN');
+        tableToolTile.getTableCell().eq(8).should('contain', 'NaN');
         });
     });
     it('verifies restore of table field content in copy document',()=>{
@@ -200,6 +203,15 @@ context('Table Tool Tile', function () {
         tableToolTile.getTableCell().eq(1).should('contain', '5');
         tableToolTile.getTableCell().eq(2).should('contain', '17');
         tableToolTile.getTableCell().eq(3).should('contain', '7');
+
+        cy.get(".primary-workspace").within((workspace) => {
+          cy.get('.editable-header-cell')
+          .contains('.header-name', 'mars')
+          .parent()
+          .siblings('.expression-cell.has-expression')
+          .should('contain', formula);
+        });
+
         canvas.deleteDocument();
     });
   });

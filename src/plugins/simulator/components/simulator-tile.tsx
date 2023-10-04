@@ -19,21 +19,17 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
   const [_steps, setSteps] = useState(0);
   useEffect(() => {
     const id = setInterval(() => {
-      content?.step();
+      content?.step(readOnly);
       setSteps(v => v + 1);
     }, content.simulationData.delay);
     return () => clearInterval(id);
-  }, [content]);
+  }, [content, readOnly]);
 
   const component = content.simulationData.component;
 
   return (
     <div className="simulator-content-container">
-      <BasicEditableTileTitle
-        model={model}
-        readOnly={readOnly}
-        scale={scale}
-      />
+      <BasicEditableTileTitle readOnly={readOnly} />
       <div className="simulator-content">
         <div className="simulator-variables">
           { content.inputVariables.map(variable =>

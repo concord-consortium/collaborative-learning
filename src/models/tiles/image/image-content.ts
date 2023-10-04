@@ -2,7 +2,7 @@ import { types, Instance, SnapshotOut } from "mobx-state-tree";
 import { exportImageTileSpec, isLegacyImageTileImport, convertLegacyImageTile } from "./image-import-export";
 import { ITileExportOptions, IDefaultContentOptions } from "../tile-content-info";
 import { ITileMetadataModel } from "../tile-metadata";
-import { tileModelHooks } from "../tile-model-hooks";
+import { tileContentAPIActions } from "../tile-model-hooks";
 import { TileContentModel } from "../tile-content";
 import { isPlaceholderImage } from "../../../utilities/image-utils";
 import placeholderImage from "../../../assets/image_placeholder.png";
@@ -43,7 +43,7 @@ export const ImageContentModel = TileContentModel
       return exportImageTileSpec(self.url, self.filename, options);
     }
   }))
-  .actions(self => tileModelHooks({
+  .actions(self => tileContentAPIActions({
       doPostCreate(metadata: ITileMetadataModel) {
         self.metadata = metadata;
       },

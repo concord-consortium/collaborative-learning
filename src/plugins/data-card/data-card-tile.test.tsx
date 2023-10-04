@@ -1,7 +1,9 @@
 import React from "react";
+import { Provider } from "mobx-react";
 import { render } from "@testing-library/react";
 import { ModalProvider } from "@concord-consortium/react-modal-hook";
-import { ITileApi } from "../../components/tiles/tile-api";
+import { ITileApi, TileModelContext } from "../../components/tiles/tile-api";
+import { specStores } from "../../models/stores/spec-stores";
 import { TileModel } from "../../models/tiles/tile-model";
 import { defaultDataCardContent } from "./data-card-content";
 import { DataCardToolComponent } from "./data-card-tile";
@@ -10,12 +12,6 @@ import { DataCardToolComponent } from "./data-card-tile";
 // knows it is a supported tile type
 import "./data-card-registration";
 
-jest.mock("../../hooks/use-stores", () => ({
-  useUIStore: () => ({
-    selectedTileIds: []
-  })
-}));
-
 // mock Logger calls
 const mockLogTileDocumentEvent = jest.fn();
 jest.mock("../../models/tiles/log/log-tile-document-event", () => ({
@@ -23,6 +19,7 @@ jest.mock("../../models/tiles/log/log-tile-document-event", () => ({
 }));
 
 describe("DataCardToolComponent", () => {
+  const stores = specStores();
   const content = defaultDataCardContent();
   const model = TileModel.create({content});
 
@@ -37,9 +34,6 @@ describe("DataCardToolComponent", () => {
       throw new Error("Function not implemented.");
     },
     onSetCanAcceptDrop: (tileId?: string): void => {
-      throw new Error("Function not implemented.");
-    },
-    onRequestTilesOfType: (tileType: string): { id: string; title?: string | undefined; }[] => {
       throw new Error("Function not implemented.");
     },
     onRequestUniqueTitle: (tileId: string): string | undefined => {
@@ -60,7 +54,11 @@ describe("DataCardToolComponent", () => {
     const {getByText} =
       render(
         <ModalProvider>
-          <DataCardToolComponent  {...defaultProps} {...{model}}></DataCardToolComponent>
+          <Provider stores={stores}>
+            <TileModelContext.Provider value={model}>
+              <DataCardToolComponent  {...defaultProps} {...{model}}></DataCardToolComponent>
+            </TileModelContext.Provider >
+          </Provider>
         </ModalProvider>
       );
       expect(getByText("Data Card Collection 1")).toBeInTheDocument();

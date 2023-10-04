@@ -664,7 +664,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     let serialNodesCt = 0;
 
     nodes.forEach((n) => {
-      const isLiveSensor = /fsr|emg|[th]-[abcd]/; // match ids any live sensor channels
+      const isLiveSensor = /fsr|emg|tmp|[th]-[abcd]/; // match ids any live sensor channels
       const sensor = n.data.sensor as string;
       if(isLiveSensor.test(sensor) && !sensor.startsWith(kSimulatedChannelPrefix)){
         serialNodesCt++;

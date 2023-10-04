@@ -522,10 +522,11 @@ context('Dataflow Tool Tile', function () {
       it("verify sensor select", () => {
         const dropdown = "sensor-select";
         const sensorSelect = [
-          "Temperature Demo Data", "Humidity Demo Data", "CO2 Demo Data", "O2 Demo Data", "Light Demo Data", "Particulates Demo Data",
+          "Humidity Demo Data", "CO2 Demo Data", "O2 Demo Data", "Light Demo Data", "Particulates Demo Data",
          "EMG - Long Clench and Hold Demo Data", "FSR Demo Data",
          "⚠️ Connect Arduino for live EMG",
          "⚠️ Connect Arduino for live FSR",
+         "⚠️ Connect Arduino for live Temperature",
          "⚠️ Connect micro:bit for live Temperature A",
          "⚠️ Connect micro:bit for live Humidity A",
          "⚠️ Connect micro:bit for live Temperature B",

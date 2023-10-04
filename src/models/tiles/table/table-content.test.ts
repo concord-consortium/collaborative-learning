@@ -1,11 +1,12 @@
 import { IAnyType, types, castToSnapshot } from "mobx-state-tree";
+import { Value } from "expr-eval";
 import { defaultTableContent, kTableTileType, TableContentModel, TableContentModelType,
-  TableMetadataModel } from "./table-content";
+  TableContentSnapshotType, TableMetadataModel } from "./table-content";
 import { TableContentTableImport } from "./table-import";
 import { IDataSet } from "../../data/data-set";
 import { kSerializedXKey } from "../../data/expression-utils";
 import { kDefaultColumnWidth } from "../../../components/tiles/table/table-types";
-import { SharedDataSet, SharedDataSetType } from "../../../models/shared/shared-data-set";
+import { SharedDataSet, SharedDataSetSnapshotType, SharedDataSetType } from "../../../models/shared/shared-data-set";
 import { ISharedModelManager } from "../../..//models/shared/shared-model-manager";
 
 // mock Logger calls
@@ -31,8 +32,8 @@ const TestTileContentModelContainer = types.model("TestTileContentModelContainer
   dataSet: types.maybe(SharedDataSet)
 });
 
-const makeSharedModelManager = (): ISharedModelManager => {
-  let sharedDataSet: SharedDataSetType | undefined;
+const makeSharedModelManager = ( dataSet?: SharedDataSetType): ISharedModelManager => {
+  let sharedDataSet = dataSet;
   return {
     isReady: true,
     findFirstSharedModelByType<IT extends IAnyType>(sharedModelType: IT): IT["Type"] | undefined {
@@ -71,10 +72,15 @@ const makeSharedModelManager = (): ISharedModelManager => {
 
 // Note: in the diagram tests this method also sets up an onSnapshot listener to automatically
 // update the content when the shared model change.
-const setupContainer = (content: TableContentModelType) => {
-  const sharedModelManager = makeSharedModelManager();
+const setupContainer = (content: TableContentModelType, dataSetSnapshot?: SharedDataSetSnapshotType) => {
+  let dataSet: SharedDataSetType | undefined;
+  if (dataSetSnapshot) {
+    dataSet = SharedDataSet.create(dataSetSnapshot);
+  }
+
+  const sharedModelManager = makeSharedModelManager(dataSet);
   TestTileContentModelContainer.create(
-    {child: castToSnapshot(content)},
+    {child: castToSnapshot(content), dataSet},
     {sharedModelManager}
   );
 };
@@ -192,63 +198,130 @@ describe("TableContent", () => {
     }
   });
 
-  // Table Remodel 8/9/2022
-  // Loading expressions stopped working, and we ran out of time to fix it.
-  // We hope to reimplement these tests sometime in the future.
-  //
-  // it("can import multi-column authored data with expressions", () => {
-  //   const kTableTitle = "Table Title";
-  //   const importData: TableContentTableImport = {
-  //           type: "Table",
-  //           name: kTableTitle,
-  //           columns: [
-  //             { name: "xCol", values: [1, 2, 3] },
-  //             { name: "y1", values: ["y-1", "y-2", "y-3"] },
-  //             { name: "y2", expression: "xCol + 1" }
-  //           ]
-  //         };
-  //   const table = TableContentModel.create(importData);
-  //   const metadata = TableMetadataModel.create({ id: "table-1" });
-  //   table.doPostCreate?.(metadata);
+  it("can load a table with a shared data set", () => {
+    const tableSnapshot: TableContentSnapshotType = {
+      type: "Table",
+    };
+    const dataSetSnapshot: SharedDataSetSnapshotType = {
+      type: "SharedDataSet",
+      dataSet: {
+        attributes: [
+          { name: "xCol", values: [1,2]},
+          { name: "yCol", values: [3,4]}
+        ],
+        cases: [
+          {}, {}
+        ]
+      }
+    };
+    const table = TableContentModel.create(tableSnapshot);
+    const metadata = TableMetadataModel.create({ id: "test-metadata" });
+    table.doPostCreate!(metadata);
 
-  //   expect(table.type).toBe(kTableTileType);
-  //   expect(table.isImported).toBe(true);
-  //   expect(table.dataSet.name).toBe(kTableTitle);
-  //   expect(table.dataSet.attributes.length).toBe(3);
-  //   expect(table.dataSet.cases.length).toBe(3);
-  //   const y2Attr = table.dataSet.attrFromName("y2");
-  //   expect(y2Attr?.formula.display).toBe("xCol + 1");
-  //   expect(y2Attr?.formula.canonical).toBe("(__x__ + 1)");
+    setupContainer(table, dataSetSnapshot);
 
-  //   expect(getCaseNoId(table.dataSet, 0)).toEqual({ xCol: 1, y1: "y-1", y2: 2 });
-  //   expect(getCaseNoId(table.dataSet, 1)).toEqual({ xCol: 2, y1: "y-2", y2: 3 });
-  //   expect(getCaseNoId(table.dataSet, 2)).toEqual({ xCol: 3, y1: "y-3", y2: 4 });
-  // });
+    expect(table.sharedModel).toBeDefined();
+    const xCol = table.dataSet.attrFromName("xCol");
+    expect(xCol).toBeDefined();
+    if (xCol) {
+      expect(table.columnWidth(xCol.id)).toEqual(kDefaultColumnWidth);
+    }
+    const yCol = table.dataSet.attrFromName("yCol");
+    expect(yCol).toBeDefined();
+    if (yCol) {
+      expect(table.columnWidth(yCol.id)).toEqual(kDefaultColumnWidth);
+    }
+    expect(table.dataSet.cases.length).toBe(2);
+    expect(getCaseNoId(table.dataSet, 0)).toEqual({ xCol: 1, yCol: 3 });
+    expect(getCaseNoId(table.dataSet, 1)).toEqual({ xCol: 2, yCol: 4 });
+  });
 
-  // it("can import multi-column authored data with invalid expressions", () => {
-  //   const kTableTitle = "Table Title";
-  //   const importData: TableContentTableImport = {
-  //           type: "Table",
-  //           name: kTableTitle,
-  //           columns: [
-  //             { name: "xCol", values: [1, 2, 3] },
-  //             { name: "y", expression: "xCol + $1" }  // <== parse error
-  //           ]
-  //         };
-  //   const table = TableContentModel.create(importData);
-  //   const metadata = TableMetadataModel.create({ id: "table-1" });
-  //   table.doPostCreate!(metadata);
+  it("can load a table with a formulas", () => {
+    const tableSnapshot: TableContentSnapshotType = {
+      type: "Table",
+    };
+    const dataSetSnapshot: SharedDataSetSnapshotType = {
+      type: "SharedDataSet",
+      dataSet: {
+        attributes: [
+          { name: "xCol", values: [1,2]},
+          { name: "yCol", values: [2,4],
+            formula: {display: "xCol*2", canonical: "(__xCol__ * 2)"}
+          }
+        ],
+        cases: [
+          {}, {}
+        ]
+      }
+    };
+    const table = TableContentModel.create(tableSnapshot);
+    const metadata = TableMetadataModel.create({ id: "test-metadata" });
+    table.doPostCreate!(metadata);
+    // The metadata has not expression info until the table has a dataset
+    expect(metadata.hasExpressions).toBe(false);
 
-  //   expect(table.type).toBe(kTableTileType);
-  //   expect(table.isImported).toBe(true);
-  //   const _yAttr = table.dataSet.attrFromName("y");
-  //   expect(_yAttr?.formula.display).toBe("xCol + $1");
-  //   expect(_yAttr?.formula.canonical).toBe("__x__ + $1");
+    setupContainer(table, dataSetSnapshot);
 
-  //   expect(getCaseNoId(table.dataSet, 0)).toEqual({ xCol: 1, y: NaN });
-  //   expect(getCaseNoId(table.dataSet, 1)).toEqual({ xCol: 2, y: NaN });
-  //   expect(getCaseNoId(table.dataSet, 2)).toEqual({ xCol: 3, y: NaN });
-  // });
+    expect(table.dataSet.cases.length).toBe(2);
+    expect(getCaseNoId(table.dataSet, 0)).toEqual({ xCol: 1, yCol: 2 });
+    expect(getCaseNoId(table.dataSet, 1)).toEqual({ xCol: 2, yCol: 4 });
+
+    expect(metadata.hasExpressions).toBe(true);
+    const yCol = table.dataSet.attrFromName("yCol");
+    expect(yCol).toBeDefined();
+    if (yCol) {
+      expect(metadata.rawExpressions.get(yCol?.id)).toBe("xCol*2");
+      expect(metadata.expressions.get(yCol?.id)).toBe("(__xCol__ * 2)");
+    }
+  });
+
+  // This should not happen via the UI, but the data could get corrupted
+  // or it could be manually edited
+  it("can load a table with invalid formulas", () => {
+    const tableSnapshot: TableContentSnapshotType = {
+      type: "Table",
+    };
+    const dataSetSnapshot: SharedDataSetSnapshotType = {
+      type: "SharedDataSet",
+      dataSet: {
+        attributes: [
+          { name: "xCol", values: [1,2]},
+          { name: "yCol", values: [2,4],
+            formula: {display: "xCol+$1", canonical: "(__xCol__ + $1)"}
+          }
+        ],
+        cases: [
+          {}, {}
+        ]
+      }
+    };
+    const table = TableContentModel.create(tableSnapshot);
+    const metadata = TableMetadataModel.create({ id: "test-metadata" });
+    table.doPostCreate!(metadata);
+    // The metadata has not expression info until the table has a dataset
+    expect(metadata.hasExpressions).toBe(false);
+
+    setupContainer(table, dataSetSnapshot);
+
+    expect(table.dataSet.cases.length).toBe(2);
+    expect(getCaseNoId(table.dataSet, 0)).toEqual({ xCol: 1, yCol: 2 });
+    expect(getCaseNoId(table.dataSet, 1)).toEqual({ xCol: 2, yCol: 4 });
+
+    expect(metadata.hasExpressions).toBe(true);
+    const yCol = table.dataSet.attrFromName("yCol");
+    expect(yCol).toBeDefined();
+    if (yCol) {
+      expect(metadata.rawExpressions.get(yCol?.id)).toBe("xCol+$1");
+      expect(metadata.expressions.get(yCol?.id)).toBe("(__xCol__ + $1)");
+    }
+
+    // force an update of the values based on the expression
+    // this does not currently happen automatically on load
+    metadata.updateDatasetByExpressions(table.dataSet);
+
+    expect(getCaseNoId(table.dataSet, 0)).toEqual({ xCol: 1, yCol: NaN });
+    expect(getCaseNoId(table.dataSet, 1)).toEqual({ xCol: 2, yCol: NaN });
+  });
 
   it("can convert original change format", () => {
     const oldChanges = [
@@ -424,5 +497,79 @@ describe("TableContent", () => {
     expect(table.dataSet.getValue("row1", "y2Col")).toBeNaN();
     expect(table.dataSet.getValue("row2", "y2Col")).toBeNaN();
     expect(table.dataSet.getValue("row3", "y2Col")).toBeNaN();
+  });
+
+  it("can evaluate expressions", () => {
+    const table = TableContentModel.create();
+    const metadata = TableMetadataModel.create({ id: "table-1" });
+    table.doPostCreate!(metadata);
+    const expression = table.parseExpression("x+1");
+    expect(expression).toBeDefined();
+    const evaluate = (val: Value) => expression!.evaluate(val);
+
+    expect(evaluate({x:1})).toBe(2);
+    expect(evaluate({x:"1"})).toBe(2);
+    expect(evaluate({x:"a"})).toBe(NaN);
+    expect(evaluate({x:"1 a"})).toBe(NaN);
+    expect(evaluate({x:NaN})).toBe(NaN);
+
+    const expression3 = table.parseExpression('x + "more"');
+    expect(expression3).toBeDefined();
+    const evaluate3 = (val: Value) => expression3!.evaluate(val);
+    expect(evaluate3({x:1})).toBe(NaN);
+    expect(evaluate3({x:"1"})).toBe(NaN);
+    expect(evaluate3({x:"a"})).toBe(NaN);
+
+    const expression4 = table.parseExpression("x[0]");
+    expect(expression4).toBeDefined();
+    const evaluate4 = (val: Value) => expression4!.evaluate(val);
+    expect(evaluate4({x:1})).toBe(undefined);
+    expect(evaluate4({x:"1"})).toBe("1");
+    expect(evaluate4({x:"a"})).toBe("a");
+
+
+  });
+
+  it("various formulas handle various input types", () => {
+    const tableSnapshot: TableContentSnapshotType = {
+      type: "Table",
+    };
+    const dataSetSnapshot: SharedDataSetSnapshotType = {
+      type: "SharedDataSet",
+      dataSet: {
+        attributes: [
+          { name: "xCol", values: [1,2,"1/2","a"]},
+          { name: "yCol", values: [0,0,    0,  0],
+            formula: {display: "xCol*2", canonical: "(__x__ * 2)"}
+          },
+          { name: "zCol", values: [0,0,    0,  0],
+            formula: {display: "xCol", canonical: "__x__"}
+          }
+        ],
+        cases: [
+          {}, {}, {}, {}
+        ]
+      }
+    };
+    const table = TableContentModel.create(tableSnapshot);
+    const metadata = TableMetadataModel.create({ id: "test-metadata" });
+    table.doPostCreate!(metadata);
+    // The metadata has not expression info until the table has a dataset
+    expect(metadata.hasExpressions).toBe(false);
+
+    setupContainer(table, dataSetSnapshot);
+
+    expect(table.dataSet.cases.length).toBe(4);
+
+    // force an update of the values based on the expression
+    // this does not currently happen automatically on load
+    metadata.updateDatasetByExpressions(table.dataSet);
+
+    expect(getCaseNoId(table.dataSet, 0)).toEqual({ xCol: 1,     yCol: 2,   zCol: 1   });
+    expect(getCaseNoId(table.dataSet, 1)).toEqual({ xCol: 2,     yCol: 4,   zCol: 2   });
+    expect(getCaseNoId(table.dataSet, 2)).toEqual({ xCol: "1/2", yCol: 1,   zCol: 0.5 });
+    // Internally the formula engine can handle string inputs to formulas, however
+    // CLUE will return NaN for any non numeric input or non numeric output
+    expect(getCaseNoId(table.dataSet, 3)).toEqual({ xCol: "a",   yCol: NaN, zCol: NaN });
   });
 });

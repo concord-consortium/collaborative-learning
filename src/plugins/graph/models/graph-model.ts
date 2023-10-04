@@ -28,6 +28,7 @@ import {
 import { onAnyAction } from "../../../utilities/mst-utils";
 import { AdornmentModelUnion } from "../adornments/adornment-types";
 import { SharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
+import { tileContentAPIViews } from "../../../models/tiles/tile-model-hooks";
 import { ConnectingLinesModel } from "../adornments/connecting-lines/connecting-lines-model";
 import { kConnectingLinesType } from "../adornments/connecting-lines/connecting-lines-types";
 import { getDotId } from "../utilities/graph-utils";
@@ -174,6 +175,11 @@ export const GraphModel = TileContentModel
       };
     }
   }))
+  .views(self => tileContentAPIViews({
+    get contentTitle() {
+      return self.data?.name;
+    }
+  }))
   .actions(self => ({
     setDataSetListener() {
       const actionsAffectingCategories = [
@@ -270,7 +276,8 @@ export const GraphModel = TileContentModel
         console.warn("GraphModel.configureLinkedGraph requires a dataset");
         return;
       }
-      if (getAppConfig(self)?.getSetting("emptyPlotIsNumeric", "graph")) {
+
+      if (getAppConfig(self)?.getSetting("autoAssignAttributes", "graph")) {
         const attributeCount = self.data.attributes.length;
         if (!attributeCount) return;
 

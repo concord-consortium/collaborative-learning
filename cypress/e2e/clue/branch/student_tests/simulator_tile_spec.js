@@ -24,11 +24,17 @@ context('Simulator Tile with Brainwaves Gripper Simulation', function () {
       simulatorTile.getSimulatorTile().should("contain.text", "Surface Pressure Sensor");
       simulatorTile.getSimulatorTile().should("contain.text", "Gripper Output");
       // Icons are being rendered
-      simulatorTile.getSimulatorTile().find(".leading-box.variable-icon").should("have.length", 3);
+      simulatorTile.getSimulatorTile().find(".leading-box.variable-icon").should("have.length", 4);
 
       cy.get(".arm-image").should("exist");
       cy.get(".arduino-image").should("exist");
       cy.get(".gripper-image").should("exist");
+
+      cy.log("Can switch to temperature variant.");
+      cy.get(".temperature-part").should("not.exist");
+      simulatorTile.getSelectionButtons().should("have.length", 2).eq(1).click();
+      cy.get(".gripper-image").should("not.exist");
+      cy.get(".temperature-part").should("exist");
     });
     it("edit tile title", () => {
       const newName = "Test Simulation";
@@ -86,10 +92,10 @@ context('Simulator Tile with Brainwaves Gripper Simulation', function () {
       output().click();
       input().click({ force: true });
       dataflowTile.getOutputNodeValueText().should("contain", "100% closed");
-      simulatorTile.getSimulatorTile().should("contain.text", "Gripper Output: 100");
+      simulatorTile.getSimulatorTile().should("contain.text", "Gripper Output100");
 
       // Pressure variable updates when the gripper changes
-      simulatorTile.getSimulatorTile().should("contain.text", "Surface Pressure Sensor: 400");
+      simulatorTile.getSimulatorTile().should("contain.text", "Surface Pressure Sensor400");
     });
   });
 });
@@ -139,7 +145,7 @@ context('Simulator Tile with Terrarium Simulation', function() {
     dataflowTile.getDropdown(sensor, "sensor-type").click();
     dataflowTile.getSensorDropdownOptions(sensor).eq(0).find(".label").click(); // Temperature
     dataflowTile.getDropdown(sensor, "sensor-select").click();
-    dataflowTile.getSensorDropdownOptions(sensor).should("have.length", 6);
+    dataflowTile.getSensorDropdownOptions(sensor).should("have.length", 7);
     dataflowTile.getDropdown(sensor, "sensor-type").click();
     dataflowTile.getSensorDropdownOptions(sensor).eq(1).find(".label").click(); // Humidity
     dataflowTile.getDropdown(sensor, "sensor-select").click();
@@ -181,7 +187,7 @@ context('Simulator Tile with Terrarium Simulation', function() {
 
     const liveOutputIndex = 4; // Heat Lamp
     dataflowTile.getCreateNodeButton(lo).click();
-    simulatorTile.getSimulatorTile().should("contain.text", `Heat Lamp Output: 0`);
+    simulatorTile.getSimulatorTile().should("contain.text", `Heat Lamp Output0`);
     dataflowTile.getDropdown(lo, "liveOutputType").eq(0).click();
     dataflowTile.getDropdownOptions(lo, "liveOutputType").eq(liveOutputIndex).click();
     const input = () => dataflowTile.getNode(lo).eq(0).find(".socket.input");
@@ -190,6 +196,6 @@ context('Simulator Tile with Terrarium Simulation', function() {
     dataflowTile.getDropdown(lo, "hubSelect").eq(0).click();
     dataflowTile.getDropdownOptions(lo, "hubSelect").should("have.length", 1);
     dataflowTile.getDropdownOptions(lo, "hubSelect").eq(0).click();
-    simulatorTile.getSimulatorTile().should("contain.text", `Heat Lamp Output: 1`);
+    simulatorTile.getSimulatorTile().should("contain.text", `Heat Lamp Output1`);
   });
 });

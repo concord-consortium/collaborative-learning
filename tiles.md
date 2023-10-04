@@ -80,7 +80,6 @@ interface ITileBaseProps {
   readOnly?: boolean;
   onResizeRow: (e: React.DragEvent<HTMLDivElement>) => void;
   onSetCanAcceptDrop: (tileId?: string) => void;
-  onRequestTilesOfType: (tileType: string) => Array<{ id: string, title?: string }>;
   onRequestUniqueTitle: (tileId: string) => string | undefined;
   onRequestRowHeight: (tileId: string, height?: number, deltaHeight?: number) => void;
 }
@@ -101,7 +100,6 @@ The `on*` properties are a way for the tool component to communicate with the ho
 A tile API allows tile components to implement one or more functions that can be called generically for any tile that supports the ITileApi without knowing the specific tile type. This can be thought of as the beginnings of a generic plugin API model for tiles. The tile API interface is defined as follows:
 ```typescript
 export interface ITileApi {
-  getTitle?: () => string | undefined;
   hasSelection?: () => boolean;
   deleteSelection?: () => void;
   getSelectionInfo?: () => string;
