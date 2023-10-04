@@ -80,7 +80,6 @@ interface ITileBaseProps {
   readOnly?: boolean;
   onResizeRow: (e: React.DragEvent<HTMLDivElement>) => void;
   onSetCanAcceptDrop: (tileId?: string) => void;
-  onRequestTilesOfType: (tileType: string) => Array<{ id: string, title?: string }>;
   onRequestUniqueTitle: (tileId: string) => string | undefined;
   onRequestRowHeight: (tileId: string, height?: number, deltaHeight?: number) => void;
 }

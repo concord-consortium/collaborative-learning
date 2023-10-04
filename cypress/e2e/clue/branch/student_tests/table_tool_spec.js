@@ -189,8 +189,8 @@ context('Table Tool Tile', function () {
         tableToolTile.getTableCell().eq(2).should('contain', '17');
         tableToolTile.getTableCell().eq(3).should('contain', '7');
         tableToolTile.typeInTableCell(6, 'a');
-        tableToolTile.getTableCell().eq(7).should('contain', '[error]');
-        tableToolTile.getTableCell().eq(8).should('contain', '[error]');
+        tableToolTile.getTableCell().eq(7).should('contain', 'NaN');
+        tableToolTile.getTableCell().eq(8).should('contain', 'NaN');
         });
     });
     it('verifies restore of table field content in copy document',()=>{

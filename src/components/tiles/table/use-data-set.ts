@@ -78,8 +78,6 @@ export const useDataSet = ({
     }
   };
 
-  const hasLinkableRows = dataSet.attributes.length > 1;
-
   const getUpdatedRowAndColumn = (_rows?: TRow[], _columns?: TColumn[]) => {
     const rs = _rows ?? rows;
     const cs = _columns ?? columns;
@@ -134,6 +132,6 @@ export const useDataSet = ({
     triggerColumnChange();
     return returnVal;
   }, [onColumnResize, triggerColumnChange]);
-  
-  return { hasLinkableRows, onColumnResize: handleColumnResize, onRowsChange, deleteSelected, onSelectedCellChange};
+
+  return { onColumnResize: handleColumnResize, onRowsChange, deleteSelected, onSelectedCellChange};
 };
