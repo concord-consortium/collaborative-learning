@@ -65,6 +65,7 @@ export const DocEditorApp = ({ appConfig }: IDocEditorAppProps) => {
     }
 
     let contents;
+    // Save in the same format that was loaded: either an export or raw
     if (sectionSnapshot) {
       // construct the contents of the section
       const docContentString = document.content.exportAsJson({ includeTileIds: true });
@@ -72,8 +73,6 @@ export const DocEditorApp = ({ appConfig }: IDocEditorAppProps) => {
       sectionSnapshot.content = docContentJSON;
       contents = JSON.stringify(sectionSnapshot, undefined, 2);
     } else {
-      // TODO: we probably want to keep track if we loaded an exported or raw file
-      // and then save it the same way
       const contentJson = getSnapshot(document.content);
       contents = stringify(contentJson, {maxLength: 100});
     }

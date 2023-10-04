@@ -54,7 +54,7 @@ context('Simulator Tile with Brainwaves Gripper Simulation', function () {
       dataflowTile.getDropdown(sensor, "sensor-type").click();
       dataflowTile.getSensorDropdownOptions(sensor).eq(7).find(".label").click(); // EMG
       dataflowTile.getDropdown(sensor, "sensor-select").click();
-      dataflowTile.getSensorDropdownOptions(sensor).should("have.length", 2);
+      dataflowTile.getSensorDropdownOptions(sensor).should("have.length", 1);
       // Click the background to not select any option
       cy.get(".primary-workspace .flow-tool").click();
       dataflowTile.getNodeValueContainer(sensor).invoke('text').then(parseFloat).should("equal", 0);

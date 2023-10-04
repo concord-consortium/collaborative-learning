@@ -3,6 +3,10 @@
 
 .data-card-toolbar {
   @include tile-toolbar;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
 
   display:flex;
   &.disabled {
@@ -47,83 +51,26 @@
     border-bottom-right-radius: 3px;
   }
 
-  .value-actions-buttons {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    height: $toolbar-button-height;
-    background-color: $workspace-teal-light-9;
-
-    .image-upload {
-      position: relative;
+  .image-upload {
+    input {
+      position: absolute;
+      left: 0;
+      top: 0;
       width: $toolbar-button-width;
       height: $toolbar-button-height;
-      background-color: $workspace-teal-light-9;
-
-      &:first-child {
-        border-bottom-left-radius: $toolbar-border-radius;
-      }
-
-      &:last-child {
-        border-bottom-right-radius: $toolbar-border-radius;
-      }
-
-      &:hover {
-        background-color: $workspace-teal-light-6;
-      }
-
-      &:active {
-        background-color: $workspace-teal-light-4;
-      }
-
-      input {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: $toolbar-button-width;
-        height: $toolbar-button-height;
-      }
-    }
-
-    .delete-value-button {
-      opacity: 1;
-      svg path {
-        fill: $charcoal-dark-1;
-      }
-      &:hover svg {
-        background-color:$workspace-teal-light-6;
-      }
-    }
-    &.value-actions-disabled {
-      opacity: 0.35;
-      pointer-events: none;
     }
   }
 
-  .card-actions-buttons {
-    display: flex;
-    flex-direction: row;
-    .duplicate-card-button {
-      opacity: 1;
-      svg {
-        stroke: transparent;
-      }
-      &:hover svg {
-        background-color:$workspace-teal-light-6;
-      }
-    }
-    .link-tile-button {
-      svg {
-        stroke: transparent;
-      }
-      &:hover svg {
-        background-color:$workspace-teal-light-6;
-      }
-    }
-    &.card-actions-disabled {
-      opacity: 0.35;
-      pointer-events: none;
-    }
+  .delete-value-button svg path {
+    fill: $charcoal-dark-1;
   }
+
+  .duplicate-card-button svg {
+    stroke: transparent;
+  }
+
+  .link-tile-button svg {
+    stroke: transparent;
+  }
+
 }
