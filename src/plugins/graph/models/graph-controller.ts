@@ -100,6 +100,7 @@ export class GraphController {
       appConfig = getAppConfig(graphModel),
       emptyPlotIsNumeric = appConfig?.getSetting("emptyPlotIsNumeric", "graph");
     if (!(graphModel && layout && dataConfig)) {
+      console.log("change for a commit");
       return;
     }
     this.callMatchCirclesToData();
