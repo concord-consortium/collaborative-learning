@@ -232,6 +232,20 @@ export const DataCardContentModel = TileContentModel
         }
       });
     }
+  }))
+  .actions(self => ({
+    duplicateCard() {
+      const originalCaseIndex = self.caseIndex;
+      const copyableCase = self.caseByIndex(originalCaseIndex);
+      if (copyableCase) {
+        // strip __id__ so a new id will be generated on insertion
+        const { __id__, ...canonicalCase } = copyableCase;
+        const desiredIndex = originalCaseIndex + 1;
+        const beforeId = self.dataSet.caseIDFromIndex(desiredIndex);
+        addCanonicalCasesToDataSet(self.dataSet, [canonicalCase], beforeId);
+        self.setCaseIndex(desiredIndex);
+      }
+    }
   }));
 
 export interface DataCardContentModelType extends Instance<typeof DataCardContentModel> {}
