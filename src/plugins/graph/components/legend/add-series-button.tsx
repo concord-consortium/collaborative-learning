@@ -6,8 +6,8 @@ import AddSeriesIcon from "../../imports/assets/add-series-icon.svg";
 export const AddSeriesButton = observer(function AddSeriesButton() {
   const graphModel = useGraphModelContext();
   const dataConfiguration = graphModel.config;
-  console.log("----<AddSeriesButton>--------");
-  console.log("🚀 ~ file: add-series-button.tsx:8 ~ AddSeriesButton ~ dataConfiguration:", dataConfiguration);
+  // console.log("----<AddSeriesButton>--------");
+  // console.log("🚀 ~ file: add-series-button.tsx:8 ~ AddSeriesButton ~ dataConfiguration:", dataConfiguration);
 
   function findUnplottedAttribute() {
     // Find first attribute in the dataset that is not shown in the graph
@@ -21,14 +21,14 @@ export const AddSeriesButton = observer(function AddSeriesButton() {
   }
 
   function handleClick() {
-    console.log("🚀 ~ file: add-series-button.tsx:12 ~ handleClick ~ handleClick:", handleClick);
+    // console.log("🚀 ~ file: add-series-button.tsx:12 ~ handleClick ~ handleClick:", handleClick);
     const first = findUnplottedAttribute();
     if (first && dataConfiguration.dataset) {
       graphModel.setAttributeID("yPlus", dataConfiguration.dataset.id, first.id);
     } else {
-      console.log('No attributes are unplotted');
+      // console.log('No attributes are unplotted');
     }
-    console.log('Y attributres are now: ', dataConfiguration.yAttributeDescriptions.map(d=>d.attributeID));
+    // console.log('Y attributres are now: ', dataConfiguration.yAttributeDescriptions.map(d=>d.attributeID));
   }
 
   if (findUnplottedAttribute()) {

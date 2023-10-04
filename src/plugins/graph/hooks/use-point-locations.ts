@@ -48,15 +48,27 @@ export const usePointLocations = () => {
   const dataset = useDataSetContext();
   const caseIds = dataset?.cases.map(c => c.__id__) ?? [];
 
-  const xSeries: number[] = [];
-  const ySeries: number[] = [];
+  const result: Iterable<[number, number]>[] = [];
+  dataConfig && console.log("\t dataConfig.yAttributeDescriptions.length:", dataConfig.yAttributeDescriptions.length);
 
-  caseIds?.forEach((caseId) => {
-    if (dataConfig && dataset && layout) {
-      xSeries.push(getScreenX({caseId, dataset, layout, dataConfig}));
-      ySeries.push(getScreenY({caseId, dataset, layout, dataConfig}));
+  // Outer loop over plotNum  (which series)
+  if (dataConfig) {
+    let plotNum = 0;
+    while (plotNum < dataConfig.yAttributeDescriptions.length) {
+      // Inner loop over cases in that series
+      const xSeries: number[] = [];
+      const ySeries: number[] = [];
+      caseIds.forEach((caseId) => {
+        if (dataConfig && dataset && layout) {
+          xSeries.push(getScreenX({caseId, dataset, layout, dataConfig}));
+          ySeries.push(getScreenY({caseId, dataset, layout, dataConfig, plotNum}));
+        }
+      });
+      result.push(xSeries.map((x, i) => [x, ySeries[i]]) as Iterable<[number, number]>);
+      plotNum++;
     }
-  });
 
-  return xSeries.map((x, i) => [x, ySeries[i]]) as Iterable<[number, number]>;
+  }
+  console.log("\t result:", result);
+  return result;
 };
