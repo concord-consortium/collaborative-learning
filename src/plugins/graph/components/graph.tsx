@@ -73,10 +73,14 @@ export const Graph = observer(function Graph({ graphController, graphRef, dotsRe
     }
   }, [dataset, plotAreaSVGRef, layout, layout.plotHeight, layout.plotWidth, xScale]);
 
-  const handleChangeAttribute = (place: GraphPlace, dataSet: IDataSet, attrId: string) => {
+  const handleChangeAttribute = (place: GraphPlace, dataSet: IDataSet, attrId: string, oldAttrId?: string) => {
     const computedPlace = place === 'plot' && graphModel.config.noAttributesAssigned ? 'bottom' : place;
     const attrRole = graphPlaceToAttrRole[computedPlace];
-    graphModel.setAttributeID(attrRole, dataSet.id, attrId);
+    if (attrRole === 'y' && oldAttrId) {
+      graphModel.config.replaceYAttribute(oldAttrId, attrId);
+    } else {
+      graphModel.setAttributeID(attrRole, dataSet.id, attrId);
+    }
   };
 
   /**

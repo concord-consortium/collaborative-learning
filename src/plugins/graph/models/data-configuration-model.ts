@@ -1,5 +1,5 @@
 import {scaleQuantile, ScaleQuantile, schemeBlues} from "d3";
-import {getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
+import { getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
 import {AttributeType, attributeTypes} from "../../../models/data/attribute";
 import {ICase} from "../../../models/data/data-set-types";
 import {IDataSet} from "../../../models/data/data-set";
@@ -649,6 +649,17 @@ export const DataConfigurationModel = types
     addYAttribute(desc: IAttributeDescriptionSnapshot) {
       self._yAttributeDescriptions.push(desc);
       this._addNewFilteredCases();
+    },
+    replaceYAttribute(oldAttrId: string, newAttrId: string) {
+      /**
+       * Replace an existing Y attribute with a different one, maintaining its position in the list.
+       */
+      const index = self._yAttributeDescriptions.findIndex(d=>d.attributeID===oldAttrId);
+      if (index>=0) {
+        self._yAttributeDescriptions[index].attributeID = newAttrId;
+        self._yAttributeDescriptions[index].type = undefined;
+        // self.updateAdornments(true);   needed?
+      }
     },
     setY2Attribute(desc?: IAttributeDescriptionSnapshot) {
       const isNewAttribute = !self._attributeDescriptions.get('rightNumeric'),

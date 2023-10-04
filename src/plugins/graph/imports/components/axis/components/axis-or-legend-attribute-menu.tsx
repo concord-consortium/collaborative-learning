@@ -18,7 +18,7 @@ interface IProps {
   attributeId?: string
   target: SVGGElement | HTMLElement | null
   portal: HTMLElement | null
-  onChangeAttribute: (place: GraphPlace, dataSet: IDataSet, attrId: string) => void
+  onChangeAttribute: (place: GraphPlace, dataSet: IDataSet, attrId: string, oldAttrId?: string) => void
   onRemoveAttribute: (place: GraphPlace, attrId: string) => void
   onTreatAttributeAs: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void
   onOpenClose?: (isOpen: boolean) => void
@@ -91,7 +91,7 @@ const _AxisOrLegendAttributeMenu = ({ place, attributeId, target, portal, onOpen
                 }
                 { data?.attributes?.map((attr) => {
                   return (
-                    <MenuItem onClick={() => onChangeAttribute(place, data, attr.id)} key={attr.id}>
+                    <MenuItem onClick={() => onChangeAttribute(place, data, attr.id, attrId)} key={attr.id}>
                       {attr.name}
                     </MenuItem>
                   );
