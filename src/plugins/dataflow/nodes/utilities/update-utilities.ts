@@ -25,7 +25,6 @@ function passSerialStateToChannel(sd: SerialDevice, channel: NodeChannelInfo) {
 
 export function sendDataToSerialDevice(n: Node, serialDevice: SerialDevice) {
   const { val, outType } = getNodeValueWithType(n);
-  console.log("| TO SERIAL: Do we see a NaN here? Do we have bumps in hardware? |", val);
   const isNumberOutput = isFinite(val);
   const { deviceFamily } = serialDevice;
 
@@ -45,8 +44,7 @@ export function sendDataToSimulatedOutput(n: Node, outputVariables?: VariableTyp
   const outputVariable = findOutputVariable(n, outputVariables);
   if (outputVariable && getHubSelect(n).getValue() === simulatedHubName(outputVariable)) {
     const { val } = getNodeValueWithType(n);
-    console.log("| TO SIMULATED: Do we see a NaN here? Do we have bumps in hardware? |", val);
-    // TODO: handle NaN source in sensor node in addition to avoiding it here
+    // NOTE: this is where we historically saw NaN values with origins in the Sensor node
     if (isFinite(val)) outputVariable.setValue(val);
     // TODO: Should we also set the unit?
     // We'd use n.data.nodeValueUnits but it might be undefined

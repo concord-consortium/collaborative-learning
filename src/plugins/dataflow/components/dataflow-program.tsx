@@ -3,7 +3,6 @@ import ReactDOM from "react-dom";
 import "regenerator-runtime/runtime";
 import { forEach } from "lodash";
 import { inject, observer } from "mobx-react";
-import { autorun } from "mobx";
 import { IDisposer, onSnapshot } from "mobx-state-tree";
 import { SizeMeProps } from "react-sizeme";
 import Rete, { NodeEditor, Engine, Node } from "rete";
@@ -489,6 +488,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const channels = [...virtualSensorChannels, ...this.simulatedChannels, ...serialSensorChannels];
     const channelIds = channels.map(c => c.channelId).join(",");
     if (channelIds !== this.previousChannelIds) {
+      console.log("| > Updating channels");
       this.previousChannelIds = channelIds;
       this.channels = channels;
       this.countSerialDataNodes(this.programEditor.nodes);
