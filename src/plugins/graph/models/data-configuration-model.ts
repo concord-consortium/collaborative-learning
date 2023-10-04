@@ -291,8 +291,13 @@ export const DataConfigurationModel = types
         return allValues.filter(aValue => aValue !== '');
       },
       numericValuesForAttrRole(role: GraphAttrRole): number[] {
-        return this.valuesForAttrRole(role).map((aValue: string) => Number(aValue))
-          .filter((aValue: number) => isFinite(aValue));
+        if (role==='y') {
+          // For Y axis, have to consider multiple attributes
+          return this.numericValuesForYAxis;
+        } else {
+          return this.valuesForAttrRole(role).map((aValue: string) => Number(aValue))
+            .filter((aValue: number) => isFinite(aValue));
+        }
       },
       get numericValuesForYAxis() {
         const allGraphCaseIds = Array.from(self.graphCaseIDs),
@@ -658,7 +663,7 @@ export const DataConfigurationModel = types
       if (index>=0) {
         self._yAttributeDescriptions[index].attributeID = newAttrId;
         self._yAttributeDescriptions[index].type = undefined;
-        // self.updateAdornments(true);   needed?
+        this._addNewFilteredCases();
       }
     },
     setY2Attribute(desc?: IAttributeDescriptionSnapshot) {
