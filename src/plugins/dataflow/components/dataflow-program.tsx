@@ -489,6 +489,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const channels = [...virtualSensorChannels, ...this.simulatedChannels, ...serialSensorChannels];
     const channelIds = channels.map(c => c.channelId).join(",");
     if (channelIds !== this.previousChannelIds) {
+      this.previousChannelIds = channelIds;
       this.channels = channels;
       this.countSerialDataNodes(this.programEditor.nodes);
 
