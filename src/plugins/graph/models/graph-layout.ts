@@ -28,6 +28,7 @@ export class GraphLayout implements IAxisLayout {
   // desired/required size of axis elements
   @observable desiredExtents: Map<GraphPlace, number> = new Map();
   axisScales: Map<AxisPlace, MultiScale> = new Map();
+  numberOfYAttributes = 0;
 
   constructor() {
     AxisPlaces.forEach(place => this.axisScales.set(place,
@@ -48,6 +49,10 @@ export class GraphLayout implements IAxisLayout {
 
   @computed get plotHeight() {
     return this.computedBounds.plot.height || this.graphHeight - this.legendHeight;
+  }
+
+  @action setNumberOfYAttributes(n: number) {
+    this.numberOfYAttributes = n;
   }
 
   getAxisLength(place: AxisPlace) {
@@ -132,13 +137,21 @@ export class GraphLayout implements IAxisLayout {
    * Todo: Eventually there will be additional room set aside at the top for formulas
    */
   @computed get computedBounds() {
-    const multiLegendRows = 2; // FIXME how do we get the actual number of Y attributes in order to determine this?
-    const multiLegendHeight = kMultiLegendPadding * 2
-      + kMultiLegendMenuHeight  * multiLegendRows
-      + kMultiLegendVerticalGap * (multiLegendRows-1);
-    const {desiredExtents, graphWidth, graphHeight} = this,
-      usesMultiLegend = appConfig.getSetting("defaultSeriesLegend", "graph"),
-      legendHeight = usesMultiLegend ? multiLegendHeight : desiredExtents.get('legend') ?? 0,
+    const {desiredExtents, graphWidth, graphHeight} = this;
+    const usesMultiLegend = appConfig.getSetting("defaultSeriesLegend", "graph");
+    let legendHeight;
+    if (usesMultiLegend) {
+      // The multilegend area contains a pulldown menu for each Y attribute, plus an "add" button.
+      // These are displayed in rows of 2 items.
+      const legendRows = Math.ceil((this.numberOfYAttributes+1)/2);
+      legendHeight = kMultiLegendPadding * 2
+        + kMultiLegendMenuHeight  * legendRows
+        + kMultiLegendVerticalGap * (legendRows-1);
+      } else {
+      legendHeight = desiredExtents.get('legend') ?? 0;
+    }
+
+    const
       topAxisHeight = desiredExtents.get('top') ?? 0,
       leftAxisWidth = desiredExtents.get('left') ?? 20,
       bottomAxisHeight = desiredExtents.get('bottom') ?? 20,

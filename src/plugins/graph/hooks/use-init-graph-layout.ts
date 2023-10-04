@@ -16,10 +16,8 @@ export function useInitGraphLayout(model?: IGraphModel) {
         const repetitions: Partial<Record<AxisPlace, number>> = {};
         if (model && isAlive(model)) {
           const { config } = model;
-          // TODO: could use this to tell the Layout how many Y attributes there are (for legend sizing)
-          // Or maybe it already knows this information?
-          // const yAttributeCount = config.yAttributeDescriptions.length;
-          console.log('updating layout, dropdowns = ', config.yAttributeDescriptions.length);
+          const yAttributeCount = config.yAttributeDescriptions.length;
+          layout.setNumberOfYAttributes(yAttributeCount);
           layout.axisScales.forEach((multiScale, place) => {
             repetitions[place] = config.numRepetitionsForPlace(place) ?? 1;
           });
