@@ -509,7 +509,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       if (["Sensor", "Live Output"].includes(node.name)) {
         updateNodeChannelInfo(node, this.channels, this.stores.serialDevice);
       }
-    })
+    });
   };
 
   private shouldShowProgramCover() {
