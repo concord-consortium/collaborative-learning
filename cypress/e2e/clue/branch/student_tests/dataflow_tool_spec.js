@@ -442,7 +442,7 @@ context('Dataflow Tool Tile', function () {
         dataflowToolTile.getDropdown(nodeType, dropdown).click();
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).eq(3).click();
         dataflowToolTile.getDropdown(nodeType, dropdown).contains("Fan").should("exist");
-        dataflowToolTile.getDropdown(nodeType, "hubSelect").should("contain", "connect device/sim");
+        dataflowToolTile.getDropdown(nodeType, "hubSelect").should("contain", "connect device");
       });
       it("can recieve a value from a connected block, and display correct on or off string", () => {
         dataflowToolTile.getNode("number").should("exist");
@@ -527,9 +527,8 @@ context('Dataflow Tool Tile', function () {
         const dropdown = "sensor-select";
         const sensorSelect = [
           "Humidity Demo Data", "CO2 Demo Data", "O2 Demo Data", "Light Demo Data", "Particulates Demo Data",
-         "EMG - Long Clench and Hold Demo Data", "FSR Demo Data",
          "⚠️ Connect Arduino for live EMG",
-         "⚠️ Connect Arduino for live FSR",
+         "⚠️ Connect Arduino for live Pressure",
          "⚠️ Connect Arduino for live Temperature",
          "⚠️ Connect micro:bit for live Temperature A",
          "⚠️ Connect micro:bit for live Humidity A",
@@ -542,7 +541,7 @@ context('Dataflow Tool Tile', function () {
         ];
         dataflowToolTile.getCreateNodeButton(nodeType).click();
         dataflowToolTile.getDropdown(nodeType, dropdown).click();
-        dataflowToolTile.getSensorDropdownOptions(nodeType).should("have.length", 18);
+        dataflowToolTile.getSensorDropdownOptions(nodeType).should("have.length", 16);
         dataflowToolTile.getSensorDropdownOptions(nodeType).each(($tab, index, $typeList) => {
           expect($tab.text()).to.contain(sensorSelect[index]);
         });

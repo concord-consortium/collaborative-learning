@@ -3,7 +3,7 @@ import { useCustomModal } from "./use-custom-modal";
 import { ITileLinkMetadata } from "../models/tiles/tile-link-types";
 import { ITileModel } from "../models/tiles/tile-model";
 import { getTileModelById } from "../utilities/mst-utils";
-import MergeInIcon from "../../src/plugins/data-card/assets/merge-in-icon.svg";
+import MergeInIcon from "../../src/assets/icons/dataset/merge-in-icon.svg";
 
 import "./link-tile-dialog.scss";
 

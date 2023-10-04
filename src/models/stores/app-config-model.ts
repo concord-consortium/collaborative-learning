@@ -1,6 +1,6 @@
 import { types, Instance, SnapshotIn, getSnapshot } from "mobx-state-tree";
 import { urlParams } from "../../utilities/url-params";
-import { isValidHttpUrl } from "../../utilities/url-utils";
+import { getUrlFromRelativeOrFullString } from "../../utilities/url-utils";
 import { SectionModelType } from "../curriculum/section";
 import { gImageMap } from "../image-map";
 import { ToolbarButtonModel } from "../tiles/toolbar-button";
@@ -45,13 +45,19 @@ export const AppConfigModel = types
     }
   }))
   .views(self => ({
-    getUnit(unitId: string) {
-      const unitCode = self.unitCodeMap.get(unitId) || unitId;
-      const unitCodeIsUrl = isValidHttpUrl(unitCode);
+    getUnitUrl(unitParam: string) {
+      const unitParamUrl = getUrlFromRelativeOrFullString(unitParam);
+      if (unitParamUrl) {
+        return unitParamUrl.href;
+      }
+      const unitCode = self.unitCodeMap.get(unitParam) || unitParam;
       const branchName = urlParams.curriculumBranch ?? "main";
-      const unitUrl = unitCodeIsUrl
-        ? unitCode
-        : `${self.curriculumBaseUrl}/branch/${branchName}/${unitCode}/content.json`;
+      return `${self.curriculumBaseUrl}/branch/${branchName}/${unitCode}/content.json`;
+    }
+  }))
+  .views(self => ({
+    getUnit(unitParam: string) {
+      const unitUrl = self.getUnitUrl(unitParam);
       const teacherGuideUrl = unitUrl.replace(/content\.json$/, "teacher-guide/content.json");
       gImageMap.setUnitUrl(unitUrl);
       gImageMap.setUnitCodeMap(getSnapshot(self.unitCodeMap));

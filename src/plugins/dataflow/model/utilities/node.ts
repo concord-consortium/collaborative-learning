@@ -418,7 +418,7 @@ export const baseLiveOutputOptions = {
   warningOption: {
     active: true,
     id: "no-outputs-found",
-    name: "⚠️ connect device/sim",
+    name: "⚠️ connect device",
   }
 };
 
