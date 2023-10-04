@@ -1,6 +1,7 @@
 import { observer } from "mobx-react";
 import React from "react";
 import { useGraphModelContext } from "../../models/graph-model";
+import AddSeriesIcon from "../../imports/assets/add-series-icon.svg";
 
 export const AddSeriesButton = observer(function AddSeriesButton() {
   const graphModel = useGraphModelContext();
@@ -32,7 +33,10 @@ export const AddSeriesButton = observer(function AddSeriesButton() {
 
   if (findUnplottedAttribute()) {
     return (
-      <button onClick={handleClick} className="add-series-button">Add Series</button>
+      <button onClick={handleClick} className="add-series-button">
+        <AddSeriesIcon/>
+        Add Series
+      </button>
     );
   } else {
     return null;
