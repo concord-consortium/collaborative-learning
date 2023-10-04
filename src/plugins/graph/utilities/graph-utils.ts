@@ -1,7 +1,6 @@
-import {extent, format, select, timeout} from "d3";
 import React from "react";
+import {extent, format, select, timeout} from "d3";
 import {isInteger} from "lodash";
-
 import { IClueObjectSnapshot } from "../../../models/annotations/clue-object";
 import { PartialSharedModelEntry } from "../../../models/document/document-content-types";
 import { UpdatedSharedDataSetIds } from "../../../models/shared/shared-data-set";
@@ -422,36 +421,41 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
         : isSelected ? defaultSelectedColor
           : aCaseData.plotNum && getPointColorAtIndex
             ? getPointColorAtIndex(aCaseData.plotNum) : pointColor;
-    },
+  };
 
-    setPoints = () => {
-
-      if (theSelection?.size()) {
+  const setPoints = () => {
+    if (theSelection?.size()) {
         // Remove dots that do not have valid data (eg, screen Y = NaN)
         const orphans = theSelection
           .filter((aCaseData: CaseData)=>{ return !getScreenY(aCaseData.caseID, aCaseData.plotNum); });
         orphans.remove();
 
-        theSelection
-          .transition()
-          .duration(duration)
-          .attr('cx', (aCaseData: CaseData) => {
-            return getScreenX(aCaseData.caseID);
-          })
-          .attr('cy', (aCaseData: CaseData) => {
-            return getScreenY(aCaseData.caseID, aCaseData.plotNum);
-          })
-          .attr('r', (aCaseData: CaseData) => dataset?.isCaseSelected(aCaseData.caseID)
-            ? selectedPointRadius : pointRadius)
-          .style('fill', (aCaseData: CaseData) => lookupLegendColor(aCaseData))
-          .style('stroke', (aCaseData: CaseData) =>
-            (getLegendColor && dataset?.isCaseSelected(aCaseData.caseID))
-            ? defaultSelectedStroke : pointStrokeColor)
-          .style('stroke-width', (aCaseData: CaseData) =>
-            (getLegendColor && dataset?.isCaseSelected(aCaseData.caseID))
-            ? defaultSelectedStrokeWidth : defaultStrokeWidth);
-      }
-    };
+      theSelection
+        .transition()
+        .duration(duration)
+        .attr('cx', (aCaseData: CaseData) => {
+          return getScreenX(aCaseData.caseID);
+        })
+        .attr('cy', (aCaseData: CaseData) => {
+          return getScreenY(aCaseData.caseID, aCaseData.plotNum);
+        })
+        .attr('r', (aCaseData: CaseData) => dataset?.isCaseSelected(aCaseData.caseID)
+          ? selectedPointRadius : pointRadius)
+        .style('fill', (aCaseData: CaseData) => lookupLegendColor(aCaseData))
+        .style('stroke', (aCaseData: CaseData) =>
+          (getLegendColor && dataset?.isCaseSelected(aCaseData.caseID))
+          ? defaultSelectedStroke : pointStrokeColor)
+        .style('stroke-width', (aCaseData: CaseData) =>
+          (getLegendColor && dataset?.isCaseSelected(aCaseData.caseID))
+          ? defaultSelectedStrokeWidth : defaultStrokeWidth);
+    }
+  };
+
+  const clearPoints = () => {
+    if (theSelection){
+      theSelection.remove();
+    }
+  };
 
   const
     {
@@ -459,10 +463,14 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
       pointStrokeColor, pointColor, getPointColorAtIndex,
       getScreenX, getScreenY, getLegendColor, enableAnimation
     } = props,
-    duration = enableAnimation.current ? transitionDuration : 0,
+    duration = enableAnimation.current ? transitionDuration : 0;
 
-    theSelection = selectDots(dotsRef.current, selectedOnly);
-  setPoints();
+  const theSelection = selectDots(dotsRef.current, selectedOnly);
+  if (dataset){
+    setPoints();
+  } else {
+    clearPoints();
+  }
 }
 
 
