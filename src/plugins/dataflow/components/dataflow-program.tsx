@@ -106,6 +106,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private components: DataflowReteNodeFactory[];
   private toolDiv: HTMLElement | null;
   private channels: NodeChannelInfo[] = [];
+  private previousChannelIds = "";
   private intervalHandle: ReturnType<typeof setTimeout>;
   private lastIntervalTime: number;
   private programEditor: NodeEditor;
@@ -391,12 +392,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         this.props.onZoomChange(transform.x, transform.y, transform.k);
       });
 
-      // TODO: if we use this condition, we do not get "crosstalk"
-      // however, programs in My Work on left do not update properly
-      if (this.props.runnable) {
-        autorun(this.updateChannels);
-      }
-
       this.programEditor.view.resize();
       this.programEditor.trigger("process");
 
@@ -491,21 +486,24 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private updateChannels = () => {
-    this.channels = [];
-    this.channels = [...virtualSensorChannels, ...this.simulatedChannels, ...serialSensorChannels];
-    this.countSerialDataNodes(this.programEditor.nodes);
+    const channels = [...virtualSensorChannels, ...this.simulatedChannels, ...serialSensorChannels];
+    const channelIds = channels.map(c => c.channelId).join(",");
+    if (channelIds !== this.previousChannelIds) {
+      this.channels = channels;
+      this.countSerialDataNodes(this.programEditor.nodes);
 
-    this.programEditor.nodes.forEach((node) => {
-      if (node.name === "Sensor") {
-        const sensorSelect = node.controls.get("sensorSelect") as SensorSelectControl;
-        sensorSelect.setChannels(this.channels);
-      }
+      this.programEditor.nodes.forEach((node) => {
+        if (node.name === "Sensor") {
+          const sensorSelect = node.controls.get("sensorSelect") as SensorSelectControl;
+          sensorSelect.setChannels(this.channels);
+        }
 
-      if (node.name === "Live Output"){
-        const hubSelect = getHubSelect(node);
-        hubSelect.setChannels(this.channels);
-      }
-    });
+        if (node.name === "Live Output"){
+          const hubSelect = getHubSelect(node);
+          hubSelect.setChannels(this.channels);
+        }
+      });
+    }
   };
 
   private shouldShowProgramCover() {
@@ -642,6 +640,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const now = Date.now();
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});
     this.lastIntervalTime = now;
+
+    this.updateChannels();
 
     switch (programMode){
       case ProgramMode.Ready:
