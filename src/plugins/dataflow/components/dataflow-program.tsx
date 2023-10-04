@@ -496,11 +496,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         if (node.name === "Sensor") {
           const sensorSelect = node.controls.get("sensorSelect") as SensorSelectControl;
           sensorSelect.setChannels(this.channels);
+          updateNodeChannelInfo(node, this.channels, this.stores.serialDevice);
         }
 
         if (node.name === "Live Output"){
           const hubSelect = getHubSelect(node);
           hubSelect.setChannels(this.channels);
+          updateNodeChannelInfo(node, this.channels, this.stores.serialDevice);
         }
       });
     }
@@ -596,13 +598,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       Generator: updateGeneratorNode,
       Timer: updateTimerNode,
       Sensor: (n: Node) => {
-        updateNodeChannelInfo(n, this.channels, this.stores.serialDevice);
         updateSensorNode(n, this.channels);
       },
       "Live Output": (n: Node) => {
         const outputVar = findOutputVariable(n, this.props.tileContent?.outputVariables);
         const foundDeviceFamily = this.stores.serialDevice.deviceFamily ?? "unknown device";
-        updateNodeChannelInfo(n, this.channels, this.stores.serialDevice);
         if (this.props.runnable) {
           sendDataToSerialDevice(n, this.stores.serialDevice);
           sendDataToSimulatedOutput(n, this.props.tileContent?.outputVariables);
