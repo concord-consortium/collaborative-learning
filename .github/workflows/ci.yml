@@ -2,21 +2,17 @@ name: Continuous Integration
 
 on:
   push:
-  pull_request:
-    types: [ labeled ]
 jobs:
   prepare:
     # only conintue if a push or PR labeled with 'run regression'
-    if: github.event_name == 'push' || (github.event.action == 'labeled' && github.event.label.name == 'run regression')
     runs-on: ubuntu-latest
     outputs:
       uuid: ${{ steps.uuid.outputs.value }}
       pr_labels: ${{ steps.pr.outputs.labels }}
-      # if we are triggered by a pull_request labeled event, there is no branch, so we fall back to checking the
-      # label in the github.event. Also steps.run_regression.outputs.value will be "false" in this case which
+      # If there is no label then steps.run_regression.outputs.value will be "false" which
       # being a string is actually considered true, so fromJSON is needed to turn `"false"` into `false`.
-      # finally if we are on the 'master' branch then run the regression tests regardless of the PR label
-      run_regression: ${{ fromJSON(steps.run_regression.outputs.value) || github.event.label.name == 'run regression' || github.ref_name == 'master' }}
+      # If we are on the 'master' branch then run the regression tests regardless of the PR label
+      run_regression: ${{ fromJSON(steps.run_regression.outputs.value) || github.ref_name == 'master' }}
     permissions:
       pull-requests: read
     steps:
