@@ -56,15 +56,17 @@ export const usePointLocations = () => {
     let plotNum = 0;
     while (plotNum < dataConfig.yAttributeDescriptions.length) {
       // Inner loop over cases in that series
-      const xSeries: number[] = [];
-      const ySeries: number[] = [];
+      const series: [number,number][] = [];
       caseIds.forEach((caseId) => {
         if (dataConfig && dataset && layout) {
-          xSeries.push(getScreenX({caseId, dataset, layout, dataConfig}));
-          ySeries.push(getScreenY({caseId, dataset, layout, dataConfig, plotNum}));
+          const xValue = getScreenX({caseId, dataset, layout, dataConfig});
+          const yValue = getScreenY({caseId, dataset, layout, dataConfig, plotNum});
+          if (isFinite(xValue) && isFinite(yValue)) {
+            series.push([xValue, yValue]);
+          }
         }
       });
-      result.push(xSeries.map((x, i) => [x, ySeries[i]]) as Iterable<[number, number]>);
+      result.push(series);
       plotNum++;
     }
 
