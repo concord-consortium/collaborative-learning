@@ -99,7 +99,7 @@ export class GraphController {
       dataConfig = graphModel?.config,
       appConfig = getAppConfig(graphModel),
       emptyPlotIsNumeric = appConfig?.getSetting("emptyPlotIsNumeric", "graph");
-    if (!(graphModel && layout && dataset && dataConfig)) {
+    if (!(graphModel && layout && dataConfig)) {
       return;
     }
     this.callMatchCirclesToData();

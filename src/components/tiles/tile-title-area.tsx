@@ -1,6 +1,6 @@
 import React from "react";
 
-export const ToolTitleArea: React.FC = ({ children }) => {
+export const TileTitleArea: React.FC = ({ children }) => {
   return (
     <div className="title-area-wrapper" key="title-area">
       <div className="title-area">

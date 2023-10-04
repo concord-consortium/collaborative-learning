@@ -15,7 +15,6 @@ import { useContentChangeHandlers } from "./use-content-change-handlers";
 import { useControlsColumn } from "./use-controls-column";
 import { useDataSet } from "./use-data-set";
 import { useExpressionsDialog } from "./use-expressions-dialog";
-import { useConsumerTileLinking } from "../../../hooks/use-consumer-tile-linking";
 import { useGridContext } from "./use-grid-context";
 import { useMeasureColumnWidth } from "./use-measure-column-width";
 import { useModelDataSet } from "./use-model-data-set";
@@ -29,14 +28,15 @@ import { useToolbarTileApi } from "../hooks/use-toolbar-tile-api";
 import { lightenColor } from "../../../utilities/color-utils";
 import { verifyAlive } from "../../../utilities/mst-utils";
 import { gImageMap } from "../../../models/image-map";
+import { getColorMapEntry } from "../../../models/shared/shared-data-set-colors";
+import { TableToolbarContext } from "./table-toolbar-context";
 
 import "./table-tile.scss";
 
 // observes row selection from shared selection store
 const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComponent({
   documentContent, tileElt, model, readOnly, height, scale,
-  onRequestRowHeight, onRequestTilesOfType, onRequestLinkableTiles, onRequestUniqueTitle,
-  onRegisterTileApi, onUnregisterTileApi
+  onRequestRowHeight, onRequestUniqueTitle, onRegisterTileApi, onUnregisterTileApi
 }) {
   // Gather data from the model
   const modelRef = useCurrent(model);
@@ -171,14 +171,12 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   // deleteSelected is a function that clears the value of the currently selected cell
   // dataGridProps contains callbacks to pass to ReactDataGrid
   // hasLinkableRows is used to determine if the table can meaningfully be linked to a geometry tile
-  const { deleteSelected, hasLinkableRows, ...dataGridProps } = useDataSet({
+  const { deleteSelected, ...dataGridProps } = useDataSet({
     gridRef, model, dataSet, triggerColumnChange, rows, rowChanges, triggerRowChange,
     readOnly: !!readOnly, changeHandlers, columns, onColumnResize, selectedCell, inputRowId, lookupImage });
 
-  // Variables for handling linking to geometry tiles
-  const { isLinkEnabled, linkColors, showLinkTileDialog } =
-    useConsumerTileLinking({ model, hasLinkableRows,
-                          onRequestTilesOfType, onRequestLinkableTiles });
+  const colorMapEntry = getColorMapEntry(model.id);
+  const linkColors = colorMapEntry?.colorSet;
 
   const containerRef = useRef<HTMLDivElement>(null);
   const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -217,19 +215,27 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     return () => disposer();
   });
 
+  // Currently this is recreated on each render, so the ToolbarContext is changed
+  // on each render. deleteSelected is changed on each render, so a useMemo
+  // here would not help the situation. I think an object that is managing
+  // the internal state of the component would be a better way to factor
+  // all of the use* calls above.
+  const toolbarContext = {
+    showExpressionsDialog,
+    deleteSelected,
+  };
+
   const toolbarProps = useToolbarTileApi({ id: model.id, enabled: !readOnly, onRegisterTileApi, onUnregisterTileApi });
   return (
     <div className="table-tool">
-      <TableToolbar
-        documentContent={documentContent}
-        tileElt={tileElt}
-        {...toolbarProps}
-        deleteSelected={deleteSelected}
-        onSetExpression={showExpressionsDialog}
-        scale={scale}
-        isLinkEnabled={isLinkEnabled}
-        showLinkDialog={showLinkTileDialog}
-      />
+      <TableToolbarContext.Provider value={toolbarContext} >
+        <TableToolbar
+          documentContent={documentContent}
+          tileElt={tileElt}
+          {...toolbarProps}
+          scale={scale}
+        />
+      </TableToolbarContext.Provider>
       <div className="table-grid-container" ref={containerRef} onClick={handleBackgroundClick}>
         <EditableTableTitle
           model={model}

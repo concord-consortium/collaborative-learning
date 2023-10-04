@@ -23,8 +23,8 @@ import "./data-card-tile.scss";
 
 export const DataCardToolComponent: React.FC<ITileProps> = observer(function DataCardToolComponent(props) {
   const { documentId, model, readOnly, documentContent, tileElt, onSetCanAcceptDrop, onRegisterTileApi,
-            scale, onRequestUniqueTitle, onUnregisterTileApi, onRequestTilesOfType,
-            height, onRequestRowHeight, onRequestLinkableTiles } = props;
+            scale, onRequestUniqueTitle, onUnregisterTileApi,
+            height, onRequestRowHeight } = props;
 
   const content = model.content as DataCardContentModelType;
   const ui = useUIStore();
@@ -236,10 +236,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
   };
 
   const hasLinkableRows = content.dataSet.attributes.length > 1;
-  const { isLinkEnabled, showLinkTileDialog } = useConsumerTileLinking({
-    model, hasLinkableRows, onRequestTilesOfType, onRequestLinkableTiles
-  });
-
+  const { isLinkEnabled, showLinkTileDialog } = useConsumerTileLinking({ model, hasLinkableRows });
 
   return (
     <div className={toolClasses}>
