@@ -33,6 +33,8 @@ module.exports = (env, argv) => {
     context: __dirname, // to automatically find tsconfig.json
     // https://survivejs.com/webpack/building/source-maps/
     devtool: devMode ? 'eval-cheap-module-source-map' : 'source-map',
+    // Performance: disabling these other entry points had no effect
+    // on the devServer start up time
     entry: {
       index: './src/index.tsx',
       admin: './cms/src/admin.tsx',

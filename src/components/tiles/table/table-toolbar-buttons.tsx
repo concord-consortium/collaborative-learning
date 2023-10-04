@@ -5,6 +5,7 @@ import classNames from "classnames";
 import DeleteSelectedIconSvg from "../../../assets/icons/delete/delete-selection-icon.svg";
 import SetExpressionIconSvg from "../../../clue/assets/icons/table/set-expression-icon.svg";
 import LinkGraphIcon from "../../../clue/assets/icons/table/link-graph-icon.svg";
+import { MergeInButton } from "../../../components/shared/merge-in-button";
 import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
 import { useConsumerTileLinking } from "../../../hooks/use-consumer-tile-linking";
 import { getTileDataSet } from "../../../models/shared/shared-data-utils";
@@ -86,4 +87,8 @@ export const LinkTileButton = () => {
       tooltipOptions={{ title: "Link table" }}
     />
   );
+};
+
+export const TableMergeInButton = () => {
+  return <MergeInButton />;
 };

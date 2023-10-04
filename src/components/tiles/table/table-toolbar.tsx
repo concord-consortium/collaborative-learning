@@ -2,7 +2,7 @@ import { observer } from "mobx-react";
 import React from "react";
 import ReactDOM from "react-dom";
 
-import { DeleteSelectedButton, LinkTileButton, SetExpressionButton } from "./table-toolbar-buttons";
+import { DeleteSelectedButton, LinkTileButton, SetExpressionButton, TableMergeInButton } from "./table-toolbar-buttons";
 import { useSettingFromStores } from "../../../hooks/use-stores";
 import { IFloatingToolbarProps, useFloatingToolbarLocation } from "../hooks/use-floating-toolbar-location";
 import { DataSetViewButton } from "../../../components/shared/data-set-view-button";
@@ -11,12 +11,14 @@ import "./table-toolbar.scss";
 
 type IButtonSetting = string | [string, string];
 
-const defaultButtons = ["set-expression", "link-tile", "delete"];
+const defaultButtons: IButtonSetting[] = ["set-expression", "link-tile", "merge-in",
+  ["data-set-view", "DataCard"], "delete"];
 
 const simpleButtons: Record<string, React.ComponentType | undefined> = {
   "set-expression": SetExpressionButton,
   "delete": DeleteSelectedButton,
   "link-tile": LinkTileButton,
+  "merge-in": TableMergeInButton,
 };
 interface IParameterButtonProps {
   args: string[];
