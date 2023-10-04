@@ -251,7 +251,8 @@ export const GraphModel = TileContentModel
         console.warn("GraphModel.configureLinkedGraph requires a dataset");
         return;
       }
-      if (getAppConfig(self)?.getSetting("emptyPlotIsNumeric", "graph")) {
+
+      if (getAppConfig(self)?.getSetting("autoAssignAttributes", "graph")) {
         const attributeCount = self.data.attributes.length;
         if (!attributeCount) return;
 
