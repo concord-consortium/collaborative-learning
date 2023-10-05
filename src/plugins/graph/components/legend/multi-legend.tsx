@@ -14,6 +14,8 @@ export const kMultiLegendMenuHeight = 30;
 export const kMultiLegendPadding = 20;
 export const kMultiLegendVerticalGap = 10;
 
+import "./multi-legend.scss";
+
 interface IMultiLegendProps {
   graphElt: HTMLDivElement | null
   onChangeAttribute: (place: GraphPlace, dataSet: IDataSet, attrId: string, oldAttrId?: string) => void;
@@ -40,7 +42,6 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
     multiLegendRef.current.style.width = `${layout.graphWidth}px`;
     multiLegendRef.current.style.height = `${legendBounds.height}px`;
   }, [layout.computedBounds.legend.height, layout.graphWidth, legendBounds, transform]);
-
 
   useEffect(function RespondToLayoutChange() {
     if (yAttributeCount !== undefined) {
@@ -75,11 +76,16 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
   while(legendItems.length) {
     legendItemRows.push(
       <div key={i++} className="legend-row">
-        {legendItems?.shift()}
-        {legendItems?.shift() || null}
+        <div className="legend-cell-1">
+          {legendItems?.shift()}
+        </div>
+        <div className="legend-cell-2">
+          {legendItems?.shift() || null}
+        </div>
       </div>
     );
   }
+
   return (
     <div className="multi-legend" ref={ multiLegendRef }>
       {legendItemRows}

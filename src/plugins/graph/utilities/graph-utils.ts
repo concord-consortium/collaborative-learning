@@ -375,8 +375,6 @@ export function setPointSelection(props: ISetPointSelection) {
     .attr('r', pointRadius)
     .style('stroke', pointStrokeColor)
     .style('fill', (aCaseData:CaseData) => {
-      console.log("-----fill D3 invoked ---------- graph-utils.ts");
-      console.log("\t🥩 legendID:", legendID);
       return legendID
         ? dataConfiguration?.getLegendColorForCase(aCaseData.caseID)
         : aCaseData.plotNum && getPointColorAtIndex

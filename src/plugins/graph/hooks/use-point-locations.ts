@@ -47,10 +47,7 @@ export const usePointLocations = () => {
   const layout = useGraphLayoutContext();
   const dataset = useDataSetContext();
   const caseIds = dataset?.cases.map(c => c.__id__) ?? [];
-
   const result: Iterable<[number, number]>[] = [];
-  dataConfig && console.log("\t dataConfig.yAttributeDescriptions.length:", dataConfig.yAttributeDescriptions.length);
-
   // Outer loop over plotNum  (which series)
   if (dataConfig) {
     let plotNum = 0;
@@ -71,6 +68,5 @@ export const usePointLocations = () => {
     }
 
   }
-  console.log("\t result:", result);
   return result;
 };
