@@ -196,7 +196,8 @@ export const brainwavesGripperSimulation: ISimulation = {
       labels: ["input", "sensor:emg-reading"],
       icon: iconUrl(kEMGKey),
       name: kEMGKey,
-      value: 40
+      value: 40,
+      unit: "f(mv)"
     },
     {
       displayName: "Surface Pressure",
@@ -204,7 +205,7 @@ export const brainwavesGripperSimulation: ISimulation = {
       icon: iconUrl(kPressureKey),
       name: kPressureKey,
       value: 0,
-      unit: "mPa"
+      unit: "g"
     },
     {
       displayName: "Gripper",
@@ -225,7 +226,8 @@ export const brainwavesGripperSimulation: ISimulation = {
       labels: ["input", "sensor:temperature"],
       icon: iconUrl(kTemperatureKey),
       name: kTemperatureKey,
-      value: baseTemperature
+      value: baseTemperature,
+      unit: "°C"
     },
     {
       displayName: "Simulation Mode",

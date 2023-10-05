@@ -63,14 +63,16 @@ export const terrariumSimulation: ISimulation = {
       labels: ["input", "sensor:temperature"],
       icon: iconUrl(kTemperatureKey),
       name: kTemperatureKey,
-      value: minTemperature
+      value: minTemperature,
+      unit: "°C"
     },
     {
       displayName: "Humidity",
       labels: ["input", "sensor:humidity"],
       icon: iconUrl(kHumidityKey),
       name: kHumidityKey,
-      value: startHumidity
+      value: startHumidity,
+      unit: "%"
     },
     {
       displayName: "Raw Temperature",

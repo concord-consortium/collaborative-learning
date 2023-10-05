@@ -37,6 +37,7 @@ export function SimulatorVariable({ variable }: ISimulatorVariableProps) {
   const value = variable?.currentValue;
   const scaleFactor = 100;
   const displayValue = value !== undefined ? Math.round(value * scaleFactor) / scaleFactor : "";
+  const displayValueText = `${displayValue}${variable?.unit ?? ""}`;
 
   const className = inputVariable ? "input" : "output";
   const variableClassNames = variable.getAllOfType("className");
@@ -46,7 +47,7 @@ export function SimulatorVariable({ variable }: ISimulatorVariableProps) {
       <div className="display-name">{displayName}</div>
       <div className="value-row">
         <VariableIcon variable={variable} />
-        <div className="display-value">{displayValue}</div>
+        <div className="display-value">{displayValueText}</div>
       </div>
     </div>
   );
