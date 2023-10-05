@@ -4,7 +4,7 @@ on:
   push:
 jobs:
   build:
-    name: Build and Run Jest Tests
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,7 +19,7 @@ jobs:
       - name: Build
         run: npm run build
   jest:
-    name: Build and Run Jest Tests
+    name: Run Jest Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -103,7 +103,8 @@ jobs:
   s3-deploy:
     name: S3 Deploy
     needs:
-      - build_test
+      - build
+      - jest
       - cypress
     runs-on: ubuntu-latest
     steps:
