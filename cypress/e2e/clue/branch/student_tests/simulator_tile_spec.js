@@ -72,12 +72,12 @@ context('Simulator Tile with Brainwaves Gripper Simulation', function () {
       // Sensor options are correct after adding the simulation to the document
       clueCanvas.addTile("simulator");
       dataflowTile.getDropdown(sensor, "sensor-select").click();
-      dataflowTile.getSensorDropdownOptions(sensor).should("have.length", 2);
-      dataflowTile.getSensorDropdownOptions(sensor).eq(0).click();
-      dataflowTile.getNodeValueContainer(sensor).invoke('text').then(parseFloat).should("equal", 40);
+      dataflowTile.getSensorDropdownOptions(sensor).should("have.length", 3);
+      dataflowTile.getSensorDropdownOptions(sensor).eq(1).click();
+      dataflowTile.getNodeValueContainer(sensor).invoke('text').then(parseFloat).should("be.below", 41).should("be.above", 35);
       simulatorTile.getEMGSlider().click("right");
       cy.wait(50);
-      dataflowTile.getNodeValueContainer(sensor).invoke('text').then(parseFloat).should("equal", 440);
+      dataflowTile.getNodeValueContainer(sensor).invoke('text').then(parseFloat).should("be.below", 441).should("be.above", 390);
 
       // Live output options are correct after adding the simulation to the document
       dataflowTile.getDropdown(lo, "hubSelect").click();
