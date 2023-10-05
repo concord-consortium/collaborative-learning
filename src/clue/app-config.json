@@ -42,7 +42,6 @@
     "supportStackedTwoUpView": false,
     "showPublishedDocsInPrimaryWorkspace": false,
     "comparisonPlaceholderContent": "",
-    "defaultSimulation": "EMG_and_claw",
     "navTabs": {
       "lazyLoadTabContents": true,
       "showNavPanel": true,
@@ -243,6 +242,9 @@
     "settings": {
       "graph": {
         "autoAssignAttributes": true
+      },
+      "simulator": {
+        "defaultSimulation": "EMG_and_claw"
       }
     }
   },

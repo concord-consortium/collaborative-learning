@@ -49,9 +49,8 @@ export const SimulatorContentModel = TileContentModel
     get simulationData() {
       // If no simulation has been specified, use the default simulation from appConfig
       if (!self.simulation) {
-        const appConfig = getAppConfig(self);
-        const defaultSimulation = appConfig?.defaultSimulation;
-        self.simulation = defaultSimulation ?? kBrainwavesKey;
+        const defaultSimulation = getAppConfig(self)?.getSetting("defaultSimulation", "simulator");
+        self.simulation = defaultSimulation as string ?? kBrainwavesKey;
       }
       return simulations[self.simulation];
     }
