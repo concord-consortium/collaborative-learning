@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React from "react";
 import { Tooltip, TooltipProps } from "react-tippy";
 import classNames from "classnames";
 
@@ -8,8 +8,6 @@ import DeleteSelectionIcon from "../assets/delete-selection-icon.svg";
 import MergeInIcon from "../assets/merge-in-icon.svg";
 import GraphIcon from "../../../assets/icons/view-data-as-graph-icon.svg";
 import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
-import { AddTilesContext, TileModelContext } from "../../../components/tiles/tile-api";
-import { SharedDataSet } from "../../../models/shared/shared-data-set";
 
 interface IToolbarButtonProps {
   className?: string;
@@ -107,28 +105,20 @@ export const MergeInButton = ({ isEnabled, onClick }: IMergeDataButtonProps) => 
 
 interface IViewInGraphButtonProps {
   isEnabled?: boolean;
+  onClick?: () => void;
 }
-export const ViewInGraphButton = ({ isEnabled }: IViewInGraphButtonProps) => {
+export const ViewInGraphButton = ({ isEnabled, onClick }: IViewInGraphButtonProps) => {
   const classes = classNames("view-in-graph-button", { disabled: !isEnabled });
-  const addTilesContext = useContext(AddTilesContext);
-  const tile = useContext(TileModelContext);
-
-  const handleClick = () => {
-    const tileId = tile?.id;
-    if (!tileId || !addTilesContext) return;
-    const content = tile.content;
-    const dataSet = content.tileEnv?.sharedModelManager?.findFirstSharedModelByType(SharedDataSet, tileId);
-    if (dataSet) {
-      addTilesContext.addTileAfter('graph', tile, [dataSet]);
-    }
+  const handleClick = (e: React.MouseEvent) => {
+    isEnabled && onClick?.();
+    e.stopPropagation();
   };
-
   return (
     <ToolbarButton
       className={classes}
       icon={<GraphIcon />}
       onClick={handleClick}
-      tooltipOptions={{ title: "View data as graph" }}
+      tooltipOptions={{ title: "View Data as Graph" }}
     />
   );
 };

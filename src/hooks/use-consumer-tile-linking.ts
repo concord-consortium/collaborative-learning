@@ -14,16 +14,20 @@ interface IProps {
   hasLinkableRows: boolean;
   model: ITileModel;
   readOnly?: boolean;
+  onlyType?: string;
   onRequestTilesOfType: (tileType: string) => ITileLinkMetadata[];
   onRequestLinkableTiles?: () => ILinkableTiles;
   onLinkTile?: (tileInfo: ITileLinkMetadata) => void;
   onUnlinkTile?: (tileInfo: ITileLinkMetadata) => void;
 }
 export const useConsumerTileLinking = ({
-  model, hasLinkableRows, readOnly, onRequestTilesOfType, onRequestLinkableTiles, onLinkTile, onUnlinkTile
+  model, hasLinkableRows, readOnly, onlyType, onRequestTilesOfType, onRequestLinkableTiles, onLinkTile, onUnlinkTile
 }: IProps) => {
   const modelId = model.id;
-  const { consumers: linkableTiles } = useLinkableTiles({ model, onRequestTilesOfType, onRequestLinkableTiles });
+  const { consumers: linkableTilesAllTypes }
+    = useLinkableTiles({ model, onRequestTilesOfType, onRequestLinkableTiles });
+  const linkableTiles = onlyType ? linkableTilesAllTypes.filter(t=>t.type===onlyType) : linkableTilesAllTypes;
+  console.log('all types: ', linkableTilesAllTypes, ' filtered ', linkableTiles);
   const isLinkEnabled = hasLinkableRows && (linkableTiles.length > 0);
   const colorMapEntry = getColorMapEntry(modelId);
   const linkColors = colorMapEntry?.colorSet;

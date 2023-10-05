@@ -28,10 +28,12 @@ interface IProps extends IFloatingToolbarProps {
   setImageUrlToAdd: (url: string) => void;
   showLinkTileDialog?: () => void;
   showMergeTileDialog?: () => void;
+  showGraphLinkDialog?: () => void;
 }
 
 export const DataCardToolbar: React.FC<IProps> = observer(function DataCardToolbar({
-    isLinkEnabled, model, documentContent, tileElt, currEditAttrId, currEditFacet, showLinkTileDialog,
+    isLinkEnabled, model, documentContent, tileElt, currEditAttrId, currEditFacet,
+    showLinkTileDialog, showGraphLinkDialog,
     onIsEnabled, setImageUrlToAdd, handleDeleteValue, handleDuplicateCard,
     ...others }: IProps) {
   const content = model.content as DataCardContentModelType;
@@ -65,6 +67,10 @@ export const DataCardToolbar: React.FC<IProps> = observer(function DataCardToolb
     showLinkTileDialog && showLinkTileDialog();
   };
 
+  const handleShowInGraphButtonClick = () => {
+    showGraphLinkDialog && showGraphLinkDialog();
+  };
+
   const handleMergeDataClick = () => {
     showMergeTileDialog && showMergeTileDialog();
   };
@@ -91,7 +97,7 @@ export const DataCardToolbar: React.FC<IProps> = observer(function DataCardToolb
           <DuplicateCardButton onClick={handleDuplicateCard} />
           <LinkTileButton isEnabled={isLinkEnabled} onClick={handleLinkButtonCLick} />
           <MergeInButton onClick={handleMergeDataClick} isEnabled={isMergeEnabled} />
-          <ViewInGraphButton isEnabled={true} />
+          <ViewInGraphButton onClick={handleShowInGraphButtonClick} isEnabled={true} />
         </div>
         <div className={valueActionsButtonsClasses}>
           <ImageUploadButton onUploadImageFile={file => uploadImage(file)} />

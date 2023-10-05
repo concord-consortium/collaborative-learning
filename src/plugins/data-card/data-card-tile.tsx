@@ -239,7 +239,9 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
   const { isLinkEnabled, showLinkTileDialog } = useConsumerTileLinking({
     model, hasLinkableRows, onRequestTilesOfType, onRequestLinkableTiles
   });
-
+  const { showLinkTileDialog: showGraphLinkDialog } = useConsumerTileLinking({
+    model, hasLinkableRows, onlyType: 'Graph', onRequestTilesOfType, onRequestLinkableTiles
+  });
 
   return (
     <div className={toolClasses}>
@@ -255,6 +257,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
         scale={scale}
         isLinkEnabled={isLinkEnabled}
         showLinkTileDialog={showLinkTileDialog}
+        showGraphLinkDialog={showGraphLinkDialog}
       />
       <div
         className="data-card-content"
