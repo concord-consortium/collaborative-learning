@@ -38,9 +38,10 @@ jobs:
     # only run the regression tests if the PR is labeled.
     if: fromJSON(needs.prepare.outputs.run_regression)
     runs-on: ubuntu-latest
-    # temporarily expand the timeout to 4hrs until cypress cloud is available again
-    # it was 1hr before.
-    timeout-minutes: 240
+    timeout-minutes: 60
+    # If we run out cypress test runs then we temporarily expand the timeout to 4hrs until cypress cloud is available
+    # again
+    # timeout-minutes: 240
     container: cypress/browsers:node16.14.2-slim-chrome103-ff102
     strategy:
       # when one test fails, DO NOT cancel the other
@@ -49,10 +50,10 @@ jobs:
       # https://github.com/cypress-io/github-action/issues/48
       fail-fast: false
       matrix:
-        # temporarily use only 1 worker until cypress cloud is available again
-        # it was:
-        # container: [1, 2, 3, 4, 5]
-        containers: [1]
+        container: [1, 2, 3, 4, 5]
+        # If we run out cypress test runs then we temporarily use only 1 worker because without cypress cloude
+        # there is no parallelization
+        # containers: [1]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4

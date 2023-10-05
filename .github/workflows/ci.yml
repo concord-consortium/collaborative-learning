@@ -3,7 +3,7 @@ name: CI Base
 on:
   push:
 jobs:
-  build_test:
+  build:
     name: Build and Run Jest Tests
     runs-on: ubuntu-latest
     steps:
@@ -18,8 +18,29 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
+  jest:
+    name: Build and Run Jest Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+      - name: Install Dependencies
+        run: npm ci
+      - name: Install CMS Dependencies
+        working-directory: ./cms
+        run: npm ci
+      - name: Cache Jest cache
+        uses: actions/cache@v3
+        with:
+          path: /tmp/jest_rt
+          key: ${{ hashFiles('**/package-lock.json') }}
+      - name: Get number of CPU cores
+        id: cpu-cores
+        uses: SimenB/github-actions-cpu-cores@v2
       - name: Run Tests
-        run: npm run test:coverage -- --runInBand
+        run: npm run test:coverage -- --maxWorkers=${{ steps.cpu-cores.outputs.count }}
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
