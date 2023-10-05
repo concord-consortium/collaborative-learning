@@ -20,7 +20,7 @@ import { logTileCopyEvent } from "../tiles/log/log-tile-copy-event";
 import { logTileDocumentEvent } from "../tiles/log/log-tile-document-event";
 import { getAppConfig } from "../tiles/tile-environment";
 import { LogEventName } from "../../lib/logger-types";
-import { safeJsonParse, uniqueId } from "../../utilities/js-utils";
+import { safeJsonParse, typedId, uniqueId } from "../../utilities/js-utils";
 import { defaultTitle, titleMatchesDefault } from "../../utilities/title-utils";
 import { SharedModel, SharedModelType } from "../shared/shared-model";
 import { kSectionHeaderHeight } from "./document-constants";
@@ -345,17 +345,13 @@ export const BaseDocumentContentModel = types
       self.importContextTileCounts = {};
     },
     getNextTileId(tileType: string) {
-      if (!self.importContextTileCounts[tileType]) {
-        self.importContextTileCounts[tileType] = 1;
-      } else {
-        ++self.importContextTileCounts[tileType];
-      }
-      // FIXME: This doesn't generate unique ids.
-      // Many sections seem to be unnamed, so they never set the importContextCurrentSection.
-      // The result is tiles in different sections (including different investigations and problems)
-      // have the same id, and in turn share the same metadata.
-      const section = self.importContextCurrentSection || "document";
-      return `${section}_${tileType}_${self.importContextTileCounts[tileType]}`;
+      // It'd be nice to use a prefix here that indicated the type of the tile
+      // However this means we'd need a unique 4 char id for each tile
+      // The first 4 chars of most tiles are unique but DataFlow and DataCard
+      // are an exception. So to do that right we'd need this unique string
+      // to be registered by each tile type. That doesn't seem worth it for
+      // these kinds of ids.
+      return typedId("TILE");
     },
     insertRow(row: TileRowModelType, index?: number) {
       self.rowMap.put(row);
