@@ -127,6 +127,10 @@ export class ConfigurationManager implements UnitConfiguration {
     return this.getProp<UC["comparisonPlaceholderContent"]>("comparisonPlaceholderContent");
   }
 
+  get defaultSimulation() {
+    return this.getProp<UC["defaultSimulation"]>("defaultSimulation");
+  }
+
   get navTabs() {
     return this.getProp<UC["navTabs"]>("navTabs");
   }

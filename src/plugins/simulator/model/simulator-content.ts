@@ -2,15 +2,16 @@ import { reaction } from "mobx";
 import { types, Instance, getType, addDisposer, getSnapshot } from "mobx-state-tree";
 import { VariableSnapshot, VariableType } from "@concord-consortium/diagram-view";
 
+import { withoutUndo } from "../../../models/history/without-undo";
+import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
+import { TileContentModel } from "../../../models/tiles/tile-content";
+import { getAppConfig } from "../../../models/tiles/tile-environment";
+import { SharedModelType } from "../../../models/shared/shared-model";
+import { isInputVariable, isOutputVariable } from "../../shared-variables/simulations/simulation-utilities";
 import { kSimulatorTileType } from "../simulator-types";
 import { kSharedVariablesID, SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
 import { kBrainwavesKey } from "../simulations/brainwaves-gripper/brainwaves-gripper";
 import { simulations } from "../simulations/simulations";
-import { isInputVariable, isOutputVariable } from "../../shared-variables/simulations/simulation-utilities";
-import { withoutUndo } from "../../../models/history/without-undo";
-import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
-import { TileContentModel } from "../../../models/tiles/tile-content";
-import { SharedModelType } from "../../../models/shared/shared-model";
 
 export function defaultSimulatorContent(): SimulatorContentModelType {
   return SimulatorContentModel.create({});
@@ -19,7 +20,7 @@ export function defaultSimulatorContent(): SimulatorContentModelType {
 export const SimulatorContentModel = TileContentModel
   .named("SimulatorTool")
   .props({
-    simulation: types.optional(types.string, kBrainwavesKey),
+    simulation: types.maybe(types.string),
     type: types.optional(types.literal(kSimulatorTileType), kSimulatorTileType),
   })
   .volatile(self => ({
@@ -46,6 +47,12 @@ export const SimulatorContentModel = TileContentModel
       return firstSharedModel as SharedVariablesType;
     },
     get simulationData() {
+      // If no simulation has been specified, use the default simulation from appConfig
+      if (!self.simulation) {
+        const appConfig = getAppConfig(self);
+        const defaultSimulation = appConfig?.defaultSimulation;
+        self.simulation = defaultSimulation ?? kBrainwavesKey;
+      }
       return simulations[self.simulation];
     }
   }))

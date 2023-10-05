@@ -100,6 +100,7 @@ export const AppConfigModel = types
     get supportStackedTwoUpView() { return self.configMgr.supportStackedTwoUpView; },
     get showPublishedDocsInPrimaryWorkspace() { return self.configMgr.showPublishedDocsInPrimaryWorkspace; },
     get comparisonPlaceholderContent() { return self.configMgr.comparisonPlaceholderContent; },
+    get defaultSimulation() { return self.configMgr.defaultSimulation; },
     get placeholderText() { return self.configMgr.placeholderText; },
     get stamps() { return self.configMgr.stamps; },
     get tools() { return self.configMgr.tools; },
