@@ -23,12 +23,6 @@ interface ISimpleAttributeLabelProps {
 
 export const SimpleAttributeLabel = observer(
   function SimpleAttributeLabel(props: ISimpleAttributeLabelProps) {
-
-    // console.log("📁 simple-attribute-label.tsx ------------------------");
-    // console.log("\t🥩 SimpleAttributeLabel:", SimpleAttributeLabel);
-    // console.log("\t🥩 props:", props);
-
-
     const {place, index, attrId, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute} = props;
     const simpleLabelRef = useRef<HTMLDivElement>(null);
     const parentElt = simpleLabelRef.current?.closest(kGraphClassSelector) as HTMLDivElement ?? null;

@@ -10,7 +10,6 @@ import { AddSeriesButton } from "./add-series-button";
 
 import "./multi-legend.scss";
 
-
 interface IMultiLegendProps {
   graphElt: HTMLDivElement | null
   onChangeAttribute: (place: GraphPlace, dataSet: IDataSet, attrId: string, oldAttrId?: string) => void;
@@ -31,10 +30,6 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
     multiLegendRef.current.style.transform = legendTransform;
     multiLegendRef.current.style.width = `${layout.graphWidth}px`;
     multiLegendRef.current.style.height = `${legendBounds.height}px`;
-    console.log("translateY:", -layout.computedBounds.legend.height);
-    console.log("multiLegendRef.current.style.transform:", multiLegendRef.current.style.transform);
-    console.log("multiLegendRef.current.style.width", multiLegendRef.current.style.width);
-    console.log("multiLegendRef.current.style.height", multiLegendRef.current.style.height);
   }, [layout.computedBounds.legend.height, layout.graphWidth, legendBounds, transform]);
 
 
@@ -58,10 +53,6 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
   // Make rows with two legend items in each row
   const legendItemRows = [] as JSX.Element[];
   let i=0;
-  console.log("\tlegendItems line 53 before while loop");
-  legendItems.forEach((item)=>{
-    console.log("item:",item);
-  });
   while(legendItems.length) {
     legendItemRows.push(
       <div key={i++} className="legend-row">
@@ -74,14 +65,10 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
       </div>
     );
   }
-  console.log("\tlegendItemRows:", legendItemRows);
-  console.log("\tlegendItems", legendItems);
-
 
   return (
     <div className="multi-legend" ref={ multiLegendRef }>
       {legendItemRows}
-      {console.log("in render legendItemRows:", legendItemRows)}
     </div>
   );
 });

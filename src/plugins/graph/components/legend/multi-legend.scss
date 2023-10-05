@@ -11,28 +11,26 @@ $codap-bg-color: #f9f9f9;
 
 .multi-legend {
 
-  // padding: $menu-vertical-padding 0;
+  padding: $menu-vertical-padding 0;
   background-color:$codap-bg-color;
   width: 100%;
-  // background-color: lightblue;
 
   .legend-row {
     display: flex;
     margin-top: $menu-vertical-gap;
     margin-bottom: $menu-vertical-gap;
-    margin-left: 10%;
-    margin-right: 10%;
     flex-flow: row;
     justify-content: flex-start;
-    // gap: 10%;
-    // background-color: red;
 
     .legend-cell-1{
       width: 50%;
-      // background-color: orange;
+      display: flex;
+      justify-content: center;
     }
     .legend-cell-2{
       width: 50%;
+      display: flex;
+      justify-content: center;
     }
 
     .add-series-button {
@@ -63,11 +61,13 @@ $codap-bg-color: #f9f9f9;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      height: $menu-height;
-      width: $min-menu-width;
-      border:1px solid #3f3f3f;
-      padding:6px;
-      border-radius:4px;
+      min-width: $min-menu-width;
+      width: 181px;
+      height: 26px;
+
+      border: 1px solid #3f3f3f;
+      padding: 6px;
+      border-radius: 4px;
       color: #3f3f3f;
 
       // TODO: does not work as expected
