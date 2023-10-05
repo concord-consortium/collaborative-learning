@@ -11,16 +11,29 @@ $codap-bg-color: #f9f9f9;
 
 .multi-legend {
 
-  padding: $menu-vertical-padding 0;
+  // padding: $menu-vertical-padding 0;
   background-color:$codap-bg-color;
+  width: 100%;
+  // background-color: lightblue;
 
   .legend-row {
     display: flex;
     margin-top: $menu-vertical-gap;
+    margin-bottom: $menu-vertical-gap;
     margin-left: 10%;
+    margin-right: 10%;
     flex-flow: row;
     justify-content: flex-start;
-    gap: 10%;
+    // gap: 10%;
+    // background-color: red;
+
+    .legend-cell-1{
+      width: 50%;
+      // background-color: orange;
+    }
+    .legend-cell-2{
+      width: 50%;
+    }
 
     .add-series-button {
       height: $menu-height;
