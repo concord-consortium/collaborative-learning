@@ -39,9 +39,11 @@ interface IProps {
   graphController: GraphController
   graphRef: MutableRefObject<HTMLDivElement | null>
   dotsRef: IDotsRef
+  onRequestRowHeight?: (id: string, size: number) => void
 }
 
-export const Graph = observer(function Graph({ graphController, graphRef, dotsRef }: IProps) {
+export const Graph = observer(
+    function Graph({ graphController, graphRef, dotsRef, onRequestRowHeight }: IProps) {
 
   const graphModel = useGraphModelContext(),
     {autoAdjustAxes, enableAnimation} = graphController,
@@ -223,6 +225,7 @@ export const Graph = observer(function Graph({ graphController, graphRef, dotsRe
             onChangeAttribute={handleChangeAttribute}
             onRemoveAttribute={handleRemoveAttribute}
             onTreatAttributeAs={handleTreatAttrAs}
+            onRequestRowHeight={onRequestRowHeight}
           />
         }
       </div>

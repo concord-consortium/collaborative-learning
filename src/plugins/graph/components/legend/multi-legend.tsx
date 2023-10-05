@@ -7,20 +7,31 @@ import { useGraphLayoutContext } from "../../models/graph-layout";
 import { IDataSet } from "../../../../models/data/data-set";
 import { useDataConfigurationContext } from "../../hooks/use-data-configuration-context";
 import { AddSeriesButton } from "./add-series-button";
+import { useInstanceIdContext } from "../../imports/hooks/use-instance-id-context";
+import { kGraphDefaultHeight } from "../../graph-types";
+
+export const kMultiLegendMenuHeight = 30;
+export const kMultiLegendPadding = 20;
+export const kMultiLegendVerticalGap = 10;
 
 interface IMultiLegendProps {
   graphElt: HTMLDivElement | null
   onChangeAttribute: (place: GraphPlace, dataSet: IDataSet, attrId: string, oldAttrId?: string) => void;
   onRemoveAttribute: (place: GraphPlace, attrId: string) => void
   onTreatAttributeAs: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void
+  onRequestRowHeight?: (id: string, size: number) => void
 }
 
 export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProps) {
-  const {onChangeAttribute, onRemoveAttribute, onTreatAttributeAs} = props;
+  const {onChangeAttribute, onRemoveAttribute, onTreatAttributeAs, onRequestRowHeight} = props;
   const layout = useGraphLayoutContext();
   const legendBounds = layout.computedBounds.legend;
   const transform = `translate(${legendBounds.left}, ${legendBounds.top})`;
   const multiLegendRef = useRef<HTMLDivElement>(null);
+  const dataConfiguration = useDataConfigurationContext();
+  const instanceId = useInstanceIdContext();
+
+  const yAttributeCount = dataConfiguration?.yAttributeDescriptions.length;
 
   useEffect(() =>{
     const legendTransform = `translateY(${-layout.computedBounds.legend.height}px)`;
@@ -30,7 +41,18 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
     multiLegendRef.current.style.height = `${legendBounds.height}px`;
   }, [layout.computedBounds.legend.height, layout.graphWidth, legendBounds, transform]);
 
-  const dataConfiguration = useDataConfigurationContext();
+
+  useEffect(function RespondToLayoutChange() {
+    if (yAttributeCount !== undefined) {
+      const legendRows = Math.ceil((yAttributeCount+1)/2);
+      const legendHeight = kMultiLegendPadding * 2
+        + kMultiLegendMenuHeight  * legendRows
+        + kMultiLegendVerticalGap * (legendRows-1);
+      layout.setDesiredExtent("legend", legendHeight);
+      onRequestRowHeight && onRequestRowHeight(instanceId, kGraphDefaultHeight + legendHeight);
+    }
+  }, [instanceId, layout, onRequestRowHeight, yAttributeCount]);
+
   let legendItems = [] as JSX.Element[];
   if (dataConfiguration) {
     const yAttributes = dataConfiguration.yAttributeDescriptions;
