@@ -20,6 +20,7 @@ import { useConsumerTileLinking } from "../../hooks/use-consumer-tile-linking";
 import { useDataCardTileHeight } from "./use-data-card-tile-height";
 
 import "./data-card-tile.scss";
+import { kGraphTileType } from "../graph/graph-defs";
 
 export const DataCardToolComponent: React.FC<ITileProps> = observer(function DataCardToolComponent(props) {
   const { documentId, model, readOnly, documentContent, tileElt, onSetCanAcceptDrop, onRegisterTileApi,
@@ -240,7 +241,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
     model, hasLinkableRows, onRequestTilesOfType, onRequestLinkableTiles
   });
   const { showLinkTileDialog: showGraphLinkDialog } = useConsumerTileLinking({
-    model, hasLinkableRows, onlyType: 'Graph', onRequestTilesOfType, onRequestLinkableTiles
+    model, hasLinkableRows, onlyType: kGraphTileType, onRequestTilesOfType, onRequestLinkableTiles
   });
 
   return (
