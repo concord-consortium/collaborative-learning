@@ -5,6 +5,7 @@ import {AxisPlace, AxisPlaces, AxisBounds, IScaleType} from "../imports/componen
 import {GraphPlace, isVertical} from "../imports/components/axis-graph-shared";
 import {IAxisLayout} from "../imports/components/axis/models/axis-layout-context";
 import {MultiScale} from "../imports/components/axis/models/multi-scale";
+import { kGraphDefaultHeight } from "../graph-types";
 
 export const kDefaultGraphWidth = 480;
 export const kDefaultGraphHeight = 300;
@@ -29,12 +30,17 @@ export class GraphLayout implements IAxisLayout {
   @observable desiredExtents: Map<GraphPlace, number> = new Map();
   axisScales: Map<AxisPlace, MultiScale> = new Map();
   numberOfYAttributes = 0;
+  onRequestTileHeight = (size:number)=>{};
 
   constructor() {
     AxisPlaces.forEach(place => this.axisScales.set(place,
       new MultiScale({scaleType: "ordinal",
         orientation: isVertical(place) ? "vertical" : "horizontal"})));
     makeObservable(this);
+  }
+
+  adjustTileHeight(size: number) {
+    this.onRequestTileHeight && this.onRequestTileHeight(size);
   }
 
   cleanup() {
@@ -53,6 +59,14 @@ export class GraphLayout implements IAxisLayout {
 
   @action setNumberOfYAttributes(n: number) {
     this.numberOfYAttributes = n;
+    const usesMultiLegend = appConfig.getSetting("defaultSeriesLegend", "graph");
+    if (usesMultiLegend) {
+      this.adjustTileHeight(kGraphDefaultHeight + this.getMultiLegendHeight());
+    }
+  }
+
+  @action setOnRequestTileHeight(method: ((size: number)=>void)) {
+    this.onRequestTileHeight = method;
   }
 
   getAxisLength(place: AxisPlace) {
@@ -131,6 +145,15 @@ export class GraphLayout implements IAxisLayout {
     this.updateScaleRanges(this.plotWidth, this.plotHeight);
   }
 
+  getMultiLegendHeight() {
+    // The multilegend area contains a pulldown menu for each Y attribute, plus an "add" button.
+    // These are displayed in rows of 2 items.
+    const legendRows = Math.ceil((this.numberOfYAttributes+1)/2);
+    return kMultiLegendPadding * 2
+      + kMultiLegendMenuHeight  * legendRows
+      + kMultiLegendVerticalGap * (legendRows-1);
+  }
+
   /**
    * We assume that all the desired extents have been set so that we can compute new bounds.
    * We set the computedBounds only once at the end so there should be only one notification to respond to.
@@ -139,19 +162,8 @@ export class GraphLayout implements IAxisLayout {
   @computed get computedBounds() {
     const {desiredExtents, graphWidth, graphHeight} = this;
     const usesMultiLegend = appConfig.getSetting("defaultSeriesLegend", "graph");
-    let legendHeight;
-    if (usesMultiLegend) {
-      // The multilegend area contains a pulldown menu for each Y attribute, plus an "add" button.
-      // These are displayed in rows of 2 items.
-      const legendRows = Math.ceil((this.numberOfYAttributes+1)/2);
-      legendHeight = kMultiLegendPadding * 2
-        + kMultiLegendMenuHeight  * legendRows
-        + kMultiLegendVerticalGap * (legendRows-1);
-      } else {
-      legendHeight = desiredExtents.get('legend') ?? 0;
-    }
-
     const
+      legendHeight = (usesMultiLegend ? this.getMultiLegendHeight() : desiredExtents.get('legend') ?? 0),
       topAxisHeight = desiredExtents.get('top') ?? 0,
       leftAxisWidth = desiredExtents.get('left') ?? 20,
       bottomAxisHeight = desiredExtents.get('bottom') ?? 20,
