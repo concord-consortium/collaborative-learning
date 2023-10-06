@@ -12,7 +12,7 @@ initializeApp(urlParams.appMode || "dev", true).then((stores) => {
   ReactDOM.render(
     <AppProvider stores={stores} modalAppElement="#app">
       <DocEditorApp appConfig={appConfig}/>
-      <DialogComponent dialog={stores.ui.dialog} />
+      <DialogComponent/>
     </AppProvider>,
     document.getElementById("app")
   );
