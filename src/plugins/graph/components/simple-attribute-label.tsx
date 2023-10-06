@@ -1,4 +1,4 @@
-import React, {useRef} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {createPortal} from "react-dom";
 import {observer} from "mobx-react-lite";
 import {GraphPlace } from "../imports/components/axis-graph-shared";
@@ -25,10 +25,10 @@ export const SimpleAttributeLabel = observer(
   function SimpleAttributeLabel(props: ISimpleAttributeLabelProps) {
     const {place, index, attrId, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute} = props;
     const simpleLabelRef = useRef<HTMLDivElement>(null);
+    const [readyForMenu, setReadyForMenu] = useState<boolean>(false);
     const dataConfiguration = useDataConfigurationContext();
     const graphElementId = useGraphElementIdContext();
     const graphElement = document.getElementById(graphElementId);
-    console.log('graph element id: ', graphElementId, ' elt ', graphElement);
     const dataset = dataConfiguration?.dataset;
     const graphModel = useGraphModelContext();
     const attr = attrId ? dataset?.attrFromID(attrId) : undefined;
@@ -39,6 +39,14 @@ export const SimpleAttributeLabel = observer(
       simpleLabelRef.current?.classList.toggle("target-open", isOpen);
       simpleLabelRef.current?.classList.toggle("target-closed", !isOpen);
     };
+
+    useEffect(() => {
+      // We need to wait for the ref to have a value before the menu portal can be rendered,
+      // since it needs the 'simpleLabelRef' element passed to it.
+      if (simpleLabelRef.current) {
+        setReadyForMenu(true);
+      }
+    }, []);
 
     return (
       <>
@@ -51,7 +59,7 @@ export const SimpleAttributeLabel = observer(
             <DropdownCaretIcon />
           </div>
         </div>
-        {graphElement && onChangeAttribute && onTreatAttributeAs && onRemoveAttribute && attrId &&
+        {readyForMenu && graphElement && onChangeAttribute && onTreatAttributeAs && onRemoveAttribute && attrId &&
           createPortal(<AxisOrLegendAttributeMenu
             target={simpleLabelRef.current}
             portal={graphElement}
