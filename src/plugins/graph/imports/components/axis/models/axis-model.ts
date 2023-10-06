@@ -88,8 +88,6 @@ export const NumericAxisModel = AxisModel
       } else if ((min < 0) && (Math.abs(max) < Math.abs(min / snapFactor))) {
         max = 0;
       }
-      // console.log("axis-model > min:", min);
-      // console.log("axis-model > max:", max);
       self.min = min;
       self.max = max;
     }

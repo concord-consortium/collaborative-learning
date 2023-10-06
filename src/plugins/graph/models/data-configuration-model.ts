@@ -260,9 +260,6 @@ export const DataConfigurationModel = types
       return this.attributes.length <= 1;
     },
     get numberOfPlots() {
-      console.log("📁data-configuration-model.ts--------------------------- > ");
-      console.log("\tget numberOfPlots");
-      console.log("\treturn self.filteredCases:", self.filteredCases );
       return self.filteredCases?.length ?? 0;  // filteredCases is an array of CaseArrays
     },
     get hasY2Attribute() {

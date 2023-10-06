@@ -132,7 +132,6 @@ export class GraphLayout implements IAxisLayout {
     if (graphWidth<1 || graphHeight<0) {
       // Layout functions can be called before tile size is known,
       // leading to ugly errors if negative sizes are returned.
-      console.log('Layout requested for graph ' + graphWidth + 'x' + graphHeight);
       const zeroSize = {left: 0, top: 0, width: 0, height: 0};
       return {
         left: zeroSize,
