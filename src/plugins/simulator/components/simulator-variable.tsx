@@ -35,9 +35,18 @@ export function SimulatorVariable({ variable }: ISimulatorVariableProps) {
 
   // Limit the value to two decimal places
   const value = variable?.currentValue;
-  const scaleFactor = 100;
-  const displayValue = value !== undefined ? Math.round(value * scaleFactor) / scaleFactor : "";
-  const displayValueText = `${displayValue}${variable?.unit ?? ""}`;
+  const displayValue = () => {
+    if (value === undefined) {
+      return "";
+    }
+    if (inputVariable) {
+      return value?.toFixed(2);
+    } else {
+      const scaleFactor = 100;
+      return Math.round(value * scaleFactor) / scaleFactor;
+    }
+  };
+  const displayValueText = `${displayValue()}${variable?.unit ?? ""}`;
 
   const className = inputVariable ? "input" : "output";
   const variableClassNames = variable.getAllOfType("className");
