@@ -105,8 +105,10 @@ export const DocEditorApp = ({ appConfig }: IDocEditorAppProps) => {
     });
   }, []);
 
+  // This is wrapped in a div.primary-workspace so it can be used with cypress
+  // tests that are looking for stuff in a div like this
   return (
-    <>
+    <div className="primary-workspace">
       <button onClick={handleOpen}>open</button>
       <button onClick={handleSave}>save</button>
       <span>{fileName}</span>
@@ -118,6 +120,6 @@ export const DocEditorApp = ({ appConfig }: IDocEditorAppProps) => {
         document={document}
         toolbar={appConfig.authorToolbar}
       />
-    </>
+    </div>
   );
 };
