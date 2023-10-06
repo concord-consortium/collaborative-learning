@@ -4,11 +4,11 @@ import {observer} from "mobx-react-lite";
 import {GraphPlace } from "../imports/components/axis-graph-shared";
 import {AttributeType} from "../../../models/data/attribute";
 import {AxisOrLegendAttributeMenu} from "../imports/components/axis/components/axis-or-legend-attribute-menu";
-import { kGraphClassSelector } from "../graph-types";
 import { useDataConfigurationContext } from "../hooks/use-data-configuration-context";
 import { useGraphModelContext } from "../models/graph-model";
 import { IDataSet } from "../../../models/data/data-set";
 import DropdownCaretIcon from "../dropdown-caret.svg";
+import { useGraphElementIdContext } from "./graph";
 
 import "../components/legend/multi-legend.scss";
 
@@ -25,9 +25,10 @@ export const SimpleAttributeLabel = observer(
   function SimpleAttributeLabel(props: ISimpleAttributeLabelProps) {
     const {place, index, attrId, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute} = props;
     const simpleLabelRef = useRef<HTMLDivElement>(null);
-    const parentElt = simpleLabelRef.current?.closest(kGraphClassSelector) as HTMLDivElement ?? null;
-    console.log("parentElt:", parentElt);
     const dataConfiguration = useDataConfigurationContext();
+    const graphElementId = useGraphElementIdContext();
+    const graphElement = document.getElementById(graphElementId);
+    console.log('graph element id: ', graphElementId, ' elt ', graphElement);
     const dataset = dataConfiguration?.dataset;
     const graphModel = useGraphModelContext();
     const attr = attrId ? dataset?.attrFromID(attrId) : undefined;
@@ -50,17 +51,17 @@ export const SimpleAttributeLabel = observer(
             <DropdownCaretIcon />
           </div>
         </div>
-        {parentElt && onChangeAttribute && onTreatAttributeAs && onRemoveAttribute && attrId &&
+        {graphElement && onChangeAttribute && onTreatAttributeAs && onRemoveAttribute && attrId &&
           createPortal(<AxisOrLegendAttributeMenu
             target={simpleLabelRef.current}
-            portal={parentElt}
+            portal={graphElement}
             place={place}
             attributeId={attrId}
             onChangeAttribute={onChangeAttribute}
             onRemoveAttribute={onRemoveAttribute}
             onTreatAttributeAs={onTreatAttributeAs}
             onOpenClose={handleOpenClose}
-          />, parentElt)
+          />, graphElement)
         }
       </>
     );
