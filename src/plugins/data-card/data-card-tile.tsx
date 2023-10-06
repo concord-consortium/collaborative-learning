@@ -236,12 +236,18 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
     setCurrEditFacet("");
   };
 
+  const onCreateTile = () => {
+    // TODO: Create graph tile and link to it here
+    console.log('create!');
+  };
+
   const hasLinkableRows = content.dataSet.attributes.length > 1;
   const { isLinkEnabled, showLinkTileDialog } = useConsumerTileLinking({
     model, hasLinkableRows, onRequestTilesOfType, onRequestLinkableTiles
   });
   const { showLinkTileDialog: showGraphLinkDialog } = useConsumerTileLinking({
-    model, hasLinkableRows, onlyType: kGraphTileType, onRequestTilesOfType, onRequestLinkableTiles
+    model, hasLinkableRows, onlyType: kGraphTileType,
+    onRequestTilesOfType, onRequestLinkableTiles, onCreateTile
   });
 
   return (

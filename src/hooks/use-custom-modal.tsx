@@ -9,7 +9,7 @@ import "./custom-modal.scss";
 // constant for use as return value from client onClick handlers
 export const kLeaveModalOpen = true;
 
-interface IModalButton {
+export interface IModalButton {
   className?: string;
   label: string | React.FC<any>;
   isDefault?: boolean;

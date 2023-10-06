@@ -19,15 +19,16 @@ interface IProps {
   onRequestLinkableTiles?: () => ILinkableTiles;
   onLinkTile?: (tileInfo: ITileLinkMetadata) => void;
   onUnlinkTile?: (tileInfo: ITileLinkMetadata) => void;
+  onCreateTile?: () => void;
 }
 export const useConsumerTileLinking = ({
-  model, hasLinkableRows, readOnly, onlyType, onRequestTilesOfType, onRequestLinkableTiles, onLinkTile, onUnlinkTile
+  model, hasLinkableRows, readOnly, onlyType,
+  onRequestTilesOfType, onRequestLinkableTiles, onLinkTile, onUnlinkTile, onCreateTile
 }: IProps) => {
   const modelId = model.id;
   const { consumers: linkableTilesAllTypes }
     = useLinkableTiles({ model, onRequestTilesOfType, onRequestLinkableTiles });
   const linkableTiles = onlyType ? linkableTilesAllTypes.filter(t=>t.type===onlyType) : linkableTilesAllTypes;
-  console.log('all types: ', linkableTilesAllTypes, ' filtered ', linkableTiles);
   const isLinkEnabled = hasLinkableRows && (linkableTiles.length > 0);
   const colorMapEntry = getColorMapEntry(modelId);
   const linkColors = colorMapEntry?.colorSet;
@@ -85,7 +86,12 @@ export const useConsumerTileLinking = ({
   const onUnlinkTileHandler = onUnlinkTile || unlinkTile;
 
   const [showLinkTileDialog] = useLinkConsumerTileDialog({
-    linkableTiles, model, onLinkTile: onLinkTileHandler, onUnlinkTile: onUnlinkTileHandler
+    linkableTiles,
+    model,
+    tileType: onlyType,
+    onLinkTile: onLinkTileHandler,
+    onUnlinkTile: onUnlinkTileHandler,
+    onCreateTile
   });
 
   return { isLinkEnabled, linkColors, showLinkTileDialog };
