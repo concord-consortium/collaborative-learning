@@ -3,7 +3,6 @@ import { observer } from "mobx-react";
 import React, { useEffect, useState } from "react";
 import { ITileProps, extractDragTileType, kDragTiles } from "../../components/tiles/tile-component";
 import { useUIStore } from "../../hooks/use-stores";
-import { addCanonicalCasesToDataSet } from "../../models/data/data-set";
 import { DataCardContentModelType } from "./data-card-content";
 import { DataCardRows } from "./components/data-card-rows";
 import { DataCardToolbar } from "./data-card-toolbar";
@@ -16,10 +15,10 @@ import { DataCardSortArea } from "./components/sort-area";
 import { safeJsonParse } from "../../utilities/js-utils";
 import { mergeTwoDataSets } from "../../models/data/data-set-utils";
 import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
-import { useConsumerTileLinking } from "../../hooks/use-consumer-tile-linking";
 import { useDataCardTileHeight } from "./use-data-card-tile-height";
 
 import "./data-card-tile.scss";
+import { DataCardToolbarContext } from "./data-card-toolbar-context";
 
 export const DataCardToolComponent: React.FC<ITileProps> = observer(function DataCardToolComponent(props) {
   const { documentId, model, readOnly, documentContent, tileElt, onSetCanAcceptDrop, onRegisterTileApi,
@@ -188,26 +187,6 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
     content.addNewAttr();
   };
 
-  const deleteSelectedValue = () => {
-    const thisCaseId = content.dataSet.caseIDFromIndex(content.caseIndex);
-    if (thisCaseId){
-      content.setAttValue(thisCaseId, currEditAttrId, "");
-    }
-  };
-
-  const duplicateCard = () => {
-    const originalCaseIndex = content.caseIndex;
-    const copyableCase = content.caseByIndex(originalCaseIndex);
-    if (copyableCase) {
-      // strip __id__ so a new id will be generated on insertion
-      const { __id__, ...canonicalCase } = copyableCase;
-      const desiredIndex = originalCaseIndex + 1;
-      const beforeId = content.dataSet.caseIDFromIndex(desiredIndex);
-      addCanonicalCasesToDataSet(content.dataSet, [canonicalCase], beforeId);
-      content.setCaseIndex(desiredIndex);
-    }
-  };
-
   const previousButtonClasses = classNames(
     "card-nav", "previous",
     content.caseIndex > 0 ? "active" : "disabled",
@@ -235,24 +214,19 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
     setCurrEditFacet("");
   };
 
-  const hasLinkableRows = content.dataSet.attributes.length > 1;
-  const { isLinkEnabled, showLinkTileDialog } = useConsumerTileLinking({ model, hasLinkableRows });
-
   return (
     <div className={toolClasses}>
-      <DataCardToolbar
-        model={model}
-        documentContent={documentContent}
-        tileElt={tileElt}
-        currEditAttrId={currEditAttrId}
-        currEditFacet={currEditFacet}
-        setImageUrlToAdd={setImageUrlToAdd} {...toolbarProps}
-        handleDeleteValue={deleteSelectedValue}
-        handleDuplicateCard={duplicateCard}
-        scale={scale}
-        isLinkEnabled={isLinkEnabled}
-        showLinkTileDialog={showLinkTileDialog}
-      />
+      <DataCardToolbarContext.Provider value={{currEditAttrId, currEditFacet}}>
+        <DataCardToolbar
+          model={model}
+          documentContent={documentContent}
+          tileElt={tileElt}
+          currEditAttrId={currEditAttrId}
+          currEditFacet={currEditFacet}
+          setImageUrlToAdd={setImageUrlToAdd} {...toolbarProps}
+          scale={scale}
+        />
+      </DataCardToolbarContext.Provider>
       <div
         className="data-card-content"
         onClick={handleBackgroundClick}
