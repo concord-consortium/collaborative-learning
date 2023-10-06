@@ -270,13 +270,15 @@ export const NodeSensorTypes = [
     name: "Temperature",
     type: "temperature",
     units: "°C",
-    icon: TemperatureIcon
+    icon: TemperatureIcon,
+    decimalPlaces: 2
   },
   {
     name: "Humidity",
     type: "humidity",
     units: "%",
-    icon: HumidityIcon
+    icon: HumidityIcon,
+    decimalPlaces: 2
   },
   {
     name: "CO₂",
@@ -317,7 +319,7 @@ export const NodeSensorTypes = [
   {
     name: "Surface Pressure",
     type: "fsr-reading",
-    units: "f(n)",
+    units: "g",
     icon: PressureIcon
   }
 ];
