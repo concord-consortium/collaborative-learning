@@ -129,6 +129,22 @@ export class GraphLayout implements IAxisLayout {
    */
   @computed get computedBounds() {
     const {desiredExtents, graphWidth, graphHeight} = this;
+    if (graphWidth<1 || graphHeight<0) {
+      // Layout functions can be called before tile size is known,
+      // leading to ugly errors if negative sizes are returned.
+      console.log('Layout requested for graph ' + graphWidth + 'x' + graphHeight);
+      const zeroSize = {left: 0, top: 0, width: 0, height: 0};
+      return {
+        left: zeroSize,
+        top: zeroSize,
+        plot: zeroSize,
+        bottom: zeroSize,
+        legend: zeroSize,
+        rightNumeric: zeroSize,
+        rightCat: zeroSize,
+        yPlus: zeroSize
+      };
+    }
     const
       legendHeight = desiredExtents.get('legend') ?? 0,
       topAxisHeight = desiredExtents.get('top') ?? 0,
