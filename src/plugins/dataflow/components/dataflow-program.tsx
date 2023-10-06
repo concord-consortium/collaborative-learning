@@ -3,7 +3,6 @@ import ReactDOM from "react-dom";
 import "regenerator-runtime/runtime";
 import { forEach } from "lodash";
 import { inject, observer } from "mobx-react";
-import { autorun } from "mobx";
 import { IDisposer, onSnapshot } from "mobx-state-tree";
 import { SizeMeProps } from "react-sizeme";
 import Rete, { NodeEditor, Engine, Node } from "rete";
@@ -73,6 +72,7 @@ interface IProps extends SizeMeProps {
   programDataRate: number;
   programZoom?: ProgramZoomType;
   readOnly?: boolean;
+  runnable?: boolean;
   tileHeight?: number;
   //state
   programMode: ProgramMode;
@@ -105,6 +105,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private components: DataflowReteNodeFactory[];
   private toolDiv: HTMLElement | null;
   private channels: NodeChannelInfo[] = [];
+  private previousChannelIds = "";
   private intervalHandle: ReturnType<typeof setTimeout>;
   private lastIntervalTime: number;
   private programEditor: NodeEditor;
@@ -390,11 +391,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         this.props.onZoomChange(transform.x, transform.y, transform.k);
       });
 
-      // Can this be in a control with stores injected?
-      if (!this.props.readOnly) {
-        autorun(this.updateChannels);
-      }
-
       this.programEditor.view.resize();
       this.programEditor.trigger("process");
 
@@ -489,19 +485,29 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private updateChannels = () => {
-    this.channels = [];
-    this.channels = [...virtualSensorChannels, ...this.simulatedChannels, ...serialSensorChannels];
-    this.countSerialDataNodes(this.programEditor.nodes);
+    const channels = [...virtualSensorChannels, ...this.simulatedChannels, ...serialSensorChannels];
+    const channelIds = channels.map(c => c.channelId).join(",");
+    if (channelIds !== this.previousChannelIds) {
+      this.previousChannelIds = channelIds;
+      this.channels = channels;
+      this.countSerialDataNodes(this.programEditor.nodes);
 
-    this.programEditor.nodes.forEach((node) => {
-      if (node.name === "Sensor") {
-        const sensorSelect = node.controls.get("sensorSelect") as SensorSelectControl;
-        sensorSelect.setChannels(this.channels);
-      }
+      this.programEditor.nodes.forEach((node) => {
+        if (node.name === "Sensor") {
+          const sensorSelect = node.controls.get("sensorSelect") as SensorSelectControl;
+          sensorSelect.setChannels(this.channels);
+        }
 
-      if (node.name === "Live Output"){
-        const hubSelect = getHubSelect(node);
-        hubSelect.setChannels(this.channels);
+        if (node.name === "Live Output"){
+          const hubSelect = getHubSelect(node);
+          hubSelect.setChannels(this.channels);
+        }
+      });
+    }
+
+    this.programEditor.nodes.forEach(node => {
+      if (["Sensor", "Live Output"].includes(node.name)) {
+        updateNodeChannelInfo(node, this.channels, this.stores.serialDevice);
       }
     });
   };
@@ -596,15 +602,15 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       Generator: updateGeneratorNode,
       Timer: updateTimerNode,
       Sensor: (n: Node) => {
-        updateNodeChannelInfo(n, this.channels, this.stores.serialDevice);
         updateSensorNode(n, this.channels);
       },
       "Live Output": (n: Node) => {
         const outputVar = findOutputVariable(n, this.props.tileContent?.outputVariables);
         const foundDeviceFamily = this.stores.serialDevice.deviceFamily ?? "unknown device";
-        updateNodeChannelInfo(n, this.channels, this.stores.serialDevice);
-        sendDataToSerialDevice(n, this.stores.serialDevice);
-        sendDataToSimulatedOutput(n, this.props.tileContent?.outputVariables);
+        if (this.props.runnable) {
+          sendDataToSerialDevice(n, this.stores.serialDevice);
+          sendDataToSimulatedOutput(n, this.props.tileContent?.outputVariables);
+        }
         setLiveOutputOpts(n, foundDeviceFamily, outputVar);
       }
     };
@@ -631,7 +637,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private tick = () => {
-    const { readOnly, tileContent: tileModel, playBackIndex, programMode,
+    const { runnable, tileContent: tileModel, playBackIndex, programMode,
             isPlaying, updateRecordIndex, updatePlayBackIndex } = this.props;
 
     const dataSet = tileModel.dataSet;
@@ -639,21 +645,26 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});
     this.lastIntervalTime = now;
 
+    this.updateChannels();
+
     switch (programMode){
       case ProgramMode.Ready:
         this.updateNodes();
         break;
       case ProgramMode.Recording:
-        if (!readOnly) {
+        if (runnable) {
           recordCase(this.props.tileContent, this.programEditor, this.props.recordIndex);
         }
         this.updateNodes();
         updateRecordIndex(UpdateMode.Increment);
         break;
       case ProgramMode.Done:
-        isPlaying && this.playbackNodesWithCaseData(dataSet, playBackIndex);
-        isPlaying && updatePlayBackIndex(UpdateMode.Increment);
-        !isPlaying && updatePlayBackIndex(UpdateMode.Reset);
+        if (isPlaying) {
+          this.playbackNodesWithCaseData(dataSet, playBackIndex);
+          updatePlayBackIndex(UpdateMode.Increment);
+        } else {
+          updatePlayBackIndex(UpdateMode.Reset);
+        }
         updateRecordIndex(UpdateMode.Reset);
         break;
     }

@@ -44,7 +44,7 @@ export function sendDataToSimulatedOutput(n: Node, outputVariables?: VariableTyp
   const outputVariable = findOutputVariable(n, outputVariables);
   if (outputVariable && getHubSelect(n).getValue() === simulatedHubName(outputVariable)) {
     const { val } = getNodeValueWithType(n);
-    // TODO: handle NaN source in sensor node in addition to avoiding it here
+    // NOTE: this is where we historically saw NaN values with origins in the Sensor node
     if (isFinite(val)) outputVariable.setValue(val);
     // TODO: Should we also set the unit?
     // We'd use n.data.nodeValueUnits but it might be undefined
@@ -60,7 +60,7 @@ export function updateNodeChannelInfo(n: Node, channels: NodeChannelInfo[], seri
   }
 
   const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
-  if (sensorSelect) {
+  if (sensorSelect && channels.length > 0) {
     sensorSelect.setChannels(channels);
     (sensorSelect as any).update();
   }
