@@ -37,10 +37,6 @@ export const GraphComponent = observer(
     [layout, instanceId]
   );
 
-  layout.setOnRequestTileHeight(function(size: number) {
-    onRequestRowHeight && onRequestRowHeight(instanceId, size);
-  });
-
   useGraphController({graphController, graphModel, dotsRef});
 
   useEffect(() => {
@@ -67,6 +63,7 @@ export const GraphComponent = observer(
               <Graph graphController={graphController}
                       graphRef={graphRef}
                       dotsRef={dotsRef}
+                      onRequestRowHeight={onRequestRowHeight}
               />
               <AttributeDragOverlay activeDragId={overlayDragId} />
             </GraphModelContext.Provider>

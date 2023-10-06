@@ -658,12 +658,15 @@ export const DataConfigurationModel = types
     replaceYAttribute(oldAttrId: string, newAttrId: string) {
       /**
        * Replace an existing Y attribute with a different one, maintaining its position in the list.
+       * If the new attribute is already in the list of Y attributes, it will be removed from
+       * the old position to prevent duplication.
        */
+      this.removeYAttributeWithID(newAttrId);
       const index = self._yAttributeDescriptions.findIndex(d=>d.attributeID===oldAttrId);
       if (index>=0) {
         self._yAttributeDescriptions[index].attributeID = newAttrId;
         self._yAttributeDescriptions[index].type = undefined;
-        this._addNewFilteredCases();
+        self.filteredCases && self.filteredCases[index].invalidateCases();
       }
     },
     setY2Attribute(desc?: IAttributeDescriptionSnapshot) {
