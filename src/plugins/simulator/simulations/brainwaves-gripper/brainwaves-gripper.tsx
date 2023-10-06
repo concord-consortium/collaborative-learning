@@ -18,7 +18,8 @@ import "./brainwaves-gripper.scss";
 
 export const kBrainwavesKey = "EMG_and_claw";
 
-const minPressureValue = 60;
+const minPressureValue = 60; // The value of the gripper when it starts to feel the cup
+const maxPressure = 300; // The pressure value when the gripper is fully closed
 
 const kPanTemperatureKey = "pan_temperature_key";
 const kSimulationModeKey = "simulation_mode_key";
@@ -160,9 +161,13 @@ function step({ frame, variables }: ISimulationProps) {
     const getPressureValue = () => {
       if (!gripperValue) return 0;
       if (modeVariable?.currentValue === kSimulationModeTemperature) {
-        return gripperValue > minTemperatureValue ? (gripperValue - minTemperatureValue) * 200 : 0;
+        return gripperValue > minTemperatureValue
+          ? (gripperValue - minTemperatureValue) / (100 - minTemperatureValue) * maxPressure
+          : 0;
       } else {
-        return gripperValue > minPressureValue ? (gripperValue - minPressureValue) * 100 : 0;
+        return gripperValue > minPressureValue
+          ? (gripperValue - minPressureValue) / (100 - minPressureValue) * maxPressure
+          : 0;
       }
     };
     pressureVariable.setValue(getPressureValue());
