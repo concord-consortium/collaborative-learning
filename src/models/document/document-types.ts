@@ -37,6 +37,13 @@ export function isPublishedType(type: string) {
   return [ProblemPublication, PersonalPublication, LearningLogPublication, SupportPublication]
           .indexOf(type) >= 0;
 }
+// This function uses a bit of a hack to determine if a document is curriculum or not:
+// curriculum documents have no ids.
+// Perhaps a better method will be found to determine if a document is curriculum. In the mean time, this
+// function will at least identify areas in the code where we need to test for curriculum.
+export function isCurriculumDocument(documentId?: string) {
+  return documentId === undefined;
+}
 
 export const DocumentTypeEnum = types.enumeration("type",
               [SectionDocumentDEPRECATED,
