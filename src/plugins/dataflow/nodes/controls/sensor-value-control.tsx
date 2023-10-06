@@ -26,9 +26,10 @@ export class SensorValueControl extends Rete.Control {
     this.updateUnits();
 
     this.component = (compProps: { value: number; units: string; }) => {
-
+      // iF decimal places are specifed for this sensor type, use them, otherwise default to 0
       const sensorType = NodeSensorTypes.find((s: any) => s.type === this.node.data.type);
       const decimalPlaces = sensorType?.decimalPlaces ? sensorType.decimalPlaces : 0;
+
       const displayValue = isNaN(compProps.value)
         ? kEmptyValueString
         : compProps.value.toFixed(decimalPlaces);
