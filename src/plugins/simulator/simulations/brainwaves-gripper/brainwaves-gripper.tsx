@@ -162,11 +162,11 @@ function step({ frame, variables }: ISimulationProps) {
       if (!gripperValue) return 0;
       if (modeVariable?.currentValue === kSimulationModeTemperature) {
         return gripperValue > minTemperatureValue
-          ? (gripperValue - minTemperatureValue) / (100 - minTemperatureValue) * maxPressure
+          ? Math.round((gripperValue - minTemperatureValue) / (100 - minTemperatureValue) * maxPressure)
           : 0;
       } else {
         return gripperValue > minPressureValue
-          ? (gripperValue - minPressureValue) / (100 - minPressureValue) * maxPressure
+          ? Math.round((gripperValue - minPressureValue) / (100 - minPressureValue) * maxPressure)
           : 0;
       }
     };

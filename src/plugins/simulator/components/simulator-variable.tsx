@@ -3,7 +3,7 @@ import React from "react";
 import { VariableType } from "@concord-consortium/diagram-view";
 
 import { getIcon } from "../../shared-assets/icons/icon-utilities";
-import { isInputVariable } from "../../shared-variables/simulations/simulation-utilities";
+import { getVariableDecimalPlaces, isInputVariable } from "../../shared-variables/simulations/simulation-utilities";
 
 import "./simulator-variable.scss";
 
@@ -32,6 +32,7 @@ export function SimulatorVariable({ variable }: ISimulatorVariableProps) {
   const inputVariable = isInputVariable(variable); // We're assuming the variable is either input or output
   const suffix = inputVariable ? "Sensor" : "Output";
   const displayName = variable?.displayName ? `${variable.displayName} ${suffix}` : "";
+  const decimalPlaces = getVariableDecimalPlaces(variable);
 
   // Limit the value to two decimal places
   const value = variable?.currentValue;
@@ -40,7 +41,7 @@ export function SimulatorVariable({ variable }: ISimulatorVariableProps) {
       return "";
     }
     if (inputVariable) {
-      return value?.toFixed(2);
+      return value?.toFixed(decimalPlaces);
     } else {
       const scaleFactor = 100;
       return Math.round(value * scaleFactor) / scaleFactor;
