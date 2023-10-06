@@ -746,7 +746,7 @@ describe("mst", () => {
       "child: afterCreate",
       "child: afterAttach",
     ]);
-});
+  });
 
   test("afterAttach of instance children in snapshots is called immediately", () => {
     const events: string[] = [];
@@ -787,5 +787,33 @@ describe("mst", () => {
         "child: afterAttach",
         "before child access"
       ]);
+  });
+
+  test("volatile state can default to props from create call", () => {
+    const TestObject = types
+      .model("TestObject", {
+        propValue: types.number
+      })
+      .volatile(self => ({
+        volatileValue: self.propValue
+      }))
+      .actions(self => ({
+        setPropValue(val: number) {
+          self.propValue = val;
+        },
+        setVolatileValue(val: number) {
+          self.volatileValue = val;
+        }
+      }));
+
+    const testObj = TestObject.create({propValue: 5});
+    expect(testObj.volatileValue).toBe(5);
+    testObj.setPropValue(2);
+    expect(testObj.volatileValue).toBe(5);
+    testObj.setVolatileValue(8);
+    expect(testObj.volatileValue).toBe(8);
+    expect(testObj.propValue).toBe(2);
+
+
   });
 });
