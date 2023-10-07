@@ -31,8 +31,9 @@ const Content: React.FC<IContentProps>
 
   let instructions;
   if (tileType) {
-    instructions = `To view data as a ${tileType}, select the ${tileType} from this list.
-    To remove the view, select a ${tileType} from the unlink list.`;
+    const lcTileType = tileType.toLowerCase();
+    instructions = `To view data as a ${lcTileType}, select the ${lcTileType} from this list.
+    To remove the view, select a ${lcTileType} from the Unlink list.`;
   } else {
     instructions = `To link ${displayTileTitle} to another tile, select a tile from the link list.
      To unlink ${displayTileTitle} from another tile, select a tile from the unlink list.`;
@@ -114,9 +115,9 @@ export const useLinkConsumerTileDialog =
   const [showModal, hideModal] = useCustomModal({
     className: "link-tile",
     Icon: LinkGraphIcon,
-    title: "Link or Unlink Tile",
+    title: tileType ? `View Data as ${tileType}` : "Link or Unlink Tile",
     Content,
-    contentProps: { linkedTiles, selectValue, tileTitle, unlinkedTiles, setSelectValue },
+    contentProps: { linkedTiles, selectValue, tileTitle, tileType, unlinkedTiles, setSelectValue },
     buttons
   }, [linkableTiles]);
 
