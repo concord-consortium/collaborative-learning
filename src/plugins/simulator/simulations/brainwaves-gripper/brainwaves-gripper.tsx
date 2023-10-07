@@ -228,7 +228,7 @@ export const brainwavesGripperSimulation: ISimulation = {
     {
       // This is the temperature sensed by the gripper's sensors
       displayName: "Temperature",
-      labels: ["input", "sensor:temperature"],
+      labels: ["input", "sensor:temperature", "decimalPlaces:2"],
       icon: iconUrl(kTemperatureKey),
       name: kTemperatureKey,
       value: baseTemperature,
