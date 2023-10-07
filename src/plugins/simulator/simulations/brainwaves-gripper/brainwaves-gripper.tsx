@@ -198,7 +198,7 @@ export const brainwavesGripperSimulation: ISimulation = {
     {
       // This is the target EMG minus a random amount on every frame to simulate imperfect EMG data
       displayName: "EMG",
-      labels: ["input", "sensor:emg-reading"],
+      labels: ["input", "sensor:emg-reading", "decimalPlaces:0"],
       icon: iconUrl(kEMGKey),
       name: kEMGKey,
       value: 40,
@@ -206,7 +206,7 @@ export const brainwavesGripperSimulation: ISimulation = {
     },
     {
       displayName: "Surface Pressure",
-      labels: ["input", "sensor:fsr-reading", "className:long-name"],
+      labels: ["input", "sensor:fsr-reading", "className:long-name", "decimalPlaces:0"],
       icon: iconUrl(kPressureKey),
       name: kPressureKey,
       value: 0,
@@ -214,7 +214,7 @@ export const brainwavesGripperSimulation: ISimulation = {
     },
     {
       displayName: "Gripper",
-      labels: ["output", "live-output:Grabber", "live-output:Gripper 2.0"],
+      labels: ["output", "live-output:Grabber", "live-output:Gripper 2.0", "decimalPlaces:0"],
       icon: iconUrl(kGripperKey),
       name: kGripperKey,
       value: 0
@@ -228,7 +228,7 @@ export const brainwavesGripperSimulation: ISimulation = {
     {
       // This is the temperature sensed by the gripper's sensors
       displayName: "Temperature",
-      labels: ["input", "sensor:temperature", "decimalPlaces:2"],
+      labels: ["input", "sensor:temperature"],
       icon: iconUrl(kTemperatureKey),
       name: kTemperatureKey,
       value: baseTemperature,

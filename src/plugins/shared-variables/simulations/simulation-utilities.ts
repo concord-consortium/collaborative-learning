@@ -10,5 +10,5 @@ export function isOutputVariable(variable: VariableType) {
 
 export function getVariableDecimalPlaces(variable: VariableType) {
   const decimalPlaces = Number(variable.getType("decimalPlaces"));
-  return isFinite(decimalPlaces) ? decimalPlaces : 0;
+  return isFinite(decimalPlaces) ? decimalPlaces : 2;
 }

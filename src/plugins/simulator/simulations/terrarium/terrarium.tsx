@@ -60,7 +60,7 @@ export const terrariumSimulation: ISimulation = {
   variables: [
     {
       displayName: "Temperature",
-      labels: ["input", "sensor:temperature", "decimalPlaces:2"],
+      labels: ["input", "sensor:temperature"],
       icon: iconUrl(kTemperatureKey),
       name: kTemperatureKey,
       value: minTemperature,
@@ -68,7 +68,7 @@ export const terrariumSimulation: ISimulation = {
     },
     {
       displayName: "Humidity",
-      labels: ["input", "sensor:humidity", "decimalPlaces:2"],
+      labels: ["input", "sensor:humidity"],
       icon: iconUrl(kHumidityKey),
       name: kHumidityKey,
       value: startHumidity,
@@ -81,21 +81,21 @@ export const terrariumSimulation: ISimulation = {
     },
     {
       displayName: "Fan",
-      labels: ["output", "live-output:Fan"],
+      labels: ["output", "live-output:Fan", "decimalPlaces:0"],
       icon: iconUrl(kFanKey),
       name: kFanKey,
       value: 0
     },
     {
       displayName: "Heat Lamp",
-      labels: ["output", "live-output:Heat Lamp"],
+      labels: ["output", "live-output:Heat Lamp", "decimalPlaces:0"],
       icon: iconUrl(kHeatLampKey),
       name: kHeatLampKey,
       value: 0
     },
     {
       displayName: "Humidifier",
-      labels: ["output", "live-output:Humidifier"],
+      labels: ["output", "live-output:Humidifier", "decimalPlaces:0"],
       icon: iconUrl(kHumidifierKey),
       name: kHumidifierKey,
       value: 0

@@ -32,7 +32,6 @@ export function SimulatorVariable({ variable }: ISimulatorVariableProps) {
   const inputVariable = isInputVariable(variable); // We're assuming the variable is either input or output
   const suffix = inputVariable ? "Sensor" : "Output";
   const displayName = variable?.displayName ? `${variable.displayName} ${suffix}` : "";
-  const decimalPlaces = getVariableDecimalPlaces(variable);
 
   // Limit the value to two decimal places
   const value = variable?.currentValue;
@@ -40,12 +39,8 @@ export function SimulatorVariable({ variable }: ISimulatorVariableProps) {
     if (value === undefined) {
       return "";
     }
-    if (inputVariable) {
-      return value?.toFixed(decimalPlaces);
-    } else {
-      const scaleFactor = 100;
-      return Math.round(value * scaleFactor) / scaleFactor;
-    }
+    const decimalPlaces = getVariableDecimalPlaces(variable);
+    return value?.toFixed(decimalPlaces);
   };
   const displayValueText = `${displayValue()}${variable?.unit ?? ""}`;
 
