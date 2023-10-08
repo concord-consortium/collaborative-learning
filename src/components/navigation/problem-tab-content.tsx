@@ -89,10 +89,11 @@ export const ProblemTabContent: React.FC<IProps>
         {isTeacher && showSolutionsSwitch &&
           <SolutionsButton onClick={handleToggleSolutions} isToggled={showTeacherContent} />}
       </div>
-      <div className="problem-panel">
+      <div className="problem-panels-container">
         {sections?.map((section) => {
           return (
-            <TabPanel key={`section-${section.type}`} data-focus-section={section.type}>
+            <TabPanel key={`section-${section.type}`} data-focus-section={section.type}
+                className={["react-tabs__tab-panel", "problem-panel-tab-panel"]}>
               <ProblemPanelComponent section={section} key={`section-${section.type}`} />
             </TabPanel>
           );

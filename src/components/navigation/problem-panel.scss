@@ -2,10 +2,10 @@
 
 .problem-panel {
   height: 100%;
-  position: relative;
 
   .section {
-    margin-top: $document-margin;
+    position: relative;
+    height: 100%;
 
     .canvas {
       overflow: auto;
