@@ -13,7 +13,7 @@ import { PortalJWT, PortalFirebaseJWT, IPortalClassInfo } from "./portal-types";
 import { Logger } from "../lib/logger";
 import { LogEventName } from "../lib/logger-types";
 import { uniqueId } from "../utilities/js-utils";
-import { getUnitCodeFromUrl, isValidHttpUrl } from "../utilities/url-utils";
+import { getUnitCodeFromUnitParam } from "../utilities/url-utils";
 
 export const PORTAL_JWT_URL_SUFFIX = "api/v1/jwt/portal";
 export const FIREBASE_JWT_URL_SUFFIX = "api/v1/jwt/firebase";
@@ -415,12 +415,12 @@ export const generateDevAuthentication = (unitCode: string, problemOrdinal: stri
   return {authenticatedUser, classInfo: DEV_CLASS_INFO};
 };
 
-const createOfferingIdFromProblem = (unitCode: string, problemOrdinal: string) => {
+const createOfferingIdFromProblem = (unitParam: string, problemOrdinal: string) => {
   // create fake offeringIds per problem so we keep section documents separate
   const [major, minor] = problemOrdinal.split(".");
   const toNumber = (s: string, fallback: number) => isNaN(parseInt(s, 10)) ? fallback : parseInt(s, 10);
   // TODO: Get the unit code from the loaded unit data?
-  const offeringPrefix = isValidHttpUrl(unitCode) ? getUnitCodeFromUrl(unitCode) : unitCode;
+  const offeringPrefix = getUnitCodeFromUnitParam(unitParam);
   return `${offeringPrefix}${(toNumber(major, 1) * 100) + toNumber(minor, 0)}`;
 };
 

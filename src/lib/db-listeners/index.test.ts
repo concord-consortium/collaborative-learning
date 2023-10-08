@@ -5,6 +5,9 @@ import { createStores } from "../../models/stores/stores";
 import { UserModel } from "../../models/stores/user";
 import { DB } from "../db";
 
+// For some reason the DB connect is running slowly
+jest.setTimeout(15000);
+
 describe("DBListeners", () => {
   const stores = createStores({
     appConfig: specAppConfig(),

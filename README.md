@@ -202,22 +202,32 @@ There are a number of URL parameters that can aid in testing:
 |Parameter  |Value(s)                  |Description|
 |-----------|--------------------------|-----------|
 |`appMode`  |`dev`, `qa`, `test`       |Unsecured modes that are partitioned off from authenticated sections of the database.|
-|`unit`     |`sas`, `msa`, etc.        |Abbreviated code for selecting a curriculum unit.|
+|`unit`     |`sas`, `msa`, etc.        |Abbreviated code or URL for the curriculum unit.|
 |`problem`  |`2.1`, `3.2`, etc.        |Reference to individual problem in curriculum unit.|
 |`demo`     |none                      |Launches demo creator UI|
 |`demoName` |string (default: `CLUE`)  |Used to partition the demo portion of the database.|
 |`network`  |string                    |Specify the network with which a teacher user is affiliated.|
 |`fakeClass`|string                    |Class id for demo, qa, or test modes.|
-|`fakeUser` |`(student|teacher):<id>`  |Configure user type and (optionally) id.|
+|`fakeUser` |`(student\|teacher):<id>` |Configure user type and (optionally) id.|
 |`qaGroup`  |string                    |Group id for qa, e.g. automated tests.|
 |`qaClear`  |`all`, `class`, `offering`|Extent of database clearing for automated tests.|
 |`firebase` |`emulator` (for default) or `host:port`|Target emulator for firebase realtime database calls.|
 |`firestore`|`emulator` (for default) or `host:port`|Target emulator for firestore database calls.|
 |`functions`|`emulator` (for default) or `host:port`|Target emulator-hosted firebase functions.|
 
+The `unit` parameter can be in 3 forms:
+- a valid URL starting with `https:` or `http:` will be treated as an absolute URL.
+- a string starting with `./` will be treated as a URL relative to the current page in the browser.
+- Everything else is treated as a unit code, these codes are first looked up in a map to remap legacy codes. Then the URL of the unit is created by `${curriculumBaseUrl}/branch/${branchName}/${unitCode}/content.json`.
+  - `curriculumBaseUrl` defaults to `https://models-resources.concord.org/clue-curriculum`.
+  - `branchName` defaults to `main`.
+  - To find out more about customizing these values look at `app-config-model.ts`.
+
 ### Standalone Document Editor
 
-There is an alternative entry point for CLUE available at `/doc-editor.html`. This can be used to save and open individual documents from the local file system. Remote documents can be loaded into this editor with the `document` URL parameter. The editor requires a `unit` parameter to configure the toolbar. The editor supports loading section documents or document content documents. It can load an exported document content which is typical for section documents. It can also load a raw document content which is the same format that is stored in Firebase.
+There is an alternative entry point for CLUE available at `/doc-editor.html`. This can be used to save and open individual documents from the local file system. Remote documents can be loaded into this editor with the `document` URL parameter. The editor requires a `unit` parameter to configure the toolbar. It can load an exported document content which is typical for section documents. It can also load a raw document content which is the same format that is stored in Firebase. It will save in the same format that was loaded.
+
+The `document` parameter is useful if you want to work on something that requires a document in a specific state. You can just reload the page and get back to this state. You can use this locally by creating an initial document in doc-editor.html, and save the file to `src/public/[filename]`. Now you can load the document back with the parameter `document=[filename]`. This works because the document parameter will load URLs relative to the current page in the browser. This approach can also be used in Cypress tests. It would mean the test could just load in a document to test instead of having to setup the document first.
 
 ### QA
 
