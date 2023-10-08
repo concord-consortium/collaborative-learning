@@ -8,10 +8,9 @@ import {
 
 import display from "./assets/display/display.png";
 import jarForeground from "./assets/jar_foreground/jar_foreground.png";
-import jarBackground from "./assets/jar_frames/jar_frames_00000.png";
 import lampOff from "./assets/lamp_frames/lamp_00000.png";
 import lampOn from "./assets/lamp_frames/lamp_00001.png";
-import { condensationFrames, fanFrames, humidifierFrames } from "./terrarium-assets";
+import { condensationFrames, fanFrames, geckoFrames, humidifierFrames, jarBackgroundFrames } from "./terrarium-assets";
 
 import "./terrarium.scss";
 
@@ -34,16 +33,39 @@ const humidifierHumidityImpactPerStep = 15 / 60000 * stepDuration; // +15%/minut
 
 function TerrariumComponent({ frame, variables }: ISimulationProps) {
   const humidifierFrameRef = useRef(0);
+  const geckoFrameRef = useRef(0);
+  const geckoDirectionRef = useRef(1);
 
+  // Determine temperature reading
   const temperatureVariable = findVariable(kTemperatureKey, variables);
   const temperatureValue = temperatureVariable?.currentValue ?? 0;
-  const temperatureReading = `${Math.round(temperatureValue)}°F`;
+  const temperatureReading = `${Math.round(temperatureValue)}°C`;
 
+  // Determine humidity reading
   const humidityVariable = findVariable(kHumidityKey, variables);
   const humidityValue = humidityVariable?.currentValue ?? startHumidity;
+  const humidityReading = `${Math.round(humidityValue)}%`;
+
+  // Determine jar background and condensation foreground frame based on humidity percent
   const humidityPercent = (humidityValue - minHumidity) / (maxHumidity - minHumidity);
   const condensationFrame = getFrame(humidityPercent, condensationFrames.length);
-  const humidityReading = `${Math.round(humidityValue)}%`;
+  const jarBackgroundFrame = getFrame(humidityPercent, jarBackgroundFrames.length);
+
+  // Determine blur for items in the jar based on humidity percent
+  const maxBlur = 1.25;
+  const condensationStyle = { filter: `blur(${humidityPercent * maxBlur}px)`};
+
+  // Update gecko if humidity percent is 20% or more and temperature is 25°C or less
+  if (humidityValue >= 20 && temperatureValue <= 25) {
+    geckoFrameRef.current = geckoFrameRef.current + geckoDirectionRef.current;
+  }
+  if (geckoFrameRef.current >= geckoFrames.length) {
+    geckoFrameRef.current = geckoFrames.length - 1;
+    geckoDirectionRef.current = -1;
+  } else if (geckoFrameRef.current < 0) {
+    geckoFrameRef.current = 0;
+    geckoDirectionRef.current = 1;
+  }
 
   // Update humidifier
   const humidifierVariable = findVariable(kHumidifierKey, variables);
@@ -63,15 +85,24 @@ function TerrariumComponent({ frame, variables }: ISimulationProps) {
   const heatLampOn = !!heatLampVariable?.currentValue;
   return (
     <div className="terrarium-component">
-      <img className="animation-image jar" src={jarBackground} />
-      <div className="display-container">
+      <img className="animation-image jar-background" src={jarBackgroundFrames[jarBackgroundFrame]} />
+      <div className="display-container" style={condensationStyle} >
         <img className="animation-image display" src={display} />
         <div className="display-message-container">
           <div className="display-message">{temperatureReading}</div>
           <div className="display-message">{humidityReading}</div>
         </div>
       </div>
-      <img className="animation-image humidifier" src={humidifierFrames[humidifierFrameRef.current]} />
+      <img
+        className="animation-image gecko"
+        src={geckoFrames[geckoFrameRef.current]}
+        style={condensationStyle}
+      />
+      <img
+        className="animation-image humidifier"
+        src={humidifierFrames[humidifierFrameRef.current]}
+        style={condensationStyle}
+      />
       <img className="animation-image jar-foreground" src={jarForeground} />
       <img className="animation-image condensation" src={condensationFrames[condensationFrame]} />
       <img className="animation-image fan" src={fanFrames[fanOn ? frame % fanFrames.length : 0]} />
