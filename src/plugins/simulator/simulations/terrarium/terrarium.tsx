@@ -8,9 +8,10 @@ import {
 
 import display from "./assets/display/display.png";
 import jarForeground from "./assets/jar_foreground/jar_foreground.png";
+import jarBackground from "./assets/jar_frames/jar_frames_00000.png";
 import lampOff from "./assets/lamp_frames/lamp_00000.png";
 import lampOn from "./assets/lamp_frames/lamp_00001.png";
-import { fanFrames, humidifierFrames, jarFrames } from "./terrarium-assets";
+import { condensationFrames, fanFrames, humidifierFrames } from "./terrarium-assets";
 
 import "./terrarium.scss";
 
@@ -41,7 +42,7 @@ function TerrariumComponent({ frame, variables }: ISimulationProps) {
   const humidityVariable = findVariable(kHumidityKey, variables);
   const humidityValue = humidityVariable?.currentValue ?? startHumidity;
   const humidityPercent = (humidityValue - minHumidity) / (maxHumidity - minHumidity);
-  const jarFrame = getFrame(humidityPercent, jarFrames.length);
+  const condensationFrame = getFrame(humidityPercent, condensationFrames.length);
   const humidityReading = `${Math.round(humidityValue)}%`;
 
   // Update humidifier
@@ -62,7 +63,7 @@ function TerrariumComponent({ frame, variables }: ISimulationProps) {
   const heatLampOn = !!heatLampVariable?.currentValue;
   return (
     <div className="terrarium-component">
-      <img className="animation-image jar" src={jarFrames[jarFrame]} />
+      <img className="animation-image jar" src={jarBackground} />
       <div className="display-container">
         <img className="animation-image display" src={display} />
         <div className="display-message-container">
@@ -72,6 +73,7 @@ function TerrariumComponent({ frame, variables }: ISimulationProps) {
       </div>
       <img className="animation-image humidifier" src={humidifierFrames[humidifierFrameRef.current]} />
       <img className="animation-image jar-foreground" src={jarForeground} />
+      <img className="animation-image condensation" src={condensationFrames[condensationFrame]} />
       <img className="animation-image fan" src={fanFrames[fanOn ? frame % fanFrames.length : 0]} />
       <img className="animation-image heat-lamp" src={heatLampOn ? lampOn : lampOff} />
     </div>

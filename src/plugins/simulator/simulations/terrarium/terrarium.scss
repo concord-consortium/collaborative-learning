@@ -8,6 +8,10 @@
   .animation-image {
     position: absolute;
 
+    &.condensation {
+      mix-blend-mode: screen;
+    }
+
     &.humidifier {
       top: -103px;
     }
