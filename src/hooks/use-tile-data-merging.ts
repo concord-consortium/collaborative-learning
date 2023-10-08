@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import { ITileLinkMetadata } from "../models/tiles/tile-link-types";
 import { ITileModel } from "../models/tiles/tile-model";
 import { useMergeTileDialog } from "./use-merge-data-dialog";
@@ -12,7 +12,7 @@ interface IProps {
 }
 
 export const useTileDataMerging = ({model}: IProps) => {
-  const mergableTiles = useMemo(() => getMergableDataSets(model),[model]);
+  const mergableTiles = getMergableDataSets(model);
   const mergeTileFunc = useCallback((selectedTile: ITileLinkMetadata) => {
     const sourceSnap = getSnapshot(selectedTile.dataSet as IDataSet);
     const targetDataSet = getTileDataSet(model.content);

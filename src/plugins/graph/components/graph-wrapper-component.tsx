@@ -22,14 +22,14 @@ import "./graph-wrapper-component.scss";
 export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(props) {
   const {
     documentContent, documentId, model, readOnly, scale, tileElt,
-    onRegisterTileApi, onUnregisterTileApi, onRequestTilesOfType, onRequestLinkableTiles
+    onRegisterTileApi, onUnregisterTileApi
   } = props;
   const enabled = !readOnly;
   const content = model.content as IGraphModel;
   const toolbarProps = useToolbarTileApi({ id: model.id, enabled, onRegisterTileApi, onUnregisterTileApi });
 
   const { isLinkEnabled, showLinkTileDialog } = useProviderTileLinking({
-    model, readOnly, onRequestTilesOfType, onRequestLinkableTiles
+    model, readOnly
   });
 
   const { data } = useDataSet(content?.data);
@@ -129,7 +129,6 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
         content={content} {...toolbarProps}
         isLinkEnabled={isLinkEnabled}
         onLinkTableButtonClick={showLinkTileDialog}
-        onRequestTilesOfType={onRequestTilesOfType}
       />
       <BasicEditableTileTitle readOnly={readOnly} />
       <GraphComponent data={data} layout={layout} tile={model} />

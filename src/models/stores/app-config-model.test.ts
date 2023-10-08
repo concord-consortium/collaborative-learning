@@ -39,17 +39,37 @@ describe("ConfigurationManager", () => {
     expect(appConfig.isFeatureSupported("baz")).toBe(true);
   });
 
-  it("can get URLs for remote curriculum content from a unit code", () => {
-    const appConfig = AppConfigModel.create({
+  describe("unit handling", () => {
+    const getAppConfig = () => AppConfigModel.create({
       curriculumBaseUrl: "https://curriculum.example.com",
       config: unitConfigDefaults
     });
-    const exampleUnitCode = "example-unit-code";
-    const exampleUnit = {
-      "content": `https://curriculum.example.com/branch/main/${exampleUnitCode}/content.json`,
-      "guide": `https://curriculum.example.com/branch/main/${exampleUnitCode}/teacher-guide/content.json`
-    };
-    expect(appConfig.getUnit(exampleUnitCode)).toStrictEqual(exampleUnit);
-    expect(appConfig.getUnitBasePath(exampleUnitCode)).toBe(exampleUnitCode);
+
+    it("can get URLs for remote curriculum content from a unit code", () => {
+      const appConfig = getAppConfig();
+      const exampleUnitCode = "example-unit-code";
+      const exampleUnit = {
+        "content": `https://curriculum.example.com/branch/main/${exampleUnitCode}/content.json`,
+        "guide": `https://curriculum.example.com/branch/main/${exampleUnitCode}/teacher-guide/content.json`
+      };
+      expect(appConfig.getUnit(exampleUnitCode)).toStrictEqual(exampleUnit);
+      expect(appConfig.getUnitBasePath(exampleUnitCode)).toBe(exampleUnitCode);
+    });
+
+    it("can get URLs for remote curriculum content from a unit URL", () => {
+      const appConfig = getAppConfig();
+      const exampleUnitUrl = "https://concord.org/content.json";
+      const exampleUnit = {
+        "content": "https://concord.org/content.json",
+        "guide": "https://concord.org/teacher-guide/content.json"
+      };
+      expect(appConfig.getUnit(exampleUnitUrl)).toStrictEqual(exampleUnit);
+      // FIXME: This is probably a bug because this base path is used to compute the location of some images
+      // by tacking on an /images/... to this base path.
+      // With the current code it means the computed URL would be something like:
+      //   https://concord.org/content.json/images/...
+      expect(appConfig.getUnitBasePath(exampleUnitUrl)).toBe(exampleUnitUrl);
+    });
+
   });
 });

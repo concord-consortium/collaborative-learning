@@ -69,7 +69,7 @@ const AddNodeButton = ({ disabled, i, nodeType, nodeDisplayName, onNodeCreateCli
       <button
         disabled={disabled}
         key={i}
-        title={`Add ${nodeType} Block`}
+        title={`Add ${nodeDisplayName} Block`}
         onClick={handleAddNodeButtonClick}
       >
         <NodeIcon i={i} nodeType={nodeType} nodeDisplayName={nodeDisplayName} />

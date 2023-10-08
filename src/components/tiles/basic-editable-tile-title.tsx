@@ -1,6 +1,6 @@
 import React from "react";
 
-import { ToolTitleArea } from "./tile-title-area";
+import { TileTitleArea } from "./tile-title-area";
 import { EditableTileTitle } from "./editable-tile-title";
 import { measureText } from "./hooks/use-measure-text";
 import { defaultTileTitleFont } from "../constants";
@@ -11,12 +11,12 @@ interface IBasicEditableTileTitleProps {
 }
 export function BasicEditableTileTitle({ readOnly, titleKey }: IBasicEditableTileTitleProps) {
   return (
-    <ToolTitleArea>
+    <TileTitleArea>
       <EditableTileTitle
         key={titleKey}
         readOnly={readOnly}
         measureText={(text) => measureText(text, defaultTileTitleFont)}
       />
-    </ToolTitleArea>
+    </TileTitleArea>
   );
 }
