@@ -142,8 +142,8 @@ function step({ frame, variables }: ISimulationProps) {
       rawTemperatureVariable.value + fanTemperatureImpact + heatLampTemperatureImpact));
     rawTemperatureVariable.setValue(rawTemperature);
 
-    // Temperature is random between rawTemperature - .5 and rawTemperature + .5
-    temperatureVariable?.setValue(rawTemperature + Math.random() - .5);
+    // Temperature is random between rawTemperature - .05 and rawTemperature + .05
+    temperatureVariable?.setValue(rawTemperature + Math.random() * .1 - .05);
   }
 }
 
