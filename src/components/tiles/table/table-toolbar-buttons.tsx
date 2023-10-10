@@ -13,6 +13,8 @@ import { useConsumerTileLinking } from "../../../hooks/use-consumer-tile-linking
 import { getTileDataSet } from "../../../models/shared/shared-data-utils";
 import { TileModelContext } from "../tile-api";
 import { TableToolbarContext } from "./table-toolbar-context";
+import { kGraphTileType } from "../../../plugins/graph/graph-defs";
+
 
 import "./table-toolbar.scss";
 
@@ -90,14 +92,31 @@ export const LinkTileButton = () => {
     />
   );
 };
-
+//----------------- LINK GRAPH BUTTON ------------------------------
 export const LinkGraphButton = () => {
   // Assume we always have a model
   const model = useContext(TileModelContext)!;
   const dataSet = getTileDataSet(model.content);
-  const classes = classNames("link-graph-button", );
+
+  const hasLinkableRows = dataSet ? dataSet.attributes.length > 1 : false;
+  console.log("📁 table-toolbar-buttons.tsx ------------------------");
+  console.log("\t🔪 hasLinkableRows:", hasLinkableRows);
+
+  // const { isLinkEnabled, showLinkTileDialog } = useConsumerTileLinking({ model, hasLinkableRows }); //above approach
+
+  //similar to data-card-toolbar-buttons.tsx
+  const { isLinkEnabled, showLinkTileDialog }
+  = useConsumerTileLinking({ model, hasLinkableRows, onlyType: kGraphTileType });
+
+  console.log("\t🔪 showLinkTileDialog:", showLinkTileDialog);
+  console.log("\t🔪 isLinkEnabled:", isLinkEnabled);
+
+
+  const classes = classNames("link-graph-button", {});
+
 
   const handleClick = (e: React.MouseEvent) => {
+    showLinkTileDialog && showLinkTileDialog();
     e.stopPropagation();
     console.log("clicked linkGraphButton");
   };
@@ -108,12 +127,12 @@ export const LinkGraphButton = () => {
      className={classes}
      icon={<ViewDataAsGraphIcon />}
      onClick={handleClick}
-     tooltipOptions={{ title: "Link table" }}
+     tooltipOptions={{ title: "View Data as Graph" }}
    />
  );
 
 };
-
+//---------------------- LINK GRAPH BUTTON -------------------------
 
 export const TableMergeInButton = () => {
   return <MergeInButton />;

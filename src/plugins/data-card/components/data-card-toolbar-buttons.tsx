@@ -119,6 +119,9 @@ export const LinkGraphButton = observer(function LinkGraphButton(
   const model = useContext(TileModelContext)!;
   const dataSet = getTileDataSet(model.content);
 
+  console.log("📁 data-card-toolbar-buttons.tsx ------------------------");
+  console.log("\t🏭 LinkGraphButton");
+
   // Currently we only enable the link button if there are 2 or more attributes
   // this is because the linking is generally used for graph and geometry tiles
   // both of them in 2 attributes (in CLUE)
@@ -127,6 +130,9 @@ export const LinkGraphButton = observer(function LinkGraphButton(
   const { isLinkEnabled, showLinkTileDialog }
     = useConsumerTileLinking({ model, hasLinkableRows, onlyType: kGraphTileType });
   const classes = classNames("link-graph-button", );
+  console.log("\t🔪 hasLinkableRows:", hasLinkableRows);
+  console.log("\t🔪 showLinkTileDialog:", showLinkTileDialog);
+  console.log("\t🔪 isLinkEnabled:", isLinkEnabled);
 
   const handleClick = () => {
     showLinkTileDialog && showLinkTileDialog();
