@@ -659,6 +659,7 @@ describe("DocumentContentModel", () => {
     const row = content.getRowByIndex(1);
     expect(row!.tileCount).toBe(1);
     const tileId = row!.getTileIdAtIndex(0);
+    expect(tileId).toBe("Foo_Text_1");
     const tile = tileId ? content.tileMap.get(tileId) : undefined;
     const tileContent = tile!.content;
     expect(tileContent.type).toBe("Text");
