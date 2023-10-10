@@ -44,7 +44,7 @@ const Content: React.FC<IContentProps>
         <div className="prompt">
           {instructions}
         </div>
-        <select ref={selectElt} value={selectValue} data-testid="link-tile-select"
+        <select ref={selectElt} value={selectValue} data-test="link-tile-select"
                                 onChange={e => {
                                   setSelectValue(e.target.value);
                                   setTimeout(() => selectElt.current?.focus());

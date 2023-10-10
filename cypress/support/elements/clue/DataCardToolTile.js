@@ -94,7 +94,7 @@ class DataCardToolTile {
     return this.getToolbarButton('link-graph-button', tileIndex, workspaceClass);
   }
   getLinkGraphModalTileMenu() {
-    const selector = ".ReactModalPortal .modal-content select[data-testid=link-tile-select]";
+    const selector = ".ReactModalPortal .modal-content select[data-test=link-tile-select]";
     return cy.get(`${selector}`).eq(0);
   }
   getLinkGraphModalCreateNewButton() {
