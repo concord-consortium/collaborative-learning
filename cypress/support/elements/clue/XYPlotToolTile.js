@@ -12,6 +12,9 @@ class XYPlotToolTile {
   getLinkTileButton(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .canvas-area .graph-toolbar .link-tile-button`);
   }
+  getAddSeriesButton(workspaceClass){
+    return cy.get(`${wsClass(workspaceClass)} .canvas-area .add-series-button`);
+  }
   getCustomModal() {
     return cy.get('.custom-modal.link-tile');
   }
@@ -26,6 +29,9 @@ class XYPlotToolTile {
     const yMenuButtons = `${wsClass(workspaceClass)} .axis-legend-attribute-menu.left button`;
     cy.get(yMenuButtons).first().click();
     cy.get(yMenuButtons).contains(attribute).click();
+  }
+  getYAttributesLabel(workspaceClass) {
+    return cy.get(`${wsClass(workspaceClass)} .canvas-area .multi-legend .simple-attribute-label`);
   }
 }
 export default XYPlotToolTile;
