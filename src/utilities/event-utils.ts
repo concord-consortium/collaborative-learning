@@ -14,10 +14,12 @@ export function hasSelectionModifier(e: MouseEvent | TouchEvent | KeyboardEvent 
   return e.ctrlKey || e.metaKey || e.shiftKey;
 }
 
-export function hasContiguousModifier(e: MouseEvent | TouchEvent | KeyboardEvent | React.MouseEvent | React.TouchEvent) {
+export function hasContiguousModifier(
+    e: MouseEvent | TouchEvent | KeyboardEvent | React.MouseEvent | React.TouchEvent) {
   return e.shiftKey;
 }
 
-export function hasDiscontiguousModifier(e: MouseEvent | TouchEvent | KeyboardEvent | React.MouseEvent | React.TouchEvent) {
+export function hasDiscontiguousModifier(
+    e: MouseEvent | TouchEvent | KeyboardEvent | React.MouseEvent | React.TouchEvent) {
   return e.ctrlKey || e.metaKey;
 }

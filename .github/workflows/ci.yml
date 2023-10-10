@@ -11,6 +11,10 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: '16'
+          cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            cms/package-lock.json
       - name: Install Dependencies
         run: npm ci
       - name: Install CMS Dependencies
@@ -26,6 +30,10 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: '16'
+          cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            cms/package-lock.json
       - name: Install Dependencies
         run: npm ci
       - name: Install CMS Dependencies
@@ -112,6 +120,10 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: '16'
+          cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            cms/package-lock.json
       - name: Install Dependencies
         run: npm ci
         env:

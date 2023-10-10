@@ -14,7 +14,6 @@ export const MergeInButton = observer(function MergeButton({ isDisabled }: IProp
   const model = useContext(TileModelContext)!;
   const { isMergeEnabled, showMergeTileDialog } = useTileDataMerging({model});
 
-  console.log("MergeInButton", {isDisabled, isMergeEnabled});
   const handleClick = () => {
     showMergeTileDialog && showMergeTileDialog();
   };

@@ -88,10 +88,10 @@ export class DropdownListControl extends Rete.Control {
       const name = option?.name ?? val.toString();
       const displayName = option?.displayName ?? name;
       const icon = option?.icon?.({}) || null;
-      const activeHub = option?.active;
+      const activeHub = option?.active !== false;
       const liveNode = this.getNode().name.substring(0,4) === "Live";
       const disableSelected = this.key === "hubSelect" && liveNode && !activeHub;
-      const labelClasses = disableSelected ? "disabled item top" : "item top";
+      const labelClasses = classNames("item top", { disabled: disableSelected });
 
       return (
         <div className={`node-select ${listClass}`} ref={divRef}>
@@ -105,7 +105,6 @@ export class DropdownListControl extends Rete.Control {
           {showList ?
           <div className={`option-list ${listClass}`} ref={listRef}>
             {options.map((ops: any, i: any) => {
-
               const disabled = ops.active === false || isDisabled?.(ops);
               const className = classNames("item", listClass, {
                 disabled,

@@ -51,7 +51,7 @@ export class ClueAppContentComponent extends BaseComponent<IProps> {
                             // we don't want to see the Groups in the header
                             showGroup={!autoAssignStudentsToIndividualGroups} />
         {currentPanelContent}
-        <DialogComponent dialog={ui.dialog} />
+        <DialogComponent/>
       </div>
     );
   }

@@ -1,6 +1,6 @@
 
 import React, { ReactNode } from "react";
-import { Tooltip, TooltipProps } from "react-tippy";
+import { Tooltip } from "react-tippy";
 import classNames from "classnames";
 
 import { useTooltipOptions } from "../../hooks/use-tooltip-options";

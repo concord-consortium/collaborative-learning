@@ -7,15 +7,11 @@ let dragXDestination = 300;
 
 context('Dataflow Tool Tile', function () {
   before(function () {
-    const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=dfe&mouseSensor";
-    cy.clearQAData('all');
-    cy.visit(queryParams);
-    cy.waitForLoad();
+    const url = "./doc-editor.html?appMode=qa&unit=./curriculum/example-curriculum/example-curriculum.json&mouseSensor";
+    cy.visit(url);
   });
   describe("Dataflow Tool", () => {
     it("renders dataflow tool tile", () => {
-      cy.wait(120000);
-      cy.showOnlyDocumentWorkspace();
       clueCanvas.addTile("dataflow");
       dataflowToolTile.getDataflowTile().should("exist");
       dataflowToolTile.getTileTitle().should("exist");

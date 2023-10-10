@@ -118,6 +118,7 @@ class Canvas {
     this.openFileMenu();
     cy.get('[data-test=list-item-icon-copy-workspace]').click();
     dialog.getDialogTitle().should('exist').contains('Copy');
+    dialog.getDialogTextInput().invoke('val').should('match', /^Copy of.*/);
     dialog.getDialogTextInput().click().clear().type(title);
     dialog.getDialogOKButton().click();
   }
