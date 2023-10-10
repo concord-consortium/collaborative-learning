@@ -8,8 +8,7 @@ import { SharedDataSet } from "../models/shared/shared-data-set";
 import { getTileContentInfo } from "../models/tiles/tile-content-info";
 import { useLinkableTiles } from "./use-linkable-tiles";
 import { AddTilesContext } from "../components/tiles/tile-api";
-import { getTileDataSet } from "../models/shared/shared-data-utils";
-import { cast } from "@concord-consortium/mobx-state-tree";
+import { getTileSharedModels } from "../models/shared/shared-data-utils";
 
 interface IProps {
   // TODO: This should be replaced with a generic disabled
@@ -90,9 +89,9 @@ export const useConsumerTileLinking = ({
 
   const createTile = useCallback(() => {
     if (onlyType && !readOnly) {
-      const dataSet = getTileDataSet(model.content);
-      if (dataSet) {
-        addTilesContext?.addTileAfter(onlyType, model, [cast(dataSet)]);
+      const sharedModels = getTileSharedModels(model.content);
+      if (sharedModels) {
+        addTilesContext?.addTileAfter(onlyType, model, sharedModels);
       }
     }
   }, [onlyType, readOnly, model, addTilesContext]);
