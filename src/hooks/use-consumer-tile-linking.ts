@@ -8,6 +8,8 @@ import { SharedDataSet } from "../models/shared/shared-data-set";
 import { getTileContentInfo } from "../models/tiles/tile-content-info";
 import { useLinkableTiles } from "./use-linkable-tiles";
 import { AddTilesContext } from "../components/tiles/tile-api";
+import { getTileDataSet } from "../models/shared/shared-data-utils";
+import { cast } from "@concord-consortium/mobx-state-tree";
 
 interface IProps {
   // TODO: This should be replaced with a generic disabled
@@ -88,9 +90,9 @@ export const useConsumerTileLinking = ({
 
   const createTile = useCallback(() => {
     if (onlyType && !readOnly) {
-      const dataSet = model.content.tileEnv?.sharedModelManager?.findFirstSharedModelByType(SharedDataSet, model.id);
+      const dataSet = getTileDataSet(model.content);
       if (dataSet) {
-        addTilesContext?.addTileAfter(onlyType, model, [dataSet]);
+        addTilesContext?.addTileAfter(onlyType, model, [cast(dataSet)]);
       }
     }
   }, [onlyType, readOnly, model, addTilesContext]);
