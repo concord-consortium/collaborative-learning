@@ -4,6 +4,8 @@ import classNames from "classnames";
 
 import DeleteSelectedIconSvg from "../../../assets/icons/delete/delete-selection-icon.svg";
 import SetExpressionIconSvg from "../../../clue/assets/icons/table/set-expression-icon.svg";
+import ViewDataAsGraphIcon from "../../../assets/icons/view-data-as-graph-icon.svg";
+
 import LinkGraphIcon from "../../../clue/assets/icons/table/link-graph-icon.svg";
 import { MergeInButton } from "../../../components/shared/merge-in-button";
 import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
@@ -88,6 +90,30 @@ export const LinkTileButton = () => {
     />
   );
 };
+
+export const LinkGraphButton = () => {
+  // Assume we always have a model
+  const model = useContext(TileModelContext)!;
+  const dataSet = getTileDataSet(model.content);
+  const classes = classNames("link-graph-button", );
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    console.log("clicked linkGraphButton");
+  };
+
+
+  return (
+   <TableButton
+     className={classes}
+     icon={<ViewDataAsGraphIcon />}
+     onClick={handleClick}
+     tooltipOptions={{ title: "Link table" }}
+   />
+ );
+
+};
+
 
 export const TableMergeInButton = () => {
   return <MergeInButton />;

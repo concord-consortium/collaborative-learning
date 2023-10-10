@@ -110,7 +110,16 @@ export const AppConfigModel = types
       ]);
     },
     getSetting(key: string, group?: string) {
+      // console.log("📁 app-config-model.ts ------------------------");
+      // console.log("\t🏭 getSetting");
+      // console.log("\t🥩 key:", key);
+      // console.log("\t🥩 group?:", group);
+
+      //table-toolbar key and group are "tools" and "table"
+
       const groupSettings = group ? self.settings?.[group] as SnapshotIn<typeof SettingsGroupMstType> : undefined;
+      // console.log("\t🔪 groupSettings:", groupSettings);
+
       return groupSettings?.[key] || self.settings?.[key];
     }
   }))
