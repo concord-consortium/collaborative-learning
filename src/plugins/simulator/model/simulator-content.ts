@@ -10,8 +10,7 @@ import { SharedModelType } from "../../../models/shared/shared-model";
 import { isInputVariable, isOutputVariable } from "../../shared-variables/simulations/simulation-utilities";
 import { kSimulatorTileType } from "../simulator-types";
 import { kSharedVariablesID, SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
-import { kBrainwavesKey } from "../simulations/brainwaves-gripper/brainwaves-gripper";
-import { simulations } from "../simulations/simulations";
+import { defaultSimulationKey, simulations } from "../simulations/simulations";
 
 export function defaultSimulatorContent(): SimulatorContentModelType {
   return SimulatorContentModel.create({});
@@ -50,7 +49,7 @@ export const SimulatorContentModel = TileContentModel
       // If no simulation has been specified, use the default simulation from appConfig
       if (!self.simulation) {
         const defaultSimulation = getAppConfig(self)?.getSetting("defaultSimulation", "simulator");
-        self.simulation = defaultSimulation as string ?? kBrainwavesKey;
+        self.simulation = defaultSimulation as string ?? defaultSimulationKey;
       }
       return simulations[self.simulation];
     }
