@@ -1,4 +1,6 @@
-import { isValidHttpUrl, getUnitCodeFromUrl, getUnitCodeFromUnitParam, getUrlFromRelativeOrFullString } from './url-utils';
+import {
+  isValidHttpUrl, getUnitCodeFromUrl, getUnitCodeFromUnitParam, getUrlFromRelativeOrFullString
+} from './url-utils';
 
 describe("isValidHttpUrl", () => {
   const validUrl = "https://concord.org";

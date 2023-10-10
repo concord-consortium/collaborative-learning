@@ -8,14 +8,10 @@ import "./dialog.sass";
 interface IProps extends IBaseProps {
   dialog?: UIDialogModelType;
 }
-interface IState {
-  promptValue?: string;
-}
 
 @inject("stores")
 @observer
-export class DialogComponent extends BaseComponent<IProps, IState> {
-  public state: IState = {};
+export class DialogComponent extends BaseComponent<IProps> {
   private input: HTMLInputElement | HTMLTextAreaElement | null;
 
   public componentDidMount() {
@@ -29,12 +25,6 @@ export class DialogComponent extends BaseComponent<IProps, IState> {
   public componentDidUpdate() {
     if (this.input) {
       this.input.focus();
-    }
-  }
-
-  public UNSAFE_componentWillReceiveProps(nextProps: IProps) {
-    if (nextProps.dialog !== this.props.dialog) {
-      this.setState({promptValue: nextProps.dialog && nextProps.dialog.defaultValue});
     }
   }
 
@@ -102,7 +92,7 @@ export class DialogComponent extends BaseComponent<IProps, IState> {
       ? <textarea
           rows={dialog.rows}
           data-test="dialog-text-input"
-          value={this.state.promptValue}
+          value={dialog.promptValue}
           onChange={this.handlePromptValueChanged}
           onKeyUp={this.handlePromptKeyUp}
           ref={(el) => this.input = el}
@@ -110,7 +100,7 @@ export class DialogComponent extends BaseComponent<IProps, IState> {
       : <input
           data-test="dialog-text-input"
           type="text"
-          value={this.state.promptValue}
+          value={dialog.promptValue}
           onChange={this.handlePromptValueChanged}
           onKeyUp={this.handlePromptKeyUp}
           ref={(el) => this.input = el}
@@ -139,7 +129,7 @@ export class DialogComponent extends BaseComponent<IProps, IState> {
 
   private handlePromptValueChanged = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (this.input) {
-      this.setState({promptValue: this.input.value});
+      this.stores.ui.dialog?.setPromptValue(this.input.value);
     }
   };
 
@@ -151,7 +141,7 @@ export class DialogComponent extends BaseComponent<IProps, IState> {
   };
 
   private get promptValue() {
-    return (this.state.promptValue || "").trim();
+    return (this.stores.ui.dialog?.promptValue || "").trim();
   }
 
   private handlePromptDialogOk = (e?: React.MouseEvent<HTMLButtonElement>) => {

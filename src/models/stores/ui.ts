@@ -35,7 +35,15 @@ export const UIDialogModel = types
     className: "",
     defaultValue: types.maybe(types.string),
     rows: types.maybe(types.number)
-  });
+  })
+  .volatile(self => ({
+    promptValue: self.defaultValue
+  }))
+  .actions(self => ({
+    setPromptValue(value: string) {
+      self.promptValue = value;
+    }
+  }));
 type UIDialogModelSnapshot = SnapshotIn<typeof UIDialogModel>;
 type UIDialogModelSnapshotWithoutType = Omit<UIDialogModelSnapshot, "type">;
 
