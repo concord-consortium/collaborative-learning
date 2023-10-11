@@ -22,6 +22,9 @@ class XYPlotToolTile {
   getGraphDot(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .canvas-area .graph-dot`);
   }
+  getXAxisLabel(workspaceClass) {
+    return cy.get(`${wsClass(workspaceClass)} .display-label.bottom`);
+  }
   selectYAttribute(attribute, workspaceClass) {
     const yMenuButtons = `${wsClass(workspaceClass)} .axis-legend-attribute-menu.left button`;
     cy.get(yMenuButtons).first().click();

@@ -1,12 +1,17 @@
 import React, { useRef, useState } from "react";
 
 import LinkGraphIcon from "../clue/assets/icons/table/link-graph-icon.svg";
-import { useCustomModal } from "./use-custom-modal";
+import { IModalButton, useCustomModal } from "./use-custom-modal";
 import { isLinkedToTile } from "../models/shared/shared-data-utils";
 import { ITileLinkMetadata } from "../models/tiles/tile-link-types";
 import { ITileModel } from "../models/tiles/tile-model";
 
 import "./link-tile-dialog.scss";
+
+// Defines a modal window that allows the user to select a tile
+// to link with or unlinkn from the current tile's dataset.
+// If a single tile type is supplied as an argument, an option to
+// create a new tile of that type will be offered as well.
 
 interface IContentProps {
   linkedTiles: ITileLinkMetadata[];
@@ -14,17 +19,30 @@ interface IContentProps {
   tileTitle?: string;
   unlinkedTiles: ITileLinkMetadata[];
   setSelectValue: React.Dispatch<React.SetStateAction<string>>;
+  tileType?: string;
 }
 const Content: React.FC<IContentProps>
-              = ({ linkedTiles, selectValue, tileTitle, unlinkedTiles, setSelectValue })=> {
+              = ({ linkedTiles, selectValue, tileTitle, unlinkedTiles, setSelectValue, tileType })=> {
+  /**
+   * Content for the link/unlink/create modal dialog.
+   */
   const displayTileTitle = tileTitle || "this tile";
   const selectElt = useRef<HTMLSelectElement>(null);
+
+  let instructions;
+  if (tileType) {
+    const lcTileType = tileType.toLowerCase();
+    instructions = `To view data as a ${lcTileType}, select the ${lcTileType} from this list.
+    To remove the view, select a ${lcTileType} from the Unlink list.`;
+  } else {
+    instructions = `To link ${displayTileTitle} to another tile, select a tile from the link list.
+     To unlink ${displayTileTitle} from another tile, select a tile from the unlink list.`;
+  }
 
     return (
       <>
         <div className="prompt">
-          To link {displayTileTitle} to another tile, select a tile from the link list.
-          To unlink {displayTileTitle} from another tile, select a tile from the unlink list.
+          {instructions}
         </div>
         <select ref={selectElt} value={selectValue} data-test="link-tile-select"
                                 onChange={e => {
@@ -54,10 +72,13 @@ const Content: React.FC<IContentProps>
 interface IProps {
   linkableTiles: ITileLinkMetadata[];
   model: ITileModel;
+  tileType?: string;
   onLinkTile: (tileInfo: ITileLinkMetadata) => void;
   onUnlinkTile: (tileInfo: ITileLinkMetadata) => void;
+  onCreateTile: () => void;
 }
-export const useLinkConsumerTileDialog = ({ linkableTiles, model, onLinkTile, onUnlinkTile }: IProps) => {
+export const useLinkConsumerTileDialog =
+    ({ linkableTiles, model, tileType, onLinkTile, onUnlinkTile, onCreateTile }: IProps) => {
   const tileTitle = model.computedTitle;
   const [selectValue, setSelectValue] = useState("");
   const handleClick = () => {
@@ -71,23 +92,34 @@ export const useLinkConsumerTileDialog = ({ linkableTiles, model, onLinkTile, on
     }
   };
   const unlinkedTiles = linkableTiles
-                                  .filter(tileInfo => !isLinkedToTile(model, tileInfo.id));
+    .filter(tileInfo => !isLinkedToTile(model, tileInfo.id));
   const linkedTiles = linkableTiles
-                                  .filter(tileInfo => isLinkedToTile(model, tileInfo.id) && tileInfo.id !== model.id);
+    .filter(tileInfo => isLinkedToTile(model, tileInfo.id) && tileInfo.id !== model.id);
+
+  const buttons: IModalButton[] = [
+    { label: "Cancel" },
+    {
+      label: !isLinkedToTile(model, selectValue) ? "Link" : "Unlink",
+      isDefault: true,
+      isDisabled: !selectValue,
+      onClick: handleClick
+    }];
+  if (onCreateTile && tileType) {
+    buttons.splice(1, 0,
+      {
+        label: `Add new ${tileType}`,
+        className: 'add-new-button',
+        onClick: onCreateTile,
+      }
+    );
+  }
   const [showModal, hideModal] = useCustomModal({
     className: "link-tile",
     Icon: LinkGraphIcon,
-    title: "Link or Unlink Tile",
+    title: tileType ? `View Data as ${tileType}` : "Link or Unlink Tile",
     Content,
-    contentProps: { linkedTiles, selectValue, tileTitle, unlinkedTiles, setSelectValue },
-    buttons: [
-      { label: "Cancel" },
-      { label: !isLinkedToTile(model, selectValue) ? "Link" : "Unlink",
-        isDefault: true,
-        isDisabled: !selectValue,
-        onClick: handleClick
-      }
-    ]
+    contentProps: { linkedTiles, selectValue, tileTitle, tileType, unlinkedTiles, setSelectValue },
+    buttons
   }, [linkableTiles]);
 
   return [showModal, hideModal];
