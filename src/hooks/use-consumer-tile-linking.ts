@@ -91,7 +91,7 @@ export const useConsumerTileLinking = ({
     if (onlyType && !readOnly) {
       const sharedModels = getTileSharedModels(model.content);
       if (sharedModels) {
-        addTilesContext?.addTileAfter(onlyType, model, sharedModels);
+        addTilesContext?.addTileAfter(onlyType, model, sharedModels, {title: model.title});
       }
     }
   }, [onlyType, readOnly, model, addTilesContext]);
