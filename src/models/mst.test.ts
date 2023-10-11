@@ -816,4 +816,17 @@ describe("mst", () => {
 
 
   });
+
+  test("frozen props can be anything", () => {
+    const TestObject = types
+      .model("TestObject", {
+        prop: types.frozen<any>()
+      });
+
+    expect(TestObject.create({prop: 1}).prop).toBe(1);
+    const simpleObj = {"hi": "bye"};
+    expect(TestObject.create({prop: simpleObj}).prop).toEqual(simpleObj);
+    const complexObj = {"hi": {"more": ["stuff", "in"], "here": 1}};
+    expect(TestObject.create({prop: complexObj}).prop).toEqual(complexObj);
+  });
 });

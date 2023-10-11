@@ -1,4 +1,4 @@
-import { IAnyStateTreeNode, types } from "mobx-state-tree";
+import { IAnyStateTreeNode, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { parseSectionPath } from "../../../functions/src/shared";
 import { DocumentContentModel } from "../document/document-content";
 import { IAuthoredTileContent } from "../document/document-content-import-types";
@@ -113,7 +113,8 @@ export const SectionModel = types
       self.realParent = parent;
     }
   }));
-export type SectionModelType = typeof SectionModel.Type;
+export interface SectionModelType extends Instance<typeof SectionModel> {}
+export interface SectionModelSnapshot extends SnapshotIn<typeof SectionModel> {}
 
 export function findSectionIndex(sections: SectionModelType[], fullPath: string | undefined){
   if (fullPath !==undefined) {
