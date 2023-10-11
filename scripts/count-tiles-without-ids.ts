@@ -24,6 +24,21 @@ async function* getFiles(dir) {
 
 let fileCount = 0;
 let tileCount = 0;
+const unitCount: Record<string, number> = {};
+
+function getUnit(file: string) {
+  const result = file.match(/\/curriculum\/([^/]+)\//);
+  return result && result[1];
+}
+
+function updateUnitCount(file: string) {
+  const unit = getUnit(file);
+  if (!unit) return;
+  if (!unitCount[unit]) {
+    unitCount[unit] = 0;
+  }
+  unitCount[unit]++;
+}
 
 (async () => {
   for await (const file of getFiles('../../clue-curriculum/curriculum')) {
@@ -55,8 +70,28 @@ let tileCount = 0;
     }
     if (hasIdLessTile) {
       fileCount++;
-      console.log(file);
+      updateUnitCount(file);
+      // console.log(file);
     }
+  }
+
+  const unitCountEntries = Object.entries(unitCount);
+  // find longest unit name
+  let longestName = 0;
+  for (const entry of unitCountEntries) {
+    if (entry[0].length > longestName) {
+      longestName = entry[0].length;
+    }
+  }
+
+  function padRight(value: string) {
+    const paddingValue = " ".repeat(longestName);
+    return String(value + paddingValue).slice(0, paddingValue.length);
+  }
+
+  for (const entry of unitCountEntries) {
+
+    console.log(`${padRight(entry[0])}: ${entry[1]} files`);
   }
 
   console.log({fileCount, tileCount});
