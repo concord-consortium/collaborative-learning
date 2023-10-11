@@ -39,12 +39,12 @@ function TerrariumComponent({ frame, variables }: ISimulationProps) {
   // Determine temperature reading
   const temperatureVariable = findVariable(kTemperatureKey, variables);
   const temperatureValue = temperatureVariable?.currentValue ?? 0;
-  const temperatureReading = `${Math.round(temperatureValue)}°C`;
+  const temperatureDisplay = `${Math.round(temperatureValue)}°C`;
 
   // Determine humidity reading
   const humidityVariable = findVariable(kHumidityKey, variables);
   const humidityValue = humidityVariable?.currentValue ?? startHumidity;
-  const humidityReading = `${Math.round(humidityValue)}%`;
+  const humidityDisplay = `${Math.round(humidityValue)}%`;
 
   // Determine jar background and condensation foreground frame based on humidity percent
   const humidityPercent = (humidityValue - minHumidity) / (maxHumidity - minHumidity);
@@ -89,8 +89,8 @@ function TerrariumComponent({ frame, variables }: ISimulationProps) {
       <div className="display-container" style={condensationStyle} >
         <img className="animation-image display" src={display} />
         <div className="display-message-container">
-          <div className="display-message">{temperatureReading}</div>
-          <div className="display-message">{humidityReading}</div>
+          <div className="display-message">{temperatureDisplay}</div>
+          <div className="display-message">{humidityDisplay}</div>
         </div>
       </div>
       <img
