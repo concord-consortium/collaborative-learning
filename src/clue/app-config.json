@@ -242,6 +242,9 @@
     "settings": {
       "graph": {
         "autoAssignAttributes": true
+      },
+      "simulator": {
+        "defaultSimulation": "EMG_and_claw"
       }
     }
   },

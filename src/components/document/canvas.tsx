@@ -1,4 +1,3 @@
-import { observable } from "mobx";
 import { inject, observer } from "mobx-react";
 import { getSnapshot, destroy } from "mobx-state-tree";
 import React from "react";
@@ -15,7 +14,7 @@ import { logHistoryEvent } from "../../models/history/log-history-event";
 import { TreeManagerType } from "../../models/history/tree-manager";
 import { PlaybackComponent } from "../playback/playback";
 import {
-  ITileApi, ITileApiInterface, TileApiInterfaceContext, EditableTileApiInterfaceRefContext, AddTilesContext
+  ITileApiInterface, TileApiInterfaceContext, EditableTileApiInterfaceRefContext, AddTilesContext, TileApiInterface
 } from "../tiles/tile-api";
 import { StringBuilder } from "../../utilities/string-builder";
 import { HotKeys } from "../../utilities/hot-keys";
@@ -47,7 +46,6 @@ interface IState {
 @inject("stores")
 @observer
 export class CanvasComponent extends BaseComponent<IProps, IState> {
-  private toolApiMap = observable.map<string, ITileApi>();
   private tileApiInterface: ITileApiInterface;
   private hotKeys: HotKeys = new HotKeys();
 
@@ -57,20 +55,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
   constructor(props: IProps) {
     super(props);
 
-    this.tileApiInterface = {
-      register: (id: string, tileApi: ITileApi) => {
-        this.toolApiMap.set(id, tileApi);
-      },
-      unregister: (id: string) => {
-        this.toolApiMap.delete(id);
-      },
-      getTileApi: (id: string) => {
-        return this.toolApiMap.get(id)!;
-      },
-      forEach: (callback: (api: ITileApi) => void) => {
-        this.toolApiMap.forEach(api => callback(api));
-      }
-    };
+    this.tileApiInterface = new TileApiInterface();
 
     this.hotKeys.register({
       "cmd-shift-s": this.handleCopyDocumentJson,
