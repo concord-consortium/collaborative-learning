@@ -12,6 +12,7 @@ import { ITileModel } from "../../models/tiles/tile-model";
 import { ImageUploadButton } from "../../components/tiles/image/image-toolbar";
 import { EditFacet } from "./data-card-types";
 import {
+  DataCardLinkGraphButton,
   DataCardLinkTileButton, DataCardMergeInButton, DeleteAttrButton, DuplicateCardButton,
 } from "./components/data-card-toolbar-buttons";
 import { useSettingFromStores } from "../../hooks/use-stores";
@@ -21,8 +22,8 @@ import "./data-card-toolbar.scss";
 
 type IButtonSetting = string | [string, string];
 
-const defaultButtons: IButtonSetting[] = ["duplicate", "link-tile", "merge-in", ["data-set-view", "Table"],
-  "image-upload", "delete-attribute"];
+const defaultButtons: IButtonSetting[] = ["duplicate", "link-tile", "link-graph", "merge-in",
+  ["data-set-view", "Table"], "image-upload", "delete-attribute"];
 interface IProps extends IFloatingToolbarProps {
   currEditAttrId: string;
   currEditFacet: EditFacet;
@@ -76,6 +77,8 @@ export const DataCardToolbar: React.FC<IProps> = observer(function DataCardToolb
           return <DuplicateCardButton key={toolName} />;
         case "link-tile":
           return <DataCardLinkTileButton key={toolName} />;
+        case "link-graph":
+          return <DataCardLinkGraphButton key={toolName} />;
         case "merge-in":
           return <DataCardMergeInButton key={toolName} />;
         case "image-upload":

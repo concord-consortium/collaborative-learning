@@ -351,17 +351,17 @@ export const NodeDemoOutputTypes = [
 
 export const NodeLiveOutputTypes = [
   {
+    name: "Gripper 2.0",
+    icon: GrabberIcon,
+    angleBase: 130,
+    sweep: 95
+  },
+  {
     name: "Grabber",
     icon: GrabberIcon,
     angleBase: 180,
     sweep: 60,
     displayName: "Gripper"
-  },
-  {
-    name: "Gripper 2.0",
-    icon: GrabberIcon,
-    angleBase: 130,
-    sweep: 95
   },
   {
     name: "Humidifier",
