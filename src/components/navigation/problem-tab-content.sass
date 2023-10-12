@@ -91,11 +91,17 @@
           background-color: $learninglog-green-light-6
     .solutions-label
       margin: 0 7px 0 3px
-  .problem-panel
-    margin-top: $document-margin
-    overflow-y: auto
+  .problem-panels-container
     flex: 1
+    // This is so the flex layout doesn't use the content height as the min height
+    min-height: 0
+    // This padding is to deal with the how the tabs above are laid out.
+    // They stick out below their box.
+    padding-top: 2px
+
   &.chat-open
     border-right: 0
   &.teacher-guide
     border-color: $learninglog-green-dark-1
+  .problem-panel-tab-panel
+    height: 100%
