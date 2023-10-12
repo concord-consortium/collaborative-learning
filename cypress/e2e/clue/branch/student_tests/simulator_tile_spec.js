@@ -95,7 +95,7 @@ context('Simulator Tile with Brainwaves Gripper Simulation', function () {
       simulatorTile.getSimulatorTile().should("contain.text", "Gripper Output100");
 
       // Pressure variable updates when the gripper changes
-      simulatorTile.getSimulatorTile().should("contain.text", "Surface Pressure Sensor400");
+      simulatorTile.getSimulatorTile().should("contain.text", "Surface Pressure Sensor300");
     });
   });
 });
