@@ -1,1 +1,0 @@
-{"rowMap":{"UeudbUW5rytSDEdQ":{"id":"UeudbUW5rytSDEdQ","height":126,"isSectionHeader":false,"tiles":[{"tileId":"lL2q3oqgiwqeczHn"}]}},"rowOrder":["UeudbUW5rytSDEdQ"],"tileMap":{"lL2q3oqgiwqeczHn":{"id":"lL2q3oqgiwqeczHn","content":{"type":"Image","changes":["{\"operation\":\"update\",\"url\":\"https://collaborative-learning.concord.org/assets/images/image_placeholder.png\"}"]}}}}
