@@ -270,15 +270,13 @@ export const NodeSensorTypes = [
     name: "Temperature",
     type: "temperature",
     units: "°C",
-    icon: TemperatureIcon,
-    decimalPlaces: 2
+    icon: TemperatureIcon
   },
   {
     name: "Humidity",
     type: "humidity",
     units: "%",
-    icon: HumidityIcon,
-    decimalPlaces: 2
+    icon: HumidityIcon
   },
   {
     name: "CO₂",
@@ -314,13 +312,15 @@ export const NodeSensorTypes = [
     name: "EMG",
     type: "emg-reading",
     units: "mV",
-    icon: EmgIcon
+    icon: EmgIcon,
+    decimalPlaces: 0
   },
   {
     name: "Surface Pressure",
     type: "fsr-reading",
     units: "psi",
-    icon: PressureIcon
+    icon: PressureIcon,
+    decimalPlaces: 0
   }
 ];
 
