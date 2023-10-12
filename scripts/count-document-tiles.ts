@@ -1,16 +1,22 @@
 #!/usr/bin/node
 
+// TODO Make sure there are at least 10 of a tag before including it
+
 // to run this script type the following in the terminal
 // cf. https://stackoverflow.com/a/66626333/16328462
 // $ cd scripts
 // $ npx tsx count-document-tiles.ts
 
+import fs from "fs";
 import admin from "firebase-admin";
 import {google} from "googleapis";
 import fetch from 'node-fetch';
 
 // Load the service account key JSON file.
 import serviceAccount from "./serviceAccountKey.json" assert { type: "json" };
+
+// Make falsy to include all documents
+const documentLimit = false;
 
 // _duration should be in miliseconds
 function prettyDuration(_duration: number) {
@@ -36,7 +42,7 @@ const startTime = Date.now();
 let documentsProcessed = 0;
 let undefinedDocuments = 0;
 let failedDocuments = 0;
-const documentTileCounts = {};
+const documentInfo = {};
 
 // Define the required scopes.
 const scopes = [
@@ -107,14 +113,25 @@ admin.initializeApp({
 
 const credentialTime = Date.now();
 
+const targetDir = `dataset${startTime}`;
+// const targetPath = `./${targetDir}`;
+await fs.mkdir(targetDir, error => {
+  if (error) {
+    console.log(`Failed to create ${targetDir}`, error);
+  }
+});
 for (const key of Object.keys(classKeys)) {
+  if (documentLimit && documentsProcessed >= documentLimit) break;
   const usersSnapshot = await admin.database().ref(`${firebaseBasePath}/${key}/users`).once("value");
   const users = usersSnapshot.val();
   // console.log(key);
   // console.log(`  - ${Object.keys(users).length} users`);
   for (const [userId, user] of Object.entries<any>(users)) {
+    if (documentLimit && documentsProcessed >= documentLimit) break;
     // console.log(`  ${userId}`);
     for (const [docId, doc] of Object.entries<any>(user.documents)) {
+      if (documentLimit && documentsProcessed >= documentLimit) break;
+
       const content = doc.content as string | undefined;
       if (!content) {
         // console.log(`    ${docId} - undefined content`);
@@ -140,7 +157,18 @@ for (const key of Object.keys(classKeys)) {
           tileCounts[tileType]++;
         }
       }
-      documentTileCounts[documentsProcessed] = tileCounts;
+      const documentId = `document${documentsProcessed}`;
+      const documentFile = `${targetDir}/${documentId}.txt`;
+      fs.writeFileSync(documentFile, content);
+      documentInfo[documentId] = {
+        fileName: documentFile,
+        tags: []
+      };
+      targetTileTypes.forEach(targetTileType => {
+        const typeCount = tileCounts[targetTileType];
+        const tagNumber = typeCount >= 5 ? "5+" : `${typeCount}`;
+        documentInfo[documentId].tags.push(`${targetTileType}${tagNumber}`);
+      });
       // console.log(`  ${tileCounts}`);
       documentsProcessed++;
 
@@ -151,10 +179,22 @@ for (const key of Object.keys(classKeys)) {
   }
 }
 
+const tagFileName = `tags.csv`;
+const fileRoot = `gs://cloud-ai-platform-d76df5a1-f27c-4288-8b89-f41e345567b9/`;
+let tagFileContent = "";
+Object.values(documentInfo).forEach(info => {
+  const fileName = `${fileRoot}${info.fileName}`;
+  const tagPart = info.tags.join(",");
+  const comma = tagPart ? "," : "";
+  const line = `${fileName}${comma}${tagPart}\n`;
+  tagFileContent = `${tagFileContent}${line}`;
+});
+fs.writeFileSync(`${targetDir}/${tagFileName}`, tagFileContent);
+
 const endTime = Date.now();
 console.log(`***** End script *****`);
 console.log(`*** Final counts ***`);
-console.log(documentTileCounts);
+console.log(documentInfo);
 console.log(`- Time to access token: ${prettyDuration(accessTime - startTime)}`);
 console.log(`- Time to fetch documents: ${prettyDuration(fetchTime - startTime)}`);
 console.log(`- Time to get credential: ${prettyDuration(credentialTime - startTime)}`);

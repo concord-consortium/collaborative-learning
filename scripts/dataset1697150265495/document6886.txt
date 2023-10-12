@@ -1,0 +1,1 @@
+{"rowMap":{"y49NogkCG1MQMcoe":{"id":"y49NogkCG1MQMcoe","isSectionHeader":false,"tiles":[{"tileId":"9y__dU_81vfZZUvM"}]}},"rowOrder":["y49NogkCG1MQMcoe"],"tileMap":{"9y__dU_81vfZZUvM":{"id":"9y__dU_81vfZZUvM","content":{"type":"Image","changes":["{\"operation\":\"update\",\"url\":\"http://www.piskelapp.com/p/agxzfnBpc2tlbC1hcHByEwsSBlBpc2tlbBiAgICA_eOjCgw/edit\"}"]}}}}
