@@ -42,7 +42,7 @@ export function SimulatorVariable({ variable }: ISimulatorVariableProps) {
     const decimalPlaces = getVariableDecimalPlaces(variable);
     return value?.toFixed(decimalPlaces);
   };
-  const displayValueText = `${displayValue()}${variable?.unit ?? ""}`;
+  const displayValueText = `${displayValue()}${variable?.unit ? " " + variable.unit : ""}`;
 
   const className = inputVariable ? "input" : "output";
   const variableClassNames = variable.getAllOfType("className");
