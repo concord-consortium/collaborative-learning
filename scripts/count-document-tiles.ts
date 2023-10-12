@@ -3,8 +3,7 @@
 // to run this script type the following in the terminal
 // cf. https://stackoverflow.com/a/66626333/16328462
 // $ cd scripts
-// ---- outdated ---- $ node --loader ts-node/esm load-docs-example.ts
-// $ npx tsx load-docs-example.ts
+// $ npx tsx count-document-tiles.ts
 
 import admin from "firebase-admin";
 import {google} from "googleapis";
@@ -13,17 +12,31 @@ import fetch from 'node-fetch';
 // Load the service account key JSON file.
 import serviceAccount from "./serviceAccountKey.json" assert { type: "json" };
 
+// _duration should be in miliseconds
+function prettyDuration(_duration: number) {
+  const miliseconds = _duration % 1000;
+  const totalSeconds = Math.floor(_duration / 1000);
+  const seconds = totalSeconds % 60;
+  const totalMinutes = Math.floor(totalSeconds / 60);
+  const minutes = totalMinutes % 60;
+  const hours = Math.floor(totalMinutes / 60);
+  const hourPart = hours > 0 ? `${hours}:` : "";
+  const minutePart = hourPart || minutes > 0 ? `${minutes}:` : "";
+  const secondPart = minutePart || seconds > 0 ? `${seconds}.` : "";
+  return `${hourPart}${minutePart}${secondPart}${miliseconds}`;
+}
+
 console.log(`*** Starting Tile Count ***`);
 
-const targetTileType = "Geometry";
+const targetTileTypes = ["Geometry", "Text", "Table"];
 
-console.log(`* Counting ${targetTileType} Tiles *`);
+console.log(`* Counting ${targetTileTypes.join(", ")} Tiles *`);
 
 const startTime = Date.now();
 let documentsProcessed = 0;
 let undefinedDocuments = 0;
 let failedDocuments = 0;
-const tileCounts = {};
+const documentTileCounts = {};
 
 // Define the required scopes.
 const scopes = [
@@ -59,6 +72,8 @@ const accessToken = await new Promise<string|undefined>((resolve, reject) => {
   });
 });
 
+const accessTime = Date.now();
+
 const databaseURL = "https://collaborative-learning-ec215.firebaseio.com";
 
 function buildFirebasePath(portal?: string) {
@@ -80,6 +95,8 @@ const response = await fetch(fetchURL,
 );
 const classKeys  = await response.json() as Record<string, boolean>;
 
+const fetchTime = Date.now();
+
 // Fetch the service account key JSON file contents; must be in same folder as script
 const credential = admin.credential.cert('./serviceAccountKey.json');
 // Initialize the app with a service account, granting admin privileges
@@ -87,6 +104,8 @@ admin.initializeApp({
   credential,
   databaseURL
 });
+
+const credentialTime = Date.now();
 
 for (const key of Object.keys(classKeys)) {
   const usersSnapshot = await admin.database().ref(`${firebaseBasePath}/${key}/users`).once("value");
@@ -112,41 +131,36 @@ for (const key of Object.keys(classKeys)) {
         break;
       }
       // console.log(`    ${docId}`);
-      let tileCount = 0;
+      const tileCounts = {};
+      targetTileTypes.forEach(tileType => tileCounts[tileType] = 0);
       const tiles = Object.values<any>(parsedContent.tileMap);
       for (const tile of tiles) {
-
-        if (tile.content.type === targetTileType) {
-          tileCount++;
+        const tileType = tile.content.type;
+        if (targetTileTypes.includes(tileType)) {
+          tileCounts[tileType]++;
         }
       }
-      if (!tileCounts[tileCount]) {
-        tileCounts[tileCount] = 0;
-      }
-      tileCounts[tileCount] = tileCounts[tileCount] + 1;
-      console.log(`  ${tileCount}`);
+      documentTileCounts[documentsProcessed] = tileCounts;
+      // console.log(`  ${tileCounts}`);
       documentsProcessed++;
+
+      if (documentsProcessed % 100 === 0) {
+        console.log(`${documentsProcessed} documents processed in ${prettyDuration(Date.now() - startTime)}`);
+      }
     }
   }
 }
 
 const endTime = Date.now();
-const duration = endTime - startTime;
-const miliseconds = duration % 1000;
-const totalSeconds = Math.floor(duration / 1000);
-const seconds = totalSeconds % 60;
-const totalMinutes = Math.floor(totalSeconds / 60);
-const minutes = totalMinutes % 60;
-const hours = Math.floor(totalMinutes / 60);
-const hourPart = hours > 0 ? `${hours}:` : "";
-const minutePart = hourPart || minutes > 0 ? `${minutes}:` : "";
-const secondPart = minutePart || seconds > 0 ? `${seconds}:` : "";
 console.log(`***** End script *****`);
+console.log(`*** Final counts ***`);
+console.log(documentTileCounts);
+console.log(`- Time to access token: ${prettyDuration(accessTime - startTime)}`);
+console.log(`- Time to fetch documents: ${prettyDuration(fetchTime - startTime)}`);
+console.log(`- Time to get credential: ${prettyDuration(credentialTime - startTime)}`);
+console.log(`- Total Time: ${prettyDuration(endTime - startTime)}`);
 console.log(`Documents processed: ${documentsProcessed}`);
 console.log(`Undefined documents: ${undefinedDocuments}`);
 console.log(`Failed to process: ${failedDocuments}`);
-console.log(`Total Time: ${hourPart}${minutePart}${secondPart}${miliseconds}`);
-console.log(`*** Final counts ***`);
-console.log(tileCounts);
 
 process.exit(0);
