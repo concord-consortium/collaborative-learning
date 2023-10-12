@@ -214,7 +214,7 @@ export const brainwavesGripperSimulation: ISimulation = {
       icon: iconUrl(kEMGKey),
       name: kEMGKey,
       value: 40,
-      unit: "f(mv)"
+      unit: "mV"
     },
     {
       displayName: "Surface Pressure",
@@ -222,7 +222,7 @@ export const brainwavesGripperSimulation: ISimulation = {
       icon: iconUrl(kPressureKey),
       name: kPressureKey,
       value: 0,
-      unit: "g"
+      unit: "psi"
     },
     {
       displayName: "Gripper",
