@@ -1,1 +1,0 @@
-{"rowMap":{"ylhmPv2unSJQPgRv":{"id":"ylhmPv2unSJQPgRv","isSectionHeader":false,"tiles":[{"tileId":"Oelogg-0aQ2OY_ko"}]}},"rowOrder":["ylhmPv2unSJQPgRv"],"tileMap":{"Oelogg-0aQ2OY_ko":{"id":"Oelogg-0aQ2OY_ko","content":{"type":"Text","text":["<p>Evidence 1: </p>"],"format":"html"}}},"sharedModelMap":{}}
