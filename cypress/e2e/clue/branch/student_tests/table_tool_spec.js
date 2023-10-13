@@ -275,3 +275,35 @@ context('Table Tool Tile Undo Redo', function () {
     });
   });
 });
+
+
+//-------Add New Tests-------------------------
+//TODO: Since this file uses url params: http://localhost:8080/?appMode=qa&fakeClass=5&fakeUser=student:5&demoOffering=5&problem=2.1&qaGroup=5
+//which defaults to unit: SAS. I noticed there actually is no element on the toolbar for the XY Plot.
+
+context('Table Tile View Graph As Data Button', function() {
+  before(function () {
+    const queryParams = `${Cypress.config("queryParams")}`;
+    cy.clearQAData('all');
+
+    cy.visit(queryParams);
+    cy.waitForLoad();
+    cy.showOnlyDocumentWorkspace();
+  });
+
+  describe('Test View Graph as Data Button', function() {
+    it('will link to an XY Plot using the "View Data as Graph" button', function () {
+      clueCanvas.addTile('table');
+      cy.get(".primary-workspace").within((workspace) => {
+        tableToolTile.typeInTableCell(1, '5');
+        tableToolTile.typeInTableCell(2, '2.5');
+        tableToolTile.typeInTableCell(5, '5');
+        tableToolTile.typeInTableCell(6, '7');
+        tableToolTile.getViewDataButton().click();
+        cy.pause();
+        tableToolTile.getLinkGraphModalCreateNewButton().click();
+      });
+    });
+  });
+});
+
