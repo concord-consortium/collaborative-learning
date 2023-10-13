@@ -28,7 +28,7 @@ export class PreviewLinkControl extends React.Component<CmsWidgetControlProps, I
   isTeacherGuide?: boolean;
   pathParts?: string[];
   unit?: string;
-  
+
   constructor(props: CmsWidgetControlProps) {
     super(props);
 
@@ -71,15 +71,24 @@ export class PreviewLinkControl extends React.Component<CmsWidgetControlProps, I
     // curriculum/[unit]/teacher-guide?/investigation-[ordinal]/problem-[ordinal]/[sectionType]/content.json
     const sectionPath = this.pathParts?.slice(-4).join("/");
     let problemParam = "";
-    unitJson.investigations.forEach((investigation: any) => {
-      investigation.problems.forEach((problem: any) => {
-        problem.sections.forEach((section: any) => {
-          if (section.sectionPath === sectionPath) {
-            problemParam = `${investigation.ordinal}.${problem.ordinal}`;
-          }
-        });
+    console.log(`--- unitJson`, unitJson, unitJson.investigations);
+    if (unitJson.investigations) {
+      unitJson.investigations.forEach((investigation: any) => {
+        console.log(` -- problems`, investigation.problems);
+        if (investigation.problems) {
+          investigation.problems.forEach((problem: any) => {
+            console.log(` -- sections`, problem.sections);
+            if (problem.sections) {
+              problem.sections.forEach((section: any) => {
+                if (section.sectionPath === sectionPath) {
+                  problemParam = `${investigation.ordinal}.${problem.ordinal}`;
+                }
+              });
+            }
+          });
+        }
       });
-    });
+    }
     if (!problemParam) {
       problemParam = "1.1";
       this.setState({ warning: `Could not determine problem parameter. Using default ${problemParam}.`});
