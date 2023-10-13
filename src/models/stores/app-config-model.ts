@@ -110,7 +110,11 @@ export const AppConfigModel = types
       ]);
     },
     getSetting(key: string, group?: string) {
-      //table-toolbar key and group are "tools" and "table"
+      /**
+       * Gets the configuration, if any, for the given item.
+       * For example, to look up what buttons (aka tools) should be on the table tile's toolbar,
+       * the key would be "tools" and group would be "table".
+       */
       const groupSettings = group ? self.settings?.[group] as SnapshotIn<typeof SettingsGroupMstType> : undefined;
       return groupSettings?.[key] || self.settings?.[key];
     }
