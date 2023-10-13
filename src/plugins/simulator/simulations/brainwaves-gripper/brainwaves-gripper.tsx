@@ -230,7 +230,7 @@ export const brainwavesGripperSimulation: ISimulation = {
       icon: iconUrl(kGripperKey),
       name: kGripperKey,
       value: 0,
-      unit: "%"
+      unit: "% closed"
     },
     {
       // This is the true temperature of the pan
