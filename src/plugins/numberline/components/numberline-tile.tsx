@@ -64,6 +64,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       .range([0, axisWidth]);
   }, [axisWidth]);
   const axisLeft = useMemo(() => tileWidth * (1 - kAxisWidth) / 2, [tileWidth]);
+  console.log("\t🔪 axisLeft:", axisLeft);
 
   const pointPosition = useCallback((point: PointObjectModelType) => {
     const x = xScale(point.currentXValue);
@@ -223,20 +224,46 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
 
   svg.on("click", (e) => handleMouseClick(e));
   svg.on("mousemove", (e) => handleMouseMove(e));
+// * ============================================ GUIDELINES ======================================================= */
+
+//   - standard range shows edit boxes when numberline has focus
+// - if rightmost value is entered that is smaller than leftmost value of range, then values are swapped
+// - if nonnumeric value is entered, previous value is restored
+// - numberline redraws after enter key or loss of focus
+// - numberline always has 11 ticks (inclusive of range ends) evenly divided between new endpoints
+// - if the 0 tick is present, it's darker/heavier than the rest
+// - When the user clicks in the box for an end value, it aquires the same edit styling/Ibeam cursor as the title box
+// - numbers from 1 to 3 digits are allowed, and the box should grow and shrink accordingly.
+// - end ticks should be drawn so that their tickmark shows, meaning that they are slightly inside of the arrows on the line
+
+
+
 
   // * =============================== [ Construct Numberline ] ================================ */
   if (axisWidth !== 0) {
     const readOnlyState = readOnly ? "readOnly" : "readWrite";
     const axisClass = `axis-${model.id}-${readOnlyState}`;
     const numOfTicks = numberlineDomainMax - numberlineDomainMin;
+
+    const tickFormatter = (value: number | { valueOf(): number }, index: number) => {
+      // Hide the tick marks for -5 and 5
+      if (typeof value === 'number' && value === -5) {
+        return '';
+      }
+      if (typeof value === 'number' && value === 5) {
+        return '';
+      }
+      return value.toString();
+    };
+
     axis
       .attr("class", `${axisClass} num-line`)
-      .attr("style", `${kAxisStyle}`) //move down
-      .call(axisBottom(xScale).tickSizeOuter(0).ticks(numOfTicks)) //remove side ticks
-      .selectAll("g.tick line") //customize 0 ticks
-      .attr("y2", function(x){ return (x === 0) ? tickHeightZero : tickHeightDefault;})
-      .attr("stroke-width", function(x){ return (x === 0) ? tickWidthZero : tickWidthDefault;})
-      .attr("style", function(x){ return (x === 0) ? tickStyleZero : tickStyleDefault;});
+      .attr("style", `${kAxisStyle}`)
+      .call(axisBottom(xScale).tickSizeOuter(0).tickFormat(tickFormatter).ticks(numOfTicks))
+      .selectAll("g.tick line") // Customize tick marks
+      .attr("y2", (value) => (value === 0 ? tickHeightZero : tickHeightDefault))
+      .attr("stroke-width", (value) => (value === 0 ? tickWidthZero : tickWidthDefault))
+      .attr("style", (value) => (value === 0 ? tickStyleZero : tickStyleDefault));
   }
 
   /* ========================== [ Construct/Update Circles ] =================================== */
@@ -335,6 +362,10 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
           <svg ref={svgRef} width={axisWidth}>
             <g ref={axisRef}></g>
           </svg>
+          {/* <EditableValue
+            axisWidth={axisWidth}
+          /> */}
+
         </div>
       </div>
     </div>

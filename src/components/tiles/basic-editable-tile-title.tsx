@@ -10,6 +10,10 @@ interface IBasicEditableTileTitleProps {
   titleKey?: string;
 }
 export function BasicEditableTileTitle({ readOnly, titleKey }: IBasicEditableTileTitleProps) {
+  // console.log("\t🥩 readOnly:", readOnly);
+  // console.log("\t🥩 titleKey:", titleKey);
+  // console.log("📁 basic-editable-tile-title.tsx ------------------------");
+
   return (
     <TileTitleArea>
       <EditableTileTitle

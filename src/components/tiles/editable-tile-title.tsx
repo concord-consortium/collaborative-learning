@@ -21,6 +21,15 @@ interface IProps {
 export const EditableTileTitle: React.FC<IProps> = observer(({
   className, readOnly, measureText, onBeginEdit, onEndEdit
 }) => {
+
+  // console.log("📁 editable-tile-title.tsx ------------------------");
+  // console.log("\t🥩 className:", className);
+  // console.log("\t🥩 onEndEdit:", onEndEdit);
+  // console.log("\t🥩 onBeginEdit:", onBeginEdit);
+  // console.log("\t🥩 measureText:", measureText);
+  // console.log("\t🥩 readOnly:", readOnly);
+
+
   // model and observer() allow this component to re-render
   // when the title changes without re-rendering the entire tile
   const model = useContext(TileModelContext);
@@ -38,7 +47,11 @@ export const EditableTileTitle: React.FC<IProps> = observer(({
     }
   };
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    // console.log("📁 editable-tile-title.tsx ------------------------");
+    // console.log("\t🏭 handleKeyDown");
     const { key } = e;
+    // console.log("\t🥩 key:", key);
+
     switch (key) {
       case "Escape":
         handleClose(false);
@@ -61,6 +74,8 @@ export const EditableTileTitle: React.FC<IProps> = observer(({
                             { "editable-tile-title-editing": isEditing,
                             "editable-tile-title-default": isDefaultTitle });
   const containerStyle: React.CSSProperties = { width };
+  console.log("\t🔪 containerStyle:", containerStyle);
+
   const kMinInputWidth = 200; // so there's room to expand very short titles
   const inputWidth = width >= kMinInputWidth ? "100%" : kMinInputWidth;
   const inputStyle: React.CSSProperties = { width: inputWidth };

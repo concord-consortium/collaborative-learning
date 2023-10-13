@@ -29,6 +29,7 @@
     flex-direction: column;
     font-family: 'Ubunutu', sans-serif;
     position: relative;
+    // background-color: orange;
 
     svg {
       overflow: visible;
@@ -77,10 +78,25 @@
         transform: rotate(-45deg);
         -webkit-transform: rotate(-45deg);
       }
-  
+
       &.left {
         transform: rotate(135deg);
         -webkit-transform: rotate(135deg);
+      }
+    }
+
+    .min-box{
+      height: 30px;
+      width: 30px;
+      background-color: lightblue;
+      position: absolute;
+      // left: 0px;
+
+      .editable-value{
+
+        width: 100%;
+        height: 100%;
+        // background-color: lightblue;
       }
     }
   }
