@@ -85,8 +85,8 @@
             align-items: baseline;
             list-style: none;
             margin: 1px 0;
+            border: none;
             padding: 0 5px;
-            display: flex;
 
             &:hover {
               background-color: $workspace-teal-light-6;
@@ -99,7 +99,8 @@
             &.dragging {
               box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.25);
               border: solid 1px #979797;
-              padding: 2px 4px;
+              margin: 0 0;
+              padding: 0 4px;
             }
 
             &.invisible {
