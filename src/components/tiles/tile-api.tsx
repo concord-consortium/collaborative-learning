@@ -1,4 +1,5 @@
 import { createContext, ReactElement } from "react";
+import { action, makeObservable, observable } from "mobx";
 import { Optional } from "utility-types";
 import { IOffsetModel, ObjectBoundingBox } from "../../models/annotations/clue-object";
 import { ITileExportOptions } from "../../models/tiles/tile-content-info";
@@ -41,9 +42,36 @@ export interface ITileApiInterface {
   forEach: (callback: (api: ITileApi) => void) => void;
 }
 
-export type ITileApiMap = Record<string, ITileApi>;
-
 export const TileApiInterfaceContext = createContext<ITileApiInterface | null>(null);
+
+/**
+ * An observable registry of tile API instances
+ */
+export class TileApiInterface implements ITileApiInterface {
+  private tileApiMap = observable.map<string, ITileApi>();
+
+  constructor() {
+    makeObservable(this);
+  }
+
+  @action
+  register(id: string, tileApi: ITileApi) {
+    this.tileApiMap.set(id, tileApi);
+  }
+
+  @action
+  unregister(id: string) {
+    this.tileApiMap.delete(id);
+  }
+
+  getTileApi(id: string) {
+    return this.tileApiMap.get(id)!;
+  }
+
+  forEach(callback: (api: ITileApi) => void) {
+    this.tileApiMap.forEach(api => callback(api));
+  }
+}
 
 // set by the canvas and used by the toolbar
 export type EditableTileApiInterfaceRef = React.MutableRefObject<ITileApiInterface | null>;
