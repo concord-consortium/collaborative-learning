@@ -41,9 +41,7 @@ export const TableToolbar: React.FC<IFloatingToolbarProps> = observer(({
                   });
 
   const buttonSettings = useSettingFromStores("tools", "table") as unknown as IButtonSetting[] | undefined;
-
   const buttons = buttonSettings || defaultButtons;
-  console.log("\t🔪 buttonSettings TABLE:", buttonSettings);
 
   const getToolbarButton = (toolName: IButtonSetting) => {
     if (typeof toolName === "string") {
@@ -57,9 +55,6 @@ export const TableToolbar: React.FC<IFloatingToolbarProps> = observer(({
       return Button && <Button key={toolName.join("_")} args={toolName} />;
     }
   };
-
-
-  // console.log("buttons:", buttons);
 
   return documentContent
     ? ReactDOM.createPortal(

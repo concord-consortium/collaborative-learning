@@ -133,10 +133,6 @@ export function useProblemStore(): ProblemModelType {
 }
 
 export function useSettingFromStores(key: string, group?: string) {
-
-  // console.log("📁 use-stores.ts ------------------------");
-  // console.log("\t🏭 useSettingFromStores");
-  // console.log("\t🥩 useAppConfig():", useAppConfig());
   return useAppConfig().getSetting(key, group);
 }
 

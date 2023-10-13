@@ -50,12 +50,7 @@ export const DataCardToolbar: React.FC<IProps> = observer(function DataCardToolb
   });
 
   const buttonSettings = useSettingFromStores("tools", "datacard") as unknown as IButtonSetting[] | undefined;
-
-  // console.log("📁 data-card-toolbar.tsx ------------------------");
-  // console.log("\t🥩 buttonSettings DataCard:", buttonSettings);
-
   const buttons = buttonSettings || defaultButtons;
-
   const isEditingValue = !!currEditAttrId && currEditFacet === "value";
 
   const uploadImage = (file: File) => {

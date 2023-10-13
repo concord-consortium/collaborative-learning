@@ -65,7 +65,6 @@ export const SetExpressionButton = () => {
 // TODO: this exact component can be used in the data-card toolbar
 // The only difference currently is the tooltip text
 export const LinkTileButton = () => {
-
   // Assume we always have a model
   const model = useContext(TileModelContext)!;
   const dataSet = getTileDataSet(model.content);
@@ -97,30 +96,14 @@ export const LinkGraphButton = () => {
   // Assume we always have a model
   const model = useContext(TileModelContext)!;
   const dataSet = getTileDataSet(model.content);
-
   const hasLinkableRows = dataSet ? dataSet.attributes.length > 1 : false;
-  console.log("📁 table-toolbar-buttons.tsx ------------------------");
-  console.log("\t🔪 hasLinkableRows:", hasLinkableRows);
-
-  // const { isLinkEnabled, showLinkTileDialog } = useConsumerTileLinking({ model, hasLinkableRows }); //above approach
-
-  //similar to data-card-toolbar-buttons.tsx
-  const { isLinkEnabled, showLinkTileDialog }
-  = useConsumerTileLinking({ model, hasLinkableRows, onlyType: kGraphTileType });
-
-  console.log("\t🔪 showLinkTileDialog:", showLinkTileDialog);
-  console.log("\t🔪 isLinkEnabled:", isLinkEnabled);
-
-
+  const { showLinkTileDialog } = useConsumerTileLinking({ model, hasLinkableRows, onlyType: kGraphTileType });
   const classes = classNames("link-graph-button", {});
-
 
   const handleClick = (e: React.MouseEvent) => {
     showLinkTileDialog && showLinkTileDialog();
     e.stopPropagation();
-    console.log("clicked linkGraphButton");
   };
-
 
   return (
    <TableButton
@@ -130,7 +113,6 @@ export const LinkGraphButton = () => {
      tooltipOptions={{ title: "View Data as Graph" }}
    />
  );
-
 };
 //---------------------- LINK GRAPH BUTTON -------------------------
 
