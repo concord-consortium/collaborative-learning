@@ -1,5 +1,5 @@
-import { getSnapshot, Instance, SnapshotIn, types } from "mobx-state-tree";
-import { SectionModel, SectionModelType } from "./section";
+import { Instance, SnapshotIn, types } from "mobx-state-tree";
+import { SectionModel, SectionModelSnapshot, SectionModelType } from "./section";
 import { SettingsMstType } from "../stores/settings";
 import { SupportModel } from "./support";
 import { ProblemConfiguration } from "../stores/problem-configuration";
@@ -22,8 +22,13 @@ const ModernProblemModel = types
     ordinal: types.integer,
     title: types.string,
     subtitle: "",
-    // loadedSections are part of the tree, but clients should use the sections view instead
-    loadedSections: types.array(SectionModel),
+    /**
+     * loadedSections are populated from the "sections" property of the serialized problem
+     * clients should use the `sections` view instead.
+     * A frozen type is used here so MST doesn't validate the id references of the section
+     * with all of the other sections in this problem, or this problem's unit
+     */
+    loadedSections: types.frozen<SectionModelSnapshot[]>(),
     supports: types.array(SupportModel),
     config: types.maybe(types.frozen<Partial<ProblemConfiguration>>())
   })
@@ -42,8 +47,7 @@ const ModernProblemModel = types
         const environment: ITileEnvironment = {
           sharedModelManager
         };
-        const sectionSnapshot = getSnapshot(section);
-        const sectionCopy = SectionModel.create(sectionSnapshot, environment);
+        const sectionCopy = SectionModel.create(section, environment);
         sectionCopy.setRealParent(self);
         if (sectionCopy.content) {
           sharedModelManager.setDocument(sectionCopy.content);
@@ -76,15 +80,18 @@ const isAmbiguousSnapshot = (sn: ModernProblemSnapshot | LegacyProblemSnapshot) 
 
 export const ProblemModel = types.snapshotProcessor(ModernProblemModel, {
   preProcessor(sn: ModernProblemSnapshot | LegacyProblemSnapshot) {
+    const { sections, ...nonSectionProps } = sn as any;
+    // Move sections to loadedSections so we can have a view called `sections`
+    const loadedSections = sections || [];
     if (isLegacySnapshot(sn)) {
-      const { disabled: disabledFeatures, settings, sections: loadedSections, ...others } = sn;
+      const { disabled: disabledFeatures, settings, ...others } = sn;
       return { ...others, loadedSections, config: { disabledFeatures, settings } } as ModernProblemSnapshot;
     }
     if (isAmbiguousSnapshot(sn)) {
-      const { disabled: disabledFeatures, settings, sections: loadedSections, config, ...others } = sn as any;
+      const { disabled: disabledFeatures, settings, config, ...others } = sn as any;
       return { ...others, loadedSections, config: { disabledFeatures, settings, ...config } } as ModernProblemSnapshot;
     }
-    return sn;
+    return { ...nonSectionProps, loadedSections };
   }
 });
 export interface ProblemModelType extends Instance<typeof ModernProblemModel> {}

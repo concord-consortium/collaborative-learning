@@ -41,7 +41,7 @@
             color: #707070;
             margin: 10px 0 0 10px;
             transform-origin: 0 50%;
-            transform: rotate(90deg);  
+            transform: rotate(90deg);
           }
         }
 
@@ -74,7 +74,7 @@
 
       .body {
         overflow-y: scroll;
-        
+
         ul {
           margin: 0;
           padding: 0;
@@ -82,9 +82,11 @@
 
           li {
             display: flex;
+            align-items: baseline;
             list-style: none;
-            padding: 3px 5px;
-            display: flex;
+            margin: 1px 0;
+            border: none;
+            padding: 0 5px;
 
             &:hover {
               background-color: $workspace-teal-light-6;
@@ -97,7 +99,8 @@
             &.dragging {
               box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.25);
               border: solid 1px #979797;
-              padding: 2px 4px;
+              margin: 0 0;
+              padding: 0 4px;
             }
 
             &.invisible {
@@ -223,7 +226,7 @@
       position: relative;
       // These are button elements so we have to disable default button styles
       // of border, padding, and display
-      border: 0;    
+      border: 0;
       padding: 0;
       display: block;
       user-select: none;
@@ -392,7 +395,7 @@
     &.one-row {
       height: 40px;
     }
-    
+
     &.vectors {
       left: 70px;
       height: 38px;
