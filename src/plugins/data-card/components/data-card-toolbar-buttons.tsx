@@ -1,6 +1,7 @@
 import React, { useContext } from "react";
 import classNames from "classnames";
 import { observer } from "mobx-react";
+
 import LinkGraphIcon from "../../../clue/assets/icons/table/link-graph-icon.svg";
 import DuplicateCardIcon from "../assets/duplicate-card-icon.svg";
 import DeleteSelectionIcon from "../assets/delete-selection-icon.svg";
