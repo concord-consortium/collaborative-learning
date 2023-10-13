@@ -16,7 +16,7 @@ import fetch from 'node-fetch';
 import serviceAccount from "./serviceAccountKey.json" assert { type: "json" };
 
 // Make falsy to include all documents
-const documentLimit = false;
+const documentLimit = 10000;
 
 // _duration should be in miliseconds
 function prettyDuration(_duration: number) {
@@ -42,6 +42,7 @@ const startTime = Date.now();
 let documentsProcessed = 0;
 let undefinedDocuments = 0;
 let failedDocuments = 0;
+let emptyDocuments = 0;
 const documentInfo = {};
 
 // Define the required scopes.
@@ -151,6 +152,11 @@ for (const key of Object.keys(classKeys)) {
       const tileCounts = {};
       targetTileTypes.forEach(tileType => tileCounts[tileType] = 0);
       const tiles = Object.values<any>(parsedContent.tileMap);
+      if (tiles.length === 0) {
+        // console.log(`      - no tiles`);
+        emptyDocuments++;
+        break;
+      }
       for (const tile of tiles) {
         const tileType = tile.content.type;
         if (targetTileTypes.includes(tileType)) {
@@ -201,6 +207,7 @@ console.log(`- Time to get credential: ${prettyDuration(credentialTime - startTi
 console.log(`- Total Time: ${prettyDuration(endTime - startTime)}`);
 console.log(`Documents processed: ${documentsProcessed}`);
 console.log(`Undefined documents: ${undefinedDocuments}`);
+console.log(`Empty documents: ${emptyDocuments}`);
 console.log(`Failed to process: ${failedDocuments}`);
 
 process.exit(0);
