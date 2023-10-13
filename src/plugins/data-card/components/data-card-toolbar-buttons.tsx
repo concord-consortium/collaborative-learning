@@ -112,7 +112,6 @@ const LinkTileButton = observer(function LinkTileButton(
 interface ILinkGraphButtonProps {
   isDisabled?: boolean;
 }
-
 export const LinkGraphButton = observer(function LinkGraphButton(
   { isDisabled }: ILinkGraphButtonProps) {
 
