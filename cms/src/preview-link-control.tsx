@@ -1,11 +1,12 @@
 import React from "react";
 import { CmsWidgetControlProps } from "netlify-cms-core";
 
-import { defaultCurriculumBranch } from "./cms-constants";
-import { urlParams } from "../../src/utilities/url-params";
-import { getGuideJson, getUnitJson } from "../../src/models/curriculum/unit";
 import { appConfig } from "../../src/initialize-app";
+import { getGuideJson, getUnitJson } from "../../src/models/curriculum/unit";
 import { DocumentModelType } from "../../src/models/document/document";
+import { stripPTNumberFromBranch } from "../../src/utilities/branch-utils";
+import { urlParams } from "../../src/utilities/url-params";
+import { defaultCurriculumBranch } from "./cms-constants";
 
 import "./custom-control.scss";
 import "./preview-link-control.scss";
@@ -63,7 +64,7 @@ export class PreviewLinkControl extends React.Component<CmsWidgetControlProps, I
   // Finishes setting up the preview link after loading the unit's json so we can determine the problem parameter.
   setPreviewLink(unitJson: any) {
     // Determine the unit parameter
-    const curriculumBranch = urlParams.curriculumBranch ?? defaultCurriculumBranch;
+    const curriculumBranch = stripPTNumberFromBranch(urlParams.curriculumBranch ?? defaultCurriculumBranch);
     const previewUnit = `https://models-resources.concord.org/clue-curriculum/branch/${curriculumBranch}/${this.unit}/content.json`;
 
     // Determine the problem parameter
