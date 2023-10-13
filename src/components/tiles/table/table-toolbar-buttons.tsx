@@ -1,11 +1,9 @@
 import React, { useContext } from "react";
 import { Tooltip, TooltipProps } from "react-tippy";
 import classNames from "classnames";
-
 import DeleteSelectedIconSvg from "../../../assets/icons/delete/delete-selection-icon.svg";
 import SetExpressionIconSvg from "../../../clue/assets/icons/table/set-expression-icon.svg";
 import ViewDataAsGraphIcon from "../../../assets/icons/view-data-as-graph-icon.svg";
-
 import LinkGraphIcon from "../../../clue/assets/icons/table/link-graph-icon.svg";
 import { MergeInButton } from "../../../components/shared/merge-in-button";
 import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
@@ -14,7 +12,6 @@ import { getTileDataSet } from "../../../models/shared/shared-data-utils";
 import { TileModelContext } from "../tile-api";
 import { TableToolbarContext } from "./table-toolbar-context";
 import { kGraphTileType } from "../../../plugins/graph/graph-defs";
-
 
 import "./table-toolbar.scss";
 
@@ -68,12 +65,10 @@ export const LinkTileButton = () => {
   // Assume we always have a model
   const model = useContext(TileModelContext)!;
   const dataSet = getTileDataSet(model.content);
-
   // Currently we only enable the link button if there are 2 or more attributes
   // this is because the linking is generally used for graph and geometry tiles
   // both of them in 2 attributes (in CLUE)
   const hasLinkableRows = dataSet ? dataSet.attributes.length > 1 : false;
-
   const { isLinkEnabled, showLinkTileDialog } =
     useConsumerTileLinking({ model, hasLinkableRows });
   const classes = classNames("link-tile-button", { disabled: !isLinkEnabled });
@@ -82,6 +77,7 @@ export const LinkTileButton = () => {
     isLinkEnabled && showLinkTileDialog();
     e.stopPropagation();
   };
+
   return (
     <TableButton
       className={classes}
@@ -91,7 +87,7 @@ export const LinkTileButton = () => {
     />
   );
 };
-//----------------- LINK GRAPH BUTTON ------------------------------
+
 export const LinkGraphButton = () => {
   // Assume we always have a model
   const model = useContext(TileModelContext)!;
@@ -114,7 +110,6 @@ export const LinkGraphButton = () => {
    />
  );
 };
-//---------------------- LINK GRAPH BUTTON -------------------------
 
 export const TableMergeInButton = () => {
   return <MergeInButton />;

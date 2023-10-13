@@ -1,7 +1,6 @@
 import React, { useContext } from "react";
 import classNames from "classnames";
 import { observer } from "mobx-react";
-
 import LinkGraphIcon from "../../../clue/assets/icons/table/link-graph-icon.svg";
 import DuplicateCardIcon from "../assets/duplicate-card-icon.svg";
 import DeleteSelectionIcon from "../assets/delete-selection-icon.svg";
@@ -112,15 +111,19 @@ const LinkTileButton = observer(function LinkTileButton(
 interface ILinkGraphButtonProps {
   isDisabled?: boolean;
 }
+
 export const LinkGraphButton = observer(function LinkGraphButton(
   { isDisabled }: ILinkGraphButtonProps) {
+
   // Assume we always have a model
   const model = useContext(TileModelContext)!;
   const dataSet = getTileDataSet(model.content);
+
   // Currently we only enable the link button if there are 2 or more attributes
   // this is because the linking is generally used for graph and geometry tiles
   // both of them in 2 attributes (in CLUE)
   const hasLinkableRows = dataSet ? dataSet.attributes.length > 1 : false;
+
   const { isLinkEnabled, showLinkTileDialog }
     = useConsumerTileLinking({ model, hasLinkableRows, onlyType: kGraphTileType });
   const classes = classNames("link-graph-button", );
