@@ -16,7 +16,7 @@ import fetch from 'node-fetch';
 import serviceAccount from "./serviceAccountKey.json" assert { type: "json" };
 
 // Make falsy to include all documents
-const documentLimit = 10000;
+const documentLimit = false;
 
 // _duration should be in miliseconds
 function prettyDuration(_duration: number) {
