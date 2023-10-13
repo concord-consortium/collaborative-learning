@@ -50,8 +50,7 @@ export const usePointLocations = () => {
   const result: Iterable<[number, number]>[] = [];
   // Outer loop over plotNum  (which series)
   if (dataConfig) {
-    let plotNum = 0;
-    while (plotNum < dataConfig.yAttributeDescriptions.length) {
+    for (let plotNum = 0; plotNum < dataConfig.yAttributeDescriptions.length; ++plotNum) {
       // Inner loop over cases in that series
       const series: [number,number][] = [];
       caseIds.forEach((caseId) => {
@@ -64,7 +63,6 @@ export const usePointLocations = () => {
         }
       });
       result.push(series);
-      plotNum++;
     }
 
   }

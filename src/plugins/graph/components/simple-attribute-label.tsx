@@ -25,7 +25,7 @@ export const SimpleAttributeLabel = observer(
   function SimpleAttributeLabel(props: ISimpleAttributeLabelProps) {
     const {place, index, attrId, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute} = props;
     const simpleLabelRef = useRef<HTMLDivElement>(null);
-    const [readyForMenu, setReadyForMenu] = useState<boolean>(false);
+    const [readyForMenu, setReadyForMenu] = useState(false);
     const dataConfiguration = useDataConfigurationContext();
     const graphElementId = useGraphElementIdContext();
     const graphElement = document.getElementById(graphElementId);
@@ -41,11 +41,9 @@ export const SimpleAttributeLabel = observer(
     };
 
     useEffect(() => {
-      // We need to wait for the ref to have a value before the menu portal can be rendered,
-      // since it needs the 'simpleLabelRef' element passed to it.
-      if (simpleLabelRef.current) {
-        setReadyForMenu(true);
-      }
+      // We cannot render the menu on the first render, because the simpleLabelRef doesn't have a value yet.
+      // This allows it to be rendered on a second pass.
+      setReadyForMenu(true);
     }, []);
 
     return (

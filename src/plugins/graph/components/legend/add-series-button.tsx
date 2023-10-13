@@ -10,9 +10,8 @@ export const AddSeriesButton = observer(function AddSeriesButton() {
   function findUnplottedAttribute() {
     // Find first attribute in the dataset that is not shown in the graph
     // Returns undefined if there are none left.
-    if (!graphModel || !dataConfiguration || !dataConfiguration.dataset) return;
+    if (!graphModel || !dataConfiguration?.dataset) return;
     const datasetAttributes = dataConfiguration.dataset.attributes;
-    // It seems like dataConfiguration.uniqueAttributes ought to work here, but it doesn't return all the Y's
     const xAttributeId = dataConfiguration._attributeDescriptions.get('x')?.attributeID;
     const yAttributeIds = dataConfiguration.yAttributeDescriptions.map((a)=>a.attributeID);
     return datasetAttributes.find((attr) => attr.id!==xAttributeId && !yAttributeIds.includes(attr.id));

@@ -84,11 +84,12 @@ export const GraphModel = TileContentModel
       return getTileCaseMetadata(self);
     },
     pointColorAtIndex(plotIndex = 0) {
-      if (self._pointColors.length <= plotIndex){
-        return kellyColors[plotIndex % kellyColors.length];
-      } else {
-        return self._pointColors[plotIndex];
-      }
+      return self._pointColors[plotIndex] ?? kellyColors[plotIndex % kellyColors.length];
+      // if (self._pointColors.length <= plotIndex){
+      //   return kellyColors[plotIndex % kellyColors.length];
+      // } else {
+      //   return self._pointColors[plotIndex];
+      // }
     },
     get pointColor() {
       return this.pointColorAtIndex(0);

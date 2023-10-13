@@ -13,7 +13,6 @@ import {
   // getScreenCoord,
   handleClickOnDot,
   setPointCoordinates,
-
   setPointSelection,
   startAnimation
 } from "../utilities/graph-utils";
@@ -147,8 +146,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
       {
         dotsRef, dataConfiguration, pointRadius: pointRadiusRef.current,
         selectedPointRadius: selectedPointRadiusRef.current,
-        pointColor, pointStrokeColor,
-        getPointColorAtIndex: graphModel.pointColorAtIndex
+        pointColor, pointStrokeColor, getPointColorAtIndex: graphModel.pointColorAtIndex
       });
   }, [dataConfiguration, dotsRef, graphModel]);
 

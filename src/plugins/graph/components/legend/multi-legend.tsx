@@ -33,7 +33,7 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
   const dataConfiguration = useDataConfigurationContext();
   const instanceId = useInstanceIdContext();
 
-  const yAttributeCount = dataConfiguration?.yAttributeDescriptions.length;
+  const yAttributeCount = dataConfiguration?.yAttributeDescriptions.length || 0;
 
   useEffect(() =>{
     const legendTransform = `translateY(${-layout.computedBounds.legend.height}px)`;
@@ -44,17 +44,15 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
   }, [layout.computedBounds.legend.height, layout.graphWidth, legendBounds, transform]);
 
   useEffect(function RespondToLayoutChange() {
-    if (yAttributeCount !== undefined) {
-      const legendRows = Math.ceil((yAttributeCount+1)/2);
-      const legendHeight = kMultiLegendPadding * 2
-        + kMultiLegendMenuHeight  * legendRows
-        + kMultiLegendVerticalGap * (legendRows-1);
-      layout.setDesiredExtent("legend", legendHeight);
-      onRequestRowHeight && onRequestRowHeight(instanceId, kGraphDefaultHeight + legendHeight);
-    }
+    const legendRows = Math.ceil((yAttributeCount+1)/2);
+    const legendHeight = kMultiLegendPadding * 2
+      + kMultiLegendMenuHeight  * legendRows
+      + kMultiLegendVerticalGap * (legendRows-1);
+    layout.setDesiredExtent("legend", legendHeight);
+    onRequestRowHeight?.(instanceId, kGraphDefaultHeight + legendHeight);
   }, [instanceId, layout, onRequestRowHeight, yAttributeCount]);
 
-  let legendItems = [] as JSX.Element[];
+  let legendItems = [] as React.ReactNode[];
   if (dataConfiguration) {
     const yAttributes = dataConfiguration.yAttributeDescriptions;
 
@@ -71,7 +69,7 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
     legendItems.push(<AddSeriesButton/>);
   }
   // Make rows with two legend items in each row
-  const legendItemRows = [] as JSX.Element[];
+  const legendItemRows = [] as React.ReactNode[];
   let i=0;
   while(legendItems.length) {
     legendItemRows.push(

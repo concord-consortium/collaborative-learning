@@ -658,12 +658,14 @@ export const DataConfigurationModel = types
        * If the new attribute is already in the list of Y attributes, it will be removed from
        * the old position to prevent duplication.
        */
-      this.removeYAttributeWithID(newAttrId);
-      const index = self._yAttributeDescriptions.findIndex(d=>d.attributeID===oldAttrId);
-      if (index>=0) {
+      if (self._yAttributeDescriptions.find(d=>d.attributeID===oldAttrId)) {
+        this.removeYAttributeWithID(newAttrId);
+        const index = self._yAttributeDescriptions.findIndex(d=>d.attributeID===oldAttrId);
         self._yAttributeDescriptions[index].attributeID = newAttrId;
-        self._yAttributeDescriptions[index].type = undefined;
-        self.filteredCases && self.filteredCases[index].invalidateCases();
+        if (index === 0 && self._yAttributeDescriptions.length === 1) {
+          self._yAttributeDescriptions[index].type = undefined;
+        }
+        self.filteredCases?.[index].invalidateCases();
       }
     },
     setY2Attribute(desc?: IAttributeDescriptionSnapshot) {
