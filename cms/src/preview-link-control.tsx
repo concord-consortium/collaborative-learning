@@ -72,13 +72,10 @@ export class PreviewLinkControl extends React.Component<CmsWidgetControlProps, I
     // curriculum/[unit]/teacher-guide?/investigation-[ordinal]/problem-[ordinal]/[sectionType]/content.json
     const sectionPath = this.pathParts?.slice(-4).join("/");
     let problemParam = "";
-    console.log(`--- unitJson`, unitJson, unitJson.investigations);
     if (unitJson.investigations) {
       unitJson.investigations.forEach((investigation: any) => {
-        console.log(` -- problems`, investigation.problems);
         if (investigation.problems) {
           investigation.problems.forEach((problem: any) => {
-            console.log(` -- sections`, problem.sections);
             if (problem.sections) {
               problem.sections.forEach((section: any) => {
                 if (section.sectionPath === sectionPath) {
