@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, { useState} from "react";
 import {createPortal} from "react-dom";
 import {observer} from "mobx-react-lite";
 import {GraphPlace } from "../imports/components/axis-graph-shared";
@@ -7,8 +7,9 @@ import {AxisOrLegendAttributeMenu} from "../imports/components/axis/components/a
 import { useDataConfigurationContext } from "../hooks/use-data-configuration-context";
 import { useGraphModelContext } from "../models/graph-model";
 import { IDataSet } from "../../../models/data/data-set";
+import { kGraphClassSelector } from "../graph-types";
+
 import DropdownCaretIcon from "../dropdown-caret.svg";
-import { useGraphElementIdContext } from "./graph";
 
 import "../components/legend/multi-legend.scss";
 
@@ -24,11 +25,10 @@ interface ISimpleAttributeLabelProps {
 export const SimpleAttributeLabel = observer(
   function SimpleAttributeLabel(props: ISimpleAttributeLabelProps) {
     const {place, index, attrId, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute} = props;
-    const simpleLabelRef = useRef<HTMLDivElement>(null);
-    const [readyForMenu, setReadyForMenu] = useState(false);
+    // Must be State, not Ref, so that the menu gets re-rendered when this becomes non-null
+    const [simpleLabelElement, setSimpleLabelElement] = useState<HTMLDivElement|null>(null);
+    const graphElement = simpleLabelElement?.closest(kGraphClassSelector) as HTMLDivElement ?? null;
     const dataConfiguration = useDataConfigurationContext();
-    const graphElementId = useGraphElementIdContext();
-    const graphElement = document.getElementById(graphElementId);
     const dataset = dataConfiguration?.dataset;
     const graphModel = useGraphModelContext();
     const attr = attrId ? dataset?.attrFromID(attrId) : undefined;
@@ -36,19 +36,13 @@ export const SimpleAttributeLabel = observer(
     const pointColor = graphModel.pointColorAtIndex(index);
 
     const handleOpenClose = (isOpen: boolean) => {
-      simpleLabelRef.current?.classList.toggle("target-open", isOpen);
-      simpleLabelRef.current?.classList.toggle("target-closed", !isOpen);
+      simpleLabelElement?.classList.toggle("target-open", isOpen);
+      simpleLabelElement?.classList.toggle("target-closed", !isOpen);
     };
-
-    useEffect(() => {
-      // We cannot render the menu on the first render, because the simpleLabelRef doesn't have a value yet.
-      // This allows it to be rendered on a second pass.
-      setReadyForMenu(true);
-    }, []);
 
     return (
       <>
-        <div ref={simpleLabelRef} className={"simple-attribute-label"}>
+        <div ref={(e) => setSimpleLabelElement(e)} className={"simple-attribute-label"}>
           <div className="symbol-title">
             <div className="attr-symbol" style={{ backgroundColor: pointColor }}></div>
             <div>{ attrName }</div>
@@ -57,9 +51,9 @@ export const SimpleAttributeLabel = observer(
             <DropdownCaretIcon />
           </div>
         </div>
-        {readyForMenu && graphElement && onChangeAttribute && onTreatAttributeAs && onRemoveAttribute && attrId &&
+        {simpleLabelElement && graphElement && onChangeAttribute && onTreatAttributeAs && onRemoveAttribute && attrId &&
           createPortal(<AxisOrLegendAttributeMenu
-            target={simpleLabelRef.current}
+            target={simpleLabelElement}
             portal={graphElement}
             place={place}
             attributeId={attrId}

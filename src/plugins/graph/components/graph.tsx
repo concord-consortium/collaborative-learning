@@ -1,7 +1,6 @@
 import {observer} from "mobx-react-lite";
 import {appConfig} from "../../../initialize-app";
-import React, {createContext, MutableRefObject, useContext, useEffect, useMemo, useRef} from "react";
-import { useId } from "@chakra-ui/react";
+import React, { MutableRefObject, useEffect, useMemo, useRef} from "react";
 import {select} from "d3";
 import {GraphController} from "../models/graph-controller";
 import {DroppableAddAttribute} from "./droppable-add-attribute";
@@ -36,10 +35,6 @@ import { Adornments } from "../adornments/adornments";
 import "./graph.scss";
 import "./graph-clue-styles.scss";
 
-export const GraphElementIdContext = createContext<string>('');
-
-export const useGraphElementIdContext = () => useContext(GraphElementIdContext);
-
 interface IProps {
   graphController: GraphController
   graphRef: MutableRefObject<HTMLDivElement | null>
@@ -50,7 +45,6 @@ interface IProps {
 export const Graph = observer(
     function Graph({ graphController, graphRef, dotsRef, onRequestRowHeight }: IProps) {
 
-  const id = useId();
   const graphModel = useGraphModelContext(),
     {autoAdjustAxes, enableAnimation} = graphController,
     {plotType} = graphModel,
@@ -188,8 +182,7 @@ export const Graph = observer(
 
   return (
     <DataConfigurationContext.Provider value={graphModel.config}>
-      <GraphElementIdContext.Provider value={id}>
-      <div id={id} className={kGraphClass} ref={graphRef} data-testid="graph">
+      <div className={kGraphClass} ref={graphRef} data-testid="graph">
         <svg className='graph-svg' ref={svgRef}>
           <Background
             marqueeState={marqueeState}
@@ -231,7 +224,6 @@ export const Graph = observer(
           />
         }
       </div>
-      </GraphElementIdContext.Provider>
     </DataConfigurationContext.Provider>
   );
 });
