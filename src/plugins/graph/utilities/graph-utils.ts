@@ -1,6 +1,7 @@
-import React from "react";
 import {extent, format, select, timeout} from "d3";
+import React from "react";
 import {isInteger} from "lodash";
+
 import { IClueObjectSnapshot } from "../../../models/annotations/clue-object";
 import { PartialSharedModelEntry } from "../../../models/document/document-content-types";
 import { UpdatedSharedDataSetIds } from "../../../models/shared/shared-data-set";
@@ -421,11 +422,10 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
         : isSelected ? defaultSelectedColor
           : aCaseData.plotNum && getPointColorAtIndex
             ? getPointColorAtIndex(aCaseData.plotNum) : pointColor;
-  };
+  },
 
-  const setPoints = () => {
+  setPoints = () => {
     if (theSelection?.size()) {
-
       theSelection
         .transition()
         .duration(duration)
@@ -453,12 +453,10 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
       pointStrokeColor, pointColor, getPointColorAtIndex,
       getScreenX, getScreenY, getLegendColor, enableAnimation
     } = props,
-    duration = enableAnimation.current ? transitionDuration : 0;
+    duration = enableAnimation.current ? transitionDuration : 0,
 
-  const theSelection = selectDots(dotsRef.current, selectedOnly);
-  if (dataset){
+    theSelection = selectDots(dotsRef.current, selectedOnly);
     setPoints();
-  }
 }
 
 
