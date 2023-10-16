@@ -12,7 +12,7 @@ import { ITileProps } from "../tile-component";
 import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
 import { IDocumentContext } from "../../../models/document/document-types";
 import { debouncedSelectTile } from "../../../models/stores/ui";
-import { gImageMap, ImageMapEntryType } from "../../../models/image-map";
+import { gImageMap, ImageMapEntry } from "../../../models/image-map";
 import { ImageContentModelType } from "../../../models/tiles/image/image-content";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
@@ -31,7 +31,7 @@ interface IState {
   imageContentUrl?: string;
   imageFilename?: string;
   documentContext?: IDocumentContext;
-  imageEntry?: ImageMapEntryType;
+  imageEntry?: ImageMapEntry;
   imageEltWidth?: number;
   imageEltHeight?: number;
   requestedHeight?: number;
@@ -206,7 +206,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     });
   };
 
-  private handleNewImage = (image: ImageMapEntryType) => {
+  private handleNewImage = (image: ImageMapEntry) => {
     if (this._isMounted) {
       const content = this.getContent();
       this.setState({ isLoading: false, imageEntry: image });

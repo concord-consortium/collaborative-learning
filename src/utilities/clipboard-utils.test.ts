@@ -1,4 +1,4 @@
-import { EntryStatus, gImageMap } from "../models/image-map";
+import { createImageMapEntry, EntryStatus, gImageMap } from "../models/image-map";
 import { getClipboardContent, pasteClipboardImage } from "./clipboard-utils";
 
 const mockBlob = {
@@ -60,7 +60,7 @@ describe("pasteClipboardImage", () => {
     type: "image/png",
     webkitRelativePath: ""
   };
-  const mockImageResponse = {
+  const mockImageResponse = createImageMapEntry({
     contentUrl: "test/test.png",
     displayUrl: "https://example.com/test/test.png",
     filename: "test.png",
@@ -68,7 +68,7 @@ describe("pasteClipboardImage", () => {
     retries: 0,
     status: EntryStatus.Ready,
     width: 100
-  };
+  });
 
   afterEach(() => {
     jest.resetAllMocks();
