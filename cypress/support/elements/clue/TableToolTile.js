@@ -64,25 +64,18 @@ class TableToolTile{
     getLinkGraphButton(){
       return cy.get('.link-tile-button');
     }
-
-
-    //--------- added -----------------
-    getViewDataButton() {
-      return cy.get('.link-graph-button');
-    }
     getLinkGraphModalCreateNewButton() {
-      console.log("\t🏭 getLinkGraphModalCreateNewButton");
-      const selector = ".ReactModalPortal .link-tile .modal-footer button.add-new-button";
-      console.log("selector!", selector);
-      console.log("\t🔪 returning", cy.get(`${selector}`));
-      // return cy.get(`${selector}`).eq(0);
-      return cy.get(`${selector}`);
+      const selector = ".ReactModalPortal .modal-footer button.add-new-button";
+      return cy.get(`${selector}`).eq(0);
     }
-    //----------------------------------
-
-
-
-
+    getLinkGraphModalLinkButton() {
+      const selector = ".ReactModalPortal .modal-footer button.default";
+      return cy.get(`${selector}`).eq(0);
+    }
+    getLinkGraphModalTileMenu() {
+      const selector = ".ReactModalPortal .modal-content select[data-test=link-tile-select]";
+      return cy.get(`${selector}`).eq(0);
+    }
     linkTable(table, graph) {
       cy.get('.table-title').text().contains(table).within((tableTile)=>{
         this.getLinkGraphButton().eq(table).click();
