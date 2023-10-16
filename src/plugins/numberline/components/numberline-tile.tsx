@@ -1,8 +1,8 @@
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import classNames from 'classnames';
 import { axisBottom, drag, pointer, scaleLinear, select } from 'd3';
 import { observer } from 'mobx-react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-
+import { useUIStore } from '../../../hooks/use-stores';
 import { kSmallAnnotationNodeRadius } from '../../../components/annotations/annotation-utilities';
 import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
 import { useToolbarTileApi } from "../../../components/tiles/hooks/use-toolbar-tile-api";
@@ -13,23 +13,29 @@ import { HotKeys } from "../../../utilities/hot-keys";
 import { NumberlineContentModelType, PointObjectModelType,  } from "../models/numberline-content";
 import {
   kAxisStyle, kAxisWidth, kContainerWidth, kNumberLineContainerHeight, numberlineDomainMax, numberlineDomainMin,
-  tickHeightDefault, tickHeightZero, tickStyleDefault, tickStyleZero, tickWidthDefault, tickWidthZero,
+  tickHeightDefault, tickStyleDefault, tickWidthDefault, tickWidthZero,
   innerPointRadius, outerPointRadius, numberlineYBound, yMidPoint, kTitleHeight, kArrowheadTop,
-  kArrowheadOffset, kPointButtonRadius
+  kArrowheadOffset, kPointButtonRadius, tickTextTopOffset
 } from '../numberline-tile-constants';
 import { NumberlineToolbar } from "./numberline-toolbar";
+import NumberlineArrowLeft from "../assets/numberline-arrow-left.svg";
+import NumberlineArrowRight from "../assets/numberline-arrow-right.svg";
 
 import "./numberline-tile.scss";
 
 export const NumberlineTile: React.FC<ITileProps> = observer(function NumberlineTile(props){
   const { documentContent, model, readOnly, scale, tileElt, onRegisterTileApi, onUnregisterTileApi } = props;
 
-  console.log("📁 numberline-tile.tsx ------------------------");
   const content = model.content as NumberlineContentModelType;
   const [hoverPointId, setHoverPointId] = useState("");
   const [_selectedPointId, setSelectedPointId] = useState(""); // Just used to rerender when a point is selected
+  const ui = useUIStore();
+  const isTileSelected = ui.isSelectedTile(model);
+  const [min, setMin] = useState(-5);
+  const [max, setMax] = useState(5);
+  // if (!readOnly) console.log("\t🥩 isTileSelected:", isTileSelected);
 
-  // Basic model manipulation functions
+  //---------------- Model Manipulation Functions -------------------------------------------------
   const deleteSelectedPoints = useCallback(() => {
     content.deleteSelectedPoints();
   }, [content]);
@@ -58,13 +64,16 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   const containerWidth = tileWidth * kContainerWidth;
   const axisWidth = tileWidth * kAxisWidth;
   const xShiftNum = (containerWidth - axisWidth) / 2;
+  console.log("\t🥩 axisWidth:", axisWidth);
+  console.log("\t🥩 containerWidth:", containerWidth);
+  console.log("\t🥩 xShiftNum:", xShiftNum);
+
   const xScale = useMemo(() => {
     return scaleLinear()
       .domain([numberlineDomainMin, numberlineDomainMax])
       .range([0, axisWidth]);
   }, [axisWidth]);
   const axisLeft = useMemo(() => tileWidth * (1 - kAxisWidth) / 2, [tileWidth]);
-  console.log("\t🔪 axisLeft:", axisLeft);
 
   const pointPosition = useCallback((point: PointObjectModelType) => {
     const x = xScale(point.currentXValue);
@@ -85,7 +94,9 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     return () => obs?.disconnect();
   }, []);
 
-  // Register Tile API functions
+
+
+  //----------------- Register Tile API functions -------------------------------------------------
   const annotationPointCenter = useCallback((pointId: string) => {
     const point = content.getPoint(pointId);
     if (!point) return undefined;
@@ -148,7 +159,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     });
   }, [annotationPointCenter, content, getObjectBoundingBox, onRegisterTileApi]);
 
-  //-------------------  SVG Ref to Numberline & SVG --------------------------------
+  //-------------------  SVG Ref to Numberline & SVG ----------------------------------------------
   const svgRef = useRef<SVGSVGElement | null>(null);
   const svg = select(svgRef.current);
   const svgNode = svg.node();
@@ -224,8 +235,8 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
 
   svg.on("click", (e) => handleMouseClick(e));
   svg.on("mousemove", (e) => handleMouseMove(e));
-// * ============================================ GUIDELINES ======================================================= */
-
+// * ============================================ GUIDELINES ===================================== */
+//console.log
 //   - standard range shows edit boxes when numberline has focus
 // - if rightmost value is entered that is smaller than leftmost value of range, then values are swapped
 // - if nonnumeric value is entered, previous value is restored
@@ -237,9 +248,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
 // - end ticks should be drawn so that their tickmark shows, meaning that they are slightly inside of the arrows on the line
 
 
-
-
-  // * =============================== [ Construct Numberline ] ================================ */
+  // * ================================ [ Construct Numberline ] =============================== */
   if (axisWidth !== 0) {
     const readOnlyState = readOnly ? "readOnly" : "readWrite";
     const axisClass = `axis-${model.id}-${readOnlyState}`;
@@ -259,11 +268,17 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     axis
       .attr("class", `${axisClass} num-line`)
       .attr("style", `${kAxisStyle}`)
-      .call(axisBottom(xScale).tickSizeOuter(0).tickFormat(tickFormatter).ticks(numOfTicks))
+      .call(axisBottom(xScale).tickSizeOuter(0).ticks(numOfTicks))
+      // .tickFormat(tickFormatter).ticks(numOfTicks))
       .selectAll("g.tick line") // Customize tick marks
-      .attr("y2", (value) => (value === 0 ? tickHeightZero : tickHeightDefault))
-      .attr("stroke-width", (value) => (value === 0 ? tickWidthZero : tickWidthDefault))
-      .attr("style", (value) => (value === 0 ? tickStyleZero : tickStyleDefault));
+      .attr("class", (value)=> (value === 0) ? "zero-tick" : "default-tick")
+      .attr("y2", tickHeightDefault)
+      .attr("stroke-width", (value) => (value === 0) ? tickWidthZero : tickWidthDefault)
+      .attr("style", tickStyleDefault);
+
+    axis
+      .selectAll("g.tick text") // Customize tick labels
+      .attr("dy", (dy) => tickTextTopOffset);
   }
 
   /* ========================== [ Construct/Update Circles ] =================================== */
@@ -332,6 +347,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
 
   // Set up toolbar props
   const toolbarProps = useToolbarTileApi({ id: model.id, enabled: !readOnly, onRegisterTileApi, onUnregisterTileApi });
+  console.log("numberlineArrowLeft Style:", { left: xShiftNum + kArrowheadOffset, top: kArrowheadTop });
 
   return (
     <div
@@ -357,15 +373,35 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
         style={{"height": `${kNumberLineContainerHeight}`}}
       >
         <div className="numberline-tool-container" >
-          <i className="arrow left" style={{ left: xShiftNum + kArrowheadOffset, top: kArrowheadTop }}/>
-          <i className="arrow right" style={{ right: xShiftNum + kArrowheadOffset, top: kArrowheadTop }}/>
+          <NumberlineArrowLeft
+            className="arrow"
+            style={{ left: xShiftNum + kArrowheadOffset, top: kArrowheadTop }}
+          />
+          <NumberlineArrowRight
+            className="arrow"
+            style={{ right: xShiftNum + kArrowheadOffset, top: kArrowheadTop }}
+          />
           <svg ref={svgRef} width={axisWidth}>
             <g ref={axisRef}></g>
           </svg>
-          {/* <EditableValue
-            axisWidth={axisWidth}
-          /> */}
-
+          {/* {
+            <>
+              <EditableNumberlineValue
+                value={min}
+                minOrMax={"min"}
+                axisWidth={axisWidth}
+                readOnly={readOnly}
+                isTileSelected={isTileSelected}
+              />
+              <EditableNumberlineValue
+                value= {max}
+                minOrMax={"max"}
+                axisWidth={axisWidth}
+                readOnly={readOnly}
+                isTileSelected={isTileSelected}
+              />
+            </>
+          } */}
         </div>
       </div>
     </div>

@@ -1,7 +1,7 @@
 import { getSnapshot, SnapshotIn, types } from "mobx-state-tree";
 import { debounce } from "lodash";
 import { AppConfigModelType } from "./app-config-model";
-import { kDividerHalf, kDividerMax, kDividerMin, UIDialogTypeEnum } from "./ui-types";
+import { kDividerMax, kDividerMin, UIDialogTypeEnum } from "./ui-types";
 import { WorkspaceModel } from "./workspace";
 import { DocumentModelType } from "../document/document";
 import { Logger } from "../../lib/logger";
@@ -63,7 +63,9 @@ export const UITabModel = types
 export const UIModel = types
   .model("UI", {
     annotationMode: types.maybe(types.string),
-    dividerPosition: kDividerHalf,
+    // dividerPosition: kDividerHalf,
+    dividerPosition: kDividerMin,
+
     error: types.maybeNull(types.string),
     activeNavTab: ENavTab.kProblems,
     selectedTileIds: types.array(types.string),

@@ -27,20 +27,33 @@
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    font-family: 'Ubunutu', sans-serif;
     position: relative;
     // background-color: orange;
-
     svg {
       overflow: visible;
 
-      text {
-        font-size: 14px;
+      .num-line {
+        stroke-width: 2px;
+        color: $charcoal;
+        min-height: 40px;
+
+        text {
+          font-size: 14px;
+          color: $charcoal-dark-2;
+          font-family: Lato;
+        }
+
+        .default-tick{
+          color: $charcoal-light-2;
+        }
+        .zero-tick{
+          color: $charcoal;
+        }
+
+
       }
 
-      .num-line {
-        stroke-width: 4px;
-      }
+
 
       .point-outer-circle {
         display: none;
@@ -65,19 +78,11 @@
     } //end svg container
 
     .arrow {
-      border: solid black;
-      border-width: 0 3px 3px 0;
-      display: inline-block;
-      padding: 3px;
       position: absolute;
-      height: 13px;
-      width: 13px;
+      // height: 100%;
+      // width: 100%;
       pointer-events: none; //click through div (our rectangular click area)
 
-      &.right {
-        transform: rotate(-45deg);
-        -webkit-transform: rotate(-45deg);
-      }
 
       &.left {
         transform: rotate(135deg);
@@ -88,17 +93,34 @@
     .min-box{
       height: 30px;
       width: 30px;
-      background-color: lightblue;
       position: absolute;
-      // left: 0px;
+      border: 1.5px solid $charcoal-light-1;
+
+      .min-textbox{
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        min-width: 26px;
+        min-height: 22px;
+      }
 
       .editable-value{
 
         width: 100%;
         height: 100%;
-        // background-color: lightblue;
+        background-color: lightblue;
       }
+
     }
+
+    // .max-box{
+    //   height: 30px;
+    //   width: 30px;
+    //   background-color: red;
+    //   position: absolute;
+
+    // }
   }
 }
 

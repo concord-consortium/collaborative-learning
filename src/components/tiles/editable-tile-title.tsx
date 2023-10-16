@@ -63,6 +63,9 @@ export const EditableTileTitle: React.FC<IProps> = observer(({
     }
   };
   const handleClose = (accept: boolean) => {
+    //
+    console.log("📁 editable-tile-title.tsx ------------------------");
+    console.log("\t🏭 handleClose");
     const trimTitle = editingTitle?.trim();
     // This automatically logs the change
     trimTitle && model?.setTitle(trimTitle);
@@ -74,7 +77,7 @@ export const EditableTileTitle: React.FC<IProps> = observer(({
                             { "editable-tile-title-editing": isEditing,
                             "editable-tile-title-default": isDefaultTitle });
   const containerStyle: React.CSSProperties = { width };
-  console.log("\t🔪 containerStyle:", containerStyle);
+  // console.log("\t🔪 containerStyle:", containerStyle);
 
   const kMinInputWidth = 200; // so there's room to expand very short titles
   const inputWidth = width >= kMinInputWidth ? "100%" : kMinInputWidth;

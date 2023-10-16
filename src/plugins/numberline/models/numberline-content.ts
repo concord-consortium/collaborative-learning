@@ -1,6 +1,5 @@
 import stringify from "json-stringify-pretty-compact";
 import { types, Instance, getSnapshot } from "mobx-state-tree";
-
 import { getTileIdFromContent } from "../../../models/tiles/tile-model";
 import { TileContentModel } from "../../../models/tiles/tile-content";
 import { uniqueId } from "../../../utilities/js-utils";
@@ -94,6 +93,8 @@ export const NumberlineContentModel = TileContentModel
   }))
   .actions(self => ({
     createNewPoint(xValue: number) {
+      console.log("\t🏭 createNewPoint");
+      console.log("\t🥩 xValue:", xValue);
       const id = uniqueId();
       const pointModel = PointObjectModel.create({ id, xValue });
       self.points.set(id, pointModel);

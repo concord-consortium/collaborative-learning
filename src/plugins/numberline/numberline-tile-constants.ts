@@ -13,14 +13,11 @@ export const kContainerWidth = 0.93; // - container should take up 93% of tileWi
 export const kAxisWidth = 0.9;
 export const kAxisStyle = "transform: translate(0px, 60px)";
 
-export const tickWidthZero = "3px";
-export const tickWidthDefault = "1px";
-
-export const tickHeightZero = "20px";
-export const tickHeightDefault = "6px";
-
-export const tickStyleZero = "transform: translateY(-10px)";
-export const tickStyleDefault = "";
+export const tickWidthZero = "2px";
+export const tickWidthDefault = "1.5px";
+export const tickHeightDefault = "14px";
+export const tickStyleDefault = "transform: translateY(-7px)";
+export const tickTextTopOffset = "15px";
 
 export const numberlineDomainMin = -5;  //max and min of the numberline
 export const numberlineDomainMax = 5;
@@ -29,7 +26,7 @@ export const numberlineYBound = 15;  //# of pixels above and below numberline to
 
 export const maxNumSelectedPoints = 1; //this may change
 
-export const kArrowheadOffset = -3;
+export const kArrowheadOffset = -17;
 export const kArrowheadTop = 53;
 
 //--------- Numberline Circle constants ---------------------------------------------------------------
