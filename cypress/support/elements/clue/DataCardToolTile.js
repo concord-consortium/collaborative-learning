@@ -79,9 +79,34 @@ class DataCardToolTile {
     const selector = ".button.modal-button.default";
     return this.getTile(tileIndex, workspaceClass).find(`${selector}`);
   }
-  getMergeDataButton(tileIndex = 0, workspaceClass){
-    const selector = ".canvas-area .data-card-toolbar .merge-data-button";
+  // Toolbar
+  getToolbarButton(buttonClass, tileIndex, workspaceClass) {
+    const selector = `.canvas-area .data-card-toolbar .${buttonClass}`;
     return cy.get(`${workspaceClass || ".primary-workspace"} ${selector}`).eq(tileIndex);
+  }
+  getDuplicateCardButton(tileIndex = 0, workspaceClass) {
+    return this.getToolbarButton('duplicate-data-card-button', tileIndex, workspaceClass);
+  }
+  getLinkTileButton(tileIndex = 0, workspaceClass) {
+    return this.getToolbarButton('link-tile-button', tileIndex, workspaceClass);
+  }
+  getLinkGraphButton(tileIndex = 0, workspaceClass) {
+    return this.getToolbarButton('link-graph-button', tileIndex, workspaceClass);
+  }
+  getLinkGraphModalTileMenu() {
+    const selector = ".ReactModalPortal .modal-content select[data-test=link-tile-select]";
+    return cy.get(`${selector}`).eq(0);
+  }
+  getLinkGraphModalCreateNewButton() {
+    const selector = ".ReactModalPortal .modal-footer button.add-new-button";
+    return cy.get(`${selector}`).eq(0);
+  }
+  getLinkGraphModalLinkButton() {
+    const selector = ".ReactModalPortal .modal-footer button.default";
+    return cy.get(`${selector}`).eq(0);
+  }
+  getMergeDataButton(tileIndex = 0, workspaceClass) {
+    return this.getToolbarButton('merge-data-button', tileIndex, workspaceClass);
   }
   getMergeDataModalSelect(tileIndex = 0){
     const selector = ".ReactModalPortal .modal-content .merge-data-select";
@@ -90,6 +115,9 @@ class DataCardToolTile {
   getMergeDataModalAddDataButton(tileIndex = 0){
     const selector = ".ReactModalPortal .modal-footer .modal-button.default";
     return cy.get(`${selector}`).eq(tileIndex);
+  }
+  getLinkTableButton(tileIndex = 0, workspaceClass) {
+    return this.getToolbarButton('dataset-view-button', tileIndex, workspaceClass);
   }
 }
 export default DataCardToolTile;
