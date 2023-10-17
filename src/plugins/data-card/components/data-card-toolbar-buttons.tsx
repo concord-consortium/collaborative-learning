@@ -5,6 +5,7 @@ import { observer } from "mobx-react";
 import LinkGraphIcon from "../../../clue/assets/icons/table/link-graph-icon.svg";
 import DuplicateCardIcon from "../assets/duplicate-card-icon.svg";
 import DeleteSelectionIcon from "../assets/delete-selection-icon.svg";
+import ViewDataAsGraphIcon from "../../../assets/icons/view-data-as-graph-icon.svg";
 import { TileToolbarButton } from "../../../components/shared/tile-toolbar-button";
 import { DataCardContentModelType } from "../data-card-content";
 import { TileModelContext } from "../../../components/tiles/tile-api";
@@ -13,6 +14,7 @@ import { useConsumerTileLinking } from "../../../hooks/use-consumer-tile-linking
 import { getTileDataSet } from "../../../models/shared/shared-data-utils";
 import { kDataCardTileType } from "../data-card-types";
 import { DataCardToolbarContext } from "../data-card-toolbar-context";
+import { kGraphTileType } from "../../graph/graph-defs";
 
 function useModelContent() {
   const model = useContext(TileModelContext);
@@ -107,6 +109,41 @@ const LinkTileButton = observer(function LinkTileButton(
   );
 });
 
+interface ILinkGraphButtonProps {
+  isDisabled?: boolean;
+}
+export const LinkGraphButton = observer(function LinkGraphButton(
+  { isDisabled }: ILinkGraphButtonProps) {
+
+  // Assume we always have a model
+  const model = useContext(TileModelContext)!;
+  const dataSet = getTileDataSet(model.content);
+
+  // Currently we only enable the link button if there are 2 or more attributes
+  // this is because the linking is generally used for graph and geometry tiles
+  // both of them in 2 attributes (in CLUE)
+  const hasLinkableRows = dataSet ? dataSet.attributes.length > 1 : false;
+
+  const { isLinkEnabled, showLinkTileDialog }
+    = useConsumerTileLinking({ model, hasLinkableRows, onlyType: kGraphTileType });
+  const classes = classNames("link-graph-button", );
+
+  const handleClick = () => {
+    showLinkTileDialog && showLinkTileDialog();
+  };
+
+  return (
+    <TileToolbarButton
+      className={classes}
+      onClick={handleClick}
+      title="View Data as Graph"
+      isDisabled={isDisabled || !isLinkEnabled}
+    >
+      <ViewDataAsGraphIcon/>
+    </TileToolbarButton>
+  );
+});
+
 export function DataCardLinkTileButton () {
   const { isDisabled } = useCardAction();
 
@@ -117,4 +154,10 @@ export function DataCardMergeInButton () {
   const { isDisabled } = useCardAction();
 
   return <MergeInButton isDisabled={isDisabled} />;
+}
+
+export function DataCardLinkGraphButton () {
+  const { isDisabled } = useCardAction();
+
+  return <LinkGraphButton isDisabled={isDisabled} />;
 }

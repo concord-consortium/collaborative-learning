@@ -2,6 +2,8 @@ import { getSnapshot, getRoot, hasParent, getEnv } from "mobx-state-tree";
 import { ProblemModel } from "./problem";
 import { SectionModelType } from "./section";
 import { omitUndefined } from "../../utilities/test-utils";
+import { SharedModel } from "../shared/shared-model";
+import { registerSharedModelInfo } from "../shared/shared-model-registry";
 
 describe("problem model", () => {
 
@@ -42,13 +44,9 @@ describe("problem model", () => {
       loadedSections: [
         {
           type: "introduction",
-          disabled: [],
-          supports: []
         },
         {
           type: "initialChallenge",
-          disabled: [],
-          supports: []
         }
       ],
       supports: [],
@@ -96,6 +94,59 @@ describe("problem model", () => {
     );
     const uniqueManagers = [...new Set(sharedModelManagers)];
     expect(uniqueManagers).toHaveLength(2);
+  });
+
+  test("sections can use the same ids as other sections", () => {
+    // Make a test shared model to demonstrate duplicate id problems
+    const TestSharedModel = SharedModel
+      .named("TestSharedModel")
+      .props({
+        type: "TestSharedModel",
+      });
+
+    registerSharedModelInfo({
+      type: "TestSharedModel",
+      modelClass: TestSharedModel
+    });
+
+    const duplicatedSection = {
+      type: "introduction",
+      content: {
+        tiles: [
+          {
+            id: "duplicate-tile-id",
+            content: {
+              type: "Text",
+              format: "html",
+              text: [ "Hello" ]
+            }
+          }
+        ],
+        sharedModels: [
+          {
+            sharedModel: {
+              type: "TestSharedModel",
+              id: "shared-model-id"
+            },
+            tiles: [ "duplicate-tile-id" ]
+          }
+        ]
+      } as any
+    };
+
+    const problem = ProblemModel.create({
+      ordinal: 1,
+      title: "test",
+      sections: [
+        duplicatedSection,
+        duplicatedSection
+      ]
+    });
+    expect(problem.sections.length).toBe(2);
+    const firstTileContent = problem.sections[0].content?.getTile("duplicate-tile-id")?.content as any;
+    expect(firstTileContent).toBeDefined();
+    const secondTileContent = problem.sections[1].content?.getTile("duplicate-tile-id")?.content as any;
+    expect(firstTileContent).not.toBe(secondTileContent);
   });
 
   it("can get sections by index", () => {

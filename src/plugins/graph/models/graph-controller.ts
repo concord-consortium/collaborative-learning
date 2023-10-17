@@ -150,6 +150,7 @@ export class GraphController {
           if (!currAxisModel || !isNumericAxisModel(currAxisModel)) {
             const newAxisModel = NumericAxisModel.create({place, min, max});
             graphModel.setAxis(place, newAxisModel);
+            dataConfig.setAttributeType(attrRole, 'numeric');
             layout.setAxisScaleType(place, 'linear');
             setNiceDomain(attr?.numValues || [], newAxisModel);
           } else {
@@ -161,6 +162,7 @@ export class GraphController {
           if (currentType !== 'categorical') {
             const newAxisModel = CategoricalAxisModel.create({place});
             graphModel.setAxis(place, newAxisModel);
+            dataConfig.setAttributeType(attrRole, 'categorical');
             layout.setAxisScaleType(place, 'band');
           }
           layout.getAxisMultiScale(place)?.setCategorySet(dataConfig.categorySetForAttrRole(attrRole));

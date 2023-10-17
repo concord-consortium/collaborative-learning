@@ -311,14 +311,16 @@ export const NodeSensorTypes = [
   {
     name: "EMG",
     type: "emg-reading",
-    units: "f(mv)",
-    icon: EmgIcon
+    units: "mV",
+    icon: EmgIcon,
+    decimalPlaces: 0
   },
   {
     name: "Surface Pressure",
     type: "fsr-reading",
-    units: "f(n)",
-    icon: PressureIcon
+    units: "psi",
+    icon: PressureIcon,
+    decimalPlaces: 0
   }
 ];
 
@@ -349,17 +351,17 @@ export const NodeDemoOutputTypes = [
 
 export const NodeLiveOutputTypes = [
   {
+    name: "Gripper 2.0",
+    icon: GrabberIcon,
+    angleBase: 130,
+    sweep: 95
+  },
+  {
     name: "Grabber",
     icon: GrabberIcon,
     angleBase: 180,
     sweep: 60,
     displayName: "Gripper"
-  },
-  {
-    name: "Gripper 2.0",
-    icon: GrabberIcon,
-    angleBase: 130,
-    sweep: 95
   },
   {
     name: "Humidifier",
