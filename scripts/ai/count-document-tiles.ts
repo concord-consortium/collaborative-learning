@@ -12,25 +12,13 @@ import admin from "firebase-admin";
 import {google} from "googleapis";
 import fetch from 'node-fetch';
 
+import { prettyDuration } from "./script-utils";
+
 // Load the service account key JSON file.
 import serviceAccount from "./serviceAccountKey.json" assert { type: "json" };
 
 // Make falsy to include all documents
 const documentLimit = false;
-
-// _duration should be in miliseconds
-function prettyDuration(_duration: number) {
-  const miliseconds = _duration % 1000;
-  const totalSeconds = Math.floor(_duration / 1000);
-  const seconds = totalSeconds % 60;
-  const totalMinutes = Math.floor(totalSeconds / 60);
-  const minutes = totalMinutes % 60;
-  const hours = Math.floor(totalMinutes / 60);
-  const hourPart = hours > 0 ? `${hours}:` : "";
-  const minutePart = hourPart || minutes > 0 ? `${minutes}:` : "";
-  const secondPart = minutePart || seconds > 0 ? `${seconds}.` : "";
-  return `${hourPart}${minutePart}${secondPart}${miliseconds}`;
-}
 
 console.log(`*** Starting Tile Count ***`);
 
@@ -127,10 +115,10 @@ for (const key of Object.keys(classKeys)) {
   const users = usersSnapshot.val();
   // console.log(key);
   // console.log(`  - ${Object.keys(users).length} users`);
-  for (const [userId, user] of Object.entries<any>(users)) {
+  for (const [_userId, user] of Object.entries<any>(users)) {
     if (documentLimit && documentsProcessed >= documentLimit) break;
     // console.log(`  ${userId}`);
-    for (const [docId, doc] of Object.entries<any>(user.documents)) {
+    for (const [_docId, doc] of Object.entries<any>(user.documents)) {
       if (documentLimit && documentsProcessed >= documentLimit) break;
 
       const content = doc.content as string | undefined;
@@ -188,7 +176,7 @@ for (const key of Object.keys(classKeys)) {
 const tagFileName = `tags.csv`;
 const fileRoot = `gs://cloud-ai-platform-d76df5a1-f27c-4288-8b89-f41e345567b9/`;
 let tagFileContent = "";
-Object.values(documentInfo).forEach(info => {
+Object.values(documentInfo).forEach((info: any) => {
   const fileName = `${fileRoot}${info.fileName}`;
   const tagPart = info.tags.join(",");
   const comma = tagPart ? "," : "";

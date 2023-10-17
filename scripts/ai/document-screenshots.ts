@@ -18,16 +18,17 @@ import { prettyDuration } from "./script-utils";
 
 const documentDirectory = "dataset1697150265495";
 // const documentDirectory = "dataset1";
+
+// Make falsy to include all documents
+const documentLimit = 30;
+
 const publicRoot = "ai";
 const rootPath = `../../src/public/${publicRoot}`;
 const documentPath = `${rootPath}/${documentDirectory}`;
 const publicPath = `${publicRoot}/${documentDirectory}`;
 const tagFileName = "tags.csv";
 
-// Sometimes Chromebooks are not sending the width and height of the screen so we need
-// to use default values if they are not specified.
-const DEFAULT_WIDTH = 1920; // half of the default width of the browser
-const DEFAULT_HEIGHT = 5000; // half of the default height of the browser
+const DEFAULT_WIDTH = 1920;
 
 const startTime = Date.now();
 let totalSnapshots = 0;
@@ -54,28 +55,32 @@ function newFileName(oldFileName: string) {
 const urlRoot = `http://localhost:8080/doc-editor.html?appMode=dev&unit=example&document=`;
 async function makeSnapshot(path: string, fileName: string) {
   const snapshotStartTime = Date.now();
-  console.log(`getting screenshot for`, path);
-  const url = `${urlRoot}${path}`;
   const targetFile = `${targetPath}/${fileName}`;
 
+  // View the document in the document editor
   const browser = await puppeteer.launch({ headless: "new" });
   const page = await browser.newPage();
-  await page.setViewport({ width: DEFAULT_WIDTH, height: DEFAULT_HEIGHT });
-
-  console.log('visiting', url);
+  const url = `${urlRoot}${path}`;
   await page.goto(url, {
     timeout: 30000, // 30 seconds
     waitUntil: 'networkidle0'
   });
-  console.log('finished loading', url);
 
+  // Approximate the height of the document by adding up the heights of the rows and make the viewport that tall
+  let pageHeight = 30;
+  const rowElements = await page.$$(".tile-row");
+  for (const rowElement of rowElements) {
+    const boundingBox = await rowElement.boundingBox();
+    pageHeight += boundingBox?.height ?? 0;
+  }
+  await page.setViewport({ width: DEFAULT_WIDTH, height: Math.round(pageHeight) });
+
+  // Take a screenshot and save it to a file
   const buffer = await page.screenshot({ fullPage: true, type: 'png' });
-  console.log('snapshot taken of', path);
   await page.close();
   await browser.close();
-  console.log('page closed for', path);
-
   fs.writeFileSync(targetFile, buffer);
+
   const snapshotEndTime = Date.now();
   const snapshotDuration = snapshotEndTime - snapshotStartTime;
   totalSnapshots++;
@@ -88,6 +93,8 @@ async function makeSnapshot(path: string, fileName: string) {
 fs.readdir(documentPath, async (error, files) => {
   // It would probably be better to run this in parallel, but I was having trouble with that so just made it sequential
   for (const file of files) {
+    if (documentLimit && totalSnapshots >= documentLimit) break;
+
     const path = `${documentPath}/${file}`;
     if (file.startsWith("document")) {
       // For documents named like documentXXX.txt, make a snapshot and save it
@@ -110,8 +117,3 @@ fs.readdir(documentPath, async (error, files) => {
     }
   }
 });
-
-const endTime = Date.now();
-const scriptDuration = endTime - startTime;
-console.log(`***** Finished document screenshots *****`);
-console.log(`Finished in `, prettyDuration(scriptDuration));
