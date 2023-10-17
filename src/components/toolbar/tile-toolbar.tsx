@@ -59,13 +59,18 @@ export const TileToolbar = observer(
 
     // Determine the buttons to be shown. Avoid recalculating defaults over and over.
     const ui = useUIStore();
-    const buttonConfiguration = useSettingFromStores("tools", tileType);
-    if (buttonConfiguration?.constructor !== Array) {
-      console.warn('Invalid configuration for toolbar (should be an array): ', buttonConfiguration);
-      return(null);
+    let buttonDescriptions;
+    const customizedButtons = useSettingFromStores("tools", tileType);
+    if (customizedButtons) {
+      if (Array.isArray(customizedButtons)) {
+        buttonDescriptions = customizedButtons;
+      } else {
+        console.warn('Invalid configuration for toolbar (should be an array): ', customizedButtons);
+        return (null);
+      }
+    } else {
+      buttonDescriptions = getDefaultTileToolbarConfig(tileType);
     }
-
-    const buttonDescriptions = buttonConfiguration ?? getDefaultTileToolbarConfig(tileType);
 
     // Determine if toolbar should be rendered or not.
     const enabled = !readOnly && id && ui.selectedTileIds.length === 1 && ui.selectedTileIds.includes(id);
