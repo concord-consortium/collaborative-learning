@@ -11,6 +11,7 @@ export interface IUseGraphControllerProps {
 
 export const useGraphController = ({graphController, graphModel, dotsRef}: IUseGraphControllerProps) => {
   useEffect(() => {
+    console.log("| useGraphController.useEffect");
     graphModel && graphController.setProperties({graphModel, dotsRef});
   }, [graphController, graphModel, dotsRef]);
 };

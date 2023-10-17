@@ -211,6 +211,7 @@ export const GraphModel = TileContentModel
       self.axes.delete(place);
     },
     setAttributeID(role: GraphAttrRole, dataSetID: string, id: string) {
+      console.log("| setAttributeId!", role, id);
       const newDataSet = getDataSetFromId(self, dataSetID);
       if (newDataSet && !isTileLinkedToDataSet(self, newDataSet)) {
         linkTileToDataSet(self, newDataSet);
@@ -272,12 +273,14 @@ export const GraphModel = TileContentModel
   }))
   .actions(self => ({
     configureLinkedGraph() {
+      console.log("| configureLinkedGraph!");
       if (!self.data) {
         console.warn("GraphModel.configureLinkedGraph requires a dataset");
         return;
       }
 
       if (getAppConfig(self)?.getSetting("autoAssignAttributes", "graph")) {
+        console.log("| we have the appConfig we expect");
         const attributeCount = self.data.attributes.length;
         if (!attributeCount) return;
 
@@ -287,14 +290,18 @@ export const GraphModel = TileContentModel
         const isValidYAttr = !!self.data.attrFromID(yAttrId);
 
         if (!isValidXAttr && !isValidYAttr) {
-          self.setAttributeID("x", self.data.id, self.data.attributes[0].id);
-          if (attributeCount > 1) {
-            self.setAttributeID("y", self.data.id, self.data.attributes[1].id);
-          }
+          setTimeout(() => {
+            if (!self.data) return;
+            self.setAttributeID("x", self.data?.id, self.data.attributes[0].id);
+            if (attributeCount > 1) {
+              self.setAttributeID("y", self.data.id, self.data.attributes[1].id);
+            }
+          });
         }
       }
     },
     configureUnlinkedGraph() {
+      console.log("configureUnlinkedGraph!");
       if (self.data) {
         console.warn("GraphModel.configureUnlinkedGraph expects the dataset to be unlinked");
         return;
@@ -342,8 +349,12 @@ export const GraphModel = TileContentModel
     afterAttachToDocument() {
       console.log("| 0 | GraphModel.afterAttachToDocument");
       addDisposer(self, reaction(
-        () => self.data,
+        () => {
+          console.log("| A running accessor for data (determine what to observe for changes)");
+          return self.data;
+        },
         data => {
+          console.log("| R The reaction, passed the result of the above accessor");
           if (!self.metadata && data){
             console.log("| 1 | about to create SharedCaseMetadata");
             const caseMetadata = SharedCaseMetadata.create();
@@ -374,7 +385,7 @@ export const GraphModel = TileContentModel
           else {
             self.configureUnlinkedGraph();
           }
-        }
+        }, { fireImmediately: true }
       ));
     }
   }));
