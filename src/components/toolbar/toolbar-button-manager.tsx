@@ -11,7 +11,7 @@
 export interface IToolbarButtonInfo {
   name: string,  // a unique named used in configuration to identify the button
   title: string, // user-visible tooltip for the button
-  component: React.ComponentType, // component to render
+  component: React.ComponentType<{args?: string[]}>, // component to render
   keyHint?: string, // If set, displayed to the user as the hotkey equivalent
 }
 

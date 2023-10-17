@@ -118,10 +118,6 @@ const TableMergeInButton = () => {
   return <MergeInButton/>;
 };
 
-function TableDataSetDataCardView() {
-  return (<DataSetViewButton args={["data-set-view", "DataCard"]}/>);
-}
-
 registerTileToolbarButtons("table",
 [
   {
@@ -151,9 +147,9 @@ registerTileToolbarButtons("table",
     component: TableMergeInButton
   },
   {
-    name: "dsdcv",
-    title: "DSDCV",
-    component: TableDataSetDataCardView
+    name: "data-set-view",
+    title: "Create a {1}",
+    component: DataSetViewButton
   }
 ]);
 

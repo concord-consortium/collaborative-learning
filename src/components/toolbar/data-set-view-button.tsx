@@ -8,14 +8,14 @@ import { TileToolbarButton } from "./tile-toolbar-button";
 // import "./data-set-view-button.scss";
 
 interface IProps {
-  args: string[];
+  args?: string[];
 }
 
-export const DataSetViewButton: React.FC<IProps> = ({args}) => {
+export function DataSetViewButton({args}: IProps) {
   const addTilesContext = useContext(AddTilesContext);
   const tile = useContext(TileModelContext);
 
-  if (args.length !== 2 || args[0] !== "data-set-view") {
+  if (args?.length !== 2 || args[0] !== "data-set-view") {
     console.error("Unknown args", args);
     return null;
   }
@@ -47,4 +47,4 @@ export const DataSetViewButton: React.FC<IProps> = ({args}) => {
       {Icon ? <Icon/> : "??"}
     </TileToolbarButton>
   );
-};
+}
