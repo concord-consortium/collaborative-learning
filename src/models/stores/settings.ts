@@ -21,8 +21,8 @@ export type SettingsType = Instance<typeof SettingsMstType>;
 
 export function getSetting(settings: SettingsType, key: string, group?: string): MaybeSettingValueType {
   if (group) {
-    const groupSettings: SettingsGroupType | undefined = settings.get(group) as SettingsGroupType | undefined;
-    return groupSettings?.get(key);
+    const groupObject = settings.get(group) as SettingsGroupType|undefined;
+    return groupObject?.get(key);
   }
   return settings.get(key) as MaybeSettingValueType;
 }
