@@ -9,6 +9,7 @@ import {AxisPlace} from "../imports/components/axis/axis-types";
 import {
   AxisModelUnion, EmptyAxisModel, IAxisModelUnion, NumericAxisModel
 } from "../imports/components/axis/models/axis-model";
+import { GraphPlace } from "../imports/components/axis-graph-shared";
 import {
   GraphAttrRole, hoverRadiusFactor, kDefaultNumericAxisBounds, kGraphTileType, PlotType, PlotTypes,
   pointRadiusLogBase, pointRadiusMax, pointRadiusMin, pointRadiusSelectionAddend
@@ -74,6 +75,7 @@ export const GraphModel = TileContentModel
   })
   .volatile(self => ({
     prevDataSetId: "",
+    autoAssignedAttributes: [] as Array<{ place: GraphPlace, role: GraphAttrRole, dataSetID: string, attrID: string }>,
     disposeDataSetListener: undefined as (() => void) | undefined
   }))
   .views(self => ({
@@ -272,6 +274,15 @@ export const GraphModel = TileContentModel
     }
   }))
   .actions(self => ({
+    autoAssignAttributeID(place: GraphPlace, role: GraphAttrRole, dataSetID: string, attrID: string) {
+      self.setAttributeID(role, dataSetID, attrID);
+      self.autoAssignedAttributes.push({ place, role, dataSetID, attrID });
+    },
+    clearAutoAssignedAttributes() {
+      self.autoAssignedAttributes = [];
+    }
+  }))
+  .actions(self => ({
     configureLinkedGraph() {
       console.log("| configureLinkedGraph!");
       if (!self.data) {
@@ -290,13 +301,10 @@ export const GraphModel = TileContentModel
         const isValidYAttr = !!self.data.attrFromID(yAttrId);
 
         if (!isValidXAttr && !isValidYAttr) {
-          setTimeout(() => { // wait for the attribute to be added to the dataset
-            if (!self.data) return;
-            self.setAttributeID("x", self.data?.id, self.data.attributes[0].id);
-            if (attributeCount > 1) {
-              self.setAttributeID("y", self.data.id, self.data.attributes[1].id);
-            }
-          });
+          self.autoAssignAttributeID("bottom", "x", self.data.id, self.data.attributes[0].id);
+          if (attributeCount > 1) {
+            self.autoAssignAttributeID("left", "y", self.data.id, self.data.attributes[1].id);
+          }
         }
       }
     },

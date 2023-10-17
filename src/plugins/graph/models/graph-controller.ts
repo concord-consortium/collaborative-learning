@@ -71,6 +71,13 @@ export class GraphController {
   initializeGraph() {
     const {graphModel, dotsRef, layout} = this,
       dataConfig = graphModel?.config;
+    // handle any attributes auto-assigned before our handlers were in place
+    if (graphModel.autoAssignedAttributes.length) {
+      graphModel.autoAssignedAttributes.forEach(({ place, role, dataSetID, attrID }) => {
+        this.handleAttributeAssignment(place, dataSetID, attrID);
+      });
+      graphModel.clearAutoAssignedAttributes();
+    }
     if (dataConfig && layout && dotsRef?.current) {
       AxisPlaces.forEach((axisPlace: AxisPlace) => {
         const axisModel = graphModel.getAxis(axisPlace),
