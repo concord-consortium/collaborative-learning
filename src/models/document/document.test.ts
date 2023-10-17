@@ -260,4 +260,16 @@ describe("document model", () => {
     document.fetchRemoteContent(mockQueryClient, mockUserContext);
     expect(mockInvalidateQueries).toHaveBeenCalled();
   });
+
+  it("can add a tile after another one", () => {
+    const newRowTile = document.addTile("text");
+    assertIsDefined(newRowTile);
+    const firstTile = document.content?.getTile(newRowTile.tileId);
+    assertIsDefined(firstTile);
+    expect(document.content!.tileMap.size).toBe(1);
+    expect(document.content?.rowCount).toBe(1);
+    document.content?.addTileAfter("text", firstTile, []);
+    expect(document.content!.tileMap.size).toBe(2);
+    expect(document.content?.rowCount).toBe(2);
+  });
 });
