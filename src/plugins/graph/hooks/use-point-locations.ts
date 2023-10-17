@@ -47,16 +47,24 @@ export const usePointLocations = () => {
   const layout = useGraphLayoutContext();
   const dataset = useDataSetContext();
   const caseIds = dataset?.cases.map(c => c.__id__) ?? [];
-
-  const xSeries: number[] = [];
-  const ySeries: number[] = [];
-
-  caseIds?.forEach((caseId) => {
-    if (dataConfig && dataset && layout) {
-      xSeries.push(getScreenX({caseId, dataset, layout, dataConfig}));
-      ySeries.push(getScreenY({caseId, dataset, layout, dataConfig}));
+  const result: Iterable<[number, number]>[] = [];
+  // Outer loop over plotNum  (which series)
+  if (dataConfig) {
+    for (let plotNum = 0; plotNum < dataConfig.yAttributeDescriptions.length; ++plotNum) {
+      // Inner loop over cases in that series
+      const series: [number,number][] = [];
+      caseIds.forEach((caseId) => {
+        if (dataConfig && dataset && layout) {
+          const xValue = getScreenX({caseId, dataset, layout, dataConfig});
+          const yValue = getScreenY({caseId, dataset, layout, dataConfig, plotNum});
+          if (isFinite(xValue) && isFinite(yValue)) {
+            series.push([xValue, yValue]);
+          }
+        }
+      });
+      result.push(series);
     }
-  });
 
-  return xSeries.map((x, i) => [x, ySeries[i]]) as Iterable<[number, number]>;
+  }
+  return result;
 };

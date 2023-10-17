@@ -1,52 +1,102 @@
+@import "../../../../components/vars.sass";
+
+// Menu sizing here must match calculations in multi-legend.tsx:
+$menu-height: 30px;
+$menu-vertical-padding: 10px;
+$menu-vertical-gap: 10px;
 $menu-label-height: 15px;
 $min-menu-width: 144px;
 $codap-menu-border-color: #0592af;
 $codap-bg-color: #f9f9f9;
 
 .multi-legend {
-  padding: 20px 30px;
+  padding: $menu-vertical-padding 0;
   background-color:$codap-bg-color;
+  width: 100%;
 
-  .simple-attribute-label {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 30px;
-    width: $min-menu-width;
-    border:1px solid #3f3f3f;
-    padding:6px;
-    border-radius:4px;
-    color: #3f3f3f;
+  .legend-row {
+    display: block;
+    margin-top: $menu-vertical-gap;
+    margin-bottom: $menu-vertical-gap;
+    height: $menu-height;
 
-    .symbol-title {
-      display: flex;
+    .legend-cell-1, .legend-cell-2{
+      display: inline-block;
+      width: 50%;
+      padding: 0 10%;
     }
 
-    .attr-symbol {
-      height: $menu-label-height;
-      width: $menu-label-height;
-      margin-right: 6px;
-      margin-top:2px;
-      border-radius: 50%;
-    }
+    .add-series-button {
+      height: $menu-height;
+      width: $min-menu-width;
+      border: none;
+      padding: 0;
+      background-color: inherit;
+      text-align: left;
+      font-family: Lato;
+      font-size: 14pt;
+      font-style: italic;
+      color: #707070;
 
-    .caret {
-      transform: rotate(0deg);
-      transition: transform 0.2s ease-in-out;
+      &:hover {
+        background-color: $workspace-teal-light-4;
+      }
+
       svg {
-        margin-top:4px;
-        stroke:#3f3f3f;
+        width: 22px;
+        height: 22px;
+        margin-right: 8px;
+        vertical-align: bottom;
       }
     }
 
-    &.target-open {
-      border-color:$codap-menu-border-color;
-      background-color: $codap-bg-color;
+    .simple-attribute-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-width: $min-menu-width;
+      height: $menu-height;
+
+      border: 1px solid #3f3f3f;
+      border-radius: 4px;
+      padding: 6px;
+      color: #3f3f3f;
+
+      // TODO: does not work as expected
+      // &:hover {
+      //   background-color: $workspace-teal-light-4;
+      // }
+
+      .symbol-title {
+        display: flex;
+      }
+
+      .attr-symbol {
+        height: $menu-label-height;
+        width: $menu-label-height;
+        margin-right: 6px;
+        margin-top:2px;
+        border-radius: 50%;
+      }
+
       .caret {
-        transform: rotate(180deg);
+        transform: rotate(0deg);
         transition: transform 0.2s ease-in-out;
         svg {
-          stroke:$codap-menu-border-color;
+          margin-top:4px;
+          stroke:#3f3f3f;
+        }
+      }
+
+      &.target-open {
+        border-color:$codap-menu-border-color;
+        background-color: $codap-bg-color;
+        .caret {
+          transform: rotate(180deg);
+          transition: transform 0.2s ease-in-out;
+          svg {
+            stroke:$codap-menu-border-color;
+          }
         }
       }
     }

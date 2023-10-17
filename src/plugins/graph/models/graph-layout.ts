@@ -1,6 +1,5 @@
 import {action, computed, makeObservable, observable} from "mobx";
 import {createContext, useContext} from "react";
-import {appConfig} from "../../../initialize-app";
 import {AxisPlace, AxisPlaces, AxisBounds, IScaleType} from "../imports/components/axis/axis-types";
 import {GraphPlace, isVertical} from "../imports/components/axis-graph-shared";
 import {IAxisLayout} from "../imports/components/axis/models/axis-layout-context";
@@ -9,8 +8,6 @@ import {MultiScale} from "../imports/components/axis/models/multi-scale";
 export const kDefaultGraphWidth = 480;
 export const kDefaultGraphHeight = 300;
 export const kDefaultLegendHeight = 0;
-export const kMultiLegendHeight = 80;
-
 export interface Bounds {
   left: number
   top: number
@@ -131,9 +128,24 @@ export class GraphLayout implements IAxisLayout {
    * Todo: Eventually there will be additional room set aside at the top for formulas
    */
   @computed get computedBounds() {
-    const {desiredExtents, graphWidth, graphHeight} = this,
-      usesMultiLegend = appConfig.getSetting("defaultSeriesLegend", "graph"),
-      legendHeight = usesMultiLegend ? kMultiLegendHeight : desiredExtents.get('legend') ?? 0,
+    const {desiredExtents, graphWidth, graphHeight} = this;
+    if (graphWidth<1 || graphHeight<0) {
+      // Layout functions can be called before tile size is known,
+      // leading to ugly errors if negative sizes are returned.
+      const zeroSize = {left: 0, top: 0, width: 0, height: 0};
+      return {
+        left: zeroSize,
+        top: zeroSize,
+        plot: zeroSize,
+        bottom: zeroSize,
+        legend: zeroSize,
+        rightNumeric: zeroSize,
+        rightCat: zeroSize,
+        yPlus: zeroSize
+      };
+    }
+    const
+      legendHeight = desiredExtents.get('legend') ?? 0,
       topAxisHeight = desiredExtents.get('top') ?? 0,
       leftAxisWidth = desiredExtents.get('left') ?? 20,
       bottomAxisHeight = desiredExtents.get('bottom') ?? 20,
