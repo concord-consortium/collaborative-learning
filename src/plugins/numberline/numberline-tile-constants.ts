@@ -17,7 +17,9 @@ export const tickWidthZero = "2px";
 export const tickWidthDefault = "1.5px";
 export const tickHeightDefault = "14px";
 export const tickStyleDefault = "transform: translateY(-7px)";
-export const tickTextTopOffset = "15px";
+
+export const tickTextTopOffsetDefault = "15px";
+export const tickTextTopOffsetMinAndMax = "0px";
 
 export const numberlineDomainMin = -5;  //max and min of the numberline
 export const numberlineDomainMax = 5;

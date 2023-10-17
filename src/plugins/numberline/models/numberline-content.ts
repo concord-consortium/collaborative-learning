@@ -35,7 +35,6 @@ export const PointObjectModel = types
     }
   }));
 
-
 export interface PointObjectModelType extends Instance<typeof PointObjectModel> {}
 
 export const NumberlineContentModel = TileContentModel
@@ -43,9 +42,12 @@ export const NumberlineContentModel = TileContentModel
   .props({
     type: types.optional(types.literal(kNumberlineTileType), kNumberlineTileType),
     points: types.map(PointObjectModel),
+    min: -5,
+    max: 5
   })
   .volatile(self => ({
-    selectedPoints: {} as Record<string, PointObjectModelType> //dictionary of id - point
+    selectedPoints: {} as Record<string, PointObjectModelType>, //dictionary of id - point
+
   }))
   .views(self => ({
     get isUserResizable() {
@@ -89,12 +91,19 @@ export const NumberlineContentModel = TileContentModel
       for (const id in self.selectedPoints){
         delete self.selectedPoints[id];
       }
+    },
+    setNewMin(num: number) {
+      self.min = num;
+    },
+    setNewMax(num: number) {
+      console.log("\t🏭 setNewMax");
+      console.log("\t🥩 num:", num);
+
+      self.max = num;
     }
   }))
   .actions(self => ({
     createNewPoint(xValue: number) {
-      console.log("\t🏭 createNewPoint");
-      console.log("\t🥩 xValue:", xValue);
       const id = uniqueId();
       const pointModel = PointObjectModel.create({ id, xValue });
       self.points.set(id, pointModel);
