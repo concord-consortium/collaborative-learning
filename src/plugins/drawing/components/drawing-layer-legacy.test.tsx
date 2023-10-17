@@ -10,7 +10,7 @@ import { RectangleObjectSnapshot } from "../objects/rectangle";
 import { EllipseObjectSnapshot } from "../objects/ellipse";
 import { ImageObjectSnapshot } from "../objects/image";
 import { DrawingMigrator } from "../model/drawing-migrator";
-import { createImageMapEntry, EntryStatus, gImageMap } from "../../../models/image-map";
+import { EntryStatus, gImageMap, ImageMapEntry } from "../../../models/image-map";
 
 // The drawing tile needs to be registered so the TileModel.create
 // knows it is a supported tile type
@@ -188,11 +188,10 @@ describe("Drawing Layer Components", () => {
       // an async error will happen when the image map fails to fetch the fake
       // URL. The following mocking short circuits the async behavior and just
       // returns a constant image map entry for every lookup.
-      const imageMapEntry = createImageMapEntry({
+      const imageMapEntry = ImageMapEntry.create({
         contentUrl: mockImageUrl,
         displayUrl: mockImageUrl,
-        status: EntryStatus.Ready,
-        retries: 0
+        status: EntryStatus.Ready
       });
       jest.spyOn(gImageMap, "getImageEntry").mockImplementation(() => imageMapEntry);
     });

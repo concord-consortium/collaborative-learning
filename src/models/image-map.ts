@@ -22,6 +22,16 @@ export enum EntryStatus {
   Error = "error"
 }
 
+export interface ImageMapEntrySnapshot {
+  filename?: string;
+  contentUrl?: string;
+  displayUrl: string;
+  width?: number;
+  height?: number;
+  status: EntryStatus;
+  retries?: number;
+}
+
 export class ImageMapEntry {
   filename?: string;
   contentUrl?: string;
@@ -35,24 +45,22 @@ export class ImageMapEntry {
     makeAutoObservable(this);
   }
 
-  toJSON() {
-    // For some reason the type of {...this} is just `this`. But by using an intermediate
-    // method resulted in type which just contains the properties of the class;
-    return serializeEntry(this);
+  toJSON(): ImageMapEntrySnapshot {
+    // When a class instance is spread like this, only properties that have been assigned
+    // get included in the result. However in typescript the resulting type is `this`
+    // instead of just the properties. This is why the function is explicitly typed.
+    return {...this};
   }
-}
-// For some reason the type of {...this} is just `this`. So putting this method inside
-// the class didn't work well.
-function serializeEntry(entry: ImageMapEntry) {
-  return {...entry};
-}
-export type ImageMapEntrySnapshot = ReturnType<typeof serializeEntry>;
-function updateEntry(entry: ImageMapEntry, props: ImageMapEntrySnapshot) {
-  Object.assign(entry, props);
-  return entry;
-}
-export function createImageMapEntry(props: ImageMapEntrySnapshot) {
-  return updateEntry(new ImageMapEntry(), props);
+
+  update(props: ImageMapEntrySnapshot) {
+    Object.assign(this, props);
+  }
+
+  static create(props: ImageMapEntrySnapshot) {
+    const newEntry = (new ImageMapEntry());
+    newEntry.update(props);
+    return newEntry;
+  }
 }
 
 export interface IImageContext {
@@ -128,7 +136,7 @@ export class ImageMap {
     return isPlaceholderImage(url);
   }
   clonePlaceholder() {
-    return createImageMapEntry(this.images.get(placeholderImage)!.toJSON());
+    return ImageMapEntry.create(this.images.get(placeholderImage)!.toJSON());
   }
   getCachedImage(url?: string) {
     return url ? this.images.get(url) : undefined;
@@ -157,11 +165,11 @@ export class ImageMap {
   _addOrUpdateEntry(url: string, entrySnapshot: ImageMapEntrySnapshot) {
     const existingEntry = this.images.get(url);
     if (existingEntry) {
-      updateEntry(existingEntry, entrySnapshot);
+      existingEntry.update(entrySnapshot);
       return existingEntry;
     } else {
       const newEntry = new ImageMapEntry();
-      updateEntry(newEntry, entrySnapshot);
+      newEntry.update(entrySnapshot);
       this.images.set(url, newEntry);
       return newEntry;
     }

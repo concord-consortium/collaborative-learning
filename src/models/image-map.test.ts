@@ -1,15 +1,15 @@
 import { autorun, flowResult, runInAction, when } from "mobx";
-import { externalUrlImagesHandler, localAssetsImagesHandler,
-        firebaseRealTimeDBImagesHandler, firebaseStorageImagesHandler,
-        IImageHandler, ImageMapEntry, ImageMap,
-        EntryStatus, IImageHandlerStoreOptions,
-        IImageHandlerStoreResult,
-        ImageMapEntrySnapshot,
-        createImageMapEntry} from "./image-map";
+
 import { parseFirebaseImageUrl } from "../../functions/src/shared-utils";
 import { DB } from "../lib/db";
 import * as ImageUtils from "../utilities/image-utils";
 import placeholderImage from "../assets/image_placeholder.png";
+import { externalUrlImagesHandler, localAssetsImagesHandler,
+  firebaseRealTimeDBImagesHandler, firebaseStorageImagesHandler,
+  IImageHandler, ImageMapEntry, ImageMap,
+  EntryStatus, IImageHandlerStoreOptions,
+  IImageHandlerStoreResult,
+  ImageMapEntrySnapshot} from "./image-map";
 
 let sImageMap: ImageMap;
 
@@ -674,11 +674,10 @@ describe("ImageMap", () => {
 
   it("can update an image entry with syncContentUrl", () => {
     const kLocalImageUrl2 = kLocalImageUrl + "2";
-    const imageEntry2 = createImageMapEntry({
+    const imageEntry2 = ImageMapEntry.create({
                           contentUrl: kLocalImageUrl2,
                           displayUrl: kLocalImageUrl2,
                           status: EntryStatus.Ready,
-                          retries: 0
                         });
 
     // It should add a new entry at the contentUrl
@@ -693,13 +692,12 @@ describe("ImageMap", () => {
     // syncs should update existing entries in place if they are in an error
     // status
     runInAction(() => altEntry!.status = EntryStatus.Error);
-    const imageEntry2mod = createImageMapEntry({
+    const imageEntry2mod = ImageMapEntry.create({
       contentUrl: kLocalImageUrl2,
       displayUrl: kLocalImageUrl2,
       width: 20,
       height: 20,
       status: EntryStatus.Ready,
-      retries: 0
     });
     sImageMap._syncContentUrl(kLocalImageUrl, imageEntry2mod);
     expect(altEntry).toEqual(imageEntry2mod);

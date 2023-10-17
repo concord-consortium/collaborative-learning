@@ -1,4 +1,4 @@
-import { createImageMapEntry, EntryStatus, gImageMap } from "../models/image-map";
+import { EntryStatus, gImageMap, ImageMapEntry } from "../models/image-map";
 import { getClipboardContent, pasteClipboardImage } from "./clipboard-utils";
 
 const mockBlob = {
@@ -60,7 +60,7 @@ describe("pasteClipboardImage", () => {
     type: "image/png",
     webkitRelativePath: ""
   };
-  const mockImageResponse = createImageMapEntry({
+  const mockImageResponse = ImageMapEntry.create({
     contentUrl: "test/test.png",
     displayUrl: "https://example.com/test/test.png",
     filename: "test.png",
