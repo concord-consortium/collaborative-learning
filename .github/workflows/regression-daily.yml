@@ -2,7 +2,7 @@ name: Regression Tests
 
 on:
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "43 11 * * *"
   workflow_dispatch:
     inputs:
       branch:
@@ -71,6 +71,7 @@ jobs:
         # run 5 copies of the current job in parallel
         containers: [1, 2, 3, 4, 5, 6, 7]
     steps:
+      - echo "Tests to run = ${{ github.event.inputs.test }}"
       - name: Checkout Repository
         uses: actions/checkout@v2
         with:
@@ -121,6 +122,7 @@ jobs:
     container: cypress/browsers:node16.14.2-slim-chrome103-ff102
     if: ${{ github.event.inputs.test != 'all' }}
     steps:
+      - echo "Tests to run = ${{ github.event.inputs.test }}"
       - name: Checkout Repository
         uses: actions/checkout@v2
         with:
