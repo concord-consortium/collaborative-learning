@@ -186,7 +186,7 @@ export class ImageMap {
       return;
     }
 
-    const entrySnapshot = serializeEntry(entry);
+    const entrySnapshot = entry.toJSON();
     const existingEntry = this.images.get(entry.contentUrl);
     if (!existingEntry || existingEntry.status === EntryStatus.Error) {
       if (entry.status === EntryStatus.Ready) {
