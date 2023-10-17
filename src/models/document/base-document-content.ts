@@ -711,7 +711,7 @@ export const BaseDocumentContentModel = types
         const newContent = contentInfo?.defaultContent({ title, url, appConfig });
         const tileInfo = self.addTileContentInNewRow(
                               newContent,
-                              { rowHeight: contentInfo.defaultHeight, ...addTileOptions });
+                              { rowHeight: contentInfo.defaultHeight, ...addTileOptions,  title: options?.title });
         if (addSidecarNotes) {
           const { rowId } = tileInfo;
           const row = self.rowMap.get(rowId);
