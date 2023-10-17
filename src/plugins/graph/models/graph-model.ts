@@ -340,10 +340,12 @@ export const GraphModel = TileContentModel
       }
     },
     afterAttachToDocument() {
+      console.log("| 0 | GraphModel.afterAttachToDocument");
       addDisposer(self, reaction(
         () => self.data,
         data => {
           if (!self.metadata && data){
+            console.log("| 1 | about to create SharedCaseMetadata");
             const caseMetadata = SharedCaseMetadata.create();
             caseMetadata.setData(data);
             const sharedModelManager = getSharedModelManager(self);
