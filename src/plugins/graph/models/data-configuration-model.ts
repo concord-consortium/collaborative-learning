@@ -1,5 +1,5 @@
 import {scaleQuantile, ScaleQuantile, schemeBlues} from "d3";
-import {getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
+import { getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
 import {AttributeType, attributeTypes} from "../../../models/data/attribute";
 import {ICase} from "../../../models/data/data-set-types";
 import {IDataSet} from "../../../models/data/data-set";
@@ -288,8 +288,13 @@ export const DataConfigurationModel = types
         return allValues.filter(aValue => aValue !== '');
       },
       numericValuesForAttrRole(role: GraphAttrRole): number[] {
-        return this.valuesForAttrRole(role).map((aValue: string) => Number(aValue))
-          .filter((aValue: number) => isFinite(aValue));
+        if (role==='y') {
+          // For Y axis, have to consider multiple attributes
+          return this.numericValuesForYAxis;
+        } else {
+          return this.valuesForAttrRole(role).map((aValue: string) => Number(aValue))
+            .filter((aValue: number) => isFinite(aValue));
+        }
       },
       get numericValuesForYAxis() {
         const allGraphCaseIds = Array.from(self.graphCaseIDs),
@@ -646,6 +651,22 @@ export const DataConfigurationModel = types
     addYAttribute(desc: IAttributeDescriptionSnapshot) {
       self._yAttributeDescriptions.push(desc);
       this._addNewFilteredCases();
+    },
+    replaceYAttribute(oldAttrId: string, newAttrId: string) {
+      /**
+       * Replace an existing Y attribute with a different one, maintaining its position in the list.
+       * If the new attribute is already in the list of Y attributes, it will be removed from
+       * the old position to prevent duplication.
+       */
+      if (self._yAttributeDescriptions.find(d=>d.attributeID===oldAttrId)) {
+        this.removeYAttributeWithID(newAttrId);
+        const index = self._yAttributeDescriptions.findIndex(d=>d.attributeID===oldAttrId);
+        self._yAttributeDescriptions[index].attributeID = newAttrId;
+        if (index === 0 && self._yAttributeDescriptions.length === 1) {
+          self._yAttributeDescriptions[index].type = undefined;
+        }
+        self.filteredCases?.[index].invalidateCases();
+      }
     },
     setY2Attribute(desc?: IAttributeDescriptionSnapshot) {
       const isNewAttribute = !self._attributeDescriptions.get('rightNumeric'),
