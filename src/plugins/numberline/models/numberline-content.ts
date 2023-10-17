@@ -96,9 +96,6 @@ export const NumberlineContentModel = TileContentModel
       self.min = num;
     },
     setNewMax(num: number) {
-      console.log("\t🏭 setNewMax");
-      console.log("\t🥩 num:", num);
-
       self.max = num;
     }
   }))

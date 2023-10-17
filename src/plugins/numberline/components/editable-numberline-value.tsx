@@ -4,17 +4,16 @@ import React, { useState, useRef, useEffect } from 'react';
 import "./numberline-tile.scss";
 
 interface IEditableValueProps {
-  axisWidth: number;
   readOnly?: boolean;
   isTileSelected: boolean;
   value: number;
   offset: number;
   minOrMax: "min" | "max";
-  onValueChange: (newValue: string) => void;
+  onValueChange: (newValue: number) => void;
 }
 
 export const EditableNumberlineValue: React.FC<IEditableValueProps> = observer(function NumberlineTile(props) {
-  const { axisWidth, readOnly, isTileSelected, value, offset, minOrMax, onValueChange } = props;
+  const { readOnly, isTileSelected, value, offset, minOrMax, onValueChange } = props;
 
   const [isEditing, setIsEditing] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -36,23 +35,32 @@ export const EditableNumberlineValue: React.FC<IEditableValueProps> = observer(f
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    let inputField = undefined;
+    let numberEntered = undefined;
     const { key } = e;
     switch (key) {
       case "Enter":
-        console.log("\t pressed enter!");
-        onValueChange((e.target as HTMLInputElement).value);
-        e.currentTarget.blur(); // Unselect the text field
+        inputField = (e.target as HTMLInputElement).value;
+        if (checkIfNumber(inputField)){
+          numberEntered = Number(inputField);
+          onValueChange(numberEntered);
+        }
+        setIsEditing(false);
         break;
       case "Escape":
       case "Tab":
-        handleClose(false);
+        setIsEditing(false);
         break;
     }
   };
 
-  const handleClose = (accept: boolean) => {
-    setIsEditing(accept);
+  const checkIfNumber = (input: string): boolean => {
+    const result = Number(input);
+    const isNumeric = !isNaN(result) && isFinite(result);
+    return isNumeric;
   };
+
+  //----------------------- Determine Styling for Border Box -----------------------
 
   const borderBoxOffset = `${offset + 4}px`;
   const hideBorderAndResetBackground = !isTileSelected;
@@ -61,7 +69,6 @@ export const EditableNumberlineValue: React.FC<IEditableValueProps> = observer(f
   const borderBoxBackgroundProperty = hideBorderAndResetBackground ? { backgroundColor: "white" }
                                                                    : { backgroundColor: "#f0f9fb" };
   const borderBoxStyle = { ...borderBoxPositionProperty, ...borderBoxBorderProperty, ...borderBoxBackgroundProperty };
-
 
   return (
     <div className="border-box" style={borderBoxStyle} onClick={handleClick}>
@@ -74,8 +81,10 @@ export const EditableNumberlineValue: React.FC<IEditableValueProps> = observer(f
           onKeyDown={(e) => handleKeyDown(e)}
           defaultValue={value.toString()} // Set the initial value
           onBlur={(e) => {
-            onValueChange((e.target as HTMLInputElement).value);
-            handleClose(true);
+            if (checkIfNumber((e.target as HTMLInputElement).value)){
+              onValueChange(Number((e.target as HTMLInputElement).value));
+            }
+            setIsEditing(false);
           }}
           onChange={(e) => {
             // Set the width of the input based on the length of the input value
