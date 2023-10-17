@@ -21,11 +21,8 @@ export const tickStyleDefault = "transform: translateY(-7px)";
 export const tickTextTopOffsetDefault = "15px";
 export const tickTextTopOffsetMinAndMax = "0px";
 
-export const numberlineDomainMin = -5;  //max and min of the numberline
-export const numberlineDomainMax = 5;
 
 export const numberlineYBound = 15;  //# of pixels above and below numberline to determine if mouse is inBoundingBox
-
 export const maxNumSelectedPoints = 1; //this may change
 
 export const kArrowheadOffset = -17;

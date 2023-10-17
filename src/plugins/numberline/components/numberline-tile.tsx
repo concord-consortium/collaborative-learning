@@ -95,10 +95,6 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   const arrowOffset = xShiftNum + kArrowheadOffset;
 
   const xScale = useMemo(() => {
-    console.log("\t🏭 recalculate xScale-------------");
-    console.log("\t🥩 min:", content.min);
-    console.log("\t🥩 max:", content.max);
-
     return scaleLinear()
       .domain([content.min, content.max])
       .range([0, axisWidth]);
@@ -124,6 +120,8 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     }
     return () => obs?.disconnect();
   }, []);
+
+
 
 
   //----------------- Register Tile API functions -------------------------------------------------
@@ -267,48 +265,36 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   svg.on("mousemove", (e) => handleMouseMove(e));
 
   // * ================================ [ Construct Numberline ] =============================== */
+  const numOfTicks = 11;
+
+  //Returns an equally divided array between min and max with numOfTick # of elements
+  const generateTickValues = (min: number, max: number) => {
+    const tickValues = [];
+    const range = content.max - content.min;
+    for (let i = 0; i < numOfTicks; i++) {
+      const position = i / (numOfTicks - 1);
+      const tickValue = content.min + (position * range);
+      tickValues.push(tickValue);
+    }
+    return tickValues;
+  };
+
+  const tickFormatter = (value: number | { valueOf(): number }, index: number) => {
+    if (typeof value === 'number' && (value === content.min || value === content.max)) {
+      return ''; // Hide the tick text fields for -5 and 5
+    }
+    if (typeof value === 'number'){
+      return value.toFixed(1).toString();
+    }
+    else {
+      return value.toString();
+    }
+  };
+
   if (axisWidth !== 0) {
     const readOnlyState = readOnly ? "readOnly" : "readWrite";
     const axisClass = `axis-${model.id}-${readOnlyState}`;
-    // const numOfTicks = numberlineDomainMax - numberlineDomainMin;
-
-    // const tickFormatter = (value: number, index: number) => {
-    //   // Hide the tick text fields for -5 and 5
-    //   if (typeof value === 'number' && (value === content.min || value === content.max)) {
-    //     return '';
-    //   }
-    //   return value.toString();
-    // };
-    const numberOfTicks = 11;
-
-    const tickFormatter = (value: number | { valueOf(): number }, index: number) => {
-      console.log("\t🏭 tickFormatter");
-      console.log("\tVALUE:", value);
-      console.log("\tINDEX:", index);
-
-
-      // Hide the tick text fields for -5 and 5
-      if (typeof value === 'number' && (value === content.min || value === content.max)) {
-        return '';
-      }
-
-      // new rounded implementation
-      if (typeof value === 'number'){
-        return value.toFixed(1).toString();
-      }
-      else {
-        return value.toString();
-      }
-      // -------end----------------------
-
-      // //old implementation
-      // return value.toString();
-      // //-------end----------------------
-
-
-    };
-    const tickValues = Array.from({ length: numberOfTicks }, (_, i) => content.min + (i / (numberOfTicks - 1)) * (content.max - content.min));
-
+    const tickValues = generateTickValues(content.min, content.max);
 
     axis
       .attr("class", `${axisClass} num-line`)
