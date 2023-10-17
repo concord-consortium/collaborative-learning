@@ -14,6 +14,7 @@ cypress/screenshots
 stats.json
 top-test/
 docs/drafts
+scripts/dataset*
 
 # VSCode project settings
 .vscode/*
