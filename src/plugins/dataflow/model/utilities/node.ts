@@ -311,14 +311,16 @@ export const NodeSensorTypes = [
   {
     name: "EMG",
     type: "emg-reading",
-    units: "f(mv)",
-    icon: EmgIcon
+    units: "mV",
+    icon: EmgIcon,
+    decimalPlaces: 0
   },
   {
     name: "Surface Pressure",
     type: "fsr-reading",
-    units: "f(n)",
-    icon: PressureIcon
+    units: "psi",
+    icon: PressureIcon,
+    decimalPlaces: 0
   }
 ];
 
