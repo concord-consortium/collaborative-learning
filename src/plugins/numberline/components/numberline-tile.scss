@@ -28,7 +28,7 @@
     justify-content: center;
     flex-direction: column;
     position: relative;
-    // background-color: orange;
+
     svg {
       overflow: visible;
 
@@ -49,11 +49,7 @@
         .zero-tick{
           color: $charcoal;
         }
-
-
       }
-
-
 
       .point-outer-circle {
         display: none;
@@ -104,14 +100,6 @@
         margin-left: '4px';
         margin-right: '4px',
       }
-
-      .editable-value{
-        // background-color: red;
-        // position: absolute;
-        // top: 10px;
-      }
-
     }
   }
 }
-

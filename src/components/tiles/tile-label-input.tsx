@@ -13,8 +13,6 @@ interface IProps {
   onBlur: (value: string) => void;
 }
 export const TileLabelInput: React.FC<IProps> = ({ style, value, onKeyDown, onChange, onBlur }) => {
-  console.log("📁 tile-label-input.tsx ------------------------");
-
   return (
     <div className="clue-editor-container" style={style}>
       <input
