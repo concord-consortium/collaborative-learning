@@ -9,16 +9,16 @@ import { IUseDraggableAttribute, useDraggableAttribute } from "../../../hooks/us
 import { useInstanceIdContext } from "../../../hooks/use-instance-id-context";
 import { useOutsidePointerDown } from "../../../hooks/use-outside-pointer-down";
 import { useOverlayBounds } from "../../../hooks/use-overlay-bounds";
-import { useSettingFromStores } from "../../../../../../hooks/use-stores";
 import { AttributeType } from "../../../../../../models/data/attribute";
 import { IDataSet } from "../../../../../../models/data/data-set";
 import { isSetAttributeNameAction } from "../../../../../../models/data/data-set-actions";
 
 interface IProps {
   place: GraphPlace
+  attributeId?: string
   target: SVGGElement | HTMLElement | null
   portal: HTMLElement | null
-  onChangeAttribute: (place: GraphPlace, dataSet: IDataSet, attrId: string) => void
+  onChangeAttribute: (place: GraphPlace, dataSet: IDataSet, attrId: string, oldAttrId?: string) => void
   onRemoveAttribute: (place: GraphPlace, attrId: string) => void
   onTreatAttributeAs: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void
   onOpenClose?: (isOpen: boolean) => void
@@ -33,19 +33,19 @@ const removeAttrItemLabelKeys: Record<string, string> = {
   "rightSplit": "DG.DataDisplayMenu.removeAttribute_right"
 };
 
-const _AxisOrLegendAttributeMenu = ({ place, target, portal, onOpenClose,
+const _AxisOrLegendAttributeMenu = ({ place, attributeId, target, portal, onOpenClose,
                                       onChangeAttribute, onRemoveAttribute, onTreatAttributeAs }: IProps) => {
   const data = useDataSetContext();
   const dataConfig = useDataConfigurationContext();
   const role = graphPlaceToAttrRole[place];
-  const attrId = dataConfig?.attributeID(role) || '';
+  const attrId = attributeId || dataConfig?.attributeID(role) || '';
   const instanceId = useInstanceIdContext();
   const attribute = attrId ? data?.attrFromID(attrId) : null;
   const [labelText, setLabelText] = useState(attribute?.name);
   const removeAttrItemLabel = t(removeAttrItemLabelKeys[role], {vars: [attribute?.name]});
   const treatAs = dataConfig?.attributeType(role) === "numeric" ? "categorical" : "numeric";
   const menuRef = useRef<HTMLDivElement>(null);
-  const showRemoveOption = useSettingFromStores("defaultSeriesLegend", "graph") !== true;
+  const showRemoveOption = true; // Used to be a setting; for now we always want it available.
 
   const onCloseRef = useRef<() => void>();
   const overlayStyle: CSSProperties = {
@@ -91,7 +91,7 @@ const _AxisOrLegendAttributeMenu = ({ place, target, portal, onOpenClose,
                 }
                 { data?.attributes?.map((attr) => {
                   return (
-                    <MenuItem onClick={() => onChangeAttribute(place, data, attr.id)} key={attr.id}>
+                    <MenuItem onClick={() => onChangeAttribute(place, data, attr.id, attrId)} key={attr.id}>
                       {attr.name}
                     </MenuItem>
                   );

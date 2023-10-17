@@ -1,4 +1,5 @@
 import { types, Instance, SnapshotIn, getSnapshot } from "mobx-state-tree";
+import { stripPTNumberFromBranch } from "../../utilities/branch-utils";
 import { urlParams } from "../../utilities/url-params";
 import { getUrlFromRelativeOrFullString } from "../../utilities/url-utils";
 import { SectionModelType } from "../curriculum/section";
@@ -51,7 +52,7 @@ export const AppConfigModel = types
         return unitParamUrl.href;
       }
       const unitCode = self.unitCodeMap.get(unitParam) || unitParam;
-      const branchName = urlParams.curriculumBranch ?? "main";
+      const branchName = stripPTNumberFromBranch(urlParams.curriculumBranch ?? "main");
       return `${self.curriculumBaseUrl}/branch/${branchName}/${unitCode}/content.json`;
     }
   }))
