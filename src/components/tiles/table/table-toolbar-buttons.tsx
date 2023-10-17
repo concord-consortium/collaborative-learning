@@ -11,7 +11,6 @@ import { useConsumerTileLinking } from "../../../hooks/use-consumer-tile-linking
 import { getTileDataSet } from "../../../models/shared/shared-data-utils";
 import { TileModelContext } from "../tile-api";
 import { TableToolbarContext } from "./table-toolbar-context";
-import { kGraphTileType } from "../../../plugins/graph/graph-defs";
 
 import "./table-toolbar.scss";
 
@@ -89,11 +88,11 @@ export const LinkTileButton = () => {
 };
 
 export const LinkGraphButton = () => {
-  // Assume we always have a model
   const model = useContext(TileModelContext)!;
   const dataSet = getTileDataSet(model.content);
   const hasLinkableRows = dataSet ? dataSet.attributes.length > 1 : false;
-  const { showLinkTileDialog } = useConsumerTileLinking({ model, hasLinkableRows, onlyType: kGraphTileType });
+  // Could be kGraphTileType, but we don't want to introduce a dependency to the plugin
+  const { showLinkTileDialog } = useConsumerTileLinking({ model, hasLinkableRows, onlyType: "Graph" });
   const classes = classNames("link-graph-button", {});
 
   const handleClick = (e: React.MouseEvent) => {
