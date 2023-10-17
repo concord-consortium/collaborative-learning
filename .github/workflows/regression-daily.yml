@@ -2,65 +2,11 @@ name: Regression Tests
 
 on:
   schedule:
-    - cron: "0 0 * * *"
-  workflow_dispatch:
-    inputs:
-      branch:
-        description: Branch (on which to run the tests)
-        default: master
-        required: true
-      browser:
-        description: Browser (can be chrome or firefox)
-        default: chrome
-        required: true
-      test:
-        description: Tests to run
-        default: all
-        options:
-          - all
-          - branch/author_tests/doc-editor_spec.js
-          - branch/student_tests/arrow_annotation_spec.js
-          - branch/student_tests/canvas_test_spec.js
-          - branch/student_tests/data_card_tool_spec.js
-          - branch/student_tests/dataflow_table_integration_test_spec.js
-          - branch/student_tests/dataflow_tool_spec.js
-          - branch/student_tests/diagram_tool_spec.js
-          - branch/student_tests/drawing_tool_spec.js
-          - branch/student_tests/duplicate_tile_spec.js
-          - branch/student_tests/expression_tool_spec.js
-          - branch/student_tests/graph_table_integraton_test_spec.js
-          - branch/student_tests/graph_tool_spec.js
-          - branch/student_tests/group_test_spec.js
-          - branch/student_tests/image_tool_spec.js
-          - branch/student_tests/nav_panel_test_spec.js
-          - branch/student_tests/numberline_tool_spec.js
-          - branch/student_tests/shared_variables_test_spec.js
-          - branch/student_tests/simulator_tile_spec.js
-          - branch/student_tests/student_test_spec.js
-          - branch/student_tests/table_tool_spec.js
-          - branch/student_tests/text_tool_spec.js
-          - branch/student_tests/workspace_test_spec.js
-          - branch/teacher_tests/history_playback_spec.js
-          - branch/teacher_tests/teacher_chat_spec.js
-          - branch/teacher_tests/teacher_curation_spec.js
-          - branch/teacher_tests/teacher_dashboard_4_quadrants_spec.js
-          - branch/teacher_tests/teacher_dashboard_spec.js
-          - branch/teacher_tests/teacher_network_spec.js
-          - branch/teacher_tests/teacher_support_spec.js
-          - branch/teacher_tests/teacher_workspace_spec.js   
-          - full/student_tests/group_chooser_spec.js
-          - full/teacher_tests/teacher_chat_spec.js
-          - full/teacher_tests/teacher_dashboard_spec.js
-          - full/teacher_tests/teacher_network_dividers_spec.js
-          - full/teacher_tests/teacher_network_problem_chat_spec.js
-          - full/teacher_tests/teacher_network_workspace_chat_spec.js
-          - full/teacher_tests/teacher_workspace_spec.js
-          - smoke/single_student_canvas_test.js
+    - cron: "35 13 * * *"
 jobs:
   all-tests:
     runs-on: ubuntu-latest
     container: cypress/browsers:node16.14.2-slim-chrome103-ff102
-    if: ${{ github.event.inputs.test == 'all' }}
     strategy:
       # when one test fails, DO NOT cancel the other
       # containers, because this will kill Cypress processes
@@ -95,57 +41,6 @@ jobs:
           # upload videos for failing specs
           config: video=true,videoUploadOnPasses=false
           browser: ${{ env.BROWSER }}
-        env:
-          # pass the Dashboard record key as an environment variable
-          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-          # pass GitHub token to allow accurately detecting a build vs a re-run build
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # turn on code coverage when running npm start
-          # so far we've been using a webpack coverage-istanbul-loader for this
-          # but there has been work on using the code coverage support in the browser directly,
-          # which should be much faster
-          CODE_COVERAGE: true
-          # Also turn on the code coverage tasks in cypress itself, these are disabled
-          # by default.
-          CYPRESS_coverage: true
-          # Increase memory allocation
-          NODE_OPTIONS: "--max_old_space_size=4096"
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v2
-        with:
-          flags: cypress
-          token: ${{ secrets.CODECOV_TOKEN }}
-
-  single-test:
-    runs-on: ubuntu-latest
-    container: cypress/browsers:node16.14.2-slim-chrome103-ff102
-    if: ${{ github.event.inputs.test != 'all' }}
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.inputs.branch }}
-      - name: Install CMS Dependencies
-        working-directory: ./cms
-        run: npm ci
-      - name: Set the browser
-        env:
-          DEFAULT_BROWSER: chrome
-        run: echo "BROWSER=${{ github.event.inputs.browser || env.DEFAULT_BROWSER }}" >> $GITHUB_ENV
-      - uses: cypress-io/github-action@v4
-        with:
-          start: npm start
-          wait-on: 'http://localhost:8080'
-          # wait 10 minutes to start the addition of the CMS required this increase
-          wait-on-timeout: 600
-          # only record the results to dashboard.cypress.io if CYPRESS_RECORD_KEY is set
-          record: ${{ !!secrets.CYPRESS_RECORD_KEY }}
-          # only do parallel if we have a record key
-          parallel: ${{ !!secrets.CYPRESS_RECORD_KEY }}
-          # upload videos for failing specs
-          config: video=true,videoUploadOnPasses=false
-          browser: ${{ env.BROWSER }}
-          spec: 'cypress/e2e/clue/${{ github.event.inputs.test }}'
         env:
           # pass the Dashboard record key as an environment variable
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}

@@ -3,7 +3,7 @@ import React from "react";
 import { VariableType } from "@concord-consortium/diagram-view";
 
 import { getIcon } from "../../shared-assets/icons/icon-utilities";
-import { isInputVariable } from "../../shared-variables/simulations/simulation-utilities";
+import { getVariableDecimalPlaces, isInputVariable } from "../../shared-variables/simulations/simulation-utilities";
 
 import "./simulator-variable.scss";
 
@@ -35,8 +35,14 @@ export function SimulatorVariable({ variable }: ISimulatorVariableProps) {
 
   // Limit the value to two decimal places
   const value = variable?.currentValue;
-  const scaleFactor = 100;
-  const displayValue = value !== undefined ? Math.round(value * scaleFactor) / scaleFactor : "";
+  const displayValue = () => {
+    if (value === undefined) {
+      return "";
+    }
+    const decimalPlaces = getVariableDecimalPlaces(variable);
+    return value?.toFixed(decimalPlaces);
+  };
+  const displayValueText = `${displayValue()}${variable?.unit ? " " + variable.unit : ""}`;
 
   const className = inputVariable ? "input" : "output";
   const variableClassNames = variable.getAllOfType("className");
@@ -46,7 +52,7 @@ export function SimulatorVariable({ variable }: ISimulatorVariableProps) {
       <div className="display-name">{displayName}</div>
       <div className="value-row">
         <VariableIcon variable={variable} />
-        <div className="display-value">{displayValue}</div>
+        <div className="display-value">{displayValueText}</div>
       </div>
     </div>
   );
