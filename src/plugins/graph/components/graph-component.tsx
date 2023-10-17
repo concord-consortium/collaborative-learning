@@ -19,8 +19,10 @@ import { IDataSet } from '../../../models/data/data-set';
 interface IGraphComponentProps extends ITileBaseProps {
   data?: IDataSet;
   layout: GraphLayout;
+  onRequestRowHeight?: (id: string, size: number) => void;
 }
-export const GraphComponent = observer(function GraphComponent({ data, layout, tile }: IGraphComponentProps) {
+export const GraphComponent = observer(
+    function GraphComponent({ data, layout, tile, onRequestRowHeight }: IGraphComponentProps) {
   const graphModel = isGraphModel(tile?.content) ? tile?.content : undefined;
 
   const instanceId = useNextInstanceId("graph");
@@ -61,6 +63,7 @@ export const GraphComponent = observer(function GraphComponent({ data, layout, t
               <Graph graphController={graphController}
                       graphRef={graphRef}
                       dotsRef={dotsRef}
+                      onRequestRowHeight={onRequestRowHeight}
               />
               <AttributeDragOverlay activeDragId={overlayDragId} />
             </GraphModelContext.Provider>

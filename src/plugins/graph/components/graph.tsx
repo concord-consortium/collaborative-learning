@@ -1,6 +1,6 @@
 import {observer} from "mobx-react-lite";
 import {appConfig} from "../../../initialize-app";
-import React, {MutableRefObject, useEffect, useMemo, useRef} from "react";
+import React, { MutableRefObject, useEffect, useMemo, useRef} from "react";
 import {select} from "d3";
 import {GraphController} from "../models/graph-controller";
 import {DroppableAddAttribute} from "./droppable-add-attribute";
@@ -39,9 +39,12 @@ interface IProps {
   graphController: GraphController
   graphRef: MutableRefObject<HTMLDivElement | null>
   dotsRef: IDotsRef
+  onRequestRowHeight?: (id: string, size: number) => void
 }
 
-export const Graph = observer(function Graph({ graphController, graphRef, dotsRef }: IProps) {
+export const Graph = observer(
+    function Graph({ graphController, graphRef, dotsRef, onRequestRowHeight }: IProps) {
+
   const graphModel = useGraphModelContext(),
     {autoAdjustAxes, enableAnimation} = graphController,
     {plotType} = graphModel,
@@ -52,9 +55,7 @@ export const Graph = observer(function Graph({ graphController, graphRef, dotsRe
     xScale = layout.getAxisScale("bottom"),
     svgRef = useRef<SVGSVGElement>(null),
     plotAreaSVGRef = useRef<SVGSVGElement>(null),
-    backgroundSvgRef = useRef<SVGGElement>(null),
-    xAttrID = graphModel.getAttributeID('x'),
-    yAttrID = graphModel.getAttributeID('y');
+    backgroundSvgRef = useRef<SVGGElement>(null);
 
   useEffect(function setupPlotArea() {
     if (xScale && xScale?.length > 0) {
@@ -67,10 +68,16 @@ export const Graph = observer(function Graph({ graphController, graphRef, dotsRe
     }
   }, [dataset, plotAreaSVGRef, layout, layout.plotHeight, layout.plotWidth, xScale]);
 
-  const handleChangeAttribute = (place: GraphPlace, dataSet: IDataSet, attrId: string) => {
+  const handleChangeAttribute = (place: GraphPlace, dataSet: IDataSet, attrId: string, oldAttrId?: string) => {
     const computedPlace = place === 'plot' && graphModel.config.noAttributesAssigned ? 'bottom' : place;
     const attrRole = graphPlaceToAttrRole[computedPlace];
-    graphModel.setAttributeID(attrRole, dataSet.id, attrId);
+    if (attrRole === 'y' && oldAttrId) {
+      graphModel.config.replaceYAttribute(oldAttrId, attrId);
+      const yAxisModel = graphModel.getAxis('left') as IAxisModel;
+      setNiceDomain(graphModel.config.numericValuesForYAxis, yAxisModel);
+    } else {
+      graphModel.setAttributeID(attrRole, dataSet.id, attrId);
+    }
   };
 
   /**
@@ -81,7 +88,7 @@ export const Graph = observer(function Graph({ graphController, graphRef, dotsRe
     if (place === 'left' && graphModel.config?.yAttributeDescriptions.length > 1) {
       graphModel.config?.removeYAttributeWithID(idOfAttributeToRemove);
       const yAxisModel = graphModel.getAxis('left') as IAxisModel;
-      setNiceDomain(graphModel.config.numericValuesForAttrRole('y'), yAxisModel);
+      setNiceDomain(graphModel.config.numericValuesForYAxis, yAxisModel);
     } else {
       dataset && handleChangeAttribute(place, dataset, '');
     }
@@ -122,7 +129,7 @@ export const Graph = observer(function Graph({ graphController, graphRef, dotsRe
 
   const renderPlotComponent = () => {
     const props = {
-        xAttrID, yAttrID, dotsRef, enableAnimation
+        dotsRef, enableAnimation
       },
       typeToPlotComponentMap = {
         casePlot: <CaseDots {...props}/>,
@@ -213,6 +220,7 @@ export const Graph = observer(function Graph({ graphController, graphRef, dotsRe
             onChangeAttribute={handleChangeAttribute}
             onRemoveAttribute={handleRemoveAttribute}
             onTreatAttributeAs={handleTreatAttrAs}
+            onRequestRowHeight={onRequestRowHeight}
           />
         }
       </div>
