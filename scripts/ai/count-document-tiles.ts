@@ -115,10 +115,10 @@ admin.initializeApp({
 const credentialTime = Date.now();
 
 const targetDir = `dataset${startTime}`;
-// const targetPath = `./${targetDir}`;
-await fs.mkdir(targetDir, error => {
+const targetPath = `../../src/public/ai/${targetDir}`;
+await fs.mkdir(targetPath, error => {
   if (error) {
-    console.log(`Failed to create ${targetDir}`, error);
+    console.log(`Failed to create ${targetPath}`, error);
   }
 });
 for (const key of Object.keys(classKeys)) {
@@ -195,7 +195,7 @@ Object.values(documentInfo).forEach(info => {
   const line = `${fileName}${comma}${tagPart}\n`;
   tagFileContent = `${tagFileContent}${line}`;
 });
-fs.writeFileSync(`${targetDir}/${tagFileName}`, tagFileContent);
+fs.writeFileSync(`${targetPath}/${tagFileName}`, tagFileContent);
 
 const endTime = Date.now();
 console.log(`***** End script *****`);
