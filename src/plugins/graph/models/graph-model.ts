@@ -290,7 +290,7 @@ export const GraphModel = TileContentModel
         const isValidYAttr = !!self.data.attrFromID(yAttrId);
 
         if (!isValidXAttr && !isValidYAttr) {
-          setTimeout(() => {
+          setTimeout(() => { // wait for the attribute to be added to the dataset
             if (!self.data) return;
             self.setAttributeID("x", self.data?.id, self.data.attributes[0].id);
             if (attributeCount > 1) {
