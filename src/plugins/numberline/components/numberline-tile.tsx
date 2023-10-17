@@ -12,7 +12,7 @@ import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { HotKeys } from "../../../utilities/hot-keys";
 import { NumberlineContentModelType, PointObjectModelType,  } from "../models/numberline-content";
 import {
-  kAxisStyle, kAxisWidth, kContainerWidth, kNumberLineContainerHeight, numberlineDomainMax, numberlineDomainMin,
+  kAxisStyle, kAxisWidth, kContainerWidth, kNumberLineContainerHeight,
   tickHeightDefault, tickStyleDefault, tickWidthDefault, tickWidthZero,
   innerPointRadius, outerPointRadius, numberlineYBound, yMidPoint, kTitleHeight, kArrowheadTop,
   kArrowheadOffset, kPointButtonRadius, tickTextTopOffsetDefault, tickTextTopOffsetMinAndMax
@@ -20,7 +20,7 @@ import {
 import { NumberlineToolbar } from "./numberline-toolbar";
 import NumberlineArrowLeft from "../assets/numberline-arrow-left.svg";
 import NumberlineArrowRight from "../assets/numberline-arrow-right.svg";
-import EditableNumberlineValue from './numberline-editable-value';
+import EditableNumberlineValue from './editable-numberline-value';
 
 import "./numberline-tile.scss";
 
@@ -45,13 +45,35 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     }
   };
 
-  const handleMinMaxChange = (minOrMax: string, newValue: number) => {
-    //numbers between 0 and 999 and -999 and 0
-    if (minOrMax === "min" && !isNaN(newValue)) {
-      content.setNewMin(newValue);
-    } else if (minOrMax === "max" && !isNaN(newValue)) {
-      content.setNewMax(newValue);
+  const handleMinMaxChange = (minOrMax: string, newValue: string) => {
+    console.log("📁 numberline-tile.tsx ------------------------");
+    console.log("\t🏭handleMinMaxChange in mode:", minOrMax);
+    console.log("\tmin:", content.min);
+    console.log("\tmax:", content.max);
+
+    // console.log("\t🏭 handleMinMaxChange");
+    // console.log("\t🥩 newValue:", newValue);
+
+    const numValue = parseInt(newValue, 10);
+
+    if (!isNaN(numValue) && (numValue >= -999 && numValue <= 999)) {
+      if (minOrMax === "min") {
+        if (numValue <= content.max) {
+          content.setNewMin(numValue);
+        }
+      } else if (minOrMax === "max") {
+        if (numValue >= content.min) {
+          content.setNewMax(numValue);
+        }
+      }
     }
+
+    // //numbers between 0 and 999 and -999 and 0
+    // if (minOrMax === "min" && !isNaN(newValue)) {
+    //   content.setNewMin(newValue);
+    // } else if (minOrMax === "max" && !isNaN(newValue)) {
+    //   content.setNewMax(newValue);
+    // }
   };
   // Set up key handling
   const hotKeys = useRef(new HotKeys());
@@ -73,10 +95,15 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   const arrowOffset = xShiftNum + kArrowheadOffset;
 
   const xScale = useMemo(() => {
+    console.log("\t🏭 recalculate xScale-------------");
+    console.log("\t🥩 min:", content.min);
+    console.log("\t🥩 max:", content.max);
+
     return scaleLinear()
-      .domain([numberlineDomainMin, numberlineDomainMax])
+      .domain([content.min, content.max])
       .range([0, axisWidth]);
-  }, [axisWidth]);
+  }, [axisWidth, content.min, content.max]);
+
   const axisLeft = useMemo(() => tileWidth * (1 - kAxisWidth) / 2, [tileWidth]);
 
   const pointPosition = useCallback((point: PointObjectModelType) => {
@@ -243,20 +270,54 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   if (axisWidth !== 0) {
     const readOnlyState = readOnly ? "readOnly" : "readWrite";
     const axisClass = `axis-${model.id}-${readOnlyState}`;
-    const numOfTicks = numberlineDomainMax - numberlineDomainMin;
+    // const numOfTicks = numberlineDomainMax - numberlineDomainMin;
+
+    // const tickFormatter = (value: number, index: number) => {
+    //   // Hide the tick text fields for -5 and 5
+    //   if (typeof value === 'number' && (value === content.min || value === content.max)) {
+    //     return '';
+    //   }
+    //   return value.toString();
+    // };
+    const numberOfTicks = 11;
 
     const tickFormatter = (value: number | { valueOf(): number }, index: number) => {
+      console.log("\t🏭 tickFormatter");
+      console.log("\tVALUE:", value);
+      console.log("\tINDEX:", index);
+
+
       // Hide the tick text fields for -5 and 5
       if (typeof value === 'number' && (value === content.min || value === content.max)) {
         return '';
       }
-      return value.toString();
+
+      // new rounded implementation
+      if (typeof value === 'number'){
+        return value.toFixed(1).toString();
+      }
+      else {
+        return value.toString();
+      }
+      // -------end----------------------
+
+      // //old implementation
+      // return value.toString();
+      // //-------end----------------------
+
+
     };
+    const tickValues = Array.from({ length: numberOfTicks }, (_, i) => content.min + (i / (numberOfTicks - 1)) * (content.max - content.min));
+
 
     axis
       .attr("class", `${axisClass} num-line`)
       .attr("style", `${kAxisStyle}`)
-      .call(axisBottom(xScale).tickSizeOuter(0).tickFormat(tickFormatter).ticks(numOfTicks))
+      // .call(axisBottom(xScale).tickFormat(tickFormatter).ticks(11))
+      .call(axisBottom(xScale)
+      .tickValues(tickValues)
+      .tickFormat(tickFormatter))
+
       .selectAll("g.tick line") // Customize tick marks
       .attr("class", (value)=> (value === 0) ? "zero-tick" : "default-tick")
       .attr("y2", tickHeightDefault)
@@ -379,8 +440,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
                 axisWidth={axisWidth}
                 readOnly={readOnly}
                 isTileSelected={isTileSelected}
-                onValueChange={(newValue) => handleMinMaxChange("min",parseFloat(newValue))}
-
+                onValueChange={(newValue) => handleMinMaxChange("min",newValue)}
               />
               <EditableNumberlineValue
                 value= {content.max}
@@ -389,7 +449,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
                 axisWidth={axisWidth}
                 readOnly={readOnly}
                 isTileSelected={isTileSelected}
-                onValueChange={(newValue) => handleMinMaxChange("max", parseFloat(newValue))}
+                onValueChange={(newValue) => handleMinMaxChange("max", newValue)}
 
               />
             </>

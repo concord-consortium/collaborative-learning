@@ -30,7 +30,6 @@ export const EditableNumberlineValue: React.FC<IEditableValueProps> = observer(f
       setIsEditing(true);
       // Check if the input element exists before focusing and selecting
       if (inputRef.current) {
-        console.log("\t🏭 handleClick");
         inputRef.current.select();
       }
     }
@@ -39,24 +38,20 @@ export const EditableNumberlineValue: React.FC<IEditableValueProps> = observer(f
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     const { key } = e;
     switch (key) {
-      case "Escape":
-        handleClose(false);
-        break;
       case "Enter":
         console.log("\t pressed enter!");
         onValueChange((e.target as HTMLInputElement).value);
         e.currentTarget.blur(); // Unselect the text field
         break;
+      case "Escape":
       case "Tab":
-        handleClose(true);
+        handleClose(false);
         break;
     }
   };
 
   const handleClose = (accept: boolean) => {
-    console.log("\t🏭 handleClose");
-    console.log("\t🥩 accept:", accept);
-    setIsEditing(false);
+    setIsEditing(accept);
   };
 
   const borderBoxOffset = `${offset + 4}px`;
@@ -78,7 +73,10 @@ export const EditableNumberlineValue: React.FC<IEditableValueProps> = observer(f
           }}
           onKeyDown={(e) => handleKeyDown(e)}
           defaultValue={value.toString()} // Set the initial value
-          onBlur={() => handleClose(true)}
+          onBlur={(e) => {
+            onValueChange((e.target as HTMLInputElement).value);
+            handleClose(true);
+          }}
           onChange={(e) => {
             // Set the width of the input based on the length of the input value
             if (inputRef.current) {
