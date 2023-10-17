@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 
-import { registerTileToolbarButtons, registerTileToolbarConfig } from "../../toolbar/toolbar-button-manager";
+import { registerTileToolbarButtons } from "../../toolbar/toolbar-button-manager";
 import { MergeInButton } from "../../toolbar/merge-in-button";
 import { useConsumerTileLinking } from "../../../hooks/use-consumer-tile-linking";
 import { getTileDataSet } from "../../../models/shared/shared-data-utils";
@@ -14,24 +14,6 @@ import SetExpressionIconSvg from "../../../clue/assets/icons/table/set-expressio
 import ViewDataAsGraphIcon from "../../../assets/icons/view-data-as-graph-icon.svg";
 import LinkGraphIcon from "../../../clue/assets/icons/table/link-graph-icon.svg";
 import { DataSetViewButton } from "../../toolbar/data-set-view-button";
-
-
-// const parameterButtons: Record<string, React.ComponentType<IParameterButtonProps> | undefined> = {
-//   "data-set-view": DataSetViewButton,
-// };
-
-// const getToolbarButton = (toolName: IButtonSetting) => {
-//   if (typeof toolName === "string") {
-//     const Button = simpleButtons[toolName];
-//     return Button && <Button key={toolName} />;
-//   } else {
-//     // If `toolName` is an array, the first item is the tool name.
-//     // The remaining items are parameters to the pass to the tool
-//     const realToolName = toolName[0];
-//     const Button = parameterButtons[realToolName];
-//     return Button && <Button key={toolName.join("_")} args={toolName} />;
-//   }
-// };
 
 const DeleteSelectedButton = () => {
   const toolbarContext = useContext(TableToolbarContext);
@@ -100,7 +82,6 @@ export const LinkGraphButton = () => {
   const handleClick = (e: React.MouseEvent) => {
     showLinkTileDialog && showLinkTileDialog();
     e.stopPropagation();
-    console.log("clicked linkGraphButton");
   };
 
   return (
@@ -147,11 +128,9 @@ registerTileToolbarButtons("table",
     component: TableMergeInButton
   },
   {
+    // This button takes an argument saying what kind of tile it should create.
     name: "data-set-view",
-    title: "Create a {1}",
+    title: "Create a linked {1} tile",
     component: DataSetViewButton
   }
 ]);
-
-registerTileToolbarConfig("table", ["set-expression", "link-tile", "link-graph", "merge-in", "dsdcv", "delete"]);
-// ["data-set-view", "DataCard"];

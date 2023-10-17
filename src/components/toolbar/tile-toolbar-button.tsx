@@ -7,11 +7,11 @@ export interface TileToolbarButtonProps {
   disabled?: boolean; // makes button grey and unclickable if defined and true
 }
 
+/**
+ * A generic, simple button that can go on a tile toolbar.
+ */
 export const TileToolbarButton =
   function({onClick, selected, disabled, children}: PropsWithChildren<TileToolbarButtonProps>) {
-    /**
-     * A generic, simple button that can go on a tile toolbar.
-     */
 
     return (
         <button

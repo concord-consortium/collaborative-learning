@@ -245,6 +245,17 @@
       },
       "simulator": {
         "defaultSimulation": "EMG_and_claw"
+      },
+      "table": {
+        "numFormat": ".2~f",
+        "tools": [
+          "set-expression",
+          "link-tile",
+          "link-graph",
+          "merge-in",
+          ["data-set-view", "DataCard"],
+          "delete"
+        ]
       }
     }
   },

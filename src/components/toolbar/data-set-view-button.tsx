@@ -3,9 +3,9 @@ import { getTileComponentInfo } from "../../models/tiles/tile-component-info";
 import { SharedDataSet } from "../../models/shared/shared-data-set";
 import { AddTilesContext, TileModelContext } from "../tiles/tile-api";
 import { TileToolbarButton } from "./tile-toolbar-button";
+import { BadgedIcon } from "./badged-icon";
 
-
-// import "./data-set-view-button.scss";
+import ViewBadgeIcon from "../../assets/icons/view/view-badge.svg";
 
 interface IProps {
   args?: string[];
@@ -39,12 +39,11 @@ export function DataSetViewButton({args}: IProps) {
   const newTileInfo = getTileComponentInfo(newTileType);
   const Icon = newTileInfo?.Icon;
 
-  // title={`Create a linked ${newTileType} tile`}>
   return (
     <TileToolbarButton
         onClick={handleClick}
     >
-      {Icon ? <Icon/> : "??"}
+      {Icon ? <BadgedIcon Icon={Icon} Badge={ViewBadgeIcon}/> : "??"}
     </TileToolbarButton>
   );
 }
