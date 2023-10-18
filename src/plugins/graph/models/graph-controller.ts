@@ -102,7 +102,6 @@ export class GraphController {
   }
 
   handleAttributeAssignment(graphPlace: GraphPlace, dataSetID: string, attrID: string) {
-    console.log("| handleAttributeAssignment", graphPlace, attrID);
     const {graphModel, layout} = this,
       dataset = getDataSetFromId(graphModel, dataSetID),
       dataConfig = graphModel?.config,
@@ -154,7 +153,7 @@ export class GraphController {
         currAxisModel = graphModel.getAxis(place),
         currentType = currAxisModel?.type ?? 'empty',
         [min, max] = kDefaultNumericAxisBounds;
-        console.log("| setupAxis", place,  attrType);
+
         switch (attrType) {
         case 'numeric': {
           if (!currAxisModel || !isNumericAxisModel(currAxisModel)) {
