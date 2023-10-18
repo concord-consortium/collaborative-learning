@@ -583,7 +583,6 @@ export const DataConfigurationModel = types
       self.setPointsNeedUpdating(true);
     },
     setDataset(dataset: IDataSet | undefined, metadata: ISharedCaseMetadata | undefined) {
-      console.log("| dataConfigurationModel.setDataset", metadata);
       self.actionHandlerDisposer?.();
       self.actionHandlerDisposer = undefined;
       self.dataset = dataset;
