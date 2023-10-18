@@ -351,17 +351,13 @@ export const GraphModel = TileContentModel
       }
     },
     afterAttachToDocument() {
-      console.log("GraphModel.afterAttachToDocument...");
       addDisposer(self, reaction(
-        () => {
-          return self.data;
-        },
+        () => self.data,
         data => {
-          if (!self.metadata && data){
-            console.log("GraphModel.afterAttachToDocument: creating caseMetadata");
+          const sharedModelManager = getSharedModelManager(self);
+          if (!self.metadata && data) {
             const caseMetadata = SharedCaseMetadata.create();
             caseMetadata.setData(data);
-            const sharedModelManager = getSharedModelManager(self);
             sharedModelManager?.addTileSharedModel(self, caseMetadata);
           }
           // CHECKME: this will only work correctly if setDataset doesn't
@@ -384,7 +380,7 @@ export const GraphModel = TileContentModel
           if (self.data) {
             self.configureLinkedGraph();
           }
-          else {
+          else if (sharedModelManager?.isReady) {
             self.configureUnlinkedGraph();
           }
         }, { fireImmediately: true }
