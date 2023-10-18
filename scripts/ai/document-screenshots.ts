@@ -20,7 +20,10 @@ const documentDirectory = "dataset1697150265495";
 // const documentDirectory = "dataset1";
 
 // Make falsy to include all documents
-const documentLimit = 30;
+const documentLimit = 1000;
+
+// Number of files to process in parallel
+const fileBatchSize = 8;
 
 const publicRoot = "ai";
 const rootPath = `../../src/public/${publicRoot}`;
@@ -28,11 +31,11 @@ const documentPath = `${rootPath}/${documentDirectory}`;
 const publicPath = `${publicRoot}/${documentDirectory}`;
 const tagFileName = "tags.csv";
 
-const DEFAULT_WIDTH = 1920;
+const DEFAULT_WIDTH = 1920 / 2;
 
 const startTime = Date.now();
+let checkedFiles = 0;
 let totalSnapshots = 0;
-let totalSnapshotTime = 0;
 const targetDir = `screenshotDataset${startTime}`;
 const targetPath = `${rootPath}/${targetDir}`;
 
@@ -54,7 +57,7 @@ function newFileName(oldFileName: string) {
 // then saves it in the output directory as fileName
 const urlRoot = `http://localhost:8080/doc-editor.html?appMode=dev&unit=example&document=`;
 async function makeSnapshot(path: string, fileName: string) {
-  const snapshotStartTime = Date.now();
+  console.log(`*   Processing snapshot`, path);
   const targetFile = `${targetPath}/${fileName}`;
 
   // View the document in the document editor
@@ -62,7 +65,7 @@ async function makeSnapshot(path: string, fileName: string) {
   const page = await browser.newPage();
   const url = `${urlRoot}${path}`;
   await page.goto(url, {
-    timeout: 30000, // 30 seconds
+    timeout: 60000, // 30 seconds
     waitUntil: 'networkidle0'
   });
 
@@ -81,39 +84,57 @@ async function makeSnapshot(path: string, fileName: string) {
   await browser.close();
   fs.writeFileSync(targetFile, buffer);
 
-  const snapshotEndTime = Date.now();
-  const snapshotDuration = snapshotEndTime - snapshotStartTime;
   totalSnapshots++;
-  totalSnapshotTime += snapshotDuration;
-  console.log(`*** Snapshot ${totalSnapshots} finished in`, prettyDuration(snapshotDuration));
-  console.log(`*   All snapshot time`, prettyDuration(totalSnapshotTime));
+}
+
+// Porcesses a file, usually making a screenshot but updating tags.csv when that file is encountered
+async function processFile(file: string) {
+  const path = `${documentPath}/${file}`;
+  if (file.startsWith("document")) {
+    // For files named like documentXXX.txt, make a snapshot and save it
+    const docEditorPath = `${publicPath}/${file}`;
+    const screenshotFileName = newFileName(file);
+    await makeSnapshot(docEditorPath, screenshotFileName);
+  } else if (file === tagFileName) {
+    // For the tag.csv file, duplicate the file, modifying the directory and file names
+    // Based on top answer at https://stackoverflow.com/questions/6156501/read-a-file-one-line-at-a-time-in-node-js
+    const fileStream = fs.createReadStream(path);
+    const rl = readline.createInterface({
+      input: fileStream,
+      crlfDelay: Infinity
+    });
+    let tagFileContent = "";
+    for await (const line of rl) {
+      tagFileContent = tagFileContent + newFileName(line).replace(documentDirectory, targetDir) + "\n";
+    }
+    fs.writeFileSync(`${targetPath}/${tagFileName}`, tagFileContent);
+  }
+}
+
+let fileBatch: string[] = [];
+// Process a batch of files
+async function processBatch() {
+  await Promise.all(fileBatch.map(async f => processFile(f)));
+  fileBatch = [];
+
+  const currentDuration = Date.now() - startTime;
+  console.log(`*** Time to process ${totalSnapshots} snapshots`, prettyDuration(currentDuration));
 }
 
 // Process every file in the source directory
-fs.readdir(documentPath, async (error, files) => {
-  // It would probably be better to run this in parallel, but I was having trouble with that so just made it sequential
+fs.readdir(documentPath, async (_error, files) => {
   for (const file of files) {
-    if (documentLimit && totalSnapshots >= documentLimit) break;
+    if (documentLimit && checkedFiles >= documentLimit) break;
 
-    const path = `${documentPath}/${file}`;
-    if (file.startsWith("document")) {
-      // For documents named like documentXXX.txt, make a snapshot and save it
-      const docEditorPath = `${publicPath}/${file}`;
-      const screenshotFileName = newFileName(file);
-      await makeSnapshot(docEditorPath, screenshotFileName);
-    } else if (file === tagFileName) {
-      // For the tag.csv file, duplicate the file, modifying the directory and file names
-      // Based on top answer at https://stackoverflow.com/questions/6156501/read-a-file-one-line-at-a-time-in-node-js
-      const fileStream = fs.createReadStream(path);
-      const rl = readline.createInterface({
-        input: fileStream,
-        crlfDelay: Infinity
-      });
-      let tagFileContent = "";
-      for await (const line of rl) {
-        tagFileContent = tagFileContent + newFileName(line).replace(documentDirectory, targetDir) + "\n";
+    checkedFiles++;
+    fileBatch.push(file);
+    // We process a batch when:
+    // - We have enough files
+    // - We've made it all the way through all of the files
+    // - We've hit our limit
+    if (fileBatch.length >= fileBatchSize || checkedFiles >= files.length
+      || (documentLimit && checkedFiles >= documentLimit)) {
+        await processBatch();
       }
-      fs.writeFileSync(`${targetPath}/${tagFileName}`, tagFileContent);
-    }
   }
 });
