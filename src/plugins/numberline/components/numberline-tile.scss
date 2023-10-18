@@ -87,6 +87,15 @@
       align-items: center;
       justify-content: center;
       margin-top: 8px;
+      border: 1.5px solid #949494;
+      background-color: #f0f9fb;
+
+      &.hide{
+        border: none;
+        background-color: white;
+      }
+
+
 
       .input-textbox{
         position: absolute;

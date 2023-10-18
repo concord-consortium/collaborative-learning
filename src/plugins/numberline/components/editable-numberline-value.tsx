@@ -1,5 +1,6 @@
 import { observer } from 'mobx-react';
 import React, { useState, useRef, useEffect } from 'react';
+import classNames from 'classnames';
 
 import "./numberline-tile.scss";
 
@@ -20,6 +21,7 @@ export const EditableNumberlineValue: React.FC<IEditableValueProps> = observer(f
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
+      console.log("inside useEffect");
       inputRef.current.select();
     }
   }, [isEditing]);
@@ -27,10 +29,6 @@ export const EditableNumberlineValue: React.FC<IEditableValueProps> = observer(f
   const handleClick = () => {
     if (!readOnly && !isEditing) {
       setIsEditing(true);
-      // Check if the input element exists before focusing and selecting
-      if (inputRef.current) {
-        inputRef.current.select();
-      }
     }
   };
 
@@ -61,17 +59,21 @@ export const EditableNumberlineValue: React.FC<IEditableValueProps> = observer(f
   };
 
   //----------------------- Determine Styling for Border Box -----------------------
-
   const borderBoxOffset = `${offset + 4}px`;
+  const borderBoxPositionProperty = (minOrMax === "min") ? { left: borderBoxOffset } : { right: borderBoxOffset };
+  const borderBoxStyle = { ...borderBoxPositionProperty };
+
   const hideBorderAndResetBackground = !isTileSelected;
-  const borderBoxPositionProperty = minOrMax === "min" ? { left: borderBoxOffset } : { right: borderBoxOffset };
-  const borderBoxBorderProperty = hideBorderAndResetBackground ? { border: "none" } : { border: "1.5px solid #949494" };
-  const borderBoxBackgroundProperty = hideBorderAndResetBackground ? { backgroundColor: "white" }
-                                                                   : { backgroundColor: "#f0f9fb" };
-  const borderBoxStyle = { ...borderBoxPositionProperty, ...borderBoxBorderProperty, ...borderBoxBackgroundProperty };
+  const borderClasses = classNames(
+    "border-box", {hide: !isTileSelected}, {show: hideBorderAndResetBackground}
+  );
+  // const borderBoxBorderProperty = hideBorderAndResetBackground ? { border: "none" } :
+  // { border: "1.5px solid #949494" };
+  // const borderBoxBackgroundProperty = hideBorderAndResetBackground ? { backgroundColor: "white" }
+  //                                                                  : { backgroundColor: "#f0f9fb" };
 
   return (
-    <div className="border-box" style={borderBoxStyle} onClick={handleClick}>
+    <div className={borderClasses} style={borderBoxStyle} onClick={handleClick}>
       {isEditing ? (
         <input
           className="input-textbox"
