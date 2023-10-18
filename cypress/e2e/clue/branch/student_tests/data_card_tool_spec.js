@@ -106,19 +106,19 @@ context('Data Card Tool Tile', function () {
     it("can create a graph from the data", () => {
       dc.getLinkGraphButton().should('not.be.disabled').click();
       dc.getLinkGraphModalCreateNewButton().click();
-      xyplot.getTile().should("exist").contains("X-Y Plot 1");
-      xyplot.getXYPlotTitle().should("contain", "X-Y Plot 1");
+      xyplot.getTile().should("exist").contains("Data Card Collection 1");
+      xyplot.getXYPlotTitle().should("contain", "Data Card Collection 1");
       xyplot.getXAxisLabel().should("contain", "habitat");
     });
     it("can link and unlink data from a graph", () => {
       // Unlink
       dc.getLinkGraphButton().should('not.be.disabled').click();
-      dc.getLinkGraphModalTileMenu().select('X-Y Plot 1');
+      dc.getLinkGraphModalTileMenu().select('Data Card Collection 1');
       dc.getLinkGraphModalLinkButton().should("contain", "Unlink").click();
       xyplot.getXAxisLabel().should("not.contain", "habitat");
       // Re-link
       dc.getLinkGraphButton().should('not.be.disabled').click();
-      dc.getLinkGraphModalTileMenu().select('X-Y Plot 1');
+      dc.getLinkGraphModalTileMenu().select('Data Card Collection 1');
       dc.getLinkGraphModalLinkButton().should("contain", "Link").click();
       xyplot.getXAxisLabel().should("contain", "habitat");
     });

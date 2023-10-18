@@ -86,7 +86,11 @@ export const GraphModel = TileContentModel
       return getTileCaseMetadata(self);
     },
     pointColorAtIndex(plotIndex = 0) {
-      return self._pointColors[plotIndex] ?? kellyColors[plotIndex % kellyColors.length];
+      if (plotIndex < self._pointColors.length) {
+        return self._pointColors[plotIndex];
+      } else {
+        return kellyColors[plotIndex % kellyColors.length];
+      }
     },
     get pointColor() {
       return this.pointColorAtIndex(0);

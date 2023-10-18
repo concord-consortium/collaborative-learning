@@ -1,8 +1,8 @@
 import stringify from "json-stringify-pretty-compact";
 import { getSnapshot, Instance, SnapshotIn } from "mobx-state-tree";
 import { cloneDeep, each } from "lodash";
-
-import { IDragTilesData, NewRowTileArray, PartialSharedModelEntry, PartialTile } from "./document-content-types";
+import { IDragTilesData, NewRowTileArray, PartialSharedModelEntry, PartialTile,
+         IDocumentContentAddTileOptions } from "./document-content-types";
 import { DocumentContentModelWithTileDragging } from "./drag-tiles";
 import { IDropRowInfo, TileRowModelType, TileRowSnapshotOutType } from "./tile-row";
 import {
@@ -387,21 +387,21 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       (t: IDropTileItem[], rowInfo: IDropRowInfo) => self.copyTilesIntoNewRows(t, rowInfo.rowInsertIndex)
     );
   },
-  addTileAfter(tileType: string, target: ITileModel, sharedModels?: SharedModelType[]) {
-    // 
+  addTileAfter(tileType: string, target: ITileModel, sharedModels?: SharedModelType[],
+    options?: IDocumentContentAddTileOptions) {
     const targetRowId = self.findRowContainingTile(target.id);
     if (!targetRowId) {
       console.warn("Can't find row to add tile after");
       return;
     }
     const rowInsertIndex = self.getRowIndex(targetRowId) + 1;
-
+    const newOptions = {...options, insertRowInfo:{rowInsertIndex}};
     // This addTile function happens to add the tile content to a tile model before
     // adding it to the document. This ordering is one part of a complex series
     // that means the reaction in tile content's afterAttach will be delayed until
     // after this action is complete. See the comment in IAddTilesContext for a
     // little more info
-    const newRowTile = self.addTile(tileType, {insertRowInfo: {rowInsertIndex}});
+    const newRowTile = self.addTile(tileType, newOptions);
     const newTileId = newRowTile?.tileId;
     if (!newTileId) {
       console.warn("New tile couldn't be added");

@@ -14,10 +14,12 @@ export function useInitGraphLayout(model?: IGraphModel) {
     return reaction(
       () => {
         const repetitions: Partial<Record<AxisPlace, number>> = {};
-        model && isAlive(model) && layout.axisScales.forEach((multiScale, place) => {
+        if (model && isAlive(model)) {
           const { config } = model;
-          repetitions[place] = config.numRepetitionsForPlace(place) ?? 1;
-        });
+          layout.axisScales.forEach((multiScale, place) => {
+            repetitions[place] = config.numRepetitionsForPlace(place) ?? 1;
+          });
+        }
         return repetitions;
       },
       (repetitions) => {

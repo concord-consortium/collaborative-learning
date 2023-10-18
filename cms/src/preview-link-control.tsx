@@ -1,11 +1,12 @@
 import React from "react";
 import { CmsWidgetControlProps } from "netlify-cms-core";
 
-import { defaultCurriculumBranch } from "./cms-constants";
-import { urlParams } from "../../src/utilities/url-params";
-import { getGuideJson, getUnitJson } from "../../src/models/curriculum/unit";
 import { appConfig } from "../../src/initialize-app";
+import { getGuideJson, getUnitJson } from "../../src/models/curriculum/unit";
 import { DocumentModelType } from "../../src/models/document/document";
+import { stripPTNumberFromBranch } from "../../src/utilities/branch-utils";
+import { urlParams } from "../../src/utilities/url-params";
+import { defaultCurriculumBranch } from "./cms-constants";
 
 import "./custom-control.scss";
 import "./preview-link-control.scss";
@@ -28,7 +29,7 @@ export class PreviewLinkControl extends React.Component<CmsWidgetControlProps, I
   isTeacherGuide?: boolean;
   pathParts?: string[];
   unit?: string;
-  
+
   constructor(props: CmsWidgetControlProps) {
     super(props);
 
@@ -63,7 +64,7 @@ export class PreviewLinkControl extends React.Component<CmsWidgetControlProps, I
   // Finishes setting up the preview link after loading the unit's json so we can determine the problem parameter.
   setPreviewLink(unitJson: any) {
     // Determine the unit parameter
-    const curriculumBranch = urlParams.curriculumBranch ?? defaultCurriculumBranch;
+    const curriculumBranch = stripPTNumberFromBranch(urlParams.curriculumBranch ?? defaultCurriculumBranch);
     const previewUnit = `https://models-resources.concord.org/clue-curriculum/branch/${curriculumBranch}/${this.unit}/content.json`;
 
     // Determine the problem parameter
@@ -71,15 +72,21 @@ export class PreviewLinkControl extends React.Component<CmsWidgetControlProps, I
     // curriculum/[unit]/teacher-guide?/investigation-[ordinal]/problem-[ordinal]/[sectionType]/content.json
     const sectionPath = this.pathParts?.slice(-4).join("/");
     let problemParam = "";
-    unitJson.investigations.forEach((investigation: any) => {
-      investigation.problems.forEach((problem: any) => {
-        problem.sections.forEach((section: any) => {
-          if (section.sectionPath === sectionPath) {
-            problemParam = `${investigation.ordinal}.${problem.ordinal}`;
-          }
-        });
+    if (unitJson.investigations) {
+      unitJson.investigations.forEach((investigation: any) => {
+        if (investigation.problems) {
+          investigation.problems.forEach((problem: any) => {
+            if (problem.sections) {
+              problem.sections.forEach((section: any) => {
+                if (section.sectionPath === sectionPath) {
+                  problemParam = `${investigation.ordinal}.${problem.ordinal}`;
+                }
+              });
+            }
+          });
+        }
       });
-    });
+    }
     if (!problemParam) {
       problemParam = "1.1";
       this.setState({ warning: `Could not determine problem parameter. Using default ${problemParam}.`});

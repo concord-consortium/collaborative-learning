@@ -1,4 +1,5 @@
 import { types, Instance, SnapshotIn, getSnapshot } from "mobx-state-tree";
+import { stripPTNumberFromBranch } from "../../utilities/branch-utils";
 import { urlParams } from "../../utilities/url-params";
 import { getUrlFromRelativeOrFullString } from "../../utilities/url-utils";
 import { SectionModelType } from "../curriculum/section";
@@ -51,7 +52,7 @@ export const AppConfigModel = types
         return unitParamUrl.href;
       }
       const unitCode = self.unitCodeMap.get(unitParam) || unitParam;
-      const branchName = urlParams.curriculumBranch ?? "main";
+      const branchName = stripPTNumberFromBranch(urlParams.curriculumBranch ?? "main");
       return `${self.curriculumBaseUrl}/branch/${branchName}/${unitCode}/content.json`;
     }
   }))
@@ -109,6 +110,11 @@ export const AppConfigModel = types
         ...self.authorTools.map(button => ToolbarButtonModel.create(getSnapshot(button)))
       ]);
     },
+    /**
+     * Gets the configuration, if any, for the given item.
+     * For example, to look up what buttons (aka tools) should be on the table tile's toolbar,
+     * the key would be "tools" and group would be "table".
+     */
     getSetting(key: string, group?: string) {
       const groupSettings = group ? self.settings?.[group] as SnapshotIn<typeof SettingsGroupMstType> : undefined;
       return groupSettings?.[key] || self.settings?.[key];
