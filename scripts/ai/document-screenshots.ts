@@ -20,7 +20,7 @@ const documentDirectory = "dataset1697150265495";
 // const documentDirectory = "dataset1";
 
 // Make falsy to include all documents
-const documentLimit = 1000;
+const documentLimit = false;
 
 // Number of files to process in parallel
 const fileBatchSize = 8;
@@ -38,6 +38,8 @@ let checkedFiles = 0;
 let totalSnapshots = 0;
 const targetDir = `screenshotDataset${startTime}`;
 const targetPath = `${rootPath}/${targetDir}`;
+
+const failedFiles: string[] = [];
 
 console.log(`***** Starting document screenshots *****`);
 
@@ -64,10 +66,16 @@ async function makeSnapshot(path: string, fileName: string) {
   const browser = await puppeteer.launch({ headless: "new" });
   const page = await browser.newPage();
   const url = `${urlRoot}${path}`;
-  await page.goto(url, {
-    timeout: 60000, // 30 seconds
-    waitUntil: 'networkidle0'
-  });
+  try {
+    await page.goto(url, {
+      timeout: 60000, // 30 seconds
+      waitUntil: 'networkidle0'
+    });
+  } catch (error) {
+    console.log(`!!!!! Failed to load file ${url}`, error);
+    failedFiles.push(path);
+    return;
+  }
 
   // Approximate the height of the document by adding up the heights of the rows and make the viewport that tall
   let pageHeight = 30;
@@ -128,13 +136,21 @@ fs.readdir(documentPath, async (_error, files) => {
 
     checkedFiles++;
     fileBatch.push(file);
-    // We process a batch when:
-    // - We have enough files
-    // - We've made it all the way through all of the files
-    // - We've hit our limit
-    if (fileBatch.length >= fileBatchSize || checkedFiles >= files.length
-      || (documentLimit && checkedFiles >= documentLimit)) {
-        await processBatch();
+
+    // We're finished if we've made it through all of the files or we've hit our limit
+    const finished = checkedFiles >= files.length || (documentLimit && checkedFiles >= documentLimit);
+    if (fileBatch.length >= fileBatchSize || finished) {
+      await processBatch();
+
+      if (finished) {
+        const endTime = Date.now();
+        const finalDuration = endTime - startTime;
+        console.log(`***** Finished in ${prettyDuration(finalDuration)}`);
+        if (failedFiles.length > 0) {
+          console.log(`Failed to get snapshots for the following files:`);
+          console.log(failedFiles);
+        }
       }
+    }
   }
 });
