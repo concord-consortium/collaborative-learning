@@ -659,7 +659,7 @@ export const DataConfigurationModel = types
        * the old position to prevent duplication.
        */
       if (self._yAttributeDescriptions.find(d=>d.attributeID===oldAttrId)) {
-        this.removeYAttributeWithID(newAttrId);
+        this.removeYAttribute(newAttrId);
         const index = self._yAttributeDescriptions.findIndex(d=>d.attributeID===oldAttrId);
         self._yAttributeDescriptions[index].attributeID = newAttrId;
         if (index === 0 && self._yAttributeDescriptions.length === 1) {
@@ -682,7 +682,7 @@ export const DataConfigurationModel = types
         existingFilteredCases?.invalidateCases();
       }
     },
-    removeYAttributeWithID(id: string) {
+    removeYAttribute(id: string) {
       const index = self._yAttributeDescriptions.findIndex((aDesc) => aDesc.attributeID === id);
       if (index >= 0) {
         self._yAttributeDescriptions.splice(index, 1);

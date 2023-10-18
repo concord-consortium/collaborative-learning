@@ -21,7 +21,10 @@ import {setNiceDomain, startAnimation} from "../utilities/graph-utils";
 import {IAxisModel} from "../imports/components/axis/models/axis-model";
 import {GraphPlace} from "../imports/components/axis-graph-shared";
 import {useGraphLayoutContext} from "../models/graph-layout";
-import {isSetAttributeIDAction, useGraphModelContext} from "../models/graph-model";
+import {
+  isAttributeAssignmentAction, isRemoveYAttributeAction, isReplaceYAttributeAction, isSetAttributeIDAction,
+  useGraphModelContext
+} from "../models/graph-model";
 import {useInstanceIdContext} from "../imports/hooks/use-instance-id-context";
 import {MarqueeState} from "../models/marquee-state";
 import {Legend} from "./legend/legend";
@@ -72,7 +75,7 @@ export const Graph = observer(
     const computedPlace = place === 'plot' && graphModel.config.noAttributesAssigned ? 'bottom' : place;
     const attrRole = graphPlaceToAttrRole[computedPlace];
     if (attrRole === 'y' && oldAttrId) {
-      graphModel.config.replaceYAttribute(oldAttrId, attrId);
+      graphModel.replaceYAttributeID(oldAttrId, attrId);
       const yAxisModel = graphModel.getAxis('left') as IAxisModel;
       setNiceDomain(graphModel.config.numericValuesForYAxis, yAxisModel);
     } else {
@@ -86,7 +89,7 @@ export const Graph = observer(
    */
   const handleRemoveAttribute = (place: GraphPlace, idOfAttributeToRemove: string) => {
     if (place === 'left' && graphModel.config?.yAttributeDescriptions.length > 1) {
-      graphModel.config?.removeYAttributeWithID(idOfAttributeToRemove);
+      graphModel.removeYAttributeID(idOfAttributeToRemove);
       const yAxisModel = graphModel.getAxis('left') as IAxisModel;
       setNiceDomain(graphModel.config.numericValuesForYAxis, yAxisModel);
     } else {
@@ -97,11 +100,26 @@ export const Graph = observer(
   // respond to assignment of new attribute ID
   useEffect(function handleNewAttributeID() {
     const disposer = graphModel && onAnyAction(graphModel, action => {
-      if (isSetAttributeIDAction(action)) {
-        const [role, dataSetId, attrID] = action.args,
-          graphPlace = attrRoleToGraphPlace[role];
+      if (isAttributeAssignmentAction(action)) {
+        let graphPlace: GraphPlace = "yPlus";
+        let dataSetId = dataset?.id ?? "";
+        let attrId = "";
+        if (isSetAttributeIDAction(action)) {
+          const [role, _dataSetId, _attrId] = action.args;
+          graphPlace = attrRoleToGraphPlace[role] as GraphPlace;
+          dataSetId = _dataSetId;
+          attrId = _attrId;
+        }
+        else if (isRemoveYAttributeAction(action)) {
+          graphPlace = "yPlus";
+        }
+        else if (isReplaceYAttributeAction(action)) {
+          const [ , newAttrId] = action.args;
+          graphPlace = "yPlus";
+          attrId = newAttrId;
+        }
         startAnimation(enableAnimation);
-        graphPlace && graphController?.handleAttributeAssignment(graphPlace, dataSetId, attrID);
+        graphPlace && graphController?.handleAttributeAssignment(graphPlace, dataSetId, attrId);
       }
     });
     return () => disposer?.();
