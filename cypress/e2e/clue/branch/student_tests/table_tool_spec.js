@@ -277,14 +277,14 @@ context('Table Tool Tile Undo Redo', function () {
 
 });
 
-context('Table Tile View Graph As Data Button', function() {
+context('Table Tile View Data As Graph Button', function() {
   before(function () {
     cy.clearQAData('all');
     cy.visit(queryParams);
     cy.waitForLoad();
     cy.showOnlyDocumentWorkspace();
   });
-  describe('Test View Graph as Data Button', function() {
+  describe('Test View Data as Graph Button', function() {
     it('will link to an XY Plot using the "View Data as Graph" button', function () {
       clueCanvas.addTile('table');
       tableToolTile.typeInTableCell(1, '5');
@@ -300,7 +300,7 @@ context('Table Tile View Graph As Data Button', function() {
       tableToolTile.getTableToolbarButton("link-tile-button").click();
       tableToolTile.getLinkGraphModalTileMenu().select('Table 1');
       tableToolTile.getLinkGraphModalLinkButton().should("contain", "Unlink").click();
-      // // Re-link
+      // Re-link
       tableToolTile.getTableToolbarButton("link-tile-button").click();
       tableToolTile.getLinkGraphModalTileMenu().select('Table 1');
       tableToolTile.getLinkGraphModalLinkButton().should("contain", "Link").click();
