@@ -126,5 +126,43 @@ class ChatPanel{
       // resourcesPanel.getCollapsedResourcesTab().click();
       this.getChatPanelToggle().click();
     }
+
+    getCommentTextDropDown() {
+      return cy.get('[data-test=comment-textbox-dropdown]');
+    }
+    getCommentTagFromThread() {
+      return cy.get('[data-testid=comment-thread] .comment-dropdown-tag');
+    }
+    addCommentTagAndVerify(commentTag) {
+      this.getCommentTextDropDown().select(commentTag);
+      this.clickPostCommentButton();
+      this.getCommentTagFromThread().should('contain', commentTag);
+    }
+    getCommentTagThread(tag) {
+      return this.getCommentTagFromThread().contains(tag).parent();
+    }
+    getCommentTagDeleteMessageButton(tagToDelete) {
+      return this.getCommentTagThread(tagToDelete).find("[data-testid=delete-message-button]");
+    }
+    verifyCommentTagThreadLength(length) {
+      this.getCommentTagFromThread().should("have.length", length);
+    }
+    verifyCommentTagNotDisplayed(message) {
+      this.getCommentThread(message).find(".comment-dropdown-tag").should("not.exist");
+    }
+    deleteCommentTagThread(tagToDelete) {
+      this.getCommentTagDeleteMessageButton(tagToDelete).click();
+      this.getDeleteConfirmModalButton().contains("Delete").click();
+      cy.wait(2000);
+      this.getCommentTagFromThread().should("not.exist");
+    }
+    addCommentTagTextAndVerify(commentTag, commentText) {
+      this.getCommentTextDropDown().select(commentTag);
+      this.typeInCommentArea(commentText);
+      this.getCommentTextArea().should('contain', commentText);
+      this.clickPostCommentButton();
+      this.getCommentTagFromThread().should('contain', commentTag);
+      this.getCommentFromThread().should('contain', commentText);
+    }
 }
 export default ChatPanel;
