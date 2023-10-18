@@ -75,7 +75,7 @@ export const Graph = observer(
     const computedPlace = place === 'plot' && graphModel.config.noAttributesAssigned ? 'bottom' : place;
     const attrRole = graphPlaceToAttrRole[computedPlace];
     if (attrRole === 'y' && oldAttrId) {
-      graphModel.replaceYAttribute(oldAttrId, attrId);
+      graphModel.replaceYAttributeID(oldAttrId, attrId);
       const yAxisModel = graphModel.getAxis('left') as IAxisModel;
       setNiceDomain(graphModel.config.numericValuesForYAxis, yAxisModel);
     } else {

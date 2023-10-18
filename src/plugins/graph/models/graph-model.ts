@@ -231,7 +231,7 @@ export const GraphModel = TileContentModel
     removeYAttributeID(attrID: string) {
       self.config.removeYAttribute(attrID);
     },
-    replaceYAttribute(oldAttrId: string, newAttrId: string) {
+    replaceYAttributeID(oldAttrId: string, newAttrId: string) {
       self.config.replaceYAttribute(oldAttrId, newAttrId);
     },
     setPlotType(type: PlotType) {
@@ -432,16 +432,16 @@ export function isRemoveYAttributeAction(action: ISerializedActionCall): action 
 }
 
 export interface ReplaceYAttributeAction extends ISerializedActionCall {
-  name: "replaceYAttribute",
+  name: "replaceYAttributeID",
   args: [string, string]
 }
 export function isReplaceYAttributeAction(action: ISerializedActionCall): action is ReplaceYAttributeAction {
-  return action.name === "replaceYAttribute";
+  return action.name === "replaceYAttributeID";
 }
 
 export type AttributeAssignmentAction = SetAttributeIDAction | RemoveYAttributeAction | ReplaceYAttributeAction;
 export function isAttributeAssignmentAction(action: ISerializedActionCall): action is AttributeAssignmentAction {
-  return ["setAttributeID", "removeYAttributeID", "replaceYAttribute"].includes(action.name);
+  return ["setAttributeID", "removeYAttributeID", "replaceYAttributeID"].includes(action.name);
 }
 
 export interface SetGraphVisualPropsAction extends ISerializedActionCall {
