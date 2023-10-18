@@ -9,7 +9,6 @@ export function useDataSet(inData?: IDataSet, inMetadata?: ISharedCaseMetadata) 
   const _data = useDataSetContext();
   const data = inData ?? _data;
   // find the metadata that corresponds to this DataSet
-  console.log("| 3 | useDataSet | data: ", data);
   const sharedModelManager = getSharedModelManager(data);
   const metadata = inMetadata ?? sharedModelManager
                                   ?.getSharedModelsByType<typeof SharedCaseMetadata>(kSharedCaseMetadataType)

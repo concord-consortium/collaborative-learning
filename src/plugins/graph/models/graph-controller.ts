@@ -71,8 +71,9 @@ export class GraphController {
   initializeGraph() {
     const {graphModel, dotsRef, layout} = this,
       dataConfig = graphModel?.config;
+
     // handle any attributes auto-assigned before our handlers were in place
-    if (graphModel.autoAssignedAttributes.length) {
+    if (graphModel?.autoAssignedAttributes.length) {
       graphModel.autoAssignedAttributes.forEach(({ place, role, dataSetID, attrID }) => {
         this.handleAttributeAssignment(place, dataSetID, attrID);
       });
@@ -101,7 +102,6 @@ export class GraphController {
   }
 
   handleAttributeAssignment(graphPlace: GraphPlace, dataSetID: string, attrID: string) {
-    console.log("| handleAttributeAssignment: ", graphPlace, attrID);
     const {graphModel, layout} = this,
       dataset = getDataSetFromId(graphModel, dataSetID),
       dataConfig = graphModel?.config,
@@ -153,8 +153,8 @@ export class GraphController {
         currAxisModel = graphModel.getAxis(place),
         currentType = currAxisModel?.type ?? 'empty',
         [min, max] = kDefaultNumericAxisBounds;
-      console.log("| setupAxis: ", place, attrType);
-      switch (attrType) {
+
+        switch (attrType) {
         case 'numeric': {
           if (!currAxisModel || !isNumericAxisModel(currAxisModel)) {
             const newAxisModel = NumericAxisModel.create({place, min, max});
