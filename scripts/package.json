@@ -10,7 +10,6 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@sparticuz/chrome-aws-lambda": "^17.1.3",
     "puppeteer": "^21.3.8"
   }
 }
