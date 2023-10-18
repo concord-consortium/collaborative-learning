@@ -153,8 +153,7 @@ export class GraphController {
         currAxisModel = graphModel.getAxis(place),
         currentType = currAxisModel?.type ?? 'empty',
         [min, max] = kDefaultNumericAxisBounds;
-
-        switch (attrType) {
+      switch (attrType) {
         case 'numeric': {
           if (!currAxisModel || !isNumericAxisModel(currAxisModel)) {
             const newAxisModel = NumericAxisModel.create({place, min, max});
