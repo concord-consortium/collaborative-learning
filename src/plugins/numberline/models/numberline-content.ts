@@ -46,8 +46,7 @@ export const NumberlineContentModel = TileContentModel
     max: 5
   })
   .volatile(self => ({
-    selectedPoints: {} as Record<string, PointObjectModelType>, //dictionary of id - point
-
+    selectedPoints: {} as Record<string, PointObjectModelType> //dictionary of id - point
   }))
   .views(self => ({
     get isUserResizable() {
@@ -92,10 +91,10 @@ export const NumberlineContentModel = TileContentModel
         delete self.selectedPoints[id];
       }
     },
-    setNewMin(num: number) {
+    setMin(num: number) {
       self.min = num;
     },
-    setNewMax(num: number) {
+    setMax(num: number) {
       self.max = num;
     }
   }))
