@@ -326,3 +326,128 @@ context('Chat Panel', () => {
     });
  });
 });
+
+context('Chat Panel Comment Tags', () => {
+  beforeEach(() => {
+    cy.fixture("teacher-dash-data-msa-test.json").as("clueData");
+  });
+
+  describe('Chat panel comment tags for networked teacher', () => {
+    it('verify chat panel comment tags', () => {
+      const tags = [
+       "Select Student Strategy",
+       "Part-to-Part",
+       "Part-to-Whole",
+       "Unit Rate",
+       "Guess and Check",
+       "None"
+      ];
+      const tagComment = [
+       "This is Part-to-Part tag comment",
+       "This is Part-to-Whole tag comment",
+       "This is Unit Rate tag comment",
+       "This is Guess and Check tag comment",
+       "This is None tag comment",
+      ];
+      cy.log('verify chat panel comment tags are accessible if teacher is in network (via url params)');
+      beforeTest(queryParams.teacherQueryParams);
+      loadNetworkTest(queryParams.teacher7NetworkQueryParams);
+    
+      cy.log('verify comment tag dropdown');
+      chatPanel.getChatPanelToggle().click();
+      chatPanel.getChatPanel().should('exist');
+      chatPanel.getCommentTextDropDown().should('exist');
+    
+      cy.log('verify comment tag dropdown options');
+      chatPanel.getCommentTextDropDown()
+      .should("contain", tags[0])
+      .should("contain", tags[1])
+      .should("contain", tags[2])
+      .should("contain", tags[3])
+      .should("contain", tags[4])
+      .should("contain", tags[5]);
+
+      cy.log('verify user post only comment tags on document comment');
+      cy.openTopTab("problems");
+      chatPanel.verifyProblemCommentClass();
+      chatPanel.addCommentTagAndVerify(tags[1]);
+      chatPanel.deleteCommentTagThread(tags[1]);
+      chatPanel.addCommentTagAndVerify(tags[2]);
+      chatPanel.deleteCommentTagThread(tags[2]);
+      chatPanel.addCommentTagAndVerify(tags[3]);
+      chatPanel.deleteCommentTagThread(tags[3]);
+      chatPanel.addCommentTagAndVerify(tags[4]);
+      chatPanel.deleteCommentTagThread(tags[4]);
+      chatPanel.addCommentTagAndVerify(tags[5]);
+      chatPanel.deleteCommentTagThread(tags[5]);
+
+      cy.log('verify user post only comment tags on tile comment');
+      cy.clickProblemResourceTile('introduction');
+      chatPanel.showAndVerifyTileCommentClass(0);
+      chatPanel.addCommentTagAndVerify(tags[1]);
+      chatPanel.deleteCommentTagThread(tags[1]);
+      chatPanel.addCommentTagAndVerify(tags[2]);
+      chatPanel.deleteCommentTagThread(tags[2]);
+      chatPanel.addCommentTagAndVerify(tags[3]);
+      chatPanel.deleteCommentTagThread(tags[3]);
+      chatPanel.addCommentTagAndVerify(tags[4]);
+      chatPanel.deleteCommentTagThread(tags[4]);
+      chatPanel.addCommentTagAndVerify(tags[5]);
+      chatPanel.deleteCommentTagThread(tags[5]);
+
+      cy.log('verify user post both comment tags and plain text on document comment');
+      cy.openTopTab("problems");
+      cy.openProblemSection("Introduction");
+      chatPanel.verifyProblemCommentClass();
+      chatPanel.addCommentTagTextAndVerify(tags[1], tagComment[0]);
+      chatPanel.deleteCommentTagThread(tags[1]);
+      chatPanel.addCommentTagTextAndVerify(tags[2], tagComment[1]);
+      chatPanel.deleteCommentTagThread(tags[2]);
+      chatPanel.addCommentTagTextAndVerify(tags[3], tagComment[2]);
+      chatPanel.deleteCommentTagThread(tags[3]);
+      chatPanel.addCommentTagTextAndVerify(tags[4], tagComment[3]);
+      chatPanel.deleteCommentTagThread(tags[4]);
+      chatPanel.addCommentTagTextAndVerify(tags[5], tagComment[4]);
+      chatPanel.deleteCommentTagThread(tags[5]);
+
+      cy.log('verify user post both comment tags and plain text on tile comment');
+      cy.openTopTab("problems");
+      cy.clickProblemResourceTile('introduction');
+      chatPanel.showAndVerifyTileCommentClass(0);
+      chatPanel.addCommentTagTextAndVerify(tags[1], tagComment[0]);
+      chatPanel.deleteCommentTagThread(tags[1]);
+      chatPanel.addCommentTagTextAndVerify(tags[2], tagComment[1]);
+      chatPanel.deleteCommentTagThread(tags[2]);
+      chatPanel.addCommentTagTextAndVerify(tags[3], tagComment[2]);
+      chatPanel.deleteCommentTagThread(tags[3]);
+      chatPanel.addCommentTagTextAndVerify(tags[4], tagComment[3]);
+      chatPanel.deleteCommentTagThread(tags[4]);
+      chatPanel.addCommentTagTextAndVerify(tags[5], tagComment[4]);
+      chatPanel.deleteCommentTagThread(tags[5]);
+
+      cy.log('verify user post only plain text and comment tag not displayed on document comment');
+      const docComment = "Only plain text and no comment tag document comment";
+      cy.openTopTab("problems");
+      cy.openProblemSection("Introduction");
+      chatPanel.verifyProblemCommentClass();
+      chatPanel.addCommentAndVerify(docComment);
+      chatPanel.verifyCommentTagNotDisplayed(docComment);
+      chatPanel.getDeleteMessageButton(docComment).click();
+      chatPanel.getDeleteConfirmModalButton().contains("Delete").click();
+      cy.wait(2000);
+      chatPanel.verifyCommentThreadDoesNotContain(docComment);
+
+      cy.log('verify user post only plain text and comment tag not displayed on tile comment');
+      const tileComment = "Only plain text and no comment tag tile comment";
+      cy.openTopTab("problems");
+      cy.clickProblemResourceTile('introduction');
+      chatPanel.showAndVerifyTileCommentClass(0);
+      chatPanel.addCommentAndVerify(tileComment);
+      chatPanel.verifyCommentTagNotDisplayed(tileComment);
+      chatPanel.getDeleteMessageButton(tileComment).click();
+      chatPanel.getDeleteConfirmModalButton().contains("Delete").click();
+      cy.wait(2000);
+      chatPanel.verifyCommentThreadDoesNotContain(tileComment);   
+    });
+ });
+});
