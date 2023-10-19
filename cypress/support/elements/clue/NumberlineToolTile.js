@@ -1,5 +1,5 @@
 
-const numberlineVals = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5];
+const numberlineVals = [-5.0, -4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0];
 
 class NumberlineToolTile {
   getNumberlineTile(workspaceClass) {
@@ -12,10 +12,15 @@ class NumberlineToolTile {
     return cy.get(`${workspaceClass || ".primary-workspace"} .editable-tile-title`);
   }
   getNumberlineTick(num){
+
+    console.log("📁 NumberlineToolTile.js ------------------------");
     const tickIndex = numberlineVals.indexOf(num);
+    console.log("\t🔪 tickIndex:", tickIndex);
+    console.log("\t🥩 cy.get:", cy.get(".numberline-tool-container .tick text"));
     return cy.get(".numberline-tool-container .tick text").eq(tickIndex);
   }
   getPointsOnGraph(){
+    console.log("\t🏭 getPointsOnGraph");
     //exclude the hovering circle that follows the mouse on the numberline
     return cy.get(".numberline-tool-container .point-inner-circle").not(".mouse-follow-point");
   }
@@ -26,6 +31,7 @@ class NumberlineToolTile {
     this.getClearButton().click();
   }
   addPointOnNumberlineTick(num){
+    console.log("\t🏭 addPointOnNumberlineTick, num:", num);
     this.getNumberlineTick(num).click();
   }
 }
