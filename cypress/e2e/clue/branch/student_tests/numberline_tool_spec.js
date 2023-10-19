@@ -22,14 +22,18 @@ context('Numberline Tile', function () {
     it("edit tile title", () => {
       const newName = "Numberline test";
       numberlineToolTile.getNumberlineTileTitleText().should("contain", "Numberline");
+      console.log("📁 numberline_tool_spec.js ------------------------");
+
+
       numberlineToolTile.getNumberlineTileTitle().click();
       numberlineToolTile.getNumberlineTileTitle().type(newName + '{enter}');
       numberlineToolTile.getNumberlineTileTitleText().should("contain", newName);
     });
     it('will test adding points to a numberline', () => {
       cy.log("add points to numberline");
-      numberlineToolTile.addPointOnNumberlineTick(-4);
-      numberlineToolTile.addPointOnNumberlineTick(2);
+      numberlineToolTile.addPointOnNumberlineTick(-4.0);
+      numberlineToolTile.addPointOnNumberlineTick(2.0);
+      cy.pause();
       numberlineToolTile.getPointsOnGraph().should('have.length', 2);
     });
 
