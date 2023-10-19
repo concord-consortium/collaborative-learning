@@ -74,6 +74,8 @@ async function makeSnapshot(path: string, fileName: string) {
   } catch (error) {
     console.log(`!!!!! Failed to load file ${url}`, error);
     failedFiles.push(path);
+    await page.close();
+    await browser.close();
     return;
   }
 
