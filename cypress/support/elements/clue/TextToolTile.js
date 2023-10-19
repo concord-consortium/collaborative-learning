@@ -24,12 +24,6 @@ class TextToolTile {
         this.getTextTile().last().type(text);
     }
 
-    // This assumes the text tool is already focused
-    clickToolbarTool(titlePrefix){
-        // Note that the title is dynamic based on the OS sometimes it has Cmd- and
-        // sometimes Ctrl-
-        cy.get(`.tile-toolbar-text [data-original-title^="${titlePrefix}"] button`).click();
-    }
     getVariableChip() {
       return cy.get('.primary-workspace [data-testid=ccrte-editor] .slate-variable-chip .variable-chip');
     }

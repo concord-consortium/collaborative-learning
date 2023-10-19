@@ -45,44 +45,44 @@ context('Text tool tile functionalities', function(){
     // elements we're checking for either don't get added, or get added in a somewhat meaningless
     // way (e.g., `<em></em> This should be italic`). This issue doesn't exist in the browser.
     it('has a toolbar that can be used', function(){
-        textToolTile.clickToolbarTool("Bold");
+        clueCanvas.clickToolbarButton('text', 'bold');
         textToolTile.enterText('{end} {enter}');
         textToolTile.enterText('{end}This should be bold.');
         textToolTile.getTextEditor().last().should('have.descendants', 'strong');
-        textToolTile.clickToolbarTool("Bold");
+        clueCanvas.clickToolbarButton('text', 'bold');
 
-        textToolTile.clickToolbarTool("Italic");
+        clueCanvas.clickToolbarButton('text', 'italic');
         textToolTile.enterText('{end} {enter}');
         textToolTile.enterText('{end} {enter}This should be italic.');
         textToolTile.getTextEditor().last().should('have.descendants', 'em');
-        textToolTile.clickToolbarTool("Italic");
+        clueCanvas.clickToolbarButton('text', 'italic');
 
-        textToolTile.clickToolbarTool("Underline");
+        clueCanvas.clickToolbarButton('text', 'underline');
         textToolTile.enterText('{end} {enter}');
         textToolTile.enterText('{end} {enter}This should be underlined.');
         textToolTile.getTextEditor().last().should('have.descendants', 'u');
-        textToolTile.clickToolbarTool("Underline");
+        clueCanvas.clickToolbarButton('text', 'underline');
 
-        textToolTile.clickToolbarTool("Subscript");
+        clueCanvas.clickToolbarButton('text', 'subscript');
         textToolTile.enterText('{end} {enter}');
         textToolTile.enterText('{end} {enter}This should be subscript.');
         textToolTile.getTextEditor().last().should('have.descendants', 'sub');
-        textToolTile.clickToolbarTool("Subscript");
+        clueCanvas.clickToolbarButton('text', 'subscript');
 
-        textToolTile.clickToolbarTool("Superscript");
+        clueCanvas.clickToolbarButton('text', 'superscript');
         textToolTile.enterText('{end} {enter}');
         textToolTile.enterText('{end} {enter}This should be superscript.');
         textToolTile.getTextEditor().last().should('have.descendants', 'sup');
-        textToolTile.clickToolbarTool("Superscript");
+        clueCanvas.clickToolbarButton('text', 'superscript');
 
         textToolTile.enterText('{end} {enter}');
         textToolTile.enterText('{end} {enter}This should be in a numbered list');
-        textToolTile.clickToolbarTool("Numbered List");
+        clueCanvas.clickToolbarButton('text', 'list-ol');
         textToolTile.getTextEditor().last().should('have.descendants', 'ol');
 
         textToolTile.enterText('{end} {enter}');
         textToolTile.enterText('{end} {enter}This should be in a bulleted list');
-        textToolTile.clickToolbarTool("Bulleted List");
+        clueCanvas.clickToolbarButton('text', 'list-ul');
         textToolTile.getTextEditor().last().should('have.descendants', 'ul');
     });
     it('verifies restore of text field content',()=>{
@@ -123,12 +123,12 @@ context('Text Tool Tile selection', function () {
     before(function () {
         const queryParams = `${Cypress.config("queryParams")}`;
           cy.clearQAData('all');
-      
+
           cy.visit(queryParams);
           cy.waitForLoad();
           cy.collapseResourceTabs();
         });
-      
+
     describe('Test undo redo actions', function () {
     it('selecting the text and verify the tool bar buttons', function(){
         clueCanvas.addTile('text');
@@ -137,45 +137,45 @@ context('Text Tool Tile selection', function () {
         textToolTile.getTextEditor().type('{selectall}');
 
         //Bold
-        textToolTile.clickToolbarTool("Bold");
+        clueCanvas.clickToolbarButton('text', 'bold');
         textToolTile.getTextEditor().last().should('have.descendants', 'strong');
-        textToolTile.clickToolbarTool("Bold");
+        clueCanvas.clickToolbarButton('text', 'bold');
         textToolTile.getTextEditor().last().should('not.have.descendants', 'strong');
 
         //Italic
-        textToolTile.clickToolbarTool("Italic");
+        clueCanvas.clickToolbarButton('text', 'italic');
         textToolTile.getTextEditor().last().should('have.descendants', 'em');
-        textToolTile.clickToolbarTool("Italic");
+        clueCanvas.clickToolbarButton('text', 'italic');
         textToolTile.getTextEditor().last().should('not.have.descendants', 'em');
 
         //Underline
-        textToolTile.clickToolbarTool("Underline");
+        clueCanvas.clickToolbarButton('text', 'underline');
         textToolTile.getTextEditor().last().should('have.descendants', 'u');
-        textToolTile.clickToolbarTool("Underline");
+        clueCanvas.clickToolbarButton('text', 'underline');
         textToolTile.getTextEditor().last().should('not.have.descendants', 'u');
 
         //Subscript
-        textToolTile.clickToolbarTool("Subscript");
+        clueCanvas.clickToolbarButton('text', 'subscript');
         textToolTile.getTextEditor().last().should('have.descendants', 'sub');
-        textToolTile.clickToolbarTool("Subscript");
+        clueCanvas.clickToolbarButton('text', 'subscript');
         textToolTile.getTextEditor().last().should('not.have.descendants', 'sub');
 
         //Superscript
-        textToolTile.clickToolbarTool("Superscript");
+        clueCanvas.clickToolbarButton('text', 'superscript');
         textToolTile.getTextEditor().last().should('have.descendants', 'sup');
-        textToolTile.clickToolbarTool("Superscript");
+        clueCanvas.clickToolbarButton('text', 'superscript');
         textToolTile.getTextEditor().last().should('not.have.descendants', 'sup');
 
         //Numbered List
-        textToolTile.clickToolbarTool("Numbered List");
+        clueCanvas.clickToolbarButton('text', 'list-ol');
         textToolTile.getTextEditor().last().should('have.descendants', 'ol');
-        textToolTile.clickToolbarTool("Numbered List");
+        clueCanvas.clickToolbarButton('text', 'list-ol');
         textToolTile.getTextEditor().last().should('not.have.descendants', 'ol');
 
         //Bulleted List
-        textToolTile.clickToolbarTool("Bulleted List");
+        clueCanvas.clickToolbarButton('text', 'list-ul');
         textToolTile.getTextEditor().last().should('have.descendants', 'ul');
-        textToolTile.clickToolbarTool("Bulleted List");
+        clueCanvas.clickToolbarButton('text', 'list-ul');
         textToolTile.getTextEditor().last().should('not.have.descendants', 'ul');
     });
   });
@@ -185,17 +185,17 @@ context('Text Tool Tile Undo Redo', function () {
     before(function () {
       const queryParams = `${Cypress.config("queryParams")}`;
       cy.clearQAData('all');
-  
+
       cy.visit(queryParams);
       cy.waitForLoad();
       cy.collapseResourceTabs();
     });
-  
+
     describe('Test undo redo actions', function () {
       it('will undo redo state', function () {
         clueCanvas.getUndoTool().should("have.class", "disabled");
         clueCanvas.getRedoTool().should("have.class", "disabled");
-      });  
+      });
       it('will undo redo text tile creation/deletion', function () {
         // Creation - Undo/Redo
         clueCanvas.addTile('text');
@@ -218,7 +218,7 @@ context('Text Tool Tile Undo Redo', function () {
         textToolTile.getTextTile().should("exist");
         clueCanvas.getRedoTool().click();
         textToolTile.getTextTile().should('not.exist');
-      });       
+      });
       it('will undo redo text field content', function () {
         clueCanvas.addTile('text');
         textToolTile.enterText('Hello World');
