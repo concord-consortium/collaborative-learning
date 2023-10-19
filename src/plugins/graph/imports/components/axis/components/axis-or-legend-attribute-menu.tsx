@@ -35,6 +35,11 @@ const removeAttrItemLabelKeys: Record<string, string> = {
 
 const _AxisOrLegendAttributeMenu = ({ place, attributeId, target, portal, onOpenClose,
                                       onChangeAttribute, onRemoveAttribute, onTreatAttributeAs }: IProps) => {
+
+
+  console.log("📁 axis-or-legend-attribute-menu.tsx ------------------------");
+
+  // console.log("\t🥩self attributeId:", attributeId);
   const data = useDataSetContext();
   const dataConfig = useDataConfigurationContext();
   const role = graphPlaceToAttrRole[place];
@@ -89,8 +94,13 @@ const _AxisOrLegendAttributeMenu = ({ place, attributeId, target, portal, onOpen
                     Link Data
                   </MenuItem>
                 }
-                { data?.attributes?.map((attr) => {
+                { data?.attributes?.map((attr, idx) => {
+                  const isCurrent = attr.id === attributeId;
+                  const isXAxis = (idx === 0); // maybe replace with this
+                  // const isXaxis = (idx === 0 && attr.name === "x");
+                  const showAttr = (!isCurrent && !isXAxis); //only show y attr that is not self, and also hide x axis
                   return (
+                    showAttr &&
                     <MenuItem onClick={() => onChangeAttribute(place, data, attr.id, attrId)} key={attr.id}>
                       {attr.name}
                     </MenuItem>
