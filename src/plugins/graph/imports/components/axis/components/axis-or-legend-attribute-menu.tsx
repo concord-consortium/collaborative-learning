@@ -22,6 +22,7 @@ interface IProps {
   onRemoveAttribute: (place: GraphPlace, attrId: string) => void
   onTreatAttributeAs: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void
   onOpenClose?: (isOpen: boolean) => void
+  yAttrsPlotted: string[];
 }
 
 const removeAttrItemLabelKeys: Record<string, string> = {
@@ -33,11 +34,12 @@ const removeAttrItemLabelKeys: Record<string, string> = {
   "rightSplit": "DG.DataDisplayMenu.removeAttribute_right"
 };
 
-const _AxisOrLegendAttributeMenu = ({ place, attributeId, target, portal, onOpenClose,
-                                      onChangeAttribute, onRemoveAttribute, onTreatAttributeAs }: IProps) => {
+const _AxisOrLegendAttributeMenu = ({ place, attributeId, target, portal, onOpenClose, onChangeAttribute,
+                                      onRemoveAttribute, onTreatAttributeAs, yAttrsPlotted }: IProps) => {
 
 
   console.log("📁 axis-or-legend-attribute-menu.tsx ------------------------");
+  console.log("\t🔪 yAttrsPlotted:", yAttrsPlotted);
 
   // console.log("\t🥩self attributeId:", attributeId);
   const data = useDataSetContext();
@@ -95,14 +97,26 @@ const _AxisOrLegendAttributeMenu = ({ place, attributeId, target, portal, onOpen
                   </MenuItem>
                 }
                 { data?.attributes?.map((attr, idx) => {
+                  // console.log("\t🥩 attrName:", attr?.name, "attrId:", attr.id);
                   const isCurrent = attr.id === attributeId;
-                  const isXAxis = (idx === 0); // maybe replace with this
-                  // const isXaxis = (idx === 0 && attr.name === "x");
-                  const showAttr = (!isCurrent && !isXAxis); //only show y attr that is not self, and also hide x axis
+                  const isXAxis = (idx === 0); // maybe replace with const isXaxis = (idx === 0 && attr.name === "x");
+
+                  // const isAPlottedYAttribute = plottedYAttributes.includes(attr.id);
+
+                  const showAttr = (!isCurrent && !isXAxis);
+                  //only show y attr that is not self, not the x axis, and not an already plotted Y
                   return (
                     showAttr &&
-                    <MenuItem onClick={() => onChangeAttribute(place, data, attr.id, attrId)} key={attr.id}>
-                      {attr.name}
+                    <MenuItem
+                      onClick={() => {
+                        onChangeAttribute(place, data, attr.id, attrId);
+                        // console.log("change attribute from", attrId, "to:", attr.id);
+                        //third arg:attr id
+                        //fourth is oldAttrId;
+                      }}
+                      key={attr.id}
+                    >
+                      {attr.name} {"-----"}{attr.id}
                     </MenuItem>
                   );
                 })}

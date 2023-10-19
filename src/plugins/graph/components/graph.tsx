@@ -72,6 +72,9 @@ export const Graph = observer(
   }, [dataset, plotAreaSVGRef, layout, layout.plotHeight, layout.plotWidth, xScale]);
 
   const handleChangeAttribute = (place: GraphPlace, dataSet: IDataSet, attrId: string, oldAttrId?: string) => {
+    console.log("\n\n");
+    console.log("\t🏭 handleChangeAttribute with attrId:", attrId, "oldAttrId:", oldAttrId);
+
     const computedPlace = place === 'plot' && graphModel.config.noAttributesAssigned ? 'bottom' : place;
     const attrRole = graphPlaceToAttrRole[computedPlace];
     if (attrRole === 'y' && oldAttrId) {
@@ -170,6 +173,7 @@ export const Graph = observer(
                         onDropAttribute={handleChangeAttribute}
                         onRemoveAttribute={handleRemoveAttribute}
                         onTreatAttributeAs={handleTreatAttrAs}
+                        yAttrsPlotted={yAttrsPlotted}
       />;
     });
   };
