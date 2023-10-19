@@ -14,13 +14,13 @@ describe.skip("Graph", () => {
   });
 
   it("renders with no broker", () => {
-    render(<GraphComponent layout={layout} />);
+    render(<GraphComponent readOnly={false} layout={layout} />);
     // expect(screen.getByTestId("graph")).toBeInTheDocument()
     expect(true).toBe(true);
   });
 
   it("renders with empty broker", () => {
-    render(<GraphComponent layout={layout} />);
+    render(<GraphComponent readOnly={false} layout={layout} />);
     expect(screen.getByTestId("graph")).toBeInTheDocument();
   });
 
@@ -30,7 +30,7 @@ describe.skip("Graph", () => {
     data.addAttributeWithID({ name: "yVariable" });
     data.addCasesWithIDs([{ xVariable: 1, yVariable: 2, __id__: "c1" }, { xVariable: 3, yVariable: 4, __id__: "c2" }]);
     broker.addDataSet(data);
-    render(<GraphComponent layout={layout} />);
+    render(<GraphComponent readOnly={false} layout={layout} />);
     expect(screen.getByTestId("graph")).toBeInTheDocument();
     // rerender(<GraphComponent broker={broker} />)
     // expect(screen.getByText('xVariable')).toBeInTheDocument()
@@ -44,12 +44,12 @@ describe.skip("Graph", () => {
     data.addAttributeWithID({ name: "yVariable" });
     data.addCasesWithIDs([{ xVariable: 1, yVariable: 2, __id__: "c1" }, { xVariable: 3, yVariable: 4, __id__: "c2" }]);
     broker.addDataSet(data);
-    const { rerender } = render(<GraphComponent layout={layout} />);
+    const { rerender } = render(<GraphComponent readOnly={false} layout={layout} />);
     expect(screen.getByTestId("graph")).toBeInTheDocument();
     // expect(screen.getByText('xVariable')).toBeInTheDocument()
     // expect(screen.getByText('yVariable')).toBeInTheDocument()
     const plotTypeButton = screen.getByText("Dot Plot");
     await user.click(plotTypeButton);
-    rerender(<GraphComponent layout={layout} />);
+    rerender(<GraphComponent readOnly={false} layout={layout} />);
   });
 });

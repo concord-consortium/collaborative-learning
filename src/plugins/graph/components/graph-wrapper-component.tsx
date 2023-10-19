@@ -131,7 +131,8 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
         onLinkTableButtonClick={showLinkTileDialog}
       />
       <BasicEditableTileTitle readOnly={readOnly} />
-      <GraphComponent data={data} layout={layout} tile={model} onRequestRowHeight={onRequestRowHeight} />
+      <GraphComponent data={data} readOnly={!!readOnly}
+        layout={layout} tile={model} onRequestRowHeight={onRequestRowHeight} />
     </div>
   );
 });

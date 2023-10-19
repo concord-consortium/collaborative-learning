@@ -14,17 +14,18 @@ import DropdownCaretIcon from "../dropdown-caret.svg";
 import "../components/legend/multi-legend.scss";
 
 interface ISimpleAttributeLabelProps {
-  place: GraphPlace
-  index: number
-  attrId: string
-  onChangeAttribute?: (place: GraphPlace, dataSet: IDataSet, attrId: string, oldAttrId?: string) => void
-  onRemoveAttribute?: (place: GraphPlace, attrId: string) => void
-  onTreatAttributeAs?: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void
+  place: GraphPlace;
+  index: number;
+  attrId: string;
+  readOnly: boolean;
+  onChangeAttribute?: (place: GraphPlace, dataSet: IDataSet, attrId: string, oldAttrId?: string) => void;
+  onRemoveAttribute?: (place: GraphPlace, attrId: string) => void;
+  onTreatAttributeAs?: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void;
 }
 
 export const SimpleAttributeLabel = observer(
   function SimpleAttributeLabel(props: ISimpleAttributeLabelProps) {
-    const {place, index, attrId, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute} = props;
+    const {place, index, attrId, readOnly, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute} = props;
     // Must be State, not Ref, so that the menu gets re-rendered when this becomes non-null
     const [simpleLabelElement, setSimpleLabelElement] = useState<HTMLDivElement|null>(null);
     const graphElement = simpleLabelElement?.closest(kGraphClassSelector) as HTMLDivElement ?? null;
@@ -47,11 +48,14 @@ export const SimpleAttributeLabel = observer(
             <div className="attr-symbol" style={{ backgroundColor: pointColor }}></div>
             <div>{ attrName }</div>
           </div>
-          <div className="caret">
-            <DropdownCaretIcon />
-          </div>
+          {!readOnly &&
+            <div className="caret">
+              <DropdownCaretIcon />
+            </div>
+          }
         </div>
-        {simpleLabelElement && graphElement && onChangeAttribute && onTreatAttributeAs && onRemoveAttribute && attrId &&
+        {!readOnly && simpleLabelElement && graphElement && onChangeAttribute
+            && onTreatAttributeAs && onRemoveAttribute && attrId &&
           createPortal(<AxisOrLegendAttributeMenu
             target={simpleLabelElement}
             portal={graphElement}

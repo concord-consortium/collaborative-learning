@@ -17,15 +17,16 @@ export const kMultiLegendVerticalGap = 10;
 import "./multi-legend.scss";
 
 interface IMultiLegendProps {
-  graphElt: HTMLDivElement | null
+  graphElt: HTMLDivElement | null;
+  readOnly: boolean;
   onChangeAttribute: (place: GraphPlace, dataSet: IDataSet, attrId: string, oldAttrId?: string) => void;
-  onRemoveAttribute: (place: GraphPlace, attrId: string) => void
-  onTreatAttributeAs: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void
-  onRequestRowHeight?: (id: string, size: number) => void
+  onRemoveAttribute: (place: GraphPlace, attrId: string) => void;
+  onTreatAttributeAs: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void;
+  onRequestRowHeight?: (id: string, size: number) => void;
 }
 
 export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProps) {
-  const {onChangeAttribute, onRemoveAttribute, onTreatAttributeAs, onRequestRowHeight} = props;
+  const {readOnly, onChangeAttribute, onRemoveAttribute, onTreatAttributeAs, onRequestRowHeight} = props;
   const layout = useGraphLayoutContext();
   const legendBounds = layout.computedBounds.legend;
   const transform = `translate(${legendBounds.left}, ${legendBounds.top})`;
@@ -62,11 +63,14 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
         place={'left'}
         index={index}
         attrId={description.attributeID}
+        readOnly={readOnly}
         onChangeAttribute={onChangeAttribute}
         onRemoveAttribute={onRemoveAttribute}
         onTreatAttributeAs={onTreatAttributeAs}
       />);
-    legendItems.push(<AddSeriesButton/>);
+    if (!readOnly) {
+      legendItems.push(<AddSeriesButton/>);
+    }
   }
   // Make rows with two legend items in each row
   const legendItemRows = [] as React.ReactNode[];
