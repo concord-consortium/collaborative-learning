@@ -14,7 +14,6 @@ import {
   GraphAttrRole, hoverRadiusFactor, kDefaultNumericAxisBounds, kGraphTileType, PlotType, PlotTypes,
   pointRadiusLogBase, pointRadiusMax, pointRadiusMin, pointRadiusSelectionAddend
 } from "../graph-types";
-import {DataConfigurationModel} from "./data-configuration-model";
 import { SharedModelType } from "../../../models/shared/shared-model";
 import {
   getDataSetFromId, getTileCaseMetadata, getTileDataSet, isTileLinkedToDataSet, linkTileToDataSet
@@ -33,6 +32,7 @@ import { tileContentAPIViews } from "../../../models/tiles/tile-model-hooks";
 import { ConnectingLinesModel } from "../adornments/connecting-lines/connecting-lines-model";
 import { kConnectingLinesType } from "../adornments/connecting-lines/connecting-lines-types";
 import { getDotId } from "../utilities/graph-utils";
+import { GraphLayerModel } from "../graph-layer-model";
 export interface GraphProperties {
   axes: Record<string, IAxisModelUnion>
   plotType: PlotType
@@ -58,7 +58,9 @@ export const GraphModel = TileContentModel
     axes: types.map(AxisModelUnion),
     // TODO: should the default plot be something like "nullPlot" (which doesn't exist yet)?
     plotType: types.optional(types.enumeration([...PlotTypes]), "casePlot"),
-    config: types.optional(DataConfigurationModel, () => DataConfigurationModel.create()),
+    // TODO: this will go away
+    // config: types.optional(DataConfigurationModel, () => DataConfigurationModel.create()),
+    layers: types.array(GraphLayerModel /*, () => GraphLayerModel.create() */),
     // Visual properties
     _pointColors: types.optional(types.array(types.string), [defaultPointColor]),
     _pointStrokeColor: defaultStrokeColor,
@@ -77,6 +79,20 @@ export const GraphModel = TileContentModel
     prevDataSetId: "",
     autoAssignedAttributes: [] as Array<{ place: GraphPlace, role: GraphAttrRole, dataSetID: string, attrID: string }>,
     disposeDataSetListener: undefined as (() => void) | undefined
+  }))
+  .preProcessSnapshot((snapshot: any) => {
+    const hasLayerAlready:boolean = (snapshot?.layers?.length || 0) > 0;
+    if (!hasLayerAlready && snapshot?.config) {
+      const layer = { config: snapshot.config };
+      snapshot.layers = [layer];
+      delete(snapshot.config);
+    }
+    return snapshot;
+  })
+  .views(self => ({
+    get config() {
+      return self.layers[0].config;
+    }
   }))
   .views(self => ({
     get data() {
@@ -187,6 +203,11 @@ export const GraphModel = TileContentModel
     }
   }))
   .actions(self => ({
+    afterCreate() {
+      const initialLayer = GraphLayerModel.create();
+      console.log('creating a default layer');
+      self.layers.push(initialLayer);
+    },
     setDataSetListener() {
       const actionsAffectingCategories = [
         "addCases", "removeAttribute", "removeCases", "setCaseValues"
