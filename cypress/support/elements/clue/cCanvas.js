@@ -144,7 +144,7 @@ class ClueCanvas {
     addTile(tile) { //tile=[text,table,geometry,image,drawing,delete]
         cy.get('.primary-workspace .tool.' + tile).click({ force: true });
     }
-    
+
     getDuplicateTool() {
         return cy.get('.primary-workspace .tool.duplicate');
     }
@@ -276,7 +276,7 @@ class ClueCanvas {
                 break;
             case 'xyplot':
                 tileElement = xyPlotToolTile.getTile().last().click({ force: true });
-                break;    
+                break;
         }
         tileElement.should('have.class','selected');
     }
@@ -358,6 +358,32 @@ class ClueCanvas {
         dialog.getDialogOKButton().click();
         dialog.getDialogTitle().should('not.exist');
     }
+
+    // Tile toolbars are in portals at the document 'body' level.
+    // These methods allow working with toolbar buttons even when invoked from,
+    // say, a `within` clause scoped to a tile.
+    toolbarButtonIsEnabled(tileType, buttonName) {
+      cy.document().within(() => {
+        cy.get(`.tile-toolbar.${tileType}-toolbar .toolbar-button.${buttonName}`)
+          .should('not.be.disabled');
+      });
+    }
+
+    toolbarButtonIsDisabled(tileType, buttonName) {
+      cy.document().within(() => {
+        cy.get(`.tile-toolbar.${tileType}-toolbar .toolbar-button.${buttonName}`)
+          .should('be.disabled');
+      });
+    }
+
+    clickToolbarButton(tileType, buttonName) {
+      cy.document().within(() => {
+        cy.get(`.tile-toolbar.${tileType}-toolbar .toolbar-button.${buttonName}`)
+          .should('not.be.disabled')
+          .click();
+      });
+    }
+
 }
 
 export default ClueCanvas;

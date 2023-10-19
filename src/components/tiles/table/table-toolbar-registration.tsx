@@ -14,6 +14,7 @@ import DeleteSelectedIconSvg from "../../../assets/icons/delete/delete-selection
 import SetExpressionIconSvg from "../../../clue/assets/icons/table/set-expression-icon.svg";
 import ViewDataAsGraphIcon from "../../../assets/icons/view-data-as-graph-icon.svg";
 import LinkGraphIcon from "../../../clue/assets/icons/table/link-graph-icon.svg";
+import { observer } from "mobx-react";
 
 const DeleteSelectedButton = ({name}: IToolbarButtonComponentProps) => {
   const toolbarContext = useContext(TableToolbarContext);
@@ -44,7 +45,7 @@ export const SetExpressionButton = ({name}: IToolbarButtonComponentProps) => {
 
 // TODO: this exact component can be used in the data-card toolbar
 // The only difference currently is the tooltip text
-function LinkTableButton({name}: IToolbarButtonComponentProps) {
+export const LinkTableButton = observer(function LinkTableButton({name}: IToolbarButtonComponentProps) {
 
   // Assume we always have a model
   const model = useContext(TileModelContext)!;
@@ -71,9 +72,9 @@ function LinkTableButton({name}: IToolbarButtonComponentProps) {
       <LinkGraphIcon />
     </TileToolbarButton>
   );
-}
+});
 
-export const LinkGraphButton = ({name}: IToolbarButtonComponentProps) => {
+export const LinkGraphButton = observer(function LinkGraphButton({name}: IToolbarButtonComponentProps) {
   const model = useContext(TileModelContext)!;
   const dataSet = getTileDataSet(model.content);
 
@@ -97,7 +98,7 @@ export const LinkGraphButton = ({name}: IToolbarButtonComponentProps) => {
     </TileToolbarButton>
  );
 
-};
+});
 
 const TableMergeInButton = ({name}: IToolbarButtonComponentProps) => {
   return <MergeInButton name={name}/>;

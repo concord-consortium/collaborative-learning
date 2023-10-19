@@ -83,9 +83,6 @@ class TableToolTile{
         cy.get('.modal-button').contains("Link Table").click();
       });
     }
-    getTableToolbarButton(button){// ['set-expression', 'delete']
-      return cy.get(`.table-toolbar .toolbar-button.${button}`);
-    }
     checkWorkspaceColumnHeaders(attributes) {
       this.getWorkspaceColumnHeader().should("have.length", attributes.length);
       attributes.forEach((attributeName, index) => {
