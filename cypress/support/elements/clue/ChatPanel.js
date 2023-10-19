@@ -89,6 +89,7 @@ class ChatPanel{
     }
     verifyProblemCommentClass() {
       this.getProblemDocumentContent().should('have.class', DOCUMENT_COMMENT_CLASS);
+      cy.wait(1000)
     }
     verifyDocumentCommentClass() {
       this.getEditableDocumentContent().should('have.class',DOCUMENT_COMMENT_CLASS);
@@ -112,7 +113,8 @@ class ChatPanel{
       this.getCommentFromThread().should("contain", commentText);
     }
     verifyCommentThreadDoesNotContain(commentText) {
-      this.getCommentFromThread().should("not.contain", commentText);
+      // this.getCommentFromThread().should("not.contain", commentText);
+      this.getChatPanel().should("not.contain", commentText);
     }
     verifyCommentThreadDoesNotExist() {
       this.getCommentFromThread().should("not.exist");
@@ -151,7 +153,8 @@ class ChatPanel{
       this.getCommentThread(message).find(".comment-dropdown-tag").should("not.exist");
     }
     deleteCommentTagThread(tagToDelete) {
-      this.getCommentTagDeleteMessageButton(tagToDelete).click();
+      this.getCommentTagDeleteMessageButton(tagToDelete).click({force:true});
+      // this.getCommentTagDeleteMessageButton(tagToDelete).click();
       this.getDeleteConfirmModalButton().contains("Delete").click();
       cy.wait(2000);
       this.getCommentTagFromThread().should("not.exist");

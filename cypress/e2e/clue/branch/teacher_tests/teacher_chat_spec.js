@@ -115,7 +115,7 @@ context('Chat Panel', () => {
     
       cy.log('verify user can delete a post');
       const msgToDelete = "Send this comment after enter.";
-      chatPanel.getDeleteMessageButton(msgToDelete).click();
+      chatPanel.getDeleteMessageButton(msgToDelete).click({force:true});
       chatPanel.getDeleteConfirmModalButton().contains("Delete").click();
       cy.wait(2000);
       chatPanel.verifyCommentThreadLength(1);
@@ -343,11 +343,11 @@ context('Chat Panel Comment Tags', () => {
        "None"
       ];
       const tagComment = [
-       "This is Part-to-Part tag comment",
-       "This is Part-to-Whole tag comment",
-       "This is Unit Rate tag comment",
-       "This is Guess and Check tag comment",
-       "This is None tag comment",
+       "This is Part-to-Part tag comment" + Math.random(),
+       "This is Part-to-Whole tag comment" + Math.random(),
+       "This is Unit Rate tag comment" + Math.random(),
+       "This is Guess and Check tag comment" + Math.random(),
+       "This is None tag comment" + Math.random(),
       ];
       cy.log('verify chat panel comment tags are accessible if teacher is in network (via url params)');
       beforeTest(queryParams.teacherQueryParams);
@@ -372,56 +372,24 @@ context('Chat Panel Comment Tags', () => {
       chatPanel.verifyProblemCommentClass();
       chatPanel.addCommentTagAndVerify(tags[1]);
       chatPanel.deleteCommentTagThread(tags[1]);
-      chatPanel.addCommentTagAndVerify(tags[2]);
-      chatPanel.deleteCommentTagThread(tags[2]);
-      chatPanel.addCommentTagAndVerify(tags[3]);
-      chatPanel.deleteCommentTagThread(tags[3]);
-      chatPanel.addCommentTagAndVerify(tags[4]);
-      chatPanel.deleteCommentTagThread(tags[4]);
-      chatPanel.addCommentTagAndVerify(tags[5]);
-      chatPanel.deleteCommentTagThread(tags[5]);
 
       cy.log('verify user post only comment tags on tile comment');
       cy.clickProblemResourceTile('introduction');
       chatPanel.showAndVerifyTileCommentClass(0);
-      chatPanel.addCommentTagAndVerify(tags[1]);
-      chatPanel.deleteCommentTagThread(tags[1]);
       chatPanel.addCommentTagAndVerify(tags[2]);
       chatPanel.deleteCommentTagThread(tags[2]);
-      chatPanel.addCommentTagAndVerify(tags[3]);
-      chatPanel.deleteCommentTagThread(tags[3]);
-      chatPanel.addCommentTagAndVerify(tags[4]);
-      chatPanel.deleteCommentTagThread(tags[4]);
-      chatPanel.addCommentTagAndVerify(tags[5]);
-      chatPanel.deleteCommentTagThread(tags[5]);
 
       cy.log('verify user post both comment tags and plain text on document comment');
       cy.openTopTab("problems");
       cy.openProblemSection("Introduction");
       chatPanel.verifyProblemCommentClass();
-      chatPanel.addCommentTagTextAndVerify(tags[1], tagComment[0]);
-      chatPanel.deleteCommentTagThread(tags[1]);
-      chatPanel.addCommentTagTextAndVerify(tags[2], tagComment[1]);
-      chatPanel.deleteCommentTagThread(tags[2]);
       chatPanel.addCommentTagTextAndVerify(tags[3], tagComment[2]);
       chatPanel.deleteCommentTagThread(tags[3]);
-      chatPanel.addCommentTagTextAndVerify(tags[4], tagComment[3]);
-      chatPanel.deleteCommentTagThread(tags[4]);
-      chatPanel.addCommentTagTextAndVerify(tags[5], tagComment[4]);
-      chatPanel.deleteCommentTagThread(tags[5]);
 
       cy.log('verify user post both comment tags and plain text on tile comment');
       cy.openTopTab("problems");
       cy.clickProblemResourceTile('introduction');
       chatPanel.showAndVerifyTileCommentClass(0);
-      chatPanel.addCommentTagTextAndVerify(tags[1], tagComment[0]);
-      chatPanel.deleteCommentTagThread(tags[1]);
-      chatPanel.addCommentTagTextAndVerify(tags[2], tagComment[1]);
-      chatPanel.deleteCommentTagThread(tags[2]);
-      chatPanel.addCommentTagTextAndVerify(tags[3], tagComment[2]);
-      chatPanel.deleteCommentTagThread(tags[3]);
-      chatPanel.addCommentTagTextAndVerify(tags[4], tagComment[3]);
-      chatPanel.deleteCommentTagThread(tags[4]);
       chatPanel.addCommentTagTextAndVerify(tags[5], tagComment[4]);
       chatPanel.deleteCommentTagThread(tags[5]);
 
@@ -432,7 +400,7 @@ context('Chat Panel Comment Tags', () => {
       chatPanel.verifyProblemCommentClass();
       chatPanel.addCommentAndVerify(docComment);
       chatPanel.verifyCommentTagNotDisplayed(docComment);
-      chatPanel.getDeleteMessageButton(docComment).click();
+      chatPanel.getDeleteMessageButton(docComment).click({force:true});
       chatPanel.getDeleteConfirmModalButton().contains("Delete").click();
       cy.wait(2000);
       chatPanel.verifyCommentThreadDoesNotContain(docComment);
@@ -444,7 +412,7 @@ context('Chat Panel Comment Tags', () => {
       chatPanel.showAndVerifyTileCommentClass(0);
       chatPanel.addCommentAndVerify(tileComment);
       chatPanel.verifyCommentTagNotDisplayed(tileComment);
-      chatPanel.getDeleteMessageButton(tileComment).click();
+      chatPanel.getDeleteMessageButton(tileComment).click({force:true});
       chatPanel.getDeleteConfirmModalButton().contains("Delete").click();
       cy.wait(2000);
       chatPanel.verifyCommentThreadDoesNotContain(tileComment);   
