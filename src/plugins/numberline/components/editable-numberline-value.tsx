@@ -61,15 +61,7 @@ export const EditableNumberlineValue: React.FC<IEditableValueProps> = observer(f
   const borderBoxOffset = `${offset + 4}px`;
   const borderBoxPositionProperty = (minOrMax === "min") ? { left: borderBoxOffset } : { right: borderBoxOffset };
   const borderBoxStyle = { ...borderBoxPositionProperty };
-
-  const hideBorderAndResetBackground = !isTileSelected;
-  const borderClasses = classNames(
-    "border-box", {hide: !isTileSelected}, {show: hideBorderAndResetBackground}
-  );
-  // const borderBoxBorderProperty = hideBorderAndResetBackground ? { border: "none" } :
-  // { border: "1.5px solid #949494" };
-  // const borderBoxBackgroundProperty = hideBorderAndResetBackground ? { backgroundColor: "white" }
-  //                                                                  : { backgroundColor: "#f0f9fb" };
+  const borderClasses = classNames("border-box", {hide: !isTileSelected});
 
   return (
     <div className={borderClasses} style={borderBoxStyle} onClick={handleClick}>
