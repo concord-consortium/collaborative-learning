@@ -230,6 +230,12 @@ export const GraphModel = TileContentModel
       }
       self.updateAdornments(true);
     },
+    removeYAttributeID(attrID: string) {
+      self.config.removeYAttribute(attrID);
+    },
+    replaceYAttributeID(oldAttrId: string, newAttrId: string) {
+      self.config.replaceYAttribute(oldAttrId, newAttrId);
+    },
     setPlotType(type: PlotType) {
       self.plotType = type;
     },
@@ -424,9 +430,29 @@ export interface SetAttributeIDAction extends ISerializedActionCall {
   name: "setAttributeID"
   args: [GraphAttrRole, string, string]
 }
-
 export function isSetAttributeIDAction(action: ISerializedActionCall): action is SetAttributeIDAction {
   return action.name === "setAttributeID";
+}
+
+export interface RemoveYAttributeAction extends ISerializedActionCall {
+  name: "removeYAttributeID",
+  args: [string]
+}
+export function isRemoveYAttributeAction(action: ISerializedActionCall): action is RemoveYAttributeAction {
+  return action.name === "removeYAttributeID";
+}
+
+export interface ReplaceYAttributeAction extends ISerializedActionCall {
+  name: "replaceYAttributeID",
+  args: [string, string]
+}
+export function isReplaceYAttributeAction(action: ISerializedActionCall): action is ReplaceYAttributeAction {
+  return action.name === "replaceYAttributeID";
+}
+
+export type AttributeAssignmentAction = SetAttributeIDAction | RemoveYAttributeAction | ReplaceYAttributeAction;
+export function isAttributeAssignmentAction(action: ISerializedActionCall): action is AttributeAssignmentAction {
+  return ["setAttributeID", "removeYAttributeID", "replaceYAttributeID"].includes(action.name);
 }
 
 export interface SetGraphVisualPropsAction extends ISerializedActionCall {
