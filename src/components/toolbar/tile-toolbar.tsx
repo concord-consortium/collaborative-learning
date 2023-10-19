@@ -26,6 +26,11 @@ export function isValidButtonDescription(obj: JSONValue): obj is IButtonDescript
     && typeof obj[1] === 'string');
  }
 
+/**
+ * Create the complete tooltip from the given button information.
+ * Button titles can have placeholders like {1}, {2} which are replaced by button arguments.
+ * If there is a button keyboard shortcut, it is shown after the title.
+ */
 function formatTooltip(desc: IButtonDescription, info: IToolbarButtonInfo) {
   let fullTitle = info.title;
   if (!(typeof desc === 'string')) {
@@ -57,7 +62,7 @@ export const TileToolbar = observer(
     const { toolbarRefs, toolbarStyles, toolbarPlacement } = useTileToolbarPositioning(tileElement);
     const tipOptions = useTooltipOptions();
 
-    // Determine the buttons to be shown. Avoid recalculating defaults over and over.
+    // Determine the buttons to be shown.
     const ui = useUIStore();
     let buttonDescriptions;
     const customizedButtons = useSettingFromStores("tools", tileType);
