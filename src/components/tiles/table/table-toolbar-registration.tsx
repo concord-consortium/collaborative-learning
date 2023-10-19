@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 
-import { registerTileToolbarButtons } from "../../toolbar/toolbar-button-manager";
+import { IToolbarButtonComponentProps, registerTileToolbarButtons } from "../../toolbar/toolbar-button-manager";
 import { MergeInButton } from "../../toolbar/merge-in-button";
 import { useConsumerTileLinking } from "../../../hooks/use-consumer-tile-linking";
 import { getTileDataSet } from "../../../models/shared/shared-data-utils";
@@ -8,18 +8,19 @@ import { TileModelContext } from "../tile-api";
 import { TableToolbarContext } from "./table-toolbar-context";
 import { kGraphTileType } from "../../../plugins/graph/graph-defs";
 import { TileToolbarButton } from "../../toolbar/tile-toolbar-button";
+import { DataSetViewButton } from "../../toolbar/data-set-view-button";
 
 import DeleteSelectedIconSvg from "../../../assets/icons/delete/delete-selection-icon.svg";
 import SetExpressionIconSvg from "../../../clue/assets/icons/table/set-expression-icon.svg";
 import ViewDataAsGraphIcon from "../../../assets/icons/view-data-as-graph-icon.svg";
 import LinkGraphIcon from "../../../clue/assets/icons/table/link-graph-icon.svg";
-import { DataSetViewButton } from "../../toolbar/data-set-view-button";
 
-const DeleteSelectedButton = () => {
+const DeleteSelectedButton = ({name}: IToolbarButtonComponentProps) => {
   const toolbarContext = useContext(TableToolbarContext);
 
   return (
     <TileToolbarButton
+      name={name}
       onClick={() => toolbarContext?.deleteSelected()}
     >
       <DeleteSelectedIconSvg />
@@ -28,11 +29,12 @@ const DeleteSelectedButton = () => {
 };
 
 
-export const SetExpressionButton = () => {
+export const SetExpressionButton = ({name}: IToolbarButtonComponentProps) => {
   const toolbarContext = useContext(TableToolbarContext);
 
   return (
     <TileToolbarButton
+      name={name}
       onClick={() => toolbarContext?.showExpressionsDialog()}
     >
       <SetExpressionIconSvg />
@@ -42,7 +44,7 @@ export const SetExpressionButton = () => {
 
 // TODO: this exact component can be used in the data-card toolbar
 // The only difference currently is the tooltip text
-function LinkTableButton() {
+function LinkTableButton({name}: IToolbarButtonComponentProps) {
 
   // Assume we always have a model
   const model = useContext(TileModelContext)!;
@@ -62,6 +64,7 @@ function LinkTableButton() {
   };
   return (
     <TileToolbarButton
+      name={name}
       onClick={handleClick}
       disabled={!isLinkEnabled}
     >
@@ -70,7 +73,7 @@ function LinkTableButton() {
   );
 }
 
-export const LinkGraphButton = () => {
+export const LinkGraphButton = ({name}: IToolbarButtonComponentProps) => {
   const model = useContext(TileModelContext)!;
   const dataSet = getTileDataSet(model.content);
 
@@ -86,6 +89,7 @@ export const LinkGraphButton = () => {
 
   return (
     <TileToolbarButton
+      name={name}
       onClick={handleClick}
       disabled={!isLinkEnabled}
     >
@@ -95,8 +99,8 @@ export const LinkGraphButton = () => {
 
 };
 
-const TableMergeInButton = () => {
-  return <MergeInButton/>;
+const TableMergeInButton = ({name}: IToolbarButtonComponentProps) => {
+  return <MergeInButton name={name}/>;
 };
 
 registerTileToolbarButtons("table",

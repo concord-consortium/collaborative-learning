@@ -3,7 +3,8 @@ import { Editor, EFormat, useSlate } from "@concord-consortium/slate-editor";
 
 import { LinkButton } from "./link-button";
 import { isMac } from "../../../../utilities/browser";
-import { registerTileToolbarButtons, registerTileToolbarConfig } from "../../../toolbar/toolbar-button-manager";
+import { IToolbarButtonComponentProps, registerTileToolbarButtons, registerTileToolbarConfig }
+  from "../../../toolbar/toolbar-button-manager";
 import { TileToolbarButton } from "../../../toolbar/tile-toolbar-button";
 
 import BoldToolIcon from "../../../../assets/icons/text/bold-text-icon.svg";
@@ -26,12 +27,13 @@ const toggleElement =
   (editor: Editor, format: EFormat) => editor.toggleElement(format);
 
 interface IGenericTextToolbarButtonProps {
-  Icon: React.FunctionComponent<React.SVGProps<SVGSVGElement>>,
-  slateType: EFormat,
-  toggleFunc: (editor: Editor, format: EFormat) => void
+  name: string;
+  Icon: React.FunctionComponent<React.SVGProps<SVGSVGElement>>;
+  slateType: EFormat;
+  toggleFunc: (editor: Editor, format: EFormat) => void;
 }
 
-function GenericTextToolbarButton({Icon, slateType, toggleFunc}: IGenericTextToolbarButtonProps) {
+function GenericTextToolbarButton({name, Icon, slateType, toggleFunc}: IGenericTextToolbarButtonProps) {
   const editor = useSlate();
   const selected = editor.isMarkActive(slateType) || editor.isElementActive(slateType);
   function handleClick (e : React.MouseEvent) {
@@ -39,44 +41,44 @@ function GenericTextToolbarButton({Icon, slateType, toggleFunc}: IGenericTextToo
     toggleFunc(editor, slateType);
   }
   return (
-    <TileToolbarButton selected={selected} onClick={handleClick}>
+    <TileToolbarButton name={name} selected={selected} onClick={handleClick}>
       <Icon/>
     </TileToolbarButton>);
 }
 
-function BoldToolbarButton() {
+function BoldToolbarButton({name}: IToolbarButtonComponentProps) {
   return <GenericTextToolbarButton
-    Icon={BoldToolIcon} slateType={EFormat.bold} toggleFunc={toggleMark}/>;
+    name={name} Icon={BoldToolIcon} slateType={EFormat.bold} toggleFunc={toggleMark}/>;
 }
 
-function ItalicToolbarButton() {
+function ItalicToolbarButton({name}: IToolbarButtonComponentProps) {
   return <GenericTextToolbarButton
-    Icon={ItalicToolIcon} slateType={EFormat.italic} toggleFunc={toggleMark}/>;
+    name={name} Icon={ItalicToolIcon} slateType={EFormat.italic} toggleFunc={toggleMark}/>;
 }
 
-function UnderlineToolbarButton() {
+function UnderlineToolbarButton({name}: IToolbarButtonComponentProps) {
   return <GenericTextToolbarButton
-    Icon={UnderlineToolIcon} slateType={EFormat.underlined} toggleFunc={toggleMark}/>;
+    name={name} Icon={UnderlineToolIcon} slateType={EFormat.underlined} toggleFunc={toggleMark}/>;
 }
 
-function SubscriptToolbarButton() {
+function SubscriptToolbarButton({name}: IToolbarButtonComponentProps) {
   return <GenericTextToolbarButton
-    Icon={SubscriptToolIcon} slateType={EFormat.subscript} toggleFunc={toggleSupSub}/>;
+    name={name} Icon={SubscriptToolIcon} slateType={EFormat.subscript} toggleFunc={toggleSupSub}/>;
 }
 
-function SuperscriptToolbarButton() {
+function SuperscriptToolbarButton({name}: IToolbarButtonComponentProps) {
   return <GenericTextToolbarButton
-    Icon={SuperscriptToolIcon} slateType={EFormat.superscript} toggleFunc={toggleSupSub}/>;
+    name={name} Icon={SuperscriptToolIcon} slateType={EFormat.superscript} toggleFunc={toggleSupSub}/>;
 }
 
-function NumberedListToolbarButton() {
+function NumberedListToolbarButton({name}: IToolbarButtonComponentProps) {
   return <GenericTextToolbarButton
-    Icon={NumberedListToolIcon} slateType={EFormat.numberedList} toggleFunc={toggleElement}/>;
+    name={name} Icon={NumberedListToolIcon} slateType={EFormat.numberedList} toggleFunc={toggleElement}/>;
 }
 
-function BulletedListToolbarButton() {
+function BulletedListToolbarButton({name}: IToolbarButtonComponentProps) {
   return <GenericTextToolbarButton
-    Icon={BulletedListToolIcon} slateType={EFormat.bulletedList} toggleFunc={toggleElement}/>;
+    name={name} Icon={BulletedListToolIcon} slateType={EFormat.bulletedList} toggleFunc={toggleElement}/>;
 }
 
 registerTileToolbarButtons('text',

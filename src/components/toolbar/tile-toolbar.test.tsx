@@ -19,7 +19,7 @@ import { specAppConfig } from "../../models/stores/spec-app-config";
 const clickHandler = jest.fn();
 
 function SampleToolbarButton() {
-  return <TileToolbarButton onClick={clickHandler}><CopyIcon/></TileToolbarButton>;
+  return <TileToolbarButton name="test-button" onClick={clickHandler}><CopyIcon/></TileToolbarButton>;
 }
 
 const sampleButtons = [
@@ -55,7 +55,7 @@ function SampleTile({type, model}: ISampleTileProps) {
 describe("Tile toolbar button", () => {
 
   it("can render a button", () => {
-    render(<TileToolbarButton onClick={clickHandler}><CopyIcon/></TileToolbarButton>);
+    render(<TileToolbarButton name="test-button" onClick={clickHandler}><CopyIcon/></TileToolbarButton>);
 
     expect(screen.getByRole("button")).toBeInTheDocument();
     expect(screen.getByRole("button")).toContainHTML("<svg");

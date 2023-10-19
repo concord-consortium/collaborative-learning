@@ -5,8 +5,9 @@ import { useLinkDialog } from "../dialog/use-link-dialog";
 
 import LinkToolIcon from "../../../../assets/icons/text/link-text-icon.svg";
 import { TileToolbarButton } from "../../../toolbar/tile-toolbar-button";
+import { IToolbarButtonComponentProps } from "../../../toolbar/toolbar-button-manager";
 
-export const LinkButton = () => {
+export const LinkButton = ({name}: IToolbarButtonComponentProps) => {
   const editor = useSlate();
   const { selection } = editor;
   const isCollapsed = selection ? Range.isCollapsed(selection) : true;
@@ -25,7 +26,7 @@ export const LinkButton = () => {
     showModal();
   };
   return(
-    <TileToolbarButton disabled={disabled} selected={isSelected} onClick={handleClick}>
+    <TileToolbarButton name={name} disabled={disabled} selected={isSelected} onClick={handleClick}>
       <LinkToolIcon/>
     </TileToolbarButton>
   );

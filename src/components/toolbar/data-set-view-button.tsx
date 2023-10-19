@@ -8,10 +8,11 @@ import { BadgedIcon } from "./badged-icon";
 import ViewBadgeIcon from "../../assets/icons/view/view-badge.svg";
 
 interface IProps {
+  name: string;
   args?: string[];
 }
 
-export function DataSetViewButton({args}: IProps) {
+export function DataSetViewButton({name, args}: IProps) {
   const addTilesContext = useContext(AddTilesContext);
   const tile = useContext(TileModelContext);
 
@@ -41,7 +42,7 @@ export function DataSetViewButton({args}: IProps) {
 
   return (
     <TileToolbarButton
-        onClick={handleClick}
+        name={name} onClick={handleClick}
     >
       {Icon ? <BadgedIcon Icon={Icon} Badge={ViewBadgeIcon}/> : "??"}
     </TileToolbarButton>

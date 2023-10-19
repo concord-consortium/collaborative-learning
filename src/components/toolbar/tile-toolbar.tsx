@@ -86,7 +86,7 @@ export const TileToolbar = observer(
         const info = getToolbarButtonInfo(tileType, name);
         if (info) {
           const Button = info?.component;
-          const buttonElt = buttonHasArg ? <Button args={desc}/> : <Button/>;
+          const buttonElt = buttonHasArg ? <Button name={name} args={desc}/> : <Button name={name}/>;
           const tooltip = formatTooltip(desc, info);
           return (
             <Tooltip key={name} title={tooltip} {...tipOptions} >
@@ -109,7 +109,7 @@ export const TileToolbar = observer(
           data-testid="tile-toolbar"
           style={toolbarStyles}
           className={classNames("tile-toolbar",
-            `tile-toolbar-${tileType}`,
+            `${tileType}-toolbar`,
             toolbarPlacement,
             { "disabled": !enabled })}
         >
