@@ -9,6 +9,7 @@ import {AxisPlace} from "../imports/components/axis/axis-types";
 import {
   AxisModelUnion, EmptyAxisModel, IAxisModelUnion, NumericAxisModel
 } from "../imports/components/axis/models/axis-model";
+import { GraphPlace } from "../imports/components/axis-graph-shared";
 import {
   GraphAttrRole, hoverRadiusFactor, kDefaultNumericAxisBounds, kGraphTileType, PlotType, PlotTypes,
   pointRadiusLogBase, pointRadiusMax, pointRadiusMin, pointRadiusSelectionAddend
@@ -74,6 +75,7 @@ export const GraphModel = TileContentModel
   })
   .volatile(self => ({
     prevDataSetId: "",
+    autoAssignedAttributes: [] as Array<{ place: GraphPlace, role: GraphAttrRole, dataSetID: string, attrID: string }>,
     disposeDataSetListener: undefined as (() => void) | undefined
   }))
   .views(self => ({
@@ -228,6 +230,12 @@ export const GraphModel = TileContentModel
       }
       self.updateAdornments(true);
     },
+    removeYAttributeID(attrID: string) {
+      self.config.removeYAttribute(attrID);
+    },
+    replaceYAttributeID(oldAttrId: string, newAttrId: string) {
+      self.config.replaceYAttribute(oldAttrId, newAttrId);
+    },
     setPlotType(type: PlotType) {
       self.plotType = type;
     },
@@ -275,6 +283,15 @@ export const GraphModel = TileContentModel
     }
   }))
   .actions(self => ({
+    autoAssignAttributeID(place: GraphPlace, role: GraphAttrRole, dataSetID: string, attrID: string) {
+      self.setAttributeID(role, dataSetID, attrID);
+      self.autoAssignedAttributes.push({ place, role, dataSetID, attrID });
+    },
+    clearAutoAssignedAttributes() {
+      self.autoAssignedAttributes = [];
+    }
+  }))
+  .actions(self => ({
     configureLinkedGraph() {
       if (!self.data) {
         console.warn("GraphModel.configureLinkedGraph requires a dataset");
@@ -291,9 +308,9 @@ export const GraphModel = TileContentModel
         const isValidYAttr = !!self.data.attrFromID(yAttrId);
 
         if (!isValidXAttr && !isValidYAttr) {
-          self.setAttributeID("x", self.data.id, self.data.attributes[0].id);
+          self.autoAssignAttributeID("bottom", "x", self.data.id, self.data.attributes[0].id);
           if (attributeCount > 1) {
-            self.setAttributeID("y", self.data.id, self.data.attributes[1].id);
+            self.autoAssignAttributeID("left", "y", self.data.id, self.data.attributes[1].id);
           }
         }
       }
@@ -347,10 +364,10 @@ export const GraphModel = TileContentModel
       addDisposer(self, reaction(
         () => self.data,
         data => {
-          if (!self.metadata && data){
+          const sharedModelManager = getSharedModelManager(self);
+          if (!self.metadata && data) {
             const caseMetadata = SharedCaseMetadata.create();
             caseMetadata.setData(data);
-            const sharedModelManager = getSharedModelManager(self);
             sharedModelManager?.addTileSharedModel(self, caseMetadata);
           }
           // CHECKME: this will only work correctly if setDataset doesn't
@@ -373,10 +390,10 @@ export const GraphModel = TileContentModel
           if (self.data) {
             self.configureLinkedGraph();
           }
-          else {
+          else if (sharedModelManager?.isReady) {
             self.configureUnlinkedGraph();
           }
-        }
+        }, { fireImmediately: true }
       ));
     }
   }));
@@ -413,9 +430,29 @@ export interface SetAttributeIDAction extends ISerializedActionCall {
   name: "setAttributeID"
   args: [GraphAttrRole, string, string]
 }
-
 export function isSetAttributeIDAction(action: ISerializedActionCall): action is SetAttributeIDAction {
   return action.name === "setAttributeID";
+}
+
+export interface RemoveYAttributeAction extends ISerializedActionCall {
+  name: "removeYAttributeID",
+  args: [string]
+}
+export function isRemoveYAttributeAction(action: ISerializedActionCall): action is RemoveYAttributeAction {
+  return action.name === "removeYAttributeID";
+}
+
+export interface ReplaceYAttributeAction extends ISerializedActionCall {
+  name: "replaceYAttributeID",
+  args: [string, string]
+}
+export function isReplaceYAttributeAction(action: ISerializedActionCall): action is ReplaceYAttributeAction {
+  return action.name === "replaceYAttributeID";
+}
+
+export type AttributeAssignmentAction = SetAttributeIDAction | RemoveYAttributeAction | ReplaceYAttributeAction;
+export function isAttributeAssignmentAction(action: ISerializedActionCall): action is AttributeAssignmentAction {
+  return ["setAttributeID", "removeYAttributeID", "replaceYAttributeID"].includes(action.name);
 }
 
 export interface SetGraphVisualPropsAction extends ISerializedActionCall {
