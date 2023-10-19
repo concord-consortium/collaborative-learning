@@ -11,6 +11,10 @@ class NumberlineToolTile {
   getNumberlineTileTitle(workspaceClass){
     return cy.get(`${workspaceClass || ".primary-workspace"} .editable-tile-title`);
   }
+  addPointOnNumberlineTick(num){
+    console.log("\t🏭 addPointOnNumberlineTick, num:", num);
+    this.getNumberlineTick(num).click();
+  }
   getNumberlineTick(num){
 
     console.log("📁 NumberlineToolTile.js ------------------------");
@@ -30,10 +34,7 @@ class NumberlineToolTile {
   deleteAllPointsOnNumberline(){
     this.getClearButton().click();
   }
-  addPointOnNumberlineTick(num){
-    console.log("\t🏭 addPointOnNumberlineTick, num:", num);
-    this.getNumberlineTick(num).click();
-  }
+
 }
 
 export default NumberlineToolTile;

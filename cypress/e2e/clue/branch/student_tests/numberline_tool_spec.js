@@ -31,7 +31,9 @@ context('Numberline Tile', function () {
     });
     it('will test adding points to a numberline', () => {
       cy.log("add points to numberline");
-      numberlineToolTile.addPointOnNumberlineTick(-4.0);
+      // numberlineToolTile.addPointOnNumberlineTick(-4.0);
+      numberlineToolTile.getNumberlineTick(-4.0).click();
+
       numberlineToolTile.addPointOnNumberlineTick(2.0);
       cy.pause();
       numberlineToolTile.getPointsOnGraph().should('have.length', 2);
