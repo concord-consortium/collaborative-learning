@@ -12,6 +12,9 @@ interface IProps {
   args: string[];
 }
 
+/**
+ * Deprecated; Tiles should move to the shared toolbar components in src/components/toolbar
+ */
 export const DataSetViewButton: React.FC<IProps> = ({args}) => {
   const addTilesContext = useContext(AddTilesContext);
   const tile = useContext(TileModelContext);
