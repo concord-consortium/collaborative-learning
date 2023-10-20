@@ -40,14 +40,13 @@ import "./graph-clue-styles.scss";
 
 interface IProps {
   graphController: GraphController;
-  readOnly: boolean;
   graphRef: MutableRefObject<HTMLDivElement | null>;
   dotsRef: IDotsRef;
   onRequestRowHeight?: (id: string, size: number) => void;
 }
 
 export const Graph = observer(
-    function Graph({ graphController, readOnly, graphRef, dotsRef, onRequestRowHeight }: IProps) {
+    function Graph({ graphController, graphRef, dotsRef, onRequestRowHeight }: IProps) {
 
   const graphModel = useGraphModelContext(),
     {autoAdjustAxes, enableAnimation} = graphController,
@@ -236,7 +235,6 @@ export const Graph = observer(
         { appConfig.getSetting("defaultSeriesLegend", "graph") &&
           <MultiLegend
             graphElt={graphRef.current}
-            readOnly={readOnly}
             onChangeAttribute={handleChangeAttribute}
             onRemoveAttribute={handleRemoveAttribute}
             onTreatAttributeAs={handleTreatAttrAs}

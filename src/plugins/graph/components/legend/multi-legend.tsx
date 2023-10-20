@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import { observer } from "mobx-react";
 import {AttributeType} from "../../../../models/data/attribute";
 import { GraphPlace } from "../../imports/components/axis-graph-shared";
@@ -15,10 +15,10 @@ export const kMultiLegendPadding = 20;
 export const kMultiLegendVerticalGap = 10;
 
 import "./multi-legend.scss";
+import { ReadOnlyContext } from "../../../../components/document/read-only-context";
 
 interface IMultiLegendProps {
   graphElt: HTMLDivElement | null;
-  readOnly: boolean;
   onChangeAttribute: (place: GraphPlace, dataSet: IDataSet, attrId: string, oldAttrId?: string) => void;
   onRemoveAttribute: (place: GraphPlace, attrId: string) => void;
   onTreatAttributeAs: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void;
@@ -26,7 +26,7 @@ interface IMultiLegendProps {
 }
 
 export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProps) {
-  const {readOnly, onChangeAttribute, onRemoveAttribute, onTreatAttributeAs, onRequestRowHeight} = props;
+  const {onChangeAttribute, onRemoveAttribute, onTreatAttributeAs, onRequestRowHeight} = props;
   const layout = useGraphLayoutContext();
   const legendBounds = layout.computedBounds.legend;
   const transform = `translate(${legendBounds.left}, ${legendBounds.top})`;
@@ -35,6 +35,8 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
   const instanceId = useInstanceIdContext();
 
   const yAttributeCount = dataConfiguration?.yAttributeDescriptions.length || 0;
+
+  const readOnly = useContext(ReadOnlyContext);
 
   useEffect(() =>{
     const legendTransform = `translateY(${-layout.computedBounds.legend.height}px)`;
@@ -63,7 +65,6 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
         place={'left'}
         index={index}
         attrId={description.attributeID}
-        readOnly={readOnly}
         onChangeAttribute={onChangeAttribute}
         onRemoveAttribute={onRemoveAttribute}
         onTreatAttributeAs={onTreatAttributeAs}

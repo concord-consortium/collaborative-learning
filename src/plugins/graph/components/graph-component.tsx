@@ -18,12 +18,11 @@ import { IDataSet } from '../../../models/data/data-set';
 
 interface IGraphComponentProps extends ITileBaseProps {
   data?: IDataSet;
-  readOnly: boolean;
   layout: GraphLayout;
   onRequestRowHeight?: (id: string, size: number) => void;
 }
 export const GraphComponent = observer(
-    function GraphComponent({ data, readOnly, layout, tile, onRequestRowHeight }: IGraphComponentProps) {
+    function GraphComponent({ data, layout, tile, onRequestRowHeight }: IGraphComponentProps) {
   const graphModel = isGraphModel(tile?.content) ? tile?.content : undefined;
 
   const instanceId = useNextInstanceId("graph");
@@ -62,7 +61,6 @@ export const GraphComponent = observer(
           <AxisLayoutContext.Provider value={layout}>
             <GraphModelContext.Provider value={graphModel}>
               <Graph graphController={graphController}
-                readOnly={readOnly}
                 graphRef={graphRef}
                 dotsRef={dotsRef}
                 onRequestRowHeight={onRequestRowHeight}

@@ -213,7 +213,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       const document = groupDoc(cornerIndex);
       // Only the user's document is editable, but not if they're a ghost user
       // (Ghost users do not own group documents and cannot edit others')
-      const readOnly = cornerIndex !== 0 || isGhostUser;
+      const readOnly = cornerIndex !== 0 || !!isGhostUser;
       return <CanvasComponent
         context={cornerLabel}
         document={document}
