@@ -99,6 +99,9 @@ export const GraphModel = TileContentModel
     }
   }))
   .views(self => ({
+    /**
+     * Returns the first shared model found -- TODO obsolete.
+     */
     get data() {
       return getTileDataSet(self);
     },
@@ -402,6 +405,7 @@ export const GraphModel = TileContentModel
   }))
   .actions(self => ({
     updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
+
       // We need to figure out how to know if we need to update the
       // dataSet. The config.dataSet is volatile, but setting it
       // might also update state in the config I'm not sure
@@ -413,6 +417,11 @@ export const GraphModel = TileContentModel
       // Note this will also happen in the reaction below
       // we do it here just to be safe incase this function is called
       // first
+
+      // TODO: The behavior below will be replaced by something that
+      // gets all currently linked models and matches them into layers
+      // we need to keep layers and linked datasets mapped to one another
+      console.log("| self.data", self.data);
       if (self.data !== self.config.dataset) {
         self.config.setDataset(self.data, self.metadata);
       }
