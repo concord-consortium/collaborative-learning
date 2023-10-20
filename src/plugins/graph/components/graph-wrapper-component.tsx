@@ -3,10 +3,8 @@ import classNames from "classnames";
 import { observer } from "mobx-react-lite";
 
 import { kSmallAnnotationNodeRadius } from "../../../components/annotations/annotation-utilities";
-import { useToolbarTileApi } from "../../../components/tiles/hooks/use-toolbar-tile-api";
 import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
 import { ITileProps } from "../../../components/tiles/tile-component";
-import { useProviderTileLinking } from "../../../hooks/use-provider-tile-linking";
 import { OffsetModel } from "../../../models/annotations/clue-object";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { useInitGraphLayout } from "../hooks/use-init-graph-layout";
@@ -15,7 +13,9 @@ import { useDataSet } from "../imports/hooks/use-data-set";
 import { IGraphModel } from "../models/graph-model";
 import { decipherDotId } from "../utilities/graph-utils";
 import { GraphComponent } from "./graph-component";
-import { GraphToolbar } from "./graph-toolbar";
+import { TileToolbar } from "../../../components/toolbar/tile-toolbar";
+
+import "./graph-toolbar-registration";
 
 import "./graph-wrapper-component.scss";
 
@@ -26,11 +26,6 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
   } = props;
   const enabled = !readOnly;
   const content = model.content as IGraphModel;
-  const toolbarProps = useToolbarTileApi({ id: model.id, enabled, onRegisterTileApi, onUnregisterTileApi });
-
-  const { isLinkEnabled, showLinkTileDialog } = useProviderTileLinking({
-    model, readOnly
-  });
 
   const { data } = useDataSet(content?.data);
   const layout = useInitGraphLayout(content);
@@ -120,16 +115,7 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
 
   return (
     <div className={classNames("graph-wrapper", { "read-only": readOnly })}>
-      <GraphToolbar
-        documentContent={documentContent}
-        documentId={documentId}
-        tileElt={tileElt}
-        scale={scale}
-        model={model}
-        content={content} {...toolbarProps}
-        isLinkEnabled={isLinkEnabled}
-        onLinkTableButtonClick={showLinkTileDialog}
-      />
+      <TileToolbar tileType="graph" readOnly={!!readOnly} tileElement={tileElt}/>
       <BasicEditableTileTitle readOnly={readOnly} />
       <GraphComponent data={data} layout={layout} tile={model} onRequestRowHeight={onRequestRowHeight} />
     </div>
