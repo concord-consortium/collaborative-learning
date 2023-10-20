@@ -562,6 +562,14 @@
         {
             "classIndex" : 2,
             "className": "CLUE B"
+        },
+        {
+            "classIndex" : 3,
+            "className": "CLUE C"
+        },
+        {
+            "classIndex" : 4,
+            "className": "CLUE D"
         }
     ]
 }
