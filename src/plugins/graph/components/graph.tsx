@@ -173,7 +173,6 @@ export const Graph = observer(
                         onDropAttribute={handleChangeAttribute}
                         onRemoveAttribute={handleRemoveAttribute}
                         onTreatAttributeAs={handleTreatAttrAs}
-                        yAttrsPlotted={yAttrsPlotted}
       />;
     });
   };

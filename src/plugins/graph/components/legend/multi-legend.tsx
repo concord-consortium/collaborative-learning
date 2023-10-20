@@ -52,16 +52,6 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
     onRequestRowHeight?.(instanceId, kGraphDefaultHeight + legendHeight);
   }, [instanceId, layout, onRequestRowHeight, yAttributeCount]);
 
-  //-----------Plotted Y Attributes ----------------
-  // const [plottedYAttributes, setPlottedYAttributes] = useState<string[]>([]);
-  const yAttributeIdsPlotted = dataConfiguration?.yAttributeDescriptions.map((a)=>a.attributeID) || [];
-
-
-  // useEffect(() => {
-  //   setPlottedYatt
-
-  // }, [dataConfiguration?.yAttributeDescriptions]);
-
 
   //-----------Legend Items ----------------
   let legendItems = [] as React.ReactNode[];
@@ -77,7 +67,6 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
         onChangeAttribute={onChangeAttribute}
         onRemoveAttribute={onRemoveAttribute}
         onTreatAttributeAs={onTreatAttributeAs}
-        yAttrsPlotted={yAttributeIdsPlotted}
       />);
     legendItems.push(<AddSeriesButton/>);
   }

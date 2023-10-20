@@ -30,7 +30,6 @@ interface IProps {
   onDropAttribute?: (place: GraphPlace, dataSet: IDataSet, attrId: string) => void
   onRemoveAttribute?: (place: GraphPlace, attrId: string) => void
   onTreatAttributeAs?: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void
-  yAttrsPlotted: string[];
 }
 
 export const GraphAxis = observer(function GraphAxis({
@@ -145,7 +144,6 @@ export const GraphAxis = observer(function GraphAxis({
         onChangeAttribute={onDropAttribute}
         onRemoveAttribute={onRemoveAttribute}
         onTreatAttributeAs={onTreatAttributeAs}
-        yAttrsPlotted={yAttrsPlotted}
       />
       {onDropAttribute &&
          <DroppableAxis

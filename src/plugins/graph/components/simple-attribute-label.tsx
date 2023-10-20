@@ -20,13 +20,11 @@ interface ISimpleAttributeLabelProps {
   onChangeAttribute?: (place: GraphPlace, dataSet: IDataSet, attrId: string, oldAttrId?: string) => void
   onRemoveAttribute?: (place: GraphPlace, attrId: string) => void
   onTreatAttributeAs?: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void
-  yAttrsPlotted: string[];
 }
 
 export const SimpleAttributeLabel = observer(
   function SimpleAttributeLabel(props: ISimpleAttributeLabelProps) {
-    const { place, index, attrId, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute, yAttrsPlotted } = props;
-    // console.log("\t🥩 attrId:", attrId);
+    const { place, index, attrId, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute } = props;
 
     // Must be State, not Ref, so that the menu gets re-rendered when this becomes non-null
     const [simpleLabelElement, setSimpleLabelElement] = useState<HTMLDivElement|null>(null);
@@ -64,7 +62,6 @@ export const SimpleAttributeLabel = observer(
             onRemoveAttribute={onRemoveAttribute}
             onTreatAttributeAs={onTreatAttributeAs}
             onOpenClose={handleOpenClose}
-            yAttrsPlotted={yAttrsPlotted}
           />, graphElement)
         }
       </>

@@ -24,7 +24,6 @@ interface IAttributeLabelProps {
   onChangeAttribute?: (place: GraphPlace, dataSet: IDataSet, attrId: string) => void
   onRemoveAttribute?: (place: GraphPlace, attrId: string) => void
   onTreatAttributeAs?: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void
-  yAttrsPlotted: string[]
 }
 
 export const AttributeLabel = observer(
@@ -175,7 +174,6 @@ export const AttributeLabel = observer(
             onChangeAttribute={onChangeAttribute}
             onRemoveAttribute={onRemoveAttribute}
             onTreatAttributeAs={onTreatAttributeAs}
-            yAttrsPlotted={yAttrsPlotted}
           />, parentElt)
         }
       </>
