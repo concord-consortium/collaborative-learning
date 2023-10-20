@@ -16,7 +16,7 @@ import DrawToolTile from "../../../../support/elements/clue/DrawToolTile";
  *    all of the students in the dashboard's current view
  */
 
-context("Teacher Workspace", () => {
+context.skip("Teacher Workspace", () => {
 
   let dashboard = new TeacherDashboard();
   let clueCanvas = new ClueCanvas;

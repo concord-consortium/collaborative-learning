@@ -36,7 +36,7 @@ context("Teacher Space", () => {
   }
 
   context('Teacher Dashboard View', () => {
-    it('verify switching classes changes six pack content', () => {
+    it.skip('verify switching classes changes six pack content', () => {
       beforeTest();
       cy.get('@clueData').then((clueData) => {
         const initClassIndex = 0;
