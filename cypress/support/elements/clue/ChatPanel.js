@@ -113,7 +113,6 @@ class ChatPanel{
       this.getCommentFromThread().should("contain", commentText);
     }
     verifyCommentThreadDoesNotContain(commentText) {
-      // this.getCommentFromThread().should("not.contain", commentText);
       this.getChatPanel().should("not.contain", commentText);
     }
     verifyCommentThreadDoesNotExist() {
@@ -154,7 +153,6 @@ class ChatPanel{
     }
     deleteCommentTagThread(tagToDelete) {
       this.getCommentTagDeleteMessageButton(tagToDelete).click({force:true});
-      // this.getCommentTagDeleteMessageButton(tagToDelete).click();
       this.getDeleteConfirmModalButton().contains("Delete").click();
       cy.wait(2000);
       this.getCommentTagFromThread().should("not.exist");

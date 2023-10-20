@@ -109,11 +109,9 @@ describe('Teachers can communicate back and forth in chat panel', () => {
     chatPanel.getCommentFromThread().should("not.contain", teacher1DocComment);
     chatPanel.getDeleteMessageButton(teacher2DocComment).click();
     cy.get(".confirm-delete-alert button").contains("Delete").click();
-    // chatPanel.getCommentFromThread().should("not.contain", teacher2DocComment);
     cy.clickProblemResourceTile('introduction');
     chatPanel.getCommentFromThread().should("not.contain", teacher1TileComment);
     chatPanel.getDeleteMessageButton(teacher2TileComment).click();
     cy.get(".confirm-delete-alert button").contains("Delete").click();
-    // chatPanel.getCommentFromThread().should("not.contain", teacher2TileComment);
   });
 });
