@@ -59,8 +59,7 @@ export const EditableNumberlineValue: React.FC<IEditableValueProps> = observer(f
 
   //----------------------- Determine Styling for Border Box -----------------------
   const borderBoxOffset = `${offset + 4}px`;
-  const borderBoxPositionProperty = (minOrMax === "min") ? { left: borderBoxOffset } : { right: borderBoxOffset };
-  const borderBoxStyle = { ...borderBoxPositionProperty };
+  const borderBoxStyle = (minOrMax === "min") ? { left: borderBoxOffset } : { right: borderBoxOffset };
   const borderClasses = classNames("border-box", {hide: !isTileSelected});
 
   return (

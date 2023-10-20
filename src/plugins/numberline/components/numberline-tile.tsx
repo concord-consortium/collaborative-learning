@@ -264,7 +264,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     if (value === content.min || value === content.max) {
       return '';
     }
-    return value.toFixed(1).toString();
+    return value.toFixed(1);
   };
 
   if (axisWidth !== 0) {
