@@ -9,13 +9,13 @@ import { useDataConfigurationContext } from "../../hooks/use-data-configuration-
 import { AddSeriesButton } from "./add-series-button";
 import { useInstanceIdContext } from "../../imports/hooks/use-instance-id-context";
 import { kGraphDefaultHeight } from "../../graph-types";
+import { ReadOnlyContext } from "../../../../components/document/read-only-context";
 
 export const kMultiLegendMenuHeight = 30;
 export const kMultiLegendPadding = 20;
 export const kMultiLegendVerticalGap = 10;
 
 import "./multi-legend.scss";
-import { ReadOnlyContext } from "../../../../components/document/read-only-context";
 
 interface IMultiLegendProps {
   graphElt: HTMLDivElement | null;

@@ -88,25 +88,25 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
     return (
       <TileApiInterfaceContext.Provider value={this.tileApiInterface}>
         <AddTilesContext.Provider value={this.getDocumentContent() || null}>
-          <ReadOnlyContext.Provider value={!!this.props.readOnly}>
-          <div
-            key="canvas"
-            className="canvas"
-            data-test="canvas"
-            onKeyDown={this.handleKeyDown}
-            ref={(el) => this.setCanvasElement(el)}
-          >
-            {this.renderContent()}
-            {this.renderDebugInfo()}
-            {this.renderOverlayMessage()}
-          </div>
-          <AnnotationLayer
-            canvasElement={this.state.canvasElement}
-            content={content}
-            documentScrollX={this.state.documentScrollX}
-            documentScrollY={this.state.documentScrollY}
-            readOnly={this.props.readOnly}
-          />
+          <ReadOnlyContext.Provider value={this.props.readOnly}>
+            <div
+              key="canvas"
+              className="canvas"
+              data-test="canvas"
+              onKeyDown={this.handleKeyDown}
+              ref={(el) => this.setCanvasElement(el)}
+            >
+              {this.renderContent()}
+              {this.renderDebugInfo()}
+              {this.renderOverlayMessage()}
+            </div>
+            <AnnotationLayer
+              canvasElement={this.state.canvasElement}
+              content={content}
+              documentScrollX={this.state.documentScrollX}
+              documentScrollY={this.state.documentScrollY}
+              readOnly={this.props.readOnly}
+            />
           </ReadOnlyContext.Provider>
         </AddTilesContext.Provider>
       </TileApiInterfaceContext.Provider>
