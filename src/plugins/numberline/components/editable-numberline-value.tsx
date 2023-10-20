@@ -21,7 +21,6 @@ export const EditableNumberlineValue: React.FC<IEditableValueProps> = observer(f
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
-      console.log("inside useEffect");
       inputRef.current.select();
     }
   }, [isEditing]);
@@ -45,7 +44,6 @@ export const EditableNumberlineValue: React.FC<IEditableValueProps> = observer(f
         break;
       }
       case "Escape":
-      case "Tab":
         setIsEditing(false);
         break;
     }
