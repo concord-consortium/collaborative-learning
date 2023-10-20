@@ -21,6 +21,8 @@ describe('GraphModel', () => {
     expect(graphModel.plotBackgroundLockInfo).toBe(undefined);
     expect(graphModel.showParentToggles).toBe(false);
     expect(graphModel.showMeasuresForSelection).toBe(false);
+    expect(graphModel.layers.length).toBe(1);
+    expect(graphModel.layers[0].config).toBeTruthy();
   });
   it('should show and hide adornments', () => {
     const graphModel = GraphModel.create();
