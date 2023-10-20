@@ -90,6 +90,10 @@ export const GraphModel = TileContentModel
     return snapshot;
   })
   .views(self => ({
+    /**
+     * Transitional way to get the layer 0 DataConfiguration.
+     * This method will be removed when we are fully transitioned to layers.
+     */
     get config() {
       return self.layers[0].config;
     }
@@ -117,12 +121,33 @@ export const GraphModel = TileContentModel
     getAxis(place: AxisPlace) {
       return self.axes.get(place);
     },
+    /**
+     * Return a single attributeID of those in use for the given role.
+     * If none is found, returns an empty string.
+     */
     getAttributeID(place: GraphAttrRole) {
-      return self.config.attributeID(place) ?? '';
+      for(const layer of self.layers) {
+        const id = layer.config.attributeID(place);
+        if (id) return id;
+      }
+      // This is for backwards compatibility, probably should be 'undefined'
+      return '';
     },
+    /**
+     * Return the count of cases in all graph layers.
+     */
+    get totalNumberOfCases() {
+      return self.layers.reduce((prev, layer) => prev+layer.config.caseDataArray.length, 0);
+    },
+    /**
+     * Radius of points to draw on the graph.
+     * This is based on the total number of points that there are.
+     * Currently considers the number of points in all layers; not sure if that is correct
+     * or if this method should be per-layer.
+     */
     getPointRadius(use: 'normal' | 'hover-drag' | 'select' = 'normal') {
       let r = pointRadiusMax;
-      const numPoints = self.config.caseDataArray.length;
+      const numPoints = this.totalNumberOfCases;
       // for loop is fast equivalent to radius = max( minSize, maxSize - floor( log( logBase, max( dataLength, 1 )))
       for (let i = pointRadiusLogBase; i <= numPoints; i = i * pointRadiusLogBase) {
         --r;
@@ -167,6 +192,7 @@ export const GraphModel = TileContentModel
       });
       return objects;
     },
+    // TODO: I don't know what this does, but probably should be moved to layer?
     getUpdateCategoriesOptions(resetPoints=false): IUpdateCategoriesOptions {
       const xAttrId = self.getAttributeID("x"),
         xAttrType = self.config.attributeType("x"),
@@ -205,8 +231,12 @@ export const GraphModel = TileContentModel
   .actions(self => ({
     afterCreate() {
       const initialLayer = GraphLayerModel.create();
-      console.log('creating a default layer');
-      self.layers.push(initialLayer);
+      if (!self.layers.length) {
+        // TODO: Current code expects there to never be an empty set of layers.
+        // But explicitly defining an empty XY Plot this way might be sensible.
+        console.log('creating a default layer');
+        self.layers.push(initialLayer);
+      }
     },
     setDataSetListener() {
       const actionsAffectingCategories = [
@@ -237,10 +267,19 @@ export const GraphModel = TileContentModel
     removeAxis(place: AxisPlace) {
       self.axes.delete(place);
     },
+    /**
+     * Use the given Attribute for the given graph role.
+     * Will remove any other attributes that may have that role.
+     * If the Attribute is part of a different DataSet, unlinks
+     * the current DataSet and links to the new one.
+     *
+     * TODO: this will need heavy modification to work with multiple layers.
+     */
     setAttributeID(role: GraphAttrRole, dataSetID: string, id: string) {
       const newDataSet = getDataSetFromId(self, dataSetID);
       if (newDataSet && !isTileLinkedToDataSet(self, newDataSet)) {
-        linkTileToDataSet(self, newDataSet);
+        linkTileToDataSet(self, newDataSet); // unlinks any current links
+        // TODO also remove Layers
         self.config.clearAttributes();
         self.config.setDataset(newDataSet, getTileCaseMetadata(self));
       }
@@ -251,11 +290,23 @@ export const GraphModel = TileContentModel
       }
       self.updateAdornments(true);
     },
+    /**
+     * Find Y attribute with the given ID in any layer and remove it if found.
+     */
     removeYAttributeID(attrID: string) {
-      self.config.removeYAttribute(attrID);
+      self.layers.forEach((layer) => layer.config.removeYAttribute(attrID));
     },
+    /**
+     * Find Y attribute with given ID in any layer, and replace it with the new attribute.
+     * Old and new attributes must belong to the same DataSet/Layer.
+     */
     replaceYAttributeID(oldAttrId: string, newAttrId: string) {
-      self.config.replaceYAttribute(oldAttrId, newAttrId);
+      const layer = self.layers.find((l) => l.config.includesAttributeID(oldAttrId));
+      if (layer) {
+        layer.config.replaceYAttribute(oldAttrId, newAttrId);
+      } else {
+        console.log('replaceee not found');
+      }
     },
     setPlotType(type: PlotType) {
       self.plotType = type;

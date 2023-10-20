@@ -86,6 +86,18 @@ export const DataConfigurationModel = types
       return this.yAttributeDescriptions.map((d: IAttributeDescriptionSnapshot) => d.attributeID);
     },
     /**
+     * Return true if the given attribute ID is present in any role.
+     */
+    includesAttributeID(id: string) {
+      for (const desc of self._attributeDescriptions.values()) {
+        if (desc.attributeID===id) return true;
+      }
+      for (const desc of self._yAttributeDescriptions) {
+        if (desc.attributeID===id) return true;
+      }
+      return false;
+    },
+    /**
      * No attribute descriptions beyond the first for y are returned.
      * The rightNumeric attribute description is also not returned.
      */
@@ -103,6 +115,7 @@ export const DataConfigurationModel = types
       return self.dataset?.attributes[0]?.id;
     },
     /**
+     * Return a single attributeDescription in use for the given role.
      * For the 'y' role we return the first y-attribute, for 'rightNumeric' we return the last y-attribute.
      * For all other roles we return the attribute description for the role.
      */
@@ -111,6 +124,9 @@ export const DataConfigurationModel = types
         : role === 'rightNumeric' ? self._attributeDescriptions.get('rightNumeric')
           : this.attributeDescriptions[role];
     },
+    /**
+     * Return a single attributeID in use for the given role.
+     */
     attributeID(role: GraphAttrRole) {
       let attrID = this.attributeDescriptionForRole(role)?.attributeID;
       if ((role === "caption") && !attrID) {
