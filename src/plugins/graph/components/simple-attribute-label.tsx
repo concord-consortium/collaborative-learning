@@ -25,7 +25,6 @@ interface ISimpleAttributeLabelProps {
 export const SimpleAttributeLabel = observer(
   function SimpleAttributeLabel(props: ISimpleAttributeLabelProps) {
     const { place, index, attrId, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute } = props;
-
     // Must be State, not Ref, so that the menu gets re-rendered when this becomes non-null
     const [simpleLabelElement, setSimpleLabelElement] = useState<HTMLDivElement|null>(null);
     const graphElement = simpleLabelElement?.closest(kGraphClassSelector) as HTMLDivElement ?? null;

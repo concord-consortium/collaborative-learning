@@ -35,10 +35,6 @@ const removeAttrItemLabelKeys: Record<string, string> = {
 
 const _AxisOrLegendAttributeMenu = ({ place, attributeId, target, portal, onOpenClose, onChangeAttribute,
                                       onRemoveAttribute, onTreatAttributeAs }: IProps) => {
-
-
-  console.log("📁 axis-or-legend-attribute-menu.tsx ------------------------");
-
   const data = useDataSetContext();
   const dataConfig = useDataConfigurationContext();
   const yAttributesPlotted = dataConfig?.yAttributeDescriptions.map((a)=>a.attributeID);
@@ -96,10 +92,9 @@ const _AxisOrLegendAttributeMenu = ({ place, attributeId, target, portal, onOpen
                   </MenuItem>
                 }
                 { data?.attributes?.map((attr, idx) => {
-                  console.log("\t🥩 attr.Name:", attr.name);
                   //only show y attr that is not self, not the x axis, and not an already plotted Y
                   const isCurrent = attr.id === attributeId;
-                  const isXAxis = (idx === 0); // maybe replace with const isXaxis = (idx === 0 && attr.name === "x");
+                  const isXAxis = (idx === 0);
                   const isAPlottedYAttribute = yAttributesPlotted?.includes(attr.id);
                   const showAttr = (!isCurrent && !isXAxis && !isAPlottedYAttribute);
 

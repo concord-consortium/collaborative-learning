@@ -52,8 +52,6 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
     onRequestRowHeight?.(instanceId, kGraphDefaultHeight + legendHeight);
   }, [instanceId, layout, onRequestRowHeight, yAttributeCount]);
 
-
-  //-----------Legend Items ----------------
   let legendItems = [] as React.ReactNode[];
   if (dataConfiguration) {
     const yAttributes = dataConfiguration.yAttributeDescriptions;

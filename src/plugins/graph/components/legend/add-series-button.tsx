@@ -4,8 +4,6 @@ import { useGraphModelContext } from "../../models/graph-model";
 import AddSeriesIcon from "../../imports/assets/add-series-icon.svg";
 
 export const AddSeriesButton = observer(function AddSeriesButton() {
-  console.log("📁 add-series-button.tsx ------------------------");
-
   const graphModel = useGraphModelContext();
   const dataConfiguration = graphModel.config;
 
@@ -15,13 +13,7 @@ export const AddSeriesButton = observer(function AddSeriesButton() {
     if (!graphModel || !dataConfiguration?.dataset) return;
     const datasetAttributes = dataConfiguration.dataset.attributes;
     const xAttributeId = dataConfiguration._attributeDescriptions.get('x')?.attributeID;
-    // console.log("\t🥩 xAttributeId:", xAttributeId);
     const yAttributeIds = dataConfiguration.yAttributeDescriptions.map((a)=>a.attributeID);
-    // console.log("\t🥩 yAttributeIds:", yAttributeIds);
-    //
-    // console.log("\t🔪 datasetAttributes.find((attr) => attr.id!==xAttributeId && !yAttributeIds.includes(attr.id));:",
-    //             datasetAttributes.find((attr) => attr.id!==xAttributeId && !yAttributeIds.includes(attr.id)));
-
     return datasetAttributes.find((attr) => attr.id!==xAttributeId && !yAttributeIds.includes(attr.id));
   }
 
