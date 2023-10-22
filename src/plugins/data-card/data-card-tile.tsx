@@ -132,17 +132,27 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
     }
   };
 
-  function nextCase(){
+  function nextCase() {
     if (content.caseIndex < content.totalCases - 1) {
       content.setCaseIndex(content.caseIndex + 1);
     }
   }
 
-  function previousCase(){
+  const handleNextCase: React.MouseEventHandler<HTMLButtonElement> = e => {
+    e.stopPropagation();
+    nextCase();
+  };
+
+  function previousCase() {
     if (content.caseIndex > 0){
       content.setCaseIndex(content.caseIndex - 1);
     }
   }
+
+  const handlePreviousCase: React.MouseEventHandler<HTMLButtonElement> = e => {
+    e.stopPropagation();
+    previousCase();
+  };
 
   function setSort(event: React.ChangeEvent<HTMLSelectElement>){
     content.setSelectedSortAttributeId(event.target.value);
@@ -154,9 +164,8 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
   }
 
   function deleteCase(){
-    const thisCaseId = content.dataSet.caseIDFromIndex(content.caseIndex);
-    if (thisCaseId) {
-      content.dataSet.removeCases([thisCaseId]);
+    if (content.caseId) {
+      content.dataSet.removeCases([content.caseId]);
     }
     previousCase();
   }
@@ -173,9 +182,8 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
   });
 
   function handleDeleteCardClick(){
-    const thisCaseId = content.dataSet.caseIDFromIndex(content.caseIndex);
-    if (thisCaseId){
-      if (content.isEmptyCase(thisCaseId)){
+    if (content.caseId){
+      if (content.isEmptyCase(content.caseId)){
         deleteCase();
       } else {
         showAlert();
@@ -235,13 +243,12 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
       >
         <div className={highlightContainerClasses}>
           <div className="data-card-header-row">
-
             <div className="panel title">
-            <CustomEditableTileTitle
-              model={props.model}
-              onRequestUniqueTitle={props.onRequestUniqueTitle}
-              readOnly={props.readOnly}
-            />
+              <CustomEditableTileTitle
+                model={props.model}
+                onRequestUniqueTitle={props.onRequestUniqueTitle}
+                readOnly={props.readOnly}
+              />
             </div>
           </div>
 
@@ -253,43 +260,46 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
             />
           </div>
           { displaySingle &&
-            <div className="panel nav">
-              <div className="card-number-of-listing">
-                <div className="cell-text">
-                  { content.totalCases > 0
-                      ? `Card ${content.caseIndex + 1} of ${content.totalCases}`
-                      : "Add a card" }
+            <>
+              <div
+                className={classNames("panel nav", { "highlight-panel": content.caseHighlighted })}
+                onClick={() => content.dataSet.highlightCase(content.caseId)}
+              >
+                <div className="card-number-of-listing">
+                  <div className="cell-text">
+                    { content.totalCases > 0
+                        ? `Card ${content.caseIndex + 1} of ${content.totalCases}`
+                        : "Add a card" }
+                  </div>
                 </div>
-              </div>
-              <div className="card-nav-buttons">
-                <button className={ previousButtonClasses } onClick={previousCase}></button>
-                <button className={ nextButtonClasses } onClick={nextCase}></button>
-              </div>
-              { !readOnly &&
-                <div className="add-remove-card-buttons">
-                  <AddIconButton className={addCardClasses} onClick={addNewCase} />
-                  <RemoveIconButton className={removeCardClasses} onClick={handleDeleteCardClick} />
+                <div className="card-nav-buttons">
+                  <button className={ previousButtonClasses } onClick={handlePreviousCase}></button>
+                  <button className={ nextButtonClasses } onClick={handleNextCase}></button>
                 </div>
-              }
-            </div>
-          }
-          { displaySingle &&
-            <div className="single-card-data-area">
-              { content.totalCases > 0 &&
-                <DataCardRows
-                  caseIndex={content.caseIndex}
-                  model={model}
-                  totalCases={content.totalCases}
-                  readOnly={readOnly}
-                  currEditAttrId={currEditAttrId}
-                  currEditFacet={currEditFacet}
-                  setCurrEditAttrId={setCurrEditAttrId}
-                  setCurrEditFacet={setCurrEditFacet}
-                  imageUrlToAdd={imageUrlToAdd}
-                  setImageUrlToAdd={setImageUrlToAdd}
-                />
-              }
-            </div>
+                { !readOnly &&
+                  <div className="add-remove-card-buttons">
+                    <AddIconButton className={addCardClasses} onClick={addNewCase} />
+                    <RemoveIconButton className={removeCardClasses} onClick={handleDeleteCardClick} />
+                  </div>
+                }
+              </div>
+              <div className="single-card-data-area">
+                { content.totalCases > 0 &&
+                  <DataCardRows
+                    caseIndex={content.caseIndex}
+                    model={model}
+                    totalCases={content.totalCases}
+                    readOnly={readOnly}
+                    currEditAttrId={currEditAttrId}
+                    currEditFacet={currEditFacet}
+                    setCurrEditAttrId={setCurrEditAttrId}
+                    setCurrEditFacet={setCurrEditFacet}
+                    imageUrlToAdd={imageUrlToAdd}
+                    setImageUrlToAdd={setImageUrlToAdd}
+                  />
+                }
+              </div>
+            </>
           }
           { shouldShowAddField && !readOnly &&
             <AddIconButton className="add-field" onClick={handleAddField} />

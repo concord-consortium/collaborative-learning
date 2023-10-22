@@ -129,6 +129,16 @@ export const DataCardContentModel = TileContentModel
       ].join("\n");
     }
   }))
+  .views(self => ({
+    get caseId() {
+      return self.dataSet.caseIDFromIndex(self.caseIndex);
+    }
+  }))
+  .views(self => ({
+    get caseHighlighted() {
+      return self.dataSet.isCaseHighlighted(self.caseId);
+    }
+  }))
   .actions(self => tileContentAPIActions({
     doPostCreate(metadata: ITileMetadataModel){
       self.metadata = metadata;
