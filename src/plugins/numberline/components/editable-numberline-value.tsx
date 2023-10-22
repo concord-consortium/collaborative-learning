@@ -31,16 +31,18 @@ export const EditableNumberlineValue: React.FC<IEditableValueProps> = observer(f
     }
   };
 
+  const updateValue = (val: string) => {
+    if (checkIfNumber(val)) {
+      onValueChange(Number(val));
+    }
+    setIsEditing(false);
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     const { key } = e;
     switch (key) {
       case "Enter": {
-        const inputField = (e.target as HTMLInputElement).value;
-        if (checkIfNumber(inputField)){
-          const numberEntered = Number(inputField);
-          onValueChange(numberEntered);
-        }
-        setIsEditing(false);
+        updateValue((e.target as HTMLInputElement).value);
         break;
       }
       case "Escape":
@@ -70,12 +72,7 @@ export const EditableNumberlineValue: React.FC<IEditableValueProps> = observer(f
           }}
           onKeyDown={(e) => handleKeyDown(e)}
           defaultValue={value.toString()} // Set the initial value
-          onBlur={(e) => {
-            if (checkIfNumber(e.target.value)){
-              onValueChange(Number(e.target.value));
-            }
-            setIsEditing(false);
-          }}
+          onBlur={(e) => updateValue(e.target.value)}
           onChange={(e) => {
             // Set the width of the input based on the length of the input value
             if (inputRef.current) {
