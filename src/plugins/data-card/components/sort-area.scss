@@ -72,6 +72,10 @@ $sort-view-width: ($sort-view-card-width * $cards-per-row ) + 3;
         align-items: center;
         text-align: center;
 
+        &.highlighted {
+          background-color: $highlight-green;
+        }
+
         .card-count-info {
           translate: 3px .5px;
         }
@@ -101,6 +105,10 @@ $sort-view-width: ($sort-view-card-width * $cards-per-row ) + 3;
         border-bottom: $card-border;
         height:$card-space-factor;
         border-radius: 0px 0px 5px 5px;
+
+        &.highlighted {
+          background-color: $highlight-green;
+        }
       }
 
       .attribute-value-row {
@@ -115,6 +123,10 @@ $sort-view-width: ($sort-view-card-width * $cards-per-row ) + 3;
         .value {
           width:106px;
           padding:$card-space-factor;
+
+          &.highlighted {
+            background-color: $highlight-green-light;
+          }
         }
         .image-value {
           width: 100%;

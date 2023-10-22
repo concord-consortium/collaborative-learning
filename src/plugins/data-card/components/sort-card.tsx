@@ -28,8 +28,10 @@ export const SortCard: React.FC<IProps> = ({ model, caseId, indexInStack, totalI
   const content = model.content as DataCardContentModelType;
   const deckCardNumberDisplay = content.dataSet.caseIndexFromID(caseId) + 1;
   const stackCardNumberDisplay = indexInStack + 1;
+  const caseHighlighted = content.dataSet.isCaseHighlighted(caseId);
   const { r, g, b } = getShadeRGB(indexInStack);
   const shadeStr = `rgb(${r},${g},${b})`;
+  const capStyle = !caseHighlighted ? { backgroundColor: shadeStr } : undefined;
   const atStackTop = stackCardNumberDisplay === totalInStack;
 
   const [expanded, setExpanded] = useState(false);
@@ -41,7 +43,10 @@ export const SortCard: React.FC<IProps> = ({ model, caseId, indexInStack, totalI
 
   const cardClasses = classNames(
     "sortable", "card",
-    { collapsed: !expanded }, { expanded }
+    { collapsed: !expanded, expanded }
+  );
+  const headingClasses = classNames(
+    "heading", { highlighted: content.dataSet.isCaseHighlighted(caseId) }
   );
 
   const {attributes, listeners, setNodeRef, transform} = useDraggable({
@@ -67,7 +72,7 @@ export const SortCard: React.FC<IProps> = ({ model, caseId, indexInStack, totalI
       ref={setNodeRef}
       style={style}
     >
-      <div className="heading" style={{ backgroundColor: shadeStr }}>
+      <div className={headingClasses} style={capStyle}>
         <div className="expand-toggle-area">
           <button className="expand-toggle" onClick={toggleExpanded}>▶</button>
         </div>
@@ -93,7 +98,10 @@ export const SortCard: React.FC<IProps> = ({ model, caseId, indexInStack, totalI
           })}
         </div>
       }
-      <div className="footer" style={{ backgroundColor: shadeStr }}></div>
+      <div
+        className={classNames("footer", { highlighted: caseHighlighted })}
+        style={capStyle}
+      />
     </div>
   );
 };
