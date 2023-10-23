@@ -17,7 +17,7 @@ export const SortCardAttribute: React.FC<IProps> = ({ model, caseId, attr }) => 
   const isImage = gImageMap.isImageUrl(value);
   const [imageUrl, setImageUrl] = useState("");
 
-  const caseHighlighted = content.dataSet.isHighlightedCaseId(caseId);
+  const caseHighlighted = content.dataSet.isCaseSelected(caseId);
 
   isImage && gImageMap.getImage(value).then((image)=>{
     setImageUrl(image.displayUrl || "");

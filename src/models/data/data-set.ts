@@ -103,6 +103,13 @@ export const DataSet = types.model("DataSet", {
     }
   };
 })
+.views(self => ({
+  get selectedCaseIds() {
+    const caseIds: string[] = [];
+    self.selection.forEach(id => caseIds.push(id));
+    return caseIds;
+  }
+}))
 .extend(self => {
   const disposers: { [index: string]: () => void } = {};
   let inFlightActions = 0;
@@ -367,23 +374,17 @@ export const DataSet = types.model("DataSet", {
                 ? group.childCaseIds.every(id => self.selection.has(id))
                 : self.selection.has(caseId);
       },
-      get attributeIsHighlighted() {
-        return self.highlightedAttributeId !== undefined && self.highlightedCaseId === undefined;
+      get firstSelectedCaseId() {
+        if (self.selectedCaseIds.length > 0) return self.selectedCaseIds[0];
       },
-      get caseIsHighlighted() {
-        return self.highlightedAttributeId === undefined && self.highlightedCaseId !== undefined;
+      get selectedCaseIdString() {
+        let caseIds = "";
+        self.selection.forEach(caseId => caseIds += `${caseId},`);
+        if (caseIds.length > 0) caseIds = caseIds.slice(0, caseIds.length - 1);
+        return caseIds;
       },
-      get cellIsHighlighted() {
-        return self.highlightedAttributeId !== undefined && self.highlightedCaseId !== undefined;
-      },
-      isHighlightedAttributeId(attributeId?: string) {
-        return self.highlightedAttributeId === attributeId && self.highlightedCaseId === undefined;
-      },
-      isHighlightedCaseId(caseId?: string) {
-        return self.highlightedAttributeId === undefined && self.highlightedCaseId === caseId;
-      },
-      isHighlightedCell(attributeId?: string, caseId?: string) {
-        return self.highlightedAttributeId === attributeId && self.highlightedCaseId === caseId;
+      get caseIsSelected() {
+        return self.selection.size > 0;
       },
       get isInTransaction() {
         return self.transactionCount > 0;
@@ -656,21 +657,6 @@ export const DataSet = types.model("DataSet", {
             self.selection.delete(id);
           }
         });
-      },
-
-      highlightAttribute(attributeId?: string) {
-        self.highlightedAttributeId = attributeId;
-        self.highlightedCaseId = undefined;
-      },
-
-      highlightCase(caseId?: string) {
-        self.highlightedAttributeId = undefined;
-        self.highlightedCaseId = caseId;
-      },
-
-      highlightCell(attributeId?: string, caseId?: string) {
-        self.highlightedAttributeId = attributeId;
-        self.highlightedCaseId = caseId;
       },
 
       setSelectedCases(caseIds: string[]) {

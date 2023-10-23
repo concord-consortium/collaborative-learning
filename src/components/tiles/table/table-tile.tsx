@@ -51,11 +51,11 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     dataSet, columnChanges, triggerColumnChange, rowChanges, triggerRowChange, ...gridModelProps
   } = useModelDataSet(model, content);
 
-  // Forces the table to rerender when its dataset's highlighted object changes
+  // Forces the table to rerender when its dataset's selected cases change
   useEffect(() => {
     triggerRowChange();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataSet.caseIsHighlighted, dataSet.highlightedCaseId]);
+  }, [dataSet.selectedCaseIdString]);
 
   // Set up user specified columns and function to measure a column
   const { measureColumnWidth, resizeColumn, resizeColumnWidth } = useMeasureColumnWidth({ content });

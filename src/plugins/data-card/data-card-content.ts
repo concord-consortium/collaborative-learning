@@ -135,8 +135,11 @@ export const DataCardContentModel = TileContentModel
     }
   }))
   .views(self => ({
-    get caseHighlighted() {
-      return self.dataSet.isHighlightedCaseId(self.caseId);
+    get caseSelected() {
+      if (self.caseId !== undefined) {
+        return self.dataSet.isCaseSelected(self.caseId);
+      }
+      return false;
     }
   }))
   .actions(self => tileContentAPIActions({

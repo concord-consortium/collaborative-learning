@@ -30,7 +30,7 @@ export const useRowsFromDataSet = ({ dataSet, readOnly, inputRowId, rowChanges, 
     const rowClass = (row: TRow) => {
       const rowId = row.__id__;
       return classNames({
-        highlighted: dataSet.isHighlightedCaseId(rowId),
+        highlighted: dataSet.isCaseSelected(rowId),
         "input-row": rowId === inputRowId
       });
     };

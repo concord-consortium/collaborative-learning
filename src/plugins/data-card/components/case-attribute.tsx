@@ -266,7 +266,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     { "editing": editingLabel }
   );
 
-  const valueHighlighted = content.caseHighlighted;
+  const valueHighlighted = content.caseSelected;
 
   const valueClassNames = classNames(
     "value", attrKey,

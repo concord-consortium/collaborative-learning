@@ -41,12 +41,12 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
   const attrIdsNames = content.existingAttributesWithNames();
 
   // When the highlighted case is set, show it
-  const highlightedCaseId = content.dataSet.caseIsHighlighted && content.dataSet.highlightedCaseId;
+  const selectedCaseId = content.dataSet.firstSelectedCaseId;
   useEffect(() => {
-    if (highlightedCaseId) {
-      content.setCaseIndex(content.dataSet.caseIndexFromID(highlightedCaseId));
+    if (selectedCaseId) {
+      content.setCaseIndex(content.dataSet.caseIndexFromID(selectedCaseId));
     }
-  }, [content, highlightedCaseId]);
+  }, [content, selectedCaseId]);
 
   useEffect(() => {
     if (!model.computedTitle) {
@@ -270,8 +270,8 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
           { displaySingle &&
             <>
               <div
-                className={classNames("panel nav", { "highlight-panel": content.caseHighlighted })}
-                onClick={() => content.dataSet.highlightCase(content.caseId)}
+                className={classNames("panel nav", { "highlight-panel": content.caseSelected })}
+                onClick={() => content.dataSet.setSelectedCases(content.caseId ? [content.caseId] : [])}
               >
                 <div className="card-number-of-listing">
                   <div className="cell-text">
