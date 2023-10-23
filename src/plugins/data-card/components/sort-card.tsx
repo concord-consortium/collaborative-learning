@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { observer } from "mobx-react";
 import classNames from "classnames";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { DataCardContentModelType } from "../data-card-content";
@@ -24,7 +25,9 @@ const getShadeRGB = (index: number) => {
   };
 };
 
-export const SortCard: React.FC<IProps> = ({ model, caseId, indexInStack, totalInStack }) => {
+export const SortCard: React.FC<IProps> = observer(
+  function SortCard({ model, caseId, indexInStack, totalInStack })
+{
   const content = model.content as DataCardContentModelType;
   const deckCardNumberDisplay = content.dataSet.caseIndexFromID(caseId) + 1;
   const stackCardNumberDisplay = indexInStack + 1;
@@ -38,6 +41,7 @@ export const SortCard: React.FC<IProps> = ({ model, caseId, indexInStack, totalI
   useEffect(()=> setExpanded(atStackTop), [atStackTop]); // "top" card loads expanded
 
   const toggleExpanded = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setExpanded(!expanded);
   };
 
@@ -68,6 +72,7 @@ export const SortCard: React.FC<IProps> = ({ model, caseId, indexInStack, totalI
   return (
     <div
       className={cardClasses} id={caseId}
+      onClick={() => content.dataSet.highlightCase(caseId)}
       onDoubleClick={loadAsSingle}
       ref={setNodeRef}
       style={style}
@@ -104,5 +109,4 @@ export const SortCard: React.FC<IProps> = ({ model, caseId, indexInStack, totalI
       />
     </div>
   );
-};
-
+});
