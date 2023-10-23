@@ -27,12 +27,6 @@ class TextToolTile {
     getVariableChip() {
       return cy.get('.primary-workspace [data-testid=ccrte-editor] .slate-variable-chip .variable-chip');
     }
-    getTextToolInsertVariable(){
-        return cy.get('.tile-toolbar-text [data-original-title="Insert Variable"]');
-    }
-    getTextToolNewVariable(){
-        return cy.get('.tile-toolbar-text [data-original-title="New Variable"]');
-    }
     deleteTextTile() {
         this.getTextTile().last().click();
         cy.get('.tool.delete').click();

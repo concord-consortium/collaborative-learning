@@ -54,7 +54,7 @@ context('Shared Variables', function () {
       textToolTile.getTextTile().last().should('contain', 'Hello World!');
       textToolTile.getTextTile().last().should('not.contain', ' Hello World!');
       textToolTile.enterText("{moveToStart}");
-      textToolTile.clickToolbarTool("New Variable");
+      clueCanvas.clickToolbarButton('text', 'new-variable');
       cy.get(".custom-modal").should("exist");
       dialogField("name").type(textTileVName1);
       dialogField("value").type(textTileVValue1);
@@ -77,7 +77,7 @@ context('Shared Variables', function () {
       textToolTile.enterText('Second Chip:');
       textToolTile.getTextTile().last().should('contain', 'Second Chip:');
       textToolTile.getTextTile().last().should('not.contain', 'Second Chip: ');
-      textToolTile.clickToolbarTool("Insert Variable");
+      clueCanvas.clickToolbarButton('text', 'insert-variable');
       cy.get(".custom-modal").should("exist");
       cy.get(".variable-chip-list .variable-chip").click();
       dialogOkButton().click();
@@ -91,7 +91,7 @@ context('Shared Variables', function () {
     // seem like Cypress supports selecting text like that.
     // it('can pre populate the notes field based on the selected text', function() {
     //   textToolTile.getTextEditor().last().click().type(' 0 time for this{shift}{leftarrow}{leftarrow}{leftarrow}{leftarrow}');
-    //   textToolTile.clickToolbarTool("New Variable");
+    //   clueCanvas.clickToolbarButton('text', 'new-variable');
     //   dialogField("name").type("new");
     //   dialogField("value").type("1");
     //   dialogField("units").type("hour");
@@ -102,7 +102,7 @@ context('Shared Variables', function () {
 
     it('can edit a variable name', function() {
       textToolTile.getTextTile().last().find('.variable-name').first().click();
-      textToolTile.clickToolbarTool("Edit Variable");
+      clueCanvas.clickToolbarButton('text', 'edit-variable');
       cy.get(".custom-modal").should("exist");
       dialogField("name").clear().type(textTileVName2);
       dialogOkButton().click();
@@ -115,7 +115,7 @@ context('Shared Variables', function () {
     });
     it('can change the value of a variable', function() {
       textToolTile.getTextTile().last().find('.variable-chip').first().click();
-      textToolTile.clickToolbarTool("Edit Variable");
+      clueCanvas.clickToolbarButton('text', 'edit-variable');
       cy.get(".custom-modal").should("exist");
       dialogField("value").clear().type(textTileVValue2);
       dialogOkButton().click();
@@ -148,7 +148,7 @@ context('Shared Variables', function () {
     // const diagramTile = () => cy.get(".diagram-tool");
     // const drawTile = () => drawToolTile.getDrawTile().last();
     // const listChip = () => cy.get(`.variable-chip-list .variable-chip`);
-    
+
   //   it("verify Insert Variable dialog opens on variable button click in drawing tile", () => {
   //     clueCanvas.addTile('drawing');
   //     drawToolTile.getDrawToolInsertVariable().click();
