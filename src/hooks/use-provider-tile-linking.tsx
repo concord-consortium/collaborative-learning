@@ -25,6 +25,7 @@ export const useProviderTileLinking = ({
       const sharedModelManager = providerTile.tileEnv?.sharedModelManager;
       if (sharedModelManager?.isReady) {
         const sharedDataSet = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, tileInfo.id);
+        console.log('adding shared model: ', sharedDataSet?.dataSet.name);
         sharedDataSet && sharedModelManager?.addTileSharedModel(model.content, sharedDataSet);
       }
     }

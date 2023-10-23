@@ -27,12 +27,15 @@ import {
 } from "../../../utilities/color-utils";
 import { onAnyAction } from "../../../utilities/mst-utils";
 import { AdornmentModelUnion } from "../adornments/adornment-types";
-import { SharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
+import { isSharedCaseMetadata, SharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
 import { tileContentAPIViews } from "../../../models/tiles/tile-model-hooks";
 import { ConnectingLinesModel } from "../adornments/connecting-lines/connecting-lines-model";
 import { kConnectingLinesType } from "../adornments/connecting-lines/connecting-lines-types";
 import { getDotId } from "../utilities/graph-utils";
 import { GraphLayerModel } from "../graph-layer-model";
+import { isSharedDataSet, SharedDataSet } from "../../../models/shared/shared-data-set";
+import { DataConfigurationModel } from "./data-configuration-model";
+
 export interface GraphProperties {
   axes: Record<string, IAxisModelUnion>
   plotType: PlotType
@@ -418,10 +421,66 @@ export const GraphModel = TileContentModel
       // we do it here just to be safe incase this function is called
       // first
 
-      // TODO: The behavior below will be replaced by something that
-      // gets all currently linked models and matches them into layers
-      // we need to keep layers and linked datasets mapped to one another
-      console.log("| self.data", self.data);
+      // TODO: May want to find ways to do this only when necessary
+      const smm = getSharedModelManager(self);
+      const models = smm?.getTileSharedModelsByType(self, SharedDataSet);
+      // console.log("| sharedModelManager.getTileSharedModels ->: ",
+      //   models?.map((m) => { return (m as SharedDataSetType).dataSet.name; }).join(', '),
+      //   JSON.parse(JSON.stringify(models)));
+
+      // if (isSharedDataSet(sharedModel)) {
+      //   console.log("| sharedModel! ", sharedModel.dataSet.name, sharedModel);
+      // } else {
+      //   console.log("| sharedModel (not a SharedDataSet):", sharedModel);
+      // }
+
+      if (models && models.length !== self.layers.length) {
+        // Sync up layers
+        const modelIds = models.map(m => isSharedDataSet(m) ? m.dataSet.id : undefined);
+        const layerIds = self.layers.map(layer => layer.config.dataset?.id);
+        const newModels = modelIds.filter(id => !layerIds.includes(id));
+        const removedModels = layerIds.filter(id => !modelIds.includes(id));
+        console.log('Layers that need to be removed: ', removedModels);
+        console.log('Layers that need to be added: ', newModels);
+
+        // Remove layers
+        if (removedModels.length) {
+          removedModels.forEach((id) => {
+            const foundLayer = self.layers.findIndex((layer) => layer.config.dataset?.id === id );
+            if (foundLayer >= 0) {
+              console.log('Removing layer ', foundLayer);
+              self.layers.splice(foundLayer, 1);
+            }
+          });
+        }
+
+        if (newModels.length) {
+          console.log("| new models: ", newModels);
+          const metaDataModels = smm?.getTileSharedModelsByType(self, SharedCaseMetadata);
+          console.log("| all metadata models: ", metaDataModels);
+          newModels.forEach((newModelId) => {
+            const dataSetModel = models.find(m => isSharedDataSet(m) && m.dataSet.id === newModelId);
+            if (dataSetModel && isSharedDataSet(dataSetModel)) {
+              console.log("| found dataSetModel: ", dataSetModel, 'dataSetModel ID: ', dataSetModel.id);
+              const metaDataModel = getTileCaseMetadata(self); // metaDataModels?.find((m) => isSharedCaseMetadata(m) && m.data?.id === newModelId);
+              // console.log("| found metaDataModel, look at id, and data.id", metaDataModel);
+              if (metaDataModel && isSharedCaseMetadata(metaDataModel)) {
+                const dataConfig = DataConfigurationModel.create();
+                dataConfig.setDataset(dataSetModel.dataSet, metaDataModel);
+                const newLayer = GraphLayerModel.create();
+                newLayer.addLayerConfig(dataConfig);
+                self.layers.push(newLayer);
+                console.log('| Created layer ', newLayer);
+              } else {
+                console.log('| Metadata not found');
+              }
+            } else {
+              console.log('| dataset not found');
+            }
+          });
+        }
+      }
+
       if (self.data !== self.config.dataset) {
         self.config.setDataset(self.data, self.metadata);
       }
