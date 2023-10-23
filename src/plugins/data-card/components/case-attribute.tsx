@@ -271,15 +271,15 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const valueClassNames = classNames(
     "value", attrKey,
     {
-      "editing": editingValue,
+      editing: editingValue,
       "has-image": gImageMap.isImageUrl(valueStr),
-      "value-highlighted": valueHighlighted
+      highlighted: valueHighlighted
     }
   );
 
   const typeIconClassNames = classNames(
     "type-icon", attrKey,
-    { "type-icon-highlighted": valueHighlighted }
+    { highlighted: valueHighlighted }
   );
 
   const deleteAttrButtonClassNames = classNames(

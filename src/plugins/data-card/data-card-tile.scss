@@ -219,7 +219,7 @@ $default-button-border-color: #979797;
             padding:$cell-padding;
           }
 
-          &.value-highlighted {
+          &.highlighted {
             background-color: $highlight-green-light;
 
             input {
@@ -231,7 +231,7 @@ $default-button-border-color: #979797;
         .type-icon {
           padding: 0 4px;
 
-          &.type-icon-highlighted {
+          &.highlighted {
             background-color: $highlight-green-light;
           }
         }
