@@ -1,6 +1,5 @@
 import stringify from "json-stringify-pretty-compact";
 import { types, Instance, getSnapshot } from "mobx-state-tree";
-
 import { getTileIdFromContent } from "../../../models/tiles/tile-model";
 import { TileContentModel } from "../../../models/tiles/tile-content";
 import { uniqueId } from "../../../utilities/js-utils";
@@ -36,7 +35,6 @@ export const PointObjectModel = types
     }
   }));
 
-
 export interface PointObjectModelType extends Instance<typeof PointObjectModel> {}
 
 export const NumberlineContentModel = TileContentModel
@@ -44,6 +42,8 @@ export const NumberlineContentModel = TileContentModel
   .props({
     type: types.optional(types.literal(kNumberlineTileType), kNumberlineTileType),
     points: types.map(PointObjectModel),
+    min: -5,
+    max: 5
   })
   .volatile(self => ({
     selectedPoints: {} as Record<string, PointObjectModelType> //dictionary of id - point
@@ -90,6 +90,12 @@ export const NumberlineContentModel = TileContentModel
       for (const id in self.selectedPoints){
         delete self.selectedPoints[id];
       }
+    },
+    setMin(num: number) {
+      self.min = num;
+    },
+    setMax(num: number) {
+      self.max = num;
     }
   }))
   .actions(self => ({
