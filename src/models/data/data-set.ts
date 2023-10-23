@@ -45,6 +45,9 @@ export const DataSet = types.model("DataSet", {
   cases: types.array(CaseID),
 })
 .volatile(self => ({
+  // An attribute is highlighted when highlightedAttributeId has an id but highlightedCaseId is undefined.
+  // A case is highlighted when highlightedAttributeId is undefined but highlightedCaseId has an id.
+  // A cell is highlighted when both highlightedAttributeId and highlightedCaseId have ids.
   highlightedAttributeId: undefined as string | undefined,
   highlightedCaseId: undefined as string | undefined,
   // MobX-observable set of selected case IDs
@@ -364,11 +367,23 @@ export const DataSet = types.model("DataSet", {
                 ? group.childCaseIds.every(id => self.selection.has(id))
                 : self.selection.has(caseId);
       },
+      get attributeIsHighlighted() {
+        return self.highlightedAttributeId !== undefined && self.highlightedCaseId === undefined;
+      },
       get caseIsHighlighted() {
         return self.highlightedAttributeId === undefined && self.highlightedCaseId !== undefined;
       },
+      get cellIsHighlighted() {
+        return self.highlightedAttributeId !== undefined && self.highlightedCaseId !== undefined;
+      },
+      isHighlightedAttributeId(attributeId?: string) {
+        return self.highlightedAttributeId === attributeId && self.highlightedCaseId === undefined;
+      },
       isHighlightedCaseId(caseId?: string) {
         return self.highlightedAttributeId === undefined && self.highlightedCaseId === caseId;
+      },
+      isHighlightedCell(attributeId?: string, caseId?: string) {
+        return self.highlightedAttributeId === attributeId && self.highlightedCaseId === caseId;
       },
       get isInTransaction() {
         return self.transactionCount > 0;
@@ -643,8 +658,18 @@ export const DataSet = types.model("DataSet", {
         });
       },
 
+      highlightAttribute(attributeId?: string) {
+        self.highlightedAttributeId = attributeId;
+        self.highlightedCaseId = undefined;
+      },
+
       highlightCase(caseId?: string) {
         self.highlightedAttributeId = undefined;
+        self.highlightedCaseId = caseId;
+      },
+
+      highlightCell(attributeId?: string, caseId?: string) {
+        self.highlightedAttributeId = attributeId;
         self.highlightedCaseId = caseId;
       },
 
