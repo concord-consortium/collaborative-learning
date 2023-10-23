@@ -183,7 +183,7 @@ export class LineDrawingTool extends DrawingTool {
       e2.preventDefault();
       if (line.deltaPoints.length > 0) {
         addPoint(e2);
-        this.drawingLayer.addNewDrawingObject(getSnapshot(line), false, false);
+        this.drawingLayer.addNewDrawingObject(getSnapshot(line), { keepToolActive: true });
       }
       this.drawingLayer.setCurrentDrawingObject(null);
       window.removeEventListener("mousemove", handleMouseMove);

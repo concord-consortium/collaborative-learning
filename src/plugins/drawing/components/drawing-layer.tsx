@@ -96,13 +96,25 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     ui.setSelectedTileId(this.props.model.id, { append });
   }
 
-  // Adds a new object and optionally selects it, activating the select tool.
+  /**
+   * Adds a new object to the canvas.
+   * @param drawingObject
+   * @param options may include: "addAtBack" - if true, the new object
+   * is put at the bottom of the stacking order instead of the default
+   * which is to put it in front. "keepToolActive" - if true, the
+   * drawing tool which was used to create this object is not changed.
+   * Default is to select the new object and therefore activate the
+   * select tool.
+   * @returns
+   */
   public addNewDrawingObject(drawingObject: DrawingObjectSnapshotForAdd,
-      addAtBack=false, select=true) {
-    if (select) {
-      return this.getContent().addAndSelectObject(drawingObject, addAtBack);
-    } else {
+    options?: { addAtBack?: boolean, keepToolActive?: boolean }) {
+      const addAtBack = options?.addAtBack;
+      const keepToolActive = options?.keepToolActive;
+    if (keepToolActive) {
       return this.getContent().addObject(drawingObject, addAtBack);
+    } else {
+      return this.getContent().addAndSelectObject(drawingObject, addAtBack);
     }
   }
 
@@ -512,7 +524,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
           width: imageEntry.width!,
           height: imageEntry.height!
         });
-        this.addNewDrawingObject(getSnapshot(image), true);
+        this.addNewDrawingObject(getSnapshot(image), { addAtBack: true });
       });
   }
 
