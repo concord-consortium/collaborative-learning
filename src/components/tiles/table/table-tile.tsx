@@ -45,7 +45,6 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   const [imageUrls, setImageUrls] = useState(new Map<string,string>());
   verifyAlive(content, "TableToolComponent");
   const metadata = getContent().metadata;
-  const highlightId = content.dataSet.highlight?.id;
 
   // Basic operations based on the model
   const {
@@ -56,7 +55,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   useEffect(() => {
     triggerRowChange();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [highlightId]);
+  }, [dataSet.caseIsHighlighted, dataSet.highlightedCaseId]);
 
   // Set up user specified columns and function to measure a column
   const { measureColumnWidth, resizeColumn, resizeColumnWidth } = useMeasureColumnWidth({ content });

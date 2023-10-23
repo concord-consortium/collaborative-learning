@@ -136,7 +136,7 @@ export const DataCardContentModel = TileContentModel
   }))
   .views(self => ({
     get caseHighlighted() {
-      return self.dataSet.isCaseHighlighted(self.caseId);
+      return self.dataSet.isHighlightedCaseId(self.caseId);
     }
   }))
   .actions(self => tileContentAPIActions({

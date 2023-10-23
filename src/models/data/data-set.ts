@@ -4,7 +4,7 @@ import { applyAction, getEnv, Instance, ISerializedActionCall,
           onAction, types, getSnapshot, SnapshotOut } from "mobx-state-tree";
 import { Attribute, IAttribute, IAttributeSnapshot } from "./attribute";
 import { uniqueId, uniqueSortableId } from "../../utilities/js-utils";
-import { CaseGroup, HighlightObject } from "./data-set-types";
+import { CaseGroup } from "./data-set-types";
 import { IValueType } from "./data-types";
 
 export const newCaseId = uniqueSortableId;
@@ -45,7 +45,8 @@ export const DataSet = types.model("DataSet", {
   cases: types.array(CaseID),
 })
 .volatile(self => ({
-  highlight: undefined as HighlightObject | undefined,
+  highlightedAttributeId: undefined as string | undefined,
+  highlightedCaseId: undefined as string | undefined,
   // MobX-observable set of selected case IDs
   selection: observable.set<string>(),
   // map from pseudo-case ID to the CaseGroup it represents
@@ -363,11 +364,11 @@ export const DataSet = types.model("DataSet", {
                 ? group.childCaseIds.every(id => self.selection.has(id))
                 : self.selection.has(caseId);
       },
-      isCaseHighlighted(caseId?: string) {
-        return self.highlight && self.highlight.type === "case" && self.highlight.id === caseId;
+      get caseIsHighlighted() {
+        return self.highlightedAttributeId === undefined && self.highlightedCaseId !== undefined;
       },
-      get highlightedCaseId() {
-        if (self.highlight?.type === "case") return self.highlight.id;
+      isHighlightedCaseId(caseId?: string) {
+        return self.highlightedAttributeId === undefined && self.highlightedCaseId === caseId;
       },
       get isInTransaction() {
         return self.transactionCount > 0;
@@ -643,11 +644,8 @@ export const DataSet = types.model("DataSet", {
       },
 
       highlightCase(caseId?: string) {
-        if (caseId) {
-          self.highlight = { id: caseId, type: "case" };
-        } else {
-          self.highlight = undefined;
-        }
+        self.highlightedAttributeId = undefined;
+        self.highlightedCaseId = caseId;
       },
 
       setSelectedCases(caseIds: string[]) {

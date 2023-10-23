@@ -31,7 +31,7 @@ export const SortCard: React.FC<IProps> = observer(
   const content = model.content as DataCardContentModelType;
   const deckCardNumberDisplay = content.dataSet.caseIndexFromID(caseId) + 1;
   const stackCardNumberDisplay = indexInStack + 1;
-  const caseHighlighted = content.dataSet.isCaseHighlighted(caseId);
+  const caseHighlighted = content.dataSet.isHighlightedCaseId(caseId);
   const { r, g, b } = getShadeRGB(indexInStack);
   const shadeStr = `rgb(${r},${g},${b})`;
   const capStyle = !caseHighlighted ? { backgroundColor: shadeStr } : undefined;
@@ -50,7 +50,7 @@ export const SortCard: React.FC<IProps> = observer(
     { collapsed: !expanded, expanded }
   );
   const headingClasses = classNames(
-    "heading", { highlighted: content.dataSet.isCaseHighlighted(caseId) }
+    "heading", { highlighted: content.dataSet.isHighlightedCaseId(caseId) }
   );
 
   const {attributes, listeners, setNodeRef, transform} = useDraggable({

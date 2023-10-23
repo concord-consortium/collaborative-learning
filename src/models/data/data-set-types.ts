@@ -82,9 +82,3 @@ export interface CaseGroup {
   // stringified version of grouped case values for easy comparison/categorization
   valuesJson: string
 }
-
-// An object being highlighted
-export interface HighlightObject {
-  id: string;
-  type: "attribute" | "case" | "cell";
-}

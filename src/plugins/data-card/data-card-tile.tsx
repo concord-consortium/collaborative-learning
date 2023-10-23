@@ -41,7 +41,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
   const attrIdsNames = content.existingAttributesWithNames();
 
   // When the highlighted case is set, show it
-  const highlightedCaseId = content.dataSet.highlightedCaseId;
+  const highlightedCaseId = content.dataSet.caseIsHighlighted && content.dataSet.highlightedCaseId;
   useEffect(() => {
     if (highlightedCaseId) {
       content.setCaseIndex(content.dataSet.caseIndexFromID(highlightedCaseId));
