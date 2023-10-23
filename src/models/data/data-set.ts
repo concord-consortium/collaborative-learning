@@ -366,6 +366,9 @@ export const DataSet = types.model("DataSet", {
       isCaseHighlighted(caseId?: string) {
         return self.highlight && self.highlight.type === "case" && self.highlight.id === caseId;
       },
+      get highlightedCaseId() {
+        if (self.highlight?.type === "case") return self.highlight.id;
+      },
       get isInTransaction() {
         return self.transactionCount > 0;
       },

@@ -40,6 +40,14 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
   const shouldShowAddField = !readOnly && isTileSelected && displaySingle;
   const attrIdsNames = content.existingAttributesWithNames();
 
+  // When the highlighted case is set, show it
+  const highlightedCaseId = content.dataSet.highlightedCaseId;
+  useEffect(() => {
+    if (highlightedCaseId) {
+      content.setCaseIndex(content.dataSet.caseIndexFromID(highlightedCaseId));
+    }
+  }, [content, highlightedCaseId]);
+
   useEffect(() => {
     if (!model.computedTitle) {
       const title = onRequestUniqueTitle(model.id);
