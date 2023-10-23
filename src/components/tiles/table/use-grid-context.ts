@@ -2,15 +2,17 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { CellNavigationMode, DataGridHandle } from "react-data-grid";
 import { useCurrent } from "../../../hooks/use-current";
 import { useSharedSelectionStore } from "../../../hooks/use-stores";
+import { TableContentModelType } from "../../../models/tiles/table/table-content";
 import { uniqueId } from "../../../utilities/js-utils";
 import { IGridContext, TPosition } from "./table-types";
 
 interface IProps {
+  content: TableContentModelType;
   modelId: string;
   showRowLabels: boolean;
   triggerColumnChange: () => void;
 }
-export const useGridContext = ({ modelId, showRowLabels, triggerColumnChange }: IProps) => {
+export const useGridContext = ({ content, modelId, showRowLabels, triggerColumnChange }: IProps) => {
   const gridRef = useRef<DataGridHandle>(null);
   const inputRowId = useRef(uniqueId());
 
@@ -57,7 +59,8 @@ export const useGridContext = ({ modelId, showRowLabels, triggerColumnChange }: 
   const selectOneRow = useCallback((rowId: string) => {
     clearColumnSelection();
     sharedSelection.setSelected(modelId, [rowId]);
-  }, [clearColumnSelection, modelId, sharedSelection]);
+    content.dataSet.highlightCase(rowId);
+  }, [content, clearColumnSelection, modelId, sharedSelection]);
 
   // Creating a new gridContext can result in focus change thus disrupting cell edits;
   // therefore, it's important that all inputs to the gridContext be wrapped in useCallback()

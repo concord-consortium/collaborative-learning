@@ -75,7 +75,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   const [showRowLabels, setShowRowLabels] = useState(false);
   const {
     ref: gridRef, gridContext, inputRowId, selectedCell, getSelectedRows, ...gridProps
-  } = useGridContext({ modelId: model.id, showRowLabels, triggerColumnChange });
+  } = useGridContext({ content, modelId: model.id, showRowLabels, triggerColumnChange });
 
   // Maintains the cache of data values that map to image URLs.
   // For use in a synchronous context, returns undefined immediately if an image is not yet cached,
