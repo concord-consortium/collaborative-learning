@@ -45,11 +45,6 @@ export const DataSet = types.model("DataSet", {
   cases: types.array(CaseID),
 })
 .volatile(self => ({
-  // An attribute is highlighted when highlightedAttributeId has an id but highlightedCaseId is undefined.
-  // A case is highlighted when highlightedAttributeId is undefined but highlightedCaseId has an id.
-  // A cell is highlighted when both highlightedAttributeId and highlightedCaseId have ids.
-  highlightedAttributeId: undefined as string | undefined,
-  highlightedCaseId: undefined as string | undefined,
   // MobX-observable set of selected case IDs
   selection: observable.set<string>(),
   // map from pseudo-case ID to the CaseGroup it represents
