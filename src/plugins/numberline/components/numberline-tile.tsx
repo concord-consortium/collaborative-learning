@@ -1,8 +1,8 @@
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import classNames from 'classnames';
 import { axisBottom, drag, pointer, scaleLinear, select } from 'd3';
 import { observer } from 'mobx-react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-
+import { useUIStore } from '../../../hooks/use-stores';
 import { kSmallAnnotationNodeRadius } from '../../../components/annotations/annotation-utilities';
 import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
 import { useToolbarTileApi } from "../../../components/tiles/hooks/use-toolbar-tile-api";
@@ -12,22 +12,28 @@ import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { HotKeys } from "../../../utilities/hot-keys";
 import { NumberlineContentModelType, PointObjectModelType,  } from "../models/numberline-content";
 import {
-  kAxisStyle, kAxisWidth, kContainerWidth, kNumberLineContainerHeight, numberlineDomainMax, numberlineDomainMin,
-  tickHeightDefault, tickHeightZero, tickStyleDefault, tickStyleZero, tickWidthDefault, tickWidthZero,
+  kAxisStyle, kAxisWidth, kContainerWidth, kNumberLineContainerHeight,
+  tickHeightDefault, tickStyleDefault, tickWidthDefault, tickWidthZero,
   innerPointRadius, outerPointRadius, numberlineYBound, yMidPoint, kTitleHeight, kArrowheadTop,
-  kArrowheadOffset, kPointButtonRadius
+  kArrowheadOffset, kPointButtonRadius, tickTextTopOffsetDefault, tickTextTopOffsetMinAndMax
 } from '../numberline-tile-constants';
 import { NumberlineToolbar } from "./numberline-toolbar";
+import NumberlineArrowLeft from "../assets/numberline-arrow-left.svg";
+import NumberlineArrowRight from "../assets/numberline-arrow-right.svg";
+import { EditableNumberlineValue } from './editable-numberline-value';
 
 import "./numberline-tile.scss";
 
 export const NumberlineTile: React.FC<ITileProps> = observer(function NumberlineTile(props){
   const { documentContent, model, readOnly, scale, tileElt, onRegisterTileApi, onUnregisterTileApi } = props;
+
   const content = model.content as NumberlineContentModelType;
   const [hoverPointId, setHoverPointId] = useState("");
   const [_selectedPointId, setSelectedPointId] = useState(""); // Just used to rerender when a point is selected
+  const ui = useUIStore();
+  const isTileSelected = ui.isSelectedTile(model);
 
-  // Basic model manipulation functions
+  //---------------- Model Manipulation Functions -------------------------------------------------
   const deleteSelectedPoints = useCallback(() => {
     content.deleteSelectedPoints();
   }, [content]);
@@ -36,6 +42,14 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     if (!readOnly) {
       const point = content.createAndSelectPoint(xValue);
       setHoverPointId(point.id);
+    }
+  };
+
+  const handleMinMaxChange = (minOrMax: string, newValue: number) => {
+    if (minOrMax === "min" && newValue < content.max){
+      content.setMin(newValue);
+    } else if (minOrMax === "max" && newValue > content.min){
+      content.setMax(newValue);
     }
   };
 
@@ -56,11 +70,14 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   const containerWidth = tileWidth * kContainerWidth;
   const axisWidth = tileWidth * kAxisWidth;
   const xShiftNum = (containerWidth - axisWidth) / 2;
+  const arrowOffset = xShiftNum + kArrowheadOffset;
+
   const xScale = useMemo(() => {
     return scaleLinear()
-      .domain([numberlineDomainMin, numberlineDomainMax])
+      .domain([content.min, content.max])
       .range([0, axisWidth]);
-  }, [axisWidth]);
+  }, [axisWidth, content.min, content.max]);
+
   const axisLeft = useMemo(() => tileWidth * (1 - kAxisWidth) / 2, [tileWidth]);
 
   const pointPosition = useCallback((point: PointObjectModelType) => {
@@ -82,7 +99,10 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     return () => obs?.disconnect();
   }, []);
 
-  // Register Tile API functions
+
+
+
+  //----------------- Register Tile API functions -------------------------------------------------
   const annotationPointCenter = useCallback((pointId: string) => {
     const point = content.getPoint(pointId);
     if (!point) return undefined;
@@ -145,7 +165,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     });
   }, [annotationPointCenter, content, getObjectBoundingBox, onRegisterTileApi]);
 
-  //-------------------  SVG Ref to Numberline & SVG --------------------------------
+  //-------------------  SVG Ref to Numberline & SVG ----------------------------------------------
   const svgRef = useRef<SVGSVGElement | null>(null);
   const svg = select(svgRef.current);
   const svgNode = svg.node();
@@ -222,19 +242,54 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   svg.on("click", (e) => handleMouseClick(e));
   svg.on("mousemove", (e) => handleMouseMove(e));
 
-  // * =============================== [ Construct Numberline ] ================================ */
+  // * ================================ [ Construct Numberline ] =============================== */
+  const numOfTicks = 11;
+
+  //Returns an equally divided array between min and max with numOfTick # of elements
+  const generateTickValues = (min: number, max: number) => {
+    const tickValues = [];
+    const range = content.max - content.min;
+    for (let i = 0; i < numOfTicks; i++) {
+      const position = i / (numOfTicks - 1);
+      const tickValue = content.min + (position * range);
+      tickValues.push(tickValue);
+    }
+    return tickValues;
+  };
+
+  const tickFormatter = (value: number | { valueOf(): number }, index: number) => {
+    if (typeof value !== 'number') {
+      return value.toString();
+    }
+    if (value === content.min || value === content.max) {
+      return '';
+    }
+    return value.toFixed(1);
+  };
+
   if (axisWidth !== 0) {
     const readOnlyState = readOnly ? "readOnly" : "readWrite";
     const axisClass = `axis-${model.id}-${readOnlyState}`;
-    const numOfTicks = numberlineDomainMax - numberlineDomainMin;
+    const tickValues = generateTickValues(content.min, content.max);
+
     axis
       .attr("class", `${axisClass} num-line`)
-      .attr("style", `${kAxisStyle}`) //move down
-      .call(axisBottom(xScale).tickSizeOuter(0).ticks(numOfTicks)) //remove side ticks
-      .selectAll("g.tick line") //customize 0 ticks
-      .attr("y2", function(x){ return (x === 0) ? tickHeightZero : tickHeightDefault;})
-      .attr("stroke-width", function(x){ return (x === 0) ? tickWidthZero : tickWidthDefault;})
-      .attr("style", function(x){ return (x === 0) ? tickStyleZero : tickStyleDefault;});
+      .attr("style", `${kAxisStyle}`)
+      .call(axisBottom(xScale)
+      .tickValues(tickValues)
+      .tickFormat(tickFormatter))
+
+      .selectAll("g.tick line") // Customize tick marks
+      .attr("class", (value)=> (value === 0) ? "zero-tick" : "default-tick")
+      .attr("y2", tickHeightDefault)
+      .attr("stroke-width", (value) => (value === 0) ? tickWidthZero : tickWidthDefault)
+      .attr("style", tickStyleDefault);
+
+    axis
+      .selectAll("g.tick text") // Customize tick labels
+      .attr("dy", (dy) => {
+        return (dy === content.min || dy === content.max) ? tickTextTopOffsetMinAndMax : tickTextTopOffsetDefault;
+      });
   }
 
   /* ========================== [ Construct/Update Circles ] =================================== */
@@ -300,10 +355,8 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     };
     updateCircles();
   }
-
   // Set up toolbar props
   const toolbarProps = useToolbarTileApi({ id: model.id, enabled: !readOnly, onRegisterTileApi, onUnregisterTileApi });
-
   return (
     <div
       className={classNames("numberline-wrapper", { "read-only": readOnly })}
@@ -328,11 +381,33 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
         style={{"height": `${kNumberLineContainerHeight}`}}
       >
         <div className="numberline-tool-container" >
-          <i className="arrow left" style={{ left: xShiftNum + kArrowheadOffset, top: kArrowheadTop }}/>
-          <i className="arrow right" style={{ right: xShiftNum + kArrowheadOffset, top: kArrowheadTop }}/>
           <svg ref={svgRef} width={axisWidth}>
             <g ref={axisRef}></g>
           </svg>
+          <NumberlineArrowLeft
+            className="arrow"
+            style={{ left: arrowOffset, top: kArrowheadTop }}
+          />
+          <NumberlineArrowRight
+            className="arrow"
+            style={{ right: arrowOffset, top: kArrowheadTop }}
+          />
+          <EditableNumberlineValue
+            value={content.min}
+            minOrMax={"min"}
+            offset={arrowOffset}
+            readOnly={readOnly}
+            isTileSelected={isTileSelected}
+            onValueChange={(newValue) => handleMinMaxChange("min", newValue)}
+          />
+          <EditableNumberlineValue
+            value= {content.max}
+            minOrMax={"max"}
+            offset={arrowOffset}
+            readOnly={readOnly}
+            isTileSelected={isTileSelected}
+            onValueChange={(newValue) => handleMinMaxChange("max", newValue)}
+          />
         </div>
       </div>
     </div>

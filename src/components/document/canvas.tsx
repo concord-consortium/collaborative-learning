@@ -2,7 +2,6 @@ import { inject, observer } from "mobx-react";
 import { getSnapshot, destroy } from "mobx-state-tree";
 import React from "react";
 import stringify from "json-stringify-pretty-compact";
-
 import { AnnotationLayer } from "./annotation-layer";
 import { DocumentLoadingSpinner } from "./document-loading-spinner";
 import { BaseComponent } from "../base";
@@ -20,6 +19,7 @@ import { StringBuilder } from "../../utilities/string-builder";
 import { HotKeys } from "../../utilities/hot-keys";
 import { DEBUG_CANVAS, DEBUG_DOCUMENT, DEBUG_HISTORY } from "../../lib/debug";
 import { DocumentError } from "./document-error";
+import { ReadOnlyContext } from "./read-only-context";
 
 import "./canvas.scss";
 
@@ -28,7 +28,7 @@ interface IProps {
   context: string;
   document?: DocumentModelType;
   overlayMessage?: string;
-  readOnly?: boolean;
+  readOnly: boolean;
   scale?: number;
   selectedSectionId?: string | null;
   showPlayback?: boolean;
@@ -88,24 +88,26 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
     return (
       <TileApiInterfaceContext.Provider value={this.tileApiInterface}>
         <AddTilesContext.Provider value={this.getDocumentContent() || null}>
-          <div
-            key="canvas"
-            className="canvas"
-            data-test="canvas"
-            onKeyDown={this.handleKeyDown}
-            ref={(el) => this.setCanvasElement(el)}
-          >
-            {this.renderContent()}
-            {this.renderDebugInfo()}
-            {this.renderOverlayMessage()}
-          </div>
-          <AnnotationLayer
-            canvasElement={this.state.canvasElement}
-            content={content}
-            documentScrollX={this.state.documentScrollX}
-            documentScrollY={this.state.documentScrollY}
-            readOnly={this.props.readOnly}
-          />
+          <ReadOnlyContext.Provider value={this.props.readOnly}>
+            <div
+              key="canvas"
+              className="canvas"
+              data-test="canvas"
+              onKeyDown={this.handleKeyDown}
+              ref={(el) => this.setCanvasElement(el)}
+            >
+              {this.renderContent()}
+              {this.renderDebugInfo()}
+              {this.renderOverlayMessage()}
+            </div>
+            <AnnotationLayer
+              canvasElement={this.state.canvasElement}
+              content={content}
+              documentScrollX={this.state.documentScrollX}
+              documentScrollY={this.state.documentScrollY}
+              readOnly={this.props.readOnly}
+            />
+          </ReadOnlyContext.Provider>
         </AddTilesContext.Provider>
       </TileApiInterfaceContext.Provider>
     );
