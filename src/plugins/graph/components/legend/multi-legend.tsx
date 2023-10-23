@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import { observer } from "mobx-react";
 import {AttributeType} from "../../../../models/data/attribute";
 import { GraphPlace } from "../../imports/components/axis-graph-shared";
@@ -9,6 +9,7 @@ import { useDataConfigurationContext } from "../../hooks/use-data-configuration-
 import { AddSeriesButton } from "./add-series-button";
 import { useInstanceIdContext } from "../../imports/hooks/use-instance-id-context";
 import { kGraphDefaultHeight } from "../../graph-types";
+import { ReadOnlyContext } from "../../../../components/document/read-only-context";
 
 export const kMultiLegendMenuHeight = 30;
 export const kMultiLegendPadding = 20;
@@ -17,11 +18,11 @@ export const kMultiLegendVerticalGap = 10;
 import "./multi-legend.scss";
 
 interface IMultiLegendProps {
-  graphElt: HTMLDivElement | null
+  graphElt: HTMLDivElement | null;
   onChangeAttribute: (place: GraphPlace, dataSet: IDataSet, attrId: string, oldAttrId?: string) => void;
-  onRemoveAttribute: (place: GraphPlace, attrId: string) => void
-  onTreatAttributeAs: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void
-  onRequestRowHeight?: (id: string, size: number) => void
+  onRemoveAttribute: (place: GraphPlace, attrId: string) => void;
+  onTreatAttributeAs: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void;
+  onRequestRowHeight?: (id: string, size: number) => void;
 }
 
 export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProps) {
@@ -34,6 +35,8 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
   const instanceId = useInstanceIdContext();
 
   const yAttributeCount = dataConfiguration?.yAttributeDescriptions.length || 0;
+
+  const readOnly = useContext(ReadOnlyContext);
 
   useEffect(() =>{
     const legendTransform = `translateY(${-layout.computedBounds.legend.height}px)`;
@@ -66,7 +69,9 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
         onRemoveAttribute={onRemoveAttribute}
         onTreatAttributeAs={onTreatAttributeAs}
       />);
-    legendItems.push(<AddSeriesButton/>);
+    if (!readOnly) {
+      legendItems.push(<AddSeriesButton/>);
+    }
   }
   // Make rows with two legend items in each row
   const legendItemRows = [] as React.ReactNode[];
