@@ -241,6 +241,10 @@
     "stamps": [],
     "settings": {
       "graph": {
+        "emptyPlotIsNumeric": true,
+        "scalePlotOnValueChange": true,
+        "defaultSeriesLegend": true,
+        "connectPointsByDefault": true,
         "autoAssignAttributes": true
       },
       "simulator": {
