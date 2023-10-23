@@ -1,4 +1,5 @@
 import React, { useContext } from "react";
+import { observer } from "mobx-react";
 
 import { IToolbarButtonComponentProps, registerTileToolbarButtons } from "../../toolbar/toolbar-button-manager";
 import { MergeInButton } from "../../toolbar/merge-in-button";
@@ -10,11 +11,10 @@ import { kGraphTileType } from "../../../plugins/graph/graph-defs";
 import { TileToolbarButton } from "../../toolbar/tile-toolbar-button";
 import { DataSetViewButton } from "../../toolbar/data-set-view-button";
 
-import DeleteSelectedIconSvg from "../../../assets/icons/delete/delete-selection-icon.svg";
-import SetExpressionIconSvg from "../../../clue/assets/icons/table/set-expression-icon.svg";
+import DeleteSelectedIcon from "../../../assets/icons/delete/delete-selection-icon.svg";
+import SetExpressionIcon from "../../../clue/assets/icons/table/set-expression-icon.svg";
 import ViewDataAsGraphIcon from "../../../assets/icons/view-data-as-graph-icon.svg";
 import LinkGraphIcon from "../../../clue/assets/icons/table/link-graph-icon.svg";
-import { observer } from "mobx-react";
 
 const DeleteSelectedButton = ({name}: IToolbarButtonComponentProps) => {
   const toolbarContext = useContext(TableToolbarContext);
@@ -24,7 +24,7 @@ const DeleteSelectedButton = ({name}: IToolbarButtonComponentProps) => {
       name={name}
       onClick={() => toolbarContext?.deleteSelected()}
     >
-      <DeleteSelectedIconSvg />
+      <DeleteSelectedIcon />
     </TileToolbarButton>
   );
 };
@@ -38,7 +38,7 @@ export const SetExpressionButton = ({name}: IToolbarButtonComponentProps) => {
       name={name}
       onClick={() => toolbarContext?.showExpressionsDialog()}
     >
-      <SetExpressionIconSvg />
+      <SetExpressionIcon />
     </TileToolbarButton>
   );
 };
