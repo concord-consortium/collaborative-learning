@@ -226,7 +226,8 @@ export interface IDrawingLayer {
   selectTile: (append: boolean) => void;
   getWorkspacePoint: (e:MouseEvent|React.MouseEvent) => Point|null;
   setCurrentDrawingObject: (object: DrawingObjectType|null) => void;
-  addNewDrawingObject: (object: DrawingObjectSnapshotForAdd) => DrawingObjectType;
+  addNewDrawingObject:
+    (object: DrawingObjectSnapshotForAdd, addAtBack?: boolean, select?: boolean) => DrawingObjectType;
   getCurrentStamp: () => StampModelType|null;
   startSelectionBox: (start: Point) => void;
   updateSelectionBox: (p: Point) => void;

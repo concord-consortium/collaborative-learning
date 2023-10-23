@@ -96,9 +96,14 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     ui.setSelectedTileId(this.props.model.id, { append });
   }
 
-  // Adds a new object and selects it, activating the select tool.
-  public addNewDrawingObject(drawingObject: DrawingObjectSnapshotForAdd, addAtBack=false) {
-    return this.getContent().addAndSelectObject(drawingObject, addAtBack);
+  // Adds a new object and optionally selects it, activating the select tool.
+  public addNewDrawingObject(drawingObject: DrawingObjectSnapshotForAdd,
+      addAtBack=false, select=true) {
+    if (select) {
+      return this.getContent().addAndSelectObject(drawingObject, addAtBack);
+    } else {
+      return this.getContent().addObject(drawingObject, addAtBack);
+    }
   }
 
   public getSelectedObjects(): DrawingObjectType [] {
