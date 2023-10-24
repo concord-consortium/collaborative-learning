@@ -139,7 +139,6 @@ export interface IMatchCirclesProps {
 }
 
 export function matchCirclesToData(props: IMatchCirclesProps) {
-  // console.log("\t🥩 matchCirclesToData:", matchCirclesToData);
 
   const {dataConfiguration, enableAnimation, instanceId,
       dotsElement, pointRadius, pointColor, pointStrokeColor} = props,
@@ -157,8 +156,9 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
           .property('id', (d: CaseData) => `${instanceId}_${d.caseID}`),
       (update) =>
         update.attr('r', (r)=> {
-          // console.log("\tr with input r:", r);
-          // console.log("\t returning pointRadius:", pointRadius);
+          console.log("\t🥩 matchCirclesToData:", matchCirclesToData);
+          console.log("\tr with input r:", r);
+          console.log("\t returning pointRadius:", pointRadius);
           return pointRadius;
         })
           .style('fill', pointColor)
@@ -366,10 +366,10 @@ export interface ISetPointSelection {
 //--------------------------------------------
 
 export function setPointSelection(props: ISetPointSelection) {
-  console.log("📁 graph-utils.ts ------------------------");
+  // console.log("📁 graph-utils.ts ------------------------");
   // console.log("\t🏭 setPointSelection");
   // console.log("\t🥩 pointcolor prop:", props.pointColor);
-  console.log("\t🥩prop: pointStrokeColor:", props.pointStrokeColor);
+  // console.log("\t🥩prop: pointStrokeColor:", props.pointStrokeColor);
 
 
 
@@ -392,13 +392,14 @@ export function setPointSelection(props: ISetPointSelection) {
     })
     // Then set properties to defaults w/o selection
     .attr('r', (aCaseData: CaseData) => {
+      console.log("\t🔪 aCaseData:", aCaseData);
       // console.log("\t🔪 pointRadius:", pointRadius);
       if (dataset?.isCaseSelected(aCaseData.caseID)){
-        // console.log("\t🔪returning :", pointRadius * 2);
+        console.log("\t🔪returning :", pointRadius * 2);
         return pointRadius * selectedRadiusFactor; //draw an outer circle for selected points
       }
       else {
-        // console.log("\t🔪returning :", pointRadius);
+        console.log("\t🔪returning :", pointRadius);
         return pointRadius;
       }
     })
@@ -414,9 +415,9 @@ export function setPointSelection(props: ISetPointSelection) {
       : aCaseData.plotNum && getPointColorAtIndex
         ? getPointColorAtIndex(aCaseData.plotNum) : pointColor;
 
-        console.log("📁 graph-utils.ts ------------------------");
-      console.log("\tfill--------------");
-      console.log("\t\t🥩 returnVal", returnVal);
+        // console.log("📁 graph-utils.ts ------------------------");
+      // console.log("\tfill--------------");
+      // console.log("\t\t🥩 returnVal", returnVal);
       return legendID
         ? dataConfiguration?.getLegendColorForCase(aCaseData.caseID)
         : aCaseData.plotNum && getPointColorAtIndex
@@ -459,13 +460,18 @@ export function setPointSelection(props: ISetPointSelection) {
   // selectedDots?.attr('r', selectedPointRadius)
 
   selectedDots?.attr('r', (aCaseData: CaseData) => {
-    // console.log("\t🔪 pointRadius:", pointRadius);
+    console.log("📁 graph-utils.ts ------------------------");
+    console.log("\t🏭selectedDots > r: where pointRadius:", pointRadius);
+
     if (dataset?.isCaseSelected(aCaseData.caseID)){
       // console.log("\t🔪returning :", pointRadius * selectedRadiusFactor);
+      console.log("\tline464");
+
       return pointRadius * selectedRadiusFactor; //draw an outer circle for selected points
     }
     else {
       // console.log("\t🔪returning :", pointRadius);
+      console.log("\tline469");
       return pointRadius;
     }
   })  //when you click on case this gets triggered
