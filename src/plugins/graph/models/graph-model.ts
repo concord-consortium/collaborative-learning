@@ -3,7 +3,7 @@ import { getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "
 import {createContext, useContext} from "react";
 import { IClueObject } from "../../../models/annotations/clue-object";
 import { getTileIdFromContent } from "../../../models/tiles/tile-model";
-import { IAdornmentModel, IUpdateCategoriesOptions } from "../adornments/adornment-models";
+import { IAdornmentModel } from "../adornments/adornment-models";
 import {AxisPlace} from "../imports/components/axis/axis-types";
 import {
   AxisModelUnion, EmptyAxisModel, IAxisModelUnion, NumericAxisModel
@@ -14,8 +14,7 @@ import {
   pointRadiusLogBase, pointRadiusMax, pointRadiusMin, pointRadiusSelectionAddend
 } from "../graph-types";
 import { SharedModelType } from "../../../models/shared/shared-model";
-import {
-  getDataSetFromId, getTileCaseMetadata, getTileDataSet, isTileLinkedToDataSet, linkTileToDataSet
+import { getTileCaseMetadata, getTileDataSet
 } from "../../../models/shared/shared-data-utils";
 import { AppConfigModelType } from "../../../models/stores/app-config-model";
 import {ITileContentModel, TileContentModel} from "../../../models/tiles/tile-content";
@@ -24,14 +23,13 @@ import { getSharedModelManager } from "../../../models/tiles/tile-environment";
 import {
   defaultBackgroundColor, defaultPointColor, defaultStrokeColor, kellyColors
 } from "../../../utilities/color-utils";
-import { onAnyAction } from "../../../utilities/mst-utils";
 import { AdornmentModelUnion } from "../adornments/adornment-types";
 import { isSharedCaseMetadata, SharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
 import { tileContentAPIViews } from "../../../models/tiles/tile-model-hooks";
 import { ConnectingLinesModel } from "../adornments/connecting-lines/connecting-lines-model";
 import { kConnectingLinesType } from "../adornments/connecting-lines/connecting-lines-types";
 import { getDotId } from "../utilities/graph-utils";
-import { GraphLayerModel } from "../graph-layer-model";
+import { GraphLayerModel } from "./graph-layer-model";
 import { isSharedDataSet, SharedDataSet } from "../../../models/shared/shared-data-set";
 import { DataConfigurationModel } from "./data-configuration-model";
 
@@ -79,7 +77,6 @@ export const GraphModel = TileContentModel
   })
   .volatile(self => ({
     prevDataSetId: "",
-    disposeDataSetListener: undefined as (() => void) | undefined
   }))
   .preProcessSnapshot((snapshot: any) => {
     const hasLayerAlready:boolean = (snapshot?.layers?.length || 0) > 0;
@@ -202,36 +199,6 @@ export const GraphModel = TileContentModel
         });
       });
       return objects;
-    },
-    // TODO: I don't know what this does, but probably should be moved to layer?
-    getUpdateCategoriesOptions(resetPoints=false): IUpdateCategoriesOptions {
-      const xAttrId = self.getAttributeID("x"),
-        xAttrType = self.config.attributeType("x"),
-        xCats = xAttrType === "categorical"
-          ? self.config.categoryArrayForAttrRole("x", [])
-          : [""],
-        yAttrId = self.getAttributeID("y"),
-        yAttrType = self.config.attributeType("y"),
-        yCats = yAttrType === "categorical"
-          ? self.config.categoryArrayForAttrRole("y", [])
-          : [""],
-        topAttrId = self.getAttributeID("topSplit"),
-        topCats = self.config.categoryArrayForAttrRole("topSplit", []) ?? [""],
-        rightAttrId = self.getAttributeID("rightSplit"),
-        rightCats = self.config.categoryArrayForAttrRole("rightSplit", []) ?? [""];
-      return {
-        xAxis: self.getAxis("bottom"),
-        xAttrId,
-        xCats,
-        yAxis: self.getAxis("left"),
-        yAttrId,
-        yCats,
-        topAttrId,
-        topCats,
-        rightAttrId,
-        rightCats,
-        resetPoints
-      };
     }
   }))
   .views(self => tileContentAPIViews({
@@ -254,29 +221,8 @@ export const GraphModel = TileContentModel
         console.log('created default layer: ', initialLayer.description);
       }
     },
-    setDataSetListener() {
-      const actionsAffectingCategories = [
-        "addCases", "removeAttribute", "removeCases", "setCaseValues"
-      ];
-      self.disposeDataSetListener?.();
-      self.disposeDataSetListener = self.data
-        ? onAnyAction(self.data, action => {
-            // TODO: check whether categories have actually changed before updating
-            if (actionsAffectingCategories.includes(action.name)) {
-              this.updateAdornments();
-            }
-          })
-        : undefined;
-    },
-    updateAdornments(resetPoints=false) {
-      const options = self.getUpdateCategoriesOptions(resetPoints);
-      self.adornments.forEach(adornment => adornment.updateCategories(options));
-    }
   }))
   .actions(self => ({
-    beforeDestroy() {
-      self.disposeDataSetListener?.();
-    },
     setAxis(place: AxisPlace, axis: IAxisModelUnion) {
       self.axes.set(place, axis);
     },
@@ -285,26 +231,18 @@ export const GraphModel = TileContentModel
     },
     /**
      * Use the given Attribute for the given graph role.
-     * Will remove any other attributes that may have that role.
-     * If the Attribute is part of a different DataSet, unlinks
-     * the current DataSet and links to the new one.
-     *
-     * TODO: this will need heavy modification to work with multiple layers.
+     * Will remove any other attributes that may have that role,
+     * unless role is 'yPlus'.
+     * Will not allow switching to an attribute from a different DataSet.
      */
     setAttributeID(role: GraphAttrRole, dataSetID: string, id: string) {
-      const newDataSet = getDataSetFromId(self, dataSetID);
-      if (newDataSet && !isTileLinkedToDataSet(self, newDataSet)) {
-        linkTileToDataSet(self, newDataSet); // unlinks any current links
-        // TODO also remove Layers
-        self.config.clearAttributes();
-        self.config.setDataset(newDataSet, getTileCaseMetadata(self));
+      for (const layer of self.layers) {
+        if (layer.config.dataset?.id === dataSetID) {
+          layer.setAttributeID(role, id);
+          return;
+        }
       }
-      if (role === 'yPlus') {
-        self.config.addYAttribute({attributeID: id});
-      } else {
-        self.config.setAttribute(role, {attributeID: id});
-      }
-      self.updateAdornments(true);
+      console.error('setAttributeID called with attribute from DataSet that is not a layer.');
     },
     /**
      * Find Y attribute with the given ID in any layer and remove it if found.
@@ -457,6 +395,7 @@ export const GraphModel = TileContentModel
                 self.layers.push(newLayer);
                 console.log('| Created layer ', newLayer);
                 newLayer.configureLinkedLayer();
+                newLayer.setDataSetListener();
               } else {
                 console.log('| Metadata not found');
               }
@@ -471,13 +410,6 @@ export const GraphModel = TileContentModel
       self.createDefaultLayerIfNeeded();
 
       console.log("| Done, final layers: ", self.layers.map(l=>l.description));
-
-      // reset listeners if necessary.  TODO layerize
-      const currDataSetId = self.data?.id ?? "";
-      if (self.prevDataSetId !== currDataSetId) {
-        self.setDataSetListener();
-        self.prevDataSetId = currDataSetId;
-      }
     },
     // afterAttachToDocument() {
     //   console.log("AATD running");

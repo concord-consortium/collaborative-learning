@@ -51,6 +51,7 @@ export class GraphController {
     this.graphModel = props.graphModel;
     this.dotsRef = props.dotsRef;
     if (this.graphModel.config.dataset !== this.graphModel.data) {
+      console.log('resetting, FIXME');
       this.graphModel.config.setDataset(this.graphModel.data, this.graphModel.metadata);
     }
     this.initializeGraph();
@@ -71,6 +72,7 @@ export class GraphController {
   initializeGraph() {
     const {graphModel, dotsRef, layout} = this,
       dataConfig = graphModel?.config;
+    console.log('initializeGraph');
 
     // handle any attributes auto-assigned before our handlers were in place
     if (graphModel?.autoAssignedAttributes.length) {
@@ -102,12 +104,14 @@ export class GraphController {
   }
 
   handleAttributeAssignment(graphPlace: GraphPlace, dataSetID: string, attrID: string) {
+    console.log('handleAttributeAssignment: ', graphPlace, attrID);
     const {graphModel, layout} = this,
       dataset = getDataSetFromId(graphModel, dataSetID),
       dataConfig = graphModel?.config,
       appConfig = getAppConfig(graphModel),
       emptyPlotIsNumeric = appConfig?.getSetting("emptyPlotIsNumeric", "graph");
     if (!(graphModel && layout && dataConfig)) {
+      console.log("  conditions not met");
       return;
     }
     this.callMatchCirclesToData();
