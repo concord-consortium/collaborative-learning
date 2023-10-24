@@ -1,6 +1,5 @@
 import stringify from "json-stringify-pretty-compact";
-import {reaction} from "mobx";
-import {addDisposer, getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
+import { getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
 import {createContext, useContext} from "react";
 import { IClueObject } from "../../../models/annotations/clue-object";
 import { getTileIdFromContent } from "../../../models/tiles/tile-model";
@@ -21,7 +20,7 @@ import {
 import { AppConfigModelType } from "../../../models/stores/app-config-model";
 import {ITileContentModel, TileContentModel} from "../../../models/tiles/tile-content";
 import {ITileExportOptions} from "../../../models/tiles/tile-content-info";
-import { getAppConfig, getSharedModelManager } from "../../../models/tiles/tile-environment";
+import { getSharedModelManager } from "../../../models/tiles/tile-environment";
 import {
   defaultBackgroundColor, defaultPointColor, defaultStrokeColor, kellyColors
 } from "../../../utilities/color-utils";
@@ -80,7 +79,6 @@ export const GraphModel = TileContentModel
   })
   .volatile(self => ({
     prevDataSetId: "",
-    autoAssignedAttributes: [] as Array<{ place: GraphPlace, role: GraphAttrRole, dataSetID: string, attrID: string }>,
     disposeDataSetListener: undefined as (() => void) | undefined
   }))
   .preProcessSnapshot((snapshot: any) => {
@@ -99,6 +97,13 @@ export const GraphModel = TileContentModel
      */
     get config() {
       return self.layers[0].config;
+    },
+    get autoAssignedAttributes() {
+      let all: Array<{ place: GraphPlace, role: GraphAttrRole, dataSetID: string, attrID: string }> = [];
+      for (const layer of self.layers) {
+        all = all.concat(layer.autoAssignedAttributes);
+      }
+      return all;
     }
   }))
   .views(self => ({
@@ -236,12 +241,17 @@ export const GraphModel = TileContentModel
   }))
   .actions(self => ({
     afterCreate() {
-      const initialLayer = GraphLayerModel.create();
+      this.createDefaultLayerIfNeeded();
+    },
+    createDefaultLayerIfNeeded() {
+      // Current code expects there to never be an empty set of layers,
+      // so an "unlinked" dataset is set up as a layer when there isn't a real one.
+      // TODO: consider refactoring so that a graph with no layers would get a reasonable default display.
       if (!self.layers.length) {
-        // TODO: Current code expects there to never be an empty set of layers.
-        // But explicitly defining an empty XY Plot this way might be sensible.
-        console.log('creating a default layer');
+        const initialLayer = GraphLayerModel.create();
         self.layers.push(initialLayer);
+        initialLayer.configureUnlinkedLayer();
+        console.log('created default layer: ', initialLayer.description);
       }
     },
     setDataSetListener() {
@@ -361,53 +371,24 @@ export const GraphModel = TileContentModel
     }
   }))
   .actions(self => ({
-    autoAssignAttributeID(place: GraphPlace, role: GraphAttrRole, dataSetID: string, attrID: string) {
-      self.setAttributeID(role, dataSetID, attrID);
-      self.autoAssignedAttributes.push({ place, role, dataSetID, attrID });
-    },
     clearAutoAssignedAttributes() {
-      self.autoAssignedAttributes = [];
-    }
-  }))
-  .actions(self => ({
-    configureLinkedGraph() {
-      if (!self.data) {
-        console.warn("GraphModel.configureLinkedGraph requires a dataset");
-        return;
-      }
-
-      if (getAppConfig(self)?.getSetting("autoAssignAttributes", "graph")) {
-        const attributeCount = self.data.attributes.length;
-        if (!attributeCount) return;
-
-        const xAttrId = self.getAttributeID("x");
-        const isValidXAttr = !!self.data.attrFromID(xAttrId);
-        const yAttrId = self.getAttributeID("y");
-        const isValidYAttr = !!self.data.attrFromID(yAttrId);
-
-        if (!isValidXAttr && !isValidYAttr) {
-          self.autoAssignAttributeID("bottom", "x", self.data.id, self.data.attributes[0].id);
-          if (attributeCount > 1) {
-            self.autoAssignAttributeID("left", "y", self.data.id, self.data.attributes[1].id);
-          }
-        }
-      }
-    },
-    configureUnlinkedGraph() {
-      if (self.data) {
-        console.warn("GraphModel.configureUnlinkedGraph expects the dataset to be unlinked");
-        return;
-      }
-      if (self.getAttributeID("y")) {
-        self.setAttributeID("y", "", "");
-      }
-      if (self.getAttributeID("x")) {
-        self.setAttributeID("x", "", "");
+      for (const layer of self.layers) {
+        layer.clearAutoAssignedAttributes();
       }
     }
   }))
   .actions(self => ({
     updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
+
+      if (isSharedDataSet(sharedModel)) {
+        console.log("| UASMC shared data set: ", sharedModel.dataSet.id, sharedModel);
+      } else if (isSharedCaseMetadata(sharedModel)) {
+        console.log("| UASMC shared metadata: ", sharedModel.data?.id, sharedModel);
+      } else {
+        console.log("| UASMC something else):", sharedModel);
+      }
+
+      console.log("| starting layers: ", self.layers.map(l=>l.description));
 
       // We need to figure out how to know if we need to update the
       // dataSet. The config.dataSet is volatile, but setting it
@@ -423,25 +404,22 @@ export const GraphModel = TileContentModel
 
       // TODO: May want to find ways to do this only when necessary
       const smm = getSharedModelManager(self);
-      const models = smm?.getTileSharedModelsByType(self, SharedDataSet);
-      // console.log("| sharedModelManager.getTileSharedModels ->: ",
-      //   models?.map((m) => { return (m as SharedDataSetType).dataSet.name; }).join(', '),
-      //   JSON.parse(JSON.stringify(models)));
+      if (!smm || !smm.isReady) return;
+      const models = smm.getTileSharedModelsByType(self, SharedDataSet);
+      if (!models) {
+        console.log("| No models, returning");
+        return;
+      }
 
-      // if (isSharedDataSet(sharedModel)) {
-      //   console.log("| sharedModel! ", sharedModel.dataSet.name, sharedModel);
-      // } else {
-      //   console.log("| sharedModel (not a SharedDataSet):", sharedModel);
-      // }
-
-      if (models && models.length !== self.layers.length) {
+      const needToSync = true; // TODO is there a way to quickly tell if anything relevant has changed?
+      if (needToSync) {
         // Sync up layers
         const modelIds = models.map(m => isSharedDataSet(m) ? m.dataSet.id : undefined);
         const layerIds = self.layers.map(layer => layer.config.dataset?.id);
         const newModels = modelIds.filter(id => !layerIds.includes(id));
         const removedModels = layerIds.filter(id => !modelIds.includes(id));
-        console.log('Layers that need to be removed: ', removedModels);
-        console.log('Layers that need to be added: ', newModels);
+        if (removedModels.length) console.log('Layers that need to be removed: ', removedModels);
+        if (newModels.length) console.log('Layers that need to be added: ', newModels);
 
         // Remove layers
         if (removedModels.length) {
@@ -457,20 +435,28 @@ export const GraphModel = TileContentModel
         if (newModels.length) {
           console.log("| new models: ", newModels);
           const metaDataModels = smm?.getTileSharedModelsByType(self, SharedCaseMetadata);
-          console.log("| all metadata models: ", metaDataModels);
           newModels.forEach((newModelId) => {
             const dataSetModel = models.find(m => isSharedDataSet(m) && m.dataSet.id === newModelId);
             if (dataSetModel && isSharedDataSet(dataSetModel)) {
               console.log("| found dataSetModel: ", dataSetModel, 'dataSetModel ID: ', dataSetModel.id);
-              const metaDataModel = getTileCaseMetadata(self); // metaDataModels?.find((m) => isSharedCaseMetadata(m) && m.data?.id === newModelId);
-              // console.log("| found metaDataModel, look at id, and data.id", metaDataModel);
+              let metaDataModel = metaDataModels?.find((m) => isSharedCaseMetadata(m) && m.data?.id === newModelId);
+              if (!metaDataModel) {
+                const newMetaDataModel = SharedCaseMetadata.create();
+                newMetaDataModel.setData(dataSetModel.dataSet);
+                smm?.addTileSharedModel(self, newMetaDataModel);
+                metaDataModel = newMetaDataModel;
+                console.log('| No shared metadata found, created one: ', metaDataModel);
+              } else {
+                console.log("| found metaDataModel, look at id, and data.id", metaDataModel);
+              }
               if (metaDataModel && isSharedCaseMetadata(metaDataModel)) {
                 const dataConfig = DataConfigurationModel.create();
                 dataConfig.setDataset(dataSetModel.dataSet, metaDataModel);
                 const newLayer = GraphLayerModel.create();
-                newLayer.addLayerConfig(dataConfig);
+                newLayer.setDataConfiguration(dataConfig);
                 self.layers.push(newLayer);
                 console.log('| Created layer ', newLayer);
+                newLayer.configureLinkedLayer();
               } else {
                 console.log('| Metadata not found');
               }
@@ -481,61 +467,56 @@ export const GraphModel = TileContentModel
         }
       }
 
-      if (self.data !== self.config.dataset) {
-        self.config.setDataset(self.data, self.metadata);
-      }
+      // If we are left with 0 layers, need to re-create a default one.
+      self.createDefaultLayerIfNeeded();
 
-      // TODO: is it necessary to do this here and in the reaction below?
-      if (self.data) {
-        self.configureLinkedGraph();
-      }
-      else {
-        self.configureUnlinkedGraph();
-      }
+      console.log("| Done, final layers: ", self.layers.map(l=>l.description));
 
-      // reset listeners if necessary
+      // reset listeners if necessary.  TODO layerize
       const currDataSetId = self.data?.id ?? "";
       if (self.prevDataSetId !== currDataSetId) {
         self.setDataSetListener();
         self.prevDataSetId = currDataSetId;
       }
     },
-    afterAttachToDocument() {
-      addDisposer(self, reaction(
-        () => self.data,
-        data => {
-          const sharedModelManager = getSharedModelManager(self);
-          if (!self.metadata && data) {
-            const caseMetadata = SharedCaseMetadata.create();
-            caseMetadata.setData(data);
-            sharedModelManager?.addTileSharedModel(self, caseMetadata);
-          }
-          // CHECKME: this will only work correctly if setDataset doesn't
-          // trigger any state updates
-          if (self.data !== self.config.dataset) {
-            self.config.setDataset(self.data, self.metadata);
-          }
-          // FIXME: When a snapshot is applied from firebase
-          // we need to sync the config dataset. But we don't want to do
-          // that if this update is happening because of a user action
-          // either an undo, history playback, or an actual user action.
-          // One possible way to address this is to make the config dataset
-          // be a view. This means we'll need another way to identify
-          // the first time a dataset is linked to the graph. Because we
-          // default the x and y attribute ids in this case. We could
-          // just check if the attributes are set already instead.
-          // TODO: refine this comment in light of the (just added) code below
+    // afterAttachToDocument() {
+    //   console.log("AATD running");
+    //   addDisposer(self, reaction(
+    //     () => self.data,
+    //     data => {
+    //       console.log('AATD reaction running');
+    //       const sharedModelManager = getSharedModelManager(self);
+    //       if (!self.metadata && data) {
+    //         const caseMetadata = SharedCaseMetadata.create();
+    //         caseMetadata.setData(data);
+    //         sharedModelManager?.addTileSharedModel(self, caseMetadata);
+    //       }
+    //       // CHECKME: this will only work correctly if setDataset doesn't
+    //       // trigger any state updates
+    //       if (self.data !== self.config.dataset) {
+    //         self.config.setDataset(self.data, self.metadata);
+    //       }
+    //       // FIXME: When a snapshot is applied from firebase
+    //       // we need to sync the config dataset. But we don't want to do
+    //       // that if this update is happening because of a user action
+    //       // either an undo, history playback, or an actual user action.
+    //       // One possible way to address this is to make the config dataset
+    //       // be a view. This means we'll need another way to identify
+    //       // the first time a dataset is linked to the graph. Because we
+    //       // default the x and y attribute ids in this case. We could
+    //       // just check if the attributes are set already instead.
+    //       // TODO: refine this comment in light of the (just added) code below
 
-          // TODO: is it necessary to do this here and in updateAfterSharedModelChanges above?
-          if (self.data) {
-            self.configureLinkedGraph();
-          }
-          else if (sharedModelManager?.isReady) {
-            self.configureUnlinkedGraph();
-          }
-        }, { fireImmediately: true }
-      ));
-    }
+    //       // TODO: is it necessary to do this here and in updateAfterSharedModelChanges above?
+    //       // if (self.data) {
+    //       //   self.configureLinkedGraph();
+    //       // }
+    //       // else if (sharedModelManager?.isReady) {
+    //       //   self.configureUnlinkedGraph();
+    //       // }
+    //     }, { fireImmediately: true }
+    //   ));
+    // }
   }));
 export interface IGraphModel extends Instance<typeof GraphModel> {}
 export interface IGraphModelSnapshot extends SnapshotIn<typeof GraphModel> {}
