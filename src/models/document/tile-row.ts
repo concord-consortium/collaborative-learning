@@ -124,7 +124,7 @@ export const TileRowModel = types
   }))
   .actions(self => ({
     setRowHeightWithoutUndo(height?: number) {
-      withoutUndo();
+      withoutUndo({ unlessChildAction: true });
       self.setRowHeight(height);
     }
   }));
