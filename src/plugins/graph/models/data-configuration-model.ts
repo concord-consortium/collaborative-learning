@@ -112,10 +112,14 @@ export const DataConfigurationModel = types
           : this.attributeDescriptions[role];
     },
     attributeID(role: GraphAttrRole) {
+      // console.log("---------attributeID-------");
+      // console.log("\t🥩 role:", role);
       let attrID = this.attributeDescriptionForRole(role)?.attributeID;
+
       if ((role === "caption") && !attrID) {
         attrID = this.defaultCaptionAttributeID;
       }
+      // console.log("\t🔪 attrID:", attrID);
       return attrID;
     },
     attributeType(role: GraphAttrRole) {

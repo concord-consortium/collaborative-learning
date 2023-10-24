@@ -16,6 +16,7 @@ import {
   setPointSelection,
   startAnimation
 } from "../utilities/graph-utils";
+import { selectedOuterCircleColor } from "../../../utilities/color-utils";
 import {useGraphModelContext} from "../models/graph-model";
 
 export const ScatterDots = function ScatterDots(props: PlotProps) {
@@ -115,7 +116,12 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
           .classed('dragging', false)
           .property('isDragging', false)
           .transition()
-          .attr('r', selectedPointRadiusRef.current);
+          .attr('r', (r: any) => {
+            console.log("📁 scatterdots.tsx --------r function---------------:");
+            console.log("-r: ", r);
+            // console.log("\t🔪 selectedPointRadiusRef.current:", selectedPointRadiusRef.current);
+            return selectedPointRadiusRef.current;
+          });
         setDragID(() => '');
         target.current = null;
 
@@ -141,12 +147,20 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
   useDragHandlers(window, {start: onDragStart, drag: onDrag, end: onDragEnd});
 
   const refreshPointSelection = useCallback(() => {
+
     const {pointColor, pointStrokeColor} = graphModel;
+    console.log("\t🥩 pointStrokeColor:", pointStrokeColor);
+    console.log("\t🥩 pointColor:", pointColor);
+    // const tempColor = "#14f49e";
+    // const tempColor = "#000000";
+
     dataConfiguration && setPointSelection(
       {
         dotsRef, dataConfiguration, pointRadius: pointRadiusRef.current,
         selectedPointRadius: selectedPointRadiusRef.current,
-        pointColor, pointStrokeColor, getPointColorAtIndex: graphModel.pointColorAtIndex
+        // pointColor, pointStrokeColor, getPointColorAtIndex: graphModel.pointColorAtIndex //old
+        pointColor, pointStrokeColor: selectedOuterCircleColor, getPointColorAtIndex: graphModel.pointColorAtIndex
+
       });
   }, [dataConfiguration, dotsRef, graphModel]);
 
@@ -182,6 +196,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
       numberOfPlots = dataConfiguration?.numberOfPlots || 1,
       getLegendColor = legendAttrID ? dataConfiguration?.getLegendColorForCase : undefined;
 
+    // console.log("📁 scatterdots.tsx ------------------------");
     setPointCoordinates({
       dataset, dotsRef, pointRadius: pointRadiusRef.current,
       selectedPointRadius: selectedPointRadiusRef.current,

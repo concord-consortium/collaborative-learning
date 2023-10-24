@@ -39,7 +39,7 @@ export const isLightColorRequiringContrastOffset = (color?: string) => {
     '#B32851', '#F4C800', '#7F180D', '#93AA00',
     '#593315', '#232C16', '#FF7A5C', '#F6768E'
   ];
-  
+
   export const defaultPointColor = '#E6805B',
     defaultSelectedColor = '#4682B4',
     defaultStrokeWidth = 1,
@@ -49,4 +49,8 @@ export const isLightColorRequiringContrastOffset = (color?: string) => {
     defaultSelectedStroke = '#FF0000',
     defaultSelectedStrokeWidth = 2,
     defaultSelectedStrokeOpacity = 1,
-    defaultBackgroundColor = '#FFFFFF';
+    defaultBackgroundColor = '#FFFFFF',
+
+    selectedStrokeWidth = 5,
+    selectedStrokeOpacity = 0.5,
+    selectedOuterCircleColor = "#89F9CE";

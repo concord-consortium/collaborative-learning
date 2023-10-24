@@ -6,13 +6,12 @@ import { IClueObjectSnapshot } from "../../../models/annotations/clue-object";
 import { PartialSharedModelEntry } from "../../../models/document/document-content-types";
 import { UpdatedSharedDataSetIds } from "../../../models/shared/shared-data-set";
 import {CaseData, DotsElt, selectCircles, selectDots} from "../d3-types";
-import {IDotsRef, kGraphFont, Point, Rect, rTreeRect, transitionDuration} from "../graph-types";
+import {IDotsRef, kGraphFont, Point, Rect, rTreeRect, selectedRadiusFactor, transitionDuration} from "../graph-types";
 import {between} from "./math-utils";
 import {IAxisModel, isNumericAxisModel} from "../imports/components/axis/models/axis-model";
 import {ScaleNumericBaseType} from "../imports/components/axis/axis-types";
 import {IDataSet} from "../../../models/data/data-set";
-import { defaultSelectedColor, defaultSelectedStroke, defaultSelectedStrokeOpacity, defaultSelectedStrokeWidth,
-  defaultStrokeOpacity, defaultStrokeWidth } from "../../../utilities/color-utils";
+import { defaultBackgroundColor, defaultSelectedColor, defaultSelectedStroke, defaultSelectedStrokeWidth, defaultStrokeWidth, selectedOuterCircleColor, selectedStrokeWidth } from "../../../utilities/color-utils";
 import {IDataConfigurationModel} from "../models/data-configuration-model";
 import {measureText} from "../../../components/tiles/hooks/use-measure-text";
 
@@ -140,6 +139,7 @@ export interface IMatchCirclesProps {
 }
 
 export function matchCirclesToData(props: IMatchCirclesProps) {
+  // console.log("\t🥩 matchCirclesToData:", matchCirclesToData);
 
   const {dataConfiguration, enableAnimation, instanceId,
       dotsElement, pointRadius, pointColor, pointStrokeColor} = props,
@@ -156,7 +156,11 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
           .attr('class', 'graph-dot')
           .property('id', (d: CaseData) => `${instanceId}_${d.caseID}`),
       (update) =>
-        update.attr('r', pointRadius)
+        update.attr('r', (r)=> {
+          // console.log("\tr with input r:", r);
+          // console.log("\t returning pointRadius:", pointRadius);
+          return pointRadius;
+        })
           .style('fill', pointColor)
           .style('stroke', pointStrokeColor)
           .style('stroke-width', defaultStrokeWidth)
@@ -359,44 +363,115 @@ export interface ISetPointSelection {
   getPointColorAtIndex?: (index: number) => string
 }
 
+//--------------------------------------------
+
 export function setPointSelection(props: ISetPointSelection) {
+  console.log("📁 graph-utils.ts ------------------------");
+  // console.log("\t🏭 setPointSelection");
+  // console.log("\t🥩 pointcolor prop:", props.pointColor);
+  console.log("\t🥩prop: pointStrokeColor:", props.pointStrokeColor);
+
+
+
   const
     {dotsRef, dataConfiguration, pointRadius, selectedPointRadius,
       pointColor, pointStrokeColor, getPointColorAtIndex} = props,
     dataset = dataConfiguration.dataset,
     dots = selectCircles(dotsRef.current),
     legendID = dataConfiguration.attributeID('legend');
+    // console.log("\t🥩 legendID:", legendID);
+
 
   if (!(dotsRef.current && dots)) return;
 
   // First set the class based on selection
+
   dots
-    .classed('graph-dot-highlighted', (aCaseData: CaseData) => !!dataset?.isCaseSelected(aCaseData.caseID))
+    .classed('graph-dot-highlighted', (aCaseData: CaseData) => {
+      return !!dataset?.isCaseSelected(aCaseData.caseID);
+    })
     // Then set properties to defaults w/o selection
-    .attr('r', pointRadius)
-    .style('stroke', pointStrokeColor)
+    .attr('r', (aCaseData: CaseData) => {
+      // console.log("\t🔪 pointRadius:", pointRadius);
+      if (dataset?.isCaseSelected(aCaseData.caseID)){
+        // console.log("\t🔪returning :", pointRadius * 2);
+        return pointRadius * selectedRadiusFactor; //draw an outer circle for selected points
+      }
+      else {
+        // console.log("\t🔪returning :", pointRadius);
+        return pointRadius;
+      }
+    })
+    .style('stroke', (stroke) => {
+      // console.log("stroke with input", stroke);
+      // console.log("\t🔪 pointStrokeColor:", pointStrokeColor);
+      return pointStrokeColor;
+      // return pointStrokeColor;
+    })
     .style('fill', (aCaseData:CaseData) => {
+      const returnVal = legendID
+      ? dataConfiguration?.getLegendColorForCase(aCaseData.caseID)
+      : aCaseData.plotNum && getPointColorAtIndex
+        ? getPointColorAtIndex(aCaseData.plotNum) : pointColor;
+
+        console.log("📁 graph-utils.ts ------------------------");
+      console.log("\tfill--------------");
+      console.log("\t\t🥩 returnVal", returnVal);
       return legendID
         ? dataConfiguration?.getLegendColorForCase(aCaseData.caseID)
         : aCaseData.plotNum && getPointColorAtIndex
           ? getPointColorAtIndex(aCaseData.plotNum) : pointColor;
     })
-    .style('stroke-width', defaultStrokeWidth)
-    .style('stroke-opacity', defaultStrokeOpacity);
+    .style('stroke-width', (aCaseData: CaseData) => {
+      return dataset?.isCaseSelected(aCaseData.caseID) ? selectedStrokeWidth : defaultStrokeWidth;
+    })
+    .style('stroke-opacity', (aCaseData: CaseData) => {
+      return 1;
+    })
+    .style('stroke-fill', (aCaseData: CaseData) => {
+      // console.log("\t🔪 stroke-fill returning...:",
+      //dataset?.isCaseSelected(aCaseData.caseID) && selectedOuterCircleColor;
+      // return "#000000";
+      return dataset?.isCaseSelected(aCaseData.caseID) ? selectedOuterCircleColor : defaultBackgroundColor;
+    });
 
   const selectedDots = selectDots(dotsRef.current, true);
   // How we deal with this depends on whether there is a legend or not
-  if (legendID) {
-    selectedDots?.style('stroke', defaultSelectedStroke)
-      .style('stroke-width', defaultSelectedStrokeWidth)
-      .style('stroke-opacity', defaultSelectedStrokeOpacity);
-  } else {
-    selectedDots?.style('fill', defaultSelectedColor);
-  }
-  selectedDots?.attr('r', selectedPointRadius)
-    .raise();
-}
 
+  // if (legendID) {
+  //   console.log("414");
+  //   selectedDots?.style('stroke', defaultSelectedStroke)
+  //     .style('stroke-width', defaultSelectedStrokeWidth)
+  //     .style('stroke-opacity', defaultSelectedStrokeOpacity);
+  // } else {
+  //   console.log("419");
+
+  //   selectedDots?.style('fill', ()=>{
+  //     console.log("\t🥩 defaultSelectedColor:", defaultSelectedColor);
+  //     return defaultSelectedColor;
+  //   });
+  // }
+
+
+  // console.log("line 418");
+  // console.log("\t🔪 selectedPointRadius:", selectedPointRadius);
+
+  // selectedDots?.attr('r', selectedPointRadius)
+
+  selectedDots?.attr('r', (aCaseData: CaseData) => {
+    // console.log("\t🔪 pointRadius:", pointRadius);
+    if (dataset?.isCaseSelected(aCaseData.caseID)){
+      // console.log("\t🔪returning :", pointRadius * selectedRadiusFactor);
+      return pointRadius * selectedRadiusFactor; //draw an outer circle for selected points
+    }
+    else {
+      // console.log("\t🔪returning :", pointRadius);
+      return pointRadius;
+    }
+  })  //when you click on case this gets triggered
+  .raise();
+}
+//--------------------------------------------
 export interface ISetPointCoordinates {
   dataset?: IDataSet
   dotsRef: IDotsRef
@@ -413,6 +488,11 @@ export interface ISetPointCoordinates {
 }
 
 export function setPointCoordinates(props: ISetPointCoordinates) {
+  // console.log("📁 graph-utils.ts ------------------------");
+
+  // console.log("\t🏭 setPointCoordinates");
+  // console.log("\t🥩 props:", props);
+
 
   const lookupLegendColor = (aCaseData: CaseData) => {
       const id = aCaseData.caseID,
@@ -425,6 +505,8 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
   },
 
   setPoints = () => {
+    // console.log("\t🏭 setPoints");
+
     if (theSelection?.size()) {
       theSelection
         .transition()
@@ -435,8 +517,13 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
         .attr('cy', (aCaseData: CaseData) => {
           return getScreenY(aCaseData.caseID, aCaseData.plotNum);
         })
-        .attr('r', (aCaseData: CaseData) => dataset?.isCaseSelected(aCaseData.caseID)
-          ? selectedPointRadius : pointRadius)
+        // .attr('r', (aCaseData: CaseData) => dataset?.isCaseSelected(aCaseData.caseID)
+        //   ? selectedPointRadius : pointRadius)
+
+        .attr('r', (aCaseData: CaseData) => {
+          return dataset?.isCaseSelected(aCaseData.caseID)
+          ? selectedPointRadius : pointRadius;
+        })
         .style('fill', (aCaseData: CaseData) => lookupLegendColor(aCaseData))
         .style('stroke', (aCaseData: CaseData) =>
           (getLegendColor && dataset?.isCaseSelected(aCaseData.caseID))

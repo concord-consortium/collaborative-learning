@@ -75,11 +75,12 @@ export interface counterProps {
 
 export const
   transitionDuration = 1000,
-  pointRadiusMax = 10,
+  pointRadiusMax = 5,
   pointRadiusMin = 3,
   pointRadiusLogBase = 2.0, // reduce point radius from max by log of (num. cases) base (LogBase).
-  pointRadiusSelectionAddend = 1,
-  hoverRadiusFactor = 1.5,
+  pointRadiusSelectionAddend = 0,
+  hoverRadiusFactor = 1.0,
+  selectedRadiusFactor = 1.5,
   kGraphFont = "12px sans-serif",
   kChoroplethHeight = 16,
   kAxisTickLength = 4,

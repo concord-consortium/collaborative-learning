@@ -12,7 +12,7 @@ import {
 import { GraphPlace } from "../imports/components/axis-graph-shared";
 import {
   GraphAttrRole, hoverRadiusFactor, kDefaultNumericAxisBounds, kGraphTileType, PlotType, PlotTypes,
-  pointRadiusLogBase, pointRadiusMax, pointRadiusMin, pointRadiusSelectionAddend
+  pointRadiusMax, pointRadiusSelectionAddend
 } from "../graph-types";
 import {DataConfigurationModel} from "./data-configuration-model";
 import { SharedModelType } from "../../../models/shared/shared-model";
@@ -64,7 +64,6 @@ export const GraphModel = TileContentModel
     _pointStrokeColor: defaultStrokeColor,
     pointStrokeSameAsFill: false,
     plotBackgroundColor: defaultBackgroundColor,
-    pointSizeMultiplier: 1,
     isTransparent: false,
     plotBackgroundImageID: "",
     // todo: how to use this type?
@@ -105,21 +104,19 @@ export const GraphModel = TileContentModel
       return self.config.attributeID(place) ?? '';
     },
     getPointRadius(use: 'normal' | 'hover-drag' | 'select' = 'normal') {
-      let r = pointRadiusMax;
-      const numPoints = self.config.caseDataArray.length;
+      const r = pointRadiusMax;
       // for loop is fast equivalent to radius = max( minSize, maxSize - floor( log( logBase, max( dataLength, 1 )))
-      for (let i = pointRadiusLogBase; i <= numPoints; i = i * pointRadiusLogBase) {
-        --r;
-        if (r <= pointRadiusMin) break;
-      }
-      const result = r * self.pointSizeMultiplier;
       switch (use) {
         case "normal":
-          return result;
+          // console.log("\tcase normal -> returns result:", result);
+          return r;
         case "hover-drag":
-          return result * hoverRadiusFactor;
+          // console.log("\tcase hover-drag -> returns  result * hoverRadiusFactor:", result * hoverRadiusFactor);
+          return r * hoverRadiusFactor;
         case "select":
-          return result + pointRadiusSelectionAddend;
+        // console.log("\tcase select -> returns result + pointRadiusSelectionAdd",
+        // result + pointRadiusSelectionAddend);
+          return r + pointRadiusSelectionAddend;
       }
     },
     axisShouldShowGridLines(place: AxisPlace) {
@@ -256,9 +253,6 @@ export const GraphModel = TileContentModel
     },
     setPlotBackgroundColor(color: string) {
       self.plotBackgroundColor = color;
-    },
-    setPointSizeMultiplier(multiplier: number) {
-      self.pointSizeMultiplier = multiplier;
     },
     setIsTransparent(transparent: boolean) {
       self.isTransparent = transparent;

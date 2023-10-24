@@ -117,6 +117,9 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
   useDragHandlers(window, {start: onDragStart, drag: onDrag, end: onDragEnd});
 
   const refreshPointSelection = useCallback(() => {
+    console.log("📁 dotplotdots.tsx ------------------------");
+    console.log("\t🏭 refreshPointSelection");
+
     dataConfiguration && setPointSelection({
       dotsRef, dataConfiguration, pointRadius: graphModel.getPointRadius(),
       pointColor, pointStrokeColor, selectedPointRadius: graphModel.getPointRadius('select')
@@ -254,6 +257,7 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
         getLegendColor = dataConfiguration?.attributeID('legend')
           ? dataConfiguration?.getLegendColorForCase : undefined;
 
+      console.log("📁 dotplotdots.tsx ------------------------");
       setPointCoordinates({
         dataset, pointRadius: graphModel.getPointRadius(),
         selectedPointRadius: graphModel.getPointRadius('select'),

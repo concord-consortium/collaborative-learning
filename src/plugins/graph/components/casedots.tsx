@@ -36,7 +36,11 @@ export const CaseDots = function CaseDots(props: {
       const aCaseData: CaseData = target.current.node().__data__;
       if (aCaseData && target.current.node()?.nodeName === 'circle') {
         target.current.transition()
-          .attr('r', dragPointRadius);
+          .attr('r', (r: any)=>{
+
+            // console.log("\tr: ", r);
+            return dragPointRadius;
+          });
         setDragID(aCaseData.caseID);
         currPos.current = {x: event.clientX, y: event.clientY};
         handleClickOnDot(event, aCaseData.caseID, dataset);
