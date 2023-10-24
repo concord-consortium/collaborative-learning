@@ -115,7 +115,7 @@ context('Chat Panel', () => {
     
       cy.log('verify user can delete a post');
       const msgToDelete = "Send this comment after enter.";
-      chatPanel.getDeleteMessageButton(msgToDelete).click();
+      chatPanel.getDeleteMessageButton(msgToDelete).click({force:true});
       chatPanel.getDeleteConfirmModalButton().contains("Delete").click();
       cy.wait(2000);
       chatPanel.verifyCommentThreadLength(1);
@@ -323,6 +323,99 @@ context('Chat Panel', () => {
       cy.clickProblemResourceTile('introduction');
       cy.wait(2000);
       chatPanel.verifyCommentThreadContains("This is a teacher8 tile comment");
+    });
+ });
+});
+
+context('Chat Panel Comment Tags', () => {
+  beforeEach(() => {
+    cy.fixture("teacher-dash-data-msa-test.json").as("clueData");
+  });
+
+  describe('Chat panel comment tags for networked teacher', () => {
+    it('verify chat panel comment tags', () => {
+      const tags = [
+       "Select Student Strategy",
+       "Part-to-Part",
+       "Part-to-Whole",
+       "Unit Rate",
+       "Guess and Check",
+       "None"
+      ];
+      const tagComment = [
+       "This is Part-to-Part tag comment" + Math.random(),
+       "This is Part-to-Whole tag comment" + Math.random(),
+       "This is Unit Rate tag comment" + Math.random(),
+       "This is Guess and Check tag comment" + Math.random(),
+       "This is None tag comment" + Math.random(),
+      ];
+      cy.log('verify chat panel comment tags are accessible if teacher is in network (via url params)');
+      beforeTest(queryParams.teacherQueryParams);
+      loadNetworkTest(queryParams.teacher7NetworkQueryParams);
+    
+      cy.log('verify comment tag dropdown');
+      chatPanel.getChatPanelToggle().click();
+      chatPanel.getChatPanel().should('exist');
+      chatPanel.getCommentTextDropDown().should('exist');
+    
+      cy.log('verify comment tag dropdown options');
+      chatPanel.getCommentTextDropDown()
+      .should("contain", tags[0])
+      .should("contain", tags[1])
+      .should("contain", tags[2])
+      .should("contain", tags[3])
+      .should("contain", tags[4])
+      .should("contain", tags[5]);
+
+      cy.log('verify user post only comment tags on document comment');
+      cy.openTopTab("problems");
+      chatPanel.verifyProblemCommentClass();
+      chatPanel.addCommentTagAndVerify(tags[1]);
+      chatPanel.deleteCommentTagThread(tags[1]);
+
+      cy.log('verify user post only comment tags on tile comment');
+      cy.clickProblemResourceTile('introduction');
+      chatPanel.showAndVerifyTileCommentClass(0);
+      chatPanel.addCommentTagAndVerify(tags[2]);
+      chatPanel.deleteCommentTagThread(tags[2]);
+
+      cy.log('verify user post both comment tags and plain text on document comment');
+      cy.openTopTab("problems");
+      cy.openProblemSection("Introduction");
+      chatPanel.verifyProblemCommentClass();
+      chatPanel.addCommentTagTextAndVerify(tags[3], tagComment[2]);
+      chatPanel.deleteCommentTagThread(tags[3]);
+
+      cy.log('verify user post both comment tags and plain text on tile comment');
+      cy.openTopTab("problems");
+      cy.clickProblemResourceTile('introduction');
+      chatPanel.showAndVerifyTileCommentClass(0);
+      chatPanel.addCommentTagTextAndVerify(tags[5], tagComment[4]);
+      chatPanel.deleteCommentTagThread(tags[5]);
+
+      cy.log('verify user post only plain text and comment tag not displayed on document comment');
+      const docComment = "Only plain text and no comment tag document comment";
+      cy.openTopTab("problems");
+      cy.openProblemSection("Introduction");
+      chatPanel.verifyProblemCommentClass();
+      chatPanel.addCommentAndVerify(docComment);
+      chatPanel.verifyCommentTagNotDisplayed(docComment);
+      chatPanel.getDeleteMessageButton(docComment).click({force:true});
+      chatPanel.getDeleteConfirmModalButton().contains("Delete").click();
+      cy.wait(2000);
+      chatPanel.verifyCommentThreadDoesNotContain(docComment);
+
+      cy.log('verify user post only plain text and comment tag not displayed on tile comment');
+      const tileComment = "Only plain text and no comment tag tile comment";
+      cy.openTopTab("problems");
+      cy.clickProblemResourceTile('introduction');
+      chatPanel.showAndVerifyTileCommentClass(0);
+      chatPanel.addCommentAndVerify(tileComment);
+      chatPanel.verifyCommentTagNotDisplayed(tileComment);
+      chatPanel.getDeleteMessageButton(tileComment).click({force:true});
+      chatPanel.getDeleteConfirmModalButton().contains("Delete").click();
+      cy.wait(2000);
+      chatPanel.verifyCommentThreadDoesNotContain(tileComment);   
     });
  });
 });

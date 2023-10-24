@@ -74,6 +74,7 @@ context('XYPlot Tool Tile', function () {
       clueCanvas.deleteTile('xyplot');
       xyTile.getTile().should('not.exist');
     });
+
     it("Test undo redo actions", () => {
       beforeTest(queryParams);
       cy.log("Undo redo  XY Plot Tile creation");
@@ -108,6 +109,45 @@ context('XYPlot Tool Tile', function () {
       xyTile.getTile().should("exist");
       clueCanvas.getRedoTool().click();
       xyTile.getTile().should('not.exist');
+    });
+
+    it("Test adding 2 Y Series", () => {
+      beforeTest(queryParams);
+      cy.log("Add XY Plot Tile");
+      cy.collapseResourceTabs();
+      clueCanvas.addTile("graph");
+      xyTile.getTile().should('be.visible');
+
+      cy.log("Add Table Tile");
+      clueCanvas.addTile('table');
+      tableToolTile.getTableTile().should('be.visible');
+      cy.get(".primary-workspace").within((workspace) => {
+        tableToolTile.typeInTableCell(1, '5');
+        tableToolTile.getTableCell().eq(1).should('contain', '5');
+        tableToolTile.typeInTableCell(2, '10');
+        tableToolTile.getTableCell().eq(2).should('contain', '10');
+        tableToolTile.getAddColumnButton().click();
+        tableToolTile.typeInTableCell(3, '8');
+        tableToolTile.getTableCell().eq(3).should('contain', '8');
+      });
+
+      cy.log("Add Second Row Table Cell");
+      cy.get(".primary-workspace").within((workspace) => {
+        tableToolTile.typeInTableCell(6, '0');
+        tableToolTile.getTableCell().eq(6).should('contain', '0');
+        tableToolTile.typeInTableCell(7, '4');
+        tableToolTile.getTableCell().eq(7).should('contain', '4');
+        tableToolTile.typeInTableCell(8, '8');
+        tableToolTile.getTableCell().eq(8).should('contain', '8');
+      });
+
+      cy.log("Link Table");
+      xyTile.getTile().click();
+      xyTile.getLinkTileButton().click();
+      xyTile.linkTable("Table 1");
+      xyTile.getAddSeriesButton().should('be.visible');
+      xyTile.getAddSeriesButton().click();
+      xyTile.getYAttributesLabel().should('have.length', 2);
     });
   });
 });

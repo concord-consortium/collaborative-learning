@@ -1,6 +1,6 @@
 import {observer} from "mobx-react-lite";
 import {appConfig} from "../../../initialize-app";
-import React, {MutableRefObject, useEffect, useMemo, useRef} from "react";
+import React, { MutableRefObject, useEffect, useMemo, useRef} from "react";
 import {select} from "d3";
 import {GraphController} from "../models/graph-controller";
 import {DroppableAddAttribute} from "./droppable-add-attribute";
@@ -21,7 +21,10 @@ import {setNiceDomain, startAnimation} from "../utilities/graph-utils";
 import {IAxisModel} from "../imports/components/axis/models/axis-model";
 import {GraphPlace} from "../imports/components/axis-graph-shared";
 import {useGraphLayoutContext} from "../models/graph-layout";
-import {isSetAttributeIDAction, useGraphModelContext} from "../models/graph-model";
+import {
+  isAttributeAssignmentAction, isRemoveYAttributeAction, isReplaceYAttributeAction, isSetAttributeIDAction,
+  useGraphModelContext
+} from "../models/graph-model";
 import {useInstanceIdContext} from "../imports/hooks/use-instance-id-context";
 import {MarqueeState} from "../models/marquee-state";
 import {Legend} from "./legend/legend";
@@ -36,12 +39,15 @@ import "./graph.scss";
 import "./graph-clue-styles.scss";
 
 interface IProps {
-  graphController: GraphController
-  graphRef: MutableRefObject<HTMLDivElement | null>
-  dotsRef: IDotsRef
+  graphController: GraphController;
+  graphRef: MutableRefObject<HTMLDivElement | null>;
+  dotsRef: IDotsRef;
+  onRequestRowHeight?: (id: string, size: number) => void;
 }
 
-export const Graph = observer(function Graph({ graphController, graphRef, dotsRef }: IProps) {
+export const Graph = observer(
+    function Graph({ graphController, graphRef, dotsRef, onRequestRowHeight }: IProps) {
+
   const graphModel = useGraphModelContext(),
     {autoAdjustAxes, enableAnimation} = graphController,
     {plotType} = graphModel,
@@ -52,9 +58,7 @@ export const Graph = observer(function Graph({ graphController, graphRef, dotsRe
     xScale = layout.getAxisScale("bottom"),
     svgRef = useRef<SVGSVGElement>(null),
     plotAreaSVGRef = useRef<SVGSVGElement>(null),
-    backgroundSvgRef = useRef<SVGGElement>(null),
-    xAttrID = graphModel.getAttributeID('x'),
-    yAttrID = graphModel.getAttributeID('y');
+    backgroundSvgRef = useRef<SVGGElement>(null);
 
   useEffect(function setupPlotArea() {
     if (xScale && xScale?.length > 0) {
@@ -67,10 +71,16 @@ export const Graph = observer(function Graph({ graphController, graphRef, dotsRe
     }
   }, [dataset, plotAreaSVGRef, layout, layout.plotHeight, layout.plotWidth, xScale]);
 
-  const handleChangeAttribute = (place: GraphPlace, dataSet: IDataSet, attrId: string) => {
+  const handleChangeAttribute = (place: GraphPlace, dataSet: IDataSet, attrId: string, oldAttrId?: string) => {
     const computedPlace = place === 'plot' && graphModel.config.noAttributesAssigned ? 'bottom' : place;
     const attrRole = graphPlaceToAttrRole[computedPlace];
-    graphModel.setAttributeID(attrRole, dataSet.id, attrId);
+    if (attrRole === 'y' && oldAttrId) {
+      graphModel.replaceYAttributeID(oldAttrId, attrId);
+      const yAxisModel = graphModel.getAxis('left') as IAxisModel;
+      setNiceDomain(graphModel.config.numericValuesForYAxis, yAxisModel);
+    } else {
+      graphModel.setAttributeID(attrRole, dataSet.id, attrId);
+    }
   };
 
   /**
@@ -79,9 +89,9 @@ export const Graph = observer(function Graph({ graphController, graphRef, dotsRe
    */
   const handleRemoveAttribute = (place: GraphPlace, idOfAttributeToRemove: string) => {
     if (place === 'left' && graphModel.config?.yAttributeDescriptions.length > 1) {
-      graphModel.config?.removeYAttributeWithID(idOfAttributeToRemove);
+      graphModel.removeYAttributeID(idOfAttributeToRemove);
       const yAxisModel = graphModel.getAxis('left') as IAxisModel;
-      setNiceDomain(graphModel.config.numericValuesForAttrRole('y'), yAxisModel);
+      setNiceDomain(graphModel.config.numericValuesForYAxis, yAxisModel);
     } else {
       dataset && handleChangeAttribute(place, dataset, '');
     }
@@ -90,11 +100,26 @@ export const Graph = observer(function Graph({ graphController, graphRef, dotsRe
   // respond to assignment of new attribute ID
   useEffect(function handleNewAttributeID() {
     const disposer = graphModel && onAnyAction(graphModel, action => {
-      if (isSetAttributeIDAction(action)) {
-        const [role, dataSetId, attrID] = action.args,
-          graphPlace = attrRoleToGraphPlace[role];
+      if (isAttributeAssignmentAction(action)) {
+        let graphPlace: GraphPlace = "yPlus";
+        let dataSetId = dataset?.id ?? "";
+        let attrId = "";
+        if (isSetAttributeIDAction(action)) {
+          const [role, _dataSetId, _attrId] = action.args;
+          graphPlace = attrRoleToGraphPlace[role] as GraphPlace;
+          dataSetId = _dataSetId;
+          attrId = _attrId;
+        }
+        else if (isRemoveYAttributeAction(action)) {
+          graphPlace = "yPlus";
+        }
+        else if (isReplaceYAttributeAction(action)) {
+          const [ , newAttrId] = action.args;
+          graphPlace = "yPlus";
+          attrId = newAttrId;
+        }
         startAnimation(enableAnimation);
-        graphPlace && graphController?.handleAttributeAssignment(graphPlace, dataSetId, attrID);
+        graphPlace && graphController?.handleAttributeAssignment(graphPlace, dataSetId, attrId);
       }
     });
     return () => disposer?.();
@@ -122,7 +147,7 @@ export const Graph = observer(function Graph({ graphController, graphRef, dotsRe
 
   const renderPlotComponent = () => {
     const props = {
-        xAttrID, yAttrID, dotsRef, enableAnimation
+        dotsRef, enableAnimation
       },
       typeToPlotComponentMap = {
         casePlot: <CaseDots {...props}/>,
@@ -213,6 +238,7 @@ export const Graph = observer(function Graph({ graphController, graphRef, dotsRe
             onChangeAttribute={handleChangeAttribute}
             onRemoveAttribute={handleRemoveAttribute}
             onTreatAttributeAs={handleTreatAttrAs}
+            onRequestRowHeight={onRequestRowHeight}
           />
         }
       </div>

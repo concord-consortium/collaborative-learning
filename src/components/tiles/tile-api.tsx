@@ -1,10 +1,11 @@
 import { createContext, ReactElement } from "react";
+import { action, makeObservable, observable } from "mobx";
 import { Optional } from "utility-types";
 import { IOffsetModel, ObjectBoundingBox } from "../../models/annotations/clue-object";
 import { ITileExportOptions } from "../../models/tiles/tile-content-info";
 import { ITileModel } from "../../models/tiles/tile-model";
 import { SharedModelType } from "../../models/shared/shared-model";
-import { action, makeObservable, observable } from "mobx";
+import { IDocumentContentAddTileOptions } from "../../models/document/document-content-types";
 
 export type TileResizeEntry = Optional<ResizeObserverEntry,
                                         "borderBoxSize" | "contentBoxSize" | "devicePixelContentBoxSize">;
@@ -101,6 +102,7 @@ export interface IAddTilesContext {
    * TODO: The configuration of shared models should be improved so we can get this behavior in a
    * more obvious way.
    */
-  addTileAfter: (tileType: string, target: ITileModel, sharedModels?: SharedModelType[]) => void;
+  addTileAfter: (tileType: string, target: ITileModel, sharedModels?: SharedModelType[],
+                 options?: IDocumentContentAddTileOptions) => void;
 }
 export const AddTilesContext = createContext<IAddTilesContext | null>(null);

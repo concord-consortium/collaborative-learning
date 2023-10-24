@@ -422,31 +422,30 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
         : isSelected ? defaultSelectedColor
           : aCaseData.plotNum && getPointColorAtIndex
             ? getPointColorAtIndex(aCaseData.plotNum) : pointColor;
-    },
+  },
 
-    setPoints = () => {
-
-      if (theSelection?.size()) {
-        theSelection
-          .transition()
-          .duration(duration)
-          .attr('cx', (aCaseData: CaseData) => {
-            return getScreenX(aCaseData.caseID);
-          })
-          .attr('cy', (aCaseData: CaseData) => {
-            return getScreenY(aCaseData.caseID, aCaseData.plotNum);
-          })
-          .attr('r', (aCaseData: CaseData) => dataset?.isCaseSelected(aCaseData.caseID)
-            ? selectedPointRadius : pointRadius)
-          .style('fill', (aCaseData: CaseData) => lookupLegendColor(aCaseData))
-          .style('stroke', (aCaseData: CaseData) =>
-            (getLegendColor && dataset?.isCaseSelected(aCaseData.caseID))
-            ? defaultSelectedStroke : pointStrokeColor)
-          .style('stroke-width', (aCaseData: CaseData) =>
-            (getLegendColor && dataset?.isCaseSelected(aCaseData.caseID))
-            ? defaultSelectedStrokeWidth : defaultStrokeWidth);
-      }
-    };
+  setPoints = () => {
+    if (theSelection?.size()) {
+      theSelection
+        .transition()
+        .duration(duration)
+        .attr('cx', (aCaseData: CaseData) => {
+          return getScreenX(aCaseData.caseID);
+        })
+        .attr('cy', (aCaseData: CaseData) => {
+          return getScreenY(aCaseData.caseID, aCaseData.plotNum);
+        })
+        .attr('r', (aCaseData: CaseData) => dataset?.isCaseSelected(aCaseData.caseID)
+          ? selectedPointRadius : pointRadius)
+        .style('fill', (aCaseData: CaseData) => lookupLegendColor(aCaseData))
+        .style('stroke', (aCaseData: CaseData) =>
+          (getLegendColor && dataset?.isCaseSelected(aCaseData.caseID))
+          ? defaultSelectedStroke : pointStrokeColor)
+        .style('stroke-width', (aCaseData: CaseData) =>
+          (getLegendColor && dataset?.isCaseSelected(aCaseData.caseID))
+          ? defaultSelectedStrokeWidth : defaultStrokeWidth);
+    }
+  };
 
   const
     {
@@ -457,7 +456,7 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
     duration = enableAnimation.current ? transitionDuration : 0,
 
     theSelection = selectDots(dotsRef.current, selectedOnly);
-  setPoints();
+    setPoints();
 }
 
 

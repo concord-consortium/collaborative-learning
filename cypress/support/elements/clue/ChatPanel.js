@@ -89,6 +89,7 @@ class ChatPanel{
     }
     verifyProblemCommentClass() {
       this.getProblemDocumentContent().should('have.class', DOCUMENT_COMMENT_CLASS);
+      cy.wait(1000)
     }
     verifyDocumentCommentClass() {
       this.getEditableDocumentContent().should('have.class',DOCUMENT_COMMENT_CLASS);
@@ -112,7 +113,7 @@ class ChatPanel{
       this.getCommentFromThread().should("contain", commentText);
     }
     verifyCommentThreadDoesNotContain(commentText) {
-      this.getCommentFromThread().should("not.contain", commentText);
+      this.getChatPanel().should("not.contain", commentText);
     }
     verifyCommentThreadDoesNotExist() {
       this.getCommentFromThread().should("not.exist");
@@ -125,6 +126,44 @@ class ChatPanel{
       dashboard.switchView("Workspace & Resources");
       // resourcesPanel.getCollapsedResourcesTab().click();
       this.getChatPanelToggle().click();
+    }
+
+    getCommentTextDropDown() {
+      return cy.get('[data-test=comment-textbox-dropdown]');
+    }
+    getCommentTagFromThread() {
+      return cy.get('[data-testid=comment-thread] .comment-dropdown-tag');
+    }
+    addCommentTagAndVerify(commentTag) {
+      this.getCommentTextDropDown().select(commentTag);
+      this.clickPostCommentButton();
+      this.getCommentTagFromThread().should('contain', commentTag);
+    }
+    getCommentTagThread(tag) {
+      return this.getCommentTagFromThread().contains(tag).parent();
+    }
+    getCommentTagDeleteMessageButton(tagToDelete) {
+      return this.getCommentTagThread(tagToDelete).find("[data-testid=delete-message-button]");
+    }
+    verifyCommentTagThreadLength(length) {
+      this.getCommentTagFromThread().should("have.length", length);
+    }
+    verifyCommentTagNotDisplayed(message) {
+      this.getCommentThread(message).find(".comment-dropdown-tag").should("not.exist");
+    }
+    deleteCommentTagThread(tagToDelete) {
+      this.getCommentTagDeleteMessageButton(tagToDelete).click({force:true});
+      this.getDeleteConfirmModalButton().contains("Delete").click();
+      cy.wait(2000);
+      this.getCommentTagFromThread().should("not.exist");
+    }
+    addCommentTagTextAndVerify(commentTag, commentText) {
+      this.getCommentTextDropDown().select(commentTag);
+      this.typeInCommentArea(commentText);
+      this.getCommentTextArea().should('contain', commentText);
+      this.clickPostCommentButton();
+      this.getCommentTagFromThread().should('contain', commentTag);
+      this.getCommentFromThread().should('contain', commentText);
     }
 }
 export default ChatPanel;

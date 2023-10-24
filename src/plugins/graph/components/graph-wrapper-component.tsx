@@ -22,7 +22,7 @@ import "./graph-wrapper-component.scss";
 export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(props) {
   const {
     documentContent, documentId, model, readOnly, scale, tileElt,
-    onRegisterTileApi, onUnregisterTileApi
+    onRegisterTileApi, onUnregisterTileApi, onRequestRowHeight
   } = props;
   const enabled = !readOnly;
   const content = model.content as IGraphModel;
@@ -131,7 +131,7 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
         onLinkTableButtonClick={showLinkTileDialog}
       />
       <BasicEditableTileTitle readOnly={readOnly} />
-      <GraphComponent data={data} layout={layout} tile={model} />
+      <GraphComponent data={data} layout={layout} tile={model} onRequestRowHeight={onRequestRowHeight} />
     </div>
   );
 });
