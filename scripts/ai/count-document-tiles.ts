@@ -9,22 +9,35 @@
 // cf. https://stackoverflow.com/a/66626333/16328462
 // Change sourceDirectory to be the name of the directory containing your documents
 // Change targetTileTypes to be a list of the tile types you want to count (like ["Geometry", "Text", "Table"])
+// Set aiService to be whichever service you're interested in. This will determine the format of the output file.
 // $ cd scripts/ai
 // $ npx tsx count-document-tiles.ts
 
 import fs from "fs";
+import stringify from "json-stringify-pretty-compact";
 
-import { cloudFileRoot, datasetPath } from "./script-constants";
+import { AIService, cloudFileRoot, datasetPath, DocumentInfo, tagFileExtension } from "./script-constants";
 import { prettyDuration } from "./script-utils";
 
 const sourceDirectory = "dataset1698192448944";
-const targetTileTypes = ["Geometry", "Text", "Table"];
+// const targetTileTypes = ["Geometry", "Text", "Table"];
+const targetTileTypes = ["Geometry"];
+const aiService: AIService = "azure";
 
 // The number of files to process in parallel
 const fileBatchSize = 8;
 
 // The maximum number of tiles to count (if 5, this count or more will be tagged as 5+)
 const maxTileCount = 5;
+
+// These variables are used for azure output files
+const singleLabel = targetTileTypes.length === 1;
+const projectName = `Count${targetTileTypes.join("")}`;
+const storageInputContainerName = "tile-count";
+const description = `Counts ${targetTileTypes.join(", ")} tiles in CLUE documents.`;
+const language = "en";
+const multilingual = false;
+const settings = {};
 
 const sourcePath = `${datasetPath}${sourceDirectory}`;
 
@@ -34,7 +47,7 @@ console.log(`* Counting ${targetTileTypes.join(", ")} Tiles *`);
 const startTime = Date.now();
 let checkedFiles = 0;
 let processedFiles = 0;
-const documentInfo = {};
+const documentInfo: Record<string, DocumentInfo> = {};
 const tagCounts = {};
 
 // Porcesses a file, counting the relevant tiles in it if it's a document
@@ -98,24 +111,63 @@ fs.readdir(sourcePath, async (_error, files) => {
 
       if (finished) {
         // Write to an output file when all of the files have been processed
-        const tagFileName = `${targetTileTypes.join("-")}.csv`;
+        const tagFileName = `${aiService}-${targetTileTypes.join("-")}${tagFileExtension[aiService]}`;
         let tagFileContent = "";
-        Object.values(documentInfo).forEach((info: any) => {
-          const fileName = `${cloudFileRoot}${info.fileName}`;
-          const tagPart = info.tags.join(",");
-          const comma = tagPart ? "," : "";
-          const line = `${fileName}${comma}${tagPart}\n`;
-          tagFileContent = `${tagFileContent}${line}`;
-        });
-        fs.writeFileSync(`${sourcePath}/${tagFileName}`, tagFileContent);
+        if (aiService === "azure") {
+          const projectKind = `Custome${singleLabel ? "Single" : "Multi"}LabelClassification`;
+          const metadata = {
+            projectName,
+            storageInputContainerName,
+            projectKind,
+            description,
+            language,
+            multilingual,
+            settings
+          };
+          const classes = Object.keys(tagCounts).map(tag => ({ category: tag }));
+          const documents = Object.values(documentInfo).map(info => {
+            const document: any = {
+              location: info.fileName,
+              language: "en-us"
+            };
+            if (singleLabel) {
+              document.class = {
+                category: info.tags[0]
+              };
+            } else {
+              document.classes = info.tags.map(tag => ({ category: tag }));
+            }
+            return document;
+          });
+          const assets = { projectKind, classes, documents };
+          const tagFileJson: any = {
+            projectFileVersion: `${startTime}`,
+            "stringIndexType": "Utf16CodeUnit",
+            metadata,
+            assets
+          };
+
+          tagFileContent = stringify(tagFileJson, { maxLength: 100 });
+        } else if (aiService === "vertexAI") {
+          Object.values(documentInfo).forEach(info => {
+            const fileName = `${cloudFileRoot}${info.fileName}`;
+            const tagPart = info.tags.join(",");
+            const comma = tagPart ? "," : "";
+            const line = `${fileName}${comma}${tagPart}\n`;
+            tagFileContent = `${tagFileContent}${line}`;
+          });
+        }
+        const tagFilePath = `${sourcePath}/${tagFileName}`;
+        fs.writeFileSync(tagFilePath, tagFileContent);
 
         const endTime = Date.now();
         const finalDuration = endTime - startTime;
-        console.log(`***** Finished in ${prettyDuration(finalDuration)}`);
+        console.log(`***** Finished in ${prettyDuration(finalDuration)} *****`);
         console.log(`*** Final Tag Counts ***`);
         Object.keys(tagCounts).sort().forEach(tag => {
           console.log(`${tag}: ${tagCounts[tag]}`);
         });
+        console.log(`*** Tags saved to ${tagFilePath}`);
 
         process.exit(0);
       }
