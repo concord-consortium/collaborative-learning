@@ -7,6 +7,8 @@ import { GraphPlace } from "../imports/components/axis-graph-shared";
 import { GraphAttrRole } from "../graph-types";
 import { IUpdateCategoriesOptions } from "../adornments/adornment-models";
 import { GraphModel } from "./graph-model";
+import { IDataSet } from "../../../models/data/data-set";
+import { ISharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
 
 export const GraphLayerModel = types
   .model('GraphLayerModel')
@@ -28,9 +30,13 @@ export const GraphLayerModel = types
     beforeDestroy() {
       self.disposeDataSetListener?.();
     },
-    setDataConfiguration: (config: IDataConfigurationModel) => {
+    setDataConfiguration(config: IDataConfigurationModel) {
       self.config = config;
       self.isLinked = true;
+    },
+    setDataset(dataset: IDataSet | undefined, metadata: ISharedCaseMetadata | undefined) {
+      self.config.setDataset(dataset, metadata);
+      self.isLinked = !!dataset && !!metadata;
     },
     setAttributeID(role: GraphAttrRole, id: string) {
       if (role === 'yPlus') {

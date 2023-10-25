@@ -14,7 +14,7 @@ import {
   pointRadiusLogBase, pointRadiusMax, pointRadiusMin, pointRadiusSelectionAddend
 } from "../graph-types";
 import { SharedModelType } from "../../../models/shared/shared-model";
-import { getTileCaseMetadata, getTileDataSet
+import { getTileCaseMetadata
 } from "../../../models/shared/shared-data-utils";
 import { AppConfigModelType } from "../../../models/stores/app-config-model";
 import {ITileContentModel, TileContentModel} from "../../../models/tiles/tile-content";
@@ -108,7 +108,7 @@ export const GraphModel = TileContentModel
      * Returns the first shared dataset found -- TODO obsolete.
      */
     get data() {
-      return getTileDataSet(self);
+      return self.layers[0].config.dataset;
     },
     /**
      * Returns the first shared case metadata found -- TODO obsolete.
@@ -330,24 +330,11 @@ export const GraphModel = TileContentModel
 
       console.log("| starting layers: ", self.layers.map(l=>l.description));
 
-      // We need to figure out how to know if we need to update the
-      // dataSet. The config.dataSet is volatile, but setting it
-      // might also update state in the config I'm not sure
-      // We could just check if they match and then update it if
-      // not. And then we'd also need a reaction that does the same
-      // thing, but we'd need the reaction to only do this if it isn't
-      // being done here.
-
-      // Note this will also happen in the reaction below
-      // we do it here just to be safe incase this function is called
-      // first
-
-      // TODO: May want to find ways to do this only when necessary
       const smm = getSharedModelManager(self);
       if (!smm || !smm.isReady) return;
       const models = smm.getTileSharedModelsByType(self, SharedDataSet);
       if (!models) {
-        console.log("| No models, returning");
+        console.log("| Undefined models, returning");
         return;
       }
 
@@ -356,26 +343,30 @@ export const GraphModel = TileContentModel
         // Sync up layers
         const modelIds = models.map(m => isSharedDataSet(m) ? m.dataSet.id : undefined);
         const layerIds = self.layers.map(layer => layer.config.dataset?.id);
-        const newModels = modelIds.filter(id => !layerIds.includes(id));
-        const removedModels = layerIds.filter(id => !modelIds.includes(id));
-        if (removedModels.length) console.log('Layers that need to be removed: ', removedModels);
-        if (newModels.length) console.log('Layers that need to be added: ', newModels);
+        const newModelIds = modelIds.filter(id => !layerIds.includes(id));
+        const removedModelIds = layerIds.filter(id => !modelIds.includes(id));
+        if (removedModelIds.length) console.log('Layers that need to be removed: ', removedModelIds);
+        if (newModelIds.length) console.log('Layers that need to be added: ', newModelIds);
 
         // Remove layers
-        if (removedModels.length) {
-          removedModels.forEach((id) => {
-            const foundLayer = self.layers.findIndex((layer) => layer.config.dataset?.id === id );
-            if (foundLayer >= 0) {
-              console.log('Removing layer ', foundLayer);
-              self.layers.splice(foundLayer, 1);
+        if (removedModelIds.length) {
+          removedModelIds.forEach((id) => {
+            const index = self.layers.findIndex((layer) => layer.config.dataset?.id === id );
+            if (index >= 0) {
+              if (self.layers[index].isLinked) {
+                console.log('Removing layer ', index);
+                self.layers.splice(index, 1);
+              } else {
+                console.log('Not removing default layer');
+              }
             }
           });
         }
 
-        if (newModels.length) {
-          console.log("| new models: ", newModels);
+        if (newModelIds.length) {
+          console.log("| new models: ", newModelIds);
           const metaDataModels = smm?.getTileSharedModelsByType(self, SharedCaseMetadata);
-          newModels.forEach((newModelId) => {
+          newModelIds.forEach((newModelId) => {
             const dataSetModel = models.find(m => isSharedDataSet(m) && m.dataSet.id === newModelId);
             if (dataSetModel && isSharedDataSet(dataSetModel)) {
               console.log("| found dataSetModel: ", dataSetModel, 'dataSetModel ID: ', dataSetModel.id);
@@ -390,15 +381,24 @@ export const GraphModel = TileContentModel
                 console.log("| found metaDataModel, look at id, and data.id", metaDataModel);
               }
               if (metaDataModel && isSharedCaseMetadata(metaDataModel)) {
-                const dataConfig = DataConfigurationModel.create();
-                dataConfig.setDataset(dataSetModel.dataSet, metaDataModel);
-                const newLayer = GraphLayerModel.create();
-                newLayer.setDataConfiguration(dataConfig);
-                self.layers.push(newLayer);
-                console.log('| Created layer ', newLayer);
-                newLayer.configureLinkedLayer();
-                self.layers[0].updateAdornments(true);
-                newLayer.setDataSetListener();
+                // Update default layer, or create a new one.
+                if (!self.layers[0].isLinked) {
+                  console.log('Re-using layer 0 for new dataset ', dataSetModel.dataSet.id);
+                  self.layers[0].setDataset(dataSetModel.dataSet, metaDataModel);
+                  self.layers[0].configureLinkedLayer();
+                  self.layers[0].updateAdornments();
+                } else {
+                  const dataConfig = DataConfigurationModel.create();
+                  dataConfig.setDataset(dataSetModel.dataSet, metaDataModel);
+                  const newLayer = GraphLayerModel.create();
+                  newLayer.setDataConfiguration(dataConfig);
+                  self.layers.push(newLayer);
+                  console.log('| Created layer ', newLayer);
+                  // May need these when we want to actually display the new layer:
+                  // newLayer.configureLinkedLayer();
+                  // newLayer.updateAdornments(true);
+                  // newLayer.setDataSetListener();
+                }
               } else {
                 console.log('| Metadata not found');
               }
