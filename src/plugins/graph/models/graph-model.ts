@@ -111,7 +111,7 @@ export const GraphModel = TileContentModel
           // console.log("\tcase normal -> returns result:", result);
           return r;
         case "hover-drag":
-          // console.log("\tcase hover-drag -> returns  result * hoverRadiusFactor:", result * hoverRadiusFactor);
+          // console.log("\tcase hover-drag -> returns  result * hoverRadiusFactor:", r * hoverRadiusFactor);
           return r * hoverRadiusFactor;
         case "select":
         // console.log("\tcase select -> returns result + pointRadiusSelectionAdd",

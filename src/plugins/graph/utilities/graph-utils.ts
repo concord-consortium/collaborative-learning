@@ -5,13 +5,13 @@ import {isInteger} from "lodash";
 import { IClueObjectSnapshot } from "../../../models/annotations/clue-object";
 import { PartialSharedModelEntry } from "../../../models/document/document-content-types";
 import { UpdatedSharedDataSetIds } from "../../../models/shared/shared-data-set";
-import {CaseData, DotsElt, selectCircles, selectDots} from "../d3-types";
+import {CaseData, DotSelection, DotsElt, selectCircles, selectDots} from "../d3-types";
 import {IDotsRef, kGraphFont, Point, Rect, rTreeRect, selectedRadiusFactor, transitionDuration} from "../graph-types";
 import {between} from "./math-utils";
 import {IAxisModel, isNumericAxisModel} from "../imports/components/axis/models/axis-model";
 import {ScaleNumericBaseType} from "../imports/components/axis/axis-types";
 import {IDataSet} from "../../../models/data/data-set";
-import { defaultBackgroundColor, defaultSelectedColor, defaultSelectedStroke, defaultSelectedStrokeWidth, defaultStrokeWidth, selectedOuterCircleColor, selectedStrokeWidth } from "../../../utilities/color-utils";
+import { defaultSelectedColor, defaultSelectedStroke, defaultSelectedStrokeWidth, defaultStrokeWidth, selectedStrokeWidth } from "../../../utilities/color-utils";
 import {IDataConfigurationModel} from "../models/data-configuration-model";
 import {measureText} from "../../../components/tiles/hooks/use-measure-text";
 
@@ -139,32 +139,28 @@ export interface IMatchCirclesProps {
 }
 
 export function matchCirclesToData(props: IMatchCirclesProps) {
-
   const {dataConfiguration, enableAnimation, instanceId,
-      dotsElement, pointRadius, pointColor, pointStrokeColor} = props,
-    allCaseData = dataConfiguration.joinedCaseDataArrays,
-    caseDataKeyFunc = (d: CaseData) => `${d.plotNum}-${d.caseID}`,
-    circles = selectCircles(dotsElement);
+      dotsElement, pointRadius, pointColor, pointStrokeColor} = props;
+  // console.log("📁 graph-utils.ts ------------------------");
+  // console.log("\t🏭 matchCirclesToData");
+
+  const allCaseData = dataConfiguration.joinedCaseDataArrays;
+  const caseDataKeyFunc = (d: CaseData) => `${d.plotNum}-${d.caseID}`;
+  const circles = selectCircles(dotsElement);
+
   if (!circles) return;
   startAnimation(enableAnimation);
-  circles
-    .data(allCaseData, caseDataKeyFunc)
-    .join(
-      (enter) =>
-        enter.append('circle')
-          .attr('class', 'graph-dot')
-          .property('id', (d: CaseData) => `${instanceId}_${d.caseID}`),
-      (update) =>
-        update.attr('r', (r)=> {
-          console.log("\t🥩 matchCirclesToData:", matchCirclesToData);
-          console.log("\tr with input r:", r);
-          console.log("\t returning pointRadius:", pointRadius);
-          return pointRadius;
-        })
-          .style('fill', pointColor)
-          .style('stroke', pointStrokeColor)
-          .style('stroke-width', defaultStrokeWidth)
-    );
+
+  renderPoints({
+    selection: circles,
+    data: allCaseData,
+    pointRadius,
+    selectedPointRadius: pointRadius * selectedRadiusFactor, // Change selectedRadiusFactor if needed
+    pointColor,
+    pointStrokeColor,
+    getPointColorAtIndex: (index) => pointColor
+  });
+
   dotsElement && select(dotsElement).on('click',
     (event: MouseEvent) => {
       const target = select(event.target as SVGSVGElement);
@@ -363,115 +359,136 @@ export interface ISetPointSelection {
   getPointColorAtIndex?: (index: number) => string
 }
 
-//--------------------------------------------
+//===================================== [ Render Points ] =========================================
+
+interface IRenderPoints {
+  selection: DotSelection;
+  data: any;
+  pointRadius: number;
+  selectedPointRadius: number;
+  pointColor: string;
+  pointStrokeColor: string;
+  getPointColorAtIndex?: (index: number) => string;
+}
+
+
+const renderPoints = ({ selection, data, pointRadius, selectedPointRadius, pointColor,
+                        pointStrokeColor, getPointColorAtIndex}: IRenderPoints) => {
+console.log("---------renderPoints-------------------");
+
+  selection
+    .data(data)
+    .join(
+      (enter) =>
+        enter.append('circle')
+          .attr('class', 'graph-dot')
+          .attr('r', pointRadius)
+          .style('fill', (d) => getPointColor(d, pointColor, getPointColorAtIndex))
+          .style('stroke', pointStrokeColor)
+          .style('stroke-width', defaultStrokeWidth),
+      (update) =>
+        update.attr('r', (d: any) => d.selected ? selectedPointRadius : pointRadius)
+          .style('fill', (d) => getPointColor(d, pointColor, getPointColorAtIndex))
+          .style('stroke', pointStrokeColor)
+          .style('stroke-width', (d: any) => d.selected ? selectedStrokeWidth : defaultStrokeWidth)
+    );
+};
+
+function getPointColor(data: any, defaultColor: string, getPointColorAtIndex?: (index: number) => string) {
+  if (getPointColorAtIndex && data.plotNum !== undefined) {
+    return getPointColorAtIndex(data.plotNum);
+  } else {
+    return defaultColor;
+  }
+}
+
+
+    //try method 2 that renders two circles - first draw the bigger hover
+    //look into size change styling bug.
+    //consolidate the styling (currently there are at least two - 522-540) - into one function
+
+
+
+
 
 export function setPointSelection(props: ISetPointSelection) {
+  const { dotsRef, dataConfiguration, pointRadius, selectedPointRadius,
+          pointColor, pointStrokeColor, getPointColorAtIndex } = props;
+
   // console.log("📁 graph-utils.ts ------------------------");
   // console.log("\t🏭 setPointSelection");
-  // console.log("\t🥩 pointcolor prop:", props.pointColor);
-  // console.log("\t🥩prop: pointStrokeColor:", props.pointStrokeColor);
-
-
-
-  const
-    {dotsRef, dataConfiguration, pointRadius, selectedPointRadius,
-      pointColor, pointStrokeColor, getPointColorAtIndex} = props,
-    dataset = dataConfiguration.dataset,
-    dots = selectCircles(dotsRef.current),
-    legendID = dataConfiguration.attributeID('legend');
-    // console.log("\t🥩 legendID:", legendID);
-
-
+  const dataset = dataConfiguration.dataset;
+  const dots = selectCircles(dotsRef.current);
   if (!(dotsRef.current && dots)) return;
 
-  // First set the class based on selection
+  console.log("dots:", dots);
 
-  dots
-    .classed('graph-dot-highlighted', (aCaseData: CaseData) => {
-      return !!dataset?.isCaseSelected(aCaseData.caseID);
-    })
-    // Then set properties to defaults w/o selection
-    .attr('r', (aCaseData: CaseData) => {
-      console.log("\t🔪 aCaseData:", aCaseData);
-      // console.log("\t🔪 pointRadius:", pointRadius);
-      if (dataset?.isCaseSelected(aCaseData.caseID)){
-        console.log("\t🔪returning :", pointRadius * 2);
-        return pointRadius * selectedRadiusFactor; //draw an outer circle for selected points
-      }
-      else {
-        console.log("\t🔪returning :", pointRadius);
-        return pointRadius;
-      }
-    })
-    .style('stroke', (stroke) => {
-      // console.log("stroke with input", stroke);
-      // console.log("\t🔪 pointStrokeColor:", pointStrokeColor);
-      return pointStrokeColor;
-      // return pointStrokeColor;
-    })
-    .style('fill', (aCaseData:CaseData) => {
-      const returnVal = legendID
-      ? dataConfiguration?.getLegendColorForCase(aCaseData.caseID)
-      : aCaseData.plotNum && getPointColorAtIndex
-        ? getPointColorAtIndex(aCaseData.plotNum) : pointColor;
-
-        // console.log("📁 graph-utils.ts ------------------------");
-      // console.log("\tfill--------------");
-      // console.log("\t\t🥩 returnVal", returnVal);
-      return legendID
-        ? dataConfiguration?.getLegendColorForCase(aCaseData.caseID)
-        : aCaseData.plotNum && getPointColorAtIndex
-          ? getPointColorAtIndex(aCaseData.plotNum) : pointColor;
-    })
-    .style('stroke-width', (aCaseData: CaseData) => {
-      return dataset?.isCaseSelected(aCaseData.caseID) ? selectedStrokeWidth : defaultStrokeWidth;
-    })
-    .style('stroke-opacity', (aCaseData: CaseData) => {
-      return 1;
-    })
-    .style('stroke-fill', (aCaseData: CaseData) => {
-      // console.log("\t🔪 stroke-fill returning...:",
-      //dataset?.isCaseSelected(aCaseData.caseID) && selectedOuterCircleColor;
-      // return "#000000";
-      return dataset?.isCaseSelected(aCaseData.caseID) ? selectedOuterCircleColor : defaultBackgroundColor;
+  // render points
+  if (getPointColorAtIndex){
+    renderPoints({
+      selection: dots,
+      data: dataConfiguration.joinedCaseDataArrays,
+      pointRadius,
+      selectedPointRadius,
+      pointColor,
+      pointStrokeColor,
+      getPointColorAtIndex: (index) => getPointColorAtIndex(index)
     });
+  }
+
+
+
+  // dots
+  //   .classed('graph-dot-highlighted', (aCaseData: CaseData) => {
+  //     return !!dataset?.isCaseSelected(aCaseData.caseID);
+  //   })
+  //   // Then set properties to defaults w/o selection
+  //   .attr('r', (aCaseData: CaseData) => {
+  //     console.log("\t🔪 line 400 aCaseData:", aCaseData);
+  //     if (dataset?.isCaseSelected(aCaseData.caseID)){
+  //       return pointRadius * selectedRadiusFactor; //draw an outer circle for selected points
+  //     }
+  //     else {
+  //       console.log("\t🔪returning :", pointRadius);
+  //       return pointRadius;
+  //     }
+  //   })
+  //   .style('stroke', (stroke) => {
+  //     return pointStrokeColor;
+  //   })
+  //   .style('fill', (aCaseData:CaseData) => {
+  //     const returnVal = legendID
+  //     ? dataConfiguration?.getLegendColorForCase(aCaseData.caseID)
+  //     : aCaseData.plotNum && getPointColorAtIndex
+  //       ? getPointColorAtIndex(aCaseData.plotNum) : pointColor;
+  //     return legendID
+  //       ? dataConfiguration?.getLegendColorForCase(aCaseData.caseID)
+  //       : aCaseData.plotNum && getPointColorAtIndex
+  //         ? getPointColorAtIndex(aCaseData.plotNum) : pointColor;
+  //   })
+  //   .style('stroke-width', (aCaseData: CaseData) => {
+  //     return dataset?.isCaseSelected(aCaseData.caseID) ? selectedStrokeWidth : defaultStrokeWidth;
+  //   })
+  //   .style('stroke-opacity', (aCaseData: CaseData) => {
+  //     // return 0.6;
+  //     return 1;
+  //   })
+  //   .style('stroke-fill', (aCaseData: CaseData) => {
+  //     return dataset?.isCaseSelected(aCaseData.caseID) ? selectedOuterCircleColor : defaultBackgroundColor;
+  //   });
+
 
   const selectedDots = selectDots(dotsRef.current, true);
   // How we deal with this depends on whether there is a legend or not
-
-  // if (legendID) {
-  //   console.log("414");
-  //   selectedDots?.style('stroke', defaultSelectedStroke)
-  //     .style('stroke-width', defaultSelectedStrokeWidth)
-  //     .style('stroke-opacity', defaultSelectedStrokeOpacity);
-  // } else {
-  //   console.log("419");
-
-  //   selectedDots?.style('fill', ()=>{
-  //     console.log("\t🥩 defaultSelectedColor:", defaultSelectedColor);
-  //     return defaultSelectedColor;
-  //   });
-  // }
-
-
-  // console.log("line 418");
-  // console.log("\t🔪 selectedPointRadius:", selectedPointRadius);
-
-  // selectedDots?.attr('r', selectedPointRadius)
+  console.log("setPointSelection:", selectedDots);
 
   selectedDots?.attr('r', (aCaseData: CaseData) => {
     console.log("📁 graph-utils.ts ------------------------");
-    console.log("\t🏭selectedDots > r: where pointRadius:", pointRadius);
 
     if (dataset?.isCaseSelected(aCaseData.caseID)){
-      // console.log("\t🔪returning :", pointRadius * selectedRadiusFactor);
-      console.log("\tline464");
-
       return pointRadius * selectedRadiusFactor; //draw an outer circle for selected points
     }
     else {
-      // console.log("\t🔪returning :", pointRadius);
-      console.log("\tline469");
       return pointRadius;
     }
   })  //when you click on case this gets triggered
@@ -499,15 +516,30 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
   // console.log("\t🏭 setPointCoordinates");
   // console.log("\t🥩 props:", props);
 
-
   const lookupLegendColor = (aCaseData: CaseData) => {
+    // console.log("\t🏭 lookupLegendColor");
+    if (getPointColorAtIndex){
       const id = aCaseData.caseID,
-        isSelected = dataset?.isCaseSelected(id),
-        legendColor = getLegendColor ? getLegendColor(id) : '';
+      isSelected = dataset?.isCaseSelected(id),
+      legendColor = getLegendColor ? getLegendColor(id) : '';
       return legendColor !== '' ? legendColor
-        : isSelected ? defaultSelectedColor
-          : aCaseData.plotNum && getPointColorAtIndex
-            ? getPointColorAtIndex(aCaseData.plotNum) : pointColor;
+      : isSelected ? defaultSelectedColor
+        : aCaseData.plotNum && getPointColorAtIndex
+          ? getPointColorAtIndex(aCaseData.plotNum) : pointColor;
+    } else {
+      const id = aCaseData.caseID;
+      const isSelected = dataset?.isCaseSelected(id);
+      const legendColor = getLegendColor ? getLegendColor(id) : '';
+      return legendColor !== ''
+        ? legendColor
+        : isSelected
+          ? defaultSelectedColor
+          : pointColor;
+
+    }
+
+
+
   },
 
   setPoints = () => {

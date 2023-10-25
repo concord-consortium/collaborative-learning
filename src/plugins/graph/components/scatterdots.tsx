@@ -2,7 +2,7 @@ import {ScaleBand, ScaleLinear, select} from "d3";
 import React, {useCallback, useRef, useState} from "react";
 import {ScaleNumericBaseType} from "../imports/components/axis/axis-types";
 import {CaseData} from "../d3-types";
-import {PlotProps, selectedRadiusFactor} from "../graph-types";
+import {PlotProps} from "../graph-types";
 import {useDragHandlers, usePlotResponders} from "../hooks/use-plot";
 import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
 import {useDataSetContext} from "../imports/hooks/use-data-set-context";
@@ -42,25 +42,25 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
   secondaryAttrIDsRef.current = dataConfiguration?.yAttributeIDs || [];
   pointRadiusRef.current = graphModel.getPointRadius();
   selectedPointRadiusRef.current = graphModel.getPointRadius('select');
-  console.log("------<ScatterDots>--------");
+  // console.log("------<ScatterDots>--------");
 
 
   //if its not selected - call on getPointRadius
   //if its selected ... call on getPointRadius('select')
   dragPointRadiusRef.current = graphModel.getPointRadius('hover-drag'); //original
 
-  dragPointRadiusRef.current = (dataset?.selectedCaseIds && dataset?.selectedCaseIds.length > 0) ?
-                                dragPointRadiusRef.current * selectedRadiusFactor :  dragPointRadiusRef.current;
+  // dragPointRadiusRef.current = (dataset?.selectedCaseIds && dataset?.selectedCaseIds.length > 0) ?
+  //                               dragPointRadiusRef.current * selectedRadiusFactor :  dragPointRadiusRef.current;
 
-  console.log("\t🏭 dragPointRadiusRef.current", dragPointRadiusRef.current);
-  console.log("\t🥩 selectedPointRadiusRef.current:", selectedPointRadiusRef.current);
-  console.log("\t🥩 pointRadiusRef:", pointRadiusRef.current);
+  // console.log("\t🏭 dragPointRadiusRef.current", dragPointRadiusRef.current);
+  // console.log("\t🥩 selectedPointRadiusRef.current:", selectedPointRadiusRef.current);
+  // console.log("\t🥩 pointRadiusRef:", pointRadiusRef.current);
 
   yScaleRef.current = layout.getAxisScale("left") as ScaleNumericBaseType;
 
   const onDragStart = useCallback((event: MouseEvent) => {
-    console.log("📁 scatterdots.tsx ------------------------");
-    console.log("\t🏭 onDragStart");
+    // console.log("📁 scatterdots.tsx ------------------------");
+    // console.log("\t🏭 onDragStart");
 
       target.current = select(event.target as SVGSVGElement);
       const aCaseData: CaseData = target.current.node().__data__;
@@ -76,10 +76,10 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
           .property('isDragging', true)
           .transition()
           .attr('r', (r: any)=>{
-            console.log("📁 scatterdots.tsx ------------------------");
-            console.log("\t🏭 onDragStart");
-            console.log("\t attr r fn: ", r);
-            console.log("\t🔪 dragPointRadiusRef.current:", dragPointRadiusRef.current);
+            // console.log("📁 scatterdots.tsx ------------------------");
+            // console.log("\t🏭 onDragStart");
+            // console.log("\t attr r fn: ", r);
+            // console.log("\t🔪 dragPointRadiusRef.current:", dragPointRadiusRef.current);
 
             return dragPointRadiusRef.current;
           });
@@ -102,19 +102,19 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
     //---------------------------------------------Look here ----------------------------------------------
     onDrag = useCallback((event: MouseEvent) => {
 
-      console.log("📁 scatterdots.tsx ------------------------");
-      console.log("\t🏭 onDrag");
+      // console.log("📁 scatterdots.tsx ------------------------");
+      // console.log("\t🏭 onDrag");
 
       const xAxisScale = layout.getAxisScale('bottom') as ScaleLinear<number, number>,
         xAttrID = dataConfiguration?.attributeID('x') ?? '';
       if (dragID !== '') {
-        console.log("line 111");
+        // console.log("line 111");
         const newPos = {x: event.clientX, y: event.clientY},
           dx = newPos.x - currPos.current.x,
           dy = newPos.y - currPos.current.y;
         currPos.current = newPos;
         if (dx !== 0 || dy !== 0) {
-          console.log("line 117");
+          // console.log("line 117");
 
           didDrag.current = true;
           const deltaX = Number(xAxisScale.invert(dx)) - Number(xAxisScale.invert(0)),
@@ -122,12 +122,12 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
             caseValues: ICase[] = [],
             {selection} = dataConfiguration || {};
           selection?.forEach(anID => {
-            console.log("line 125");
+            // console.log("line 125");
 
             const currX = Number(dataset?.getNumeric(anID, xAttrID)),
               currY = Number(dataset?.getNumeric(anID, secondaryAttrIDsRef.current[plotNumRef.current]));
             if (isFinite(currX) && isFinite(currY)) {
-              console.log("line 130");
+              // console.log("line 130");
 
               caseValues.push({
                 __id__: anID,
@@ -145,8 +145,8 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
 
     onDragEnd = useCallback(() => {
 
-      console.log("📁 scatterdots.tsx ------------------------");
-      console.log("\t🏭 onDragEnd");
+      // console.log("📁 scatterdots.tsx ------------------------");
+      // console.log("\t🏭 onDragEnd");
 
       if (dragID !== '') {
         target.current
@@ -154,8 +154,8 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
           .property('isDragging', false)
           .transition()
           .attr('r', (r: any) => {
-            console.log("📁 scatterdots.tsx --------r function---------------:");
-            console.log("-r: ", r);
+            // console.log("📁 scatterdots.tsx --------r function---------------:");
+            // console.log("-r: ", r);
             // console.log("\t🔪 selectedPointRadiusRef.current:", selectedPointRadiusRef.current);
             return selectedPointRadiusRef.current;
           });
@@ -184,11 +184,11 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
   useDragHandlers(window, {start: onDragStart, drag: onDrag, end: onDragEnd});
 
   const refreshPointSelection = useCallback(() => {
-    console.log("\t🏭 refreshPointSelection");
+    // console.log("\t🏭 refreshPointSelection");
 
     const {pointColor, pointStrokeColor} = graphModel;
-    console.log("\t🥩 pointStrokeColor:", pointStrokeColor);
-    console.log("\t🥩 pointColor:", pointColor);
+    // console.log("\t🥩 pointStrokeColor:", pointStrokeColor);
+    // console.log("\t🥩 pointColor:", pointColor);
     // const tempColor = "#14f49e";
     // const tempColor = "#000000";
 
@@ -234,7 +234,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
       numberOfPlots = dataConfiguration?.numberOfPlots || 1,
       getLegendColor = legendAttrID ? dataConfiguration?.getLegendColorForCase : undefined;
 
-    console.log("📁 scatterdots.tsx -----about to call setPointCoordinates------------------");
+    // console.log("📁 scatterdots.tsx -----about to call setPointCoordinates------------------");
     setPointCoordinates({
       dataset, dotsRef, pointRadius: pointRadiusRef.current,
       selectedPointRadius: selectedPointRadiusRef.current,
