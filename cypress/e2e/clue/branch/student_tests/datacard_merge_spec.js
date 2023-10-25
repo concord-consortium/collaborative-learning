@@ -25,7 +25,7 @@ function openMyWork() {
 }
 
 context('Merge Data Card Tool Tile', function () {
-  it("can merge in data using the merge button", () => {
+  it("Merge Data Card Tool Tile", () => {
     beforeTest();
     clueCanvas.addTile("datacard");
     dc.getTile(0).should("exist");
@@ -54,8 +54,8 @@ context('Merge Data Card Tool Tile', function () {
     dc.getAttrName(1).eq(1).should("have.text", "animal");
     dc.getNextCardButton(1).click();
     dc.getAttrValue(1).eq(1).invoke("attr", "value").should("contain", "cat");
-  });
-  it("merges two empty Data Card tool tiles", () => {
+  
+    cy.log("merges two empty Data Card tool tiles");
     beforeTest();
     clueCanvas.addTile("datacard");
     dc.getTile(0).should("exist");
@@ -84,8 +84,8 @@ context('Merge Data Card Tool Tile', function () {
     dc.getAttrName(1).should("have.text", "Label 1");
     dc.getPreviousCardButton(1).click();
     dc.getCardNofTotalListing(1).should("have.text", "Card 1 of 2");
-  });
-  it("merges filled-in into empty Data Card tool tile", () => {
+  
+    cy.log("merges filled-in into empty Data Card tool tile");
     beforeTest();
     clueCanvas.addTile("datacard");
     dc.getTile(0).should("exist");
@@ -126,8 +126,8 @@ context('Merge Data Card Tool Tile', function () {
     dc.getAttrValue(1).eq(1).invoke("attr", "value").should("contain", "Attr1 Value");
     dc.getPreviousCardButton(1).click();
     dc.getCardNofTotalListing(1).should("have.text", "Card 1 of 2");
-  });
-  it("merges empty into filled-in Data Card tool tile", () => {
+  
+    cy.log("merges empty into filled-in Data Card tool tile");
     beforeTest();
     clueCanvas.addTile("datacard");
     dc.getTile(0).should("exist");
@@ -168,8 +168,8 @@ context('Merge Data Card Tool Tile', function () {
     dc.getAttrValue(1).eq(1).invoke("attr", "value").should("be.empty");
     dc.getPreviousCardButton(1).click();
     dc.getCardNofTotalListing(1).should("have.text", "Card 1 of 2");
-  });
-  it("merges two filled-in Data Card tool tiles", () => {
+  
+    cy.log("merges two filled-in Data Card tool tiles");
     beforeTest();
     clueCanvas.addTile("datacard");
     dc.getTile(0).should("exist");
@@ -214,8 +214,8 @@ context('Merge Data Card Tool Tile', function () {
     dc.getAttrValue(1).eq(1).invoke("attr", "value").should("contain", "Attr1 Value");
     dc.getPreviousCardButton(1).click();
     dc.getCardNofTotalListing(1).should("have.text", "Card 1 of 2");
-  });
-  it("merges datacards with same attribute labels", () => {
+  
+    cy.log("merges datacards with same attribute labels");
     beforeTest();
     clueCanvas.addTile("datacard");
     dc.getTile(0).should("exist");

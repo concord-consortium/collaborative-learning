@@ -111,28 +111,27 @@ context.skip("Teacher Workspace", () => {
         let problems = clueData.classes[0].problems;
         let initProblemIndex = 0;
 
-      clueCanvas.publishTeacherDocToMultipleClasses();
-      cy.openResourceTabs();
-      cy.openTopTab("class-work");
-      cy.getCanvasItemTitle('workspaces').contains(problems[initProblemIndex].problemTitle).should('exist');
-      dashboard.getClassDropdown().click({ force: true });
-      dashboard.getClassList().find('.list-item').contains(class2).click({ force: true });
-      cy.waitForLoad();
-      dashboard.switchView('Workspace & Resources');
-      // cy.openResourceTabs();
-      cy.openTopTab("class-work");
-      cy.getCanvasItemTitle('workspaces').contains(problems[initProblemIndex].problemTitle).should('exist');
+        clueCanvas.publishTeacherDocToMultipleClasses();
+        cy.openResourceTabs();
+        cy.openTopTab("class-work");
+        cy.getCanvasItemTitle('workspaces').contains(problems[initProblemIndex].problemTitle).should('exist');
+        dashboard.getClassDropdown().click({ force: true });
+        dashboard.getClassList().find('.list-item').contains(class2).click({ force: true });
+        cy.waitForLoad();
+        dashboard.switchView('Workspace & Resources');
+        // cy.openResourceTabs();
+        cy.openTopTab("class-work");
+        cy.getCanvasItemTitle('workspaces').contains(problems[initProblemIndex].problemTitle).should('exist');
+
+        beforeTest();
+        //switch back to original problem for later test
+        dashboard.getClassDropdown().click({ force: true });
+        dashboard.getClassList().find('.list-item').contains(class1).click({ force: true });
+        cy.waitForLoad();
+        dashboard.switchView('Workspace & Resources');
+        drawToolTile.getDrawTile().should('exist');
+        clueCanvas.deleteTile('draw');
       });
     });
-  });
-  after(function () {
-    beforeTest();
-    //switch back to original problem for later test
-    dashboard.getClassDropdown().click({ force: true });
-    dashboard.getClassList().find('.list-item').contains(class1).click({ force: true });
-    cy.waitForLoad();
-    dashboard.switchView('Workspace & Resources');
-    drawToolTile.getDrawTile().should('exist');
-    clueCanvas.deleteTile('draw');
   });
 });
