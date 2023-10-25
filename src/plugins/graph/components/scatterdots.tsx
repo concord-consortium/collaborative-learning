@@ -234,7 +234,9 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
       numberOfPlots = dataConfiguration?.numberOfPlots || 1,
       getLegendColor = legendAttrID ? dataConfiguration?.getLegendColorForCase : undefined;
 
-    // console.log("📁 scatterdots.tsx -----about to call setPointCoordinates------------------");
+    console.log("📁 scatterdots.tsx -----about to call setPointCoordinates------------------");
+    console.log("\tgetPointcolorAtIndeX:", graphModel.pointColorAtIndex);
+
     setPointCoordinates({
       dataset, dotsRef, pointRadius: pointRadiusRef.current,
       selectedPointRadius: selectedPointRadiusRef.current,

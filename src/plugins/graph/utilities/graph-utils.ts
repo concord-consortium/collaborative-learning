@@ -409,8 +409,6 @@ function getPointColor(data: any, defaultColor: string, getPointColorAtIndex?: (
 
 
 
-
-
 export function setPointSelection(props: ISetPointSelection) {
   const { dotsRef, dataConfiguration, pointRadius, selectedPointRadius,
           pointColor, pointStrokeColor, getPointColorAtIndex } = props;

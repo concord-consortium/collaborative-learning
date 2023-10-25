@@ -85,9 +85,16 @@ export const GraphModel = TileContentModel
       return getTileCaseMetadata(self);
     },
     pointColorAtIndex(plotIndex = 0) {
+      console.log("📁 graph-model.ts ------------------------");
+      console.log("\t🏭 pointColorAtIndex with plotIndex:", plotIndex);
+
       if (plotIndex < self._pointColors.length) {
+
+        console.log("\tline 91 returning:", self._pointColors[plotIndex]);
         return self._pointColors[plotIndex];
       } else {
+        console.log("\tline94 else returning:", kellyColors[plotIndex % kellyColors.length]);
+
         return kellyColors[plotIndex % kellyColors.length];
       }
     },
