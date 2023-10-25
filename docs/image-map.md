@@ -141,3 +141,23 @@ jxg-image (a part of the geometry tile) is getting a size from the internal obje
 drawing-layer.tsx (old version) assumes the image has a width and height. MST will throw an error in this code if there is an error and an image is returned without width and height. FIXME: This issue should be fixed in the new version.
 
 drawing-tool/objects/image.tsx this handles the case when the map entry doesn't have a width or height. It only updates its own image object width and height if they are set. So otherwise the width and height of the saved entry should be used.
+
+# Update
+
+TODO:
+- x check that I can test image upload in the image tile
+- add new action to uploadFile, it should return the imageMapEntry as well as the promise
+- switch the image tile to use the new approach
+- look for cypress tests of the image tile
+
+Notes:
+There isn't a good approach for using the observer approach and also updating the contentUrl stored in model state. Since this contentUrl can change after the initial image load for example on a file upload or when accessing an old image that needs to migrated to the newer URL style. The drawing tool seems to ignore this all together. Other tiles wait for the entry to finish loading and then they update their URLs.
+
+Here are some options for this:
+- models support image map entries in places of URLs for their URLs. Then when they are serialized (getSnapshot) the URL, filename, and dimensions would be written out. This requires more refactoring since we can't put an image map entry in two trees at the same time. So if the entries were converted to basic MobX objects instead of MST objects this would work with a custom serializer.
+- a postSnapshot handler. The initial URL is left in the model until it is serialized. This handler would look up the entry given the stored url, and then write out the contentUrl. Downside of this is that that the conversion would have to happen each time, and if the object was never accessed by a component the image map might not have the updated contentURL, so getting this contentURL could slow down the serialization. Probably in this case we'd want to not trigger a image fetch.
+- the model has an action for updating the image, and this action adds a MobX `when` observer to monitor when the entry is ready. At that point it updates the stored URL.
+
+The first option might cause problems for undo redo, it would depend on what is stored when the image map entry is first set.
+The 2nd option might also have problems with undo redo. If the url put in the model is a blob URL and that is changed when the model is serialized, this blob URL would be stored in the undo history. So now when replaying the history in a new session this blob URL would be invalid.
+The 3rd option would cause an async undo/history action. We could use without undo, but that would cause the history to store the blob URL again. What we want is a flow. If it used a flow and waited for the `when` to finish (or we provided additional ways to add listeners to entries), then there would just be a single history entry that contained the final URL. So this 3rd option seems best.
