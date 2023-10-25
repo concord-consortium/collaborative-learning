@@ -7,6 +7,7 @@ import { TileToolbar } from "./tile-toolbar";
 import { ITileModel, TileModel } from "../../models/tiles/tile-model";
 import { defaultTextContent } from "../../models/tiles/text/text-content";
 import { specStores } from "../../models/stores/spec-stores";
+import { specAppConfig } from "../../models/stores/spec-app-config";
 import { TileModelContext } from "../tiles/tile-api";
 
 import CopyIcon from "../../../assets/icons/copy/copy-icon-default.svg";
@@ -14,24 +15,31 @@ import CopyIcon from "../../../assets/icons/copy/copy-icon-default.svg";
 // The text tile needs to be registered so the TileModel.create
 // knows it is a supported tile type
 import "../../models/tiles/text/text-registration";
-import { specAppConfig } from "../../models/stores/spec-app-config";
 
 const clickHandler = jest.fn();
 
-function SampleToolbarButton() {
-  return <TileToolbarButton name="test-button" onClick={clickHandler}><CopyIcon/></TileToolbarButton>;
+function SampleToolbarButtonA() {
+  return (
+    <TileToolbarButton name="a" title="Test Button A" onClick={clickHandler}>
+      <CopyIcon/>
+    </TileToolbarButton>);
+}
+
+function SampleToolbarButtonB() {
+  return (
+    <TileToolbarButton name="b" title="Test Button B" onClick={clickHandler}>
+      <CopyIcon/>
+    </TileToolbarButton>);
 }
 
 const sampleButtons = [
   {
-    name: "default",
-    title: "Default Button",
-    component: SampleToolbarButton,
+    name: "a",
+    component: SampleToolbarButtonA,
   },
   {
-    name: "non-default",
-    title: "Non-default button",
-    component: SampleToolbarButton,
+    name: "b",
+    component: SampleToolbarButtonB,
   }
 ];
 
@@ -55,7 +63,10 @@ function SampleTile({type, model}: ISampleTileProps) {
 describe("Tile toolbar button", () => {
 
   it("can render a button", () => {
-    render(<TileToolbarButton name="test-button" onClick={clickHandler}><CopyIcon/></TileToolbarButton>);
+    render(
+      <TileToolbarButton name="test-button" title="Test Button" onClick={clickHandler}>
+        <CopyIcon/>
+      </TileToolbarButton>);
 
     expect(screen.getByRole("button")).toBeInTheDocument();
     expect(screen.getByRole("button")).toContainHTML("<svg");
@@ -69,7 +80,7 @@ describe("Tile toolbar button", () => {
     stores.ui.setSelectedTileId(model.id);
 
     registerTileToolbarButtons("test", sampleButtons);
-    registerTileToolbarConfig("test", ["default"]);
+    registerTileToolbarConfig("test", ["a"]);
 
     render(
       <Provider stores={stores}>
@@ -77,8 +88,8 @@ describe("Tile toolbar button", () => {
       </Provider>
     );
     expect(screen.getByTestId("tile-toolbar")).toBeInTheDocument();
-    expect(screen.getByTestId("tile-toolbar")).toContainHTML("Default Button");
-    expect(screen.getByTestId("tile-toolbar")).not.toContainHTML("Non-default Button");
+    expect(screen.getByTestId("tile-toolbar")).toContainHTML("Test Button A");
+    expect(screen.getByTestId("tile-toolbar")).not.toContainHTML("Test Button B");
   });
 
   it("can read tools list from app configuration", () => {
@@ -88,7 +99,7 @@ describe("Tile toolbar button", () => {
         config: {
           settings: {
             test: {
-              tools: ["default"]
+              tools: ["b"]
             }
           }
         }
@@ -104,8 +115,8 @@ describe("Tile toolbar button", () => {
       </Provider>
     );
     expect(screen.getByTestId("tile-toolbar")).toBeInTheDocument();
-    expect(screen.getByTestId("tile-toolbar")).toContainHTML("Default Button");
-    expect(screen.getByTestId("tile-toolbar")).not.toContainHTML("Non-default Button");
+    expect(screen.getByTestId("tile-toolbar")).toContainHTML("Test Button B");
+    expect(screen.getByTestId("tile-toolbar")).not.toContainHTML("Test Button A");
 
   });
 

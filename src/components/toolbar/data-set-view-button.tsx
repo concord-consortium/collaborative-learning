@@ -22,6 +22,7 @@ export function DataSetViewButton({name, args}: IProps) {
   }
 
   const newTileType = args[1];
+  const tooltip = `Create a linked ${newTileType} tile`;
 
   // TODO: if the document or tile are undefined then disable the button
 
@@ -42,7 +43,9 @@ export function DataSetViewButton({name, args}: IProps) {
 
   return (
     <TileToolbarButton
-        name={name} onClick={handleClick}
+        name={name}
+        title={tooltip}
+        onClick={handleClick}
     >
       {Icon ? <BadgedIcon Icon={Icon} Badge={ViewBadgeIcon}/> : "??"}
     </TileToolbarButton>

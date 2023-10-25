@@ -15,9 +15,7 @@ export interface IToolbarButtonComponentProps {
 
 export interface IToolbarButtonInfo {
   name: string,  // a unique named used in configuration to identify the button
-  title: string, // user-visible tooltip for the button
   component: React.ComponentType<IToolbarButtonComponentProps>, // component to render
-  keyHint?: string, // If set, displayed to the user as the hotkey equivalent
 }
 
 // This is the actual registry.
@@ -27,10 +25,6 @@ const toolbarButtonInfos: Map<string,Map<string, IToolbarButtonInfo>> = new Map;
 // Return the information for a given button
 export function getToolbarButtonInfo(tileType: string, buttonName: string) {
   return toolbarButtonInfos.get(tileType)?.get(buttonName);
-}
-
-function prettyPrint(info?: IToolbarButtonInfo) {
-  return info ? `${info.name} (${info.title})` : '[undefined]';
 }
 
 /**
@@ -51,8 +45,7 @@ export function registerTileToolbarButtons(
     }
     infos.forEach((info) => {
       if (tileButtons.has(info.name)) {
-        console.warn('Adding button to ', tileType, ': overriding ',
-          prettyPrint(tileButtons.get(info.name)), ' with ', prettyPrint(info));
+        console.warn('Adding button ', info.name, ' to ', tileType, 'overrides previous definition');
       }
       tileButtons.set(info.name, info);
     });
@@ -66,7 +59,10 @@ export function getDefaultTileToolbarConfig(tileType: string) {
   return tileToolbarConfigs.get(tileType) || [];
 }
 
-// Register default buttons
+/**
+ * Register default buttons
+ * @deprecated: we should move to setting all defaults in app-config.json.
+ */
 export function registerTileToolbarConfig(tileType: string, config: string[]) {
   if (tileToolbarConfigs.has(tileType)) {
     console.warn('Default button config for ', tileType, ' was already set, overriding with new value');

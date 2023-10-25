@@ -22,6 +22,7 @@ const DeleteSelectedButton = ({name}: IToolbarButtonComponentProps) => {
   return (
     <TileToolbarButton
       name={name}
+      title="Clear cell"
       onClick={() => toolbarContext?.deleteSelected()}
     >
       <DeleteSelectedIcon />
@@ -36,6 +37,7 @@ export const SetExpressionButton = ({name}: IToolbarButtonComponentProps) => {
   return (
     <TileToolbarButton
       name={name}
+      title="Set expression"
       onClick={() => toolbarContext?.showExpressionsDialog()}
     >
       <SetExpressionIcon />
@@ -66,6 +68,7 @@ export const LinkTableButton = observer(function LinkTableButton({name}: IToolba
   return (
     <TileToolbarButton
       name={name}
+      title="Link table"
       onClick={handleClick}
       disabled={!isLinkEnabled}
     >
@@ -91,6 +94,7 @@ export const LinkGraphButton = observer(function LinkGraphButton({name}: IToolba
   return (
     <TileToolbarButton
       name={name}
+      title="View data as graph"
       onClick={handleClick}
       disabled={!isLinkEnabled}
     >
@@ -101,41 +105,34 @@ export const LinkGraphButton = observer(function LinkGraphButton({name}: IToolba
 });
 
 const TableMergeInButton = ({name}: IToolbarButtonComponentProps) => {
-  return <MergeInButton name={name}/>;
+  return <MergeInButton name={name} title="Add data from..."/>;
 };
 
 registerTileToolbarButtons("table",
 [
   {
     name: "delete",
-    title: "Clear cell",
     component: DeleteSelectedButton
-    // Kbd shortcut?
   },
   {
     name: "set-expression",
-    title: "Set expression",
     component: SetExpressionButton
   },
   {
     name: "link-tile",
-    title: "Link table",
     component: LinkTableButton
   },
   {
     name: "link-graph",
-    title: "View data as graph",
     component: LinkGraphButton
   },
   {
     name: "merge-in",
-    title: "Add data from...",
     component: TableMergeInButton
   },
   {
     // This button takes an argument saying what kind of tile it should create.
     name: "data-set-view",
-    title: "Create a linked {1} tile",
     component: DataSetViewButton
   }
 ]);

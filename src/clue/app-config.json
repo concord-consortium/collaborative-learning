@@ -256,6 +256,18 @@
           ["data-set-view", "DataCard"],
           "delete"
         ]
+      },
+      "text": {
+        "tools": [
+          "bold",
+          "italic",
+          "underline",
+          "subscript",
+          "superscript",
+          "list-ol",
+          "list-ul",
+          "link"
+        ]
       }
     }
   },

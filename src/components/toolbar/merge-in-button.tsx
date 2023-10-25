@@ -8,10 +8,11 @@ import MergeInIcon from "../../assets/icons/dataset/merge-in-icon.svg";
 
 interface IProps {
   name: string;
+  title: string;
   isDisabled?: boolean;
 }
 
-export const MergeInButton = observer(function MergeButton({ name, isDisabled }: IProps) {
+export const MergeInButton = observer(function MergeButton({ name, title, isDisabled }: IProps) {
   const model = useContext(TileModelContext)!;
   const { isMergeEnabled, showMergeTileDialog } = useTileDataMerging({model});
 
@@ -22,6 +23,7 @@ export const MergeInButton = observer(function MergeButton({ name, isDisabled }:
   return (
     <TileToolbarButton
       name={name}
+      title={title}
       onClick={handleClick}
       disabled={isDisabled || !isMergeEnabled}
     >

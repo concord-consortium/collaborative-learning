@@ -135,7 +135,8 @@ export const NewVariableTextButton = observer(
     showDialog();
   };
   return (
-    <TileToolbarButton name={name} disabled={disabled} selected={isSelected} onClick={handleClick}>
+    <TileToolbarButton name={name} title="New Variable"
+      disabled={disabled} selected={isSelected} onClick={handleClick}>
       <AddVariableChipIcon/>
     </TileToolbarButton>
   );
@@ -168,7 +169,8 @@ export const InsertVariableTextButton = observer(
     showDialog();
   };
   return (
-    <TileToolbarButton name={name} disabled={disabled} selected={isSelected} onClick={handleClick}>
+    <TileToolbarButton name={name} title="Insert Variable"
+      disabled={disabled} selected={isSelected} onClick={handleClick}>
       <InsertVariableChipIcon/>
     </TileToolbarButton>
   );
@@ -198,7 +200,8 @@ export const EditVariableTextButton = observer(
   };
 
   return (
-    <TileToolbarButton name={name} disabled={disabled} selected={isSelected} onClick={handleClick}>
+    <TileToolbarButton name={name} title="Edit Variable"
+      disabled={disabled} selected={isSelected} onClick={handleClick}>
       <VariableEditorIcon/>
     </TileToolbarButton>
   );

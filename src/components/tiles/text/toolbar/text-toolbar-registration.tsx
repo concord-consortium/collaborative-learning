@@ -3,7 +3,7 @@ import { Editor, EFormat, useSlate } from "@concord-consortium/slate-editor";
 
 import { LinkButton } from "./link-button";
 import { isMac } from "../../../../utilities/browser";
-import { IToolbarButtonComponentProps, registerTileToolbarButtons, registerTileToolbarConfig }
+import { IToolbarButtonComponentProps, registerTileToolbarButtons }
   from "../../../toolbar/toolbar-button-manager";
 import { TileToolbarButton } from "../../../toolbar/tile-toolbar-button";
 
@@ -28,12 +28,14 @@ const toggleElement =
 
 interface IGenericTextToolbarButtonProps {
   name: string;
+  title: string;
+  keyHint?: string;
   Icon: React.FunctionComponent<React.SVGProps<SVGSVGElement>>;
   slateType: EFormat;
   toggleFunc: (editor: Editor, format: EFormat) => void;
 }
 
-function GenericTextToolbarButton({name, Icon, slateType, toggleFunc}: IGenericTextToolbarButtonProps) {
+function GenericTextToolbarButton({name, title, keyHint, Icon, slateType, toggleFunc}: IGenericTextToolbarButtonProps) {
   const editor = useSlate();
   const selected = editor.isMarkActive(slateType) || editor.isElementActive(slateType);
   function handleClick (e : React.MouseEvent) {
@@ -41,92 +43,85 @@ function GenericTextToolbarButton({name, Icon, slateType, toggleFunc}: IGenericT
     toggleFunc(editor, slateType);
   }
   return (
-    <TileToolbarButton name={name} selected={selected} onClick={handleClick}>
+    <TileToolbarButton name={name} title={title} keyHint={keyHint}
+      selected={selected} onClick={handleClick}>
       <Icon/>
     </TileToolbarButton>);
 }
 
 function BoldToolbarButton({name}: IToolbarButtonComponentProps) {
   return <GenericTextToolbarButton
-    name={name} Icon={BoldToolIcon} slateType={EFormat.bold} toggleFunc={toggleMark}/>;
+    name={name} title="Bold" keyHint={kShortcutPrefix+'b'} Icon={BoldToolIcon}
+    slateType={EFormat.bold} toggleFunc={toggleMark}/>;
 }
 
 function ItalicToolbarButton({name}: IToolbarButtonComponentProps) {
   return <GenericTextToolbarButton
-    name={name} Icon={ItalicToolIcon} slateType={EFormat.italic} toggleFunc={toggleMark}/>;
+    name={name} title="Italic" keyHint={kShortcutPrefix+'i'} Icon={ItalicToolIcon}
+    slateType={EFormat.italic} toggleFunc={toggleMark}/>;
 }
 
 function UnderlineToolbarButton({name}: IToolbarButtonComponentProps) {
   return <GenericTextToolbarButton
-    name={name} Icon={UnderlineToolIcon} slateType={EFormat.underlined} toggleFunc={toggleMark}/>;
+    name={name} title="Underline" keyHint={kShortcutPrefix+'u'} Icon={UnderlineToolIcon}
+    slateType={EFormat.underlined} toggleFunc={toggleMark}/>;
 }
 
 function SubscriptToolbarButton({name}: IToolbarButtonComponentProps) {
   return <GenericTextToolbarButton
-    name={name} Icon={SubscriptToolIcon} slateType={EFormat.subscript} toggleFunc={toggleSupSub}/>;
+    name={name} title="Subscript" Icon={SubscriptToolIcon} slateType={EFormat.subscript} toggleFunc={toggleSupSub}/>;
 }
 
 function SuperscriptToolbarButton({name}: IToolbarButtonComponentProps) {
   return <GenericTextToolbarButton
-    name={name} Icon={SuperscriptToolIcon} slateType={EFormat.superscript} toggleFunc={toggleSupSub}/>;
+    name={name} title="Superscript" Icon={SuperscriptToolIcon}
+    slateType={EFormat.superscript} toggleFunc={toggleSupSub}/>;
 }
 
 function NumberedListToolbarButton({name}: IToolbarButtonComponentProps) {
   return <GenericTextToolbarButton
-    name={name} Icon={NumberedListToolIcon} slateType={EFormat.numberedList} toggleFunc={toggleElement}/>;
+    name={name} title="Numbered list" Icon={NumberedListToolIcon}
+    slateType={EFormat.numberedList} toggleFunc={toggleElement}/>;
 }
 
 function BulletedListToolbarButton({name}: IToolbarButtonComponentProps) {
   return <GenericTextToolbarButton
-    name={name} Icon={BulletedListToolIcon} slateType={EFormat.bulletedList} toggleFunc={toggleElement}/>;
+    name={name} title="Bulleted list" Icon={BulletedListToolIcon}
+    slateType={EFormat.bulletedList} toggleFunc={toggleElement}/>;
 }
 
 registerTileToolbarButtons('text',
 [
   {
     name: 'bold',
-    title: 'Bold',
-    keyHint: `${kShortcutPrefix}b`,
     component: BoldToolbarButton,
   },
   {
     name: 'italic',
-    title: 'Italic',
-    keyHint: `${kShortcutPrefix}i`,
     component: ItalicToolbarButton,
   },
   {
     name: 'underline',
-    title: 'Underline',
-    keyHint: `${kShortcutPrefix}u`,
     component: UnderlineToolbarButton,
   },
   {
     name: 'subscript',
-    title: 'Subscript',
     component: SubscriptToolbarButton,
   },
   {
     name: 'superscript',
-    title: 'Superscript',
     component: SuperscriptToolbarButton,
   },
   {
     name: 'list-ol',
-    title: 'Numbered List',
     component: NumberedListToolbarButton,
   },
   {
     name: 'list-ul',
-    title: 'Bulleted List',
     component: BulletedListToolbarButton,
   },
   {
     name: 'link',
-    title: 'Link',
     component: LinkButton,
   }
 ]);
-
-registerTileToolbarConfig('text',
-  ['bold', 'italic', 'underline', 'subscript', 'superscript', 'list-ol', 'list-ul', 'link']);

@@ -2,11 +2,9 @@ import React, { useContext } from "react";
 import { observer } from "mobx-react";
 import classNames from "classnames";
 import { FloatingPortal } from "@floating-ui/react";
-import { Tooltip } from "react-tippy";
 import { useSettingFromStores, useUIStore } from "../../hooks/use-stores";
 import { useTileToolbarPositioning } from "./use-tile-toolbar-positioning";
-import { getToolbarButtonInfo, getDefaultTileToolbarConfig, IToolbarButtonInfo } from "./toolbar-button-manager";
-import { useTooltipOptions } from "../../hooks/use-tooltip-options";
+import { getToolbarButtonInfo, getDefaultTileToolbarConfig } from "./toolbar-button-manager";
 import { TileModelContext } from "../tiles/tile-api";
 import { JSONValue } from "../../models/stores/settings";
 
@@ -26,26 +24,6 @@ export function isValidButtonDescription(obj: JSONValue): obj is IButtonDescript
     && typeof obj[1] === 'string');
  }
 
-/**
- * Create the complete tooltip from the given button information.
- * Button titles can have placeholders like {1}, {2} which are replaced by button arguments.
- * If there is a button keyboard shortcut, it is shown after the title.
- */
-function formatTooltip(desc: IButtonDescription, info: IToolbarButtonInfo) {
-  let fullTitle = info.title;
-  if (!(typeof desc === 'string')) {
-    fullTitle = fullTitle.replaceAll(/\{([0-9]+)\}/g, (match) => {
-      const i = Number(match[1]);
-      if (typeof i === 'number' && i<desc.length) {
-        return desc[i];
-      } else {
-        return match[0];
-      }
-    });
-  }
-  return fullTitle + (info.keyHint ? ` (${info.keyHint})` : '');
-}
-
 export const TileToolbar = observer(
   function TileToolbar({ tileType, readOnly, tileElement }: ToolbarWrapperProps) {
     /**
@@ -60,7 +38,6 @@ export const TileToolbar = observer(
 
     // Get styles to position the toolbar
     const { toolbarRefs, toolbarStyles, toolbarPlacement } = useTileToolbarPositioning(tileElement);
-    const tipOptions = useTooltipOptions();
 
     // Determine the buttons to be shown.
     const ui = useUIStore();
@@ -84,19 +61,18 @@ export const TileToolbar = observer(
     // when you click in the tile, that would be super responsive.
     if (!enabled) return(null);
 
-    const buttons = buttonDescriptions.map((desc) => {
+    const buttons = buttonDescriptions.map((desc, i) => {
       if (isValidButtonDescription(desc)) {
         const buttonHasArg = !(typeof desc === 'string');
         const name = buttonHasArg ? desc[0] : desc;
         const info = getToolbarButtonInfo(tileType, name);
         if (info) {
           const Button = info?.component;
-          const buttonElt = buttonHasArg ? <Button name={name} args={desc}/> : <Button name={name}/>;
-          const tooltip = formatTooltip(desc, info);
-          return (
-            <Tooltip key={name} title={tooltip} {...tipOptions} >
-              {buttonElt}
-            </Tooltip>);
+          if (buttonHasArg) {
+            return (<Button key={i} name={name} args={desc}/>);
+          } else {
+            return (<Button key={i} name={name}/>);
+          }
         } else {
           console.warn('Did not find info for button name: ', name);
           return null;
