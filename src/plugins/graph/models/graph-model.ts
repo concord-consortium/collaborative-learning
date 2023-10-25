@@ -76,7 +76,7 @@ export const GraphModel = TileContentModel
     showMeasuresForSelection: false
   })
   .volatile(self => ({
-    prevDataSetId: "",
+    // prevDataSetId: "",
   }))
   .preProcessSnapshot((snapshot: any) => {
     const hasLayerAlready:boolean = (snapshot?.layers?.length || 0) > 0;
@@ -105,11 +105,14 @@ export const GraphModel = TileContentModel
   }))
   .views(self => ({
     /**
-     * Returns the first shared model found -- TODO obsolete.
+     * Returns the first shared dataset found -- TODO obsolete.
      */
     get data() {
       return getTileDataSet(self);
     },
+    /**
+     * Returns the first shared case metadata found -- TODO obsolete.
+     */
     get metadata() {
       return getTileCaseMetadata(self);
     },
@@ -231,8 +234,7 @@ export const GraphModel = TileContentModel
     },
     /**
      * Use the given Attribute for the given graph role.
-     * Will remove any other attributes that may have that role,
-     * unless role is 'yPlus'.
+     * Will remove any other attributes that may have that role, unless role is 'yPlus'.
      * Will not allow switching to an attribute from a different DataSet.
      */
     setAttributeID(role: GraphAttrRole, dataSetID: string, id: string) {
@@ -259,7 +261,7 @@ export const GraphModel = TileContentModel
       if (layer) {
         layer.config.replaceYAttribute(oldAttrId, newAttrId);
       } else {
-        console.log('replaceee not found');
+        console.log('replacee not found');
       }
     },
     setPlotType(type: PlotType) {
@@ -395,6 +397,7 @@ export const GraphModel = TileContentModel
                 self.layers.push(newLayer);
                 console.log('| Created layer ', newLayer);
                 newLayer.configureLinkedLayer();
+                self.layers[0].updateAdornments(true);
                 newLayer.setDataSetListener();
               } else {
                 console.log('| Metadata not found');

@@ -1,4 +1,4 @@
-import { getParent, types } from "@concord-consortium/mobx-state-tree";
+import { getParentOfType, types } from "@concord-consortium/mobx-state-tree";
 import { typedId } from "../../../utilities/js-utils";
 import { onAnyAction } from "../../../utilities/mst-utils";
 import { DataConfigurationModel, IDataConfigurationModel } from "./data-configuration-model";
@@ -6,7 +6,7 @@ import { getAppConfig } from "../../../models/tiles/tile-environment";
 import { GraphPlace } from "../imports/components/axis-graph-shared";
 import { GraphAttrRole } from "../graph-types";
 import { IUpdateCategoriesOptions } from "../adornments/adornment-models";
-import { IGraphModel } from "./graph-model";
+import { GraphModel } from "./graph-model";
 
 export const GraphLayerModel = types
   .model('GraphLayerModel')
@@ -97,11 +97,11 @@ export const GraphLayerModel = types
         : undefined;
     },
     updateAdornments(resetPoints=false) {
-      console.log('updateAdornments');
+      console.log('updateAdornments for ', self.config.dataset?.id);
       const options = this.getUpdateCategoriesOptions(resetPoints);
       // TODO: should adornments be registered on each layer?
       // Currently storing and updating them at the Graph level:
-      const graph = getParent(self) as IGraphModel;
+      const graph = getParentOfType(self, GraphModel);
       if (graph) {
         graph.adornments.forEach(adornment => adornment.updateCategories(options));
       } else {
@@ -123,7 +123,7 @@ export const GraphLayerModel = types
         topCats = self.config.categoryArrayForAttrRole("topSplit", []) ?? [""],
         rightAttrId = self.config.attributeID("rightSplit") || '',
         rightCats = self.config.categoryArrayForAttrRole("rightSplit", []) ?? [""];
-      const graph = getParent(self) as IGraphModel;
+      const graph = getParentOfType(self, GraphModel);
       const xAxis = graph.getAxis("bottom");
       const yAxis = graph.getAxis("left");
       return {
