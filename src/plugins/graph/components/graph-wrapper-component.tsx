@@ -21,10 +21,8 @@ import "./graph-wrapper-component.scss";
 
 export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(props) {
   const {
-    documentContent, documentId, model, readOnly, scale, tileElt,
-    onRegisterTileApi, onUnregisterTileApi, onRequestRowHeight
+    model, readOnly, tileElt, onRegisterTileApi, onRequestRowHeight
   } = props;
-  const enabled = !readOnly;
   const content = model.content as IGraphModel;
 
   const { data } = useDataSet(content?.data);
