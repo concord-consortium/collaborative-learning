@@ -35,6 +35,7 @@ export const GraphLayerModel = types
       self.isLinked = true;
     },
     setDataset(dataset: IDataSet | undefined, metadata: ISharedCaseMetadata | undefined) {
+      self.config.clearAttributes();
       self.config.setDataset(dataset, metadata);
       self.isLinked = !!dataset && !!metadata;
     },
