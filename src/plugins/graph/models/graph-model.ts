@@ -12,7 +12,7 @@ import {
 import { GraphPlace } from "../imports/components/axis-graph-shared";
 import {
   GraphAttrRole, hoverRadiusFactor, kDefaultNumericAxisBounds, kGraphTileType, PlotType, PlotTypes,
-  pointRadiusMax, pointRadiusSelectionAddend
+  pointRadiusLogBase, pointRadiusMax, pointRadiusMin, pointRadiusSelectionAddend
 } from "../graph-types";
 import {DataConfigurationModel} from "./data-configuration-model";
 import { SharedModelType } from "../../../models/shared/shared-model";
@@ -64,6 +64,7 @@ export const GraphModel = TileContentModel
     _pointStrokeColor: defaultStrokeColor,
     pointStrokeSameAsFill: false,
     plotBackgroundColor: defaultBackgroundColor,
+    pointSizeMultiplier: 1,
     isTransparent: false,
     plotBackgroundImageID: "",
     // todo: how to use this type?
@@ -104,19 +105,22 @@ export const GraphModel = TileContentModel
       return self.config.attributeID(place) ?? '';
     },
     getPointRadius(use: 'normal' | 'hover-drag' | 'select' = 'normal') {
-      const r = pointRadiusMax;
+      let r = pointRadiusMax;
       // for loop is fast equivalent to radius = max( minSize, maxSize - floor( log( logBase, max( dataLength, 1 )))
+      const numPoints = self.config.caseDataArray.length;
+
+      for (let i = pointRadiusLogBase; i <= numPoints; i = i * pointRadiusLogBase) {
+        --r;
+        if (r <= pointRadiusMin) break;
+      }
+      const result = r * self.pointSizeMultiplier;
       switch (use) {
         case "normal":
-          // console.log("\tcase normal -> returns result:", result);
-          return r;
+          return result;
         case "hover-drag":
-          // console.log("\tcase hover-drag -> returns  result * hoverRadiusFactor:", result * hoverRadiusFactor);
-          return r * hoverRadiusFactor;
+          return result * hoverRadiusFactor;
         case "select":
-        // console.log("\tcase select -> returns result + pointRadiusSelectionAdd",
-        // result + pointRadiusSelectionAddend);
-          return r + pointRadiusSelectionAddend;
+          return result + pointRadiusSelectionAddend;
       }
     },
     axisShouldShowGridLines(place: AxisPlace) {
