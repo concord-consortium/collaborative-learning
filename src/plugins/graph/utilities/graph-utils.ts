@@ -178,7 +178,6 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
 }
 
 
-//===================================== [ Render Inner Points ] =========================================
 interface IInitializePoints {
   selection: DotSelection;
   data: any;
@@ -190,9 +189,6 @@ interface IInitializePoints {
 
 const initializePoints = ({ selection, data, pointRadius,  pointColor,
                             pointStrokeColor, getPointColorAtIndex }: IInitializePoints) => {
-  // console.log("📁 graph-utils.ts ------------------------");
-  // console.log("\t🏭 renderDataSetToPoints");
-
   //initialize outer highlight dots (this must be before the inner dots so that the inner dots are on top)
   selection
     .data(data)
@@ -211,9 +207,19 @@ const initializePoints = ({ selection, data, pointRadius,  pointColor,
     );
 };
 
+export interface ISetPointSelection {
+  dotsRef: IDotsRef
+  dataConfiguration: IDataConfigurationModel
+  pointRadius: number,
+  selectedPointRadius: number,
+  pointColor: string,
+  pointStrokeColor: string,
+  getPointColorAtIndex?: (index: number) => string
+  //remove above properties since they aren't being used
+}
+
 export function setPointSelection(props: ISetPointSelection) {
-  const { dotsRef, dataConfiguration, pointRadius, selectedPointRadius,
-          pointColor, pointStrokeColor, getPointColorAtIndex } = props;
+  const { dotsRef, dataConfiguration } = props;
 
   // console.log("📁 graph-utils.ts ------------------------");
   // console.log("\t🏭 setPointSelection");
@@ -423,15 +429,6 @@ export function getScreenCoord(dataSet: IDataSet | undefined, id: string,
   return value != null && !isNaN(value) ? scale(value) : null;
 }
 
-export interface ISetPointSelection {
-  dotsRef: IDotsRef
-  dataConfiguration: IDataConfigurationModel
-  pointRadius: number,
-  selectedPointRadius: number,
-  pointColor: string,
-  pointStrokeColor: string,
-  getPointColorAtIndex?: (index: number) => string
-}
 
 function getPointColor(data: any, defaultColor: string, getPointColorAtIndex?: (index: number) => string) {
   if (getPointColorAtIndex && data.plotNum !== undefined) {
@@ -486,7 +483,7 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
   };
 
   const setPoints = (radius: number) => {
-    // console.log("\t🏭 setPoints");
+    console.log("\t🏭 setPoints");
     if (theSelection?.size()) {
       theSelection
         .transition()
@@ -499,7 +496,11 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
         })
         // .attr('r', (aCaseData: CaseData) => dataset?.isCaseSelected(aCaseData.caseID)
         //   ? selectedPointRadius : pointRadius)
-        .attr('r', radius)
+        .attr('r', () => {
+
+          console.log("📁 graph-utils.ts ------------------------");
+          return radius;
+        })
         .style('fill', (aCaseData: CaseData) => {
           // console.log("in setPoints look up legendColor:", lookupLegendColor(aCaseData));
           return lookupLegendColor(aCaseData);
@@ -518,7 +519,7 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
           getScreenX, getScreenY, getLegendColor, enableAnimation } = props;
 
   const duration = enableAnimation.current ? transitionDuration : 0;
-  // console.log("right before setPoints() selectedOnly:", selectedOnly);
+  console.log("right before setPoints() selectedOnly:", selectedOnly);
   let theSelection = selectDots(dotsRef.current, selectedOnly);
   setPoints(5);
   theSelection = selectDots(dotsRef.current, true);

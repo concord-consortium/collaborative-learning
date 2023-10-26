@@ -60,7 +60,12 @@ export const useDataTips = ({dotsRef, dataset, graphModel, enableAnimation}:IUse
           isSelected = dataset?.isCaseSelected(caseID);
         select(event.target as SVGSVGElement)
           .transition().duration(transitionDuration)
-          .attr('r', isSelected ? selectedPointRadius : pointRadius);
+          .attr('r', () => {
+
+            console.log("📁 use-data-tips.ts ------------------------");
+            console.log("hideDatatip returning:", isSelected ? selectedPointRadius : pointRadius);
+            return isSelected ? selectedPointRadius : pointRadius;
+          });
       }
     }
 

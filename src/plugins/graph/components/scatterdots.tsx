@@ -76,7 +76,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
           .property('isDragging', true)
           .transition()
           .attr('r', (r: any)=>{
-            // console.log("📁 scatterdots.tsx ------------------------");
+            console.log("📁 scatterdots.tsx --------line 79----------------");
             // console.log("\t🏭 onDragStart");
             // console.log("\t attr r fn: ", r);
             // console.log("\t🔪 dragPointRadiusRef.current:", dragPointRadiusRef.current);
@@ -154,7 +154,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
           .property('isDragging', false)
           .transition()
           .attr('r', (r: any) => {
-            // console.log("📁 scatterdots.tsx --------r function---------------:");
+            console.log("📁 scatterdots.tsx --------line 157---------------:");
             // console.log("-r: ", r);
             // console.log("\t🔪 selectedPointRadiusRef.current:", selectedPointRadiusRef.current);
             return selectedPointRadiusRef.current;

@@ -45,7 +45,10 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
         target.current
           .property('isDragging', true)
           .transition()
-          .attr('r', graphModel.getPointRadius('hover-drag'));
+          .attr('r', () => {
+            console.log("📁 dotplotdots.tsx ------------------------");
+            return graphModel.getPointRadius('hover-drag');
+          });
         setDragID(() => tItsID);
         currPos.current = primaryIsBottom ? event.clientX : event.clientY;
 
@@ -94,7 +97,10 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
           .classed('dragging', false)
           .property('isDragging', false)
           .transition()
-          .attr('r', graphModel.getPointRadius('select'));
+          .attr('r', () => {
+            console.log("📁 dotplotdots.tsx --------------line 101----------");
+            return graphModel.getPointRadius('select');
+          });
         setDragID('');
         target.current = null;
 
