@@ -85,20 +85,24 @@ export const GraphModel = TileContentModel
       return getTileCaseMetadata(self);
     },
     pointColorAtIndex(plotIndex = 0) {
-      console.log("📁 graph-model.ts ------------------------");
-      console.log("\t🏭 pointColorAtIndex with plotIndex:", plotIndex);
+      // console.log("📁 graph-model.ts");
+      // console.log("\t🏭 pointColorAtIndex with plotIndex:", plotIndex);
 
       if (plotIndex < self._pointColors.length) {
 
-        console.log("\tline 91 returning:", self._pointColors[plotIndex]);
+        // console.log("\tline 91 returning:", self._pointColors[plotIndex]);
         return self._pointColors[plotIndex];
       } else {
-        console.log("\tline94 else returning:", kellyColors[plotIndex % kellyColors.length]);
+        // console.log("\tline94 else returning:", kellyColors[plotIndex % kellyColors.length]);
 
         return kellyColors[plotIndex % kellyColors.length];
       }
     },
     get pointColor() {
+      // console.log("📁 graph-model.ts");
+      // console.log("\t🏭 pointColor");
+      // console.log("\treturning:", this.pointColorAtIndex(0));
+
       return this.pointColorAtIndex(0);
     },
     get pointStrokeColor() {
@@ -115,14 +119,13 @@ export const GraphModel = TileContentModel
       // for loop is fast equivalent to radius = max( minSize, maxSize - floor( log( logBase, max( dataLength, 1 )))
       switch (use) {
         case "normal":
-          // console.log("\tcase normal -> returns result:", result);
+          console.log("\tcase normal -> returns result:", r);
           return r;
         case "hover-drag":
-          // console.log("\tcase hover-drag -> returns  result * hoverRadiusFactor:", r * hoverRadiusFactor);
+          console.log("\tcase hover-drag -> returns  result * hoverRadiusFactor:", r * hoverRadiusFactor);
           return r * hoverRadiusFactor;
         case "select":
-        // console.log("\tcase select -> returns result + pointRadiusSelectionAdd",
-        // result + pointRadiusSelectionAddend);
+        console.log("\tcase select -> returns result + pointRadiusSelectionAdd", r + pointRadiusSelectionAddend);
           return r + pointRadiusSelectionAddend;
       }
     },

@@ -46,7 +46,8 @@ export const MovablePoint = observer(function MovablePoint(props: IProps) {
     instanceKey = model.instanceKey(subPlotKey),
     pointRef = useRef<SVGGElement | null>(null),
     [pointObject, setPointObject] = useState<IPointObject>({});
-
+  console.log("<MoveablePoint>)");
+  console.log("pointObject:", pointObject);
   // get attributes for use in coordinates box and for determining when to reset the point
   // to the initial position when the attributes have changed
   const allAttributes = dataConfig?.dataset?.attributes,
@@ -149,6 +150,7 @@ export const MovablePoint = observer(function MovablePoint(props: IProps) {
                   .attr('fill', '#ffff00')
                   .attr('stroke', '#000000')
       };
+    console.log("movable-point.tsx > createNewPointObject, about to call setPointObject");
     setPointObject(newPointObject);
 
   // This effect should only run once on mount, otherwise it would create multiple

@@ -117,6 +117,7 @@ export class GraphLayout implements IAxisLayout {
   }
 
   @action setParentExtent(width: number, height: number) {
+    console.log("----------------resizing graph!!-----------------");
     this.graphWidth = width;
     this.graphHeight = height;
     this.updateScaleRanges(this.plotWidth, this.plotHeight);

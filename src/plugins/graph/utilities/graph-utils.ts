@@ -6,12 +6,12 @@ import { IClueObjectSnapshot } from "../../../models/annotations/clue-object";
 import { PartialSharedModelEntry } from "../../../models/document/document-content-types";
 import { UpdatedSharedDataSetIds } from "../../../models/shared/shared-data-set";
 import {CaseData, DotSelection, DotsElt, selectCircles, selectDots} from "../d3-types";
-import {IDotsRef, kGraphFont, Point, Rect, rTreeRect, selectedRadiusFactor, transitionDuration} from "../graph-types";
+import {IDotsRef, kGraphFont, Point, Rect, rTreeRect, transitionDuration} from "../graph-types";
 import {between} from "./math-utils";
 import {IAxisModel, isNumericAxisModel} from "../imports/components/axis/models/axis-model";
 import {ScaleNumericBaseType} from "../imports/components/axis/axis-types";
 import {IDataSet} from "../../../models/data/data-set";
-import { defaultSelectedColor, defaultSelectedStroke, defaultSelectedStrokeWidth, defaultStrokeWidth, selectedStrokeWidth } from "../../../utilities/color-utils";
+import { defaultSelectedColor, defaultSelectedStroke, defaultSelectedStrokeWidth, defaultStrokeWidth, selectedOuterCircleColor } from "../../../utilities/color-utils";
 import {IDataConfigurationModel} from "../models/data-configuration-model";
 import {measureText} from "../../../components/tiles/hooks/use-measure-text";
 
@@ -138,7 +138,14 @@ export interface IMatchCirclesProps {
   instanceId: string | undefined
 }
 
+//renderDataSetToPoints - called inside matchCirclesToData - makes two sets of dots
+//renderSelectedPoints - called inside setPointSelection, setPointCoordinates
+// - this doesnt make any new dots - which looks out for selection - try to have this do all the styling
+
+
+
 export function matchCirclesToData(props: IMatchCirclesProps) {
+  //make sure this is what creates dots and respond to data changes
   const {dataConfiguration, enableAnimation, instanceId,
       dotsElement, pointRadius, pointColor, pointStrokeColor} = props;
   // console.log("📁 graph-utils.ts ------------------------");
@@ -151,11 +158,10 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
   if (!circles) return;
   startAnimation(enableAnimation);
 
-  renderPoints({
+  initializePoints({
     selection: circles,
     data: allCaseData,
     pointRadius,
-    selectedPointRadius: pointRadius * selectedRadiusFactor, // Change selectedRadiusFactor if needed
     pointColor,
     pointStrokeColor,
     getPointColorAtIndex: (index) => pointColor
@@ -170,6 +176,74 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
     });
   dataConfiguration.setPointsNeedUpdating(false);
 }
+
+
+//===================================== [ Render Inner Points ] =========================================
+interface IInitializePoints {
+  selection: DotSelection;
+  data: any;
+  pointRadius: number;
+  pointColor: string;
+  pointStrokeColor: string;
+  getPointColorAtIndex?: (index: number) => string;
+}
+
+const initializePoints = ({ selection, data, pointRadius,  pointColor,
+                            pointStrokeColor, getPointColorAtIndex }: IInitializePoints) => {
+  // console.log("📁 graph-utils.ts ------------------------");
+  // console.log("\t🏭 renderDataSetToPoints");
+
+  //initialize outer highlight dots (this must be before the inner dots so that the inner dots are on top)
+  selection
+    .data(data)
+    .join(
+      (enter)=>
+        enter.append('circle')
+        .attr('class', 'graph-dot-highlighted')
+    );
+  //initialize inner dots
+  selection
+    .data(data)
+    .join(
+      (enter) =>
+        enter.append('circle')
+          .attr('class', 'graph-dot')
+    );
+};
+
+export function setPointSelection(props: ISetPointSelection) {
+  const { dotsRef, dataConfiguration, pointRadius, selectedPointRadius,
+          pointColor, pointStrokeColor, getPointColorAtIndex } = props;
+
+  // console.log("📁 graph-utils.ts ------------------------");
+  // console.log("\t🏭 setPointSelection");
+  // console.log("\tdotsRef:", dotsRef);
+  const dataset = dataConfiguration.dataset;
+  const dots = selectCircles(dotsRef.current);
+  if (!(dotsRef.current && dots)) return;
+  // console.log("dots:", dots);
+  //apply highlighted class to dots that are the caseSelected
+  const selectedDots = selectDots(dotsRef.current, true);
+  // console.log("\tselectedDots.size()", selectedDots?.size());
+  // console.log("\tdataset:", dataset);
+  if (dataset?.selection.size && selectedDots?.size){
+    // console.log("need to update selectedDots");
+    // console.log("TODO: - set selection cases, and set those cases to selected");
+    //wait start with selectedDots
+
+    selectedDots
+    .attr('r', (aCaseData: CaseData) => {
+      // console.log(aCaseData);
+      return (dataset?.isCaseSelected(aCaseData.caseID))
+      ? 10 : 0;
+    })
+    .style('fill', (aCaseData: CaseData) => {
+      // console.log("\tfill returns:", (dataset?.isCaseSelected(aCaseData.caseID)) && selectedOuterCircleColor);
+      return (dataset?.isCaseSelected(aCaseData.caseID)) && selectedOuterCircleColor;
+    });
+  }
+}
+
 
 //  Return the two points in logical coordinates where the line with the given
 //  iSlope and iIntercept intersects the rectangle defined by the upper and lower
@@ -359,41 +433,6 @@ export interface ISetPointSelection {
   getPointColorAtIndex?: (index: number) => string
 }
 
-//===================================== [ Render Points ] =========================================
-
-interface IRenderPoints {
-  selection: DotSelection;
-  data: any;
-  pointRadius: number;
-  selectedPointRadius: number;
-  pointColor: string;
-  pointStrokeColor: string;
-  getPointColorAtIndex?: (index: number) => string;
-}
-
-
-const renderPoints = ({ selection, data, pointRadius, selectedPointRadius, pointColor,
-                        pointStrokeColor, getPointColorAtIndex}: IRenderPoints) => {
-console.log("---------renderPoints-------------------");
-
-  selection
-    .data(data)
-    .join(
-      (enter) =>
-        enter.append('circle')
-          .attr('class', 'graph-dot')
-          .attr('r', pointRadius)
-          .style('fill', (d) => getPointColor(d, pointColor, getPointColorAtIndex))
-          .style('stroke', pointStrokeColor)
-          .style('stroke-width', defaultStrokeWidth),
-      (update) =>
-        update.attr('r', (d: any) => d.selected ? selectedPointRadius : pointRadius)
-          .style('fill', (d) => getPointColor(d, pointColor, getPointColorAtIndex))
-          .style('stroke', pointStrokeColor)
-          .style('stroke-width', (d: any) => d.selected ? selectedStrokeWidth : defaultStrokeWidth)
-    );
-};
-
 function getPointColor(data: any, defaultColor: string, getPointColorAtIndex?: (index: number) => string) {
   if (getPointColorAtIndex && data.plotNum !== undefined) {
     return getPointColorAtIndex(data.plotNum);
@@ -402,96 +441,6 @@ function getPointColor(data: any, defaultColor: string, getPointColorAtIndex?: (
   }
 }
 
-
-    //try method 2 that renders two circles - first draw the bigger hover
-    //look into size change styling bug.
-    //consolidate the styling (currently there are at least two - 522-540) - into one function
-
-
-
-export function setPointSelection(props: ISetPointSelection) {
-  const { dotsRef, dataConfiguration, pointRadius, selectedPointRadius,
-          pointColor, pointStrokeColor, getPointColorAtIndex } = props;
-
-  // console.log("📁 graph-utils.ts ------------------------");
-  // console.log("\t🏭 setPointSelection");
-  const dataset = dataConfiguration.dataset;
-  const dots = selectCircles(dotsRef.current);
-  if (!(dotsRef.current && dots)) return;
-
-  console.log("dots:", dots);
-
-  // render points
-  if (getPointColorAtIndex){
-    renderPoints({
-      selection: dots,
-      data: dataConfiguration.joinedCaseDataArrays,
-      pointRadius,
-      selectedPointRadius,
-      pointColor,
-      pointStrokeColor,
-      getPointColorAtIndex: (index) => getPointColorAtIndex(index)
-    });
-  }
-
-
-
-  // dots
-  //   .classed('graph-dot-highlighted', (aCaseData: CaseData) => {
-  //     return !!dataset?.isCaseSelected(aCaseData.caseID);
-  //   })
-  //   // Then set properties to defaults w/o selection
-  //   .attr('r', (aCaseData: CaseData) => {
-  //     console.log("\t🔪 line 400 aCaseData:", aCaseData);
-  //     if (dataset?.isCaseSelected(aCaseData.caseID)){
-  //       return pointRadius * selectedRadiusFactor; //draw an outer circle for selected points
-  //     }
-  //     else {
-  //       console.log("\t🔪returning :", pointRadius);
-  //       return pointRadius;
-  //     }
-  //   })
-  //   .style('stroke', (stroke) => {
-  //     return pointStrokeColor;
-  //   })
-  //   .style('fill', (aCaseData:CaseData) => {
-  //     const returnVal = legendID
-  //     ? dataConfiguration?.getLegendColorForCase(aCaseData.caseID)
-  //     : aCaseData.plotNum && getPointColorAtIndex
-  //       ? getPointColorAtIndex(aCaseData.plotNum) : pointColor;
-  //     return legendID
-  //       ? dataConfiguration?.getLegendColorForCase(aCaseData.caseID)
-  //       : aCaseData.plotNum && getPointColorAtIndex
-  //         ? getPointColorAtIndex(aCaseData.plotNum) : pointColor;
-  //   })
-  //   .style('stroke-width', (aCaseData: CaseData) => {
-  //     return dataset?.isCaseSelected(aCaseData.caseID) ? selectedStrokeWidth : defaultStrokeWidth;
-  //   })
-  //   .style('stroke-opacity', (aCaseData: CaseData) => {
-  //     // return 0.6;
-  //     return 1;
-  //   })
-  //   .style('stroke-fill', (aCaseData: CaseData) => {
-  //     return dataset?.isCaseSelected(aCaseData.caseID) ? selectedOuterCircleColor : defaultBackgroundColor;
-  //   });
-
-
-  const selectedDots = selectDots(dotsRef.current, true);
-  // How we deal with this depends on whether there is a legend or not
-  console.log("setPointSelection:", selectedDots);
-
-  selectedDots?.attr('r', (aCaseData: CaseData) => {
-    console.log("📁 graph-utils.ts ------------------------");
-
-    if (dataset?.isCaseSelected(aCaseData.caseID)){
-      return pointRadius * selectedRadiusFactor; //draw an outer circle for selected points
-    }
-    else {
-      return pointRadius;
-    }
-  })  //when you click on case this gets triggered
-  .raise();
-}
 //--------------------------------------------
 export interface ISetPointCoordinates {
   dataset?: IDataSet
@@ -533,16 +482,11 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
         : isSelected
           ? defaultSelectedColor
           : pointColor;
-
     }
+  };
 
-
-
-  },
-
-  setPoints = () => {
+  const setPoints = (radius: number) => {
     // console.log("\t🏭 setPoints");
-
     if (theSelection?.size()) {
       theSelection
         .transition()
@@ -555,12 +499,11 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
         })
         // .attr('r', (aCaseData: CaseData) => dataset?.isCaseSelected(aCaseData.caseID)
         //   ? selectedPointRadius : pointRadius)
-
-        .attr('r', (aCaseData: CaseData) => {
-          return dataset?.isCaseSelected(aCaseData.caseID)
-          ? selectedPointRadius : pointRadius;
+        .attr('r', radius)
+        .style('fill', (aCaseData: CaseData) => {
+          // console.log("in setPoints look up legendColor:", lookupLegendColor(aCaseData));
+          return lookupLegendColor(aCaseData);
         })
-        .style('fill', (aCaseData: CaseData) => lookupLegendColor(aCaseData))
         .style('stroke', (aCaseData: CaseData) =>
           (getLegendColor && dataset?.isCaseSelected(aCaseData.caseID))
           ? defaultSelectedStroke : pointStrokeColor)
@@ -570,16 +513,16 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
     }
   };
 
-  const
-    {
-      dataset, dotsRef, selectedOnly = false, pointRadius, selectedPointRadius,
-      pointStrokeColor, pointColor, getPointColorAtIndex,
-      getScreenX, getScreenY, getLegendColor, enableAnimation
-    } = props,
-    duration = enableAnimation.current ? transitionDuration : 0,
+  const { dataset, dotsRef, selectedOnly = false, pointRadius, selectedPointRadius,
+          pointStrokeColor, pointColor, getPointColorAtIndex,
+          getScreenX, getScreenY, getLegendColor, enableAnimation } = props;
 
-    theSelection = selectDots(dotsRef.current, selectedOnly);
-    setPoints();
+  const duration = enableAnimation.current ? transitionDuration : 0;
+  // console.log("right before setPoints() selectedOnly:", selectedOnly);
+  let theSelection = selectDots(dotsRef.current, selectedOnly);
+  setPoints(5);
+  theSelection = selectDots(dotsRef.current, true);
+  setPoints(0);
 }
 
 
