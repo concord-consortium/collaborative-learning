@@ -28,7 +28,6 @@ export const useDataTips = ({dotsRef, dataset, graphModel, enableAnimation}:IUse
     yAttrIDs = graphModel.config.yAttributeIDs;
 
   useEffect(() => {
-
     function okToTransition(target: any) {
       return !enableAnimation.current && target.node()?.nodeName === 'circle' && dataset &&
         !target.property('isDragging');
@@ -37,7 +36,11 @@ export const useDataTips = ({dotsRef, dataset, graphModel, enableAnimation}:IUse
     function showDataTip(event: MouseEvent) {
       const target = select(event.target as SVGSVGElement);
       if (okToTransition(target)) {
-        target.transition().duration(transitionDuration).attr('r', hoverPointRadius);
+        target.transition().duration(transitionDuration).attr('r',() => {
+          console.log("📁 use-data-tips.ts ---------- line 40-------------");
+          console.log("\treturning:", hoverPointRadius);
+          return hoverPointRadius;
+        });
         const caseID = (target.datum() as CaseData).caseID,
           plotNum = (target.datum() as CaseData).plotNum, // Only can be non-zero for scatter plots
           attrIDsToUse = roleAttrIDPairs.filter((aPair) => {
@@ -58,21 +61,26 @@ export const useDataTips = ({dotsRef, dataset, graphModel, enableAnimation}:IUse
       if (okToTransition(target)) {
         const caseID = (select(event.target as SVGSVGElement).datum() as CaseData).caseID,
           isSelected = dataset?.isCaseSelected(caseID);
+
         select(event.target as SVGSVGElement)
           .transition().duration(transitionDuration)
-          .attr('r', () => {
+          .attr('r', (d: any) => {
+            console.log("📁 use-data-tips.ts ------line 68------------------");
+            console.log("\thideDatatip isSelected:", isSelected );
+            console.log("\thideDatatip target:", target);
+            console.log("d:",  d);
+            console.log("\thideDatatip returning:", isSelected ? selectedPointRadius : pointRadius);
 
-            console.log("📁 use-data-tips.ts ------------------------");
-            console.log("hideDatatip returning:", isSelected ? selectedPointRadius : pointRadius);
             return isSelected ? selectedPointRadius : pointRadius;
           });
       }
     }
 
-    dotsRef.current && select(dotsRef.current)
-      .on('mouseover', showDataTip)
-      .on('mouseout', hideDataTip)
-      .call(dataTip);
-  }, [dotsRef, dataset, enableAnimation, roleAttrIDPairs, yAttrIDs,
-    hoverPointRadius, pointRadius, selectedPointRadius]);
+    // dotsRef.current && select(dotsRef.current)
+    //   .on('mouseover', showDataTip)
+    //   .on('mouseout', hideDataTip)
+    //   .call(dataTip);
+   }, [ dotsRef, dataset, enableAnimation, roleAttrIDPairs, yAttrIDs,
+        hoverPointRadius, pointRadius, selectedPointRadius ]);
+
 };

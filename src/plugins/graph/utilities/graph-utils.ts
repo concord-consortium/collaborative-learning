@@ -1,4 +1,4 @@
-import {extent, format, select, timeout} from "d3";
+import {extent, format, timeout} from "d3";
 import React from "react";
 import {isInteger} from "lodash";
 
@@ -167,13 +167,16 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
     getPointColorAtIndex: (index) => pointColor
   });
 
-  dotsElement && select(dotsElement).on('click',
-    (event: MouseEvent) => {
-      const target = select(event.target as SVGSVGElement);
-      if (target.node()?.nodeName === 'circle') {
-        handleClickOnDot(event, (target.datum() as CaseData).caseID, dataConfiguration.dataset);
-      }
-    });
+  //----------------- Click on Dot -------------------
+  // dotsElement && select(dotsElement).on('click',
+  //   (event: MouseEvent) => {
+  //     console.log("click a dot");
+  //     const target = select(event.target as SVGSVGElement);
+  //     if (target.node()?.nodeName === 'circle') {
+  //       handleClickOnDot(event, (target.datum() as CaseData).caseID, dataConfiguration.dataset);
+  //     }
+  //   });
+
   dataConfiguration.setPointsNeedUpdating(false);
 }
 

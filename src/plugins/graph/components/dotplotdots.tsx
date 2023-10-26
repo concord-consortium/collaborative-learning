@@ -46,7 +46,7 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
           .property('isDragging', true)
           .transition()
           .attr('r', () => {
-            console.log("📁 dotplotdots.tsx ------------------------");
+            console.log("📁 dotplotdots.tsx --------line 49----------------");
             return graphModel.getPointRadius('hover-drag');
           });
         setDragID(() => tItsID);
