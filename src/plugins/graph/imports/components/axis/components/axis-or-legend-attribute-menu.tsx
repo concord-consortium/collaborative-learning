@@ -54,7 +54,7 @@ export const AxisOrLegendAttributeMenu = ({ place, attributeId, target, parent, 
   parentRef.current = parent;
   const portalRef = useRef(portal);
   portalRef.current = portal;
-  const menuRef = useRef<HTMLDivElement>(null);
+  const menuListRef = useRef<HTMLDivElement>(null);
   const showRemoveOption = true; // Used to be a setting; for now we always want it available.
 
   const onCloseRef = useRef<() => void>();
@@ -70,7 +70,7 @@ export const AxisOrLegendAttributeMenu = ({ place, attributeId, target, parent, 
   };
   const { attributes, listeners, setNodeRef: setDragNodeRef } = useDraggableAttribute(draggableOptions);
 
-  useOutsidePointerDown({ref: menuRef, handler: () => onCloseRef.current?.()});
+  useOutsidePointerDown({ref: menuListRef, handler: () => onCloseRef.current?.()});
 
   useEffect(() => {
     dataConfig?.onAction(action => {
@@ -85,7 +85,7 @@ export const AxisOrLegendAttributeMenu = ({ place, attributeId, target, parent, 
   }, [attribute?.name, data?.attributes, dataConfig, labelText, setLabelText, attrId]);
 
   return (
-    <div className={`axis-legend-attribute-menu ${place}`} ref={menuRef}>
+    <div className={`axis-legend-attribute-menu ${place}`} >
       <Menu boundary="scrollParent">
         {({ onClose, isOpen }) => {
           onOpenClose && onOpenClose(isOpen);
@@ -95,7 +95,7 @@ export const AxisOrLegendAttributeMenu = ({ place, attributeId, target, parent, 
               <div ref={setDragNodeRef} style={overlayStyle} {...attributes} {...listeners}>
                 <MenuButton style={buttonStyle}>{attribute?.name}</MenuButton>
                 <Portal containerRef={portalRef}>
-                  <MenuList>
+                  <MenuList ref={menuListRef}>
                     { !data &&
                       <MenuItem className="inactive">
                         Link Data
