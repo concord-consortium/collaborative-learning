@@ -1,6 +1,5 @@
 import stringify from "json-stringify-pretty-compact";
-import { reaction } from "mobx";
-import { addDisposer, getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
+import { getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
 import {createContext, useContext} from "react";
 import { IClueObject } from "../../../models/annotations/clue-object";
 import { getTileIdFromContent } from "../../../models/tiles/tile-model";
@@ -389,11 +388,11 @@ export const GraphModel = TileContentModel
                   self.layers[0].configureLinkedLayer();
                   self.layers[0].updateAdornments();
                 } else {
-                  const dataConfig = DataConfigurationModel.create();
-                  dataConfig.setDataset(dataSetModel.dataSet, metaDataModel);
                   const newLayer = GraphLayerModel.create();
-                  newLayer.setDataConfiguration(dataConfig);
                   self.layers.push(newLayer);
+                  const dataConfig = DataConfigurationModel.create();
+                  newLayer.setDataConfiguration(dataConfig);
+                  dataConfig.setDataset(dataSetModel.dataSet, metaDataModel);
                   console.log('| Created layer ', newLayer);
                   // May need these when we want to actually display the new layer:
                   // newLayer.configureLinkedLayer();
