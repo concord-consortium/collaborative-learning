@@ -17,7 +17,7 @@ import serviceAccount from "./serviceAccountKey.json" assert { type: "json" };
 import { writeTabularLabelsCSV } from "./ai/json-in-csv";
 
 // Make falsy to include all documents
-const documentLimit = 5; //false;
+const documentLimit = 2; //false;
 
 // _duration should be in miliseconds
 function prettyDuration(_duration: number) {
