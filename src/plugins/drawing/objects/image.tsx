@@ -142,7 +142,7 @@ export class StampDrawingTool extends DrawingTool {
         height: stamp.height
       };
 
-      this.drawingLayer.addNewDrawingObject(stampImage);
+      this.drawingLayer.addNewDrawingObject(stampImage, { keepToolActive: true });
     }
   }
 }

@@ -40,7 +40,7 @@ import {
 } from "../../../models/tiles/geometry/jxg-vertex-angle";
 import { getAllLinkedPoints, injectGetTableLinkColorsFunction } from "../../../models/tiles/geometry/jxg-table-link";
 import { extractDragTileType, kDragTileContent, kDragTileId, dragTileSrcDocId } from "../tile-component";
-import { ImageMapEntryType, gImageMap } from "../../../models/image-map";
+import { gImageMap, ImageMapEntry } from "../../../models/image-map";
 import { linkedPointId } from "../../../models/tiles/table-link-types";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { getParentWithTypeName } from "../../../utilities/mst-utils";
@@ -85,7 +85,7 @@ interface IState extends Mutable<SizeMeProps> {
   isEditingTitle?: boolean;
   imageContentUrl?: string;
   imageFilename?: string;
-  imageEntry?: ImageMapEntryType;
+  imageEntry?: ImageMapEntry;
   disableRotate: boolean;
   redoStack: string[][];
   selectedComment?: JXG.Text;
@@ -1015,7 +1015,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     return this.handleDelete();
   };
 
-  private handleNewImage = (image: ImageMapEntryType) => {
+  private handleNewImage = (image: ImageMapEntry) => {
     if (this._isMounted) {
       const content = this.getContent();
       this.setState({ isLoading: false, imageEntry: image });
@@ -1180,7 +1180,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     });
   };
 
-  private setBackgroundImage(image: ImageMapEntryType) {
+  private setBackgroundImage(image: ImageMapEntry) {
     const { board } = this.state;
     const contentUrl = image.contentUrl;
     if (!board || !this._isMounted || !contentUrl) return;

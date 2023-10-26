@@ -2,7 +2,7 @@ name: Regression Tests
 
 on:
   schedule:
-    - cron: "35 13 * * *"
+    - cron: "0 0 * * *"
 jobs:
   all-tests:
     runs-on: ubuntu-latest

@@ -6,108 +6,103 @@ let clueCanvas = new ClueCanvas;
 const dataflowTile = new DataflowTile;
 let simulatorTile = new SimulatorTile;
 
-context('Simulator Tile with Brainwaves Gripper Simulation', function () {
-  beforeEach(function () {
-    const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&mouseSensor&unit=brain";
-    cy.clearQAData('all');
-    cy.visit(queryParams);
-    cy.waitForLoad();
-    cy.collapseResourceTabs();
-  });
-  describe("Simulator Tile", () => {
-    it("renders simulator tile", () => {
-      simulatorTile.getSimulatorTile().should("not.exist");
-      clueCanvas.addTile("simulator");
-      simulatorTile.getSimulatorTile().should("exist");
-      simulatorTile.getTileTitle().should("exist");
-      simulatorTile.getSimulatorTile().should("contain.text", "EMG Sensor");
-      simulatorTile.getSimulatorTile().should("contain.text", "Surface Pressure Sensor");
-      simulatorTile.getSimulatorTile().should("contain.text", "Gripper Output");
-      // Icons are being rendered
-      simulatorTile.getSimulatorTile().find(".leading-box.variable-icon").should("have.length", 4);
+const queryParams1 = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&mouseSensor&unit=brain";
+const queryParams2 = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&mouseSensor&unit=seeit";
 
-      cy.get(".arm-image").should("exist");
-      cy.get(".arduino-image").should("exist");
-      cy.get(".gripper-image").should("exist");
+function beforeTest(params) {
+  cy.clearQAData('all');
+  cy.visit(params);
+  cy.waitForLoad();
+}
 
-      cy.log("Can switch to temperature variant.");
-      cy.get(".temperature-part").should("not.exist");
-      simulatorTile.getSelectionButtons().should("have.length", 2).eq(1).click();
-      cy.get(".gripper-image").should("not.exist");
-      cy.get(".temperature-part").should("exist");
-    });
-    it("edit tile title", () => {
-      const newName = "Test Simulation";
-      clueCanvas.addTile("simulator");
-      simulatorTile.getTileTitle().should("contain", "Simulation 1");
-      simulatorTile.getSimulatorTileTitle().click();
-      simulatorTile.getSimulatorTileTitle().type(newName + '{enter}');
-      simulatorTile.getTileTitle().should("contain", newName);
-    });
-    it("links to dataflow tile", () => {
-      clueCanvas.addTile("dataflow");
-      dataflowTile.selectSamplingRate("50ms");
+context('Simulator Tile', function () {
+  it("Simulator Tile with Brainwaves Gripper Simulation", () => {
+    beforeTest(queryParams1);
 
-      // Simulation options are not present in the sensor before the simulation has been added to the document
-      const sensor = "sensor";
-      dataflowTile.getCreateNodeButton(sensor).click();
-      dataflowTile.getDropdown(sensor, "sensor-type").click();
-      dataflowTile.getSensorDropdownOptions(sensor).eq(7).find(".label").click(); // EMG
-      dataflowTile.getDropdown(sensor, "sensor-select").click();
-      dataflowTile.getSensorDropdownOptions(sensor).should("have.length", 1);
-      // Click the background to not select any option
-      cy.get(".primary-workspace .flow-tool").click();
-      dataflowTile.getNodeValueContainer(sensor).invoke('text').then(parseFloat).should("equal", 0);
+    cy.log("renders simulator tile");
+    simulatorTile.getSimulatorTile().should("not.exist");
+    clueCanvas.addTile("simulator");
+    simulatorTile.getSimulatorTile().should("exist");
+    simulatorTile.getTileTitle().should("exist");
+    simulatorTile.getSimulatorTile().should("contain.text", "EMG Sensor");
+    simulatorTile.getSimulatorTile().should("contain.text", "Surface Pressure Sensor");
+    simulatorTile.getSimulatorTile().should("contain.text", "Gripper Output");
+    // Icons are being rendered
+    simulatorTile.getSimulatorTile().find(".leading-box.variable-icon").should("have.length", 4);
 
-      // Simulation options are not present in the live output before the simulation has been added to the document
-      const lo = "live-output";
-      dataflowTile.getCreateNodeButton(lo).click();
-      dataflowTile.getDropdown(lo, "liveOutputType").click();
-      dataflowTile.getDropdownOptions(lo, "liveOutputType").eq(1).click(); // Gripper
-      dataflowTile.getDropdown(lo, "hubSelect").click();
-      dataflowTile.getDropdownOptions(lo, "hubSelect").should("have.length", 1);
-      // Click the background to not select any option
-      cy.get(".primary-workspace .flow-tool").click();
+    cy.get(".arm-image").should("exist");
+    cy.get(".arduino-image").should("exist");
+    cy.get(".gripper-image").should("exist");
 
-      // Sensor options are correct after adding the simulation to the document
-      clueCanvas.addTile("simulator");
-      dataflowTile.getDropdown(sensor, "sensor-select").click();
-      dataflowTile.getSensorDropdownOptions(sensor).should("have.length", 2);
-      dataflowTile.getSensorDropdownOptions(sensor).eq(0).click();
-      dataflowTile.getNodeValueContainer(sensor).invoke('text').then(parseFloat).should("be.below", 41).should("be.above", 35);
-      simulatorTile.getEMGSlider().click("right");
-      cy.wait(50);
-      dataflowTile.getNodeValueContainer(sensor).invoke('text').then(parseFloat).should("be.below", 441).should("be.above", 390);
+    cy.log("Can switch to temperature variant.");
+    cy.get(".temperature-part").should("not.exist");
+    simulatorTile.getSelectionButtons().should("have.length", 2).eq(1).click();
+    cy.get(".gripper-image").should("not.exist");
+    cy.get(".temperature-part").should("exist");
 
-      // Live output options are correct after adding the simulation to the document
-      dataflowTile.getDropdown(lo, "hubSelect").click();
-      dataflowTile.getDropdownOptions(lo, "hubSelect").should("have.length", 2);
-      dataflowTile.getDropdownOptions(lo, "hubSelect").eq(0).click({force: true});
+    cy.log("edit tile title");
+    const newName = "Test Simulation";
+    clueCanvas.addTile("simulator");
+    simulatorTile.getTileTitle().should("contain", "Simulation 1");
+    simulatorTile.getSimulatorTileTitle().click();
+    simulatorTile.getSimulatorTileTitle().type(newName + '{enter}');
+    simulatorTile.getTileTitle().should("contain", newName);
 
-      // Simulator tile's output variable updates when dataflow sets it
-      dataflowTile.getCreateNodeButton("number").click();
-      dataflowTile.getNumberField().type("1{enter}");
-      const output = () => dataflowTile.getNode("number").find(".socket.output");
-      const input = () => dataflowTile.getNode(lo).find(".socket.input");
-      output().click();
-      input().click({ force: true });
-      dataflowTile.getOutputNodeValueText().should("contain", "100% closed");
-      simulatorTile.getSimulatorTile().should("contain.text", "Gripper Output100");
+    cy.log("links to dataflow tile");
+    clueCanvas.addTile("dataflow");
+    dataflowTile.selectSamplingRate("50ms");
 
-      // Pressure variable updates when the gripper changes
-      simulatorTile.getSimulatorTile().should("contain.text", "Surface Pressure Sensor300");
-    });
-  });
-});
+    // Simulation options are not present in the sensor before the simulation has been added to the document
+    const sensor = "sensor";
+    dataflowTile.getCreateNodeButton(sensor).click();
+    dataflowTile.getDropdown(sensor, "sensor-type").click();
+    dataflowTile.getSensorDropdownOptions(sensor).find(".label").contains("EMG").click(); // EMG
+    dataflowTile.getDropdown(sensor, "sensor-select").click();
+    dataflowTile.getSensorDropdownOptions(sensor).should("have.length", 2);
+    // Click the background to not select any option
+    cy.get(".primary-workspace .flow-tool").click();
+    dataflowTile.getNodeValueContainer(sensor).invoke('text').then(parseFloat).should("equal", 0);
 
-context('Simulator Tile with Brain Simulation', function() {
-  beforeEach(function () {
-    const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&mouseSensor&unit=brain";
-    cy.clearQAData('all');
-    cy.visit(queryParams);
-    cy.waitForLoad();
-  });
-  it("Make sure only one simulator tile is allowed", () => {
+    // Simulation options are not present in the live output before the simulation has been added to the document
+    const lo = "live-output";
+    dataflowTile.getCreateNodeButton(lo).click();
+    dataflowTile.getDropdown(lo, "liveOutputType").click();
+    dataflowTile.getDropdownOptions(lo, "liveOutputType").eq(1).click(); // Gripper
+    dataflowTile.getDropdown(lo, "hubSelect").click();
+    dataflowTile.getDropdownOptions(lo, "hubSelect").should("have.length", 2);
+    // Click the background to not select any option
+    cy.get(".primary-workspace .flow-tool").click();
+
+    // Sensor options are correct after adding the simulation to the document
+    clueCanvas.addTile("simulator");
+    dataflowTile.getDropdown(sensor, "sensor-select").click();
+    dataflowTile.getSensorDropdownOptions(sensor).should("have.length", 2);
+    dataflowTile.getSensorDropdownOptions(sensor).eq(0).click();
+    dataflowTile.getNodeValueContainer(sensor).invoke('text').then(parseFloat).should("be.below", 41).should("be.above", 35);
+    simulatorTile.getEMGSlider().click("right");
+    cy.wait(50);
+    dataflowTile.getNodeValueContainer(sensor).invoke('text').then(parseFloat).should("be.below", 441).should("be.above", 390);
+
+    // Live output options are correct after adding the simulation to the document
+    dataflowTile.getDropdown(lo, "hubSelect").click();
+    dataflowTile.getDropdownOptions(lo, "hubSelect").should("have.length", 2);
+    dataflowTile.getDropdownOptions(lo, "hubSelect").eq(0).click({ force: true });
+
+    // Simulator tile's output variable updates when dataflow sets it
+    dataflowTile.getCreateNodeButton("number").click();
+    dataflowTile.getNumberField().type("1{enter}");
+    const output = () => dataflowTile.getNode("number").find(".socket.output");
+    const input = () => dataflowTile.getNode(lo).find(".socket.input");
+    output().click();
+    input().click({ force: true });
+    dataflowTile.getOutputNodeValueText().should("contain", "100% closed");
+    simulatorTile.getSimulatorTile().should("contain.text", "Gripper Output100");
+
+    // Pressure variable updates when the gripper changes
+    simulatorTile.getSimulatorTile().should("contain.text", "Surface Pressure Sensor300");
+    clueCanvas.deleteTile("simulator");
+
+    cy.log("Make sure only one simulator tile is allowed");
     clueCanvas.addTile("simulator");
     clueCanvas.verifyToolDisabled("simulator");
     clueCanvas.deleteTile("simulator");
@@ -115,16 +110,11 @@ context('Simulator Tile with Brain Simulation', function() {
     clueCanvas.addTile("simulator");
     simulatorTile.getSimulatorTile().should("exist");
   });
-});
 
-context('Simulator Tile with Terrarium Simulation', function() {
-  beforeEach(function () {
-    const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&mouseSensor&unit=seeit";
-    cy.clearQAData('all');
-    cy.visit(queryParams);
-    cy.waitForLoad();
-  });
-  it("links to dataflow tile", () => {
+  it("Simulator Tile with Terrarium Simulation", () => {
+    beforeTest(queryParams2);
+    
+    cy.log("links to dataflow tile")
     // Copy a simulator tile over from curriculum
     simulatorTile.getSimulatorTile().should("not.exist");
     const dataTransfer = new DataTransfer;

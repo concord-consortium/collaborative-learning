@@ -33,10 +33,12 @@ const removeAttrItemLabelKeys: Record<string, string> = {
   "rightSplit": "DG.DataDisplayMenu.removeAttribute_right"
 };
 
-const _AxisOrLegendAttributeMenu = ({ place, attributeId, target, portal, onOpenClose,
-                                      onChangeAttribute, onRemoveAttribute, onTreatAttributeAs }: IProps) => {
+const _AxisOrLegendAttributeMenu = ({ place, attributeId, target, portal, onOpenClose, onChangeAttribute,
+                                      onRemoveAttribute, onTreatAttributeAs }: IProps) => {
   const data = useDataSetContext();
   const dataConfig = useDataConfigurationContext();
+  const yAttributesPlotted = dataConfig?.yAttributeDescriptions.map((a)=>a.attributeID);
+
   const role = graphPlaceToAttrRole[place];
   const attrId = attributeId || dataConfig?.attributeID(role) || '';
   const instanceId = useInstanceIdContext();
@@ -89,9 +91,19 @@ const _AxisOrLegendAttributeMenu = ({ place, attributeId, target, portal, onOpen
                     Link Data
                   </MenuItem>
                 }
-                { data?.attributes?.map((attr) => {
+                { data?.attributes?.map((attr, idx) => {
+                  //only show y attr that is not self, not the x axis, and not an already plotted Y
+                  const isCurrent = attr.id === attributeId;
+                  const isXAxis = (idx === 0);
+                  const isAPlottedYAttribute = yAttributesPlotted?.includes(attr.id);
+                  const showAttr = (!isCurrent && !isXAxis && !isAPlottedYAttribute);
+
                   return (
-                    <MenuItem onClick={() => onChangeAttribute(place, data, attr.id, attrId)} key={attr.id}>
+                    showAttr &&
+                    <MenuItem
+                      onClick={() => {onChangeAttribute(place, data, attr.id, attrId);}}
+                      key={attr.id}
+                    >
                       {attr.name}
                     </MenuItem>
                   );

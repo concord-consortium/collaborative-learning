@@ -62,6 +62,18 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
+
+    const handleTilePointerDown = (e: MouseEvent | TouchEvent) => {
+      // This handler gets attached to the outer Tile element (our parent).
+      // It handles the literal "edge" case - where you've clicked the Tile element
+      // but not inside the DrawingTile element.
+      // I don't know if this ever happens in real life, but it does happen in Cypress.
+      if (e.currentTarget === e.target) {
+        const append = hasSelectionModifier(e);
+        ui.setSelectedTileId(model.id, { append });
+      }
+    };
+
     if (tileElt) {
       tileElt.addEventListener("mousedown", handleTilePointerDown);
       tileElt.addEventListener("touchstart", handleTilePointerDown);
@@ -70,7 +82,7 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
         tileElt.removeEventListener("touchstart", handleTilePointerDown);
       });
     }
-  }, [tileElt]);
+  }, [model.id, tileElt, ui]);
 
   const handlePaste = async () => {
     const osClipboardContents = await getClipboardContent();
@@ -99,17 +111,6 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
       content.ungroupGroups(content.selection);
     }
     return true; // true return means 'prevent default action'
-  };
-
-  const handleTilePointerDown = (e: MouseEvent | TouchEvent) => {
-    // This handler gets attached to the outer Tile element (our parent).
-    // It handles the literal "edge" case - where you've clicked the Tile element
-    // but not inside the DrawingTile element.
-    // I don't know if this ever happens in real life, but it does happen in Cypress.
-    if (e.currentTarget === e.target) {
-      const append = hasSelectionModifier(e);
-      ui.setSelectedTileId(model.id, { append });
-    }
   };
 
   const handlePointerDown = (e: React.MouseEvent | React.TouchEvent) => {
