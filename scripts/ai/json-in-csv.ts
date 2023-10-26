@@ -1,9 +1,12 @@
 import fs from "fs";
 
-/**
- * Gets the multilabel value from a tag array
- * @param tagArray an array of tags
- */
+// These functions would need to be tweaked for the CSV requirements of various sevices on AWS
+// The output here is designed for Multi-Label mode on Amazon Comprenhend
+// https://docs.aws.amazon.com/comprehend/latest/dg/prep-classifier-data-multi-label.html
+
+// run this function at the end of count-document-tiles.ts by calling
+// writeTabularLabelsCSV(documentInfo, startTime);
+
 function getMultilabelValue(tagArray: [string]) {
   const hasTags = tagArray.length > 0;
   if (!hasTags) {
@@ -15,14 +18,8 @@ function getMultilabelValue(tagArray: [string]) {
   }
 }
 
-/**
- * Writes a csv file
- * @param docInfoObj a massive object of objects whose values are docN.txt, and tags
- * @param startTime unique id associated with this run
- */
 export function writeTabularLabelsCSV(docInfoObj: any, startTime: number){
   const csvFileName = `tabular_${startTime}.csv`;
-
   let csvData = '';
 
   Object.values(docInfoObj).forEach((info) => {
@@ -32,9 +29,10 @@ export function writeTabularLabelsCSV(docInfoObj: any, startTime: number){
     const flat = JSON.stringify(parsed);
     const csvValue = `"${flat.replace(/"/g, '""')}"`;
     const csvLine = tagFields + "," + csvValue;
-    csvData += csvLine + '\n';
+    // aws has a 100k character limit on csv lines
+    if (csvLine.length < 100000) {
+      csvData += csvLine + '\n';
+    }
   });
-
-  console.log("about to write ", csvData);
   fs.writeFileSync(csvFileName, csvData);
 }
