@@ -352,13 +352,17 @@ export const GraphModel = TileContentModel
         if (removedModelIds.length) {
           removedModelIds.forEach((id) => {
             const index = self.layers.findIndex((layer) => layer.config.dataset?.id === id );
-            if (index >= 0) {
-              if (self.layers[index].isLinked) {
-                console.log('Removing layer ', index);
-                self.layers.splice(index, 1);
-              } else {
-                console.log('Not removing default layer');
-              }
+            if (index > 0) {
+              console.log('Removing layer ', index);
+              self.layers.splice(index, 1);
+            } else if (index === 0) {
+              // Unlink layer 0, don't remove it.
+              self.layers[0].setDataset(undefined, undefined);
+              self.layers[0].configureUnlinkedLayer();
+              self.layers[0].updateAdornments();
+              console.log('Reset layer 0 to default: ', self.layers[0]);
+            } else {
+              console.error('Failed to find layer with dataset id ', id);
             }
           });
         }
@@ -408,9 +412,6 @@ export const GraphModel = TileContentModel
           });
         }
       }
-
-      // If we are left with 0 layers, need to re-create a default one.
-      self.createDefaultLayerIfNeeded();
 
       console.log("| Done, final layers: ", self.layers.map(l=>l.description));
     },
