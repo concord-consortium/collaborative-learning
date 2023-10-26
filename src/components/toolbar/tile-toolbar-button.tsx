@@ -31,7 +31,7 @@ export const TileToolbarButton =
 
     const tooltip = formatTooltip(title, keyHint);
     return (
-      <Tooltip key={name} title={tooltip} {...tipOptions} >
+      <Tooltip title={tooltip} {...tipOptions} >
         <button
           className={classNames('toolbar-button', name, { selected, disabled })}
           // TODO: confer with Scott about aria-disabled vs. disabled
