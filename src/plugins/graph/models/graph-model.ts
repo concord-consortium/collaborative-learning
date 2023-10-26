@@ -338,6 +338,11 @@ export const GraphModel = TileContentModel
         return;
       }
 
+      if (self.layers.length === 1 && !self.layers[0].config.dataset && !self.layers[0].config.isEmpty) {
+        // Non-empty dataset lacking a dataset reference -- needs to be fixed.
+        this.setDataConfigurationReferences();
+      }
+
       const needToSync = true; // TODO is there a way to quickly tell if anything relevant has changed?
       if (needToSync) {
         // Sync up layers
@@ -415,6 +420,34 @@ export const GraphModel = TileContentModel
 
       console.log("| Done, final layers: ", self.layers.map(l=>l.description));
     },
+    setDataConfigurationReferences() {
+      // Updates pre-existing DataConfiguration objects that don't have the now-required references
+      // for dataset and metadata. We can determine these from the unique shared models these
+      // legacy tile models should have.
+      const smm = getSharedModelManager(self);
+      if (smm && smm.isReady) {
+        const sharedDataSets = smm.getTileSharedModelsByType(self, SharedDataSet);
+        if (sharedDataSets.length === 1) {
+          const sds = sharedDataSets[0];
+          if (isSharedDataSet(sds)) {
+            self.layers[0].config.dataset = sds.dataSet;
+            console.log('Set dataset reference');
+          }
+        }
+        const sharedMetadata = smm.getTileSharedModelsByType(self, SharedCaseMetadata);
+        if (sharedMetadata.length === 1) {
+          const smd = sharedMetadata[0];
+          if (isSharedCaseMetadata(smd)) {
+            self.layers[0].config.metadata = smd;
+            console.log('Set metadata reference');
+          }
+        }
+      } else {
+        console.warn('Could not update missing dataset/metadata - SharedModelManager not ready');
+      }
+
+    },
+
     // afterAttachToDocument() {
     //   console.log("AATD running");
     //   addDisposer(self, reaction(
