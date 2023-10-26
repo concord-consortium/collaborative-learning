@@ -14,9 +14,10 @@ import fetch from 'node-fetch';
 
 // Load the service account key JSON file.
 import serviceAccount from "./serviceAccountKey.json" assert { type: "json" };
+import { writeTabularLabelsCSV } from "./ai/json-in-csv";
 
 // Make falsy to include all documents
-const documentLimit = false;
+const documentLimit = 5; //false;
 
 // _duration should be in miliseconds
 function prettyDuration(_duration: number) {
@@ -134,6 +135,8 @@ for (const key of Object.keys(classKeys)) {
       if (documentLimit && documentsProcessed >= documentLimit) break;
 
       const content = doc.content as string | undefined;
+
+
       if (!content) {
         // console.log(`    ${docId} - undefined content`);
         undefinedDocuments++;
@@ -142,6 +145,7 @@ for (const key of Object.keys(classKeys)) {
       let parsedContent;
       try {
         parsedContent = JSON.parse(content);
+        // console.log("OH we need this parsedContent: \n", parsedContent);
       } catch (e) {
         // console.log(`    ${docId} - error parsing content`);
         // console.log(`      ${e}`);
@@ -197,17 +201,20 @@ Object.values(documentInfo).forEach(info => {
 });
 fs.writeFileSync(`${targetDir}/${tagFileName}`, tagFileContent);
 
+const isSageMaker = true; // condition will be implemented in Teales' multi-platform version
+isSageMaker && writeTabularLabelsCSV(documentInfo, startTime);
+
 const endTime = Date.now();
-console.log(`***** End script *****`);
-console.log(`*** Final counts ***`);
-console.log(documentInfo);
-console.log(`- Time to access token: ${prettyDuration(accessTime - startTime)}`);
-console.log(`- Time to fetch documents: ${prettyDuration(fetchTime - startTime)}`);
-console.log(`- Time to get credential: ${prettyDuration(credentialTime - startTime)}`);
-console.log(`- Total Time: ${prettyDuration(endTime - startTime)}`);
-console.log(`Documents processed: ${documentsProcessed}`);
-console.log(`Undefined documents: ${undefinedDocuments}`);
-console.log(`Empty documents: ${emptyDocuments}`);
-console.log(`Failed to process: ${failedDocuments}`);
+// console.log(`***** End script *****`);
+// console.log(`*** Final counts ***`);
+// console.log(documentInfo);
+// console.log(`- Time to access token: ${prettyDuration(accessTime - startTime)}`);
+// console.log(`- Time to fetch documents: ${prettyDuration(fetchTime - startTime)}`);
+// console.log(`- Time to get credential: ${prettyDuration(credentialTime - startTime)}`);
+// console.log(`- Total Time: ${prettyDuration(endTime - startTime)}`);
+// console.log(`Documents processed: ${documentsProcessed}`);
+// console.log(`Undefined documents: ${undefinedDocuments}`);
+// console.log(`Empty documents: ${emptyDocuments}`);
+// console.log(`Failed to process: ${failedDocuments}`);
 
 process.exit(0);

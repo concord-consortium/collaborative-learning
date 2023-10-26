@@ -18,7 +18,7 @@ import { prettyDuration } from "./script-utils";
 import serviceAccount from "./serviceAccountKey.json" assert { type: "json" };
 
 // Make falsy to include all documents
-const documentLimit = false;
+const documentLimit = 5; //false;
 
 console.log(`*** Starting Tile Count ***`);
 
