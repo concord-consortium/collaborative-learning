@@ -1,5 +1,6 @@
 import stringify from "json-stringify-pretty-compact";
-import { getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
+import { reaction } from "mobx";
+import { addDisposer, getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
 import {createContext, useContext} from "react";
 import { IClueObject } from "../../../models/annotations/clue-object";
 import { getTileIdFromContent } from "../../../models/tiles/tile-model";
@@ -240,7 +241,7 @@ export const GraphModel = TileContentModel
     setAttributeID(role: GraphAttrRole, dataSetID: string, id: string) {
       for (const layer of self.layers) {
         if (layer.config.dataset?.id === dataSetID) {
-          layer.setAttributeID(role, id);
+          layer.setAttributeID(role, dataSetID, id);
           return;
         }
       }
@@ -484,7 +485,7 @@ export function createGraphModel(snap?: IGraphModelSnapshot, appConfig?: AppConf
 
 export interface SetAttributeIDAction extends ISerializedActionCall {
   name: "setAttributeID"
-  args: [GraphAttrRole, string, string]
+  args: [role: GraphAttrRole, dataSetId: string, attrId: string]
 }
 export function isSetAttributeIDAction(action: ISerializedActionCall): action is SetAttributeIDAction {
   return action.name === "setAttributeID";
@@ -492,7 +493,7 @@ export function isSetAttributeIDAction(action: ISerializedActionCall): action is
 
 export interface RemoveYAttributeAction extends ISerializedActionCall {
   name: "removeYAttributeID",
-  args: [string]
+  args: [attrId: string]
 }
 export function isRemoveYAttributeAction(action: ISerializedActionCall): action is RemoveYAttributeAction {
   return action.name === "removeYAttributeID";

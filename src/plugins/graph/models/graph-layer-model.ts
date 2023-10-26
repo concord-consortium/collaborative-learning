@@ -39,7 +39,8 @@ export const GraphLayerModel = types
       self.config.setDataset(dataset, metadata);
       self.isLinked = !!dataset && !!metadata;
     },
-    setAttributeID(role: GraphAttrRole, id: string) {
+    setAttributeID(role: GraphAttrRole, dataSetID: string, id: string) {
+      // dataSetID argument is used by onAction handlers
       if (role === 'yPlus') {
         self.config.addYAttribute({attributeID: id});
       } else {
@@ -48,7 +49,7 @@ export const GraphLayerModel = types
       this.updateAdornments(true);
     },
     autoAssignAttributeID(place: GraphPlace, role: GraphAttrRole, dataSetID: string, attrID: string) {
-      self.config.setAttribute(role, {attributeID: attrID});
+      this.setAttributeID(role, dataSetID, attrID);
       self.autoAssignedAttributes.push({ place, role, dataSetID, attrID });
     },
     clearAutoAssignedAttributes() {
@@ -62,23 +63,24 @@ export const GraphLayerModel = types
 
       if (getAppConfig(self)?.getSetting("autoAssignAttributes", "graph")) {
         const attributeCount = self.config.dataset?.attributes.length;
-        console.log('autoAssign is on. Atts: ', attributeCount);
+        console.log('autoAssign is on. Attrs: ', attributeCount);
         if (!attributeCount) return;
 
+        const data = self.config.dataset;
         const xAttrId = self.config.attributeID("x");
-        const isValidXAttr = xAttrId && !!self.config.dataset?.attrFromID(xAttrId);
+        const isValidXAttr = xAttrId && !!data?.attrFromID(xAttrId);
         const yAttrId = self.config.attributeID("y");
-        const isValidYAttr = yAttrId && !!self.config.dataset?.attrFromID(yAttrId);
+        const isValidYAttr = yAttrId && !!data?.attrFromID(yAttrId);
 
         if (!isValidXAttr && !isValidYAttr) {
-          this.autoAssignAttributeID("bottom", "x", self.config.id, self.config.dataset?.attributes[0].id || '');
+          this.autoAssignAttributeID("bottom", "x", data?.id ?? "", data?.attributes[0].id || '');
           if (attributeCount > 1) {
-            this.autoAssignAttributeID("left", "y", self.config.id, self.config.dataset?.attributes[1].id || '');
+            this.autoAssignAttributeID("left", "y", data?.id ?? "", data?.attributes[1].id || '');
           }
         }
         console.log('autoAssigned: ', self.autoAssignedAttributes);
       } else {
-        console.log('autoassign is off');
+        console.log('autoAssign is off');
       }
     },
     configureUnlinkedLayer() {

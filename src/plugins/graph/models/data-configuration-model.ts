@@ -2,8 +2,8 @@ import {scaleQuantile, ScaleQuantile, schemeBlues} from "d3";
 import { getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
 import {AttributeType, attributeTypes} from "../../../models/data/attribute";
 import {ICase} from "../../../models/data/data-set-types";
-import {IDataSet} from "../../../models/data/data-set";
-import {getCategorySet, ISharedCaseMetadata} from "../../../models/shared/shared-case-metadata";
+import {DataSet, IDataSet} from "../../../models/data/data-set";
+import {getCategorySet, ISharedCaseMetadata, SharedCaseMetadata} from "../../../models/shared/shared-case-metadata";
 import {isSetCaseValuesAction} from "../../../models/data/data-set-actions";
 import {FilteredCases, IFilteredChangedCases} from "../../../models/data/filtered-cases";
 import {typedId, uniqueId} from "../../../utilities/js-utils";
@@ -45,6 +45,8 @@ export interface IAttributeDescriptionSnapshot extends SnapshotIn<typeof Attribu
 export const DataConfigurationModel = types
   .model('DataConfigurationModel', {
     id: types.optional(types.identifier, () => typedId("DCON")),
+    dataset: types.safeReference(DataSet),
+    metadata: types.safeReference(SharedCaseMetadata),
     // determines stacking direction in categorical-categorical, for instance
     primaryRole: types.maybe(types.enumeration([...PrimaryAttrRoles])),
     // keys are GraphAttrRoles, excluding y role
@@ -53,10 +55,8 @@ export const DataConfigurationModel = types
     _yAttributeDescriptions: types.array(AttributeDescription),
   })
   .volatile(() => ({
-    dataset: undefined as IDataSet | undefined,
-    metadata: undefined as ISharedCaseMetadata | undefined,
     actionHandlerDisposer: undefined as (() => void) | undefined,
-    filteredCases: undefined as FilteredCases[] | undefined,
+    filteredCases: [] as FilteredCases[],
     handlers: new Map<string, (actionCall: ISerializedActionCall) => void>(),
     pointsNeedUpdating: false
   }))
@@ -180,7 +180,7 @@ export const DataConfigurationModel = types
     get graphCaseIDs() {
       const allGraphCaseIds = new Set<string>();
       // todo: We're bypassing get caseDataArray to avoid infinite recursion. Is it necessary?
-      self.filteredCases?.forEach(aFilteredCases => {
+      self.filteredCases.forEach(aFilteredCases => {
         if (aFilteredCases) {
           aFilteredCases.caseIds.forEach(id => allGraphCaseIds.add(id));
         }
@@ -189,7 +189,7 @@ export const DataConfigurationModel = types
     },
     subPlotCases(subPlotKey: Record<string, string>) {
       const casesInPlot = [] as ICase[];
-      self.filteredCases?.forEach(aFilteredCases => {
+      self.filteredCases.forEach(aFilteredCases => {
         aFilteredCases.caseIds.forEach((id) => {
           const caseData = self.dataset?.getCanonicalCase(id);
           if (caseData) {
@@ -276,7 +276,7 @@ export const DataConfigurationModel = types
       return this.attributes.length <= 1;
     },
     get numberOfPlots() {
-      return self.filteredCases?.length ?? 0;  // filteredCases is an array of CaseArrays
+      return self.filteredCases.length ?? 0;  // filteredCases is an array of CaseArrays
     },
     get hasY2Attribute() {
       return !!self.attributeID('rightNumeric');
@@ -383,7 +383,7 @@ export const DataConfigurationModel = types
     },
     get joinedCaseDataArrays() {
       const joinedCaseData: CaseData[] = [];
-      self.filteredCases?.forEach((aFilteredCases, index) => {
+      self.filteredCases.forEach((aFilteredCases, index) => {
           aFilteredCases.caseIds.forEach(
             (id) => joinedCaseData.push({plotNum: index, caseID: id}));
         }
@@ -657,7 +657,7 @@ export const DataConfigurationModel = types
       } else {
         self._setAttributeDescription(role, desc);
       }
-      self.filteredCases?.forEach((aFilteredCases) => {
+      self.filteredCases.forEach((aFilteredCases) => {
         aFilteredCases.invalidateCases();
       });
       if (role === 'legend') {
@@ -681,7 +681,7 @@ export const DataConfigurationModel = types
         if (index === 0 && self._yAttributeDescriptions.length === 1) {
           self._yAttributeDescriptions[index].type = undefined;
         }
-        self.filteredCases?.[index].invalidateCases();
+        self.filteredCases[index].invalidateCases();
       }
     },
     setY2Attribute(desc?: IAttributeDescriptionSnapshot) {
@@ -691,10 +691,10 @@ export const DataConfigurationModel = types
       if (isNewAttribute) {
         this._addNewFilteredCases();
       } else if (isEmpty) {
-        self.filteredCases?.pop(); // remove the last one because it is the array
+        self.filteredCases.pop(); // remove the last one because it is the array
         self.setPointsNeedUpdating(true);
       } else {
-        const existingFilteredCases = self.filteredCases?.[self.numberOfPlots - 1];
+        const existingFilteredCases = self.filteredCases[self.numberOfPlots - 1];
         existingFilteredCases?.invalidateCases();
       }
     },
@@ -702,7 +702,7 @@ export const DataConfigurationModel = types
       const index = self._yAttributeDescriptions.findIndex((aDesc) => aDesc.attributeID === id);
       if (index >= 0) {
         self._yAttributeDescriptions.splice(index, 1);
-        self.filteredCases?.splice(index, 1);
+        self.filteredCases.splice(index, 1);
         self.setPointsNeedUpdating(true);
       }
     },
@@ -712,7 +712,7 @@ export const DataConfigurationModel = types
       } else {
         self._attributeDescriptions.get(role)?.setType(type);
       }
-      self.filteredCases?.forEach((aFilteredCases) => {
+      self.filteredCases.forEach((aFilteredCases) => {
         aFilteredCases.invalidateCases();
       });
     },
