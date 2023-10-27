@@ -102,11 +102,10 @@ export const AxisOrLegendAttributeMenu = ({ place, attributeId, target, parent, 
                       </MenuItem>
                     }
                     { data?.attributes?.map((attr, idx) => {
-                      //only show y attr that is not self, not the x axis, and not an already plotted Y
-                      const isCurrent = attr.id === attributeId;
-                      const isXAxis = (idx === 0);
-                      const isAPlottedYAttribute = yAttributesPlotted?.includes(attr.id);
-                      const showAttr = (!isCurrent && !isXAxis && !isAPlottedYAttribute);
+                      const isCurrent = attr.id === attrId;
+                      const isPlottedX = dataConfig?.attributeID("x") === attr.id;
+                      const isPlottedY = yAttributesPlotted?.includes(attr.id);
+                      const showAttr = (!isCurrent && !isPlottedX && !isPlottedY);
 
                       return showAttr && (
                         <MenuItem onClick={() => onChangeAttribute(place, data, attr.id, attrId)} key={attr.id}>
