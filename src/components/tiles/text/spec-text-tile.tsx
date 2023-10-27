@@ -1,11 +1,12 @@
 import React from "react";
-import {render, screen} from "@testing-library/react";
+import { Provider } from "mobx-react";
+import { ModalProvider } from "@concord-consortium/react-modal-hook";
+import { render, screen } from "@testing-library/react";
 
 import { defaultTextContent } from "../../../models/tiles/text/text-content";
 import { ITileModel, TileModel } from "../../../models/tiles/tile-model";
 import { specStores } from "../../../models/stores/spec-stores";
-import { ModalProvider } from "@concord-consortium/react-modal-hook";
-import { Provider } from "mobx-react";
+import { specAppConfig } from "../../../models/stores/spec-app-config";
 import TextToolComponent from "./text-tile";
 import { ITileProps } from "../tile-component";
 import { TileModelContext } from "../tile-api";
@@ -17,8 +18,26 @@ export interface ISpecTextTileOptions {
 export function specTextTile(options: ISpecTextTileOptions) {
   const model = options.tileModel || TileModel.create({content: defaultTextContent()});
 
-  const stores = specStores();
-
+  const stores = specStores({
+    appConfig: specAppConfig({
+      config: {
+        settings: {
+          "text": {
+            "tools": [
+              "bold",
+              "italic",
+              "underline",
+              "subscript",
+              "superscript",
+              "list-ol",
+              "list-ul",
+              "link"
+            ]
+          }
+        }
+      }
+      })
+    });
   render(<div className="document-content" data-testid="document-content"/>);
   const documentContent = screen.getByTestId("document-content");
 

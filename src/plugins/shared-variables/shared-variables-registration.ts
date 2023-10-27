@@ -26,17 +26,14 @@ registerTextPluginInfo({
 registerTileToolbarButtons('text', [
   {
     name: kNewVariableButtonName,
-    title: "New Variable",
     component: NewVariableTextButton
   },
   {
     name: kInsertVariableButtonName,
-    title: "Insert Variable",
     component: InsertVariableTextButton
   },
   {
     name: kEditVariableButtonName,
-    title: "Edit Variable",
     component: EditVariableTextButton
   },
 ]);
