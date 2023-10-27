@@ -9,12 +9,6 @@ class XYPlotToolTile {
   getXYPlotTitle(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .canvas-area .editable-tile-title`);
   }
-  // TODO update once PR #2016 is merged, this will be replace by:
-  // clueCanvas.clickToolbarButton('graph', 'link-tile');
-
-  getLinkTileButton(workspaceClass) {
-    return cy.get(`.tile-toolbar.tile-toolbar-graph div[data-original-title='Link data'] button`);
-  }
   getAddSeriesButton(workspaceClass){
     return cy.get(`${wsClass(workspaceClass)} .canvas-area .add-series-button`);
   }

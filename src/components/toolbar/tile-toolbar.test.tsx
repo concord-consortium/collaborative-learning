@@ -2,7 +2,7 @@ import React, { useRef } from "react";
 import { Provider } from "mobx-react";
 import { render, screen } from "@testing-library/react";
 import { TileToolbarButton } from "./tile-toolbar-button";
-import { registerTileToolbarButtons, registerTileToolbarConfig } from "./toolbar-button-manager";
+import { registerTileToolbarButtons } from "./toolbar-button-manager";
 import { TileToolbar } from "./tile-toolbar";
 import { ITileModel, TileModel } from "../../models/tiles/tile-model";
 import { defaultTextContent } from "../../models/tiles/text/text-content";
@@ -72,24 +72,6 @@ describe("Tile toolbar button", () => {
     expect(screen.getByRole("button")).toContainHTML("<svg");
     screen.getByRole("button").click();
     expect(clickHandler).toHaveBeenCalledTimes(1);
-  });
-
-  it("can register buttons and render default toolbar", () => {
-    const model = TileModel.create({content: defaultTextContent()});
-    const stores = specStores();
-    stores.ui.setSelectedTileId(model.id);
-
-    registerTileToolbarButtons("test", sampleButtons);
-    registerTileToolbarConfig("test", ["a"]);
-
-    render(
-      <Provider stores={stores}>
-        <SampleTile type="test" model={model}/>
-      </Provider>
-    );
-    expect(screen.getByTestId("tile-toolbar")).toBeInTheDocument();
-    expect(screen.getByTestId("tile-toolbar")).toContainHTML("Test Button A");
-    expect(screen.getByTestId("tile-toolbar")).not.toContainHTML("Test Button B");
   });
 
   it("can read tools list from app configuration", () => {

@@ -265,7 +265,7 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationButtons().should("have.length", 9);
     aa.clickArrowToolbarButton();
     xyTile.getTile().click();
-    xyTile.getLinkTileButton().click();
+    clueCanvas.clickToolbarButton('graph', 'link-tile');
     xyTile.linkTable("Table 1");
     aa.clickArrowToolbarButton();
     aa.getAnnotationButtons().should("have.length", 12);
