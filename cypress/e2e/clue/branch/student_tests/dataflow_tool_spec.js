@@ -66,10 +66,14 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getNodeOutput().should("exist");
 
     cy.log("verify zoom in & out");
-    dataflowToolTile.getZoomInButton().click();
-    dataflowToolTile.getFlowtool().children().should("have.attr", "style").and("contain", "scale(1.05)");
-    dataflowToolTile.getZoomOutButton().click();
-    dataflowToolTile.getFlowtool().children().should("have.attr", "style").and("contain", "scale(1)");
+    dataflowToolTile.getFlowtool().children().invoke("attr", "style").then(scale => {
+      dataflowToolTile.getZoomInButton().click();
+      dataflowToolTile.verifyZoomIn(scale);
+    });
+    dataflowToolTile.getFlowtool().children().invoke("attr", "style").then(scale => {
+      dataflowToolTile.getZoomOutButton().click();
+      dataflowToolTile.verifyZoomOut(scale);
+    });
 
     cy.log("can delete number node");
     dataflowToolTile.getDeleteNodeButton(numberNode).click();

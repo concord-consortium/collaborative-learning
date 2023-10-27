@@ -64,6 +64,27 @@ class DataflowToolTile {
   getZoomOutButton() {
     return cy.get(`.primary-workspace [title='Zoom Out']`);
   }
+  verifyZoomIn(previousStyle) {
+    this.getFlowtool().children().invoke("attr", "style").then(style => {
+      let currentScale = this.getScaleFromStyle(style);
+      let previousScale = this.getScaleFromStyle(previousStyle);
+      expect(currentScale).to.be.greaterThan(previousScale);
+    });
+  }
+  verifyZoomOut(previousStyle) {
+    this.getFlowtool().children().invoke("attr", "style").then(style => {
+      let currentScale = this.getScaleFromStyle(style);
+      let previousScale = this.getScaleFromStyle(previousStyle);
+      expect(currentScale).to.be.lessThan(previousScale);
+    });
+  }
+  getScaleFromStyle(style) {
+    let startIndex = style.indexOf("scale")+6;
+    cy.log("startIndex:", startIndex);
+    let endIndex = style.indexOf(")", startIndex);
+    cy.log("endIndex:", endIndex);
+    return Number(style.substring(startIndex, endIndex));
+  }
   getNumberNodeOutput() {
     return cy.get(".flow-tool .node.number .node-output");
   }
