@@ -17,7 +17,7 @@ export interface IImageDimensions {
 export interface ISimpleImage {
   imageKey?: string;
   imageUrl: string;
-  imageData?: string;
+  imageData: string;
 }
 
 const ccImageId = "ccimg://";
@@ -34,7 +34,8 @@ export function isPlaceholderImage(url?: string) {
 
 function kUploadImage(db: DB, image: ImageModelType): Promise<ISimpleImage> {
   const img: ISimpleImage = {
-    imageUrl: placeholderImage
+    imageUrl: placeholderImage,
+    imageData: placeholderImage
   };
 
   return new Promise((resolve, reject) =>

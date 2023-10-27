@@ -34,7 +34,7 @@ describe("Canvas Component", () => {
     const stores = specStores();
     render(
       <Provider stores={stores}>
-        <CanvasComponent context="test" />
+        <CanvasComponent context="test" readOnly={false} />
       </Provider>
     );
     expect(screen.queryByTestId("document-content")).toBeNull();

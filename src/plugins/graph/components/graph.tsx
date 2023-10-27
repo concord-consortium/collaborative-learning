@@ -39,10 +39,10 @@ import "./graph.scss";
 import "./graph-clue-styles.scss";
 
 interface IProps {
-  graphController: GraphController
-  graphRef: MutableRefObject<HTMLDivElement | null>
-  dotsRef: IDotsRef
-  onRequestRowHeight?: (id: string, size: number) => void
+  graphController: GraphController;
+  graphRef: MutableRefObject<HTMLDivElement | null>;
+  dotsRef: IDotsRef;
+  onRequestRowHeight?: (id: string, size: number) => void;
 }
 
 export const Graph = observer(

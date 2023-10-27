@@ -119,11 +119,11 @@ class ClueCanvas {
     }
 
     shareCanvas() {
-        this.getShareButton().click();
+        this.getShareButton().click({force:true});
     }
 
     unshareCanvas() {
-        this.getShareButton().click();
+        this.getShareButton().click({force:true});
     }
 
     getToolPalette() {

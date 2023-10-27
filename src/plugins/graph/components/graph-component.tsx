@@ -61,9 +61,9 @@ export const GraphComponent = observer(
           <AxisLayoutContext.Provider value={layout}>
             <GraphModelContext.Provider value={graphModel}>
               <Graph graphController={graphController}
-                      graphRef={graphRef}
-                      dotsRef={dotsRef}
-                      onRequestRowHeight={onRequestRowHeight}
+                graphRef={graphRef}
+                dotsRef={dotsRef}
+                onRequestRowHeight={onRequestRowHeight}
               />
               <AttributeDragOverlay activeDragId={overlayDragId} />
             </GraphModelContext.Provider>

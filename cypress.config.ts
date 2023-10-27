@@ -25,6 +25,7 @@ export default defineConfig({
     // You may want to clean this up later by importing these.
 
     numTestsKeptInMemory: 20,
+    experimentalRunAllSpecs: true,
     setupNodeEvents(on, config) {
       const fetchConfigurationByFile = file => {
         const pathOfConfigurationFile = `config/cypress.${file}.json`;
