@@ -2,18 +2,27 @@ import React, { useContext } from "react";
 import { observer } from "mobx-react";
 import classNames from "classnames";
 import { FloatingPortal } from "@floating-ui/react";
-import { Tooltip } from "react-tippy";
 import { useSettingFromStores, useUIStore } from "../../hooks/use-stores";
 import { useTileToolbarPositioning } from "./use-tile-toolbar-positioning";
 import { getToolbarButtonInfo, getDefaultTileToolbarConfig } from "./toolbar-button-manager";
-import { useTooltipOptions } from "../../hooks/use-tooltip-options";
 import { TileModelContext } from "../tiles/tile-api";
+import { JSONValue } from "../../models/stores/settings";
 
 interface ToolbarWrapperProps {
   tileType: string,
   readOnly: boolean,
   tileElement: HTMLElement | null,
 }
+
+type IButtonDescription = string | [string, string];
+export function isValidButtonDescription(obj: JSONValue): obj is IButtonDescription {
+  if (!obj) return false;
+  if (typeof obj === 'string') return true;
+  return (obj.constructor === Array
+    && obj.length === 2
+    && typeof obj[0] === 'string'
+    && typeof obj[1] === 'string');
+ }
 
 export const TileToolbar = observer(
   function TileToolbar({ tileType, readOnly, tileElement }: ToolbarWrapperProps) {
@@ -29,12 +38,21 @@ export const TileToolbar = observer(
 
     // Get styles to position the toolbar
     const { toolbarRefs, toolbarStyles, toolbarPlacement } = useTileToolbarPositioning(tileElement);
-    const tipOptions = useTooltipOptions();
 
-    // Determine the buttons to be shown. Avoid recalculating defaults over and over.
+    // Determine the buttons to be shown.
     const ui = useUIStore();
-    const configuredButtonNames = useSettingFromStores("tools", tileType) as unknown as string[] | undefined;
-    const buttonNames = configuredButtonNames ?? getDefaultTileToolbarConfig(tileType);
+    let buttonDescriptions;
+    const customizedButtons = useSettingFromStores("tools", tileType);
+    if (customizedButtons) {
+      if (Array.isArray(customizedButtons)) {
+        buttonDescriptions = customizedButtons;
+      } else {
+        console.warn('Invalid configuration for toolbar (should be an array): ', customizedButtons);
+        return (null);
+      }
+    } else {
+      buttonDescriptions = getDefaultTileToolbarConfig(tileType);
+    }
 
     // Determine if toolbar should be rendered or not.
     const enabled = !readOnly && id && ui.selectedTileIds.length === 1 && ui.selectedTileIds.includes(id);
@@ -43,17 +61,24 @@ export const TileToolbar = observer(
     // when you click in the tile, that would be super responsive.
     if (!enabled) return(null);
 
-    const buttons = buttonNames.map((name) => {
-      const info = getToolbarButtonInfo(tileType, name);
-      if (info) {
-        const Button = info?.component;
-        const tooltip = info.title + (info.keyHint ? ` (${info.keyHint})` : '');
-        return (
-          <Tooltip key={name} title={tooltip} {...tipOptions} >
-            <Button />
-          </Tooltip>);
+    const buttons = buttonDescriptions.map((desc, i) => {
+      if (isValidButtonDescription(desc)) {
+        const buttonHasArg = !(typeof desc === 'string');
+        const name = buttonHasArg ? desc[0] : desc;
+        const info = getToolbarButtonInfo(tileType, name);
+        if (info) {
+          const Button = info?.component;
+          if (buttonHasArg) {
+            return (<Button key={`${i}-${name}`} name={name} args={desc}/>);
+          } else {
+            return (<Button key={`${i}-${name}`} name={name}/>);
+          }
+        } else {
+          console.warn('Did not find info for button name: ', name);
+          return null;
+        }
       } else {
-        console.warn('Did not find info for button name: ', name);
+        console.warn('Invalid configuration for toolbar button: ', desc);
         return null;
       }
     });
@@ -65,7 +90,7 @@ export const TileToolbar = observer(
           data-testid="tile-toolbar"
           style={toolbarStyles}
           className={classNames("tile-toolbar",
-            `tile-toolbar-${tileType}`,
+            `${tileType}-toolbar`,
             toolbarPlacement,
             { "disabled": !enabled })}
         >
