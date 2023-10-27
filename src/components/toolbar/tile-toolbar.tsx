@@ -69,9 +69,9 @@ export const TileToolbar = observer(
         if (info) {
           const Button = info?.component;
           if (buttonHasArg) {
-            return (<Button key={i} name={name} args={desc}/>);
+            return (<Button key={`${i}-${name}`} name={name} args={desc}/>);
           } else {
-            return (<Button key={i} name={name}/>);
+            return (<Button key={`${i}-${name}`} name={name}/>);
           }
         } else {
           console.warn('Did not find info for button name: ', name);
