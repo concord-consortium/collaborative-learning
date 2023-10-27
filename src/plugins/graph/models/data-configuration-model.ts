@@ -609,10 +609,15 @@ export const DataConfigurationModel = types
       self.dataset = dataset;
       self.metadata = metadata;
       self.filteredCases = [];
-      if (dataset) {
+      this.checkFilteredCasesArray();
+      self.invalidateQuantileScale();
+    },
+    checkFilteredCasesArray() {
+      console.log('Checking filtered cases');
+      if (self.dataset) {
         self.actionHandlerDisposer = onAnyAction(self.dataset, self.handleAction);
         self.filteredCases[0] = new FilteredCases({
-          source: dataset, filter: self.filterCase,
+          source: self.dataset, filter: self.filterCase,
           onSetCaseValues: self.handleSetCaseValues
         });
         // make sure there are enough filteredCases to hold all the y attributes
@@ -624,7 +629,6 @@ export const DataConfigurationModel = types
           this._addNewFilteredCases();
         }
       }
-      self.invalidateQuantileScale();
     },
     setPrimaryRole(role: GraphAttrRole) {
       if (role === 'x' || role === 'y') {

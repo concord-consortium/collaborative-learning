@@ -448,8 +448,12 @@ export const GraphModel = TileContentModel
 
     },
 
-    // afterAttachToDocument() {
-    //   console.log("AATD running");
+    afterAttachToDocument() {
+      console.log("AATD running");
+      for (const layer of self.layers) {
+        layer.config.checkFilteredCasesArray();
+      }
+    }
     //   addDisposer(self, reaction(
     //     () => self.data,
     //     data => {
