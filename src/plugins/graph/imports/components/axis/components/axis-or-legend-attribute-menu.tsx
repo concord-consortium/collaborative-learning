@@ -101,7 +101,7 @@ export const AxisOrLegendAttributeMenu = ({ place, attributeId, target, parent, 
                         Link Data
                       </MenuItem>
                     }
-                    { data?.attributes?.map((attr, idx) => {
+                    { data?.attributes?.map((attr) => {
                       const isCurrent = attr.id === attrId;
                       const isPlottedX = dataConfig?.attributeID("x") === attr.id;
                       const isPlottedY = yAttributesPlotted?.includes(attr.id);
