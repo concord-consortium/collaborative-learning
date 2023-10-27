@@ -472,7 +472,6 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
   setPoints();
 }
 
-
 /**
  Use the bounds of the given axes to compute slope and intercept.
 */
