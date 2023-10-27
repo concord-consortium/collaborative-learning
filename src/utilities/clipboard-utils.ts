@@ -1,7 +1,7 @@
-import { gImageMap, ImageMapEntryType } from "../models/image-map";
+import { gImageMap, ImageMapEntry } from "../models/image-map";
 
 interface IOnCompleteParams {
-  image: ImageMapEntryType;
+  image: ImageMapEntry;
 }
 interface IClipboardContents {
   image: File | null;
