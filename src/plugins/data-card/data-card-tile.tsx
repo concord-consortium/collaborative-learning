@@ -270,7 +270,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
           { displaySingle &&
             <>
               <div
-                className={classNames("panel nav", { "highlight-panel": content.caseSelected })}
+                className={classNames("panel nav", { "highlighted": content.caseSelected })}
                 onClick={() => content.dataSet.setSelectedCases(content.caseId ? [content.caseId] : [])}
               >
                 <div className="card-number-of-listing">

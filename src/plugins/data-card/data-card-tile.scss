@@ -88,7 +88,7 @@ $default-button-border-color: #979797;
       display: flex;
       justify-content: space-between;
 
-      &.highlight-panel {
+      &.highlighted {
         background-color: $highlight-green;
       }
 

@@ -25,6 +25,9 @@ class XYPlotToolTile {
   getGraphDot(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .canvas-area .graph-dot`);
   }
+  getHighlightedDot(workspaceClass) {
+    return cy.get(`${wsClass(workspaceClass)} .canvas-area .graph-dot-highlighted`);
+  }
   getXAxisLabel(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .display-label.bottom`);
   }
