@@ -31,13 +31,12 @@ class XYPlotToolTile {
   getXAxisLabel(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .display-label.bottom`);
   }
-  selectYAttribute(attribute, workspaceClass) {
-    const yMenuButtons = `${wsClass(workspaceClass)} .axis-legend-attribute-menu.left button`;
-    cy.get(yMenuButtons).first().click();
-    cy.get(yMenuButtons).contains(attribute).click();
-  }
   getYAttributesLabel(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .canvas-area .multi-legend .simple-attribute-label`);
+  }
+  selectYAttribute(attribute, workspaceClass) {
+    this.getYAttributesLabel(workspaceClass).first().click({ force: true });
+    cy.get(`.chakra-portal button`).contains(attribute).click({ force: true });
   }
 }
 export default XYPlotToolTile;
