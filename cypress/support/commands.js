@@ -213,9 +213,7 @@ Cypress.Commands.add('collapseWorkspace', () => {
 });
 Cypress.Commands.add('linkTableToGraph', (table, graph) => {
   cy.get('.primary-workspace .table-title').contains(table).click();
-  cy.get(".primary-workspace").within((workspace) => {
-    cy.get(".table-toolbar .toolbar-button.link-tile-button").click();
-  });
+  cy.get(".table-toolbar .toolbar-button.link-tile").click();
   cy.get('.ReactModalPortal').within(() => {
     cy.get('[data-test=link-tile-select]').select(graph);
     cy.get('button').contains('Link').click();
@@ -223,9 +221,7 @@ Cypress.Commands.add('linkTableToGraph', (table, graph) => {
 });
 Cypress.Commands.add('unlinkTableToGraph', (table, graph) => {
   cy.get('.primary-workspace .table-title').contains(table).click();
-  cy.get(".primary-workspace").within((workspace) => {
-    cy.get(".table-toolbar .toolbar-button.link-tile-button").click();
-  });
+  cy.get(".table-toolbar .toolbar-button.link-tile").click();
   cy.get('.ReactModalPortal').within(() => {
     cy.get('[data-test=link-tile-select]').select(graph);
     cy.get('button').contains('Unlink').click();

@@ -144,7 +144,7 @@ class ClueCanvas {
     addTile(tile) { //tile=[text,table,geometry,image,drawing,delete]
         cy.get('.primary-workspace .tool.' + tile).click({ force: true });
     }
-    
+
     getDuplicateTool() {
         return cy.get('.primary-workspace .tool.duplicate');
     }
@@ -276,7 +276,7 @@ class ClueCanvas {
                 break;
             case 'xyplot':
                 tileElement = xyPlotToolTile.getTile().last().click({ force: true });
-                break;    
+                break;
         }
         tileElement.should('have.class','selected');
     }
@@ -358,6 +358,51 @@ class ClueCanvas {
         dialog.getDialogOKButton().click();
         dialog.getDialogTitle().should('not.exist');
     }
+
+    // Tile toolbars are in portals at the document 'body' level.
+    // These methods allow working with toolbar buttons even when invoked from,
+    // say, a `within` clause scoped to a tile.
+    /**
+     * Locate the requested toolbar button and make sure it is enabled.
+     * This escapes from any "within" restriction since toolbars are at the HTML document level.
+     * @param {*} tileType string name of the tile
+     * @param {*} buttonName string name of the button
+     */
+    toolbarButtonIsEnabled(tileType, buttonName) {
+      cy.document().within(() => {
+        cy.get(`.tile-toolbar.${tileType}-toolbar .toolbar-button.${buttonName}`)
+          .should('not.be.disabled');
+      });
+    }
+
+    /**
+     * Locate the requested toolbar button and make sure it is disabled.
+     * This escapes from any "within" restriction since toolbars are at the HTML document level.
+     * @param {*} tileType string name of the tile
+     * @param {*} buttonName string name of the button
+     */
+    toolbarButtonIsDisabled(tileType, buttonName) {
+      cy.document().within(() => {
+        cy.get(`.tile-toolbar.${tileType}-toolbar .toolbar-button.${buttonName}`)
+          .should('be.disabled');
+      });
+    }
+
+    /**
+     * Locate the requested toolbar button and, make sure it is enabled, and click it.
+     * This escapes from any "within" restriction since toolbars are at the HTML document level.
+     * @param {*} tileType string name of the tile
+     * @param {*} buttonName string name of the button
+     */
+    clickToolbarButton(tileType, buttonName) {
+      cy.document().within(() => {
+        cy.get(`.tile-toolbar.${tileType}-toolbar .toolbar-button.${buttonName}`)
+          .should('have.length', 1)
+          .should('not.be.disabled')
+          .click();
+      });
+    }
+
 }
 
 export default ClueCanvas;

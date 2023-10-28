@@ -52,7 +52,7 @@ context('Graph Table Integration', function () {
 
     cy.log('verify correct graph names appear in selection list');
     tableToolTile.getTableTile().click();
-    cy.get('.primary-workspace .link-tile-button').click();
+    clueCanvas.clickToolbarButton('table', 'link-tile');
     cy.wait(2000);
     // cy.get('[data-test=link-tile-select]').select('Second One');
     cy.get('[data-test=link-tile-select]').select('Graph 1');
@@ -97,7 +97,7 @@ context('Graph Table Integration', function () {
     beforeTest();
     clueCanvas.addTile('table');
     clueCanvas.addTile('geometry');
-    cy.log('will create a polygon')
+    cy.log('will create a polygon');
     graphToolTile.getGraphPoint().last().click({ force: true }).dblclick({ force: true });
     graphToolTile.getGraphPolygon().should('exist');
 
@@ -181,7 +181,7 @@ context('Graph Table Integration', function () {
 
   it("Dragging to copy linked tiles", () => {
     beforeTest();
-    
+
     const dataTransfer = new DataTransfer;
     cy.log("drag a linked table and geometry tile");
     // Set up and link table and geometry tile

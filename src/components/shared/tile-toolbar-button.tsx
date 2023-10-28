@@ -17,6 +17,10 @@ interface IProps {
   title: string;
   isDisabled?: boolean;
 }
+
+/**
+ * Deprecated; Tiles should move to the shared toolbar components in src/components/toolbar
+ */
 export const TileToolbarButton = ({ className, children, onClick, title, isDisabled }: IProps) => {
   const to = useTooltipOptions({title});
   const classes = classNames("toolbar-button", { disabled: isDisabled }, className);

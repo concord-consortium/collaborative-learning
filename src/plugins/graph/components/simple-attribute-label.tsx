@@ -1,5 +1,4 @@
 import React, { useContext, useState} from "react";
-import {createPortal} from "react-dom";
 import {observer} from "mobx-react-lite";
 import {GraphPlace } from "../imports/components/axis-graph-shared";
 import {AttributeType} from "../../../models/data/attribute";
@@ -28,6 +27,7 @@ export const SimpleAttributeLabel = observer(
     const { place, index, attrId, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute } = props;
     // Must be State, not Ref, so that the menu gets re-rendered when this becomes non-null
     const [simpleLabelElement, setSimpleLabelElement] = useState<HTMLDivElement|null>(null);
+    const documentElt = simpleLabelElement?.closest('.document-content') as HTMLDivElement ?? null;
     const graphElement = simpleLabelElement?.closest(kGraphClassSelector) as HTMLDivElement ?? null;
     const dataConfiguration = useDataConfigurationContext();
     const dataset = dataConfiguration?.dataset;
@@ -58,16 +58,17 @@ export const SimpleAttributeLabel = observer(
         </div>
         {!readOnly && simpleLabelElement && graphElement && onChangeAttribute
             && onTreatAttributeAs && onRemoveAttribute && attrId &&
-          createPortal(<AxisOrLegendAttributeMenu
+          <AxisOrLegendAttributeMenu
             target={simpleLabelElement}
-            portal={graphElement}
+            parent={graphElement}
+            portal={documentElt}
             place={place}
             attributeId={attrId}
             onChangeAttribute={onChangeAttribute}
             onRemoveAttribute={onRemoveAttribute}
             onTreatAttributeAs={onTreatAttributeAs}
             onOpenClose={handleOpenClose}
-          />, graphElement)
+          />
         }
       </>
     );
