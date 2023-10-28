@@ -123,6 +123,7 @@ export const CaseDots = function CaseDots(props: {
         initCases(action.args[0]);
       }
     });
+
     return () => disposer?.();
   }, [dataset]);
 

@@ -106,9 +106,8 @@ export const GraphModel = TileContentModel
     },
     getPointRadius(use: 'normal' | 'hover-drag' | 'select' = 'normal') {
       let r = pointRadiusMax;
-      // for loop is fast equivalent to radius = max( minSize, maxSize - floor( log( logBase, max( dataLength, 1 )))
       const numPoints = self.config.caseDataArray.length;
-
+      // for loop is fast equivalent to radius = max( minSize, maxSize - floor( log( logBase, max( dataLength, 1 )))
       for (let i = pointRadiusLogBase; i <= numPoints; i = i * pointRadiusLogBase) {
         --r;
         if (r <= pointRadiusMin) break;
@@ -257,6 +256,9 @@ export const GraphModel = TileContentModel
     },
     setPlotBackgroundColor(color: string) {
       self.plotBackgroundColor = color;
+    },
+    setPointSizeMultiplier(multiplier: number) {
+      self.pointSizeMultiplier = multiplier;
     },
     setIsTransparent(transparent: boolean) {
       self.isTransparent = transparent;

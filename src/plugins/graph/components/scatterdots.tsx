@@ -42,6 +42,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
   pointRadiusRef.current = graphModel.getPointRadius();
   selectedPointRadiusRef.current = graphModel.getPointRadius('select');
   dragPointRadiusRef.current = graphModel.getPointRadius('hover-drag');
+
   yScaleRef.current = layout.getAxisScale("left") as ScaleNumericBaseType;
 
   const onDragStart = useCallback((event: MouseEvent) => {
@@ -108,6 +109,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
     }, [layout, dataConfiguration, dataset, dragID]),
 
     onDragEnd = useCallback(() => {
+
       if (dragID !== '') {
         target.current
           .classed('dragging', false)

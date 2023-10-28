@@ -6,12 +6,13 @@ import { IClueObjectSnapshot } from "../../../models/annotations/clue-object";
 import { PartialSharedModelEntry } from "../../../models/document/document-content-types";
 import { UpdatedSharedDataSetIds } from "../../../models/shared/shared-data-set";
 import {CaseData, DotsElt, selectCircles, selectDots} from "../d3-types";
-import {IDotsRef, kGraphFont, Point, Rect, rTreeRect, selectedRadiusFactor, transitionDuration} from "../graph-types";
+import {IDotsRef, kGraphFont, Point, Rect, rTreeRect, transitionDuration} from "../graph-types";
 import {between} from "./math-utils";
 import {IAxisModel, isNumericAxisModel} from "../imports/components/axis/models/axis-model";
 import {ScaleNumericBaseType} from "../imports/components/axis/axis-types";
 import {IDataSet} from "../../../models/data/data-set";
-import { defaultBackgroundColor, defaultSelectedColor, defaultSelectedStroke, defaultSelectedStrokeWidth, defaultStrokeWidth, selectedOuterCircleColor, selectedStrokeWidth } from "../../../utilities/color-utils";
+import { defaultSelectedColor, defaultSelectedStroke, defaultSelectedStrokeOpacity, defaultSelectedStrokeWidth,
+  defaultStrokeOpacity, defaultStrokeWidth } from "../../../utilities/color-utils";
 import {IDataConfigurationModel} from "../models/data-configuration-model";
 import {measureText} from "../../../components/tiles/hooks/use-measure-text";
 
@@ -359,30 +360,20 @@ export interface ISetPointSelection {
 }
 
 export function setPointSelection(props: ISetPointSelection) {
-  const { dotsRef, dataConfiguration, pointRadius, selectedPointRadius,
-          pointColor, pointStrokeColor, getPointColorAtIndex } = props;
-
-  const dataset = dataConfiguration.dataset;
-  const dots = selectCircles(dotsRef.current);
-  const legendID = dataConfiguration.attributeID('legend');
+  const
+    {dotsRef, dataConfiguration, pointRadius, selectedPointRadius,
+      pointColor, pointStrokeColor, getPointColorAtIndex} = props,
+    dataset = dataConfiguration.dataset,
+    dots = selectCircles(dotsRef.current),
+    legendID = dataConfiguration.attributeID('legend');
 
   if (!(dotsRef.current && dots)) return;
 
   // First set the class based on selection
-
   dots
-    .classed('graph-dot-highlighted', (aCaseData: CaseData) => {
-      return !!dataset?.isCaseSelected(aCaseData.caseID);
-    })
+    .classed('graph-dot-highlighted', (aCaseData: CaseData) => !!dataset?.isCaseSelected(aCaseData.caseID))
     // Then set properties to defaults w/o selection
-    .attr('r', (aCaseData: CaseData) => {
-      if (dataset?.isCaseSelected(aCaseData.caseID)){
-        return pointRadius * selectedRadiusFactor; //draw an outer circle for selected points
-      }
-      else {
-        return pointRadius;
-      }
-    })
+    .attr('r', pointRadius)
     .style('stroke', pointStrokeColor)
     .style('fill', (aCaseData:CaseData) => {
       return legendID
@@ -390,29 +381,22 @@ export function setPointSelection(props: ISetPointSelection) {
         : aCaseData.plotNum && getPointColorAtIndex
           ? getPointColorAtIndex(aCaseData.plotNum) : pointColor;
     })
-    .style('stroke-width', (aCaseData: CaseData) => {
-      return dataset?.isCaseSelected(aCaseData.caseID) ? selectedStrokeWidth : defaultStrokeWidth;
-    })
-    .style('stroke-opacity', (aCaseData: CaseData) => {
-      return 1;
-    })
-    .style('stroke-fill', (aCaseData: CaseData) => {
-      return dataset?.isCaseSelected(aCaseData.caseID) ? selectedOuterCircleColor : defaultBackgroundColor;
-    });
+    .style('stroke-width', defaultStrokeWidth)
+    .style('stroke-opacity', defaultStrokeOpacity);
 
   const selectedDots = selectDots(dotsRef.current, true);
+  // How we deal with this depends on whether there is a legend or not
+  if (legendID) {
+    selectedDots?.style('stroke', defaultSelectedStroke)
+      .style('stroke-width', defaultSelectedStrokeWidth)
+      .style('stroke-opacity', defaultSelectedStrokeOpacity);
+  } else {
+    selectedDots?.style('fill', defaultSelectedColor);
+  }
+  selectedDots?.attr('r', selectedPointRadius)
+    .raise();
+  }
 
-  selectedDots?.attr('r', (aCaseData: CaseData) => {
-    if (dataset?.isCaseSelected(aCaseData.caseID)){
-      return pointRadius * selectedRadiusFactor; //draw an outer circle for selected points
-    }
-    else {
-      return pointRadius;
-    }
-  })  //when you click on case this gets triggered
-  .raise();
-}
-//--------------------------------------------
 export interface ISetPointCoordinates {
   dataset?: IDataSet
   dotsRef: IDotsRef
@@ -429,6 +413,7 @@ export interface ISetPointCoordinates {
 }
 
 export function setPointCoordinates(props: ISetPointCoordinates) {
+
   const lookupLegendColor = (aCaseData: CaseData) => {
       const id = aCaseData.caseID,
         isSelected = dataset?.isCaseSelected(id),
@@ -450,10 +435,8 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
         .attr('cy', (aCaseData: CaseData) => {
           return getScreenY(aCaseData.caseID, aCaseData.plotNum);
         })
-        .attr('r', (aCaseData: CaseData) => {
-          return dataset?.isCaseSelected(aCaseData.caseID)
-          ? selectedPointRadius : pointRadius;
-        })
+        .attr('r', (aCaseData: CaseData) => dataset?.isCaseSelected(aCaseData.caseID)
+          ? selectedPointRadius : pointRadius)
         .style('fill', (aCaseData: CaseData) => lookupLegendColor(aCaseData))
         .style('stroke', (aCaseData: CaseData) =>
           (getLegendColor && dataset?.isCaseSelected(aCaseData.caseID))
@@ -464,13 +447,18 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
     }
   };
 
-  const { dataset, dotsRef, selectedOnly = false, pointRadius, selectedPointRadius,
-          pointStrokeColor, pointColor, getPointColorAtIndex, getScreenX, getScreenY,
-          getLegendColor, enableAnimation } = props;
-  const duration = enableAnimation.current ? transitionDuration : 0;
-  const theSelection = selectDots(dotsRef.current, selectedOnly);
-  setPoints();
+  const
+    {
+      dataset, dotsRef, selectedOnly = false, pointRadius, selectedPointRadius,
+      pointStrokeColor, pointColor, getPointColorAtIndex,
+      getScreenX, getScreenY, getLegendColor, enableAnimation
+    } = props,
+    duration = enableAnimation.current ? transitionDuration : 0,
+
+    theSelection = selectDots(dotsRef.current, selectedOnly);
+    setPoints();
 }
+
 
 /**
  Use the bounds of the given axes to compute slope and intercept.
