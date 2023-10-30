@@ -120,22 +120,6 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
       return;
     }
 
-    // If the tile is of type Graph, remove it from any shared data sets it's already linked
-    // to before linking it to a new data set. We're checking the sharedModel's type property
-    // instead of using isSharedDataSet because we don't want to introduce a dependency on the
-    // data set types here. We should ultimately make this behavior configurable from outside
-    // the SharedModelDocumentManager to eliminate this issue.
-    // if (tileContentModel.type === "Graph" && sharedModel.type === "SharedDataSet") {
-    //   // Related to the comment above, although we know the type of sharedModel is
-    //   // SharedDataSetType, TypeScript will throw an error if we try to access the dataSet
-    //   // property on it without first using isSharedDataSet to check the type. So we cast
-    //   // sharedModel to any (again we don't want to introduce the data set types here).
-    //   const sm = sharedModel as any;
-    //   if (isTileLinkedToOtherDataSet(tileContentModel, sm.dataSet)) {
-    //     unlinkTileFromDataSets(tileContentModel);
-    //   }
-    // }
-
     // assign an indexOfType if necessary
     this.assignIndexOfType(sharedModel);
 

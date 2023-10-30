@@ -27,6 +27,8 @@ export const useProviderTileLinking = ({
       const sharedModelManager = providerTile.tileEnv?.sharedModelManager;
       if (sharedModelManager?.isReady) {
         // TODO: this is temporary while we are working on getting Graph to work with multiple datasets
+        // Once multiple datasets are fully implemented, we should look at the "consumesMultipleDataSets"
+        // setting for the tile type; but for now graph has to allow multiples while not having that be the default.
         if (!allowMultipleGraphDatasets && isGraphModel(model.content)) {
           for (const shared of sharedModelManager.getTileSharedModels(model.content)) {
             console.log('Removing existing shared model before adding a new one: ', shared);
@@ -35,9 +37,7 @@ export const useProviderTileLinking = ({
         }
 
         const sharedDataSet = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, tileInfo.id);
-        console.log('adding shared model: ', sharedDataSet?.dataSet.name, ' to ', model);
         sharedDataSet && sharedModelManager?.addTileSharedModel(model.content, sharedDataSet);
-        // TODO determine if receiving tile can only handle one dataset...
       }
     }
   }, [readOnly, model, allowMultipleGraphDatasets]);
