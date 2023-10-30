@@ -35,7 +35,6 @@ export const GraphLayerModel = types
       self.isLinked = true;
     },
     setDataset(dataset: IDataSet | undefined, metadata: ISharedCaseMetadata | undefined) {
-      self.config.clearAttributes();
       self.config.setDataset(dataset, metadata);
       self.isLinked = !!dataset && !!metadata;
     },
@@ -85,10 +84,10 @@ export const GraphLayerModel = types
     },
     configureUnlinkedLayer() {
       if (self.config.attributeID("y")) {
-        self.config.setAttribute("y");
+        this.setAttributeID("y", "", "");
       }
       if (self.config.attributeID("x")) {
-        self.config.setAttribute("x");
+        this.setAttributeID("x", "", "");
       }
     },
     setDataSetListener() {

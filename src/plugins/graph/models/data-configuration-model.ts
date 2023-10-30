@@ -604,16 +604,14 @@ export const DataConfigurationModel = types
       self.setPointsNeedUpdating(true);
     },
     setDataset(dataset: IDataSet | undefined, metadata: ISharedCaseMetadata | undefined) {
-      self.actionHandlerDisposer?.();
-      self.actionHandlerDisposer = undefined;
       self.dataset = dataset;
       self.metadata = metadata;
-      self.filteredCases = [];
-      this.checkFilteredCasesArray();
-      self.invalidateQuantileScale();
+      this.handleDataSetChange();
     },
-    checkFilteredCasesArray() {
-      console.log('Checking filtered cases');
+    handleDataSetChange() {
+      self.actionHandlerDisposer?.();
+      self.actionHandlerDisposer = undefined;
+      self.filteredCases = [];
       if (self.dataset) {
         self.actionHandlerDisposer = onAnyAction(self.dataset, self.handleAction);
         self.filteredCases[0] = new FilteredCases({
@@ -629,6 +627,7 @@ export const DataConfigurationModel = types
           this._addNewFilteredCases();
         }
       }
+      self.invalidateQuantileScale();
     },
     setPrimaryRole(role: GraphAttrRole) {
       if (role === 'x' || role === 'y') {

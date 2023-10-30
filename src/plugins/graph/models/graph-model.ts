@@ -339,7 +339,10 @@ export const GraphModel = TileContentModel
       }
 
       if (self.layers.length === 1 && !self.layers[0].config.dataset && !self.layers[0].config.isEmpty) {
-        // Non-empty dataset lacking a dataset reference -- needs to be fixed.
+        // Non-empty dataset lacking a dataset reference = legacy data needing a one-time fix.
+        // This is actually not a great place to call this; would be better to do so at document load time
+        // since it is a one-time thing and neccessary for first display.
+        // But I tried that and the SharedModelManager was not yet ready.
         this.setDataConfigurationReferences();
       }
 
@@ -451,7 +454,7 @@ export const GraphModel = TileContentModel
     afterAttachToDocument() {
       console.log("AATD running");
       for (const layer of self.layers) {
-        layer.config.checkFilteredCasesArray();
+        layer.config.handleDataSetChange();
       }
     }
     //   addDisposer(self, reaction(

@@ -51,7 +51,7 @@ export class GraphController {
     this.graphModel = props.graphModel;
     this.dotsRef = props.dotsRef;
     if (this.graphModel.config.dataset !== this.graphModel.data) {
-      console.log('resetting, FIXME');
+      console.log('resetting, FIXME'); // This won't work when plotting more than just the 1st layer.
       this.graphModel.config.setDataset(this.graphModel.data, this.graphModel.metadata);
     }
     this.initializeGraph();

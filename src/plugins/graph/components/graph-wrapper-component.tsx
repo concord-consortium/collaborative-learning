@@ -9,7 +9,6 @@ import { OffsetModel } from "../../../models/annotations/clue-object";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { useInitGraphLayout } from "../hooks/use-init-graph-layout";
 import { getScreenX, getScreenY } from "../hooks/use-point-locations";
-import { useDataSet } from "../imports/hooks/use-data-set";
 import { IGraphModel } from "../models/graph-model";
 import { decipherDotId } from "../utilities/graph-utils";
 import { GraphComponent } from "./graph-component";
@@ -21,13 +20,12 @@ import "./graph-wrapper-component.scss";
 
 export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(props) {
   const {
-    documentContent, documentId, model, readOnly, scale, tileElt,
-    onRegisterTileApi, onUnregisterTileApi, onRequestRowHeight
+    model, readOnly, tileElt,
+    onRegisterTileApi, onRequestRowHeight
   } = props;
-  const enabled = !readOnly;
   const content = model.content as IGraphModel;
 
-  const { data } = useDataSet(content?.data);
+  const data = content.config.dataset; // TODO: this only considers layer 0
   const layout = useInitGraphLayout(content);
   const xAttrID = content.getAttributeID("x");
   const yAttrID = content.getAttributeID("y");
