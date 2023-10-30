@@ -224,24 +224,32 @@ export interface ISetPointSelection {
 export function setPointSelection(props: ISetPointSelection) {
   const { dotsRef, dataConfiguration } = props;
 
-  // console.log("📁 graph-utils.ts ------------------------");
-  // console.log("\t🏭 setPointSelection");
-  // console.log("\tdotsRef:", dotsRef);
+  console.log("📁 graph-utils.ts ------------------------");
+  console.log("\t🏭 setPointSelection");
   const dataset = dataConfiguration.dataset;
   const dots = selectCircles(dotsRef.current);
   if (!(dotsRef.current && dots)) return;
-  const selectedDots = selectDots(dotsRef.current, true);
-  if (dataset?.selection.size && selectedDots?.size){
+  const dotsPlotted = selectDots(dotsRef.current, true);
 
-    selectedDots
-    .attr('r', (aCaseData: CaseData) => {
-      return (dataset?.isCaseSelected(aCaseData.caseID))
-      ? 10 : 0;
-    })
-    .style('fill', (aCaseData: CaseData) => {
-      return (dataset?.isCaseSelected(aCaseData.caseID)) && selectedOuterCircleColor;
-    });
-
+  if (dotsPlotted?.size()){
+  // if (dotsPlotted?.size()){
+    const isSelection = !!dataset?.selection.size;
+    console.log("\t🥩 isSelection:", isSelection);
+    if (dataset?.selection.size){
+      console.log("enter 243");
+      dotsPlotted
+      .attr('r', (aCaseData: CaseData) => {
+        return (dataset?.isCaseSelected(aCaseData.caseID) && isSelection)
+        ? 10 : 0;
+      })
+      .style('fill', (aCaseData: CaseData) => {
+        return (dataset?.isCaseSelected(aCaseData.caseID)) && selectedOuterCircleColor;
+      });
+    }
+    else { //in this case, there is no selection and user clicks on graph - so remove all outer circles
+      dotsPlotted
+      .attr('r', (aCaseData: CaseData) => 0);
+    }
   }
 }
 
