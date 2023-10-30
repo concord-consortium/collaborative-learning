@@ -30,7 +30,7 @@ context('Diagram Tool Tile', function () {
   const hideNavigatorButton = () => diagramTile.getDiagramToolbarButton("button-hide-navigator", undefined, true);
   const diagramDeleteButton = () => diagramTile.getDiagramToolbarButton("button-delete", undefined, true);
   const dialogOkButton = () => cy.get(".modal-button").last();
-  
+
   it("Shared Variable Tiles (Diagram, Drawing)", () => {
 
     beforeTest();
@@ -161,7 +161,7 @@ context('Diagram Tool Tile', function () {
     // Can redo previous step by pressing control+shift+z or command+shift+z on the keyboard
     cy.get("body").type(redoKeystroke);
     diagramTile.getVariableCard().should("exist");
-  
+
     cy.log("Make sure only one diagram tile is allowed");
     clueCanvas.addTile("diagram");
     clueCanvas.verifyToolDisabled("diagram");
@@ -322,7 +322,7 @@ context('Diagram Tool Tile', function () {
     const dialogChip = () => diagramTile.getDiagramDialog().find(".variable-chip");
     clueCanvas.addTile("text");
     textTile.getTextTile().click();
-    textTile.getTextToolInsertVariable().click();
+    clueCanvas.clickToolbarButton('text', 'insert-variable');
     diagramTile.getDiagramDialog().should("contain.text", "other tiles:");
     dialogChip().click();
     dialogOkButton().click();
@@ -335,7 +335,7 @@ context('Diagram Tool Tile', function () {
 
     //undo redo on text tile after adding a new variable
     textTile.getTextTile().click();
-    textTile.getTextToolNewVariable().click();
+    clueCanvas.clickToolbarButton('text', 'new-variable');
     dialogField("name").should("exist").type("name2");
     dialogOkButton().click();
     textTile.getVariableChip().should("exist");

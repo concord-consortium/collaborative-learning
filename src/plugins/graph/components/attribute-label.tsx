@@ -1,5 +1,4 @@
 import React, {useCallback, useEffect, useState} from "react";
-import {createPortal} from "react-dom";
 import {reaction} from "mobx";
 import {observer} from "mobx-react-lite";
 import {select} from "d3";
@@ -9,7 +8,7 @@ import {AttributeType} from "../../../models/data/attribute";
 import {IDataSet} from "../../../models/data/data-set";
 import {isSetAttributeNameAction} from "../../../models/data/data-set-actions";
 import {GraphPlace, isVertical} from "../imports/components/axis-graph-shared";
-import {graphPlaceToAttrRole} from "../graph-types";
+import {graphPlaceToAttrRole, kGraphClassSelector} from "../graph-types";
 import {useGraphModelContext} from "../models/graph-model";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {useTileModelContext} from "../imports/hooks/use-tile-model-context";
@@ -38,7 +37,8 @@ export const AttributeLabel = observer(
       hideClickHereCue = useClickHereCue &&
         !dataConfiguration?.placeAlwaysShowsClickHereCue(place) && !isTileSelected(),
       [labelElt, setLabelElt] = useState<SVGGElement | null>(null),
-      parentElt = labelElt?.closest('.document-content') as HTMLDivElement ?? null;
+      portalParentElt = labelElt?.closest('.document-content') as HTMLDivElement ?? null,
+      positioningParentElt = labelElt?.closest(kGraphClassSelector) as HTMLDivElement ?? null;
 
     const getAttributeIDs = useCallback(() => {
       const isScatterPlot = graphModel.plotType === 'scatterPlot',
@@ -144,37 +144,38 @@ export const AttributeLabel = observer(
 
     // Respond to changes in attributeID assigned to my place
     useEffect(() => {
-        const disposer = reaction(
-          () => {
-            if (place === 'left') {
-              return dataConfiguration?.yAttributeDescriptionsExcludingY2.map((desc) => desc.attributeID);
-            }
-            else {
-              return dataConfiguration?.attributeID(graphPlaceToAttrRole[place]);
-            }
-          },
-          () => {
-            refreshAxisTitle();
+      const disposer = reaction(
+        () => {
+          if (place === 'left') {
+            return dataConfiguration?.yAttributeDescriptionsExcludingY2.map((desc) => desc.attributeID);
           }
-        );
-        return () => disposer();
+          else {
+            return dataConfiguration?.attributeID(graphPlaceToAttrRole[place]);
+          }
+        },
+        () => {
+          refreshAxisTitle();
+        }
+      );
+      return () => disposer();
     }, [place, dataConfiguration, refreshAxisTitle]);
 
-    const readyForPortal = parentElt && onChangeAttribute && onTreatAttributeAs && onRemoveAttribute;
+    const readyForPortal = positioningParentElt && onChangeAttribute && onTreatAttributeAs && onRemoveAttribute;
     const skipPortal = useSettingFromStores("defaultSeriesLegend", "graph") && place === "left";
 
     return (
       <>
         <g ref={(elt) => setLabelElt(elt)} className={`display-label ${place}`} />
         {readyForPortal && !skipPortal &&
-          createPortal(<AxisOrLegendAttributeMenu
+          <AxisOrLegendAttributeMenu
             target={labelElt}
-            portal={parentElt}
+            parent={positioningParentElt}
+            portal={portalParentElt}
             place={place}
             onChangeAttribute={onChangeAttribute}
             onRemoveAttribute={onRemoveAttribute}
             onTreatAttributeAs={onTreatAttributeAs}
-          />, parentElt)
+          />
         }
       </>
     );

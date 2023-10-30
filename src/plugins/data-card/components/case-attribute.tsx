@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { observer } from "mobx-react";
 import classNames from "classnames";
 import { useCombobox } from "downshift";
@@ -61,7 +61,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const editingLabel = currEditFacet === "name" && currEditAttrId === attrKey;
   const editingValue = currEditFacet === "value" && currEditAttrId === attrKey;
 
-  const validCompletions = (aValues: string[], prefixString: string) => {
+  const validCompletions = useCallback((aValues: string[], prefixString: string) => {
     const prefixStringLC = prefixString.toLowerCase();
     const values = uniq(aValues).sort();
     if (editingValue && valueCandidate.length > 0){
@@ -74,7 +74,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
         return value && typeof(value)==='string' && !isImageUrl(value);
       }) as string[];
     }
-  };
+  }, [editingValue, valueCandidate.length]);
 
   const {
     isOpen,
@@ -101,7 +101,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     const attrValues = content.dataSet.attrFromID(attrKey)?.values || [];
     const completions = validCompletions(attrValues as string[], valueCandidate);
     setInputItems(completions);
-  }, [content.dataSet, attrKey, valueCandidate]);
+  }, [content.dataSet, attrKey, valueCandidate, validCompletions]);
 
   // reset contents of input when attribute value changes without direct user input
   // (when it is deleted by toolbar or the underlying case has changed )
@@ -219,8 +219,8 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     }
   };
 
-  function deleteAttribute(){
-    if(attrKey){
+  function deleteAttribute() {
+    if (attrKey){
       content.dataSet.removeAttribute(attrKey);
     }
   }

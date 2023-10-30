@@ -20,8 +20,7 @@ import "./graph-wrapper-component.scss";
 
 export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(props) {
   const {
-    model, readOnly, tileElt,
-    onRegisterTileApi, onRequestRowHeight
+    model, readOnly, tileElt, onRegisterTileApi, onRequestRowHeight
   } = props;
   const content = model.content as IGraphModel;
 

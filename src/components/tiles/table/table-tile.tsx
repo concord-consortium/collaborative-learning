@@ -6,7 +6,6 @@ import ReactDataGrid from "react-data-grid";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
 import { ITileProps } from "../tile-component";
 import { EditableTableTitle } from "./editable-table-title";
-import { TableToolbar } from "./table-toolbar";
 import { useColumnsFromDataSet } from "./use-columns-from-data-set";
 import { useTitleSize } from "./use-title-size";
 import { useColumnExtensions } from "./use-column-extensions";
@@ -24,14 +23,15 @@ import { useToolApi } from "./use-tile-api";
 import { useRowHeight } from "./use-row-height";
 import { useRowsFromDataSet } from "./use-rows-from-data-set";
 import { useCurrent } from "../../../hooks/use-current";
-import { useToolbarTileApi } from "../hooks/use-toolbar-tile-api";
 import { lightenColor } from "../../../utilities/color-utils";
 import { verifyAlive } from "../../../utilities/mst-utils";
 import { gImageMap } from "../../../models/image-map";
 import { getColorMapEntry } from "../../../models/shared/shared-data-set-colors";
+import { TileToolbar } from "../../toolbar/tile-toolbar";
 import { TableToolbarContext } from "./table-toolbar-context";
 
 import "./table-tile.scss";
+import "./table-toolbar-registration";
 
 // observes row selection from shared selection store
 const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComponent({
@@ -219,15 +219,13 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     deleteSelected,
   };
 
-  const toolbarProps = useToolbarTileApi({ id: model.id, enabled: !readOnly, onRegisterTileApi, onUnregisterTileApi });
   return (
     <div className="table-tool">
       <TableToolbarContext.Provider value={toolbarContext} >
-        <TableToolbar
-          documentContent={documentContent}
-          tileElt={tileElt}
-          {...toolbarProps}
-          scale={scale}
+        <TileToolbar
+          tileType="table"
+          readOnly={!!readOnly}
+          tileElement={tileElt}
         />
       </TableToolbarContext.Provider>
       <div className="table-grid-container" ref={containerRef} onClick={handleBackgroundClick}>

@@ -51,7 +51,7 @@ context('Shared Variables', function () {
         textToolTile.getTextTile().last().should('contain', 'Hello World!');
         textToolTile.getTextTile().last().should('not.contain', ' Hello World!');
         textToolTile.enterText("{moveToStart}");
-        textToolTile.clickToolbarTool("New Variable");
+        clueCanvas.clickToolbarButton('text', 'new-variable');
         cy.get(".custom-modal").should("exist");
         dialogField("name").type(textTileVName1);
         dialogField("value").type(textTileVValue1);
@@ -73,7 +73,7 @@ context('Shared Variables', function () {
         textToolTile.enterText('Second Chip:');
         textToolTile.getTextTile().last().should('contain', 'Second Chip:');
         textToolTile.getTextTile().last().should('not.contain', 'Second Chip: ');
-        textToolTile.clickToolbarTool("Insert Variable");
+        clueCanvas.clickToolbarButton('text', 'insert-variable');
         cy.get(".custom-modal").should("exist");
         cy.get(".variable-chip-list .variable-chip").click();
         dialogOkButton().click();
@@ -83,7 +83,7 @@ context('Shared Variables', function () {
 
         cy.log('can edit a variable name');
         textToolTile.getTextTile().last().find('.variable-name').first().click();
-        textToolTile.clickToolbarTool("Edit Variable");
+        clueCanvas.clickToolbarButton('text', 'edit-variable');
         cy.get(".custom-modal").should("exist");
         dialogField("name").clear().type(textTileVName2);
         dialogOkButton().click();
@@ -96,7 +96,7 @@ context('Shared Variables', function () {
 
         cy.log('can change the value of a variable');
         textToolTile.getTextTile().last().find('.variable-chip').first().click();
-        textToolTile.clickToolbarTool("Edit Variable");
+        clueCanvas.clickToolbarButton('text', 'edit-variable');
         cy.get(".custom-modal").should("exist");
         dialogField("value").clear().type(textTileVValue2);
         dialogOkButton().click();

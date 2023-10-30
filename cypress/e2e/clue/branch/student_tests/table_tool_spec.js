@@ -112,7 +112,7 @@ context('Table Tool Tile', function () {
     cy.log('delete button works');
     cy.get(".primary-workspace").within((workspace) => {
       tableToolTile.getTableCell().eq(1).should('contain', '5');
-      tableToolTile.getTableToolbarButton('delete').click();
+      clueCanvas.clickToolbarButton('table', 'delete');
       tableToolTile.getTableCell().eq(1).should('contain', '');
     });
 
@@ -129,9 +129,7 @@ context('Table Tool Tile', function () {
     cy.get(".index-cell-contents").eq(0).should('contain', "");
 
     cy.log('will verify formula modal');
-    cy.get(".primary-workspace").within((workspace) => {
-      tableToolTile.getTableToolbarButton('set-expression').click();
-    });
+    clueCanvas.clickToolbarButton('table', 'set-expression');
     cy.get('.modal-title').should('contain', "Set Expression");
     cy.get('.modal-content .prompt select').should('not.exist');
     cy.get('.modal-content .prompt').should('contain', "y");
@@ -151,7 +149,7 @@ context('Table Tool Tile', function () {
     cy.get(".primary-workspace").within((workspace) => {
       tableToolTile.getAddColumnButton().click();
       tableToolTile.renameColumn('y', headerY); //makes it easier to find the correct column header
-      tableToolTile.getTableToolbarButton('set-expression').click();
+      clueCanvas.clickToolbarButton('table', 'set-expression');
     });
     cy.get('.modal-title').should('contain', "Set Expression");
     cy.get('.modal-content .prompt select').should('exist');
@@ -172,9 +170,7 @@ context('Table Tool Tile', function () {
       .should('not.exist');
 
     cy.log('verify selection of y2 axis and will enter a formula');
-    cy.get(".primary-workspace").within((workspace) => {
-      tableToolTile.getTableToolbarButton('set-expression').click();
-    });
+    clueCanvas.clickToolbarButton('table', 'set-expression');
     cy.get('.modal-title').should('contain', "Set Expression");
     cy.get('.modal-content .prompt select').should('exist');
     cy.get('.modal-content .prompt select').select('y2');
@@ -273,17 +269,17 @@ context('Table Tool Tile', function () {
     tableToolTile.typeInTableCell(2, '2.5');
     tableToolTile.typeInTableCell(5, '4');
     tableToolTile.typeInTableCell(6, '7');
-    tableToolTile.getTableToolbarButton("link-graph-button").should('not.be.disabled').click();
+    clueCanvas.clickToolbarButton('table', 'link-graph');
     tableToolTile.getLinkGraphModalCreateNewButton().click();
     xyplot.getTile().should("exist").contains("Table 1");
 
     cy.log('can unlink and link data from a table using the "Link Table" button');
     // Unlink
-    tableToolTile.getTableToolbarButton("link-tile-button").click();
+    clueCanvas.clickToolbarButton('table', 'link-tile');
     tableToolTile.getLinkGraphModalTileMenu().select('Table 1');
     tableToolTile.getLinkGraphModalLinkButton().should("contain", "Unlink").click();
     // Re-link
-    tableToolTile.getTableToolbarButton("link-tile-button").click();
+    clueCanvas.clickToolbarButton('table', 'link-tile');
     tableToolTile.getLinkGraphModalTileMenu().select('Table 1');
     tableToolTile.getLinkGraphModalLinkButton().should("contain", "Link").click();
   });

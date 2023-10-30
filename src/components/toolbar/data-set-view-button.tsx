@@ -3,28 +3,26 @@ import { getTileComponentInfo } from "../../models/tiles/tile-component-info";
 import { SharedDataSet } from "../../models/shared/shared-data-set";
 import { AddTilesContext, TileModelContext } from "../tiles/tile-api";
 import { TileToolbarButton } from "./tile-toolbar-button";
+import { BadgedIcon } from "./badged-icon";
 
 import ViewBadgeIcon from "../../assets/icons/view/view-badge.svg";
 
-import "./data-set-view-button.scss";
-
 interface IProps {
-  args: string[];
+  name: string;
+  args?: string[];
 }
 
-/**
- * Deprecated; Tiles should move to the shared toolbar components in src/components/toolbar
- */
-export const DataSetViewButton: React.FC<IProps> = ({args}) => {
+export function DataSetViewButton({name, args}: IProps) {
   const addTilesContext = useContext(AddTilesContext);
   const tile = useContext(TileModelContext);
 
-  if (args.length !== 2 || args[0] !== "data-set-view") {
+  if (args?.length !== 2 || args[0] !== "data-set-view") {
     console.error("Unknown args", args);
     return null;
   }
 
   const newTileType = args[1];
+  const tooltip = `Create a linked ${newTileType} tile`;
 
   // TODO: if the document or tile are undefined then disable the button
 
@@ -45,10 +43,11 @@ export const DataSetViewButton: React.FC<IProps> = ({args}) => {
 
   return (
     <TileToolbarButton
-        className="dataset-view-button" onClick={handleClick}
-        title={`Create a linked ${newTileType} tile`}>
-      { Icon ? <Icon/> : "??" }
-      <ViewBadgeIcon className="button-badge"/>
+        name={name}
+        title={tooltip}
+        onClick={handleClick}
+    >
+      {Icon ? <BadgedIcon Icon={Icon} Badge={ViewBadgeIcon}/> : "??"}
     </TileToolbarButton>
   );
-};
+}
