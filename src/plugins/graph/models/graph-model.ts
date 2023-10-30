@@ -119,13 +119,14 @@ export const GraphModel = TileContentModel
       // for loop is fast equivalent to radius = max( minSize, maxSize - floor( log( logBase, max( dataLength, 1 )))
       switch (use) {
         case "normal":
+
+        console.log("📁 graph-model.ts ------------------------");
           console.log("\tcase normal -> returns result:", r);
           return r;
         case "hover-drag":
           console.log("\tcase hover-drag -> returns  result * hoverRadiusFactor:", r * hoverRadiusFactor);
           return r * hoverRadiusFactor;
         case "select":
-        console.log("\tcase select -> returns result + pointRadiusSelectionAdd", r + pointRadiusSelectionAddend);
           return r + pointRadiusSelectionAddend;
       }
     },

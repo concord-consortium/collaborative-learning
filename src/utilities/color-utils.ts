@@ -53,4 +53,4 @@ export const isLightColorRequiringContrastOffset = (color?: string) => {
 
     selectedStrokeWidth = 5,
     selectedStrokeOpacity = 0.5,
-    selectedOuterCircleColor = "#89F9CE";
+    selectedOuterCircleColor = "#14F49E";

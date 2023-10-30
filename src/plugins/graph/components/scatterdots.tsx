@@ -79,7 +79,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
             console.log("📁 scatterdots.tsx --------line 79----------------");
             // console.log("\t🏭 onDragStart");
             // console.log("\t attr r fn: ", r);
-            // console.log("\t🔪 dragPointRadiusRef.current:", dragPointRadiusRef.current);
+            console.log("\treturns dragPointRadiusRef.current:", dragPointRadiusRef.current);
 
             return dragPointRadiusRef.current;
           });

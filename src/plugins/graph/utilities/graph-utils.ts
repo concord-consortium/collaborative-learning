@@ -230,26 +230,18 @@ export function setPointSelection(props: ISetPointSelection) {
   const dataset = dataConfiguration.dataset;
   const dots = selectCircles(dotsRef.current);
   if (!(dotsRef.current && dots)) return;
-  // console.log("dots:", dots);
-  //apply highlighted class to dots that are the caseSelected
   const selectedDots = selectDots(dotsRef.current, true);
-  // console.log("\tselectedDots.size()", selectedDots?.size());
-  // console.log("\tdataset:", dataset);
   if (dataset?.selection.size && selectedDots?.size){
-    // console.log("need to update selectedDots");
-    // console.log("TODO: - set selection cases, and set those cases to selected");
-    //wait start with selectedDots
 
     selectedDots
     .attr('r', (aCaseData: CaseData) => {
-      // console.log(aCaseData);
       return (dataset?.isCaseSelected(aCaseData.caseID))
       ? 10 : 0;
     })
     .style('fill', (aCaseData: CaseData) => {
-      // console.log("\tfill returns:", (dataset?.isCaseSelected(aCaseData.caseID)) && selectedOuterCircleColor);
       return (dataset?.isCaseSelected(aCaseData.caseID)) && selectedOuterCircleColor;
     });
+
   }
 }
 
