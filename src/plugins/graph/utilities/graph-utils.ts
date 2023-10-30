@@ -502,11 +502,14 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
       const id = aCaseData.caseID;
       const isSelected = dataset?.isCaseSelected(id);
       const legendColor = getLegendColor ? getLegendColor(id) : '';
-      return legendColor !== ''
-        ? legendColor
-        : isSelected
-          ? defaultSelectedColor
-          : pointColor;
+      if (legendColor !== '') {
+        return legendColor;
+      } else if (isSelected) {
+        return defaultSelectedColor;
+      } else {
+        return pointColor;
+      }
+
     }
   };
 
