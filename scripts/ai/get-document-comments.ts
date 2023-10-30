@@ -171,20 +171,25 @@ console.log(`***** Getting document tags *****`);
 const tagStartTime = Date.now();
 const includedDocumentIds = Object.keys(documentTags);
 admin.firestore()
-  .collection("authed/learn_concord_org/documents")
-  .listDocuments()
+  .collection("authed/learn_concord_org/documents").listDocuments()
   .then(async documentsDocRefs => {
-    console.log(`--- documentDocRefs`, documentsDocRefs.length);
     const docRefTime = Date.now();
+    console.log(`- Time to get document info: ${prettyDuration(docRefTime - startTime)}`);
+    console.log(`- documentDocRefs`, documentsDocRefs.length);
     const docs = await Promise.all(documentsDocRefs.map((documentDocRef, docIndex) => new Promise((resolve, reject) => {
       documentDocRef.get()
         .then(doc => {
           const documentData = doc?.data();
           console.log(`--- Document key:`, documentData?.key);
-          if (includedDocumentIds.includes(documentData?.key)) {
-            console.log(` -- Document:`, documentData);
-            // const comments = documentDocRef.collection("comments");
-          }
+          // if (includedDocumentIds.includes(documentData?.key)) {
+            if (documentData?.comments) {
+              console.log(` -- Document:`, documentData);
+            }
+            // documentDocRef.collection("comments").listDocuments()
+            //   .then(async commentsDocRef => {
+            //     const
+            //   });
+          // }
         });
     })));
 
