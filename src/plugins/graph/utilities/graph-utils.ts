@@ -486,7 +486,9 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
         console.log("\tforID:", id);
         console.log("\treturning.....defaultSelectedColor:", defaultSelectedColor);
         // return defaultSelectedColor;
-        return pointColor;
+        // return pointColor;
+        return getPointColorAtIndex(aCaseData.plotNum);
+
       } else if (aCaseData.plotNum && getPointColorAtIndex) {
         console.log("line 487");
         console.log("\tforID:", id);
@@ -499,7 +501,7 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
         return pointColor;
       }
     } else {
-      // console.log("\t line 481");
+      console.log("\t line 504");
       const id = aCaseData.caseID;
       const isSelected = dataset?.isCaseSelected(id);
       const legendColor = getLegendColor ? getLegendColor(id) : '';
