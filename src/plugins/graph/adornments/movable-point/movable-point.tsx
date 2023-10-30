@@ -131,6 +131,7 @@ export const MovablePoint = observer(function MovablePoint(props: IProps) {
 
   // Set up the point and shadow
   useEffect(function createElements() {
+    console.log("createElements");
     const selection = select(pointRef.current),
       { x, y } = model.points.get(instanceKey) ??
                   { x: model.getInitialPosition(xAxis), y: model.getInitialPosition(yAxis) },
