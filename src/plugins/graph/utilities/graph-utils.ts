@@ -413,6 +413,8 @@ export interface ISetPointCoordinates {
 }
 
 export function setPointCoordinates(props: ISetPointCoordinates) {
+  console.log("setPointCoordinates");
+
 
   const lookupLegendColor = (aCaseData: CaseData) => {
       const id = aCaseData.caseID,
@@ -423,6 +425,7 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
           : aCaseData.plotNum && getPointColorAtIndex
             ? getPointColorAtIndex(aCaseData.plotNum) : pointColor;
   },
+
 
   setPoints = () => {
     if (theSelection?.size()) {
