@@ -115,7 +115,7 @@ for (const key of Object.keys(classKeys)) {
   for (const [_userId, user] of Object.entries<any>(users)) {
     if (documentLimit && documentsProcessed >= documentLimit) break;
     // console.log(`  ${userId}`);
-    for (const [_docId, doc] of Object.entries<any>(user.documents)) {
+    for (const [docId, doc] of Object.entries<any>(user.documents)) {
       if (documentLimit && documentsProcessed >= documentLimit) break;
 
       const content = doc.content as string | undefined;
@@ -140,7 +140,7 @@ for (const key of Object.keys(classKeys)) {
         emptyDocuments++;
         break;
       }
-      const documentId = `document${documentsProcessed}`;
+      const documentId = `document${docId}`;
       const documentFile = `${targetPath}/${documentId}.txt`;
       fs.writeFileSync(documentFile, content);
       documentsProcessed++;
