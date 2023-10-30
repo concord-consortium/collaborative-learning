@@ -59,11 +59,14 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
   yScaleRef.current = layout.getAxisScale("left") as ScaleNumericBaseType;
 
   const onDragStart = useCallback((event: MouseEvent) => {
-    // console.log("📁 scatterdots.tsx ------------------------");
-    // console.log("\t🏭 onDragStart");
+    console.log("📁 scatterdots.tsx ------------------------");
+    console.log("\t🏭 onDragStart");
+
 
       target.current = select(event.target as SVGSVGElement);
       const aCaseData: CaseData = target.current.node().__data__;
+      const id = aCaseData.caseID;
+      console.log("\tforID:", id);
       if (!aCaseData) return;
       dataset?.beginCaching();
       secondaryAttrIDsRef.current = dataConfiguration?.yAttributeIDs || [];
@@ -76,11 +79,6 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
           .property('isDragging', true)
           .transition()
           .attr('r', (r: any)=>{
-            console.log("📁 scatterdots.tsx --------line 79----------------");
-            // console.log("\t🏭 onDragStart");
-            // console.log("\t attr r fn: ", r);
-            console.log("\treturns dragPointRadiusRef.current:", dragPointRadiusRef.current);
-
             return dragPointRadiusRef.current;
           });
         setDragID(tItsID);

@@ -224,8 +224,8 @@ export interface ISetPointSelection {
 export function setPointSelection(props: ISetPointSelection) {
   const { dotsRef, dataConfiguration } = props;
 
-  console.log("📁 graph-utils.ts ------------------------");
-  console.log("\t🏭 setPointSelection");
+  // console.log("📁 graph-utils.ts ------------------------");
+  // console.log("\t🏭 setPointSelection");
   const dataset = dataConfiguration.dataset;
   const dots = selectCircles(dotsRef.current);
   if (!(dotsRef.current && dots)) return;
@@ -234,9 +234,9 @@ export function setPointSelection(props: ISetPointSelection) {
   if (dotsPlotted?.size()){
   // if (dotsPlotted?.size()){
     const isSelection = !!dataset?.selection.size;
-    console.log("\t🥩 isSelection:", isSelection);
+    // console.log("\t🥩 isSelection:", isSelection);
     if (dataset?.selection.size){
-      console.log("enter 243");
+      // console.log("enter 243");
       dotsPlotted
       .attr('r', (aCaseData: CaseData) => {
         return (dataset?.isCaseSelected(aCaseData.caseID) && isSelection)
@@ -466,14 +466,40 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
   const lookupLegendColor = (aCaseData: CaseData) => {
     // console.log("\t🏭 lookupLegendColor");
     if (getPointColorAtIndex){
-      const id = aCaseData.caseID,
-      isSelected = dataset?.isCaseSelected(id),
-      legendColor = getLegendColor ? getLegendColor(id) : '';
-      return legendColor !== '' ? legendColor
-      : isSelected ? defaultSelectedColor
-        : aCaseData.plotNum && getPointColorAtIndex
-          ? getPointColorAtIndex(aCaseData.plotNum) : pointColor;
+
+
+
+      // console.log("\t line 472");
+      const id = aCaseData.caseID;
+      const isSelected = dataset?.isCaseSelected(id);
+      // console.log("\t🔪 isSelected:", isSelected);
+      const legendColor = getLegendColor ? getLegendColor(id) : '';
+      // console.log("\t🔪 legendColor:", legendColor);
+
+      if (legendColor !== '') {
+        console.log("line 480");
+        console.log("\tforID:", id);
+        console.log("\treturning.....legendColor:", legendColor);
+        return legendColor;
+      } else if (isSelected) {
+        console.log("line 484");
+        console.log("\tforID:", id);
+        console.log("\treturning.....defaultSelectedColor:", defaultSelectedColor);
+        // return defaultSelectedColor;
+        return pointColor;
+      } else if (aCaseData.plotNum && getPointColorAtIndex) {
+        console.log("line 487");
+        console.log("\tforID:", id);
+        console.log("\treturning.....getPointColorAtIndex:", getPointColorAtIndex(aCaseData.plotNum));
+        return getPointColorAtIndex(aCaseData.plotNum);
+      } else {
+        console.log("line 490");
+        console.log("\tforID:", id);
+        console.log("\treturning.....pointColor:", pointColor);
+        return pointColor;
+      }
     } else {
+      // console.log("\t line 481");
       const id = aCaseData.caseID;
       const isSelected = dataset?.isCaseSelected(id);
       const legendColor = getLegendColor ? getLegendColor(id) : '';
@@ -486,7 +512,7 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
   };
 
   const setPoints = (radius: number) => {
-    console.log("\t🏭 setPoints");
+    // console.log("\t🏭 setPoints");
     if (theSelection?.size()) {
       theSelection
         .transition()
@@ -497,15 +523,11 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
         .attr('cy', (aCaseData: CaseData) => {
           return getScreenY(aCaseData.caseID, aCaseData.plotNum);
         })
-        // .attr('r', (aCaseData: CaseData) => dataset?.isCaseSelected(aCaseData.caseID)
-        //   ? selectedPointRadius : pointRadius)
         .attr('r', () => {
-
-          console.log("📁 graph-utils.ts ------------------------");
           return radius;
         })
         .style('fill', (aCaseData: CaseData) => {
-          // console.log("in setPoints look up legendColor:", lookupLegendColor(aCaseData));
+          // console.log("\tsetPoints> fill > look up legendColor:", lookupLegendColor(aCaseData));
           return lookupLegendColor(aCaseData);
         })
         .style('stroke', (aCaseData: CaseData) =>
@@ -522,7 +544,7 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
           getScreenX, getScreenY, getLegendColor, enableAnimation } = props;
 
   const duration = enableAnimation.current ? transitionDuration : 0;
-  console.log("right before setPoints() selectedOnly:", selectedOnly);
+  // console.log("right before setPoints() selectedOnly:", selectedOnly);
   let theSelection = selectDots(dotsRef.current, selectedOnly);
   setPoints(5);
   theSelection = selectDots(dotsRef.current, true);
