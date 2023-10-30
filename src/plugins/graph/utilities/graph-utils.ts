@@ -466,9 +466,6 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
   const lookupLegendColor = (aCaseData: CaseData) => {
     // console.log("\t🏭 lookupLegendColor");
     if (getPointColorAtIndex){
-
-
-
       // console.log("\t line 472");
       const id = aCaseData.caseID;
       const isSelected = dataset?.isCaseSelected(id);
