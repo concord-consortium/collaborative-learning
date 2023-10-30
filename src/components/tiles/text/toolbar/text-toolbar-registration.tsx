@@ -15,8 +15,6 @@ import SubscriptToolIcon from "../../../../assets/icons/text/subscript-text-icon
 import NumberedListToolIcon from "../../../../assets/icons/text/numbered-list-text-icon.svg";
 import BulletedListToolIcon from "../../../../assets/icons/text/bulleted-list-text-icon.svg";
 
-import "./text-toolbar.sass";
-
 const kShortcutPrefix = isMac() ? "Cmd-" : "Ctrl-";
 
 const toggleMark =

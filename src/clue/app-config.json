@@ -241,7 +241,10 @@
     "stamps": [],
     "settings": {
       "graph": {
-        "autoAssignAttributes": true
+        "autoAssignAttributes": true,
+        "tools": [
+          "link-tile"
+        ]
       },
       "simulator": {
         "defaultSimulation": "EMG_and_claw"
