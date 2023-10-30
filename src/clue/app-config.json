@@ -245,10 +245,36 @@
         "scalePlotOnValueChange": true,
         "defaultSeriesLegend": true,
         "connectPointsByDefault": true,
-        "autoAssignAttributes": true
+        "autoAssignAttributes": true,
+        "tools": [
+          "link-tile"
+        ]
       },
       "simulator": {
         "defaultSimulation": "EMG_and_claw"
+      },
+      "table": {
+        "numFormat": ".2~f",
+        "tools": [
+          "set-expression",
+          "link-tile",
+          "link-graph",
+          "merge-in",
+          ["data-set-view", "DataCard"],
+          "delete"
+        ]
+      },
+      "text": {
+        "tools": [
+          "bold",
+          "italic",
+          "underline",
+          "subscript",
+          "superscript",
+          "list-ol",
+          "list-ul",
+          "link"
+        ]
       }
     }
   },

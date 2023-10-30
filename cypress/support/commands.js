@@ -24,40 +24,13 @@
 // -- This is will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
 import '@testing-library/cypress/add-commands';
-import ClueHeader from './elements/clue/cHeader';
 import PrimaryWorkspace from './elements/common/PrimaryWorkspace';
 import Canvas from './elements/common/Canvas';
 import TeacherDashboard from "./elements/clue/TeacherDashboard";
 import 'cypress-file-upload';
 import 'cypress-commands';
 import ResourcesPanel from "./elements/clue/ResourcesPanel";
-import ClueCanvas from './elements/clue/cCanvas';
 import {platformCmdKey} from '../../src/utilities/hot-keys';
-
-const clueCanvas = new ClueCanvas;
-
-Cypress.Commands.add("setupGroup", (students, group) => {
-    let qaClass = 10,
-        problem = 2.3;
-
-    let header = new ClueHeader;
-    let i=0, j=0;
-
-    for (i=0;i<students.length;i++) {
-        cy.visit('?appMode=qa&qaGroup='+group+'&fakeClass='+qaClass+'&fakeUser=student:'+students[i]+'&problem='+problem);
-        // These checks are here to make sure the workspace has loaded enough to create
-        // the student
-        cy.waitForLoad();
-        header.getGroupName().should('contain','Group '+group);
-        header.getGroupMembers().find('div.member').should('contain','S'+students[i]);
-        clueCanvas.shareCanvas();
-    }
-    // Verify Group num and the correct 4 students are listed, now that all 4 are loaded
-    header.getGroupName().should('contain','Group '+group);
-    for (j=0; j<students.length; j++) {
-        header.getGroupMembers().find('div.member').should('contain','S'+students[j]);
-    }
-});
 
 Cypress.Commands.add("uploadFile",(selector, filename, type="")=>{
     // cy.fixture(filename).as("image");
@@ -240,9 +213,7 @@ Cypress.Commands.add('collapseWorkspace', () => {
 });
 Cypress.Commands.add('linkTableToGraph', (table, graph) => {
   cy.get('.primary-workspace .table-title').contains(table).click();
-  cy.get(".primary-workspace").within((workspace) => {
-    cy.get(".table-toolbar .toolbar-button.link-tile-button").click();
-  });
+  cy.get(".table-toolbar .toolbar-button.link-tile").click();
   cy.get('.ReactModalPortal').within(() => {
     cy.get('[data-test=link-tile-select]').select(graph);
     cy.get('button').contains('Link').click();
@@ -250,9 +221,7 @@ Cypress.Commands.add('linkTableToGraph', (table, graph) => {
 });
 Cypress.Commands.add('unlinkTableToGraph', (table, graph) => {
   cy.get('.primary-workspace .table-title').contains(table).click();
-  cy.get(".primary-workspace").within((workspace) => {
-    cy.get(".table-toolbar .toolbar-button.link-tile-button").click();
-  });
+  cy.get(".table-toolbar .toolbar-button.link-tile").click();
   cy.get('.ReactModalPortal').within(() => {
     cy.get('[data-test=link-tile-select]').select(graph);
     cy.get('button').contains('Unlink').click();

@@ -31,7 +31,9 @@ export const useConsumerTileLinking = ({
   model, hasLinkableRows, readOnly, onlyType, onLinkTile, onUnlinkTile, onCreateTile
 }: IProps) => {
   const { consumers: linkableTilesAllTypes } = useLinkableTiles({ model });
-  const linkableTiles = onlyType ? linkableTilesAllTypes.filter(t=>t.type===onlyType) : linkableTilesAllTypes;
+  let linkableTiles = onlyType ? linkableTilesAllTypes.filter(t=>t.type===onlyType) : linkableTilesAllTypes;
+  // Can't link to self
+  linkableTiles = linkableTiles.filter(t => t.id!==model.id);
   // Button should be enabled if we have sufficient data to provide, and
   // either there are existing tiles to link it to, or we are able to create a tile for it.
   const isLinkEnabled = hasLinkableRows && (onlyType || linkableTiles.length > 0);

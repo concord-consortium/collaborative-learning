@@ -15,16 +15,18 @@ const textToolTile = new TextToolTile;
 const problemDoc = '2.1 Drawing Wumps';
 const ptsDoc = 'Points';
 
-context('Graph Tool', function () {
-  beforeEach(function () {
-    const queryParams = `${Cypress.config("queryParams")}`;
-    cy.clearQAData('all');
-    cy.visit(queryParams);
-    cy.waitForLoad();
-    cy.collapseResourceTabs();
-  });
+function beforeTest() {
+  const queryParams = `${Cypress.config("queryParams")}`;
+  cy.clearQAData('all');
+  cy.visit(queryParams);
+  cy.waitForLoad();
+  cy.collapseResourceTabs();
+}
 
+context('Graph Tool', function () {
   it('will test adding points to a graph', function () {
+    beforeTest();
+
     cy.log("add a point to the origin");
     clueCanvas.addTile('geometry');
     graphToolTile.addPointToGraph(0, 0);
@@ -81,6 +83,8 @@ context('Graph Tool', function () {
   });
 
   it('will test Graph tile undo redo', () => {
+    beforeTest();
+
     cy.log("undo redo graph tile creation/deletion");
     // Creation - Undo/Redo
     clueCanvas.addTile('geometry');
