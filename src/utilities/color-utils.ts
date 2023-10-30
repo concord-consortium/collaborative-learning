@@ -43,14 +43,10 @@ export const isLightColorRequiringContrastOffset = (color?: string) => {
   export const defaultPointColor = '#E6805B',
     defaultSelectedColor = '#4682B4',
     defaultStrokeWidth = 1,
-    defaultStrokeOpacity = 0.4,
     missingColor = '#888888',
     defaultStrokeColor = '#FFFFFF',
-    defaultSelectedStroke = '#FF0000',
-    defaultSelectedStrokeWidth = 2,
-    defaultSelectedStrokeOpacity = 1,
     defaultBackgroundColor = '#FFFFFF',
 
-    selectedStrokeWidth = 5,
-    selectedStrokeOpacity = 0.5,
+    selectedStrokeColor = '#FF0000',
+    selectedStrokeWidth = 1, //1 for now - may change such that the stroke-width increases when selected
     selectedOuterCircleColor = "#14F49E";

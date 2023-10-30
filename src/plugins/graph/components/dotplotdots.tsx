@@ -46,7 +46,6 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
           .property('isDragging', true)
           .transition()
           .attr('r', () => {
-            console.log("📁 dotplotdots.tsx --------line 49----------------");
             return graphModel.getPointRadius('hover-drag');
           });
         setDragID(() => tItsID);
@@ -98,7 +97,6 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
           .property('isDragging', false)
           .transition()
           .attr('r', () => {
-            console.log("📁 dotplotdots.tsx --------------line 101----------");
             return graphModel.getPointRadius('select');
           });
         setDragID('');
@@ -123,9 +121,6 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
   useDragHandlers(window, {start: onDragStart, drag: onDrag, end: onDragEnd});
 
   const refreshPointSelection = useCallback(() => {
-    console.log("📁 dotplotdots.tsx ------------------------");
-    console.log("\t🏭 refreshPointSelection");
-
     dataConfiguration && setPointSelection({
       dotsRef, dataConfiguration, pointRadius: graphModel.getPointRadius(),
       pointColor, pointStrokeColor, selectedPointRadius: graphModel.getPointRadius('select')
@@ -262,8 +257,6 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
         getScreenY = primaryIsBottom ? getSecondaryScreenCoord : getPrimaryScreenCoord,
         getLegendColor = dataConfiguration?.attributeID('legend')
           ? dataConfiguration?.getLegendColorForCase : undefined;
-
-      console.log("📁 dotplotdots.tsx ------------------------");
       setPointCoordinates({
         dataset, pointRadius: graphModel.getPointRadius(),
         selectedPointRadius: graphModel.getPointRadius('select'),
