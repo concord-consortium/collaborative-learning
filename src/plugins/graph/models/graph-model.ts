@@ -319,22 +319,11 @@ export const GraphModel = TileContentModel
   }))
   .actions(self => ({
     updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
-
-      if (isSharedDataSet(sharedModel)) {
-        console.log("| UASMC shared data set: ", sharedModel.dataSet.id, sharedModel);
-      } else if (isSharedCaseMetadata(sharedModel)) {
-        console.log("| UASMC shared metadata: ", sharedModel.data?.id, sharedModel);
-      } else {
-        console.log("| UASMC something else):", sharedModel);
-      }
-
-      console.log("| starting layers: ", self.layers.map(l=>l.description));
-
       const smm = getSharedModelManager(self);
       if (!smm || !smm.isReady) return;
-      const models = smm.getTileSharedModelsByType(self, SharedDataSet);
-      if (!models) {
-        console.log("| Undefined models, returning");
+      const sharedDataSets = smm.getTileSharedModelsByType(self, SharedDataSet);
+      if (!sharedDataSets) {
+        console.warn("Unable to query for shared datasets");
         return;
       }
 
@@ -346,82 +335,72 @@ export const GraphModel = TileContentModel
         this.setDataConfigurationReferences();
       }
 
-      const needToSync = true; // TODO is there a way to quickly tell if anything relevant has changed?
-      if (needToSync) {
-        // Sync up layers
-        const modelIds = models.map(m => isSharedDataSet(m) ? m.dataSet.id : undefined);
-        const layerIds = self.layers.map(layer => layer.config.dataset?.id);
-        const newModelIds = modelIds.filter(id => !layerIds.includes(id));
-        const removedModelIds = layerIds.filter(id => !modelIds.includes(id));
-        if (removedModelIds.length) console.log('Layers that need to be removed: ', removedModelIds);
-        if (newModelIds.length) console.log('Layers that need to be added: ', newModelIds);
+      // The rest of this method is all about checking whether the list of linked
+      // datasets has changed, and updating layers if so.
+      // Would be nice if there was a simple way to tell if anything relevant has changed.
+      // This is a little heavy-handed but does the job.
+      const sharedDatasetIds = sharedDataSets.map(m => isSharedDataSet(m) ? m.dataSet.id : undefined);
+      const layerDatasetIds = self.layers.map(layer => layer.config.dataset?.id);
+      const attachedDatasetIds = sharedDatasetIds.filter(id => !layerDatasetIds.includes(id));
+      const detachedDatasetIds = layerDatasetIds.filter(id => !sharedDatasetIds.includes(id));
 
-        // Remove layers
-        if (removedModelIds.length) {
-          removedModelIds.forEach((id) => {
-            const index = self.layers.findIndex((layer) => layer.config.dataset?.id === id );
-            if (index > 0) {
-              console.log('Removing layer ', index);
-              self.layers.splice(index, 1);
-            } else if (index === 0) {
-              // Unlink layer 0, don't remove it.
-              self.layers[0].setDataset(undefined, undefined);
-              self.layers[0].configureUnlinkedLayer();
-              self.layers[0].updateAdornments();
-              console.log('Reset layer 0 to default: ', self.layers[0]);
-            } else {
-              console.error('Failed to find layer with dataset id ', id);
-            }
-          });
-        }
-
-        if (newModelIds.length) {
-          console.log("| new models: ", newModelIds);
-          const metaDataModels = smm?.getTileSharedModelsByType(self, SharedCaseMetadata);
-          newModelIds.forEach((newModelId) => {
-            const dataSetModel = models.find(m => isSharedDataSet(m) && m.dataSet.id === newModelId);
-            if (dataSetModel && isSharedDataSet(dataSetModel)) {
-              console.log("| found dataSetModel: ", dataSetModel, 'dataSetModel ID: ', dataSetModel.id);
-              let metaDataModel = metaDataModels?.find((m) => isSharedCaseMetadata(m) && m.data?.id === newModelId);
-              if (!metaDataModel) {
-                const newMetaDataModel = SharedCaseMetadata.create();
-                newMetaDataModel.setData(dataSetModel.dataSet);
-                smm?.addTileSharedModel(self, newMetaDataModel);
-                metaDataModel = newMetaDataModel;
-                console.log('| No shared metadata found, created one: ', metaDataModel);
-              } else {
-                console.log("| found metaDataModel, look at id, and data.id", metaDataModel);
-              }
-              if (metaDataModel && isSharedCaseMetadata(metaDataModel)) {
-                // Update default layer, or create a new one.
-                if (!self.layers[0].isLinked) {
-                  console.log('Re-using layer 0 for new dataset ', dataSetModel.dataSet.id);
-                  self.layers[0].setDataset(dataSetModel.dataSet, metaDataModel);
-                  self.layers[0].configureLinkedLayer();
-                  self.layers[0].updateAdornments();
-                } else {
-                  const newLayer = GraphLayerModel.create();
-                  self.layers.push(newLayer);
-                  const dataConfig = DataConfigurationModel.create();
-                  newLayer.setDataConfiguration(dataConfig);
-                  dataConfig.setDataset(dataSetModel.dataSet, metaDataModel);
-                  console.log('| Created layer ', newLayer);
-                  // May need these when we want to actually display the new layer:
-                  // newLayer.configureLinkedLayer();
-                  // newLayer.updateAdornments(true);
-                  // newLayer.setDataSetListener();
-                }
-              } else {
-                console.log('| Metadata not found');
-              }
-            } else {
-              console.log('| dataset not found');
-            }
-          });
-        }
+      // Remove any layers for datasets that have been unlinked from this tile
+      if (detachedDatasetIds.length) {
+        detachedDatasetIds.forEach((id) => {
+          const index = self.layers.findIndex((layer) => layer.config.dataset?.id === id);
+          if (index > 0) {
+            self.layers.splice(index, 1);
+          } else if (index === 0) {
+            // Unlink layer 0, don't remove it.
+            self.layers[0].setDataset(undefined, undefined);
+            self.layers[0].configureUnlinkedLayer();
+            self.layers[0].updateAdornments();
+          } else {
+            console.warn('Failed to find layer with dataset id ', id);
+          }
+        });
       }
 
-      console.log("| Done, final layers: ", self.layers.map(l=>l.description));
+      // Create layers for any datasets newly linked to this tile
+      if (attachedDatasetIds.length) {
+        const sharedMetadatas = smm?.getTileSharedModelsByType(self, SharedCaseMetadata);
+        attachedDatasetIds.forEach((newModelId) => {
+          const dataSetModel = sharedDataSets.find(m => isSharedDataSet(m) && m.dataSet.id === newModelId);
+          if (dataSetModel && isSharedDataSet(dataSetModel)) {
+            let metaDataModel = sharedMetadatas?.find((m) => isSharedCaseMetadata(m) && m.data?.id === newModelId);
+            if (!metaDataModel) {
+              // No existing shared metadata found, create one
+              // In the future, this should probably check if there is one unlinked, and if so link with it.
+              const newMetaDataModel = SharedCaseMetadata.create();
+              newMetaDataModel.setData(dataSetModel.dataSet);
+              smm?.addTileSharedModel(self, newMetaDataModel);
+              metaDataModel = newMetaDataModel;
+            }
+            if (metaDataModel && isSharedCaseMetadata(metaDataModel)) {
+              // Update default layer, or create a new one.
+              if (!self.layers[0].isLinked) {
+                self.layers[0].setDataset(dataSetModel.dataSet, metaDataModel);
+                self.layers[0].configureLinkedLayer();
+                self.layers[0].updateAdornments();
+              } else {
+                const newLayer = GraphLayerModel.create();
+                self.layers.push(newLayer);
+                const dataConfig = DataConfigurationModel.create();
+                newLayer.setDataConfiguration(dataConfig);
+                dataConfig.setDataset(dataSetModel.dataSet, metaDataModel);
+                // May need these when we want to actually display the new layer:
+                // newLayer.configureLinkedLayer();
+                // newLayer.updateAdornments(true);
+                // newLayer.setDataSetListener();
+              }
+            } else {
+              console.warn('| Metadata not found');
+            }
+          } else {
+            console.warn('| dataset not found');
+          }
+        });
+      }
     },
     setDataConfigurationReferences() {
       // Updates pre-existing DataConfiguration objects that don't have the now-required references
@@ -434,7 +413,7 @@ export const GraphModel = TileContentModel
           const sds = sharedDataSets[0];
           if (isSharedDataSet(sds)) {
             self.layers[0].config.dataset = sds.dataSet;
-            console.log('Set dataset reference');
+            console.log('Updated legacy document - set dataset reference');
           }
         }
         const sharedMetadata = smm.getTileSharedModelsByType(self, SharedCaseMetadata);
@@ -442,7 +421,7 @@ export const GraphModel = TileContentModel
           const smd = sharedMetadata[0];
           if (isSharedCaseMetadata(smd)) {
             self.layers[0].config.metadata = smd;
-            console.log('Set metadata reference');
+            console.log('Updated legacy document - set metadata reference');
           }
         }
       } else {
@@ -452,48 +431,12 @@ export const GraphModel = TileContentModel
     },
 
     afterAttachToDocument() {
-      console.log("AATD running");
       for (const layer of self.layers) {
         layer.config.handleDataSetChange();
       }
     }
-    //   addDisposer(self, reaction(
-    //     () => self.data,
-    //     data => {
-    //       console.log('AATD reaction running');
-    //       const sharedModelManager = getSharedModelManager(self);
-    //       if (!self.metadata && data) {
-    //         const caseMetadata = SharedCaseMetadata.create();
-    //         caseMetadata.setData(data);
-    //         sharedModelManager?.addTileSharedModel(self, caseMetadata);
-    //       }
-    //       // CHECKME: this will only work correctly if setDataset doesn't
-    //       // trigger any state updates
-    //       if (self.data !== self.config.dataset) {
-    //         self.config.setDataset(self.data, self.metadata);
-    //       }
-    //       // FIXME: When a snapshot is applied from firebase
-    //       // we need to sync the config dataset. But we don't want to do
-    //       // that if this update is happening because of a user action
-    //       // either an undo, history playback, or an actual user action.
-    //       // One possible way to address this is to make the config dataset
-    //       // be a view. This means we'll need another way to identify
-    //       // the first time a dataset is linked to the graph. Because we
-    //       // default the x and y attribute ids in this case. We could
-    //       // just check if the attributes are set already instead.
-    //       // TODO: refine this comment in light of the (just added) code below
-
-    //       // TODO: is it necessary to do this here and in updateAfterSharedModelChanges above?
-    //       // if (self.data) {
-    //       //   self.configureLinkedGraph();
-    //       // }
-    //       // else if (sharedModelManager?.isReady) {
-    //       //   self.configureUnlinkedGraph();
-    //       // }
-    //     }, { fireImmediately: true }
-    //   ));
-    // }
   }));
+
 export interface IGraphModel extends Instance<typeof GraphModel> {}
 export interface IGraphModelSnapshot extends SnapshotIn<typeof GraphModel> {}
 

@@ -40,7 +40,7 @@ export const useProviderTileLinking = ({
         // TODO determine if receiving tile can only handle one dataset...
       }
     }
-  }, [readOnly, model]);
+  }, [readOnly, model, allowMultipleGraphDatasets]);
 
   const unlinkTile = useCallback((tileInfo: ITileLinkMetadata) => {
     const linkedTile = getTileContentById(model.content, tileInfo.id);
