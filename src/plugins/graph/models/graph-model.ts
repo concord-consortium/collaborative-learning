@@ -221,7 +221,6 @@ export const GraphModel = TileContentModel
         const initialLayer = GraphLayerModel.create();
         self.layers.push(initialLayer);
         initialLayer.configureUnlinkedLayer();
-        console.log('created default layer: ', initialLayer.description);
       }
     },
   }))
@@ -261,7 +260,7 @@ export const GraphModel = TileContentModel
       if (layer) {
         layer.config.replaceYAttribute(oldAttrId, newAttrId);
       } else {
-        console.log('replacee not found');
+        console.log('replaceYAttributeID - attribute to replace was not found');
       }
     },
     setPlotType(type: PlotType) {
