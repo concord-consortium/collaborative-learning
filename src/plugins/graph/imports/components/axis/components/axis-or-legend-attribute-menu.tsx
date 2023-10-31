@@ -92,7 +92,8 @@ export const AxisOrLegendAttributeMenu = ({ place, attributeId, target, parent, 
           onCloseRef.current = onClose;
           return (
             <Portal containerRef={parentRef}>
-              <div ref={setDragNodeRef} style={overlayStyle} {...attributes} {...listeners}>
+              <div ref={setDragNodeRef} style={overlayStyle} {...attributes} {...listeners}
+               data-testid={`axis-legend-attribute-menu-${place}`}>
                 <MenuButton style={buttonStyle}>{attribute?.name}</MenuButton>
                 <Portal containerRef={portalRef}>
                   <MenuList ref={menuListRef}>
@@ -108,7 +109,8 @@ export const AxisOrLegendAttributeMenu = ({ place, attributeId, target, parent, 
                       const showAttr = (!isCurrent && !isPlottedX && !isPlottedY);
 
                       return showAttr && (
-                        <MenuItem onClick={() => onChangeAttribute(place, data, attr.id, attrId)} key={attr.id}>
+                        <MenuItem onClick={() => onChangeAttribute(place, data, attr.id, attrId)} key={attr.id} 
+                        data-testid={`axis-legend-attribute-${attr.name}`}>
                           {attr.name}
                         </MenuItem>
                       );

@@ -26,9 +26,10 @@ class XYPlotToolTile {
     return cy.get(`${wsClass(workspaceClass)} .display-label.bottom`);
   }
   selectYAttribute(attribute, workspaceClass) {
-    const yMenuButtons = `${wsClass(workspaceClass)} .axis-legend-attribute-menu.left button`;
+    const yMenuButtons = `${wsClass(workspaceClass)} [data-testid=axis-legend-attribute-menu-left] button`;
+    const yAttributeButton = `${wsClass(workspaceClass)} [data-testid=axis-legend-attribute-${attribute}]`;
     cy.get(yMenuButtons).first().click();
-    cy.get(yMenuButtons).contains(attribute).click();
+    cy.get(yAttributeButton).contains(attribute).click({force:true});
   }
   getYAttributesLabel(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .canvas-area .multi-legend .simple-attribute-label`);
