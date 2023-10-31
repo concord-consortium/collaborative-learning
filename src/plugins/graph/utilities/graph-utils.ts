@@ -128,7 +128,6 @@ export function handleClickOnDot(event: MouseEvent, caseID: string, dataset?: ID
   }
 }
 
-
 //================================= [Point Rendering Functions] ====================================
 
 export interface IMatchCirclesProps {
@@ -162,7 +161,6 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
   //----------------- Click on Dot -------------------
   dotsElement && select(dotsElement).on('click',
     (event: MouseEvent) => {
-      console.log("click a dot");
       const target = select(event.target as SVGSVGElement);
       if (target.node()?.nodeName === 'circle') {
         handleClickOnDot(event, (target.datum() as CaseData).caseID, dataConfiguration.dataset);
