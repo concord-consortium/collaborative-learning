@@ -395,7 +395,7 @@ export function setPointSelection(props: ISetPointSelection) {
   }
   selectedDots?.attr('r', selectedPointRadius)
     .raise();
-  }
+}
 
 export interface ISetPointCoordinates {
   dataset?: IDataSet

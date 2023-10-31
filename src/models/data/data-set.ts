@@ -100,9 +100,7 @@ export const DataSet = types.model("DataSet", {
 })
 .views(self => ({
   get selectedCaseIds() {
-    const caseIds: string[] = [];
-    self.selection.forEach(id => caseIds.push(id));
-    return caseIds;
+    return Array.from(self.selection);
   }
 }))
 .extend(self => {
@@ -373,12 +371,9 @@ export const DataSet = types.model("DataSet", {
         if (self.selectedCaseIds.length > 0) return self.selectedCaseIds[0];
       },
       get selectedCaseIdString() {
-        let caseIds = "";
-        self.selection.forEach(caseId => caseIds += `${caseId},`);
-        if (caseIds.length > 0) caseIds = caseIds.slice(0, caseIds.length - 1);
-        return caseIds;
+        return self.selectedCaseIds.join(", ");
       },
-      get caseIsSelected() {
+      get isAnyCaseSelected() {
         return self.selection.size > 0;
       },
       get isInTransaction() {
