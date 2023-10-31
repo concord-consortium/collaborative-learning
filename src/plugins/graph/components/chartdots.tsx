@@ -73,9 +73,6 @@ export const ChartDots = function ChartDots(props: PlotProps) {
     primaryAttrRole, secondaryAttrRole]);
 
   const refreshPointSelection = useCallback(() => {
-
-    console.log("📁 chartdots.tsx ------------------------");
-    console.log("refreshPoinntSelection");
     dataConfiguration && setPointSelection({
       pointColor, pointStrokeColor, dotsRef, dataConfiguration,
       pointRadius: graphModel.getPointRadius(), selectedPointRadius: graphModel.getPointRadius('select')
@@ -208,9 +205,6 @@ export const ChartDots = function ChartDots(props: PlotProps) {
       },
       getScreenX = primaryIsBottom ? getPrimaryScreenCoord : getSecondaryScreenCoord,
       getScreenY = primaryIsBottom ? getSecondaryScreenCoord : getPrimaryScreenCoord;
-
-
-      console.log("📁 chartdots.tsx ------------------------");
     setPointCoordinates({
       dataset, pointRadius, selectedPointRadius: graphModel.getPointRadius('select'),
       dotsRef, selectedOnly, pointColor, pointStrokeColor,

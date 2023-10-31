@@ -16,7 +16,7 @@ import {
   setPointSelection,
   startAnimation
 } from "../utilities/graph-utils";
-import { selectedOuterCircleColor } from "../../../utilities/color-utils";
+import { selectedOuterCircleFillColor } from "../../../utilities/color-utils";
 import {useGraphModelContext} from "../models/graph-model";
 
 export const ScatterDots = function ScatterDots(props: PlotProps) {
@@ -151,7 +151,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
       {
         dotsRef, dataConfiguration, pointRadius: pointRadiusRef.current,
         selectedPointRadius: selectedPointRadiusRef.current,
-        pointColor, pointStrokeColor: selectedOuterCircleColor, getPointColorAtIndex: graphModel.pointColorAtIndex
+        pointColor, pointStrokeColor: selectedOuterCircleFillColor, getPointColorAtIndex: graphModel.pointColorAtIndex
       });
   }, [dataConfiguration, dotsRef, graphModel]);
 

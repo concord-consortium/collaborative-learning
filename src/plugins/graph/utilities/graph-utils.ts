@@ -4,14 +4,14 @@ import { isInteger} from "lodash";
 import { IClueObjectSnapshot } from "../../../models/annotations/clue-object";
 import { PartialSharedModelEntry } from "../../../models/document/document-content-types";
 import { UpdatedSharedDataSetIds } from "../../../models/shared/shared-data-set";
-import {CaseData, DotSelection, DotsElt, selectCircles, selectDots} from "../d3-types";
-import {IDotsRef, kGraphFont, Point, Rect, rTreeRect, transitionDuration} from "../graph-types";
+import {CaseData, DotSelection, DotsElt, selectAllCircles, selectDots} from "../d3-types";
+import {IDotsRef, kGraphFont, Point, Rect, rTreeRect} from "../graph-types";
 import {between} from "./math-utils";
 import {IAxisModel, isNumericAxisModel} from "../imports/components/axis/models/axis-model";
 import {ScaleNumericBaseType} from "../imports/components/axis/axis-types";
 import {IDataSet} from "../../../models/data/data-set";
-import { defaultSelectedColor, selectedStrokeColor, selectedStrokeWidth,
-         defaultStrokeWidth, selectedOuterCircleColor } from "../../../utilities/color-utils";
+import { defaultSelectedColor, selectedStrokeWidth, defaultStrokeWidth,
+         selectedOuterCircleFillColor, selectedOuterCircleStrokeColor } from "../../../utilities/color-utils";
 import {IDataConfigurationModel} from "../models/data-configuration-model";
 import {measureText} from "../../../components/tiles/hooks/use-measure-text";
 
@@ -129,7 +129,7 @@ export function handleClickOnDot(event: MouseEvent, caseID: string, dataset?: ID
 }
 
 
-  //---------------- Point Rendering Functions ------------------------------------------
+//================================= [Point Rendering Functions] ====================================
 
 export interface IMatchCirclesProps {
   dataConfiguration: IDataConfigurationModel
@@ -142,17 +142,16 @@ export interface IMatchCirclesProps {
 }
 
 export function matchCirclesToData(props: IMatchCirclesProps) {
-  // console.log("\t🏭 matchCirclesToData");
   const {dataConfiguration, enableAnimation, instanceId,
       dotsElement, pointRadius, pointColor, pointStrokeColor} = props;
 
   const allCaseData = dataConfiguration.joinedCaseDataArrays;
-  const circles = selectCircles(dotsElement);
-  if (!circles) return;
+  const allCircles = selectAllCircles(dotsElement); //includes both inner and outer circles
+  if (!allCircles) return;
   startAnimation(enableAnimation);
 
   initializePoints({
-    selection: circles,
+    selection: allCircles,
     data: allCaseData,
     pointRadius,
     pointColor,
@@ -160,7 +159,6 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
     getPointColorAtIndex: (index) => pointColor,
     instanceId
   });
-
   //----------------- Click on Dot -------------------
   // dotsElement && select(dotsElement).on('click',
   //   (event: MouseEvent) => {
@@ -170,7 +168,6 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
   //       handleClickOnDot(event, (target.datum() as CaseData).caseID, dataConfiguration.dataset);
   //     }
   //   });
-
   dataConfiguration.setPointsNeedUpdating(false);
 }
 
@@ -187,9 +184,8 @@ interface IInitializePoints {
 
 const initializePoints = ({ selection, data, pointRadius,  pointColor,
                             pointStrokeColor, getPointColorAtIndex, instanceId }: IInitializePoints) => {
-  //initialize outer highlight dots (this must be before the inner dots so that the inner dots are on top)
-  // console.log("\t🏭 initializePoints");
 
+  //initialize outer highlight dots (this must be before the inner dots so that the inner dots are on top)
   selection
     .data(data)
     .join(
@@ -219,43 +215,42 @@ export interface ISetPointSelection {
 }
 
 
-//idea:
-
-//move dotsPlotted styling into another function
-//call this function from setPointSelection and setPointCoordinates
-
 export function setPointSelection(props: ISetPointSelection) {
-  console.log("\t🏭 setPointSelection");
   const { dotsRef, dataConfiguration } = props;
   const dataset = dataConfiguration.dataset;
+  const allCircles = selectAllCircles(dotsRef.current); //includes both inner and outer circles
   const outerCircles = selectDots(dotsRef.current, true);
-  if (!(dotsRef.current && outerCircles)) return;
-
-  // console.log("dotsPlotted:", outerCircles?.size());
-  if (outerCircles?.size()){
-    styleOuterCircles(outerCircles, dataset);
+  if (allCircles){
+    applySelectedClassToCircles(allCircles, dataset);
   }
+  if (!(dotsRef.current && outerCircles)) return;
+  styleOuterCircles(outerCircles, dataset);
 }
 
-function styleOuterCircles(outerCircles: DotSelection, dataset?: IDataSet){
-  // console.log("\t🏭 styleOuterCircles");
-  const isSelection = !!dataset?.selection.size;
-  if (dataset?.selection.size){
-    // console.log("enters here 244");
+function applySelectedClassToCircles(selection: DotSelection, dataset?: IDataSet){
+  selection
+    .classed('selected', (aCaseData: CaseData) => !!dataset?.isCaseSelected(aCaseData.caseID));
+}
+
+function styleOuterCircles(outerCircles: any, dataset?: IDataSet){
+  if (dataset?.selection.size === 0) {
     outerCircles
-    .attr('r', (aCaseData: CaseData) => {
-      console.log("for id:", aCaseData.caseID);
-      console.log("radius returned:", (dataset?.isCaseSelected(aCaseData.caseID) && isSelection)? 10: 0);
-      return (dataset?.isCaseSelected(aCaseData.caseID) && isSelection)
-      ? 10 : 0;
-    })
-    .style('fill', (aCaseData: CaseData) => {
-      return (dataset?.isCaseSelected(aCaseData.caseID)) && selectedOuterCircleColor;
-    });
+      .attr('r', (aCaseData: CaseData) => {
+        return 0;
+      });
   }
-  else { //in this case, there is no selection and user clicks on graph - so remove all outer circles
+  else {
     outerCircles
-    .attr('r', (aCaseData: CaseData) => 0);
+      .attr('r', (aCaseData: CaseData) => {
+        return (dataset?.isCaseSelected(aCaseData.caseID)) ? 10 : 0;
+      })
+      .style('fill', (aCaseData: CaseData) => {
+        return (dataset?.isCaseSelected(aCaseData.caseID)) && selectedOuterCircleFillColor;
+      })
+      .style('stroke', (aCaseData: CaseData) =>{
+        return selectedOuterCircleStrokeColor;
+      })
+      .style('opacity', 0.5);
   }
 }
 
@@ -276,7 +271,35 @@ export interface ISetPointCoordinates {
 }
 
 export function setPointCoordinates(props: ISetPointCoordinates) {
-  // console.log("\t🏭 setPointCoordinates");
+
+  const setPoints = (radius: number) => {
+    if (theSelection?.size()) {
+      theSelection
+        .attr('cx', (aCaseData: CaseData) => {
+          return getScreenX(aCaseData.caseID);
+        })
+        .attr('cy', (aCaseData: CaseData) => {
+          return getScreenY(aCaseData.caseID, aCaseData.plotNum);
+        })
+        .attr('r', (aCaseData: CaseData) => {
+          return radius;
+        })
+        .style('fill', (aCaseData: CaseData) => {
+          return lookupLegendColor(aCaseData);
+        })
+        .style('stroke', (aCaseData: CaseData) =>{
+          if (getPointColorAtIndex){
+            return getPointColorAtIndex(aCaseData.plotNum);//border color of inner dot should be same color as legend
+          } else {
+            return pointColor;
+          }
+        })
+        .style('stroke-width', (aCaseData: CaseData) =>{
+          return (dataset?.isCaseSelected(aCaseData.caseID))
+                 ? selectedStrokeWidth : defaultStrokeWidth;
+        });
+    }
+  };
 
   const lookupLegendColor = (aCaseData: CaseData) => {
     const id = aCaseData.caseID;
@@ -294,7 +317,6 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
       if (legendColor !== '') {
         return legendColor;
       } else if (isSelected) {
-        // console.log("line 454???");
         return defaultSelectedColor;
       } else {
         return pointColor;
@@ -302,62 +324,22 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
     }
   };
 
-  const setPoints = (radius: number) => {
-    if (theSelection?.size()) {
-      theSelection
-        .transition()
-        .duration(duration)
-        .attr('cx', (aCaseData: CaseData) => {
-          return getScreenX(aCaseData.caseID);
-        })
-        .attr('cy', (aCaseData: CaseData) => {
-          return getScreenY(aCaseData.caseID, aCaseData.plotNum);
-        })
-        .attr('r', () => {
-          return radius;
-        })
-        .style('fill', (aCaseData: CaseData) => {
-          return lookupLegendColor(aCaseData);
-        })
-        .style('stroke', (aCaseData: CaseData) =>{
-          if (getLegendColor && dataset?.isCaseSelected(aCaseData.caseID)){
-            return selectedStrokeColor;
-          } else {
-            if (getPointColorAtIndex){
-              return getPointColorAtIndex(aCaseData.plotNum); //border color of inner dot should be same color as legend
-            }
-            else {
-              return pointColor;
-            }
-          }
-        })
-        .style('stroke-width', (aCaseData: CaseData) =>{
-          return (dataset?.isCaseSelected(aCaseData.caseID))
-          ? selectedStrokeWidth : defaultStrokeWidth;
-        });
-    }
-  };
+  const { dataset, dotsRef, pointColor, getPointColorAtIndex,
+          getScreenX, getScreenY, getLegendColor } = props;
 
-  const { dataset, dotsRef, selectedOnly = false,
-          pointColor, getPointColorAtIndex,
-          getScreenX, getScreenY, getLegendColor, enableAnimation } = props;
-
-  const duration = enableAnimation.current ? transitionDuration : 0;
-  let theSelection = selectDots(dotsRef.current, selectedOnly); //select inner circles
+  let theSelection = selectDots(dotsRef.current, false); //select inner circles
   setPoints(5);
   theSelection = selectDots(dotsRef.current, true); //select outer circles
-  // console.log("theSelection before:", theSelection);
+  setPoints(0);
+
   if (theSelection){
     styleOuterCircles(theSelection, dataset);
   }
-
-  setPoints(0);
-  // console.log("theSelection after:", theSelection);
 }
 
 
 
-  //---------------- Line Rendering Functions ------------------------------------------
+//================================= [Line Rendering Functions] ====================================
 //  Return the two points in logical coordinates where the line with the given
 //  iSlope and iIntercept intersects the rectangle defined by the upper and lower
 //  bounds of the two axes.
