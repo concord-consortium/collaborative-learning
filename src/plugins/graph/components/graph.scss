@@ -82,7 +82,7 @@ $graph-background-fill: #f9f9f9;
   fill: white;
 }
 
-.graph-dot { //console.log - under what circumstances would the dots be this color? Could this be removed?
+.graph-dot {
   fill: rgba(230, 128, 91);
   cursor: pointer;
   stroke-opacity: 0.4;

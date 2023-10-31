@@ -59,9 +59,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
         target.current
           .property('isDragging', true)
           .transition()
-          .attr('r', (r: any)=>{
-            return dragPointRadiusRef.current;
-          });
+          .attr('r', dragPointRadiusRef.current);
         setDragID(tItsID);
         currPos.current = {x: event.clientX, y: event.clientY};
 
@@ -145,7 +143,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
   useDragHandlers(window, {start: onDragStart, drag: onDrag, end: onDragEnd});
 
   const refreshPointSelection = useCallback(() => {
-    const {pointColor, pointStrokeColor} = graphModel;
+    const {pointColor} = graphModel;
 
     dataConfiguration && setPointSelection(
       {
