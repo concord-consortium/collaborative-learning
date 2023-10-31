@@ -9,9 +9,6 @@ class XYPlotToolTile {
   getXYPlotTitle(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .canvas-area .editable-tile-title`);
   }
-  getLinkTileButton(workspaceClass) {
-    return cy.get(`${wsClass(workspaceClass)} .canvas-area .graph-toolbar .link-tile-button`);
-  }
   getAddSeriesButton(workspaceClass){
     return cy.get(`${wsClass(workspaceClass)} .canvas-area .add-series-button`);
   }

@@ -45,7 +45,7 @@ context('XYPlot Tool Tile', function () {
       xyTile.getXYPlotTitle().should('contain', title);
 
       cy.log("Link Table");
-      xyTile.getLinkTileButton().click();
+      clueCanvas.clickToolbarButton('graph', 'link-tile');
       xyTile.linkTable("Table 1");
 
       cy.log("verify graph dot is displayed");
@@ -143,7 +143,7 @@ context('XYPlot Tool Tile', function () {
 
       cy.log("Link Table");
       xyTile.getTile().click();
-      xyTile.getLinkTileButton().click();
+      clueCanvas.clickToolbarButton('graph', 'link-tile');
       xyTile.linkTable("Table 1");
       xyTile.getAddSeriesButton().should('be.visible');
       xyTile.getAddSeriesButton().click();

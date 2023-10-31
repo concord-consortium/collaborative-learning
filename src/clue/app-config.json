@@ -245,7 +245,10 @@
         "scalePlotOnValueChange": true,
         "defaultSeriesLegend": true,
         "connectPointsByDefault": true,
-        "autoAssignAttributes": true
+        "autoAssignAttributes": true,
+        "tools": [
+          "link-tile"
+        ]
       },
       "simulator": {
         "defaultSimulation": "EMG_and_claw"

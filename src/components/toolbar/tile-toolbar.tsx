@@ -4,7 +4,7 @@ import classNames from "classnames";
 import { FloatingPortal } from "@floating-ui/react";
 import { useSettingFromStores, useUIStore } from "../../hooks/use-stores";
 import { useTileToolbarPositioning } from "./use-tile-toolbar-positioning";
-import { getToolbarButtonInfo, getDefaultTileToolbarConfig } from "./toolbar-button-manager";
+import { getToolbarButtonInfo } from "./toolbar-button-manager";
 import { TileModelContext } from "../tiles/tile-api";
 import { JSONValue } from "../../models/stores/settings";
 
@@ -24,14 +24,15 @@ export function isValidButtonDescription(obj: JSONValue): obj is IButtonDescript
     && typeof obj[1] === 'string');
  }
 
+/**
+ * Generates a standard toolbar for a tile.
+ * The buttons to be included are not specified here: all potential buttons must
+ * be registered with the toolbar-button-manager and then can be selected and
+ * ordered by AppConfig, unit or lesson configuration.
+ */
 export const TileToolbar = observer(
   function TileToolbar({ tileType, readOnly, tileElement }: ToolbarWrapperProps) {
-    /**
-     * Generates a standard toolbar for a tile.
-     * The buttons to be included are not specified here:
-     * all potential buttons must be registered with the toolbar-button-manager and
-     * then can be selected and ordered by unit or lesson configuration.
-     */
+
 
     const model = useContext(TileModelContext);
     const id = model?.id;
@@ -41,7 +42,7 @@ export const TileToolbar = observer(
 
     // Determine the buttons to be shown.
     const ui = useUIStore();
-    let buttonDescriptions;
+    let buttonDescriptions: JSONValue[];
     const customizedButtons = useSettingFromStores("tools", tileType);
     if (customizedButtons) {
       if (Array.isArray(customizedButtons)) {
@@ -51,7 +52,8 @@ export const TileToolbar = observer(
         return (null);
       }
     } else {
-      buttonDescriptions = getDefaultTileToolbarConfig(tileType);
+      // No buttons, no toolbar
+      return null;
     }
 
     // Determine if toolbar should be rendered or not.
