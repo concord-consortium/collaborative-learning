@@ -31,6 +31,7 @@ import {Legend} from "./legend/legend";
 import {MultiLegend} from "./legend/multi-legend";
 import {AttributeType} from "../../../models/data/attribute";
 import {IDataSet} from "../../../models/data/data-set";
+// import {useDataTips} from "../hooks/use-data-tips";
 import {onAnyAction} from "../../../utilities/mst-utils";
 import { Adornments } from "../adornments/adornments";
 
@@ -141,6 +142,10 @@ export const Graph = observer(
       if (anyFoundPath) anyFoundPath.remove();
     }
   };
+
+  // useDataTips({dotsRef, dataset, graphModel, enableAnimation});
+  //useDataTips hook is used to identify individual points in a dense scatterplot
+  //it should be commented out for now as it shrinks outer circle when hovered over - but may prove useful in the future
 
   const renderPlotComponent = () => {
     const props = {
