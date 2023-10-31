@@ -6,7 +6,7 @@ import { IToolbarButtonComponentProps, registerTileToolbarButtons }
   from "../../../components/toolbar/toolbar-button-manager";
 
 import LinkTableIcon from "../../../clue/assets/icons/geometry/link-table-icon.svg";
-import AddIcon from "../../../assets/icons/new/add.svg";
+import AddIcon from "../assets/add-data-graph-icon.svg";
 
 function LinkTileButton(name: string, title: string, allowMultiple: boolean) {
 

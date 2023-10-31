@@ -5,7 +5,7 @@ import { GraphWrapperComponent } from "./components/graph-wrapper-component";
 import { createGraphModel, GraphModel } from "./models/graph-model";
 import { updateGraphObjectWithNewSharedModelIds } from "./utilities/graph-utils";
 
-import GraphToolIcon from "./graph-icon.svg";
+import GraphToolIcon from "./assets/graph-icon.svg";
 
 registerTileContentInfo({
   defaultContent: (options) => createGraphModel(undefined, options?.appConfig),
