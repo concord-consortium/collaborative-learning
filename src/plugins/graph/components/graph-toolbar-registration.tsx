@@ -35,7 +35,7 @@ function LinkTileButton(name: string, title: string, allowMultiple: boolean) {
 }
 
 function LinkTileButtonMultiple({name}: IToolbarButtonComponentProps) {
-  return LinkTileButton(name, "Link more data", true);
+  return LinkTileButton(name, "Add data", true);
 }
 
 function LinkTileButtonNoMultiple({name}: IToolbarButtonComponentProps) {
