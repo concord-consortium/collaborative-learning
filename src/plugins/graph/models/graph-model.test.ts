@@ -15,7 +15,6 @@ describe('GraphModel', () => {
     expect(graphModel._pointStrokeColor).toBe(defaultStrokeColor);
     expect(graphModel.pointStrokeSameAsFill).toBe(false);
     expect(graphModel.plotBackgroundColor).toBe(defaultBackgroundColor);
-    // expect(graphModel.pointSizeMultiplier).toBe(1);
     expect(graphModel.isTransparent).toBe(false);
     expect(graphModel.plotBackgroundImageID).toBe('');
     expect(graphModel.plotBackgroundLockInfo).toBe(undefined);

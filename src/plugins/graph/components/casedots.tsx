@@ -36,13 +36,7 @@ export const CaseDots = function CaseDots(props: {
       const aCaseData: CaseData = target.current.node().__data__;
       if (aCaseData && target.current.node()?.nodeName === 'circle') {
         target.current.transition()
-          .attr('r', (r: any)=>{
-
-            console.log("📁 casedots.tsx ------------------------");
-            console.log("\tr: ", r);
-            console.log("\treturning -> dragPointRadius:", dragPointRadius);
-            return dragPointRadius;
-          });
+          .attr('r', dragPointRadius);
         setDragID(aCaseData.caseID);
         currPos.current = {x: event.clientX, y: event.clientY};
         handleClickOnDot(event, aCaseData.caseID, dataset);
@@ -73,14 +67,7 @@ export const CaseDots = function CaseDots(props: {
         target.current
           .classed('dragging', false)
           .transition()
-          .attr('r', (r: any) => {
-            console.log("📁 casedots.tsx ------------------------");
-            console.log("\t🏭 onDragEnd");
-            console.log("\t🏭 r: ", r);
-            console.log("\t🏭 returning -> graphModel.getPointRadius('select'):", graphModel.getPointRadius('select'));
-
-            return graphModel.getPointRadius('select');
-          });
+          .attr('r', graphModel.getPointRadius('select'));
         setDragID(() => '');
         target.current = null;
       }
@@ -91,9 +78,6 @@ export const CaseDots = function CaseDots(props: {
   const refreshPointSelection = useCallback(() => {
     const {pointColor, pointStrokeColor} = graphModel,
       selectedPointRadius = graphModel.getPointRadius('select');
-      console.log("📁 casedots.tsx ------------------------");
-      console.log("\t🏭 pointColor");
-
     dataConfiguration && setPointSelection({
       dotsRef, dataConfiguration, pointRadius: graphModel.getPointRadius(), selectedPointRadius,
       pointColor, pointStrokeColor
@@ -101,9 +85,6 @@ export const CaseDots = function CaseDots(props: {
   }, [dataConfiguration, graphModel, dotsRef]);
 
   const refreshPointPositions = useCallback((selectedOnly: boolean) => {
-    console.log("📁 casedots.tsx ------------------------");
-    console.log("\t🏭 refreshPointPositions");
-
     if (!dotsRef.current) return;
     const
       pointRadius = graphModel.getPointRadius(),
