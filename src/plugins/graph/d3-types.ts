@@ -14,17 +14,17 @@ export type DotsElt = SVGSVGElement | null;
 //  unknown: type of data attached to parent element (none in this case)
 export type DotSelection = Selection<SVGCircleElement, CaseData, SVGSVGElement, unknown>;
 
+// selects all `circle` elements
+export function selectAllCircles(svg: DotsElt): DotSelection | null {
+  return svg
+          ? select(svg).selectAll("circle")
+          : null;
+}
+
 // selects all `.graph-dot` or `.graph-dot-highlighted` elements
 export function selectDots(svg: DotsElt, selectedOnly = false): DotSelection | null {
   const innerSelector = selectedOnly ? ".graph-dot-highlighted" : ".graph-dot";
   return svg
           ? select(svg).selectAll(innerSelector)
-          : null;
-}
-
-// selects all `circle` elements
-export function selectAllCircles(svg: DotsElt): DotSelection | null {
-  return svg
-          ? select(svg).selectAll("circle")
           : null;
 }

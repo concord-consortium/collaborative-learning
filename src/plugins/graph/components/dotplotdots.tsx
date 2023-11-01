@@ -45,7 +45,7 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
         target.current
           .property('isDragging', true)
           .transition()
-          .attr('r',graphModel.getPointRadius('hover-drag'));
+          .attr('r', graphModel.getPointRadius('hover-drag'));
         setDragID(() => tItsID);
         currPos.current = primaryIsBottom ? event.clientX : event.clientY;
 

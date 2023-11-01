@@ -46,7 +46,8 @@ export const MovablePoint = observer(function MovablePoint(props: IProps) {
     instanceKey = model.instanceKey(subPlotKey),
     pointRef = useRef<SVGGElement | null>(null),
     [pointObject, setPointObject] = useState<IPointObject>({});
-  // get attributes for use in coordinates box and for determining when to reset the point
+
+    // get attributes for use in coordinates box and for determining when to reset the point
   // to the initial position when the attributes have changed
   const allAttributes = dataConfig?.dataset?.attributes,
     xAttrId = dataConfig?.attributeID('x') || '',

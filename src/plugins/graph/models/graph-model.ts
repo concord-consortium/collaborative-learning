@@ -10,10 +10,10 @@ import {
   AxisModelUnion, EmptyAxisModel, IAxisModelUnion, NumericAxisModel
 } from "../imports/components/axis/models/axis-model";
 import { GraphPlace } from "../imports/components/axis-graph-shared";
-import {
-  GraphAttrRole, hoverRadiusFactor, kDefaultNumericAxisBounds, kGraphTileType, PlotType, PlotTypes,
-  pointRadiusLogBase, pointRadiusMax, pointRadiusMin, pointRadiusSelectionAddend
-} from "../graph-types";
+import { GraphAttrRole, hoverRadiusFactor, kDefaultNumericAxisBounds, kGraphTileType,
+         PlotType, PlotTypes, pointRadiusMax, pointRadiusSelectionAddend
+
+       } from "../graph-types";
 import {DataConfigurationModel} from "./data-configuration-model";
 import { SharedModelType } from "../../../models/shared/shared-model";
 import {
@@ -105,14 +105,18 @@ export const GraphModel = TileContentModel
       return self.config.attributeID(place) ?? '';
     },
     getPointRadius(use: 'normal' | 'hover-drag' | 'select' = 'normal') {
-      let r = pointRadiusMax;
-      const numPoints = self.config.caseDataArray.length;
-      // for loop is fast equivalent to radius = max( minSize, maxSize - floor( log( logBase, max( dataLength, 1 )))
-      for (let i = pointRadiusLogBase; i <= numPoints; i = i * pointRadiusLogBase) {
-        --r;
-        if (r <= pointRadiusMin) break;
-      }
-      const result = r * self.pointSizeMultiplier;
+      const r = pointRadiusMax;
+
+      // -- we used to return result which grew the inner circle radius as we clicked on it, but now we return r
+      // -- commented out below ---
+      // const numPoints = self.config.caseDataArray.length;
+      // // for loop is fast equivalent to radius = max( minSize, maxSize - floor( log( logBase, max( dataLength, 1 )))
+      // for (let i = pointRadiusLogBase; i <= numPoints; i = i * pointRadiusLogBase) {
+      //   --r;
+      //   if (r <= pointRadiusMin) break;
+      // }
+      // const result = r * self.pointSizeMultiplier;
+
       switch (use) {
         case "normal":
           return r;
