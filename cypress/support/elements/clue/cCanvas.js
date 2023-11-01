@@ -120,10 +120,14 @@ class ClueCanvas {
 
     shareCanvas() {
         this.getShareButton().click({force:true});
+        this.getShareButton().find('.track').invoke('attr', 'class').should('contain', 'toggle-on');
+        this.getShareButton().find('.ball').invoke('attr', 'class').should('contain', 'toggle-on');
     }
 
     unshareCanvas() {
         this.getShareButton().click({force:true});
+        this.getShareButton().find('.track').invoke('attr', 'class').should('not.contain', 'toggle-on');
+        this.getShareButton().find('.ball').invoke('attr', 'class').should('not.contain', 'toggle-on');
     }
 
     getToolPalette() {
