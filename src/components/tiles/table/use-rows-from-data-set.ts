@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import classNames from "classnames";
 import { IDataSet } from "../../../models/data/data-set";
 import { IGridContext, TRow } from "./table-types";
 
@@ -26,7 +27,13 @@ const canonicalize = (dataSet: IDataSet, row: TRow) => {
 export const useRowsFromDataSet = ({ dataSet, readOnly, inputRowId, rowChanges, context }: IUseRowsFromDataSet) => {
   return useMemo(() => {
     const rowKeyGetter = (row: TRow) => row.__id__;
-    const rowClass = (row: TRow) => row.__id__ === inputRowId ? "input-row" : undefined;
+    const rowClass = (row: TRow) => {
+      const rowId = row.__id__;
+      return classNames({
+        highlighted: dataSet.isCaseSelected(rowId),
+        "input-row": rowId === inputRowId
+      });
+    };
     const _rows = dataSet.getCanonicalCasesAtIndices();
     const rows = _rows.map((_case, i) => canonicalize(dataSet, {
                           __index__: i + 1,

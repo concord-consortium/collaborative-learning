@@ -19,6 +19,10 @@ class DataCardToolTile {
     const nameSelector = ".attribute-name-value-pair .name";
     return this.getTile(tileIndex, workspaceClass).find(`${nameSelector}`);
   }
+  getAttrValueCell(tileIndex = 0, workspaceClass){
+    const valueSelector = ".attribute-name-value-pair .value";
+    return this.getTile(tileIndex, workspaceClass).find(`${valueSelector}`);
+  }
   getAttrValue(tileIndex = 0, workspaceClass){
     const valueSelector = ".attribute-name-value-pair .value input";
     return this.getTile(tileIndex, workspaceClass).find(`${valueSelector}`);
@@ -74,6 +78,10 @@ class DataCardToolTile {
   getSortCardData(tileIndex = 0, workspaceClass){
     const selector = ".sortable.expanded .attribute-value-row";
     return this.getTile(tileIndex, workspaceClass).find(`${selector}`);
+  }
+  getNavPanel(tileIndex = 0, workspaceClass) {
+    const selector = ".panel.nav";
+    return this.getTile(tileIndex, workspaceClass).find(selector);
   }
   getConfirmDeleteButton(tileIndex = 0, workspaceClass){
     const selector = ".button.modal-button.default";

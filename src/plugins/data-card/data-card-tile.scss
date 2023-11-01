@@ -74,8 +74,6 @@ $default-button-border-color: #979797;
       }
     }
 
-
-
     .panel.sort {
       background-color: $workspace-teal-light-6;
       border-bottom:0px;
@@ -89,6 +87,10 @@ $default-button-border-color: #979797;
       background-color: $workspace-teal-light-5;
       display: flex;
       justify-content: space-between;
+
+      &.highlighted {
+        background-color: $highlight-green;
+      }
 
       .card-number-of-listing {
         width: $name-width;
@@ -212,13 +214,26 @@ $default-button-border-color: #979797;
           flex: 1;
           font-weight: normal;
           color:$cell-text-color;
+
           .cell-value {
             padding:$cell-padding;
+          }
+
+          &.highlighted {
+            background-color: $highlight-green-light;
+
+            input {
+              background-color: $highlight-green-light;
+            }
           }
         }
 
         .type-icon {
-          margin: 0 4px;
+          padding: 0 4px;
+
+          &.highlighted {
+            background-color: $highlight-green-light;
+          }
         }
 
         .delete-attribute {

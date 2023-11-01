@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ITileProps, extractDragTileType, kDragTiles } from "../../components/tiles/tile-component";
 import { useUIStore } from "../../hooks/use-stores";
 import { DataCardContentModelType } from "./data-card-content";
@@ -24,8 +24,10 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
   const { documentId, model, readOnly, documentContent, tileElt, onSetCanAcceptDrop, onRegisterTileApi,
             scale, onRequestUniqueTitle, onUnregisterTileApi,
             height, onRequestRowHeight } = props;
+  const backgroundRef = useRef<HTMLDivElement | null>(null);
 
   const content = model.content as DataCardContentModelType;
+  const dataSet = content.dataSet;
   const ui = useUIStore();
 
   const isTileSelected = ui.selectedTileIds.findIndex(id => id === content.metadata.id) >= 0;
@@ -35,10 +37,18 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
   const [highlightDataCard, setHighlightDataCard] = useState(false);
 
   const shouldShowAddCase = !readOnly && isTileSelected;
-  const shouldShowDeleteCase = !readOnly && isTileSelected && content.dataSet.cases.length > 1;
+  const shouldShowDeleteCase = !readOnly && isTileSelected && dataSet.cases.length > 1;
   const displaySingle = !content.selectedSortAttributeId;
   const shouldShowAddField = !readOnly && isTileSelected && displaySingle;
   const attrIdsNames = content.existingAttributesWithNames();
+
+  // When the highlighted case is set, show it
+  const selectedCaseId = dataSet.firstSelectedCaseId;
+  useEffect(() => {
+    if (selectedCaseId) {
+      content.setCaseIndex(dataSet.caseIndexFromID(selectedCaseId));
+    }
+  }, [content, dataSet, selectedCaseId]);
 
   useEffect(() => {
     if (!model.computedTitle) {
@@ -113,9 +123,8 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
       const parsedDataDraggedTile = safeJsonParse(getDataDraggedTile);
       const contentOfDraggedTile= safeJsonParse(parsedDataDraggedTile.sharedModels[0].content);
       const dataSetOfDraggedTile = contentOfDraggedTile.dataSet;
-      const dataSetOfDroppedTile = content.dataSet;
 
-      mergeTwoDataSets(dataSetOfDraggedTile, dataSetOfDroppedTile);
+      mergeTwoDataSets(dataSetOfDraggedTile, dataSet);
       e.preventDefault();
       e.stopPropagation(); //prevents calling document-content > handleDrop
 
@@ -132,17 +141,27 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
     }
   };
 
-  function nextCase(){
+  function nextCase() {
     if (content.caseIndex < content.totalCases - 1) {
       content.setCaseIndex(content.caseIndex + 1);
     }
   }
 
-  function previousCase(){
+  const handleNextCase: React.MouseEventHandler<HTMLButtonElement> = e => {
+    e.stopPropagation();
+    nextCase();
+  };
+
+  function previousCase() {
     if (content.caseIndex > 0){
       content.setCaseIndex(content.caseIndex - 1);
     }
   }
+
+  const handlePreviousCase: React.MouseEventHandler<HTMLButtonElement> = e => {
+    e.stopPropagation();
+    previousCase();
+  };
 
   function setSort(event: React.ChangeEvent<HTMLSelectElement>){
     content.setSelectedSortAttributeId(event.target.value);
@@ -153,10 +172,14 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
     content.setCaseIndex(content.totalCases - 1);
   }
 
+  const handleAddNewCase: React.MouseEventHandler<HTMLDivElement> = event => {
+    event.stopPropagation();
+    addNewCase();
+  };
+
   function deleteCase(){
-    const thisCaseId = content.dataSet.caseIDFromIndex(content.caseIndex);
-    if (thisCaseId) {
-      content.dataSet.removeCases([thisCaseId]);
+    if (content.caseId) {
+      dataSet.removeCases([content.caseId]);
     }
     previousCase();
   }
@@ -172,16 +195,16 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
     onConfirm: () => deleteCase()
   });
 
-  function handleDeleteCardClick(){
-    const thisCaseId = content.dataSet.caseIDFromIndex(content.caseIndex);
-    if (thisCaseId){
-      if (content.isEmptyCase(thisCaseId)){
+  const handleDeleteCardClick: React.MouseEventHandler<HTMLDivElement> = event => {
+    event.stopPropagation();
+    if (content.caseId){
+      if (content.isEmptyCase(content.caseId)){
         deleteCase();
       } else {
         showAlert();
       }
     }
-  }
+  };
 
   const handleAddField = () => {
     content.addNewAttr();
@@ -210,8 +233,16 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
   );
 
   const handleBackgroundClick = (event: React.MouseEvent<HTMLDivElement | HTMLInputElement>) => {
-    setCurrEditAttrId("");
-    setCurrEditFacet("");
+    // Prevents clicks on child elements
+    if (event.target === backgroundRef.current) {
+      setCurrEditAttrId("");
+      setCurrEditFacet("");
+      dataSet.setSelectedCases([]);
+    }
+  };
+
+  const handleNavPanelClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    dataSet.setSelectedCases(content.caseId ? [content.caseId] : []);
   };
 
   return (
@@ -232,16 +263,16 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
         onClick={handleBackgroundClick}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
+        ref={element => backgroundRef.current = element}
       >
         <div className={highlightContainerClasses}>
           <div className="data-card-header-row">
-
             <div className="panel title">
-            <CustomEditableTileTitle
-              model={props.model}
-              onRequestUniqueTitle={props.onRequestUniqueTitle}
-              readOnly={props.readOnly}
-            />
+              <CustomEditableTileTitle
+                model={props.model}
+                onRequestUniqueTitle={props.onRequestUniqueTitle}
+                readOnly={props.readOnly}
+              />
             </div>
           </div>
 
@@ -253,43 +284,46 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
             />
           </div>
           { displaySingle &&
-            <div className="panel nav">
-              <div className="card-number-of-listing">
-                <div className="cell-text">
-                  { content.totalCases > 0
-                      ? `Card ${content.caseIndex + 1} of ${content.totalCases}`
-                      : "Add a card" }
+            <>
+              <div
+                className={classNames("panel nav", { "highlighted": content.caseSelected })}
+                onClick={handleNavPanelClick}
+              >
+                <div className="card-number-of-listing">
+                  <div className="cell-text">
+                    { content.totalCases > 0
+                        ? `Card ${content.caseIndex + 1} of ${content.totalCases}`
+                        : "Add a card" }
+                  </div>
                 </div>
-              </div>
-              <div className="card-nav-buttons">
-                <button className={ previousButtonClasses } onClick={previousCase}></button>
-                <button className={ nextButtonClasses } onClick={nextCase}></button>
-              </div>
-              { !readOnly &&
-                <div className="add-remove-card-buttons">
-                  <AddIconButton className={addCardClasses} onClick={addNewCase} />
-                  <RemoveIconButton className={removeCardClasses} onClick={handleDeleteCardClick} />
+                <div className="card-nav-buttons">
+                  <button className={ previousButtonClasses } onClick={handlePreviousCase}></button>
+                  <button className={ nextButtonClasses } onClick={handleNextCase}></button>
                 </div>
-              }
-            </div>
-          }
-          { displaySingle &&
-            <div className="single-card-data-area">
-              { content.totalCases > 0 &&
-                <DataCardRows
-                  caseIndex={content.caseIndex}
-                  model={model}
-                  totalCases={content.totalCases}
-                  readOnly={readOnly}
-                  currEditAttrId={currEditAttrId}
-                  currEditFacet={currEditFacet}
-                  setCurrEditAttrId={setCurrEditAttrId}
-                  setCurrEditFacet={setCurrEditFacet}
-                  imageUrlToAdd={imageUrlToAdd}
-                  setImageUrlToAdd={setImageUrlToAdd}
-                />
-              }
-            </div>
+                { !readOnly &&
+                  <div className="add-remove-card-buttons">
+                    <AddIconButton className={addCardClasses} onClick={handleAddNewCase} />
+                    <RemoveIconButton className={removeCardClasses} onClick={handleDeleteCardClick} />
+                  </div>
+                }
+              </div>
+              <div className="single-card-data-area">
+                { content.totalCases > 0 &&
+                  <DataCardRows
+                    caseIndex={content.caseIndex}
+                    model={model}
+                    totalCases={content.totalCases}
+                    readOnly={readOnly}
+                    currEditAttrId={currEditAttrId}
+                    currEditFacet={currEditFacet}
+                    setCurrEditAttrId={setCurrEditAttrId}
+                    setCurrEditFacet={setCurrEditFacet}
+                    imageUrlToAdd={imageUrlToAdd}
+                    setImageUrlToAdd={setImageUrlToAdd}
+                  />
+                }
+              </div>
+            </>
           }
           { shouldShowAddField && !readOnly &&
             <AddIconButton className="add-field" onClick={handleAddField} />

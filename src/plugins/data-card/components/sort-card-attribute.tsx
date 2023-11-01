@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import classNames from "classnames";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { DataCardContentModelType } from "../data-card-content";
 import { gImageMap } from "../../../models/image-map";
@@ -12,10 +13,11 @@ interface IProps {
 
 export const SortCardAttribute: React.FC<IProps> = ({ model, caseId, attr }) => {
   const content = model.content as DataCardContentModelType;
-  const attrName = content.dataSet.attrFromID(attr.id).name;
   const value = content.dataSet.getStrValue(caseId, attr.id);
   const isImage = gImageMap.isImageUrl(value);
   const [imageUrl, setImageUrl] = useState("");
+
+  const caseHighlighted = content.dataSet.isCaseSelected(caseId);
 
   isImage && gImageMap.getImage(value).then((image)=>{
     setImageUrl(image.displayUrl || "");
@@ -23,8 +25,8 @@ export const SortCardAttribute: React.FC<IProps> = ({ model, caseId, attr }) => 
 
   return (
     <div className="attribute-value-row">
-      <div className="attribute">{attrName}</div>
-      <div className="value">
+      <div className="attribute">{attr.name}</div>
+      <div className={classNames("value", { highlighted: caseHighlighted })}>
         { !isImage && value }
         { isImage && <img src={imageUrl} className="image-value" /> }
       </div>
