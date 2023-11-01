@@ -77,17 +77,26 @@ for (let i = 0; i < includedDocumentIds.length; i += queryLimit) {
       await documentSnapshots.forEach(async documentSnapshot => {
         const documentData = documentSnapshot.data();
         console.log(`  - Document`, documentData);
+        // TODO Determine comments url for documents without a network
         if (documentData.network) {
           const commentsUrl = `${collectionUrl}/${documentData.network}_${documentData.key}/comments`;
           console.log(`  - commentsUrl`, commentsUrl);
           const commentCollection = admin.firestore().collection(commentsUrl);
           console.log(`  - commentConnection`, commentCollection);
           await commentCollection.listDocuments().then(async commentDocRefs => {
-            console.log(`  ~ commentRefs`, commentDocRefs);
+            console.log(` ~~ commentRefs`, commentDocRefs);
             await commentDocRefs.map(async (commentDocRef, docIndex) => {
               await commentDocRef.get().then(commentDoc => {
                 const commentData = commentDoc.data();
-                console.log(`  - Comment`, commentData);
+                console.log(`  ~ Comment`, commentData);
+                if (commentData?.tags) {
+                  commentData.tags.forEach(tag => {
+                    if (!documentTags[documentData.key].includes(tag)) {
+                      documentTags[documentData.key].push(tag);
+                    }
+                  });
+                }
+                console.log(`  ~ documentTags`, documentTags);
               });
             });
           });
