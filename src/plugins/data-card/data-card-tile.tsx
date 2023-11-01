@@ -172,6 +172,11 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
     content.setCaseIndex(content.totalCases - 1);
   }
 
+  const handleAddNewCase: React.MouseEventHandler<HTMLDivElement> = event => {
+    event.stopPropagation();
+    addNewCase();
+  };
+
   function deleteCase(){
     if (content.caseId) {
       dataSet.removeCases([content.caseId]);
@@ -190,7 +195,8 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
     onConfirm: () => deleteCase()
   });
 
-  function handleDeleteCardClick(){
+  const handleDeleteCardClick: React.MouseEventHandler<HTMLDivElement> = event => {
+    event.stopPropagation();
     if (content.caseId){
       if (content.isEmptyCase(content.caseId)){
         deleteCase();
@@ -198,7 +204,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
         showAlert();
       }
     }
-  }
+  };
 
   const handleAddField = () => {
     content.addNewAttr();
@@ -296,7 +302,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
                 </div>
                 { !readOnly &&
                   <div className="add-remove-card-buttons">
-                    <AddIconButton className={addCardClasses} onClick={addNewCase} />
+                    <AddIconButton className={addCardClasses} onClick={handleAddNewCase} />
                     <RemoveIconButton className={removeCardClasses} onClick={handleDeleteCardClick} />
                   </div>
                 }
