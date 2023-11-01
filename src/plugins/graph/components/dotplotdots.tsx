@@ -253,6 +253,7 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
         getScreenY = primaryIsBottom ? getSecondaryScreenCoord : getPrimaryScreenCoord,
         getLegendColor = dataConfiguration?.attributeID('legend')
           ? dataConfiguration?.getLegendColorForCase : undefined;
+
       setPointCoordinates({
         dataset, pointRadius: graphModel.getPointRadius(),
         selectedPointRadius: graphModel.getPointRadius('select'),

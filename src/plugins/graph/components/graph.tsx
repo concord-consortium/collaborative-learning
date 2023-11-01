@@ -145,7 +145,7 @@ export const Graph = observer(
 
   // useDataTips({dotsRef, dataset, graphModel, enableAnimation});
   //useDataTips hook is used to identify individual points in a dense scatterplot
-  //it should be commented out for now as it shrinks outer circle when hovered over - but may prove useful in the future
+  //it should be commented out for now as it shrinks outer circle when hovered over, but may prove useful in the future
 
   const renderPlotComponent = () => {
     const props = {

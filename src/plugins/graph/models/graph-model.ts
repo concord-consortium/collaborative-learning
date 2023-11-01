@@ -123,6 +123,7 @@ export const GraphModel = TileContentModel
         case "hover-drag":
           return r * hoverRadiusFactor;
         case "select":
+          console.log("selected! returning:", r + pointRadiusSelectionAddend);
           return r + pointRadiusSelectionAddend;
       }
     },
