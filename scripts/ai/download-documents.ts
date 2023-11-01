@@ -19,6 +19,11 @@ import { prettyDuration } from "./script-utils";
 // Load the service account key JSON file.
 import serviceAccount from "./serviceAccountKey.json" assert { type: "json" };
 
+// The portal to get documents from. For example, "learn.concord.org".
+const portal = "learn.concord.org";
+// The demo name to use. Make falsy to not use a demo.
+const demo = "TEALE";
+
 // Make falsy to include all documents
 const documentLimit = false;
 
@@ -68,13 +73,10 @@ const accessTime = Date.now();
 
 const databaseURL = "https://collaborative-learning-ec215.firebaseio.com";
 
-function buildFirebasePath(portal?: string) {
-  return portal === "demo"
-          ? `/demo/CLUE/portals/demo/classes`
-          : `/authed/portals/${portal?.replace(/\./g, "_")}/classes`;
-}
+const firebaseBasePath = demo
+  ? `/demo/${demo}/portals/demo/classes`
+  : `/authed/portals/${portal.replace(/\./g, "_")}/classes`;
 
-const firebaseBasePath = buildFirebasePath("learn.concord.org");
 const fetchURL = `${databaseURL}${firebaseBasePath}.json?shallow=true`;
 console.log(`Fetching URL: ${fetchURL}`);
 

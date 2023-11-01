@@ -17,7 +17,13 @@ import { prettyDuration } from "./script-utils";
 // The directory containing the documents you're interested in.
 // This should be the output of download-documents.ts.
 // Each document should be named like documentID.txt, where ID is the document's id in the database.
-const sourceDirectory = "dataset1698684356054";
+const sourceDirectory = "dataset1698797038458";
+
+// These should be the same as what was used for download-documents.ts to create the sourceDirectory
+// The portal to get documents from. For example, "learn.concord.org".
+const portal = "learn.concord.org";
+// The demo name to use. Make falsy to not use a demo.
+const demo = "TEALE";
 
 // Number of documents to include in each query. I believe 10 is the max for this.
 const queryLimit = 10;
@@ -55,23 +61,44 @@ fs.readdirSync(sourcePath).forEach(file => {
 console.log(`***** Getting document tags *****`);
 const tagStartTime = Date.now();
 const includedDocumentIds = Object.keys(documentTags);
-const documentCollection = admin.firestore().collection("authed/learn_concord_org/documents");
+console.log(`~~~ includedDocumentIds`, includedDocumentIds);
+const collectionUrl = demo
+  ? `demo/${demo}/documents`
+  : `authed/${portal.replace(/\./g, "_")}/documents`;
+const documentCollection = admin.firestore().collection(collectionUrl);
 for (let i = 0; i < includedDocumentIds.length; i += queryLimit) {
   console.log(`--- Checking documents ${i}-${i+queryLimit}`);
   const documentIdSubset = includedDocumentIds.slice(i, i + queryLimit);
-  documentCollection.where("key", "in", documentIdSubset).get()
-    .then(documentSnapshots => {
+  await documentCollection.where("key", "in", documentIdSubset).get()
+    .then(async documentSnapshots => {
       const docRefTime = Date.now();
       console.log(` -- Time to get document info: ${prettyDuration(docRefTime - startTime)}`);
-      documentSnapshots.forEach(documentSnapshot => {
+      // console.log(` -- Documents:`, documentSnapshots);
+      await documentSnapshots.forEach(async documentSnapshot => {
         const documentData = documentSnapshot.data();
         console.log(`  - Document`, documentData);
+        if (documentData.network) {
+          const commentsUrl = `${collectionUrl}/${documentData.network}_${documentData.key}/comments`;
+          console.log(`  - commentsUrl`, commentsUrl);
+          const commentCollection = admin.firestore().collection(commentsUrl);
+          console.log(`  - commentConnection`, commentCollection);
+          await commentCollection.listDocuments().then(async commentDocRefs => {
+            console.log(`  ~ commentRefs`, commentDocRefs);
+            await commentDocRefs.map(async (commentDocRef, docIndex) => {
+              await commentDocRef.get().then(commentDoc => {
+                const commentData = commentDoc.data();
+                console.log(`  - Comment`, commentData);
+              });
+            });
+          });
+        }
       });
     });
-  }
+}
       // documentSnapshots.docs.find(doc => !!doc.data()?.classPath)?.data()?.classPath;
       // console.log(`  - documentDocRefs`, documentsDocRefs.length);
-      // const docs = await Promise.all(documentsDocRefs.map((documentDocRef, docIndex) => new Promise((resolve, reject) => {
+      // const docs =
+          // await Promise.all(documentsDocRefs.map((documentDocRef, docIndex) => new Promise((resolve, reject) => {
       //   documentDocRef.get()
       //     .then(doc => {
       //       const documentData = doc?.data();
@@ -101,8 +128,8 @@ for (let i = 0; i < includedDocumentIds.length; i += queryLimit) {
     console.log(`***** End script *****`);
     console.log(`- Time to get credential: ${prettyDuration(credentialTime - startTime)}`);
     console.log(`- Time to download documents: ${prettyDuration(tagStartTime - startTime)}`);
-    console.log(`- Time to get documents from firestore: ${prettyDuration(docRefTime - startTime)}`);
+    // console.log(`- Time to get documents from firestore: ${prettyDuration(docRefTime - startTime)}`);
     console.log(`- Total Time: ${prettyDuration(endTime - startTime)}`);
 
-    process.exit(0);
+    // process.exit(0);
   // });
