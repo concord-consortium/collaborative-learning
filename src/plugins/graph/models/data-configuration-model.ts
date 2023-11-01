@@ -678,7 +678,7 @@ export const DataConfigurationModel = types
        * the old position to prevent duplication.
        */
       if (self._yAttributeDescriptions.find(d=>d.attributeID===oldAttrId)) {
-        this.removeYAttribute(newAttrId);
+        this.removeYAttributeID(newAttrId);
         const index = self._yAttributeDescriptions.findIndex(d=>d.attributeID===oldAttrId);
         self._yAttributeDescriptions[index].attributeID = newAttrId;
         if (index === 0 && self._yAttributeDescriptions.length === 1) {
@@ -701,7 +701,7 @@ export const DataConfigurationModel = types
         existingFilteredCases?.invalidateCases();
       }
     },
-    removeYAttribute(id: string) {
+    removeYAttributeID(id: string) {
       const index = self._yAttributeDescriptions.findIndex((aDesc) => aDesc.attributeID === id);
       if (index >= 0) {
         self._yAttributeDescriptions.splice(index, 1);
@@ -719,14 +719,46 @@ export const DataConfigurationModel = types
         aFilteredCases.invalidateCases();
       });
     },
+    /**
+     * Register a "handler" to be called on any action in the linked dataset.
+     * @param handler - a method that accepts an actionCall parameter.
+     */
     onAction(handler: (actionCall: ISerializedActionCall) => void) {
       const id = uniqueId();
       self.handlers.set(id, handler);
       return () => {
         self.handlers.delete(id);
       };
+    },
+    afterCreate() {
+      this.onAction(this.handleRemoveAttributeAction);
+    },
+    handleRemoveAttributeAction(actionCall: ISerializedActionCall) {
+      if (isRemoveAttributeTypeAction(actionCall)) {
+        const removedAttributeId = actionCall.args[0];
+        for (const desc of self._attributeDescriptions.values()) {
+          if (desc.attributeID===removedAttributeId) {
+            console.log('TODO: remove non-Y attribute', desc);
+          }
+        }
+        for (const desc of self._yAttributeDescriptions) {
+          if (desc.attributeID===removedAttributeId) {
+            this.removeYAttributeID(removedAttributeId);
+          }
+        }
+      }
     }
+
   }));
+
+  export interface RemoveAttributeTypeAction extends ISerializedActionCall {
+    name: "removeAttribute";
+    args: [string];
+  }
+
+  export function isRemoveAttributeTypeAction(action: ISerializedActionCall): action is RemoveAttributeTypeAction {
+    return action.name === "removeAttribute";
+  }
 
 /*
 export interface SetAttributeTypeAction extends ISerializedActionCall {

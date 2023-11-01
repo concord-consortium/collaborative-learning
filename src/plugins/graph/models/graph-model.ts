@@ -249,7 +249,7 @@ export const GraphModel = TileContentModel
      * Find Y attribute with the given ID in any layer and remove it if found.
      */
     removeYAttributeID(attrID: string) {
-      self.layers.forEach((layer) => layer.config.removeYAttribute(attrID));
+      self.layers.forEach((layer) => layer.config.removeYAttributeID(attrID));
     },
     /**
      * Find Y attribute with given ID in any layer, and replace it with the new attribute.
