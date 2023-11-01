@@ -159,9 +159,11 @@ export const Graph = observer(
   };
 
   const renderGraphAxes = () => {
+
     const places = AxisPlaces.filter((place: AxisPlace) => {
       return !!graphModel.getAxis(place);
     });
+    // console.log("\t🔪 places:", places);
     return places.map((place: AxisPlace) => {
       return <GraphAxis key={place}
                         place={place}

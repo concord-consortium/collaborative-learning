@@ -40,6 +40,10 @@ export const NumericAxisDragRects = observer(
         dilationAnchorCoord: number,
         dragging = false;
 
+
+        // console.log("📁 numeric-axis-drag-rects.tsx ------------------------");
+        // console.log("\tuseEffect #1: with dependencies:", axisModel, place, layout, numSubAxes, subAxisIndex);
+
       const onDragStart: D3Handler = function() {
           const subAxisLength = layout.getAxisLength(place) / numSubAxes,
             rangeMin = subAxisIndex * subAxisLength,

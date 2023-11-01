@@ -83,12 +83,19 @@ export const useSubAxis = ({
             .style("stroke-opacity", "0.7");
         },
         renderNumericAxis = () => {
+          console.log("\t🏭 renderNumericAxis------------------");
           select(subAxisElt).selectAll('*').remove();
-          const numericScale = d3Scale as unknown as ScaleLinear<number, number>,
-            axisScale = axis(numericScale).tickSizeOuter(0).tickFormat(format('.9')),
-            duration = enableAnimation.current ? transitionDuration : 0;
+          const numericScale = d3Scale as unknown as ScaleLinear<number, number>;
+          // console.log("\t🔪 numericScale:", numericScale);
+          const axisScale = axis(numericScale).tickSizeOuter(0).tickFormat(format('.9'));
+          // console.log("\t🔪 axisScale:", axisScale);
+          const duration = enableAnimation.current ? transitionDuration : 0;
+          console.log("\t🔪 duration:", duration);
           if (!axisIsVertical && numericScale.ticks) {
+            console.log("nonVerticalAxis");
             axisScale.tickValues(numericScale.ticks(computeBestNumberOfTicks(numericScale)));
+            console.log("\t numericScale.ticks(computeBestNumberOfTicks(numericScale)):",
+              numericScale.ticks(computeBestNumberOfTicks(numericScale)));
           }
           select(subAxisElt)
             .attr("transform", initialTransform)

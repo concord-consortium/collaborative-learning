@@ -27,9 +27,14 @@ export const SubAxis = memo(function SubAxis({
     subAxisIndex, axisModel, subAxisElt, enableAnimation, showScatterPlotGridLines, centerCategoryLabels
   });
 
+  // console.log("-----<SubAxis>------");
+
+  // console.log("\t numeric:", axisModel?.type === 'numeric');
+
   return (
     <g className='sub-axis-wrapper' ref={subWrapperElt}>
       <g className='axis' ref={elt => setSubAxisElt(elt)}/>
+
       {axisModel?.type === 'numeric'
         ? <NumericAxisDragRects
           axisModel={axisModel as INumericAxisModel}
