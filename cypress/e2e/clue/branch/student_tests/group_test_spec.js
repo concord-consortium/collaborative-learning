@@ -121,7 +121,7 @@ context('Test group functionalities', function () {
     clueCanvas.getFourToOneUpViewToggle().should('be.visible');
     clueCanvas.getNorthEastCanvas().should('contain', 'S15');
     clueCanvas.getNorthEastCanvas().should('be.visible').and('not.contain', 'not shared their workspace');
-    clueCanvas.shareCanvas();
+    clueCanvas.unshareCanvas();
     cy.visit(getUrl(0));
     cy.waitForLoad();
     clueCanvas.openFourUpView();
