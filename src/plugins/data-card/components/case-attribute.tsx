@@ -266,14 +266,20 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     { "editing": editingLabel }
   );
 
+  const valueHighlighted = content.caseSelected;
+
   const valueClassNames = classNames(
-    `value ${attrKey}`,
-    { "editing": editingValue },
-    {"has-image": gImageMap.isImageUrl(valueStr)}
+    "value", attrKey,
+    {
+      editing: editingValue,
+      "has-image": gImageMap.isImageUrl(valueStr),
+      highlighted: valueHighlighted
+    }
   );
 
   const typeIconClassNames = classNames(
-    `type-icon ${attrKey}`
+    "type-icon", attrKey,
+    { highlighted: valueHighlighted }
   );
 
   const deleteAttrButtonClassNames = classNames(
@@ -329,40 +335,40 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
       </div>
 
       <div className={valueClassNames} onClick={handleValueClick}>
-          <div style={{display: (!readOnly && !valueIsImage()) ? 'block' : 'none'}} className="downshift-dropdown">
-            <VisuallyHidden>
-              <label {...getLabelProps()} className="">
-                Value for {labelCandidate}
-              </label>
-            </VisuallyHidden>
-            <input
-              {...customizedGetInputProps()}
-              className={valueInputClassNames}
-              onFocus={handleValueInputFocus}
-              onPaste={handleValuePaste}
-            />
-            <button aria-label="toggle menu" type="button" {...getToggleButtonProps()}>
-              {displayArrow()}
-            </button>
-            <ul {...getMenuProps()} className={ isOpen ? "open" : "closed"}>
-              {isOpen &&
-                inputItems.map((item, index) => (
-                  <li className="dropdown-item" style={highlightedIndex === index ? {backgroundColor: '#bde4ff'} : {} }
-                    key={`${item}${index}`}
-                    {...getItemProps({item, index})}
-                  >
-                    {item}
-                  </li>
-              ))}
-            </ul>
-          </div>
+        <div style={{display: (!readOnly && !valueIsImage()) ? 'block' : 'none'}} className="downshift-dropdown">
+          <VisuallyHidden>
+            <label {...getLabelProps()} className="">
+              Value for {labelCandidate}
+            </label>
+          </VisuallyHidden>
+          <input
+            {...customizedGetInputProps()}
+            className={valueInputClassNames}
+            onFocus={handleValueInputFocus}
+            onPaste={handleValuePaste}
+          />
+          <button aria-label="toggle menu" type="button" {...getToggleButtonProps()}>
+            {displayArrow()}
+          </button>
+          <ul {...getMenuProps()} className={ isOpen ? "open" : "closed"}>
+            {isOpen &&
+              inputItems.map((item, index) => (
+                <li className="dropdown-item" style={highlightedIndex === index ? {backgroundColor: '#bde4ff'} : {} }
+                  key={`${item}${index}`}
+                  {...getItemProps({item, index})}
+                >
+                  {item}
+                </li>
+            ))}
+          </ul>
+        </div>
 
-          { valueIsImage() &&
-            <img src={imageUrl} className="image-value" />
-          }
-          { readOnly && !valueIsImage() &&
-            <div className="cell-value">{valueStr}</div>
-          }
+        { valueIsImage() &&
+          <img src={imageUrl} className="image-value" />
+        }
+        { readOnly && !valueIsImage() &&
+          <div className="cell-value">{valueStr}</div>
+        }
       </div>
       <div className={typeIconClassNames} >{typeIcon}</div>
 
