@@ -9,7 +9,7 @@ import {useDataSetContext} from "../imports/hooks/use-data-set-context";
 // import {useInstanceIdContext} from "../hooks/use-instance-id-context";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {ICase} from "../../../models/data/data-set-types";
-import { selectedOuterCircleFillColor } from "../../../utilities/color-utils";
+import {selectedOuterCircleFillColor} from "../../../utilities/color-utils";
 import {useGraphModelContext} from "../models/graph-model";
 import {
   // getScreenCoord,

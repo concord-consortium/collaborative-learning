@@ -80,7 +80,6 @@ export const
   pointRadiusLogBase = 2.0, // reduce point radius from max by log of (num. cases) base (LogBase).
   pointRadiusSelectionAddend = 0, // Zero for now - could be used to increase point radius when selected.
   hoverRadiusFactor = 1.0,
-  selectedRadiusFactor = 1.5,
   kGraphFont = "12px sans-serif",
   kChoroplethHeight = 16,
   kAxisTickLength = 4,
