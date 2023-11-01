@@ -12,7 +12,7 @@ import {
 import { GraphPlace } from "../imports/components/axis-graph-shared";
 import {
   GraphAttrRole, hoverRadiusFactor, kDefaultNumericAxisBounds, kGraphTileType, PlotType, PlotTypes,
-  pointRadiusMax, pointRadiusSelectionAddend
+  pointRadiusLogBase, pointRadiusMax, pointRadiusMin, pointRadiusSelectionAddend
 } from "../graph-types";
 import {DataConfigurationModel} from "./data-configuration-model";
 import { SharedModelType } from "../../../models/shared/shared-model";
@@ -64,6 +64,7 @@ export const GraphModel = TileContentModel
     _pointStrokeColor: defaultStrokeColor,
     pointStrokeSameAsFill: false,
     plotBackgroundColor: defaultBackgroundColor,
+    pointSizeMultiplier: 1,
     isTransparent: false,
     plotBackgroundImageID: "",
     // todo: how to use this type?
@@ -104,8 +105,14 @@ export const GraphModel = TileContentModel
       return self.config.attributeID(place) ?? '';
     },
     getPointRadius(use: 'normal' | 'hover-drag' | 'select' = 'normal') {
-      const r = pointRadiusMax;
+      let r = pointRadiusMax;
+      const numPoints = self.config.caseDataArray.length;
       // for loop is fast equivalent to radius = max( minSize, maxSize - floor( log( logBase, max( dataLength, 1 )))
+      for (let i = pointRadiusLogBase; i <= numPoints; i = i * pointRadiusLogBase) {
+        --r;
+        if (r <= pointRadiusMin) break;
+      }
+      const result = r * self.pointSizeMultiplier;
       switch (use) {
         case "normal":
           return r;
@@ -249,6 +256,9 @@ export const GraphModel = TileContentModel
     },
     setPlotBackgroundColor(color: string) {
       self.plotBackgroundColor = color;
+    },
+    setPointSizeMultiplier(multiplier: number) {
+      self.pointSizeMultiplier = multiplier;
     },
     setIsTransparent(transparent: boolean) {
       self.isTransparent = transparent;

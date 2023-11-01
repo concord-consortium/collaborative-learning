@@ -10,11 +10,12 @@ interface IProps {
   modelId: string;
   showRowLabels: boolean;
   triggerColumnChange: () => void;
+  triggerRowChange: () => void;
 }
-export const useGridContext = ({ content, modelId, showRowLabels, triggerColumnChange }: IProps) => {
+export const useGridContext = ({ content, modelId, showRowLabels, triggerColumnChange, triggerRowChange }: IProps) => {
   const gridRef = useRef<DataGridHandle>(null);
   const inputRowId = useRef(uniqueId());
-  const dataSet = useMemo(() => content.dataSet, [content]);
+  const dataSet = content.dataSet;
 
   // this tracks ReactDataGrid's notion of the selected cell
   const selectedCell = useRef<TPosition>({ rowIdx: -1, idx: -1 });
@@ -28,9 +29,9 @@ export const useGridContext = ({ content, modelId, showRowLabels, triggerColumnC
                             selectedColumnsRef.current.has(columnId), [selectedColumnsRef]);
   const getSelectedRows = useCallback(() => {
     // this is suitable for passing into ReactDataGrid
-    return new Set<React.Key>(Array.from(dataSet.selection));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [modelId, dataSet.selection, dataSet.selectedCaseIds]);
+    const { selection } = dataSet;
+    return new Set<React.Key>(Array.from(selection));
+  }, [dataSet]);
 
   const clearRowSelection = useCallback(() => dataSet.selectAll(false), [dataSet]);
   const clearColumnSelection = useCallback(() => setSelectedColumns(new Set([])), []);
@@ -54,15 +55,15 @@ export const useGridContext = ({ content, modelId, showRowLabels, triggerColumnC
     if (select !== dataSet.isCaseSelected(rowId)) {
       clearSelection({ row: false });
       dataSet.selectCases([rowId], !dataSet.isCaseSelected(rowId));
-      triggerColumnChange();
+      triggerRowChange();
     }
-  }, [clearSelection, dataSet, triggerColumnChange]);
+  }, [clearSelection, dataSet, triggerRowChange]);
 
   const selectOneRow = useCallback((rowId: string) => {
     clearSelection();
     dataSet.setSelectedCases([rowId]);
-    triggerColumnChange();
-  }, [clearSelection, dataSet, triggerColumnChange]);
+    triggerRowChange();
+  }, [clearSelection, dataSet, triggerRowChange]);
 
   // Creating a new gridContext can result in focus change thus disrupting cell edits;
   // therefore, it's important that all inputs to the gridContext be wrapped in useCallback()
@@ -83,8 +84,7 @@ export const useGridContext = ({ content, modelId, showRowLabels, triggerColumnC
     clearSelection({ row: false });
     _rows.delete(inputRowId.current);
     dataSet.setSelectedCases(Array.from(_rows) as string[]);
-    triggerColumnChange();
-  }, [clearSelection, dataSet, triggerColumnChange]);
+  }, [clearSelection, dataSet]);
 
   const cellNavigationMode: CellNavigationMode = "CHANGE_ROW";
   return {

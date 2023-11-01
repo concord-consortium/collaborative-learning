@@ -3,6 +3,7 @@ import React, {useCallback, useRef, useState} from "react";
 import {ScaleNumericBaseType} from "../imports/components/axis/axis-types";
 import {CaseData} from "../d3-types";
 import {PlotProps} from "../graph-types";
+import {PlotProps} from "../graph-types";
 import {useDragHandlers, usePlotResponders} from "../hooks/use-plot";
 import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
 import {useDataSetContext} from "../imports/hooks/use-data-set-context";
@@ -60,6 +61,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
           .property('isDragging', true)
           .transition()
           .attr('r', dragPointRadiusRef.current);
+          .attr('r', dragPointRadiusRef.current);
         setDragID(tItsID);
         currPos.current = {x: event.clientX, y: event.clientY};
 
@@ -115,6 +117,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
           .classed('dragging', false)
           .property('isDragging', false)
           .transition()
+          .attr('r', selectedPointRadiusRef.current);
           .attr('r', selectedPointRadiusRef.current);
         setDragID(() => '');
         target.current = null;

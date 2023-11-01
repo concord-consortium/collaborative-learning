@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ITileProps, extractDragTileType, kDragTiles } from "../../components/tiles/tile-component";
 import { useUIStore } from "../../hooks/use-stores";
 import { DataCardContentModelType } from "./data-card-content";
@@ -24,8 +24,10 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
   const { documentId, model, readOnly, documentContent, tileElt, onSetCanAcceptDrop, onRegisterTileApi,
             scale, onRequestUniqueTitle, onUnregisterTileApi,
             height, onRequestRowHeight } = props;
+  const backgroundRef = useRef<HTMLDivElement | null>(null);
 
   const content = model.content as DataCardContentModelType;
+  const dataSet = content.dataSet;
   const ui = useUIStore();
 
   const isTileSelected = ui.selectedTileIds.findIndex(id => id === content.metadata.id) >= 0;
@@ -35,18 +37,18 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
   const [highlightDataCard, setHighlightDataCard] = useState(false);
 
   const shouldShowAddCase = !readOnly && isTileSelected;
-  const shouldShowDeleteCase = !readOnly && isTileSelected && content.dataSet.cases.length > 1;
+  const shouldShowDeleteCase = !readOnly && isTileSelected && dataSet.cases.length > 1;
   const displaySingle = !content.selectedSortAttributeId;
   const shouldShowAddField = !readOnly && isTileSelected && displaySingle;
   const attrIdsNames = content.existingAttributesWithNames();
 
   // When the highlighted case is set, show it
-  const selectedCaseId = content.dataSet.firstSelectedCaseId;
+  const selectedCaseId = dataSet.firstSelectedCaseId;
   useEffect(() => {
     if (selectedCaseId) {
-      content.setCaseIndex(content.dataSet.caseIndexFromID(selectedCaseId));
+      content.setCaseIndex(dataSet.caseIndexFromID(selectedCaseId));
     }
-  }, [content, selectedCaseId]);
+  }, [content, dataSet, selectedCaseId]);
 
   useEffect(() => {
     if (!model.computedTitle) {
@@ -121,9 +123,8 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
       const parsedDataDraggedTile = safeJsonParse(getDataDraggedTile);
       const contentOfDraggedTile= safeJsonParse(parsedDataDraggedTile.sharedModels[0].content);
       const dataSetOfDraggedTile = contentOfDraggedTile.dataSet;
-      const dataSetOfDroppedTile = content.dataSet;
 
-      mergeTwoDataSets(dataSetOfDraggedTile, dataSetOfDroppedTile);
+      mergeTwoDataSets(dataSetOfDraggedTile, dataSet);
       e.preventDefault();
       e.stopPropagation(); //prevents calling document-content > handleDrop
 
@@ -171,9 +172,14 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
     content.setCaseIndex(content.totalCases - 1);
   }
 
+  const handleAddNewCase: React.MouseEventHandler<HTMLDivElement> = event => {
+    event.stopPropagation();
+    addNewCase();
+  };
+
   function deleteCase(){
     if (content.caseId) {
-      content.dataSet.removeCases([content.caseId]);
+      dataSet.removeCases([content.caseId]);
     }
     previousCase();
   }
@@ -189,7 +195,8 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
     onConfirm: () => deleteCase()
   });
 
-  function handleDeleteCardClick(){
+  const handleDeleteCardClick: React.MouseEventHandler<HTMLDivElement> = event => {
+    event.stopPropagation();
     if (content.caseId){
       if (content.isEmptyCase(content.caseId)){
         deleteCase();
@@ -197,7 +204,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
         showAlert();
       }
     }
-  }
+  };
 
   const handleAddField = () => {
     content.addNewAttr();
@@ -226,8 +233,16 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
   );
 
   const handleBackgroundClick = (event: React.MouseEvent<HTMLDivElement | HTMLInputElement>) => {
-    setCurrEditAttrId("");
-    setCurrEditFacet("");
+    // Prevents clicks on child elements
+    if (event.target === backgroundRef.current) {
+      setCurrEditAttrId("");
+      setCurrEditFacet("");
+      dataSet.setSelectedCases([]);
+    }
+  };
+
+  const handleNavPanelClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    dataSet.setSelectedCases(content.caseId ? [content.caseId] : []);
   };
 
   return (
@@ -248,6 +263,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
         onClick={handleBackgroundClick}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
+        ref={element => backgroundRef.current = element}
       >
         <div className={highlightContainerClasses}>
           <div className="data-card-header-row">
@@ -270,8 +286,8 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
           { displaySingle &&
             <>
               <div
-                className={classNames("panel nav", { "highlight-panel": content.caseSelected })}
-                onClick={() => content.dataSet.setSelectedCases(content.caseId ? [content.caseId] : [])}
+                className={classNames("panel nav", { "highlighted": content.caseSelected })}
+                onClick={handleNavPanelClick}
               >
                 <div className="card-number-of-listing">
                   <div className="cell-text">
@@ -286,7 +302,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
                 </div>
                 { !readOnly &&
                   <div className="add-remove-card-buttons">
-                    <AddIconButton className={addCardClasses} onClick={addNewCase} />
+                    <AddIconButton className={addCardClasses} onClick={handleAddNewCase} />
                     <RemoveIconButton className={removeCardClasses} onClick={handleDeleteCardClick} />
                   </div>
                 }
