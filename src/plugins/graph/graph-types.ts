@@ -75,7 +75,7 @@ export interface counterProps {
 
 export const
   transitionDuration = 1000,
-  pointRadiusMax = 10,
+  pointRadiusMax = 5,
   pointRadiusMin = 3,
   pointRadiusLogBase = 2.0, // reduce point radius from max by log of (num. cases) base (LogBase).
   pointRadiusSelectionAddend = 0, // Zero for now - could be used to increase point radius when selected.
