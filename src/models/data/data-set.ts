@@ -98,6 +98,11 @@ export const DataSet = types.model("DataSet", {
     }
   };
 })
+.views(self => ({
+  get selectedCaseIds() {
+    return Array.from(self.selection);
+  }
+}))
 .extend(self => {
   const disposers: { [index: string]: () => void } = {};
   let inFlightActions = 0;
@@ -361,6 +366,15 @@ export const DataSet = types.model("DataSet", {
         return group
                 ? group.childCaseIds.every(id => self.selection.has(id))
                 : self.selection.has(caseId);
+      },
+      get firstSelectedCaseId() {
+        if (self.selectedCaseIds.length > 0) return self.selectedCaseIds[0];
+      },
+      get selectedCaseIdString() {
+        return self.selectedCaseIds.join(", ");
+      },
+      get isAnyCaseSelected() {
+        return self.selection.size > 0;
       },
       get isInTransaction() {
         return self.transactionCount > 0;

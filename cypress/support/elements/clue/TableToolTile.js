@@ -83,6 +83,15 @@ class TableToolTile{
         cy.get('.modal-button').contains("Link Table").click();
       });
     }
+    createNewLinkedGraph() {
+      this.getTableTile().click();
+      cy.get('.toolbar-button.link-graph').click();
+      cy.get('.modal-button.add-new-button').click();
+    }
+    createNewDatacard() {
+      this.getTableTile().click();
+      cy.get('.toolbar-button.data-set-view').click();
+    }
     checkWorkspaceColumnHeaders(attributes) {
       this.getWorkspaceColumnHeader().should("have.length", attributes.length);
       attributes.forEach((attributeName, index) => {

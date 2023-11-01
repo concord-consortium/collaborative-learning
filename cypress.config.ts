@@ -6,7 +6,8 @@ export default defineConfig({
   video: false,
   viewportWidth: 1400,
   viewportHeight: 1000,
-  projectId: '3pbqac',
+  // projectId: '3pbqac', // OSS plan
+  projectId: '5vjgo9', // paid plan
   chromeWebSecurity: false,
   retries: {
     runMode: 2,

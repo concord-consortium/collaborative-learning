@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { observer } from "mobx-react";
 import classNames from "classnames";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { DataCardContentModelType } from "../data-card-content";
@@ -24,24 +25,32 @@ const getShadeRGB = (index: number) => {
   };
 };
 
-export const SortCard: React.FC<IProps> = ({ model, caseId, indexInStack, totalInStack }) => {
+export const SortCard: React.FC<IProps> = observer(
+  function SortCard({ model, caseId, indexInStack, totalInStack })
+{
   const content = model.content as DataCardContentModelType;
   const deckCardNumberDisplay = content.dataSet.caseIndexFromID(caseId) + 1;
   const stackCardNumberDisplay = indexInStack + 1;
+  const caseHighlighted = content.dataSet.isCaseSelected(caseId);
   const { r, g, b } = getShadeRGB(indexInStack);
   const shadeStr = `rgb(${r},${g},${b})`;
+  const capStyle = !caseHighlighted ? { backgroundColor: shadeStr } : undefined;
   const atStackTop = stackCardNumberDisplay === totalInStack;
 
   const [expanded, setExpanded] = useState(false);
   useEffect(()=> setExpanded(atStackTop), [atStackTop]); // "top" card loads expanded
 
   const toggleExpanded = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setExpanded(!expanded);
   };
 
   const cardClasses = classNames(
     "sortable", "card",
-    { collapsed: !expanded }, { expanded }
+    { collapsed: !expanded, expanded }
+  );
+  const headingClasses = classNames(
+    "heading", { highlighted: caseHighlighted }
   );
 
   const {attributes, listeners, setNodeRef, transform} = useDraggable({
@@ -63,11 +72,12 @@ export const SortCard: React.FC<IProps> = ({ model, caseId, indexInStack, totalI
   return (
     <div
       className={cardClasses} id={caseId}
+      onClick={() => content.dataSet.setSelectedCases([caseId])}
       onDoubleClick={loadAsSingle}
       ref={setNodeRef}
       style={style}
     >
-      <div className="heading" style={{ backgroundColor: shadeStr }}>
+      <div className={headingClasses} style={capStyle}>
         <div className="expand-toggle-area">
           <button className="expand-toggle" onClick={toggleExpanded}>▶</button>
         </div>
@@ -93,8 +103,10 @@ export const SortCard: React.FC<IProps> = ({ model, caseId, indexInStack, totalI
           })}
         </div>
       }
-      <div className="footer" style={{ backgroundColor: shadeStr }}></div>
+      <div
+        className={classNames("footer", { highlighted: caseHighlighted })}
+        style={capStyle}
+      />
     </div>
   );
-};
-
+});

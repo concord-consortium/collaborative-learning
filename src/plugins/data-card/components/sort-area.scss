@@ -72,6 +72,10 @@ $sort-view-width: ($sort-view-card-width * $cards-per-row ) + 3;
         align-items: center;
         text-align: center;
 
+        &.highlighted {
+          background-color: $highlight-green;
+        }
+
         .card-count-info {
           translate: 3px .5px;
         }
@@ -101,38 +105,46 @@ $sort-view-width: ($sort-view-card-width * $cards-per-row ) + 3;
         border-bottom: $card-border;
         height:$card-space-factor;
         border-radius: 0px 0px 5px 5px;
+
+        &.highlighted {
+          background-color: $highlight-green;
+        }
       }
 
       .attribute-value-row {
-        display:flex;
+        display: flex;
         .attribute {
-          border-right:$card-border;
-          width:60px;
-          padding:$card-space-factor;
+          border-right: $card-border;
+          width: 60px;
+          padding: $card-space-factor;
           background-color: $workspace-teal-light-4;
           font-weight: bold;
         }
         .value {
-          width:106px;
-          padding:$card-space-factor;
+          width: 100%;
+          padding: $card-space-factor;
+
+          &.highlighted {
+            background-color: $highlight-green-light;
+          }
         }
         .image-value {
           width: 100%;
         }
       }
       .expand-toggle {
-        cursor:pointer;
-        border:0px;
+        cursor: pointer;
+        border: 0px;
         padding: 0px;
-        margin-right:2px;
+        margin-right: 2px;
         font-size: 12px;
         text-align: left;
         transition: all .4s;
-        color:$charcoal-dark-2;
+        color: $charcoal-dark-2;
         background-color: transparent;
         translate: 0px 1px;
-        height:13px;
-        width:13px;
+        height: 13px;
+        width: 13px;
       }
       &.expanded .expand-toggle {
         transform: rotate(90deg);
