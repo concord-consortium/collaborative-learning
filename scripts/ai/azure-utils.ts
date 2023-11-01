@@ -16,7 +16,7 @@ const defaultAzureMetadata: IAzureMetadata = {
 
 export function outputAzureFile(props: IOutputFileProps) {
   console.log(`**** Writing Azure Output File ****`);
-  const { azureMetadata, documentInfo, filename, sourceDirectory } = props;
+  const { azureMetadata, documentInfo, fileName, sourceDirectory } = props;
 
   // Look through all tags to determine whether this is single label and what all the possible tags are
   let singleLabel = true;
@@ -56,7 +56,7 @@ export function outputAzureFile(props: IOutputFileProps) {
   };
 
   // Write output file
-  const filePath = `${datasetPath}${sourceDirectory}/${filename}`;
+  const filePath = `${datasetPath}${sourceDirectory}/${fileName}`;
   fs.writeFileSync(filePath, stringify(tagFileJson, { maxLength: 100 }));
   console.log(`**** Tags saved to ${filePath} ****`);
 }

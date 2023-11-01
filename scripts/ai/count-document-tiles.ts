@@ -16,14 +16,15 @@
 import fs from "fs";
 
 import { outputAzureFile } from "./azure-utils";
-import { AIService, cloudFileRoot, datasetPath, tagFileExtension } from "./script-constants";
+import { AIService, datasetPath, tagFileExtension } from "./script-constants";
 import { DocumentInfo, IAzureMetadata } from "./script-types";
 import { prettyDuration } from "./script-utils";
+import { outputVertexAIFile } from "./vertexai-utils";
 
 const sourceDirectory = "dataset1698192448944";
 // const targetTileTypes = ["Geometry", "Text", "Table"];
 const targetTileTypes = ["Geometry"];
-const aiService: AIService = "azure";
+const aiService: AIService = "vertexAI";
 
 // The number of files to process in parallel
 const fileBatchSize = 8;
@@ -110,22 +111,19 @@ fs.readdir(sourcePath, async (_error, files) => {
 
       if (finished) {
         // Write to an output file when all of the files have been processed
-        const tagFileName = `${aiService}-${targetTileTypes.join("-")}${tagFileExtension[aiService]}`;
-        let tagFileContent = "";
+        const fileName = `${aiService}-${targetTileTypes.join("-")}${tagFileExtension[aiService]}`;
         if (aiService === "azure") {
           outputAzureFile({
             documentInfo,
-            filename: tagFileName,
+            fileName,
             sourceDirectory,
             azureMetadata
           });
         } else if (aiService === "vertexAI") {
-          Object.values(documentInfo).forEach(info => {
-            const fileName = `${cloudFileRoot}${info.fileName}`;
-            const tagPart = info.tags.join(",");
-            const comma = tagPart ? "," : "";
-            const line = `${fileName}${comma}${tagPart}\n`;
-            tagFileContent = `${tagFileContent}${line}`;
+          outputVertexAIFile({
+            documentInfo,
+            fileName,
+            sourceDirectory
           });
         }
 
