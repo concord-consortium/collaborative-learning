@@ -112,20 +112,9 @@ fs.readdir(sourcePath, async (_error, files) => {
       if (finished) {
         // Write to an output file when all of the files have been processed
         const fileName = `${aiService}-${targetTileTypes.join("-")}${tagFileExtension[aiService]}`;
-        if (aiService === "azure") {
-          outputAzureFile({
-            documentInfo,
-            fileName,
-            sourceDirectory,
-            azureMetadata
-          });
-        } else if (aiService === "vertexAI") {
-          outputVertexAIFile({
-            documentInfo,
-            fileName,
-            sourceDirectory
-          });
-        }
+        const outputFileProps = { documentInfo, fileName, sourceDirectory, azureMetadata };
+        const outputFunctions = { azure: outputAzureFile, vertexAI: outputVertexAIFile };
+        outputFunctions[aiService](outputFileProps);
 
         const endTime = Date.now();
         const finalDuration = endTime - startTime;
