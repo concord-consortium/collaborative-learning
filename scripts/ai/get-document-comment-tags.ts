@@ -17,7 +17,7 @@ import { prettyDuration } from "./script-utils";
 // The directory containing the documents you're interested in.
 // This should be the output of download-documents.ts.
 // Each document should be named like documentID.txt, where ID is the document's id in the database.
-const sourceDirectory = "dataset1698884492918";
+const sourceDirectory = "dataset1698887061656";
 
 // Number of documents to include in each query. I believe 10 is the max for this.
 const queryLimit = 10;
@@ -76,30 +76,27 @@ for (let i = 0; i < includedDocumentIds.length; i += queryLimit) {
       await documentSnapshots.forEach(async documentSnapshot => {
         const documentData = documentSnapshot.data();
         console.log(`  - Document`, documentData);
-        // TODO Determine comments url for documents without a network
-        if (documentData.network) {
-          const commentsUrl = `${collectionUrl}/${documentData.network}_${documentData.key}/comments`;
-          console.log(`  - commentsUrl`, commentsUrl);
-          const commentCollection = admin.firestore().collection(commentsUrl);
-          console.log(`  - commentCollection`, commentCollection);
-          await commentCollection.listDocuments().then(async commentDocRefs => {
-            console.log(` ~~ commentRefs`, commentDocRefs);
-            await commentDocRefs.map(async (commentDocRef, docIndex) => {
-              await commentDocRef.get().then(commentDoc => {
-                const commentData = commentDoc.data();
-                console.log(`  ~ Comment`, commentData);
-                if (commentData?.tags) {
-                  commentData.tags.forEach(tag => {
-                    if (!documentTags[documentData.key].includes(tag)) {
-                      documentTags[documentData.key].push(tag);
-                    }
-                  });
-                }
-                console.log(`  ~ documentTags`, documentTags);
-              });
+        const commentsUrl = `${documentSnapshot.ref.path}/comments`;
+        console.log(`  - commentsUrl`, commentsUrl);
+        const commentCollection = admin.firestore().collection(commentsUrl);
+        console.log(`  - commentCollection`, commentCollection);
+        await commentCollection.listDocuments().then(async commentDocRefs => {
+          console.log(` ~~ commentRefs`, commentDocRefs);
+          await commentDocRefs.map(async (commentDocRef, docIndex) => {
+            await commentDocRef.get().then(commentDoc => {
+              const commentData = commentDoc.data();
+              console.log(`  ~ Comment`, commentData);
+              if (commentData?.tags) {
+                commentData.tags.forEach(tag => {
+                  if (!documentTags[documentData.key].includes(tag)) {
+                    documentTags[documentData.key].push(tag);
+                  }
+                });
+              }
+              console.log(`  ~ documentTags`, documentTags);
             });
           });
-        }
+        });
       });
     });
 }

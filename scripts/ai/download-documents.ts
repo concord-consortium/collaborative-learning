@@ -23,7 +23,7 @@ import serviceAccount from "./serviceAccountKey.json" assert { type: "json" };
 // The portal to get documents from. For example, "learn.concord.org".
 const portal = "learn.concord.org";
 // The demo name to use. Make falsy to not use a demo.
-const demo = "TEALE";
+const demo = "TAGCLUE";
 // const demo = false;
 
 // Make falsy to include all documents
