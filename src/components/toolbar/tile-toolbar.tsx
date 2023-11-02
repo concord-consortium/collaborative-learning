@@ -33,12 +33,11 @@ export function isValidButtonDescription(obj: JSONValue): obj is IButtonDescript
 export const TileToolbar = observer(
   function TileToolbar({ tileType, readOnly, tileElement }: ToolbarWrapperProps) {
 
-
     const model = useContext(TileModelContext);
     const id = model?.id;
 
     // Get styles to position the toolbar
-    const { toolbarRefs, toolbarStyles, toolbarPlacement } = useTileToolbarPositioning(tileElement);
+    const { toolbarRefs, toolbarStyles, toolbarPlacement, rootElement, hide } = useTileToolbarPositioning(tileElement);
 
     // Determine the buttons to be shown.
     const ui = useUIStore();
@@ -86,11 +85,11 @@ export const TileToolbar = observer(
     });
 
     return (
-      <FloatingPortal>
+      <FloatingPortal root={rootElement}>
         <div
           ref={toolbarRefs.setFloating}
           data-testid="tile-toolbar"
-          style={toolbarStyles}
+          style={{visibility: hide ? 'hidden' : 'visible', ...toolbarStyles}}
           className={classNames("tile-toolbar",
             `${tileType}-toolbar`,
             toolbarPlacement,
