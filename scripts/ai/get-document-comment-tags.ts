@@ -68,37 +68,41 @@ const documentCollection = admin.firestore().collection(collectionUrl);
 for (let i = 0; i < includedDocumentIds.length; i += queryLimit) {
   console.log(`--- Checking documents ${i}-${i+queryLimit}`);
   const documentIdSubset = includedDocumentIds.slice(i, i + queryLimit);
-  await documentCollection.where("key", "in", documentIdSubset).get()
-    .then(async documentSnapshots => {
-      const docRefTime = Date.now();
-      console.log(` -- Time to get document info: ${prettyDuration(docRefTime - startTime)}`);
-      // console.log(` -- Documents:`, documentSnapshots);
-      await documentSnapshots.forEach(async documentSnapshot => {
-        const documentData = documentSnapshot.data();
-        console.log(`  - Document`, documentData);
-        const commentsUrl = `${documentSnapshot.ref.path}/comments`;
-        console.log(`  - commentsUrl`, commentsUrl);
-        const commentCollection = admin.firestore().collection(commentsUrl);
-        console.log(`  - commentCollection`, commentCollection);
-        await commentCollection.listDocuments().then(async commentDocRefs => {
-          console.log(` ~~ commentRefs`, commentDocRefs);
-          await commentDocRefs.map(async (commentDocRef, docIndex) => {
-            await commentDocRef.get().then(commentDoc => {
-              const commentData = commentDoc.data();
-              console.log(`  ~ Comment`, commentData);
-              if (commentData?.tags) {
-                commentData.tags.forEach(tag => {
-                  if (!documentTags[documentData.key].includes(tag)) {
-                    documentTags[documentData.key].push(tag);
-                  }
-                });
+  const documentSnapshots = await documentCollection.where("key", "in", documentIdSubset).get();
+  const docRefTime = Date.now();
+  console.log(` -- Time to get document info: ${prettyDuration(docRefTime - startTime)}`);
+
+  const processDocument =
+    async (documentSnapshot: admin.firestore.QueryDocumentSnapshot<admin.firestore.DocumentData>) => {
+      const documentData = documentSnapshot.data();
+      console.log(`  - Document`, documentData);
+      const commentsUrl = `${documentSnapshot.ref.path}/comments`;
+      console.log(`  - commentsUrl`, commentsUrl);
+      const commentCollection = admin.firestore().collection(commentsUrl);
+      // console.log(`  - commentCollection`, commentCollection);
+      const commentSnapshots = await commentCollection.get();
+      console.log(`000 comment snapshots`);
+
+      const processComment =
+        async (commentSnapshot: admin.firestore.QueryDocumentSnapshot<admin.firestore.DocumentData>) => {
+          const commentData = commentSnapshot.data();
+          console.log(` 00 comment`, commentData);
+          if (commentData?.tags) {
+            commentData.tags.forEach(tag => {
+              if (!documentTags[documentData.key].includes(tag)) {
+                documentTags[documentData.key].push(tag);
               }
-              console.log(`  ~ documentTags`, documentTags);
             });
-          });
-        });
-      });
-    });
+          }
+          console.log(`  0 documentTags`, documentTags);
+        };
+      for (const _commentSnapshot of commentSnapshots.docs) {
+        await processComment(_commentSnapshot);
+      }
+  };
+  for (const _documentSnapshot of documentSnapshots.docs) {
+    await processDocument(_documentSnapshot);
+  }
 }
 
 const endTime = Date.now();
@@ -108,4 +112,4 @@ console.log(`- Time to download documents: ${prettyDuration(tagStartTime - start
 // console.log(`- Time to get documents from firestore: ${prettyDuration(docRefTime - startTime)}`);
 console.log(`- Total Time: ${prettyDuration(endTime - startTime)}`);
 
-// process.exit(0);
+process.exit(0);
