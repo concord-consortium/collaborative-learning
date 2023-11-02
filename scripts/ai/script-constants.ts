@@ -6,3 +6,4 @@ export const tagFileExtension = {
 };
 
 export const datasetPath = "../../src/public/ai/";
+export const networkFileName = "network.json";

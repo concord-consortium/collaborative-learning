@@ -11,9 +11,10 @@
 import fs from "fs";
 import admin from "firebase-admin";
 import {google} from "googleapis";
+import stringify from "json-stringify-pretty-compact";
 import fetch from 'node-fetch';
 
-import { datasetPath } from "./script-constants";
+import { datasetPath, networkFileName } from "./script-constants";
 import { prettyDuration } from "./script-utils";
 
 // Load the service account key JSON file.
@@ -23,6 +24,7 @@ import serviceAccount from "./serviceAccountKey.json" assert { type: "json" };
 const portal = "learn.concord.org";
 // The demo name to use. Make falsy to not use a demo.
 const demo = "TEALE";
+// const demo = false;
 
 // Make falsy to include all documents
 const documentLimit = false;
@@ -153,6 +155,11 @@ for (const key of Object.keys(classKeys)) {
     }
   }
 }
+
+// Write a file that includes network information for future scripts
+const networkFile = `${targetPath}/${networkFileName}`;
+fs.writeFileSync(networkFile, stringify({ portal, demo }));
+console.log(`*** Network information written to ${networkFile} ***`);
 
 const endTime = Date.now();
 console.log(`***** End script *****`);

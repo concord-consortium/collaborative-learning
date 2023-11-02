@@ -11,25 +11,16 @@
 import fs from "fs";
 import admin from "firebase-admin";
 
-import { datasetPath } from "./script-constants";
+import { datasetPath, networkFileName } from "./script-constants";
 import { prettyDuration } from "./script-utils";
 
 // The directory containing the documents you're interested in.
 // This should be the output of download-documents.ts.
 // Each document should be named like documentID.txt, where ID is the document's id in the database.
-const sourceDirectory = "dataset1698797038458";
-
-// These should be the same as what was used for download-documents.ts to create the sourceDirectory
-// The portal to get documents from. For example, "learn.concord.org".
-const portal = "learn.concord.org";
-// The demo name to use. Make falsy to not use a demo.
-const demo = "TEALE";
+const sourceDirectory = "dataset1698884492918";
 
 // Number of documents to include in each query. I believe 10 is the max for this.
 const queryLimit = 10;
-
-// Make falsy to include all documents
-// const documentLimit = 100;
 
 console.log(`*** Starting to Compile Document Tags ***`);
 
@@ -48,6 +39,14 @@ admin.initializeApp({
 const credentialTime = Date.now();
 
 const sourcePath = `${datasetPath}${sourceDirectory}`;
+
+function getNetworkInfo() {
+  const networkFile = `${sourcePath}/${networkFileName}`;
+  if (fs.existsSync(networkFile)) {
+    return JSON.parse(fs.readFileSync(networkFile, "utf8"));
+  }
+}
+const { portal, demo } = getNetworkInfo() ?? { portal: "learn.concord.org" };
 
 // Determine ids of relevant documents by looking at files in source directory
 const documentTags: Record<string, string[]> = {};
@@ -82,7 +81,7 @@ for (let i = 0; i < includedDocumentIds.length; i += queryLimit) {
           const commentsUrl = `${collectionUrl}/${documentData.network}_${documentData.key}/comments`;
           console.log(`  - commentsUrl`, commentsUrl);
           const commentCollection = admin.firestore().collection(commentsUrl);
-          console.log(`  - commentConnection`, commentCollection);
+          console.log(`  - commentCollection`, commentCollection);
           await commentCollection.listDocuments().then(async commentDocRefs => {
             console.log(` ~~ commentRefs`, commentDocRefs);
             await commentDocRefs.map(async (commentDocRef, docIndex) => {
@@ -104,41 +103,12 @@ for (let i = 0; i < includedDocumentIds.length; i += queryLimit) {
       });
     });
 }
-      // documentSnapshots.docs.find(doc => !!doc.data()?.classPath)?.data()?.classPath;
-      // console.log(`  - documentDocRefs`, documentsDocRefs.length);
-      // const docs =
-          // await Promise.all(documentsDocRefs.map((documentDocRef, docIndex) => new Promise((resolve, reject) => {
-      //   documentDocRef.get()
-      //     .then(doc => {
-      //       const documentData = doc?.data();
-      //       console.log(`--- Document key:`, documentData?.key);
-      //       // if (includedDocumentIds.includes(documentData?.key)) {
-      //         if (documentData?.comments) {
-      //           console.log(` -- Document:`, documentData);
-      //         }
-      //         documentDocRef.collection("comments").listDocuments()
-      //           .then(async commentsDocRef => {
-      //             const comments =
-      //             await Promise.all(commentsDocRef.map(
-      //               (commentDocRef, commentDocIndex) => new Promise((resolve, reject) => {
-      //               commentDocRef.get()
-      //                 .then(commentDoc => {
-      //                   const commentData = commentDoc?.data();
-      //                   console.log(`!!! Comment data`, commentData);
-      //                 });
-      //             })));
-      //           });
-      //       // }
-      //     });
-      // })));
-// }
 
-    const endTime = Date.now();
-    console.log(`***** End script *****`);
-    console.log(`- Time to get credential: ${prettyDuration(credentialTime - startTime)}`);
-    console.log(`- Time to download documents: ${prettyDuration(tagStartTime - startTime)}`);
-    // console.log(`- Time to get documents from firestore: ${prettyDuration(docRefTime - startTime)}`);
-    console.log(`- Total Time: ${prettyDuration(endTime - startTime)}`);
+const endTime = Date.now();
+console.log(`***** End script *****`);
+console.log(`- Time to get credential: ${prettyDuration(credentialTime - startTime)}`);
+console.log(`- Time to download documents: ${prettyDuration(tagStartTime - startTime)}`);
+// console.log(`- Time to get documents from firestore: ${prettyDuration(docRefTime - startTime)}`);
+console.log(`- Total Time: ${prettyDuration(endTime - startTime)}`);
 
-    // process.exit(0);
-  // });
+// process.exit(0);
