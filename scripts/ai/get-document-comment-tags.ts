@@ -20,7 +20,7 @@ import { outputVertexAIFile } from "./vertexai-utils";
 // The directory containing the documents you're interested in.
 // This should be the output of download-documents.ts.
 // Each document should be named like documentID.txt, where ID is the document's id in the database.
-const sourceDirectory = "dataset1698693570284";
+const sourceDirectory = "dataset1699029183595";
 const aiService: AIService = "vertexAI";
 
 // Number of documents to include in each query. I believe 10 is the max for this.
@@ -81,6 +81,7 @@ let documentsProcessed = 0;
 let commentsProcessed = 0;
 let tagsProcessed = 0;
 let tagsIncluded = 0;
+let emptyTags = 0;
 
 // Look through all documents
 for (let i = 0; i < includedDocumentIds.length; i += queryLimit) {
@@ -104,16 +105,21 @@ for (let i = 0; i < includedDocumentIds.length; i += queryLimit) {
         async (commentSnapshot: admin.firestore.QueryDocumentSnapshot<admin.firestore.DocumentData>) => {
           const commentTags = commentSnapshot.data().tags ?? [];
           commentTags.forEach(tag => {
-            if (!documentTags[documentId].includes(tag)) {
-              // For now, just add all tags to the document.
-              // In the future we might want to refine this behavior, for example only including the last tag applied.
-              documentTags[documentId].push(tag);
+            if (tag) {
+              // Don't include empty tags
+              if (!documentTags[documentId].includes(tag)) {
+                // For now, just add all tags to the document.
+                // In the future we might want to refine this behavior, for example only including the last tag applied.
+                documentTags[documentId].push(tag);
 
-              tagsIncluded++;
-              if (!tagCounts[tag]) tagCounts[tag] = 0;
-              tagCounts[tag]++;
+                tagsIncluded++;
+                if (!tagCounts[tag]) tagCounts[tag] = 0;
+                tagCounts[tag]++;
+              }
+              tagsProcessed++;
+            } else {
+              emptyTags++;
             }
-            tagsProcessed++;
           });
           commentsProcessed++;
         };
@@ -155,5 +161,6 @@ console.log(`+ Documents processed: ${documentsProcessed}`);
 console.log(`+ Comments processed: ${commentsProcessed}`);
 console.log(`+ Tags processed: ${tagsProcessed}`);
 console.log(`+ Tags included: ${tagsIncluded}`);
+console.log(`+ Empty tags ignored: ${emptyTags}`);
 
 process.exit(0);
