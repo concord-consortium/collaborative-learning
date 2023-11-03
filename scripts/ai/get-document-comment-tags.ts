@@ -14,7 +14,7 @@ import admin from "firebase-admin";
 import { outputAzureFile } from "./azure-utils";
 import { AIService, datasetPath, networkFileName, tagFileExtension } from "./script-constants";
 import { DocumentInfo, IAzureMetadata } from "./script-types";
-import { prettyDuration } from "./script-utils";
+import { getFirebaseBasePath, prettyDuration } from "./script-utils";
 import { outputVertexAIFile } from "./vertexai-utils";
 
 // The directory containing the documents you're interested in.
@@ -74,9 +74,7 @@ fs.readdirSync(sourcePath).forEach(file => {
 console.log(`***** Getting document tags *****`);
 const tagStartTime = Date.now();
 const includedDocumentIds = Object.keys(documentTags);
-const collectionUrl = demo
-  ? `demo/${demo}/documents`
-  : `authed/${portal.replace(/\./g, "_")}/documents`;
+const collectionUrl = getFirebaseBasePath(portal, demo);
 const documentCollection = admin.firestore().collection(collectionUrl);
 
 let documentsProcessed = 0;

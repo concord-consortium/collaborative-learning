@@ -15,7 +15,7 @@ import stringify from "json-stringify-pretty-compact";
 import fetch from 'node-fetch';
 
 import { datasetPath, networkFileName } from "./script-constants";
-import { prettyDuration } from "./script-utils";
+import { getFirebaseBasePath, prettyDuration } from "./script-utils";
 
 // Load the service account key JSON file.
 import serviceAccount from "./serviceAccountKey.json" assert { type: "json" };
@@ -75,10 +75,7 @@ const accessTime = Date.now();
 
 const databaseURL = "https://collaborative-learning-ec215.firebaseio.com";
 
-const firebaseBasePath = demo
-  ? `/demo/${demo}/portals/demo/classes`
-  : `/authed/portals/${portal.replace(/\./g, "_")}/classes`;
-
+const firebaseBasePath = getFirebaseBasePath(portal, demo);
 const fetchURL = `${databaseURL}${firebaseBasePath}.json?shallow=true`;
 console.log(`Fetching URL: ${fetchURL}`);
 
