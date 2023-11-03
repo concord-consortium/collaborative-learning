@@ -20,8 +20,8 @@ import { outputVertexAIFile } from "./vertexai-utils";
 // The directory containing the documents you're interested in.
 // This should be the output of download-documents.ts.
 // Each document should be named like documentID.txt, where ID is the document's id in the database.
-const sourceDirectory = "dataset1698887061656";
-const aiService: AIService = "azure";
+const sourceDirectory = "dataset1698693570284";
+const aiService: AIService = "vertexAI";
 
 // Number of documents to include in each query. I believe 10 is the max for this.
 const queryLimit = 10;
@@ -52,6 +52,7 @@ const credentialTime = Date.now();
 
 const sourcePath = `${datasetPath}${sourceDirectory}`;
 
+// Get network info from portal file. This should have been created by download-documents.ts.
 function getNetworkInfo() {
   const networkFile = `${sourcePath}/${networkFileName}`;
   if (fs.existsSync(networkFile)) {
@@ -61,6 +62,7 @@ function getNetworkInfo() {
 const { portal, demo } = getNetworkInfo() ?? { portal: "learn.concord.org" };
 
 // Determine ids of relevant documents by looking at files in source directory
+const tagCounts: Record<string, number> = {};
 const documentTags: Record<string, string[]> = {};
 fs.readdirSync(sourcePath).forEach(file => {
   if (file.startsWith("document") && file.endsWith(".txt")) {
@@ -72,51 +74,65 @@ fs.readdirSync(sourcePath).forEach(file => {
 console.log(`***** Getting document tags *****`);
 const tagStartTime = Date.now();
 const includedDocumentIds = Object.keys(documentTags);
-console.log(`~~~ includedDocumentIds`, includedDocumentIds);
 const collectionUrl = demo
   ? `demo/${demo}/documents`
   : `authed/${portal.replace(/\./g, "_")}/documents`;
 const documentCollection = admin.firestore().collection(collectionUrl);
+
+let documentsProcessed = 0;
+let commentsProcessed = 0;
+let tagsProcessed = 0;
+let tagsIncluded = 0;
+
+// Look through all documents
 for (let i = 0; i < includedDocumentIds.length; i += queryLimit) {
+  // Documents are retrieved from firestore in batches so we can use the where query, which has a limit of 10.
   console.log(`--- Checking documents ${i}-${i+queryLimit}`);
   const documentIdSubset = includedDocumentIds.slice(i, i + queryLimit);
   const documentSnapshots = await documentCollection.where("key", "in", documentIdSubset).get();
-  const docRefTime = Date.now();
-  console.log(` -- Time to get document info: ${prettyDuration(docRefTime - startTime)}`);
 
   const processDocument =
     async (documentSnapshot: admin.firestore.QueryDocumentSnapshot<admin.firestore.DocumentData>) => {
-      const documentData = documentSnapshot.data();
-      console.log(`  - Document`, documentData);
-      const commentsUrl = `${documentSnapshot.ref.path}/comments`;
-      console.log(`  - commentsUrl`, commentsUrl);
-      const commentCollection = admin.firestore().collection(commentsUrl);
-      // console.log(`  - commentCollection`, commentCollection);
-      const commentSnapshots = await commentCollection.get();
-      console.log(`000 comment snapshots`);
+      const documentStartTime = Date.now();
+      const documentId = documentSnapshot.data().key;
 
+      // Get the document's comments from firestore
+      const commentsUrl = `${documentSnapshot.ref.path}/comments`;
+      const commentCollection = admin.firestore().collection(commentsUrl);
+      const commentSnapshots = await commentCollection.get();
+
+      // Process each comment in series
       const processComment =
         async (commentSnapshot: admin.firestore.QueryDocumentSnapshot<admin.firestore.DocumentData>) => {
-          const commentData = commentSnapshot.data();
-          console.log(` 00 comment`, commentData);
-          if (commentData?.tags) {
-            commentData.tags.forEach(tag => {
-              if (!documentTags[documentData.key].includes(tag)) {
-                documentTags[documentData.key].push(tag);
-              }
-            });
-          }
-          console.log(`  0 documentTags`, documentTags);
+          const commentTags = commentSnapshot.data().tags ?? [];
+          commentTags.forEach(tag => {
+            if (!documentTags[documentId].includes(tag)) {
+              // For now, just add all tags to the document.
+              // In the future we might want to refine this behavior, for example only including the last tag applied.
+              documentTags[documentId].push(tag);
+
+              tagsIncluded++;
+              if (!tagCounts[tag]) tagCounts[tag] = 0;
+              tagCounts[tag]++;
+            }
+            tagsProcessed++;
+          });
+          commentsProcessed++;
         };
       for (const _commentSnapshot of commentSnapshots.docs) {
         await processComment(_commentSnapshot);
       }
 
-      documentInfo[documentData.key] = {
-        fileName: `document${documentData.key}.txt`,
-        tags: documentTags[documentData.key]
+      documentInfo[documentId] = {
+        fileName: `document${documentId}.txt`,
+        tags: documentTags[documentId]
       };
+
+      documentsProcessed++;
+      const documentEndTime = Date.now();
+      console.log(`  - Processed document ${documentId} in ${prettyDuration(documentEndTime - documentStartTime)}`);
   };
+  // It would be better to process documents in parallel, but I wasn't able to figure out how to do it in time.
   for (const _documentSnapshot of documentSnapshots.docs) {
     await processDocument(_documentSnapshot);
   }
@@ -130,9 +146,16 @@ outputFunctions[aiService](outputFileProps);
 
 const endTime = Date.now();
 console.log(`***** End script *****`);
+console.log(`*** Tags used ***`);
+Object.keys(tagCounts).forEach(tag => {
+  console.log(`* ${tag}: ${tagCounts[tag]}`);
+});
 console.log(`- Time to get credential: ${prettyDuration(credentialTime - startTime)}`);
 console.log(`- Time to download documents: ${prettyDuration(tagStartTime - startTime)}`);
-// console.log(`- Time to get documents from firestore: ${prettyDuration(docRefTime - startTime)}`);
 console.log(`- Total Time: ${prettyDuration(endTime - startTime)}`);
+console.log(`+ Documents processed: ${documentsProcessed}`);
+console.log(`+ Comments processed: ${commentsProcessed}`);
+console.log(`+ Tags processed: ${tagsProcessed}`);
+console.log(`+ Tags included: ${tagsIncluded}`);
 
 process.exit(0);
