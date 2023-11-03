@@ -8,10 +8,11 @@ import { useDndMonitor } from "@dnd-kit/core";
 import "./sort-area.scss";
 
 interface IProps {
+  isLinked?: boolean;
   model: ITileModel;
 }
 
-export const DataCardSortArea: React.FC<IProps> = ({ model }) => {
+export const DataCardSortArea: React.FC<IProps> = ({ isLinked, model }) => {
   const content = model.content as DataCardContentModelType;
   const sortById = content.selectedSortAttributeId;
 
@@ -59,6 +60,7 @@ export const DataCardSortArea: React.FC<IProps> = ({ model }) => {
             <SortStack
               key={`${sortById}-${value}`}
               id={`${sortById}-${value}`}
+              isLinked={isLinked}
               model={model}
               stackValue={value}
               inAttributeId={sortById}

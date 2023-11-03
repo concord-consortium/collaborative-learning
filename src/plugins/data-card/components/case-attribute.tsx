@@ -34,6 +34,7 @@ interface IProps {
   attrKey: string;
   currEditAttrId: string;
   currEditFacet: EditFacet;
+  isLinked?: boolean;
   readOnly?: boolean;
   imageUrlToAdd?: string;
   setImageUrlToAdd: (url: string) => void;
@@ -43,7 +44,7 @@ interface IProps {
 
 export const CaseAttribute: React.FC<IProps> = observer(props => {
   const {
-    model, caseId, attrKey, currEditAttrId, currEditFacet,
+    model, caseId, attrKey, currEditAttrId, currEditFacet, isLinked,
     setCurrEditFacet, setCurrEditAttrId, readOnly
   } = props;
   const content = model.content as DataCardContentModelType;
@@ -273,13 +274,14 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     {
       editing: editingValue,
       "has-image": gImageMap.isImageUrl(valueStr),
-      highlighted: valueHighlighted
+      highlighted: valueHighlighted,
+      linked: isLinked
     }
   );
 
   const typeIconClassNames = classNames(
     "type-icon", attrKey,
-    { highlighted: valueHighlighted }
+    { highlighted: valueHighlighted, linked: isLinked }
   );
 
   const deleteAttrButtonClassNames = classNames(
@@ -350,7 +352,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
           <button aria-label="toggle menu" type="button" {...getToggleButtonProps()}>
             {displayArrow()}
           </button>
-          <ul {...getMenuProps()} className={ isOpen ? "open" : "closed"}>
+          <ul {...getMenuProps()} className={ isOpen ? "open" : "closed" }>
             {isOpen &&
               inputItems.map((item, index) => (
                 <li className="dropdown-item" style={highlightedIndex === index ? {backgroundColor: '#bde4ff'} : {} }

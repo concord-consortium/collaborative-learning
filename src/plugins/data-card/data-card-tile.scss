@@ -89,7 +89,11 @@ $default-button-border-color: #979797;
       justify-content: space-between;
 
       &.highlighted {
-        background-color: $highlight-green;
+        background-color: $highlight-blue-new;
+
+        &.linked {
+          background-color: $highlight-green;
+        }
       }
 
       .card-number-of-listing {
@@ -220,10 +224,18 @@ $default-button-border-color: #979797;
           }
 
           &.highlighted {
-            background-color: $highlight-green-light;
+            background-color: $highlight-blue-light-new;
 
             input {
+              background-color: $highlight-blue-light-new;
+            }
+
+            &.linked {
               background-color: $highlight-green-light;
+
+              input {
+                background-color: $highlight-green-light;
+              }
             }
           }
         }
@@ -232,7 +244,11 @@ $default-button-border-color: #979797;
           padding: 0 4px;
 
           &.highlighted {
-            background-color: $highlight-green-light;
+            background-color: $highlight-blue-light-new;
+
+            &.linked {
+              background-color: $highlight-green-light;
+            }
           }
         }
 

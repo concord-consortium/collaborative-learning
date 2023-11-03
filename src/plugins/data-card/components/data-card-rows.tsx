@@ -13,6 +13,7 @@ interface IProps {
   imageUrlToAdd?: string;
   currEditAttrId: string;
   currEditFacet: EditFacet;
+  isLinked?: boolean;
   setImageUrlToAdd: (url: string) => void;
   setCurrEditFacet: (facetName: EditFacet ) => void;
   setCurrEditAttrId: (attrId: string) => void;
@@ -20,7 +21,7 @@ interface IProps {
 
 export const DataCardRows: React.FC<IProps> = observer(({
   caseIndex, model, readOnly,
-  imageUrlToAdd, currEditAttrId, currEditFacet,
+  imageUrlToAdd, currEditAttrId, currEditFacet, isLinked,
   setCurrEditFacet, setCurrEditAttrId, setImageUrlToAdd
 }) => {
   const content = model.content as DataCardContentModelType;
@@ -38,6 +39,7 @@ export const DataCardRows: React.FC<IProps> = observer(({
             attrKey={attr.id}
             currEditAttrId={currEditAttrId}
             currEditFacet={currEditFacet}
+            isLinked={isLinked}
             setCurrEditAttrId={setCurrEditAttrId}
             setCurrEditFacet={setCurrEditFacet}
             setImageUrlToAdd={setImageUrlToAdd}

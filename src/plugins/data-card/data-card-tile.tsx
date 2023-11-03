@@ -28,6 +28,8 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
 
   const content = model.content as DataCardContentModelType;
   const dataSet = content.dataSet;
+  const linkedTiles = content.tileEnv?.sharedModelManager?.getSharedModelTiles(content.sharedModel);
+  const isLinked = linkedTiles && linkedTiles.length > 1;
   const ui = useUIStore();
 
   const isTileSelected = ui.selectedTileIds.findIndex(id => id === content.metadata.id) >= 0;
@@ -286,7 +288,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
           { displaySingle &&
             <>
               <div
-                className={classNames("panel nav", { "highlighted": content.caseSelected })}
+                className={classNames("panel nav", { highlighted: content.caseSelected, linked: isLinked })}
                 onClick={handleNavPanelClick}
               >
                 <div className="card-number-of-listing">
@@ -316,6 +318,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
                     readOnly={readOnly}
                     currEditAttrId={currEditAttrId}
                     currEditFacet={currEditFacet}
+                    isLinked={isLinked}
                     setCurrEditAttrId={setCurrEditAttrId}
                     setCurrEditFacet={setCurrEditFacet}
                     imageUrlToAdd={imageUrlToAdd}
@@ -330,7 +333,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
           }
           { !displaySingle &&
             <div className="sorting-cards-data-area">
-              <DataCardSortArea model={model} />
+              <DataCardSortArea model={model} isLinked={isLinked} />
             </div>
           }
         </div>

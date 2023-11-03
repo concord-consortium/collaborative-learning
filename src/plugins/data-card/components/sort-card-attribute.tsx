@@ -7,11 +7,12 @@ import { IAttribute } from "../../../models/data/attribute";
 
 interface IProps {
   caseId: string;
+  isLinked?: boolean;
   model: ITileModel;
   attr: IAttribute;
 }
 
-export const SortCardAttribute: React.FC<IProps> = ({ model, caseId, attr }) => {
+export const SortCardAttribute: React.FC<IProps> = ({ isLinked, model, caseId, attr }) => {
   const content = model.content as DataCardContentModelType;
   const value = content.dataSet.getStrValue(caseId, attr.id);
   const isImage = gImageMap.isImageUrl(value);
@@ -26,7 +27,7 @@ export const SortCardAttribute: React.FC<IProps> = ({ model, caseId, attr }) => 
   return (
     <div className="attribute-value-row">
       <div className="attribute">{attr.name}</div>
-      <div className={classNames("value", { highlighted: caseHighlighted })}>
+      <div className={classNames("value", { highlighted: caseHighlighted, linked: isLinked })}>
         { !isImage && value }
         { isImage && <img src={imageUrl} className="image-value" /> }
       </div>

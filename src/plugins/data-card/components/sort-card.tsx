@@ -11,6 +11,7 @@ interface IProps {
   caseId: string;
   model: ITileModel;
   indexInStack: number;
+  isLinked?: boolean;
   totalInStack: number;
   id?: string;
 }
@@ -26,7 +27,7 @@ const getShadeRGB = (index: number) => {
 };
 
 export const SortCard: React.FC<IProps> = observer(
-  function SortCard({ model, caseId, indexInStack, totalInStack })
+  function SortCard({ model, caseId, indexInStack, isLinked, totalInStack })
 {
   const content = model.content as DataCardContentModelType;
   const deckCardNumberDisplay = content.dataSet.caseIndexFromID(caseId) + 1;
@@ -50,7 +51,7 @@ export const SortCard: React.FC<IProps> = observer(
     { collapsed: !expanded, expanded }
   );
   const headingClasses = classNames(
-    "heading", { highlighted: caseHighlighted }
+    "heading", { highlighted: caseHighlighted, linked: isLinked }
   );
 
   const {attributes, listeners, setNodeRef, transform} = useDraggable({
@@ -94,6 +95,7 @@ export const SortCard: React.FC<IProps> = observer(
           { content.dataSet.attributes.map((attr)=>{
             return (
               <SortCardAttribute
+                isLinked={isLinked}
                 key={attr.id}
                 model={model}
                 caseId={caseId}
@@ -104,7 +106,7 @@ export const SortCard: React.FC<IProps> = observer(
         </div>
       }
       <div
-        className={classNames("footer", { highlighted: caseHighlighted })}
+        className={classNames("footer", { highlighted: caseHighlighted, linked: isLinked })}
         style={capStyle}
       />
     </div>
