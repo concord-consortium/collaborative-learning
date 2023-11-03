@@ -11,20 +11,32 @@
 import fs from "fs";
 import admin from "firebase-admin";
 
-import { datasetPath, networkFileName } from "./script-constants";
+import { outputAzureFile } from "./azure-utils";
+import { AIService, datasetPath, networkFileName, tagFileExtension } from "./script-constants";
+import { DocumentInfo, IAzureMetadata } from "./script-types";
 import { prettyDuration } from "./script-utils";
+import { outputVertexAIFile } from "./vertexai-utils";
 
 // The directory containing the documents you're interested in.
 // This should be the output of download-documents.ts.
 // Each document should be named like documentID.txt, where ID is the document's id in the database.
 const sourceDirectory = "dataset1698887061656";
+const aiService: AIService = "azure";
 
 // Number of documents to include in each query. I believe 10 is the max for this.
 const queryLimit = 10;
 
+// Used for azure output files
+const azureMetadata: IAzureMetadata = {
+  projectName: `Comment Tags`,
+  storageInputContainerName: "comment-tags",
+  description: `Uses tags specified in comments.`
+};
+
 console.log(`*** Starting to Compile Document Tags ***`);
 
 const startTime = Date.now();
+const documentInfo: Record<string, DocumentInfo> = {};
 
 const databaseURL = "https://collaborative-learning-ec215.firebaseio.com";
 
@@ -99,11 +111,22 @@ for (let i = 0; i < includedDocumentIds.length; i += queryLimit) {
       for (const _commentSnapshot of commentSnapshots.docs) {
         await processComment(_commentSnapshot);
       }
+
+      documentInfo[documentData.key] = {
+        fileName: `document${documentData.key}.txt`,
+        tags: documentTags[documentData.key]
+      };
   };
   for (const _documentSnapshot of documentSnapshots.docs) {
     await processDocument(_documentSnapshot);
   }
 }
+
+// Write output file
+const fileName = `${aiService}-comment-tags${tagFileExtension[aiService]}`;
+const outputFileProps = { documentInfo, fileName, sourceDirectory, azureMetadata };
+const outputFunctions = { azure: outputAzureFile, vertexAI: outputVertexAIFile };
+outputFunctions[aiService](outputFileProps);
 
 const endTime = Date.now();
 console.log(`***** End script *****`);
