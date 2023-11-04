@@ -232,6 +232,7 @@ context('Graph Table Integration', function () {
     // Add a new point to the table
     cy.get(".primary-workspace").within((workspace) => {
       tableToolTile.getTableCell().eq(9).click();
+      tableToolTile.getTableCell().eq(9).click();
       tableToolTile.getTableCell().eq(9).type(x[2] + '{enter}');
       tableToolTile.getTableCell().eq(10).click();
       tableToolTile.getTableCell().eq(10).type(y[2] + '{enter}');
