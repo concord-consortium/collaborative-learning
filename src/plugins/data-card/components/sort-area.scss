@@ -127,6 +127,14 @@ $sort-view-width: ($sort-view-card-width * $cards-per-row ) + 3;
           padding: $card-space-factor;
           background-color: $workspace-teal-light-4;
           font-weight: bold;
+
+          &.highlighted {
+            background-color: $highlight-blue-new;
+
+            &.linked {
+              background-color: $highlight-green;
+            }
+          }
         }
         .value {
           width: 100%;

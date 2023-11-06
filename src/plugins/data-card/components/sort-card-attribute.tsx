@@ -14,20 +14,36 @@ interface IProps {
 
 export const SortCardAttribute: React.FC<IProps> = ({ isLinked, model, caseId, attr }) => {
   const content = model.content as DataCardContentModelType;
-  const value = content.dataSet.getStrValue(caseId, attr.id);
+  const dataSet = content.dataSet;
+  const value = dataSet.getStrValue(caseId, attr.id);
   const isImage = gImageMap.isImageUrl(value);
   const [imageUrl, setImageUrl] = useState("");
 
-  const caseHighlighted = content.dataSet.isCaseSelected(caseId);
+  const attributeHighlighted = dataSet.isAttributeSelected(attr.id);
+  const caseHighlighted = dataSet.isCaseSelected(caseId);
 
   isImage && gImageMap.getImage(value).then((image)=>{
     setImageUrl(image.displayUrl || "");
   });
 
+  const attributeClassNames = classNames(
+    "attribute",
+    {
+      highlighted: attributeHighlighted,
+      linked: isLinked
+    }
+  );
+  const valueClassNames = classNames(
+    "value",
+    {
+      highlighted: caseHighlighted || attributeHighlighted,
+      linked: isLinked
+    }
+  );
   return (
     <div className="attribute-value-row">
-      <div className="attribute">{attr.name}</div>
-      <div className={classNames("value", { highlighted: caseHighlighted, linked: isLinked })}>
+      <div className={attributeClassNames}>{attr.name}</div>
+      <div className={valueClassNames}>
         { !isImage && value }
         { isImage && <img src={imageUrl} className="image-value" /> }
       </div>
