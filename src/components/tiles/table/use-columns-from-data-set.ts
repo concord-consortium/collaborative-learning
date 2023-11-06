@@ -13,6 +13,7 @@ import {
 interface IUseColumnsFromDataSet {
   gridContext: IGridContext;
   dataSet: IDataSet;
+  isLinked?: boolean;
   metadata: TableMetadataModelType;
   readOnly?: boolean;
   columnChanges: number;
@@ -24,8 +25,8 @@ interface IUseColumnsFromDataSet {
   lookupImage: (value: string) => string|undefined;
 }
 export const useColumnsFromDataSet = ({
-  gridContext, dataSet, metadata, readOnly, columnChanges, headerHeight, rowHeight, RowLabelHeader, RowLabelFormatter,
-  measureColumnWidth, lookupImage
+  gridContext, dataSet, isLinked, metadata, readOnly, columnChanges, headerHeight, rowHeight,
+  RowLabelHeader, RowLabelFormatter, measureColumnWidth, lookupImage
 }: IUseColumnsFromDataSet) => {
   const { attributes } = dataSet;
 
@@ -35,12 +36,15 @@ export const useColumnsFromDataSet = ({
   };
 
   const cellClasses = useCallback((attrId: string) => {
-    const selectedColumnClass = { "selected-column": gridContext.isColumnSelected(attrId) };
+    const selectedColumnClass = {
+      linked: isLinked,
+      "selected-column": gridContext.isColumnSelected(attrId)
+    };
     return {
       cellClass: classNames({ "has-expression": metadata.hasExpression(attrId), ...selectedColumnClass }),
       headerCellClass: classNames({ "rdg-cell-editing": columnEditingName === attrId, ...selectedColumnClass })
     };
-  }, [columnEditingName, gridContext, metadata]);
+  }, [columnEditingName, gridContext, isLinked, metadata]);
 
   // controlsColumn is specified separate from the other columns because its headerRenderer and formatter
   // cannot be defined yet, so they must be attached in a later hook.

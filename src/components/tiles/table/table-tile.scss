@@ -141,7 +141,11 @@ $controls-hover-background: #c0dfe7;
       .rdg-cell {
         border-top: $border-style;
         &.selected-column {
-          background-color: var(--header-selected-background-color);
+          background-color: $highlight-blue-new;
+
+          &.linked {
+            background-color: $highlight-green;
+          }
         }
         &.rdg-cell-editing {
           padding: 0;
@@ -183,7 +187,11 @@ $controls-hover-background: #c0dfe7;
       &.rdg-row-selected {
         background-color: var(--row-selected-background-color);
         .index-column {
-          background-color: var(--header-selected-background-color);
+          background-color: $highlight-blue-new;
+
+          &.linked {
+            background-color: $highlight-green;
+          }
         }
         .has-expression {
           background-color: var(--row-selected-background-color);
@@ -288,7 +296,11 @@ $controls-hover-background: #c0dfe7;
         background-color: $charcoal-light-5;
       }
       &.selected-column {
-        background-color: var(--row-selected-background-color);
+        background-color: $highlight-blue-light-new;
+
+        &.linked {
+          background-color: $highlight-green-light;
+        }
       }
       &.rdg-cell-resizable {
         padding: 0;

@@ -111,7 +111,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
 
   // columns are required by ReactDataGrid and are used by other hooks as well
   const { columns, controlsColumn, columnEditingName, handleSetColumnEditingName } = useColumnsFromDataSet({
-    gridContext, dataSet, metadata, readOnly: !!readOnly, columnChanges, headerHeight, rowHeight,
+    gridContext, dataSet, isLinked, metadata, readOnly: !!readOnly, columnChanges, headerHeight, rowHeight,
     ...rowLabelProps, measureColumnWidth, lookupImage});
 
   // The size of the title bar
