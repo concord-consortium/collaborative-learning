@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import classNames from "classnames";
+import { observer } from "mobx-react-lite";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { DataCardContentModelType } from "../data-card-content";
 import { gImageMap } from "../../../models/image-map";
@@ -12,7 +13,7 @@ interface IProps {
   attr: IAttribute;
 }
 
-export const SortCardAttribute: React.FC<IProps> = ({ isLinked, model, caseId, attr }) => {
+export const SortCardAttribute: React.FC<IProps> = observer(({ isLinked, model, caseId, attr }) => {
   const content = model.content as DataCardContentModelType;
   const dataSet = content.dataSet;
   const value = dataSet.getStrValue(caseId, attr.id);
@@ -25,6 +26,10 @@ export const SortCardAttribute: React.FC<IProps> = ({ isLinked, model, caseId, a
   isImage && gImageMap.getImage(value).then((image)=>{
     setImageUrl(image.displayUrl || "");
   });
+
+  function handleAttributeClick() {
+    dataSet.setSelectedAttributes([attr.id]);
+  }
 
   const attributeClassNames = classNames(
     "attribute",
@@ -42,11 +47,13 @@ export const SortCardAttribute: React.FC<IProps> = ({ isLinked, model, caseId, a
   );
   return (
     <div className="attribute-value-row">
-      <div className={attributeClassNames}>{attr.name}</div>
+      <div className={attributeClassNames} onClick={handleAttributeClick}>
+        {attr.name}
+      </div>
       <div className={valueClassNames}>
         { !isImage && value }
         { isImage && <img src={imageUrl} className="image-value" /> }
       </div>
     </div>
   );
-};
+});

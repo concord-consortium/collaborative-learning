@@ -73,12 +73,15 @@ export const SortCard: React.FC<IProps> = observer(
   return (
     <div
       className={cardClasses} id={caseId}
-      onClick={() => content.dataSet.setSelectedCases([caseId])}
       onDoubleClick={loadAsSingle}
       ref={setNodeRef}
       style={style}
     >
-      <div className={headingClasses} style={capStyle}>
+      <div
+        className={headingClasses}
+        onClick={() => content.dataSet.setSelectedCases([caseId])}
+        style={capStyle}
+      >
         <div className="expand-toggle-area">
           <button className="expand-toggle" onClick={toggleExpanded}>▶</button>
         </div>
