@@ -153,6 +153,11 @@ service cloud.firestore {
         return resource.data.network in getTeacherNetworks();
       }
 
+      // user's class_hash must be the requested document's context_id
+      function resourceInUserClass() {
+        return request.auth.token.class_hash == resource.data.context_id;
+      }
+
       match /users/{userId} {
         // teachers can read their own user documents or other teachers in the same network
         allow read: if isAuthedTeacher() &&
@@ -294,14 +299,11 @@ service cloud.firestore {
         // teachers can only delete their own documents
         allow delete: if isAuthedTeacher() && userIsResourceUser();
         // teachers can read their own documents or other documents in their network
-        allow read: if  (isAuthed() && (resource == null || userOwnsDocument())) || (isAuthedTeacher() && (userInResourceTeachers() || resourceInTeacherNetworks()));
+        allow read: if (isAuthed() && (resource == null || userOwnsDocument())) ||
+          (isAuthedTeacher() && (userInResourceTeachers() || resourceInTeacherNetworks() || resourceInUserClass()))
 
         function getDocumentData() {
           return get(/databases/$(database)/documents/authed/$(portal)/documents/$(docId)).data;
-        }
-        // return the list of teachers associated with the specified document
-        function getDocumentTeachers() {
-          return getDocumentData().teachers;
         }
 
         // return owner of the parent document
@@ -314,20 +316,32 @@ service cloud.firestore {
           return getDocumentData().network;
         }
 
-        // check whether the current teacher is one of the teachers associated with the document
-        function teacherInDocumentTeachers() {
-          return isAuthedTeacher() && (string(request.auth.token.platform_user_id) in getDocumentTeachers());
-        }
-
-        // check whether the document's network corresponds to one of the teacher's networks
-        function documentInTeacherNetworks() {
-          let docNetwork = getDocumentNetwork();
-          return exists(docNetwork) && (docNetwork in getTeacherNetworks());
+        // Note: some of this logic seems redundant with the functions used above:
+        // userInResourceTeachers, resourceInTeacherNetworks, resourceInUserClass.
+        // However there is a important difference.
+        // This function works with the doc that is the parent of the comments or history. While those other
+        // functions work with the actual resource/document being requested.
+        // So `userInResourceTeachers` would fail if used on a comment request because it would be
+        // looking for teachers in the comment document itself. And the logic in this function would
+        // probably be inefficient for a top level document request becuase it would do an additional lookup
+        // to retrieve the data from the document, when the system already had access the document in
+        // `resource.data`.
+        function userCanAccessDocument() {
+          let docData = getDocumentData();
+          let docNetwork = docData.network;
+          return (
+            // check whether the current user is one of the teachers associated with the document
+            string(request.auth.token.platform_user_id) in docData.teachers ||
+            // check whether the document's network corresponds to one of the users's networks
+            exists(docNetwork) && (docNetwork in getTeacherNetworks()) ||
+            // check if document is in user's class
+            request.auth.token.class_hash == docData.context_id
+          );
         }
 
         // check whether the teacher can access the document
         function teacherCanAccessDocument() {
-          return teacherInDocumentTeachers() || documentInTeacherNetworks();
+          return isAuthedTeacher() && userCanAccessDocument();
         }
 
         function isValidCommentCreateRequest() {
@@ -346,30 +360,30 @@ service cloud.firestore {
         function isValidCommentUpdateRequest() {
           return userIsRequestUser() && preservesReadOnlyCommentFields();
         }
-        
+
         function userOwnsDocument() {
           return getDocumentOwner() == string(request.auth.token.platform_user_id);
         }
         match /comments/{commentId} {
           // portal-authenticated teachers with access to the document can create valid comments
-          allow create: if isAuthedTeacher() && teacherCanAccessDocument() && isValidCommentCreateRequest();
+          allow create: if teacherCanAccessDocument() && isValidCommentCreateRequest();
           // teachers can only update their own comments and only if they're valid
-          allow update: if isAuthedTeacher() && teacherCanAccessDocument() && isValidCommentUpdateRequest();
+          allow update: if teacherCanAccessDocument() && isValidCommentUpdateRequest();
           // teachers can only delete their own comments
-          allow delete: if isAuthedTeacher() && teacherCanAccessDocument() && userIsResourceUser();
+          allow delete: if teacherCanAccessDocument() && userIsResourceUser();
           // only teachers that "own" the document can read the comments (for now)
-          allow read: if isAuthedTeacher() && teacherCanAccessDocument();
+          allow read: if teacherCanAccessDocument();
         }
-        
+
         // For writing individual history entries
         match /history/{entryId} {
           allow create: if isAuthed() && userOwnsDocument();
-          allow read: if (isAuthed() && userOwnsDocument()) || (isAuthedTeacher() && teacherCanAccessDocument());
+          allow read: if (isAuthed() && userOwnsDocument()) || teacherCanAccessDocument();
           allow delete: if false;
           allow update: if false;
         }
       }
-      
+
       match /mcsupports/{docId} {
         // portal-authenticated teachers can create valid supports
         allow create: if isAuthedTeacher() && isValidSupportCreateRequest();
