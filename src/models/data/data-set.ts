@@ -238,6 +238,11 @@ export const DataSet = types.model("DataSet", {
     });
   }
 
+  function clearAllSelections() {
+    self.attributeSelection.clear();
+    self.caseSelection.clear();
+  }
+
   return {
     views: {
       attrFromID(id: string) {
@@ -633,6 +638,7 @@ export const DataSet = types.model("DataSet", {
 
       selectAllAttributes(select = true) {
         if (select) {
+          clearAllSelections();
           self.attributes.forEach(attribute => self.attributeSelection.add(attribute.id));
         } else {
           self.attributeSelection.clear();
@@ -641,6 +647,7 @@ export const DataSet = types.model("DataSet", {
 
       selectAllCases(select = true) {
         if (select) {
+          clearAllSelections();
           self.cases.forEach(({__id__}) => self.caseSelection.add(__id__));
         }
         else {
@@ -651,6 +658,7 @@ export const DataSet = types.model("DataSet", {
       selectAttributes(attributeIds: string[], select = true) {
         attributeIds.forEach(id => {
           if (select) {
+            self.caseSelection.clear();
             self.attributeSelection.add(id);
           } else {
             self.attributeSelection.delete(id);
@@ -670,6 +678,7 @@ export const DataSet = types.model("DataSet", {
         });
         ids.forEach(id => {
           if (select) {
+            self.attributeSelection.clear();
             self.caseSelection.add(id);
           }
           else {
@@ -679,10 +688,12 @@ export const DataSet = types.model("DataSet", {
       },
 
       setSelectedAttributes(attributeIds: string[]) {
+        clearAllSelections();
         self.attributeSelection.replace(attributeIds);
       },
 
       setSelectedCases(caseIds: string[]) {
+        clearAllSelections();
         const ids: string[] = [];
         caseIds.forEach(id => {
           const pseudoCase = self.pseudoCaseMap[id];

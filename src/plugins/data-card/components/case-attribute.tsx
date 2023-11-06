@@ -48,6 +48,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     setCurrEditFacet, setCurrEditAttrId, readOnly
   } = props;
   const content = model.content as DataCardContentModelType;
+  const dataSet = content.dataSet;
   const getLabel = () => content.dataSet.attrFromID(attrKey).name;
   const getValue = () => {
     const value = caseId && content.dataSet.getValue(caseId, attrKey) || "";
@@ -151,6 +152,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     setCurrEditAttrId(attrKey);
     setCurrEditFacet("name");
     !editingLabel && setLabelCandidate(getLabel());
+    dataSet.setSelectedAttributes([attrKey]);
   };
 
   const handleValueClick = (event: React.MouseEvent<HTMLInputElement | HTMLDivElement>) => {
@@ -260,20 +262,40 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   };
 
   const pairClassNames = `attribute-name-value-pair ${attrKey}`;
-  const valueInputClassNames = `value-input ${attrKey}`;
+
+  const attributeSelected = dataSet.isAttributeSelected(attrKey);
 
   const labelClassNames = classNames(
-    `name ${attrKey}`,
-    { "editing": editingLabel }
+    "name", attrKey,
+    {
+      editing: editingLabel,
+      highlighted: attributeSelected,
+      linked: isLinked
+    }
   );
 
-  const valueHighlighted = content.caseSelected;
+  const labelInputClassNames = classNames(
+    "input",
+    {
+      highlighted: attributeSelected,
+      linked: isLinked
+    }
+  );
+
+  const valueHighlighted = attributeSelected || content.caseSelected;
 
   const valueClassNames = classNames(
     "value", attrKey,
     {
       editing: editingValue,
       "has-image": gImageMap.isImageUrl(valueStr),
+      highlighted: valueHighlighted,
+      linked: isLinked
+    }
+  );
+  const valueInputClassNames = classNames(
+    "value-input", attrKey,
+    {
       highlighted: valueHighlighted,
       linked: isLinked
     }
@@ -325,7 +347,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
         { !readOnly && editingLabel
           ? <input
               type="text"
-              className="input"
+              className={labelInputClassNames}
               value={labelCandidate}
               onChange={handleChange}
               onKeyDown={handleKeyDown}

@@ -200,6 +200,14 @@ $default-button-border-color: #979797;
           color: $cell-text-color;
           box-sizing: border-box;
 
+          &.highlighted {
+            background-color: $highlight-blue-new;
+
+            &.linked {
+              background-color: $highlight-green;
+            }
+          }
+
           .cell-value {
             height: 100%;
             display: flex;
@@ -210,6 +218,22 @@ $default-button-border-color: #979797;
             padding:$cell-padding;
             &.default-label {
               font-style: italic;
+            }
+          }
+
+          input {
+            text-align: right;
+
+            &.highlighted {
+              box-shadow: inset 0 0 0 3px $highlight-blue-edit-new;
+
+              &.linked {
+                box-shadow: inset 0 0 0 3px $highlight-green-edit;
+              }
+            }
+
+            &:hover {
+              background:rgba(245, 245, 245);
             }
           }
         }
@@ -223,18 +247,25 @@ $default-button-border-color: #979797;
             padding:$cell-padding;
           }
 
-          &.highlighted {
-            background-color: $highlight-blue-light-new;
-
-            input {
+          input {
+            &.highlighted {
               background-color: $highlight-blue-light-new;
+
+              &.linked {
+                background-color: $highlight-green-light;
+              }
             }
 
-            &.linked {
-              background-color: $highlight-green-light;
+            &:focus {
+              background-color: white;
 
-              input {
-                background-color: $highlight-green-light;
+              &.highlighted {
+                box-shadow: inset 0 0 0 3px $highlight-blue-edit-new;
+
+                &.linked {
+                  background-color: white;
+                  box-shadow: inset 0 0 0 3px $highlight-green-edit;
+                }
               }
             }
           }
@@ -272,16 +303,8 @@ $default-button-border-color: #979797;
           outline: 0;
         }
 
-        .name input {
-          text-align: right;
-        }
-
         .editing input {
           padding: 2px 8px;
-        }
-
-        input:hover {
-          background:rgba(245, 245, 245);
         }
 
         .value.has-image {
