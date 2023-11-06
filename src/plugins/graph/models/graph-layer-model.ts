@@ -83,11 +83,8 @@ export const GraphLayerModel = types
       }
     },
     configureUnlinkedLayer() {
-      if (self.config.attributeID("y")) {
-        this.setAttributeID("y", "", "");
-      }
-      if (self.config.attributeID("x")) {
-        this.setAttributeID("x", "", "");
+      if (!self.config.isEmpty) {
+        self.config.clearAttributes();
       }
     },
     setDataSetListener() {

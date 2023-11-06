@@ -43,22 +43,23 @@ export function useGraphModel(props: IProps) {
   useEffect(function installPlotTypeAction() {
     const disposer = onAnyAction(graphModel, action => {
       if (action.name === 'setPlotType') {
+        const { caseDataArray } = dataConfig || {};
         const newPlotType = action.args?.[0];/*,
           attrIDs = newPlotType === 'dotPlot' ? [xAttrID] : [xAttrID, yAttrID]*/
         startAnimation(enableAnimation);
         // In case the y-values have changed we rescale
         if (newPlotType === 'scatterPlot') {
           const yAxisModel = graphModel.getAxis('left');
-          if (dataset) {
+          if (caseDataArray) {
             const values
-              = dataConfig.caseDataArray.map(({ caseID }) => dataset?.getNumeric(caseID, yAttrID)) as number[];
+              = caseDataArray.map(({ caseID }) => dataset?.getNumeric(caseID, yAttrID)) as number[];
             setNiceDomain(values || [], yAxisModel as INumericAxisModel);
           }
         }
       }
     });
     return () => disposer();
-  }, [dataConfig.caseDataArray, dataset, enableAnimation, graphModel, yAttrID]);
+  }, [dataConfig, dataset, enableAnimation, graphModel, yAttrID]);
 
   // respond to point properties change
   useEffect(function respondToGraphPointVisualAction() {

@@ -1,8 +1,9 @@
+import { observable } from "mobx";
 import {scaleQuantile, ScaleQuantile, schemeBlues} from "d3";
 import { getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
 import {AttributeType, attributeTypes} from "../../../models/data/attribute";
 import {ICase} from "../../../models/data/data-set-types";
-import {DataSet, IDataSet} from "../../../models/data/data-set";
+import {DataSet, IDataSet, isDatasetRemoveAttributeAction} from "../../../models/data/data-set";
 import {getCategorySet, ISharedCaseMetadata, SharedCaseMetadata} from "../../../models/shared/shared-case-metadata";
 import {isSetCaseValuesAction} from "../../../models/data/data-set-actions";
 import {FilteredCases, IFilteredChangedCases} from "../../../models/data/filtered-cases";
@@ -56,7 +57,7 @@ export const DataConfigurationModel = types
   })
   .volatile(() => ({
     actionHandlerDisposer: undefined as (() => void) | undefined,
-    filteredCases: [] as FilteredCases[],
+    filteredCases: observable.array<FilteredCases>([] as FilteredCases[], {deep:false }),   //[] as FilteredCases[],
     handlers: new Map<string, (actionCall: ISerializedActionCall) => void>(),
     pointsNeedUpdating: false
   }))
@@ -201,9 +202,15 @@ export const DataConfigurationModel = types
     }
   }))
   .actions(self => ({
+    /**
+     * Low-level method to set the Y Attribute Description for a graph role.
+     * If no attribute description is provided, the role will be made empty.
+     * Caller is responsible for updating and/or invalidating the corresponding filteredCases.
+     * @param iRole the graph role
+     * @param iDesc IAttributeDescriptionSnapshot (eg attribute and type)
+     */
     _setAttributeDescription(iRole: GraphAttrRole, iDesc?: IAttributeDescriptionSnapshot) {
       if (iRole === 'y') {
-        self._yAttributeDescriptions.clear();
         if (iDesc?.attributeID) {
           self._yAttributeDescriptions.push(iDesc);
         }
@@ -286,7 +293,7 @@ export const DataConfigurationModel = types
      * present in any of the case sets, not just the 0th one.
      */
     get selection() {
-      if (!self.dataset || !self.filteredCases || !self.filteredCases[0]) return [];
+      if (!self.dataset || self.filteredCases.length === 0) return [];
       const selection = Array.from(self.dataset.selection),
         allGraphCaseIds = self.graphCaseIDs;
       return selection.filter((caseId: string) => allGraphCaseIds.has(caseId));
@@ -362,11 +369,10 @@ export const DataConfigurationModel = types
     }))
   .views(self => ({
     getUnsortedCaseDataArray(caseArrayNumber: number): CaseData[] {
-      return self.filteredCases
-        ? (self.filteredCases[caseArrayNumber]?.caseIds || []).map(id => {
-          return {plotNum: caseArrayNumber, caseID: id};
-        })
-        : [];
+      if (self.filteredCases.length <= caseArrayNumber) return [];
+      return (self.filteredCases[caseArrayNumber].caseIds || []).map(id => {
+        return { plotNum: caseArrayNumber, caseID: id };
+      });
     },
     getCaseDataArray(caseArrayNumber: number) {
       const caseDataArray = this.getUnsortedCaseDataArray(caseArrayNumber),
@@ -611,14 +617,10 @@ export const DataConfigurationModel = types
     handleDataSetChange() {
       self.actionHandlerDisposer?.();
       self.actionHandlerDisposer = undefined;
-      self.filteredCases = [];
+      self.filteredCases.clear();
       if (self.dataset) {
         self.actionHandlerDisposer = onAnyAction(self.dataset, self.handleAction);
-        self.filteredCases[0] = new FilteredCases({
-          source: self.dataset, filter: self.filterCase,
-          onSetCaseValues: self.handleSetCaseValues
-        });
-        // make sure there are enough filteredCases to hold all the y attributes
+        // Create one filteredCases for each Y attribute
         while (self.filteredCases.length < self._yAttributeDescriptions.length) {
           this._addNewFilteredCases();
         }
@@ -634,33 +636,37 @@ export const DataConfigurationModel = types
         self.primaryRole = role;
       }
     },
+    /**
+     * Remove all attributes currently in our lists.
+     */
     clearAttributes() {
-      self._attributeDescriptions.clear();
-      self._yAttributeDescriptions.clear();
+      // Clear the attributes one by one so that reactions can happen
+      while (self._yAttributeDescriptions.length) {
+        this.removeYAttribute(self._yAttributeDescriptions[0].attributeID);
+      }
+      for (const [role] of self._attributeDescriptions) {
+        this.removeAttribute(role as GraphAttrRole);
+      }
+    },
+    removeAttribute(role: GraphAttrRole) {
+      self._setAttributeDescription(role);
     },
     setAttribute(role: GraphAttrRole, desc?: IAttributeDescriptionSnapshot) {
-
-      // For 'x' and 'y' roles, if the given attribute is already present on the other axis, then
-      // move whatever attribute is assigned to the given role to that axis.
-      if (['x', 'y'].includes(role)) {
-        const otherRole = role === 'x' ? 'y' : 'x',
-          otherDesc = self.attributeDescriptionForRole(otherRole);
-        if (otherDesc?.attributeID === desc?.attributeID) {
-          const currentDesc = self.attributeDescriptionForRole(role) ?? {attributeID: '', type: 'categorical'};
-          self._setAttributeDescription(otherRole, currentDesc);
-        }
-      }
       if (role === 'y') {
-        self._yAttributeDescriptions.clear();
         if (desc && desc.attributeID !== '') {
+          // Setting "Y" role implies that user only wants one Y attribute.
+          while (self._yAttributeDescriptions.length) {
+            this.removeYAttribute(self._yAttributeDescriptions[1].attributeID);
+          }
           self._yAttributeDescriptions.push(desc);
+          this._addNewFilteredCases();
         }
       } else if (role === 'rightNumeric') {
         this.setY2Attribute(desc);
       } else {
         self._setAttributeDescription(role, desc);
       }
-      self.filteredCases.forEach((aFilteredCases) => {
+      self.filteredCases.forEach((aFilteredCases) => { // TODO: do we always need to invalidate all of them?
         aFilteredCases.invalidateCases();
       });
       if (role === 'legend') {
@@ -671,14 +677,17 @@ export const DataConfigurationModel = types
       self._yAttributeDescriptions.push(desc);
       this._addNewFilteredCases();
     },
+    /**
+     * Replace an existing Y attribute with a different one, maintaining its position in the list.
+     * If the new attribute is already in the list of Y attributes, it will be removed from
+     * the old position to prevent duplication.
+     */
     replaceYAttribute(oldAttrId: string, newAttrId: string) {
-      /**
-       * Replace an existing Y attribute with a different one, maintaining its position in the list.
-       * If the new attribute is already in the list of Y attributes, it will be removed from
-       * the old position to prevent duplication.
-       */
-      if (self._yAttributeDescriptions.find(d=>d.attributeID===oldAttrId)) {
-        this.removeYAttributeID(newAttrId);
+      if (self.yAttributeIDs.includes(oldAttrId)) {
+        if (self.yAttributeIDs.includes(newAttrId)) {
+          // Remove the new attribute from its other position
+          this.removeYAttribute(newAttrId);
+        }
         const index = self._yAttributeDescriptions.findIndex(d=>d.attributeID===oldAttrId);
         self._yAttributeDescriptions[index].attributeID = newAttrId;
         if (index === 0 && self._yAttributeDescriptions.length === 1) {
@@ -701,7 +710,12 @@ export const DataConfigurationModel = types
         existingFilteredCases?.invalidateCases();
       }
     },
-    removeYAttributeID(id: string) {
+    /**
+     * Remove the attribute with the given ID from the list of y attributes plotted.
+     * Note, calls to this method are observed by Graph's handleNewAttributeID method.
+     * @param id - ID of Attribute to remove.
+     */
+    removeYAttribute(id: string) {
       const index = self._yAttributeDescriptions.findIndex((aDesc) => aDesc.attributeID === id);
       if (index >= 0) {
         self._yAttributeDescriptions.splice(index, 1);
@@ -733,17 +747,20 @@ export const DataConfigurationModel = types
     afterCreate() {
       this.onAction(this.handleRemoveAttributeAction);
     },
+    /**
+     * Respond to an attribute being removed from the underlying dataset.
+     */
     handleRemoveAttributeAction(actionCall: ISerializedActionCall) {
-      if (isRemoveAttributeTypeAction(actionCall)) {
+      if (isDatasetRemoveAttributeAction(actionCall)) {
         const removedAttributeId = actionCall.args[0];
-        for (const desc of self._attributeDescriptions.values()) {
+        for (const [role, desc] of self._attributeDescriptions.entries()) {
           if (desc.attributeID===removedAttributeId) {
-            console.log('TODO: remove non-Y attribute', desc);
+            this.removeAttribute(role as GraphAttrRole);
           }
         }
         for (const desc of self._yAttributeDescriptions) {
           if (desc.attributeID===removedAttributeId) {
-            this.removeYAttributeID(removedAttributeId);
+            this.removeYAttribute(removedAttributeId);
           }
         }
       }
@@ -751,32 +768,13 @@ export const DataConfigurationModel = types
 
   }));
 
-  export interface RemoveAttributeTypeAction extends ISerializedActionCall {
-    name: "removeAttribute";
-    args: [string];
-  }
-
-  export function isRemoveAttributeTypeAction(action: ISerializedActionCall): action is RemoveAttributeTypeAction {
-    return action.name === "removeAttribute";
-  }
-
-/*
-export interface SetAttributeTypeAction extends ISerializedActionCall {
-  name: "setAttributeType"
-  args: [GraphAttrRole, AttributeType]
-}
-*/
-
-/*
-export function isSetAttributeTypeAction(action: ISerializedActionCall): action is SetAttributeTypeAction {
-  return action.name === "setAttributeType"
-}
-*/
-
 export interface IDataConfigurationModel extends Instance<typeof DataConfigurationModel> {
 }
 
-/*
-export interface IDataConfigurationSnapshot extends SnapshotIn<typeof DataConfigurationModel> {
+export interface RemoveAttributeAction extends ISerializedActionCall {
+  name: "removeAttribute",
+  args: [role: GraphAttrRole]
 }
-*/
+export function isRemoveAttributeAction(action: ISerializedActionCall): action is RemoveAttributeAction {
+  return action.name === "removeAttribute";
+}

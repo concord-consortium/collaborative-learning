@@ -31,7 +31,7 @@ import { kConnectingLinesType } from "../adornments/connecting-lines/connecting-
 import { getDotId } from "../utilities/graph-utils";
 import { GraphLayerModel } from "./graph-layer-model";
 import { isSharedDataSet, SharedDataSet } from "../../../models/shared/shared-data-set";
-import { DataConfigurationModel } from "./data-configuration-model";
+import { DataConfigurationModel, RemoveAttributeAction } from "./data-configuration-model";
 
 export interface GraphProperties {
   axes: Record<string, IAxisModelUnion>
@@ -235,6 +235,7 @@ export const GraphModel = TileContentModel
      * Use the given Attribute for the given graph role.
      * Will remove any other attributes that may have that role, unless role is 'yPlus'.
      * Will not allow switching to an attribute from a different DataSet.
+     * Note, calls to this method are observed by Graph's handleNewAttributeID method.
      */
     setAttributeID(role: GraphAttrRole, dataSetID: string, id: string) {
       for (const layer of self.layers) {
@@ -249,18 +250,26 @@ export const GraphModel = TileContentModel
      * Find Y attribute with the given ID in any layer and remove it if found.
      */
     removeYAttributeID(attrID: string) {
-      self.layers.forEach((layer) => layer.config.removeYAttributeID(attrID));
+      for(const layer of self.layers) {
+        if (layer.config.yAttributeIDs.includes(attrID)) {
+          layer.config.removeYAttribute(attrID);
+          return;
+        }
+      }
+      console.warn('removeYAttributeID: ', attrID, ' not found in any layer');
     },
     /**
      * Find Y attribute with given ID in any layer, and replace it with the new attribute.
      * Old and new attributes must belong to the same DataSet/Layer.
+     * Note, calls to this method are observed by Graph's handleNewAttributeID method.
      */
     replaceYAttributeID(oldAttrId: string, newAttrId: string) {
-      const layer = self.layers.find((l) => l.config.includesAttributeID(oldAttrId));
-      if (layer) {
-        layer.config.replaceYAttribute(oldAttrId, newAttrId);
-      } else {
-        console.log('replaceYAttributeID - attribute to replace was not found');
+      for(const layer of self.layers) {
+        if (layer.config.yAttributeIDs.includes(oldAttrId)) {
+          layer.config.replaceYAttribute(oldAttrId, newAttrId);
+          return;
+      }
+      console.warn('replaceYAttributeID: attribute ', oldAttrId, ' not found in any layer');
       }
     },
     setPlotType(type: PlotType) {
@@ -474,11 +483,11 @@ export function isSetAttributeIDAction(action: ISerializedActionCall): action is
 }
 
 export interface RemoveYAttributeAction extends ISerializedActionCall {
-  name: "removeYAttributeID",
+  name: "removeYAttribute",
   args: [attrId: string]
 }
 export function isRemoveYAttributeAction(action: ISerializedActionCall): action is RemoveYAttributeAction {
-  return action.name === "removeYAttributeID";
+  return action.name === "removeYAttribute";
 }
 
 export interface ReplaceYAttributeAction extends ISerializedActionCall {
@@ -489,9 +498,10 @@ export function isReplaceYAttributeAction(action: ISerializedActionCall): action
   return action.name === "replaceYAttributeID";
 }
 
-export type AttributeAssignmentAction = SetAttributeIDAction | RemoveYAttributeAction | ReplaceYAttributeAction;
+export type AttributeAssignmentAction
+  = SetAttributeIDAction | RemoveYAttributeAction | ReplaceYAttributeAction | RemoveAttributeAction;
 export function isAttributeAssignmentAction(action: ISerializedActionCall): action is AttributeAssignmentAction {
-  return ["setAttributeID", "removeYAttributeID", "replaceYAttributeID"].includes(action.name);
+  return ["setAttributeID", "removeYAttribute", "replaceYAttributeID", "removeAttribute"].includes(action.name);
 }
 
 export interface SetGraphVisualPropsAction extends ISerializedActionCall {

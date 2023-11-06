@@ -550,6 +550,11 @@ export const DataSet = types.model("DataSet", {
         }
       },
 
+      /**
+       * Remove an attribute from the dataset.
+       * Note, this method is observed by a listener in data-configuration-model.
+       * @param attributeID
+       */
       removeAttribute(attributeID: string) {
         const attrIndex = attrIndexFromID(attributeID);
         if (attrIndex != null) {
@@ -749,3 +754,13 @@ export function getDataSetBounds(dataSet: IDataSet) {
   });
   return result;
 }
+
+export interface DatasetRemoveAttributeAction extends ISerializedActionCall {
+  name: "removeAttribute";
+  args: [attributeID: string];
+}
+
+export function isDatasetRemoveAttributeAction(action: ISerializedActionCall): action is DatasetRemoveAttributeAction {
+  return action.name === "removeAttribute";
+}
+

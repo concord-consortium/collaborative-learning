@@ -8,6 +8,7 @@ import {graphPlaceToAttrRole} from "../../../../graph-types";
 import {maxWidthOfStringsD3} from "../../../../utilities/graph-utils";
 import {useDataConfigurationContext} from "../../../../hooks/use-data-configuration-context";
 import {collisionExists, getStringBounds} from "../axis-utils";
+import { isAlive } from "@concord-consortium/mobx-state-tree";
 import graphVars from "../../../../components/graph.scss";
 
 export interface IUseAxis {
@@ -105,6 +106,10 @@ export const useAxis = ({
   useEffect(function installDomainSync() {
     if (isNumeric) {
       const disposer = autorun(() => {
+        if (!isAlive(axisModel)) {
+          console.log('autorun trying to run after axisModel is defunct');
+          return;
+        }
         multiScale?.setNumericDomain(axisModel.domain);
         layout.setDesiredExtent(axisPlace, computeDesiredExtent());
       });

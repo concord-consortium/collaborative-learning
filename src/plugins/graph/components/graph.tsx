@@ -21,8 +21,10 @@ import {setNiceDomain, startAnimation} from "../utilities/graph-utils";
 import {IAxisModel} from "../imports/components/axis/models/axis-model";
 import {GraphPlace} from "../imports/components/axis-graph-shared";
 import {useGraphLayoutContext} from "../models/graph-layout";
+import { isRemoveAttributeAction } from "../models/data-configuration-model";
 import {
-  isAttributeAssignmentAction, isRemoveYAttributeAction, isReplaceYAttributeAction, isSetAttributeIDAction,
+  isAttributeAssignmentAction, isRemoveYAttributeAction, isReplaceYAttributeAction,
+  isSetAttributeIDAction,
   useGraphModelContext
 } from "../models/graph-model";
 import {useInstanceIdContext} from "../imports/hooks/use-instance-id-context";
@@ -84,14 +86,14 @@ export const Graph = observer(
   };
 
   /**
-   * Only in the case that place === 'y' and there is more than one attribute assigned to the y-axis
-   * do we have to do anything special. Otherwise, we can just call handleChangeAttribute.
+   * Remove a given Attribute from the graph.
+   * This is called by 'Remove...' menu options.
    */
   const handleRemoveAttribute = (place: GraphPlace, idOfAttributeToRemove: string) => {
-    if (place === 'left' && graphModel.config?.yAttributeDescriptions.length > 1) {
+    if (place === 'left') {
       graphModel.removeYAttributeID(idOfAttributeToRemove);
       const yAxisModel = graphModel.getAxis('left') as IAxisModel;
-      setNiceDomain(graphModel.config.numericValuesForYAxis, yAxisModel);
+      setNiceDomain(graphModel.config.numericValuesForYAxis, yAxisModel); // FIXME needs update for multiple datasets
     } else {
       dataset && handleChangeAttribute(place, dataset, '');
     }
@@ -102,13 +104,17 @@ export const Graph = observer(
     const disposer = graphModel && onAnyAction(graphModel, action => {
       if (isAttributeAssignmentAction(action)) {
         let graphPlace: GraphPlace = "yPlus";
-        let dataSetId = dataset?.id ?? "";
+        let dataSetId = dataset?.id ?? ""; // FIXME for multi-dataset
         let attrId = "";
         if (isSetAttributeIDAction(action)) {
           const [role, _dataSetId, _attrId] = action.args;
           graphPlace = attrRoleToGraphPlace[role] as GraphPlace;
           dataSetId = _dataSetId;
           attrId = _attrId;
+        }
+        else if (isRemoveAttributeAction(action)) {
+          const [role] = action.args;
+          graphPlace = attrRoleToGraphPlace[role] as GraphPlace;
         }
         else if (isRemoveYAttributeAction(action)) {
           graphPlace = "yPlus";
