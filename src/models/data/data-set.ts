@@ -45,6 +45,8 @@ export const DataSet = types.model("DataSet", {
   cases: types.array(CaseID),
 })
 .volatile(self => ({
+  // MobX-observable set of selected attribute IDs
+  attributeSelection: observable.set<string>(),
   // MobX-observable set of selected case IDs
   caseSelection: observable.set<string>(),
   // map from pseudo-case ID to the CaseGroup it represents
@@ -99,6 +101,9 @@ export const DataSet = types.model("DataSet", {
   };
 })
 .views(self => ({
+  get selectedAttributeIds() {
+    return Array.from(self.attributeSelection);
+  },
   get selectedCaseIds() {
     return Array.from(self.caseSelection);
   }
@@ -360,12 +365,18 @@ export const DataSet = types.model("DataSet", {
         }
         return cases;
       },
+      isAttributeSelected(attributeId: string) {
+        return self.attributeSelection.has(attributeId);
+      },
       isCaseSelected(caseId: string) {
         // a pseudo-case is selected if all of its individual cases are selected
         const group = self.pseudoCaseMap[caseId];
         return group
                 ? group.childCaseIds.every(id => self.caseSelection.has(id))
                 : self.caseSelection.has(caseId);
+      },
+      get firstSelectedAttributeId() {
+        if (self.selectedAttributeIds.length > 0) return self.selectedAttributeIds[0];
       },
       get firstSelectedCaseId() {
         if (self.selectedCaseIds.length > 0) return self.selectedCaseIds[0];
@@ -620,6 +631,14 @@ export const DataSet = types.model("DataSet", {
         });
       },
 
+      selectAllAttributes(select = true) {
+        if (select) {
+          self.attributes.forEach(attribute => self.attributeSelection.add(attribute.id));
+        } else {
+          self.attributeSelection.clear();
+        }
+      },
+
       selectAllCases(select = true) {
         if (select) {
           self.cases.forEach(({__id__}) => self.caseSelection.add(__id__));
@@ -627,6 +646,16 @@ export const DataSet = types.model("DataSet", {
         else {
           self.caseSelection.clear();
         }
+      },
+
+      selectAttributes(attributeIds: string[], select = true) {
+        attributeIds.forEach(id => {
+          if (select) {
+            self.attributeSelection.add(id);
+          } else {
+            self.attributeSelection.delete(id);
+          }
+        });
       },
 
       selectCases(caseIds: string[], select = true) {
@@ -647,6 +676,10 @@ export const DataSet = types.model("DataSet", {
             self.caseSelection.delete(id);
           }
         });
+      },
+
+      setSelectedAttributes(attributeIds: string[]) {
+        self.attributeSelection.replace(attributeIds);
       },
 
       setSelectedCases(caseIds: string[]) {
