@@ -14,13 +14,13 @@ import admin from "firebase-admin";
 import { outputAzureFile } from "./azure-utils";
 import { AIService, datasetPath, networkFileName, tagFileExtension } from "./script-constants";
 import { DocumentInfo, IAzureMetadata } from "./script-types";
-import { getFirebaseBasePath, prettyDuration } from "./script-utils";
+import { getFirestoreBasePath, prettyDuration } from "./script-utils";
 import { outputVertexAIFile } from "./vertexai-utils";
 
 // The directory containing the documents you're interested in.
 // This should be the output of download-documents.ts.
 // Each document should be named like documentID.txt, where ID is the document's id in the database.
-const sourceDirectory = "dataset1699029183595";
+const sourceDirectory = "dataset1699369801517";
 const aiService: AIService = "vertexAI";
 
 // Number of documents to include in each query. I believe 10 is the max for this.
@@ -74,7 +74,7 @@ fs.readdirSync(sourcePath).forEach(file => {
 console.log(`***** Getting document tags *****`);
 const tagStartTime = Date.now();
 const includedDocumentIds = Object.keys(documentTags);
-const collectionUrl = getFirebaseBasePath(portal, demo);
+const collectionUrl = getFirestoreBasePath(portal, demo);
 const documentCollection = admin.firestore().collection(collectionUrl);
 
 let documentsProcessed = 0;
@@ -102,7 +102,7 @@ for (let i = 0; i < includedDocumentIds.length; i += queryLimit) {
 
       // Process each comment in series
       const processComment =
-        async (commentSnapshot: admin.firestore.QueryDocumentSnapshot<admin.firestore.DocumentData>) => {
+        (commentSnapshot: admin.firestore.QueryDocumentSnapshot<admin.firestore.DocumentData>) => {
           const commentTags = commentSnapshot.data().tags ?? [];
           commentTags.forEach(tag => {
             if (tag) {
@@ -124,7 +124,7 @@ for (let i = 0; i < includedDocumentIds.length; i += queryLimit) {
           commentsProcessed++;
         };
       for (const _commentSnapshot of commentSnapshots.docs) {
-        await processComment(_commentSnapshot);
+        processComment(_commentSnapshot);
       }
 
       documentInfo[documentId] = {
