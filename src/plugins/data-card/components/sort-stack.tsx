@@ -9,7 +9,6 @@ import { useDroppable } from "@dnd-kit/core";
 interface IProps {
   stackValue: string;
   inAttributeId: string;
-  isLinked?: boolean;
   model: ITileModel;
   id?: string;
   passedRef?:any;
@@ -23,7 +22,7 @@ const getStackValueDisplay = (value: string) => {
   return value.slice(0, 13) + '... ';
 };
 
-export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, isLinked, draggingActive }) => {
+export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, draggingActive }) => {
   const content = model.content as DataCardContentModelType;
   const caseIds = content.caseIdsFromAttributeValue(inAttributeId, stackValue);
   const units = caseIds.length > 1 ? "cards" : "card";
@@ -55,7 +54,6 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
               model={model}
               caseId={cid}
               indexInStack={i}
-              isLinked={isLinked}
               totalInStack={caseIds.length}
             />;
           })

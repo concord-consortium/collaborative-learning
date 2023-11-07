@@ -7,6 +7,7 @@ import { DataCardContentModelType } from "./data-card-content";
 import { DataCardRows } from "./components/data-card-rows";
 import { DataCardToolbar } from "./data-card-toolbar";
 import { SortSelect } from "./components/sort-select";
+import { IsLinkedContext } from "./use-is-linked";
 import { useToolbarTileApi } from "../../components/tiles/hooks/use-toolbar-tile-api";
 import { AddIconButton, RemoveIconButton } from "./components/add-remove-icons";
 import { useCautionAlert } from "../../components/utilities/use-caution-alert";
@@ -248,96 +249,97 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
   };
 
   return (
-    <div className={toolClasses}>
-      <DataCardToolbarContext.Provider value={{currEditAttrId, currEditFacet}}>
-        <DataCardToolbar
-          model={model}
-          documentContent={documentContent}
-          tileElt={tileElt}
-          currEditAttrId={currEditAttrId}
-          currEditFacet={currEditFacet}
-          setImageUrlToAdd={setImageUrlToAdd} {...toolbarProps}
-          scale={scale}
-        />
-      </DataCardToolbarContext.Provider>
-      <div
-        className="data-card-content"
-        onClick={handleBackgroundClick}
-        onDragOver={handleDragOver}
-        onDrop={handleDrop}
-        ref={element => backgroundRef.current = element}
-      >
-        <div className={highlightContainerClasses}>
-          <div className="data-card-header-row">
-            <div className="panel title">
-              <CustomEditableTileTitle
-                model={props.model}
-                onRequestUniqueTitle={props.onRequestUniqueTitle}
-                readOnly={props.readOnly}
+    <IsLinkedContext.Provider value={!!isLinked}>
+      <div className={toolClasses}>
+        <DataCardToolbarContext.Provider value={{currEditAttrId, currEditFacet}}>
+          <DataCardToolbar
+            model={model}
+            documentContent={documentContent}
+            tileElt={tileElt}
+            currEditAttrId={currEditAttrId}
+            currEditFacet={currEditFacet}
+            setImageUrlToAdd={setImageUrlToAdd} {...toolbarProps}
+            scale={scale}
+          />
+        </DataCardToolbarContext.Provider>
+        <div
+          className="data-card-content"
+          onClick={handleBackgroundClick}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+          ref={element => backgroundRef.current = element}
+        >
+          <div className={highlightContainerClasses}>
+            <div className="data-card-header-row">
+              <div className="panel title">
+                <CustomEditableTileTitle
+                  model={props.model}
+                  onRequestUniqueTitle={props.onRequestUniqueTitle}
+                  readOnly={props.readOnly}
+                />
+              </div>
+            </div>
+
+            <div className="panel sort">
+              <SortSelect
+                model={model}
+                onSortAttrChange={setSort}
+                attrIdNamePairs={attrIdsNames}
               />
             </div>
-          </div>
-
-          <div className="panel sort">
-            <SortSelect
-              model={model}
-              onSortAttrChange={setSort}
-              attrIdNamePairs={attrIdsNames}
-            />
-          </div>
-          { displaySingle &&
-            <>
-              <div
-                className={classNames("panel nav", { highlighted: content.caseSelected, linked: isLinked })}
-                onClick={handleNavPanelClick}
-              >
-                <div className="card-number-of-listing">
-                  <div className="cell-text">
-                    { content.totalCases > 0
-                        ? `Card ${content.caseIndex + 1} of ${content.totalCases}`
-                        : "Add a card" }
+            { displaySingle &&
+              <>
+                <div
+                  className={classNames("panel nav", { highlighted: content.caseSelected, linked: isLinked })}
+                  onClick={handleNavPanelClick}
+                >
+                  <div className="card-number-of-listing">
+                    <div className="cell-text">
+                      { content.totalCases > 0
+                          ? `Card ${content.caseIndex + 1} of ${content.totalCases}`
+                          : "Add a card" }
+                    </div>
                   </div>
-                </div>
-                <div className="card-nav-buttons">
-                  <button className={ previousButtonClasses } onClick={handlePreviousCase}></button>
-                  <button className={ nextButtonClasses } onClick={handleNextCase}></button>
-                </div>
-                { !readOnly &&
-                  <div className="add-remove-card-buttons">
-                    <AddIconButton className={addCardClasses} onClick={handleAddNewCase} />
-                    <RemoveIconButton className={removeCardClasses} onClick={handleDeleteCardClick} />
+                  <div className="card-nav-buttons">
+                    <button className={ previousButtonClasses } onClick={handlePreviousCase}></button>
+                    <button className={ nextButtonClasses } onClick={handleNextCase}></button>
                   </div>
-                }
+                  { !readOnly &&
+                    <div className="add-remove-card-buttons">
+                      <AddIconButton className={addCardClasses} onClick={handleAddNewCase} />
+                      <RemoveIconButton className={removeCardClasses} onClick={handleDeleteCardClick} />
+                    </div>
+                  }
+                </div>
+                <div className="single-card-data-area">
+                  { content.totalCases > 0 &&
+                    <DataCardRows
+                      caseIndex={content.caseIndex}
+                      model={model}
+                      totalCases={content.totalCases}
+                      readOnly={readOnly}
+                      currEditAttrId={currEditAttrId}
+                      currEditFacet={currEditFacet}
+                      setCurrEditAttrId={setCurrEditAttrId}
+                      setCurrEditFacet={setCurrEditFacet}
+                      imageUrlToAdd={imageUrlToAdd}
+                      setImageUrlToAdd={setImageUrlToAdd}
+                    />
+                  }
+                </div>
+              </>
+            }
+            { shouldShowAddField && !readOnly &&
+              <AddIconButton className="add-field" onClick={handleAddField} />
+            }
+            { !displaySingle &&
+              <div className="sorting-cards-data-area">
+                <DataCardSortArea model={model} />
               </div>
-              <div className="single-card-data-area">
-                { content.totalCases > 0 &&
-                  <DataCardRows
-                    caseIndex={content.caseIndex}
-                    model={model}
-                    totalCases={content.totalCases}
-                    readOnly={readOnly}
-                    currEditAttrId={currEditAttrId}
-                    currEditFacet={currEditFacet}
-                    isLinked={isLinked}
-                    setCurrEditAttrId={setCurrEditAttrId}
-                    setCurrEditFacet={setCurrEditFacet}
-                    imageUrlToAdd={imageUrlToAdd}
-                    setImageUrlToAdd={setImageUrlToAdd}
-                  />
-                }
-              </div>
-            </>
-          }
-          { shouldShowAddField && !readOnly &&
-            <AddIconButton className="add-field" onClick={handleAddField} />
-          }
-          { !displaySingle &&
-            <div className="sorting-cards-data-area">
-              <DataCardSortArea model={model} isLinked={isLinked} />
-            </div>
-          }
+            }
+          </div>
         </div>
       </div>
-    </div>
+    </IsLinkedContext.Provider>
   );
 });
