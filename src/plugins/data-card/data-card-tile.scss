@@ -89,10 +89,10 @@ $default-button-border-color: #979797;
       justify-content: space-between;
 
       &.highlighted {
-        background-color: $highlight-blue-new;
+        background-color: $highlight-unlinked-header;
 
         &.linked {
-          background-color: $highlight-green;
+          background-color: $highlight-linked-header;
         }
       }
 
@@ -201,10 +201,10 @@ $default-button-border-color: #979797;
           box-sizing: border-box;
 
           &.highlighted {
-            background-color: $highlight-blue-new;
+            background-color: $highlight-unlinked-header;
 
             &.linked {
-              background-color: $highlight-green;
+              background-color: $highlight-linked-header;
             }
           }
 
@@ -225,10 +225,10 @@ $default-button-border-color: #979797;
             text-align: right;
 
             &.highlighted {
-              box-shadow: inset 0 0 0 3px $highlight-blue-edit-new;
+              box-shadow: inset 0 0 0 3px $highlight-unlinked-edit;
 
               &.linked {
-                box-shadow: inset 0 0 0 3px $highlight-green-edit;
+                box-shadow: inset 0 0 0 3px $highlight-linked-edit;
               }
             }
 
@@ -249,10 +249,10 @@ $default-button-border-color: #979797;
 
           input {
             &.highlighted {
-              background-color: $highlight-blue-light-new;
+              background-color: $highlight-unlinked-cell;
 
               &.linked {
-                background-color: $highlight-green-light;
+                background-color: $highlight-linked-cell;
               }
             }
 
@@ -260,11 +260,11 @@ $default-button-border-color: #979797;
               background-color: white;
 
               &.highlighted {
-                box-shadow: inset 0 0 0 3px $highlight-blue-edit-new;
+                box-shadow: inset 0 0 0 3px $highlight-unlinked-edit;
 
                 &.linked {
                   background-color: white;
-                  box-shadow: inset 0 0 0 3px $highlight-green-edit;
+                  box-shadow: inset 0 0 0 3px $highlight-linked-edit;
                 }
               }
             }
@@ -275,10 +275,10 @@ $default-button-border-color: #979797;
           padding: 0 4px;
 
           &.highlighted {
-            background-color: $highlight-blue-light-new;
+            background-color: $highlight-unlinked-cell;
 
             &.linked {
-              background-color: $highlight-green-light;
+              background-color: $highlight-linked-cell;
             }
           }
         }

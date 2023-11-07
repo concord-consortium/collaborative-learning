@@ -73,10 +73,10 @@ $sort-view-width: ($sort-view-card-width * $cards-per-row ) + 3;
         text-align: center;
 
         &.highlighted {
-          background-color: $highlight-blue-new;
+          background-color: $highlight-unlinked-header;
 
           &.linked {
-            background-color: $highlight-green;
+            background-color: $highlight-linked-header;
           }
         }
 
@@ -111,10 +111,10 @@ $sort-view-width: ($sort-view-card-width * $cards-per-row ) + 3;
         border-radius: 0px 0px 5px 5px;
 
         &.highlighted {
-          background-color: $highlight-blue-new;
+          background-color: $highlight-unlinked-header;
 
           &.linked {
-            background-color: $highlight-green;
+            background-color: $highlight-linked-header;
           }
         }
       }
@@ -129,10 +129,10 @@ $sort-view-width: ($sort-view-card-width * $cards-per-row ) + 3;
           font-weight: bold;
 
           &.highlighted {
-            background-color: $highlight-blue-new;
+            background-color: $highlight-unlinked-header;
 
             &.linked {
-              background-color: $highlight-green;
+              background-color: $highlight-linked-header;
             }
           }
         }
@@ -141,10 +141,10 @@ $sort-view-width: ($sort-view-card-width * $cards-per-row ) + 3;
           padding: $card-space-factor;
 
           &.highlighted {
-            background-color: $highlight-blue-light-new;
+            background-color: $highlight-unlinked-cell;
 
             &.linked {
-              background-color: $highlight-green-light;
+              background-color: $highlight-linked-cell;
             }
           }
         }
