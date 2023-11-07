@@ -141,7 +141,7 @@ export interface IMatchCirclesProps {
 }
 
 export function matchCirclesToData(props: IMatchCirclesProps) {
-  console.log("\t🏭 matchCirclesToData");
+  // console.log("\t🏭 matchCirclesToData");
   const {dataConfiguration, enableAnimation, instanceId,
       dotsElement, pointRadius, pointColor, pointStrokeColor} = props;
 
@@ -183,6 +183,8 @@ interface IInitializePoints {
 const initializePoints = ({ selection, data, pointRadius,  pointColor,
                             pointStrokeColor, getPointColorAtIndex, instanceId }: IInitializePoints) => {
   console.log("\t🏭 initializePoints");
+  console.log("\tdata:", data);
+  console.log("\tselection is of size:", selection.size());
 
   //initialize outer highlight dots (this must be before the inner dots so that the inner dots are on top)
   selection
@@ -200,15 +202,6 @@ const initializePoints = ({ selection, data, pointRadius,  pointColor,
         enter.append('circle')
           .attr('class', 'graph-dot')
           .property('id', (d: CaseData) => `${instanceId}_${d.caseID}`),
-
-          //not sure if we want this below??
-      (update) =>
-        update.attr('r', pointRadius)
-        .style('fill', pointColor)
-        .style('stroke', pointStrokeColor)
-        .style('stroke-width', defaultStrokeWidth)
-
-        // end --------------------
     );
 };
 
@@ -224,7 +217,6 @@ export interface ISetPointSelection {
 
 
 export function setPointSelection(props: ISetPointSelection) {
-  console.log("\t🏭 setPointSelection");
   const { dotsRef, dataConfiguration } = props;
   const dataset = dataConfiguration.dataset;
   const allCircles = selectAllCircles(dotsRef.current); //includes both inner and outer circles
@@ -272,10 +264,11 @@ export interface ISetPointCoordinates {
 }
 
 export function setPointCoordinates(props: ISetPointCoordinates) {
-  console.log("\t🏭 setPointCoordinates with dataset:", props.dataset);
+  // console.log("\t🏭 setPointCoordinates with dataset:", props.dataset);
+  // console.log("dotsRef: ", props.dotsRef.current);
 
   const setPoints = (radius: number) => {
-    if (theSelection?.size()) {
+    if (theSelection !== null) {
       theSelection
         .transition()
         .duration(duration)
@@ -331,14 +324,37 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
           getScreenX, getScreenY, getLegendColor, enableAnimation } = props;
 
   const duration = enableAnimation.current ? transitionDuration : 0;
+
+  // //new code -----------------------------------------
+  // console.log("------outer circles-----------------");
+  // console.log("\tdotsRef.current: ", dotsRef.current);
+  // let theSelection = selectOuterCircles(dotsRef.current); //select outer circles
+  // console.log("theSelection.size()", theSelection?.size());
+  // setPoints(0);
+  // console.log("------inner circles-----------------");
+  // console.log("\tdotsRef.current: ", dotsRef.current);
+  // theSelection = selectInnerCircles(dotsRef.current); //select inner circles
+  // console.log("theSelection.size()", theSelection?.size());
+  // setPoints(5);
+
+
+  // old code-----------------------------------------
+  console.log("------inner circles-----------------");
+  console.log("\tdotsRef.current: ", dotsRef.current);
   let theSelection = selectInnerCircles(dotsRef.current); //select inner circles
+  console.log("theSelection.size()", theSelection?.size());
   setPoints(5);
+  console.log("------outer circles-----------------");
+  console.log("\tdotsRef.current: ", dotsRef.current);
+
   theSelection = selectOuterCircles(dotsRef.current); //select outer circles
+  console.log("theSelection.size()", theSelection?.size());
   setPoints(0);
 
-  if (theSelection){
-    styleOuterCircles(theSelection, dataset);
-  }
+  // if (theSelection){
+  //   console.log("right hereeeee!");
+  //   styleOuterCircles(theSelection, dataset);
+  // }
 }
 
 
