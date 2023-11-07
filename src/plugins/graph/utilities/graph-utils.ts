@@ -1,10 +1,10 @@
-import {extent, format, timeout} from "d3";
+import {extent, format, select, timeout} from "d3";
 import React from "react";
 import { isInteger} from "lodash";
 import { IClueObjectSnapshot } from "../../../models/annotations/clue-object";
 import { PartialSharedModelEntry } from "../../../models/document/document-content-types";
 import { UpdatedSharedDataSetIds } from "../../../models/shared/shared-data-set";
-import {CaseData, DotSelection, DotsElt, selectAllCircles, selectDots} from "../d3-types";
+import {CaseData, DotSelection, DotsElt, selectAllCircles, selectInnerCircles, selectOuterCircles} from "../d3-types";
 import {IDotsRef, kGraphFont, Point, Rect, rTreeRect} from "../graph-types";
 import {between} from "./math-utils";
 import {IAxisModel, isNumericAxisModel} from "../imports/components/axis/models/axis-model";
@@ -158,15 +158,14 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
     getPointColorAtIndex: (index) => pointColor,
     instanceId
   });
-  //----------------- Click on Dot -------------------
-  // dotsElement && select(dotsElement).on('click',
-  //   (event: MouseEvent) => {
-  //     const target = select(event.target as SVGSVGElement);
-  //     if (target.node()?.nodeName === 'circle') {
-  //       handleClickOnDot(event, (target.datum() as CaseData).caseID, dataConfiguration.dataset);
-  //     }
-  //   });
-  // dataConfiguration.setPointsNeedUpdating(false);
+
+  dotsElement && select(dotsElement).on('click', (event: MouseEvent) => {
+    const target = select(event.target as SVGSVGElement);
+    if (target.node()?.nodeName === 'circle') {
+      handleClickOnDot(event, (target.datum() as CaseData).caseID, dataConfiguration.dataset);
+    }
+  });
+  dataConfiguration.setPointsNeedUpdating(false);
 }
 
 
@@ -187,7 +186,7 @@ const initializePoints = ({ selection, data, pointRadius,  pointColor,
   selection
     .data(data)
     .join(
-      (enter)=>
+      (enter) =>
         enter.append('circle')
         .attr('class', 'graph-dot-highlighted')
     );
@@ -217,7 +216,7 @@ export function setPointSelection(props: ISetPointSelection) {
   const { dotsRef, dataConfiguration } = props;
   const dataset = dataConfiguration.dataset;
   const allCircles = selectAllCircles(dotsRef.current); //includes both inner and outer circles
-  const outerCircles = selectDots(dotsRef.current, true);
+  const outerCircles = selectOuterCircles(dotsRef.current);
   if (allCircles){
     applySelectedClassToCircles(allCircles, dataset);
   }
@@ -245,7 +244,7 @@ function styleOuterCircles(outerCircles: any, dataset?: IDataSet){
       .style('fill', (aCaseData: CaseData) => {
         return (dataset?.isCaseSelected(aCaseData.caseID)) && selectedOuterCircleFillColor;
       })
-      .style('stroke', (aCaseData: CaseData) =>{
+      .style('stroke', (aCaseData: CaseData) => {
         return selectedOuterCircleStrokeColor;
       })
       .style('opacity', 0.5);
@@ -286,11 +285,7 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
           return lookupLegendColor(aCaseData);
         })
         .style('stroke', (aCaseData: CaseData) =>{
-          if (getPointColorAtIndex){
-            return getPointColorAtIndex(aCaseData.plotNum);//border color of inner dot should be same color as legend
-          } else {
-            return pointColor;
-          }
+          return lookupLegendColor(aCaseData); //border color of inner dot should be same color as legend
         })
         .style('stroke-width', (aCaseData: CaseData) =>{
           return (dataset?.isCaseSelected(aCaseData.caseID))
@@ -303,11 +298,14 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
     const id = aCaseData.caseID;
     const isSelected = dataset?.isCaseSelected(id);
     const legendColor = getLegendColor ? getLegendColor(id) : '';
+
     if (getPointColorAtIndex) {
       if (legendColor !== '') {
         return legendColor;
-      } else if (isSelected ||(aCaseData.plotNum && getPointColorAtIndex)) {
+      } else if (getPointColorAtIndex && aCaseData.plotNum) {
         return getPointColorAtIndex(aCaseData.plotNum);
+      } else if (isSelected) {
+        return defaultSelectedColor;
       } else {
         return pointColor;
       }
@@ -325,9 +323,9 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
   const { dataset, dotsRef, pointColor, getPointColorAtIndex,
           getScreenX, getScreenY, getLegendColor } = props;
 
-  let theSelection = selectDots(dotsRef.current, false); //select inner circles
+  let theSelection = selectInnerCircles(dotsRef.current); //select inner circles
   setPoints(5);
-  theSelection = selectDots(dotsRef.current, true); //select outer circles
+  theSelection = selectOuterCircles(dotsRef.current); //select outer circles
   setPoints(0);
 
   if (theSelection){

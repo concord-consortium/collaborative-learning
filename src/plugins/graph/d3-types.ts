@@ -22,9 +22,13 @@ export function selectAllCircles(svg: DotsElt): DotSelection | null {
 }
 
 // selects all `.graph-dot` or `.graph-dot-highlighted` elements
-export function selectDots(svg: DotsElt, selectedOnly = false): DotSelection | null {
-  const innerSelector = selectedOnly ? ".graph-dot-highlighted" : ".graph-dot";
+export function selectOuterCircles(svg: DotsElt): DotSelection | null {
   return svg
-          ? select(svg).selectAll(innerSelector)
+          ? select(svg).selectAll(".graph-dot-highlighted")
+          : null;
+}
+export function selectInnerCircles(svg: DotsElt): DotSelection | null {
+  return svg
+          ? select(svg).selectAll(".graph-dot")
           : null;
 }

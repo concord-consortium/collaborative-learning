@@ -107,8 +107,11 @@ export const GraphModel = TileContentModel
     getPointRadius(use: 'normal' | 'hover-drag' | 'select' = 'normal') {
       const r = pointRadiusMax;
 
-      // -- we used to return result which grew the inner circle radius as we clicked on it, but now we return r
-      // -- commented out below ---
+      //*************************************************************************************************************
+      //We used to return "result" which decreased the inner radius circle when we clicked on a
+      //selected point. Leaving this commented in case we want to change the radius when we click on a point
+      //**************************************************************************************************************
+
       // const numPoints = self.config.caseDataArray.length;
       // // for loop is fast equivalent to radius = max( minSize, maxSize - floor( log( logBase, max( dataLength, 1 )))
       // for (let i = pointRadiusLogBase; i <= numPoints; i = i * pointRadiusLogBase) {
@@ -123,7 +126,6 @@ export const GraphModel = TileContentModel
         case "hover-drag":
           return r * hoverRadiusFactor;
         case "select":
-          console.log("selected! returning:", r + pointRadiusSelectionAddend);
           return r + pointRadiusSelectionAddend;
       }
     },
