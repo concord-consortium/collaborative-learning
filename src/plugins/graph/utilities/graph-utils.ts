@@ -230,25 +230,17 @@ function applySelectedClassToCircles(selection: DotSelection, dataset?: IDataSet
 }
 
 function styleOuterCircles(outerCircles: any, dataset?: IDataSet){
-  if (dataset?.selection.size === 0) {
-    outerCircles
-      .attr('r', (aCaseData: CaseData) => {
-        return 0;
-      });
-  }
-  else {
-    outerCircles
-      .attr('r', (aCaseData: CaseData) => {
-        return (dataset?.isCaseSelected(aCaseData.caseID)) ? 10 : 0;
-      })
-      .style('fill', (aCaseData: CaseData) => {
-        return (dataset?.isCaseSelected(aCaseData.caseID)) && selectedOuterCircleFillColor;
-      })
-      .style('stroke', (aCaseData: CaseData) => {
-        return selectedOuterCircleStrokeColor;
-      })
-      .style('opacity', 0.5);
-  }
+  outerCircles
+    .attr('r', (aCaseData: CaseData) => {
+      return (dataset?.isCaseSelected(aCaseData.caseID)) ? 10 : 0;
+    })
+    .style('fill', (aCaseData: CaseData) => {
+      return (dataset?.isCaseSelected(aCaseData.caseID)) && selectedOuterCircleFillColor;
+    })
+    .style('stroke', (aCaseData: CaseData) => {
+      return selectedOuterCircleStrokeColor;
+    })
+    .style('opacity', 0.5);
 }
 
 
