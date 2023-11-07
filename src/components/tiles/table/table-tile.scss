@@ -185,7 +185,6 @@ $controls-hover-background: #c0dfe7;
     }
     .rdg-row {
       &.rdg-row-selected {
-        background-color: var(--row-selected-background-color);
         .index-column {
           background-color: $highlight-blue-new;
 

@@ -40,11 +40,12 @@ export const useColumnsFromDataSet = ({
       linked: isLinked,
       "selected-column": gridContext.isColumnSelected(attrId)
     };
+    dataSet.selectedAttributeIds; // eslint-disable-line no-unused-expressions
     return {
       cellClass: classNames({ "has-expression": metadata.hasExpression(attrId), ...selectedColumnClass }),
       headerCellClass: classNames({ "rdg-cell-editing": columnEditingName === attrId, ...selectedColumnClass })
     };
-  }, [columnEditingName, gridContext, isLinked, metadata]);
+  }, [columnEditingName, dataSet.selectedAttributeIds, gridContext, isLinked, metadata]);
 
   // controlsColumn is specified separate from the other columns because its headerRenderer and formatter
   // cannot be defined yet, so they must be attached in a later hook.
