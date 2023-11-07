@@ -141,6 +141,7 @@ export interface IMatchCirclesProps {
 }
 
 export function matchCirclesToData(props: IMatchCirclesProps) {
+  console.log("\t🏭 matchCirclesToData");
   const {dataConfiguration, enableAnimation, instanceId,
       dotsElement, pointRadius, pointColor, pointStrokeColor} = props;
 
@@ -181,6 +182,7 @@ interface IInitializePoints {
 
 const initializePoints = ({ selection, data, pointRadius,  pointColor,
                             pointStrokeColor, getPointColorAtIndex, instanceId }: IInitializePoints) => {
+  console.log("\t🏭 initializePoints");
 
   //initialize outer highlight dots (this must be before the inner dots so that the inner dots are on top)
   selection
@@ -198,6 +200,15 @@ const initializePoints = ({ selection, data, pointRadius,  pointColor,
         enter.append('circle')
           .attr('class', 'graph-dot')
           .property('id', (d: CaseData) => `${instanceId}_${d.caseID}`),
+
+          //not sure if we want this below??
+      (update) =>
+        update.attr('r', pointRadius)
+        .style('fill', pointColor)
+        .style('stroke', pointStrokeColor)
+        .style('stroke-width', defaultStrokeWidth)
+
+        // end --------------------
     );
 };
 
@@ -213,6 +224,7 @@ export interface ISetPointSelection {
 
 
 export function setPointSelection(props: ISetPointSelection) {
+  console.log("\t🏭 setPointSelection");
   const { dotsRef, dataConfiguration } = props;
   const dataset = dataConfiguration.dataset;
   const allCircles = selectAllCircles(dotsRef.current); //includes both inner and outer circles
