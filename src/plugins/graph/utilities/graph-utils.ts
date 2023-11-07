@@ -5,7 +5,7 @@ import { IClueObjectSnapshot } from "../../../models/annotations/clue-object";
 import { PartialSharedModelEntry } from "../../../models/document/document-content-types";
 import { UpdatedSharedDataSetIds } from "../../../models/shared/shared-data-set";
 import {CaseData, DotSelection, DotsElt, selectAllCircles, selectInnerCircles, selectOuterCircles} from "../d3-types";
-import {IDotsRef, kGraphFont, Point, Rect, rTreeRect} from "../graph-types";
+import {IDotsRef, kGraphFont, Point, Rect, rTreeRect, transitionDuration} from "../graph-types";
 import {between} from "./math-utils";
 import {IAxisModel, isNumericAxisModel} from "../imports/components/axis/models/axis-model";
 import {ScaleNumericBaseType} from "../imports/components/axis/axis-types";
@@ -260,10 +260,13 @@ export interface ISetPointCoordinates {
 }
 
 export function setPointCoordinates(props: ISetPointCoordinates) {
+  console.log("\t🏭 setPointCoordinates with dataset:", props.dataset);
 
   const setPoints = (radius: number) => {
     if (theSelection?.size()) {
       theSelection
+        .transition()
+        .duration(duration)
         .attr('cx', (aCaseData: CaseData) => {
           return getScreenX(aCaseData.caseID);
         })
@@ -313,8 +316,9 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
   };
 
   const { dataset, dotsRef, pointColor, getPointColorAtIndex,
-          getScreenX, getScreenY, getLegendColor } = props;
+          getScreenX, getScreenY, getLegendColor, enableAnimation } = props;
 
+  const duration = enableAnimation.current ? transitionDuration : 0;
   let theSelection = selectInnerCircles(dotsRef.current); //select inner circles
   setPoints(5);
   theSelection = selectOuterCircles(dotsRef.current); //select outer circles
