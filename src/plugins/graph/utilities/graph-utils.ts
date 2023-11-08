@@ -150,15 +150,27 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
   if (!allCircles) return;
   startAnimation(enableAnimation);
 
-  initializePoints({
-    selection: allCircles,
-    data: allCaseData,
-    pointRadius,
-    pointColor,
-    pointStrokeColor,
-    getPointColorAtIndex: (index) => pointColor,
-    instanceId
-  });
+  console.log("\t🏭 initializePoints");
+  console.log("\tdata:", allCaseData);
+  console.log("\tselection is of size:", allCircles.size());
+
+  //initialize outer highlight dots (this must be before the inner dots so that the inner dots are on top)
+  allCircles
+    .data(allCaseData)
+    .join(
+      (enter) =>
+        enter.append('circle')
+        .attr('class', 'graph-dot-highlighted')
+    );
+  //initialize inner dots
+  allCircles
+    .data(allCaseData)
+    .join(
+      (enter) =>
+        enter.append('circle')
+          .attr('class', 'graph-dot')
+          .property('id', (d: CaseData) => `${instanceId}_${d.caseID}`),
+    );
 
   dotsElement && select(dotsElement).on('click', (event: MouseEvent) => {
     const target = select(event.target as SVGSVGElement);
@@ -168,42 +180,6 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
   });
   dataConfiguration.setPointsNeedUpdating(false);
 }
-
-
-interface IInitializePoints {
-  selection: DotSelection;
-  data: any;
-  pointRadius: number;
-  pointColor: string;
-  pointStrokeColor: string;
-  getPointColorAtIndex?: (index: number) => string;
-  instanceId?: string;
-}
-
-const initializePoints = ({ selection, data, pointRadius,  pointColor,
-                            pointStrokeColor, getPointColorAtIndex, instanceId }: IInitializePoints) => {
-  console.log("\t🏭 initializePoints");
-  console.log("\tdata:", data);
-  console.log("\tselection is of size:", selection.size());
-
-  //initialize outer highlight dots (this must be before the inner dots so that the inner dots are on top)
-  selection
-    .data(data)
-    .join(
-      (enter) =>
-        enter.append('circle')
-        .attr('class', 'graph-dot-highlighted')
-    );
-  //initialize inner dots
-  selection
-    .data(data)
-    .join(
-      (enter) =>
-        enter.append('circle')
-          .attr('class', 'graph-dot')
-          .property('id', (d: CaseData) => `${instanceId}_${d.caseID}`),
-    );
-};
 
 function applySelectedClassToCircles(selection: DotSelection, dataset?: IDataSet){
   selection
