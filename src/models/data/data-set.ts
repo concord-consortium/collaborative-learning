@@ -5,7 +5,8 @@ import { applyAction, getEnv, Instance, ISerializedActionCall,
 import { Attribute, IAttribute, IAttributeSnapshot } from "./attribute";
 import { uniqueId, uniqueSortableId } from "../../utilities/js-utils";
 import { CaseGroup } from "./data-set-types";
-import { ICell, IValueType } from "./data-types";
+import { ICell, IValueType, uniqueCaseIds } from "./data-types";
+import { getAppConfig } from "../tiles/tile-environment";
 
 export const newCaseId = uniqueSortableId;
 
@@ -257,6 +258,45 @@ export const DataSet = types.model("DataSet", {
       }
     });
     return cellSelected;
+  }
+
+  function selectCases(caseIds: string[], select = true) {
+    if (select) self.attributeSelection.clear();
+    const ids: string[] = [];
+    caseIds.forEach(id => {
+      const pseudoCase = self.pseudoCaseMap[id];
+      if (pseudoCase) {
+        ids.push(...pseudoCase.childCaseIds);
+      } else {
+        ids.push(id);
+      }
+    });
+    if (select) {
+      self.attributeSelection.clear();
+      self.cellSelection.clear();
+    }
+    ids.forEach(id => {
+      if (select) {
+        self.caseSelection.add(id);
+      }
+      else {
+        self.caseSelection.delete(id);
+      }
+    });
+  }
+
+  function setSelectedCases(caseIds: string[]) {
+    clearAllSelections();
+    const ids: string[] = [];
+    caseIds.forEach(id => {
+      const pseudoCase = self.pseudoCaseMap[id];
+      if (pseudoCase) {
+        ids.push(...pseudoCase.childCaseIds);
+      } else {
+        ids.push(id);
+      }
+    });
+    self.caseSelection.replace(ids);
   }
 
   return {
@@ -702,32 +742,14 @@ export const DataSet = types.model("DataSet", {
         });
       },
 
-      selectCases(caseIds: string[], select = true) {
-        if (select) self.attributeSelection.clear();
-        const ids: string[] = [];
-        caseIds.forEach(id => {
-          const pseudoCase = self.pseudoCaseMap[id];
-          if (pseudoCase) {
-            ids.push(...pseudoCase.childCaseIds);
-          } else {
-            ids.push(id);
-          }
-        });
-        if (select) {
-          self.attributeSelection.clear();
-          self.cellSelection.clear();
-        }
-        ids.forEach(id => {
-          if (select) {
-            self.caseSelection.add(id);
-          }
-          else {
-            self.caseSelection.delete(id);
-          }
-        });
-      },
+      selectCases,
 
       selectCells(cells: ICell[], select = true) {
+        if (getAppConfig(self)?.getSetting("cellsSelectCases", "dataset")) {
+          selectCases(uniqueCaseIds(cells), select);
+          return;
+        }
+
         if (select) {
           self.attributeSelection.clear();
           self.caseSelection.clear();
@@ -752,21 +774,14 @@ export const DataSet = types.model("DataSet", {
         self.attributeSelection.replace(attributeIds);
       },
 
-      setSelectedCases(caseIds: string[]) {
-        clearAllSelections();
-        const ids: string[] = [];
-        caseIds.forEach(id => {
-          const pseudoCase = self.pseudoCaseMap[id];
-          if (pseudoCase) {
-            ids.push(...pseudoCase.childCaseIds);
-          } else {
-            ids.push(id);
-          }
-        });
-        self.caseSelection.replace(ids);
-      },
+      setSelectedCases,
 
       setSelectedCells(cells: ICell[]) {
+        if (getAppConfig(self)?.getSetting("cellsSelectCases", "dataset")) {
+          setSelectedCases(uniqueCaseIds(cells));
+          return;
+        }
+
         clearAllSelections();
         self.cellSelection.replace(cells);
       },

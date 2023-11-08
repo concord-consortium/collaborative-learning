@@ -53,6 +53,15 @@ export interface ICell {
   attributeId: string;
   caseId: string;
 }
+export function uniqueCaseIds(cells: ICell[]) {
+  const caseIds: string[] = [];
+  cells.forEach(cell => {
+    if (!caseIds.includes(cell.caseId)) {
+      caseIds.push(cell.caseId);
+    }
+  });
+  return caseIds;
+}
 
 export function isNumeric(val: IValueType) {
   return !isNaN(toNumeric(val));
