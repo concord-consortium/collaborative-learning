@@ -146,11 +146,11 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
       dotsElement, pointRadius, pointColor, pointStrokeColor} = props;
 
   const allCaseData = dataConfiguration.joinedCaseDataArrays;
-  const allCircles = selectAllCircles(dotsElement); //includes both inner and outer circles
-  if (!allCircles) {
-    console.log(`!!! allCircles`);
-    return;
-  }
+  let allCircles = selectAllCircles(dotsElement); //includes both inner and outer circles
+  if (!allCircles) return;
+  allCircles.remove();
+  allCircles = selectAllCircles(dotsElement);
+  if (!allCircles) return;
   startAnimation(enableAnimation);
 
   console.log("\t🏭 initializePoints");
