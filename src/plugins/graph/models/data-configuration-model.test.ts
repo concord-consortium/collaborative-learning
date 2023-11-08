@@ -74,7 +74,7 @@ describe("DataConfigurationModel", () => {
   it("behaves as expected with dot chart on x axis", () => {
     const config = tree.config;
     config.setDataset(tree.data, tree.metadata);
-    config.setAttribute("x", { attributeID: "nId" });
+    config.setRoleToAttributeDesc("x", { attributeID: "nId" });
     expect(config.isEmpty).toBeFalsy();
     expect(config.defaultCaptionAttributeID).toBe("nId");
     expect(config.attributeID("x")).toBe("nId");
@@ -97,7 +97,7 @@ describe("DataConfigurationModel", () => {
   it("behaves as expected with dot plot on x axis", () => {
     const config = tree.config;
     config.setDataset(tree.data, tree.metadata);
-    config.setAttribute("x", { attributeID: "xId" });
+    config.setRoleToAttributeDesc("x", { attributeID: "xId" });
     expect(config.defaultCaptionAttributeID).toBe("nId");
     expect(config.attributeID("x")).toBe("xId");
     expect(config.attributeID("y")).toBeUndefined();
@@ -121,9 +121,9 @@ describe("DataConfigurationModel", () => {
     const config = tree.config;
     config.setDataset(tree.data, tree.metadata);
     // xId on x-axis, yId on y-axis
-    config.setAttribute("x", { attributeID: "xId" });
-    config.setAttribute("y", { attributeID: "yId" });
-    config.setAttribute("caption", { attributeID: "nId" });
+    config.setRoleToAttributeDesc("x", { attributeID: "xId" });
+    config.setRoleToAttributeDesc("y", { attributeID: "yId" });
+    config.setRoleToAttributeDesc("caption", { attributeID: "nId" });
     expect(config.defaultCaptionAttributeID).toBe("nId");
     expect(config.attributeID("x")).toBe("xId");
     expect(config.attributeID("y")).toBe("yId");
@@ -141,7 +141,7 @@ describe("DataConfigurationModel", () => {
     expect(config.caseDataArray).toEqual([{plotNum: 0, caseID: "c1"}]);
 
     // behaves as expected after removing x axis attribute (yId on y-axis)
-    config.setAttribute("x");
+    config.setRoleToAttributeDesc("x");
     expect(config.defaultCaptionAttributeID).toBe("nId");
     expect(config.attributeID("x")).toBeUndefined();
     expect(config.attributeID("y")).toBe("yId");
@@ -190,20 +190,20 @@ describe("DataConfigurationModel", () => {
 
   it("selection behaves as expected", () => {
     const config = tree.config;
-    config.setAttribute("x", { attributeID: "xId" });
+    config.setRoleToAttributeDesc("x", { attributeID: "xId" });
     expect(config.selection.length).toBe(0);
 
     config.setDataset(tree.data, tree.metadata);
     tree.data.selectAll();
     expect(config.selection.length).toBe(2);
 
-    config.setAttribute("x", { attributeID: "xId" });
+    config.setRoleToAttributeDesc("x", { attributeID: "xId" });
     expect(config.selection.length).toBe(2);
 
     const selectionReaction = jest.fn();
     const disposer = reaction(() => config.selection, () => selectionReaction());
     expect(selectionReaction).toHaveBeenCalledTimes(0);
-    config.setAttribute("y", { attributeID: "yId" });
+    config.setRoleToAttributeDesc("y", { attributeID: "yId" });
     expect(config.selection.length).toBe(1);
     expect(selectionReaction).toHaveBeenCalledTimes(1);
     disposer();
@@ -212,7 +212,7 @@ describe("DataConfigurationModel", () => {
   it("calls action listeners when appropriate", () => {
     const config = tree.config;
     config.setDataset(tree.data, tree.metadata);
-    config.setAttribute("x", { attributeID: "xId" });
+    config.setRoleToAttributeDesc("x", { attributeID: "xId" });
 
     const handleAction = jest.fn();
     config.onAction(handleAction);
@@ -252,9 +252,9 @@ describe("DataConfigurationModel", () => {
       { __id__: "c6", n: "n1", x: 6, y: 6 }]);
     const config = tree.config;
     config.setDataset(tree.data, tree.metadata);
-    config.setAttribute("x", { attributeID: "xId" });
-    config.setAttribute("y", { attributeID: "yId" });
-    config.setAttribute("caption", { attributeID: "nId" });
+    config.setRoleToAttributeDesc("x", { attributeID: "xId" });
+    config.setRoleToAttributeDesc("y", { attributeID: "yId" });
+    config.setRoleToAttributeDesc("caption", { attributeID: "nId" });
     expect(config.valuesForAttrRole("x")).toEqual(["1", "1", "6", "6"]);
     expect(config.valuesForAttrRole("y")).toEqual(["1", "1", "1", "6"]);
     expect(config.valuesForAttrRole("caption")).toEqual(["n1", "n1", "n1"]);
@@ -264,7 +264,7 @@ describe("DataConfigurationModel", () => {
     expect(config.numericValuesForAttrRole("x")).toEqual([1, 1, 6, 6]);
     expect(config.numericValuesForAttrRole("caption")).toEqual([]);
 
-    config.setAttribute("y");
+    config.setRoleToAttributeDesc("y");
     expect(config.valuesForAttrRole("y")).toEqual([]);
     expect(config.categoryArrayForAttrRole("y")).toEqual(["__main__"]);
   });

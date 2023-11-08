@@ -21,12 +21,9 @@ import {setNiceDomain, startAnimation} from "../utilities/graph-utils";
 import {IAxisModel} from "../imports/components/axis/models/axis-model";
 import {GraphPlace} from "../imports/components/axis-graph-shared";
 import {useGraphLayoutContext} from "../models/graph-layout";
-import { isRemoveAttributeAction } from "../models/data-configuration-model";
-import {
-  isAttributeAssignmentAction, isRemoveYAttributeAction, isReplaceYAttributeAction,
-  isSetAttributeIDAction,
-  useGraphModelContext
-} from "../models/graph-model";
+import { isAttributeAssignmentAction, isRemoveAttributeFromRoleAction, isRemoveYAttributeWithIDAction, isReplaceYAttributeAction, isSetRoleToAttributeDescAction }
+  from "../models/data-configuration-model";
+import { useGraphModelContext } from "../models/graph-model";
 import {useInstanceIdContext} from "../imports/hooks/use-instance-id-context";
 import {MarqueeState} from "../models/marquee-state";
 import {Legend} from "./legend/legend";
@@ -104,26 +101,49 @@ export const Graph = observer(
     const disposer = graphModel && onAnyAction(graphModel, action => {
       if (isAttributeAssignmentAction(action)) {
         let graphPlace: GraphPlace = "yPlus";
-        let dataSetId = dataset?.id ?? ""; // FIXME for multi-dataset
-        let attrId = "";
-        if (isSetAttributeIDAction(action)) {
-          const [role, _dataSetId, _attrId] = action.args;
-          graphPlace = attrRoleToGraphPlace[role] as GraphPlace;
-          dataSetId = _dataSetId;
-          attrId = _attrId;
+        // This should trigger only on changes in one of the attached DataConfiguration objects.
+        // We can determine which one from the path.
+        if (!action.path) return;
+        const match = action.path.match(/^\/layers\/([0-9]+)\/config$/);
+        if (!match) {
+          console.warn('Unexpected action.path: ', action.path);
+          return;
         }
-        else if (isRemoveAttributeAction(action)) {
+        const layerNumber = Number(match[1]);
+        if (!isFinite(layerNumber) || layerNumber >= graphModel.layers.length) {
+          console.warn('Unexpected layer number: ', action.path);
+          return;
+        }
+        const dataSetId = graphModel.layers[layerNumber].config.dataset?.id;
+        if (!dataSetId) {
+          console.warn("No dataset found");
+          return;
+        }
+        if (layerNumber > 0) {
+          console.log('Ignoring change in layer ', layerNumber, action.name);
+          return;
+        }
+        let attrId = "";
+        if (isSetRoleToAttributeDescAction(action)) {
+          const [role, _desc] = action.args;
+          graphPlace = attrRoleToGraphPlace[role] as GraphPlace;
+          attrId = _desc?.attributeID || "";
+        }
+        else if (isRemoveAttributeFromRoleAction(action)) {
           const [role] = action.args;
           graphPlace = attrRoleToGraphPlace[role] as GraphPlace;
         }
-        else if (isRemoveYAttributeAction(action)) {
+        else if (isRemoveYAttributeWithIDAction(action)) {
+          const [_attrId] = action.args;
           graphPlace = "yPlus";
+          attrId = _attrId;
         }
         else if (isReplaceYAttributeAction(action)) {
           const [ , newAttrId] = action.args;
           graphPlace = "yPlus";
           attrId = newAttrId;
         }
+        console.log('Handling', action.name, 'from', action.path, ':', graphPlace, 'ds', dataSetId, 'attr', attrId);
         startAnimation(enableAnimation);
         graphPlace && graphController?.handleAttributeAssignment(graphPlace, dataSetId, attrId);
       }

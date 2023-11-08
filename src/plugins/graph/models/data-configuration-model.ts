@@ -3,9 +3,9 @@ import {scaleQuantile, ScaleQuantile, schemeBlues} from "d3";
 import { getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
 import {AttributeType, attributeTypes} from "../../../models/data/attribute";
 import {ICase} from "../../../models/data/data-set-types";
-import {DataSet, IDataSet, isDatasetRemoveAttributeAction} from "../../../models/data/data-set";
+import {DataSet, IDataSet } from "../../../models/data/data-set";
 import {getCategorySet, ISharedCaseMetadata, SharedCaseMetadata} from "../../../models/shared/shared-case-metadata";
-import {isSetCaseValuesAction} from "../../../models/data/data-set-actions";
+import {isRemoveAttributeAction, isSetCaseValuesAction} from "../../../models/data/data-set-actions";
 import {FilteredCases, IFilteredChangedCases} from "../../../models/data/filtered-cases";
 import {typedId, uniqueId} from "../../../utilities/js-utils";
 import {missingColor} from "../../../utilities/color-utils";
@@ -650,21 +650,21 @@ export const DataConfigurationModel = types
     clearAttributes() {
       // Clear the attributes one by one so that reactions can happen
       while (self._yAttributeDescriptions.length) {
-        this.removeYAttribute(self._yAttributeDescriptions[0].attributeID);
+        this.removeYAttributeWithID(self._yAttributeDescriptions[0].attributeID);
       }
       for (const [role] of self._attributeDescriptions) {
-        this.removeAttribute(role as GraphAttrRole);
+        this.removeAttributeFromRole(role as GraphAttrRole);
       }
     },
-    removeAttribute(role: GraphAttrRole) {
+    removeAttributeFromRole(role: GraphAttrRole) {
       self._setAttributeDescription(role);
     },
-    setAttribute(role: GraphAttrRole, desc?: IAttributeDescriptionSnapshot) {
+    setRoleToAttributeDesc(role: GraphAttrRole, desc?: IAttributeDescriptionSnapshot) {
       if (role === 'y') {
         if (desc && desc.attributeID !== '') {
           // Setting "Y" role implies that user only wants one Y attribute.
           while (self._yAttributeDescriptions.length) {
-            this.removeYAttribute(self._yAttributeDescriptions[0].attributeID);
+            this.removeYAttributeWithID(self._yAttributeDescriptions[0].attributeID);
           }
           self._yAttributeDescriptions.push(desc);
           this._addNewFilteredCases();
@@ -694,7 +694,7 @@ export const DataConfigurationModel = types
       if (self.yAttributeIDs.includes(oldAttrId)) {
         if (self.yAttributeIDs.includes(newAttrId)) {
           // Remove the new attribute from its other position
-          this.removeYAttribute(newAttrId);
+          this.removeYAttributeWithID(newAttrId);
         }
         const index = self._yAttributeDescriptions.findIndex(d=>d.attributeID===oldAttrId);
         self._yAttributeDescriptions[index].attributeID = newAttrId;
@@ -723,7 +723,7 @@ export const DataConfigurationModel = types
      * Note, calls to this method are observed by Graph's handleNewAttributeID method.
      * @param id - ID of Attribute to remove.
      */
-    removeYAttribute(id: string) {
+    removeYAttributeWithID(id: string) {
       const index = self._yAttributeDescriptions.findIndex((aDesc) => aDesc.attributeID === id);
       if (index >= 0) {
         self._yAttributeDescriptions.splice(index, 1);
@@ -753,22 +753,22 @@ export const DataConfigurationModel = types
       };
     },
     afterCreate() {
-      this.onAction(this.handleRemoveAttributeAction);
+      this.onAction(this.handleDatasetRemoveAttributeAction);
     },
     /**
      * Respond to an attribute being removed from the underlying dataset.
      */
-    handleRemoveAttributeAction(actionCall: ISerializedActionCall) {
-      if (isDatasetRemoveAttributeAction(actionCall)) {
+    handleDatasetRemoveAttributeAction(actionCall: ISerializedActionCall) {
+      if (isRemoveAttributeAction(actionCall)) {
         const removedAttributeId = actionCall.args[0];
         for (const [role, desc] of self._attributeDescriptions.entries()) {
           if (desc.attributeID===removedAttributeId) {
-            this.removeAttribute(role as GraphAttrRole);
+            this.removeAttributeFromRole(role as GraphAttrRole);
           }
         }
         for (const desc of self._yAttributeDescriptions) {
           if (desc.attributeID===removedAttributeId) {
-            this.removeYAttribute(removedAttributeId);
+            this.removeYAttributeWithID(removedAttributeId);
           }
         }
       }
@@ -779,10 +779,44 @@ export const DataConfigurationModel = types
 export interface IDataConfigurationModel extends Instance<typeof DataConfigurationModel> {
 }
 
-export interface RemoveAttributeAction extends ISerializedActionCall {
-  name: "removeAttribute",
+export type AttributeAssignmentAction =
+  SetRoleToAttributeDescAction | ReplaceYAttributeAction | RemoveAttributeFromRoleAction | RemoveYAttributeWithIDAction;
+export function isAttributeAssignmentAction(action: ISerializedActionCall): action is AttributeAssignmentAction {
+  return isSetRoleToAttributeDescAction(action)
+    || isReplaceYAttributeAction(action)
+    || isRemoveAttributeFromRoleAction(action)
+    || isRemoveYAttributeWithIDAction(action);
+}
+
+export interface SetRoleToAttributeDescAction extends ISerializedActionCall {
+  name: "SetRoleToAttributeDesc",
+  args: [role: GraphAttrRole, desc?: IAttributeDescriptionSnapshot]
+}
+export function isSetRoleToAttributeDescAction(action: ISerializedActionCall): action is SetRoleToAttributeDescAction {
+  return action.name === "setRoleToAttributeDesc";
+}
+
+export interface ReplaceYAttributeAction extends ISerializedActionCall {
+  name: "ReplaceYAttribute",
+  args: [oldAttrId: string, newAttrId: string]
+}
+export function isReplaceYAttributeAction(action: ISerializedActionCall): action is ReplaceYAttributeAction {
+  return action.name === "replaceYAttribute";
+}
+
+export interface RemoveAttributeFromRoleAction extends ISerializedActionCall {
+  name: "removeAttributeFromRole",
   args: [role: GraphAttrRole]
 }
-export function isRemoveAttributeAction(action: ISerializedActionCall): action is RemoveAttributeAction {
-  return action.name === "removeAttribute";
+export function isRemoveAttributeFromRoleAction(action: ISerializedActionCall):
+      action is RemoveAttributeFromRoleAction {
+  return action.name === "removeAttributeFromRole";
+}
+
+export interface RemoveYAttributeWithIDAction extends ISerializedActionCall {
+  name: "removeYAttributeWithID",
+  args: [attrId: string]
+}
+export function isRemoveYAttributeWithIDAction(action: ISerializedActionCall): action is RemoveYAttributeWithIDAction {
+  return action.name === "removeYAttributeWithID";
 }
