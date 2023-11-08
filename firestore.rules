@@ -318,7 +318,7 @@ service cloud.firestore {
 
         // Note: some of this logic seems redundant with the functions used above:
         // userInResourceTeachers, resourceInTeacherNetworks, resourceInUserClass.
-        // However there is a important difference.
+        // However there is an important difference.
         // This function works with the doc that is the parent of the comments or history. While those other
         // functions work with the actual resource/document being requested.
         // So `userInResourceTeachers` would fail if used on a comment request because it would be
