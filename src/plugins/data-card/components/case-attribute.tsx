@@ -9,6 +9,7 @@ import { ITileModel } from "../../../models/tiles/tile-model";
 import { DataCardContentModelType } from "../data-card-content";
 import { looksLikeDefaultLabel, EditFacet } from "../data-card-types";
 import { RemoveIconButton } from "./add-remove-icons";
+import { useIsLinked } from "../use-is-linked";
 import { useCautionAlert } from "../../../components/utilities/use-caution-alert";
 import { useErrorAlert } from "../../../components/utilities/use-error-alert";
 import { getClipboardContent } from "../../../utilities/clipboard-utils";
@@ -47,6 +48,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     setCurrEditFacet, setCurrEditAttrId, readOnly
   } = props;
   const content = model.content as DataCardContentModelType;
+  const isLinked = useIsLinked();
   const getLabel = () => content.dataSet.attrFromID(attrKey).name;
   const getValue = () => {
     const value = caseId && content.dataSet.getValue(caseId, attrKey) || "";
@@ -273,13 +275,14 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     {
       editing: editingValue,
       "has-image": gImageMap.isImageUrl(valueStr),
-      highlighted: valueHighlighted
+      highlighted: valueHighlighted,
+      linked: isLinked
     }
   );
 
   const typeIconClassNames = classNames(
     "type-icon", attrKey,
-    { highlighted: valueHighlighted }
+    { highlighted: valueHighlighted, linked: isLinked }
   );
 
   const deleteAttrButtonClassNames = classNames(
@@ -350,7 +353,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
           <button aria-label="toggle menu" type="button" {...getToggleButtonProps()}>
             {displayArrow()}
           </button>
-          <ul {...getMenuProps()} className={ isOpen ? "open" : "closed"}>
+          <ul {...getMenuProps()} className={ isOpen ? "open" : "closed" }>
             {isOpen &&
               inputItems.map((item, index) => (
                 <li className="dropdown-item" style={highlightedIndex === index ? {backgroundColor: '#bde4ff'} : {} }

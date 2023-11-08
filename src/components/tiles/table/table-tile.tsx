@@ -45,6 +45,8 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   const [imageUrls, setImageUrls] = useState(new Map<string,string>());
   verifyAlive(content, "TableToolComponent");
   const metadata = getContent().metadata;
+  const linkedTiles = content.tileEnv?.sharedModelManager?.getSharedModelTiles(content.sharedModel);
+  const isLinked = linkedTiles && linkedTiles.length > 1;
 
   // Basic operations based on the model
   const {
@@ -104,7 +106,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   // rows are required by ReactDataGrid and are used by other hooks as well
   // rowProps are expanded and passed to ReactDataGrid
   const { rows, ...rowProps } = useRowsFromDataSet({
-    dataSet, readOnly: !!readOnly, inputRowId: inputRowId.current,
+    dataSet, isLinked, readOnly: !!readOnly, inputRowId: inputRowId.current,
     rowChanges, context: gridContext});
 
   // columns are required by ReactDataGrid and are used by other hooks as well

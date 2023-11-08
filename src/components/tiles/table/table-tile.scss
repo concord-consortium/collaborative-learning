@@ -196,14 +196,28 @@ $controls-hover-background: #c0dfe7;
       }
       &.highlighted {
         .rdg-cell {
-          background-color: $highlight-green-light;
+          background-color: $highlight-blue-light-new;
 
           &.controls-column {
             background-color: white;
           }
 
           &.index-column {
-            background-color: $highlight-green;
+            background-color: $highlight-blue-new;
+          }
+        }
+
+        &.linked {
+          .rdg-cell {
+            background-color: $highlight-green-light;
+
+            &.controls-column {
+              background-color: white;
+            }
+
+            &.index-column {
+              background-color: $highlight-green;
+            }
           }
         }
       }

@@ -99,8 +99,6 @@ jobs:
           record: ${{ !!secrets.CYPRESS_RECORD_KEY }}
           # only do parallel if we have a record key
           parallel: ${{ !!secrets.CYPRESS_RECORD_KEY }}
-          # upload videos for failing specs
-          config: video=true,videoUploadOnPasses=false
           browser: ${{ env.BROWSER }}
         env:
           # pass the Dashboard record key as an environment variable
@@ -151,8 +149,6 @@ jobs:
           record: ${{ !!secrets.CYPRESS_RECORD_KEY }}
           # only do parallel if we have a record key
           parallel: ${{ !!secrets.CYPRESS_RECORD_KEY }}
-          # upload videos for failing specs
-          config: video=true,videoUploadOnPasses=false
           browser: ${{ env.BROWSER }}
           spec: 'cypress/e2e/clue/${{ github.event.inputs.test }}'
         env:
