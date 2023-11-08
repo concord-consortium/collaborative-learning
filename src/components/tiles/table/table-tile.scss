@@ -143,8 +143,18 @@ $controls-hover-background: #c0dfe7;
         &.selected-column {
           background-color: $highlight-unlinked-header;
 
+          .rdg-text-editor {
+            background-color: white;
+            border: none;
+            box-shadow: inset 0 0 0 3px $highlight-unlinked-edit;
+          }
+
           &.linked {
             background-color: $highlight-linked-header;
+
+            .rdg-text-editor {
+              box-shadow: inset 0 0 0 3px $highlight-linked-edit;
+            }
           }
         }
         &.rdg-cell-editing {
