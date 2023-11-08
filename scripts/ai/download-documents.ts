@@ -11,13 +11,20 @@
 import fs from "fs";
 import admin from "firebase-admin";
 import {google} from "googleapis";
+import stringify from "json-stringify-pretty-compact";
 import fetch from 'node-fetch';
 
-import { datasetPath } from "./script-constants";
-import { prettyDuration } from "./script-utils";
+import { datasetPath, networkFileName } from "./script-constants";
+import { getFirebaseBasePath, prettyDuration } from "./script-utils";
 
 // Load the service account key JSON file.
 import serviceAccount from "./serviceAccountKey.json" assert { type: "json" };
+
+// The portal to get documents from. For example, "learn.concord.org".
+const portal = "learn.concord.org";
+// The demo name to use. Make falsy to not use a demo.
+const demo = "TAGCLUE";
+// const demo = false;
 
 // Make falsy to include all documents
 const documentLimit = false;
@@ -68,13 +75,7 @@ const accessTime = Date.now();
 
 const databaseURL = "https://collaborative-learning-ec215.firebaseio.com";
 
-function buildFirebasePath(portal?: string) {
-  return portal === "demo"
-          ? `/demo/CLUE/portals/demo/classes`
-          : `/authed/portals/${portal?.replace(/\./g, "_")}/classes`;
-}
-
-const firebaseBasePath = buildFirebasePath("learn.concord.org");
+const firebaseBasePath = getFirebaseBasePath(portal, demo);
 const fetchURL = `${databaseURL}${firebaseBasePath}.json?shallow=true`;
 console.log(`Fetching URL: ${fetchURL}`);
 
@@ -115,7 +116,7 @@ for (const key of Object.keys(classKeys)) {
   for (const [_userId, user] of Object.entries<any>(users)) {
     if (documentLimit && documentsProcessed >= documentLimit) break;
     // console.log(`  ${userId}`);
-    for (const [_docId, doc] of Object.entries<any>(user.documents)) {
+    for (const [docId, doc] of Object.entries<any>(user.documents)) {
       if (documentLimit && documentsProcessed >= documentLimit) break;
 
       const content = doc.content as string | undefined;
@@ -140,7 +141,7 @@ for (const key of Object.keys(classKeys)) {
         emptyDocuments++;
         break;
       }
-      const documentId = `document${documentsProcessed}`;
+      const documentId = `document${docId}`;
       const documentFile = `${targetPath}/${documentId}.txt`;
       fs.writeFileSync(documentFile, content);
       documentsProcessed++;
@@ -151,6 +152,11 @@ for (const key of Object.keys(classKeys)) {
     }
   }
 }
+
+// Write a file that includes network information for future scripts
+const networkFile = `${targetPath}/${networkFileName}`;
+fs.writeFileSync(networkFile, stringify({ portal, demo }));
+console.log(`*** Network information written to ${networkFile} ***`);
 
 const endTime = Date.now();
 console.log(`***** End script *****`);

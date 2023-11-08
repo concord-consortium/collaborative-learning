@@ -1,7 +1,7 @@
 #!/usr/bin/node
 
 // This script counts the tiles of specific types in documents downloaded with download-documents.ts,
-// then saves the information as tags in a .csv file that can be used to train a Vertex AI model
+// then saves the information as tags in an output file that can be used to train a model from a specified AI service.
 
 // TODO Make sure there are at least 10 of a tag before including it
 
@@ -14,15 +14,17 @@
 // $ npx tsx count-document-tiles.ts
 
 import fs from "fs";
-import stringify from "json-stringify-pretty-compact";
 
-import { AIService, cloudFileRoot, datasetPath, DocumentInfo, tagFileExtension } from "./script-constants";
+import { outputAzureFile } from "./azure-utils";
+import { AIService, datasetPath, tagFileExtension } from "./script-constants";
+import { DocumentInfo, IAzureMetadata } from "./script-types";
 import { prettyDuration } from "./script-utils";
+import { outputVertexAIFile } from "./vertexai-utils";
 
 const sourceDirectory = "dataset1698192448944";
 // const targetTileTypes = ["Geometry", "Text", "Table"];
 const targetTileTypes = ["Geometry"];
-const aiService: AIService = "azure";
+const aiService: AIService = "vertexAI";
 
 // The number of files to process in parallel
 const fileBatchSize = 8;
@@ -30,14 +32,12 @@ const fileBatchSize = 8;
 // The maximum number of tiles to count (if 5, this count or more will be tagged as 5+)
 const maxTileCount = 5;
 
-// These variables are used for azure output files
-const singleLabel = targetTileTypes.length === 1;
-const projectName = `Count${targetTileTypes.join("")}`;
-const storageInputContainerName = "tile-count";
-const description = `Counts ${targetTileTypes.join(", ")} tiles in CLUE documents.`;
-const language = "en";
-const multilingual = false;
-const settings = {};
+// Used for azure output files
+const azureMetadata: IAzureMetadata = {
+  projectName: `Count${targetTileTypes.join("")}`,
+  storageInputContainerName: "tile-count",
+  description: `Counts ${targetTileTypes.join(", ")} tiles in CLUE documents.`
+};
 
 const sourcePath = `${datasetPath}${sourceDirectory}`;
 
@@ -111,54 +111,10 @@ fs.readdir(sourcePath, async (_error, files) => {
 
       if (finished) {
         // Write to an output file when all of the files have been processed
-        const tagFileName = `${aiService}-${targetTileTypes.join("-")}${tagFileExtension[aiService]}`;
-        let tagFileContent = "";
-        if (aiService === "azure") {
-          const projectKind = `Custome${singleLabel ? "Single" : "Multi"}LabelClassification`;
-          const metadata = {
-            projectName,
-            storageInputContainerName,
-            projectKind,
-            description,
-            language,
-            multilingual,
-            settings
-          };
-          const classes = Object.keys(tagCounts).map(tag => ({ category: tag }));
-          const documents = Object.values(documentInfo).map(info => {
-            const document: any = {
-              location: info.fileName,
-              language: "en-us"
-            };
-            if (singleLabel) {
-              document.class = {
-                category: info.tags[0]
-              };
-            } else {
-              document.classes = info.tags.map(tag => ({ category: tag }));
-            }
-            return document;
-          });
-          const assets = { projectKind, classes, documents };
-          const tagFileJson: any = {
-            projectFileVersion: `${startTime}`,
-            "stringIndexType": "Utf16CodeUnit",
-            metadata,
-            assets
-          };
-
-          tagFileContent = stringify(tagFileJson, { maxLength: 100 });
-        } else if (aiService === "vertexAI") {
-          Object.values(documentInfo).forEach(info => {
-            const fileName = `${cloudFileRoot}${info.fileName}`;
-            const tagPart = info.tags.join(",");
-            const comma = tagPart ? "," : "";
-            const line = `${fileName}${comma}${tagPart}\n`;
-            tagFileContent = `${tagFileContent}${line}`;
-          });
-        }
-        const tagFilePath = `${sourcePath}/${tagFileName}`;
-        fs.writeFileSync(tagFilePath, tagFileContent);
+        const fileName = `${aiService}-${targetTileTypes.join("-")}${tagFileExtension[aiService]}`;
+        const outputFileProps = { documentInfo, fileName, sourceDirectory, azureMetadata };
+        const outputFunctions = { azure: outputAzureFile, vertexAI: outputVertexAIFile };
+        outputFunctions[aiService](outputFileProps);
 
         const endTime = Date.now();
         const finalDuration = endTime - startTime;
@@ -167,7 +123,6 @@ fs.readdir(sourcePath, async (_error, files) => {
         Object.keys(tagCounts).sort().forEach(tag => {
           console.log(`${tag}: ${tagCounts[tag]}`);
         });
-        console.log(`*** Tags saved to ${tagFilePath}`);
 
         process.exit(0);
       }
