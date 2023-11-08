@@ -3,6 +3,7 @@ import { observer } from "mobx-react";
 import classNames from "classnames";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { DataCardContentModelType } from "../data-card-content";
+import { useIsLinked } from "../use-is-linked";
 import { SortCardAttribute } from "./sort-card-attribute";
 import { useDraggable } from "@dnd-kit/core";
 import TileDragHandle from "../../../assets/icons/drag-tile/move.svg";
@@ -36,6 +37,7 @@ export const SortCard: React.FC<IProps> = observer(
   const shadeStr = `rgb(${r},${g},${b})`;
   const capStyle = !caseHighlighted ? { backgroundColor: shadeStr } : undefined;
   const atStackTop = stackCardNumberDisplay === totalInStack;
+  const isLinked = useIsLinked();
 
   const [expanded, setExpanded] = useState(false);
   useEffect(()=> setExpanded(atStackTop), [atStackTop]); // "top" card loads expanded
@@ -50,7 +52,7 @@ export const SortCard: React.FC<IProps> = observer(
     { collapsed: !expanded, expanded }
   );
   const headingClasses = classNames(
-    "heading", { highlighted: caseHighlighted }
+    "heading", { highlighted: caseHighlighted, linked: isLinked }
   );
 
   const {attributes, listeners, setNodeRef, transform} = useDraggable({
@@ -104,7 +106,7 @@ export const SortCard: React.FC<IProps> = observer(
         </div>
       }
       <div
-        className={classNames("footer", { highlighted: caseHighlighted })}
+        className={classNames("footer", { highlighted: caseHighlighted, linked: isLinked })}
         style={capStyle}
       />
     </div>
