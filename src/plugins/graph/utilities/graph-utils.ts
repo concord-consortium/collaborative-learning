@@ -147,12 +147,16 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
 
   const allCaseData = dataConfiguration.joinedCaseDataArrays;
   const allCircles = selectAllCircles(dotsElement); //includes both inner and outer circles
-  if (!allCircles) return;
+  if (!allCircles) {
+    console.log(`!!! allCircles`);
+    return;
+  }
   startAnimation(enableAnimation);
 
   console.log("\t🏭 initializePoints");
   console.log("\tdata:", allCaseData);
   console.log("\tselection is of size:", allCircles.size());
+  //initialize inner dots
 
   //initialize outer highlight dots (this must be before the inner dots so that the inner dots are on top)
   allCircles
@@ -161,8 +165,11 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
       (enter) =>
         enter.append('circle')
         .attr('class', 'graph-dot-highlighted')
+        .property('id', (d: CaseData) => `${instanceId}_${d.caseID}_highlight`)
     );
-  //initialize inner dots
+
+    console.log(`- after outers`, selectAllCircles(dotsElement)?.size());
+
   allCircles
     .data(allCaseData)
     .join(
@@ -170,9 +177,17 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
         enter.append('circle')
           .attr('class', 'graph-dot')
           .property('id', (d: CaseData) => `${instanceId}_${d.caseID}`),
+      (update) =>
+        update.attr('r', pointRadius)
+          .style('fill', pointColor)
+          .style('stroke', pointStrokeColor)
+          .style('stroke-width', defaultStrokeWidth)
     );
 
+    console.log(`- after inners`, selectAllCircles(dotsElement)?.size());
+
   dotsElement && select(dotsElement).on('click', (event: MouseEvent) => {
+    event.stopPropagation();
     const target = select(event.target as SVGSVGElement);
     if (target.node()?.nodeName === 'circle') {
       handleClickOnDot(event, (target.datum() as CaseData).caseID, dataConfiguration.dataset);
