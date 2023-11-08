@@ -205,29 +205,6 @@ const initializePoints = ({ selection, data, pointRadius,  pointColor,
     );
 };
 
-export interface ISetPointSelection {
-  dotsRef: IDotsRef
-  dataConfiguration: IDataConfigurationModel
-  pointRadius: number,
-  selectedPointRadius: number,
-  pointColor: string,
-  pointStrokeColor: string,
-  getPointColorAtIndex?: (index: number) => string
-}
-
-
-export function setPointSelection(props: ISetPointSelection) {
-  const { dotsRef, dataConfiguration } = props;
-  const dataset = dataConfiguration.dataset;
-  const allCircles = selectAllCircles(dotsRef.current); //includes both inner and outer circles
-  const outerCircles = selectOuterCircles(dotsRef.current);
-  if (allCircles){
-    applySelectedClassToCircles(allCircles, dataset);
-  }
-  if (!(dotsRef.current && outerCircles)) return;
-  styleOuterCircles(outerCircles, dataset);
-}
-
 function applySelectedClassToCircles(selection: DotSelection, dataset?: IDataSet){
   selection
     .classed('selected', (aCaseData: CaseData) => !!dataset?.isCaseSelected(aCaseData.caseID));
@@ -245,116 +222,6 @@ function styleOuterCircles(outerCircles: any, dataset?: IDataSet){
       return selectedOuterCircleStrokeColor;
     })
     .style('opacity', 0.5);
-}
-
-
-export interface ISetPointCoordinates {
-  dataset?: IDataSet
-  dotsRef: IDotsRef
-  selectedOnly?: boolean
-  pointRadius: number
-  selectedPointRadius: number
-  pointColor: string
-  pointStrokeColor: string
-  getPointColorAtIndex?: (index: number) => string
-  getScreenX: ((anID: string) => number | null)
-  getScreenY: ((anID: string, plotNum?:number) => number | null)
-  getLegendColor?: ((anID: string) => string)
-  enableAnimation: React.MutableRefObject<boolean>
-}
-
-export function setPointCoordinates(props: ISetPointCoordinates) {
-  // console.log("\t🏭 setPointCoordinates with dataset:", props.dataset);
-  // console.log("dotsRef: ", props.dotsRef.current);
-
-  const setPoints = (radius: number) => {
-    if (theSelection !== null) {
-      theSelection
-        .transition()
-        .duration(duration)
-        .attr('cx', (aCaseData: CaseData) => {
-          return getScreenX(aCaseData.caseID);
-        })
-        .attr('cy', (aCaseData: CaseData) => {
-          return getScreenY(aCaseData.caseID, aCaseData.plotNum);
-        })
-        .attr('r', (aCaseData: CaseData) => {
-          return radius;
-        })
-        .style('fill', (aCaseData: CaseData) => {
-          return lookupLegendColor(aCaseData);
-        })
-        .style('stroke', (aCaseData: CaseData) =>{
-          return lookupLegendColor(aCaseData); //border color of inner dot should be same color as legend
-        })
-        .style('stroke-width', (aCaseData: CaseData) =>{
-          return (dataset?.isCaseSelected(aCaseData.caseID))
-                 ? selectedStrokeWidth : defaultStrokeWidth;
-        });
-    }
-  };
-
-  const lookupLegendColor = (aCaseData: CaseData) => {
-    const id = aCaseData.caseID;
-    const isSelected = dataset?.isCaseSelected(id);
-    const legendColor = getLegendColor ? getLegendColor(id) : '';
-
-    if (getPointColorAtIndex) {
-      if (legendColor !== '') {
-        return legendColor;
-      } else if (getPointColorAtIndex && aCaseData.plotNum) {
-        return getPointColorAtIndex(aCaseData.plotNum);
-      } else if (isSelected) {
-        return defaultSelectedColor;
-      } else {
-        return pointColor;
-      }
-    } else {
-      if (legendColor !== '') {
-        return legendColor;
-      } else if (isSelected) {
-        return defaultSelectedColor;
-      } else {
-        return pointColor;
-      }
-    }
-  };
-
-  const { dataset, dotsRef, pointColor, getPointColorAtIndex,
-          getScreenX, getScreenY, getLegendColor, enableAnimation } = props;
-
-  const duration = enableAnimation.current ? transitionDuration : 0;
-
-  // //new code -----------------------------------------
-  // console.log("------outer circles-----------------");
-  // console.log("\tdotsRef.current: ", dotsRef.current);
-  // let theSelection = selectOuterCircles(dotsRef.current); //select outer circles
-  // console.log("theSelection.size()", theSelection?.size());
-  // setPoints(0);
-  // console.log("------inner circles-----------------");
-  // console.log("\tdotsRef.current: ", dotsRef.current);
-  // theSelection = selectInnerCircles(dotsRef.current); //select inner circles
-  // console.log("theSelection.size()", theSelection?.size());
-  // setPoints(5);
-
-
-  // old code-----------------------------------------
-  console.log("------inner circles-----------------");
-  console.log("\tdotsRef.current: ", dotsRef.current);
-  let theSelection = selectInnerCircles(dotsRef.current); //select inner circles
-  console.log("theSelection.size()", theSelection?.size());
-  setPoints(5);
-  console.log("------outer circles-----------------");
-  console.log("\tdotsRef.current: ", dotsRef.current);
-
-  theSelection = selectOuterCircles(dotsRef.current); //select outer circles
-  console.log("theSelection.size()", theSelection?.size());
-  setPoints(0);
-
-  // if (theSelection){
-  //   console.log("right hereeeee!");
-  //   styleOuterCircles(theSelection, dataset);
-  // }
 }
 
 
@@ -536,6 +403,139 @@ export function getScreenCoord(dataSet: IDataSet | undefined, id: string,
                                attrID: string, scale: ScaleNumericBaseType) {
   const value = dataSet?.getNumeric(id, attrID);
   return value != null && !isNaN(value) ? scale(value) : null;
+}
+
+export interface ISetPointSelection {
+  dotsRef: IDotsRef
+  dataConfiguration: IDataConfigurationModel
+  pointRadius: number,
+  selectedPointRadius: number,
+  pointColor: string,
+  pointStrokeColor: string,
+  getPointColorAtIndex?: (index: number) => string
+}
+
+
+export function setPointSelection(props: ISetPointSelection) {
+  const { dotsRef, dataConfiguration } = props;
+  const dataset = dataConfiguration.dataset;
+  const allCircles = selectAllCircles(dotsRef.current); //includes both inner and outer circles
+  const outerCircles = selectOuterCircles(dotsRef.current);
+  if (allCircles){
+    applySelectedClassToCircles(allCircles, dataset);
+  }
+  if (!(dotsRef.current && outerCircles)) return;
+  styleOuterCircles(outerCircles, dataset);
+}
+
+
+export interface ISetPointCoordinates {
+  dataset?: IDataSet
+  dotsRef: IDotsRef
+  selectedOnly?: boolean
+  pointRadius: number
+  selectedPointRadius: number
+  pointColor: string
+  pointStrokeColor: string
+  getPointColorAtIndex?: (index: number) => string
+  getScreenX: ((anID: string) => number | null)
+  getScreenY: ((anID: string, plotNum?:number) => number | null)
+  getLegendColor?: ((anID: string) => string)
+  enableAnimation: React.MutableRefObject<boolean>
+}
+
+export function setPointCoordinates(props: ISetPointCoordinates) {
+  // console.log("\t🏭 setPointCoordinates with dataset:", props.dataset);
+  // console.log("dotsRef: ", props.dotsRef.current);
+
+  const lookupLegendColor = (aCaseData: CaseData) => {
+    const id = aCaseData.caseID;
+    const isSelected = dataset?.isCaseSelected(id);
+    const legendColor = getLegendColor ? getLegendColor(id) : '';
+
+    if (getPointColorAtIndex) {
+      if (legendColor !== '') {
+        return legendColor;
+      } else if (getPointColorAtIndex && aCaseData.plotNum) {
+        return getPointColorAtIndex(aCaseData.plotNum);
+      } else if (isSelected) {
+        return defaultSelectedColor;
+      } else {
+        return pointColor;
+      }
+    } else {
+      if (legendColor !== '') {
+        return legendColor;
+      } else if (isSelected) {
+        return defaultSelectedColor;
+      } else {
+        return pointColor;
+      }
+    }
+  };
+
+  const setPoints = (radius: number) => {
+    if (theSelection !== null) {
+      theSelection
+        .transition()
+        .duration(duration)
+        .attr('cx', (aCaseData: CaseData) => {
+          return getScreenX(aCaseData.caseID);
+        })
+        .attr('cy', (aCaseData: CaseData) => {
+          return getScreenY(aCaseData.caseID, aCaseData.plotNum);
+        })
+        .attr('r', (aCaseData: CaseData) => {
+          return radius;
+        })
+        .style('fill', (aCaseData: CaseData) => {
+          return lookupLegendColor(aCaseData);
+        })
+        .style('stroke', (aCaseData: CaseData) =>{
+          return lookupLegendColor(aCaseData); //border color of inner dot should be same color as legend
+        })
+        .style('stroke-width', (aCaseData: CaseData) =>{
+          return (dataset?.isCaseSelected(aCaseData.caseID))
+                 ? selectedStrokeWidth : defaultStrokeWidth;
+        });
+    }
+  };
+
+  const { dataset, dotsRef, pointColor, getPointColorAtIndex,
+          getScreenX, getScreenY, getLegendColor, enableAnimation } = props;
+
+  const duration = enableAnimation.current ? transitionDuration : 0;
+
+  // //new code -----------------------------------------
+  // console.log("------outer circles-----------------");
+  // console.log("\tdotsRef.current: ", dotsRef.current);
+  // let theSelection = selectOuterCircles(dotsRef.current); //select outer circles
+  // console.log("theSelection.size()", theSelection?.size());
+  // setPoints(0);
+  // console.log("------inner circles-----------------");
+  // console.log("\tdotsRef.current: ", dotsRef.current);
+  // theSelection = selectInnerCircles(dotsRef.current); //select inner circles
+  // console.log("theSelection.size()", theSelection?.size());
+  // setPoints(5);
+
+
+  // old code-----------------------------------------
+  console.log("------inner circles-----------------");
+  console.log("\tdotsRef.current: ", dotsRef.current);
+  let theSelection = selectInnerCircles(dotsRef.current); //select inner circles
+  console.log("theSelection.size()", theSelection?.size());
+  setPoints(5);
+  console.log("------outer circles-----------------");
+  console.log("\tdotsRef.current: ", dotsRef.current);
+
+  theSelection = selectOuterCircles(dotsRef.current); //select outer circles
+  console.log("theSelection.size()", theSelection?.size());
+  setPoints(0);
+
+  // if (theSelection){
+  //   console.log("right hereeeee!");
+  //   styleOuterCircles(theSelection, dataset);
+  // }
 }
 
 
