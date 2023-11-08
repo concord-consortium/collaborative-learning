@@ -81,9 +81,8 @@ export const GraphModel = TileContentModel
   .preProcessSnapshot((snapshot: any) => {
     const hasLayerAlready:boolean = (snapshot?.layers?.length || 0) > 0;
     if (!hasLayerAlready && snapshot?.config) {
-      const layer = { config: snapshot.config };
-      snapshot.layers = [layer];
-      delete(snapshot.config);
+      const { config, others } = snapshot;
+      return config != null ? { ...others } : snapshot;
     }
     return snapshot;
   })
@@ -152,9 +151,7 @@ export const GraphModel = TileContentModel
     },
     /**
      * Radius of points to draw on the graph.
-     * This is based on the total number of points that there are.
-     * Currently considers the number of points in all layers; not sure if that is correct
-     * or if this method should be per-layer.
+     * This is based on the total number of points that there are in all layers.
      */
     getPointRadius(use: 'normal' | 'hover-drag' | 'select' = 'normal') {
       let r = pointRadiusMax;

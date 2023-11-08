@@ -57,7 +57,7 @@ export const DataConfigurationModel = types
   })
   .volatile(() => ({
     actionHandlerDisposer: undefined as (() => void) | undefined,
-    filteredCases: observable.array<FilteredCases>([] as FilteredCases[], {deep:false }),   //[] as FilteredCases[],
+    filteredCases: observable.array<FilteredCases>([], {deep:false }),
     handlers: new Map<string, (actionCall: ISerializedActionCall) => void>(),
     pointsNeedUpdating: false
   }))
@@ -656,7 +656,7 @@ export const DataConfigurationModel = types
         if (desc && desc.attributeID !== '') {
           // Setting "Y" role implies that user only wants one Y attribute.
           while (self._yAttributeDescriptions.length) {
-            this.removeYAttribute(self._yAttributeDescriptions[1].attributeID);
+            this.removeYAttribute(self._yAttributeDescriptions[0].attributeID);
           }
           self._yAttributeDescriptions.push(desc);
           this._addNewFilteredCases();

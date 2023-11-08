@@ -14,10 +14,10 @@ interface IProps {
 }
 
 export function useGraphModel(props: IProps) {
-  const {graphModel, enableAnimation, dotsRef, instanceId} = props,
+  const { graphModel, enableAnimation, dotsRef, instanceId } = props,
     dataConfig = graphModel.config,
-      yAttrID = graphModel.getAttributeID('y');
-    const dataset = dataConfig.dataset;
+    yAttrID = graphModel.getAttributeID('y');
+  const dataset = dataConfig.dataset;
 
   const callMatchCirclesToData = useCallback(() => {
     matchCirclesToData({

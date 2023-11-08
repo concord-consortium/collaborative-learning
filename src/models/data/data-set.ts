@@ -552,7 +552,6 @@ export const DataSet = types.model("DataSet", {
 
       /**
        * Remove an attribute from the dataset.
-       * Note, this method is observed by a listener in data-configuration-model.
        * @param attributeID
        */
       removeAttribute(attributeID: string) {

@@ -13,7 +13,7 @@ import { ISharedCaseMetadata } from "../../../models/shared/shared-case-metadata
 export const GraphLayerModel = types
   .model('GraphLayerModel')
   .props({
-    id: types.optional(types.identifier, () => typedId("LAYER")),
+    id: types.optional(types.identifier, () => typedId("LAYR")),
     config: types.optional(DataConfigurationModel, () => DataConfigurationModel.create())
   })
   .volatile(self => ({
