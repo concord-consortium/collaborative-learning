@@ -9,6 +9,7 @@ import { ITileModel } from "../../../models/tiles/tile-model";
 import { DataCardContentModelType } from "../data-card-content";
 import { looksLikeDefaultLabel, EditFacet } from "../data-card-types";
 import { RemoveIconButton } from "./add-remove-icons";
+import { useIsLinked } from "../use-is-linked";
 import { useCautionAlert } from "../../../components/utilities/use-caution-alert";
 import { useErrorAlert } from "../../../components/utilities/use-error-alert";
 import { getClipboardContent } from "../../../utilities/clipboard-utils";
@@ -34,7 +35,6 @@ interface IProps {
   attrKey: string;
   currEditAttrId: string;
   currEditFacet: EditFacet;
-  isLinked?: boolean;
   readOnly?: boolean;
   imageUrlToAdd?: string;
   setImageUrlToAdd: (url: string) => void;
@@ -44,11 +44,12 @@ interface IProps {
 
 export const CaseAttribute: React.FC<IProps> = observer(props => {
   const {
-    model, caseId, attrKey, currEditAttrId, currEditFacet, isLinked,
+    model, caseId, attrKey, currEditAttrId, currEditFacet,
     setCurrEditFacet, setCurrEditAttrId, readOnly
   } = props;
   const content = model.content as DataCardContentModelType;
   const dataSet = content.dataSet;
+  const isLinked = useIsLinked();
   const getLabel = () => content.dataSet.attrFromID(attrKey).name;
   const getValue = () => {
     const value = caseId && content.dataSet.getValue(caseId, attrKey) || "";

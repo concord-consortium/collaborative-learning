@@ -3,6 +3,7 @@ import { observer } from "mobx-react";
 import classNames from "classnames";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { DataCardContentModelType } from "../data-card-content";
+import { useIsLinked } from "../use-is-linked";
 import { SortCardAttribute } from "./sort-card-attribute";
 import { useDraggable } from "@dnd-kit/core";
 import TileDragHandle from "../../../assets/icons/drag-tile/move.svg";
@@ -11,7 +12,6 @@ interface IProps {
   caseId: string;
   model: ITileModel;
   indexInStack: number;
-  isLinked?: boolean;
   totalInStack: number;
   id?: string;
 }
@@ -27,7 +27,7 @@ const getShadeRGB = (index: number) => {
 };
 
 export const SortCard: React.FC<IProps> = observer(
-  function SortCard({ model, caseId, indexInStack, isLinked, totalInStack })
+  function SortCard({ model, caseId, indexInStack, totalInStack })
 {
   const content = model.content as DataCardContentModelType;
   const deckCardNumberDisplay = content.dataSet.caseIndexFromID(caseId) + 1;
@@ -37,6 +37,7 @@ export const SortCard: React.FC<IProps> = observer(
   const shadeStr = `rgb(${r},${g},${b})`;
   const capStyle = !caseHighlighted ? { backgroundColor: shadeStr } : undefined;
   const atStackTop = stackCardNumberDisplay === totalInStack;
+  const isLinked = useIsLinked();
 
   const [expanded, setExpanded] = useState(false);
   useEffect(()=> setExpanded(atStackTop), [atStackTop]); // "top" card loads expanded
@@ -98,7 +99,6 @@ export const SortCard: React.FC<IProps> = observer(
           { content.dataSet.attributes.map((attr)=>{
             return (
               <SortCardAttribute
-                isLinked={isLinked}
                 key={attr.id}
                 model={model}
                 caseId={caseId}
