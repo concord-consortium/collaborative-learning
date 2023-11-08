@@ -657,8 +657,8 @@ export const DataSet = types.model("DataSet", {
       },
 
       selectAllAttributes(select = true) {
+        self.caseSelection.clear();
         if (select) {
-          clearAllSelections();
           self.attributes.forEach(attribute => self.attributeSelection.add(attribute.id));
         } else {
           self.attributeSelection.clear();
@@ -666,8 +666,8 @@ export const DataSet = types.model("DataSet", {
       },
 
       selectAllCases(select = true) {
+        self.attributeSelection.clear();
         if (select) {
-          clearAllSelections();
           self.cases.forEach(({__id__}) => self.caseSelection.add(__id__));
         }
         else {
@@ -703,6 +703,7 @@ export const DataSet = types.model("DataSet", {
       },
 
       selectCases(caseIds: string[], select = true) {
+        if (select) self.attributeSelection.clear();
         const ids: string[] = [];
         caseIds.forEach(id => {
           const pseudoCase = self.pseudoCaseMap[id];
