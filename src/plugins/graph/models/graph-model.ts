@@ -31,7 +31,7 @@ import { kConnectingLinesType } from "../adornments/connecting-lines/connecting-
 import { getDotId } from "../utilities/graph-utils";
 import { GraphLayerModel } from "./graph-layer-model";
 import { isSharedDataSet, SharedDataSet } from "../../../models/shared/shared-data-set";
-import { DataConfigurationModel, RemoveAttributeAction } from "./data-configuration-model";
+import { DataConfigurationModel } from "./data-configuration-model";
 
 export interface GraphProperties {
   axes: Record<string, IAxisModelUnion>
@@ -232,7 +232,6 @@ export const GraphModel = TileContentModel
      * Use the given Attribute for the given graph role.
      * Will remove any other attributes that may have that role, unless role is 'yPlus'.
      * Will not allow switching to an attribute from a different DataSet.
-     * Note, calls to this method are observed by Graph's handleNewAttributeID method.
      */
     setAttributeID(role: GraphAttrRole, dataSetID: string, id: string) {
       for (const layer of self.layers) {
@@ -249,7 +248,7 @@ export const GraphModel = TileContentModel
     removeYAttributeID(attrID: string) {
       for(const layer of self.layers) {
         if (layer.config.yAttributeIDs.includes(attrID)) {
-          layer.config.removeYAttribute(attrID);
+          layer.config.removeYAttributeWithID(attrID);
           return;
         }
       }
@@ -469,36 +468,6 @@ export function createGraphModel(snap?: IGraphModelSnapshot, appConfig?: AppConf
     createdGraphModel.showAdornment(cLines, kConnectingLinesType);
   }
   return createdGraphModel;
-}
-
-export interface SetAttributeIDAction extends ISerializedActionCall {
-  name: "setAttributeID"
-  args: [role: GraphAttrRole, dataSetId: string, attrId: string]
-}
-export function isSetAttributeIDAction(action: ISerializedActionCall): action is SetAttributeIDAction {
-  return action.name === "setAttributeID";
-}
-
-export interface RemoveYAttributeAction extends ISerializedActionCall {
-  name: "removeYAttribute",
-  args: [attrId: string]
-}
-export function isRemoveYAttributeAction(action: ISerializedActionCall): action is RemoveYAttributeAction {
-  return action.name === "removeYAttribute";
-}
-
-export interface ReplaceYAttributeAction extends ISerializedActionCall {
-  name: "replaceYAttributeID",
-  args: [string, string]
-}
-export function isReplaceYAttributeAction(action: ISerializedActionCall): action is ReplaceYAttributeAction {
-  return action.name === "replaceYAttributeID";
-}
-
-export type AttributeAssignmentAction
-  = SetAttributeIDAction | RemoveYAttributeAction | ReplaceYAttributeAction | RemoveAttributeAction;
-export function isAttributeAssignmentAction(action: ISerializedActionCall): action is AttributeAssignmentAction {
-  return ["setAttributeID", "removeYAttribute", "replaceYAttributeID", "removeAttribute"].includes(action.name);
 }
 
 export interface SetGraphVisualPropsAction extends ISerializedActionCall {
