@@ -5,7 +5,7 @@ import { applyAction, getEnv, Instance, ISerializedActionCall,
 import { Attribute, IAttribute, IAttributeSnapshot } from "./attribute";
 import { uniqueId, uniqueSortableId } from "../../utilities/js-utils";
 import { CaseGroup } from "./data-set-types";
-import { IValueType } from "./data-types";
+import { ICell, IValueType } from "./data-types";
 
 export const newCaseId = uniqueSortableId;
 
@@ -49,6 +49,8 @@ export const DataSet = types.model("DataSet", {
   attributeSelection: observable.set<string>(),
   // MobX-observable set of selected case IDs
   caseSelection: observable.set<string>(),
+  // MobX-observable set of selected cells
+  cellSelection: observable.set<ICell>(),
   // map from pseudo-case ID to the CaseGroup it represents
   pseudoCaseMap: {} as Record<string, CaseGroup>,
   transactionCount: 0
@@ -106,6 +108,9 @@ export const DataSet = types.model("DataSet", {
   },
   get selectedCaseIds() {
     return Array.from(self.caseSelection);
+  },
+  get selectedCells() {
+    return Array.from(self.cellSelection);
   }
 }))
 .extend(self => {
@@ -241,6 +246,17 @@ export const DataSet = types.model("DataSet", {
   function clearAllSelections() {
     self.attributeSelection.clear();
     self.caseSelection.clear();
+    self.cellSelection.clear();
+  }
+
+  function isCellSelected(cellIds: ICell) {
+    let cellSelected = false;
+    Array.from(self.cellSelection).forEach(cell => {
+      if (cell.attributeId === cellIds.attributeId && cell.caseId === cellIds.caseId) {
+        cellSelected = true;
+      }
+    });
+    return cellSelected;
   }
 
   return {
@@ -380,6 +396,7 @@ export const DataSet = types.model("DataSet", {
                 ? group.childCaseIds.every(id => self.caseSelection.has(id))
                 : self.caseSelection.has(caseId);
       },
+      isCellSelected,
       get firstSelectedAttributeId() {
         if (self.selectedAttributeIds.length > 0) return self.selectedAttributeIds[0];
       },
@@ -391,6 +408,9 @@ export const DataSet = types.model("DataSet", {
       },
       get isAnyCaseSelected() {
         return self.caseSelection.size > 0;
+      },
+      get isAnyCellSelected() {
+        return self.cellSelection.size > 0;
       },
       get isInTransaction() {
         return self.transactionCount > 0;
@@ -655,10 +675,26 @@ export const DataSet = types.model("DataSet", {
         }
       },
 
+      selectAllCells(select = true) {
+        if (select) {
+          clearAllSelections();
+          self.attributes.forEach(attribute => {
+            self.cases.forEach(({__id__}) => {
+              self.cellSelection.add({ attributeId: attribute.id, caseId: __id__ });
+            });
+          });
+        } else {
+          self.cellSelection.clear();
+        }
+      },
+
       selectAttributes(attributeIds: string[], select = true) {
+        if (select) {
+          self.caseSelection.clear();
+          self.cellSelection.clear();
+        }
         attributeIds.forEach(id => {
           if (select) {
-            self.caseSelection.clear();
             self.attributeSelection.add(id);
           } else {
             self.attributeSelection.delete(id);
@@ -676,13 +712,36 @@ export const DataSet = types.model("DataSet", {
             ids.push(id);
           }
         });
+        if (select) {
+          self.attributeSelection.clear();
+          self.cellSelection.clear();
+        }
         ids.forEach(id => {
           if (select) {
-            self.attributeSelection.clear();
             self.caseSelection.add(id);
           }
           else {
             self.caseSelection.delete(id);
+          }
+        });
+      },
+
+      selectCells(cells: ICell[], select = true) {
+        if (select) {
+          self.attributeSelection.clear();
+          self.caseSelection.clear();
+        }
+        cells.forEach(cell => {
+          if (select) {
+            if (!isCellSelected(cell)) {
+              self.cellSelection.add(cell);
+            }
+          } else {
+            Array.from(self.cellSelection).forEach(selectedCell => {
+              if (selectedCell.attributeId === cell.attributeId && selectedCell.caseId === cell.caseId) {
+                self.cellSelection.delete(selectedCell);
+              }
+            });
           }
         });
       },
@@ -704,6 +763,11 @@ export const DataSet = types.model("DataSet", {
           }
         });
         self.caseSelection.replace(ids);
+      },
+
+      setSelectedCells(cells: ICell[]) {
+        clearAllSelections();
+        self.cellSelection.replace(cells);
       },
 
       addActionListener(key: string, listener: (action: ISerializedActionCall) => void) {

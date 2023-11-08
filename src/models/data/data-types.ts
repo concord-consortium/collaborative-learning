@@ -49,6 +49,11 @@ const dayjsFormats = [
 export const ValueType = types.union(types.number, types.string, types.undefined);
 export type IValueType = number | string | undefined;
 
+export interface ICell {
+  attributeId: string;
+  caseId: string;
+}
+
 export function isNumeric(val: IValueType) {
   return !isNaN(toNumeric(val));
 }
