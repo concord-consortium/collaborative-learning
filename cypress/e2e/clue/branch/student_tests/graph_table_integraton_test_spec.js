@@ -181,7 +181,7 @@ context('Graph Table Integration', function () {
     tableToolTile.getTableCell().eq(3).should('contain', x[1]);
   });
 
-  it.only("Dragging to copy linked tiles", () => {
+  it("Dragging to copy linked tiles", () => {
     beforeTest();
 
     const dataTransfer = new DataTransfer;
