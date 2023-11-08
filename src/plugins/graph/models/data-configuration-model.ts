@@ -87,18 +87,6 @@ export const DataConfigurationModel = types
       return this.yAttributeDescriptions.map((d: IAttributeDescriptionSnapshot) => d.attributeID);
     },
     /**
-     * Return true if the given attribute ID is present in any role.
-     */
-    includesAttributeID(id: string) {
-      for (const desc of self._attributeDescriptions.values()) {
-        if (desc.attributeID===id) return true;
-      }
-      for (const desc of self._yAttributeDescriptions) {
-        if (desc.attributeID===id) return true;
-      }
-      return false;
-    },
-    /**
      * No attribute descriptions beyond the first for y are returned.
      * The rightNumeric attribute description is also not returned.
      */
@@ -134,6 +122,26 @@ export const DataConfigurationModel = types
         attrID = this.defaultCaptionAttributeID;
       }
       return attrID;
+    },
+    /**
+     * Return the list of roles that the given attribute is currently assigned to.
+     * Will include 'y' if the attribute is the only Y attribute, or 'yPlus' if it
+     * is one of several.
+     * @param attrID attribute ID
+     * @returns list (possibly empty) of GraphAttrRole
+     */
+    rolesForAttribute(attrID: string) {
+      const roles: GraphAttrRole[] = [];
+      self._attributeDescriptions.forEach((desc, role) => {
+        if (desc?.attributeID === attrID) {
+          roles.push(role as GraphAttrRole);
+        }
+        if (this.yAttributeIDs.includes(attrID)) {
+          // role depends on whether there are attributes remaining
+          roles.push(this.yAttributeDescriptions.length > 1 ? "yPlus" : "y");
+        }
+      });
+      return roles;
     },
     attributeType(role: GraphAttrRole) {
       const desc = this.attributeDescriptionForRole(role);
