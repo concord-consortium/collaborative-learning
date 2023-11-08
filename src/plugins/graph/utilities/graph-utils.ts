@@ -453,24 +453,14 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
     const isSelected = dataset?.isCaseSelected(id);
     const legendColor = getLegendColor ? getLegendColor(id) : '';
 
-    if (getPointColorAtIndex) {
-      if (legendColor !== '') {
-        return legendColor;
-      } else if (getPointColorAtIndex && aCaseData.plotNum) {
-        return getPointColorAtIndex(aCaseData.plotNum);
-      } else if (isSelected) {
-        return defaultSelectedColor;
-      } else {
-        return pointColor;
-      }
+    if (legendColor !== '') {
+      return legendColor;
+    } else if (getPointColorAtIndex && aCaseData.plotNum) {
+      return getPointColorAtIndex(aCaseData.plotNum);
+    } else if (isSelected) {
+      return defaultSelectedColor;
     } else {
-      if (legendColor !== '') {
-        return legendColor;
-      } else if (isSelected) {
-        return defaultSelectedColor;
-      } else {
-        return pointColor;
-      }
+      return pointColor;
     }
   };
 
