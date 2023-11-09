@@ -1,5 +1,5 @@
 import stringify from "json-stringify-pretty-compact";
-import { getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
+import { addDisposer, getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
 import {createContext, useContext} from "react";
 import { IClueObject } from "../../../models/annotations/clue-object";
 import { getTileIdFromContent } from "../../../models/tiles/tile-model";
@@ -32,6 +32,7 @@ import { getDotId } from "../utilities/graph-utils";
 import { GraphLayerModel } from "./graph-layer-model";
 import { isSharedDataSet, SharedDataSet } from "../../../models/shared/shared-data-set";
 import { DataConfigurationModel } from "./data-configuration-model";
+import { reaction } from "mobx";
 
 export interface GraphProperties {
   axes: Record<string, IAxisModelUnion>
@@ -322,6 +323,11 @@ export const GraphModel = TileContentModel
     }
   }))
   .actions(self => ({
+    /**
+     * Update layers as needed when shared models are attached or detached.
+     * Called by the shared model manager.
+     * @param sharedModel
+     */
     updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
       const smm = getSharedModelManager(self);
       if (!smm || !smm.isReady) return;
@@ -331,16 +337,6 @@ export const GraphModel = TileContentModel
         return;
       }
 
-      if (self.layers.length === 1 && !self.layers[0].config.dataset && !self.layers[0].config.isEmpty) {
-        // Non-empty dataset lacking a dataset reference = legacy data needing a one-time fix.
-        // This is actually not a great place to call this; would be better to do so at document load time
-        // since it is a one-time thing and neccessary for first display.
-        // But I tried that and the SharedModelManager was not yet ready.
-        this.setDataConfigurationReferences();
-      }
-
-      // The rest of this method is all about checking whether the list of linked
-      // datasets has changed, and updating layers if so.
       // Would be nice if there was a simple way to tell if anything relevant has changed.
       // This is a little heavy-handed but does the job.
       const sharedDatasetIds = sharedDataSets.map(m => isSharedDataSet(m) ? m.dataSet.id : undefined);
@@ -406,6 +402,21 @@ export const GraphModel = TileContentModel
         });
       }
     },
+    afterAttach() {
+      if (self.layers.length === 1 && !self.layers[0].config.dataset && !self.layers[0].config.isEmpty) {
+        // Non-empty dataset lacking a dataset reference = legacy data needing a one-time fix.
+        // We can't do that fix until the SharedModelManager is ready, though.
+        addDisposer(self, reaction(
+          () => {
+            return self.tileEnv?.sharedModelManager?.isReady;
+          },
+          (ready) => {
+            if (!ready) return;
+            this.setDataConfigurationReferences();
+          }
+        ));
+      }
+    },
     setDataConfigurationReferences() {
       // Updates pre-existing DataConfiguration objects that don't have the now-required references
       // for dataset and metadata. We can determine these from the unique shared models these
@@ -425,7 +436,7 @@ export const GraphModel = TileContentModel
           const smd = sharedMetadata[0];
           if (isSharedCaseMetadata(smd)) {
             self.layers[0].config.metadata = smd;
-            console.log('Updated legacy document - set metadata reference');
+            console.log('Updated legacy document by setting metadata reference');
           }
         }
       } else {
