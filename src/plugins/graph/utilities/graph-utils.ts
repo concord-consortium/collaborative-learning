@@ -141,10 +141,8 @@ export interface IMatchCirclesProps {
 }
 
 export function matchCirclesToData(props: IMatchCirclesProps) {
-  // console.log("\t🏭 matchCirclesToData");
   const {dataConfiguration, enableAnimation, instanceId,
       dotsElement, pointRadius, pointColor, pointStrokeColor} = props;
-
   const allCaseData = dataConfiguration.joinedCaseDataArrays;
   let allCircles = selectAllCircles(dotsElement); //includes both inner and outer circles
   if (!allCircles) return;
@@ -152,11 +150,6 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
   allCircles = selectAllCircles(dotsElement);
   if (!allCircles) return;
   startAnimation(enableAnimation);
-
-  console.log("\t🏭 initializePoints");
-  console.log("\tdata:", allCaseData);
-  console.log("\tselection is of size:", allCircles.size());
-  //initialize inner dots
 
   //initialize outer highlight dots (this must be before the inner dots so that the inner dots are on top)
   allCircles
@@ -167,8 +160,6 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
         .attr('class', 'graph-dot-highlighted')
         .property('id', (d: CaseData) => `${instanceId}_${d.caseID}_highlight`)
     );
-
-    console.log(`- after outers`, selectAllCircles(dotsElement)?.size());
 
   allCircles
     .data(allCaseData)
@@ -183,8 +174,6 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
           .style('stroke', pointStrokeColor)
           .style('stroke-width', defaultStrokeWidth)
     );
-
-    console.log(`- after inners`, selectAllCircles(dotsElement)?.size());
 
   dotsElement && select(dotsElement).on('click', (event: MouseEvent) => {
     event.stopPropagation();
@@ -214,8 +203,6 @@ function styleOuterCircles(outerCircles: any, dataset?: IDataSet){
     })
     .style('opacity', 0.5);
 }
-
-
 
 //================================= [Line Rendering Functions] ====================================
 //  Return the two points in logical coordinates where the line with the given
@@ -436,9 +423,6 @@ export interface ISetPointCoordinates {
 }
 
 export function setPointCoordinates(props: ISetPointCoordinates) {
-  // console.log("\t🏭 setPointCoordinates with dataset:", props.dataset);
-  // console.log("dotsRef: ", props.dotsRef.current);
-
   const lookupLegendColor = (aCaseData: CaseData) => {
     const id = aCaseData.caseID;
     const isSelected = dataset?.isCaseSelected(id);
@@ -484,42 +468,12 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
 
   const { dataset, dotsRef, pointColor, getPointColorAtIndex,
           getScreenX, getScreenY, getLegendColor, enableAnimation } = props;
-
   const duration = enableAnimation.current ? transitionDuration : 0;
-
-  // //new code -----------------------------------------
-  // console.log("------outer circles-----------------");
-  // console.log("\tdotsRef.current: ", dotsRef.current);
-  // let theSelection = selectOuterCircles(dotsRef.current); //select outer circles
-  // console.log("theSelection.size()", theSelection?.size());
-  // setPoints(0);
-  // console.log("------inner circles-----------------");
-  // console.log("\tdotsRef.current: ", dotsRef.current);
-  // theSelection = selectInnerCircles(dotsRef.current); //select inner circles
-  // console.log("theSelection.size()", theSelection?.size());
-  // setPoints(5);
-
-
-  // old code-----------------------------------------
-  console.log("------inner circles-----------------");
-  console.log("\tdotsRef.current: ", dotsRef.current);
   let theSelection = selectInnerCircles(dotsRef.current); //select inner circles
-  console.log("theSelection.size()", theSelection?.size());
   setPoints(5);
-  console.log("------outer circles-----------------");
-  console.log("\tdotsRef.current: ", dotsRef.current);
-
   theSelection = selectOuterCircles(dotsRef.current); //select outer circles
-  console.log("theSelection.size()", theSelection?.size());
   setPoints(0);
-
-  // if (theSelection){
-  //   console.log("right hereeeee!");
-  //   styleOuterCircles(theSelection, dataset);
-  // }
 }
-
-
 
 /**
  Use the bounds of the given axes to compute slope and intercept.
