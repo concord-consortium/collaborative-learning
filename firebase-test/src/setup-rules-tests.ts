@@ -14,18 +14,28 @@ export const studentAuth = { uid: studentId, platform_user_id: studentIdNumeric,
 export const student2IdNumeric = 2;
 export const student2Id = `${student2IdNumeric}`;
 export const student2Auth = { uid: student2Id, platform_user_id: student2IdNumeric, user_type: "student", class_hash: otherClass };
+
 export const teacherIdNumeric = 11;
 export const teacherId = `${teacherIdNumeric}`;
 export const teacherName = "Jane Teacher";
 export const teacherAuth = { uid: teacherId, platform_user_id: teacherIdNumeric, user_type: "teacher", class_hash: thisClass };
+
 export const teacher2IdNumeric = 12;
 export const teacher2Id = `${teacher2IdNumeric}`;
 export const teacher2Name = "John Teacher";
 export const teacher2Auth = { uid: teacher2Id, platform_user_id: teacher2IdNumeric, user_type: "teacher", class_hash: otherClass };
+
 export const teacher3IdNumeric = 13;
 export const teacher3Id = `${teacher3IdNumeric}`;
 export const teacher3Name = "Jade Teacher";
 export const teacher3Auth = { uid: teacher3Id, platform_user_id: teacher3IdNumeric, user_type: "teacher", class_hash: lastClass };
+
+// Co-teacher of teacher's class
+export const teacher4IdNumeric = 14;
+export const teacher4Id = `${teacher4IdNumeric}`;
+export const teacher4Name = "Joe Teacher";
+export const teacher4Auth = { uid: teacher4Id, platform_user_id: teacher4IdNumeric, user_type: "teacher", class_hash: thisClass };
+
 export const offeringIdNumeric = 2000;
 export const offeringId = `${offeringIdNumeric}`;
 export const noNetwork = null;
