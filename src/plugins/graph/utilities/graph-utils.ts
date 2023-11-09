@@ -427,21 +427,16 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
     const id = aCaseData.caseID;
     const isSelected = dataset?.isCaseSelected(id);
     const legendColor = getLegendColor ? getLegendColor(id) : '';
-    console.log(`-------setPointCoordinates-----id:${id}`);
     if (legendColor !== '') {
-      console.log("\t433, return :", legendColor);
       return legendColor;
     } else if ((getPointColorAtIndex && (aCaseData.plotNum || isSelected))) {
       return getPointColorAtIndex(aCaseData.plotNum);
     } else {
-      console.log("\t442, return :", pointColor);
       return pointColor;
     }
   };
 
   const setPoints = (radius: number) => {
-    console.log("-------------------setPoints --------------------");
-
     if (theSelection !== null) {
       theSelection
         .transition()
@@ -456,13 +451,9 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
           return radius;
         })
         .style('fill', (aCaseData: CaseData) => {
-          console.log("\tfill fn, id:",aCaseData.caseID);
-          console.log("\treturning ", lookupLegendColor(aCaseData));
           return lookupLegendColor(aCaseData);
         })
         .style('stroke', (aCaseData: CaseData) =>{
-          console.log("\t---stroke fn, id:", aCaseData.caseID);
-          console.log("\t returning ", lookupLegendColor(aCaseData));
           return lookupLegendColor(aCaseData); //border color of inner dot should be same color as legend
         })
         .style('stroke-width', (aCaseData: CaseData) =>{

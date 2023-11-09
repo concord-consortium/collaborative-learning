@@ -41,7 +41,6 @@ export const kellyColors = [
 ];
 
 export const defaultPointColor = '#E6805B';
-export const defaultSelectedColor = '#4682B4';
 export const defaultStrokeWidth = 1;
 export const missingColor = '#888888';
 export const defaultStrokeColor = '#FFFFFF';
