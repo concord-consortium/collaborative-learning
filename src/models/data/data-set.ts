@@ -443,8 +443,14 @@ export const DataSet = types.model("DataSet", {
       get firstSelectedCaseId() {
         if (self.selectedCaseIds.length > 0) return self.selectedCaseIds[0];
       },
+      get selectedAttributeIdString() {
+        return self.selectedAttributeIds.join(", ");
+      },
       get selectedCaseIdString() {
         return self.selectedCaseIds.join(", ");
+      },
+      get selectedCellIdString() {
+        return self.selectedCells.map(cell => `(${cell.attributeId},${cell.caseId})`).join(", ");
       },
       get isAnyCaseSelected() {
         return self.caseSelection.size > 0;

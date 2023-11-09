@@ -76,7 +76,7 @@ export const useColumnsFromDataSet = ({
         width,
         resizable: !readOnly,
         headerRenderer: ColumnHeaderCell,
-        formatter: getCellFormatter(width, rowHeight, lookupImage),
+        formatter: getCellFormatter({ dataSet, isLinked, lookupImage, rowHeight, width }),
         editor: !readOnly && !metadata.hasExpression(attr.id) ? CellTextEditor : undefined,
         editorOptions: {
           editOnClick: !readOnly

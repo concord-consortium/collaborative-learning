@@ -51,11 +51,13 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     dataSet, columnChanges, triggerColumnChange, rowChanges, triggerRowChange, ...gridModelProps
   } = useModelDataSet(model, content);
 
-  // Forces the table to rerender when its dataset's selected cases change
+  // Forces the table to rerender when its dataset's selection changes
   useEffect(() => {
     triggerRowChange();
+    dataSet.selectedAttributeIdString; // eslint-disable-line no-unused-expressions
     dataSet.selectedCaseIdString; // eslint-disable-line no-unused-expressions
-  }, [dataSet.selectedCaseIdString, triggerRowChange]);
+    dataSet.selectedCellIdString; // eslint-disable-line no-unused-expressions
+  }, [dataSet.selectedAttributeIdString, dataSet.selectedCaseIdString, dataSet.selectedCellIdString, triggerRowChange]);
 
   // Set up user specified columns and function to measure a column
   const { measureColumnWidth, resizeColumn, resizeColumnWidth } = useMeasureColumnWidth({ content });

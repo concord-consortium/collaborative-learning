@@ -62,22 +62,18 @@ export const useGridContext = ({ content, modelId, showRowLabels, triggerColumnC
     const actuallySelectRowById = () => {
       clearSelection({ row: false });
       dataSet.selectCases([rowId], !dataSet.isCaseSelected(rowId));
-      sharedSelection.select(modelId, rowId, select);
       triggerRowChange();
     };
     if (select !== dataSet.isCaseSelected(rowId)) {
       actuallySelectRowById();
-    } else if (select !== sharedSelection.isSelected(modelId, rowId)) {
-      actuallySelectRowById();
     }
-  }, [clearSelection, dataSet, modelId, sharedSelection, triggerRowChange]);
+  }, [clearSelection, dataSet, triggerRowChange]);
 
   const selectOneRow = useCallback((rowId: string) => {
     clearSelection();
     dataSet.setSelectedCases([rowId]);
-    sharedSelection.setSelected(modelId, [rowId]);
     triggerRowChange();
-  }, [clearSelection, dataSet, modelId, sharedSelection, triggerRowChange]);
+  }, [clearSelection, dataSet, triggerRowChange]);
 
   // Creating a new gridContext can result in focus change thus disrupting cell edits;
   // therefore, it's important that all inputs to the gridContext be wrapped in useCallback()
@@ -99,8 +95,7 @@ export const useGridContext = ({ content, modelId, showRowLabels, triggerColumnC
     _rows.delete(inputRowId.current);
     const rowArray = Array.from(_rows) as string[];
     dataSet.setSelectedCases(rowArray);
-    sharedSelection.setSelected(modelId, rowArray);
-  }, [clearSelection, dataSet, modelId, sharedSelection]);
+  }, [clearSelection, dataSet]);
 
   const cellNavigationMode: CellNavigationMode = "CHANGE_ROW";
   return {

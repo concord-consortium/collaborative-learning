@@ -1,23 +1,36 @@
-.text-cell {
-  display: flex;
-  align-items: center;
-  white-space: normal;
-  word-break: break-word;
-  text-align: left;
-  line-height: 18px;
-  margin: 0 4px;
-}
+@use "../../vars.sass";
 
-.image-cell {
+.cell {
+  height: 100%;
+  width: 100%;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  &.highlighted {
+    background-color: vars.$highlight-unlinked-cell;
 
-  img {
-    max-height: 100%;
-    max-width: 100%;
-    padding: 6px;
+    &.linked {
+      background-color: vars.$highlight-linked-cell;
+    }
   }
-  
+
+  &.text-cell {
+    display: flex;
+    align-items: center;
+    white-space: normal;
+    word-break: break-word;
+    text-align: left;
+    line-height: 18px;
+    margin: 0 4px;
+  }
+
+  &.image-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    img {
+      max-height: 100%;
+      max-width: 100%;
+      padding: 6px;
+    }
+  }
 }
