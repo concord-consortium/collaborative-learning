@@ -143,12 +143,12 @@ export const TileModel = types
       // can't be validated, etc.. Therefore, the tile model will call the content's afterAttachToDocument()
       // method when the tile model itself is attached.
       // Note: The shared model manager is not guaranteed to be ready at this point. This is because it is
-      // is setup after the document is created from the snapshot, and this afterAttach can be called
-      // in between. It is recommended that you use a reaction to check for the shared model manager to
-      // be ready.
+      // setup after the document is created from the snapshot, and this afterAttach can be called
+      // after the create but before the shared model setup. It is recommended that you use a reaction to check
+      // for the shared model manager to be ready.
       // Also the shared model manager won't be ready until the tile is attached to the document, so you
       // don't really need to use afterAttachToDocument in these cases you can instead just use afterAttach
-      // with a reaction.
+      // with a reaction monitoring the readiness of the shared model manager.
       if ("afterAttachToDocument" in self.content && typeof self.content.afterAttachToDocument === "function") {
         self.content.afterAttachToDocument();
       }
