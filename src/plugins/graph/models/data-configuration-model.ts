@@ -211,18 +211,14 @@ export const DataConfigurationModel = types
   }))
   .actions(self => ({
     /**
-     * Low-level method to set the Y Attribute Description for a graph role.
+     * Low-level method to set the attribute description for a graph role.
      * If no attribute description is provided, the role will be made empty.
-     * Caller is responsible for updating and/or invalidating the corresponding filteredCases.
-     * @param iRole the graph role
+     * Not used for Y attributes, which have their own set/remove methods.
+     * @param iRole the graph role (not including 'y')
      * @param iDesc IAttributeDescriptionSnapshot (eg attribute and type)
      */
     _setAttributeDescription(iRole: GraphAttrRole, iDesc?: IAttributeDescriptionSnapshot) {
-      if (iRole === 'y') {
-        if (iDesc?.attributeID) {
-          self._yAttributeDescriptions.push(iDesc);
-        }
-      } else if (iDesc?.attributeID) {
+      if (iDesc?.attributeID) {
         self._attributeDescriptions.set(iRole, iDesc);
       } else {
         self._attributeDescriptions.delete(iRole);
@@ -617,6 +613,36 @@ export const DataConfigurationModel = types
         }));
       self.setPointsNeedUpdating(true);
     },
+    /**
+     * Make sure the filteredCases array has the right number of FilteredCases.
+     * For CLUE, this should be equal to the number of Y attributes. If the
+     * length has changed, invalidate the cached case lists.
+     *
+     * Note, if we want to allow drawing of casePlot or single-attribute
+     * dotPlot or dotChart types of graphs, then we will need to have one
+     * FilteredCases object even when there are no Y attributes configured.
+     * But doing so right now causes dots to float to the top of the screen when
+     * the last Y attribute is removed.
+     *
+     * @param alwaysInvalidate - If true, the caches of all FilteredCases are
+     * invalidated even if we did not modify the array.
+     */
+    syncFilteredCasesCount(alwaysInvalidate?: boolean) {
+      const desiredCount = self.yAttributeDescriptions.length;
+      const changed = self.filteredCases.length !== desiredCount;
+      while(self.filteredCases.length > desiredCount) {
+        self.filteredCases.pop()?.destroy();
+      }
+      while(self.filteredCases.length < desiredCount) {
+        this._addNewFilteredCases();
+      }
+      if (alwaysInvalidate || changed) {
+        // Optimization: just invalidate some, not all, in cases where we know some are unchanged.
+        self.filteredCases.forEach((aFilteredCases) => {
+          aFilteredCases.invalidateCases();
+        });
+      }
+    },
     setDataset(dataset: IDataSet | undefined, metadata: ISharedCaseMetadata | undefined) {
       self.dataset = dataset;
       self.metadata = metadata;
@@ -625,18 +651,10 @@ export const DataConfigurationModel = types
     handleDataSetChange() {
       self.actionHandlerDisposer?.();
       self.actionHandlerDisposer = undefined;
-      self.filteredCases.clear();
       if (self.dataset) {
         self.actionHandlerDisposer = onAnyAction(self.dataset, self.handleAction);
-        // Create one filteredCases for each Y attribute
-        while (self.filteredCases.length < self._yAttributeDescriptions.length) {
-          this._addNewFilteredCases();
-        }
-        // A y2 attribute is optional, so only add a new filteredCases if there is one.
-        if (self.hasY2Attribute) {
-          this._addNewFilteredCases();
-        }
       }
+      this.syncFilteredCasesCount(true);
       self.invalidateQuantileScale();
     },
     setPrimaryRole(role: GraphAttrRole) {
@@ -656,6 +674,11 @@ export const DataConfigurationModel = types
         this.removeAttributeFromRole(role as GraphAttrRole);
       }
     },
+    /**
+     * Unset any attribute currently in the given role.
+     * Not used for Y attributes, which have their own methods.
+     * @param role GraphAttrRole, not inluding 'y'
+     */
     removeAttributeFromRole(role: GraphAttrRole) {
       self._setAttributeDescription(role);
     },
@@ -667,23 +690,21 @@ export const DataConfigurationModel = types
             this.removeYAttributeWithID(self._yAttributeDescriptions[0].attributeID);
           }
           self._yAttributeDescriptions.push(desc);
-          this._addNewFilteredCases();
         }
+      } else if (role === 'yPlus' && desc && desc.attributeID !== '') {
+        self._yAttributeDescriptions.push(desc);
       } else if (role === 'rightNumeric') {
         this.setY2Attribute(desc);
       } else {
         self._setAttributeDescription(role, desc);
       }
-      self.filteredCases.forEach((aFilteredCases) => { // TODO: do we always need to invalidate all of them?
-        aFilteredCases.invalidateCases();
-      });
+      this.syncFilteredCasesCount(true);
       if (role === 'legend') {
         self.invalidateQuantileScale();
       }
     },
     addYAttribute(desc: IAttributeDescriptionSnapshot) {
-      self._yAttributeDescriptions.push(desc);
-      this._addNewFilteredCases();
+      this.setRoleToAttributeDesc("yPlus", desc);
     },
     /**
      * Replace an existing Y attribute with a different one, maintaining its position in the list.
@@ -708,13 +729,12 @@ export const DataConfigurationModel = types
       const isNewAttribute = !self._attributeDescriptions.get('rightNumeric'),
         isEmpty = !desc?.attributeID;
       self._setAttributeDescription('rightNumeric', desc);
-      if (isNewAttribute) {
-        this._addNewFilteredCases();
-      } else if (isEmpty) {
-        self.filteredCases.pop(); // remove the last one because it is the array
+      this.syncFilteredCasesCount();
+      if (isEmpty) {
         self.setPointsNeedUpdating(true);
-      } else {
-        const existingFilteredCases = self.filteredCases[self.numberOfPlots - 1];
+      } else if (!isNewAttribute) {
+        // Replacing one attribute with another, invalidate that specific cache
+        const existingFilteredCases = self.filteredCases[self.filteredCases.length - 1];
         existingFilteredCases?.invalidateCases();
       }
     },
@@ -727,7 +747,7 @@ export const DataConfigurationModel = types
       const index = self._yAttributeDescriptions.findIndex((aDesc) => aDesc.attributeID === id);
       if (index >= 0) {
         self._yAttributeDescriptions.splice(index, 1);
-        self.filteredCases.splice(index, 1);
+        this.syncFilteredCasesCount(true);
         self.setPointsNeedUpdating(true);
       }
     },

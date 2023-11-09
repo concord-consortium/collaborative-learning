@@ -13,7 +13,10 @@ import {GraphPlace} from "../imports/components/axis-graph-shared";
 import {matchCirclesToData, setNiceDomain} from "../utilities/graph-utils";
 import { getAppConfig } from "../../../models/tiles/tile-environment";
 
-// keys are [primaryAxisType][secondaryAxisType]
+/**
+ * This determines the type of plot that will be drawn, based on the types of the two axes.
+ * The keys are [primaryAxisType][secondaryAxisType]
+ */
 const plotChoices: Record<string, Record<string, PlotType>> = {
   empty: {empty: 'casePlot', numeric: 'dotPlot', categorical: 'dotChart'},
   numeric: {empty: 'dotPlot', numeric: 'scatterPlot', categorical: 'dotPlot'},
@@ -102,9 +105,9 @@ export class GraphController {
     }
   }
 
-  handleAttributeAssignment(graphPlace: GraphPlace, dataSetID: string, attrID: string) {
+  handleAttributeAssignment(graphPlace: GraphPlace, dataSetID: string|undefined, attrID: string) {
     const {graphModel, layout} = this,
-      dataset = getDataSetFromId(graphModel, dataSetID),
+      dataset = dataSetID ? getDataSetFromId(graphModel, dataSetID) : undefined,
       dataConfig = graphModel?.config,
       appConfig = getAppConfig(graphModel),
       emptyPlotIsNumeric = appConfig?.getSetting("emptyPlotIsNumeric", "graph");
@@ -141,7 +144,7 @@ export class GraphController {
         dataConfig.setPrimaryRole(primaryRole);
         graphModel.setPlotType(plotChoices[primaryType][otherAttributeType]);
       }
-      if (dataConfig.attributeID(graphAttributeRole) !== attrID) {
+      if (attrID && dataConfig.attributeID(graphAttributeRole) !== attrID) {
         dataConfig.setRoleToAttributeDesc(graphAttributeRole, {attributeID: attrID});
       }
     };

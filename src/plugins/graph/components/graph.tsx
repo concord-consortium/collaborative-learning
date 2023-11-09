@@ -114,15 +114,12 @@ export const Graph = observer(
           console.warn('Unexpected layer number: ', action.path);
           return;
         }
-        const dataSetId = graphModel.layers[layerNumber].config.dataset?.id;
-        if (!dataSetId) {
-          console.warn("No dataset found");
-          return;
-        }
-        if (layerNumber > 0) {
+        if (layerNumber > 0) { // TODO temporary
           console.log('Ignoring change in layer ', layerNumber, action.name);
           return;
         }
+        const layer = graphModel.layers[layerNumber];
+        const dataSetId = layer.config.dataset?.id;
         let attrId = "";
         if (isSetRoleToAttributeDescAction(action)) {
           const [role, _desc] = action.args;
@@ -134,16 +131,15 @@ export const Graph = observer(
           graphPlace = attrRoleToGraphPlace[role] as GraphPlace;
         }
         else if (isRemoveYAttributeWithIDAction(action)) {
-          const [_attrId] = action.args;
-          graphPlace = "yPlus";
-          attrId = _attrId;
+          const [_attrId] = action.args; // "old" attr ID, do not pass to handleAttributeAssignment
+          const removingLastOne = layer.config.yAttributeDescriptions.length === 0;
+          graphPlace = removingLastOne ? "left" : "yPlus";
         }
         else if (isReplaceYAttributeAction(action)) {
           const [ , newAttrId] = action.args;
           graphPlace = "yPlus";
           attrId = newAttrId;
         }
-        console.log('Handling', action.name, 'from', action.path, ':', graphPlace, 'ds', dataSetId, 'attr', attrId);
         startAnimation(enableAnimation);
         graphPlace && graphController?.handleAttributeAssignment(graphPlace, dataSetId, attrId);
       }
