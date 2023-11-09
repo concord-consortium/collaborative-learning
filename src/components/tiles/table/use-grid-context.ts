@@ -19,7 +19,16 @@ export const useGridContext = ({ content, modelId, showRowLabels, triggerColumnC
 
   // this tracks ReactDataGrid's notion of the selected cell
   const selectedCell = useRef<TPosition>({ rowIdx: -1, idx: -1 });
-  const isSelectedCellInRow = useCallback((rowIdx: number) => selectedCell.current.rowIdx === rowIdx, []);
+  const isSelectedCellInRow = useCallback((rowIdx: number) => {
+    const rowId = dataSet.getCaseAtIndex(rowIdx)?.__id__;
+    if (!rowId) return false;
+    let containsSelectedCell = false;
+    dataSet.selectedCells.forEach(cell => {
+      const { caseId } = cell;
+      if (rowId === caseId) containsSelectedCell = true;
+    });
+    return containsSelectedCell;
+  }, [dataSet]);
   const isColumnSelected = useCallback((columnId: string) => dataSet.isAttributeSelected(columnId),
     [dataSet]);
   // TODO Remove the sharedSelection.
