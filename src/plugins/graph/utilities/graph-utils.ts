@@ -160,7 +160,7 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
         .attr('class', 'graph-dot-highlighted')
         .property('id', (d: CaseData) => `${instanceId}_${d.caseID}_highlight`)
     );
-
+  //initialize inner dots
   allCircles
     .data(allCaseData)
     .join(
