@@ -1,6 +1,5 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { CellNavigationMode, DataGridHandle } from "react-data-grid";
-import { useCurrent } from "../../../hooks/use-current";
 import { useSharedSelectionStore } from "../../../hooks/use-stores";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
 import { uniqueId } from "../../../utilities/js-utils";
@@ -21,13 +20,8 @@ export const useGridContext = ({ content, modelId, showRowLabels, triggerColumnC
   // this tracks ReactDataGrid's notion of the selected cell
   const selectedCell = useRef<TPosition>({ rowIdx: -1, idx: -1 });
   const isSelectedCellInRow = useCallback((rowIdx: number) => selectedCell.current.rowIdx === rowIdx, []);
-  // local since ReactDataGrid doesn't have a notion of column selection
-  const [selectedColumns, setSelectedColumns] = useState(new Set<string>());
-  const selectedColumnsRef = useCurrent(selectedColumns);
-  // we use a Set to eventually support multiple selected columns, but
-  // currently the API constrains to a single selected column.
-  const isColumnSelected = useCallback((columnId: string) =>
-                            selectedColumnsRef.current.has(columnId), [selectedColumnsRef]);
+  const isColumnSelected = useCallback((columnId: string) => dataSet.isAttributeSelected(columnId),
+    [dataSet]);
   // TODO Remove the sharedSelection.
   // There should just be a single selection mechanism, and it should be the one in the dataSet.
   // However, sharedSelection is still in the code to maintain legacy shared highlighting between
@@ -35,8 +29,8 @@ export const useGridContext = ({ content, modelId, showRowLabels, triggerColumnC
   const sharedSelection = useSharedSelectionStore();
   const getSelectedRows = useCallback(() => {
     // this is suitable for passing into ReactDataGrid
-    const { selection } = dataSet;
-    const dataSetSelection = new Set<React.Key>(selection);
+    const { caseSelection } = dataSet;
+    const dataSetSelection = new Set<React.Key>(caseSelection);
     sharedSelection.getSelected(modelId).forEach(caseId => {
       if (!dataSetSelection.has(caseId)) dataSetSelection.add(caseId);
     });
@@ -44,10 +38,10 @@ export const useGridContext = ({ content, modelId, showRowLabels, triggerColumnC
   }, [dataSet, modelId, sharedSelection]);
 
   const clearRowSelection = useCallback(() => {
-    dataSet.selectAll(false);
+    dataSet.selectAllCases(false);
     sharedSelection.clear(modelId);
   }, [dataSet, modelId, sharedSelection]);
-  const clearColumnSelection = useCallback(() => setSelectedColumns(new Set([])), []);
+  const clearColumnSelection = useCallback(() => dataSet.selectAllAttributes(false), [dataSet]);
   const clearCellSelection = useCallback(() => gridRef.current?.selectCell({ idx: -1, rowIdx: -1 }), []);
 
   // clears all selection by default; options can be used to preserve particular forms of selection
@@ -60,9 +54,9 @@ export const useGridContext = ({ content, modelId, showRowLabels, triggerColumnC
 
   const selectColumn = useCallback((columnId: string) => {
     clearSelection({ column: false });
-    setSelectedColumns(new Set([columnId]));
+    dataSet.setSelectedAttributes([columnId]);
     triggerColumnChange();
-  }, [clearSelection, triggerColumnChange]);
+  }, [clearSelection, dataSet, triggerColumnChange]);
 
   const selectRowById = useCallback((rowId: string, select: boolean) => {
     const actuallySelectRowById = () => {

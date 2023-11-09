@@ -141,7 +141,21 @@ $controls-hover-background: #c0dfe7;
       .rdg-cell {
         border-top: $border-style;
         &.selected-column {
-          background-color: var(--header-selected-background-color);
+          background-color: $highlight-unlinked-header;
+
+          .rdg-text-editor {
+            background-color: white;
+            border: none;
+            box-shadow: inset 0 0 0 3px $highlight-unlinked-edit;
+          }
+
+          &.linked {
+            background-color: $highlight-linked-header;
+
+            .rdg-text-editor {
+              box-shadow: inset 0 0 0 3px $highlight-linked-edit;
+            }
+          }
         }
         &.rdg-cell-editing {
           padding: 0;
@@ -181,9 +195,12 @@ $controls-hover-background: #c0dfe7;
     }
     .rdg-row {
       &.rdg-row-selected {
-        background-color: var(--row-selected-background-color);
         .index-column {
-          background-color: var(--header-selected-background-color);
+          background-color: $highlight-unlinked-header;
+
+          &.linked {
+            background-color: $highlight-linked-header;
+          }
         }
         .has-expression {
           background-color: var(--row-selected-background-color);
@@ -196,27 +213,27 @@ $controls-hover-background: #c0dfe7;
       }
       &.highlighted {
         .rdg-cell {
-          background-color: $highlight-blue-light-new;
+          background-color: $highlight-unlinked-cell;
 
           &.controls-column {
             background-color: white;
           }
 
           &.index-column {
-            background-color: $highlight-blue-new;
+            background-color: $highlight-unlinked-header;
           }
         }
 
         &.linked {
           .rdg-cell {
-            background-color: $highlight-green-light;
+            background-color: $highlight-linked-cell;
 
             &.controls-column {
               background-color: white;
             }
 
             &.index-column {
-              background-color: $highlight-green;
+              background-color: $highlight-linked-header;
             }
           }
         }
@@ -288,7 +305,11 @@ $controls-hover-background: #c0dfe7;
         background-color: $charcoal-light-5;
       }
       &.selected-column {
-        background-color: var(--row-selected-background-color);
+        background-color: $highlight-unlinked-cell;
+
+        &.linked {
+          background-color: $highlight-linked-cell;
+        }
       }
       &.rdg-cell-resizable {
         padding: 0;
