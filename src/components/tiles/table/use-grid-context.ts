@@ -42,7 +42,7 @@ export const useGridContext = ({ content, modelId, showRowLabels, triggerColumnC
     sharedSelection.clear(modelId);
   }, [dataSet, modelId, sharedSelection]);
   const clearColumnSelection = useCallback(() => dataSet.selectAllAttributes(false), [dataSet]);
-  const clearCellSelection = useCallback(() => gridRef.current?.selectCell({ idx: -1, rowIdx: -1 }), []);
+  const clearCellSelection = useCallback(() => dataSet.selectAllCells(false), [dataSet]);
 
   // clears all selection by default; options can be used to preserve particular forms of selection
   const clearSelection = useCallback((options?: { row?: boolean, column?: boolean, cell?: boolean }) => {
