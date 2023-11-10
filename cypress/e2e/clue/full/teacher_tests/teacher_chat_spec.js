@@ -78,14 +78,5 @@ describe('Teachers can communicate back and forth in chat panel', () => {
     chatPanel.getFocusedThread().should("contain", teacher1SecondTileComment);
     chatPanel.getDeleteMessageButton(teacher2TileComment).click();
     chatPanel.getDeleteConfirmModalButton().click();
-
-    // Cleanup/delete comments
-    cy.logout(portalUrl);
-    beforeTest(portalUrl, clueTeacher1, reportUrl1);
-    chatPanel.getDeleteMessageButton(teacher1SecondDocComment).click();
-    chatPanel.getDeleteConfirmModalButton().click();
-    cy.clickProblemResourceTile('initialChallenge');
-    chatPanel.getDeleteMessageButton(teacher1SecondTileComment).click();
-    chatPanel.getDeleteConfirmModalButton().click();
   });
 });
