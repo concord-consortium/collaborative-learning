@@ -30,6 +30,8 @@ function beforeTest(portalUrl, clueTeacher, reportUrl) {
   chatPanel.getChatPanel().should("be.visible");
   cy.openTopTab("problems");
   cy.openProblemSection("Initial Challenge");
+  cy.clickProblemResource();
+  cy.wait(10000)
 }
 
 describe('Teachers can communicate back and forth in chat panel', () => {

@@ -187,6 +187,9 @@ Cypress.Commands.add("clickProblemResourceTile", (subsection, tileIndex = 0) => 
 Cypress.Commands.add("getToolTile", (tileIndex = 0) => {
   cy.get('.problem-panel .document-content .tile-row .tool-tile').eq(tileIndex);
 });
+Cypress.Commands.add("clickProblemResource", () => {
+  cy.get(".prob-tab.selected").eq(0).click();
+})
 Cypress.Commands.add("clickDocumentResource", () => {
   cy.get(".documents-panel div.document-title").eq(0).click();
 })

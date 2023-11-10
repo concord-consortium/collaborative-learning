@@ -120,7 +120,7 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
       }
       {focusedItemHasNoComments  && !isDocumentView &&
         <div key={focusTileId ? focusTileId : "document"}
-          className={`chat-thread chat-thread-focused , ${focusTileId ? "chat-thread-tile" : "chat-thread-document"}`}
+          className={`chat-thread chat-thread-focused ${focusTileId ? "chat-thread-tile" : "chat-thread-document"}`}
           data-testid="chat-thread">
           <div className={`chat-thread-header ${activeNavTab} selected`}
             data-testid="chat-thread-header">
