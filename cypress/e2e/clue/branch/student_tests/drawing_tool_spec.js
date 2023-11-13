@@ -618,14 +618,14 @@ context('Draw Tool Tile', function () {
     clueCanvas.addTile("drawing");
     drawToolTile.getDrawTile().should("exist");
     drawToolTile.getTileTitle().should("exist");
-    drawToolTile.getTileTitle().first().should("contain", "Drawing 1");
+    drawToolTile.getTileTitle().first().should("contain", "Sketch 1");
     drawToolTile.getDrawTileTitle().first().click();
     drawToolTile.getDrawTileTitle().first().type(newName + '{enter}');
     drawToolTile.getTileTitle().should("contain", newName);
 
     cy.log("undo redo actions");
     clueCanvas.getUndoTool().click();
-    drawToolTile.getTileTitle().first().should("contain", "Drawing 1");
+    drawToolTile.getTileTitle().first().should("contain", "Sketch 1");
     clueCanvas.getUndoTool().click();
     drawToolTile.getDrawTile().should("not.exist");
     clueCanvas.getRedoTool().click().click();
