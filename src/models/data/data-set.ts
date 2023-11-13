@@ -760,15 +760,15 @@ export const DataSet = types.model("DataSet", {
       selectCases,
 
       selectCells(cells: ICell[], select = true) {
-        if (getAppConfig(self)?.getSetting("cellsSelectCases", "dataset")) {
-          selectCases(uniqueCaseIds(cells), select);
-          return;
-        }
-
         if (select) {
           self.attributeSelection.clear();
           self.caseSelection.clear();
         }
+
+        if (getAppConfig(self)?.getSetting("cellsSelectCases", "dataset")) {
+          selectCases(uniqueCaseIds(cells), select);
+        }
+
         cells.forEach(cell => {
           if (select) {
             if (!isCellSelected(cell)) {
@@ -792,12 +792,12 @@ export const DataSet = types.model("DataSet", {
       setSelectedCases,
 
       setSelectedCells(cells: ICell[]) {
+        clearAllSelections();
+
         if (getAppConfig(self)?.getSetting("cellsSelectCases", "dataset")) {
           setSelectedCases(uniqueCaseIds(cells));
-          return;
         }
 
-        clearAllSelections();
         self.cellSelection.replace(cells);
       },
 
