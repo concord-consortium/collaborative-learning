@@ -70,7 +70,7 @@ export const formatValue = ({
       return (<span>[loading...]</span>);
     }
     return (
-      <div className={`text-cell ${baseClasses}`} onClick={handleClick} style={{ height, width: cellWidth }}>
+      <div className={`text-cell ${baseClasses}`} onClick={handleClick}>
         {value}
       </div>
     );
