@@ -363,17 +363,25 @@ export const GraphModel = TileContentModel
 
       // Create layers for any datasets newly linked to this tile
       if (attachedDatasetIds.length) {
-        const sharedMetadatas = smm?.getTileSharedModelsByType(self, SharedCaseMetadata);
+        const sharedMetadatas = smm.getTileSharedModelsByType(self, SharedCaseMetadata);
+        const allMetadatas = smm.getSharedModelsByType("SharedCaseMetadata");
         attachedDatasetIds.forEach((newModelId) => {
           const dataSetModel = sharedDataSets.find(m => isSharedDataSet(m) && m.dataSet.id === newModelId);
           if (dataSetModel && isSharedDataSet(dataSetModel)) {
-            let metaDataModel = sharedMetadatas?.find((m) => isSharedCaseMetadata(m) && m.data?.id === newModelId);
+            // Find a matching MetaDataModel, first looking in already-attached models
+            let metaDataModel = sharedMetadatas.find((m) => isSharedCaseMetadata(m) && m.data?.id === newModelId);
             if (!metaDataModel) {
-              // No existing shared metadata found, create one
-              // In the future, this should probably check if there is one unlinked, and if so link with it.
+              // See if we can find one that already exists, but is not linked. If so, link to it.
+              metaDataModel = allMetadatas.find((m) => isSharedCaseMetadata(m) && m.data?.id === newModelId);
+              if (metaDataModel) {
+                smm.addTileSharedModel(self, metaDataModel);
+              }
+            }
+            if (!metaDataModel) {
+              // No existing shared metadata exists, create one
               const newMetaDataModel = SharedCaseMetadata.create();
               newMetaDataModel.setData(dataSetModel.dataSet);
-              smm?.addTileSharedModel(self, newMetaDataModel);
+              smm.addTileSharedModel(self, newMetaDataModel);
               metaDataModel = newMetaDataModel;
             }
             if (metaDataModel && isSharedCaseMetadata(metaDataModel)) {
