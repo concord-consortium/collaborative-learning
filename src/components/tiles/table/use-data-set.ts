@@ -9,8 +9,8 @@ import { IContentChangeHandlers } from "./use-content-change-handlers";
 import { useNumberFormat } from "./use-number-format";
 
 const isCellSelectable = (position: TPosition, columns: TColumn[], readOnly: boolean) => {
-  return position.idx !== 0 &&
-    (position.idx !== columns.length - (readOnly ? 0 : 1));
+  return position.idx > 0 &&
+    (position.idx < columns.length - (readOnly ? 0 : 1));
 };
 
 interface IUseDataSet {
@@ -47,9 +47,9 @@ export const useDataSet = ({
   const onSelectedCellChange = (position: TPosition) => {
     // Only modify the selection if a single cell is selected
     if (dataSet.selectedCells.length !== 1) return;
-    const { selectedCellColumnIndex, selectedCellRowIndex } = getSelectedCellIndicies();
 
     // Determine if we're moving forwards or backwards
+    const { selectedCellColumnIndex, selectedCellRowIndex } = getSelectedCellIndicies();
     const forward = (selectedCellRowIndex < position.rowIdx) ||
       (selectedCellRowIndex === position.rowIdx && selectedCellColumnIndex < position.idx);
 
@@ -68,29 +68,30 @@ export const useDataSet = ({
     // Update the position if it's not a legal option (if we're in the control or delete column).
     // Note that rdg will not allow us to move to a row outside of the grid
     let newPosition = { ...position };
+    const rightColumnIndex = columns.length - (readOnly ? 1 : 2);
     while(!isCellSelectable(newPosition, columns, readOnly)) {
       if (forward) {
-        if (newPosition.rowIdx === rows.length - 1 && newPosition.idx >= columns.length - 1) {
-          // move from last cell to { 0, 1 }
+        if (newPosition.rowIdx === rows.length - 1 && newPosition.idx > rightColumnIndex) {
+          // move from bottom right cell to top left cell
           newPosition = { rowIdx: 0, idx: 1 };
         } else if (++newPosition.idx >= columns.length) {
-          // otherwise advance to next selectable cell
+          // otherwise advance to left cell of next row
           newPosition.idx = 1;
           ++newPosition.rowIdx;
         }
       } else {
         if (newPosition.rowIdx === 0 && newPosition.idx < 1) {
-          // move from first cell to bottom right cell
-          newPosition = { rowIdx: rows.length - 1, idx: columns.length };
+          // move from top left cell to bottom right cell
+          newPosition = { rowIdx: rows.length - 1, idx: rightColumnIndex };
         } else if (--newPosition.idx < 1) {
-          // otherwise move to previous selectable cell
-          newPosition.idx = columns.length - (readOnly ? 1 : 2);
+          // otherwise move to right cell of previous row
+          newPosition.idx = rightColumnIndex;
           --newPosition.rowIdx;
         }
       }
     }
 
-    // Update rdg if we fixed the position
+    // Update rdg if we fixed the position, which will cause this function to be called again
     if ((newPosition.rowIdx !== position.rowIdx) || (newPosition.idx !== position.idx)) {
       gridRef.current?.selectCell(newPosition);
     }
