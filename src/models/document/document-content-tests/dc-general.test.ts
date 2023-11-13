@@ -63,7 +63,7 @@ describe("DocumentContentModel", () => {
           { content: { type: "Text", format: "html", text: ["<p></p>"] } }
         ],
         { title: "Table 1", content: { type: "Table", columnWidths } },
-        { title: "Drawing 1", content: { type: "Drawing", objects: [] } }
+        { title: "Sketch 1", content: { type: "Drawing", objects: [] } }
       ]
     });
   });

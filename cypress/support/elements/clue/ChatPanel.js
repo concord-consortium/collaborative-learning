@@ -26,7 +26,7 @@ class ChatPanel{
       return cy.get('[data-testid=chat-thread-tile-type]');
     }
     getCommentTextArea() {
-      return cy.get('[data-testid=comment-textarea]');
+      return cy.get('.chat-thread-focused [data-testid=comment-textarea]');
     }
     getCommentPostButton(){
       return cy.get('[data-testid=comment-post-button]');
@@ -40,23 +40,26 @@ class ChatPanel{
     getSelectedCommentThreadHeader(){
       return cy.get('.chat-thread-focused').find('[data-testid=chat-thread-header]');
     }
-    getCommentFromThread() {
-      return cy.get('[data-testid=comment-thread] [data-testid=comment]');
+    getFocusedThread() {
+      return cy.get('.chat-thread-focused');
+    }
+    getCommentFromFocusedThread(message) {
+      return this.getFocusedThread().find('[data-testid=comment-thread] [data-testid=comment]').contains(message);
     }
     getUsernameFromCommentHeader() {
       return cy.get('.comment-text-header .user-name');
     }
     getCommentThread(message) {
-      return this.getCommentFromThread().contains(message).parent();
+      return this.getCommentFromFocusedThread(message).parent();
     }
     getDeleteMessageButton(msgToDelete) {
-      return this.getCommentThread(msgToDelete).find("[data-testid=delete-message-button]");
+      return this.getCommentFromFocusedThread(msgToDelete).parent().find("[data-testid=delete-message-button]");
     }
     getDeleteMessageButtonForUser(user) {
       return this.getUsernameFromCommentHeader().contains(user).siblings().find("[data-testid=delete-message-button]");
     }
     getDeleteConfirmModalButton() {
-      return cy.get(".confirm-delete-alert .modal-button");
+      return cy.get(".confirm-delete-alert .modal-button").contains("Delete");
     }
     getProblemDocumentContent() {
       return cy.get('.problem-panel [data-testid=document-content]');
@@ -81,16 +84,25 @@ class ChatPanel{
       this.typeInCommentArea("{enter}");
       cy.wait(5000);
     }
-    addCommentAndVerify(commentText) {
+    addDocumentCommentAndVerify(commentText) {
+      cy.get(".chat-thread-focused").invoke("attr", "class").should("contain", "chat-thread-document");
       this.typeInCommentArea(commentText);
       this.getCommentTextArea().should('contain', commentText);
       this.clickPostCommentButton();
-      this.getCommentFromThread().should('contain', commentText);
+      this.getFocusedThread().should('contain', commentText);
+    }
+    addTileCommentAndVerify(commentText) {
+      cy.get(".chat-thread-focused").invoke("attr", "class").should("contain", "chat-thread-tile");
+      this.typeInCommentArea(commentText);
+      this.getCommentTextArea().should('contain', commentText);
+      this.clickPostCommentButton();
+      this.getFocusedThread().should('contain', commentText);
     }
     verifyProblemCommentClass() {
       this.getProblemDocumentContent().should('have.class', DOCUMENT_COMMENT_CLASS);
       cy.wait(1000)
     }
+    verify
     verifyDocumentCommentClass() {
       this.getEditableDocumentContent().should('have.class',DOCUMENT_COMMENT_CLASS);
     }
@@ -107,16 +119,16 @@ class ChatPanel{
       this.getCommentTextArea().scrollIntoView().should('not.contain', commentText);
     }
     verifyCommentThreadLength(length) {
-      this.getCommentFromThread().should("have.length", length);
+      this.getFocusedThread().should("have.length", length);
     }
     verifyCommentThreadContains(commentText) {
-      this.getCommentFromThread().should("contain", commentText);
+      this.getFocusedThread().should("contain", commentText);
     }
     verifyCommentThreadDoesNotContain(commentText) {
       this.getChatPanel().should("not.contain", commentText);
     }
     verifyCommentThreadDoesNotExist() {
-      this.getCommentFromThread().should("not.exist");
+      this.getFocusedThread().should("not.exist");
     }
 
     openTeacherChat(portalUrl, teacher, reportUrl) {
@@ -153,7 +165,7 @@ class ChatPanel{
     }
     deleteCommentTagThread(tagToDelete) {
       this.getCommentTagDeleteMessageButton(tagToDelete).click({force:true});
-      this.getDeleteConfirmModalButton().contains("Delete").click();
+      this.getDeleteConfirmModalButton().click();
       cy.wait(2000);
       this.getCommentTagFromThread().should("not.exist");
     }
@@ -163,7 +175,7 @@ class ChatPanel{
       this.getCommentTextArea().should('contain', commentText);
       this.clickPostCommentButton();
       this.getCommentTagFromThread().should('contain', commentTag);
-      this.getCommentFromThread().should('contain', commentText);
+      this.getFocusedThread().should('contain', commentText);
     }
 }
 export default ChatPanel;
