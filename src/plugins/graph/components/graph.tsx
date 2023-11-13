@@ -15,7 +15,7 @@ import {CaseDots} from "./casedots";
 import {ChartDots} from "./chartdots";
 import {Marquee} from "./marquee";
 import {DataConfigurationContext} from "../hooks/use-data-configuration-context";
-import {useDataSetContext} from "../imports/hooks/use-data-set-context";
+import {DataSetContext, useDataSetContext} from "../imports/hooks/use-data-set-context";
 import {useGraphModel} from "../hooks/use-graph-model";
 import {setNiceDomain, startAnimation} from "../utilities/graph-utils";
 import {IAxisModel} from "../imports/components/axis/models/axis-model";
@@ -221,50 +221,53 @@ export const Graph = observer(
 
   useGraphModel({dotsRef, graphModel, enableAnimation, instanceId});
 
+  // TODO multi-dataset: DataContext / providers will need to be replaced by looping over layers.
   return (
     <DataConfigurationContext.Provider value={graphModel.config}>
-      <div className={kGraphClass} ref={graphRef} data-testid="graph">
-        <svg className='graph-svg' ref={svgRef}>
-          <Background
-            marqueeState={marqueeState}
-            ref={backgroundSvgRef}
-          />
+      <DataSetContext.Provider value={graphModel.config.dataset}>
+        <div className={kGraphClass} ref={graphRef} data-testid="graph">
+          <svg className='graph-svg' ref={svgRef}>
+            <Background
+              marqueeState={marqueeState}
+              ref={backgroundSvgRef}
+            />
 
-          {renderGraphAxes()}
+            {renderGraphAxes()}
 
-          <svg ref={plotAreaSVGRef}>
-            <svg ref={dotsRef} className={`graph-dot-area ${instanceId}`}>
-              {renderPlotComponent()}
+            <svg ref={plotAreaSVGRef}>
+              <svg ref={dotsRef} className={`graph-dot-area ${instanceId}`}>
+                {renderPlotComponent()}
+              </svg>
+              <Marquee marqueeState={marqueeState} />
             </svg>
-            <Marquee marqueeState={marqueeState}/>
+
+            <DroppablePlot
+              graphElt={graphRef.current}
+              plotElt={backgroundSvgRef.current}
+              onDropAttribute={handleChangeAttribute}
+            />
+
+            <Legend
+              legendAttrID={graphModel.getAttributeID('legend')}
+              graphElt={graphRef.current}
+              onDropAttribute={handleChangeAttribute}
+              onRemoveAttribute={handleRemoveAttribute}
+              onTreatAttributeAs={handleTreatAttrAs}
+            />
           </svg>
-
-          <DroppablePlot
-            graphElt={graphRef.current}
-            plotElt={backgroundSvgRef.current}
-            onDropAttribute={handleChangeAttribute}
-          />
-
-          <Legend
-            legendAttrID={graphModel.getAttributeID('legend')}
-            graphElt={graphRef.current}
-            onDropAttribute={handleChangeAttribute}
-            onRemoveAttribute={handleRemoveAttribute}
-            onTreatAttributeAs={handleTreatAttrAs}
-          />
-        </svg>
-        {renderDroppableAddAttributes()}
-        <Adornments dotsRef={dotsRef}/>
-        { appConfig.getSetting("defaultSeriesLegend", "graph") &&
-          <MultiLegend
-            graphElt={graphRef.current}
-            onChangeAttribute={handleChangeAttribute}
-            onRemoveAttribute={handleRemoveAttribute}
-            onTreatAttributeAs={handleTreatAttrAs}
-            onRequestRowHeight={onRequestRowHeight}
-          />
-        }
-      </div>
+          {renderDroppableAddAttributes()}
+          <Adornments dotsRef={dotsRef} />
+          {appConfig.getSetting("defaultSeriesLegend", "graph") &&
+            <MultiLegend
+              graphElt={graphRef.current}
+              onChangeAttribute={handleChangeAttribute}
+              onRemoveAttribute={handleRemoveAttribute}
+              onTreatAttributeAs={handleTreatAttrAs}
+              onRequestRowHeight={onRequestRowHeight}
+            />
+          }
+        </div>
+      </DataSetContext.Provider>
     </DataConfigurationContext.Provider>
   );
 });
