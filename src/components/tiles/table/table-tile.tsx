@@ -76,7 +76,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   // Functions and variables to handle selecting and navigating the grid
   const [showRowLabels, setShowRowLabels] = useState(false);
   const {
-    ref: gridRef, gridContext, inputRowId, selectedCell, getSelectedRows, ...gridProps
+    ref: gridRef, gridContext, inputRowId, getSelectedRows, ...gridProps
   } = useGridContext({ content, modelId: model.id, showRowLabels, triggerColumnChange, triggerRowChange });
   const selectedCaseIds = getSelectedRows();
 
@@ -101,7 +101,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
 
   // React components used for the index (left most) column
   const rowLabelProps = useRowLabelColumn({
-    inputRowId: inputRowId.current, selectedCell, showRowLabels, setShowRowLabels
+    inputRowId: inputRowId.current, showRowLabels, setShowRowLabels
   });
 
   // rows are required by ReactDataGrid and are used by other hooks as well
@@ -176,7 +176,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   // hasLinkableRows is used to determine if the table can meaningfully be linked to a geometry tile
   const { deleteSelected, ...dataGridProps } = useDataSet({
     gridRef, model, dataSet, triggerColumnChange, rows, rowChanges, triggerRowChange,
-    readOnly: !!readOnly, changeHandlers, columns, onColumnResize, selectedCell, inputRowId, lookupImage });
+    readOnly: !!readOnly, changeHandlers, columns, onColumnResize, inputRowId, lookupImage });
 
   const containerRef = useRef<HTMLDivElement>(null);
   const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {

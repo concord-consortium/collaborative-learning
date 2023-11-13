@@ -24,10 +24,13 @@ export const formatValue = ({
   column, dataSet, formatter, isLinked, lookupImage, row, rowHeight, value, width
 }: IFormatValueProps) => {
   const cell = { attributeId: column?.key ?? "", caseId: row?.__id__ ?? "" };
-  const highlighted = dataSet?.isCellSelected(cell);
+  const cellSelected = dataSet?.isCellSelected(cell);
+  const highlighted = cellSelected;
   const baseClasses = classNames("cell", { highlighted, linked: isLinked });
   function handleClick() {
-    dataSet?.setSelectedCells([cell]);
+    if (!cellSelected) {
+      dataSet?.setSelectedCells([cell]);
+    }
   }
   if ((value == null) || (value === "")) return <div className={baseClasses} onClick={handleClick}></div>;
 

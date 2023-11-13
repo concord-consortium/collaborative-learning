@@ -3,7 +3,7 @@ import { CellNavigationMode, DataGridHandle } from "react-data-grid";
 import { useSharedSelectionStore } from "../../../hooks/use-stores";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
 import { uniqueId } from "../../../utilities/js-utils";
-import { IGridContext, TPosition } from "./table-types";
+import { IGridContext } from "./table-types";
 
 interface IProps {
   content: TableContentModelType;
@@ -17,8 +17,6 @@ export const useGridContext = ({ content, modelId, showRowLabels, triggerColumnC
   const inputRowId = useRef(uniqueId());
   const dataSet = content.dataSet;
 
-  // this tracks ReactDataGrid's notion of the selected cell
-  const selectedCell = useRef<TPosition>({ rowIdx: -1, idx: -1 });
   const isSelectedCellInRow = useCallback((rowIdx: number) => {
     const rowId = dataSet.getCaseAtIndex(rowIdx)?.__id__;
     if (!rowId) return false;
@@ -108,6 +106,6 @@ export const useGridContext = ({ content, modelId, showRowLabels, triggerColumnC
 
   const cellNavigationMode: CellNavigationMode = "CHANGE_ROW";
   return {
-    ref: gridRef, cellNavigationMode, inputRowId, selectedCell, getSelectedRows, gridContext, onSelectedRowsChange
+    ref: gridRef, cellNavigationMode, inputRowId, getSelectedRows, gridContext, onSelectedRowsChange
   };
 };
