@@ -107,7 +107,6 @@ export const useContentChangeHandlers = ({
   }, [readOnly, getContent, requestRowHeight, validateCase]);
 
   const updateRow = useCallback((caseValues: ICase) => {
-    console.log(`--- updateRow`, caseValues);
     if (readOnly) return;
     getContent().setCanonicalCaseValues([caseValues]);
     triggerRowChange();

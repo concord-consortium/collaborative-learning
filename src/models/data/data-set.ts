@@ -221,20 +221,15 @@ export const DataSet = types.model("DataSet", {
   }
 
   function setCanonicalCaseValues(caseValues: ICase) {
-    console.log(`xxx setCanonicalCaseValues`, caseValues);
     const index = self.caseIDMap[caseValues.__id__];
-    console.log(` xx index`, index);
     if (index == null) { return; }
 
     for (const key in caseValues) {
       if (key !== "__id__") {
         const attributeID = key,
               attribute = self.attrIDMap[attributeID];
-        console.log(`  x attributeId`, attributeID);
-        console.log(`  x attribute`, attribute);
         if (attribute) {
           const value = caseValues[key];
-          console.log(`  x value`, value);
           attribute.setValue(index, value != null ? value : undefined);
         }
       }

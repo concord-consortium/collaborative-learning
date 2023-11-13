@@ -90,7 +90,7 @@ export const useDataSet = ({
       }
     }
 
-    // Update rdg if we changed the
+    // Update rdg if we fixed the position
     if ((newPosition.rowIdx !== position.rowIdx) || (newPosition.idx !== position.idx)) {
       gridRef.current?.selectCell(newPosition);
     }
