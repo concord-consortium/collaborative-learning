@@ -100,16 +100,12 @@ export const useDataSet = ({
   const getUpdatedRowAndColumn = (_rows?: TRow[], _columns?: TColumn[]) => {
     const rs = _rows ?? rows;
     const cs = _columns ?? columns;
-    const selectedCellIndecies = getSelectedCellIndicies();
-    const selectedCellColumnIndex = selectedCellIndecies.selectedCellColumnIndex;
-    // If the row index is -1, assume we're adding to a new row at the bottom
-    const selectedCellRowIndex = selectedCellIndecies.selectedCellRowIndex >= 0
-      ? selectedCellIndecies.selectedCellRowIndex : rs.length - 1;
+    const { selectedCellColumnIndex, selectedCellRowIndex } = getSelectedCellIndicies();
     const updatedRow = (selectedCellRowIndex != null) && (selectedCellRowIndex >= 0)
       ? rs[selectedCellRowIndex] : undefined;
     const updatedColumn = (selectedCellColumnIndex != null) && (selectedCellColumnIndex >= 0)
       ? cs[selectedCellColumnIndex + 1] : undefined;
-    return { selectedCellRowIndex, selectedCellColIndex: selectedCellColumnIndex, updatedRow, updatedColumn };
+    return { selectedCellRowIndex, selectedCellColumnIndex, updatedRow, updatedColumn };
   };
 
   const formatter = useNumberFormat();
