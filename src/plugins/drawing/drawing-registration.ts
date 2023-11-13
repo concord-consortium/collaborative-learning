@@ -11,7 +11,7 @@ import { GroupComponent, GroupObject } from "./objects/group";
 
 registerTileContentInfo({
   type: kDrawingTileType,
-  titleBase: "Drawing",
+  titleBase: "Sketch",
   // TODO: maybe there is a better way to do this kind of casting?
   //   The issue is that modelClass prop has a type of `typeof TileContentModel`,
   //   That type is pretty restrictive and doesn't accommodate the return of
