@@ -684,11 +684,11 @@ export const DataConfigurationModel = types
     },
     setRoleToAttributeDesc(role: GraphAttrRole, desc?: IAttributeDescriptionSnapshot) {
       if (role === 'y') {
+        // Setting "Y" role implies that user only wants one, or no Y attributes.
+        while (self._yAttributeDescriptions.length) {
+          this.removeYAttributeWithID(self._yAttributeDescriptions[0].attributeID);
+        }
         if (desc && desc.attributeID !== '') {
-          // Setting "Y" role implies that user only wants one Y attribute.
-          while (self._yAttributeDescriptions.length) {
-            this.removeYAttributeWithID(self._yAttributeDescriptions[0].attributeID);
-          }
           self._yAttributeDescriptions.push(desc);
         }
       } else if (role === 'yPlus' && desc && desc.attributeID !== '') {

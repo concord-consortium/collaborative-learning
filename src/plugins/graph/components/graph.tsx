@@ -21,7 +21,8 @@ import {setNiceDomain, startAnimation} from "../utilities/graph-utils";
 import {IAxisModel} from "../imports/components/axis/models/axis-model";
 import {GraphPlace} from "../imports/components/axis-graph-shared";
 import {useGraphLayoutContext} from "../models/graph-layout";
-import { isAttributeAssignmentAction, isRemoveAttributeFromRoleAction, isRemoveYAttributeWithIDAction, isReplaceYAttributeAction, isSetRoleToAttributeDescAction }
+import { isAttributeAssignmentAction, isRemoveAttributeFromRoleAction, isRemoveYAttributeWithIDAction,
+  isReplaceYAttributeAction, isSetRoleToAttributeDescAction }
   from "../models/data-configuration-model";
 import { useGraphModelContext } from "../models/graph-model";
 import {useInstanceIdContext} from "../imports/hooks/use-instance-id-context";

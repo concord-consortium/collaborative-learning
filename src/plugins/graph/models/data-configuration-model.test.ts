@@ -12,6 +12,10 @@ const TreeModel = types.model("Tree", {
 
 let tree: Instance<typeof TreeModel>;
 
+const supportCasePlot = false;
+const supportDotChart = false;
+const supportDotPlot = false;
+
 describe("DataConfigurationModel", () => {
   beforeEach(() => {
     tree = TreeModel.create({
@@ -64,11 +68,15 @@ describe("DataConfigurationModel", () => {
     expect(config.uniqueAttributes).toEqual(["nId"]);
     expect(config.tipAttributes).toEqual([{attributeID: "nId", role: "caption"}]);
     expect(config.uniqueTipAttributes).toEqual([{attributeID: "nId", role: "caption"}]);
-    expect(config.caseDataArray).toEqual([
-      {plotNum: 0, caseID: "c1"},
-      {plotNum: 0, caseID: "c2"},
-      {plotNum: 0, caseID: "c3"}
-    ]);
+    if (supportCasePlot) {
+      expect(config.caseDataArray).toEqual([
+        { plotNum: 0, caseID: "c1" },
+        { plotNum: 0, caseID: "c2" },
+        { plotNum: 0, caseID: "c3" }
+      ]);
+    } else {
+      expect(config.caseDataArray).toEqual([]);
+    }
   });
 
   it("behaves as expected with dot chart on x axis", () => {
@@ -88,10 +96,14 @@ describe("DataConfigurationModel", () => {
     expect(config.tipAttributes).toEqual([{attributeID: "nId", role: "x"},
       {attributeID: "nId", role: "caption"}]);
     expect(config.uniqueTipAttributes).toEqual([{attributeID: "nId", role: "caption"}]);
-    expect(config.caseDataArray).toEqual([
-      {plotNum: 0, caseID: "c1"},
-      {plotNum: 0, caseID: "c3"}
-    ]);
+    if (supportDotChart) {
+      expect(config.caseDataArray).toEqual([
+        {plotNum: 0, caseID: "c1"},
+        {plotNum: 0, caseID: "c3"}
+      ]);
+    } else {
+      expect(config.caseDataArray).toEqual([]);
+    }
   });
 
   it("behaves as expected with dot plot on x axis", () => {
@@ -111,10 +123,14 @@ describe("DataConfigurationModel", () => {
       {attributeID: "nId", role: "caption"}]);
     expect(config.uniqueTipAttributes).toEqual([{attributeID: "xId", role: "x"},
       {attributeID: "nId", role: "caption"}]);
-    expect(config.caseDataArray).toEqual([
-      {plotNum: 0, caseID: "c1"},
-      {plotNum: 0, caseID: "c2"}
-    ]);
+    if (supportDotPlot) {
+      expect(config.caseDataArray).toEqual([
+        { plotNum: 0, caseID: "c1" },
+        { plotNum: 0, caseID: "c2" }
+      ]);
+    } else {
+      expect(config.caseDataArray).toEqual([]);
+    }
   });
 
   it("behaves as expected with scatter plot and explicit caption attribute", () => {
@@ -190,15 +206,16 @@ describe("DataConfigurationModel", () => {
 
   it("selection behaves as expected", () => {
     const config = tree.config;
+    config.setDataset(tree.data, tree.metadata);
     config.setRoleToAttributeDesc("x", { attributeID: "xId" });
     expect(config.selection.length).toBe(0);
 
     config.setDataset(tree.data, tree.metadata);
     tree.data.selectAll();
-    expect(config.selection.length).toBe(2);
+    expect(config.selection.length).toBe(supportDotPlot ? 2 : 0);
 
     config.setRoleToAttributeDesc("x", { attributeID: "xId" });
-    expect(config.selection.length).toBe(2);
+    expect(config.selection.length).toBe(supportDotPlot ? 2 : 0);
 
     const selectionReaction = jest.fn();
     const disposer = reaction(() => config.selection, () => selectionReaction());
@@ -209,7 +226,8 @@ describe("DataConfigurationModel", () => {
     disposer();
   });
 
-  it("calls action listeners when appropriate", () => {
+  // Skipped for now because this assumes a graph can be drawn with a single attribute.
+  it.skip("calls action listeners when appropriate", () => {
     const config = tree.config;
     config.setDataset(tree.data, tree.metadata);
     config.setRoleToAttributeDesc("x", { attributeID: "xId" });
@@ -269,7 +287,8 @@ describe("DataConfigurationModel", () => {
     expect(config.categoryArrayForAttrRole("y")).toEqual(["__main__"]);
   });
 
-  it("returns an array of cases in a plot", () => {
+  // Skip for now -- assumes cases available with no attributes
+  it.skip("returns an array of cases in a plot", () => {
     const config = tree.config;
     config.setDataset(tree.data, tree.metadata);
     expect(config.subPlotCases({})).toEqual([
