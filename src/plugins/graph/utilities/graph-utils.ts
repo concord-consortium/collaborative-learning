@@ -216,7 +216,6 @@ export interface IAxisIntercepts {
 
 export function lineToAxisIntercepts(iSlope: number, iIntercept: number,
                                      xDomain: readonly number[], yDomain: readonly number[]): IAxisIntercepts {
-  console.log("test");
   let tX1, tY1, tX2, tY2;
   const tLogicalBounds = {
     left: xDomain[0],
