@@ -615,20 +615,20 @@ export const DataConfigurationModel = types
     },
     /**
      * Make sure the filteredCases array has the right number of FilteredCases.
-     * For CLUE, this should be equal to the number of Y attributes. If the
-     * length has changed, invalidate the cached case lists.
-     *
-     * Note, if we want to allow drawing of casePlot or single-attribute
-     * dotPlot or dotChart types of graphs, then we will need to have one
-     * FilteredCases object even when there are no Y attributes configured.
-     * But doing so right now causes dots to float to the top of the screen when
-     * the last Y attribute is removed.
+     * For CLUE, this should be equal to the number of Y attributes,
+     * or 1 if there is a dataset but no Y attributes. If there is no dataset
+     * there are no filteredCases.
+     * If this method adds or removes FilteredCases from the array, it will
+     * invalidate the cached case lists.
      *
      * @param alwaysInvalidate - If true, the caches of all FilteredCases are
      * invalidated even if we did not modify the array.
      */
     syncFilteredCasesCount(alwaysInvalidate?: boolean) {
-      const desiredCount = self.yAttributeDescriptions.length;
+      let desiredCount = self.yAttributeDescriptions.length;
+      if (desiredCount === 0 && self.dataset) {
+        desiredCount = 1;
+      }
       const changed = self.filteredCases.length !== desiredCount;
       while(self.filteredCases.length > desiredCount) {
         self.filteredCases.pop()?.destroy();
