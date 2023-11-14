@@ -2,7 +2,7 @@ import { action, autorun, makeObservable, observable } from "mobx";
 import { addDisposer, applySnapshot, getType, isAlive, types, getRoot,
   isStateTreeNode, SnapshotOut, Instance, getParent, destroy, hasParent,
   getSnapshot, addMiddleware, getEnv,
-  createActionTrackingMiddleware2, resolvePath} from "mobx-state-tree";
+  createActionTrackingMiddleware2, resolvePath, flow, onSnapshot} from "mobx-state-tree";
 
 describe("mst", () => {
   it("snapshotProcessor unexpectedly modifies the base type", () => {
@@ -828,5 +828,41 @@ describe("mst", () => {
     expect(TestObject.create({prop: simpleObj}).prop).toEqual(simpleObj);
     const complexObj = {"hi": {"more": ["stuff", "in"], "here": 1}};
     expect(TestObject.create({prop: complexObj}).prop).toEqual(complexObj);
+  });
+
+  /**
+   * This is not used by our code currently, so if this test fails it is fine
+   * to just update the test to document the behavior.
+   */
+  test("flow causes onSnapshot to be called before each yield", async () => {
+    const TestObject = types.
+      model("TestObject", {
+        propValue: types.string
+      })
+      .actions(self => ({
+        modifyValue: flow(function *(){
+          self.propValue = "1";
+          self.propValue = "2";
+          yield new Promise((resolve) => setTimeout(resolve, 50));
+          self.propValue = "3";
+          self.propValue = "4";
+          yield new Promise((resolve) => setTimeout(resolve, 50));
+          self.propValue = "5";
+          self.propValue = "6";
+        })
+      }));
+
+    const testObject = TestObject.create({propValue: "0"});
+    const log: any[] = [];
+    const snapshotHandler = (snapshot: any) => {
+      log.push(snapshot);
+    };
+    onSnapshot(testObject, snapshotHandler);
+    await testObject.modifyValue();
+    expect(log).toEqual([
+      {propValue: "2"},
+      {propValue: "4"},
+      {propValue: "6"}
+    ]);
   });
 });
