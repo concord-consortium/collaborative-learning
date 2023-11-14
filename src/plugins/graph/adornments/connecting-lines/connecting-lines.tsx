@@ -3,6 +3,7 @@ import { observer } from "mobx-react-lite";
 import { IConnectingLinesModel } from "./connecting-lines-model";
 import { DotsElt } from "../../d3-types";
 import { IDotsRef } from "../../graph-types";
+import { isNumericAxisModel } from "../../imports/components/axis/models/axis-model";
 import { usePointLocations } from "../../hooks/use-point-locations";
 
 import { useGraphModelContext } from "../../models/graph-model";
@@ -37,6 +38,15 @@ interface IConnectLines {
 export const ConnectingLines = observer(function ConnectingLines({dotsRef}: IConnectLines) {
   const graphModel = useGraphModelContext();
   const foundLinePoints = usePointLocations();
+  // access the axis domains so that a render will be triggered when they change
+  const xAxis = graphModel.getAxis("bottom");
+  const xDomain = isNumericAxisModel(xAxis) ? xAxis.domain : undefined;
+  const yAxis = graphModel.getAxis("left");
+  const yDomain = isNumericAxisModel(yAxis) ? yAxis.domain : undefined;
+  const domains = { xDomain, yDomain }; // eslint-disable-line unused-imports/no-unused-vars
+
+  // TODO: these are essentially side effects which should be handled in a MobX reaction
+  // installed by a useEffect() (which should also improve the render lag currently present).
   cleanUpPaths(dotsRef.current);
   //first clean up paths then render each line
   foundLinePoints.forEach((singleLinePoints, idx) => {

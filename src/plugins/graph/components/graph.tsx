@@ -34,6 +34,7 @@ import {IDataSet} from "../../../models/data/data-set";
 import {useDataTips} from "../hooks/use-data-tips";
 import {onAnyAction} from "../../../utilities/mst-utils";
 import { Adornments } from "../adornments/adornments";
+import { kConnectingLinesType } from "../adornments/connecting-lines/connecting-lines-types";
 
 import "./graph.scss";
 import "./graph-clue-styles.scss";
@@ -129,10 +130,10 @@ export const Graph = observer(
     graphModel.config.setAttributeType(graphPlaceToAttrRole[place], treatAs);
     dataset && graphController?.handleAttributeAssignment(place, dataset.id, attrId);
 
-    const connectingLines = graphModel.adornments.find(a => a.type === "Connecting Lines");
+    const connectingLines = graphModel.adornments.find(a => a.type === kConnectingLinesType);
     if (connectingLines && place === "left") {
-      treatAs === 'categorical' && graphModel.hideAdornment("Connecting Lines");
-      treatAs === 'numeric' && graphModel.showAdornment(connectingLines, "Connecting Lines");
+      treatAs === 'categorical' && graphModel.hideAdornment(kConnectingLinesType);
+      treatAs === 'numeric' && graphModel.showAdornment(connectingLines);
     }
 
     // TODO: use isVisible state, set above, instead of this hack
