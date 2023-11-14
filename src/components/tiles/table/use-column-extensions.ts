@@ -33,10 +33,10 @@ export const useColumnExtensions = ({
                     metadata.rawExpressions.get(column.key),
                     metadata.expressions.get(column.key) || "",
                     xName),
-      onBeginHeaderCellEdit: (() => {
-        gridContext.onClearSelection();
+      onBeginHeaderCellEdit: () => {
         !readOnly && setColumnEditingName(column);
-      }) as any,
+        return undefined;
+      },
       onHeaderCellEditKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => {
         switch (e.key) {
           case "Tab": {

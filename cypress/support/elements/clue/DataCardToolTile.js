@@ -68,12 +68,18 @@ class DataCardToolTile {
   getPreviousCardButton(tileIndex = 0, workspaceClass){
     return this.getTile(tileIndex, workspaceClass).find(`.card-nav.previous`);
   }
+  getSortCards(tileIndex = 0, workspaceClass) {
+    return this.getTile(tileIndex, workspaceClass).find(`.sortable.card`);
+  }
   getSortCardHeading(tileIndex = 0, workspaceClass){
     return this.getTile(tileIndex, workspaceClass).find(`.sortable .heading`);
   }
   getSortCardCollapseToggle(tileIndex = 0, workspaceClass){
     const selector = ".expand-toggle-area button.expand-toggle";
     return this.getTile(tileIndex, workspaceClass).find(`${selector}`);
+  }
+  getSortCardAttributes(card = 0, tileIndex = 0, workspaceClass){
+    return this.getSortCards(tileIndex, workspaceClass).eq(card).find(`.attribute`);
   }
   getSortCardData(tileIndex = 0, workspaceClass){
     const selector = ".sortable.expanded .attribute-value-row";

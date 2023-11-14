@@ -120,10 +120,14 @@ class ClueCanvas {
 
     shareCanvas() {
         this.getShareButton().click({force:true});
+        this.getShareButton().find('.track').invoke('attr', 'class').should('contain', 'toggle-on');
+        this.getShareButton().find('.ball').invoke('attr', 'class').should('contain', 'toggle-on');
     }
 
     unshareCanvas() {
         this.getShareButton().click({force:true});
+        this.getShareButton().find('.track').invoke('attr', 'class').should('not.contain', 'toggle-on');
+        this.getShareButton().find('.ball').invoke('attr', 'class').should('not.contain', 'toggle-on');
     }
 
     getToolPalette() {
@@ -396,7 +400,7 @@ class ClueCanvas {
      */
     clickToolbarButton(tileType, buttonName) {
       cy.document().within(() => {
-        cy.get(`.tile-toolbar.${tileType}-toolbar .toolbar-button.${buttonName}`)
+        cy.get(`[data-test=canvas] .tile-toolbar.${tileType}-toolbar .toolbar-button.${buttonName}`)
           .should('have.length', 1)
           .should('not.be.disabled')
           .click();

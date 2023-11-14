@@ -9,6 +9,7 @@ import { ITileModel } from "../../../models/tiles/tile-model";
 import { DataCardContentModelType } from "../data-card-content";
 import { looksLikeDefaultLabel, EditFacet } from "../data-card-types";
 import { RemoveIconButton } from "./add-remove-icons";
+import { useIsLinked } from "../use-is-linked";
 import { useCautionAlert } from "../../../components/utilities/use-caution-alert";
 import { useErrorAlert } from "../../../components/utilities/use-error-alert";
 import { getClipboardContent } from "../../../utilities/clipboard-utils";
@@ -47,6 +48,8 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     setCurrEditFacet, setCurrEditAttrId, readOnly
   } = props;
   const content = model.content as DataCardContentModelType;
+  const dataSet = content.dataSet;
+  const isLinked = useIsLinked();
   const getLabel = () => content.dataSet.attrFromID(attrKey).name;
   const getValue = () => {
     const value = caseId && content.dataSet.getValue(caseId, attrKey) || "";
@@ -150,6 +153,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     setCurrEditAttrId(attrKey);
     setCurrEditFacet("name");
     !editingLabel && setLabelCandidate(getLabel());
+    dataSet.setSelectedAttributes([attrKey]);
   };
 
   const handleValueClick = (event: React.MouseEvent<HTMLInputElement | HTMLDivElement>) => {
@@ -259,27 +263,48 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   };
 
   const pairClassNames = `attribute-name-value-pair ${attrKey}`;
-  const valueInputClassNames = `value-input ${attrKey}`;
+
+  const attributeSelected = dataSet.isAttributeSelected(attrKey);
 
   const labelClassNames = classNames(
-    `name ${attrKey}`,
-    { "editing": editingLabel }
+    "name", attrKey,
+    {
+      editing: editingLabel,
+      highlighted: attributeSelected,
+      linked: isLinked
+    }
   );
 
-  const valueHighlighted = content.caseSelected;
+  const labelInputClassNames = classNames(
+    "input",
+    {
+      highlighted: attributeSelected,
+      linked: isLinked
+    }
+  );
+
+  const valueHighlighted = attributeSelected || content.caseSelected;
 
   const valueClassNames = classNames(
     "value", attrKey,
     {
       editing: editingValue,
       "has-image": gImageMap.isImageUrl(valueStr),
-      highlighted: valueHighlighted
+      highlighted: valueHighlighted,
+      linked: isLinked
+    }
+  );
+  const valueInputClassNames = classNames(
+    "value-input", attrKey,
+    {
+      highlighted: valueHighlighted,
+      linked: isLinked
     }
   );
 
   const typeIconClassNames = classNames(
     "type-icon", attrKey,
-    { highlighted: valueHighlighted }
+    { highlighted: valueHighlighted, linked: isLinked }
   );
 
   const deleteAttrButtonClassNames = classNames(
@@ -323,7 +348,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
         { !readOnly && editingLabel
           ? <input
               type="text"
-              className="input"
+              className={labelInputClassNames}
               value={labelCandidate}
               onChange={handleChange}
               onKeyDown={handleKeyDown}
@@ -350,7 +375,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
           <button aria-label="toggle menu" type="button" {...getToggleButtonProps()}>
             {displayArrow()}
           </button>
-          <ul {...getMenuProps()} className={ isOpen ? "open" : "closed"}>
+          <ul {...getMenuProps()} className={ isOpen ? "open" : "closed" }>
             {isOpen &&
               inputItems.map((item, index) => (
                 <li className="dropdown-item" style={highlightedIndex === index ? {backgroundColor: '#bde4ff'} : {} }

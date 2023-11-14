@@ -23,10 +23,8 @@ import { useToolApi } from "./use-tile-api";
 import { useRowHeight } from "./use-row-height";
 import { useRowsFromDataSet } from "./use-rows-from-data-set";
 import { useCurrent } from "../../../hooks/use-current";
-import { lightenColor } from "../../../utilities/color-utils";
 import { verifyAlive } from "../../../utilities/mst-utils";
 import { gImageMap } from "../../../models/image-map";
-import { getColorMapEntry } from "../../../models/shared/shared-data-set-colors";
 import { TileToolbar } from "../../toolbar/tile-toolbar";
 import { TableToolbarContext } from "./table-toolbar-context";
 
@@ -45,6 +43,8 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   const [imageUrls, setImageUrls] = useState(new Map<string,string>());
   verifyAlive(content, "TableToolComponent");
   const metadata = getContent().metadata;
+  const linkedTiles = content.tileEnv?.sharedModelManager?.getSharedModelTiles(content.sharedModel);
+  const isLinked = linkedTiles && linkedTiles.length > 1;
 
   // Basic operations based on the model
   const {
@@ -76,6 +76,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   const {
     ref: gridRef, gridContext, inputRowId, selectedCell, getSelectedRows, ...gridProps
   } = useGridContext({ content, modelId: model.id, showRowLabels, triggerColumnChange, triggerRowChange });
+  const selectedCaseIds = getSelectedRows();
 
   // Maintains the cache of data values that map to image URLs.
   // For use in a synchronous context, returns undefined immediately if an image is not yet cached,
@@ -104,12 +105,12 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   // rows are required by ReactDataGrid and are used by other hooks as well
   // rowProps are expanded and passed to ReactDataGrid
   const { rows, ...rowProps } = useRowsFromDataSet({
-    dataSet, readOnly: !!readOnly, inputRowId: inputRowId.current,
-    rowChanges, context: gridContext});
+    dataSet, isLinked, readOnly: !!readOnly, inputRowId: inputRowId.current,
+    rowChanges, context: gridContext, selectedCaseIds });
 
   // columns are required by ReactDataGrid and are used by other hooks as well
   const { columns, controlsColumn, columnEditingName, handleSetColumnEditingName } = useColumnsFromDataSet({
-    gridContext, dataSet, metadata, readOnly: !!readOnly, columnChanges, headerHeight, rowHeight,
+    gridContext, dataSet, isLinked, metadata, readOnly: !!readOnly, columnChanges, headerHeight, rowHeight,
     ...rowLabelProps, measureColumnWidth, lookupImage});
 
   // The size of the title bar
@@ -175,9 +176,6 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     gridRef, model, dataSet, triggerColumnChange, rows, rowChanges, triggerRowChange,
     readOnly: !!readOnly, changeHandlers, columns, onColumnResize, selectedCell, inputRowId, lookupImage });
 
-  const colorMapEntry = getColorMapEntry(model.id);
-  const linkColors = colorMapEntry?.colorSet;
-
   const containerRef = useRef<HTMLDivElement>(null);
   const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
     // clear any selection on background click
@@ -192,11 +190,11 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   });
 
   useEffect(() => {
-    if (containerRef.current && linkColors) {
+    if (containerRef.current) {
       // override the CSS variables controlling selection color for linked tables
       const dataGrid = containerRef.current.getElementsByClassName("rdg")[0] as HTMLDivElement | undefined;
-      dataGrid?.style.setProperty("--header-selected-background-color", lightenColor(linkColors.stroke));
-      dataGrid?.style.setProperty("--row-selected-background-color", lightenColor(linkColors.fill));
+      dataGrid?.style.setProperty("--header-selected-background-color", "rgba(0,0,0,0)");
+      dataGrid?.style.setProperty("--row-selected-background-color", "rgba(0,0,0,0)");
     }
   });
 
@@ -243,7 +241,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
           titleCellHeight={getTitleHeight()}
           onBeginEdit={onBeginTitleEdit}
           onEndEdit={onEndTitleEdit} />
-        <ReactDataGrid ref={gridRef} selectedRows={getSelectedRows()} rows={rows} rowHeight={rowHeight}
+        <ReactDataGrid ref={gridRef} selectedRows={selectedCaseIds} rows={rows} rowHeight={rowHeight}
           headerRowHeight={headerRowHeight()} columns={columns} {...gridProps} {...gridModelProps}
           {...dataGridProps} {...rowProps} />
       </div>

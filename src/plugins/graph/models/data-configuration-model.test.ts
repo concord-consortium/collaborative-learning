@@ -195,7 +195,7 @@ describe("DataConfigurationModel", () => {
     expect(config.selection.length).toBe(0);
 
     config.setDataset(tree.data, tree.metadata);
-    tree.data.selectAll();
+    tree.data.selectAllCases();
     expect(config.selection.length).toBe(2);
 
     config.setRoleToAttributeDesc("x", { attributeID: "xId" });

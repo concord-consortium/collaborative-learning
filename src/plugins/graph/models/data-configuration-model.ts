@@ -298,9 +298,9 @@ export const DataConfigurationModel = types
      */
     get selection() {
       if (!self.dataset || self.filteredCases.length === 0) return [];
-      const selection = Array.from(self.dataset.selection),
+      const caseSelection = Array.from(self.dataset.caseSelection),
         allGraphCaseIds = self.graphCaseIDs;
-      return selection.filter((caseId: string) => allGraphCaseIds.has(caseId));
+      return caseSelection.filter((caseId: string) => allGraphCaseIds.has(caseId));
     }
   }))
   .views(self => (

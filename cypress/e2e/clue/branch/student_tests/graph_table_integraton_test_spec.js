@@ -29,7 +29,9 @@ context('Graph Table Integration', function () {
     beforeTest();
     clueCanvas.addTile('table');
     cy.get(".primary-workspace").within((workspace) => {
-      tableToolTile.getTableCell().eq(1).click().type(x[0] + '{enter}');
+      tableToolTile.getTableCell().eq(1).click();
+      tableToolTile.getTableCell().eq(1).click();
+      tableToolTile.getTableCell().eq(1).type(x[0] + '{enter}');
       tableToolTile.getTableCell().eq(2).click();
       tableToolTile.getTableCell().eq(2).type(y[0] + '{enter}');
       tableToolTile.getTableCell().eq(5).click();
@@ -187,7 +189,9 @@ context('Graph Table Integration', function () {
     // Set up and link table and geometry tile
     clueCanvas.addTile('table');
     cy.get(".primary-workspace").within((workspace) => {
-      tableToolTile.getTableCell().eq(1).click().type(x[0] + '{enter}');
+      tableToolTile.getTableCell().eq(1).click();
+      tableToolTile.getTableCell().eq(1).click();
+      tableToolTile.getTableCell().eq(1).type(x[0] + '{enter}');
       tableToolTile.getTableCell().eq(2).click();
       tableToolTile.getTableCell().eq(2).type(y[0] + '{enter}');
       tableToolTile.getTableCell().eq(5).click();
@@ -235,6 +239,9 @@ context('Graph Table Integration', function () {
       tableToolTile.getTableCell().eq(9).type(x[2] + '{enter}');
       tableToolTile.getTableCell().eq(10).click();
       tableToolTile.getTableCell().eq(10).type(y[2] + '{enter}');
+      // The first .type here stopped working, so we have to do it twice.
+      tableToolTile.getTableCell().eq(9).click();
+      tableToolTile.getTableCell().eq(9).type(x[2] + '{enter}');
       tableToolTile.getTableCell().eq(13).click();
     });
 
