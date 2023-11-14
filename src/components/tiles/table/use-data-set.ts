@@ -35,15 +35,15 @@ export const useDataSet = ({
   const { onAddRows, onUpdateRow } = changeHandlers;
 
   function getSelectedCellIndices() {
-    const selectedCellIndecies = { selectedCellColumnIndex: -1, selectedCellRowIndex: -1 };
+    const selectedCellIndices = { selectedCellColumnIndex: -1, selectedCellRowIndex: -1 };
     if (dataSet.selectedCells.length === 1) {
       const _selectedCell = dataSet.selectedCells[0];
-      selectedCellIndecies.selectedCellColumnIndex = dataSet.attrIndexFromID(_selectedCell.attributeId) ?? -1;
-      selectedCellIndecies.selectedCellRowIndex = _selectedCell.caseId === inputRowId.current
+      selectedCellIndices.selectedCellColumnIndex = dataSet.attrIndexFromID(_selectedCell.attributeId) ?? -1;
+      selectedCellIndices.selectedCellRowIndex = _selectedCell.caseId === inputRowId.current
         ? rows.length - 1
         : dataSet.caseIndexFromID(_selectedCell.caseId);
     }
-    return selectedCellIndecies;
+    return selectedCellIndices;
   }
   const onSelectedCellChange = (position: TPosition) => {
     // Only modify the selection if a single cell is selected
