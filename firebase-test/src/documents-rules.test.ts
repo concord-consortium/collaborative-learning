@@ -2,8 +2,12 @@ import firebase from "firebase";
 import {
   adminWriteDoc, expectDeleteToFail, expectDeleteToSucceed, expectReadToFail, expectReadToSucceed,
   expectUpdateToFail, expectUpdateToSucceed, expectWriteToFail, expectWriteToSucceed, genericAuth,
-  initFirestore, mockTimestamp, noNetwork, prepareEachTest, studentAuth, studentId, teacher2Auth, teacher2Id, teacherAuth,
-  teacherId, teacherName, tearDownTests, thisClass
+  initFirestore, mockTimestamp, network1, network2, noNetwork, otherClass, prepareEachTest,
+  studentAuth, studentId,
+  teacher2Auth, teacher2Id, teacher2Name,
+  teacher4Auth, teacher4Id, teacher4Name,
+  teacherAuth, teacherId, teacherName,
+  tearDownTests, thisClass
 } from "./setup-rules-tests";
 
 describe("Firestore security rules", () => {
@@ -35,6 +39,18 @@ describe("Firestore security rules", () => {
       (documentDoc as any)[prop] = options.add?.[prop];
     });
     return documentDoc;
+  }
+
+  const kUsersDocPath = `authed/myPortal/users`;
+
+  async function specTeacher2(network: string) {
+    await adminWriteDoc(`${kUsersDocPath}/${teacher2Id}`,
+      { uid: teacher2Id, name: teacher2Name, type: "teacher", network, networks: [network] });
+  }
+
+  async function specTeacher4(network: string) {
+    await adminWriteDoc(`${kUsersDocPath}/${teacher4Id}`,
+      { uid: teacher4Id, name: teacher4Name, type: "teacher", network, networks: [network] });
   }
 
   describe("user documents", () => {
@@ -146,6 +162,26 @@ describe("Firestore security rules", () => {
       await expectDeleteToFail(db, kDocumentDocPath);
     });
 
+    it("authenticated teachers can read documents from their network", async () => {
+      db = initFirestore(teacher2Auth);
+
+      // any teacher can look for non-existent documents
+      await expectReadToSucceed(db, kDocumentDocPath);
+      await adminWriteDoc(kDocumentDocPath, specDocumentDoc({add:{network:network1}}));
+      await specTeacher2(network1);
+      await expectReadToSucceed(db, kDocumentDocPath);
+    });
+
+    it("authenticated teachers can read documents from their class", async () => {
+      db = initFirestore(teacher4Auth);
+
+      // any teacher can look for non-existent documents
+      await expectReadToSucceed(db, kDocumentDocPath);
+      await adminWriteDoc(kDocumentDocPath, specDocumentDoc({add:{network:network1}}));
+      await specTeacher4(network2);
+      await expectReadToSucceed(db, kDocumentDocPath);
+    });
+
     it("authenticated students can't read user documents", async () => {
       db = initFirestore(studentAuth);
       await adminWriteDoc(kDocumentDocPath, specDocumentDoc());
@@ -193,18 +229,18 @@ describe("Firestore security rules", () => {
       });
       return historyDoc;
     }
-    
+
     it("unauthed reads fail", async () => {
       db = initFirestore();
       await expectReadToFail(db, kDocumentHistoryDocPath);
     });
-    
+
     it("unauthed user cannot read. Parent doc exists", async () => {
       db = initFirestore();
       await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc());
       await expectReadToFail(db, kDocumentHistoryDocPath);
     });
-    
+
     it ("student can read their own history entries", async () => {
       db = initFirestore(studentAuth);
       await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({add:{uid: studentId }}));
@@ -216,25 +252,42 @@ describe("Firestore security rules", () => {
       await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({add:{uid: studentId }}));
       await expectReadToSucceed(db, kDocumentDocPath);
     });
-    
+
     it ("student cannot read their own history entries if no parent", async () => {
       db = initFirestore(studentAuth);
       await adminWriteDoc(kDocumentHistoryDocPath, specHistoryEntryDoc());
       await expectReadToFail(db, kDocumentHistoryDocPath);
     });
-    
+
     it ("teacher can read student history in teacher list", async () => {
       db = initFirestore(teacherAuth);
       await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({add:{uid: studentId }}));
       await adminWriteDoc(kDocumentHistoryDocPath, specHistoryEntryDoc());
       await expectReadToSucceed(db, kDocumentHistoryDocPath);
     });
-    
-    it("teacher cannot read student history if not in the list", async () => {
+
+    it("teacher cannot read student history if not in the list and not in class", async () => {
       db = initFirestore(teacherAuth);
-      await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({add:{uid: studentId, teachers: [99, 100] }}));
+      await adminWriteDoc(kDocumentDocPath,
+        specHistoryEntryParentDoc({add:{uid: studentId, teachers: [99, 100], context_id: otherClass }}));
       await adminWriteDoc(kDocumentHistoryDocPath, specHistoryEntryDoc());
       await expectReadToFail(db, kDocumentHistoryDocPath);
+    });
+
+    it ("teacher in network can read student history", async () => {
+      db = initFirestore(teacher2Auth);
+      await specTeacher2(network1);
+      await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({add:{uid: studentId, network: network1 }}));
+      await adminWriteDoc(kDocumentHistoryDocPath, specHistoryEntryDoc());
+      await expectReadToSucceed(db, kDocumentHistoryDocPath);
+    });
+
+    it ("co-teacher in class can read student history", async () => {
+      db = initFirestore(teacher4Auth);
+      await specTeacher4(network2);
+      await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({add:{uid: studentId }}));
+      await adminWriteDoc(kDocumentHistoryDocPath, specHistoryEntryDoc());
+      await expectReadToSucceed(db, kDocumentHistoryDocPath);
     });
 
     // FIX-ME: https://www.pivotaltracker.com/n/projects/2441242/stories/183545430
@@ -251,24 +304,24 @@ describe("Firestore security rules", () => {
       await adminWriteDoc(kDocumentHistoryDocPath, specHistoryEntryDoc());
       expectReadToFail(db, kDocumentHistoryDocPath);
     });
-    
+
     it("unauthed user cannot write. Parent doc does not exist", async () => {
       db = initFirestore();
       await expectWriteToFail(db, kDocumentHistoryDocPath, specHistoryEntryDoc());
     });
-    
+
     it("unauthed user cannot write. Parent doc exists", async () => {
       db = initFirestore();
       await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc());
       await expectWriteToFail(db, kDocumentHistoryDocPath, specHistoryEntryDoc());
     });
-    
+
     it ("student can write their own history entries", async () => {
       db = initFirestore(studentAuth);
       await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({add: {uid: studentId }}));
       await expectWriteToSucceed(db, kDocumentHistoryDocPath, specHistoryEntryDoc());
     });
-    
+
     // FIX-ME: https://www.pivotaltracker.com/n/projects/2441242/stories/183545430
     it.skip("users authed from different portals cannot write each other's history entries", async () => {
       db = initFirestore(studentAuth);
@@ -276,18 +329,18 @@ describe("Firestore security rules", () => {
       await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({ add: {uid: studentId }}));
       await expectWriteToFail(db, "authed/otherPortal/documents/myDocument/history/myHistoryEntry", specHistoryEntryDoc());
     });
-    
+
     it ("user cannot write someone else's history entries", async () => {
       db = initFirestore(genericAuth);
       await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({add: {uid: studentId}}));
       await expectWriteToFail(db, kDocumentHistoryDocPath, specHistoryEntryDoc());
     });
-    
+
     it ("user cannot write their history entries if no parent document", async () => {
       db = initFirestore(genericAuth);
       await expectWriteToFail(db, kDocumentHistoryDocPath, specHistoryEntryDoc());
     });
-    
+
     it ("teacher can write their own history entries", async () => {
       db = initFirestore(teacherAuth);
       await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({add:{uid: teacherId }}));
@@ -298,7 +351,7 @@ describe("Firestore security rules", () => {
       db = initFirestore();
       await expectUpdateToFail(db, kDocumentHistoryDocPath, {});
     });
-    
+
     it ("all deletes fail", async () => {
       db = initFirestore();
       await expectUpdateToFail(db, kDocumentHistoryDocPath, {});
@@ -354,6 +407,22 @@ describe("Firestore security rules", () => {
 
     it("authenticated teachers can read their own document comments", async () => {
       await initFirestoreWithUserDocument(teacherAuth);
+      await adminWriteDoc(kDocumentCommentDocPath, specCommentDoc());
+      await expectReadToSucceed(db, kDocumentCommentDocPath);
+    });
+
+    it ("teacher in network can read document comments from other classes", async () => {
+      db = initFirestore(teacher2Auth);
+      await adminWriteDoc(kDocumentDocPath, specDocumentDoc({add: {network: network1}}));
+      await specTeacher2(network1);
+      await adminWriteDoc(kDocumentCommentDocPath, specCommentDoc());
+      await expectReadToSucceed(db, kDocumentCommentDocPath);
+    });
+
+    it ("co-teacher not in network can read document comments from the class", async () => {
+      db = initFirestore(teacher4Auth);
+      await adminWriteDoc(kDocumentDocPath, specDocumentDoc({add: {network: network1}}));
+      await specTeacher4(network2);
       await adminWriteDoc(kDocumentCommentDocPath, specCommentDoc());
       await expectReadToSucceed(db, kDocumentCommentDocPath);
     });

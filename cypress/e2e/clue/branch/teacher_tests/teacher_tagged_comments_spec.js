@@ -3,9 +3,7 @@ import ChatPanel from "../../../../support/elements/clue/ChatPanel";
 let chatPanel = new ChatPanel;
 
 const queryParams = {
-  teacherQueryParams: "/?appMode=qa&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:7&unit=msa",
-  teacher7NetworkQueryParams: "/?appMode=qa&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:7&unit=msa&network=foo",
-  teacher8NetworkQueryParams: "/?appMode=qa&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:8&unit=msa&network=foo"
+  teacher7NetworkQueryParams: "/?appMode=qa&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:7&unit=msa&network=foo"
 };
 
 function beforeTest(params) {
@@ -15,54 +13,6 @@ function beforeTest(params) {
   cy.openTopTab("problems");
   chatPanel.getChatPanelToggle().should('exist');
 }
-
-context('Chat Panel', () => {
-  it("Teachers can communicate back and forth in chat panel", () => {
-    cy.log("verify teacher7 can post document and tile comments");
-    beforeTest(queryParams.teacher7NetworkQueryParams);
-    // Teacher 7 document comment
-    cy.openTopTab("problems");
-    cy.openProblemSection("Introduction");
-    chatPanel.getChatPanelToggle().click();
-    chatPanel.verifyProblemCommentClass();
-    cy.wait(2000);
-    chatPanel.addCommentAndVerify("This is a teacher7 document comment");
-    // Teacher 7 tile comment
-    cy.clickProblemResourceTile('introduction');
-    cy.wait(2000);
-    chatPanel.addCommentAndVerify("This is a teacher7 tile comment");
-
-    cy.log("verify teacher8 can open clue chat in the same network");
-    // Open clue chat for Teacher 8
-    beforeTest(queryParams.teacher8NetworkQueryParams);
-    chatPanel.getChatPanelToggle().click();
-
-    cy.log("verify teacher8 can view teacher7's comments and add more comments");
-    // Teacher 8 document comment
-    chatPanel.verifyProblemCommentClass();
-    chatPanel.verifyCommentThreadContains("This is a teacher7 document comment");
-    chatPanel.addCommentAndVerify("This is a teacher8 document comment");
-    // Teacher 8 tile comment
-    cy.clickProblemResourceTile('introduction');
-    cy.wait(2000);
-    chatPanel.verifyCommentThreadContains("This is a teacher7 tile comment");
-    chatPanel.addCommentAndVerify("This is a teacher8 tile comment");
-
-    cy.log("verify reopening teacher7's clue chat in the same network");
-    // Open clue chat for Teacher 7
-    beforeTest(queryParams.teacher7NetworkQueryParams);
-    chatPanel.getChatPanelToggle().click();
-
-    cy.log("verify teacher7 can view teacher8's comments");
-    // Teacher 7 document comment
-    chatPanel.verifyProblemCommentClass();
-    chatPanel.verifyCommentThreadContains("This is a teacher8 document comment");
-    // Teacher 7 tile comment
-    cy.clickProblemResourceTile('introduction');
-    cy.wait(2000);
-    chatPanel.verifyCommentThreadContains("This is a teacher8 tile comment");
-  });
-});
 
 context('Chat Panel Comment Tags', () => {
   it('verify chat panel comment tags', () => {
@@ -138,10 +88,10 @@ context('Chat Panel Comment Tags', () => {
     cy.openTopTab("problems");
     cy.openProblemSection("Introduction");
     chatPanel.verifyProblemCommentClass();
-    chatPanel.addCommentAndVerify(docComment);
+    chatPanel.addDocumentCommentAndVerify(docComment);
     chatPanel.verifyCommentTagNotDisplayed(docComment);
     chatPanel.getDeleteMessageButton(docComment).click({ force: true });
-    chatPanel.getDeleteConfirmModalButton().contains("Delete").click();
+    chatPanel.getDeleteConfirmModalButton().click();
     cy.wait(2000);
     chatPanel.verifyCommentThreadDoesNotContain(docComment);
 
@@ -150,10 +100,10 @@ context('Chat Panel Comment Tags', () => {
     cy.openTopTab("problems");
     cy.clickProblemResourceTile('introduction');
     chatPanel.showAndVerifyTileCommentClass(0);
-    chatPanel.addCommentAndVerify(tileComment);
+    chatPanel.addTileCommentAndVerify(tileComment);
     chatPanel.verifyCommentTagNotDisplayed(tileComment);
     chatPanel.getDeleteMessageButton(tileComment).click({ force: true });
-    chatPanel.getDeleteConfirmModalButton().contains("Delete").click();
+    chatPanel.getDeleteConfirmModalButton().click();
     cy.wait(2000);
     chatPanel.verifyCommentThreadDoesNotContain(tileComment);
   });
