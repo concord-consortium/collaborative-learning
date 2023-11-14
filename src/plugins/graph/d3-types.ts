@@ -27,8 +27,16 @@ export function selectOuterCircles(svg: DotsElt): DotSelection | null {
           ? select(svg).selectAll(".graph-dot-highlighted")
           : null;
 }
+
+export function selectOuterCirclesSelected(svg: DotsElt): DotSelection | null {
+  return svg
+          ? select(svg).selectAll(".graph-dot-highlighted.selected")
+          : null;
+}
+
 export function selectInnerCircles(svg: DotsElt): DotSelection | null {
   return svg
           ? select(svg).selectAll(".graph-dot")
           : null;
 }
+

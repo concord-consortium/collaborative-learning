@@ -4,7 +4,8 @@ import { isInteger} from "lodash";
 import { IClueObjectSnapshot } from "../../../models/annotations/clue-object";
 import { PartialSharedModelEntry } from "../../../models/document/document-content-types";
 import { UpdatedSharedDataSetIds } from "../../../models/shared/shared-data-set";
-import {CaseData, DotSelection, DotsElt, selectAllCircles, selectInnerCircles, selectOuterCircles} from "../d3-types";
+import {CaseData, DotSelection, DotsElt, selectAllCircles,
+        selectInnerCircles, selectOuterCircles, selectOuterCirclesSelected} from "../d3-types";
 import {IDotsRef, kGraphFont, Point, Rect, rTreeRect, transitionDuration} from "../graph-types";
 import {between} from "./math-utils";
 import {IAxisModel, isNumericAxisModel} from "../imports/components/axis/models/axis-model";
@@ -466,10 +467,21 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
   const { dataset, dotsRef, pointColor, getPointColorAtIndex,
           getScreenX, getScreenY, getLegendColor, enableAnimation } = props;
   const duration = enableAnimation.current ? transitionDuration : 0;
+
   let theSelection = selectInnerCircles(dotsRef.current); //select inner circles
   setPoints(5);
-  theSelection = selectOuterCircles(dotsRef.current); //select outer circles
+  theSelection = selectOuterCircles(dotsRef.current); //select all outer circles
   setPoints(0);
+  if(theSelection){
+    applySelectedClassToCircles(theSelection, dataset); //apply class ".selected" to outer circle of selected Case
+  }
+  theSelection = selectOuterCirclesSelected(dotsRef.current);
+  //Only pass in selectedOuterCircles into styleOuterCircles
+  //without setTimeout setPoints(0) will cause outer highlight circle to not show (r=0)
+  //therefore we need a setTimeOut that applies the radius (r=10) after the transitionDuration
+  setTimeout(()=>{
+    styleOuterCircles(theSelection, dataset);
+  },transitionDuration + 100);
 }
 
 /**
