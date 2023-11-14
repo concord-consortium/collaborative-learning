@@ -33,7 +33,8 @@ export const useDataSet = ({
   changeHandlers, columns, onColumnResize, lookupImage
 }: IUseDataSet) => {
   const { onAddRows, onUpdateRow } = changeHandlers;
-  function getSelectedCellIndicies() {
+
+  function getSelectedCellIndices() {
     const selectedCellIndecies = { selectedCellColumnIndex: -1, selectedCellRowIndex: -1 };
     if (dataSet.selectedCells.length === 1) {
       const _selectedCell = dataSet.selectedCells[0];
@@ -49,7 +50,7 @@ export const useDataSet = ({
     if (dataSet.selectedCells.length !== 1) return;
 
     // Determine if we're moving forwards or backwards
-    const { selectedCellColumnIndex, selectedCellRowIndex } = getSelectedCellIndicies();
+    const { selectedCellColumnIndex, selectedCellRowIndex } = getSelectedCellIndices();
     const forward = (selectedCellRowIndex < position.rowIdx) ||
       (selectedCellRowIndex === position.rowIdx && selectedCellColumnIndex < position.idx);
 
@@ -100,7 +101,7 @@ export const useDataSet = ({
   const getUpdatedRowAndColumn = (_rows?: TRow[], _columns?: TColumn[]) => {
     const rs = _rows ?? rows;
     const cs = _columns ?? columns;
-    const { selectedCellColumnIndex, selectedCellRowIndex } = getSelectedCellIndicies();
+    const { selectedCellColumnIndex, selectedCellRowIndex } = getSelectedCellIndices();
     const updatedRow = (selectedCellRowIndex != null) && (selectedCellRowIndex >= 0)
       ? rs[selectedCellRowIndex] : undefined;
     const updatedColumn = (selectedCellColumnIndex != null) && (selectedCellColumnIndex >= 0)
