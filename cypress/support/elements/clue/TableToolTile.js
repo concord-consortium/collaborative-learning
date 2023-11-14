@@ -47,6 +47,9 @@ class TableToolTile{
     getTableCell(){
       return cy.get('.rdg-row .rdg-cell');
     }
+    getTableCellContent(cellIndex) {
+      return this.getTableCell().eq(cellIndex).find('.cell');
+    }
     getTableCellEdit(){
       return cy.get('.rdg-row .rdg-cell .rdg-text-editor');
     }

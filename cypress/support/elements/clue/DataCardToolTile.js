@@ -81,6 +81,9 @@ class DataCardToolTile {
   getSortCardAttributes(card = 0, tileIndex = 0, workspaceClass){
     return this.getSortCards(tileIndex, workspaceClass).eq(card).find(`.attribute`);
   }
+  getSortCardValues(card = 0, tileIndex = 0, workspaceClass) {
+    return this.getSortCards(tileIndex, workspaceClass).eq(card).find('.value');
+  }
   getSortCardData(tileIndex = 0, workspaceClass){
     const selector = ".sortable.expanded .attribute-value-row";
     return this.getTile(tileIndex, workspaceClass).find(`${selector}`);
