@@ -25,8 +25,7 @@ export const formatValue = ({
 }: IFormatValueProps) => {
   const cell = { attributeId: column?.key ?? "", caseId: row?.__id__ ?? "" };
   const cellSelected = dataSet?.isCellSelected(cell);
-  const highlighted = cellSelected;
-  const baseClasses = classNames("cell", { highlighted, linked: isLinked });
+  const baseClasses = classNames("cell", { highlighted: cellSelected, linked: isLinked });
   function handleClick() {
     if (!cellSelected) {
       dataSet?.setSelectedCells([cell]);
