@@ -625,7 +625,7 @@ export const DataConfigurationModel = types
      * invalidated even if we did not modify the array.
      */
     syncFilteredCasesCount(alwaysInvalidate?: boolean) {
-      let desiredCount = self.yAttributeDescriptions.length;
+      let desiredCount = self.dataset ? self.yAttributeDescriptions.length : 0;
       if (desiredCount === 0 && self.dataset) {
         desiredCount = 1;
       }

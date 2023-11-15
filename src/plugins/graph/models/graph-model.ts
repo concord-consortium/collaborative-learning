@@ -82,8 +82,13 @@ export const GraphModel = TileContentModel
   .preProcessSnapshot((snapshot: any) => {
     const hasLayerAlready:boolean = (snapshot?.layers?.length || 0) > 0;
     if (!hasLayerAlready && snapshot?.config) {
-      const { config, others } = snapshot;
-      return config != null ? { ...others } : snapshot;
+      const { config, ...others } = snapshot;
+      if (config != null) {
+        return {
+          layers: [{ config }],
+          ...others
+        };
+      }
     }
     return snapshot;
   })
@@ -412,7 +417,7 @@ export const GraphModel = TileContentModel
     },
     afterAttach() {
       if (self.layers.length === 1 && !self.layers[0].config.dataset && !self.layers[0].config.isEmpty) {
-        // Non-empty dataset lacking a dataset reference = legacy data needing a one-time fix.
+        // Non-empty DataConfiguration lacking a dataset reference = legacy data needing a one-time fix.
         // We can't do that fix until the SharedModelManager is ready, though.
         addDisposer(self, reaction(
           () => {
@@ -444,7 +449,7 @@ export const GraphModel = TileContentModel
           const smd = sharedMetadata[0];
           if (isSharedCaseMetadata(smd)) {
             self.layers[0].config.metadata = smd;
-            console.log('Updated legacy document by setting metadata reference');
+            console.log('Updated legacy document - set metadata reference');
           }
         }
       } else {
