@@ -31,6 +31,8 @@ export const useSubAxis = ({
                              subAxisIndex, axisModel, subAxisElt, showScatterPlotGridLines, centerCategoryLabels,
                              enableAnimation
                            }: IUseSubAxis) => {
+
+  console.log(`📁 use-sub-axis.ts -----------${axisModel?.place}-------------`);
   const layout = useAxisLayoutContext(),
     isNumeric = isNumericAxisModel(axisModel),
     isCategorical = isCategoricalAxisModel(axisModel),
@@ -49,9 +51,9 @@ export const useSubAxis = ({
     }),
     swapInProgress = useRef(false),
     subAxisSelectionRef = useRef<Selection<SVGGElement, any, any, any>>(),
-    categoriesSelectionRef = useRef<Selection<SVGGElement | BaseType, CatObject, SVGGElement, any>>(),
+    categoriesSelectionRef = useRef<Selection<SVGGElement | BaseType, CatObject, SVGGElement, any>>();
 
-    renderSubAxis = useCallback(() => {
+    const renderSubAxis = useCallback(() => {
       const
         place = axisModel.place,
         multiScale = layout.getAxisMultiScale(place);
@@ -81,25 +83,41 @@ export const useSubAxis = ({
             .attr('y2', axisIsVertical ? subAxisLength : 0)
             .style("stroke", "lightgrey")
             .style("stroke-opacity", "0.7");
-        },
+      };
         //***********************************************
         //******   HORIZONTAL AXIS HERE *****************
         //***********************************************
 
-        renderNumericAxis = () => {
+    //*******************************   GUIDELINES **************************
+    // - standard domain and range shows edit boxes around axis limit numbers when plot has focus (both x and y)
+    // - if value is entered that is smaller than bottom of range, then it is ignored and the original value is restored
+    // - if nonnumeric value is entered, previous value is restored
+    // - graph redraws after enter key or loss of focus or tab key in control
+
+    // - ticks redraw according to new scale - if numbers are very large we hope that the graph code is smart
+    // enough to reduce the number of ticks so they don't render all over each other
+
+    // - controls are not shown on categorical axes and are not restored as the graph swaps from categorical to numeric
+    // - if axis limits are hard set graph will not rescale as data is added or changed
+    // - axis limits are stored with the document and restored on reload
+
+
+      const renderNumericAxis = () => {
           console.log("\t🏭 renderNumericAxis------------------");
           select(subAxisElt).selectAll('*').remove();
           const numericScale = d3Scale as unknown as ScaleLinear<number, number>;
           // console.log("\t🔪 numericScale:", numericScale);
           const axisScale = axis(numericScale).tickSizeOuter(0).tickFormat(format('.9'));
-          // console.log("\t🔪 axisScale:", axisScale);
+          console.log("\t🔪 axisScale:", axisScale);
           const duration = enableAnimation.current ? transitionDuration : 0;
-          console.log("\t🔪 duration:", duration);
           if (!axisIsVertical && numericScale.ticks) {
-            console.log("-------nonVerticalAxis (horizontal)-----------");
+            console.log("\t-------nonVerticalAxis (horizontal)-----------");
+            console.log("\t numericScale.ticks(computeBestNumberOfTicks(numericScale): ",
+                           numericScale.ticks(computeBestNumberOfTicks(numericScale)));
+            console.log("\t tickSize: ", numericScale.ticks(computeBestNumberOfTicks(numericScale)));
+
+            //---------------------------------------------------------------------------------------------------------
             axisScale.tickValues(numericScale.ticks(computeBestNumberOfTicks(numericScale)));
-            console.log("\t numericScale.ticks(computeBestNumberOfTicks(numericScale)):",
-              numericScale.ticks(computeBestNumberOfTicks(numericScale)));
           }
           select(subAxisElt)
             .attr("transform", initialTransform)
@@ -109,9 +127,12 @@ export const useSubAxis = ({
             .call(axisScale).selectAll("line,path")
             .style("stroke", "lightgrey")
             .style("stroke-opacity", "0.7");
-        },
+      };
 
-        renderScatterPlotGridLines = () => {
+      //******   VERTICAL AXIS HERE *****************
+
+
+      const renderScatterPlotGridLines = () => {
           if (axis) {
             const numericScale = d3Scale as unknown as ScaleLinear<number, number>;
             select(subAxisElt).selectAll('.zero, .grid').remove();
@@ -127,9 +148,9 @@ export const useSubAxis = ({
               select(subAxisElt).select('.zero').selectAll('text').remove();
             }
           }
-        },
+        };
 
-        renderCategoricalSubAxis = () => {
+      const renderCategoricalSubAxis = () => {
           console.log("\t🏭 renderCategoricalSubAxis");
           if (!(subAxisSelectionRef.current && categoriesSelectionRef.current)) return;
 
@@ -207,7 +228,7 @@ export const useSubAxis = ({
                 return update;
               }
             );
-        };
+      };
 
       d3Scale.range(axisIsVertical ? [rangeMax, rangeMin] : [rangeMin, rangeMax]);
       switch (type) {
@@ -223,9 +244,9 @@ export const useSubAxis = ({
           break;
       }
     }, [subAxisElt, layout, showScatterPlotGridLines, enableAnimation, centerCategoryLabels, axisModel,
-      subAxisIndex]),
+      subAxisIndex]);
 
-    onDragStart = useCallback((event: any) => {
+    const onDragStart = useCallback((event: any) => {
       const dI = dragInfo.current;
       dI.currentDragPosition = dI.axisOrientation === 'horizontal' ? event.x : event.y;
       dI.indexOfCategory = dI.axisOrientation === 'horizontal'
@@ -234,7 +255,7 @@ export const useSubAxis = ({
       dI.catName = dI.categories[dI.indexOfCategory];
       dI.currentOffset = 0;
       dI.initialOffset = dI.currentDragPosition - (dI.indexOfCategory + 0.5) * dI.bandwidth;
-    }, []),
+    }, []);
 
     /**
      * Note: The event actually includes 'dx' and 'dy' properties, but they are not
@@ -242,7 +263,7 @@ export const useSubAxis = ({
      * and the current less straightforward approach was adopted. It may be worth
      * revisiting this at some point.
      */
-    onDrag = useCallback((event: any) => {
+    const onDrag = useCallback((event: any) => {
       const dI = dragInfo.current,
         delta = dI.axisOrientation === 'horizontal' ? event.dx : event.dy;
       if (delta !== 0) {
@@ -268,24 +289,24 @@ export const useSubAxis = ({
         }
         dI.currentDragPosition = newDragPosition;
       }
-    }, [renderSubAxis]),
+    }, [renderSubAxis]);
 
-    onDragEnd = useCallback(() => {
+    const onDragEnd = useCallback(() => {
       const dI = dragInfo.current;
       dI.indexOfCategory = -1; // so dragInfo won't influence category placement
       enableAnimation.current = false; // disable animation for final placement
       renderSubAxis();
-    }, [enableAnimation, renderSubAxis]),
+    }, [enableAnimation, renderSubAxis]);
 
-    dragBehavior = useMemo(() => drag()
+    const dragBehavior = useMemo(() => drag()
       .on("start", onDragStart)
       .on("drag", onDrag)
-      .on("end", onDragEnd), [onDragStart, onDrag, onDragEnd]),
+      .on("end", onDragEnd), [onDragStart, onDrag, onDragEnd]);
 
     /**
      * Make sure there is a group element for each category and that the text elements have drag behavior
      */
-    setupCategories = useCallback(() => {
+    const setupCategories = useCallback(() => {
       if (!subAxisElt) return;
       const
         place = axisModel.place,

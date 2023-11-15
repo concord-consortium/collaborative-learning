@@ -1,0 +1,32 @@
+@import "../../../components/vars.sass";
+
+.border-box{
+  height: 22px;
+  min-width: 25px;
+  position: absolute;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 8px;
+  border: 1.5px solid #949494;
+  background-color: #f0f9fb;
+
+  &.hide{
+    border: none;
+    background-color: white;
+  }
+
+  .input-textbox{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-width: 25px;
+    width: 50%;
+    height: 22px;
+    text-align: center;
+    margin-left: '4px';
+    margin-right: '4px',
+  }
+}

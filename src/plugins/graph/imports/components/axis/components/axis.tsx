@@ -20,12 +20,13 @@ export const Axis = ({
                        enableAnimation,
                        centerCategoryLabels = true,
                      }: IProps) => {
-  console.log("-------< Axis > -------------");
 
-  const
-    layout = useAxisLayoutContext(),
-    place = axisModel?.place || 'bottom',
-    [axisElt, setAxisElt] = useState<SVGGElement | null>(null);
+
+  const layout = useAxisLayoutContext();
+  const place = axisModel?.place || 'bottom';
+  const [axisElt, setAxisElt] = useState<SVGGElement | null>(null);
+  console.log(`📁 axis.tsx ---------${place}------------`);
+
 
   useAxis({
     axisModel, axisElt, axisTitle: label, centerCategoryLabels
@@ -33,10 +34,7 @@ export const Axis = ({
 
   const getSubAxes = () => {
     const numRepetitions = layout.getAxisMultiScale(place)?.repetitions ?? 1;
-    console.log("\t🔪 numRepetitions:", numRepetitions);
-    // console.log("\t🔪 range(numRepetitions):", range(numRepetitions));
     return range(numRepetitions).map(i => {
-      // console.log("\t in map where i =", i);
       return <SubAxis key={i}
                       numSubAxes={numRepetitions}
                       subAxisIndex={i}

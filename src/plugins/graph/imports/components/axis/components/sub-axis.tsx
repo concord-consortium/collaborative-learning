@@ -27,14 +27,9 @@ export const SubAxis = memo(function SubAxis({
     subAxisIndex, axisModel, subAxisElt, enableAnimation, showScatterPlotGridLines, centerCategoryLabels
   });
 
-  console.log("-----<SubAxis>------");
-  console.log("\t numeric:", axisModel?.type === 'numeric');
-  console.log("\t🥩 centerCategoryLabels:", centerCategoryLabels);
-  console.log("\t🥩 showScatterPlotGridLines:", showScatterPlotGridLines);
-  console.log("\t🥩 enableAnimation:", enableAnimation);
-  console.log("\t🥩 subAxisElt:", subAxisElt);
-  console.log("\t🥩 axisModel:", axisModel);
-  console.log("\t🥩 subAxisIndex:", subAxisIndex);
+  console.log(`📁 sub-axis.tsx --------${axisModel?.place}---------------`);
+  // console.log("\t🥩 axisModel:", axisModel);
+  // console.log("\t🥩 subAxisIndex:", subAxisIndex);
 
 
   return (
