@@ -84,6 +84,8 @@ export const
   kChoroplethHeight = 16,
   kAxisTickLength = 4,
   kAxisGap = 2;
+export const outerCircleSelectedRadius = 10;
+export const outerCircleUnselectedRadius = 0;
 
 export const PlotTypes = ["casePlot", "dotPlot", "dotChart", "scatterPlot"] as const;
 export type PlotType = typeof PlotTypes[number];

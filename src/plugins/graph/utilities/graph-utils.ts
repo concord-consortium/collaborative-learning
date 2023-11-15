@@ -5,8 +5,11 @@ import { IClueObjectSnapshot } from "../../../models/annotations/clue-object";
 import { PartialSharedModelEntry } from "../../../models/document/document-content-types";
 import { UpdatedSharedDataSetIds } from "../../../models/shared/shared-data-set";
 import {CaseData, DotSelection, DotsElt, selectAllCircles,
-        selectInnerCircles, selectOuterCircles, selectOuterCirclesSelected} from "../d3-types";
-import {IDotsRef, kGraphFont, Point, Rect, rTreeRect, transitionDuration} from "../graph-types";
+        selectInnerCircles, selectOuterCircles} from "../d3-types";
+import {
+  IDotsRef, kGraphFont, Point, outerCircleSelectedRadius, outerCircleUnselectedRadius,
+  Rect,rTreeRect, transitionDuration
+} from "../graph-types";
 import {between} from "./math-utils";
 import {IAxisModel, isNumericAxisModel} from "../imports/components/axis/models/axis-model";
 import {ScaleNumericBaseType} from "../imports/components/axis/axis-types";
@@ -145,9 +148,15 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
   const {dataConfiguration, enableAnimation, instanceId,
       dotsElement, pointRadius, pointColor, pointStrokeColor} = props;
   const allCaseData = dataConfiguration.joinedCaseDataArrays;
+
+  // Remove the circles if they already existed
+  // We needed to do this because initializing the circles without first removing them resulted in one set of
+  // circles not being created. We weren't able to figure out why this was happening.
   let allCircles = selectAllCircles(dotsElement); //includes both inner and outer circles
   if (!allCircles) return;
   allCircles.remove();
+
+  // Create the circles
   allCircles = selectAllCircles(dotsElement);
   if (!allCircles) return;
   startAnimation(enableAnimation);
@@ -186,18 +195,22 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
   dataConfiguration.setPointsNeedUpdating(false);
 }
 
+function isCircleSelected(aCaseData: CaseData, dataset?: IDataSet) {
+  return !!dataset?.isCaseSelected(aCaseData.caseID);
+}
+
 function applySelectedClassToCircles(selection: DotSelection, dataset?: IDataSet){
   selection
-    .classed('selected', (aCaseData: CaseData) => !!dataset?.isCaseSelected(aCaseData.caseID));
+    .classed('selected', (aCaseData: CaseData) => isCircleSelected(aCaseData, dataset));
 }
 
 function styleOuterCircles(outerCircles: any, dataset?: IDataSet){
   outerCircles
     .attr('r', (aCaseData: CaseData) => {
-      return (dataset?.isCaseSelected(aCaseData.caseID)) ? 10 : 0;
+      return isCircleSelected(aCaseData, dataset) ? outerCircleSelectedRadius : outerCircleUnselectedRadius;
     })
     .style('fill', (aCaseData: CaseData) => {
-      return (dataset?.isCaseSelected(aCaseData.caseID)) && selectedOuterCircleFillColor;
+      return isCircleSelected(aCaseData, dataset) && selectedOuterCircleFillColor;
     })
     .style('stroke', (aCaseData: CaseData) => {
       return selectedOuterCircleStrokeColor;
@@ -394,19 +407,18 @@ export interface ISetPointSelection {
   getPointColorAtIndex?: (index: number) => string
 }
 
-
 export function setPointSelection(props: ISetPointSelection) {
   const { dotsRef, dataConfiguration } = props;
   const dataset = dataConfiguration.dataset;
   const allCircles = selectAllCircles(dotsRef.current); //includes both inner and outer circles
   const outerCircles = selectOuterCircles(dotsRef.current);
-  if (allCircles){
+  if (allCircles) {
     applySelectedClassToCircles(allCircles, dataset);
   }
-  if (!(dotsRef.current && outerCircles)) return;
-  styleOuterCircles(outerCircles, dataset);
+  if (outerCircles) {
+    styleOuterCircles(outerCircles, dataset);
+  }
 }
-
 
 export interface ISetPointCoordinates {
   dataset?: IDataSet
@@ -424,22 +436,25 @@ export interface ISetPointCoordinates {
 }
 
 export function setPointCoordinates(props: ISetPointCoordinates) {
+  const { dataset, dotsRef, pointColor, pointRadius, getPointColorAtIndex,
+          getScreenX, getScreenY, getLegendColor, enableAnimation, selectedPointRadius } = props;
+  const duration = enableAnimation.current ? transitionDuration : 0;
+
   const lookupLegendColor = (aCaseData: CaseData) => {
     const id = aCaseData.caseID;
-    const isSelected = dataset?.isCaseSelected(id);
     const legendColor = getLegendColor ? getLegendColor(id) : '';
     if (legendColor !== '') {
       return legendColor;
-    } else if ((getPointColorAtIndex && (aCaseData.plotNum || isSelected))) {
+    } else if (getPointColorAtIndex && aCaseData.plotNum) {
       return getPointColorAtIndex(aCaseData.plotNum);
     } else {
       return pointColor;
     }
   };
 
-  const setPoints = (radius: number) => {
-    if (theSelection !== null) {
-      theSelection
+  const setPoints = (circles: DotSelection | null) => {
+    if (circles !== null) {
+      circles
         .transition()
         .duration(duration)
         .attr('cx', (aCaseData: CaseData) => {
@@ -447,9 +462,15 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
         })
         .attr('cy', (aCaseData: CaseData) => {
           return getScreenY(aCaseData.caseID, aCaseData.plotNum);
-        })
+        });
+    }
+  };
+
+  const styleInnerCircles = (circles: DotSelection | null) => {
+    if (circles != null) {
+      circles
         .attr('r', (aCaseData: CaseData) => {
-          return radius;
+          return isCircleSelected(aCaseData, dataset) ? selectedPointRadius : pointRadius;
         })
         .style('fill', (aCaseData: CaseData) => {
           return lookupLegendColor(aCaseData);
@@ -458,30 +479,19 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
           return lookupLegendColor(aCaseData); //border color of inner dot should be same color as legend
         })
         .style('stroke-width', (aCaseData: CaseData) =>{
-          return (dataset?.isCaseSelected(aCaseData.caseID))
-                 ? selectedStrokeWidth : defaultStrokeWidth;
+          return isCircleSelected(aCaseData, dataset) ? selectedStrokeWidth : defaultStrokeWidth;
         });
     }
   };
 
-  const { dataset, dotsRef, pointColor, getPointColorAtIndex,
-          getScreenX, getScreenY, getLegendColor, enableAnimation } = props;
-  const duration = enableAnimation.current ? transitionDuration : 0;
+  const innerCircles = selectInnerCircles(dotsRef.current);
+  setPoints(innerCircles);
+  styleInnerCircles(innerCircles);
 
-  let theSelection = selectInnerCircles(dotsRef.current); //select inner circles
-  setPoints(5);
-  theSelection = selectOuterCircles(dotsRef.current); //select all outer circles
-  setPoints(0);
-  if(theSelection){
-    applySelectedClassToCircles(theSelection, dataset); //apply class ".selected" to outer circle of selected Case
-  }
-  theSelection = selectOuterCirclesSelected(dotsRef.current);
-  //Only pass in selectedOuterCircles into styleOuterCircles
-  //without setTimeout setPoints(0) will cause outer highlight circle to not show (r=0)
-  //therefore we need a setTimeOut that applies the radius (r=10) after the transitionDuration
-  setTimeout(()=>{
-    styleOuterCircles(theSelection, dataset);
-  },transitionDuration + 100);
+  const outerCircles = selectOuterCircles(dotsRef.current);
+  if (outerCircles) applySelectedClassToCircles(outerCircles, dataset);
+  setPoints(outerCircles);
+  styleOuterCircles(outerCircles, dataset);
 }
 
 /**
