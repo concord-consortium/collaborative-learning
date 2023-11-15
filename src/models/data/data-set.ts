@@ -80,6 +80,9 @@ export const DataSet = types.model("DataSet", {
       caseIDMap[aCase.__id__] = index;
     });
     return caseIDMap;
+  },
+  get cellsSelectCases() {
+    return getAppConfig(self)?.getSetting("cellsSelectCases", "dataset");
   }
 }))
 .views(self => {
@@ -756,7 +759,7 @@ export const DataSet = types.model("DataSet", {
           self.caseSelection.clear();
         }
 
-        if (getAppConfig(self)?.getSetting("cellsSelectCases", "dataset")) {
+        if (self.cellsSelectCases) {
           const caseIds = uniqueCaseIds(cells);
           if (select) {
             selectCases(caseIds, select);
@@ -803,7 +806,7 @@ export const DataSet = types.model("DataSet", {
       setSelectedCells(cells: ICell[]) {
         clearAllSelections();
 
-        if (getAppConfig(self)?.getSetting("cellsSelectCases", "dataset")) {
+        if (self.cellsSelectCases) {
           setSelectedCases(uniqueCaseIds(cells));
         }
 
