@@ -22,7 +22,7 @@ import {IAxisModel} from "../imports/components/axis/models/axis-model";
 import {GraphPlace} from "../imports/components/axis-graph-shared";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import { isAttributeAssignmentAction, isRemoveAttributeFromRoleAction, isRemoveYAttributeWithIDAction,
-  isReplaceYAttributeAction, isSetRoleToAttributeDescAction }
+  isReplaceYAttributeAction, isSetAttributeForRoleAction }
   from "../models/data-configuration-model";
 import { useGraphModelContext } from "../models/graph-model";
 import {useInstanceIdContext} from "../imports/hooks/use-instance-id-context";
@@ -122,7 +122,7 @@ export const Graph = observer(
         const layer = graphModel.layers[layerNumber];
         const dataSetId = layer.config.dataset?.id;
         let attrId = "";
-        if (isSetRoleToAttributeDescAction(action)) {
+        if (isSetAttributeForRoleAction(action)) {
           const [role, _desc] = action.args;
           graphPlace = attrRoleToGraphPlace[role] as GraphPlace;
           attrId = _desc?.attributeID || "";

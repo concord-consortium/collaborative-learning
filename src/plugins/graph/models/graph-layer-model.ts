@@ -43,7 +43,7 @@ export const GraphLayerModel = types
       if (role === 'yPlus') {
         self.config.addYAttribute({attributeID: id});
       } else {
-        self.config.setRoleToAttributeDesc(role, {attributeID: id});
+        self.config.setAttributeForRole(role, {attributeID: id});
       }
       this.updateAdornments(true);
     },

@@ -145,7 +145,7 @@ export class GraphController {
         graphModel.setPlotType(plotChoices[primaryType][otherAttributeType]);
       }
       if (attrID && dataConfig.attributeID(graphAttributeRole) !== attrID) {
-        dataConfig.setRoleToAttributeDesc(graphAttributeRole, {attributeID: attrID});
+        dataConfig.setAttributeForRole(graphAttributeRole, {attributeID: attrID});
       }
     };
 

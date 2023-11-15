@@ -682,7 +682,7 @@ export const DataConfigurationModel = types
     removeAttributeFromRole(role: GraphAttrRole) {
       self._setAttributeDescription(role);
     },
-    setRoleToAttributeDesc(role: GraphAttrRole, desc?: IAttributeDescriptionSnapshot) {
+    setAttributeForRole(role: GraphAttrRole, desc?: IAttributeDescriptionSnapshot) {
       if (role === 'y') {
         // Setting "Y" role implies that user only wants one, or no Y attributes.
         while (self._yAttributeDescriptions.length) {
@@ -704,7 +704,7 @@ export const DataConfigurationModel = types
       }
     },
     addYAttribute(desc: IAttributeDescriptionSnapshot) {
-      this.setRoleToAttributeDesc("yPlus", desc);
+      this.setAttributeForRole("yPlus", desc);
     },
     /**
      * Replace an existing Y attribute with a different one, maintaining its position in the list.
@@ -800,20 +800,20 @@ export interface IDataConfigurationModel extends Instance<typeof DataConfigurati
 }
 
 export type AttributeAssignmentAction =
-  SetRoleToAttributeDescAction | ReplaceYAttributeAction | RemoveAttributeFromRoleAction | RemoveYAttributeWithIDAction;
+  SetAttributeForRoleAction | ReplaceYAttributeAction | RemoveAttributeFromRoleAction | RemoveYAttributeWithIDAction;
 export function isAttributeAssignmentAction(action: ISerializedActionCall): action is AttributeAssignmentAction {
-  return isSetRoleToAttributeDescAction(action)
+  return isSetAttributeForRoleAction(action)
     || isReplaceYAttributeAction(action)
     || isRemoveAttributeFromRoleAction(action)
     || isRemoveYAttributeWithIDAction(action);
 }
 
-export interface SetRoleToAttributeDescAction extends ISerializedActionCall {
-  name: "SetRoleToAttributeDesc",
+export interface SetAttributeForRoleAction extends ISerializedActionCall {
+  name: "SetAttributeForRole",
   args: [role: GraphAttrRole, desc?: IAttributeDescriptionSnapshot]
 }
-export function isSetRoleToAttributeDescAction(action: ISerializedActionCall): action is SetRoleToAttributeDescAction {
-  return action.name === "setRoleToAttributeDesc";
+export function isSetAttributeForRoleAction(action: ISerializedActionCall): action is SetAttributeForRoleAction {
+  return action.name === "setAttributeForRole";
 }
 
 export interface ReplaceYAttributeAction extends ISerializedActionCall {
