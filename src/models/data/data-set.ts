@@ -757,7 +757,31 @@ export const DataSet = types.model("DataSet", {
         }
 
         if (getAppConfig(self)?.getSetting("cellsSelectCases", "dataset")) {
-          selectCases(uniqueCaseIds(cells), select);
+          const caseIds = uniqueCaseIds(cells);
+          if (select) {
+            selectCases(caseIds, select);
+          } else {
+            // When deselecting cells, we don't want to deselect cases that
+            // are related to a cell not being deselected
+            const preservedCellIds: string[] = [];
+            const cellIds = cells.map(cell => getCellId(cell));
+            // Find cells that will continue to be selected
+            self.cellSelection.forEach(cellId => {
+              if (!cellIds.includes(cellId)) {
+                preservedCellIds.push(cellId);
+              }
+            });
+            // Find cases related to cells that will continue to be selected
+            const preservedCaseIds = uniqueCaseIds(preservedCellIds.map(cellId => getCellFromId(cellId)) as ICell[]);
+            // Only remove cases related to deselected cells if they aren't also related to a continuing cell
+            const removedCaseIds: string[] = [];
+            caseIds.forEach(caseId => {
+              if (!preservedCaseIds.includes(caseId)) {
+                removedCaseIds.push(caseId);
+              }
+            });
+            selectCases(removedCaseIds, select);
+          }
         }
 
         cells.forEach(cell => {
