@@ -53,6 +53,13 @@ export interface ICell {
   attributeId: string;
   caseId: string;
 }
+export function getCellId(cell: ICell) {
+  return JSON.stringify(cell);
+}
+export function getCellFromId(cellId: string) {
+  const cell = JSON.parse(cellId);
+  if (cell.attributeId && cell.caseId) return cell as ICell;
+}
 export function uniqueCaseIds(cells: ICell[]) {
   const caseIds: string[] = [];
   cells.forEach(cell => {

@@ -5,7 +5,7 @@ import { applyAction, getEnv, Instance, ISerializedActionCall,
 import { Attribute, IAttribute, IAttributeSnapshot } from "./attribute";
 import { uniqueId, uniqueSortableId } from "../../utilities/js-utils";
 import { CaseGroup } from "./data-set-types";
-import { ICell, IValueType, uniqueCaseIds } from "./data-types";
+import { getCellFromId, getCellId, ICell, IValueType, uniqueCaseIds } from "./data-types";
 import { getAppConfig } from "../tiles/tile-environment";
 
 export const newCaseId = uniqueSortableId;
@@ -50,8 +50,8 @@ export const DataSet = types.model("DataSet", {
   attributeSelection: observable.set<string>(),
   // MobX-observable set of selected case IDs
   caseSelection: observable.set<string>(),
-  // MobX-observable set of selected cells
-  cellSelection: observable.set<ICell>(),
+  // MobX-observable set of selected cell IDs
+  cellSelection: observable.set<string>(),
   // map from pseudo-case ID to the CaseGroup it represents
   pseudoCaseMap: {} as Record<string, CaseGroup>,
   transactionCount: 0
@@ -111,7 +111,8 @@ export const DataSet = types.model("DataSet", {
     return Array.from(self.caseSelection);
   },
   get selectedCells() {
-    return Array.from(self.cellSelection);
+    return Array.from(self.cellSelection).map(cellId => getCellFromId(cellId))
+      .filter(cell => cell !== undefined) as ICell[];
   }
 }))
 .extend(self => {
@@ -249,16 +250,6 @@ export const DataSet = types.model("DataSet", {
     self.attributeSelection.clear();
     self.caseSelection.clear();
     self.cellSelection.clear();
-  }
-
-  function isCellSelected(cellIds: ICell) {
-    let cellSelected = false;
-    Array.from(self.cellSelection).forEach(cell => {
-      if (cell.attributeId === cellIds.attributeId && cell.caseId === cellIds.caseId) {
-        cellSelected = true;
-      }
-    });
-    return cellSelected;
   }
 
   function selectCases(caseIds: string[], select = true) {
@@ -442,7 +433,10 @@ export const DataSet = types.model("DataSet", {
                 ? group.childCaseIds.every(id => self.caseSelection.has(id))
                 : self.caseSelection.has(caseId);
       },
-      isCellSelected,
+      isCellSelected(cell: ICell) {
+        const cellId = getCellId(cell);
+        return self.cellSelection.has(cellId);
+      },
       get firstSelectedAttributeId() {
         if (self.selectedAttributeIds.length > 0) return self.selectedAttributeIds[0];
       },
@@ -456,7 +450,7 @@ export const DataSet = types.model("DataSet", {
         return self.selectedCaseIds.join(", ");
       },
       get selectedCellIdString() {
-        return self.selectedCells.map(cell => `(${cell.attributeId},${cell.caseId})`).join(", ");
+        return self.selectedCells.join(", ");
       },
       get isAnyCaseSelected() {
         return self.caseSelection.size > 0;
@@ -735,7 +729,7 @@ export const DataSet = types.model("DataSet", {
           self.caseSelection.clear();
           self.attributes.forEach(attribute => {
             self.cases.forEach(({__id__}) => {
-              self.cellSelection.add({ attributeId: attribute.id, caseId: __id__ });
+              self.cellSelection.add(getCellId({ attributeId: attribute.id, caseId: __id__ }));
             });
           });
         } else {
@@ -771,15 +765,9 @@ export const DataSet = types.model("DataSet", {
 
         cells.forEach(cell => {
           if (select) {
-            if (!isCellSelected(cell)) {
-              self.cellSelection.add(cell);
-            }
+            self.cellSelection.add(getCellId(cell));
           } else {
-            Array.from(self.cellSelection).forEach(selectedCell => {
-              if (selectedCell.attributeId === cell.attributeId && selectedCell.caseId === cell.caseId) {
-                self.cellSelection.delete(selectedCell);
-              }
-            });
+            self.cellSelection.delete(getCellId(cell));
           }
         });
       },
@@ -798,7 +786,7 @@ export const DataSet = types.model("DataSet", {
           setSelectedCases(uniqueCaseIds(cells));
         }
 
-        self.cellSelection.replace(cells);
+        self.cellSelection.replace(cells.map(cell => getCellId(cell)));
       },
 
       addActionListener(key: string, listener: (action: ISerializedActionCall) => void) {
