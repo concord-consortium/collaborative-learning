@@ -61,13 +61,9 @@ export function getCellFromId(cellId: string) {
   if (cell.attributeId && cell.caseId) return cell as ICell;
 }
 export function uniqueCaseIds(cells: ICell[]) {
-  const caseIds: string[] = [];
-  cells.forEach(cell => {
-    if (!caseIds.includes(cell.caseId)) {
-      caseIds.push(cell.caseId);
-    }
-  });
-  return caseIds;
+  const caseIds = new Set<string>();
+  cells.forEach(cell => caseIds.add(cell.caseId));
+  return Array.from(caseIds);
 }
 
 export function isNumeric(val: IValueType) {
