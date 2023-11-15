@@ -82,6 +82,10 @@ export const useSubAxis = ({
             .style("stroke", "lightgrey")
             .style("stroke-opacity", "0.7");
         },
+        //***********************************************
+        //******   HORIZONTAL AXIS HERE *****************
+        //***********************************************
+
         renderNumericAxis = () => {
           console.log("\t🏭 renderNumericAxis------------------");
           select(subAxisElt).selectAll('*').remove();
@@ -92,7 +96,7 @@ export const useSubAxis = ({
           const duration = enableAnimation.current ? transitionDuration : 0;
           console.log("\t🔪 duration:", duration);
           if (!axisIsVertical && numericScale.ticks) {
-            console.log("nonVerticalAxis");
+            console.log("-------nonVerticalAxis (horizontal)-----------");
             axisScale.tickValues(numericScale.ticks(computeBestNumberOfTicks(numericScale)));
             console.log("\t numericScale.ticks(computeBestNumberOfTicks(numericScale)):",
               numericScale.ticks(computeBestNumberOfTicks(numericScale)));
@@ -126,6 +130,7 @@ export const useSubAxis = ({
         },
 
         renderCategoricalSubAxis = () => {
+          console.log("\t🏭 renderCategoricalSubAxis");
           if (!(subAxisSelectionRef.current && categoriesSelectionRef.current)) return;
 
           const categorySet = multiScale?.categorySet,
@@ -151,6 +156,9 @@ export const useSubAxis = ({
             : (collision ? 'vertical' : 'horizontal');
 
           const sAS = subAxisSelectionRef.current;
+
+          console.log("\t🥩 rangeMin:", rangeMin);
+          console.log("\t🥩 rangeMax:", rangeMax);
 
           sAS.attr("transform", initialTransform)
             .select('line')

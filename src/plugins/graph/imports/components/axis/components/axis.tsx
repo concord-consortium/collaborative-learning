@@ -20,6 +20,8 @@ export const Axis = ({
                        enableAnimation,
                        centerCategoryLabels = true,
                      }: IProps) => {
+  console.log("-------< Axis > -------------");
+
   const
     layout = useAxisLayoutContext(),
     place = axisModel?.place || 'bottom',
@@ -31,7 +33,7 @@ export const Axis = ({
 
   const getSubAxes = () => {
     const numRepetitions = layout.getAxisMultiScale(place)?.repetitions ?? 1;
-    // console.log("\t🔪 numRepetitions:", numRepetitions);
+    console.log("\t🔪 numRepetitions:", numRepetitions);
     // console.log("\t🔪 range(numRepetitions):", range(numRepetitions));
     return range(numRepetitions).map(i => {
       // console.log("\t in map where i =", i);
