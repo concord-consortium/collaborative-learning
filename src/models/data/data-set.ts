@@ -252,8 +252,8 @@ export const DataSet = types.model("DataSet", {
     self.cellSelection.clear();
   }
 
-  function selectCases(caseIds: string[], select = true) {
-    if (select) self.attributeSelection.clear();
+  // Returns a list of caseIds, which could be from pseudo cases
+  function getCaseIds(caseIds: string[]) {
     const ids: string[] = [];
     caseIds.forEach(id => {
       const pseudoCase = self.pseudoCaseMap[id];
@@ -263,10 +263,15 @@ export const DataSet = types.model("DataSet", {
         ids.push(id);
       }
     });
+    return ids;
+  }
+
+  function selectCases(caseIds: string[], select = true) {
     if (select) {
       self.attributeSelection.clear();
       self.cellSelection.clear();
     }
+    const ids = getCaseIds(caseIds);
     ids.forEach(id => {
       if (select) {
         self.caseSelection.add(id);
@@ -279,15 +284,7 @@ export const DataSet = types.model("DataSet", {
 
   function setSelectedCases(caseIds: string[]) {
     clearAllSelections();
-    const ids: string[] = [];
-    caseIds.forEach(id => {
-      const pseudoCase = self.pseudoCaseMap[id];
-      if (pseudoCase) {
-        ids.push(...pseudoCase.childCaseIds);
-      } else {
-        ids.push(id);
-      }
-    });
+    const ids = getCaseIds(caseIds);
     self.caseSelection.replace(ids);
   }
 
