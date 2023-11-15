@@ -1,9 +1,13 @@
+function wsclass(workspaceClass) {
+  return workspaceClass || ".primary-workspace";
+}
+
 class TableToolTile{
     getTableTile(workspaceClass) {
-        return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .table-tool`);
+        return cy.get(`${wsclass(workspaceClass)} .canvas-area .table-tool`);
     }
     getTableTitle(workspaceClass){
-      return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .table-title`);
+      return cy.get(`${wsclass(workspaceClass)} .canvas-area .table-title`);
     }
     getAddColumnButton(){
       return cy.get('.add-column-button');
@@ -12,13 +16,16 @@ class TableToolTile{
       return cy.get('.remove-column-button');
     }
     getIndexNumberToggle(workspaceClass){
-      return cy.get(`${workspaceClass || ".primary-workspace"} .show-hide-row-labels-button`);
+      return cy.get(`${wsclass(workspaceClass)} .show-hide-row-labels-button`);
     }
     getRemoveRowButton(){
         return cy.get('[data-test=remove-row-button]');
     }
     getColumnHeader(){
       return cy.get('.column-header-cell .editable-header-cell');
+    }
+    getSelectedColumnHeaders(workspaceClass) {
+      return cy.get(`${wsclass(workspaceClass)} .selected-column .column-header-cell`);
     }
     getWorkspaceColumnHeader(){
       return cy.get('.primary-workspace .column-header-cell .editable-header-cell');

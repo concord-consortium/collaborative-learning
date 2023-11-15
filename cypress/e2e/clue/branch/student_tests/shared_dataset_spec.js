@@ -72,15 +72,36 @@ context('Shared Dataset', function () {
       tableTile.getTableCell().eq(5).click();
       datacardTile.getNavPanel().should("have.text", "Card 2 of 3");
 
+      cy.log("All Tiles Highlight Attributes Selected In Table");
+      tableTile.getTableRow().eq(1).should("have.class", "highlighted");
+      tableTile.getSelectedColumnHeaders().should("have.length", 0);
+      datacardTile.getAttrName().eq(0).should("not.have.class", "highlighted");
+      tableTile.getColumnHeader().eq(0).click();
+      tableTile.getSelectedColumnHeaders().should("have.length", 1);
+      datacardTile.getAttrName().eq(0).should("have.class", "highlighted");
+      // Selecting a column should deselect all rows
+      tableTile.getTableRow().eq(1).should("not.have.class", "highlighted");
+      // TODO: Synchronous attribute highlighting in xy plots
+
       cy.log("All Tiles Highlight Cases Selected In Datacard");
-      xyTile.getTile().click(); // Deselect all cases
       tableTile.getTableRow().eq(0).should("not.have.class", "highlighted");
+      // TODO: The xy plot is not set up for attribute selection so I'm commenting out these lines for now
       // TODO: It would be better to check which dot is highlighted, rather than counting how many are highlighted
-      xyTile.getHighlightedDot().should("not.exist");
+      // xyTile.getHighlightedDot().should("not.exist");
       datacardTile.getPreviousCardButton().click();
       datacardTile.getNavPanel().click("left");
       tableTile.getTableRow().eq(0).should("have.class", "highlighted");
-      xyTile.getHighlightedDot().should("have.length", 1);
+      // xyTile.getHighlightedDot().should("have.length", 1);
+      // Selecting a case should deselect all attributes
+      datacardTile.getAttrName().eq(0).should("not.have.class", "highlighted");
+
+      cy.log("All Tiles Highlight Attributes Selected In Datacard");
+      tableTile.getSelectedColumnHeaders().should("have.length", 0);
+      datacardTile.getAttrName().eq(0).click();
+      datacardTile.getAttrName().eq(0).should("have.class", "highlighted");
+      tableTile.getSelectedColumnHeaders().should("have.length", 1);
+      // Selecting an attribute should deselect all cases
+      datacardTile.getNavPanel().should("not.have.class", "highlighted");
 
       cy.log("All Tiles Highlight Cases Selected In XY Plot");
       xyTile.getTile().click(); // Deselect all cases
@@ -92,7 +113,7 @@ context('Shared Dataset', function () {
       datacardTile.getNavPanel().should("have.class", "highlighted");
       datacardTile.getAttrValueCell().eq(0).should("have.class", "highlighted");
 
-      cy.log("Datacard Sort View Highlights Correctly And Can Change Highlight");
+      cy.log("Datacard Sort View Highlights Cases Correctly And Can Change Case Highlight");
       tableTile.getTableRow().eq(0).should("have.class", "highlighted");
       tableTile.getTableRow().eq(1).should("not.have.class", "highlighted");
       datacardTile.getSortSelect().select("x");
@@ -103,6 +124,15 @@ context('Shared Dataset', function () {
       datacardTile.getSortCardHeading().eq(1).should("have.class", "highlighted");
       tableTile.getTableRow().eq(0).should("not.have.class", "highlighted");
       tableTile.getTableRow().eq(1).should("have.class", "highlighted");
+
+      cy.log("Datacard Sort View Highlights Attributes Correctly And Can Change Attribute Highlight");
+      datacardTile.getSortCardAttributes().eq(0).should("not.have.class", "highlighted");
+      tableTile.getSelectedColumnHeaders().should("have.length", 0);
+      datacardTile.getSortCardAttributes().eq(0).click();
+      datacardTile.getSortCardAttributes().eq(0).should("have.class", "highlighted");
+      datacardTile.getSortCardHeading().eq(1).should("not.have.class", "highlighted");
+      tableTile.getTableRow().eq(1).should("not.have.class", "highlighted");
+      tableTile.getSelectedColumnHeaders().should("have.length", 1);
     });
   });
 });

@@ -121,7 +121,7 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
         // clicking on the background deselects all cases
         .on('click', (event) => {
           if (!event.shiftKey) {
-            dataset.current?.selectAll(false);
+            dataset.current?.selectAllCases(false);
           }
         })
         .selectAll<SVGRectElement, number>('rect')

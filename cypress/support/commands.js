@@ -71,17 +71,6 @@ Cypress.Commands.add("clearQAData", (data)=>{ //clears data from Firebase (curre
 // Login using cy.request, this is faster than using visit, and it makes it possible
 // to visit a local domain after logging in
 Cypress.Commands.add("login", (baseUrl, testTeacher) => {
-    /*
-      Cookies should be cleared automatically, but that doesn't seem to happen
-      with cy.request to other domains.
-      The use of {domain: null} is an undocumented feature that I found here:
-      https://github.com/cypress-io/cypress/issues/408
-      Without this, the tests will typically pass, but if you leave your cypress browser
-      open long enough, then an invalid cookie will be sent when the test is run and
-      the login will fail in a strange way. It returns success, but doesn't set a valid
-      cookie.
-    */
-    cy.clearCookies({domain: null});
 
     cy.request({
         url: `${baseUrl}/api/v1/users/sign_in`,
@@ -93,6 +82,16 @@ Cypress.Commands.add("login", (baseUrl, testTeacher) => {
         form: true
     })
     .its("status").should("equal", 200);
+});
+
+Cypress.Commands.add("logout", (baseUrl) => {
+    cy.request({
+        url: `${baseUrl}/api/v1/users/sign_out`,
+        method: "GET"
+    })
+    .then((resp) => {
+        expect(resp.status).to.eq(200);
+      });
 });
 
 // Launch a local report, this uses cy.request to first launch the portal report
@@ -149,9 +148,11 @@ Cypress.Commands.add("openResourceTabs", () => {
 } );
 Cypress.Commands.add("openTopTab", (tab) => {
   cy.get('.top-tab.tab-'+tab).click();
+  cy.get('.top-tab.tab-'+tab).invoke("attr", "class").should("contain", "selected");
 } );
 Cypress.Commands.add("openProblemSection", (section) => {//doc-tab my-work workspaces problem-documents selected
   cy.get('.prob-tab').contains(section).click({force:true});
+  cy.get('.prob-tab').contains(section).invoke("attr", "class").should("contain", "selected");
 });
 Cypress.Commands.add("openSection", (tab, section) => {//doc-tab my-work workspaces problem-documents selected
   cy.get('.doc-tab.'+tab+'.'+section).click({force:true});
@@ -177,11 +178,21 @@ Cypress.Commands.add("openDocumentWithIndex", (tab, section, docIndex) => {
   cy.get('.edit-button').click();
 });
 Cypress.Commands.add("clickProblemResourceTile", (subsection, tileIndex = 0) => {
-  cy.get('[data-focus-section='+subsection+'] .problem-panel .document-content .tile-row').eq(tileIndex).click();
+  cy.get('[data-focus-section='+subsection+'] .problem-panel .document-content .tile-row').eq(tileIndex).then($tileRow => {
+    cy.wrap($tileRow).click();
+    cy.wrap($tileRow).find(".tool-tile").invoke("attr", "class").should("contain", "selected");
+  })
+
 });
 Cypress.Commands.add("getToolTile", (tileIndex = 0) => {
   cy.get('.problem-panel .document-content .tile-row .tool-tile').eq(tileIndex);
 });
+Cypress.Commands.add("clickProblemResource", () => {
+  cy.get(".prob-tab.selected").eq(0).click();
+})
+Cypress.Commands.add("clickDocumentResource", () => {
+  cy.get(".documents-panel div.document-title").eq(0).click();
+})
 Cypress.Commands.add("clickDocumentResourceTile", (tileIndex = 0) => {
   cy.get('.documents-panel .editable-document-content .tile-row').eq(tileIndex).click();
 });

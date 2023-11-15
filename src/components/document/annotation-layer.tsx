@@ -60,8 +60,14 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   }
 
   const documentWidth = canvasElement?.offsetWidth ?? 0;
-  // TODO Would it be better to use canvasElement?.offsetHeight here?
-  const documentHeight = content?.height ?? 0;
+  let documentHeight = 0;
+  const rows = canvasElement?.getElementsByClassName("tile-row");
+  if (rows) {
+    Array.from(rows).forEach(row => {
+      const boundingBox = row.getBoundingClientRect();
+      documentHeight += boundingBox.height;
+    });
+  }
   const documentLeft = 0;
   const documentRight = documentWidth;
   const documentBottom = documentHeight - (documentScrollY ?? 0);

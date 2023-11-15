@@ -67,6 +67,38 @@ describe("ConfigurationManager", () => {
     settings: {}
   } as UnitConfiguration;
 
+  const baseSettings: Partial<UnitConfiguration> = {
+    settings: {
+      table: {
+        numFormat: ".2~f",
+        tools: [
+          "set-expression",
+          "link-tile",
+          ["data-set-view", "DataCard"],
+         ]
+        }
+    }
+  };
+
+  const unitSettings: Partial<UnitConfiguration> = {
+    settings: {
+      table: {
+        tools: [
+          "delete"
+         ]
+      }
+    }
+  };
+
+  const mergedSettings = {
+    table: {
+      numFormat: ".2~f",
+      tools: [
+        "delete"
+        ]
+      }
+  };
+
   const keys = Object.keys(defaults) as Array<keyof typeof defaults>;
 
   it("can be constructed with just defaults and return those defaults", () => {
@@ -88,4 +120,10 @@ describe("ConfigurationManager", () => {
       }
     });
   });
+
+  it("merges settings", () => {
+    const config = new ConfigurationManager(defaults, [baseSettings, unitSettings]);
+    expect(config.settings).toEqual(mergedSettings);
+  });
+
 });
