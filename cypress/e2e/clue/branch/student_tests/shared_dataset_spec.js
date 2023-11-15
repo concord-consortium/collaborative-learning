@@ -140,23 +140,6 @@ context('Shared Dataset', function () {
       tableTile.getTableCell().eq(2).click();
       datacardTile.getSortCardValues().eq(1).should("have.class", "highlighted");
       tableTile.getTableCellContent(2).should("have.class", "highlighted");
-
-      // TODO: Figure out how to press arrow keys
-      // cy.log("Can Navigate Table Cells With Arrows");
-      // tableTile.getTableCell().eq(1).click();
-      // cy.get("body").type("{leftArrow}", { force: true });
-      // tableTile.getTableCellContent(1).should("not.have.class", "highlighted");
-      // tableTile.getTableCellContent(18).should("have.class", "highlighted");
-      // cy.get("body").type("{rightArrow", { force: true });
-      // tableTile.getTableCellContent(1).should("have.class", "highlighted");
-      // tableTile.getTableCellContent(18).should("not.have.class", "highlighted");
-      // tableTile.getTableCell().eq(4).click();
-      // cy.get("body").type("{rightArrow", { force: true });
-      // tableTile.getTableCellContent(4).should("not.have.class", "highlighted");
-      // tableTile.getTableCellContent(7).should("have.class", "highlighted");
-      // cy.get("body").type("{leftArrow", { force: true });
-      // tableTile.getTableCellContent(4).should("have.class", "highlighted");
-      // tableTile.getTableCellContent(7).should("not.have.class", "highlighted");
     });
   });
 });
