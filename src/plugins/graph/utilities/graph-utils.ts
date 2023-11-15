@@ -410,12 +410,9 @@ export interface ISetPointSelection {
 export function setPointSelection(props: ISetPointSelection) {
   const { dotsRef, dataConfiguration } = props;
   const dataset = dataConfiguration.dataset;
-  const allCircles = selectAllCircles(dotsRef.current); //includes both inner and outer circles
   const outerCircles = selectOuterCircles(dotsRef.current);
-  if (allCircles) {
-    applySelectedClassToCircles(allCircles, dataset);
-  }
   if (outerCircles) {
+    applySelectedClassToCircles(outerCircles, dataset);
     styleOuterCircles(outerCircles, dataset);
   }
 }
