@@ -1,21 +1,21 @@
-import React, { useContext, useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { observer } from "mobx-react";
 import {AttributeType} from "../../../../models/data/attribute";
 import { GraphPlace } from "../../imports/components/axis-graph-shared";
-import { SimpleAttributeLabel } from "../simple-attribute-label";
 import { useGraphLayoutContext } from "../../models/graph-layout";
 import { IDataSet } from "../../../../models/data/data-set";
-import { useDataConfigurationContext } from "../../hooks/use-data-configuration-context";
-import { AddSeriesButton } from "./add-series-button";
 import { useInstanceIdContext } from "../../imports/hooks/use-instance-id-context";
 import { kGraphDefaultHeight } from "../../graph-types";
-import { ReadOnlyContext } from "../../../../components/document/read-only-context";
+import { useGraphModelContext } from "../../models/graph-model";
 
 export const kMultiLegendMenuHeight = 30;
 export const kMultiLegendPadding = 20;
 export const kMultiLegendVerticalGap = 10;
+export const kMultiLegendLabelHeight = 20;
 
 import "./multi-legend.scss";
+import { LayerLegend } from "./layer-legend";
+import { IGraphLayerModel } from "../../models/graph-layer-model";
 
 interface IMultiLegendProps {
   graphElt: HTMLDivElement | null;
@@ -31,12 +31,8 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
   const legendBounds = layout.computedBounds.legend;
   const transform = `translate(${legendBounds.left}, ${legendBounds.top})`;
   const multiLegendRef = useRef<HTMLDivElement>(null);
-  const dataConfiguration = useDataConfigurationContext();
+  const graphModel = useGraphModelContext();
   const instanceId = useInstanceIdContext();
-
-  const yAttributeCount = dataConfiguration?.yAttributeDescriptions.length || 0;
-
-  const readOnly = useContext(ReadOnlyContext);
 
   useEffect(() =>{
     const legendTransform = `translateY(${-layout.computedBounds.legend.height}px)`;
@@ -46,52 +42,32 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
     multiLegendRef.current.style.height = `${legendBounds.height}px`;
   }, [layout.computedBounds.legend.height, layout.graphWidth, legendBounds, transform]);
 
-  useEffect(function RespondToLayoutChange() {
+  function heightOfLayerLegend(layer: IGraphLayerModel) {
+    const yAttributeCount = layer.config.yAttributeDescriptions.length || 0;
     const legendRows = Math.ceil((yAttributeCount+1)/2);
-    const legendHeight = kMultiLegendPadding * 2
-      + kMultiLegendMenuHeight  * legendRows
-      + kMultiLegendVerticalGap * (legendRows-1);
-    layout.setDesiredExtent("legend", legendHeight);
-    onRequestRowHeight?.(instanceId, kGraphDefaultHeight + legendHeight);
-  }, [instanceId, layout, onRequestRowHeight, yAttributeCount]);
+    return kMultiLegendPadding * 2
+      + kMultiLegendLabelHeight
+      + kMultiLegendMenuHeight * legendRows
+      + kMultiLegendVerticalGap * (legendRows - 1);
+  }
 
-  let legendItems = [] as React.ReactNode[];
-  if (dataConfiguration) {
-    const yAttributes = dataConfiguration.yAttributeDescriptions;
+  useEffect(function RespondToLayoutChange() {
+    const totalHeight = graphModel.layers.reduce((prev, layer)=>{ return prev + heightOfLayerLegend(layer);}, 0);
+    layout.setDesiredExtent("legend", totalHeight);
+    onRequestRowHeight?.(instanceId, kGraphDefaultHeight + totalHeight);
+  }, [instanceId, layout, onRequestRowHeight, graphModel.layers]);
 
-    legendItems = yAttributes.map((description, index) =>
-      <SimpleAttributeLabel
-        key={description.attributeID}
-        place={'left'}
-        index={index}
-        attrId={description.attributeID}
+  const layerLegends = graphModel.layers.map((layer) => {
+    return (
+      <LayerLegend layer={layer}
+        key={layer.id}
         onChangeAttribute={onChangeAttribute}
         onRemoveAttribute={onRemoveAttribute}
-        onTreatAttributeAs={onTreatAttributeAs}
-      />);
-    if (!readOnly) {
-      legendItems.push(<AddSeriesButton/>);
-    }
-  }
-  // Make rows with two legend items in each row
-  const legendItemRows = [] as React.ReactNode[];
-  let i=0;
-  while(legendItems.length) {
-    legendItemRows.push(
-      <div key={i++} className="legend-row">
-        <div className="legend-cell-1">
-          {legendItems?.shift()}
-        </div>
-        <div className="legend-cell-2">
-          {legendItems?.shift() || null}
-        </div>
-      </div>
-    );
-  }
+        onTreatAttributeAs={onTreatAttributeAs} />); });
 
   return (
     <div className="multi-legend" ref={ multiLegendRef }>
-      {legendItemRows}
+      { layerLegends }
     </div>
   );
 });
