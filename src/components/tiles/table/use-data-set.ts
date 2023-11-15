@@ -49,52 +49,60 @@ export const useDataSet = ({
     // Only modify the selection if a single cell is selected
     if (dataSet.selectedCells.length !== 1) return;
 
-    // Determine if we're moving forwards or backwards
     const { selectedCellColumnIndex, selectedCellRowIndex } = getSelectedCellIndices();
-    const forward = (selectedCellRowIndex < position.rowIdx) ||
-      (selectedCellRowIndex === position.rowIdx && selectedCellColumnIndex < position.idx);
 
-    // Set the dataSet's selected cell
-    const newRowId = position.rowIdx === rows.length - 1
-      ? inputRowId.current
-      : dataSet.caseIDFromIndex(position.rowIdx);
-    const newColumnId = dataSet.attrIDFromIndex(position.idx - 1);
-    if (newColumnId && newRowId
-      && !(selectedCellColumnIndex === position.idx - 1 && selectedCellRowIndex === position.rowIdx)
-    ) {
-      dataSet.setSelectedCells([{ attributeId: newColumnId, caseId: newRowId }]);
-      triggerRowChange();
-    }
-
-    // Update the position if it's not a legal option (if we're in the control or delete column).
-    // Note that rdg will not allow us to move to a row outside of the grid
-    let newPosition = { ...position };
-    const rightColumnIndex = columns.length - (readOnly ? 1 : 2);
-    while(!isCellSelectable(newPosition, columns, readOnly)) {
+    if (isCellSelectable(position, columns, readOnly)) {
+      // Set the dataSet's selected cell
+      const newRowId = position.rowIdx === rows.length - 1
+        ? inputRowId.current
+        : dataSet.caseIDFromIndex(position.rowIdx);
+      const newColumnId = dataSet.attrIDFromIndex(position.idx - 1);
+      if (newColumnId && newRowId
+        && !(selectedCellColumnIndex === position.idx - 1 && selectedCellRowIndex === position.rowIdx)
+      ) {
+        dataSet.setSelectedCells([{ attributeId: newColumnId, caseId: newRowId }]);
+        triggerRowChange();
+      }
+    } else if (!(position.idx === -1 && position.rowIdx === -1)) {
+      // Update the position if it's not a legal option (if we're in the control or delete column).
+      // Note that rdg will not allow us to move to a row outside of the grid
+      let newPosition = { ...position };
+      const rightColumnIndex = columns.length - (readOnly ? 1 : 2);
+      // Determine if we're moving forwards or backwards
+      const forward = (selectedCellRowIndex < position.rowIdx) ||
+        (selectedCellRowIndex === position.rowIdx && selectedCellColumnIndex < position.idx);
       if (forward) {
-        if (newPosition.rowIdx === rows.length - 1 && newPosition.idx > rightColumnIndex) {
-          // move from bottom right cell to top left cell
-          newPosition = { rowIdx: 0, idx: 1 };
-        } else if (++newPosition.idx >= columns.length) {
-          // otherwise advance to left cell of next row
-          newPosition.idx = 1;
-          ++newPosition.rowIdx;
+        if (newPosition.idx > rightColumnIndex) {
+          if (newPosition.rowIdx >= rows.length - 1) {
+            // deselect all cells
+            newPosition = { rowIdx: -1, idx: -1 };
+          } else {
+            // otherwise advance to left cell of next row
+            newPosition.idx = 1;
+            ++newPosition.rowIdx;
+          }
         }
       } else {
-        if (newPosition.rowIdx === 0 && newPosition.idx < 1) {
-          // move from top left cell to bottom right cell
-          newPosition = { rowIdx: rows.length - 1, idx: rightColumnIndex };
-        } else if (--newPosition.idx < 1) {
-          // otherwise move to right cell of previous row
-          newPosition.idx = rightColumnIndex;
-          --newPosition.rowIdx;
+        if (newPosition.idx < 1) {
+          if (newPosition.rowIdx <= 0) {
+            // deselect all cells
+            newPosition = { rowIdx: -1, idx: -1 };
+          } else if (newPosition.idx < 1) {
+            // otherwise move to right cell of previous row
+            newPosition.idx = rightColumnIndex;
+            --newPosition.rowIdx;
+          }
         }
       }
-    }
 
-    // Update rdg if we fixed the position, which will cause this function to be called again
-    if ((newPosition.rowIdx !== position.rowIdx) || (newPosition.idx !== position.idx)) {
-      gridRef.current?.selectCell(newPosition);
+      // Update rdg if we fixed the position, which will cause this function to be called again
+      if ((newPosition.rowIdx !== position.rowIdx) || (newPosition.idx !== position.idx)) {
+        gridRef.current?.selectCell(newPosition);
+        if (newPosition.rowIdx === -1 && newPosition.idx === -1) {
+          dataSet.setSelectedCells([]);
+          triggerRowChange();
+        }
+      }
     }
   };
 
