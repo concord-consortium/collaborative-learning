@@ -450,7 +450,7 @@ export const DataSet = types.model("DataSet", {
         return self.selectedCaseIds.join(", ");
       },
       get selectedCellIdString() {
-        return self.selectedCells.join(", ");
+        return Array.from(self.cellSelection).join(", ");
       },
       get isAnyCaseSelected() {
         return self.caseSelection.size > 0;
