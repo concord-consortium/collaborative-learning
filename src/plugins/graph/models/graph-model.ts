@@ -25,10 +25,9 @@ import {
   defaultBackgroundColor, defaultPointColor, defaultStrokeColor, kellyColors
 } from "../../../utilities/color-utils";
 import { AdornmentModelUnion } from "../adornments/adornment-types";
+import { ConnectingLinesModel } from "../adornments/connecting-lines/connecting-lines-model";
 import { isSharedCaseMetadata, SharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
 import { tileContentAPIViews } from "../../../models/tiles/tile-model-hooks";
-import { ConnectingLinesModel } from "../adornments/connecting-lines/connecting-lines-model";
-import { kConnectingLinesType } from "../adornments/connecting-lines/connecting-lines-types";
 import { getDotId } from "../utilities/graph-utils";
 import { GraphLayerModel } from "./graph-layer-model";
 import { isSharedDataSet, SharedDataSet } from "../../../models/shared/shared-data-set";
@@ -307,8 +306,8 @@ export const GraphModel = TileContentModel
     setShowMeasuresForSelection(show: boolean) {
       self.showMeasuresForSelection = show;
     },
-    showAdornment(adornment: IAdornmentModel, type: string) {
-      const adornmentExists = self.adornments.find(a => a.type === type);
+    showAdornment(adornment: IAdornmentModel) {
+      const adornmentExists = self.adornments.find(a => a.type === adornment.type);
       if (adornmentExists) {
         adornmentExists.setVisibility(true);
       } else {
@@ -488,8 +487,8 @@ export function createGraphModel(snap?: IGraphModelSnapshot, appConfig?: AppConf
   // const connectLinesByDefault = appConfig?.getSetting("defaultConnectedLines", "graph");
   const connectByDefault = appConfig?.getSetting("defaultSeriesLegend", "graph");
   if (connectByDefault) {
-    const cLines = ConnectingLinesModel.create({type: kConnectingLinesType, isVisible: true});
-    createdGraphModel.showAdornment(cLines, kConnectingLinesType);
+    const cLines = ConnectingLinesModel.create();
+    createdGraphModel.showAdornment(cLines);
   }
   return createdGraphModel;
 }
