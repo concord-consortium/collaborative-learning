@@ -31,22 +31,22 @@ export const isLightColorRequiringContrastOffset = (color?: string) => {
   and https://stackoverflow.com/questions/470690/how-to-automatically-generate-n-distinct-colors
 
   The first seven are also visually distinct for people with defective color vision
-   */
-  export const kellyColors = [
-    '#FF6800', '#803E75', '#A6BDD7', '#FFB300',
-    '#C10020', '#CEA262', '#817066', '#007D34',
-    '#00538A', '#F13A13', '#53377A', '#FF8E00',
-    '#B32851', '#F4C800', '#7F180D', '#93AA00',
-    '#593315', '#232C16', '#FF7A5C', '#F6768E'
-  ];
+*/
+export const kellyColors = [
+  '#FF6800', '#803E75', '#A6BDD7', '#FFB300',
+  '#C10020', '#CEA262', '#817066', '#007D34',
+  '#00538A', '#F13A13', '#53377A', '#FF8E00',
+  '#B32851', '#F4C800', '#7F180D', '#93AA00',
+  '#593315', '#232C16', '#FF7A5C', '#F6768E'
+];
 
-  export const defaultPointColor = '#E6805B',
-    defaultSelectedColor = '#4682B4',
-    defaultStrokeWidth = 1,
-    defaultStrokeOpacity = 0.4,
-    missingColor = '#888888',
-    defaultStrokeColor = '#FFFFFF',
-    defaultSelectedStroke = '#FF0000',
-    defaultSelectedStrokeWidth = 2,
-    defaultSelectedStrokeOpacity = 1,
-    defaultBackgroundColor = '#FFFFFF';
+export const defaultPointColor = '#E6805B';
+export const defaultStrokeWidth = 1;
+export const missingColor = '#888888';
+export const defaultStrokeColor = '#FFFFFF';
+export const defaultBackgroundColor = '#FFFFFF';
+
+export const selectedStrokeWidth = 1; //1 for now - may change such that the stroke-width increases when selected
+export const selectedOuterCircleFillColor = "#14F49E";
+export const selectedOuterCircleStrokeColor = "#FFFFFF";
+

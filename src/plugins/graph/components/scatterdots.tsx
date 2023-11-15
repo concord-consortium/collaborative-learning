@@ -9,6 +9,8 @@ import {useDataSetContext} from "../imports/hooks/use-data-set-context";
 // import {useInstanceIdContext} from "../hooks/use-instance-id-context";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {ICase} from "../../../models/data/data-set-types";
+import {selectedOuterCircleFillColor} from "../../../utilities/color-utils";
+import {useGraphModelContext} from "../models/graph-model";
 import {
   // getScreenCoord,
   handleClickOnDot,
@@ -16,7 +18,6 @@ import {
   setPointSelection,
   startAnimation
 } from "../utilities/graph-utils";
-import {useGraphModelContext} from "../models/graph-model";
 
 export const ScatterDots = function ScatterDots(props: PlotProps) {
   const {dotsRef, enableAnimation} = props,
@@ -42,7 +43,6 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
   pointRadiusRef.current = graphModel.getPointRadius();
   selectedPointRadiusRef.current = graphModel.getPointRadius('select');
   dragPointRadiusRef.current = graphModel.getPointRadius('hover-drag');
-
   yScaleRef.current = layout.getAxisScale("left") as ScaleNumericBaseType;
 
   const onDragStart = useCallback((event: MouseEvent) => {
@@ -77,6 +77,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
     }, [dataConfiguration, dataset, enableAnimation]),
 
     onDrag = useCallback((event: MouseEvent) => {
+
       const xAxisScale = layout.getAxisScale('bottom') as ScaleLinear<number, number>,
         xAttrID = dataConfiguration?.attributeID('x') ?? '';
       if (dragID !== '') {
@@ -109,7 +110,6 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
     }, [layout, dataConfiguration, dataset, dragID]),
 
     onDragEnd = useCallback(() => {
-
       if (dragID !== '') {
         target.current
           .classed('dragging', false)
@@ -141,12 +141,13 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
   useDragHandlers(window, {start: onDragStart, drag: onDrag, end: onDragEnd});
 
   const refreshPointSelection = useCallback(() => {
-    const {pointColor, pointStrokeColor} = graphModel;
+    const { pointColor } = graphModel;
+
     dataConfiguration && setPointSelection(
       {
         dotsRef, dataConfiguration, pointRadius: pointRadiusRef.current,
         selectedPointRadius: selectedPointRadiusRef.current,
-        pointColor, pointStrokeColor, getPointColorAtIndex: graphModel.pointColorAtIndex
+        pointColor, pointStrokeColor: selectedOuterCircleFillColor, getPointColorAtIndex: graphModel.pointColorAtIndex
       });
   }, [dataConfiguration, dotsRef, graphModel]);
 

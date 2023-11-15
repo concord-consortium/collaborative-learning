@@ -10,10 +10,10 @@ import {
   AxisModelUnion, EmptyAxisModel, IAxisModelUnion, NumericAxisModel
 } from "../imports/components/axis/models/axis-model";
 import { GraphPlace } from "../imports/components/axis-graph-shared";
-import {
-  GraphAttrRole, hoverRadiusFactor, kDefaultNumericAxisBounds, kGraphTileType, PlotType, PlotTypes,
-  pointRadiusLogBase, pointRadiusMax, pointRadiusMin, pointRadiusSelectionAddend
-} from "../graph-types";
+import { GraphAttrRole, hoverRadiusFactor, kDefaultNumericAxisBounds, kGraphTileType,
+         PlotType, PlotTypes, pointRadiusMax, pointRadiusSelectionAddend
+
+       } from "../graph-types";
 import {DataConfigurationModel} from "./data-configuration-model";
 import { SharedModelType } from "../../../models/shared/shared-model";
 import {
@@ -28,10 +28,9 @@ import {
 } from "../../../utilities/color-utils";
 import { onAnyAction } from "../../../utilities/mst-utils";
 import { AdornmentModelUnion } from "../adornments/adornment-types";
+import { ConnectingLinesModel } from "../adornments/connecting-lines/connecting-lines-model";
 import { SharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
 import { tileContentAPIViews } from "../../../models/tiles/tile-model-hooks";
-import { ConnectingLinesModel } from "../adornments/connecting-lines/connecting-lines-model";
-import { kConnectingLinesType } from "../adornments/connecting-lines/connecting-lines-types";
 import { getDotId } from "../utilities/graph-utils";
 export interface GraphProperties {
   axes: Record<string, IAxisModelUnion>
@@ -105,21 +104,28 @@ export const GraphModel = TileContentModel
       return self.config.attributeID(place) ?? '';
     },
     getPointRadius(use: 'normal' | 'hover-drag' | 'select' = 'normal') {
-      let r = pointRadiusMax;
-      const numPoints = self.config.caseDataArray.length;
-      // for loop is fast equivalent to radius = max( minSize, maxSize - floor( log( logBase, max( dataLength, 1 )))
-      for (let i = pointRadiusLogBase; i <= numPoints; i = i * pointRadiusLogBase) {
-        --r;
-        if (r <= pointRadiusMin) break;
-      }
-      const result = r * self.pointSizeMultiplier;
+      const r = pointRadiusMax;
+
+      //*************************************************************************************************************
+      //We used to return "result" which decreased the inner radius circle when we clicked on a
+      //selected point. Leaving this commented in case we want to change the radius when we click on a point
+      //**************************************************************************************************************
+
+      // const numPoints = self.config.caseDataArray.length;
+      // // for loop is fast equivalent to radius = max( minSize, maxSize - floor( log( logBase, max( dataLength, 1 )))
+      // for (let i = pointRadiusLogBase; i <= numPoints; i = i * pointRadiusLogBase) {
+      //   --r;
+      //   if (r <= pointRadiusMin) break;
+      // }
+      // const result = r * self.pointSizeMultiplier;
+
       switch (use) {
         case "normal":
-          return result;
+          return r;
         case "hover-drag":
-          return result * hoverRadiusFactor;
+          return r * hoverRadiusFactor;
         case "select":
-          return result + pointRadiusSelectionAddend;
+          return r + pointRadiusSelectionAddend;
       }
     },
     axisShouldShowGridLines(place: AxisPlace) {
@@ -269,8 +275,8 @@ export const GraphModel = TileContentModel
     setShowMeasuresForSelection(show: boolean) {
       self.showMeasuresForSelection = show;
     },
-    showAdornment(adornment: IAdornmentModel, type: string) {
-      const adornmentExists = self.adornments.find(a => a.type === type);
+    showAdornment(adornment: IAdornmentModel) {
+      const adornmentExists = self.adornments.find(a => a.type === adornment.type);
       if (adornmentExists) {
         adornmentExists.setVisibility(true);
       } else {
@@ -420,8 +426,8 @@ export function createGraphModel(snap?: IGraphModelSnapshot, appConfig?: AppConf
   // const connectLinesByDefault = appConfig?.getSetting("defaultConnectedLines", "graph");
   const connectByDefault = appConfig?.getSetting("defaultSeriesLegend", "graph");
   if (connectByDefault) {
-    const cLines = ConnectingLinesModel.create({type: kConnectingLinesType, isVisible: true});
-    createdGraphModel.showAdornment(cLines, kConnectingLinesType);
+    const cLines = ConnectingLinesModel.create();
+    createdGraphModel.showAdornment(cLines);
   }
   return createdGraphModel;
 }
