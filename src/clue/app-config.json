@@ -246,6 +246,7 @@
         "defaultSeriesLegend": true,
         "connectPointsByDefault": true,
         "autoAssignAttributes": true,
+        "disableAttributeDnD": true,
         "tools": [
           "link-tile"
         ]

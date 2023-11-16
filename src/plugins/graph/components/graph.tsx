@@ -35,9 +35,12 @@ import {useDataTips} from "../hooks/use-data-tips";
 import {onAnyAction} from "../../../utilities/mst-utils";
 import { Adornments } from "../adornments/adornments";
 import { kConnectingLinesType } from "../adornments/connecting-lines/connecting-lines-types";
+import { useSettingFromStores } from "../../../hooks/use-stores";
+import { GraphSettingsContext, IGraphSettings } from "../hooks/use-graph-settings-context";
 
 import "./graph.scss";
 import "./graph-clue-styles.scss";
+
 
 interface IProps {
   graphController: GraphController;
@@ -59,7 +62,16 @@ export const Graph = observer(
     xScale = layout.getAxisScale("bottom"),
     svgRef = useRef<SVGSVGElement>(null),
     plotAreaSVGRef = useRef<SVGSVGElement>(null),
-    backgroundSvgRef = useRef<SVGGElement>(null);
+    backgroundSvgRef = useRef<SVGGElement>(null),
+    graphSettingsObj: IGraphSettings = {
+      disableAttributeDnD: useSettingFromStores("disableAttributeDnD", "graph") as boolean,
+      scalePlotOnValueChange: useSettingFromStores("scalePlotOnValueChange", "graph") as boolean,
+      emptyPlotIsNumeric: useSettingFromStores("emptyPlotIsNumeric", "graph") as boolean,
+      defaultSeriesLegend: useSettingFromStores("defaultSeriesLegend", "graph") as boolean,
+      connectPointsByDefault: useSettingFromStores("connectPointsByDefault", "graph") as boolean,
+      autoAssignAttributes: useSettingFromStores("autoAssignAttributes", "graph") as boolean,
+      defaultAxisLabels: useSettingFromStores("defaultAxisLabels", "graph") as Record<string, string> | undefined
+    };
 
   useEffect(function setupPlotArea() {
     if (xScale && xScale?.length > 0) {
@@ -224,8 +236,8 @@ export const Graph = observer(
 
   // TODO multi-dataset: DataContext / providers will need to be replaced by looping over layers.
   return (
-    <DataConfigurationContext.Provider value={graphModel.config}>
-      <DataSetContext.Provider value={graphModel.config.dataset}>
+    <GraphSettingsContext.Provider value={graphSettingsObj}>
+      <DataConfigurationContext.Provider value={graphModel.config}>
         <div className={kGraphClass} ref={graphRef} data-testid="graph">
           <svg className='graph-svg' ref={svgRef}>
             <Background
@@ -239,14 +251,16 @@ export const Graph = observer(
               <svg ref={dotsRef} className={`graph-dot-area ${instanceId}`}>
                 {renderPlotComponent()}
               </svg>
-              <Marquee marqueeState={marqueeState} />
+              <Marquee marqueeState={marqueeState}/>
             </svg>
 
-            <DroppablePlot
-              graphElt={graphRef.current}
-              plotElt={backgroundSvgRef.current}
-              onDropAttribute={handleChangeAttribute}
-            />
+            { !graphSettingsObj.disableAttributeDnD &&
+              <DroppablePlot
+                graphElt={graphRef.current}
+                plotElt={backgroundSvgRef.current}
+                onDropAttribute={handleChangeAttribute}
+              />
+            }
 
             <Legend
               legendAttrID={graphModel.getAttributeID('legend')}
@@ -256,9 +270,9 @@ export const Graph = observer(
               onTreatAttributeAs={handleTreatAttrAs}
             />
           </svg>
-          {renderDroppableAddAttributes()}
-          <Adornments dotsRef={dotsRef} />
-          {appConfig.getSetting("defaultSeriesLegend", "graph") &&
+          {!graphSettingsObj.disableAttributeDnD && renderDroppableAddAttributes()}
+          <Adornments dotsRef={dotsRef}/>
+          { appConfig.getSetting("defaultSeriesLegend", "graph") &&
             <MultiLegend
               graphElt={graphRef.current}
               onChangeAttribute={handleChangeAttribute}
@@ -268,7 +282,7 @@ export const Graph = observer(
             />
           }
         </div>
-      </DataSetContext.Provider>
-    </DataConfigurationContext.Provider>
+      </DataConfigurationContext.Provider>
+    </GraphSettingsContext.Provider>
   );
 });
