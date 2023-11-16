@@ -25,7 +25,7 @@ export const Axis = ({
   const layout = useAxisLayoutContext();
   const place = axisModel?.place || 'bottom';
   const [axisElt, setAxisElt] = useState<SVGGElement | null>(null);
-  console.log(`📁 axis.tsx ---------${place}------------`);
+  // console.log(`📁 axis.tsx ---------${place}------------`);
 
 
   useAxis({

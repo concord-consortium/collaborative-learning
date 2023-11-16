@@ -49,17 +49,18 @@ interface IProps {
 export const Graph = observer(
     function Graph({ graphController, graphRef, dotsRef, onRequestRowHeight }: IProps) {
 
-  const graphModel = useGraphModelContext(),
-    {autoAdjustAxes, enableAnimation} = graphController,
-    {plotType} = graphModel,
-    instanceId = useInstanceIdContext(),
-    marqueeState = useMemo<MarqueeState>(() => new MarqueeState(), []),
-    dataset = useDataSetContext(),
-    layout = useGraphLayoutContext(),
-    xScale = layout.getAxisScale("bottom"),
-    svgRef = useRef<SVGSVGElement>(null),
-    plotAreaSVGRef = useRef<SVGSVGElement>(null),
-    backgroundSvgRef = useRef<SVGGElement>(null);
+  const graphModel = useGraphModelContext();
+  const {autoAdjustAxes, enableAnimation} = graphController;
+  const {plotType} = graphModel;
+  const instanceId = useInstanceIdContext();
+  const marqueeState = useMemo<MarqueeState>(() => new MarqueeState(), []);
+  const dataset = useDataSetContext();
+  const showEditableGraphValue = !!dataset;
+  const layout = useGraphLayoutContext();
+  const xScale = layout.getAxisScale("bottom");
+  const svgRef = useRef<SVGSVGElement>(null);
+  const plotAreaSVGRef = useRef<SVGSVGElement>(null);
+  const backgroundSvgRef = useRef<SVGGElement>(null);
 
   useEffect(function setupPlotArea() {
     if (xScale && xScale?.length > 0) {
@@ -166,7 +167,7 @@ export const Graph = observer(
     const places = AxisPlaces.filter((place: AxisPlace) => {
       return !!graphModel.getAxis(place);
     });
-    console.log("\t🔪 places:", places);
+    // console.log("\t🔪 places:", places);
     return places.map((place: AxisPlace) => {
       return <GraphAxis key={place}
                         place={place}
@@ -202,6 +203,13 @@ export const Graph = observer(
   };
 
   useGraphModel({dotsRef, graphModel, enableAnimation, instanceId});
+
+  //-------------Min Max Value Change -------------------//
+  const handleMinMaxChange = (minOrMax: string, newValue: number) => {
+    // console.log("minOrMax:", minOrMax);
+  };
+
+
 
   return (
     <DataConfigurationContext.Provider value={graphModel.config}>
@@ -246,6 +254,14 @@ export const Graph = observer(
             onRequestRowHeight={onRequestRowHeight}
           />
         }
+        {/* { showEditableGraphValue &&
+          <EditableGraphValue
+            value={8}
+            minOrMax={"min"}
+            // isTileSelected={isTileSelected}
+            onValueChange={(newValue) => handleMinMaxChange("min", newValue)}
+          />
+        } */}
       </div>
     </DataConfigurationContext.Provider>
   );

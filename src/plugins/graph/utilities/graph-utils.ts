@@ -196,6 +196,11 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
 }
 
 function isCircleSelected(aCaseData: CaseData, dataset?: IDataSet) {
+  console.log("📁 graph-utils.ts ------------------------");
+  console.log("\t🏭 isCircleSelected");
+  console.log("\t🥩 aCaseData:", aCaseData);
+  console.log("\t🥩 dataset:", dataset);
+
   return !!dataset?.isCaseSelected(aCaseData.caseID);
 }
 

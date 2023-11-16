@@ -35,8 +35,8 @@ interface IProps {
 export const GraphAxis = observer(function GraphAxis({
   place, enableAnimation, autoAdjust, onDropAttribute, onRemoveAttribute, onTreatAttributeAs
 }: IProps) {
-  console.log("\n");
-  console.log(`📁 graph-axis.tsx -------${place}-----------------`);
+  // console.log("\n");
+  // console.log(`📁 graph-axis.tsx -------${place}-----------------`);
   const dataConfig = useDataConfigurationContext(),
     isDropAllowed = dataConfig?.graphPlaceCanAcceptAttributeIDDrop ?? (() => true),
     graphModel = useGraphModelContext(),
@@ -136,7 +136,7 @@ export const GraphAxis = observer(function GraphAxis({
   }, [layout, place, graphModel]);
 
   const axisModel = graphModel?.getAxis(place);
-  console.log("\t🔪 axisModel:", axisModel);
+  // console.log("\t🔪 axisModel:", axisModel);
   return (
     <g className='axis-wrapper' ref={elt => setWrapperElt(elt)}>
       <rect className='axis-background'/>

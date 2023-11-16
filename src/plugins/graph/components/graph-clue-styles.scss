@@ -2,6 +2,7 @@
 
 .graph-plot {
   background-color: $workspace-teal-light-7;
+  position: relative; //used to position EditableGraphValue
   .display-label.left text {
     fill: black;
     text-decoration: none;

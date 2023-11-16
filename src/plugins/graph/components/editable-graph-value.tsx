@@ -1,20 +1,22 @@
 import { observer } from 'mobx-react';
 import React, { useState, useRef, useEffect } from 'react';
-import classNames from 'classnames';
 
 import "./editable-graph-value.scss";
+import classNames from 'classnames';
 
 interface IEditableValueProps {
-  readOnly?: boolean;
-  isTileSelected: boolean;
   value: number;
-  offset: number;
   minOrMax: "min" | "max";
-  onValueChange: (newValue: number) => void;
+  leftOrBottom?: "left" | "bottom";
+  onValueChange?: (newValue: number) => void;
 }
 
+//look into readOnly? Parent is <Graph> and readOnly is NOT passed in as a prop
+// isTileSelected?: boolean;
+
+
 export const EditableGraphValue: React.FC<IEditableValueProps> = observer(function NumberlineTile(props) {
-  const { readOnly, isTileSelected, value, offset, minOrMax, onValueChange } = props;
+  const { value, minOrMax, leftOrBottom, onValueChange } = props;
 
   const [isEditing, setIsEditing] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -26,14 +28,15 @@ export const EditableGraphValue: React.FC<IEditableValueProps> = observer(functi
   }, [isEditing]);
 
   const handleClick = () => {
-    if (!readOnly && !isEditing) {
-      setIsEditing(true);
-    }
+    // if (!readOnly && !isEditing) {
+    //   setIsEditing(true);
+    // }
+    console.log("click!");
   };
 
   const updateValue = (val: string) => {
     if (checkIfNumber(val)) {
-      onValueChange(Number(val));
+      // onValueChange(Number(val));
     }
     setIsEditing(false);
   };
@@ -58,12 +61,13 @@ export const EditableGraphValue: React.FC<IEditableValueProps> = observer(functi
   };
 
   //----------------------- Determine Styling for Border Box -----------------------
-  const borderBoxOffset = `${offset + 4}px`;
-  const borderBoxStyle = (minOrMax === "min") ? { left: borderBoxOffset } : { right: borderBoxOffset };
-  const borderClasses = classNames("border-box", {hide: !isTileSelected});
+  // const borderBoxOffset = `${offset + 4}px`;
+  // const borderBoxStyle = (minOrMax === "min") ? { left: borderBoxOffset } : { right: borderBoxOffset };
+  // const borderClasses = classNames("editable-border-box", {hide: !isTileSelected});
+  const borderClasses = classNames("editable-border-box", {bottom: true});
 
   return (
-    <div className={borderClasses} style={borderBoxStyle} onClick={handleClick}>
+    <div className={borderClasses} onClick={handleClick}>
       {isEditing ? (
         <input
           className="input-textbox"

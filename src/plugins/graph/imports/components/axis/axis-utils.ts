@@ -185,7 +185,7 @@ export const getCoordFunctions = (props: IGetCoordFunctionsProps): ICoordFunctio
  */
 export const computeBestNumberOfTicks = (scale: ScaleLinear<number, number>): number => {
 
-  console.log("📁 axis-utils.ts ------------------------");
+  // console.log("📁 axis-utils.ts ------------------------");
 
   const formatter = scale.tickFormat();
 
@@ -229,7 +229,7 @@ export const computeBestNumberOfTicks = (scale: ScaleLinear<number, number>): nu
     firstTime = false;
   }
 
-  console.log("\t🏭 computeBestNumberOfTicks returns:", Math.max(2, currentNumber));
+  // console.log("\t🏭 computeBestNumberOfTicks returns:", Math.max(2, currentNumber));
 
   return Math.max(2, currentNumber);
 };
