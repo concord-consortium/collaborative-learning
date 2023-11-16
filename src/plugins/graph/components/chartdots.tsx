@@ -1,6 +1,6 @@
 import {ScaleBand} from "d3";
 import React, {useCallback} from "react";
-import {CaseData, selectAllCircles} from "../d3-types";
+import {CaseData, selectGraphDots} from "../d3-types";
 import {attrRoleToAxisPlace, PlotProps} from "../graph-types";
 import {usePlotResponders} from "../hooks/use-plot";
 import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
@@ -112,7 +112,7 @@ export const ChartDots = function ChartDots(props: PlotProps) {
       legendAttrID = dataConfiguration?.attributeID('legend'),
       getLegendColor = legendAttrID ? dataConfiguration?.getLegendColorForCase : undefined;
 
-    const selection = selectAllCircles(dotsRef.current);
+    const selection = selectGraphDots(dotsRef.current);
     if (!selection) return;
 
     const computeCellParams = () => {
