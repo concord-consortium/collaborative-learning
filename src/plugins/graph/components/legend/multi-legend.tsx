@@ -50,12 +50,12 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
       + kMultiLegendMenuHeight * legendRows
       + kMultiLegendVerticalGap * (legendRows - 1);
   }
+  const totalHeight = graphModel.layers.reduce((prev, layer)=>{ return prev + heightOfLayerLegend(layer);}, 0);
 
   useEffect(function RespondToLayoutChange() {
-    const totalHeight = graphModel.layers.reduce((prev, layer)=>{ return prev + heightOfLayerLegend(layer);}, 0);
     layout.setDesiredExtent("legend", totalHeight);
     onRequestRowHeight?.(instanceId, kGraphDefaultHeight + totalHeight);
-  }, [instanceId, layout, onRequestRowHeight, graphModel.layers]);
+  }, [instanceId, layout, onRequestRowHeight, totalHeight]);
 
   const layerLegends = graphModel.layers.map((layer) => {
     return (
@@ -71,5 +71,3 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
     </div>
   );
 });
-
-// MultiLegend.displayName = "MultiLegend";

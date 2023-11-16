@@ -220,6 +220,7 @@ export const GraphModel = TileContentModel
       // so an "unlinked" dataset is set up as a layer when there isn't a real one.
       // TODO: consider refactoring so that a graph with no layers would get a reasonable default display.
       if (!self.layers.length) {
+        console.log('Creating default layer');
         const initialLayer = GraphLayerModel.create();
         self.layers.push(initialLayer);
         initialLayer.configureUnlinkedLayer();
@@ -352,13 +353,15 @@ export const GraphModel = TileContentModel
       if (detachedDatasetIds.length) {
         detachedDatasetIds.forEach((id) => {
           const index = self.layers.findIndex((layer) => layer.config.dataset?.id === id);
-          if (index > 0) {
+          if (index > 0 || self.layers.length > 1) {
             self.layers.splice(index, 1);
+            console.log('Removed layer', index);
           } else if (index === 0) {
-            // Unlink layer 0, don't remove it.
+            // Unlink last remaining layer, don't remove it.
             self.layers[0].setDataset(undefined, undefined);
             self.layers[0].configureUnlinkedLayer();
             self.layers[0].updateAdornments();
+            console.log('Unlinked layer 0');
           } else {
             console.warn('Failed to find layer with dataset id ', id);
           }
@@ -394,12 +397,14 @@ export const GraphModel = TileContentModel
                 self.layers[0].setDataset(dataSetModel.dataSet, metaDataModel);
                 self.layers[0].configureLinkedLayer();
                 self.layers[0].updateAdornments();
+                console.log('Attached layer 0');
               } else {
                 const newLayer = GraphLayerModel.create();
                 self.layers.push(newLayer);
                 const dataConfig = DataConfigurationModel.create();
                 newLayer.setDataConfiguration(dataConfig);
                 dataConfig.setDataset(dataSetModel.dataSet, metaDataModel);
+                console.log('Added layer', self.layers.length-1);
                 // May need these when we want to actually display the new layer:
                 // newLayer.configureLinkedLayer();
                 // newLayer.updateAdornments(true);
