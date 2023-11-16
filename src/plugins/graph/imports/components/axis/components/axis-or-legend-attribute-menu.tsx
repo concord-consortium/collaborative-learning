@@ -133,15 +133,13 @@ export const AxisOrLegendAttributeMenu = ({ place, attributeId, target, parent, 
           onCloseRef.current = onClose;
           return (
             <Portal containerRef={parentRef}>
-              { !disableAttributeDnD &&
-                <div ref={setDragNodeRef} style={overlayStyle} {...attributes} {...listeners}>
-                  { menuButtonAndPortal }
-                </div>
-              }
-              { disableAttributeDnD &&
-                <div style={overlayStyle}>
-                  {menuButtonAndPortal}
-                </div>
+              { disableAttributeDnD
+                  ? <div style={overlayStyle}>
+                      {menuButtonAndPortal}
+                    </div>
+                  : <div ref={setDragNodeRef} style={overlayStyle} {...attributes} {...listeners}>
+                      {menuButtonAndPortal}
+                    </div>
               }
             </Portal>
           );
