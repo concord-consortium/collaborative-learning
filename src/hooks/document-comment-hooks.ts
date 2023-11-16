@@ -11,7 +11,6 @@ import { useFirebaseFunction } from "./use-firebase-function";
 import { useDocumentOrCurriculumMetadata, useNetworkDocumentKey } from "./use-stores";
 import { useUserContext } from "./use-user-context";
 import { uniqueId } from "../utilities/js-utils";
-import { HistoryEntrySnapshot } from "../models/history/history";
 
 // documentKeyOrSectionPath => queryKey
 const commentsQueryKeyMap: Record<string, string> = {};
@@ -76,7 +75,7 @@ export const useValidateCommentableDocument = (options?: ValidateDocumentUseMuta
 /**
  * useCommentableDocument
  *
- * Checks whether the specified document exists and creates it if not.
+ * Waits for the specified document to exist and returns it.
  * Implemented via React Query's useQuery hook.
  *
  * @param documentKeyOrSectionPath
@@ -88,9 +87,10 @@ export const useCommentableDocument = (documentKeyOrSectionPath?: string, userId
   const [firestore] = useFirestore();
   const documentPath = useCommentableDocumentPath(documentKeyOrSectionPath || "", userId);
   const documentMetadata = useDocumentOrCurriculumMetadata(documentKeyOrSectionPath);
-  const validateDocumentMutation = useValidateCommentableDocument();
-  return useQuery(documentPath, () => new Promise<DocumentQueryType>((resolve, reject) => {
+  return useQuery(documentPath, ({signal}) => new Promise<DocumentQueryType>((resolve, reject) => {
     const documentRef = firestore.doc(documentPath);
+
+    // Note: This will wait until a document is available at documentPath
     const unsubscribeDocListener = documentRef?.onSnapshot({
       next: docSnapshot => {
         unsubscribeDocListener?.();
@@ -98,38 +98,13 @@ export const useCommentableDocument = (documentKeyOrSectionPath?: string, userId
       },
       error: readError => {
         unsubscribeDocListener?.();
-        // FIXME-HISTORY: This code assumes that onSnapshot will return an error
-        // if the history document doesn't exist. That isn't correct. The
-        // `onSnapshot` above will just sit there waiting for the document to
-        // show up if it doesn't exist. The better approach for checking for
-        // existence is `get`:
-
-        // const documentRef = firestore.doc(documentPath);
-        //   documentRef.get()
-        //     .then(docSnapshot => {
-        //       if (docSnapshot.exists) {
-        //          ...
-
-        // However, creating the document if it doesn't exist, is actually not
-        // necessary. `useCommentableDocument` is only called by
-        // `useDocumentComments` and `useDocumentHistory`. In the case of
-        // `useDocumentComments`, `postDocumentComment` will create the Document
-        // in firestore if it doesn't exist. In the case of `useDocumentHistory`
-        // the TreeManager will create the document if it doesn't exist.
-        //
-        // Both `useDocumentComments` and `useDocumentHistory` should be fine
-        // waiting until there is actually a document available. However the
-        // unsubscribeDocLister will never be called if the document is never
-        // created. So even if the component that called this hook is unmounted.
-        // this onSnapshot listener is going to sit around.
-        //
-        // https://www.pivotaltracker.com/story/show/183291353
-        validateDocumentMutation.mutate({ document: documentMetadata! }, {  // ! since query won't run otherwise
-          onSuccess: result => resolve(result.data),
-          onError: createError => { throw createError; }
-        });
+        reject(`Failed to watch ${documentPath} because ${readError.message}`);
       }
     });
+
+    // If all components monitoring this query are unmounted, and the promise hasn't been
+    // resolved or rejected, react-query will send us an abort.
+    signal?.addEventListener("abort", unsubscribeDocListener);
   }), { // useQuery options
     enabled: !!documentPath && !!documentMetadata,  // don't run the query if we don't have prerequisites
     staleTime: Infinity,                            // never need to rerun the query once it succeeds
@@ -236,31 +211,4 @@ export const useDocumentComments = (documentKeyOrSectionPath?: string) => {
 export const useUnreadDocumentComments = (documentKeyOrSectionPath?: string) => {
   // TODO: figure this out; for now it's just a comment counter
   return useDocumentComments(documentKeyOrSectionPath);
-};
-
-const historyEntryConverter = {
-  toFirestore: (entry: HistoryEntrySnapshot) => {
-    throw new Error(
-      "We can't convert a raw HistoryEntry to firestore because we need the index from its parent collection");
-  },
-  fromFirestore: (doc: firebase.firestore.QueryDocumentSnapshot): HistoryEntrySnapshot => {
-    const { entry } = doc.data();
-    return JSON.parse(entry);
-  }
-};
-
-/**
- *
- * @param documentKeyOrSectionPath
- * @param userId optional param that overrides the current user and the network.
- * This is used so teachers can find the path of student documents.
- * @returns
- */
-export const useDocumentHistory = (documentKeyOrSectionPath?: string, userId?: string) => {
-  const { isSuccess } = useCommentableDocument(documentKeyOrSectionPath, userId);
-  const docPath = useCommentableDocumentPath(documentKeyOrSectionPath || "", userId);
-  // docPath could in theory be an empty string which
-  const queryPath = isSuccess && docPath ? `${docPath}/history` : "";
-  const converter = historyEntryConverter;
-  return useCollectionOrderedRealTimeQuery(queryPath, { converter, orderBy: "index" });
 };
