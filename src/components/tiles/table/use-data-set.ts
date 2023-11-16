@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 import { DataGridHandle } from "react-data-grid";
 import { ICase, IDataSet } from "../../../models/data/data-set";
 import { ITileModel } from "../../../models/tiles/tile-model";
@@ -32,6 +32,8 @@ export const useDataSet = ({
   gridRef, model, dataSet, triggerColumnChange, triggerRowChange, readOnly, inputRowId, rows,
   changeHandlers, columns, onColumnResize, lookupImage
 }: IUseDataSet) => {
+  const selectedCell = useRef<TPosition|null>();
+
   const { onAddRows, onUpdateRow } = changeHandlers;
 
   function getSelectedCellIndices() {
@@ -46,6 +48,8 @@ export const useDataSet = ({
     return selectedCellIndices;
   }
   const onSelectedCellChange = (position: TPosition) => {
+    selectedCell.current = position;
+
     // Only modify the selection if a single cell is selected
     if (dataSet.selectedCells.length !== 1) return;
 
@@ -57,9 +61,9 @@ export const useDataSet = ({
         ? inputRowId.current
         : dataSet.caseIDFromIndex(position.rowIdx);
       const newColumnId = dataSet.attrIDFromIndex(position.idx - 1);
-      if (newColumnId && newRowId
-        && !(selectedCellColumnIndex === position.idx - 1 && selectedCellRowIndex === position.rowIdx)
-      ) {
+      const differentIndices =
+        !(selectedCellColumnIndex === position.idx - 1 && selectedCellRowIndex === position.rowIdx);
+      if (newColumnId && newRowId && differentIndices) {
         dataSet.setSelectedCells([{ attributeId: newColumnId, caseId: newRowId }]);
         triggerRowChange();
       }
@@ -132,10 +136,14 @@ export const useDataSet = ({
         };
         const inputRowIndex = _rows.findIndex(row => row.__id__ === inputRowId.current);
         if ((inputRowIndex >= 0) && (selectedCellRowIndex === inputRowIndex)) {
-          onAddRows([updatedCaseValues]);
+          onAddRows([{ ...updatedCaseValues, __id__: inputRowId.current }]);
           inputRowId.current = uniqueId();
-        }
-        else {
+          setTimeout(() => {
+            if (selectedCell.current) {
+              gridRef.current?.selectCell(selectedCell.current);
+            }
+          });
+        } else {
           onUpdateRow(updatedCaseValues);
         }
       }
