@@ -36,7 +36,7 @@ export const LayerLegend = observer(function LayerLegend(props: ILayerLegendProp
         onTreatAttributeAs={onTreatAttributeAs}
       />);
     if (!readOnly) {
-      legendItems.push(<AddSeriesButton />);
+      legendItems.push(<AddSeriesButton layer={layer} />);
     }
   }
   // Make rows with two legend items in each row
