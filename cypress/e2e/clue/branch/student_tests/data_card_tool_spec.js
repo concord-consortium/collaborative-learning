@@ -7,7 +7,7 @@ let dc = new DataCardToolTile;
 let xyplot = new XYPlotToolTile;
 
 function beforeTest() {
-  const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=moth";
+  const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=moth&mouseSensor";
   cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();
@@ -105,6 +105,19 @@ context('Data Card Tool Tile', () => {
           dc.getAttrValueInput().eq(0).click().type("d");
           dc.getDownshiftOptions().should('have.length', 1);
           dc.getDownshiftOptions().eq(0).contains("desert");
+
+          cy.log("can drag a card into another stack in sort view");
+          dc.getSortSelect().select("animal");
+          dc.getSortView().should('exist');
+          dc.dragCardToStack(1, 0);
+          dc.getSortSelect().select("None");
+          dc.getCardNofTotalListing().contains("Card 1 of 2");
+          dc.getAttrValueInput().eq(0).invoke('val').should('eq', "ocean");
+          dc.getAttrValueInput().eq(1).invoke('val').should('eq', "camel");
+          dc.getNextCardButton().click();
+          dc.getCardNofTotalListing().contains("Card 2 of 2");
+          dc.getAttrValueInput().eq(0).invoke('val').should('eq', "d");
+          dc.getAttrValueInput().eq(1).invoke('val').should('eq', "camel");
 
           cy.log("can create a graph from the data");
           dc.getLinkGraphButton().should('not.be.disabled').click();
