@@ -43,6 +43,7 @@ export const GraphAxis = observer(function GraphAxis({
     droppableId = `${instanceId}-${place}-axis-drop`,
     hintString = useDropHintString({role: axisPlaceToAttrRole[place]}),
     emptyPlotIsNumeric = useSettingFromStores("emptyPlotIsNumeric", "graph") as boolean | undefined,
+    usesMultiLegend = useSettingFromStores("defaultSeriesLegend", "graph") as boolean | undefined,
     axisShouldShowGridlines = emptyPlotIsNumeric || graphModel.axisShouldShowGridLines(place),
     parentEltRef = useRef<HTMLDivElement | null>(null),
     [wrapperElt, _setWrapperElt] = useState<SVGGElement | null>(null),
@@ -129,6 +130,10 @@ export const GraphAxis = observer(function GraphAxis({
   }, [layout, place, graphModel]);
 
   const axisModel = graphModel?.getAxis(place);
+  const thisRole = axisPlaceToAttrRole[place];
+  const attrId = dataConfig?.attributeID(thisRole);
+  const showAttributeLabel = place === "left" || !usesMultiLegend;
+
   return (
     <g className='axis-wrapper' ref={elt => setWrapperElt(elt)}>
       <rect className='axis-background'/>
@@ -139,13 +144,16 @@ export const GraphAxis = observer(function GraphAxis({
             showScatterPlotGridLines={axisShouldShowGridlines}
             centerCategoryLabels={graphModel.config.categoriesForAxisShouldBeCentered(place)}
       />}
-      <AttributeLabel
-        layer={graphModel.layers[0]} // FIXME ?
-        place={place}
-        onChangeAttribute={onDropAttribute}
-        onRemoveAttribute={onRemoveAttribute}
-        onTreatAttributeAs={onTreatAttributeAs}
-      />
+      { showAttributeLabel &&
+            <AttributeLabel
+              layer={graphModel.layers[0]} // FIXME ?
+              place={place}
+              onChangeAttribute={onDropAttribute}
+              onRemoveAttribute={onRemoveAttribute}
+              onTreatAttributeAs={onTreatAttributeAs}
+            />
+      }
+
       {onDropAttribute &&
          <DroppableAxis
             place={`${place}`}

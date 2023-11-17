@@ -5,7 +5,7 @@ import { GraphPlace } from "../../imports/components/axis-graph-shared";
 import { useGraphLayoutContext } from "../../models/graph-layout";
 import { IDataSet } from "../../../../models/data/data-set";
 import { useInstanceIdContext } from "../../imports/hooks/use-instance-id-context";
-import { kGraphDefaultHeight } from "../../graph-types";
+import { axisPlaceToAttrRole, kGraphDefaultHeight } from "../../graph-types";
 import { useGraphModelContext } from "../../models/graph-model";
 
 export const kMultiLegendMenuHeight = 30;
@@ -16,6 +16,7 @@ export const kMultiLegendLabelHeight = 20;
 import "./multi-legend.scss";
 import { LayerLegend } from "./layer-legend";
 import { IGraphLayerModel } from "../../models/graph-layer-model";
+import { SimpleAttributeLabel } from "../simple-attribute-label";
 
 interface IMultiLegendProps {
   graphElt: HTMLDivElement | null;
@@ -52,6 +53,9 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
   }
   const totalHeight = graphModel.layers.reduce((prev, layer)=>{ return prev + heightOfLayerLegend(layer);}, 0);
 
+  const thisRole = axisPlaceToAttrRole.bottom;
+  const attrId = graphModel.layers[0].config?.attributeID(thisRole);
+
   useEffect(function RespondToLayoutChange() {
     layout.setDesiredExtent("legend", totalHeight);
     onRequestRowHeight?.(instanceId, kGraphDefaultHeight + totalHeight);
@@ -66,8 +70,24 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
         onTreatAttributeAs={onTreatAttributeAs} />); });
 
   return (
-    <div className="multi-legend" ref={ multiLegendRef }>
-      { layerLegends }
-    </div>
+    <>
+      <div className="x-axis-menu">
+        {/* TODO - make this succeed in showing */}
+        { attrId &&
+          <SimpleAttributeLabel
+            place="bottom"
+            key={graphModel.layers[0].id}
+            attrId={attrId}
+            layer={graphModel.layers[0]}
+            onChangeAttribute={onChangeAttribute}
+            onRemoveAttribute={onRemoveAttribute}
+            onTreatAttributeAs={onTreatAttributeAs}
+          />
+        }
+      </div>
+      <div className="multi-legend" ref={ multiLegendRef }>
+        { layerLegends }
+      </div>
+    </>
   );
 });
