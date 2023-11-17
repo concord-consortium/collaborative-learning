@@ -359,10 +359,16 @@ export const GraphModel = TileContentModel
         self.prevDataSetId = currDataSetId;
       }
     },
-    afterAttachToDocument() {
+    afterAttach() {
       addDisposer(self, reaction(
-        () => self.data,
-        data => {
+        () => {
+          const sharedModelManager = self.tileEnv?.sharedModelManager;
+          const sharedModelManagerReady = sharedModelManager?.isReady;
+          const data = sharedModelManagerReady ? self.data : undefined;
+          return { sharedModelManagerReady, data };
+        },
+        ({ sharedModelManagerReady, data }) => {
+          if (!sharedModelManagerReady) return;
           const sharedModelManager = getSharedModelManager(self);
           if (!self.metadata && data) {
             const caseMetadata = SharedCaseMetadata.create();
