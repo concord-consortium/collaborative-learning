@@ -51,7 +51,9 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
       + kMultiLegendMenuHeight * legendRows
       + kMultiLegendVerticalGap * (legendRows - 1);
   }
-  const totalHeight = graphModel.layers.reduce((prev, layer)=>{ return prev + heightOfLayerLegend(layer);}, 0);
+  // Total height is height of X-axis menus, plus sum of all the layer sections
+  const totalHeight = kMultiLegendLabelHeight + kMultiLegendVerticalGap
+    + graphModel.layers.reduce((prev, layer)=>{ return prev + heightOfLayerLegend(layer);}, 0);
 
   const thisRole = axisPlaceToAttrRole.bottom;
   const attrId = graphModel.layers[0].config?.attributeID(thisRole);
@@ -70,24 +72,24 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
         onTreatAttributeAs={onTreatAttributeAs} />); });
 
   return (
-    <>
+    <div className="multi-legend" ref={ multiLegendRef }>
       <div className="x-axis-menu">
         {/* TODO - make this succeed in showing */}
         { attrId &&
-          <SimpleAttributeLabel
-            place="bottom"
-            key={graphModel.layers[0].id}
-            attrId={attrId}
-            layer={graphModel.layers[0]}
-            onChangeAttribute={onChangeAttribute}
-            onRemoveAttribute={onRemoveAttribute}
-            onTreatAttributeAs={onTreatAttributeAs}
-          />
+          <div className="x-axis-item">
+            <SimpleAttributeLabel
+              place="bottom"
+              key={graphModel.layers[0].id}
+              attrId={attrId}
+              layer={graphModel.layers[0]}
+              onChangeAttribute={onChangeAttribute}
+              onRemoveAttribute={onRemoveAttribute}
+              onTreatAttributeAs={onTreatAttributeAs}
+            />
+          </div>
         }
       </div>
-      <div className="multi-legend" ref={ multiLegendRef }>
-        { layerLegends }
-      </div>
-    </>
+      { layerLegends }
+    </div>
   );
 });
