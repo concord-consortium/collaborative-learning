@@ -3,7 +3,6 @@ import React, { CSSProperties, useRef, useEffect, useState } from "react";
 import t from "../../../utilities/translation/translate";
 import {GraphPlace} from "../../axis-graph-shared";
 import { graphPlaceToAttrRole } from "../../../../graph-types";
-import { useDataSetContext } from "../../../hooks/use-data-set-context";
 import { IUseDraggableAttribute, useDraggableAttribute } from "../../../hooks/use-drag-drop";
 import { useInstanceIdContext } from "../../../hooks/use-instance-id-context";
 import { useOutsidePointerDown } from "../../../hooks/use-outside-pointer-down";
@@ -40,8 +39,8 @@ const removeAttrItemLabelKeys: Record<string, string> = {
 
 export const AxisOrLegendAttributeMenu = ({ place, layer, attributeId, target, parent, portal, onOpenClose,
                                       onChangeAttribute, onRemoveAttribute, onTreatAttributeAs }: IProps) => {
-  const data = useDataSetContext();
   const dataConfig = layer.config;
+  const data = dataConfig.dataset;
   const yAttributesPlotted = dataConfig.yAttributeDescriptions.map((a)=>a.attributeID);
 
   const role = graphPlaceToAttrRole[place];
