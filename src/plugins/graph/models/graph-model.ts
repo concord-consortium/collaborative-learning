@@ -405,8 +405,8 @@ export const GraphModel = TileContentModel
                 newLayer.setDataConfiguration(dataConfig);
                 dataConfig.setDataset(dataSetModel.dataSet, metaDataModel);
                 console.log('Added layer', self.layers.length-1);
+                newLayer.configureLinkedLayer();
                 // May need these when we want to actually display the new layer:
-                // newLayer.configureLinkedLayer();
                 // newLayer.updateAdornments(true);
                 // newLayer.setDataSetListener();
               }

@@ -3,7 +3,6 @@ import React, { CSSProperties, useRef, useEffect, useState } from "react";
 import t from "../../../utilities/translation/translate";
 import {GraphPlace} from "../../axis-graph-shared";
 import { graphPlaceToAttrRole } from "../../../../graph-types";
-import { useDataConfigurationContext } from "../../../../hooks/use-data-configuration-context";
 import { useDataSetContext } from "../../../hooks/use-data-set-context";
 import { IUseDraggableAttribute, useDraggableAttribute } from "../../../hooks/use-drag-drop";
 import { useInstanceIdContext } from "../../../hooks/use-instance-id-context";
@@ -12,20 +11,22 @@ import { useOverlayBounds } from "../../../hooks/use-overlay-bounds";
 import { AttributeType } from "../../../../../../models/data/attribute";
 import { IDataSet } from "../../../../../../models/data/data-set";
 import { isSetAttributeNameAction } from "../../../../../../models/data/data-set-actions";
+import { IGraphLayerModel } from "../../../../models/graph-layer-model";
 
 interface IProps {
-  place: GraphPlace
-  attributeId?: string
+  place: GraphPlace;
+  layer: IGraphLayerModel;
+  attributeId?: string;
   // element to be mirrored
-  target: SVGGElement | HTMLElement | null
+  target: SVGGElement | HTMLElement | null;
   // element to be used for positioning/portal-ing the button that triggers the menu
-  parent: HTMLElement | null
+  parent: HTMLElement | null;
   // element to be used for portal-ing the popup menu list
-  portal: HTMLElement | null
-  onChangeAttribute: (place: GraphPlace, dataSet: IDataSet, attrId: string, oldAttrId?: string) => void
-  onRemoveAttribute: (place: GraphPlace, attrId: string) => void
-  onTreatAttributeAs: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void
-  onOpenClose?: (isOpen: boolean) => void
+  portal: HTMLElement | null;
+  onChangeAttribute: (place: GraphPlace, dataSet: IDataSet, attrId: string, oldAttrId?: string) => void;
+  onRemoveAttribute: (place: GraphPlace, attrId: string) => void;
+  onTreatAttributeAs: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void;
+  onOpenClose?: (isOpen: boolean) => void;
 }
 
 const removeAttrItemLabelKeys: Record<string, string> = {
@@ -37,11 +38,11 @@ const removeAttrItemLabelKeys: Record<string, string> = {
   "rightSplit": "DG.DataDisplayMenu.removeAttribute_right"
 };
 
-export const AxisOrLegendAttributeMenu = ({ place, attributeId, target, parent, portal, onOpenClose,
+export const AxisOrLegendAttributeMenu = ({ place, layer, attributeId, target, parent, portal, onOpenClose,
                                       onChangeAttribute, onRemoveAttribute, onTreatAttributeAs }: IProps) => {
   const data = useDataSetContext();
-  const dataConfig = useDataConfigurationContext();
-  const yAttributesPlotted = dataConfig?.yAttributeDescriptions.map((a)=>a.attributeID);
+  const dataConfig = layer.config;
+  const yAttributesPlotted = dataConfig.yAttributeDescriptions.map((a)=>a.attributeID);
 
   const role = graphPlaceToAttrRole[place];
   const attrId = attributeId || dataConfig?.attributeID(role) || '';

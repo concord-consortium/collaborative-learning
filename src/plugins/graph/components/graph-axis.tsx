@@ -140,6 +140,7 @@ export const GraphAxis = observer(function GraphAxis({
             centerCategoryLabels={graphModel.config.categoriesForAxisShouldBeCentered(place)}
       />}
       <AttributeLabel
+        layer={graphModel.layers[0]} // FIXME ?
         place={place}
         onChangeAttribute={onDropAttribute}
         onRemoveAttribute={onRemoveAttribute}

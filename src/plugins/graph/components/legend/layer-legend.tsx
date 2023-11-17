@@ -27,6 +27,7 @@ export const LayerLegend = observer(function LayerLegend(props: ILayerLegendProp
 
     legendItems = yAttributes.map((description, index) =>
       <SimpleAttributeLabel
+        layer={layer}
         key={description.attributeID}
         place={'left'}
         index={index}
