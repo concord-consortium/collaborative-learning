@@ -566,6 +566,10 @@ export const DataSet = types.model("DataSet", {
         }
       },
 
+      /**
+       * Remove an attribute from the dataset.
+       * @param attributeID
+       */
       removeAttribute(attributeID: string) {
         const attrIndex = attrIndexFromID(attributeID);
         if (attrIndex != null) {
@@ -793,3 +797,5 @@ export function getDataSetBounds(dataSet: IDataSet) {
   });
   return result;
 }
+
+
