@@ -4,7 +4,8 @@ import {isAlive} from "mobx-state-tree";
 import {MutableRefObject, useCallback, useEffect, useMemo, useRef} from "react";
 import {AxisBounds, axisPlaceToAxisFn, AxisScaleType, otherPlace} from "../axis-types";
 import {useAxisLayoutContext} from "../models/axis-layout-context";
-import {IAxisModel, isCategoricalAxisModel, isNumericAxisModel} from "../models/axis-model";
+import {IAxisModel, INumericAxisModel, isCategoricalAxisModel, isNumericAxisModel,
+      } from "../models/axis-model";
 import {isVertical} from "../../axis-graph-shared";
 import {between} from "../../../../utilities/math-utils";
 import {kAxisTickLength, transitionDuration} from "../../../../graph-types";
@@ -15,7 +16,7 @@ import {
 
 export interface IUseSubAxis {
   subAxisIndex: number
-  axisModel: IAxisModel
+  axisModel: IAxisModel | INumericAxisModel
   subAxisElt: SVGGElement | null
   enableAnimation: MutableRefObject<boolean>
   showScatterPlotGridLines: boolean
@@ -31,6 +32,13 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
                             centerCategoryLabels, enableAnimation}: IUseSubAxis) => {
 
   // console.log(`📁 use-sub-axis.ts -----------${axisModel?.place}-------------`);
+  // console.log("\t🥩 showScatterPlotGridLines:", showScatterPlotGridLines);
+  // console.log("\t🥩 subAxisElt:", subAxisElt);
+  // console.log("\t🥩 axisModel:", axisModel);
+  // console.log("\t🥩 subAxisIndex:", subAxisIndex);
+  // console.log("\t🥩 enableAnimation:", enableAnimation);
+  // console.log("\t🥩 centerCategoryLabels:", centerCategoryLabels);
+
   const layout = useAxisLayoutContext();
   const isNumeric = isNumericAxisModel(axisModel);
   const isCategorical = isCategoricalAxisModel(axisModel);
@@ -102,12 +110,11 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
       // console.log("\t🏭 renderNumericAxis------------------");
       select(subAxisElt).selectAll('*').remove();
       const numericScale = d3Scale as unknown as ScaleLinear<number, number>;
-      // console.log("\t🔪 numericScale:", numericScale);
       const axisScale = axis(numericScale).tickSizeOuter(0).tickFormat(format('.9'));
-      // console.log("\t🔪 axisScale:", axisScale);
       const duration = enableAnimation.current ? transitionDuration : 0;
       if (!axisIsVertical && numericScale.ticks) {
         const horizontalTicks = numericScale.ticks(computeBestNumberOfTicks(numericScale)); //array of all ticks
+        //get first and last and put them into model min and max
         axisScale.tickValues(horizontalTicks);
       }
 
@@ -121,11 +128,20 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
         .style("stroke", "lightgrey")
         .style("stroke-opacity", "0.7");
 
+        // console.log("📁 use-sub-axis.ts ------------------------");
       // Hide the text of the first and last tick labels
       select(subAxisElt)
         .selectAll('.tick text')
         .style('display', (d, i, nodes) => {
-          return (i === 0 || i === nodes.length - 1) ? 'none' : null;
+          // console.log("d:", d);
+          //TODO - when the dataset is linked - we need to write to axisModel.isLinkedDataSet
+          //write two functions inside axis-model.ts that mutate the min and max
+          let hideMinAndMax = (i === 0 || i === nodes.length - 1);
+          if(isNumericAxisModel(axisModel) && !axisModel.isLinkedDataSet){
+            hideMinAndMax = false;
+          }
+          console.log("\t🥩 hideMinAndMax:", hideMinAndMax);
+          return hideMinAndMax  ? 'none' : null;
         });
     };
 
@@ -134,6 +150,7 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
     const renderScatterPlotGridLines = () => {
       if (axis) {
         const numericScale = d3Scale as unknown as ScaleLinear<number, number>;
+        // console.log("vertical values:", numericScale.ticks());
         select(subAxisElt).selectAll('.zero, .grid').remove();
         const tickLength = layout.getAxisLength(otherPlace(place)) ?? 0;
         select(subAxisElt).append('g')

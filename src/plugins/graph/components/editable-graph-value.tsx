@@ -1,13 +1,14 @@
 import { observer } from 'mobx-react';
 import React, { useState, useRef, useEffect } from 'react';
+import { AxisPlace } from '../imports/components/axis/axis-types';
+import classNames from 'classnames';
 
 import "./editable-graph-value.scss";
-import classNames from 'classnames';
 
 interface IEditableValueProps {
   value: number;
   minOrMax: "min" | "max";
-  leftOrBottom?: "left" | "bottom";
+  axis: AxisPlace
   onValueChange?: (newValue: number) => void;
 }
 
@@ -16,7 +17,11 @@ interface IEditableValueProps {
 
 
 export const EditableGraphValue: React.FC<IEditableValueProps> = observer(function NumberlineTile(props) {
-  const { value, minOrMax, leftOrBottom, onValueChange } = props;
+  const { value, minOrMax, axis, onValueChange } = props;
+  // console.log("📁 editable-graph-value.tsx ------------------------");
+  // console.log("\t🥩 axis:", axis);
+  // console.log("\t🥩 minOrMax:", minOrMax);
+
 
   const [isEditing, setIsEditing] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -60,11 +65,8 @@ export const EditableGraphValue: React.FC<IEditableValueProps> = observer(functi
     return isNumeric;
   };
 
-  //----------------------- Determine Styling for Border Box -----------------------
-  // const borderBoxOffset = `${offset + 4}px`;
-  // const borderBoxStyle = (minOrMax === "min") ? { left: borderBoxOffset } : { right: borderBoxOffset };
-  // const borderClasses = classNames("editable-border-box", {hide: !isTileSelected});
-  const borderClasses = classNames("editable-border-box", {bottom: true});
+  const borderClasses = classNames("editable-border-box", `${axis}-${minOrMax}`);
+  // console.log("\t🥩 borderClasses:", borderClasses);
 
   return (
     <div className={borderClasses} onClick={handleClick}>

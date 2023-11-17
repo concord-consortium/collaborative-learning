@@ -14,23 +14,14 @@ interface ISubAxisProps {
   centerCategoryLabels?: boolean
 }
 
-export const SubAxis = memo(function SubAxis({
-                                               numSubAxes, subAxisIndex, axisModel, showScatterPlotGridLines = false,
-                                               centerCategoryLabels = true, enableAnimation/*, getCategorySet*/
-                                             }: ISubAxisProps) {
-  const
-    subWrapperElt = useRef<SVGGElement | null>(null),
-    [subAxisElt, setSubAxisElt] = useState<SVGGElement | null>(null);
+export const SubAxis = memo(function SubAxis({numSubAxes, subAxisIndex, axisModel, showScatterPlotGridLines = false,
+                                          centerCategoryLabels = true, enableAnimation}: ISubAxisProps) {
 
+  const subWrapperElt = useRef<SVGGElement | null>(null);
+  const [subAxisElt, setSubAxisElt] = useState<SVGGElement | null>(null);
 
-  useSubAxis({
-    subAxisIndex, axisModel, subAxisElt, enableAnimation, showScatterPlotGridLines, centerCategoryLabels
-  });
-
-  // console.log(`📁 sub-axis.tsx --------${axisModel?.place}---------------`);
-  // console.log("\t🥩 axisModel:", axisModel);
-  // console.log("\t🥩 subAxisIndex:", subAxisIndex);
-
+  useSubAxis({ subAxisIndex, axisModel, subAxisElt, enableAnimation,
+               showScatterPlotGridLines, centerCategoryLabels });
 
   return (
     <g className='sub-axis-wrapper' ref={subWrapperElt}>

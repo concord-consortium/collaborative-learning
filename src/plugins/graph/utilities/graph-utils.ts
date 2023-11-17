@@ -97,6 +97,11 @@ export function computeNiceNumericBounds(min: number, max: number): { min: numbe
 }
 
 export function setNiceDomain(values: number[], axisModel: IAxisModel) {
+  console.log("📁 graph-utils.ts ------------------------");
+  console.log("\t🥩 axisModel:", axisModel);
+  console.log("\t🥩 values:", values);
+  console.log("\t🥩 setNiceDomain:", setNiceDomain);
+
   if (isNumericAxisModel(axisModel)) {
     const [minValue, maxValue] = extent(values, d => d) as [number, number];
     const {min: niceMin, max: niceMax} = computeNiceNumericBounds(minValue, maxValue);
@@ -196,11 +201,6 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
 }
 
 function isCircleSelected(aCaseData: CaseData, dataset?: IDataSet) {
-  console.log("📁 graph-utils.ts ------------------------");
-  console.log("\t🏭 isCircleSelected");
-  console.log("\t🥩 aCaseData:", aCaseData);
-  console.log("\t🥩 dataset:", dataset);
-
   return !!dataset?.isCaseSelected(aCaseData.caseID);
 }
 

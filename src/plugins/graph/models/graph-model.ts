@@ -70,7 +70,11 @@ export const GraphModel = TileContentModel
     plotBackgroundLockInfo: types.maybe(types.frozen<BackgroundLockInfo>()),
     // numberToggleModel: types.optional(types.union(NumberToggleModel, null))
     showParentToggles: false,
-    showMeasuresForSelection: false
+    showMeasuresForSelection: false,
+    xAxisMin: -10,
+    xAxisMax: 10,
+    yAxisMin: -10,
+    yAxisMax: 10
   })
   .volatile(self => ({
     prevDataSetId: "",
@@ -407,7 +411,12 @@ export interface IGraphModel extends Instance<typeof GraphModel> {}
 export interface IGraphModelSnapshot extends SnapshotIn<typeof GraphModel> {}
 
 export function createGraphModel(snap?: IGraphModelSnapshot, appConfig?: AppConfigModelType) {
+  console.log("📁 graph-model.ts ------------------------");
+  console.log("\t🏭 createGraphModel");
+  console.log("\t🥩 snap?:", snap);
+
   const [min, max] = kDefaultNumericAxisBounds;
+
   const emptyPlotIsNumeric = appConfig?.getSetting("emptyPlotIsNumeric", "graph");
   const bottomAxisModel = emptyPlotIsNumeric
                             ? NumericAxisModel.create({place: "bottom", min, max})

@@ -68,6 +68,7 @@ export const NumericAxisModel = AxisModel
   .props({
     type: "numeric",
     scale: types.optional(types.enumeration([...ScaleTypes]), "linear"),
+    isLinkedDataSet: false,
     min: types.number,
     max: types.number
   })
@@ -81,6 +82,14 @@ export const NumericAxisModel = AxisModel
   }))
   .actions(self => ({
     setDomain(min: number, max: number) {
+      console.log("📁 axis-model.ts -----------------------");
+      console.log("\t🏭 setDomain");
+      console.log("\t🥩called with max:", max);
+      console.log("\t🥩called with min:", min);
+
+
+
+
       // If we're close enough to zero on either end, we snap to it
       const snapFactor = 100;
       if ((max > 0) && (Math.abs(min) <= max / snapFactor)) {
@@ -88,6 +97,9 @@ export const NumericAxisModel = AxisModel
       } else if ((min < 0) && (Math.abs(max) < Math.abs(min / snapFactor))) {
         max = 0;
       }
+      console.log("\t🥩 self.max:", self.max);
+      console.log("\t🥩 min:", self.min);
+
       self.min = min;
       self.max = max;
     }

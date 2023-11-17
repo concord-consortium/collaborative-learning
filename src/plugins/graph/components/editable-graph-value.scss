@@ -10,12 +10,26 @@
   border: solid 1.5px #949494;
   background-color: #f0f9fb;
   font: 12px sans-serif;
-    //place in correct position
-    position: absolute;
-    bottom: 90px;
-    // right: 100px;
-    left: 31px;
+  position: absolute;
 
+  &.bottom-min{
+    bottom: 90px;
+    left: 31px;
+  }
+  &.bottom-max{
+    right: 0px;
+    bottom: 90px;
+  }
+
+  &.left-min{
+    left: 15px;
+    bottom: 110px;
+  }
+
+  &.left-max{
+    left: 15px;
+    top: 5px;
+  }
 
 
 

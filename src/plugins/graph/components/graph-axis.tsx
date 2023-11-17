@@ -79,10 +79,6 @@ export const GraphAxis = observer(function GraphAxis({
         const left = ['bottom', 'top'].includes(place) ? 0 : bounds.left;
         const width = ['bottom', 'top'].includes(place) ? graphWidth : bounds.width;
         const transform = `translate(${left}, ${bounds.top})`;
-        // console.log("---- for place:", place);
-        // console.log("\t🔪 transform:", transform);
-        // console.log("\t🔪 width:", width);
-        // console.log("\t🔪 height:", bounds.height);
 
         select(wrapperElt)
           .selectAll<SVGRectElement, number>('rect.axis-background')
@@ -136,7 +132,7 @@ export const GraphAxis = observer(function GraphAxis({
   }, [layout, place, graphModel]);
 
   const axisModel = graphModel?.getAxis(place);
-  // console.log("\t🔪 axisModel:", axisModel);
+
   return (
     <g className='axis-wrapper' ref={elt => setWrapperElt(elt)}>
       <rect className='axis-background'/>

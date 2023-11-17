@@ -15,18 +15,13 @@ interface IProps {
   centerCategoryLabels?: boolean
 }
 
-export const Axis = ({
-                       label, axisModel, showScatterPlotGridLines = false,
-                       enableAnimation,
-                       centerCategoryLabels = true,
-                     }: IProps) => {
+export const Axis = ({ label, axisModel, showScatterPlotGridLines = false,
+                       enableAnimation, centerCategoryLabels = true, }: IProps) => {
 
 
   const layout = useAxisLayoutContext();
   const place = axisModel?.place || 'bottom';
   const [axisElt, setAxisElt] = useState<SVGGElement | null>(null);
-  // console.log(`📁 axis.tsx ---------${place}------------`);
-
 
   useAxis({
     axisModel, axisElt, axisTitle: label, centerCategoryLabels

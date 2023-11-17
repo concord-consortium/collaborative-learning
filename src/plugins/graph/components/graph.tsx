@@ -35,6 +35,7 @@ import {IDataSet} from "../../../models/data/data-set";
 import {onAnyAction} from "../../../utilities/mst-utils";
 import { Adornments } from "../adornments/adornments";
 import { kConnectingLinesType } from "../adornments/connecting-lines/connecting-lines-types";
+import { EditableGraphValue } from "./editable-graph-value";
 
 import "./graph.scss";
 import "./graph-clue-styles.scss";
@@ -49,7 +50,10 @@ interface IProps {
 export const Graph = observer(
     function Graph({ graphController, graphRef, dotsRef, onRequestRowHeight }: IProps) {
 
+  // console.log("📁 graph.tsx ------------------------");
+
   const graphModel = useGraphModelContext();
+  // console.log("\t🥩 graphModel:", graphModel);
   const {autoAdjustAxes, enableAnimation} = graphController;
   const {plotType} = graphModel;
   const instanceId = useInstanceIdContext();
@@ -58,6 +62,7 @@ export const Graph = observer(
   const showEditableGraphValue = !!dataset;
   const layout = useGraphLayoutContext();
   const xScale = layout.getAxisScale("bottom");
+  // console.log("\t🥩 xScale:", xScale);
   const svgRef = useRef<SVGSVGElement>(null);
   const plotAreaSVGRef = useRef<SVGSVGElement>(null);
   const backgroundSvgRef = useRef<SVGGElement>(null);
@@ -65,6 +70,7 @@ export const Graph = observer(
   useEffect(function setupPlotArea() {
     if (xScale && xScale?.length > 0) {
       const plotBounds = layout.getComputedBounds('plot');
+      // console.log("\t🥩 plotBounds:", plotBounds);
       select(plotAreaSVGRef.current)
         .attr('x', plotBounds?.left || 0)
         .attr('y', plotBounds?.top || 0)
@@ -93,6 +99,8 @@ export const Graph = observer(
     if (place === 'left' && graphModel.config?.yAttributeDescriptions.length > 1) {
       graphModel.removeYAttributeID(idOfAttributeToRemove);
       const yAxisModel = graphModel.getAxis('left') as IAxisModel;
+      console.log("\t🥩 yAxisModel:", yAxisModel);
+
       setNiceDomain(graphModel.config.numericValuesForYAxis, yAxisModel);
     } else {
       dataset && handleChangeAttribute(place, dataset, '');
@@ -162,13 +170,13 @@ export const Graph = observer(
     return typeToPlotComponentMap[plotType];
   };
 
-  const renderGraphAxes = () => {
+//******************** Render Graph Axes **********************
+  const axes = AxisPlaces.filter((place: AxisPlace) => {
+    return !!graphModel.getAxis(place);
+  });
 
-    const places = AxisPlaces.filter((place: AxisPlace) => {
-      return !!graphModel.getAxis(place);
-    });
-    // console.log("\t🔪 places:", places);
-    return places.map((place: AxisPlace) => {
+  const renderGraphAxes = () => {
+    return axes.map((place: AxisPlace) => {
       return <GraphAxis key={place}
                         place={place}
                         enableAnimation={enableAnimation}
@@ -206,8 +214,11 @@ export const Graph = observer(
 
   //-------------Min Max Value Change -------------------//
   const handleMinMaxChange = (minOrMax: string, newValue: number) => {
-    // console.log("minOrMax:", minOrMax);
+    console.log("minOrMax:", minOrMax);
+    console.log("newValue:", newValue);
   };
+
+  // console.log("\t🥩 axes:", axes);
 
 
 
@@ -244,7 +255,7 @@ export const Graph = observer(
           />
         </svg>
         {renderDroppableAddAttributes()}
-        <Adornments dotsRef={dotsRef}/>
+        <Adornments dotsRef={dotsRef}/>=
         { appConfig.getSetting("defaultSeriesLegend", "graph") &&
           <MultiLegend
             graphElt={graphRef.current}
@@ -254,14 +265,30 @@ export const Graph = observer(
             onRequestRowHeight={onRequestRowHeight}
           />
         }
-        {/* { showEditableGraphValue &&
-          <EditableGraphValue
-            value={8}
-            minOrMax={"min"}
-            // isTileSelected={isTileSelected}
-            onValueChange={(newValue) => handleMinMaxChange("min", newValue)}
-          />
-        } */}
+        {
+          showEditableGraphValue &&
+          axes.map((axis, idx) => {
+            const minVal = (axis === "bottom") ? graphModel.xAxisMin : graphModel.yAxisMin;
+            const maxVal = (axis === "bottom") ? graphModel.xAxisMax : graphModel.yAxisMax;
+
+            return (
+              <div key={`${axis}-min-max`}>
+                <EditableGraphValue
+                  value={minVal}
+                  minOrMax={"min"}
+                  axis={axis}
+                  onValueChange={(newValue) => handleMinMaxChange("min", newValue)}
+                />
+                <EditableGraphValue
+                  value={maxVal}
+                  minOrMax={"max"}
+                  axis={axis}
+                  onValueChange={(newValue) => handleMinMaxChange("min", newValue)}
+                />
+              </div>
+            );
+          })
+        }
       </div>
     </DataConfigurationContext.Provider>
   );

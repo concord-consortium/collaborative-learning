@@ -223,8 +223,6 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     deleteSelected,
   };
 
-  console.log("table-tile with attribute selection:", dataSet.attributeSelection);
-
   return (
     <div className="table-tool">
       <TableToolbarContext.Provider value={toolbarContext} >
