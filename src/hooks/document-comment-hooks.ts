@@ -1,8 +1,7 @@
 import firebase from "firebase/app";
 import { useCallback } from "react";
 import { useMutation, UseMutationOptions, useQuery, useQueryClient } from "react-query";
-import {
-  ICommentableDocumentParams, ICurriculumMetadata, IDocumentMetadata, IPostDocumentCommentParams,
+import { ICurriculumMetadata, IDocumentMetadata, IPostDocumentCommentParams,
   isCurriculumMetadata, isDocumentMetadata, isSectionPath
 } from "../../functions/src/shared";
 import { CommentDocument, CurriculumDocument, DocumentDocument } from "../lib/firestore-schema";
@@ -54,29 +53,16 @@ export const getCommentsQueryKeyFromMetadata = (metadata: IDocumentMetadata | IC
   return curriculumOrDocumentKey && commentsQueryKeyMap[curriculumOrDocumentKey];
 };
 
-/*
- * useValidateCommentableDocument
- *
- * Implemented via React Query's useMutation hook.
- */
-type IValidateDocumentClientParams = Omit<ICommentableDocumentParams, "context">;
-type ValidateDocumentUseMutationOptions =
-      UseMutationOptions<firebase.functions.HttpsCallableResult, unknown, IValidateDocumentClientParams>;
-
-export const useValidateCommentableDocument = (options?: ValidateDocumentUseMutationOptions) => {
-  const validateCommentableDocument = useFirebaseFunction<ICommentableDocumentParams>("validateCommentableDocument_v1");
-  const context = useUserContext();
-  const validateDocument = useCallback((clientParams: IValidateDocumentClientParams) => {
-    return validateCommentableDocument({ context, ...clientParams });
-  }, [context, validateCommentableDocument]);
-  return useMutation(validateDocument, options);
-};
-
 /**
  * useCommentableDocument
  *
  * Waits for the specified document to exist and returns it.
  * Implemented via React Query's useQuery hook.
+ *
+ * The document will be created by other parts of the code. Either when a comment is posted, or
+ * when the history is saved by the student:
+ * - functions/src/post-document-comment.ts -> createCommentableDocumentIfNecessary
+ * - src/models/history/tree-manager.ts -> prepareFirestoreHistoryInfo
  *
  * @param documentKeyOrSectionPath
  * @param userId optional param that overrides the current user and the network.
