@@ -16,6 +16,32 @@ $codap-bg-color: #f9f9f9;
   text-align: left;
   margin-left: 10px;
 
+  .legend-title-row {
+    display: flex;
+    margin: 0 10px;
+
+    .legend-title {
+      flex: 1 0 auto;
+    }
+
+    .legend-icon {
+      flex-grow: 0 0 auto;
+
+      .remove-button {
+        margin: 0;
+        padding: 0 10px;
+        border: none;
+        background: inherit;
+        cursor: pointer;
+
+        &:hover {
+          background-color: $workspace-teal-light-6;
+        }
+      }
+
+    }
+  }
+
   .legend-row {
     display: block;
     margin-top: $menu-vertical-gap;

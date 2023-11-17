@@ -7,6 +7,11 @@ import { SimpleAttributeLabel } from "../simple-attribute-label";
 import { AddSeriesButton } from "./add-series-button";
 import { IGraphLayerModel } from "../../models/graph-layer-model";
 import { ReadOnlyContext } from "../../../../components/document/read-only-context";
+import { useGraphModelContext } from "../../models/graph-model";
+import { getSharedModelManager } from "../../../../models/tiles/tile-environment";
+import { isSharedDataSet, SharedDataSet } from "../../../../models/shared/shared-data-set";
+
+import RemoveDataIcon from "../../assets/remove-data-icon.svg";
 
 interface ILayerLegendProps {
   layer: IGraphLayerModel;
@@ -16,10 +21,25 @@ interface ILayerLegendProps {
 }
 
 export const LayerLegend = observer(function LayerLegend(props: ILayerLegendProps) {
-
   let legendItems = [] as React.ReactNode[];
   const { layer, onChangeAttribute, onRemoveAttribute, onTreatAttributeAs } = props;
+  const graphModel = useGraphModelContext();
   const readOnly = useContext(ReadOnlyContext);
+
+  function handleRemoveIconClick() {
+    if (layer.config.dataset) {
+      const removeId = layer.config.dataset.id;
+      const smm = getSharedModelManager(layer);
+      if (smm && smm.isReady) {
+        const sharedDataSets = smm.getTileSharedModelsByType(graphModel, SharedDataSet);
+        const layerSharedDataSet = sharedDataSets.find((sds) => {
+          return isSharedDataSet(sds) && sds.dataSet.id === removeId; });
+        if (layerSharedDataSet) {
+          smm.removeTileSharedModel(graphModel, layerSharedDataSet);
+        }
+      }
+    }
+  }
 
   const dataConfiguration = layer.config;
   if (dataConfiguration) {
@@ -56,9 +76,22 @@ export const LayerLegend = observer(function LayerLegend(props: ILayerLegendProp
     );
   }
 
+  const hasDataset = layer.config.dataset !== undefined;
+
   return (
     <>
-      Data from: <strong>{dataConfiguration?.dataset?.name}</strong>&nbsp;
+      {hasDataset &&
+        <div className="legend-title-row">
+          <div className="legend-title">
+            Data from: <strong>{dataConfiguration?.dataset?.name}</strong>&nbsp;
+          </div>
+          <div className="legend-icon">
+            <button onClick={handleRemoveIconClick} className="remove-button">
+              <RemoveDataIcon />
+            </button>
+          </div>
+        </div>
+      }
       {legendItemRows}
     </>
   );
