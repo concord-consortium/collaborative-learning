@@ -6,7 +6,8 @@ import {SharedCaseMetadata} from "../../../models/shared/shared-case-metadata";
 
 const TreeModel = types.model("Tree", {
   data: DataSet,
-  metadata: SharedCaseMetadata
+  metadata: SharedCaseMetadata,
+  config: DataConfigurationModel
 });
 
 let tree: Instance<typeof TreeModel>;
@@ -15,7 +16,8 @@ describe("DataConfigurationModel", () => {
   beforeEach(() => {
     tree = TreeModel.create({
       data: getSnapshot(DataSet.create()),
-      metadata: getSnapshot(SharedCaseMetadata.create())
+      metadata: getSnapshot(SharedCaseMetadata.create()),
+      config: getSnapshot(DataConfigurationModel.create())
     });
     tree.data.addAttributeWithID({ id: "nId", name: "n" });
     tree.data.addAttributeWithID({ id: "xId", name: "x" });
@@ -27,13 +29,16 @@ describe("DataConfigurationModel", () => {
   });
 
   it("behaves as expected when empty", () => {
-    const config = DataConfigurationModel.create();
+    const config = tree.config;
+    expect(config.isEmpty).toBeTruthy();
     expect(config.defaultCaptionAttributeID).toBeUndefined();
     expect(config.attributeID("x")).toBeUndefined();
     expect(config.attributeID("y")).toBeUndefined();
     expect(config.attributeID("caption")).toBeUndefined();
     expect(config.attributeType("x")).toBeUndefined();
     expect(config.attributeType("caption")).toBeUndefined();
+    expect(config.dataset).toBeUndefined();
+    expect(config.metadata).toBeUndefined();
     expect(config.places).toEqual([]);
     expect(config.attributes).toEqual([]);
     expect(config.uniqueAttributes).toEqual([]);
@@ -43,8 +48,11 @@ describe("DataConfigurationModel", () => {
   });
 
   it("behaves as expected with empty/case plot", () => {
-    const config = DataConfigurationModel.create();
+    const config = tree.config;
     config.setDataset(tree.data, tree.metadata);
+    expect(config.dataset).toEqual(tree.data);
+    expect(config.metadata).toEqual(tree.metadata);
+    expect(config.isEmpty).toBeTruthy();
     expect(config.defaultCaptionAttributeID).toBe("nId");
     expect(config.attributeID("x")).toBeUndefined();
     expect(config.attributeID("y")).toBeUndefined();
@@ -57,16 +65,17 @@ describe("DataConfigurationModel", () => {
     expect(config.tipAttributes).toEqual([{attributeID: "nId", role: "caption"}]);
     expect(config.uniqueTipAttributes).toEqual([{attributeID: "nId", role: "caption"}]);
     expect(config.caseDataArray).toEqual([
-      {plotNum: 0, caseID: "c1"},
-      {plotNum: 0, caseID: "c2"},
-      {plotNum: 0, caseID: "c3"}
+      { plotNum: 0, caseID: "c1" },
+      { plotNum: 0, caseID: "c2" },
+      { plotNum: 0, caseID: "c3" }
     ]);
   });
 
   it("behaves as expected with dot chart on x axis", () => {
-    const config = DataConfigurationModel.create();
+    const config = tree.config;
     config.setDataset(tree.data, tree.metadata);
-    config.setAttribute("x", { attributeID: "nId" });
+    config.setAttributeForRole("x", { attributeID: "nId" });
+    expect(config.isEmpty).toBeFalsy();
     expect(config.defaultCaptionAttributeID).toBe("nId");
     expect(config.attributeID("x")).toBe("nId");
     expect(config.attributeID("y")).toBeUndefined();
@@ -86,9 +95,9 @@ describe("DataConfigurationModel", () => {
   });
 
   it("behaves as expected with dot plot on x axis", () => {
-    const config = DataConfigurationModel.create();
+    const config = tree.config;
     config.setDataset(tree.data, tree.metadata);
-    config.setAttribute("x", { attributeID: "xId" });
+    config.setAttributeForRole("x", { attributeID: "xId" });
     expect(config.defaultCaptionAttributeID).toBe("nId");
     expect(config.attributeID("x")).toBe("xId");
     expect(config.attributeID("y")).toBeUndefined();
@@ -103,18 +112,18 @@ describe("DataConfigurationModel", () => {
     expect(config.uniqueTipAttributes).toEqual([{attributeID: "xId", role: "x"},
       {attributeID: "nId", role: "caption"}]);
     expect(config.caseDataArray).toEqual([
-      {plotNum: 0, caseID: "c1"},
-      {plotNum: 0, caseID: "c2"}
+      { plotNum: 0, caseID: "c1" },
+      { plotNum: 0, caseID: "c2" }
     ]);
   });
 
   it("behaves as expected with scatter plot and explicit caption attribute", () => {
-    const config = DataConfigurationModel.create();
+    const config = tree.config;
     config.setDataset(tree.data, tree.metadata);
     // xId on x-axis, yId on y-axis
-    config.setAttribute("x", { attributeID: "xId" });
-    config.setAttribute("y", { attributeID: "yId" });
-    config.setAttribute("caption", { attributeID: "nId" });
+    config.setAttributeForRole("x", { attributeID: "xId" });
+    config.setAttributeForRole("y", { attributeID: "yId" });
+    config.setAttributeForRole("caption", { attributeID: "nId" });
     expect(config.defaultCaptionAttributeID).toBe("nId");
     expect(config.attributeID("x")).toBe("xId");
     expect(config.attributeID("y")).toBe("yId");
@@ -132,7 +141,7 @@ describe("DataConfigurationModel", () => {
     expect(config.caseDataArray).toEqual([{plotNum: 0, caseID: "c1"}]);
 
     // behaves as expected after removing x axis attribute (yId on y-axis)
-    config.setAttribute("x");
+    config.setAttributeForRole("x");
     expect(config.defaultCaptionAttributeID).toBe("nId");
     expect(config.attributeID("x")).toBeUndefined();
     expect(config.attributeID("y")).toBe("yId");
@@ -180,30 +189,31 @@ describe("DataConfigurationModel", () => {
   });
 
   it("selection behaves as expected", () => {
-    const config = DataConfigurationModel.create();
-    config.setAttribute("x", { attributeID: "xId" });
+    const config = tree.config;
+    config.setDataset(tree.data, tree.metadata);
+    config.setAttributeForRole("x", { attributeID: "xId" });
     expect(config.selection.length).toBe(0);
 
     config.setDataset(tree.data, tree.metadata);
     tree.data.selectAllCases();
     expect(config.selection.length).toBe(2);
 
-    config.setAttribute("x", { attributeID: "xId" });
+    config.setAttributeForRole("x", { attributeID: "xId" });
     expect(config.selection.length).toBe(2);
 
     const selectionReaction = jest.fn();
     const disposer = reaction(() => config.selection, () => selectionReaction());
     expect(selectionReaction).toHaveBeenCalledTimes(0);
-    config.setAttribute("y", { attributeID: "yId" });
+    config.setAttributeForRole("y", { attributeID: "yId" });
     expect(config.selection.length).toBe(1);
     expect(selectionReaction).toHaveBeenCalledTimes(1);
     disposer();
   });
 
   it("calls action listeners when appropriate", () => {
-    const config = DataConfigurationModel.create();
+    const config = tree.config;
     config.setDataset(tree.data, tree.metadata);
-    config.setAttribute("x", { attributeID: "xId" });
+    config.setAttributeForRole("x", { attributeID: "xId" });
 
     const handleAction = jest.fn();
     config.onAction(handleAction);
@@ -228,7 +238,7 @@ describe("DataConfigurationModel", () => {
   });
 
   it("only allows x and y as primary place", () => {
-    const config = DataConfigurationModel.create();
+    const config = tree.config;
     config.setDataset(tree.data, tree.metadata);
     config.setPrimaryRole('y');
     expect(config.primaryRole).toBe("y");
@@ -241,11 +251,11 @@ describe("DataConfigurationModel", () => {
       { __id__: "c4", n: "n1", x: 1, y: 1 },
       { __id__: "c5", n: "", x: 6, y: 1 },
       { __id__: "c6", n: "n1", x: 6, y: 6 }]);
-    const config = DataConfigurationModel.create();
+    const config = tree.config;
     config.setDataset(tree.data, tree.metadata);
-    config.setAttribute("x", { attributeID: "xId" });
-    config.setAttribute("y", { attributeID: "yId" });
-    config.setAttribute("caption", { attributeID: "nId" });
+    config.setAttributeForRole("x", { attributeID: "xId" });
+    config.setAttributeForRole("y", { attributeID: "yId" });
+    config.setAttributeForRole("caption", { attributeID: "nId" });
     expect(config.valuesForAttrRole("x")).toEqual(["1", "1", "6", "6"]);
     expect(config.valuesForAttrRole("y")).toEqual(["1", "1", "1", "6"]);
     expect(config.valuesForAttrRole("caption")).toEqual(["n1", "n1", "n1"]);
@@ -255,13 +265,13 @@ describe("DataConfigurationModel", () => {
     expect(config.numericValuesForAttrRole("x")).toEqual([1, 1, 6, 6]);
     expect(config.numericValuesForAttrRole("caption")).toEqual([]);
 
-    config.setAttribute("y");
+    config.setAttributeForRole("y");
     expect(config.valuesForAttrRole("y")).toEqual([]);
     expect(config.categoryArrayForAttrRole("y")).toEqual(["__main__"]);
   });
 
   it("returns an array of cases in a plot", () => {
-    const config = DataConfigurationModel.create();
+    const config = tree.config;
     config.setDataset(tree.data, tree.metadata);
     expect(config.subPlotCases({})).toEqual([
       {"__id__": "c1", "nId": "n1", "xId": 1, "yId": 1},

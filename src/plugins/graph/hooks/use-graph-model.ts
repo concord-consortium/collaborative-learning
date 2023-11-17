@@ -1,7 +1,6 @@
 import {MutableRefObject, useCallback, useEffect} from "react";
 import {isAddCasesAction, isRemoveCasesAction} from "../../../models/data/data-set-actions";
 import {IGraphModel, isGraphVisualPropsAction} from "../models/graph-model";
-import {useDataSetContext} from "../imports/hooks/use-data-set-context";
 import {INumericAxisModel} from "../imports/components/axis/models/axis-model";
 import {IDotsRef} from "../graph-types";
 import {matchCirclesToData, setNiceDomain, startAnimation} from "../utilities/graph-utils";
@@ -15,10 +14,10 @@ interface IProps {
 }
 
 export function useGraphModel(props: IProps) {
-  const {graphModel, enableAnimation, dotsRef, instanceId} = props,
+  const { graphModel, enableAnimation, dotsRef, instanceId } = props,
     dataConfig = graphModel.config,
-    yAttrID = graphModel.getAttributeID('y'),
-    dataset = useDataSetContext();
+    yAttrID = graphModel.getAttributeID('y');
+  const dataset = dataConfig.dataset;
 
   const callMatchCirclesToData = useCallback(() => {
     matchCirclesToData({
@@ -44,19 +43,23 @@ export function useGraphModel(props: IProps) {
   useEffect(function installPlotTypeAction() {
     const disposer = onAnyAction(graphModel, action => {
       if (action.name === 'setPlotType') {
+        const { caseDataArray } = dataConfig || {};
         const newPlotType = action.args?.[0];/*,
           attrIDs = newPlotType === 'dotPlot' ? [xAttrID] : [xAttrID, yAttrID]*/
         startAnimation(enableAnimation);
         // In case the y-values have changed we rescale
         if (newPlotType === 'scatterPlot') {
           const yAxisModel = graphModel.getAxis('left');
-          const values = dataConfig.caseDataArray.map(({ caseID }) => dataset?.getNumeric(caseID, yAttrID)) as number[];
-          setNiceDomain(values || [], yAxisModel as INumericAxisModel);
+          if (caseDataArray) {
+            const values
+              = caseDataArray.map(({ caseID }) => dataset?.getNumeric(caseID, yAttrID)) as number[];
+            setNiceDomain(values || [], yAxisModel as INumericAxisModel);
+          }
         }
       }
     });
     return () => disposer();
-  }, [dataConfig.caseDataArray, dataset, enableAnimation, graphModel, yAttrID]);
+  }, [dataConfig, dataset, enableAnimation, graphModel, yAttrID]);
 
   // respond to point properties change
   useEffect(function respondToGraphPointVisualAction() {

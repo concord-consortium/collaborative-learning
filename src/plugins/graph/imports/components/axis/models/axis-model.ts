@@ -81,6 +81,12 @@ export const NumericAxisModel = AxisModel
   }))
   .actions(self => ({
     setDomain(min: number, max: number) {
+      // Clean NaNs since they will make the document crash
+      if (!isFinite(min) || !isFinite(max)) {
+        console.warn('NumericAxisModel.setDomain called with non-numeric arg(s):', min, max);
+        min=kDefaultNumericAxisBounds[0];
+        max=kDefaultNumericAxisBounds[1];
+      }
       // If we're close enough to zero on either end, we snap to it
       const snapFactor = 100;
       if ((max > 0) && (Math.abs(min) <= max / snapFactor)) {

@@ -13,7 +13,10 @@ import {GraphPlace} from "../imports/components/axis-graph-shared";
 import {matchCirclesToData, setNiceDomain} from "../utilities/graph-utils";
 import { getAppConfig } from "../../../models/tiles/tile-environment";
 
-// keys are [primaryAxisType][secondaryAxisType]
+/**
+ * This determines the type of plot that will be drawn, based on the types of the two axes.
+ * The keys are [primaryAxisType][secondaryAxisType]
+ */
 const plotChoices: Record<string, Record<string, PlotType>> = {
   empty: {empty: 'casePlot', numeric: 'dotPlot', categorical: 'dotChart'},
   numeric: {empty: 'dotPlot', numeric: 'scatterPlot', categorical: 'dotPlot'},
@@ -51,6 +54,7 @@ export class GraphController {
     this.graphModel = props.graphModel;
     this.dotsRef = props.dotsRef;
     if (this.graphModel.config.dataset !== this.graphModel.data) {
+      // FIXME - This no longer makes sense when plotting more than just the 1st layer.
       this.graphModel.config.setDataset(this.graphModel.data, this.graphModel.metadata);
     }
     this.initializeGraph();
@@ -101,9 +105,9 @@ export class GraphController {
     }
   }
 
-  handleAttributeAssignment(graphPlace: GraphPlace, dataSetID: string, attrID: string) {
+  handleAttributeAssignment(graphPlace: GraphPlace, dataSetID: string|undefined, attrID: string) {
     const {graphModel, layout} = this,
-      dataset = getDataSetFromId(graphModel, dataSetID),
+      dataset = dataSetID ? getDataSetFromId(graphModel, dataSetID) : undefined,
       dataConfig = graphModel?.config,
       appConfig = getAppConfig(graphModel),
       emptyPlotIsNumeric = appConfig?.getSetting("emptyPlotIsNumeric", "graph");
@@ -140,8 +144,8 @@ export class GraphController {
         dataConfig.setPrimaryRole(primaryRole);
         graphModel.setPlotType(plotChoices[primaryType][otherAttributeType]);
       }
-      if (dataConfig.attributeID(graphAttributeRole) !== attrID) {
-        dataConfig.setAttribute(graphAttributeRole, {attributeID: attrID});
+      if (attrID && dataConfig.attributeID(graphAttributeRole) !== attrID) {
+        dataConfig.setAttributeForRole(graphAttributeRole, {attributeID: attrID});
       }
     };
 
