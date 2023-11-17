@@ -55,6 +55,13 @@ export const useDataSet = ({
     // We don't update the position while adding a new row so we can move to the new row if necessary.
     if (addingNewRow.current) return;
 
+    // If the new position is (-1, -1), deselect all cells and bail
+    if (position.rowIdx === -1 && position.idx === -1) {
+      dataSet.setSelectedCells([]);
+      triggerRowChange();
+      return;
+    }
+
     // Only modify the selection if a single cell is selected
     if (dataSet.selectedCells.length !== 1) return;
 
@@ -107,10 +114,6 @@ export const useDataSet = ({
       // Update rdg if we fixed the position, which will cause this function to be called again
       if ((newPosition.rowIdx !== position.rowIdx) || (newPosition.idx !== position.idx)) {
         gridRef.current?.selectCell(newPosition);
-        if (newPosition.rowIdx === -1 && newPosition.idx === -1) {
-          dataSet.setSelectedCells([]);
-          triggerRowChange();
-        }
       }
     }
   };
