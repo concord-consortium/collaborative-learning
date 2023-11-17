@@ -4,7 +4,7 @@ import {isAlive} from "mobx-state-tree";
 import {MutableRefObject, useCallback, useEffect, useMemo, useRef} from "react";
 import {AxisBounds, axisPlaceToAxisFn, AxisScaleType, otherPlace} from "../axis-types";
 import {useAxisLayoutContext} from "../models/axis-layout-context";
-import {IAxisModel, INumericAxisModel, isCategoricalAxisModel, isNumericAxisModel,
+import {IAxisModel, isCategoricalAxisModel, isNumericAxisModel,
       } from "../models/axis-model";
 import {isVertical} from "../../axis-graph-shared";
 import {between} from "../../../../utilities/math-utils";
@@ -13,10 +13,13 @@ import {
   DragInfo, collisionExists, computeBestNumberOfTicks, getCategoricalLabelPlacement,
   getCoordFunctions, IGetCoordFunctionsProps
 } from "../axis-utils";
+// import { useGraphModelContext } from "src/plugins/graph/models/graph-model"; //TODO
+import { useGraphModelContext } from "../../../../models/graph-model";
+
 
 export interface IUseSubAxis {
   subAxisIndex: number
-  axisModel: IAxisModel | INumericAxisModel
+  axisModel: IAxisModel
   subAxisElt: SVGGElement | null
   enableAnimation: MutableRefObject<boolean>
   showScatterPlotGridLines: boolean
@@ -31,7 +34,10 @@ interface CatObject {
 export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlotGridLines,
                             centerCategoryLabels, enableAnimation}: IUseSubAxis) => {
 
-  // console.log(`📁 use-sub-axis.ts -----------${axisModel?.place}-------------`);
+  console.log(`📁 use-sub-axis.ts -----------${axisModel?.place}-------------`);
+  // console.log("\t🏭 axisModel:", axisModel);
+  const graphModel = useGraphModelContext();
+  console.log("graphModel.isLinked?:", graphModel.isLinkedToDataSet);
   // console.log("\t🥩 showScatterPlotGridLines:", showScatterPlotGridLines);
   // console.log("\t🥩 subAxisElt:", subAxisElt);
   // console.log("\t🥩 axisModel:", axisModel);
@@ -79,7 +85,6 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
       : (place === 'top') ? `translate(${axisBounds.left}, ${axisBounds.top + axisBounds.height})`
       : `translate(${axisBounds.left}, ${axisBounds.top})`;
 
-
   //*******************************   GUIDELINES **************************
   // - standard domain and range shows edit boxes around axis limit numbers when plot has focus (both x and y)
   // - if value is entered that is smaller than bottom of range, then it is ignored and the original value is restored
@@ -117,7 +122,6 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
         //get first and last and put them into model min and max
         axisScale.tickValues(horizontalTicks);
       }
-
       select(subAxisElt)
         .attr("transform", initialTransform)
         .transition().duration(duration)
@@ -128,19 +132,13 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
         .style("stroke", "lightgrey")
         .style("stroke-opacity", "0.7");
 
-        // console.log("📁 use-sub-axis.ts ------------------------");
+      // console.log("📁 use-sub-axis.ts ------------------------");
       // Hide the text of the first and last tick labels
       select(subAxisElt)
         .selectAll('.tick text')
         .style('display', (d, i, nodes) => {
-          // console.log("d:", d);
-          //TODO - when the dataset is linked - we need to write to axisModel.isLinkedDataSet
-          //write two functions inside axis-model.ts that mutate the min and max
-          let hideMinAndMax = (i === 0 || i === nodes.length - 1);
-          if(isNumericAxisModel(axisModel) && !axisModel.isLinkedDataSet){
-            hideMinAndMax = false;
-          }
-          console.log("\t🥩 hideMinAndMax:", hideMinAndMax);
+          const  hideMinAndMax = (i === 0 || i === nodes.length - 1) && isNumericAxisModel(axisModel)
+                                 && graphModel.isLinkedToDataSet; //hide first and last tick labels when linked
           return hideMinAndMax  ? 'none' : null;
         });
     };

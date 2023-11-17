@@ -9,19 +9,19 @@ interface IEditableValueProps {
   value: number;
   minOrMax: "min" | "max";
   axis: AxisPlace
-  onValueChange?: (newValue: number) => void;
+  onValueChange: (newValue: number) => void;
 }
 
-//look into readOnly? Parent is <Graph> and readOnly is NOT passed in as a prop
-// isTileSelected?: boolean;
 
 
 export const EditableGraphValue: React.FC<IEditableValueProps> = observer(function NumberlineTile(props) {
   const { value, minOrMax, axis, onValueChange } = props;
+  //TODO: readOnly? Parent is <Graph> and readOnly is NOT passed in as a prop
+  // isTileSelected?: boolean;
+  const readOnly = false; //for now
   // console.log("📁 editable-graph-value.tsx ------------------------");
   // console.log("\t🥩 axis:", axis);
   // console.log("\t🥩 minOrMax:", minOrMax);
-
 
   const [isEditing, setIsEditing] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -33,15 +33,14 @@ export const EditableGraphValue: React.FC<IEditableValueProps> = observer(functi
   }, [isEditing]);
 
   const handleClick = () => {
-    // if (!readOnly && !isEditing) {
-    //   setIsEditing(true);
-    // }
-    console.log("click!");
+    if (!readOnly && !isEditing) {
+      setIsEditing(true);
+    }
   };
 
   const updateValue = (val: string) => {
     if (checkIfNumber(val)) {
-      // onValueChange(Number(val));
+      onValueChange(Number(val));
     }
     setIsEditing(false);
   };

@@ -8,7 +8,7 @@ import {Background} from "./background";
 import {DroppablePlot} from "./droppable-plot";
 import {AxisPlace, AxisPlaces} from "../imports/components/axis/axis-types";
 import {GraphAxis} from "./graph-axis";
-import {attrRoleToGraphPlace, graphPlaceToAttrRole, IDotsRef, kGraphClass} from "../graph-types";
+import {attrRoleToGraphPlace, graphPlaceToAttrRole, IDotsRef, kDefaultNumericAxisBounds, kGraphClass} from "../graph-types";
 import {ScatterDots} from "./scatterdots";
 import {DotPlotDots} from "./dotplotdots";
 import {CaseDots} from "./casedots";
@@ -18,7 +18,7 @@ import {DataConfigurationContext} from "../hooks/use-data-configuration-context"
 import {useDataSetContext} from "../imports/hooks/use-data-set-context";
 import {useGraphModel} from "../hooks/use-graph-model";
 import {setNiceDomain, startAnimation} from "../utilities/graph-utils";
-import {IAxisModel} from "../imports/components/axis/models/axis-model";
+import {IAxisModel, INumericAxisModel, isNumericAxisModel} from "../imports/components/axis/models/axis-model";
 import {GraphPlace} from "../imports/components/axis-graph-shared";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {
@@ -53,7 +53,6 @@ export const Graph = observer(
   // console.log("📁 graph.tsx ------------------------");
 
   const graphModel = useGraphModelContext();
-  // console.log("\t🥩 graphModel:", graphModel);
   const {autoAdjustAxes, enableAnimation} = graphController;
   const {plotType} = graphModel;
   const instanceId = useInstanceIdContext();
@@ -62,7 +61,6 @@ export const Graph = observer(
   const showEditableGraphValue = !!dataset;
   const layout = useGraphLayoutContext();
   const xScale = layout.getAxisScale("bottom");
-  // console.log("\t🥩 xScale:", xScale);
   const svgRef = useRef<SVGSVGElement>(null);
   const plotAreaSVGRef = useRef<SVGSVGElement>(null);
   const backgroundSvgRef = useRef<SVGGElement>(null);
@@ -99,7 +97,7 @@ export const Graph = observer(
     if (place === 'left' && graphModel.config?.yAttributeDescriptions.length > 1) {
       graphModel.removeYAttributeID(idOfAttributeToRemove);
       const yAxisModel = graphModel.getAxis('left') as IAxisModel;
-      console.log("\t🥩 yAxisModel:", yAxisModel);
+      // console.log("\t🥩 yAxisModel:", yAxisModel);
 
       setNiceDomain(graphModel.config.numericValuesForYAxis, yAxisModel);
     } else {
@@ -213,13 +211,22 @@ export const Graph = observer(
   useGraphModel({dotsRef, graphModel, enableAnimation, instanceId});
 
   //-------------Min Max Value Change -------------------//
-  const handleMinMaxChange = (minOrMax: string, newValue: number) => {
+  const handleMinMaxChange = (minOrMax: string, axis: AxisPlace, newValue: number) => {
+    console.log("📁 graph.tsx ------------------------");
+    console.log("\t🥩 newValue:", newValue);
+    console.log("\t🥩 axis:", axis);
+    console.log("\t🥩 minOrMax:", minOrMax);
+
+    const axisModel = graphModel.getAxis(axis) as INumericAxisModel;
+    // console.log("\t🥩 yAxisModel:", yAxisModel);
     console.log("minOrMax:", minOrMax);
     console.log("newValue:", newValue);
+    if (minOrMax === "min" && newValue < axisModel.max){
+      axisModel.setMin(newValue);
+    } else if (minOrMax === "max" && newValue > axisModel.min){
+      axisModel.setMax(newValue);
+    }
   };
-
-  // console.log("\t🥩 axes:", axes);
-
 
 
   return (
@@ -267,23 +274,25 @@ export const Graph = observer(
         }
         {
           showEditableGraphValue &&
-          axes.map((axis, idx) => {
-            const minVal = (axis === "bottom") ? graphModel.xAxisMin : graphModel.yAxisMin;
-            const maxVal = (axis === "bottom") ? graphModel.xAxisMax : graphModel.yAxisMax;
-
+          axes.map((axis: AxisPlace, idx) => {
+            // console.log("\t🥩 axis-----------", axis);
+            const axisModel = graphModel?.getAxis(axis);
+            const minVal = isNumericAxisModel(axisModel) ? axisModel.min : kDefaultNumericAxisBounds[0];
+            const maxVal = isNumericAxisModel(axisModel) ? axisModel.max : kDefaultNumericAxisBounds[1];
+            //TODO - hide first and last tick
             return (
               <div key={`${axis}-min-max`}>
                 <EditableGraphValue
                   value={minVal}
                   minOrMax={"min"}
                   axis={axis}
-                  onValueChange={(newValue) => handleMinMaxChange("min", newValue)}
+                  onValueChange={(newValue) => handleMinMaxChange("min", axis, newValue)}
                 />
                 <EditableGraphValue
                   value={maxVal}
                   minOrMax={"max"}
                   axis={axis}
-                  onValueChange={(newValue) => handleMinMaxChange("min", newValue)}
+                  onValueChange={(newValue) => handleMinMaxChange("max", axis, newValue)}
                 />
               </div>
             );

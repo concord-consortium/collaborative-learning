@@ -70,11 +70,7 @@ export const GraphModel = TileContentModel
     plotBackgroundLockInfo: types.maybe(types.frozen<BackgroundLockInfo>()),
     // numberToggleModel: types.optional(types.union(NumberToggleModel, null))
     showParentToggles: false,
-    showMeasuresForSelection: false,
-    xAxisMin: -10,
-    xAxisMax: 10,
-    yAxisMin: -10,
-    yAxisMax: 10
+    showMeasuresForSelection: false
   })
   .volatile(self => ({
     prevDataSetId: "",
@@ -83,6 +79,8 @@ export const GraphModel = TileContentModel
   }))
   .views(self => ({
     get data() {
+      console.log("📁 graph-model.ts ------------------------");
+      console.log("\t🥩 getTileDataSet(self):", getTileDataSet(self));
       return getTileDataSet(self);
     },
     get metadata() {
@@ -189,7 +187,11 @@ export const GraphModel = TileContentModel
         rightCats,
         resetPoints
       };
-    }
+    },
+    //TODO: touch base with Boris about his structural changes to the graph model
+    get isLinkedToDataSet(){
+      return !!self.data;
+    },
   }))
   .views(self => tileContentAPIViews({
     get contentTitle() {
