@@ -15,16 +15,16 @@ import {CaseDots} from "./casedots";
 import {ChartDots} from "./chartdots";
 import {Marquee} from "./marquee";
 import {DataConfigurationContext} from "../hooks/use-data-configuration-context";
-import {useDataSetContext} from "../imports/hooks/use-data-set-context";
+import {DataSetContext, useDataSetContext} from "../imports/hooks/use-data-set-context";
 import {useGraphModel} from "../hooks/use-graph-model";
 import {setNiceDomain, startAnimation} from "../utilities/graph-utils";
 import {IAxisModel} from "../imports/components/axis/models/axis-model";
 import {GraphPlace} from "../imports/components/axis-graph-shared";
 import {useGraphLayoutContext} from "../models/graph-layout";
-import {
-  isAttributeAssignmentAction, isRemoveYAttributeAction, isReplaceYAttributeAction, isSetAttributeIDAction,
-  useGraphModelContext
-} from "../models/graph-model";
+import { isAttributeAssignmentAction, isRemoveAttributeFromRoleAction, isRemoveYAttributeWithIDAction,
+  isReplaceYAttributeAction, isSetAttributeForRoleAction }
+  from "../models/data-configuration-model";
+import { useGraphModelContext } from "../models/graph-model";
 import {useInstanceIdContext} from "../imports/hooks/use-instance-id-context";
 import {MarqueeState} from "../models/marquee-state";
 import {Legend} from "./legend/legend";
@@ -85,14 +85,14 @@ export const Graph = observer(
   };
 
   /**
-   * Only in the case that place === 'y' and there is more than one attribute assigned to the y-axis
-   * do we have to do anything special. Otherwise, we can just call handleChangeAttribute.
+   * Remove a given Attribute from the graph.
+   * This is called by 'Remove...' menu options.
    */
   const handleRemoveAttribute = (place: GraphPlace, idOfAttributeToRemove: string) => {
-    if (place === 'left' && graphModel.config?.yAttributeDescriptions.length > 1) {
+    if (place === 'left') {
       graphModel.removeYAttributeID(idOfAttributeToRemove);
       const yAxisModel = graphModel.getAxis('left') as IAxisModel;
-      setNiceDomain(graphModel.config.numericValuesForYAxis, yAxisModel);
+      setNiceDomain(graphModel.config.numericValuesForYAxis, yAxisModel); // FIXME needs update for multiple datasets
     } else {
       dataset && handleChangeAttribute(place, dataset, '');
     }
@@ -103,16 +103,39 @@ export const Graph = observer(
     const disposer = graphModel && onAnyAction(graphModel, action => {
       if (isAttributeAssignmentAction(action)) {
         let graphPlace: GraphPlace = "yPlus";
-        let dataSetId = dataset?.id ?? "";
-        let attrId = "";
-        if (isSetAttributeIDAction(action)) {
-          const [role, _dataSetId, _attrId] = action.args;
-          graphPlace = attrRoleToGraphPlace[role] as GraphPlace;
-          dataSetId = _dataSetId;
-          attrId = _attrId;
+        // This should trigger only on changes in one of the attached DataConfiguration objects.
+        // We can determine which one from the path.
+        if (!action.path) return;
+        const match = action.path.match(/^\/layers\/([0-9]+)\/config$/);
+        if (!match) {
+          console.warn('Unexpected action.path: ', action.path);
+          return;
         }
-        else if (isRemoveYAttributeAction(action)) {
-          graphPlace = "yPlus";
+        const layerNumber = Number(match[1]);
+        if (!isFinite(layerNumber) || layerNumber >= graphModel.layers.length) {
+          console.warn('Unexpected layer number: ', action.path);
+          return;
+        }
+        if (layerNumber > 0) { // TODO temporary
+          console.log('Ignoring change in layer ', layerNumber, action.name);
+          return;
+        }
+        const layer = graphModel.layers[layerNumber];
+        const dataSetId = layer.config.dataset?.id;
+        let attrId = "";
+        if (isSetAttributeForRoleAction(action)) {
+          const [role, _desc] = action.args;
+          graphPlace = attrRoleToGraphPlace[role] as GraphPlace;
+          attrId = _desc?.attributeID || "";
+        }
+        else if (isRemoveAttributeFromRoleAction(action)) {
+          const [role] = action.args;
+          graphPlace = attrRoleToGraphPlace[role] as GraphPlace;
+        }
+        else if (isRemoveYAttributeWithIDAction(action)) {
+          const [_attrId] = action.args; // "old" attr ID, do not pass to handleAttributeAssignment
+          const removingLastOne = layer.config.yAttributeDescriptions.length === 0;
+          graphPlace = removingLastOne ? "left" : "yPlus";
         }
         else if (isReplaceYAttributeAction(action)) {
           const [ , newAttrId] = action.args;
@@ -201,50 +224,53 @@ export const Graph = observer(
 
   useGraphModel({dotsRef, graphModel, enableAnimation, instanceId});
 
+  // TODO multi-dataset: DataContext / providers will need to be replaced by looping over layers.
   return (
     <DataConfigurationContext.Provider value={graphModel.config}>
-      <div className={kGraphClass} ref={graphRef} data-testid="graph">
-        <svg className='graph-svg' ref={svgRef}>
-          <Background
-            marqueeState={marqueeState}
-            ref={backgroundSvgRef}
-          />
+      <DataSetContext.Provider value={graphModel.config.dataset}>
+        <div className={kGraphClass} ref={graphRef} data-testid="graph">
+          <svg className='graph-svg' ref={svgRef}>
+            <Background
+              marqueeState={marqueeState}
+              ref={backgroundSvgRef}
+            />
 
-          {renderGraphAxes()}
+            {renderGraphAxes()}
 
-          <svg ref={plotAreaSVGRef}>
-            <svg ref={dotsRef} className={`graph-dot-area ${instanceId}`}>
-              {renderPlotComponent()}
+            <svg ref={plotAreaSVGRef}>
+              <svg ref={dotsRef} className={`graph-dot-area ${instanceId}`}>
+                {renderPlotComponent()}
+              </svg>
+              <Marquee marqueeState={marqueeState} />
             </svg>
-            <Marquee marqueeState={marqueeState}/>
+
+            <DroppablePlot
+              graphElt={graphRef.current}
+              plotElt={backgroundSvgRef.current}
+              onDropAttribute={handleChangeAttribute}
+            />
+
+            <Legend
+              legendAttrID={graphModel.getAttributeID('legend')}
+              graphElt={graphRef.current}
+              onDropAttribute={handleChangeAttribute}
+              onRemoveAttribute={handleRemoveAttribute}
+              onTreatAttributeAs={handleTreatAttrAs}
+            />
           </svg>
-
-          <DroppablePlot
-            graphElt={graphRef.current}
-            plotElt={backgroundSvgRef.current}
-            onDropAttribute={handleChangeAttribute}
-          />
-
-          <Legend
-            legendAttrID={graphModel.getAttributeID('legend')}
-            graphElt={graphRef.current}
-            onDropAttribute={handleChangeAttribute}
-            onRemoveAttribute={handleRemoveAttribute}
-            onTreatAttributeAs={handleTreatAttrAs}
-          />
-        </svg>
-        {renderDroppableAddAttributes()}
-        <Adornments dotsRef={dotsRef}/>
-        { appConfig.getSetting("defaultSeriesLegend", "graph") &&
-          <MultiLegend
-            graphElt={graphRef.current}
-            onChangeAttribute={handleChangeAttribute}
-            onRemoveAttribute={handleRemoveAttribute}
-            onTreatAttributeAs={handleTreatAttrAs}
-            onRequestRowHeight={onRequestRowHeight}
-          />
-        }
-      </div>
+          {renderDroppableAddAttributes()}
+          <Adornments dotsRef={dotsRef} />
+          {appConfig.getSetting("defaultSeriesLegend", "graph") &&
+            <MultiLegend
+              graphElt={graphRef.current}
+              onChangeAttribute={handleChangeAttribute}
+              onRemoveAttribute={handleRemoveAttribute}
+              onTreatAttributeAs={handleTreatAttrAs}
+              onRequestRowHeight={onRequestRowHeight}
+            />
+          }
+        </div>
+      </DataSetContext.Provider>
     </DataConfigurationContext.Provider>
   );
 });

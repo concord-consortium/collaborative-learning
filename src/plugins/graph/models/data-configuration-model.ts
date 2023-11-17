@@ -1,10 +1,11 @@
+import { observable } from "mobx";
 import {scaleQuantile, ScaleQuantile, schemeBlues} from "d3";
 import { getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
 import {AttributeType, attributeTypes} from "../../../models/data/attribute";
 import {ICase} from "../../../models/data/data-set-types";
-import {IDataSet} from "../../../models/data/data-set";
-import {getCategorySet, ISharedCaseMetadata} from "../../../models/shared/shared-case-metadata";
-import {isSetCaseValuesAction} from "../../../models/data/data-set-actions";
+import {DataSet, IDataSet } from "../../../models/data/data-set";
+import {getCategorySet, ISharedCaseMetadata, SharedCaseMetadata} from "../../../models/shared/shared-case-metadata";
+import {isRemoveAttributeAction, isSetCaseValuesAction} from "../../../models/data/data-set-actions";
 import {FilteredCases, IFilteredChangedCases} from "../../../models/data/filtered-cases";
 import {typedId, uniqueId} from "../../../utilities/js-utils";
 import {missingColor} from "../../../utilities/color-utils";
@@ -45,6 +46,8 @@ export interface IAttributeDescriptionSnapshot extends SnapshotIn<typeof Attribu
 export const DataConfigurationModel = types
   .model('DataConfigurationModel', {
     id: types.optional(types.identifier, () => typedId("DCON")),
+    dataset: types.safeReference(DataSet),
+    metadata: types.safeReference(SharedCaseMetadata),
     // determines stacking direction in categorical-categorical, for instance
     primaryRole: types.maybe(types.enumeration([...PrimaryAttrRoles])),
     // keys are GraphAttrRoles, excluding y role
@@ -53,10 +56,8 @@ export const DataConfigurationModel = types
     _yAttributeDescriptions: types.array(AttributeDescription),
   })
   .volatile(() => ({
-    dataset: undefined as IDataSet | undefined,
-    metadata: undefined as ISharedCaseMetadata | undefined,
     actionHandlerDisposer: undefined as (() => void) | undefined,
-    filteredCases: undefined as FilteredCases[] | undefined,
+    filteredCases: observable.array<FilteredCases>([], {deep:false }),
     handlers: new Map<string, (actionCall: ISerializedActionCall) => void>(),
     pointsNeedUpdating: false
   }))
@@ -103,6 +104,7 @@ export const DataConfigurationModel = types
       return self.dataset?.attributes[0]?.id;
     },
     /**
+     * Return a single attributeDescription in use for the given role.
      * For the 'y' role we return the first y-attribute, for 'rightNumeric' we return the last y-attribute.
      * For all other roles we return the attribute description for the role.
      */
@@ -111,12 +113,35 @@ export const DataConfigurationModel = types
         : role === 'rightNumeric' ? self._attributeDescriptions.get('rightNumeric')
           : this.attributeDescriptions[role];
     },
+    /**
+     * Return a single attributeID in use for the given role.
+     */
     attributeID(role: GraphAttrRole) {
       let attrID = this.attributeDescriptionForRole(role)?.attributeID;
       if ((role === "caption") && !attrID) {
         attrID = this.defaultCaptionAttributeID;
       }
       return attrID;
+    },
+    /**
+     * Return the list of roles that the given attribute is currently assigned to.
+     * Will include 'y' if the attribute is the only Y attribute, or 'yPlus' if it
+     * is one of several.
+     * @param attrID attribute ID
+     * @returns list (possibly empty) of GraphAttrRole
+     */
+    rolesForAttribute(attrID: string) {
+      const roles: GraphAttrRole[] = [];
+      self._attributeDescriptions.forEach((desc, role) => {
+        if (desc?.attributeID === attrID) {
+          roles.push(role as GraphAttrRole);
+        }
+        if (this.yAttributeIDs.includes(attrID)) {
+          // role depends on whether there are attributes remaining
+          roles.push(this.yAttributeDescriptions.length > 1 ? "yPlus" : "y");
+        }
+      });
+      return roles;
     },
     attributeType(role: GraphAttrRole) {
       const desc = this.attributeDescriptionForRole(role);
@@ -164,7 +189,7 @@ export const DataConfigurationModel = types
     get graphCaseIDs() {
       const allGraphCaseIds = new Set<string>();
       // todo: We're bypassing get caseDataArray to avoid infinite recursion. Is it necessary?
-      self.filteredCases?.forEach(aFilteredCases => {
+      self.filteredCases.forEach(aFilteredCases => {
         if (aFilteredCases) {
           aFilteredCases.caseIds.forEach(id => allGraphCaseIds.add(id));
         }
@@ -173,7 +198,7 @@ export const DataConfigurationModel = types
     },
     subPlotCases(subPlotKey: Record<string, string>) {
       const casesInPlot = [] as ICase[];
-      self.filteredCases?.forEach(aFilteredCases => {
+      self.filteredCases.forEach(aFilteredCases => {
         aFilteredCases.caseIds.forEach((id) => {
           const caseData = self.dataset?.getCanonicalCase(id);
           if (caseData) {
@@ -185,13 +210,15 @@ export const DataConfigurationModel = types
     }
   }))
   .actions(self => ({
+    /**
+     * Low-level method to set the attribute description for a graph role.
+     * If no attribute description is provided, the role will be made empty.
+     * Not used for Y attributes, which have their own set/remove methods.
+     * @param iRole the graph role (not including 'y')
+     * @param iDesc IAttributeDescriptionSnapshot (eg attribute and type)
+     */
     _setAttributeDescription(iRole: GraphAttrRole, iDesc?: IAttributeDescriptionSnapshot) {
-      if (iRole === 'y') {
-        self._yAttributeDescriptions.clear();
-        if (iDesc?.attributeID) {
-          self._yAttributeDescriptions.push(iDesc);
-        }
-      } else if (iDesc?.attributeID) {
+      if (iDesc?.attributeID) {
         self._attributeDescriptions.set(iRole, iDesc);
       } else {
         self._attributeDescriptions.delete(iRole);
@@ -260,7 +287,7 @@ export const DataConfigurationModel = types
       return this.attributes.length <= 1;
     },
     get numberOfPlots() {
-      return self.filteredCases?.length ?? 0;  // filteredCases is an array of CaseArrays
+      return self.filteredCases.length ?? 0;  // filteredCases is an array of CaseArrays
     },
     get hasY2Attribute() {
       return !!self.attributeID('rightNumeric');
@@ -270,7 +297,7 @@ export const DataConfigurationModel = types
      * present in any of the case sets, not just the 0th one.
      */
     get selection() {
-      if (!self.dataset || !self.filteredCases || !self.filteredCases[0]) return [];
+      if (!self.dataset || self.filteredCases.length === 0) return [];
       const caseSelection = Array.from(self.dataset.caseSelection),
         allGraphCaseIds = self.graphCaseIDs;
       return caseSelection.filter((caseId: string) => allGraphCaseIds.has(caseId));
@@ -346,11 +373,10 @@ export const DataConfigurationModel = types
     }))
   .views(self => ({
     getUnsortedCaseDataArray(caseArrayNumber: number): CaseData[] {
-      return self.filteredCases
-        ? (self.filteredCases[caseArrayNumber]?.caseIds || []).map(id => {
-          return {plotNum: caseArrayNumber, caseID: id};
-        })
-        : [];
+      if (self.filteredCases.length <= caseArrayNumber) return [];
+      return (self.filteredCases[caseArrayNumber].caseIds || []).map(id => {
+        return { plotNum: caseArrayNumber, caseID: id };
+      });
     },
     getCaseDataArray(caseArrayNumber: number) {
       const caseDataArray = this.getUnsortedCaseDataArray(caseArrayNumber),
@@ -367,7 +393,7 @@ export const DataConfigurationModel = types
     },
     get joinedCaseDataArrays() {
       const joinedCaseData: CaseData[] = [];
-      self.filteredCases?.forEach((aFilteredCases, index) => {
+      self.filteredCases.forEach((aFilteredCases, index) => {
           aFilteredCases.caseIds.forEach(
             (id) => joinedCaseData.push({plotNum: index, caseID: id}));
         }
@@ -587,27 +613,48 @@ export const DataConfigurationModel = types
         }));
       self.setPointsNeedUpdating(true);
     },
+    /**
+     * Make sure the filteredCases array has the right number of FilteredCases.
+     * For CLUE, this should be equal to the number of Y attributes,
+     * or 1 if there is a dataset but no Y attributes. If there is no dataset
+     * there are no filteredCases.
+     * If this method adds or removes FilteredCases from the array, it will
+     * invalidate the cached case lists.
+     *
+     * @param alwaysInvalidate - If true, the caches of all FilteredCases are
+     * invalidated even if we did not modify the array.
+     */
+    syncFilteredCasesCount(alwaysInvalidate?: boolean) {
+      let desiredCount = self.dataset ? self.yAttributeDescriptions.length : 0;
+      if (desiredCount === 0 && self.dataset) {
+        desiredCount = 1;
+      }
+      const changed = self.filteredCases.length !== desiredCount;
+      while(self.filteredCases.length > desiredCount) {
+        self.filteredCases.pop()?.destroy();
+      }
+      while(self.filteredCases.length < desiredCount) {
+        this._addNewFilteredCases();
+      }
+      if (alwaysInvalidate || changed) {
+        // Optimization: just invalidate some, not all, in cases where we know some are unchanged.
+        self.filteredCases.forEach((aFilteredCases) => {
+          aFilteredCases.invalidateCases();
+        });
+      }
+    },
     setDataset(dataset: IDataSet | undefined, metadata: ISharedCaseMetadata | undefined) {
-      self.actionHandlerDisposer?.();
-      self.actionHandlerDisposer = undefined;
       self.dataset = dataset;
       self.metadata = metadata;
-      self.filteredCases = [];
-      if (dataset) {
+      this.handleDataSetChange();
+    },
+    handleDataSetChange() {
+      self.actionHandlerDisposer?.();
+      self.actionHandlerDisposer = undefined;
+      if (self.dataset) {
         self.actionHandlerDisposer = onAnyAction(self.dataset, self.handleAction);
-        self.filteredCases[0] = new FilteredCases({
-          source: dataset, filter: self.filterCase,
-          onSetCaseValues: self.handleSetCaseValues
-        });
-        // make sure there are enough filteredCases to hold all the y attributes
-        while (self.filteredCases.length < self._yAttributeDescriptions.length) {
-          this._addNewFilteredCases();
-        }
-        // A y2 attribute is optional, so only add a new filteredCases if there is one.
-        if (self.hasY2Attribute) {
-          this._addNewFilteredCases();
-        }
       }
+      this.syncFilteredCasesCount(true);
       self.invalidateQuantileScale();
     },
     setPrimaryRole(role: GraphAttrRole) {
@@ -615,78 +662,92 @@ export const DataConfigurationModel = types
         self.primaryRole = role;
       }
     },
+    /**
+     * Remove all attributes currently in our lists.
+     */
     clearAttributes() {
-      self._attributeDescriptions.clear();
-      self._yAttributeDescriptions.clear();
-    },
-    setAttribute(role: GraphAttrRole, desc?: IAttributeDescriptionSnapshot) {
-
-      // For 'x' and 'y' roles, if the given attribute is already present on the other axis, then
-      // move whatever attribute is assigned to the given role to that axis.
-      if (['x', 'y'].includes(role)) {
-        const otherRole = role === 'x' ? 'y' : 'x',
-          otherDesc = self.attributeDescriptionForRole(otherRole);
-        if (otherDesc?.attributeID === desc?.attributeID) {
-          const currentDesc = self.attributeDescriptionForRole(role) ?? {attributeID: '', type: 'categorical'};
-          self._setAttributeDescription(otherRole, currentDesc);
-        }
+      // Clear the attributes one by one so that reactions can happen
+      while (self._yAttributeDescriptions.length) {
+        this.removeYAttributeWithID(self._yAttributeDescriptions[0].attributeID);
       }
+      for (const [role] of self._attributeDescriptions) {
+        this.removeAttributeFromRole(role as GraphAttrRole);
+      }
+    },
+    /**
+     * Unset any attribute currently in the given role.
+     * Not used for Y attributes, which have their own methods.
+     * @param role GraphAttrRole, not inluding 'y'
+     */
+    removeAttributeFromRole(role: GraphAttrRole) {
+      self._setAttributeDescription(role);
+    },
+    setAttributeForRole(role: GraphAttrRole, desc?: IAttributeDescriptionSnapshot) {
       if (role === 'y') {
-        self._yAttributeDescriptions.clear();
+        // Setting "Y" role implies that user only wants one, or no Y attributes.
+        while (self._yAttributeDescriptions.length) {
+          this.removeYAttributeWithID(self._yAttributeDescriptions[0].attributeID);
+        }
         if (desc && desc.attributeID !== '') {
           self._yAttributeDescriptions.push(desc);
         }
+      } else if (role === 'yPlus' && desc && desc.attributeID !== '') {
+        self._yAttributeDescriptions.push(desc);
       } else if (role === 'rightNumeric') {
         this.setY2Attribute(desc);
       } else {
         self._setAttributeDescription(role, desc);
       }
-      self.filteredCases?.forEach((aFilteredCases) => {
-        aFilteredCases.invalidateCases();
-      });
+      this.syncFilteredCasesCount(true);
       if (role === 'legend') {
         self.invalidateQuantileScale();
       }
     },
     addYAttribute(desc: IAttributeDescriptionSnapshot) {
-      self._yAttributeDescriptions.push(desc);
-      this._addNewFilteredCases();
+      this.setAttributeForRole("yPlus", desc);
     },
+    /**
+     * Replace an existing Y attribute with a different one, maintaining its position in the list.
+     * If the new attribute is already in the list of Y attributes, it will be removed from
+     * the old position to prevent duplication.
+     */
     replaceYAttribute(oldAttrId: string, newAttrId: string) {
-      /**
-       * Replace an existing Y attribute with a different one, maintaining its position in the list.
-       * If the new attribute is already in the list of Y attributes, it will be removed from
-       * the old position to prevent duplication.
-       */
-      if (self._yAttributeDescriptions.find(d=>d.attributeID===oldAttrId)) {
-        this.removeYAttribute(newAttrId);
+      if (self.yAttributeIDs.includes(oldAttrId)) {
+        if (self.yAttributeIDs.includes(newAttrId)) {
+          // Remove the new attribute from its other position
+          this.removeYAttributeWithID(newAttrId);
+        }
         const index = self._yAttributeDescriptions.findIndex(d=>d.attributeID===oldAttrId);
         self._yAttributeDescriptions[index].attributeID = newAttrId;
         if (index === 0 && self._yAttributeDescriptions.length === 1) {
           self._yAttributeDescriptions[index].type = undefined;
         }
-        self.filteredCases?.[index].invalidateCases();
+        self.filteredCases[index].invalidateCases();
       }
     },
     setY2Attribute(desc?: IAttributeDescriptionSnapshot) {
       const isNewAttribute = !self._attributeDescriptions.get('rightNumeric'),
         isEmpty = !desc?.attributeID;
       self._setAttributeDescription('rightNumeric', desc);
-      if (isNewAttribute) {
-        this._addNewFilteredCases();
-      } else if (isEmpty) {
-        self.filteredCases?.pop(); // remove the last one because it is the array
+      this.syncFilteredCasesCount();
+      if (isEmpty) {
         self.setPointsNeedUpdating(true);
-      } else {
-        const existingFilteredCases = self.filteredCases?.[self.numberOfPlots - 1];
+      } else if (!isNewAttribute) {
+        // Replacing one attribute with another, invalidate that specific cache
+        const existingFilteredCases = self.filteredCases[self.filteredCases.length - 1];
         existingFilteredCases?.invalidateCases();
       }
     },
-    removeYAttribute(id: string) {
+    /**
+     * Remove the attribute with the given ID from the list of y attributes plotted.
+     * Note, calls to this method are observed by Graph's handleNewAttributeID method.
+     * @param id - ID of Attribute to remove.
+     */
+    removeYAttributeWithID(id: string) {
       const index = self._yAttributeDescriptions.findIndex((aDesc) => aDesc.attributeID === id);
       if (index >= 0) {
         self._yAttributeDescriptions.splice(index, 1);
-        self.filteredCases?.splice(index, 1);
+        this.syncFilteredCasesCount(true);
         self.setPointsNeedUpdating(true);
       }
     },
@@ -696,36 +757,86 @@ export const DataConfigurationModel = types
       } else {
         self._attributeDescriptions.get(role)?.setType(type);
       }
-      self.filteredCases?.forEach((aFilteredCases) => {
+      self.filteredCases.forEach((aFilteredCases) => {
         aFilteredCases.invalidateCases();
       });
     },
+    /**
+     * Register a "handler" to be called on any action in the linked dataset.
+     * @param handler - a method that accepts an actionCall parameter.
+     */
     onAction(handler: (actionCall: ISerializedActionCall) => void) {
       const id = uniqueId();
       self.handlers.set(id, handler);
       return () => {
         self.handlers.delete(id);
       };
+    },
+    afterCreate() {
+      this.onAction(this.handleDatasetRemoveAttributeAction);
+    },
+    /**
+     * Respond to an attribute being removed from the underlying dataset.
+     */
+    handleDatasetRemoveAttributeAction(actionCall: ISerializedActionCall) {
+      if (isRemoveAttributeAction(actionCall)) {
+        const removedAttributeId = actionCall.args[0];
+        for (const [role, desc] of self._attributeDescriptions.entries()) {
+          if (desc.attributeID===removedAttributeId) {
+            this.removeAttributeFromRole(role as GraphAttrRole);
+          }
+        }
+        for (const desc of self._yAttributeDescriptions) {
+          if (desc.attributeID===removedAttributeId) {
+            this.removeYAttributeWithID(removedAttributeId);
+          }
+        }
+      }
     }
+
   }));
-
-/*
-export interface SetAttributeTypeAction extends ISerializedActionCall {
-  name: "setAttributeType"
-  args: [GraphAttrRole, AttributeType]
-}
-*/
-
-/*
-export function isSetAttributeTypeAction(action: ISerializedActionCall): action is SetAttributeTypeAction {
-  return action.name === "setAttributeType"
-}
-*/
 
 export interface IDataConfigurationModel extends Instance<typeof DataConfigurationModel> {
 }
 
-/*
-export interface IDataConfigurationSnapshot extends SnapshotIn<typeof DataConfigurationModel> {
+export type AttributeAssignmentAction =
+  SetAttributeForRoleAction | ReplaceYAttributeAction | RemoveAttributeFromRoleAction | RemoveYAttributeWithIDAction;
+export function isAttributeAssignmentAction(action: ISerializedActionCall): action is AttributeAssignmentAction {
+  return isSetAttributeForRoleAction(action)
+    || isReplaceYAttributeAction(action)
+    || isRemoveAttributeFromRoleAction(action)
+    || isRemoveYAttributeWithIDAction(action);
 }
-*/
+
+export interface SetAttributeForRoleAction extends ISerializedActionCall {
+  name: "SetAttributeForRole",
+  args: [role: GraphAttrRole, desc?: IAttributeDescriptionSnapshot]
+}
+export function isSetAttributeForRoleAction(action: ISerializedActionCall): action is SetAttributeForRoleAction {
+  return action.name === "setAttributeForRole";
+}
+
+export interface ReplaceYAttributeAction extends ISerializedActionCall {
+  name: "ReplaceYAttribute",
+  args: [oldAttrId: string, newAttrId: string]
+}
+export function isReplaceYAttributeAction(action: ISerializedActionCall): action is ReplaceYAttributeAction {
+  return action.name === "replaceYAttribute";
+}
+
+export interface RemoveAttributeFromRoleAction extends ISerializedActionCall {
+  name: "removeAttributeFromRole",
+  args: [role: GraphAttrRole]
+}
+export function isRemoveAttributeFromRoleAction(action: ISerializedActionCall):
+      action is RemoveAttributeFromRoleAction {
+  return action.name === "removeAttributeFromRole";
+}
+
+export interface RemoveYAttributeWithIDAction extends ISerializedActionCall {
+  name: "removeYAttributeWithID",
+  args: [attrId: string]
+}
+export function isRemoveYAttributeWithIDAction(action: ISerializedActionCall): action is RemoveYAttributeWithIDAction {
+  return action.name === "removeYAttributeWithID";
+}

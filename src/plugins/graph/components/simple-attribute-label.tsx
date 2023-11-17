@@ -9,7 +9,7 @@ import { IDataSet } from "../../../models/data/data-set";
 import { kGraphClassSelector } from "../graph-types";
 import { ReadOnlyContext } from "../../../components/document/read-only-context";
 
-import DropdownCaretIcon from "../dropdown-caret.svg";
+import DropdownCaretIcon from "../assets/dropdown-caret.svg";
 
 import "../components/legend/multi-legend.scss";
 
