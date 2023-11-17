@@ -106,7 +106,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
 
   // rows are required by ReactDataGrid and are used by other hooks as well
   // rowProps are expanded and passed to ReactDataGrid
-  const { rows, rowsRef, ...rowProps } = useRowsFromDataSet({
+  const { rows, ...rowProps } = useRowsFromDataSet({
     dataSet, isLinked, readOnly: !!readOnly, inputRowId: inputRowId.current,
     rowChanges, context: gridContext, selectedCaseIds });
 
@@ -175,7 +175,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   // dataGridProps contains callbacks to pass to ReactDataGrid
   // hasLinkableRows is used to determine if the table can meaningfully be linked to a geometry tile
   const { deleteSelected, ...dataGridProps } = useDataSet({
-    gridRef, model, dataSet, triggerColumnChange, rows, rowsRef, rowChanges, triggerRowChange,
+    gridRef, model, dataSet, triggerColumnChange, rows, rowChanges, triggerRowChange,
     readOnly: !!readOnly, changeHandlers, columns, onColumnResize, inputRowId, lookupImage });
 
   const containerRef = useRef<HTMLDivElement>(null);

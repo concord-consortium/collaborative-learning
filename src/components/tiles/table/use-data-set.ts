@@ -23,16 +23,18 @@ interface IUseDataSet {
   readOnly: boolean;
   inputRowId: React.MutableRefObject<string>;
   rows: TRow[];
-  rowsRef: React.MutableRefObject<TRow[] | null | undefined>;
   changeHandlers: IContentChangeHandlers;
   columns: TColumn[];
   onColumnResize: (idx: number, width: number, complete: boolean) => void;
   lookupImage: (value: string) => string|undefined;
 }
 export const useDataSet = ({
-  gridRef, model, dataSet, triggerColumnChange, triggerRowChange, readOnly, inputRowId, rows, rowsRef,
+  gridRef, model, dataSet, triggerColumnChange, triggerRowChange, readOnly, inputRowId, rows,
   changeHandlers, columns, onColumnResize, lookupImage
 }: IUseDataSet) => {
+  // Used to prevent moving the selected position while actively adding a new row
+  const addingNewRow = useRef(false);
+  // RDG's concept of which cell is selected.
   const selectedCell = useRef<TPosition|null>();
 
   const { onAddRows, onUpdateRow } = changeHandlers;
@@ -43,19 +45,15 @@ export const useDataSet = ({
       const _selectedCell = dataSet.selectedCells[0];
       selectedCellIndices.selectedCellColumnIndex = dataSet.attrIndexFromID(_selectedCell.attributeId) ?? -1;
       selectedCellIndices.selectedCellRowIndex = _selectedCell.caseId === inputRowId.current
-        ? rowsRef.current ? rowsRef.current.length - 1 : rows.length - 1
+        ? rows.length - 1
         : dataSet.caseIndexFromID(_selectedCell.caseId);
-      console.log(`*** selectedCellIndices`, _selectedCell.caseId, inputRowId.current);
-      console.trace();
-      console.log(` ** rows`, rows);
-      console.log(` ** rowsRef`, rowsRef.current);
-      console.log(`  * selectedCell row index`, selectedCellIndices.selectedCellRowIndex);
     }
     return selectedCellIndices;
   }
   const onSelectedCellChange = (position: TPosition) => {
-    console.log(`ooo selection change`, position);
     selectedCell.current = position;
+    // We don't update the position while adding a new row so we can move to the new row if necessary.
+    if (addingNewRow.current) return;
 
     // Only modify the selection if a single cell is selected
     if (dataSet.selectedCells.length !== 1) return;
@@ -143,14 +141,17 @@ export const useDataSet = ({
         };
         const inputRowIndex = _rows.findIndex(row => row.__id__ === inputRowId.current);
         if ((inputRowIndex >= 0) && (selectedCellRowIndex === inputRowIndex)) {
-          console.log(`+++ Adding rows`);
+          // Prevent the selected cell position from updating while adding rows
+          addingNewRow.current = true;
           onAddRows([{ ...updatedCaseValues, __id__: inputRowId.current }]);
           inputRowId.current = uniqueId();
-          // setTimeout(() => {
-          //   if (selectedCell.current) {
-          //     gridRef.current?.selectCell(selectedCell.current);
-          //   }
-          // });
+          // After adding the new rows to the dataSet, actually update the selected cell position
+          setTimeout(() => {
+            addingNewRow.current = false;
+            if (selectedCell.current) {
+              gridRef.current?.selectCell(selectedCell.current);
+            }
+          });
         } else {
           onUpdateRow(updatedCaseValues);
         }

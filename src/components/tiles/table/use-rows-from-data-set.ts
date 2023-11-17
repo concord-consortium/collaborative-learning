@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useMemo } from "react";
 import classNames from "classnames";
 import { IDataSet } from "../../../models/data/data-set";
 import { IGridContext, TRow } from "./table-types";
@@ -29,7 +29,6 @@ const canonicalize = (dataSet: IDataSet, row: TRow) => {
 export const useRowsFromDataSet = ({
   dataSet, isLinked, readOnly, inputRowId, rowChanges, context, selectedCaseIds
 }: IUseRowsFromDataSet) => {
-  const rowsRef = useRef<TRow[]|null>();
   return useMemo(() => {
     const rowKeyGetter = (row: TRow) => row.__id__;
     const rowClass = (row: TRow) => {
@@ -48,8 +47,7 @@ export const useRowsFromDataSet = ({
                           __context__: context,
                           ..._case } as TRow));
     !readOnly && rows.push(canonicalize(dataSet, { __id__: inputRowId, __context__: context }));
-    rowsRef.current = rows;
     rowChanges; // eslint-disable-line no-unused-expressions
-    return { rows, rowsRef, rowKeyGetter, rowClass };
+    return { rows, rowKeyGetter, rowClass };
   }, [context, dataSet, inputRowId, isLinked, readOnly, rowChanges, selectedCaseIds]);
 };
