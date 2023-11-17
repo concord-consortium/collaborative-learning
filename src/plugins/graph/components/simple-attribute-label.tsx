@@ -15,7 +15,7 @@ import { IGraphLayerModel } from "../models/graph-layer-model";
 
 interface ISimpleAttributeLabelProps {
   place: GraphPlace;
-  index: number;
+  index?: number;
   layer: IGraphLayerModel;
   attrId: string;
   onChangeAttribute?: (place: GraphPlace, dataSet: IDataSet, attrId: string, oldAttrId?: string) => void;
@@ -34,7 +34,7 @@ export const SimpleAttributeLabel = observer(
     const graphModel = useGraphModelContext();
     const attr = attrId ? dataset?.attrFromID(attrId) : undefined;
     const attrName = attr?.name ?? "";
-    const pointColor = graphModel.pointColorAtIndex(index);
+    const pointColor = index !== undefined && graphModel.pointColorAtIndex(index);
 
     const readOnly = useContext(ReadOnlyContext);
 
@@ -47,7 +47,9 @@ export const SimpleAttributeLabel = observer(
       <>
         <div ref={(e) => setSimpleLabelElement(e)} className={"simple-attribute-label"}>
           <div className="symbol-title">
-            <div className="attr-symbol" style={{ backgroundColor: pointColor }}></div>
+            { pointColor &&
+              <div className="attr-symbol" style={{ backgroundColor: pointColor }}></div>
+            }
             <div>{ attrName }</div>
           </div>
           {!readOnly &&

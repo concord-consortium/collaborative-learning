@@ -165,6 +165,8 @@ export const AttributeLabel = observer(
     const readyForPortal = positioningParentElt && onChangeAttribute && onTreatAttributeAs && onRemoveAttribute;
     const skipPortal = useSettingFromStores("defaultSeriesLegend", "graph") && place === "left";
 
+    console.log("| positioningParentElement: ", positioningParentElt);
+
     return (
       <>
         <g ref={(elt) => setLabelElt(elt)} className={`display-label ${place}`} />
