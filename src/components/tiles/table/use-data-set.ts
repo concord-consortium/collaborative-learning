@@ -79,7 +79,7 @@ export const useDataSet = ({
         dataSet.setSelectedCells([{ attributeId: newColumnId, caseId: newRowId }]);
         triggerRowChange();
       }
-    } else if (!(position.idx === -1 && position.rowIdx === -1)) {
+    } else {
       // Update the position if it's not a legal option (if we're in the control or delete column).
       // Note that rdg will not allow us to move to a row outside of the grid
       let newPosition = { ...position };
