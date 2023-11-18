@@ -15,7 +15,7 @@ import {CaseDots} from "./casedots";
 import {ChartDots} from "./chartdots";
 import {Marquee} from "./marquee";
 import {DataConfigurationContext} from "../hooks/use-data-configuration-context";
-import {DataSetContext, useDataSetContext} from "../imports/hooks/use-data-set-context";
+import { useDataSetContext} from "../imports/hooks/use-data-set-context";
 import {useGraphModel} from "../hooks/use-graph-model";
 import {setNiceDomain, startAnimation} from "../utilities/graph-utils";
 import {IAxisModel, INumericAxisModel, isNumericAxisModel} from "../imports/components/axis/models/axis-model";
@@ -252,29 +252,24 @@ export const Graph = observer(
 
   return (
     <DataConfigurationContext.Provider value={graphModel.config}>
-      <DataSetContext.Provider value={graphModel.config.dataset}>
-        <div className={kGraphClass} ref={graphRef} data-testid="graph">
-          <svg className='graph-svg' ref={svgRef}>
-            <Background
-              marqueeState={marqueeState}
-              ref={backgroundSvgRef}
-            />
-
-            {renderGraphAxes()}
-
-            <svg ref={plotAreaSVGRef}>
-              <svg ref={dotsRef} className={`graph-dot-area ${instanceId}`}>
-                {renderPlotComponent()}
-              </svg>
-              <Marquee marqueeState={marqueeState} />
+      <div className={kGraphClass} ref={graphRef} data-testid="graph">
+        <svg className='graph-svg' ref={svgRef}>
+          <Background
+            marqueeState={marqueeState}
+            ref={backgroundSvgRef}
+          />
+          {renderGraphAxes()}
+          <svg ref={plotAreaSVGRef}>
+            <svg ref={dotsRef} className={`graph-dot-area ${instanceId}`}>
+              {renderPlotComponent()}
             </svg>
-
-            <DroppablePlot
-              graphElt={graphRef.current}
-              plotElt={backgroundSvgRef.current}
-              onDropAttribute={handleChangeAttribute}
-            />
-
+            <Marquee marqueeState={marqueeState} />
+          </svg>
+          <DroppablePlot
+            graphElt={graphRef.current}
+            plotElt={backgroundSvgRef.current}
+            onDropAttribute={handleChangeAttribute}
+          />
           <Legend
             legendAttrID={graphModel.getAttributeID('legend')}
             graphElt={graphRef.current}
