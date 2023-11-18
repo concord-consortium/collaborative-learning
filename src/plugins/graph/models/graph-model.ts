@@ -1,37 +1,38 @@
+import { reaction } from "mobx";
 import stringify from "json-stringify-pretty-compact";
-import {reaction} from "mobx";
-import {addDisposer, getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
+import { addDisposer, getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
 import {createContext, useContext} from "react";
 import { IClueObject } from "../../../models/annotations/clue-object";
 import { getTileIdFromContent } from "../../../models/tiles/tile-model";
-import { IAdornmentModel, IUpdateCategoriesOptions } from "../adornments/adornment-models";
+import { IAdornmentModel } from "../adornments/adornment-models";
 import {AxisPlace} from "../imports/components/axis/axis-types";
 import {
   AxisModelUnion, EmptyAxisModel, IAxisModelUnion, NumericAxisModel
 } from "../imports/components/axis/models/axis-model";
 import { GraphPlace } from "../imports/components/axis-graph-shared";
 import { GraphAttrRole, hoverRadiusFactor, kDefaultNumericAxisBounds, kGraphTileType,
-         PlotType, PlotTypes, pointRadiusMax, pointRadiusSelectionAddend
+         PlotType, PlotTypes, pointRadiusLogBase, pointRadiusMax, pointRadiusMin, pointRadiusSelectionAddend
 
        } from "../graph-types";
 import {DataConfigurationModel} from "./data-configuration-model";
 import { SharedModelType } from "../../../models/shared/shared-model";
-import {
-  getDataSetFromId, getTileCaseMetadata, getTileDataSet, isTileLinkedToDataSet, linkTileToDataSet
+import { getTileCaseMetadata
 } from "../../../models/shared/shared-data-utils";
 import { AppConfigModelType } from "../../../models/stores/app-config-model";
 import {ITileContentModel, TileContentModel} from "../../../models/tiles/tile-content";
 import {ITileExportOptions} from "../../../models/tiles/tile-content-info";
-import { getAppConfig, getSharedModelManager } from "../../../models/tiles/tile-environment";
+import { getSharedModelManager } from "../../../models/tiles/tile-environment";
 import {
   defaultBackgroundColor, defaultPointColor, defaultStrokeColor, kellyColors
 } from "../../../utilities/color-utils";
-import { onAnyAction } from "../../../utilities/mst-utils";
 import { AdornmentModelUnion } from "../adornments/adornment-types";
 import { ConnectingLinesModel } from "../adornments/connecting-lines/connecting-lines-model";
-import { SharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
+import { isSharedCaseMetadata, SharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
 import { tileContentAPIViews } from "../../../models/tiles/tile-model-hooks";
 import { getDotId } from "../utilities/graph-utils";
+import { GraphLayerModel } from "./graph-layer-model";
+import { isSharedDataSet, SharedDataSet } from "../../../models/shared/shared-data-set";
+
 export interface GraphProperties {
   axes: Record<string, IAxisModelUnion>
   plotType: PlotType
@@ -57,7 +58,9 @@ export const GraphModel = TileContentModel
     axes: types.map(AxisModelUnion),
     // TODO: should the default plot be something like "nullPlot" (which doesn't exist yet)?
     plotType: types.optional(types.enumeration([...PlotTypes]), "casePlot"),
-    config: types.optional(DataConfigurationModel, () => DataConfigurationModel.create()),
+    // TODO: this will go away
+    // config: types.optional(DataConfigurationModel, () => DataConfigurationModel.create()),
+    layers: types.array(GraphLayerModel /*, () => GraphLayerModel.create() */),
     // Visual properties
     _pointColors: types.optional(types.array(types.string), [defaultPointColor]),
     _pointStrokeColor: defaultStrokeColor,
@@ -73,16 +76,47 @@ export const GraphModel = TileContentModel
     showMeasuresForSelection: false
   })
   .volatile(self => ({
-    prevDataSetId: "",
-    autoAssignedAttributes: [] as Array<{ place: GraphPlace, role: GraphAttrRole, dataSetID: string, attrID: string }>,
-    disposeDataSetListener: undefined as (() => void) | undefined
+    // prevDataSetId: "",
+  }))
+  .preProcessSnapshot((snapshot: any) => {
+    const hasLayerAlready:boolean = (snapshot?.layers?.length || 0) > 0;
+    if (!hasLayerAlready && snapshot?.config) {
+      const { config, ...others } = snapshot;
+      if (config != null) {
+        return {
+          layers: [{ config }],
+          ...others
+        };
+      }
+    }
+    return snapshot;
+  })
+  .views(self => ({
+    /**
+     * Transitional way to get the layer 0 DataConfiguration.
+     * This method will be removed when we are fully transitioned to layers.
+     */
+    get config() {
+      return self.layers[0].config;
+    },
+    get autoAssignedAttributes() {
+      let all: Array<{ place: GraphPlace, role: GraphAttrRole, dataSetID: string, attrID: string }> = [];
+      for (const layer of self.layers) {
+        all = all.concat(layer.autoAssignedAttributes);
+      }
+      return all;
+    }
   }))
   .views(self => ({
+    /**
+     * Returns the first shared dataset found -- TODO obsolete.
+     */
     get data() {
-      console.log("📁 graph-model.ts ------------------------");
-      console.log("\t🥩 getTileDataSet(self):", getTileDataSet(self));
-      return getTileDataSet(self);
+      return self.layers[0].config.dataset;
     },
+    /**
+     * Returns the first shared case metadata found -- TODO obsolete.
+     */
     get metadata() {
       return getTileCaseMetadata(self);
     },
@@ -102,32 +136,44 @@ export const GraphModel = TileContentModel
     getAxis(place: AxisPlace) {
       return self.axes.get(place);
     },
+    /**
+     * Return a single attributeID of those in use for the given role.
+     * If none is found, returns an empty string.
+     */
     getAttributeID(place: GraphAttrRole) {
-      return self.config.attributeID(place) ?? '';
+      for(const layer of self.layers) {
+        const id = layer.config.attributeID(place);
+        if (id) return id;
+      }
+      // This is for backwards compatibility, probably should be 'undefined'
+      return '';
     },
+    /**
+     * Return the count of cases in all graph layers.
+     */
+    get totalNumberOfCases() {
+      return self.layers.reduce((prev, layer) => prev+layer.config.caseDataArray.length, 0);
+    },
+    /**
+     * Radius of points to draw on the graph.
+     * This is based on the total number of points that there are in all layers.
+     */
     getPointRadius(use: 'normal' | 'hover-drag' | 'select' = 'normal') {
-      const r = pointRadiusMax;
-
-      //*************************************************************************************************************
-      //We used to return "result" which decreased the inner radius circle when we clicked on a
-      //selected point. Leaving this commented in case we want to change the radius when we click on a point
-      //**************************************************************************************************************
-
-      // const numPoints = self.config.caseDataArray.length;
-      // // for loop is fast equivalent to radius = max( minSize, maxSize - floor( log( logBase, max( dataLength, 1 )))
-      // for (let i = pointRadiusLogBase; i <= numPoints; i = i * pointRadiusLogBase) {
-      //   --r;
-      //   if (r <= pointRadiusMin) break;
-      // }
-      // const result = r * self.pointSizeMultiplier;
-
+      let r = pointRadiusMax;
+      const numPoints = this.totalNumberOfCases;
+      // for loop is fast equivalent to radius = max( minSize, maxSize - floor( log( logBase, max( dataLength, 1 )))
+      for (let i = pointRadiusLogBase; i <= numPoints; i = i * pointRadiusLogBase) {
+        --r;
+        if (r <= pointRadiusMin) break;
+      }
+      const result = r * self.pointSizeMultiplier;
       switch (use) {
         case "normal":
-          return r;
+          return result;
         case "hover-drag":
-          return r * hoverRadiusFactor;
+          return result * hoverRadiusFactor;
         case "select":
-          return r + pointRadiusSelectionAddend;
+          return result + pointRadiusSelectionAddend;
       }
     },
     axisShouldShowGridLines(place: AxisPlace) {
@@ -143,6 +189,9 @@ export const GraphModel = TileContentModel
     }
   }))
   .views(self => ({
+    get isLinkedToDataSet(){
+      return !!self.data;
+    },
     get annotatableObjects() {
       const tileId = getTileIdFromContent(self) ?? "";
       const xAttributeID = self.getAttributeID("x");
@@ -158,40 +207,7 @@ export const GraphModel = TileContentModel
         });
       });
       return objects;
-    },
-    getUpdateCategoriesOptions(resetPoints=false): IUpdateCategoriesOptions {
-      const xAttrId = self.getAttributeID("x"),
-        xAttrType = self.config.attributeType("x"),
-        xCats = xAttrType === "categorical"
-          ? self.config.categoryArrayForAttrRole("x", [])
-          : [""],
-        yAttrId = self.getAttributeID("y"),
-        yAttrType = self.config.attributeType("y"),
-        yCats = yAttrType === "categorical"
-          ? self.config.categoryArrayForAttrRole("y", [])
-          : [""],
-        topAttrId = self.getAttributeID("topSplit"),
-        topCats = self.config.categoryArrayForAttrRole("topSplit", []) ?? [""],
-        rightAttrId = self.getAttributeID("rightSplit"),
-        rightCats = self.config.categoryArrayForAttrRole("rightSplit", []) ?? [""];
-      return {
-        xAxis: self.getAxis("bottom"),
-        xAttrId,
-        xCats,
-        yAxis: self.getAxis("left"),
-        yAttrId,
-        yCats,
-        topAttrId,
-        topCats,
-        rightAttrId,
-        rightCats,
-        resetPoints
-      };
-    },
-    //TODO: touch base with Boris about his structural changes to the graph model
-    get isLinkedToDataSet(){
-      return !!self.data;
-    },
+    }
   }))
   .views(self => tileContentAPIViews({
     get contentTitle() {
@@ -199,54 +215,66 @@ export const GraphModel = TileContentModel
     }
   }))
   .actions(self => ({
-    setDataSetListener() {
-      const actionsAffectingCategories = [
-        "addCases", "removeAttribute", "removeCases", "setCaseValues"
-      ];
-      self.disposeDataSetListener?.();
-      self.disposeDataSetListener = self.data
-        ? onAnyAction(self.data, action => {
-            // TODO: check whether categories have actually changed before updating
-            if (actionsAffectingCategories.includes(action.name)) {
-              this.updateAdornments();
-            }
-          })
-        : undefined;
+    afterCreate() {
+      this.createDefaultLayerIfNeeded();
     },
-    updateAdornments(resetPoints=false) {
-      const options = self.getUpdateCategoriesOptions(resetPoints);
-      self.adornments.forEach(adornment => adornment.updateCategories(options));
-    }
+    createDefaultLayerIfNeeded() {
+      // Current code expects there to never be an empty set of layers,
+      // so an "unlinked" dataset is set up as a layer when there isn't a real one.
+      // TODO: consider refactoring so that a graph with no layers would get a reasonable default display.
+      if (!self.layers.length) {
+        const initialLayer = GraphLayerModel.create();
+        self.layers.push(initialLayer);
+        initialLayer.configureUnlinkedLayer();
+      }
+    },
   }))
   .actions(self => ({
-    beforeDestroy() {
-      self.disposeDataSetListener?.();
-    },
     setAxis(place: AxisPlace, axis: IAxisModelUnion) {
       self.axes.set(place, axis);
     },
     removeAxis(place: AxisPlace) {
       self.axes.delete(place);
     },
+    /**
+     * Use the given Attribute for the given graph role.
+     * Will remove any other attributes that may have that role, unless role is 'yPlus'.
+     * Will not allow switching to an attribute from a different DataSet.
+     */
     setAttributeID(role: GraphAttrRole, dataSetID: string, id: string) {
-      const newDataSet = getDataSetFromId(self, dataSetID);
-      if (newDataSet && !isTileLinkedToDataSet(self, newDataSet)) {
-        linkTileToDataSet(self, newDataSet);
-        self.config.clearAttributes();
-        self.config.setDataset(newDataSet, getTileCaseMetadata(self));
+      for (const layer of self.layers) {
+        if (layer.config.dataset?.id === dataSetID) {
+          layer.setAttributeID(role, dataSetID, id);
+          return;
+        }
       }
-      if (role === 'yPlus') {
-        self.config.addYAttribute({attributeID: id});
-      } else {
-        self.config.setAttribute(role, {attributeID: id});
-      }
-      self.updateAdornments(true);
+      console.error('setAttributeID called with attribute from DataSet that is not a layer.');
     },
+    /**
+     * Find Y attribute with the given ID in any layer and remove it if found.
+     */
     removeYAttributeID(attrID: string) {
-      self.config.removeYAttribute(attrID);
+      for(const layer of self.layers) {
+        if (layer.config.yAttributeIDs.includes(attrID)) {
+          layer.config.removeYAttributeWithID(attrID);
+          return;
+        }
+      }
+      console.warn('removeYAttributeID: ', attrID, ' not found in any layer');
     },
+    /**
+     * Find Y attribute with given ID in any layer, and replace it with the new attribute.
+     * Old and new attributes must belong to the same DataSet/Layer.
+     * Note, calls to this method are observed by Graph's handleNewAttributeID method.
+     */
     replaceYAttributeID(oldAttrId: string, newAttrId: string) {
-      self.config.replaceYAttribute(oldAttrId, newAttrId);
+      for(const layer of self.layers) {
+        if (layer.config.yAttributeIDs.includes(oldAttrId)) {
+          layer.config.replaceYAttribute(oldAttrId, newAttrId);
+          return;
+      }
+      console.warn('replaceYAttributeID: attribute ', oldAttrId, ' not found in any layer');
+      }
     },
     setPlotType(type: PlotType) {
       self.plotType = type;
@@ -295,130 +323,155 @@ export const GraphModel = TileContentModel
     }
   }))
   .actions(self => ({
-    autoAssignAttributeID(place: GraphPlace, role: GraphAttrRole, dataSetID: string, attrID: string) {
-      self.setAttributeID(role, dataSetID, attrID);
-      self.autoAssignedAttributes.push({ place, role, dataSetID, attrID });
-    },
     clearAutoAssignedAttributes() {
-      self.autoAssignedAttributes = [];
+      for (const layer of self.layers) {
+        layer.clearAutoAssignedAttributes();
+      }
     }
   }))
   .actions(self => ({
-    configureLinkedGraph() {
-      if (!self.data) {
-        console.warn("GraphModel.configureLinkedGraph requires a dataset");
+    /**
+     * Update layers as needed when shared models are attached or detached.
+     * Called by the shared model manager.
+     * @param sharedModel
+     */
+    updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
+      const smm = getSharedModelManager(self);
+      if (!smm || !smm.isReady) return;
+      const sharedDataSets = smm.getTileSharedModelsByType(self, SharedDataSet);
+      if (!sharedDataSets) {
+        console.warn("Unable to query for shared datasets");
         return;
       }
 
-      if (getAppConfig(self)?.getSetting("autoAssignAttributes", "graph")) {
-        const attributeCount = self.data.attributes.length;
-        if (!attributeCount) return;
+      // Would be nice if there was a simple way to tell if anything relevant has changed.
+      // This is a little heavy-handed but does the job.
+      const sharedDatasetIds = sharedDataSets.map(m => isSharedDataSet(m) ? m.dataSet.id : undefined);
+      const layerDatasetIds = self.layers.map(layer => layer.config.dataset?.id);
+      const attachedDatasetIds = sharedDatasetIds.filter(id => !layerDatasetIds.includes(id));
+      const detachedDatasetIds = layerDatasetIds.filter(id => !sharedDatasetIds.includes(id));
 
-        const xAttrId = self.getAttributeID("x");
-        const isValidXAttr = !!self.data.attrFromID(xAttrId);
-        const yAttrId = self.getAttributeID("y");
-        const isValidYAttr = !!self.data.attrFromID(yAttrId);
+      // Remove any layers for datasets that have been unlinked from this tile
+      if (detachedDatasetIds.length) {
+        detachedDatasetIds.forEach((id) => {
+          const index = self.layers.findIndex((layer) => layer.config.dataset?.id === id);
+          if (index > 0) {
+            self.layers.splice(index, 1);
+          } else if (index === 0) {
+            // Unlink layer 0, don't remove it.
+            self.layers[0].setDataset(undefined, undefined);
+            self.layers[0].configureUnlinkedLayer();
+            self.layers[0].updateAdornments();
+          } else {
+            console.warn('Failed to find layer with dataset id ', id);
+          }
+        });
+      }
 
-        if (!isValidXAttr && !isValidYAttr) {
-          self.autoAssignAttributeID("bottom", "x", self.data.id, self.data.attributes[0].id);
-          if (attributeCount > 1) {
-            self.autoAssignAttributeID("left", "y", self.data.id, self.data.attributes[1].id);
+      // Create layers for any datasets newly linked to this tile
+      if (attachedDatasetIds.length) {
+        const sharedMetadatas = smm.getTileSharedModelsByType(self, SharedCaseMetadata);
+        const allMetadatas = smm.getSharedModelsByType("SharedCaseMetadata");
+        attachedDatasetIds.forEach((newModelId) => {
+          const dataSetModel = sharedDataSets.find(m => isSharedDataSet(m) && m.dataSet.id === newModelId);
+          if (dataSetModel && isSharedDataSet(dataSetModel)) {
+            // Find a matching MetaDataModel, first looking in already-attached models
+            let metaDataModel = sharedMetadatas.find((m) => isSharedCaseMetadata(m) && m.data?.id === newModelId);
+            if (!metaDataModel) {
+              // See if we can find one that already exists, but is not linked. If so, link to it.
+              metaDataModel = allMetadatas.find((m) => isSharedCaseMetadata(m) && m.data?.id === newModelId);
+              if (metaDataModel) {
+                smm.addTileSharedModel(self, metaDataModel);
+              }
+            }
+            if (!metaDataModel) {
+              // No existing shared metadata exists, create one
+              const newMetaDataModel = SharedCaseMetadata.create();
+              newMetaDataModel.setData(dataSetModel.dataSet);
+              smm.addTileSharedModel(self, newMetaDataModel);
+              metaDataModel = newMetaDataModel;
+            }
+            if (metaDataModel && isSharedCaseMetadata(metaDataModel)) {
+              // Update default layer, or create a new one.
+              if (!self.layers[0].isLinked) {
+                self.layers[0].setDataset(dataSetModel.dataSet, metaDataModel);
+                self.layers[0].configureLinkedLayer();
+                self.layers[0].updateAdornments();
+              } else {
+                const newLayer = GraphLayerModel.create();
+                self.layers.push(newLayer);
+                const dataConfig = DataConfigurationModel.create();
+                newLayer.setDataConfiguration(dataConfig);
+                dataConfig.setDataset(dataSetModel.dataSet, metaDataModel);
+                // May need these when we want to actually display the new layer:
+                // newLayer.configureLinkedLayer();
+                // newLayer.updateAdornments(true);
+                // newLayer.setDataSetListener();
+              }
+            } else {
+              console.warn('| Metadata not found');
+            }
+          } else {
+            console.warn('| dataset not found');
+          }
+        });
+      }
+    },
+    afterAttach() {
+      if (self.layers.length === 1 && !self.layers[0].config.dataset && !self.layers[0].config.isEmpty) {
+        // Non-empty DataConfiguration lacking a dataset reference = legacy data needing a one-time fix.
+        // We can't do that fix until the SharedModelManager is ready, though.
+        addDisposer(self, reaction(
+          () => {
+            return self.tileEnv?.sharedModelManager?.isReady;
+          },
+          (ready) => {
+            if (!ready) return;
+            this.setDataConfigurationReferences();
+          }
+        ));
+      }
+    },
+    setDataConfigurationReferences() {
+      // Updates pre-existing DataConfiguration objects that don't have the now-required references
+      // for dataset and metadata. We can determine these from the unique shared models these
+      // legacy tile models should have.
+      const smm = getSharedModelManager(self);
+      if (smm && smm.isReady) {
+        const sharedDataSets = smm.getTileSharedModelsByType(self, SharedDataSet);
+        if (sharedDataSets.length === 1) {
+          const sds = sharedDataSets[0];
+          if (isSharedDataSet(sds)) {
+            self.layers[0].config.dataset = sds.dataSet;
+            console.log('Updated legacy document - set dataset reference');
           }
         }
+        const sharedMetadata = smm.getTileSharedModelsByType(self, SharedCaseMetadata);
+        if (sharedMetadata.length === 1) {
+          const smd = sharedMetadata[0];
+          if (isSharedCaseMetadata(smd)) {
+            self.layers[0].config.metadata = smd;
+            console.log('Updated legacy document - set metadata reference');
+          }
+        }
+      } else {
+        console.warn('Could not update missing dataset/metadata - SharedModelManager not ready');
       }
+
     },
-    configureUnlinkedGraph() {
-      if (self.data) {
-        console.warn("GraphModel.configureUnlinkedGraph expects the dataset to be unlinked");
-        return;
-      }
-      if (self.getAttributeID("y")) {
-        self.setAttributeID("y", "", "");
-      }
-      if (self.getAttributeID("x")) {
-        self.setAttributeID("x", "", "");
-      }
-    }
-  }))
-  .actions(self => ({
-    updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
-      // We need to figure out how to know if we need to update the
-      // dataSet. The config.dataSet is volatile, but setting it
-      // might also update state in the config I'm not sure
-      // We could just check if they match and then update it if
-      // not. And then we'd also need a reaction that does the same
-      // thing, but we'd need the reaction to only do this if it isn't
-      // being done here.
 
-      // Note this will also happen in the reaction below
-      // we do it here just to be safe incase this function is called
-      // first
-      if (self.data !== self.config.dataset) {
-        self.config.setDataset(self.data, self.metadata);
-      }
-
-      // TODO: is it necessary to do this here and in the reaction below?
-      if (self.data) {
-        self.configureLinkedGraph();
-      }
-      else {
-        self.configureUnlinkedGraph();
-      }
-
-      // reset listeners if necessary
-      const currDataSetId = self.data?.id ?? "";
-      if (self.prevDataSetId !== currDataSetId) {
-        self.setDataSetListener();
-        self.prevDataSetId = currDataSetId;
-      }
-    },
     afterAttachToDocument() {
-      addDisposer(self, reaction(
-        () => self.data,
-        data => {
-          const sharedModelManager = getSharedModelManager(self);
-          if (!self.metadata && data) {
-            const caseMetadata = SharedCaseMetadata.create();
-            caseMetadata.setData(data);
-            sharedModelManager?.addTileSharedModel(self, caseMetadata);
-          }
-          // CHECKME: this will only work correctly if setDataset doesn't
-          // trigger any state updates
-          if (self.data !== self.config.dataset) {
-            self.config.setDataset(self.data, self.metadata);
-          }
-          // FIXME: When a snapshot is applied from firebase
-          // we need to sync the config dataset. But we don't want to do
-          // that if this update is happening because of a user action
-          // either an undo, history playback, or an actual user action.
-          // One possible way to address this is to make the config dataset
-          // be a view. This means we'll need another way to identify
-          // the first time a dataset is linked to the graph. Because we
-          // default the x and y attribute ids in this case. We could
-          // just check if the attributes are set already instead.
-          // TODO: refine this comment in light of the (just added) code below
-
-          // TODO: is it necessary to do this here and in updateAfterSharedModelChanges above?
-          if (self.data) {
-            self.configureLinkedGraph();
-          }
-          else if (sharedModelManager?.isReady) {
-            self.configureUnlinkedGraph();
-          }
-        }, { fireImmediately: true }
-      ));
+      for (const layer of self.layers) {
+        layer.config.handleDataSetChange();
+      }
     }
   }));
+
 export interface IGraphModel extends Instance<typeof GraphModel> {}
 export interface IGraphModelSnapshot extends SnapshotIn<typeof GraphModel> {}
 
 export function createGraphModel(snap?: IGraphModelSnapshot, appConfig?: AppConfigModelType) {
-  console.log("📁 graph-model.ts ------------------------");
-  console.log("\t🏭 createGraphModel");
-  console.log("\t🥩 snap?:", snap);
-
   const [min, max] = kDefaultNumericAxisBounds;
-
   const emptyPlotIsNumeric = appConfig?.getSetting("emptyPlotIsNumeric", "graph");
   const bottomAxisModel = emptyPlotIsNumeric
                             ? NumericAxisModel.create({place: "bottom", min, max})
@@ -441,35 +494,6 @@ export function createGraphModel(snap?: IGraphModelSnapshot, appConfig?: AppConf
     createdGraphModel.showAdornment(cLines);
   }
   return createdGraphModel;
-}
-
-export interface SetAttributeIDAction extends ISerializedActionCall {
-  name: "setAttributeID"
-  args: [GraphAttrRole, string, string]
-}
-export function isSetAttributeIDAction(action: ISerializedActionCall): action is SetAttributeIDAction {
-  return action.name === "setAttributeID";
-}
-
-export interface RemoveYAttributeAction extends ISerializedActionCall {
-  name: "removeYAttributeID",
-  args: [string]
-}
-export function isRemoveYAttributeAction(action: ISerializedActionCall): action is RemoveYAttributeAction {
-  return action.name === "removeYAttributeID";
-}
-
-export interface ReplaceYAttributeAction extends ISerializedActionCall {
-  name: "replaceYAttributeID",
-  args: [string, string]
-}
-export function isReplaceYAttributeAction(action: ISerializedActionCall): action is ReplaceYAttributeAction {
-  return action.name === "replaceYAttributeID";
-}
-
-export type AttributeAssignmentAction = SetAttributeIDAction | RemoveYAttributeAction | ReplaceYAttributeAction;
-export function isAttributeAssignmentAction(action: ISerializedActionCall): action is AttributeAssignmentAction {
-  return ["setAttributeID", "removeYAttributeID", "replaceYAttributeID"].includes(action.name);
 }
 
 export interface SetGraphVisualPropsAction extends ISerializedActionCall {

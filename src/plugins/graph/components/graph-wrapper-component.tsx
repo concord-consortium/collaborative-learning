@@ -9,7 +9,6 @@ import { OffsetModel } from "../../../models/annotations/clue-object";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { useInitGraphLayout } from "../hooks/use-init-graph-layout";
 import { getScreenX, getScreenY } from "../hooks/use-point-locations";
-import { useDataSet } from "../imports/hooks/use-data-set";
 import { IGraphModel } from "../models/graph-model";
 import { decipherDotId } from "../utilities/graph-utils";
 import { GraphComponent } from "./graph-component";
@@ -25,13 +24,15 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
   } = props;
   const content = model.content as IGraphModel;
 
-  const { data } = useDataSet(content?.data);
+  const data = content.config.dataset; // TODO: this only considers layer 0
   const layout = useInitGraphLayout(content);
   const xAttrID = content.getAttributeID("x");
   const yAttrID = content.getAttributeID("y");
   const xAttrType = content.config.attributeType("x");
   const yAttrType = content.config.attributeType("y");
 
+  // This is used for locating Sparrow endpoints.
+  // TODO multi-dataset update, needs to check if attribute ID is currently showing in any layer
   const getDotCenter = useCallback((dotId: string) => {
     // FIXME Currently, getScreenX and getScreenY only handle numeric axes, so just bail if they are a different type.
     if (xAttrType !== "numeric" || yAttrType !== "numeric") return;
@@ -115,7 +116,7 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
     <div className={classNames("graph-wrapper", { "read-only": readOnly })}>
       <TileToolbar tileType="graph" readOnly={!!readOnly} tileElement={tileElt}/>
       <BasicEditableTileTitle readOnly={readOnly} />
-      <GraphComponent data={data} layout={layout} tile={model} onRequestRowHeight={onRequestRowHeight} />
+      <GraphComponent layout={layout} tile={model} onRequestRowHeight={onRequestRowHeight} />
     </div>
   );
 });

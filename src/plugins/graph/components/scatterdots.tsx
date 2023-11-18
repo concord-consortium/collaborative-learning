@@ -180,7 +180,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
       v2Scale = layout.getAxisScale("rightNumeric") as ScaleNumericBaseType,
       numExtraPrimaryBands = dataConfiguration?.numRepetitionsForPlace('bottom') ?? 1,
       numExtraSecondaryBands = dataConfiguration?.numRepetitionsForPlace('left') ?? 1,
-      numberOfPlots = dataConfiguration?.numberOfPlots || 1,
+      numberOfPlots = dataConfiguration?.numberOfPlots || 0,
       getLegendColor = legendAttrID ? dataConfiguration?.getLegendColorForCase : undefined;
 
     setPointCoordinates({
