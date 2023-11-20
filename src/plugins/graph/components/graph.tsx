@@ -7,18 +7,18 @@ import {Background} from "./background";
 import {DroppablePlot} from "./droppable-plot";
 import {AxisPlace, AxisPlaces} from "../imports/components/axis/axis-types";
 import {GraphAxis} from "./graph-axis";
-import {attrRoleToGraphPlace, graphPlaceToAttrRole, IDotsRef, kGraphClass} from "../graph-types";
+import {attrRoleToGraphPlace, graphPlaceToAttrRole, IDotsRef, kDefaultNumericAxisBounds, kGraphClass} from "../graph-types";
 import {ScatterDots} from "./scatterdots";
 import {DotPlotDots} from "./dotplotdots";
 import {CaseDots} from "./casedots";
 import {ChartDots} from "./chartdots";
 import {Marquee} from "./marquee";
 import {DataConfigurationContext} from "../hooks/use-data-configuration-context";
-import { useDataSetContext} from "../imports/hooks/use-data-set-context";
+import {DataSetContext, useDataSetContext} from "../imports/hooks/use-data-set-context";
 import {useGraphModel} from "../hooks/use-graph-model";
 import {useGraphSettingsContext} from "../hooks/use-graph-settings-context";
 import {setNiceDomain, startAnimation} from "../utilities/graph-utils";
-import {IAxisModel, INumericAxisModel} from "../imports/components/axis/models/axis-model";
+import {IAxisModel, INumericAxisModel, isNumericAxisModel} from "../imports/components/axis/models/axis-model";
 import {GraphPlace} from "../imports/components/axis-graph-shared";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import { isAttributeAssignmentAction, isRemoveAttributeFromRoleAction, isRemoveYAttributeWithIDAction,
@@ -38,6 +38,7 @@ import { kConnectingLinesType } from "../adornments/connecting-lines/connecting-
 
 import "./graph.scss";
 import "./graph-clue-styles.scss";
+import { EditableGraphValue } from "./editable-graph-value";
 
 interface IProps {
   graphController: GraphController;
@@ -61,6 +62,7 @@ export const Graph = observer(
     svgRef = useRef<SVGSVGElement>(null),
     plotAreaSVGRef = useRef<SVGSVGElement>(null),
     backgroundSvgRef = useRef<SVGGElement>(null);
+  const showEditableGraphValue = graphModel.layers[0].isLinked;
 
   useEffect(function setupPlotArea() {
     if (xScale && xScale?.length > 0) {
@@ -291,6 +293,32 @@ export const Graph = observer(
               onTreatAttributeAs={handleTreatAttrAs}
               onRequestRowHeight={onRequestRowHeight}
             />
+          }
+          {
+            showEditableGraphValue &&
+            axes.map((axis: AxisPlace, idx) => {
+              const axisModel = graphModel?.getAxis(axis);
+              const minVal = isNumericAxisModel(axisModel) ? axisModel.min : kDefaultNumericAxisBounds[0];
+              const maxVal = isNumericAxisModel(axisModel) ? axisModel.max : kDefaultNumericAxisBounds[1];
+              //TODO - hide first and last tick
+              return (
+                <div key={`${axis}-min-max`}>
+                  <EditableGraphValue
+                    value={minVal}
+                    minOrMax={"min"}
+                    axis={axis}
+                    onValueChange={(newValue) => handleMinMaxChange("min", axis, newValue)}
+                  />
+                  <EditableGraphValue
+                    value={maxVal}
+                    minOrMax={"max"}
+                    axis={axis}
+                    onValueChange={(newValue) => handleMinMaxChange("max", axis, newValue)}
+                  />
+                </div>
+              );
+
+            })
           }
         </div>
       </DataSetContext.Provider>

@@ -35,15 +35,8 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
                             centerCategoryLabels, enableAnimation}: IUseSubAxis) => {
 
   console.log(`📁 use-sub-axis.ts -----------${axisModel?.place}-------------`);
-  // console.log("\t🏭 axisModel:", axisModel);
   const graphModel = useGraphModelContext();
   console.log("graphModel.isLinked?:", graphModel.isLinkedToDataSet);
-  // console.log("\t🥩 showScatterPlotGridLines:", showScatterPlotGridLines);
-  // console.log("\t🥩 subAxisElt:", subAxisElt);
-  // console.log("\t🥩 axisModel:", axisModel);
-  // console.log("\t🥩 subAxisIndex:", subAxisIndex);
-  // console.log("\t🥩 enableAnimation:", enableAnimation);
-  // console.log("\t🥩 centerCategoryLabels:", centerCategoryLabels);
 
   const layout = useAxisLayoutContext();
   const isNumeric = isNumericAxisModel(axisModel);

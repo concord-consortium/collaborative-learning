@@ -19,10 +19,6 @@ export const EditableGraphValue: React.FC<IEditableValueProps> = observer(functi
   //TODO: readOnly? Parent is <Graph> and readOnly is NOT passed in as a prop
   // isTileSelected?: boolean;
   const readOnly = false; //for now
-  // console.log("📁 editable-graph-value.tsx ------------------------");
-  // console.log("\t🥩 axis:", axis);
-  // console.log("\t🥩 minOrMax:", minOrMax);
-
   const [isEditing, setIsEditing] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -65,7 +61,6 @@ export const EditableGraphValue: React.FC<IEditableValueProps> = observer(functi
   };
 
   const borderClasses = classNames("editable-border-box", `${axis}-${minOrMax}`);
-  // console.log("\t🥩 borderClasses:", borderClasses);
 
   return (
     <div className={borderClasses} onClick={handleClick}>
