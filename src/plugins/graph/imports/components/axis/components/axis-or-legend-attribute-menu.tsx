@@ -11,6 +11,7 @@ import { AttributeType } from "../../../../../../models/data/attribute";
 import { IDataSet } from "../../../../../../models/data/data-set";
 import { isSetAttributeNameAction } from "../../../../../../models/data/data-set-actions";
 import { IGraphLayerModel } from "../../../../models/graph-layer-model";
+import { useGraphSettingsContext } from "../../../../hooks/use-graph-settings-context";
 
 interface IProps {
   place: GraphPlace;
@@ -56,7 +57,7 @@ export const AxisOrLegendAttributeMenu = ({ place, layer, attributeId, target, p
   portalRef.current = portal;
   const menuListRef = useRef<HTMLDivElement>(null);
   const showRemoveOption = true; // Used to be a setting; for now we always want it available.
-
+  const { disableAttributeDnD }  = useGraphSettingsContext();
   const onCloseRef = useRef<() => void>();
   const overlayStyle: CSSProperties = {
     position: "absolute", ...useOverlayBounds({target, portal: parent})
@@ -84,6 +85,46 @@ export const AxisOrLegendAttributeMenu = ({ place, layer, attributeId, target, p
     });
   }, [attribute?.name, data?.attributes, dataConfig, labelText, setLabelText, attrId]);
 
+  const menuButtonAndPortal =
+    <>
+      <MenuButton style={buttonStyle}>{attribute?.name}</MenuButton>
+      <Portal containerRef={portalRef}>
+        <MenuList ref={menuListRef}>
+          { !data &&
+            <MenuItem className="inactive">
+              Link Data
+            </MenuItem>
+          }
+          { data?.attributes?.map((attr) => {
+            const isCurrent = attr.id === attrId;
+            const isPlottedX = dataConfig?.attributeID("x") === attr.id;
+            const isPlottedY = yAttributesPlotted?.includes(attr.id);
+            const showAttr = (!isCurrent && !isPlottedX && !isPlottedY);
+
+            return showAttr && (
+              <MenuItem onClick={() => onChangeAttribute(place, data, attr.id, attrId)} key={attr.id}>
+                {attr.name}
+              </MenuItem>
+            );
+          })}
+          { attribute &&
+            <>
+              <MenuDivider />
+              { showRemoveOption &&
+                <MenuItem onClick={() => onRemoveAttribute(place, attrId)}>
+                {removeAttrItemLabel}
+                </MenuItem>
+              }
+              <MenuItem onClick={() => onTreatAttributeAs(place, attribute?.id, treatAs)}>
+                {treatAs === "categorical" && t("DG.DataDisplayMenu.treatAsCategorical")}
+                {treatAs === "numeric" && t("DG.DataDisplayMenu.treatAsNumeric")}
+              </MenuItem>
+            </>
+          }
+        </MenuList>
+      </Portal>
+    </>;
+
   return (
     <div className={`axis-legend-attribute-menu ${place}`} >
       <Menu boundary="scrollParent">
@@ -92,44 +133,14 @@ export const AxisOrLegendAttributeMenu = ({ place, layer, attributeId, target, p
           onCloseRef.current = onClose;
           return (
             <Portal containerRef={parentRef}>
-              <div ref={setDragNodeRef} style={overlayStyle} {...attributes} {...listeners}>
-                <MenuButton style={buttonStyle}>{attribute?.name}</MenuButton>
-                <Portal containerRef={portalRef}>
-                  <MenuList ref={menuListRef}>
-                    { !data &&
-                      <MenuItem className="inactive">
-                        Link Data
-                      </MenuItem>
-                    }
-                    { data?.attributes?.map((attr) => {
-                      const isCurrent = attr.id === attrId;
-                      const isPlottedX = dataConfig?.attributeID("x") === attr.id;
-                      const isPlottedY = yAttributesPlotted?.includes(attr.id);
-                      const showAttr = (!isCurrent && !isPlottedX && !isPlottedY);
-
-                      return showAttr && (
-                        <MenuItem onClick={() => onChangeAttribute(place, data, attr.id, attrId)} key={attr.id}>
-                          {attr.name}
-                        </MenuItem>
-                      );
-                    })}
-                    { attribute &&
-                      <>
-                        <MenuDivider />
-                        { showRemoveOption &&
-                          <MenuItem onClick={() => onRemoveAttribute(place, attrId)}>
-                          {removeAttrItemLabel}
-                          </MenuItem>
-                        }
-                        <MenuItem onClick={() => onTreatAttributeAs(place, attribute?.id, treatAs)}>
-                          {treatAs === "categorical" && t("DG.DataDisplayMenu.treatAsCategorical")}
-                          {treatAs === "numeric" && t("DG.DataDisplayMenu.treatAsNumeric")}
-                        </MenuItem>
-                      </>
-                    }
-                  </MenuList>
-                </Portal>
-              </div>
+              { disableAttributeDnD
+                  ? <div style={overlayStyle}>
+                      {menuButtonAndPortal}
+                    </div>
+                  : <div ref={setDragNodeRef} style={overlayStyle} {...attributes} {...listeners}>
+                      {menuButtonAndPortal}
+                    </div>
+              }
             </Portal>
           );
         }}

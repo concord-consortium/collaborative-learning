@@ -20,8 +20,8 @@ import {useDropHintString} from "../imports/hooks/use-drop-hint-string";
 import { isAddCasesAction, isSetCaseValuesAction } from "../../../models/data/data-set-actions";
 import { computeNiceNumericBounds } from "../utilities/graph-utils";
 import { isNumericAxisModel } from "../imports/components/axis/models/axis-model";
-import { useSettingFromStores } from "../../../hooks/use-stores";
 import { DroppableAxis } from "./droppable-axis";
+import { useGraphSettingsContext } from "../hooks/use-graph-settings-context";
 
 interface IProps {
   place: AxisPlace
@@ -42,8 +42,7 @@ export const GraphAxis = observer(function GraphAxis({
     layout = useGraphLayoutContext(),
     droppableId = `${instanceId}-${place}-axis-drop`,
     hintString = useDropHintString({role: axisPlaceToAttrRole[place]}),
-    emptyPlotIsNumeric = useSettingFromStores("emptyPlotIsNumeric", "graph") as boolean | undefined,
-    usesMultiLegend = useSettingFromStores("defaultSeriesLegend", "graph") as boolean | undefined,
+    { disableAttributeDnD, emptyPlotIsNumeric, usesMultiLegend } = useGraphSettingsContext(),
     axisShouldShowGridlines = emptyPlotIsNumeric || graphModel.axisShouldShowGridLines(place),
     parentEltRef = useRef<HTMLDivElement | null>(null),
     [wrapperElt, _setWrapperElt] = useState<SVGGElement | null>(null),
@@ -154,7 +153,7 @@ export const GraphAxis = observer(function GraphAxis({
             />
       }
 
-      {onDropAttribute &&
+      {onDropAttribute && !disableAttributeDnD &&
          <DroppableAxis
             place={`${place}`}
             dropId={droppableId}
