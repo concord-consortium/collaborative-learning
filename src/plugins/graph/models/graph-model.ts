@@ -344,6 +344,16 @@ export const GraphModel = TileContentModel
         return;
       }
 
+      // This handles auto-assignment in case dataset has changed in significant ways (eg, columns and recreated)
+      if (isSharedDataSet(sharedModel)) {
+        const dataSetId = sharedModel.dataSet?.id;
+        if (dataSetId) {
+          const changedLayer = self.layers.find((layer) => {
+            return layer.config.dataset?.id === dataSetId; });
+          changedLayer?.configureLinkedLayer();
+        }
+      }
+
       // Would be nice if there was a simple way to tell if anything relevant has changed.
       // This is a little heavy-handed but does the job.
       const sharedDatasetIds = sharedDataSets.map(m => isSharedDataSet(m) ? m.dataSet.id : undefined);
