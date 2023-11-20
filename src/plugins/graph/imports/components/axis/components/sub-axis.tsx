@@ -15,7 +15,7 @@ interface ISubAxisProps {
 }
 
 export const SubAxis = memo(function SubAxis({numSubAxes, subAxisIndex, axisModel, showScatterPlotGridLines = false,
-                                          centerCategoryLabels = true, enableAnimation}: ISubAxisProps) {
+                                          centerCategoryLabels = true,  enableAnimation}: ISubAxisProps) {
 
   const subWrapperElt = useRef<SVGGElement | null>(null);
   const [subAxisElt, setSubAxisElt] = useState<SVGGElement | null>(null);

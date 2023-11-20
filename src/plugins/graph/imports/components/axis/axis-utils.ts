@@ -226,8 +226,5 @@ export const computeBestNumberOfTicks = (scale: ScaleLinear<number, number>): nu
     tickValues = scale.ticks(currentNumber);
     firstTime = false;
   }
-
-  // console.log("\t🏭 computeBestNumberOfTicks returns:", Math.max(2, currentNumber));
-
   return Math.max(2, currentNumber);
 };
