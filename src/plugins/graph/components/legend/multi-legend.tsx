@@ -55,9 +55,6 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
   const totalHeight = kMultiLegendLabelHeight + kMultiLegendVerticalGap
     + graphModel.layers.reduce((prev, layer)=>{ return prev + heightOfLayerLegend(layer);}, 0);
 
-  const thisRole = axisPlaceToAttrRole.bottom;
-  const attrId = graphModel.layers[0].config?.attributeID(thisRole);
-
   useEffect(function RespondToLayoutChange() {
     layout.setDesiredExtent("legend", totalHeight);
     onRequestRowHeight?.(instanceId, kGraphDefaultHeight + totalHeight);
@@ -71,23 +68,30 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
         onRemoveAttribute={onRemoveAttribute}
         onTreatAttributeAs={onTreatAttributeAs} />); });
 
+  const thisRole = axisPlaceToAttrRole.bottom;
+
+  const xMenus = graphModel.layers.map((layer) => {
+    const attrId = layer.config?.attributeID(thisRole);
+    if (!attrId) return;
+
+    return (
+      <div className="x-axis-item" key={layer.id}>
+        <SimpleAttributeLabel
+          place="bottom"
+          attrId={attrId}
+          layer={layer}
+          onChangeAttribute={onChangeAttribute}
+          onRemoveAttribute={onRemoveAttribute}
+          onTreatAttributeAs={onTreatAttributeAs}
+        />
+      </div>
+    );
+  });
+
   return (
     <div className="multi-legend" ref={ multiLegendRef }>
       <div className="x-axis-menu">
-        {/* TODO - make this succeed in showing */}
-        { attrId &&
-          <div className="x-axis-item">
-            <SimpleAttributeLabel
-              place="bottom"
-              key={graphModel.layers[0].id}
-              attrId={attrId}
-              layer={graphModel.layers[0]}
-              onChangeAttribute={onChangeAttribute}
-              onRemoveAttribute={onRemoveAttribute}
-              onTreatAttributeAs={onTreatAttributeAs}
-            />
-          </div>
-        }
+        { xMenus }
       </div>
       { layerLegends }
     </div>
