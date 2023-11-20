@@ -14,6 +14,7 @@ $codap-bg-color: #f9f9f9;
   background-color:$codap-bg-color;
   width: 100%;
   text-align: left;
+  font-size: 14px;
   margin-left: 10px;
 
   .x-axis-menu {
@@ -31,7 +32,10 @@ $codap-bg-color: #f9f9f9;
 
   .legend-title-row {
     display: flex;
-    margin: 0 10px;
+    align-items: center;
+    margin: 8px 0 0 0;
+    padding: 5px 0;
+    border-top: 2px solid $workspace-teal;
 
     .legend-title {
       flex: 1 0 auto;
@@ -39,6 +43,7 @@ $codap-bg-color: #f9f9f9;
 
     .legend-icon {
       flex-grow: 0 0 auto;
+      vertical-align: baseline;
 
       .remove-button {
         margin: 0;
@@ -57,8 +62,6 @@ $codap-bg-color: #f9f9f9;
 
   .legend-row {
     display: block;
-    margin-top: $menu-vertical-gap;
-    margin-bottom: $menu-vertical-gap;
     height: $menu-height;
 
     .legend-cell-1, .legend-cell-2{
@@ -103,8 +106,8 @@ $codap-bg-color: #f9f9f9;
 
   border: 1px solid #3f3f3f;
   border-radius: 4px;
-  padding: 6px;
   color: #3f3f3f;
+  background-color: $workspace-teal-light-8;
 
   // TODO: does not work as expected
   // &:hover {
@@ -113,14 +116,23 @@ $codap-bg-color: #f9f9f9;
 
   .symbol-title {
     display: flex;
+    height: 100%;
+  }
+
+  .symbol-container {
+    padding: 6px;
+    border-right: 1px solid #3f3f3f;
   }
 
   .attr-symbol {
-    height: $menu-label-height;
-    width: $menu-label-height;
-    margin-right: 6px;
-    margin-top:2px;
+    height: $menu-label-height+2px;
+    width: $menu-label-height+2px;
+    border: 2px solid #ffffff;
     border-radius: 50%;
+  }
+
+  .attr-title {
+    padding: 6px;
   }
 
   .caret {

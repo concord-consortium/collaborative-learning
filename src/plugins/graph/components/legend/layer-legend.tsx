@@ -86,7 +86,7 @@ export const LayerLegend = observer(function LayerLegend(props: ILayerLegendProp
             Data from: <strong>{dataConfiguration?.dataset?.name}</strong>&nbsp;
           </div>
           <div className="legend-icon">
-            <button onClick={handleRemoveIconClick} className="remove-button">
+            <button onClick={handleRemoveIconClick} className="remove-button" title="Unlink data provider">
               <RemoveDataIcon />
             </button>
           </div>

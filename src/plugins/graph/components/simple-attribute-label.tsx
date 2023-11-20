@@ -48,9 +48,11 @@ export const SimpleAttributeLabel = observer(
         <div ref={(e) => setSimpleLabelElement(e)} className={"simple-attribute-label"}>
           <div className="symbol-title">
             { pointColor &&
-              <div className="attr-symbol" style={{ backgroundColor: pointColor }}></div>
+              <div className="symbol-container">
+                <div className="attr-symbol" style={{ backgroundColor: pointColor }}></div>
+              </div>
             }
-            <div>{ attrName }</div>
+            <div className="attr-title">{ attrName }</div>
           </div>
           {!readOnly &&
             <div className="caret">
