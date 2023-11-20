@@ -69,6 +69,10 @@ $codap-bg-color: #f9f9f9;
       //   background-color: $workspace-teal-light-4;
       // }
 
+      &.highlighted {
+        background-color: $highlight-linked-header;
+      }
+
       .symbol-title {
         display: flex;
       }
