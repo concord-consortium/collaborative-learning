@@ -196,7 +196,7 @@ context('XYPlot Tool Tile', function () {
       clueCanvas.clickToolbarButton('graph', 'link-tile-multiple');
       xyTile.linkTable("Table 2");
 
-      // xyTile.getXAttributesLabel().should('have.length', 2); // TODO not yet implemented
+      xyTile.getXAttributesLabel().should('have.length', 2);
       xyTile.getYAttributesLabel().should('have.length', 2);
 
     });
