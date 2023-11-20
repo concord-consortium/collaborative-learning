@@ -202,6 +202,9 @@ export const GraphModel = TileContentModel
     }
   }))
   .views(self => ({
+    get isLinkedToDataSet() {
+      return self.layers[0].isLinked;
+    },
     get annotatableObjects() {
       const tileId = getTileIdFromContent(self) ?? "";
       const xAttributeID = self.getAttributeID("x");
