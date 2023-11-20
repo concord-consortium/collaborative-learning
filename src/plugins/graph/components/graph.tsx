@@ -1,5 +1,4 @@
 import {observer} from "mobx-react-lite";
-import {appConfig} from "../../../initialize-app";
 import React, { MutableRefObject, useEffect, useMemo, useRef} from "react";
 import {select} from "d3";
 import {GraphController} from "../models/graph-controller";
@@ -8,7 +7,7 @@ import {Background} from "./background";
 import {DroppablePlot} from "./droppable-plot";
 import {AxisPlace, AxisPlaces} from "../imports/components/axis/axis-types";
 import {GraphAxis} from "./graph-axis";
-import {attrRoleToGraphPlace, graphPlaceToAttrRole, IDotsRef, kDefaultNumericAxisBounds, kGraphClass} from "../graph-types";
+import {attrRoleToGraphPlace, graphPlaceToAttrRole, IDotsRef, kGraphClass} from "../graph-types";
 import {ScatterDots} from "./scatterdots";
 import {DotPlotDots} from "./dotplotdots";
 import {CaseDots} from "./casedots";
@@ -17,8 +16,9 @@ import {Marquee} from "./marquee";
 import {DataConfigurationContext} from "../hooks/use-data-configuration-context";
 import { useDataSetContext} from "../imports/hooks/use-data-set-context";
 import {useGraphModel} from "../hooks/use-graph-model";
+import {useGraphSettingsContext} from "../hooks/use-graph-settings-context";
 import {setNiceDomain, startAnimation} from "../utilities/graph-utils";
-import {IAxisModel, INumericAxisModel, isNumericAxisModel} from "../imports/components/axis/models/axis-model";
+import {IAxisModel, INumericAxisModel} from "../imports/components/axis/models/axis-model";
 import {GraphPlace} from "../imports/components/axis-graph-shared";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import { isAttributeAssignmentAction, isRemoveAttributeFromRoleAction, isRemoveYAttributeWithIDAction,
@@ -35,7 +35,6 @@ import {IDataSet} from "../../../models/data/data-set";
 import {onAnyAction} from "../../../utilities/mst-utils";
 import { Adornments } from "../adornments/adornments";
 import { kConnectingLinesType } from "../adornments/connecting-lines/connecting-lines-types";
-import { EditableGraphValue } from "./editable-graph-value";
 
 import "./graph.scss";
 import "./graph-clue-styles.scss";
@@ -50,25 +49,22 @@ interface IProps {
 export const Graph = observer(
     function Graph({ graphController, graphRef, dotsRef, onRequestRowHeight }: IProps) {
 
-  // console.log("📁 graph.tsx ------------------------");
-
-  const graphModel = useGraphModelContext();
-  const {autoAdjustAxes, enableAnimation} = graphController;
-  const {plotType} = graphModel;
-  const instanceId = useInstanceIdContext();
-  const marqueeState = useMemo<MarqueeState>(() => new MarqueeState(), []);
-  const dataset = useDataSetContext();
-  const showEditableGraphValue = !!dataset;
-  const layout = useGraphLayoutContext();
-  const xScale = layout.getAxisScale("bottom");
-  const svgRef = useRef<SVGSVGElement>(null);
-  const plotAreaSVGRef = useRef<SVGSVGElement>(null);
-  const backgroundSvgRef = useRef<SVGGElement>(null);
+  const graphModel = useGraphModelContext(),
+    {autoAdjustAxes, enableAnimation} = graphController,
+    {plotType} = graphModel,
+    instanceId = useInstanceIdContext(),
+    marqueeState = useMemo<MarqueeState>(() => new MarqueeState(), []),
+    dataset = useDataSetContext(),
+    layout = useGraphLayoutContext(),
+    {defaultSeriesLegend, disableAttributeDnD} = useGraphSettingsContext(),
+    xScale = layout.getAxisScale("bottom"),
+    svgRef = useRef<SVGSVGElement>(null),
+    plotAreaSVGRef = useRef<SVGSVGElement>(null),
+    backgroundSvgRef = useRef<SVGGElement>(null);
 
   useEffect(function setupPlotArea() {
     if (xScale && xScale?.length > 0) {
       const plotBounds = layout.getComputedBounds('plot');
-      // console.log("\t🥩 plotBounds:", plotBounds);
       select(plotAreaSVGRef.current)
         .attr('x', plotBounds?.left || 0)
         .attr('y', plotBounds?.top || 0)
@@ -252,70 +248,52 @@ export const Graph = observer(
 
   return (
     <DataConfigurationContext.Provider value={graphModel.config}>
-      <div className={kGraphClass} ref={graphRef} data-testid="graph">
-        <svg className='graph-svg' ref={svgRef}>
-          <Background
-            marqueeState={marqueeState}
-            ref={backgroundSvgRef}
-          />
-          {renderGraphAxes()}
-          <svg ref={plotAreaSVGRef}>
-            <svg ref={dotsRef} className={`graph-dot-area ${instanceId}`}>
-              {renderPlotComponent()}
+      <DataSetContext.Provider value={graphModel.config.dataset}>
+        <div className={kGraphClass} ref={graphRef} data-testid="graph">
+          <svg className='graph-svg' ref={svgRef}>
+            <Background
+              marqueeState={marqueeState}
+              ref={backgroundSvgRef}
+            />
+
+            {renderGraphAxes()}
+
+            <svg ref={plotAreaSVGRef}>
+              <svg ref={dotsRef} className={`graph-dot-area ${instanceId}`}>
+                {renderPlotComponent()}
+              </svg>
+              <Marquee marqueeState={marqueeState}/>
             </svg>
-            <Marquee marqueeState={marqueeState} />
+
+            { !disableAttributeDnD &&
+              <DroppablePlot
+                graphElt={graphRef.current}
+                plotElt={backgroundSvgRef.current}
+                onDropAttribute={handleChangeAttribute}
+              />
+            }
+
+            <Legend
+              legendAttrID={graphModel.getAttributeID('legend')}
+              graphElt={graphRef.current}
+              onDropAttribute={handleChangeAttribute}
+              onRemoveAttribute={handleRemoveAttribute}
+              onTreatAttributeAs={handleTreatAttrAs}
+            />
           </svg>
-          <DroppablePlot
-            graphElt={graphRef.current}
-            plotElt={backgroundSvgRef.current}
-            onDropAttribute={handleChangeAttribute}
-          />
-          <Legend
-            legendAttrID={graphModel.getAttributeID('legend')}
-            graphElt={graphRef.current}
-            onDropAttribute={handleChangeAttribute}
-            onRemoveAttribute={handleRemoveAttribute}
-            onTreatAttributeAs={handleTreatAttrAs}
-          />
-        </svg>
-        {renderDroppableAddAttributes()}
-        <Adornments dotsRef={dotsRef}/>
-        { appConfig.getSetting("defaultSeriesLegend", "graph") &&
-          <MultiLegend
-            graphElt={graphRef.current}
-            onChangeAttribute={handleChangeAttribute}
-            onRemoveAttribute={handleRemoveAttribute}
-            onTreatAttributeAs={handleTreatAttrAs}
-            onRequestRowHeight={onRequestRowHeight}
-          />
-        }
-        {
-          showEditableGraphValue &&
-          axes.map((axis: AxisPlace, idx) => {
-            // console.log("\t🥩 axis-----------", axis);
-            const axisModel = graphModel?.getAxis(axis);
-            const minVal = isNumericAxisModel(axisModel) ? axisModel.min : kDefaultNumericAxisBounds[0];
-            const maxVal = isNumericAxisModel(axisModel) ? axisModel.max : kDefaultNumericAxisBounds[1];
-            //TODO - hide first and last tick
-            return (
-              <div key={`${axis}-min-max`}>
-                <EditableGraphValue
-                  value={minVal}
-                  minOrMax={"min"}
-                  axis={axis}
-                  onValueChange={(newValue) => handleMinMaxChange("min", axis, newValue)}
-                />
-                <EditableGraphValue
-                  value={maxVal}
-                  minOrMax={"max"}
-                  axis={axis}
-                  onValueChange={(newValue) => handleMinMaxChange("max", axis, newValue)}
-                />
-              </div>
-            );
-          })
-        }
-      </div>
+          {!disableAttributeDnD && renderDroppableAddAttributes()}
+          <Adornments dotsRef={dotsRef}/>
+          {defaultSeriesLegend &&
+            <MultiLegend
+              graphElt={graphRef.current}
+              onChangeAttribute={handleChangeAttribute}
+              onRemoveAttribute={handleRemoveAttribute}
+              onTreatAttributeAs={handleTreatAttrAs}
+              onRequestRowHeight={onRequestRowHeight}
+            />
+          }
+        </div>
+      </DataSetContext.Provider>
     </DataConfigurationContext.Provider>
   );
 });

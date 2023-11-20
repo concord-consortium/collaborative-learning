@@ -15,6 +15,7 @@ import {AttributeType} from "../../../../models/data/attribute";
 import {IDataSet} from "../../../../models/data/data-set";
 import {GraphAttrRole} from "../../graph-types";
 import {GraphPlace} from "../../imports/components/axis-graph-shared";
+import { useGraphSettingsContext } from "../../hooks/use-graph-settings-context";
 
 interface ILegendProps {
   legendAttrID: string
@@ -36,7 +37,8 @@ export const Legend = function Legend({
     instanceId = useInstanceIdContext(),
     droppableId = `${instanceId}-legend-area-drop`,
     role = 'legend' as GraphAttrRole,
-    hintString = useDropHintString({role});
+    hintString = useDropHintString({role}),
+    { disableAttributeDnD } = useGraphSettingsContext();
 
   const handleIsActive = (active: Active) => {
     const {dataSet, attributeId: droppedAttrId} = getDragAttributeInfo(active) || {};
@@ -87,14 +89,16 @@ export const Legend = function Legend({
             : attrType === 'numeric' ? <NumericLegend legendAttrID={legendAttrID}/> : null
         }
       </svg>
-      <DroppableSvg
-        className="droppable-legend"
-        portal={graphElt}
-        target={legendRef.current}
-        dropId={droppableId}
-        onIsActive={handleIsActive}
-        hintString={hintString}
-      />
+      { !disableAttributeDnD &&
+        <DroppableSvg
+          className="droppable-legend"
+          portal={graphElt}
+          target={legendRef.current}
+          dropId={droppableId}
+          onIsActive={handleIsActive}
+          hintString={hintString}
+        />
+      }
     </>
 
   ) : null;

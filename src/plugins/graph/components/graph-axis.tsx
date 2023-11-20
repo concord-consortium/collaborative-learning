@@ -20,8 +20,8 @@ import {useDropHintString} from "../imports/hooks/use-drop-hint-string";
 import { isAddCasesAction, isSetCaseValuesAction } from "../../../models/data/data-set-actions";
 import { computeNiceNumericBounds } from "../utilities/graph-utils";
 import { isNumericAxisModel } from "../imports/components/axis/models/axis-model";
-import { useSettingFromStores } from "../../../hooks/use-stores";
 import { DroppableAxis } from "./droppable-axis";
+import { useGraphSettingsContext } from "../hooks/use-graph-settings-context";
 
 interface IProps {
   place: AxisPlace
@@ -35,24 +35,21 @@ interface IProps {
 export const GraphAxis = observer(function GraphAxis({
   place, enableAnimation, autoAdjust, onDropAttribute, onRemoveAttribute, onTreatAttributeAs
 }: IProps) {
-  // console.log("\n");
-  // console.log(`📁 graph-axis.tsx -------${place}-----------------`);
-  const dataConfig = useDataConfigurationContext();
-  const isDropAllowed = dataConfig?.graphPlaceCanAcceptAttributeIDDrop ?? (() => true);
-  const graphModel = useGraphModelContext();
-  // console.log("\t🥩 graphModel:", graphModel);
-  const instanceId = useInstanceIdContext();
-  const layout = useGraphLayoutContext();
-  const droppableId = `${instanceId}-${place}-axis-drop`;
-  const hintString = useDropHintString({role: axisPlaceToAttrRole[place]});
-  const emptyPlotIsNumeric = useSettingFromStores("emptyPlotIsNumeric", "graph") as boolean | undefined;
-  const axisShouldShowGridlines = emptyPlotIsNumeric || graphModel.axisShouldShowGridLines(place);
-  const parentEltRef = useRef<HTMLDivElement | null>(null);
-  const [wrapperElt, _setWrapperElt] = useState<SVGGElement | null>(null);
-  const setWrapperElt = useCallback((elt: SVGGElement | null) => {
-    parentEltRef.current = elt?.closest(kGraphClassSelector) as HTMLDivElement ?? null;
-    _setWrapperElt(elt);
-  }, []);
+  const dataConfig = useDataConfigurationContext(),
+    isDropAllowed = dataConfig?.graphPlaceCanAcceptAttributeIDDrop ?? (() => true),
+    graphModel = useGraphModelContext(),
+    instanceId = useInstanceIdContext(),
+    layout = useGraphLayoutContext(),
+    droppableId = `${instanceId}-${place}-axis-drop`,
+    hintString = useDropHintString({role: axisPlaceToAttrRole[place]}),
+    { disableAttributeDnD, emptyPlotIsNumeric } = useGraphSettingsContext(),
+    axisShouldShowGridlines = emptyPlotIsNumeric || graphModel.axisShouldShowGridLines(place),
+    parentEltRef = useRef<HTMLDivElement | null>(null),
+    [wrapperElt, _setWrapperElt] = useState<SVGGElement | null>(null),
+    setWrapperElt = useCallback((elt: SVGGElement | null) => {
+      parentEltRef.current = elt?.closest(kGraphClassSelector) as HTMLDivElement ?? null;
+      _setWrapperElt(elt);
+    }, []);
   const handleIsActive = (active: Active) => {
     // console.log("\t🏭 handleIsActive");
     const {dataSet, attributeId: droppedAttrId} = getDragAttributeInfo(active) || {};
@@ -101,9 +98,6 @@ export const GraphAxis = observer(function GraphAxis({
            )
         {
           const _axisModel = graphModel?.getAxis(place);
-          // console.log("📁 graph-axis.tsx ------------------------");
-          // console.log("\t🥩 _axisModel:", _axisModel);
-
           const xValues = dataConfig.numericValuesForAttrRole("x");
           const yValues = dataConfig.numericValuesForAttrRole("y");
 
@@ -156,7 +150,7 @@ export const GraphAxis = observer(function GraphAxis({
         onRemoveAttribute={onRemoveAttribute}
         onTreatAttributeAs={onTreatAttributeAs}
       />
-      {onDropAttribute &&
+      {onDropAttribute && !disableAttributeDnD &&
          <DroppableAxis
             place={`${place}`}
             dropId={droppableId}
