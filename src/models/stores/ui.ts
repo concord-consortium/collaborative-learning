@@ -1,7 +1,7 @@
 import { getSnapshot, SnapshotIn, types } from "mobx-state-tree";
 import { debounce } from "lodash";
 import { AppConfigModelType } from "./app-config-model";
-import { kDividerMax, kDividerMin, UIDialogTypeEnum } from "./ui-types";
+import { kDividerHalf, kDividerMax, kDividerMin, UIDialogTypeEnum } from "./ui-types";
 import { WorkspaceModel } from "./workspace";
 import { DocumentModelType } from "../document/document";
 import { Logger } from "../../lib/logger";
