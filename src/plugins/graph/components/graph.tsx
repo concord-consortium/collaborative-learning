@@ -234,15 +234,7 @@ export const Graph = observer(
 
   //-------------Min Max Value Change -------------------//
   const handleMinMaxChange = (minOrMax: string, axis: AxisPlace, newValue: number) => {
-    console.log("📁 graph.tsx ------------------------");
-    console.log("\t🥩 newValue:", newValue);
-    console.log("\t🥩 axis:", axis);
-    console.log("\t🥩 minOrMax:", minOrMax);
-
     const axisModel = graphModel.getAxis(axis) as INumericAxisModel;
-    // console.log("\t🥩 yAxisModel:", yAxisModel);
-    console.log("minOrMax:", minOrMax);
-    console.log("newValue:", newValue);
     if (minOrMax === "min" && newValue < axisModel.max){
       axisModel.setMin(newValue);
     } else if (minOrMax === "max" && newValue > axisModel.min){

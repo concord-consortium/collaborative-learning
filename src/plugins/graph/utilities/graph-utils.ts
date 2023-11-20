@@ -97,11 +97,6 @@ export function computeNiceNumericBounds(min: number, max: number): { min: numbe
 }
 
 export function setNiceDomain(values: number[], axisModel: IAxisModel) {
-  // console.log("📁 graph-utils.ts ------------------------");
-  // console.log("\t🥩 axisModel:", axisModel);
-  // console.log("\t🥩 values:", values);
-  // console.log("\t🥩 setNiceDomain:", setNiceDomain);
-
   if (isNumericAxisModel(axisModel)) {
     const [minValue, maxValue] = extent(values, d => d) as [number, number];
     const {min: niceMin, max: niceMax} = computeNiceNumericBounds(minValue, maxValue);

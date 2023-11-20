@@ -185,8 +185,6 @@ export const getCoordFunctions = (props: IGetCoordFunctionsProps): ICoordFunctio
  */
 export const computeBestNumberOfTicks = (scale: ScaleLinear<number, number>): number => {
 
-  // console.log("📁 axis-utils.ts ------------------------");
-
   const formatter = scale.tickFormat();
 
   // Helper function to detect collisions between tick labels
