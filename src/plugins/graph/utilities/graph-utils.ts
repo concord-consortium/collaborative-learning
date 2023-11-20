@@ -179,7 +179,10 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
 }
 
 function isCircleSelected(aCaseData: CaseData, dataset?: IDataSet) {
-  return !!dataset?.isCaseSelected(aCaseData.caseID);
+  if (!dataset) return false;
+  return dataset.isCaseSelected(aCaseData.caseID)
+    || dataset.isAttributeSelected(aCaseData.xAttributeId)
+    || dataset.isAttributeSelected(aCaseData.yAttributeId);
 }
 
 function applySelectedClassToCircles(selection: DotSelection, dataset?: IDataSet){

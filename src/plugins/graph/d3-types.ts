@@ -1,7 +1,7 @@
 import { select, Selection } from "d3";
 
  // The data stored with each plot element (e.g. 'circle')
-export type CaseData = { plotNum: number, caseID: string };
+export type CaseData = { plotNum: number, caseID: string, xAttributeId: string, yAttributeId: string };
 
 export type DotsElt = SVGSVGElement | null;
 

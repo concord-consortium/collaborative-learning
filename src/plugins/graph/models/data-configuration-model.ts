@@ -82,6 +82,10 @@ export const DataConfigurationModel = types
         y2Description = self._attributeDescriptions.get('rightNumeric') ?? null;
       return descriptions.concat(y2Description ? [y2Description] : []);
     },
+    get xAttributeID() {
+      const xAttributeDescription = self._attributeDescriptions.get('x');
+      return xAttributeDescription?.attributeID ?? "";
+    },
     // Includes rightNumeric if present
     get yAttributeIDs() {
       return this.yAttributeDescriptions.map((d: IAttributeDescriptionSnapshot) => d.attributeID);
@@ -375,7 +379,12 @@ export const DataConfigurationModel = types
     getUnsortedCaseDataArray(caseArrayNumber: number): CaseData[] {
       if (self.filteredCases.length <= caseArrayNumber) return [];
       return (self.filteredCases[caseArrayNumber].caseIds || []).map(id => {
-        return { plotNum: caseArrayNumber, caseID: id };
+        return {
+          plotNum: caseArrayNumber,
+          caseID: id,
+          xAttributeId: self.xAttributeID,
+          yAttributeId: self.yAttributeDescriptions[caseArrayNumber].attributeID
+        };
       });
     },
     getCaseDataArray(caseArrayNumber: number) {
@@ -394,8 +403,13 @@ export const DataConfigurationModel = types
     get joinedCaseDataArrays() {
       const joinedCaseData: CaseData[] = [];
       self.filteredCases.forEach((aFilteredCases, index) => {
-          aFilteredCases.caseIds.forEach(
-            (id) => joinedCaseData.push({plotNum: index, caseID: id}));
+        aFilteredCases.caseIds.forEach(
+          (id) => joinedCaseData.push({
+            plotNum: index,
+            caseID: id,
+            xAttributeId: self.xAttributeID,
+            yAttributeId: self.yAttributeDescriptions[index].attributeID
+          }));
         }
       );
       return joinedCaseData;
