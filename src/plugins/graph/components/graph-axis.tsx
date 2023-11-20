@@ -51,7 +51,6 @@ export const GraphAxis = observer(function GraphAxis({
       _setWrapperElt(elt);
     }, []);
   const handleIsActive = (active: Active) => {
-    // console.log("\t🏭 handleIsActive");
     const {dataSet, attributeId: droppedAttrId} = getDragAttributeInfo(active) || {};
     // console.log("\t🥩 dataSet:", dataSet);
     if (isDropAllowed) {

@@ -8,17 +8,16 @@ import "./editable-graph-value.scss";
 interface IEditableValueProps {
   value: number;
   minOrMax: "min" | "max";
-  axis: AxisPlace
+  axis: AxisPlace;
   onValueChange: (newValue: number) => void;
+  readOnly?: boolean;
 }
 
 
 
 export const EditableGraphValue: React.FC<IEditableValueProps> = observer(function NumberlineTile(props) {
-  const { value, minOrMax, axis, onValueChange } = props;
-  //TODO: readOnly? Parent is <Graph> and readOnly is NOT passed in as a prop
+  const { value, minOrMax, axis, onValueChange, readOnly } = props;
   // isTileSelected?: boolean;
-  const readOnly = false; //for now
   const [isEditing, setIsEditing] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
 

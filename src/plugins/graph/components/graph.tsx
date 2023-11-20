@@ -7,7 +7,8 @@ import {Background} from "./background";
 import {DroppablePlot} from "./droppable-plot";
 import {AxisPlace, AxisPlaces} from "../imports/components/axis/axis-types";
 import {GraphAxis} from "./graph-axis";
-import {attrRoleToGraphPlace, graphPlaceToAttrRole, IDotsRef, kDefaultNumericAxisBounds, kGraphClass} from "../graph-types";
+import {attrRoleToGraphPlace, graphPlaceToAttrRole,
+        IDotsRef, kDefaultNumericAxisBounds, kGraphClass} from "../graph-types";
 import {ScatterDots} from "./scatterdots";
 import {DotPlotDots} from "./dotplotdots";
 import {CaseDots} from "./casedots";
@@ -45,10 +46,11 @@ interface IProps {
   graphRef: MutableRefObject<HTMLDivElement | null>;
   dotsRef: IDotsRef;
   onRequestRowHeight?: (id: string, size: number) => void;
+  readOnly?: boolean
 }
 
 export const Graph = observer(
-    function Graph({ graphController, graphRef, dotsRef, onRequestRowHeight }: IProps) {
+    function Graph({ graphController, readOnly, graphRef, dotsRef, onRequestRowHeight }: IProps) {
 
   const graphModel = useGraphModelContext(),
     {autoAdjustAxes, enableAnimation} = graphController,
@@ -308,12 +310,14 @@ export const Graph = observer(
                     minOrMax={"min"}
                     axis={axis}
                     onValueChange={(newValue) => handleMinMaxChange("min", axis, newValue)}
+                    readOnly={readOnly}
                   />
                   <EditableGraphValue
                     value={maxVal}
                     minOrMax={"max"}
                     axis={axis}
                     onValueChange={(newValue) => handleMinMaxChange("max", axis, newValue)}
+                    readOnly={readOnly}
                   />
                 </div>
               );
