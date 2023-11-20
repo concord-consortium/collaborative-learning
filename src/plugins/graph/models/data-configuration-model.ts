@@ -83,7 +83,7 @@ export const DataConfigurationModel = types
       return descriptions.concat(y2Description ? [y2Description] : []);
     },
     get xAttributeID() {
-      const xAttributeDescription = self._attributeDescriptions.get('x');
+      const xAttributeDescription = self._attributeDescriptions.get("x");
       return xAttributeDescription?.attributeID ?? "";
     },
     // Includes rightNumeric if present
@@ -259,6 +259,12 @@ export const DataConfigurationModel = types
     }
   }))
   .views(self => ({
+    yAttributeID(index: number) {
+      if (index < self.yAttributeDescriptions.length) {
+        return self.yAttributeDescriptions[index].attributeID;
+      }
+      return "";
+    },
     get attributes() {
       return self.places.map(place => self.attributeID(place)).filter(attrID => !!attrID) as string[];
     },
@@ -383,7 +389,7 @@ export const DataConfigurationModel = types
           plotNum: caseArrayNumber,
           caseID: id,
           xAttributeId: self.xAttributeID,
-          yAttributeId: self.yAttributeDescriptions[caseArrayNumber].attributeID
+          yAttributeId: self.yAttributeID(caseArrayNumber)
         };
       });
     },
@@ -408,7 +414,7 @@ export const DataConfigurationModel = types
             plotNum: index,
             caseID: id,
             xAttributeId: self.xAttributeID,
-            yAttributeId: self.yAttributeDescriptions[index].attributeID
+            yAttributeId: self.yAttributeID(index)
           }));
         }
       );

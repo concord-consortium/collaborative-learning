@@ -65,9 +65,9 @@ describe("DataConfigurationModel", () => {
     expect(config.tipAttributes).toEqual([{attributeID: "nId", role: "caption"}]);
     expect(config.uniqueTipAttributes).toEqual([{attributeID: "nId", role: "caption"}]);
     expect(config.caseDataArray).toEqual([
-      { plotNum: 0, caseID: "c1" },
-      { plotNum: 0, caseID: "c2" },
-      { plotNum: 0, caseID: "c3" }
+      { plotNum: 0, caseID: "c1", xAttributeId: "", yAttributeId: "" },
+      { plotNum: 0, caseID: "c2", xAttributeId: "", yAttributeId: "" },
+      { plotNum: 0, caseID: "c3", xAttributeId: "", yAttributeId: "" }
     ]);
   });
 
@@ -89,8 +89,8 @@ describe("DataConfigurationModel", () => {
       {attributeID: "nId", role: "caption"}]);
     expect(config.uniqueTipAttributes).toEqual([{attributeID: "nId", role: "caption"}]);
     expect(config.caseDataArray).toEqual([
-      {plotNum: 0, caseID: "c1"},
-      {plotNum: 0, caseID: "c3"}
+      { plotNum: 0, caseID: "c1", xAttributeId: "nId", yAttributeId: "" },
+      { plotNum: 0, caseID: "c3", xAttributeId: "nId", yAttributeId: "" }
     ]);
   });
 
@@ -112,8 +112,8 @@ describe("DataConfigurationModel", () => {
     expect(config.uniqueTipAttributes).toEqual([{attributeID: "xId", role: "x"},
       {attributeID: "nId", role: "caption"}]);
     expect(config.caseDataArray).toEqual([
-      { plotNum: 0, caseID: "c1" },
-      { plotNum: 0, caseID: "c2" }
+      { plotNum: 0, caseID: "c1", xAttributeId: "xId", yAttributeId: "" },
+      { plotNum: 0, caseID: "c2", xAttributeId: "xId", yAttributeId: "" }
     ]);
   });
 
@@ -138,7 +138,7 @@ describe("DataConfigurationModel", () => {
       {attributeID: "yId", role: "y"}, {attributeID: "nId", role: "caption"}]);
     expect(config.uniqueTipAttributes).toEqual([{attributeID: "xId", role: "x"},
       {attributeID: "yId", role: "y"}, {attributeID: "nId", role: "caption"}]);
-    expect(config.caseDataArray).toEqual([{plotNum: 0, caseID: "c1"}]);
+    expect(config.caseDataArray).toEqual([{ plotNum: 0, caseID: "c1", xAttributeId: "xId", yAttributeId: "yId" }]);
 
     // behaves as expected after removing x axis attribute (yId on y-axis)
     config.setAttributeForRole("x");
@@ -157,16 +157,16 @@ describe("DataConfigurationModel", () => {
     expect(config.uniqueTipAttributes).toEqual([{attributeID: "yId", role: "y"},
       {attributeID: "nId", role: "caption"}]);
     expect(config.caseDataArray).toEqual([
-      {plotNum: 0, caseID: "c1"},
-      {plotNum: 0, caseID: "c3"}
+      { plotNum: 0, caseID: "c1", xAttributeId: "", yAttributeId: "yId" },
+      { plotNum: 0, caseID: "c3", xAttributeId: "", yAttributeId: "yId" }
     ]);
 
     // updates cases when values change
     tree.data.setCanonicalCaseValues([{ __id__: "c2", "yId": 2 }]);
     expect(config.caseDataArray).toEqual([
-      {plotNum: 0, caseID: "c1"},
-      {plotNum: 0, caseID: "c2"},
-      {plotNum: 0, caseID: "c3"}
+      { plotNum: 0, caseID: "c1", xAttributeId: "", yAttributeId: "yId" },
+      { plotNum: 0, caseID: "c2", xAttributeId: "", yAttributeId: "yId" },
+      { plotNum: 0, caseID: "c3", xAttributeId: "", yAttributeId: "yId" }
     ]);
 
     // triggers observers when values change
@@ -176,15 +176,15 @@ describe("DataConfigurationModel", () => {
     tree.data.setCanonicalCaseValues([{ __id__: "c2", "yId": "" }]);
     expect(trigger).toHaveBeenCalledTimes(2); // TODO: should be 1
     expect(config.caseDataArray).toEqual([
-      {plotNum: 0, caseID: "c1"},
-      {plotNum: 0, caseID: "c3"}
+      { plotNum: 0, caseID: "c1", xAttributeId: "", yAttributeId: "yId" },
+      { plotNum: 0, caseID: "c3", xAttributeId: "", yAttributeId: "yId" }
     ]);
     tree.data.setCanonicalCaseValues([{ __id__: "c2", "yId": "2" }]);
     expect(trigger).toHaveBeenCalledTimes(4); // TODO: should be 2
     expect(config.caseDataArray).toEqual([
-      {plotNum: 0, caseID: "c1"},
-      {plotNum: 0, caseID: "c2"},
-      {plotNum: 0, caseID: "c3"}
+      { plotNum: 0, caseID: "c1", xAttributeId: "", yAttributeId: "yId" },
+      { plotNum: 0, caseID: "c2", xAttributeId: "", yAttributeId: "yId" },
+      { plotNum: 0, caseID: "c3", xAttributeId: "", yAttributeId: "yId" }
     ]);
   });
 
