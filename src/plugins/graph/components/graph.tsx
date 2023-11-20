@@ -9,9 +9,6 @@ import {AxisPlace, AxisPlaces} from "../imports/components/axis/axis-types";
 import {GraphAxis} from "./graph-axis";
 import {attrRoleToGraphPlace, graphPlaceToAttrRole, IDotsRef, kGraphClass} from "../graph-types";
 import {ScatterDots} from "./scatterdots";
-import {DotPlotDots} from "./dotplotdots";
-import {CaseDots} from "./casedots";
-import {ChartDots} from "./chartdots";
 import {Marquee} from "./marquee";
 import {DataConfigurationContext} from "../hooks/use-data-configuration-context";
 import {DataSetContext, useDataSetContext} from "../imports/hooks/use-data-set-context";
@@ -171,16 +168,22 @@ export const Graph = observer(
   useDataTips({dotsRef, dataset, graphModel, enableAnimation});
 
   const renderPlotComponent = () => {
-    const props = {
-        dotsRef, enableAnimation
-      },
-      typeToPlotComponentMap = {
-        casePlot: <CaseDots {...props}/>,
-        dotChart: <ChartDots {...props}/>,
-        dotPlot: <DotPlotDots {...props}/>,
+
+    const plots = graphModel.layers.map((layer) => {
+      const props = {
+        dotsRef, enableAnimation, layer, key: layer.id
+      };
+      const typeToPlotComponentMap = {
+        casePlot: null, // <CaseDots {...props}/>,
+        dotChart: null, // <ChartDots {...props}/>,
+        dotPlot: null, // <DotPlotDots {...props}/>,
         scatterPlot: <ScatterDots {...props}/>
       };
-    return typeToPlotComponentMap[plotType];
+      return typeToPlotComponentMap[plotType];
+    });
+
+    return plots;
+
   };
 
   const renderGraphAxes = () => {

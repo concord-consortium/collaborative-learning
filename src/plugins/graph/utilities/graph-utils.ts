@@ -140,7 +140,7 @@ export interface IMatchCirclesProps {
 }
 
 export function matchCirclesToData(props: IMatchCirclesProps) {
-
+  console.log("|| matchCirclesToData!", props);
   const {dataConfiguration, enableAnimation, instanceId,
       dotsElement, pointRadius, pointColor, pointStrokeColor} = props,
     allCaseData = dataConfiguration.joinedCaseDataArrays,

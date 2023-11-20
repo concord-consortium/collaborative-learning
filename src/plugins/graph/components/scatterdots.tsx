@@ -4,8 +4,6 @@ import {ScaleNumericBaseType} from "../imports/components/axis/axis-types";
 import {CaseData} from "../d3-types";
 import {PlotProps} from "../graph-types";
 import {useDragHandlers, usePlotResponders} from "../hooks/use-plot";
-import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
-import {useDataSetContext} from "../imports/hooks/use-data-set-context";
 // import {useInstanceIdContext} from "../hooks/use-instance-id-context";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {ICase} from "../../../models/data/data-set-types";
@@ -19,11 +17,11 @@ import {
 import {useGraphModelContext} from "../models/graph-model";
 
 export const ScatterDots = function ScatterDots(props: PlotProps) {
-  const {dotsRef, enableAnimation} = props,
+  const {layer, dotsRef, enableAnimation} = props,
     graphModel = useGraphModelContext(),
     // instanceId = useInstanceIdContext(),
-    dataConfiguration = useDataConfigurationContext(),
-    dataset = useDataSetContext(),
+    dataConfiguration = layer.config,
+    dataset = dataConfiguration.dataset,
     secondaryAttrIDsRef = useRef<string[]>([]),
     pointRadiusRef = useRef(0),
     selectedPointRadiusRef = useRef(0),

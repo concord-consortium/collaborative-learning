@@ -53,28 +53,32 @@ export class GraphController {
   setProperties(props: IGraphControllerProps) {
     this.graphModel = props.graphModel;
     this.dotsRef = props.dotsRef;
-    if (this.graphModel.config.dataset !== this.graphModel.data) {
-      // FIXME - This no longer makes sense when plotting more than just the 1st layer.
-      this.graphModel.config.setDataset(this.graphModel.data, this.graphModel.metadata);
-    }
+    // if (this.graphModel.config.dataset !== this.graphModel.data) {
+    //   // FIXME - This no longer makes sense when plotting more than just the 1st layer.
+    //   this.graphModel.config.setDataset(this.graphModel.data, this.graphModel.metadata);
+    // }
     this.initializeGraph();
   }
 
   callMatchCirclesToData() {
     const {graphModel, dotsRef, enableAnimation, instanceId} = this;
     if (graphModel && dotsRef?.current) {
-      const { config: dataConfiguration, pointColor, pointStrokeColor } = graphModel,
+      const { pointColor, pointStrokeColor } = graphModel,
         pointRadius = graphModel.getPointRadius();
-      matchCirclesToData({
-        dataConfiguration, dotsElement: dotsRef.current,
-        pointRadius, enableAnimation, instanceId, pointColor, pointStrokeColor
-      });
+      for (const layer of graphModel.layers) {
+        const dataConfiguration = layer.config;
+        if (dataConfiguration) {
+          matchCirclesToData({
+            dataConfiguration, dotsElement: dotsRef.current,
+            pointRadius, enableAnimation, instanceId, pointColor, pointStrokeColor
+          });
+      }
+      }
     }
   }
 
   initializeGraph() {
-    const {graphModel, dotsRef, layout} = this,
-      dataConfig = graphModel?.config;
+    const {graphModel, dotsRef, layout} = this;
 
     // handle any attributes auto-assigned before our handlers were in place
     if (graphModel?.autoAssignedAttributes.length) {
@@ -83,7 +87,7 @@ export class GraphController {
       });
       graphModel.clearAutoAssignedAttributes();
     }
-    if (dataConfig && layout && dotsRef?.current) {
+    if (graphModel && layout && dotsRef?.current) {
       AxisPlaces.forEach((axisPlace: AxisPlace) => {
         const axisModel = graphModel.getAxis(axisPlace),
           attrRole = axisPlaceToAttrRole[axisPlace];
@@ -94,7 +98,7 @@ export class GraphController {
             axisMultiScale.setScaleType('ordinal');
           }
           if (isCategoricalAxisModel(axisModel)) {
-            axisMultiScale.setCategorySet(dataConfig.categorySetForAttrRole(attrRole));
+            axisMultiScale.setCategorySet(graphModel.layers[0].config.categorySetForAttrRole(attrRole)); // FIXME handle multiple layers
           }
           if (isNumericAxisModel(axisModel)) {
             axisMultiScale.setNumericDomain(axisModel.domain);
