@@ -42,7 +42,7 @@ export const GraphAxis = observer(function GraphAxis({
     layout = useGraphLayoutContext(),
     droppableId = `${instanceId}-${place}-axis-drop`,
     hintString = useDropHintString({role: axisPlaceToAttrRole[place]}),
-    { disableAttributeDnD, emptyPlotIsNumeric, usesMultiLegend } = useGraphSettingsContext(),
+    { disableAttributeDnD, emptyPlotIsNumeric, defaultSeriesLegend } = useGraphSettingsContext(),
     axisShouldShowGridlines = emptyPlotIsNumeric || graphModel.axisShouldShowGridLines(place),
     parentEltRef = useRef<HTMLDivElement | null>(null),
     [wrapperElt, _setWrapperElt] = useState<SVGGElement | null>(null),
@@ -129,9 +129,7 @@ export const GraphAxis = observer(function GraphAxis({
   }, [layout, place, graphModel]);
 
   const axisModel = graphModel?.getAxis(place);
-  const thisRole = axisPlaceToAttrRole[place];
-  const attrId = dataConfig?.attributeID(thisRole);
-  const showAttributeLabel = place === "left" || !usesMultiLegend;
+  const showAttributeLabel = place === "left" || !defaultSeriesLegend;
 
   return (
     <g className='axis-wrapper' ref={elt => setWrapperElt(elt)}>
