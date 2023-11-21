@@ -15,8 +15,7 @@ import {
   pointRadiusLogBase, pointRadiusMax, pointRadiusMin, pointRadiusSelectionAddend
 } from "../graph-types";
 import { SharedModelType } from "../../../models/shared/shared-model";
-import { getTileCaseMetadata
-} from "../../../models/shared/shared-data-utils";
+
 import { AppConfigModelType } from "../../../models/stores/app-config-model";
 import {ITileContentModel, TileContentModel} from "../../../models/tiles/tile-content";
 import {ITileExportOptions} from "../../../models/tiles/tile-content-info";
@@ -58,8 +57,6 @@ export const GraphModel = TileContentModel
     axes: types.map(AxisModelUnion),
     // TODO: should the default plot be something like "nullPlot" (which doesn't exist yet)?
     plotType: types.optional(types.enumeration([...PlotTypes]), "casePlot"),
-    // TODO: this will go away
-    // config: types.optional(DataConfigurationModel, () => DataConfigurationModel.create()),
     layers: types.array(GraphLayerModel /*, () => GraphLayerModel.create() */),
     // Visual properties
     _pointColors: types.optional(types.array(types.string), [defaultPointColor]),
@@ -108,18 +105,6 @@ export const GraphModel = TileContentModel
     }
   }))
   .views(self => ({
-    /**
-     * Returns the first shared dataset found -- TODO obsolete.
-     */
-    get data() {
-      return self.layers[0].config.dataset;
-    },
-    /**
-     * Returns the first shared case metadata found -- TODO obsolete.
-     */
-    get metadata() {
-      return getTileCaseMetadata(self);
-    },
     pointColorAtIndex(plotIndex = 0) {
       if (plotIndex < self._pointColors.length) {
         return self._pointColors[plotIndex];
@@ -210,7 +195,6 @@ export const GraphModel = TileContentModel
     },
     exportJson(options?: ITileExportOptions) {
       const snapshot = getSnapshot(self);
-
       // json-stringify-pretty-compact is used, so the exported content is more
       // compact. It results in something close to what we used to get when the
       // export was created using a string builder.
@@ -222,9 +206,9 @@ export const GraphModel = TileContentModel
       const tileId = getTileIdFromContent(self) ?? "";
       const xAttributeID = self.getAttributeID("x");
       const yAttributeID = self.getAttributeID("y");
-      if (!self.data) return [];
+      if (!self.layers[0].config.dataset) return []; // FIXME multi dataset
       const objects: IClueObject[] = [];
-      self.data.cases.forEach(c => {
+      self.layers[0].config.dataset.cases.forEach(c => {
         const objectId = getDotId(c.__id__, xAttributeID, yAttributeID);
         objects.push({
           tileId,
@@ -237,7 +221,7 @@ export const GraphModel = TileContentModel
   }))
   .views(self => tileContentAPIViews({
     get contentTitle() {
-      return self.data?.name;
+      return self.layers[0].config.dataset?.name;
     }
   }))
   .actions(self => ({
