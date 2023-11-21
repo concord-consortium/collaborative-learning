@@ -11,7 +11,7 @@ import {attrRoleToGraphPlace, graphPlaceToAttrRole, IDotsRef, kGraphClass} from 
 import {ScatterDots} from "./scatterdots";
 import {Marquee} from "./marquee";
 import {DataConfigurationContext} from "../hooks/use-data-configuration-context";
-import {DataSetContext, useDataSetContext} from "../imports/hooks/use-data-set-context";
+import {DataSetContext} from "../imports/hooks/use-data-set-context";
 import {useGraphModel} from "../hooks/use-graph-model";
 import {useGraphSettingsContext} from "../hooks/use-graph-settings-context";
 import {setNiceDomain, startAnimation} from "../utilities/graph-utils";
@@ -51,7 +51,6 @@ export const Graph = observer(
     {plotType} = graphModel,
     instanceId = useInstanceIdContext(),
     marqueeState = useMemo<MarqueeState>(() => new MarqueeState(), []),
-    dataset = useDataSetContext(),
     layout = useGraphLayoutContext(),
     {defaultSeriesLegend, disableAttributeDnD} = useGraphSettingsContext(),
     xScale = layout.getAxisScale("bottom"),
@@ -68,7 +67,7 @@ export const Graph = observer(
         .attr('width', layout.plotWidth > 0 ? layout.plotWidth : 0)
         .attr('height', layout.plotHeight > 0 ? layout.plotHeight : 0);
     }
-  }, [dataset, plotAreaSVGRef, layout, layout.plotHeight, layout.plotWidth, xScale]);
+  }, [plotAreaSVGRef, layout, layout.plotHeight, layout.plotWidth, xScale]);
 
   const handleChangeAttribute = (place: GraphPlace, dataSet: IDataSet, attrId: string, oldAttrId?: string) => {
     const computedPlace = place === 'plot' && graphModel.config.noAttributesAssigned ? 'bottom' : place;
@@ -90,9 +89,14 @@ export const Graph = observer(
     if (place === 'left') {
       graphModel.removeYAttributeID(idOfAttributeToRemove);
       const yAxisModel = graphModel.getAxis('left') as IAxisModel;
-      setNiceDomain(graphModel.config.numericValuesForYAxis, yAxisModel); // FIXME needs update for multiple datasets
+      setNiceDomain(graphModel.numericValuesForYAxis, yAxisModel);
     } else {
-      dataset && handleChangeAttribute(place, dataset, '');
+      const role = graphPlaceToAttrRole[place];
+      if (role === 'y') {
+        graphModel.removeYAttributeID(idOfAttributeToRemove);
+      } else {
+        graphModel.removeAttribute(role, idOfAttributeToRemove);
+      }
     }
   };
 
@@ -112,10 +116,6 @@ export const Graph = observer(
         const layerNumber = Number(match[1]);
         if (!isFinite(layerNumber) || layerNumber >= graphModel.layers.length) {
           console.warn('Unexpected layer number: ', action.path);
-          return;
-        }
-        if (layerNumber > 0) { // TODO temporary
-          console.log('Ignoring change in layer ', layerNumber, action.name);
           return;
         }
         const layer = graphModel.layers[layerNumber];
@@ -145,11 +145,13 @@ export const Graph = observer(
       }
     });
     return () => disposer?.();
-  }, [graphController, dataset, layout, enableAnimation, graphModel]);
+  }, [graphController, layout, enableAnimation, graphModel]);
 
   const handleTreatAttrAs = (place: GraphPlace, attrId: string, treatAs: AttributeType) => {
-    graphModel.config.setAttributeType(graphPlaceToAttrRole[place], treatAs);
-    dataset && graphController?.handleAttributeAssignment(place, dataset.id, attrId);
+    const layer = graphModel.layerForAttributeId(attrId);
+    if (!layer) return;
+    layer.config.setAttributeType(graphPlaceToAttrRole[place], treatAs);
+    layer.config.dataset && graphController?.handleAttributeAssignment(place, layer.config.dataset.id, attrId);
 
     const connectingLines = graphModel.adornments.find(a => a.type === kConnectingLinesType);
     if (connectingLines && place === "left") {
@@ -165,7 +167,7 @@ export const Graph = observer(
     }
   };
 
-  useDataTips({dotsRef, dataset, graphModel, enableAnimation});
+  useDataTips({dotsRef, graphModel, enableAnimation});
 
   const renderPlotComponent = () => {
 

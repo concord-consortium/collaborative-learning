@@ -282,6 +282,12 @@ export const GraphModel = TileContentModel
       console.warn('removeYAttributeID: ', attrID, ' not found in any layer');
     },
     /**
+     * Remove attribute with the given role from whichever layer it is found in.
+     */
+    removeAttribute(role: GraphAttrRole, attrID: string) {
+      self.layerForAttributeId(attrID)?.config.removeAttributeFromRole(role);
+    },
+    /**
      * Find Y attribute with given ID in any layer, and replace it with the new attribute.
      * Old and new attributes must belong to the same DataSet/Layer.
      * Note, calls to this method are observed by Graph's handleNewAttributeID method.

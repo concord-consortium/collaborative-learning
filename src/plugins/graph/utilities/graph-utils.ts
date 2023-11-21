@@ -15,6 +15,7 @@ import { defaultSelectedColor, defaultSelectedStroke, defaultSelectedStrokeOpaci
   defaultStrokeOpacity, defaultStrokeWidth } from "../../../utilities/color-utils";
 import {IDataConfigurationModel} from "../models/data-configuration-model";
 import {measureText} from "../../../components/tiles/hooks/use-measure-text";
+import { IGraphModel } from "../models/graph-model";
 
 /**
  * Utility routines having to do with graph entities
@@ -101,7 +102,8 @@ export function setNiceDomain(values: number[], axisModel: IAxisModel) {
   }
 }
 
-export function getPointTipText(caseID: string, attributeIDs: string[], dataset?: IDataSet) {
+export function getPointTipText(caseID: string, attributeIDs: string[], graphModel: IGraphModel) {
+  const dataset = graphModel.layerForAttributeId(attributeIDs[0])?.config.dataset;
   const float = format('.3~f'),
     attrArray = (attributeIDs.map(attrID => {
       const attribute = dataset?.attrFromID(attrID),

@@ -3,7 +3,6 @@ import React, {useEffect} from "react";
 import {tip as d3tip} from "d3-v6-tip";
 import {IGraphModel} from "../models/graph-model";
 import {IDotsRef, transitionDuration} from "../graph-types";
-import {IDataSet} from "../../../models/data/data-set";
 import {getPointTipText} from "../utilities/graph-utils";
 import {RoleAttrIDPair} from "../models/data-configuration-model";
 import { CaseData } from "../d3-types";
@@ -16,11 +15,10 @@ const dataTip = d3tip().attr('class', 'graph-d3-tip')/*.attr('opacity', 0.8)*/
 
 interface IUseDataTips {
   dotsRef: IDotsRef,
-  dataset: IDataSet | undefined,
   graphModel: IGraphModel,
   enableAnimation: React.MutableRefObject<boolean>
 }
-export const useDataTips = ({dotsRef, dataset, graphModel, enableAnimation}:IUseDataTips) => {
+export const useDataTips = ({dotsRef, graphModel, enableAnimation}: IUseDataTips) => {
   const hoverPointRadius = graphModel.getPointRadius('hover-drag'),
     pointRadius = graphModel.getPointRadius(),
     selectedPointRadius = graphModel.getPointRadius('select'),
@@ -30,8 +28,9 @@ export const useDataTips = ({dotsRef, dataset, graphModel, enableAnimation}:IUse
   useEffect(() => {
 
     function okToTransition(target: any) {
-      return !enableAnimation.current && target.node()?.nodeName === 'circle' && dataset &&
-        !target.property('isDragging');
+      return !enableAnimation.current && target.node()?.nodeName === 'circle'
+        && graphModel.layers[0].isLinked
+        && !target.property('isDragging');
     }
 
     function showDataTip(event: MouseEvent) {
@@ -47,7 +46,7 @@ export const useDataTips = ({dotsRef, dataset, graphModel, enableAnimation}:IUse
               ? aPair.attributeID
               : aPair.role === 'y' ? yAttrIDs[plotNum] : aPair.attributeID;
           });
-        const tipText = getPointTipText(caseID, attrIDsToUse, dataset);
+        const tipText = getPointTipText(caseID, attrIDsToUse, graphModel);
         tipText !== '' && dataTip.show(tipText, event.target);
       }
     }
@@ -57,7 +56,7 @@ export const useDataTips = ({dotsRef, dataset, graphModel, enableAnimation}:IUse
       dataTip.hide();
       if (okToTransition(target)) {
         const caseID = (select(event.target as SVGSVGElement).datum() as CaseData).caseID,
-          isSelected = dataset?.isCaseSelected(caseID);
+          isSelected = graphModel.layers[0].config.dataset?.isCaseSelected(caseID); // FIXME multi dataset
         select(event.target as SVGSVGElement)
           .transition().duration(transitionDuration)
           .attr('r', isSelected ? selectedPointRadius : pointRadius);
@@ -68,6 +67,6 @@ export const useDataTips = ({dotsRef, dataset, graphModel, enableAnimation}:IUse
       .on('mouseover', showDataTip)
       .on('mouseout', hideDataTip)
       .call(dataTip);
-  }, [dotsRef, dataset, enableAnimation, roleAttrIDPairs, yAttrIDs,
-    hoverPointRadius, pointRadius, selectedPointRadius]);
+  }, [dotsRef, enableAnimation, roleAttrIDPairs, yAttrIDs,
+      hoverPointRadius, pointRadius, selectedPointRadius, graphModel]);
 };
