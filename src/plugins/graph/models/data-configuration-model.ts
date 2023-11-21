@@ -387,9 +387,7 @@ export const DataConfigurationModel = types
       return (self.filteredCases[caseArrayNumber].caseIds || []).map(id => {
         return {
           plotNum: caseArrayNumber,
-          caseID: id,
-          xAttributeId: self.xAttributeID,
-          yAttributeId: self.yAttributeID(caseArrayNumber)
+          caseID: id
         };
       });
     },
@@ -412,9 +410,7 @@ export const DataConfigurationModel = types
         aFilteredCases.caseIds.forEach(
           (id) => joinedCaseData.push({
             plotNum: index,
-            caseID: id,
-            xAttributeId: self.xAttributeID,
-            yAttributeId: self.yAttributeID(index)
+            caseID: id
           }));
         }
       );
