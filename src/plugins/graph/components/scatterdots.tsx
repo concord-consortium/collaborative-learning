@@ -9,7 +9,6 @@ import {useDataSetContext} from "../imports/hooks/use-data-set-context";
 // import {useInstanceIdContext} from "../hooks/use-instance-id-context";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {ICase} from "../../../models/data/data-set-types";
-import {selectedOuterCircleFillColor} from "../../../utilities/color-utils";
 import {useGraphModelContext} from "../models/graph-model";
 import {
   // getScreenCoord,
@@ -77,7 +76,6 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
     }, [dataConfiguration, dataset, enableAnimation]),
 
     onDrag = useCallback((event: MouseEvent) => {
-
       const xAxisScale = layout.getAxisScale('bottom') as ScaleLinear<number, number>,
         xAttrID = dataConfiguration?.attributeID('x') ?? '';
       if (dragID !== '') {
@@ -141,13 +139,12 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
   useDragHandlers(window, {start: onDragStart, drag: onDrag, end: onDragEnd});
 
   const refreshPointSelection = useCallback(() => {
-    const { pointColor } = graphModel;
-
+    const { pointColor, pointStrokeColor } = graphModel;
     dataConfiguration && setPointSelection(
       {
         dotsRef, dataConfiguration, pointRadius: pointRadiusRef.current,
         selectedPointRadius: selectedPointRadiusRef.current,
-        pointColor, pointStrokeColor: selectedOuterCircleFillColor, getPointColorAtIndex: graphModel.pointColorAtIndex
+        pointColor, pointStrokeColor, getPointColorAtIndex: graphModel.pointColorAtIndex
       });
   }, [dataConfiguration, dotsRef, graphModel]);
 
