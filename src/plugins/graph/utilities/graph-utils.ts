@@ -1,11 +1,13 @@
 import {extent, format, select, timeout} from "d3";
 import React from "react";
 import { isInteger} from "lodash";
+
 import { IClueObjectSnapshot } from "../../../models/annotations/clue-object";
 import { PartialSharedModelEntry } from "../../../models/document/document-content-types";
 import { UpdatedSharedDataSetIds } from "../../../models/shared/shared-data-set";
-import {CaseData, DotSelection, DotsElt, selectAllCircles,
-        selectInnerCircles, selectOuterCircles} from "../d3-types";
+import {
+  CaseData, DotSelection, DotsElt, selectGraphDots, selectInnerCircles, selectOuterCircles
+} from "../d3-types";
 import {
   IDotsRef, kGraphFont, Point, outerCircleSelectedRadius, outerCircleUnselectedRadius,
   Rect,rTreeRect, transitionDuration
@@ -14,8 +16,9 @@ import {between} from "./math-utils";
 import {IAxisModel, isNumericAxisModel} from "../imports/components/axis/models/axis-model";
 import {ScaleNumericBaseType} from "../imports/components/axis/axis-types";
 import {IDataSet} from "../../../models/data/data-set";
-import { selectedStrokeWidth, defaultStrokeWidth,
-         selectedOuterCircleFillColor, selectedOuterCircleStrokeColor } from "../../../utilities/color-utils";
+import {
+  selectedStrokeWidth, defaultStrokeWidth, selectedOuterCircleFillColor, selectedOuterCircleStrokeColor
+} from "../../../utilities/color-utils";
 import {IDataConfigurationModel} from "../models/data-configuration-model";
 import {measureText} from "../../../components/tiles/hooks/use-measure-text";
 
@@ -145,44 +148,28 @@ export interface IMatchCirclesProps {
 }
 
 export function matchCirclesToData(props: IMatchCirclesProps) {
-  const {dataConfiguration, enableAnimation, instanceId,
-      dotsElement, pointRadius, pointColor, pointStrokeColor} = props;
+  const { dataConfiguration, enableAnimation, instanceId, dotsElement } = props;
   const allCaseData = dataConfiguration.joinedCaseDataArrays;
-
-  // Remove the circles if they already existed
-  // We needed to do this because initializing the circles without first removing them resulted in one set of
-  // circles not being created. We weren't able to figure out why this was happening.
-  let allCircles = selectAllCircles(dotsElement); //includes both inner and outer circles
-  if (!allCircles) return;
-  allCircles.remove();
+  const caseDataKeyFunc = (d: CaseData) => `${d.plotNum}-${d.caseID}`;
 
   // Create the circles
-  allCircles = selectAllCircles(dotsElement);
+  const allCircles = selectGraphDots(dotsElement);
   if (!allCircles) return;
   startAnimation(enableAnimation);
 
-  //initialize outer highlight dots (this must be before the inner dots so that the inner dots are on top)
   allCircles
-    .data(allCaseData)
+    .data(allCaseData, caseDataKeyFunc)
     .join(
-      (enter) =>
-        enter.append('circle')
-        .attr('class', 'graph-dot-highlighted')
-        .property('id', (d: CaseData) => `${instanceId}_${d.caseID}_highlight`)
-    );
-  //initialize inner dots
-  allCircles
-    .data(allCaseData)
-    .join(
-      (enter) =>
-        enter.append('circle')
+      enter => {
+        const g = enter.append('g')
           .attr('class', 'graph-dot')
-          .property('id', (d: CaseData) => `${instanceId}_${d.caseID}`),
-      (update) =>
-        update.attr('r', pointRadius)
-          .style('fill', pointColor)
-          .style('stroke', pointStrokeColor)
-          .style('stroke-width', defaultStrokeWidth)
+          .property('id', (d: CaseData) => `${instanceId}_${d.caseID}`);
+        g.append('circle')
+          .attr('class', 'outer-circle');
+        g.append('circle')
+          .attr('class', 'inner-circle');
+        return g;
+      }
     );
 
   dotsElement && select(dotsElement).on('click', (event: MouseEvent) => {
@@ -218,7 +205,6 @@ function styleOuterCircles(outerCircles: any, dataset?: IDataSet){
     .style('opacity', 0.5);
 }
 
-//================================= [Line Rendering Functions] ====================================
 //  Return the two points in logical coordinates where the line with the given
 //  iSlope and iIntercept intersects the rectangle defined by the upper and lower
 //  bounds of the two axes.
@@ -449,16 +435,13 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
     }
   };
 
-  const setPoints = (circles: DotSelection | null) => {
-    if (circles !== null) {
-      circles
+  const setPositions = (dots: DotSelection | null) => {
+    if (dots !== null) {
+      dots
         .transition()
         .duration(duration)
-        .attr('cx', (aCaseData: CaseData) => {
-          return getScreenX(aCaseData.caseID);
-        })
-        .attr('cy', (aCaseData: CaseData) => {
-          return getScreenY(aCaseData.caseID, aCaseData.plotNum);
+        .attr('transform', (aCaseData: CaseData) => {
+          return `translate(${getScreenX(aCaseData.caseID)} ${getScreenY(aCaseData.caseID, aCaseData.plotNum)})`;
         });
     }
   };
@@ -481,13 +464,14 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
     }
   };
 
+  const graphDots = selectGraphDots(dotsRef.current);
+  setPositions(graphDots);
+
   const innerCircles = selectInnerCircles(dotsRef.current);
-  setPoints(innerCircles);
   styleInnerCircles(innerCircles);
 
   const outerCircles = selectOuterCircles(dotsRef.current);
   if (outerCircles) applySelectedClassToCircles(outerCircles, dataset);
-  setPoints(outerCircles);
   styleOuterCircles(outerCircles, dataset);
 }
 
