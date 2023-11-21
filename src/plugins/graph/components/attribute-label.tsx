@@ -14,7 +14,7 @@ import {useGraphLayoutContext} from "../models/graph-layout";
 import {useTileModelContext} from "../imports/hooks/use-tile-model-context";
 import {getStringBounds} from "../imports/components/axis/axis-utils";
 import {AxisOrLegendAttributeMenu} from "../imports/components/axis/components/axis-or-legend-attribute-menu";
-import {useSettingFromStores} from "../../../hooks/use-stores";
+import { useGraphSettingsContext } from "../hooks/use-graph-settings-context";
 
 import graphVars from "./graph.scss";
 
@@ -29,7 +29,7 @@ export const AttributeLabel = observer(
   function AttributeLabel({place, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute}: IAttributeLabelProps) {
     const graphModel = useGraphModelContext(),
       dataConfiguration = useDataConfigurationContext(),
-      defaultAxisLabels = useSettingFromStores("defaultAxisLabels", "graph") as Record<string, string> | undefined,
+      { defaultSeriesLegend, defaultAxisLabels } = useGraphSettingsContext(),
       layout = useGraphLayoutContext(),
       {isTileSelected} = useTileModelContext(),
       dataset = dataConfiguration?.dataset,
@@ -161,7 +161,7 @@ export const AttributeLabel = observer(
     }, [place, dataConfiguration, refreshAxisTitle]);
 
     const readyForPortal = positioningParentElt && onChangeAttribute && onTreatAttributeAs && onRemoveAttribute;
-    const skipPortal = useSettingFromStores("defaultSeriesLegend", "graph") && place === "left";
+    const skipPortal = defaultSeriesLegend && place === "left";
 
     return (
       <>
