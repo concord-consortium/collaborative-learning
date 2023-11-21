@@ -14,17 +14,28 @@ export type DotsElt = SVGSVGElement | null;
 //  unknown: type of data attached to parent element (none in this case)
 export type DotSelection = Selection<SVGCircleElement, CaseData, SVGSVGElement, unknown>;
 
-// selects all `circle` elements
-export function selectCircles(svg: DotsElt): DotSelection | null {
+// selects all all g elements, which contain inner and outer circles
+export function selectGraphDots(svg: DotsElt): DotSelection | null {
   return svg
-          ? select(svg).selectAll("circle")
+          ? select(svg).selectAll("g.graph-dot")
           : null;
 }
 
-// selects all `.graph-dot` or `.graph-dot-highlighted` elements
-export function selectDots(svg: DotsElt, selectedOnly = false): DotSelection | null {
-  const innerSelector = selectedOnly ? ".graph-dot-highlighted" : ".graph-dot";
+export function selectOuterCircles(svg: DotsElt): DotSelection | null {
   return svg
-          ? select(svg).selectAll(innerSelector)
+          ? select(svg).selectAll(".graph-dot .outer-circle")
           : null;
 }
+
+export function selectOuterCirclesSelected(svg: DotsElt): DotSelection | null {
+  return svg
+          ? select(svg).selectAll(".graph-dot .outer-circle.selected")
+          : null;
+}
+
+export function selectInnerCircles(svg: DotsElt): DotSelection | null {
+  return svg
+          ? select(svg).selectAll(".graph-dot .inner-circle")
+          : null;
+}
+
