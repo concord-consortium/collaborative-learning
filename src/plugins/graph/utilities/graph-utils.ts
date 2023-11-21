@@ -1,11 +1,13 @@
 import {extent, format, select, timeout} from "d3";
 import React from "react";
 import { isInteger} from "lodash";
+
 import { IClueObjectSnapshot } from "../../../models/annotations/clue-object";
 import { PartialSharedModelEntry } from "../../../models/document/document-content-types";
 import { UpdatedSharedDataSetIds } from "../../../models/shared/shared-data-set";
-import {CaseData, DotSelection, DotsElt, selectGraphDots,
-        selectInnerCircles, selectOuterCircles} from "../d3-types";
+import {
+  CaseData, DotSelection, DotsElt, selectGraphDots, selectInnerCircles, selectOuterCircles
+} from "../d3-types";
 import {
   IDotsRef, kGraphFont, Point, outerCircleSelectedRadius, outerCircleUnselectedRadius,
   Rect,rTreeRect, transitionDuration
@@ -14,8 +16,9 @@ import {between} from "./math-utils";
 import {IAxisModel, isNumericAxisModel} from "../imports/components/axis/models/axis-model";
 import {ScaleNumericBaseType} from "../imports/components/axis/axis-types";
 import {IDataSet} from "../../../models/data/data-set";
-import { selectedStrokeWidth, defaultStrokeWidth,
-         selectedOuterCircleFillColor, selectedOuterCircleStrokeColor } from "../../../utilities/color-utils";
+import {
+  selectedStrokeWidth, defaultStrokeWidth, selectedOuterCircleFillColor, selectedOuterCircleStrokeColor
+} from "../../../utilities/color-utils";
 import {IDataConfigurationModel} from "../models/data-configuration-model";
 import {measureText} from "../../../components/tiles/hooks/use-measure-text";
 
@@ -132,8 +135,6 @@ export function handleClickOnDot(event: MouseEvent, caseID: string, dataset?: ID
   }
 }
 
-//================================= [Point Rendering Functions] ====================================
-
 export interface IMatchCirclesProps {
   dataConfiguration: IDataConfigurationModel
   dotsElement: DotsElt
@@ -147,6 +148,7 @@ export interface IMatchCirclesProps {
 export function matchCirclesToData(props: IMatchCirclesProps) {
   const { dataConfiguration, enableAnimation, instanceId, dotsElement } = props;
   const allCaseData = dataConfiguration.joinedCaseDataArrays;
+  const caseDataKeyFunc = (d: CaseData) => `${d.plotNum}-${d.caseID}`;
 
   // Create the circles
   const allCircles = selectGraphDots(dotsElement);
@@ -154,7 +156,7 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
   startAnimation(enableAnimation);
 
   allCircles
-    .data(allCaseData)
+    .data(allCaseData, caseDataKeyFunc)
     .join(
       enter => {
         const g = enter.append('g')
@@ -201,7 +203,6 @@ function styleOuterCircles(outerCircles: any, dataset?: IDataSet){
     .style('opacity', 0.5);
 }
 
-//================================= [Line Rendering Functions] ====================================
 //  Return the two points in logical coordinates where the line with the given
 //  iSlope and iIntercept intersects the rectangle defined by the upper and lower
 //  bounds of the two axes.
