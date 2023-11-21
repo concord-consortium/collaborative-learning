@@ -108,7 +108,7 @@ context('Shared Dataset', function () {
       tableTile.getTableRow().eq(0).should("not.have.class", "highlighted");
       datacardTile.getNavPanel().should("not.have.class", "highlighted");
       datacardTile.getAttrValueCell().eq(0).should("not.have.class", "highlighted");
-      xyTile.getGraphDot().eq(2).click();
+      xyTile.getGraphDot().eq(0).click();
       tableTile.getTableRow().eq(0).should("have.class", "highlighted");
       datacardTile.getNavPanel().should("have.class", "highlighted");
       datacardTile.getAttrValueCell().eq(0).should("have.class", "highlighted");

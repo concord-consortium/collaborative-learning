@@ -23,7 +23,7 @@ class XYPlotToolTile {
     return cy.get(`${wsClass(workspaceClass)} .canvas-area .graph-dot`);
   }
   getHighlightedDot(workspaceClass) {
-    return cy.get(`${wsClass(workspaceClass)} .canvas-area .graph-dot-highlighted`);
+    return cy.get(`${wsClass(workspaceClass)} .canvas-area .graph-dot .outer-circle.selected`);
   }
   getXAxisLabel(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .display-label.bottom`);

@@ -1,5 +1,4 @@
 import {observer} from "mobx-react-lite";
-import {appConfig} from "../../../initialize-app";
 import React, { MutableRefObject, useEffect, useMemo, useRef} from "react";
 import {select} from "d3";
 import {GraphController} from "../models/graph-controller";
@@ -17,6 +16,7 @@ import {Marquee} from "./marquee";
 import {DataConfigurationContext} from "../hooks/use-data-configuration-context";
 import {DataSetContext, useDataSetContext} from "../imports/hooks/use-data-set-context";
 import {useGraphModel} from "../hooks/use-graph-model";
+import {useGraphSettingsContext} from "../hooks/use-graph-settings-context";
 import {setNiceDomain, startAnimation} from "../utilities/graph-utils";
 import {IAxisModel} from "../imports/components/axis/models/axis-model";
 import {GraphPlace} from "../imports/components/axis-graph-shared";
@@ -31,7 +31,7 @@ import {Legend} from "./legend/legend";
 import {MultiLegend} from "./legend/multi-legend";
 import {AttributeType} from "../../../models/data/attribute";
 import {IDataSet} from "../../../models/data/data-set";
-import {useDataTips} from "../hooks/use-data-tips";
+// import {useDataTips} from "../hooks/use-data-tips";
 import {onAnyAction} from "../../../utilities/mst-utils";
 import { Adornments } from "../adornments/adornments";
 import { kConnectingLinesType } from "../adornments/connecting-lines/connecting-lines-types";
@@ -56,6 +56,7 @@ export const Graph = observer(
     marqueeState = useMemo<MarqueeState>(() => new MarqueeState(), []),
     dataset = useDataSetContext(),
     layout = useGraphLayoutContext(),
+    {defaultSeriesLegend, disableAttributeDnD} = useGraphSettingsContext(),
     xScale = layout.getAxisScale("bottom"),
     svgRef = useRef<SVGSVGElement>(null),
     plotAreaSVGRef = useRef<SVGSVGElement>(null),
@@ -167,7 +168,9 @@ export const Graph = observer(
     }
   };
 
-  useDataTips({dotsRef, dataset, graphModel, enableAnimation});
+  // useDataTips({dotsRef, dataset, graphModel, enableAnimation});
+  //useDataTips hook is used to identify individual points in a dense scatterplot
+  //it should be commented out for now as it shrinks outer circle when hovered over, but may prove useful in the future
 
   const renderPlotComponent = () => {
     const props = {
@@ -239,14 +242,16 @@ export const Graph = observer(
               <svg ref={dotsRef} className={`graph-dot-area ${instanceId}`}>
                 {renderPlotComponent()}
               </svg>
-              <Marquee marqueeState={marqueeState} />
+              <Marquee marqueeState={marqueeState}/>
             </svg>
 
-            <DroppablePlot
-              graphElt={graphRef.current}
-              plotElt={backgroundSvgRef.current}
-              onDropAttribute={handleChangeAttribute}
-            />
+            { !disableAttributeDnD &&
+              <DroppablePlot
+                graphElt={graphRef.current}
+                plotElt={backgroundSvgRef.current}
+                onDropAttribute={handleChangeAttribute}
+              />
+            }
 
             <Legend
               legendAttrID={graphModel.getAttributeID('legend')}
@@ -256,9 +261,9 @@ export const Graph = observer(
               onTreatAttributeAs={handleTreatAttrAs}
             />
           </svg>
-          {renderDroppableAddAttributes()}
-          <Adornments dotsRef={dotsRef} />
-          {appConfig.getSetting("defaultSeriesLegend", "graph") &&
+          {!disableAttributeDnD && renderDroppableAddAttributes()}
+          <Adornments dotsRef={dotsRef}/>
+          {defaultSeriesLegend &&
             <MultiLegend
               graphElt={graphRef.current}
               onChangeAttribute={handleChangeAttribute}
