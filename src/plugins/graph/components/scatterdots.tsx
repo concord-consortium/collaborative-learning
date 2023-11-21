@@ -65,9 +65,9 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
 
         handleClickOnDot(event, tItsID, dataset);
         // Record the current values, so we can change them during the drag and restore them when done
-        const {selection} = dataConfiguration || {},
+        const { caseSelection } = dataConfiguration || {},
           xAttrID = dataConfiguration?.attributeID('x') ?? '';
-        selection?.forEach(anID => {
+          caseSelection?.forEach(anID => {
           selectedDataObjects.current[anID] = {
             x: dataset?.getNumeric(anID, xAttrID) ?? 0,
             y: dataset?.getNumeric(anID, secondaryAttrIDsRef.current[plotNumRef.current]) ?? 0
@@ -90,8 +90,8 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
           const deltaX = Number(xAxisScale.invert(dx)) - Number(xAxisScale.invert(0)),
             deltaY = Number(yScaleRef.current?.invert(dy)) - Number(yScaleRef.current?.invert(0)),
             caseValues: ICase[] = [],
-            {selection} = dataConfiguration || {};
-          selection?.forEach(anID => {
+            { caseSelection } = dataConfiguration || {};
+            caseSelection?.forEach(anID => {
             const currX = Number(dataset?.getNumeric(anID, xAttrID)),
               currY = Number(dataset?.getNumeric(anID, secondaryAttrIDsRef.current[plotNumRef.current]));
             if (isFinite(currX) && isFinite(currY)) {
@@ -121,9 +121,9 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
 
         if (didDrag.current) {
           const caseValues: ICase[] = [],
-            {selection} = dataConfiguration || {},
+            { caseSelection } = dataConfiguration || {},
             xAttrID = dataConfiguration?.attributeID('x') ?? '';
-          selection?.forEach(anID => {
+            caseSelection?.forEach(anID => {
             caseValues.push({
               __id__: anID,
               [xAttrID]: selectedDataObjects.current[anID].x,

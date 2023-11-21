@@ -306,7 +306,7 @@ export const DataConfigurationModel = types
      * Note that in order to eliminate a selected case from the graph's selection, we have to check that it is not
      * present in any of the case sets, not just the 0th one.
      */
-    get selection() {
+    get caseSelection() {
       if (!self.dataset || self.filteredCases.length === 0) return [];
       const caseSelection = Array.from(self.dataset.caseSelection),
         allGraphCaseIds = self.graphCaseIDs;

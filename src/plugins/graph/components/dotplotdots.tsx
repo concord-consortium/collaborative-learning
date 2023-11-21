@@ -51,9 +51,9 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
 
         handleClickOnDot(event, tItsID, dataset);
         // Record the current values, so we can change them during the drag and restore them when done
-        const {selection} = dataConfiguration || {},
+        const { caseSelection } = dataConfiguration || {},
           primaryAttrID = dataConfiguration?.attributeID(dataConfiguration?.primaryRole ?? 'x') ?? '';
-        selection?.forEach(anID => {
+          caseSelection?.forEach(anID => {
           const itsValue = dataset?.getNumeric(anID, primaryAttrID) || undefined;
           if (itsValue != null) {
             selectedDataObjects.current[anID] = itsValue;
@@ -75,8 +75,8 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
           const delta = Number(primaryAxisScale.invert(deltaPixels)) -
               Number(primaryAxisScale.invert(0)),
             caseValues: ICase[] = [],
-            {selection} = dataConfiguration || {};
-          selection?.forEach(anID => {
+            { caseSelection } = dataConfiguration || {};
+            caseSelection?.forEach(anID => {
             const currValue = Number(dataset?.getNumeric(anID, primaryAttrID));
             if (isFinite(currValue)) {
               caseValues.push({__id__: anID, [primaryAttrID]: currValue + delta});
@@ -100,8 +100,8 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
 
         if (didDrag.current) {
           const caseValues: ICase[] = [],
-            {selection} = dataConfiguration || {};
-          selection?.forEach(anID => {
+            { caseSelection } = dataConfiguration || {};
+            caseSelection?.forEach(anID => {
             caseValues.push({
               __id__: anID,
               [dataConfiguration?.attributeID(primaryAttrRole) ?? '']: selectedDataObjects.current[anID]
