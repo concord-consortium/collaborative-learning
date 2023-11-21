@@ -7,8 +7,12 @@ import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable
 import { ITileProps } from "../../../components/tiles/tile-component";
 import { OffsetModel } from "../../../models/annotations/clue-object";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
+import {
+  GraphSettingsContext, IGraphSettings, IGraphSettingsFromStores, kDefaultGraphSettings
+} from "../hooks/use-graph-settings-context";
 import { useInitGraphLayout } from "../hooks/use-init-graph-layout";
 import { getScreenX, getScreenY } from "../hooks/use-point-locations";
+import { useSettingFromStores } from "../../../hooks/use-stores";
 import { IGraphModel } from "../models/graph-model";
 import { decipherDotId } from "../utilities/graph-utils";
 import { GraphComponent } from "./graph-component";
@@ -22,6 +26,8 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
   const {
     model, readOnly, tileElt, onRegisterTileApi, onRequestRowHeight
   } = props;
+  const graphSettingsFromStores = useSettingFromStores("graph") as IGraphSettingsFromStores;
+  const graphSettings: IGraphSettings = { ...kDefaultGraphSettings, ...graphSettingsFromStores };
   const content = model.content as IGraphModel;
 
   const data = content.config.dataset; // TODO: this only considers layer 0
@@ -113,10 +119,12 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
   }, [layout]);
 
   return (
-    <div className={classNames("graph-wrapper", { "read-only": readOnly })}>
-      <TileToolbar tileType="graph" readOnly={!!readOnly} tileElement={tileElt}/>
-      <BasicEditableTileTitle readOnly={readOnly} />
-      <GraphComponent layout={layout} tile={model} onRequestRowHeight={onRequestRowHeight} />
-    </div>
+    <GraphSettingsContext.Provider value={graphSettings}>
+      <div className={classNames("graph-wrapper", { "read-only": readOnly })}>
+        <TileToolbar tileType="graph" readOnly={!!readOnly} tileElement={tileElt}/>
+        <BasicEditableTileTitle readOnly={readOnly} />
+        <GraphComponent layout={layout} tile={model} onRequestRowHeight={onRequestRowHeight} />
+      </div>
+    </GraphSettingsContext.Provider>
   );
 });

@@ -10,13 +10,12 @@ import {
   AxisModelUnion, EmptyAxisModel, IAxisModelUnion, NumericAxisModel
 } from "../imports/components/axis/models/axis-model";
 import { GraphPlace } from "../imports/components/axis-graph-shared";
-import { GraphAttrRole, hoverRadiusFactor, kDefaultNumericAxisBounds, kGraphTileType,
-         PlotType, PlotTypes, pointRadiusMax, pointRadiusSelectionAddend
-
-       } from "../graph-types";
+import {
+  GraphAttrRole, hoverRadiusFactor, kDefaultNumericAxisBounds, kGraphTileType,
+  PlotType, PlotTypes, pointRadiusMax, pointRadiusSelectionAddend
+} from "../graph-types";
 import { SharedModelType } from "../../../models/shared/shared-model";
-import { getTileCaseMetadata
-} from "../../../models/shared/shared-data-utils";
+import { getTileCaseMetadata } from "../../../models/shared/shared-data-utils";
 import { AppConfigModelType } from "../../../models/stores/app-config-model";
 import {ITileContentModel, TileContentModel} from "../../../models/tiles/tile-content";
 import {ITileExportOptions} from "../../../models/tiles/tile-content-info";
@@ -346,6 +345,16 @@ export const GraphModel = TileContentModel
       if (!sharedDataSets) {
         console.warn("Unable to query for shared datasets");
         return;
+      }
+
+      // This handles auto-assignment in case dataset has changed in significant ways (eg, columns and recreated)
+      if (isSharedDataSet(sharedModel)) {
+        const dataSetId = sharedModel.dataSet?.id;
+        if (dataSetId) {
+          const changedLayer = self.layers.find((layer) => {
+            return layer.config.dataset?.id === dataSetId; });
+          changedLayer?.configureLinkedLayer();
+        }
       }
 
       // Would be nice if there was a simple way to tell if anything relevant has changed.
