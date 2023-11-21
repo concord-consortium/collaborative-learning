@@ -710,13 +710,21 @@ export const DataConfigurationModel = types
         }
         if (desc && desc.attributeID !== '') {
           self._yAttributeDescriptions.push(desc);
+          self.dataset?.setSelectedAttributes([desc.attributeID]);
         }
       } else if (role === 'yPlus' && desc && desc.attributeID !== '') {
         self._yAttributeDescriptions.push(desc);
+        self.dataset?.setSelectedAttributes([desc.attributeID]);
       } else if (role === 'rightNumeric') {
         this.setY2Attribute(desc);
+        if (desc) {
+          self.dataset?.setSelectedAttributes([desc.attributeID]);
+        }
       } else {
         self._setAttributeDescription(role, desc);
+        if (desc) {
+          self.dataset?.setSelectedAttributes([desc.attributeID]);
+        }
       }
       this.syncFilteredCasesCount(true);
       if (role === 'legend') {
@@ -725,6 +733,7 @@ export const DataConfigurationModel = types
     },
     addYAttribute(desc: IAttributeDescriptionSnapshot) {
       this.setAttributeForRole("yPlus", desc);
+      self.dataset?.setSelectedAttributes([desc.attributeID]);
     },
     /**
      * Replace an existing Y attribute with a different one, maintaining its position in the list.
@@ -739,6 +748,7 @@ export const DataConfigurationModel = types
         }
         const index = self._yAttributeDescriptions.findIndex(d=>d.attributeID===oldAttrId);
         self._yAttributeDescriptions[index].attributeID = newAttrId;
+        self.dataset?.setSelectedAttributes([newAttrId]);
         if (index === 0 && self._yAttributeDescriptions.length === 1) {
           self._yAttributeDescriptions[index].type = undefined;
         }

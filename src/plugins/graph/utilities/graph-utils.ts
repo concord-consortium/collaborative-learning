@@ -178,25 +178,27 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
   dataConfiguration.setPointsNeedUpdating(false);
 }
 
-function isCircleSelected(aCaseData: CaseData, dataset?: IDataSet) {
+function isCircleSelected(aCaseData: CaseData, dataConfiguration?: IDataConfigurationModel) {
+  const dataset = dataConfiguration?.dataset;
   if (!dataset) return false;
   return dataset.isCaseSelected(aCaseData.caseID)
-    || dataset.isAttributeSelected(aCaseData.xAttributeId)
-    || dataset.isAttributeSelected(aCaseData.yAttributeId);
+    || dataset.isAttributeSelected(dataConfiguration.xAttributeID)
+    || dataset.isAttributeSelected(dataConfiguration.yAttributeID(aCaseData.plotNum));
 }
 
-function applySelectedClassToCircles(selection: DotSelection, dataset?: IDataSet){
+function applySelectedClassToCircles(selection: DotSelection, dataConfiguration?: IDataConfigurationModel){
   selection
-    .classed('selected', (aCaseData: CaseData) => isCircleSelected(aCaseData, dataset));
+    .classed('selected', (aCaseData: CaseData) => isCircleSelected(aCaseData, dataConfiguration));
 }
 
-function styleOuterCircles(outerCircles: any, dataset?: IDataSet){
+function styleOuterCircles(outerCircles: any, dataConfiguration?: IDataConfigurationModel){
   outerCircles
     .attr('r', (aCaseData: CaseData) => {
-      return isCircleSelected(aCaseData, dataset) ? outerCircleSelectedRadius : outerCircleUnselectedRadius;
+      return isCircleSelected(aCaseData, dataConfiguration)
+        ? outerCircleSelectedRadius : outerCircleUnselectedRadius;
     })
     .style('fill', (aCaseData: CaseData) => {
-      return isCircleSelected(aCaseData, dataset) && selectedOuterCircleFillColor;
+      return isCircleSelected(aCaseData, dataConfiguration) && selectedOuterCircleFillColor;
     })
     .style('stroke', (aCaseData: CaseData) => {
       return selectedOuterCircleStrokeColor;
@@ -395,16 +397,15 @@ export interface ISetPointSelection {
 
 export function setPointSelection(props: ISetPointSelection) {
   const { dotsRef, dataConfiguration } = props;
-  const dataset = dataConfiguration.dataset;
   const outerCircles = selectOuterCircles(dotsRef.current);
   if (outerCircles) {
-    applySelectedClassToCircles(outerCircles, dataset);
-    styleOuterCircles(outerCircles, dataset);
+    applySelectedClassToCircles(outerCircles, dataConfiguration);
+    styleOuterCircles(outerCircles, dataConfiguration);
   }
 }
 
 export interface ISetPointCoordinates {
-  dataset?: IDataSet
+  dataConfiguration?: IDataConfigurationModel
   dotsRef: IDotsRef
   selectedOnly?: boolean
   pointRadius: number
@@ -419,7 +420,7 @@ export interface ISetPointCoordinates {
 }
 
 export function setPointCoordinates(props: ISetPointCoordinates) {
-  const { dataset, dotsRef, pointColor, pointRadius, getPointColorAtIndex,
+  const { dataConfiguration, dotsRef, pointColor, pointRadius, getPointColorAtIndex,
           getScreenX, getScreenY, getLegendColor, enableAnimation, selectedPointRadius } = props;
   const duration = enableAnimation.current ? transitionDuration : 0;
 
@@ -450,7 +451,7 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
     if (circles != null) {
       circles
         .attr('r', (aCaseData: CaseData) => {
-          return isCircleSelected(aCaseData, dataset) ? selectedPointRadius : pointRadius;
+          return isCircleSelected(aCaseData, dataConfiguration) ? selectedPointRadius : pointRadius;
         })
         .style('fill', (aCaseData: CaseData) => {
           return lookupLegendColor(aCaseData);
@@ -459,7 +460,7 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
           return lookupLegendColor(aCaseData); //border color of inner dot should be same color as legend
         })
         .style('stroke-width', (aCaseData: CaseData) =>{
-          return isCircleSelected(aCaseData, dataset) ? selectedStrokeWidth : defaultStrokeWidth;
+          return isCircleSelected(aCaseData, dataConfiguration) ? selectedStrokeWidth : defaultStrokeWidth;
         });
     }
   };
@@ -471,8 +472,8 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
   styleInnerCircles(innerCircles);
 
   const outerCircles = selectOuterCircles(dotsRef.current);
-  if (outerCircles) applySelectedClassToCircles(outerCircles, dataset);
-  styleOuterCircles(outerCircles, dataset);
+  if (outerCircles) applySelectedClassToCircles(outerCircles, dataConfiguration);
+  styleOuterCircles(outerCircles, dataConfiguration);
 }
 
 /**

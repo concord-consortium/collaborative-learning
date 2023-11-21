@@ -184,7 +184,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
       getLegendColor = legendAttrID ? dataConfiguration?.getLegendColorForCase : undefined;
 
     setPointCoordinates({
-      dataset, dotsRef, pointRadius: pointRadiusRef.current,
+      dataConfiguration, dotsRef, pointRadius: pointRadiusRef.current,
       selectedPointRadius: selectedPointRadiusRef.current,
       selectedOnly, getScreenX, getScreenY, getLegendColor,
       getPointColorAtIndex: graphModel.pointColorAtIndex, enableAnimation, pointColor, pointStrokeColor

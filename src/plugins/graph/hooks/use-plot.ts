@@ -147,7 +147,7 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
       });
       return () => disposer();
     }
-  }, [dataset, callRefreshPointPositions, refreshPointSelection]);
+  }, [dataset, callRefreshPointPositions]);
 
   // respond to selection change
   useEffect(function respondToSelectionChange() {

@@ -255,7 +255,7 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
           ? dataConfiguration?.getLegendColorForCase : undefined;
 
       setPointCoordinates({
-        dataset, pointRadius: graphModel.getPointRadius(),
+        dataConfiguration, pointRadius: graphModel.getPointRadius(),
         selectedPointRadius: graphModel.getPointRadius('select'),
         dotsRef, selectedOnly, pointColor, pointStrokeColor,
         getScreenX, getScreenY, getLegendColor, enableAnimation
