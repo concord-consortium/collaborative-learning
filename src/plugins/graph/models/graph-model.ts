@@ -10,13 +10,12 @@ import {
   AxisModelUnion, EmptyAxisModel, IAxisModelUnion, NumericAxisModel
 } from "../imports/components/axis/models/axis-model";
 import { GraphPlace } from "../imports/components/axis-graph-shared";
-import { GraphAttrRole, hoverRadiusFactor, kDefaultNumericAxisBounds, kGraphTileType,
-         PlotType, PlotTypes, pointRadiusMax, pointRadiusSelectionAddend
-
-       } from "../graph-types";
+import {
+  GraphAttrRole, hoverRadiusFactor, kDefaultNumericAxisBounds, kGraphTileType,
+  PlotType, PlotTypes, pointRadiusMax, pointRadiusSelectionAddend
+} from "../graph-types";
 import { SharedModelType } from "../../../models/shared/shared-model";
-import { getTileCaseMetadata
-} from "../../../models/shared/shared-data-utils";
+import { getTileCaseMetadata } from "../../../models/shared/shared-data-utils";
 import { AppConfigModelType } from "../../../models/stores/app-config-model";
 import {ITileContentModel, TileContentModel} from "../../../models/tiles/tile-content";
 import {ITileExportOptions} from "../../../models/tiles/tile-content-info";
