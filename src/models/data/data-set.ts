@@ -118,6 +118,25 @@ export const DataSet = types.model("DataSet", {
       .filter(cell => cell !== undefined) as ICell[];
   }
 }))
+.views(self => ({
+  get selectedAttributeIdString() {
+    return self.selectedAttributeIds.join(", ");
+  },
+  get selectedCaseIdString() {
+    return self.selectedCaseIds.join(", ");
+  },
+  get selectedCellIdString() {
+    return Array.from(self.cellSelection).join(", ");
+  }
+}))
+.views(self => ({
+  get selectionIdString() {
+    const attributeString = `attributes: ${self.selectedAttributeIdString}`;
+    const caseString = `cases: ${self.selectedCaseIdString}`;
+    const cellString = `cells: ${self.selectedCellIdString}`;
+    return `${attributeString}, ${caseString}, ${cellString}`;
+  }
+}))
 .extend(self => {
   const disposers: { [index: string]: () => void } = {};
   let inFlightActions = 0;
@@ -445,15 +464,6 @@ export const DataSet = types.model("DataSet", {
       },
       get firstSelectedCell() {
         if (self.selectedCells.length > 0) return self.selectedCells[0];
-      },
-      get selectedAttributeIdString() {
-        return self.selectedAttributeIds.join(", ");
-      },
-      get selectedCaseIdString() {
-        return self.selectedCaseIds.join(", ");
-      },
-      get selectedCellIdString() {
-        return Array.from(self.cellSelection).join(", ");
       },
       get isAnyCaseSelected() {
         return self.caseSelection.size > 0;
