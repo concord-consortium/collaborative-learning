@@ -150,20 +150,20 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   const handleLabelClick = (event: React.MouseEvent<HTMLInputElement | HTMLDivElement>) => {
     event.stopPropagation();
+    dataSet.setSelectedAttributes([attrKey]);
     if (readOnly) return;
     setCurrEditAttrId(attrKey);
     setCurrEditFacet("name");
     !editingLabel && setLabelCandidate(getLabel());
-    dataSet.setSelectedAttributes([attrKey]);
   };
 
   const handleValueClick = (event: React.MouseEvent<HTMLInputElement | HTMLDivElement>) => {
     event.stopPropagation();
+    dataSet.setSelectedCells([cell]);
     if (readOnly) return;
     setCurrEditAttrId(attrKey);
     setCurrEditFacet("value");
     !editingValue && setValueCandidate(getValue());
-    dataSet.setSelectedCells([cell]);
   };
 
   const handleInputDoubleClick = (event: React.MouseEvent<HTMLInputElement>) => {
