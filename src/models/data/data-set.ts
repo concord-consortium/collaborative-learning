@@ -5,7 +5,8 @@ import { applyAction, getEnv, Instance, ISerializedActionCall,
 import { Attribute, IAttribute, IAttributeSnapshot } from "./attribute";
 import { uniqueId, uniqueSortableId } from "../../utilities/js-utils";
 import { CaseGroup } from "./data-set-types";
-import { IValueType } from "./data-types";
+import { getCellFromId, getCellId, ICell, IValueType, uniqueCaseIds } from "./data-types";
+import { getAppConfig } from "../tiles/tile-environment";
 
 export const newCaseId = uniqueSortableId;
 
@@ -49,6 +50,8 @@ export const DataSet = types.model("DataSet", {
   attributeSelection: observable.set<string>(),
   // MobX-observable set of selected case IDs
   caseSelection: observable.set<string>(),
+  // MobX-observable set of selected cell IDs
+  cellSelection: observable.set<string>(),
   // map from pseudo-case ID to the CaseGroup it represents
   pseudoCaseMap: {} as Record<string, CaseGroup>,
   transactionCount: 0
@@ -77,6 +80,9 @@ export const DataSet = types.model("DataSet", {
       caseIDMap[aCase.__id__] = index;
     });
     return caseIDMap;
+  },
+  get cellsSelectCases() {
+    return getAppConfig(self)?.getSetting("cellsSelectCases", "dataset");
   }
 }))
 .views(self => {
@@ -106,6 +112,29 @@ export const DataSet = types.model("DataSet", {
   },
   get selectedCaseIds() {
     return Array.from(self.caseSelection);
+  },
+  get selectedCells() {
+    return Array.from(self.cellSelection).map(cellId => getCellFromId(cellId))
+      .filter(cell => cell !== undefined) as ICell[];
+  }
+}))
+.views(self => ({
+  get selectedAttributeIdString() {
+    return self.selectedAttributeIds.join(", ");
+  },
+  get selectedCaseIdString() {
+    return self.selectedCaseIds.join(", ");
+  },
+  get selectedCellIdString() {
+    return Array.from(self.cellSelection).join(", ");
+  }
+}))
+.views(self => ({
+  get selectionIdString() {
+    const attributeString = `attributes: ${self.selectedAttributeIdString}`;
+    const caseString = `cases: ${self.selectedCaseIdString}`;
+    const cellString = `cells: ${self.selectedCellIdString}`;
+    return `${attributeString}, ${caseString}, ${cellString}`;
   }
 }))
 .extend(self => {
@@ -152,6 +181,7 @@ export const DataSet = types.model("DataSet", {
   }
 
   function getCaseAtIndex(index: number) {
+    if (index >= self.cases.length) return;
     const aCase = self.cases[index],
           id = aCase && aCase.__id__;
     return id ? getCase(id) : undefined;
@@ -241,6 +271,43 @@ export const DataSet = types.model("DataSet", {
   function clearAllSelections() {
     self.attributeSelection.clear();
     self.caseSelection.clear();
+    self.cellSelection.clear();
+  }
+
+  // Returns a list of caseIds, which could be from pseudo cases
+  function getCaseIds(caseIds: string[]) {
+    const ids: string[] = [];
+    caseIds.forEach(id => {
+      const pseudoCase = self.pseudoCaseMap[id];
+      if (pseudoCase) {
+        ids.push(...pseudoCase.childCaseIds);
+      } else {
+        ids.push(id);
+      }
+    });
+    return ids;
+  }
+
+  function selectCases(caseIds: string[], select = true) {
+    if (select) {
+      self.attributeSelection.clear();
+      self.cellSelection.clear();
+    }
+    const ids = getCaseIds(caseIds);
+    ids.forEach(id => {
+      if (select) {
+        self.caseSelection.add(id);
+      }
+      else {
+        self.caseSelection.delete(id);
+      }
+    });
+  }
+
+  function setSelectedCases(caseIds: string[]) {
+    clearAllSelections();
+    const ids = getCaseIds(caseIds);
+    self.caseSelection.replace(ids);
   }
 
   return {
@@ -254,6 +321,11 @@ export const DataSet = types.model("DataSet", {
       },
       attrIndexFromID(id: string) {
         return attrIndexFromID(id);
+      },
+      attrIDFromIndex(index: number) {
+        if (index >= self.attributes.length) return;
+        const attr = self.attributes[index];
+        return attr?.id;
       },
       caseIndexFromID(id: string) {
         return self.caseIDMap[id];
@@ -380,17 +452,24 @@ export const DataSet = types.model("DataSet", {
                 ? group.childCaseIds.every(id => self.caseSelection.has(id))
                 : self.caseSelection.has(caseId);
       },
+      isCellSelected(cell: ICell) {
+        const cellId = getCellId(cell);
+        return self.cellSelection.has(cellId);
+      },
       get firstSelectedAttributeId() {
         if (self.selectedAttributeIds.length > 0) return self.selectedAttributeIds[0];
       },
       get firstSelectedCaseId() {
         if (self.selectedCaseIds.length > 0) return self.selectedCaseIds[0];
       },
-      get selectedCaseIdString() {
-        return self.selectedCaseIds.join(", ");
+      get firstSelectedCell() {
+        if (self.selectedCells.length > 0) return self.selectedCells[0];
       },
       get isAnyCaseSelected() {
         return self.caseSelection.size > 0;
+      },
+      get isAnyCellSelected() {
+        return self.cellSelection.size > 0;
       },
       get isInTransaction() {
         return self.transactionCount > 0;
@@ -642,6 +721,7 @@ export const DataSet = types.model("DataSet", {
 
       selectAllAttributes(select = true) {
         self.caseSelection.clear();
+        self.cellSelection.clear();
         if (select) {
           self.attributes.forEach(attribute => self.attributeSelection.add(attribute.id));
         } else {
@@ -651,6 +731,7 @@ export const DataSet = types.model("DataSet", {
 
       selectAllCases(select = true) {
         self.attributeSelection.clear();
+        self.cellSelection.clear();
         if (select) {
           self.cases.forEach(({__id__}) => self.caseSelection.add(__id__));
         }
@@ -659,8 +740,25 @@ export const DataSet = types.model("DataSet", {
         }
       },
 
+      selectAllCells(select = true) {
+        if (select) {
+          self.attributeSelection.clear();
+          self.caseSelection.clear();
+          self.attributes.forEach(attribute => {
+            self.cases.forEach(({__id__}) => {
+              self.cellSelection.add(getCellId({ attributeId: attribute.id, caseId: __id__ }));
+            });
+          });
+        } else {
+          self.cellSelection.clear();
+        }
+      },
+
       selectAttributes(attributeIds: string[], select = true) {
-        if (select) self.caseSelection.clear();
+        if (select) {
+          self.caseSelection.clear();
+          self.cellSelection.clear();
+        }
         attributeIds.forEach(id => {
           if (select) {
             self.attributeSelection.add(id);
@@ -670,23 +768,47 @@ export const DataSet = types.model("DataSet", {
         });
       },
 
-      selectCases(caseIds: string[], select = true) {
-        if (select) self.attributeSelection.clear();
-        const ids: string[] = [];
-        caseIds.forEach(id => {
-          const pseudoCase = self.pseudoCaseMap[id];
-          if (pseudoCase) {
-            ids.push(...pseudoCase.childCaseIds);
-          } else {
-            ids.push(id);
-          }
-        });
-        ids.forEach(id => {
+      selectCases,
+
+      selectCells(cells: ICell[], select = true) {
+        if (select) {
+          self.attributeSelection.clear();
+          self.caseSelection.clear();
+        }
+
+        if (self.cellsSelectCases) {
+          const caseIds = uniqueCaseIds(cells);
           if (select) {
-            self.caseSelection.add(id);
+            selectCases(caseIds, select);
+          } else {
+            // When deselecting cells, we don't want to deselect cases that
+            // are related to a cell not being deselected
+            const preservedCellIds: string[] = [];
+            const cellIds = cells.map(cell => getCellId(cell));
+            // Find cells that will continue to be selected
+            self.cellSelection.forEach(cellId => {
+              if (!cellIds.includes(cellId)) {
+                preservedCellIds.push(cellId);
+              }
+            });
+            // Find cases related to cells that will continue to be selected
+            const preservedCaseIds = uniqueCaseIds(preservedCellIds.map(cellId => getCellFromId(cellId)) as ICell[]);
+            // Only remove cases related to deselected cells if they aren't also related to a continuing cell
+            const removedCaseIds: string[] = [];
+            caseIds.forEach(caseId => {
+              if (!preservedCaseIds.includes(caseId)) {
+                removedCaseIds.push(caseId);
+              }
+            });
+            selectCases(removedCaseIds, select);
           }
-          else {
-            self.caseSelection.delete(id);
+        }
+
+        cells.forEach(cell => {
+          if (select) {
+            self.cellSelection.add(getCellId(cell));
+          } else {
+            self.cellSelection.delete(getCellId(cell));
           }
         });
       },
@@ -696,18 +818,16 @@ export const DataSet = types.model("DataSet", {
         self.attributeSelection.replace(attributeIds);
       },
 
-      setSelectedCases(caseIds: string[]) {
+      setSelectedCases,
+
+      setSelectedCells(cells: ICell[]) {
         clearAllSelections();
-        const ids: string[] = [];
-        caseIds.forEach(id => {
-          const pseudoCase = self.pseudoCaseMap[id];
-          if (pseudoCase) {
-            ids.push(...pseudoCase.childCaseIds);
-          } else {
-            ids.push(id);
-          }
-        });
-        self.caseSelection.replace(ids);
+
+        if (self.cellsSelectCases) {
+          setSelectedCases(uniqueCaseIds(cells));
+        }
+
+        self.cellSelection.replace(cells.map(cell => getCellId(cell)));
       },
 
       addActionListener(key: string, listener: (action: ISerializedActionCall) => void) {

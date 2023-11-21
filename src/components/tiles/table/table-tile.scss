@@ -194,6 +194,21 @@ $controls-hover-background: #c0dfe7;
       }
     }
     .rdg-row {
+      .rdg-cell {
+        box-shadow: none;
+
+        .rdg-text-editor {
+          border: none;
+          box-shadow: inset 0 0 0 3px $highlight-unlinked-edit;
+        }
+
+        &.linked {
+          .rdg-text-editor {
+            box-shadow: inset 0 0 0 3px $highlight-linked-edit;
+          }
+        }
+      }
+
       &.rdg-row-selected {
         .index-column {
           background-color: $highlight-unlinked-header;
@@ -211,6 +226,7 @@ $controls-hover-background: #c0dfe7;
           }
         }
       }
+
       &.highlighted {
         .rdg-cell {
           background-color: $highlight-unlinked-cell;
