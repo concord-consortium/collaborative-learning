@@ -155,6 +155,35 @@ export const GraphModel = TileContentModel
       return self.layers.reduce((prev, layer) => prev+layer.config.caseDataArray.length, 0);
     },
     /**
+     * Return list of all values of all Y attributes in all layers.
+     */
+    get numericValuesForYAxis() {
+      const allValues: number[] = [];
+      return self.layers.reduce((acc: number[], layer) => {
+        return acc.concat(layer.config.numericValuesForYAxis);
+      }, allValues);
+    },
+    /**
+     * Type (eg numeric, catgorical) for the given role.
+     * Currently this is defined by the first layer; may need more subtlety in the future.
+     */
+    attributeType(role: GraphAttrRole) {
+      return self.layers[0].config.attributeType(role);
+    },
+    /**
+     * Search for the given attribute ID and return the layer it is found in.
+     * @param id - Attribute ID
+     * @returns IGraphLayerModel or undefined
+     */
+    layerForAttributeId(id: string) {
+      for (const layer of self.layers) {
+        if (layer.config.rolesForAttribute(id)) {
+          return layer;
+        }
+      }
+      return undefined;
+    },
+    /**
      * Radius of points to draw on the graph.
      * This is based on the total number of points that there are in all layers.
      */
@@ -233,6 +262,14 @@ export const GraphModel = TileContentModel
     },
     removeAxis(place: AxisPlace) {
       self.axes.delete(place);
+    },
+    /**
+     * Set the primary role for all layers.
+     */
+    setPrimaryRole(role: GraphAttrRole) {
+      for (const layer of self.layers) {
+        layer.config.setPrimaryRole(role);
+      }
     },
     /**
      * Use the given Attribute for the given graph role.

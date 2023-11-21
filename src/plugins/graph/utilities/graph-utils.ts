@@ -140,12 +140,14 @@ export interface IMatchCirclesProps {
 }
 
 export function matchCirclesToData(props: IMatchCirclesProps) {
-  console.log("|| matchCirclesToData!", props);
   const {dataConfiguration, enableAnimation, instanceId,
       dotsElement, pointRadius, pointColor, pointStrokeColor} = props,
     allCaseData = dataConfiguration.joinedCaseDataArrays,
-    caseDataKeyFunc = (d: CaseData) => `${d.plotNum}-${d.caseID}`,
-    circles = selectCircles(dotsElement);
+    caseDataKeyFunc = (d: CaseData) => `${dataConfiguration.id}-${d.plotNum}-${d.caseID}`,
+    circles = selectCircles(dotsElement, dataConfiguration);
+  console.log("|| BB matchCirclesToData!", props);
+  console.log("|| BB  circles:", circles);
+  console.log("|| BB  cases:", allCaseData);
   if (!circles) return;
   startAnimation(enableAnimation);
   circles
@@ -153,7 +155,7 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
     .join(
       (enter) =>
         enter.append('circle')
-          .attr('class', 'graph-dot')
+          .attr('class', `graph-dot ${dataConfiguration.id}`)
           .property('id', (d: CaseData) => `${instanceId}_${d.caseID}`),
       (update) =>
         update.attr('r', pointRadius)
@@ -364,7 +366,7 @@ export function setPointSelection(props: ISetPointSelection) {
     {dotsRef, dataConfiguration, pointRadius, selectedPointRadius,
       pointColor, pointStrokeColor, getPointColorAtIndex} = props,
     dataset = dataConfiguration.dataset,
-    dots = selectCircles(dotsRef.current),
+    dots = selectCircles(dotsRef.current, dataConfiguration),
     legendID = dataConfiguration.attributeID('legend');
 
   if (!(dotsRef.current && dots)) return;
@@ -384,7 +386,7 @@ export function setPointSelection(props: ISetPointSelection) {
     .style('stroke-width', defaultStrokeWidth)
     .style('stroke-opacity', defaultStrokeOpacity);
 
-  const selectedDots = selectDots(dotsRef.current, true);
+  const selectedDots = selectDots(dotsRef.current, true, dataConfiguration);
   // How we deal with this depends on whether there is a legend or not
   if (legendID) {
     selectedDots?.style('stroke', defaultSelectedStroke)
@@ -398,6 +400,7 @@ export function setPointSelection(props: ISetPointSelection) {
 }
 
 export interface ISetPointCoordinates {
+  dataConfiguration: IDataConfigurationModel
   dataset?: IDataSet
   dotsRef: IDotsRef
   selectedOnly?: boolean
@@ -449,13 +452,15 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
 
   const
     {
-      dataset, dotsRef, selectedOnly = false, pointRadius, selectedPointRadius,
+      dataConfiguration, dataset, dotsRef, selectedOnly = false, pointRadius, selectedPointRadius,
       pointStrokeColor, pointColor, getPointColorAtIndex,
       getScreenX, getScreenY, getLegendColor, enableAnimation
     } = props,
     duration = enableAnimation.current ? transitionDuration : 0,
 
-    theSelection = selectDots(dotsRef.current, selectedOnly);
+    theSelection = selectDots(dotsRef.current, selectedOnly, dataConfiguration);
+    console.log('BB points selection: ', theSelection?.size(), 'points');
+
     setPoints();
 }
 

@@ -3,8 +3,6 @@ import React, {useCallback} from "react";
 import {CaseData, selectDots} from "../d3-types";
 import {attrRoleToAxisPlace, PlotProps} from "../graph-types";
 import {usePlotResponders} from "../hooks/use-plot";
-import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
-import {useDataSetContext} from "../imports/hooks/use-data-set-context";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {setPointCoordinates, setPointSelection} from "../utilities/graph-utils";
 import {useGraphModelContext} from "../models/graph-model";
@@ -12,11 +10,11 @@ import {useGraphModelContext} from "../models/graph-model";
 type BinMap = Record<string, Record<string, Record<string, Record<string, number>>>>;
 
 export const ChartDots = function ChartDots(props: PlotProps) {
-  const {dotsRef, enableAnimation} = props,
+  const {layer, dotsRef, enableAnimation} = props,
     graphModel = useGraphModelContext(),
     {pointColor, pointStrokeColor} = graphModel,
-    dataConfiguration = useDataConfigurationContext(),
-    dataset = useDataSetContext(),
+    dataConfiguration = layer.config,
+    dataset = dataConfiguration.dataset,
     layout = useGraphLayoutContext(),
     primaryAttrRole = dataConfiguration?.primaryRole ?? 'x',
     primaryAxisPlace = attrRoleToAxisPlace[primaryAttrRole] ?? 'bottom',
@@ -96,7 +94,7 @@ export const ChartDots = function ChartDots(props: PlotProps) {
       extraSecCatsArray: string[] = (dataConfiguration && extraSecondaryAttrRole)
         ? Array.from(dataConfiguration.categoryArrayForAttrRole(extraSecondaryAttrRole)) : [],
       pointDiameter = 2 * graphModel.getPointRadius(),
-      selection = selectDots(dotsRef.current, selectedOnly),
+      selection = selectDots(dotsRef.current, selectedOnly, dataConfiguration),
       primOrdinalScale = layout.getAxisScale(primaryAxisPlace) as ScaleBand<string>,
       secOrdinalScale = layout.getAxisScale(secondaryAxisPlace) as ScaleBand<string>,
       extraPrimOrdinalScale = layout.getAxisScale(extraPrimaryAxisPlace) as ScaleBand<string>,
@@ -207,7 +205,7 @@ export const ChartDots = function ChartDots(props: PlotProps) {
       getScreenY = primaryIsBottom ? getSecondaryScreenCoord : getPrimaryScreenCoord;
 
     setPointCoordinates({
-      dataset, pointRadius, selectedPointRadius: graphModel.getPointRadius('select'),
+      dataConfiguration, dataset, pointRadius, selectedPointRadius: graphModel.getPointRadius('select'),
       dotsRef, selectedOnly, pointColor, pointStrokeColor,
       getScreenX, getScreenY, getLegendColor, enableAnimation
     });
@@ -215,7 +213,7 @@ export const ChartDots = function ChartDots(props: PlotProps) {
     extraPrimaryAttrRole, extraSecondaryAttrRole, pointColor,
     enableAnimation, primaryIsBottom, layout, pointStrokeColor, computeMaxOverAllCells, dataset]);
 
-  usePlotResponders({dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation});
+  usePlotResponders({dataConfiguration, dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation});
 
   return (
     <>

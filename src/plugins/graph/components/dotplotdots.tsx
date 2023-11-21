@@ -4,8 +4,6 @@ import React, {useCallback, useRef, useState} from "react";
 import {CaseData} from "../d3-types";
 import {PlotProps} from "../graph-types";
 import {useDragHandlers, usePlotResponders} from "../hooks/use-plot";
-import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
-import {useDataSetContext} from "../imports/hooks/use-data-set-context";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {ICase} from "../../../models/data/data-set-types";
 import {
@@ -17,10 +15,10 @@ import {
 import {useGraphModelContext} from "../models/graph-model";
 
 export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
-  const {dotsRef, enableAnimation} = props,
+  const {layer, dotsRef, enableAnimation} = props,
     graphModel = useGraphModelContext(),
-    dataConfiguration = useDataConfigurationContext(),
-    dataset = useDataSetContext(),
+    dataConfiguration = layer.config,
+    dataset = dataConfiguration.dataset,
     layout = useGraphLayoutContext(),
     primaryAttrRole = dataConfiguration?.primaryRole ?? 'x',
     primaryIsBottom = primaryAttrRole === 'x',
@@ -255,7 +253,7 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
           ? dataConfiguration?.getLegendColorForCase : undefined;
 
       setPointCoordinates({
-        dataset, pointRadius: graphModel.getPointRadius(),
+        dataConfiguration, dataset, pointRadius: graphModel.getPointRadius(),
         selectedPointRadius: graphModel.getPointRadius('select'),
         dotsRef, selectedOnly, pointColor, pointStrokeColor,
         getScreenX, getScreenY, getLegendColor, enableAnimation
@@ -264,7 +262,7 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
     [graphModel, dataConfiguration, layout, primaryAttrRole, secondaryAttrRole, dataset, dotsRef,
       enableAnimation, primaryIsBottom, pointColor, pointStrokeColor]);
 
-  usePlotResponders({dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation});
+  usePlotResponders({dataConfiguration, dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation});
 
   return (
     <>

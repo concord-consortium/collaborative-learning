@@ -165,7 +165,7 @@ export const AttributeLabel = observer(
     const readyForPortal = positioningParentElt && onChangeAttribute && onTreatAttributeAs && onRemoveAttribute;
     const skipPortal = defaultSeriesLegend && place === "left";
 
-    console.log("| positioningParentElement: ", positioningParentElt);
+    // console.log("| positioningParentElement: ", positioningParentElt);
 
     return (
       <>

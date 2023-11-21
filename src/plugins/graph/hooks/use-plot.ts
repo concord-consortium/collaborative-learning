@@ -9,6 +9,7 @@ import {matchCirclesToData, startAnimation} from "../utilities/graph-utils";
 import {useCurrent} from "../../../hooks/use-current";
 import {useInstanceIdContext} from "../imports/hooks/use-instance-id-context";
 import {onAnyAction} from "../../../utilities/mst-utils";
+import { IDataConfigurationModel } from "../models/data-configuration-model";
 
 interface IDragHandlers {
   start: (event: MouseEvent) => void
@@ -33,18 +34,18 @@ export const useDragHandlers = (target: any, {start, drag, end}: IDragHandlers) 
 };
 
 export interface IPlotResponderProps {
-  refreshPointPositions: (selectedOnly: boolean) => void
-  refreshPointSelection: () => void
-  dotsRef: IDotsRef
-  enableAnimation: React.MutableRefObject<boolean>
+  dataConfiguration: IDataConfigurationModel;
+  refreshPointPositions: (selectedOnly: boolean) => void;
+  refreshPointSelection: () => void;
+  dotsRef: IDotsRef;
+  enableAnimation: React.MutableRefObject<boolean>;
 }
 
 export const usePlotResponders = (props: IPlotResponderProps) => {
-  const {enableAnimation, refreshPointPositions, refreshPointSelection, dotsRef} = props,
+  const {dataConfiguration, enableAnimation, refreshPointPositions, refreshPointSelection, dotsRef} = props,
     graphModel = useGraphModelContext(),
-    layout = useGraphLayoutContext(),
-    dataConfiguration = graphModel.config,
     dataset = dataConfiguration.dataset,
+    layout = useGraphLayoutContext(),
     instanceId = useInstanceIdContext(),
     refreshPointPositionsRef = useCurrent(refreshPointPositions);
 
@@ -174,8 +175,8 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
   useEffect(() => {
     return autorun(
       () => {
-        !graphModel.config?.pointsNeedUpdating && callRefreshPointPositions(false);
+        !dataConfiguration.pointsNeedUpdating && callRefreshPointPositions(false);
       });
-  }, [graphModel, callRefreshPointPositions]);
+  }, [dataConfiguration, callRefreshPointPositions]);
 
 };

@@ -79,6 +79,7 @@ export class GraphController {
 
   initializeGraph() {
     const {graphModel, dotsRef, layout} = this;
+    console.log('BB initializeGraph', graphModel?.contentTitle);
 
     // handle any attributes auto-assigned before our handlers were in place
     if (graphModel?.autoAssignedAttributes.length) {
@@ -112,10 +113,9 @@ export class GraphController {
   handleAttributeAssignment(graphPlace: GraphPlace, dataSetID: string|undefined, attrID: string) {
     const {graphModel, layout} = this,
       dataset = dataSetID ? getDataSetFromId(graphModel, dataSetID) : undefined,
-      dataConfig = graphModel?.config,
       appConfig = getAppConfig(graphModel),
       emptyPlotIsNumeric = appConfig?.getSetting("emptyPlotIsNumeric", "graph");
-    if (!(graphModel && layout && dataConfig)) {
+    if (!(graphModel && layout)) {
       return;
     }
     this.callMatchCirclesToData();
@@ -125,7 +125,7 @@ export class GraphController {
     } else if (graphPlace === 'yPlus') {
       // The yPlus attribute utilizes the left numeric axis for plotting but doesn't change anything else
       const yAxisModel = graphModel.getAxis('left');
-      yAxisModel && setNiceDomain(dataConfig.numericValuesForYAxis, yAxisModel);
+      yAxisModel && setNiceDomain(graphModel.numericValuesForYAxis, yAxisModel);
       return;
     }
 
@@ -134,27 +134,31 @@ export class GraphController {
         graphAttributeRole = axisPlaceToAttrRole[axisPlace];
       if (['left', 'bottom'].includes(axisPlace)) { // Only assignment to 'left' and 'bottom' change plotType
         const defaultAttrType = emptyPlotIsNumeric ? 'numeric' : 'empty';
-        const attributeType = dataConfig.attributeType(graphPlaceToAttrRole[graphPlace]) ?? defaultAttrType,
+        const attributeType = graphModel.attributeType(graphPlaceToAttrRole[graphPlace]) ?? defaultAttrType,
           primaryType = attributeType,
           otherAxisPlace = axisPlace === 'bottom' ? 'left' : 'bottom',
           otherAttrRole = axisPlaceToAttrRole[otherAxisPlace],
-          otherAttributeType = dataConfig.attributeType(graphPlaceToAttrRole[otherAxisPlace]) ?? defaultAttrType,
+          otherAttributeType = graphModel.attributeType(graphPlaceToAttrRole[otherAxisPlace]) ?? defaultAttrType,
           // Numeric attributes get priority for primaryRole when present. First one that is already present
           // and then the newly assigned one. If there is an already assigned categorical then its place is
           // the primaryRole, or, lastly, the newly assigned place
           primaryRole = otherAttributeType === 'numeric' ? otherAttrRole
             : attributeType === 'numeric' ? graphAttributeRole
               : otherAttributeType !== 'empty' ? otherAttrRole : graphAttributeRole;
-        dataConfig.setPrimaryRole(primaryRole);
+        graphModel.setPrimaryRole(primaryRole);
         graphModel.setPlotType(plotChoices[primaryType][otherAttributeType]);
       }
-      if (attrID && dataConfig.attributeID(graphAttributeRole) !== attrID) {
-        dataConfig.setAttributeForRole(graphAttributeRole, {attributeID: attrID});
+      if (attrID) {
+        const layer = graphModel.layerForAttributeId(attrID);
+        if (layer && layer.config.attributeID(graphAttributeRole) !== attrID) {
+          layer.config.setAttributeForRole(graphAttributeRole, {attributeID: attrID});
+        }
       }
     };
 
     const setupAxis = (place: AxisPlace) => {
       const attrRole = graphPlaceToAttrRole[place],
+        dataConfig = graphModel.layers[0].config, // FIXME multi dataset
         attributeID = dataConfig.attributeID(attrRole),
         attr = attributeID ? dataset?.attrFromID(attributeID) : undefined,
         attrType = dataConfig.attributeType(attrRole) ?? 'empty',
