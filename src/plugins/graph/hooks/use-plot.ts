@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect, useRef} from "react";
 import {autorun, reaction} from "mobx";
-import { isSetCaseValuesAction} from "../../../models/data/data-set-actions";
+import { isSetCaseValuesAction } from "../../../models/data/data-set-actions";
 import {IDotsRef, GraphAttrRoles} from "../graph-types";
 import {INumericAxisModel} from "../imports/components/axis/models/axis-model";
 import {useGraphLayoutContext} from "../models/graph-layout";

@@ -76,7 +76,6 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
     }, [dataConfiguration, dataset, enableAnimation]),
 
     onDrag = useCallback((event: MouseEvent) => {
-
       const xAxisScale = layout.getAxisScale('bottom') as ScaleLinear<number, number>,
         xAttrID = dataConfiguration?.attributeID('x') ?? '';
       if (dragID !== '') {
