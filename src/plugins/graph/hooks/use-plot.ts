@@ -151,11 +151,10 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
 
   // respond to selection change
   useEffect(function respondToSelectionChange() {
-    const disposer = reaction(
+    return reaction(
       () => [dataset?.selectedAttributeIdString, dataset?.selectedCaseIdString],
       () => refreshPointSelection()
     );
-    return () => disposer();
   }, [dataset, refreshPointSelection]);
 
   // respond to added or removed cases and change in attribute type
