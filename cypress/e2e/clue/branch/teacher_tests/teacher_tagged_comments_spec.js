@@ -3,7 +3,7 @@ import ChatPanel from "../../../../support/elements/clue/ChatPanel";
 let chatPanel = new ChatPanel;
 
 const queryParams = {
-  teacher7NetworkQueryParams: "/?appMode=qa&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:7&unit=msa&network=foo"
+  teacher7NetworkQueryParams: "/?unit=https://models-resources.concord.org/clue-curriculum/branch/add-test-unit-qa/qa/content.json&problem=0.1&appMode=qa&demoName=add-test-unit-qa&fakeClass=5&fakeUser=teacher:7&network=foo"
 };
 
 function beforeTest(params) {
@@ -21,21 +21,13 @@ context('Chat Panel Comment Tags', () => {
       "Part-to-Part",
       "Part-to-Whole",
       "Unit Rate",
-      "Ratios of Same Variable",
-      "Common Part or Whole",
-      "Building Up",
-      "Other - Proportional",
-      "Other - Nonproportional"
+      "Ratios of Same Variable"
     ];
     const tagComment = [
       "This is Part-to-Part tag comment" + Math.random(),
       "This is Part-to-Whole tag comment" + Math.random(),
       "This is Unit Rate tag comment" + Math.random(),
-      "This is Ratios of Same Variable tag comment" + Math.random(),
-      "This is Common Part or Whole tag comment" + Math.random(),
-      "This is Building Up tag comment" + Math.random(),
-      "This is Other - Proportional tag comment" + Math.random(),
-      "This is Other - Nonproportional tag comment" + Math.random()
+      "This is Ratios of Same Variable tag comment" + Math.random()
     ];
     cy.log('verify chat panel comment tags are accessible if teacher is in network (via url params)');
     beforeTest(queryParams.teacher7NetworkQueryParams);
@@ -51,11 +43,7 @@ context('Chat Panel Comment Tags', () => {
       .should("contain", tags[1])
       .should("contain", tags[2])
       .should("contain", tags[3])
-      .should("contain", tags[4])
-      .should("contain", tags[5])
-      .should("contain", tags[6])
-      .should("contain", tags[7])
-      .should("contain", tags[8]);
+      .should("contain", tags[4]);
 
     cy.log('verify user post only comment tags on document comment');
     cy.openTopTab("problems");
@@ -80,8 +68,8 @@ context('Chat Panel Comment Tags', () => {
     cy.openTopTab("problems");
     cy.clickProblemResourceTile('introduction');
     chatPanel.showAndVerifyTileCommentClass(0);
-    chatPanel.addCommentTagTextAndVerify(tags[5], tagComment[4]);
-    chatPanel.deleteCommentTagThread(tags[5]);
+    chatPanel.addCommentTagTextAndVerify(tags[4], tagComment[3]);
+    chatPanel.deleteCommentTagThread(tags[4]);
 
     cy.log('verify user post only plain text and comment tag not displayed on document comment');
     const docComment = "Only plain text and no comment tag document comment";
