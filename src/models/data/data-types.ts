@@ -49,6 +49,23 @@ const dayjsFormats = [
 export const ValueType = types.union(types.number, types.string, types.undefined);
 export type IValueType = number | string | undefined;
 
+export interface ICell {
+  attributeId: string;
+  caseId: string;
+}
+export function getCellId(cell: ICell) {
+  return JSON.stringify(cell);
+}
+export function getCellFromId(cellId: string) {
+  const cell = JSON.parse(cellId);
+  if (cell.attributeId && cell.caseId) return cell as ICell;
+}
+export function uniqueCaseIds(cells: ICell[]) {
+  const caseIds = new Set<string>();
+  cells.forEach(cell => caseIds.add(cell.caseId));
+  return Array.from(caseIds);
+}
+
 export function isNumeric(val: IValueType) {
   return !isNaN(toNumeric(val));
 }

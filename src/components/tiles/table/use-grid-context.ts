@@ -3,7 +3,7 @@ import { CellNavigationMode, DataGridHandle } from "react-data-grid";
 import { useSharedSelectionStore } from "../../../hooks/use-stores";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
 import { uniqueId } from "../../../utilities/js-utils";
-import { IGridContext, TPosition } from "./table-types";
+import { IGridContext } from "./table-types";
 
 interface IProps {
   content: TableContentModelType;
@@ -17,9 +17,16 @@ export const useGridContext = ({ content, modelId, showRowLabels, triggerColumnC
   const inputRowId = useRef(uniqueId());
   const dataSet = content.dataSet;
 
-  // this tracks ReactDataGrid's notion of the selected cell
-  const selectedCell = useRef<TPosition>({ rowIdx: -1, idx: -1 });
-  const isSelectedCellInRow = useCallback((rowIdx: number) => selectedCell.current.rowIdx === rowIdx, []);
+  const isSelectedCellInRow = useCallback((rowIdx: number) => {
+    const rowId = dataSet.getCaseAtIndex(rowIdx)?.__id__;
+    if (!rowId) return false;
+    let containsSelectedCell = false;
+    dataSet.selectedCells.forEach(cell => {
+      const { caseId } = cell;
+      if (rowId === caseId) containsSelectedCell = true;
+    });
+    return containsSelectedCell;
+  }, [dataSet]);
   const isColumnSelected = useCallback((columnId: string) => dataSet.isAttributeSelected(columnId),
     [dataSet]);
   // TODO Remove the sharedSelection.
@@ -29,8 +36,8 @@ export const useGridContext = ({ content, modelId, showRowLabels, triggerColumnC
   const sharedSelection = useSharedSelectionStore();
   const getSelectedRows = useCallback(() => {
     // this is suitable for passing into ReactDataGrid
-    const { caseSelection } = dataSet;
-    const dataSetSelection = new Set<React.Key>(caseSelection);
+    const { selectedCaseIds } = dataSet;
+    const dataSetSelection = new Set<React.Key>(selectedCaseIds);
     sharedSelection.getSelected(modelId).forEach(caseId => {
       if (!dataSetSelection.has(caseId)) dataSetSelection.add(caseId);
     });
@@ -62,22 +69,18 @@ export const useGridContext = ({ content, modelId, showRowLabels, triggerColumnC
     const actuallySelectRowById = () => {
       clearSelection({ row: false });
       dataSet.selectCases([rowId], !dataSet.isCaseSelected(rowId));
-      sharedSelection.select(modelId, rowId, select);
       triggerRowChange();
     };
     if (select !== dataSet.isCaseSelected(rowId)) {
       actuallySelectRowById();
-    } else if (select !== sharedSelection.isSelected(modelId, rowId)) {
-      actuallySelectRowById();
     }
-  }, [clearSelection, dataSet, modelId, sharedSelection, triggerRowChange]);
+  }, [clearSelection, dataSet, triggerRowChange]);
 
   const selectOneRow = useCallback((rowId: string) => {
     clearSelection();
     dataSet.setSelectedCases([rowId]);
-    sharedSelection.setSelected(modelId, [rowId]);
     triggerRowChange();
-  }, [clearSelection, dataSet, modelId, sharedSelection, triggerRowChange]);
+  }, [clearSelection, dataSet, triggerRowChange]);
 
   // Creating a new gridContext can result in focus change thus disrupting cell edits;
   // therefore, it's important that all inputs to the gridContext be wrapped in useCallback()
@@ -99,11 +102,10 @@ export const useGridContext = ({ content, modelId, showRowLabels, triggerColumnC
     _rows.delete(inputRowId.current);
     const rowArray = Array.from(_rows) as string[];
     dataSet.setSelectedCases(rowArray);
-    sharedSelection.setSelected(modelId, rowArray);
-  }, [clearSelection, dataSet, modelId, sharedSelection]);
+  }, [clearSelection, dataSet]);
 
   const cellNavigationMode: CellNavigationMode = "CHANGE_ROW";
   return {
-    ref: gridRef, cellNavigationMode, inputRowId, selectedCell, getSelectedRows, gridContext, onSelectedRowsChange
+    ref: gridRef, cellNavigationMode, inputRowId, getSelectedRows, gridContext, onSelectedRowsChange
   };
 };

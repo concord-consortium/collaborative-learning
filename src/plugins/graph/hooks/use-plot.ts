@@ -152,7 +152,7 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
   // respond to selection change
   useEffect(function respondToSelectionChange() {
     return reaction(
-      () => [dataset?.selectedAttributeIdString, dataset?.selectedCaseIdString],
+      () => [dataset?.selectionIdString],
       () => refreshPointSelection()
     );
   }, [dataset, refreshPointSelection]);

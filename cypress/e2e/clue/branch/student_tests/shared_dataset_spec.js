@@ -133,6 +133,13 @@ context('Shared Dataset', function () {
       datacardTile.getSortCardHeading().eq(1).should("not.have.class", "highlighted");
       tableTile.getTableRow().eq(1).should("not.have.class", "highlighted");
       tableTile.getSelectedColumnHeaders().should("have.length", 1);
+
+      cy.log("All Tiles Highlight Cells Selected in Table");
+      datacardTile.getSortCardValues().eq(1).should("not.have.class", "highlighted");
+      tableTile.getTableCellContent(2).should("not.have.class", "highlighted");
+      tableTile.getTableCell().eq(2).click();
+      datacardTile.getSortCardValues().eq(1).should("have.class", "highlighted");
+      tableTile.getTableCellContent(2).should("have.class", "highlighted");
     });
   });
 });

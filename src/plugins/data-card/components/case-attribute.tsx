@@ -49,6 +49,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   } = props;
   const content = model.content as DataCardContentModelType;
   const dataSet = content.dataSet;
+  const cell = { attributeId: attrKey, caseId: caseId ?? "" };
   const isLinked = useIsLinked();
   const getLabel = () => content.dataSet.attrFromID(attrKey).name;
   const getValue = () => {
@@ -149,15 +150,16 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   const handleLabelClick = (event: React.MouseEvent<HTMLInputElement | HTMLDivElement>) => {
     event.stopPropagation();
+    dataSet.setSelectedAttributes([attrKey]);
     if (readOnly) return;
     setCurrEditAttrId(attrKey);
     setCurrEditFacet("name");
     !editingLabel && setLabelCandidate(getLabel());
-    dataSet.setSelectedAttributes([attrKey]);
   };
 
   const handleValueClick = (event: React.MouseEvent<HTMLInputElement | HTMLDivElement>) => {
     event.stopPropagation();
+    dataSet.setSelectedCells([cell]);
     if (readOnly) return;
     setCurrEditAttrId(attrKey);
     setCurrEditFacet("value");
@@ -283,7 +285,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     }
   );
 
-  const valueHighlighted = attributeSelected || content.caseSelected;
+  const valueHighlighted = attributeSelected || content.caseSelected || dataSet.isCellSelected(cell);
 
   const valueClassNames = classNames(
     "value", attrKey,

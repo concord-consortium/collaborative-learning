@@ -17,6 +17,7 @@ export const SortCardAttribute: React.FC<IProps> = observer(({ model, caseId, at
   const content = model.content as DataCardContentModelType;
   const dataSet = content.dataSet;
   const value = dataSet.getStrValue(caseId, attr.id);
+  const cell = { attributeId: attr.id, caseId };
   const isLinked = useIsLinked();
   const isImage = gImageMap.isImageUrl(value);
   const [imageUrl, setImageUrl] = useState("");
@@ -32,6 +33,10 @@ export const SortCardAttribute: React.FC<IProps> = observer(({ model, caseId, at
     dataSet.setSelectedAttributes([attr.id]);
   }
 
+  function handleValueClick() {
+    dataSet.setSelectedCells([cell]);
+  }
+
   const attributeClassNames = classNames(
     "attribute",
     {
@@ -42,7 +47,7 @@ export const SortCardAttribute: React.FC<IProps> = observer(({ model, caseId, at
   const valueClassNames = classNames(
     "value",
     {
-      highlighted: caseHighlighted || attributeHighlighted,
+      highlighted: caseHighlighted || attributeHighlighted || dataSet.isCellSelected(cell),
       linked: isLinked
     }
   );
@@ -51,7 +56,7 @@ export const SortCardAttribute: React.FC<IProps> = observer(({ model, caseId, at
       <div className={attributeClassNames} onClick={handleAttributeClick}>
         {attr.name}
       </div>
-      <div className={valueClassNames}>
+      <div className={valueClassNames} onClick={handleValueClick}>
         { !isImage && value }
         { isImage && <img src={imageUrl} className="image-value" /> }
       </div>
