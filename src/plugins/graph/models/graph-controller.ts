@@ -1,7 +1,6 @@
 import React from "react";
 import {IGraphModel} from "./graph-model";
 import {GraphLayout} from "./graph-layout";
-import {getDataSetFromId} from "../../../models/shared/shared-data-utils";
 import {AxisPlace, AxisPlaces} from "../imports/components/axis/axis-types";
 import {
   CategoricalAxisModel, EmptyAxisModel, isCategoricalAxisModel, isEmptyAxisModel, isNumericAxisModel, NumericAxisModel
@@ -12,6 +11,7 @@ import {
 import {GraphPlace} from "../imports/components/axis-graph-shared";
 import {matchCirclesToData, setNiceDomain} from "../utilities/graph-utils";
 import { getAppConfig } from "../../../models/tiles/tile-environment";
+import { IDataConfigurationModel } from "./data-configuration-model";
 
 /**
  * This determines the type of plot that will be drawn, based on the types of the two axes.
@@ -83,8 +83,8 @@ export class GraphController {
 
     // handle any attributes auto-assigned before our handlers were in place
     if (graphModel?.autoAssignedAttributes.length) {
-      graphModel.autoAssignedAttributes.forEach(({ place, role, dataSetID, attrID }) => {
-        this.handleAttributeAssignment(place, dataSetID, attrID);
+      graphModel.autoAssignedAttributes.forEach(({ layer, place, role, dataSetID, attrID }) => {
+        this.handleAttributeAssignment(layer.config, place, attrID);
       });
       graphModel.clearAutoAssignedAttributes();
     }
@@ -110,9 +110,9 @@ export class GraphController {
     }
   }
 
-  handleAttributeAssignment(graphPlace: GraphPlace, dataSetID: string|undefined, attrID: string) {
+  handleAttributeAssignment(dataConfiguration: IDataConfigurationModel, graphPlace: GraphPlace, attrID: string) {
     const {graphModel, layout} = this,
-      dataset = dataSetID ? getDataSetFromId(graphModel, dataSetID) : undefined,
+      dataset = dataConfiguration.dataset,
       appConfig = getAppConfig(graphModel),
       emptyPlotIsNumeric = appConfig?.getSetting("emptyPlotIsNumeric", "graph");
     if (!(graphModel && layout)) {
@@ -148,20 +148,16 @@ export class GraphController {
         graphModel.setPrimaryRole(primaryRole);
         graphModel.setPlotType(plotChoices[primaryType][otherAttributeType]);
       }
-      if (attrID) {
-        const layer = graphModel.layerForAttributeId(attrID);
-        if (layer && layer.config.attributeID(graphAttributeRole) !== attrID) {
-          layer.config.setAttributeForRole(graphAttributeRole, {attributeID: attrID});
-        }
+      if (attrID && dataConfiguration.attributeID(graphAttributeRole) !== attrID) {
+          dataConfiguration.setAttributeForRole(graphAttributeRole, {attributeID: attrID});
       }
     };
 
     const setupAxis = (place: AxisPlace) => {
       const attrRole = graphPlaceToAttrRole[place],
-        dataConfig = graphModel.layers[0].config, // FIXME multi dataset
-        attributeID = dataConfig.attributeID(attrRole),
+        attributeID = dataConfiguration.attributeID(attrRole),
         attr = attributeID ? dataset?.attrFromID(attributeID) : undefined,
-        attrType = dataConfig.attributeType(attrRole) ?? 'empty',
+        attrType = dataConfiguration.attributeType(attrRole) ?? 'empty',
         currAxisModel = graphModel.getAxis(place),
         currentType = currAxisModel?.type ?? 'empty',
         [min, max] = kDefaultNumericAxisBounds;
@@ -170,7 +166,7 @@ export class GraphController {
           if (!currAxisModel || !isNumericAxisModel(currAxisModel)) {
             const newAxisModel = NumericAxisModel.create({place, min, max});
             graphModel.setAxis(place, newAxisModel);
-            dataConfig.setAttributeType(attrRole, 'numeric');
+            dataConfiguration.setAttributeType(attrRole, 'numeric');
             layout.setAxisScaleType(place, 'linear');
             setNiceDomain(attr?.numValues || [], newAxisModel);
           } else {
@@ -182,10 +178,10 @@ export class GraphController {
           if (currentType !== 'categorical') {
             const newAxisModel = CategoricalAxisModel.create({place});
             graphModel.setAxis(place, newAxisModel);
-            dataConfig.setAttributeType(attrRole, 'categorical');
+            dataConfiguration.setAttributeType(attrRole, 'categorical');
             layout.setAxisScaleType(place, 'band');
           }
-          layout.getAxisMultiScale(place)?.setCategorySet(dataConfig.categorySetForAttrRole(attrRole));
+          layout.getAxisMultiScale(place)?.setCategorySet(dataConfiguration.categorySetForAttrRole(attrRole));
         }
           break;
         case 'empty': {

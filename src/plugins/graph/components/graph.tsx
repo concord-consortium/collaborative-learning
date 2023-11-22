@@ -70,12 +70,12 @@ export const Graph = observer(
   }, [plotAreaSVGRef, layout, layout.plotHeight, layout.plotWidth, xScale]);
 
   const handleChangeAttribute = (place: GraphPlace, dataSet: IDataSet, attrId: string, oldAttrId?: string) => {
-    const computedPlace = place === 'plot' && graphModel.config.noAttributesAssigned ? 'bottom' : place;
+    const computedPlace = place === 'plot' && graphModel.noAttributesAssigned ? 'bottom' : place;
     const attrRole = graphPlaceToAttrRole[computedPlace];
     if (attrRole === 'y' && oldAttrId) {
       graphModel.replaceYAttributeID(oldAttrId, attrId);
       const yAxisModel = graphModel.getAxis('left') as IAxisModel;
-      setNiceDomain(graphModel.config.numericValuesForYAxis, yAxisModel);
+      setNiceDomain(graphModel.numericValuesForYAxis, yAxisModel);
     } else {
       graphModel.setAttributeID(attrRole, dataSet.id, attrId);
     }
@@ -141,7 +141,7 @@ export const Graph = observer(
           attrId = newAttrId;
         }
         startAnimation(enableAnimation);
-        graphPlace && graphController?.handleAttributeAssignment(graphPlace, dataSetId, attrId);
+        graphPlace && graphController?.handleAttributeAssignment(layer.config, graphPlace, attrId);
       }
     });
     return () => disposer?.();
@@ -151,7 +151,7 @@ export const Graph = observer(
     const layer = graphModel.layerForAttributeId(attrId);
     if (!layer) return;
     layer.config.setAttributeType(graphPlaceToAttrRole[place], treatAs);
-    layer.config.dataset && graphController?.handleAttributeAssignment(place, layer.config.dataset.id, attrId);
+    layer.config.dataset && graphController?.handleAttributeAssignment(layer.config, place, attrId);
 
     const connectingLines = graphModel.adornments.find(a => a.type === kConnectingLinesType);
     if (connectingLines && place === "left") {

@@ -28,7 +28,7 @@ import { ConnectingLinesModel } from "../adornments/connecting-lines/connecting-
 import { isSharedCaseMetadata, SharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
 import { tileContentAPIViews } from "../../../models/tiles/tile-model-hooks";
 import { getDotId } from "../utilities/graph-utils";
-import { GraphLayerModel } from "./graph-layer-model";
+import { GraphLayerModel, IGraphLayerModel } from "./graph-layer-model";
 import { isSharedDataSet, SharedDataSet } from "../../../models/shared/shared-data-set";
 import { DataConfigurationModel } from "./data-configuration-model";
 
@@ -97,9 +97,12 @@ export const GraphModel = TileContentModel
       return self.layers[0].config;
     },
     get autoAssignedAttributes() {
-      let all: Array<{ place: GraphPlace, role: GraphAttrRole, dataSetID: string, attrID: string }> = [];
+      let all: Array<{ layer: IGraphLayerModel, // We add the layer here
+        place: GraphPlace, role: GraphAttrRole, dataSetID: string, attrID: string }> = [];
       for (const layer of self.layers) {
-        all = all.concat(layer.autoAssignedAttributes);
+        all = all.concat(layer.autoAssignedAttributes.map((info) => {
+          return { layer, ...info };
+        }));
       }
       return all;
     }
@@ -204,6 +207,15 @@ export const GraphModel = TileContentModel
   .views(self => ({
     get isLinkedToDataSet() {
       return self.layers[0].isLinked;
+    },
+    /**
+     * Return true if no attribute has been assigned to any graph role in any layer.
+     */
+    get noAttributesAssigned() {
+      for (const layer of self.layers) {
+        if (!layer.config.noAttributesAssigned) return false;
+      }
+      return true;
     },
     get annotatableObjects() {
       const tileId = getTileIdFromContent(self) ?? "";
