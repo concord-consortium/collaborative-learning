@@ -1,6 +1,6 @@
 import Dialog from "./Dialog";
-import TeacherDashboard from "../clue/TeacherDashboard";
-import ResourcesPanel from "../clue/ResourcesPanel";
+import TeacherDashboard from "./TeacherDashboard";
+import ResourcesPanel from "./ResourcesPanel";
 
 const dialog = new Dialog;
 let dashboard = new TeacherDashboard;
@@ -9,11 +9,10 @@ let resourcesPanel = new ResourcesPanel;
 class Scrolling {
 
   verifyScrolling(subsection) {
-    cy.get('[data-focus-section='+subsection+'] [data-testid=tool-tile]').last();
     cy.get('[data-focus-section='+subsection+'] [data-testid=tool-tile]').last().should("not.be.visible");
-    cy.get('[data-focus-section='+subsection+'] [data-testid=tool-tile]').last().scrollIntoView();
+    cy.get('[data-focus-section='+subsection+'] [data-testid=tool-tile]').last().scrollIntoView({ easing: 'linear' });
     cy.get('[data-focus-section='+subsection+'] [data-testid=tool-tile]').last().should("be.visible");
-    cy.get('[data-focus-section='+subsection+'] [data-testid=tool-tile]').first().scrollIntoView();
+    cy.get('[data-focus-section='+subsection+'] [data-testid=tool-tile]').first().scrollIntoView({ easing: 'linear' });
     cy.get('[data-focus-section='+subsection+'] [data-testid=tool-tile]').last().should("not.be.visible");
   }
   verifyDashboard() {

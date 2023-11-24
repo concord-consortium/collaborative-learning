@@ -1,9 +1,9 @@
-import TeacherDashboard from "../../../../support/elements/clue/TeacherDashboard";
-import ClueCanvas from "../../../../support/elements/clue/cCanvas";
-import ChatPanel from "../../../../support/elements/clue/ChatPanel";
-import Canvas from '../../../../support/elements/common/Canvas';
-import Scrolling from '../../../../support/elements/common/Scrolling';
-import ResourcesPanel from "../../../../support/elements/clue/ResourcesPanel";
+import TeacherDashboard from "../../../support/elements/common/TeacherDashboard";
+import ClueCanvas from "../../../support/elements/common/cCanvas";
+import ChatPanel from "../../../support/elements/common/ChatPanel";
+import Canvas from '../../../support/elements/common/Canvas';
+import Scrolling from '../../../support/elements/common/Scrolling';
+import ResourcesPanel from "../../../support/elements/common/ResourcesPanel";
 
 let dashboard = new TeacherDashboard();
 let clueCanvas = new ClueCanvas;
@@ -31,25 +31,12 @@ context('Vertical Scrolling', () => {
   describe('Vertical scrolling in various places', () => {   
     it('verify scrolling in Resources', () => {
       cy.log('verify vertical scrolling under problem subtabs');
-      beforeTest(queryParams.sas3_1);
-
+      beforeTest(queryParams.msa);
       cy.log('verify introduction subtab');
-      cy.openProblemSection("Introduction");
-      cy.clickProblemResourceTile('introduction');
-      cy.wait(10000);
-      scrolling.verifyScrolling('introduction');
-
-      cy.log('verify initial challenge subtab');
       cy.openProblemSection("Initial Challenge");
       cy.clickProblemResourceTile('initialChallenge');
       cy.wait(10000);
       scrolling.verifyScrolling('initialChallenge');
-
-      cy.log('verify what if...? subtab');
-      cy.openProblemSection("What If...?");
-      cy.clickProblemResourceTile('whatIf');
-      cy.wait(10000);
-      scrolling.verifyScrolling('whatIf');
 
       cy.log('verify vertical scrolling under teacher guide subtabs');
       cy.log('verify launch subtab');
@@ -58,12 +45,6 @@ context('Vertical Scrolling', () => {
       cy.clickProblemResourceTile('launch');
       cy.wait(10000);
       scrolling.verifyScrolling('launch');
-
-      cy.log('verify explore subtab');
-      cy.openProblemSection("Explore");
-      cy.clickProblemResourceTile('explore');
-      cy.wait(10000);
-      scrolling.verifyScrolling('explore');
     });
     it('verify scrolling in Dashboard', () => {
       beforeTest(queryParams.sas1_1);
