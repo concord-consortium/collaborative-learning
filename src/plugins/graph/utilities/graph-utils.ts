@@ -5,7 +5,7 @@ import {isInteger} from "lodash";
 import { IClueObjectSnapshot } from "../../../models/annotations/clue-object";
 import { PartialSharedModelEntry } from "../../../models/document/document-content-types";
 import { UpdatedSharedDataSetIds } from "../../../models/shared/shared-data-set";
-import {CaseData, DotsElt, selectCircles, selectDots} from "../d3-types";
+import {CaseData, DotsElt, selectCircles, selectDots, selectOrphanCircles} from "../d3-types";
 import {IDotsRef, kGraphFont, Point, Rect, rTreeRect, transitionDuration} from "../graph-types";
 import {between} from "./math-utils";
 import {IAxisModel, isNumericAxisModel} from "../imports/components/axis/models/axis-model";
@@ -132,6 +132,29 @@ export function handleClickOnDot(event: MouseEvent, caseID: string, dataset?: ID
   } else if (extendSelection) { // case is selected and Shift key is down => deselect case
     dataset?.selectCases([caseID], false);
   }
+}
+
+export interface IMatchAllCirclesProps {
+  graphModel: IGraphModel;
+  dotsElement: DotsElt;
+  enableAnimation: React.MutableRefObject<boolean>
+  instanceId: string | undefined
+}
+
+export function matchAllCirclesToData(props: IMatchAllCirclesProps) {
+  const
+    { graphModel, dotsElement, enableAnimation, instanceId } = props,
+    pointRadius = graphModel.getPointRadius(),
+    pointColor = graphModel.pointColor,
+    pointStrokeColor = graphModel.pointStrokeColor;
+  for (const layer of graphModel.layers) {
+    matchCirclesToData({
+      dataConfiguration: layer.config,
+      dotsElement, pointRadius, pointColor, pointStrokeColor,
+      enableAnimation, instanceId});
+  }
+  // Remove circles that match no layer at all
+  selectOrphanCircles(dotsElement, graphModel)?.remove();
 }
 
 export interface IMatchCirclesProps {

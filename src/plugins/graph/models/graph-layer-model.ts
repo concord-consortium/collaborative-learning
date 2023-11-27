@@ -65,7 +65,6 @@ export const GraphLayerModel = types
 
       if (getAppConfig(self)?.getSetting("autoAssignAttributes", "graph")) {
         const attributeCount = self.config.dataset?.attributes.length;
-        console.log('autoAssign is on. Attrs: ', attributeCount);
         if (!attributeCount) return;
 
         const data = self.config.dataset;
@@ -80,7 +79,6 @@ export const GraphLayerModel = types
             this.autoAssignAttributeID("left", "y", data?.id ?? "", data?.attributes[1].id || '');
           }
         }
-        console.log('autoAssigned: ', self.autoAssignedAttributes);
       } else {
         console.log('autoAssign is off');
       }

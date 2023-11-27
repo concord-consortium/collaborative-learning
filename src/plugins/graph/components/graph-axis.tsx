@@ -88,6 +88,7 @@ export const GraphAxis = observer(function GraphAxis({
 
   useEffect(() => {
     if (autoAdjust?.current) {
+      // TODO multi dataset - this should consider all layers
       dataConfig?.onAction(action => {
         if (
             isAlive(graphModel) &&

@@ -422,7 +422,6 @@ export const GraphModel = TileContentModel
             self.layers[0].setDataset(undefined, undefined);
             self.layers[0].configureUnlinkedLayer();
             self.layers[0].updateAdornments();
-            console.log('Unlinked layer 0');
           } else {
             console.warn('Failed to find layer with dataset id ', id);
           }
@@ -458,7 +457,6 @@ export const GraphModel = TileContentModel
                 self.layers[0].setDataset(dataSetModel.dataSet, metaDataModel);
                 self.layers[0].configureLinkedLayer();
                 self.layers[0].updateAdornments();
-                console.log('Attached layer 0');
               } else {
                 const newLayer = GraphLayerModel.create();
                 self.layers.push(newLayer);

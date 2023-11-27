@@ -68,8 +68,8 @@ export const Adornments = observer(function Adornments(props: AdornmmentsProps) 
   // on the bottom and left axes.
   const outerGridCells: React.ReactElement[] = [];
   const { left, top, width, height } = layout.computedBounds.plot;
-  const bottomRepetitions = dataConfig?.numRepetitionsForPlace('bottom') ?? 1;
-  const leftRepetitions = dataConfig?.numRepetitionsForPlace('left') ?? 1;
+  const bottomRepetitions = graphModel.numRepetitionsForPlace('bottom') ?? 1;
+  const leftRepetitions = graphModel.numRepetitionsForPlace('left') ?? 1;
   const outerGridStyle = {
     gridTemplateColumns: `repeat(${bottomRepetitions}, 1fr)`,
     gridTemplateRows: `repeat(${leftRepetitions}, 1fr)`,

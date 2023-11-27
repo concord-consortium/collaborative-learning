@@ -1,5 +1,6 @@
 import { select, Selection } from "d3";
 import { IDataConfigurationModel } from "./models/data-configuration-model";
+import { IGraphModel } from "./models/graph-model";
 
  // The data stored with each plot element (e.g. 'circle')
 export type CaseData = { dataConfigID: string, plotNum: number, caseID: string };
@@ -15,13 +16,24 @@ export type DotsElt = SVGSVGElement | null;
 //  unknown: type of data attached to parent element (none in this case)
 export type DotSelection = Selection<SVGCircleElement, CaseData, SVGSVGElement, unknown>;
 
-// selects all `circle` elements
+// selects all `circle` elements for the given dataConfiguration
 export function selectCircles(svg: DotsElt, dataConfiguration: IDataConfigurationModel): DotSelection | null {
   const dots: DotSelection | null = svg
           ? select(svg).selectAll(`circle.${dataConfiguration.id}`)
           : null;
   console.log('found', dots?.size(), 'for', dataConfiguration.id);
   return dots;
+}
+
+// selects all `circle` elements that match NO data configuration in the given graph
+export function selectOrphanCircles(svg: DotsElt, graphModel: IGraphModel): DotSelection | null {
+  const configIds = graphModel.layers.map(layer => layer.config.id );
+  const circles: DotSelection | null = svg ? select(svg).selectAll('circle') : null;
+  const selection: DotSelection | null = circles
+    ? circles.filter((datum) => { return !configIds.includes((datum as CaseData).dataConfigID); })
+    : null;
+  console.log('Orphan circles:', selection);
+  return selection;
 }
 
 // selects all `.graph-dot` or `.graph-dot-highlighted` elements
