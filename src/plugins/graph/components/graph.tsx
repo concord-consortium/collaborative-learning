@@ -36,10 +36,10 @@ import {IDataSet} from "../../../models/data/data-set";
 import {onAnyAction} from "../../../utilities/mst-utils";
 import { Adornments } from "../adornments/adornments";
 import { kConnectingLinesType } from "../adornments/connecting-lines/connecting-lines-types";
+import { EditableGraphValue } from "./editable-graph-value";
 
 import "./graph.scss";
 import "./graph-clue-styles.scss";
-import { EditableGraphValue } from "./editable-graph-value";
 
 interface IProps {
   graphController: GraphController;
@@ -64,7 +64,7 @@ export const Graph = observer(
     svgRef = useRef<SVGSVGElement>(null),
     plotAreaSVGRef = useRef<SVGSVGElement>(null),
     backgroundSvgRef = useRef<SVGGElement>(null);
-  const showEditableGraphValue = graphModel.layers[0].isLinked;
+  const showEditableGraphValue = graphModel.isLinkedToDataSet;
 
   useEffect(function setupPlotArea() {
     if (xScale && xScale?.length > 0) {
@@ -97,7 +97,7 @@ export const Graph = observer(
     if (place === 'left') {
       graphModel.removeYAttributeID(idOfAttributeToRemove);
       const yAxisModel = graphModel.getAxis('left') as IAxisModel;
-      setNiceDomain(graphModel.config.numericValuesForYAxis, yAxisModel);
+      setNiceDomain(graphModel.config.numericValuesForYAxis, yAxisModel); // FIXME needs update for multiple datasets
     } else {
       dataset && handleChangeAttribute(place, dataset, '');
     }
@@ -230,9 +230,8 @@ export const Graph = observer(
   };
 
   useGraphModel({dotsRef, graphModel, enableAnimation, instanceId});
+  // TODO multi-dataset: DataContext / providers will need to be replaced by looping over layers.
 
-
-  //-------------Min Max Value Change -------------------//
   const handleMinMaxChange = (minOrMax: string, axis: AxisPlace, newValue: number) => {
     const axisModel = graphModel.getAxis(axis) as INumericAxisModel;
     if (minOrMax === "min" && newValue < axisModel.max){

@@ -13,9 +13,7 @@ import {
   DragInfo, collisionExists, computeBestNumberOfTicks, getCategoricalLabelPlacement,
   getCoordFunctions, IGetCoordFunctionsProps
 } from "../axis-utils";
-// import { useGraphModelContext } from "src/plugins/graph/models/graph-model"; //TODO
 import { useGraphModelContext } from "../../../../models/graph-model";
-
 
 export interface IUseSubAxis {
   subAxisIndex: number
@@ -34,10 +32,7 @@ interface CatObject {
 export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlotGridLines,
                             centerCategoryLabels, enableAnimation}: IUseSubAxis) => {
 
-  console.log(`📁 use-sub-axis.ts -----------${axisModel?.place}-------------`);
   const graphModel = useGraphModelContext();
-  console.log("graphModel.isLinked?:", graphModel.isLinkedToDataSet);
-
   const layout = useAxisLayoutContext();
   const isNumeric = isNumericAxisModel(axisModel);
   const isCategorical = isCategoricalAxisModel(axisModel);
@@ -78,19 +73,6 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
       : (place === 'top') ? `translate(${axisBounds.left}, ${axisBounds.top + axisBounds.height})`
       : `translate(${axisBounds.left}, ${axisBounds.top})`;
 
-  //*******************************   GUIDELINES **************************
-  // - standard domain and range shows edit boxes around axis limit numbers when plot has focus (both x and y)
-  // - if value is entered that is smaller than bottom of range, then it is ignored and the original value is restored
-  // - if nonnumeric value is entered, previous value is restored
-  // - graph redraws after enter key or loss of focus or tab key in control
-
-  // - ticks redraw according to new scale - if numbers are very large we hope that the graph code is smart
-  // enough to reduce the number of ticks so they don't render all over each other
-
-  // - controls are not shown on categorical axes and are not restored as the graph swaps from categorical to numeric
-  // - if axis limits are hard set graph will not rescale as data is added or changed
-  // - axis limits are stored with the document and restored on reload
-
     const renderEmptyAxis = () => {
       select(subAxisElt).selectAll('*').remove();
       select(subAxisElt)
@@ -105,7 +87,6 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
     };
 
     const renderNumericAxis = () => {
-      // console.log("\t🏭 renderNumericAxis------------------");
       select(subAxisElt).selectAll('*').remove();
       const numericScale = d3Scale as unknown as ScaleLinear<number, number>;
       const axisScale = axis(numericScale).tickSizeOuter(0).tickFormat(format('.9'));
@@ -125,8 +106,6 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
         .style("stroke", "lightgrey")
         .style("stroke-opacity", "0.7");
 
-      // console.log("📁 use-sub-axis.ts ------------------------");
-      // Hide the text of the first and last tick labels
       select(subAxisElt)
         .selectAll('.tick text')
         .style('display', (d, i, nodes) => {
@@ -141,7 +120,6 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
     const renderScatterPlotGridLines = () => {
       if (axis) {
         const numericScale = d3Scale as unknown as ScaleLinear<number, number>;
-        // console.log("vertical values:", numericScale.ticks());
         select(subAxisElt).selectAll('.zero, .grid').remove();
         const tickLength = layout.getAxisLength(otherPlace(place)) ?? 0;
         select(subAxisElt).append('g')
@@ -158,7 +136,6 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
     };
 
     const renderCategoricalSubAxis = () => {
-      // console.log("\t🏭 renderCategoricalSubAxis");
       if (!(subAxisSelectionRef.current && categoriesSelectionRef.current)) return;
 
       const categorySet = multiScale?.categorySet;
@@ -183,9 +160,6 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
         : (collision ? 'vertical' : 'horizontal');
 
       const sAS = subAxisSelectionRef.current;
-
-      // console.log("\t🥩 rangeMin:", rangeMin);
-      // console.log("\t🥩 rangeMax:", rangeMax);
 
       sAS.attr("transform", initialTransform)
         .select('line')

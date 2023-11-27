@@ -30,7 +30,7 @@ import { tileContentAPIViews } from "../../../models/tiles/tile-model-hooks";
 import { getDotId } from "../utilities/graph-utils";
 import { GraphLayerModel } from "./graph-layer-model";
 import { isSharedDataSet, SharedDataSet } from "../../../models/shared/shared-data-set";
-import {DataConfigurationModel} from "./data-configuration-model";
+import { DataConfigurationModel } from "./data-configuration-model";
 
 export interface GraphProperties {
   axes: Record<string, IAxisModelUnion>
@@ -196,7 +196,7 @@ export const GraphModel = TileContentModel
   }))
   .views(self => ({
     get isLinkedToDataSet() {
-      return self.layers[0].isLinked;
+      return !!self.layers[0]?.isLinked;
     },
     get annotatableObjects() {
       const tileId = getTileIdFromContent(self) ?? "";

@@ -15,9 +15,8 @@ interface IEditableValueProps {
 
 
 
-export const EditableGraphValue: React.FC<IEditableValueProps> = observer(function NumberlineTile(props) {
+export const EditableGraphValue: React.FC<IEditableValueProps> = observer(function EditableGraphValue(props) {
   const { value, minOrMax, axis, onValueChange, readOnly } = props;
-  // isTileSelected?: boolean;
   const [isEditing, setIsEditing] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -69,7 +68,7 @@ export const EditableGraphValue: React.FC<IEditableValueProps> = observer(functi
           ref={(el) => {
             inputRef.current = el;
           }}
-          onKeyDown={(e) => handleKeyDown(e)}
+          onKeyDown={handleKeyDown}
           defaultValue={value.toString()} // Set the initial value
           onBlur={(e) => updateValue(e.target.value)}
           onChange={(e) => {
