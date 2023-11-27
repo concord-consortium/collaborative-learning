@@ -1,7 +1,7 @@
 @import "../../../components/vars.sass";
 
 .editable-border-box{
-  width: 25px;
+  //width is determined dynaimcally by how many characters in the number
   height: 22px;
   display: flex;
   align-items: center;
@@ -14,31 +14,22 @@
 
   &.bottom-min{
     left: 36px;
-    top: 275px;
+    top: 273px;
 
   }
   &.bottom-max{
     right: 0px;
-    top: 275px;
+    top: 273px;
   }
 
   &.left-min{
-    left: 20px;
+    //left position determined dynamically by how many characters in the number
     top: 255px;
   }
 
   &.left-max{
-    left: 20px;
     top: 0px;
   }
-
-
-
-
-  // &.hide{
-  //   border: none;
-  //   background-color: white;
-  // }
 
   .input-textbox{
     position: absolute;

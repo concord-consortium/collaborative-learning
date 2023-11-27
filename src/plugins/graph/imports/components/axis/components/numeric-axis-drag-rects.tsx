@@ -72,6 +72,7 @@ export const NumericAxisDragRects = observer(
         },
 
         onLowerDilateDrag = (event: { x: number, y: number, dx: number, dy: number }) => {
+          // console.log("\t🏭 onLowerDilateDrag------------------");
           const delta = -(place === 'bottom' ? event.dx : event.dy);
           if (dragging && delta !== 0) {
             const
@@ -80,22 +81,30 @@ export const NumericAxisDragRects = observer(
               ratio = (upper - x2) / (upper - dilationAnchorCoord),
               newRange = (upper - lower) / ratio,
               newLowerBound = upper - newRange;
+              // console.log("\t🥩 newLowerBound:", newLowerBound);
+              // console.log("\t🥩 upper:", upper);
+
             axisModel.setDomain(newLowerBound, upper);
           }
         },
 
         onDragTranslate = (event: { dx: number; dy: number }) => {
+          // console.log("\t🏭 onDragTranslate------------------");
+
           const delta = -(place === 'bottom' ? event.dx : event.dy);
           if (delta !== 0) {
             const worldDelta = Number(d3Scale.invert(delta)) -
               Number(d3Scale.invert(0));
             lower += worldDelta;
             upper += worldDelta;
+            // console.log("\t🥩 upper:", upper);
+            // console.log("\t🥩 lower:", lower);
             axisModel.setDomain(lower, upper);
           }
         },
 
         onUpperDilateDrag = (event: { x: number, y: number, dx: number, dy: number }) => {
+          // console.log("\t🏭 onUpperDilateDrag------------------");
           const delta = (place === 'bottom' ? event.dx : event.dy);
           if (dragging && delta !== 0) {
             const
@@ -104,6 +113,8 @@ export const NumericAxisDragRects = observer(
               ratio = (x2 - lower) / (dilationAnchorCoord - lower),
               newRange = (upper - lower) / ratio,
               newUpperBound = lower + newRange;
+              // console.log("\t🥩 lower:", lower);
+              // console.log("\t🥩 newUpperBound:", newUpperBound);
             axisModel.setDomain(lower, newUpperBound);
           }
         },

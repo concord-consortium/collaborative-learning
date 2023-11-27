@@ -101,8 +101,18 @@ export const NumericAxisModel = AxisModel
       } else if ((min < 0) && (Math.abs(max) < Math.abs(min / snapFactor))) {
         max = 0;
       }
-      self.min = min;
-      self.max = max;
+
+      // console.log("📁 axis-model.ts ------------------------");
+      // console.log("setDomain");
+      // console.log("\t🥩 min:", min);
+      // console.log("\t🥩 max:", max);
+
+
+      self.min = parseFloat(min.toFixed(2));
+      // console.log("\t🏭newMin:", parseFloat(min.toFixed(2)));
+      self.max = parseFloat(max.toFixed(2));
+      // console.log("\t🏭 newMax:", parseFloat(max.toFixed(2)));
+
     }
   }));
 export interface INumericAxisModel extends Instance<typeof NumericAxisModel> {}

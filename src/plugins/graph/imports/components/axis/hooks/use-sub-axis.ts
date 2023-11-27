@@ -115,8 +115,7 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
         });
     };
 
-    //******   VERTICAL AXIS HERE *****************
-
+    //******  VERTICAL AXIS *****************
     const renderScatterPlotGridLines = () => {
       if (axis) {
         const numericScale = d3Scale as unknown as ScaleLinear<number, number>;
@@ -222,10 +221,11 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
         renderCategoricalSubAxis();
         break;
     }
-  }, [subAxisElt, layout, showScatterPlotGridLines, enableAnimation, centerCategoryLabels, axisModel,
-    subAxisIndex]);
+  }, [subAxisElt, layout, showScatterPlotGridLines, enableAnimation, centerCategoryLabels,
+      axisModel, subAxisIndex, graphModel.isLinkedToDataSet]);
 
   const onDragStart = useCallback((event: any) => {
+    // console.log("onDragStart callBack");
     const dI = dragInfo.current;
     dI.currentDragPosition = dI.axisOrientation === 'horizontal' ? event.x : event.y;
     dI.indexOfCategory = dI.axisOrientation === 'horizontal'
@@ -278,7 +278,10 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
     }, [enableAnimation, renderSubAxis]);
 
     const dragBehavior = useMemo(() => drag()
-      .on("start", onDragStart)
+      .on("start", (e)=>{
+        // console.log("drag start"); //reformat this to just be onDragStart
+        onDragStart(e);
+      })
       .on("drag", onDrag)
       .on("end", onDragEnd), [onDragStart, onDrag, onDragEnd]);
 

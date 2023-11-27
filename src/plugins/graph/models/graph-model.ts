@@ -459,7 +459,7 @@ export const GraphModel = TileContentModel
           const sds = sharedDataSets[0];
           if (isSharedDataSet(sds)) {
             self.layers[0].config.dataset = sds.dataSet;
-            console.log('Updated legacy document - set dataset reference');
+            // console.log('Updated legacy document - set dataset reference');
           }
         }
         const sharedMetadata = smm.getTileSharedModelsByType(self, SharedCaseMetadata);
@@ -467,7 +467,7 @@ export const GraphModel = TileContentModel
           const smd = sharedMetadata[0];
           if (isSharedCaseMetadata(smd)) {
             self.layers[0].config.metadata = smd;
-            console.log('Updated legacy document - set metadata reference');
+            // console.log('Updated legacy document - set metadata reference');
           }
         }
       } else {
