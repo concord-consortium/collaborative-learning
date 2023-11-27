@@ -710,7 +710,6 @@ export const DataConfigurationModel = types
         }
       } else if (role === 'yPlus' && desc && desc.attributeID !== '') {
         self._yAttributeDescriptions.push(desc);
-        self.dataset?.setSelectedAttributes([desc.attributeID]);
       } else if (role === 'rightNumeric') {
         this.setY2Attribute(desc);
         if (desc) {
@@ -729,7 +728,6 @@ export const DataConfigurationModel = types
     },
     addYAttribute(desc: IAttributeDescriptionSnapshot) {
       this.setAttributeForRole("yPlus", desc);
-      self.dataset?.setSelectedAttributes([desc.attributeID]);
     },
     /**
      * Replace an existing Y attribute with a different one, maintaining its position in the list.
