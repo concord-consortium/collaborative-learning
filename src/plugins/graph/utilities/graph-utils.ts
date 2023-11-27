@@ -102,17 +102,20 @@ export function setNiceDomain(values: number[], axisModel: IAxisModel) {
   }
 }
 
-export function getPointTipText(caseID: string, attributeIDs: string[], graphModel: IGraphModel) {
-  const dataset = graphModel.layerForAttributeId(attributeIDs[0])?.config.dataset;
-  const float = format('.3~f'),
-    attrArray = (attributeIDs.map(attrID => {
-      const attribute = dataset?.attrFromID(attrID),
-        name = attribute?.name,
-        numValue = dataset?.getNumeric(caseID, attrID),
+export function getPointTipText(caseID: string, attributeIDs: (string|undefined)[], graphModel: IGraphModel) {
+  // All the attribute IDs should be from the same dataset.
+  const dataset = attributeIDs[0] && graphModel.layerForAttributeId(attributeIDs[0])?.config.dataset;
+  const float = format('.3~f');
+  const attrArray = (attributeIDs.map(attrID => {
+    if (dataset && attrID) {
+      const attribute = dataset.attrFromID(attrID),
+        name = attribute.name,
+        numValue = dataset.getNumeric(caseID, attrID),
         value = numValue != null && isFinite(numValue) ? float(numValue)
-                  : dataset?.getValue(caseID, attrID);
+          : dataset.getValue(caseID, attrID);
       return value ? `${name}: ${value}` : '';
-    }));
+    }
+  }));
   // Caption attribute can also be one of the plotted attributes, so we remove dups and join into html string
   return Array.from(new Set(attrArray)).filter(anEntry => anEntry !== '').join('<br>');
 }
@@ -145,7 +148,7 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
   const {dataConfiguration, enableAnimation, instanceId,
       dotsElement, pointRadius, pointColor, pointStrokeColor} = props,
     allCaseData = dataConfiguration.joinedCaseDataArrays,
-    caseDataKeyFunc = (d: CaseData) => `${dataConfiguration.id}-${d.plotNum}-${d.caseID}`,
+    caseDataKeyFunc = (d: CaseData) => `${d.dataConfigID}-${d.plotNum}-${d.caseID}`,
     circles = selectCircles(dotsElement, dataConfiguration);
   console.log("|| BB matchCirclesToData!", props);
   console.log("|| BB  circles:", circles);

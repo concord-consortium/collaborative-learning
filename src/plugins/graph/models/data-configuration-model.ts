@@ -378,7 +378,7 @@ export const DataConfigurationModel = types
     getUnsortedCaseDataArray(caseArrayNumber: number): CaseData[] {
       if (self.filteredCases.length <= caseArrayNumber) return [];
       return (self.filteredCases[caseArrayNumber].caseIds || []).map(id => {
-        return { plotNum: caseArrayNumber, caseID: id };
+        return { dataConfigID: self.id, plotNum: caseArrayNumber, caseID: id };
       });
     },
     getCaseDataArray(caseArrayNumber: number) {
@@ -398,7 +398,7 @@ export const DataConfigurationModel = types
       const joinedCaseData: CaseData[] = [];
       self.filteredCases.forEach((aFilteredCases, index) => {
           aFilteredCases.caseIds.forEach(
-            (id) => joinedCaseData.push({plotNum: index, caseID: id}));
+            (id) => joinedCaseData.push({dataConfigID: self.id, plotNum: index, caseID: id}));
         }
       );
       return joinedCaseData;

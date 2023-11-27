@@ -80,7 +80,7 @@ export function determineBaseString(role: GraphAttrRole, dropType?: AttributeTyp
 }
 
 export const useDropHintString = ({role} : IUseDropHintStringProps) => {
-  const dataSet = useDataSetContext(),
+  const dataSet = useDataSetContext(), // TODO multi-dataset this is no longer provided
     dataConfig = useDataConfigurationContext(),
     { active } = useDndContext(),
     { attributeId: dragAttrId = "" } = getDragAttributeInfo(active) || {},

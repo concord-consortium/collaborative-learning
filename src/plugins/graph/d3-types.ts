@@ -2,7 +2,7 @@ import { select, Selection } from "d3";
 import { IDataConfigurationModel } from "./models/data-configuration-model";
 
  // The data stored with each plot element (e.g. 'circle')
-export type CaseData = { plotNum: number, caseID: string };
+export type CaseData = { dataConfigID: string, plotNum: number, caseID: string };
 
 export type DotsElt = SVGSVGElement | null;
 

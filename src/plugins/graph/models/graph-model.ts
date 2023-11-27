@@ -30,7 +30,7 @@ import { tileContentAPIViews } from "../../../models/tiles/tile-model-hooks";
 import { getDotId } from "../utilities/graph-utils";
 import { GraphLayerModel, IGraphLayerModel } from "./graph-layer-model";
 import { isSharedDataSet, SharedDataSet } from "../../../models/shared/shared-data-set";
-import { DataConfigurationModel } from "./data-configuration-model";
+import { DataConfigurationModel, RoleAttrIDPair } from "./data-configuration-model";
 
 export interface GraphProperties {
   axes: Record<string, IAxisModelUnion>
@@ -124,6 +124,13 @@ export const GraphModel = TileContentModel
     getAxis(place: AxisPlace) {
       return self.axes.get(place);
     },
+    // Currently we mostly let the first layer define what the axes should be like.
+    categoriesForAxisShouldBeCentered(place: AxisPlace) {
+      return self.layers[0].config.categoriesForAxisShouldBeCentered(place);
+    },
+    numRepetitionsForPlace(place: AxisPlace) {
+      return self.layers[0].config.numRepetitionsForPlace(place);
+    },
     /**
      * Return a single attributeID of those in use for the given role.
      * If none is found, returns an empty string.
@@ -158,6 +165,9 @@ export const GraphModel = TileContentModel
     attributeType(role: GraphAttrRole) {
       return self.layers[0].config.attributeType(role);
     },
+    layerForDataConfigurationId(dataConfID: string) {
+      return self.layers.find(layer => layer.config.id === dataConfID);
+    },
     /**
      * Search for the given attribute ID and return the layer it is found in.
      * @param id - Attribute ID
@@ -170,6 +180,15 @@ export const GraphModel = TileContentModel
         }
       }
       return undefined;
+    },
+    /**
+     * Find all tooltip-related attributes from all layers.
+     * Returned as a list of { role, attribute } pairs.
+     */
+    get uniqueTipAttributes(): RoleAttrIDPair[] {
+      return self.layers.reduce((prev, layer) => {
+        return prev.concat(layer.config.uniqueTipAttributes);
+      }, [] as RoleAttrIDPair[]);
     },
     /**
      * Radius of points to draw on the graph.

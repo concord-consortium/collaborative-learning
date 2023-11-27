@@ -11,7 +11,6 @@ import {attrRoleToGraphPlace, graphPlaceToAttrRole, IDotsRef, kGraphClass} from 
 import {ScatterDots} from "./scatterdots";
 import {Marquee} from "./marquee";
 import {DataConfigurationContext} from "../hooks/use-data-configuration-context";
-import {DataSetContext} from "../imports/hooks/use-data-set-context";
 import {useGraphModel} from "../hooks/use-graph-model";
 import {useGraphSettingsContext} from "../hooks/use-graph-settings-context";
 import {setNiceDomain, startAnimation} from "../utilities/graph-utils";
@@ -228,10 +227,9 @@ export const Graph = observer(
 
   useGraphModel({dotsRef, graphModel, enableAnimation, instanceId});
 
-  // TODO multi-dataset: DataContext / providers will need to be replaced by looping over layers.
+  // TODO multi-dataset: DataConfigurationContext should not be provided here, but is still used in some places.
   return (
     <DataConfigurationContext.Provider value={graphModel.config}>
-      <DataSetContext.Provider value={graphModel.config.dataset}>
         <div className={kGraphClass} ref={graphRef} data-testid="graph">
           <svg className='graph-svg' ref={svgRef}>
             <Background
@@ -276,7 +274,6 @@ export const Graph = observer(
             />
           }
         </div>
-      </DataSetContext.Provider>
     </DataConfigurationContext.Provider>
   );
 });

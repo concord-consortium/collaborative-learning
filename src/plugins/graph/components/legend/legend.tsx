@@ -30,7 +30,7 @@ export const Legend = function Legend({
                                         onDropAttribute, onTreatAttributeAs, onRemoveAttribute
                                       }: ILegendProps) {
   const graphModel = useGraphModelContext(),
-    // This legend component only handles one layer. Use MultiLegend for more
+    // This legend component only handles one layer. TODO multi dataset
     layer = graphModel.layers[0],
     dataConfiguration = layer.config,
     isDropAllowed = dataConfiguration?.graphPlaceCanAcceptAttributeIDDrop ?? (() => true),
@@ -89,8 +89,8 @@ export const Legend = function Legend({
           onTreatAttributeAs={onTreatAttributeAs}
         />
         {
-          attrType === 'categorical' ? <CategoricalLegend transform={transform}/>
-            : attrType === 'numeric' ? <NumericLegend legendAttrID={legendAttrID}/> : null
+          attrType === 'categorical' ? <CategoricalLegend layer={layer} transform={transform}/>
+            : attrType === 'numeric' ? <NumericLegend layer={layer} legendAttrID={legendAttrID}/> : null
         }
       </svg>
       { !disableAttributeDnD &&

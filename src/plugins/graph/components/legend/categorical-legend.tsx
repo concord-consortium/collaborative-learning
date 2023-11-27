@@ -3,7 +3,6 @@ import {reaction} from "mobx";
 import {drag, range, select} from "d3";
 import React, {useCallback, useEffect, useMemo, useRef} from "react";
 import {isSelectionAction} from "../../../../models/data/data-set-actions";
-import {useDataConfigurationContext} from "../../hooks/use-data-configuration-context";
 import {useGraphLayoutContext} from "../../models/graph-layout";
 import {missingColor} from "../../../../utilities/color-utils";
 import {onAnyAction} from "../../../../utilities/mst-utils";
@@ -14,9 +13,11 @@ import {axisGap} from "../../imports/components/axis/axis-types";
 
 import './legend.scss';
 import graphVars from "../graph.scss";
+import { IGraphLayerModel } from "../../models/graph-layer-model";
 
 interface ICategoricalLegendProps {
-  transform: string,
+  layer: IGraphLayerModel;
+  transform: string;
 }
 
 interface Key {
@@ -69,9 +70,9 @@ const coordinatesToCatIndex = (lod: LayoutData, numCategories: number, localPoin
   };
 
 export const CategoricalLegend = observer(function CategoricalLegend(
-  {transform}: ICategoricalLegendProps) {
+  {layer, transform}: ICategoricalLegendProps) {
   const transformRef = useRef(transform),
-    dataConfiguration = useDataConfigurationContext(),
+    dataConfiguration = layer.config,
     dataset = dataConfiguration?.dataset,
     layout = useGraphLayoutContext(),
     categoriesRef = useRef<string[] | undefined>(),

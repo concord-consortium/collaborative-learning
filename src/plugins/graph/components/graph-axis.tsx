@@ -139,7 +139,7 @@ export const GraphAxis = observer(function GraphAxis({
             label={''}  // Remove
             enableAnimation={enableAnimation}
             showScatterPlotGridLines={axisShouldShowGridlines}
-            centerCategoryLabels={graphModel.config.categoriesForAxisShouldBeCentered(place)}
+            centerCategoryLabels={graphModel.categoriesForAxisShouldBeCentered(place)}
       />}
       { showAttributeLabel &&
             <AttributeLabel

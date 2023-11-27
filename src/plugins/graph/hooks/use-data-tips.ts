@@ -22,8 +22,7 @@ export const useDataTips = ({dotsRef, graphModel, enableAnimation}: IUseDataTips
   const hoverPointRadius = graphModel.getPointRadius('hover-drag'),
     pointRadius = graphModel.getPointRadius(),
     selectedPointRadius = graphModel.getPointRadius('select'),
-    roleAttrIDPairs:RoleAttrIDPair[] = graphModel.config.uniqueTipAttributes,
-    yAttrIDs = graphModel.config.yAttributeIDs;
+    roleAttrIDPairs:RoleAttrIDPair[] = graphModel.uniqueTipAttributes;
 
   useEffect(() => {
 
@@ -37,14 +36,15 @@ export const useDataTips = ({dotsRef, graphModel, enableAnimation}: IUseDataTips
       const target = select(event.target as SVGSVGElement);
       if (okToTransition(target)) {
         target.transition().duration(transitionDuration).attr('r', hoverPointRadius);
-        const caseID = (target.datum() as CaseData).caseID,
-          plotNum = (target.datum() as CaseData).plotNum, // Only can be non-zero for scatter plots
+        const { dataConfigID, plotNum, caseID } = (target.datum() as CaseData),
           attrIDsToUse = roleAttrIDPairs.filter((aPair) => {
             return plotNum > 0 || aPair.role !== 'rightNumeric';
           }).map((aPair) => {
             return plotNum === 0
               ? aPair.attributeID
-              : aPair.role === 'y' ? yAttrIDs[plotNum] : aPair.attributeID;
+              : aPair.role === 'y'
+                ? graphModel.layerForDataConfigurationId(dataConfigID)?.config.yAttributeIDs[plotNum]
+                : aPair.attributeID;
           });
         const tipText = getPointTipText(caseID, attrIDsToUse, graphModel);
         tipText !== '' && dataTip.show(tipText, event.target);
@@ -55,8 +55,8 @@ export const useDataTips = ({dotsRef, graphModel, enableAnimation}: IUseDataTips
       const target = select(event.target as SVGSVGElement);
       dataTip.hide();
       if (okToTransition(target)) {
-        const caseID = (select(event.target as SVGSVGElement).datum() as CaseData).caseID,
-          isSelected = graphModel.layers[0].config.dataset?.isCaseSelected(caseID); // FIXME multi dataset
+        const { dataConfigID, caseID } = (select(event.target as SVGSVGElement).datum() as CaseData),
+          isSelected = graphModel.layerForDataConfigurationId(dataConfigID)?.config.dataset?.isCaseSelected(caseID);
         select(event.target as SVGSVGElement)
           .transition().duration(transitionDuration)
           .attr('r', isSelected ? selectedPointRadius : pointRadius);
@@ -67,6 +67,5 @@ export const useDataTips = ({dotsRef, graphModel, enableAnimation}: IUseDataTips
       .on('mouseover', showDataTip)
       .on('mouseout', hideDataTip)
       .call(dataTip);
-  }, [dotsRef, enableAnimation, roleAttrIDPairs, yAttrIDs,
-      hoverPointRadius, pointRadius, selectedPointRadius, graphModel]);
+  }, [dotsRef, enableAnimation, roleAttrIDPairs, hoverPointRadius, pointRadius, selectedPointRadius, graphModel]);
 };
