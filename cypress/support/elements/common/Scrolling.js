@@ -30,7 +30,7 @@ class Scrolling {
   verifyScrollingClassWork() {
     cy.get("[data-test=supports-section-teacher-supports-documents] .list-item").last().should("not.be.visible");
     cy.get("[data-test=supports-section-teacher-supports-documents] .list-item").last().scrollIntoView();
-    cy.get("[data-test=supports-section-teacher-supports-documents] .list-item").last().should("be.visible").should("contain", "Test Image Publish to This Class v1");
+    cy.get("[data-test=supports-section-teacher-supports-documents] .list-item").last().should("be.visible").should("contain", "1.1 silly pix");
   }
 
   verifyScrollingWorkspaces() {
@@ -47,29 +47,40 @@ class Scrolling {
     cy.wait(1000);
   }
   verifyScrollingClassWorkStarred() {
-    resourcesPanel.getCanvasItemTitle('class-work', 'starred').contains("Student 5: MSA 1.3 Raising Money").should('exist').click({ force: true });
+    resourcesPanel.getCanvasItemTitle('class-work', 'starred').contains("Student 9: SAS 1.1 Solving a Mystery with Proportional Reasoning v3").should('exist').click({ force: true });
     cy.wait(5000);
     cy.get(".focus-document.class-work #section_NW").should("not.be.visible");
     cy.get(".focus-document.class-work #section_NW").scrollIntoView();
     cy.get(".focus-document.class-work #section_NW").should("be.visible");
     cy.wait(1000);
   }
+  verifyScrollingClassWorkStarredDoubleFlipperView() {
+    resourcesPanel.getCanvasItemTitle('class-work', 'starred').contains("Student 1: SAS 1.1 Solving a Mystery with Proportional Reasoning v2").should('exist').click({ force: true });
+    cy.wait(5000);
+    cy.get(".focus-document.class-work.secondary #section_NW").should("not.be.visible");
+    cy.get(".focus-document.class-work.secondary #section_NW").scrollIntoView();
+    cy.get(".focus-document.class-work.secondary #section_NW").should("be.visible");
+    cy.wait(1000);
+  }
   verifyScrollingThumbnailView() {
-    cy.get(".class-work .scroll-arrow-button.right").click();
+    cy.get(".class-work .scroller-controls.right .scroll-arrow-button.right").click();
     cy.wait(2000);
     cy.get("[data-test=class-work-section-starred-documents] .list-item").first().should("not.be.visible");
-    cy.get("[data-test=class-work-section-starred-documents] .list-item").last().should("be.visible");
-    cy.get(".class-work .scroll-arrow-button.left").click();
-    cy.wait(2000);
-    cy.get(".class-work .scroll-arrow-button.left").click();
+    cy.get(".class-work .scroller-controls.left .scroll-arrow-button.left").click();
     cy.wait(2000);
     cy.get("[data-test=class-work-section-starred-documents] .list-item").first().should("be.visible");
-    cy.get("[data-test=class-work-section-starred-documents] .list-item").last().should("not.be.visible");
+  }
+  verifyScrollingStudentWorkspaces4upView() {
+    cy.get(".four-up .north-west .tile-row").last().should("not.be.visible");
+      cy.get(".four-up .north-west .tile-row").last().scrollIntoView();
+      cy.wait(1000);
+      cy.get(".four-up .north-west .tile-row").last().scrollIntoView();
+      cy.get(".four-up .north-west .tile-row").last().should("be.visible");
   }
   verifyScrollingStudentWorkspacesExpandedView() {
-    cy.get(".four-up .north-west .tile-row").last().should("not.be.visible");
-    cy.get(".four-up .north-west .tile-row").last().scrollIntoView();
-    cy.get(".four-up .north-west .tile-row").last().should("be.visible");
+    cy.get(".four-up .north-east .tile-row").last().should("not.be.visible");
+    cy.get(".four-up .north-east .tile-row").last().scrollIntoView();
+    cy.get(".four-up .north-east .tile-row").last().should("be.visible");
   }
   scrollToBottom(element) {
     element.scrollTo('bottom');
