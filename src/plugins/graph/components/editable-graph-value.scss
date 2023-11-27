@@ -13,22 +13,23 @@
   position: absolute;
 
   &.bottom-min{
-    bottom: 90px;
-    left: 31px;
+    left: 36px;
+    top: 275px;
+
   }
   &.bottom-max{
     right: 0px;
-    bottom: 90px;
+    top: 275px;
   }
 
   &.left-min{
-    left: 15px;
-    bottom: 110px;
+    left: 20px;
+    top: 255px;
   }
 
   &.left-max{
-    left: 15px;
-    top: 5px;
+    left: 20px;
+    top: 0px;
   }
 
 

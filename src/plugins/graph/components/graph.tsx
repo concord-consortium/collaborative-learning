@@ -293,7 +293,6 @@ export const Graph = observer(
               const axisModel = graphModel?.getAxis(axis);
               const minVal = isNumericAxisModel(axisModel) ? axisModel.min : kDefaultNumericAxisBounds[0];
               const maxVal = isNumericAxisModel(axisModel) ? axisModel.max : kDefaultNumericAxisBounds[1];
-              //TODO - hide first and last tick
               return (
                 <div key={`${axis}-min-max`}>
                   <EditableGraphValue
