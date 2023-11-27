@@ -44,7 +44,7 @@ export const useContentChangeHandlers = ({
    * helper functions
    */
   const validateCase = useCallback((aCase: ICaseCreation) => {
-    const newCase: ICaseCreation = { __id__: uniqueId() };
+    const newCase: ICaseCreation = { __id__: aCase.__id__ ?? uniqueId() };
     if (getContent().isLinked) {
       // validate linkable values
       dataSet.attributes.forEach(attr => {

@@ -243,18 +243,20 @@ $default-button-border-color: #979797;
           font-weight: normal;
           color:$cell-text-color;
 
+          &.highlighted {
+            background-color: $highlight-unlinked-cell;
+
+            &.linked {
+              background-color: $highlight-linked-cell;
+            }
+          }
+
           .cell-value {
             padding:$cell-padding;
           }
 
           input {
-            &.highlighted {
-              background-color: $highlight-unlinked-cell;
-
-              &.linked {
-                background-color: $highlight-linked-cell;
-              }
-            }
+            background-color: rgba(0,0,0,0);
 
             &:focus {
               background-color: white;
