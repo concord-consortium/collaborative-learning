@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect, useRef} from "react";
 import {autorun, reaction} from "mobx";
-import {isSelectionAction, isSetCaseValuesAction} from "../../../models/data/data-set-actions";
+import { isSetCaseValuesAction } from "../../../models/data/data-set-actions";
 import {IDotsRef, GraphAttrRoles} from "../graph-types";
 import {INumericAxisModel} from "../imports/components/axis/models/axis-model";
 import {useGraphLayoutContext} from "../models/graph-layout";
@@ -131,13 +131,11 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
     return () => disposer();
   }, [layout, callRefreshPointPositions]);
 
-  // respond to selection and value changes
+  // respond to value changes
   useEffect(() => {
     if (dataset) {
       const disposer = onAnyAction(dataset, action => {
-        if (isSelectionAction(action)) {
-          refreshPointSelection();
-        } else if (isSetCaseValuesAction(action)) {
+        if (isSetCaseValuesAction(action)) {
           // assumes that if we're caching then only selected cases are being updated
           callRefreshPointPositions(dataset.isCaching);
           // TODO: handling of add/remove cases was added specifically for the case plot.
@@ -150,7 +148,15 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
       });
       return () => disposer();
     }
-  }, [dataset, callRefreshPointPositions, refreshPointSelection]);
+  }, [dataset, callRefreshPointPositions]);
+
+  // respond to selection change
+  useEffect(function respondToSelectionChange() {
+    return reaction(
+      () => [dataset?.selectionIdString],
+      () => refreshPointSelection()
+    );
+  }, [dataset, refreshPointSelection]);
 
   // respond to added or removed cases and change in attribute type
   useEffect(function handleAddRemoveCases() {

@@ -1,6 +1,6 @@
 import {ScaleBand} from "d3";
 import React, {useCallback} from "react";
-import {CaseData, selectDots} from "../d3-types";
+import {CaseData, selectGraphDots} from "../d3-types";
 import {attrRoleToAxisPlace, PlotProps} from "../graph-types";
 import {usePlotResponders} from "../hooks/use-plot";
 import {useGraphLayoutContext} from "../models/graph-layout";
@@ -94,7 +94,6 @@ export const ChartDots = function ChartDots(props: PlotProps) {
       extraSecCatsArray: string[] = (dataConfiguration && extraSecondaryAttrRole)
         ? Array.from(dataConfiguration.categoryArrayForAttrRole(extraSecondaryAttrRole)) : [],
       pointDiameter = 2 * graphModel.getPointRadius(),
-      selection = selectDots(dotsRef.current, selectedOnly, dataConfiguration),
       primOrdinalScale = layout.getAxisScale(primaryAxisPlace) as ScaleBand<string>,
       secOrdinalScale = layout.getAxisScale(secondaryAxisPlace) as ScaleBand<string>,
       extraPrimOrdinalScale = layout.getAxisScale(extraPrimaryAxisPlace) as ScaleBand<string>,
@@ -111,6 +110,7 @@ export const ChartDots = function ChartDots(props: PlotProps) {
       legendAttrID = dataConfiguration?.attributeID('legend'),
       getLegendColor = legendAttrID ? dataConfiguration?.getLegendColorForCase : undefined;
 
+    const selection = selectGraphDots(dotsRef.current, dataConfiguration);
     if (!selection) return;
 
     const computeCellParams = () => {

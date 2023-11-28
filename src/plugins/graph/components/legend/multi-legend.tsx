@@ -1,22 +1,22 @@
 import React, { useEffect, useRef } from "react";
 import { observer } from "mobx-react";
-import {AttributeType} from "../../../../models/data/attribute";
+import { AttributeType } from "../../../../models/data/attribute";
 import { GraphPlace } from "../../imports/components/axis-graph-shared";
 import { useGraphLayoutContext } from "../../models/graph-layout";
 import { IDataSet } from "../../../../models/data/data-set";
 import { useInstanceIdContext } from "../../imports/hooks/use-instance-id-context";
 import { axisPlaceToAttrRole, kGraphDefaultHeight } from "../../graph-types";
 import { useGraphModelContext } from "../../models/graph-model";
+import { LayerLegend } from "./layer-legend";
+import { IGraphLayerModel } from "../../models/graph-layer-model";
+import { SimpleAttributeLabel } from "../simple-attribute-label";
+
+import "./multi-legend.scss";
 
 export const kMultiLegendMenuHeight = 30;
 export const kMultiLegendPadding = 20;
 export const kMultiLegendVerticalGap = 10;
 export const kMultiLegendLabelHeight = 20;
-
-import "./multi-legend.scss";
-import { LayerLegend } from "./layer-legend";
-import { IGraphLayerModel } from "../../models/graph-layer-model";
-import { SimpleAttributeLabel } from "../simple-attribute-label";
 
 interface IMultiLegendProps {
   graphElt: HTMLDivElement | null;
@@ -66,7 +66,10 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
         key={layer.id}
         onChangeAttribute={onChangeAttribute}
         onRemoveAttribute={onRemoveAttribute}
-        onTreatAttributeAs={onTreatAttributeAs} />); });
+        onTreatAttributeAs={onTreatAttributeAs}
+      />);
+    }
+  );
 
   const thisRole = axisPlaceToAttrRole.bottom;
 

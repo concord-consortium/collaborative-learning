@@ -1,4 +1,5 @@
 import React, { useContext, useState} from "react";
+import classNames from "classnames";
 import {observer} from "mobx-react-lite";
 import {GraphPlace } from "../imports/components/axis-graph-shared";
 import {AttributeType} from "../../../models/data/attribute";
@@ -7,11 +8,10 @@ import { useGraphModelContext } from "../models/graph-model";
 import { IDataSet } from "../../../models/data/data-set";
 import { kGraphClassSelector } from "../graph-types";
 import { ReadOnlyContext } from "../../../components/document/read-only-context";
-
+import { IGraphLayerModel } from "../models/graph-layer-model";
 import DropdownCaretIcon from "../assets/dropdown-caret.svg";
 
 import "../components/legend/multi-legend.scss";
-import { IGraphLayerModel } from "../models/graph-layer-model";
 
 interface ISimpleAttributeLabelProps {
   place: GraphPlace;
@@ -43,9 +43,10 @@ export const SimpleAttributeLabel = observer(
       simpleLabelElement?.classList.toggle("target-closed", !isOpen);
     };
 
+    const labelClassNames = classNames("simple-attribute-label", { highlighted: dataset?.isAttributeSelected(attrId) });
     return (
       <>
-        <div ref={(e) => setSimpleLabelElement(e)} className={"simple-attribute-label"}>
+        <div ref={(e) => setSimpleLabelElement(e)} className={labelClassNames}>
           <div className="symbol-title">
             { pointColor &&
               <div className="symbol-container">

@@ -103,10 +103,10 @@ export const CaseDots = function CaseDots(props: {
         ? dataConfiguration?.getLegendColorForCase : undefined;
 
     setPointCoordinates({
-      dataConfiguration, dataset, pointRadius, selectedPointRadius, dotsRef, selectedOnly,
+      dataConfiguration, pointRadius, selectedPointRadius, dotsRef, selectedOnly,
       pointColor, pointStrokeColor, getScreenX, getScreenY, getLegendColor, enableAnimation
     });
-  }, [dataset, dataConfiguration, graphModel, layout, dotsRef, enableAnimation]);
+  }, [dataConfiguration, graphModel, layout, dotsRef, enableAnimation]);
 
   useEffect(function initDistribution() {
     const {cases} = dataset || {};

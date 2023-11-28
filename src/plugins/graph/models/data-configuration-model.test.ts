@@ -192,20 +192,20 @@ describe("DataConfigurationModel", () => {
     const config = tree.config;
     config.setDataset(tree.data, tree.metadata);
     config.setAttributeForRole("x", { attributeID: "xId" });
-    expect(config.selection.length).toBe(0);
+    expect(config.caseSelection.length).toBe(0);
 
     config.setDataset(tree.data, tree.metadata);
     tree.data.selectAllCases();
-    expect(config.selection.length).toBe(2);
+    expect(config.caseSelection.length).toBe(2);
 
     config.setAttributeForRole("x", { attributeID: "xId" });
-    expect(config.selection.length).toBe(2);
+    expect(config.caseSelection.length).toBe(0);
 
     const selectionReaction = jest.fn();
-    const disposer = reaction(() => config.selection, () => selectionReaction());
+    const disposer = reaction(() => config.caseSelection, () => selectionReaction());
     expect(selectionReaction).toHaveBeenCalledTimes(0);
     config.setAttributeForRole("y", { attributeID: "yId" });
-    expect(config.selection.length).toBe(1);
+    expect(config.caseSelection.length).toBe(0);
     expect(selectionReaction).toHaveBeenCalledTimes(1);
     disposer();
   });

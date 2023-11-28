@@ -26,10 +26,10 @@
 import '@testing-library/cypress/add-commands';
 import PrimaryWorkspace from './elements/common/PrimaryWorkspace';
 import Canvas from './elements/common/Canvas';
-import TeacherDashboard from "./elements/clue/TeacherDashboard";
+import TeacherDashboard from "./elements/common/TeacherDashboard";
 import 'cypress-file-upload';
 import 'cypress-commands';
-import ResourcesPanel from "./elements/clue/ResourcesPanel";
+import ResourcesPanel from "./elements/common/ResourcesPanel";
 import {platformCmdKey} from '../../src/utilities/hot-keys';
 
 Cypress.Commands.add("uploadFile",(selector, filename, type="")=>{
@@ -181,7 +181,7 @@ Cypress.Commands.add("clickProblemResourceTile", (subsection, tileIndex = 0) => 
   cy.get('[data-focus-section='+subsection+'] .problem-panel .document-content .tile-row').eq(tileIndex).then($tileRow => {
     cy.wrap($tileRow).click();
     cy.wrap($tileRow).find(".tool-tile").invoke("attr", "class").should("contain", "selected");
-  })
+  });
 
 });
 Cypress.Commands.add("getToolTile", (tileIndex = 0) => {
@@ -189,10 +189,10 @@ Cypress.Commands.add("getToolTile", (tileIndex = 0) => {
 });
 Cypress.Commands.add("clickProblemResource", () => {
   cy.get(".prob-tab.selected").eq(0).click();
-})
+});
 Cypress.Commands.add("clickDocumentResource", () => {
   cy.get(".documents-panel div.document-title").eq(0).click();
-})
+});
 Cypress.Commands.add("clickDocumentResourceTile", (tileIndex = 0) => {
   cy.get('.documents-panel .editable-document-content .tile-row').eq(tileIndex).click();
 });

@@ -14,9 +14,9 @@ import {useTileModelContext} from "../imports/hooks/use-tile-model-context";
 import {getStringBounds} from "../imports/components/axis/axis-utils";
 import {AxisOrLegendAttributeMenu} from "../imports/components/axis/components/axis-or-legend-attribute-menu";
 import { useGraphSettingsContext } from "../hooks/use-graph-settings-context";
+import { IGraphLayerModel } from "../models/graph-layer-model";
 
 import graphVars from "./graph.scss";
-import { IGraphLayerModel } from "../models/graph-layer-model";
 
 interface IAttributeLabelProps {
   layer: IGraphLayerModel;
@@ -164,8 +164,6 @@ export const AttributeLabel = observer(
 
     const readyForPortal = positioningParentElt && onChangeAttribute && onTreatAttributeAs && onRemoveAttribute;
     const skipPortal = defaultSeriesLegend && place === "left";
-
-    // console.log("| positioningParentElement: ", positioningParentElt);
 
     return (
       <>

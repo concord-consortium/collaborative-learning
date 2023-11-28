@@ -45,8 +45,8 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
   const shouldShowAddField = !readOnly && isTileSelected && displaySingle;
   const attrIdsNames = content.existingAttributesWithNames();
 
-  // When the highlighted case is set, show it
-  const selectedCaseId = dataSet.firstSelectedCaseId;
+  // When a highlighted case or cell is set, show it
+  const selectedCaseId = dataSet.firstSelectedCaseId ? dataSet.firstSelectedCaseId : dataSet.firstSelectedCell?.caseId;
   useEffect(() => {
     if (selectedCaseId) {
       content.setCaseIndex(dataSet.caseIndexFromID(selectedCaseId));
@@ -240,7 +240,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
     if (event.target === backgroundRef.current) {
       setCurrEditAttrId("");
       setCurrEditFacet("");
-      dataSet.setSelectedCases([]);
+      dataSet.clearAllSelections();
     }
   };
 

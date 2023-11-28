@@ -9,7 +9,7 @@ import { IGraphLayerModel } from "../../models/graph-layer-model";
 import { ReadOnlyContext } from "../../../../components/document/read-only-context";
 import { useGraphModelContext } from "../../models/graph-model";
 import { getSharedModelManager } from "../../../../models/tiles/tile-environment";
-import { isSharedDataSet, SharedDataSet } from "../../../../models/shared/shared-data-set";
+import { isSharedDataSet, SharedDataSet, SharedDataSetType } from "../../../../models/shared/shared-data-set";
 
 import RemoveDataIcon from "../../assets/remove-data-icon.svg";
 
@@ -20,6 +20,12 @@ interface ILayerLegendProps {
   onTreatAttributeAs: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void;
 }
 
+/**
+ * The Legend for a single dataset in an xy-plot
+ * Contains SimpleAttributeLabel for each current yAttribute
+ * Adds an Add Series button when appropriate
+ * Adds unlink button to remove layer
+ */
 export const LayerLegend = observer(function LayerLegend(props: ILayerLegendProps) {
   let legendItems = [] as React.ReactNode[];
   const { layer, onChangeAttribute, onRemoveAttribute, onTreatAttributeAs } = props;
@@ -76,14 +82,32 @@ export const LayerLegend = observer(function LayerLegend(props: ILayerLegendProp
     );
   }
 
-  const hasDataset = layer.config.dataset !== undefined;
+  // FIXME: down the road we will use persistent human-readable dataset names: PT-186549943
+  // At the moment, however, we look for the name of the tile that originally spawned the dataset
+  // In the case that the original tile was deleted we show "unknown data source"
+  function getOriginString() {
+    const tempUnknownString = "unknown data source";
+    const datasetId = layer.config.dataset?.id;
+    const smm = getSharedModelManager(layer);
+
+    if (datasetId && smm?.isReady) {
+      const sharedModels = smm.getTileSharedModels(graphModel);
+      const foundSharedModel = sharedModels?.find((sharedModel) => {
+        return isSharedDataSet(sharedModel) && sharedModel.dataSet.id === datasetId;
+      });
+      const foundProviderId = (foundSharedModel as SharedDataSetType)?.providerId;
+      const foundTile = smm.getSharedModelTiles(foundSharedModel)?.find(tile => tile.id === foundProviderId);
+      return foundTile?.title ?? tempUnknownString;
+    }
+    return tempUnknownString;
+  }
 
   return (
     <>
-      {hasDataset &&
+      { layer.config.dataset !== undefined &&
         <div className="legend-title-row">
           <div className="legend-title">
-            Data from: <strong>{dataConfiguration?.dataset?.name}</strong>&nbsp;
+            Data from: <strong>{getOriginString()}</strong>&nbsp;
           </div>
           <div className="legend-icon">
             <button onClick={handleRemoveIconClick} className="remove-button" title="Unlink data provider">
@@ -95,5 +119,4 @@ export const LayerLegend = observer(function LayerLegend(props: ILayerLegendProp
       {legendItemRows}
     </>
   );
-
 });
