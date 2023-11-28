@@ -29,9 +29,10 @@ function beforeTest(params) {
 
 context('Vertical Scrolling', () => {
   describe('Vertical scrolling in various places', () => {   
-    it('verify scrolling in Resources', () => {
+    it('verify scrolling in Resources under problem, teacher guide and problem, personal documents', () => {
       cy.log('verify vertical scrolling under problem subtabs');
-      beforeTest(queryParams.msa);
+      beforeTest(queryParams.sas1_1);
+      cy.wait(20000);
       cy.log('verify introduction subtab');
       cy.openProblemSection("Initial Challenge");
       cy.clickProblemResourceTile('initialChallenge');
@@ -45,52 +46,13 @@ context('Vertical Scrolling', () => {
       cy.clickProblemResourceTile('launch');
       cy.wait(10000);
       scrolling.verifyScrolling('launch');
-    });
-    it('verify scrolling in Dashboard', () => {
-      beforeTest(queryParams.sas1_1);
-      cy.wait(20000);
-      dashboard.switchView("Dashboard");
-      dashboard.getWorkToggle("Current").should('have.class', 'selected').and('be.visible');
-      cy.log('verify scrolling under current work')
-      scrolling.verifyDashboard();
-      
-      cy.log('verify scrolling under published work');
-      dashboard.getWorkToggle("Published").should('not.have.class', 'selected').and('be.visible').click({ force: true });
-      cy.wait(10000);
-      dashboard.getWorkToggle("Published").should('have.class', 'selected');
-      scrolling.verifyDashboard();
 
-      cy.log('verify scrolling for individual student workspace 4-up view');
-      dashboard.getWorkToggle("Current").should('not.have.class', 'selected').and('be.visible').click({ force: true });
-      cy.wait(10000);
-      dashboard.getGroups().eq(0).within(() => {
-          dashboard.getStudentCanvas(".north-east").find("[data-testid='document-content'] .tile-row").last().should("not.be.visible");
-          dashboard.getStudentCanvas(".north-east").find("[data-testid='document-content'] .tile-row").last().scrollIntoView();
-          cy.wait(1000);
-          dashboard.getStudentCanvas(".north-east").find("[data-testid='document-content'] .tile-row").last().scrollIntoView();
-          dashboard.getStudentCanvas(".north-east").find("[data-testid='document-content'] .tile-row").last().should("be.visible");
-        });
-      
-      cy.log('verify scrolling for individual student workspace');
-      dashboard.getWorkToggle("Current").should('have.class', 'selected').and('be.visible');
-      cy.wait(2000);
-      dashboard.getGroups().eq(0).within(() => {
-        dashboard.getStudentID(0).should('contain', "S1").click();
-      });  
-      dashboard.getGroups().eq(0).within(() => {
-        dashboard.getStudentCanvas(".north-west").find('#section_NW').should("not.be.visible");
-        dashboard.getStudentCanvas(".north-west").find('#section_NW').scrollIntoView();
-        dashboard.getStudentCanvas(".north-west").find('#section_NW').should("be.visible");
-      });
-    });
-    it('verify scrolling in workspace', () => {
-      beforeTest(queryParams.sas1_1);
-      cy.log("verify problem Document");
+      cy.log("verify vertical scrolling in problem Document");
       cy.get(".primary-workspace #section_NW").should("not.be.visible");
       cy.get(".primary-workspace #section_NW").scrollIntoView();
       cy.get(".primary-workspace #section_NW").should("be.visible");
 
-      cy.log("verify personal document");
+      cy.log("verify vertical scrolling in personal document");
       const title = "0.1 Intro to CLUE";
       cy.openTopTab("my-work");
       cy.wait(20000);
@@ -99,10 +61,11 @@ context('Vertical Scrolling', () => {
       cy.get(".primary-workspace #section_NW").scrollIntoView();
       cy.get(".primary-workspace #section_NW").should("be.visible");
     });
-    it('verify scrolling in my work', () => {
+
+    it('verify scrolling in Resources under my work, student workspaces, class work', () => {
       beforeTest(queryParams.sas1_1);
       cy.wait(20000);
-      cy.log("verify my work - workspaces");
+      cy.log("verify scrolling in my work - workspaces");
       cy.openTopTab("my-work");
       cy.openSection("my-work", "workspaces");
       cy.wait(10000);
@@ -122,27 +85,22 @@ context('Vertical Scrolling', () => {
       scrolling.verifyScrollingMyWorkStarredDoubleFlipperView();
       cy.log("verify my work - starred thumbnail view scrolling");
       scrolling.verifyScrollingMyWorkThumbnailView();
-    });
-    it('verify scrolling in student workspaces', () => {
-      beforeTest(queryParams.sas1_1);
-      cy.log("verify student workspaces");
+    
+      cy.log("verify scrolling in student workspaces");
       cy.openTopTab("student-work");
-      cy.wait(20000);
+      cy.wait(10000);
       
       cy.log('verify scrolling for individual student workspace 4-up view');
       scrolling.verifyScrollingStudentWorkspaces4upView();
       cy.log('verify scrolling for individual student workspace');
       cy.get('.four-up .north-east .member').should('contain', "S3").click();
       scrolling.verifyScrollingStudentWorkspacesExpandedView();
-    });
-    it('verify scrolling in class work', () => {
-      beforeTest(queryParams.sas1_1);
-      cy.wait(20000);
-      cy.log("verify class work - workspaces");
+   
+      cy.log("verify scrolling in class work - workspaces");
       cy.openTopTab("class-work");
       cy.wait(2000);
       cy.openSection("class-work", "workspaces");
-      cy.wait(20000);
+      cy.wait(10000);
       scrolling.verifyScrollingClassWork();
 
       cy.log("verify class work - starred");
@@ -157,6 +115,44 @@ context('Vertical Scrolling', () => {
       scrolling.verifyScrollingClassWorkStarredDoubleFlipperView();
       cy.log("verify class work - starred thumbnail view scrolling");
       scrolling.verifyScrollingThumbnailView();
+    });
+
+    it('verify scrolling in dashboard', () => {
+      beforeTest(queryParams.sas1_1);
+      cy.wait(20000);
+      dashboard.switchView("Dashboard");
+      dashboard.getWorkToggle("Current").should('have.class', 'selected').and('be.visible');
+      cy.log('verify scrolling under current work')
+      scrolling.verifyDashboard();
+      
+      cy.log('verify scrolling under published work');
+      dashboard.getWorkToggle("Published").should('not.have.class', 'selected').and('be.visible').click({ force: true });
+      cy.wait(10000);
+      dashboard.getWorkToggle("Published").should('have.class', 'selected');
+      scrolling.verifyDashboard();
+
+      cy.log('verify scrolling for individual student workspace 4-up view');
+      dashboard.getWorkToggle("Current").should('not.have.class', 'selected').and('be.visible').click({ force: true });
+      cy.wait(10000);
+      dashboard.getGroups().eq(0).within(() => {
+        dashboard.getStudentCanvas(".north-east").find("[data-testid='document-content'] .tile-row").last().should("not.be.visible");
+        dashboard.getStudentCanvas(".north-east").find("[data-testid='document-content'] .tile-row").last().scrollIntoView();
+        cy.wait(1000);
+        dashboard.getStudentCanvas(".north-east").find("[data-testid='document-content'] .tile-row").last().scrollIntoView();
+        dashboard.getStudentCanvas(".north-east").find("[data-testid='document-content'] .tile-row").last().should("be.visible");
+      });
+      
+      cy.log('verify scrolling for individual student workspace');
+      dashboard.getWorkToggle("Current").should('have.class', 'selected').and('be.visible');
+      cy.wait(2000);
+      dashboard.getGroups().eq(0).within(() => {
+        dashboard.getStudentID(0).should('contain', "S1").click();
+      });  
+      dashboard.getGroups().eq(0).within(() => {
+        dashboard.getStudentCanvas(".north-west").find('#section_NW').should("not.be.visible");
+        dashboard.getStudentCanvas(".north-west").find('#section_NW').scrollIntoView();
+        dashboard.getStudentCanvas(".north-west").find('#section_NW').should("be.visible");
+      });
     });
   });
 })
