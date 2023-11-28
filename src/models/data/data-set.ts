@@ -719,6 +719,8 @@ export const DataSet = types.model("DataSet", {
         });
       },
 
+      clearAllSelections,
+
       selectAllAttributes(select = true) {
         self.caseSelection.clear();
         self.cellSelection.clear();
