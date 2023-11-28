@@ -17,25 +17,25 @@ export type DotSelection = Selection<SVGCircleElement, CaseData, SVGSVGElement, 
 // selects all all g elements, which contain inner and outer circles
 export function selectGraphDots(svg: DotsElt): DotSelection | null {
   return svg
-    ? select(svg).selectAll("g.graph-dot")
-    : null;
+          ? select(svg).selectAll("g.graph-dot")
+          : null;
 }
 
 export function selectOuterCircles(svg: DotsElt): DotSelection | null {
   return svg
-    ? select(svg).selectAll(".graph-dot .outer-circle")
-    : null;
+          ? select(svg).selectAll(".graph-dot .outer-circle")
+          : null;
 }
 
 export function selectOuterCirclesSelected(svg: DotsElt): DotSelection | null {
   return svg
-    ? select(svg).selectAll(".graph-dot .outer-circle.selected")
-    : null;
+          ? select(svg).selectAll(".graph-dot .outer-circle.selected")
+          : null;
 }
 
 export function selectInnerCircles(svg: DotsElt): DotSelection | null {
   return svg
-    ? select(svg).selectAll(".graph-dot .inner-circle")
-    : null;
+          ? select(svg).selectAll(".graph-dot .inner-circle")
+          : null;
 }
 
