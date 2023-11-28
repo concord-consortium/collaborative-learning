@@ -53,10 +53,6 @@ export class GraphController {
   setProperties(props: IGraphControllerProps) {
     this.graphModel = props.graphModel;
     this.dotsRef = props.dotsRef;
-    // if (this.graphModel.config.dataset !== this.graphModel.data) {
-    //   // FIXME - This no longer makes sense when plotting more than just the 1st layer.
-    //   this.graphModel.config.setDataset(this.graphModel.data, this.graphModel.metadata);
-    // }
     this.initializeGraph();
   }
 
@@ -98,7 +94,8 @@ export class GraphController {
             axisMultiScale.setScaleType('ordinal');
           }
           if (isCategoricalAxisModel(axisModel)) {
-            axisMultiScale.setCategorySet(graphModel.layers[0].config.categorySetForAttrRole(attrRole)); // FIXME handle multiple layers
+            // FIXME handle multiple layers
+            axisMultiScale.setCategorySet(graphModel.layers[0].config.categorySetForAttrRole(attrRole));
           }
           if (isNumericAxisModel(axisModel)) {
             axisMultiScale.setNumericDomain(axisModel.domain);
@@ -111,7 +108,6 @@ export class GraphController {
 
   handleAttributeAssignment(dataConfiguration: IDataConfigurationModel, graphPlace: GraphPlace, attrID: string) {
     const {graphModel, layout} = this,
-      dataset = dataConfiguration.dataset,
       appConfig = getAppConfig(graphModel),
       emptyPlotIsNumeric = appConfig?.getSetting("emptyPlotIsNumeric", "graph");
     if (!(graphModel && layout)) {
@@ -154,12 +150,10 @@ export class GraphController {
 
     const setupAxis = (place: AxisPlace) => {
       const attrRole = graphPlaceToAttrRole[place],
-        attributeID = dataConfiguration.attributeID(attrRole),
         attrType = dataConfiguration.attributeType(attrRole) ?? 'empty',
         currAxisModel = graphModel.getAxis(place),
         currentType = currAxisModel?.type ?? 'empty',
         [min, max] = kDefaultNumericAxisBounds;
-      console.log('setting', attrRole, 'axis based on', attributeID);
       switch (attrType) {
         case 'numeric': {
           if (!currAxisModel || !isNumericAxisModel(currAxisModel)) {

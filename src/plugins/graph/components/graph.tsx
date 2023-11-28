@@ -120,7 +120,6 @@ export const Graph = observer(
           return;
         }
         const layer = graphModel.layers[layerNumber];
-        const dataSetId = layer.config.dataset?.id;
         let attrId = "";
         if (isSetAttributeForRoleAction(action)) {
           const [role, _desc] = action.args;
