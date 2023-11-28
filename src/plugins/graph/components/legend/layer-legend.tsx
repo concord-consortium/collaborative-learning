@@ -109,11 +109,13 @@ export const LayerLegend = observer(function LayerLegend(props: ILayerLegendProp
           <div className="legend-title">
             Data from: <strong>{getOriginString()}</strong>&nbsp;
           </div>
-          <div className="legend-icon">
-            <button onClick={handleRemoveIconClick} className="remove-button" title="Unlink data provider">
-              <RemoveDataIcon />
-            </button>
-          </div>
+          { !readOnly &&
+            <div className="legend-icon">
+              <button onClick={handleRemoveIconClick} className="remove-button" title="Unlink data provider">
+                <RemoveDataIcon />
+              </button>
+            </div>
+          }
         </div>
       }
       {legendItemRows}
