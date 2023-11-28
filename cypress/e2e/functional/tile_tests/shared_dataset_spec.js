@@ -103,26 +103,20 @@ context('Shared Dataset', function () {
       // Selecting an attribute should deselect all cases
       datacardTile.getNavPanel().should("not.have.class", "highlighted");
 
-      cy.log("All Tiles Highlight Cases Selected In XY Plot");
+      cy.log("All Tiles Highlight Cells Selected In XY Plot");
       xyTile.getTile().click(); // Deselect all cases
-      tableTile.getTableRow().eq(0).should("not.have.class", "highlighted");
-      datacardTile.getNavPanel().should("not.have.class", "highlighted");
-      datacardTile.getAttrValueCell().eq(0).should("not.have.class", "highlighted");
+      tableTile.getTableCellContent(2).should("not.have.class", "highlighted");
+      datacardTile.getAttrValueCell().eq(1).should("not.have.class", "highlighted");
       xyTile.getGraphDot().eq(0).click();
-      tableTile.getTableRow().eq(0).should("have.class", "highlighted");
-      datacardTile.getNavPanel().should("have.class", "highlighted");
-      datacardTile.getAttrValueCell().eq(0).should("have.class", "highlighted");
+      tableTile.getTableCellContent(2).should("have.class", "highlighted");
+      datacardTile.getAttrValueCell().eq(1).should("have.class", "highlighted");
 
       cy.log("Datacard Sort View Highlights Cases Correctly And Can Change Case Highlight");
-      tableTile.getTableRow().eq(0).should("have.class", "highlighted");
       tableTile.getTableRow().eq(1).should("not.have.class", "highlighted");
       datacardTile.getSortSelect().select("x");
-      datacardTile.getSortCardHeading().eq(0).should("have.class", "highlighted");
       datacardTile.getSortCardHeading().eq(1).should("not.have.class", "highlighted");
       datacardTile.getSortCardHeading().eq(1).click();
-      datacardTile.getSortCardHeading().eq(0).should("not.have.class", "highlighted");
       datacardTile.getSortCardHeading().eq(1).should("have.class", "highlighted");
-      tableTile.getTableRow().eq(0).should("not.have.class", "highlighted");
       tableTile.getTableRow().eq(1).should("have.class", "highlighted");
 
       cy.log("Datacard Sort View Highlights Attributes Correctly And Can Change Attribute Highlight");
