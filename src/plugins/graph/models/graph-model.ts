@@ -150,7 +150,16 @@ export const GraphModel = TileContentModel
       return self.layers.reduce((prev, layer) => prev+layer.config.caseDataArray.length, 0);
     },
     /**
-     * Return list of all values of all Y attributes in all layers.
+     * Return list of all values for attributes of the given role across all layers.
+     */
+    numericValuesForAttrRole(role: GraphAttrRole): number[] {
+      const allValues: number[] = [];
+      return self.layers.reduce((acc: number[], layer) => {
+        return acc.concat(layer.config.numericValuesForAttrRole(role));
+      }, allValues);
+    },
+    /**
+     * Return list of all values of all Y attributes across all layers.
      */
     get numericValuesForYAxis() {
       const allValues: number[] = [];
@@ -158,6 +167,7 @@ export const GraphModel = TileContentModel
         return acc.concat(layer.config.numericValuesForYAxis);
       }, allValues);
     },
+
     /**
      * Type (eg numeric, catgorical) for the given role.
      * Currently this is defined by the first layer; may need more subtlety in the future.

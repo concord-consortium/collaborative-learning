@@ -377,11 +377,9 @@ export const DataSet = types.model("DataSet", {
         const _caseId = self.pseudoCaseMap[caseID]
                           ? self.pseudoCaseMap[caseID].childCaseIds[0]
                           : caseID;
-        const index = _caseId ? self.caseIDMap[_caseId] : undefined;
-        if (index) {
-          console.log('Found ', caseID, 'in', attributeID, ':', this.getNumericAtIndex(self.caseIDMap[_caseId], attributeID));
-        } else {
-          console.log('did not find case', caseID, 'in', attributeID);
+        const index = _caseId ? self.caseIDMap[_caseId] : null;
+        if (index == null) {
+          console.warn('Did not find case', caseID, 'in', attributeID);
         }
         return index != null
                 ? this.getNumericAtIndex(self.caseIDMap[_caseId], attributeID)

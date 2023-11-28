@@ -154,7 +154,6 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
         topSplitID = dataConfiguration?.attributeID('topSplit') ?? '',
         topCoordValue = dataset?.getStrValue(anID, topSplitID) ?? '',
         topScale = layout.getAxisScale('top') as ScaleBand<string>;
-      console.log('BB getScreenX for ', dataset?.name, xValue, xScale(xValue));
       return xScale(xValue) / numExtraPrimaryBands + (topScale(topCoordValue) || 0);
     };
 
@@ -179,7 +178,6 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
       numberOfPlots = dataConfiguration?.numberOfPlots || 0,
       getLegendColor = legendAttrID ? dataConfiguration?.getLegendColorForCase : undefined;
 
-    console.log('refreshing point positions for', dataset?.id);
     setPointCoordinates({
       dataConfiguration, dotsRef, pointRadius: pointRadiusRef.current,
       selectedPointRadius: selectedPointRadiusRef.current,
