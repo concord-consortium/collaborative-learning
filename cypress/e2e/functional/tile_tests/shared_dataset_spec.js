@@ -85,13 +85,12 @@ context('Shared Dataset', function () {
 
       cy.log("All Tiles Highlight Cases Selected In Datacard");
       tableTile.getTableRow().eq(0).should("not.have.class", "highlighted");
-      // TODO: The xy plot is not set up for attribute selection so I'm commenting out these lines for now
       // TODO: It would be better to check which dot is highlighted, rather than counting how many are highlighted
-      // xyTile.getHighlightedDot().should("not.exist");
+      xyTile.getHighlightedDot().should("have.length", 3);
       datacardTile.getPreviousCardButton().click();
       datacardTile.getNavPanel().click("left");
       tableTile.getTableRow().eq(0).should("have.class", "highlighted");
-      // xyTile.getHighlightedDot().should("have.length", 1);
+      xyTile.getHighlightedDot().should("have.length", 1);
       // Selecting a case should deselect all attributes
       datacardTile.getAttrName().eq(0).should("not.have.class", "highlighted");
 
@@ -110,6 +109,16 @@ context('Shared Dataset', function () {
       xyTile.getGraphDot().eq(0).click();
       tableTile.getTableCellContent(2).should("have.class", "highlighted");
       datacardTile.getAttrValueCell().eq(1).should("have.class", "highlighted");
+
+      cy.log("All Tiles Highlight Attributes Selected In XY Plot");
+      xyTile.getTile().click(); // Deselect all cases
+      tableTile.getSelectedColumnHeaders().should("have.length", 0);
+      datacardTile.getAttrName().eq(2).should("not.have.class", "highlighted");
+      xyTile.getHighlightedDot().should("not.exist");
+      xyTile.selectYAttribute("y2");
+      tableTile.getSelectedColumnHeaders().should("have.length", 1);
+      datacardTile.getAttrName().eq(2).should("have.class", "highlighted");
+      xyTile.getHighlightedDot().should("have.length", 3);
 
       cy.log("Datacard Sort View Highlights Cases Correctly And Can Change Case Highlight");
       tableTile.getTableRow().eq(1).should("not.have.class", "highlighted");
