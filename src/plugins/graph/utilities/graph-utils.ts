@@ -183,9 +183,13 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
 function isCircleSelected(aCaseData: CaseData, dataConfiguration?: IDataConfigurationModel) {
   const dataset = dataConfiguration?.dataset;
   if (!dataset) return false;
+  const xAttributeId = dataConfiguration.xAttributeID;
+  const yAttributeId = dataConfiguration.yAttributeID(aCaseData.plotNum);
   return dataset.isCaseSelected(aCaseData.caseID)
-    || dataset.isAttributeSelected(dataConfiguration.xAttributeID)
-    || dataset.isAttributeSelected(dataConfiguration.yAttributeID(aCaseData.plotNum));
+    || dataset.isAttributeSelected(xAttributeId)
+    || dataset.isAttributeSelected(yAttributeId)
+    || dataset.isCellSelected({ attributeId: xAttributeId, caseId: aCaseData.caseID })
+    || dataset.isCellSelected({ attributeId: yAttributeId, caseId: aCaseData.caseID });
 }
 
 function applySelectedClassToCircles(selection: DotSelection, dataConfiguration?: IDataConfigurationModel){
