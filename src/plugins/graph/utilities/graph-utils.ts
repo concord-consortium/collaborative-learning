@@ -434,7 +434,7 @@ export function setPointSelection(props: ISetPointSelection) {
 }
 
 export interface ISetPointCoordinates {
-  dataConfiguration?: IDataConfigurationModel
+  dataConfiguration: IDataConfigurationModel
   dotsRef: IDotsRef
   selectedOnly?: boolean
   pointRadius: number

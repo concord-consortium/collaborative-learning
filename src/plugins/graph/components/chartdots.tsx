@@ -26,7 +26,7 @@ export const ChartDots = function ChartDots(props: PlotProps) {
   /**
    * Compute the maximum number of points in any cell of the grid. The grid has four
    * dimensions: primary, secondary, extraPrimary, and extraSecondary.
-   * (Seems like there ought to be a more straightforward way to do this.)
+   * ( Seems like there ought to be a more straightforward way to do this.)
    */
   const computeMaxOverAllCells = useCallback(() => {
     const primAttrID = dataConfiguration?.attributeID(primaryAttrRole) ?? '',
@@ -205,7 +205,7 @@ export const ChartDots = function ChartDots(props: PlotProps) {
       getScreenY = primaryIsBottom ? getSecondaryScreenCoord : getPrimaryScreenCoord;
 
     setPointCoordinates({
-      dataConfiguration, dataset, pointRadius, selectedPointRadius: graphModel.getPointRadius('select'),
+      dataConfiguration, pointRadius, selectedPointRadius: graphModel.getPointRadius('select'),
       dotsRef, selectedOnly, pointColor, pointStrokeColor,
       getScreenX, getScreenY, getLegendColor, enableAnimation
     });

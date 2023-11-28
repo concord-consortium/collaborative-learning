@@ -181,7 +181,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
 
     console.log('refreshing point positions for', dataset?.id);
     setPointCoordinates({
-      dataConfiguration, dataset, dotsRef, pointRadius: pointRadiusRef.current,
+      dataConfiguration, dotsRef, pointRadius: pointRadiusRef.current,
       selectedPointRadius: selectedPointRadiusRef.current,
       selectedOnly, getScreenX, getScreenY, getLegendColor,
       getPointColorAtIndex: graphModel.pointColorAtIndex, enableAnimation, pointColor, pointStrokeColor
