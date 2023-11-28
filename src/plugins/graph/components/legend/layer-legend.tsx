@@ -9,7 +9,7 @@ import { IGraphLayerModel } from "../../models/graph-layer-model";
 import { ReadOnlyContext } from "../../../../components/document/read-only-context";
 import { useGraphModelContext } from "../../models/graph-model";
 import { getSharedModelManager } from "../../../../models/tiles/tile-environment";
-import { isSharedDataSet, SharedDataSet } from "../../../../models/shared/shared-data-set";
+import { isSharedDataSet, SharedDataSet, SharedDataSetType } from "../../../../models/shared/shared-data-set";
 
 import RemoveDataIcon from "../../assets/remove-data-icon.svg";
 
@@ -76,14 +76,29 @@ export const LayerLegend = observer(function LayerLegend(props: ILayerLegendProp
     );
   }
 
-  const hasDataset = layer.config.dataset !== undefined;
+  function getOriginString() {
+    const tempUnknownString = "unknown data source";
+    const datasetId = layer.config.dataset?.id;
+    const smm = getSharedModelManager(layer);
+
+    if (datasetId && smm?.isReady) {
+      const sharedModels = smm.getTileSharedModels(graphModel);
+      const foundSharedModel = sharedModels?.find((sharedModel) => {
+        return isSharedDataSet(sharedModel) && sharedModel.dataSet.id === datasetId;
+      });
+      const foundProviderId = (foundSharedModel as SharedDataSetType)?.providerId;
+      const foundTile = smm.getSharedModelTiles(foundSharedModel)?.find(tile => tile.id === foundProviderId);
+      return foundTile?.title ?? tempUnknownString;
+    }
+    return tempUnknownString;
+  }
 
   return (
     <>
-      {hasDataset &&
+      { layer.config.dataset !== undefined &&
         <div className="legend-title-row">
           <div className="legend-title">
-            Data from: <strong>{dataConfiguration?.dataset?.name}</strong>&nbsp;
+            Data from: <strong>{getOriginString()}</strong>&nbsp;
           </div>
           <div className="legend-icon">
             <button onClick={handleRemoveIconClick} className="remove-button" title="Unlink data provider">
@@ -95,5 +110,4 @@ export const LayerLegend = observer(function LayerLegend(props: ILayerLegendProp
       {legendItemRows}
     </>
   );
-
 });
