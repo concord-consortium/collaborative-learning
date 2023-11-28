@@ -107,21 +107,30 @@ context('Vertical Scrolling', () => {
       cy.openSection("my-work", "workspaces");
       cy.wait(10000);
       scrolling.verifyScrollingWorkspaces();
+
+      cy.log("Star documents");
+      scrolling.starCanvasItem("my-work", "workspaces", "0.1 Intro to CLUE");
+      scrolling.starMultipleCanvasItem("my-work", "workspaces");
+
       cy.log("verify My Work - starred");
       cy.openSection("my-work", "starred");
       cy.wait(10000);
-
+      
       cy.log("verify my work - starred single flipper view scrolling");
       scrolling.verifyScrollingMyWorkStarred();
+      cy.log("verify my work - starred double flipper view scrolling");
+      scrolling.verifyScrollingMyWorkStarredDoubleFlipperView();
+      cy.log("verify my work - starred thumbnail view scrolling");
+      scrolling.verifyScrollingMyWorkThumbnailView();
     });
     it('verify scrolling in student workspaces', () => {
       beforeTest(queryParams.sas1_1);
       cy.log("verify student workspaces");
       cy.openTopTab("student-work");
       cy.wait(20000);
+      
       cy.log('verify scrolling for individual student workspace 4-up view');
       scrolling.verifyScrollingStudentWorkspaces4upView();
-
       cy.log('verify scrolling for individual student workspace');
       cy.get('.four-up .north-east .member').should('contain', "S3").click();
       scrolling.verifyScrollingStudentWorkspacesExpandedView();
@@ -144,10 +153,8 @@ context('Vertical Scrolling', () => {
 
       cy.log("verify class work - starred single flipper view scrolling");
       scrolling.verifyScrollingClassWorkStarred();
-
       cy.log("verify class work - starred double flipper view scrolling");
       scrolling.verifyScrollingClassWorkStarredDoubleFlipperView();
-
       cy.log("verify class work - starred thumbnail view scrolling");
       scrolling.verifyScrollingThumbnailView();
     });
