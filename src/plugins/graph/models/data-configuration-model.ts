@@ -82,6 +82,10 @@ export const DataConfigurationModel = types
         y2Description = self._attributeDescriptions.get('rightNumeric') ?? null;
       return descriptions.concat(y2Description ? [y2Description] : []);
     },
+    get xAttributeID() {
+      const xAttributeDescription = self._attributeDescriptions.get("x");
+      return xAttributeDescription?.attributeID ?? "";
+    },
     // Includes rightNumeric if present
     get yAttributeIDs() {
       return this.yAttributeDescriptions.map((d: IAttributeDescriptionSnapshot) => d.attributeID);
@@ -255,6 +259,12 @@ export const DataConfigurationModel = types
     }
   }))
   .views(self => ({
+    yAttributeID(index: number) {
+      if (index < self.yAttributeDescriptions.length) {
+        return self.yAttributeDescriptions[index].attributeID;
+      }
+      return "";
+    },
     get attributes() {
       return self.places.map(place => self.attributeID(place)).filter(attrID => !!attrID) as string[];
     },
@@ -296,7 +306,7 @@ export const DataConfigurationModel = types
      * Note that in order to eliminate a selected case from the graph's selection, we have to check that it is not
      * present in any of the case sets, not just the 0th one.
      */
-    get selection() {
+    get caseSelection() {
       if (!self.dataset || self.filteredCases.length === 0) return [];
       const caseSelection = Array.from(self.dataset.caseSelection),
         allGraphCaseIds = self.graphCaseIDs;
@@ -375,7 +385,10 @@ export const DataConfigurationModel = types
     getUnsortedCaseDataArray(caseArrayNumber: number): CaseData[] {
       if (self.filteredCases.length <= caseArrayNumber) return [];
       return (self.filteredCases[caseArrayNumber].caseIds || []).map(id => {
-        return { plotNum: caseArrayNumber, caseID: id };
+        return {
+          plotNum: caseArrayNumber,
+          caseID: id
+        };
       });
     },
     getCaseDataArray(caseArrayNumber: number) {
@@ -394,8 +407,11 @@ export const DataConfigurationModel = types
     get joinedCaseDataArrays() {
       const joinedCaseData: CaseData[] = [];
       self.filteredCases.forEach((aFilteredCases, index) => {
-          aFilteredCases.caseIds.forEach(
-            (id) => joinedCaseData.push({plotNum: index, caseID: id}));
+        aFilteredCases.caseIds.forEach(
+          (id) => joinedCaseData.push({
+            plotNum: index,
+            caseID: id
+          }));
         }
       );
       return joinedCaseData;
@@ -690,13 +706,20 @@ export const DataConfigurationModel = types
         }
         if (desc && desc.attributeID !== '') {
           self._yAttributeDescriptions.push(desc);
+          self.dataset?.setSelectedAttributes([desc.attributeID]);
         }
       } else if (role === 'yPlus' && desc && desc.attributeID !== '') {
         self._yAttributeDescriptions.push(desc);
       } else if (role === 'rightNumeric') {
         this.setY2Attribute(desc);
+        if (desc) {
+          self.dataset?.setSelectedAttributes([desc.attributeID]);
+        }
       } else {
         self._setAttributeDescription(role, desc);
+        if (desc) {
+          self.dataset?.setSelectedAttributes([desc.attributeID]);
+        }
       }
       this.syncFilteredCasesCount(true);
       if (role === 'legend') {
@@ -719,6 +742,7 @@ export const DataConfigurationModel = types
         }
         const index = self._yAttributeDescriptions.findIndex(d=>d.attributeID===oldAttrId);
         self._yAttributeDescriptions[index].attributeID = newAttrId;
+        self.dataset?.setSelectedAttributes([newAttrId]);
         if (index === 0 && self._yAttributeDescriptions.length === 1) {
           self._yAttributeDescriptions[index].type = undefined;
         }

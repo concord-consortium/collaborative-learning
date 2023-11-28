@@ -207,7 +207,7 @@ export const ChartDots = function ChartDots(props: PlotProps) {
       getScreenY = primaryIsBottom ? getSecondaryScreenCoord : getPrimaryScreenCoord;
 
     setPointCoordinates({
-      dataset, pointRadius, selectedPointRadius: graphModel.getPointRadius('select'),
+      dataConfiguration, pointRadius, selectedPointRadius: graphModel.getPointRadius('select'),
       dotsRef, selectedOnly, pointColor, pointStrokeColor,
       getScreenX, getScreenY, getLegendColor, enableAnimation
     });

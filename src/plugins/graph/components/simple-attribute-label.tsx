@@ -1,4 +1,5 @@
 import React, { useContext, useState} from "react";
+import classNames from "classnames";
 import {observer} from "mobx-react-lite";
 import {GraphPlace } from "../imports/components/axis-graph-shared";
 import {AttributeType} from "../../../models/data/attribute";
@@ -42,9 +43,10 @@ export const SimpleAttributeLabel = observer(
       simpleLabelElement?.classList.toggle("target-closed", !isOpen);
     };
 
+    const labelClassNames = classNames("simple-attribute-label", { highlighted: dataset?.isAttributeSelected(attrId) });
     return (
       <>
-        <div ref={(e) => setSimpleLabelElement(e)} className="simple-attribute-label">
+        <div ref={(e) => setSimpleLabelElement(e)} className={labelClassNames}>
           <div className="symbol-title">
             { pointColor &&
               <div className="symbol-container">
