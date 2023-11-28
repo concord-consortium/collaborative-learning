@@ -20,6 +20,12 @@ interface ILayerLegendProps {
   onTreatAttributeAs: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void;
 }
 
+/**
+ * The Legend for a single dataset in an xy-plot
+ * Contains SimpleAttributeLabel for each current yAttribute
+ * Adds an Add Series button when appropriate
+ * Adds unlink button to remove layer
+ */
 export const LayerLegend = observer(function LayerLegend(props: ILayerLegendProps) {
   let legendItems = [] as React.ReactNode[];
   const { layer, onChangeAttribute, onRemoveAttribute, onTreatAttributeAs } = props;

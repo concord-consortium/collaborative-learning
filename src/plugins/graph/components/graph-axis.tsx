@@ -135,31 +135,33 @@ export const GraphAxis = observer(function GraphAxis({
     <g className='axis-wrapper' ref={elt => setWrapperElt(elt)}>
       <rect className='axis-background'/>
       {axisModel && isAlive(axisModel) &&
-      <Axis axisModel={axisModel}
-            label={''}  // Remove
-            enableAnimation={enableAnimation}
-            showScatterPlotGridLines={axisShouldShowGridlines}
-            centerCategoryLabels={graphModel.config.categoriesForAxisShouldBeCentered(place)}
-      />}
-      { showAttributeLabel &&
-            <AttributeLabel
-              layer={graphModel.layers[0]} // FIXME ?
-              place={place}
-              onChangeAttribute={onDropAttribute}
-              onRemoveAttribute={onRemoveAttribute}
-              onTreatAttributeAs={onTreatAttributeAs}
-            />
+        <Axis
+          axisModel={axisModel}
+          label={''}  // Remove
+          enableAnimation={enableAnimation}
+          showScatterPlotGridLines={axisShouldShowGridlines}
+          centerCategoryLabels={graphModel.config.categoriesForAxisShouldBeCentered(place)}
+        />
       }
-
+      {showAttributeLabel &&
+        <AttributeLabel
+          layer={graphModel.layers[0]} // This is a non-multiple-dataset/multi-legend case
+          place={place}
+          onChangeAttribute={onDropAttribute}
+          onRemoveAttribute={onRemoveAttribute}
+          onTreatAttributeAs={onTreatAttributeAs}
+        />
+      }
       {onDropAttribute && !disableAttributeDnD &&
-         <DroppableAxis
-            place={`${place}`}
-            dropId={droppableId}
-            hintString={hintString}
-            portal={parentEltRef.current}
-            target={wrapperElt}
-            onIsActive={handleIsActive}
-         />}
+        <DroppableAxis
+          place={`${place}`}
+          dropId={droppableId}
+          hintString={hintString}
+          portal={parentEltRef.current}
+          target={wrapperElt}
+          onIsActive={handleIsActive}
+        />
+      }
     </g>
   );
 });

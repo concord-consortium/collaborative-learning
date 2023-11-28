@@ -7,11 +7,10 @@ import { useGraphModelContext } from "../models/graph-model";
 import { IDataSet } from "../../../models/data/data-set";
 import { kGraphClassSelector } from "../graph-types";
 import { ReadOnlyContext } from "../../../components/document/read-only-context";
-
+import { IGraphLayerModel } from "../models/graph-layer-model";
 import DropdownCaretIcon from "../assets/dropdown-caret.svg";
 
 import "../components/legend/multi-legend.scss";
-import { IGraphLayerModel } from "../models/graph-layer-model";
 
 interface ISimpleAttributeLabelProps {
   place: GraphPlace;
@@ -45,7 +44,7 @@ export const SimpleAttributeLabel = observer(
 
     return (
       <>
-        <div ref={(e) => setSimpleLabelElement(e)} className={"simple-attribute-label"}>
+        <div ref={(e) => setSimpleLabelElement(e)} className="simple-attribute-label">
           <div className="symbol-title">
             { pointColor &&
               <div className="symbol-container">
