@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, CSSProperties } from 'react';
 import { AxisBounds, AxisPlace } from '../imports/components/axis/axis-types';
 import { useAxisLayoutContext } from '../imports/components/axis/models/axis-layout-context';
 
@@ -17,7 +17,6 @@ export const EditableGraphValue: React.FC<IEditableValueProps> = observer(functi
   const { value, minOrMax, axis, onValueChange, readOnly } = props;
   const [isEditing, setIsEditing] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const borderBoxRef = useRef<HTMLInputElement | null>(null);
   const layout = useAxisLayoutContext();
   const axisBounds = layout.getComputedBounds(axis) as AxisBounds;
 
@@ -27,46 +26,50 @@ export const EditableGraphValue: React.FC<IEditableValueProps> = observer(functi
     }
   }, [isEditing]);
 
-  //**************  Dynamically calculate border box size and offset positions ******************
-  useEffect(() => {
-    if (borderBoxRef.current) {
-      // Calculate the width of the border box (and Y axis left offset) depending on how many characters are in value
-      const numOfCharacters = value.toString().length;
-      const widthPerCharacter = 8;
-      let boxWidth: number;
-      if (numOfCharacters === 1){
-        boxWidth = 15;
-      } else if (numOfCharacters === 2){
-        boxWidth = 20;
+  //**************  Calculate border box size and offset positions ******************
+
+  const calculateBorderBoxStyles = () => {
+    const numOfCharacters = value.toString().length;
+    const widthPerCharacter = 8;
+    let boxWidth: number;
+    // Calculate boxWidth based on the number of characters
+    if (numOfCharacters === 1) {
+      boxWidth = 15;
+    } else if (numOfCharacters === 2) {
+      boxWidth = 20;
+    } else {
+      boxWidth = numOfCharacters * widthPerCharacter;
+    }
+
+    const style: CSSProperties = {
+      width: `${boxWidth}px`,
+      justifyContent: axis === 'bottom' ? 'center' : 'flex-end',
+    };
+
+    // For left axis determine min/max left offset based on axisBounds accounting for boxWidth
+    if (axis === 'left') {
+      const yTickRightEdgePosition = axisBounds.left + axisBounds.width - 7;
+      const leftOffset = yTickRightEdgePosition - boxWidth;
+      const topOffsetMin = axisBounds.height - 22;
+      style.left = `${leftOffset}px`;
+      style.top = minOrMax === 'max' ? `0px` : `${topOffsetMin}px`;
+    }
+
+    //For bottom axis place min/max under numberline and for min calc left offset
+    if (axis === 'bottom') {
+      const xTickTopEdgePosition = axisBounds.top + 2;
+      style.top = `${xTickTopEdgePosition}px`;
+      if (minOrMax === 'min') {
+        const leftOffset = axisBounds.left - (boxWidth / 2);
+        style.left = `${leftOffset}px`;
       } else {
-        boxWidth = value.toString().length * widthPerCharacter;
-      }
-      borderBoxRef.current.style.width = `${boxWidth}px`;
-
-      // For left axis determine min/max left offset based on axisBounds and width of border box
-      let leftOffset;
-      if (axis === 'left') {
-        const yTickRightEdgePosition = axisBounds.width - 7; //represents right edge of each Y tick
-        leftOffset = yTickRightEdgePosition - boxWidth;
-        borderBoxRef.current.style.left = `${leftOffset}px`;
-        //position max at top and min such that bottom edge of it's border is at x-axis
-        borderBoxRef.current.style.top = (minOrMax === 'max') ? `0px` : `${(axisBounds.height - 22)}px`;
-      }
-
-      //For bottom axis place min and max top then calculate left offset for min
-      if(axis === 'bottom'){
-        const xTickTopEdgePosition = axisBounds.top + 2; //represents right edge of each Y tick
-        borderBoxRef.current.style.top = `${xTickTopEdgePosition}px`;
-        if (minOrMax === 'min'){
-          leftOffset = axisBounds.left - (boxWidth/2);
-          borderBoxRef.current.style.left = `${leftOffset}px`;
-        } else {
-          borderBoxRef.current.style.right = `0px`;
-        }
+        style.right = `0px`;
       }
     }
-  }, [value, axis, minOrMax, axisBounds]);
 
+    return style;
+  };
+  const borderBoxStyles = calculateBorderBoxStyles();
 
   const handleClick = () => {
     if (!readOnly && !isEditing) {
@@ -101,8 +104,8 @@ export const EditableGraphValue: React.FC<IEditableValueProps> = observer(functi
   };
 
   return (
-    <div ref={borderBoxRef} className={"editable-border-box"} onClick={handleClick}>
-      {isEditing ? (
+    <div style={borderBoxStyles} className={"editable-border-box"} onClick={handleClick}>
+      { isEditing ?
         <input
           className="input-textbox"
           ref={(el) => {
@@ -117,10 +120,9 @@ export const EditableGraphValue: React.FC<IEditableValueProps> = observer(functi
               inputRef.current.style.width = `${Math.max(5, e.target.value.length)}ch`;
             }
           }}
-        />
-      ) : (
+        /> :
         <div>{value}</div>
-      )}
+      }
     </div>
   );
 });
