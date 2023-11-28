@@ -12,24 +12,6 @@
   font: 12px sans-serif;
   position: absolute;
 
-  &.bottom-min{
-    left: 36px;
-    top: 273px;
-
-  }
-  &.bottom-max{
-    right: 0px;
-    top: 273px;
-  }
-
-  &.left-min{
-    //left position determined dynamically by how many characters in the number
-    top: 255px;
-  }
-
-  &.left-max{
-    top: 0px;
-  }
 
   .input-textbox{
     position: absolute;

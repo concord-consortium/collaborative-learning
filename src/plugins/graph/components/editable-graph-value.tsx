@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react';
 import React, { useState, useRef, useEffect } from 'react';
-import { AxisPlace } from '../imports/components/axis/axis-types';
-import classNames from 'classnames';
+import { AxisBounds, AxisPlace } from '../imports/components/axis/axis-types';
+import { useAxisLayoutContext } from '../imports/components/axis/models/axis-layout-context';
 
 import "./editable-graph-value.scss";
 
@@ -16,17 +16,11 @@ interface IEditableValueProps {
 
 export const EditableGraphValue: React.FC<IEditableValueProps> = observer(function EditableGraphValue(props) {
   const { value, minOrMax, axis, onValueChange, readOnly } = props;
-  // console.log("📁 editable-graph-value.tsx ------------------------");
-  // console.log("\t🏭 EditableGraphValue");
-  // console.log("\t🥩 axis:", axis);
-  // console.log("\t🥩 minOrMax:", minOrMax);
-  // console.log("\t🥩 value:", value);
-
   const [isEditing, setIsEditing] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const borderBoxRef = useRef<HTMLInputElement | null>(null);
-  const yAxisRef = useRef(null); // Ref for the Y-axis
-
+  const layout = useAxisLayoutContext();
+  const axisBounds = layout.getComputedBounds(axis) as AxisBounds;
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
@@ -34,32 +28,46 @@ export const EditableGraphValue: React.FC<IEditableValueProps> = observer(functi
     }
   }, [isEditing]);
 
-  // Calculate the width of the border box (and Y axis left offset) depending on how many characters are in value
+  //**************  Dynamically calculate border box size and offset positions ******************
   useEffect(() => {
     if (borderBoxRef.current) {
+      // Calculate the width of the border box (and Y axis left offset) depending on how many characters are in value
       const numOfCharacters = value.toString().length;
       const widthPerCharacter = 8;
-      let newWidth: number;
+      let boxWidth: number;
       if (numOfCharacters === 1){
-        newWidth = 15;
+        boxWidth = 15;
       } else if (numOfCharacters === 2){
-        newWidth = 20;
+        boxWidth = 20;
       } else {
-        newWidth = value.toString().length * widthPerCharacter;
+        boxWidth = value.toString().length * widthPerCharacter;
       }
-      borderBoxRef.current.style.width = `${newWidth}px`;
+      borderBoxRef.current.style.width = `${boxWidth}px`;
 
-      // Calculate the left offset for left-min and left-max based on how many characters are in value
+      let leftOffset;
 
-      if (axis === 'left' && (minOrMax === 'min' || minOrMax === 'max')) {
-        const baseOffset = 45; // The base left offset
-        const newLeftOffset = baseOffset - newWidth; // Subtract newWidth from baseOffset
-        console.log("\t🏭 newLeftOffset", newLeftOffset);
-        borderBoxRef.current.style.left = `${newLeftOffset}px`;
+      // For left axis determine min/max left offset based on axisBounds and width of border box
+      if (axis === 'left') {
+        const yTickRightEdgePosition = axisBounds.width - 6; //represents right edge of each Y tick
+        leftOffset = yTickRightEdgePosition - boxWidth;
+        borderBoxRef.current.style.left = `${leftOffset}px`;
+        //position max at top and min such that bottom edge of it's border is at x-axis
+        borderBoxRef.current.style.top = (minOrMax === 'max') ? `0px` : `${(axisBounds.height - 22)}px`;
       }
 
+      //For bottom axis place min and max top then calculate left offset for min
+      if(axis === 'bottom'){
+        const xTickTopEdgePosition = axisBounds.top + 2; //represents right edge of each Y tick
+        borderBoxRef.current.style.top = `${xTickTopEdgePosition}px`;
+        if (minOrMax === 'min'){
+          leftOffset = axisBounds.left - (boxWidth/2);
+          borderBoxRef.current.style.left = `${leftOffset}px`;
+        } else {
+          borderBoxRef.current.style.right = `0px`;
+        }
+      }
     }
-  }, [value, axis, minOrMax]);
+  }, [value, axis, minOrMax, axisBounds]);
 
 
   const handleClick = () => {
@@ -94,10 +102,8 @@ export const EditableGraphValue: React.FC<IEditableValueProps> = observer(functi
     return isNumeric;
   };
 
-  const borderClasses = classNames("editable-border-box", `${axis}-${minOrMax}`);
-
   return (
-    <div ref={borderBoxRef} className={borderClasses} onClick={handleClick}>
+    <div ref={borderBoxRef} className={"editable-border-box"} onClick={handleClick}>
       {isEditing ? (
         <input
           className="input-textbox"
