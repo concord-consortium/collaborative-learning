@@ -225,7 +225,6 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
       axisModel, subAxisIndex, graphModel.isLinkedToDataSet]);
 
   const onDragStart = useCallback((event: any) => {
-    // console.log("onDragStart callBack");
     const dI = dragInfo.current;
     dI.currentDragPosition = dI.axisOrientation === 'horizontal' ? event.x : event.y;
     dI.indexOfCategory = dI.axisOrientation === 'horizontal'
@@ -278,10 +277,7 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
     }, [enableAnimation, renderSubAxis]);
 
     const dragBehavior = useMemo(() => drag()
-      .on("start", (e)=>{
-        // console.log("drag start"); //reformat this to just be onDragStart
-        onDragStart(e);
-      })
+      .on("start", onDragStart)
       .on("drag", onDrag)
       .on("end", onDragEnd), [onDragStart, onDrag, onDragEnd]);
 

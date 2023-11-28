@@ -184,7 +184,6 @@ export const getCoordFunctions = (props: IGetCoordFunctionsProps): ICoordFunctio
  * @returns {number} - The computed optimal number of ticks for the given scale.
  */
 export const computeBestNumberOfTicks = (scale: ScaleLinear<number, number>): number => {
-
   const formatter = scale.tickFormat();
 
   // Helper function to detect collisions between tick labels
@@ -226,5 +225,6 @@ export const computeBestNumberOfTicks = (scale: ScaleLinear<number, number>): nu
     tickValues = scale.ticks(currentNumber);
     firstTime = false;
   }
+
   return Math.max(2, currentNumber);
 };
