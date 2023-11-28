@@ -130,7 +130,6 @@ export const GraphAxis = observer(function GraphAxis({
   }, [layout, place, graphModel]);
 
   const axisModel = graphModel?.getAxis(place);
-
   return (
     <g className='axis-wrapper' ref={elt => setWrapperElt(elt)}>
       <rect className='axis-background'/>

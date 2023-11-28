@@ -135,8 +135,6 @@ export function handleClickOnDot(event: MouseEvent, caseID: string, dataset?: ID
   }
 }
 
-
-
 export interface IMatchCirclesProps {
   dataConfiguration: IDataConfigurationModel
   dotsElement: DotsElt

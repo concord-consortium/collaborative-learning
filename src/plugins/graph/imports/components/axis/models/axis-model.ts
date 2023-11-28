@@ -78,7 +78,6 @@ export const NumericAxisModel = AxisModel
       console.warn("NumericAxisModel.domain", "attempt to access defunct axis model domain");
       return kDefaultNumericAxisBounds;
     }
-    //add isLinkedDataSet:
   }))
   .actions(self => ({
     setMin(value: number){

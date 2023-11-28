@@ -4,15 +4,12 @@ import {isAlive} from "mobx-state-tree";
 import {MutableRefObject, useCallback, useEffect, useMemo, useRef} from "react";
 import {AxisBounds, axisPlaceToAxisFn, AxisScaleType, otherPlace} from "../axis-types";
 import {useAxisLayoutContext} from "../models/axis-layout-context";
-import {IAxisModel, isCategoricalAxisModel, isNumericAxisModel,
-      } from "../models/axis-model";
+import {IAxisModel, isCategoricalAxisModel, isNumericAxisModel} from "../models/axis-model";
 import {isVertical} from "../../axis-graph-shared";
 import {between} from "../../../../utilities/math-utils";
 import {kAxisTickLength, transitionDuration} from "../../../../graph-types";
-import {
-  DragInfo, collisionExists, computeBestNumberOfTicks, getCategoricalLabelPlacement,
-  getCoordFunctions, IGetCoordFunctionsProps
-} from "../axis-utils";
+import {DragInfo, collisionExists, computeBestNumberOfTicks,
+        getCategoricalLabelPlacement,getCoordFunctions, IGetCoordFunctionsProps} from "../axis-utils";
 import { useGraphModelContext } from "../../../../models/graph-model";
 
 export interface IUseSubAxis {
