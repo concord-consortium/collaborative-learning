@@ -8,7 +8,9 @@ import {DroppablePlot} from "./droppable-plot";
 import {AxisPlace, AxisPlaces} from "../imports/components/axis/axis-types";
 import {GraphAxis} from "./graph-axis";
 import {attrRoleToGraphPlace, graphPlaceToAttrRole, IDotsRef, kGraphClass} from "../graph-types";
-import {ScatterDots} from "./scatterdots";
+import { DotPlotDots } from "./dotplotdots";
+import { ChartDots } from "./chartdots";
+import { ScatterDots } from "./scatterdots";
 import {Marquee} from "./marquee";
 import {DataConfigurationContext} from "../hooks/use-data-configuration-context";
 import {useGraphModel} from "../hooks/use-graph-model";
@@ -178,8 +180,8 @@ export const Graph = observer(
       };
       const typeToPlotComponentMap = {
         casePlot: null, // <CaseDots {...props}/>,
-        dotChart: null, // <ChartDots {...props}/>,
-        dotPlot: null, // <DotPlotDots {...props}/>,
+        dotChart: <ChartDots {...props}/>,
+        dotPlot: <DotPlotDots {...props}/>,
         scatterPlot: <ScatterDots {...props}/>
       };
       return typeToPlotComponentMap[plotType];
