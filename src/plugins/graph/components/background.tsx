@@ -65,7 +65,7 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
       width.current = 0;
       height.current = 0;
       if (!event.sourceEvent.shiftKey) {
-        dataset.current?.setSelectedCases([]);
+        dataset.current?.clearAllSelections();
       }
       marqueeState.setMarqueeRect({x: startX.current, y: startY.current, width: 0, height: 0});
     }, [dataset, instanceId, layout, marqueeState]),

@@ -240,7 +240,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
     if (event.target === backgroundRef.current) {
       setCurrEditAttrId("");
       setCurrEditFacet("");
-      dataSet.setSelectedCases([]);
+      dataSet.clearAllSelections();
     }
   };
 

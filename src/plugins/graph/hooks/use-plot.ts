@@ -130,7 +130,7 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
     return () => disposer();
   }, [layout, callRefreshPointPositions]);
 
-  // respond to selection and value changes
+  // respond to value changes
   useEffect(() => {
     if (dataset) {
       const disposer = onAnyAction(dataset, action => {
@@ -151,11 +151,10 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
 
   // respond to selection change
   useEffect(function respondToSelectionChange() {
-    const disposer = reaction(
+    return reaction(
       () => [dataset?.selectionIdString],
       () => refreshPointSelection()
     );
-    return () => disposer();
   }, [dataset, refreshPointSelection]);
 
   // respond to added or removed cases and change in attribute type
