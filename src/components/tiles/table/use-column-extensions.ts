@@ -56,10 +56,7 @@ export const useColumnExtensions = ({
         setColumnEditingName();
       },
       onRemoveColumn,
-      onShowExpressionsDialog,
-      onBeginBodyCellEdit: (() => {
-        gridContext.onClearSelection({ cell: false });
-      }) as any
+      onShowExpressionsDialog
     };
   });
 };

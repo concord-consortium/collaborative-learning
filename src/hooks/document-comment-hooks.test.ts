@@ -4,12 +4,9 @@ import {
   DocumentQueryType, useDocumentComments, usePostDocumentComment, useUnreadDocumentComments
 } from "./document-comment-hooks";
 
-const mockValidateCommentableDocument_v1 = jest.fn();
 const mockPostDocumentComment_v1 = jest.fn();
 const mockHttpsCallable = jest.fn((fn: string) => {
   switch(fn) {
-    case "validateCommentableDocument_v1":
-      return mockValidateCommentableDocument_v1;
     case "postDocumentComment_v1":
       return mockPostDocumentComment_v1;
   }
@@ -99,7 +96,6 @@ jest.mock("./firestore-hooks", () => ({
 describe("Document comment hooks", () => {
 
   function resetMocks() {
-    mockValidateCommentableDocument_v1.mockClear();
     mockPostDocumentComment_v1.mockClear();
     mockHttpsCallable.mockClear();
     mockUseMutation.mockClear();
@@ -123,8 +119,7 @@ describe("Document comment hooks", () => {
       const document = { uid: "user-id", type: "problem", key: "key" };
       // useDocumentComments() fills the commentsQueryKeyMap
       renderHook(() => useDocumentComments(document.key));
-      expect(mockHttpsCallable).toHaveBeenCalled();
-      expect(mockHttpsCallable.mock.calls[0][0]).toBe("validateCommentableDocument_v1");
+      expect(mockUseCollectionOrderedRealTimeQuery).toHaveBeenCalled();
       const { result: postCommentResult } = renderHook(() => usePostDocumentComment());
       expect(mockUseMutation).toHaveBeenCalled();
       expect(typeof postCommentResult.current.mutate).toBe("function");
@@ -133,7 +128,7 @@ describe("Document comment hooks", () => {
       expect(mockSetQueryData).toHaveBeenCalled();
       expect(mockSetQueryData.mock.calls[0][1]).toHaveLength(1);
       expect(mockHttpsCallable).toHaveBeenCalled();
-      expect(mockHttpsCallable.mock.calls[1][0]).toBe("postDocumentComment_v1");
+      expect(mockHttpsCallable.mock.calls[0][0]).toBe("postDocumentComment_v1");
       expect(mockPostDocumentComment_v1).toHaveBeenCalled();
     });
 

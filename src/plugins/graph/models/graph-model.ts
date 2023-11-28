@@ -11,12 +11,11 @@ import {
 } from "../imports/components/axis/models/axis-model";
 import { GraphPlace } from "../imports/components/axis-graph-shared";
 import {
-  GraphAttrRole, hoverRadiusFactor, kDefaultNumericAxisBounds, kGraphTileType, PlotType, PlotTypes,
-  pointRadiusLogBase, pointRadiusMax, pointRadiusMin, pointRadiusSelectionAddend
+  GraphAttrRole, hoverRadiusFactor, kDefaultNumericAxisBounds, kGraphTileType,
+  PlotType, PlotTypes, pointRadiusMax, pointRadiusSelectionAddend
 } from "../graph-types";
 import { SharedModelType } from "../../../models/shared/shared-model";
-import { getTileCaseMetadata
-} from "../../../models/shared/shared-data-utils";
+import { getTileCaseMetadata } from "../../../models/shared/shared-data-utils";
 import { AppConfigModelType } from "../../../models/stores/app-config-model";
 import {ITileContentModel, TileContentModel} from "../../../models/tiles/tile-content";
 import {ITileExportOptions} from "../../../models/tiles/tile-content-info";
@@ -159,21 +158,28 @@ export const GraphModel = TileContentModel
      * This is based on the total number of points that there are in all layers.
      */
     getPointRadius(use: 'normal' | 'hover-drag' | 'select' = 'normal') {
-      let r = pointRadiusMax;
-      const numPoints = this.totalNumberOfCases;
-      // for loop is fast equivalent to radius = max( minSize, maxSize - floor( log( logBase, max( dataLength, 1 )))
-      for (let i = pointRadiusLogBase; i <= numPoints; i = i * pointRadiusLogBase) {
-        --r;
-        if (r <= pointRadiusMin) break;
-      }
-      const result = r * self.pointSizeMultiplier;
+      const r = pointRadiusMax;
+
+      //*************************************************************************************************************
+      //We used to return "result" which decreased the inner radius circle when we clicked on a
+      //selected point. Leaving this commented in case we want to change the radius when we click on a point
+      //**************************************************************************************************************
+
+      // const numPoints = self.config.caseDataArray.length;
+      // // for loop is fast equivalent to radius = max( minSize, maxSize - floor( log( logBase, max( dataLength, 1 )))
+      // for (let i = pointRadiusLogBase; i <= numPoints; i = i * pointRadiusLogBase) {
+      //   --r;
+      //   if (r <= pointRadiusMin) break;
+      // }
+      // const result = r * self.pointSizeMultiplier;
+
       switch (use) {
         case "normal":
-          return result;
+          return r;
         case "hover-drag":
-          return result * hoverRadiusFactor;
+          return r * hoverRadiusFactor;
         case "select":
-          return result + pointRadiusSelectionAddend;
+          return r + pointRadiusSelectionAddend;
       }
     },
     axisShouldShowGridLines(place: AxisPlace) {
@@ -340,6 +346,16 @@ export const GraphModel = TileContentModel
       if (!sharedDataSets) {
         console.warn("Unable to query for shared datasets");
         return;
+      }
+
+      // This handles auto-assignment in case dataset has changed in significant ways (eg, columns and recreated)
+      if (isSharedDataSet(sharedModel)) {
+        const dataSetId = sharedModel.dataSet?.id;
+        if (dataSetId) {
+          const changedLayer = self.layers.find((layer) => {
+            return layer.config.dataset?.id === dataSetId; });
+          changedLayer?.configureLinkedLayer();
+        }
       }
 
       // Would be nice if there was a simple way to tell if anything relevant has changed.
