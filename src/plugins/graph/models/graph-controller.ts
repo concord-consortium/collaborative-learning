@@ -79,7 +79,6 @@ export class GraphController {
 
   initializeGraph() {
     const {graphModel, dotsRef, layout} = this;
-    console.log('BB initializeGraph', graphModel?.contentTitle);
 
     // handle any attributes auto-assigned before our handlers were in place
     if (graphModel?.autoAssignedAttributes.length) {
@@ -156,11 +155,11 @@ export class GraphController {
     const setupAxis = (place: AxisPlace) => {
       const attrRole = graphPlaceToAttrRole[place],
         attributeID = dataConfiguration.attributeID(attrRole),
-        attr = attributeID ? dataset?.attrFromID(attributeID) : undefined,
         attrType = dataConfiguration.attributeType(attrRole) ?? 'empty',
         currAxisModel = graphModel.getAxis(place),
         currentType = currAxisModel?.type ?? 'empty',
         [min, max] = kDefaultNumericAxisBounds;
+      console.log('setting', attrRole, 'axis based on', attributeID);
       switch (attrType) {
         case 'numeric': {
           if (!currAxisModel || !isNumericAxisModel(currAxisModel)) {
@@ -168,9 +167,9 @@ export class GraphController {
             graphModel.setAxis(place, newAxisModel);
             dataConfiguration.setAttributeType(attrRole, 'numeric');
             layout.setAxisScaleType(place, 'linear');
-            setNiceDomain(attr?.numValues || [], newAxisModel);
+            setNiceDomain(graphModel.numericValuesForAttrRole(attrRole), newAxisModel);
           } else {
-            setNiceDomain(attr?.numValues || [], currAxisModel);
+            setNiceDomain(graphModel.numericValuesForAttrRole(attrRole), currAxisModel);
           }
         }
           break;
