@@ -46,7 +46,7 @@ export const EditableGraphValue: React.FC<IEditableValueProps> = observer(functi
       // For left axis determine min/max left offset based on axisBounds and width of border box
       let leftOffset;
       if (axis === 'left') {
-        const yTickRightEdgePosition = axisBounds.width - 6; //represents right edge of each Y tick
+        const yTickRightEdgePosition = axisBounds.width - 7; //represents right edge of each Y tick
         leftOffset = yTickRightEdgePosition - boxWidth;
         borderBoxRef.current.style.left = `${leftOffset}px`;
         //position max at top and min such that bottom edge of it's border is at x-axis
@@ -66,6 +66,7 @@ export const EditableGraphValue: React.FC<IEditableValueProps> = observer(functi
       }
     }
   }, [value, axis, minOrMax, axisBounds]);
+
 
   const handleClick = () => {
     if (!readOnly && !isEditing) {
