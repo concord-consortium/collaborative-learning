@@ -47,11 +47,26 @@ class TableToolTile{
     getTableCell(){
       return cy.get('.rdg-row .rdg-cell');
     }
+    /**
+     * Get table cell at the given coordinates.
+     * row and col arguments count from 0,0 at the top left,
+     * not including the header row or the label column
+     */
+    getTableCellXY(row, col) {
+      // header/label have rowindex=1 and colindex=1; the data cells start from 2.
+      const rowindex = row+2, colindex = col+2;
+      return cy.get(`.rdg-row[aria-rowindex=${rowindex}] .rdg-cell[aria-colindex=${colindex}]`);
+    }
     getTableCellContent(cellIndex) {
       return this.getTableCell().eq(cellIndex).find('.cell');
     }
     getTableCellEdit(){
       return cy.get('.rdg-row .rdg-cell .rdg-text-editor');
+    }
+    typeInTableCellXY(row, col, text) {
+      this.getTableCellXY(row, col).dblclick().then(() => {
+        this.getTableCellEdit().type(`${text}{enter}`);
+      });
     }
     typeInTableCell(i, text) {
       this.getTableCell().eq(i).dblclick().then(() => {
