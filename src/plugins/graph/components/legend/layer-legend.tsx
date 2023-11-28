@@ -76,6 +76,9 @@ export const LayerLegend = observer(function LayerLegend(props: ILayerLegendProp
     );
   }
 
+  // FIXME: down the road we will use persistent human-readable dataset names: PT-186549943
+  // At the moment, however, we look for the name of the tile that originally spawned the dataset
+  // In the case that the original tile was deleted we show "unknown data source"
   function getOriginString() {
     const tempUnknownString = "unknown data source";
     const datasetId = layer.config.dataset?.id;
