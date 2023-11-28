@@ -39,9 +39,9 @@ export const CaseDots = function CaseDots(props: {
           .attr('r', dragPointRadius);
         setDragID(aCaseData.caseID);
         currPos.current = {x: event.clientX, y: event.clientY};
-        handleClickOnDot(event, aCaseData.caseID, dataset);
+        handleClickOnDot(event, aCaseData, dataConfiguration);
       }
-    }, [dragPointRadius, dataset, enableAnimation]),
+    }, [dragPointRadius, dataConfiguration, enableAnimation]),
 
     onDrag = useCallback((event: MouseEvent) => {
       if (dotsRef.current && dragID !== '') {
