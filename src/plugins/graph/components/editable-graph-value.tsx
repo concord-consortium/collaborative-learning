@@ -13,7 +13,6 @@ interface IEditableValueProps {
   readOnly?: boolean;
 }
 
-
 export const EditableGraphValue: React.FC<IEditableValueProps> = observer(function EditableGraphValue(props) {
   const { value, minOrMax, axis, onValueChange, readOnly } = props;
   const [isEditing, setIsEditing] = useState(false);
@@ -44,9 +43,8 @@ export const EditableGraphValue: React.FC<IEditableValueProps> = observer(functi
       }
       borderBoxRef.current.style.width = `${boxWidth}px`;
 
-      let leftOffset;
-
       // For left axis determine min/max left offset based on axisBounds and width of border box
+      let leftOffset;
       if (axis === 'left') {
         const yTickRightEdgePosition = axisBounds.width - 6; //represents right edge of each Y tick
         leftOffset = yTickRightEdgePosition - boxWidth;
@@ -68,7 +66,6 @@ export const EditableGraphValue: React.FC<IEditableValueProps> = observer(functi
       }
     }
   }, [value, axis, minOrMax, axisBounds]);
-
 
   const handleClick = () => {
     if (!readOnly && !isEditing) {
