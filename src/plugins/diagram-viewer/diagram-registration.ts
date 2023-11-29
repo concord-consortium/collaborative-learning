@@ -6,7 +6,7 @@ import { DiagramToolComponent } from "./diagram-tile";
 import DiagramToolIcon from "./src/assets/program.svg";
 import { DiagramMigrator } from "./diagram-migrator";
 import { registerTileToolbarButtons } from "../../components/toolbar/toolbar-button-manager";
-import { FitViewToolbarButton, ZoomInToolbarButton, ZoomOutToolbarButton } from "./diagram-toolbar-buttons";
+import { DeleteButton, EditVariableButton, FitViewToolbarButton, HideNavigatorButton, InsertVariableButton, LockLayoutButton, NewVariableButton, ZoomInToolbarButton, ZoomOutToolbarButton } from "./diagram-toolbar-buttons";
 
 registerTileContentInfo({
   type: kDiagramTileType,
@@ -28,7 +28,13 @@ registerTileComponentInfo({
 });
 
 registerTileToolbarButtons("diagram", [
+  { name: "new-variable", component: NewVariableButton },
+  { name: "add-variable", component: InsertVariableButton },
+  { name: "edit-variable", component: EditVariableButton },
   { name: "zoom-in", component: ZoomInToolbarButton },
   { name: "zoom-out", component: ZoomOutToolbarButton },
   { name: "fit-view", component: FitViewToolbarButton },
+  { name: "lock-layout", component: LockLayoutButton },
+  { name: "toggle-navigator", component: HideNavigatorButton },
+  { name: "delete", component: DeleteButton },
 ]);

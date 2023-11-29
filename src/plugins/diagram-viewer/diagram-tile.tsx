@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { createContext, useState } from "react";
 import { observer } from "mobx-react";
 import { DragEndEvent, useDndMonitor, useDroppable } from "@dnd-kit/core";
 import { Diagram, DiagramHelper, Variable, VariableType } from "@concord-consortium/diagram-view";
@@ -11,7 +11,6 @@ import { useInsertVariableDialog } from "../shared-variables/dialog/use-insert-v
 import { SharedVariablesType } from "../shared-variables/shared-variables";
 import { useNewVariableDialog } from "../shared-variables/dialog/use-new-variable-dialog";
 import { ITileProps } from "../../components/tiles/tile-component";
-import { useToolbarTileApi } from "../../components/tiles/hooks/use-toolbar-tile-api";
 import { useUIStore } from "../../hooks/use-stores";
 import { BasicEditableTileTitle } from "../../components/tiles/basic-editable-tile-title";
 import { DiagramHelperContext } from "./use-diagram-helper-context";
@@ -20,6 +19,19 @@ import { TileToolbar } from "../../components/toolbar/tile-toolbar";
 import InsertVariableCardIcon from "./src/assets/insert-variable-card-icon.svg";
 import "@concord-consortium/diagram-view/dist/index.css";
 import "./diagram-tile.scss";
+
+export interface DiagramTileMethods {
+  isInteractionLocked: () => boolean;
+  toggleInteractionLocked: () => void;
+  isNavigatorHidden: () => boolean;
+  toggleNavigatorHidden: () => void;
+  showDialog: (showDialogFunction: () => void) => void;
+  showNewVariableDialog: () => void;
+  showInsertVariableDialog: () => void;
+  showEditVariableDialog: () => void;
+}
+
+export const DiagramTileMethodsContext = createContext<DiagramTileMethods|undefined>(undefined);
 
 export const DiagramToolComponent: React.FC<ITileProps> = observer((
   { documentContent, model, onRegisterTileApi, onUnregisterTileApi, readOnly, scale, tileElt }
@@ -30,6 +42,7 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
 
   const [diagramHelper, setDiagramHelper] = useState<DiagramHelper | undefined>();
   const [interactionLocked, setInteractionLocked] = useState(false);
+
   const toggleInteractionLocked = () => {
     if (!interactionLocked) {
       content.root.setSelectedNode(undefined);
@@ -39,13 +52,6 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const onClose = () => setDialogOpen(false);
-
-  const handleDeleteClick = () => {
-    const selectedNode = content.root.selectedNode;
-    if (selectedNode) {
-      content.root.removeNode(selectedNode);
-    }
-  };
 
   const showDialog = (showDialogFunction: () => void) => {
     setDialogOpen(true);
@@ -102,7 +108,17 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
   const disableInsertVariableButton =
     otherVariables.length < 1 && unusedVariables.length < 1;
 
-  const toolbarProps = useToolbarTileApi({ id: model.id, enabled: !readOnly, onRegisterTileApi, onUnregisterTileApi });
+    const diagramMethods: DiagramTileMethods = {
+      showDialog,
+      showNewVariableDialog,
+      showInsertVariableDialog,
+      showEditVariableDialog,
+      isInteractionLocked: () => { return interactionLocked; },
+      toggleInteractionLocked,
+      isNavigatorHidden: () => { return !!content.hideNavigator; },
+      toggleNavigatorHidden: () => { content.setHideNavigator(!content.hideNavigator); },
+    };
+
 
   const droppableId = `${kDiagramDroppableId}-${model.id}`;
   const { isOver, setNodeRef } = useDroppable({ id: droppableId });
@@ -130,41 +146,25 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
   const preventKeyboardDelete = dialogOpen || !isTileSelected || readOnly;
   return (
     <DiagramHelperContext.Provider value={diagramHelper}>
-    <div className="diagram-tool">
-      <BasicEditableTileTitle readOnly={readOnly} />
-      <TileToolbar tileType="diagram" readOnly={!!readOnly} tileElement={tileElt} />
-      {/* <DiagramToolbar
-        content={content}
-        diagramHelper={diagramHelper}
-        disableInsertVariableButton={disableInsertVariableButton}
-        documentContent={documentContent}
-        handleDeleteClick={handleDeleteClick}
-        handleEditVariableClick={() => showDialog(showEditVariableDialog)}
-        handleInsertVariableClick={() => showDialog(showInsertVariableDialog)}
-        handleNewVariableClick={() => showDialog(showNewVariableDialog)}
-        hideNavigator={!!content.hideNavigator}
-        interactionLocked={interactionLocked || readOnly || false}
-        tileElt={tileElt}
-        tileId={model.id}
-        toggleInteractionLocked={toggleInteractionLocked}
-        toggleNavigator={() => content.setHideNavigator(!content.hideNavigator)}
-        scale={scale}
-        { ...toolbarProps }
-      /> */}
-      <div className="drop-target" ref={setNodeRef} style={dropTargetStyle}>
-        <Diagram
-          dqRoot={content.root}
-          hideControls={true}
-          hideNavigator={!!content.hideNavigator}
-          hideNewVariableButton={true}
-          interactionLocked={interactionLocked || readOnly}
-          preventKeyboardDelete={preventKeyboardDelete}
-          readOnly={readOnly}
-          setDiagramHelper={setDiagramHelper}
-        />
-      </div>
-      <div className="qp-version">{`version: ${kQPVersion}`}</div>
-    </div>
+      <DiagramTileMethodsContext.Provider value={diagramMethods}>
+        <div className="diagram-tool">
+          <BasicEditableTileTitle readOnly={readOnly} />
+          <TileToolbar tileType="diagram" readOnly={!!readOnly} tileElement={tileElt} />
+          <div className="drop-target" ref={setNodeRef} style={dropTargetStyle}>
+            <Diagram
+              dqRoot={content.root}
+              hideControls={true}
+              hideNavigator={!!content.hideNavigator}
+              hideNewVariableButton={true}
+              interactionLocked={interactionLocked || readOnly}
+              preventKeyboardDelete={preventKeyboardDelete}
+              readOnly={readOnly}
+              setDiagramHelper={setDiagramHelper}
+            />
+          </div>
+          <div className="qp-version">{`version: ${kQPVersion}`}</div>
+        </div>
+      </DiagramTileMethodsContext.Provider>
     </DiagramHelperContext.Provider>
   );
 });

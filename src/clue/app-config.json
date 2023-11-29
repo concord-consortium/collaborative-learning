@@ -245,9 +245,15 @@
       },
       "diagram": {
         "tools": [
+          "new-variable",
+          "add-variable",
+          "edit-variable",
           "zoom-in",
           "zoom-out",
-          "fit-view"
+          "fit-view",
+          "lock-layout",
+          "toggle-navigator",
+          "delete"
         ]
       },
       "graph": {
