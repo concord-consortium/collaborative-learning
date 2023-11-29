@@ -126,17 +126,21 @@ export function getPointTipText(caseID: string, attributeIDs: (string|undefined)
   return Array.from(new Set(attrArray)).filter(anEntry => anEntry !== '').join('<br>');
 }
 
-export function handleClickOnDot(event: MouseEvent, caseID: string, dataset?: IDataSet) {
+export function handleClickOnDot(event: MouseEvent, caseData: CaseData, dataConfiguration?: IDataConfigurationModel) {
+  if (!dataConfiguration) return;
+  const dataset = dataConfiguration.dataset;
+  const yAttributeId = dataConfiguration.yAttributeID(caseData.plotNum);
+  const yCell = { attributeId: yAttributeId, caseId: caseData.caseID };
   const extendSelection = event.shiftKey,
-    caseIsSelected = dataset?.isCaseSelected(caseID);
-  if (!caseIsSelected) {
-    if (extendSelection) { // case is not selected and Shift key is down => add case to selection
-      dataset?.selectCases([caseID]);
-    } else { // case is not selected and Shift key is up => only this case should be selected
-      dataset?.setSelectedCases([caseID]);
+    cellIsSelected = dataset?.isCellSelected(yCell);
+  if (!cellIsSelected) {
+    if (extendSelection) { // y cell is not selected and Shift key is down => add y cell to selection
+      dataset?.selectCells([yCell]);
+    } else { // y cell is not selected and Shift key is up => only this y cell should be selected
+      dataset?.setSelectedCells([yCell]);
     }
-  } else if (extendSelection) { // case is selected and Shift key is down => deselect case
-    dataset?.selectCases([caseID], false);
+  } else if (extendSelection) { // y cell is selected and Shift key is down => deselect cell
+    dataset?.selectCells([yCell], false);
   }
 }
 
@@ -202,7 +206,7 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
     event.stopPropagation();
     const target = select(event.target as SVGSVGElement);
     if (target.node()?.nodeName === 'circle') {
-      handleClickOnDot(event, (target.datum() as CaseData).caseID, dataConfiguration.dataset);
+      handleClickOnDot(event, target.datum() as CaseData, dataConfiguration);
     }
   });
   dataConfiguration.setPointsNeedUpdating(false);
@@ -211,9 +215,13 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
 function isCircleSelected(aCaseData: CaseData, dataConfiguration?: IDataConfigurationModel) {
   const dataset = dataConfiguration?.dataset;
   if (!dataset) return false;
+  const xAttributeId = dataConfiguration.xAttributeID;
+  const yAttributeId = dataConfiguration.yAttributeID(aCaseData.plotNum);
   return dataset.isCaseSelected(aCaseData.caseID)
-    || dataset.isAttributeSelected(dataConfiguration.xAttributeID)
-    || dataset.isAttributeSelected(dataConfiguration.yAttributeID(aCaseData.plotNum));
+    || dataset.isAttributeSelected(xAttributeId)
+    || dataset.isAttributeSelected(yAttributeId)
+    || dataset.isCellSelected({ attributeId: xAttributeId, caseId: aCaseData.caseID })
+    || dataset.isCellSelected({ attributeId: yAttributeId, caseId: aCaseData.caseID });
 }
 
 function applySelectedClassToCircles(selection: DotSelection, dataConfiguration?: IDataConfigurationModel){

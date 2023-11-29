@@ -60,7 +60,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
         setDragID(tItsID);
         currPos.current = {x: event.clientX, y: event.clientY};
 
-        handleClickOnDot(event, tItsID, dataset);
+        handleClickOnDot(event, aCaseData, dataConfiguration);
         // Record the current values, so we can change them during the drag and restore them when done
         const { caseSelection } = dataConfiguration || {},
           xAttrID = dataConfiguration?.attributeID('x') ?? '';

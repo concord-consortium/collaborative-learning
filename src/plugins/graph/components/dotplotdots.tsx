@@ -47,7 +47,7 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
         setDragID(() => tItsID);
         currPos.current = primaryIsBottom ? event.clientX : event.clientY;
 
-        handleClickOnDot(event, tItsID, dataset);
+        handleClickOnDot(event, aCaseData, dataConfiguration);
         // Record the current values, so we can change them during the drag and restore them when done
         const { caseSelection } = dataConfiguration || {},
           primaryAttrID = dataConfiguration?.attributeID(dataConfiguration?.primaryRole ?? 'x') ?? '';
