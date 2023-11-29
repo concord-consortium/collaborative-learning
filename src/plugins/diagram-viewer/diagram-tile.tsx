@@ -3,7 +3,6 @@ import { observer } from "mobx-react";
 import { DragEndEvent, useDndMonitor, useDroppable } from "@dnd-kit/core";
 import { Diagram, DiagramHelper, Variable, VariableType } from "@concord-consortium/diagram-view";
 
-import { DiagramToolbar } from "./diagram-toolbar";
 import { DiagramContentModelType } from "./diagram-content";
 import { kDiagramDroppableId, kNewVariableButtonDraggableId, kQPVersion } from "./diagram-types";
 import { variableBuckets } from "../shared-variables/shared-variables-utils";
@@ -15,6 +14,8 @@ import { ITileProps } from "../../components/tiles/tile-component";
 import { useToolbarTileApi } from "../../components/tiles/hooks/use-toolbar-tile-api";
 import { useUIStore } from "../../hooks/use-stores";
 import { BasicEditableTileTitle } from "../../components/tiles/basic-editable-tile-title";
+import { DiagramHelperContext } from "./use-diagram-helper-context";
+import { TileToolbar } from "../../components/toolbar/tile-toolbar";
 
 import InsertVariableCardIcon from "./src/assets/insert-variable-card-icon.svg";
 import "@concord-consortium/diagram-view/dist/index.css";
@@ -128,9 +129,11 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
 
   const preventKeyboardDelete = dialogOpen || !isTileSelected || readOnly;
   return (
+    <DiagramHelperContext.Provider value={diagramHelper}>
     <div className="diagram-tool">
       <BasicEditableTileTitle readOnly={readOnly} />
-      <DiagramToolbar
+      <TileToolbar tileType="diagram" readOnly={!!readOnly} tileElement={tileElt} />
+      {/* <DiagramToolbar
         content={content}
         diagramHelper={diagramHelper}
         disableInsertVariableButton={disableInsertVariableButton}
@@ -147,7 +150,7 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
         toggleNavigator={() => content.setHideNavigator(!content.hideNavigator)}
         scale={scale}
         { ...toolbarProps }
-      />
+      /> */}
       <div className="drop-target" ref={setNodeRef} style={dropTargetStyle}>
         <Diagram
           dqRoot={content.root}
@@ -162,6 +165,7 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
       </div>
       <div className="qp-version">{`version: ${kQPVersion}`}</div>
     </div>
+    </DiagramHelperContext.Provider>
   );
 });
 DiagramToolComponent.displayName = "DiagramToolComponent";

@@ -243,6 +243,13 @@
       "dataset": {
         "cellsSelectCases": false
       },
+      "diagram": {
+        "tools": [
+          "zoom-in",
+          "zoom-out",
+          "fit-view"
+        ]
+      },
       "graph": {
         "emptyPlotIsNumeric": true,
         "scalePlotOnValueChange": true,

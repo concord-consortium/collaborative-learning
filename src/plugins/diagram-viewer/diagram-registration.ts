@@ -5,6 +5,8 @@ import { defaultDiagramContent, DiagramContentModel } from "./diagram-content";
 import { DiagramToolComponent } from "./diagram-tile";
 import DiagramToolIcon from "./src/assets/program.svg";
 import { DiagramMigrator } from "./diagram-migrator";
+import { registerTileToolbarButtons } from "../../components/toolbar/toolbar-button-manager";
+import { FitViewToolbarButton, ZoomInToolbarButton, ZoomOutToolbarButton } from "./diagram-toolbar-buttons";
 
 registerTileContentInfo({
   type: kDiagramTileType,
@@ -24,3 +26,9 @@ registerTileComponentInfo({
   tileEltClass: "diagram-tool-tile disable-tile-content-drag nowheel",
   Icon: DiagramToolIcon
 });
+
+registerTileToolbarButtons("diagram", [
+  { name: "zoom-in", component: ZoomInToolbarButton },
+  { name: "zoom-out", component: ZoomOutToolbarButton },
+  { name: "fit-view", component: FitViewToolbarButton },
+]);
