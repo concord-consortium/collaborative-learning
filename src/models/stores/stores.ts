@@ -85,6 +85,10 @@ class Stores implements IStores{
     this.appConfig = params?.appConfig || AppConfigModel.create();
 
     // for testing, we create a null problem or investigation if none is provided
+    // HERE IS WHERE WE WILL SET UP OUR NEW STORE
+    // OUR ONSNAPSHOT HANDLER WILL BE HERE TOO
+    // SETuP listener will add the handler to itself...will also need the user in hand at the time...
+
     this.investigation = params?.investigation ||
       InvestigationModel.create({ ordinal: 0, title: "Null Investigation" });
     this.problem = params?.problem || ProblemModel.create({ ordinal: 0, title: "Null Problem" });

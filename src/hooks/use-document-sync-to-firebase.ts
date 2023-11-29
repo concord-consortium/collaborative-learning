@@ -93,6 +93,7 @@ export function useDocumentSyncToFirebase(
   });
 
   // sync properties for problem, personal, and learning log documents
+  // THIS ONE - THE CALLER
   useSyncMstNodeToFirebase({
     firebase, model: document.properties, path: `${metadata}/properties`,
     enabled: commonSyncEnabled && !readOnly && [ProblemDocument, PersonalDocument, LearningLogDocument].includes(type),

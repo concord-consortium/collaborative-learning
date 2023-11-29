@@ -1,6 +1,12 @@
 import { NodeChannelInfo } from "src/plugins/dataflow/model/utilities/channel";
 import { NodeLiveOutputTypes } from "../../plugins/dataflow/model/utilities/node";
 
+// OUR NEW STORE WILL HAVE A METHOD CALLED "install listener" that will be called from the ui store
+// it will have get the user and database from them, and call the the instasll listener method with those as params
+// it will be called from the constructor, which will be ordered in the code after the other stores are constructed
+// so the user and database will be available
+// but the user and the database will exist before they are populated, so you will need to check for them being ready, might be a thing we do somewhere else
+
 export class SerialDevice {
   localBuffer: string;
   private port: SerialPort | null;

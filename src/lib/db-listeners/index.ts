@@ -94,6 +94,11 @@ export class DBListeners extends BaseListener {
       const updatePath = path || this.db.firebase.getUserDocumentMetadataPath(user, key, document.uid);
       const updateRef = this.db.firebase.ref(updatePath);
       // synchronize document property changes to firebase
+      // MONITORING DOCUMENT.PROPERTIES, calling the callback when it changes with properties as the param
+      // IN THIS CASE IT IS STORING THE SNAPSHOT DIRECTLY
+      // SO WE WILL JUST STRINGIFY THE SNAPSHOT BEFORE IT GOES IN
+
+      // In the initializer for the ui store you will pass the database, e.g storage.ts...
       onSnapshot(document.properties, properties => updateRef.update({ properties }));
     }
     else if (dbType === "firestore") {

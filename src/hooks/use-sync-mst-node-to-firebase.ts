@@ -32,13 +32,18 @@ export function useSyncMstNodeToFirebase<T extends IAnyStateTreeNode>({
     // but clients may override the defaults
     ...clientOptions
   };
+  // HERE IS WHERE THE ACTUAL FIREBASE CALL IS MADE WE PROBABLY JUST NEED LINE 37 JUST CALL DIRECLY
   const mutation = useMutation((snapshot: SnapshotOut<T>) => {
-    return firebase.ref(path).update(transform?.(snapshot) ?? snapshot);
+    return firebase.ref(path).update(transform?.(snapshot) ?? snapshot); // PATH BLAH SHOULD BE UPDATED WITH WITH THE SNAPSHOT IN HAND
   }, options);
   const throttledMutate = useMemo(() => _throttle(mutation.mutate, throttle), [mutation.mutate, throttle]);
 
+  // AN AN EXAMPLE OF A ON SNAPSHOT HANDLER IN A STORE:
+  // ADDING A HANDLER ON AN EFFECT NOT ON RENDER
   useEffect(() => {
     const cleanup = enabled
+            // ADD A HANDLER ON SNAPSHOT PARAMES CAME FROM THE CALLER EG THE ONE IN
+            // WE CAN CALL OUR SNAPSHOT WITH THE PERSISTENT UI SNAPSHOT
             ? onSnapshot<SnapshotOut<T>>(model, snapshot => {
                 // reset (e.g. stop retrying and restart) when value changes
                 mutation.isError && mutation.reset();
