@@ -339,9 +339,9 @@ $default-button-border-color: #979797;
   }
 }
 
-
 .downshift-dropdown {
-  position: relative;
+  position: absolute;
+  width: 213px;
 
   ul {
     padding: 0px;
@@ -349,9 +349,23 @@ $default-button-border-color: #979797;
 
     li {
       list-style: none;
-      background-color: $workspace-teal-light-6;
+      background-color: white;
       padding-left:7px;
     }
+    &:last-of-type {
+      li {
+        border-radius: 0px 0px 3px 3px;
+      }
+    }
+  }
+
+  ul.open {
+    border:1px solid #222;
+    box-shadow: 0px 0px 3px 0px rgba(0,0,0,0.4);
+    background-color: white;
+    position: relative;
+    z-index:1; // must define z-index since parent/child are aboslute/relative
+    border-radius: 0px 0px 3px 3px;
   }
 
   button {
