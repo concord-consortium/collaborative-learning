@@ -13,7 +13,7 @@ import { SharedVariablesType } from "../shared-variables/shared-variables";
 import { useNewVariableDialog } from "../shared-variables/dialog/use-new-variable-dialog";
 import { ITileProps } from "../../components/tiles/tile-component";
 import { useToolbarTileApi } from "../../components/tiles/hooks/use-toolbar-tile-api";
-import { useUIStore } from "../../hooks/use-stores";
+import { usePersistentUIStore } from "../../hooks/use-stores";
 import { BasicEditableTileTitle } from "../../components/tiles/basic-editable-tile-title";
 
 import InsertVariableCardIcon from "./src/assets/insert-variable-card-icon.svg";
@@ -24,7 +24,7 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
   { documentContent, model, onRegisterTileApi, onUnregisterTileApi, readOnly, scale, tileElt }
 ) => {
   const content = model.content as DiagramContentModelType;
-  const ui = useUIStore();
+  const ui = usePersistentUIStore();
   const isTileSelected = ui.isSelectedTile(model);
 
   const [diagramHelper, setDiagramHelper] = useState<DiagramHelper | undefined>();

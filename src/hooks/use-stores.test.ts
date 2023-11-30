@@ -12,7 +12,7 @@ import {
   useAppConfig, useAppMode, useClassStore, useDemoStore, useDocumentFromStore, useDocumentMetadataFromStore,
   useDocumentOrCurriculumMetadata, useGroupsStore, useLocalDocuments, useNetworkDocumentKey, useNetworkDocuments,
   useProblemPath, useProblemPathWithFacet, useProblemStore, useSharedSelectionStore,
-  useTypeOfTileInDocumentOrCurriculum, useUIStore, useUserStore
+  useTypeOfTileInDocumentOrCurriculum, usePersistentUIStore, useUserStore
 } from "./use-stores";
 import { unitConfigDefaults } from "../test-fixtures/sample-unit-configurations";
 
@@ -80,7 +80,7 @@ describe("useStores", () => {
       expect(useProblemPathWithFacet("facet")).toBe(problemPathWithFacet);
       expect(useProblemStore()).toBe(problem);
       expect(useSharedSelectionStore()).toBe(selection);
-      expect(useUIStore()).toBe(ui);
+      expect(usePersistentUIStore()).toBe(ui);
       expect(useUserStore()).toBe(user);
     });
   });

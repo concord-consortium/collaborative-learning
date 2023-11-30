@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { observer } from "mobx-react";
 import classNames from "classnames";
 import { FloatingPortal } from "@floating-ui/react";
-import { useSettingFromStores, useUIStore } from "../../hooks/use-stores";
+import { useSettingFromStores, usePersistentUIStore } from "../../hooks/use-stores";
 import { useTileToolbarPositioning } from "./use-tile-toolbar-positioning";
 import { getToolbarButtonInfo } from "./toolbar-button-manager";
 import { TileModelContext } from "../tiles/tile-api";
@@ -40,7 +40,7 @@ export const TileToolbar = observer(
     const { toolbarRefs, toolbarStyles, toolbarPlacement, rootElement, hide } = useTileToolbarPositioning(tileElement);
 
     // Determine the buttons to be shown.
-    const ui = useUIStore();
+    const ui = usePersistentUIStore();
     let buttonDescriptions: JSONValue[];
     const customizedButtons = useSettingFromStores("tools", tileType);
     if (customizedButtons) {

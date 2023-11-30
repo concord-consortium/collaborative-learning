@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import React, { useEffect, useRef, useState } from "react";
-import { useUIStore } from "../../hooks/use-stores";
+import { usePersistentUIStore } from "../../hooks/use-stores";
 import SendIcon from "../../assets/send-icon.svg";
 import "../themes.scss";
 
@@ -30,7 +30,7 @@ export const CommentTextBox: React.FC<IProps> = (props) => {
                                       { disabled: commentEmptyNoTags,
                                       "no-action": commentEmptyNoTags });
 
-  const ui = useUIStore();
+  const ui = usePersistentUIStore();
 
   // resize textarea when user deletes some text
   useEffect(() => {

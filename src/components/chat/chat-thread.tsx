@@ -4,7 +4,7 @@ import { ILogComment, logCommentEvent } from "../../models/tiles/log/log-comment
 import { UserModelType } from "../../models/stores/user";
 import { getTileComponentInfo } from "../../models/tiles/tile-component-info";
 import { WithId } from "../../hooks/firestore-hooks";
-import { useUIStore } from "../../hooks/use-stores";
+import { usePersistentUIStore } from "../../hooks/use-stores";
 import { CommentDocument} from "../../lib/firestore-schema";
 import { CommentCard } from "./comment-card";
 import UserIcon from "../../assets/icons/clue-dashboard/teacher-student.svg";
@@ -36,7 +36,7 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
   const focusId = focusTileId === undefined ? null : focusTileId;
   const focusedItemHasNoComments = !chatThreads?.find(item => (item.tileId === focusId));
   const [expandedThread, setExpandedThread] = useState(focusId || '');
-  const ui = useUIStore();
+  const ui = usePersistentUIStore();
 
   const handleThreadClick = (clickedId: string | null) => {
     // Do the logging before we change expandedThread so we can tell whether the thread was expanded or collapsed.

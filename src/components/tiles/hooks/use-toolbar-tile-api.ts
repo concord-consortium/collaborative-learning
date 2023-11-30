@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useCurrent } from "../../../hooks/use-current";
-import { useUIStore } from "../../../hooks/use-stores";
+import { usePersistentUIStore } from "../../../hooks/use-stores";
 import { ITileApi, TileResizeEntry } from "../tile-api";
 
 export interface IUseToolbarToolApi {
@@ -29,7 +29,7 @@ export const useToolbarTileApi = (
     return () => onUnregisterTileApi("layout");
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const ui = useUIStore();
+  const ui = usePersistentUIStore();
   const enabledRef = useCurrent(enabled);
   const handleIsEnabled = useRef(() => {
     // Implemented as callback so that the MST accesses occur from the toolbar's

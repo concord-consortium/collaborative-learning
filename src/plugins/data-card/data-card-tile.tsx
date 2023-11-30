@@ -2,7 +2,7 @@ import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { useEffect, useRef, useState } from "react";
 import { ITileProps, extractDragTileType, kDragTiles } from "../../components/tiles/tile-component";
-import { useUIStore } from "../../hooks/use-stores";
+import { usePersistentUIStore } from "../../hooks/use-stores";
 import { DataCardContentModelType } from "./data-card-content";
 import { DataCardRows } from "./components/data-card-rows";
 import { DataCardToolbar } from "./data-card-toolbar";
@@ -31,7 +31,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
   const dataSet = content.dataSet;
   const linkedTiles = content.tileEnv?.sharedModelManager?.getSharedModelTiles(content.sharedModel);
   const isLinked = linkedTiles && linkedTiles.length > 1;
-  const ui = useUIStore();
+  const ui = usePersistentUIStore();
 
   const isTileSelected = ui.selectedTileIds.findIndex(id => id === content.metadata.id) >= 0;
   const [currEditAttrId, setCurrEditAttrId] = useState<string>("");

@@ -1,7 +1,7 @@
 import React from "react";
 import PublishSvg from "../../assets/icons/publish/publish-icon-default.svg";
 import { useCustomModal } from "../../hooks/use-custom-modal";
-import { useDBStore, useProblemPath, useStores, useUIStore, useUserStore } from "../../hooks/use-stores";
+import { useDBStore, useProblemPath, useStores, usePersistentUIStore, useUserStore } from "../../hooks/use-stores";
 import { DocumentModelType } from "../../models/document/document";
 import { ProblemDocument } from "../../models/document/document-types";
 
@@ -12,7 +12,7 @@ export const usePublishDialog = (document: DocumentModelType) => {
   const user = useUserStore();
   const db = useDBStore();
   const problemPath = useProblemPath();
-  const ui = useUIStore();
+  const ui = usePersistentUIStore();
   const docTypeString = document.getLabel(stores.appConfig, 1);
   const docTypeStringL = document.getLabel(stores.appConfig, 1, true);
 

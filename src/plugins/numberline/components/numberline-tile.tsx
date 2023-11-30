@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import classNames from 'classnames';
 import { axisBottom, drag, pointer, scaleLinear, select } from 'd3';
 import { observer } from 'mobx-react';
-import { useUIStore } from '../../../hooks/use-stores';
+import { usePersistentUIStore } from '../../../hooks/use-stores';
 import { kSmallAnnotationNodeRadius } from '../../../components/annotations/annotation-utilities';
 import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
 import { useToolbarTileApi } from "../../../components/tiles/hooks/use-toolbar-tile-api";
@@ -30,7 +30,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   const content = model.content as NumberlineContentModelType;
   const [hoverPointId, setHoverPointId] = useState("");
   const [_selectedPointId, setSelectedPointId] = useState(""); // Just used to rerender when a point is selected
-  const ui = useUIStore();
+  const ui = usePersistentUIStore();
   const isTileSelected = ui.isSelectedTile(model);
 
   //---------------- Model Manipulation Functions -------------------------------------------------

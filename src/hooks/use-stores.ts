@@ -140,7 +140,7 @@ export function useSharedSelectionStore(): SelectionStoreModelType {
   return useStores().selection;
 }
 
-export function useUIStore(): UIModelType {
+export function usePersistentUIStore(): UIModelType {
   return useStores().persistentUi;
 }
 

@@ -18,7 +18,7 @@ import ExpandLeftIcon from "../assets/expand-left-icon.svg";
 import MoveIcon from "../assets/move-icon.svg";
 import HideObjectIcon from "../assets/hide-object-icon.svg";
 import ShowObjectIcon from "../assets/show-object-icon.svg";
-import { useUIStore } from "../../../hooks/use-stores";
+import { usePersistentUIStore } from "../../../hooks/use-stores";
 
 
 interface IObjectListViewProps {
@@ -126,7 +126,7 @@ const ObjectLine = observer(function ObjectLine(
     isDragging
   } = useSortable({id: object.id});
 
-  const ui = useUIStore();
+  const ui = usePersistentUIStore();
 
   function handleHoverIn() {
     if (active) return; // avoid flashes of highlight while dragging

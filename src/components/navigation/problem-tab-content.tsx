@@ -2,7 +2,7 @@ import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { useEffect } from "react";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
-import { useProblemPathWithFacet, useUIStore, useUserStore } from "../../hooks/use-stores";
+import { useProblemPathWithFacet, usePersistentUIStore, useUserStore } from "../../hooks/use-stores";
 import { getSectionTitle, SectionModelType } from "../../models/curriculum/section";
 import { ProblemPanelComponent } from "./problem-panel";
 import { Logger } from "../../lib/logger";
@@ -21,7 +21,7 @@ interface IProps {
 export const ProblemTabContent: React.FC<IProps>
   = observer(function ProblemTabContent({ context, sections, showSolutionsSwitch }: IProps) {
   const { isTeacher } = useUserStore();
-  const ui = useUIStore();
+  const ui = usePersistentUIStore();
   const problemPath = useProblemPathWithFacet(context);
   const { showTeacherContent } = ui;
   const hasSubTabs = sections && sections.length > 1;

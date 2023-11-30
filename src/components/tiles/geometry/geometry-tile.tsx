@@ -4,7 +4,7 @@ import { IGeometryProps, IActionHandlers } from "./geometry-shared";
 import { GeometryToolbar } from "./geometry-toolbar";
 import { GeometryContentModelType } from "../../../models/tiles/geometry/geometry-content";
 import { useTileSelectionPointerEvents } from "./use-tile-selection-pointer-events";
-import { useUIStore } from "../../../hooks/use-stores";
+import { usePersistentUIStore } from "../../../hooks/use-stores";
 import { useCurrent } from "../../../hooks/use-current";
 import { useForceUpdate } from "../hooks/use-force-update";
 import { useToolbarTileApi } from "../hooks/use-toolbar-tile-api";
@@ -40,7 +40,7 @@ const _GeometryToolComponent: React.FC<IGeometryProps> = ({
     setActionHandlers(handlers);
   };
 
-  const ui = useUIStore();
+  const ui = usePersistentUIStore();
   const [handlePointerDown, handlePointerUp] = useTileSelectionPointerEvents(
     useCallback(() => ui.isSelectedTile(modelRef.current), [modelRef, ui]),
     useCallback((append: boolean) => ui.setSelectedTile(modelRef.current, { append }), [modelRef, ui]),

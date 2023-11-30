@@ -3,7 +3,7 @@ import { observer } from "mobx-react";
 import { useQueryClient } from "react-query";
 import classNames from "classnames";
 import { useAppConfig, useLocalDocuments, useProblemStore, useStores,
-  useUIStore, useUserStore, useClassStore } from "../../hooks/use-stores";
+  usePersistentUIStore, useUserStore, useClassStore } from "../../hooks/use-stores";
 import { useUserContext } from "../../hooks/use-user-context";
 import { ISubTabSpec, NavTabModelType } from "src/models/view/nav-tabs";
 import { DocumentType } from "../../models/document/document-types";
@@ -21,7 +21,7 @@ interface IProps {
 }
 //TODO: Need to refactor this if we want to deploy to all tabs
 export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IProps) {
-  const ui = useUIStore();
+  const ui = usePersistentUIStore();
   const store = useStores();
   const appConfigStore = useAppConfig();
   const context = useUserContext();
@@ -204,7 +204,7 @@ interface IDocumentAreaProps {
 
 const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocument,
     hasSecondaryDocument, hideLeftFlipper, hideRightFlipper, onChangeDocument}: IDocumentAreaProps) => {
-  const ui = useUIStore();
+  const ui = usePersistentUIStore();
   const user = useUserStore();
   const appConfig = useAppConfig();
   const classStore = useClassStore();
