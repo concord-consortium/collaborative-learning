@@ -81,7 +81,7 @@ context('XYPlot Tool Tile', function () {
       xyTile.getTile().should('not.exist');
     });
 
-    it.skip("Test undo redo actions", () => {
+    it("Test undo redo actions", () => {
       beforeTest(queryParams);
       cy.log("Undo redo  XY Plot Tile creation");
       clueCanvas.addTile('graph');
@@ -117,7 +117,7 @@ context('XYPlot Tool Tile', function () {
       xyTile.getTile().should('not.exist');
     });
 
-    it.skip("Test adding 2 Y Series", () => {
+    it("Test adding 2 Y Series", () => {
       beforeTest(queryParams);
       cy.log("Add XY Plot Tile");
       cy.collapseResourceTabs();
