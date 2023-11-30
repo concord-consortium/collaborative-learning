@@ -72,11 +72,12 @@ export const GraphAxis = observer(function GraphAxis({
   useEffect(function installBackground() {
     return autorun(() => {
       if (wrapperElt) {
-        const bounds = layout.getComputedBounds(place),
-          graphWidth = layout.graphWidth,
-          left = ['bottom', 'top'].includes(place) ? 0 : bounds.left,
-          width = ['bottom', 'top'].includes(place) ? graphWidth : bounds.width,
-          transform = `translate(${left}, ${bounds.top})`;
+        const bounds = layout.getComputedBounds(place);
+        const graphWidth = layout.graphWidth;
+        const left = ['bottom', 'top'].includes(place) ? 0 : bounds.left;
+        const width = ['bottom', 'top'].includes(place) ? graphWidth : bounds.width;
+        const transform = `translate(${left}, ${bounds.top})`;
+
         select(wrapperElt)
           .selectAll<SVGRectElement, number>('rect.axis-background')
           .attr('transform', transform)

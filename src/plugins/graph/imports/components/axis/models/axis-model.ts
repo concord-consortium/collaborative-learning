@@ -80,6 +80,12 @@ export const NumericAxisModel = AxisModel
     }
   }))
   .actions(self => ({
+    setMin(value: number){
+      self.min = value;
+    },
+    setMax(value: number){
+      self.max = value;
+    },
     setDomain(min: number, max: number) {
       // Clean NaNs since they will make the document crash
       if (!isFinite(min) || !isFinite(max)) {
@@ -94,8 +100,8 @@ export const NumericAxisModel = AxisModel
       } else if ((min < 0) && (Math.abs(max) < Math.abs(min / snapFactor))) {
         max = 0;
       }
-      self.min = min;
-      self.max = max;
+      self.min = parseFloat(min.toFixed(2));
+      self.max = parseFloat(max.toFixed(2));
     }
   }));
 export interface INumericAxisModel extends Instance<typeof NumericAxisModel> {}
