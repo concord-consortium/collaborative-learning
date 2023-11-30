@@ -31,9 +31,6 @@ export const GraphLayerModel = types
     }
   }))
   .actions(self => ({
-    afterCreate() {
-      self.isLinked = !!self.config?.dataset;
-    },
     beforeDestroy() {
       self.disposeDataSetListener?.();
     },
