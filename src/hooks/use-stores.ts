@@ -13,7 +13,7 @@ import { GroupsModelType } from "../models/stores/groups";
 import { SelectionStoreModelType } from "../models/stores/selection";
 import { IStores } from "../models/stores/stores";
 import { UserModelType } from "../models/stores/user";
-import { UIModelType } from "../models/stores/ui";
+import { UIModelType } from "../models/stores/persistent-ui";
 
 // https://mobx-react.js.org/recipes-migration
 export function useStores(): IStores {

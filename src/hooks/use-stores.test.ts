@@ -5,7 +5,7 @@ import { DemoClassModel, DemoModel } from "../models/stores/demo";
 import { DocumentsModel } from "../models/stores/documents";
 import { GroupsModel } from "../models/stores/groups";
 import { SelectionStoreModel } from "../models/stores/selection";
-import { UIModel } from "../models/stores/ui";
+import { UIModel } from "../models/stores/persistent-ui";
 import { UserModel } from "../models/stores/user";
 import { LearningLogWorkspace, ProblemWorkspace, WorkspaceModel } from "../models/stores/workspace";
 import {

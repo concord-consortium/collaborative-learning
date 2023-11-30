@@ -1,4 +1,4 @@
-import { UIModel, UIModelType, UIDialogModelType } from "./ui";
+import { UIModel, UIModelType, UIDialogModelType } from "./persistent-ui";
 import { ProblemWorkspace, LearningLogWorkspace } from "./workspace";
 import { TileModel } from "../tiles/tile-model";
 import { TextContentModel } from "../tiles/text/text-content";

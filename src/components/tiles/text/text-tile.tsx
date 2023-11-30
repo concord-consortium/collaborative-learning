@@ -6,7 +6,7 @@ import {
 } from "@concord-consortium/slate-editor";
 import { TextContentModelContext } from "./text-content-context";
 import { BaseComponent } from "../../base";
-import { debouncedSelectTile } from "../../../models/stores/ui";
+import { debouncedSelectTile } from "../../../models/stores/persistent-ui";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
 import { TextContentModelType } from "../../../models/tiles/text/text-content";
 import { hasSelectionModifier } from "../../../utilities/event-utils";

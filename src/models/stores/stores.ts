@@ -4,7 +4,7 @@ import { AppConfigModel, AppConfigModelType } from "./app-config-model";
 import { createUnitWithoutContent, getGuideJson, getUnitJson, UnitModel, UnitModelType } from "../curriculum/unit";
 import { InvestigationModel, InvestigationModelType } from "../curriculum/investigation";
 import { ProblemModel, ProblemModelType } from "../curriculum/problem";
-import { UIModel, UIModelType } from "./ui";
+import { UIModel, UIModelType } from "./persistent-ui";
 import { UserModel, UserModelType } from "./user";
 import { GroupsModel, GroupsModelType } from "./groups";
 import { ClassModel, ClassModelType } from "./class";

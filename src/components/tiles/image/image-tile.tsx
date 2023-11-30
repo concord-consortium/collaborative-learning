@@ -11,7 +11,7 @@ import { ITileApi, TileResizeEntry } from "../tile-api";
 import { ITileProps } from "../tile-component";
 import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
 import { IDocumentContext } from "../../../models/document/document-types";
-import { debouncedSelectTile } from "../../../models/stores/ui";
+import { debouncedSelectTile } from "../../../models/stores/persistent-ui";
 import { gImageMap, ImageMapEntry } from "../../../models/image-map";
 import { ImageContentModelType } from "../../../models/tiles/image/image-content";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";

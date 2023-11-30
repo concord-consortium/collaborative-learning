@@ -2,7 +2,7 @@ import { AppConfigModelType } from "./app-config-model";
 import { UnitModelType } from "../curriculum/unit";
 import { InvestigationModelType } from "../curriculum/investigation";
 import { ProblemModelType } from "../curriculum/problem";
-import { UIModelType } from "./ui";
+import { UIModelType } from "./persistent-ui";
 import { UserModelType } from "./user";
 import { GroupsModelType } from "./groups";
 import { ClassModelType } from "./class";

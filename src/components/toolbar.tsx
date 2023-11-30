@@ -12,7 +12,7 @@ import { DeleteButton } from "./delete-button";
 import { IToolbarButtonProps, ToolbarButtonComponent } from "./toolbar-button";
 import { EditableTileApiInterfaceRefContext } from "./tiles/tile-api";
 import { kDragTileCreate  } from "./tiles/tile-component";
-import { kSparrowAnnotationMode } from "../models/stores/ui";
+import { kSparrowAnnotationMode } from "../models/stores/persistent-ui";
 
 import "./toolbar.scss";
 

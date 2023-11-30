@@ -1,7 +1,7 @@
 import { inject, observer } from "mobx-react";
 import React from "react";
 import { BaseComponent, IBaseProps } from "../base";
-import { UIDialogModelType } from "../../models/stores/ui";
+import { UIDialogModelType } from "../../models/stores/persistent-ui";
 
 import "./dialog.sass";
 
