@@ -115,9 +115,9 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
   };
 
   const diagramMethods: DiagramTileMethods = {
-    isInteractionLocked: () => { return interactionLocked; },
+    isInteractionLocked: () => interactionLocked,
     toggleInteractionLocked,
-    isNavigatorHidden: () => { return !!content.hideNavigator; },
+    isNavigatorHidden: () => !!content.hideNavigator,
     toggleNavigatorHidden: () => { content.setHideNavigator(!content.hideNavigator); },
     isUnusedVariableAvailable,
     showDialog,
