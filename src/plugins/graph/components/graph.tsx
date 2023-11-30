@@ -48,8 +48,6 @@ interface IProps {
 
 export const Graph = observer(
     function Graph({ graphController, graphRef, dotsRef, onRequestRowHeight }: IProps) {
-  console.log("one change for draft PR");
-
   const graphModel = useGraphModelContext(),
     {autoAdjustAxes, enableAnimation} = graphController,
     {plotType} = graphModel,

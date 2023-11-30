@@ -228,8 +228,12 @@ class Stores implements IStores{
       this.ui.setProblemPath(this.problemPath);
 
       // Set the active tab to be the first tab
+      console.log("appConfig:", appConfig);
+      console.log("this.tabsToDisplay", this.tabsToDisplay);
+
       const tabs = this.tabsToDisplay;
       if (tabs.length > 0) {
+        console.log("\t🥩 tabs[0].tab:", tabs[0].tab);
         this.ui.setActiveNavTab(tabs[0].tab);
       }
     });

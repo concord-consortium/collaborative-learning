@@ -109,6 +109,11 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   }
 
   public componentDidUpdate(prevProps: IProps) {
+    // console.log("📁 document-content.tsx ------------------------");
+    // console.log("\t🏭 componentDidUpdate");
+    // console.log("\t🔪 props:", this.props);
+    // console.log("\t🔪 prevProps:", prevProps);
+
     // recalculate after render
     requestAnimationFrame(() => {
       this.updateVisibleRows();
@@ -134,6 +139,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       });
     });
   }
+
 
   public render() {
     const { viaTeacherDashboard } = this.props;

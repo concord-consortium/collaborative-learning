@@ -23,7 +23,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
 
   constructor(props: IProps) {
     super(props);
-
     this.imageDragDrop = new ImageDragDrop({
       isAcceptableImageDrag: this.isAcceptableImageDrag
     });
@@ -48,6 +47,10 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     if (!primaryDocument) {
       return this.renderDocument("single-workspace", "primary");
     }
+
+
+    // console.log("📁 document-workspace.tsx ------------------------");
+    // console.log("\t🥩 props:", this.props);
 
     const CompareDocument = groupVirtualDocument
       ? <GroupVirtualDocumentComponent

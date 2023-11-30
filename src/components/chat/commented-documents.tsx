@@ -133,6 +133,8 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
     return () => unsubscribeFromDocs?.();
   },[mDocsRef, mDocsInScopeRef]);
 
+
+
   return (
     <div className="commented-document-list">
       {
@@ -145,6 +147,7 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
               key={index}
               onClick={() => {
                 ui.openCurriculumDocument(doc.path);
+                console.log("\t🥩 doc.path:", doc.path);
                 ui.setSelectedTile();
                 if (handleDocView !== undefined){
                   handleDocView();
