@@ -1,9 +1,15 @@
 import React, { FunctionComponent, SVGProps, useContext } from "react";
+import { observer } from "mobx-react";
+import { createPortal } from "react-dom";
+import { DragOverlay, useDraggable } from "@dnd-kit/core";
 import { TileToolbarButton } from "../../components/toolbar/tile-toolbar-button";
 import { IToolbarButtonComponentProps } from "../../components/toolbar/toolbar-button-manager";
 import { DiagramContentModelType } from "./diagram-content";
 import { useDiagramHelperContext } from "./use-diagram-helper-context";
 import { TileModelContext } from "../../components/tiles/tile-api";
+import { DiagramTileMethodsContext } from "./diagram-tile";
+import { useUIStore } from "../../hooks/use-stores";
+import { kNewVariableButtonDraggableId } from "./diagram-types";
 
 import AddVariableCardIcon from "./src/assets/add-variable-card-icon.svg";
 import InsertVariableCardIcon from "./src/assets/insert-variable-card-icon.svg";
@@ -16,10 +22,6 @@ import UnlockLayoutIcon from "./src/assets/unlock-layout-icon.svg";
 import HideNavigatorIcon from "./src/assets/hide-navigator-icon.svg";
 import ShowNavigatorIcon from "./src/assets/show-navigator-icon.svg";
 import DeleteSelectionIcon from "../../assets/icons/delete/delete-selection-icon.svg";
-
-import "./diagram-toolbar.scss";
-import { DiagramTileMethodsContext } from "./diagram-tile";
-import { observer } from "mobx-react";
 
 function handleViewportChange(content: DiagramContentModelType, changeFunction: () => any) {
   const updatedViewport = changeFunction?.();
@@ -35,6 +37,9 @@ interface IChangeViewportToolbarButtonProps {
   onClick: ()=>any;
 }
 
+/**
+ * Helper component for several buttons that change the viewport.
+ */
 function ChangeViewportToolbarButton({name, title, Icon, onClick}: IChangeViewportToolbarButtonProps) {
   const tile = useContext(TileModelContext);
   if (!tile) return null;
@@ -73,7 +78,13 @@ export function FitViewToolbarButton({ name }: IToolbarButtonComponentProps) {
       onClick={() => diagramHelper?.fitView()} />);
 }
 
+// New variable button is draggable.
 export function NewVariableButton({ name }: IToolbarButtonComponentProps) {
+  const ui = useUIStore();
+  const tile = useContext(TileModelContext);
+  const draggableId = `${kNewVariableButtonDraggableId}-${tile?.id}`;
+  const { attributes, listeners, setNodeRef } = useDraggable({ id: draggableId });
+
   const methods = useContext(DiagramTileMethodsContext);
 
   function handleClick() {
@@ -81,9 +92,19 @@ export function NewVariableButton({ name }: IToolbarButtonComponentProps) {
   }
 
   return (
-    <TileToolbarButton name={name} title="New Variable" onClick={handleClick}>
-      <AddVariableCardIcon/>
-    </TileToolbarButton>
+    <>
+      <div ref={setNodeRef} {...attributes} {...listeners}>
+        <TileToolbarButton name={name} title="New Variable" onClick={handleClick}>
+          <AddVariableCardIcon />
+        </TileToolbarButton>
+      </div>
+      {createPortal(
+      <DragOverlay>
+        {ui.dragId === draggableId.toString()
+          ? <AddVariableCardIcon />
+          : null}
+      </DragOverlay>, document.body)}
+    </>
   );
 
 }
