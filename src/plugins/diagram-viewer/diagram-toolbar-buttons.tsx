@@ -93,11 +93,11 @@ export function NewVariableButton({ name }: IToolbarButtonComponentProps) {
 
   return (
     <>
-      <div ref={setNodeRef} {...attributes} {...listeners}>
-        <TileToolbarButton name={name} title="New Variable" onClick={handleClick}>
+      <TileToolbarButton name={name} title="New Variable" onClick={handleClick}>
+        <div ref={setNodeRef} {...attributes} {...listeners}>
           <AddVariableCardIcon />
-        </TileToolbarButton>
-      </div>
+        </div>
+      </TileToolbarButton>
       {createPortal(
       <DragOverlay>
         {ui.dragId === draggableId.toString()
