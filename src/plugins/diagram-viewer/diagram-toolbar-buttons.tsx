@@ -117,7 +117,8 @@ export function InsertVariableButton({ name }: IToolbarButtonComponentProps) {
   }
 
   return (
-    <TileToolbarButton name={name} title="Add Variable" onClick={handleClick}>
+    <TileToolbarButton name={name} title="Add Variable" disabled={!methods?.isUnusedVariableAvailable()}
+        onClick={handleClick}>
       <InsertVariableCardIcon/>
     </TileToolbarButton>
   );

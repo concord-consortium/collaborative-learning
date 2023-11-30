@@ -2,7 +2,6 @@ import React, { createContext, useState } from "react";
 import { observer } from "mobx-react";
 import { DragEndEvent, useDndMonitor, useDroppable } from "@dnd-kit/core";
 import { Diagram, DiagramHelper, Variable, VariableType } from "@concord-consortium/diagram-view";
-
 import { DiagramContentModelType } from "./diagram-content";
 import { kDiagramDroppableId, kNewVariableButtonDraggableId, kQPVersion } from "./diagram-types";
 import { variableBuckets } from "../shared-variables/shared-variables-utils";
@@ -20,15 +19,20 @@ import InsertVariableCardIcon from "./src/assets/insert-variable-card-icon.svg";
 import "@concord-consortium/diagram-view/dist/index.css";
 import "./diagram-tile.scss";
 
+/**
+ * A packet of callbacks provided to the toolbar via context.
+ */
 export interface DiagramTileMethods {
   isInteractionLocked: () => boolean;
   toggleInteractionLocked: () => void;
   isNavigatorHidden: () => boolean;
   toggleNavigatorHidden: () => void;
+  isUnusedVariableAvailable: () => boolean;
   showDialog: (showDialogFunction: () => void) => void;
   showNewVariableDialog: () => void;
   showInsertVariableDialog: () => void;
   showEditVariableDialog: () => void;
+
 }
 
 export const DiagramTileMethodsContext = createContext<DiagramTileMethods|undefined>(undefined);
@@ -105,20 +109,22 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
     selfVariables,
     unusedVariables
   });
-  const disableInsertVariableButton =
-    otherVariables.length < 1 && unusedVariables.length < 1;
 
-    const diagramMethods: DiagramTileMethods = {
-      showDialog,
-      showNewVariableDialog,
-      showInsertVariableDialog,
-      showEditVariableDialog,
-      isInteractionLocked: () => { return interactionLocked; },
-      toggleInteractionLocked,
-      isNavigatorHidden: () => { return !!content.hideNavigator; },
-      toggleNavigatorHidden: () => { content.setHideNavigator(!content.hideNavigator); },
-    };
+  const isUnusedVariableAvailable = () => {
+    return !(otherVariables.length < 1 && unusedVariables.length < 1);
+  };
 
+  const diagramMethods: DiagramTileMethods = {
+    isInteractionLocked: () => { return interactionLocked; },
+    toggleInteractionLocked,
+    isNavigatorHidden: () => { return !!content.hideNavigator; },
+    toggleNavigatorHidden: () => { content.setHideNavigator(!content.hideNavigator); },
+    isUnusedVariableAvailable,
+    showDialog,
+    showNewVariableDialog,
+    showInsertVariableDialog,
+    showEditVariableDialog,
+  };
 
   const droppableId = `${kDiagramDroppableId}-${model.id}`;
   const { isOver, setNodeRef } = useDroppable({ id: droppableId });
