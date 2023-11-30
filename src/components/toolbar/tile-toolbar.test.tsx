@@ -87,7 +87,7 @@ describe("Tile toolbar button", () => {
         }
         })
       });
-    stores.ui.setSelectedTileId(model.id);
+    stores.persistentUi.setSelectedTileId(model.id);
 
     registerTileToolbarButtons("test", sampleButtons);
 

@@ -12,7 +12,7 @@ import "./student-group-view.scss";
 
 export const StudentGroupView:React.FC = observer(function StudentGroupView(){
   const stores = useStores();
-  const {groups, ui } = stores;
+  const {groups, persistentUi: ui } = stores;
 
   useEffect(() => stores.initializeStudentWorkTab(), [stores]);
 
@@ -47,7 +47,7 @@ interface IGroupComponentProps {
 }
 
 const GroupViewTitlebar: React.FC<IGroupComponentProps> = observer(function GroupViewTitlebar({group, groupUser}) {
-  const {groups, ui} = useStores();
+  const {groups, persistentUi: ui} = useStores();
   const focusedGroupUser = groupUser;
 
   const handleFocusedUserChange = (selectedUser: GroupUserModelType) => {

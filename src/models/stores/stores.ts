@@ -56,7 +56,7 @@ class Stores implements IStores{
   problem: ProblemModelType;
   teacherGuide?: ProblemModelType;
   user: UserModelType;
-  ui: UIModelType;
+  persistentUi: UIModelType;
   groups: GroupsModelType;
   class: ClassModelType;
   documents: DocumentsModelType;
@@ -89,7 +89,7 @@ class Stores implements IStores{
       InvestigationModel.create({ ordinal: 0, title: "Null Investigation" });
     this.problem = params?.problem || ProblemModel.create({ ordinal: 0, title: "Null Problem" });
     this.user = params?.user || UserModel.create({ id: "0" });
-    this.ui = params?.ui || UIModel.create({
+    this.persistentUi = params?.persistentUi || UIModel.create({
         problemWorkspace: {
           type: ProblemWorkspace,
           mode: "1-up"
@@ -113,7 +113,7 @@ class Stores implements IStores{
     this.clipboard = ClipboardModel.create();
     this.selection = SelectionStoreModel.create();
     this.serialDevice = new SerialDevice();
-    this.ui.setProblemPath(this.problemPath);
+    this.persistentUi.setProblemPath(this.problemPath);
     this.userContextProvider = new UserContextProvider(this);
   }
 
@@ -138,7 +138,7 @@ class Stores implements IStores{
   }
 
   get isShowingTeacherContent() {
-    const { ui: { showTeacherContent }, user: { isTeacher } } = this;
+    const { persistentUi: { showTeacherContent }, user: { isTeacher } } = this;
     return isTeacher && showTeacherContent;
   }
 
@@ -146,7 +146,7 @@ class Stores implements IStores{
    * The currently open group in the Student Work tab
    */
   get studentWorkTabSelectedGroupId() {
-    const { ui, groups } = this;
+    const { persistentUi: ui, groups } = this;
     return ui.tabs.get("student-work")?.openSubTab
         || (groups.nonEmptyGroups.length ? groups.nonEmptyGroups[0].id : "");
   }
@@ -163,7 +163,7 @@ class Stores implements IStores{
     // waiting
     when(
       () => this.studentWorkTabSelectedGroupId !== "",
-      () => this.ui.setOpenSubTab("student-work", this.studentWorkTabSelectedGroupId)
+      () => this.persistentUi.setOpenSubTab("student-work", this.studentWorkTabSelectedGroupId)
     );
   }
 
@@ -225,12 +225,12 @@ class Stores implements IStores{
         this.investigation = investigation;
         this.problem = problem;
       }
-      this.ui.setProblemPath(this.problemPath);
+      this.persistentUi.setProblemPath(this.problemPath);
 
       // Set the active tab to be the first tab
       const tabs = this.tabsToDisplay;
       if (tabs.length > 0) {
-        this.ui.setActiveNavTab(tabs[0].tab);
+        this.persistentUi.setActiveNavTab(tabs[0].tab);
       }
     });
 

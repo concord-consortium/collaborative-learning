@@ -117,7 +117,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   }
 
   private getDocument() {
-    const { documents, ui: { problemWorkspace: { primaryDocumentKey } } } = this.stores;
+    const { documents, persistentUi: { problemWorkspace: { primaryDocumentKey } } } = this.stores;
     return primaryDocumentKey ? documents.getDocument(primaryDocumentKey) : undefined;
   }
 

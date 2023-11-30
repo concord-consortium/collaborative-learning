@@ -141,7 +141,7 @@ export function useSharedSelectionStore(): SelectionStoreModelType {
 }
 
 export function useUIStore(): UIModelType {
-  return useStores().ui;
+  return useStores().persistentUi;
 }
 
 export function useUserStore(): UserModelType {

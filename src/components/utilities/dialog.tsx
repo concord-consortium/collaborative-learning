@@ -29,7 +29,7 @@ export class DialogComponent extends BaseComponent<IProps> {
   }
 
   public render() {
-    const {dialog} = this.stores.ui;
+    const {dialog} = this.stores.persistentUi;
     if (dialog) {
       let title = dialog.title;
       let contents: JSX.Element;
@@ -120,16 +120,16 @@ export class DialogComponent extends BaseComponent<IProps> {
   }
 
   private handleConfirmDialogYes = (e: React.MouseEvent<HTMLButtonElement>) => {
-    this.stores.ui.resolveDialog(true);
+    this.stores.persistentUi.resolveDialog(true);
   };
 
   private handleConfirmDialogNo = (e: React.MouseEvent<HTMLButtonElement>) => {
-    this.stores.ui.resolveDialog(false);
+    this.stores.persistentUi.resolveDialog(false);
   };
 
   private handlePromptValueChanged = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (this.input) {
-      this.stores.ui.dialog?.setPromptValue(this.input.value);
+      this.stores.persistentUi.dialog?.setPromptValue(this.input.value);
     }
   };
 
@@ -141,23 +141,23 @@ export class DialogComponent extends BaseComponent<IProps> {
   };
 
   private get promptValue() {
-    return (this.stores.ui.dialog?.promptValue || "").trim();
+    return (this.stores.persistentUi.dialog?.promptValue || "").trim();
   }
 
   private handlePromptDialogOk = (e?: React.MouseEvent<HTMLButtonElement>) => {
     const {promptValue} = this;
     if (promptValue.length > 0) {
-      this.stores.ui.resolveDialog(promptValue);
+      this.stores.persistentUi.resolveDialog(promptValue);
     }
   };
 
   private handleCancelDialog = (e?: React.MouseEvent<HTMLButtonElement>) => {
-    this.stores.ui.closeDialog();
+    this.stores.persistentUi.closeDialog();
   };
 
   private handleWindowKeyUp = (e: KeyboardEvent) => {
     // listen for escape key when dialog is visible
-    if (this.stores.ui.dialog && (e.keyCode === 27)) {
+    if (this.stores.persistentUi.dialog && (e.keyCode === 27)) {
       this.handleCancelDialog();
     }
   };

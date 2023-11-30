@@ -22,7 +22,7 @@ export class ClueAppContentComponent extends BaseComponent<IProps> {
   }
 
   public render() {
-    const { appConfig: {autoAssignStudentsToIndividualGroups}, user, ui } = this.stores;
+    const { appConfig: {autoAssignStudentsToIndividualGroups}, user, persistentUi: ui } = this.stores;
 
     const panels: IPanelGroupSpec = [{
                     panelId: EPanelId.workspace,
@@ -57,7 +57,7 @@ export class ClueAppContentComponent extends BaseComponent<IProps> {
   }
 
   private handlePanelChange = (panelId: EPanelId) => {
-    const { user, ui } = this.stores;
+    const { user, persistentUi: ui } = this.stores;
     ui.setTeacherPanelKey(panelId);
 
     // log teacher dashboard panel changes

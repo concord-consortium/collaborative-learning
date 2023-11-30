@@ -725,7 +725,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
 
     if (!this.stores.serialDevice.serialModalShown){
-      this.stores.ui.alert(alertMessage, "Program Requires Connection to External Device");
+      this.stores.persistentUi.alert(alertMessage, "Program Requires Connection to External Device");
       this.stores.serialDevice.serialModalShown = true;
     }
   }

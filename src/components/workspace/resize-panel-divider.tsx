@@ -15,7 +15,7 @@ interface IProps {
 export const ResizePanelDivider: React.FC <IProps> = observer(function ResizePanelDivider() {
     const stores = useStores();
     const {
-      ui: { activeNavTab, dividerPosition, problemWorkspace, setDividerPosition }
+      persistentUi: { activeNavTab, dividerPosition, problemWorkspace, setDividerPosition }
     } = stores;
     const [showExpanders, setShowExpanders] = useState(false);
 

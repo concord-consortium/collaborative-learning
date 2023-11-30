@@ -32,7 +32,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
   }
 
   public render() {
-    const { ui: { activeNavTab, focusDocument, showChatPanel, selectedTileIds },
+    const { persistentUi: { activeNavTab, focusDocument, showChatPanel, selectedTileIds },
             user } = this.stores;
     const tabs = this.stores.tabsToDisplay;
     const selectedTabIndex = tabs?.findIndex(t => t.tab === activeNavTab);
@@ -113,7 +113,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
   };
 
   private renderDocuments = (tabSpec: NavTabModelType) => {
-    const { ui: { showChatPanel } } = this.stores;
+    const { persistentUi: { showChatPanel } } = this.stores;
     return (
       <SectionDocumentOrBrowser
         tabSpec={tabSpec}
@@ -146,7 +146,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
 
   private handleSelectTab = (tabIndex: number) => {
     const tabs = this.stores.tabsToDisplay;
-    const { ui } = this.stores;
+    const { persistentUi: ui } = this.stores;
     if (tabs) {
       const tabSpec = tabs[tabIndex];
       if (ui.activeNavTab !== tabSpec.tab) {
@@ -168,14 +168,14 @@ export class NavTabPanel extends BaseComponent<IProps> {
   };
 
   private handleShowChatColumn = () => {
-    const { ui } = this.stores;
+    const { persistentUi: ui } = this.stores;
     const event = ui.showChatPanel ? LogEventName.CHAT_PANEL_HIDE : LogEventName.CHAT_PANEL_SHOW;
     Logger.log(event);
     ui.toggleShowChatPanel(!ui.showChatPanel);
   };
 
   private handleCloseResources = () => {
-    const { ui } = this.stores;
+    const { persistentUi: ui } = this.stores;
     ui.setDividerPosition(kDividerMin);
   };
 }

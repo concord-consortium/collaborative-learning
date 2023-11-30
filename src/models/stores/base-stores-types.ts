@@ -26,7 +26,7 @@ export interface IBaseStores {
   problem: ProblemModelType;
   teacherGuide?: ProblemModelType;
   user: UserModelType;
-  ui: UIModelType;
+  persistentUi: UIModelType;
   groups: GroupsModelType;
   class: ClassModelType;
   documents: DocumentsModelType;

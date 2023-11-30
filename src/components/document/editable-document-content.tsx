@@ -101,7 +101,7 @@ export function EditableDocumentContent({
   className, contained, mode, isPrimary, document, toolbar, readOnly, showPlayback, fullHeight
 }: IProps) {
   const documentContext = useDocumentContext(document);
-  const { db: { firebase }, ui, user } = useStores();
+  const { db: { firebase }, persistentUi: ui, user } = useStores();
   // set by the canvas and used by the toolbar
   const editableTileApiInterfaceRef: EditableTileApiInterfaceRef = useRef(null);
   const isReadOnly = !isPrimary || readOnly || document.isPublished;

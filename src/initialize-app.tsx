@@ -70,7 +70,7 @@ export const initializeApp = async (appMode: AppMode, authoring?: boolean): Prom
   if (authoring) {
     // Make the user a teacher and show solution tiles
     stores.user.setType("teacher");
-    stores.ui.toggleShowTeacherContent(true);
+    stores.persistentUi.toggleShowTeacherContent(true);
   }
 
   return stores;

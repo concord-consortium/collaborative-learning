@@ -16,7 +16,7 @@ describe("stores object", () => {
     expect(stores).toBeDefined();
     expect(stores.user).toBeDefined();
     expect(stores.problem).toBeDefined();
-    expect(stores.ui).toBeDefined();
+    expect(stores.persistentUi).toBeDefined();
     expect(stores.db).toBeDefined();
   });
 

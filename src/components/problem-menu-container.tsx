@@ -10,7 +10,7 @@ import { useStores } from "../hooks/use-stores";
 interface IProps extends IBaseProps {}
 
 export const ProblemMenuContainer: React.FC<IProps> = observer(function ProblemMenuContainer(props) {
-  const { problem, ui, unit, user } = useStores();
+  const { problem, persistentUi: ui, unit, user } = useStores();
 
   const showUnassignedLinkAlert = (problemName: string) => {
     ui.alert(
