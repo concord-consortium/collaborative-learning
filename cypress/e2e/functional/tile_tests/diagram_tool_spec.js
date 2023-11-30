@@ -33,7 +33,7 @@ context('Diagram Tool Tile', function () {
     diagramTile.getDiagramTile().should("exist").click();
     // No variables created, can create but not add or edit.
     clueCanvas.toolbarButtonIsEnabled("diagram", "new-variable");
-    clueCanvas.toolbarButtonIsDisabled("diagram", "add-variable");
+    clueCanvas.toolbarButtonIsDisabled("diagram", "insert-variable");
     clueCanvas.toolbarButtonIsDisabled("diagram", "edit-variable");
     clueCanvas.toolbarButtonIsEnabled("diagram", "zoom-in");
     clueCanvas.toolbarButtonIsEnabled("diagram", "zoom-out");
@@ -68,7 +68,7 @@ context('Diagram Tool Tile', function () {
     diagramTile.getVariableCardField("name").should("have.value", name);
 
     // Insert variable button is disabled when all variables are in the diagram
-    clueCanvas.toolbarButtonIsDisabled("diagram", "add-variable");
+    clueCanvas.toolbarButtonIsDisabled("diagram", "insert-variable");
 
     // Lock layout button prevents nodes from being selected
     clueCanvas.clickToolbarButton("diagram", "toggle-lock");
@@ -135,7 +135,7 @@ context('Diagram Tool Tile', function () {
     diagramTile.getVariableCard().should("not.exist");
 
     // Insert variable dialog shows unused variables
-    clueCanvas.clickToolbarButton("diagram", "add-variable");
+    clueCanvas.clickToolbarButton("diagram", "insert-variable");
     diagramTile.getDiagramDialog().should("contain.text", "Unused variables:");
     diagramTile.getDiagramDialogCloseButton().click();
 
@@ -203,12 +203,12 @@ context('Diagram Tool Tile', function () {
     const dialogChip = () => diagramTile.getDiagramDialog().find(".variable-chip");
     diagramTile.getDiagramTile().click();
     diagramTile.getVariableCard().should("not.exist");
-    clueCanvas.clickToolbarButton("diagram", "add-variable");
+    clueCanvas.clickToolbarButton("diagram", "insert-variable");
     diagramTile.getDiagramDialog().should("contain.text", "other tiles:");
     dialogChip().click();
     dialogOkButton().click();
     diagramTile.getVariableCard().should("exist");
-    clueCanvas.toolbarButtonIsDisabled("diagram", "add-variable");
+    clueCanvas.toolbarButtonIsDisabled("diagram", "insert-variable");
 
     // Draw tile edit variable dialog works
     const newName = "vn2";

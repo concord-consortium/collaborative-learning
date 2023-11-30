@@ -246,7 +246,7 @@
       "diagram": {
         "tools": [
           "new-variable",
-          "add-variable",
+          "insert-variable",
           "edit-variable",
           "|",
           "zoom-in",
