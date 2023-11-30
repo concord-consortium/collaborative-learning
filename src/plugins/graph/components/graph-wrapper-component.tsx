@@ -123,7 +123,12 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
       <div className={classNames("graph-wrapper", { "read-only": readOnly })}>
         <TileToolbar tileType="graph" readOnly={!!readOnly} tileElement={tileElt}/>
         <BasicEditableTileTitle readOnly={readOnly} />
-        <GraphComponent layout={layout} tile={model} onRequestRowHeight={onRequestRowHeight} />
+        <GraphComponent
+          layout={layout}
+          tile={model}
+          onRequestRowHeight={onRequestRowHeight}
+          readOnly={readOnly}
+        />
       </div>
     </GraphSettingsContext.Provider>
   );

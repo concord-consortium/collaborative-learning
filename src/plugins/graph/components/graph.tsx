@@ -7,7 +7,8 @@ import {Background} from "./background";
 import {DroppablePlot} from "./droppable-plot";
 import {AxisPlace, AxisPlaces} from "../imports/components/axis/axis-types";
 import {GraphAxis} from "./graph-axis";
-import {attrRoleToGraphPlace, graphPlaceToAttrRole, IDotsRef, kGraphClass} from "../graph-types";
+import {attrRoleToGraphPlace, graphPlaceToAttrRole,
+        IDotsRef, kDefaultNumericAxisBounds, kGraphClass} from "../graph-types";
 import { DotPlotDots } from "./dotplotdots";
 import { ChartDots } from "./chartdots";
 import { ScatterDots } from "./scatterdots";
@@ -16,7 +17,7 @@ import {DataConfigurationContext} from "../hooks/use-data-configuration-context"
 import {useGraphModel} from "../hooks/use-graph-model";
 import {useGraphSettingsContext} from "../hooks/use-graph-settings-context";
 import {setNiceDomain, startAnimation} from "../utilities/graph-utils";
-import {IAxisModel} from "../imports/components/axis/models/axis-model";
+import {IAxisModel, INumericAxisModel, isNumericAxisModel} from "../imports/components/axis/models/axis-model";
 import {GraphPlace} from "../imports/components/axis-graph-shared";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import { isAttributeAssignmentAction, isRemoveAttributeFromRoleAction, isRemoveYAttributeWithIDAction,
@@ -33,6 +34,7 @@ import {IDataSet} from "../../../models/data/data-set";
 import {onAnyAction} from "../../../utilities/mst-utils";
 import { Adornments } from "../adornments/adornments";
 import { kConnectingLinesType } from "../adornments/connecting-lines/connecting-lines-types";
+import { EditableGraphValue } from "./editable-graph-value";
 
 import "./graph.scss";
 import "./graph-clue-styles.scss";
@@ -42,10 +44,11 @@ interface IProps {
   graphRef: MutableRefObject<HTMLDivElement | null>;
   dotsRef: IDotsRef;
   onRequestRowHeight?: (id: string, size: number) => void;
+  readOnly?: boolean
 }
 
 export const Graph = observer(
-    function Graph({ graphController, graphRef, dotsRef, onRequestRowHeight }: IProps) {
+    function Graph({ graphController, readOnly, graphRef, dotsRef, onRequestRowHeight }: IProps) {
 
   const graphModel = useGraphModelContext(),
     {autoAdjustAxes, enableAnimation} = graphController,
@@ -58,6 +61,7 @@ export const Graph = observer(
     svgRef = useRef<SVGSVGElement>(null),
     plotAreaSVGRef = useRef<SVGSVGElement>(null),
     backgroundSvgRef = useRef<SVGGElement>(null);
+  const showEditableGraphValue = graphModel.isLinkedToDataSet;
 
   useEffect(function setupPlotArea() {
     if (xScale && xScale?.length > 0) {
@@ -190,11 +194,13 @@ export const Graph = observer(
 
   };
 
+//******************** Render Graph Axes **********************
+  const axes = AxisPlaces.filter((place: AxisPlace) => {
+    return !!graphModel.getAxis(place);
+  });
+
   const renderGraphAxes = () => {
-    const places = AxisPlaces.filter((place: AxisPlace) => {
-      return !!graphModel.getAxis(place);
-    });
-    return places.map((place: AxisPlace) => {
+    return axes.map((place: AxisPlace) => {
       return <GraphAxis key={place}
                         place={place}
                         enableAnimation={enableAnimation}
@@ -229,6 +235,15 @@ export const Graph = observer(
   };
 
   useGraphModel({dotsRef, graphModel, enableAnimation, instanceId});
+
+  const handleMinMaxChange = (minOrMax: string, axis: AxisPlace, newValue: number) => {
+    const axisModel = graphModel.getAxis(axis) as INumericAxisModel;
+    if (minOrMax === "min" && newValue < axisModel.max){
+      axisModel.setMin(newValue);
+    } else if (minOrMax === "max" && newValue > axisModel.min){
+      axisModel.setMax(newValue);
+    }
+  };
 
   // TODO multi-dataset: DataConfigurationContext should not be provided here, but is still used in some places.
   return (
@@ -275,6 +290,33 @@ export const Graph = observer(
               onTreatAttributeAs={handleTreatAttrAs}
               onRequestRowHeight={onRequestRowHeight}
             />
+          }
+          {
+            showEditableGraphValue &&
+            axes.map((axis: AxisPlace, idx) => {
+              const axisModel = graphModel?.getAxis(axis);
+              const minVal = isNumericAxisModel(axisModel) ? axisModel.min : kDefaultNumericAxisBounds[0];
+              const maxVal = isNumericAxisModel(axisModel) ? axisModel.max : kDefaultNumericAxisBounds[1];
+              return (
+                <div key={`${axis}-min-max`}>
+                  <EditableGraphValue
+                    value={minVal}
+                    minOrMax={"min"}
+                    axis={axis}
+                    onValueChange={(newValue) => handleMinMaxChange("min", axis, newValue)}
+                    readOnly={readOnly}
+                  />
+                  <EditableGraphValue
+                    value={maxVal}
+                    minOrMax={"max"}
+                    axis={axis}
+                    onValueChange={(newValue) => handleMinMaxChange("max", axis, newValue)}
+                    readOnly={readOnly}
+                  />
+                </div>
+              );
+
+            })
           }
         </div>
     </DataConfigurationContext.Provider>

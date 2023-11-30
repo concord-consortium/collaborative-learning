@@ -8,10 +8,9 @@ import {IAxisModel, isCategoricalAxisModel, isNumericAxisModel} from "../models/
 import {isVertical} from "../../axis-graph-shared";
 import {between} from "../../../../utilities/math-utils";
 import {kAxisTickLength, transitionDuration} from "../../../../graph-types";
-import {
-  DragInfo, collisionExists, computeBestNumberOfTicks, getCategoricalLabelPlacement,
-  getCoordFunctions, IGetCoordFunctionsProps
-} from "../axis-utils";
+import {DragInfo, collisionExists, computeBestNumberOfTicks,
+        getCategoricalLabelPlacement,getCoordFunctions, IGetCoordFunctionsProps} from "../axis-utils";
+import { useGraphModelContext } from "../../../../models/graph-model";
 
 export interface IUseSubAxis {
   subAxisIndex: number
@@ -27,16 +26,16 @@ interface CatObject {
   index: number
 }
 
-export const useSubAxis = ({
-                             subAxisIndex, axisModel, subAxisElt, showScatterPlotGridLines, centerCategoryLabels,
-                             enableAnimation
-                           }: IUseSubAxis) => {
-  const layout = useAxisLayoutContext(),
-    isNumeric = isNumericAxisModel(axisModel),
-    isCategorical = isCategoricalAxisModel(axisModel),
-    multiScaleChangeCount = layout.getAxisMultiScale(axisModel?.place ?? 'bottom')?.changeCount ?? 0,
-    savedCategorySetValuesRef = useRef<string[]>([]),
-    dragInfo = useRef<DragInfo>({
+export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlotGridLines,
+                            centerCategoryLabels, enableAnimation}: IUseSubAxis) => {
+
+  const graphModel = useGraphModelContext();
+  const layout = useAxisLayoutContext();
+  const isNumeric = isNumericAxisModel(axisModel);
+  const isCategorical = isCategoricalAxisModel(axisModel);
+  const multiScaleChangeCount = layout.getAxisMultiScale(axisModel?.place ?? 'bottom')?.changeCount ?? 0;
+  const savedCategorySetValuesRef = useRef<string[]>([]);
+  const dragInfo = useRef<DragInfo>({
       indexOfCategory: -1,
       catName: '',
       initialOffset: 0,
@@ -46,180 +45,192 @@ export const useSubAxis = ({
       bandwidth: 0,
       axisOrientation: 'horizontal',
       labelOrientation: 'horizontal'
-    }),
-    swapInProgress = useRef(false),
-    subAxisSelectionRef = useRef<Selection<SVGGElement, any, any, any>>(),
-    categoriesSelectionRef = useRef<Selection<SVGGElement | BaseType, CatObject, SVGGElement, any>>(),
+  });
+  const swapInProgress = useRef(false);
+  const subAxisSelectionRef = useRef<Selection<SVGGElement, any, any, any>>();
+  const categoriesSelectionRef = useRef<Selection<SVGGElement | BaseType, CatObject, SVGGElement, any>>();
 
-    renderSubAxis = useCallback(() => {
-      const
-        place = axisModel.place,
-        multiScale = layout.getAxisMultiScale(place);
-      if (!multiScale) return; // no scale, no axis (But this shouldn't happen)
+  const renderSubAxis = useCallback(() => {
+    const place = axisModel.place;
+    const multiScale = layout.getAxisMultiScale(place);
+    if (!multiScale) return; // no scale, no axis (But this shouldn't happen)
 
-      const subAxisLength = multiScale?.cellLength ?? 0,
-        rangeMin = subAxisIndex * subAxisLength,
-        rangeMax = rangeMin + subAxisLength,
-        axisIsVertical = isVertical(place),
-        axis = axisPlaceToAxisFn(place),
-        type = axisModel.type,
-        axisBounds = layout.getComputedBounds(place) as AxisBounds,
-        d3Scale: AxisScaleType = multiScale.scale.copy()
-          .range(axisIsVertical ? [rangeMax, rangeMin] : [rangeMin, rangeMax]) as AxisScaleType,
-        initialTransform = (place === 'left') ? `translate(${axisBounds.left + axisBounds.width}, ${axisBounds.top})`
-          : (place === 'top') ? `translate(${axisBounds.left}, ${axisBounds.top + axisBounds.height})`
-            : `translate(${axisBounds.left}, ${axisBounds.top})`;
+    const subAxisLength = multiScale?.cellLength ?? 0;
+    const rangeMin = subAxisIndex * subAxisLength;
+    const rangeMax = rangeMin + subAxisLength;
+    const axisIsVertical = isVertical(place);
+    const axis = axisPlaceToAxisFn(place);
+    const type = axisModel.type;
+    const axisBounds = layout.getComputedBounds(place) as AxisBounds;
 
-      const renderEmptyAxis = () => {
-          select(subAxisElt).selectAll('*').remove();
-          select(subAxisElt)
-            .attr("transform", initialTransform)
-            .append('line')
-            .attr('x1', 0)
-            .attr('x2', axisIsVertical ? 0 : subAxisLength)
-            .attr('y1', 0)
-            .attr('y2', axisIsVertical ? subAxisLength : 0)
-            .style("stroke", "lightgrey")
-            .style("stroke-opacity", "0.7");
-        },
-        renderNumericAxis = () => {
-          select(subAxisElt).selectAll('*').remove();
-          const numericScale = d3Scale as unknown as ScaleLinear<number, number>,
-            axisScale = axis(numericScale).tickSizeOuter(0).tickFormat(format('.9')),
-            duration = enableAnimation.current ? transitionDuration : 0;
-          if (!axisIsVertical && numericScale.ticks) {
-            axisScale.tickValues(numericScale.ticks(computeBestNumberOfTicks(numericScale)));
-          }
-          select(subAxisElt)
-            .attr("transform", initialTransform)
-            .transition().duration(duration)
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore types are incompatible
-            .call(axisScale).selectAll("line,path")
-            .style("stroke", "lightgrey")
-            .style("stroke-opacity", "0.7");
-        },
+    const d3Scale: AxisScaleType =
+      multiScale.scale.copy().range(axisIsVertical ? [rangeMax, rangeMin] : [rangeMin, rangeMax]) as AxisScaleType;
 
-        renderScatterPlotGridLines = () => {
-          if (axis) {
-            const numericScale = d3Scale as unknown as ScaleLinear<number, number>;
-            select(subAxisElt).selectAll('.zero, .grid').remove();
-            const tickLength = layout.getAxisLength(otherPlace(place)) ?? 0;
-            select(subAxisElt).append('g')
-              .attr('class', 'grid')
-              .call(axis(numericScale).tickSizeInner(-tickLength));
-            select(subAxisElt).select('.grid').selectAll('text').remove();
-            if (between(0, numericScale.domain()[0], numericScale.domain()[1])) {
-              select(subAxisElt).append('g')
-                .attr('class', 'zero')
-                .call(axis(numericScale).tickSizeInner(-tickLength).tickValues([0]));
-              select(subAxisElt).select('.zero').selectAll('text').remove();
-            }
-          }
-        },
+    const initialTransform = (place === 'left') ? `translate(${axisBounds.left + axisBounds.width}, ${axisBounds.top})`
+      : (place === 'top') ? `translate(${axisBounds.left}, ${axisBounds.top + axisBounds.height})`
+      : `translate(${axisBounds.left}, ${axisBounds.top})`;
 
-        renderCategoricalSubAxis = () => {
-          if (!(subAxisSelectionRef.current && categoriesSelectionRef.current)) return;
+    const renderEmptyAxis = () => {
+      select(subAxisElt).selectAll('*').remove();
+      select(subAxisElt)
+        .attr("transform", initialTransform)
+        .append('line')
+        .attr('x1', 0)
+        .attr('x2', axisIsVertical ? 0 : subAxisLength)
+        .attr('y1', 0)
+        .attr('y2', axisIsVertical ? subAxisLength : 0)
+        .style("stroke", "lightgrey")
+        .style("stroke-opacity", "0.7");
+    };
 
-          const categorySet = multiScale?.categorySet,
-            dividerLength = layout.getAxisLength(otherPlace(place)) ?? 0,
-            isRightCat = place === 'rightCat',
-            isTop = place === 'top',
-            categories = Array.from(categorySet?.values ?? []),
-            numCategories = categories.length,
-            bandWidth = subAxisLength / numCategories,
-            collision = collisionExists({bandWidth, categories, centerCategoryLabels}),
-            {rotation, textAnchor} = getCategoricalLabelPlacement(place, centerCategoryLabels,
-              collision),
-            duration = (enableAnimation.current && !swapInProgress.current &&
-              dragInfo.current.indexOfCategory === -1) ? transitionDuration : 0;
-
-          // Fill out dragInfo for use in drag callbacks
-          const dI = dragInfo.current;
-          dI.categorySet = categorySet;
-          dI.categories = categories;
-          dI.bandwidth = bandWidth;
-          dI.axisOrientation = axisIsVertical ? 'vertical' : 'horizontal';
-          dI.labelOrientation = axisIsVertical ? (collision ? 'horizontal' : 'vertical')
-            : (collision ? 'vertical' : 'horizontal');
-
-          const sAS = subAxisSelectionRef.current;
-
-          sAS.attr("transform", initialTransform)
-            .select('line')
-            .attr('x1', axisIsVertical ? 0 : rangeMin)
-            .attr('x2', axisIsVertical ? 0 : rangeMax)
-            .attr('y1', axisIsVertical ? rangeMin : 0)
-            .attr('y2', axisIsVertical ? rangeMax : 0);
-
-          const props: IGetCoordFunctionsProps = {
-              numCategories, centerCategoryLabels, collision, axisIsVertical, rangeMin, rangeMax,
-              subAxisLength, isRightCat, isTop, dragInfo
-            },
-            fns = getCoordFunctions(props);
-
-          categoriesSelectionRef.current
-            .join(
-              enter => enter,
-              update => {
-                update.select('.tick')
-                  .attr('x1', (d, i) => fns.getTickX(i))
-                  .attr('x2', (d, i) => axisIsVertical
-                    ? (isRightCat ? 1 : -1) * kAxisTickLength : fns.getTickX(i))
-                  .attr('y1', (d, i) => fns.getTickY(i))
-                  .attr('y2', (d, i) => axisIsVertical
-                    ? fns.getTickY(i) : (isTop ? -1 : 1) * kAxisTickLength);
-                // divider between groups
-                update.select('.divider')
-                  .attr('x1', (d, i) => fns.getDividerX(i))
-                  .attr('x2', (d, i) => axisIsVertical
-                    ? (isRightCat ? -1 : 1) * dividerLength : fns.getDividerX(i))
-                  .attr('y1', (d, i) => fns.getDividerY(i))
-                  .attr('y2', (d, i) => axisIsVertical
-                    ? fns.getDividerY(i) : (isTop ? 1 : -1) * dividerLength);
-                // labels
-                update.select('.category-label')
-                  .attr('transform', `${rotation}`)
-                  .attr('text-anchor', textAnchor)
-                  .attr('transform-origin', (d, i) => {
-                    return `${fns.getLabelX(i)} ${fns.getLabelY(i)}`;
-                  })
-                  .transition().duration(duration)
-                  .attr('class', 'category-label')
-                  .attr('x', (d, i) => fns.getLabelX(i))
-                  .attr('y', (d, i) => fns.getLabelY(i))
-                  .text((catObject: CatObject) => String(catObject.cat));
-                return update;
-              }
-            );
-        };
-
-      d3Scale.range(axisIsVertical ? [rangeMax, rangeMin] : [rangeMin, rangeMax]);
-      switch (type) {
-        case 'empty':
-          renderEmptyAxis();
-          break;
-        case 'numeric':
-          renderNumericAxis();
-          showScatterPlotGridLines && renderScatterPlotGridLines();
-          break;
-        case 'categorical':
-          renderCategoricalSubAxis();
-          break;
+    const renderNumericAxis = () => {
+      select(subAxisElt).selectAll('*').remove();
+      const numericScale = d3Scale as unknown as ScaleLinear<number, number>;
+      const axisScale = axis(numericScale).tickSizeOuter(0).tickFormat(format('.9'));
+      const duration = enableAnimation.current ? transitionDuration : 0;
+      if (!axisIsVertical && numericScale.ticks) {
+        const horizontalTicks = numericScale.ticks(computeBestNumberOfTicks(numericScale)); //array of all ticks
+        //get first and last and put them into model min and max
+        axisScale.tickValues(horizontalTicks);
       }
-    }, [subAxisElt, layout, showScatterPlotGridLines, enableAnimation, centerCategoryLabels, axisModel,
-      subAxisIndex]),
+      select(subAxisElt)
+        .attr("transform", initialTransform)
+        .transition().duration(duration)
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore types are incompatible
+        .call(axisScale)
+        .selectAll("line,path")
+        .style("stroke", "lightgrey")
+        .style("stroke-opacity", "0.7");
 
-    onDragStart = useCallback((event: any) => {
+      select(subAxisElt)
+        .selectAll('.tick text')
+        .style('display', (d, i, nodes) => {
+          const  hideMinAndMax = (i === 0 || i === nodes.length - 1) && isNumericAxisModel(axisModel)
+                                 && graphModel.isLinkedToDataSet; //hide first and last tick labels when linked
+          return hideMinAndMax  ? 'none' : null;
+        });
+    };
+
+    //******  VERTICAL AXIS *****************
+    const renderScatterPlotGridLines = () => {
+      if (axis) {
+        const numericScale = d3Scale as unknown as ScaleLinear<number, number>;
+        select(subAxisElt).selectAll('.zero, .grid').remove();
+        const tickLength = layout.getAxisLength(otherPlace(place)) ?? 0;
+        select(subAxisElt).append('g')
+          .attr('class', 'grid')
+          .call(axis(numericScale).tickSizeInner(-tickLength));
+        select(subAxisElt).select('.grid').selectAll('text').remove();
+        if (between(0, numericScale.domain()[0], numericScale.domain()[1])) {
+          select(subAxisElt).append('g')
+            .attr('class', 'zero')
+            .call(axis(numericScale).tickSizeInner(-tickLength).tickValues([0]));
+          select(subAxisElt).select('.zero').selectAll('text').remove();
+        }
+      }
+    };
+
+    const renderCategoricalSubAxis = () => {
+      if (!(subAxisSelectionRef.current && categoriesSelectionRef.current)) return;
+
+      const categorySet = multiScale?.categorySet;
+      const dividerLength = layout.getAxisLength(otherPlace(place)) ?? 0;
+      const isRightCat = place === 'rightCat';
+      const isTop = place === 'top';
+      const categories = Array.from(categorySet?.values ?? []);
+      const numCategories = categories.length;
+      const bandWidth = subAxisLength / numCategories;
+      const collision = collisionExists({bandWidth, categories, centerCategoryLabels});
+      const {rotation, textAnchor} = getCategoricalLabelPlacement(place, centerCategoryLabels, collision);
+      const duration = (enableAnimation.current && !swapInProgress.current &&
+                       dragInfo.current.indexOfCategory === -1) ? transitionDuration : 0;
+
+      // Fill out dragInfo for use in drag callbacks
       const dI = dragInfo.current;
-      dI.currentDragPosition = dI.axisOrientation === 'horizontal' ? event.x : event.y;
-      dI.indexOfCategory = dI.axisOrientation === 'horizontal'
-        ? Math.floor(dI.currentDragPosition / dI.bandwidth)
-        : dI.categories.length - 1 - Math.floor(dI.currentDragPosition / dI.bandwidth);
-      dI.catName = dI.categories[dI.indexOfCategory];
-      dI.currentOffset = 0;
-      dI.initialOffset = dI.currentDragPosition - (dI.indexOfCategory + 0.5) * dI.bandwidth;
-    }, []),
+      dI.categorySet = categorySet;
+      dI.categories = categories;
+      dI.bandwidth = bandWidth;
+      dI.axisOrientation = axisIsVertical ? 'vertical' : 'horizontal';
+      dI.labelOrientation = axisIsVertical ? (collision ? 'horizontal' : 'vertical')
+        : (collision ? 'vertical' : 'horizontal');
+
+      const sAS = subAxisSelectionRef.current;
+
+      sAS.attr("transform", initialTransform)
+        .select('line')
+        .attr('x1', axisIsVertical ? 0 : rangeMin)
+        .attr('x2', axisIsVertical ? 0 : rangeMax)
+        .attr('y1', axisIsVertical ? rangeMin : 0)
+        .attr('y2', axisIsVertical ? rangeMax : 0);
+
+      const props: IGetCoordFunctionsProps = { numCategories, centerCategoryLabels, collision,
+        axisIsVertical, rangeMin, rangeMax, subAxisLength, isRightCat, isTop, dragInfo };
+
+      const fns = getCoordFunctions(props);
+
+      categoriesSelectionRef.current
+        .join(
+          enter => enter,
+          update => {
+            update.select('.tick')
+              .attr('x1', (d, i) => fns.getTickX(i))
+              .attr('x2', (d, i) => axisIsVertical
+                ? (isRightCat ? 1 : -1) * kAxisTickLength : fns.getTickX(i))
+              .attr('y1', (d, i) => fns.getTickY(i))
+              .attr('y2', (d, i) => axisIsVertical
+                ? fns.getTickY(i) : (isTop ? -1 : 1) * kAxisTickLength);
+            // divider between groups
+            update.select('.divider')
+              .attr('x1', (d, i) => fns.getDividerX(i))
+              .attr('x2', (d, i) => axisIsVertical
+                ? (isRightCat ? -1 : 1) * dividerLength : fns.getDividerX(i))
+              .attr('y1', (d, i) => fns.getDividerY(i))
+              .attr('y2', (d, i) => axisIsVertical
+                ? fns.getDividerY(i) : (isTop ? 1 : -1) * dividerLength);
+            // labels
+            update.select('.category-label')
+              .attr('transform', `${rotation}`)
+              .attr('text-anchor', textAnchor)
+              .attr('transform-origin', (d, i) => {
+                return `${fns.getLabelX(i)} ${fns.getLabelY(i)}`;
+              })
+              .transition().duration(duration)
+              .attr('class', 'category-label')
+              .attr('x', (d, i) => fns.getLabelX(i))
+              .attr('y', (d, i) => fns.getLabelY(i))
+              .text((catObject: CatObject) => String(catObject.cat));
+            return update;
+          }
+        );
+    };
+
+    d3Scale.range(axisIsVertical ? [rangeMax, rangeMin] : [rangeMin, rangeMax]);
+    switch (type) {
+      case 'empty':
+        renderEmptyAxis();
+        break;
+      case 'numeric':
+        renderNumericAxis();
+        showScatterPlotGridLines && renderScatterPlotGridLines();
+        break;
+      case 'categorical':
+        renderCategoricalSubAxis();
+        break;
+    }
+  }, [subAxisElt, layout, showScatterPlotGridLines, enableAnimation, centerCategoryLabels,
+      axisModel, subAxisIndex, graphModel.isLinkedToDataSet]);
+
+  const onDragStart = useCallback((event: any) => {
+    const dI = dragInfo.current;
+    dI.currentDragPosition = dI.axisOrientation === 'horizontal' ? event.x : event.y;
+    dI.indexOfCategory = dI.axisOrientation === 'horizontal'
+      ? Math.floor(dI.currentDragPosition / dI.bandwidth)
+      : dI.categories.length - 1 - Math.floor(dI.currentDragPosition / dI.bandwidth);
+    dI.catName = dI.categories[dI.indexOfCategory];
+    dI.currentOffset = 0;
+    dI.initialOffset = dI.currentDragPosition - (dI.indexOfCategory + 0.5) * dI.bandwidth;
+  }, []);
 
     /**
      * Note: The event actually includes 'dx' and 'dy' properties, but they are not
@@ -227,7 +238,7 @@ export const useSubAxis = ({
      * and the current less straightforward approach was adopted. It may be worth
      * revisiting this at some point.
      */
-    onDrag = useCallback((event: any) => {
+    const onDrag = useCallback((event: any) => {
       const dI = dragInfo.current,
         delta = dI.axisOrientation === 'horizontal' ? event.dx : event.dy;
       if (delta !== 0) {
@@ -253,24 +264,24 @@ export const useSubAxis = ({
         }
         dI.currentDragPosition = newDragPosition;
       }
-    }, [renderSubAxis]),
+    }, [renderSubAxis]);
 
-    onDragEnd = useCallback(() => {
+    const onDragEnd = useCallback(() => {
       const dI = dragInfo.current;
       dI.indexOfCategory = -1; // so dragInfo won't influence category placement
       enableAnimation.current = false; // disable animation for final placement
       renderSubAxis();
-    }, [enableAnimation, renderSubAxis]),
+    }, [enableAnimation, renderSubAxis]);
 
-    dragBehavior = useMemo(() => drag()
+    const dragBehavior = useMemo(() => drag()
       .on("start", onDragStart)
       .on("drag", onDrag)
-      .on("end", onDragEnd), [onDragStart, onDrag, onDragEnd]),
+      .on("end", onDragEnd), [onDragStart, onDrag, onDragEnd]);
 
     /**
      * Make sure there is a group element for each category and that the text elements have drag behavior
      */
-    setupCategories = useCallback(() => {
+    const setupCategories = useCallback(() => {
       if (!subAxisElt) return;
       const
         place = axisModel.place,
