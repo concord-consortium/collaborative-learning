@@ -1,4 +1,4 @@
-import { UIModel, UIModelType, UIDialogModelType } from "./persistent-ui";
+import { PersistentUIModel, PersistentUIModelType, UIDialogModelType } from "./persistent-ui";
 import { ProblemWorkspace, LearningLogWorkspace } from "./workspace";
 import { TileModel } from "../tiles/tile-model";
 import { TextContentModel } from "../tiles/text/text-content";
@@ -8,10 +8,10 @@ import { registerTileTypes } from "../../register-tile-types";
 registerTileTypes(["Text"]);
 
 describe("ui model", () => {
-  let ui: UIModelType;
+  let ui: PersistentUIModelType;
 
   beforeEach(() => {
-    ui = UIModel.create({
+    ui = PersistentUIModel.create({
       problemWorkspace: {
         type: ProblemWorkspace,
         mode: "1-up"
@@ -31,7 +31,7 @@ describe("ui model", () => {
   });
 
   it("uses override values", () => {
-    ui = UIModel.create({
+    ui = PersistentUIModel.create({
       showDemoCreator: true,
       error: "test",
       problemWorkspace: {

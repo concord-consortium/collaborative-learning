@@ -4,7 +4,8 @@ import { AppConfigModel, AppConfigModelType } from "./app-config-model";
 import { createUnitWithoutContent, getGuideJson, getUnitJson, UnitModel, UnitModelType } from "../curriculum/unit";
 import { InvestigationModel, InvestigationModelType } from "../curriculum/investigation";
 import { ProblemModel, ProblemModelType } from "../curriculum/problem";
-import { UIModel, UIModelType } from "./persistent-ui";
+import { PersistentUIModel, PersistentUIModelType } from "./persistent-ui";
+import { UIModel, UIModelType } from "./ui";
 import { UserModel, UserModelType } from "./user";
 import { GroupsModel, GroupsModelType } from "./groups";
 import { ClassModel, ClassModelType } from "./class";
@@ -56,7 +57,8 @@ class Stores implements IStores{
   problem: ProblemModelType;
   teacherGuide?: ProblemModelType;
   user: UserModelType;
-  persistentUi: UIModelType;
+  persistentUi: PersistentUIModelType;
+  ui: UIModelType;
   groups: GroupsModelType;
   class: ClassModelType;
   documents: DocumentsModelType;
@@ -89,16 +91,6 @@ class Stores implements IStores{
       InvestigationModel.create({ ordinal: 0, title: "Null Investigation" });
     this.problem = params?.problem || ProblemModel.create({ ordinal: 0, title: "Null Problem" });
     this.user = params?.user || UserModel.create({ id: "0" });
-    this.persistentUi = params?.persistentUi || UIModel.create({
-        problemWorkspace: {
-          type: ProblemWorkspace,
-          mode: "1-up"
-        },
-        learningLogWorkspace: {
-          type: LearningLogWorkspace,
-          mode: "1-up"
-        },
-      });
     this.groups = params?.groups || GroupsModel.create({ acceptUnknownStudents: params?.isPreviewing });
     this.groups.setEnvironment(this);
     this.class = params?.class || ClassModel.create({ name: "Null Class", classHash: "" });
@@ -113,6 +105,18 @@ class Stores implements IStores{
     this.clipboard = ClipboardModel.create();
     this.selection = SelectionStoreModel.create();
     this.serialDevice = new SerialDevice();
+    this.ui = params?.ui || UIModel.create({
+      learningLogWorkspace: {
+        type: LearningLogWorkspace,
+        mode: "1-up"
+      },
+    });
+    this.persistentUi = params?.persistentUi || PersistentUIModel.create({
+      problemWorkspace: {
+        type: ProblemWorkspace,
+        mode: "1-up"
+      }
+    });
     this.persistentUi.setProblemPath(this.problemPath);
     this.userContextProvider = new UserContextProvider(this);
   }

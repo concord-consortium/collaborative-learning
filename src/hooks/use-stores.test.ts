@@ -5,7 +5,7 @@ import { DemoClassModel, DemoModel } from "../models/stores/demo";
 import { DocumentsModel } from "../models/stores/documents";
 import { GroupsModel } from "../models/stores/groups";
 import { SelectionStoreModel } from "../models/stores/selection";
-import { UIModel } from "../models/stores/persistent-ui";
+import { PersistentUIModel } from "../models/stores/persistent-ui";
 import { UserModel } from "../models/stores/user";
 import { LearningLogWorkspace, ProblemWorkspace, WorkspaceModel } from "../models/stores/workspace";
 import {
@@ -43,7 +43,7 @@ describe("useStores", () => {
       const problemPathWithFacet = "sas:facet/1/2";
       const problem = ProblemModel.create({ ordinal: 2, title: "1.2" });
       const selection = SelectionStoreModel.create();
-      const ui = UIModel.create({
+      const ui = PersistentUIModel.create({
         problemWorkspace: WorkspaceModel.create({ type: ProblemWorkspace, mode: "4-up" }),
         learningLogWorkspace: WorkspaceModel.create({ type: LearningLogWorkspace, mode: "1-up" })
       });

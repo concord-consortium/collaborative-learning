@@ -2,7 +2,7 @@ import { AppConfigModelType } from "./app-config-model";
 import { UnitModelType } from "../curriculum/unit";
 import { InvestigationModelType } from "../curriculum/investigation";
 import { ProblemModelType } from "../curriculum/problem";
-import { UIModelType } from "./persistent-ui";
+import { PersistentUIModelType } from "./persistent-ui";
 import { UserModelType } from "./user";
 import { GroupsModelType } from "./groups";
 import { ClassModelType } from "./class";
@@ -14,6 +14,7 @@ import { ClipboardModelType } from "./clipboard";
 import { SelectionStoreModelType } from "./selection";
 import { AppMode } from "./store-types";
 import { SerialDevice } from "./serial";
+import { UIModelType } from "./ui";
 
 
 export interface IBaseStores {
@@ -26,7 +27,8 @@ export interface IBaseStores {
   problem: ProblemModelType;
   teacherGuide?: ProblemModelType;
   user: UserModelType;
-  persistentUi: UIModelType;
+  persistentUi: PersistentUIModelType;
+  ui: UIModelType;
   groups: GroupsModelType;
   class: ClassModelType;
   documents: DocumentsModelType;
