@@ -252,7 +252,7 @@
           "zoom-in",
           "zoom-out",
           "fit-view",
-          "lock-layout",
+          "toggle-lock",
           "toggle-navigator",
           "|",
           "delete"

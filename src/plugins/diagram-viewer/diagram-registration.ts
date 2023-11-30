@@ -34,7 +34,7 @@ registerTileToolbarButtons("diagram", [
   { name: "zoom-in", component: ZoomInToolbarButton },
   { name: "zoom-out", component: ZoomOutToolbarButton },
   { name: "fit-view", component: FitViewToolbarButton },
-  { name: "lock-layout", component: LockLayoutButton },
+  { name: "toggle-lock", component: LockLayoutButton },
   { name: "toggle-navigator", component: HideNavigatorButton },
   { name: "delete", component: DeleteButton },
 ]);
