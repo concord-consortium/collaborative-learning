@@ -3,7 +3,7 @@ import React, { useRef, useState } from "react";
 import LinkGraphIcon from "../clue/assets/icons/table/link-graph-icon.svg";
 import { useCustomModal } from "./use-custom-modal";
 import { isLinkedToTile } from "../models/shared/shared-data-utils";
-import { ITileLinkMetadata } from "../models/tiles/tile-link-types";
+import { ITileLinkMetadata, ITypedTileLinkMetadata } from "../models/tiles/tile-link-types";
 import { ITileModel } from "../models/tiles/tile-model";
 
 import "./link-tile-dialog.scss";
@@ -52,7 +52,7 @@ const Content: React.FC<IContentProps>
 };
 
 interface IProps {
-  linkableTiles: ITileLinkMetadata[];
+  linkableTiles: ITypedTileLinkMetadata[];
   model: ITileModel;
   onLinkTile: (tileInfo: ITileLinkMetadata) => void;
   onUnlinkTile: (tileInfo: ITileLinkMetadata) => void;
@@ -62,19 +62,21 @@ export const useLinkProviderTileDialog = ({
 }: IProps) => {
   const tileTitle = model.computedTitle;
   const [selectValue, setSelectValue] = useState("");
+  const selectedTileInfo = linkableTiles.find(tile => tile.id === selectValue);
+
   const handleClick = () => {
     const tileInfo = linkableTiles.find(tile => tile.id === selectValue);
     if (tileInfo) {
-      if (isLinkedToTile(model, tileInfo.id)) {
+      if (isLinkedToTile(model, tileInfo.id, tileInfo.type)) {
         onUnlinkTile?.(tileInfo);
       } else {
         onLinkTile?.(tileInfo);
       }
     }
   };
-  const unlinkedTiles = linkableTiles.filter(tileInfo => !isLinkedToTile(model, tileInfo.id));
+  const unlinkedTiles = linkableTiles.filter(tileInfo => !isLinkedToTile(model, tileInfo.id, tileInfo.type));
   const linkedTiles =
-    linkableTiles.filter(tileInfo => isLinkedToTile(model, tileInfo.id) && tileInfo.id !== model.id);
+    linkableTiles.filter(tileInfo => isLinkedToTile(model, tileInfo.id, tileInfo.type) && tileInfo.id !== model.id);
   const [showModal, hideModal] = useCustomModal({
     className: "link-tile",
     Icon: LinkGraphIcon,
@@ -83,7 +85,7 @@ export const useLinkProviderTileDialog = ({
     contentProps: { unlinkedTiles, linkedTiles, selectValue, tileTitle, setSelectValue },
     buttons: [
       { label: "Cancel" },
-      { label: !isLinkedToTile(model, selectValue) ? "Link" : "Unlink",
+      { label: !isLinkedToTile(model, selectValue, selectedTileInfo?.type) ? "Link" : "Unlink",
         isDefault: true,
         isDisabled: !selectValue,
         onClick: handleClick

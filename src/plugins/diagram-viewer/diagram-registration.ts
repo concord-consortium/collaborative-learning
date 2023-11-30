@@ -15,7 +15,8 @@ registerTileContentInfo({
   //   typescript type for a MST "Class" which is less restrictive
   modelClass: DiagramMigrator as typeof DiagramContentModel,
   defaultContent: defaultDiagramContent,
-  defaultHeight: kDiagramDefaultHeight
+  defaultHeight: kDiagramDefaultHeight,
+  isVariableProvider: true
 });
 
 registerTileComponentInfo({

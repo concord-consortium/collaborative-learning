@@ -263,26 +263,31 @@ export const BaseDocumentContentModel = types
     getLinkableTiles(): ILinkableTiles {
       const providers: ITypedTileLinkMetadata[] = [];
       const consumers: ITypedTileLinkMetadata[] = [];
+      const variableProviders: ITypedTileLinkMetadata[] = [];
       self.rowOrder.forEach(rowId => {
         const row = self.getRow(rowId);
         each(row?.tiles, tileEntry => {
           const tileType = self.getTileType(tileEntry.tileId);
-          const titleBase = getTileContentInfo(tileType)?.titleBase || tileType;
           if (tileType) {
             const tile = self.getTile(tileEntry.tileId);
+            const contentInfo = getTileContentInfo(tileType);
+            const titleBase = contentInfo?.titleBase || tileType;
             const typedTileLinkMetadata: ITypedTileLinkMetadata = {
               id: tileEntry.tileId, type: tileType, title: tile?.title, titleBase
             };
-            if (getTileContentInfo(tileType)?.isDataProvider) {
+            if (contentInfo?.isDataProvider) {
               providers.push(typedTileLinkMetadata);
             }
-            if (getTileContentInfo(tileType)?.isDataConsumer) {
+            if (contentInfo?.isDataConsumer) {
               consumers.push(typedTileLinkMetadata);
+            }
+            if (contentInfo?.isVariableProvider) {
+              variableProviders.push(typedTileLinkMetadata);
             }
           }
         });
       });
-      return { providers, consumers };
+      return { providers, consumers, variableProviders };
     },
     exportTileAsJson(tileInfo: TileLayoutModelType, options?: IDocumentExportOptions) {
       const { includeTileIds, ...otherOptions } = options || {};
