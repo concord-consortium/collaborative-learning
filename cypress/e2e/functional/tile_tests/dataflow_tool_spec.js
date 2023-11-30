@@ -5,6 +5,9 @@ let clueCanvas = new ClueCanvas;
 let dataflowToolTile = new DataflowToolTile;
 let dragXDestination = 300;
 
+let dataflowToolTile2 = new DataflowToolTile; //creates an internal object, a Dataflow tile
+let dragXDestination2 = 600;
+
 function beforeTest() {
   const url = "./doc-editor.html?appMode=qa&unit=./curriculum/example-curriculum/example-curriculum.json&mouseSensor";
   cy.visit(url);
@@ -628,5 +631,125 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getSamplingRateLabel().should("have.text", "Sampling Rate");
     dataflowToolTile.verifyRecordButtonText();
     dataflowToolTile.verifyRecordButtonIcon();
+  });
+  // messing around with creating a second Dataflow Tool
+  it.skip("Dataflow Tool and Number Node 2", () => {
+    beforeTest();
+
+    cy.log("renders a second dataflow tool tile");
+    clueCanvas.addTile("dataflow");
+    clueCanvas.addTile("dataflow");
+    dataflowToolTile.getDataflowTile().should("exist");
+    dataflowToolTile.getTileTitle().should("exist");
+
+    cy.log("edit tile title");
+    const newName = "Dataflow Tile 2";
+    dataflowToolTile.getTileTitle().should("contain", "Program 2");
+    dataflowToolTile.getDataflowTileTitle().click();
+    dataflowToolTile.getDataflowTileTitle().type(newName + '{enter}');
+    dataflowToolTile.getTileTitle().should("contain", newName);
+
+    cy.log("makes link button active when table is present");
+    dataflowToolTile.getLinkTileButton().should("exist");
+    dataflowToolTile.getLinkTileButton().should("have.class", "disabled");
+    clueCanvas.addTile("table");
+    dataflowToolTile.getLinkTileButton().should("not.have.class", "disabled");
+    clueCanvas.deleteTile("table");
+
+    cy.log("Number Node");
+    const numberNode = "number";
+    cy.log("can create number node");
+
+    dataflowToolTile.getCreateNodeButton(numberNode).click();
+    dataflowToolTile.getNode(numberNode).should("exist");
+    dataflowToolTile.getNodeTitle().should("contain", "Number");
+
+    cy.log("can toggle minigraph");
+    dataflowToolTile.getShowGraphButton(numberNode).click();
+    dataflowToolTile.getMinigraph(numberNode).should("exist");
+    dataflowToolTile.getShowGraphButton(numberNode).click();
+    dataflowToolTile.getMinigraph(numberNode).should("not.exist");
+
+    cy.log("can change the number");
+    dataflowToolTile.getNumberField().type("3{enter}");
+    dataflowToolTile.getNumberField().should("have.value", "3");
+
+    //TODO: write a test that can check min and max (should be 0 and 3)
+    // could be in class .chartjs-size-monitor
+
+    cy.log("can click zoom in positive button");
+    dataflowToolTile.getShowGraphButton(numberNode).click(); //open minigraph
+    dataflowToolTile.getShowZoomInButton(numberNode).click();
+
+    cy.log("can click zoom out negative button");
+    dataflowToolTile.getShowZoomOutButton(numberNode).click();
+    dataflowToolTile.getShowGraphButton(numberNode).click(); //close minigraph
+
+    cy.log("verify node inputs outputs");
+    dataflowToolTile.getNodeInput().should("not.exist");
+    dataflowToolTile.getNodeOutput().should("exist");
+
+    cy.log("verify zoom in & out");
+    dataflowToolTile.getFlowtool().children().invoke("attr", "style").then(scale => {
+      dataflowToolTile.getZoomInButton().click();
+      dataflowToolTile.verifyZoomIn(scale);
+    });
+    dataflowToolTile.getFlowtool().children().invoke("attr", "style").then(scale => {
+      dataflowToolTile.getZoomOutButton().click();
+      dataflowToolTile.verifyZoomOut(scale);
+    });
+
+    cy.log("can delete number node");
+    dataflowToolTile.getDeleteNodeButton(numberNode).click();
+    dataflowToolTile.getNode(numberNode).should("not.exist");
+
+    cy.log('can create node by dragging button onto tile');
+    const draggable = () => cy.get(".program-toolbar [aria-roledescription='draggable'] button").eq(1);
+    dataflowToolTile.getNode(numberNode).should("not.exist");
+    draggable().trigger("mousedown", { force: true })
+      .wait(100)
+      .trigger("mousemove", {
+        force: true,
+        clientX: 500,
+        clientY: 200
+      })
+      .wait(100)
+      .trigger("mouseup", { force: true })
+      .wait(100);
+    // const dataTransfer = new DataTransfer;
+    // draggable().focus().trigger('dragstart', { dataTransfer });
+    // dataflowToolTile.getDataflowTile().trigger('drop', { dataTransfer });
+    // draggable().trigger('dragend');
+    dataflowToolTile.getNode(numberNode).should("exist");
+    dataflowToolTile.getDeleteNodeButton(numberNode).click();
+    dataflowToolTile.getNode(numberNode).should("not.exist");
+
+    cy.log("Manage Decimals");
+    cy.log('can create a number node and change it to a decimal');
+    // create a number node
+    dataflowToolTile.getCreateNodeButton("number").click();
+    dataflowToolTile.getNode("number").should("exist");
+    dataflowToolTile.getNodeTitle().should("contain", "Number");
+    dataflowToolTile.getNumberField().type("1.8309{enter}");
+
+    cy.log('values should be rounded to three decimals for display');
+    // create transform node and drag to the right
+    dataflowToolTile.getCreateNodeButton("transform").click();
+    dataflowToolTile.getNode("transform").should("exist");
+    dataflowToolTile.getNodeTitle().should("contain", "Transform");
+    dataflowToolTile.getNode("transform").click(50, 10)
+      .trigger("pointerdown", 50, 10)
+      .trigger("pointermove", dragXDestination, 10, { force: true })
+      .trigger("pointerup", dragXDestination, 10, { force: true });
+    cy.wait(2000);
+    // connect the number node to the transform node
+    dataflowToolTile.getNodeOutput().eq(0).click();
+    dataflowToolTile.getNodeInput().eq(0).click();
+    // verify the transform node has the correct value
+    dataflowToolTile.getNode("transform").should("contain", "1.831");
+    dataflowToolTile.getDeleteNodeButton("number").click();
+    dataflowToolTile.getDeleteNodeButton("transform").click();
+    dataflowToolTile.getNode("number").should("not.exist");
+    dataflowToolTile.getNode("transform").should("not.exist");
   });
 });
