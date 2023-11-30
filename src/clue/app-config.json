@@ -248,11 +248,13 @@
           "new-variable",
           "add-variable",
           "edit-variable",
+          "|",
           "zoom-in",
           "zoom-out",
           "fit-view",
           "lock-layout",
           "toggle-navigator",
+          "|",
           "delete"
         ]
       },
