@@ -85,8 +85,8 @@ export const Legend = function Legend({
           onTreatAttributeAs={onTreatAttributeAs}
         />
         {
-          attrType === 'categorical' ? <CategoricalLegend layer={layer} transform={transform}/>
-            : attrType === 'numeric' ? <NumericLegend layer={layer} legendAttrID={legendAttrID}/> : null
+          attrType === 'categorical' ? <CategoricalLegend transform={transform}/>
+            : attrType === 'numeric' ? <NumericLegend legendAttrID={legendAttrID}/> : null
         }
       </svg>
       { !disableAttributeDnD &&
