@@ -11,7 +11,7 @@ import { ITileApi, TileResizeEntry } from "../tile-api";
 import { ITileProps } from "../tile-component";
 import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
 import { IDocumentContext } from "../../../models/document/document-types";
-import { debouncedSelectTile } from "../../../models/stores/persistent-ui";
+import { debouncedSelectTile } from "../../../models/stores/ui";
 import { gImageMap, ImageMapEntry } from "../../../models/image-map";
 import { ImageContentModelType } from "../../../models/tiles/image/image-content";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
@@ -218,7 +218,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
 
   private handleIsEnabled = () => {
     const { model: { id }, readOnly } = this.props;
-    const { persistentUI: ui } = this.stores;
+    const { ui } = this.stores;
     return !readOnly &&
             (ui?.selectedTileIds.length === 1) &&
             (ui?.selectedTileIds.includes(id));
@@ -261,7 +261,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    debouncedSelectTile(this.stores.persistentUI, this.props.model, hasSelectionModifier(e));
+    debouncedSelectTile(this.stores.ui, this.props.model, hasSelectionModifier(e));
   };
 
   private storeNewImageUrl(newUrl: string) {

@@ -8,7 +8,6 @@ import { SizeMeProps } from "react-sizeme";
 import Rete, { NodeEditor, Engine, Node } from "rete";
 import ConnectionPlugin from "rete-connection-plugin";
 import ReactRenderPlugin from "rete-react-render-plugin";
-
 import { BaseComponent } from "../../../components/base";
 import { ProgramZoomType, DataflowContentModelType } from "../model/dataflow-content";
 import { DataflowProgramModelType } from "../model/dataflow-program-model";
@@ -725,7 +724,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
 
     if (!this.stores.serialDevice.serialModalShown){
-      this.stores.persistentUI.alert(alertMessage, "Program Requires Connection to External Device");
+      this.stores.ui.alert(alertMessage, "Program Requires Connection to External Device");
       this.stores.serialDevice.serialModalShown = true;
     }
   }

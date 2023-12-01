@@ -6,7 +6,7 @@ import {
 } from "@concord-consortium/slate-editor";
 import { TextContentModelContext } from "./text-content-context";
 import { BaseComponent } from "../../base";
-import { debouncedSelectTile } from "../../../models/stores/persistent-ui";
+import { debouncedSelectTile } from "../../../models/stores/ui";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
 import { TextContentModelType } from "../../../models/tiles/text/text-content";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
@@ -137,7 +137,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     this.disposers.push(reaction(
       () => {
         const { model: { id } } = this.props;
-        const { persistentUI: { selectedTileIds } } = this.stores;
+        const { ui: { selectedTileIds } } = this.stores;
         return selectedTileIds.includes(id);
       },
       isTileSelected => {
@@ -218,7 +218,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   private handleChange = (value: EditorValue) => {
     const { model } = this.props;
     const content = this.getContent();
-    const { persistentUI: ui } = this.stores;
+    const { ui } = this.stores;
 
     if (this.editor && ReactEditor.isFocused(this.editor)) {
       debouncedSelectTile(ui, model);
@@ -231,7 +231,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   };
 
   private handleMouseDownInWrapper = (e: React.MouseEvent<HTMLDivElement>) => {
-    const { persistentUI: ui } = this.stores;
+    const { ui } = this.stores;
     const { model, readOnly } = this.props;
     const isExtendingSelection = hasSelectionModifier(e);
     const isWrapperClick = e.target === this.textTileDiv;

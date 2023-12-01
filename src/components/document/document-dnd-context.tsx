@@ -24,8 +24,8 @@ export const DocumentDndContext = ({ children }: IDocumentDndContextProps) => {
   );
   // We use useStores instead of useUIStore because the ui store is not set up for some jest tests.
   const stores = useStores();
-  const onDragStart = (event: DragStartEvent) => stores.persistentUI?.setDraggingId(event.active.id.toString());
-  const onDragEnd = (event: DragEndEvent) => stores.persistentUI?.setDraggingId(undefined);
+  const onDragStart = (event: DragStartEvent) => stores.ui?.setDraggingId(event.active.id.toString());
+  const onDragEnd = (event: DragEndEvent) => stores.ui?.setDraggingId(undefined);
   return (
     <DndContext onDragStart={onDragStart} onDragEnd={onDragEnd} sensors={sensors} >
       { children }
