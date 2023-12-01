@@ -83,8 +83,7 @@ export const PersistentUIModel = types
       return tabState;
     };
     return {
-      alert,
-      prompt,
+      alert, //returned in both - console.log
 
       setDividerPosition(position: number) {
         self.dividerPosition = position;

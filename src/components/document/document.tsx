@@ -147,7 +147,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   public componentDidUpdate() {
     this.openHandlerDisposer = reaction(
       // data function: changes to primaryDocumentKey trigger the reaction
-      () => this.stores.persistentUi.problemWorkspace.primaryDocumentKey,
+      () => this.stores.persistentUI.problemWorkspace.primaryDocumentKey,
       // reaction function
       () => this.setState({ showBrowser: false })
     );
@@ -188,7 +188,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         const isDeleted = document.getProperty("isDeleted");
         // close comparison when comparison document is deleted
         if (isDeleted && (side === "comparison")) {
-          const { persistentUi: { problemWorkspace } } = stores;
+          const { persistentUI: { problemWorkspace } } = stores;
           problemWorkspace.toggleComparisonVisible({ override: false, muteLog: true });
         }
       });
@@ -465,7 +465,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleSelectDocument = (document: DocumentModelType) => {
-    const { appConfig, persistentUi: ui } = this.stores;
+    const { appConfig, persistentUI: ui } = this.stores;
     ui.rightNavDocumentSelected(appConfig, document);
     this.setState({ showBrowser: false });
   };
@@ -475,7 +475,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const { appConfig } = this.stores;
     const docTypeString = document.getLabel(appConfig, 1);
     const docTypeStringL = document.getLabel(appConfig, 1, true);
-    this.stores.persistentUi.prompt(`Rename your ${docTypeStringL}:`, document.title, `Rename ${docTypeString}`)
+    this.stores.ui.prompt(`Rename your ${docTypeStringL}:`, document.title, `Rename ${docTypeString}`)
       .then((title: string) => {
         if (title !== document.title) {
           document.setTitle(title);

@@ -78,9 +78,9 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       // store could have a scrollToMap with keys of the docId and values of the tileId
       this.scrollDisposer = reaction(
         () => {
-          const docId = this.stores.persistentUi.scrollTo?.docId;
+          const docId = this.stores.ui.scrollTo?.docId;
           return getDocumentIdentifier(this.props.content) === docId
-            ? this.stores.persistentUi.scrollTo?.tileId
+            ? this.stores.ui.scrollTo?.tileId
             : undefined;
         },
         (scrollToTileId: string | undefined) => {
@@ -137,10 +137,10 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
   public render() {
     const { viaTeacherDashboard } = this.props;
-    const { persistentUi: ui, user } = this.stores;
+    const { ui, persistentUI, user } = this.stores;
     const isChatEnabled = user.isTeacher;
-    const documentSelectedForComment = isChatEnabled && ui.showChatPanel && ui.selectedTileIds.length === 0
-                                          && ui.focusDocument;
+    const documentSelectedForComment = isChatEnabled && persistentUI.showChatPanel && ui.selectedTileIds.length === 0
+                                          && persistentUI.focusDocument;
     const documentClass = classNames(
       "document-content",
       {"document-content-smooth-scroll" : viaTeacherDashboard, "comment-select" : documentSelectedForComment},
@@ -266,7 +266,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const { persistentUi: ui } = this.stores;
+    const { ui } = this.stores;
     // deselect tiles on click on document background
     // click must be on DocumentContent itself, not bubble up from child
     if (e.target === e.currentTarget) {
@@ -414,7 +414,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
   private handleInsertNewTile = (e: React.DragEvent<HTMLDivElement>) => {
     const { content } = this.props;
-    const { persistentUi: ui } = this.stores;
+    const { ui } = this.stores;
 
     const createTileInfoStr = e.dataTransfer.getData(kDragTileCreate);
     const createTileInfo = safeJsonParse<IDragToolCreateInfo>(createTileInfoStr);

@@ -135,7 +135,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   }
 
   private getFocusedUserDocKey() {
-    const {persistentUi: ui} = this.stores;
+    const {persistentUI: ui} = this.stores;
     const {group} = this.props;
     return ui.tabs.get(this.getNavTabName())?.openDocuments.get(group.id);
   }
@@ -399,13 +399,13 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleFourUpClick = () => {
-    const { persistentUi: ui } = this.stores;
+    const { persistentUI: ui } = this.stores;
     const { group } = this.props;
     ui.closeSubTabDocument(this.getNavTabName(),  group.id);
   };
 
   private handleOverlayClick = (groupUser?: GroupUserModelType) => {
-    const { persistentUi: ui } = this.stores;
+    const { persistentUI: ui } = this.stores;
     const { group } = this.props;
     const focusedUser = this.getFocusedGroupUser();
     const document = this.getGroupUserDoc(groupUser);

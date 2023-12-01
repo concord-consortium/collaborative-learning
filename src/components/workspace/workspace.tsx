@@ -16,7 +16,7 @@ interface IProps extends IBaseProps {
 export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
   const stores = useStores();
   const { appConfig: { navTabs: navTabSpecs },
-          persistentUi: { navTabContentShown, workspaceShown }
+          persistentUI: { navTabContentShown, workspaceShown }
         } = stores;
 
   let imageDragDrop: ImageDragDrop;

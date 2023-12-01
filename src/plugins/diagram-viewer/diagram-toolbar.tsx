@@ -8,7 +8,7 @@ import { DiagramHelper/*, VariableType*/ } from "@concord-consortium/diagram-vie
 
 import { DiagramContentModelType } from "./diagram-content";
 import { kNewVariableButtonDraggableId } from "./diagram-types";
-import { usePersistentUIStore } from "../../hooks/use-stores";
+import { useUIStore } from "../../hooks/use-stores";
 import { useTooltipOptions } from "../../hooks/use-tooltip-options";
 import { ButtonDivider } from "../../components/tiles/toolbar/button-divider";
 import { IFloatingToolbarProps, useFloatingToolbarLocation }
@@ -25,6 +25,7 @@ import UnlockLayoutIcon from "./src/assets/unlock-layout-icon.svg";
 import HideNavigatorIcon from "./src/assets/hide-navigator-icon.svg";
 import ShowNavigatorIcon from "./src/assets/show-navigator-icon.svg";
 import DeleteSelectionIcon from "../../assets/icons/delete/delete-selection-icon.svg";
+
 import "./diagram-toolbar.scss";
 
 /*
@@ -67,7 +68,7 @@ interface INewVariableButton {
   tileId: string;
 }
 const NewVaribleButton = ({ handleClick, tileId }: INewVariableButton) => {
-  const ui = usePersistentUIStore();
+  const ui = useUIStore();
   const draggableId = `${kNewVariableButtonDraggableId}-${tileId}`;
   const { attributes, listeners, setNodeRef } = useDraggable({ id: draggableId });
 

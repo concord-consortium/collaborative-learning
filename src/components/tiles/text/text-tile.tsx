@@ -137,7 +137,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     this.disposers.push(reaction(
       () => {
         const { model: { id } } = this.props;
-        const { persistentUi: { selectedTileIds } } = this.stores;
+        const { persistentUI: { selectedTileIds } } = this.stores;
         return selectedTileIds.includes(id);
       },
       isTileSelected => {
@@ -218,7 +218,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   private handleChange = (value: EditorValue) => {
     const { model } = this.props;
     const content = this.getContent();
-    const { persistentUi: ui } = this.stores;
+    const { persistentUI: ui } = this.stores;
 
     if (this.editor && ReactEditor.isFocused(this.editor)) {
       debouncedSelectTile(ui, model);
@@ -231,7 +231,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   };
 
   private handleMouseDownInWrapper = (e: React.MouseEvent<HTMLDivElement>) => {
-    const { persistentUi: ui } = this.stores;
+    const { persistentUI: ui } = this.stores;
     const { model, readOnly } = this.props;
     const isExtendingSelection = hasSelectionModifier(e);
     const isWrapperClick = e.target === this.textTileDiv;

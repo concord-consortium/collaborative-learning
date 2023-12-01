@@ -19,7 +19,7 @@ if (appMode === "qa" && urlParams.qaClear === "all") {
 } else {
   initializeApp(appMode).then((stores) => {
     setPageTitle(stores);
-    stores.persistentUi.setShowDemoCreator(!!stores.showDemoCreator);
+    stores.ui.setShowDemoCreator(!!stores.showDemoCreator);
     stores.supports.createFromUnit({
       unit: stores.unit,
       investigation: stores.investigation,

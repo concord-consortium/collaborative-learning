@@ -5,7 +5,7 @@ import { DocumentModelType } from "../../models/document/document";
 import { logDocumentEvent } from "../../models/document/log-document-event";
 import { ISubTabSpec, NavTabModelType } from "../../models/view/nav-tabs";
 import { useAppConfig, useClassStore, useProblemStore, useStores,
-  usePersistentUIStore, useUserStore } from "../../hooks/use-stores";
+         useUserStore, useUIStore, usePersistentUIStore } from "../../hooks/use-stores";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import { useUserContext } from "../../hooks/use-user-context";
@@ -23,7 +23,8 @@ interface IProps {
 
 export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function SectionDocumentOrBrowser(
     { tabSpec, isChatOpen }) {
-  const ui = usePersistentUIStore();
+  const ui = useUIStore();
+  const persistentUI = usePersistentUIStore();
   const store = useStores();
   const appConfigStore = useAppConfig();
   const problemStore = useProblemStore();
@@ -33,16 +34,16 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
   const classStore = useClassStore();
   const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
   const subTabs = tabSpec.subTabs;
-  const tabState = navTabSpec && ui.tabs.get(navTabSpec?.tab);
+  const tabState = navTabSpec && persistentUI.tabs.get(navTabSpec?.tab);
   const subTabIndex = Math.max(subTabs.findIndex((subTab) => tabState?.openSubTab === subTab.label), 0);
   const selectedSubTab = subTabs[subTabIndex];
 
   useEffect(() => {
     // Set the default open subTab if a subTab isn't already set.
-    if (!ui.tabs.get(tabSpec.tab)?.openSubTab) {
-      ui.setOpenSubTab(tabSpec.tab, subTabs[0].label);
+    if (!persistentUI.tabs.get(tabSpec.tab)?.openSubTab) {
+      persistentUI.setOpenSubTab(tabSpec.tab, subTabs[0].label);
     }
-  }, [subTabs, tabSpec.tab, ui]);
+  }, [subTabs, tabSpec.tab, persistentUI]);
 
   // This is called even if the tab is already open
   const handleTabSelect = (tabidx: number) => {
@@ -52,9 +53,9 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     if (tabState?.openSubTab === title && tabState?.openDocuments.get(title)) {
       // If there is a document open then a click on the tab should close
       // the document
-      ui.closeSubTabDocument(tabSpec.tab, title);
+      persistentUI.closeSubTabDocument(tabSpec.tab, title);
     }
-    ui.setOpenSubTab(tabSpec.tab, title);
+    persistentUI.setOpenSubTab(tabSpec.tab, title);
     Logger.log(LogEventName.SHOW_TAB_SECTION, {
       tab_section_name: title,
       // FIXME: this can be inaccurate, there can be multiple
@@ -65,13 +66,13 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
   };
 
   const handleSelectDocument = (document: DocumentModelType) => {
-    if (ui.focusDocument === document.key) {
-      ui.closeSubTabDocument(tabSpec.tab, selectedSubTab.label);
+    if (persistentUI.focusDocument === document.key) {
+      persistentUI.closeSubTabDocument(tabSpec.tab, selectedSubTab.label);
     } else {
       if (!document.hasContent && document.isRemote) {
         loadDocumentContent(document);
       }
-      ui.openSubTabDocument(tabSpec.tab, selectedSubTab.label, document.key);
+      persistentUI.openSubTabDocument(tabSpec.tab, selectedSubTab.label, document.key);
       const logEvent = document.isRemote
         ? LogEventName.VIEW_SHOW_TEACHER_NETWORK_COMPARISON_DOCUMENT
         : LogEventName.VIEW_SHOW_COMPARISON_DOCUMENT;

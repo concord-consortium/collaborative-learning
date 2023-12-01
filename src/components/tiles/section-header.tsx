@@ -30,6 +30,6 @@ export class SectionHeader extends BaseComponent<IProps> {
   }
 
   private handleMouseDown = (e: React.MouseEvent) => {
-    this.stores.persistentUi.setSelectedTile();
+    this.stores.persistentUI.setSelectedTile();
   };
 }

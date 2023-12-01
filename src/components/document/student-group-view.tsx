@@ -12,16 +12,17 @@ import "./student-group-view.scss";
 
 export const StudentGroupView:React.FC = observer(function StudentGroupView(){
   const stores = useStores();
-  const {groups, persistentUi: ui } = stores;
+  const {groups, ui, persistentUI} = stores;
 
   useEffect(() => stores.initializeStudentWorkTab(), [stores]);
 
-  const selectedGroupId = ui.tabs.get("student-work")?.openSubTab || "";
+  const selectedGroupId = persistentUI.tabs.get("student-work")?.openSubTab || "";
   const group = groups.getGroupById(selectedGroupId);
-  const openDocId = ui.tabs.get("student-work")?.openDocuments.get(selectedGroupId);
+  const openDocId = persistentUI.tabs.get("student-work")?.openDocuments.get(selectedGroupId);
   const focusedGroupUser = getFocusedGroupUser(group, openDocId, DocumentViewMode.Live);
-  const isChatPanelShown = ui.showChatPanel;
-  const documentSelectedForComment = ui.showChatPanel && ui.selectedTileIds.length === 0 && ui.focusDocument;
+  const isChatPanelShown = persistentUI.showChatPanel;
+  const documentSelectedForComment = persistentUI.showChatPanel && (ui.selectedTileIds.length === 0)
+                                     && persistentUI.focusDocument;
   const studentGroupViewClasses = classNames( "editable-document-content", "document", "student-group-view",
     {"chat-open": isChatPanelShown}, {"comment-select" : documentSelectedForComment});
 
@@ -47,7 +48,8 @@ interface IGroupComponentProps {
 }
 
 const GroupViewTitlebar: React.FC<IGroupComponentProps> = observer(function GroupViewTitlebar({group, groupUser}) {
-  const {groups, persistentUi: ui} = useStores();
+  // console.log("\t🏭 GroupViewTitlebar");
+  const {groups, persistentUI: ui} = useStores();
   const focusedGroupUser = groupUser;
 
   const handleFocusedUserChange = (selectedUser: GroupUserModelType) => {

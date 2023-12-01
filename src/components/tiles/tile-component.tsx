@@ -186,11 +186,11 @@ export class TileComponent extends BaseComponent<IProps, IState> {
   public render() {
     const { model, readOnly, isUserResizable, widthPct } = this.props;
     const { hoverTile } = this.state;
-    const { appConfig, persistentUi: ui } = this.stores;
+    const { appConfig, ui, persistentUI } = this.stores;
     const { Component, tileEltClass } = getTileComponentInfo(model.content.type) || {};
     const isPlaceholderTile = Component === PlaceholderTileComponent;
     const isTileSelected = ui.isSelectedTile(model);
-    const tileSelectedForComment = isTileSelected && ui.showChatPanel;
+    const tileSelectedForComment = isTileSelected && persistentUI.showChatPanel;
     const classes = classNames("tool-tile", model.display, tileEltClass, {
                       placeholder: isPlaceholderTile,
                       readonly: readOnly,
@@ -306,7 +306,7 @@ export class TileComponent extends BaseComponent<IProps, IState> {
 
   private handlePointerDown = (e: MouseEvent | TouchEvent) => {
     const { model } = this.props;
-    const { persistentUi: ui } = this.stores;
+    const { ui } = this.stores;
 
     // ignore mousedown on drag element
     let targetElement: HTMLElement | null = e.target as HTMLElement;
@@ -383,7 +383,7 @@ export class TileComponent extends BaseComponent<IProps, IState> {
     }
     if (!e.dataTransfer) return;
 
-    const { persistentUi: ui } = this.stores;
+    const { ui } = this.stores;
 
     // dragging a tile selects it first
     ui.setSelectedTile(model, { append: hasSelectionModifier(e) });

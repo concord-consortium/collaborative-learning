@@ -86,7 +86,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     const updateToolButton = (toolButton: IToolbarButtonModel) => {
       if (toolButton.id === "hide-annotations") {
         // Update hide annotation button's icon and title based on current annotation visibility
-        const { persistentUi: ui } = this.stores;
+        const { persistentUI: ui } = this.stores;
         const appIcons = toolButton.env?.appIcons;
         toolButton.setIcon(
           appIcons?.[ui.showAnnotations ? "icon-hide-annotations-tool" : "icon-show-annotations-tool"]
@@ -136,7 +136,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
 
   private showDropRowHighlightAfterSelectedTiles = () => {
     const { document } = this.props;
-    const { persistentUi: { selectedTileIds } } = this.stores;
+    const { persistentUI: { selectedTileIds } } = this.stores;
     const tilePositions = document.content?.getTilePositions(Array.from(selectedTileIds)) || [];
     const rowIndex = document.content?.getRowAfterTiles(tilePositions);
     document.content?.showPendingInsertHighlight(true, rowIndex);
@@ -156,7 +156,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   }
 
   private isButtonActive(toolButton: IToolbarButtonModel) {
-    const { persistentUi: ui } = this.stores;
+    const { persistentUI: ui } = this.stores;
     if (toolButton.id === "solution") {
       return this.selectedTilesIncludeTeacher();
     } else if (toolButton.id === "sparrow") {
@@ -168,7 +168,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
 
   private isButtonDisabled(toolButton: IToolbarButtonModel) {
     const { document: { content } } = this.props;
-    const { appConfig: { settings }, persistentUi: { selectedTileIds } } = this.stores;
+    const { appConfig: { settings }, persistentUI: { selectedTileIds } } = this.stores;
 
     const undoManager = this.props.document.treeManagerAPI?.undoManager;
     if (toolButton.id === "undo" && !undoManager?.canUndo) return true;
@@ -191,7 +191,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
 
   private handleAddTile(tool: IToolbarButtonModel) {
     const { document } = this.props;
-    const { persistentUi: ui } = this.stores;
+    const { persistentUI: ui } = this.stores;
     const tileContentInfo = getTileContentInfo(tool.id);
     if (!tileContentInfo) return;
 
@@ -222,7 +222,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleSparrow() {
-    const { persistentUi: ui } = this.stores;
+    const { persistentUI: ui } = this.stores;
     if (ui.annotationMode === kSparrowAnnotationMode) {
       ui.setAnnotationMode();
     } else {
@@ -233,7 +233,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleHideAnnotations() {
-    const { persistentUi: ui } = this.stores;
+    const { persistentUI: ui } = this.stores;
     ui.setAnnotationMode();
     ui.setShowAnnotations(!ui.showAnnotations);
   }
@@ -250,7 +250,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     const tileApiInterface = this.context?.current;
     if (!tileApiInterface) return;
     let didDeleteInteriorSelection = false;
-    const { persistentUi: ui } = this.stores;
+    const { persistentUI: ui } = this.stores;
     ui.selectedTileIds.forEach(tileId => {
       const tileApi = tileApiInterface?.getTileApi(tileId);
       // if there is selected content inside the selected tile, delete it first
@@ -267,7 +267,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
 
   private handleDuplicate() {
     const { document } = this.props;
-    const { persistentUi: ui } = this.stores;
+    const { persistentUI: ui } = this.stores;
     const selectedTileIds = ui.selectedTileIds;
 
     // Sort the selected tile ids in top->bottom, left->right order so they duplicate in the correct formation
@@ -285,7 +285,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleDeleteSelectedTiles = () => {
-    const { persistentUi: ui } = this.stores;
+    const { persistentUI: ui } = this.stores;
     const { document } = this.props;
     ui.selectedTileIds.forEach(tileId => {
       ui.removeTileIdFromSelection(tileId);
@@ -295,7 +295,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
 
   // Returns true if any of the selected tiles have display: "teacher"
   private selectedTilesIncludeTeacher = () => {
-    const { persistentUi: ui } = this.stores;
+    const { persistentUI: ui } = this.stores;
     const { document } = this.props;
     const documentContent = document.content;
     let includesTeacher = false;
@@ -311,7 +311,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleToggleSelectedTilesSolution = () => {
-    const { persistentUi: ui } = this.stores;
+    const { persistentUI: ui } = this.stores;
     const { document } = this.props;
     const documentContent = document.content;
     if (documentContent) {

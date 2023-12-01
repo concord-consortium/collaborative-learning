@@ -85,9 +85,9 @@ interface IGroupHeaderProps {
 
 const TeacherGroupHeader: React.FC<IGroupHeaderProps> = observer(function TeacherGroupHeader(
     {group, navTabName, documentViewMode}){
-  const { persistentUi: ui, db, groups }  = useStores();
+  const { ui, persistentUI, db, groups }  = useStores();
 
-  const openDocId = ui.tabs.get(navTabName)?.openDocuments.get(group.id);
+  const openDocId = persistentUI.tabs.get(navTabName)?.openDocuments.get(group.id);
   const groupModel = groups.getGroupById(group.id);
   const focusedGroupUser = getFocusedGroupUser(groupModel, openDocId, documentViewMode);
 

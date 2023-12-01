@@ -218,7 +218,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
 
   private handleIsEnabled = () => {
     const { model: { id }, readOnly } = this.props;
-    const { persistentUi: ui } = this.stores;
+    const { persistentUI: ui } = this.stores;
     return !readOnly &&
             (ui?.selectedTileIds.length === 1) &&
             (ui?.selectedTileIds.includes(id));
@@ -261,7 +261,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    debouncedSelectTile(this.stores.persistentUi, this.props.model, hasSelectionModifier(e));
+    debouncedSelectTile(this.stores.persistentUI, this.props.model, hasSelectionModifier(e));
   };
 
   private storeNewImageUrl(newUrl: string) {
@@ -306,7 +306,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
         this.storeNewImageUrl(dropUrl);
       })
       .catch((err) => {
-        this.stores.persistentUi.alert(err.toString());
+        this.stores.persistentUI.alert(err.toString());
       });
   };
 }

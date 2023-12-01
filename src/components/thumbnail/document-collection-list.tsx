@@ -2,7 +2,7 @@ import { observer } from "mobx-react";
 import React from "react";
 import classNames from "classnames";
 import { DocumentDragKey, SupportPublication } from "../../models/document/document-types";
-import { useAppConfig, usePersistentUIStore, useUserStore } from "../../hooks/use-stores";
+import { useAppConfig, useUIStore, useUserStore } from "../../hooks/use-stores";
 import { ISubTabSpec, NavTabModelType } from "../../models/view/nav-tabs";
 import { DocumentModelType } from "../../models/document/document";
 import { logDocumentEvent } from "../../models/document/log-document-event";
@@ -27,7 +27,7 @@ export const kNavItemScale = 0.11;
 export const DocumentCollectionList: React.FC<IProps> = observer(function DocumentCollectionList(
     { setCollectionElement, subTab, tabSpec, horizontal, collapsed, selectedDocument, selectedSecondaryDocument,
         onSelectNewDocument, onSelectDocument}) {
-  const ui = usePersistentUIStore();
+  const ui = useUIStore();
   const appConfigStore = useAppConfig();
   const user = useUserStore();
   const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);

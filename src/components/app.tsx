@@ -47,7 +47,7 @@ function resolveAppMode(
   stores: IStores,
   rawFirebaseJWT: string | undefined,
   onQAClear?: (result: boolean, err?: string) => void) {
-  const { appMode, db, persistentUi: ui} = stores;
+  const { appMode, db, ui} = stores;
   if (appMode === "authed")  {
     if (rawFirebaseJWT) {
       return db.connect({appMode, stores, rawFirebaseJWT}).catch(error => ui.setError(error));
@@ -81,7 +81,7 @@ function resolveAppMode(
 }
 
 export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, err?: string) => void) => {
-  const {appConfig, appMode, db, user, persistentUi: ui} = stores;
+  const {appConfig, appMode, db, user, ui} = stores;
   let rawPortalJWT: string | undefined;
 
   authenticate(appMode, appConfig, urlParams)
@@ -160,7 +160,7 @@ export class AppComponent extends BaseComponent<IProps, IState> {
   // time.
 
   public render() {
-    const {appConfig, user, persistentUi: ui, db} = this.stores;
+    const {appConfig, user, ui, db} = this.stores;
 
     if (ui.showDemoCreator) {
       return this.renderApp(<DemoCreatorComponent />);

@@ -60,7 +60,7 @@ export class ClassLogsComponent extends BaseComponent<IProps> {
   private handlePublicationClicked = (publication: DocumentModelType) => {
     const { appConfig } = this.stores;
     return (e: React.MouseEvent<HTMLDivElement>) => {
-      this.stores.persistentUi.rightNavDocumentSelected(appConfig, publication);
+      this.stores.persistentUI.rightNavDocumentSelected(appConfig, publication);
     };
   };
 

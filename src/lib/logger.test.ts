@@ -81,7 +81,7 @@ describe("dev/qa/test logger with DEBUG_LOGGER false", () => {
     stores = createStores({
       appMode: "test",
       appConfig: specAppConfig({ config: { appName: "TestLogger"} }),
-      persistentUi: PersistentUIModel.create({
+      persistentUI: PersistentUIModel.create({
         activeNavTab: ENavTab.kStudentWork,
         problemWorkspace: {
           type: ProblemWorkspace,
@@ -130,7 +130,7 @@ describe("demo logger with DEBUG_LOGGER false", () => {
     stores = createStores({
       appMode: "demo",
       appConfig: specAppConfig({ config: { appName: "TestLogger"} }),
-      persistentUi: PersistentUIModel.create({
+      persistentUI: PersistentUIModel.create({
         activeNavTab: ENavTab.kStudentWork,
         problemWorkspace: {
           type: ProblemWorkspace,

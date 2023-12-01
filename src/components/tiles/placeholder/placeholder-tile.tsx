@@ -32,6 +32,6 @@ export default class PlaceholderTileComponent extends BaseComponent<ITileProps> 
   }
 
   private handleMouseDown = (e: React.MouseEvent) => {
-    this.stores.persistentUi.setSelectedTile();
+    this.stores.persistentUI.setSelectedTile();
   };
 }

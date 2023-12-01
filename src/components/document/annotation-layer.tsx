@@ -8,7 +8,7 @@ import { getDefaultPeak } from "../annotations/annotation-utilities";
 import { ArrowAnnotationComponent } from "../annotations/arrow-annotation";
 import { PreviewArrow } from "../annotations/preview-arrow";
 import { TileApiInterfaceContext } from "../tiles/tile-api";
-import { usePersistentUIStore } from "../../hooks/use-stores";
+import { useUIStore } from "../../hooks/use-stores";
 import { ArrowAnnotation } from "../../models/annotations/arrow-annotation";
 import { ClueObjectModel, IClueObject, OffsetModel } from "../../models/annotations/clue-object";
 import { DocumentContentModelType } from "../../models/document/document-content";
@@ -37,7 +37,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const [mouseX, setMouseX] = useState<number | undefined>();
   const [mouseY, setMouseY] = useState<number | undefined>();
   const divRef = useRef<Element|null>(null);
-  const ui = usePersistentUIStore();
+  const ui = useUIStore();
   const tileApiInterface = useContext(TileApiInterfaceContext);
 
   // Clear a partially completed annotation when the mode changes

@@ -34,7 +34,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   public render() {
-    const { appMode, appConfig: { toolbar }, documents, persistentUi: ui, groups } = this.stores;
+    const { appMode, appConfig: { toolbar }, documents, persistentUI: ui, groups } = this.stores;
     const { problemWorkspace } = ui;
     const { comparisonDocumentKey, hidePrimaryForCompare, comparisonVisible } = problemWorkspace;
     const showPrimary = !hidePrimaryForCompare;
@@ -116,7 +116,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
 
   private async guaranteeInitialDocuments() {
     const { appConfig: { defaultLearningLogDocument, defaultLearningLogTitle, initialLearningLogTitle },
-            db, persistentUi: { problemWorkspace }, unit: { planningDocument }, user: { type: role } } = this.stores;
+            db, persistentUI: { problemWorkspace }, unit: { planningDocument }, user: { type: role } } = this.stores;
     if (!problemWorkspace.primaryDocumentKey) {
       const { type, content } = this.getDefaultDocumentContentSpec();
       const documentContent = this.getDefaultSectionedDocumentContent(type, content);
@@ -164,7 +164,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
 
   private isAcceptableImageDrag = (e: React.DragEvent<HTMLDivElement>) => {
     // make sure we have a primary document to drop onto
-    return !!this.getPrimaryDocument(this.stores.persistentUi.problemWorkspace.primaryDocumentKey);
+    return !!this.getPrimaryDocument(this.stores.persistentUI.problemWorkspace.primaryDocumentKey);
   };
 
   private handleDragOverSide = (e: React.DragEvent<HTMLDivElement>) => {
@@ -175,7 +175,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
 
   private handleDropSide = (side: WorkspaceSide) => {
     return (e: React.DragEvent<HTMLDivElement>) => {
-      const {persistentUi: ui, documents} = this.stores;
+      const {persistentUI: ui, documents} = this.stores;
       const documentKey = e.dataTransfer && e.dataTransfer.getData(DocumentDragKey);
       if (documentKey) {
         const {problemWorkspace} = ui;
@@ -202,7 +202,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   };
 
   private handleImageDrop = (e: React.DragEvent<HTMLDivElement>, rowId?: string) => {
-    const {persistentUi: ui} = this.stores;
+    const {persistentUI: ui} = this.stores;
     this.imageDragDrop.drop(e)
       .then((url) => {
         const primaryDocument = this.getPrimaryDocument(ui.problemWorkspace.primaryDocumentKey);
@@ -228,7 +228,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   };
 
   private handleNewDocument = (type: string) => {
-    const { appConfig, documents, persistentUi: ui, user } = this.stores;
+    const { appConfig, documents, ui, user } = this.stores;
     const isLearningLog = type === LearningLogDocument;
     const docType = isLearningLog ? LearningLogDocument : PersonalDocument;
     const defaultDocTitle = isLearningLog
@@ -256,7 +256,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   };
 
   private handleNewDocumentOpen = async (type: OtherDocumentType, title: string) => {
-    const { db, persistentUi: { problemWorkspace } } = this.stores;
+    const { db, persistentUI: { problemWorkspace } } = this.stores;
     const content = this.defaultOtherDocumentContent(type);
     const newDocument = await db.createOtherDocument(type, {title, content});
     if (newDocument) {
@@ -265,7 +265,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   };
 
   private handleCopyDocument = (document: DocumentModelType) => {
-    const { appConfig, persistentUi: ui } = this.stores;
+    const { appConfig, ui } = this.stores;
     const docTypeString = document.getLabel(appConfig, 1);
     const docTypeStringL = document.getLabel(appConfig, 1, true);
     const originTitle = document?.properties?.get("originTitle");
@@ -281,7 +281,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   };
 
   private handleCopyDocumentOpen = async (document: DocumentModelType, title: string) => {
-    const { db, persistentUi: { problemWorkspace } } = this.stores;
+    const { db, persistentUI: { problemWorkspace } } = this.stores;
     const copyDocument = await db.copyOtherDocument(document, { title, asTemplate: true });
     if (copyDocument) {
       problemWorkspace.setPrimaryDocument(copyDocument);
@@ -292,7 +292,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     const { appConfig } = this.stores;
     const docTypeString = document.getLabel(appConfig, 1);
     const docTypeStringL = document.getLabel(appConfig, 1, true);
-    this.stores.persistentUi.confirm(`Delete this ${docTypeStringL}? ${document.title}`, `Delete ${docTypeString}`)
+    this.stores.ui.confirm(`Delete this ${docTypeStringL}? ${document.title}`, `Delete ${docTypeString}`)
     .then((confirmDelete: boolean) => {
       if (confirmDelete) {
         document.setProperty("isDeleted", "true");
@@ -302,7 +302,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   };
 
   private handleAdminDestroyDocument = (document: DocumentModelType) => {
-    const { appConfig, db, persistentUi: ui } = this.stores;
+    const { appConfig, db, ui } = this.stores;
     const docTypeString = document.getLabel(appConfig, 1);
     const docTypeStringL = document.getLabel(appConfig, 1, true);
     const documentString = `${document.type} ${docTypeStringL} (${document.title || ""})`;
@@ -317,7 +317,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   };
 
   private handleDeleteOpenPrimaryDocument = async () => {
-    const { db, persistentUi: { problemWorkspace } } = this.stores;
+    const { db, persistentUI: { problemWorkspace } } = this.stores;
     const { type, content } = this.getDefaultDocumentContentSpec();
     const defaultDocument = await db.guaranteeOpenDefaultDocument(type, content);
     if (defaultDocument) {

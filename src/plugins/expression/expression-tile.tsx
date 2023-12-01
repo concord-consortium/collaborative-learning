@@ -11,7 +11,7 @@ import { ITileProps } from "../../components/tiles/tile-component";
 import { ExpressionContentModelType } from "./expression-content";
 import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
 import { replaceKeyBinding } from "./expression-tile-utils";
-import { usePersistentUIStore } from "../../hooks/use-stores";
+import { useUIStore } from "../../hooks/use-stores";
 import { useToolbarTileApi } from "../../components/tiles/hooks/use-toolbar-tile-api";
 import { ExpressionToolbar } from "./expression-toolbar";
 import { findMissingElements, replaceMissingElements } from "./expression-cortex-utils";
@@ -47,7 +47,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   const content = model.content as ExpressionContentModelType;
   const mf = useRef<MathfieldElement>(null);
   const trackedCursorPos = useRef<number>(0);
-  const ui = usePersistentUIStore();
+  const ui = useUIStore();
 
   useEffect(() => {
     const handleFocus = () => ui.setSelectedTileId(model.id);

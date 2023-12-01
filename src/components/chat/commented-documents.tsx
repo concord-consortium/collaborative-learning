@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 
 import { useFirestore } from "../../hooks/firestore-hooks";
-import { useStores, usePersistentUIStore, useUserStore} from "../../hooks/use-stores";
+import { useStores, usePersistentUIStore, useUserStore, useUIStore} from "../../hooks/use-stores";
 import { useDocumentCaption } from "../../hooks/use-document-caption";
 import { CurriculumDocument, DocumentDocument } from "../../lib/firestore-schema";
 import { getSectionTitle } from "../../models/curriculum/section";
@@ -30,7 +30,8 @@ interface PromisedDocumentDocument extends DocumentDocument {
 
 export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
   const [db] = useFirestore();
-  const ui = usePersistentUIStore();
+  const ui = useUIStore();
+  const persistentUI = usePersistentUIStore();
   const store = useStores();
   const problem =  store.problemOrdinal;
   const unit = store.unit.code;
@@ -144,7 +145,7 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
               className={`document-box ${navTab}`}
               key={index}
               onClick={() => {
-                ui.openCurriculumDocument(doc.path);
+                persistentUI.openCurriculumDocument(doc.path);
                 ui.setSelectedTile();
                 if (handleDocView !== undefined){
                   handleDocView();
@@ -209,7 +210,8 @@ interface JProps {
 // This is rendering a single document item in the commented document list
 export const WorkDocumentItem: React.FC<JProps> = (props) => {
   const { doc, sectionOrNetworkDoc, isNetworkDoc, handleDocView } = props;
-  const ui = usePersistentUIStore();
+  const ui = useUIStore();
+  const persistentUI = usePersistentUIStore();
   const user = useUserStore();
   // We need the navTab to style the item.
   const navTab = getNavTabOfDocument(doc, user);
@@ -219,7 +221,7 @@ export const WorkDocumentItem: React.FC<JProps> = (props) => {
     <div
       className={`document-box my-work-document ${navTab}`}
       onClick={()=>{
-        ui.openResourceDocument(sectionOrNetworkDoc, user);
+        persistentUI.openResourceDocument(sectionOrNetworkDoc, user);
         ui.setSelectedTile();
         if (handleDocView !== undefined){
           handleDocView();

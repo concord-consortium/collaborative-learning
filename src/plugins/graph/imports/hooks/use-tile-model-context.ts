@@ -1,12 +1,12 @@
 import { createContext, useCallback, useContext } from "react";
 import { ITileModel } from "../../../../models/tiles/tile-model";
-import { usePersistentUIStore } from "../../../../hooks/use-stores";
+import { useUIStore } from "../../../../hooks/use-stores";
 
 export const TileModelContext = createContext<ITileModel | undefined>(undefined);
 
 export const useTileModelContext = () => {
   const tile = useContext(TileModelContext);
-  const ui = usePersistentUIStore();
+  const ui = useUIStore();
 
   const isTileSelected = useCallback(function isTileSelected() {
     const { selectedTileIds } = ui;

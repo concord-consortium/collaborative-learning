@@ -13,7 +13,7 @@ import { HotKeys } from "../../../utilities/hot-keys";
 import { getClipboardContent, pasteClipboardImage } from "../../../utilities/clipboard-utils";
 import "./drawing-tile.scss";
 import { ObjectListView } from "./object-list-view";
-import { usePersistentUIStore } from "../../../hooks/use-stores";
+import { useUIStore } from "../../../hooks/use-stores";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 
 type IProps = ITileProps;
@@ -26,7 +26,7 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
   const hotKeys = useRef(new HotKeys());
   const drawingToolElement = useRef<HTMLDivElement>(null);
 
-  const ui = usePersistentUIStore();
+  const ui = useUIStore();
 
   useEffect(() => {
     if (!readOnly) {

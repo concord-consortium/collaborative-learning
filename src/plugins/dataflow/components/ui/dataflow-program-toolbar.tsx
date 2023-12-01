@@ -1,9 +1,8 @@
 import React from "react";
 import { DragOverlay, useDraggable } from "@dnd-kit/core";
-
 import { getNodeType, isNodeDraggableId, nodeDraggableId } from "../dataflow-types";
 import { NodeType, NodeTypes } from "../../model/utilities/node";
-import { usePersistentUIStore } from "../../../../hooks/use-stores";
+import { useUIStore } from "../../../../hooks/use-stores";
 
 import "./dataflow-program-toolbar.scss";
 
@@ -86,7 +85,7 @@ interface IProps {
   tileId: string;
 }
 export const DataflowProgramToolbar = ({ disabled, isTesting, onClearClick, onNodeCreateClick, tileId }: IProps) => {
-  const ui = usePersistentUIStore();
+  const ui = useUIStore();
   let dragOverlay = null;
   if (ui.dragId && isNodeDraggableId(ui.dragId)) {
     dragOverlay = (

@@ -2,7 +2,6 @@ import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { useEffect, useRef, useState } from "react";
 import { ITileProps, extractDragTileType, kDragTiles } from "../../components/tiles/tile-component";
-import { usePersistentUIStore } from "../../hooks/use-stores";
 import { DataCardContentModelType } from "./data-card-content";
 import { DataCardRows } from "./components/data-card-rows";
 import { DataCardToolbar } from "./data-card-toolbar";
@@ -17,9 +16,10 @@ import { safeJsonParse } from "../../utilities/js-utils";
 import { mergeTwoDataSets } from "../../models/data/data-set-utils";
 import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
 import { useDataCardTileHeight } from "./use-data-card-tile-height";
+import { DataCardToolbarContext } from "./data-card-toolbar-context";
+import { useUIStore } from "../../hooks/use-stores";
 
 import "./data-card-tile.scss";
-import { DataCardToolbarContext } from "./data-card-toolbar-context";
 
 export const DataCardToolComponent: React.FC<ITileProps> = observer(function DataCardToolComponent(props) {
   const { documentId, model, readOnly, documentContent, tileElt, onSetCanAcceptDrop, onRegisterTileApi,
@@ -31,7 +31,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
   const dataSet = content.dataSet;
   const linkedTiles = content.tileEnv?.sharedModelManager?.getSharedModelTiles(content.sharedModel);
   const isLinked = linkedTiles && linkedTiles.length > 1;
-  const ui = usePersistentUIStore();
+  const ui = useUIStore();
 
   const isTileSelected = ui.selectedTileIds.findIndex(id => id === content.metadata.id) >= 0;
   const [currEditAttrId, setCurrEditAttrId] = useState<string>("");
