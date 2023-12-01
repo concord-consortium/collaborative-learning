@@ -101,7 +101,7 @@ class Stores implements IStores{
           mode: "1-up"
         },
       });
-    this.ui = params?.persistentUi || UIModel.create({
+    this.ui = params?.ui || UIModel.create({
       problemWorkspace: {
         type: ProblemWorkspace,
         mode: "1-up"
