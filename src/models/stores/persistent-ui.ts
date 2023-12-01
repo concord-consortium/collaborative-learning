@@ -61,7 +61,7 @@ export const UITabModel = types
   });
 
 export const PersistentUIModel = types
-  .model("UI", {
+  .model("PersistentUI", {
     annotationMode: types.maybe(types.string),
     dividerPosition: kDividerHalf,
     error: types.maybeNull(types.string),
