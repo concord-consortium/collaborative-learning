@@ -10,7 +10,8 @@ let tableToolTile = new TableToolTile;
 const primaryWorkspace = new PrimaryWorkspace;
 const resourcePanel = new ResourcePanel;
 
-const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=example-config-subtabs";
+const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=brain";
+const queryParamsMultiDataset = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=example-config-subtabs";
 
 const problemDoc = 'Lesson 1.1 - What is a bionic arm?';
 
@@ -173,7 +174,7 @@ context('XYPlot Tool Tile', function () {
     });
 
     it("Test linking two datasets", () => {
-      beforeTest(queryParams);
+      beforeTest(queryParamsMultiDataset);
       cy.log("Add XY Plot Tile");
       cy.collapseResourceTabs();
       clueCanvas.addTile("graph");
