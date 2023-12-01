@@ -3,6 +3,7 @@ import {reaction} from "mobx";
 import {observer} from "mobx-react-lite";
 import {select} from "d3";
 import t from "../imports/utilities/translation/translate";
+import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
 import {AttributeType} from "../../../models/data/attribute";
 import {IDataSet} from "../../../models/data/data-set";
 import {isSetAttributeNameAction} from "../../../models/data/data-set-actions";
@@ -16,7 +17,6 @@ import {AxisOrLegendAttributeMenu} from "../imports/components/axis/components/a
 import { useGraphSettingsContext } from "../hooks/use-graph-settings-context";
 
 import graphVars from "./graph.scss";
-import { useDataConfigurationContext } from "../hooks/use-data-configuration-context";
 
 interface IAttributeLabelProps {
   place: GraphPlace;
@@ -26,8 +26,7 @@ interface IAttributeLabelProps {
 }
 
 export const AttributeLabel = observer(
-  function AttributeLabel(
-      {place, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute}: IAttributeLabelProps) {
+  function AttributeLabel({place, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute}: IAttributeLabelProps) {
     const graphModel = useGraphModelContext(),
       dataConfiguration = useDataConfigurationContext(),
       { defaultSeriesLegend, defaultAxisLabels } = useGraphSettingsContext(),

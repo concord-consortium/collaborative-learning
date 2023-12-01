@@ -3,6 +3,7 @@ import React, { CSSProperties, useRef, useEffect, useState } from "react";
 import t from "../../../utilities/translation/translate";
 import {GraphPlace} from "../../axis-graph-shared";
 import { graphPlaceToAttrRole } from "../../../../graph-types";
+import { useDataConfigurationContext } from "../../../../hooks/use-data-configuration-context";
 import { IUseDraggableAttribute, useDraggableAttribute } from "../../../hooks/use-drag-drop";
 import { useInstanceIdContext } from "../../../hooks/use-instance-id-context";
 import { useOutsidePointerDown } from "../../../hooks/use-outside-pointer-down";
@@ -11,7 +12,6 @@ import { AttributeType } from "../../../../../../models/data/attribute";
 import { IDataSet } from "../../../../../../models/data/data-set";
 import { isSetAttributeNameAction } from "../../../../../../models/data/data-set-actions";
 import { useGraphSettingsContext } from "../../../../hooks/use-graph-settings-context";
-import { useDataConfigurationContext } from "../../../../hooks/use-data-configuration-context";
 
 interface IProps {
   place: GraphPlace;

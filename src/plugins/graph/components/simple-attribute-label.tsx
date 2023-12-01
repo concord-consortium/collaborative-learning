@@ -4,6 +4,7 @@ import {observer} from "mobx-react-lite";
 import {GraphPlace } from "../imports/components/axis-graph-shared";
 import {AttributeType} from "../../../models/data/attribute";
 import {AxisOrLegendAttributeMenu} from "../imports/components/axis/components/axis-or-legend-attribute-menu";
+import { useDataConfigurationContext } from "../hooks/use-data-configuration-context";
 import { useGraphModelContext } from "../models/graph-model";
 import { IDataSet } from "../../../models/data/data-set";
 import { kGraphClassSelector } from "../graph-types";
@@ -11,7 +12,6 @@ import { ReadOnlyContext } from "../../../components/document/read-only-context"
 import DropdownCaretIcon from "../assets/dropdown-caret.svg";
 
 import "../components/legend/multi-legend.scss";
-import { useDataConfigurationContext } from "../hooks/use-data-configuration-context";
 
 interface ISimpleAttributeLabelProps {
   place: GraphPlace;

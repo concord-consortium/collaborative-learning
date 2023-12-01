@@ -4,6 +4,7 @@ import { AttributeType } from "../../../../models/data/attribute";
 import { GraphPlace } from "../../imports/components/axis-graph-shared";
 import { useGraphLayoutContext } from "../../models/graph-layout";
 import { IDataSet } from "../../../../models/data/data-set";
+import { DataConfigurationContext } from "../../hooks/use-data-configuration-context";
 import { useInstanceIdContext } from "../../imports/hooks/use-instance-id-context";
 import { axisPlaceToAttrRole, kGraphDefaultHeight } from "../../graph-types";
 import { useGraphModelContext } from "../../models/graph-model";
@@ -12,7 +13,6 @@ import { IGraphLayerModel } from "../../models/graph-layer-model";
 import { SimpleAttributeLabel } from "../simple-attribute-label";
 
 import "./multi-legend.scss";
-import { DataConfigurationContext } from "../../hooks/use-data-configuration-context";
 
 export const kMultiLegendMenuHeight = 30;
 export const kMultiLegendPadding = 20;
