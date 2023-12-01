@@ -8,7 +8,7 @@ import { Adornment } from "./adornment";
 import { getAdornmentContentInfo } from "./adornment-content-info";
 import { IAdornmentModel } from "./adornment-models";
 import { useInstanceIdContext } from "../imports/hooks/use-instance-id-context";
-import { useTileModelContext } from "../imports/hooks/use-tile-model-context";
+import { useTileModelContext } from "../../../components/tiles/hooks/use-tile-model-context";
 import { useDataConfigurationContext } from "../hooks/use-data-configuration-context";
 
 import "./adornments.scss";

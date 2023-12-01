@@ -1,8 +1,6 @@
-import { createContext, useCallback, useContext } from "react";
-import { ITileModel } from "../../../../models/tiles/tile-model";
-import { useUIStore } from "../../../../hooks/use-stores";
-
-export const TileModelContext = createContext<ITileModel | undefined>(undefined);
+import { useCallback, useContext } from "react";
+import { TileModelContext } from "../tile-api";
+import { useUIStore } from "../../../hooks/use-stores";
 
 export const useTileModelContext = () => {
   const tile = useContext(TileModelContext);
