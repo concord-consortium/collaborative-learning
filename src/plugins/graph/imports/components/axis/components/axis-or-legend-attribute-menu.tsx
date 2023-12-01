@@ -10,12 +10,11 @@ import { useOverlayBounds } from "../../../hooks/use-overlay-bounds";
 import { AttributeType } from "../../../../../../models/data/attribute";
 import { IDataSet } from "../../../../../../models/data/data-set";
 import { isSetAttributeNameAction } from "../../../../../../models/data/data-set-actions";
-import { IGraphLayerModel } from "../../../../models/graph-layer-model";
 import { useGraphSettingsContext } from "../../../../hooks/use-graph-settings-context";
+import { useDataConfigurationContext } from "../../../../hooks/use-data-configuration-context";
 
 interface IProps {
   place: GraphPlace;
-  layer: IGraphLayerModel;
   attributeId?: string;
   // element to be mirrored
   target: SVGGElement | HTMLElement | null;
@@ -38,11 +37,11 @@ const removeAttrItemLabelKeys: Record<string, string> = {
   "rightSplit": "DG.DataDisplayMenu.removeAttribute_right"
 };
 
-export const AxisOrLegendAttributeMenu = ({ place, layer, attributeId, target, parent, portal, onOpenClose,
+export const AxisOrLegendAttributeMenu = ({ place, attributeId, target, parent, portal, onOpenClose,
                                       onChangeAttribute, onRemoveAttribute, onTreatAttributeAs }: IProps) => {
-  const dataConfig = layer.config;
-  const data = dataConfig.dataset;
-  const yAttributesPlotted = dataConfig.yAttributeDescriptions.map((a)=>a.attributeID);
+  const dataConfig = useDataConfigurationContext();
+  const data = dataConfig?.dataset;
+  const yAttributesPlotted = dataConfig?.yAttributeDescriptions.map((a)=>a.attributeID);
 
   const role = graphPlaceToAttrRole[place];
   const attrId = attributeId || dataConfig?.attributeID(role) || '';

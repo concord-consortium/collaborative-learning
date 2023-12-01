@@ -14,12 +14,11 @@ import {useTileModelContext} from "../imports/hooks/use-tile-model-context";
 import {getStringBounds} from "../imports/components/axis/axis-utils";
 import {AxisOrLegendAttributeMenu} from "../imports/components/axis/components/axis-or-legend-attribute-menu";
 import { useGraphSettingsContext } from "../hooks/use-graph-settings-context";
-import { IGraphLayerModel } from "../models/graph-layer-model";
 
 import graphVars from "./graph.scss";
+import { useDataConfigurationContext } from "../hooks/use-data-configuration-context";
 
 interface IAttributeLabelProps {
-  layer: IGraphLayerModel;
   place: GraphPlace;
   onChangeAttribute?: (place: GraphPlace, dataSet: IDataSet, attrId: string) => void;
   onRemoveAttribute?: (place: GraphPlace, attrId: string) => void;
@@ -28,14 +27,14 @@ interface IAttributeLabelProps {
 
 export const AttributeLabel = observer(
   function AttributeLabel(
-      {layer, place, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute}: IAttributeLabelProps) {
+      {place, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute}: IAttributeLabelProps) {
     const graphModel = useGraphModelContext(),
-      dataConfiguration = layer.config,
+      dataConfiguration = useDataConfigurationContext(),
       { defaultSeriesLegend, defaultAxisLabels } = useGraphSettingsContext(),
       layout = useGraphLayoutContext(),
       {isTileSelected} = useTileModelContext(),
-      dataset = dataConfiguration.dataset,
-      useClickHereCue = dataConfiguration.placeCanShowClickHereCue(place) ?? false,
+      dataset = dataConfiguration?.dataset,
+      useClickHereCue = dataConfiguration?.placeCanShowClickHereCue(place) ?? false,
       hideClickHereCue = useClickHereCue &&
         !dataConfiguration?.placeAlwaysShowsClickHereCue(place) && !isTileSelected(),
       [labelElt, setLabelElt] = useState<SVGGElement | null>(null),
@@ -44,9 +43,9 @@ export const AttributeLabel = observer(
 
     const getAttributeIDs = useCallback(() => {
       const isScatterPlot = graphModel.plotType === 'scatterPlot',
-        yAttributeDescriptions = dataConfiguration.yAttributeDescriptionsExcludingY2 || [],
+        yAttributeDescriptions = dataConfiguration?.yAttributeDescriptionsExcludingY2 || [],
         role = graphPlaceToAttrRole[place],
-        attrID = dataConfiguration.attributeID(role) || '';
+        attrID = dataConfiguration?.attributeID(role) || '';
       return place === 'left' && isScatterPlot
         ? yAttributeDescriptions.map((desc) => desc.attributeID)
         : [attrID];
@@ -174,7 +173,6 @@ export const AttributeLabel = observer(
             parent={positioningParentElt}
             portal={portalParentElt}
             place={place}
-            layer={layer}
             onChangeAttribute={onChangeAttribute}
             onRemoveAttribute={onRemoveAttribute}
             onTreatAttributeAs={onTreatAttributeAs}

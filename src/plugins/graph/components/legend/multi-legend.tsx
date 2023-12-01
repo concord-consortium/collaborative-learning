@@ -12,6 +12,7 @@ import { IGraphLayerModel } from "../../models/graph-layer-model";
 import { SimpleAttributeLabel } from "../simple-attribute-label";
 
 import "./multi-legend.scss";
+import { DataConfigurationContext } from "../../hooks/use-data-configuration-context";
 
 export const kMultiLegendMenuHeight = 30;
 export const kMultiLegendPadding = 20;
@@ -62,12 +63,13 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
 
   const layerLegends = graphModel.layers.map((layer) => {
     return (
-      <LayerLegend layer={layer}
-        key={layer.id}
-        onChangeAttribute={onChangeAttribute}
-        onRemoveAttribute={onRemoveAttribute}
-        onTreatAttributeAs={onTreatAttributeAs}
-      />);
+      <DataConfigurationContext.Provider key={layer.id} value={layer.config}>
+        <LayerLegend
+          onChangeAttribute={onChangeAttribute}
+          onRemoveAttribute={onRemoveAttribute}
+          onTreatAttributeAs={onTreatAttributeAs}
+        />
+      </DataConfigurationContext.Provider>);
     }
   );
 
@@ -79,14 +81,15 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
 
     return (
       <div className="x-axis-item" key={layer.id}>
-        <SimpleAttributeLabel
-          place="bottom"
-          attrId={attrId}
-          layer={layer}
-          onChangeAttribute={onChangeAttribute}
-          onRemoveAttribute={onRemoveAttribute}
-          onTreatAttributeAs={onTreatAttributeAs}
-        />
+        <DataConfigurationContext.Provider value={layer.config}>
+          <SimpleAttributeLabel
+            place="bottom"
+            attrId={attrId}
+            onChangeAttribute={onChangeAttribute}
+            onRemoveAttribute={onRemoveAttribute}
+            onTreatAttributeAs={onTreatAttributeAs}
+          />
+        </DataConfigurationContext.Provider>
       </div>
     );
   });
