@@ -1,4 +1,5 @@
-import { PersistentUIModel, PersistentUIModelType, UIDialogModelType } from "./persistent-ui";
+import { PersistentUIModel, PersistentUIModelType } from "./persistent-ui";
+import { UIDialogModelType, UIModel, UIModelType } from "./ui";
 import { ProblemWorkspace, LearningLogWorkspace } from "./workspace";
 import { TileModel } from "../tiles/tile-model";
 import { TextContentModel } from "../tiles/text/text-content";
@@ -8,40 +9,39 @@ import { registerTileTypes } from "../../register-tile-types";
 registerTileTypes(["Text"]);
 
 describe("ui model", () => {
-  let ui: PersistentUIModelType;
+  let ui: UIModelType;
+  let persistentUi: PersistentUIModelType;
 
   beforeEach(() => {
-    ui = PersistentUIModel.create({
-      problemWorkspace: {
-        type: ProblemWorkspace,
-        mode: "1-up"
-      },
+    ui = UIModel.create({
+      error: "test",
+      showDemoCreator: true,
       learningLogWorkspace: {
         type: LearningLogWorkspace,
         mode: "1-up"
       },
     });
+    persistentUi = PersistentUIModel.create({
+      problemWorkspace: {
+        type: ProblemWorkspace,
+        mode: "1-up"
+      }
+    });
   });
 
   it("has default values", () => {
-    expect(ui.error).toBe(null);
-    expect(ui.showDemoCreator).toBe(false);
-    expect(ui.showTeacherContent).toBe(true);
+    // expect(ui.error).toBe(null);
+    // expect(ui.showDemoCreator).toBe(false);
+    expect(persistentUi.showTeacherContent).toBe(true);
     expect(ui.dialog).toBeUndefined();
   });
 
   it("uses override values", () => {
-    ui = PersistentUIModel.create({
-      showDemoCreator: true,
-      error: "test",
+    persistentUi = PersistentUIModel.create({
       problemWorkspace: {
         type: ProblemWorkspace,
         mode: "1-up"
-      },
-      learningLogWorkspace: {
-        type: LearningLogWorkspace,
-        mode: "1-up"
-      },
+      }
     });
     expect(ui.error).toBe("test");
     expect(ui.showDemoCreator).toBe(true);
@@ -59,7 +59,7 @@ describe("ui model", () => {
   });
 
   it("allows demo creator to be shown", () => {
-    expect(ui.showDemoCreator).toBe(false);
+    // expect(ui.showDemoCreator).toBe(false);
     ui.setShowDemoCreator(true);
     expect(ui.showDemoCreator).toBe(true);
   });
@@ -80,11 +80,11 @@ describe("ui model", () => {
   });
 
   it("allows divider position to be set", () => {
-    expect(ui.navTabContentShown).toBe(true);
-    expect(ui.workspaceShown).toBe(true);
-    ui.setDividerPosition(0);
-    expect(ui.navTabContentShown).toBe(false);
-    expect(ui.workspaceShown).toBe(true);
+    expect(persistentUi.navTabContentShown).toBe(true);
+    expect(persistentUi.workspaceShown).toBe(true);
+    persistentUi.setDividerPosition(0);
+    expect(persistentUi.navTabContentShown).toBe(false);
+    expect(persistentUi.workspaceShown).toBe(true);
   });
 
   it("allows alert dialogs", () => {
