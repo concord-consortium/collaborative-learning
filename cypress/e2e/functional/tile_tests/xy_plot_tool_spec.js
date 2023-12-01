@@ -172,7 +172,7 @@ context('XYPlot Tool Tile', function () {
       xyTile.getYAttributesLabel().should('have.length', 2);
     });
 
-    it.only("Test linking two datasets", () => {
+    it("Test linking two datasets", () => {
       beforeTest(queryParams);
       cy.log("Add XY Plot Tile");
       cy.collapseResourceTabs();
