@@ -19,6 +19,7 @@ const adornmentTypeDispatcher = (adornmentSnap: IAdornmentModel) => {
     case "Movable Point": return MovablePointModel;
     case "Movable Value": return MovableValueModel;
     case "Connecting Lines": return ConnectingLinesModel;
+    case "Plotted Function": return PlottedFunctionAdornmentModel;
     default: return UnknownAdornmentModel;
   }
 };
