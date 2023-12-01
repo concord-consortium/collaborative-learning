@@ -10,6 +10,7 @@ import { AddSeriesButton } from "./add-series-button";
 import { useInstanceIdContext } from "../../imports/hooks/use-instance-id-context";
 import { kGraphDefaultHeight } from "../../graph-types";
 import { ReadOnlyContext } from "../../../../components/document/read-only-context";
+import { VariableFunctionLegend } from "./variable-function-legend";
 
 export const kMultiLegendMenuHeight = 30;
 export const kMultiLegendPadding = 20;
@@ -91,6 +92,7 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
 
   return (
     <div className="multi-legend" ref={ multiLegendRef }>
+      <VariableFunctionLegend/>
       {legendItemRows}
     </div>
   );
