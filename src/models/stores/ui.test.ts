@@ -1,5 +1,5 @@
+import { UIModel, UIModelType, UIDialogModelType } from "./ui";
 import { PersistentUIModel, PersistentUIModelType } from "./persistent-ui";
-import { UIDialogModelType, UIModel, UIModelType } from "./ui";
 import { ProblemWorkspace, LearningLogWorkspace } from "./workspace";
 import { TileModel } from "../tiles/tile-model";
 import { TextContentModel } from "../tiles/text/text-content";
@@ -10,18 +10,16 @@ registerTileTypes(["Text"]);
 
 describe("ui model", () => {
   let ui: UIModelType;
-  let persistentUi: PersistentUIModelType;
+  let persistentUI: PersistentUIModelType;
 
   beforeEach(() => {
     ui = UIModel.create({
-      error: "test",
-      showDemoCreator: true,
       learningLogWorkspace: {
         type: LearningLogWorkspace,
         mode: "1-up"
       },
     });
-    persistentUi = PersistentUIModel.create({
+    persistentUI = PersistentUIModel.create({
       problemWorkspace: {
         type: ProblemWorkspace,
         mode: "1-up"
@@ -30,18 +28,20 @@ describe("ui model", () => {
   });
 
   it("has default values", () => {
-    // expect(ui.error).toBe(null);
-    // expect(ui.showDemoCreator).toBe(false);
-    expect(persistentUi.showTeacherContent).toBe(true);
+    expect(ui.error).toBe(null);
+    expect(ui.showDemoCreator).toBe(false);
+    expect(persistentUI.showTeacherContent).toBe(true);
     expect(ui.dialog).toBeUndefined();
   });
 
   it("uses override values", () => {
-    persistentUi = PersistentUIModel.create({
-      problemWorkspace: {
-        type: ProblemWorkspace,
+    ui = UIModel.create({
+      showDemoCreator: true,
+      error: "test",
+      learningLogWorkspace: {
+        type: LearningLogWorkspace,
         mode: "1-up"
-      }
+      },
     });
     expect(ui.error).toBe("test");
     expect(ui.showDemoCreator).toBe(true);
@@ -59,7 +59,7 @@ describe("ui model", () => {
   });
 
   it("allows demo creator to be shown", () => {
-    // expect(ui.showDemoCreator).toBe(false);
+    expect(ui.showDemoCreator).toBe(false);
     ui.setShowDemoCreator(true);
     expect(ui.showDemoCreator).toBe(true);
   });
@@ -80,11 +80,11 @@ describe("ui model", () => {
   });
 
   it("allows divider position to be set", () => {
-    expect(persistentUi.navTabContentShown).toBe(true);
-    expect(persistentUi.workspaceShown).toBe(true);
-    persistentUi.setDividerPosition(0);
-    expect(persistentUi.navTabContentShown).toBe(false);
-    expect(persistentUi.workspaceShown).toBe(true);
+    expect(persistentUI.navTabContentShown).toBe(true);
+    expect(persistentUI.workspaceShown).toBe(true);
+    persistentUI.setDividerPosition(0);
+    expect(persistentUI.navTabContentShown).toBe(false);
+    expect(persistentUI.workspaceShown).toBe(true);
   });
 
   it("allows alert dialogs", () => {
