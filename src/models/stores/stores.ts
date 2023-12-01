@@ -5,6 +5,7 @@ import { createUnitWithoutContent, getGuideJson, getUnitJson, UnitModel, UnitMod
 import { InvestigationModel, InvestigationModelType } from "../curriculum/investigation";
 import { ProblemModel, ProblemModelType } from "../curriculum/problem";
 import { PersistentUIModelType, PersistentUIModel } from "./persistent-ui";
+import { UIModelType, UIModel } from "./ui";
 import { UserModel, UserModelType } from "./user";
 import { GroupsModel, GroupsModelType } from "./groups";
 import { ClassModel, ClassModelType } from "./class";
@@ -57,6 +58,7 @@ class Stores implements IStores{
   teacherGuide?: ProblemModelType;
   user: UserModelType;
   persistentUi: PersistentUIModelType;
+  ui: UIModelType;
   groups: GroupsModelType;
   class: ClassModelType;
   documents: DocumentsModelType;
@@ -99,6 +101,16 @@ class Stores implements IStores{
           mode: "1-up"
         },
       });
+    this.ui = params?.persistentUi || UIModel.create({
+      problemWorkspace: {
+        type: ProblemWorkspace,
+        mode: "1-up"
+      },
+      learningLogWorkspace: {
+        type: LearningLogWorkspace,
+        mode: "1-up"
+      },
+    });
     this.groups = params?.groups || GroupsModel.create({ acceptUnknownStudents: params?.isPreviewing });
     this.groups.setEnvironment(this);
     this.class = params?.class || ClassModel.create({ name: "Null Class", classHash: "" });
