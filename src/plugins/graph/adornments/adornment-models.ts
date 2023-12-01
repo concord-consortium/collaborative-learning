@@ -27,16 +27,6 @@ export const PointModel = types.model("Point", {
 export interface IPointModel extends Instance<typeof PointModel> {}
 export const kInfinitePoint = {x:NaN, y:NaN};
 
-// export interface IUpdateCategoriesOptions {
-//   dataConfig: IGraphDataConfigurationModel
-//   interceptLocked?: boolean
-//   resetPoints?: boolean
-//   xAxis?: IAxisModel
-//   yAxis?: IAxisModel
-//   xScale?: ScaleNumericBaseType
-//   yScale?: ScaleNumericBaseType
-// }
-
 export interface IUpdateCategoriesOptions {
   xAxis?: IAxisModel
   xAttrId: string
