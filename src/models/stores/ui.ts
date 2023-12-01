@@ -53,7 +53,7 @@ export const UIModel = types
   })
   .volatile(self => ({
     defaultLeftNavExpanded: false,
-    problemPath: "" //console.log - see if we need to take this out - probably.
+    problemPath: "" //TODO: figure out if we need problem path
   }))
   .views((self) => ({
     isSelectedTile(tile: ITileModel) {
@@ -162,8 +162,7 @@ export const UIModel = types
         self.dragId = dragId;
       },
 
-
-      setProblemPath(problemPath: string) {//console.log - maybe delete this
+      setProblemPath(problemPath: string) { //TODO: Figure out if we need a problem path in ui.ts
         self.problemPath = problemPath;
       }
     };

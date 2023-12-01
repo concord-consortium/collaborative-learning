@@ -85,7 +85,7 @@ export const PersistentUIModel = types
       return tabState;
     };
     return {
-      alert, //returned in both - console.log
+      alert,
 
       setDividerPosition(position: number) {
         self.dividerPosition = position;
@@ -114,11 +114,7 @@ export const PersistentUIModel = types
             self.problemWorkspace.toggleComparisonVisible({override: true});
           }
           else {
-            console.log("📁 persistent-ui.ts ------------------------");
-            console.log("\t🏭 rightNavDocumentSelected");
-            console.log("\t🔪 document:", document);
-            console.log("\t🥩 appConfig:", appConfig);
-            alert("Please select a primary document first.", /*"Select Primary Document"*/); //
+            alert("Please select a primary document first.");
           }
         }
       },
@@ -232,12 +228,8 @@ export const PersistentUIModel = types
     },
     initializedPersistentUISync(user: UserModelType, db: DB){
       const path = db.firebase.getOfferingUserPath(user);
-      console.log("📁 persistent-ui.ts ------------------------");
-      console.log("\t🥩 user:", user);
-      console.log("\t🥩 path:", path);
       onSnapshot(self, (snapshot)=>{
         const snapshotStr = JSON.stringify(snapshot);
-        console.log("\t🥩 snapshot:", snapshotStr);
         const updateRef = db.firebase.ref(path);
         updateRef.update({persistentUI: snapshotStr});
       });
