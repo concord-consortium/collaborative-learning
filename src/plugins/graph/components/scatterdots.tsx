@@ -4,7 +4,7 @@ import {ScaleNumericBaseType} from "../imports/components/axis/axis-types";
 import {CaseData} from "../d3-types";
 import {PlotProps} from "../graph-types";
 import {useDragHandlers, usePlotResponders} from "../hooks/use-plot";
-// import {useInstanceIdContext} from "../hooks/use-instance-id-context";
+import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {ICase} from "../../../models/data/data-set-types";
 import {useGraphModelContext} from "../models/graph-model";
@@ -17,11 +17,11 @@ import {
 } from "../utilities/graph-utils";
 
 export const ScatterDots = function ScatterDots(props: PlotProps) {
-  const {layer, dotsRef, enableAnimation} = props,
+  const {dotsRef, enableAnimation} = props,
     graphModel = useGraphModelContext(),
     // instanceId = useInstanceIdContext(),
-    dataConfiguration = layer.config,
-    dataset = dataConfiguration.dataset,
+    dataConfiguration = useDataConfigurationContext(),
+    dataset = dataConfiguration?.dataset,
     secondaryAttrIDsRef = useRef<string[]>([]),
     pointRadiusRef = useRef(0),
     selectedPointRadiusRef = useRef(0),
@@ -147,6 +147,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
   }, [dataConfiguration, dotsRef, graphModel]);
 
   const refreshPointPositionsD3 = useCallback((selectedOnly: boolean) => {
+    if (!dataConfiguration) return;
     const getScreenX = (anID: string) => {
       const xAttrID = dataConfiguration?.attributeID('x') ?? '',
         xValue = dataset?.getNumeric(anID, xAttrID) ?? NaN,

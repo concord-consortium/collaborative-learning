@@ -34,7 +34,7 @@ export const useDragHandlers = (target: any, {start, drag, end}: IDragHandlers) 
 };
 
 export interface IPlotResponderProps {
-  dataConfiguration: IDataConfigurationModel;
+  dataConfiguration?: IDataConfigurationModel;
   refreshPointPositions: (selectedOnly: boolean) => void;
   refreshPointSelection: () => void;
   dotsRef: IDotsRef;
@@ -44,7 +44,7 @@ export interface IPlotResponderProps {
 export const usePlotResponders = (props: IPlotResponderProps) => {
   const {dataConfiguration, enableAnimation, refreshPointPositions, refreshPointSelection, dotsRef} = props,
     graphModel = useGraphModelContext(),
-    dataset = dataConfiguration.dataset,
+    dataset = dataConfiguration?.dataset,
     layout = useGraphLayoutContext(),
     instanceId = useInstanceIdContext(),
     refreshPointPositionsRef = useCurrent(refreshPointPositions);
@@ -181,7 +181,7 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
   useEffect(() => {
     return autorun(
       () => {
-        !dataConfiguration.pointsNeedUpdating && callRefreshPointPositions(false);
+        !dataConfiguration?.pointsNeedUpdating && callRefreshPointPositions(false);
       });
   }, [dataConfiguration, callRefreshPointPositions]);
 

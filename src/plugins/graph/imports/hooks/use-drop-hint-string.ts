@@ -1,6 +1,5 @@
 import {useDndContext} from "@dnd-kit/core";
 import { AttributeType } from "../../../../models/data/attribute";
-import {useDataSetContext} from "./use-data-set-context";
 import {getDragAttributeInfo} from "./use-drag-drop";
 import {useDataConfigurationContext} from "../../../graph/hooks/use-data-configuration-context";
 import {attrRoleToGraphPlace, GraphAttrRole} from "../../../graph/graph-types";
@@ -80,8 +79,9 @@ export function determineBaseString(role: GraphAttrRole, dropType?: AttributeTyp
 }
 
 export const useDropHintString = ({role} : IUseDropHintStringProps) => {
-  const dataSet = useDataSetContext(), // TODO multi-dataset this is no longer provided
+  const
     dataConfig = useDataConfigurationContext(),
+    dataSet = dataConfig?.dataset,
     { active } = useDndContext(),
     { attributeId: dragAttrId = "" } = getDragAttributeInfo(active) || {},
     place = attrRoleToGraphPlace[role] as GraphPlace,

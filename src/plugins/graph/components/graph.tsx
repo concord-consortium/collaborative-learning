@@ -179,7 +179,7 @@ export const Graph = observer(
 
     const plots = graphModel.layers.map((layer) => {
       const props = {
-        dotsRef, enableAnimation, layer, key: layer.id
+        dotsRef, enableAnimation
       };
       const typeToPlotComponentMap = {
         casePlot: null, // <CaseDots {...props}/>,
@@ -187,7 +187,11 @@ export const Graph = observer(
         dotPlot: <DotPlotDots {...props}/>,
         scatterPlot: <ScatterDots {...props}/>
       };
-      return typeToPlotComponentMap[plotType];
+      return (
+        <DataConfigurationContext.Provider key={layer.id} value={layer.config}>
+          { typeToPlotComponentMap[plotType] }
+        </DataConfigurationContext.Provider>
+      );
     });
 
     return plots;

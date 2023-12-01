@@ -2,7 +2,6 @@ import React from "react";
 import { AxisPlace } from "./imports/components/axis/axis-types";
 import {GraphPlace} from "./imports/components/axis-graph-shared";
 import {DotsElt} from "./d3-types";
-import { IGraphLayerModel } from "./models/graph-layer-model";
 
 export const kGraphTileType = "Graph";
 export const kGraphTileClass = "graph";
@@ -48,7 +47,6 @@ export const graphPlaceToAttrRole: Record<GraphPlace, GraphAttrRole> = {
 };
 
 export interface PlotProps {
-  layer: IGraphLayerModel,
   dotsRef: IDotsRef
   enableAnimation: React.MutableRefObject<boolean>
 }

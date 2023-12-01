@@ -13,12 +13,13 @@ import {
   startAnimation
 } from "../utilities/graph-utils";
 import {useGraphModelContext} from "../models/graph-model";
+import { useDataConfigurationContext } from "../hooks/use-data-configuration-context";
 
 export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
-  const {layer, dotsRef, enableAnimation} = props,
+  const {dotsRef, enableAnimation} = props,
     graphModel = useGraphModelContext(),
-    dataConfiguration = layer.config,
-    dataset = dataConfiguration.dataset,
+    dataConfiguration = useDataConfigurationContext(),
+    dataset = dataConfiguration?.dataset,
     layout = useGraphLayoutContext(),
     primaryAttrRole = dataConfiguration?.primaryRole ?? 'x',
     primaryIsBottom = primaryAttrRole === 'x',
@@ -122,6 +123,8 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
   }, [dataConfiguration, dotsRef, graphModel, pointColor, pointStrokeColor]);
 
   const refreshPointPositions = useCallback((selectedOnly: boolean) => {
+      if (!dataConfiguration) return;
+
       const primaryPlace = primaryIsBottom ? 'bottom' : 'left',
         secondaryPlace = primaryIsBottom ? 'left' : 'bottom',
         extraPrimaryPlace = primaryIsBottom ? 'top' : 'rightCat',

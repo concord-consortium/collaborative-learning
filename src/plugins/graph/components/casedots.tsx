@@ -1,7 +1,7 @@
 import {randomUniform, select} from "d3";
 import React, {useCallback, useEffect, useRef, useState} from "react";
 import {CaseData} from "../d3-types";
-import {IDotsRef} from "../graph-types";
+import { PlotProps} from "../graph-types";
 import {ICase} from "../../../models/data/data-set-types";
 import {isAddCasesAction} from "../../../models/data/data-set-actions";
 import {useDragHandlers, usePlotResponders} from "../hooks/use-plot";
@@ -9,21 +9,16 @@ import {useGraphLayoutContext} from "../models/graph-layout";
 import {handleClickOnDot, setPointCoordinates, setPointSelection} from "../utilities/graph-utils";
 import {useGraphModelContext} from "../models/graph-model";
 import {onAnyAction} from "../../../utilities/mst-utils";
-import { IGraphLayerModel } from "../models/graph-layer-model";
+import { useDataConfigurationContext } from "../hooks/use-data-configuration-context";
 
-export const CaseDots = function CaseDots(props: {
-  layer: IGraphLayerModel,
-  dotsRef: IDotsRef
-  enableAnimation: React.MutableRefObject<boolean>
-}) {
+export const CaseDots = function CaseDots(props: PlotProps) {
   const {
-      layer,
       dotsRef,
       enableAnimation
     } = props,
     graphModel = useGraphModelContext(),
-    dataConfiguration = layer.config,
-    dataset = dataConfiguration.dataset,
+    dataConfiguration = useDataConfigurationContext(),
+    dataset = dataConfiguration?.dataset,
     layout = useGraphLayoutContext(),
     randomPointsRef = useRef<Record<string, { x: number, y: number }>>({}),
     dragPointRadius = graphModel.getPointRadius('hover-drag'),
@@ -86,7 +81,7 @@ export const CaseDots = function CaseDots(props: {
   }, [dataConfiguration, graphModel, dotsRef]);
 
   const refreshPointPositions = useCallback((selectedOnly: boolean) => {
-    if (!dotsRef.current) return;
+    if (!dotsRef.current || !dataConfiguration) return;
     const
       pointRadius = graphModel.getPointRadius(),
       selectedPointRadius = graphModel.getPointRadius('select'),
