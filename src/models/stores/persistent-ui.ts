@@ -235,13 +235,11 @@ export const PersistentUIModel = types
       console.log("📁 persistent-ui.ts ------------------------");
       console.log("\t🥩 user:", user);
       console.log("\t🥩 path:", path);
-
       onSnapshot(self, (snapshot)=>{
-        console.log("\t🥩 snapshot:", snapshot);
-        // const niceString = stringify(snapshot)
-        // updateRef(niceString)
-        console.log("send snapshot to firebase:", snapshot);
-
+        const snapshotStr = JSON.stringify(snapshot);
+        console.log("\t🥩 snapshot:", snapshotStr);
+        const updateRef = db.firebase.ref(path);
+        updateRef.update({persistentUI: snapshotStr});
       });
     }
 }));
