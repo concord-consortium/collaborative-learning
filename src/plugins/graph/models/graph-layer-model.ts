@@ -17,9 +17,13 @@ export const GraphLayerModel = types
     config: types.optional(DataConfigurationModel, () => DataConfigurationModel.create())
   })
   .volatile(self => ({
-    isLinked: false,
     autoAssignedAttributes: [] as Array<{ place: GraphPlace, role: GraphAttrRole, dataSetID: string, attrID: string }>,
     disposeDataSetListener: undefined as (() => void) | undefined
+  }))
+  .views(self => ({
+    get isLinked() {
+      return !!self.config?.dataset;
+    }
   }))
   .views(self => ({
     get description() {
@@ -32,11 +36,9 @@ export const GraphLayerModel = types
     },
     setDataConfiguration(config: IDataConfigurationModel) {
       self.config = config;
-      self.isLinked = true;
     },
     setDataset(dataset: IDataSet | undefined, metadata: ISharedCaseMetadata | undefined) {
       self.config.setDataset(dataset, metadata);
-      self.isLinked = !!dataset && !!metadata;
     },
     setAttributeID(role: GraphAttrRole, dataSetID: string, id: string) {
       // dataSetID argument is used by onAction handlers

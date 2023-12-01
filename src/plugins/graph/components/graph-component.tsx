@@ -17,11 +17,11 @@ import "../register-adornment-types";
 interface IGraphComponentProps extends ITileBaseProps {
   layout: GraphLayout;
   onRequestRowHeight?: (id: string, size: number) => void;
+  readOnly?: boolean;
 }
 export const GraphComponent = observer(
-    function GraphComponent({ layout, tile, onRequestRowHeight }: IGraphComponentProps) {
+    function GraphComponent({ layout, tile, onRequestRowHeight, readOnly }: IGraphComponentProps) {
   const graphModel = isGraphModel(tile?.content) ? tile?.content : undefined;
-
   const instanceId = useNextInstanceId("graph");
   // Removed debouncing, but we can bring it back if we find we need it
   const graphRef = useRef<HTMLDivElement | null>(null);
@@ -60,6 +60,7 @@ export const GraphComponent = observer(
               graphRef={graphRef}
               dotsRef={dotsRef}
               onRequestRowHeight={onRequestRowHeight}
+              readOnly={readOnly}
             />
             <AttributeDragOverlay activeDragId={overlayDragId} />
           </GraphModelContext.Provider>
