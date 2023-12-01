@@ -5,6 +5,9 @@ import { IMovablePointModel, MovablePointModel } from "./movable-point/movable-p
 import { IMovableValueModel, MovableValueModel } from "./movable-value/movable-value-model";
 import { CountModel, ICountModel } from "./count/count-model";
 import { ConnectingLinesModel, IConnectingLinesModel } from "./connecting-lines/connecting-lines-model";
+import {
+  PlottedFunctionAdornmentModel, IPlottedFunctionAdornmentModel
+} from "./plotted-function/plotted-function-adornment-model";
 
 export const kGraphAdornmentsClass = "graph-adornments-grid";
 export const kGraphAdornmentsClassSelector = `.${kGraphAdornmentsClass}`;
@@ -21,7 +24,8 @@ const adornmentTypeDispatcher = (adornmentSnap: IAdornmentModel) => {
 };
 
 export const AdornmentModelUnion = types.union({ dispatcher: adornmentTypeDispatcher },
-  CountModel, MovableValueModel, MovableLineModel, MovablePointModel, ConnectingLinesModel, UnknownAdornmentModel);
+  CountModel, MovableValueModel, MovableLineModel, MovablePointModel, ConnectingLinesModel,
+  PlottedFunctionAdornmentModel, UnknownAdornmentModel);
 export type IAdornmentModelUnion =
   ICountModel | IMovableValueModel | IMovableLineModel |
-  IMovablePointModel | IConnectingLinesModel | IUnknownAdornmentModel ;
+  IMovablePointModel | IConnectingLinesModel | IPlottedFunctionAdornmentModel | IUnknownAdornmentModel ;
