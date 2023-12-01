@@ -14,6 +14,7 @@ import { SelectionStoreModelType } from "../models/stores/selection";
 import { IStores } from "../models/stores/stores";
 import { UserModelType } from "../models/stores/user";
 import { PersistentUIModelType } from "../models/stores/persistent-ui";
+import { UIModelType } from "../models/stores/ui";
 
 // https://mobx-react.js.org/recipes-migration
 export function useStores(): IStores {
@@ -142,6 +143,10 @@ export function useSharedSelectionStore(): SelectionStoreModelType {
 
 export function usePersistentUIStore(): PersistentUIModelType {
   return useStores().persistentUi;
+}
+
+export function useUIStore(): UIModelType {
+  return useStores().ui;
 }
 
 export function useUserStore(): UserModelType {
