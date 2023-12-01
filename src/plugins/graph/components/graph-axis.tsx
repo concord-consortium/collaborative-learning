@@ -147,7 +147,6 @@ export const GraphAxis = observer(function GraphAxis({
       }
       {showAttributeLabel &&
         <AttributeLabel
-          layer={graphModel.layers[0]} // This is a non-multiple-dataset/multi-legend case
           place={place}
           onChangeAttribute={onDropAttribute}
           onRemoveAttribute={onRemoveAttribute}

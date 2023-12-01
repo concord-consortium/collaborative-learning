@@ -2,6 +2,7 @@ import {autorun} from "mobx";
 import React, {useEffect, useRef} from "react";
 import {select} from "d3";
 import {Active} from "@dnd-kit/core";
+import {useDataConfigurationContext} from "../../hooks/use-data-configuration-context";
 import {useGraphLayoutContext} from "../../models/graph-layout";
 import {AttributeLabel} from "../attribute-label";
 import {CategoricalLegend} from "./categorical-legend";
@@ -14,7 +15,6 @@ import {AttributeType} from "../../../../models/data/attribute";
 import {IDataSet} from "../../../../models/data/data-set";
 import {GraphAttrRole} from "../../graph-types";
 import {GraphPlace} from "../../imports/components/axis-graph-shared";
-import { useGraphModelContext } from "../../models/graph-model";
 import { useGraphSettingsContext } from "../../hooks/use-graph-settings-context";
 
 interface ILegendProps {
@@ -29,10 +29,7 @@ export const Legend = function Legend({
                                         legendAttrID, graphElt,
                                         onDropAttribute, onTreatAttributeAs, onRemoveAttribute
                                       }: ILegendProps) {
-  const graphModel = useGraphModelContext(),
-    // This legend component only handles one layer. TODO multi dataset
-    layer = graphModel.layers[0],
-    dataConfiguration = layer.config,
+  const dataConfiguration = useDataConfigurationContext(),
     isDropAllowed = dataConfiguration?.graphPlaceCanAcceptAttributeIDDrop ?? (() => true),
     layout = useGraphLayoutContext(),
     attrType = dataConfiguration?.dataset?.attrFromID(legendAttrID ?? '')?.type,
@@ -82,7 +79,6 @@ export const Legend = function Legend({
       <svg ref={legendRef} className='legend-component'>
         <rect className='legend-background'/>
         <AttributeLabel
-          layer={layer}
           place={'legend'}
           onChangeAttribute={onDropAttribute}
           onRemoveAttribute={onRemoveAttribute}

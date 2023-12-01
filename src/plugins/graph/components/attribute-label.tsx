@@ -3,6 +3,7 @@ import {reaction} from "mobx";
 import {observer} from "mobx-react-lite";
 import {select} from "d3";
 import t from "../imports/utilities/translation/translate";
+import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
 import {AttributeType} from "../../../models/data/attribute";
 import {IDataSet} from "../../../models/data/data-set";
 import {isSetAttributeNameAction} from "../../../models/data/data-set-actions";
@@ -14,12 +15,10 @@ import {useTileModelContext} from "../imports/hooks/use-tile-model-context";
 import {getStringBounds} from "../imports/components/axis/axis-utils";
 import {AxisOrLegendAttributeMenu} from "../imports/components/axis/components/axis-or-legend-attribute-menu";
 import { useGraphSettingsContext } from "../hooks/use-graph-settings-context";
-import { IGraphLayerModel } from "../models/graph-layer-model";
 
 import graphVars from "./graph.scss";
 
 interface IAttributeLabelProps {
-  layer: IGraphLayerModel;
   place: GraphPlace;
   onChangeAttribute?: (place: GraphPlace, dataSet: IDataSet, attrId: string) => void;
   onRemoveAttribute?: (place: GraphPlace, attrId: string) => void;
@@ -27,15 +26,14 @@ interface IAttributeLabelProps {
 }
 
 export const AttributeLabel = observer(
-  function AttributeLabel(
-      {layer, place, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute}: IAttributeLabelProps) {
+  function AttributeLabel({place, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute}: IAttributeLabelProps) {
     const graphModel = useGraphModelContext(),
-      dataConfiguration = layer.config,
+      dataConfiguration = useDataConfigurationContext(),
       { defaultSeriesLegend, defaultAxisLabels } = useGraphSettingsContext(),
       layout = useGraphLayoutContext(),
       {isTileSelected} = useTileModelContext(),
-      dataset = dataConfiguration.dataset,
-      useClickHereCue = dataConfiguration.placeCanShowClickHereCue(place) ?? false,
+      dataset = dataConfiguration?.dataset,
+      useClickHereCue = dataConfiguration?.placeCanShowClickHereCue(place) ?? false,
       hideClickHereCue = useClickHereCue &&
         !dataConfiguration?.placeAlwaysShowsClickHereCue(place) && !isTileSelected(),
       [labelElt, setLabelElt] = useState<SVGGElement | null>(null),
@@ -44,9 +42,9 @@ export const AttributeLabel = observer(
 
     const getAttributeIDs = useCallback(() => {
       const isScatterPlot = graphModel.plotType === 'scatterPlot',
-        yAttributeDescriptions = dataConfiguration.yAttributeDescriptionsExcludingY2 || [],
+        yAttributeDescriptions = dataConfiguration?.yAttributeDescriptionsExcludingY2 || [],
         role = graphPlaceToAttrRole[place],
-        attrID = dataConfiguration.attributeID(role) || '';
+        attrID = dataConfiguration?.attributeID(role) || '';
       return place === 'left' && isScatterPlot
         ? yAttributeDescriptions.map((desc) => desc.attributeID)
         : [attrID];
@@ -174,7 +172,6 @@ export const AttributeLabel = observer(
             parent={positioningParentElt}
             portal={portalParentElt}
             place={place}
-            layer={layer}
             onChangeAttribute={onChangeAttribute}
             onRemoveAttribute={onRemoveAttribute}
             onTreatAttributeAs={onTreatAttributeAs}

@@ -1,14 +1,10 @@
 import React from "react";
 import { observer } from "mobx-react";
-import { IGraphLayerModel } from "../../models/graph-layer-model";
+import { useDataConfigurationContext } from "../../hooks/use-data-configuration-context";
 import AddSeriesIcon from "../../imports/assets/add-series-icon.svg";
 
-interface IAddSeriesButtonProps {
-  layer: IGraphLayerModel;
-}
-
-export const AddSeriesButton = observer(function AddSeriesButton({ layer }: IAddSeriesButtonProps) {
-  const dataConfiguration = layer.config;
+export const AddSeriesButton = observer(function AddSeriesButton() {
+  const dataConfiguration = useDataConfigurationContext();
 
   function findUnplottedAttribute() {
     // Find first attribute in the dataset that is not shown in the graph
@@ -22,8 +18,8 @@ export const AddSeriesButton = observer(function AddSeriesButton({ layer }: IAdd
 
   function handleClick() {
     const first = findUnplottedAttribute();
-    if (first && dataConfiguration.dataset) {
-      layer.setAttributeID("yPlus", dataConfiguration.dataset.id, first.id);
+    if (first && dataConfiguration?.dataset) {
+      dataConfiguration.addYAttribute({attributeID: first.id});
     }
   }
 

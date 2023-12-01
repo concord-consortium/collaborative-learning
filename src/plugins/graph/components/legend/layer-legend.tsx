@@ -5,16 +5,15 @@ import { IDataSet } from "../../../../models/data/data-set";
 import { GraphPlace } from "../../imports/components/axis-graph-shared";
 import { SimpleAttributeLabel } from "../simple-attribute-label";
 import { AddSeriesButton } from "./add-series-button";
-import { IGraphLayerModel } from "../../models/graph-layer-model";
 import { ReadOnlyContext } from "../../../../components/document/read-only-context";
 import { useGraphModelContext } from "../../models/graph-model";
 import { getSharedModelManager } from "../../../../models/tiles/tile-environment";
 import { isSharedDataSet, SharedDataSet, SharedDataSetType } from "../../../../models/shared/shared-data-set";
+import { useDataConfigurationContext } from "../../hooks/use-data-configuration-context";
 
 import RemoveDataIcon from "../../assets/remove-data-icon.svg";
 
 interface ILayerLegendProps {
-  layer: IGraphLayerModel;
   onChangeAttribute: (place: GraphPlace, dataSet: IDataSet, attrId: string, oldAttrId?: string) => void;
   onRemoveAttribute: (place: GraphPlace, attrId: string) => void;
   onTreatAttributeAs: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void;
@@ -28,14 +27,15 @@ interface ILayerLegendProps {
  */
 export const LayerLegend = observer(function LayerLegend(props: ILayerLegendProps) {
   let legendItems = [] as React.ReactNode[];
-  const { layer, onChangeAttribute, onRemoveAttribute, onTreatAttributeAs } = props;
+  const { onChangeAttribute, onRemoveAttribute, onTreatAttributeAs } = props;
   const graphModel = useGraphModelContext();
+  const dataConfiguration = useDataConfigurationContext();
   const readOnly = useContext(ReadOnlyContext);
 
   function handleRemoveIconClick() {
-    if (layer.config.dataset) {
-      const removeId = layer.config.dataset.id;
-      const smm = getSharedModelManager(layer);
+    if (dataConfiguration?.dataset) {
+      const removeId = dataConfiguration.dataset.id;
+      const smm = getSharedModelManager(graphModel);
       if (smm && smm.isReady) {
         const sharedDataSets = smm.getTileSharedModelsByType(graphModel, SharedDataSet);
         const layerSharedDataSet = sharedDataSets.find((sds) => {
@@ -47,13 +47,11 @@ export const LayerLegend = observer(function LayerLegend(props: ILayerLegendProp
     }
   }
 
-  const dataConfiguration = layer.config;
   if (dataConfiguration) {
     const yAttributes = dataConfiguration.yAttributeDescriptions;
 
     legendItems = yAttributes.map((description, index) =>
       <SimpleAttributeLabel
-        layer={layer}
         key={description.attributeID}
         place={'left'}
         index={index}
@@ -63,7 +61,7 @@ export const LayerLegend = observer(function LayerLegend(props: ILayerLegendProp
         onTreatAttributeAs={onTreatAttributeAs}
       />);
     if (!readOnly) {
-      legendItems.push(<AddSeriesButton layer={layer} />);
+      legendItems.push(<AddSeriesButton />);
     }
   }
   // Make rows with two legend items in each row
@@ -87,8 +85,8 @@ export const LayerLegend = observer(function LayerLegend(props: ILayerLegendProp
   // In the case that the original tile was deleted we show "unknown data source"
   function getOriginString() {
     const tempUnknownString = "unknown data source";
-    const datasetId = layer.config.dataset?.id;
-    const smm = getSharedModelManager(layer);
+    const datasetId = dataConfiguration?.dataset?.id;
+    const smm = getSharedModelManager(graphModel);
 
     if (datasetId && smm?.isReady) {
       const sharedModels = smm.getTileSharedModels(graphModel);
@@ -104,7 +102,7 @@ export const LayerLegend = observer(function LayerLegend(props: ILayerLegendProp
 
   return (
     <>
-      { layer.config.dataset !== undefined &&
+      { dataConfiguration?.dataset !== undefined &&
         <div className="legend-title-row">
           <div className="legend-title">
             Data from: <strong>{getOriginString()}</strong>&nbsp;
