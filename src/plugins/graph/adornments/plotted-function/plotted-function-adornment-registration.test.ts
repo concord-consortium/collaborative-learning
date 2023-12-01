@@ -16,7 +16,6 @@ describe("PlottedFunctionRegistration", () => {
     expect(plottedFunctionComponentInfo).toBeDefined();
     expect(plottedFunctionComponentInfo?.adornmentEltClass).toBe(kPlottedFunctionClass);
     expect(plottedFunctionComponentInfo?.Component).toBeDefined();
-    // expect(plottedFunctionComponentInfo?.BannerComponent).toBeDefined();
     expect(plottedFunctionComponentInfo?.type).toBe(kPlottedFunctionType);
   });
 });

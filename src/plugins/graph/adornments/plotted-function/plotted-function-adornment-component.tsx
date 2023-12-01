@@ -72,7 +72,6 @@ export const PlottedFunctionAdornmentComponent = observer(function PlottedFuncti
   const plottedFunctionRef = useRef<SVGGElement>(null);
 
   const addPath = useCallback((formulaFunction: FormulaFn) => {
-    // if (!model.expression) return;
     const xMin = xScale.domain()[0];
     const xMax = xScale.domain()[1];
     const tPixelMin = xScale(xMin);
@@ -90,7 +89,6 @@ export const PlottedFunctionAdornmentComponent = observer(function PlottedFuncti
       .attr("data-testid", `plotted-function-path${classFromKey ? `-${classFromKey}` : ""}`)
       .attr("d", path.current);
 
-  // }, [classFromKey, model, xCellCount, xScale, yCellCount, yScale]);
   }, [classFromKey, xCellCount, xScale, yCellCount, yScale]);
 
   // Add the lines and their associated covers and labels
@@ -111,10 +109,14 @@ export const PlottedFunctionAdornmentComponent = observer(function PlottedFuncti
   // Refresh values on expression changes
   useEffect(function refreshExpressionChange() {
     return mstAutorun(() => {
+      // The following comment and commented line are copied from CODAP. I'm leaving them in because
+      // I'm not sure if they're relevant for CLUE or not.
+
       // The next line should not be needed, but without it this autorun doesn't get triggered.
       // TODO: Figure out exactly why this is needed and adjust accordingly.
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       // const modelValue = isPlottedFunctionAdornment(model) ? model.expression : undefined;
+
       model.updateCategories(graphModel.layers[0].getUpdateCategoriesOptions(false));
     }, { name: "PlottedFunctionAdornmentComponent.refreshExpressionChange" }, model);
   }, [graphModel, model, xScale, xSubAxesCount, yScale]);

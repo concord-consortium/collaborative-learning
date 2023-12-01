@@ -6,34 +6,16 @@ import {
 } from "./plotted-function-adornment-types";
 import { PlottedFunctionAdornmentComponent } from "./plotted-function-adornment-component";
 
-// const Controls = () => {
-//   return (
-//     <AdornmentCheckbox
-//       classNameValue={kPlottedFunctionClass}
-//       labelKey={kPlottedFunctionLabelKey}
-//       type={kPlottedFunctionType}
-//     />
-//   );
-// };
-
 registerAdornmentContentInfo({
   type: kPlottedFunctionType,
   plots: ["scatterPlot"],
   prefix: kPlottedFunctionPrefix,
-  modelClass: PlottedFunctionAdornmentModel,
-  // undoRedoKeys: {
-  //   undoAdd: kPlottedFunctionUndoAddKey,
-  //   redoAdd: kPlottedFunctionRedoAddKey,
-  //   undoRemove: kPlottedFunctionUndoRemoveKey,
-  //   redoRemove: kPlottedFunctionRedoRemoveKey
-  // }
+  modelClass: PlottedFunctionAdornmentModel
 });
 
 registerAdornmentComponentInfo({
   adornmentEltClass: kPlottedFunctionClass,
   Component: PlottedFunctionAdornmentComponent,
-  // Controls,
-  // BannerComponent: PlottedFunctionAdornmentBanner,
   labelKey: kPlottedFunctionLabelKey,
   order: 10,
   type: kPlottedFunctionType

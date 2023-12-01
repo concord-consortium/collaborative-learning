@@ -16,20 +16,11 @@ export const PlottedFunctionAdornmentModel = AdornmentModel
   .named("PlottedFunctionAdornmentModel")
   .props({
     type: types.optional(types.literal(kPlottedFunctionType), kPlottedFunctionType),
-    // formula: types.optional(Formula, () => Formula.create()),
     labelTitle: types.optional(types.literal(kPlottedFunctionValueTitleKey), kPlottedFunctionValueTitleKey),
     plottedFunctions: types.map(PlottedFunctionInstance),
     error: ""
   })
-  // .views(self => ({
-  //   get expression() {
-  //     return self.formula.display;
-  //   }
-  // }))
   .actions(self => ({
-    // setExpression(expression: string) {
-    //   self.formula.setDisplayExpression(expression);
-    // },
     setError(error: string) {
       self.error = error;
     },
