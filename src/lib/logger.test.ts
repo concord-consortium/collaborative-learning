@@ -10,6 +10,7 @@ import { ProblemModel, ProblemModelType } from "../models/curriculum/problem";
 import { specAppConfig } from "../models/stores/spec-app-config";
 import { IStores, createStores } from "../models/stores/stores";
 import { PersistentUIModel } from "../models/stores/persistent-ui";
+import { UIModel } from "../models/stores/ui";
 import { UserModel } from "../models/stores/user";
 import { WorkspaceModel, ProblemWorkspace, WorkspaceModelType, LearningLogWorkspace } from "../models/stores/workspace";
 import { IDropTileItem } from "../models/tiles/tile-model";
@@ -87,6 +88,8 @@ describe("dev/qa/test logger with DEBUG_LOGGER false", () => {
           type: ProblemWorkspace,
           mode: "1-up"
         },
+      }),
+      ui: UIModel.create({
         learningLogWorkspace: {
           type: LearningLogWorkspace,
           mode: "1-up"
@@ -136,6 +139,8 @@ describe("demo logger with DEBUG_LOGGER false", () => {
           type: ProblemWorkspace,
           mode: "1-up"
         },
+      }),
+      ui: UIModel.create({
         learningLogWorkspace: {
           type: LearningLogWorkspace,
           mode: "1-up"
