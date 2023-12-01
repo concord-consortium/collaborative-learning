@@ -4,7 +4,7 @@ import { AppConfigModel, AppConfigModelType } from "./app-config-model";
 import { createUnitWithoutContent, getGuideJson, getUnitJson, UnitModel, UnitModelType } from "../curriculum/unit";
 import { InvestigationModel, InvestigationModelType } from "../curriculum/investigation";
 import { ProblemModel, ProblemModelType } from "../curriculum/problem";
-import { UIModel, UIModelType } from "./persistent-ui";
+import { PersistentUIModelType, PersistentUIModel } from "./persistent-ui";
 import { UserModel, UserModelType } from "./user";
 import { GroupsModel, GroupsModelType } from "./groups";
 import { ClassModel, ClassModelType } from "./class";
@@ -56,7 +56,7 @@ class Stores implements IStores{
   problem: ProblemModelType;
   teacherGuide?: ProblemModelType;
   user: UserModelType;
-  persistentUi: UIModelType;
+  persistentUi: PersistentUIModelType;
   groups: GroupsModelType;
   class: ClassModelType;
   documents: DocumentsModelType;
@@ -89,7 +89,7 @@ class Stores implements IStores{
       InvestigationModel.create({ ordinal: 0, title: "Null Investigation" });
     this.problem = params?.problem || ProblemModel.create({ ordinal: 0, title: "Null Problem" });
     this.user = params?.user || UserModel.create({ id: "0" });
-    this.persistentUi = params?.persistentUi || UIModel.create({
+    this.persistentUi = params?.persistentUi || PersistentUIModel.create({
         problemWorkspace: {
           type: ProblemWorkspace,
           mode: "1-up"

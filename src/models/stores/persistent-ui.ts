@@ -60,7 +60,7 @@ export const UITabModel = types
     openSecondaryDocuments: types.map(types.string)
   });
 
-export const UIModel = types
+export const PersistentUIModel = types
   .model("UI", {
     annotationMode: types.maybe(types.string),
     dividerPosition: kDividerHalf,
@@ -368,10 +368,10 @@ export const UIModel = types
     }
 }));
 
-export type UIModelType = typeof UIModel.Type;
+export type PersistentUIModelType = typeof PersistentUIModel.Type;
 export type UIDialogModelType = typeof UIDialogModel.Type;
 
-export function selectTile(ui: UIModelType, model: ITileModel, isExtending?: boolean) {
+export function selectTile(ui: PersistentUIModelType, model: ITileModel, isExtending?: boolean) {
   ui.setSelectedTile(model, { append: !!isExtending });
 }
 

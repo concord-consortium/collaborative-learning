@@ -9,7 +9,7 @@ import { InvestigationModel } from "../models/curriculum/investigation";
 import { ProblemModel, ProblemModelType } from "../models/curriculum/problem";
 import { specAppConfig } from "../models/stores/spec-app-config";
 import { IStores, createStores } from "../models/stores/stores";
-import { UIModel } from "../models/stores/persistent-ui";
+import { PersistentUIModel } from "../models/stores/persistent-ui";
 import { UserModel } from "../models/stores/user";
 import { WorkspaceModel, ProblemWorkspace, WorkspaceModelType, LearningLogWorkspace } from "../models/stores/workspace";
 import { IDropTileItem } from "../models/tiles/tile-model";
@@ -81,7 +81,7 @@ describe("dev/qa/test logger with DEBUG_LOGGER false", () => {
     stores = createStores({
       appMode: "test",
       appConfig: specAppConfig({ config: { appName: "TestLogger"} }),
-      persistentUi: UIModel.create({
+      persistentUi: PersistentUIModel.create({
         activeNavTab: ENavTab.kStudentWork,
         problemWorkspace: {
           type: ProblemWorkspace,
@@ -130,7 +130,7 @@ describe("demo logger with DEBUG_LOGGER false", () => {
     stores = createStores({
       appMode: "demo",
       appConfig: specAppConfig({ config: { appName: "TestLogger"} }),
-      persistentUi: UIModel.create({
+      persistentUi: PersistentUIModel.create({
         activeNavTab: ENavTab.kStudentWork,
         problemWorkspace: {
           type: ProblemWorkspace,
