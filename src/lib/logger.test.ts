@@ -64,12 +64,12 @@ describe("uninitialized logger", () => {
     mockXhr.use(mockPostHandler);
 
     // should not log since we're not initialized
-    Logger.log(TEST_LOG_MESSAGE);
+    Logger.log(LogEventName.TEST_LOG_MESSAGE);
 
     Logger.initializeLogger(stores);
 
     // should log now that we're initialized
-    Logger.log(TEST_LOG_MESSAGE);
+    Logger.log(LogEventName.TEST_LOG_MESSAGE);
   });
 });
 
@@ -113,11 +113,11 @@ describe("dev/qa/test logger with DEBUG_LOGGER false", () => {
     mockXhr.use(mockPostHandler);
 
     // should not be logged due to mode
-    Logger.log(TEST_LOG_MESSAGE);
+    Logger.log(LogEventName.TEST_LOG_MESSAGE);
 
     // should be logged
     Logger.isLoggingEnabled = true;
-    Logger.log(TEST_LOG_MESSAGE);
+    Logger.log(LogEventName.TEST_LOG_MESSAGE);
   });
 
 });
@@ -162,11 +162,11 @@ describe("demo logger with DEBUG_LOGGER false", () => {
     mockXhr.use(mockPostHandler);
 
     // should not be logged due to mode
-    Logger.log(TEST_LOG_MESSAGE);
+    Logger.log(LogEventName.TEST_LOG_MESSAGE);
 
     // should be logged
     Logger.isLoggingEnabled = true;
-    Logger.log(TEST_LOG_MESSAGE);
+    Logger.log(LogEventName.TEST_LOG_MESSAGE);
   });
 
 });
