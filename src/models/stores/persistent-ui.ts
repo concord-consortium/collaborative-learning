@@ -1,4 +1,4 @@
-import { getSnapshot, types } from "mobx-state-tree";
+import { getSnapshot, onSnapshot, types } from "mobx-state-tree";
 import { AppConfigModelType } from "./app-config-model";
 import { kDividerHalf, kDividerMax, kDividerMin } from "./ui-types";
 import { WorkspaceModel } from "./workspace";
@@ -9,6 +9,8 @@ import { LearningLogDocument, LearningLogPublication, PersonalDocument,
   PersonalPublication, PlanningDocument, ProblemDocument,
   ProblemPublication, SupportPublication } from "../document/document-types";
 import { UserModelType } from "./user";
+import { DB } from "../../lib/db";
+
 
 export const kSparrowAnnotationMode = "sparrow";
 
@@ -27,14 +29,14 @@ export const UITabModel = types
 
 export const PersistentUIModel = types
   .model("PersistentUI", {
-    dividerPosition: kDividerHalf, //
-    activeNavTab: ENavTab.kProblems,// <-- keep this here
-    showAnnotations: true, //
-    showTeacherContent: true,//
-    showChatPanel: false, //
-    tabs: types.map(UITabModel), //
-    problemWorkspace: WorkspaceModel, //
-    teacherPanelKey: types.maybe(types.string), //
+    dividerPosition: kDividerHalf,
+    activeNavTab: ENavTab.kProblems,
+    showAnnotations: true,
+    showTeacherContent: true,
+    showChatPanel: false,
+    tabs: types.map(UITabModel),
+    problemWorkspace: WorkspaceModel,
+    teacherPanelKey: types.maybe(types.string),
   })
   .volatile(self => ({
     defaultLeftNavExpanded: false,
@@ -227,6 +229,20 @@ export const PersistentUIModel = types
       }
       self.setActiveNavTab(navTab);
       self.setOpenSubTab(navTab, subTab);
+    },
+    initializedPersistentUISync(user: UserModelType, db: DB){
+      const path = db.firebase.getOfferingUserPath(user);
+      console.log("📁 persistent-ui.ts ------------------------");
+      console.log("\t🥩 user:", user);
+      console.log("\t🥩 path:", path);
+
+      onSnapshot(self, (snapshot)=>{
+        console.log("\t🥩 snapshot:", snapshot);
+        // const niceString = stringify(snapshot)
+        // updateRef(niceString)
+        console.log("send snapshot to firebase:", snapshot);
+
+      });
     }
 }));
 
@@ -268,3 +284,4 @@ export function getNavTabOfDocument(doc: DocumentModelType, user?: UserModelType
       return docTypeToNavTab[doc.type];
     }
 }
+
