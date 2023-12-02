@@ -24,8 +24,15 @@ jest.mock("../hooks/use-stores", () => ({
     }
   }),
   useUIStore: () => ({
-    showAdornments: true
-  })
+    showAdornments: true //console.log - issue is here
+  }),
+  //first try
+  // usePersistentUIStore: () => ({
+  //   showAnnotations: true
+  // })
+  // useUIStore: () => ({
+  //   showAnnotations: true
+  // }),
 }));
 
 describe("Four Up Component", () => {
