@@ -497,6 +497,7 @@ export function createGraphModel(snap?: IGraphModelSnapshot, appConfig?: AppConf
                           ? NumericAxisModel.create({place: "left", min, max})
                           : EmptyAxisModel.create({place: "left"});
   const createdGraphModel = GraphModel.create({
+    plotType: emptyPlotIsNumeric ? "scatterPlot" : "casePlot",
     axes: {
       bottom: bottomAxisModel,
       left: leftAxisModel
