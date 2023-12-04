@@ -2,7 +2,7 @@ import { Instance, types } from "mobx-state-tree";
 import { AdornmentModel, IAdornmentModel } from "../adornment-models";
 import { kPlottedFunctionType, FormulaFn } from "./plotted-function-adornment-types";
 
-const kDefaultFunctionKey = "default-function-key";
+const kDefaultFunctionKey = "{}";
 
 export const PlottedFunctionInstance = types.model("PlottedFunctionInstance", {})
   .volatile(self => ({
