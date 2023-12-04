@@ -28,14 +28,14 @@ interface IComputePointsOptions {
 const computePoints = (options: IComputePointsOptions) => {
   const { min, max, xCellCount, yCellCount, gap, xScale, yScale, formulaFunction } = options;
   const tPoints: Point[] = [];
-  for (let pixelX = min; pixelX <= max; pixelX += gap) {
-    // Sometimes xScale.invert is undefined, which is causing an error.
-    // pixelX * xCellCount probably isn't the correct fallback tX, though.
-    const tX = xScale.invert ? xScale.invert(pixelX * xCellCount) : pixelX * xCellCount;
-    const tY = formulaFunction(tX);
-    if (Number.isFinite(tY)) {
-      const pixelY = yScale(tY) / yCellCount;
-      tPoints.push({ x: pixelX, y: pixelY });
+  if (xScale.invert) {
+    for (let pixelX = min; pixelX <= max; pixelX += gap) {
+      const tX = xScale.invert(pixelX * xCellCount);
+      const tY = formulaFunction(tX);
+      if (Number.isFinite(tY)) {
+        const pixelY = yScale(tY) / yCellCount;
+        tPoints.push({ x: pixelX, y: pixelY });
+      }
     }
   }
   return tPoints;
