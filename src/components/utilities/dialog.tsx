@@ -161,4 +161,5 @@ export class DialogComponent extends BaseComponent<IProps> {
       this.handleCancelDialog();
     }
   };
+
 }

@@ -9,6 +9,7 @@ import { defaultTextContent } from "../../models/tiles/text/text-content";
 import { specStores } from "../../models/stores/spec-stores";
 import { specAppConfig } from "../../models/stores/spec-app-config";
 import { TileModelContext } from "../tiles/tile-api";
+
 import CopyIcon from "../../../assets/icons/copy/copy-icon-default.svg";
 
 // The text tile needs to be registered so the TileModel.create
