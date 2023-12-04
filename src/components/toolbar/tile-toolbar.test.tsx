@@ -18,87 +18,87 @@ import "../../models/tiles/text/text-registration";
 const clickHandler = jest.fn();
 
 function SampleToolbarButtonA() {
- return (
-   <TileToolbarButton name="a" title="Test Button A" onClick={clickHandler}>
-     <CopyIcon/>
-   </TileToolbarButton>);
+  return (
+    <TileToolbarButton name="a" title="Test Button A" onClick={clickHandler}>
+      <CopyIcon/>
+    </TileToolbarButton>);
 }
 
 function SampleToolbarButtonB() {
- return (
-   <TileToolbarButton name="b" title="Test Button B" onClick={clickHandler}>
-     <CopyIcon/>
-   </TileToolbarButton>);
+  return (
+    <TileToolbarButton name="b" title="Test Button B" onClick={clickHandler}>
+      <CopyIcon/>
+    </TileToolbarButton>);
 }
 
 const sampleButtons = [
- {
-   name: "a",
-   component: SampleToolbarButtonA,
- },
- {
-   name: "b",
-   component: SampleToolbarButtonB,
- }
+  {
+    name: "a",
+    component: SampleToolbarButtonA,
+  },
+  {
+    name: "b",
+    component: SampleToolbarButtonB,
+  }
 ];
 
 interface ISampleTileProps {
- type: string;
- model: ITileModel;
+  type: string;
+  model: ITileModel;
 }
 
 function SampleTile({type, model}: ISampleTileProps) {
- const tileElt = useRef<HTMLDivElement>(null);
- return (
-   <TileModelContext.Provider value={model}>
-     <div ref={tileElt}>
-       Tile content.
-     </div>
-     <TileToolbar readOnly={false} tileElement={tileElt.current} tileType={type} />
-   </TileModelContext.Provider>
- );
+  const tileElt = useRef<HTMLDivElement>(null);
+  return (
+    <TileModelContext.Provider value={model}>
+      <div ref={tileElt}>
+        Tile content.
+      </div>
+      <TileToolbar readOnly={false} tileElement={tileElt.current} tileType={type} />
+    </TileModelContext.Provider>
+  );
 }
 
 describe("Tile toolbar button", () => {
 
- it("can render a button", () => {
-   render(
-     <TileToolbarButton name="test-button" title="Test Button" onClick={clickHandler}>
-       <CopyIcon/>
-     </TileToolbarButton>);
+  it("can render a button", () => {
+    render(
+      <TileToolbarButton name="test-button" title="Test Button" onClick={clickHandler}>
+        <CopyIcon/>
+      </TileToolbarButton>);
 
-   expect(screen.getByRole("button")).toBeInTheDocument();
-   expect(screen.getByRole("button")).toContainHTML("<svg");
-   screen.getByRole("button").click();
-   expect(clickHandler).toHaveBeenCalledTimes(1);
- });
+    expect(screen.getByRole("button")).toBeInTheDocument();
+    expect(screen.getByRole("button")).toContainHTML("<svg");
+    screen.getByRole("button").click();
+    expect(clickHandler).toHaveBeenCalledTimes(1);
+  });
 
- it("can read tools list from app configuration", () => {
-   const model = TileModel.create({content: defaultTextContent()});
-   const stores = specStores({
-     appConfig: specAppConfig({
-       config: {
-         settings: {
-           test: {
-             tools: ["b"]
-           }
-         }
-       }
-       })
-     });
-   stores.ui.setSelectedTileId(model.id);
+  it("can read tools list from app configuration", () => {
+    const model = TileModel.create({content: defaultTextContent()});
+    const stores = specStores({
+      appConfig: specAppConfig({
+        config: {
+          settings: {
+            test: {
+              tools: ["b"]
+            }
+          }
+        }
+        })
+      });
+    stores.ui.setSelectedTileId(model.id);
 
-   registerTileToolbarButtons("test", sampleButtons);
+    registerTileToolbarButtons("test", sampleButtons);
 
-   render(
-     <Provider stores={stores}>
-       <SampleTile type="test" model={model}/>
-     </Provider>
-   );
-   expect(screen.getByTestId("tile-toolbar")).toBeInTheDocument();
-   expect(screen.getByTestId("tile-toolbar")).toContainHTML("Test Button B");
-   expect(screen.getByTestId("tile-toolbar")).not.toContainHTML("Test Button A");
+    render(
+      <Provider stores={stores}>
+        <SampleTile type="test" model={model}/>
+      </Provider>
+    );
+    expect(screen.getByTestId("tile-toolbar")).toBeInTheDocument();
+    expect(screen.getByTestId("tile-toolbar")).toContainHTML("Test Button B");
+    expect(screen.getByTestId("tile-toolbar")).not.toContainHTML("Test Button A");
 
- });
+  });
 
 });

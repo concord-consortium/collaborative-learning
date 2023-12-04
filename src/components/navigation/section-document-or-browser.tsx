@@ -5,7 +5,7 @@ import { DocumentModelType } from "../../models/document/document";
 import { logDocumentEvent } from "../../models/document/log-document-event";
 import { ISubTabSpec, NavTabModelType } from "../../models/view/nav-tabs";
 import { useAppConfig, useClassStore, useProblemStore, useStores,
-         useUserStore, useUIStore, usePersistentUIStore } from "../../hooks/use-stores";
+         useUserStore, usePersistentUIStore } from "../../hooks/use-stores";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import { useUserContext } from "../../hooks/use-user-context";
@@ -23,7 +23,6 @@ interface IProps {
 
 export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function SectionDocumentOrBrowser(
     { tabSpec, isChatOpen }) {
-  const ui = useUIStore();
   const persistentUI = usePersistentUIStore();
   const store = useStores();
   const appConfigStore = useAppConfig();
