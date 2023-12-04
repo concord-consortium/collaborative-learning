@@ -28,12 +28,14 @@ interface IComputePointsOptions {
 const computePoints = (options: IComputePointsOptions) => {
   const { min, max, xCellCount, yCellCount, gap, xScale, yScale, formulaFunction } = options;
   const tPoints: Point[] = [];
-  for (let pixelX = min; pixelX <= max; pixelX += gap) {
-    const tX = xScale.invert(pixelX * xCellCount);
-    const tY = formulaFunction(tX);
-    if (Number.isFinite(tY)) {
-      const pixelY = yScale(tY) / yCellCount;
-      tPoints.push({ x: pixelX, y: pixelY });
+  if (xScale.invert) {
+    for (let pixelX = min; pixelX <= max; pixelX += gap) {
+      const tX = xScale.invert(pixelX * xCellCount);
+      const tY = formulaFunction(tX);
+      if (Number.isFinite(tY)) {
+        const pixelY = yScale(tY) / yCellCount;
+        tPoints.push({ x: pixelX, y: pixelY });
+      }
     }
   }
   return tPoints;

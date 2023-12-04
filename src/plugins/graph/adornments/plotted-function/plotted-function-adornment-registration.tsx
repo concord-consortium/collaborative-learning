@@ -8,7 +8,7 @@ import { PlottedFunctionAdornmentComponent } from "./plotted-function-adornment-
 
 registerAdornmentContentInfo({
   type: kPlottedFunctionType,
-  plots: ["scatterPlot"],
+  plots: ["scatterPlot", "casePlot"],
   prefix: kPlottedFunctionPrefix,
   modelClass: PlottedFunctionAdornmentModel
 });

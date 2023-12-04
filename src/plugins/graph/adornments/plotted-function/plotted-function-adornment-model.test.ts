@@ -7,7 +7,8 @@ describe("PlottedFunctionInstance", () => {
   });
   it("can have its formulaFunction set", () => {
     const plottedFunction = PlottedFunctionInstance.create();
-    expect(plottedFunction.formulaFunction(10)).toBe(NaN); // the default returns NaN no matter what
+    expect(plottedFunction.formulaFunction(10)).toBe(100); // For now, the default is hard coded to x^2
+    // expect(plottedFunction.formulaFunction(10)).toBe(NaN); // the default returns NaN no matter what
     plottedFunction.setValue(x => x);
     expect(plottedFunction.formulaFunction(10)).toBe(10);
   });
