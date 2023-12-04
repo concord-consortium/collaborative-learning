@@ -25,7 +25,6 @@ import UnlockLayoutIcon from "./src/assets/unlock-layout-icon.svg";
 import HideNavigatorIcon from "./src/assets/hide-navigator-icon.svg";
 import ShowNavigatorIcon from "./src/assets/show-navigator-icon.svg";
 import DeleteSelectionIcon from "../../assets/icons/delete/delete-selection-icon.svg";
-
 import "./diagram-toolbar.scss";
 
 /*

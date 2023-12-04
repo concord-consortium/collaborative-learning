@@ -1,4 +1,3 @@
-
 import { ProblemModel } from "../models/curriculum/problem";
 import { AppConfigModel } from "../models/stores/app-config-model";
 import { ClassModel } from "../models/stores/class";
@@ -9,7 +8,6 @@ import { SelectionStoreModel } from "../models/stores/selection";
 import { UserModel } from "../models/stores/user";
 import {
   LearningLogWorkspace, ProblemWorkspace, WorkspaceModel,
-  //LearningLogWorkspace
 } from "../models/stores/workspace";
 import {
   useAppConfig, useAppMode, useClassStore, useDemoStore, useDocumentFromStore, useDocumentMetadataFromStore,
@@ -21,9 +19,7 @@ import { unitConfigDefaults } from "../test-fixtures/sample-unit-configurations"
 import { UIModel } from "../models/stores/ui";
 import { PersistentUIModel } from "../models/stores/persistent-ui";
 
-
 jest.mock("@concord-consortium/slate-editor", () => ({}));
-
 
 const mockUseContext = jest.fn();
 jest.mock("react", () => ({
@@ -32,12 +28,10 @@ jest.mock("react", () => ({
   useMemo: (fn: () => any) => fn()
 }));
 
-
 describe("useStores", () => {
   function resetMocks() {
     mockUseContext.mockReset();
   }
-
 
   describe("simple store hooks", () => {
     beforeEach(() => resetMocks());
@@ -99,10 +93,8 @@ describe("useStores", () => {
     });
   });
 
-
   describe("useTypeOfTileInDocumentOrCurriculum", () => {
     beforeEach(() => resetMocks());
-
 
     it("should return undefined if specified document or tile doesn't exist", () => {
       mockUseContext.mockImplementation(() => ({
@@ -115,7 +107,6 @@ describe("useStores", () => {
       expect(useTypeOfTileInDocumentOrCurriculum(undefined, "id")).toBeUndefined();
       expect(useTypeOfTileInDocumentOrCurriculum("key", "id")).toBeUndefined();
     });
-
 
     it("should return type of tile from tile id for curriculum documents", () => {
       mockUseContext.mockImplementation(() => ({
@@ -130,7 +121,6 @@ describe("useStores", () => {
       expect(useTypeOfTileInDocumentOrCurriculum("sas/1/2/introduction", "introduction_Geometry_1")).toBe("Geometry");
     });
 
-
     it("should return type of tile from content for user documents", () => {
       mockUseContext.mockImplementation(() => ({
         stores: {
@@ -141,7 +131,6 @@ describe("useStores", () => {
       }));
       expect(useTypeOfTileInDocumentOrCurriculum("document-key", "tile-id")).toBe("Text");
     });
-
 
     it("should return type of tile from content for remote user documents", () => {
       mockUseContext.mockImplementation(() => ({
@@ -157,6 +146,5 @@ describe("useStores", () => {
       expect(useTypeOfTileInDocumentOrCurriculum("document-key", "tile-id")).toBe("Text");
     });
   });
-
 
 });
