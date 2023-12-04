@@ -47,7 +47,6 @@ describe("useStores", () => {
       const problem = ProblemModel.create({ ordinal: 2, title: "1.2" });
       const selection = SelectionStoreModel.create();
       const ui = UIModel.create({
-        // problemWorkspace: WorkspaceModel.create({ type: ProblemWorkspace, mode: "4-up" }),
         learningLogWorkspace: WorkspaceModel.create({ type: LearningLogWorkspace, mode: "1-up" })
       });
       const persistentUI = PersistentUIModel.create({
