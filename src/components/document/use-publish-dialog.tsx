@@ -1,7 +1,7 @@
 import React from "react";
 import PublishSvg from "../../assets/icons/publish/publish-icon-default.svg";
 import { useCustomModal } from "../../hooks/use-custom-modal";
-import { useDBStore, useProblemPath, useStores, useUserStore, useUIStore } from "../../hooks/use-stores";
+import { useDBStore, useProblemPath, useStores, useUIStore, useUserStore } from "../../hooks/use-stores";
 import { DocumentModelType } from "../../models/document/document";
 import { ProblemDocument } from "../../models/document/document-types";
 
