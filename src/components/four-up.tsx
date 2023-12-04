@@ -152,7 +152,6 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    {console.log("<Four-up-View>");}
     const {documentViewMode, viaStudentGroupView,
         group, isGhostUser, ...others} = this.props;
 

@@ -38,7 +38,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const [mouseY, setMouseY] = useState<number | undefined>();
   const divRef = useRef<Element|null>(null);
   const ui = useUIStore();
-  const persistentUI = usePersistentUIStore(); //console.log this is where it being called!
+  const persistentUI = usePersistentUIStore();
   const tileApiInterface = useContext(TileApiInterfaceContext);
 
   // Clear a partially completed annotation when the mode changes

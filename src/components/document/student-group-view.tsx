@@ -48,7 +48,6 @@ interface IGroupComponentProps {
 }
 
 const GroupViewTitlebar: React.FC<IGroupComponentProps> = observer(function GroupViewTitlebar({group, groupUser}) {
-  // console.log("\t🏭 GroupViewTitlebar");
   const {groups, persistentUI: ui} = useStores();
   const focusedGroupUser = groupUser;
 

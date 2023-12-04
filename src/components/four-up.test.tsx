@@ -24,15 +24,13 @@ jest.mock("../hooks/use-stores", () => ({
     }
   }),
   useUIStore: () => ({
-    showAdornments: true //console.log - issue is here
+    showAdornments: true
+    // TODO: FIXME - doesn't seem like showAdornments is being used (since missing from UIModel)
+    // but useUIStore needs to be defined
   }),
-  //first try
-  // usePersistentUIStore: () => ({
-  //   showAnnotations: true
-  // })
-  // useUIStore: () => ({
-  //   showAnnotations: true
-  // }),
+  usePersistentUIStore: () => ({
+    showAnnotations: true
+  })
 }));
 
 describe("Four Up Component", () => {
