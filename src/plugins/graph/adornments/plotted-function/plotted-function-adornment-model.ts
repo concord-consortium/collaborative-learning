@@ -2,6 +2,8 @@ import { Instance, types } from "mobx-state-tree";
 import { AdornmentModel, IAdornmentModel } from "../adornment-models";
 import { kPlottedFunctionType, FormulaFn } from "./plotted-function-adornment-types";
 
+const kDefaultFunctionKey = "default-function-key";
+
 export const PlottedFunctionInstance = types.model("PlottedFunctionInstance", {})
   .volatile(self => ({
     // This is being hard coded to x**2 for now.
@@ -26,12 +28,12 @@ export const PlottedFunctionAdornmentModel = AdornmentModel
     setError(error: string) {
       self.error = error;
     },
-    addPlottedFunction(formulaFunction: FormulaFn, key="{}") {
+    addPlottedFunction(formulaFunction: FormulaFn, key=kDefaultFunctionKey) {
       const newPlottedFunction = PlottedFunctionInstance.create();
       newPlottedFunction.setValue(formulaFunction);
       self.plottedFunctions.set(key, newPlottedFunction);
     },
-    updatePlottedFunctionValue(formulaFunction: FormulaFn, key="{}") {
+    updatePlottedFunctionValue(formulaFunction: FormulaFn, key=kDefaultFunctionKey) {
       const plottedFunction = self.plottedFunctions.get(key);
       if (plottedFunction) {
         plottedFunction.setValue(formulaFunction);
