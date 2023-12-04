@@ -15,6 +15,7 @@ interface IProps {
   actionHandlers?: any;
   model: ITileModel;
   readOnly?: boolean;
+  includeVariableProviders?: boolean;
   allowMultipleGraphDatasets?: boolean;
 }
 
@@ -28,17 +29,20 @@ interface IProps {
  * @param props.model - model representing the Tile that we are linking to.
  * @param props.actionHandlers - callback methods to handle linking and unlinking.
  *  Optional; default methods are provided.
- * @param props.readOnly - whether we are in a read-only context
+ * @param props.readOnly - whether we are in a read-only context (default false)
+ * @param props.includeVariableProviders - whether to allow linking to tiles that provide shared variables,
+ *  in addition to tiles that provide a shared dataset (default false)
  * @param props.allowMultipleGraphDatasets - whether the dialog should allow multiple connections to an XY Plot tile.
+ *  (default false)
  *
  * @returns a boolean indicating whether any providers are available, and a function to open the dialog.
  */
 export const useProviderTileLinking = ({
-  actionHandlers, model, readOnly, allowMultipleGraphDatasets
+  actionHandlers, model, readOnly, includeVariableProviders, allowMultipleGraphDatasets
 }: IProps) => {
   const {handleRequestTileLink, handleRequestTileUnlink} = actionHandlers || {};
   const { providers, variableProviders } = useLinkableTiles({ model });
-  const isLinkEnabled = (providers.length > 0 || variableProviders.length > 0);
+  const isLinkEnabled = (providers.length > 0 || (!!includeVariableProviders && variableProviders.length > 0));
 
   const linkTile = useCallback((tileInfo: ITileLinkMetadata) => {
     const providerTile = getTileContentById(model.content, tileInfo.id);
@@ -80,7 +84,7 @@ export const useProviderTileLinking = ({
   const onLinkTile = handleRequestTileLink || linkTile;
   const onUnlinkTile = handleRequestTileUnlink || unlinkTile;
 
-  const linkableTiles = providers.concat(variableProviders);
+  const linkableTiles = includeVariableProviders ? providers.concat(variableProviders) : providers;
 
   const [showLinkTileDialog] =
           useLinkProviderTileDialog({
