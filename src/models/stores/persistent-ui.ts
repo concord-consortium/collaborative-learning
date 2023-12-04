@@ -1,4 +1,4 @@
-import { getSnapshot, onSnapshot, types } from "mobx-state-tree";
+import { getSnapshot, types } from "mobx-state-tree";
 import { AppConfigModelType } from "./app-config-model";
 import { kDividerHalf, kDividerMax, kDividerMin } from "./ui-types";
 import { WorkspaceModel } from "./workspace";
@@ -9,7 +9,6 @@ import { LearningLogDocument, LearningLogPublication, PersonalDocument,
   PersonalPublication, PlanningDocument, ProblemDocument,
   ProblemPublication, SupportPublication } from "../document/document-types";
 import { UserModelType } from "./user";
-import { DB } from "../../lib/db";
 
 
 export const kSparrowAnnotationMode = "sparrow";
@@ -225,14 +224,6 @@ export const PersistentUIModel = types
       }
       self.setActiveNavTab(navTab);
       self.setOpenSubTab(navTab, subTab);
-    },
-    initializedPersistentUISync(user: UserModelType, db: DB){
-      const path = db.firebase.getOfferingUserPath(user);
-      onSnapshot(self, (snapshot)=>{
-        const snapshotStr = JSON.stringify(snapshot);
-        const updateRef = db.firebase.ref(path);
-        updateRef.update({persistentUI: snapshotStr});
-      });
     }
 }));
 

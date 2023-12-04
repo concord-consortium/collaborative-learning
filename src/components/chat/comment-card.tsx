@@ -100,7 +100,7 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
                   showCommentTag && !isTagPrompt &&
                   <div className="comment-dropdown-tag">
                     {
-                      (comment.tags || []).map((tag) => {
+                      comment.tags?.map((tag) => {
                         return commentTags && (commentTags[tag]);
                       }).join(", ")
                     }
@@ -111,7 +111,7 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
                 </div>
               </div>
             );
-         }) || [] //default in case postedCmments is undefined or null
+         })
         }
         <CommentTextBox
           activeNavTab={activeNavTab}
