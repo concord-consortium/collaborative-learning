@@ -100,6 +100,7 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
           updateProblem(stores, problemId);
         });
       }
+      stores.persistentUI.initializePersistentUISync(user, db);
       initRollbar(stores, problemId || stores.appConfig.defaultProblemOrdinal);
       return resolveAppMode(stores, authenticatedUser.rawFirebaseJWT, onQAClear);
     })
