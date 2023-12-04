@@ -4,7 +4,10 @@ import { kPlottedFunctionType, kPlottedFunctionValueTitleKey, FormulaFn } from "
 
 export const PlottedFunctionInstance = types.model("PlottedFunctionInstance", {})
   .volatile(self => ({
-    formulaFunction: (x: number) => NaN,
+    // This is being hard coded to x**2 for now.
+    // It should be reverted to NaN once we've set up correct functions.
+    // formulaFunction: (x: number) => NaN,
+    formulaFunction: (x: number) => x**2,
   }))
   .actions(self => ({
     setValue(formulaFunction: FormulaFn) {
