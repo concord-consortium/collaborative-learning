@@ -9,6 +9,7 @@ import { LearningLogDocument, LearningLogPublication, PersonalDocument,
   PersonalPublication, PlanningDocument, ProblemDocument,
   ProblemPublication, SupportPublication } from "../document/document-types";
 import { UserModelType } from "./user";
+import { DB } from "../../lib/db";
 
 export const kPersistentUiStateVersion = "1.0.0";
 export const kSparrowAnnotationMode = "sparrow";
