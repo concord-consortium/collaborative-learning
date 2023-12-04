@@ -111,7 +111,7 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
                 </div>
               </div>
             );
-         })
+        })
         }
         <CommentTextBox
           activeNavTab={activeNavTab}
