@@ -64,6 +64,9 @@ export const TileToolbar = observer(
 
     const buttons = buttonDescriptions.map((desc, i) => {
       if (isValidButtonDescription(desc)) {
+        if (desc === '|') {
+          return (<div key={`${i}-divider`} className="divider"/>);
+        }
         const buttonHasArg = !(typeof desc === 'string');
         const name = buttonHasArg ? desc[0] : desc;
         const info = getToolbarButtonInfo(tileType, name);

@@ -79,6 +79,13 @@
     }
   }
 
+  div.divider {
+    margin-left: 1px;
+    border-left: dotted 1px $workspace-teal;
+    height: 100%;
+    width: 0px;
+  }
+
   button {
     display: block;
     border: none;
