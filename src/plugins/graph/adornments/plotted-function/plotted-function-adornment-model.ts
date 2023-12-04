@@ -1,6 +1,6 @@
 import { Instance, types } from "mobx-state-tree";
 import { AdornmentModel, IAdornmentModel } from "../adornment-models";
-import { kPlottedFunctionType, kPlottedFunctionValueTitleKey, FormulaFn } from "./plotted-function-adornment-types";
+import { kPlottedFunctionType, FormulaFn } from "./plotted-function-adornment-types";
 
 export const PlottedFunctionInstance = types.model("PlottedFunctionInstance", {})
   .volatile(self => ({
@@ -19,7 +19,7 @@ export const PlottedFunctionAdornmentModel = AdornmentModel
   .named("PlottedFunctionAdornmentModel")
   .props({
     type: types.optional(types.literal(kPlottedFunctionType), kPlottedFunctionType),
-    labelTitle: types.optional(types.literal(kPlottedFunctionValueTitleKey), kPlottedFunctionValueTitleKey),
+    labelTitle: types.optional(types.literal(kPlottedFunctionType), kPlottedFunctionType),
     plottedFunctions: types.map(PlottedFunctionInstance),
     error: ""
   })
