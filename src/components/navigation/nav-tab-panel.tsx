@@ -146,36 +146,36 @@ export class NavTabPanel extends BaseComponent<IProps> {
 
   private handleSelectTab = (tabIndex: number) => {
     const tabs = this.stores.tabsToDisplay;
-    const { persistentUI: ui } = this.stores;
+    const { persistentUI } = this.stores;
     if (tabs) {
       const tabSpec = tabs[tabIndex];
-      if (ui.activeNavTab !== tabSpec.tab) {
-        ui.setActiveNavTab(tabSpec.tab);
+      if (persistentUI.activeNavTab !== tabSpec.tab) {
+        persistentUI.setActiveNavTab(tabSpec.tab);
         const logParameters = {
           tab_name: tabSpec.tab.toString()
         };
         const logEvent = () => { Logger.log(LogEventName.SHOW_TAB, logParameters); };
         logEvent();
       } else {
-        if (ui.openSubTab) {
+        if (persistentUI.openSubTab) {
           // If there is a document open then a click on the active top level tab
           // closes the document. Also a click on the active sub tab closes the
           // document, this is handled in section-document-or-browser
-          ui.closeSubTabDocument(tabSpec.tab, ui.openSubTab);
+          persistentUI.closeSubTabDocument(tabSpec.tab, persistentUI.openSubTab);
         }
       }
     }
   };
 
   private handleShowChatColumn = () => {
-    const { persistentUI: ui } = this.stores;
-    const event = ui.showChatPanel ? LogEventName.CHAT_PANEL_HIDE : LogEventName.CHAT_PANEL_SHOW;
+    const { persistentUI } = this.stores;
+    const event = persistentUI.showChatPanel ? LogEventName.CHAT_PANEL_HIDE : LogEventName.CHAT_PANEL_SHOW;
     Logger.log(event);
-    ui.toggleShowChatPanel(!ui.showChatPanel);
+    persistentUI.toggleShowChatPanel(!persistentUI.showChatPanel);
   };
 
   private handleCloseResources = () => {
-    const { persistentUI: ui } = this.stores;
-    ui.setDividerPosition(kDividerMin);
+    const { persistentUI } = this.stores;
+    persistentUI.setDividerPosition(kDividerMin);
   };
 }

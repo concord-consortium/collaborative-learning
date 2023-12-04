@@ -150,8 +150,8 @@ class Stores implements IStores{
    * The currently open group in the Student Work tab
    */
   get studentWorkTabSelectedGroupId() {
-    const { persistentUI: ui, groups } = this;
-    return ui.tabs.get("student-work")?.openSubTab
+    const { persistentUI, groups } = this;
+    return persistentUI.tabs.get("student-work")?.openSubTab
         || (groups.nonEmptyGroups.length ? groups.nonEmptyGroups[0].id : "");
   }
 

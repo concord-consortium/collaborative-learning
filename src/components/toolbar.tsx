@@ -86,12 +86,12 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     const updateToolButton = (toolButton: IToolbarButtonModel) => {
       if (toolButton.id === "hide-annotations") {
         // Update hide annotation button's icon and title based on current annotation visibility
-        const { persistentUI: ui } = this.stores;
+        const { persistentUI } = this.stores;
         const appIcons = toolButton.env?.appIcons;
         toolButton.setIcon(
-          appIcons?.[ui.showAnnotations ? "icon-hide-annotations-tool" : "icon-show-annotations-tool"]
+          appIcons?.[persistentUI.showAnnotations ? "icon-hide-annotations-tool" : "icon-show-annotations-tool"]
         );
-        toolButton.setTitle(ui.showAnnotations ? "Hide Annotations" : "Show Annotations");
+        toolButton.setTitle(persistentUI.showAnnotations ? "Hide Annotations" : "Show Annotations");
       }
     };
     const renderToolButtons = (toolbarModel: IToolbarModel) => {

@@ -465,8 +465,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleSelectDocument = (document: DocumentModelType) => {
-    const { appConfig, persistentUI: ui } = this.stores;
-    ui.rightNavDocumentSelected(appConfig, document);
+    const { appConfig, persistentUI } = this.stores;
+    persistentUI.rightNavDocumentSelected(appConfig, document);
     this.setState({ showBrowser: false });
   };
 

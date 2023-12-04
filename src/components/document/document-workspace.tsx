@@ -34,8 +34,8 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   public render() {
-    const { appMode, appConfig: { toolbar }, documents, persistentUI: ui, groups } = this.stores;
-    const { problemWorkspace } = ui;
+    const { appMode, appConfig: { toolbar }, documents, persistentUI, groups } = this.stores;
+    const { problemWorkspace } = persistentUI;
     const { comparisonDocumentKey, hidePrimaryForCompare, comparisonVisible } = problemWorkspace;
     const showPrimary = !hidePrimaryForCompare;
     const primaryDocument = this.getPrimaryDocument(problemWorkspace.primaryDocumentKey);
@@ -175,10 +175,10 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
 
   private handleDropSide = (side: WorkspaceSide) => {
     return (e: React.DragEvent<HTMLDivElement>) => {
-      const {persistentUI: ui, documents} = this.stores;
+      const {persistentUI, documents} = this.stores;
       const documentKey = e.dataTransfer && e.dataTransfer.getData(DocumentDragKey);
       if (documentKey) {
-        const {problemWorkspace} = ui;
+        const {problemWorkspace} = persistentUI;
         const document = documents.getDocument(documentKey);
         if (document) {
           if ((side === "primary") && !document.isPublished) {
@@ -202,10 +202,10 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   };
 
   private handleImageDrop = (e: React.DragEvent<HTMLDivElement>, rowId?: string) => {
-    const {persistentUI: ui} = this.stores;
+    const {persistentUI} = this.stores;
     this.imageDragDrop.drop(e)
       .then((url) => {
-        const primaryDocument = this.getPrimaryDocument(ui.problemWorkspace.primaryDocumentKey);
+        const primaryDocument = this.getPrimaryDocument(persistentUI.problemWorkspace.primaryDocumentKey);
         if (primaryDocument?.content) {
           // insert the tile after the row it was dropped on otherwise add to end of document
           const rowIndex = rowId ? primaryDocument.content?.getRowIndex(rowId) : undefined;
@@ -219,7 +219,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
         }
       })
       .catch((err) => {
-        ui.alert(err.toString());
+        persistentUI.alert(err.toString());
       });
   };
 

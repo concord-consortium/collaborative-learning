@@ -48,17 +48,17 @@ interface IGroupComponentProps {
 }
 
 const GroupViewTitlebar: React.FC<IGroupComponentProps> = observer(function GroupViewTitlebar({group, groupUser}) {
-  const {groups, persistentUI: ui} = useStores();
+  const {groups, persistentUI} = useStores();
   const focusedGroupUser = groupUser;
 
   const handleFocusedUserChange = (selectedUser: GroupUserModelType) => {
     group?.id && selectedUser.problemDocument &&
-      ui.openSubTabDocument("student-work", group.id, selectedUser.problemDocument.key);
+      persistentUI.openSubTabDocument("student-work", group.id, selectedUser.problemDocument.key);
   };
 
   const handleSelectGroup = (id: string) => {
-    ui.setOpenSubTab("student-work", id);
-    ui.closeSubTabDocument("student-work", id);
+    persistentUI.setOpenSubTab("student-work", id);
+    persistentUI.closeSubTabDocument("student-work", id);
     Logger.log(LogEventName.VIEW_GROUP, {group: id, via: "group-document-titlebar"});
   };
 
