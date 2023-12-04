@@ -19,7 +19,6 @@ export const PlottedFunctionAdornmentModel = AdornmentModel
   .named("PlottedFunctionAdornmentModel")
   .props({
     type: types.optional(types.literal(kPlottedFunctionType), kPlottedFunctionType),
-    labelTitle: types.optional(types.literal(kPlottedFunctionType), kPlottedFunctionType),
     plottedFunctions: types.map(PlottedFunctionInstance),
     error: ""
   })
