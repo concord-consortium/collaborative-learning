@@ -101,6 +101,8 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
         });
       }
       stores.persistentUI.initializePersistentUISync(user, db);
+      console.log("| get the string from firebase and load it into stores.persistentUI?");
+      console.log("| should we get it from the local representation or from the cloud?");
       initRollbar(stores, problemId || stores.appConfig.defaultProblemOrdinal);
       return resolveAppMode(stores, authenticatedUser.rawFirebaseJWT, onQAClear);
     })
