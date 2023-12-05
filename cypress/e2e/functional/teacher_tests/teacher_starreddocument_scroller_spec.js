@@ -19,10 +19,8 @@ context('Document Flipper', () => {
       beforeTest(queryParams.teacherQueryParams);
       cy.log('verify document flipper under my work - starred tab');
       cy.openTopTab("my-work"); 
-      cy.wait(15000);
       starred.starMultipleCanvasItem("my-work", "workspaces");
       cy.openSection('my-work', 'starred');
-      cy.wait(2000);
       
       starred.getFocusDocument("my-work").should("not.exist");
       
@@ -35,11 +33,12 @@ context('Document Flipper', () => {
       cy.log("verify thumbnail flipper");
       starred.verifyThumbnailFlipper("my-work");
 
+      cy.log("verify scroller toggle");
+      starred.verifyScrollerToggle("my-work");
+
       cy.log('verify document flipper under class work - starred tab');
       cy.openTopTab("class-work"); 
-      cy.wait(5000);
       cy.openSection('class-work', 'starred');
-      cy.wait(2000);
       
       starred.getFocusDocument("class-work").should("not.exist");
       
@@ -48,6 +47,9 @@ context('Document Flipper', () => {
 
       cy.log("verify double document flipper");
       starred.verifyDoubleDocumentFlipper("class-work");
+
+      cy.log("verify scroller toggle");
+      starred.verifyScrollerToggle("class-work");
     });
   });
 });
