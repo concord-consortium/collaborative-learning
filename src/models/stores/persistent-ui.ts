@@ -1,4 +1,4 @@
-import { getSnapshot, onSnapshot, types } from "mobx-state-tree";
+import { getSnapshot, onSnapshot, applySnapshot, types } from "mobx-state-tree";
 import { AppConfigModelType } from "./app-config-model";
 import { kDividerHalf, kDividerMax, kDividerMin } from "./ui-types";
 import { WorkspaceModel } from "./workspace";
@@ -10,6 +10,7 @@ import { LearningLogDocument, LearningLogPublication, PersonalDocument,
   ProblemPublication, SupportPublication } from "../document/document-types";
 import { UserModelType } from "./user";
 import { DB } from "../../lib/db";
+import { safeJsonParse } from "../../utilities/js-utils";
 
 export const kPersistentUiStateVersion = "1.0.0";
 export const kSparrowAnnotationMode = "sparrow";
@@ -227,16 +228,20 @@ export const PersistentUIModel = types
       self.setActiveNavTab(navTab);
       self.setOpenSubTab(navTab, subTab);
     },
-    initializePersistentUISync(user: UserModelType, db: DB){
-      const path = db.firebase.getOfferingUserPath(user);
+    async initializePersistentUISync(user: UserModelType, db: DB){
+      const userPath = db.firebase.getOfferingUserPath(user);
+      const uiPath = userPath + "/persistentUI";
+      const getRef = db.firebase.ref(uiPath);
+      const theData: string | undefined = ( await getRef.once("value"))?.val();
+      const asObj = safeJsonParse(theData);
+      if (asObj) applySnapshot(self, asObj);
+
       onSnapshot(self, (snapshot)=>{
-        console.log("| snapshot of persistentUI", snapshot);
         const snapshotStr = JSON.stringify(snapshot);
-        const updateRef = db.firebase.ref(path);
+        const updateRef = db.firebase.ref(userPath);
         updateRef.update({persistentUI: snapshotStr});
       });
     }
-
 }));
 
 export type PersistentUIModelType = typeof PersistentUIModel.Type;
