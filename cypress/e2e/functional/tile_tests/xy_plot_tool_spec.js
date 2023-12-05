@@ -11,8 +11,30 @@ const primaryWorkspace = new PrimaryWorkspace;
 const resourcePanel = new ResourcePanel;
 
 const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=brain";
+const queryParamsMultiDataset = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=example-config-subtabs";
 
 const problemDoc = 'Lesson 1.1 - What is a bionic arm?';
+
+// Construct and fill in a table tile with the given data (a list of lists)
+function buildTable(data) {
+  // at least two cols, or as many as the longest row in the data array
+  const cols = Math.max(2, ...data.map(row => row.length));
+  clueCanvas.addTile('table');
+  tableToolTile.getTableTile().last().should('be.visible');
+  tableToolTile.getTableTile().last().within((tile) => {
+    // tile will start with two columns; make more if desired
+    for (let i=2; i<cols; i++) {
+      tile.getAddColumnButton().click();
+    }
+    for (let i=0; i<data.length; i++) {
+      for (let j=0; j<data[i].length; j++) {
+        const cellContent = data[i][j];
+        tableToolTile.typeInTableCellXY(i, j, cellContent);
+        tableToolTile.getTableCellXY(i, j).should('contain', cellContent);
+      }
+    }
+  });
+}
 
 function beforeTest(params) {
   cy.clearQAData('all');
@@ -147,7 +169,37 @@ context('XYPlot Tool Tile', function () {
       xyTile.linkTable("Table 1");
       xyTile.getAddSeriesButton().should('be.visible');
       xyTile.getAddSeriesButton().click();
+      xyTile.getXAttributesLabel().should('have.length', 1);
       xyTile.getYAttributesLabel().should('have.length', 2);
+    });
+
+    it("Test linking two datasets", () => {
+      beforeTest(queryParamsMultiDataset);
+      cy.log("Add XY Plot Tile");
+      cy.collapseResourceTabs();
+      clueCanvas.addTile("graph");
+      xyTile.getTile().should('be.visible');
+
+      buildTable([[1, 2], [2, 4], [3, 9]]);
+      buildTable([[1, 1], [2, 5], [3, 1], [4, 5]]);
+
+      tableToolTile.getTableTile().should('have.length', 2);
+
+      cy.log("Link First Table");
+      xyTile.getTile().click();
+      clueCanvas.clickToolbarButton('graph', 'link-tile');
+      xyTile.linkTable("Table 1");
+      xyTile.getXAttributesLabel().should('have.length', 1);
+      xyTile.getYAttributesLabel().should('have.length', 1);
+
+      cy.log("Link Second Table");
+      xyTile.getTile().click();
+      clueCanvas.clickToolbarButton('graph', 'link-tile-multiple');
+      xyTile.linkTable("Table 2");
+
+      xyTile.getXAttributesLabel().should('have.length', 2);
+      xyTile.getYAttributesLabel().should('have.length', 2);
+
     });
   });
 });
