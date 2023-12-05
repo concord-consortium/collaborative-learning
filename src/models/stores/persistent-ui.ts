@@ -245,6 +245,9 @@ export const PersistentUIModel = types
         const snapshotStr = JSON.stringify(snapshot);
         const updateRef = db.firebase.ref(userPath);
         updateRef.update({persistentUI: snapshotStr});
+        // TODO (future PR)
+        // an additional write of the value of `workspaceDocument` to the group
+        // so it is in a place where groupmates' clients can easily listen to it
       });
     }
 }));
