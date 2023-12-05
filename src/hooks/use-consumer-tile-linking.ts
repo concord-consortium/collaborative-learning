@@ -4,11 +4,13 @@ import { ITileLinkMetadata} from "../models/tiles/tile-link-types";
 import { ITileModel } from "../models/tiles/tile-model";
 import { useLinkConsumerTileDialog } from "./use-link-consumer-tile-dialog";
 import { getTileContentById } from "../utilities/mst-utils";
-import { SharedDataSet } from "../models/shared/shared-data-set";
+import { isSharedDataSet, SharedDataSet } from "../models/shared/shared-data-set";
 import { getTileContentInfo } from "../models/tiles/tile-content-info";
 import { useLinkableTiles } from "./use-linkable-tiles";
 import { AddTilesContext } from "../components/tiles/tile-api";
 import { getTileSharedModels } from "../models/shared/shared-data-utils";
+import { SharedVariables } from "../plugins/shared-variables/shared-variables";
+import { getSharedModelManager } from "../models/tiles/tile-environment";
 
 interface IProps {
   // TODO: This should be replaced with a generic disabled
@@ -27,11 +29,33 @@ interface IProps {
   onUnlinkTile?: (tileInfo: ITileLinkMetadata) => void;
   onCreateTile?: () => void;
 }
+
+/**
+ * Sets up a dialog that lists potential tiles that can "consume" a given tile's data.
+ * Dialog will show tiles that can accept a shared dataset (or shared variables if that is
+ * what the given tile provides).
+ * Tiles that are already linked with the given shared model are listed in an "Unlink" list
+ * and can be removed.
+ * A specific tile type can be specified, in which case only tiles of that type are shown,
+ * and in addition a button is shown to create a new tile of that type to receive the data.
+ *
+ * @param props - properties object
+ * @param props.model - model representing the tile that has data to share.
+ * @param props.hasLinkableRows - whether the tile currently has sufficient data to allow sharing.
+ * @param props.readOnly - whether we are in a read-only context (default false)
+ * @param props.onlyType - limit to this tile type
+ * @param props.onLinkTile - callback, overrides default connection method
+ * @param props.onUnlinkTile - callback, overrides default disconnection method
+ * @param props.onCreateTile - callback, overrides default tile-create-and-link method
+ *
+ * @returns a boolean indicating whether any receivers are available, and a function to open the dialog.
+ */
 export const useConsumerTileLinking = ({
   model, hasLinkableRows, readOnly, onlyType, onLinkTile, onUnlinkTile, onCreateTile
 }: IProps) => {
   const { consumers: linkableTilesAllTypes } = useLinkableTiles({ model });
   let linkableTiles = onlyType ? linkableTilesAllTypes.filter(t=>t.type===onlyType) : linkableTilesAllTypes;
+  console.log('linkable:', linkableTiles);
   // Can't link to self
   linkableTiles = linkableTiles.filter(t => t.id!==model.id);
   // Button should be enabled if we have sufficient data to provide, and
@@ -51,21 +75,24 @@ export const useConsumerTileLinking = ({
   const linkTile = useCallback((tileInfo: ITileLinkMetadata) => {
     const consumerTile = getTileContentById(model.content, tileInfo.id);
     if (!readOnly && consumerTile) {
-      const sharedModelManager = consumerTile.tileEnv?.sharedModelManager;
+      const sharedModelManager = getSharedModelManager(consumerTile);
       if (sharedModelManager?.isReady) {
+        const providerTileInfo = getTileContentInfo(model.content.type);
+        const sharedModelType = providerTileInfo?.isDataProvider ? SharedDataSet : SharedVariables;
+        console.log('linking', sharedModelType.name);
         // If the consumer tile does not support multiple shared data sets, remove it from
         // any existing shared data sets before linking.
-        if (!getTileContentInfo(consumerTile.type)?.consumesMultipleDataSets) {
-          const allSharedDataSets = sharedModelManager?.getSharedModelsByType("SharedDataSet");
+        if (sharedModelType === SharedDataSet && !getTileContentInfo(consumerTile.type)?.consumesMultipleDataSets) {
+          const allSharedDataSets = sharedModelManager.getSharedModelsByType("SharedDataSet");
           allSharedDataSets?.forEach(sharedDataSet => {
-            const sharedModelTileIds = sharedModelManager?.getSharedModelTileIds(sharedDataSet);
+            const sharedModelTileIds = sharedModelManager.getSharedModelTileIds(sharedDataSet);
             if (sharedModelTileIds?.includes(tileInfo.id)) {
-              sharedModelManager?.removeTileSharedModel(consumerTile, sharedDataSet);
+              sharedModelManager.removeTileSharedModel(consumerTile, sharedDataSet);
             }
           });
         }
-        const sharedModel = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, model.id);
-        sharedModel && sharedModelManager?.addTileSharedModel(consumerTile, sharedModel);
+        const sharedModel = sharedModelManager.findFirstSharedModelByType(sharedModelType, model.id);
+        sharedModel && sharedModelManager.addTileSharedModel(consumerTile, sharedModel);
       }
     }
   }, [readOnly, model]);
@@ -73,15 +100,19 @@ export const useConsumerTileLinking = ({
   const unlinkTile = useCallback((tileInfo: ITileLinkMetadata) => {
     const linkedTile = getTileContentById(model.content, tileInfo.id);
     if (!readOnly && linkedTile) {
-      const sharedModelManager = linkedTile.tileEnv?.sharedModelManager;
+      const sharedModelManager = getSharedModelManager(linkedTile);
       if (sharedModelManager?.isReady) {
-        const sharedModel = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, model.id);
-        // If providerId matches model.id, we're the provider and should remove the other tile
-        // from the sharedModel. Otherwise, we're the consumer and should remove ourselves.
-        if (sharedModel && sharedModel.providerId === model.id) {
-          sharedModelManager?.removeTileSharedModel(linkedTile, sharedModel);
+        const providerTileInfo = getTileContentInfo(model.content.type);
+        const sharedModelType = providerTileInfo?.isDataProvider ? SharedDataSet : SharedVariables;
+        console.log('unlinking', sharedModelType.name);
+        const sharedModel = sharedModelManager.findFirstSharedModelByType(sharedModelType, model.id);
+        // Normally we unlink the other tile to break the connection.
+        // However, if the other tile matches the shared model's providerId, then it's the owner;
+        // we leave it attached and unlink ourselves.
+        if (sharedModel && isSharedDataSet(sharedModel) && sharedModel.providerId === tileInfo.id) {
+          sharedModelManager.removeTileSharedModel(model.content, sharedModel);  // unlink us
         } else if (sharedModel) {
-          sharedModelManager?.removeTileSharedModel(model.content, sharedModel);
+          sharedModelManager.removeTileSharedModel(linkedTile, sharedModel); // unlink them
         }
       }
     }

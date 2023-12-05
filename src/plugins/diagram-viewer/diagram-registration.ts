@@ -7,6 +7,7 @@ import DiagramToolIcon from "./src/assets/program.svg";
 import { DiagramMigrator } from "./diagram-migrator";
 import { registerTileToolbarButtons } from "../../components/toolbar/toolbar-button-manager";
 import { DeleteButton, EditVariableButton, FitViewToolbarButton, HideNavigatorButton, InsertVariableButton,
+  LinkGraphButton,
   LockLayoutButton, NewVariableButton, ZoomInToolbarButton, ZoomOutToolbarButton } from "./diagram-toolbar-buttons";
 
 registerTileContentInfo({
@@ -37,5 +38,6 @@ registerTileToolbarButtons("diagram", [
   { name: "fit-view", component: FitViewToolbarButton },
   { name: "toggle-lock", component: LockLayoutButton },
   { name: "toggle-navigator", component: HideNavigatorButton },
-  { name: "delete", component: DeleteButton }
+  { name: "delete", component: DeleteButton },
+  { name: "link-graph", component: LinkGraphButton }
 ]);

@@ -255,6 +255,8 @@
           "toggle-lock",
           "toggle-navigator",
           "|",
+          "link-graph",
+          "|",
           "delete"
         ]
       },
