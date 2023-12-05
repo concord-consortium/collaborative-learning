@@ -5,9 +5,6 @@ let clueCanvas = new ClueCanvas;
 let dataflowToolTile = new DataflowToolTile;
 let dragXDestination = 300;
 
-let dataflowToolTile2 = new DataflowToolTile; //creates an internal object, a Dataflow tile
-let dragXDestination2 = 600;
-
 function beforeTest() {
   const url = "./doc-editor.html?appMode=qa&unit=./curriculum/example-curriculum/example-curriculum.json&mouseSensor";
   cy.visit(url);
