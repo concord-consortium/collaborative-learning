@@ -84,7 +84,6 @@ export const PersistentUIModel = types
       return tabState;
     };
     return {
-      alert,
 
       setDividerPosition(position: number) {
         self.dividerPosition = position;

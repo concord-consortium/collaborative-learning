@@ -52,8 +52,7 @@ export const UIModel = types
     dragId: types.maybe(types.string) // The id of the object being dragged. Used with dnd-kit dragging.
   })
   .volatile(self => ({
-    defaultLeftNavExpanded: false,
-    problemPath: "" //TODO: figure out if we need problem path
+    defaultLeftNavExpanded: false
   }))
   .views((self) => ({
     isSelectedTile(tile: ITileModel) {
@@ -160,10 +159,6 @@ export const UIModel = types
 
       setDraggingId(dragId?: string) {
         self.dragId = dragId;
-      },
-
-      setProblemPath(problemPath: string) { //TODO: Figure out if we need a problem path in ui.ts
-        self.problemPath = problemPath;
       }
     };
   })
