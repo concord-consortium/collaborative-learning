@@ -14,10 +14,11 @@ import { SimpleAttributeLabel } from "../simple-attribute-label";
 
 import "./multi-legend.scss";
 
-export const kMultiLegendMenuHeight = 30;
-export const kMultiLegendVerticalPadding = 5;
-export const kMultiLegendVerticalGap = 8;
-export const kMultiLegendLabelHeight = 28;
+const kMultiLegendMenuHeight = 30;
+const kMultiLegendVerticalPadding = 10;
+const kMultiLegendVerticalGap = 8;
+const kMultiLegendLabelHeight = 28;
+const kMultiLegendHRuleHeight = 2;
 
 interface IMultiLegendProps {
   graphElt: HTMLDivElement | null;
@@ -48,7 +49,8 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
     // Menu for each Y attribute, plus one for "Add series" button
     const menuCount = (layer.config.yAttributeDescriptions.length || 0) + 1;
     const legendRows = Math.ceil(menuCount/2);
-    return kMultiLegendVerticalPadding * 3 // above title, below title, below all.
+    return kMultiLegendHRuleHeight
+      + kMultiLegendVerticalPadding * 3 // above title, below title, below all.
       + kMultiLegendLabelHeight
       + kMultiLegendMenuHeight * legendRows
       + kMultiLegendVerticalGap * legendRows * 2; // above each row
