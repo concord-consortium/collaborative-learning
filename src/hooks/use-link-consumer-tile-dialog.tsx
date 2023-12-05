@@ -32,7 +32,7 @@ const Content: React.FC<IContentProps>
   let instructions;
   if (tileType) {
     const lcTileType = tileType.toLowerCase();
-    instructions = `To view data as a ${lcTileType}, select the ${lcTileType} from this list.
+    instructions = `To view data or variables as a ${lcTileType}, select the ${lcTileType} from this list.
     To remove the view, select a ${lcTileType} from the Unlink list.`;
   } else {
     instructions = `To link ${displayTileTitle} to another tile, select a tile from the link list.
