@@ -57,6 +57,10 @@ export const DrawingContentModel = TileContentModel
         tileId
       }));
     },
+    // Note: We could be using MST's resolveIdentifier instead of making our own
+    // objectMap. This would be more efficient, however this will really
+    // enforce unique ids for all drawing objects regardless of which tile they
+    // are in.
     get objectMap() {
       // TODO this will rebuild the map when any of the objects change
       // We could handle this more efficiently
