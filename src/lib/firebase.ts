@@ -193,6 +193,10 @@ export class Firebase {
     return `${this.getOfferingPath(user)}/users`;
   }
 
+  public getPersistentUIPath(user: UserModelType){
+    return `${this.getOfferingUserPath(user)}/persistentUI`;
+  }
+
   // the path to the user folder for a particular problem (assignment)
   // metadata for each user document is in the class/offerings/users/userId path, but
   // the contents of all of a user's documents are in the class/users/userId/documents path.

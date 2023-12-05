@@ -229,25 +229,16 @@ export const PersistentUIModel = types
       self.setOpenSubTab(navTab, subTab);
     },
     async initializePersistentUISync(user: UserModelType, db: DB){
-      // TASKS
-      // use one path, which will allow you to use .set instead of .update
-      // (we may still need two refs because we don't know if they get out of date? but probably just fine to have one)
-      // move the computation of the persistentUI path into db.ts where getOfferingUserPath is defined (make a sibling)
-      // it will be getPersistentUIPath
-      const userPath = db.firebase.getOfferingUserPath(user);
-      const uiPath = userPath + "/persistentUI";
-      const getRef = db.firebase.ref(uiPath);
-      const theData: string | undefined = ( await getRef.once("value"))?.val();
+      const path = db.firebase.getPersistentUIPath(user);
+      const getRef = db.firebase.ref(path);
+      const theData: string | undefined = (await getRef.once("value"))?.val();
       const asObj = safeJsonParse(theData);
       if (asObj) applySnapshot(self, asObj);
 
       onSnapshot(self, (snapshot)=>{
         const snapshotStr = JSON.stringify(snapshot);
-        const updateRef = db.firebase.ref(userPath);
-        updateRef.update({persistentUI: snapshotStr});
-        // TODO (future PR)
-        // an additional write of the value of `workspaceDocument` to the group
-        // so it is in a place where groupmates' clients can easily listen to it
+        const updateRef = db.firebase.ref(path);
+        updateRef.set(snapshotStr);
       });
     }
 }));
