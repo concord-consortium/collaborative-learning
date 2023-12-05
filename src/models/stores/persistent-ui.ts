@@ -230,6 +230,7 @@ export const PersistentUIModel = types
     initializePersistentUISync(user: UserModelType, db: DB){
       const path = db.firebase.getOfferingUserPath(user);
       onSnapshot(self, (snapshot)=>{
+        console.log("| snapshot of persistentUI", snapshot);
         const snapshotStr = JSON.stringify(snapshot);
         const updateRef = db.firebase.ref(path);
         updateRef.update({persistentUI: snapshotStr});
