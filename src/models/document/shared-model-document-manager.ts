@@ -1,5 +1,6 @@
 import { action, computed, makeObservable, observable } from "mobx";
 import { getParentOfType, getSnapshot, getType, hasParentOfType, IAnyStateTreeNode } from "mobx-state-tree";
+import { uniq } from "lodash";
 import { DocumentContentModelType } from "./document-content";
 import { SharedModelType } from "../shared/shared-model";
 import { IDragSharedModelItem, ISharedModelManager, SharedModelUnion } from "../shared/shared-model-manager";
@@ -33,6 +34,14 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
 
   get isReady() {
     return !!this.document;
+  }
+
+  getSharedModelLabel(model: SharedModelType) {
+    // To label a model, list the titles of all the tiles that use it (removing dups).
+    // If no tiles use it, default to something based on the ID.
+    const tiles = this.getSharedModelTiles(model);
+    const titles = uniq(tiles.map(t => t.computedTitle));
+    return titles.length > 0 ? titles.join(", ") : `${model.type} ${model.id}`;
   }
 
   setDocument(document: DocumentContentModelType) {

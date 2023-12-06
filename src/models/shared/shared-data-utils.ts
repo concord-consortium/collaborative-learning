@@ -1,8 +1,6 @@
 import { IAnyStateTreeNode } from "mobx-state-tree";
-import { SharedVariables } from "../../plugins/shared-variables/shared-variables";
 import { IDataSet } from "../data/data-set";
 import { ITileContentModel } from "../tiles/tile-content";
-import { getTileContentInfo } from "../tiles/tile-content-info";
 import { getSharedModelManager } from "../tiles/tile-environment";
 import { ITileModel } from "../tiles/tile-model";
 import {
@@ -36,26 +34,21 @@ export function getTileCaseMetadata(tile: ITileContentModel) {
   return isSharedCaseMetadata(sharedCaseMetadata) ? sharedCaseMetadata : undefined;
 }
 
-export const isLinkedToTile = (model: ITileModel, tileId: string, tileType?: string) => {
+export const isLinkedToTile = (model: ITileModel, tileId: string) => {
   const sharedModelManager = getSharedModelManager(model);
   if (sharedModelManager?.isReady) {
-    // Normally we look for a link in the form of a SharedDataSet.
-    // However, if the tile only provides shared variables, see if we are linked by them.
-    const tileInfo = tileType && getTileContentInfo(tileType);
-    const sharedModelType = tileInfo && !tileInfo.isDataProvider && tileInfo.isVariableProvider
-      ? SharedVariables : SharedDataSet;
     // Determine if the tile initiating the link has a shared data set that the
     // target tile is already linked to.
-    const modelSharedItem = sharedModelManager?.findFirstSharedModelByType(sharedModelType, model.id);
-    const modelLinkedTileIds = sharedModelManager?.getSharedModelTileIds(modelSharedItem);
-    if (modelLinkedTileIds?.includes(tileId)) {
+    const modelDataSet = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, model.id);
+    const modelDataSetTileIds = sharedModelManager?.getSharedModelTileIds(modelDataSet);
+    if (modelDataSetTileIds?.includes(tileId)) {
       return true;
     }
     // Determine if the target tile has a shared data set that the initiating tile is
     // already linked to.
-    const tileSharedItem = sharedModelManager?.findFirstSharedModelByType(sharedModelType, tileId);
-    const tileLinkedTileIds = sharedModelManager?.getSharedModelTileIds(tileSharedItem);
-    if (tileLinkedTileIds?.includes(model.id)) {
+    const tileDataSet = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, tileId);
+    const tileDataSetTileIds = sharedModelManager?.getSharedModelTileIds(tileDataSet);
+    if (tileDataSetTileIds?.includes(model.id)) {
       return true;
     }
   }

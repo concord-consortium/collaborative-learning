@@ -1,26 +1,27 @@
 import React, { useRef, useState } from "react";
-
-import LinkGraphIcon from "../clue/assets/icons/table/link-graph-icon.svg";
 import { useCustomModal } from "./use-custom-modal";
-import { isLinkedToTile } from "../models/shared/shared-data-utils";
-import { ITileLinkMetadata, ITypedTileLinkMetadata } from "../models/tiles/tile-link-types";
 import { ITileModel } from "../models/tiles/tile-model";
+import { SharedModelType } from "../models/shared/shared-model";
+import { getSharedModelManager } from "../models/tiles/tile-environment";
+import LinkGraphIcon from "../clue/assets/icons/table/link-graph-icon.svg";
 
 import "./link-tile-dialog.scss";
 
 interface IContentProps {
-  linkedTiles: ITileLinkMetadata[];
+  labelFunction: (model: SharedModelType) => string;
+  linkedSharedModels: SharedModelType[];
+  unlinkedSharedModels: SharedModelType[];
   selectValue: string;
   tileTitle?: string;
-  unlinkedTiles: ITileLinkMetadata[];
   setSelectValue: React.Dispatch<React.SetStateAction<string>>;
 }
 const Content: React.FC<IContentProps>
-              = ({ linkedTiles, selectValue, tileTitle, unlinkedTiles, setSelectValue })=> {
+              = ({ labelFunction, linkedSharedModels, unlinkedSharedModels,
+                   selectValue, tileTitle, setSelectValue })=> {
   const displayTileTitle = tileTitle || "this tile";
   const selectElt = useRef<HTMLSelectElement>(null);
 
-    return (
+  return (
       <>
         <div className="prompt">
           To link {displayTileTitle} to a data provider, select a data provider from the link list.
@@ -32,66 +33,77 @@ const Content: React.FC<IContentProps>
                                   setTimeout(() => selectElt.current?.focus());
                                 }}>
           <option key="prompt" value={""}>Select a data provider</option>
-            {unlinkedTiles.length > 0 &&
+            {unlinkedSharedModels.length > 0 &&
               <optgroup label="Link Tile">
-                {unlinkedTiles
-                  .map(tileInfo => <option key={tileInfo.id} value={tileInfo.id}>{tileInfo.title}</option>)}
+                {unlinkedSharedModels
+                  .map(m => <option key={m.id} value={m.id}>{labelFunction(m)}</option>)}
               </optgroup>
             }
-            {(unlinkedTiles.length > 0) && (linkedTiles.length > 0) &&
+            {(linkedSharedModels.length > 0) && (unlinkedSharedModels.length > 0) &&
               <option disabled>──────────────────────────────</option> }
-            {linkedTiles.length > 0 &&
+            {linkedSharedModels.length > 0 &&
                 <optgroup label="Unlink Tile">
-                  {linkedTiles
-                    .map(tileInfo => <option key={tileInfo.id} value={tileInfo.id}>{tileInfo.title}</option>)}
+                  {linkedSharedModels
+                    .map(m => <option key={m.id} value={m.id}>{labelFunction(m)}</option>)}
                 </optgroup>
             }
         </select>
       </>
-    );
+  );
 };
 
 interface IProps {
-  linkableTiles: ITypedTileLinkMetadata[];
+  sharedModels: SharedModelType[];
   model: ITileModel;
-  onLinkTile: (tileInfo: ITileLinkMetadata) => void;
-  onUnlinkTile: (tileInfo: ITileLinkMetadata) => void;
+  onLinkTile: (tileInfo: SharedModelType) => void;
+  onUnlinkTile: (tileInfo: SharedModelType) => void;
 }
 export const useLinkProviderTileDialog = ({
-  linkableTiles, model, onLinkTile, onUnlinkTile
+  sharedModels, model, onLinkTile, onUnlinkTile
 }: IProps) => {
   const tileTitle = model.computedTitle;
   const [selectValue, setSelectValue] = useState("");
-  const selectedTileInfo = linkableTiles.find(tile => tile.id === selectValue);
+  const selectedModel = sharedModels.find(m => m.id === selectValue);
+  const sharedModelManager = getSharedModelManager(model);
+  const currentTileModels = (sharedModelManager?.isReady) ? sharedModelManager.getTileSharedModels(model.content) : [];
+  const linkedSharedModels   = sharedModels.filter(m => currentTileModels.includes(m));
+  const unlinkedSharedModels = sharedModels.filter(m => !currentTileModels.includes(m));
 
   const handleClick = () => {
-    const tileInfo = linkableTiles.find(tile => tile.id === selectValue);
-    if (tileInfo) {
-      if (isLinkedToTile(model, tileInfo.id, tileInfo.type)) {
-        onUnlinkTile?.(tileInfo);
+    const chosen = sharedModels.find(m => m.id === selectValue);
+    if (chosen) {
+      if (linkedSharedModels.includes(chosen)) {
+        onUnlinkTile?.(chosen);
       } else {
-        onLinkTile?.(tileInfo);
+        onLinkTile?.(chosen);
       }
     }
   };
-  const unlinkedTiles = linkableTiles.filter(tileInfo => !isLinkedToTile(model, tileInfo.id, tileInfo.type));
-  const linkedTiles =
-    linkableTiles.filter(tileInfo => isLinkedToTile(model, tileInfo.id, tileInfo.type) && tileInfo.id !== model.id);
+
+  const labelFunction = (m: SharedModelType) => {
+    if (sharedModelManager?.isReady) {
+      return sharedModelManager.getSharedModelLabel(m);
+    } else {
+      return m.id;
+    }
+  };
+
   const [showModal, hideModal] = useCustomModal({
     className: "link-tile",
     Icon: LinkGraphIcon,
     title: "Link or Unlink Data Provider",
     Content,
-    contentProps: { unlinkedTiles, linkedTiles, selectValue, tileTitle, setSelectValue },
+    contentProps: { labelFunction, unlinkedSharedModels, linkedSharedModels,
+      selectValue, tileTitle, setSelectValue },
     buttons: [
       { label: "Cancel" },
-      { label: !isLinkedToTile(model, selectValue, selectedTileInfo?.type) ? "Link" : "Unlink",
+      { label: selectedModel && linkedSharedModels.includes(selectedModel) ? "Unlink" : "Link",
         isDefault: true,
         isDisabled: !selectValue,
         onClick: handleClick
       }
     ]
-  }, [linkableTiles]);
+  }, [sharedModels]);
 
   return [showModal, hideModal];
 };

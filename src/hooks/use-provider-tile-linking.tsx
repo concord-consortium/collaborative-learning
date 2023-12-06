@@ -1,21 +1,15 @@
 import { useCallback } from "react";
-
-import { ITileLinkMetadata } from "../models/tiles/tile-link-types";
 import { ITileModel } from "../models/tiles/tile-model";
 import { useLinkProviderTileDialog } from "./use-link-provider-tile-dialog";
-import { getTileContentById } from "../utilities/mst-utils";
-import { SharedDataSet } from "../models/shared/shared-data-set";
-import { useLinkableTiles } from "./use-linkable-tiles";
 import { isGraphModel } from "../plugins/graph/models/graph-model";
-import { SharedVariables } from "../plugins/shared-variables/shared-variables";
 import { getSharedModelManager } from "../models/tiles/tile-environment";
-import { getTileContentInfo } from "../models/tiles/tile-content-info";
+import { SharedModelType } from "../models/shared/shared-model";
 
 interface IProps {
   actionHandlers?: any;
   model: ITileModel;
   readOnly?: boolean;
-  includeVariableProviders?: boolean;
+  sharedModelTypes: string[];  // TODO should perhaps be SharedModelType[];
   allowMultipleGraphDatasets?: boolean;
 }
 
@@ -30,65 +24,59 @@ interface IProps {
  * @param props.actionHandlers - callback methods to handle linking and unlinking.
  *  Optional; default methods are provided.
  * @param props.readOnly - whether we are in a read-only context (default false)
- * @param props.includeVariableProviders - whether to allow linking to tiles that provide shared variables,
- *  in addition to tiles that provide a shared dataset (default false)
+ * @param props.sharedModelTypes - list of types of shared models to look for (as strings)
  * @param props.allowMultipleGraphDatasets - whether the dialog should allow multiple connections to an XY Plot tile.
  *  (default false)
  *
  * @returns a boolean indicating whether any providers are available, and a function to open the dialog.
  */
 export const useProviderTileLinking = ({
-  actionHandlers, model, readOnly, includeVariableProviders, allowMultipleGraphDatasets
+  actionHandlers, model, readOnly, sharedModelTypes, allowMultipleGraphDatasets
 }: IProps) => {
   const {handleRequestTileLink, handleRequestTileUnlink} = actionHandlers || {};
-  const { providers, variableProviders } = useLinkableTiles({ model });
-  const isLinkEnabled = (providers.length > 0 || (!!includeVariableProviders && variableProviders.length > 0));
-
-  const linkTile = useCallback((tileInfo: ITileLinkMetadata) => {
-    const providerTile = getTileContentById(model.content, tileInfo.id);
-    if (!readOnly && providerTile) {
-      const sharedModelManager = getSharedModelManager(providerTile);
-      if (sharedModelManager?.isReady) {
-        // TODO: this is temporary while we are working on getting Graph to work with multiple datasets
-        // Once multiple datasets are fully implemented, we should look at the "consumesMultipleDataSets"
-        // setting for the tile type; but for now graph has to allow multiples while not having that be the default.
-        if (!allowMultipleGraphDatasets && isGraphModel(model.content)) {
-          for (const shared of sharedModelManager.getTileSharedModels(model.content)) {
-            console.log('Removing existing shared model before adding a new one: ', shared);
-            sharedModelManager.removeTileSharedModel(model.content, shared);
-          }
-        }
-        const contentInfo = getTileContentInfo(providerTile.type);
-        const sharedModelType = contentInfo?.isVariableProvider ? SharedVariables : SharedDataSet;
-        const sharedModel = sharedModelManager.findFirstSharedModelByType(sharedModelType, tileInfo.id);
-        sharedModel && sharedModelManager.addTileSharedModel(model.content, sharedModel);
-      }
-    }
-  }, [readOnly, model, allowMultipleGraphDatasets]);
-
-  const unlinkTile = useCallback((tileInfo: ITileLinkMetadata) => {
-    const linkedTile = getTileContentById(model.content, tileInfo.id);
-    if (!readOnly && linkedTile) {
-      const sharedModelManager = getSharedModelManager(linkedTile);
-      if (sharedModelManager?.isReady) {
-        const contentInfo = getTileContentInfo(linkedTile.type);
-        const sharedModelType = contentInfo?.isVariableProvider ? SharedVariables : SharedDataSet;
-        const sharedModel = sharedModelManager.findFirstSharedModelByType(sharedModelType, tileInfo.id);
-        if (sharedModel) {
-          sharedModelManager.removeTileSharedModel(model.content, sharedModel);
+  const sharedModelManager = getSharedModelManager(model);
+  const sharedModels: SharedModelType[] = [];
+  if (sharedModelManager?.isReady) {
+    for (const type of sharedModelTypes) {
+      for (const m of sharedModelManager.getSharedModelsByType(type)) {
+        // Ignore any shared model that has no tile attached to it
+        // (this is not necessary but keeps us compatible with previous behavior)
+        if (sharedModelManager.getSharedModelTiles(m).length > 0) {
+          sharedModels.push(m);
         }
       }
     }
-  }, [readOnly, model]);
+  }
+
+  const isLinkEnabled = sharedModels.length > 0;
+
+  const linkTile = useCallback((sharedModel: SharedModelType) => {
+    if (!readOnly && sharedModelManager?.isReady) {
+      // TODO: this is temporary while we are working on getting Graph to work with multiple datasets
+      // Once multiple datasets are fully implemented, we should look at the "consumesMultipleDataSets"
+      // setting for the tile type; but for now graph has to allow multiples while not having that be the default.
+      if (!allowMultipleGraphDatasets && isGraphModel(model.content)) {
+        for (const shared of sharedModelManager.getTileSharedModels(model.content)) {
+          console.log('Removing existing shared model before adding a new one: ', shared);
+          sharedModelManager.removeTileSharedModel(model.content, shared);
+        }
+      }
+      sharedModelManager.addTileSharedModel(model.content, sharedModel);
+    }
+  }, [readOnly, sharedModelManager, model.content, allowMultipleGraphDatasets]);
+
+  const unlinkTile = useCallback((sharedModel: SharedModelType) => {
+    if (!readOnly && sharedModelManager?.isReady) {
+      sharedModelManager.removeTileSharedModel(model.content, sharedModel);
+    }
+  }, [readOnly, sharedModelManager, model.content]);
 
   const onLinkTile = handleRequestTileLink || linkTile;
   const onUnlinkTile = handleRequestTileUnlink || unlinkTile;
 
-  const linkableTiles = includeVariableProviders ? providers.concat(variableProviders) : providers;
-
   const [showLinkTileDialog] =
           useLinkProviderTileDialog({
-            linkableTiles, model, onLinkTile, onUnlinkTile
+            sharedModels, model, onLinkTile, onUnlinkTile
           });
 
   return { isLinkEnabled, showLinkTileDialog };
