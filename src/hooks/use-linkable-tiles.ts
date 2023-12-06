@@ -9,7 +9,7 @@ export const useLinkableTiles = ({ model }: IUseLinkableTilesProps) => {
   // See document-scope.md for notes about how linkable tiles
   // are accessed here.
   const documentContent = getDocumentContentFromNode(model);
-  const { providers, consumers, variableProviders } = documentContent?.getLinkableTiles() || kNoLinkableTiles;
+  const { providers, consumers } = documentContent?.getLinkableTiles() || kNoLinkableTiles;
 
   // add default title if there isn't a title
   const countsOfType = {} as Record<string, number>;
@@ -24,7 +24,6 @@ export const useLinkableTiles = ({ model }: IUseLinkableTilesProps) => {
 
   return {
     providers: providers.map(addDefaultTitle),
-    consumers: consumers.map(addDefaultTitle),
-    variableProviders: variableProviders.map(addDefaultTitle)
+    consumers: consumers.map(addDefaultTitle)
   };
 };

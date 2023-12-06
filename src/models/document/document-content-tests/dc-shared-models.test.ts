@@ -705,24 +705,11 @@ Object {
   });
 
   it("queries for consumer and provider tiles", () => {
-    const { consumers, providers, variableProviders } = documentContent.getLinkableTiles();
+    const { consumers, providers } = documentContent.getLinkableTiles();
     expect(providers).toHaveLength(1);
     expect(providers[0].type).toEqual("Table");
     expect(consumers).toHaveLength(2);
     expect(consumers.map(t => t.type).sort()).toEqual(["Geometry", "Table"]);
-    expect(variableProviders).toHaveLength(0);
   });
-
-  it("queries for variable provider tiles", () => {
-    documentContent.addTile("diagram");
-    const { consumers, providers, variableProviders } = documentContent.getLinkableTiles();
-    expect(providers).toHaveLength(1);
-    expect(providers[0].type).toEqual("Table");
-    expect(consumers).toHaveLength(2);
-    expect(consumers.map(t => t.type).sort()).toEqual(["Geometry", "Table"]);
-    expect(variableProviders).toHaveLength(1);
-    expect(variableProviders[0].type).toEqual("Diagram");
-  });
-
 
 });

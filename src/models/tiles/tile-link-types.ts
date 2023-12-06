@@ -15,6 +15,5 @@ export interface ITypedTileLinkMetadata extends ITileLinkMetadata {
 export interface ILinkableTiles {
   providers: ITypedTileLinkMetadata[];
   consumers: ITypedTileLinkMetadata[];
-  variableProviders: ITypedTileLinkMetadata[];
 }
-export const kNoLinkableTiles: ILinkableTiles = { providers: [], consumers: [], variableProviders: [] };
+export const kNoLinkableTiles: ILinkableTiles = { providers: [], consumers: [] };
