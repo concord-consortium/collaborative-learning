@@ -5,6 +5,7 @@ import { DocumentContentModelType } from "./document-content";
 import { SharedModelType } from "../shared/shared-model";
 import { IDragSharedModelItem, ISharedModelManager, SharedModelUnion } from "../shared/shared-model-manager";
 import { ITileModel, TileModel } from "../tiles/tile-model";
+import { getTileContentInfo } from "../tiles/tile-content-info";
 
 function getTileModel(tileContentModel: IAnyStateTreeNode) {
   if (!hasParentOfType(tileContentModel, TileModel)) {
@@ -37,9 +38,14 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
   }
 
   getSharedModelLabel(model: SharedModelType) {
-    // To label a model, list the titles of all the tiles that use it (removing dups).
-    // If no tiles use it, default to something based on the ID.
-    const tiles = this.getSharedModelTiles(model);
+    // To label a model, list the titles of all the provider-type tiles that are linked to it.
+    // If no tiles are linked, default to something based on the ID.
+    function canProvide(tile: ITileModel) {
+      const info = getTileContentInfo(tile.content.type);
+      return info?.isDataProvider || info?.isVariableProvider;
+    }
+
+    const tiles = this.getSharedModelTiles(model).filter(tile => canProvide(tile));
     const titles = uniq(tiles.map(t => t.computedTitle));
     return titles.length > 0 ? titles.join(", ") : `${model.type} ${model.id}`;
   }
