@@ -1,9 +1,9 @@
 import React from "react";
+import { observer } from "mobx-react";
 import { getSharedModelManager } from "../../../../models/tiles/tile-environment";
 import { ITileModel } from "../../../../models/tiles/tile-model";
 import { SharedVariables } from "../../../shared-variables/shared-variables";
 import { useTileModelContext } from "../../../../components/tiles/hooks/use-tile-model-context";
-import { observer } from "mobx-react";
 
 // TODO: The presence of the Adornment should actually be used to control showing this legend.
 function hasLinkedSharedVariables(tileModel: ITileModel) {
