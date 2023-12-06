@@ -1,4 +1,5 @@
 import { UIModel, UIModelType, UIDialogModelType } from "./ui";
+import { PersistentUIModel, PersistentUIModelType } from "./persistent-ui";
 import { ProblemWorkspace, LearningLogWorkspace } from "./workspace";
 import { TileModel } from "../tiles/tile-model";
 import { TextContentModel } from "../tiles/text/text-content";
@@ -9,24 +10,27 @@ registerTileTypes(["Text"]);
 
 describe("ui model", () => {
   let ui: UIModelType;
+  let persistentUI: PersistentUIModelType;
 
   beforeEach(() => {
     ui = UIModel.create({
-      problemWorkspace: {
-        type: ProblemWorkspace,
-        mode: "1-up"
-      },
       learningLogWorkspace: {
         type: LearningLogWorkspace,
         mode: "1-up"
       },
+    });
+    persistentUI = PersistentUIModel.create({
+      problemWorkspace: {
+        type: ProblemWorkspace,
+        mode: "1-up"
+      }
     });
   });
 
   it("has default values", () => {
     expect(ui.error).toBe(null);
     expect(ui.showDemoCreator).toBe(false);
-    expect(ui.showTeacherContent).toBe(true);
+    expect(persistentUI.showTeacherContent).toBe(true);
     expect(ui.dialog).toBeUndefined();
   });
 
@@ -34,10 +38,6 @@ describe("ui model", () => {
     ui = UIModel.create({
       showDemoCreator: true,
       error: "test",
-      problemWorkspace: {
-        type: ProblemWorkspace,
-        mode: "1-up"
-      },
       learningLogWorkspace: {
         type: LearningLogWorkspace,
         mode: "1-up"
@@ -80,11 +80,11 @@ describe("ui model", () => {
   });
 
   it("allows divider position to be set", () => {
-    expect(ui.navTabContentShown).toBe(true);
-    expect(ui.workspaceShown).toBe(true);
-    ui.setDividerPosition(0);
-    expect(ui.navTabContentShown).toBe(false);
-    expect(ui.workspaceShown).toBe(true);
+    expect(persistentUI.navTabContentShown).toBe(true);
+    expect(persistentUI.workspaceShown).toBe(true);
+    persistentUI.setDividerPosition(0);
+    expect(persistentUI.navTabContentShown).toBe(false);
+    expect(persistentUI.workspaceShown).toBe(true);
   });
 
   it("allows alert dialogs", () => {

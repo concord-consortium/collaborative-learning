@@ -12,7 +12,7 @@ import { DeleteButton } from "./delete-button";
 import { IToolbarButtonProps, ToolbarButtonComponent } from "./toolbar-button";
 import { EditableTileApiInterfaceRefContext } from "./tiles/tile-api";
 import { kDragTileCreate  } from "./tiles/tile-component";
-import { kSparrowAnnotationMode } from "../models/stores/ui";
+import { kSparrowAnnotationMode } from "../models/stores/persistent-ui";
 
 import "./toolbar.scss";
 
@@ -86,12 +86,12 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     const updateToolButton = (toolButton: IToolbarButtonModel) => {
       if (toolButton.id === "hide-annotations") {
         // Update hide annotation button's icon and title based on current annotation visibility
-        const { ui } = this.stores;
+        const { persistentUI } = this.stores;
         const appIcons = toolButton.env?.appIcons;
         toolButton.setIcon(
-          appIcons?.[ui.showAnnotations ? "icon-hide-annotations-tool" : "icon-show-annotations-tool"]
+          appIcons?.[persistentUI.showAnnotations ? "icon-hide-annotations-tool" : "icon-show-annotations-tool"]
         );
-        toolButton.setTitle(ui.showAnnotations ? "Hide Annotations" : "Show Annotations");
+        toolButton.setTitle(persistentUI.showAnnotations ? "Hide Annotations" : "Show Annotations");
       }
     };
     const renderToolButtons = (toolbarModel: IToolbarModel) => {
@@ -222,20 +222,20 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleSparrow() {
-    const { ui } = this.stores;
+    const { ui, persistentUI } = this.stores;
     if (ui.annotationMode === kSparrowAnnotationMode) {
       ui.setAnnotationMode();
     } else {
       ui.setAnnotationMode("sparrow");
-      ui.setShowAnnotations(true);
+      persistentUI.setShowAnnotations(true);
       ui.setSelectedTile();
     }
   }
 
   private handleHideAnnotations() {
-    const { ui } = this.stores;
+    const { ui, persistentUI } = this.stores;
     ui.setAnnotationMode();
-    ui.setShowAnnotations(!ui.showAnnotations);
+    persistentUI.setShowAnnotations(!persistentUI.showAnnotations);
   }
 
   private handleUndo() {

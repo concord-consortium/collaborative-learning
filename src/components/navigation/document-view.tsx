@@ -3,7 +3,7 @@ import { observer } from "mobx-react";
 import { useQueryClient } from "react-query";
 import classNames from "classnames";
 import { useAppConfig, useLocalDocuments, useProblemStore, useStores,
-  useUIStore, useUserStore, useClassStore } from "../../hooks/use-stores";
+  usePersistentUIStore, useUserStore, useClassStore, useUIStore } from "../../hooks/use-stores";
 import { useUserContext } from "../../hooks/use-user-context";
 import { ISubTabSpec, NavTabModelType } from "src/models/view/nav-tabs";
 import { DocumentType } from "../../models/document/document-types";
@@ -21,14 +21,14 @@ interface IProps {
 }
 //TODO: Need to refactor this if we want to deploy to all tabs
 export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IProps) {
-  const ui = useUIStore();
+  const persistentUI = usePersistentUIStore();
   const store = useStores();
   const appConfigStore = useAppConfig();
   const context = useUserContext();
   const queryClient = useQueryClient();
   const documents = useLocalDocuments();
   const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
-  const tabState = navTabSpec && ui.tabs.get(navTabSpec?.tab);
+  const tabState = navTabSpec && persistentUI.tabs.get(navTabSpec?.tab);
   const openDocumentKey = tabState?.openDocuments.get(subTab.label) || "";
   const openDocument = store.documents.getDocument(openDocumentKey) ||
     store.networkDocuments.getDocument(openDocumentKey);
@@ -78,24 +78,24 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
     // we make the secondary document primary, and close the secondary document.
     // If there is a primary and secondary document open, and the user clicks on a third document,
     // we close the secondary document, and make the open the third document as the secondary document.
-    if (ui.focusDocument === document.key) {
-      if (ui.focusSecondaryDocument) {
-        ui.openSubTabDocument(tabSpec.tab, subTab.label, ui.focusSecondaryDocument);
-        ui.closeSubTabSecondaryDocument(tabSpec.tab, subTab.label);
+    if (persistentUI.focusDocument === document.key) {
+      if (persistentUI.focusSecondaryDocument) {
+        persistentUI.openSubTabDocument(tabSpec.tab, subTab.label, persistentUI.focusSecondaryDocument);
+        persistentUI.closeSubTabSecondaryDocument(tabSpec.tab, subTab.label);
       } else {
-        ui.closeSubTabDocument(tabSpec.tab, subTab.label);
+        persistentUI.closeSubTabDocument(tabSpec.tab, subTab.label);
       }
     } else if (tabState?.openDocuments.get("Starred")) {
-      if (ui.focusSecondaryDocument === document.key) {
-        ui.closeSubTabSecondaryDocument(tabSpec.tab, "Starred");
+      if (persistentUI.focusSecondaryDocument === document.key) {
+        persistentUI.closeSubTabSecondaryDocument(tabSpec.tab, "Starred");
       } else {
-        ui.openSubTabSecondaryDocument(tabSpec.tab, "Starred", document.key);
+        persistentUI.openSubTabSecondaryDocument(tabSpec.tab, "Starred", document.key);
       }
     } else {
       if (!document.hasContent && document.isRemote) {
         loadDocumentContent(document);
       }
-      ui.openSubTabDocument(tabSpec.tab, subTab.label, document.key);
+      persistentUI.openSubTabDocument(tabSpec.tab, subTab.label, document.key);
       const logEvent = document.isRemote
         ? LogEventName.VIEW_SHOW_TEACHER_NETWORK_COMPARISON_DOCUMENT
         : LogEventName.VIEW_SHOW_COMPARISON_DOCUMENT;
@@ -126,9 +126,9 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
       const newDocKey = starredDocuments.at(newDocIndex)?.key;
 
       if (secondary) {
-        newDocKey && ui.openSubTabSecondaryDocument(tabSpec.tab, subTab.label, newDocKey);
+        newDocKey && persistentUI.openSubTabSecondaryDocument(tabSpec.tab, subTab.label, newDocKey);
       } else {
-        newDocKey && ui.openSubTabDocument(tabSpec.tab, subTab.label, newDocKey);
+        newDocKey && persistentUI.openSubTabDocument(tabSpec.tab, subTab.label, newDocKey);
       }
     }
   };
@@ -205,6 +205,7 @@ interface IDocumentAreaProps {
 const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocument,
     hasSecondaryDocument, hideLeftFlipper, hideRightFlipper, onChangeDocument}: IDocumentAreaProps) => {
   const ui = useUIStore();
+  const persistentUI = usePersistentUIStore();
   const user = useUserStore();
   const appConfig = useAppConfig();
   const classStore = useClassStore();
@@ -219,7 +220,7 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocum
   const displayTitle = getDisplayTitle(openDocument);
 
   function handleEditClick(document: DocumentModelType) {
-    ui.problemWorkspace.setPrimaryDocument(document);
+    persistentUI.problemWorkspace.setPrimaryDocument(document);
   }
   // TODO: this edit button is confusing when the history is being viewed. It
   // opens the original document for editing, not some old version of the
