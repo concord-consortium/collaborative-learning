@@ -19,10 +19,10 @@ import { useGraphSettingsContext } from "../hooks/use-graph-settings-context";
 import graphVars from "./graph.scss";
 
 interface IAttributeLabelProps {
-  place: GraphPlace
-  onChangeAttribute?: (place: GraphPlace, dataSet: IDataSet, attrId: string) => void
-  onRemoveAttribute?: (place: GraphPlace, attrId: string) => void
-  onTreatAttributeAs?: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void
+  place: GraphPlace;
+  onChangeAttribute?: (place: GraphPlace, dataSet: IDataSet, attrId: string) => void;
+  onRemoveAttribute?: (place: GraphPlace, attrId: string) => void;
+  onTreatAttributeAs?: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void;
 }
 
 export const AttributeLabel = observer(

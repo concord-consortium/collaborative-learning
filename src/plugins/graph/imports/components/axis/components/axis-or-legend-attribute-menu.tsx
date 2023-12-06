@@ -4,7 +4,6 @@ import t from "../../../utilities/translation/translate";
 import {GraphPlace} from "../../axis-graph-shared";
 import { graphPlaceToAttrRole } from "../../../../graph-types";
 import { useDataConfigurationContext } from "../../../../hooks/use-data-configuration-context";
-import { useDataSetContext } from "../../../hooks/use-data-set-context";
 import { IUseDraggableAttribute, useDraggableAttribute } from "../../../hooks/use-drag-drop";
 import { useInstanceIdContext } from "../../../hooks/use-instance-id-context";
 import { useOutsidePointerDown } from "../../../hooks/use-outside-pointer-down";
@@ -15,18 +14,18 @@ import { isSetAttributeNameAction } from "../../../../../../models/data/data-set
 import { useGraphSettingsContext } from "../../../../hooks/use-graph-settings-context";
 
 interface IProps {
-  place: GraphPlace
-  attributeId?: string
+  place: GraphPlace;
+  attributeId?: string;
   // element to be mirrored
-  target: SVGGElement | HTMLElement | null
+  target: SVGGElement | HTMLElement | null;
   // element to be used for positioning/portal-ing the button that triggers the menu
-  parent: HTMLElement | null
+  parent: HTMLElement | null;
   // element to be used for portal-ing the popup menu list
-  portal: HTMLElement | null
-  onChangeAttribute: (place: GraphPlace, dataSet: IDataSet, attrId: string, oldAttrId?: string) => void
-  onRemoveAttribute: (place: GraphPlace, attrId: string) => void
-  onTreatAttributeAs: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void
-  onOpenClose?: (isOpen: boolean) => void
+  portal: HTMLElement | null;
+  onChangeAttribute: (place: GraphPlace, dataSet: IDataSet, attrId: string, oldAttrId?: string) => void;
+  onRemoveAttribute: (place: GraphPlace, attrId: string) => void;
+  onTreatAttributeAs: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void;
+  onOpenClose?: (isOpen: boolean) => void;
 }
 
 const removeAttrItemLabelKeys: Record<string, string> = {
@@ -40,8 +39,8 @@ const removeAttrItemLabelKeys: Record<string, string> = {
 
 export const AxisOrLegendAttributeMenu = ({ place, attributeId, target, parent, portal, onOpenClose,
                                       onChangeAttribute, onRemoveAttribute, onTreatAttributeAs }: IProps) => {
-  const data = useDataSetContext();
   const dataConfig = useDataConfigurationContext();
+  const data = dataConfig?.dataset;
   const yAttributesPlotted = dataConfig?.yAttributeDescriptions.map((a)=>a.attributeID);
 
   const role = graphPlaceToAttrRole[place];

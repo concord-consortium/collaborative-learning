@@ -1,22 +1,25 @@
-import React, { useContext, useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { observer } from "mobx-react";
-import {AttributeType} from "../../../../models/data/attribute";
+import { AttributeType } from "../../../../models/data/attribute";
 import { GraphPlace } from "../../imports/components/axis-graph-shared";
-import { SimpleAttributeLabel } from "../simple-attribute-label";
 import { useGraphLayoutContext } from "../../models/graph-layout";
 import { IDataSet } from "../../../../models/data/data-set";
-import { useDataConfigurationContext } from "../../hooks/use-data-configuration-context";
-import { AddSeriesButton } from "./add-series-button";
+import { DataConfigurationContext } from "../../hooks/use-data-configuration-context";
 import { useInstanceIdContext } from "../../imports/hooks/use-instance-id-context";
-import { kGraphDefaultHeight } from "../../graph-types";
-import { ReadOnlyContext } from "../../../../components/document/read-only-context";
+import { axisPlaceToAttrRole, kGraphDefaultHeight } from "../../graph-types";
+import { useGraphModelContext } from "../../models/graph-model";
+import { LayerLegend } from "./layer-legend";
+import { IGraphLayerModel } from "../../models/graph-layer-model";
+import { SimpleAttributeLabel } from "../simple-attribute-label";
 import { VariableFunctionLegend } from "./variable-function-legend";
 
-export const kMultiLegendMenuHeight = 30;
-export const kMultiLegendPadding = 20;
-export const kMultiLegendVerticalGap = 10;
-
 import "./multi-legend.scss";
+
+const kMultiLegendMenuHeight = 30;
+const kMultiLegendVerticalPadding = 10;
+const kMultiLegendVerticalGap = 8;
+const kMultiLegendLabelHeight = 28;
+const kMultiLegendHRuleHeight = 2;
 
 interface IMultiLegendProps {
   graphElt: HTMLDivElement | null;
@@ -32,12 +35,8 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
   const legendBounds = layout.computedBounds.legend;
   const transform = `translate(${legendBounds.left}, ${legendBounds.top})`;
   const multiLegendRef = useRef<HTMLDivElement>(null);
-  const dataConfiguration = useDataConfigurationContext();
+  const graphModel = useGraphModelContext();
   const instanceId = useInstanceIdContext();
-
-  const yAttributeCount = dataConfiguration?.yAttributeDescriptions.length || 0;
-
-  const readOnly = useContext(ReadOnlyContext);
 
   useEffect(() =>{
     const legendTransform = `translateY(${-layout.computedBounds.legend.height}px)`;
@@ -47,55 +46,65 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
     multiLegendRef.current.style.height = `${legendBounds.height}px`;
   }, [layout.computedBounds.legend.height, layout.graphWidth, legendBounds, transform]);
 
-  useEffect(function RespondToLayoutChange() {
-    const legendRows = Math.ceil((yAttributeCount+1)/2);
-    const legendHeight = kMultiLegendPadding * 2
-      + kMultiLegendMenuHeight  * legendRows
-      + kMultiLegendVerticalGap * (legendRows-1);
-    layout.setDesiredExtent("legend", legendHeight);
-    onRequestRowHeight?.(instanceId, kGraphDefaultHeight + legendHeight);
-  }, [instanceId, layout, onRequestRowHeight, yAttributeCount]);
-
-  let legendItems = [] as React.ReactNode[];
-  if (dataConfiguration) {
-    const yAttributes = dataConfiguration.yAttributeDescriptions;
-
-    legendItems = yAttributes.map((description, index) =>
-      <SimpleAttributeLabel
-        key={description.attributeID}
-        place={'left'}
-        index={index}
-        attrId={description.attributeID}
-        onChangeAttribute={onChangeAttribute}
-        onRemoveAttribute={onRemoveAttribute}
-        onTreatAttributeAs={onTreatAttributeAs}
-      />);
-    if (!readOnly) {
-      legendItems.push(<AddSeriesButton/>);
-    }
+  function heightOfLayerLegend(layer: IGraphLayerModel) {
+    // Menu for each Y attribute, plus one for "Add series" button
+    const menuCount = (layer.config.yAttributeDescriptions.length || 0) + 1;
+    const legendRows = Math.ceil(menuCount/2);
+    return kMultiLegendHRuleHeight
+      + kMultiLegendVerticalPadding * 3 // above title, below title, below all.
+      + kMultiLegendLabelHeight
+      + kMultiLegendMenuHeight * legendRows
+      + kMultiLegendVerticalGap * legendRows * 2; // above each row
   }
-  // Make rows with two legend items in each row
-  const legendItemRows = [] as React.ReactNode[];
-  let i=0;
-  while(legendItems.length) {
-    legendItemRows.push(
-      <div key={i++} className="legend-row">
-        <div className="legend-cell-1">
-          {legendItems?.shift()}
-        </div>
-        <div className="legend-cell-2">
-          {legendItems?.shift() || null}
-        </div>
+  // Total height is height of X-axis menus, plus sum of all the layer sections
+  const totalHeight = kMultiLegendMenuHeight + kMultiLegendVerticalPadding
+    + graphModel.layers.reduce((prev, layer)=>{ return prev + heightOfLayerLegend(layer);}, 0);
+
+  useEffect(function RespondToLayoutChange() {
+    layout.setDesiredExtent("legend", totalHeight);
+    onRequestRowHeight?.(instanceId, kGraphDefaultHeight + totalHeight);
+  }, [instanceId, layout, onRequestRowHeight, totalHeight]);
+
+  const layerLegends = graphModel.layers.map((layer) => {
+    return (
+      <DataConfigurationContext.Provider key={layer.id} value={layer.config}>
+        <LayerLegend
+          onChangeAttribute={onChangeAttribute}
+          onRemoveAttribute={onRemoveAttribute}
+          onTreatAttributeAs={onTreatAttributeAs}
+        />
+      </DataConfigurationContext.Provider>);
+    }
+  );
+
+  const thisRole = axisPlaceToAttrRole.bottom;
+
+  const xMenus = graphModel.layers.map((layer) => {
+    const attrId = layer.config?.attributeID(thisRole);
+    if (!attrId) return;
+
+    return (
+      <div className="x-axis-item" key={layer.id}>
+        <DataConfigurationContext.Provider value={layer.config}>
+          <SimpleAttributeLabel
+            place="bottom"
+            attrId={attrId}
+            onChangeAttribute={onChangeAttribute}
+            onRemoveAttribute={onRemoveAttribute}
+            onTreatAttributeAs={onTreatAttributeAs}
+          />
+        </DataConfigurationContext.Provider>
       </div>
     );
-  }
+  });
 
   return (
     <div className="multi-legend" ref={ multiLegendRef }>
+      <div className="x-axis-menu">
+        { xMenus }
+      </div>
+      { layerLegends }
       <VariableFunctionLegend/>
-      {legendItemRows}
     </div>
   );
 });
-
-// MultiLegend.displayName = "MultiLegend";

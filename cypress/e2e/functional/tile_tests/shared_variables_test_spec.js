@@ -24,7 +24,7 @@ context('Shared Variables', function () {
         let title = $canvasTitle.text().trim();
 
         const addCard = (last) => {
-          diagramToolTile.getDiagramToolbarButton("button-insert-variable").click();
+          clueCanvas.clickToolbarButton("diagram", "insert-variable");
           if (last) {
             cy.get(".custom-modal .variable-chip").last().click();
           } else {
@@ -64,6 +64,7 @@ context('Shared Variables', function () {
         textToolTile.getVariableChip().should("contain", textTileVUnit1);
         textToolTile.getTextTile().last().should('contain', ' Hello World!');
         // Make sure the diagram tile now has a card with variable name.
+        diagramToolTile.getDiagramTile().click();
         addLastCard();
         cy.get('.primary-workspace .canvas-area .diagram-tool [data-testid="quantity-node"]')
           .findByDisplayValue(textTileVName1)
