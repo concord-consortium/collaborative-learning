@@ -31,7 +31,7 @@ export const SharedVariables = SharedModel.named("SharedVariables")
     // leading to unexpected behavior. The noUndo flag is available to prevent a second undo step by
     // triggering a call to withoutUndo here when it is set to true.
     //
-    // In the case of the text tile, for example, adding a new variable would add undo steps for both 
+    // In the case of the text tile, for example, adding a new variable would add undo steps for both
     // the related call to setSlate and to addAndInsertVariable. The undo step for setSlate would be
     // added before the one for addAndInsertVariable. So after adding a new variable to a text tile
     // and then clicking undo, the variable was deleted but its chip in the text editor was replaced
@@ -49,6 +49,17 @@ export const SharedVariables = SharedModel.named("SharedVariables")
     self.addVariable(variable);
     return variable;
   },
+  getFunctionValue(independentValue: number, independentVariableName: string, dependentVariableName: string) {
+    const independentVariable = self.variables.find(variable => variable.name === independentVariableName);
+    const dependentVariable = self.variables.find(variable => variable.name === dependentVariableName);
+    if (independentVariable && dependentVariable) {
+      // const startingIndependentValue = independentVariable.value;
+      // independentVariable.setValue(independentValue);
+      const dependentValue = dependentVariable.computedValue;
+      // independentVariable.setValue(startingIndependentValue);
+      return dependentValue;
+    }
+  }
 }))
 .views(self => ({
   getVariables() {

@@ -342,22 +342,14 @@ export const GraphModel = TileContentModel
       if (smm && smm.isReady) {
         const sharedVariableModels = smm.getTileSharedModelsByType(self, SharedVariables);
         if (sharedVariableModels.length > 0) {
-          const sharedVariables = sharedVariableModels[0] as SharedVariablesType;
-          const variables = sharedVariables.getVariables();
-          const xVariable = variables.find(variable => variable.name === "x");
-          const yVariable = variables.find(variable => variable.name === "y");
-          if (xVariable && yVariable) {
-            if (x <= .9) {
-              console.log(`OOO plotting`, x);
-            } else if (x >= 2.298) {
-              console.log(` OO plotting`, x);
-            }
-            // const startingX = xVariable.value;
-            // xVariable.setValue(x);
-            const yValue = yVariable.computedValue;
-            // xVariable.setValue(startingX);
-            if (yValue !== undefined) return yValue;
+          if (x <= .9) {
+            console.log(`OOO plotting`, x);
+          } else if (x >= 2.298) {
+            console.log(` OO plotting`, x);
           }
+          const sharedVariables = sharedVariableModels[0] as SharedVariablesType;
+          const yValue = sharedVariables.getFunctionValue(x, "x", "y");
+          if (yValue !== undefined) return yValue;
         }
       }
       return x ** 2;
