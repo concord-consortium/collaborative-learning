@@ -1,31 +1,25 @@
 import React from "react";
 import { observer } from "mobx-react";
 import { getSharedModelManager } from "../../../../models/tiles/tile-environment";
-import { ITileModel } from "../../../../models/tiles/tile-model";
 import { SharedVariables } from "../../../shared-variables/shared-variables";
 import { useTileModelContext } from "../../../../components/tiles/hooks/use-tile-model-context";
 
-// TODO: The presence of the Adornment should actually be used to control showing this legend.
-function hasLinkedSharedVariables(tileModel: ITileModel) {
-  const smm = getSharedModelManager(tileModel);
-  if (smm?.isReady) {
-    const sharedVars = smm.findFirstSharedModelByType(SharedVariables, tileModel?.id);
-    if (sharedVars) return true;
-  }
-  return false;
-}
+
 
 /**
  * XY Plot legend component that will control variables-based adornment.
  * Just a stub for now.
+ *
+ * TODO: The presence of the Adornment should actually be used to control showing the legend.
  */
 export const VariableFunctionLegend = observer(function() {
-
+  console.log('running');
   const { tile } = useTileModelContext();
-  const hasSharedVariables = tile && hasLinkedSharedVariables(tile);
+  const smm = getSharedModelManager(tile);
+  const sharedVars = (smm?.isReady) ? smm.findFirstSharedModelByType(SharedVariables, tile?.id): undefined;
 
-  if (hasSharedVariables) {
-    return (<p>Shared variables are attached</p>);
+  if (sharedVars) {
+    return (<p>Variables from: <strong>{smm?.getSharedModelLabel(sharedVars)}</strong></p>);
   } else {
     return null;
   }
