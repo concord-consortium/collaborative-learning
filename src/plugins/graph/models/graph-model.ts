@@ -32,6 +32,8 @@ import { GraphLayerModel } from "./graph-layer-model";
 import { isSharedDataSet, SharedDataSet } from "../../../models/shared/shared-data-set";
 import { DataConfigurationModel } from "./data-configuration-model";
 import { PlottedFunctionAdornmentModel } from "../adornments/plotted-function/plotted-function-adornment-model";
+import { kSharedVariablesID, SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
+import { kPlottedFunctionType } from "../adornments/plotted-function/plotted-function-adornment-types";
 
 export interface GraphProperties {
   axes: Record<string, IAxisModelUnion>
@@ -334,6 +336,31 @@ export const GraphModel = TileContentModel
       for (const layer of self.layers) {
         layer.clearAutoAssignedAttributes();
       }
+    },
+    plotFunction(x: number) {
+      const smm = getSharedModelManager(self);
+      if (smm && smm.isReady) {
+        const sharedVariableModels = smm.getTileSharedModelsByType(self, SharedVariables);
+        if (sharedVariableModels.length > 0) {
+          const sharedVariables = sharedVariableModels[0] as SharedVariablesType;
+          const variables = sharedVariables.getVariables();
+          const xVariable = variables.find(variable => variable.name === "x");
+          const yVariable = variables.find(variable => variable.name === "y");
+          if (xVariable && yVariable) {
+            if (x <= .9) {
+              console.log(`OOO plotting`, x);
+            } else if (x >= 2.298) {
+              console.log(` OO plotting`, x);
+            }
+            // const startingX = xVariable.value;
+            // xVariable.setValue(x);
+            const yValue = yVariable.computedValue;
+            // xVariable.setValue(startingX);
+            if (yValue !== undefined) return yValue;
+          }
+        }
+      }
+      return x ** 2;
     }
   }))
   .actions(self => ({
@@ -448,6 +475,53 @@ export const GraphModel = TileContentModel
           }
         ));
       }
+
+      // Display a plotted function when this is linked to a SharedVariableModel
+      addDisposer(self, reaction(
+        () => {
+          const smm = getSharedModelManager(self);
+          let sharedVariableModels;
+          if (smm?.isReady) {
+            sharedVariableModels = smm.getTileSharedModelsByType(self, SharedVariables);
+          }
+          return sharedVariableModels;
+        },
+        (sharedVariableModels) => {
+          console.log(`ooo Changing plotted functions`, sharedVariableModels?.length);
+          if (sharedVariableModels && sharedVariableModels.length > 0) {
+            const plottedFunctionAdornment = PlottedFunctionAdornmentModel.create();
+            plottedFunctionAdornment.addPlottedFunction(self.plotFunction);
+              // getPlottedFunction(sharedVariableModels[0] as SharedVariablesType));
+            self.showAdornment(plottedFunctionAdornment);
+            console.log(` oo displaying`);
+          } else {
+            self.hideAdornment(kPlottedFunctionType);
+            console.log(` oo hiding`);
+          }
+        }
+      ));
+
+      // Link to any SharedVariableModel in the document
+      console.log(`xxx Adding shared model disposer`);
+      addDisposer(self, reaction(
+        () => {
+          const smm = getSharedModelManager(self);
+          const isReady = smm?.isReady;
+          const sharedVariableModels = isReady && smm.getSharedModelsByType(kSharedVariablesID);
+          const tileSharedVariables = isReady && smm.getTileSharedModelsByType(self, SharedVariables);
+          console.log(`~~~ reaction condition`, { smm, sharedVariableModels, tileSharedVariables });
+          return { smm, sharedVariableModels, tileSharedVariables };
+        },
+        ({smm, sharedVariableModels, tileSharedVariables}) => {
+          console.log(`--- Connecting to shared variables`, sharedVariableModels, tileSharedVariables);
+          if (smm && sharedVariableModels && sharedVariableModels.length > 0
+            && tileSharedVariables && tileSharedVariables.length === 0
+          ) {
+            console.log(` -- Adding shared model`, sharedVariableModels[0]);
+            smm.addTileSharedModel(self, sharedVariableModels[0]);
+          }
+        }
+      ));
     },
     setDataConfigurationReferences() {
       // Updates pre-existing DataConfiguration objects that don't have the now-required references
@@ -513,9 +587,9 @@ export function createGraphModel(snap?: IGraphModelSnapshot, appConfig?: AppConf
   }
 
   // TODO Add plotted function adornment at the proper time, like when connecting to a SharedVariableModel
-  const plottedFunctionAdornment = PlottedFunctionAdornmentModel.create();
-  plottedFunctionAdornment.addPlottedFunction(x => x ** 2);
-  createdGraphModel.showAdornment(plottedFunctionAdornment);
+  // const plottedFunctionAdornment = PlottedFunctionAdornmentModel.create();
+  // plottedFunctionAdornment.addPlottedFunction(x => x ** 2);
+  // createdGraphModel.showAdornment(plottedFunctionAdornment);
 
   return createdGraphModel;
 }
