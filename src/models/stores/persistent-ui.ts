@@ -87,8 +87,6 @@ export const PersistentUIModel = types
       return tabState;
     };
     return {
-      alert,
-
       setDividerPosition(position: number) {
         self.dividerPosition = position;
       },
@@ -101,11 +99,9 @@ export const PersistentUIModel = types
       toggleShowChatPanel(show:boolean) {
         self.showChatPanel = show;
       },
-
       setActiveNavTab(tab: string) {
         self.activeNavTab = tab;
       },
-
       rightNavDocumentSelected(appConfig: AppConfigModelType, document: DocumentModelType) {
         if (!document.isPublished || appConfig.showPublishedDocsInPrimaryWorkspace) {
           self.problemWorkspace.setAvailableDocument(document);

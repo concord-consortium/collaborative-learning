@@ -2,6 +2,7 @@ import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { useEffect, useRef, useState } from "react";
 import { ITileProps, extractDragTileType, kDragTiles } from "../../components/tiles/tile-component";
+import { useUIStore } from "../../hooks/use-stores";
 import { DataCardContentModelType } from "./data-card-content";
 import { DataCardRows } from "./components/data-card-rows";
 import { DataCardToolbar } from "./data-card-toolbar";
@@ -17,7 +18,6 @@ import { mergeTwoDataSets } from "../../models/data/data-set-utils";
 import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
 import { useDataCardTileHeight } from "./use-data-card-tile-height";
 import { DataCardToolbarContext } from "./data-card-toolbar-context";
-import { useUIStore } from "../../hooks/use-stores";
 
 import "./data-card-tile.scss";
 

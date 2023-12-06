@@ -202,7 +202,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   };
 
   private handleImageDrop = (e: React.DragEvent<HTMLDivElement>, rowId?: string) => {
-    const {persistentUI} = this.stores;
+    const {persistentUI, ui } = this.stores;
     this.imageDragDrop.drop(e)
       .then((url) => {
         const primaryDocument = this.getPrimaryDocument(persistentUI.problemWorkspace.primaryDocumentKey);
@@ -219,7 +219,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
         }
       })
       .catch((err) => {
-        persistentUI.alert(err.toString());
+        ui.alert(err.toString());
       });
   };
 

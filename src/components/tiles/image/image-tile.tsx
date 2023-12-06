@@ -306,7 +306,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
         this.storeNewImageUrl(dropUrl);
       })
       .catch((err) => {
-        this.stores.persistentUI.alert(err.toString());
+        this.stores.ui.alert(err.toString());
       });
   };
 }
