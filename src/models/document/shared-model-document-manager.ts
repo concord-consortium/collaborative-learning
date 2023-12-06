@@ -40,7 +40,11 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
   getSharedModelLabel(model: SharedModelType) {
     // To label a model, list the titles of all the provider-type tiles that are linked to it.
     // If no tiles are linked, default to something based on the ID.
+    // Longer term, would be better to update things so that appropriate titles are stored as part of
+    // the shared models.
     function canProvide(tile: ITileModel) {
+      // Will need an update when XY Plots can provide a dataset - they will only be providers
+      // for some of the shared models they are linked to.
       const info = getTileContentInfo(tile.content.type);
       return info?.isDataProvider || info?.isVariableProvider;
     }
