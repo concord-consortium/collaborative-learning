@@ -19,7 +19,11 @@ export const VariableFunctionLegend = observer(function() {
   const sharedVars = (smm?.isReady) ? smm.findFirstSharedModelByType(SharedVariables, tile?.id): undefined;
 
   if (sharedVars) {
-    return (<p>Variables from: <strong>{smm?.getSharedModelLabel(sharedVars)}</strong></p>);
+    return (
+      <div className="legend-title-row">
+        <p>Variables from: <strong>{smm?.getSharedModelLabel(sharedVars)}</strong></p>
+      </div>
+    );
   } else {
     return null;
   }
