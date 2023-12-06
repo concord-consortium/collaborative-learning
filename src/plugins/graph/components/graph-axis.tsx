@@ -42,7 +42,7 @@ export const GraphAxis = observer(function GraphAxis({
     layout = useGraphLayoutContext(),
     droppableId = `${instanceId}-${place}-axis-drop`,
     hintString = useDropHintString({role: axisPlaceToAttrRole[place]}),
-    { disableAttributeDnD, emptyPlotIsNumeric } = useGraphSettingsContext(),
+    { disableAttributeDnD, emptyPlotIsNumeric, defaultSeriesLegend } = useGraphSettingsContext(),
     axisShouldShowGridlines = emptyPlotIsNumeric || graphModel.axisShouldShowGridLines(place),
     parentEltRef = useRef<HTMLDivElement | null>(null),
     [wrapperElt, _setWrapperElt] = useState<SVGGElement | null>(null),
@@ -130,31 +130,38 @@ export const GraphAxis = observer(function GraphAxis({
   }, [layout, place, graphModel]);
 
   const axisModel = graphModel?.getAxis(place);
+  const showAttributeLabel = place === "left" || !defaultSeriesLegend;
+
   return (
     <g className='axis-wrapper' ref={elt => setWrapperElt(elt)}>
       <rect className='axis-background'/>
       {axisModel && isAlive(axisModel) &&
-      <Axis axisModel={axisModel}
-            label={''}  // Remove
-            enableAnimation={enableAnimation}
-            showScatterPlotGridLines={axisShouldShowGridlines}
-            centerCategoryLabels={graphModel.config.categoriesForAxisShouldBeCentered(place)}
-      />}
-      <AttributeLabel
-        place={place}
-        onChangeAttribute={onDropAttribute}
-        onRemoveAttribute={onRemoveAttribute}
-        onTreatAttributeAs={onTreatAttributeAs}
-      />
+        <Axis
+          axisModel={axisModel}
+          label={''}  // Remove
+          enableAnimation={enableAnimation}
+          showScatterPlotGridLines={axisShouldShowGridlines}
+          centerCategoryLabels={graphModel.config.categoriesForAxisShouldBeCentered(place)}
+        />
+      }
+      {showAttributeLabel &&
+        <AttributeLabel
+          place={place}
+          onChangeAttribute={onDropAttribute}
+          onRemoveAttribute={onRemoveAttribute}
+          onTreatAttributeAs={onTreatAttributeAs}
+        />
+      }
       {onDropAttribute && !disableAttributeDnD &&
-         <DroppableAxis
-            place={`${place}`}
-            dropId={droppableId}
-            hintString={hintString}
-            portal={parentEltRef.current}
-            target={wrapperElt}
-            onIsActive={handleIsActive}
-         />}
+        <DroppableAxis
+          place={`${place}`}
+          dropId={droppableId}
+          hintString={hintString}
+          portal={parentEltRef.current}
+          target={wrapperElt}
+          onIsActive={handleIsActive}
+        />
+      }
     </g>
   );
 });
