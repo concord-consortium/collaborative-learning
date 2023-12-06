@@ -23,7 +23,7 @@ jest.mock("../hooks/use-stores", () => ({
       setDraggingId: (id?: string) => undefined
     }
   }),
-  // TODO: Not sure this is the ideal way to create the conditions for the test to run
+  // TODO: Audit similar tests for instantiations of properites that are not required
   useUIStore: () => ({}),
   usePersistentUIStore: () => ({})
 }));
