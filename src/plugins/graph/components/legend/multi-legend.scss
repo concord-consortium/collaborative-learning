@@ -2,25 +2,70 @@
 
 // Menu sizing here must match calculations in multi-legend.tsx:
 $menu-height: 30px;
-$menu-vertical-padding: 10px;
-$menu-vertical-gap: 10px;
-$menu-label-height: 15px;
+$vertical-padding: 10px;
+$vertical-gap: 8px;
+$label-height: 28px;
 $min-menu-width: 144px;
 $codap-menu-border-color: #0592af;
 $codap-bg-color: #f9f9f9;
 
 .multi-legend {
-  padding: $menu-vertical-padding 0;
   background-color:$codap-bg-color;
   width: 100%;
   text-align: left;
-  margin-left: 10px;
+  font-size: 14px;
+
+  .x-axis-menu {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding-bottom: $vertical-padding;
+
+    .x-axis-item {
+      flex: 0 0 auto;
+      padding: 0px 5px;
+    }
+
+  }
+
+  .legend-title-row {
+    display: flex;
+    align-items: center;
+    padding: $vertical-padding 10px;
+    min-height: $label-height;
+    border-top: 2px solid $workspace-teal;
+
+    .legend-title {
+      flex: 1 0 auto;
+    }
+
+    .legend-icon {
+      flex-grow: 0 0 auto;
+      vertical-align: baseline;
+
+      .remove-button {
+        margin: 0;
+        height: 27px;
+        width: 27px;
+        padding: 2px;
+        border: none;
+        border-radius: 50%;
+        background: inherit;
+        cursor: pointer;
+
+        &:hover {
+          background-color: $workspace-teal-light-6;
+        }
+
+
+      }
+
+    }
+  }
 
   .legend-row {
     display: block;
-    margin-top: $menu-vertical-gap;
-    margin-bottom: $menu-vertical-gap;
-    height: $menu-height;
+    padding: $vertical-gap 0;
 
     .legend-cell-1, .legend-cell-2{
       display: inline-block;
@@ -51,64 +96,68 @@ $codap-bg-color: #f9f9f9;
         vertical-align: bottom;
       }
     }
+  }
+}
 
-    .simple-attribute-label {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      min-width: $min-menu-width;
-      height: $menu-height;
+.simple-attribute-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: $min-menu-width;
+  height: $menu-height;
 
-      border: 1px solid #3f3f3f;
-      border-radius: 4px;
-      padding: 6px;
-      color: #3f3f3f;
+  border: 1px solid #3f3f3f;
+  border-radius: 4px;
+  color: #3f3f3f;
+  background-color: $workspace-teal-light-8;
 
-      // TODO: does not work as expected
-      // &:hover {
-      //   background-color: $workspace-teal-light-4;
-      // }
+  &.highlighted {
+    background-color: $highlight-linked-header;
+  }
 
-      &.highlighted {
-        background-color: $highlight-linked-header;
-      }
+  .symbol-title {
+    display: flex;
+    height: 100%;
+  }
 
-      .symbol-title {
-        display: flex;
-      }
+  .symbol-container {
+    padding: 3px;
+    border-right: 1px solid #3f3f3f;
+  }
 
-      .attr-symbol {
-        height: $menu-label-height;
-        width: $menu-label-height;
-        margin-right: 6px;
-        margin-top:2px;
-        border-radius: 50%;
-      }
+  .attr-symbol {
+    height: $menu-height - 8px;
+    width: $menu-height - 8px;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+  }
 
-      .caret {
-        transform: rotate(0deg);
-        transition: transform 0.2s ease-in-out;
-        svg {
-          margin-top:4px;
-          stroke:#3f3f3f;
-        }
-      }
+  .attr-title {
+    padding: 6px;
+    overflow: hidden;
+  }
 
-      &.target-open {
-        border-color:$codap-menu-border-color;
-        background-color: $codap-bg-color;
+  .caret {
+    transform: rotate(0deg);
+    transition: transform 0.2s ease-in-out;
+    svg {
+      margin-top:4px;
+      stroke:#3f3f3f;
+    }
+  }
 
-        &.highlighted {
-          background-color: $highlight-linked-header;
-        }
+  &.target-open {
+    border-color:$codap-menu-border-color;
+    background-color: $codap-bg-color;
 
-        .caret {
-          transform: rotate(180deg);
-          transition: transform 0.2s ease-in-out;
-          svg {
-            stroke:$codap-menu-border-color;
-          }
-        }
+    &.highlighted {
+       background-color: $highlight-linked-header;
+    }
+    .caret {
+      transform: rotate(180deg);
+      transition: transform 0.2s ease-in-out;
+      svg {
+        stroke:$codap-menu-border-color;
       }
     }
   }

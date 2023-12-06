@@ -42,7 +42,7 @@ export const GraphAxis = observer(function GraphAxis({
     layout = useGraphLayoutContext(),
     droppableId = `${instanceId}-${place}-axis-drop`,
     hintString = useDropHintString({role: axisPlaceToAttrRole[place]}),
-    { disableAttributeDnD, emptyPlotIsNumeric } = useGraphSettingsContext(),
+    { disableAttributeDnD, emptyPlotIsNumeric, defaultSeriesLegend } = useGraphSettingsContext(),
     axisShouldShowGridlines = emptyPlotIsNumeric || graphModel.axisShouldShowGridLines(place),
     parentEltRef = useRef<HTMLDivElement | null>(null),
     [wrapperElt, _setWrapperElt] = useState<SVGGElement | null>(null),
@@ -72,11 +72,12 @@ export const GraphAxis = observer(function GraphAxis({
   useEffect(function installBackground() {
     return autorun(() => {
       if (wrapperElt) {
-        const bounds = layout.getComputedBounds(place),
-          graphWidth = layout.graphWidth,
-          left = ['bottom', 'top'].includes(place) ? 0 : bounds.left,
-          width = ['bottom', 'top'].includes(place) ? graphWidth : bounds.width,
-          transform = `translate(${left}, ${bounds.top})`;
+        const bounds = layout.getComputedBounds(place);
+        const graphWidth = layout.graphWidth;
+        const left = ['bottom', 'top'].includes(place) ? 0 : bounds.left;
+        const width = ['bottom', 'top'].includes(place) ? graphWidth : bounds.width;
+        const transform = `translate(${left}, ${bounds.top})`;
+
         select(wrapperElt)
           .selectAll<SVGRectElement, number>('rect.axis-background')
           .attr('transform', transform)
@@ -129,31 +130,38 @@ export const GraphAxis = observer(function GraphAxis({
   }, [layout, place, graphModel]);
 
   const axisModel = graphModel?.getAxis(place);
+  const showAttributeLabel = place === "left" || !defaultSeriesLegend;
+
   return (
     <g className='axis-wrapper' ref={elt => setWrapperElt(elt)}>
       <rect className='axis-background'/>
       {axisModel && isAlive(axisModel) &&
-      <Axis axisModel={axisModel}
-            label={''}  // Remove
-            enableAnimation={enableAnimation}
-            showScatterPlotGridLines={axisShouldShowGridlines}
-            centerCategoryLabels={graphModel.config.categoriesForAxisShouldBeCentered(place)}
-      />}
-      <AttributeLabel
-        place={place}
-        onChangeAttribute={onDropAttribute}
-        onRemoveAttribute={onRemoveAttribute}
-        onTreatAttributeAs={onTreatAttributeAs}
-      />
+        <Axis
+          axisModel={axisModel}
+          label={''}  // Remove
+          enableAnimation={enableAnimation}
+          showScatterPlotGridLines={axisShouldShowGridlines}
+          centerCategoryLabels={graphModel.config.categoriesForAxisShouldBeCentered(place)}
+        />
+      }
+      {showAttributeLabel &&
+        <AttributeLabel
+          place={place}
+          onChangeAttribute={onDropAttribute}
+          onRemoveAttribute={onRemoveAttribute}
+          onTreatAttributeAs={onTreatAttributeAs}
+        />
+      }
       {onDropAttribute && !disableAttributeDnD &&
-         <DroppableAxis
-            place={`${place}`}
-            dropId={droppableId}
-            hintString={hintString}
-            portal={parentEltRef.current}
-            target={wrapperElt}
-            onIsActive={handleIsActive}
-         />}
+        <DroppableAxis
+          place={`${place}`}
+          dropId={droppableId}
+          hintString={hintString}
+          portal={parentEltRef.current}
+          target={wrapperElt}
+          onIsActive={handleIsActive}
+        />
+      }
     </g>
   );
 });

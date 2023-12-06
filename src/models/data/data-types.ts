@@ -54,7 +54,9 @@ export interface ICell {
   caseId: string;
 }
 export function getCellId(cell: ICell) {
-  return JSON.stringify(cell);
+  // Create a new one to ensure that the members are in a consistent order
+  const orderedCell = { attributeId: cell.attributeId, caseId: cell.caseId };
+  return JSON.stringify(orderedCell);
 }
 export function getCellFromId(cellId: string) {
   const cell = JSON.parse(cellId);

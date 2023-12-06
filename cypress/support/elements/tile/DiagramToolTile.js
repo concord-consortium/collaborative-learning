@@ -12,15 +12,8 @@ class DiagramToolTile {
   getTileTitleContainer(workspaceClass){
     return cy.get(`${workspaceClass || ".primary-workspace"} .editable-tile-title`);
   }
-  getDiagramToolbar(workspaceClass, skipClick) {
-    if (!skipClick) {
-      this.getDiagramTile(workspaceClass).click();
-    }
-    return cy.get(`${canvasArea(workspaceClass)} .diagram-toolbar`);
-  }
-  getDiagramToolbarButton(buttonClass, workspaceClass, skipClick) {
-    if (!skipClick) this.getDiagramTile(workspaceClass).click();
-    return cy.get(`${canvasArea(workspaceClass)} .diagram-toolbar .${buttonClass}`);
+  getDraggableToolbarButton(workspaceClass){
+    return cy.get(`${workspaceClass || ".primary-workspace"} .tile-toolbar.diagram-toolbar div[aria-roledescription=draggable]`);
   }
   getDiagramDialog(workspaceClass) {
     return cy.get(dialog(workspaceClass));
