@@ -376,7 +376,7 @@ export const GraphModel = TileContentModel
       return x ** 2;
     },
     disposeSharedVariablesCopy() {
-      destroy(self.sharedVariablesCopy);
+      if (self.sharedVariablesCopy) destroy(self.sharedVariablesCopy);
       self.sharedVariablesCopy = undefined;
     }
   }))
@@ -387,20 +387,15 @@ export const GraphModel = TileContentModel
       }
     },
     setupCompute(xName: string, yName: string) {
-      const defaultComputeY = (x: number) => x ** 2;
       const smm = getSharedModelManager(self);
       if (smm && smm.isReady) {
         const sharedVariableModels = smm.getTileSharedModelsByType(self, SharedVariables);
         if (sharedVariableModels.length > 0) {
           const sharedVariables = sharedVariableModels[0] as SharedVariablesType;
           self.sharedVariablesCopy = SharedVariables.create(getSnapshot(sharedVariables));
-          return { computeY: self.computeY, dispose: self.disposeSharedVariablesCopy };
         }
       }
-      return {
-        computeY: defaultComputeY,
-        dispose: () => undefined
-      };
+      return { computeY: self.computeY, dispose: self.disposeSharedVariablesCopy };
     }
   }))
   .actions(self => ({
