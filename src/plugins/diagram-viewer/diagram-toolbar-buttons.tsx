@@ -12,6 +12,7 @@ import { useUIStore } from "../../hooks/use-stores";
 import { kNewVariableButtonDraggableId } from "./diagram-types";
 import { kGraphTileType } from "../graph/graph-defs";
 import { useConsumerTileLinking } from "../../hooks/use-consumer-tile-linking";
+import { SharedVariables } from "../shared-variables/shared-variables";
 
 import AddVariableCardIcon from "./src/assets/add-variable-card-icon.svg";
 import InsertVariableCardIcon from "./src/assets/insert-variable-card-icon.svg";
@@ -212,7 +213,7 @@ export const LinkGraphButton = observer(function LinkGraphButton({name}: IToolba
   const hasLinkableRows = true; // TODO
 
   const { isLinkEnabled, showLinkTileDialog }
-  = useConsumerTileLinking({ model, hasLinkableRows, onlyType: kGraphTileType });
+  = useConsumerTileLinking({ model, hasLinkableRows, shareType: SharedVariables, tileType: kGraphTileType });
 
   const handleClick = (e: React.MouseEvent) => {
     showLinkTileDialog && showLinkTileDialog();

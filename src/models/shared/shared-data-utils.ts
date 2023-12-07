@@ -7,6 +7,7 @@ import {
   ISharedCaseMetadata, isSharedCaseMetadata, kSharedCaseMetadataType, SharedCaseMetadata
 } from "./shared-case-metadata";
 import { isSharedDataSet, kSharedDataSetType, SharedDataSet, SharedDataSetType } from "./shared-data-set";
+import { SharedModelType } from "./shared-model";
 
 export function getSharedDataSets(node: IAnyStateTreeNode): SharedDataSetType[] {
   const sharedModelManager = getSharedModelManager(node);
@@ -34,25 +35,19 @@ export function getTileCaseMetadata(tile: ITileContentModel) {
   return isSharedCaseMetadata(sharedCaseMetadata) ? sharedCaseMetadata : undefined;
 }
 
-export const isLinkedToTile = (model: ITileModel, tileId: string) => {
+/**
+ * Determine if the SharedModel is already linked to the given tile.
+ * @param model a SharedModel instance
+ * @param tileId the ID of a Tile
+ * @returns true if currently linked
+ */
+export const isLinkedToTile = (model: SharedModelType, tileId: string) => {
   const sharedModelManager = getSharedModelManager(model);
   if (sharedModelManager?.isReady) {
-    // Determine if the tile initiating the link has a shared data set that the
-    // target tile is already linked to.
-    const modelDataSet = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, model.id);
-    const modelDataSetTileIds = sharedModelManager?.getSharedModelTileIds(modelDataSet);
-    if (modelDataSetTileIds?.includes(tileId)) {
-      return true;
-    }
-    // Determine if the target tile has a shared data set that the initiating tile is
-    // already linked to.
-    const tileDataSet = sharedModelManager?.findFirstSharedModelByType(SharedDataSet, tileId);
-    const tileDataSetTileIds = sharedModelManager?.getSharedModelTileIds(tileDataSet);
-    if (tileDataSetTileIds?.includes(model.id)) {
-      return true;
-    }
+    return sharedModelManager.getSharedModelTileIds(model).includes(tileId);
+  } else {
+    return false;
   }
-  return false;
 };
 
 export function isTileLinkedToDataSet(tile: ITileContentModel, dataSet: IDataSet) {

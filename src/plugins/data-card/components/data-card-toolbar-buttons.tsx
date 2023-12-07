@@ -15,6 +15,7 @@ import { getTileDataSet } from "../../../models/shared/shared-data-utils";
 import { kDataCardTileType } from "../data-card-types";
 import { DataCardToolbarContext } from "../data-card-toolbar-context";
 import { kGraphTileType } from "../../graph/graph-defs";
+import { SharedDataSet } from "../../../models/shared/shared-data-set";
 
 function useModelContent() {
   const model = useContext(TileModelContext);
@@ -90,7 +91,8 @@ const LinkTileButton = observer(function LinkTileButton(
   // this is because the linking is generally used for graph and geometry tiles
   // both of them in 2 attributes (in CLUE)
   const hasLinkableRows = dataSet ? dataSet.attributes.length > 1 : false;
-  const { isLinkEnabled, showLinkTileDialog } = useConsumerTileLinking({ model, hasLinkableRows });
+  const { isLinkEnabled, showLinkTileDialog }
+    = useConsumerTileLinking({ model, hasLinkableRows, shareType: SharedDataSet });
   const classes = classNames("link-tile-button", );
 
   const handleClick = () => {
@@ -125,7 +127,7 @@ export const LinkGraphButton = observer(function LinkGraphButton(
   const hasLinkableRows = dataSet ? dataSet.attributes.length > 1 : false;
 
   const { isLinkEnabled, showLinkTileDialog }
-    = useConsumerTileLinking({ model, hasLinkableRows, onlyType: kGraphTileType });
+    = useConsumerTileLinking({ model, hasLinkableRows, tileType: kGraphTileType, shareType: SharedDataSet });
   const classes = classNames("link-graph-button", );
 
   const handleClick = () => {

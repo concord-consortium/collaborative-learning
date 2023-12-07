@@ -5,11 +5,12 @@ import { IModalButton, useCustomModal } from "./use-custom-modal";
 import { isLinkedToTile } from "../models/shared/shared-data-utils";
 import { ITileLinkMetadata } from "../models/tiles/tile-link-types";
 import { ITileModel } from "../models/tiles/tile-model";
+import { SharedModelType } from "../models/shared/shared-model";
 
 import "./link-tile-dialog.scss";
 
 // Defines a modal window that allows the user to select a tile
-// to link with or unlinkn from the current tile's dataset.
+// to link with or unlink from the current tile's dataset.
 // If a single tile type is supplied as an argument, an option to
 // create a new tile of that type will be offered as well.
 
@@ -72,19 +73,20 @@ const Content: React.FC<IContentProps>
 interface IProps {
   linkableTiles: ITileLinkMetadata[];
   model: ITileModel;
+  modelToShare?: SharedModelType;
   tileType?: string;
   onLinkTile: (tileInfo: ITileLinkMetadata) => void;
   onUnlinkTile: (tileInfo: ITileLinkMetadata) => void;
   onCreateTile: () => void;
 }
 export const useLinkConsumerTileDialog =
-    ({ linkableTiles, model, tileType, onLinkTile, onUnlinkTile, onCreateTile }: IProps) => {
+    ({ linkableTiles, model, modelToShare, tileType, onLinkTile, onUnlinkTile, onCreateTile }: IProps) => {
   const tileTitle = model.computedTitle;
   const [selectValue, setSelectValue] = useState("");
   const handleClick = () => {
     const tileInfo = linkableTiles.find(tile => tile.id === selectValue);
-    if (tileInfo) {
-      if (isLinkedToTile(model, tileInfo.id)) {
+    if (tileInfo && modelToShare) {
+      if (isLinkedToTile(modelToShare, tileInfo.id)) {
         onUnlinkTile(tileInfo);
       } else {
         onLinkTile(tileInfo);
@@ -92,14 +94,14 @@ export const useLinkConsumerTileDialog =
     }
   };
   const unlinkedTiles = linkableTiles
-    .filter(tileInfo => !isLinkedToTile(model, tileInfo.id));
+    .filter(tileInfo => modelToShare && !isLinkedToTile(modelToShare, tileInfo.id));
   const linkedTiles = linkableTiles
-    .filter(tileInfo => isLinkedToTile(model, tileInfo.id) && tileInfo.id !== model.id);
+    .filter(tileInfo => modelToShare && isLinkedToTile(modelToShare, tileInfo.id) && tileInfo.id !== model.id);
 
   const buttons: IModalButton[] = [
     { label: "Cancel" },
     {
-      label: !isLinkedToTile(model, selectValue) ? "Link" : "Unlink",
+      label: modelToShare && !isLinkedToTile(modelToShare, selectValue) ? "Link" : "Unlink",
       isDefault: true,
       isDisabled: !selectValue,
       onClick: handleClick
