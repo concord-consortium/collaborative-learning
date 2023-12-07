@@ -1,4 +1,6 @@
 import { Instance, types } from "mobx-state-tree";
+import { Point } from "../../graph-types";
+import { ScaleNumericBaseType } from "../../imports/components/axis/axis-types";
 import { AdornmentModel, IAdornmentModel } from "../adornment-models";
 import { kPlottedFunctionType, FormulaFn } from "./plotted-function-adornment-types";
 
@@ -17,6 +19,17 @@ export const PlottedFunctionInstance = types.model("PlottedFunctionInstance", {}
     }
   }));
 
+interface IComputePointsOptions {
+  formulaFunction: (x: number) => number,
+  min: number,
+  max: number,
+  xCellCount: number,
+  yCellCount: number,
+  gap: number,
+  xScale: ScaleNumericBaseType,
+  yScale: ScaleNumericBaseType
+}
+
 export const PlottedFunctionAdornmentModel = AdornmentModel
   .named("PlottedFunctionAdornmentModel")
   .props({
@@ -24,6 +37,23 @@ export const PlottedFunctionAdornmentModel = AdornmentModel
     plottedFunctions: types.map(PlottedFunctionInstance),
     error: ""
   })
+  .views( self => ({
+    computePoints(options: IComputePointsOptions) {
+      const { min, max, xCellCount, yCellCount, gap, xScale, yScale, formulaFunction } = options;
+      const tPoints: Point[] = [];
+      if (xScale.invert) {
+        for (let pixelX = min; pixelX <= max; pixelX += gap) {
+          const tX = xScale.invert(pixelX * xCellCount);
+          const tY = formulaFunction(tX);
+          if (Number.isFinite(tY)) {
+            const pixelY = yScale(tY) / yCellCount;
+            tPoints.push({ x: pixelX, y: pixelY });
+          }
+        }
+      }
+      return tPoints;
+    }
+  }))
   .actions(self => ({
     setError(error: string) {
       self.error = error;

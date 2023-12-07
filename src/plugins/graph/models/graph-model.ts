@@ -5,14 +5,14 @@ import {createContext, useContext} from "react";
 import { IClueObject } from "../../../models/annotations/clue-object";
 import { getTileIdFromContent } from "../../../models/tiles/tile-model";
 import { IAdornmentModel } from "../adornments/adornment-models";
-import { AxisPlace, ScaleNumericBaseType } from "../imports/components/axis/axis-types";
+import { AxisPlace } from "../imports/components/axis/axis-types";
 import {
   AxisModelUnion, EmptyAxisModel, IAxisModelUnion, NumericAxisModel
 } from "../imports/components/axis/models/axis-model";
 import { GraphPlace } from "../imports/components/axis-graph-shared";
 import {
   GraphAttrRole, hoverRadiusFactor, kDefaultNumericAxisBounds, kGraphTileType,
-  PlotType, PlotTypes, Point, pointRadiusMax, pointRadiusSelectionAddend
+  PlotType, PlotTypes, pointRadiusMax, pointRadiusSelectionAddend
 } from "../graph-types";
 import { SharedModelType } from "../../../models/shared/shared-model";
 import { getTileCaseMetadata } from "../../../models/shared/shared-data-utils";
@@ -47,17 +47,6 @@ export type BackgroundLockInfo = {
   yAxisLowerBound: number,
   yAxisUpperBound: number
 };
-
-interface IComputePointsOptions {
-  formulaFunction: (x: number) => number,
-  min: number,
-  max: number,
-  xCellCount: number,
-  yCellCount: number,
-  gap: number,
-  xScale: ScaleNumericBaseType,
-  yScale: ScaleNumericBaseType
-}
 
 export const NumberToggleModel = types
   .model('NumberToggleModel', {});
@@ -119,22 +108,7 @@ export const GraphModel = TileContentModel
         all = all.concat(layer.autoAssignedAttributes);
       }
       return all;
-    },
-    computePoints(options: IComputePointsOptions) {
-      const { min, max, xCellCount, yCellCount, gap, xScale, yScale, formulaFunction } = options;
-      const tPoints: Point[] = [];
-      if (xScale.invert) {
-        for (let pixelX = min; pixelX <= max; pixelX += gap) {
-          const tX = xScale.invert(pixelX * xCellCount);
-          const tY = formulaFunction(tX);
-          if (Number.isFinite(tY)) {
-            const pixelY = yScale(tY) / yCellCount;
-            tPoints.push({ x: pixelX, y: pixelY });
-          }
-        }
-      }
-      return tPoints;
-    },
+    }
   }))
   .views(self => ({
     /**

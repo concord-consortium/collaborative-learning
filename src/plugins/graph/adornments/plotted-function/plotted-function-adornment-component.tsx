@@ -79,7 +79,7 @@ export const PlottedFunctionAdornmentComponent = observer(function PlottedFuncti
     const tPixelMin = xScale(xMin);
     const tPixelMax = xScale(xMax);
     const kPixelGap = 1;
-    const tPoints = graphModel.computePoints({
+    const tPoints = model.computePoints({
       formulaFunction, min: tPixelMin, max: tPixelMax, xCellCount, yCellCount, gap: kPixelGap, xScale, yScale
     });
     if (tPoints.length === 0) return;
@@ -91,7 +91,7 @@ export const PlottedFunctionAdornmentComponent = observer(function PlottedFuncti
       .attr("data-testid", `plotted-function-path${classFromKey ? `-${classFromKey}` : ""}`)
       .attr("d", path.current);
 
-  }, [classFromKey, graphModel, xCellCount, xScale, yCellCount, yScale]);
+  }, [classFromKey, model, xCellCount, xScale, yCellCount, yScale]);
 
   // Add the lines and their associated covers and labels
   const refreshValues = useCallback(() => {
