@@ -32,7 +32,7 @@ import { GraphLayerModel } from "./graph-layer-model";
 import { isSharedDataSet, SharedDataSet } from "../../../models/shared/shared-data-set";
 import { DataConfigurationModel } from "./data-configuration-model";
 import { PlottedFunctionAdornmentModel } from "../adornments/plotted-function/plotted-function-adornment-model";
-import { SharedVariables } from "../../shared-variables/shared-variables";
+import { SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
 import { kPlottedFunctionType } from "../adornments/plotted-function/plotted-function-adornment-types";
 
 export interface GraphProperties {
@@ -121,6 +121,15 @@ export const GraphModel = TileContentModel
      */
     get metadata() {
       return getTileCaseMetadata(self);
+    },
+    get sharedVariables() {
+      const smm = getSharedModelManager(self);
+      if (smm?.isReady) {
+        const sharedVariableModels = smm.getTileSharedModelsByType(self, SharedVariables);
+        if (sharedVariableModels && sharedVariableModels.length > 0) {
+          return sharedVariableModels[0] as SharedVariablesType;
+        }
+      }
     },
     pointColorAtIndex(plotIndex = 0) {
       if (plotIndex < self._pointColors.length) {

@@ -44,6 +44,7 @@ export const PlottedFunctionAdornmentComponent = observer(function PlottedFuncti
   const instanceKey = model.instanceKey(cellKey);
   const path = useRef("");
   const plottedFunctionRef = useRef<SVGGElement>(null);
+  const sharedVariables = graphModel.sharedVariables;
 
   const addPath = useCallback((formulaFunction: FormulaFn) => {
     const xMin = xScale.domain()[0];
@@ -95,20 +96,26 @@ export const PlottedFunctionAdornmentComponent = observer(function PlottedFuncti
     }, { name: "PlottedFunctionAdornmentComponent.refreshExpressionChange" }, model);
   }, [graphModel, model, xScale, xSubAxesCount, yScale]);
 
-  // Refresh values on axis changes
+  // Refresh values on axis or expression change
   useEffect(function refreshAxisChange() {
     return mstAutorun(() => {
+      console.log(`*** refreshAxisChange`);
       // We observe changes to the axis domains within the autorun by extracting them from the axes below.
       // We do this instead of including domains in the useEffect dependency array to prevent domain changes
       // from triggering a reinstall of the autorun.
       if (xAxis && yAxis) {
-        console.log(`*** refreshAxisChange`);
         const { domain: xDomain } = xAxis; // eslint-disable-line unused-imports/no-unused-vars
         const { domain: yDomain } = yAxis; // eslint-disable-line unused-imports/no-unused-vars
       }
+      // Trigger an autorun if the expression of y changes
+      // TODO Change this from hard coded "y"
+      if (sharedVariables) {
+        const y = sharedVariables.variables.find(variable => variable.name === "y");
+        y?.expression; // eslint-disable-line no-unused-expressions
+      }
       refreshValues();
     }, { name: "PlottedFunctionAdornmentComponent.refreshAxisChange" }, model);
-  }, [dataConfig, model, plotWidth, plotHeight, refreshValues, xAxis, yAxis]);
+  }, [dataConfig, model, plotWidth, plotHeight, refreshValues, sharedVariables, xAxis, yAxis]);
 
   return (
     <svg
