@@ -378,7 +378,7 @@ export const DataSet = types.model("DataSet", {
                           ? self.pseudoCaseMap[caseID].childCaseIds[0]
                           : caseID;
         const index = _caseId ? self.caseIDMap[_caseId] : undefined;
-        if (index === null || index === undefined) {
+        if (index == null) {
           console.warn('Did not find case', _caseId, 'in', attributeID);
         }
         return index != null
