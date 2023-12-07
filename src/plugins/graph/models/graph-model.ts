@@ -5,7 +5,7 @@ import {createContext, useContext} from "react";
 import { IClueObject } from "../../../models/annotations/clue-object";
 import { getTileIdFromContent } from "../../../models/tiles/tile-model";
 import { IAdornmentModel } from "../adornments/adornment-models";
-import {AxisPlace} from "../imports/components/axis/axis-types";
+import { AxisPlace } from "../imports/components/axis/axis-types";
 import {
   AxisModelUnion, EmptyAxisModel, IAxisModelUnion, NumericAxisModel
 } from "../imports/components/axis/models/axis-model";
@@ -31,6 +31,7 @@ import { getDotId } from "../utilities/graph-utils";
 import { GraphLayerModel } from "./graph-layer-model";
 import { isSharedDataSet, SharedDataSet } from "../../../models/shared/shared-data-set";
 import { DataConfigurationModel } from "./data-configuration-model";
+import { PlottedFunctionAdornmentModel } from "../adornments/plotted-function/plotted-function-adornment-model";
 
 export interface GraphProperties {
   axes: Record<string, IAxisModelUnion>
@@ -496,6 +497,7 @@ export function createGraphModel(snap?: IGraphModelSnapshot, appConfig?: AppConf
                           ? NumericAxisModel.create({place: "left", min, max})
                           : EmptyAxisModel.create({place: "left"});
   const createdGraphModel = GraphModel.create({
+    plotType: emptyPlotIsNumeric ? "scatterPlot" : "casePlot",
     axes: {
       bottom: bottomAxisModel,
       left: leftAxisModel
@@ -509,6 +511,12 @@ export function createGraphModel(snap?: IGraphModelSnapshot, appConfig?: AppConf
     const cLines = ConnectingLinesModel.create();
     createdGraphModel.showAdornment(cLines);
   }
+
+  // TODO Add plotted function adornment at the proper time, like when connecting to a SharedVariableModel
+  const plottedFunctionAdornment = PlottedFunctionAdornmentModel.create();
+  plottedFunctionAdornment.addPlottedFunction(x => x ** 2);
+  createdGraphModel.showAdornment(plottedFunctionAdornment);
+
   return createdGraphModel;
 }
 
