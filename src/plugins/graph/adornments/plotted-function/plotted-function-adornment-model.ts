@@ -1,4 +1,4 @@
-import { destroy, getSnapshot, Instance, types } from "mobx-state-tree";
+import { Instance, types } from "mobx-state-tree";
 import { getSharedModelManager } from "../../../../models/tiles/tile-environment";
 import { SharedVariables, SharedVariablesType } from "../../../shared-variables/shared-variables";
 import { Point } from "../../graph-types";
@@ -47,14 +47,31 @@ export const PlottedFunctionAdornmentModel = AdornmentModel
       const { min, max, xCellCount, yCellCount, gap, xScale, yScale, formulaFunction } = options;
       const tPoints: Point[] = [];
       if (xScale.invert) {
+        let sharedVariables: SharedVariablesType | undefined;
+        let computeY = formulaFunction;
+        let dispose = () => {};
+
+        // Use variable expression if we're connected to a shared variables model
+        const sharedModelManager = getSharedModelManager(self);
+        if (sharedModelManager?.isReady) {
+          const sharedVariableModels = sharedModelManager.getTileSharedModelsByType(self, SharedVariables);
+          if (sharedVariableModels.length > 0) {
+            sharedVariables = sharedVariableModels[0] as SharedVariablesType;
+            const compute = sharedVariables.setupCompute("x", "y");
+            computeY = compute.computeY;
+            dispose = compute.dispose;
+          }
+        }
+
         for (let pixelX = min; pixelX <= max; pixelX += gap) {
           const tX = xScale.invert(pixelX * xCellCount);
-          const tY = formulaFunction(tX);
+          const tY = computeY(tX);
           if (Number.isFinite(tY)) {
             const pixelY = yScale(tY) / yCellCount;
             tPoints.push({ x: pixelX, y: pixelY });
           }
         }
+        dispose();
       }
       return tPoints;
     }
@@ -76,41 +93,6 @@ export const PlottedFunctionAdornmentModel = AdornmentModel
     },
     removePlottedFunction(key: string) {
       self.plottedFunctions.delete(key);
-    },
-    computeY(x: number) {
-      if (self.sharedVariablesCopy) {
-        const independentVariable = self.sharedVariablesCopy.variables.find(variable => variable.name === "x");
-        const dependentVariable = self.sharedVariablesCopy.variables.find(variable => variable.name === "y");
-        if (independentVariable && dependentVariable) {
-          if (x <= .9) {
-            console.log(`OOO plotting`, x);
-          } else if (x >= 2.298) {
-            console.log(` OO plotting`, x);
-          }
-          independentVariable.setValue(x);
-          const dependentValue = dependentVariable.computedValue;
-          return dependentValue ?? x ** 2;
-        }
-      }
-      console.log(`^^^ Failed to compute`);
-      return x ** 2;
-    },
-    disposeSharedVariablesCopy() {
-      if (self.sharedVariablesCopy) destroy(self.sharedVariablesCopy);
-      self.sharedVariablesCopy = undefined;
-    }
-  }))
-  .actions(self => ({
-    setupCompute(xName: string, yName: string) {
-      const smm = getSharedModelManager(self);
-      if (smm && smm.isReady) {
-        const sharedVariableModels = smm.getTileSharedModelsByType(self, SharedVariables);
-        if (sharedVariableModels.length > 0) {
-          const sharedVariables = sharedVariableModels[0] as SharedVariablesType;
-          self.sharedVariablesCopy = SharedVariables.create(getSnapshot(sharedVariables));
-        }
-      }
-      return { computeY: self.computeY, dispose: self.disposeSharedVariablesCopy };
     }
   }));
 

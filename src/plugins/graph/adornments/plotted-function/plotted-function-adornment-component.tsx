@@ -5,7 +5,6 @@ import { mstAutorun } from "../../../../utilities/mst-autorun";
 import { INumericAxisModel } from "../../imports/components/axis/models/axis-model";
 import { useAxisLayoutContext } from "../../imports/components/axis/models/axis-layout-context";
 import { ScaleNumericBaseType } from "../../imports/components/axis/axis-types";
-import { Point } from "../../graph-types";
 import { IPlottedFunctionAdornmentModel } from "./plotted-function-adornment-model";
 import { useGraphModelContext } from "../../models/graph-model";
 import { useDataConfigurationContext } from "../../hooks/use-data-configuration-context";
@@ -13,33 +12,6 @@ import { curveBasis } from "../../utilities/graph-utils";
 import { FormulaFn } from "./plotted-function-adornment-types";
 
 import "./plotted-function-adornment-component.scss";
-
-interface IComputePointsOptions {
-  formulaFunction: FormulaFn,
-  min: number,
-  max: number,
-  xCellCount: number,
-  yCellCount: number,
-  gap: number,
-  xScale: ScaleNumericBaseType,
-  yScale: ScaleNumericBaseType
-}
-
-const computePoints = (options: IComputePointsOptions) => {
-  const { min, max, xCellCount, yCellCount, gap, xScale, yScale, formulaFunction } = options;
-  const tPoints: Point[] = [];
-  if (xScale.invert) {
-    for (let pixelX = min; pixelX <= max; pixelX += gap) {
-      const tX = xScale.invert(pixelX * xCellCount);
-      const tY = formulaFunction(tX);
-      if (Number.isFinite(tY)) {
-        const pixelY = yScale(tY) / yCellCount;
-        tPoints.push({ x: pixelX, y: pixelY });
-      }
-    }
-  }
-  return tPoints;
-};
 
 interface IProps {
   containerId?: string
@@ -97,21 +69,16 @@ export const PlottedFunctionAdornmentComponent = observer(function PlottedFuncti
   const refreshValues = useCallback(() => {
     if (!model.isVisible) return;
 
-    const { computeY, dispose } = model.setupCompute("x", "y");
-    // const measure = model?.plottedFunctions.get(instanceKey);
+    const measure = model?.plottedFunctions.get(instanceKey);
     const selection = select(plottedFunctionRef.current);
 
     // Remove the previous value's elements
     selection.html(null);
 
-    if (computeY) {
-      addPath(computeY);
+    if (measure) {
+      addPath(measure.formulaFunction);
     }
-    dispose?.();
-    // if (measure) {
-    //   addPath(measure.formulaFunction);
-    // }
-  }, [model, addPath]);
+  }, [addPath, instanceKey, model]);
 
   // Refresh values on expression changes
   useEffect(function refreshExpressionChange() {

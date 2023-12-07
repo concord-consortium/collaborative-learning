@@ -464,6 +464,7 @@ export const GraphModel = TileContentModel
         (sharedVariableModels) => {
           if (sharedVariableModels && sharedVariableModels.length > 0) {
             const plottedFunctionAdornment = PlottedFunctionAdornmentModel.create();
+            plottedFunctionAdornment.addPlottedFunction(x => x**2);
             self.showAdornment(plottedFunctionAdornment);
           } else {
             self.hideAdornment(kPlottedFunctionType);
