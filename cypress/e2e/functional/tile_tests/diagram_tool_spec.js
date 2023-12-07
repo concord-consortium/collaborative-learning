@@ -22,13 +22,6 @@ function beforeTest() {
 
 context('Diagram Tool Tile', function () {
   const dialogField = (field) => cy.get(`#evd-${field}`);
-  // The following functions specify undefined, true as parameters to avoid clicking on the tile and therefore deselecting a variable card
-  const diagramNewVariableButton = () => diagramTile.getDiagramToolbarButton("button-add-variable", undefined, true);
-  const diagramInsertVariableButton = () => diagramTile.getDiagramToolbarButton("button-insert-variable", undefined, true);
-  const diagramEditVariableButton = () => diagramTile.getDiagramToolbarButton("button-edit-variable", undefined, true);
-  const lockLayoutButton = () => diagramTile.getDiagramToolbarButton("button-lock-layout", undefined, true);
-  const hideNavigatorButton = () => diagramTile.getDiagramToolbarButton("button-hide-navigator", undefined, true);
-  const diagramDeleteButton = () => diagramTile.getDiagramToolbarButton("button-delete", undefined, true);
   const dialogOkButton = () => cy.get(".modal-button").last();
 
   it("Shared Variable Tiles (Diagram, Drawing)", () => {
@@ -38,16 +31,16 @@ context('Diagram Tool Tile', function () {
 
     // Tile, toolbar, and buttons render
     diagramTile.getDiagramTile().should("exist").click();
-    diagramTile.getDiagramToolbar().should("exist");
-    diagramNewVariableButton().should("exist");
-    diagramInsertVariableButton().should("exist").should("be.disabled"); // Insert variable button is disabled when no variables have been created
-    diagramEditVariableButton().should("exist").should("be.disabled");
-    diagramTile.getDiagramToolbarButton("button-zoom-in").should("be.enabled");
-    diagramTile.getDiagramToolbarButton("button-zoom-out").should("be.enabled");
-    diagramTile.getDiagramToolbarButton("button-fit-view").should("be.enabled");
-    lockLayoutButton().should("exist");
-    hideNavigatorButton().should("exist");
-    diagramDeleteButton().should("exist").should("be.disabled");
+    // No variables created, can create but not add or edit.
+    clueCanvas.toolbarButtonIsEnabled("diagram", "new-variable");
+    clueCanvas.toolbarButtonIsDisabled("diagram", "insert-variable");
+    clueCanvas.toolbarButtonIsDisabled("diagram", "edit-variable");
+    clueCanvas.toolbarButtonIsEnabled("diagram", "zoom-in");
+    clueCanvas.toolbarButtonIsEnabled("diagram", "zoom-out");
+    clueCanvas.toolbarButtonIsEnabled("diagram", "fit-view");
+    clueCanvas.toolbarButtonIsEnabled("diagram", "toggle-lock");
+    clueCanvas.toolbarButtonIsEnabled("diagram", "toggle-navigator");
+    clueCanvas.toolbarButtonIsDisabled("diagram", "delete");
 
     // Title
     const newName = "Test Diagram";
@@ -59,14 +52,14 @@ context('Diagram Tool Tile', function () {
     // Navigator can be hidden and shown
     const navigator = () => diagramTile.getDiagramTile().find(".react-flow__minimap");
     navigator().should("exist");
-    hideNavigatorButton().click();
+    clueCanvas.clickToolbarButton("diagram", "toggle-navigator");
     navigator().should("not.exist");
-    hideNavigatorButton().click();
+    clueCanvas.clickToolbarButton("diagram", "toggle-navigator");
     navigator().should("exist");
 
     // New variable dialog works
     diagramTile.getVariableCard().should("not.exist");
-    diagramNewVariableButton().click();
+    clueCanvas.clickToolbarButton("diagram", "new-variable");
     diagramTile.getDiagramDialog().should("exist");
     const name = "name1";
     dialogField("name").should("exist").type(name);
@@ -75,21 +68,21 @@ context('Diagram Tool Tile', function () {
     diagramTile.getVariableCardField("name").should("have.value", name);
 
     // Insert variable button is disabled when all variables are in the diagram
-    diagramInsertVariableButton().should("be.disabled");
+    clueCanvas.toolbarButtonIsDisabled("diagram", "insert-variable");
 
     // Lock layout button prevents nodes from being selected
-    lockLayoutButton().click();
-    diagramDeleteButton().should("be.disabled");
+    clueCanvas.clickToolbarButton("diagram", "toggle-lock");
+    clueCanvas.toolbarButtonIsDisabled("diagram", "delete");
     diagramTile.getVariableCard().should("have.css", "pointer-events", "none");
-    lockLayoutButton().click();
+    clueCanvas.clickToolbarButton("diagram", "toggle-lock");
     diagramTile.getVariableCard().click();
-    diagramDeleteButton().should("be.enabled");
+    clueCanvas.toolbarButtonIsEnabled("diagram", "delete");
 
     // Edit variable dialog works
     const vName = "name3";
     const vValue = "999.999";
     const vUnit = "C";
-    diagramEditVariableButton().should("be.enabled").click();
+    clueCanvas.clickToolbarButton("diagram", "edit-variable");
     dialogField("name").clear();
     dialogField("name").type(vName);
     dialogField("value").clear();
@@ -134,21 +127,21 @@ context('Diagram Tool Tile', function () {
     diagramTile.getVariableCard().children().should("have.class", "green");
 
     // Fit view
-    diagramTile.getDiagramToolbarButton("button-fit-view").click();
+    clueCanvas.clickToolbarButton("diagram", "fit-view");
     diagramTile.getVariableCard().parent().parent().should("have.attr", "style").and("contain", "scale(2)");
 
     // Delete button works
-    diagramDeleteButton().should("be.enabled").click();
+    clueCanvas.clickToolbarButton("diagram", "delete");
     diagramTile.getVariableCard().should("not.exist");
 
     // Insert variable dialog shows unused variables
-    diagramInsertVariableButton().should("be.enabled").click();
+    clueCanvas.clickToolbarButton("diagram", "insert-variable");
     diagramTile.getDiagramDialog().should("contain.text", "Unused variables:");
     diagramTile.getDiagramDialogCloseButton().click();
 
     // Can drag new variable button to create a new variable card
     const dataTransfer = new DataTransfer;
-    const draggable = () => diagramTile.getDiagramToolbar(undefined, true).find("div[role=button]").first();
+    const draggable = () => diagramTile.getDraggableToolbarButton();
     draggable().focus().trigger("dragstart", { dataTransfer });
     diagramTile.getDiagramTile().trigger("drop", { dataTransfer });
     draggable().trigger("dragend");
@@ -210,12 +203,12 @@ context('Diagram Tool Tile', function () {
     const dialogChip = () => diagramTile.getDiagramDialog().find(".variable-chip");
     diagramTile.getDiagramTile().click();
     diagramTile.getVariableCard().should("not.exist");
-    diagramInsertVariableButton().should("be.enabled").click();
+    clueCanvas.clickToolbarButton("diagram", "insert-variable");
     diagramTile.getDiagramDialog().should("contain.text", "other tiles:");
     dialogChip().click();
     dialogOkButton().click();
     diagramTile.getVariableCard().should("exist");
-    diagramInsertVariableButton().should("be.disabled");
+    clueCanvas.toolbarButtonIsDisabled("diagram", "insert-variable");
 
     // Draw tile edit variable dialog works
     const newName = "vn2";
@@ -305,7 +298,8 @@ context('Diagram Tool Tile', function () {
     clueCanvas.getUndoTool().should("not.have.class", "disabled");
     clueCanvas.getRedoTool().should("have.class", "disabled");
 
-    diagramNewVariableButton().click();
+    diagramTile.getDiagramTile().should("exist").click();
+    clueCanvas.clickToolbarButton("diagram", "new-variable");
     diagramTile.getDiagramDialog().should("exist");
     const name = "name1";
     dialogField("name").should("exist").type(name);

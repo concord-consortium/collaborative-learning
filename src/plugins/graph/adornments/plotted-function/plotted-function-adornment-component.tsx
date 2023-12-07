@@ -136,13 +136,6 @@ export const PlottedFunctionAdornmentComponent = observer(function PlottedFuncti
       // from triggering a reinstall of the autorun.
       if (xAxis && yAxis) {
         console.log(`*** refreshAxisChange`);
-        console.log(`  *`, dataConfig);
-        console.log(`  *`, model);
-        console.log(`  *`, plotWidth);
-        console.log(`  *`, plotHeight);
-        console.log(`  *`, refreshValues);
-        console.log(`  *`, xAxis);
-        console.log(`  *`, yAxis);
         const { domain: xDomain } = xAxis; // eslint-disable-line unused-imports/no-unused-vars
         const { domain: yDomain } = yAxis; // eslint-disable-line unused-imports/no-unused-vars
       }

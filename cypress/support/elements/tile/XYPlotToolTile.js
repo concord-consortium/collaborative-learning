@@ -28,8 +28,11 @@ class XYPlotToolTile {
   getXAxisLabel(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .display-label.bottom`);
   }
+  getXAttributesLabel(workspaceClass) {
+    return cy.get(`${wsClass(workspaceClass)} .canvas-area .multi-legend .x-axis-menu .simple-attribute-label`);
+  }
   getYAttributesLabel(workspaceClass) {
-    return cy.get(`${wsClass(workspaceClass)} .canvas-area .multi-legend .simple-attribute-label`);
+    return cy.get(`${wsClass(workspaceClass)} .canvas-area .multi-legend .legend-row .simple-attribute-label`);
   }
   selectYAttribute(attribute, workspaceClass) {
     this.getYAttributesLabel(workspaceClass).first().click({ force: true });

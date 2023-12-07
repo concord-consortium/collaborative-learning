@@ -434,10 +434,10 @@ export const GraphModel = TileContentModel
       if (detachedDatasetIds.length) {
         detachedDatasetIds.forEach((id) => {
           const index = self.layers.findIndex((layer) => layer.config.dataset?.id === id);
-          if (index > 0) {
+          if (index > 0 || self.layers.length > 1) {
             self.layers.splice(index, 1);
           } else if (index === 0) {
-            // Unlink layer 0, don't remove it.
+            // Unlink last remaining layer, don't remove it.
             self.layers[0].setDataset(undefined, undefined);
             self.layers[0].configureUnlinkedLayer();
             self.layers[0].updateAdornments();
@@ -482,8 +482,8 @@ export const GraphModel = TileContentModel
                 const dataConfig = DataConfigurationModel.create();
                 newLayer.setDataConfiguration(dataConfig);
                 dataConfig.setDataset(dataSetModel.dataSet, metaDataModel);
+                newLayer.configureLinkedLayer();
                 // May need these when we want to actually display the new layer:
-                // newLayer.configureLinkedLayer();
                 // newLayer.updateAdornments(true);
                 // newLayer.setDataSetListener();
               }
@@ -612,11 +612,6 @@ export function createGraphModel(snap?: IGraphModelSnapshot, appConfig?: AppConf
     const cLines = ConnectingLinesModel.create();
     createdGraphModel.showAdornment(cLines);
   }
-
-  // TODO Add plotted function adornment at the proper time, like when connecting to a SharedVariableModel
-  // const plottedFunctionAdornment = PlottedFunctionAdornmentModel.create();
-  // plottedFunctionAdornment.addPlottedFunction(x => x ** 2);
-  // createdGraphModel.showAdornment(plottedFunctionAdornment);
 
   return createdGraphModel;
 }
