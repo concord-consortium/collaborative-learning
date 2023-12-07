@@ -86,7 +86,7 @@ export const useConsumerTileLinking = ({
         // any existing shared data sets before linking.
         if (shareType === SharedDataSet && !getTileContentInfo(consumerTile.type)?.consumesMultipleDataSets) {
           const allSharedDataSets
-            = sharedModelManager.getTileSharedModelsByType(tileInfo.id, SharedDataSet);
+            = sharedModelManager.getTileSharedModelsByType(consumerTile, SharedDataSet);
           allSharedDataSets.forEach(sharedDataSet => {
             sharedModelManager.removeTileSharedModel(consumerTile, sharedDataSet);
           });
