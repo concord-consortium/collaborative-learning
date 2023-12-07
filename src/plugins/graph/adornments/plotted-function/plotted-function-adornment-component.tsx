@@ -79,7 +79,7 @@ export const PlottedFunctionAdornmentComponent = observer(function PlottedFuncti
     const tPixelMin = xScale(xMin);
     const tPixelMax = xScale(xMax);
     const kPixelGap = 1;
-    const tPoints = computePoints({
+    const tPoints = graphModel.computePoints({
       formulaFunction, min: tPixelMin, max: tPixelMax, xCellCount, yCellCount, gap: kPixelGap, xScale, yScale
     });
     if (tPoints.length === 0) return;
@@ -91,22 +91,27 @@ export const PlottedFunctionAdornmentComponent = observer(function PlottedFuncti
       .attr("data-testid", `plotted-function-path${classFromKey ? `-${classFromKey}` : ""}`)
       .attr("d", path.current);
 
-  }, [classFromKey, xCellCount, xScale, yCellCount, yScale]);
+  }, [classFromKey, graphModel, xCellCount, xScale, yCellCount, yScale]);
 
   // Add the lines and their associated covers and labels
   const refreshValues = useCallback(() => {
     if (!model.isVisible) return;
 
-    const measure = model?.plottedFunctions.get(instanceKey);
+    const { computeY, dispose } = graphModel.setupCompute("x", "y");
+    // const measure = model?.plottedFunctions.get(instanceKey);
     const selection = select(plottedFunctionRef.current);
 
     // Remove the previous value's elements
     selection.html(null);
 
-    if (measure) {
-      addPath(measure.formulaFunction);
+    if (computeY) {
+      addPath(computeY);
     }
-  }, [model, instanceKey, addPath]);
+    dispose?.();
+    // if (measure) {
+    //   addPath(measure.formulaFunction);
+    // }
+  }, [graphModel, model, addPath]);
 
   // Refresh values on expression changes
   useEffect(function refreshExpressionChange() {
@@ -130,6 +135,14 @@ export const PlottedFunctionAdornmentComponent = observer(function PlottedFuncti
       // We do this instead of including domains in the useEffect dependency array to prevent domain changes
       // from triggering a reinstall of the autorun.
       if (xAxis && yAxis) {
+        console.log(`*** refreshAxisChange`);
+        console.log(`  *`, dataConfig);
+        console.log(`  *`, model);
+        console.log(`  *`, plotWidth);
+        console.log(`  *`, plotHeight);
+        console.log(`  *`, refreshValues);
+        console.log(`  *`, xAxis);
+        console.log(`  *`, yAxis);
         const { domain: xDomain } = xAxis; // eslint-disable-line unused-imports/no-unused-vars
         const { domain: yDomain } = yAxis; // eslint-disable-line unused-imports/no-unused-vars
       }

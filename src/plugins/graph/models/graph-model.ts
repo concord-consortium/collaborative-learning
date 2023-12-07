@@ -1,18 +1,18 @@
 import { reaction } from "mobx";
 import stringify from "json-stringify-pretty-compact";
-import { addDisposer, getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
+import { addDisposer, destroy, getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
 import {createContext, useContext} from "react";
 import { IClueObject } from "../../../models/annotations/clue-object";
 import { getTileIdFromContent } from "../../../models/tiles/tile-model";
 import { IAdornmentModel } from "../adornments/adornment-models";
-import { AxisPlace } from "../imports/components/axis/axis-types";
+import { AxisPlace, ScaleNumericBaseType } from "../imports/components/axis/axis-types";
 import {
   AxisModelUnion, EmptyAxisModel, IAxisModelUnion, NumericAxisModel
 } from "../imports/components/axis/models/axis-model";
 import { GraphPlace } from "../imports/components/axis-graph-shared";
 import {
   GraphAttrRole, hoverRadiusFactor, kDefaultNumericAxisBounds, kGraphTileType,
-  PlotType, PlotTypes, pointRadiusMax, pointRadiusSelectionAddend
+  PlotType, PlotTypes, Point, pointRadiusMax, pointRadiusSelectionAddend
 } from "../graph-types";
 import { SharedModelType } from "../../../models/shared/shared-model";
 import { getTileCaseMetadata } from "../../../models/shared/shared-data-utils";
@@ -48,6 +48,17 @@ export type BackgroundLockInfo = {
   yAxisUpperBound: number
 };
 
+interface IComputePointsOptions {
+  formulaFunction: (x: number) => number,
+  min: number,
+  max: number,
+  xCellCount: number,
+  yCellCount: number,
+  gap: number,
+  xScale: ScaleNumericBaseType,
+  yScale: ScaleNumericBaseType
+}
+
 export const NumberToggleModel = types
   .model('NumberToggleModel', {});
 
@@ -79,6 +90,7 @@ export const GraphModel = TileContentModel
   })
   .volatile(self => ({
     // prevDataSetId: "",
+    sharedVariablesCopy: undefined as SharedVariablesType | undefined
   }))
   .preProcessSnapshot((snapshot: any) => {
     const hasLayerAlready:boolean = (snapshot?.layers?.length || 0) > 0;
@@ -107,7 +119,24 @@ export const GraphModel = TileContentModel
         all = all.concat(layer.autoAssignedAttributes);
       }
       return all;
-    }
+    },
+    computePoints(options: IComputePointsOptions) {
+      const { min, max, xCellCount, yCellCount, gap, xScale, yScale, formulaFunction } = options;
+      const tPoints: Point[] = [];
+      if (xScale.invert) {
+        for (let pixelX = min; pixelX <= max; pixelX += gap) {
+          const tX = xScale.invert(pixelX * xCellCount);
+          const tY = formulaFunction(tX);
+          console.log(`  .`, tX, tY);
+          if (Number.isFinite(tY)) {
+            const pixelY = yScale(tY) / yCellCount;
+            tPoints.push({ x: pixelX, y: pixelY });
+          }
+        }
+      }
+      console.log(`... tPoints`, tPoints);
+      return tPoints;
+    },
   }))
   .views(self => ({
     /**
@@ -329,6 +358,29 @@ export const GraphModel = TileContentModel
     hideAdornment(type: string) {
       const adornment = self.adornments.find(a => a.type === type);
       adornment?.setVisibility(false);
+    },
+    computeY(x: number) {
+      if (self.sharedVariablesCopy) {
+        const independentVariable = self.sharedVariablesCopy.variables.find(variable => variable.name === "x");
+        const dependentVariable = self.sharedVariablesCopy.variables.find(variable => variable.name === "y");
+        if (independentVariable && dependentVariable) {
+          if (x <= .9) {
+            console.log(`OOO plotting`, x);
+          } else if (x >= 2.298) {
+            console.log(` OO plotting`, x);
+          }
+          independentVariable.setValue(x);
+          const dependentValue = dependentVariable.computedValue;
+          console.log(`  O computed`, x, dependentValue);
+          return dependentValue ?? x ** 2;
+        }
+      }
+      console.log(`^^^ Failed to compute`);
+      return x ** 2;
+    },
+    disposeSharedVariablesCopy() {
+      destroy(self.sharedVariablesCopy);
+      self.sharedVariablesCopy = undefined;
     }
   }))
   .actions(self => ({
@@ -336,6 +388,22 @@ export const GraphModel = TileContentModel
       for (const layer of self.layers) {
         layer.clearAutoAssignedAttributes();
       }
+    },
+    setupCompute(xName: string, yName: string) {
+      const defaultComputeY = (x: number) => x ** 2;
+      const smm = getSharedModelManager(self);
+      if (smm && smm.isReady) {
+        const sharedVariableModels = smm.getTileSharedModelsByType(self, SharedVariables);
+        if (sharedVariableModels.length > 0) {
+          const sharedVariables = sharedVariableModels[0] as SharedVariablesType;
+          self.sharedVariablesCopy = SharedVariables.create(getSnapshot(sharedVariables));
+          return { computeY: self.computeY, dispose: self.disposeSharedVariablesCopy };
+        }
+      }
+      return {
+        computeY: defaultComputeY,
+        dispose: () => undefined
+      };
     },
     plotFunction(x: number) {
       const smm = getSharedModelManager(self);
@@ -479,37 +547,29 @@ export const GraphModel = TileContentModel
           return sharedVariableModels;
         },
         (sharedVariableModels) => {
-          console.log(`ooo Changing plotted functions`, sharedVariableModels?.length);
           if (sharedVariableModels && sharedVariableModels.length > 0) {
             const plottedFunctionAdornment = PlottedFunctionAdornmentModel.create();
             plottedFunctionAdornment.addPlottedFunction(self.plotFunction);
-              // getPlottedFunction(sharedVariableModels[0] as SharedVariablesType));
             self.showAdornment(plottedFunctionAdornment);
-            console.log(` oo displaying`);
           } else {
             self.hideAdornment(kPlottedFunctionType);
-            console.log(` oo hiding`);
           }
         }
       ));
 
       // Link to any SharedVariableModel in the document
-      console.log(`xxx Adding shared model disposer`);
       addDisposer(self, reaction(
         () => {
           const smm = getSharedModelManager(self);
           const isReady = smm?.isReady;
           const sharedVariableModels = isReady && smm.getSharedModelsByType(kSharedVariablesID);
           const tileSharedVariables = isReady && smm.getTileSharedModelsByType(self, SharedVariables);
-          console.log(`~~~ reaction condition`, { smm, sharedVariableModels, tileSharedVariables });
           return { smm, sharedVariableModels, tileSharedVariables };
         },
         ({smm, sharedVariableModels, tileSharedVariables}) => {
-          console.log(`--- Connecting to shared variables`, sharedVariableModels, tileSharedVariables);
           if (smm && sharedVariableModels && sharedVariableModels.length > 0
             && tileSharedVariables && tileSharedVariables.length === 0
           ) {
-            console.log(` -- Adding shared model`, sharedVariableModels[0]);
             smm.addTileSharedModel(self, sharedVariableModels[0]);
           }
         }
