@@ -1,6 +1,6 @@
 import { reaction } from "mobx";
 import stringify from "json-stringify-pretty-compact";
-import { addDisposer, destroy, getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
+import { addDisposer, getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
 import {createContext, useContext} from "react";
 import { IClueObject } from "../../../models/annotations/clue-object";
 import { getTileIdFromContent } from "../../../models/tiles/tile-model";
@@ -32,7 +32,7 @@ import { GraphLayerModel } from "./graph-layer-model";
 import { isSharedDataSet, SharedDataSet } from "../../../models/shared/shared-data-set";
 import { DataConfigurationModel } from "./data-configuration-model";
 import { PlottedFunctionAdornmentModel } from "../adornments/plotted-function/plotted-function-adornment-model";
-import { SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
+import { SharedVariables } from "../../shared-variables/shared-variables";
 import { kPlottedFunctionType } from "../adornments/plotted-function/plotted-function-adornment-types";
 
 export interface GraphProperties {
@@ -78,8 +78,7 @@ export const GraphModel = TileContentModel
     showMeasuresForSelection: false
   })
   .volatile(self => ({
-    // prevDataSetId: "",
-    sharedVariablesCopy: undefined as SharedVariablesType | undefined
+    // prevDataSetId: ""
   }))
   .preProcessSnapshot((snapshot: any) => {
     const hasLayerAlready:boolean = (snapshot?.layers?.length || 0) > 0;
@@ -330,28 +329,6 @@ export const GraphModel = TileContentModel
     hideAdornment(type: string) {
       const adornment = self.adornments.find(a => a.type === type);
       adornment?.setVisibility(false);
-    },
-    computeY(x: number) {
-      if (self.sharedVariablesCopy) {
-        const independentVariable = self.sharedVariablesCopy.variables.find(variable => variable.name === "x");
-        const dependentVariable = self.sharedVariablesCopy.variables.find(variable => variable.name === "y");
-        if (independentVariable && dependentVariable) {
-          if (x <= .9) {
-            console.log(`OOO plotting`, x);
-          } else if (x >= 2.298) {
-            console.log(` OO plotting`, x);
-          }
-          independentVariable.setValue(x);
-          const dependentValue = dependentVariable.computedValue;
-          return dependentValue ?? x ** 2;
-        }
-      }
-      console.log(`^^^ Failed to compute`);
-      return x ** 2;
-    },
-    disposeSharedVariablesCopy() {
-      if (self.sharedVariablesCopy) destroy(self.sharedVariablesCopy);
-      self.sharedVariablesCopy = undefined;
     }
   }))
   .actions(self => ({
@@ -359,17 +336,6 @@ export const GraphModel = TileContentModel
       for (const layer of self.layers) {
         layer.clearAutoAssignedAttributes();
       }
-    },
-    setupCompute(xName: string, yName: string) {
-      const smm = getSharedModelManager(self);
-      if (smm && smm.isReady) {
-        const sharedVariableModels = smm.getTileSharedModelsByType(self, SharedVariables);
-        if (sharedVariableModels.length > 0) {
-          const sharedVariables = sharedVariableModels[0] as SharedVariablesType;
-          self.sharedVariablesCopy = SharedVariables.create(getSnapshot(sharedVariables));
-        }
-      }
-      return { computeY: self.computeY, dispose: self.disposeSharedVariablesCopy };
     }
   }))
   .actions(self => ({
@@ -498,7 +464,6 @@ export const GraphModel = TileContentModel
         (sharedVariableModels) => {
           if (sharedVariableModels && sharedVariableModels.length > 0) {
             const plottedFunctionAdornment = PlottedFunctionAdornmentModel.create();
-            plottedFunctionAdornment.addPlottedFunction(self.computeY);
             self.showAdornment(plottedFunctionAdornment);
           } else {
             self.hideAdornment(kPlottedFunctionType);

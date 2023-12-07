@@ -97,7 +97,7 @@ export const PlottedFunctionAdornmentComponent = observer(function PlottedFuncti
   const refreshValues = useCallback(() => {
     if (!model.isVisible) return;
 
-    const { computeY, dispose } = graphModel.setupCompute("x", "y");
+    const { computeY, dispose } = model.setupCompute("x", "y");
     // const measure = model?.plottedFunctions.get(instanceKey);
     const selection = select(plottedFunctionRef.current);
 
@@ -111,7 +111,7 @@ export const PlottedFunctionAdornmentComponent = observer(function PlottedFuncti
     // if (measure) {
     //   addPath(measure.formulaFunction);
     // }
-  }, [graphModel, model, addPath]);
+  }, [model, addPath]);
 
   // Refresh values on expression changes
   useEffect(function refreshExpressionChange() {

@@ -1,4 +1,6 @@
-import { Instance, types } from "mobx-state-tree";
+import { destroy, getSnapshot, Instance, types } from "mobx-state-tree";
+import { getSharedModelManager } from "../../../../models/tiles/tile-environment";
+import { SharedVariables, SharedVariablesType } from "../../../shared-variables/shared-variables";
 import { Point } from "../../graph-types";
 import { ScaleNumericBaseType } from "../../imports/components/axis/axis-types";
 import { AdornmentModel, IAdornmentModel } from "../adornment-models";
@@ -37,6 +39,9 @@ export const PlottedFunctionAdornmentModel = AdornmentModel
     plottedFunctions: types.map(PlottedFunctionInstance),
     error: ""
   })
+  .volatile(self => ({
+    sharedVariablesCopy: undefined as SharedVariablesType | undefined
+  }))
   .views( self => ({
     computePoints(options: IComputePointsOptions) {
       const { min, max, xCellCount, yCellCount, gap, xScale, yScale, formulaFunction } = options;
@@ -58,9 +63,9 @@ export const PlottedFunctionAdornmentModel = AdornmentModel
     setError(error: string) {
       self.error = error;
     },
-    addPlottedFunction(formulaFunction: FormulaFn, key=kDefaultFunctionKey) {
+    addPlottedFunction(formulaFunction?: FormulaFn, key=kDefaultFunctionKey) {
       const newPlottedFunction = PlottedFunctionInstance.create();
-      newPlottedFunction.setValue(formulaFunction);
+      if (formulaFunction) newPlottedFunction.setValue(formulaFunction);
       self.plottedFunctions.set(key, newPlottedFunction);
     },
     updatePlottedFunctionValue(formulaFunction: FormulaFn, key=kDefaultFunctionKey) {
@@ -71,6 +76,41 @@ export const PlottedFunctionAdornmentModel = AdornmentModel
     },
     removePlottedFunction(key: string) {
       self.plottedFunctions.delete(key);
+    },
+    computeY(x: number) {
+      if (self.sharedVariablesCopy) {
+        const independentVariable = self.sharedVariablesCopy.variables.find(variable => variable.name === "x");
+        const dependentVariable = self.sharedVariablesCopy.variables.find(variable => variable.name === "y");
+        if (independentVariable && dependentVariable) {
+          if (x <= .9) {
+            console.log(`OOO plotting`, x);
+          } else if (x >= 2.298) {
+            console.log(` OO plotting`, x);
+          }
+          independentVariable.setValue(x);
+          const dependentValue = dependentVariable.computedValue;
+          return dependentValue ?? x ** 2;
+        }
+      }
+      console.log(`^^^ Failed to compute`);
+      return x ** 2;
+    },
+    disposeSharedVariablesCopy() {
+      if (self.sharedVariablesCopy) destroy(self.sharedVariablesCopy);
+      self.sharedVariablesCopy = undefined;
+    }
+  }))
+  .actions(self => ({
+    setupCompute(xName: string, yName: string) {
+      const smm = getSharedModelManager(self);
+      if (smm && smm.isReady) {
+        const sharedVariableModels = smm.getTileSharedModelsByType(self, SharedVariables);
+        if (sharedVariableModels.length > 0) {
+          const sharedVariables = sharedVariableModels[0] as SharedVariablesType;
+          self.sharedVariablesCopy = SharedVariables.create(getSnapshot(sharedVariables));
+        }
+      }
+      return { computeY: self.computeY, dispose: self.disposeSharedVariablesCopy };
     }
   }));
 
