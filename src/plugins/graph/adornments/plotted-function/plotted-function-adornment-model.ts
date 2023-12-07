@@ -39,9 +39,6 @@ export const PlottedFunctionAdornmentModel = AdornmentModel
     plottedFunctions: types.map(PlottedFunctionInstance),
     error: ""
   })
-  .volatile(self => ({
-    sharedVariablesCopy: undefined as SharedVariablesType | undefined
-  }))
   .views( self => ({
     computePoints(options: IComputePointsOptions) {
       console.log(`--- computePoints`);

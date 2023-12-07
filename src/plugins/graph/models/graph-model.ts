@@ -78,7 +78,7 @@ export const GraphModel = TileContentModel
     showMeasuresForSelection: false
   })
   .volatile(self => ({
-    // prevDataSetId: ""
+    // prevDataSetId: "",
   }))
   .preProcessSnapshot((snapshot: any) => {
     const hasLayerAlready:boolean = (snapshot?.layers?.length || 0) > 0;

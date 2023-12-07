@@ -27,16 +27,10 @@ export const SharedVariables = SharedModel.named("SharedVariables")
   },
   computeY(x: number) {
     if (self.variablesCopy && self.xVariable && self.yVariable) {
-      if (x <= .9) {
-        console.log(`OOO plotting`, x);
-      } else if (x >= 2.298) {
-        console.log(` OO plotting`, x);
-      }
       self.xVariable.setValue(x);
       const dependentValue = self.yVariable.computedValue;
       return dependentValue ?? x ** 2;
     }
-    console.log(`^^^ Failed to compute`);
     return x ** 2;
   },
   disposeCompute() {
