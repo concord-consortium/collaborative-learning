@@ -84,6 +84,18 @@ context('XYPlot Tool Tile', function () {
       cy.log("verify graph dot is updated");
       xyTile.getGraphDot().should('have.length', 2);
 
+      cy.log("verify edit box for horizontal and vertical axes");
+      xyTile.getEditableAxisBox("bottom", "min").click().type('-10{enter}');
+      xyTile.getEditableAxisBox("bottom", "min").should('contain', '-10');
+      xyTile.getEditableAxisBox("bottom", "max").click().type('50.02345{enter}');
+      xyTile.getEditableAxisBox("bottom", "max").should('contain', '50.02345');
+      xyTile.getEditableAxisBox("left", "min").click().type('-10.55{enter}');
+      xyTile.getEditableAxisBox("left", "min").should('contain', '-10.55');
+      xyTile.getEditableAxisBox("left", "max").click().type('50{enter}');
+      xyTile.getEditableAxisBox("left", "max").should('contain', '50');
+      xyTile.getEditableAxisBox("left", "max").click().type('abc{enter}');
+      xyTile.getEditableAxisBox("left", "max").should('contain', '50');
+
       cy.log("restore points to canvas");
       primaryWorkspace.openResourceTab();
       resourcePanel.openPrimaryWorkspaceTab("my-work");

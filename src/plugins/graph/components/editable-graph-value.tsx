@@ -104,7 +104,8 @@ export const EditableGraphValue: React.FC<IEditableValueProps> = observer(functi
   };
 
   return (
-    <div style={borderBoxStyles} className={"editable-border-box"} onClick={handleClick}>
+    <div style={borderBoxStyles} className={"editable-border-box"} onClick={handleClick}
+      data-testid={`editable-border-box-${axis}-${minOrMax}`}>
       { isEditing ?
         <input
           className="input-textbox"
