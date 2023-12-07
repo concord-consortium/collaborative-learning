@@ -110,7 +110,7 @@ export const useConsumerTileLinking = ({
         }
       }
     }
-  }, [model.content, modelToShare, readOnly, shareType.name, sharedModelManager]);
+  }, [model.content, modelToShare, readOnly, sharedModelManager]);
 
   const addTilesContext = useContext(AddTilesContext);
 
