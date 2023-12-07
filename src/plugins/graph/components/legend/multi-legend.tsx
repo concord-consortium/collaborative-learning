@@ -11,6 +11,7 @@ import { useGraphModelContext } from "../../models/graph-model";
 import { LayerLegend } from "./layer-legend";
 import { IGraphLayerModel } from "../../models/graph-layer-model";
 import { SimpleAttributeLabel } from "../simple-attribute-label";
+import { VariableFunctionLegend } from "./variable-function-legend";
 
 import "./multi-legend.scss";
 
@@ -19,6 +20,7 @@ const kMultiLegendVerticalPadding = 10;
 const kMultiLegendVerticalGap = 8;
 const kMultiLegendLabelHeight = 28;
 const kMultiLegendHRuleHeight = 2;
+const kTemporarySpaceForVariablesLegend = 30; // TODO: actually calculate height for variables legend
 
 interface IMultiLegendProps {
   graphElt: HTMLDivElement | null;
@@ -57,6 +59,7 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
   }
   // Total height is height of X-axis menus, plus sum of all the layer sections
   const totalHeight = kMultiLegendMenuHeight + kMultiLegendVerticalPadding
+    + kTemporarySpaceForVariablesLegend
     + graphModel.layers.reduce((prev, layer)=>{ return prev + heightOfLayerLegend(layer);}, 0);
 
   useEffect(function RespondToLayoutChange() {
@@ -103,6 +106,7 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
         { xMenus }
       </div>
       { layerLegends }
+      <VariableFunctionLegend/>
     </div>
   );
 });

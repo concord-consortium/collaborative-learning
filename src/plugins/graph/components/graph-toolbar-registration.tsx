@@ -13,7 +13,8 @@ function LinkTileButton(name: string, title: string, allowMultiple: boolean) {
   const model = useContext(TileModelContext)!;
 
   const { isLinkEnabled, showLinkTileDialog }
-    = useProviderTileLinking({ model, allowMultipleGraphDatasets: allowMultiple });
+    = useProviderTileLinking({ model, allowMultipleGraphDatasets: allowMultiple,
+        sharedModelTypes: [ "SharedDataSet", "SharedVariables" ] });
 
   const handleLinkTileButtonClick = (e: React.MouseEvent) => {
     isLinkEnabled && showLinkTileDialog();
