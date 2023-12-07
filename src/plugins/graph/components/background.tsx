@@ -30,12 +30,6 @@ const prepareTree = (areaSelector: string, circleSelector: string): RTree => {
     return selectionTree;
   },
 
-  clearAllSelected = (graphModel: IGraphModel) => {
-    for (const layer of graphModel.layers) {
-      layer.config.dataset?.setSelectedCases([]);
-    }
-  },
-
   getCasesForDelta = (tree: any, newRect: rTreeRect, prevRect: rTreeRect) => {
     const diffRects = rectangleSubtract(newRect, prevRect);
     let caseIDs: string[] = [];
@@ -80,7 +74,7 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
       width.current = 0;
       height.current = 0;
       if (!event.sourceEvent.shiftKey) {
-        clearAllSelected(graphModel);
+        graphModel.clearAllSelectedCases();
       }
       marqueeState.setMarqueeRect({x: startX.current, y: startY.current, width: 0, height: 0});
     }, [graphModel, instanceId, layout, marqueeState]),
@@ -133,7 +127,7 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
         // clicking on the background deselects all cases
         .on('click', (event) => {
           if (!event.shiftKey) {
-            clearAllSelected(graphModel);
+            graphModel.clearAllSelectedCases();
           }
         })
         .selectAll<SVGRectElement, number>('rect')

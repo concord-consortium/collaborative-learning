@@ -178,6 +178,9 @@ export const GraphModel = TileContentModel
     layerForDataConfigurationId(dataConfID: string) {
       return self.layers.find(layer => layer.config.id === dataConfID);
     },
+    getDataConfiguration(dataConfigID: string) {
+      return this.layerForDataConfigurationId(dataConfigID)?.config;
+    },
     /**
      * Search for the given attribute ID and return the layer it is found in.
      * @param id - Attribute ID
@@ -248,10 +251,7 @@ export const GraphModel = TileContentModel
      * Return true if no attribute has been assigned to any graph role in any layer.
      */
     get noAttributesAssigned() {
-      for (const layer of self.layers) {
-        if (!layer.config.noAttributesAssigned) return false;
-      }
-      return true;
+      return !self.layers.some(layer => !layer.config.noAttributesAssigned);
     },
     get annotatableObjects() {
       const tileId = getTileIdFromContent(self) ?? "";
@@ -353,6 +353,11 @@ export const GraphModel = TileContentModel
     },
     setPlotType(type: PlotType) {
       self.plotType = type;
+    },
+    clearAllSelectedCases() {
+      for (const layer of self.layers) {
+        layer.config.dataset?.setSelectedCases([]);
+      }
     },
     setGraphProperties(props: GraphProperties) {
       (Object.keys(props.axes) as AxisPlace[]).forEach(aKey => {

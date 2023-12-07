@@ -43,7 +43,7 @@ export const useDataTips = ({dotsRef, graphModel, enableAnimation}: IUseDataTips
             return plotNum === 0
               ? aPair.attributeID
               : aPair.role === 'y'
-                ? graphModel.layerForDataConfigurationId(dataConfigID)?.config.yAttributeIDs[plotNum]
+                ? graphModel.getDataConfiguration(dataConfigID)?.yAttributeIDs[plotNum]
                 : aPair.attributeID;
           });
         const tipText = getPointTipText(caseID, attrIDsToUse, graphModel);
@@ -56,7 +56,7 @@ export const useDataTips = ({dotsRef, graphModel, enableAnimation}: IUseDataTips
       dataTip.hide();
       if (okToTransition(target)) {
         const { dataConfigID, caseID } = (select(event.target as SVGSVGElement).datum() as CaseData),
-          isSelected = graphModel.layerForDataConfigurationId(dataConfigID)?.config.dataset?.isCaseSelected(caseID);
+          isSelected = graphModel.getDataConfiguration(dataConfigID)?.dataset?.isCaseSelected(caseID);
         select(event.target as SVGSVGElement)
           .transition().duration(transitionDuration)
           .attr('r', isSelected ? selectedPointRadius : pointRadius);

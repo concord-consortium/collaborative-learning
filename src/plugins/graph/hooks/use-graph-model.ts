@@ -1,10 +1,10 @@
 import {MutableRefObject, useCallback, useEffect} from "react";
+import { reaction } from "mobx";
 import {isAddCasesAction, isRemoveCasesAction} from "../../../models/data/data-set-actions";
 import {IGraphModel, isGraphVisualPropsAction} from "../models/graph-model";
 import {IDotsRef} from "../graph-types";
 import {matchAllCirclesToData, matchCirclesToData, setNiceDomain, startAnimation} from "../utilities/graph-utils";
 import {onAnyAction} from "../../../utilities/mst-utils";
-import { reaction } from "mobx";
 
 interface IProps {
   graphModel: IGraphModel
