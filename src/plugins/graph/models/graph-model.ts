@@ -127,14 +127,12 @@ export const GraphModel = TileContentModel
         for (let pixelX = min; pixelX <= max; pixelX += gap) {
           const tX = xScale.invert(pixelX * xCellCount);
           const tY = formulaFunction(tX);
-          console.log(`  .`, tX, tY);
           if (Number.isFinite(tY)) {
             const pixelY = yScale(tY) / yCellCount;
             tPoints.push({ x: pixelX, y: pixelY });
           }
         }
       }
-      console.log(`... tPoints`, tPoints);
       return tPoints;
     },
   }))
@@ -371,7 +369,6 @@ export const GraphModel = TileContentModel
           }
           independentVariable.setValue(x);
           const dependentValue = dependentVariable.computedValue;
-          console.log(`  O computed`, x, dependentValue);
           return dependentValue ?? x ** 2;
         }
       }
@@ -404,23 +401,6 @@ export const GraphModel = TileContentModel
         computeY: defaultComputeY,
         dispose: () => undefined
       };
-    },
-    plotFunction(x: number) {
-      const smm = getSharedModelManager(self);
-      if (smm && smm.isReady) {
-        const sharedVariableModels = smm.getTileSharedModelsByType(self, SharedVariables);
-        if (sharedVariableModels.length > 0) {
-          if (x <= .9) {
-            console.log(`OOO plotting`, x);
-          } else if (x >= 2.298) {
-            console.log(` OO plotting`, x);
-          }
-          const sharedVariables = sharedVariableModels[0] as SharedVariablesType;
-          const yValue = sharedVariables.getFunctionValue(x, "x", "y");
-          if (yValue !== undefined) return yValue;
-        }
-      }
-      return x ** 2;
     }
   }))
   .actions(self => ({
@@ -549,7 +529,7 @@ export const GraphModel = TileContentModel
         (sharedVariableModels) => {
           if (sharedVariableModels && sharedVariableModels.length > 0) {
             const plottedFunctionAdornment = PlottedFunctionAdornmentModel.create();
-            plottedFunctionAdornment.addPlottedFunction(self.plotFunction);
+            plottedFunctionAdornment.addPlottedFunction(self.computeY);
             self.showAdornment(plottedFunctionAdornment);
           } else {
             self.hideAdornment(kPlottedFunctionType);
