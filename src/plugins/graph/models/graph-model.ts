@@ -32,7 +32,7 @@ import { GraphLayerModel } from "./graph-layer-model";
 import { isSharedDataSet, SharedDataSet } from "../../../models/shared/shared-data-set";
 import { DataConfigurationModel } from "./data-configuration-model";
 import { PlottedFunctionAdornmentModel } from "../adornments/plotted-function/plotted-function-adornment-model";
-import { kSharedVariablesID, SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
+import { SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
 import { kPlottedFunctionType } from "../adornments/plotted-function/plotted-function-adornment-types";
 
 export interface GraphProperties {
@@ -528,24 +528,6 @@ export const GraphModel = TileContentModel
             self.showAdornment(plottedFunctionAdornment);
           } else {
             self.hideAdornment(kPlottedFunctionType);
-          }
-        }
-      ));
-
-      // Link to any SharedVariableModel in the document
-      addDisposer(self, reaction(
-        () => {
-          const smm = getSharedModelManager(self);
-          const isReady = smm?.isReady;
-          const sharedVariableModels = isReady && smm.getSharedModelsByType(kSharedVariablesID);
-          const tileSharedVariables = isReady && smm.getTileSharedModelsByType(self, SharedVariables);
-          return { smm, sharedVariableModels, tileSharedVariables };
-        },
-        ({smm, sharedVariableModels, tileSharedVariables}) => {
-          if (smm && sharedVariableModels && sharedVariableModels.length > 0
-            && tileSharedVariables && tileSharedVariables.length === 0
-          ) {
-            smm.addTileSharedModel(self, sharedVariableModels[0]);
           }
         }
       ));
