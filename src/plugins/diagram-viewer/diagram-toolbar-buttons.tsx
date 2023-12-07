@@ -209,8 +209,9 @@ export const DeleteButton = observer(function DeleteButton({ name }: IToolbarBut
 
 export const LinkGraphButton = observer(function LinkGraphButton({name}: IToolbarButtonComponentProps) {
   const model = useContext(TileModelContext)!;
+  const methods = useContext(DiagramTileMethodsContext);
 
-  const hasLinkableRows = true; // TODO
+  const hasLinkableRows = methods?.isDisplayingSomeVariables() || false;
 
   const { isLinkEnabled, showLinkTileDialog }
   = useConsumerTileLinking({ model, hasLinkableRows, shareType: SharedVariables, tileType: kGraphTileType });
