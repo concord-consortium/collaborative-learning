@@ -234,7 +234,7 @@ export const PersistentUIModel = types
       onSnapshot(self, (snapshot)=>{
         const snapshotStr = JSON.stringify(snapshot);
         const updateRef = db.firebase.ref(path);
-        updateRef.set(snapshotStr);
+        // updateRef.set(snapshotStr);
       });
     }
 }));
