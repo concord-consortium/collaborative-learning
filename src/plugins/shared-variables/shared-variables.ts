@@ -48,17 +48,6 @@ export const SharedVariables = SharedModel.named("SharedVariables")
     const variable = Variable.create(snapshot);
     self.addVariable(variable);
     return variable;
-  },
-  getFunctionValue(independentValue: number, independentVariableName: string, dependentVariableName: string) {
-    const independentVariable = self.variables.find(variable => variable.name === independentVariableName);
-    const dependentVariable = self.variables.find(variable => variable.name === dependentVariableName);
-    if (independentVariable && dependentVariable) {
-      // const startingIndependentValue = independentVariable.value;
-      // independentVariable.setValue(independentValue);
-      const dependentValue = dependentVariable.computedValue;
-      // independentVariable.setValue(startingIndependentValue);
-      return dependentValue;
-    }
   }
 }))
 .views(self => ({
