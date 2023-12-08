@@ -26,13 +26,10 @@ export class DBProblemDocumentsListener extends BaseListener {
     return new Promise<void>((resolve, reject) => {
       const offeringUsersRef = this.offeringUsersRef = this.db.firebase.ref(
         this.db.firebase.getOfferingUsersPath(user));
-      // use once() so we are ensured that documents are set before we resolve
       this.debugLogHandler("#start", "adding", "once", offeringUsersRef);
+      // once is called immediately, and will proceed to resolve promise even if there is no value
       offeringUsersRef.once("value")
-        // if this is running as a result of the fact that were adding persistentUI...
-        // then we may be trying to deal with documents that should be set but are not, a la line 29
         .then((snapshot) => {
-          console.log("| snapshot :) ", snapshot.val());
           this.handleLoadOfferingUsersProblemDocuments(snapshot);
           // We have to listen to both events because of a race condition of the documents
           // not being set when the child is added
@@ -64,10 +61,11 @@ export class DBProblemDocumentsListener extends BaseListener {
         this.handleOfferingUser(user);
       }
     });
-    // if the user doesn't exist in the offering, then there can't be any problem or planning documents
-    const userStatus = users?.[selfUserId];
-    const readyToInitializeUser = !userStatus?.self; // if user not initialized, or user initialized without a self
-    readyToInitializeUser && documents.resolveRequiredDocumentPromisesWithNull([ProblemDocument, PlanningDocument]);
+    // if the user doesn't exist in the offering or if the user exists without a self
+    // then we need to initialize the user and (most likely) any problem or planning documents
+    // in the case of a user with self and without documents handleOfferingUser creates the documents
+    const currentUser = users?.[selfUserId];
+    !currentUser?.self && documents.resolveRequiredDocumentPromisesWithNull([ProblemDocument, PlanningDocument]);
   };
 
   private handleLoadOfferingUserAddedOrChanged = (eventType: string) => (snapshot: firebase.database.DataSnapshot) => {
@@ -79,9 +77,7 @@ export class DBProblemDocumentsListener extends BaseListener {
   };
 
   private handleOfferingUser = (user: DBOfferingUser) => {
-    console.log("| user.self:", user.self);
     if (!user.self?.uid) return;
-    console.log("| still goin?");
     const { documents, user: currentUser } = this.db.stores;
     // uid should always be a string, but demo users with numeric uids have been encountered
     const isCurrentUser = String(user.self.uid) === currentUser.id;
