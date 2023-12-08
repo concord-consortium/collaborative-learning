@@ -253,7 +253,6 @@ export const DocumentsModel = types
      * corresponding promise is resolved with null.
      */
     const addRequiredDocumentPromises = (requiredTypes: string[]) => {
-      console.warn("| addRequiredDocumentPromises!");
       requiredTypes.forEach(type => {
         const wrapper: Partial<IRequiredDocumentPromise> = { isResolved: false };
         wrapper.promise = new Promise(resolve => {

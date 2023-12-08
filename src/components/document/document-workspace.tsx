@@ -34,7 +34,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   public render() {
-    console.log("render <DocumentWorkspaceComponent>");
     const { appMode, appConfig: { toolbar }, documents, persistentUI, groups } = this.stores;
     const { problemWorkspace } = persistentUI;
     const { comparisonDocumentKey, hidePrimaryForCompare, comparisonVisible } = problemWorkspace;
