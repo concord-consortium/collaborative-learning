@@ -3,6 +3,7 @@ import {isAddCasesAction, isRemoveCasesAction} from "../../../models/data/data-s
 import {IGraphModel, isGraphVisualPropsAction} from "../models/graph-model";
 import {matchAllCirclesToData, matchCirclesToData, setNiceDomain, startAnimation} from "../utilities/graph-utils";
 import {onAnyAction} from "../../../utilities/mst-utils";
+import { reaction } from "mobx";
 
 interface IProps {
   graphModel: IGraphModel;
@@ -61,25 +62,15 @@ export function useGraphModel(props: IProps) {
 
   // respond to layer update
   useEffect(function respondToLayerChange() {
-    const disposer = onAnyAction(graphModel, action => {
-      if (action.name === 'setDotsElt') {
-        if (!action.path) return;
-        const match = action.path.match(/^\/layers\/([0-9]+)$/);
-        if (!match) {
-          console.warn(`Unexpected action.path: ${action.path}`);
-          return;
-        }
-        const layerNumber = Number(match[1]);
-        if (!isFinite(layerNumber) || layerNumber >= graphModel.layers.length) {
-          console.warn('Unexpected layer number: ', action.path);
-          return;
-        }
-        const layer = graphModel.layers[layerNumber];
-        callMatchCirclesToData(layer);
+    return reaction(
+      () => { return graphModel.layers.map(l => l.dotsElt); },
+      (dotsElements) => {
+        // Is there some way to determine _which_ layer has changed here?
+        // It feels inefficient to always rematch them all.
+        callMatchAllCirclesToData();
       }
-    });
-    return () => disposer();
-  }, [callMatchCirclesToData, graphModel]);
+    );
+  }, [callMatchAllCirclesToData, graphModel]);
 
   // respond to point properties change
   useEffect(function respondToGraphPointVisualAction() {
