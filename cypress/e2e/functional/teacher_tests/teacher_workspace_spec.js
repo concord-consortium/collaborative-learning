@@ -53,7 +53,7 @@ function loadStudentWorkspace(params) {
 
 context('Teacher Workspace', () => {
   describe('teacher document functionality', function () {
-    
+
     it('verify teacher workspace tab', function () {
       cy.log('verify save and restore');
       beforeTest(queryParams.teacherQueryParams);
@@ -77,7 +77,7 @@ context('Teacher Workspace', () => {
       afterDelete();
   // });
 
-    
+
   // });
 
   // TODO: The placement of this context in the order matters because for some reason the
@@ -125,6 +125,7 @@ context('Teacher Workspace', () => {
         cy.get('.top-tab.tab-student-work').should('exist').click({force:true});
         cy.get('.student-group-view').should('be.visible');
         cy.get('.student-group .group-number').should('be.visible').and('have.length', groups.length);
+        cy.get('.student-group .group-number').contains('G1').click();
         cy.get('.student-group .group-number').eq(0).should('have.class', 'active');
         cy.get('.group-title').should('contain', 'Group 1');
         cy.get('.canvas-area .four-up .member').should('have.length', 4);
