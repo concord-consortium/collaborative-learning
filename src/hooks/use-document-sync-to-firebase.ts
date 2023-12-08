@@ -28,7 +28,8 @@ export function useDocumentSyncToFirebase(
                   user: UserModelType, firebase: Firebase, document: DocumentModelType, readOnly = false) {
   const { key, type, uid, contentStatus } = document;
   const { content: contentPath, metadata, typedMetadata } = firebase.getUserDocumentPaths(user, type, key, uid);
-
+  console.log("---useDocumentSyncToFirebase----");
+  console.log("typedMetaData:", typedMetadata);
   // TODO: when running in doc-editor this warning was printed constantly
   // Ideally we'd figure out how to separate the syncing from the document stuff so the doc-editor can use
   // documents without also bringing in the syncing.

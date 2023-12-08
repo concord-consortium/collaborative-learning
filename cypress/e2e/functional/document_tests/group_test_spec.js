@@ -19,9 +19,11 @@ function getUrl(studentIndex) {
 }
 
 function setupTest(studentIndex) {
+  cy.log("-----studentIndex:", studentIndex);
   const url = getUrl(studentIndex);
   cy.visit(url);
   cy.waitForLoad();
+  cy.pause();
   header.getGroupName().should('contain', 'Group ' + qaGroup);
   header.getGroupMembers().find('div.member').should('contain', 'S' + students[studentIndex]);
   clueCanvas.shareCanvas();

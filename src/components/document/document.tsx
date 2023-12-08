@@ -160,6 +160,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
+    console.log("render <DocumentComponent>");
     const { workspace, document, toolbar, side, readOnly } = this.props;
     return (
       <div key="document" className="document" ref={(el) => this.documentContainer = el}>
@@ -465,6 +466,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleSelectDocument = (document: DocumentModelType) => {
+    console.log("-----handleSelectDocument");
+    console.log("\tdocument:", document);
     const { appConfig, persistentUI } = this.stores;
     persistentUI.rightNavDocumentSelected(appConfig, document);
     this.setState({ showBrowser: false });

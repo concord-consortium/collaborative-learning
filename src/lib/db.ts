@@ -327,6 +327,7 @@ export class DB {
   }
 
   public createProblemOrPlanningDocument(type: ProblemOrPlanningDocumentType, content?: DocumentContentModelType) {
+    console.log("createProblemOrPlanningDocument invoked");
     return new Promise<DocumentModelType | null>((resolve, reject) => {
       const {user, documents} = this.stores;
       const offeringUserRef = this.firebase.ref(this.firebase.getOfferingUserPath(user));
@@ -347,6 +348,7 @@ export class DB {
           }
          })
         .then(() => {
+          console.log("---then block for create document");
           // create the new document
           return this.createDocument({ type, content: JSON.stringify(content) })
             .then(({document, metadata}) => {

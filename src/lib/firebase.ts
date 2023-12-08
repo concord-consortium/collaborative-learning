@@ -128,7 +128,10 @@ export class Firebase {
     const content = this.getUserDocumentPath(user, documentKey, userId);
     const metadata = this.getUserDocumentMetadataPath(user, documentKey, userId);
     const typedMetadataMap: Record<string, () => string> = {
-      [ProblemDocument]: () => this.getProblemDocumentPath(user, documentKey, userId),
+      [ProblemDocument]: () => {
+        // console.log("line")
+        return this.getProblemDocumentPath(user, documentKey, userId);
+      },
       [PlanningDocument]: () => this.getPlanningDocumentPath(user, documentKey, userId),
       [PersonalDocument]: () => this.getOtherDocumentPath(user, PersonalDocument, documentKey),
       [LearningLogDocument]: () => this.getOtherDocumentPath(user, LearningLogDocument, documentKey),
@@ -194,6 +197,9 @@ export class Firebase {
   }
 
   public getPersistentUIPath(user: UserModelType){
+    console.log("\t🥩 getPersistentUI path returning...",
+    `${this.getOfferingUserPath(user)}/persistentUI`);
+
     return `${this.getOfferingUserPath(user)}/persistentUI`;
   }
 

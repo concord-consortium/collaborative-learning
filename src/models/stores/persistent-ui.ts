@@ -1,4 +1,7 @@
-import { getSnapshot, onSnapshot, applySnapshot, types } from "mobx-state-tree";
+import { getSnapshot, applySnapshot, types,
+  onSnapshot
+
+} from "mobx-state-tree";
 import { AppConfigModelType } from "./app-config-model";
 import { kDividerHalf, kDividerMax, kDividerMin } from "./ui-types";
 import { WorkspaceModel } from "./workspace";
@@ -103,7 +106,10 @@ export const PersistentUIModel = types
         self.activeNavTab = tab;
       },
       rightNavDocumentSelected(appConfig: AppConfigModelType, document: DocumentModelType) {
+        console.log("---rightNavDocumentSelected");
+        console.log("\t:document:", document);
         if (!document.isPublished || appConfig.showPublishedDocsInPrimaryWorkspace) {
+          console.log("\tenters If");
           self.problemWorkspace.setAvailableDocument(document);
         }
         else if (document.isPublished) {
@@ -225,17 +231,27 @@ export const PersistentUIModel = types
       self.setOpenSubTab(navTab, subTab);
     },
     async initializePersistentUISync(user: UserModelType, db: DB){
+      console.log("initializePersistentUISync invoked");
       const path = db.firebase.getPersistentUIPath(user);
       const getRef = db.firebase.ref(path);
+      console.log("\tgetRef:", getRef);
       const theData: string | undefined = (await getRef.once("value"))?.val();
+      console.log("\ttheData:", theData);
       const asObj = safeJsonParse(theData);
-      if (asObj) applySnapshot(self, asObj);
+      if (asObj) {
+        console.log("valid asObj,", asObj);
+        applySnapshot(self, asObj);
+      }
 
+      console.log("documentKey:", self.problemWorkspace.primaryDocumentKey);
       onSnapshot(self, (snapshot)=>{
+        console.log("onSnapshot begin: with snapshot", snapshot);
         const snapshotStr = JSON.stringify(snapshot);
         const updateRef = db.firebase.ref(path);
         updateRef.set(snapshotStr);
+        console.log("onSnapshot End");
       });
+      //snapshot causing a mobX error ? and not causing maybe documentworkspace not to render..
     }
 }));
 

@@ -34,6 +34,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   public render() {
+    console.log("render <DocumentWorkspaceComponent>");
     const { appMode, appConfig: { toolbar }, documents, persistentUI, groups } = this.stores;
     const { problemWorkspace } = persistentUI;
     const { comparisonDocumentKey, hidePrimaryForCompare, comparisonVisible } = problemWorkspace;
@@ -80,8 +81,12 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
         side="primary"
       />;
 
+    console.log("\tPrimary:", Primary);
+    console.log("\tshowPrimary:", showPrimary);
+
     // Show Primary and comparison docs:
     if (comparisonVisible && showPrimary) {
+      console.log("89 if statement");
       return (
         <div onClick={this.handleClick}>
           { this.renderDocument("left-workspace", "primary", Primary) }
@@ -91,10 +96,12 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     }
     // Just display the "Compare" document.
     else if (hidePrimaryForCompare) {
+      console.log("line 98, display compare doc??");
       return this.renderDocument("single-workspace", "primary", CompareDocument);
     }
     // Just display the primary document:
     else {
+      console.log("\t line 102 display primary document");
       return this.renderDocument("single-workspace", "primary", Primary);
     }
   }

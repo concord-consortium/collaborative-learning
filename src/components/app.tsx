@@ -100,10 +100,12 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
           updateProblem(stores, problemId);
         });
       }
+      console.log("-------set autheticated user");
       initRollbar(stores, problemId || stores.appConfig.defaultProblemOrdinal);
       return resolveAppMode(stores, authenticatedUser.rawFirebaseJWT, onQAClear);
     })
     .then(() => {
+      console.log("----then block");
       stores.persistentUI.initializePersistentUISync(user, db);
       return user.isTeacher
               ? db.firestore.getFirestoreUser(user.id)
