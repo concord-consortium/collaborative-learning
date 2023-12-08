@@ -245,7 +245,7 @@ export const PersistentUIModel = types
 
       console.log("documentKey:", self.problemWorkspace.primaryDocumentKey);
       onSnapshot(self, (snapshot)=>{
-        console.log("onSnapshot begin: with snapshot", snapshot);
+        console.log("#L onSnapshot begin: with snapshot", snapshot);
         const snapshotStr = JSON.stringify(snapshot);
         const updateRef = db.firebase.ref(path);
         updateRef.set(snapshotStr);

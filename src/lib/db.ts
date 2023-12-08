@@ -265,6 +265,8 @@ export class DB {
 
   public async guaranteeOpenDefaultDocument(documentType: typeof ProblemDocument | typeof PersonalDocument,
                                             defaultContent?: DocumentContentModelType) {
+
+    console.log("| guarantee!...", documentType );
     const {documents} = this.stores;
 
     // problem document
@@ -272,6 +274,18 @@ export class DB {
       const requiredProblemDocument = documents.requiredDocuments[ProblemDocument];
       if (requiredProblemDocument) {
         const problemDocument = await requiredProblemDocument.promise;
+        console.log("| problemDocument: ", problemDocument);
+        /*
+         In the case that there is a user, but no user.self, we need to resolve to null
+         The reason it was resolving to null before - there was a check in (DBProblem Listeners?)
+         That
+        */
+        /* current theory
+          problemDocumet never resolves
+          because problemDocument Listener doesn't have self defined
+          user.self is written on a .once of createProblemOrPlanningDocument
+
+        */
         return problemDocument ||
                 this.createProblemOrPlanningDocument(ProblemDocument, defaultContent);
       }
@@ -327,15 +341,20 @@ export class DB {
   }
 
   public createProblemOrPlanningDocument(type: ProblemOrPlanningDocumentType, content?: DocumentContentModelType) {
-    console.log("createProblemOrPlanningDocument invoked");
+    console.log("| createProblemOrPlanningDocument invoked");
+    /* this is only being called when the requiredDocuments in ___ promise is resolved as null */
+
     return new Promise<DocumentModelType | null>((resolve, reject) => {
       const {user, documents} = this.stores;
       const offeringUserRef = this.firebase.ref(this.firebase.getOfferingUserPath(user));
 
       return offeringUserRef.once("value")
         .then((snapshot) => {
+          console.log("| snapshot: ", snapshot);
           // ensure the offering user exists
-          if (!snapshot.val()) {
+          const candidateSnapshot = snapshot.val();
+          if (!candidateSnapshot?.version || !candidateSnapshot?.self){
+            console.log("| we need to populate the self!");
             const offeringUser: DBOfferingUser = {
               version: "1.0",
               self: {
@@ -344,7 +363,7 @@ export class DB {
                 uid: user.id,
               }
             };
-            return offeringUserRef.set(offeringUser);
+            return offeringUserRef.update(offeringUser);
           }
          })
         .then(() => {

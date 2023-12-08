@@ -253,6 +253,7 @@ export const DocumentsModel = types
      * corresponding promise is resolved with null.
      */
     const addRequiredDocumentPromises = (requiredTypes: string[]) => {
+      console.warn("| addRequiredDocumentPromises!");
       requiredTypes.forEach(type => {
         const wrapper: Partial<IRequiredDocumentPromise> = { isResolved: false };
         wrapper.promise = new Promise(resolve => {
@@ -273,6 +274,7 @@ export const DocumentsModel = types
 
     // resolve the specified promise with null, i.e. the user has no documents of this type
     const resolveRequiredDocumentPromiseWithNull = (type: string) => {
+      console.warn("| who called resolveRequiredDocumentPromiseWithNull", type);
       const promise = self.requiredDocuments[type];
       !promise.isResolved && promise.resolve(null);
     };
@@ -280,6 +282,7 @@ export const DocumentsModel = types
     // convenience function for nulling multiple promises
     // if `requiredTypes` is empty then all promises are nulled (mainly useful for testing)
     const resolveRequiredDocumentPromisesWithNull = (requiredTypes?: string[]) => {
+      console.log("| resolveRequiredDocumentPromisesWithNull: ", requiredTypes);
       if (requiredTypes) {
         requiredTypes.forEach(type => resolveRequiredDocumentPromiseWithNull(type));
       }

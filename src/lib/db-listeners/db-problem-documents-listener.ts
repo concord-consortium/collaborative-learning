@@ -29,7 +29,10 @@ export class DBProblemDocumentsListener extends BaseListener {
       // use once() so we are ensured that documents are set before we resolve
       this.debugLogHandler("#start", "adding", "once", offeringUsersRef);
       offeringUsersRef.once("value")
+        // if this is running as a result of the fact that were adding persistentUI...
+        // then we may be trying to deal with documents that should be set but are not, a la line 29
         .then((snapshot) => {
+          console.log("| snapshot :) ", snapshot.val());
           this.handleLoadOfferingUsersProblemDocuments(snapshot);
           // We have to listen to both events because of a race condition of the documents
           // not being set when the child is added
@@ -62,7 +65,9 @@ export class DBProblemDocumentsListener extends BaseListener {
       }
     });
     // if the user doesn't exist in the offering, then there can't be any problem or planning documents
-    !users?.[selfUserId] && documents.resolveRequiredDocumentPromisesWithNull([ProblemDocument, PlanningDocument]);
+    const userStatus = users?.[selfUserId];
+    const readyToInitializeUser = !userStatus?.self; // if user not initialized, or user initialized without a self
+    readyToInitializeUser && documents.resolveRequiredDocumentPromisesWithNull([ProblemDocument, PlanningDocument]);
   };
 
   private handleLoadOfferingUserAddedOrChanged = (eventType: string) => (snapshot: firebase.database.DataSnapshot) => {
@@ -74,12 +79,14 @@ export class DBProblemDocumentsListener extends BaseListener {
   };
 
   private handleOfferingUser = (user: DBOfferingUser) => {
-    if (!user?.self?.uid) return;
+    console.log("| user.self:", user.self);
+    if (!user.self?.uid) return;
+    console.log("| still goin?");
     const { documents, user: currentUser } = this.db.stores;
     // uid should always be a string, but demo users with numeric uids have been encountered
-    const isOwnDocument = String(user.self.uid) === currentUser.id;
+    const isCurrentUser = String(user.self.uid) === currentUser.id;
 
-    if (isOwnDocument && (size(user.documents) === 0)) {
+    if (isCurrentUser && (size(user.documents) === 0)) {
       documents.resolveRequiredDocumentPromiseWithNull(ProblemDocument);
     }
 
@@ -91,7 +98,7 @@ export class DBProblemDocumentsListener extends BaseListener {
       } else {
         this.db.createDocumentModelFromProblemMetadata(ProblemDocument, document.self.uid, document)
           .then((docModel) => {
-            if (isOwnDocument) {
+            if (isCurrentUser) {
               documents.resolveRequiredDocumentPromise(docModel);
               syncStars(docModel, this.db);
             }
@@ -99,7 +106,7 @@ export class DBProblemDocumentsListener extends BaseListener {
       }
     });
 
-    if (isOwnDocument && (size(user.planning) === 0)) {
+    if (isCurrentUser && (size(user.planning) === 0)) {
       documents.resolveRequiredDocumentPromiseWithNull(PlanningDocument);
     }
     forEach(user.planning, document => {
@@ -108,7 +115,7 @@ export class DBProblemDocumentsListener extends BaseListener {
       if (!existingDoc) {
         this.db.createDocumentModelFromProblemMetadata(PlanningDocument, document.self.uid, document)
           .then(doc => {
-            isOwnDocument && documents.resolveRequiredDocumentPromise(doc);
+            isCurrentUser && documents.resolveRequiredDocumentPromise(doc);
           });
       }
     });
