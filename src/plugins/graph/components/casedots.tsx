@@ -10,6 +10,7 @@ import {handleClickOnDot, setPointCoordinates, setPointSelection} from "../utili
 import {useGraphModelContext} from "../models/graph-model";
 import {onAnyAction} from "../../../utilities/mst-utils";
 import { useDataConfigurationContext } from "../hooks/use-data-configuration-context";
+import { useGraphLayerContext } from "../models/graph-layer-model";
 
 export const CaseDots = function CaseDots(props: PlotProps) {
   const {
@@ -17,6 +18,7 @@ export const CaseDots = function CaseDots(props: PlotProps) {
       enableAnimation
     } = props,
     graphModel = useGraphModelContext(),
+    layer = useGraphLayerContext(),
     dataConfiguration = useDataConfigurationContext(),
     dataset = dataConfiguration?.dataset,
     layout = useGraphLayoutContext(),
@@ -123,7 +125,7 @@ export const CaseDots = function CaseDots(props: PlotProps) {
     return () => disposer?.();
   }, [dataset]);
 
-  usePlotResponders({dataConfiguration, dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation});
+  usePlotResponders({layer, dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation});
 
   return (
     <>

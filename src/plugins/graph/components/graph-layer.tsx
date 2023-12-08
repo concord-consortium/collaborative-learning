@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { DotsElt } from "../d3-types";
 import { PlotProps } from "../graph-types";
 import { DataConfigurationContext } from "../hooks/use-data-configuration-context";
-import { IGraphLayerModel } from "../models/graph-layer-model";
+import { GraphLayerContext, IGraphLayerModel } from "../models/graph-layer-model";
 import { IGraphModel } from "../models/graph-model";
 import { ChartDots } from "./chartdots";
 import { DotPlotDots } from "./dotplotdots";
@@ -45,9 +45,11 @@ export const GraphLayer = function GraphLayer({ graphModel, layer, enableAnimati
 
   return (
     <svg ref={dotsRef} key={layer.id} data-layer={layer.id} data-config={layer.config.id}>
-      <DataConfigurationContext.Provider value={layer.config}>
-        {typeToPlotComponentMap[graphModel.plotType]}
-      </DataConfigurationContext.Provider>
+      <GraphLayerContext.Provider value={layer}>
+        <DataConfigurationContext.Provider value={layer.config}>
+          {typeToPlotComponentMap[graphModel.plotType]}
+        </DataConfigurationContext.Provider>
+      </GraphLayerContext.Provider>
     </svg>
   );
 

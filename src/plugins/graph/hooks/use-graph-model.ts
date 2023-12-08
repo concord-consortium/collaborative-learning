@@ -3,7 +3,6 @@ import {isAddCasesAction, isRemoveCasesAction} from "../../../models/data/data-s
 import {IGraphModel, isGraphVisualPropsAction} from "../models/graph-model";
 import {matchAllCirclesToData, matchCirclesToData, setNiceDomain, startAnimation} from "../utilities/graph-utils";
 import {onAnyAction} from "../../../utilities/mst-utils";
-import { reaction } from "mobx";
 
 interface IProps {
   graphModel: IGraphModel;
@@ -59,18 +58,6 @@ export function useGraphModel(props: IProps) {
     });
     return () => disposer();
   }, [enableAnimation, graphModel]);
-
-  // respond to layer update
-  useEffect(function respondToLayerChange() {
-    return reaction(
-      () => { return graphModel.layers.map(l => l.dotsElt); },
-      (dotsElements) => {
-        // Is there some way to determine _which_ layer has changed here?
-        // It feels inefficient to always rematch them all.
-        callMatchAllCirclesToData();
-      }
-    );
-  }, [callMatchAllCirclesToData, graphModel]);
 
   // respond to point properties change
   useEffect(function respondToGraphPointVisualAction() {

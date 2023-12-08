@@ -7,6 +7,7 @@ import {useGraphLayoutContext} from "../models/graph-layout";
 import {setPointCoordinates, setPointSelection} from "../utilities/graph-utils";
 import {useGraphModelContext} from "../models/graph-model";
 import { useDataConfigurationContext } from "../hooks/use-data-configuration-context";
+import { useGraphLayerContext } from "../models/graph-layer-model";
 
 type BinMap = Record<string, Record<string, Record<string, Record<string, number>>>>;
 
@@ -14,6 +15,7 @@ export const ChartDots = function ChartDots(props: PlotProps) {
   const {dotsRef, enableAnimation} = props,
     graphModel = useGraphModelContext(),
     {pointColor, pointStrokeColor} = graphModel,
+    layer = useGraphLayerContext(),
     dataConfiguration = useDataConfigurationContext(),
     dataset = dataConfiguration?.dataset,
     layout = useGraphLayoutContext(),
@@ -215,7 +217,7 @@ export const ChartDots = function ChartDots(props: PlotProps) {
     extraPrimaryAttrRole, extraSecondaryAttrRole, pointColor,
     enableAnimation, primaryIsBottom, layout, pointStrokeColor, computeMaxOverAllCells, dataset]);
 
-  usePlotResponders({dataConfiguration, dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation});
+  usePlotResponders({layer, dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation});
 
   return (
     <>

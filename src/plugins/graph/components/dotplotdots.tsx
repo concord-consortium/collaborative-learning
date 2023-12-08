@@ -14,10 +14,12 @@ import {
 } from "../utilities/graph-utils";
 import {useGraphModelContext} from "../models/graph-model";
 import { useDataConfigurationContext } from "../hooks/use-data-configuration-context";
+import { useGraphLayerContext } from "../models/graph-layer-model";
 
 export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
   const {dotsRef, enableAnimation} = props,
     graphModel = useGraphModelContext(),
+    layer = useGraphLayerContext(),
     dataConfiguration = useDataConfigurationContext(),
     dataset = dataConfiguration?.dataset,
     layout = useGraphLayoutContext(),
@@ -265,7 +267,7 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
     [graphModel, dataConfiguration, layout, primaryAttrRole, secondaryAttrRole, dataset, dotsRef,
       enableAnimation, primaryIsBottom, pointColor, pointStrokeColor]);
 
-  usePlotResponders({dataConfiguration, dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation});
+  usePlotResponders({layer, dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation});
 
   return (
     <>

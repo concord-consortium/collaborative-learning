@@ -10,6 +10,7 @@ import { GraphModel } from "./graph-model";
 import { IDataSet } from "../../../models/data/data-set";
 import { ISharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
 import { DotsElt } from "../d3-types";
+import { createContext, useContext } from "react";
 
 export const GraphLayerModel = types
   .model('GraphLayerModel')
@@ -156,3 +157,7 @@ export const GraphLayerModel = types
 
 export interface IGraphLayerModel extends Instance<typeof GraphLayerModel> { }
 export interface IGraphLayerModelSnapshot extends SnapshotIn<typeof GraphLayerModel> {}
+
+export const GraphLayerContext = createContext<IGraphLayerModel>({} as IGraphLayerModel);
+
+export const useGraphLayerContext = () => useContext(GraphLayerContext);

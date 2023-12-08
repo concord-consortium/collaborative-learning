@@ -15,11 +15,12 @@ import {
   setPointSelection,
   startAnimation
 } from "../utilities/graph-utils";
+import { useGraphLayerContext } from "../models/graph-layer-model";
 
 export const ScatterDots = function ScatterDots(props: PlotProps) {
   const {dotsRef, enableAnimation} = props,
     graphModel = useGraphModelContext(),
-    // instanceId = useInstanceIdContext(),
+    layer = useGraphLayerContext(),
     dataConfiguration = useDataConfigurationContext(),
     dataset = dataConfiguration?.dataset,
     secondaryAttrIDsRef = useRef<string[]>([]),
@@ -218,7 +219,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
   }, [refreshPointPositionsD3]);
 
   usePlotResponders({
-    dataConfiguration, dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation
+    layer, dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation
   });
 
   return (
