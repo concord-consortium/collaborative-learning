@@ -184,7 +184,7 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
   console.log('matchCircles', dataConfiguration.id, dotsElement);
 
   // Create the circles
-  const allCircles = selectGraphDots(dotsElement, dataConfiguration);
+  const allCircles = selectGraphDots(dotsElement);
   if (!allCircles) return;
   startAnimation(enableAnimation);
 
@@ -436,7 +436,7 @@ export interface ISetPointSelection {
 
 export function setPointSelection(props: ISetPointSelection) {
   const { dotsRef, dataConfiguration } = props;
-  const outerCircles = selectOuterCircles(dotsRef.current, dataConfiguration);
+  const outerCircles = selectOuterCircles(dotsRef.current);
   if (outerCircles) {
     applySelectedClassToCircles(outerCircles, dataConfiguration);
     styleOuterCircles(outerCircles, dataConfiguration);
@@ -506,13 +506,13 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
     }
   };
 
-  const graphDots = selectGraphDots(dotsRef.current, dataConfiguration);
+  const graphDots = selectGraphDots(dotsRef.current);
   setPositions(graphDots);
 
-  const innerCircles = selectInnerCircles(dotsRef.current, dataConfiguration);
+  const innerCircles = selectInnerCircles(dotsRef.current);
   styleInnerCircles(innerCircles);
 
-  const outerCircles = selectOuterCircles(dotsRef.current, dataConfiguration);
+  const outerCircles = selectOuterCircles(dotsRef.current);
   if (outerCircles) applySelectedClassToCircles(outerCircles, dataConfiguration);
   styleOuterCircles(outerCircles, dataConfiguration);
 }

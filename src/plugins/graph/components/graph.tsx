@@ -158,13 +158,6 @@ export const Graph = observer(
       treatAs === 'categorical' && graphModel.hideAdornment(kConnectingLinesType);
       treatAs === 'numeric' && graphModel.showAdornment(connectingLines);
     }
-
-    // // TODO: use isVisible state, set above, instead of this hack
-    // if (!connectingLines?.isVisible){
-    //   const dotArea = select(dotsRef.current);
-    //   const anyFoundPath = dotArea.selectAll("path");
-    //   if (anyFoundPath) anyFoundPath.remove();
-    // }
   };
 
   // useDataTips({dotsRef, graphModel, enableAnimation});

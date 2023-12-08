@@ -19,6 +19,8 @@ export interface GraphLayerProps {
  * Render a single layer of the Graph.
  *
  * @param props - properties object
+ * @param props.graphModel - the graph content
+ * @param props.layer - the layer model
  * @param props.enableAnimation - Ref indicating whether animation of changes is currently desired
  */
 export const GraphLayer = function GraphLayer({ graphModel, layer, enableAnimation }: GraphLayerProps) {

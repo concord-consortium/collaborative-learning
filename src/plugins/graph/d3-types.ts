@@ -1,8 +1,6 @@
 import { select, Selection } from "d3";
-import { IDataConfigurationModel } from "./models/data-configuration-model";
-import { IGraphModel } from "./models/graph-model";
 
- // The data stored with each plot element (e.g. 'circle')
+// The data stored with each plot element (e.g. 'circle')
 export type CaseData = { dataConfigID: string, plotNum: number, caseID: string };
 
 export type DotsElt = SVGSVGElement | null;
@@ -17,39 +15,26 @@ export type DotsElt = SVGSVGElement | null;
 export type DotSelection = Selection<SVGCircleElement, CaseData, SVGSVGElement, unknown>;
 
 // selects all all g elements, which contain inner and outer circles, for a DataConfiguration
-export function selectGraphDots(svg: DotsElt, dataConfiguration: IDataConfigurationModel): DotSelection | null {
+export function selectGraphDots(svg: DotsElt): DotSelection | null {
   return svg
-          ? select(svg).selectAll(`g.graph-dot.${dataConfiguration.id}`)
+          ? select(svg).selectAll("g.graph-dot")
           : null;
 }
 
-export function selectOuterCircles(svg: DotsElt, dataConfiguration: IDataConfigurationModel): DotSelection | null {
+export function selectOuterCircles(svg: DotsElt): DotSelection | null {
   return svg
-          ? select(svg).selectAll(`g.graph-dot.${dataConfiguration.id} .outer-circle`)
+          ? select(svg).selectAll("g.graph-dot .outer-circle")
           : null;
 }
 
-export function selectOuterCirclesSelected(svg: DotsElt,
-    dataConfiguration: IDataConfigurationModel): DotSelection | null {
+export function selectOuterCirclesSelected(svg: DotsElt): DotSelection | null {
   return svg
-          ? select(svg).selectAll(`g.graph-dot.${dataConfiguration.id} .outer-circle.selected`)
+          ? select(svg).selectAll("g.graph-dot .outer-circle.selected")
           : null;
 }
 
-
-export function selectInnerCircles(svg: DotsElt, dataConfiguration: IDataConfigurationModel): DotSelection | null {
+export function selectInnerCircles(svg: DotsElt): DotSelection | null {
   return svg
-          ? select(svg).selectAll(`g.graph-dot.${dataConfiguration.id} .inner-circle`)
+          ? select(svg).selectAll("g.graph-dot .inner-circle")
           : null;
-}
-
-// selects all `circle` elements that match NO data configuration in the given graph
-export function selectOrphanCircles(svg: DotsElt, graphModel: IGraphModel): DotSelection | null {
-  const configIds = graphModel.layers.map(layer => layer.config.id );
-  const circles: DotSelection | null = svg ? select(svg).selectAll('g.graph-dot') : null;
-  const selection: DotSelection | null = circles
-    ? circles.filter((datum) => { return !configIds.includes((datum as CaseData).dataConfigID); })
-    : null;
-  console.log('Orphan circles:', selection);
-  return selection;
 }

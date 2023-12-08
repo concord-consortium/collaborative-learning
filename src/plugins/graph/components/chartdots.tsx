@@ -112,7 +112,7 @@ export const ChartDots = function ChartDots(props: PlotProps) {
       legendAttrID = dataConfiguration?.attributeID('legend'),
       getLegendColor = legendAttrID ? dataConfiguration?.getLegendColorForCase : undefined;
 
-    const selection = selectGraphDots(dotsRef.current, dataConfiguration);
+    const selection = selectGraphDots(dotsRef.current);
     if (!selection) return;
 
     const computeCellParams = () => {
