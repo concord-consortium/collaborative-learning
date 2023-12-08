@@ -81,12 +81,8 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
         side="primary"
       />;
 
-    console.log("\tPrimary:", Primary);
-    console.log("\tshowPrimary:", showPrimary);
-
     // Show Primary and comparison docs:
     if (comparisonVisible && showPrimary) {
-      console.log("89 if statement");
       return (
         <div onClick={this.handleClick}>
           { this.renderDocument("left-workspace", "primary", Primary) }
@@ -96,7 +92,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     }
     // Just display the "Compare" document.
     else if (hidePrimaryForCompare) {
-      console.log("line 98, display compare doc??");
       return this.renderDocument("single-workspace", "primary", CompareDocument);
     }
     // Just display the primary document:

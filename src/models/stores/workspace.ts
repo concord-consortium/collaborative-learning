@@ -25,8 +25,6 @@ export const WorkspaceModel = types
   })
   .actions((self) => {
     const setPrimaryDocument = (document?: DocumentModelType) => {
-      console.log("---setPrimaryDocument");
-      console.log("\tdocument:", document);
       self.primaryDocumentKey = document && document.key;
       if (document) {
         logDocumentEvent(LogEventName.VIEW_SHOW_DOCUMENT, { document });
