@@ -1,20 +1,17 @@
 import {MutableRefObject, useCallback, useEffect} from "react";
-import { reaction } from "mobx";
 import {isAddCasesAction, isRemoveCasesAction} from "../../../models/data/data-set-actions";
 import {IGraphModel, isGraphVisualPropsAction} from "../models/graph-model";
-import {IDotsRef} from "../graph-types";
 import {matchAllCirclesToData, matchCirclesToData, setNiceDomain, startAnimation} from "../utilities/graph-utils";
 import {onAnyAction} from "../../../utilities/mst-utils";
 
 interface IProps {
-  graphModel: IGraphModel
-  enableAnimation: MutableRefObject<boolean>
-  dotsRef: IDotsRef
-  instanceId: string | undefined
+  graphModel: IGraphModel;
+  enableAnimation: MutableRefObject<boolean>;
+  instanceId: string | undefined;
 }
 
 export function useGraphModel(props: IProps) {
-  const { graphModel, enableAnimation, dotsRef, instanceId } = props;
+  const { graphModel, enableAnimation, instanceId } = props;
 
   const callMatchCirclesToData = useCallback((layer) => {
     matchCirclesToData({
@@ -22,17 +19,16 @@ export function useGraphModel(props: IProps) {
       pointRadius: graphModel.getPointRadius(),
       pointColor: graphModel.pointColor,
       pointStrokeColor: graphModel.pointStrokeColor,
-      dotsElement: dotsRef.current,
+      dotsElement: layer.dotsElt,
       enableAnimation, instanceId
     });
-  }, [graphModel, dotsRef, enableAnimation, instanceId]);
+  }, [graphModel, enableAnimation, instanceId]);
 
   const callMatchAllCirclesToData = useCallback(() => {
     matchAllCirclesToData({
-      dotsElement: dotsRef.current,
       graphModel, enableAnimation, instanceId
     });
-  }, [graphModel, dotsRef, enableAnimation, instanceId]);
+  }, [graphModel, enableAnimation, instanceId]);
 
   // respond to added/removed cases
   useEffect(function installAddRemoveCaseHandler() {
@@ -63,15 +59,27 @@ export function useGraphModel(props: IProps) {
     return () => disposer();
   }, [enableAnimation, graphModel]);
 
-  // respond to layer add/remove
+  // respond to layer update
   useEffect(function respondToLayerChange() {
-    return reaction(
-      () => { return graphModel.layers.length; },
-      (length) => {
-        callMatchAllCirclesToData();
+    const disposer = onAnyAction(graphModel, action => {
+      if (action.name === 'setDotsElt') {
+        if (!action.path) return;
+        const match = action.path.match(/^\/layers\/([0-9]+)$/);
+        if (!match) {
+          console.warn(`Unexpected action.path: ${action.path}`);
+          return;
+        }
+        const layerNumber = Number(match[1]);
+        if (!isFinite(layerNumber) || layerNumber >= graphModel.layers.length) {
+          console.warn('Unexpected layer number: ', action.path);
+          return;
+        }
+        const layer = graphModel.layers[layerNumber];
+        callMatchCirclesToData(layer);
       }
-    );
-  }, [callMatchAllCirclesToData, graphModel.layers.length]);
+    });
+    return () => disposer();
+  }, [callMatchCirclesToData, graphModel]);
 
   // respond to point properties change
   useEffect(function respondToGraphPointVisualAction() {

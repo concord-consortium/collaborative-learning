@@ -7,11 +7,7 @@ import {Background} from "./background";
 import {DroppablePlot} from "./droppable-plot";
 import {AxisPlace, AxisPlaces} from "../imports/components/axis/axis-types";
 import {GraphAxis} from "./graph-axis";
-import {attrRoleToGraphPlace, graphPlaceToAttrRole,
-        IDotsRef, kDefaultNumericAxisBounds, kGraphClass} from "../graph-types";
-import { DotPlotDots } from "./dotplotdots";
-import { ChartDots } from "./chartdots";
-import { ScatterDots } from "./scatterdots";
+import {attrRoleToGraphPlace, graphPlaceToAttrRole, kDefaultNumericAxisBounds, kGraphClass} from "../graph-types";
 import {Marquee} from "./marquee";
 import {DataConfigurationContext} from "../hooks/use-data-configuration-context";
 import {useGraphModel} from "../hooks/use-graph-model";
@@ -35,6 +31,7 @@ import {onAnyAction} from "../../../utilities/mst-utils";
 import { Adornments } from "../adornments/adornments";
 import { kConnectingLinesType } from "../adornments/connecting-lines/connecting-lines-types";
 import { EditableGraphValue } from "./editable-graph-value";
+import { GraphLayer } from "./graph-layer";
 
 import "./graph.scss";
 import "./graph-clue-styles.scss";
@@ -42,13 +39,12 @@ import "./graph-clue-styles.scss";
 interface IProps {
   graphController: GraphController;
   graphRef: MutableRefObject<HTMLDivElement | null>;
-  dotsRef: IDotsRef;
   onRequestRowHeight?: (id: string, size: number) => void;
   readOnly?: boolean
 }
 
 export const Graph = observer(
-    function Graph({ graphController, readOnly, graphRef, dotsRef, onRequestRowHeight }: IProps) {
+    function Graph({ graphController, readOnly, graphRef, onRequestRowHeight }: IProps) {
 
   const graphModel = useGraphModelContext(),
     {autoAdjustAxes, enableAnimation} = graphController,
@@ -163,39 +159,23 @@ export const Graph = observer(
       treatAs === 'numeric' && graphModel.showAdornment(connectingLines);
     }
 
-    // TODO: use isVisible state, set above, instead of this hack
-    if (!connectingLines?.isVisible){
-      const dotArea = select(dotsRef.current);
-      const anyFoundPath = dotArea.selectAll("path");
-      if (anyFoundPath) anyFoundPath.remove();
-    }
+    // // TODO: use isVisible state, set above, instead of this hack
+    // if (!connectingLines?.isVisible){
+    //   const dotArea = select(dotsRef.current);
+    //   const anyFoundPath = dotArea.selectAll("path");
+    //   if (anyFoundPath) anyFoundPath.remove();
+    // }
   };
 
   // useDataTips({dotsRef, graphModel, enableAnimation});
   //useDataTips hook is used to identify individual points in a dense scatterplot
   //it should be commented out for now as it shrinks outer circle when hovered over, but may prove useful in the future
 
-  const renderPlotComponent = () => {
-
-    const plots = graphModel.layers.map((layer) => {
-      const props = {
-        dotsRef, enableAnimation
-      };
-      const typeToPlotComponentMap = {
-        casePlot: null, // <CaseDots {...props}/>,
-        dotChart: <ChartDots {...props}/>,
-        dotPlot: <DotPlotDots {...props}/>,
-        scatterPlot: <ScatterDots {...props}/>
-      };
-      return (
-        <DataConfigurationContext.Provider key={layer.id} value={layer.config}>
-          { typeToPlotComponentMap[plotType] }
-        </DataConfigurationContext.Provider>
-      );
+  const renderPlotComponents = () => {
+    const layers = graphModel.layers.map((layer) => {
+      return (<GraphLayer key={layer.id} graphModel={graphModel} layer={layer} enableAnimation={enableAnimation}/>);
     });
-
-    return plots;
-
+    return layers;
   };
 
 //******************** Render Graph Axes **********************
@@ -238,7 +218,7 @@ export const Graph = observer(
     return droppables;
   };
 
-  useGraphModel({dotsRef, graphModel, enableAnimation, instanceId});
+  useGraphModel({ graphModel, enableAnimation, instanceId });
 
   const handleMinMaxChange = (minOrMax: string, axis: AxisPlace, newValue: number) => {
     const axisModel = graphModel.getAxis(axis) as INumericAxisModel;
@@ -262,8 +242,8 @@ export const Graph = observer(
             {renderGraphAxes()}
 
             <svg ref={plotAreaSVGRef}>
-              <svg ref={dotsRef} className={`graph-dot-area ${instanceId}`}>
-                {renderPlotComponent()}
+              <svg className={`graph-dot-area ${instanceId}`}>
+                {renderPlotComponents()}
               </svg>
               <Marquee marqueeState={marqueeState}/>
             </svg>
@@ -285,7 +265,7 @@ export const Graph = observer(
             />
           </svg>
           {!disableAttributeDnD && renderDroppableAddAttributes()}
-          <Adornments dotsRef={dotsRef}/>
+          <Adornments/>
           {defaultSeriesLegend &&
             <MultiLegend
               graphElt={graphRef.current}

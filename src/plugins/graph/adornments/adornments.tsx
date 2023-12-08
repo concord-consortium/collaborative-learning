@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useRef } from "react";
 import { clsx } from "clsx";
 import { observer } from "mobx-react-lite";
-import { kGraphAdornmentsClass, IDotsRef } from "../graph-types";
+import { kGraphAdornmentsClass } from "../graph-types";
 import { useGraphLayoutContext } from "../models/graph-layout";
 import { useGraphModelContext } from "../models/graph-model";
 import { Adornment } from "./adornment";
@@ -10,22 +10,23 @@ import { IAdornmentModel } from "./adornment-models";
 import { useInstanceIdContext } from "../imports/hooks/use-instance-id-context";
 import { useTileModelContext } from "../imports/hooks/use-tile-model-context";
 import { useDataConfigurationContext } from "../hooks/use-data-configuration-context";
+import { DotsElt } from "../d3-types";
 
 import "./adornments.scss";
 
 export interface AdornmmentsProps {
-  dotsRef?: IDotsRef
 }
 
 export const Adornments = observer(function Adornments(props: AdornmmentsProps) {
   const
-    { dotsRef } = props,
     graphModel = useGraphModelContext(),
     dataConfig = useDataConfigurationContext(),
     instanceId = useInstanceIdContext(),
     layout = useGraphLayoutContext(),
     { isTileSelected } = useTileModelContext(),
     adornments = graphModel.adornments;
+
+  const dotsRef = useRef<DotsElt>(null);
 
   if (!adornments?.length) return null;
   // The subPlotKey is an object that contains the attribute IDs and categorical values for the
@@ -145,8 +146,8 @@ export const Adornments = observer(function Adornments(props: AdornmmentsProps) 
     { 'tile-selected': isTileSelected() }
   );
   return (
-    <div className={containerClass} data-testid={kGraphAdornmentsClass} style={outerGridStyle}>
+    <svg ref={dotsRef} className={containerClass} data-testid={kGraphAdornmentsClass} style={outerGridStyle}>
       {outerGridCells}
-    </div>
+    </svg>
   );
 });

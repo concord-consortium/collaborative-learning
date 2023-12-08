@@ -7,7 +7,7 @@ import { PartialSharedModelEntry } from "../../../models/document/document-conte
 import { UpdatedSharedDataSetIds } from "../../../models/shared/shared-data-set";
 import {
   CaseData, DotSelection, DotsElt, selectGraphDots, selectInnerCircles, selectOuterCircles
-, selectOrphanCircles} from "../d3-types";
+} from "../d3-types";
 import {
   IDotsRef, kGraphFont, Point, outerCircleSelectedRadius, outerCircleUnselectedRadius,
   Rect,rTreeRect, transitionDuration
@@ -146,25 +146,25 @@ export function handleClickOnDot(event: MouseEvent, caseData: CaseData, dataConf
 
 export interface IMatchAllCirclesProps {
   graphModel: IGraphModel;
-  dotsElement: DotsElt;
   enableAnimation: React.MutableRefObject<boolean>
   instanceId: string | undefined
 }
 
 export function matchAllCirclesToData(props: IMatchAllCirclesProps) {
   const
-    { graphModel, dotsElement, enableAnimation, instanceId } = props,
+    { graphModel, enableAnimation, instanceId } = props,
     pointRadius = graphModel.getPointRadius(),
     pointColor = graphModel.pointColor,
     pointStrokeColor = graphModel.pointStrokeColor;
   for (const layer of graphModel.layers) {
     matchCirclesToData({
       dataConfiguration: layer.config,
-      dotsElement, pointRadius, pointColor, pointStrokeColor,
+      dotsElement: layer.dotsElt,
+      pointRadius, pointColor, pointStrokeColor,
       enableAnimation, instanceId});
   }
   // Remove circles that match no layer at all
-  selectOrphanCircles(dotsElement, graphModel)?.remove();
+  // selectOrphanCircles(dotsElement, graphModel)?.remove();
 }
 
 export interface IMatchCirclesProps {
@@ -181,6 +181,7 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
   const { dataConfiguration, enableAnimation, instanceId, dotsElement } = props;
   const allCaseData = dataConfiguration.joinedCaseDataArrays;
   const caseDataKeyFunc = (d: CaseData) => `${d.dataConfigID}-${d.plotNum}-${d.caseID}`;
+  console.log('matchCircles', dataConfiguration.id, dotsElement);
 
   // Create the circles
   const allCircles = selectGraphDots(dotsElement, dataConfiguration);
@@ -229,7 +230,8 @@ function applySelectedClassToCircles(selection: DotSelection, dataConfiguration?
     .classed('selected', (aCaseData: CaseData) => isCircleSelected(aCaseData, dataConfiguration));
 }
 
-function styleOuterCircles(outerCircles: any, dataConfiguration?: IDataConfigurationModel){
+function styleOuterCircles(outerCircles: DotSelection|null, dataConfiguration?: IDataConfigurationModel){
+  if (!outerCircles) return;
   outerCircles
     .attr('r', (aCaseData: CaseData) => {
       return isCircleSelected(aCaseData, dataConfiguration)

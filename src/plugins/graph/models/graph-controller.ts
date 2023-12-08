@@ -6,7 +6,7 @@ import {
   CategoricalAxisModel, EmptyAxisModel, isCategoricalAxisModel, isEmptyAxisModel, isNumericAxisModel, NumericAxisModel
 } from "../imports/components/axis/models/axis-model";
 import {
-  axisPlaceToAttrRole, graphPlaceToAttrRole, IDotsRef, kDefaultNumericAxisBounds, PlotType
+  axisPlaceToAttrRole, graphPlaceToAttrRole, kDefaultNumericAxisBounds, PlotType
 } from "../graph-types";
 import {GraphPlace} from "../imports/components/axis-graph-shared";
 import {matchCirclesToData, setNiceDomain} from "../utilities/graph-utils";
@@ -32,12 +32,10 @@ interface IGraphControllerConstructorProps {
 
 interface IGraphControllerProps {
   graphModel: IGraphModel
-  dotsRef: IDotsRef
 }
 
 export class GraphController {
   graphModel?: IGraphModel;
-  dotsRef?: IDotsRef;
   layout: GraphLayout;
   enableAnimation: React.MutableRefObject<boolean>;
   instanceId: string;
@@ -52,20 +50,19 @@ export class GraphController {
 
   setProperties(props: IGraphControllerProps) {
     this.graphModel = props.graphModel;
-    this.dotsRef = props.dotsRef;
     this.initializeGraph();
   }
 
   callMatchCirclesToData() {
-    const {graphModel, dotsRef, enableAnimation, instanceId} = this;
-    if (graphModel && dotsRef?.current) {
+    const {graphModel, enableAnimation, instanceId} = this;
+    if (graphModel) {
       const { pointColor, pointStrokeColor } = graphModel,
         pointRadius = graphModel.getPointRadius();
       for (const layer of graphModel.layers) {
         const dataConfiguration = layer.config;
-        if (dataConfiguration) {
+        if (dataConfiguration && layer.dotsElt) {
           matchCirclesToData({
-            dataConfiguration, dotsElement: dotsRef.current,
+            dataConfiguration, dotsElement: layer.dotsElt,
             pointRadius, enableAnimation, instanceId, pointColor, pointStrokeColor
           });
       }
@@ -74,7 +71,7 @@ export class GraphController {
   }
 
   initializeGraph() {
-    const {graphModel, dotsRef, layout} = this;
+    const {graphModel, layout} = this;
 
     // handle any attributes auto-assigned before our handlers were in place
     if (graphModel?.autoAssignedAttributes.length) {
@@ -83,7 +80,7 @@ export class GraphController {
       });
       graphModel.clearAutoAssignedAttributes();
     }
-    if (graphModel && layout && dotsRef?.current) {
+    if (graphModel && layout) {
       AxisPlaces.forEach((axisPlace: AxisPlace) => {
         const axisModel = graphModel.getAxis(axisPlace),
           attrRole = axisPlaceToAttrRole[axisPlace];

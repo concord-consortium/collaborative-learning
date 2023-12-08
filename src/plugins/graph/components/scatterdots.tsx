@@ -222,6 +222,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
   });
 
   return (
-    <svg/>
+    <>
+    </>
   );
 };
