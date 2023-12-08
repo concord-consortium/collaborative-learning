@@ -1,3 +1,4 @@
+import { createContext, useContext } from "react";
 import { getParentOfType, Instance, SnapshotIn, types } from "@concord-consortium/mobx-state-tree";
 import { typedId } from "../../../utilities/js-utils";
 import { onAnyAction } from "../../../utilities/mst-utils";
@@ -10,7 +11,6 @@ import { GraphModel } from "./graph-model";
 import { IDataSet } from "../../../models/data/data-set";
 import { ISharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
 import { DotsElt } from "../d3-types";
-import { createContext, useContext } from "react";
 
 export const GraphLayerModel = types
   .model('GraphLayerModel')

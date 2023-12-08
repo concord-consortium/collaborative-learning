@@ -163,8 +163,6 @@ export function matchAllCirclesToData(props: IMatchAllCirclesProps) {
       pointRadius, pointColor, pointStrokeColor,
       enableAnimation, instanceId});
   }
-  // Remove circles that match no layer at all
-  // selectOrphanCircles(dotsElement, graphModel)?.remove();
 }
 
 export interface IMatchCirclesProps {
@@ -181,7 +179,6 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
   const { dataConfiguration, enableAnimation, instanceId, dotsElement } = props;
   const allCaseData = dataConfiguration.joinedCaseDataArrays;
   const caseDataKeyFunc = (d: CaseData) => `${d.dataConfigID}-${d.plotNum}-${d.caseID}`;
-  console.log('matchCircles', dataConfiguration.id, dotsElement);
 
   // Create the circles
   const allCircles = selectGraphDots(dotsElement);
@@ -193,7 +190,7 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
     .join(
       enter => {
         const g = enter.append('g')
-          .attr('class', `graph-dot ${dataConfiguration.id}`)
+          .attr('class', `graph-dot`)
           .property('id', (d: CaseData) => `${d.dataConfigID}_${instanceId}_${d.caseID}`);
         g.append('circle')
           .attr('class', 'outer-circle');
@@ -483,7 +480,13 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
         .transition()
         .duration(duration)
         .attr('transform', (aCaseData: CaseData) => {
-          return `translate(${getScreenX(aCaseData.caseID)} ${getScreenY(aCaseData.caseID, aCaseData.plotNum)})`;
+          const x = getScreenX(aCaseData.caseID), y = getScreenY(aCaseData.caseID, aCaseData.plotNum);
+          if (x !== null && isFinite(x) && y !== null && isFinite(y)) {
+            return `translate(${x} ${y})`;
+          } else {
+            console.log('position of point became undefined in setPositions');
+            return '';
+          }
         });
     }
   };
