@@ -14,7 +14,6 @@ function beforeTest(params) {
     cy.clearQAData('all');
     cy.visit(params);
     cy.waitForLoad();
-    dashboard.switchView("Workspace & Resources");
     cy.wait(5000);
     clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle');
 }
@@ -39,7 +38,7 @@ describe('verify document curation', function() {//adding a star to a student do
         dashboard.switchView('Dashboard');
         dashboard.switchWorkView('Published');
         dashboard.getGroup(1).find('.four-up .icon-star').should('have.class', 'starred');
-    
+
         cy.log('verify unstar in dashboard unstars in workspace');
         dashboard.clearAllStarsFromPublishedWork();
         cy.wait(1000);
