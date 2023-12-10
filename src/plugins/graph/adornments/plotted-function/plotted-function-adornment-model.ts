@@ -37,29 +37,36 @@ export const PlottedFunctionAdornmentModel = AdornmentModel
   .props({
     type: types.optional(types.literal(kPlottedFunctionType), kPlottedFunctionType),
     plottedFunctions: types.map(PlottedFunctionInstance),
-    error: ""
+    error: "",
+    xVariableName: types.maybe(types.string),
+    yVariableName: types.maybe(types.string)
   })
-  .views( self => ({
+  .views(self => ({
+    get sharedVariables() {
+      const sharedModelManager = getSharedModelManager(self);
+      if (sharedModelManager?.isReady) {
+        const sharedVariableModels = sharedModelManager.getTileSharedModelsByType(self, SharedVariables);
+        if (sharedVariableModels.length > 0) {
+          return sharedVariableModels[0] as SharedVariablesType;
+        }
+      }
+    }
+  }))
+  .views(self => ({
     computePoints(options: IComputePointsOptions) {
       console.log(`--- computePoints`);
       const startTime = Date.now();
       const { min, max, xCellCount, yCellCount, gap, xScale, yScale, formulaFunction } = options;
       const tPoints: Point[] = [];
       if (xScale.invert) {
-        let sharedVariables: SharedVariablesType | undefined;
         let computeY = formulaFunction;
         let dispose = () => {};
 
         // Use variable expression if we're connected to a shared variables model
-        const sharedModelManager = getSharedModelManager(self);
-        if (sharedModelManager?.isReady) {
-          const sharedVariableModels = sharedModelManager.getTileSharedModelsByType(self, SharedVariables);
-          if (sharedVariableModels.length > 0) {
-            sharedVariables = sharedVariableModels[0] as SharedVariablesType;
-            const compute = sharedVariables.setupCompute("x", "y");
-            computeY = compute.computeY;
-            dispose = compute.dispose;
-          }
+        if (self.sharedVariables) {
+          const compute = self.sharedVariables.setupCompute("x", "y");
+          computeY = compute.computeY;
+          dispose = compute.dispose;
         }
 
         const setupTime = Date.now();
@@ -99,6 +106,12 @@ export const PlottedFunctionAdornmentModel = AdornmentModel
     },
     removePlottedFunction(key: string) {
       self.plottedFunctions.delete(key);
+    },
+    setXVariableName(xVariableName?: string) {
+      self.xVariableName = xVariableName;
+    },
+    setYVariableName(yVariableName?: string) {
+      self.yVariableName = yVariableName;
     }
   }));
 

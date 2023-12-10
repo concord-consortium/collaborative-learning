@@ -4,6 +4,7 @@ import { AttributeType } from "../../../../models/data/attribute";
 import { GraphPlace } from "../../imports/components/axis-graph-shared";
 import { useGraphLayoutContext } from "../../models/graph-layout";
 import { IDataSet } from "../../../../models/data/data-set";
+import { isPlottedFunctionAdornment } from "../../adornments/plotted-function/plotted-function-adornment-model";
 import { DataConfigurationContext } from "../../hooks/use-data-configuration-context";
 import { useInstanceIdContext } from "../../imports/hooks/use-instance-id-context";
 import { axisPlaceToAttrRole, kGraphDefaultHeight } from "../../graph-types";
@@ -106,7 +107,19 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
         { xMenus }
       </div>
       { layerLegends }
-      <VariableFunctionLegend/>
+      {
+        graphModel.adornments.map(adornment => {
+          if (isPlottedFunctionAdornment(adornment)) {
+            return (
+              <VariableFunctionLegend
+                key={adornment.id}
+                plottedFunctionAdornment={adornment}
+              />
+            );
+          }
+          return null;
+        })
+      }
     </div>
   );
 });
