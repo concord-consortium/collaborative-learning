@@ -2,6 +2,7 @@ import { destroy, getSnapshot, Instance, types } from "mobx-state-tree";
 import { Variable, VariableSnapshot, VariableType } from "@concord-consortium/diagram-view";
 import { SharedModel } from "../../models/shared/shared-model";
 import { withoutUndo } from "../../models/history/without-undo";
+import { getSharedModelManager } from "../../models/tiles/tile-environment";
 
 export const kSharedVariablesID = "SharedVariables";
 
@@ -76,6 +77,10 @@ export const SharedVariables = SharedModel.named("SharedVariables")
   }
 }))
 .views(self => ({
+  get label() {
+    const sharedModelManager = getSharedModelManager(self);
+    return sharedModelManager?.getSharedModelLabel(self);
+  },
   getVariables() {
     return self.variables;
   }

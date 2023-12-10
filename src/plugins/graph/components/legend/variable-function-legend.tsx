@@ -1,9 +1,6 @@
 import React from "react";
 import { observer } from "mobx-react";
 import { IPlottedFunctionAdornmentModel } from "../../adornments/plotted-function/plotted-function-adornment-model";
-import { getSharedModelManager } from "../../../../models/tiles/tile-environment";
-import { SharedVariables } from "../../../shared-variables/shared-variables";
-import { useTileModelContext } from "../../../../components/tiles/hooks/use-tile-model-context";
 
 interface IVariableFunctionLegendProps {
   plottedFunctionAdornment: IPlottedFunctionAdornmentModel;
@@ -18,16 +15,26 @@ interface IVariableFunctionLegendProps {
 export const VariableFunctionLegend = observer(function(
   { plottedFunctionAdornment }: IVariableFunctionLegendProps
 ) {
-  console.log('running');
-  const { tile } = useTileModelContext();
-  const smm = getSharedModelManager(tile);
-  const sharedVars = (smm?.isReady) ? smm.findFirstSharedModelByType(SharedVariables, tile?.id): undefined;
+  const sharedVars = plottedFunctionAdornment.sharedVariables;
 
   if (sharedVars) {
     return (
-      <div className="legend-title-row">
-        <p>Variables from: <strong>{smm?.getSharedModelLabel(sharedVars)}</strong></p>
-      </div>
+      <>
+        <div className="legend-title-row">
+          <div className="legend-title">
+            Variables from: <strong>{sharedVars.label}</strong>
+          </div>
+        </div>
+        {
+          sharedVars.variables.map(variable => {
+            return (
+              <div key={variable.id}>
+                { variable.name }
+              </div>
+            );
+          })
+        }
+      </>
     );
   } else {
     return null;

@@ -61,7 +61,16 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
   // Total height is height of X-axis menus, plus sum of all the layer sections
   const totalHeight = kMultiLegendMenuHeight + kMultiLegendVerticalPadding
     + kTemporarySpaceForVariablesLegend
-    + graphModel.layers.reduce((prev, layer)=>{ return prev + heightOfLayerLegend(layer);}, 0);
+    + graphModel.layers.reduce((prev, layer)=>{ return prev + heightOfLayerLegend(layer);}, 0)
+    + graphModel.adornments.reduce((prev, adornment) => {
+      if (isPlottedFunctionAdornment(adornment)) {
+        if (adornment.sharedVariables) {
+          // TODO: How tall should plotted function adornment legends be?
+          return prev + 100;
+        }
+      }
+      return prev;
+    }, 0);
 
   useEffect(function RespondToLayoutChange() {
     layout.setDesiredExtent("legend", totalHeight);
