@@ -22,6 +22,7 @@ import {
 import {IDataConfigurationModel} from "../models/data-configuration-model";
 import {measureText} from "../../../components/tiles/hooks/use-measure-text";
 import { IGraphModel } from "../models/graph-model";
+import { isFiniteNumber } from "../../../utilities/math-utils";
 
 /**
  * Utility routines having to do with graph entities
@@ -117,7 +118,7 @@ export function getPointTipText(caseID: string, attributeIDs: (string|undefined)
       const attribute = dataset.attrFromID(attrID),
         name = attribute.name,
         numValue = dataset.getNumeric(caseID, attrID),
-        value = numValue != null && isFinite(numValue) ? float(numValue)
+        value = isFiniteNumber(numValue) ? float(numValue)
           : dataset.getValue(caseID, attrID);
       return value ? `${name}: ${value}` : '';
     }
@@ -481,7 +482,7 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
         .duration(duration)
         .attr('transform', (aCaseData: CaseData) => {
           const x = getScreenX(aCaseData.caseID), y = getScreenY(aCaseData.caseID, aCaseData.plotNum);
-          if (x !== null && isFinite(x) && y !== null && isFinite(y)) {
+          if (isFiniteNumber(x) && isFiniteNumber(y)) {
             return `translate(${x} ${y})`;
           } else {
             console.log('position of point became undefined in setPositions');
