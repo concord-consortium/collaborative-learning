@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import React, { useRef, useState } from "react";
+import React, { ReactElement, useRef, useState } from "react";
 import { Menu, MenuItem, MenuList, MenuButton, Portal } from "@chakra-ui/react";
 import { VariableType } from "@concord-consortium/diagram-view";
 
@@ -15,13 +15,13 @@ function variableDisplay(variable: VariableType) {
 
 interface IVariableSelectionProps {
   alternateButtonLabel: string;
-  label: string;
+  icon: ReactElement;
   onSelect: (id: string) => void;
   selectedVariable?: VariableType;
   variables: VariableType[];
 }
 export const VariableSelection = observer(function VariableSelection({
-  alternateButtonLabel, label, onSelect, selectedVariable, variables
+  alternateButtonLabel, icon, onSelect, selectedVariable, variables
 }: IVariableSelectionProps) {
   const menuListRef = useRef<HTMLDivElement>(null);
   const [buttonContainer, setButtonContainer] = useState<HTMLDivElement | null>(null);
@@ -35,7 +35,7 @@ export const VariableSelection = observer(function VariableSelection({
   const buttonLabel = selectedVariable ? variableDisplay(selectedVariable) : alternateButtonLabel;
   return (
     <>
-      <div>{label}</div>
+      <div>{icon}</div>
       <Menu boundary="scrollParent">
         <div ref={(e) => setButtonContainer(e)} className={labelClassNames}>
           <MenuButton className="variable-function-legend-button">

@@ -4,6 +4,9 @@ import { observer } from "mobx-react";
 import { IPlottedFunctionAdornmentModel } from "../../adornments/plotted-function/plotted-function-adornment-model";
 import { VariableSelection } from "./variable-selection";
 
+import XAxisIcon from "../../assets/x-axis-icon.svg";
+import YAxisIcon from "../../assets/y-axis-icon.svg";
+
 interface IVariableFunctionLegendProps {
   plottedFunctionAdornment: IPlottedFunctionAdornmentModel;
 }
@@ -30,14 +33,14 @@ export const VariableFunctionLegend = observer(function(
         <div className="variable-row">
           <VariableSelection
             alternateButtonLabel="Select a variable for X"
-            label="X:"
+            icon={<XAxisIcon />}
             onSelect={variableId => plottedFunctionAdornment?.setXVariableId(variableId)}
             selectedVariable={plottedFunctionAdornment?.xVariable}
             variables={sharedVars.variables.filter(variable => variable.inputs.length <= 0)}
           />
           <VariableSelection
             alternateButtonLabel="Select a variable for Y"
-            label="Y:"
+            icon={<YAxisIcon />}
             onSelect={(variableId) => plottedFunctionAdornment?.setYVariableId(variableId)}
             selectedVariable={plottedFunctionAdornment?.yVariable}
             variables={sharedVars.variables}
