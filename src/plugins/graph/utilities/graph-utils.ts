@@ -584,9 +584,9 @@ export const pathBasis = (p0: Point, p1: Point, p2: Point, p3: Point) => {
   const b2 = weight(basis[2]);
   const b3 = weight(basis[3]);
 
-  const b1String = `${Math.round(b1.x)},${Math.round(b1.y)}`;
-  const b2String = `${Math.round(b2.x)},${Math.round(b2.y)}`;
-  const b3String = `${Math.round(b3.x)},${Math.round(b3.y)}`;
+  const b1String = `${b1.x},${b1.y}`;
+  const b2String = `${b2.x},${b2.y}`;
+  const b3String = `${b3.x},${b3.y}`;
   return `C${b1String},${b2String},${b3String}`;
 };
 
