@@ -7,14 +7,21 @@ import { kGraphClassSelector } from "../../graph-types";
 
 import "./variable-selection.scss";
 
+function variableDisplay(variable: VariableType) {
+  const namePart = variable.name || "<unnamed variable>";
+  const unitPart = variable.computedUnit ? ` (${variable.computedUnit})` : "";
+  return `${namePart}${unitPart}`;
+}
+
 interface IVariableSelectionProps {
-  buttonLabel: string;
+  alternateButtonLabel: string;
   label: string;
   onSelect: (id: string) => void;
+  selectedVariable?: VariableType;
   variables: VariableType[];
 }
 export const VariableSelection = observer(function VariableSelection({
-  buttonLabel, label, onSelect, variables
+  alternateButtonLabel, label, onSelect, selectedVariable, variables
 }: IVariableSelectionProps) {
   const menuListRef = useRef<HTMLDivElement>(null);
   const [buttonContainer, setButtonContainer] = useState<HTMLDivElement | null>(null);
@@ -25,6 +32,7 @@ export const VariableSelection = observer(function VariableSelection({
   const portalRef = useRef(portalParentElt);
   portalRef.current = portalParentElt;
   const labelClassNames = "graph-legend-label variable-label";
+  const buttonLabel = selectedVariable ? variableDisplay(selectedVariable) : alternateButtonLabel;
   return (
     <>
       <div>{label}</div>
@@ -43,7 +51,7 @@ export const VariableSelection = observer(function VariableSelection({
                     key={variable.id}
                     onClick={() => onSelect(variable.id)}
                   >
-                    {variable.name || "<unnamed variable>"}
+                    {variableDisplay(variable)}
                   </MenuItem>
                 );
               })
