@@ -38,8 +38,8 @@ export const PlottedFunctionAdornmentModel = AdornmentModel
     type: types.optional(types.literal(kPlottedFunctionType), kPlottedFunctionType),
     plottedFunctions: types.map(PlottedFunctionInstance),
     error: "",
-    xVariableName: types.maybe(types.string),
-    yVariableName: types.maybe(types.string)
+    xVariableId: types.maybe(types.string),
+    yVariableId: types.maybe(types.string)
   })
   .views(self => ({
     get sharedVariables() {
@@ -50,6 +50,14 @@ export const PlottedFunctionAdornmentModel = AdornmentModel
           return sharedVariableModels[0] as SharedVariablesType;
         }
       }
+    }
+  }))
+  .views(self => ({
+    get xVariable() {
+      return self.sharedVariables?.variables.find(variable => variable.id === self.xVariableId);
+    },
+    get yVariable() {
+      return self.sharedVariables?.variables.find(variable => variable.id === self.yVariableId);
     }
   }))
   .views(self => ({
@@ -107,11 +115,11 @@ export const PlottedFunctionAdornmentModel = AdornmentModel
     removePlottedFunction(key: string) {
       self.plottedFunctions.delete(key);
     },
-    setXVariableName(xVariableName?: string) {
-      self.xVariableName = xVariableName;
+    setXVariableId(xVariableId?: string) {
+      self.xVariableId = xVariableId;
     },
-    setYVariableName(yVariableName?: string) {
-      self.yVariableName = yVariableName;
+    setYVariableId(yVariableId?: string) {
+      self.yVariableId = yVariableId;
     }
   }));
 

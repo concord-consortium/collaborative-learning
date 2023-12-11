@@ -43,7 +43,7 @@ export const VariableFunctionLegend = observer(function(
           <Menu boundary="scrollParent">
             <div ref={(e) => setLabelElt(e)} className={labelClassNames}>
               <MenuButton className="variable-function-legend-button">
-                {plottedFunctionAdornment?.yVariableName ?? "Y"}
+                {plottedFunctionAdornment?.yVariable?.name ?? "Y"}
               </MenuButton>
             </div>
             <Portal containerRef={portalRef}>
@@ -51,8 +51,11 @@ export const VariableFunctionLegend = observer(function(
                 {
                   sharedVars.variables.map(variable => {
                     return (
-                      <MenuItem key={variable.id}>
-                        {variable.name}
+                      <MenuItem
+                        key={variable.id}
+                        onClick={() => plottedFunctionAdornment?.setYVariableId(variable.id)}
+                      >
+                        {variable.name || "<unnamed variable>"}
                       </MenuItem>
                     );
                   })
