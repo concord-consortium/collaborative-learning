@@ -10,9 +10,7 @@ import { TileModelContext } from "../../components/tiles/tile-api";
 import { DiagramTileMethodsContext } from "./diagram-tile";
 import { useUIStore } from "../../hooks/use-stores";
 import { kNewVariableButtonDraggableId } from "./diagram-types";
-import { kGraphTileType } from "../graph/graph-defs";
-import { useConsumerTileLinking } from "../../hooks/use-consumer-tile-linking";
-import { SharedVariables } from "../shared-variables/shared-variables";
+import { SharedVariablesLinkButton } from "../shared-variables/shared-variables-link-button";
 
 import AddVariableCardIcon from "./src/assets/add-variable-card-icon.svg";
 import InsertVariableCardIcon from "./src/assets/insert-variable-card-icon.svg";
@@ -25,7 +23,6 @@ import UnlockLayoutIcon from "./src/assets/unlock-layout-icon.svg";
 import HideNavigatorIcon from "./src/assets/hide-navigator-icon.svg";
 import ShowNavigatorIcon from "./src/assets/show-navigator-icon.svg";
 import DeleteSelectionIcon from "../../assets/icons/delete/delete-selection-icon.svg";
-import ViewDataAsGraphIcon from "../../assets/icons/view-data-as-graph-icon.svg";
 
 function handleViewportChange(content: DiagramContentModelType, changeFunction: () => any) {
   const updatedViewport = changeFunction?.();
@@ -207,29 +204,9 @@ export const DeleteButton = observer(function DeleteButton({ name }: IToolbarBut
 
 });
 
-export const LinkGraphButton = observer(function LinkGraphButton({name}: IToolbarButtonComponentProps) {
-  const model = useContext(TileModelContext)!;
+export const VariablesLinkButton = observer(function VariablesLinkButton({name, args}: IToolbarButtonComponentProps) {
   const methods = useContext(DiagramTileMethodsContext);
+  const disabled = methods ? !methods.isDisplayingSomeVariables() : true;
 
-  const hasLinkableRows = methods?.isDisplayingSomeVariables() || false;
-
-  const { isLinkEnabled, showLinkTileDialog }
-  = useConsumerTileLinking({ model, hasLinkableRows, shareType: SharedVariables, tileType: kGraphTileType });
-
-  const handleClick = (e: React.MouseEvent) => {
-    showLinkTileDialog && showLinkTileDialog();
-    e.stopPropagation();
-  };
-
-  return (
-    <TileToolbarButton
-      name={name}
-      title="View data as graph"
-      onClick={handleClick}
-      disabled={!isLinkEnabled}
-    >
-      <ViewDataAsGraphIcon />
-    </TileToolbarButton>
- );
-
+  return <SharedVariablesLinkButton name={name} args={args} disabled={disabled}/>;
 });
