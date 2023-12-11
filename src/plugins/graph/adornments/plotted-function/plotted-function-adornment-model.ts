@@ -1,4 +1,8 @@
 import { Instance, types } from "mobx-state-tree";
+import { getSharedModelManager } from "../../../../models/tiles/tile-environment";
+import { SharedVariables, SharedVariablesType } from "../../../shared-variables/shared-variables";
+import { Point } from "../../graph-types";
+import { ScaleNumericBaseType } from "../../imports/components/axis/axis-types";
 import { AdornmentModel, IAdornmentModel } from "../adornment-models";
 import { kPlottedFunctionType, FormulaFn } from "./plotted-function-adornment-types";
 
@@ -17,6 +21,17 @@ export const PlottedFunctionInstance = types.model("PlottedFunctionInstance", {}
     }
   }));
 
+interface IComputePointsOptions {
+  formulaFunction: (x: number) => number,
+  min: number,
+  max: number,
+  xCellCount: number,
+  yCellCount: number,
+  gap: number,
+  xScale: ScaleNumericBaseType,
+  yScale: ScaleNumericBaseType
+}
+
 export const PlottedFunctionAdornmentModel = AdornmentModel
   .named("PlottedFunctionAdornmentModel")
   .props({
@@ -24,13 +39,47 @@ export const PlottedFunctionAdornmentModel = AdornmentModel
     plottedFunctions: types.map(PlottedFunctionInstance),
     error: ""
   })
+  .views( self => ({
+    computePoints(options: IComputePointsOptions) {
+      const { min, max, xCellCount, yCellCount, gap, xScale, yScale, formulaFunction } = options;
+      const tPoints: Point[] = [];
+      if (xScale.invert) {
+        let sharedVariables: SharedVariablesType | undefined;
+        let computeY = formulaFunction;
+        let dispose = () => {};
+
+        // Use variable expression if we're connected to a shared variables model
+        const sharedModelManager = getSharedModelManager(self);
+        if (sharedModelManager?.isReady) {
+          const sharedVariableModels = sharedModelManager.getTileSharedModelsByType(self, SharedVariables);
+          if (sharedVariableModels.length > 0) {
+            sharedVariables = sharedVariableModels[0] as SharedVariablesType;
+            const compute = sharedVariables.setupCompute("x", "y");
+            computeY = compute.computeY;
+            dispose = compute.dispose;
+          }
+        }
+
+        for (let pixelX = min; pixelX <= max; pixelX += gap) {
+          const tX = xScale.invert(pixelX * xCellCount);
+          const tY = computeY(tX);
+          if (Number.isFinite(tY)) {
+            const pixelY = yScale(tY) / yCellCount;
+            tPoints.push({ x: pixelX, y: pixelY });
+          }
+        }
+        dispose();
+      }
+      return tPoints;
+    }
+  }))
   .actions(self => ({
     setError(error: string) {
       self.error = error;
     },
-    addPlottedFunction(formulaFunction: FormulaFn, key=kDefaultFunctionKey) {
+    addPlottedFunction(formulaFunction?: FormulaFn, key=kDefaultFunctionKey) {
       const newPlottedFunction = PlottedFunctionInstance.create();
-      newPlottedFunction.setValue(formulaFunction);
+      if (formulaFunction) newPlottedFunction.setValue(formulaFunction);
       self.plottedFunctions.set(key, newPlottedFunction);
     },
     updatePlottedFunctionValue(formulaFunction: FormulaFn, key=kDefaultFunctionKey) {

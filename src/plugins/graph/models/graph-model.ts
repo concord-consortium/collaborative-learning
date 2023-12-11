@@ -32,6 +32,8 @@ import { GraphLayerModel } from "./graph-layer-model";
 import { isSharedDataSet, SharedDataSet } from "../../../models/shared/shared-data-set";
 import { DataConfigurationModel } from "./data-configuration-model";
 import { PlottedFunctionAdornmentModel } from "../adornments/plotted-function/plotted-function-adornment-model";
+import { SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
+import { kPlottedFunctionType } from "../adornments/plotted-function/plotted-function-adornment-types";
 
 export interface GraphProperties {
   axes: Record<string, IAxisModelUnion>
@@ -119,6 +121,15 @@ export const GraphModel = TileContentModel
      */
     get metadata() {
       return getTileCaseMetadata(self);
+    },
+    get sharedVariables() {
+      const smm = getSharedModelManager(self);
+      if (smm?.isReady) {
+        const sharedVariableModels = smm.getTileSharedModelsByType(self, SharedVariables);
+        if (sharedVariableModels && sharedVariableModels.length > 0) {
+          return sharedVariableModels[0] as SharedVariablesType;
+        }
+      }
     },
     pointColorAtIndex(plotIndex = 0) {
       if (plotIndex < self._pointColors.length) {
@@ -448,6 +459,27 @@ export const GraphModel = TileContentModel
           }
         ));
       }
+
+      // Display a plotted function when this is linked to a SharedVariableModel
+      addDisposer(self, reaction(
+        () => {
+          const smm = getSharedModelManager(self);
+          let sharedVariableModels;
+          if (smm?.isReady) {
+            sharedVariableModels = smm.getTileSharedModelsByType(self, SharedVariables);
+          }
+          return sharedVariableModels;
+        },
+        (sharedVariableModels) => {
+          if (sharedVariableModels && sharedVariableModels.length > 0) {
+            const plottedFunctionAdornment = PlottedFunctionAdornmentModel.create();
+            plottedFunctionAdornment.addPlottedFunction(x => x**2);
+            self.showAdornment(plottedFunctionAdornment);
+          } else {
+            self.hideAdornment(kPlottedFunctionType);
+          }
+        }
+      ));
     },
     setDataConfigurationReferences() {
       // Updates pre-existing DataConfiguration objects that don't have the now-required references
@@ -511,11 +543,6 @@ export function createGraphModel(snap?: IGraphModelSnapshot, appConfig?: AppConf
     const cLines = ConnectingLinesModel.create();
     createdGraphModel.showAdornment(cLines);
   }
-
-  // TODO Add plotted function adornment at the proper time, like when connecting to a SharedVariableModel
-  const plottedFunctionAdornment = PlottedFunctionAdornmentModel.create();
-  plottedFunctionAdornment.addPlottedFunction(x => x ** 2);
-  createdGraphModel.showAdornment(plottedFunctionAdornment);
 
   return createdGraphModel;
 }

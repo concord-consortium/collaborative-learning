@@ -1,4 +1,4 @@
-import { destroy, Instance, types } from "mobx-state-tree";
+import { destroy, getSnapshot, Instance, types } from "mobx-state-tree";
 import { Variable, VariableSnapshot, VariableType } from "@concord-consortium/diagram-view";
 import { SharedModel } from "../../models/shared/shared-model";
 import { withoutUndo } from "../../models/history/without-undo";
@@ -10,6 +10,11 @@ export const SharedVariables = SharedModel.named("SharedVariables")
   type: types.optional(types.literal(kSharedVariablesID), kSharedVariablesID),
   variables: types.array(Variable)
 })
+.volatile(self => ({
+  variablesCopy: undefined as VariableType[] | undefined,
+  xVariable: undefined as VariableType | undefined,
+  yVariable: undefined as VariableType | undefined
+}))
 .actions(self => ({
   addVariable(variable: VariableType) {
     self.variables.push(variable);
@@ -19,6 +24,20 @@ export const SharedVariables = SharedModel.named("SharedVariables")
     if (variable) {
       destroy(variable);
     }
+  },
+  computeY(x: number) {
+    if (self.variablesCopy && self.xVariable && self.yVariable) {
+      self.xVariable.setValue(x);
+      const dependentValue = self.yVariable.computedValue;
+      return dependentValue ?? x ** 2;
+    }
+    return x ** 2;
+  },
+  disposeCompute() {
+    self.xVariable = undefined;
+    self.yVariable = undefined;
+    if (self.variablesCopy) destroy(self.variablesCopy);
+    self.variablesCopy = undefined;
   }
 }))
 .actions(self => ({
@@ -31,7 +50,7 @@ export const SharedVariables = SharedModel.named("SharedVariables")
     // leading to unexpected behavior. The noUndo flag is available to prevent a second undo step by
     // triggering a call to withoutUndo here when it is set to true.
     //
-    // In the case of the text tile, for example, adding a new variable would add undo steps for both 
+    // In the case of the text tile, for example, adding a new variable would add undo steps for both
     // the related call to setSlate and to addAndInsertVariable. The undo step for setSlate would be
     // added before the one for addAndInsertVariable. So after adding a new variable to a text tile
     // and then clicking undo, the variable was deleted but its chip in the text editor was replaced
@@ -49,6 +68,12 @@ export const SharedVariables = SharedModel.named("SharedVariables")
     self.addVariable(variable);
     return variable;
   },
+  setupCompute(xName: string, yName: string) {
+    self.variablesCopy = types.array(Variable).create(getSnapshot(self.variables));
+    self.xVariable = self.variablesCopy?.find(variable => variable.name === xName);
+    self.yVariable = self.variablesCopy?.find(variable => variable.name === yName);
+    return { computeY: self.computeY, dispose: self.disposeCompute };
+  }
 }))
 .views(self => ({
   getVariables() {

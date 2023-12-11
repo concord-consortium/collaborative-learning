@@ -5,7 +5,6 @@ import { mstAutorun } from "../../../../utilities/mst-autorun";
 import { INumericAxisModel } from "../../imports/components/axis/models/axis-model";
 import { useAxisLayoutContext } from "../../imports/components/axis/models/axis-layout-context";
 import { ScaleNumericBaseType } from "../../imports/components/axis/axis-types";
-import { Point } from "../../graph-types";
 import { IPlottedFunctionAdornmentModel } from "./plotted-function-adornment-model";
 import { useGraphModelContext } from "../../models/graph-model";
 import { useDataConfigurationContext } from "../../hooks/use-data-configuration-context";
@@ -13,33 +12,6 @@ import { curveBasis } from "../../utilities/graph-utils";
 import { FormulaFn } from "./plotted-function-adornment-types";
 
 import "./plotted-function-adornment-component.scss";
-
-interface IComputePointsOptions {
-  formulaFunction: FormulaFn,
-  min: number,
-  max: number,
-  xCellCount: number,
-  yCellCount: number,
-  gap: number,
-  xScale: ScaleNumericBaseType,
-  yScale: ScaleNumericBaseType
-}
-
-const computePoints = (options: IComputePointsOptions) => {
-  const { min, max, xCellCount, yCellCount, gap, xScale, yScale, formulaFunction } = options;
-  const tPoints: Point[] = [];
-  if (xScale.invert) {
-    for (let pixelX = min; pixelX <= max; pixelX += gap) {
-      const tX = xScale.invert(pixelX * xCellCount);
-      const tY = formulaFunction(tX);
-      if (Number.isFinite(tY)) {
-        const pixelY = yScale(tY) / yCellCount;
-        tPoints.push({ x: pixelX, y: pixelY });
-      }
-    }
-  }
-  return tPoints;
-};
 
 interface IProps {
   containerId?: string
@@ -72,6 +44,7 @@ export const PlottedFunctionAdornmentComponent = observer(function PlottedFuncti
   const instanceKey = model.instanceKey(cellKey);
   const path = useRef("");
   const plottedFunctionRef = useRef<SVGGElement>(null);
+  const sharedVariables = graphModel.sharedVariables;
 
   const addPath = useCallback((formulaFunction: FormulaFn) => {
     const xMin = xScale.domain()[0];
@@ -79,7 +52,7 @@ export const PlottedFunctionAdornmentComponent = observer(function PlottedFuncti
     const tPixelMin = xScale(xMin);
     const tPixelMax = xScale(xMax);
     const kPixelGap = 1;
-    const tPoints = computePoints({
+    const tPoints = model.computePoints({
       formulaFunction, min: tPixelMin, max: tPixelMax, xCellCount, yCellCount, gap: kPixelGap, xScale, yScale
     });
     if (tPoints.length === 0) return;
@@ -91,7 +64,7 @@ export const PlottedFunctionAdornmentComponent = observer(function PlottedFuncti
       .attr("data-testid", `plotted-function-path${classFromKey ? `-${classFromKey}` : ""}`)
       .attr("d", path.current);
 
-  }, [classFromKey, xCellCount, xScale, yCellCount, yScale]);
+  }, [classFromKey, model, xCellCount, xScale, yCellCount, yScale]);
 
   // Add the lines and their associated covers and labels
   const refreshValues = useCallback(() => {
@@ -106,7 +79,7 @@ export const PlottedFunctionAdornmentComponent = observer(function PlottedFuncti
     if (measure) {
       addPath(measure.formulaFunction);
     }
-  }, [model, instanceKey, addPath]);
+  }, [addPath, instanceKey, model]);
 
   // Refresh values on expression changes
   useEffect(function refreshExpressionChange() {
@@ -123,7 +96,7 @@ export const PlottedFunctionAdornmentComponent = observer(function PlottedFuncti
     }, { name: "PlottedFunctionAdornmentComponent.refreshExpressionChange" }, model);
   }, [graphModel, model, xScale, xSubAxesCount, yScale]);
 
-  // Refresh values on axis changes
+  // Refresh values on axis or expression change
   useEffect(function refreshAxisChange() {
     return mstAutorun(() => {
       // We observe changes to the axis domains within the autorun by extracting them from the axes below.
@@ -133,9 +106,15 @@ export const PlottedFunctionAdornmentComponent = observer(function PlottedFuncti
         const { domain: xDomain } = xAxis; // eslint-disable-line unused-imports/no-unused-vars
         const { domain: yDomain } = yAxis; // eslint-disable-line unused-imports/no-unused-vars
       }
+      // Trigger an autorun if the expression of y changes
+      // TODO Change this from hard coded "y"
+      if (sharedVariables) {
+        const y = sharedVariables.variables.find(variable => variable.name === "y");
+        y?.expression; // eslint-disable-line no-unused-expressions
+      }
       refreshValues();
     }, { name: "PlottedFunctionAdornmentComponent.refreshAxisChange" }, model);
-  }, [dataConfig, model, plotWidth, plotHeight, refreshValues, xAxis, yAxis]);
+  }, [dataConfig, model, plotWidth, plotHeight, refreshValues, sharedVariables, xAxis, yAxis]);
 
   return (
     <svg
