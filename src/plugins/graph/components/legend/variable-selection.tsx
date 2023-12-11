@@ -3,12 +3,11 @@ import React, { ReactElement, useRef, useState } from "react";
 import { Menu, MenuItem, MenuList, MenuButton, Portal } from "@chakra-ui/react";
 import { VariableType } from "@concord-consortium/diagram-view";
 
-import { kGraphClassSelector } from "../../graph-types";
 
 import "./variable-selection.scss";
 
 function variableDisplay(variable: VariableType) {
-  const namePart = variable.name || "<unnamed variable>";
+  const namePart = variable.name || "<no name>";
   const unitPart = variable.computedUnit ? ` (${variable.computedUnit})` : "";
   return `${namePart}${unitPart}`;
 }
@@ -23,14 +22,11 @@ interface IVariableSelectionProps {
 export const VariableSelection = observer(function VariableSelection({
   alternateButtonLabel, icon, onSelect, selectedVariable, variables
 }: IVariableSelectionProps) {
-  const menuListRef = useRef<HTMLDivElement>(null);
   const [buttonContainer, setButtonContainer] = useState<HTMLDivElement | null>(null);
-  const positioningParentElt = buttonContainer?.closest(kGraphClassSelector) as HTMLDivElement ?? null;
-  const parentRef = useRef(positioningParentElt);
-  parentRef.current = positioningParentElt;
   const portalParentElt = buttonContainer?.closest('.document-content') as HTMLDivElement ?? null;
   const portalRef = useRef(portalParentElt);
   portalRef.current = portalParentElt;
+
   const labelClassNames = "graph-legend-label variable-label";
   const buttonLabel = selectedVariable ? variableDisplay(selectedVariable) : alternateButtonLabel;
   return (
@@ -43,7 +39,7 @@ export const VariableSelection = observer(function VariableSelection({
           </MenuButton>
         </div>
         <Portal containerRef={portalRef}>
-          <MenuList ref={menuListRef}>
+          <MenuList>
             {
               variables.map(variable => {
                 return (
