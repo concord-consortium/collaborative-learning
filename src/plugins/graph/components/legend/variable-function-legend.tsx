@@ -1,10 +1,8 @@
-import React, { useRef, useState } from "react";
-import { Menu, MenuItem, MenuList, MenuButton, Portal } from "@chakra-ui/react";
+import React from "react";
 import { observer } from "mobx-react";
-import { kGraphClassSelector } from "../../graph-types";
-import { IPlottedFunctionAdornmentModel } from "../../adornments/plotted-function/plotted-function-adornment-model";
 
-import "./variable-function-label.scss";
+import { IPlottedFunctionAdornmentModel } from "../../adornments/plotted-function/plotted-function-adornment-model";
+import { VariableSelection } from "./variable-selection";
 
 interface IVariableFunctionLegendProps {
   plottedFunctionAdornment: IPlottedFunctionAdornmentModel;
@@ -19,17 +17,8 @@ interface IVariableFunctionLegendProps {
 export const VariableFunctionLegend = observer(function(
   { plottedFunctionAdornment }: IVariableFunctionLegendProps
 ) {
-  const menuListRef = useRef<HTMLDivElement>(null);
   const sharedVars = plottedFunctionAdornment.sharedVariables;
-  const [labelElt, setLabelElt] = useState<HTMLDivElement | null>(null);
-  const positioningParentElt = labelElt?.closest(kGraphClassSelector) as HTMLDivElement ?? null;
-  const parentRef = useRef(positioningParentElt);
-  parentRef.current = positioningParentElt;
-  const portalParentElt = labelElt?.closest('.document-content') as HTMLDivElement ?? null;
-  const portalRef = useRef(portalParentElt);
-  portalRef.current = portalParentElt;
 
-  const labelClassNames = "graph-legend-label variable-label";
   if (sharedVars) {
     return (
       <>
@@ -39,30 +28,12 @@ export const VariableFunctionLegend = observer(function(
           </div>
         </div>
         <div className="variable-row">
-          <div>Y:</div>
-          <Menu boundary="scrollParent">
-            <div ref={(e) => setLabelElt(e)} className={labelClassNames}>
-              <MenuButton className="variable-function-legend-button">
-                {plottedFunctionAdornment?.yVariable?.name ?? "Y"}
-              </MenuButton>
-            </div>
-            <Portal containerRef={portalRef}>
-              <MenuList ref={menuListRef}>
-                {
-                  sharedVars.variables.map(variable => {
-                    return (
-                      <MenuItem
-                        key={variable.id}
-                        onClick={() => plottedFunctionAdornment?.setYVariableId(variable.id)}
-                      >
-                        {variable.name || "<unnamed variable>"}
-                      </MenuItem>
-                    );
-                  })
-                }
-              </MenuList>
-            </Portal>
-          </Menu>
+          <VariableSelection
+            buttonLabel={plottedFunctionAdornment?.yVariable?.name ?? "Y"}
+            label="Y:"
+            onSelect={(variableId) => plottedFunctionAdornment?.setYVariableId(variableId)}
+            variables={sharedVars.variables}
+          />
         </div>
       </>
     );
