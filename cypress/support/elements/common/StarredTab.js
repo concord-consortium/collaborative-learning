@@ -97,9 +97,9 @@ class StarredTab {
           } else {
             this.getTopPanelCanvasItemWithIndex(tab, section, j).click();
             this.getTopPanelCanvasItemWithIndex(tab, section, j).invoke("attr", "class").should("contain", "starred");
-          }      
+          }
         }
-      }))
+      }));
     this.getCanvasItem(tab, section).then(((value) => {
       totalCount = Cypress.$(value).length;
       expect(value).to.have.length(totalCount);
@@ -109,10 +109,10 @@ class StarredTab {
           } else {
             this.getCanvasItemWithIndex(tab, section, i).click();
             this.getCanvasItemWithIndex(tab, section, i).invoke("attr", "class").should("contain", "starred");
-          }  
+          }
         }
       })
-    )  
+    );
   }
   starMultipleCanvasItemClassWork(tab, section) {
     let i;
@@ -126,10 +126,10 @@ class StarredTab {
           } else {
             this.getTopPanelCanvasItemWithIndex(tab, section, i).click();
             this.getTopPanelCanvasItemWithIndex(tab, section, i).invoke("attr", "class").should("contain", "starred");
-          }      
+          }
         }
       })
-    )  
+    );
   }
   verifyThumbnailFlipper(tab) {
     this.getThumbnailRightDocumentFlipper(tab).should("exist");
