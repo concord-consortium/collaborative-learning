@@ -62,8 +62,6 @@ export const PlottedFunctionAdornmentModel = AdornmentModel
   }))
   .views(self => ({
     computePoints(options: IComputePointsOptions) {
-      console.log(`--- computePoints`);
-      const startTime = Date.now();
       const { min, max, xCellCount, yCellCount, gap, xScale, yScale, formulaFunction } = options;
       const tPoints: Point[] = [];
       if (xScale.invert) {
@@ -77,7 +75,6 @@ export const PlottedFunctionAdornmentModel = AdornmentModel
           dispose = compute.dispose;
         }
 
-        const setupTime = Date.now();
         for (let pixelX = min; pixelX <= max; pixelX += gap) {
           const tX = xScale.invert(pixelX * xCellCount);
           const tY = computeY(tX);
@@ -86,14 +83,8 @@ export const PlottedFunctionAdornmentModel = AdornmentModel
             tPoints.push({ x: pixelX, y: pixelY });
           }
         }
-        const loopTime = Date.now();
-        console.log(` -- setup time`, setupTime - startTime);
-        console.log(` -- loop time`, loopTime - setupTime);
         dispose();
       }
-      const finishTime = Date.now();
-      console.log(`  - total time`, finishTime - startTime);
-      console.log(`  - final points`, tPoints);
       return tPoints;
     }
   }))

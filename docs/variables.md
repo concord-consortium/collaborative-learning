@@ -28,6 +28,14 @@ Much like the Text Tile, `VariableChip`s are available in the Drawing Tile when 
 #### Variable Dialogs
 While users often use the Diagram Tile to create and modify variables, there are two dialogs which let users create and modify variables via the toolbars of Text and Drawing Tiles when they are set up properly.
 
+#### Graph Tile
+The graph tile uses a `PlottedFunctionAdornment` to display functions of variables in terms of each other. This allows students to visualize the relationships between different variables.
+
+Because most units will not use this feature, and including it will bring in all of `quantity-playground`, we're trying to keep references to `SharedVariables` out of the core graph tile code. However, during development, we're cutting corners to get something out sooner. Below is a list of locations in the codebase with references to `SharedVariables` that we'll need to clean up before releasing this work.
+- `graph-model.ts` has a convenience view that returns its first linked `sharedVariables`. It also has a reaction set up in `afterAttach` which displays a `PlottedFunctionAdornment` based on whether any `sharedVariables` are attached or not. We have no plan for how to handle this reference at the moment.
+- `plotted-function-adornment-component.tsx` uses the expression of the y variable in a reaction to update the plot. This reference should be handled when we make the `PlottedFunctionAdornment` a plugin for the graph.
+- `plotted-function-adornment-model.ts` references the `SharedVariables` in `computePoints` to display a function defined by variables if the graph tile is linked to a `SharedVariables`. This reference should be handled when we make the `PlottedFunctionAdornment` a plugin for the graph.
+
 ### Case 2: Simulations and the Simulator Tile
 The second use case involves premade simulations, which users access through Simulator Tiles. Here, the `SharedVariable` model starts with built in variables defined by a developer, and the user generally does not add additional variables or directly modify variables. Instead, the user uses a Dataflow Tile to import data from certain variables into sensor nodes, modifies the data via a dataflow program, then sends values to output variables via live output nodes.
 
