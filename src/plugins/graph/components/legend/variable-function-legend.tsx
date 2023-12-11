@@ -29,7 +29,13 @@ export const VariableFunctionLegend = observer(function(
         </div>
         <div className="variable-row">
           <VariableSelection
-            buttonLabel={plottedFunctionAdornment?.yVariable?.name ?? "Y"}
+            buttonLabel={plottedFunctionAdornment?.xVariable?.name ?? "Select a variable for X"}
+            label="X:"
+            onSelect={variableId => plottedFunctionAdornment?.setXVariableId(variableId)}
+            variables={sharedVars.variables.filter(variable => variable.inputs.length <= 0)}
+          />
+          <VariableSelection
+            buttonLabel={plottedFunctionAdornment?.yVariable?.name ?? "Select a variable for Y"}
             label="Y:"
             onSelect={(variableId) => plottedFunctionAdornment?.setYVariableId(variableId)}
             variables={sharedVars.variables}
