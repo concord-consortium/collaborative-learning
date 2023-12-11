@@ -1,4 +1,4 @@
-import React from "react";
+import React, { createContext } from "react";
 import {IGraphModel} from "./graph-model";
 import {GraphLayout} from "./graph-layout";
 import {AxisPlace, AxisPlaces} from "../imports/components/axis/axis-types";
@@ -9,7 +9,7 @@ import {
   axisPlaceToAttrRole, graphPlaceToAttrRole, kDefaultNumericAxisBounds, PlotType
 } from "../graph-types";
 import {GraphPlace} from "../imports/components/axis-graph-shared";
-import {matchCirclesToData, setNiceDomain} from "../utilities/graph-utils";
+import {matchCirclesToData, setNiceDomain, startAnimation} from "../utilities/graph-utils";
 import { getAppConfig } from "../../../models/tiles/tile-environment";
 import { IDataConfigurationModel } from "./data-configuration-model";
 
@@ -194,4 +194,18 @@ export class GraphController {
     setPrimaryRoleAndPlotType();
     AxisPlaces.forEach(setupAxis);
   }
+
+  handleFullView() {
+    if (!this.graphModel) return;
+    startAnimation(this.enableAnimation);
+    for (const place of AxisPlaces) {
+      const role = graphPlaceToAttrRole[place];
+      const axisModel = this.graphModel.getAxis(place);
+      if (isNumericAxisModel(axisModel)) {
+        setNiceDomain(this.graphModel.numericValuesForAttrRole(role), axisModel);
+      }
+    }
+  }
 }
+
+export const GraphControllerContext = createContext<GraphController|undefined>(undefined);

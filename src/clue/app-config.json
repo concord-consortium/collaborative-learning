@@ -251,7 +251,8 @@
         "autoAssignAttributes": true,
         "disableAttributeDnD": true,
         "tools": [
-          "link-tile"
+          "link-tile",
+          "full-view"
         ]
       },
       "simulator": {
