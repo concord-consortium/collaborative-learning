@@ -69,10 +69,10 @@ export const SharedVariables = SharedModel.named("SharedVariables")
     self.addVariable(variable);
     return variable;
   },
-  setupCompute(xName: string, yName: string) {
+  setupCompute(xId?: string, yId?: string) {
     self.variablesCopy = types.array(Variable).create(getSnapshot(self.variables));
-    self.xVariable = self.variablesCopy?.find(variable => variable.name === xName);
-    self.yVariable = self.variablesCopy?.find(variable => variable.name === yName);
+    self.xVariable = self.variablesCopy?.find(variable => variable.id === xId);
+    self.yVariable = self.variablesCopy?.find(variable => variable.id === yId);
     return { computeY: self.computeY, dispose: self.disposeCompute };
   }
 }))

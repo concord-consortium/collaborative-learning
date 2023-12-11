@@ -72,7 +72,7 @@ export const PlottedFunctionAdornmentModel = AdornmentModel
 
         // Use variable expression if we're connected to a shared variables model
         if (self.sharedVariables) {
-          const compute = self.sharedVariables.setupCompute("x", "y");
+          const compute = self.sharedVariables.setupCompute(self.xVariableId, self.yVariableId);
           computeY = compute.computeY;
           dispose = compute.dispose;
         }
