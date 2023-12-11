@@ -1,4 +1,24 @@
-.variable-function-legend-button {
-  height: 100%;
-  width: 100%;
+@import "./legend-vars.scss";
+
+.variable-selection {
+  display: flex;
+  margin: 0 10px 0 0;
+
+  .variable-function-legend-button {
+    height: 100%;
+    width: 100%;
+  }
+
+  .variable-icon {
+    align-items: center;
+    display: flex;
+    height: $label-height;
+    justify-content: center;
+    padding: 0 4px;
+
+    svg {
+      height: auto;
+      width: auto;
+    }
+  }
 }

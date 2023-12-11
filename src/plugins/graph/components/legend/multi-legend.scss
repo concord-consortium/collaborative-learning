@@ -1,13 +1,5 @@
 @import "../../../../components/vars.sass";
-
-// Menu sizing here must match calculations in multi-legend.tsx:
-$menu-height: 30px;
-$vertical-padding: 10px;
-$vertical-gap: 8px;
-$label-height: 28px;
-$min-menu-width: 144px;
-$codap-menu-border-color: #0592af;
-$codap-bg-color: #f9f9f9;
+@import "./legend-vars.scss";
 
 .multi-legend {
   background-color:$codap-bg-color;
@@ -101,6 +93,7 @@ $codap-bg-color: #f9f9f9;
   .variable-row {
     display: flex;
     flex-direction: row;
+    margin-left: 20px;
     padding: $vertical-gap 0;
   }
 }

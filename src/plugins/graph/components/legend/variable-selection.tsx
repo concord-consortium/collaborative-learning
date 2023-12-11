@@ -34,8 +34,8 @@ export const VariableSelection = observer(function VariableSelection({
   const labelClassNames = "graph-legend-label variable-label";
   const buttonLabel = selectedVariable ? variableDisplay(selectedVariable) : alternateButtonLabel;
   return (
-    <>
-      <div>{icon}</div>
+    <div className="variable-selection">
+      <div className="variable-icon">{icon}</div>
       <Menu boundary="scrollParent">
         <div ref={(e) => setButtonContainer(e)} className={labelClassNames}>
           <MenuButton className="variable-function-legend-button">
@@ -59,6 +59,6 @@ export const VariableSelection = observer(function VariableSelection({
           </MenuList>
         </Portal>
       </Menu>
-    </>
+    </div>
   );
 });
