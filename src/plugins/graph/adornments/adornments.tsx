@@ -26,6 +26,8 @@ export const Adornments = observer(function Adornments(props: AdornmmentsProps) 
     { isTileSelected } = useTileModelContext(),
     adornments = graphModel.adornments;
 
+  // This is only used by ConnectingLines.
+  // TODO: Next time we update that adornment, we should have it create its own container element and remove this.
   const dotsRef = useRef<DotsElt>(null);
 
   if (!adornments?.length) return null;
