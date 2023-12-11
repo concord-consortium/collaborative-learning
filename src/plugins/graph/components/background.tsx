@@ -8,8 +8,9 @@ import {InternalizedData, rTreeRect} from "../graph-types";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {rectangleSubtract, rectNormalize} from "../utilities/graph-utils";
 import {MarqueeState} from "../models/marquee-state";
-import {IGraphModel, useGraphModelContext} from "../models/graph-model";
+import {IGraphModel} from "../models/graph-model";
 import {useInstanceIdContext} from "../imports/hooks/use-instance-id-context";
+import { useGraphModelContext } from "../hooks/use-graph-model-context";
 
 interface IProps {
   marqueeState: MarqueeState

@@ -5,9 +5,9 @@ import {attrRoleToAxisPlace, PlotProps} from "../graph-types";
 import {usePlotResponders} from "../hooks/use-plot";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {setPointCoordinates, setPointSelection} from "../utilities/graph-utils";
-import {useGraphModelContext} from "../models/graph-model";
+import { useGraphModelContext } from "../hooks/use-graph-model-context";
 import { useDataConfigurationContext } from "../hooks/use-data-configuration-context";
-import { useGraphLayerContext } from "../models/graph-layer-model";
+import { useGraphLayerContext } from "../hooks/use-graph-layer-context";
 
 type BinMap = Record<string, Record<string, Record<string, Record<string, number>>>>;
 

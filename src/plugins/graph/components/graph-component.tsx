@@ -8,7 +8,8 @@ import {InstanceIdContext, useNextInstanceId} from "../imports/hooks/use-instanc
 import {AxisLayoutContext} from "../imports/components/axis/models/axis-layout-context";
 import {GraphController} from "../models/graph-controller";
 import {GraphLayout, GraphLayoutContext} from "../models/graph-layout";
-import {GraphModelContext, isGraphModel} from "../models/graph-model";
+import {isGraphModel} from "../models/graph-model";
+import {GraphModelContext} from "../hooks/use-graph-model-context";
 import {Graph} from "./graph";
 import {AttributeDragOverlay} from "../imports/components/drag-drop/attribute-drag-overlay";
 import "../register-adornment-types";

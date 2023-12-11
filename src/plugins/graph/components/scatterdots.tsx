@@ -7,7 +7,7 @@ import {useDragHandlers, usePlotResponders} from "../hooks/use-plot";
 import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {ICase} from "../../../models/data/data-set-types";
-import {useGraphModelContext} from "../models/graph-model";
+import { useGraphModelContext } from "../hooks/use-graph-model-context";
 import {
   // getScreenCoord,
   handleClickOnDot,
@@ -15,7 +15,7 @@ import {
   setPointSelection,
   startAnimation
 } from "../utilities/graph-utils";
-import { useGraphLayerContext } from "../models/graph-layer-model";
+import { useGraphLayerContext } from "../hooks/use-graph-layer-context";
 
 export const ScatterDots = function ScatterDots(props: PlotProps) {
   const {dotsRef, enableAnimation} = props,

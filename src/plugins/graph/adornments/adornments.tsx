@@ -3,7 +3,7 @@ import { clsx } from "clsx";
 import { observer } from "mobx-react-lite";
 import { kGraphAdornmentsClass } from "../graph-types";
 import { useGraphLayoutContext } from "../models/graph-layout";
-import { useGraphModelContext } from "../models/graph-model";
+import { useGraphModelContext } from "../hooks/use-graph-model-context";
 import { Adornment } from "./adornment";
 import { getAdornmentContentInfo } from "./adornment-content-info";
 import { IAdornmentModel } from "./adornment-models";

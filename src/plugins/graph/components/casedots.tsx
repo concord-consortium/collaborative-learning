@@ -7,10 +7,10 @@ import {isAddCasesAction} from "../../../models/data/data-set-actions";
 import {useDragHandlers, usePlotResponders} from "../hooks/use-plot";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {handleClickOnDot, setPointCoordinates, setPointSelection} from "../utilities/graph-utils";
-import {useGraphModelContext} from "../models/graph-model";
+import { useGraphModelContext } from "../hooks/use-graph-model-context";
 import {onAnyAction} from "../../../utilities/mst-utils";
 import { useDataConfigurationContext } from "../hooks/use-data-configuration-context";
-import { useGraphLayerContext } from "../models/graph-layer-model";
+import { useGraphLayerContext } from "../hooks/use-graph-layer-context";
 
 export const CaseDots = function CaseDots(props: PlotProps) {
   const {

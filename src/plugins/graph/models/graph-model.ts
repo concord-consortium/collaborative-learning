@@ -1,7 +1,6 @@
 import { reaction } from "mobx";
 import stringify from "json-stringify-pretty-compact";
 import { addDisposer, getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
-import {createContext, useContext} from "react";
 import { IClueObject } from "../../../models/annotations/clue-object";
 import { getTileIdFromContent } from "../../../models/tiles/tile-model";
 import { IAdornmentModel } from "../adornments/adornment-models";
@@ -595,10 +594,6 @@ export function isGraphVisualPropsAction(action: ISerializedActionCall): action 
   return ['setPointColor', 'setPointStrokeColor', 'setPointStrokeSameAsFill', 'setPlotBackgroundColor',
     'setPointSizeMultiplier', 'setIsTransparent'].includes(action.name);
 }
-
-export const GraphModelContext = createContext<IGraphModel>({} as IGraphModel);
-
-export const useGraphModelContext = () => useContext(GraphModelContext);
 
 export function isGraphModel(model?: ITileContentModel): model is IGraphModel {
   return model?.type === kGraphTileType;

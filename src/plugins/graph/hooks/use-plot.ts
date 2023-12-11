@@ -4,7 +4,7 @@ import { isSetCaseValuesAction } from "../../../models/data/data-set-actions";
 import {IDotsRef, GraphAttrRoles} from "../graph-types";
 import {INumericAxisModel} from "../imports/components/axis/models/axis-model";
 import {useGraphLayoutContext} from "../models/graph-layout";
-import {useGraphModelContext} from "../models/graph-model";
+import {useGraphModelContext} from "../hooks/use-graph-model-context";
 import {matchCirclesToData, startAnimation} from "../utilities/graph-utils";
 import {useCurrent} from "../../../hooks/use-current";
 import {useInstanceIdContext} from "../imports/hooks/use-instance-id-context";
@@ -63,7 +63,7 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
           enableAnimation,
           instanceId
         });
-        
+
       }
     );
   }, [dataConfiguration, enableAnimation, graphModel, instanceId, layer.dotsElt]);

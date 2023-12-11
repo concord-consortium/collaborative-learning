@@ -3,7 +3,7 @@ import { ScaleNumericBaseType } from "../imports/components/axis/axis-types";
 import { GraphLayout, useGraphLayoutContext } from "../models/graph-layout";
 import { IDataConfigurationModel } from "../models/data-configuration-model";
 import { IDataSet } from "../../../models/data/data-set";
-import { useGraphModelContext } from "../models/graph-model";
+import { useGraphModelContext } from "../hooks/use-graph-model-context";
 
 interface GetScreenXYParams {
   caseId: string;

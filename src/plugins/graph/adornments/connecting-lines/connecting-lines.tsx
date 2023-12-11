@@ -5,9 +5,7 @@ import { DotsElt } from "../../d3-types";
 import { IDotsRef } from "../../graph-types";
 import { isNumericAxisModel } from "../../imports/components/axis/models/axis-model";
 import { usePointLocations } from "../../hooks/use-point-locations";
-
-import { useGraphModelContext } from "../../models/graph-model";
-
+import { useGraphModelContext } from "../../hooks/use-graph-model-context";
 import { lightenColor } from "../../../../utilities/color-utils";
 
 function cleanUpPaths(el: DotsElt){
