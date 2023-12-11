@@ -97,12 +97,15 @@ $codap-bg-color: #f9f9f9;
       }
     }
   }
+
+  .variable-row {
+    display: flex;
+    flex-direction: row;
+    padding: $vertical-gap 0;
+  }
 }
 
-.simple-attribute-label {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.graph-legend-label {
   min-width: $min-menu-width;
   height: $menu-height;
 
@@ -110,6 +113,12 @@ $codap-bg-color: #f9f9f9;
   border-radius: 4px;
   color: #3f3f3f;
   background-color: $workspace-teal-light-8;
+}
+
+.simple-attribute-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
   &.highlighted {
     background-color: $highlight-linked-header;

@@ -43,7 +43,11 @@ export const SimpleAttributeLabel = observer(
       simpleLabelElement?.classList.toggle("target-closed", !isOpen);
     };
 
-    const labelClassNames = classNames("simple-attribute-label", { highlighted: dataset?.isAttributeSelected(attrId) });
+    const labelClassNames = classNames(
+      "graph-legend-label",
+      "simple-attribute-label",
+      { highlighted: dataset?.isAttributeSelected(attrId) }
+    );
     return (
       <>
         <div ref={(e) => setSimpleLabelElement(e)} className={labelClassNames}>
