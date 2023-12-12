@@ -27,12 +27,12 @@ export interface DiagramTileMethods {
   toggleInteractionLocked: () => void;
   isNavigatorHidden: () => boolean;
   toggleNavigatorHidden: () => void;
+  isDisplayingSomeVariables: () => boolean;
   isUnusedVariableAvailable: () => boolean;
   showDialog: (showDialogFunction: () => void) => void;
   showNewVariableDialog: () => void;
   showInsertVariableDialog: () => void;
   showEditVariableDialog: () => void;
-
 }
 
 export const DiagramTileMethodsContext = createContext<DiagramTileMethods|undefined>(undefined);
@@ -100,6 +100,11 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
   });
 
   const { selfVariables, otherVariables, unusedVariables } = variableBuckets(content, content.sharedModel);
+
+  const isDisplayingSomeVariables = () => {
+    return selfVariables.length > 0;
+  };
+
   const [showInsertVariableDialog] = useInsertVariableDialog({
     onClose,
     disallowSelf: true,
@@ -119,6 +124,7 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
     toggleInteractionLocked,
     isNavigatorHidden: () => !!content.hideNavigator,
     toggleNavigatorHidden: () => { content.setHideNavigator(!content.hideNavigator); },
+    isDisplayingSomeVariables,
     isUnusedVariableAvailable,
     showDialog,
     showNewVariableDialog,

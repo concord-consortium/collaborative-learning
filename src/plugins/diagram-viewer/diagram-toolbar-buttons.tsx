@@ -10,6 +10,7 @@ import { TileModelContext } from "../../components/tiles/tile-api";
 import { DiagramTileMethodsContext } from "./diagram-tile";
 import { useUIStore } from "../../hooks/use-stores";
 import { kNewVariableButtonDraggableId } from "./diagram-types";
+import { SharedVariablesLinkButton } from "../shared-variables/shared-variables-link-button";
 
 import AddVariableCardIcon from "./src/assets/add-variable-card-icon.svg";
 import InsertVariableCardIcon from "./src/assets/insert-variable-card-icon.svg";
@@ -201,4 +202,11 @@ export const DeleteButton = observer(function DeleteButton({ name }: IToolbarBut
     </TileToolbarButton>
   );
 
+});
+
+export const VariablesLinkButton = observer(function VariablesLinkButton({name, args}: IToolbarButtonComponentProps) {
+  const methods = useContext(DiagramTileMethodsContext);
+  const disabled = methods ? !methods.isDisplayingSomeVariables() : true;
+
+  return <SharedVariablesLinkButton name={name} args={args} disabled={disabled}/>;
 });
