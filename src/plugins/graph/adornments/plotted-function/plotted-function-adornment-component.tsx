@@ -106,12 +106,8 @@ export const PlottedFunctionAdornmentComponent = observer(function PlottedFuncti
         const { domain: xDomain } = xAxis; // eslint-disable-line unused-imports/no-unused-vars
         const { domain: yDomain } = yAxis; // eslint-disable-line unused-imports/no-unused-vars
       }
-      // Trigger an autorun if the expression of y changes
-      // TODO Change this from hard coded "y"
-      if (sharedVariables) {
-        const y = sharedVariables.variables.find(variable => variable.name === "y");
-        y?.expression; // eslint-disable-line no-unused-expressions
-      }
+      // Trigger an autorun if any inputs or the expression of y change
+      model.yVariable?.computedValueIncludingMessageAndError; // eslint-disable-line no-unused-expressions
       refreshValues();
     }, { name: "PlottedFunctionAdornmentComponent.refreshAxisChange" }, model);
   }, [dataConfig, model, plotWidth, plotHeight, refreshValues, sharedVariables, xAxis, yAxis]);
