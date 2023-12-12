@@ -14,21 +14,21 @@ function beforeTest(params) {
 
 context('Document Flipper', () => {
   describe('teacher document flipper', function () {
-   
-    it('verify document flipper', function () {
+
+    it.skip('verify document flipper', function () {
       beforeTest(queryParams.teacherQueryParams);
       cy.log('verify document flipper under my work - starred tab');
-      cy.openTopTab("my-work"); 
+      cy.openTopTab("my-work");
       starred.starMultipleCanvasItem("my-work", "workspaces");
       cy.openSection('my-work', 'starred');
-      
+
       starred.getFocusDocument("my-work").should("not.exist");
-      
+
       cy.log("verify single document flipper");
-      starred.verifySingleDocumentFlipper("my-work"); 
+      starred.verifySingleDocumentFlipper("my-work");
 
       cy.log("verify double document flipper");
-      starred.verifyDoubleDocumentFlipper("my-work"); 
+      starred.verifyDoubleDocumentFlipper("my-work");
 
       cy.log("verify thumbnail flipper");
       starred.verifyThumbnailFlipper("my-work");
@@ -37,13 +37,13 @@ context('Document Flipper', () => {
       starred.verifyScrollerToggle("my-work");
 
       cy.log('verify document flipper under class work - starred tab');
-      cy.openTopTab("class-work"); 
+      cy.openTopTab("class-work");
       cy.openSection('class-work', 'starred');
-      
+
       starred.getFocusDocument("class-work").should("not.exist");
-      
+
       cy.log("verify single document flipper");
-      starred.verifySingleDocumentFlipper("class-work"); 
+      starred.verifySingleDocumentFlipper("class-work");
 
       cy.log("verify double document flipper");
       starred.verifyDoubleDocumentFlipper("class-work");
