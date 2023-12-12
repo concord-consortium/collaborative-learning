@@ -214,7 +214,10 @@ There are a number of URL parameters that can aid in testing:
 |`firebase` |`emulator` (for default) or `host:port`|Target emulator for firebase realtime database calls.|
 |`firestore`|`emulator` (for default) or `host:port`|Target emulator for firestore database calls.|
 |`functions`|`emulator` (for default) or `host:port`|Target emulator-hosted firebase functions.|
+|`noPersistentUI`|none                  |Do not initialize persistent ui store.|
 
+  // do not use persistentUI in some cy tests that rely on demo
+  ?: boolean;
 The `unit` parameter can be in 3 forms:
 - a valid URL starting with `https:` or `http:` will be treated as an absolute URL.
 - a string starting with `./` will be treated as a URL relative to the current page in the browser.
