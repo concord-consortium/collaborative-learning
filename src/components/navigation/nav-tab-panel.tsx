@@ -110,6 +110,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
       case ENavTab.kClassWork:
       case ENavTab.kLearningLog:
       case ENavTab.kMyWork:
+      case ENavTab.kSortWork:
       case ENavTab.kSupports:
         return this.renderDocuments(tabSpec);
       default:

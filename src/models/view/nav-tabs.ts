@@ -8,6 +8,7 @@ export enum ENavTab {
   kStudentWork = "student-work",
   kMyWork = "my-work",
   kClassWork = "class-work",
+  kSortWork = "sort-work",
   kLearningLog = "learning-log",
   kSupports = "supports"
 }
