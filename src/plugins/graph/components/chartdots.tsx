@@ -3,11 +3,11 @@ import React, {useCallback} from "react";
 import {CaseData, selectGraphDots} from "../d3-types";
 import {attrRoleToAxisPlace, PlotProps} from "../graph-types";
 import {usePlotResponders} from "../hooks/use-plot";
-import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
-import {useDataSetContext} from "../imports/hooks/use-data-set-context";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {setPointCoordinates, setPointSelection} from "../utilities/graph-utils";
-import {useGraphModelContext} from "../models/graph-model";
+import { useGraphModelContext } from "../hooks/use-graph-model-context";
+import { useDataConfigurationContext } from "../hooks/use-data-configuration-context";
+import { useGraphLayerContext } from "../hooks/use-graph-layer-context";
 
 type BinMap = Record<string, Record<string, Record<string, Record<string, number>>>>;
 
@@ -15,8 +15,9 @@ export const ChartDots = function ChartDots(props: PlotProps) {
   const {dotsRef, enableAnimation} = props,
     graphModel = useGraphModelContext(),
     {pointColor, pointStrokeColor} = graphModel,
+    layer = useGraphLayerContext(),
     dataConfiguration = useDataConfigurationContext(),
-    dataset = useDataSetContext(),
+    dataset = dataConfiguration?.dataset,
     layout = useGraphLayoutContext(),
     primaryAttrRole = dataConfiguration?.primaryRole ?? 'x',
     primaryAxisPlace = attrRoleToAxisPlace[primaryAttrRole] ?? 'bottom',
@@ -80,6 +81,7 @@ export const ChartDots = function ChartDots(props: PlotProps) {
   }, [dataConfiguration, dotsRef, graphModel, pointColor, pointStrokeColor]);
 
   const refreshPointPositions = useCallback((selectedOnly: boolean) => {
+    if (!dataConfiguration) return;
     // We're pretending that the primaryRole is the bottom just to help understand the naming
     const
       secondaryAxisPlace = attrRoleToAxisPlace[secondaryAttrRole] ?? 'left',
@@ -215,7 +217,7 @@ export const ChartDots = function ChartDots(props: PlotProps) {
     extraPrimaryAttrRole, extraSecondaryAttrRole, pointColor,
     enableAnimation, primaryIsBottom, layout, pointStrokeColor, computeMaxOverAllCells, dataset]);
 
-  usePlotResponders({dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation});
+  usePlotResponders({layer, dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation});
 
   return (
     <>

@@ -1,10 +1,9 @@
 import { ScaleLinear, ScaleBand } from "d3";
 import { ScaleNumericBaseType } from "../imports/components/axis/axis-types";
-import { useDataSetContext } from "../imports/hooks/use-data-set-context";
 import { GraphLayout, useGraphLayoutContext } from "../models/graph-layout";
-import { useDataConfigurationContext } from "./use-data-configuration-context";
 import { IDataConfigurationModel } from "../models/data-configuration-model";
 import { IDataSet } from "../../../models/data/data-set";
+import { useGraphModelContext } from "../hooks/use-graph-model-context";
 
 interface GetScreenXYParams {
   caseId: string;
@@ -43,28 +42,31 @@ export const getScreenY = ({ caseId, dataset, layout, dataConfig, plotNum = 0 }:
 };
 
 export const usePointLocations = () => {
-  const dataConfig = useDataConfigurationContext();
   const layout = useGraphLayoutContext();
-  const dataset = useDataSetContext();
-  const caseIds = dataset?.cases.map(c => c.__id__) ?? [];
+  const graphModel = useGraphModelContext();
   const result: Iterable<[number, number]>[] = [];
-  // Outer loop over plotNum  (which series)
-  if (dataConfig) {
-    for (let plotNum = 0; plotNum < dataConfig.yAttributeDescriptions.length; ++plotNum) {
-      // Inner loop over cases in that series
-      const series: [number,number][] = [];
-      caseIds.forEach((caseId) => {
-        if (dataConfig && dataset && layout) {
-          const xValue = getScreenX({caseId, dataset, layout, dataConfig});
-          const yValue = getScreenY({caseId, dataset, layout, dataConfig, plotNum});
-          if (isFinite(xValue) && isFinite(yValue)) {
-            series.push([xValue, yValue]);
+  // Outer loop over layer
+  for (const layer of graphModel.layers) {
+    const dataConfig = layer.config;
+    const dataset = dataConfig.dataset;
+    const caseIds = dataset?.cases.map(c => c.__id__) ?? [];
+    // Loop over plotNum (which series in the layer)
+    if (dataConfig) {
+      for (let plotNum = 0; plotNum < dataConfig.yAttributeDescriptions.length; ++plotNum) {
+        // Inner loop over cases in that series
+        const series: [number, number][] = [];
+        caseIds.forEach((caseId) => {
+          if (dataConfig && dataset && layout) {
+            const xValue = getScreenX({ caseId, dataset, layout, dataConfig });
+            const yValue = getScreenY({ caseId, dataset, layout, dataConfig, plotNum });
+            if (isFinite(xValue) && isFinite(yValue)) {
+              series.push([xValue, yValue]);
+            }
           }
-        }
-      });
-      result.push(series);
+        });
+        result.push(series);
+      }
     }
-
   }
   return result;
 };

@@ -1,7 +1,6 @@
 import { reaction } from "mobx";
 import stringify from "json-stringify-pretty-compact";
 import { addDisposer, getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
-import {createContext, useContext} from "react";
 import { IClueObject } from "../../../models/annotations/clue-object";
 import { getTileIdFromContent } from "../../../models/tiles/tile-model";
 import { IAdornmentModel } from "../adornments/adornment-models";
@@ -15,7 +14,7 @@ import {
   PlotType, PlotTypes, pointRadiusMax, pointRadiusSelectionAddend
 } from "../graph-types";
 import { SharedModelType } from "../../../models/shared/shared-model";
-import { getTileCaseMetadata } from "../../../models/shared/shared-data-utils";
+
 import { AppConfigModelType } from "../../../models/stores/app-config-model";
 import {ITileContentModel, TileContentModel} from "../../../models/tiles/tile-content";
 import {ITileExportOptions} from "../../../models/tiles/tile-content-info";
@@ -28,9 +27,9 @@ import { ConnectingLinesModel } from "../adornments/connecting-lines/connecting-
 import { isSharedCaseMetadata, SharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
 import { tileContentAPIViews } from "../../../models/tiles/tile-model-hooks";
 import { getDotId } from "../utilities/graph-utils";
-import { GraphLayerModel } from "./graph-layer-model";
+import { GraphLayerModel, IGraphLayerModel } from "./graph-layer-model";
 import { isSharedDataSet, SharedDataSet } from "../../../models/shared/shared-data-set";
-import { DataConfigurationModel } from "./data-configuration-model";
+import { DataConfigurationModel, RoleAttrIDPair } from "./data-configuration-model";
 
 export interface GraphProperties {
   axes: Record<string, IAxisModelUnion>
@@ -57,8 +56,6 @@ export const GraphModel = TileContentModel
     axes: types.map(AxisModelUnion),
     // TODO: should the default plot be something like "nullPlot" (which doesn't exist yet)?
     plotType: types.optional(types.enumeration([...PlotTypes]), "casePlot"),
-    // TODO: this will go away
-    // config: types.optional(DataConfigurationModel, () => DataConfigurationModel.create()),
     layers: types.array(GraphLayerModel /*, () => GraphLayerModel.create() */),
     // Visual properties
     _pointColors: types.optional(types.array(types.string), [defaultPointColor]),
@@ -99,26 +96,17 @@ export const GraphModel = TileContentModel
       return self.layers[0].config;
     },
     get autoAssignedAttributes() {
-      let all: Array<{ place: GraphPlace, role: GraphAttrRole, dataSetID: string, attrID: string }> = [];
+      let all: Array<{ layer: IGraphLayerModel, // We add the layer here
+        place: GraphPlace, role: GraphAttrRole, dataSetID: string, attrID: string }> = [];
       for (const layer of self.layers) {
-        all = all.concat(layer.autoAssignedAttributes);
+        all = all.concat(layer.autoAssignedAttributes.map((info) => {
+          return { layer, ...info };
+        }));
       }
       return all;
     }
   }))
   .views(self => ({
-    /**
-     * Returns the first shared dataset found -- TODO obsolete.
-     */
-    get data() {
-      return self.layers[0].config.dataset;
-    },
-    /**
-     * Returns the first shared case metadata found -- TODO obsolete.
-     */
-    get metadata() {
-      return getTileCaseMetadata(self);
-    },
     pointColorAtIndex(plotIndex = 0) {
       if (plotIndex < self._pointColors.length) {
         return self._pointColors[plotIndex];
@@ -134,6 +122,13 @@ export const GraphModel = TileContentModel
     },
     getAxis(place: AxisPlace) {
       return self.axes.get(place);
+    },
+    // Currently we mostly let the first layer define what the axes should be like.
+    categoriesForAxisShouldBeCentered(place: AxisPlace) {
+      return self.layers[0].config.categoriesForAxisShouldBeCentered(place);
+    },
+    numRepetitionsForPlace(place: AxisPlace) {
+      return self.layers[0].config.numRepetitionsForPlace(place);
     },
     /**
      * Return a single attributeID of those in use for the given role.
@@ -152,6 +147,60 @@ export const GraphModel = TileContentModel
      */
     get totalNumberOfCases() {
       return self.layers.reduce((prev, layer) => prev+layer.config.caseDataArray.length, 0);
+    },
+    /**
+     * Return list of all values for attributes of the given role across all layers.
+     */
+    numericValuesForAttrRole(role: GraphAttrRole): number[] {
+      const allValues: number[] = [];
+      return self.layers.reduce((acc: number[], layer) => {
+        return acc.concat(layer.config.numericValuesForAttrRole(role));
+      }, allValues);
+    },
+    /**
+     * Return list of all values of all Y attributes across all layers.
+     */
+    get numericValuesForYAxis() {
+      const allValues: number[] = [];
+      return self.layers.reduce((acc: number[], layer) => {
+        return acc.concat(layer.config.numericValuesForYAxis);
+      }, allValues);
+    },
+
+    /**
+     * Type (eg numeric, catgorical) for the given role.
+     * Currently this is defined by the first layer; may need more subtlety in the future.
+     */
+    attributeType(role: GraphAttrRole) {
+      return self.layers[0].config.attributeType(role);
+    },
+    layerForDataConfigurationId(dataConfID: string) {
+      return self.layers.find(layer => layer.config.id === dataConfID);
+    },
+    getDataConfiguration(dataConfigID: string) {
+      return this.layerForDataConfigurationId(dataConfigID)?.config;
+    },
+    /**
+     * Search for the given attribute ID and return the layer it is found in.
+     * @param id - Attribute ID
+     * @returns IGraphLayerModel or undefined
+     */
+    layerForAttributeId(id: string) {
+      for (const layer of self.layers) {
+        if (layer.config.rolesForAttribute(id)) {
+          return layer;
+        }
+      }
+      return undefined;
+    },
+    /**
+     * Find all tooltip-related attributes from all layers.
+     * Returned as a list of { role, attribute } pairs.
+     */
+    get uniqueTipAttributes(): RoleAttrIDPair[] {
+      return self.layers.reduce((prev, layer) => {
+        return prev.concat(layer.config.uniqueTipAttributes);
+      }, [] as RoleAttrIDPair[]);
     },
     /**
      * Radius of points to draw on the graph.
@@ -187,7 +236,6 @@ export const GraphModel = TileContentModel
     },
     exportJson(options?: ITileExportOptions) {
       const snapshot = getSnapshot(self);
-
       // json-stringify-pretty-compact is used, so the exported content is more
       // compact. It results in something close to what we used to get when the
       // export was created using a string builder.
@@ -196,15 +244,21 @@ export const GraphModel = TileContentModel
   }))
   .views(self => ({
     get isLinkedToDataSet() {
-      return !!self.layers[0]?.isLinked;
+      return self.layers[0].isLinked;
+    },
+    /**
+     * Return true if no attribute has been assigned to any graph role in any layer.
+     */
+    get noAttributesAssigned() {
+      return !self.layers.some(layer => !layer.config.noAttributesAssigned);
     },
     get annotatableObjects() {
       const tileId = getTileIdFromContent(self) ?? "";
       const xAttributeID = self.getAttributeID("x");
       const yAttributeID = self.getAttributeID("y");
-      if (!self.data) return [];
+      if (!self.layers[0].config.dataset) return []; // FIXME multi dataset
       const objects: IClueObject[] = [];
-      self.data.cases.forEach(c => {
+      self.layers[0].config.dataset.cases.forEach(c => {
         const objectId = getDotId(c.__id__, xAttributeID, yAttributeID);
         objects.push({
           tileId,
@@ -217,7 +271,7 @@ export const GraphModel = TileContentModel
   }))
   .views(self => tileContentAPIViews({
     get contentTitle() {
-      return self.data?.name;
+      return self.layers[0].config.dataset?.name;
     }
   }))
   .actions(self => ({
@@ -241,6 +295,14 @@ export const GraphModel = TileContentModel
     },
     removeAxis(place: AxisPlace) {
       self.axes.delete(place);
+    },
+    /**
+     * Set the primary role for all layers.
+     */
+    setPrimaryRole(role: GraphAttrRole) {
+      for (const layer of self.layers) {
+        layer.config.setPrimaryRole(role);
+      }
     },
     /**
      * Use the given Attribute for the given graph role.
@@ -269,6 +331,12 @@ export const GraphModel = TileContentModel
       console.warn('removeYAttributeID: ', attrID, ' not found in any layer');
     },
     /**
+     * Remove attribute with the given role from whichever layer it is found in.
+     */
+    removeAttribute(role: GraphAttrRole, attrID: string) {
+      self.layerForAttributeId(attrID)?.config.removeAttributeFromRole(role);
+    },
+    /**
      * Find Y attribute with given ID in any layer, and replace it with the new attribute.
      * Old and new attributes must belong to the same DataSet/Layer.
      * Note, calls to this method are observed by Graph's handleNewAttributeID method.
@@ -284,6 +352,11 @@ export const GraphModel = TileContentModel
     },
     setPlotType(type: PlotType) {
       self.plotType = type;
+    },
+    clearAllSelectedCases() {
+      for (const layer of self.layers) {
+        layer.config.dataset?.setSelectedCases([]);
+      }
     },
     setGraphProperties(props: GraphProperties) {
       (Object.keys(props.axes) as AxisPlace[]).forEach(aKey => {
@@ -521,10 +594,6 @@ export function isGraphVisualPropsAction(action: ISerializedActionCall): action 
   return ['setPointColor', 'setPointStrokeColor', 'setPointStrokeSameAsFill', 'setPlotBackgroundColor',
     'setPointSizeMultiplier', 'setIsTransparent'].includes(action.name);
 }
-
-export const GraphModelContext = createContext<IGraphModel>({} as IGraphModel);
-
-export const useGraphModelContext = () => useContext(GraphModelContext);
 
 export function isGraphModel(model?: ITileContentModel): model is IGraphModel {
   return model?.type === kGraphTileType;
