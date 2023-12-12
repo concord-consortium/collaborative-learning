@@ -35,6 +35,10 @@ export class NavTabPanel extends BaseComponent<IProps> {
     const { persistentUI: { activeNavTab, focusDocument, showChatPanel }, ui: { selectedTileIds },
             user } = this.stores;
     const tabs = this.stores.tabsToDisplay;
+    console.log("<NavTabPanel>");
+    tabs.forEach((tab)=>{
+      console.log("\t tab:", tab.label);
+    });
     const selectedTabIndex = tabs?.findIndex(t => t.tab === activeNavTab);
     const isChatEnabled = user.isTeacher; //only enable chat for teachers
     const openChatPanel = isChatEnabled && showChatPanel;

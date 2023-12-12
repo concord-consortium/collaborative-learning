@@ -1,0 +1,117 @@
+{
+  "type": "first",
+  "content": {
+    "tiles": [
+      {
+        "id": "mvnKpMGcUR_-oy6y",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Here is a test text tile.</p>"
+          ]
+        }
+      },
+      {
+        "id": "n6Ov7HS8RSe4Y2_G",
+        "title": "Table 1",
+        "content": {
+          "type": "Table",
+          "columnWidths": {
+            "rkDiqfe9RW10O9V9": 80,
+            "GyAwZvXxMPjOsSIp": 248.6640625
+          },
+          "name": "Table 1"
+        }
+      },
+      {
+        "id": "uahm7oe8UMBIX0bi",
+        "title": "Drawing 1",
+        "content": {
+          "type": "Drawing",
+          "objects": [
+            {
+              "type": "rectangle",
+              "id": "0xAlBazzgzkIF_Fd",
+              "x": 86,
+              "y": 95,
+              "stroke": "#000000",
+              "strokeDashArray": "",
+              "strokeWidth": 2,
+              "fill": "none",
+              "width": 65,
+              "height": 51
+            },
+            {
+              "type": "text",
+              "id": "FYSNZdbsuU0B74OR",
+              "x": 229,
+              "y": 90,
+              "width": 99,
+              "height": 60,
+              "stroke": "#000000",
+              "text": "it's a label in content."
+            }
+          ]
+        },
+        "layout": {
+          "height": 273
+        }
+      }
+    ],
+    "sharedModels": [
+      {
+        "sharedModel": {
+          "type": "SharedDataSet",
+          "id": "0P1MBauHE0iHv0Gv",
+          "providerId": "n6Ov7HS8RSe4Y2_G",
+          "dataSet": {
+            "id": "zpzPoJKhkEtfuUdB",
+            "name": "Table 1",
+            "attributes": [
+              {
+                "id": "rkDiqfe9RW10O9V9",
+                "clientKey": "",
+                "name": "x",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "1",
+                  "2"
+                ],
+                "title": ""
+              },
+              {
+                "id": "GyAwZvXxMPjOsSIp",
+                "clientKey": "",
+                "name": "longish title for an attribute",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "3",
+                  "4"
+                ],
+                "title": ""
+              }
+            ],
+            "cases": [
+              {
+                "__id__": "gM8l4d4T-AcZWKjC"
+              },
+              {
+                "__id__": "hgpAkgPugAu1QuAp"
+              }
+            ]
+          }
+        },
+        "tiles": [
+          "n6Ov7HS8RSe4Y2_G"
+        ]
+      }
+    ]
+  },
+  "supports": []
+}
