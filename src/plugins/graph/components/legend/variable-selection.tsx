@@ -1,8 +1,10 @@
+import classNames from "classnames";
 import { observer } from "mobx-react-lite";
 import React, { ReactElement, useRef, useState } from "react";
 import { Menu, MenuItem, MenuList, MenuButton, Portal } from "@chakra-ui/react";
 import { VariableType } from "@concord-consortium/diagram-view";
 
+import DropdownCaretIcon from "../../assets/dropdown-caret.svg";
 
 import "./variable-selection.scss";
 
@@ -33,27 +35,36 @@ export const VariableSelection = observer(function VariableSelection({
     <div className="variable-selection">
       <div className="variable-icon">{icon}</div>
       <Menu boundary="scrollParent">
-        <div ref={(e) => setButtonContainer(e)} className={labelClassNames}>
-          <MenuButton className="variable-function-legend-button">
-            {buttonLabel}
-          </MenuButton>
-        </div>
-        <Portal containerRef={portalRef}>
-          <MenuList>
-            {
-              variables.map(variable => {
-                return (
-                  <MenuItem
-                    key={variable.id}
-                    onClick={() => onSelect(variable.id)}
-                  >
-                    {variableDisplay(variable)}
-                  </MenuItem>
-                );
-              })
-            }
-          </MenuList>
-        </Portal>
+        {({ isOpen }) => (
+          <>
+            <div ref={(e) => setButtonContainer(e)} className={labelClassNames}>
+              <MenuButton className="variable-function-legend-button">
+                <div className="button-content">
+                  <div>{buttonLabel}</div>
+                  <div className={classNames("caret", { open: isOpen })}>
+                    <DropdownCaretIcon />
+                  </div>
+                </div>
+              </MenuButton>
+            </div>
+            <Portal containerRef={portalRef}>
+              <MenuList>
+                {
+                  variables.map(variable => {
+                    return (
+                      <MenuItem
+                        key={variable.id}
+                        onClick={() => onSelect(variable.id)}
+                      >
+                        {variableDisplay(variable)}
+                      </MenuItem>
+                    );
+                  })
+                }
+              </MenuList>
+            </Portal>
+          </>
+        )}
       </Menu>
     </div>
   );
