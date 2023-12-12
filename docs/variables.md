@@ -35,6 +35,7 @@ Because most units will not use this feature, and including it will bring in all
 - `graph-model.ts` has a convenience view that returns its first linked `sharedVariables`. It also has a reaction set up in `afterAttach` which displays a `PlottedFunctionAdornment` based on whether any `sharedVariables` are attached or not. We have no plan for how to handle this reference at the moment.
 - `plotted-function-adornment-component.tsx` uses the expression of the y variable in a reaction to update the plot. This reference should be handled when we make the `PlottedFunctionAdornment` a plugin for the graph.
 - `plotted-function-adornment-model.ts` references the `SharedVariables` in `computePoints` to display a function defined by variables if the graph tile is linked to a `SharedVariables`. This reference should be handled when we make the `PlottedFunctionAdornment` a plugin for the graph.
+- `multi-legend.tsx` references the `PlottedFunctionAdornment`. This reference should be handled when we add a plugin system for the graph legend.
 
 ### Case 2: Simulations and the Simulator Tile
 The second use case involves premade simulations, which users access through Simulator Tiles. Here, the `SharedVariable` model starts with built in variables defined by a developer, and the user generally does not add additional variables or directly modify variables. Instead, the user uses a Dataflow Tile to import data from certain variables into sensor nodes, modifies the data via a dataflow program, then sends values to output variables via live output nodes.
