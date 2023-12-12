@@ -1,333 +1,122 @@
 {
   "code": "example-config-subtabs",
   "abbrevTitle": "EXCS",
-  "title": "Example Curriculum Configured SubTabs",
-  "subtitle": "Some Subtabs",
+  "title": "Example Curriculum No SubTabs",
+  "subtitle": " No Subtabs",
   "placeholderText": "Type in me!",
-  "config": {
-    "placeholderText": "This is where users can type text",
-    "defaultDocumentType": "problem",
-    "settings": {
-      "table": {
-        "numFormat": ".2~f"
+  "settings": {
+    "table": {
+      "numFormat": ".2~f"
+    }
+  },
+  "navTabs": {
+    "lazyLoadTabContents": true,
+    "showNavPanel": true,
+    "tabSpecs": [
+      {
+        "tab": "problems",
+        "label": "Problems",
+        "sections": [
+          {
+            "initials": "REF",
+            "title": "Reference",
+            "type": "problem-documents"
+          },
+          {
+            "initials": "PR",
+            "title": "Practice",
+            "type": "problem-documents"
+          },
+          {
+            "initials": "EX",
+            "title": "Experiment",
+            "type": "problem-documents"
+          }
+        ]
       },
-      "graph": {
-        "defaultAxisLabels": {
-          "bottom": "time",
-          "left": "dist"
-        },
-        "emptyPlotIsNumeric": true,
-        "scalePlotOnValueChange": true,
-        "defaultSeriesLegend": true,
-        "connectPointsByDefault": true,
-        "tools": [
-          "link-tile",
-          "link-tile-multiple"
+      {
+        "tab": "my-work",
+        "label": "My Work",
+        "sections": [
+          {
+            "title": "Workspaces",
+            "type": "problem-documents",
+            "dataTestHeader": "my-work-section-investigations",
+            "dataTestItem": "my-work-list-items",
+            "documentTypes": ["problem", "planning"],
+            "order": "original",
+            "showStars": ["student", "teacher"]
+          },
+          {
+            "title": "Workspaces",
+            "type": "personal-documents",
+            "dataTestHeader": "my-work-section-workspaces",
+            "dataTestItem": "my-work-list-items",
+            "documentTypes": ["personal"],
+            "properties": ["!isDeleted"],
+            "showStars": ["student", "teacher"],
+            "addDocument": true
+          },
+          {
+            "title": "Starred",
+            "type": "starred-problem-documents",
+            "dataTestHeader": "my-work-section-starred",
+            "documentTypes": ["personal", "problem"],
+            "properties": ["starred", "!isDeleted"],
+            "showStars": ["student", "teacher"]
+          }
+        ]
+      },
+      {
+        "tab": "class-work",
+        "label": "Class Work",
+        "sections": [
+          {
+            "title": "Workspaces",
+            "type": "published-problem-documents",
+            "dataTestHeader": "class-work-section-published",
+            "dataTestItem": "class-work-list-items",
+            "documentTypes": ["publication"],
+            "showStars": ["teacher"],
+            "properties": ["!isTeacherDocument"]
+          },
+          {
+            "title": "Workspaces",
+            "type": "published-personal-documents",
+            "dataTestHeader": "class-work-section-personal",
+            "dataTestItem": "class-work-list-items",
+            "documentTypes": ["personalPublication"],
+            "properties": ["!isTeacherDocument"]
+          },
+          {
+            "className": "section teacher published-documents",
+            "title": "Workspaces",
+            "type": "teacher-supports",
+            "dataTestHeader": "supports-section-teacher-supports",
+            "dataTestItem": "supports-list-items",
+            "documentTypes": ["publication", "personalPublication"],
+            "properties": ["isTeacherDocument", "!isDeleted"]
+          },
+          {
+            "title": "Workspaces",
+            "type": "teacher-supports",
+            "dataTestHeader": "supports-section-teacher-supports",
+            "dataTestItem": "supports-list-items",
+            "documentTypes": ["supportPublication"],
+            "properties": ["teacherSupport", "!isDeleted"]
+          },
+          {
+            "className": "section problem starred",
+            "title": "Starred",
+            "type": "starred-problem-documents",
+            "dataTestHeader": "class-work-section-starred",
+            "documentTypes": ["publication"],
+            "properties": ["starred"],
+            "showStars": ["teacher"]
+          }
         ]
       }
-    },
-    "navTabs": {
-      "lazyLoadTabContents": true,
-      "showNavPanel": true,
-      "tabSpecs": [
-        {
-          "tab": "problems",
-          "label": "Problems",
-          "sections": [
-            {
-              "initials": "REF",
-              "title": "Reference",
-              "type": "problem-documents"
-            },
-            {
-              "initials": "PR",
-              "title": "Practice",
-              "type": "problem-documents"
-            },
-            {
-              "initials": "EX",
-              "title": "Experiment",
-              "type": "problem-documents"
-            }
-          ]
-        },
-        {
-          "tab": "my-work",
-          "label": "My Work",
-          "sections": [
-            {
-              "title": "Workspaces",
-              "type": "problem-documents",
-              "dataTestHeader": "my-work-section-investigations",
-              "dataTestItem": "my-work-list-items",
-              "documentTypes": [
-                "problem",
-                "planning"
-              ],
-              "order": "original",
-              "showStars": [
-                "student",
-                "teacher"
-              ]
-            },
-            {
-              "title": "Workspaces",
-              "type": "personal-documents",
-              "dataTestHeader": "my-work-section-workspaces",
-              "dataTestItem": "my-work-list-items",
-              "documentTypes": [
-                "personal"
-              ],
-              "properties": [
-                "!isDeleted"
-              ],
-              "showStars": [
-                "student",
-                "teacher"
-              ],
-              "addDocument": true
-            },
-            {
-              "title": "Starred",
-              "type": "starred-problem-documents",
-              "dataTestHeader": "my-work-section-starred",
-              "documentTypes": [
-                "personal",
-                "problem"
-              ],
-              "properties": [
-                "starred",
-                "!isDeleted"
-              ],
-              "showStars": [
-                "student",
-                "teacher"
-              ]
-            }
-          ]
-        },
-        {
-          "tab": "student-work",
-          "label": "Student Work",
-          "teacherOnly": true,
-          "sections": []
-        },
-        {
-          "tab": "class-work",
-          "label": "Class Work",
-          "sections": [
-            {
-              "title": "Workspaces",
-              "type": "published-problem-documents",
-              "dataTestHeader": "class-work-section-published",
-              "dataTestItem": "class-work-list-items",
-              "documentTypes": [
-                "publication"
-              ],
-              "showStars": [
-                "teacher"
-              ],
-              "properties": [
-                "!isTeacherDocument"
-              ]
-            },
-            {
-              "title": "Workspaces",
-              "type": "published-personal-documents",
-              "dataTestHeader": "class-work-section-personal",
-              "dataTestItem": "class-work-list-items",
-              "documentTypes": [
-                "personalPublication"
-              ],
-              "showStars": [
-                "teacher",
-                "student"
-              ],
-              "properties": [
-                "!isTeacherDocument"
-              ]
-            },
-            {
-              "className": "section teacher published-documents",
-              "title": "Supplemental Work",
-              "type": "teacher-supports",
-              "dataTestHeader": "supports-section-teacher-supports",
-              "dataTestItem": "supports-list-items",
-              "documentTypes": [
-                "publication",
-                "personalPublication"
-              ],
-              "properties": [
-                "isTeacherDocument",
-                "!isDeleted"
-              ]
-            },
-            {
-              "title": "Workspaces",
-              "type": "teacher-supports",
-              "dataTestHeader": "supports-section-teacher-supports",
-              "dataTestItem": "supports-list-items",
-              "documentTypes": [
-                "supportPublication"
-              ],
-              "properties": [
-                "teacherSupport",
-                "!isDeleted"
-              ]
-            },
-            {
-              "className": "section problem starred",
-              "title": "Starred",
-              "type": "starred-problem-documents",
-              "dataTestHeader": "class-work-section-starred",
-              "documentTypes": [
-                "publication"
-              ],
-              "properties": [
-                "starred"
-              ],
-              "showStars": [
-                "teacher",
-                "student"
-              ]
-            },
-            {
-              "className": "section problem starred",
-              "title": "Starred",
-              "type": "starred-personal-documents",
-              "dataTestHeader": "class-work-section-starred",
-              "documentTypes": [
-                "publication"
-              ],
-              "properties": [
-                "starred"
-              ],
-              "showStars": [
-                "teacher",
-                "student"
-              ]
-            }
-          ]
-        },
-        {
-          "tab": "sort-work",
-          "label": "Sort Work",
-          "sections": [
-            {
-              "title": "Workspaces",
-              "type": "published-problem-documents",
-              "dataTestHeader": "class-work-section-published",
-              "dataTestItem": "class-work-list-items",
-              "documentTypes": [
-                "publication"
-              ],
-              "showStars": [
-                "teacher"
-              ],
-              "properties": [
-                "!isTeacherDocument"
-              ]
-            },
-            {
-              "title": "Workspaces",
-              "type": "published-personal-documents",
-              "dataTestHeader": "class-work-section-personal",
-              "dataTestItem": "class-work-list-items",
-              "documentTypes": [
-                "personalPublication"
-              ],
-              "showStars": [
-                "teacher",
-                "student"
-              ],
-              "properties": [
-                "!isTeacherDocument"
-              ]
-            },
-            {
-              "className": "section teacher published-documents",
-              "title": "Supplemental Work",
-              "type": "teacher-supports",
-              "dataTestHeader": "supports-section-teacher-supports",
-              "dataTestItem": "supports-list-items",
-              "documentTypes": [
-                "publication",
-                "personalPublication"
-              ],
-              "properties": [
-                "isTeacherDocument",
-                "!isDeleted"
-              ]
-            },
-            {
-              "title": "Workspaces",
-              "type": "teacher-supports",
-              "dataTestHeader": "supports-section-teacher-supports",
-              "dataTestItem": "supports-list-items",
-              "documentTypes": [
-                "supportPublication"
-              ],
-              "properties": [
-                "teacherSupport",
-                "!isDeleted"
-              ]
-            },
-            {
-              "className": "section problem starred",
-              "title": "Starred",
-              "type": "starred-problem-documents",
-              "dataTestHeader": "class-work-section-starred",
-              "documentTypes": [
-                "publication"
-              ],
-              "properties": [
-                "starred"
-              ],
-              "showStars": [
-                "teacher",
-                "student"
-              ]
-            },
-            {
-              "className": "section problem starred",
-              "title": "Starred",
-              "type": "starred-personal-documents",
-              "dataTestHeader": "class-work-section-starred",
-              "documentTypes": [
-                "publication"
-              ],
-              "properties": [
-                "starred"
-              ],
-              "showStars": [
-                "teacher",
-                "student"
-              ]
-            }
-          ]
-        }
-
-      ]
-    },
-    "toolbar": [
-      {"id": "Text", "title": "Text", "isTileTool": true},
-      {"id": "Table", "title": "Table", "isTileTool": true},
-      {"id": "DataCard", "title": "Data Card", "isTileTool": true},
-      {"id": "Image", "title": "Image", "isTileTool": true},
-      {"id": "Drawing", "title": "Drawing", "isTileTool": true},
-      {"id": "Expression", "title": "Expression", "isTileTool": true},
-      {"id": "Graph", "title": "XY Plot", "isTileTool": true},
-      {"id": "Geometry", "title": "Graph", "isTileTool": true},
-      {"id": "Numberline", "title": "Numberline", "isTileTool": true},
-      {"id": "Dataflow", "title": "Dataflow", "isTileTool": true},
-      {"id": "sparrow", "title": "Sparrow", "iconId": "icon-sparrow-tool", "isTileTool": false},
-      {"id": "hide-annotations", "title": "Hide Annotations", "iconId": "icon-hide-annotations-tool", "isTileTool": false},
-      {"id": "undo", "title": "Undo", "iconId": "icon-undo-tool", "isTileTool": false},
-      {"id": "redo", "title": "Redo", "iconId": "icon-redo-tool", "isTileTool": false},
-      {"id": "duplicate", "title": "Duplicate", "iconId": "icon-duplicate-tool", "isTileTool": false},
-      {"id": "delete", "title": "Delete", "iconId": "icon-delete-tool", "isTileTool": false}
-    ],
-    "stamps": []
+    ]
   },
   "sections": {
     "first": {
@@ -356,13 +145,10 @@
         "placeholder": "Plan the work; work the plan"
       }
     },
-    "sections": [
-      {
-        "type": "plan"
-      }
-    ]
+    "sections": [{ "type": "plan" }]
   },
-  "defaultStamps": [],
+  "defaultStamps": [
+  ],
   "investigations": [
     {
       "description": "Investigation 1",
@@ -375,9 +161,9 @@
           "title": "1.1 Unit Toolbar Configuration",
           "subtitle": "Text, Table, Drawing",
           "sections": [
-            "investigation-1/problem-1/first/content.json",
-            "investigation-1/problem-1/second/content.json",
-            "investigation-1/problem-1/third/content.json"
+            { "type": "first", "content": { "tiles": [] }, "supports": [] },
+            { "type": "second", "content": { "tiles": [] }, "supports": [] },
+            { "type": "third", "content": { "tiles": [] }, "supports": [] }
           ]
         },
         {
@@ -401,9 +187,9 @@
             ]
           },
           "sections": [
-            "investigation-1/problem-2/first/content.json",
-            "investigation-1/problem-2/second/content.json",
-            "investigation-1/problem-2/third/content.json"
+            { "type": "first", "content": { "tiles": [] }, "supports": [] },
+            { "type": "second", "content": { "tiles": [] }, "supports": [] },
+            { "type": "third", "content": { "tiles": [] }, "supports": [] }
           ]
         }
       ]
