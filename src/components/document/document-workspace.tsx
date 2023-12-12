@@ -95,7 +95,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     }
     // Just display the primary document:
     else {
-      console.log("\t line 102 display primary document");
       return this.renderDocument("single-workspace", "primary", Primary);
     }
   }
