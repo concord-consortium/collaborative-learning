@@ -2,13 +2,12 @@ import TeacherDashboard from "../../../support/elements/common/TeacherDashboard"
 
 let dashboard = new TeacherDashboard();
 
-const queryParams = "/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:6";
+const queryParams = "/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:6&noPersistentUI";
 
 function beforeTest(params) {
   cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();
-  cy.wait(2000); // wait for persistentUI to load
   dashboard.switchView("Dashboard");
   dashboard.switchWorkView('Published');
   cy.wait(8000);
