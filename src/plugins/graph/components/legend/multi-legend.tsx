@@ -65,8 +65,7 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
     + graphModel.adornments.reduce((prev, adornment) => {
       if (isPlottedFunctionAdornment(adornment)) {
         if (adornment.sharedVariables) {
-          // TODO: How tall should plotted function adornment legends be?
-          return prev + 100;
+          return prev + 60;
         }
       }
       return prev;
