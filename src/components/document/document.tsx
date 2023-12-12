@@ -147,7 +147,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   public componentDidUpdate() {
     this.openHandlerDisposer = reaction(
       // data function: changes to primaryDocumentKey trigger the reaction
-      () => this.stores.ui.problemWorkspace.primaryDocumentKey,
+      () => this.stores.persistentUI.problemWorkspace.primaryDocumentKey,
       // reaction function
       () => this.setState({ showBrowser: false })
     );
@@ -188,7 +188,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         const isDeleted = document.getProperty("isDeleted");
         // close comparison when comparison document is deleted
         if (isDeleted && (side === "comparison")) {
-          const { ui: { problemWorkspace } } = stores;
+          const { persistentUI: { problemWorkspace } } = stores;
           problemWorkspace.toggleComparisonVisible({ override: false, muteLog: true });
         }
       });
@@ -465,8 +465,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleSelectDocument = (document: DocumentModelType) => {
-    const { appConfig, ui } = this.stores;
-    ui.rightNavDocumentSelected(appConfig, document);
+    const { appConfig, persistentUI } = this.stores;
+    persistentUI.rightNavDocumentSelected(appConfig, document);
     this.setState({ showBrowser: false });
   };
 

@@ -17,6 +17,7 @@ on:
         default: all
         options:
           - all
+          - cleanup/remove_teacher_comment_spec.js
           - functional/author_tests/doc-editor_spec.js
           - functional/document_tests/canvas_test_spec.js
           - functional/document_tests/group_chooser_spec.js
@@ -34,6 +35,7 @@ on:
           - functional/teacher_tests/teacher_dashboard_spec.js
           - functional/teacher_tests/teacher_network_spec.js
           - functional/teacher_tests/teacher_six_pack_spec.js
+          - functional/teacher_tests/teacher_starreddocument_scroller_spec.js
           - functional/teacher_tests/teacher_support_spec.js
           - functional/teacher_tests/teacher_tagged_comments_spec.js
           - functional/teacher_tests/teacher_workspace_spec.js
@@ -96,6 +98,7 @@ jobs:
           # only do parallel if we have a record key
           parallel: ${{ !!secrets.CYPRESS_RECORD_KEY }}
           browser: ${{ env.BROWSER }}
+          spec: cypress/e2e/functional/**
         env:
           # pass the Dashboard record key as an environment variable
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}

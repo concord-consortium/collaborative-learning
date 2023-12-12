@@ -14,10 +14,11 @@ import { SimpleAttributeLabel } from "../simple-attribute-label";
 
 import "./multi-legend.scss";
 
-export const kMultiLegendMenuHeight = 30;
-export const kMultiLegendPadding = 20;
-export const kMultiLegendVerticalGap = 10;
-export const kMultiLegendLabelHeight = 20;
+const kMultiLegendMenuHeight = 30;
+const kMultiLegendVerticalPadding = 10;
+const kMultiLegendVerticalGap = 8;
+const kMultiLegendLabelHeight = 28;
+const kMultiLegendHRuleHeight = 2;
 
 interface IMultiLegendProps {
   graphElt: HTMLDivElement | null;
@@ -45,15 +46,17 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
   }, [layout.computedBounds.legend.height, layout.graphWidth, legendBounds, transform]);
 
   function heightOfLayerLegend(layer: IGraphLayerModel) {
-    const yAttributeCount = layer.config.yAttributeDescriptions.length || 0;
-    const legendRows = Math.ceil((yAttributeCount+1)/2);
-    return kMultiLegendPadding * 2
+    // Menu for each Y attribute, plus one for "Add series" button
+    const menuCount = (layer.config.yAttributeDescriptions.length || 0) + 1;
+    const legendRows = Math.ceil(menuCount/2);
+    return kMultiLegendHRuleHeight
+      + kMultiLegendVerticalPadding * 3 // above title, below title, below all.
       + kMultiLegendLabelHeight
       + kMultiLegendMenuHeight * legendRows
-      + kMultiLegendVerticalGap * (legendRows - 1);
+      + kMultiLegendVerticalGap * legendRows * 2; // above each row
   }
   // Total height is height of X-axis menus, plus sum of all the layer sections
-  const totalHeight = kMultiLegendLabelHeight + kMultiLegendVerticalGap
+  const totalHeight = kMultiLegendMenuHeight + kMultiLegendVerticalPadding
     + graphModel.layers.reduce((prev, layer)=>{ return prev + heightOfLayerLegend(layer);}, 0);
 
   useEffect(function RespondToLayoutChange() {

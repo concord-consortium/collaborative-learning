@@ -2,7 +2,7 @@ import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { useEffect } from "react";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
-import { useProblemPathWithFacet, useUIStore, useUserStore } from "../../hooks/use-stores";
+import { useProblemPathWithFacet, usePersistentUIStore, useUserStore, useUIStore } from "../../hooks/use-stores";
 import { getSectionTitle, SectionModelType } from "../../models/curriculum/section";
 import { ProblemPanelComponent } from "./problem-panel";
 import { Logger } from "../../lib/logger";
@@ -21,25 +21,26 @@ interface IProps {
 export const ProblemTabContent: React.FC<IProps>
   = observer(function ProblemTabContent({ context, sections, showSolutionsSwitch }: IProps) {
   const { isTeacher } = useUserStore();
+  const persistentUI = usePersistentUIStore();
   const ui = useUIStore();
+  const { showTeacherContent } = persistentUI;
   const problemPath = useProblemPathWithFacet(context);
-  const { showTeacherContent } = ui;
   const hasSubTabs = sections && sections.length > 1;
-  const chatBorder = ui.showChatPanel ? "chat-open" : "";
+  const chatBorder = persistentUI.showChatPanel ? "chat-open" : "";
   const tabId = context || ENavTab.kProblems;
 
   useEffect(() => {
     // Set the default subTab if a subtab isn't already set
-    if (hasSubTabs && !ui.tabs.get(tabId)?.openSubTab) {
-      ui.setOpenSubTab(tabId, sections[0].type);
+    if (hasSubTabs && !persistentUI.tabs.get(tabId)?.openSubTab) {
+      persistentUI.setOpenSubTab(tabId, sections[0].type);
     }
-  }, [hasSubTabs, sections, tabId, ui]);
+  }, [hasSubTabs, sections, tabId, persistentUI]);
 
   const handleTabSelected = (index: number) => {
     const section = sections?.[index];
     if (!section) return;
 
-    ui.setOpenSubTab(tabId, section.type);
+    persistentUI.setOpenSubTab(tabId, section.type);
 
     // TODO: The log event properties have been reversed for quite a while now.
     // We don't want to introduce a breaking change in the log event stream, so
@@ -56,11 +57,11 @@ export const ProblemTabContent: React.FC<IProps>
   };
 
   const handleToggleSolutions = () => {
-    ui.toggleShowTeacherContent(!showTeacherContent);
+    persistentUI.toggleShowTeacherContent(!showTeacherContent);
     Logger.log(showTeacherContent ? LogEventName.HIDE_SOLUTIONS : LogEventName.SHOW_SOLUTIONS);
   };
 
-  const openSubTab = ui.tabs.get(tabId)?.openSubTab;
+  const openSubTab = persistentUI.tabs.get(tabId)?.openSubTab;
   const sectionIndex = sections.findIndex((section: any) => section.type === openSubTab);
   // activeIndex might be -1 in an error condition
   const activeIndex = sectionIndex < 0 ? 0 : sectionIndex;
@@ -73,7 +74,7 @@ export const ProblemTabContent: React.FC<IProps>
           data-focus-document={problemPath}
     >
       <div className={classNames("tab-header-row", {"no-sub-tabs": !hasSubTabs})}>
-        <TabList className={classNames("tab-list", {"chat-open" : ui.showChatPanel})}>
+        <TabList className={classNames("tab-list", {"chat-open" : persistentUI.showChatPanel})}>
           {sections?.map((section, index) => {
             const sectionTitle = getSectionTitle(section.type);
             return (

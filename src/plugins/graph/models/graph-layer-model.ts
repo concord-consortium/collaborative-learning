@@ -107,7 +107,6 @@ export const GraphLayerModel = types
         : undefined;
     },
     updateAdornments(resetPoints=false) {
-      console.log('updateAdornments for ', self.config.dataset?.id);
       const options = this.getUpdateCategoriesOptions(resetPoints);
       // TODO: should adornments be registered on each layer?
       // Currently storing and updating them at the Graph level:

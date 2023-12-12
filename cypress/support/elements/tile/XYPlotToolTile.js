@@ -38,8 +38,8 @@ class XYPlotToolTile {
     this.getYAttributesLabel(workspaceClass).first().click({ force: true });
     cy.get(`.chakra-portal button`).contains(attribute).click({ force: true });
   }
-  getEditableLimits(workspaceClass) {
-    return cy.get(`${wsClass(workspaceClass)} .graph-plot .editable-border-box`);
+  getEditableAxisBox(axis, minOrMax) {
+    return this.getTile().find(`[data-testid=editable-border-box-${axis}-${minOrMax}]`);
   }
 }
 export default XYPlotToolTile;

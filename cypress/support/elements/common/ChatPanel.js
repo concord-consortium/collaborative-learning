@@ -176,5 +176,29 @@ class ChatPanel{
       this.getCommentTagFromThread().should('contain', commentTag);
       this.getFocusedThread().should('contain', commentText);
     }
+    getDeleteCommentButton() {
+      return cy.get(".chat-thread-focused [data-testid=delete-message-button]");
+    }
+    deleteTeacherComments() {
+      let i;
+      let totalCount;
+      cy.get('body').then((body) => {
+        if (body.find(".chat-thread-focused [data-testid=delete-message-button]").length > 0) {
+          this.getDeleteCommentButton().then(((value) => {
+            totalCount = Cypress.$(value).length;
+            expect(value).to.have.length(totalCount);
+            cy.log("Number of Comments: " + totalCount);
+              for(i=totalCount; i > 0; i--) {
+                this.getDeleteCommentButton().eq(i - 1).click();
+                this.getDeleteConfirmModalButton().click();
+                cy.wait(1000);
+              }
+            })
+          )
+        } else {
+          cy.log("No Comments to Delete"); 
+        }
+      });
+    }
 }
 export default ChatPanel;

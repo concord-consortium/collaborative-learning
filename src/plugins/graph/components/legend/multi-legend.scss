@@ -2,15 +2,14 @@
 
 // Menu sizing here must match calculations in multi-legend.tsx:
 $menu-height: 30px;
-$menu-vertical-padding: 0;
-$menu-vertical-gap: 10px;
-$menu-label-height: 15px;
+$vertical-padding: 10px;
+$vertical-gap: 8px;
+$label-height: 28px;
 $min-menu-width: 144px;
 $codap-menu-border-color: #0592af;
 $codap-bg-color: #f9f9f9;
 
 .multi-legend {
-  padding: $menu-vertical-padding 0;
   background-color:$codap-bg-color;
   width: 100%;
   text-align: left;
@@ -20,7 +19,7 @@ $codap-bg-color: #f9f9f9;
     display: flex;
     justify-content: center;
     width: 100%;
-    height: 30px;
+    padding-bottom: $vertical-padding;
 
     .x-axis-item {
       flex: 0 0 auto;
@@ -32,8 +31,8 @@ $codap-bg-color: #f9f9f9;
   .legend-title-row {
     display: flex;
     align-items: center;
-    margin: 8px 0 0 0;
-    padding: 5px;
+    padding: $vertical-padding 10px;
+    min-height: $label-height;
     border-top: 2px solid $workspace-teal;
 
     .legend-title {
@@ -46,8 +45,11 @@ $codap-bg-color: #f9f9f9;
 
       .remove-button {
         margin: 0;
-        padding: 0 10px;
+        height: 27px;
+        width: 27px;
+        padding: 2px;
         border: none;
+        border-radius: 50%;
         background: inherit;
         cursor: pointer;
 
@@ -55,9 +57,7 @@ $codap-bg-color: #f9f9f9;
           background-color: $workspace-teal-light-6;
         }
 
-        svg {
-          transform: translateY(2px);
-        }
+
       }
 
     }
@@ -65,7 +65,7 @@ $codap-bg-color: #f9f9f9;
 
   .legend-row {
     display: block;
-    height: $menu-height;
+    padding: $vertical-gap 0;
 
     .legend-cell-1, .legend-cell-2{
       display: inline-block;
@@ -121,19 +121,20 @@ $codap-bg-color: #f9f9f9;
   }
 
   .symbol-container {
-    padding: 6px;
+    padding: 3px;
     border-right: 1px solid #3f3f3f;
   }
 
   .attr-symbol {
-    height: $menu-label-height+2px;
-    width: $menu-label-height+2px;
+    height: $menu-height - 8px;
+    width: $menu-height - 8px;
     border: 2px solid #ffffff;
     border-radius: 50%;
   }
 
   .attr-title {
     padding: 6px;
+    overflow: hidden;
   }
 
   .caret {
@@ -148,7 +149,7 @@ $codap-bg-color: #f9f9f9;
   &.target-open {
     border-color:$codap-menu-border-color;
     background-color: $codap-bg-color;
-    
+
     &.highlighted {
        background-color: $highlight-linked-header;
     }

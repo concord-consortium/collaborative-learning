@@ -5,16 +5,19 @@ import { DemoClassModel, DemoModel } from "../models/stores/demo";
 import { DocumentsModel } from "../models/stores/documents";
 import { GroupsModel } from "../models/stores/groups";
 import { SelectionStoreModel } from "../models/stores/selection";
-import { UIModel } from "../models/stores/ui";
 import { UserModel } from "../models/stores/user";
-import { LearningLogWorkspace, ProblemWorkspace, WorkspaceModel } from "../models/stores/workspace";
+import {
+  LearningLogWorkspace, ProblemWorkspace, WorkspaceModel,
+} from "../models/stores/workspace";
 import {
   useAppConfig, useAppMode, useClassStore, useDemoStore, useDocumentFromStore, useDocumentMetadataFromStore,
   useDocumentOrCurriculumMetadata, useGroupsStore, useLocalDocuments, useNetworkDocumentKey, useNetworkDocuments,
   useProblemPath, useProblemPathWithFacet, useProblemStore, useSharedSelectionStore,
-  useTypeOfTileInDocumentOrCurriculum, useUIStore, useUserStore
+  useTypeOfTileInDocumentOrCurriculum, usePersistentUIStore, useUserStore, useUIStore
 } from "./use-stores";
 import { unitConfigDefaults } from "../test-fixtures/sample-unit-configurations";
+import { UIModel } from "../models/stores/ui";
+import { PersistentUIModel } from "../models/stores/persistent-ui";
 
 jest.mock("@concord-consortium/slate-editor", () => ({}));
 
@@ -35,7 +38,7 @@ describe("useStores", () => {
     it("should return the requested store", () => {
       const appConfig = AppConfigModel.create({ curriculumBaseUrl: "https://curriculum.example.com", config: unitConfigDefaults });
       const _class = ClassModel.create({ name: "Class 1", classHash: "hash-1" });
-      const demo = DemoModel.create({ class : DemoClassModel.create({ id: "class-1", name: "Class 1" }) });
+      const demo = DemoModel.create({ class: DemoClassModel.create({ id: "class-1", name: "Class 1" }) });
       const groups = GroupsModel.create();
       const localDocuments = DocumentsModel.create();
       const networkDocuments = DocumentsModel.create();
@@ -44,14 +47,16 @@ describe("useStores", () => {
       const problem = ProblemModel.create({ ordinal: 2, title: "1.2" });
       const selection = SelectionStoreModel.create();
       const ui = UIModel.create({
-        problemWorkspace: WorkspaceModel.create({ type: ProblemWorkspace, mode: "4-up" }),
         learningLogWorkspace: WorkspaceModel.create({ type: LearningLogWorkspace, mode: "1-up" })
+      });
+      const persistentUI = PersistentUIModel.create({
+        problemWorkspace: WorkspaceModel.create({ type: ProblemWorkspace, mode: "4-up" })
       });
       const user = UserModel.create({ id: "id-1", network: "network-1" });
       mockUseContext.mockImplementation(() => ({
         stores: {
           appConfig,
-          appMode : "authed",
+          appMode: "authed",
           class: _class,
           demo,
           documents: localDocuments,
@@ -61,6 +66,7 @@ describe("useStores", () => {
           problem,
           selection,
           ui,
+          persistentUI,
           user
         }
       }));
@@ -80,6 +86,7 @@ describe("useStores", () => {
       expect(useProblemPathWithFacet("facet")).toBe(problemPathWithFacet);
       expect(useProblemStore()).toBe(problem);
       expect(useSharedSelectionStore()).toBe(selection);
+      expect(usePersistentUIStore()).toBe(persistentUI);
       expect(useUIStore()).toBe(ui);
       expect(useUserStore()).toBe(user);
     });
@@ -91,7 +98,7 @@ describe("useStores", () => {
     it("should return undefined if specified document or tile doesn't exist", () => {
       mockUseContext.mockImplementation(() => ({
         stores: {
-          documents : DocumentsModel.create()
+          documents: DocumentsModel.create()
         }
       }));
       expect(useTypeOfTileInDocumentOrCurriculum()).toBeUndefined();
@@ -103,7 +110,7 @@ describe("useStores", () => {
     it("should return type of tile from tile id for curriculum documents", () => {
       mockUseContext.mockImplementation(() => ({
         stores: {
-          documents : {
+          documents: {
             getTypeOfTileInDocument: () => "Text"
           }
         }
@@ -116,7 +123,7 @@ describe("useStores", () => {
     it("should return type of tile from content for user documents", () => {
       mockUseContext.mockImplementation(() => ({
         stores: {
-          documents : {
+          documents: {
             getTypeOfTileInDocument: () => "Text"
           }
         }
@@ -127,10 +134,10 @@ describe("useStores", () => {
     it("should return type of tile from content for remote user documents", () => {
       mockUseContext.mockImplementation(() => ({
         stores: {
-          documents : {
+          documents: {
             getTypeOfTileInDocument: () => undefined
           },
-          networkDocuments : {
+          networkDocuments: {
             getTypeOfTileInDocument: () => "Text"
           }
         }

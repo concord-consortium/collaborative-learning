@@ -274,25 +274,26 @@ export const Graph = observer(
               const axisModel = graphModel?.getAxis(axis);
               const minVal = isNumericAxisModel(axisModel) ? axisModel.min : kDefaultNumericAxisBounds[0];
               const maxVal = isNumericAxisModel(axisModel) ? axisModel.max : kDefaultNumericAxisBounds[1];
-              return (
-                <div key={`${axis}-min-max`}>
-                  <EditableGraphValue
-                    value={minVal}
-                    minOrMax={"min"}
-                    axis={axis}
-                    onValueChange={(newValue) => handleMinMaxChange("min", axis, newValue)}
-                    readOnly={readOnly}
-                  />
-                  <EditableGraphValue
-                    value={maxVal}
-                    minOrMax={"max"}
-                    axis={axis}
-                    onValueChange={(newValue) => handleMinMaxChange("max", axis, newValue)}
-                    readOnly={readOnly}
-                  />
-                </div>
-              );
-
+              if (isNumericAxisModel(axisModel)){
+                return (
+                  <div key={`${axis}-min-max`}>
+                    <EditableGraphValue
+                      value={minVal}
+                      minOrMax={"min"}
+                      axis={axis}
+                      onValueChange={(newValue) => handleMinMaxChange("min", axis, newValue)}
+                      readOnly={readOnly}
+                    />
+                    <EditableGraphValue
+                      value={maxVal}
+                      minOrMax={"max"}
+                      axis={axis}
+                      onValueChange={(newValue) => handleMinMaxChange("max", axis, newValue)}
+                      readOnly={readOnly}
+                    />
+                  </div>
+                );
+              }
             })
           }
         </div>
