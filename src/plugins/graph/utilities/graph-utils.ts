@@ -21,6 +21,8 @@ import {
 } from "../../../utilities/color-utils";
 import {IDataConfigurationModel} from "../models/data-configuration-model";
 import {measureText} from "../../../components/tiles/hooks/use-measure-text";
+import { IGraphModel } from "../models/graph-model";
+import { isFiniteNumber } from "../../../utilities/math-utils";
 
 /**
  * Utility routines having to do with graph entities
@@ -107,16 +109,20 @@ export function setNiceDomain(values: number[], axisModel: IAxisModel) {
   }
 }
 
-export function getPointTipText(caseID: string, attributeIDs: string[], dataset?: IDataSet) {
-  const float = format('.3~f'),
-    attrArray = (attributeIDs.map(attrID => {
-      const attribute = dataset?.attrFromID(attrID),
-        name = attribute?.name,
-        numValue = dataset?.getNumeric(caseID, attrID),
-        value = numValue != null && isFinite(numValue) ? float(numValue)
-                  : dataset?.getValue(caseID, attrID);
+export function getPointTipText(caseID: string, attributeIDs: (string|undefined)[], graphModel: IGraphModel) {
+  // All the attribute IDs should be from the same dataset.
+  const dataset = attributeIDs[0] && graphModel.layerForAttributeId(attributeIDs[0])?.config.dataset;
+  const float = format('.3~f');
+  const attrArray = (attributeIDs.map(attrID => {
+    if (dataset && attrID) {
+      const attribute = dataset.attrFromID(attrID),
+        name = attribute.name,
+        numValue = dataset.getNumeric(caseID, attrID),
+        value = isFiniteNumber(numValue) ? float(numValue)
+          : dataset.getValue(caseID, attrID);
       return value ? `${name}: ${value}` : '';
-    }));
+    }
+  }));
   // Caption attribute can also be one of the plotted attributes, so we remove dups and join into html string
   return Array.from(new Set(attrArray)).filter(anEntry => anEntry !== '').join('<br>');
 }
@@ -139,6 +145,27 @@ export function handleClickOnDot(event: MouseEvent, caseData: CaseData, dataConf
   }
 }
 
+export interface IMatchAllCirclesProps {
+  graphModel: IGraphModel;
+  enableAnimation: React.MutableRefObject<boolean>
+  instanceId: string | undefined
+}
+
+export function matchAllCirclesToData(props: IMatchAllCirclesProps) {
+  const
+    { graphModel, enableAnimation, instanceId } = props,
+    pointRadius = graphModel.getPointRadius(),
+    pointColor = graphModel.pointColor,
+    pointStrokeColor = graphModel.pointStrokeColor;
+  for (const layer of graphModel.layers) {
+    matchCirclesToData({
+      dataConfiguration: layer.config,
+      dotsElement: layer.dotsElt,
+      pointRadius, pointColor, pointStrokeColor,
+      enableAnimation, instanceId});
+  }
+}
+
 export interface IMatchCirclesProps {
   dataConfiguration: IDataConfigurationModel
   dotsElement: DotsElt
@@ -152,7 +179,7 @@ export interface IMatchCirclesProps {
 export function matchCirclesToData(props: IMatchCirclesProps) {
   const { dataConfiguration, enableAnimation, instanceId, dotsElement } = props;
   const allCaseData = dataConfiguration.joinedCaseDataArrays;
-  const caseDataKeyFunc = (d: CaseData) => `${d.plotNum}-${d.caseID}`;
+  const caseDataKeyFunc = (d: CaseData) => `${d.dataConfigID}-${d.plotNum}-${d.caseID}`;
 
   // Create the circles
   const allCircles = selectGraphDots(dotsElement);
@@ -164,8 +191,8 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
     .join(
       enter => {
         const g = enter.append('g')
-          .attr('class', 'graph-dot')
-          .property('id', (d: CaseData) => `${instanceId}_${d.caseID}`);
+          .attr('class', `graph-dot`)
+          .property('id', (d: CaseData) => `${d.dataConfigID}_${instanceId}_${d.caseID}`);
         g.append('circle')
           .attr('class', 'outer-circle');
         g.append('circle')
@@ -201,7 +228,8 @@ function applySelectedClassToCircles(selection: DotSelection, dataConfiguration?
     .classed('selected', (aCaseData: CaseData) => isCircleSelected(aCaseData, dataConfiguration));
 }
 
-function styleOuterCircles(outerCircles: any, dataConfiguration?: IDataConfigurationModel){
+function styleOuterCircles(outerCircles: DotSelection|null, dataConfiguration?: IDataConfigurationModel){
+  if (!outerCircles) return;
   outerCircles
     .attr('r', (aCaseData: CaseData) => {
       return isCircleSelected(aCaseData, dataConfiguration)
@@ -414,7 +442,7 @@ export function setPointSelection(props: ISetPointSelection) {
 }
 
 export interface ISetPointCoordinates {
-  dataConfiguration?: IDataConfigurationModel
+  dataConfiguration: IDataConfigurationModel
   dotsRef: IDotsRef
   selectedOnly?: boolean
   pointRadius: number
@@ -453,7 +481,13 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
         .transition()
         .duration(duration)
         .attr('transform', (aCaseData: CaseData) => {
-          return `translate(${getScreenX(aCaseData.caseID)} ${getScreenY(aCaseData.caseID, aCaseData.plotNum)})`;
+          const x = getScreenX(aCaseData.caseID), y = getScreenY(aCaseData.caseID, aCaseData.plotNum);
+          if (isFiniteNumber(x) && isFiniteNumber(y)) {
+            return `translate(${x} ${y})`;
+          } else {
+            console.log('position of point became undefined in setPositions');
+            return '';
+          }
         });
     }
   };

@@ -9,7 +9,7 @@ import {IDataSet} from "../../../models/data/data-set";
 import {isSetAttributeNameAction} from "../../../models/data/data-set-actions";
 import {GraphPlace, isVertical} from "../imports/components/axis-graph-shared";
 import {graphPlaceToAttrRole, kGraphClassSelector} from "../graph-types";
-import {useGraphModelContext} from "../models/graph-model";
+import { useGraphModelContext } from "../hooks/use-graph-model-context";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {useTileModelContext} from "../imports/hooks/use-tile-model-context";
 import {getStringBounds} from "../imports/components/axis/axis-utils";

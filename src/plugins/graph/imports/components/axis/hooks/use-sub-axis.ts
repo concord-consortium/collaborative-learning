@@ -10,7 +10,7 @@ import {between} from "../../../../utilities/math-utils";
 import {kAxisTickLength, transitionDuration} from "../../../../graph-types";
 import {DragInfo, collisionExists, computeBestNumberOfTicks,
         getCategoricalLabelPlacement,getCoordFunctions, IGetCoordFunctionsProps} from "../axis-utils";
-import { useGraphModelContext } from "../../../../models/graph-model";
+import { useGraphModelContext } from "../../../../hooks/use-graph-model-context";
 
 export interface IUseSubAxis {
   subAxisIndex: number
