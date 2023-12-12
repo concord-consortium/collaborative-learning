@@ -44,11 +44,11 @@ function LinkTileButtonNoMultiple({name}: IToolbarButtonComponentProps) {
   return LinkTileButton(name, "Link data", false);
 }
 
-function FullViewButton({name}: IToolbarButtonComponentProps) {
+function FitAllButton({name}: IToolbarButtonComponentProps) {
   const controller = useContext(GraphControllerContext);
 
   function handleClick() {
-    controller && controller.handleFullView();
+    controller && controller.autoscaleAllAxes();
   }
 
   return (
@@ -74,7 +74,7 @@ registerTileToolbarButtons("graph",
     component: LinkTileButtonMultiple
   },
   {
-    name: 'full-view',
-    component: FullViewButton
+    name: 'fit-all',
+    component: FitAllButton
   }
 ]);

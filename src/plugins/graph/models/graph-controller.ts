@@ -195,7 +195,10 @@ export class GraphController {
     AxisPlaces.forEach(setupAxis);
   }
 
-  handleFullView() {
+  /**
+   * Set the domains of all axes to fit all of the data points.
+   */
+  autoscaleAllAxes() {
     if (!this.graphModel) return;
     startAnimation(this.enableAnimation);
     for (const place of AxisPlaces) {
