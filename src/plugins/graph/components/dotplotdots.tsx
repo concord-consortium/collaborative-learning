@@ -12,9 +12,9 @@ import {
   setPointSelection,
   startAnimation
 } from "../utilities/graph-utils";
-import {useGraphModelContext} from "../models/graph-model";
+import { useGraphModelContext } from "../hooks/use-graph-model-context";
 import { useDataConfigurationContext } from "../hooks/use-data-configuration-context";
-import { useGraphLayerContext } from "../models/graph-layer-model";
+import { useGraphLayerContext } from "../hooks/use-graph-layer-context";
 
 export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
   const {dotsRef, enableAnimation} = props,

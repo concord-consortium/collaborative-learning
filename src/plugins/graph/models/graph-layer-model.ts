@@ -1,4 +1,3 @@
-import { createContext, useContext } from "react";
 import { getParentOfType, Instance, SnapshotIn, types } from "@concord-consortium/mobx-state-tree";
 import { typedId } from "../../../utilities/js-utils";
 import { onAnyAction } from "../../../utilities/mst-utils";
@@ -157,7 +156,3 @@ export const GraphLayerModel = types
 
 export interface IGraphLayerModel extends Instance<typeof GraphLayerModel> { }
 export interface IGraphLayerModelSnapshot extends SnapshotIn<typeof GraphLayerModel> {}
-
-export const GraphLayerContext = createContext<IGraphLayerModel>({} as IGraphLayerModel);
-
-export const useGraphLayerContext = () => useContext(GraphLayerContext);

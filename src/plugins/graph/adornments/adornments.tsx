@@ -3,7 +3,7 @@ import { clsx } from "clsx";
 import { observer } from "mobx-react-lite";
 import { kGraphAdornmentsClass } from "../graph-types";
 import { useGraphLayoutContext } from "../models/graph-layout";
-import { useGraphModelContext } from "../models/graph-model";
+import { useGraphModelContext } from "../hooks/use-graph-model-context";
 import { Adornment } from "./adornment";
 import { getAdornmentContentInfo } from "./adornment-content-info";
 import { IAdornmentModel } from "./adornment-models";
@@ -26,6 +26,8 @@ export const Adornments = observer(function Adornments(props: AdornmmentsProps) 
     { isTileSelected } = useTileModelContext(),
     adornments = graphModel.adornments;
 
+  // This is only used by ConnectingLines.
+  // TODO: Next time we update that adornment, we should have it create its own container element and remove this.
   const dotsRef = useRef<DotsElt>(null);
 
   if (!adornments?.length) return null;

@@ -8,3 +8,7 @@ export function normalizeAngle(angle: number) {
 }
 
 export type Point = [x: number, y: number];
+
+export function isFiniteNumber(x: any): x is number {
+  return x != null && Number.isFinite(x);
+}
