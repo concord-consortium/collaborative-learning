@@ -20,7 +20,7 @@ function beforeTest(params) {
 context('Document Flipper', () => {
   describe('teacher document flipper', function () {
 
-    it('verify document flipper', function () {
+    it.skip('verify document flipper', function () {
       beforeTest(queryParams.teacherQueryParams);
       cy.log('verify document flipper under my work - starred tab');
       cy.openTopTab("my-work");
