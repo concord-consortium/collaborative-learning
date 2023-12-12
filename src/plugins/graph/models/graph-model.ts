@@ -1,4 +1,4 @@
-import { reaction } from "mobx";
+import { autorun, reaction } from "mobx";
 import stringify from "json-stringify-pretty-compact";
 import { addDisposer, getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
 import {createContext, useContext} from "react";
@@ -461,25 +461,20 @@ export const GraphModel = TileContentModel
       }
 
       // Display a plotted function when this is linked to a SharedVariableModel
-      addDisposer(self, reaction(
-        () => {
-          const smm = getSharedModelManager(self);
-          let sharedVariableModels;
-          if (smm?.isReady) {
-            sharedVariableModels = smm.getTileSharedModelsByType(self, SharedVariables);
-          }
-          return sharedVariableModels;
-        },
-        (sharedVariableModels) => {
-          if (sharedVariableModels && sharedVariableModels.length > 0) {
-            const plottedFunctionAdornment = PlottedFunctionAdornmentModel.create();
-            plottedFunctionAdornment.addPlottedFunction(x => x**2);
-            self.showAdornment(plottedFunctionAdornment);
-          } else {
-            self.hideAdornment(kPlottedFunctionType);
-          }
+      addDisposer(self, autorun(() => {
+        const smm = getSharedModelManager(self);
+        let sharedVariableModels;
+        if (smm?.isReady) {
+          sharedVariableModels = smm.getTileSharedModelsByType(self, SharedVariables);
         }
-      ));
+        if (sharedVariableModels && sharedVariableModels.length > 0) {
+          const plottedFunctionAdornment = PlottedFunctionAdornmentModel.create();
+          plottedFunctionAdornment.addPlottedFunction(x => x**2);
+          self.showAdornment(plottedFunctionAdornment);
+        } else {
+          self.hideAdornment(kPlottedFunctionType);
+        }
+      }));
     },
     setDataConfigurationReferences() {
       // Updates pre-existing DataConfiguration objects that don't have the now-required references
