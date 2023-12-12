@@ -84,11 +84,42 @@ context('XYPlot Tool Tile', function () {
       cy.log("verify graph dot is updated");
       xyTile.getGraphDot().should('have.length', 2);
 
+      // X axis should have scaled to fit 5 and 7.
+      xyTile.getEditableLimits().should('have.length', 4);
+      xyTile.getEditableLimits().eq(0).invoke('text').then(parseFloat).should("be.within", -1, 5);
+      xyTile.getEditableLimits().eq(1).invoke('text').then(parseFloat).should("be.within", 7, 12);
+
+      cy.log("add another data point");
+      cy.get(".primary-workspace").within((workspace) => {
+        tableToolTile.typeInTableCell(9, '15');
+        tableToolTile.getTableCell(8).should('contain', '15');
+        tableToolTile.typeInTableCell(10, '0');
+        tableToolTile.getTableCell(9).should('contain', '0');
+      });
+      // Added data point will be off the right edge of the plot area until we click 'Fit'.
+      xyTile.getTile().scrollIntoView();
+      xyTile.getGraphDot().should('have.length', 3);
+      xyTile.getGraphDot().eq(0).should('be.visible');
+      xyTile.getGraphDot().eq(1).should('be.visible');
+      xyTile.getGraphDot().eq(2).should('not.be.visible');
+      // X axis should not have changed in response to adding a data point.
+      xyTile.getEditableLimits().eq(0).invoke('text').then(parseFloat).should("be.within", -1, 5);
+      xyTile.getEditableLimits().eq(1).invoke('text').then(parseFloat).should("be.within", 7, 12);
+
+      cy.log("fit view");
+      xyTile.getTile().click();
+      clueCanvas.clickToolbarButton('graph', 'fit-all');
+      xyTile.getGraphDot().eq(0).should('be.visible');
+      xyTile.getGraphDot().eq(1).should('be.visible');
+      xyTile.getGraphDot().eq(2).should('be.visible');
+      xyTile.getEditableLimits().eq(0).invoke('text').then(parseFloat).should("be.within", -1, 5);
+      xyTile.getEditableLimits().eq(1).invoke('text').then(parseFloat).should("be.within", 15, 20);
+
       cy.log("restore points to canvas");
       primaryWorkspace.openResourceTab();
       resourcePanel.openPrimaryWorkspaceTab("my-work");
       cy.openDocumentWithTitle('my-work', 'workspaces', problemDoc);
-      xyTile.getGraphDot().should('have.length', 2);
+      xyTile.getGraphDot().should('have.length', 3);
       xyTile.getXYPlotTitle().should('contain', title);
 
       cy.log("Delete XY Plot Tile");
