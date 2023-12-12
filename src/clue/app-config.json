@@ -252,7 +252,7 @@
         "disableAttributeDnD": true,
         "tools": [
           "link-tile",
-          "full-view"
+          "fit-all"
         ]
       },
       "simulator": {

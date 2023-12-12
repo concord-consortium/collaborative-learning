@@ -8,7 +8,7 @@ import { IToolbarButtonComponentProps, registerTileToolbarButtons }
 
 import LinkTableIcon from "../../../clue/assets/icons/geometry/link-table-icon.svg";
 import AddIcon from "../assets/add-data-graph-icon.svg";
-import FitViewIcon from "../../../assets/icons/fit-view-icon.svg";
+import FitAllIcon from "../assets/fit-all-icon.svg";
 
 function LinkTileButton(name: string, title: string, allowMultiple: boolean) {
 
@@ -54,10 +54,10 @@ function FullViewButton({name}: IToolbarButtonComponentProps) {
   return (
     <TileToolbarButton
       name={name}
-      title="Full View"
+      title="Fit All"
       onClick={handleClick}
     >
-      <FitViewIcon/>
+      <FitAllIcon/>
     </TileToolbarButton>
   );
 
