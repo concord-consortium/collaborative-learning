@@ -14,6 +14,7 @@ import { LearningLogDocument, LearningLogPublication, PersonalDocument,
 import { UserModelType } from "./user";
 import { DB } from "../../lib/db";
 import { safeJsonParse } from "../../utilities/js-utils";
+import { urlParams } from "../../utilities/url-params";
 
 export const kPersistentUiStateVersion = "1.0.0";
 export const kSparrowAnnotationMode = "sparrow";
@@ -228,6 +229,7 @@ export const PersistentUIModel = types
       self.setOpenSubTab(navTab, subTab);
     },
     async initializePersistentUISync(user: UserModelType, db: DB){
+      if (urlParams.noPersistentUI) return;
       const path = db.firebase.getPersistentUIPath(user);
       const getRef = db.firebase.ref(path);
       const theData: string | undefined = (await getRef.once("value"))?.val();
