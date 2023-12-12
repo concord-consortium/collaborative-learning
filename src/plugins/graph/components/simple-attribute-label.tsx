@@ -1,5 +1,4 @@
 import React, { useContext, useState} from "react";
-import classNames from "classnames";
 import {observer} from "mobx-react-lite";
 import {GraphPlace } from "../imports/components/axis-graph-shared";
 import {AttributeType} from "../../../models/data/attribute";
@@ -9,7 +8,6 @@ import { useGraphModelContext } from "../models/graph-model";
 import { IDataSet } from "../../../models/data/data-set";
 import { kGraphClassSelector } from "../graph-types";
 import { ReadOnlyContext } from "../../../components/document/read-only-context";
-import DropdownCaretIcon from "../assets/dropdown-caret.svg";
 
 import "../components/legend/multi-legend.scss";
 
@@ -32,8 +30,6 @@ export const SimpleAttributeLabel = observer(
     const graphModel = useGraphModelContext();
     const dataConfiguration = useDataConfigurationContext();
     const dataset = dataConfiguration?.dataset;
-    const attr = attrId ? dataset?.attrFromID(attrId) : undefined;
-    const attrName = attr?.name ?? "";
     const pointColor = index !== undefined && graphModel.pointColorAtIndex(index);
 
     const readOnly = useContext(ReadOnlyContext);
@@ -43,43 +39,25 @@ export const SimpleAttributeLabel = observer(
       simpleLabelElement?.classList.toggle("target-closed", !isOpen);
     };
 
-    const labelClassNames = classNames(
-      "graph-legend-label",
-      "simple-attribute-label",
-      { highlighted: dataset?.isAttributeSelected(attrId) }
-    );
-    return (
-      <>
-        <div ref={(e) => setSimpleLabelElement(e)} className={labelClassNames}>
-          <div className="symbol-title">
-            { pointColor &&
-              <div className="symbol-container">
-                <div className="attr-symbol" style={{ backgroundColor: pointColor }}></div>
-              </div>
-            }
-            <div className="attr-title">{ attrName }</div>
-          </div>
-          {!readOnly &&
-            <div className="caret">
-              <DropdownCaretIcon />
-            </div>
-          }
-        </div>
-        {!readOnly && simpleLabelElement && graphElement && onChangeAttribute
-            && onTreatAttributeAs && onRemoveAttribute && attrId &&
-          <AxisOrLegendAttributeMenu
-            target={simpleLabelElement}
-            parent={graphElement}
-            portal={documentElt}
-            place={place}
-            attributeId={attrId}
-            onChangeAttribute={onChangeAttribute}
-            onRemoveAttribute={onRemoveAttribute}
-            onTreatAttributeAs={onTreatAttributeAs}
-            onOpenClose={handleOpenClose}
-          />
-        }
-      </>
-    );
+    if (onChangeAttribute && onTreatAttributeAs && onRemoveAttribute && attrId) {
+      return  (
+        <AxisOrLegendAttributeMenu
+          setButtonElement={setSimpleLabelElement}
+          pointColor={pointColor || undefined}
+          target={null}
+          parent={graphElement}
+          portal={documentElt}
+          place={place}
+          attributeId={attrId}
+          highlighted={dataset?.isAttributeSelected(attrId)}
+          readOnly={readOnly}
+          onChangeAttribute={onChangeAttribute}
+          onRemoveAttribute={onRemoveAttribute}
+          onTreatAttributeAs={onTreatAttributeAs}
+          onOpenClose={handleOpenClose}
+        />
+      );
+    }
+    return null;
   });
 SimpleAttributeLabel.displayName = "SimpleAttributeLabel";

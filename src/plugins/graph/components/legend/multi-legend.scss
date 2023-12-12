@@ -98,6 +98,23 @@
   }
 }
 
+.styled-button {
+  align-items: center;
+  display: flex;
+  height: $menu-height;
+  justify-content: space-between;
+  min-width: $min-menu-width;
+
+  border: 1px solid #3f3f3f;
+  border-radius: 4px;
+  color: #3f3f3f;
+  background-color: $workspace-teal-light-8;
+
+  &.highlighted {
+    background-color: $highlight-linked-header;
+  }
+}
+
 .graph-legend-label {
   min-width: $min-menu-width;
   height: $menu-height;
