@@ -1,6 +1,5 @@
 import { getSnapshot, applySnapshot, types,
   onSnapshot
-
 } from "mobx-state-tree";
 import { AppConfigModelType } from "./app-config-model";
 import { kDividerHalf, kDividerMax, kDividerMin } from "./ui-types";

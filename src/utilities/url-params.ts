@@ -106,6 +106,7 @@ export const processUrlParams = (): QueryParams => {
     demo: (params.demo !== undefined),
     // allows use of localCMSBackend without a value
     localCMSBackend: (params.localCMSBackend !== undefined),
+    // disables persistentUI store initialization
     noPersistentUI: (params.noPersistentUI !== undefined)
   };
 };
