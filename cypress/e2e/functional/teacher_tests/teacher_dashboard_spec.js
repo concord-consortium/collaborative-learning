@@ -9,6 +9,7 @@ function beforeTest() {
   cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();
+  cy.wait(2000); // wait for persistentUI to load
   dashboard.switchView("Dashboard");
   dashboard.switchWorkView('Published');
   cy.wait(8000);
