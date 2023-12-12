@@ -27,12 +27,13 @@ export const SharedVariables = SharedModel.named("SharedVariables")
     }
   },
   computeY(x: number) {
+    const defaultY = x ** 2;
     if (self.variablesCopy && self.xVariable && self.yVariable) {
       self.xVariable.setValue(x);
       const dependentValue = self.yVariable.computedValue;
-      return dependentValue ?? x ** 2;
+      return dependentValue ?? defaultY;
     }
-    return x ** 2;
+    return defaultY;
   },
   disposeCompute() {
     self.xVariable = undefined;
