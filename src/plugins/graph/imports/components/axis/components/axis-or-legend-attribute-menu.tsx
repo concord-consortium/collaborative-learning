@@ -1,5 +1,5 @@
 import { Menu, MenuItem, MenuList, MenuButton, MenuDivider, Portal } from "@chakra-ui/react";
-import React, { CSSProperties, useRef, useEffect, useState } from "react";
+import React, { CSSProperties, useContext, useEffect, useRef, useState } from "react";
 import classNames from "classnames";
 
 import t from "../../../utilities/translation/translate";
@@ -14,6 +14,7 @@ import { AttributeType } from "../../../../../../models/data/attribute";
 import { IDataSet } from "../../../../../../models/data/data-set";
 import { isSetAttributeNameAction } from "../../../../../../models/data/data-set-actions";
 import { useGraphSettingsContext } from "../../../../hooks/use-graph-settings-context";
+import { ReadOnlyContext } from "../../../../../../components/document/read-only-context";
 
 import DropdownCaretIcon from "../../../../assets/dropdown-caret.svg";
 
@@ -29,11 +30,8 @@ interface IProps {
   onChangeAttribute: (place: GraphPlace, dataSet: IDataSet, attrId: string, oldAttrId?: string) => void;
   onRemoveAttribute: (place: GraphPlace, attrId: string) => void;
   onTreatAttributeAs: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void;
-  onOpenClose?: (isOpen: boolean) => void;
   highlighted?: boolean;
-  readOnly?: boolean;
-  // If the target is set to null, these two props help style the resulting button
-  setButtonElement?: any;
+  // If the target is set to null, a circle of this color will be drawn on the styled button
   pointColor?: string;
 }
 
@@ -48,7 +46,7 @@ const removeAttrItemLabelKeys: Record<string, string> = {
 
 export const AxisOrLegendAttributeMenu = ({
   place, attributeId, target, parent, portal, onChangeAttribute, onRemoveAttribute, onTreatAttributeAs,
-  onOpenClose, highlighted, readOnly, setButtonElement, pointColor
+  highlighted, pointColor
 }: IProps) => {
   const dataConfig = useDataConfigurationContext();
   const data = dataConfig?.dataset;
@@ -75,6 +73,8 @@ export const AxisOrLegendAttributeMenu = ({
     position: "absolute", inset: 0, padding: 0, color: "transparent"
   };
 
+  const readOnly = useContext(ReadOnlyContext);
+
   const draggableOptions: IUseDraggableAttribute = {
     prefix: instanceId, dataSet: data, attributeId: attrId
   };
@@ -94,10 +94,16 @@ export const AxisOrLegendAttributeMenu = ({
     });
   }, [attribute?.name, data?.attributes, dataConfig, labelText, setLabelText, attrId]);
 
-  const buttonPart = target
+  const getButtonPart = (isOpen: boolean) => {
+    return target
     ? <MenuButton style={buttonStyle}>{attribute?.name}</MenuButton>
     : (
-      <MenuButton ref={(e) => setButtonElement(e)} className="graph-legend-label simple-attribute-label">
+      <MenuButton
+        className={classNames(
+          "graph-legend-label simple-attribute-label",
+          {"target-open": isOpen, "target-closed": !isOpen}
+        )}
+      >
         <div className={classNames("styled-button", { highlighted })}>
           <div className="symbol-title">
             { pointColor &&
@@ -115,10 +121,11 @@ export const AxisOrLegendAttributeMenu = ({
         </div>
       </MenuButton>
     );
+  };
 
-  const menuButtonAndPortal =
+  const getMenuButtonAndPortal = (isOpen: boolean) => (
     <>
-      {buttonPart}
+      {getButtonPart(isOpen)}
       <Portal containerRef={portalRef}>
         <MenuList ref={menuListRef}>
           { !data &&
@@ -154,14 +161,15 @@ export const AxisOrLegendAttributeMenu = ({
           }
         </MenuList>
       </Portal>
-    </>;
+    </>
+  );
 
   return (
     <div className={`axis-legend-attribute-menu ${place}`} >
       <Menu boundary="scrollParent">
         {({ onClose, isOpen }) => {
-          onOpenClose && onOpenClose(isOpen);
           onCloseRef.current = onClose;
+          const menuButtonAndPortal = getMenuButtonAndPortal(isOpen);
           const portalContent = disableAttributeDnD
             ? <div style={overlayStyle}>
                 {menuButtonAndPortal}
