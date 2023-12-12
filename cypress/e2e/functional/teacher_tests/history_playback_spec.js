@@ -7,7 +7,7 @@ let tableToolTile = new TableToolTile;
 let drawToolTile = new DrawToolTile;
 
 const queryParams = "/?appMode=qa&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:7&unit=msa";
-const studentQueryParams = "/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=student:1";
+const studentQueryParams = "/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=student:1&noPersistentUI";
 
 function moveSliderTo(percent) {
   cy.get('.rc-slider-horizontal').then($slider => {
@@ -128,7 +128,7 @@ context('History Playback', () => {
     });
     moveSliderTo(10);
     cy.get('[data-test="subtab-workspaces"] .editable-document-content .canvas .document-content .table-tool').should('not.exist');
-    
+
     cy.log('verify table is redone in the correctly');
     moveSliderTo(40);
     tableToolTile.getTableTile('[data-test="subtab-workspaces"] .editable-document-content').within(() => {
@@ -145,7 +145,7 @@ context('History Playback', () => {
       tableToolTile.getTableCell().eq(1).should('contain', '1');
       tableToolTile.getTableCell().eq(2).should('contain', '2');
     });
-    
+
     cy.log('verify undo action in primary document and verify playback of history');
     clueCanvas.getUndoTool().click();
     tableToolTile.getTableTile('[data-test="subtab-workspaces"] .editable-document-content').within(() => {
@@ -177,7 +177,7 @@ context('History Playback', () => {
       tableToolTile.getTableCell().eq(1).should('contain', '1');
       tableToolTile.getTableCell().eq(2).should('contain', '2');
     });
-    
+
     cy.log('verify playback icon in class work & learning logs & icon background color');
     cy.get('[data-testid="playback-component-button"]').click();
     cy.get('.playback-toolbar-button.themed.my-work').should('have.css', 'background-color', 'rgb(183, 226, 236)');
@@ -201,7 +201,7 @@ context('History Playback', () => {
 
   it('verify playback icon not displayed for student', function() {
     beforeTest(studentQueryParams);
-    
+
     cy.get('[data-testid="playback-component-button"]').should("not.exist");
   });
 });
