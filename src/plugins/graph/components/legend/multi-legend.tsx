@@ -21,7 +21,7 @@ const kMultiLegendVerticalPadding = 10;
 const kMultiLegendVerticalGap = 8;
 const kMultiLegendLabelHeight = 28;
 const kMultiLegendHRuleHeight = 2;
-const kTemporarySpaceForVariablesLegend = 30; // TODO: actually calculate height for variables legend
+const kTemporarySpaceForVariablesLegend = 80; // TODO: actually calculate height for variables legend
 
 interface IMultiLegendProps {
   graphElt: HTMLDivElement | null;
@@ -60,12 +60,11 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
   }
   // Total height is height of X-axis menus, plus sum of all the layer sections
   const totalHeight = kMultiLegendMenuHeight + kMultiLegendVerticalPadding
-    + kTemporarySpaceForVariablesLegend
     + graphModel.layers.reduce((prev, layer)=>{ return prev + heightOfLayerLegend(layer);}, 0)
     + graphModel.adornments.reduce((prev, adornment) => {
       if (isPlottedFunctionAdornment(adornment)) {
         if (adornment.sharedVariables) {
-          return prev + 60;
+          return prev + kTemporarySpaceForVariablesLegend;
         }
       }
       return prev;
