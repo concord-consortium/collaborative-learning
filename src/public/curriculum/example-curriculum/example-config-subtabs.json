@@ -115,6 +115,29 @@
             "showStars": ["teacher"]
           }
         ]
+      },
+      {
+        "tab": "sort-work",
+        "label": "Sort Work",
+        "sections": [
+          {
+            "title": "Workspaces",
+            "type": "published-problem-documents",
+            "dataTestHeader": "class-work-section-published",
+            "dataTestItem": "sort-work-list-items",
+            "documentTypes": ["publication"],
+            "showStars": ["teacher"],
+            "properties": ["!isTeacherDocument"]
+          },
+          {
+            "title": "Workspaces",
+            "type": "published-personal-documents",
+            "dataTestHeader": "sort-work-section-personal",
+            "dataTestItem": "sort-work-list-items",
+            "documentTypes": ["personalPublication"],
+            "properties": ["!isTeacherDocument"]
+          }
+        ]
       }
     ]
   },
