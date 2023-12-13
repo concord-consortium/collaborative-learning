@@ -42,6 +42,9 @@ export const PlottedFunctionAdornmentModel = AdornmentModel
     get sharedVariables() {
       const sharedModelManager = getSharedModelManager(self);
       if (sharedModelManager?.isReady) {
+        // const sharedVariables = sharedModelManager.findFirstSharedModelByType(SharedVariables, self.id);
+        // console.log(`--- sharedVariables`, sharedVariables);
+        // if (sharedVariables) return sharedVariables as SharedVariablesType;
         const sharedVariableModels = sharedModelManager.getTileSharedModelsByType(self, SharedVariables);
         if (sharedVariableModels.length > 0) {
           return sharedVariableModels[0] as SharedVariablesType;
