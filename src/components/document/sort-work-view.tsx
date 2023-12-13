@@ -6,7 +6,6 @@ export const SortWorkView:React.FC = observer(function SortWorkView(){
   const stores = useStores();
   const allDocuments = JSON.parse(JSON.stringify(stores.documents.all));
 
-
   return (
     <div key="sort-work-view">
       <ul>
@@ -17,7 +16,7 @@ export const SortWorkView:React.FC = observer(function SortWorkView(){
       </ul>
       {allDocuments.map((doc: any) => {
         return (
-          <li key={doc.key}>{doc.key} | {doc.type} | {doc.properties.pubCount } | user: { doc.uid} </li>
+          <li key={doc.key}>{doc.key} | {doc.type} | pubCount: {doc.properties.pubCount } | user: { doc.uid} </li>
         );
       })}
 
