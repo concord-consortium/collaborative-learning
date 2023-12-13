@@ -1,4 +1,4 @@
-import GraphToolTile from '../tile/GraphToolTile';
+import GeometryToolTile from '../tile/GeometryToolTile';
 import ImageToolTile from '../tile/ImageToolTile';
 import DrawToolTile from '../tile/DrawToolTile';
 import TextToolTile from '../tile/TextToolTile';
@@ -11,7 +11,7 @@ import Canvas from './Canvas';
 import Dialog from './Dialog';
 import XYPlotToolTile from '../tile/XYPlotToolTile';
 
-let graphToolTile = new GraphToolTile,
+let graphToolTile = new GeometryToolTile,
     imageToolTile = new ImageToolTile,
     drawToolTile = new DrawToolTile,
     textToolTile = new TextToolTile,
@@ -187,8 +187,8 @@ class ClueCanvas {
                     .trigger('dragstart', { dataTransfer });
                 break;
             case ('geometry'):
-                graphToolTile.getGraphTile().eq(0).click();
-                graphToolTile.getGraphTile().eq(0)
+                graphToolTile.getGeometryTile().eq(0).click();
+                graphToolTile.getGeometryTile().eq(0)
                     .trigger('dragstart', { dataTransfer });
                 break;
             case ('text'):
@@ -251,7 +251,7 @@ class ClueCanvas {
                 tileElement = cy.get('.text-tool-wrapper').last().click({ force: true }).parent();
                 break;
             case 'graph':
-                tileElement = graphToolTile.getGraphTile().last().click({ force: true }).parent();
+                tileElement = graphToolTile.getGeometryTile().last().click({ force: true }).parent();
                 break;
             case 'image':
                 tileElement = imageToolTile.getImageTile().last().click({ force: true }).parent();
@@ -264,7 +264,7 @@ class ClueCanvas {
                 tileElement = tableToolTile.getTableTile().last().click({ force: true }).parent();
                 break;
             case 'geometry':
-                tileElement = graphToolTile.getGraphTile().last().click({ force: true }).parent();
+                tileElement = graphToolTile.getGeometryTile().last().click({ force: true }).parent();
                 break;
             case 'dataflow':
                 tileElement = dataflowToolTile.getDataflowTile().last().click({ force: true });

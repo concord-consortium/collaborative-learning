@@ -222,19 +222,19 @@ Cypress.Commands.add('collapseWorkspace', () => {
     cy.get('.divider-container .resources-expander').click();
   });
 });
-Cypress.Commands.add('linkTableToGraph', (table, graph) => {
+Cypress.Commands.add('linkTableToTile', (table, tile) => {
   cy.get('.primary-workspace .table-title').contains(table).click();
   cy.get(".table-toolbar .toolbar-button.link-tile").click();
   cy.get('.ReactModalPortal').within(() => {
-    cy.get('[data-test=link-tile-select]').select(graph);
+    cy.get('[data-test=link-tile-select]').select(tile);
     cy.get('button').contains('Link').click();
   });
 });
-Cypress.Commands.add('unlinkTableToGraph', (table, graph) => {
+Cypress.Commands.add('unlinkTableToTile', (table, tile) => {
   cy.get('.primary-workspace .table-title').contains(table).click();
   cy.get(".table-toolbar .toolbar-button.link-tile").click();
   cy.get('.ReactModalPortal').within(() => {
-    cy.get('[data-test=link-tile-select]').select(graph);
+    cy.get('[data-test=link-tile-select]').select(tile);
     cy.get('button').contains('Unlink').click();
   });
 });
