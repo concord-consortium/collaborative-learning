@@ -8,9 +8,9 @@ import {InstanceIdContext, useNextInstanceId} from "../imports/hooks/use-instanc
 import {AxisLayoutContext} from "../imports/components/axis/models/axis-layout-context";
 import {GraphController} from "../models/graph-controller";
 import {GraphLayout, GraphLayoutContext} from "../models/graph-layout";
-import {GraphModelContext, isGraphModel} from "../models/graph-model";
+import {isGraphModel} from "../models/graph-model";
+import {GraphModelContext} from "../hooks/use-graph-model-context";
 import {Graph} from "./graph";
-import {DotsElt} from '../d3-types';
 import {AttributeDragOverlay} from "../imports/components/drag-drop/attribute-drag-overlay";
 import "../register-adornment-types";
 
@@ -28,13 +28,12 @@ export const GraphComponent = observer(
   const {width, height} = useResizeDetector<HTMLDivElement>({ targetRef: graphRef });
   const enableAnimation = useRef(true);
   const autoAdjustAxes = useRef(true);
-  const dotsRef = useRef<DotsElt>(null);
   const graphController = useMemo(
     () => new GraphController({layout, enableAnimation, instanceId, autoAdjustAxes}),
     [layout, instanceId]
   );
 
-  useGraphController({graphController, graphModel, dotsRef});
+  useGraphController({graphController, graphModel});
 
   useEffect(() => {
     (width != null) && (height != null) && layout.setParentExtent(width, height);
@@ -58,7 +57,6 @@ export const GraphComponent = observer(
           <GraphModelContext.Provider value={graphModel}>
             <Graph graphController={graphController}
               graphRef={graphRef}
-              dotsRef={dotsRef}
               onRequestRowHeight={onRequestRowHeight}
               readOnly={readOnly}
             />
