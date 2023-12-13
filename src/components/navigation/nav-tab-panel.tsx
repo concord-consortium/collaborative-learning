@@ -16,6 +16,7 @@ import ChatIcon from "../../assets/chat-icon.svg";
 import "react-tabs/style/react-tabs.css";
 import "./nav-tab-panel.sass";
 import "../themes.scss";
+import { SortWorkView } from "../document/sort-work-view";
 
 interface IProps extends IBaseProps {
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
@@ -107,10 +108,11 @@ export class NavTabPanel extends BaseComponent<IProps> {
         return this.renderTeacherGuide();
       case ENavTab.kStudentWork:
         return <StudentGroupView/>;
+      case ENavTab.kSortWork:
+        return <SortWorkView />;
       case ENavTab.kClassWork:
       case ENavTab.kLearningLog:
       case ENavTab.kMyWork:
-      case ENavTab.kSortWork:
       case ENavTab.kSupports:
         return this.renderDocuments(tabSpec);
       default:
