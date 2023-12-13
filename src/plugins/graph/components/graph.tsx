@@ -214,6 +214,10 @@ export const Graph = observer(
   useGraphModel({ graphModel, enableAnimation, instanceId });
 
   const handleMinMaxChange = (minOrMax: string, axis: AxisPlace, newValue: number) => {
+
+    console.log("📁 graph.tsx ------------------------");
+    console.log("\t🏭 handleMinMaxChange");
+
     const axisModel = graphModel.getAxis(axis) as INumericAxisModel;
     if (minOrMax === "min" && newValue < axisModel.max){
       axisModel.setMin(newValue);

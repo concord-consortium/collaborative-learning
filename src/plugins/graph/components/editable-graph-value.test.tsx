@@ -1,13 +1,13 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { EditableGraphValue } from './editable-graph-value';
 import { INumericAxisModel, NumericAxisModel } from '../imports/components/axis/models/axis-model';
 import { AxisPlace } from '../imports/components/axis/axis-types';
 import { AxisLayoutContext } from '../imports/components/axis/models/axis-layout-context';
 
 const mockAxisLayout = {
-  setParentExtent: jest.fn(),
   getAxisLength: jest.fn().mockReturnValue(100),
+  setParentExtent: jest.fn(),
   getAxisBounds: jest.fn(),
   setAxisBounds: jest.fn(),
   getAxisMultiScale: jest.fn(),
@@ -24,7 +24,6 @@ interface TestWrapperProps {
   children: React.ReactNode;
 }
 
-
 const TestWrapper: React.FC<TestWrapperProps> = ({children}) => {
   return (
     <AxisLayoutContext.Provider value={mockAxisLayout}>
@@ -32,6 +31,21 @@ const TestWrapper: React.FC<TestWrapperProps> = ({children}) => {
     </AxisLayoutContext.Provider>
   );
 };
+
+//----------------------------------------------------------
+
+//Clue story hour question
+//It's not actually mutating the model by going through handleMinMaxChange (graph.tsx) -> setMin (axis-model.ts)
+//Wouldn't we have to create a mock Graph (which is a parent of EditableGraphValue) - seems too complex.
+// - Graph's props are
+// interface IProps {
+//   graphController: GraphController;
+//   graphRef: MutableRefObject<HTMLDivElement | null>;
+//   onRequestRowHeight?: (id: string, size: number) => void;
+//   readOnly?: boolean
+// }
+//--------------------------------------------
+
 
 describe('EditableGraphValue component', () => {
   let numericAxisModel: INumericAxisModel;
@@ -56,29 +70,36 @@ describe('EditableGraphValue component', () => {
 
   });
 
+  //----Helper Functions----
 
-  // it('updates to a new valid min value', () => {
-  //   numericAxisModel.setMin(-20);
-  //   expect(numericAxisModel.min).toBe(-20);
-  // });
+  function editMinOrMaxValue(newValue: number, minOrMax: string) {
+    //simulates clicking an editable-graph-value and entering  newvalue
+    const editableBox = screen.getByTestId(`editable-border-box-left-${minOrMax}`);
+    fireEvent.click(editableBox);
+    const input = screen.getByRole('textbox');
+    fireEvent.change(input, { target: { value: newValue } }); // Simulate user changing the input value
+    fireEvent.blur(input);
+  }
 
   it('can edit the min', () => {
-
-     const editableBox = screen.getByTestId('editable-border-box-left-min');
-     fireEvent.click(editableBox);
-     // Find the input element, assuming it becomes visible after clicking the box
-     const input = screen.getByRole('textbox'); // Adjust this if the input has a specific role or test id
-     // Simulate user changing the input value
-     fireEvent.change(input, { target: { value: '15' } });
-     fireEvent.blur(input); // If onBlur is used to trigger updates
-     // Verify that the value has changed
-     expect(onValueChangeMock).toHaveBeenCalledWith(15);
+    editMinOrMaxValue(15, "min");
+    expect(onValueChangeMock).toHaveBeenCalledWith(15);
   });
 
-  // it('does not update to a new valid min value', () => {
-  //   numericAxisModel.setMin(15); //since max is 10 it should not update
-  //   expect(numericAxisModel.min).toBe(-10);
-  // });
+  it('can edit the min and update the min given a valid input', async () => {
+    editMinOrMaxValue(-11, "min");
+    await waitFor(() => {
+      expect(numericAxisModel.min).toBe(-11);
+    });
+  });
+
+
+  it('does not update to a new min value given an invalid input', () => {
+    //Since original min is -10, if we enter a number thats greater than the max, we validate the input
+    expect(onValueChangeMock).toHaveBeenCalledWith(15);
+    expect(numericAxisModel.min).toBe(-10);
+  });
+
 
 
 });

@@ -15,8 +15,6 @@ interface IEditableValueProps {
 
 export const EditableGraphValue: React.FC<IEditableValueProps> = observer(function EditableGraphValue(props) {
   const { value, minOrMax, axis, onValueChange, readOnly } = props;
-
-  console.log("📁 editable-graph-value.tsx ------------------------");
   const [isEditing, setIsEditing] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const layout = useAxisLayoutContext();
