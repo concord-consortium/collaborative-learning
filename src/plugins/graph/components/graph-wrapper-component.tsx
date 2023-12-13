@@ -16,7 +16,6 @@ import { useSettingFromStores } from "../../../hooks/use-stores";
 import { IGraphModel } from "../models/graph-model";
 import { decipherDotId } from "../utilities/graph-utils";
 import { GraphComponent } from "./graph-component";
-import { TileToolbar } from "../../../components/toolbar/tile-toolbar";
 
 import "./graph-toolbar-registration";
 
@@ -121,11 +120,11 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
   return (
     <GraphSettingsContext.Provider value={graphSettings}>
       <div className={classNames("graph-wrapper", { "read-only": readOnly })}>
-        <TileToolbar tileType="graph" readOnly={!!readOnly} tileElement={tileElt}/>
         <BasicEditableTileTitle readOnly={readOnly} />
         <GraphComponent
           layout={layout}
           tile={model}
+          tileElt={tileElt}
           onRequestRowHeight={onRequestRowHeight}
           readOnly={readOnly}
         />

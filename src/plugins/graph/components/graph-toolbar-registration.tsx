@@ -4,9 +4,11 @@ import { TileModelContext } from "../../../components/tiles/tile-api";
 import { useProviderTileLinking } from "../../../hooks/use-provider-tile-linking";
 import { IToolbarButtonComponentProps, registerTileToolbarButtons }
   from "../../../components/toolbar/toolbar-button-manager";
+  import { GraphControllerContext } from "../models/graph-controller";
 
 import LinkTableIcon from "../../../clue/assets/icons/geometry/link-table-icon.svg";
 import AddIcon from "../assets/add-data-graph-icon.svg";
+import FitAllIcon from "../assets/fit-all-icon.svg";
 
 function LinkTileButton(name: string, title: string, allowMultiple: boolean) {
 
@@ -42,6 +44,25 @@ function LinkTileButtonNoMultiple({name}: IToolbarButtonComponentProps) {
   return LinkTileButton(name, "Link data", false);
 }
 
+function FitAllButton({name}: IToolbarButtonComponentProps) {
+  const controller = useContext(GraphControllerContext);
+
+  function handleClick() {
+    controller && controller.autoscaleAllAxes();
+  }
+
+  return (
+    <TileToolbarButton
+      name={name}
+      title="Fit All"
+      onClick={handleClick}
+    >
+      <FitAllIcon/>
+    </TileToolbarButton>
+  );
+
+}
+
 registerTileToolbarButtons("graph",
 [
   {
@@ -51,5 +72,9 @@ registerTileToolbarButtons("graph",
   {
     name: 'link-tile-multiple',
     component: LinkTileButtonMultiple
+  },
+  {
+    name: 'fit-all',
+    component: FitAllButton
   }
 ]);
