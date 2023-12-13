@@ -72,6 +72,8 @@ export interface QueryParams {
   firestore?: string; // "emulator" or host:port url
   // direct firebase function calls to the emulator
   functions?: string; // "emulator" or host:port url
+  // do not use persistentUI in some cy tests that rely on demo
+  noPersistentUI?: boolean;
 
   //
   // CMS options (admin.html)
@@ -103,7 +105,9 @@ export const processUrlParams = (): QueryParams => {
     // allows use of ?demo without a value for demo mode
     demo: (params.demo !== undefined),
     // allows use of localCMSBackend without a value
-    localCMSBackend: (params.localCMSBackend !== undefined)
+    localCMSBackend: (params.localCMSBackend !== undefined),
+    // disables persistentUI store initialization
+    noPersistentUI: (params.noPersistentUI !== undefined)
   };
 };
 

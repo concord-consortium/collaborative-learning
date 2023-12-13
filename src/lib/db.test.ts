@@ -159,6 +159,7 @@ describe("db", () => {
     const newDocument = createDocumentModel({ uid: "1", type: ProblemDocument, key: "doc-1" });
     mockDatabase.mockImplementation(() => ({
       ref: () => ({
+        update: () => {},
         once: () => ({
           then: (callback: (snap: any) => any) => {
             // offeringUserRef.once("value")
@@ -189,6 +190,7 @@ describe("db", () => {
     const newDocument = createDocumentModel({ uid: "1", type: PlanningDocument, key: "doc-1" });
     mockDatabase.mockImplementation(() => ({
       ref: () => ({
+        update: () => {},
         once: () => ({
           then: (callback: (snap: any) => any) => {
             // offeringUserRef.once("value")

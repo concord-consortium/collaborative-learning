@@ -334,7 +334,8 @@ export class DB {
       return offeringUserRef.once("value")
         .then((snapshot) => {
           // ensure the offering user exists
-          if (!snapshot.val()) {
+          const candidateSnapshot = snapshot.val();
+          if (!candidateSnapshot?.version || !candidateSnapshot?.self){
             const offeringUser: DBOfferingUser = {
               version: "1.0",
               self: {
@@ -343,7 +344,7 @@ export class DB {
                 uid: user.id,
               }
             };
-            return offeringUserRef.set(offeringUser);
+            return offeringUserRef.update(offeringUser);
           }
          })
         .then(() => {

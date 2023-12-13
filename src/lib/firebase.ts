@@ -128,7 +128,9 @@ export class Firebase {
     const content = this.getUserDocumentPath(user, documentKey, userId);
     const metadata = this.getUserDocumentMetadataPath(user, documentKey, userId);
     const typedMetadataMap: Record<string, () => string> = {
-      [ProblemDocument]: () => this.getProblemDocumentPath(user, documentKey, userId),
+      [ProblemDocument]: () => {
+        return this.getProblemDocumentPath(user, documentKey, userId);
+      },
       [PlanningDocument]: () => this.getPlanningDocumentPath(user, documentKey, userId),
       [PersonalDocument]: () => this.getOtherDocumentPath(user, PersonalDocument, documentKey),
       [LearningLogDocument]: () => this.getOtherDocumentPath(user, LearningLogDocument, documentKey),
@@ -191,6 +193,10 @@ export class Firebase {
 
   public getOfferingUsersPath(user: UserModelType) {
     return `${this.getOfferingPath(user)}/users`;
+  }
+
+  public getPersistentUIPath(user: UserModelType){
+    return `${this.getOfferingUserPath(user)}/persistentUI`;
   }
 
   // the path to the user folder for a particular problem (assignment)
