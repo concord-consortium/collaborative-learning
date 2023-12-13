@@ -162,7 +162,6 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   );
 
   const handleAnnotationButtonClick = (tileId: string, objectId: string, objectType?: string) => {
-    console.log("----delete this- starting this for a draft PR");
     if (!sourceBoundingBox) {
       // We don't have a source object yet, so make this one the source object
       setSourceTileId(tileId);

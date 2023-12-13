@@ -15,7 +15,7 @@ function beforeTest(params) {
     cy.visit(params);
     cy.waitForLoad();
     dashboard.switchView("Workspace & Resources");
-    cy.wait(10000);
+    cy.wait(5000);
     clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle');
 }
 
