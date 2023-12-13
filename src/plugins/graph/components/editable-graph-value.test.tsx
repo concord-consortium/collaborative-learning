@@ -33,21 +33,14 @@ const TestWrapper: React.FC<TestWrapperProps> = ({children}) => {
   );
 };
 
-
-
-
 describe('EditableGraphValue component', () => {
   let numericAxisModel: INumericAxisModel;
   let onValueChangeMock: jest.Mock<void, [number]>;
 
-  it('renders the component',() => {
-    // Assuming AxisModel.create can be mocked to return an object with min, max, and setMin/setMax functions
+  beforeEach(()=>{
     numericAxisModel = NumericAxisModel.create({ place: "left", min: -10, max: 10 }) as INumericAxisModel;
     numericAxisModel.setDomain(-10, 10);
     onValueChangeMock = jest.fn();
-
-    // Mocking the context or other hooks might be necessary depending on how EditableGraphValue accesses the model
-    // For example, if it uses a context, you will need to mock the context provider
 
     render(
       <TestWrapper>
@@ -59,9 +52,10 @@ describe('EditableGraphValue component', () => {
           readOnly={false}
         />
       </TestWrapper>
-
     );
+
   });
+
 
   // it('updates to a new valid min value', () => {
   //   numericAxisModel.setMin(-20);
@@ -69,32 +63,14 @@ describe('EditableGraphValue component', () => {
   // });
 
   it('can edit the min', () => {
-     // Trigger editing mode if needed
-
-
-    render(
-      <TestWrapper>
-        <EditableGraphValue
-          value={numericAxisModel.min}
-          axis={numericAxisModel.place}
-          minOrMax={"min"}
-          onValueChange={onValueChangeMock}
-          readOnly={false}
-        />
-      </TestWrapper>
-
-    );
 
      const editableBox = screen.getByTestId('editable-border-box-left-min');
      fireEvent.click(editableBox);
-
      // Find the input element, assuming it becomes visible after clicking the box
      const input = screen.getByRole('textbox'); // Adjust this if the input has a specific role or test id
-
      // Simulate user changing the input value
      fireEvent.change(input, { target: { value: '15' } });
      fireEvent.blur(input); // If onBlur is used to trigger updates
-
      // Verify that the value has changed
      expect(onValueChangeMock).toHaveBeenCalledWith(15);
   });
