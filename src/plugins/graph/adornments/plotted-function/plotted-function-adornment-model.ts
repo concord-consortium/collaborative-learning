@@ -10,10 +10,7 @@ const kDefaultFunctionKey = "{}";
 
 export const PlottedFunctionInstance = types.model("PlottedFunctionInstance", {})
   .volatile(self => ({
-    // This is being hard coded to x**2 for now.
-    // It should be reverted to NaN once we've set up correct functions.
-    // formulaFunction: (x: number) => NaN,
-    formulaFunction: (x: number) => x**2,
+    formulaFunction: (x: number) => NaN,
   }))
   .actions(self => ({
     setValue(formulaFunction: FormulaFn) {
