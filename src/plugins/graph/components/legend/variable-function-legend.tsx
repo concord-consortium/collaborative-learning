@@ -8,18 +8,17 @@ import XAxisIcon from "../../assets/x-axis-icon.svg";
 import YAxisIcon from "../../assets/y-axis-icon.svg";
 
 interface IVariableFunctionLegendProps {
-  plottedFunctionAdornment: IPlottedFunctionAdornmentModel;
+  plottedFunctionAdornment?: IPlottedFunctionAdornmentModel;
 }
 
 /**
  * XY Plot legend component that will control variables-based adornment.
- * Just a stub for now.
- *
- * TODO: The presence of the Adornment should actually be used to control showing the legend.
  */
 export const VariableFunctionLegend = observer(function(
   { plottedFunctionAdornment }: IVariableFunctionLegendProps
 ) {
+  if (!plottedFunctionAdornment) return null;
+
   const sharedVars = plottedFunctionAdornment.sharedVariables;
 
   if (sharedVars) {
