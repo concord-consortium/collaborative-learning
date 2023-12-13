@@ -64,7 +64,6 @@ export const Graph = observer(
     svgRef = useRef<SVGSVGElement>(null),
     plotAreaSVGRef = useRef<SVGSVGElement>(null),
     backgroundSvgRef = useRef<SVGGElement>(null);
-  const showEditableGraphValue = graphModel.isLinkedToDataSet;
 
   useEffect(function setupPlotArea() {
     if (xScale && xScale?.length > 0) {
@@ -288,7 +287,6 @@ export const Graph = observer(
             />
           }
           {
-            showEditableGraphValue &&
             axes.map((axis: AxisPlace, idx) => {
               const axisModel = graphModel?.getAxis(axis);
               const minVal = isNumericAxisModel(axisModel) ? axisModel.min : kDefaultNumericAxisBounds[0];
