@@ -8,7 +8,8 @@ let dashboard = new TeacherDashboard();
 let resourcesPanel = new ResourcesPanel();
 let clueCanvas = new ClueCanvas;
 
-const queryParams = "?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:6";
+const queryParams = "?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:4&noPersistentUI";
+const defaultProblemDocTitle = "SAS 2.1 Drawing Wumps";
 
 function beforeTest(params) {
     cy.clearQAData('all');
@@ -16,13 +17,13 @@ function beforeTest(params) {
     cy.waitForLoad();
     dashboard.switchView("Workspace & Resources");
     cy.wait(5000);
+    cy.openDocumentWithTitle('my-work', 'workspaces', defaultProblemDocTitle);
     clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle');
 }
 
 describe('verify document curation', function() {//adding a star to a student document
 
     let studentDoc = "Student 5: SAS 2.1 Drawing Wumps";
-
     it('verify starring and unstar',function(){
         beforeTest(queryParams);
         cy.log('verify starring a student published investigation');

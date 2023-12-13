@@ -1,4 +1,6 @@
-import { getSnapshot, types } from "mobx-state-tree";
+import { getSnapshot, applySnapshot, types,
+  onSnapshot
+} from "mobx-state-tree";
 import { AppConfigModelType } from "./app-config-model";
 import { kDividerHalf, kDividerMax, kDividerMin } from "./ui-types";
 import { WorkspaceModel } from "./workspace";
@@ -9,8 +11,11 @@ import { LearningLogDocument, LearningLogPublication, PersonalDocument,
   PersonalPublication, PlanningDocument, ProblemDocument,
   ProblemPublication, SupportPublication } from "../document/document-types";
 import { UserModelType } from "./user";
+import { DB } from "../../lib/db";
+import { safeJsonParse } from "../../utilities/js-utils";
+import { urlParams } from "../../utilities/url-params";
 
-
+export const kPersistentUiStateVersion = "1.0.0";
 export const kSparrowAnnotationMode = "sparrow";
 
 // This generic model should work for both the problem tab, and the MyWork/ClassWork tabs
@@ -36,6 +41,7 @@ export const PersistentUIModel = types
     tabs: types.map(UITabModel),
     problemWorkspace: WorkspaceModel,
     teacherPanelKey: types.maybe(types.string),
+    version: types.optional(types.literal(kPersistentUiStateVersion), kPersistentUiStateVersion),
   })
   .volatile(self => ({
     defaultLeftNavExpanded: false,
@@ -220,6 +226,22 @@ export const PersistentUIModel = types
       }
       self.setActiveNavTab(navTab);
       self.setOpenSubTab(navTab, subTab);
+    },
+    async initializePersistentUISync(user: UserModelType, db: DB){
+      if (urlParams.noPersistentUI) return;
+      const path = db.firebase.getPersistentUIPath(user);
+      const getRef = db.firebase.ref(path);
+      const theData: string | undefined = (await getRef.once("value"))?.val();
+      const asObj = safeJsonParse(theData);
+      if (asObj) {
+        applySnapshot(self, asObj);
+      }
+
+      onSnapshot(self, (snapshot)=>{
+        const snapshotStr = JSON.stringify(snapshot);
+        const updateRef = db.firebase.ref(path);
+        updateRef.set(snapshotStr);
+      });
     }
 }));
 
