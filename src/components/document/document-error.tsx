@@ -13,7 +13,12 @@ interface IProps {
 export const DocumentError: React.FC<IProps> = ({ action, document, errorMessage, content }) => {
   const {user, db: {firebase} } = useStores();
 
-  const path = document && firebase?.getFullDocumentPath(document, user);
+  let path;
+  try {
+    path = document && firebase?.getFullDocumentPath(document, user);
+  } catch(e) {
+    path = "unable to get the document path";
+  }
   return (
     <div className="document-error" data-testid="document-error">
       <h1>Error {action} the document</h1>
