@@ -25,6 +25,7 @@ export const MyWorkDocumentOrBrowser: React.FC<IProps> = props => {
     // However since we are passing most of our props to DocumentCollectionList
     // it is likely that every re-render will be because one of these props
     // changed and we need to re-render the SubTabsPanel anyhow.
+    console.log("about to call subtabPanel with tabspeclabel:", myWorkTabSpec.label);
     return (
       <SubTabsPanel tabSpec={myWorkTabSpec} renderSubTabPanel={(subTab) => (
         <div>

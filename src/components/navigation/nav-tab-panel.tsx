@@ -56,7 +56,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
             forceRenderTabPanel={true}
           >
             <div className="top-row">
-              {console.log("tabs:", tabs)}
+              {/* {console.log("tabs:", tabs)} */}
               <TabList className="top-tab-list">
                 { tabs?.map((tabSpec, index) => {
                     const tabClass = `top-tab tab-${tabSpec.tab}
@@ -109,7 +109,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
       case ENavTab.kStudentWork:
         return <StudentGroupView/>;
       case ENavTab.kSortWork:
-        return <SortWorkView />;
+        return <SortWorkView tabSpec={tabSpec}/>;
       case ENavTab.kClassWork:
       case ENavTab.kLearningLog:
       case ENavTab.kMyWork:

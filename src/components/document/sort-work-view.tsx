@@ -1,10 +1,16 @@
 import { observer } from "mobx-react";
 import { useStores } from "../../hooks/use-stores";
 import React from "react";
-
+import { NavTabModelType } from "../../models/view/nav-tabs";
 import "./sort-work-view.scss";
 
-export const SortWorkView:React.FC = observer(function SortWorkView(){
+interface ISortProps {
+  tabSpec: NavTabModelType;
+}
+
+export const SortWorkView:React.FC<ISortProps> = observer(function SortWorkView({tabSpec}){
+  console.log("-----------SortWorkView----------");
+  console.log("\ttabSpec:", tabSpec);
   const stores = useStores();
   const allDocuments = JSON.parse(JSON.stringify(stores.documents.all));
 
@@ -15,8 +21,6 @@ export const SortWorkView:React.FC = observer(function SortWorkView(){
     >
       <div className="sort-work-header"/>
       <div className="sort-work-documents">
-
-
 
       </div>
 

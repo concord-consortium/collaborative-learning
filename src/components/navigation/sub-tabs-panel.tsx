@@ -19,7 +19,7 @@ interface IProps {
 export const SubTabsPanel: React.FC<IProps> = observer(function SubTabsPanel(
     { tabSpec, renderSubTabPanel, tabsExtraClassNames, onSelect, selectedIndex }) {
 
-  console.log("\t <SubTabsPanel>", tabSpec);
+  console.log("--------------Tab:", tabSpec.label, "-------------------");
   const appConfigStore = useAppConfig();
   const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
   const subTabs = tabSpec.subTabs;
@@ -38,7 +38,7 @@ export const SubTabsPanel: React.FC<IProps> = observer(function SubTabsPanel(
         <div className={classNames("tab-header-row", {"no-sub-tabs": !hasSubTabs})}>
           <TabList className={classNames("tab-list", navTabClass)}>
             {subTabs.map((subTab) => {
-              //console.log("\t🥩 subTab:", subTab);
+              // console.log("\t🥩 subTab:", subTab);
               const sectionTitle = subTab.label.toLowerCase().replace(' ', '-');
               const type = subTab.sections[0].type;
               return (
@@ -51,10 +51,19 @@ export const SubTabsPanel: React.FC<IProps> = observer(function SubTabsPanel(
           </TabList>
         </div>
         <div className={classNames("documents-panel", {"no-sub-tabs": !hasSubTabs})}>
+
           {subTabs.map((subTab, index) => {
             const sectionTitle = subTab.label.toLowerCase().replace(' ', '-');
-            // console.log("📁 sub-tabs-panel.tsx map2 -----------------------");
-            // console.log("\t🥩 subTab:", subTab);
+            // console.log("\t-----subTab:", subTab.label, "------");
+            // console.log("\t-----subTab object:", subTab);
+
+            {
+              subTab.sections.map((section)=>{
+                // console.log(`\t\t---- section ${section.title}-------`);
+                // console.log("\t\tsection type:", section.type);
+                // console.log("\t\tsection:", section);
+              });
+            }
 
             return (
               <TabPanel key={`subtab-${subTab.label}`} className={["react-tabs__tab-panel", "sub-tab-panel"]}

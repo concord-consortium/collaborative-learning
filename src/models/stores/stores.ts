@@ -126,9 +126,9 @@ class Stores implements IStores{
       teacherGuide,
       user: { isTeacher }
     } = this;
-    console.log("appConfig:", this.appConfig);
-    console.log("\t🔪 teacherGuide:", teacherGuide);
-    console.log("\t🔪 user:", this.user);
+    // console.log("appConfig:", this.appConfig);
+    // console.log("\t🔪 teacherGuide:", teacherGuide);
+    // console.log("\t🔪 user:", this.user);
 
 
     return isTeacher
