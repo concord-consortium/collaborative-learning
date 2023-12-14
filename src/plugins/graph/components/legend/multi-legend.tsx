@@ -4,7 +4,9 @@ import { AttributeType } from "../../../../models/data/attribute";
 import { GraphPlace } from "../../imports/components/axis-graph-shared";
 import { useGraphLayoutContext } from "../../models/graph-layout";
 import { IDataSet } from "../../../../models/data/data-set";
-import { isPlottedFunctionAdornment } from "../../adornments/plotted-function/plotted-function-adornment-model";
+import {
+  isPlottedVariablesAdornment
+} from "../../adornments/plotted-function/plotted-variables/plotted-variables-adornment-model";
 import { DataConfigurationContext } from "../../hooks/use-data-configuration-context";
 import { useInstanceIdContext } from "../../imports/hooks/use-instance-id-context";
 import { axisPlaceToAttrRole, kGraphDefaultHeight } from "../../graph-types";
@@ -62,7 +64,7 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
   const totalHeight = kMultiLegendMenuHeight + kMultiLegendVerticalPadding
     + graphModel.layers.reduce((prev, layer)=>{ return prev + heightOfLayerLegend(layer);}, 0)
     + graphModel.adornments.reduce((prev, adornment) => {
-      if (isPlottedFunctionAdornment(adornment)) {
+      if (isPlottedVariablesAdornment(adornment)) {
         if (adornment.sharedVariables) {
           return prev + kTemporarySpaceForVariablesLegend;
         }
@@ -116,11 +118,11 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
       { layerLegends }
       {
         graphModel.adornments.map(adornment => {
-          if (isPlottedFunctionAdornment(adornment)) {
+          if (isPlottedVariablesAdornment(adornment)) {
             return (
               <VariableFunctionLegend
                 key={adornment.id}
-                plottedFunctionAdornment={adornment}
+                plottedVariablesAdornment={adornment}
               />
             );
           }

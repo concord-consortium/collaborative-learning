@@ -1,25 +1,27 @@
 import React from "react";
 import { observer } from "mobx-react";
 
-import { IPlottedFunctionAdornmentModel } from "../../adornments/plotted-function/plotted-function-adornment-model";
+import {
+  IPlottedVariablesAdornmentModel
+} from "../../adornments/plotted-function/plotted-variables/plotted-variables-adornment-model";
 import { VariableSelection } from "./variable-selection";
 
 import XAxisIcon from "../../assets/x-axis-icon.svg";
 import YAxisIcon from "../../assets/y-axis-icon.svg";
 
 interface IVariableFunctionLegendProps {
-  plottedFunctionAdornment?: IPlottedFunctionAdornmentModel;
+  plottedVariablesAdornment?: IPlottedVariablesAdornmentModel;
 }
 
 /**
  * XY Plot legend component that will control variables-based adornment.
  */
 export const VariableFunctionLegend = observer(function(
-  { plottedFunctionAdornment }: IVariableFunctionLegendProps
+  { plottedVariablesAdornment }: IVariableFunctionLegendProps
 ) {
-  if (!plottedFunctionAdornment) return null;
+  if (!plottedVariablesAdornment) return null;
 
-  const sharedVars = plottedFunctionAdornment.sharedVariables;
+  const sharedVars = plottedVariablesAdornment.sharedVariables;
 
   if (sharedVars) {
     return (
@@ -33,15 +35,15 @@ export const VariableFunctionLegend = observer(function(
           <VariableSelection
             alternateButtonLabel="Select a variable for X"
             icon={<XAxisIcon />}
-            onSelect={variableId => plottedFunctionAdornment?.setXVariableId(variableId)}
-            selectedVariable={plottedFunctionAdornment?.xVariable}
+            onSelect={variableId => plottedVariablesAdornment?.setXVariableId(variableId)}
+            selectedVariable={plottedVariablesAdornment?.xVariable}
             variables={sharedVars.variables.filter(variable => variable.inputs.length <= 0)}
           />
           <VariableSelection
             alternateButtonLabel="Select a variable for Y"
             icon={<YAxisIcon />}
-            onSelect={(variableId) => plottedFunctionAdornment?.setYVariableId(variableId)}
-            selectedVariable={plottedFunctionAdornment?.yVariable}
+            onSelect={(variableId) => plottedVariablesAdornment?.setYVariableId(variableId)}
+            selectedVariable={plottedVariablesAdornment?.yVariable}
             variables={sharedVars.variables}
           />
         </div>

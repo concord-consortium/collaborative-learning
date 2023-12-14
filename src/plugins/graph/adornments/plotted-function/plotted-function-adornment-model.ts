@@ -1,7 +1,4 @@
 import { Instance, types } from "mobx-state-tree";
-import { getTileModel } from "../../../../models/document/shared-model-document-manager";
-import { getSharedModelManager } from "../../../../models/tiles/tile-environment";
-import { SharedVariables, SharedVariablesType } from "../../../shared-variables/shared-variables";
 import { Point } from "../../graph-types";
 import { ScaleNumericBaseType } from "../../imports/components/axis/axis-types";
 import { AdornmentModel, IAdornmentModel } from "../adornment-models";
@@ -19,7 +16,7 @@ export const PlottedFunctionInstance = types.model("PlottedFunctionInstance", {}
     }
   }));
 
-interface IComputePointsOptions {
+export interface IComputePointsOptions {
   formulaFunction: (x: number) => number,
   min: number,
   max: number,
@@ -35,54 +32,21 @@ export const PlottedFunctionAdornmentModel = AdornmentModel
   .props({
     type: types.optional(types.literal(kPlottedFunctionType), kPlottedFunctionType),
     plottedFunctions: types.map(PlottedFunctionInstance),
-    error: "",
-    xVariableId: types.maybe(types.string),
-    yVariableId: types.maybe(types.string)
+    error: ""
   })
-  .views(self => ({
-    get sharedVariables() {
-      const sharedModelManager = getSharedModelManager(self);
-      if (sharedModelManager?.isReady) {
-        const tile = getTileModel(self);
-        if (tile) {
-          const sharedVariables = sharedModelManager.findFirstSharedModelByType(SharedVariables, tile.id);
-          if (sharedVariables) return sharedVariables as SharedVariablesType;
-        }
-      }
-    }
-  }))
-  .views(self => ({
-    get xVariable() {
-      return self.sharedVariables?.variables.find(variable => variable.id === self.xVariableId);
-    },
-    get yVariable() {
-      return self.sharedVariables?.variables.find(variable => variable.id === self.yVariableId);
-    }
-  }))
   .views(self => ({
     computePoints(options: IComputePointsOptions) {
       const { min, max, xCellCount, yCellCount, gap, xScale, yScale, formulaFunction } = options;
       const tPoints: Point[] = [];
       if (xScale.invert) {
-        let computeY = formulaFunction;
-        let dispose = () => {};
-
-        // Use variable expression if we're connected to a shared variables model
-        if (self.sharedVariables) {
-          const compute = self.sharedVariables.setupCompute(self.xVariableId, self.yVariableId);
-          computeY = compute.computeY;
-          dispose = compute.dispose;
-        }
-
         for (let pixelX = min; pixelX <= max; pixelX += gap) {
           const tX = xScale.invert(pixelX * xCellCount);
-          const tY = computeY(tX);
+          const tY = formulaFunction(tX);
           if (Number.isFinite(tY)) {
             const pixelY = yScale(tY) / yCellCount;
             tPoints.push({ x: pixelX, y: pixelY });
           }
         }
-        dispose();
       }
       return tPoints;
     }
@@ -104,12 +68,6 @@ export const PlottedFunctionAdornmentModel = AdornmentModel
     },
     removePlottedFunction(key: string) {
       self.plottedFunctions.delete(key);
-    },
-    setXVariableId(xVariableId?: string) {
-      self.xVariableId = xVariableId;
-    },
-    setYVariableId(yVariableId?: string) {
-      self.yVariableId = yVariableId;
     }
   }));
 

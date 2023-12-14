@@ -1,21 +1,21 @@
 import React, { useCallback, useEffect, useRef } from "react";
 import { select } from "d3";
 import { observer } from "mobx-react-lite";
-import { mstAutorun } from "../../../../utilities/mst-autorun";
-import { INumericAxisModel } from "../../imports/components/axis/models/axis-model";
-import { useAxisLayoutContext } from "../../imports/components/axis/models/axis-layout-context";
-import { ScaleNumericBaseType } from "../../imports/components/axis/axis-types";
-import { IPlottedFunctionAdornmentModel } from "./plotted-function-adornment-model";
-import { useGraphModelContext } from "../../models/graph-model";
-import { useDataConfigurationContext } from "../../hooks/use-data-configuration-context";
-import { curveBasis } from "../../utilities/graph-utils";
-import { FormulaFn } from "./plotted-function-adornment-types";
+import { mstAutorun } from "../../../../../utilities/mst-autorun";
+import { INumericAxisModel } from "../../../imports/components/axis/models/axis-model";
+import { useAxisLayoutContext } from "../../../imports/components/axis/models/axis-layout-context";
+import { ScaleNumericBaseType } from "../../../imports/components/axis/axis-types";
+import { IPlottedVariablesAdornmentModel } from "./plotted-variables-adornment-model";
+import { useGraphModelContext } from "../../../models/graph-model";
+import { useDataConfigurationContext } from "../../../hooks/use-data-configuration-context";
+import { curveBasis } from "../../../utilities/graph-utils";
+import { FormulaFn } from "../plotted-function-adornment-types";
 
-import "./plotted-function-adornment-component.scss";
+import "../plotted-function-adornment-component.scss";
 
 interface IProps {
   containerId?: string
-  model: IPlottedFunctionAdornmentModel
+  model: IPlottedVariablesAdornmentModel
   plotHeight: number
   plotWidth: number
   cellKey: Record<string, string>
@@ -23,7 +23,7 @@ interface IProps {
   yAxis?: INumericAxisModel
 }
 
-export const PlottedFunctionAdornmentComponent = observer(function PlottedFunctionAdornment(props: IProps) {
+export const PlottedVariablesAdornmentComponent = observer(function PlottedVariablesAdornment(props: IProps) {
   const {model, cellKey = {}, plotWidth, plotHeight, xAxis, yAxis} = props;
   const graphModel = useGraphModelContext();
   const dataConfig = useDataConfigurationContext();
@@ -41,7 +41,7 @@ export const PlottedFunctionAdornmentComponent = observer(function PlottedFuncti
   const xCellCount = xCats.length * xSubAxesCount;
   const yCellCount = yCats.length * ySubAxesCount;
   const classFromKey = model.classNameFromKey(cellKey);
-  const instanceKey = model.instanceKey(cellKey);
+  // const instanceKey = model.instanceKey(cellKey);
   const path = useRef("");
   const plottedFunctionRef = useRef<SVGGElement>(null);
   const sharedVariables = graphModel.sharedVariables;
@@ -70,16 +70,16 @@ export const PlottedFunctionAdornmentComponent = observer(function PlottedFuncti
   const refreshValues = useCallback(() => {
     if (!model.isVisible) return;
 
-    const measure = model?.plottedFunctions.get(instanceKey);
+    // const measure = model?.plottedFunctions.get(instanceKey);
     const selection = select(plottedFunctionRef.current);
 
     // Remove the previous value's elements
     selection.html(null);
 
-    if (measure) {
-      addPath(measure.formulaFunction);
-    }
-  }, [addPath, instanceKey, model]);
+    // if (measure) {
+      addPath(x => NaN);
+    // }
+  }, [addPath, model]);
 
   // Refresh values on expression changes
   useEffect(function refreshExpressionChange() {
@@ -93,7 +93,7 @@ export const PlottedFunctionAdornmentComponent = observer(function PlottedFuncti
       // const modelValue = isPlottedFunctionAdornment(model) ? model.expression : undefined;
 
       model.updateCategories(graphModel.layers[0].getUpdateCategoriesOptions(false));
-    }, { name: "PlottedFunctionAdornmentComponent.refreshExpressionChange" }, model);
+    }, { name: "PlottedVariablesAdornmentComponent.refreshExpressionChange" }, model);
   }, [graphModel, model, xScale, xSubAxesCount, yScale]);
 
   // Refresh values on axis or expression change
@@ -106,6 +106,8 @@ export const PlottedFunctionAdornmentComponent = observer(function PlottedFuncti
         const { domain: xDomain } = xAxis; // eslint-disable-line unused-imports/no-unused-vars
         const { domain: yDomain } = yAxis; // eslint-disable-line unused-imports/no-unused-vars
       }
+      // Trigger an autorun if any inputs or the expression of y change
+      model.yVariable?.computedValueIncludingMessageAndError; // eslint-disable-line no-unused-expressions
       refreshValues();
     }, { name: "PlottedFunctionAdornmentComponent.refreshAxisChange" }, model);
   }, [dataConfig, model, plotWidth, plotHeight, refreshValues, sharedVariables, xAxis, yAxis]);

@@ -31,9 +31,13 @@ import { getDotId } from "../utilities/graph-utils";
 import { GraphLayerModel } from "./graph-layer-model";
 import { isSharedDataSet, SharedDataSet } from "../../../models/shared/shared-data-set";
 import { DataConfigurationModel } from "./data-configuration-model";
-import { IPlottedFunctionAdornmentModel, isPlottedFunctionAdornment, PlottedFunctionAdornmentModel } from "../adornments/plotted-function/plotted-function-adornment-model";
+import {
+  IPlottedVariablesAdornmentModel, isPlottedVariablesAdornment, PlottedVariablesAdornmentModel
+} from "../adornments/plotted-function/plotted-variables/plotted-variables-adornment-model";
 import { SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
-import { kPlottedFunctionType } from "../adornments/plotted-function/plotted-function-adornment-types";
+import {
+  kPlottedVariablesType
+} from "../adornments/plotted-function/plotted-variables/plotted-variables-adornment-types";
 
 export interface GraphProperties {
   axes: Record<string, IAxisModelUnion>
@@ -357,18 +361,17 @@ export const GraphModel = TileContentModel
       const smm = getSharedModelManager(self);
       if (!smm || !smm.isReady) return;
 
-      // Display a plotted function adornment when this is linked to a shared variables model
+      // Display a plotted variables adornment when this is linked to a shared variables model
       const sharedVariableModels = smm.getTileSharedModelsByType(self, SharedVariables);
       if (sharedVariableModels && sharedVariableModels.length > 0) {
-        let plottedFunctionAdornment: IPlottedFunctionAdornmentModel | undefined =
-          self.adornments.find(adornment => isPlottedFunctionAdornment(adornment)) as IPlottedFunctionAdornmentModel;
-        if (!plottedFunctionAdornment) {
-          plottedFunctionAdornment = PlottedFunctionAdornmentModel.create();
-          plottedFunctionAdornment.addPlottedFunction(x => NaN);
+        let plottedVariablesAdornment: IPlottedVariablesAdornmentModel | undefined =
+          self.adornments.find(adornment => isPlottedVariablesAdornment(adornment)) as IPlottedVariablesAdornmentModel;
+        if (!plottedVariablesAdornment) {
+          plottedVariablesAdornment = PlottedVariablesAdornmentModel.create();
         }
-        self.showAdornment(plottedFunctionAdornment);
+        self.showAdornment(plottedVariablesAdornment);
       } else {
-        self.hideAdornment(kPlottedFunctionType);
+        self.hideAdornment(kPlottedVariablesType);
       }
 
       const sharedDataSets = smm.getTileSharedModelsByType(self, SharedDataSet);
