@@ -12,11 +12,11 @@ import { SectionDocumentOrBrowser } from "./section-document-or-browser";
 // import { NewCommentsBadge } from "./new-comments-badge";
 import { ChatPanel } from "../chat/chat-panel";
 import ChatIcon from "../../assets/chat-icon.svg";
+import { SortWorkView } from "../document/sort-work-view";
 
 import "react-tabs/style/react-tabs.css";
 import "./nav-tab-panel.sass";
 import "../themes.scss";
-import { SortWorkView } from "../document/sort-work-view";
 
 interface IProps extends IBaseProps {
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
@@ -36,9 +36,9 @@ export class NavTabPanel extends BaseComponent<IProps> {
     const { persistentUI: { activeNavTab, focusDocument, showChatPanel }, ui: { selectedTileIds },
             user } = this.stores;
     const tabs = this.stores.tabsToDisplay;
-    console.log("<NavTabPanel>");
+    // console.log("<NavTabPanel>");
     tabs.forEach((tab)=>{
-      console.log("\t tab:", tab.label);
+      // console.log("\t tab:", tab.label);
     });
     const selectedTabIndex = tabs?.findIndex(t => t.tab === activeNavTab);
     const isChatEnabled = user.isTeacher; //only enable chat for teachers
@@ -121,7 +121,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
   };
 
   private renderDocuments = (tabSpec: NavTabModelType) => {
-    console.log("\t🏭 renderDocuments");
+    // console.log("\t🏭 renderDocuments");
     const { persistentUI: { showChatPanel } } = this.stores;
     return (
       <SectionDocumentOrBrowser
