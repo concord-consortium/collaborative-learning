@@ -368,6 +368,7 @@ export const GraphModel = TileContentModel
           self.adornments.find(adornment => isPlottedVariablesAdornment(adornment)) as IPlottedVariablesAdornmentModel;
         if (!plottedVariablesAdornment) {
           plottedVariablesAdornment = PlottedVariablesAdornmentModel.create();
+          plottedVariablesAdornment.addPlottedVariables();
         }
         self.showAdornment(plottedVariablesAdornment);
       } else {

@@ -9,7 +9,6 @@ import { IPlottedFunctionAdornmentModel } from "./plotted-function-adornment-mod
 import { useGraphModelContext } from "../../models/graph-model";
 import { useDataConfigurationContext } from "../../hooks/use-data-configuration-context";
 import { curveBasis } from "../../utilities/graph-utils";
-import { FormulaFn } from "./plotted-function-adornment-types";
 
 import "./plotted-function-adornment-component.scss";
 
@@ -46,14 +45,14 @@ export const PlottedFunctionAdornmentComponent = observer(function PlottedFuncti
   const plottedFunctionRef = useRef<SVGGElement>(null);
   const sharedVariables = graphModel.sharedVariables;
 
-  const addPath = useCallback((formulaFunction: FormulaFn) => {
+  const addPath = useCallback(() => {
     const xMin = xScale.domain()[0];
     const xMax = xScale.domain()[1];
     const tPixelMin = xScale(xMin);
     const tPixelMax = xScale(xMax);
     const kPixelGap = 1;
     const tPoints = model.computePoints({
-      formulaFunction, min: tPixelMin, max: tPixelMax, xCellCount, yCellCount, gap: kPixelGap, xScale, yScale
+      instanceKey, min: tPixelMin, max: tPixelMax, xCellCount, yCellCount, gap: kPixelGap, xScale, yScale
     });
     if (tPoints.length === 0) return;
     path.current = `M${tPoints[0].x},${tPoints[0].y},${curveBasis(tPoints)}`;
@@ -64,22 +63,19 @@ export const PlottedFunctionAdornmentComponent = observer(function PlottedFuncti
       .attr("data-testid", `plotted-function-path${classFromKey ? `-${classFromKey}` : ""}`)
       .attr("d", path.current);
 
-  }, [classFromKey, model, xCellCount, xScale, yCellCount, yScale]);
+  }, [classFromKey, instanceKey, model, xCellCount, xScale, yCellCount, yScale]);
 
   // Add the lines and their associated covers and labels
   const refreshValues = useCallback(() => {
     if (!model.isVisible) return;
 
-    const measure = model?.plottedFunctions.get(instanceKey);
     const selection = select(plottedFunctionRef.current);
 
     // Remove the previous value's elements
     selection.html(null);
 
-    if (measure) {
-      addPath(measure.formulaFunction);
-    }
-  }, [addPath, instanceKey, model]);
+    addPath();
+  }, [addPath, model]);
 
   // Refresh values on expression changes
   useEffect(function refreshExpressionChange() {

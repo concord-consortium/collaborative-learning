@@ -1,4 +1,4 @@
-import { destroy, getSnapshot, Instance, types } from "mobx-state-tree";
+import { destroy, Instance, types } from "mobx-state-tree";
 import { Variable, VariableSnapshot, VariableType } from "@concord-consortium/diagram-view";
 import { SharedModel } from "../../models/shared/shared-model";
 import { withoutUndo } from "../../models/history/without-undo";
@@ -11,11 +11,6 @@ export const SharedVariables = SharedModel.named("SharedVariables")
   type: types.optional(types.literal(kSharedVariablesID), kSharedVariablesID),
   variables: types.array(Variable)
 })
-.volatile(self => ({
-  variablesCopy: undefined as VariableType[] | undefined,
-  xVariable: undefined as VariableType | undefined,
-  yVariable: undefined as VariableType | undefined
-}))
 .actions(self => ({
   addVariable(variable: VariableType) {
     self.variables.push(variable);
@@ -25,20 +20,6 @@ export const SharedVariables = SharedModel.named("SharedVariables")
     if (variable) {
       destroy(variable);
     }
-  },
-  computeY(x: number) {
-    if (self.variablesCopy && self.xVariable && self.yVariable) {
-      self.xVariable.setValue(x);
-      const dependentValue = self.yVariable.computedValue;
-      return dependentValue ?? NaN;
-    }
-    return NaN;
-  },
-  disposeCompute() {
-    self.xVariable = undefined;
-    self.yVariable = undefined;
-    if (self.variablesCopy) destroy(self.variablesCopy);
-    self.variablesCopy = undefined;
   }
 }))
 .actions(self => ({
@@ -68,12 +49,6 @@ export const SharedVariables = SharedModel.named("SharedVariables")
     const variable = Variable.create(snapshot);
     self.addVariable(variable);
     return variable;
-  },
-  setupCompute(xId?: string, yId?: string) {
-    self.variablesCopy = types.array(Variable).create(getSnapshot(self.variables));
-    self.xVariable = self.variablesCopy?.find(variable => variable.id === xId);
-    self.yVariable = self.variablesCopy?.find(variable => variable.id === yId);
-    return { computeY: self.computeY, dispose: self.disposeCompute };
   }
 }))
 .views(self => ({

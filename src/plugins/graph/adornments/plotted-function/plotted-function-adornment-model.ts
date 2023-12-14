@@ -17,7 +17,7 @@ export const PlottedFunctionInstance = types.model("PlottedFunctionInstance", {}
   }));
 
 export interface IComputePointsOptions {
-  formulaFunction: (x: number) => number,
+  instanceKey: string,
   min: number,
   max: number,
   xCellCount: number,
@@ -34,23 +34,6 @@ export const PlottedFunctionAdornmentModel = AdornmentModel
     plottedFunctions: types.map(PlottedFunctionInstance),
     error: ""
   })
-  .views(self => ({
-    computePoints(options: IComputePointsOptions) {
-      const { min, max, xCellCount, yCellCount, gap, xScale, yScale, formulaFunction } = options;
-      const tPoints: Point[] = [];
-      if (xScale.invert) {
-        for (let pixelX = min; pixelX <= max; pixelX += gap) {
-          const tX = xScale.invert(pixelX * xCellCount);
-          const tY = formulaFunction(tX);
-          if (Number.isFinite(tY)) {
-            const pixelY = yScale(tY) / yCellCount;
-            tPoints.push({ x: pixelX, y: pixelY });
-          }
-        }
-      }
-      return tPoints;
-    }
-  }))
   .actions(self => ({
     setError(error: string) {
       self.error = error;
@@ -68,6 +51,30 @@ export const PlottedFunctionAdornmentModel = AdornmentModel
     },
     removePlottedFunction(key: string) {
       self.plottedFunctions.delete(key);
+    },
+    setupCompute(instanceKey: string) {
+      const computeY = self.plottedFunctions.get(instanceKey)?.formulaFunction;
+      const dispose = () => {};
+      return { computeY, dispose };
+    }
+  }))
+  .views(self => ({
+    computePoints(options: IComputePointsOptions) {
+      const { instanceKey, min, max, xCellCount, yCellCount, gap, xScale, yScale } = options;
+      const tPoints: Point[] = [];
+      const { computeY, dispose } = self.setupCompute(instanceKey);
+      if (xScale.invert && computeY) {
+        for (let pixelX = min; pixelX <= max; pixelX += gap) {
+          const tX = xScale.invert(pixelX * xCellCount);
+          const tY = computeY(tX);
+          if (Number.isFinite(tY)) {
+            const pixelY = yScale(tY) / yCellCount;
+            tPoints.push({ x: pixelX, y: pixelY });
+          }
+        }
+      }
+      dispose?.();
+      return tPoints;
     }
   }));
 

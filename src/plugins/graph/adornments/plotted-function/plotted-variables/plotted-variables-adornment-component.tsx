@@ -9,7 +9,6 @@ import { IPlottedVariablesAdornmentModel } from "./plotted-variables-adornment-m
 import { useGraphModelContext } from "../../../models/graph-model";
 import { useDataConfigurationContext } from "../../../hooks/use-data-configuration-context";
 import { curveBasis } from "../../../utilities/graph-utils";
-import { FormulaFn } from "../plotted-function-adornment-types";
 
 import "../plotted-function-adornment-component.scss";
 
@@ -46,14 +45,15 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
   const plottedFunctionRef = useRef<SVGGElement>(null);
   const sharedVariables = graphModel.sharedVariables;
 
-  const addPath = useCallback((formulaFunction: FormulaFn) => {
+  const addPath = useCallback(() => {
     const xMin = xScale.domain()[0];
     const xMax = xScale.domain()[1];
     const tPixelMin = xScale(xMin);
     const tPixelMax = xScale(xMax);
     const kPixelGap = 1;
+    const instanceKey = Array.from(model.plottedVariables.keys())[0];
     const tPoints = model.computePoints({
-      formulaFunction, min: tPixelMin, max: tPixelMax, xCellCount, yCellCount, gap: kPixelGap, xScale, yScale
+      instanceKey, min: tPixelMin, max: tPixelMax, xCellCount, yCellCount, gap: kPixelGap, xScale, yScale
     });
     if (tPoints.length === 0) return;
     path.current = `M${tPoints[0].x},${tPoints[0].y},${curveBasis(tPoints)}`;
@@ -76,9 +76,7 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
     // Remove the previous value's elements
     selection.html(null);
 
-    // if (measure) {
-      addPath(x => NaN);
-    // }
+    addPath();
   }, [addPath, model]);
 
   // Refresh values on expression changes
@@ -107,9 +105,11 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
         const { domain: yDomain } = yAxis; // eslint-disable-line unused-imports/no-unused-vars
       }
       // Trigger an autorun if any inputs or the expression of y change
-      model.yVariable?.computedValueIncludingMessageAndError; // eslint-disable-line no-unused-expressions
+      Array.from(model.plottedVariables.values()).forEach(plottedVariables => {
+        plottedVariables.yVariable?.computedValueIncludingMessageAndError; // eslint-disable-line no-unused-expressions
+      });
       refreshValues();
-    }, { name: "PlottedFunctionAdornmentComponent.refreshAxisChange" }, model);
+    }, { name: "PlottedVariablesAdornmentComponent.refreshAxisChange" }, model);
   }, [dataConfig, model, plotWidth, plotHeight, refreshValues, sharedVariables, xAxis, yAxis]);
 
   return (

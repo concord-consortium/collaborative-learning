@@ -19,10 +19,9 @@ interface IVariableFunctionLegendProps {
 export const VariableFunctionLegend = observer(function(
   { plottedVariablesAdornment }: IVariableFunctionLegendProps
 ) {
-  if (!plottedVariablesAdornment) return null;
+  if (!plottedVariablesAdornment || plottedVariablesAdornment.plottedVariables.size <= 0) return null;
 
   const sharedVars = plottedVariablesAdornment.sharedVariables;
-
   if (sharedVars) {
     return (
       <>
@@ -31,22 +30,31 @@ export const VariableFunctionLegend = observer(function(
             Variables from: <strong>{sharedVars.label}</strong>
           </div>
         </div>
-        <div className="variable-row">
-          <VariableSelection
-            alternateButtonLabel="Select a variable for X"
-            icon={<XAxisIcon />}
-            onSelect={variableId => plottedVariablesAdornment?.setXVariableId(variableId)}
-            selectedVariable={plottedVariablesAdornment?.xVariable}
-            variables={sharedVars.variables.filter(variable => variable.inputs.length <= 0)}
-          />
-          <VariableSelection
-            alternateButtonLabel="Select a variable for Y"
-            icon={<YAxisIcon />}
-            onSelect={(variableId) => plottedVariablesAdornment?.setYVariableId(variableId)}
-            selectedVariable={plottedVariablesAdornment?.yVariable}
-            variables={sharedVars.variables}
-          />
-        </div>
+        {
+          Array.from(plottedVariablesAdornment.plottedVariables.keys()).map(instanceKey => {
+            const plottedVariablesInstance = plottedVariablesAdornment.plottedVariables.get(instanceKey);
+            if (plottedVariablesInstance) {
+              return (
+                <div className="variable-row" key={instanceKey}>
+                  <VariableSelection
+                    alternateButtonLabel="Select a variable for X"
+                    icon={<XAxisIcon />}
+                    onSelect={variableId => plottedVariablesInstance.setXVariableId(variableId)}
+                    selectedVariable={plottedVariablesInstance.xVariable}
+                    variables={sharedVars.variables.filter(variable => variable.inputs.length <= 0)}
+                  />
+                  <VariableSelection
+                    alternateButtonLabel="Select a variable for Y"
+                    icon={<YAxisIcon />}
+                    onSelect={(variableId) => plottedVariablesInstance.setYVariableId(variableId)}
+                    selectedVariable={plottedVariablesInstance.yVariable}
+                    variables={sharedVars.variables}
+                  />
+                </div>
+              );
+            }
+          })
+        }
       </>
     );
   } else {
