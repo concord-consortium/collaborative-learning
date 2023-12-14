@@ -18,31 +18,30 @@ interface IContentProps {
 const Content: React.FC<IContentProps>
               = ({ labelFunction, linkedSharedModels, unlinkedSharedModels,
                    selectValue, tileTitle, setSelectValue })=> {
-  const displayTileTitle = tileTitle || "this tile";
   const selectElt = useRef<HTMLSelectElement>(null);
+
+  const separator = <option disabled>──────────────────────────────</option>;
 
   return (
       <>
         <div className="prompt">
-          To link {displayTileTitle} to a data provider, select a data provider from the link list.
-          To unlink {displayTileTitle} from a data provider, select a data provider from the unlink list.
+          Select a data or variables source to link or unlink:
         </div>
         <select ref={selectElt} value={selectValue} data-test="link-tile-select"
                                 onChange={e => {
                                   setSelectValue(e.target.value);
                                   setTimeout(() => selectElt.current?.focus());
                                 }}>
-          <option key="prompt" value={""}>Select a data provider</option>
+          <option key="prompt" value={""}>Select a data or variables source</option>
             {unlinkedSharedModels.length > 0 &&
-              <optgroup label="Link Tile">
+              <optgroup label="Link Source">
                 {unlinkedSharedModels
                   .map(m => <option key={m.id} value={m.id}>{labelFunction(m)}</option>)}
               </optgroup>
             }
-            {(linkedSharedModels.length > 0) && (unlinkedSharedModels.length > 0) &&
-              <option disabled>──────────────────────────────</option> }
+            {(linkedSharedModels.length > 0) && (unlinkedSharedModels.length > 0) && separator }
             {linkedSharedModels.length > 0 &&
-                <optgroup label="Unlink Tile">
+                <optgroup label="Unlink Source">
                   {linkedSharedModels
                     .map(m => <option key={m.id} value={m.id}>{labelFunction(m)}</option>)}
                 </optgroup>
@@ -91,7 +90,7 @@ export const useLinkProviderTileDialog = ({
   const [showModal, hideModal] = useCustomModal({
     className: "link-tile",
     Icon: LinkGraphIcon,
-    title: "Link or Unlink Data Provider",
+    title: "Add Data and Variables",
     Content,
     contentProps: { labelFunction, unlinkedSharedModels, linkedSharedModels,
       selectValue, tileTitle, setSelectValue },
