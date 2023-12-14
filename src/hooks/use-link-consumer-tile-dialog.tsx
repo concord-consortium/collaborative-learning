@@ -4,7 +4,11 @@ import { isLinkedToTile } from "../models/shared/shared-data-utils";
 import { ITileLinkMetadata } from "../models/tiles/tile-link-types";
 import { ITileModel } from "../models/tiles/tile-model";
 import { SharedModelType } from "../models/shared/shared-model";
+import { getTileComponentInfo } from "../models/tiles/tile-component-info";
+import { BadgedIcon } from "../components/toolbar/badged-icon";
+
 import LinkGraphIcon from "../clue/assets/icons/table/link-graph-icon.svg";
+import ViewBadgeIcon from "../assets/icons/view/view-badge.svg";
 
 import "./link-tile-dialog.scss";
 
@@ -114,6 +118,17 @@ export const useLinkConsumerTileDialog =
     ? 'Unlink'
     : tileType ? `${tileType} It!` : 'Link';
 
+  // Builds an appopriate icon for the dialog.
+  // Alternatively, we could consider requiring the caller to pass in an icon.
+  const Icon: React.FC<any> = () => {
+    const baseIcon = tileType && getTileComponentInfo(tileType)?.Icon;
+    if (baseIcon) {
+      return <BadgedIcon Icon={baseIcon} Badge={ViewBadgeIcon}/>;
+    } else {
+      return <LinkGraphIcon/>;
+    }
+  };
+
   const buttons: IModalButton[] = [
     { label: "Cancel" },
     {
@@ -124,7 +139,7 @@ export const useLinkConsumerTileDialog =
     }];
   const [showModal, hideModal] = useCustomModal({
     className: "link-tile",
-    Icon: LinkGraphIcon,
+    Icon,
     title: tileType ? `${tileType} It!` : "Link or Unlink Tile",
     Content,
     contentProps: { linkedTiles, selectValue, tileTitle, tileType, unlinkedTiles, setSelectValue },

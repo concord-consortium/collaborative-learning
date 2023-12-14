@@ -3,7 +3,7 @@ import { useCustomModal } from "./use-custom-modal";
 import { ITileModel } from "../models/tiles/tile-model";
 import { SharedModelType } from "../models/shared/shared-model";
 import { getSharedModelManager } from "../models/tiles/tile-environment";
-import LinkGraphIcon from "../clue/assets/icons/table/link-graph-icon.svg";
+import LinkGraphIcon from "../assets/icons/add-data-graph-icon.svg";
 
 import "./link-tile-dialog.scss";
 
