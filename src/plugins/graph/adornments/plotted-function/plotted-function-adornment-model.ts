@@ -1,4 +1,5 @@
 import { Instance, types } from "mobx-state-tree";
+import { getTileModel } from "../../../../models/document/shared-model-document-manager";
 import { getSharedModelManager } from "../../../../models/tiles/tile-environment";
 import { SharedVariables, SharedVariablesType } from "../../../shared-variables/shared-variables";
 import { Point } from "../../graph-types";
@@ -42,12 +43,10 @@ export const PlottedFunctionAdornmentModel = AdornmentModel
     get sharedVariables() {
       const sharedModelManager = getSharedModelManager(self);
       if (sharedModelManager?.isReady) {
-        // const sharedVariables = sharedModelManager.findFirstSharedModelByType(SharedVariables, self.id);
-        // console.log(`--- sharedVariables`, sharedVariables);
-        // if (sharedVariables) return sharedVariables as SharedVariablesType;
-        const sharedVariableModels = sharedModelManager.getTileSharedModelsByType(self, SharedVariables);
-        if (sharedVariableModels.length > 0) {
-          return sharedVariableModels[0] as SharedVariablesType;
+        const tile = getTileModel(self);
+        if (tile) {
+          const sharedVariables = sharedModelManager.findFirstSharedModelByType(SharedVariables, tile.id);
+          if (sharedVariables) return sharedVariables as SharedVariablesType;
         }
       }
     }
