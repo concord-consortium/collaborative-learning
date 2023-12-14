@@ -1,4 +1,4 @@
-import { autorun, reaction } from "mobx";
+import { reaction } from "mobx";
 import stringify from "json-stringify-pretty-compact";
 import { addDisposer, getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
 import {createContext, useContext} from "react";
@@ -31,7 +31,7 @@ import { getDotId } from "../utilities/graph-utils";
 import { GraphLayerModel } from "./graph-layer-model";
 import { isSharedDataSet, SharedDataSet } from "../../../models/shared/shared-data-set";
 import { DataConfigurationModel } from "./data-configuration-model";
-import { PlottedFunctionAdornmentModel } from "../adornments/plotted-function/plotted-function-adornment-model";
+import { IPlottedFunctionAdornmentModel, isPlottedFunctionAdornment, PlottedFunctionAdornmentModel } from "../adornments/plotted-function/plotted-function-adornment-model";
 import { SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
 import { kPlottedFunctionType } from "../adornments/plotted-function/plotted-function-adornment-types";
 
@@ -356,6 +356,21 @@ export const GraphModel = TileContentModel
     updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
       const smm = getSharedModelManager(self);
       if (!smm || !smm.isReady) return;
+
+      // Display a plotted function adornment when this is linked to a shared variables model
+      const sharedVariableModels = smm.getTileSharedModelsByType(self, SharedVariables);
+      if (sharedVariableModels && sharedVariableModels.length > 0) {
+        let plottedFunctionAdornment: IPlottedFunctionAdornmentModel | undefined =
+          self.adornments.find(adornment => isPlottedFunctionAdornment(adornment)) as IPlottedFunctionAdornmentModel;
+        if (!plottedFunctionAdornment) {
+          plottedFunctionAdornment = PlottedFunctionAdornmentModel.create();
+          plottedFunctionAdornment.addPlottedFunction(x => NaN);
+        }
+        self.showAdornment(plottedFunctionAdornment);
+      } else {
+        self.hideAdornment(kPlottedFunctionType);
+      }
+
       const sharedDataSets = smm.getTileSharedModelsByType(self, SharedDataSet);
       if (!sharedDataSets) {
         console.warn("Unable to query for shared datasets");
@@ -459,22 +474,6 @@ export const GraphModel = TileContentModel
           }
         ));
       }
-
-      // Display a plotted function when this is linked to a SharedVariableModel
-      addDisposer(self, autorun(() => {
-        const smm = getSharedModelManager(self);
-        let sharedVariableModels;
-        if (smm?.isReady) {
-          sharedVariableModels = smm.getTileSharedModelsByType(self, SharedVariables);
-        }
-        if (sharedVariableModels && sharedVariableModels.length > 0) {
-          const plottedFunctionAdornment = PlottedFunctionAdornmentModel.create();
-          plottedFunctionAdornment.addPlottedFunction(x => NaN);
-          self.showAdornment(plottedFunctionAdornment);
-        } else {
-          self.hideAdornment(kPlottedFunctionType);
-        }
-      }));
     },
     setDataConfigurationReferences() {
       // Updates pre-existing DataConfiguration objects that don't have the now-required references
