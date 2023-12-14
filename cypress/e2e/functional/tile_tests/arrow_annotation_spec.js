@@ -1,7 +1,7 @@
 import ClueCanvas from '../../../support/elements/common/cCanvas';
 import ArrowAnnotation from '../../../support/elements/tile/ArrowAnnotation';
 import DrawToolTile from '../../../support/elements/tile/DrawToolTile';
-import GraphToolTile from '../../../support/elements/tile/GraphToolTile';
+import GeometryToolTile from '../../../support/elements/tile/GeometryToolTile';
 import NumberlineToolTile from '../../../support/elements/tile/NumberlineToolTile';
 import TableToolTile from '../../../support/elements/tile/TableToolTile';
 import XYPlotToolTile from '../../../support/elements/tile/XYPlotToolTile';
@@ -10,7 +10,7 @@ const aa = new ArrowAnnotation;
 const clueCanvas = new ClueCanvas;
 const drawToolTile = new DrawToolTile;
 const tableToolTile = new TableToolTile;
-const graphToolTile = new GraphToolTile;
+const geometryToolTile = new GeometryToolTile;
 const numberlineToolTile = new NumberlineToolTile;
 const xyTile = new XYPlotToolTile;
 
@@ -207,11 +207,11 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationButtons().should("not.exist");
     aa.clickArrowToolbarButton();
     // For some reason adding the first point is ignored, so we add four but get three to make a triangle
-    graphToolTile.addPointToGraph(5, 5);
-    graphToolTile.addPointToGraph(10, 5);
-    graphToolTile.addPointToGraph(15, 10);
-    graphToolTile.addPointToGraph(20, 5);
-    graphToolTile.getGraphPoint().last().dblclick({ force: true });
+    geometryToolTile.addPointToGraph(5, 5);
+    geometryToolTile.addPointToGraph(10, 5);
+    geometryToolTile.addPointToGraph(15, 10);
+    geometryToolTile.addPointToGraph(20, 5);
+    geometryToolTile.getGraphPoint().last().dblclick({ force: true });
     aa.clickArrowToolbarButton();
     // 3 points + 3 segments + 1 polygon = 7
     aa.getAnnotationButtons().should("have.length", 7);
