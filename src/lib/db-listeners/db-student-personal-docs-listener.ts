@@ -5,7 +5,6 @@ import { BaseListener } from "./base-listener";
 
 export class DBStudentPersonalDocsListener extends BaseListener {
   private db: DB;
-  private offeringUsersRef: firebase.database.Reference | null  = null;
   private userPersonalDocsRefs: firebase.database.Reference[];
 
   constructor(db: DB, documentType: OtherDocumentType) {
@@ -16,17 +15,19 @@ export class DBStudentPersonalDocsListener extends BaseListener {
   public start() {
     const { user } = this.db.stores;
     return new Promise<void>((resolve, reject) => {
-      const offeringUsersRef = this.offeringUsersRef = this.db.firebase.ref(
+      const offeringUsersRef = this.db.firebase.ref(
         this.db.firebase.getOfferingUsersPath(user)
       );
 
       const classPath = this.db.firebase.getClassPath(user);
+      this.debugLogHandler("#start", "adding", "once", offeringUsersRef);
       offeringUsersRef.once("value").then((snapshot) => {
           const snapVal = snapshot.val();
           const userKeys = Object.keys(snapVal).filter(key => key !== user.id);
           const userPaths = userKeys.map(key => `${classPath}/users/${key}/personalDocs`);
           this.userPersonalDocsRefs = userPaths.map(path => this.db.firebase.ref(path));
           this.userPersonalDocsRefs.forEach(ref => {
+            this.debugLogHandlers("#start", "adding", ["child_added"], ref);
             ref.on("child_added", this.handlePersonalDocAdded);
           });
           resolve();
@@ -38,6 +39,7 @@ export class DBStudentPersonalDocsListener extends BaseListener {
   public stop() {
     if (this.userPersonalDocsRefs) {
       this.userPersonalDocsRefs.forEach(ref => {
+        this.debugLogHandlers("#stop", "removing", ["child_added"], ref);
         ref.off("child_added", this.handlePersonalDocAdded);
       });
     }
