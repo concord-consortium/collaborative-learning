@@ -79,17 +79,54 @@ class StarredTab {
   getCanvasItemWithIndex(tab, section, index) {
     return cy.get('.'+tab+ ' .list.'+section+'.bottom-panel .list-item[data-test='+section+'-list-items]').find('.icon-holder .icon-star').eq(index);
   }
+  getTopPanelCanvasItemWithIndex(tab, section, index) {
+    return cy.get('.'+tab+ ' .list.'+section+'.top-panel .list-item[data-test='+section+'-list-items]').find('.icon-holder .icon-star').eq(index);
+  }
+  getTopPanelCanvasItemWithIndexStar(tab, section) {
+    return cy.get('.'+tab+ ' .list.'+section+'.top-panel .list-item[data-test='+section+'-list-items]').find('.icon-holder .icon-star');
+  }
   starMultipleCanvasItem(tab, section) {
-    let i;
-    let totalCount;
+    let i, j;
+    let totalCount, starCount;
+    this.getTopPanelCanvasItemWithIndexStar(tab, section).then(((value) => {
+      starCount = Cypress.$(value).length;
+      expect(value).to.have.length(starCount);
+        for(j=0; j < (starCount - (starCount-1)); j++) {
+            if (Cypress.$(value).eq(j).parent().find('.starred').length > 0) {
+                cy.log("Document Already Starred");
+          } else {
+            this.getTopPanelCanvasItemWithIndex(tab, section, j).click();
+            this.getTopPanelCanvasItemWithIndex(tab, section, j).invoke("attr", "class").should("contain", "starred");
+          }      
+        }
+      }))
     this.getCanvasItem(tab, section).then(((value) => {
       totalCount = Cypress.$(value).length;
       expect(value).to.have.length(totalCount);
         for(i=0; i < totalCount; i++) {
-          if(this.getCanvasItemWithIndex(tab, section, i).invoke("attr", "class").should("not.contain", "starred")) {
+          if(Cypress.$(value).eq(i).parent().find('.starred').length > 0){
+            cy.log("Document Already Starred");
+          } else {
             this.getCanvasItemWithIndex(tab, section, i).click();
             this.getCanvasItemWithIndex(tab, section, i).invoke("attr", "class").should("contain", "starred");
           }  
+        }
+      })
+    )  
+  }
+  starMultipleCanvasItemClassWork(tab, section) {
+    let i;
+    let totalCount;
+    this.getTopPanelCanvasItemWithIndexStar(tab, section).then(((value) => {
+      totalCount = Cypress.$(value).length;
+      expect(value).to.have.length(totalCount);
+        for(i=0; i < totalCount; i++) {
+            if (Cypress.$(value).eq(i).parent().find('.starred').length > 0) {
+                cy.log("Document Already Starred");
+          } else {
+            this.getTopPanelCanvasItemWithIndex(tab, section, i).click();
+            this.getTopPanelCanvasItemWithIndex(tab, section, i).invoke("attr", "class").should("contain", "starred");
+          }      
         }
       })
     )  

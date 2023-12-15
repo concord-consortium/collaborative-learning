@@ -7,7 +7,7 @@ import {Active} from "@dnd-kit/core";
 import {useInstanceIdContext} from "../imports/hooks/use-instance-id-context";
 import {AttributeType} from "../../../models/data/attribute";
 import { IDataSet } from "../../../models/data/data-set";
-import {useGraphModelContext} from "../models/graph-model";
+import { useGraphModelContext } from "../hooks/use-graph-model-context";
 import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {getDragAttributeInfo, useDropHandler} from "../imports/hooks/use-drag-drop";
@@ -89,6 +89,7 @@ export const GraphAxis = observer(function GraphAxis({
 
   useEffect(() => {
     if (autoAdjust?.current) {
+      // TODO multi dataset - this should consider all layers
       dataConfig?.onAction(action => {
         if (
             isAlive(graphModel) &&
@@ -141,7 +142,7 @@ export const GraphAxis = observer(function GraphAxis({
           label={''}  // Remove
           enableAnimation={enableAnimation}
           showScatterPlotGridLines={axisShouldShowGridlines}
-          centerCategoryLabels={graphModel.config.categoriesForAxisShouldBeCentered(place)}
+          centerCategoryLabels={graphModel.categoriesForAxisShouldBeCentered(place)}
         />
       }
       {showAttributeLabel &&

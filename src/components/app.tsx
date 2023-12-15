@@ -104,6 +104,7 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
       return resolveAppMode(stores, authenticatedUser.rawFirebaseJWT, onQAClear);
     })
     .then(() => {
+      stores.persistentUI.initializePersistentUISync(user, db);
       return user.isTeacher
               ? db.firestore.getFirestoreUser(user.id)
               : undefined;

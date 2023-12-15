@@ -38,5 +38,8 @@ class XYPlotToolTile {
     this.getYAttributesLabel(workspaceClass).first().click({ force: true });
     cy.get(`.chakra-portal button`).contains(attribute).click({ force: true });
   }
+  getEditableAxisBox(axis, minOrMax) {
+    return this.getTile().find(`[data-testid=editable-border-box-${axis}-${minOrMax}]`);
+  }
 }
 export default XYPlotToolTile;

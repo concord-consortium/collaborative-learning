@@ -84,11 +84,53 @@ context('XYPlot Tool Tile', function () {
       cy.log("verify graph dot is updated");
       xyTile.getGraphDot().should('have.length', 2);
 
+      // X axis should have scaled to fit 5 and 7.
+      xyTile.getEditableAxisBox("bottom", "min").invoke('text').then(parseFloat).should("be.within", -1, 5);
+      xyTile.getEditableAxisBox("bottom", "max").invoke('text').then(parseFloat).should("be.within", 7, 12);
+
+      cy.log("add another data point");
+      cy.get(".primary-workspace").within((workspace) => {
+        tableToolTile.typeInTableCell(9, '15');
+        tableToolTile.getTableCell(8).should('contain', '15');
+        tableToolTile.typeInTableCell(10, '0');
+        tableToolTile.getTableCell(9).should('contain', '0');
+      });
+      // Added data point will be off the right edge of the plot area until we click 'Fit'.
+      xyTile.getTile().scrollIntoView();
+      xyTile.getGraphDot().should('have.length', 3);
+      xyTile.getGraphDot().eq(0).should('be.visible');
+      xyTile.getGraphDot().eq(1).should('be.visible');
+      xyTile.getGraphDot().eq(2).should('not.be.visible');
+      // X axis should not have changed in response to adding a data point.
+      xyTile.getEditableAxisBox("bottom", "min").invoke('text').then(parseFloat).should("be.within", -1, 5);
+      xyTile.getEditableAxisBox("bottom", "max").invoke('text').then(parseFloat).should("be.within", 7, 12);
+
+      cy.log("fit view");
+      xyTile.getTile().click();
+      clueCanvas.clickToolbarButton('graph', 'fit-all');
+      xyTile.getGraphDot().eq(0).should('be.visible');
+      xyTile.getGraphDot().eq(1).should('be.visible');
+      xyTile.getGraphDot().eq(2).should('be.visible');
+      xyTile.getEditableAxisBox("bottom", "min").invoke('text').then(parseFloat).should("be.within", -1, 5);
+      xyTile.getEditableAxisBox("bottom", "max").invoke('text').then(parseFloat).should("be.within", 15, 20);
+
+      cy.log("verify edit box for horizontal and vertical axes");
+      xyTile.getEditableAxisBox("bottom", "min").click().type('-10{enter}');
+      xyTile.getEditableAxisBox("bottom", "min").should('contain', '-10');
+      xyTile.getEditableAxisBox("bottom", "max").click().type('50.02345{enter}');
+      xyTile.getEditableAxisBox("bottom", "max").should('contain', '50.02345');
+      xyTile.getEditableAxisBox("left", "min").click().type('-10.55{enter}');
+      xyTile.getEditableAxisBox("left", "min").should('contain', '-10.55');
+      xyTile.getEditableAxisBox("left", "max").click().type('50{enter}');
+      xyTile.getEditableAxisBox("left", "max").should('contain', '50');
+      xyTile.getEditableAxisBox("left", "max").click().type('abc{enter}');
+      xyTile.getEditableAxisBox("left", "max").should('contain', '50');
+
       cy.log("restore points to canvas");
       primaryWorkspace.openResourceTab();
       resourcePanel.openPrimaryWorkspaceTab("my-work");
       cy.openDocumentWithTitle('my-work', 'workspaces', problemDoc);
-      xyTile.getGraphDot().should('have.length', 2);
+      xyTile.getGraphDot().should('have.length', 3);
       xyTile.getXYPlotTitle().should('contain', title);
 
       cy.log("Delete XY Plot Tile");
@@ -115,7 +157,7 @@ context('XYPlot Tool Tile', function () {
 
       cy.log("Undo redo XY Plot tile content");
       const title = "XY Plot test";
-      const defaultTitle = "X-Y Plot 1";
+      const defaultTitle = "Graph 1";
       xyTile.getXYPlotTitle().click().type(title + '{enter}');
       xyTile.getXYPlotTitle().should('contain', title);
       clueCanvas.getUndoTool().click();

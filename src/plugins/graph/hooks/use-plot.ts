@@ -4,11 +4,12 @@ import { isSetCaseValuesAction } from "../../../models/data/data-set-actions";
 import {IDotsRef, GraphAttrRoles} from "../graph-types";
 import {INumericAxisModel} from "../imports/components/axis/models/axis-model";
 import {useGraphLayoutContext} from "../models/graph-layout";
-import {useGraphModelContext} from "../models/graph-model";
+import {useGraphModelContext} from "../hooks/use-graph-model-context";
 import {matchCirclesToData, startAnimation} from "../utilities/graph-utils";
 import {useCurrent} from "../../../hooks/use-current";
 import {useInstanceIdContext} from "../imports/hooks/use-instance-id-context";
 import {onAnyAction} from "../../../utilities/mst-utils";
+import { IGraphLayerModel } from "../models/graph-layer-model";
 
 interface IDragHandlers {
   start: (event: MouseEvent) => void
@@ -33,20 +34,39 @@ export const useDragHandlers = (target: any, {start, drag, end}: IDragHandlers) 
 };
 
 export interface IPlotResponderProps {
-  refreshPointPositions: (selectedOnly: boolean) => void
-  refreshPointSelection: () => void
-  dotsRef: IDotsRef
-  enableAnimation: React.MutableRefObject<boolean>
+  layer: IGraphLayerModel;
+  refreshPointPositions: (selectedOnly: boolean) => void;
+  refreshPointSelection: () => void;
+  dotsRef: IDotsRef;
+  enableAnimation: React.MutableRefObject<boolean>;
 }
 
 export const usePlotResponders = (props: IPlotResponderProps) => {
-  const {enableAnimation, refreshPointPositions, refreshPointSelection, dotsRef} = props,
+  const {layer, enableAnimation, refreshPointPositions, refreshPointSelection, dotsRef} = props,
+    dataConfiguration = layer.config,
+    dataset = dataConfiguration?.dataset,
     graphModel = useGraphModelContext(),
     layout = useGraphLayoutContext(),
-    dataConfiguration = graphModel.config,
-    dataset = dataConfiguration.dataset,
     instanceId = useInstanceIdContext(),
     refreshPointPositionsRef = useCurrent(refreshPointPositions);
+
+  useEffect(function respondToLayerDotsEltCreation() {
+    return reaction(
+      () => { return layer.dotsElt; },
+      (dotsElt) => {
+        matchCirclesToData({
+          dataConfiguration,
+          pointRadius: graphModel.getPointRadius(),
+          pointColor: graphModel.pointColor,
+          pointStrokeColor: graphModel.pointStrokeColor,
+          dotsElement: dotsElt,
+          enableAnimation,
+          instanceId
+        });
+
+      }
+    );
+  }, [dataConfiguration, enableAnimation, graphModel, instanceId, layer.dotsElt]);
 
   /* This routine is frequently called many times in a row when something about the graph changes that requires
   * refreshing the plot's point positions. That, by itself, would be a reason to ensure that
@@ -180,8 +200,8 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
   useEffect(() => {
     return autorun(
       () => {
-        !graphModel.config?.pointsNeedUpdating && callRefreshPointPositions(false);
+        !dataConfiguration?.pointsNeedUpdating && callRefreshPointPositions(false);
       });
-  }, [graphModel, callRefreshPointPositions]);
+  }, [dataConfiguration, callRefreshPointPositions]);
 
 };

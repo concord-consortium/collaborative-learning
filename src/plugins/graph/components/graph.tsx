@@ -7,15 +7,9 @@ import {Background} from "./background";
 import {DroppablePlot} from "./droppable-plot";
 import {AxisPlace, AxisPlaces} from "../imports/components/axis/axis-types";
 import {GraphAxis} from "./graph-axis";
-import {attrRoleToGraphPlace, graphPlaceToAttrRole,
-        IDotsRef, kDefaultNumericAxisBounds, kGraphClass} from "../graph-types";
-import {ScatterDots} from "./scatterdots";
-import {DotPlotDots} from "./dotplotdots";
-import {CaseDots} from "./casedots";
-import {ChartDots} from "./chartdots";
+import {attrRoleToGraphPlace, graphPlaceToAttrRole, kDefaultNumericAxisBounds, kGraphClass} from "../graph-types";
 import {Marquee} from "./marquee";
 import {DataConfigurationContext} from "../hooks/use-data-configuration-context";
-import {DataSetContext, useDataSetContext} from "../imports/hooks/use-data-set-context";
 import {useGraphModel} from "../hooks/use-graph-model";
 import {useGraphSettingsContext} from "../hooks/use-graph-settings-context";
 import {setNiceDomain, startAnimation} from "../utilities/graph-utils";
@@ -25,7 +19,7 @@ import {useGraphLayoutContext} from "../models/graph-layout";
 import { isAttributeAssignmentAction, isRemoveAttributeFromRoleAction, isRemoveYAttributeWithIDAction,
   isReplaceYAttributeAction, isSetAttributeForRoleAction }
   from "../models/data-configuration-model";
-import { useGraphModelContext } from "../models/graph-model";
+import { useGraphModelContext } from "../hooks/use-graph-model-context";
 import {useInstanceIdContext} from "../imports/hooks/use-instance-id-context";
 import {MarqueeState} from "../models/marquee-state";
 import {Legend} from "./legend/legend";
@@ -37,6 +31,7 @@ import {onAnyAction} from "../../../utilities/mst-utils";
 import { Adornments } from "../adornments/adornments";
 import { kConnectingLinesType } from "../adornments/connecting-lines/connecting-lines-types";
 import { EditableGraphValue } from "./editable-graph-value";
+import { GraphLayer } from "./graph-layer";
 
 import "./graph.scss";
 import "./graph-clue-styles.scss";
@@ -44,20 +39,18 @@ import "./graph-clue-styles.scss";
 interface IProps {
   graphController: GraphController;
   graphRef: MutableRefObject<HTMLDivElement | null>;
-  dotsRef: IDotsRef;
   onRequestRowHeight?: (id: string, size: number) => void;
   readOnly?: boolean
 }
 
 export const Graph = observer(
-    function Graph({ graphController, readOnly, graphRef, dotsRef, onRequestRowHeight }: IProps) {
+    function Graph({ graphController, readOnly, graphRef, onRequestRowHeight }: IProps) {
 
   const graphModel = useGraphModelContext(),
     {autoAdjustAxes, enableAnimation} = graphController,
     {plotType} = graphModel,
     instanceId = useInstanceIdContext(),
     marqueeState = useMemo<MarqueeState>(() => new MarqueeState(), []),
-    dataset = useDataSetContext(),
     layout = useGraphLayoutContext(),
     {defaultSeriesLegend, disableAttributeDnD} = useGraphSettingsContext(),
     xScale = layout.getAxisScale("bottom"),
@@ -75,15 +68,15 @@ export const Graph = observer(
         .attr('width', layout.plotWidth > 0 ? layout.plotWidth : 0)
         .attr('height', layout.plotHeight > 0 ? layout.plotHeight : 0);
     }
-  }, [dataset, plotAreaSVGRef, layout, layout.plotHeight, layout.plotWidth, xScale]);
+  }, [plotAreaSVGRef, layout, layout.plotHeight, layout.plotWidth, xScale]);
 
   const handleChangeAttribute = (place: GraphPlace, dataSet: IDataSet, attrId: string, oldAttrId?: string) => {
-    const computedPlace = place === 'plot' && graphModel.config.noAttributesAssigned ? 'bottom' : place;
+    const computedPlace = place === 'plot' && graphModel.noAttributesAssigned ? 'bottom' : place;
     const attrRole = graphPlaceToAttrRole[computedPlace];
     if (attrRole === 'y' && oldAttrId) {
       graphModel.replaceYAttributeID(oldAttrId, attrId);
       const yAxisModel = graphModel.getAxis('left') as IAxisModel;
-      setNiceDomain(graphModel.config.numericValuesForYAxis, yAxisModel);
+      setNiceDomain(graphModel.numericValuesForYAxis, yAxisModel);
     } else {
       graphModel.setAttributeID(attrRole, dataSet.id, attrId);
     }
@@ -97,9 +90,14 @@ export const Graph = observer(
     if (place === 'left') {
       graphModel.removeYAttributeID(idOfAttributeToRemove);
       const yAxisModel = graphModel.getAxis('left') as IAxisModel;
-      setNiceDomain(graphModel.config.numericValuesForYAxis, yAxisModel); // FIXME needs update for multiple datasets
+      setNiceDomain(graphModel.numericValuesForYAxis, yAxisModel);
     } else {
-      dataset && handleChangeAttribute(place, dataset, '');
+      const role = graphPlaceToAttrRole[place];
+      if (role === 'y') {
+        graphModel.removeYAttributeID(idOfAttributeToRemove);
+      } else {
+        graphModel.removeAttribute(role, idOfAttributeToRemove);
+      }
     }
   };
 
@@ -121,12 +119,7 @@ export const Graph = observer(
           console.warn('Unexpected layer number: ', action.path);
           return;
         }
-        if (layerNumber > 0) { // TODO temporary
-          console.log('Ignoring change in layer ', layerNumber, action.name);
-          return;
-        }
         const layer = graphModel.layers[layerNumber];
-        const dataSetId = layer.config.dataset?.id;
         let attrId = "";
         if (isSetAttributeForRoleAction(action)) {
           const [role, _desc] = action.args;
@@ -148,45 +141,34 @@ export const Graph = observer(
           attrId = newAttrId;
         }
         startAnimation(enableAnimation);
-        graphPlace && graphController?.handleAttributeAssignment(graphPlace, dataSetId, attrId);
+        graphPlace && graphController?.handleAttributeAssignment(layer.config, graphPlace, attrId);
       }
     });
     return () => disposer?.();
-  }, [graphController, dataset, layout, enableAnimation, graphModel]);
+  }, [graphController, layout, enableAnimation, graphModel]);
 
   const handleTreatAttrAs = (place: GraphPlace, attrId: string, treatAs: AttributeType) => {
-    graphModel.config.setAttributeType(graphPlaceToAttrRole[place], treatAs);
-    dataset && graphController?.handleAttributeAssignment(place, dataset.id, attrId);
+    const layer = graphModel.layerForAttributeId(attrId);
+    if (!layer) return;
+    layer.config.setAttributeType(graphPlaceToAttrRole[place], treatAs);
+    layer.config.dataset && graphController?.handleAttributeAssignment(layer.config, place, attrId);
 
     const connectingLines = graphModel.adornments.find(a => a.type === kConnectingLinesType);
     if (connectingLines && place === "left") {
       treatAs === 'categorical' && graphModel.hideAdornment(kConnectingLinesType);
       treatAs === 'numeric' && graphModel.showAdornment(connectingLines);
     }
-
-    // TODO: use isVisible state, set above, instead of this hack
-    if (!connectingLines?.isVisible){
-      const dotArea = select(dotsRef.current);
-      const anyFoundPath = dotArea.selectAll("path");
-      if (anyFoundPath) anyFoundPath.remove();
-    }
   };
 
-  // useDataTips({dotsRef, dataset, graphModel, enableAnimation});
+  // useDataTips({dotsRef, graphModel, enableAnimation});
   //useDataTips hook is used to identify individual points in a dense scatterplot
   //it should be commented out for now as it shrinks outer circle when hovered over, but may prove useful in the future
 
-  const renderPlotComponent = () => {
-    const props = {
-        dotsRef, enableAnimation
-      },
-      typeToPlotComponentMap = {
-        casePlot: <CaseDots {...props}/>,
-        dotChart: <ChartDots {...props}/>,
-        dotPlot: <DotPlotDots {...props}/>,
-        scatterPlot: <ScatterDots {...props}/>
-      };
-    return typeToPlotComponentMap[plotType];
+  const renderPlotComponents = () => {
+    const layers = graphModel.layers.map((layer) => {
+      return (<GraphLayer key={layer.id} graphModel={graphModel} layer={layer} enableAnimation={enableAnimation}/>);
+    });
+    return layers;
   };
 
 //******************** Render Graph Axes **********************
@@ -229,8 +211,7 @@ export const Graph = observer(
     return droppables;
   };
 
-  useGraphModel({dotsRef, graphModel, enableAnimation, instanceId});
-  // TODO multi-dataset: DataContext / providers will need to be replaced by looping over layers.
+  useGraphModel({ graphModel, enableAnimation, instanceId });
 
   const handleMinMaxChange = (minOrMax: string, axis: AxisPlace, newValue: number) => {
     const axisModel = graphModel.getAxis(axis) as INumericAxisModel;
@@ -241,9 +222,9 @@ export const Graph = observer(
     }
   };
 
+  // TODO multi-dataset: DataConfigurationContext should not be provided here, but is still used in some places.
   return (
     <DataConfigurationContext.Provider value={graphModel.config}>
-      <DataSetContext.Provider value={graphModel.config.dataset}>
         <div className={kGraphClass} ref={graphRef} data-testid="graph">
           <svg className='graph-svg' ref={svgRef}>
             <Background
@@ -254,8 +235,8 @@ export const Graph = observer(
             {renderGraphAxes()}
 
             <svg ref={plotAreaSVGRef}>
-              <svg ref={dotsRef} className={`graph-dot-area ${instanceId}`}>
-                {renderPlotComponent()}
+              <svg className={`graph-dot-area ${instanceId}`}>
+                {renderPlotComponents()}
               </svg>
               <Marquee marqueeState={marqueeState}/>
             </svg>
@@ -277,7 +258,7 @@ export const Graph = observer(
             />
           </svg>
           {!disableAttributeDnD && renderDroppableAddAttributes()}
-          <Adornments dotsRef={dotsRef}/>
+          <Adornments/>
           {defaultSeriesLegend &&
             <MultiLegend
               graphElt={graphRef.current}
@@ -316,7 +297,6 @@ export const Graph = observer(
             })
           }
         </div>
-      </DataSetContext.Provider>
     </DataConfigurationContext.Provider>
   );
 });
