@@ -18,25 +18,28 @@ export class DBStudentPersonalDocsListener extends BaseListener {
   }
 
   public start() {
-    //console.log("||> 1 start has a single user, that is the logged in user:", user );
     const { user } = this.db.stores;
     return new Promise<void>((resolve, reject) => {
-      //console.log("||> 2 path is calculated to a ref that is all users in the offering:");
       const offeringUsersRef = this.offeringUsersRef = this.db.firebase.ref(
-        this.db.firebase.getUserDocumentMetadataPath(user)
+        this.db.firebase.getOfferingUsersPath(user)
       );
 
       /* but I think we need to get a different Ref to find the docs */
-      // console.log(">> result of getOfferingUsersPath:", this.db.firebase.getOfferingUsersPath(user));
-      // console.log(">> but we want to get docs from: ... classes/demoClass8/users/[userId]personalDocs", this.db.firebase.getUserDocumentMetadataPath(user) );
+      console.log(">> result of getOfferingUsersPath:", this.db.firebase.getOfferingUsersPath(user));
+      console.log(">> but we want to get docs from another path, which is: ... classes/demoClass8/users/[userId]personalDocs", );
       //console.log("|| 3,4, ref is onced to a snapshot, which is passed to handlePersonalDocs");
+
       offeringUsersRef.once("value").then((snapshot) => {
-          this.handlePersonalDocs(snapshot);
-          offeringUsersRef.on("child_added", this.onUserChildAdded = this.handleAddOrChange("child_added"));
-          offeringUsersRef.on("child_changed", this.onUserChildChanged = this.handleAddOrChange("child_changed"));
-          resolve();
+          console.log(">>> we need to assemble a path for each student documentMetaData:  classes/demoClass8/users/[userId]personalDocs ");
+          console.log(">>> we have this in hand: ", snapshot.val());
+          // this.handlePersonalDocs(snapshot);
+          // offeringUsersRef.on("child_added", this.onUserChildAdded = this.handleAddOrChange("child_added"));
+          // offeringUsersRef.on("child_changed", this.onUserChildChanged = this.handleAddOrChange("child_changed"));
+          // resolve();
         })
         .catch(reject);
+
+
     });
   }
 
