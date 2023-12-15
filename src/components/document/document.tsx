@@ -55,8 +55,13 @@ const DownloadButton = ({ onClick }: { onClick: SVGClickHandler }) => {
 };
 
 const PublishButton = ({ document }: { document: DocumentModelType }) => {
+
+  console.log("📁 document.tsx ------------------------");
+
   const [showPublishDialog] = usePublishDialog(document);
   const handlePublishButtonClick = () => {
+    console.log("\t🏭 handlePublishButtonClick");
+
     showPublishDialog();
   };
   return (

@@ -59,6 +59,10 @@ export class DBPublicationsListener extends BaseListener {
   };
 
   private handlePublication = (publication: DBPublication|null) => {
+
+    console.log("📁 db-publications-listener.ts ------------------------");
+    console.log("\t🏭 handlePublication");
+
     if (publication) {
       // All publications are added initially by the `once`. Then a
       // `child_added` listener is added to watch for new publications. This

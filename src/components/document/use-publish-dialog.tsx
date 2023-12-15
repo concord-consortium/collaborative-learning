@@ -27,6 +27,7 @@ export const usePublishDialog = (document: DocumentModelType) => {
             : document.title;
   };
   const handlePublishSupport = () => {
+    console.log("\t🏭 handlePublishSupport");
     const caption = getSupportDocumentBaseCaption() || "Untitled";
     // TODO: Disable publish button while publishing
     db.publishDocumentAsSupport(document, caption)

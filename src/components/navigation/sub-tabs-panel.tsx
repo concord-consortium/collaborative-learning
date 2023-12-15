@@ -19,7 +19,7 @@ interface IProps {
 export const SubTabsPanel: React.FC<IProps> = observer(function SubTabsPanel(
     { tabSpec, renderSubTabPanel, tabsExtraClassNames, onSelect, selectedIndex }) {
 
-  console.log("--------------Tab:", tabSpec.label, "-------------------");
+  // console.log("-----------SubTab:", tabSpec.label, "-------------------");
   const appConfigStore = useAppConfig();
   const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
   const subTabs = tabSpec.subTabs;

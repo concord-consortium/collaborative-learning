@@ -2,6 +2,7 @@ import { observer } from "mobx-react";
 import { useStores } from "../../hooks/use-stores";
 import React from "react";
 import { NavTabModelType } from "../../models/view/nav-tabs";
+
 import "./sort-work-view.scss";
 
 interface ISortProps {
@@ -21,6 +22,14 @@ export const SortWorkView:React.FC<ISortProps> = observer(function SortWorkView(
     >
       <div className="sort-work-header"/>
       <div className="sort-work-documents">
+        <div className="live-problem-documents">
+          {"Problem Documents (Not Published) - Include documents from all assignments"}
+        </div>
+        <div className="live-personal-documents">
+          {"Personal Documents (Not Published)"}
+        </div>
+
+
 
       </div>
 

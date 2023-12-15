@@ -766,6 +766,11 @@ export class DB {
   }
 
   public createDocumentFromPublication(publication: DBPublication) {
+
+    console.log("📁 db.ts ------------------------");
+    console.log("\t🏭 createDocumentFromPublication");
+    console.log("\t🥩 publication:", publication);
+
     const {groupId, groupUserConnections, userId, documentKey, pubVersion} = publication;
     // groupUserConnections returns as an array and must be converted back to a map
     const groupUserConnectionsMap = Object.keys(groupUserConnections || [])

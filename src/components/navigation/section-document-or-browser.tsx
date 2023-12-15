@@ -26,7 +26,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
 
 
 
-  console.log("📁 section-document-or-browser.tsx ------------------------");
+  // console.log("📁 section-document-or-browser.tsx ------------------------");
   const persistentUI = usePersistentUIStore();
   const store = useStores();
   const appConfigStore = useAppConfig();
@@ -36,9 +36,9 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
   const user = useUserStore();
   const classStore = useClassStore();
   const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
-  console.log("\t🥩 navTabSpec label:", navTabSpec?.label);
+  // console.log("\t🥩 navTabSpec label:", navTabSpec?.label);
   const subTabs = tabSpec.subTabs;
-  console.log("\t🥩 subTabs:", subTabs);
+  // console.log("\t🥩 subTabs:", subTabs);
   const tabState = navTabSpec && persistentUI.tabs.get(navTabSpec?.tab);
   const subTabIndex = Math.max(subTabs.findIndex((subTab) => tabState?.openSubTab === subTab.label), 0);
   const selectedSubTab = subTabs[subTabIndex];
@@ -90,6 +90,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
   };
 
   const renderDocumentBrowserView = (subTab: ISubTabSpec) => {
+    // console.log("\t🏭 renderDocumentBrowserView for subTab:", subTab.label);
     const openDocumentKey = tabState?.openDocuments.get(subTab.label);
     const classHash = classStore.classHash;
     return (
@@ -117,6 +118,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
   };
 
   const renderDocumentView = (subTab: ISubTabSpec) => {
+    // console.log("\t🏭 renderDocumentView for subTab:", subTab.label);
     const openDocumentKey = tabState?.openDocuments.get(subTab.label) || "";
     const openDocument = store.documents.getDocument(openDocumentKey) ||
                             store.networkDocuments.getDocument(openDocumentKey);
@@ -127,7 +129,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     );
   };
 
-  console.log("about to render with tabspecLabel:", tabSpec.label);
+  // console.log("about to render with tabspecLabel:", tabSpec.label);
 
   return (
     <SubTabsPanel
