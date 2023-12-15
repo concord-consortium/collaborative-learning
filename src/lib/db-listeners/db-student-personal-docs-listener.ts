@@ -47,15 +47,18 @@ export class DBStudentPersonalDocsListener extends BaseListener {
           const userPaths = userKeys.map(key => `${this.classPath}/users/${key}/personalDocs`);
           this.usersDocumentMetadataPaths = userPaths;
 
+          console.log("|| userDocumentMetadataPaths:", userPaths);
           // create a firebase ref for each path in userPaths
           const userRefs = userPaths.map(path => this.db.firebase.ref(path));
+          userRefs.forEach(ref => {
 
-          // get a snapshot for each ref
-          const userSnapPromises = userRefs.map(ref => ref.once("value"));
+            ref.once('value').then(userRefSnap => {
+              console.log("|| userRefSnap: ", userRefSnap);
+              const userRefSnapVal = userRefSnap.val();
+              console.log("|| userRefSnapVal: ", userRefSnapVal);
+            });
 
-          // this.handlePersonalDocs(snapshot);
-          // offeringUsersRef.on("child_added", this.onUserChildAdded = this.handleAddOrChange("child_added"));
-          // offeringUsersRef.on("child_changed", this.onUserChildChanged = this.handleAddOrChange("child_changed"));
+          });
           resolve();
         })
         .catch(reject);
@@ -64,8 +67,8 @@ export class DBStudentPersonalDocsListener extends BaseListener {
 
   public stop() {
     if (this.offeringUsersRef) {
-      this.offeringUsersRef.off("child_added", this.onUserChildAdded);
-      this.offeringUsersRef.off("child_changed", this.onUserChildChanged);
+      // this.offeringUsersRef.off("child_added", this.onUserChildAdded);
+      // this.offeringUsersRef.off("child_changed", this.onUserChildChanged);
     }
   }
 
