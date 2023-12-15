@@ -1,5 +1,5 @@
-function wsClass(wsc) {
-  return wsc || ".primary-workspace";
+function wsClass(workspaceClass) {
+  return workspaceClass || ".primary-workspace";
 }
 
 class XYPlotToolTile {
@@ -34,11 +34,11 @@ class XYPlotToolTile {
   getYAttributesLabel(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .canvas-area .multi-legend .legend-row .simple-attribute-label`);
   }
-  getPortalButton(wsc) {
-    return cy.get(`${wsClass(wsc)} .chakra-portal button`);
+  getPortalButton(workspaceClass) {
+    return cy.get(`${wsClass(workspaceClass)} .chakra-portal button`);
   }
-  clickPortalButton(buttonText, wsc) {
-    this.getPortalButton(wsc).contains(buttonText).click({ force: true });
+  clickPortalButton(buttonText, workspaceClass) {
+    this.getPortalButton(workspaceClass).contains(buttonText).click({ force: true });
   }
   selectYAttribute(attribute, workspaceClass) {
     this.getYAttributesLabel(workspaceClass).first().click({ force: true });
@@ -50,25 +50,25 @@ class XYPlotToolTile {
   getPlottedVariablesPath(workspaceClass) {
     return this.getAdornments("plotted-function", workspaceClass).find("path");
   }
-  getMultiLegend(wsc) {
-    return cy.get(`${wsClass(wsc)} .graph-tool-tile .multi-legend`);
+  getMultiLegend(workspaceClass) {
+    return cy.get(`${wsClass(workspaceClass)} .graph-tool-tile .multi-legend`);
   }
-  getVariableDropdowns(wsc) {
-    return this.getMultiLegend(wsc).find(".variable-function-legend-button");
+  getVariableDropdowns(workspaceClass) {
+    return this.getMultiLegend(workspaceClass).find(".variable-function-legend-button");
   }
-  getXVariableDropdown(wsc) {
-    return this.getVariableDropdowns(wsc).eq(0);
+  getXVariableDropdown(workspaceClass) {
+    return this.getVariableDropdowns(workspaceClass).eq(0);
   }
-  selectXVariable(variableName, wsc) {
+  selectXVariable(variableName, workspaceClass) {
     this.getXVariableDropdown().click();
-    this.clickPortalButton(variableName, wsc);
+    this.clickPortalButton(variableName, workspaceClass);
   }
-  getYVariableDropdown(wsc) {
-    return this.getVariableDropdowns(wsc).eq(1);
+  getYVariableDropdown(workspaceClass) {
+    return this.getVariableDropdowns(workspaceClass).eq(1);
   }
-  selectYVariable(variableName, wsc) {
+  selectYVariable(variableName, workspaceClass) {
     this.getYVariableDropdown().click();
-    this.clickPortalButton(variableName, wsc);
+    this.clickPortalButton(variableName, workspaceClass);
   }
 }
 export default XYPlotToolTile;

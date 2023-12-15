@@ -113,14 +113,6 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
   // Refresh values on expression changes
   useEffect(function refreshExpressionChange() {
     return mstAutorun(() => {
-      // The following comment and commented line are copied from CODAP. I'm leaving them in because
-      // I'm not sure if they're relevant for CLUE or not.
-
-      // The next line should not be needed, but without it this autorun doesn't get triggered.
-      // TODO: Figure out exactly why this is needed and adjust accordingly.
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      // const modelValue = isPlottedFunctionAdornment(model) ? model.expression : undefined;
-
       model.updateCategories(graphModel.layers[0].getUpdateCategoriesOptions(false));
     }, { name: "PlottedVariablesAdornmentComponent.refreshExpressionChange" }, model);
   }, [graphModel, model, xScale, xSubAxesCount, yScale]);
@@ -174,12 +166,7 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
   }, [model, xAxis, yAxis]);
 
   return (
-    <svg
-      className={`plotted-function-${classFromKey}`}
-      style={{height: "100%", width: "100%"}}
-      x={0}
-      y={0}
-    >
+    <svg className={`plotted-function-${classFromKey}`}>
       <g
         className={`plotted-function plotted-function-${classFromKey}`}
         ref={plottedFunctionRef}

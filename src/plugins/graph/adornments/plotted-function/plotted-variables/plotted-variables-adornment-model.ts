@@ -20,7 +20,7 @@ function getSharedVariables(node: IAnyStateTreeNode) {
   }
 }
 
-export const PlottedVariablesInstance = types.model("PlottedVariablesInstance", {})
+export const PlottedVariables = types.model("PlottedVariables", {})
   .props({
     xVariableId: types.maybe(types.string),
     yVariableId: types.maybe(types.string)
@@ -92,7 +92,7 @@ export const PlottedVariablesInstance = types.model("PlottedVariablesInstance", 
 export const PlottedVariablesAdornmentModel = PlottedFunctionAdornmentModel
   .named("PlottedVariablesAdornmentModel")
   .props({
-    plottedVariables: types.map(PlottedVariablesInstance),
+    plottedVariables: types.map(PlottedVariables),
     type: types.optional(types.literal(kPlottedVariablesType), kPlottedVariablesType)
   })
   .views(self => ({
@@ -120,7 +120,7 @@ export const PlottedVariablesAdornmentModel = PlottedFunctionAdornmentModel
   }))
   .actions(self => ({
     addPlottedVariables(key?: string, xVariableId?: string, yVariableId?: string) {
-      const newPlottedVariables = PlottedVariablesInstance.create({ xVariableId, yVariableId });
+      const newPlottedVariables = PlottedVariables.create({ xVariableId, yVariableId });
       const newKey = key ?? uniqueId();
       self.plottedVariables.set(newKey, newPlottedVariables);
       return newKey;
