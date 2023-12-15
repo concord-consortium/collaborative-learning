@@ -32,8 +32,8 @@ export class DBProblemDocumentsListener extends BaseListener {
       // once is called immediately, and will proceed to resolve promise even if there is no value
       offeringUsersRef.once("value")
         .then((snapshot) => {
-          console.log("|> 3 that ref is onced to a snapshot", snapshot );
-          console.log("|> 4 and that snapshot is passed to handleLoadOfferingUsersProblemDocuments...");
+          //console.log("|> 3 that ref is onced to a snapshot", snapshot );
+          //console.log("|> 4 and that snapshot is passed to handleLoadOfferingUsersProblemDocuments...");
           this.handleLoadOfferingUsersProblemDocuments(snapshot);
           // We have to listen to both events because of a race condition of the documents
           // not being set when the child is added
@@ -57,13 +57,12 @@ export class DBProblemDocumentsListener extends BaseListener {
     }
   }
 
-  // --listener-- 4
+  // {{HANDLEDOCS}}
   private handleLoadOfferingUsersProblemDocuments = (snapshot: firebase.database.DataSnapshot) => {
 
     const { user: { id: selfUserId }, documents } = this.db.stores;
-    //console.log("|>  4.1 handleLoadOfferingUsersProblemDocuments has access to documents in store:...", documents);
     const users: DBOfferingUserMap = snapshot.val();
-    console.log("|> 5 handleLoadOfferingUsersProblemDocuments loops over and passes each of user metadata to handleOfferingUser:...", users);
+    //console.log("|> 5 handleLoadOfferingUsersProblemDocuments loops over and passes each of user metadata to handleOfferingUser:...", users);
     this.debugLogSnapshot("#handleLoadOfferingUsersProblemDocuments", snapshot);
     forEach(users, (user: DBOfferingUser) => {
       if (user) {
@@ -77,6 +76,7 @@ export class DBProblemDocumentsListener extends BaseListener {
     !currentUser?.self && documents.resolveRequiredDocumentPromisesWithNull([ProblemDocument, PlanningDocument]);
   };
 
+  // {{ HANDLEADDORCHANGE }}
   private handleLoadOfferingUserAddedOrChanged = (eventType: string) => (snapshot: firebase.database.DataSnapshot) => {
     const user: DBOfferingUser = snapshot.val();
     this.debugLogSnapshot(`#handleLoadOfferingUserAddedOrChanged (${eventType})`, snapshot);
@@ -86,6 +86,7 @@ export class DBProblemDocumentsListener extends BaseListener {
   };
 
   // --listener-- 5
+  // {{ MAINEVENT }}
   private handleOfferingUser = (user: DBOfferingUser) => {
     if (!user.self?.uid) return;
     const { documents, user: currentUser } = this.db.stores;
@@ -96,10 +97,10 @@ export class DBProblemDocumentsListener extends BaseListener {
       documents.resolveRequiredDocumentPromiseWithNull(ProblemDocument);
     }
 
-    console.log("|> ... 6  handleOfferingUser takes user...", user.self.uid);
-    console.log("|> ... 7 and loops over documents in store already:", documents);
+    //console.log("|> ... 6  handleOfferingUser takes user...", user.self.uid);
+    // console.log("|> ... 7 and loops over documents in store already:", documents);
     forEach(user.documents, document => {
-      console.log("|> ... ...  8  it considers if doc is in store...and...passes it to appropriate db method", document.documentKey);
+      //console.log("|> ... ...  8  it considers if doc is in store...and...passes it to appropriate db method", document.documentKey);
       if (!document?.documentKey || !document?.self?.uid) return;
       const existingDoc = documents.getDocument(document.documentKey);
       if (existingDoc) {

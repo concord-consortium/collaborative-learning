@@ -21,15 +21,19 @@ export class DBStudentPersonalDocsListener extends BaseListener {
     //console.log("||> 1 start has a single user, that is the logged in user:", user );
     const { user } = this.db.stores;
     return new Promise<void>((resolve, reject) => {
-      //console.log("||> 2 path is calculated to a ref that is all users in the offering:", this.db.firebase.getOfferingUsersPath(user));
+      //console.log("||> 2 path is calculated to a ref that is all users in the offering:");
       const offeringUsersRef = this.offeringUsersRef = this.db.firebase.ref(
-        this.db.firebase.getOfferingUsersPath(user)
+        this.db.firebase.getUserDocumentMetadataPath(user)
       );
 
+      /* but I think we need to get a different Ref to find the docs */
+      // console.log(">> result of getOfferingUsersPath:", this.db.firebase.getOfferingUsersPath(user));
+      // console.log(">> but we want to get docs from: ... classes/demoClass8/users/[userId]personalDocs", this.db.firebase.getUserDocumentMetadataPath(user) );
+      //console.log("|| 3,4, ref is onced to a snapshot, which is passed to handlePersonalDocs");
       offeringUsersRef.once("value").then((snapshot) => {
           this.handlePersonalDocs(snapshot);
-          offeringUsersRef.on("child_added", this.onUserChildAdded = this.handleUserChange("child_added"));
-          offeringUsersRef.on("child_changed", this.onUserChildChanged = this.handleUserChange("child_changed"));
+          offeringUsersRef.on("child_added", this.onUserChildAdded = this.handleAddOrChange("child_added"));
+          offeringUsersRef.on("child_changed", this.onUserChildChanged = this.handleAddOrChange("child_changed"));
           resolve();
         })
         .catch(reject);
@@ -43,8 +47,10 @@ export class DBStudentPersonalDocsListener extends BaseListener {
     }
   }
 
-  // --listener-- 4
+  // {{HANDLEDOCS}}
   private handlePersonalDocs = (snapshot: firebase.database.DataSnapshot) => {
+    const snapVal = snapshot.val();
+    console.log("|| handlePersonalDocs, looking for student personal docs!", snapVal);
     const users: DBOfferingUserMap = snapshot.val();
     const { user: currentUser } = this.db.stores;
     forEach(users, (user: DBOfferingUser) => {
@@ -55,53 +61,47 @@ export class DBStudentPersonalDocsListener extends BaseListener {
     });
   };
 
-  private handleUserChange = (eventType: string) => (snapshot: firebase.database.DataSnapshot) => {
-    console.log("|    ...handleUserChange!", eventType, snapshot.val());
+  // {{ HANDLEADDORCHANGE}}
+  private handleAddOrChange = (eventType: string) => (snapshot: firebase.database.DataSnapshot) => {
+    const user: DBOfferingUser = snapshot.val();
+    this.debugLogSnapshot(`#handleLoadOfferingUserAddedOrChanged (${eventType})`, snapshot);
+    if (user) {
+      this.handleOfferingUser(user);
+    }
   };
 
-  // --listener-- 5
+  // {{ MAINEVENT }}
   private handleOfferingUser = (user: DBOfferingUser) => {
+    console.log("|| handleOfferingUser, looking for a student!", user);
     if (!user.self?.uid) return;
-    console.log("|    ...handleOfferingUser", user.self.uid);
-    const { documents } = this.db.stores;
+    const { documents, user: currentUser } = this.db.stores;
+    const isCurrentUser = String(user.self.uid) === currentUser.id;
 
     if (size(user.documents) === 0) {
       documents.resolveRequiredDocumentPromiseWithNull(PersonalDocument);
     }
 
-    // --listener-- 6
     forEach(user.documents, document => {
       if (!document?.documentKey || !document?.self?.uid) return;
+
       const existingDoc = documents.getDocument(document.documentKey);
 
       if (existingDoc) {
-        console.log("| TODO - handle visibility like this?");
+        console.log("|| YA EXISTE:", document);
         // this.db.updateDocumentFromProblemDocument(existingDoc, document);
       }
 
       else {
-        console.log("| got a document?", document, document.self);
-        // this.db.createDocumentModelFromOtherDocument(document as any, PersonalDocument)
-        //   .then((docModel) => {
-        //     if (isCurrentUser) {
-        //       documents.resolveRequiredDocumentPromise(docModel);
-        //       syncStars(docModel, this.db);
-        //     }
+        console.log("|| NO EXISTE:", document);
+        // this.db.createDocumentModelFromProblemMetadata(PersonalDocument as any, document.self.uid, document)
+        // .then((docModel) => {
+        //   if (isCurrentUser) {
+        //     documents.resolveRequiredDocumentPromise(docModel);
+        //     syncStars(docModel, this.db);
         //   }
-        // );
+        // });
       }
     });
-
-
   };
 }
 
-/*
-
-  1. get this installing in index.ts
-  2. see if you make it to the console.log
-  3. I think the next step will be getting the right path from the right spot
-
-
-
-*/
