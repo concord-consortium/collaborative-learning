@@ -17,9 +17,9 @@ import { safeJsonParse } from "../../utilities/js-utils";
 import { mergeTwoDataSets } from "../../models/data/data-set-utils";
 import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
 import { useDataCardTileHeight } from "./use-data-card-tile-height";
+import { DataCardToolbarContext } from "./data-card-toolbar-context";
 
 import "./data-card-tile.scss";
-import { DataCardToolbarContext } from "./data-card-toolbar-context";
 
 export const DataCardToolComponent: React.FC<ITileProps> = observer(function DataCardToolComponent(props) {
   const { documentId, model, readOnly, documentContent, tileElt, onSetCanAcceptDrop, onRegisterTileApi,

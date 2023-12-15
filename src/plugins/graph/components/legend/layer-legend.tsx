@@ -6,7 +6,7 @@ import { GraphPlace } from "../../imports/components/axis-graph-shared";
 import { SimpleAttributeLabel } from "../simple-attribute-label";
 import { AddSeriesButton } from "./add-series-button";
 import { ReadOnlyContext } from "../../../../components/document/read-only-context";
-import { useGraphModelContext } from "../../models/graph-model";
+import { useGraphModelContext } from "../../hooks/use-graph-model-context";
 import { getSharedModelManager } from "../../../../models/tiles/tile-environment";
 import { isSharedDataSet, SharedDataSet, SharedDataSetType } from "../../../../models/shared/shared-data-set";
 import { useDataConfigurationContext } from "../../hooks/use-data-configuration-context";
@@ -107,11 +107,13 @@ export const LayerLegend = observer(function LayerLegend(props: ILayerLegendProp
           <div className="legend-title">
             Data from: <strong>{getOriginString()}</strong>&nbsp;
           </div>
-          <div className="legend-icon">
-            <button onClick={handleRemoveIconClick} className="remove-button" title="Unlink data provider">
-              <RemoveDataIcon />
-            </button>
-          </div>
+          { !readOnly &&
+            <div className="legend-icon">
+              <button onClick={handleRemoveIconClick} className="remove-button" title="Unlink data provider">
+                <RemoveDataIcon />
+              </button>
+            </div>
+          }
         </div>
       }
       {legendItemRows}

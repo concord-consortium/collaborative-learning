@@ -9,6 +9,7 @@ import { InvestigationModel } from "../models/curriculum/investigation";
 import { ProblemModel, ProblemModelType } from "../models/curriculum/problem";
 import { specAppConfig } from "../models/stores/spec-app-config";
 import { IStores, createStores } from "../models/stores/stores";
+import { PersistentUIModel } from "../models/stores/persistent-ui";
 import { UIModel } from "../models/stores/ui";
 import { UserModel } from "../models/stores/user";
 import { WorkspaceModel, ProblemWorkspace, WorkspaceModelType, LearningLogWorkspace } from "../models/stores/workspace";
@@ -81,12 +82,14 @@ describe("dev/qa/test logger with DEBUG_LOGGER false", () => {
     stores = createStores({
       appMode: "test",
       appConfig: specAppConfig({ config: { appName: "TestLogger"} }),
-      ui: UIModel.create({
+      persistentUI: PersistentUIModel.create({
         activeNavTab: ENavTab.kStudentWork,
         problemWorkspace: {
           type: ProblemWorkspace,
           mode: "1-up"
         },
+      }),
+      ui: UIModel.create({
         learningLogWorkspace: {
           type: LearningLogWorkspace,
           mode: "1-up"
@@ -130,12 +133,14 @@ describe("demo logger with DEBUG_LOGGER false", () => {
     stores = createStores({
       appMode: "demo",
       appConfig: specAppConfig({ config: { appName: "TestLogger"} }),
-      ui: UIModel.create({
+      persistentUI: PersistentUIModel.create({
         activeNavTab: ENavTab.kStudentWork,
         problemWorkspace: {
           type: ProblemWorkspace,
           mode: "1-up"
         },
+      }),
+      ui: UIModel.create({
         learningLogWorkspace: {
           type: LearningLogWorkspace,
           mode: "1-up"

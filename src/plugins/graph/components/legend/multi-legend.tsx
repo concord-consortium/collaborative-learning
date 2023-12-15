@@ -7,7 +7,7 @@ import { IDataSet } from "../../../../models/data/data-set";
 import { DataConfigurationContext } from "../../hooks/use-data-configuration-context";
 import { useInstanceIdContext } from "../../imports/hooks/use-instance-id-context";
 import { axisPlaceToAttrRole, kGraphDefaultHeight } from "../../graph-types";
-import { useGraphModelContext } from "../../models/graph-model";
+import { useGraphModelContext } from "../../hooks/use-graph-model-context";
 import { LayerLegend } from "./layer-legend";
 import { IGraphLayerModel } from "../../models/graph-layer-model";
 import { SimpleAttributeLabel } from "../simple-attribute-label";

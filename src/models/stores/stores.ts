@@ -4,6 +4,7 @@ import { AppConfigModel, AppConfigModelType } from "./app-config-model";
 import { createUnitWithoutContent, getGuideJson, getUnitJson, UnitModel, UnitModelType } from "../curriculum/unit";
 import { InvestigationModel, InvestigationModelType } from "../curriculum/investigation";
 import { ProblemModel, ProblemModelType } from "../curriculum/problem";
+import { PersistentUIModel, PersistentUIModelType } from "./persistent-ui";
 import { UIModel, UIModelType } from "./ui";
 import { UserModel, UserModelType } from "./user";
 import { GroupsModel, GroupsModelType } from "./groups";
@@ -56,6 +57,7 @@ class Stores implements IStores{
   problem: ProblemModelType;
   teacherGuide?: ProblemModelType;
   user: UserModelType;
+  persistentUI: PersistentUIModelType;
   ui: UIModelType;
   groups: GroupsModelType;
   class: ClassModelType;
@@ -89,16 +91,6 @@ class Stores implements IStores{
       InvestigationModel.create({ ordinal: 0, title: "Null Investigation" });
     this.problem = params?.problem || ProblemModel.create({ ordinal: 0, title: "Null Problem" });
     this.user = params?.user || UserModel.create({ id: "0" });
-    this.ui = params?.ui || UIModel.create({
-        problemWorkspace: {
-          type: ProblemWorkspace,
-          mode: "1-up"
-        },
-        learningLogWorkspace: {
-          type: LearningLogWorkspace,
-          mode: "1-up"
-        },
-      });
     this.groups = params?.groups || GroupsModel.create({ acceptUnknownStudents: params?.isPreviewing });
     this.groups.setEnvironment(this);
     this.class = params?.class || ClassModel.create({ name: "Null Class", classHash: "" });
@@ -113,7 +105,19 @@ class Stores implements IStores{
     this.clipboard = ClipboardModel.create();
     this.selection = SelectionStoreModel.create();
     this.serialDevice = new SerialDevice();
-    this.ui.setProblemPath(this.problemPath);
+    this.ui = params?.ui || UIModel.create({
+      learningLogWorkspace: {
+        type: LearningLogWorkspace,
+        mode: "1-up"
+      },
+    });
+    this.persistentUI = params?.persistentUI || PersistentUIModel.create({
+      problemWorkspace: {
+        type: ProblemWorkspace,
+        mode: "1-up"
+      }
+    });
+    this.persistentUI.setProblemPath(this.problemPath);
     this.userContextProvider = new UserContextProvider(this);
   }
 
@@ -138,7 +142,7 @@ class Stores implements IStores{
   }
 
   get isShowingTeacherContent() {
-    const { ui: { showTeacherContent }, user: { isTeacher } } = this;
+    const { persistentUI: { showTeacherContent }, user: { isTeacher } } = this;
     return isTeacher && showTeacherContent;
   }
 
@@ -146,8 +150,8 @@ class Stores implements IStores{
    * The currently open group in the Student Work tab
    */
   get studentWorkTabSelectedGroupId() {
-    const { ui, groups } = this;
-    return ui.tabs.get("student-work")?.openSubTab
+    const { persistentUI, groups } = this;
+    return persistentUI.tabs.get("student-work")?.openSubTab
         || (groups.nonEmptyGroups.length ? groups.nonEmptyGroups[0].id : "");
   }
 
@@ -163,7 +167,7 @@ class Stores implements IStores{
     // waiting
     when(
       () => this.studentWorkTabSelectedGroupId !== "",
-      () => this.ui.setOpenSubTab("student-work", this.studentWorkTabSelectedGroupId)
+      () => this.persistentUI.setOpenSubTab("student-work", this.studentWorkTabSelectedGroupId)
     );
   }
 
@@ -225,12 +229,12 @@ class Stores implements IStores{
         this.investigation = investigation;
         this.problem = problem;
       }
-      this.ui.setProblemPath(this.problemPath);
+      this.persistentUI.setProblemPath(this.problemPath);
 
       // Set the active tab to be the first tab
       const tabs = this.tabsToDisplay;
       if (tabs.length > 0) {
-        this.ui.setActiveNavTab(tabs[0].tab);
+        this.persistentUI.setActiveNavTab(tabs[0].tab);
       }
     });
 

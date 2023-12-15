@@ -15,9 +15,8 @@ export function useInitGraphLayout(model?: IGraphModel) {
       () => {
         const repetitions: Partial<Record<AxisPlace, number>> = {};
         if (model && isAlive(model)) {
-          const { config } = model;
           layout.axisScales.forEach((multiScale, place) => {
-            repetitions[place] = config.numRepetitionsForPlace(place) ?? 1;
+            repetitions[place] = model.numRepetitionsForPlace(place) ?? 1;
           });
         }
         return repetitions;

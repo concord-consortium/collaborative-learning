@@ -334,7 +334,8 @@ export class DB {
       return offeringUserRef.once("value")
         .then((snapshot) => {
           // ensure the offering user exists
-          if (!snapshot.val()) {
+          const candidateSnapshot = snapshot.val();
+          if (!candidateSnapshot?.version || !candidateSnapshot?.self){
             const offeringUser: DBOfferingUser = {
               version: "1.0",
               self: {
@@ -343,7 +344,7 @@ export class DB {
                 uid: user.id,
               }
             };
-            return offeringUserRef.set(offeringUser);
+            return offeringUserRef.update(offeringUser);
           }
          })
         .then(() => {
@@ -587,7 +588,22 @@ export class DB {
           documents.add(document);
           resolve(document);
         })
-        .catch(reject);
+        .catch((msg) => {
+          // TODO: rather than rejecting the promise here it seems it would be better to resolve with a
+          // document that has a contentStatus of Error. Or perhaps add new status field that is independent
+          // contentStatus since the errors here are not content errors they are either metadata or other
+          // problems.
+          // The callers of openDocument do not handle rejected promises. So currently this results in
+          // console errors: "Uncaught (in promise) ...". There are many callers and it seems the best thing
+          // is to show the user message where the document would have been shown. Returning an error
+          // document should take care of this so we don't need to update all of these places. We might just
+          // need to update the DocumentError component.
+          // However we still need to trace through these place to make sure this invalid document isn't
+          // being saved somewhere. For example if a network error happens while opening a document, we
+          // wouldn't want to try to save this error document back to firebase blowing away the legitimate
+          // document.
+          reject(msg);
+        });
     });
   }
 

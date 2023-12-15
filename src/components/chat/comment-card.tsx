@@ -64,7 +64,8 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
   return (
     <div className="comment-card selected" data-testid="comment-card">
       <div className="comment-card-content selected" data-testid="comment-card-content">
-        {postedComments?.map((comment, idx) => {
+        {
+          postedComments?.map((comment, idx) => {
             const userInitialBackgroundColor = ["#f79999", "#ffc18a", "#99d099", "#ff9", "#b2b2ff", "#efa6ef"];
             const commenterInitial = comment.name.charAt(0);
             const userInitialBackgroundColorIndex = parseInt(comment.uid, 10) % 6;

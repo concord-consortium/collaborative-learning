@@ -9,6 +9,7 @@ import { IUpdateCategoriesOptions } from "../adornments/adornment-models";
 import { GraphModel } from "./graph-model";
 import { IDataSet } from "../../../models/data/data-set";
 import { ISharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
+import { DotsElt } from "../d3-types";
 
 export const GraphLayerModel = types
   .model('GraphLayerModel')
@@ -18,7 +19,8 @@ export const GraphLayerModel = types
   })
   .volatile(self => ({
     autoAssignedAttributes: [] as Array<{ place: GraphPlace, role: GraphAttrRole, dataSetID: string, attrID: string }>,
-    disposeDataSetListener: undefined as (() => void) | undefined
+    disposeDataSetListener: undefined as (() => void) | undefined,
+    dotsElt: null as DotsElt
   }))
   .views(self => ({
     get isLinked() {
@@ -39,6 +41,9 @@ export const GraphLayerModel = types
     },
     setDataset(dataset: IDataSet | undefined, metadata: ISharedCaseMetadata | undefined) {
       self.config.setDataset(dataset, metadata);
+    },
+    setDotsElt(elt: DotsElt) {
+      self.dotsElt = elt;
     },
     setAttributeID(role: GraphAttrRole, dataSetID: string, id: string) {
       // dataSetID argument is used by onAction handlers
@@ -64,7 +69,6 @@ export const GraphLayerModel = types
 
       if (getAppConfig(self)?.getSetting("autoAssignAttributes", "graph")) {
         const attributeCount = self.config.dataset?.attributes.length;
-        console.log('autoAssign is on. Attrs: ', attributeCount);
         if (!attributeCount) return;
 
         const data = self.config.dataset;
@@ -79,7 +83,6 @@ export const GraphLayerModel = types
             this.autoAssignAttributeID("left", "y", data?.id ?? "", data?.attributes[1].id || '');
           }
         }
-        console.log('autoAssigned: ', self.autoAssignedAttributes);
       } else {
         console.log('autoAssign is off');
       }
@@ -104,7 +107,6 @@ export const GraphLayerModel = types
         : undefined;
     },
     updateAdornments(resetPoints=false) {
-      console.log('updateAdornments for ', self.config.dataset?.id);
       const options = this.getUpdateCategoriesOptions(resetPoints);
       // TODO: should adornments be registered on each layer?
       // Currently storing and updating them at the Graph level:
