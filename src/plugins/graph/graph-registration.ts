@@ -11,7 +11,7 @@ registerTileContentInfo({
   defaultContent: (options) => createGraphModel(undefined, options?.appConfig),
   defaultHeight: kGraphDefaultHeight,
   modelClass: GraphModel,
-  titleBase: "X-Y Plot",
+  titleBase: "Graph",
   type: kGraphTileType,
   isDataConsumer: true,
   updateObjectReferenceWithNewSharedModelIds: updateGraphObjectWithNewSharedModelIds

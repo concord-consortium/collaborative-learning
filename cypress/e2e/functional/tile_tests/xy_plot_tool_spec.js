@@ -157,7 +157,7 @@ context('XYPlot Tool Tile', function () {
 
       cy.log("Undo redo XY Plot tile content");
       const title = "XY Plot test";
-      const defaultTitle = "X-Y Plot 1";
+      const defaultTitle = "Graph 1";
       xyTile.getXYPlotTitle().click().type(title + '{enter}');
       xyTile.getXYPlotTitle().should('contain', title);
       clueCanvas.getUndoTool().click();

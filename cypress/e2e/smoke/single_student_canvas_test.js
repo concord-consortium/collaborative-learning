@@ -1,6 +1,6 @@
 import Canvas from '../../support/elements/common/Canvas';
 import ClueCanvas from '../../support/elements/common/cCanvas';
-import GraphToolTile from '../../support/elements/tile/GraphToolTile';
+import GeometryToolTile from '../../support/elements/tile/GeometryToolTile';
 import ImageToolTile from '../../support/elements/tile/ImageToolTile';
 import DrawToolTile from '../../support/elements/tile/DrawToolTile';
 import TextToolTile from '../../support/elements/tile/TextToolTile';
@@ -8,7 +8,7 @@ import TableToolTile from '../../support/elements/tile/TableToolTile';
 
 let canvas = new Canvas;
 let clueCanvas = new ClueCanvas;
-let graphToolTile = new GraphToolTile;
+let geometryToolTile = new GeometryToolTile;
 let imageToolTile = new ImageToolTile;
 let drawToolTile = new DrawToolTile;
 let textToolTile = new TextToolTile;
@@ -88,21 +88,21 @@ context('single student functional test', () => {
     cy.log('verify publish button');
     canvas.publishCanvas("investigation");
     canvas.getPublishIcon().should('exist');
-  
+
     cy.log('test the tool palette');
-    //This should test the tools in the tool shelf
-    // Tool palettes for Graph, Image, Draw,and Table are tested in respective tool spec test
-    //Selection tool is tested as a functionality of graph tool tiles
+    // This should test the tools in the tool shelf
+    // Tool palettes for Geometry, Image, Draw,and Table are tested in respective tool spec test
+    // Selection tool is tested as a functionality of geometry tool tiles
 
     cy.log('adds text tool');
     clueCanvas.addTile('text');
     textToolTile.getTextTile().should('exist');
     textToolTile.enterText('This is a smoke test');
 
-    cy.log('adds a graph tool');
+    cy.log('adds a geometry tool');
     clueCanvas.addTile('geometry');
-    graphToolTile.getGraphTile().should('exist');
-    graphToolTile.addPointToGraph(0, 0);
+    geometryToolTile.getGeometryTile().should('exist');
+    geometryToolTile.addPointToGraph(0, 0);
 
     cy.log('adds an image tool');
     clueCanvas.addTile('image');
@@ -131,7 +131,7 @@ context('single student functional test', () => {
     cy.openSection('my-work', 'workspaces');
     cy.openDocumentWithTitle('my-work', 'workspaces', title);
     textToolTile.getTextTile().should('exist');
-    graphToolTile.getGraphTile().first().should('exist');
+    geometryToolTile.getGeometryTile().first().should('exist');
     drawToolTile.getDrawTile().should('exist');
     imageToolTile.getImageTile().should('exist');
     tableToolTile.getTableTile().should('exist');
