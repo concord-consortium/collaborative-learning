@@ -1,6 +1,5 @@
 import { makeObservable, observable, runInAction } from "mobx";
 import { onSnapshot } from "mobx-state-tree";
-
 import { DB } from "../db";
 import { DBLatestGroupIdListener } from "./db-latest-group-id-listener";
 import { DBGroupsListener } from "./db-groups-listener";
@@ -8,13 +7,15 @@ import { DBOtherDocumentsListener } from "./db-other-docs-listener";
 import { DBProblemDocumentsListener } from "./db-problem-documents-listener";
 import { DBPublicationsListener } from "./db-publications-listener";
 import { DocumentModelType } from "../../models/document/document";
-import { LearningLogDocument, PersonalDocument } from "../../models/document/document-types";
+import { LearningLogDocument, PersonalDocument} from "../../models/document/document-types";
 import { DatabaseType } from "../db-types";
 import { DBSupportsListener } from "./db-supports-listener";
 import { DBCommentsListener } from "./db-comments-listener";
 import { DBStarsListener } from "./db-stars-listener";
 import { BaseListener } from "./base-listener";
 import { DBDocumentsContentListener } from "./db-docs-content-listener";
+import { DBLiveDocsListener } from "./db-live-docs-listener";
+
 
 export class DBListeners extends BaseListener {
   @observable public isListening = false;
@@ -30,6 +31,7 @@ export class DBListeners extends BaseListener {
   private commentsListener: DBCommentsListener;
   private starsListener: DBStarsListener;
   private documentsContentListener: DBDocumentsContentListener;
+  private liveDocsListener: DBLiveDocsListener;
 
   constructor(db: DB) {
     super("DBListeners");
@@ -45,9 +47,14 @@ export class DBListeners extends BaseListener {
     this.commentsListener = new DBCommentsListener(db);
     this.starsListener = new DBStarsListener(db);
     this.documentsContentListener = new DBDocumentsContentListener(db);
+    this.liveDocsListener = new DBLiveDocsListener(db);
   }
 
   public async start() {
+    console.log("📁 index.ts ------------------------");
+    console.log("\t🏭 async start");
+
+
     // listeners must start in this order so we know the latest group joined so we can autojoin groups if needed
     await this.latestGroupIdListener.start();
     // start group and document listeners
@@ -57,7 +64,8 @@ export class DBListeners extends BaseListener {
       this.personalDocumentsListener.start(),
       this.learningLogsListener.start(),
       this.publicationListener.start(),
-      this.supportsListener.start()
+      this.supportsListener.start(),
+      this.liveDocsListener.start()
     ]);
     // start listeners that depend on documents
     await Promise.all([
@@ -82,6 +90,7 @@ export class DBListeners extends BaseListener {
     this.problemDocumentsListener.stop();
     this.groupsListener.stop();
     this.latestGroupIdListener.stop();
+    this.liveDocsListener.stop();
   }
 
   // sync local support document properties to firebase (teachers only)

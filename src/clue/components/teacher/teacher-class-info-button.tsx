@@ -32,6 +32,7 @@ export class ClassInfoButton extends BaseComponent <IProps> {
   }
 
   private handleExportClick = async () => {
+    console.log("\t🏭 handleExportClick");
     const {db, user} = this.stores; // access the database
     const latestGroupsArray: string[] = []; // store the group ids
 

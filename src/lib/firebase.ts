@@ -92,6 +92,9 @@ export class Firebase {
   //
 
   public getClassPath(user: UserModelType) {
+    // console.log("\t🏭 getClassPath");
+    // console.log("\t🥩 user:", user);
+    // console.log("\t🥩returns:", `classes/${user.classHash}`);
     return `classes/${user.classHash}`;
   }
 
@@ -100,6 +103,8 @@ export class Firebase {
   }
 
   public getUsersPath(user: UserModelType) {
+    console.log("\t🏭 getUsersPath");
+    console.log("\treturning:", `${this.getClassPath(user)}/users`);
     return `${this.getClassPath(user)}/users`;
   }
 
@@ -184,14 +189,18 @@ export class Firebase {
   }
 
   public getOfferingsPath(user: UserModelType) {
+    // console.log("\tgetOfferingsPath returns:", `${this.getClassPath(user)}/offerings`);
     return `${this.getClassPath(user)}/offerings`;
+
   }
 
   public getOfferingPath(user: UserModelType) {
+    // console.log("\t🏭 getOfferingPath returns", `${this.getClassPath(user)}/offerings/${user.offeringId}` );
     return `${this.getClassPath(user)}/offerings/${user.offeringId}`;
   }
 
   public getOfferingUsersPath(user: UserModelType) {
+    // console.log("\t🏭 getOfferingUsersPath", `${this.getOfferingPath(user)}/users`);
     return `${this.getOfferingPath(user)}/users`;
   }
 

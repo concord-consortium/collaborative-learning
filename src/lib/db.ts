@@ -422,6 +422,8 @@ export class DB {
   }
 
   public createPersonalDocument(params: ICreateOtherDocumentParams) {
+    console.log("📁 db.ts ------------------------");
+    console.log("\t🏭 createPersonalDocument");
     return this.createOtherDocument(PersonalDocument, params);
   }
 

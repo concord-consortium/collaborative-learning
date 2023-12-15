@@ -40,6 +40,7 @@ export const usePublishDialog = (document: DocumentModelType) => {
   };
 
   const handlePublishDocument = () => {
+    console.log("\t🏭 handlePublishDocument");
       const dbPublishDocumentFunc = document.type === ProblemDocument
                                       ? () => db.publishProblemDocument(document)
                                       : () => db.publishOtherDocument(document);
