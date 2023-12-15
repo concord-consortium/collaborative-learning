@@ -105,12 +105,7 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
   }, [dataConfig, model, plotWidth, plotHeight, refreshValues, sharedVariables, xAxis, yAxis]);
 
   return (
-    <svg
-      className={`plotted-function-${classFromKey}`}
-      style={{height: "100%", width: "100%"}}
-      x={0}
-      y={0}
-    >
+    <svg className={`plotted-function-${classFromKey}`}>
       <g
         className={`plotted-function plotted-function-${classFromKey}`}
         ref={plottedFunctionRef}
