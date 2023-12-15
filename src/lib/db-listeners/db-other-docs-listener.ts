@@ -85,6 +85,8 @@ export class DBOtherDocumentsListener extends BaseListener {
     const dbDoc: DBOtherPublication|null = snapshot.val();
     this.debugLogSnapshot("#handlePublicationAdded", snapshot);
     if (dbDoc) {
+      // TODO: handle rejections of this promise, see the note in
+      // the catch of db.ts#openDocument
       this.db.createDocumentModelFromOtherPublication(dbDoc, this.publicationType);
     }
   };

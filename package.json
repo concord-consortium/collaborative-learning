@@ -254,6 +254,7 @@
     "react-data-grid": "7.0.0-canary.46",
     "react-dom": "^17.0.2",
     "react-dom-factories": "^1.0.2",
+    "react-error-boundary": "^4.0.11",
     "react-modal": "^3.15.1",
     "react-query": "^3.39.2",
     "react-resize-detector": "^8.0.4",

@@ -1,6 +1,7 @@
 import { inject, observer } from "mobx-react";
 import { getSnapshot, destroy } from "mobx-state-tree";
 import React from "react";
+import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 import stringify from "json-stringify-pretty-compact";
 import { AnnotationLayer } from "./annotation-layer";
 import { DocumentLoadingSpinner } from "./document-loading-spinner";
@@ -73,6 +74,17 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
     };
   }
 
+  private fallbackRender = ({ error, resetErrorBoundary }: FallbackProps) => {
+    return (
+      <DocumentError
+        action="rendering"
+        document={this.props.document}
+        errorMessage={error.message}
+        content={this.props.document?.content}
+      />
+    );
+  };
+
   private setCanvasElement(canvasElement?: HTMLDivElement | null) {
     if (!this.state.canvasElement) {
       this.setState({ canvasElement });
@@ -89,24 +101,26 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
       <TileApiInterfaceContext.Provider value={this.tileApiInterface}>
         <AddTilesContext.Provider value={this.getDocumentContent() || null}>
           <ReadOnlyContext.Provider value={this.props.readOnly}>
-            <div
-              key="canvas"
-              className="canvas"
-              data-test="canvas"
-              onKeyDown={this.handleKeyDown}
-              ref={(el) => this.setCanvasElement(el)}
-            >
-              {this.renderContent()}
-              {this.renderDebugInfo()}
-              {this.renderOverlayMessage()}
-            </div>
-            <AnnotationLayer
-              canvasElement={this.state.canvasElement}
-              content={content}
-              documentScrollX={this.state.documentScrollX}
-              documentScrollY={this.state.documentScrollY}
-              readOnly={this.props.readOnly}
-            />
+            <ErrorBoundary fallbackRender={this.fallbackRender}>
+              <div
+                key="canvas"
+                className="canvas"
+                data-test="canvas"
+                onKeyDown={this.handleKeyDown}
+                ref={(el) => this.setCanvasElement(el)}
+              >
+                {this.renderContent()}
+                {this.renderDebugInfo()}
+                {this.renderOverlayMessage()}
+              </div>
+              <AnnotationLayer
+                canvasElement={this.state.canvasElement}
+                content={content}
+                documentScrollX={this.state.documentScrollX}
+                documentScrollY={this.state.documentScrollY}
+                readOnly={this.props.readOnly}
+              />
+            </ErrorBoundary>
           </ReadOnlyContext.Provider>
         </AddTilesContext.Provider>
       </TileApiInterfaceContext.Provider>
@@ -124,7 +138,12 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
     // It might be useful in the future to support showing the history so a user could try to
     // rewind to a document version that doesn't have an error.
     if (document?.contentStatus === ContentStatus.Error) {
-      return <DocumentError document={document} />;
+      return <DocumentError
+        action="loading"
+        document={document}
+        errorMessage={document.contentErrorMessage}
+        content={document.invalidContent}
+      />;
     } else if (documentContent) {
       return (
         <>

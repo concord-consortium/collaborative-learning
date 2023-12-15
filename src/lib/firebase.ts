@@ -7,6 +7,7 @@ import { UserModelType } from "../models/stores/user";
 import { DB } from "./db";
 import { escapeKey } from "./fire-utils";
 import { urlParams } from "../utilities/url-params";
+import { DocumentModelType } from "src/models/document/document";
 
 // Set this during database testing in combination with the urlParam testMigration=true to
 // override the top-level Firebase key regardless of mode. For example, setting this to "authed-copy"
@@ -121,6 +122,18 @@ export class Firebase {
   public getUserDocumentPath(user: UserModelType, documentKey?: string, userId?: string) {
     const suffix = documentKey ? `/${documentKey}` : "";
     return `${this.getUserPath(user, userId)}/documents${suffix}`;
+  }
+
+  public getDocumentPath(document: DocumentModelType, user: UserModelType) {
+    if (document.isRemote) {
+      return `classes/${document.remoteContext}/users/${document.uid}/documents/${document.key}`;
+    } else {
+      return this.getUserDocumentPath(user, document.key, document.uid);
+    }
+  }
+
+  public getFullDocumentPath(document: DocumentModelType, user: UserModelType) {
+    return this.getFullPath(this.getDocumentPath(document, user));
   }
 
   // convenience function which returns all of the relevant paths for a given document
