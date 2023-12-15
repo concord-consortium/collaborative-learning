@@ -10,6 +10,14 @@ class ChatPanel{
     getChatPanelToggle() {
       return cy.get('.chat-panel-toggle');
     }
+    openChatPanel() {
+      cy.get('.resource-and-chat-panel .top-row').then(topRow => {
+        if(topRow.find(".chat-panel-toggle").length > 0) {
+          this.getChatPanelToggle().click();
+          cy.wait(10000);
+        }
+      })
+    }
     getChatPanel() {
       return cy.get('.chat-panel');
     }
