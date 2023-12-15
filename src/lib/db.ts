@@ -14,7 +14,7 @@ import { DocumentModelType, createDocumentModel } from "../models/document/docum
 import {
   DocumentType, LearningLogDocument, LearningLogPublication, OtherDocumentType, OtherPublicationType,
   PersonalDocument, PersonalPublication, PlanningDocument, ProblemDocument, ProblemOrPlanningDocumentType,
-  ProblemPublication, SupportPublication
+  ProblemPublication, ProcessableDocumentTypes, SupportPublication
 } from "../models/document/document-types";
 import { SectionModelType } from "../models/curriculum/section";
 import { SupportModelType } from "../models/curriculum/support";
@@ -585,6 +585,7 @@ export class DB {
           }
         })
         .then((document) => {
+          console.log("| ... 8  and THEN put the document in the store!", document.key);
           documents.add(document);
           resolve(document);
         })
@@ -730,10 +731,12 @@ export class DB {
   }
 
   public createDocumentModelFromProblemMetadata(
-          type: ProblemOrPlanningDocumentType, userId: string,
+
+          type: ProcessableDocumentTypes, userId: string,
           metadata: DBOfferingUserProblemDocument) {
     const {documentKey} = metadata;
     const group = this.stores.groups.groupForUser(userId);
+    console.log("| ... 7 eventually given to me, db.ts to open the document");
     return this.openDocument({
       type,
       userId,

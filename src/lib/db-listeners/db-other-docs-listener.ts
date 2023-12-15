@@ -38,6 +38,7 @@ export class DBOtherDocumentsListener extends BaseListener {
     const documentsRef = this.db.firebase.ref(this.documentsPath);
     this.documentsRef = documentsRef;
     documentsRef.once("value", snapshot => {
+      console.log("| DBOtherDocumentsListener... is for which documentType?", this.documentType);
       if (size(snapshot.val()) === 0) {
         this.db.stores.documents.resolveRequiredDocumentPromiseWithNull(this.documentType);
       }
@@ -69,13 +70,14 @@ export class DBOtherDocumentsListener extends BaseListener {
     const {documents, user} = this.db.stores;
     const dbDoc: DBOtherDocument|null = snapshot.val();
     this.debugLogSnapshot("#handleDocumentAdded", snapshot);
-    if (dbDoc) {
+    if ( dbDoc ) {
       this.db.createDocumentModelFromOtherDocument(dbDoc, this.documentType)
         .then(doc => {
           if (doc.uid === user.id) {
             !doc.getProperty("isDeleted") && documents.resolveRequiredDocumentPromise(doc);
             (doc.type === PersonalDocument) && syncStars(doc, this.db);
           }
+          console.log("| DBOtherDocumentsListener... CREATED:", this.documentType, doc.key, doc.title);
           return doc;
         });
     }

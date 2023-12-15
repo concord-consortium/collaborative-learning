@@ -13,12 +13,14 @@ export class DBProblemDocumentsListener extends BaseListener {
   private onLoadOfferingUserChildChanged: (snapshot: firebase.database.DataSnapshot) => void;
 
   constructor(db: DB) {
+    console.log("| 1 instantiate a DBProblemDocumentsListener");
     super("DBProblemDocumentsListener");
     this.db = db;
   }
 
   public start() {
     const { user } = this.db.stores;
+    console.log("| 2 start a DBProblemDocumentsListener with user:", user );
 
     // both teachers and students listen to all problem documents
     // but only teachers listen to all content.  students only listen
@@ -30,6 +32,7 @@ export class DBProblemDocumentsListener extends BaseListener {
       // once is called immediately, and will proceed to resolve promise even if there is no value
       offeringUsersRef.once("value")
         .then((snapshot) => {
+          console.log("| 3 start a DBProblemDocumentsListener onces a snapshot of getOfferingUsersPath:", snapshot );
           this.handleLoadOfferingUsersProblemDocuments(snapshot);
           // We have to listen to both events because of a race condition of the documents
           // not being set when the child is added
@@ -53,9 +56,11 @@ export class DBProblemDocumentsListener extends BaseListener {
   }
 
   private handleLoadOfferingUsersProblemDocuments = (snapshot: firebase.database.DataSnapshot) => {
+    console.log("| 4 handleLoadOfferingUsersProblemDocuments gets snapshot...", snapshot);
     const { user: { id: selfUserId }, documents } = this.db.stores;
     const users: DBOfferingUserMap = snapshot.val();
     this.debugLogSnapshot("#handleLoadOfferingUsersProblemDocuments", snapshot);
+    console.log("| 5... and handles each user in it...", users);
     forEach(users, (user: DBOfferingUser) => {
       if (user) {
         this.handleOfferingUser(user);
@@ -87,6 +92,7 @@ export class DBProblemDocumentsListener extends BaseListener {
     }
 
     forEach(user.documents, document => {
+      console.log("| ... 6  handleOfferingUser gets document...", document.documentKey);
       if (!document?.documentKey || !document?.self?.uid) return;
       const existingDoc = documents.getDocument(document.documentKey);
       if (existingDoc) {
