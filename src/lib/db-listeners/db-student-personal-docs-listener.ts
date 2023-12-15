@@ -54,6 +54,7 @@ export class DBStudentPersonalDocsListener extends BaseListener {
   };
 
   private handleUserChange = (eventType: string) => (snapshot: firebase.database.DataSnapshot) => {
+    console.log("|    ...handleUserChange!", eventType, snapshot.val());
   };
 
   // --listener-- 5
