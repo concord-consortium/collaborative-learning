@@ -1,12 +1,15 @@
 import { observer } from "mobx-react";
 import { useStores } from "../../hooks/use-stores";
 import React from "react";
-
+import { PersonalDocument, ProblemDocument } from "../../models/document/document-types";
 import "./sort-work-view.scss";
+
 
 export const SortWorkView:React.FC = observer(function SortWorkView(){
   const stores = useStores();
   const allDocuments = JSON.parse(JSON.stringify(stores.documents.all));
+
+  const typesToInclude = [ProblemDocument, PersonalDocument];
 
   return (
     <div
@@ -19,7 +22,7 @@ export const SortWorkView:React.FC = observer(function SortWorkView(){
       </div>
         {allDocuments.map((doc: any) => {
           return (
-            <li key={doc.key}>{doc.key} | {doc.type} | pubCount: {doc.properties.pubCount } | user: { doc.uid} </li>
+            <pre key={doc.key}>{doc.key} | {doc.type} | pubCount: {doc.properties.pubCount } | user: { doc.uid} </pre>
           );
         })}
     </div>
