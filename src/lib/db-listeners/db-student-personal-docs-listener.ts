@@ -11,6 +11,7 @@ export class DBStudentPersonalDocsListener extends BaseListener {
   private documentType: OtherDocumentType; // not sure we'll need this
   private onUserChildAdded: (snapshot: firebase.database.DataSnapshot) => void;
   private onUserChildChanged: (snapshot: firebase.database.DataSnapshot) => void;
+  //private handlePersonalDocAdded: (snapshot: firebase.database.DataSnapshot) => void;
   private relevantUsers: string[];
   private usersDocumentMetadataPaths: string[];
   private classPath: string;
@@ -21,14 +22,15 @@ export class DBStudentPersonalDocsListener extends BaseListener {
   }
 
   public start() {
-
     const { user } = this.db.stores;
     return new Promise<void>((resolve, reject) => {
       const offeringUsersRef = this.offeringUsersRef = this.db.firebase.ref(
         this.db.firebase.getOfferingUsersPath(user)
       );
 
-      this.classPath = this.db.firebase.getFullClassPath(user);
+      console.log("|| good path, for example: ", this.db.firebase.getOfferingUsersPath(user));
+
+      this.classPath = this.db.firebase.getClassPath(user);
       // console.log("|| classPath:", this.classPath);
 
       // const firstSnap = offeringUsersRef.once("value").then((snapshot) => snapshot.val());
@@ -47,17 +49,11 @@ export class DBStudentPersonalDocsListener extends BaseListener {
           const userPaths = userKeys.map(key => `${this.classPath}/users/${key}/personalDocs`);
           this.usersDocumentMetadataPaths = userPaths;
 
-          console.log("|| userDocumentMetadataPaths:", userPaths);
+          // console.log("|| userDocumentMetadataPaths:", userPaths);
           // create a firebase ref for each path in userPaths
-          const userRefs = userPaths.map(path => this.db.firebase.ref(path));
-          userRefs.forEach(ref => {
-
-            ref.once('value').then(userRefSnap => {
-              console.log("|| userRefSnap: ", userRefSnap);
-              const userRefSnapVal = userRefSnap.val();
-              console.log("|| userRefSnapVal: ", userRefSnapVal);
-            });
-
+          const userPersonalDocsRefs = userPaths.map(path => this.db.firebase.ref(path));
+          userPersonalDocsRefs.forEach(ref => {
+            ref.on("child_added", this.handlePersonalDocAdded);
           });
           resolve();
         })
@@ -71,6 +67,31 @@ export class DBStudentPersonalDocsListener extends BaseListener {
       // this.offeringUsersRef.off("child_changed", this.onUserChildChanged);
     }
   }
+
+  private handlePersonalDocAdded = (snapshot: firebase.database.DataSnapshot) => {
+    const docMetaSnap = snapshot.val();
+    const docKey = docMetaSnap.self.documentKey;
+
+    if (!docKey || !docMetaSnap?.self?.uid) return;
+    const documents = this.db.stores.documents;
+    const existingDoc = documents.getDocument(docKey);
+
+    if (existingDoc) return;
+
+
+
+    //console.log("|| DOCUMENT:", document);
+
+    this.db.createDocumentModelFromOtherDocument(docMetaSnap, PersonalDocument);
+      // this.db.createDocumentModelFromProblemMetadata(PersonalDocument as any, document.self.uid, document)
+      // .then((docModel) => {
+      //   if (isCurrentUser) {
+      //     documents.resolveRequiredDocumentPromise(docModel);
+      //     syncStars(docModel, this.db);
+      //   }
+      // });
+
+  };
 
   // {{HANDLEDOCS}}
   private handlePersonalDocs = (snapshot: firebase.database.DataSnapshot) => {
@@ -107,25 +128,7 @@ export class DBStudentPersonalDocsListener extends BaseListener {
     }
 
     forEach(user.documents, document => {
-      if (!document?.documentKey || !document?.self?.uid) return;
 
-      const existingDoc = documents.getDocument(document.documentKey);
-
-      if (existingDoc) {
-        console.log("|| YA EXISTE:", document);
-        // this.db.updateDocumentFromProblemDocument(existingDoc, document);
-      }
-
-      else {
-        console.log("|| NO EXISTE:", document);
-        // this.db.createDocumentModelFromProblemMetadata(PersonalDocument as any, document.self.uid, document)
-        // .then((docModel) => {
-        //   if (isCurrentUser) {
-        //     documents.resolveRequiredDocumentPromise(docModel);
-        //     syncStars(docModel, this.db);
-        //   }
-        // });
-      }
     });
   };
 }
