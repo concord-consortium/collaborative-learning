@@ -14,7 +14,7 @@ import { DocumentModelType, createDocumentModel } from "../models/document/docum
 import {
   DocumentType, LearningLogDocument, LearningLogPublication, OtherDocumentType, OtherPublicationType,
   PersonalDocument, PersonalPublication, PlanningDocument, ProblemDocument, ProblemOrPlanningDocumentType,
-  ProblemPublication, ProcessableDocumentTypes, SupportPublication
+  ProblemPublication, SupportPublication
 } from "../models/document/document-types";
 import { SectionModelType } from "../models/curriculum/section";
 import { SupportModelType } from "../models/curriculum/support";
@@ -732,7 +732,7 @@ export class DB {
 
   public createDocumentModelFromProblemMetadata(
 
-          type: ProcessableDocumentTypes, userId: string,
+          type: ProblemOrPlanningDocumentType, userId: string,
           metadata: DBOfferingUserProblemDocument) {
     const {documentKey} = metadata;
     const group = this.stores.groups.groupForUser(userId);

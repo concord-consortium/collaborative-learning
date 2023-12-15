@@ -55,6 +55,7 @@ export class DBProblemDocumentsListener extends BaseListener {
     }
   }
 
+  // --listener-- 4
   private handleLoadOfferingUsersProblemDocuments = (snapshot: firebase.database.DataSnapshot) => {
     console.log("| 4 handleLoadOfferingUsersProblemDocuments gets snapshot...", snapshot);
     const { user: { id: selfUserId }, documents } = this.db.stores;
@@ -81,6 +82,7 @@ export class DBProblemDocumentsListener extends BaseListener {
     }
   };
 
+  // --listener-- 5
   private handleOfferingUser = (user: DBOfferingUser) => {
     if (!user.self?.uid) return;
     const { documents, user: currentUser } = this.db.stores;
@@ -91,6 +93,7 @@ export class DBProblemDocumentsListener extends BaseListener {
       documents.resolveRequiredDocumentPromiseWithNull(ProblemDocument);
     }
 
+    // --listener-- 6
     forEach(user.documents, document => {
       console.log("| ... 6  handleOfferingUser gets document...", document.documentKey);
       if (!document?.documentKey || !document?.self?.uid) return;
