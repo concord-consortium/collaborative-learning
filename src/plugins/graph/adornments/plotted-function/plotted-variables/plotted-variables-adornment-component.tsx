@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef } from "react";
 import { select } from "d3";
 import { observer } from "mobx-react-lite";
 import { mstAutorun } from "../../../../../utilities/mst-autorun";
+import { mstReaction } from "../../../../../utilities/mst-reaction";
 import { INumericAxisModel } from "../../../imports/components/axis/models/axis-model";
 import { useAxisLayoutContext } from "../../../imports/components/axis/models/axis-layout-context";
 import { ScaleNumericBaseType } from "../../../imports/components/axis/axis-types";
@@ -43,6 +44,7 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
   // const instanceKey = model.instanceKey(cellKey);
   const path = useRef("");
   const plottedFunctionRef = useRef<SVGGElement>(null);
+  const plottedFunctionCurrentValueRef = useRef<SVGGElement>(null);
   const sharedVariables = graphModel.sharedVariables;
 
   const addPath = useCallback(() => {
@@ -79,6 +81,35 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
     addPath();
   }, [addPath, model]);
 
+  const refreshCurrentValue = useCallback(() => {
+    if (!model.isVisible) return;
+    for (const pvi of model.plottedVariables.values()) {
+      const selection = select(plottedFunctionCurrentValueRef.current).selectAll("circle");
+      const vals = pvi.variableValues;
+      if (vals) {
+        selection
+          .data([vals])
+          .join(
+            enter => {
+              return enter.append('circle')
+                .attr('r', '5')
+                .attr('class', 'variable-value')
+                .attr('cx', (data) => model.pointPosition(data.x, xScale, xCellCount))
+                .attr('cy', (data) => model.pointPosition(data.y, yScale, yCellCount));
+            },
+            update => {
+              return update
+                .attr('cx', (data) => model.pointPosition(data.x, xScale, xCellCount))
+                .attr('cy', (data) => model.pointPosition(data.y, yScale, yCellCount));
+            },
+            exit => {
+              exit.remove();
+            }
+          );
+      }
+    }
+  }, [model, xCellCount, xScale, yCellCount, yScale]);
+
   // Refresh values on expression changes
   useEffect(function refreshExpressionChange() {
     return mstAutorun(() => {
@@ -109,8 +140,38 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
         plottedVariables.yVariable?.computedValueIncludingMessageAndError; // eslint-disable-line no-unused-expressions
       });
       refreshValues();
+      refreshCurrentValue();
     }, { name: "PlottedVariablesAdornmentComponent.refreshAxisChange" }, model);
-  }, [dataConfig, model, plotWidth, plotHeight, refreshValues, sharedVariables, xAxis, yAxis]);
+  }, [dataConfig, model, plotWidth, plotHeight, refreshValues, sharedVariables, xAxis, yAxis, refreshCurrentValue]);
+
+  // Scale graph when a new X or Y variable is selected
+  useEffect(function scaleOnVariableChange() {
+    return mstReaction(() => {
+      return Array.from(model.plottedVariables.values()).map((pvi) => [pvi.xVariableId, pvi.yVariableId]);
+    },
+    (varlist) => {
+      console.log('autoscale!', varlist);
+
+      function calcDomain(v: number) {
+        if (v === 0) return [-10, 10];
+        if (v < 0) return [2*v, 0];
+        return [0, 2*v];
+      }
+
+      // TODO: get rid of this loop; it should aggregate all values
+      // and use setNiceDomain to find a reasonable bound for them all.
+      for (const pvi of model.plottedVariables.values()) {
+        const vals = pvi.variableValues;
+        if (vals) {
+          const xDomain = calcDomain(vals.x), yDomain = calcDomain(vals.y);
+          xAxis?.setDomain(xDomain[0], xDomain[1]);
+          yAxis?.setDomain(yDomain[0], yDomain[1]);
+        }
+      }
+    },
+    { name: "PlottedVariablesAdornmentComponent.scaleOnVariableChange" },
+    model);
+  }, [model, xAxis, yAxis]);
 
   return (
     <svg
@@ -122,6 +183,10 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
       <g
         className={`plotted-function plotted-function-${classFromKey}`}
         ref={plottedFunctionRef}
+      />
+      <g
+        className={`plotted-function-current-value plotted-function-current-value-${classFromKey}`}
+        ref={plottedFunctionCurrentValueRef}
       />
     </svg>
   );

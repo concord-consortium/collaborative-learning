@@ -43,6 +43,19 @@ export const PlottedVariablesInstance = types.model("PlottedVariablesInstance", 
       return self.sharedVariables?.variables.find(variable => variable.id === self.yVariableId);
     }
   }))
+  .views(self => ({
+    /**
+     * Return the current values of the X and Y variables.
+     * Returns an object with { x, y }, or undefined if either one is not set.
+     */
+    get variableValues() {
+      const x = self.xVariable?.computedValue,
+        y = self.yVariable?.computedValue;
+    if (x !== undefined && y !== undefined) {
+      return { x, y };
+    }
+    }
+  }))
   .actions(self => ({
     computeY(x: number) {
       if (self.variablesCopy && self.xVariableCopy && self.yVariableCopy) {
@@ -85,6 +98,24 @@ export const PlottedVariablesAdornmentModel = PlottedFunctionAdornmentModel
   .views(self => ({
     get sharedVariables() {
       return getSharedVariables(self);
+    },
+    /**
+     * Returns an object with all X and Y values of plotted variables.
+     * Format is { x: [list of x values], y: [list of y values] }
+     */
+    get variableValues() {
+      const lists = {
+        x: [] as number[],
+        y: [] as number[]
+      };
+      for (const pvi of self.plottedVariables.values()) {
+        const vals = pvi.variableValues;
+        if (vals) {
+          lists.x.push(vals.x);
+          lists.y.push(vals.y);
+        }
+      }
+      return lists;
     }
   }))
   .actions(self => ({
