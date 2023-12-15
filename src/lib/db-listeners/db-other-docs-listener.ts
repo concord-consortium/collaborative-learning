@@ -23,15 +23,10 @@ export class DBOtherDocumentsListener extends BaseListener {
     this.documentType = documentType;
   }
 
-  private niceLog = (msg: string, ...args: any[]) => {
-    this.documentType === PersonalDocument && console.log(`| ☑️ %c${msg}`, "background: #222; color: #bada55", ...args);
-  };
-
   public start() {
     if (this.documentType === PersonalDocument) {
       this.publicationType = PersonalPublication;
       this.documentsPath = this.db.firebase.getUserPersonalDocPath(this.db.stores.user);
-      this.niceLog("1 got path to documents metadata:", this.documentsPath );
       this.publicationsPath = this.db.firebase.getPersonalPublicationsPath(this.db.stores.user);
     }
     else {
@@ -42,14 +37,11 @@ export class DBOtherDocumentsListener extends BaseListener {
 
     const documentsRef = this.db.firebase.ref(this.documentsPath);
     this.documentsRef = documentsRef;
-    this.niceLog("2 used the path to get a firebase ref:", this.documentsRef);
     documentsRef.once("value", snapshot => {
-      this.niceLog("3 once the ref and do the resolve null check", );
       if (size(snapshot.val()) === 0) {
         this.db.stores.documents.resolveRequiredDocumentPromiseWithNull(this.documentType);
       }
       this.debugLogHandlers("#start", "adding", ["child_added", "child_changed", "child_removed"], documentsRef);
-      this.niceLog("4 added the listeners to the ref", );
       documentsRef.on("child_added", this.handleDocumentAdded);
       documentsRef.on("child_changed", this.handleDocumentChanged);
       documentsRef.on("child_removed", this.handleDocumentRemoved);
