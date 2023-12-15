@@ -6,6 +6,7 @@ import { BaseListener } from "./base-listener";
 export class DBStudentPersonalDocsListener extends BaseListener {
   private db: DB;
   private offeringUsersRef: firebase.database.Reference | null  = null;
+  private userPersonalDocsRefs: firebase.database.Reference[];
 
   constructor(db: DB, documentType: OtherDocumentType) {
     super("DBStudentPersonalDocsListener");
@@ -24,8 +25,8 @@ export class DBStudentPersonalDocsListener extends BaseListener {
           const snapVal = snapshot.val();
           const userKeys = Object.keys(snapVal).filter(key => key !== user.id);
           const userPaths = userKeys.map(key => `${classPath}/users/${key}/personalDocs`);
-          const userPersonalDocsRefs = userPaths.map(path => this.db.firebase.ref(path));
-          userPersonalDocsRefs.forEach(ref => {
+          this.userPersonalDocsRefs = userPaths.map(path => this.db.firebase.ref(path));
+          this.userPersonalDocsRefs.forEach(ref => {
             ref.on("child_added", this.handlePersonalDocAdded);
           });
           resolve();
@@ -35,9 +36,10 @@ export class DBStudentPersonalDocsListener extends BaseListener {
   }
 
   public stop() {
-    if (this.offeringUsersRef) {
-      // this.offeringUsersRef.off("child_added", this.onUserChildAdded);
-      // this.offeringUsersRef.off("child_changed", this.onUserChildChanged);
+    if (this.userPersonalDocsRefs) {
+      this.userPersonalDocsRefs.forEach(ref => {
+        ref.off("child_added", this.handlePersonalDocAdded);
+      });
     }
   }
 
