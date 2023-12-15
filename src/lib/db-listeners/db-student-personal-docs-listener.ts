@@ -11,6 +11,9 @@ export class DBStudentPersonalDocsListener extends BaseListener {
   private documentType: OtherDocumentType; // not sure we'll need this
   private onUserChildAdded: (snapshot: firebase.database.DataSnapshot) => void;
   private onUserChildChanged: (snapshot: firebase.database.DataSnapshot) => void;
+  private relevantUsers: string[];
+  private usersDocumentMetadataPaths: string[];
+  private classPath: string;
 
   constructor(db: DB, documentType: OtherDocumentType) {
     super("DBStudentPersonalDocsListener");
@@ -18,28 +21,44 @@ export class DBStudentPersonalDocsListener extends BaseListener {
   }
 
   public start() {
+
     const { user } = this.db.stores;
     return new Promise<void>((resolve, reject) => {
       const offeringUsersRef = this.offeringUsersRef = this.db.firebase.ref(
         this.db.firebase.getOfferingUsersPath(user)
       );
 
-      /* but I think we need to get a different Ref to find the docs */
-      console.log(">> result of getOfferingUsersPath:", this.db.firebase.getOfferingUsersPath(user));
-      console.log(">> but we want to get docs from another path, which is: ... classes/demoClass8/users/[userId]personalDocs", );
-      //console.log("|| 3,4, ref is onced to a snapshot, which is passed to handlePersonalDocs");
+      this.classPath = this.db.firebase.getFullClassPath(user);
+      // console.log("|| classPath:", this.classPath);
 
+      // const firstSnap = offeringUsersRef.once("value").then((snapshot) => snapshot.val());
+      // console.log("|| firstSnap:", firstSnap);
+      // this.relevantUsers = Object.keys(firstSnap).filter(key => key !== user.id);
+      // this.usersDocumentMetadataPaths = this.relevantUsers.map(key => {
+      //   return `${this.classPath}/users/${key}/personalDocs`;
+      // });
+
+      // console.log("|| relevantUsers:", this.relevantUsers);
+
+      // resolve();
       offeringUsersRef.once("value").then((snapshot) => {
-          console.log(">>> we need to assemble a path for each student documentMetaData:  classes/demoClass8/users/[userId]personalDocs ");
-          console.log(">>> we have this in hand: ", snapshot.val());
+          const snapVal = snapshot.val();
+          const userKeys = Object.keys(snapVal).filter(key => key !== user.id);
+          const userPaths = userKeys.map(key => `${this.classPath}/users/${key}/personalDocs`);
+          this.usersDocumentMetadataPaths = userPaths;
+
+          // create a firebase ref for each path in userPaths
+          const userRefs = userPaths.map(path => this.db.firebase.ref(path));
+
+          // get a snapshot for each ref
+          const userSnapPromises = userRefs.map(ref => ref.once("value"));
+
           // this.handlePersonalDocs(snapshot);
           // offeringUsersRef.on("child_added", this.onUserChildAdded = this.handleAddOrChange("child_added"));
           // offeringUsersRef.on("child_changed", this.onUserChildChanged = this.handleAddOrChange("child_changed"));
-          // resolve();
+          resolve();
         })
         .catch(reject);
-
-
     });
   }
 
