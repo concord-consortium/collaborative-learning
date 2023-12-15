@@ -24,7 +24,7 @@ interface IProps {
 export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function SectionDocumentOrBrowser(
     { tabSpec, isChatOpen }) {
 
-  console.log(`---------${tabSpec.label}--------`);
+  // console.log(`---------${tabSpec.label}--------`);
   const persistentUI = usePersistentUIStore();
   const store = useStores();
   const appConfigStore = useAppConfig();
