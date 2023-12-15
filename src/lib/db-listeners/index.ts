@@ -43,7 +43,7 @@ export class DBListeners extends BaseListener {
     this.personalDocumentsListener = new DBOtherDocumentsListener(db, PersonalDocument);
     this.learningLogsListener = new DBOtherDocumentsListener(db, LearningLogDocument);
     this.publicationListener = new DBPublicationsListener(db);
-    this.studentPersonalDocsListener = new DBStudentPersonalDocsListener(db);
+    this.studentPersonalDocsListener = new DBStudentPersonalDocsListener(db, PersonalDocument);
     this.supportsListener = new DBSupportsListener(db);
     this.commentsListener = new DBCommentsListener(db);
     this.starsListener = new DBStarsListener(db);

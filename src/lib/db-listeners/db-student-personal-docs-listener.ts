@@ -2,16 +2,17 @@ import firebase from "firebase/app";
 import { forEach, size } from "lodash";
 import { DB } from "../db";
 import { DBOfferingUser, DBOfferingUserMap } from "../db-types";
-import { PersonalDocument } from "../../models/document/document-types";
+import { OtherDocumentType, PersonalDocument } from "../../models/document/document-types";
 import { BaseListener } from "./base-listener";
 
 export class DBStudentPersonalDocsListener extends BaseListener {
   private db: DB;
   private offeringUsersRef: firebase.database.Reference | null  = null;
+  private documentType: OtherDocumentType; // not sure we'll need this
   private onUserChildAdded: (snapshot: firebase.database.DataSnapshot) => void;
   private onUserChildChanged: (snapshot: firebase.database.DataSnapshot) => void;
 
-  constructor(db: DB) {
+  constructor(db: DB, documentType: OtherDocumentType) {
     super("DBStudentPersonalDocsListener");
     this.db = db;
   }
@@ -20,7 +21,7 @@ export class DBStudentPersonalDocsListener extends BaseListener {
     const { user } = this.db.stores;
     return new Promise<void>((resolve, reject) => {
       const offeringUsersRef = this.offeringUsersRef = this.db.firebase.ref(
-        this.db.firebase.getOfferingUsersPath(user) //TODO: the correct path
+        this.db.firebase.getOfferingUsersPath(user)
       );
 
       offeringUsersRef.once("value").then((snapshot) => {
@@ -42,10 +43,11 @@ export class DBStudentPersonalDocsListener extends BaseListener {
 
   // --listener-- 4
   private handlePersonalDocs = (snapshot: firebase.database.DataSnapshot) => {
-    const { user: { id: selfUserId }, documents } = this.db.stores;
     const users: DBOfferingUserMap = snapshot.val();
+    const { user: currentUser } = this.db.stores;
     forEach(users, (user: DBOfferingUser) => {
-      if (user) {
+      const isCurrentUser = String(user.self.uid) === currentUser.id;
+      if (user && !isCurrentUser) {
         this.handleOfferingUser(user);
       }
     });
@@ -57,10 +59,10 @@ export class DBStudentPersonalDocsListener extends BaseListener {
   // --listener-- 5
   private handleOfferingUser = (user: DBOfferingUser) => {
     if (!user.self?.uid) return;
-    const { documents, user: currentUser } = this.db.stores;
-    const isCurrentUser = String(user.self.uid) === currentUser.id;
+    console.log("|    ...handleOfferingUser", user.self.uid);
+    const { documents } = this.db.stores;
 
-    if (isCurrentUser && (size(user.documents) === 0)) {
+    if (size(user.documents) === 0) {
       documents.resolveRequiredDocumentPromiseWithNull(PersonalDocument);
     }
 
@@ -75,7 +77,7 @@ export class DBStudentPersonalDocsListener extends BaseListener {
       }
 
       else {
-        console.log("|| document? can we call in the db methods???", document, document.self);
+        console.log("| got a document?", document, document.self);
         // this.db.createDocumentModelFromOtherDocument(document as any, PersonalDocument)
         //   .then((docModel) => {
         //     if (isCurrentUser) {
