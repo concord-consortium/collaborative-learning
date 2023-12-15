@@ -18,8 +18,10 @@ export class DBStudentPersonalDocsListener extends BaseListener {
   }
 
   public start() {
+    //console.log("||> 1 start has a single user, that is the logged in user:", user );
     const { user } = this.db.stores;
     return new Promise<void>((resolve, reject) => {
+      //console.log("||> 2 path is calculated to a ref that is all users in the offering:", this.db.firebase.getOfferingUsersPath(user));
       const offeringUsersRef = this.offeringUsersRef = this.db.firebase.ref(
         this.db.firebase.getOfferingUsersPath(user)
       );

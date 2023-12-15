@@ -736,7 +736,7 @@ export class DB {
           metadata: DBOfferingUserProblemDocument) {
     const {documentKey} = metadata;
     const group = this.stores.groups.groupForUser(userId);
-    console.log("| ... 7 eventually given to me, db.ts to open the document");
+    //console.log("|> ... 20 eventually given to me, db.ts to open the document");
     return this.openDocument({
       type,
       userId,
