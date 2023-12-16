@@ -53,7 +53,6 @@ describe('GraphModel', () => {
     expect(graphModel.adornments.length).toBe(0);
     expect(graphModel.axes.size).toBe(0);
     expect(graphModel.plotType).toBe('casePlot');
-    expect(graphModel.config).toBeTruthy();
     expect(graphModel._pointColors).toStrictEqual([defaultPointColor]);
     expect(graphModel._pointStrokeColor).toBe(defaultStrokeColor);
     expect(graphModel.pointStrokeSameAsFill).toBe(false);

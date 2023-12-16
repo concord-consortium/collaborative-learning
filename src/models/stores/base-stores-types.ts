@@ -3,6 +3,7 @@ import { UnitModelType } from "../curriculum/unit";
 import { InvestigationModelType } from "../curriculum/investigation";
 import { ProblemModelType } from "../curriculum/problem";
 import { UIModelType } from "./ui";
+import { PersistentUIModelType } from "./persistent-ui";
 import { UserModelType } from "./user";
 import { GroupsModelType } from "./groups";
 import { ClassModelType } from "./class";
@@ -26,6 +27,7 @@ export interface IBaseStores {
   problem: ProblemModelType;
   teacherGuide?: ProblemModelType;
   user: UserModelType;
+  persistentUI: PersistentUIModelType;
   ui: UIModelType;
   groups: GroupsModelType;
   class: ClassModelType;

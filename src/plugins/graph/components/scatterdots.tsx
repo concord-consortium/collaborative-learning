@@ -5,11 +5,9 @@ import {CaseData} from "../d3-types";
 import {PlotProps} from "../graph-types";
 import {useDragHandlers, usePlotResponders} from "../hooks/use-plot";
 import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
-import {useDataSetContext} from "../imports/hooks/use-data-set-context";
-// import {useInstanceIdContext} from "../hooks/use-instance-id-context";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {ICase} from "../../../models/data/data-set-types";
-import {useGraphModelContext} from "../models/graph-model";
+import { useGraphModelContext } from "../hooks/use-graph-model-context";
 import {
   // getScreenCoord,
   handleClickOnDot,
@@ -17,13 +15,14 @@ import {
   setPointSelection,
   startAnimation
 } from "../utilities/graph-utils";
+import { useGraphLayerContext } from "../hooks/use-graph-layer-context";
 
 export const ScatterDots = function ScatterDots(props: PlotProps) {
   const {dotsRef, enableAnimation} = props,
     graphModel = useGraphModelContext(),
-    // instanceId = useInstanceIdContext(),
+    layer = useGraphLayerContext(),
     dataConfiguration = useDataConfigurationContext(),
-    dataset = useDataSetContext(),
+    dataset = dataConfiguration?.dataset,
     secondaryAttrIDsRef = useRef<string[]>([]),
     pointRadiusRef = useRef(0),
     selectedPointRadiusRef = useRef(0),
@@ -149,6 +148,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
   }, [dataConfiguration, dotsRef, graphModel]);
 
   const refreshPointPositionsD3 = useCallback((selectedOnly: boolean) => {
+    if (!dataConfiguration) return;
     const getScreenX = (anID: string) => {
       const xAttrID = dataConfiguration?.attributeID('x') ?? '',
         xValue = dataset?.getNumeric(anID, xAttrID) ?? NaN,
@@ -219,10 +219,11 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
   }, [refreshPointPositionsD3]);
 
   usePlotResponders({
-    dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation
+    layer, dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation
   });
 
   return (
-    <svg/>
+    <>
+    </>
   );
 };

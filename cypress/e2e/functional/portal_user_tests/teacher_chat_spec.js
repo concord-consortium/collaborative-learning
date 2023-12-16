@@ -26,7 +26,6 @@ function beforeTest(url, clueTeacher, reportUrl) {
   cy.login(url, clueTeacher);
   cy.launchReport(reportUrl);
   cy.waitForLoad();
-  chatPanel.getChatPanelToggle().click();
   chatPanel.getChatPanel().should("be.visible");
   cy.openTopTab("problems");
   cy.openProblemSection("Initial Challenge");
@@ -42,7 +41,7 @@ describe('Teachers can communicate back and forth in chat panel', () => {
     // Teacher 1 document comment
     chatPanel.verifyProblemCommentClass();
     chatPanel.addDocumentCommentAndVerify(teacher1DocComment);
-    
+
     chatPanel.getDeleteMessageButton(teacher1DocComment).click();
     chatPanel.getDeleteConfirmModalButton().click();
     chatPanel.getFocusedThread().should("not.contain", teacher1DocComment);

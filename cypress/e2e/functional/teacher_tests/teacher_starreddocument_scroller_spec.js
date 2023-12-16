@@ -1,5 +1,7 @@
 import StarredTab from "../../../support/elements/common/StarredTab";
+import TeacherDashboard from "../../../support/elements/common/TeacherDashboard";
 
+let dashboard = new TeacherDashboard();
 let starred = new StarredTab;
 
 const queryParams = {
@@ -10,6 +12,7 @@ function beforeTest(params) {
   cy.clearQAData('all');
   cy.visit(params);
   cy.waitForLoad();
+  dashboard.switchView("Workspace & Resources");
 }
 
 context('Document Flipper', () => {
@@ -19,9 +22,12 @@ context('Document Flipper', () => {
       beforeTest(queryParams.teacherQueryParams);
       cy.log('verify document flipper under my work - starred tab');
       cy.openTopTab("my-work");
+      cy.wait(1000);
+      cy.openSection("my-work", "workspaces");
+      cy.wait(20000);
+
       starred.starMultipleCanvasItem("my-work", "workspaces");
       cy.openSection('my-work', 'starred');
-
       starred.getFocusDocument("my-work").should("not.exist");
 
       cy.log("verify single document flipper");
@@ -38,6 +44,8 @@ context('Document Flipper', () => {
 
       cy.log('verify document flipper under class work - starred tab');
       cy.openTopTab("class-work");
+      cy.openSection("class-work", "workspaces");
+      starred.starMultipleCanvasItemClassWork("class-work", "workspaces");
       cy.openSection('class-work', 'starred');
 
       starred.getFocusDocument("class-work").should("not.exist");
