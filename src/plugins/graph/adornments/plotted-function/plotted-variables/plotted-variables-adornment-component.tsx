@@ -6,7 +6,7 @@ import { INumericAxisModel } from "../../../imports/components/axis/models/axis-
 import { useAxisLayoutContext } from "../../../imports/components/axis/models/axis-layout-context";
 import { ScaleNumericBaseType } from "../../../imports/components/axis/axis-types";
 import { IPlottedVariablesAdornmentModel } from "./plotted-variables-adornment-model";
-import { useGraphModelContext } from "../../../models/graph-model";
+import { useGraphModelContext } from "../../../hooks/use-graph-model-context";
 import { useDataConfigurationContext } from "../../../hooks/use-data-configuration-context";
 import { curveBasis } from "../../../utilities/graph-utils";
 
