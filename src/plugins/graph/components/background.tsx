@@ -7,11 +7,10 @@ import {CaseData} from "../d3-types";
 import {InternalizedData, rTreeRect} from "../graph-types";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {rectangleSubtract, rectNormalize} from "../utilities/graph-utils";
-import {useCurrent} from "../../../hooks/use-current";
-import {useDataSetContext} from "../imports/hooks/use-data-set-context";
 import {MarqueeState} from "../models/marquee-state";
-import {useGraphModelContext} from "../models/graph-model";
+import {IGraphModel} from "../models/graph-model";
 import {useInstanceIdContext} from "../imports/hooks/use-instance-id-context";
+import { useGraphModelContext } from "../hooks/use-graph-model-context";
 
 interface IProps {
   marqueeState: MarqueeState
@@ -40,12 +39,23 @@ const prepareTree = (areaSelector: string, circleSelector: string): RTree => {
       caseIDs = caseIDs.concat(newlyFoundIDs);
     });
     return caseIDs;
+  },
+
+  updateSelections = (graphModel: IGraphModel, tree: any, newRect: rTreeRect, prevRect: rTreeRect) => {
+    const newSelection = getCasesForDelta(tree, newRect, prevRect);
+    const newDeselection = getCasesForDelta(tree, prevRect, newRect);
+    if (newSelection.length) {
+      graphModel.layers[0].config.dataset?.selectCases(newSelection, true); // FIXME multi dataset
+    }
+    if (newDeselection.length) {
+      graphModel.layers[0].config.dataset?.selectCases(newDeselection, false);
+    }
+
   };
 
 export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
   const {marqueeState} = props,
     instanceId = useInstanceIdContext() || 'background',
-    dataset = useCurrent(useDataSetContext()),
     layout = useGraphLayoutContext(),
     graphModel = useGraphModelContext(),
     bgRef = ref as MutableRefObject<SVGGElement | null>,
@@ -65,10 +75,10 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
       width.current = 0;
       height.current = 0;
       if (!event.sourceEvent.shiftKey) {
-        dataset.current?.clearAllSelections();
+        graphModel.clearAllSelectedCases();
       }
       marqueeState.setMarqueeRect({x: startX.current, y: startY.current, width: 0, height: 0});
-    }, [dataset, instanceId, layout, marqueeState]),
+    }, [graphModel, instanceId, layout, marqueeState]),
 
     onDrag = useCallback((event: { dx: number; dy: number }) => {
       if (event.dx !== 0 || event.dy !== 0) {
@@ -86,13 +96,10 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
             x: startX.current, y: startY.current,
             w: width.current,
             h: height.current
-          }),
-          newSelection = getCasesForDelta(selectionTree.current, currentRect, previousMarqueeRect.current),
-          newDeselection = getCasesForDelta(selectionTree.current, previousMarqueeRect.current, currentRect);
-        newSelection.length && dataset.current?.selectCases(newSelection, true);
-        newDeselection.length && dataset.current?.selectCases(newDeselection, false);
+          });
+        updateSelections(graphModel, selectionTree.current, currentRect, previousMarqueeRect.current);
       }
-    }, [dataset, marqueeState]),
+    }, [graphModel, marqueeState]),
 
     onDragEnd = useCallback(() => {
       marqueeState.setMarqueeRect({x: 0, y: 0, width: 0, height: 0});
@@ -121,7 +128,7 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
         // clicking on the background deselects all cases
         .on('click', (event) => {
           if (!event.shiftKey) {
-            dataset.current?.selectAllCases(false);
+            graphModel.clearAllSelectedCases();
           }
         })
         .selectAll<SVGRectElement, number>('rect')
@@ -137,7 +144,7 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
         .style('fill-opacity', isTransparent ? 0 : 1)
         .call(dragBehavior);
     });
-  }, [bgRef, dataset, dragBehavior, graphModel, layout]);
+  }, [bgRef, dragBehavior, graphModel, layout]);
 
   return (
     <g ref={bgRef}/>

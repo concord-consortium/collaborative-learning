@@ -1,4 +1,5 @@
 import { ESupportMode, ESupportType } from "../models/curriculum/support";
+import { PersistentUIModelType } from "../models/stores/persistent-ui";
 import { AudienceEnum, SectionTarget } from "../models/stores/supports";
 
 export type DatabaseType = "firebase" | "firestore";
@@ -205,7 +206,7 @@ export interface DBOfferingUser {
   documents?: DBOfferingUserProblemDocumentMap;
   planning?: DBOfferingUserProblemDocumentMap;
   sectionDocuments?: DBOfferingUserSectionDocumentMapDEPRECATED;
-  // TDB: store ui information here?
+  persistentUI?: PersistentUIModelType;
 }
 
 // metadata written to {classHash}/offerings/{offeringId}/users/{userId}/documents (for problem documents)

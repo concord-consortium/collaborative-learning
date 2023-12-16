@@ -13,7 +13,7 @@ export function pointPixToCoords(ptPix, originPix) {
     return { x: x === 0 ? 0 : x, y: y === 0 ? 0 : y }; // convert -0 to 0
 }
 
-class GraphToolTile{
+class GeometryToolTile {
     transformFromCoordinate(axis, num){
         return kGraphOriginCoordPix[axis] + num * kGraphPixPerCoord[axis];
     }
@@ -21,7 +21,7 @@ class GraphToolTile{
         const coord = Math.round((num - kGraphOriginCoordPix[axis]) / kGraphPixPerCoord[axis]);
         return coord === 0 ? 0 : coord; // convert -0 to 0
     }
-    getGraphTile(workspaceClass){
+    getGeometryTile(workspaceClass){
         return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .geometry-tool`);
     }
     getGraph(workspaceClass){
@@ -132,4 +132,4 @@ class GraphToolTile{
         cy.get('.single-workspace.primary-workspace .geometry-toolbar .button.delete.enabled').click();
     }
 }
-export default GraphToolTile;
+export default GeometryToolTile;

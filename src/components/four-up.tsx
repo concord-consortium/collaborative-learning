@@ -135,9 +135,9 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   }
 
   private getFocusedUserDocKey() {
-    const {ui} = this.stores;
+    const {persistentUI} = this.stores;
     const {group} = this.props;
-    return ui.tabs.get(this.getNavTabName())?.openDocuments.get(group.id);
+    return persistentUI.tabs.get(this.getNavTabName())?.openDocuments.get(group.id);
   }
 
   private getFocusedGroupUser() {
@@ -153,7 +153,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
 
   public render() {
     const {documentViewMode, viaStudentGroupView,
-        group, isGhostUser, ...others } = this.props;
+        group, isGhostUser, ...others} = this.props;
 
     const {width, height} = this.grid;
     const nwCell = this.grid.cells[CellPositions.NorthWest];
@@ -399,13 +399,13 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleFourUpClick = () => {
-    const { ui } = this.stores;
+    const { persistentUI } = this.stores;
     const { group } = this.props;
-    ui.closeSubTabDocument(this.getNavTabName(),  group.id);
+    persistentUI.closeSubTabDocument(this.getNavTabName(),  group.id);
   };
 
   private handleOverlayClick = (groupUser?: GroupUserModelType) => {
-    const { ui } = this.stores;
+    const { persistentUI } = this.stores;
     const { group } = this.props;
     const focusedUser = this.getFocusedGroupUser();
     const document = this.getGroupUserDoc(groupUser);
@@ -413,10 +413,10 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     if (groupUser && document) {
       const logInfo = {groupId: group.id, studentId: groupUser.id};
       if (focusedUser){
-        ui.closeSubTabDocument(this.getNavTabName(), group.id);
+        persistentUI.closeSubTabDocument(this.getNavTabName(), group.id);
         Logger.log(LogEventName.DASHBOARD_DESELECT_STUDENT, logInfo);
       } else {
-        ui.setOpenSubTabDocument(this.getNavTabName(), group.id, document.key); //sets the focus document;
+        persistentUI.setOpenSubTabDocument(this.getNavTabName(), group.id, document.key); //sets the focus document;
         Logger.log(LogEventName.DASHBOARD_SELECT_STUDENT, logInfo);
       }
     }

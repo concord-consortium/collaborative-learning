@@ -1,7 +1,7 @@
 import { select, Selection } from "d3";
 
- // The data stored with each plot element (e.g. 'circle')
-export type CaseData = { plotNum: number, caseID: string };
+// The data stored with each plot element (e.g. 'circle')
+export type CaseData = { dataConfigID: string, plotNum: number, caseID: string };
 
 export type DotsElt = SVGSVGElement | null;
 
@@ -23,19 +23,18 @@ export function selectGraphDots(svg: DotsElt): DotSelection | null {
 
 export function selectOuterCircles(svg: DotsElt): DotSelection | null {
   return svg
-          ? select(svg).selectAll(".graph-dot .outer-circle")
+          ? select(svg).selectAll("g.graph-dot .outer-circle")
           : null;
 }
 
 export function selectOuterCirclesSelected(svg: DotsElt): DotSelection | null {
   return svg
-          ? select(svg).selectAll(".graph-dot .outer-circle.selected")
+          ? select(svg).selectAll("g.graph-dot .outer-circle.selected")
           : null;
 }
 
 export function selectInnerCircles(svg: DotsElt): DotSelection | null {
   return svg
-          ? select(svg).selectAll(".graph-dot .inner-circle")
+          ? select(svg).selectAll("g.graph-dot .inner-circle")
           : null;
 }
-

@@ -70,5 +70,8 @@ class XYPlotToolTile {
     this.getYVariableDropdown().click();
     this.clickPortalButton(variableName, workspaceClass);
   }
+  getEditableAxisBox(axis, minOrMax) {
+    return this.getTile().find(`[data-testid=editable-border-box-${axis}-${minOrMax}]`);
+  }
 }
 export default XYPlotToolTile;

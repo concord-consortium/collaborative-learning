@@ -292,8 +292,11 @@ export const DataConfigurationModel = types
         return true;
       });
     },
+    /**
+     * Return true if no attribute has been assigned to any graph role (other than caption).
+     * The first attribute is always assigned as 'caption', so that does not count.
+     */
     get noAttributesAssigned() {
-      // The first attribute is always assigned as 'caption'. So it's really no attributes assigned except for that
       return this.attributes.length <= 1;
     },
     get numberOfPlots() {
@@ -386,6 +389,7 @@ export const DataConfigurationModel = types
       if (self.filteredCases.length <= caseArrayNumber) return [];
       return (self.filteredCases[caseArrayNumber].caseIds || []).map(id => {
         return {
+          dataConfigID: self.id,
           plotNum: caseArrayNumber,
           caseID: id
         };
@@ -409,6 +413,7 @@ export const DataConfigurationModel = types
       self.filteredCases.forEach((aFilteredCases, index) => {
         aFilteredCases.caseIds.forEach(
           (id) => joinedCaseData.push({
+            dataConfigID: self.id,
             plotNum: index,
             caseID: id
           }));

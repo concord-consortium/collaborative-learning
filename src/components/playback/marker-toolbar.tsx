@@ -1,6 +1,6 @@
 import React from "react";
 import classNames from "classnames";
-import { useUIStore } from "../../hooks/use-stores";
+import { usePersistentUIStore } from "../../hooks/use-stores";
 import { IMarkerProps } from "./playback-control";
 import AddMarkerIcon from "../../clue/assets/icons/playback/add-marker-icon.svg";
 import DeleteMarkerIcon from "../../clue/assets/icons/playback/delete-marker-icon.svg";
@@ -22,7 +22,7 @@ interface IProps {
 // TODO: need to handle comment marker.
 // TODO: need to add editable marker labels.
 export const PlaybackMarkerToolbar: React.FC<IProps> = ({markerSelected, addMarkerSelected, onAddMarkerSelected}) => {
-  const { activeNavTab } = useUIStore();
+  const { activeNavTab } = usePersistentUIStore();
 
   const AddMarkerButton: React.FC = () => {
     const handleAddMarker = () => {

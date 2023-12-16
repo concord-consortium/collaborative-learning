@@ -23,9 +23,9 @@ jest.mock("../hooks/use-stores", () => ({
       setDraggingId: (id?: string) => undefined
     }
   }),
-  useUIStore: () => ({
-    showAdornments: true
-  })
+  // TODO: Audit similar tests for instantiations of properites that are not required
+  useUIStore: () => ({}),
+  usePersistentUIStore: () => ({})
 }));
 
 describe("Four Up Component", () => {

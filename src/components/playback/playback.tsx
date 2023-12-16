@@ -2,7 +2,7 @@ import React from "react";
 import { Instance } from "mobx-state-tree";
 import { observer } from "mobx-react";
 import classNames from "classnames";
-import { useUIStore } from "../../hooks/use-stores";
+import { usePersistentUIStore } from "../../hooks/use-stores";
 import { HistoryStatus, TreeManager } from "../../models/history//tree-manager";
 import { DocumentModelType } from "../../models/document/document";
 import { PlaybackControlComponent } from "./playback-control";
@@ -18,7 +18,7 @@ interface IProps {
 
 export const PlaybackComponent: React.FC<IProps> = observer((props: IProps) => {
   const { document, showPlaybackControls, onTogglePlaybackControls  } = props;
-  const { activeNavTab } = useUIStore();
+  const { activeNavTab } = usePersistentUIStore();
   const treeManager = document?.treeManagerAPI as Instance<typeof TreeManager>;
 
   const renderPlaybackToolbarButton = () => {
@@ -43,7 +43,7 @@ export const PlaybackComponent: React.FC<IProps> = observer((props: IProps) => {
 
   let playbackControls = null;
   if (showPlaybackControls) {
-    playbackControls = treeManager.historyStatus === HistoryStatus.HISTORY_LOADED 
+    playbackControls = treeManager.historyStatus === HistoryStatus.HISTORY_LOADED
       ? <PlaybackControlComponent treeManager={treeManager} />
       : <div className="playback-controls loading">
           {treeManager.historyStatusString}

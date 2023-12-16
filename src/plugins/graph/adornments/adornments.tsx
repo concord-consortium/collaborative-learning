@@ -1,31 +1,34 @@
-import React from "react";
+import React, { useRef } from "react";
 import { clsx } from "clsx";
 import { observer } from "mobx-react-lite";
-import { kGraphAdornmentsClass, IDotsRef } from "../graph-types";
+import { kGraphAdornmentsClass } from "../graph-types";
 import { useGraphLayoutContext } from "../models/graph-layout";
-import { useGraphModelContext } from "../models/graph-model";
+import { useGraphModelContext } from "../hooks/use-graph-model-context";
 import { Adornment } from "./adornment";
 import { getAdornmentContentInfo } from "./adornment-content-info";
 import { IAdornmentModel } from "./adornment-models";
 import { useInstanceIdContext } from "../imports/hooks/use-instance-id-context";
 import { useTileModelContext } from "../../../components/tiles/hooks/use-tile-model-context";
 import { useDataConfigurationContext } from "../hooks/use-data-configuration-context";
+import { DotsElt } from "../d3-types";
 
 import "./adornments.scss";
 
 export interface AdornmmentsProps {
-  dotsRef?: IDotsRef
 }
 
 export const Adornments = observer(function Adornments(props: AdornmmentsProps) {
   const
-    { dotsRef } = props,
     graphModel = useGraphModelContext(),
     dataConfig = useDataConfigurationContext(),
     instanceId = useInstanceIdContext(),
     layout = useGraphLayoutContext(),
     { isTileSelected } = useTileModelContext(),
     adornments = graphModel.adornments;
+
+  // This is only used by ConnectingLines.
+  // TODO: Next time we update that adornment, we should have it create its own container element and remove this.
+  const dotsRef = useRef<DotsElt>(null);
 
   if (!adornments?.length) return null;
   // The subPlotKey is an object that contains the attribute IDs and categorical values for the
@@ -68,8 +71,8 @@ export const Adornments = observer(function Adornments(props: AdornmmentsProps) 
   // on the bottom and left axes.
   const outerGridCells: React.ReactElement[] = [];
   const { left, top, width, height } = layout.computedBounds.plot;
-  const bottomRepetitions = dataConfig?.numRepetitionsForPlace('bottom') ?? 1;
-  const leftRepetitions = dataConfig?.numRepetitionsForPlace('left') ?? 1;
+  const bottomRepetitions = graphModel.numRepetitionsForPlace('bottom') ?? 1;
+  const leftRepetitions = graphModel.numRepetitionsForPlace('left') ?? 1;
   const outerGridStyle = {
     gridTemplateColumns: `repeat(${bottomRepetitions}, 1fr)`,
     gridTemplateRows: `repeat(${leftRepetitions}, 1fr)`,
@@ -145,8 +148,8 @@ export const Adornments = observer(function Adornments(props: AdornmmentsProps) 
     { 'tile-selected': isTileSelected() }
   );
   return (
-    <div className={containerClass} data-testid={kGraphAdornmentsClass} style={outerGridStyle}>
+    <svg ref={dotsRef} className={containerClass} data-testid={kGraphAdornmentsClass} style={outerGridStyle}>
       {outerGridCells}
-    </div>
+    </svg>
   );
 });
