@@ -6,6 +6,7 @@ import {
 } from "../../adornments/plotted-function/plotted-variables/plotted-variables-adornment-model";
 import { VariableSelection } from "./variable-selection";
 
+import AddSeriesIcon from "../../imports/assets/add-series-icon.svg";
 import XAxisIcon from "../../assets/x-axis-icon.svg";
 import YAxisIcon from "../../assets/y-axis-icon.svg";
 
@@ -55,6 +56,15 @@ export const VariableFunctionLegend = observer(function(
             }
           })
         }
+        <div className="variable-row">
+          <button
+            className="add-series-button"
+            onClick={() => plottedVariablesAdornment.addPlottedVariables()}
+          >
+            <AddSeriesIcon/>
+            Add variables
+          </button>
+        </div>
       </>
     );
   } else {
