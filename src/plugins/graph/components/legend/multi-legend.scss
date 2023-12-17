@@ -30,28 +30,25 @@
     .legend-title {
       flex: 1 0 auto;
     }
+  }
 
-    .legend-icon {
-      flex-grow: 0 0 auto;
-      vertical-align: baseline;
+  .legend-icon {
+    flex-grow: 0 0 auto;
+    vertical-align: baseline;
 
-      .remove-button {
-        margin: 0;
-        height: 27px;
-        width: 27px;
-        padding: 2px;
-        border: none;
-        border-radius: 50%;
-        background: inherit;
-        cursor: pointer;
+    .remove-button {
+      margin: 0;
+      height: 27px;
+      width: 27px;
+      padding: 2px;
+      border: none;
+      border-radius: 50%;
+      background: inherit;
+      cursor: pointer;
 
-        &:hover {
-          background-color: $workspace-teal-light-6;
-        }
-
-
+      &:hover {
+        background-color: $workspace-teal-light-6;
       }
-
     }
   }
 

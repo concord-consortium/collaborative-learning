@@ -7,6 +7,7 @@ import {
 import { VariableSelection } from "./variable-selection";
 
 import AddSeriesIcon from "../../imports/assets/add-series-icon.svg";
+import RemoveDataIcon from "../../assets/remove-data-icon.svg";
 import XAxisIcon from "../../assets/x-axis-icon.svg";
 import YAxisIcon from "../../assets/y-axis-icon.svg";
 
@@ -51,6 +52,17 @@ export const VariableFunctionLegend = observer(function(
                     selectedVariable={plottedVariablesInstance.yVariable}
                     variables={sharedVars.variables}
                   />
+                  {plottedVariablesAdornment.plottedVariables.size > 1 &&
+                    <div className="legend-icon">
+                      <button
+                        className="remove-button"
+                        onClick={() => plottedVariablesAdornment.removePlottedVariables(instanceKey)}
+                        title="Remove variable plot"
+                      >
+                        <RemoveDataIcon />
+                      </button>
+                    </div>
+                  }
                 </div>
               );
             }
