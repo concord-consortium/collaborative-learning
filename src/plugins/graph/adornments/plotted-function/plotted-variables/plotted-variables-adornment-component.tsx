@@ -3,13 +3,13 @@ import { select } from "d3";
 import { observer } from "mobx-react-lite";
 import { mstAutorun } from "../../../../../utilities/mst-autorun";
 import { mstReaction } from "../../../../../utilities/mst-reaction";
-import { INumericAxisModel } from "../../../imports/components/axis/models/axis-model";
+import { IAxisModel, INumericAxisModel } from "../../../imports/components/axis/models/axis-model";
 import { useAxisLayoutContext } from "../../../imports/components/axis/models/axis-layout-context";
 import { ScaleNumericBaseType } from "../../../imports/components/axis/axis-types";
 import { IPlottedVariablesAdornmentModel } from "./plotted-variables-adornment-model";
 import { useGraphModelContext } from "../../../hooks/use-graph-model-context";
 import { useDataConfigurationContext } from "../../../hooks/use-data-configuration-context";
-import { curveBasis } from "../../../utilities/graph-utils";
+import { curveBasis, setNiceDomain } from "../../../utilities/graph-utils";
 
 import "../plotted-function-adornment-component.scss";
 
@@ -142,23 +142,17 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
       return Array.from(model.plottedVariables.values()).map((pvi) => [pvi.xVariableId, pvi.yVariableId]);
     },
     (varlist) => {
-      console.log('autoscale!', varlist);
-
-      function calcDomain(v: number) {
-        if (v === 0) return [-10, 10];
-        if (v < 0) return [2*v, 0];
-        return [0, 2*v];
+      // Set a range that includes 0 to 2x for all the given values.
+      function fitValues(values: number[], axis: IAxisModel) {
+        if (values.length) {
+          setNiceDomain([0, ...values.map(x=>2*x)], axis);
+        }
       }
 
-      // TODO: get rid of this loop; it should aggregate all values
-      // and use setNiceDomain to find a reasonable bound for them all.
-      for (const pvi of model.plottedVariables.values()) {
-        const vals = pvi.variableValues;
-        if (vals) {
-          const xDomain = calcDomain(vals.x), yDomain = calcDomain(vals.y);
-          xAxis?.setDomain(xDomain[0], xDomain[1]);
-          yAxis?.setDomain(yDomain[0], yDomain[1]);
-        }
+      const variableValues = model.variableValues;
+      if (xAxis && yAxis) {
+        fitValues(variableValues.x, xAxis);
+        fitValues(variableValues.y, yAxis);
       }
     },
     { name: "PlottedVariablesAdornmentComponent.scaleOnVariableChange" },
