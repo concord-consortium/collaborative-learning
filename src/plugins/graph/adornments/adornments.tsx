@@ -148,8 +148,9 @@ export const Adornments = observer(function Adornments(props: AdornmmentsProps) 
     { 'tile-selected': isTileSelected() }
   );
   return (
-    <svg ref={dotsRef} className={containerClass} data-testid={kGraphAdornmentsClass} style={outerGridStyle}>
+    <div className={containerClass} data-testid={kGraphAdornmentsClass} style={outerGridStyle}>
       {outerGridCells}
-    </svg>
+      <svg ref={dotsRef} className="connecting-lines-svg" />
+    </div>
   );
 });
