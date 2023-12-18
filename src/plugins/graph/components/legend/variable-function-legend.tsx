@@ -26,7 +26,7 @@ export const VariableFunctionLegend = observer(function(
   const sharedVars = plottedVariablesAdornment.sharedVariables;
   if (sharedVars) {
     return (
-      <>
+      <div className="plotted-variables-legend">
         <div className="legend-title-row">
           <div className="legend-title">
             Variables from: <strong>{sharedVars.label}</strong>
@@ -77,7 +77,7 @@ export const VariableFunctionLegend = observer(function(
             Add variables
           </button>
         </div>
-      </>
+      </div>
     );
   } else {
     return null;
