@@ -14,7 +14,29 @@ export const SortWorkView:React.FC = observer(function SortWorkView(){
 
   // const subtab = "sort";
   // const tabSpec = stores.appConfig.navTabs.getNavTabSpec("sort");
-  const someSectionModel = stores?.appConfig?.navTabs?.getNavTabSpec("class-work" as ENavTab)?.sections[0];
+  const someSectionModel = stores?.appConfig?.navTabs?.getNavTabSpec(ENavTab.kSortWork)?.sections[0];
+
+  console.log("ZZZ someSectionModel:", someSectionModel);
+  // const someSectionModel = {
+  //   "className": "",
+  //   "title": "Workspaces",
+  //   "type": "published-problem-documents",
+  //   "dataTestHeader": "class-work-section-published",
+  //   "dataTestItem": "class-work-list-items",
+  //   "documentTypes": [
+  //     "publication"
+  //   ],
+  //   "order": "reverse",
+  //   "properties": [
+  //     "!isTeacherDocument"
+  //   ],
+  //   "showStars": [
+  //     "teacher"
+  //   ],
+  //   "showGroupWorkspaces": false,
+  //   "addDocument": false
+  // };
+
   return (
     <div key="sort-work-view" className="sort-work-view">
       <SortWorkHeader />
@@ -23,7 +45,7 @@ export const SortWorkView:React.FC = observer(function SortWorkView(){
         subTab={subTab}
         tabSpec={tabSpec}
       /> */}
-
+      some section model:  <pre>{JSON.stringify(someSectionModel, null, 2)}</pre>
       <DocumentCollectionByType
         key={0}
         tab={"sort"}
