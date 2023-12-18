@@ -1,18 +1,41 @@
 import { observer } from "mobx-react";
-import { useStores } from "../../hooks/use-stores";
+import { useAppConfig, usePersistentUIStore, useStores } from "../../hooks/use-stores";
 import React from "react";
-import { ProblemDocument } from "../../models/document/document-types";
+import { PersonalDocument, ProblemDocument } from "../../models/document/document-types";
+import { NavTabModelType } from "../../models/view/nav-tabs";
 
 import "./sort-work-view.scss";
 
-export const SortWorkView:React.FC = observer(function SortWorkView(){
+
+interface ISortProps {
+  tabSpec: NavTabModelType;
+  isChatOpen: boolean;
+}
+
+export const SortWorkView:React.FC<ISortProps> = observer(function SortWorkView({ tabSpec, isChatOpen }){
   const stores = useStores();
   const allDocuments = stores.documents;
-  console.log("\t🥩 allDocuments:", allDocuments);
-  // // Sort by ... [Group Dropdown] [All Dropdown]
   const problemDocuments = allDocuments.byType(ProblemDocument);
-  console.log("\t🥩 problemDocuments:", problemDocuments);
+  const personalDocuments = allDocuments.byType(PersonalDocument);
 
+  console.log("📁 sort-work-view.tsx ------------------------");
+  // console.log("\t🥩 isChatOpen:", isChatOpen);
+  // console.log("\t🥩 tabSpec:", tabSpec);
+
+  const persistentUI = usePersistentUIStore();
+  const appConfigStore = useAppConfig();
+  const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
+  console.log("\t🔪 navTabSpec:", navTabSpec);
+  console.log("\t🔪 navTabSpec?.tab:", navTabSpec?.tab);
+
+  const tabState = navTabSpec && persistentUI.tabs.get(navTabSpec?.tab);
+  console.log("\t🥩 Sort tabState:", tabState);
+
+
+//   const temp =  <DocumentCollectionList
+//   subTab={subTab}
+
+// />
   return (
     <div
       key="sort-work-view"
@@ -24,12 +47,12 @@ export const SortWorkView:React.FC = observer(function SortWorkView(){
           {"Problem Documents (Not Published) - Include documents from all assignments"}
           {
             problemDocuments.map((doc:any, idx: number) =>{
-              console.log("problemDoc:", doc);
               return (
                 <div key={`entry-${idx}`} className="entry">  {doc.key} </div>
               );
             })
           }
+
         </div>
         <div className="live-personal-documents">
           {"Personal Documents (Not Published)"}

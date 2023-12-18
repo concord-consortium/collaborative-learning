@@ -56,7 +56,6 @@ export class NavTabPanel extends BaseComponent<IProps> {
             forceRenderTabPanel={true}
           >
             <div className="top-row">
-              {console.log("tabs:", tabs)}
               <TabList className="top-tab-list">
                 { tabs?.map((tabSpec, index) => {
                     const tabClass = `top-tab tab-${tabSpec.tab}
@@ -109,7 +108,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
       case ENavTab.kStudentWork:
         return <StudentGroupView/>;
       case ENavTab.kSortWork:
-        return <SortWorkView />;
+        return this.renderSortView(tabSpec);
       case ENavTab.kClassWork:
       case ENavTab.kLearningLog:
       case ENavTab.kMyWork:
@@ -120,8 +119,17 @@ export class NavTabPanel extends BaseComponent<IProps> {
     }
   };
 
+  private renderSortView = (tabSpec: NavTabModelType) => {
+    const { persistentUI: { showChatPanel } } = this.stores;
+    return (
+      <SortWorkView
+        tabSpec={tabSpec}
+        isChatOpen={showChatPanel}
+        />
+    );
+  };
+
   private renderDocuments = (tabSpec: NavTabModelType) => {
-    // console.log("\t🏭 renderDocuments");
     const { persistentUI: { showChatPanel } } = this.stores;
     return (
       <SectionDocumentOrBrowser

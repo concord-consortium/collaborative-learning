@@ -84,10 +84,17 @@ function getSectionDocs(section: NavTabSectionModelType, documents: DocumentsMod
   return sectDocs;
 }
 
-export const DocumentCollectionByType: React.FC<IProps> = observer(({
-                                  topTab, tab, section, index, numSections=0, scale, selectedDocument,
-                                  selectedSecondaryDocument, horizontal, onSelectNewDocument, onSelectDocument,
-                                  onDocumentDragStart, onDocumentStarClick, onDocumentDeleteClick }: IProps) => {
+export const DocumentCollectionByType: React.FC<IProps> = observer((props) => {
+  // console.log("📁 documents-type-collection.tsx ------------------------");
+  // console.log("\t🏭 DocumentCollectionByType");
+  // console.log("\t🥩 props:", props);
+
+
+  const {
+    topTab, tab, section, index, numSections=0, scale, selectedDocument,
+    selectedSecondaryDocument, horizontal, onSelectNewDocument, onSelectDocument,
+    onDocumentDragStart, onDocumentStarClick, onDocumentDeleteClick } = props;
+
   const appConfigStore = useAppConfig();
   const classStore = useClassStore();
   const documents = useLocalDocuments();

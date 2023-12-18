@@ -11,6 +11,9 @@ export const NavTabsConfigModel = types
   })
   .views(self => ({
     getNavTabSpec(tabId: ENavTab) {
+      console.log("\t🏭 getNavTabSpec");
+      console.log("\t🥩 tabId:", tabId);
+      console.log("\t🔪 return:", self.tabSpecs.find(tab => tabId === tab.tab));
       return self.tabSpecs.find(tab => tabId === tab.tab);
     }
   }))

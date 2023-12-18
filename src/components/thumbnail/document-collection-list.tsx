@@ -27,6 +27,10 @@ export const kNavItemScale = 0.11;
 export const DocumentCollectionList: React.FC<IProps> = observer(function DocumentCollectionList(
     { setCollectionElement, subTab, tabSpec, horizontal, collapsed, selectedDocument, selectedSecondaryDocument,
         onSelectNewDocument, onSelectDocument}) {
+  // console.log("\t🏭 DocumentCollectionList");
+  // console.log("\t🥩 subTab:", subTab);
+  // console.log("\t🥩 tabSpec:", tabSpec);
+
   const ui = useUIStore();
   const appConfigStore = useAppConfig();
   const user = useUserStore();

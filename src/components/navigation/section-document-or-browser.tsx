@@ -24,7 +24,10 @@ interface IProps {
 export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function SectionDocumentOrBrowser(
     { tabSpec, isChatOpen }) {
 
-  // console.log(`---------${tabSpec.label}--------`);
+  console.log("📁 section-document-or-browser.tsx ------------------------");
+  // console.log("\t🔪 tabSpec:", tabSpec);
+  // console.log("\t🔪 isChatOpen:", isChatOpen);
+
   const persistentUI = usePersistentUIStore();
   const store = useStores();
   const appConfigStore = useAppConfig();
@@ -36,6 +39,9 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
   const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
   const subTabs = tabSpec.subTabs;
   const tabState = navTabSpec && persistentUI.tabs.get(navTabSpec?.tab);
+  console.log("\t🔪 navTabSpec:", navTabSpec);
+  console.log("\t🔪 navTabSpec?.tab:", navTabSpec?.tab);
+  console.log("\t🥩 secDocOrBrowser: tabState:", tabState);
   const subTabIndex = Math.max(subTabs.findIndex((subTab) => tabState?.openSubTab === subTab.label), 0);
   const selectedSubTab = subTabs[subTabIndex];
 

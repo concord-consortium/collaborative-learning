@@ -585,7 +585,7 @@ export class DB {
           }
         })
         .then((document) => {
-          console.log("| ... 8  and THEN put the document in the store!", document.key);
+          // console.log("| ... 8  and THEN put the document in the store!", document.key);
           documents.add(document);
           resolve(document);
         })
