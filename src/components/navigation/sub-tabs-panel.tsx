@@ -38,7 +38,6 @@ export const SubTabsPanel: React.FC<IProps> = observer(function SubTabsPanel(
         <div className={classNames("tab-header-row", {"no-sub-tabs": !hasSubTabs})}>
           <TabList className={classNames("tab-list", navTabClass)}>
             {subTabs.map((subTab) => {
-              //console.log("\t🥩 subTab:", subTab);
               const sectionTitle = subTab.label.toLowerCase().replace(' ', '-');
               const type = subTab.sections[0].type;
               return (

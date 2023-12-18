@@ -88,6 +88,8 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
   const renderDocumentBrowserView = (subTab: ISubTabSpec) => {
     const openDocumentKey = tabState?.openDocuments.get(subTab.label);
     const classHash = classStore.classHash;
+    console.log("| NEED subTab:", subTab);
+    console.log("| NEED tabSpec:", tabSpec);
     return (
       <div className="document-browser vertical">
         <DocumentCollectionList
