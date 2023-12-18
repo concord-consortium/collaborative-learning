@@ -7,7 +7,7 @@ import { IDragSharedModelItem, ISharedModelManager, SharedModelUnion } from "../
 import { ITileModel, TileModel } from "../tiles/tile-model";
 import { getTileContentInfo } from "../tiles/tile-content-info";
 
-function getTileModel(tileContentModel: IAnyStateTreeNode) {
+export function getTileModel(tileContentModel: IAnyStateTreeNode) {
   if (!hasParentOfType(tileContentModel, TileModel)) {
     // we aren't attached in the right place yet
     return undefined;
