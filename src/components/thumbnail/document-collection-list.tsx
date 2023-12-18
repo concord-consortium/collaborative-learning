@@ -36,10 +36,12 @@ export const DocumentCollectionList: React.FC<IProps> = observer(function Docume
     e.dataTransfer.setData(DocumentDragKey, document.key);
   };
 
+  // MOVE TO THUMBNAIL?
   const handleDocumentStarClick = (document: DocumentModelType) => {
     document?.toggleUserStar(user.id);
   };
 
+  // MOVE TO THUMBNAIL?
   const handleDocumentDeleteClick = (document: DocumentModelType) => {
     ui.confirm("Do you want to delete this?", "Confirm Delete")
       .then(ok => {
@@ -93,8 +95,8 @@ export const DocumentCollectionList: React.FC<IProps> = observer(function Docume
               selectedDocument={selectedDocument}
               selectedSecondaryDocument={selectedSecondaryDocument}
               onSelectNewDocument={onSelectNewDocument}
-              onSelectDocument={onSelectDocument}
-              onDocumentDragStart={handleDocumentDragStart}
+              onSelectDocument={onSelectDocument} // WE WONT NEED THIS
+              onDocumentDragStart={handleDocumentDragStart} // MAYBE THIS COULD MOVE DOWN TO THUMBNAIL TOO?
               onDocumentStarClick={_handleDocumentStarClick}
               onDocumentDeleteClick={handleDocumentDeleteClick}
             />
