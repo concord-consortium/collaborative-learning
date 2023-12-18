@@ -1,43 +1,52 @@
 import { observer } from "mobx-react";
 import { useStores } from "../../hooks/use-stores";
-import React from "react";
-import { ProblemDocument } from "../../models/document/document-types";
+import React, {useState } from "react";
 import { SortWorkHeader } from "../navigation/sort-work-header";
 
 import "./sort-work-view.scss";
+import { DocumentCollectionByType } from "../thumbnail/documents-type-collection";
+import { ENavTab } from "../../models/view/nav-tabs";
 
 export const SortWorkView:React.FC = observer(function SortWorkView(){
   const stores = useStores();
-  const allDocuments = stores.documents;
-  const problemDocuments = allDocuments.byType(ProblemDocument);
+  const allDocuments = stores.documents.all;
+  const [sortableDocs, setSortableDocs] = useState(allDocuments);
 
+  // const subtab = "sort";
+  // const tabSpec = stores.appConfig.navTabs.getNavTabSpec("sort");
+  const someSectionModel = stores?.appConfig?.navTabs?.getNavTabSpec("class-work" as ENavTab)?.sections[0];
   return (
     <div key="sort-work-view" className="sort-work-view">
       <SortWorkHeader />
 
       {/* <DocumentCollectionList
-        subTab={}
-        tabSpec={myWorkTabSpec}
+        subTab={subTab}
+        tabSpec={tabSpec}
       /> */}
 
-      {/* <div className="sort-work-documents">
-        <div className="live-problem-documents">
-          {"Problem Documents (Not Published) - Include documents from all assignments"}
-          {
-            problemDocuments.map((doc:any, idx: number) =>{
-              console.log("problemDoc:", doc);
-              return (
-                <div key={`entry-${idx}`} className="entry">  {doc.key} </div>
-              );
-            })
-          }
-        </div>
+      <DocumentCollectionByType
+        key={0}
+        tab={"sort"}
+        section={someSectionModel as any}
+        index={0}
+        horizontal={false}
+        numSections={1}
+        scale={1}
+        selectedDocument={""}
+        selectedSecondaryDocument={""}
+        onDocumentDragStart={() => {}}
+      />
 
-        <div className="live-personal-documents">
-          {"Personal Documents (Not Published)"}
-        </div>
 
-      </div> */}
+      <hr />
+      { sortableDocs.map((doc:any, idx: number) => {
+        return (
+          <pre style={{padding:0, margin:0}} key={idx}>
+            {doc.key} | group: {doc.groupId ?? "_"} | user: {doc.uid}
+          </pre>
+        );
+      })}
+
     </div>
   );
 });

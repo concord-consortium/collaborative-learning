@@ -22,6 +22,7 @@ export const SubTabsPanel: React.FC<IProps> = observer(function SubTabsPanel(
   console.log("\t <SubTabsPanel>", tabSpec);
   const appConfigStore = useAppConfig();
   const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
+  console.log("ZZZ tabSpec.tab:", tabSpec.tab);
   const subTabs = tabSpec.subTabs;
   const hasSubTabs = subTabs.length > 1;
   const navTabClass = navTabSpec?.tab;
