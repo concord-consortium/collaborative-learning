@@ -20,7 +20,7 @@ import {ITileContentModel, TileContentModel} from "../../../models/tiles/tile-co
 import {ITileExportOptions} from "../../../models/tiles/tile-content-info";
 import { getSharedModelManager } from "../../../models/tiles/tile-environment";
 import {
-  defaultBackgroundColor, defaultPointColor, defaultStrokeColor, kellyColors
+  clueGraphColors, defaultBackgroundColor, defaultPointColor, defaultStrokeColor
 } from "../../../utilities/color-utils";
 import { AdornmentModelUnion } from "../adornments/adornment-types";
 import { ConnectingLinesModel } from "../adornments/connecting-lines/connecting-lines-model";
@@ -123,7 +123,7 @@ export const GraphModel = TileContentModel
       if (plotIndex < self._pointColors.length) {
         return self._pointColors[plotIndex];
       } else {
-        return kellyColors[plotIndex % kellyColors.length];
+        return clueGraphColors[plotIndex % clueGraphColors.length];
       }
     },
     get pointColor() {
