@@ -53,9 +53,7 @@ function beforePortalTest(url, clueTeacher, reportUrl) {
   cy.login(url, clueTeacher);
   cy.launchReport(reportUrl);
   cy.waitForLoad();
-  chatPanel.getChatPanelToggle().click();
-  chatPanel.getChatPanel().should("be.visible");
-  cy.wait(10000);
+  chatPanel.openChatPanel();
 }
 
 function beforeTest(params) {
@@ -63,9 +61,7 @@ function beforeTest(params) {
   cy.visit(params);
   cy.waitForLoad();
   cy.openTopTab("problems");
-  chatPanel.getChatPanelToggle().should('exist');
-  chatPanel.getChatPanelToggle().click();
-  cy.wait(10000);
+  chatPanel.openChatPanel();
 }
 
 describe('Delete Teacher Comments In chat panel', () => {
