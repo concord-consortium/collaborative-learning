@@ -91,6 +91,8 @@ export class DBProblemDocumentsListener extends BaseListener {
       if (existingDoc) {
         this.db.updateDocumentFromProblemDocument(existingDoc, document);
       } else {
+        // TODO: handle rejections of this promise, see the note in
+        // the catch of db.ts#openDocument
         this.db.createDocumentModelFromProblemMetadata(ProblemDocument, document.self.uid, document)
           .then((docModel) => {
             if (isCurrentUser) {

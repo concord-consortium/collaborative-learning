@@ -590,19 +590,18 @@ export class DB {
           resolve(document);
         })
         .catch((msg) => {
-          // TODO: rather than rejecting the promise here it seems it would be better to resolve with a
-          // document that has a contentStatus of Error. Or perhaps add new status field that is independent
-          // contentStatus since the errors here are not content errors they are either metadata or other
-          // problems.
-          // The callers of openDocument do not handle rejected promises. So currently this results in
-          // console errors: "Uncaught (in promise) ...". There are many callers and it seems the best thing
-          // is to show the user message where the document would have been shown. Returning an error
-          // document should take care of this so we don't need to update all of these places. We might just
-          // need to update the DocumentError component.
-          // However we still need to trace through these place to make sure this invalid document isn't
-          // being saved somewhere. For example if a network error happens while opening a document, we
-          // wouldn't want to try to save this error document back to firebase blowing away the legitimate
-          // document.
+          // TODO: this rejected promise is not handled by the callers of openDocument. Most of those
+          // callers trace back to firebase listeners. The listener is triggered by some existing or new
+          // entry representing a document. The listener then tries to create a document from the
+          // information. If an error happens this document is likely not added to the documents list.
+          // The document will likely not ever be seen by the user.
+          // The best thing to do here seems to be to add error handling in these listeners so they can
+          // print out a useful error message. Ideally the message should include the paths in firebase
+          // that were accessed, and what data was missing or invalid. Getting all of this information
+          // will probably require additional logging a lower level.
+          // After this is changed, the updated error reporting should be tested to make sure it
+          // continues show a stack trace pointing at the original error site.
+          // For example just calling console.error(msg) here will hide the original stack trace.
           reject(msg);
         });
     });
@@ -956,4 +955,8 @@ export class DB {
     this.firebase.getLastStickyNoteViewTimestampRef().set(Date.now());
   }
 
+}
+
+export function getRefFullPath(ref: firebase.database.Reference) {
+  return ref.toString().substring(ref.root.toString().length-1);
 }
