@@ -1,6 +1,6 @@
 import { observer } from "mobx-react";
 import { useStores } from "../../hooks/use-stores";
-import React, {useState } from "react";
+import React from "react";
 import { SortWorkHeader } from "../navigation/sort-work-header";
 
 import "./sort-work-view.scss";
@@ -10,46 +10,30 @@ import { ENavTab } from "../../models/view/nav-tabs";
 export const SortWorkView:React.FC = observer(function SortWorkView(){
   const stores = useStores();
   const allDocuments = stores.documents.all;
-  const [sortableDocs, setSortableDocs] = useState(allDocuments);
+  const sectionModelToGetRidOf = stores?.appConfig?.navTabs?.getNavTabSpec(ENavTab.kSortWork)?.sections[0];
 
-  // const subtab = "sort";
-  // const tabSpec = stores.appConfig.navTabs.getNavTabSpec("sort");
-  const someSectionModel = stores?.appConfig?.navTabs?.getNavTabSpec(ENavTab.kSortWork)?.sections[0];
+  /*
+     modelling after DocumentCollectionByType (documents-type-collection.tsx):
+     map out to a flat array all the docs from each group render those
+     from stores you have the groups, you have the users
 
-  console.log("ZZZ someSectionModel:", someSectionModel);
-  // const someSectionModel = {
-  //   "className": "",
-  //   "title": "Workspaces",
-  //   "type": "published-problem-documents",
-  //   "dataTestHeader": "class-work-section-published",
-  //   "dataTestItem": "class-work-list-items",
-  //   "documentTypes": [
-  //     "publication"
-  //   ],
-  //   "order": "reverse",
-  //   "properties": [
-  //     "!isTeacherDocument"
-  //   ],
-  //   "showStars": [
-  //     "teacher"
-  //   ],
-  //   "showGroupWorkspaces": false,
-  //   "addDocument": false
-  // };
+     when you open a document -- there are handlers for that that you will need to
+     be able to pass down - selectedDocument
+
+     so look for that some like handleSelectedDocument something - whatever does the opening on click
+     onSelectDocument...
+  */
 
   return (
     <div key="sort-work-view" className="sort-work-view">
       <SortWorkHeader />
 
-      {/* <DocumentCollectionList
-        subTab={subTab}
-        tabSpec={tabSpec}
-      /> */}
-      some section model:  <pre>{JSON.stringify(someSectionModel, null, 2)}</pre>
+      {/* This is going to go away, but is a cousin of how we'll render thumbnails,
+      see note in DocumentCollectionByType */}
       <DocumentCollectionByType
         key={0}
         tab={"sort"}
-        section={someSectionModel as any}
+        section={sectionModelToGetRidOf as any}
         index={0}
         horizontal={false}
         numSections={1}
@@ -59,9 +43,8 @@ export const SortWorkView:React.FC = observer(function SortWorkView(){
         onDocumentDragStart={() => {}}
       />
 
-
-      <hr />
-      { sortableDocs.map((doc:any, idx: number) => {
+      {/* This is going to go away, but for now lets us see documents in store */}
+      { allDocuments.map((doc:any, idx: number) => {
         return (
           <pre style={{padding:0, margin:0}} key={idx}>
             {doc.key} | group: {doc.groupId ?? "_"} | user: {doc.uid}

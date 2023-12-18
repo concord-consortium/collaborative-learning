@@ -63,25 +63,6 @@ export const DocumentCollectionList: React.FC<IProps> = observer(function Docume
             ? handleDocumentStarClick
             : undefined;
 
-            // log all the props that are passed below, with a label for each on a new line
-            console.log("ZZ DocumentCollectionByType getting passed: ",
-              "\n key: ", `${section.type}_${index}`,
-              //"\n topTab: ", navTabSpec?.tab,
-              "\n tab: ", subTab.label,
-              "\n section: ", section,
-              "\n index: ", index,
-              //"\n horizontal: ", horizontal,
-              "\n numSections: ", subTab.sections.length,
-              "\n scale: ", kNavItemScale,
-              //"\n selectedDocument: ", selectedDocument,
-              //"\n selectedSecondaryDocument: ", selectedSecondaryDocument,
-              //"\n onSelectNewDocument: ", onSelectNewDocument,
-              //"\n onSelectDocument: ", onSelectDocument,
-              "\n onDocumentDragStart: ", handleDocumentDragStart,
-              //"\n _handleDocumentStarClick: ", _handleDocumentStarClick,
-              //"\n handleDocumentDeleteClick: ", handleDocumentDeleteClick
-            );
-
           return (
             <DocumentCollectionByType
               key={`${section.type}_${index}`}
