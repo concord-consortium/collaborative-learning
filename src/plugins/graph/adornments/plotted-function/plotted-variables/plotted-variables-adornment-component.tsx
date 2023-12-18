@@ -96,9 +96,10 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
         const { domain: xDomain } = xAxis; // eslint-disable-line unused-imports/no-unused-vars
         const { domain: yDomain } = yAxis; // eslint-disable-line unused-imports/no-unused-vars
       }
-      // Trigger an autorun if any inputs or the expression of y change
+      // Trigger an autorun if any inputs or the expression of y change, or if the x variable changes
       Array.from(model.plottedVariables.values()).forEach(plottedVariables => {
         plottedVariables.yVariable?.computedValueIncludingMessageAndError; // eslint-disable-line no-unused-expressions
+        plottedVariables.xVariable; // eslint-disable-line no-unused-expressions
       });
       refreshValues();
     }, { name: "PlottedVariablesAdornmentComponent.refreshAxisChange" }, model);
