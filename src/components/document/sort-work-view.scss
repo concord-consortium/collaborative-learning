@@ -6,7 +6,18 @@
   .sort-work-header{
     height: 36px;
     width: 100%;
-    background-color: #B4A8D6;
+    background-color: #ecc9ff;
+    display: flex;
+
+    .header-text{
+      width: 50px;
+      display: flex;
+      align-items: center;
+      margin-left: 10px;
+    }
+    .header-dropdown-1{
+
+    }
   }
 
   .sort-work-documents{
