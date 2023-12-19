@@ -73,7 +73,7 @@ export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
                                         ? handleDocumentDeleteClick
                                         : undefined;
 
-                                        console.log("| NEED 2: ", scale, section, sectionDocument, tab);
+                                        // console.log("| NEED 2: ", scale, section, sectionDocument, tab);
     return (
       <ThumbnailDocumentItem
         key={sectionDocument.key}

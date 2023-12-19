@@ -56,7 +56,6 @@ export class NavTabPanel extends BaseComponent<IProps> {
             forceRenderTabPanel={true}
           >
             <div className="top-row">
-              {console.log("tabs:", tabs)}
               <TabList className="top-tab-list">
                 { tabs?.map((tabSpec, index) => {
                     const tabClass = `top-tab tab-${tabSpec.tab}

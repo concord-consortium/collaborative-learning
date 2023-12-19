@@ -1,11 +1,12 @@
 import { observer } from "mobx-react";
 import { useStores } from "../../hooks/use-stores";
-import React from "react";
+import React, { useState } from "react";
 import { SortWorkHeader } from "../navigation/sort-work-header";
-
-import "./sort-work-view.scss";
 import { DocumentCollectionByType } from "../thumbnail/documents-type-collection";
 import { ENavTab } from "../../models/view/nav-tabs";
+import { ICustomDropdownItem } from "../../clue/components/custom-select";
+
+import "./sort-work-view.scss";
 
 export const SortWorkView:React.FC = observer(function SortWorkView(){
   const stores = useStores();
@@ -24,9 +25,37 @@ export const SortWorkView:React.FC = observer(function SortWorkView(){
      onSelectDocument...
   */
 
+  /* ============================ [ Sort - State / Options / Handlers]  ============================== */
+  const [selectedFilters, setSelectedFilters] = useState(["Group", "All"]); //holds both selection option one and two
+
+  const firstFilterOptions = ["Group", "Student"];
+  const secondFilterOptions = ["All", "Test-1", "Test-2"];
+  const firstFilterItems: ICustomDropdownItem[] = firstFilterOptions.map((option)=>({
+    text: option,
+    onClick: () => handleChangeSelectedFilters(0, option)
+  }));
+
+  const secondFilterItems: ICustomDropdownItem[] = secondFilterOptions.map((option)=>({
+    text: option,
+    onClick: () => handleChangeSelectedFilters(1, option)
+  }));
+
+  const handleChangeSelectedFilters = (index: number, sortByStr: string) => {
+    setSelectedFilters(prevOptions => {
+      const updatedOptions = [...prevOptions];
+      updatedOptions[index] = sortByStr; // Update the specific index with the new value
+      console.log("Updated state is:", updatedOptions);
+      return updatedOptions;
+    });
+  };
+
   return (
     <div key="sort-work-view" className="sort-work-view">
-      <SortWorkHeader />
+      <SortWorkHeader
+        firstOptionItems={firstFilterItems}
+        secondOptionItems={secondFilterItems}
+        selectedOptions={selectedFilters}
+      />
 
       {/* This is going to go away, but is a cousin of how we'll render thumbnails,
       see note in DocumentCollectionByType */}

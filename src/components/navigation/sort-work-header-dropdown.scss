@@ -1,0 +1,47 @@
+
+.sort-work-header{
+  height: 36px;
+  width: 100%;
+  background-color: #ecc9ff;
+  display: flex;
+
+  .header-text{
+    width: 50px;
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+  }
+
+  .header-dropdown{
+    display: flex;
+    align-items: center;
+
+    &.option-two{
+      margin-left: 10px;
+    }
+
+    .sort-work-header-menu{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &.custom-select{
+
+        .header{
+          width: 151px;
+          min-width: 151px;
+          max-width: 151px;
+          height: 26px;
+        }
+
+        .list-item{
+          width: 151px;
+          min-width: 151px;
+          max-width: 151px;
+        }
+      }
+    }
+  }
+}
+
+
