@@ -15,7 +15,9 @@ import "./sort-work-view.scss";
 
 const sortByGroup = (docs: any) => {
   console.log("-----sorting!!! ----------");
-  const groupIds = docs.map((doc: any) => doc.groupId);
+  const groupIds = docs.filter((doc: any) => doc.groupId !== undefined)//first remove teacher documents
+                       .map((doc: any) => doc.groupId);
+
   const uniqueGroupIds = new Set(groupIds);
   const sortedUniqueGroupIds = Array.from(uniqueGroupIds).sort((a: any, b: any) => a - b);
 
