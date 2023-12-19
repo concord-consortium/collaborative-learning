@@ -15,7 +15,6 @@ import "../components/legend/multi-legend.scss";
 
 interface ISimpleAttributeLabelProps {
   place: GraphPlace;
-  index?: number;
   attrId: string;
   onChangeAttribute?: (place: GraphPlace, dataSet: IDataSet, attrId: string, oldAttrId?: string) => void;
   onRemoveAttribute?: (place: GraphPlace, attrId: string) => void;
@@ -24,7 +23,7 @@ interface ISimpleAttributeLabelProps {
 
 export const SimpleAttributeLabel = observer(
   function SimpleAttributeLabel(props: ISimpleAttributeLabelProps) {
-    const { place, index, attrId, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute } = props;
+    const { place, attrId, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute } = props;
     // Must be State, not Ref, so that the menu gets re-rendered when this becomes non-null
     const [simpleLabelElement, setSimpleLabelElement] = useState<HTMLDivElement|null>(null);
     const documentElt = simpleLabelElement?.closest('.document-content') as HTMLDivElement ?? null;
@@ -34,7 +33,7 @@ export const SimpleAttributeLabel = observer(
     const dataset = dataConfiguration?.dataset;
     const attr = attrId ? dataset?.attrFromID(attrId) : undefined;
     const attrName = attr?.name ?? "";
-    const pointColor = index !== undefined && graphModel.pointColorAtIndex(index);
+    const pointColor = graphModel.getColorForId(attrId);
 
     const readOnly = useContext(ReadOnlyContext);
 

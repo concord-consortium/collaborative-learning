@@ -33,6 +33,7 @@ import { DataConfigurationModel, RoleAttrIDPair } from "./data-configuration-mod
 import { PlottedFunctionAdornmentModel } from "../adornments/plotted-function/plotted-function-adornment-model";
 import { SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
 import { kPlottedFunctionType } from "../adornments/plotted-function/plotted-function-adornment-types";
+import { withoutUndo } from "../../../models/history/without-undo";
 
 export interface GraphProperties {
   axes: Record<string, IAxisModelUnion>
@@ -61,6 +62,8 @@ export const GraphModel = TileContentModel
     plotType: types.optional(types.enumeration([...PlotTypes]), "casePlot"),
     layers: types.array(GraphLayerModel /*, () => GraphLayerModel.create() */),
     // Visual properties
+    // A map from IDs (which can refer to anything) to indexes to an array of colors
+    _idColors: types.map(types.number),
     _pointColors: types.optional(types.array(types.string), [defaultPointColor]),
     _pointStrokeColor: defaultStrokeColor,
     pointStrokeSameAsFill: false,
@@ -107,6 +110,24 @@ export const GraphModel = TileContentModel
         }));
       }
       return all;
+    },
+    get nextColor() {
+      const colorCounts: Record<number, number> = {};
+      self._idColors.forEach(index => {
+        if (!colorCounts[index]) colorCounts[index] = 0;
+        colorCounts[index]++;
+      });
+      const usedColorIndices = Object.keys(colorCounts).map(index => Number(index));
+      if (usedColorIndices.length < clueGraphColors.length) {
+        // If there are unused colors, return the index of the first one
+        return Object.keys(clueGraphColors).map(index => Number(index))
+          .filter(index => !usedColorIndices.includes(index))[0];
+      } else {
+        // Otherwise, use the next minimally used color's index
+        const counts = usedColorIndices.map(index => colorCounts[index]);
+        const minCount = Math.min(...counts);
+        return usedColorIndices.find(index => colorCounts[index] === minCount) ?? 0;
+      }
     }
   }))
   .views(self => ({
@@ -302,6 +323,17 @@ export const GraphModel = TileContentModel
     },
   }))
   .actions(self => ({
+    // Returns an objet's color, given its id.
+    // This is an action because if the id doesn't have a specified color, this will assign one to it.
+    getColorForId(id: string) {
+      let colorIndex = self._idColors.get(id);
+      if (colorIndex === undefined) {
+        withoutUndo();
+        colorIndex = self.nextColor;
+        self._idColors.set(id, colorIndex);
+      }
+      return clueGraphColors[colorIndex % clueGraphColors.length];
+    },
     setAxis(place: AxisPlace, axis: IAxisModelUnion) {
       self.axes.set(place, axis);
     },
