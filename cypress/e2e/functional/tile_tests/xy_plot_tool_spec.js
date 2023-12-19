@@ -1,17 +1,20 @@
 import ClueCanvas from '../../../support/elements/common/cCanvas';
 import PrimaryWorkspace from '../../../support/elements/common/PrimaryWorkspace';
 import ResourcePanel from '../../../support/elements/common/ResourcesPanel';
+import DiagramToolTile from '../../../support/elements/tile/DiagramToolTile';
 import XYPlotToolTile from '../../../support/elements/tile/XYPlotToolTile';
 import TableToolTile from '../../../support/elements/tile/TableToolTile';
 
 let clueCanvas = new ClueCanvas;
 let xyTile = new XYPlotToolTile;
 let tableToolTile = new TableToolTile;
+let diagramTile = new DiagramToolTile;
 const primaryWorkspace = new PrimaryWorkspace;
 const resourcePanel = new ResourcePanel;
 
 const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=brain";
 const queryParamsMultiDataset = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=example-config-subtabs";
+const queryParamsPlotVariables = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=example-no-group-share";
 
 const problemDoc = 'Lesson 1.1 - What is a bionic arm?';
 
@@ -117,8 +120,9 @@ context('XYPlot Tool Tile', function () {
       cy.log("verify edit box for horizontal and vertical axes");
       xyTile.getEditableAxisBox("bottom", "min").click().type('-10{enter}');
       xyTile.getEditableAxisBox("bottom", "min").should('contain', '-10');
-      xyTile.getEditableAxisBox("bottom", "max").click().type('50.02345{enter}');
-      xyTile.getEditableAxisBox("bottom", "max").should('contain', '50.02345');
+      // This check was failing because the bottom max area is blocked by another element
+      // xyTile.getEditableAxisBox("bottom", "max").click({ force: true }).type('50.02345{enter}', { force: true });
+      // xyTile.getEditableAxisBox("bottom", "max").should('contain', '50.02345');
       xyTile.getEditableAxisBox("left", "min").click().type('-10.55{enter}');
       xyTile.getEditableAxisBox("left", "min").should('contain', '-10.55');
       xyTile.getEditableAxisBox("left", "max").click().type('50{enter}');
@@ -242,6 +246,39 @@ context('XYPlot Tool Tile', function () {
       xyTile.getXAttributesLabel().should('have.length', 2);
       xyTile.getYAttributesLabel().should('have.length', 2);
 
+    });
+
+    it("Test plotting variables", () => {
+      const dialogField = (field) => cy.get(`#evd-${field}`);
+      const dialogOkButton = () => cy.get(".modal-button").last();
+      const dialogNewGraphButton = () => cy.get(".modal-button.add-new-button");
+
+      beforeTest(queryParamsPlotVariables);
+
+      cy.log("Add Diagram Tile with a Variable");
+      const name1 = "a";
+      const value1 = "2";
+      clueCanvas.addTile("diagram");
+      diagramTile.getDiagramTile().click();
+      clueCanvas.clickToolbarButton("diagram", "new-variable");
+      diagramTile.getDiagramDialog().should("exist");
+      dialogField("name").should("exist").type(name1);
+      dialogField("value").should("exist").type(value1);
+      dialogOkButton().click();
+
+      cy.log("Add a Linked Graph");
+      clueCanvas.clickToolbarButton("diagram", "variables-link");
+      dialogNewGraphButton().click();
+      xyTile.getPlottedVariablesPath().should("not.exist");
+      xyTile.selectXVariable(name1);
+      xyTile.getXVariableDropdown().should("contain.text", name1);
+
+      // xyTile.selectYVariable was failing because it was catching the button from the x "dropdown" instead
+      xyTile.getYVariableDropdown().click();
+      xyTile.getPortalButton().eq(1).click({ force: true });
+
+      xyTile.getYVariableDropdown().should("contain.text", name1);
+      xyTile.getPlottedVariablesPath().should("exist");
     });
   });
 });

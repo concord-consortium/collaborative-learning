@@ -13,6 +13,7 @@ import {
   GraphAttrRole, hoverRadiusFactor, kDefaultNumericAxisBounds, kGraphTileType,
   PlotType, PlotTypes, pointRadiusMax, pointRadiusSelectionAddend
 } from "../graph-types";
+import { withoutUndo } from "../../../models/history/without-undo";
 import { SharedModelType } from "../../../models/shared/shared-model";
 
 import { AppConfigModelType } from "../../../models/stores/app-config-model";
@@ -30,10 +31,13 @@ import { getDotId } from "../utilities/graph-utils";
 import { GraphLayerModel, IGraphLayerModel } from "./graph-layer-model";
 import { isSharedDataSet, SharedDataSet } from "../../../models/shared/shared-data-set";
 import { DataConfigurationModel, RoleAttrIDPair } from "./data-configuration-model";
-import { PlottedFunctionAdornmentModel } from "../adornments/plotted-function/plotted-function-adornment-model";
+import {
+  IPlottedVariablesAdornmentModel, isPlottedVariablesAdornment, PlottedVariablesAdornmentModel
+} from "../adornments/plotted-function/plotted-variables/plotted-variables-adornment-model";
 import { SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
-import { kPlottedFunctionType } from "../adornments/plotted-function/plotted-function-adornment-types";
-import { withoutUndo } from "../../../models/history/without-undo";
+import {
+  kPlottedVariablesType
+} from "../adornments/plotted-function/plotted-variables/plotted-variables-adornment-types";
 
 export interface GraphProperties {
   axes: Record<string, IAxisModelUnion>
@@ -464,6 +468,21 @@ export const GraphModel = TileContentModel
     updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
       const smm = getSharedModelManager(self);
       if (!smm || !smm.isReady) return;
+
+      // Display a plotted variables adornment when this is linked to a shared variables model
+      const sharedVariableModels = smm.getTileSharedModelsByType(self, SharedVariables);
+      if (sharedVariableModels && sharedVariableModels.length > 0) {
+        let plottedVariablesAdornment: IPlottedVariablesAdornmentModel | undefined =
+          self.adornments.find(adornment => isPlottedVariablesAdornment(adornment)) as IPlottedVariablesAdornmentModel;
+        if (!plottedVariablesAdornment) {
+          plottedVariablesAdornment = PlottedVariablesAdornmentModel.create();
+          plottedVariablesAdornment.addPlottedVariables();
+        }
+        self.showAdornment(plottedVariablesAdornment);
+      } else {
+        self.hideAdornment(kPlottedVariablesType);
+      }
+
       const sharedDataSets = smm.getTileSharedModelsByType(self, SharedDataSet);
       if (!sharedDataSets) {
         console.warn("Unable to query for shared datasets");
@@ -567,27 +586,6 @@ export const GraphModel = TileContentModel
           }
         ));
       }
-
-      // Display a plotted function when this is linked to a SharedVariableModel
-      addDisposer(self, reaction(
-        () => {
-          const smm = getSharedModelManager(self);
-          let sharedVariableModels;
-          if (smm?.isReady) {
-            sharedVariableModels = smm.getTileSharedModelsByType(self, SharedVariables);
-          }
-          return sharedVariableModels;
-        },
-        (sharedVariableModels) => {
-          if (sharedVariableModels && sharedVariableModels.length > 0) {
-            const plottedFunctionAdornment = PlottedFunctionAdornmentModel.create();
-            plottedFunctionAdornment.addPlottedFunction(x => x**2);
-            self.showAdornment(plottedFunctionAdornment);
-          } else {
-            self.hideAdornment(kPlottedFunctionType);
-          }
-        }
-      ));
     },
     setDataConfigurationReferences() {
       // Updates pre-existing DataConfiguration objects that don't have the now-required references

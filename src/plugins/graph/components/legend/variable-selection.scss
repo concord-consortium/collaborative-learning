@@ -1,0 +1,45 @@
+@import "./legend-vars.scss";
+
+.variable-selection {
+  display: flex;
+  margin: 0 10px 0 0;
+
+  .variable-function-legend-button {
+    height: 100%;
+    text-align: start;
+    width: 100%;
+
+    .button-content {
+      align-items: center;
+      display: flex;
+      justify-content: space-between;
+
+      .caret {
+        transform: rotate(0deg);
+        transition: transform 0.2s ease-in-out;
+
+        svg {
+          margin-top:4px;
+          stroke:$codap-menu-border-color;
+        }
+
+        &.open {
+          transform: rotate(180deg);
+        }
+      }
+    }
+  }
+
+  .variable-icon {
+    align-items: center;
+    display: flex;
+    height: $label-height;
+    justify-content: center;
+    padding: 0 4px;
+
+    svg {
+      height: auto;
+      width: auto;
+    }
+  }
+}
