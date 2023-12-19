@@ -101,7 +101,7 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
                     onSelectDocument={() => onSelectDocument?.(document)}
                     scale={scale}
                     section={currentSection}
-                    sectionDocument={document}
+                    document={document}
                     selectedDocument={selectedDocument}
                     tab={subTab.label}
                   />

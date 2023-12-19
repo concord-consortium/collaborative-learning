@@ -10,6 +10,9 @@ import { useDBStore, useUIStore, useUserStore } from "../../hooks/use-stores";
 import { NavTabSectionModelType } from "../../models/view/nav-tabs";
 
 import "./document-type-collection.sass";
+import { SupportPublication } from "../../models/document/document-types";
+import { logDocumentEvent } from "../../models/document/log-document-event";
+import { LogEventName } from "../../lib/logger-types";
 
 interface IProps {
   onDocumentDragStart?: (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => void;
@@ -17,7 +20,7 @@ interface IProps {
   onSelectDocument?: (document: DocumentModelType) => void;
   scale: number;
   section: NavTabSectionModelType;
-  sectionDocument: DocumentModelType;
+  document: DocumentModelType;
   selectedDocument?: string;
   selectedSecondaryDocument?: string;
   tab: string;
@@ -25,41 +28,41 @@ interface IProps {
 
 // observes teacher names via useDocumentCaption()
 export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
-  section, sectionDocument, tab, scale, selectedDocument, selectedSecondaryDocument,
+  section, document, tab, scale, selectedDocument, selectedSecondaryDocument,
   onSelectDocument, onDocumentDragStart, onDocumentStarClick
 }: IProps) => {
     const user = useUserStore();
     const dbStore = useDBStore();
     const tabName = tab.toLowerCase().replace(' ', '-');
-    const caption = useDocumentCaption(sectionDocument);
+    const caption = useDocumentCaption(document);
     const ui = useUIStore();
 
     // sync delete a publication to firebase
-    useDocumentSyncToFirebase(user, dbStore.firebase, sectionDocument, true);
+    useDocumentSyncToFirebase(user, dbStore.firebase, document, true);
 
     // sync user's last support view time stamp to firebase
     useLastSupportViewTimestamp(section.type === "teacher-supports");
 
     function handleDocumentClick() {
-      onSelectDocument?.(sectionDocument);
+      onSelectDocument?.(document);
       (section.type === "teacher-supports") && user.setLastSupportViewTimestamp(Date.now());
     }
     function handleDocumentDragStart(e: React.DragEvent<HTMLDivElement>) {
-      onDocumentDragStart?.(e, sectionDocument);
+      onDocumentDragStart?.(e, document);
     }
     function handleDocumentStarClick() {
-      onDocumentStarClick?.(sectionDocument);
+      onDocumentStarClick?.(document);
     }
 
     function handleDocumentDeleteClick() {
       ui.confirm("Do you want to delete this?", "Confirm Delete")
       .then(ok => {
         if (ok) {
-          sectionDocument.setProperty("isDeleted", "true");
-          // TODO not sure why ts is mad about sectionDocument var here
-          // if (sectionDocument.type === SupportPublication) {
-          //   logDocumentEvent(LogEventName.DELETE_SUPPORT, { sectionDocument });
-          // }
+          document.setProperty("isDeleted", "true");
+          if (document.type === SupportPublication) {
+            // TODO: log all the deletions?
+            logDocumentEvent(LogEventName.DELETE_SUPPORT, { document });
+          }
         }
       });
     }
@@ -74,28 +77,28 @@ export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
               // ? user.isTeacher
               //   ? sectionDocument.isStarredByUser(user.id)
               //   : sectionDocument.isStarred
-                ? sectionDocument.isStarred
+                ? document.isStarred
                 : false;
     };
-    const _handleDocumentStarClick = section.showStarsForUser(user) && !sectionDocument.isRemote
+    const _handleDocumentStarClick = section.showStarsForUser(user) && !document.isRemote
                                       ? handleDocumentStarClick
                                       : undefined;
-    const _handleDocumentDeleteClick = section.showDeleteForUser(user, sectionDocument)
+    const _handleDocumentDeleteClick = section.showDeleteForUser(user, document)
                                         ? handleDocumentDeleteClick
                                         : undefined;
 
     return (
       <ThumbnailDocumentItem
-        key={sectionDocument.key}
+        key={document.key}
         dataTestName={`${tabName}-list-items`}
         canvasContext={tab}
-        document={sectionDocument}
+        document={document}
         scale={scale}
-        isSelected={sectionDocument.key === selectedDocument}
-        isSecondarySelected={sectionDocument.key === selectedSecondaryDocument}
+        isSelected={document.key === selectedDocument}
+        isSecondarySelected={document.key === selectedSecondaryDocument}
         captionText={caption}
         onDocumentClick={handleDocumentClick}
-        onDocumentDragStart={!sectionDocument.isRemote ? handleDocumentDragStart: undefined}
+        onDocumentDragStart={!document.isRemote ? handleDocumentDragStart: undefined}
         onIsStarred={onIsStarred}
         onDocumentStarClick={_handleDocumentStarClick}
         onDocumentDeleteClick={_handleDocumentDeleteClick}

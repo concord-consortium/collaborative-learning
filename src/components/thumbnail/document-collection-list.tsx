@@ -32,6 +32,7 @@ export const DocumentCollectionList: React.FC<IProps> = observer(function Docume
   const user = useUserStore();
   const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
 
+  // TODO - seems like this can be moved down too, thumbnail will have document as this type...
   const handleDocumentDragStart = (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => {
     e.dataTransfer.setData(DocumentDragKey, document.key);
   };
@@ -66,7 +67,7 @@ export const DocumentCollectionList: React.FC<IProps> = observer(function Docume
               // MAYBE THIS COULD MOVE DOWN TO THUMBNAIL TOO?
               onDocumentDragStart={handleDocumentDragStart}
               // TODO - move? It seems defined by section so do we need to continue to calculate it here?
-              onDocumentStarClick={_handleDocumentStarClick}
+              onDocumentStarClick={_handleDocumentStarClick} // replace this with a boolean flag, calculated here, and use same idea on sort-tab
             />
           );
         })

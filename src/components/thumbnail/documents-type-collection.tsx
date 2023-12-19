@@ -138,7 +138,7 @@ export const DocumentCollectionByType: React.FC<IProps> = observer(({
             <DocumentContextReact.Provider key={document.key} value={documentContext}>
               <DecoratedDocumentThumbnailItem
                 section={section}
-                sectionDocument={document}
+                document={document}
                 tab={tab}
                 scale={scale}
                 selectedDocument={selectedDocument}
