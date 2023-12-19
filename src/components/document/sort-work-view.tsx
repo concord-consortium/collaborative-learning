@@ -93,7 +93,7 @@ export const SortWorkView:React.FC = observer(function SortWorkView(){
       <div className="sort-work-documents">
         {/* This is going to go away, but is a cousin of how we'll render thumbnails,
         see note in DocumentCollectionByType */}
-        {/* <DocumentCollectionByType
+        <DocumentCollectionByType
           key={0}
           tab={"sort"}
           section={sectionModelToGetRidOf as any}
@@ -104,7 +104,7 @@ export const SortWorkView:React.FC = observer(function SortWorkView(){
           selectedDocument={""}
           selectedSecondaryDocument={""}
           onDocumentDragStart={() => {}}
-        /> */}
+        />
 
 
 
