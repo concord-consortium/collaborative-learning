@@ -137,5 +137,23 @@ context('Data Card Tool Tile', () => {
     dc.getLinkGraphModalTileMenu().select('Data Card Collection 1');
     dc.getLinkGraphModalLinkButton().should("contain", "Link").click();
     xyplot.getXAxisLabel().should("contain", "habitat");
+
+    cy.log("Copy card functionality");
+    // Select a card
+    dc.getTile().click();
+    // Click the duplicate card button
+    dc.getDuplicateCardButton().should('not.be.disabled').click();
+    // Number of cards should increase by 1
+    // New card has focus/is in view.
+    dc.getCardNofTotalListing().contains("Card 3 of 3");
+    // New cards can be in the middle of the deck
+    dc.getPreviousCardButton().click();
+    dc.getDuplicateCardButton().should('not.be.disabled').click();
+    dc.getCardNofTotalListing().contains("Card 3 of 4");
+    // Data can be changed/is not linked to original card
+    dc.getAttrValue().eq(0).dblclick().clear().type("river{enter}");
+    dc.getAttrValue().eq(1).dblclick().clear().type("rhinocerotter{enter}");
+    dc.getAttrValueInput().eq(0).invoke('val').should('eq', "river");
+    dc.getAttrValueInput().eq(1).invoke('val').should('eq', "rhinocerotter");
   });
 });
