@@ -334,6 +334,9 @@ export const GraphModel = TileContentModel
       }
       return clueGraphColors[colorIndex % clueGraphColors.length];
     },
+    removeColorForId(id: string) {
+      self._idColors.delete(id);
+    },
     setAxis(place: AxisPlace, axis: IAxisModelUnion) {
       self.axes.set(place, axis);
     },
