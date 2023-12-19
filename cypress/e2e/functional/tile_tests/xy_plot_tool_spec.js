@@ -66,7 +66,7 @@ context('XYPlot Tool Tile', function () {
       xyTile.getXYPlotTitle().click().type(title + '{enter}');
       xyTile.getXYPlotTitle().should('contain', title);
 
-      cy.log("does not show edit boxes on axes")
+      cy.log("does not show edit boxes on axes");
       xyTile.getEditableAxisBox("bottom", "min").should("not.exist");
       xyTile.getEditableAxisBox("bottom", "max").should("not.exist");
       xyTile.getEditableAxisBox("left", "min").should("not.exist");
@@ -76,7 +76,7 @@ context('XYPlot Tool Tile', function () {
       clueCanvas.clickToolbarButton('graph', 'link-tile');
       xyTile.linkTable("Table 1");
 
-      cy.log("shows edit boxes on axes")
+      cy.log("shows edit boxes on axes");
       xyTile.getEditableAxisBox("bottom", "min").should("exist");
       xyTile.getEditableAxisBox("bottom", "max").should("exist");
       xyTile.getEditableAxisBox("left", "min").should("exist");
