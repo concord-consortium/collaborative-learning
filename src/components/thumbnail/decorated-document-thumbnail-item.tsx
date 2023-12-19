@@ -56,8 +56,9 @@ export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
       .then(ok => {
         if (ok) {
           sectionDocument.setProperty("isDeleted", "true");
+          // TODO not sure why ts is mad about sectionDocument var here
           // if (sectionDocument.type === SupportPublication) {
-          //   logDocumentEvent(LogEventName.DELETE_SUPPORT, { sectionDocument });//TODO, what is problem?
+          //   logDocumentEvent(LogEventName.DELETE_SUPPORT, { sectionDocument });
           // }
         }
       });
