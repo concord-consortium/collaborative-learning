@@ -52,12 +52,13 @@ export const LayerLegend = observer(function LayerLegend(props: ILayerLegendProp
 
     legendItems = yAttributes.map((description, index) =>
       <SimpleAttributeLabel
-        key={description.attributeID}
-        place={'left'}
         attrId={description.attributeID}
+        includePoint={true}
+        key={description.attributeID}
         onChangeAttribute={onChangeAttribute}
         onRemoveAttribute={onRemoveAttribute}
         onTreatAttributeAs={onTreatAttributeAs}
+        place={'left'}
       />);
     if (!readOnly) {
       legendItems.push(<AddSeriesButton />);
