@@ -14,6 +14,7 @@ import "./sort-work-view.scss";
   */
 
 const sortByGroup = (docs: any) => {
+  console.log("-----sorting!!! ----------");
   const groupIds = docs.map((doc: any) => doc.groupId);
   const uniqueGroupIds = new Set(groupIds);
   const sortedUniqueGroupIds = Array.from(uniqueGroupIds).sort((a: any, b: any) => a - b);
@@ -29,28 +30,26 @@ export const SortWorkView:React.FC = observer(function SortWorkView(){
   const stores = useStores();
   const [sortBy, setSortBy] = useState("Group");
   const sortable = stores.documents.all;
-  console.log("| get groups from stores?", stores);
-  let sortedAll: any[] = [];
+  const [sortedAll, setSortedAll] = useState<any[]>(stores.documents.all);
 
   const sortByOptions: ICustomDropdownItem[] = sortOptions.map((option)=>({
     text: option,
     onClick: () => setSortBy(option)
   }));
 
-  useEffect(()=> {
-    sortedAll = stores.documents.all;
-  },[]);
-
   useEffect(() => {
-    console.log("| yello?", stores.documents.all);
+    console.log("useEffect triggered with sortedAll:", sortedAll);
+    console.log("\tsortedAll.length:", sortedAll.length);
     if (sortBy === "Group") {
-      sortedAll = sortByGroup(sortable); //TODO -refactor with ref or just operate on store
-      console.log("| sortedAll: ", sortedAll);
+      console.log("\tlets sort by group!");
+      setSortedAll(sortByGroup(sortable));
+      console.log("\tsortedAll: ", sortedAll);
     } else {
       console.log("implement sortByStudents!");
       // Add your additional code here
     }
-  }, [sortBy, stores.documents]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sortBy, stores.documents.all.length]);
 
 
 
@@ -60,16 +59,27 @@ export const SortWorkView:React.FC = observer(function SortWorkView(){
       <SortWorkHeader sortBy={sortBy} sortByOptions={sortByOptions} />
 
       <hr/>
-      {/* just for reference */}
+      --------------------All Documents------------------------------
       {
-          stores.documents.all.map((doc:any, idx: number) => {
-            return (
-              <pre style={{padding:0, margin:0}} key={`${doc.key-idx}`}>
-                {doc.key} | group: {doc.groupId ?? "_"} | user: {doc.uid} | {doc.type}
-              </pre>
-            );
-          })
-        }
+        stores.documents.all.map((doc:any, idx: number) => {
+          return (
+            <pre style={{padding:0, margin:0}} key={`${doc.key-idx}`}>
+              {doc.key} | group: {doc.groupId ?? "_"} | user: {doc.uid} | {doc.type}
+            </pre>
+          );
+        })
+      }
+      ----------------------Sorted-----------------------------------
+      {
+        sortedAll.map((doc:any, idx: number) => {
+          console.log("doc:", doc);
+          return (
+            <pre style={{padding:0, margin:0}} key={`${doc.key-idx}`}>
+              {doc.key} | group: {doc.groupId ?? "_"} | user: {doc.uid} | {doc.type}
+            </pre>
+          );
+        })
+      }
     </div>
   );
 });
