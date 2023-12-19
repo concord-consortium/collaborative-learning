@@ -41,19 +41,6 @@ export const DocumentCollectionList: React.FC<IProps> = observer(function Docume
     document?.toggleUserStar(user.id);
   };
 
-  // MOVE TO THUMBNAIL?
-  const handleDocumentDeleteClick = (document: DocumentModelType) => {
-    ui.confirm("Do you want to delete this?", "Confirm Delete")
-      .then(ok => {
-        if (ok) {
-          document.setProperty("isDeleted", "true");
-          if (document.type === SupportPublication) {
-            logDocumentEvent(LogEventName.DELETE_SUPPORT, { document });
-          }
-        }
-      });
-  };
-
   return (
     <div className={classNames("doc-collection-list", {horizontal, collapsed})}
         ref={element => element && setCollectionElement?.(element)}>
@@ -79,7 +66,6 @@ export const DocumentCollectionList: React.FC<IProps> = observer(function Docume
               onSelectDocument={onSelectDocument} // WE WONT NEED THIS
               onDocumentDragStart={handleDocumentDragStart} // MAYBE THIS COULD MOVE DOWN TO THUMBNAIL TOO?
               onDocumentStarClick={_handleDocumentStarClick}
-              onDocumentDeleteClick={handleDocumentDeleteClick}
             />
           );
         })

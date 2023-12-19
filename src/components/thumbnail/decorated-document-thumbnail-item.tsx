@@ -6,13 +6,12 @@ import { useDocumentCaption } from "../../hooks/use-document-caption";
 import { useDocumentSyncToFirebase } from "../../hooks/use-document-sync-to-firebase";
 import { useLastSupportViewTimestamp } from "../../hooks/use-last-support-view-timestamp";
 import { DocumentModelType } from "../../models/document/document";
-import { useDBStore, useUserStore } from "../../hooks/use-stores";
+import { useDBStore, useUIStore, useUserStore } from "../../hooks/use-stores";
 import { NavTabSectionModelType } from "../../models/view/nav-tabs";
 
 import "./document-type-collection.sass";
 
 interface IProps {
-  onDocumentDeleteClick?: (document: DocumentModelType) => void;
   onDocumentDragStart?: (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => void;
   onDocumentStarClick?: (document: DocumentModelType) => void;
   onSelectDocument?: (document: DocumentModelType) => void;
@@ -27,12 +26,13 @@ interface IProps {
 // observes teacher names via useDocumentCaption()
 export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
   section, sectionDocument, tab, scale, selectedDocument, selectedSecondaryDocument,
-  onSelectDocument, onDocumentDragStart, onDocumentStarClick, onDocumentDeleteClick
+  onSelectDocument, onDocumentDragStart, onDocumentStarClick
 }: IProps) => {
     const user = useUserStore();
     const dbStore = useDBStore();
     const tabName = tab.toLowerCase().replace(' ', '-');
     const caption = useDocumentCaption(sectionDocument);
+    const ui = useUIStore();
 
     // sync delete a publication to firebase
     useDocumentSyncToFirebase(user, dbStore.firebase, sectionDocument, true);
@@ -50,9 +50,19 @@ export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
     function handleDocumentStarClick() {
       onDocumentStarClick?.(sectionDocument);
     }
+
     function handleDocumentDeleteClick() {
-      onDocumentDeleteClick?.(sectionDocument);
+      ui.confirm("Do you want to delete this?", "Confirm Delete")
+      .then(ok => {
+        if (ok) {
+          sectionDocument.setProperty("isDeleted", "true");
+          // if (sectionDocument.type === SupportPublication) {
+          //   logDocumentEvent(LogEventName.DELETE_SUPPORT, { sectionDocument });//TODO, what is problem?
+          // }
+        }
+      });
     }
+
     // pass function so logic stays here but access occurs from child
     // so that mobx-react triggers child render not parent render.
     const onIsStarred = () => {
@@ -73,7 +83,6 @@ export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
                                         ? handleDocumentDeleteClick
                                         : undefined;
 
-                                        // console.log("| NEED 2: ", scale, section, sectionDocument, tab);
     return (
       <ThumbnailDocumentItem
         key={sectionDocument.key}
