@@ -13,8 +13,11 @@ import "./sort-work-view.scss";
       3 ensure handlers are working, perhaps moving some dowen chain (already done with delete, eg)
   */
 
+  //for this ticket we don't need to sort by group,
+  // just show personal (from all units) & problem documents (just unit teacher is on)
 const sortByGroup = (docs: any) => {
   console.log("-----sorting!!! ----------");
+  //find userID, then look at group store, to find the groupID... then we can start sorting.
   const groupIds = docs.filter((doc: any) => doc.groupId !== undefined)//first remove teacher documents
                        .map((doc: any) => doc.groupId);
 
@@ -74,7 +77,7 @@ export const SortWorkView:React.FC = observer(function SortWorkView(){
       ----------------------Sorted-----------------------------------
       {
         sortedAll.map((doc:any, idx: number) => {
-          console.log("doc:", doc);
+          // console.log("doc:", doc);
           return (
             <pre style={{padding:0, margin:0}} key={`${doc.key-idx}`}>
               {doc.key} | group: {doc.groupId ?? "_"} | user: {doc.uid} | {doc.type}
