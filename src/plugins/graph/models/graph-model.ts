@@ -332,6 +332,8 @@ export const GraphModel = TileContentModel
     getColorForId(id: string) {
       let colorIndex = self._idColors.get(id);
       if (colorIndex === undefined) {
+        // This function gets called automatically in response to plots being added to a graph.
+        // withoutUndo prevents a second action being added to the undo stack when this happens.
         withoutUndo();
         colorIndex = self.nextColor;
         self._idColors.set(id, colorIndex);
