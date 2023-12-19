@@ -36,7 +36,6 @@ export const DocumentCollectionList: React.FC<IProps> = observer(function Docume
     e.dataTransfer.setData(DocumentDragKey, document.key);
   };
 
-  // MOVE TO THUMBNAIL?
   const handleDocumentStarClick = (document: DocumentModelType) => {
     document?.toggleUserStar(user.id);
   };
@@ -63,8 +62,10 @@ export const DocumentCollectionList: React.FC<IProps> = observer(function Docume
               selectedDocument={selectedDocument}
               selectedSecondaryDocument={selectedSecondaryDocument}
               onSelectNewDocument={onSelectNewDocument}
-              onSelectDocument={onSelectDocument} // WE WONT NEED THIS
-              onDocumentDragStart={handleDocumentDragStart} // MAYBE THIS COULD MOVE DOWN TO THUMBNAIL TOO?
+              onSelectDocument={onSelectDocument}
+              // MAYBE THIS COULD MOVE DOWN TO THUMBNAIL TOO?
+              onDocumentDragStart={handleDocumentDragStart}
+              // TODO - move? It seems defined by section so do we need to continue to calculate it here?
               onDocumentStarClick={_handleDocumentStarClick}
             />
           );
