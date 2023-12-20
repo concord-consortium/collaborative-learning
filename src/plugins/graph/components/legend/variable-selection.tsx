@@ -3,6 +3,7 @@ import { observer } from "mobx-react-lite";
 import React, { ReactElement, useRef, useState } from "react";
 import { Menu, MenuItem, MenuList, MenuButton, Portal } from "@chakra-ui/react";
 import { VariableType } from "@concord-consortium/diagram-view";
+import { kGraphPortalClass } from "../../graph-types";
 
 import DropdownCaretIcon from "../../assets/dropdown-caret.svg";
 
@@ -25,7 +26,7 @@ export const VariableSelection = observer(function VariableSelection({
   alternateButtonLabel, icon, onSelect, selectedVariable, variables
 }: IVariableSelectionProps) {
   const [buttonContainer, setButtonContainer] = useState<HTMLDivElement | null>(null);
-  const portalParentElt = buttonContainer?.closest('.document-content') as HTMLDivElement ?? null;
+  const portalParentElt = buttonContainer?.closest(kGraphPortalClass) as HTMLDivElement ?? null;
   const portalRef = useRef(portalParentElt);
   portalRef.current = portalParentElt;
 
