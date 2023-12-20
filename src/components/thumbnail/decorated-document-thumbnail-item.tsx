@@ -17,7 +17,7 @@ import { LogEventName } from "../../lib/logger-types";
 interface IProps {
   onDocumentDragStart?: (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => void;
   shouldHandleStarClick?: boolean;
-  onSelectDocument?: (document: DocumentModelType) => void;
+  onSelectDocument?: (document: DocumentModelType) => void; // TODO: implement on our sort-work path
   scale: number;
   section: NavTabSectionModelType;
   document: DocumentModelType;
@@ -70,7 +70,7 @@ export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
     // pass function so logic stays here but access occurs from child
     // so that mobx-react triggers child render not parent render.
     const onIsStarred = () => {
-      return section.showStarsForUser(user)
+      return shouldHandleStarClick
           // We weren't showing stars that a "co-teacher" has placed on a document even though the document
           // is classified as "isStarred". We commented out lines 88-90 to show all starred documents regardless of who
           // placed the star.
@@ -80,9 +80,12 @@ export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
                 ? document.isStarred
                 : false;
     };
-    const _handleDocumentStarClick = section.showStarsForUser(user) && !document.isRemote
+    const _handleDocumentStarClick = shouldHandleStarClick && !document.isRemote
                                       ? handleDocumentStarClick
                                       : undefined;
+    // TODO: remove dependency on section, make a boolean like shouldShowDelete, which is a
+    // function of user and document and who knows what else
+    // make sure this flag is handled at all section levels on the existing path (or only used where needed)
     const _handleDocumentDeleteClick = section.showDeleteForUser(user, document)
                                         ? handleDocumentDeleteClick
                                         : undefined;

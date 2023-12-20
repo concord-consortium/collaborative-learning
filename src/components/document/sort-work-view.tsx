@@ -10,6 +10,34 @@ import { ENavTab } from "../../models/view/nav-tabs";
 import { getDocumentContext } from "../../models/document/document";
 import { DocumentContextReact } from "./document-context";
 
+const getGroups = (documents: any[], sortBy: string) => {
+  const groupLabel = () => {
+    if (sortBy === "group"){
+      // who is the user that owns the document?
+      // what group are they in on the problem we are on now? (thats in groups.store)
+      // THAT is the group that we will place this document in (NOT the group found in doc.groupId)
+    }
+    if (sortBy === "name"){
+      //...
+    }
+  };
+
+  /* return
+  [
+    {
+      groupLabel: "2" | "Bob Smith", (depending on sortBy)
+      groupKey: <unique>
+      documents: [
+        { actualDocumentObj from store },
+        { actualDocumentObj from store },
+        { actualDocumentObj from store }
+      ]
+    }
+  ]
+  */
+};
+
+
 
 export const SortWorkView:React.FC = observer(function SortWorkView(){
   const sortOptions = ["Group", "Student"];
@@ -29,12 +57,24 @@ export const SortWorkView:React.FC = observer(function SortWorkView(){
    }, [sortBy]);
 
   // TODO: real calculation of this boolean
+  // The section config is the source of this truth on other paths
   const shouldHandleStarClick = true;
 
   const tempDebugView = false;
   return (
     <div key="sort-work-view" className="sort-work-view">
       <SortWorkHeader sortBy={sortBy} sortByOptions={sortByOptions} />
+
+      {/* const groups = getGroups(docs, sortBy) */}
+      {/* for each group: <SortedDocsGroup> which would be one of the below per group */}
+
+      {/* or do it inline
+         for each group
+            groupcomponent
+               foreach document
+                  thumbnail
+      */}
+
       <div className="documents-panel">
         {
           sortedAll.map((doc:any, idx: number) => {

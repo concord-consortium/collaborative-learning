@@ -73,7 +73,7 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
         }
       </div>
       { onDocumentStarClick &&
-          <DocumentStar isStarred={onIsStarred()} onStarClick={handleDocumentStarClick} />
+          <DocumentStar isStarred={onIsStarred()} onStarClick={handleDocumentStarClick} /> //TODO: ? change onIsStarred to isStarred a plain boolean
       }
       <DocumentCaption
         captionText={captionText}
