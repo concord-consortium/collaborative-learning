@@ -31,14 +31,27 @@
 
   }
 
-  /* need to bring in markup and styles from document panel, etc */
+  /* this is hacked style for proof of concept */
   .documents-panel {
-    display:block;
+    display:flex;
+    flex-direction: column;
     transform: scale(0.9) !important;
+
     div, svg {
       transform: scale(0.9) !important;
     }
+    svg {
+      display: none;
+    }
+  }
 
+  .list-item {
+    border:2px solid orange;
+    width: 170px;
+    height: 100px;
+    transform: scale(0.2);
+    transform-origin: 0 0;
+    overflow: hidden;
   }
 
 }

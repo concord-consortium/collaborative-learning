@@ -19,7 +19,7 @@ interface IProps {
   collapsed?: boolean;
   scrollToLocation?: number;
   onSelectNewDocument?: (type: string) => void;
-  onSelectDocument?: (document: DocumentModelType) => void;
+  onSelectDocument?: (document: DocumentModelType) => void; // TODO: implement on our sort-work path
 }
 
 export const kNavItemScale = 0.11;

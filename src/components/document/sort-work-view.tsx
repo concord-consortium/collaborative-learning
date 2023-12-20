@@ -60,44 +60,41 @@ export const SortWorkView:React.FC = observer(function SortWorkView(){
   // The section config is the source of this truth on other paths
   const shouldHandleStarClick = true;
 
-  const tempDebugView = false;
   return (
     <div key="sort-work-view" className="sort-work-view">
       <SortWorkHeader sortBy={sortBy} sortByOptions={sortByOptions} />
 
-      {/* const groups = getGroups(docs, sortBy) */}
-      {/* for each group: <SortedDocsGroup> which would be one of the below per group */}
-
-      {/* or do it inline
-         for each group
-            groupcomponent
-               foreach document
-                  thumbnail
-      */}
-
       <div className="documents-panel">
+
+        {/* const groups = getGroups(docs, sortBy) */}
+        {/* for each group: <SortedDocsGroup> which would be one of the below per group */}
+
+        {/* or do it inline
+          for each group
+              groupcomponent
+                foreach document
+                    thumbnail
+        */}
+
         {
           sortedAll.map((doc:any, idx: number) => {
             const documentContext = getDocumentContext(doc);
             return (
               <DocumentContextReact.Provider key={doc.key} value={documentContext}>
-                {!tempDebugView &&
-                  <DecoratedDocumentThumbnailItem
-                    key={doc.key}
-                    scale={0.1}
-                    section={sectionModelToGetRidOf as any} // TODO : refactor so not required
-                    document={doc}
-                    tab={'sort-work'}
-                    shouldHandleStarClick={shouldHandleStarClick ?? false}
-                  />
-                }
-                { tempDebugView &&
-                  <pre key={`${doc.key}`}> {doc.key} | group: {doc.groupId ?? "_"} | user: {doc.uid} | {doc.type}</pre>
-                }
+                { doc.key }
+                <DecoratedDocumentThumbnailItem
+                  key={doc.key}
+                  scale={0.1}
+                  section={sectionModelToGetRidOf as any} // TODO : refactor so not required
+                  document={doc}
+                  tab={'sort-work'}
+                  shouldHandleStarClick={shouldHandleStarClick ?? false}
+                />
               </DocumentContextReact.Provider>
             );
           })
         }
+
       </div>
     </div>
   );
