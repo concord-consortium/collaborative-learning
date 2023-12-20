@@ -66,9 +66,21 @@ context('XYPlot Tool Tile', function () {
       xyTile.getXYPlotTitle().click().type(title + '{enter}');
       xyTile.getXYPlotTitle().should('contain', title);
 
+      cy.log("does not show edit boxes on axes");
+      xyTile.getEditableAxisBox("bottom", "min").should("not.exist");
+      xyTile.getEditableAxisBox("bottom", "max").should("not.exist");
+      xyTile.getEditableAxisBox("left", "min").should("not.exist");
+      xyTile.getEditableAxisBox("left", "max").should("not.exist");
+
       cy.log("Link Table");
       clueCanvas.clickToolbarButton('graph', 'link-tile');
       xyTile.linkTable("Table 1");
+
+      cy.log("shows edit boxes on axes");
+      xyTile.getEditableAxisBox("bottom", "min").should("exist");
+      xyTile.getEditableAxisBox("bottom", "max").should("exist");
+      xyTile.getEditableAxisBox("left", "min").should("exist");
+      xyTile.getEditableAxisBox("left", "max").should("exist");
 
       cy.log("verify graph dot is displayed");
       xyTile.getGraphDot().should('have.length', 1);
@@ -117,13 +129,23 @@ context('XYPlot Tool Tile', function () {
       cy.log("verify edit box for horizontal and vertical axes");
       xyTile.getEditableAxisBox("bottom", "min").click().type('-10{enter}');
       xyTile.getEditableAxisBox("bottom", "min").should('contain', '-10');
-      xyTile.getEditableAxisBox("bottom", "max").click().type('50.02345{enter}');
-      xyTile.getEditableAxisBox("bottom", "max").should('contain', '50.02345');
       xyTile.getEditableAxisBox("left", "min").click().type('-10.55{enter}');
       xyTile.getEditableAxisBox("left", "min").should('contain', '-10.55');
       xyTile.getEditableAxisBox("left", "max").click().type('50{enter}');
       xyTile.getEditableAxisBox("left", "max").should('contain', '50');
+
+      cy.log("verify nonnumeric inputs are not accepted");
       xyTile.getEditableAxisBox("left", "max").click().type('abc{enter}');
+      xyTile.getEditableAxisBox("left", "max").should('contain', '50');
+
+      cy.log("check that values more or less than the other bounding box are not accepted");
+      // Excluding the bottom max edit box from these tests because currently, the
+      // scrollbar is covering up that element and causing click and type fail on it
+      xyTile.getEditableAxisBox("bottom", "min").click().type('60{enter}');
+      xyTile.getEditableAxisBox("bottom", "min").should('contain', '-10');
+      xyTile.getEditableAxisBox("left", "min").click().type('60{enter}');
+      xyTile.getEditableAxisBox("left", "min").should('contain', '-10.55');
+      xyTile.getEditableAxisBox("left", "max").click().type('-20{enter}');
       xyTile.getEditableAxisBox("left", "max").should('contain', '50');
 
       cy.log("restore points to canvas");
