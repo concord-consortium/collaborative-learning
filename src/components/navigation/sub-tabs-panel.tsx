@@ -19,7 +19,6 @@ interface IProps {
 export const SubTabsPanel: React.FC<IProps> = observer(function SubTabsPanel(
     { tabSpec, renderSubTabPanel, tabsExtraClassNames, onSelect, selectedIndex }) {
 
-  // console.log("\t <SubTabsPanel>", tabSpec);
   const appConfigStore = useAppConfig();
   const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
   const subTabs = tabSpec.subTabs;
@@ -52,8 +51,6 @@ export const SubTabsPanel: React.FC<IProps> = observer(function SubTabsPanel(
         <div className={classNames("documents-panel", {"no-sub-tabs": !hasSubTabs})}>
           {subTabs.map((subTab, index) => {
             const sectionTitle = subTab.label.toLowerCase().replace(' ', '-');
-            // console.log("📁 sub-tabs-panel.tsx map2 -----------------------");
-            // console.log("\t🥩 subTab:", subTab);
 
             return (
               <TabPanel key={`subtab-${subTab.label}`} className={["react-tabs__tab-panel", "sub-tab-panel"]}

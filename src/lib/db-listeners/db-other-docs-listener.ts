@@ -76,7 +76,6 @@ export class DBOtherDocumentsListener extends BaseListener {
             !doc.getProperty("isDeleted") && documents.resolveRequiredDocumentPromise(doc);
             (doc.type === PersonalDocument) && syncStars(doc, this.db);
           }
-          console.log("| DBOtherDocumentsListener... CREATED:", this.documentType, doc.key, doc.title);
           return doc;
         });
     }

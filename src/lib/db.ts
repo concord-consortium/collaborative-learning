@@ -585,7 +585,6 @@ export class DB {
           }
         })
         .then((document) => {
-          // console.log("| ... 8  and THEN put the document in the store!", document.key);
           documents.add(document);
           resolve(document);
         })
@@ -735,7 +734,6 @@ export class DB {
           metadata: DBOfferingUserProblemDocument) {
     const {documentKey} = metadata;
     const group = this.stores.groups.groupForUser(userId);
-    //console.log("|> ... 20 eventually given to me, db.ts to open the document");
     return this.openDocument({
       type,
       userId,
