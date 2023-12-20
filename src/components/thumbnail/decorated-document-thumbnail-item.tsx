@@ -16,7 +16,7 @@ import { LogEventName } from "../../lib/logger-types";
 
 interface IProps {
   onDocumentDragStart?: (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => void;
-  onDocumentStarClick?: (document: DocumentModelType) => void;
+  shouldHandleStarClick?: boolean;
   onSelectDocument?: (document: DocumentModelType) => void;
   scale: number;
   section: NavTabSectionModelType;
@@ -29,7 +29,7 @@ interface IProps {
 // observes teacher names via useDocumentCaption()
 export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
   section, document, tab, scale, selectedDocument, selectedSecondaryDocument,
-  onSelectDocument, onDocumentDragStart, onDocumentStarClick
+  onSelectDocument, onDocumentDragStart, shouldHandleStarClick
 }: IProps) => {
     const user = useUserStore();
     const dbStore = useDBStore();
@@ -51,7 +51,7 @@ export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
       onDocumentDragStart?.(e, document);
     }
     function handleDocumentStarClick() {
-      onDocumentStarClick?.(document);
+      shouldHandleStarClick && document?.toggleUserStar(user.id);
     }
 
     function handleDocumentDeleteClick() {

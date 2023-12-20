@@ -37,18 +37,12 @@ export const DocumentCollectionList: React.FC<IProps> = observer(function Docume
     e.dataTransfer.setData(DocumentDragKey, document.key);
   };
 
-  const handleDocumentStarClick = (document: DocumentModelType) => {
-    document?.toggleUserStar(user.id);
-  };
-
   return (
     <div className={classNames("doc-collection-list", {horizontal, collapsed})}
         ref={element => element && setCollectionElement?.(element)}>
       {
         subTab.sections.map((section: any, index: any) => {
-          const _handleDocumentStarClick = section.showStarsForUser(user)
-            ? handleDocumentStarClick
-            : undefined;
+          const shouldHandleStarClick = section.showStarsForUser(user);
 
           return (
             <DocumentCollectionByType
@@ -66,8 +60,7 @@ export const DocumentCollectionList: React.FC<IProps> = observer(function Docume
               onSelectDocument={onSelectDocument}
               // MAYBE THIS COULD MOVE DOWN TO THUMBNAIL TOO?
               onDocumentDragStart={handleDocumentDragStart}
-              // TODO - move? It seems defined by section so do we need to continue to calculate it here?
-              onDocumentStarClick={_handleDocumentStarClick} // replace this with a boolean flag, calculated here, and use same idea on sort-tab
+              shouldHandleStarClick={shouldHandleStarClick}
             />
           );
         })

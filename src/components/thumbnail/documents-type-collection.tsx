@@ -28,7 +28,7 @@ interface IProps {
   onSelectNewDocument?: (type: string) => void;
   onSelectDocument?: (document: DocumentModelType) => void;
   onDocumentDragStart: (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => void;
-  onDocumentStarClick?: (document: DocumentModelType) => void;
+  shouldHandleStarClick?: boolean;
 }
 
 function getNewDocumentLabel(section: NavTabSectionModelType , appConfigStore: AppConfigModelType) {
@@ -86,7 +86,7 @@ function getSectionDocs(section: NavTabSectionModelType, documents: DocumentsMod
 export const DocumentCollectionByType: React.FC<IProps> = observer(({
                                   topTab, tab, section, index, numSections=0, scale, selectedDocument,
                                   selectedSecondaryDocument, horizontal, onSelectNewDocument, onSelectDocument,
-                                  onDocumentDragStart, onDocumentStarClick }: IProps) => {
+                                  onDocumentDragStart, shouldHandleStarClick }: IProps) => {
   const appConfigStore = useAppConfig();
   const classStore = useClassStore();
   const documents = useLocalDocuments();
@@ -145,7 +145,7 @@ export const DocumentCollectionByType: React.FC<IProps> = observer(({
                 selectedSecondaryDocument={selectedSecondaryDocument}
                 onSelectDocument={onSelectDocument}
                 onDocumentDragStart={onDocumentDragStart}
-                onDocumentStarClick={onDocumentStarClick}
+                shouldHandleStarClick={shouldHandleStarClick}
               />
             </DocumentContextReact.Provider>
           );

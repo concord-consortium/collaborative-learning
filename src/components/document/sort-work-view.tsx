@@ -24,43 +24,40 @@ export const SortWorkView:React.FC = observer(function SortWorkView(){
   }));
 
   useEffect(() => {
+    // TODO: implement the sort
     console.log("| sort by: ", sortBy);
-  }, [sortBy]);
+   }, [sortBy]);
+
+  // TODO: real calculation of this boolean
+  const shouldHandleStarClick = true;
 
   const tempDebugView = false;
   return (
     <div key="sort-work-view" className="sort-work-view">
       <SortWorkHeader sortBy={sortBy} sortByOptions={sortByOptions} />
       <div className="documents-panel">
-      {
-        sortedAll.map((doc:any, idx: number) => {
-          const documentContext = getDocumentContext(doc);
-
-          return (
-            <DocumentContextReact.Provider key={doc.key} value={documentContext}>
-
-
-                    {!tempDebugView &&
-                      <DecoratedDocumentThumbnailItem
-                        key={doc.key}
-                        scale={0.1}
-                        section={sectionModelToGetRidOf as any} // TODO : refactor so not required
-                        document={doc}
-                        tab={'sort-work'}
-                      />
-                    }
-
-                    { tempDebugView &&
-                      <pre style={{padding:0, margin:0}} key={`${doc.key}`}>
-                        {doc.key} | group: {doc.groupId ?? "_"} | user: {doc.uid} | {doc.type}
-                      </pre>
-                    }
-
-            </DocumentContextReact.Provider>
-          );
-        })
-
-      }
+        {
+          sortedAll.map((doc:any, idx: number) => {
+            const documentContext = getDocumentContext(doc);
+            return (
+              <DocumentContextReact.Provider key={doc.key} value={documentContext}>
+                {!tempDebugView &&
+                  <DecoratedDocumentThumbnailItem
+                    key={doc.key}
+                    scale={0.1}
+                    section={sectionModelToGetRidOf as any} // TODO : refactor so not required
+                    document={doc}
+                    tab={'sort-work'}
+                    shouldHandleStarClick={shouldHandleStarClick ?? false}
+                  />
+                }
+                { tempDebugView &&
+                  <pre key={`${doc.key}`}> {doc.key} | group: {doc.groupId ?? "_"} | user: {doc.uid} | {doc.type}</pre>
+                }
+              </DocumentContextReact.Provider>
+            );
+          })
+        }
       </div>
     </div>
   );
