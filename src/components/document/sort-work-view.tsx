@@ -65,16 +65,6 @@ export const SortWorkView:React.FC = observer(function SortWorkView(){
 
       <div className="documents-panel">
 
-        {/* const groups = getGroupsOfDocuments(docs, sortBy) */}
-        {/* for each group: <SortedDocsGroup> which would be one of the below per group */}
-
-        {/* or do it inline
-          for each group
-              groupcomponent
-                foreach document
-                    thumbnail
-        */}
-
         {
           stores.documents.all.map((doc:any, idx: number) => {
             const documentContext = getDocumentContext(doc);
