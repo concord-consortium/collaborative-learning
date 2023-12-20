@@ -81,7 +81,7 @@ export const SortWorkView:React.FC = observer(function SortWorkView(){
             const documentContext = getDocumentContext(doc);
             return (
               <DocumentContextReact.Provider key={doc.key} value={documentContext}>
-                { doc.key }
+                <pre style={{padding: "0px", margin: "0px", fontSize: "9px"}}>{ doc.key }</pre>
                 <DecoratedDocumentThumbnailItem
                   key={doc.key}
                   scale={0.1}
