@@ -729,7 +729,6 @@ export class DB {
   }
 
   public createDocumentModelFromProblemMetadata(
-
           type: ProblemOrPlanningDocumentType, userId: string,
           metadata: DBOfferingUserProblemDocument) {
     const {documentKey} = metadata;

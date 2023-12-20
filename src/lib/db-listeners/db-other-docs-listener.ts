@@ -69,7 +69,7 @@ export class DBOtherDocumentsListener extends BaseListener {
     const {documents, user} = this.db.stores;
     const dbDoc: DBOtherDocument|null = snapshot.val();
     this.debugLogSnapshot("#handleDocumentAdded", snapshot);
-    if ( dbDoc ) {
+    if (dbDoc) {
       this.db.createDocumentModelFromOtherDocument(dbDoc, this.documentType)
         .then(doc => {
           if (doc.uid === user.id) {

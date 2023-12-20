@@ -19,6 +19,7 @@ export class DBProblemDocumentsListener extends BaseListener {
 
   public start() {
     const { user } = this.db.stores;
+
     // both teachers and students listen to all problem documents
     // but only teachers listen to all content.  students only listen
     // to content of users in their group to reduce network traffic

@@ -23,7 +23,6 @@ interface IProps {
 
 export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function SectionDocumentOrBrowser(
     { tabSpec, isChatOpen }) {
-
   const persistentUI = usePersistentUIStore();
   const store = useStores();
   const appConfigStore = useAppConfig();
@@ -87,7 +86,6 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
   const renderDocumentBrowserView = (subTab: ISubTabSpec) => {
     const openDocumentKey = tabState?.openDocuments.get(subTab.label);
     const classHash = classStore.classHash;
-
     return (
       <div className="document-browser vertical">
         <DocumentCollectionList
