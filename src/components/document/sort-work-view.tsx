@@ -6,9 +6,11 @@ import { ICustomDropdownItem } from "../../clue/components/custom-select";
 import { DecoratedDocumentThumbnailItem } from "../thumbnail/decorated-document-thumbnail-item";
 import { getDocumentContext } from "../../models/document/document";
 import { DocumentContextReact } from "./document-context";
+import { DEBUG_SORT_WORK } from "../../lib/debug";
 
 import "../thumbnail/document-type-collection.sass";
 import "./sort-work-view.scss";
+
 
 export const SortWorkView:React.FC = observer(function SortWorkView(){
   const sortOptions = ["Group", "Student"];
@@ -20,13 +22,23 @@ export const SortWorkView:React.FC = observer(function SortWorkView(){
     onClick: () => setSortBy(option)
   }));
 
-  const shouldHandleStarClick = true;
+  const renderDebugView = (docs: any) => {
+    return docs.map((doc:any, idx: number) => {
+      const ct = idx + 1;
+      return (
+        <pre key={idx} style={{margin:"0px", padding: "0px", fontSize: "10px"}}>
+          {ct < 10 && " "}{ct} | {doc.key} | {doc.type}
+        </pre>
+      );
+    });
+  };
 
   return (
     <div key="sort-work-view" className="sort-work-view">
       <SortWorkHeader sortBy={sortBy} sortByOptions={sortByOptions} />
       <div className="documents-panel">
         <div className={"tab-panel-documents-section"}>
+          { DEBUG_SORT_WORK && renderDebugView(stores.documents.all)}
           <div className={"list"}>
             {
               stores.documents.all.map((doc:any, idx: number) => {
@@ -37,8 +49,8 @@ export const SortWorkView:React.FC = observer(function SortWorkView(){
                       key={doc.key}
                       scale={0.1}
                       document={doc}
-                      tab={'sort-work'}
-                      shouldHandleStarClick={shouldHandleStarClick}
+                      tab={"sort-work"}
+                      shouldHandleStarClick={true}
                       allowDelete={false}
                     />
                   </DocumentContextReact.Provider>

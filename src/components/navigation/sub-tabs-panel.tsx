@@ -53,7 +53,7 @@ export const SubTabsPanel: React.FC<IProps> = observer(function SubTabsPanel(
             return (
               <TabPanel key={`subtab-${subTab.label}`} className={["react-tabs__tab-panel", "sub-tab-panel"]}
                 data-test={`subtab-${sectionTitle}`}>
-                SubTabPanel: {subTab.label} { renderSubTabPanel(subTab) }
+                { renderSubTabPanel(subTab) }
               </TabPanel>
             );
           })}
