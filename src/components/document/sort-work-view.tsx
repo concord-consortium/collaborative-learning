@@ -42,8 +42,10 @@ export const SortWorkView:React.FC = observer(function SortWorkView(){
   const sortOptions = ["Group", "Student"];
   const stores = useStores();
   const [sortBy, setSortBy] = useState("Group");
-  const [sortedAll, setSortedAll] = useState<any[]>(stores.documents.all);
+  // const [sortedAll, setSortedAll] = useState<any[]>(stores.documents.all);
   const sectionModelToGetRidOf = stores?.appConfig?.navTabs?.getNavTabSpec(ENavTab.kSortWork)?.sections[0];
+
+  const problemAndPersonalDocs = stores.documents.all; //TODO: filter out published and...look in story
 
   const sortByOptions: ICustomDropdownItem[] = sortOptions.map((option)=>({
     text: option,
@@ -76,7 +78,7 @@ export const SortWorkView:React.FC = observer(function SortWorkView(){
         */}
 
         {
-          sortedAll.map((doc:any, idx: number) => {
+          stores.documents.all.map((doc:any, idx: number) => {
             const documentContext = getDocumentContext(doc);
             return (
               <DocumentContextReact.Provider key={doc.key} value={documentContext}>
