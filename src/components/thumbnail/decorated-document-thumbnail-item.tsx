@@ -4,32 +4,29 @@ import React from "react";
 import { ThumbnailDocumentItem } from "./thumbnail-document-item";
 import { useDocumentCaption } from "../../hooks/use-document-caption";
 import { useDocumentSyncToFirebase } from "../../hooks/use-document-sync-to-firebase";
-import { useLastSupportViewTimestamp } from "../../hooks/use-last-support-view-timestamp";
 import { DocumentModelType } from "../../models/document/document";
 import { useDBStore, useUIStore, useUserStore } from "../../hooks/use-stores";
-import { NavTabSectionModelType } from "../../models/view/nav-tabs";
-
-import "./document-type-collection.sass";
-import { SupportPublication } from "../../models/document/document-types";
+import { DocumentDragKey, SupportPublication } from "../../models/document/document-types";
 import { logDocumentEvent } from "../../models/document/log-document-event";
 import { LogEventName } from "../../lib/logger-types";
 
+import "./document-type-collection.sass";
+
 interface IProps {
-  onDocumentDragStart?: (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => void;
-  shouldHandleStarClick?: boolean;
+  shouldHandleStarClick: boolean;
   onSelectDocument?: (document: DocumentModelType) => void; // TODO: implement on our sort-work path
   scale: number;
-  section: NavTabSectionModelType;
   document: DocumentModelType;
   selectedDocument?: string;
   selectedSecondaryDocument?: string;
+  allowDelete: boolean;
   tab: string;
 }
 
 // observes teacher names via useDocumentCaption()
 export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
-  section, document, tab, scale, selectedDocument, selectedSecondaryDocument,
-  onSelectDocument, onDocumentDragStart, shouldHandleStarClick
+  document, tab, scale, selectedDocument, selectedSecondaryDocument, allowDelete,
+  onSelectDocument, shouldHandleStarClick
 }: IProps) => {
     const user = useUserStore();
     const dbStore = useDBStore();
@@ -40,16 +37,10 @@ export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
     // sync delete a publication to firebase
     useDocumentSyncToFirebase(user, dbStore.firebase, document, true);
 
-    // sync user's last support view time stamp to firebase
-    useLastSupportViewTimestamp(section.type === "teacher-supports");
-
-    function handleDocumentClick() {
-      onSelectDocument?.(document);
-      (section.type === "teacher-supports") && user.setLastSupportViewTimestamp(Date.now());
-    }
     function handleDocumentDragStart(e: React.DragEvent<HTMLDivElement>) {
-      onDocumentDragStart?.(e, document);
+      e.dataTransfer.setData(DocumentDragKey, document.key);
     }
+
     function handleDocumentStarClick() {
       shouldHandleStarClick && document?.toggleUserStar(user.id);
     }
@@ -86,9 +77,14 @@ export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
     // TODO: remove dependency on section, make a boolean like shouldShowDelete, which is a
     // function of user and document and who knows what else
     // make sure this flag is handled at all section levels on the existing path (or only used where needed)
-    const _handleDocumentDeleteClick = section.showDeleteForUser(user, document)
+    const userOwnsDocument = user.id === document.uid;
+    const _handleDocumentDeleteClick = allowDelete && userOwnsDocument
                                         ? handleDocumentDeleteClick
                                         : undefined;
+
+    const handleDocumentClick = () => {
+      onSelectDocument?.(document);
+    };
 
     return (
       <ThumbnailDocumentItem

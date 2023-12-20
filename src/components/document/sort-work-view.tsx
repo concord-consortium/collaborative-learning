@@ -4,12 +4,11 @@ import React, { useEffect, useState } from "react";
 import { SortWorkHeader } from "../navigation/sort-work-header";
 import { ICustomDropdownItem } from "../../clue/components/custom-select";
 import { DecoratedDocumentThumbnailItem } from "../thumbnail/decorated-document-thumbnail-item";
-import { ENavTab } from "../../models/view/nav-tabs";
 import { getDocumentContext } from "../../models/document/document";
 import { DocumentContextReact } from "./document-context";
 
+import "../thumbnail/document-type-collection.sass";
 import "./sort-work-view.scss";
-
 
 const getGroupsOfDocuments = (documents: any[], sortBy: string) => {
   const groupLabel = () => {
@@ -43,7 +42,6 @@ export const SortWorkView:React.FC = observer(function SortWorkView(){
   const stores = useStores();
   const [sortBy, setSortBy] = useState("Group");
   // const [sortedAll, setSortedAll] = useState<any[]>(stores.documents.all);
-  const sectionModelToGetRidOf = stores?.appConfig?.navTabs?.getNavTabSpec(ENavTab.kSortWork)?.sections[0];
 
   const problemAndPersonalDocs = stores.documents.all; //TODO: filter out published and...look in story
 
@@ -86,10 +84,10 @@ export const SortWorkView:React.FC = observer(function SortWorkView(){
                 <DecoratedDocumentThumbnailItem
                   key={doc.key}
                   scale={0.1}
-                  section={sectionModelToGetRidOf as any} // TODO : refactor so not required
                   document={doc}
                   tab={'sort-work'}
-                  shouldHandleStarClick={shouldHandleStarClick ?? false}
+                  shouldHandleStarClick={shouldHandleStarClick}
+                  allowDelete={false}
                 />
               </DocumentContextReact.Provider>
             );

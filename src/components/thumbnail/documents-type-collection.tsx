@@ -14,6 +14,7 @@ import { DecoratedDocumentThumbnailItem } from "./decorated-document-thumbnail-i
 import NewDocumentIcon from "../../assets/icons/new/add.svg";
 
 import "./document-type-collection.sass";
+import { useLastSupportViewTimestamp } from "../../hooks/use-last-support-view-timestamp";
 
 interface IProps {
   topTab?: ENavTab;
@@ -27,8 +28,8 @@ interface IProps {
   selectedSecondaryDocument?: string;
   onSelectNewDocument?: (type: string) => void;
   onSelectDocument?: (document: DocumentModelType) => void;
-  onDocumentDragStart: (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => void;
   shouldHandleStarClick?: boolean;
+  allowDelete: boolean;
 }
 
 function getNewDocumentLabel(section: NavTabSectionModelType , appConfigStore: AppConfigModelType) {
@@ -86,7 +87,7 @@ function getSectionDocs(section: NavTabSectionModelType, documents: DocumentsMod
 export const DocumentCollectionByType: React.FC<IProps> = observer(({
                                   topTab, tab, section, index, numSections=0, scale, selectedDocument,
                                   selectedSecondaryDocument, horizontal, onSelectNewDocument, onSelectDocument,
-                                  onDocumentDragStart, shouldHandleStarClick }: IProps) => {
+                                  shouldHandleStarClick, allowDelete }: IProps) => {
   const appConfigStore = useAppConfig();
   const classStore = useClassStore();
   const documents = useLocalDocuments();
@@ -105,6 +106,15 @@ export const DocumentCollectionByType: React.FC<IProps> = observer(({
   function handleNewDocumentClick() {
     onSelectNewDocument?.(section.documentTypes[0]);
   }
+
+  // sync user's last support view time stamp to firebase
+  useLastSupportViewTimestamp(section.type === "teacher-supports");
+
+  function handleSelectDocument(document: DocumentModelType) {
+    onSelectDocument?.(document);
+    (section.type === "teacher-supports") && user.setLastSupportViewTimestamp(Date.now());
+  }
+
   const tabPanelDocumentSectionClass = classNames("tab-panel-documents-section", tabName,
                                                   {"top-panel": isTopPanel, horizontal});
   const bottomPanel = isBottomPanel && !isSinglePanel && sectionDocs.length > 0;
@@ -137,15 +147,14 @@ export const DocumentCollectionByType: React.FC<IProps> = observer(({
           return (
             <DocumentContextReact.Provider key={document.key} value={documentContext}>
               <DecoratedDocumentThumbnailItem
-                section={section}
                 document={document}
                 tab={tab}
                 scale={scale}
                 selectedDocument={selectedDocument}
                 selectedSecondaryDocument={selectedSecondaryDocument}
-                onSelectDocument={onSelectDocument}
-                onDocumentDragStart={onDocumentDragStart}
-                shouldHandleStarClick={shouldHandleStarClick}
+                onSelectDocument={handleSelectDocument}
+                shouldHandleStarClick={shouldHandleStarClick ?? false}
+                allowDelete={allowDelete}
               />
             </DocumentContextReact.Provider>
           );

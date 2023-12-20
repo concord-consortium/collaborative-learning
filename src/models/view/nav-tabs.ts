@@ -67,6 +67,14 @@ export const NavTabSectionModel =
        ];
       return (deletableTypes.includes(self.type) && userOwnsDocument);
     },
+    get allowDelete(){
+      const deletableTypes = [ENavTabSectionType.kPublishedPersonalDocuments,
+        ENavTabSectionType.kPublishedProblemDocuments,
+        ENavTabSectionType.kPublishedLearningLogs,
+        ENavTabSectionType.kTeacherSupports,
+       ];
+      return deletableTypes.includes(self.type);
+    }
   }));
 export type NavTabSectionSpec = SnapshotIn<typeof NavTabSectionModel>;
 export type NavTabSectionModelType  = Instance<typeof NavTabSectionModel>;

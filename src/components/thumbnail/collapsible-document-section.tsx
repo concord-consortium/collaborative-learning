@@ -79,6 +79,7 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
 
   const networkDocuments = useNetworkDocuments();
   const currentSection = subTab.sections[0] as NavTabSectionModelType;
+  const shouldHandleStarClick = currentSection.showStarsForUser(user) ?? false;
   const hasDocuments = documentKeys.length > 0;
   return (
     <div className="collapsible-documents-section">
@@ -100,10 +101,11 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
                   <DecoratedDocumentThumbnailItem
                     onSelectDocument={() => onSelectDocument?.(document)}
                     scale={scale}
-                    section={currentSection}
                     document={document}
                     selectedDocument={selectedDocument}
                     tab={subTab.label}
+                    shouldHandleStarClick={shouldHandleStarClick}
+                    allowDelete={currentSection.allowDelete}
                   />
                 </DocumentContextReact.Provider>
               );
