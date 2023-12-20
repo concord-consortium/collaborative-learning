@@ -20,12 +20,34 @@
 
   }
 
+  .axis-icon {
+    align-items: center;
+    display: flex;
+    height: $label-height;
+    justify-content: center;
+    padding: 0 4px;
+
+    svg {
+      height: auto;
+      width: auto;
+    }
+  }
+
   .legend-title-row {
     display: flex;
+    justify-content: flex-start;
     align-items: center;
     padding: $vertical-padding 10px;
     min-height: $label-height;
     border-top: 2px solid $workspace-teal;
+
+    .legend-cell-1, .legend-cell-2 {
+      align-items: center;
+      display: flex;
+      // display: inline-block;
+      width: 50%;
+      // padding: 0 10%;
+    }
 
     .legend-title {
       flex: 1 0 auto;
@@ -59,7 +81,7 @@
     display: block;
     padding: $vertical-gap 0;
 
-    .legend-cell-1, .legend-cell-2{
+    .legend-cell-1, .legend-cell-2 {
       display: inline-block;
       width: 50%;
       padding: 0 10%;
