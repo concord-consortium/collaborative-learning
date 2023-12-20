@@ -127,18 +127,7 @@ export const DocumentCollectionByType: React.FC<IProps> = observer(({
       {(classStore.isTeacher(sectionDocs[0]?.uid) && topTab === ENavTab.kClassWork && !isBottomPanel)
         && <div className="document-divider">
               <div className="document-divider-label">Teacher Documents</div>
-           </div>
-      }
-      {/* Make a component like whats below, and pass it something like allDocs instead of sectionDocs as above
-          Move the handlers to thumbnail component(s) first? You will need to eventually.
-          We might need to support overriding them - in the parent of the thumbnail
-
-          We are also going to have to dumb-down DecoratedDocumentThumbanil item in the tabs department:
-          In the thumbnail path below, stuff like section.showStars - should no
-          longer be pulled from props.section.Instead should be defined
-          as props in thumbnail components, and passed from
-          ours as hard coded, and from here as values dervied from section value
-      */}
+           </div>}
       <div className={listClass}>
         {showNewDocumentThumbnail &&
           <NewDocumentThumbnail label={newDocumentLabel} onClick={handleNewDocumentClick} />}

@@ -14,7 +14,7 @@ import "./document-type-collection.sass";
 
 interface IProps {
   shouldHandleStarClick: boolean;
-  onSelectDocument?: (document: DocumentModelType) => void; // TODO: implement on our sort-work path
+  onSelectDocument?: (document: DocumentModelType) => void;
   scale: number;
   document: DocumentModelType;
   selectedDocument?: string;
@@ -74,9 +74,6 @@ export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
     const _handleDocumentStarClick = shouldHandleStarClick && !document.isRemote
                                       ? handleDocumentStarClick
                                       : undefined;
-    // TODO: remove dependency on section, make a boolean like shouldShowDelete, which is a
-    // function of user and document and who knows what else
-    // make sure this flag is handled at all section levels on the existing path (or only used where needed)
     const userOwnsDocument = user.id === document.uid;
     const _handleDocumentDeleteClick = allowDelete && userOwnsDocument
                                         ? handleDocumentDeleteClick

@@ -9,7 +9,6 @@ import { LogEventName } from "../../lib/logger-types";
 import { StudentGroupView } from "../document/student-group-view";
 import { ProblemTabContent } from "./problem-tab-content";
 import { SectionDocumentOrBrowser } from "./section-document-or-browser";
-// import { NewCommentsBadge } from "./new-comments-badge";
 import { ChatPanel } from "../chat/chat-panel";
 import ChatIcon from "../../assets/chat-icon.svg";
 import { SortWorkView } from "../document/sort-work-view";
