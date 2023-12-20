@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useContext } from "react";
 import { observer } from "mobx-react";
 
+import { ReadOnlyContext } from "../../../../components/document/read-only-context";
 import {
   IPlottedVariablesAdornmentModel
 } from "../../adornments/plotted-function/plotted-variables/plotted-variables-adornment-model";
@@ -21,6 +22,7 @@ interface IVariableFunctionLegendProps {
 export const VariableFunctionLegend = observer(function(
   { plottedVariablesAdornment }: IVariableFunctionLegendProps
 ) {
+  const readOnly = useContext(ReadOnlyContext);
   if (!plottedVariablesAdornment || plottedVariablesAdornment.plottedVariables.size <= 0) return null;
 
   const sharedVars = plottedVariablesAdornment.sharedVariables;
@@ -48,7 +50,7 @@ export const VariableFunctionLegend = observer(function(
                   <VariableSelection
                     alternateButtonLabel="Select a variable for Y"
                     icon={<YAxisIcon />}
-                    onSelect={(variableId) => plottedVariablesInstance.setYVariableId(variableId)}
+                    onSelect={variableId => plottedVariablesInstance.setYVariableId(variableId)}
                     selectedVariable={plottedVariablesInstance.yVariable}
                     variables={sharedVars.variables}
                   />
@@ -68,15 +70,17 @@ export const VariableFunctionLegend = observer(function(
             }
           })
         }
-        <div className="variable-row">
-          <button
-            className="add-series-button"
-            onClick={() => plottedVariablesAdornment.addPlottedVariables()}
-          >
-            <AddSeriesIcon/>
-            Add variables
-          </button>
-        </div>
+        { !readOnly &&
+          <div className="variable-row">
+            <button
+              className="add-series-button"
+              onClick={() => plottedVariablesAdornment.addPlottedVariables()}
+            >
+              <AddSeriesIcon/>
+              Add variables
+            </button>
+          </div>
+        }
       </div>
     );
   } else {
