@@ -1,15 +1,15 @@
-.sort-work-view{
+.sort-work-view {
   height: 100%;
   width: 100%;
 
-  .sort-work-documents{
+  .sort-work-documents {
     width: 100%;
     height: 100%;
     //background-color: orange;
     margin-top: 10px;
     border-bottom: 2px solid black;
 
-    .sort-document{
+    .sort-document {
       height: 32px;
       background-color: brown;
       border-bottom: 1px solid black;
@@ -31,5 +31,14 @@
 
   }
 
+  /* need to bring in markup and styles from document panel, etc */
+  .documents-panel {
+    display:block;
+    transform: scale(0.9) !important;
+    div, svg {
+      transform: scale(0.9) !important;
+    }
+
+  }
 
 }
