@@ -3,14 +3,15 @@ import { useStores } from "../../hooks/use-stores";
 import React, { useEffect, useState } from "react";
 import { SortWorkHeader } from "../navigation/sort-work-header";
 import { ICustomDropdownItem } from "../../clue/components/custom-select";
-
-import "./sort-work-view.scss";
 import { DecoratedDocumentThumbnailItem } from "../thumbnail/decorated-document-thumbnail-item";
 import { ENavTab } from "../../models/view/nav-tabs";
 import { getDocumentContext } from "../../models/document/document";
 import { DocumentContextReact } from "./document-context";
 
-const getGroups = (documents: any[], sortBy: string) => {
+import "./sort-work-view.scss";
+
+
+const getGroupsOfDocuments = (documents: any[], sortBy: string) => {
   const groupLabel = () => {
     if (sortBy === "group"){
       // who is the user that owns the document?
@@ -36,8 +37,6 @@ const getGroups = (documents: any[], sortBy: string) => {
   ]
   */
 };
-
-
 
 export const SortWorkView:React.FC = observer(function SortWorkView(){
   const sortOptions = ["Group", "Student"];
@@ -66,7 +65,7 @@ export const SortWorkView:React.FC = observer(function SortWorkView(){
 
       <div className="documents-panel">
 
-        {/* const groups = getGroups(docs, sortBy) */}
+        {/* const groups = getGroupsOfDocuments(docs, sortBy) */}
         {/* for each group: <SortedDocsGroup> which would be one of the below per group */}
 
         {/* or do it inline
