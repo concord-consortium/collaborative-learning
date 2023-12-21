@@ -46,7 +46,7 @@ export const DataSetViewButton: React.FC<IProps> = ({args}) => {
   return (
     <TileToolbarButton
         className="dataset-view-button" onClick={handleClick}
-        title={`Create a linked ${newTileType} tile`}>
+        title={`${newTileType} It!`}>
       { Icon ? <Icon/> : "??" }
       <ViewBadgeIcon className="button-badge"/>
     </TileToolbarButton>

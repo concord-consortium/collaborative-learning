@@ -121,7 +121,8 @@ context('Data Card Tool Tile', () => {
 
     cy.log("can create a graph from the data");
     dc.getLinkGraphButton().should('not.be.disabled').click();
-    dc.getLinkGraphModalCreateNewButton().click();
+    dc.getLinkGraphModalTileMenu().select('New Graph');
+    dc.getLinkGraphModalLinkButton().click();
     xyplot.getTile().should("exist").contains("Data Card Collection 1");
     xyplot.getXYPlotTitle().should("contain", "Data Card Collection 1");
     xyplot.getXAxisLabel().should("contain", "habitat");
@@ -135,7 +136,7 @@ context('Data Card Tool Tile', () => {
     // Re-link
     dc.getLinkGraphButton().should('not.be.disabled').click();
     dc.getLinkGraphModalTileMenu().select('Data Card Collection 1');
-    dc.getLinkGraphModalLinkButton().should("contain", "Link").click();
+    dc.getLinkGraphModalLinkButton().should("contain", "Graph It!").click();
     xyplot.getXAxisLabel().should("contain", "habitat");
 
     cy.log("Copy card functionality");

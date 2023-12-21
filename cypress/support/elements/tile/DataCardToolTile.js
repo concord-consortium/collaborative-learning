@@ -114,10 +114,6 @@ class DataCardToolTile {
     const selector = ".ReactModalPortal .modal-content select[data-test=link-tile-select]";
     return cy.get(`${selector}`).eq(0);
   }
-  getLinkGraphModalCreateNewButton() {
-    const selector = ".ReactModalPortal .modal-footer button.add-new-button";
-    return cy.get(`${selector}`).eq(0);
-  }
   getLinkGraphModalLinkButton() {
     const selector = ".ReactModalPortal .modal-footer button.default";
     return cy.get(`${selector}`).eq(0);
