@@ -23,6 +23,7 @@ export class DBStudentPersonalDocsListener extends BaseListener {
       this.debugLogHandler("#start", "adding", "once", offeringUsersRef);
       offeringUsersRef.once("value").then((snapshot) => {
           const snapVal = snapshot.val();
+          if (!snapVal) return resolve();
           const userKeys = Object.keys(snapVal).filter(key => key !== user.id);
           const userPaths = userKeys.map(key => `${classPath}/users/${key}/personalDocs`);
           this.userPersonalDocsRefs = userPaths.map(path => this.db.firebase.ref(path));

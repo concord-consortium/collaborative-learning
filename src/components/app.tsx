@@ -57,8 +57,6 @@ function resolveAppMode(
     }
   }
   else {
-    console.log("\t🥩 stores:", stores);
-    console.log("\t🥩 appMode:", appMode);
     return db.connect({appMode, stores})
       .then(() => {
         console.log("62!");
