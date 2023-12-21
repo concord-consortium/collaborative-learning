@@ -16,6 +16,7 @@ export const SortWorkView:React.FC = observer(function SortWorkView(){
   const sortOptions = ["Group", "Student"];
   const stores = useStores();
   const [sortBy, setSortBy] = useState("Group");
+  console.log("one console.log for PR!");
 
   const sortByOptions: ICustomDropdownItem[] = sortOptions.map((option)=>({
     text: option,
