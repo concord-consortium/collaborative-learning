@@ -27,7 +27,7 @@ export const SortWorkView:React.FC = observer(function SortWorkView(){
       const ct = idx + 1;
       return (
         <pre key={idx} style={{margin:"0px", padding: "0px", fontSize: "10px"}}>
-          {ct < 10 && " "}{ct} | {doc.key} | {doc.type}
+          {ct < 10 && " "}{ct} | {doc.key} | {doc.type} | {doc.uid}
         </pre>
       );
     });

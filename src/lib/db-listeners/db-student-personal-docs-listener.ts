@@ -5,7 +5,7 @@ import { BaseListener } from "./base-listener";
 
 export class DBStudentPersonalDocsListener extends BaseListener {
   private db: DB;
-  private userPersonalDocsRefs: firebase.database.Reference[];
+  private userPersonalDocsRefs: firebase.database.Reference[] = [];
 
   constructor(db: DB, documentType: OtherDocumentType) {
     super("DBStudentPersonalDocsListener");
@@ -21,19 +21,25 @@ export class DBStudentPersonalDocsListener extends BaseListener {
 
       const classPath = this.db.firebase.getClassPath(user);
       this.debugLogHandler("#start", "adding", "once", offeringUsersRef);
-      offeringUsersRef.once("value").then((snapshot) => {
-          const snapVal = snapshot.val();
-          if (!snapVal) return resolve();
-          const userKeys = Object.keys(snapVal).filter(key => key !== user.id);
-          const userPaths = userKeys.map(key => `${classPath}/users/${key}/personalDocs`);
-          this.userPersonalDocsRefs = userPaths.map(path => this.db.firebase.ref(path));
-          this.userPersonalDocsRefs.forEach(ref => {
-            this.debugLogHandlers("#start", "adding", ["child_added"], ref);
+
+      offeringUsersRef.on("value", (snapshot) => {
+        const snapVal = snapshot.val();
+        if (!snapVal) return resolve();
+        const userKeys = Object.keys(snapVal).filter(key => key !== user.id);
+        const userPaths = userKeys.map(key => `${classPath}/users/${key}/personalDocs`);
+        const existingPaths = (this.userPersonalDocsRefs.map(ref => ref.toString()));
+
+        userPaths.forEach((userPath) => {
+          const potentiallyNewRef = this.db.firebase.ref(userPath);
+          if (!existingPaths.includes(potentiallyNewRef.toString())){
+            const ref = potentiallyNewRef;
+            this.debugLogHandlers("#start", "adding", ["child_added"], ref );
             ref.on("child_added", this.handlePersonalDocAdded);
-          });
-          resolve();
-        })
-        .catch(reject);
+            this.userPersonalDocsRefs.push(ref);
+          }
+        });
+        resolve();
+      });
     });
   }
 
@@ -47,6 +53,7 @@ export class DBStudentPersonalDocsListener extends BaseListener {
   }
 
   private handlePersonalDocAdded = (snapshot: firebase.database.DataSnapshot) => {
+    console.log("| path of snapshot ", snapshot.ref.toString());
     const docMetaSnap = snapshot.val();
     const docKey = docMetaSnap.self.documentKey;
 
