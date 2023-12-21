@@ -277,7 +277,7 @@ context('XYPlot Tool Tile', function () {
       beforeTest(queryParamsPlotVariables);
 
       cy.log("Add Diagram Tile with a Variable");
-      const name1 = "a";
+      const name1 = "variable_name";
       const value1 = "2";
       clueCanvas.addTile("diagram");
       diagramTile.getDiagramTile().click();
@@ -297,9 +297,29 @@ context('XYPlot Tool Tile', function () {
       // xyTile.selectYVariable was failing because it was catching the button from the x "dropdown" instead
       xyTile.getYVariableDropdown().click();
       xyTile.getPortalButton().eq(1).click({ force: true });
-
       xyTile.getYVariableDropdown().should("contain.text", name1);
-      xyTile.getPlottedVariablesPath().should("exist");
+
+      xyTile.getPlottedVariablesPath().should("have.length", 1);
+
+      cy.log("Plot multiple traces");
+      xyTile.getAddVariablesButton().should("exist").click();
+
+      // Select the x variable for the 2nd trace
+      xyTile.getXVariableDropdown(1).click();
+      xyTile.getPortalButton().eq(2).click({ force: true });
+      xyTile.getXVariableDropdown(1).should("contain.text", name1);
+
+      // Select the y variable for the 2nd trace
+      xyTile.getYVariableDropdown(1).click();
+      xyTile.getPortalButton().eq(3).click({ force: true });
+      xyTile.getYVariableDropdown().should("contain.text", name1);
+
+      xyTile.getPlottedVariablesPath().should("have.length", 2);
+
+      cy.log("Remove a variable trace");
+      xyTile.getRemoveVariablesButton(1).click();
+      xyTile.getPlottedVariablesPath().should("have.length", 1);
+      xyTile.getRemoveVariablesButtons().should("not.exist");
     });
   });
 });
