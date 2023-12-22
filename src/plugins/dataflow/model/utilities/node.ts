@@ -176,14 +176,20 @@ export const NodeOperationTypes = [
     name: "Ramp",
     type: "transform",
     method: (n1: number, n2: number, tMinus1?: number) => {
-      if (!tMinus1) return n1;
+      if (!tMinus1 || !isFinite(tMinus1)) return n1;
       const delta = n1 - tMinus1;
-      const deltaDirection = delta < 0 ? "down" : "up";
-      if (deltaDirection === "down") return n1;
       const deltaMagnitude = Math.abs(delta);
-      const changeIsGreaterThanTenPercent = deltaMagnitude > 0.1 * tMinus1;
-      const increaseBy = n1 * 0.1;
-      return changeIsGreaterThanTenPercent ? tMinus1 + increaseBy : n1;
+      if (delta > 0) {
+        const changeIsGreaterThanTenPercent = deltaMagnitude > 0.1 * tMinus1;
+        const increaseBy = n1 * 0.1;
+        return changeIsGreaterThanTenPercent ? tMinus1 + increaseBy : n1;
+      }
+      if (delta < 0) {
+        const changeIsGreaterThanTenPercent = deltaMagnitude > 0.1 * tMinus1;
+        const decreaseBy = tMinus1 * 0.1;
+        return changeIsGreaterThanTenPercent ? tMinus1 - decreaseBy : n1;
+      }
+      return n1;
     },
     numberSentence: (n1: string, n2: string) => `|${n1}| = `,
     icon: AbsoluteValueIcon
