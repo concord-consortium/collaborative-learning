@@ -178,9 +178,12 @@ export const NodeOperationTypes = [
     method: (n1: number, n2: number, tMinus1?: number) => {
       if (!tMinus1) return n1;
       const delta = n1 - tMinus1;
-      const deltaThreshold = 50;
-      const increaseBy = 15;
-      return delta > deltaThreshold ? tMinus1 + increaseBy : n1;
+      const deltaDirection = delta < 0 ? "down" : "up";
+      if (deltaDirection === "down") return n1;
+      const deltaMagnitude = Math.abs(delta);
+      const changeIsGreaterThanTenPercent = deltaMagnitude > 0.1 * tMinus1;
+      const increaseBy = n1 * 0.1;
+      return changeIsGreaterThanTenPercent ? tMinus1 + increaseBy : n1;
     },
     numberSentence: (n1: string, n2: string) => `|${n1}| = `,
     icon: AbsoluteValueIcon
