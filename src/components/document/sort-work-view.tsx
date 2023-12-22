@@ -11,11 +11,14 @@ import { DEBUG_SORT_WORK } from "../../lib/debug";
 import "../thumbnail/document-type-collection.sass";
 import "./sort-work-view.scss";
 
-
 export const SortWorkView:React.FC = observer(function SortWorkView(){
   const sortOptions = ["Group", "Student"];
   const stores = useStores();
   const [sortBy, setSortBy] = useState("Group");
+
+  const filteredDocsByType = stores.documents.all.filter((doc:any) => {
+    return ["problem", "personal", "learningLog"].includes(doc.type);
+  });
 
   const sortByOptions: ICustomDropdownItem[] = sortOptions.map((option)=>({
     text: option,
@@ -23,7 +26,7 @@ export const SortWorkView:React.FC = observer(function SortWorkView(){
   }));
 
   const renderDebugView = (docs: any) => {
-    return docs.map((doc:any, idx: number) => {
+    return filteredDocsByType.map((doc:any, idx: number) => {
       const ct = idx + 1;
       return (
         <pre key={idx} style={{margin:"0px", padding: "0px", fontSize: "10px"}}>
@@ -41,7 +44,7 @@ export const SortWorkView:React.FC = observer(function SortWorkView(){
           { DEBUG_SORT_WORK && renderDebugView(stores.documents.all)}
           <div className={"list"}>
             {
-              stores.documents.all.map((doc:any, idx: number) => {
+              filteredDocsByType.map((doc:any, idx: number) => {
                 const documentContext = getDocumentContext(doc);
                 return (
                   <DocumentContextReact.Provider key={doc.key} value={documentContext}>
