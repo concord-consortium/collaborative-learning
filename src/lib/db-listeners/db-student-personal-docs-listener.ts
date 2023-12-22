@@ -53,7 +53,6 @@ export class DBStudentPersonalDocsListener extends BaseListener {
   }
 
   private handlePersonalDocAdded = (snapshot: firebase.database.DataSnapshot) => {
-    console.log("| path of snapshot ", snapshot.ref.toString());
     const docMetaSnap = snapshot.val();
     const docKey = docMetaSnap.self.documentKey;
 

@@ -59,7 +59,6 @@ function resolveAppMode(
   else {
     return db.connect({appMode, stores})
       .then(() => {
-        console.log("62!");
         if (appMode === "qa") {
           const {qaClear, qaGroup} = urlParams;
           if (qaClear) {
@@ -76,11 +75,8 @@ function resolveAppMode(
             db.leaveGroup().then(() => db.joinGroup(qaGroup));
           }
         }
-        console.log("79!");
-
       })
       .catch(error => {
-        console.log("line 80 fail");
         return ui.setError(error);
       });
   }
@@ -92,9 +88,6 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
 
   authenticate(appMode, appConfig, urlParams)
     .then(async ({appMode: newAppMode, authenticatedUser, classInfo, problemId, unitCode}) => {
-
-      console.log("📁 app.tsx ------------------------");
-      console.log("\t🥩 authenticatedUser:", authenticatedUser);
       // authentication can trigger appMode change (e.g. preview => demo)
       if (newAppMode && (newAppMode !== appMode)) {
         stores.setAppMode(newAppMode);
@@ -110,8 +103,6 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
         });
       }
       initRollbar(stores, problemId || stores.appConfig.defaultProblemOrdinal);
-      console.log("\t🥩 authenticatedUser:", authenticatedUser);
-      console.log("\t🥩 stores:", stores);
       return resolveAppMode(stores, authenticatedUser.rawFirebaseJWT, onQAClear);
     })
     .then(() => {
