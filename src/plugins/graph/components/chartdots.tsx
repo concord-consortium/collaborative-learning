@@ -210,6 +210,7 @@ export const ChartDots = function ChartDots(props: PlotProps) {
 
     setPointCoordinates({
       dataConfiguration, pointRadius, selectedPointRadius: graphModel.getPointRadius('select'),
+      getColorForId: graphModel.getColorForId,
       dotsRef, selectedOnly, pointColor, pointStrokeColor,
       getScreenX, getScreenY, getLegendColor, enableAnimation
     });
