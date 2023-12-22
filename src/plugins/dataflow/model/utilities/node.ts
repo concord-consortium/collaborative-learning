@@ -173,6 +173,22 @@ export const NodeOperationTypes = [
     icon: EmgIcon
   },
   {
+    name: "Ramp",
+    type: "transform",
+    method: (n1: number, n2: number, priors?: any) => {
+      if (priors !== undefined){
+        const priorsArr = JSON.parse(JSON.stringify(priors)).nodeValue;
+        const popped = priorsArr.pop();
+        const ultimo = isFinite(popped) && popped !== null ? popped : 0;
+        const delta = n1 - ultimo;
+        const rampBy = 15;
+        return delta > 50 ? ultimo + rampBy : n1;
+      }
+    },
+    numberSentence: (n1: string, n2: string) => `|${n1}| = `,
+    icon: AbsoluteValueIcon
+  },
+  {
     name: "Greater Than",
     type: "logic",
     method: (n1: number, n2: number) => +(n1 > n2),

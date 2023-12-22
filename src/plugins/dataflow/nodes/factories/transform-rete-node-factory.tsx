@@ -45,7 +45,7 @@ export class TransformReteNodeFactory extends DataflowReteNodeFactory {
       if (isNaN(n1)) {
         result = NaN;
       } else {
-        result = nodeOperationTypes.method(n1, 0);
+        result = nodeOperationTypes.method(n1, 0, node.data.recentValues as [number]);
       }
 
       const n1Str = getNumDisplayStr(n1);
