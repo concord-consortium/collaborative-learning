@@ -20,21 +20,21 @@ export class DBStudentPersonalDocsListener extends BaseListener {
       );
 
       const classPath = this.db.firebase.getClassPath(user);
-      this.debugLogHandler("#start", "adding", "once", offeringUsersRef);
+      this.debugLogHandler("#start", "adding", "on", offeringUsersRef);
 
       offeringUsersRef.on("value", (snapshot) => {
         const snapVal = snapshot.val();
         if (!snapVal) return resolve();
         const userKeys = Object.keys(snapVal).filter(key => key !== user.id);
         const userPaths = userKeys.map(key => `${classPath}/users/${key}/personalDocs`);
-        const existingPaths = (this.userPersonalDocsRefs.map(ref => ref.toString()));
+        const existingRefUrls = (this.userPersonalDocsRefs.map(ref => ref.toString()));
 
         userPaths.forEach((userPath) => {
           const potentiallyNewRef = this.db.firebase.ref(userPath);
-          if (!existingPaths.includes(potentiallyNewRef.toString())){
+          if (!existingRefUrls.includes(potentiallyNewRef.toString())){
             const ref = potentiallyNewRef;
             this.debugLogHandlers("#start", "adding", ["child_added"], ref );
-            ref.on("child_added", this.handlePersonalDocAdded);
+            ref.on("child_added", this.handlePersonalDocumentAdded);
             this.userPersonalDocsRefs.push(ref);
           }
         });
@@ -47,12 +47,13 @@ export class DBStudentPersonalDocsListener extends BaseListener {
     if (this.userPersonalDocsRefs) {
       this.userPersonalDocsRefs.forEach(ref => {
         this.debugLogHandlers("#stop", "removing", ["child_added"], ref);
-        ref.off("child_added", this.handlePersonalDocAdded);
+        ref.off("child_added", this.handlePersonalDocumentAdded);
       });
     }
   }
 
-  private handlePersonalDocAdded = (snapshot: firebase.database.DataSnapshot) => {
+  private handlePersonalDocumentAdded = (snapshot: firebase.database.DataSnapshot) => {
+    this.debugLogSnapshot("#handlePersonalDocumentAdded", snapshot);
     const docMetaSnap = snapshot.val();
     const docKey = docMetaSnap.self.documentKey;
 

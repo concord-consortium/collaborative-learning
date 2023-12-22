@@ -52,8 +52,6 @@ export const DocumentTypeEnum = types.enumeration("type",
 export type DocumentType = Instance<typeof DocumentTypeEnum>;
 export type ProblemOrPlanningDocumentType = typeof ProblemDocument | typeof PlanningDocument;
 export type OtherDocumentType = typeof PersonalDocument | typeof LearningLogDocument;
-export type ProcessableDocumentTypes =
-  typeof PersonalDocument | typeof LearningLogDocument | typeof ProblemDocument | typeof PlanningDocument
 export type PublishableType = typeof ProblemDocument | OtherDocumentType;
 export type OtherPublicationType = typeof PersonalPublication | typeof LearningLogPublication;
 export type PublicationType = typeof ProblemPublication | OtherPublicationType | typeof SupportPublication;
