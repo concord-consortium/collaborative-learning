@@ -7,10 +7,10 @@ import { DecoratedDocumentThumbnailItem } from "../thumbnail/decorated-document-
 import { DocumentModelType, getDocumentContext } from "../../models/document/document";
 import { DocumentContextReact } from "./document-context";
 import { DEBUG_SORT_WORK } from "../../lib/debug";
+import { isSortableType } from "../../models/document/document-types";
 
 import "../thumbnail/document-type-collection.sass";
 import "./sort-work-view.scss";
-import { isSortableType } from "../../models/document/document-types";
 
 export const SortWorkView:React.FC = observer(function SortWorkView(){
   const sortOptions = ["Group", "Student"];
