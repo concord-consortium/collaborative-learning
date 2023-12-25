@@ -2,9 +2,12 @@ import React, { useContext } from "react";
 import { observer } from "mobx-react";
 
 import { ReadOnlyContext } from "../../../../components/document/read-only-context";
+import { getSharedModelManager } from "../../../../models/tiles/tile-environment";
+import { isSharedVariables, SharedVariables } from "../../../shared-variables/shared-variables";
 import {
   IPlottedVariablesAdornmentModel
 } from "../../adornments/plotted-function/plotted-variables/plotted-variables-adornment-model";
+import { useGraphModelContext } from "../../hooks/use-graph-model-context";
 import { VariableSelection } from "./variable-selection";
 
 import AddSeriesIcon from "../../imports/assets/add-series-icon.svg";
@@ -22,14 +25,34 @@ interface IVariableFunctionLegendProps {
 export const VariableFunctionLegend = observer(function(
   { plottedVariablesAdornment }: IVariableFunctionLegendProps
 ) {
+  const graphModel = useGraphModelContext();
   const readOnly = useContext(ReadOnlyContext);
   if (!plottedVariablesAdornment || plottedVariablesAdornment.plottedVariables.size <= 0) return null;
+
+  function handleRemoveIconClick() {
+    const sharedVariablesId = plottedVariablesAdornment?.sharedVariables?.id;
+    const smm = getSharedModelManager(graphModel);
+    if (smm && smm.isReady) {
+      const linkedSharedVariables = smm.getTileSharedModelsByType(graphModel, SharedVariables);
+      const sharedVariables = linkedSharedVariables.find(sv => isSharedVariables(sv) && sv.id === sharedVariablesId);
+      if (sharedVariables) {
+        smm.removeTileSharedModel(graphModel, sharedVariables);
+      }
+    }
+  }
 
   const sharedVars = plottedVariablesAdornment.sharedVariables;
   if (sharedVars) {
     return (
       <div className="plotted-variables-legend">
         <div className="legend-row legend-title-row">
+            { !readOnly &&
+              <div className="legend-icon">
+                <button onClick={handleRemoveIconClick} className="remove-button" title="Unlink variables provider">
+                    <RemoveDataIcon />
+                </button>
+              </div>
+            }
           <div className="legend-title">
             Variables from: <strong>{sharedVars.label}</strong>
           </div>
