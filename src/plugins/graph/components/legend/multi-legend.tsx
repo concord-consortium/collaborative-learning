@@ -64,7 +64,9 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
   }
   // Total height is height of X-axis menus, plus sum of all the plotted data and variable sections
   const xMenuHeight = defaultSeriesLegend ? 0 : kMultiLegendMenuHeight + kMultiLegendVerticalPadding;
-  const totalHeight = xMenuHeight
+  // TODO Remove this extra buffer space to make sure the whole legend can be seen before refactoring height calculation
+  const extraHeight = 100;
+  const totalHeight = extraHeight + xMenuHeight
     + graphModel.layers.reduce((prev, layer)=>{ return prev + heightOfLayerLegend(layer);}, 0)
     + graphModel.adornments.reduce((prev, adornment) => {
       if (isPlottedVariablesAdornment(adornment)) {
@@ -92,13 +94,13 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
     }
   );
 
-  const thisRole = axisPlaceToAttrRole.bottom;
+  const bottomRole = axisPlaceToAttrRole.bottom;
 
   const xMenus = defaultSeriesLegend ? null : (
     <div className="x-axis-menu">
       {
         graphModel.layers.map((layer) => {
-          const attrId = layer.config?.attributeID(thisRole);
+          const attrId = layer.config?.attributeID(bottomRole);
           if (!attrId) return;
 
           return (

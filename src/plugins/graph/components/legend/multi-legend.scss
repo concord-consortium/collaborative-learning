@@ -19,12 +19,13 @@
     }
   }
 
-  .axis-icon {
+  .legend-icon {
     align-items: center;
     display: flex;
     height: $label-height;
-    justify-content: center;
+    justify-content: flex-end;
     padding: 0 4px;
+    width: 40px;
 
     svg {
       height: auto;
@@ -33,70 +34,64 @@
   }
 
   .legend-title-row {
+    border-top: 2px solid $workspace-teal;
+
+    .legend-title {
+      padding-left: 6px;
+    }
+
+    .remove-button {
+      align-items: flex-start;
+      background-color: inherit;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      height: 27px;
+      justify-content: center;
+      margin: 0;
+      padding: 1px;
+      width: 27px;
+
+      &:hover {
+        background-color: $workspace-teal-light-6;
+      }
+
+      svg {
+        height: 22px;
+        width: 22px;
+      }
+    }
+  }
+
+  .legend-row {
     display: flex;
     justify-content: flex-start;
     align-items: center;
     padding: $vertical-padding 10px;
     min-height: $label-height;
-    border-top: 2px solid $workspace-teal;
 
     .legend-cell-1, .legend-cell-2 {
       align-items: center;
       display: flex;
-      // display: inline-block;
       width: 50%;
-      // padding: 0 10%;
-    }
-
-    .legend-title {
-      flex: 1 0 auto;
-    }
-
-    .legend-icon {
-      flex-grow: 0 0 auto;
-      vertical-align: baseline;
-
-      .remove-button {
-        margin: 0;
-        height: 27px;
-        width: 27px;
-        padding: 2px;
-        border: none;
-        border-radius: 50%;
-        background: inherit;
-        cursor: pointer;
-
-        &:hover {
-          background-color: $workspace-teal-light-6;
-        }
-
-
-      }
-
-    }
-  }
-
-  .legend-row {
-    display: block;
-    padding: $vertical-gap 0;
-
-    .legend-cell-1, .legend-cell-2 {
-      display: inline-block;
-      width: 50%;
-      padding: 0 10%;
     }
 
     .add-series-button {
-      height: $menu-height;
-      width: $min-menu-width;
-      border: none;
-      padding: 0;
+      align-items: center;
       background-color: inherit;
-      text-align: left;
+      border: none;
+      border-radius: 6px;
+      color: #707070;
+      cursor: pointer;
+      display: flex;
       font-family: Lato;
       font-size: 14pt;
       font-style: italic;
-      color: #707070;
+      height: $menu-height;
+      padding: 0;
+      text-align: left;
+      width: $min-menu-width;
 
       &:hover {
         background-color: $workspace-teal-light-4;
@@ -105,8 +100,10 @@
       svg {
         width: 22px;
         height: 22px;
-        margin-right: 8px;
-        vertical-align: bottom;
+      }
+
+      .add-series-label {
+        padding-left: 6px;
       }
     }
   }

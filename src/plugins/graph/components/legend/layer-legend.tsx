@@ -14,7 +14,7 @@ import { useDataConfigurationContext } from "../../hooks/use-data-configuration-
 
 import RemoveDataIcon from "../../assets/remove-data-icon.svg";
 import XAxisIcon from "../../assets/x-axis-icon.svg";
-// import YAxisIcon from "../../assets/y-axis-icon.svg";
+import YAxisIcon from "../../assets/y-axis-icon.svg";
 
 interface ILayerLegendProps {
   onChangeAttribute: (place: GraphPlace, dataSet: IDataSet, attrId: string, oldAttrId?: string) => void;
@@ -55,15 +55,21 @@ export const LayerLegend = observer(function LayerLegend(props: ILayerLegendProp
     const yAttributes = dataConfiguration.yAttributeDescriptions;
 
     legendItems = yAttributes.map((description, index) =>
-      <SimpleAttributeLabel
-        key={description.attributeID}
-        place={'left'}
-        index={index}
-        attrId={description.attributeID}
-        onChangeAttribute={onChangeAttribute}
-        onRemoveAttribute={onRemoveAttribute}
-        onTreatAttributeAs={onTreatAttributeAs}
-      />);
+      <>
+        <div className="legend-icon">
+          <YAxisIcon />
+        </div>
+        <SimpleAttributeLabel
+          key={description.attributeID}
+          place={'left'}
+          index={index}
+          attrId={description.attributeID}
+          onChangeAttribute={onChangeAttribute}
+          onRemoveAttribute={onRemoveAttribute}
+          onTreatAttributeAs={onTreatAttributeAs}
+        />
+      </>
+    );
     if (!readOnly) {
       legendItems.push(<AddSeriesButton />);
     }
@@ -107,12 +113,12 @@ export const LayerLegend = observer(function LayerLegend(props: ILayerLegendProp
   return (
     <>
       { dataConfiguration?.dataset !== undefined &&
-        <div className="legend-title-row">
+        <div className="legend-row legend-title-row">
           <div className="legend-cell-1">
             { !readOnly &&
               <div className="legend-icon">
                 <button onClick={handleRemoveIconClick} className="remove-button" title="Unlink data provider">
-                  <RemoveDataIcon />
+                    <RemoveDataIcon />
                 </button>
               </div>
             }
@@ -123,7 +129,7 @@ export const LayerLegend = observer(function LayerLegend(props: ILayerLegendProp
           <div className="legend-cell-2">
             { xAttrId &&
               <>
-                <div className="axis-icon">
+                <div className="legend-icon">
                   <XAxisIcon />
                 </div>
                 <SimpleAttributeLabel

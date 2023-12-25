@@ -26,8 +26,12 @@ export const AddSeriesButton = observer(function AddSeriesButton() {
   if (findUnplottedAttribute()) {
     return (
       <button onClick={handleClick} className="add-series-button">
-        <AddSeriesIcon/>
-        Add Series
+        <div className="legend-icon">
+          <AddSeriesIcon/>
+        </div>
+        <div className="add-series-label">
+          Add Series
+        </div>
       </button>
     );
   } else {
