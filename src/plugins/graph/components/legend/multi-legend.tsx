@@ -89,6 +89,18 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
     onRequestRowHeight?.(instanceId, kGraphDefaultHeight + totalHeight);
   }, [instanceId, layout, onRequestRowHeight, totalHeight]);
 
+  const variableLegends = graphModel.adornments.map(adornment => {
+    if (isPlottedVariablesAdornment(adornment)) {
+      return (
+        <VariableFunctionLegend
+          key={adornment.id}
+          plottedVariablesAdornment={adornment}
+        />
+      );
+    }
+    return null;
+  });
+
   const layerLegends = graphModel.layers.map((layer) => {
     return (
       <DataConfigurationContext.Provider key={layer.id} value={layer.config}>
@@ -131,20 +143,8 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
   return (
     <div className="multi-legend" ref={ multiLegendRef }>
       { xMenus }
+      { variableLegends }
       { layerLegends }
-      {
-        graphModel.adornments.map(adornment => {
-          if (isPlottedVariablesAdornment(adornment)) {
-            return (
-              <VariableFunctionLegend
-                key={adornment.id}
-                plottedVariablesAdornment={adornment}
-              />
-            );
-          }
-          return null;
-        })
-      }
     </div>
   );
 });
