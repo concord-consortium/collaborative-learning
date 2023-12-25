@@ -76,57 +76,23 @@
       display: flex;
       width: 50%;
     }
-
-    .add-series-button {
-      align-items: center;
-      background-color: inherit;
-      border: none;
-      border-radius: 6px;
-      color: #707070;
-      cursor: pointer;
-      display: flex;
-      font-family: Lato;
-      font-size: 14pt;
-      font-style: italic;
-      height: $menu-height;
-      padding: 0;
-      text-align: left;
-      width: $min-menu-width;
-
-      &:hover {
-        background-color: $workspace-teal-light-4;
-      }
-
-      svg {
-        width: 22px;
-        height: 22px;
-      }
-
-      .add-series-label {
-        padding-left: 6px;
-      }
-    }
-  }
-
-  .variable-row {
-    display: flex;
-    flex-direction: row;
-    margin-left: 20px;
-    padding: $vertical-gap 0;
   }
 
   .add-series-button {
-    cursor: pointer;
-    height: $menu-height;
-    width: $min-menu-width;
-    border: none;
-    padding: 0;
+    align-items: center;
     background-color: inherit;
-    text-align: left;
+    border: none;
+    border-radius: 6px;
+    color: #707070;
+    cursor: pointer;
+    display: flex;
     font-family: Lato;
     font-size: 14pt;
     font-style: italic;
-    color: #707070;
+    height: $menu-height;
+    min-width: $min-menu-width;
+    padding: 0 8px 0 0;
+    text-align: left;
 
     &:hover {
       background-color: $workspace-teal-light-4;
@@ -135,6 +101,10 @@
     svg {
       width: 22px;
       height: 22px;
+    }
+
+    .add-series-label {
+      padding-left: 6px;
     }
   }
 }

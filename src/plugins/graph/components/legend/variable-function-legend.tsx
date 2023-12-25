@@ -29,7 +29,7 @@ export const VariableFunctionLegend = observer(function(
   if (sharedVars) {
     return (
       <div className="plotted-variables-legend">
-        <div className="legend-title-row">
+        <div className="legend-row legend-title-row">
           <div className="legend-title">
             Variables from: <strong>{sharedVars.label}</strong>
           </div>
@@ -39,7 +39,7 @@ export const VariableFunctionLegend = observer(function(
             const plottedVariablesInstance = plottedVariablesAdornment.plottedVariables.get(instanceKey);
             if (plottedVariablesInstance) {
               return (
-                <div className="variable-row" key={instanceKey}>
+                <div className="legend-row" key={instanceKey}>
                   <VariableSelection
                     alternateButtonLabel="Select a variable for X"
                     icon={<XAxisIcon />}
@@ -71,13 +71,17 @@ export const VariableFunctionLegend = observer(function(
           })
         }
         { !readOnly &&
-          <div className="variable-row">
+          <div className="legend-row">
             <button
               className="add-series-button"
               onClick={() => plottedVariablesAdornment.addPlottedVariables()}
             >
-              <AddSeriesIcon/>
-              Add variables
+              <div className="legend-icon">
+                <AddSeriesIcon/>
+              </div>
+              <div className="add-series-label">
+                Add variables
+              </div>
             </button>
           </div>
         }
