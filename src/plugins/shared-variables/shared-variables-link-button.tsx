@@ -22,7 +22,7 @@ export function SharedVariablesLinkButton({name, args, disabled}: IProps) {
   }
 
   const newTileType = args?.[1] || '';
-  const tooltip = `View data as ${newTileType}`;
+  const tooltip = `${newTileType} It!`;
 
   const newTileInfo = getTileComponentInfo(newTileType);
   const Icon = newTileInfo?.Icon;

@@ -143,7 +143,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
       {
         dotsRef, dataConfiguration, pointRadius: pointRadiusRef.current,
         selectedPointRadius: selectedPointRadiusRef.current,
-        pointColor, pointStrokeColor, getPointColorAtIndex: graphModel.pointColorAtIndex
+        pointColor, pointStrokeColor
       });
   }, [dataConfiguration, dotsRef, graphModel]);
 
@@ -184,7 +184,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
       dataConfiguration, dotsRef, pointRadius: pointRadiusRef.current,
       selectedPointRadius: selectedPointRadiusRef.current,
       selectedOnly, getScreenX, getScreenY, getLegendColor,
-      getPointColorAtIndex: graphModel.pointColorAtIndex, enableAnimation, pointColor, pointStrokeColor
+      getColorForId: graphModel.getColorForId, enableAnimation, pointColor, pointStrokeColor
     });
   }, [dataConfiguration, dataset, dotsRef, layout, legendAttrID,
     enableAnimation, graphModel, yScaleRef]);

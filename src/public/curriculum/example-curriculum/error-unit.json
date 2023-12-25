@@ -1,0 +1,36 @@
+{
+  "code": "error-test",
+  "abbrevTitle": "ERT",
+  "title": "Error Test",
+  "subtitle": "Test errors in tiles",
+  "config": {
+    "autoAssignStudentsToIndividualGroups": true,
+    "placeholderText": "Enter notes here",
+    "toolbar": [
+      {
+        "id": "ErrorTest",
+        "title": "ErrorTest",
+        "isTileTool": true
+      },
+      {
+        "id": "Text",
+        "title": "Text",
+        "isTileTool": true
+      },
+      {
+        "id": "delete",
+        "title": "Delete",
+        "iconId": "icon-delete-tool",
+        "isTileTool": false
+      }
+    ]
+  },
+  "sections": {
+    "content": {
+      "initials": "",
+      "title": "Content",
+      "placeholder": ""
+    }
+  },
+  "investigations": []
+}

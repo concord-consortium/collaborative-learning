@@ -39,28 +39,28 @@
     .legend-title {
       padding-left: 6px;
     }
+  }
 
-    .remove-button {
-      align-items: flex-start;
-      background-color: inherit;
-      border: none;
-      border-radius: 50%;
-      cursor: pointer;
-      display: flex;
-      height: 27px;
-      justify-content: center;
-      margin: 0;
-      padding: 1px;
-      width: 27px;
+  .remove-button {
+    align-items: flex-start;
+    background: inherit;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    height: 27px;
+    justify-content: center;
+    margin: 0;
+    padding: 1px;
+    width: 27px;
 
-      &:hover {
-        background-color: $workspace-teal-light-6;
-      }
+    &:hover {
+      background-color: $workspace-teal-light-6;
+    }
 
-      svg {
-        height: 22px;
-        width: 22px;
-      }
+    svg {
+      height: 22px;
+      width: 22px;
     }
   }
 
@@ -113,6 +113,29 @@
     flex-direction: row;
     margin-left: 20px;
     padding: $vertical-gap 0;
+  }
+
+  .add-series-button {
+    cursor: pointer;
+    height: $menu-height;
+    width: $min-menu-width;
+    border: none;
+    padding: 0;
+    background-color: inherit;
+    text-align: left;
+    font-family: Lato;
+    font-size: 14pt;
+    font-style: italic;
+    color: #707070;
+
+    &:hover {
+      background-color: $workspace-teal-light-4;
+    }
+
+    svg {
+      width: 22px;
+      height: 22px;
+    }
   }
 }
 

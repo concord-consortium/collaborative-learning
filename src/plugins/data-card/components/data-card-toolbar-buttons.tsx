@@ -138,7 +138,7 @@ export const LinkGraphButton = observer(function LinkGraphButton(
     <TileToolbarButton
       className={classes}
       onClick={handleClick}
-      title="View Data as Graph"
+      title="Graph It!"
       isDisabled={isDisabled || !isLinkEnabled}
     >
       <ViewDataAsGraphIcon/>

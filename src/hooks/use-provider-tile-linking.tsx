@@ -57,7 +57,6 @@ export const useProviderTileLinking = ({
       // setting for the tile type; but for now graph has to allow multiples while not having that be the default.
       if (!allowMultipleGraphDatasets && isGraphModel(model.content)) {
         for (const shared of sharedModelManager.getTileSharedModels(model.content)) {
-          console.log('Removing existing shared model before adding a new one: ', shared);
           sharedModelManager.removeTileSharedModel(model.content, shared);
         }
       }

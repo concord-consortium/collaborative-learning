@@ -428,8 +428,7 @@ export interface ISetPointSelection {
   pointRadius: number,
   selectedPointRadius: number,
   pointColor: string,
-  pointStrokeColor: string,
-  getPointColorAtIndex?: (index: number) => string
+  pointStrokeColor: string
 }
 
 export function setPointSelection(props: ISetPointSelection) {
@@ -449,7 +448,7 @@ export interface ISetPointCoordinates {
   selectedPointRadius: number
   pointColor: string
   pointStrokeColor: string
-  getPointColorAtIndex?: (index: number) => string
+  getColorForId?: (id: string) => string
   getScreenX: ((anID: string) => number | null)
   getScreenY: ((anID: string, plotNum?:number) => number | null)
   getLegendColor?: ((anID: string) => string)
@@ -458,7 +457,7 @@ export interface ISetPointCoordinates {
 
 export function setPointCoordinates(props: ISetPointCoordinates) {
   const {
-    dataConfiguration, dotsRef, pointColor, pointRadius, getPointColorAtIndex,
+    dataConfiguration, dotsRef, pointColor, pointRadius, getColorForId,
     getScreenX, getScreenY, getLegendColor, enableAnimation, selectedPointRadius
   } = props;
   const duration = enableAnimation.current ? transitionDuration : 0;
@@ -468,8 +467,8 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
     const legendColor = getLegendColor ? getLegendColor(id) : '';
     if (legendColor !== '') {
       return legendColor;
-    } else if (getPointColorAtIndex && aCaseData.plotNum) {
-      return getPointColorAtIndex(aCaseData.plotNum);
+    } else if (getColorForId) {
+      return getColorForId(dataConfiguration.yAttributeID(aCaseData.plotNum));
     } else {
       return pointColor;
     }

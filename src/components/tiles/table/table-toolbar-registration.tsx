@@ -95,7 +95,7 @@ export const LinkGraphButton = observer(function LinkGraphButton({name}: IToolba
   return (
     <TileToolbarButton
       name={name}
-      title="View data as graph"
+      title="Graph It!"
       onClick={handleClick}
       disabled={!isLinkEnabled}
     >

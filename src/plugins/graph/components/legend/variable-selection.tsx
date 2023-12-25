@@ -1,9 +1,10 @@
 import classNames from "classnames";
 import { observer } from "mobx-react-lite";
-import React, { ReactElement, useRef, useState } from "react";
+import React, { ReactElement, useContext, useRef, useState } from "react";
 import { Menu, MenuItem, MenuList, MenuButton, Portal } from "@chakra-ui/react";
 import { VariableType } from "@concord-consortium/diagram-view";
 
+import { ReadOnlyContext } from "../../../../components/document/read-only-context";
 import DropdownCaretIcon from "../../assets/dropdown-caret.svg";
 
 import "./variable-selection.scss";
@@ -24,6 +25,7 @@ interface IVariableSelectionProps {
 export const VariableSelection = observer(function VariableSelection({
   alternateButtonLabel, icon, onSelect, selectedVariable, variables
 }: IVariableSelectionProps) {
+  const readOnly = useContext(ReadOnlyContext);
   const [buttonContainer, setButtonContainer] = useState<HTMLDivElement | null>(null);
   const portalParentElt = buttonContainer?.closest('.document-content') as HTMLDivElement ?? null;
   const portalRef = useRef(portalParentElt);
@@ -38,7 +40,7 @@ export const VariableSelection = observer(function VariableSelection({
         {({ isOpen }) => (
           <>
             <div ref={(e) => setButtonContainer(e)} className={labelClassNames}>
-              <MenuButton className="variable-function-legend-button">
+              <MenuButton className="variable-function-legend-button" disabled={readOnly}>
                 <div className="button-content">
                   <div>{buttonLabel}</div>
                   <div className={classNames("caret", { open: isOpen })}>

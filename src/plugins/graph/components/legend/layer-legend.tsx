@@ -60,13 +60,13 @@ export const LayerLegend = observer(function LayerLegend(props: ILayerLegendProp
           <YAxisIcon />
         </div>
         <SimpleAttributeLabel
-          key={description.attributeID}
-          place={'left'}
-          index={index}
           attrId={description.attributeID}
+          includePoint={true}
+          key={description.attributeID}
           onChangeAttribute={onChangeAttribute}
           onRemoveAttribute={onRemoveAttribute}
           onTreatAttributeAs={onTreatAttributeAs}
+          place={'left'}
         />
       </>
     );
