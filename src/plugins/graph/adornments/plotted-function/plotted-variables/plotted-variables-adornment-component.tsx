@@ -60,10 +60,11 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
         selection.append("path")
           .attr("class", `plotted-function plotted-function-${classFromKey}`)
           .attr("data-testid", `plotted-function-path${classFromKey ? `-${classFromKey}` : ""}`)
+          .attr("stroke", graphModel.getColorForId(instanceKey))
           .attr("d", path);
       }
     }
-  }, [classFromKey, model, xCellCount, xScale, yCellCount, yScale]);
+  }, [classFromKey, graphModel, model, xCellCount, xScale, yCellCount, yScale]);
 
   // Add the lines and their associated covers and labels
   const refreshValues = useCallback(() => {
