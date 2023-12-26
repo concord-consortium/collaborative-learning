@@ -97,3 +97,5 @@ export const kGraphAdornmentsClassSelector = `.${kGraphAdornmentsClass}`;
 
 // TODO: determine this via configuration, e.g. appConfig, since apps may prefer different defaults
 export const kDefaultNumericAxisBounds = [-10, 11] as const;
+
+export const kGraphPortalClass = ".canvas-area";

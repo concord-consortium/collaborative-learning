@@ -6,7 +6,7 @@ import {AxisOrLegendAttributeMenu} from "../imports/components/axis/components/a
 import { useDataConfigurationContext } from "../hooks/use-data-configuration-context";
 import { useGraphModelContext } from "../hooks/use-graph-model-context";
 import { IDataSet } from "../../../models/data/data-set";
-import { kGraphClassSelector } from "../graph-types";
+import { kGraphClassSelector, kGraphPortalClass } from "../graph-types";
 
 import "../components/legend/multi-legend.scss";
 
@@ -24,7 +24,7 @@ export const SimpleAttributeLabel = observer(
     const { attrId, includePoint, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute, place } = props;
     // Must be State, not Ref, so that the menu gets re-rendered when this becomes non-null
     const [simpleLabelElement, setSimpleLabelElement] = useState<HTMLSpanElement|null>(null);
-    const documentElt = simpleLabelElement?.closest('.document-content') as HTMLDivElement ?? null;
+    const canvasAreaElt = simpleLabelElement?.closest(kGraphPortalClass) as HTMLDivElement ?? null;
     const graphElement = simpleLabelElement?.closest(kGraphClassSelector) as HTMLDivElement ?? null;
     const graphModel = useGraphModelContext();
     const dataConfiguration = useDataConfigurationContext();
@@ -38,7 +38,7 @@ export const SimpleAttributeLabel = observer(
             pointColor={pointColor || undefined}
             target={null}
             parent={graphElement}
-            portal={documentElt}
+            portal={canvasAreaElt}
             place={place}
             attributeId={attrId}
             highlighted={dataset?.isAttributeSelected(attrId)}
