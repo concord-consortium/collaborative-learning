@@ -53,6 +53,7 @@ function beforePortalTest(url, clueTeacher, reportUrl) {
   cy.login(url, clueTeacher);
   cy.launchReport(reportUrl);
   cy.waitForLoad();
+  cy.wait(10000);
   chatPanel.openChatPanel();
 }
 

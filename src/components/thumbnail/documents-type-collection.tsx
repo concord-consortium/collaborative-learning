@@ -11,10 +11,11 @@ import { ENavTab, ENavTabOrder, NavTabSectionModelType  } from "../../models/vie
 import { CanvasComponent } from "../document/canvas";
 import { DocumentContextReact } from "../document/document-context";
 import { DecoratedDocumentThumbnailItem } from "./decorated-document-thumbnail-item";
+import { useLastSupportViewTimestamp } from "../../hooks/use-last-support-view-timestamp";
 import NewDocumentIcon from "../../assets/icons/new/add.svg";
 
 import "./document-type-collection.sass";
-import { useLastSupportViewTimestamp } from "../../hooks/use-last-support-view-timestamp";
+
 
 interface IProps {
   topTab?: ENavTab;

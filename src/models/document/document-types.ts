@@ -37,6 +37,9 @@ export function isPublishedType(type: string) {
   return [ProblemPublication, PersonalPublication, LearningLogPublication, SupportPublication]
           .indexOf(type) >= 0;
 }
+export function isSortableType(type: string){
+  return [ProblemDocument, PersonalDocument, LearningLogDocument].indexOf(type) >= 0;
+}
 // This function uses a bit of a hack to determine if a document is curriculum or not:
 // curriculum documents have no ids.
 // Perhaps a better method will be found to determine if a document is curriculum. In the mean time, this
@@ -52,8 +55,6 @@ export const DocumentTypeEnum = types.enumeration("type",
 export type DocumentType = Instance<typeof DocumentTypeEnum>;
 export type ProblemOrPlanningDocumentType = typeof ProblemDocument | typeof PlanningDocument;
 export type OtherDocumentType = typeof PersonalDocument | typeof LearningLogDocument;
-export type ProcessableDocumentTypes =
-  typeof PersonalDocument | typeof LearningLogDocument | typeof ProblemDocument | typeof PlanningDocument
 export type PublishableType = typeof ProblemDocument | OtherDocumentType;
 export type OtherPublicationType = typeof PersonalPublication | typeof LearningLogPublication;
 export type PublicationType = typeof ProblemPublication | OtherPublicationType | typeof SupportPublication;
