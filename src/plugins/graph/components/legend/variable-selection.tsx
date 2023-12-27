@@ -1,12 +1,8 @@
-import classNames from "classnames";
 import { observer } from "mobx-react-lite";
-import React, { ReactElement, useContext, useRef, useState } from "react";
-import { Menu, MenuItem, MenuList, MenuButton, Portal } from "@chakra-ui/react";
+import React, { ReactElement } from "react";
 import { VariableType } from "@concord-consortium/diagram-view";
-import { kGraphPortalClass } from "../../graph-types";
 
-import { ReadOnlyContext } from "../../../../components/document/read-only-context";
-import DropdownCaretIcon from "../../assets/dropdown-caret.svg";
+import { LegendDropdown } from "./legend-dropdown";
 
 import "./variable-selection.scss";
 
@@ -26,49 +22,19 @@ interface IVariableSelectionProps {
 export const VariableSelection = observer(function VariableSelection({
   alternateButtonLabel, icon, onSelect, selectedVariable, variables
 }: IVariableSelectionProps) {
-  const readOnly = useContext(ReadOnlyContext);
-  const [buttonContainer, setButtonContainer] = useState<HTMLDivElement | null>(null);
-  const portalParentElt = buttonContainer?.closest(kGraphPortalClass) as HTMLDivElement ?? null;
-  const portalRef = useRef(portalParentElt);
-  portalRef.current = portalParentElt;
-
-  const labelClassNames = "graph-legend-label variable-label";
   const buttonLabel = selectedVariable ? variableDisplay(selectedVariable) : alternateButtonLabel;
+  const menuItems = variables.map(variable => ({
+    key: variable.id,
+    label: variableDisplay(variable),
+    onClick: () => onSelect(variable.id)
+  }));
+
   return (
-    <div className="variable-selection">
-      <div className="legend-icon">{icon}</div>
-      <Menu boundary="scrollParent">
-        {({ isOpen }) => (
-          <>
-            <div ref={(e) => setButtonContainer(e)} className={labelClassNames}>
-              <MenuButton className="variable-function-legend-button" disabled={readOnly}>
-                <div className="button-content">
-                  <div>{buttonLabel}</div>
-                  <div className={classNames("caret", { open: isOpen })}>
-                    <DropdownCaretIcon />
-                  </div>
-                </div>
-              </MenuButton>
-            </div>
-            <Portal containerRef={portalRef}>
-              <MenuList>
-                {
-                  variables.map(variable => {
-                    return (
-                      <MenuItem
-                        key={variable.id}
-                        onClick={() => onSelect(variable.id)}
-                      >
-                        {variableDisplay(variable)}
-                      </MenuItem>
-                    );
-                  })
-                }
-              </MenuList>
-            </Portal>
-          </>
-        )}
-      </Menu>
-    </div>
+    <LegendDropdown
+      buttonLabel={buttonLabel}
+      icon={icon}
+      menuItems={menuItems}
+      showCaret={true}
+    />
   );
 });
