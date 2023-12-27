@@ -15,12 +15,16 @@ import "./sort-work-view.scss";
 export const SortWorkView:React.FC = observer(function SortWorkView(){
   const sortOptions = ["Group", "Student"];
   const stores = useStores();
+
   const [sortBy, setSortBy] = useState("Group");
-  console.log("one console.log for PR!");
 
   const filteredDocsByType = stores.documents.all.filter((doc:DocumentModelType) => {
     return isSortableType(doc.type);
   });
+
+  const groups = stores.groups;
+
+  console.log("\t🥩 groups:", groups);
 
   const sortByOptions: ICustomDropdownItem[] = sortOptions.map((option)=>({
     text: option,
@@ -32,7 +36,8 @@ export const SortWorkView:React.FC = observer(function SortWorkView(){
       const ct = idx + 1;
       return (
         <pre key={idx} style={{margin:"0px", padding: "0px", fontSize: "10px"}}>
-          {ct < 10 && " "}{ct} | {doc.key} | {doc.type} | {doc.uid}
+          {ct < 10 && " "}{ct} | {doc.title?.slice(0, 20) || "                    "}
+          | {doc.key} | {doc.type} | {doc.uid}
         </pre>
       );
     });
