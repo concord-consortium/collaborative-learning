@@ -26,8 +26,6 @@ export class DBProblemDocumentsListener extends BaseListener {
     return new Promise<void>((resolve, reject) => {
       const offeringUsersRef = this.offeringUsersRef = this.db.firebase.ref(
         this.db.firebase.getOfferingUsersPath(user));
-      console.log("\t🔪 offeringUsersRef:", offeringUsersRef);
-
       this.debugLogHandler("#start", "adding", "once", offeringUsersRef);
       // once is called immediately, and will proceed to resolve promise even if there is no value
       offeringUsersRef.once("value")

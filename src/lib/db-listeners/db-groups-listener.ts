@@ -17,8 +17,6 @@ export class DBGroupsListener extends BaseListener {
     return new Promise<void>((resolve, reject) => {
       const {user, groups} = this.db.stores;
       const groupsRef = this.groupsRef = this.db.firebase.ref(this.db.firebase.getGroupsPath(user));
-      console.log("\t🔪 groupsRef:", groupsRef);
-
       // use once() so we are ensured that groups are set before we resolve
       this.debugLogHandler("#start", "adding", "once", groupsRef);
       groupsRef.once("value")
@@ -27,12 +25,7 @@ export class DBGroupsListener extends BaseListener {
           this.debugLogSnapshot("#start", snapshot);
           // Groups may be invalid at this point, but the listener will resolve it once connection times are set
           groups.updateFromDB(dbGroups, this.db.stores.class);
-
-          console.log("\t💩 groups:", groups);
           const group = groups.groupForUser(user.id);
-          console.log("\t🔪 group:", group);
-
-
           if (group) {
             // update our connection time so we report as connected/disconnected
             const userRef = this.db.firebase.ref(this.db.firebase.getGroupUserPath(user, group.id));
