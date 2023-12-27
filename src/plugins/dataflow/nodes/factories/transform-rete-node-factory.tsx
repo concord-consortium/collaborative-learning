@@ -46,7 +46,6 @@ export class TransformReteNodeFactory extends DataflowReteNodeFactory {
         result = NaN;
       } else {
         if (nodeOperationTypes.name === "Ramp") {
-          // TODO: is there typing we can do for here and `updateNodeRecentValues`?
           const recents = (node.data.recentValues as Record<string, any>).nodeValue;
           result = nodeOperationTypes.method(n1, 0, recents[recents.length - 1]);
         } else {

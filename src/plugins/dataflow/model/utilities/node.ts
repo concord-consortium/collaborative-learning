@@ -193,7 +193,7 @@ export const NodeOperationTypes = [
 
       return n1;
     },
-    numberSentence: (n1: string, n2: string) => `${n1} = `,
+    numberSentence: (n1: string, n2: string) => `${n1} → `,
     icon: EmgIcon
   },
   {
