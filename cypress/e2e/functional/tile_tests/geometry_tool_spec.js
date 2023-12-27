@@ -132,4 +132,22 @@ context('Geometry Tool', function () {
     geometryToolTile.getGraph().should("not.exist");
     textToolTile.getTextTile().should("exist");
   });
+  it('Geometry tile title restore upon page reload', () => {
+    beforeTest();
+
+    cy.log("edit tile title");
+    const newName = "Graph Tile";
+    clueCanvas.addTile('geometry');
+    textToolTile.deleteTextTile();
+    geometryToolTile.getGraphTitle().first().should("contain", "Shapes Graph 1");
+    geometryToolTile.getGraphTileTitle().first().click();
+    geometryToolTile.getGraphTileTitle().first().type(newName + '{enter}');
+    geometryToolTile.getGraphTitle().should("contain", newName);
+    cy.wait(2000);
+
+    cy.reload();
+    cy.waitForLoad();
+
+    geometryToolTile.getGraphTitle().should("contain", newName);
+  });
 });

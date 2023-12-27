@@ -156,4 +156,20 @@ context('Data Card Tool Tile', () => {
     dc.getAttrValueInput().eq(0).invoke('val').should('eq', "river");
     dc.getAttrValueInput().eq(1).invoke('val').should('eq', "rhinocerotter");
   });
+  it('Datacard tile title restore upon page reload', () => {
+    beforeTest();
+
+    cy.log("edit tile title");
+    clueCanvas.addTile("datacard");
+    const newName = "Data Card Title";
+    dc.getTile().find('.title-text-element').first().dblclick();
+    dc.getTile().find('.title-text-element').first().type(newName + '{enter}');
+    dc.getTile().contains(newName);
+    cy.wait(2000);
+
+    cy.reload();
+    cy.waitForLoad();
+
+    dc.getTile().contains(newName);
+  });
 });

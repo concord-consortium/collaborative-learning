@@ -101,5 +101,23 @@ context('Image Tile', function () {
     clueCanvas.deleteTile('image');
     imageToolTile.getImageToolTile().should("not.exist");
   });
+
+  it('Image tile title restore upon page reload', () => {
+    beforeTest();
+
+    cy.log("edit tile title");
+    const newName = "Image Tile";
+    clueCanvas.addTile('image');
+    imageToolTile.getTileTitle().first().should("contain", "Image 1");
+    imageToolTile.getImageTileTitle().first().click();
+    imageToolTile.getImageTileTitle().first().type(newName + '{enter}');
+    imageToolTile.getTileTitle().should("contain", newName);
+    cy.wait(2000);
+
+    cy.reload();
+    cy.waitForLoad();
+
+    imageToolTile.getTileTitle().should("contain", newName);
+  });
 });
 

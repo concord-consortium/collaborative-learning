@@ -635,4 +635,21 @@ context('Draw Tool Tile', function () {
     clueCanvas.deleteTile('draw');
     drawToolTile.getDrawTile().should("not.exist");
   });
+  it('Draw tile title restore upon page reload', () => {
+    beforeTest();
+
+    cy.log("edit tile title");
+    const newName = "Drawing Tile";
+    clueCanvas.addTile("drawing");
+    drawToolTile.getTileTitle().first().should("contain", "Sketch 1");
+    drawToolTile.getDrawTileTitle().first().click();
+    drawToolTile.getDrawTileTitle().first().type(newName + '{enter}');
+    drawToolTile.getTileTitle().should("contain", newName);
+    cy.wait(2000);
+
+    cy.reload();
+    cy.waitForLoad();
+
+    drawToolTile.getTileTitle().should("contain", newName);
+  });
 });
