@@ -1,0 +1,36 @@
+@import "./legend-vars.scss";
+
+.legend-dropdown {
+  display: flex;
+  margin: 0 10px 0 0;
+
+  .legend-dropdown-label {
+    margin-left: 6px;
+
+    .legend-dropdown-button {
+      height: 100%;
+      text-align: start;
+      width: 100%;
+
+      .button-content {
+        align-items: center;
+        display: flex;
+        justify-content: space-between;
+
+        .caret {
+          transform: rotate(0deg);
+          transition: transform 0.2s ease-in-out;
+
+          svg {
+            margin-top:4px;
+            stroke:$codap-menu-border-color;
+          }
+
+          &.open {
+            transform: rotate(180deg);
+          }
+        }
+      }
+    }
+  }
+}
