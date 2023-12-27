@@ -155,12 +155,8 @@ context('Data Card Tool Tile', () => {
     dc.getAttrValue().eq(1).dblclick().clear().type("rhinocerotter{enter}");
     dc.getAttrValueInput().eq(0).invoke('val').should('eq', "river");
     dc.getAttrValueInput().eq(1).invoke('val').should('eq', "rhinocerotter");
-  });
-  it('Datacard tile title restore upon page reload', () => {
-    beforeTest();
 
-    cy.log("edit tile title");
-    clueCanvas.addTile("datacard");
+    cy.log("verify Datacard tile title restore upon page reload")
     const newName = "Data Card Title";
     dc.getTile().find('.title-text-element').first().dblclick();
     dc.getTile().find('.title-text-element').first().type(newName + '{enter}');

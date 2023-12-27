@@ -44,6 +44,20 @@ context('Image Tile', function () {
     // imageToolTile.getImageToolControl().last().click();
     cy.uploadFile(imageToolTile.imageChooseFileButton(), imageFilePath3, 'image/gif');
     cy.wait(2000);
+
+    cy.log('verify Image tile title restore upon page reload');
+    const newName = "Image Tile";
+    clueCanvas.addTile('image');
+    imageToolTile.getTileTitle().first().should("contain", "Image 1");
+    imageToolTile.getImageTileTitle().first().click();
+    imageToolTile.getImageTileTitle().first().type(newName + '{enter}');
+    imageToolTile.getTileTitle().should("contain", newName);
+    cy.wait(2000);
+
+    cy.reload();
+    cy.waitForLoad();
+
+    imageToolTile.getTileTitle().first().should("contain", newName);
   });
 
   it('Image tile title edit, undo redo and delete tile', () => {
@@ -100,24 +114,6 @@ context('Image Tile', function () {
     imageToolTile.getImageToolTile().first().click();
     clueCanvas.deleteTile('image');
     imageToolTile.getImageToolTile().should("not.exist");
-  });
-
-  it('Image tile title restore upon page reload', () => {
-    beforeTest();
-
-    cy.log("edit tile title");
-    const newName = "Image Tile";
-    clueCanvas.addTile('image');
-    imageToolTile.getTileTitle().first().should("contain", "Image 1");
-    imageToolTile.getImageTileTitle().first().click();
-    imageToolTile.getImageTileTitle().first().type(newName + '{enter}');
-    imageToolTile.getTileTitle().should("contain", newName);
-    cy.wait(2000);
-
-    cy.reload();
-    cy.waitForLoad();
-
-    imageToolTile.getTileTitle().should("contain", newName);
   });
 });
 
