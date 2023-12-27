@@ -146,6 +146,20 @@ context('Draw Tool Tile', function () {
     drawToolTile.getSelectionBox().should("exist");
     drawToolTile.getDrawToolDelete().should("not.have.class", "disabled").click();
     drawToolTile.getFreehandDrawing().should("not.exist");
+
+    cy.log("verify Draw tile title restore upon page reload");
+    const newName = "Drawing Tile";
+    clueCanvas.addTile("drawing");
+    drawToolTile.getTileTitle().first().should("contain", "Sketch 1");
+    drawToolTile.getDrawTileTitle().first().click();
+    drawToolTile.getDrawTileTitle().first().type(newName + '{enter}');
+    drawToolTile.getTileTitle().should("contain", newName);
+    cy.wait(2000);
+
+    cy.reload();
+    cy.waitForLoad();
+
+    drawToolTile.getTileTitle().should("contain", newName);
   });
   it("Vector", { scrollBehavior: false }, () => {
     beforeTest();
