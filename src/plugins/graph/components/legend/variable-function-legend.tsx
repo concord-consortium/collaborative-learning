@@ -61,8 +61,12 @@ export const VariableFunctionLegend = observer(function(
           Array.from(plottedVariablesAdornment.plottedVariables.keys()).map(instanceKey => {
             const plottedVariablesInstance = plottedVariablesAdornment.plottedVariables.get(instanceKey);
             if (plottedVariablesInstance) {
+              const colorLineStyle = { backgroundColor: graphModel.getColorForId(instanceKey) };
               return (
                 <div className="legend-row" key={instanceKey}>
+                  <div className="graph-legend-label color-label">
+                    <div className="color-line" style={colorLineStyle} />
+                  </div>
                   <VariableSelection
                     alternateButtonLabel="Select a variable for X"
                     icon={<XAxisIcon />}
