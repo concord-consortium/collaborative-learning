@@ -27,6 +27,12 @@ context('Numberline Tile', function () {
     numberlineToolTile.getNumberlineTileTitle().type(newName + '{enter}');
     numberlineToolTile.getNumberlineTileTitleText().should("contain", newName);
 
+     //Numberline tile title restore upon page reload
+     cy.wait(2000);
+     cy.reload();
+     cy.waitForLoad();
+     numberlineToolTile.getNumberlineTileTitleText().should("contain", newName);
+
     cy.log('will test adding points to a numberline');
     numberlineToolTile.addPointOnNumberlineTick(-4.0);
     numberlineToolTile.addPointOnNumberlineTick(2.0);
