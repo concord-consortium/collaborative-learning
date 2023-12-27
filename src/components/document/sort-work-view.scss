@@ -1,20 +1,51 @@
+@import "../vars";
+
 .sort-work-view {
   height: 100%;
   width: 100%;
-
-  .sort-work-documents {
+  // background-color: lightblue;
+  .sorted-sections{
     width: 100%;
     height: 100%;
-    margin-top: 10px;
-    border-bottom: 2px solid black;
 
-    .sort-document {
-      height: 32px;
-      background-color: brown;
-      border-bottom: 1px solid black;
-      display: flex;
-      align-items: center;
+    .section-header{
+      width: 100%;
+      height: 30px;
       position: relative;
+
+      margin-top: 5px;
+      margin-bottom: 5px;
+      // border: 1px solid black;
+
+
+      &::after{ //divider line drawn across
+        content: "";
+        position: absolute;
+        left: 0px;
+        right: 0px;
+        bottom: 50%;
+        border-bottom: 1px solid $charcoal-light-1;
+      }
+
+      .section-header-label{
+        position: absolute;
+        left: 10px;
+        width: 71px;
+        height: 26px;
+        border-radius: 5px;
+        background-color: $classwork-purple-light-7;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-black);
+        z-index: 1;
+
+
+
+      }
+
     }
+
   }
 }
