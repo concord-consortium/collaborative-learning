@@ -9,6 +9,7 @@
 
     .legend-dropdown-button {
       height: 100%;
+      padding: 0;
       text-align: start;
       width: 100%;
 
@@ -16,6 +17,10 @@
         align-items: center;
         display: flex;
         justify-content: space-between;
+
+        &.extra-padding {
+          padding: 0 6px;
+        }
 
         .caret {
           transform: rotate(0deg);

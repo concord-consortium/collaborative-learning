@@ -100,7 +100,7 @@ export const AxisOrLegendAttributeMenu = ({
     : (
       <MenuButton
         className={classNames(
-          "graph-legend-label simple-attribute-label",
+          "graph-legend-label normal-dropdown-label simple-attribute-label",
           {"target-open": isOpen, "target-closed": !isOpen}
         )}
       >

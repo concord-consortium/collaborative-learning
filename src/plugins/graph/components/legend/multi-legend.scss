@@ -127,28 +127,31 @@
 }
 
 .graph-legend-label {
-  min-width: $min-menu-width;
-  height: $menu-height;
-
   border: 1px solid #3f3f3f;
   border-radius: 4px;
   color: #3f3f3f;
   background-color: $workspace-teal-light-8;
 
-  &.color-label {
-    align-items: center;
-    display: flex;
-    justify-content: center;
-    min-width: $menu-height;
-    width: $menu-height;
+  &.normal-dropdown-label {
+    min-width: $min-menu-width;
+    height: $menu-height;
+  }
+}
 
-    .color-line {
-      border-bottom: 2px solid white;
-      border-top: 2px solid white;
-      height: 7px;
-      margin: 0 4px;
-      width: 100%;
-    }
+.color-label {
+  align-items: center;
+  display: flex;
+  height: $menu-height;
+  justify-content: center;
+  min-width: $menu-height;
+  width: $menu-height;
+
+  .color-line {
+    border-bottom: 2px solid white;
+    border-top: 2px solid white;
+    height: 7px;
+    margin: 0 4px;
+    width: 100%;
   }
 }
 

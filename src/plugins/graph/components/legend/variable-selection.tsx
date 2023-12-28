@@ -31,9 +31,12 @@ export const VariableSelection = observer(function VariableSelection({
 
   return (
     <LegendDropdown
+      buttonContentClass="extra-padding"
       buttonLabel={buttonLabel}
       icon={icon}
+      labelClass="normal-dropdown-label"
       menuItems={menuItems}
+      menuListClass="normal-menu-list"
       showCaret={true}
     />
   );

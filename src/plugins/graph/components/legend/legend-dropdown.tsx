@@ -16,13 +16,16 @@ interface IMenuItemInfo {
 }
 
 interface IVariableSelectionProps {
+  buttonContentClass?: string;
   buttonLabel: string | ReactElement;
   icon?: ReactElement;
+  labelClass?: string;
   menuItems: IMenuItemInfo[];
+  menuListClass?: string;
   showCaret?: boolean;
 }
 export const LegendDropdown = observer(function LegendDropdown({
-  buttonLabel, icon, menuItems, showCaret
+  buttonContentClass, buttonLabel, icon, labelClass, menuItems, menuListClass, showCaret
 }: IVariableSelectionProps) {
   const readOnly = useContext(ReadOnlyContext);
   const [buttonContainer, setButtonContainer] = useState<HTMLDivElement | null>(null);
@@ -30,7 +33,7 @@ export const LegendDropdown = observer(function LegendDropdown({
   const portalRef = useRef(portalParentElt);
   portalRef.current = portalParentElt;
 
-  const labelClassNames = "graph-legend-label legend-dropdown-label";
+  const labelClassNames = classNames("graph-legend-label legend-dropdown-label", labelClass);
   return (
     <div className="legend-dropdown">
       {icon && <div className="legend-icon">{icon}</div>}
@@ -39,7 +42,7 @@ export const LegendDropdown = observer(function LegendDropdown({
           <>
             <div ref={(e) => setButtonContainer(e)} className={labelClassNames}>
               <MenuButton className="legend-dropdown-button" disabled={readOnly}>
-                <div className="button-content">
+                <div className={classNames("button-content", buttonContentClass)}>
                   <div>{buttonLabel}</div>
                   {showCaret &&
                     <div className={classNames("caret", { open: isOpen })}>
@@ -50,7 +53,7 @@ export const LegendDropdown = observer(function LegendDropdown({
               </MenuButton>
             </div>
             <Portal containerRef={portalRef}>
-              <MenuList>
+              <MenuList className={menuListClass}>
                 {
                   menuItems.map(menuItemInfo => {
                     return (

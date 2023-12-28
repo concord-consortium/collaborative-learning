@@ -3,17 +3,31 @@ import { observer } from "mobx-react";
 
 import { ReadOnlyContext } from "../../../../components/document/read-only-context";
 import { getSharedModelManager } from "../../../../models/tiles/tile-environment";
+import { clueGraphColors } from "../../../../utilities/color-utils";
 import { isSharedVariables, SharedVariables } from "../../../shared-variables/shared-variables";
 import {
   IPlottedVariablesAdornmentModel
 } from "../../adornments/plotted-function/plotted-variables/plotted-variables-adornment-model";
 import { useGraphModelContext } from "../../hooks/use-graph-model-context";
+import { LegendDropdown } from "./legend-dropdown";
 import { VariableSelection } from "./variable-selection";
 
 import AddSeriesIcon from "../../imports/assets/add-series-icon.svg";
 import RemoveDataIcon from "../../assets/remove-data-icon.svg";
 import XAxisIcon from "../../assets/x-axis-icon.svg";
 import YAxisIcon from "../../assets/y-axis-icon.svg";
+
+interface IColorKeyProps {
+  color: string;
+}
+function ColorKey({ color }: IColorKeyProps) {
+  const colorLineStyle = { backgroundColor: color };
+  return (
+    <div className="color-label">
+      <div className="color-line" style={colorLineStyle} />
+    </div>
+  );
+}
 
 interface IVariableFunctionLegendProps {
   plottedVariablesAdornment?: IPlottedVariablesAdornmentModel;
@@ -61,12 +75,18 @@ export const VariableFunctionLegend = observer(function(
           Array.from(plottedVariablesAdornment.plottedVariables.keys()).map(instanceKey => {
             const plottedVariablesInstance = plottedVariablesAdornment.plottedVariables.get(instanceKey);
             if (plottedVariablesInstance) {
-              const colorLineStyle = { backgroundColor: graphModel.getColorForId(instanceKey) };
               return (
                 <div className="legend-row" key={instanceKey}>
-                  <div className="graph-legend-label color-label">
-                    <div className="color-line" style={colorLineStyle} />
-                  </div>
+                  <LegendDropdown
+                    buttonLabel={<ColorKey color={graphModel.getColorForId(instanceKey)} />}
+                    menuItems={
+                      clueGraphColors.map((color, index) => ({
+                        key: color,
+                        label: <ColorKey color={color} />,
+                        onClick: () => graphModel.setColorForId(instanceKey, index)
+                      }))
+                    }
+                  />
                   <VariableSelection
                     alternateButtonLabel="Select a variable for X"
                     icon={<XAxisIcon />}
