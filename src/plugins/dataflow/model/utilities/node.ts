@@ -42,6 +42,8 @@ import HoldPreviousArrowIcon from "../../assets/icons/control/hold-previous.svg"
 import HoldCurrentArrowIcon from "../../assets/icons/control/hold-this.svg";
 import HoldZeroArrowIcon from "../../assets/icons/control/hold-zero.svg";
 
+import { isFiniteNumber } from "../../../../utilities/math-utils";
+
 export const kMaxNodeValues = 16;
 
 interface NodeNameValuePair {
@@ -175,20 +177,20 @@ export const NodeOperationTypes = [
   {
     name: "Ramp",
     type: "transform",
-    method: (n1: number, n2: number, tMinus1?: number) => {
-      if (!tMinus1 || !isFinite(tMinus1)) return n1;
+    method: (n1: number, n2: number, prevValue?: number) => {
+      if (!isFiniteNumber(prevValue)) return n1;
 
-      const delta = n1 - tMinus1;
-      const isSteep = Math.abs(delta) > 0.1 * tMinus1;
+      const delta = n1 - prevValue;
+      const isSteep = Math.abs(delta) > 0.1 * prevValue;
 
       if (delta > 0) {
         const increaseBy = n1 * 0.1;
-        return isSteep ? tMinus1 + increaseBy : n1;
+        return isSteep ? prevValue + increaseBy : n1;
       }
 
       if (delta < 0) {
-        const decreaseBy = tMinus1 * 0.1;
-        return isSteep ? tMinus1 - decreaseBy : n1;
+        const decreaseBy = prevValue * 0.1;
+        return isSteep ? prevValue - decreaseBy : n1;
       }
 
       return n1;
