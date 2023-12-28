@@ -42,6 +42,12 @@ context('Expression Tool Tile', function () {
     exp.getTitleInput().type("new title{enter}");
     exp.getTileTitle().should("contain", "(new title)");
 
+    //Expression tile title restore upon page reload
+    cy.wait(2000);
+    cy.reload();
+    cy.waitForLoad();
+    exp.getTileTitle().should("contain", "(new title)");
+
     cy.log("should accept basic keyboard input");
     // Can now perform keyboard input
     // but thus far cannot get sequences like {del} to work in test
