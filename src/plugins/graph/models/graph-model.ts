@@ -304,6 +304,17 @@ export const GraphModel = TileContentModel
         });
       });
       return objects;
+    },
+    getColorForId(id: string) {
+      let colorIndex = self._idColors.get(id);
+      if (colorIndex === undefined) {
+        // This function gets called automatically in response to plots being added to a graph.
+        // withoutUndo prevents a second action being added to the undo stack when this happens.
+        withoutUndo();
+        colorIndex = self.nextColor;
+        self._idColors.set(id, colorIndex);
+      }
+      return clueGraphColors[colorIndex % clueGraphColors.length];
     }
   }))
   .views(self => tileContentAPIViews({
@@ -327,19 +338,6 @@ export const GraphModel = TileContentModel
     },
   }))
   .actions(self => ({
-    // Returns an objet's color, given its id.
-    // This is an action because if the id doesn't have a specified color, this will assign one to it.
-    getColorForId(id: string) {
-      let colorIndex = self._idColors.get(id);
-      if (colorIndex === undefined) {
-        // This function gets called automatically in response to plots being added to a graph.
-        // withoutUndo prevents a second action being added to the undo stack when this happens.
-        withoutUndo();
-        colorIndex = self.nextColor;
-        self._idColors.set(id, colorIndex);
-      }
-      return clueGraphColors[colorIndex % clueGraphColors.length];
-    },
     removeColorForId(id: string) {
       self._idColors.delete(id);
     },
