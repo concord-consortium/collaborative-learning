@@ -34,11 +34,11 @@ class XYPlotToolTile {
   getYAttributesLabel(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .canvas-area .multi-legend .legend-row .left .simple-attribute-label`);
   }
-  getPortalButton(workspaceClass) {
-    return cy.get(`${wsClass(workspaceClass)} .chakra-portal .normal-menu-list button`);
+  getPortalButton(listClass="", workspaceClass) {
+    return cy.get(`${wsClass(workspaceClass)} .chakra-portal ${listClass} button`);
   }
-  clickPortalButton(buttonText, workspaceClass) {
-    this.getPortalButton(workspaceClass).contains(buttonText).click({ force: true });
+  clickPortalButton(buttonText, listClass, workspaceClass) {
+    this.getPortalButton(listClass, workspaceClass).contains(buttonText).click({ force: true });
   }
   selectYAttribute(attribute, workspaceClass) {
     this.getYAttributesLabel(workspaceClass).first().click({ force: true });
@@ -65,7 +65,7 @@ class XYPlotToolTile {
   // This function only works for the first menu, including y variables :\
   selectXVariable(variableName, traceNumber = 0, workspaceClass) {
     this.getXVariableDropdown(traceNumber).click();
-    this.clickPortalButton(variableName, workspaceClass);
+    this.clickPortalButton(variableName, ".normal-menu-list", workspaceClass);
   }
   getYVariableDropdown(traceNumber = 0, workspaceClass) {
     return this.getVariableDropdowns(workspaceClass).eq(traceNumber * 3 + 2);
@@ -73,7 +73,7 @@ class XYPlotToolTile {
   // This function only works for the first menu, including x variables :\
   selectYVariable(variableName, traceNumber = 0, workspaceClass) {
     this.getYVariableDropdown(traceNumber).click();
-    this.clickPortalButton(variableName, workspaceClass);
+    this.clickPortalButton(variableName, ".normal-menu-list", workspaceClass);
   }
   getRemoveVariablesButtons(workspaceClass) {
     return this.getPlottedVariablesLegend(workspaceClass).find("button.remove-button");

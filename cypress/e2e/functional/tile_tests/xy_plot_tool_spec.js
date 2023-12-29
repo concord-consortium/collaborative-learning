@@ -290,7 +290,7 @@ context('XYPlot Tool Tile', function () {
 
       // xyTile.selectYVariable was failing because it was catching the button from the x "dropdown" instead
       xyTile.getYVariableDropdown().click();
-      xyTile.getPortalButton().eq(1).click({ force: true });
+      xyTile.getPortalButton(".normal-menu-list").eq(1).click({ force: true });
       xyTile.getYVariableDropdown().should("contain.text", name1);
 
       xyTile.getPlottedVariablesPath().should("have.length", 1);
@@ -300,12 +300,12 @@ context('XYPlot Tool Tile', function () {
 
       // Select the x variable for the 2nd trace
       xyTile.getXVariableDropdown(1).click();
-      xyTile.getPortalButton().eq(2).click({ force: true });
+      xyTile.getPortalButton(".normal-menu-list").eq(2).click({ force: true });
       xyTile.getXVariableDropdown(1).should("contain.text", name1);
 
       // Select the y variable for the 2nd trace
       xyTile.getYVariableDropdown(1).click();
-      xyTile.getPortalButton().eq(3).click({ force: true });
+      xyTile.getPortalButton(".normal-menu-list").eq(3).click({ force: true });
       xyTile.getYVariableDropdown().should("contain.text", name1);
 
       xyTile.getPlottedVariablesPath().should("have.length", 2);
