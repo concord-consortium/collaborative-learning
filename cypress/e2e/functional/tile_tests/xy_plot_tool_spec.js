@@ -86,8 +86,8 @@ context('XYPlot Tool Tile', function () {
       cy.get(".primary-workspace").within((workspace) => {
         tableToolTile.typeInTableCell(5, '7');
         tableToolTile.getTableCell().eq(5).should('contain', '7');
-        tableToolTile.typeInTableCell(6, '15');
-        tableToolTile.getTableCell().eq(6).should('contain', '15');
+        tableToolTile.typeInTableCell(6, '6');
+        tableToolTile.getTableCell().eq(6).should('contain', '6');
       });
 
       cy.log("verify graph dot is updated");

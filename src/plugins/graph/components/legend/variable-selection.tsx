@@ -4,8 +4,6 @@ import { VariableType } from "@concord-consortium/diagram-view";
 
 import { LegendDropdown } from "./legend-dropdown";
 
-import "./variable-selection.scss";
-
 function variableDisplay(variable: VariableType) {
   const namePart = variable.name || "<no name>";
   const unitPart = variable.computedUnit ? ` (${variable.computedUnit})` : "";

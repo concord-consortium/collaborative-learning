@@ -304,17 +304,6 @@ export const GraphModel = TileContentModel
         });
       });
       return objects;
-    },
-    getColorForId(id: string) {
-      let colorIndex = self._idColors.get(id);
-      if (colorIndex === undefined) {
-        // This function gets called automatically in response to plots being added to a graph.
-        // withoutUndo prevents a second action being added to the undo stack when this happens.
-        withoutUndo();
-        colorIndex = self.nextColor;
-        self._idColors.set(id, colorIndex);
-      }
-      return clueGraphColors[colorIndex % clueGraphColors.length];
     }
   }))
   .views(self => tileContentAPIViews({
@@ -335,7 +324,7 @@ export const GraphModel = TileContentModel
         self.layers.push(initialLayer);
         initialLayer.configureUnlinkedLayer();
       }
-    },
+    }
   }))
   .actions(self => ({
     removeColorForId(id: string) {
@@ -460,6 +449,20 @@ export const GraphModel = TileContentModel
       for (const layer of self.layers) {
         layer.clearAutoAssignedAttributes();
       }
+    },
+    setColorForIdWithoutUndo(id: string, colorIndex: number) {
+      withoutUndo();
+      self.setColorForId(id, colorIndex);
+    }
+  }))
+  .views(self => ({
+    getColorForId(id: string) {
+      let colorIndex = self._idColors.get(id);
+      if (colorIndex === undefined) {
+        colorIndex = self.nextColor;
+        self.setColorForIdWithoutUndo(id, colorIndex);
+      }
+      return clueGraphColors[colorIndex % clueGraphColors.length];
     }
   }))
   .actions(self => ({
