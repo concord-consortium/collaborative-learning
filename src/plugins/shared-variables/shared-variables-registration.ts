@@ -8,6 +8,12 @@ import { registerDrawingObjectInfo, registerDrawingToolInfo } from "../drawing/c
 import { EditVariableButton, InsertVariableButton, NewVariableButton, VariableChipComponent, VariableChipObject }
   from "./drawing/variable-object";
 import { registerTileToolbarButtons } from "../../components/toolbar/toolbar-button-manager";
+import { registerMultiLegendPart } from "../graph/components/legend/legend-registration";
+import {
+  heightOfVariableFunctionLegend, VariableFunctionLegend, variableFunctionLegendType
+} from "../graph/components/legend/variable-function-legend";
+import { registerAdornmentInfo } from "../graph/adornments/adornment-types";
+import { PlottedVariablesAdornmentModel } from "../graph/adornments/plotted-function/plotted-variables/plotted-variables-adornment-model";
 
 registerSharedModelInfo({
   type: kSharedVariablesID,
@@ -58,3 +64,14 @@ registerDrawingToolInfo({
   name: "edit-variable",
   buttonComponent: EditVariableButton
 });
+
+registerAdornmentInfo({
+  type: "Plotted Variables",
+  modelClass: PlottedVariablesAdornmentModel
+});
+
+registerMultiLegendPart({
+  component: VariableFunctionLegend,
+  getHeight: heightOfVariableFunctionLegend,
+  type: variableFunctionLegendType
+}, true);

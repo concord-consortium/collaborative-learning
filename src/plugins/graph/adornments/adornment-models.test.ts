@@ -1,6 +1,6 @@
 import { getSnapshot, types } from "mobx-state-tree";
-import { AdornmentModel, PointModel, UnknownAdornmentModel } from "./adornment-models";
-import { AdornmentModelUnion, IAdornmentModelUnion } from "./adornment-types";
+import { AdornmentModel, IAdornmentModel, PointModel, UnknownAdornmentModel } from "./adornment-models";
+import { AdornmentModelUnion } from "./adornment-types";
 import { MovableLineModel, isMovableLine } from "./movable-line/movable-line-model";
 import { MovablePointModel, isMovablePoint } from "./movable-point/movable-point-model";
 import { MovableValueModel, isMovableValue } from "./movable-value/movable-value-model";
@@ -85,7 +85,7 @@ describe("Deserialization", () => {
       adornment: AdornmentModelUnion
     })
     .actions(self => ({
-      setAdornment(adornment: IAdornmentModelUnion) {
+      setAdornment(adornment: IAdornmentModel) {
         self.adornment = adornment;
       }
     }));

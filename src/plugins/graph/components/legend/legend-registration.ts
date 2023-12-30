@@ -5,9 +5,6 @@ import { appConfig } from "../../../../initialize-app";
 import { JSONValue } from "../../../../models/stores/settings";
 import { CodapXLegend, codapXLegendType, heightOfCodapXLegend } from "./codap-x-legend";
 import { heightOfLayerLegend, LayerLegend, layerLegendType } from "./layer-legend";
-import {
-  heightOfVariableFunctionLegend, VariableFunctionLegend, variableFunctionLegendType
-} from "./variable-function-legend";
 import { ILegendHeightFunctionProps, ILegendPartProps } from "./legend-types";
 
 interface IMultiLegendPart {
@@ -17,7 +14,6 @@ interface IMultiLegendPart {
 }
 
 export const multiLegendParts: IMultiLegendPart[] = [
-  { component: VariableFunctionLegend, getHeight: heightOfVariableFunctionLegend, type: variableFunctionLegendType },
   { component: LayerLegend, getHeight: heightOfLayerLegend, type: layerLegendType }
 ];
 
