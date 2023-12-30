@@ -34,7 +34,7 @@ import { DataConfigurationModel, RoleAttrIDPair } from "./data-configuration-mod
 import {
   IPlottedVariablesAdornmentModel, isPlottedVariablesAdornment, PlottedVariablesAdornmentModel
 } from "../adornments/plotted-function/plotted-variables/plotted-variables-adornment-model";
-import { SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
+import { SharedVariables } from "../../shared-variables/shared-variables";
 import {
   kPlottedVariablesType
 } from "../adornments/plotted-function/plotted-variables/plotted-variables-adornment-types";
@@ -135,15 +135,6 @@ export const GraphModel = TileContentModel
     }
   }))
   .views(self => ({
-    get sharedVariables() {
-      const smm = getSharedModelManager(self);
-      if (smm?.isReady) {
-        const sharedVariableModels = smm.getTileSharedModelsByType(self, SharedVariables);
-        if (sharedVariableModels && sharedVariableModels.length > 0) {
-          return sharedVariableModels[0] as SharedVariablesType;
-        }
-      }
-    },
     pointColorAtIndex(plotIndex = 0) {
       if (plotIndex < self._pointColors.length) {
         return self._pointColors[plotIndex];

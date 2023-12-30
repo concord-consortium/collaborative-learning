@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef } from "react";
 import { select } from "d3";
 import { observer } from "mobx-react-lite";
+import { getSharedModelManager } from "../../../../../models/tiles/tile-environment";
 import { mstAutorun } from "../../../../../utilities/mst-autorun";
 import { INumericAxisModel } from "../../../imports/components/axis/models/axis-model";
 import { useAxisLayoutContext } from "../../../imports/components/axis/models/axis-layout-context";
@@ -11,6 +12,8 @@ import { useDataConfigurationContext } from "../../../hooks/use-data-configurati
 import { curveBasis } from "../../../utilities/graph-utils";
 
 import "../plotted-function-adornment-component.scss";
+import { useTileModelContext } from "../../../../../components/tiles/hooks/use-tile-model-context";
+import { SharedVariables } from "../../../../shared-variables/shared-variables";
 
 interface IProps {
   containerId?: string
@@ -24,6 +27,7 @@ interface IProps {
 
 export const PlottedVariablesAdornmentComponent = observer(function PlottedVariablesAdornment(props: IProps) {
   const {model, cellKey = {}, plotWidth, plotHeight, xAxis, yAxis} = props;
+  const { tile } = useTileModelContext();
   const graphModel = useGraphModelContext();
   const dataConfig = useDataConfigurationContext();
   const layout = useAxisLayoutContext();
@@ -41,7 +45,8 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
   const yCellCount = yCats.length * ySubAxesCount;
   const classFromKey = model.classNameFromKey(cellKey);
   const plottedFunctionRef = useRef<SVGGElement>(null);
-  const sharedVariables = graphModel.sharedVariables;
+  const smm = getSharedModelManager(graphModel);
+  const sharedVariables = tile && smm?.isReady && smm.findFirstSharedModelByType(SharedVariables, tile.id);
 
   const addPath = useCallback(() => {
     const xMin = xScale.domain()[0];
