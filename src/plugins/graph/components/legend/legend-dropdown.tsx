@@ -1,9 +1,9 @@
 import classNames from "classnames";
 import { observer } from "mobx-react-lite";
-import React, { ReactElement, useContext, useRef, useState } from "react";
+import React, { ReactElement, useRef, useState } from "react";
 import { Menu, MenuItem, MenuList, MenuButton, Portal } from "@chakra-ui/react";
 
-import { ReadOnlyContext } from "../../../../components/document/read-only-context";
+import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 import { kGraphPortalClass } from "../../graph-types";
 import DropdownCaretIcon from "../../assets/dropdown-caret.svg";
 
@@ -27,7 +27,7 @@ interface IVariableSelectionProps {
 export const LegendDropdown = observer(function LegendDropdown({
   buttonContentClass, buttonLabel, icon, labelClass, menuItems, menuListClass, showCaret
 }: IVariableSelectionProps) {
-  const readOnly = useContext(ReadOnlyContext);
+  const readOnly = useReadOnlyContext();
   const [buttonContainer, setButtonContainer] = useState<HTMLDivElement | null>(null);
   const portalParentElt = buttonContainer?.closest(kGraphPortalClass) as HTMLDivElement ?? null;
   const portalRef = useRef(portalParentElt);

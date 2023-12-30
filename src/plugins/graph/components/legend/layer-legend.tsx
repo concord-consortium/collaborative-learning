@@ -1,26 +1,25 @@
 import { observer } from "mobx-react";
-import React, { useContext } from "react";
-import { AttributeType } from "../../../../models/data/attribute";
-import { IDataSet } from "../../../../models/data/data-set";
+import React from "react";
 import { axisPlaceToAttrRole } from "../../graph-types";
-import { GraphPlace } from "../../imports/components/axis-graph-shared";
 import { SimpleAttributeLabel } from "../simple-attribute-label";
 import { AddSeriesButton } from "./add-series-button";
-import { ReadOnlyContext } from "../../../../components/document/read-only-context";
+import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 import { useGraphModelContext } from "../../hooks/use-graph-model-context";
 import { getSharedModelManager } from "../../../../models/tiles/tile-environment";
 import { isSharedDataSet, SharedDataSet, SharedDataSetType } from "../../../../models/shared/shared-data-set";
-import { useDataConfigurationContext } from "../../hooks/use-data-configuration-context";
+import { DataConfigurationContext, useDataConfigurationContext } from "../../hooks/use-data-configuration-context";
+import { IGraphLayerModel } from "../../models/graph-layer-model";
+import { ILegendHeightFunctionProps, ILegendPartProps } from "./legend-types";
+import {
+  kMultiLegendHRuleHeight, kMultiLegendLabelHeight, kMultiLegendMenuHeight, kMultiLegendVerticalGap,
+  kMultiLegendVerticalPadding
+} from "./legend-constants";
 
 import RemoveDataIcon from "../../assets/remove-data-icon.svg";
 import XAxisIcon from "../../assets/x-axis-icon.svg";
 import YAxisIcon from "../../assets/y-axis-icon.svg";
 
-interface ILayerLegendProps {
-  onChangeAttribute: (place: GraphPlace, dataSet: IDataSet, attrId: string, oldAttrId?: string) => void;
-  onRemoveAttribute: (place: GraphPlace, attrId: string) => void;
-  onTreatAttributeAs: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void;
-}
+export const layerLegendType = "layer-legend";
 
 /**
  * The Legend for a single dataset in an xy-plot
@@ -28,13 +27,14 @@ interface ILayerLegendProps {
  * Adds an Add Series button when appropriate
  * Adds unlink button to remove layer
  */
-export const LayerLegend = observer(function LayerLegend(props: ILayerLegendProps) {
+const SingleLayerLegend = observer(function SingleLayerLegend(props: ILegendPartProps) {
   let legendItems = [] as React.ReactNode[];
-  const { onChangeAttribute, onRemoveAttribute, onTreatAttributeAs } = props;
   const graphModel = useGraphModelContext();
   const dataConfiguration = useDataConfigurationContext();
-  const readOnly = useContext(ReadOnlyContext);
+  const readOnly = useReadOnlyContext();
   const xAttrId = dataConfiguration?.attributeID(axisPlaceToAttrRole.bottom);
+  const { onChangeAttribute, onRemoveAttribute, onTreatAttributeAs } = props;
+  if (!onChangeAttribute || !onRemoveAttribute || !onTreatAttributeAs) return null;
 
   function handleRemoveIconClick() {
     if (dataConfiguration?.dataset) {
@@ -148,3 +148,37 @@ export const LayerLegend = observer(function LayerLegend(props: ILayerLegendProp
     </>
   );
 });
+
+export const LayerLegend = observer(function LayerLegend(props: ILegendPartProps) {
+  const graphModel = useGraphModelContext();
+  return (
+    <>
+      {
+        graphModel.layers.map((layer) => {
+          return (
+            <DataConfigurationContext.Provider key={layer.id} value={layer.config}>
+              <SingleLayerLegend {...props} />
+            </DataConfigurationContext.Provider>);
+          }
+        )
+      }
+    </>
+  );
+});
+
+// TODO: Improve this calculation
+function heightOfOneLayerLegend(layer: IGraphLayerModel) {
+  // Menu for each Y attribute, plus one for "Add series" button
+  const menuCount = (layer.config.yAttributeDescriptions.length || 0) + 1;
+  const legendRows = Math.ceil(menuCount/2);
+  return kMultiLegendHRuleHeight
+    + kMultiLegendVerticalPadding * 3 // above title, below title, below all.
+    + kMultiLegendLabelHeight
+    + kMultiLegendMenuHeight * legendRows
+    + kMultiLegendVerticalGap * legendRows * 2; // above each row
+}
+export function heightOfLayerLegend({ graphModel }: ILegendHeightFunctionProps) {
+  return graphModel.layers.reduce((prev, layer) => {
+    return prev + heightOfOneLayerLegend(layer);
+  }, 0);
+}

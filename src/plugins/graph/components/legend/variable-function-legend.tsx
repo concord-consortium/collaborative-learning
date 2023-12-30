@@ -1,21 +1,27 @@
-import React, { useContext } from "react";
+import React from "react";
 import { observer } from "mobx-react";
 
-import { ReadOnlyContext } from "../../../../components/document/read-only-context";
+import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 import { getSharedModelManager } from "../../../../models/tiles/tile-environment";
 import { clueGraphColors } from "../../../../utilities/color-utils";
 import { isSharedVariables, SharedVariables } from "../../../shared-variables/shared-variables";
 import {
-  IPlottedVariablesAdornmentModel
+  IPlottedVariablesAdornmentModel, isPlottedVariablesAdornment
 } from "../../adornments/plotted-function/plotted-variables/plotted-variables-adornment-model";
 import { useGraphModelContext } from "../../hooks/use-graph-model-context";
 import { LegendDropdown } from "./legend-dropdown";
+import { ILegendHeightFunctionProps, ILegendPartProps } from "./legend-types";
 import { VariableSelection } from "./variable-selection";
 
 import AddSeriesIcon from "../../imports/assets/add-series-icon.svg";
 import RemoveDataIcon from "../../assets/remove-data-icon.svg";
 import XAxisIcon from "../../assets/x-axis-icon.svg";
 import YAxisIcon from "../../assets/y-axis-icon.svg";
+
+export const variableFunctionLegendType = "variable-function-legend";
+
+const kPlottedVariableHeader = 40;
+const kPlottedVariableRow = 46;
 
 interface IColorKeyProps {
   color: string;
@@ -34,13 +40,14 @@ interface IVariableFunctionLegendProps {
 }
 
 /**
- * XY Plot legend component that will control variables-based adornment.
+ * XY Plot legend component that will control a single variables-based adornment.
  */
-export const VariableFunctionLegend = observer(function(
-  { plottedVariablesAdornment }: IVariableFunctionLegendProps
-) {
+export const SingleVariableFunctionLegend = observer(function SingleVariableFunctionLegend({
+  plottedVariablesAdornment
+}: IVariableFunctionLegendProps) {
   const graphModel = useGraphModelContext();
-  const readOnly = useContext(ReadOnlyContext);
+  const readOnly = useReadOnlyContext();
+
   if (!plottedVariablesAdornment || plottedVariablesAdornment.plottedVariables.size <= 0) return null;
 
   function handleRemoveIconClick() {
@@ -137,5 +144,37 @@ export const VariableFunctionLegend = observer(function(
   } else {
     return null;
   }
-
 });
+
+export const VariableFunctionLegend = observer(function VariableFunctionsLegend(props: ILegendPartProps) {
+  const graphModel = useGraphModelContext();
+
+  return (
+    <>
+      {
+        graphModel.adornments.map(adornment => {
+          if (isPlottedVariablesAdornment(adornment)) {
+            return (
+              <SingleVariableFunctionLegend
+                key={adornment.id}
+                plottedVariablesAdornment={adornment}
+              />
+            );
+          }
+          return null;
+        })
+      }
+    </>
+  );
+});
+
+export function heightOfVariableFunctionLegend({ graphModel }: ILegendHeightFunctionProps) {
+  const plottedVariableAdornments = graphModel.adornments
+    .filter(adornment => isPlottedVariablesAdornment(adornment)) as IPlottedVariablesAdornmentModel[];
+  const plottedVariableTraces = plottedVariableAdornments.reduce((prev, adornment) => {
+    return adornment.plottedVariables.size;
+  }, 0);
+  // Each adornment has a header and an add variable row, plus one row for each plot
+  return plottedVariableAdornments.length * (kPlottedVariableHeader + kPlottedVariableRow)
+    + plottedVariableTraces * kPlottedVariableRow;
+}

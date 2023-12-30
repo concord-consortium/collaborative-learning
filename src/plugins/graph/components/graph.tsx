@@ -260,7 +260,6 @@ export const Graph = observer(
           <Adornments/>
           {defaultSeriesLegend &&
             <MultiLegend
-              graphElt={graphRef.current}
               onChangeAttribute={handleChangeAttribute}
               onRemoveAttribute={handleRemoveAttribute}
               onTreatAttributeAs={handleTreatAttrAs}
